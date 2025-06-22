@@ -18,6 +18,9 @@ import { OrganizationMemberRole } from '../organization/enums/organization-membe
 import { OrganizationResourcePermission } from '../organization/enums/organization-resource-permission.enum'
 import { OrganizationResourceActionGuard } from '../organization/guards/organization-resource-action.guard'
 import { SystemRole } from '../user/enums/system-role.enum'
+import { Audit, TypedRequest } from '../audit/decorators/audit.decorator'
+import { AuditAction } from '../audit/enums/audit-action.enum'
+import { AuditTarget } from '../audit/enums/audit-target.enum'
 
 @ApiTags('api-keys')
 @Controller('api-keys')
@@ -37,6 +40,18 @@ export class ApiKeyController {
     status: 201,
     description: 'API key created successfully.',
     type: ApiKeyResponseDto,
+  })
+  @Audit({
+    action: AuditAction.CREATE,
+    targetType: AuditTarget.API_KEY,
+    targetIdFromResult: (result: ApiKeyResponseDto) => result?.name,
+    requestMetadata: {
+      body: (req: TypedRequest<CreateApiKeyDto>) => ({
+        name: req.body?.name,
+        permissions: req.body?.permissions,
+        expiresAt: req.body?.expiresAt,
+      }),
+    },
   })
   async createApiKey(
     @AuthContext() authContext: OrganizationAuthContext,
@@ -114,6 +129,11 @@ export class ApiKeyController {
   })
   @ApiResponse({ status: 204, description: 'API key deleted successfully.' })
   @HttpCode(204)
+  @Audit({
+    action: AuditAction.DELETE,
+    targetType: AuditTarget.API_KEY,
+    targetIdFromRequest: (req) => req.params.name,
+  })
   async deleteApiKey(@AuthContext() authContext: OrganizationAuthContext, @Param('name') name: string) {
     await this.apiKeyService.deleteApiKey(authContext.organizationId, authContext.userId, name)
   }

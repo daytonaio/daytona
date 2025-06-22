@@ -30,7 +30,6 @@ import {
   ArrowUpDown,
   Archive,
   Container,
-  Monitor,
 } from 'lucide-react'
 import { TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from './ui/table'
 import { Button } from './ui/button'
@@ -65,6 +64,7 @@ interface DataTableProps {
   handleBulkDelete: (ids: string[]) => void
   handleArchive: (id: string) => void
   handleVnc: (id: string) => void
+  handleOpenWebTerminal: (id: string) => void
 }
 
 export function SandboxTable({
@@ -77,6 +77,7 @@ export function SandboxTable({
   handleBulkDelete,
   handleArchive,
   handleVnc,
+  handleOpenWebTerminal,
 }: DataTableProps) {
   const { authenticatedUserHasPermission } = useSelectedOrganization()
   const navigate = useNavigate()
@@ -119,6 +120,7 @@ export function SandboxTable({
     handleDelete,
     handleArchive,
     handleVnc,
+    handleOpenWebTerminal,
     loadingSandboxes,
     writePermitted,
     deletePermitted,
@@ -348,6 +350,7 @@ const getColumns = ({
   handleDelete,
   handleArchive,
   handleVnc,
+  handleOpenWebTerminal,
   loadingSandboxes,
   writePermitted,
   deletePermitted,
@@ -357,6 +360,7 @@ const getColumns = ({
   handleDelete: (id: string) => void
   handleArchive: (id: string) => void
   handleVnc: (id: string) => void
+  handleOpenWebTerminal: (id: string) => void
   loadingSandboxes: Record<string, boolean>
   writePermitted: boolean
   deletePermitted: boolean
@@ -615,26 +619,10 @@ const getColumns = ({
       cell: ({ row }) => {
         if (row.original.state !== SandboxState.STARTED) return ''
 
-        let terminalUrl: string | null = null
-
-        if (!row.original.daemonVersion) {
-          terminalUrl = `https://22222-${row.original.id}.${row.original.runnerDomain}`
-        } else {
-          terminalUrl =
-            import.meta.env.VITE_PROXY_TEMPLATE_URL?.replace('{{PORT}}', '22222').replace(
-              '{{sandboxId}}',
-              row.original.id,
-            ) || null
-        }
-
         return (
-          <div className="flex items-center gap-2">
-            {terminalUrl && (
-              <a href={terminalUrl} target="_blank" rel="noopener noreferrer">
-                <Terminal className="w-4 h-4" />
-              </a>
-            )}
-          </div>
+          <button onClick={() => handleOpenWebTerminal(row.original.id)} className="flex">
+            <Terminal className="w-4 h-4" />
+          </button>
         )
       },
     },

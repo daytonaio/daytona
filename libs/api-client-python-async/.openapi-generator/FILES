@@ -2,6 +2,7 @@
 daytona_api_client_async/__init__.py
 daytona_api_client_async/api/__init__.py
 daytona_api_client_async/api/api_keys_api.py
+daytona_api_client_async/api/audit_api.py
 daytona_api_client_async/api/docker_registry_api.py
 daytona_api_client_async/api/object_storage_api.py
 daytona_api_client_async/api/organizations_api.py
@@ -21,6 +22,7 @@ daytona_api_client_async/models/__init__.py
 daytona_api_client_async/models/account_provider.py
 daytona_api_client_async/models/api_key_list.py
 daytona_api_client_async/models/api_key_response.py
+daytona_api_client_async/models/audit_log.py
 daytona_api_client_async/models/build_info.py
 daytona_api_client_async/models/command.py
 daytona_api_client_async/models/completion_context.py
@@ -31,6 +33,7 @@ daytona_api_client_async/models/computer_use_start_response.py
 daytona_api_client_async/models/computer_use_status_response.py
 daytona_api_client_async/models/computer_use_stop_response.py
 daytona_api_client_async/models/create_api_key.py
+daytona_api_client_async/models/create_audit_log.py
 daytona_api_client_async/models/create_build_info.py
 daytona_api_client_async/models/create_docker_registry.py
 daytona_api_client_async/models/create_linked_account.py
@@ -85,6 +88,7 @@ daytona_api_client_async/models/organization_invitation.py
 daytona_api_client_async/models/organization_role.py
 daytona_api_client_async/models/organization_suspension.py
 daytona_api_client_async/models/organization_user.py
+daytona_api_client_async/models/paginated_audit_logs.py
 daytona_api_client_async/models/paginated_snapshots_dto.py
 daytona_api_client_async/models/port_preview_url.py
 daytona_api_client_async/models/position.py
