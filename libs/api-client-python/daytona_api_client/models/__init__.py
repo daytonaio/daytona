@@ -18,6 +18,7 @@
 from daytona_api_client.models.account_provider import AccountProvider
 from daytona_api_client.models.api_key_list import ApiKeyList
 from daytona_api_client.models.api_key_response import ApiKeyResponse
+from daytona_api_client.models.audit_log import AuditLog
 from daytona_api_client.models.build_info import BuildInfo
 from daytona_api_client.models.command import Command
 from daytona_api_client.models.completion_context import CompletionContext
@@ -28,6 +29,7 @@ from daytona_api_client.models.computer_use_start_response import ComputerUseSta
 from daytona_api_client.models.computer_use_status_response import ComputerUseStatusResponse
 from daytona_api_client.models.computer_use_stop_response import ComputerUseStopResponse
 from daytona_api_client.models.create_api_key import CreateApiKey
+from daytona_api_client.models.create_audit_log import CreateAuditLog
 from daytona_api_client.models.create_build_info import CreateBuildInfo
 from daytona_api_client.models.create_docker_registry import CreateDockerRegistry
 from daytona_api_client.models.create_linked_account import CreateLinkedAccount
@@ -82,6 +84,7 @@ from daytona_api_client.models.organization_invitation import OrganizationInvita
 from daytona_api_client.models.organization_role import OrganizationRole
 from daytona_api_client.models.organization_suspension import OrganizationSuspension
 from daytona_api_client.models.organization_user import OrganizationUser
+from daytona_api_client.models.paginated_audit_logs import PaginatedAuditLogs
 from daytona_api_client.models.paginated_snapshots_dto import PaginatedSnapshotsDto
 from daytona_api_client.models.port_preview_url import PortPreviewUrl
 from daytona_api_client.models.position import Position

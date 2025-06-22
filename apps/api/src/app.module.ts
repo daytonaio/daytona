@@ -28,6 +28,7 @@ import { NotificationModule } from './notification/notification.module'
 import { ObjectStorageModule } from './object-storage/object-storage.module'
 import { CustomNamingStrategy } from './common/utils/naming-strategy.util'
 import { MaintenanceMiddleware } from './common/middleware/maintenance.middleware'
+import { AuditModule } from './audit/audit.module'
 
 @Module({
   imports: [
@@ -106,6 +107,7 @@ import { MaintenanceMiddleware } from './common/middleware/maintenance.middlewar
     }),
     NotificationModule,
     ObjectStorageModule,
+    AuditModule,
   ],
   controllers: [],
   providers: [AppService],

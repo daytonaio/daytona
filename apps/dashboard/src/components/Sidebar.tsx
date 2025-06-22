@@ -22,6 +22,7 @@ import {
   Slack,
   SquareUserRound,
   Sun,
+  TextSearch,
   TriangleAlert,
   Users,
 } from 'lucide-react'
@@ -117,6 +118,13 @@ export function Sidebar({ isBannerVisible }: SidebarProps) {
       // if (authenticatedUserOrganizationMember?.role === OrganizationUserRoleEnum.OWNER) {
       //   arr.push({ icon: <UserCog className="w-5 h-5" />, label: 'Roles', path: RoutePath.ROLES })
       // }
+    }
+    if (authenticatedUserHasPermission(OrganizationRolePermissionsEnum.READ_AUDIT_LOGS)) {
+      arr.push({
+        icon: <TextSearch size={16} strokeWidth={1.5} />,
+        label: 'Audit Logs',
+        path: RoutePath.AUDIT_LOGS,
+      })
     }
     arr.push({
       icon: <Settings size={16} strokeWidth={1.5} />,
