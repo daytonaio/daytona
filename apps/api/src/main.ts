@@ -23,6 +23,7 @@ import { SandboxClass } from './sandbox/enums/sandbox-class.enum'
 import { getOpenApiConfig } from './openapi.config'
 import { SchedulerRegistry } from '@nestjs/schedule'
 import { EventEmitter2 } from '@nestjs/event-emitter'
+import { AuditInterceptor } from './audit/interceptors/audit.interceptor'
 
 // https options
 const httpsEnabled = process.env.CERT_PATH && process.env.CERT_KEY_PATH
@@ -32,7 +33,7 @@ const httpsOptions: HttpsOptions = {
 }
 
 // Default log level
-const logLevels: LogLevel[] = ['log', 'error']
+const logLevels: LogLevel[] = ['log', 'error', 'warn']
 if (process.env.LOG_LEVEL) {
   logLevels.push(process.env.LOG_LEVEL as LogLevel)
 }
@@ -56,6 +57,7 @@ async function bootstrap() {
   app.useGlobalFilters(new AllExceptionsFilter(httpAdapter))
   app.useGlobalFilters(new NotFoundExceptionFilter())
   app.useGlobalInterceptors(new MetricsInterceptor())
+  app.useGlobalInterceptors(app.get(AuditInterceptor))
   app.useGlobalPipes(new ValidationPipe())
 
   const eventEmitter = app.get(EventEmitter2)

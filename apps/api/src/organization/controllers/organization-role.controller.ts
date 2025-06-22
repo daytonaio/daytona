@@ -13,6 +13,9 @@ import { OrganizationRoleDto } from '../dto/organization-role.dto'
 import { OrganizationMemberRole } from '../enums/organization-member-role.enum'
 import { OrganizationActionGuard } from '../guards/organization-action.guard'
 import { OrganizationRoleService } from '../services/organization-role.service'
+import { Audit, TypedRequest } from '../../audit/decorators/audit.decorator'
+import { AuditAction } from '../../audit/enums/audit-action.enum'
+import { AuditTarget } from '../../audit/enums/audit-target.enum'
 
 @ApiTags('organizations')
 @Controller('organizations/:organizationId/roles')
@@ -37,6 +40,18 @@ export class OrganizationRoleController {
     name: 'organizationId',
     description: 'Organization ID',
     type: 'string',
+  })
+  @Audit({
+    action: AuditAction.CREATE,
+    targetType: AuditTarget.ORGANIZATION_ROLE,
+    targetIdFromResult: (result: OrganizationRoleDto) => result?.id,
+    requestMetadata: {
+      body: (req: TypedRequest<CreateOrganizationRoleDto>) => ({
+        name: req.body?.name,
+        description: req.body?.description,
+        permissions: req.body?.permissions,
+      }),
+    },
   })
   async create(
     @Param('organizationId') organizationId: string,
@@ -86,6 +101,18 @@ export class OrganizationRoleController {
     description: 'Role ID',
     type: 'string',
   })
+  @Audit({
+    action: AuditAction.UPDATE,
+    targetType: AuditTarget.ORGANIZATION_ROLE,
+    targetIdFromRequest: (req) => req.params.roleId,
+    requestMetadata: {
+      body: (req: TypedRequest<UpdateOrganizationRoleDto>) => ({
+        name: req.body?.name,
+        description: req.body?.description,
+        permissions: req.body?.permissions,
+      }),
+    },
+  })
   async updateRole(
     @Param('organizationId') organizationId: string,
     @Param('roleId') roleId: string,
@@ -113,6 +140,11 @@ export class OrganizationRoleController {
     name: 'roleId',
     description: 'Role ID',
     type: 'string',
+  })
+  @Audit({
+    action: AuditAction.DELETE,
+    targetType: AuditTarget.ORGANIZATION_ROLE,
+    targetIdFromRequest: (req) => req.params.roleId,
   })
   async delete(@Param('organizationId') organizationId: string, @Param('roleId') roleId: string): Promise<void> {
     return this.organizationRoleService.delete(roleId)

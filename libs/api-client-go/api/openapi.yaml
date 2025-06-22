@@ -5861,6 +5861,111 @@ paths:
       summary: Get temporary storage access for pushing objects
       tags:
         - object-storage
+  /audit:
+    get:
+      operationId: getAllAuditLogs
+      parameters:
+        - description: 'Number of items per page (default: 10)'
+          explode: true
+          in: query
+          name: limit
+          required: false
+          schema:
+            type: number
+          style: form
+        - description: 'Page number (default: 1)'
+          explode: true
+          in: query
+          name: page
+          required: false
+          schema:
+            type: number
+          style: form
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAuditLogs'
+          description: Paginated list of all audit logs
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Get all audit logs
+      tags:
+        - audit
+    post:
+      operationId: createAuditLog
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAuditLog'
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuditLog'
+          description: Audit log entry created successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Create audit log entry
+      tags:
+        - audit
+  /audit/organizations/{organizationId}:
+    get:
+      operationId: getOrganizationAuditLogs
+      parameters:
+        - description: Organization ID
+          explode: false
+          in: path
+          name: organizationId
+          required: true
+          schema:
+            type: string
+          style: simple
+        - description: 'Number of items per page (default: 10)'
+          explode: true
+          in: query
+          name: limit
+          required: false
+          schema:
+            type: number
+          style: form
+        - description: 'Page number (default: 1)'
+          explode: true
+          in: query
+          name: page
+          required: false
+          schema:
+            type: number
+          style: form
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAuditLogs'
+          description: Paginated list of organization audit logs
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Get audit logs for organization
+      tags:
+        - audit
 components:
   schemas:
     CreateApiKey:
@@ -5889,6 +5994,7 @@ components:
               - read:volumes
               - write:volumes
               - delete:volumes
+              - read:audit_logs
             type: string
           type: array
         expiresAt:
@@ -5938,6 +6044,7 @@ components:
               - read:volumes
               - write:volumes
               - delete:volumes
+              - read:audit_logs
             type: string
           type: array
         expiresAt:
@@ -5991,6 +6098,7 @@ components:
               - read:volumes
               - write:volumes
               - delete:volumes
+              - read:audit_logs
             type: string
           type: array
         lastUsedAt:
@@ -6047,6 +6155,7 @@ components:
               - read:volumes
               - write:volumes
               - delete:volumes
+              - read:audit_logs
             type: string
           type: array
         isGlobal:
@@ -6358,6 +6467,7 @@ components:
               - read:volumes
               - write:volumes
               - delete:volumes
+              - read:audit_logs
             type: string
           type: array
       required:
@@ -6394,6 +6504,7 @@ components:
               - read:volumes
               - write:volumes
               - delete:volumes
+              - read:audit_logs
             type: string
           type: array
       required:
@@ -9421,6 +9532,202 @@ components:
         - secret
         - sessionToken
         - storageUrl
+      type: object
+    AuditLog:
+      example:
+        metadata:
+          key: ''
+        targetId: targetId
+        errorMessage: errorMessage
+        ipAddress: ipAddress
+        actorEmail: actorEmail
+        targetType: targetType
+        userAgent: userAgent
+        source: source
+        organizationId: organizationId
+        createdAt: 2000-01-23T04:56:07.000+00:00
+        actorId: actorId
+        action: action
+        id: id
+        statusCode: 0.8008281904610115
+      properties:
+        id:
+          type: string
+        actorId:
+          type: string
+        actorEmail:
+          type: string
+        organizationId:
+          type: string
+        action:
+          type: string
+        targetType:
+          type: string
+        targetId:
+          type: string
+        statusCode:
+          type: number
+        errorMessage:
+          type: string
+        ipAddress:
+          type: string
+        userAgent:
+          type: string
+        source:
+          type: string
+        metadata:
+          additionalProperties: true
+          type: object
+        createdAt:
+          format: date-time
+          type: string
+      required:
+        - action
+        - actorEmail
+        - actorId
+        - createdAt
+        - id
+      type: object
+    PaginatedAuditLogs:
+      example:
+        total: 6.027456183070403
+        totalPages: 5.962133916683182
+        page: 1.4658129805029452
+        items:
+          - metadata:
+              key: ''
+            targetId: targetId
+            errorMessage: errorMessage
+            ipAddress: ipAddress
+            actorEmail: actorEmail
+            targetType: targetType
+            userAgent: userAgent
+            source: source
+            organizationId: organizationId
+            createdAt: 2000-01-23T04:56:07.000+00:00
+            actorId: actorId
+            action: action
+            id: id
+            statusCode: 0.8008281904610115
+          - metadata:
+              key: ''
+            targetId: targetId
+            errorMessage: errorMessage
+            ipAddress: ipAddress
+            actorEmail: actorEmail
+            targetType: targetType
+            userAgent: userAgent
+            source: source
+            organizationId: organizationId
+            createdAt: 2000-01-23T04:56:07.000+00:00
+            actorId: actorId
+            action: action
+            id: id
+            statusCode: 0.8008281904610115
+      properties:
+        items:
+          items:
+            $ref: '#/components/schemas/AuditLog'
+          type: array
+        total:
+          type: number
+        page:
+          type: number
+        totalPages:
+          type: number
+      required:
+        - items
+        - page
+        - total
+        - totalPages
+      type: object
+    CreateAuditLog:
+      example:
+        organizationId: organizationId
+        actorId: actorId
+        targetId: targetId
+        actorEmail: actorEmail
+        action: create
+        targetType: api_key
+      properties:
+        actorId:
+          type: string
+        actorEmail:
+          type: string
+        organizationId:
+          type: string
+        action:
+          enum:
+            - create
+            - read
+            - update
+            - delete
+            - login
+            - docker_registry_set_default
+            - organization_user_update_role
+            - organization_user_update_assigned_roles
+            - organization_update_quota
+            - organization_suspend
+            - organization_unsuspend
+            - organization_invitation_accept
+            - organization_invitation_decline
+            - user_link_account
+            - user_unlink_account
+            - user_leave_organization
+            - user_regenerate_key_pair
+            - runner_update_scheduling
+            - sandbox_start
+            - sandbox_stop
+            - sandbox_replace_labels
+            - sandbox_create_backup
+            - sandbox_update_public_status
+            - sandbox_set_auto_stop_interval
+            - sandbox_set_auto_archive_interval
+            - sandbox_archive
+            - sandbox_get_port_preview_url
+            - snapshot_toggle_state
+            - snapshot_set_general_status
+            - toolbox_delete_file
+            - toolbox_download_file
+            - toolbox_create_folder
+            - toolbox_move_file
+            - toolbox_set_file_permissions
+            - toolbox_replace_in_files
+            - toolbox_upload_file
+            - toolbox_bulk_upload_files
+            - toolbox_git_add_files
+            - toolbox_git_create_branch
+            - toolbox_git_delete_branch
+            - toolbox_git_clone_repository
+            - toolbox_git_commit_changes
+            - toolbox_git_pull_changes
+            - toolbox_git_push_changes
+            - toolbox_git_checkout_branch
+            - toolbox_execute_command
+            - toolbox_create_session
+            - toolbox_session_execute_command
+            - toolbox_delete_session
+          type: string
+        targetType:
+          enum:
+            - api_key
+            - organization
+            - organization_invitation
+            - organization_role
+            - organization_user
+            - docker_registry
+            - runner
+            - sandbox
+            - snapshot
+            - user
+            - volume
+          type: string
+        targetId:
+          type: string
+      required:
+        - action
+        - actorEmail
+        - actorId
       type: object
     uploadFile_request:
       properties:

@@ -16,27 +16,6 @@ import {
 import { SandboxTableActionsProps } from './types'
 import { useMemo } from 'react'
 
-const buildTerminalUrl = (() => {
-  let cachedUrl: string | null = null
-  let cachedSandboxId: string | null = null
-
-  return (sandboxId: string, runnerDomain?: string, daemonVersion?: string) => {
-    if (!runnerDomain) return null
-
-    if (daemonVersion) {
-      if (!cachedUrl || cachedSandboxId !== sandboxId) {
-        cachedUrl =
-          import.meta.env.VITE_PROXY_TEMPLATE_URL?.replace('{{PORT}}', '22222').replace('{{sandboxId}}', sandboxId) ||
-          null
-        cachedSandboxId = sandboxId
-      }
-      return cachedUrl
-    } else {
-      return `https://22222-${sandboxId}.${runnerDomain}`
-    }
-  }
-})()
-
 export function SandboxTableActions({
   sandbox,
   writePermitted,
@@ -47,10 +26,8 @@ export function SandboxTableActions({
   onDelete,
   onArchive,
   onVnc,
+  onOpenWebTerminal,
 }: SandboxTableActionsProps) {
-  const terminalUrl = buildTerminalUrl(sandbox.id, sandbox.runnerDomain, sandbox.daemonVersion)
-  const isTerminalEnabled = terminalUrl && sandbox.state === SandboxState.STARTED
-
   const menuItems = useMemo(() => {
     const items = []
 
@@ -142,11 +119,13 @@ export function SandboxTableActions({
         )}
       </Button>
 
-      {isTerminalEnabled ? (
-        <Button asChild variant="outline" className="h-7 w-7 p-0 text-muted-foreground">
-          <a href={terminalUrl} target="_blank" rel="noopener noreferrer">
-            <Terminal className="w-4 h-4" />
-          </a>
+      {sandbox.state === SandboxState.STARTED ? (
+        <Button
+          variant="outline"
+          className="h-7 w-7 p-0 text-muted-foreground"
+          onClick={() => onOpenWebTerminal(sandbox.id)}
+        >
+          <Terminal className="w-4 h-4" />
         </Button>
       ) : (
         <Button variant="outline" className="h-7 w-7 p-0 text-muted-foreground" disabled>
