@@ -11,7 +11,8 @@ from contextlib import ExitStack
 from typing import Callable, List, Union, overload
 
 import httpx
-from daytona_api_client import FileInfo, Match, ReplaceRequest, ReplaceResult, SearchFilesResponse, ToolboxApi
+from daytona_api_client import (FileInfo, Match, ReplaceRequest, ReplaceResult,
+                                SearchFilesResponse, ToolboxApi)
 
 from .._utils.errors import intercept_errors
 from .._utils.path import prefix_relative_path

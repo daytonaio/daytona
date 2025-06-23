@@ -12,16 +12,9 @@ import warnings
 from importlib.metadata import version
 from typing import Callable, Dict, List, Optional, Union, overload
 
-from daytona_api_client import (
-    ApiClient,
-    Configuration,
-    CreateBuildInfo,
-    CreateSandbox,
-    ObjectStorageApi,
-    SandboxApi,
-    SandboxState,
-    SnapshotsApi,
-)
+from daytona_api_client import (ApiClient, Configuration, CreateBuildInfo,
+                                CreateSandbox, ObjectStorageApi, SandboxApi,
+                                SandboxState, SnapshotsApi)
 from daytona_api_client import ToolboxApi as ToolboxApi
 from daytona_api_client import VolumesApi as VolumesApi
 from environs import Env
@@ -32,13 +25,9 @@ from .._utils.stream import process_streaming_response
 from .._utils.timeout import with_timeout
 from ..code_toolbox.sandbox_python_code_toolbox import SandboxPythonCodeToolbox
 from ..code_toolbox.sandbox_ts_code_toolbox import SandboxTsCodeToolbox
-from ..common.daytona import (
-    CodeLanguage,
-    CreateSandboxFromImageParams,
-    CreateSandboxFromSnapshotParams,
-    DaytonaConfig,
-    Image,
-)
+from ..common.daytona import (CodeLanguage, CreateSandboxFromImageParams,
+                              CreateSandboxFromSnapshotParams, DaytonaConfig,
+                              Image)
 from .sandbox import Sandbox
 from .snapshot import SnapshotService
 from .volume import VolumeService
@@ -215,7 +204,7 @@ class Daytona:
             Sandbox: The created Sandbox instance.
 
         Raises:
-            DaytonaError: If timeout, auto_stop_interval or auto_archive_interval is negative;
+            DaytonaError: If timeout, auto_stop_interval, auto_archive_interval or auto_delete_interval is negative;
                 If sandbox fails to start or times out
 
         Example:
@@ -231,7 +220,8 @@ class Daytona:
                 snapshot="my-snapshot-id",
                 env_vars={"DEBUG": "true"},
                 auto_stop_interval=0,
-                auto_archive_interval=60
+                auto_archive_interval=60,
+                auto_delete_interval=120
             )
             sandbox = daytona.create(params, timeout=40)
             ```
@@ -259,7 +249,7 @@ class Daytona:
             Sandbox: The created Sandbox instance.
 
         Raises:
-            DaytonaError: If timeout, auto_stop_interval or auto_archive_interval is negative;
+            DaytonaError: If timeout, auto_stop_interval, auto_archive_interval or auto_delete_interval is negative;
                 If sandbox fails to start or times out
 
         Example:
@@ -282,6 +272,7 @@ class Daytona:
                 resources=Resources(cpu=2, memory=4),
                 auto_stop_interval=0,
                 auto_archive_interval=60,
+                auto_delete_interval=120
             )
             sandbox = daytona.create(
                 params,
@@ -330,6 +321,9 @@ class Daytona:
         if params.auto_archive_interval is not None and params.auto_archive_interval < 0:
             raise DaytonaError("auto_archive_interval must be a non-negative integer")
 
+        if params.auto_delete_interval is not None and params.auto_delete_interval < 0:
+            raise DaytonaError("auto_delete_interval must be a non-negative integer")
+
         target = self._target
 
         # Create sandbox using dictionary
@@ -341,6 +335,7 @@ class Daytona:
             target=str(target) if target else None,
             auto_stop_interval=params.auto_stop_interval,
             auto_archive_interval=params.auto_archive_interval,
+            auto_delete_interval=params.auto_delete_interval,
             volumes=params.volumes,
         )
 

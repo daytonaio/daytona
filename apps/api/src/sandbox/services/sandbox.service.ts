@@ -322,11 +322,15 @@ export class SandboxService {
     sandbox.public = createSandboxDto.public || false
 
     if (createSandboxDto.autoStopInterval !== undefined) {
-      sandbox.autoStopInterval = createSandboxDto.autoStopInterval
+      sandbox.autoStopInterval = this.resolveAutoStopInterval(createSandboxDto.autoStopInterval)
     }
 
     if (createSandboxDto.autoArchiveInterval !== undefined) {
       sandbox.autoArchiveInterval = this.resolveAutoArchiveInterval(createSandboxDto.autoArchiveInterval)
+    }
+
+    if (createSandboxDto.autoDeleteInterval !== undefined) {
+      sandbox.autoDeleteInterval = this.resolveAutoDeleteInterval(createSandboxDto.autoDeleteInterval)
     }
 
     sandbox.runnerId = runner.id
@@ -346,11 +350,15 @@ export class SandboxService {
     warmPoolSandbox.createdAt = new Date()
 
     if (createSandboxDto.autoStopInterval !== undefined) {
-      warmPoolSandbox.autoStopInterval = createSandboxDto.autoStopInterval
+      warmPoolSandbox.autoStopInterval = this.resolveAutoStopInterval(createSandboxDto.autoStopInterval)
     }
 
     if (createSandboxDto.autoArchiveInterval !== undefined) {
       warmPoolSandbox.autoArchiveInterval = this.resolveAutoArchiveInterval(createSandboxDto.autoArchiveInterval)
+    }
+
+    if (createSandboxDto.autoDeleteInterval !== undefined) {
+      warmPoolSandbox.autoDeleteInterval = this.resolveAutoDeleteInterval(createSandboxDto.autoDeleteInterval)
     }
 
     const runner = await this.runnerService.findOne(warmPoolSandbox.runnerId)
@@ -398,11 +406,15 @@ export class SandboxService {
     sandbox.public = createSandboxDto.public || false
 
     if (createSandboxDto.autoStopInterval !== undefined) {
-      sandbox.autoStopInterval = createSandboxDto.autoStopInterval
+      sandbox.autoStopInterval = this.resolveAutoStopInterval(createSandboxDto.autoStopInterval)
     }
 
     if (createSandboxDto.autoArchiveInterval !== undefined) {
       sandbox.autoArchiveInterval = this.resolveAutoArchiveInterval(createSandboxDto.autoArchiveInterval)
+    }
+
+    if (createSandboxDto.autoDeleteInterval !== undefined) {
+      sandbox.autoDeleteInterval = this.resolveAutoDeleteInterval(createSandboxDto.autoDeleteInterval)
     }
 
     const buildInfoSnapshotRef = generateBuildSnapshotRef(
@@ -714,12 +726,7 @@ export class SandboxService {
       throw new NotFoundException(`Sandbox with ID ${sandboxId} not found`)
     }
 
-    // Validate interval is non-negative
-    if (interval < 0) {
-      throw new BadRequestError('Auto-stop interval must be non-negative')
-    }
-
-    sandbox.autoStopInterval = interval
+    sandbox.autoStopInterval = this.resolveAutoStopInterval(interval)
     await this.sandboxRepository.save(sandbox)
   }
 
@@ -733,6 +740,19 @@ export class SandboxService {
     }
 
     sandbox.autoArchiveInterval = this.resolveAutoArchiveInterval(interval)
+    await this.sandboxRepository.save(sandbox)
+  }
+
+  async setAutoDeleteInterval(sandboxId: string, interval: number): Promise<void> {
+    const sandbox = await this.sandboxRepository.findOne({
+      where: { id: sandboxId },
+    })
+
+    if (!sandbox) {
+      throw new NotFoundException(`Sandbox with ID ${sandboxId} not found`)
+    }
+
+    sandbox.autoDeleteInterval = this.resolveAutoDeleteInterval(interval)
     await this.sandboxRepository.save(sandbox)
   }
 
@@ -794,6 +814,14 @@ export class SandboxService {
     })
   }
 
+  private resolveAutoStopInterval(autoStopInterval: number): number {
+    if (autoStopInterval < 0) {
+      throw new BadRequestError('Auto-stop interval must be non-negative')
+    }
+
+    return autoStopInterval
+  }
+
   private resolveAutoArchiveInterval(autoArchiveInterval: number): number {
     if (autoArchiveInterval < 0) {
       throw new BadRequestError('Auto-archive interval must be non-negative')
@@ -806,5 +834,13 @@ export class SandboxService {
     }
 
     return Math.min(autoArchiveInterval, maxAutoArchiveInterval)
+  }
+
+  private resolveAutoDeleteInterval(autoDeleteInterval: number): number {
+    if (autoDeleteInterval < 0) {
+      throw new BadRequestError('Auto-delete interval must be non-negative')
+    }
+
+    return autoDeleteInterval
   }
 }

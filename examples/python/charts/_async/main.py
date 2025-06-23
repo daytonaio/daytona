@@ -3,19 +3,9 @@ import base64
 import os
 import time
 
-from daytona import (
-    AsyncDaytona,
-    BarChart,
-    BoxAndWhiskerChart,
-    Chart,
-    ChartType,
-    CompositeChart,
-    CreateSandboxFromImageParams,
-    Image,
-    LineChart,
-    PieChart,
-    ScatterChart,
-)
+from daytona import (AsyncDaytona, BarChart, BoxAndWhiskerChart, Chart,
+                     ChartType, CompositeChart, CreateSandboxFromImageParams,
+                     Image, LineChart, PieChart, ScatterChart)
 
 code = """
 import matplotlib.pyplot as plt

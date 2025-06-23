@@ -1,14 +1,9 @@
 import asyncio
 import time
 
-from daytona import (
-    AsyncDaytona,
-    CreateSandboxFromImageParams,
-    CreateSandboxFromSnapshotParams,
-    CreateSnapshotParams,
-    Image,
-    Resources,
-)
+from daytona import (AsyncDaytona, CreateSandboxFromImageParams,
+                     CreateSandboxFromSnapshotParams, CreateSnapshotParams,
+                     Image, Resources)
 
 
 async def main():
