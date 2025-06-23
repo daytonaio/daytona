@@ -46,6 +46,8 @@ type CreateSandbox struct {
 	AutoStopInterval *int32 `json:"autoStopInterval,omitempty"`
 	// Auto-archive interval in minutes (0 means the maximum interval will be used)
 	AutoArchiveInterval *int32 `json:"autoArchiveInterval,omitempty"`
+	// Auto-delete interval in minutes (0 means disabled)
+	AutoDeleteInterval *int32 `json:"autoDeleteInterval,omitempty"`
 	// Array of volumes to attach to the sandbox
 	Volumes []SandboxVolume `json:"volumes,omitempty"`
 	// Build information for the sandbox
@@ -485,6 +487,38 @@ func (o *CreateSandbox) SetAutoArchiveInterval(v int32) {
 	o.AutoArchiveInterval = &v
 }
 
+// GetAutoDeleteInterval returns the AutoDeleteInterval field value if set, zero value otherwise.
+func (o *CreateSandbox) GetAutoDeleteInterval() int32 {
+	if o == nil || IsNil(o.AutoDeleteInterval) {
+		var ret int32
+		return ret
+	}
+	return *o.AutoDeleteInterval
+}
+
+// GetAutoDeleteIntervalOk returns a tuple with the AutoDeleteInterval field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *CreateSandbox) GetAutoDeleteIntervalOk() (*int32, bool) {
+	if o == nil || IsNil(o.AutoDeleteInterval) {
+		return nil, false
+	}
+	return o.AutoDeleteInterval, true
+}
+
+// HasAutoDeleteInterval returns a boolean if a field has been set.
+func (o *CreateSandbox) HasAutoDeleteInterval() bool {
+	if o != nil && !IsNil(o.AutoDeleteInterval) {
+		return true
+	}
+
+	return false
+}
+
+// SetAutoDeleteInterval gets a reference to the given int32 and assigns it to the AutoDeleteInterval field.
+func (o *CreateSandbox) SetAutoDeleteInterval(v int32) {
+	o.AutoDeleteInterval = &v
+}
+
 // GetVolumes returns the Volumes field value if set, zero value otherwise.
 func (o *CreateSandbox) GetVolumes() []SandboxVolume {
 	if o == nil || IsNil(o.Volumes) {
@@ -597,6 +631,9 @@ func (o CreateSandbox) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.AutoArchiveInterval) {
 		toSerialize["autoArchiveInterval"] = o.AutoArchiveInterval
+	}
+	if !IsNil(o.AutoDeleteInterval) {
+		toSerialize["autoDeleteInterval"] = o.AutoDeleteInterval
 	}
 	if !IsNil(o.Volumes) {
 		toSerialize["volumes"] = o.Volumes

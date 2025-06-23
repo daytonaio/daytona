@@ -149,6 +149,19 @@ type SandboxAPI interface {
 	SetAutoArchiveIntervalExecute(r SandboxAPISetAutoArchiveIntervalRequest) (*http.Response, error)
 
 	/*
+		SetAutoDeleteInterval Set sandbox auto-delete interval
+
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId ID of the sandbox
+		@param interval Auto-delete interval in minutes (0 to disable)
+		@return SandboxAPISetAutoDeleteIntervalRequest
+	*/
+	SetAutoDeleteInterval(ctx context.Context, sandboxId string, interval float32) SandboxAPISetAutoDeleteIntervalRequest
+
+	// SetAutoDeleteIntervalExecute executes the request
+	SetAutoDeleteIntervalExecute(r SandboxAPISetAutoDeleteIntervalRequest) (*http.Response, error)
+
+	/*
 		SetAutostopInterval Set sandbox auto-stop interval
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
@@ -1302,6 +1315,110 @@ func (a *SandboxAPIService) SetAutoArchiveIntervalExecute(r SandboxAPISetAutoArc
 	}
 
 	localVarPath := localBasePath + "/sandbox/{sandboxId}/autoarchive/{interval}"
+	localVarPath = strings.Replace(localVarPath, "{"+"sandboxId"+"}", url.PathEscape(parameterValueToString(r.sandboxId, "sandboxId")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"interval"+"}", url.PathEscape(parameterValueToString(r.interval, "interval")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.xDaytonaOrganizationID != nil {
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Daytona-Organization-ID", r.xDaytonaOrganizationID, "simple", "")
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarHTTPResponse, newErr
+	}
+
+	return localVarHTTPResponse, nil
+}
+
+type SandboxAPISetAutoDeleteIntervalRequest struct {
+	ctx                    context.Context
+	ApiService             SandboxAPI
+	sandboxId              string
+	interval               float32
+	xDaytonaOrganizationID *string
+}
+
+// Use with JWT to specify the organization ID
+func (r SandboxAPISetAutoDeleteIntervalRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) SandboxAPISetAutoDeleteIntervalRequest {
+	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
+	return r
+}
+
+func (r SandboxAPISetAutoDeleteIntervalRequest) Execute() (*http.Response, error) {
+	return r.ApiService.SetAutoDeleteIntervalExecute(r)
+}
+
+/*
+SetAutoDeleteInterval Set sandbox auto-delete interval
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId ID of the sandbox
+	@param interval Auto-delete interval in minutes (0 to disable)
+	@return SandboxAPISetAutoDeleteIntervalRequest
+*/
+func (a *SandboxAPIService) SetAutoDeleteInterval(ctx context.Context, sandboxId string, interval float32) SandboxAPISetAutoDeleteIntervalRequest {
+	return SandboxAPISetAutoDeleteIntervalRequest{
+		ApiService: a,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
+		interval:   interval,
+	}
+}
+
+// Execute executes the request
+func (a *SandboxAPIService) SetAutoDeleteIntervalExecute(r SandboxAPISetAutoDeleteIntervalRequest) (*http.Response, error) {
+	var (
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SandboxAPIService.SetAutoDeleteInterval")
+	if err != nil {
+		return nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/sandbox/{sandboxId}/autodelete/{interval}"
 	localVarPath = strings.Replace(localVarPath, "{"+"sandboxId"+"}", url.PathEscape(parameterValueToString(r.sandboxId, "sandboxId")), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"interval"+"}", url.PathEscape(parameterValueToString(r.interval, "interval")), -1)
 

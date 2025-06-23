@@ -7,14 +7,9 @@
 
 from typing import List
 
-from daytona_api_client import (
-    CompletionList,
-    LspCompletionParams,
-    LspDocumentRequest,
-    LspServerRequest,
-    LspSymbol,
-    ToolboxApi,
-)
+from daytona_api_client import (CompletionList, LspCompletionParams,
+                                LspDocumentRequest, LspServerRequest,
+                                LspSymbol, ToolboxApi)
 from deprecated import deprecated
 
 from .._utils.errors import intercept_errors

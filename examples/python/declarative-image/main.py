@@ -1,13 +1,8 @@
 import time
 
-from daytona import (
-    CreateSandboxFromImageParams,
-    CreateSandboxFromSnapshotParams,
-    CreateSnapshotParams,
-    Daytona,
-    Image,
-    Resources,
-)
+from daytona import (CreateSandboxFromImageParams,
+                     CreateSandboxFromSnapshotParams, CreateSnapshotParams,
+                     Daytona, Image, Resources)
 
 
 def main():

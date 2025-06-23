@@ -146,6 +146,12 @@ export interface Sandbox {
    */
   autoArchiveInterval?: number
   /**
+   * Auto-delete interval in minutes (0 means disabled)
+   * @type {number}
+   * @memberof Sandbox
+   */
+  autoDeleteInterval?: number
+  /**
    * The domain name of the runner
    * @type {string}
    * @memberof Sandbox

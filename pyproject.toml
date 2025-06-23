@@ -64,3 +64,9 @@ disable = [
 ]
 const-rgx = "(([A-Z_][A-Z0-9_]*)|([a-z_][a-z0-9_]*))"
 allowed-redefined-builtins = ["id"]
+<<<<<<< HEAD
+=======
+
+[tool.basedpyright]
+typeCheckingMode = "off"
+>>>>>>> 3f39c443 (feat(api,cli,docs): auto-delete sandbox interval)

@@ -35,6 +35,7 @@ Represents a Daytona Sandbox.
 - `backup_created_at` _str_ - When the backup was created.
 - `auto_stop_interval` _int_ - Auto-stop interval in minutes.
 - `auto_archive_interval` _int_ - Auto-archive interval in minutes.
+- `auto_delete_interval` _int_ - Auto-delete interval in minutes.
 - `runner_domain` _str_ - Domain name of the Sandbox runner.
 - `volumes` _List[str]_ - Volumes attached to the Sandbox.
 - `build_info` _str_ - Build information for the Sandbox if it was created from dynamic build.
@@ -338,9 +339,38 @@ The Sandbox will automatically archive after being continuously stopped for the 
 
 ```python
 # Auto-archive after 1 hour
-sandbox.set_autoarchive_interval(60)
+sandbox.set_auto_archive_interval(60)
 # Or use the maximum interval
-sandbox.set_autoarchive_interval(0)
+sandbox.set_auto_archive_interval(0)
+```
+
+#### AsyncSandbox.set_auto_delete_interval
+
+```python
+@intercept_errors(message_prefix="Failed to set auto-delete interval: ")
+async def set_auto_delete_interval(interval: int) -> None
+```
+
+Sets the auto-delete interval for the Sandbox.
+
+The Sandbox will automatically delete after being continuously stopped for the specified interval.
+
+**Arguments**:
+
+- `interval` _int_ - Number of minutes after which a continuously stopped Sandbox will be auto-deleted.
+  Set to 0 to disable auto-stop. By default, auto-delete is disabled.
+
+**Raises**:
+
+- `DaytonaError` - If interval is negative
+
+**Example**:
+
+```python
+# Auto-delete after 1 hour
+sandbox.set_auto_delete_interval(60)
+# Or disable auto-delete
+sandbox.set_auto_delete_interval(0)
 ```
 
 #### AsyncSandbox.get\_preview\_link

@@ -5,20 +5,16 @@ import base64
 import json
 from typing import Awaitable, Callable, Dict, List, Optional
 
-from daytona_api_client_async import (
-    Command,
-    CreateSessionRequest,
-    ExecuteRequest,
-    Session,
-    SessionExecuteResponse,
-    ToolboxApi,
-)
+from daytona_api_client_async import (Command, CreateSessionRequest,
+                                      ExecuteRequest, Session,
+                                      SessionExecuteResponse, ToolboxApi)
 
 from .._utils.errors import intercept_errors
 from .._utils.stream import process_streaming_response
 from ..code_toolbox.sandbox_python_code_toolbox import SandboxPythonCodeToolbox
 from ..common.charts import parse_chart
-from ..common.process import CodeRunParams, ExecuteResponse, ExecutionArtifacts, SessionExecuteRequest
+from ..common.process import (CodeRunParams, ExecuteResponse,
+                              ExecutionArtifacts, SessionExecuteRequest)
 
 
 class AsyncProcess:

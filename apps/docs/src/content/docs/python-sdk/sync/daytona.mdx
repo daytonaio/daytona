@@ -106,7 +106,7 @@ including language, image, environment variables, and volumes.
 
 **Raises**:
 
-- `DaytonaError` - If timeout, auto_stop_interval or auto_archive_interval is negative;
+- `DaytonaError` - If timeout, auto_stop_interval, auto_archive_interval or auto_delete_interval is negative;
   If sandbox fails to start or times out
   
 
@@ -124,7 +124,8 @@ params = CreateSandboxFromSnapshotParams(
     snapshot="my-snapshot-id",
     env_vars={"DEBUG": "true"},
     auto_stop_interval=0,
-    auto_archive_interval=60
+    auto_archive_interval=60,
+    auto_delete_interval=120
 )
 sandbox = daytona.create(params, timeout=40)
 ```
@@ -158,7 +159,7 @@ and volumes. Daytona creates snapshot from provided image and uses it to create 
 
 **Raises**:
 
-- `DaytonaError` - If timeout, auto_stop_interval or auto_archive_interval is negative;
+- `DaytonaError` - If timeout, auto_stop_interval, auto_archive_interval or auto_delete_interval is negative;
   If sandbox fails to start or times out
   
 
@@ -183,6 +184,7 @@ params = CreateSandboxFromImageParams(
     resources=Resources(cpu=2, memory=4),
     auto_stop_interval=0,
     auto_archive_interval=60,
+    auto_delete_interval=120
 )
 sandbox = daytona.create(
     params,
@@ -418,6 +420,9 @@ Base parameters for creating a new Sandbox.
 - `auto_archive_interval` _Optional[int]_ - Interval in minutes after which a continuously stopped Sandbox will
   automatically archive. Default is 7 days.
   0 means the maximum interval will be used.
+- `auto_delete_interval` _Optional[int]_ - Interval in minutes after which a continuously stopped Sandbox will
+  automatically be deleted. By default, auto-delete is disabled.
+  0 means no auto-delete.
 
 ## CreateSandboxFromImageParams
 

@@ -47,6 +47,7 @@ class AsyncSandbox(SandboxDto):
         backup_created_at (str): When the backup was created.
         auto_stop_interval (int): Auto-stop interval in minutes.
         auto_archive_interval (int): Auto-archive interval in minutes.
+        auto_delete_interval (int): Auto-delete interval in minutes.
         runner_domain (str): Domain name of the Sandbox runner.
         volumes (List[str]): Volumes attached to the Sandbox.
         build_info (str): Build information for the Sandbox if it was created from dynamic build.
@@ -367,15 +368,42 @@ class AsyncSandbox(SandboxDto):
         Example:
             ```python
             # Auto-archive after 1 hour
-            sandbox.set_autoarchive_interval(60)
+            sandbox.set_auto_archive_interval(60)
             # Or use the maximum interval
-            sandbox.set_autoarchive_interval(0)
+            sandbox.set_auto_archive_interval(0)
             ```
         """
         if not isinstance(interval, int) or interval < 0:
             raise DaytonaError("Auto-archive interval must be a non-negative integer")
         await self._sandbox_api.set_auto_archive_interval(self.id, interval)
         self.auto_archive_interval = interval
+
+    @intercept_errors(message_prefix="Failed to set auto-delete interval: ")
+    async def set_auto_delete_interval(self, interval: int) -> None:
+        """Sets the auto-delete interval for the Sandbox.
+
+        The Sandbox will automatically delete after being continuously stopped for the specified interval.
+
+        Args:
+            interval (int): Number of minutes after which a continuously stopped Sandbox will be auto-deleted.
+                Set to 0 to disable auto-stop. By default, auto-delete is disabled.
+
+        Raises:
+            DaytonaError: If interval is negative
+
+        Example:
+            ```python
+            # Auto-delete after 1 hour
+            sandbox.set_auto_delete_interval(60)
+            # Or disable auto-delete
+            sandbox.set_auto_delete_interval(0)
+            ```
+        """
+        if not isinstance(interval, int) or interval < 0:
+            raise DaytonaError("Auto-delete interval must be a non-negative integer")
+
+        await self._sandbox_api.set_auto_delete_interval(self.id, interval)
+        self.auto_delete_interval = interval
 
     @intercept_errors(message_prefix="Failed to get preview link: ")
     async def get_preview_link(self, port: int) -> PortPreviewUrl:
@@ -434,6 +462,7 @@ class AsyncSandbox(SandboxDto):
         self.backup_created_at = sandbox_dto.backup_created_at
         self.auto_stop_interval = sandbox_dto.auto_stop_interval
         self.auto_archive_interval = sandbox_dto.auto_archive_interval
+        self.auto_delete_interval = sandbox_dto.auto_delete_interval
         self.runner_domain = sandbox_dto.runner_domain
         self.volumes = sandbox_dto.volumes
         self.build_info = sandbox_dto.build_info

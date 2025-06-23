@@ -158,6 +158,11 @@ export class Sandbox {
   @Column({ default: 7 * 24 * 60 })
   autoArchiveInterval?: number
 
+  //  this is the interval in minutes after which a continuously stopped workspace will be automatically deleted
+  //  if set to 0, auto delete will be disabled
+  @Column({ default: 0 })
+  autoDeleteInterval?: number
+
   @Column({ default: false })
   pending?: boolean
 

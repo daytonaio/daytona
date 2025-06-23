@@ -3,18 +3,11 @@
 
 from typing import Awaitable, Callable, List, Optional
 
-from daytona_api_client_async import (
-    GitAddRequest,
-    GitBranchRequest,
-    GitCheckoutRequest,
-    GitCloneRequest,
-    GitCommitRequest,
-    GitDeleteBranchRequest,
-    GitRepoRequest,
-    GitStatus,
-    ListBranchResponse,
-    ToolboxApi,
-)
+from daytona_api_client_async import (GitAddRequest, GitBranchRequest,
+                                      GitCheckoutRequest, GitCloneRequest,
+                                      GitCommitRequest, GitDeleteBranchRequest,
+                                      GitRepoRequest, GitStatus,
+                                      ListBranchResponse, ToolboxApi)
 
 from .._utils.errors import intercept_errors
 from .._utils.path import prefix_relative_path

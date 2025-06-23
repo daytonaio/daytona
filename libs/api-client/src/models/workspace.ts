@@ -149,6 +149,12 @@ export interface Workspace {
    */
   autoArchiveInterval?: number
   /**
+   * Auto-delete interval in minutes (0 means disabled)
+   * @type {number}
+   * @memberof Workspace
+   */
+  autoDeleteInterval?: number
+  /**
    * The domain name of the runner
    * @type {string}
    * @memberof Workspace
