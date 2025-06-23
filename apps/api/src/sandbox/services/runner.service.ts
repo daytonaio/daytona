@@ -21,6 +21,8 @@ import { SandboxState } from '../enums/sandbox-state.enum'
 import { Sandbox } from '../entities/sandbox.entity'
 import { SnapshotRunner } from '../entities/snapshot-runner.entity'
 import { SnapshotRunnerState } from '../enums/snapshot-runner-state.enum'
+import { Snapshot } from '../entities/snapshot.entity'
+import { RunnerSnapshotDto } from '../dto/runner-snapshot.dto'
 
 @Injectable()
 export class RunnerService {
@@ -35,6 +37,8 @@ export class RunnerService {
     private readonly sandboxRepository: Repository<Sandbox>,
     @InjectRepository(SnapshotRunner)
     private readonly snapshotRunnerRepository: Repository<SnapshotRunner>,
+    @InjectRepository(Snapshot)
+    private readonly snapshotRepository: Repository<Snapshot>,
   ) {}
 
   async create(createRunnerDto: CreateRunnerDto): Promise<Runner> {
@@ -279,6 +283,53 @@ export class RunnerService {
       .getRawMany()
 
     return runners.map((item) => item.runnerId)
+  }
+
+  async getRunnersBySnapshotInternalName(internalName: string): Promise<RunnerSnapshotDto[]> {
+    this.logger.debug(`Looking for snapshot with internalName: ${internalName}`)
+
+    // First find the snapshot by internalName
+    const snapshot = await this.snapshotRepository.findOne({
+      where: { internalName },
+    })
+
+    if (!snapshot) {
+      this.logger.debug(`No snapshot found with internalName: ${internalName}`)
+      return []
+    }
+
+    this.logger.debug(`Found snapshot with ID: ${snapshot.id}`)
+
+    // Find all snapshot runners for this snapshot
+    // Note: snapshotRef contains the internalName, not the snapshot ID
+    const snapshotRunners = await this.snapshotRunnerRepository.find({
+      where: { snapshotRef: internalName },
+    })
+
+    this.logger.debug(`Found ${snapshotRunners.length} snapshot runners for snapshot ${snapshot.id}`)
+
+    if (snapshotRunners.length === 0) {
+      this.logger.debug(`No snapshot runners found for snapshot ${snapshot.id}`)
+      return []
+    }
+
+    // Get the runner IDs
+    const runnerIds = snapshotRunners.map((sr) => sr.runnerId)
+    this.logger.debug(`Runner IDs found: ${runnerIds.join(', ')}`)
+
+    // Find all runners with these IDs
+    const runners = await this.runnerRepository.find({
+      where: { id: In(runnerIds) },
+      select: ['id', 'domain'],
+    })
+
+    this.logger.debug(`Found ${runners.length} runners with IDs: ${runners.map((r) => r.id).join(', ')}`)
+
+    // Map to DTO format, including the snapshot runner ID
+    return runners.map((runner) => {
+      const snapshotRunner = snapshotRunners.find((sr) => sr.runnerId === runner.id)
+      return new RunnerSnapshotDto(snapshotRunner.id, runner.id, runner.domain)
+    })
   }
 }
 
