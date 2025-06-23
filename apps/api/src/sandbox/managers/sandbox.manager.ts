@@ -77,7 +77,7 @@ export class SandboxManager {
     // Process all runners in parallel
     await Promise.all(
       readyRunners.map(async (runner) => {
-        const sandboxs = await this.sandboxRepository.find({
+        const sandboxes = await this.sandboxRepository.find({
           where: {
             runnerId: runner.id,
             organizationId: Not(SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION),
@@ -95,7 +95,7 @@ export class SandboxManager {
         })
 
         await Promise.all(
-          sandboxs.map(async (sandbox) => {
+          sandboxes.map(async (sandbox) => {
             const lockKey = SYNC_INSTANCE_STATE_LOCK_KEY + sandbox.id
             const acquired = await this.redisLockProvider.lock(lockKey, 30)
             if (!acquired) {
@@ -134,7 +134,7 @@ export class SandboxManager {
     // Process all runners in parallel
     await Promise.all(
       readyRunners.map(async (runner) => {
-        const sandboxs = await this.sandboxRepository.find({
+        const sandboxes = await this.sandboxRepository.find({
           where: {
             runnerId: runner.id,
             organizationId: Not(SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION),
@@ -152,7 +152,7 @@ export class SandboxManager {
         })
 
         await Promise.all(
-          sandboxs.map(async (sandbox) => {
+          sandboxes.map(async (sandbox) => {
             const lockKey = SYNC_INSTANCE_STATE_LOCK_KEY + sandbox.id
             const acquired = await this.redisLockProvider.lock(lockKey, 30)
             if (!acquired) {
@@ -182,7 +182,7 @@ export class SandboxManager {
       return
     }
 
-    const sandboxs = await this.sandboxRepository.find({
+    const sandboxes = await this.sandboxRepository.find({
       where: {
         state: Not(In([SandboxState.DESTROYED, SandboxState.ERROR, SandboxState.BUILD_FAILED])),
         desiredState: Raw(
@@ -197,7 +197,7 @@ export class SandboxManager {
     })
 
     await Promise.all(
-      sandboxs.map(async (sandbox) => {
+      sandboxes.map(async (sandbox) => {
         this.syncInstanceState(sandbox.id)
       }),
     )
@@ -219,7 +219,7 @@ export class SandboxManager {
       .having('COUNT(*) >= 3')
       .getRawMany()
 
-    const sandboxs = await this.sandboxRepository.find({
+    const sandboxes = await this.sandboxRepository.find({
       where: [
         {
           state: SandboxState.ARCHIVING,
@@ -240,7 +240,7 @@ export class SandboxManager {
     })
 
     await Promise.all(
-      sandboxs.map(async (sandbox) => {
+      sandboxes.map(async (sandbox) => {
         this.syncInstanceState(sandbox.id)
       }),
     )
@@ -430,7 +430,7 @@ export class SandboxManager {
 
     //  if the sandbox is already in progress, continue
     if (!inProgressOnRunner.find((s) => s.id === sandbox.id)) {
-      //  max 3 sandboxs can be archived at the same time on the same runner
+      //  max 3 sandboxes can be archived at the same time on the same runner
       //  this is to prevent the runner from being overloaded
       if (inProgressOnRunner.length > 2) {
         await this.redisLockProvider.unlock(lockKey)
@@ -853,7 +853,7 @@ export class SandboxManager {
           })
           const lessUsedRunners = availableRunners.filter((runner) => runner.id !== sandbox.runnerId)
 
-          //  temp workaround to move sandboxs to less used runner
+          //  temp workaround to move sandboxes to less used runner
           if (lessUsedRunners.length > 0) {
             await this.sandboxRepository.update(sandbox.id, {
               runnerId: null,
