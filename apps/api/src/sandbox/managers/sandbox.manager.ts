@@ -287,7 +287,8 @@ export class SandboxManager {
       if (error.code === 'ECONNRESET') {
         syncState = SYNC_AGAIN
       } else {
-        this.logger.error(`Error processing desired state for sandbox ${sandboxId}:`, fromAxiosError(error))
+        const sandboxError = fromAxiosError(error)
+        this.logger.error(`Error processing desired state for sandbox ${sandboxId}:`, sandboxError)
 
         const sandbox = await this.sandboxRepository.findOneBy({
           id: sandboxId,
@@ -296,7 +297,7 @@ export class SandboxManager {
           //  edge case where sandbox is deleted while desired state is being processed
           return
         }
-        await this.updateSandboxState(sandbox.id, SandboxState.ERROR, undefined, error.message || String(error))
+        await this.updateSandboxState(sandbox.id, SandboxState.ERROR, undefined, sandboxError.message || String(error))
       }
     }
 
