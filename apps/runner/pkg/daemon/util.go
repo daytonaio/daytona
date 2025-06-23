@@ -4,12 +4,13 @@
 package daemon
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 )
 
-func WriteDaemonBinary() (string, error) {
-	daemonBinary, err := static.ReadFile("static/daemon-amd64")
+func WriteStaticBinary(name string) (string, error) {
+	daemonBinary, err := static.ReadFile(fmt.Sprintf("static/%s", name))
 	if err != nil {
 		return "", err
 	}
@@ -25,7 +26,7 @@ func WriteDaemonBinary() (string, error) {
 		return "", err
 	}
 
-	daemonPath := filepath.Join(tmpBinariesDir, "daemon-amd64")
+	daemonPath := filepath.Join(tmpBinariesDir, name)
 	_, err = os.Stat(daemonPath)
 	if err != nil && !os.IsNotExist(err) {
 		return "", err
