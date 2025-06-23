@@ -3,16 +3,17 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Body, Controller, Get, Post, Param, Patch, UseGuards } from '@nestjs/common'
+import { Body, Controller, Get, Post, Param, Patch, UseGuards, Query } from '@nestjs/common'
 import { CreateRunnerDto } from '../dto/create-runner.dto'
 import { Runner } from '../entities/runner.entity'
 import { RunnerService } from '../services/runner.service'
-import { ApiOAuth2, ApiTags, ApiOperation, ApiBearerAuth, ApiResponse } from '@nestjs/swagger'
+import { ApiOAuth2, ApiTags, ApiOperation, ApiBearerAuth, ApiResponse, ApiQuery } from '@nestjs/swagger'
 import { SystemActionGuard } from '../../auth/system-action.guard'
 import { RequiredApiRole } from '../../common/decorators/required-role.decorator'
 import { SystemRole } from '../../user/enums/system-role.enum'
 import { ProxyGuard } from '../../auth/proxy.guard'
 import { RunnerDto } from '../dto/runner.dto'
+import { RunnerSnapshotDto } from '../dto/runner-snapshot.dto'
 
 import { CombinedAuthGuard } from '../../auth/combined-auth.guard'
 @ApiTags('runners')
@@ -67,5 +68,25 @@ export class RunnerController {
   async getRunnerBySandboxId(@Param('sandboxId') sandboxId: string): Promise<RunnerDto> {
     const runner = await this.runnerService.findBySandboxId(sandboxId)
     return RunnerDto.fromRunner(runner)
+  }
+
+  @Get('/by-snapshot')
+  @ApiOperation({
+    summary: 'Get runners by snapshot internal name',
+    operationId: 'getRunnersBySnapshotInternalName',
+  })
+  @ApiQuery({
+    name: 'internalName',
+    description: 'Internal name of the snapshot',
+    type: String,
+    required: true,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Runners found for the snapshot',
+    type: [RunnerSnapshotDto],
+  })
+  async getRunnersBySnapshotInternalName(@Query('internalName') internalName: string): Promise<RunnerSnapshotDto[]> {
+    return this.runnerService.getRunnersBySnapshotInternalName(internalName)
   }
 }
