@@ -701,7 +701,7 @@ export class SandboxService {
     })
 
     if (destroyedSandboxs.affected > 0) {
-      this.logger.debug(`Cleaned up ${destroyedSandboxs.affected} destroyed sandboxs`)
+      this.logger.debug(`Cleaned up ${destroyedSandboxs.affected} destroyed sandboxes`)
     }
   }
 
@@ -749,8 +749,8 @@ export class SandboxService {
       return
     }
 
-    //  find all sandboxs that are using the unschedulable runners and have organizationId = '00000000-0000-0000-0000-000000000000'
-    const sandboxs = await this.sandboxRepository.find({
+    //  find all sandboxes that are using the unschedulable runners and have organizationId = '00000000-0000-0000-0000-000000000000'
+    const sandboxes = await this.sandboxRepository.find({
       where: {
         runnerId: In(runners.map((runner) => runner.id)),
         organizationId: '00000000-0000-0000-0000-000000000000',
@@ -759,17 +759,17 @@ export class SandboxService {
       },
     })
 
-    if (sandboxs.length === 0) {
+    if (sandboxes.length === 0) {
       return
     }
 
-    const destroyPromises = sandboxs.map((sandbox) => this.destroy(sandbox.id))
+    const destroyPromises = sandboxes.map((sandbox) => this.destroy(sandbox.id))
     const results = await Promise.allSettled(destroyPromises)
 
     // Log any failed sandbox destructions
     results.forEach((result, index) => {
       if (result.status === 'rejected') {
-        this.logger.error(`Failed to destroy sandbox ${sandboxs[index].id}: ${result.reason}`)
+        this.logger.error(`Failed to destroy sandbox ${sandboxes[index].id}: ${result.reason}`)
       }
     })
   }
