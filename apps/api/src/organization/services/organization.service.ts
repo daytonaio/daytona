@@ -32,6 +32,8 @@ import { Redis } from 'ioredis'
 import { RedisLockProvider } from '../../sandbox/common/redis-lock.provider'
 import { OrganizationSuspendedSandboxStoppedEvent } from '../events/organization-suspended-sandbox-stopped.event'
 import { SandboxDesiredState } from '../../sandbox/enums/sandbox-desired-state.enum'
+import { SnapshotRunner } from '../../sandbox/entities/snapshot-runner.entity'
+import { OrganizationSuspendedSnapshotRunnerRemovedEvent } from '../events/organization-suspended-snapshot-runner-removed'
 
 @Injectable()
 export class OrganizationService implements OnModuleInit {
@@ -45,6 +47,8 @@ export class OrganizationService implements OnModuleInit {
     private readonly sandboxRepository: Repository<Sandbox>,
     @InjectRepository(Snapshot)
     private readonly snapshotRepository: Repository<Snapshot>,
+    @InjectRepository(SnapshotRunner)
+    private readonly snapshotRunnerRepository: Repository<SnapshotRunner>,
     @InjectRepository(Volume)
     private readonly volumeRepository: Repository<Volume>,
     private readonly eventEmitter: EventEmitter2,
@@ -331,6 +335,41 @@ export class OrganizationService implements OnModuleInit {
     await this.redis.del(lockKey)
   }
 
+  @Cron(CronExpression.EVERY_10_MINUTES, { name: 'remove-suspended-organization-snapshot-runners' })
+  async removeSuspendedOrganizationSnapshotRunners(): Promise<void> {
+    //  lock the sync to only run one instance at a time
+    const lockKey = 'remove-suspended-organization-snapshot-runners'
+    if (!(await this.redisLockProvider.lock(lockKey, 60))) {
+      return
+    }
+
+    const suspendedOrganizations = await this.findSuspended(
+      // Find organization suspended more than 24 hours ago
+      new Date(Date.now() - 1 * 1000 * 60 * 60 * 24),
+      //  and less than 7 days ago
+      new Date(Date.now() - 7 * 1000 * 60 * 60 * 24),
+    )
+
+    const suspendedOrganizationIds = suspendedOrganizations.map((organization) => organization.id)
+
+    const snapshotRunners = await this.snapshotRunnerRepository
+      .createQueryBuilder('snapshotRunner')
+      .innerJoin('snapshot', 'snapshot', 'snapshot.internalName = snapshotRunner.snapshotRef')
+      .where('snapshot.general = false')
+      .andWhere('snapshot.organizationId IN (:...suspendedOrgIds)', { suspendedOrgIds: suspendedOrganizationIds })
+      .orderBy('snapshotRunner.createdAt', 'ASC')
+      .getMany()
+
+    snapshotRunners.map((snapshotRunner) =>
+      this.eventEmitter.emitAsync(
+        OrganizationEvents.SUSPENDED_SNAPSHOT_RUNNER_REMOVED,
+        new OrganizationSuspendedSnapshotRunnerRemovedEvent(snapshotRunner.id),
+      ),
+    )
+
+    await this.redis.del(lockKey)
+  }
+
   @OnAsyncEvent({
     event: UserEvents.CREATED,
   })
@@ -361,5 +400,19 @@ export class OrganizationService implements OnModuleInit {
     const organization = await this.findPersonalWithEntityManager(payload.entityManager, payload.userId)
 
     await this.removeWithEntityManager(payload.entityManager, organization, true)
+  }
+
+  async assertOrganizationIsNotSuspended(organization: Organization): Promise<void> {
+    if (!organization.suspended) {
+      return
+    }
+
+    if (organization.suspendedUntil ? organization.suspendedUntil > new Date() : true) {
+      if (organization.suspensionReason) {
+        throw new ForbiddenException(`Organization is suspended: ${organization.suspensionReason}`)
+      } else {
+        throw new ForbiddenException('Organization is suspended')
+      }
+    }
   }
 }
