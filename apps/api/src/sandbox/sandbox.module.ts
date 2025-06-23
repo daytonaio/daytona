@@ -41,6 +41,7 @@ import { BuildInfo } from './entities/build-info.entity'
 import { BackupManager } from './managers/backup.manager'
 import { VolumeSubscriber } from './subscribers/volume.subscriber'
 import { WorkspaceController } from './controllers/workspace.deprecated.controller'
+import { SnapshotRunnerService } from './services/snapshot-runner.service'
 
 @Module({
   imports: [
@@ -76,8 +77,17 @@ import { WorkspaceController } from './controllers/workspace.deprecated.controll
     VolumeService,
     VolumeManager,
     VolumeSubscriber,
+    SnapshotRunnerService,
   ],
-  exports: [SandboxService, RunnerService, RedisLockProvider, SnapshotService, VolumeService, VolumeManager],
+  exports: [
+    SandboxService,
+    RunnerService,
+    RedisLockProvider,
+    SnapshotService,
+    VolumeService,
+    VolumeManager,
+    SnapshotRunnerService,
+  ],
 })
 export class SandboxModule {
   configure(consumer: MiddlewareConsumer) {

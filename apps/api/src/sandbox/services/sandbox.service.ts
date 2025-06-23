@@ -77,7 +77,7 @@ export class SandboxService {
     disk: number,
     excludeSandboxId?: string,
   ): Promise<void> {
-    await this.assertOrganizationIsNotSuspended(organization)
+    await this.organizationService.assertOrganizationIsNotSuspended(organization)
 
     // Check per-sandbox resource limits
     if (cpu > organization.maxCpuPerSandbox) {
@@ -552,7 +552,7 @@ export class SandboxService {
       throw new SandboxError('Sandbox is not in valid state')
     }
 
-    await this.assertOrganizationIsNotSuspended(organization)
+    await this.organizationService.assertOrganizationIsNotSuspended(organization)
 
     if (sandbox.runnerId) {
       // Add runner readiness check
@@ -741,20 +741,6 @@ export class SandboxService {
         this.logger.error(`Failed to destroy sandbox ${sandboxs[index].id}: ${result.reason}`)
       }
     })
-  }
-
-  private async assertOrganizationIsNotSuspended(organization: Organization): Promise<void> {
-    if (!organization.suspended) {
-      return
-    }
-
-    if (organization.suspendedUntil ? organization.suspendedUntil > new Date() : true) {
-      if (organization.suspensionReason) {
-        throw new ForbiddenException(`Organization is suspended: ${organization.suspensionReason}`)
-      } else {
-        throw new ForbiddenException('Organization is suspended')
-      }
-    }
   }
 
   async isSandboxPublic(sandboxId: string): Promise<boolean> {

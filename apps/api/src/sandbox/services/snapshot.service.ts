@@ -21,6 +21,7 @@ import { OnEvent } from '@nestjs/event-emitter'
 import { SandboxEvents } from '../constants/sandbox-events.constants'
 import { SandboxCreatedEvent } from '../events/sandbox-create.event'
 import { Organization } from '../../organization/entities/organization.entity'
+import { OrganizationService } from '../../organization/services/organization.service'
 
 const IMAGE_NAME_REGEX = /^[a-zA-Z0-9.\-:]+(\/[a-zA-Z0-9.\-:]+)*$/
 @Injectable()
@@ -30,6 +31,7 @@ export class SnapshotService {
     private readonly snapshotRepository: Repository<Snapshot>,
     @InjectRepository(BuildInfo)
     private readonly buildInfoRepository: Repository<BuildInfo>,
+    private readonly organizationService: OrganizationService,
   ) {}
 
   private validateImageName(name: string): string | null {
@@ -68,6 +70,8 @@ export class SnapshotService {
         throw new BadRequestException(imageValidationError)
       }
     }
+
+    await this.organizationService.assertOrganizationIsNotSuspended(organization)
 
     // check if the organization has reached the snapshot quota
     const snapshots = await this.snapshotRepository.find({

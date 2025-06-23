@@ -22,6 +22,7 @@ import { Sandbox } from '../sandbox/entities/sandbox.entity'
 import { Snapshot } from '../sandbox/entities/snapshot.entity'
 import { Volume } from '../sandbox/entities/volume.entity'
 import { RedisLockProvider } from '../sandbox/common/redis-lock.provider'
+import { SnapshotRunner } from '../sandbox/entities/snapshot-runner.entity'
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { RedisLockProvider } from '../sandbox/common/redis-lock.provider'
       Sandbox,
       Snapshot,
       Volume,
+      SnapshotRunner,
     ]),
   ],
   controllers: [
