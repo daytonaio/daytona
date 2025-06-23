@@ -5877,7 +5877,7 @@ components:
         autoStopInterval: 30
         labels:
           daytona.io/public: 'true'
-        target: eu
+        target: us-west
         disk: 3
         public: false
         user: daytona
@@ -5921,11 +5921,7 @@ components:
           type: string
         target:
           description: The target (region) where the sandbox will be created
-          enum:
-            - eu
-            - us
-            - asia
-          example: eu
+          example: us-west
           type: string
         cpu:
           description: CPU cores allocated to the sandbox
@@ -6004,7 +6000,7 @@ components:
         apiKey: apiKey
         domain: domain
         cpu: 0.8008281904610115
-        region: eu
+        region: us-west
         gpu: 5.962133916683182
         class: small
         gpuType: gpuType
@@ -6036,11 +6032,7 @@ components:
         capacity:
           type: number
         region:
-          enum:
-            - eu
-            - us
-            - asia
-          example: eu
+          example: us-west
           type: string
       required:
         - apiKey
@@ -6061,13 +6053,6 @@ components:
         - small
         - medium
         - large
-      type: string
-    RunnerRegion:
-      description: The region of the runner
-      enum:
-        - eu
-        - us
-        - asia
       type: string
     RunnerState:
       description: The state of the runner
@@ -6092,7 +6077,7 @@ components:
         domain: runner1.example.com
         id: runner123
         state: initializing
-        region: eu
+        region: us-west
         unschedulable: false
         class: small
         lastChecked: 2024-10-01T12:00:00Z
@@ -6148,10 +6133,9 @@ components:
           example: 10
           type: number
         region:
-          allOf:
-            - $ref: '#/components/schemas/RunnerRegion'
           description: The region of the runner
-          example: eu
+          example: us-west
+          type: string
         state:
           allOf:
             - $ref: '#/components/schemas/RunnerState'

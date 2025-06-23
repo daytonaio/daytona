@@ -17,7 +17,6 @@ import { SandboxOrganizationUpdatedEvent } from '../events/sandbox-organization-
 import { ConfigService } from '@nestjs/config'
 import { Snapshot } from '../entities/snapshot.entity'
 import { SnapshotState } from '../enums/snapshot-state.enum'
-import { RunnerRegion } from '../enums/runner-region.enum'
 import { SandboxClass } from '../enums/sandbox-class.enum'
 import { BadRequestError } from '../../exceptions/bad-request.exception'
 import { SandboxState } from '../enums/sandbox-state.enum'
@@ -31,7 +30,7 @@ import { isValidUuid } from '../../common/utils/uuid'
 
 export type FetchWarmPoolSandboxParams = {
   snapshot: string
-  target: RunnerRegion
+  target: string
   class: SandboxClass
   cpu: number
   mem: number

@@ -71,7 +71,7 @@ export interface CreateSandbox {
    * @type {string}
    * @memberof CreateSandbox
    */
-  target?: CreateSandboxTargetEnum
+  target?: string
   /**
    * CPU cores allocated to the sandbox
    * @type {number}
@@ -129,10 +129,3 @@ export const CreateSandboxClassEnum = {
 } as const
 
 export type CreateSandboxClassEnum = (typeof CreateSandboxClassEnum)[keyof typeof CreateSandboxClassEnum]
-export const CreateSandboxTargetEnum = {
-  EU: 'eu',
-  US: 'us',
-  ASIA: 'asia',
-} as const
-
-export type CreateSandboxTargetEnum = (typeof CreateSandboxTargetEnum)[keyof typeof CreateSandboxTargetEnum]

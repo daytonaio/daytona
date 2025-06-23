@@ -6,10 +6,14 @@
 import { IsEnum, IsObject, IsOptional, IsString, IsNumber, IsBoolean } from 'class-validator'
 import { ApiPropertyOptional, ApiSchema } from '@nestjs/swagger'
 import { SandboxClass } from '../enums/sandbox-class.enum'
-import { RunnerRegion } from '../enums/runner-region.enum'
 import { SandboxVolume } from './sandbox.dto'
 import { CreateBuildInfoDto } from './create-build-info.dto'
 
+enum RunnerRegion {
+  EU = 'eu',
+  US = 'us',
+  ASIA = 'asia',
+}
 @ApiSchema({ name: 'CreateWorkspace' })
 export class CreateWorkspaceDto {
   @ApiPropertyOptional({
