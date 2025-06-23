@@ -29,6 +29,7 @@ import {
   Timer,
   ArrowUpDown,
   Archive,
+  Container,
 } from 'lucide-react'
 import { TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from './ui/table'
 import { Button } from './ui/button'
@@ -50,6 +51,8 @@ import { DebouncedInput } from './DebouncedInput'
 import { DataTableFacetedFilter, FacetedFilterOption } from './ui/data-table-faceted-filter'
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 import { TableEmptyState } from './TableEmptyState'
+import { useNavigate } from 'react-router-dom'
+import { RoutePath } from '@/enums/RoutePath'
 
 interface DataTableProps {
   data: Sandbox[]
@@ -73,6 +76,7 @@ export function SandboxTable({
   handleArchive,
 }: DataTableProps) {
   const { authenticatedUserHasPermission } = useSelectedOrganization()
+  const navigate = useNavigate()
 
   const writePermitted = useMemo(
     () => authenticatedUserHasPermission(OrganizationRolePermissionsEnum.WRITE_SANDBOXES),
@@ -196,7 +200,26 @@ export function SandboxTable({
                 </TableRow>
               ))
             ) : (
-              <TableEmptyState colSpan={columns.length} message="No Sandboxes found." />
+              <TableEmptyState
+                colSpan={columns.length}
+                message="No Sandboxes yet."
+                icon={<Container className="w-8 h-8" />}
+                description={
+                  <div className="space-y-2">
+                    <p>Spin up a Sandbox to run code in an isolated environment.</p>
+                    <p>Use the Daytona SDK or CLI to create one.</p>
+                    <p>
+                      <button
+                        onClick={() => navigate(RoutePath.ONBOARDING)}
+                        className="text-primary hover:underline font-medium"
+                      >
+                        Check out the Onboarding guide
+                      </button>{' '}
+                      to learn more.
+                    </p>
+                  </div>
+                }
+              />
             )}
           </TableBody>
         </Table>

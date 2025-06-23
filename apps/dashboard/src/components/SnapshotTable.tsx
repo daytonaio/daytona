@@ -15,7 +15,7 @@ import {
 import { TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from './ui/table'
 import { Button } from './ui/button'
 import { useMemo, useState } from 'react'
-import { AlertTriangle, CheckCircle, MoreHorizontal, Timer, Trash2, Pause } from 'lucide-react'
+import { AlertTriangle, CheckCircle, MoreHorizontal, Timer, Trash2, Pause, Box } from 'lucide-react'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -208,7 +208,31 @@ export function SnapshotTable({
                 </TableRow>
               ))
             ) : (
-              <TableEmptyState colSpan={columns.length} message="No Images found." />
+              <TableEmptyState
+                colSpan={columns.length}
+                message="No Snapshots yet."
+                icon={<Box className="w-8 h-8" />}
+                description={
+                  <div className="space-y-2">
+                    <p>
+                      Snapshots are reproducible, pre-configured environments based on any Docker-compatible image. Use
+                      them to define language runtimes, dependencies, and tools for your sandboxes.
+                    </p>
+                    <p>
+                      Create one from the Dashboard, CLI, or SDK to get started. Read the{' '}
+                      <a
+                        href="https://www.daytona.io/docs/snapshots"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary hover:underline font-medium"
+                      >
+                        Snapshots guide
+                      </a>{' '}
+                      to learn more.
+                    </p>
+                  </div>
+                }
+              />
             )}
           </TableBody>
         </Table>
@@ -225,7 +249,7 @@ export function SnapshotTable({
               </PopoverTrigger>
               <PopoverContent side="top">
                 <div className="flex flex-col gap-4">
-                  <p>Are you sure you want to delete these images?</p>
+                  <p>Are you sure you want to delete these Snapshots?</p>
                   <div className="flex items-center space-x-2">
                     <Button
                       variant="destructive"
@@ -250,7 +274,7 @@ export function SnapshotTable({
             </span>
           )}
         </div>
-        <Pagination table={table} entityName="Images" />
+        <Pagination table={table} className="mt-4" entityName="Snapshots" />
       </div>
     </div>
   )

@@ -21,7 +21,7 @@ interface TableEmptyStateProps {
   /**
    * Optional description text to display below the main message
    */
-  description?: string
+  description?: React.ReactNode
   /**
    * Additional CSS classes for the container
    */
@@ -32,10 +32,10 @@ export function TableEmptyState({ colSpan, message, icon, description, className
   return (
     <TableRow>
       <TableCell colSpan={colSpan} className={`h-24 text-center ${className}`}>
-        <div className="flex flex-col items-center justify-center space-y-2">
+        <div className="flex flex-col items-center justify-center space-y-3 py-8">
           {icon && <div className="text-muted-foreground">{icon}</div>}
-          <p className="text-muted-foreground">{message}</p>
-          {description && <p className="text-sm text-muted-foreground/80">{description}</p>}
+          <p className="text-muted-foreground font-medium">{message}</p>
+          {description && <div className="text-sm text-muted-foreground/80 max-w-md">{description}</div>}
         </div>
       </TableCell>
     </TableRow>
