@@ -145,9 +145,9 @@ class AsyncDaytona:
             if not config.api_key and config.jwt_token:
                 self._api_key = None
             else:
-                self._api_key = config.api_key or getattr(self, "api_key", None)
-            self._jwt_token = config.jwt_token or getattr(self, "jwt_token", None)
-            self._organization_id = config.organization_id or getattr(self, "organization_id", None)
+                self._api_key = config.api_key or getattr(self, "_api_key", None)
+            self._jwt_token = config.jwt_token or getattr(self, "_jwt_token", None)
+            self._organization_id = config.organization_id or getattr(self, "_organization_id", None)
             self._api_url = config.api_url or self._api_url
             self._target = config.target or self._target
 
