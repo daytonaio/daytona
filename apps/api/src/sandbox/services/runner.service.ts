@@ -72,7 +72,7 @@ export class RunnerService {
   }
 
   async findBySandboxId(sandboxId: string): Promise<Runner | null> {
-    const sandbox = await this.sandboxRepository.findOneBy({ id: sandboxId })
+    const sandbox = await this.sandboxRepository.findOneBy({ id: sandboxId, state: Not(SandboxState.DESTROYED) })
     if (!sandbox) {
       throw new NotFoundException(`Sandbox with ID ${sandboxId} not found`)
     }
