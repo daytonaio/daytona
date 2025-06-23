@@ -149,7 +149,7 @@ export class RunnerService {
     this.checkingRunners = true
     const runners = await this.runnerRepository.find({
       where: {
-        unschedulable: Not(true),
+        state: Not(RunnerState.DECOMMISSIONED),
       },
     })
     for (const runner of runners) {
