@@ -13,12 +13,13 @@ import (
 
 	common_proxy "github.com/daytonaio/common-go/pkg/proxy"
 	"github.com/daytonaio/daemon/internal"
+	"github.com/daytonaio/daemon/pkg/toolbox/computeruse"
+	"github.com/daytonaio/daemon/pkg/toolbox/computeruse/manager"
 	"github.com/daytonaio/daemon/pkg/toolbox/config"
 	"github.com/daytonaio/daemon/pkg/toolbox/fs"
 	"github.com/daytonaio/daemon/pkg/toolbox/git"
 	"github.com/daytonaio/daemon/pkg/toolbox/lsp"
 	"github.com/daytonaio/daemon/pkg/toolbox/middlewares"
-	"github.com/daytonaio/daemon/pkg/toolbox/plugin_loader"
 	"github.com/daytonaio/daemon/pkg/toolbox/port"
 	"github.com/daytonaio/daemon/pkg/toolbox/process"
 	"github.com/daytonaio/daemon/pkg/toolbox/process/session"
@@ -32,7 +33,7 @@ import (
 
 type Server struct {
 	ProjectDir  string
-	ComputerUse *plugin_loader.PluginLoader
+	ComputerUse computeruse.IComputerUse
 }
 
 type ProjectDirResponse struct {
@@ -150,48 +151,53 @@ func (s *Server) Start() error {
 	}
 
 	// Initialize plugin-based computer use
-	pluginPath := "/usr/local/lib/computeruse.so"
+	pluginPath := "/usr/local/lib/daytona-computer-use"
 	// Fallback to local config directory for development
 	if _, err := os.Stat(pluginPath); os.IsNotExist(err) {
-		pluginPath = path.Join(configDir, "computeruse.so")
+		pluginPath = path.Join(configDir, "daytona-computer-use")
 	}
-	s.ComputerUse = plugin_loader.NewPluginLoader(pluginPath)
+	s.ComputerUse, err = manager.GetComputerUse(pluginPath)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	computerUseController := r.Group("/computer")
-	{
-		// Computer use status endpoint
-		computerUseController.GET("/status", s.ComputerUse.GetStatus)
+	if s.ComputerUse != nil {
+		computerUseController := r.Group("/computer")
+		{
+			// Computer use status endpoint
+			computerUseController.GET("/status", computeruse.WrapRequest(s.ComputerUse.GetStatus))
 
-		// Computer use management endpoints
-		computerUseController.POST("/start", s.startComputerUse)
-		computerUseController.POST("/stop", s.stopComputerUse)
-		computerUseController.GET("/process-status", s.getComputerUseStatus)
-		computerUseController.GET("/process/:processName/status", s.getProcessStatus)
-		computerUseController.POST("/process/:processName/restart", s.restartProcess)
-		computerUseController.GET("/process/:processName/logs", s.getProcessLogs)
-		computerUseController.GET("/process/:processName/errors", s.getProcessErrors)
+			// Computer use management endpoints
+			computerUseController.POST("/start", s.startComputerUse)
+			computerUseController.POST("/stop", s.stopComputerUse)
+			computerUseController.GET("/process-status", s.getComputerUseStatus)
+			computerUseController.GET("/process/:processName/status", s.getProcessStatus)
+			computerUseController.POST("/process/:processName/restart", s.restartProcess)
+			computerUseController.GET("/process/:processName/logs", s.getProcessLogs)
+			computerUseController.GET("/process/:processName/errors", s.getProcessErrors)
 
-		// Screenshot endpoints
-		computerUseController.GET("/screenshot", s.ComputerUse.TakeScreenshot)
-		computerUseController.GET("/screenshot/region", s.ComputerUse.TakeRegionScreenshot)
-		computerUseController.GET("/screenshot/compressed", s.ComputerUse.TakeCompressedScreenshot)
-		computerUseController.GET("/screenshot/region/compressed", s.ComputerUse.TakeCompressedRegionScreenshot)
+			// Screenshot endpoints
+			computerUseController.GET("/screenshot", computeruse.WrapRequest(s.ComputerUse.TakeScreenshot))
+			computerUseController.GET("/screenshot/region", computeruse.WrapRequest(s.ComputerUse.TakeRegionScreenshot))
+			computerUseController.GET("/screenshot/compressed", computeruse.WrapRequest(s.ComputerUse.TakeCompressedScreenshot))
+			computerUseController.GET("/screenshot/region/compressed", computeruse.WrapRequest(s.ComputerUse.TakeCompressedRegionScreenshot))
 
-		// Mouse control endpoints
-		computerUseController.GET("/mouse/position", s.ComputerUse.GetMousePosition)
-		computerUseController.POST("/mouse/move", s.ComputerUse.MoveMouse)
-		computerUseController.POST("/mouse/click", s.ComputerUse.Click)
-		computerUseController.POST("/mouse/drag", s.ComputerUse.Drag)
-		computerUseController.POST("/mouse/scroll", s.ComputerUse.Scroll)
+			// Mouse control endpoints
+			computerUseController.GET("/mouse/position", computeruse.WrapRequest(s.ComputerUse.GetMousePosition))
+			computerUseController.POST("/mouse/move", computeruse.WrapRequest(s.ComputerUse.MoveMouse))
+			computerUseController.POST("/mouse/click", computeruse.WrapRequest(s.ComputerUse.Click))
+			computerUseController.POST("/mouse/drag", computeruse.WrapRequest(s.ComputerUse.Drag))
+			computerUseController.POST("/mouse/scroll", computeruse.WrapRequest(s.ComputerUse.Scroll))
 
-		// Keyboard control endpoints
-		computerUseController.POST("/keyboard/type", s.ComputerUse.TypeText)
-		computerUseController.POST("/keyboard/key", s.ComputerUse.PressKey)
-		computerUseController.POST("/keyboard/hotkey", s.ComputerUse.PressHotkey)
+			// Keyboard control endpoints
+			computerUseController.POST("/keyboard/type", computeruse.WrapRequest(s.ComputerUse.TypeText))
+			computerUseController.POST("/keyboard/key", computeruse.WrapRequest(s.ComputerUse.PressKey))
+			computerUseController.POST("/keyboard/hotkey", computeruse.WrapRequest(s.ComputerUse.PressHotkey))
 
-		// Display info endpoints
-		computerUseController.GET("/display/info", s.ComputerUse.GetDisplayInfo)
-		computerUseController.GET("/display/windows", s.ComputerUse.GetWindows)
+			// Display info endpoints
+			computerUseController.GET("/display/info", computeruse.WrapRequest(s.ComputerUse.GetDisplayInfo))
+			computerUseController.GET("/display/windows", computeruse.WrapRequest(s.ComputerUse.GetWindows))
+		}
 	}
 
 	portDetector := port.NewPortsDetector()
@@ -227,7 +233,7 @@ func (s *Server) Start() error {
 
 // Computer use management handlers
 func (s *Server) startComputerUse(ctx *gin.Context) {
-	err := s.ComputerUse.Start()
+	_, err := s.ComputerUse.Start()
 	if err != nil {
 		ctx.JSON(http.StatusServiceUnavailable, gin.H{
 			"error":   "Failed to start computer use",
@@ -236,29 +242,72 @@ func (s *Server) startComputerUse(ctx *gin.Context) {
 		return
 	}
 
+	status, err := s.ComputerUse.GetProcessStatus()
+	if err != nil {
+		ctx.JSON(http.StatusServiceUnavailable, gin.H{
+			"error":   "Failed to get computer use status",
+			"details": err.Error(),
+		})
+		return
+	}
+
 	ctx.JSON(http.StatusOK, gin.H{
 		"message": "Computer use processes started successfully",
-		"status":  s.ComputerUse.GetProcessStatus(),
+		"status":  status,
 	})
 }
 
 func (s *Server) stopComputerUse(ctx *gin.Context) {
-	s.ComputerUse.Stop()
+	_, err := s.ComputerUse.Stop()
+	if err != nil {
+		ctx.JSON(http.StatusServiceUnavailable, gin.H{
+			"error":   "Failed to stop computer use",
+			"details": err.Error(),
+		})
+		return
+	}
+
+	status, err := s.ComputerUse.GetProcessStatus()
+	if err != nil {
+		ctx.JSON(http.StatusServiceUnavailable, gin.H{
+			"error":   "Failed to get computer use status",
+			"details": err.Error(),
+		})
+		return
+	}
 	ctx.JSON(http.StatusOK, gin.H{
 		"message": "Computer use processes stopped successfully",
-		"status":  s.ComputerUse.GetProcessStatus(),
+		"status":  status,
 	})
 }
 
 func (s *Server) getComputerUseStatus(ctx *gin.Context) {
+	status, err := s.ComputerUse.GetProcessStatus()
+	if err != nil {
+		ctx.JSON(http.StatusServiceUnavailable, gin.H{
+			"error":   "Failed to get computer use status",
+			"details": err.Error(),
+		})
+		return
+	}
 	ctx.JSON(http.StatusOK, gin.H{
-		"status": s.ComputerUse.GetProcessStatus(),
+		"status": status,
 	})
 }
 
 func (s *Server) getProcessStatus(ctx *gin.Context) {
 	processName := ctx.Param("processName")
-	isRunning := s.ComputerUse.IsProcessRunning(processName)
+	req := &computeruse.ProcessRequest{
+		ProcessName: processName,
+	}
+	isRunning, err := s.ComputerUse.IsProcessRunning(req)
+	if err != nil {
+		ctx.JSON(http.StatusServiceUnavailable, gin.H{
+			"error":   "Failed to get process status",
+			"details": err.Error(),
+		})
+		return
+	}
 
 	ctx.JSON(http.StatusOK, gin.H{
 		"processName": processName,
@@ -268,7 +317,10 @@ func (s *Server) getProcessStatus(ctx *gin.Context) {
 
 func (s *Server) restartProcess(ctx *gin.Context) {
 	processName := ctx.Param("processName")
-	err := s.ComputerUse.RestartProcess(processName)
+	req := &computeruse.ProcessRequest{
+		ProcessName: processName,
+	}
+	_, err := s.ComputerUse.RestartProcess(req)
 
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
@@ -285,7 +337,10 @@ func (s *Server) restartProcess(ctx *gin.Context) {
 
 func (s *Server) getProcessLogs(ctx *gin.Context) {
 	processName := ctx.Param("processName")
-	logs, err := s.ComputerUse.GetProcessLogs(processName)
+	req := &computeruse.ProcessRequest{
+		ProcessName: processName,
+	}
+	logs, err := s.ComputerUse.GetProcessLogs(req)
 
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
@@ -302,7 +357,10 @@ func (s *Server) getProcessLogs(ctx *gin.Context) {
 
 func (s *Server) getProcessErrors(ctx *gin.Context) {
 	processName := ctx.Param("processName")
-	errors, err := s.ComputerUse.GetProcessErrors(processName)
+	req := &computeruse.ProcessRequest{
+		ProcessName: processName,
+	}
+	errors, err := s.ComputerUse.GetProcessErrors(req)
 
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{

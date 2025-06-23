@@ -17,18 +17,6 @@
         }
       ]
     },
-    "copy-computeruse-plugin": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "cp dist/apps/computeruse.so {projectRoot}/pkg/daemon/static"
-      },
-      "dependsOn": [
-        {
-          "target": "build-plugin",
-          "projects": "daemon"
-        }
-      ]
-    },
     "build": {
       "executor": "@nx-go/nx-go:build",
       "options": {
@@ -47,8 +35,7 @@
           "target": "build-amd64",
           "projects": "daemon"
         },
-        "copy-daemon-bin",
-        "copy-computeruse-plugin"
+        "copy-daemon-bin"
       ]
     },
     "serve": {
