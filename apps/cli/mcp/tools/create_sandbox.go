@@ -77,6 +77,18 @@ func CreateSandbox(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallT
 		}
 	}
 
+	if autoDeleteInterval, ok := request.Params.Arguments["auto_delete_interval"]; ok && autoDeleteInterval != nil {
+		if autoDeleteIntervalStr, ok := autoDeleteInterval.(string); ok && autoDeleteIntervalStr != "" {
+			autoDeleteIntervalValue, err := strconv.Atoi(autoDeleteIntervalStr)
+			if err != nil {
+				log.Error(fmt.Errorf("invalid auto delete interval value, fallback to default (no auto delete)"))
+				autoDeleteIntervalValue = 0
+			}
+
+			createSandbox.SetAutoDeleteInterval(int32(autoDeleteIntervalValue))
+		}
+	}
+
 	// Create new sandbox with retries
 	maxRetries := 3
 	retryDelay := time.Second * 2

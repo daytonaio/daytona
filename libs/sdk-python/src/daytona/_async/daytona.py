@@ -250,7 +250,7 @@ class AsyncDaytona:
             Sandbox: The created Sandbox instance.
 
         Raises:
-            DaytonaError: If timeout, auto_stop_interval or auto_archive_interval is negative;
+            DaytonaError: If timeout, auto_stop_interval, auto_archive_interval or auto_delete_interval is negative;
                 If sandbox fails to start or times out
 
         Example:
@@ -266,7 +266,8 @@ class AsyncDaytona:
                 snapshot="my-snapshot-id",
                 env_vars={"DEBUG": "true"},
                 auto_stop_interval=0,
-                auto_archive_interval=60
+                auto_archive_interval=60,
+                auto_delete_interval=120
             )
             sandbox = await daytona.create(params, timeout=40)
             ```
@@ -294,7 +295,7 @@ class AsyncDaytona:
             Sandbox: The created Sandbox instance.
 
         Raises:
-            DaytonaError: If timeout, auto_stop_interval or auto_archive_interval is negative;
+            DaytonaError: If timeout, auto_stop_interval, auto_archive_interval or auto_delete_interval is negative;
                 If sandbox fails to start or times out
 
         Example:
@@ -317,6 +318,7 @@ class AsyncDaytona:
                 resources=Resources(cpu=2, memory=4),
                 auto_stop_interval=0,
                 auto_archive_interval=60,
+                auto_delete_interval=120
             )
             sandbox = await daytona.create(
                 params,
@@ -365,6 +367,9 @@ class AsyncDaytona:
         if params.auto_archive_interval is not None and params.auto_archive_interval < 0:
             raise DaytonaError("auto_archive_interval must be a non-negative integer")
 
+        if params.auto_delete_interval is not None and params.auto_delete_interval < 0:
+            raise DaytonaError("auto_delete_interval must be a non-negative integer")
+
         target = self._target
 
         # Create sandbox using dictionary
@@ -376,6 +381,7 @@ class AsyncDaytona:
             target=str(target) if target else None,
             auto_stop_interval=params.auto_stop_interval,
             auto_archive_interval=params.auto_archive_interval,
+            auto_delete_interval=params.auto_delete_interval,
             volumes=params.volumes,
         )
 

@@ -56,6 +56,9 @@ class CreateSandbox(BaseModel):
         description="Auto-archive interval in minutes (0 means the maximum interval will be used)",
         alias="autoArchiveInterval",
     )
+    auto_delete_interval: Optional[StrictInt] = Field(
+        default=None, description="Auto-delete interval in minutes (0 means disabled)", alias="autoDeleteInterval"
+    )
     volumes: Optional[List[SandboxVolume]] = Field(
         default=None, description="Array of volumes to attach to the sandbox"
     )
@@ -77,6 +80,7 @@ class CreateSandbox(BaseModel):
         "disk",
         "autoStopInterval",
         "autoArchiveInterval",
+        "autoDeleteInterval",
         "volumes",
         "buildInfo",
     ]
@@ -184,6 +188,7 @@ class CreateSandbox(BaseModel):
                 "disk": obj.get("disk"),
                 "autoStopInterval": obj.get("autoStopInterval"),
                 "autoArchiveInterval": obj.get("autoArchiveInterval"),
+                "autoDeleteInterval": obj.get("autoDeleteInterval"),
                 "volumes": [SandboxVolume.from_dict(_item) for _item in obj["volumes"]]
                 if obj.get("volumes") is not None
                 else None,

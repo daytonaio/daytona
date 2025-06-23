@@ -39,6 +39,7 @@ func (s *DaytonaMCPServer) addTools() {
 		mcp.WithString("snapshot", mcp.Description("Snapshot of the sandbox (don't specify any if not explicitly instructed from user).")),
 		mcp.WithString("auto_stop_interval", mcp.DefaultString("15"), mcp.Description("Auto-stop interval in minutes (0 means disabled) for the sandbox.")),
 		mcp.WithString("auto_archive_interval", mcp.DefaultString("10080"), mcp.Description("Auto-archive interval in minutes (0 means the maximum interval will be used) for the sandbox.")),
+		mcp.WithString("auto_delete_interval", mcp.DefaultString("0"), mcp.Description("Auto-delete interval in minutes (0 means disabled) for the sandbox.")),
 	)
 
 	s.AddTool(createSandboxTool, tools.CreateSandbox)
