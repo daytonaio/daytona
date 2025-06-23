@@ -4832,6 +4832,32 @@ paths:
       summary: Get temporary storage access for pushing objects
       tags:
         - object-storage
+  /audit:
+    post:
+      operationId: createAuditLog
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAuditLog'
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuditLog'
+          description: Audit log entry created successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Create audit log entry
+      tags:
+        - audit
 components:
   schemas:
     CreateApiKey:
@@ -7810,6 +7836,146 @@ components:
         - secret
         - sessionToken
         - storageUrl
+      type: object
+    CreateAuditLog:
+      example:
+        organizationId: organizationId
+        actorId: actorId
+        targetId: targetId
+        actorEmail: actorEmail
+        action: create
+        targetType: api_key
+      properties:
+        actorId:
+          type: string
+        actorEmail:
+          type: string
+        organizationId:
+          type: string
+        action:
+          enum:
+            - create
+            - read
+            - update
+            - delete
+            - login
+            - set_default
+            - update_role
+            - update_assigned_roles
+            - update_quota
+            - suspend
+            - unsuspend
+            - accept
+            - decline
+            - link_account
+            - unlink_account
+            - leave_organization
+            - regenerate_key_pair
+            - update_scheduling
+            - start
+            - stop
+            - replace_labels
+            - create_backup
+            - update_public_status
+            - set_auto_stop_interval
+            - set_auto_archive_interval
+            - archive
+            - toggle_state
+            - set_general_status
+            - toolbox_delete_file
+            - toolbox_download_file
+            - toolbox_create_folder
+            - toolbox_move_file
+            - toolbox_set_file_permissions
+            - toolbox_replace_in_files
+            - toolbox_upload_file
+            - toolbox_bulk_upload_files
+            - toolbox_git_add_files
+            - toolbox_git_create_branch
+            - toolbox_git_delete_branch
+            - toolbox_git_clone_repository
+            - toolbox_git_commit_changes
+            - toolbox_git_pull_changes
+            - toolbox_git_push_changes
+            - toolbox_git_checkout_branch
+            - toolbox_execute_command
+            - toolbox_create_session
+            - toolbox_session_execute_command
+            - toolbox_delete_session
+          type: string
+        targetType:
+          enum:
+            - api_key
+            - organization
+            - organization_invitation
+            - organization_role
+            - organization_user
+            - docker_registry
+            - runner
+            - sandbox
+            - snapshot
+            - user
+            - volume
+          type: string
+        targetId:
+          type: string
+      required:
+        - action
+        - actorEmail
+        - actorId
+      type: object
+    AuditLog:
+      example:
+        metadata: '{}'
+        targetId: targetId
+        errorMessage: errorMessage
+        ipAddress: ipAddress
+        actorEmail: actorEmail
+        targetType: targetType
+        userAgent: userAgent
+        source: source
+        organizationId: organizationId
+        createdAt: 2000-01-23T04:56:07.000+00:00
+        actorId: actorId
+        action: action
+        id: id
+        statusCode: 0.8008281904610115
+      properties:
+        id:
+          type: string
+        actorId:
+          type: string
+        actorEmail:
+          type: string
+        organizationId:
+          type: string
+        action:
+          type: string
+        targetType:
+          type: string
+        targetId:
+          type: string
+        statusCode:
+          type: number
+        errorMessage:
+          type: string
+        ipAddress:
+          type: string
+        userAgent:
+          type: string
+        source:
+          type: string
+        metadata:
+          type: object
+        createdAt:
+          format: date-time
+          type: string
+      required:
+        - action
+        - actorEmail
+        - actorId
+        - createdAt
+        - id
       type: object
     uploadFile_request:
       properties:
