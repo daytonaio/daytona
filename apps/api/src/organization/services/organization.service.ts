@@ -346,8 +346,6 @@ export class OrganizationService implements OnModuleInit {
     const suspendedOrganizations = await this.findSuspended(
       // Find organization suspended more than 24 hours ago
       new Date(Date.now() - 1 * 1000 * 60 * 60 * 24),
-      //  and less than 7 days ago
-      new Date(Date.now() - 7 * 1000 * 60 * 60 * 24),
     )
 
     const suspendedOrganizationIds = suspendedOrganizations.map((organization) => organization.id)
