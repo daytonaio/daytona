@@ -362,4 +362,18 @@ export class OrganizationService implements OnModuleInit {
 
     await this.removeWithEntityManager(payload.entityManager, organization, true)
   }
+
+  async assertOrganizationIsNotSuspended(organization: Organization): Promise<void> {
+    if (!organization.suspended) {
+      return
+    }
+
+    if (organization.suspendedUntil ? organization.suspendedUntil > new Date() : true) {
+      if (organization.suspensionReason) {
+        throw new ForbiddenException(`Organization is suspended: ${organization.suspensionReason}`)
+      } else {
+        throw new ForbiddenException('Organization is suspended')
+      }
+    }
+  }
 }
