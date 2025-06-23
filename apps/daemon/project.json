@@ -42,18 +42,6 @@
       },
       "dependsOn": ["prepare"]
     },
-    "build-plugin": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "go build -buildmode=plugin -o dist/apps/computeruse.so ./apps/daemon/pkg/toolbox/computeruse_plugin"
-      },
-      "dependsOn": [
-        {
-          "target": "build",
-          "projects": "daemon"
-        }
-      ]
-    },
     "serve": {
       "executor": "@nx-go/nx-go:serve",
       "options": {
