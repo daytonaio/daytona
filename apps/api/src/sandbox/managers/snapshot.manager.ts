@@ -68,16 +68,15 @@ export class SnapshotManager {
       },
     })
 
-    const snapshots = await this.snapshotRepository.find({
-      where: {
-        state: SnapshotState.ACTIVE,
-      },
-      order: {
-        createdAt: 'ASC',
-      },
-      take: 100,
-      skip: Number(skip),
-    })
+    const snapshots = await this.snapshotRepository
+      .createQueryBuilder('snapshot')
+      .innerJoin('organization', 'org', 'org.id = snapshot.organizationId')
+      .where('snapshot.state = :snapshotState', { snapshotState: SnapshotState.ACTIVE })
+      .andWhere('org.suspended = false')
+      .orderBy('snapshot.createdAt', 'ASC')
+      .take(100)
+      .skip(Number(skip))
+      .getMany()
 
     if (snapshots.length === 0) {
       await this.redis.set('sync-runner-snapshots-skip', 0)
