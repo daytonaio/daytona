@@ -103,7 +103,7 @@ func (s *Server) Start() error {
 	{
 		processController.POST("/execute", process.ExecuteCommand)
 
-		sessionController := session.NewSessionController(s.ProjectDir, configDir)
+		sessionController := session.NewSessionController(configDir, s.ProjectDir)
 		sessionGroup := processController.Group("/session")
 		{
 			sessionGroup.GET("", sessionController.ListSessions)
