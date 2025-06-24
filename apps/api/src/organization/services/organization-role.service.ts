@@ -39,6 +39,10 @@ export class OrganizationRoleService {
   }
 
   async findByIds(roleIds: string[]): Promise<OrganizationRole[]> {
+    if (roleIds.length === 0) {
+      return []
+    }
+
     return this.organizationRoleRepository.find({
       where: {
         id: In(roleIds),

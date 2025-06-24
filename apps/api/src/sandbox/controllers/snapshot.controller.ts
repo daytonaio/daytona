@@ -304,4 +304,34 @@ export class SnapshotController {
     )
     return logProxy.create()
   }
+
+  @Post(':id/activate')
+  @HttpCode(200)
+  @ApiOperation({
+    summary: 'Activate a snapshot',
+    operationId: 'activateSnapshot',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Snapshot ID',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'The snapshot has been successfully activated.',
+    type: SnapshotDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad request - Snapshot is already active, not in inactive state, or has associated snapshot runners',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Snapshot not found',
+  })
+  @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SNAPSHOTS])
+  @UseGuards(SnapshotAccessGuard)
+  async activateSnapshot(@Param('id') snapshotId: string): Promise<SnapshotDto> {
+    const snapshot = await this.snapshotService.activateSnapshot(snapshotId)
+    return SnapshotDto.fromSnapshot(snapshot)
+  }
 }
