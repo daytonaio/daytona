@@ -1,6 +1,3 @@
-# Copyright 2025 Daytona Platforms Inc.
-# SPDX-License-Identifier: Apache-2.0
-
 """API response object."""
 
 from __future__ import annotations
