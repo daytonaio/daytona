@@ -91,7 +91,7 @@ export class OrganizationService implements OnModuleInit {
     })
   }
 
-  async findSuspended(suspendedBefore?: Date, suspendedAfter?: Date): Promise<Organization[]> {
+  async findSuspended(suspendedBefore?: Date, suspendedAfter?: Date, take?: number): Promise<Organization[]> {
     return this.organizationRepository.find({
       where: {
         suspended: true,
@@ -100,7 +100,7 @@ export class OrganizationService implements OnModuleInit {
         ...(suspendedAfter ? { suspendedAt: MoreThan(suspendedAfter) } : {}),
       },
       //  limit the number of organizations to avoid memory issues
-      take: 1000,
+      take: take || 100,
     })
   }
 
@@ -349,15 +349,10 @@ export class OrganizationService implements OnModuleInit {
       return
     }
 
-    const suspendedOrganizations = await this.organizationRepository.find({
-      where: {
-        suspended: true,
-        suspendedUntil: Or(IsNull(), MoreThan(new Date())), // Still suspended (indefinite or future end date)
-        suspendedAt: LessThan(new Date(Date.now() - 7 * 1000 * 60 * 60 * 24)), // More than 7 days ago
-      },
-      //  limit the number of organizations to avoid memory issues
-      take: 1000,
-    })
+    const suspendedOrganizations = await this.findSuspended(
+      new Date(Date.now() - 1 * 1000 * 60 * 60 * 24),
+      new Date(Date.now() - 7 * 1000 * 60 * 60 * 24),
+    )
 
     const suspendedOrganizationIds = suspendedOrganizations.map((organization) => organization.id)
 
