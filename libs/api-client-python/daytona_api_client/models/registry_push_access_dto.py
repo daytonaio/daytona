@@ -23,12 +23,10 @@ from typing import Any, ClassVar, Dict, List
 from typing import Optional, Set
 from typing_extensions import Self
 
-
 class RegistryPushAccessDto(BaseModel):
     """
     RegistryPushAccessDto
-    """  # noqa: E501
-
+    """ # noqa: E501
     username: StrictStr = Field(description="Temporary username for registry authentication")
     secret: StrictStr = Field(description="Temporary secret for registry authentication")
     registry_url: StrictStr = Field(description="Registry URL", alias="registryUrl")
@@ -43,6 +41,7 @@ class RegistryPushAccessDto(BaseModel):
         validate_assignment=True,
         protected_namespaces=(),
     )
+
 
     def to_str(self) -> str:
         """Returns the string representation of the model using alias"""
@@ -69,11 +68,9 @@ class RegistryPushAccessDto(BaseModel):
           are ignored.
         * Fields in `self.additional_properties` are added to the output dict.
         """
-        excluded_fields: Set[str] = set(
-            [
-                "additional_properties",
-            ]
-        )
+        excluded_fields: Set[str] = set([
+            "additional_properties",
+        ])
 
         _dict = self.model_dump(
             by_alias=True,
@@ -96,19 +93,19 @@ class RegistryPushAccessDto(BaseModel):
         if not isinstance(obj, dict):
             return cls.model_validate(obj)
 
-        _obj = cls.model_validate(
-            {
-                "username": obj.get("username"),
-                "secret": obj.get("secret"),
-                "registryUrl": obj.get("registryUrl"),
-                "registryId": obj.get("registryId"),
-                "project": obj.get("project"),
-                "expiresAt": obj.get("expiresAt"),
-            }
-        )
+        _obj = cls.model_validate({
+            "username": obj.get("username"),
+            "secret": obj.get("secret"),
+            "registryUrl": obj.get("registryUrl"),
+            "registryId": obj.get("registryId"),
+            "project": obj.get("project"),
+            "expiresAt": obj.get("expiresAt")
+        })
         # store additional fields in additional_properties
         for _key in obj.keys():
             if _key not in cls.__properties:
                 _obj.additional_properties[_key] = obj.get(_key)
 
         return _obj
+
+

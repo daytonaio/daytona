@@ -23,21 +23,13 @@ from typing import Any, ClassVar, Dict, List, Optional
 from typing import Optional, Set
 from typing_extensions import Self
 
-
 class SessionExecuteRequest(BaseModel):
     """
     SessionExecuteRequest
-    """  # noqa: E501
-
+    """ # noqa: E501
     command: StrictStr = Field(description="The command to execute")
-    run_async: Optional[StrictBool] = Field(
-        default=None, description="Whether to execute the command asynchronously", alias="runAsync"
-    )
-    var_async: Optional[StrictBool] = Field(
-        default=None,
-        description="Deprecated: Use runAsync instead. Whether to execute the command asynchronously",
-        alias="async",
-    )
+    run_async: Optional[StrictBool] = Field(default=None, description="Whether to execute the command asynchronously", alias="runAsync")
+    var_async: Optional[StrictBool] = Field(default=None, description="Deprecated: Use runAsync instead. Whether to execute the command asynchronously", alias="async")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["command", "runAsync", "async"]
 
@@ -46,6 +38,7 @@ class SessionExecuteRequest(BaseModel):
         validate_assignment=True,
         protected_namespaces=(),
     )
+
 
     def to_str(self) -> str:
         """Returns the string representation of the model using alias"""
@@ -72,11 +65,9 @@ class SessionExecuteRequest(BaseModel):
           are ignored.
         * Fields in `self.additional_properties` are added to the output dict.
         """
-        excluded_fields: Set[str] = set(
-            [
-                "additional_properties",
-            ]
-        )
+        excluded_fields: Set[str] = set([
+            "additional_properties",
+        ])
 
         _dict = self.model_dump(
             by_alias=True,
@@ -99,12 +90,16 @@ class SessionExecuteRequest(BaseModel):
         if not isinstance(obj, dict):
             return cls.model_validate(obj)
 
-        _obj = cls.model_validate(
-            {"command": obj.get("command"), "runAsync": obj.get("runAsync"), "async": obj.get("async")}
-        )
+        _obj = cls.model_validate({
+            "command": obj.get("command"),
+            "runAsync": obj.get("runAsync"),
+            "async": obj.get("async")
+        })
         # store additional fields in additional_properties
         for _key in obj.keys():
             if _key not in cls.__properties:
                 _obj.additional_properties[_key] = obj.get(_key)
 
         return _obj
+
+
