@@ -65,6 +65,10 @@ export class UserService {
   }
 
   async findByIds(ids: string[]): Promise<User[]> {
+    if (ids.length === 0) {
+      return []
+    }
+
     return this.userRepository.find({
       where: {
         id: In(ids),

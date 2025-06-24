@@ -305,6 +305,30 @@ const Snapshots: React.FC = () => {
     }
   }
 
+  const handleActivate = async (snapshot: SnapshotDto) => {
+    setLoadingSnapshots((prev) => ({ ...prev, [snapshot.id]: true }))
+
+    // Optimistically update the snapshot state
+    setSnapshotsData((prev) => ({
+      ...prev,
+      items: prev.items.map((i) => (i.id === snapshot.id ? { ...i, state: SnapshotState.ACTIVE } : i)),
+    }))
+
+    try {
+      await snapshotApi.activateSnapshot(snapshot.id, selectedOrganization?.id)
+      toast.success(`Activating snapshot ${snapshot.name}`)
+    } catch (error) {
+      handleApiError(error, 'Failed to activate snapshot')
+      // Revert the optimistic update
+      setSnapshotsData((prev) => ({
+        ...prev,
+        items: prev.items.map((i) => (i.id === snapshot.id ? { ...i, state: snapshot.state } : i)),
+      }))
+    } finally {
+      setLoadingSnapshots((prev) => ({ ...prev, [snapshot.id]: false }))
+    }
+  }
+
   const writePermitted = useMemo(
     () => authenticatedUserHasPermission(OrganizationRolePermissionsEnum.WRITE_SNAPSHOTS),
     [authenticatedUserHasPermission],
@@ -517,6 +541,7 @@ const Snapshots: React.FC = () => {
           }}
           onBulkDelete={handleBulkDelete}
           onToggleEnabled={handleToggleEnabled}
+          onActivate={handleActivate}
           pageCount={snapshotsData.totalPages}
           onPaginationChange={handlePaginationChange}
           pagination={{

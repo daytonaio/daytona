@@ -22,6 +22,7 @@ import { SandboxEvents } from '../constants/sandbox-events.constants'
 import { SandboxCreatedEvent } from '../events/sandbox-create.event'
 import { Organization } from '../../organization/entities/organization.entity'
 import { OrganizationService } from '../../organization/services/organization.service'
+import { SnapshotRunner } from '../entities/snapshot-runner.entity'
 
 const IMAGE_NAME_REGEX = /^[a-zA-Z0-9.\-:]+(\/[a-zA-Z0-9.\-:]+)*$/
 @Injectable()
@@ -31,6 +32,8 @@ export class SnapshotService {
     private readonly snapshotRepository: Repository<Snapshot>,
     @InjectRepository(BuildInfo)
     private readonly buildInfoRepository: Repository<BuildInfo>,
+    @InjectRepository(SnapshotRunner)
+    private readonly snapshotRunnerRepository: Repository<SnapshotRunner>,
     private readonly organizationService: OrganizationService,
   ) {}
 
@@ -264,5 +267,27 @@ export class SnapshotService {
     const snapshot = await this.getSnapshotByName(event.sandbox.snapshot, event.sandbox.organizationId)
     snapshot.lastUsedAt = event.sandbox.createdAt
     await this.snapshotRepository.save(snapshot)
+  }
+
+  async activateSnapshot(snapshotId: string): Promise<Snapshot> {
+    const snapshot = await this.snapshotRepository.findOne({
+      where: { id: snapshotId },
+    })
+
+    if (!snapshot) {
+      throw new NotFoundException(`Snapshot ${snapshotId} not found`)
+    }
+
+    if (snapshot.state === SnapshotState.ACTIVE) {
+      throw new BadRequestException(`Snapshot ${snapshotId} is already active`)
+    }
+
+    if (snapshot.state !== SnapshotState.INACTIVE) {
+      throw new BadRequestException(`Snapshot ${snapshotId} cannot be activated - it is in ${snapshot.state} state`)
+    }
+
+    snapshot.state = SnapshotState.ACTIVE
+    snapshot.lastUsedAt = new Date()
+    return await this.snapshotRepository.save(snapshot)
   }
 }

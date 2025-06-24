@@ -28,6 +28,7 @@ const (
 	SNAPSHOTSTATE_PENDING_VALIDATION SnapshotState = "pending_validation"
 	SNAPSHOTSTATE_VALIDATING         SnapshotState = "validating"
 	SNAPSHOTSTATE_ACTIVE             SnapshotState = "active"
+	SNAPSHOTSTATE_INACTIVE           SnapshotState = "inactive"
 	SNAPSHOTSTATE_ERROR              SnapshotState = "error"
 	SNAPSHOTSTATE_BUILD_FAILED       SnapshotState = "build_failed"
 	SNAPSHOTSTATE_REMOVING           SnapshotState = "removing"
@@ -42,6 +43,7 @@ var AllowedSnapshotStateEnumValues = []SnapshotState{
 	"pending_validation",
 	"validating",
 	"active",
+	"inactive",
 	"error",
 	"build_failed",
 	"removing",

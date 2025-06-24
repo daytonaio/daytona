@@ -317,6 +317,12 @@ export class OrganizationService implements OnModuleInit {
 
     const suspendedOrganizationIds = suspendedOrganizations.map((organization) => organization.id)
 
+    // Skip if no suspended organizations found to avoid empty IN clause
+    if (suspendedOrganizationIds.length === 0) {
+      await this.redis.del(lockKey)
+      return
+    }
+
     const sandboxes = await this.sandboxRepository.find({
       where: {
         organizationId: In(suspendedOrganizationIds),
@@ -354,6 +360,12 @@ export class OrganizationService implements OnModuleInit {
     })
 
     const suspendedOrganizationIds = suspendedOrganizations.map((organization) => organization.id)
+
+    // Skip if no suspended organizations found to avoid empty IN clause
+    if (suspendedOrganizationIds.length === 0) {
+      await this.redis.del(lockKey)
+      return
+    }
 
     const snapshotRunners = await this.snapshotRunnerRepository
       .createQueryBuilder('snapshotRunner')
