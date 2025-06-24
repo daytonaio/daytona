@@ -12,43 +12,43 @@ export enum AuditAction {
   LOGIN = 'login',
 
   // docker registry
-  DOCKER_REGISTRY_SET_DEFAULT = 'set_default',
+  DOCKER_REGISTRY_SET_DEFAULT = 'docker_registry_set_default',
 
   // organization user
-  ORGANIZATION_USER_UPDATE_ROLE = 'update_role',
-  ORGANIZATION_USER_UPDATE_ASSIGNED_ROLES = 'update_assigned_roles',
+  ORGANIZATION_USER_UPDATE_ROLE = 'organization_user_update_role',
+  ORGANIZATION_USER_UPDATE_ASSIGNED_ROLES = 'organization_user_update_assigned_roles',
 
   // organization
-  ORGANIZATION_UPDATE_QUOTA = 'update_quota',
-  ORGANIZATION_SUSPEND = 'suspend',
-  ORGANIZATION_UNSUSPEND = 'unsuspend',
+  ORGANIZATION_UPDATE_QUOTA = 'organization_update_quota',
+  ORGANIZATION_SUSPEND = 'organization_suspend',
+  ORGANIZATION_UNSUSPEND = 'organization_unsuspend',
 
   // organization invitation
-  ORGANIZATION_INVITATION_ACCEPT = 'accept',
-  ORGANIZATION_INVITATION_DECLINE = 'decline',
+  ORGANIZATION_INVITATION_ACCEPT = 'organization_invitation_accept',
+  ORGANIZATION_INVITATION_DECLINE = 'organization_invitation_decline',
 
   // user
-  USER_LINK_ACCOUNT = 'link_account',
-  USER_UNLINK_ACCOUNT = 'unlink_account',
-  USER_LEAVE_ORGANIZATION = 'leave_organization',
-  USER_REGENERATE_KEY_PAIR = 'regenerate_key_pair',
+  USER_LINK_ACCOUNT = 'user_link_account',
+  USER_UNLINK_ACCOUNT = 'user_unlink_account',
+  USER_LEAVE_ORGANIZATION = 'user_leave_organization',
+  USER_REGENERATE_KEY_PAIR = 'user_regenerate_key_pair',
 
   // runner
-  RUNNER_UPDATE_SCHEDULING = 'update_scheduling',
+  RUNNER_UPDATE_SCHEDULING = 'runner_update_scheduling',
 
   // sandbox
-  SANDBOX_START = 'start',
-  SANDBOX_STOP = 'stop',
-  SANDBOX_REPLACE_LABELS = 'replace_labels',
-  SANDBOX_CREATE_BACKUP = 'create_backup',
-  SANDBOX_UPDATE_PUBLIC_STATUS = 'update_public_status',
-  SANDBOX_SET_AUTO_STOP_INTERVAL = 'set_auto_stop_interval',
-  SANDBOX_SET_AUTO_ARCHIVE_INTERVAL = 'set_auto_archive_interval',
-  SANDBOX_ARCHIVE = 'archive',
+  SANDBOX_START = 'sandbox_start',
+  SANDBOX_STOP = 'sandbox_stop',
+  SANDBOX_REPLACE_LABELS = 'sandbox_replace_labels',
+  SANDBOX_CREATE_BACKUP = 'sandbox_create_backup',
+  SANDBOX_UPDATE_PUBLIC_STATUS = 'sandbox_update_public_status',
+  SANDBOX_SET_AUTO_STOP_INTERVAL = 'sandbox_set_auto_stop_interval',
+  SANDBOX_SET_AUTO_ARCHIVE_INTERVAL = 'sandbox_set_auto_archive_interval',
+  SANDBOX_ARCHIVE = 'sandbox_archive',
 
   // snapshot
-  SNAPSHOT_TOGGLE_STATE = 'toggle_state',
-  SNAPSHOT_SET_GENERAL_STATUS = 'set_general_status',
+  SNAPSHOT_TOGGLE_STATE = 'snapshot_toggle_state',
+  SNAPSHOT_SET_GENERAL_STATUS = 'snapshot_set_general_status',
 
   // toolbox (must be prefixed with 'toolbox_')
   TOOLBOX_DELETE_FILE = 'toolbox_delete_file',
