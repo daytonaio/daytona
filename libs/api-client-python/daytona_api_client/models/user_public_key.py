@@ -23,12 +23,10 @@ from typing import Any, ClassVar, Dict, List
 from typing import Optional, Set
 from typing_extensions import Self
 
-
 class UserPublicKey(BaseModel):
     """
     UserPublicKey
-    """  # noqa: E501
-
+    """ # noqa: E501
     key: StrictStr = Field(description="Public key")
     name: StrictStr = Field(description="Key name")
     additional_properties: Dict[str, Any] = {}
@@ -39,6 +37,7 @@ class UserPublicKey(BaseModel):
         validate_assignment=True,
         protected_namespaces=(),
     )
+
 
     def to_str(self) -> str:
         """Returns the string representation of the model using alias"""
@@ -65,11 +64,9 @@ class UserPublicKey(BaseModel):
           are ignored.
         * Fields in `self.additional_properties` are added to the output dict.
         """
-        excluded_fields: Set[str] = set(
-            [
-                "additional_properties",
-            ]
-        )
+        excluded_fields: Set[str] = set([
+            "additional_properties",
+        ])
 
         _dict = self.model_dump(
             by_alias=True,
@@ -92,10 +89,15 @@ class UserPublicKey(BaseModel):
         if not isinstance(obj, dict):
             return cls.model_validate(obj)
 
-        _obj = cls.model_validate({"key": obj.get("key"), "name": obj.get("name")})
+        _obj = cls.model_validate({
+            "key": obj.get("key"),
+            "name": obj.get("name")
+        })
         # store additional fields in additional_properties
         for _key in obj.keys():
             if _key not in cls.__properties:
                 _obj.additional_properties[_key] = obj.get(_key)
 
         return _obj
+
+

@@ -39,16 +39,18 @@ class ObjectStorageApi:
             api_client = ApiClient.get_default()
         self.api_client = api_client
 
+
     @validate_call
     def get_push_access(
         self,
-        x_daytona_organization_id: Annotated[
-            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
-        ] = None,
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -80,36 +82,41 @@ class ObjectStorageApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """  # noqa: E501
+        """ # noqa: E501
 
         _param = self._get_push_access_serialize(
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index,
+            _host_index=_host_index
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "StorageAccessDto",
+            '200': "StorageAccessDto",
         }
-        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         ).data
 
+
     @validate_call
     def get_push_access_with_http_info(
         self,
-        x_daytona_organization_id: Annotated[
-            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
-        ] = None,
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -141,36 +148,41 @@ class ObjectStorageApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """  # noqa: E501
+        """ # noqa: E501
 
         _param = self._get_push_access_serialize(
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index,
+            _host_index=_host_index
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "StorageAccessDto",
+            '200': "StorageAccessDto",
         }
-        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         )
 
+
     @validate_call
     def get_push_access_without_preload_content(
         self,
-        x_daytona_organization_id: Annotated[
-            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
-        ] = None,
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -202,21 +214,25 @@ class ObjectStorageApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """  # noqa: E501
+        """ # noqa: E501
 
         _param = self._get_push_access_serialize(
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index,
+            _host_index=_host_index
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "StorageAccessDto",
+            '200': "StorageAccessDto",
         }
-        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
         return response_data.response
+
 
     def _get_push_access_serialize(
         self,
@@ -226,35 +242,47 @@ class ObjectStorageApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
+
         _host = None
 
-        _collection_formats: Dict[str, str] = {}
+        _collection_formats: Dict[str, str] = {
+        }
 
         _path_params: Dict[str, str] = {}
         _query_params: List[Tuple[str, str]] = []
         _header_params: Dict[str, Optional[str]] = _headers or {}
         _form_params: List[Tuple[str, str]] = []
-        _files: Dict[str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]] = {}
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        ] = {}
         _body_params: Optional[bytes] = None
 
         # process the path parameters
         # process the query parameters
         # process the header parameters
         if x_daytona_organization_id is not None:
-            _header_params["X-Daytona-Organization-ID"] = x_daytona_organization_id
+            _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id
         # process the form parameters
         # process the body parameter
 
+
         # set the HTTP header `Accept`
-        if "Accept" not in _header_params:
-            _header_params["Accept"] = self.api_client.select_header_accept(["application/json"])
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
+                [
+                    'application/json'
+                ]
+            )
+
 
         # authentication setting
-        _auth_settings: List[str] = ["oauth2"]
+        _auth_settings: List[str] = [
+            'oauth2'
+        ]
 
         return self.api_client.param_serialize(
-            method="GET",
-            resource_path="/object-storage/push-access",
+            method='GET',
+            resource_path='/object-storage/push-access',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -264,5 +292,7 @@ class ObjectStorageApi:
             auth_settings=_auth_settings,
             collection_formats=_collection_formats,
             _host=_host,
-            _request_auth=_request_auth,
+            _request_auth=_request_auth
         )
+
+

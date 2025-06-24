@@ -24,12 +24,10 @@ from typing import Any, ClassVar, Dict, List
 from typing import Optional, Set
 from typing_extensions import Self
 
-
 class OrganizationRole(BaseModel):
     """
     OrganizationRole
-    """  # noqa: E501
-
+    """ # noqa: E501
     id: StrictStr = Field(description="Role ID")
     name: StrictStr = Field(description="Role name")
     description: StrictStr = Field(description="Role description")
@@ -38,36 +36,14 @@ class OrganizationRole(BaseModel):
     created_at: datetime = Field(description="Creation timestamp", alias="createdAt")
     updated_at: datetime = Field(description="Last update timestamp", alias="updatedAt")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = [
-        "id",
-        "name",
-        "description",
-        "permissions",
-        "isGlobal",
-        "createdAt",
-        "updatedAt",
-    ]
+    __properties: ClassVar[List[str]] = ["id", "name", "description", "permissions", "isGlobal", "createdAt", "updatedAt"]
 
-    @field_validator("permissions")
+    @field_validator('permissions')
     def permissions_validate_enum(cls, value):
         """Validates the enum"""
         for i in value:
-            if i not in set(
-                [
-                    "write:registries",
-                    "delete:registries",
-                    "write:snapshots",
-                    "delete:snapshots",
-                    "write:sandboxes",
-                    "delete:sandboxes",
-                    "read:volumes",
-                    "write:volumes",
-                    "delete:volumes",
-                ]
-            ):
-                raise ValueError(
-                    "each list item must be one of ('write:registries', 'delete:registries', 'write:snapshots', 'delete:snapshots', 'write:sandboxes', 'delete:sandboxes', 'read:volumes', 'write:volumes', 'delete:volumes')"
-                )
+            if i not in set(['write:registries', 'delete:registries', 'write:snapshots', 'delete:snapshots', 'write:sandboxes', 'delete:sandboxes', 'read:volumes', 'write:volumes', 'delete:volumes']):
+                raise ValueError("each list item must be one of ('write:registries', 'delete:registries', 'write:snapshots', 'delete:snapshots', 'write:sandboxes', 'delete:sandboxes', 'read:volumes', 'write:volumes', 'delete:volumes')")
         return value
 
     model_config = ConfigDict(
@@ -75,6 +51,7 @@ class OrganizationRole(BaseModel):
         validate_assignment=True,
         protected_namespaces=(),
     )
+
 
     def to_str(self) -> str:
         """Returns the string representation of the model using alias"""
@@ -101,11 +78,9 @@ class OrganizationRole(BaseModel):
           are ignored.
         * Fields in `self.additional_properties` are added to the output dict.
         """
-        excluded_fields: Set[str] = set(
-            [
-                "additional_properties",
-            ]
-        )
+        excluded_fields: Set[str] = set([
+            "additional_properties",
+        ])
 
         _dict = self.model_dump(
             by_alias=True,
@@ -128,20 +103,20 @@ class OrganizationRole(BaseModel):
         if not isinstance(obj, dict):
             return cls.model_validate(obj)
 
-        _obj = cls.model_validate(
-            {
-                "id": obj.get("id"),
-                "name": obj.get("name"),
-                "description": obj.get("description"),
-                "permissions": obj.get("permissions"),
-                "isGlobal": obj.get("isGlobal"),
-                "createdAt": obj.get("createdAt"),
-                "updatedAt": obj.get("updatedAt"),
-            }
-        )
+        _obj = cls.model_validate({
+            "id": obj.get("id"),
+            "name": obj.get("name"),
+            "description": obj.get("description"),
+            "permissions": obj.get("permissions"),
+            "isGlobal": obj.get("isGlobal"),
+            "createdAt": obj.get("createdAt"),
+            "updatedAt": obj.get("updatedAt")
+        })
         # store additional fields in additional_properties
         for _key in obj.keys():
             if _key not in cls.__properties:
                 _obj.additional_properties[_key] = obj.get(_key)
 
         return _obj
+
+

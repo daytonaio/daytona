@@ -27,12 +27,10 @@ from daytona_api_client.models.sandbox_volume import SandboxVolume
 from typing import Optional, Set
 from typing_extensions import Self
 
-
 class Sandbox(BaseModel):
     """
     Sandbox
-    """  # noqa: E501
-
+    """ # noqa: E501
     id: StrictStr = Field(description="The ID of the sandbox")
     organization_id: StrictStr = Field(description="The organization ID of the sandbox", alias="organizationId")
     snapshot: Optional[StrictStr] = Field(default=None, description="The snapshot used for the sandbox")
@@ -46,40 +44,29 @@ class Sandbox(BaseModel):
     memory: Union[StrictFloat, StrictInt] = Field(description="The memory quota for the sandbox")
     disk: Union[StrictFloat, StrictInt] = Field(description="The disk quota for the sandbox")
     state: Optional[SandboxState] = Field(default=None, description="The state of the sandbox")
+<<<<<<< HEAD
     desired_state: Optional[SandboxDesiredState] = Field(
         default=None, description="The desired state of the sandbox", alias="desiredState"
     )
     error_reason: Optional[StrictStr] = Field(
         default=None, description="The error reason of the sandbox", alias="errorReason"
     )
+=======
+    error_reason: Optional[StrictStr] = Field(default=None, description="The error reason of the sandbox", alias="errorReason")
+>>>>>>> 02989cbf (refactor: nx setup; local pipeline for package publishing)
     backup_state: Optional[StrictStr] = Field(default=None, description="The state of the backup", alias="backupState")
-    backup_created_at: Optional[StrictStr] = Field(
-        default=None, description="The creation timestamp of the last backup", alias="backupCreatedAt"
-    )
-    auto_stop_interval: Optional[Union[StrictFloat, StrictInt]] = Field(
-        default=None, description="Auto-stop interval in minutes (0 means disabled)", alias="autoStopInterval"
-    )
-    auto_archive_interval: Optional[Union[StrictFloat, StrictInt]] = Field(
-        default=None, description="Auto-archive interval in minutes", alias="autoArchiveInterval"
-    )
-    runner_domain: Optional[StrictStr] = Field(
-        default=None, description="The domain name of the runner", alias="runnerDomain"
-    )
+    backup_created_at: Optional[StrictStr] = Field(default=None, description="The creation timestamp of the last backup", alias="backupCreatedAt")
+    auto_stop_interval: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Auto-stop interval in minutes (0 means disabled)", alias="autoStopInterval")
+    auto_archive_interval: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Auto-archive interval in minutes", alias="autoArchiveInterval")
+    runner_domain: Optional[StrictStr] = Field(default=None, description="The domain name of the runner", alias="runnerDomain")
     volumes: Optional[List[SandboxVolume]] = Field(default=None, description="Array of volumes attached to the sandbox")
-    build_info: Optional[BuildInfo] = Field(
-        default=None, description="Build information for the sandbox", alias="buildInfo"
-    )
-    created_at: Optional[StrictStr] = Field(
-        default=None, description="The creation timestamp of the sandbox", alias="createdAt"
-    )
-    updated_at: Optional[StrictStr] = Field(
-        default=None, description="The last update timestamp of the sandbox", alias="updatedAt"
-    )
+    build_info: Optional[BuildInfo] = Field(default=None, description="Build information for the sandbox", alias="buildInfo")
+    created_at: Optional[StrictStr] = Field(default=None, description="The creation timestamp of the sandbox", alias="createdAt")
+    updated_at: Optional[StrictStr] = Field(default=None, description="The last update timestamp of the sandbox", alias="updatedAt")
     var_class: Optional[StrictStr] = Field(default=None, description="The class of the sandbox", alias="class")
-    daemon_version: Optional[StrictStr] = Field(
-        default=None, description="The version of the daemon running in the sandbox", alias="daemonVersion"
-    )
+    daemon_version: Optional[StrictStr] = Field(default=None, description="The version of the daemon running in the sandbox", alias="daemonVersion")
     additional_properties: Dict[str, Any] = {}
+<<<<<<< HEAD
     __properties: ClassVar[List[str]] = [
         "id",
         "organizationId",
@@ -108,24 +95,27 @@ class Sandbox(BaseModel):
         "class",
         "daemonVersion",
     ]
+=======
+    __properties: ClassVar[List[str]] = ["id", "organizationId", "snapshot", "user", "env", "labels", "public", "target", "cpu", "gpu", "memory", "disk", "state", "errorReason", "backupState", "backupCreatedAt", "autoStopInterval", "autoArchiveInterval", "runnerDomain", "volumes", "buildInfo", "createdAt", "updatedAt", "class", "daemonVersion"]
+>>>>>>> 02989cbf (refactor: nx setup; local pipeline for package publishing)
 
-    @field_validator("backup_state")
+    @field_validator('backup_state')
     def backup_state_validate_enum(cls, value):
         """Validates the enum"""
         if value is None:
             return value
 
-        if value not in set(["None", "Pending", "InProgress", "Completed", "Error"]):
+        if value not in set(['None', 'Pending', 'InProgress', 'Completed', 'Error']):
             raise ValueError("must be one of enum values ('None', 'Pending', 'InProgress', 'Completed', 'Error')")
         return value
 
-    @field_validator("var_class")
+    @field_validator('var_class')
     def var_class_validate_enum(cls, value):
         """Validates the enum"""
         if value is None:
             return value
 
-        if value not in set(["small", "medium", "large"]):
+        if value not in set(['small', 'medium', 'large']):
             raise ValueError("must be one of enum values ('small', 'medium', 'large')")
         return value
 
@@ -134,6 +124,7 @@ class Sandbox(BaseModel):
         validate_assignment=True,
         protected_namespaces=(),
     )
+
 
     def to_str(self) -> str:
         """Returns the string representation of the model using alias"""
@@ -160,11 +151,9 @@ class Sandbox(BaseModel):
           are ignored.
         * Fields in `self.additional_properties` are added to the output dict.
         """
-        excluded_fields: Set[str] = set(
-            [
-                "additional_properties",
-            ]
-        )
+        excluded_fields: Set[str] = set([
+            "additional_properties",
+        ])
 
         _dict = self.model_dump(
             by_alias=True,
@@ -177,10 +166,10 @@ class Sandbox(BaseModel):
             for _item_volumes in self.volumes:
                 if _item_volumes:
                     _items.append(_item_volumes.to_dict())
-            _dict["volumes"] = _items
+            _dict['volumes'] = _items
         # override the default output from pydantic by calling `to_dict()` of build_info
         if self.build_info:
-            _dict["buildInfo"] = self.build_info.to_dict()
+            _dict['buildInfo'] = self.build_info.to_dict()
         # puts key-value pairs in additional_properties in the top level
         if self.additional_properties is not None:
             for _key, _value in self.additional_properties.items():
@@ -197,6 +186,7 @@ class Sandbox(BaseModel):
         if not isinstance(obj, dict):
             return cls.model_validate(obj)
 
+<<<<<<< HEAD
         _obj = cls.model_validate(
             {
                 "id": obj.get("id"),
@@ -229,9 +219,40 @@ class Sandbox(BaseModel):
                 "daemonVersion": obj.get("daemonVersion"),
             }
         )
+=======
+        _obj = cls.model_validate({
+            "id": obj.get("id"),
+            "organizationId": obj.get("organizationId"),
+            "snapshot": obj.get("snapshot"),
+            "user": obj.get("user"),
+            "env": obj.get("env"),
+            "labels": obj.get("labels"),
+            "public": obj.get("public"),
+            "target": obj.get("target"),
+            "cpu": obj.get("cpu"),
+            "gpu": obj.get("gpu"),
+            "memory": obj.get("memory"),
+            "disk": obj.get("disk"),
+            "state": obj.get("state"),
+            "errorReason": obj.get("errorReason"),
+            "backupState": obj.get("backupState"),
+            "backupCreatedAt": obj.get("backupCreatedAt"),
+            "autoStopInterval": obj.get("autoStopInterval"),
+            "autoArchiveInterval": obj.get("autoArchiveInterval"),
+            "runnerDomain": obj.get("runnerDomain"),
+            "volumes": [SandboxVolume.from_dict(_item) for _item in obj["volumes"]] if obj.get("volumes") is not None else None,
+            "buildInfo": BuildInfo.from_dict(obj["buildInfo"]) if obj.get("buildInfo") is not None else None,
+            "createdAt": obj.get("createdAt"),
+            "updatedAt": obj.get("updatedAt"),
+            "class": obj.get("class"),
+            "daemonVersion": obj.get("daemonVersion")
+        })
+>>>>>>> 02989cbf (refactor: nx setup; local pipeline for package publishing)
         # store additional fields in additional_properties
         for _key in obj.keys():
             if _key not in cls.__properties:
                 _obj.additional_properties[_key] = obj.get(_key)
 
         return _obj
+
+

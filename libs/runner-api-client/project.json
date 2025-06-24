@@ -30,19 +30,6 @@
       "options": {
         "command": "cd {projectRoot} && prettier --write \"**/*.{ts,json}\" --config ../../.prettierrc"
       }
-    },
-    "publish": {
-      "executor": "nx:run-commands",
-      "options": {
-        "commands": ["npm version $NX_PACKAGE_PUBLISH_VERSION", "npm publish"],
-        "cwd": "dist/libs/runner-api-client",
-        "parallel": false
-      },
-      "dependsOn": [
-        {
-          "target": "build"
-        }
-      ]
     }
   },
   "tags": []

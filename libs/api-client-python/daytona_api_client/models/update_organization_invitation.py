@@ -24,24 +24,20 @@ from typing import Any, ClassVar, Dict, List, Optional
 from typing import Optional, Set
 from typing_extensions import Self
 
-
 class UpdateOrganizationInvitation(BaseModel):
     """
     UpdateOrganizationInvitation
-    """  # noqa: E501
-
+    """ # noqa: E501
     role: StrictStr = Field(description="Organization member role")
     assigned_role_ids: List[StrictStr] = Field(description="Array of role IDs", alias="assignedRoleIds")
-    expires_at: Optional[datetime] = Field(
-        default=None, description="Expiration date of the invitation", alias="expiresAt"
-    )
+    expires_at: Optional[datetime] = Field(default=None, description="Expiration date of the invitation", alias="expiresAt")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["role", "assignedRoleIds", "expiresAt"]
 
-    @field_validator("role")
+    @field_validator('role')
     def role_validate_enum(cls, value):
         """Validates the enum"""
-        if value not in set(["owner", "member"]):
+        if value not in set(['owner', 'member']):
             raise ValueError("must be one of enum values ('owner', 'member')")
         return value
 
@@ -50,6 +46,7 @@ class UpdateOrganizationInvitation(BaseModel):
         validate_assignment=True,
         protected_namespaces=(),
     )
+
 
     def to_str(self) -> str:
         """Returns the string representation of the model using alias"""
@@ -76,11 +73,9 @@ class UpdateOrganizationInvitation(BaseModel):
           are ignored.
         * Fields in `self.additional_properties` are added to the output dict.
         """
-        excluded_fields: Set[str] = set(
-            [
-                "additional_properties",
-            ]
-        )
+        excluded_fields: Set[str] = set([
+            "additional_properties",
+        ])
 
         _dict = self.model_dump(
             by_alias=True,
@@ -103,12 +98,16 @@ class UpdateOrganizationInvitation(BaseModel):
         if not isinstance(obj, dict):
             return cls.model_validate(obj)
 
-        _obj = cls.model_validate(
-            {"role": obj.get("role"), "assignedRoleIds": obj.get("assignedRoleIds"), "expiresAt": obj.get("expiresAt")}
-        )
+        _obj = cls.model_validate({
+            "role": obj.get("role"),
+            "assignedRoleIds": obj.get("assignedRoleIds"),
+            "expiresAt": obj.get("expiresAt")
+        })
         # store additional fields in additional_properties
         for _key in obj.keys():
             if _key not in cls.__properties:
                 _obj.additional_properties[_key] = obj.get(_key)
 
         return _obj
+
+

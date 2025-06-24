@@ -23,12 +23,10 @@ from typing import Any, ClassVar, Dict, List, Optional, Union
 from typing import Optional, Set
 from typing_extensions import Self
 
-
 class CompletionItem(BaseModel):
     """
     CompletionItem
-    """  # noqa: E501
-
+    """ # noqa: E501
     label: StrictStr
     kind: Optional[Union[StrictFloat, StrictInt]] = None
     detail: Optional[StrictStr] = None
@@ -37,21 +35,14 @@ class CompletionItem(BaseModel):
     filter_text: Optional[StrictStr] = Field(default=None, alias="filterText")
     insert_text: Optional[StrictStr] = Field(default=None, alias="insertText")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = [
-        "label",
-        "kind",
-        "detail",
-        "documentation",
-        "sortText",
-        "filterText",
-        "insertText",
-    ]
+    __properties: ClassVar[List[str]] = ["label", "kind", "detail", "documentation", "sortText", "filterText", "insertText"]
 
     model_config = ConfigDict(
         populate_by_name=True,
         validate_assignment=True,
         protected_namespaces=(),
     )
+
 
     def to_str(self) -> str:
         """Returns the string representation of the model using alias"""
@@ -78,11 +69,9 @@ class CompletionItem(BaseModel):
           are ignored.
         * Fields in `self.additional_properties` are added to the output dict.
         """
-        excluded_fields: Set[str] = set(
-            [
-                "additional_properties",
-            ]
-        )
+        excluded_fields: Set[str] = set([
+            "additional_properties",
+        ])
 
         _dict = self.model_dump(
             by_alias=True,
@@ -105,20 +94,20 @@ class CompletionItem(BaseModel):
         if not isinstance(obj, dict):
             return cls.model_validate(obj)
 
-        _obj = cls.model_validate(
-            {
-                "label": obj.get("label"),
-                "kind": obj.get("kind"),
-                "detail": obj.get("detail"),
-                "documentation": obj.get("documentation"),
-                "sortText": obj.get("sortText"),
-                "filterText": obj.get("filterText"),
-                "insertText": obj.get("insertText"),
-            }
-        )
+        _obj = cls.model_validate({
+            "label": obj.get("label"),
+            "kind": obj.get("kind"),
+            "detail": obj.get("detail"),
+            "documentation": obj.get("documentation"),
+            "sortText": obj.get("sortText"),
+            "filterText": obj.get("filterText"),
+            "insertText": obj.get("insertText")
+        })
         # store additional fields in additional_properties
         for _key in obj.keys():
             if _key not in cls.__properties:
                 _obj.additional_properties[_key] = obj.get(_key)
 
         return _obj
+
+

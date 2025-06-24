@@ -2,7 +2,6 @@
 # Copyright 2025 Daytona Platforms Inc.
 # SPDX-License-Identifier: Apache-2.0
 
-
 """
 Script to convert async code to sync code using the unasync library.
 
@@ -812,10 +811,11 @@ def manage_asyncio_imports(text: str) -> str:
     # Check if asyncio, time, and aiofiles are already imported
     has_asyncio_import = False
     has_time_import = False
-    import_asyncio_line_idx = None
-    import_time_line_idx = None
 
     new_lines = []
+    in_multiline_import = False
+    paren_count = 0
+
     for i, line in enumerate(lines):
         # Check for existing asyncio imports
         if re.match(r"^\s*import asyncio\s*$", line):
@@ -891,84 +891,89 @@ def manage_asyncio_imports(text: str) -> str:
             # else: skip this line (remove unused import)
             continue
 
+        # Track multi-line imports by counting parentheses
+        if line.strip().startswith(("import ", "from ")):
+            paren_count += line.count("(") - line.count(")")
+            if paren_count > 0:
+                in_multiline_import = True
+        elif in_multiline_import:
+            paren_count += line.count("(") - line.count(")")
+            if paren_count <= 0:
+                in_multiline_import = False
+                paren_count = 0
+
+        # Add the line to output (only once!)
         new_lines.append(line)
-
-        # Track where we could insert imports (after other imports)
-        if (
-            not has_asyncio_import
-            and import_asyncio_line_idx is None
-            and line.strip()
-            and not line.strip().startswith("#")
-            and not line.strip().startswith("import")
-            and not line.strip().startswith("from")
-        ):
-            import_asyncio_line_idx = len(new_lines) - 1
-
-        if (
-            not has_time_import
-            and import_time_line_idx is None
-            and line.strip()
-            and not line.strip().startswith("#")
-            and not line.strip().startswith("import")
-            and not line.strip().startswith("from")
-        ):
-            import_time_line_idx = len(new_lines) - 1
 
     # If asyncio is used but not imported, add the import
     if asyncio_used and not has_asyncio_import:
-        if import_asyncio_line_idx is not None:
-            # Insert after the last import but before other code
-            # Find the best position - after imports but before other code
-            insert_idx = 0
-            for i, line in enumerate(new_lines):
-                if (
-                    line.strip().startswith("import")
-                    or line.strip().startswith("from")
-                    or line.strip().startswith("#")
-                    or not line.strip()
-                ):
-                    insert_idx = i + 1
-                else:
-                    break
-            new_lines.insert(insert_idx, "import asyncio\n")
-        else:
-            # If no good position found, add at the beginning after license/comments
-            license_end = 0
-            for i, line in enumerate(new_lines):
-                stripped = line.strip()
-                if not stripped or stripped.startswith("#"):
-                    license_end = i + 1
-                else:
-                    break
-            new_lines.insert(license_end, "import asyncio\n")
+        # Find the best position - after all imports (including multi-line ones)
+        insert_idx = 0
+        in_multiline_import = False
+        paren_count = 0
+
+        for i, line in enumerate(new_lines):
+            stripped = line.strip()
+
+            # Skip license/comments at the beginning
+            if not stripped or stripped.startswith("#"):
+                insert_idx = i + 1
+                continue
+
+            # Handle import statements
+            if stripped.startswith(("import ", "from ")):
+                paren_count += line.count("(") - line.count(")")
+                if paren_count > 0:
+                    in_multiline_import = True
+                insert_idx = i + 1
+            elif in_multiline_import:
+                paren_count += line.count("(") - line.count(")")
+                if paren_count <= 0:
+                    in_multiline_import = False
+                    paren_count = 0
+                insert_idx = i + 1
+            elif not in_multiline_import:
+                # This is the first non-import line, insert here
+                break
+            else:
+                insert_idx = i + 1
+
+        new_lines.insert(insert_idx, "import asyncio\n")
 
     # If time is used but not imported, add the import
     if time_used and not has_time_import:
-        if import_time_line_idx is not None:
-            # Insert after the last import but before other code
-            # Find the best position - after imports but before other code
-            insert_idx = 0
-            for i, line in enumerate(new_lines):
-                if (
-                    line.strip().startswith("import")
-                    or line.strip().startswith("from")
-                    or line.strip().startswith("#")
-                    or not line.strip()
-                ):
-                    insert_idx = i + 1
-                else:
-                    break
-            new_lines.insert(insert_idx, "import time\n")
-        else:
-            # If no good position found, add at the beginning after license/comments
-            license_end = 0
-            for i, line in enumerate(new_lines):
-                stripped = line.strip()
-                if not stripped or stripped.startswith("#"):
-                    license_end = i + 1
-                else:
-                    break
-            new_lines.insert(license_end, "import time\n")
+        # Find the best position - after imports but before other code
+        insert_idx = 0
+        in_multiline_import = False
+        paren_count = 0
+
+        for i, line in enumerate(new_lines):
+            stripped = line.strip()
+
+            # Skip license/comments at the beginning
+            if not stripped or stripped.startswith("#"):
+                insert_idx = i + 1
+                continue
+
+            # Handle import statements
+            if stripped.startswith(("import ", "from ")):
+                paren_count += line.count("(") - line.count(")")
+                if paren_count > 0:
+                    in_multiline_import = True
+                insert_idx = i + 1
+            elif in_multiline_import:
+                paren_count += line.count("(") - line.count(")")
+                if paren_count <= 0:
+                    in_multiline_import = False
+                    paren_count = 0
+                insert_idx = i + 1
+            elif not in_multiline_import:
+                # This is the first non-import line, insert here
+                break
+            else:
+                insert_idx = i + 1
+
+        new_lines.insert(insert_idx, "import time\n")
 
     return "".join(new_lines)
 

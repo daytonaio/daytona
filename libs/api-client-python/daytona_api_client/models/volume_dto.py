@@ -24,12 +24,10 @@ from daytona_api_client.models.volume_state import VolumeState
 from typing import Optional, Set
 from typing_extensions import Self
 
-
 class VolumeDto(BaseModel):
     """
     VolumeDto
-    """  # noqa: E501
-
+    """ # noqa: E501
     id: StrictStr = Field(description="Volume ID")
     name: StrictStr = Field(description="Volume name")
     organization_id: StrictStr = Field(description="Organization ID", alias="organizationId")
@@ -39,22 +37,14 @@ class VolumeDto(BaseModel):
     last_used_at: Optional[StrictStr] = Field(default=None, description="Last used timestamp", alias="lastUsedAt")
     error_reason: Optional[StrictStr] = Field(description="The error reason of the volume", alias="errorReason")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = [
-        "id",
-        "name",
-        "organizationId",
-        "state",
-        "createdAt",
-        "updatedAt",
-        "lastUsedAt",
-        "errorReason",
-    ]
+    __properties: ClassVar[List[str]] = ["id", "name", "organizationId", "state", "createdAt", "updatedAt", "lastUsedAt", "errorReason"]
 
     model_config = ConfigDict(
         populate_by_name=True,
         validate_assignment=True,
         protected_namespaces=(),
     )
+
 
     def to_str(self) -> str:
         """Returns the string representation of the model using alias"""
@@ -81,11 +71,9 @@ class VolumeDto(BaseModel):
           are ignored.
         * Fields in `self.additional_properties` are added to the output dict.
         """
-        excluded_fields: Set[str] = set(
-            [
-                "additional_properties",
-            ]
-        )
+        excluded_fields: Set[str] = set([
+            "additional_properties",
+        ])
 
         _dict = self.model_dump(
             by_alias=True,
@@ -100,12 +88,12 @@ class VolumeDto(BaseModel):
         # set to None if last_used_at (nullable) is None
         # and model_fields_set contains the field
         if self.last_used_at is None and "last_used_at" in self.model_fields_set:
-            _dict["lastUsedAt"] = None
+            _dict['lastUsedAt'] = None
 
         # set to None if error_reason (nullable) is None
         # and model_fields_set contains the field
         if self.error_reason is None and "error_reason" in self.model_fields_set:
-            _dict["errorReason"] = None
+            _dict['errorReason'] = None
 
         return _dict
 
@@ -118,21 +106,21 @@ class VolumeDto(BaseModel):
         if not isinstance(obj, dict):
             return cls.model_validate(obj)
 
-        _obj = cls.model_validate(
-            {
-                "id": obj.get("id"),
-                "name": obj.get("name"),
-                "organizationId": obj.get("organizationId"),
-                "state": obj.get("state"),
-                "createdAt": obj.get("createdAt"),
-                "updatedAt": obj.get("updatedAt"),
-                "lastUsedAt": obj.get("lastUsedAt"),
-                "errorReason": obj.get("errorReason"),
-            }
-        )
+        _obj = cls.model_validate({
+            "id": obj.get("id"),
+            "name": obj.get("name"),
+            "organizationId": obj.get("organizationId"),
+            "state": obj.get("state"),
+            "createdAt": obj.get("createdAt"),
+            "updatedAt": obj.get("updatedAt"),
+            "lastUsedAt": obj.get("lastUsedAt"),
+            "errorReason": obj.get("errorReason")
+        })
         # store additional fields in additional_properties
         for _key in obj.keys():
             if _key not in cls.__properties:
                 _obj.additional_properties[_key] = obj.get(_key)
 
         return _obj
+
+

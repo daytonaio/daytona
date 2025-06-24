@@ -23,12 +23,10 @@ from typing import Any, ClassVar, Dict, List, Union
 from typing import Optional, Set
 from typing_extensions import Self
 
-
 class UsageOverview(BaseModel):
     """
     UsageOverview
-    """  # noqa: E501
-
+    """ # noqa: E501
     total_cpu_quota: Union[StrictFloat, StrictInt] = Field(alias="totalCpuQuota")
     total_gpu_quota: Union[StrictFloat, StrictInt] = Field(alias="totalGpuQuota")
     total_memory_quota: Union[StrictFloat, StrictInt] = Field(alias="totalMemoryQuota")
@@ -37,21 +35,14 @@ class UsageOverview(BaseModel):
     current_memory_usage: Union[StrictFloat, StrictInt] = Field(alias="currentMemoryUsage")
     current_disk_usage: Union[StrictFloat, StrictInt] = Field(alias="currentDiskUsage")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = [
-        "totalCpuQuota",
-        "totalGpuQuota",
-        "totalMemoryQuota",
-        "totalDiskQuota",
-        "currentCpuUsage",
-        "currentMemoryUsage",
-        "currentDiskUsage",
-    ]
+    __properties: ClassVar[List[str]] = ["totalCpuQuota", "totalGpuQuota", "totalMemoryQuota", "totalDiskQuota", "currentCpuUsage", "currentMemoryUsage", "currentDiskUsage"]
 
     model_config = ConfigDict(
         populate_by_name=True,
         validate_assignment=True,
         protected_namespaces=(),
     )
+
 
     def to_str(self) -> str:
         """Returns the string representation of the model using alias"""
@@ -78,11 +69,9 @@ class UsageOverview(BaseModel):
           are ignored.
         * Fields in `self.additional_properties` are added to the output dict.
         """
-        excluded_fields: Set[str] = set(
-            [
-                "additional_properties",
-            ]
-        )
+        excluded_fields: Set[str] = set([
+            "additional_properties",
+        ])
 
         _dict = self.model_dump(
             by_alias=True,
@@ -105,20 +94,20 @@ class UsageOverview(BaseModel):
         if not isinstance(obj, dict):
             return cls.model_validate(obj)
 
-        _obj = cls.model_validate(
-            {
-                "totalCpuQuota": obj.get("totalCpuQuota"),
-                "totalGpuQuota": obj.get("totalGpuQuota"),
-                "totalMemoryQuota": obj.get("totalMemoryQuota"),
-                "totalDiskQuota": obj.get("totalDiskQuota"),
-                "currentCpuUsage": obj.get("currentCpuUsage"),
-                "currentMemoryUsage": obj.get("currentMemoryUsage"),
-                "currentDiskUsage": obj.get("currentDiskUsage"),
-            }
-        )
+        _obj = cls.model_validate({
+            "totalCpuQuota": obj.get("totalCpuQuota"),
+            "totalGpuQuota": obj.get("totalGpuQuota"),
+            "totalMemoryQuota": obj.get("totalMemoryQuota"),
+            "totalDiskQuota": obj.get("totalDiskQuota"),
+            "currentCpuUsage": obj.get("currentCpuUsage"),
+            "currentMemoryUsage": obj.get("currentMemoryUsage"),
+            "currentDiskUsage": obj.get("currentDiskUsage")
+        })
         # store additional fields in additional_properties
         for _key in obj.keys():
             if _key not in cls.__properties:
                 _obj.additional_properties[_key] = obj.get(_key)
 
         return _obj
+
+

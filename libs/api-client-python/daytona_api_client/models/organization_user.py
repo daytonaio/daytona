@@ -25,12 +25,10 @@ from daytona_api_client.models.organization_role import OrganizationRole
 from typing import Optional, Set
 from typing_extensions import Self
 
-
 class OrganizationUser(BaseModel):
     """
     OrganizationUser
-    """  # noqa: E501
-
+    """ # noqa: E501
     user_id: StrictStr = Field(description="User ID", alias="userId")
     organization_id: StrictStr = Field(description="Organization ID", alias="organizationId")
     name: StrictStr = Field(description="User name")
@@ -40,21 +38,12 @@ class OrganizationUser(BaseModel):
     created_at: datetime = Field(description="Creation timestamp", alias="createdAt")
     updated_at: datetime = Field(description="Last update timestamp", alias="updatedAt")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = [
-        "userId",
-        "organizationId",
-        "name",
-        "email",
-        "role",
-        "assignedRoles",
-        "createdAt",
-        "updatedAt",
-    ]
+    __properties: ClassVar[List[str]] = ["userId", "organizationId", "name", "email", "role", "assignedRoles", "createdAt", "updatedAt"]
 
-    @field_validator("role")
+    @field_validator('role')
     def role_validate_enum(cls, value):
         """Validates the enum"""
-        if value not in set(["owner", "member"]):
+        if value not in set(['owner', 'member']):
             raise ValueError("must be one of enum values ('owner', 'member')")
         return value
 
@@ -63,6 +52,7 @@ class OrganizationUser(BaseModel):
         validate_assignment=True,
         protected_namespaces=(),
     )
+
 
     def to_str(self) -> str:
         """Returns the string representation of the model using alias"""
@@ -89,11 +79,9 @@ class OrganizationUser(BaseModel):
           are ignored.
         * Fields in `self.additional_properties` are added to the output dict.
         """
-        excluded_fields: Set[str] = set(
-            [
-                "additional_properties",
-            ]
-        )
+        excluded_fields: Set[str] = set([
+            "additional_properties",
+        ])
 
         _dict = self.model_dump(
             by_alias=True,
@@ -106,7 +94,7 @@ class OrganizationUser(BaseModel):
             for _item_assigned_roles in self.assigned_roles:
                 if _item_assigned_roles:
                     _items.append(_item_assigned_roles.to_dict())
-            _dict["assignedRoles"] = _items
+            _dict['assignedRoles'] = _items
         # puts key-value pairs in additional_properties in the top level
         if self.additional_properties is not None:
             for _key, _value in self.additional_properties.items():
@@ -123,23 +111,21 @@ class OrganizationUser(BaseModel):
         if not isinstance(obj, dict):
             return cls.model_validate(obj)
 
-        _obj = cls.model_validate(
-            {
-                "userId": obj.get("userId"),
-                "organizationId": obj.get("organizationId"),
-                "name": obj.get("name"),
-                "email": obj.get("email"),
-                "role": obj.get("role"),
-                "assignedRoles": [OrganizationRole.from_dict(_item) for _item in obj["assignedRoles"]]
-                if obj.get("assignedRoles") is not None
-                else None,
-                "createdAt": obj.get("createdAt"),
-                "updatedAt": obj.get("updatedAt"),
-            }
-        )
+        _obj = cls.model_validate({
+            "userId": obj.get("userId"),
+            "organizationId": obj.get("organizationId"),
+            "name": obj.get("name"),
+            "email": obj.get("email"),
+            "role": obj.get("role"),
+            "assignedRoles": [OrganizationRole.from_dict(_item) for _item in obj["assignedRoles"]] if obj.get("assignedRoles") is not None else None,
+            "createdAt": obj.get("createdAt"),
+            "updatedAt": obj.get("updatedAt")
+        })
         # store additional fields in additional_properties
         for _key in obj.keys():
             if _key not in cls.__properties:
                 _obj.additional_properties[_key] = obj.get(_key)
 
         return _obj
+
+

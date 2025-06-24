@@ -66,3 +66,7 @@ vitest.config.*.timestamp*
 __pycache__/
 
 examples/**/*.png
+
+**/.venv
+**/poetry.lock
+!/poetry.lock
