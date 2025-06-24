@@ -9,6 +9,17 @@
       "executor": "@nx-go/nx-go:build",
       "options": {
         "main": "{projectRoot}/main.go",
+        "outputPath": "dist/libs/computer-use",
+        "flags": ["-tags=no_gui"]
+      },
+      "configurations": {
+        "production": {}
+      }
+    },
+    "build:full": {
+      "executor": "@nx-go/nx-go:build",
+      "options": {
+        "main": "{projectRoot}/main.go",
         "outputPath": "dist/libs/computer-use"
       },
       "configurations": {

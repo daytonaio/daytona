@@ -13,7 +13,6 @@ import (
 	"time"
 
 	"github.com/daytonaio/daemon/pkg/toolbox/computeruse"
-	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -420,8 +419,8 @@ func (c *ComputerUse) GetProcessErrors(req *computeruse.ProcessRequest) (string,
 	return string(content), nil
 }
 
-func (c *ComputerUse) GetStatus(req *computeruse.ComputerUseRequest) (*computeruse.Empty, error) {
-	req.RequestContext.JSON(200, gin.H{"status": "ok"})
-
-	return new(computeruse.Empty), nil
+func (c *ComputerUse) GetStatus() (*computeruse.StatusResponse, error) {
+	return &computeruse.StatusResponse{
+		Status: "ok",
+	}, nil
 }

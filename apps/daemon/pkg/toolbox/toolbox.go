@@ -158,14 +158,15 @@ func (s *Server) Start() error {
 	}
 	s.ComputerUse, err = manager.GetComputerUse(pluginPath)
 	if err != nil {
-		log.Fatal(err)
+		log.Errorf("Failed to initialize computer-use plugin: %v", err)
+		log.Info("Continuing without computer-use functionality...")
 	}
 
 	if s.ComputerUse != nil {
 		computerUseController := r.Group("/computer")
 		{
 			// Computer use status endpoint
-			computerUseController.GET("/status", computeruse.WrapRequest(s.ComputerUse.GetStatus))
+			computerUseController.GET("/status", computeruse.WrapStatusHandler(s.ComputerUse.GetStatus))
 
 			// Computer use management endpoints
 			computerUseController.POST("/start", s.startComputerUse)
@@ -177,26 +178,32 @@ func (s *Server) Start() error {
 			computerUseController.GET("/process/:processName/errors", s.getProcessErrors)
 
 			// Screenshot endpoints
-			computerUseController.GET("/screenshot", computeruse.WrapRequest(s.ComputerUse.TakeScreenshot))
-			computerUseController.GET("/screenshot/region", computeruse.WrapRequest(s.ComputerUse.TakeRegionScreenshot))
-			computerUseController.GET("/screenshot/compressed", computeruse.WrapRequest(s.ComputerUse.TakeCompressedScreenshot))
-			computerUseController.GET("/screenshot/region/compressed", computeruse.WrapRequest(s.ComputerUse.TakeCompressedRegionScreenshot))
+			computerUseController.GET("/screenshot", computeruse.WrapScreenshotHandler(s.ComputerUse.TakeScreenshot))
+			computerUseController.GET("/screenshot/region", computeruse.WrapRegionScreenshotHandler(s.ComputerUse.TakeRegionScreenshot))
+			computerUseController.GET("/screenshot/compressed", computeruse.WrapCompressedScreenshotHandler(s.ComputerUse.TakeCompressedScreenshot))
+			computerUseController.GET("/screenshot/region/compressed", computeruse.WrapCompressedRegionScreenshotHandler(s.ComputerUse.TakeCompressedRegionScreenshot))
 
 			// Mouse control endpoints
-			computerUseController.GET("/mouse/position", computeruse.WrapRequest(s.ComputerUse.GetMousePosition))
-			computerUseController.POST("/mouse/move", computeruse.WrapRequest(s.ComputerUse.MoveMouse))
-			computerUseController.POST("/mouse/click", computeruse.WrapRequest(s.ComputerUse.Click))
-			computerUseController.POST("/mouse/drag", computeruse.WrapRequest(s.ComputerUse.Drag))
-			computerUseController.POST("/mouse/scroll", computeruse.WrapRequest(s.ComputerUse.Scroll))
+			computerUseController.GET("/mouse/position", computeruse.WrapMousePositionHandler(s.ComputerUse.GetMousePosition))
+			computerUseController.POST("/mouse/move", computeruse.WrapMoveMouseHandler(s.ComputerUse.MoveMouse))
+			computerUseController.POST("/mouse/click", computeruse.WrapClickHandler(s.ComputerUse.Click))
+			computerUseController.POST("/mouse/drag", computeruse.WrapDragHandler(s.ComputerUse.Drag))
+			computerUseController.POST("/mouse/scroll", computeruse.WrapScrollHandler(s.ComputerUse.Scroll))
 
 			// Keyboard control endpoints
-			computerUseController.POST("/keyboard/type", computeruse.WrapRequest(s.ComputerUse.TypeText))
-			computerUseController.POST("/keyboard/key", computeruse.WrapRequest(s.ComputerUse.PressKey))
-			computerUseController.POST("/keyboard/hotkey", computeruse.WrapRequest(s.ComputerUse.PressHotkey))
+			computerUseController.POST("/keyboard/type", computeruse.WrapTypeTextHandler(s.ComputerUse.TypeText))
+			computerUseController.POST("/keyboard/key", computeruse.WrapPressKeyHandler(s.ComputerUse.PressKey))
+			computerUseController.POST("/keyboard/hotkey", computeruse.WrapPressHotkeyHandler(s.ComputerUse.PressHotkey))
 
 			// Display info endpoints
-			computerUseController.GET("/display/info", computeruse.WrapRequest(s.ComputerUse.GetDisplayInfo))
-			computerUseController.GET("/display/windows", computeruse.WrapRequest(s.ComputerUse.GetWindows))
+			computerUseController.GET("/display/info", computeruse.WrapDisplayInfoHandler(s.ComputerUse.GetDisplayInfo))
+			computerUseController.GET("/display/windows", computeruse.WrapWindowsHandler(s.ComputerUse.GetWindows))
+		}
+	} else {
+		// Add a disabled computer-use controller that returns helpful error messages
+		computerUseController := r.Group("/computer")
+		{
+			computerUseController.Any("*path", s.computerUseDisabledMiddleware())
 		}
 	}
 
@@ -228,6 +235,30 @@ func (s *Server) Start() error {
 	}
 
 	return httpServer.Serve(listener)
+}
+
+// computerUseDisabledMiddleware returns a middleware that handles requests when computer-use is disabled
+func (s *Server) computerUseDisabledMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.JSON(http.StatusServiceUnavailable, gin.H{
+			"error":    "Computer-use functionality is not available",
+			"details":  "The computer-use plugin failed to initialize. This is usually due to missing X11 dependencies.",
+			"solution": "Install the required dependencies to enable computer-use functionality. Check the daemon logs for specific instructions.",
+			"endpoints": []string{
+				"GET /computer/status - Get computer-use status",
+				"POST /computer/start - Start computer-use processes",
+				"POST /computer/stop - Stop computer-use processes",
+				"GET /computer/screenshot - Take screenshot",
+				"GET /computer/mouse/position - Get mouse position",
+				"POST /computer/mouse/move - Move mouse",
+				"POST /computer/mouse/click - Click mouse",
+				"POST /computer/keyboard/type - Type text",
+				"POST /computer/keyboard/key - Press key",
+				"GET /computer/display/info - Get display info",
+			},
+		})
+		c.Abort()
+	}
 }
 
 // Computer use management handlers
