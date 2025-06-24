@@ -91,7 +91,7 @@ export class OrganizationService implements OnModuleInit {
     })
   }
 
-  async findSuspended(suspendedBefore?: Date, suspendedAfter?: Date): Promise<Organization[]> {
+  async findSuspended(suspendedBefore?: Date, suspendedAfter?: Date, take?: number): Promise<Organization[]> {
     return this.organizationRepository.find({
       where: {
         suspended: true,
@@ -100,7 +100,7 @@ export class OrganizationService implements OnModuleInit {
         ...(suspendedAfter ? { suspendedAt: MoreThan(suspendedAfter) } : {}),
       },
       //  limit the number of organizations to avoid memory issues
-      take: 1000,
+      take: take || 100,
     })
   }
 
@@ -317,6 +317,12 @@ export class OrganizationService implements OnModuleInit {
 
     const suspendedOrganizationIds = suspendedOrganizations.map((organization) => organization.id)
 
+    // Skip if no suspended organizations found to avoid empty IN clause
+    if (suspendedOrganizationIds.length === 0) {
+      await this.redis.del(lockKey)
+      return
+    }
+
     const sandboxes = await this.sandboxRepository.find({
       where: {
         organizationId: In(suspendedOrganizationIds),
@@ -344,13 +350,17 @@ export class OrganizationService implements OnModuleInit {
     }
 
     const suspendedOrganizations = await this.findSuspended(
-      // Find organization suspended more than 24 hours ago
       new Date(Date.now() - 1 * 1000 * 60 * 60 * 24),
-      //  and less than 7 days ago
       new Date(Date.now() - 7 * 1000 * 60 * 60 * 24),
     )
 
     const suspendedOrganizationIds = suspendedOrganizations.map((organization) => organization.id)
+
+    // Skip if no suspended organizations found to avoid empty IN clause
+    if (suspendedOrganizationIds.length === 0) {
+      await this.redis.del(lockKey)
+      return
+    }
 
     const snapshotRunners = await this.snapshotRunnerRepository
       .createQueryBuilder('snapshotRunner')

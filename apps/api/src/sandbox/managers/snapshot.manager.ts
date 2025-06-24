@@ -6,7 +6,7 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Cron, CronExpression } from '@nestjs/schedule'
-import { In, LessThan, Not, Repository } from 'typeorm'
+import { In, IsNull, LessThan, Not, Or, Repository } from 'typeorm'
 import { DockerRegistryService } from '../../docker-registry/services/docker-registry.service'
 import { Snapshot } from '../entities/snapshot.entity'
 import { SnapshotState } from '../enums/snapshot-state.enum'
@@ -135,6 +135,12 @@ export class SnapshotManager {
       runnerSnapshots.map((snapshotRunner) => {
         return this.syncRunnerSnapshotState(snapshotRunner).catch((err) => {
           if (err.code !== 'ECONNRESET') {
+            if (err instanceof RunnerNotReadyError) {
+              this.logger.debug(
+                `Runner ${snapshotRunner.runnerId} is not ready while trying to sync snapshot runner ${snapshotRunner.id}: ${err}`,
+              )
+              return
+            }
             this.logger.error(`Error syncing runner snapshot state ${snapshotRunner.id}: ${fromAxiosError(err)}`)
             this.snapshotRunnerRepository.update(snapshotRunner.id, {
               state: SnapshotRunnerState.ERROR,
@@ -354,7 +360,7 @@ export class SnapshotManager {
     //  get all snapshots
     const snapshots = await this.snapshotRepository.find({
       where: {
-        state: Not(In([SnapshotState.ACTIVE, SnapshotState.ERROR, SnapshotState.BUILD_FAILED])),
+        state: Not(In([SnapshotState.ACTIVE, SnapshotState.ERROR, SnapshotState.BUILD_FAILED, SnapshotState.INACTIVE])),
       },
     })
 
@@ -843,6 +849,58 @@ export class SnapshotManager {
       }
     } catch (error) {
       this.logger.error(`Failed to mark old BuildInfo SnapshotRunners for removal: ${fromAxiosError(error)}`)
+    } finally {
+      await this.redisLockProvider.unlock(lockKey)
+    }
+  }
+
+  @Cron(CronExpression.EVERY_10_MINUTES)
+  async deactivateOldSnapshots() {
+    const lockKey = 'deactivate-old-snapshots-lock'
+    if (!(await this.redisLockProvider.lock(lockKey, 300))) {
+      return
+    }
+
+    try {
+      const sevenDaysAgo = new Date(Date.now() - 7 * 1000 * 60 * 60 * 24)
+
+      // Find all active snapshots that haven't been used in over 7 days or have null lastUsedAt
+      const oldSnapshots = await this.snapshotRepository.find({
+        where: [
+          {
+            general: false,
+            state: SnapshotState.ACTIVE,
+            lastUsedAt: Or(IsNull(), LessThan(sevenDaysAgo)),
+            createdAt: LessThan(sevenDaysAgo),
+          },
+        ],
+        take: 100,
+      })
+
+      if (oldSnapshots.length === 0) {
+        return
+      }
+
+      // Deactivate the snapshots
+      const snapshotIds = oldSnapshots.map((snapshot) => snapshot.id)
+      await this.snapshotRepository.update({ id: In(snapshotIds) }, { state: SnapshotState.INACTIVE })
+
+      // Get internal names of deactivated snapshots
+      const internalNames = oldSnapshots.map((snapshot) => snapshot.internalName).filter((name) => name) // Filter out null/undefined values
+
+      if (internalNames.length > 0) {
+        // Set associated SnapshotRunner records to REMOVING state
+        const result = await this.snapshotRunnerRepository.update(
+          { snapshotRef: In(internalNames) },
+          { state: SnapshotRunnerState.REMOVING },
+        )
+
+        this.logger.debug(
+          `Deactivated ${oldSnapshots.length} snapshots and marked ${result.affected} SnapshotRunners for removal`,
+        )
+      }
+    } catch (error) {
+      this.logger.error(`Failed to deactivate old snapshots: ${fromAxiosError(error)}`)
     } finally {
       await this.redisLockProvider.unlock(lockKey)
     }

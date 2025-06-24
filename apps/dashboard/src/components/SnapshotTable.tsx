@@ -15,7 +15,7 @@ import {
 import { TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from './ui/table'
 import { Button } from './ui/button'
 import { useMemo, useState } from 'react'
-import { AlertTriangle, CheckCircle, MoreHorizontal, Timer, Trash2 } from 'lucide-react'
+import { AlertTriangle, CheckCircle, MoreHorizontal, Timer, Trash2, Pause } from 'lucide-react'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -40,6 +40,7 @@ interface DataTableProps {
   onDelete: (snapshot: SnapshotDto) => void
   onBulkDelete?: (snapshots: SnapshotDto[]) => void
   onToggleEnabled: (snapshot: SnapshotDto, enabled: boolean) => void
+  onActivate?: (snapshot: SnapshotDto) => void
   pagination: {
     pageIndex: number
     pageSize: number
@@ -54,6 +55,7 @@ export function SnapshotTable({
   loadingSnapshots,
   onDelete,
   onToggleEnabled,
+  onActivate,
   pagination,
   pageCount,
   onBulkDelete,
@@ -78,11 +80,12 @@ export function SnapshotTable({
       getColumns({
         onDelete,
         onToggleEnabled,
+        onActivate,
         loadingSnapshots,
         writePermitted,
         deletePermitted,
       }),
-    [onDelete, onToggleEnabled, loadingSnapshots, writePermitted, deletePermitted],
+    [onDelete, onToggleEnabled, onActivate, loadingSnapshots, writePermitted, deletePermitted],
   )
 
   const columnsWithSelection = useMemo(() => {
@@ -256,12 +259,14 @@ export function SnapshotTable({
 const getColumns = ({
   onDelete,
   onToggleEnabled,
+  onActivate,
   loadingSnapshots,
   writePermitted,
   deletePermitted,
 }: {
   onDelete: (snapshot: SnapshotDto) => void
   onToggleEnabled: (snapshot: SnapshotDto, enabled: boolean) => void
+  onActivate?: (snapshot: SnapshotDto) => void
   loadingSnapshots: Record<string, boolean>
   writePermitted: boolean
   deletePermitted: boolean
@@ -375,6 +380,15 @@ const getColumns = ({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
+              {writePermitted && onActivate && row.original.state === SnapshotState.INACTIVE && (
+                <DropdownMenuItem
+                  onClick={() => onActivate(row.original)}
+                  className="cursor-pointer"
+                  disabled={loadingSnapshots[row.original.id]}
+                >
+                  Activate
+                </DropdownMenuItem>
+              )}
               {writePermitted && (
                 <DropdownMenuItem
                   onClick={() => onToggleEnabled(row.original, !row.original.enabled)}
@@ -410,6 +424,8 @@ const getStateIcon = (state: SnapshotState) => {
   switch (state) {
     case SnapshotState.ACTIVE:
       return <CheckCircle className="w-4 h-4 flex-shrink-0" />
+    case SnapshotState.INACTIVE:
+      return <Pause className="w-4 h-4 flex-shrink-0" />
     case SnapshotState.ERROR:
     case SnapshotState.BUILD_FAILED:
       return <AlertTriangle className="w-4 h-4 flex-shrink-0" />
@@ -422,6 +438,8 @@ const getStateColor = (state: SnapshotState) => {
   switch (state) {
     case SnapshotState.ACTIVE:
       return 'text-green-500'
+    case SnapshotState.INACTIVE:
+      return 'text-gray-500 dark:text-gray-400'
     case SnapshotState.ERROR:
     case SnapshotState.BUILD_FAILED:
       return 'text-red-500'
