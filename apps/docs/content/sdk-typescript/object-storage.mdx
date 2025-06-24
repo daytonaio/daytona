@@ -29,31 +29,13 @@ new ObjectStorage(config: ObjectStorageConfig): ObjectStorage
 
 ### Methods
 
-#### computeArchiveBasePath()
-
-```ts
-static computeArchiveBasePath(pathStr: string): string
-```
-
-Compute the base path for an archive. Returns normalized path without the root (drive letter or leading slash).
-
-**Parameters**:
-
-- `pathStr` _string_ - The path to compute the base path for.
-
-**Returns**:
-
-- `string` - The base path for the archive.
-
----
-
 #### upload()
 
 ```ts
 upload(
    path: string,
    organizationId: string,
-archiveBasePath?: string): Promise<string>
+archiveBasePath: string): Promise<string>
 ```
 
 Upload a file or directory to object storage.
@@ -62,7 +44,7 @@ Upload a file or directory to object storage.
 
 - `path` _string_ - The path to the file or directory to upload.
 - `organizationId` _string_ - The organization ID to use for the upload.
-- `archiveBasePath?` _string_ - The base path to use for the archive.
+- `archiveBasePath` _string_ - The base path to use for the archive.
 
 **Returns**:
 

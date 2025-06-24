@@ -27,24 +27,26 @@ class SandboxState(str, Enum):
     """
     allowed enum values
     """
-    CREATING = "creating"
-    RESTORING = "restoring"
-    DESTROYED = "destroyed"
-    DESTROYING = "destroying"
-    STARTED = "started"
-    STOPPED = "stopped"
-    STARTING = "starting"
-    STOPPING = "stopping"
-    ERROR = "error"
-    BUILD_FAILED = "build_failed"
-    PENDING_BUILD = "pending_build"
-    BUILDING_SNAPSHOT = "building_snapshot"
-    UNKNOWN = "unknown"
-    PULLING_SNAPSHOT = "pulling_snapshot"
-    ARCHIVING = "archiving"
-    ARCHIVED = "archived"
+    CREATING = 'creating'
+    RESTORING = 'restoring'
+    DESTROYED = 'destroyed'
+    DESTROYING = 'destroying'
+    STARTED = 'started'
+    STOPPED = 'stopped'
+    STARTING = 'starting'
+    STOPPING = 'stopping'
+    ERROR = 'error'
+    BUILD_FAILED = 'build_failed'
+    PENDING_BUILD = 'pending_build'
+    BUILDING_SNAPSHOT = 'building_snapshot'
+    UNKNOWN = 'unknown'
+    PULLING_SNAPSHOT = 'pulling_snapshot'
+    ARCHIVING = 'archiving'
+    ARCHIVED = 'archived'
 
     @classmethod
     def from_json(cls, json_str: str) -> Self:
         """Create an instance of SandboxState from a JSON string"""
         return cls(json.loads(json_str))
+
+

@@ -4,13 +4,6 @@
   "projectType": "library",
   "sourceRoot": "libs/sdk-python",
   "targets": {
-    "build": {
-      "executor": "nx:run-commands",
-      "options": {
-        "cwd": "{projectRoot}",
-        "command": "python3 -m build"
-      }
-    },
     "docs": {
       "executor": "nx:run-commands",
       "options": {
@@ -24,6 +17,59 @@
         "cwd": "{projectRoot}",
         "command": "python scripts/sync_generator.py"
       }
+    },
+    "add-api-clients": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "command": "./scripts/add-api-clients.sh"
+      },
+      "dependsOn": [
+        {
+          "target": "publish",
+          "projects": ["api-client-python", "api-client-python-async"]
+        }
+      ]
+    },
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "commands": ["rm -rf dist", "./scripts/build-sdk.sh"],
+        "parallel": false
+      }
+    },
+    "build-for-publish": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "commands": ["rm -rf dist", "./scripts/build-sdk.sh"],
+        "parallel": false
+      },
+      "dependsOn": ["deps-check"]
+    },
+    "publish": {
+      "executor": "nx:run-commands",
+      "dependsOnStrict": true,
+      "options": {
+        "cwd": "{projectRoot}",
+        "commands": [
+          "poetry publish --username __token__ --password $PYPI_TOKEN --no-interaction",
+          "sed -i 's/^name = \"[^\"]*\"/name = \"daytona_sdk\"/' pyproject.toml",
+          "poetry publish --username __token__ --password $PYPI_TOKEN --no-interaction",
+          "sed -i 's/^name = \"[^\"]*\"/name = \"daytona\"/' pyproject.toml"
+        ],
+        "parallel": false
+      },
+      "dependsOn": ["build-for-publish"]
+    },
+    "deps-check": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "commands": ["poetry run deptry .", "poetry lock --regenerate"]
+      },
+      "dependsOn": ["add-api-clients"]
     }
   }
 }

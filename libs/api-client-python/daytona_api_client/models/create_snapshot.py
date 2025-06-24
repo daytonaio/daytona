@@ -24,43 +24,28 @@ from daytona_api_client.models.create_build_info import CreateBuildInfo
 from typing import Optional, Set
 from typing_extensions import Self
 
-
 class CreateSnapshot(BaseModel):
     """
     CreateSnapshot
-    """  # noqa: E501
-
+    """ # noqa: E501
     name: StrictStr = Field(description="The name of the snapshot")
-    image_name: Optional[StrictStr] = Field(
-        default=None, description="The image name of the snapshot", alias="imageName"
-    )
+    image_name: Optional[StrictStr] = Field(default=None, description="The image name of the snapshot", alias="imageName")
     entrypoint: Optional[List[StrictStr]] = Field(default=None, description="The entrypoint command for the snapshot")
     general: Optional[StrictBool] = Field(default=None, description="Whether the snapshot is general")
     cpu: Optional[StrictInt] = Field(default=None, description="CPU cores allocated to the resulting sandbox")
     gpu: Optional[StrictInt] = Field(default=None, description="GPU units allocated to the resulting sandbox")
     memory: Optional[StrictInt] = Field(default=None, description="Memory allocated to the resulting sandbox in GB")
     disk: Optional[StrictInt] = Field(default=None, description="Disk space allocated to the sandbox in GB")
-    build_info: Optional[CreateBuildInfo] = Field(
-        default=None, description="Build information for the snapshot", alias="buildInfo"
-    )
+    build_info: Optional[CreateBuildInfo] = Field(default=None, description="Build information for the snapshot", alias="buildInfo")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = [
-        "name",
-        "imageName",
-        "entrypoint",
-        "general",
-        "cpu",
-        "gpu",
-        "memory",
-        "disk",
-        "buildInfo",
-    ]
+    __properties: ClassVar[List[str]] = ["name", "imageName", "entrypoint", "general", "cpu", "gpu", "memory", "disk", "buildInfo"]
 
     model_config = ConfigDict(
         populate_by_name=True,
         validate_assignment=True,
         protected_namespaces=(),
     )
+
 
     def to_str(self) -> str:
         """Returns the string representation of the model using alias"""
@@ -87,11 +72,9 @@ class CreateSnapshot(BaseModel):
           are ignored.
         * Fields in `self.additional_properties` are added to the output dict.
         """
-        excluded_fields: Set[str] = set(
-            [
-                "additional_properties",
-            ]
-        )
+        excluded_fields: Set[str] = set([
+            "additional_properties",
+        ])
 
         _dict = self.model_dump(
             by_alias=True,
@@ -100,7 +83,7 @@ class CreateSnapshot(BaseModel):
         )
         # override the default output from pydantic by calling `to_dict()` of build_info
         if self.build_info:
-            _dict["buildInfo"] = self.build_info.to_dict()
+            _dict['buildInfo'] = self.build_info.to_dict()
         # puts key-value pairs in additional_properties in the top level
         if self.additional_properties is not None:
             for _key, _value in self.additional_properties.items():
@@ -117,22 +100,22 @@ class CreateSnapshot(BaseModel):
         if not isinstance(obj, dict):
             return cls.model_validate(obj)
 
-        _obj = cls.model_validate(
-            {
-                "name": obj.get("name"),
-                "imageName": obj.get("imageName"),
-                "entrypoint": obj.get("entrypoint"),
-                "general": obj.get("general"),
-                "cpu": obj.get("cpu"),
-                "gpu": obj.get("gpu"),
-                "memory": obj.get("memory"),
-                "disk": obj.get("disk"),
-                "buildInfo": CreateBuildInfo.from_dict(obj["buildInfo"]) if obj.get("buildInfo") is not None else None,
-            }
-        )
+        _obj = cls.model_validate({
+            "name": obj.get("name"),
+            "imageName": obj.get("imageName"),
+            "entrypoint": obj.get("entrypoint"),
+            "general": obj.get("general"),
+            "cpu": obj.get("cpu"),
+            "gpu": obj.get("gpu"),
+            "memory": obj.get("memory"),
+            "disk": obj.get("disk"),
+            "buildInfo": CreateBuildInfo.from_dict(obj["buildInfo"]) if obj.get("buildInfo") is not None else None
+        })
         # store additional fields in additional_properties
         for _key in obj.keys():
             if _key not in cls.__properties:
                 _obj.additional_properties[_key] = obj.get(_key)
 
         return _obj
+
+

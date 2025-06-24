@@ -1,0 +1,1 @@
+{"version":3,"file":"volume-state.js","sourceRoot":"","sources":["volume-state.ts"],"names":[],"mappings":";AAAA,oBAAoB;AACpB,oBAAoB;AACpB;;;;;;;;;;GAUG;;;AAEH;;;;GAIG;AAEU,QAAA,WAAW,GAAG;IACzB,QAAQ,EAAE,UAAU;IACpB,KAAK,EAAE,OAAO;IACd,cAAc,EAAE,gBAAgB;IAChC,cAAc,EAAE,gBAAgB;IAChC,QAAQ,EAAE,UAAU;IACpB,OAAO,EAAE,SAAS;IAClB,KAAK,EAAE,OAAO;CACN,CAAA"}

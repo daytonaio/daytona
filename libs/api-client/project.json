@@ -6,14 +6,16 @@
   "targets": {
     "build": {
       "executor": "@nx/js:tsc",
+      "inputs": ["default", "{projectRoot}/package.json"],
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/libs/api-client",
-        "tsConfig": "libs/api-client/tsconfig.lib.json",
-        "packageJson": "libs/api-client/package.json",
-        "main": "libs/api-client/index.ts",
+        "tsConfig": "{projectRoot}/tsconfig.lib.json",
+        "packageJson": "{projectRoot}/package.json",
+        "main": "{projectRoot}/src/index.ts",
         "updateBuildableProjectDepsInPackageJson": true
-      }
+      },
+      "dependsOn": ["set-version"]
     },
     "generate:api-client": {
       "executor": "nx:run-commands",
@@ -37,18 +39,21 @@
         "command": "cd {projectRoot} && prettier --write \"**/*.{ts,json}\" --config ../../.prettierrc"
       }
     },
+    "set-version": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "command": "if [ -n \"$NPM_PKG_VERSION\" ] || [ -n \"$DEFAULT_PACKAGE_VERSION\" ]; then VER=${NPM_PKG_VERSION:-$DEFAULT_PACKAGE_VERSION}; npm version \"$VER\" --allow-same-version && echo \"Changed version to $VER\"; else echo \"Using version from package.json\"; fi"
+      }
+    },
     "publish": {
       "executor": "nx:run-commands",
       "options": {
-        "commands": ["npm version $NX_PACKAGE_PUBLISH_VERSION", "npm publish"],
-        "cwd": "dist/libs/api-client",
+        "cwd": "{workspaceRoot}/dist/libs/api-client",
+        "command": "npm publish --tag $NPM_TAG --access public --registry https://registry.npmjs.org/ --//registry.npmjs.org/:_authToken=$NPM_TOKEN",
         "parallel": false
       },
-      "dependsOn": [
-        {
-          "target": "build"
-        }
-      ]
+      "dependsOn": ["build"]
     }
   },
   "tags": []
