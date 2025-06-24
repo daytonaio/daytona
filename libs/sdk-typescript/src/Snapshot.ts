@@ -167,6 +167,11 @@ export class SnapshotService {
     }
 
     const terminalStates: SnapshotState[] = [SnapshotState.ACTIVE, SnapshotState.ERROR, SnapshotState.BUILD_FAILED]
+    const logTerminalStates: SnapshotState[] = [
+      ...terminalStates,
+      SnapshotState.PENDING_VALIDATION,
+      SnapshotState.VALIDATING,
+    ]
     const snapshotRef = { createdSnapshot: createdSnapshot }
     let streamPromise: Promise<void> | undefined
     // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -175,7 +180,7 @@ export class SnapshotService {
         streamPromise = processStreamingResponse(
           () => this.snapshotsApi.getSnapshotBuildLogs(createdSnapshot.id, undefined, true, { responseType: 'stream' }),
           (chunk) => onChunk(chunk.trimEnd()),
-          async () => terminalStates.includes(snapshotRef.createdSnapshot.state),
+          async () => logTerminalStates.includes(snapshotRef.createdSnapshot.state),
         )
       }
     }

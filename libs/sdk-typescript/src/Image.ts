@@ -25,7 +25,7 @@ const LATEST_PYTHON_MICRO_VERSIONS = ['3.9.22', '3.10.17', '3.11.12', '3.12.10',
  */
 export interface Context {
   sourcePath: string
-  archivePath?: string
+  archivePath: string
 }
 
 /**
@@ -122,9 +122,8 @@ export class Image {
 
     const extraArgs = this.formatPipInstallArgs(options)
 
-    const archivePath = ObjectStorage.computeArchiveBasePath(expandedPath)
-    this._contextList.push({ sourcePath: expandedPath, archivePath })
-    this._dockerfile += `COPY ${archivePath} /.requirements.txt\n`
+    this._contextList.push({ sourcePath: expandedPath, archivePath: expandedPath })
+    this._dockerfile += `COPY ${expandedPath} /.requirements.txt\n`
     this._dockerfile += `RUN python -m pip install -r /.requirements.txt${extraArgs}\n`
 
     return this
@@ -186,9 +185,8 @@ export class Image {
     }
 
     const expandedPath = untildify(localPath)
-    const archivePath = ObjectStorage.computeArchiveBasePath(expandedPath)
-    this._contextList.push({ sourcePath: expandedPath, archivePath })
-    this._dockerfile += `COPY ${archivePath} ${remotePath}\n`
+    this._contextList.push({ sourcePath: expandedPath, archivePath: expandedPath })
+    this._dockerfile += `COPY ${expandedPath} ${remotePath}\n`
 
     return this
   }
@@ -207,10 +205,9 @@ export class Image {
    */
   addLocalDir(localPath: string, remotePath: string): Image {
     const expandedPath = untildify(localPath)
-    const archivePath = ObjectStorage.computeArchiveBasePath(expandedPath)
 
-    this._contextList.push({ sourcePath: expandedPath, archivePath })
-    this._dockerfile += `COPY ${archivePath} ${remotePath}\n`
+    this._contextList.push({ sourcePath: expandedPath, archivePath: expandedPath })
+    this._dockerfile += `COPY ${expandedPath} ${remotePath}\n`
 
     return this
   }

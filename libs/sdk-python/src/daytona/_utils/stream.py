@@ -93,3 +93,6 @@ async def process_streaming_response(
                         await next_chunk
                     except asyncio.CancelledError:
                         pass
+                    except httpx.RemoteProtocolError as e:
+                        if "peer closed connection without sending complete message body" not in str(e):
+                            raise e
