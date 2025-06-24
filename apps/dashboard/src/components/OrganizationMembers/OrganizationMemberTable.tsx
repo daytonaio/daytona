@@ -11,7 +11,6 @@ import {
   getCoreRowModel,
   getPaginationRowModel,
   getSortedRowModel,
-  SortingState,
   useReactTable,
 } from '@tanstack/react-table'
 import { OrganizationRole, OrganizationUser, OrganizationUserRoleEnum } from '@daytonaio/api-client'
@@ -25,6 +24,7 @@ import { UpdateAssignedOrganizationRolesDialog } from '@/components/Organization
 import { capitalize } from '@/lib/utils'
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 import { TableEmptyState } from '../TableEmptyState'
+import { useTableSorting } from '@/hooks/useTableSorting'
 
 interface DataTableProps {
   data: OrganizationUser[]
@@ -49,7 +49,7 @@ export function OrganizationMemberTable({
   loadingMemberAction,
   ownerMode,
 }: DataTableProps) {
-  const [sorting, setSorting] = useState<SortingState>([])
+  const [sorting, setSorting] = useTableSorting('organization-member')
   const [memberToUpdate, setMemberToUpdate] = useState<OrganizationUser | null>(null)
   const [isUpdateMemberRoleDialogOpen, setIsUpdateMemberRoleDialogOpen] = useState(false)
   const [isUpdateAssignedRolesDialogOpen, setIsUpdateAssignedRolesDialogOpen] = useState(false)

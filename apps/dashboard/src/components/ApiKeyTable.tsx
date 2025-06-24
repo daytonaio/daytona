@@ -10,12 +10,10 @@ import {
   getCoreRowModel,
   getPaginationRowModel,
   getSortedRowModel,
-  SortingState,
   useReactTable,
 } from '@tanstack/react-table'
 import { TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from './ui/table'
 import { Button } from './ui/button'
-import { useState } from 'react'
 import {
   Dialog,
   DialogClose,
@@ -32,6 +30,7 @@ import { Loader2 } from 'lucide-react'
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 import { getRelativeTimeString } from '@/lib/utils'
 import { TableEmptyState } from './TableEmptyState'
+import { useTableSorting } from '@/hooks/useTableSorting'
 
 interface DataTableProps {
   data: ApiKeyList[]
@@ -41,7 +40,7 @@ interface DataTableProps {
 }
 
 export function ApiKeyTable({ data, loading, loadingKeys, onRevoke }: DataTableProps) {
-  const [sorting, setSorting] = useState<SortingState>([])
+  const [sorting, setSorting] = useTableSorting('api-key')
   const columns = getColumns({ onRevoke, loadingKeys })
   const table = useReactTable({
     data,

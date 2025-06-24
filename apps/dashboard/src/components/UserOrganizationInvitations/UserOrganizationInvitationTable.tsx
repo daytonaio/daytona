@@ -11,7 +11,6 @@ import {
   getCoreRowModel,
   getPaginationRowModel,
   getSortedRowModel,
-  SortingState,
   useReactTable,
 } from '@tanstack/react-table'
 import { OrganizationInvitation } from '@daytonaio/api-client'
@@ -21,6 +20,7 @@ import { TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from '@
 import { DeclineOrganizationInvitationDialog } from '@/components/UserOrganizationInvitations/DeclineOrganizationInvitationDialog'
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 import { TableEmptyState } from '../TableEmptyState'
+import { useTableSorting } from '@/hooks/useTableSorting'
 
 interface DataTableProps {
   data: OrganizationInvitation[]
@@ -37,7 +37,7 @@ export function UserOrganizationInvitationTable({
   onDeclineInvitation,
   loadingInvitationAction,
 }: DataTableProps) {
-  const [sorting, setSorting] = useState<SortingState>([])
+  const [sorting, setSorting] = useTableSorting('user-organization-invitation')
   const [invitationToDecline, setInvitationToDecline] = useState<OrganizationInvitation | null>(null)
   const [isDeclineDialogOpen, setIsDeclineDialogOpen] = useState(false)
 

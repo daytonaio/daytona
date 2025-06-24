@@ -4,14 +4,7 @@
  */
 
 import { SnapshotDto, SnapshotState, OrganizationRolePermissionsEnum } from '@daytonaio/api-client'
-import {
-  ColumnDef,
-  flexRender,
-  getCoreRowModel,
-  getSortedRowModel,
-  SortingState,
-  useReactTable,
-} from '@tanstack/react-table'
+import { ColumnDef, flexRender, getCoreRowModel, getSortedRowModel, useReactTable } from '@tanstack/react-table'
 import { TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from './ui/table'
 import { Button } from './ui/button'
 import { useMemo, useState } from 'react'
@@ -32,6 +25,7 @@ import { getRelativeTimeString } from '@/lib/utils'
 import { TableEmptyState } from './TableEmptyState'
 import { Loader2 } from 'lucide-react'
 import { Badge } from './ui/badge'
+import { useTableSorting } from '@/hooks/useTableSorting'
 
 interface DataTableProps {
   data: SnapshotDto[]
@@ -71,7 +65,7 @@ export function SnapshotTable({
     [authenticatedUserHasPermission],
   )
 
-  const [sorting, setSorting] = useState<SortingState>([])
+  const [sorting, setSorting] = useTableSorting('snapshot')
 
   const columns = useMemo(
     () =>
