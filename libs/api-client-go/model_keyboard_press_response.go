@@ -12,8 +12,8 @@ Contact: support@daytona.com
 package daytonaapiclient
 
 import (
-	"bytes"
 	"encoding/json"
+	"bytes"
 	"fmt"
 )
 
@@ -22,8 +22,8 @@ var _ MappedNullable = &KeyboardPressResponse{}
 
 // KeyboardPressResponse struct for KeyboardPressResponse
 type KeyboardPressResponse struct {
-	Success   bool     `json:"success"`
-	Key       string   `json:"key"`
+	Success bool `json:"success"`
+	Key string `json:"key"`
 	Modifiers []string `json:"modifiers"`
 }
 
@@ -122,7 +122,7 @@ func (o *KeyboardPressResponse) SetModifiers(v []string) {
 }
 
 func (o KeyboardPressResponse) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
+	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -152,10 +152,10 @@ func (o *KeyboardPressResponse) UnmarshalJSON(data []byte) (err error) {
 	err = json.Unmarshal(data, &allProperties)
 
 	if err != nil {
-		return err
+		return err;
 	}
 
-	for _, requiredProperty := range requiredProperties {
+	for _, requiredProperty := range(requiredProperties) {
 		if _, exists := allProperties[requiredProperty]; !exists {
 			return fmt.Errorf("no value given for required property %v", requiredProperty)
 		}
@@ -211,3 +211,5 @@ func (v *NullableKeyboardPressResponse) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

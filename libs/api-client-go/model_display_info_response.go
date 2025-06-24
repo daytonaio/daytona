@@ -12,8 +12,8 @@ Contact: support@daytona.com
 package daytonaapiclient
 
 import (
-	"bytes"
 	"encoding/json"
+	"bytes"
 	"fmt"
 )
 
@@ -22,9 +22,9 @@ var _ MappedNullable = &DisplayInfoResponse{}
 
 // DisplayInfoResponse struct for DisplayInfoResponse
 type DisplayInfoResponse struct {
-	PrimaryDisplay map[string]interface{}   `json:"primary_display"`
-	Displays       []map[string]interface{} `json:"displays"`
-	TotalDisplays  float32                  `json:"total_displays"`
+	PrimaryDisplay map[string]interface{} `json:"primary_display"`
+	Displays []map[string]interface{} `json:"displays"`
+	TotalDisplays float32 `json:"total_displays"`
 }
 
 type _DisplayInfoResponse DisplayInfoResponse
@@ -122,7 +122,7 @@ func (o *DisplayInfoResponse) SetTotalDisplays(v float32) {
 }
 
 func (o DisplayInfoResponse) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
+	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -152,10 +152,10 @@ func (o *DisplayInfoResponse) UnmarshalJSON(data []byte) (err error) {
 	err = json.Unmarshal(data, &allProperties)
 
 	if err != nil {
-		return err
+		return err;
 	}
 
-	for _, requiredProperty := range requiredProperties {
+	for _, requiredProperty := range(requiredProperties) {
 		if _, exists := allProperties[requiredProperty]; !exists {
 			return fmt.Errorf("no value given for required property %v", requiredProperty)
 		}
@@ -211,3 +211,5 @@ func (v *NullableDisplayInfoResponse) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

@@ -12,8 +12,8 @@ Contact: support@daytona.com
 package daytonaapiclient
 
 import (
-	"bytes"
 	"encoding/json"
+	"bytes"
 	"fmt"
 )
 
@@ -22,9 +22,9 @@ var _ MappedNullable = &ScreenshotResponse{}
 
 // ScreenshotResponse struct for ScreenshotResponse
 type ScreenshotResponse struct {
-	Screenshot     string                 `json:"screenshot"`
-	Width          float32                `json:"width"`
-	Height         float32                `json:"height"`
+	Screenshot string `json:"screenshot"`
+	Width float32 `json:"width"`
+	Height float32 `json:"height"`
 	CursorPosition map[string]interface{} `json:"cursor_position,omitempty"`
 }
 
@@ -155,7 +155,7 @@ func (o *ScreenshotResponse) SetCursorPosition(v map[string]interface{}) {
 }
 
 func (o ScreenshotResponse) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
+	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -188,10 +188,10 @@ func (o *ScreenshotResponse) UnmarshalJSON(data []byte) (err error) {
 	err = json.Unmarshal(data, &allProperties)
 
 	if err != nil {
-		return err
+		return err;
 	}
 
-	for _, requiredProperty := range requiredProperties {
+	for _, requiredProperty := range(requiredProperties) {
 		if _, exists := allProperties[requiredProperty]; !exists {
 			return fmt.Errorf("no value given for required property %v", requiredProperty)
 		}
@@ -247,3 +247,5 @@ func (v *NullableScreenshotResponse) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

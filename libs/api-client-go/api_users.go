@@ -20,13 +20,14 @@ import (
 	"strings"
 )
 
+
 type UsersAPI interface {
 
 	/*
-		CreateUser Create user
+	CreateUser Create user
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@return UsersAPICreateUserRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return UsersAPICreateUserRequest
 	*/
 	CreateUser(ctx context.Context) UsersAPICreateUserRequest
 
@@ -34,10 +35,10 @@ type UsersAPI interface {
 	CreateUserExecute(r UsersAPICreateUserRequest) (*http.Response, error)
 
 	/*
-		GetAuthenticatedUser Get authenticated user
+	GetAuthenticatedUser Get authenticated user
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@return UsersAPIGetAuthenticatedUserRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return UsersAPIGetAuthenticatedUserRequest
 	*/
 	GetAuthenticatedUser(ctx context.Context) UsersAPIGetAuthenticatedUserRequest
 
@@ -46,10 +47,10 @@ type UsersAPI interface {
 	GetAuthenticatedUserExecute(r UsersAPIGetAuthenticatedUserRequest) (*User, *http.Response, error)
 
 	/*
-		GetAvailableAccountProviders Get available account providers
+	GetAvailableAccountProviders Get available account providers
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@return UsersAPIGetAvailableAccountProvidersRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return UsersAPIGetAvailableAccountProvidersRequest
 	*/
 	GetAvailableAccountProviders(ctx context.Context) UsersAPIGetAvailableAccountProvidersRequest
 
@@ -58,11 +59,11 @@ type UsersAPI interface {
 	GetAvailableAccountProvidersExecute(r UsersAPIGetAvailableAccountProvidersRequest) ([]AccountProvider, *http.Response, error)
 
 	/*
-		GetUser Get user by ID
+	GetUser Get user by ID
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param id
-		@return UsersAPIGetUserRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param id
+	@return UsersAPIGetUserRequest
 	*/
 	GetUser(ctx context.Context, id string) UsersAPIGetUserRequest
 
@@ -71,10 +72,10 @@ type UsersAPI interface {
 	GetUserExecute(r UsersAPIGetUserRequest) (*User, *http.Response, error)
 
 	/*
-		LinkAccount Link account
+	LinkAccount Link account
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@return UsersAPILinkAccountRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return UsersAPILinkAccountRequest
 	*/
 	LinkAccount(ctx context.Context) UsersAPILinkAccountRequest
 
@@ -82,10 +83,10 @@ type UsersAPI interface {
 	LinkAccountExecute(r UsersAPILinkAccountRequest) (*http.Response, error)
 
 	/*
-		ListUsers List all users
+	ListUsers List all users
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@return UsersAPIListUsersRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return UsersAPIListUsersRequest
 	*/
 	ListUsers(ctx context.Context) UsersAPIListUsersRequest
 
@@ -93,11 +94,11 @@ type UsersAPI interface {
 	ListUsersExecute(r UsersAPIListUsersRequest) (*http.Response, error)
 
 	/*
-		RegenerateKeyPair Regenerate user key pair
+	RegenerateKeyPair Regenerate user key pair
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param id
-		@return UsersAPIRegenerateKeyPairRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param id
+	@return UsersAPIRegenerateKeyPairRequest
 	*/
 	RegenerateKeyPair(ctx context.Context, id string) UsersAPIRegenerateKeyPairRequest
 
@@ -105,12 +106,12 @@ type UsersAPI interface {
 	RegenerateKeyPairExecute(r UsersAPIRegenerateKeyPairRequest) (*http.Response, error)
 
 	/*
-		UnlinkAccount Unlink account
+	UnlinkAccount Unlink account
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param provider
-		@param providerUserId
-		@return UsersAPIUnlinkAccountRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param provider
+	@param providerUserId
+	@return UsersAPIUnlinkAccountRequest
 	*/
 	UnlinkAccount(ctx context.Context, provider string, providerUserId string) UsersAPIUnlinkAccountRequest
 
@@ -122,7 +123,7 @@ type UsersAPI interface {
 type UsersAPIService service
 
 type UsersAPICreateUserRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService UsersAPI
 	createUser *CreateUser
 }
@@ -139,22 +140,22 @@ func (r UsersAPICreateUserRequest) Execute() (*http.Response, error) {
 /*
 CreateUser Create user
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return UsersAPICreateUserRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return UsersAPICreateUserRequest
 */
 func (a *UsersAPIService) CreateUser(ctx context.Context) UsersAPICreateUserRequest {
 	return UsersAPICreateUserRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
 func (a *UsersAPIService) CreateUserExecute(r UsersAPICreateUserRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod = http.MethodPost
-		localVarPostBody   interface{}
-		formFiles          []formFile
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "UsersAPIService.CreateUser")
@@ -219,7 +220,7 @@ func (a *UsersAPIService) CreateUserExecute(r UsersAPICreateUserRequest) (*http.
 }
 
 type UsersAPIGetAuthenticatedUserRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService UsersAPI
 }
 
@@ -230,25 +231,24 @@ func (r UsersAPIGetAuthenticatedUserRequest) Execute() (*User, *http.Response, e
 /*
 GetAuthenticatedUser Get authenticated user
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return UsersAPIGetAuthenticatedUserRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return UsersAPIGetAuthenticatedUserRequest
 */
 func (a *UsersAPIService) GetAuthenticatedUser(ctx context.Context) UsersAPIGetAuthenticatedUserRequest {
 	return UsersAPIGetAuthenticatedUserRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-//
-//	@return User
+//  @return User
 func (a *UsersAPIService) GetAuthenticatedUserExecute(r UsersAPIGetAuthenticatedUserRequest) (*User, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *User
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *User
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "UsersAPIService.GetAuthenticatedUser")
@@ -317,7 +317,7 @@ func (a *UsersAPIService) GetAuthenticatedUserExecute(r UsersAPIGetAuthenticated
 }
 
 type UsersAPIGetAvailableAccountProvidersRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService UsersAPI
 }
 
@@ -328,25 +328,24 @@ func (r UsersAPIGetAvailableAccountProvidersRequest) Execute() ([]AccountProvide
 /*
 GetAvailableAccountProviders Get available account providers
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return UsersAPIGetAvailableAccountProvidersRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return UsersAPIGetAvailableAccountProvidersRequest
 */
 func (a *UsersAPIService) GetAvailableAccountProviders(ctx context.Context) UsersAPIGetAvailableAccountProvidersRequest {
 	return UsersAPIGetAvailableAccountProvidersRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-//
-//	@return []AccountProvider
+//  @return []AccountProvider
 func (a *UsersAPIService) GetAvailableAccountProvidersExecute(r UsersAPIGetAvailableAccountProvidersRequest) ([]AccountProvider, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue []AccountProvider
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  []AccountProvider
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "UsersAPIService.GetAvailableAccountProviders")
@@ -415,9 +414,9 @@ func (a *UsersAPIService) GetAvailableAccountProvidersExecute(r UsersAPIGetAvail
 }
 
 type UsersAPIGetUserRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService UsersAPI
-	id         string
+	id string
 }
 
 func (r UsersAPIGetUserRequest) Execute() (*User, *http.Response, error) {
@@ -427,27 +426,26 @@ func (r UsersAPIGetUserRequest) Execute() (*User, *http.Response, error) {
 /*
 GetUser Get user by ID
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param id
-	@return UsersAPIGetUserRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param id
+ @return UsersAPIGetUserRequest
 */
 func (a *UsersAPIService) GetUser(ctx context.Context, id string) UsersAPIGetUserRequest {
 	return UsersAPIGetUserRequest{
 		ApiService: a,
-		ctx:        ctx,
-		id:         id,
+		ctx: ctx,
+		id: id,
 	}
 }
 
 // Execute executes the request
-//
-//	@return User
+//  @return User
 func (a *UsersAPIService) GetUserExecute(r UsersAPIGetUserRequest) (*User, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *User
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *User
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "UsersAPIService.GetUser")
@@ -517,8 +515,8 @@ func (a *UsersAPIService) GetUserExecute(r UsersAPIGetUserRequest) (*User, *http
 }
 
 type UsersAPILinkAccountRequest struct {
-	ctx                 context.Context
-	ApiService          UsersAPI
+	ctx context.Context
+	ApiService UsersAPI
 	createLinkedAccount *CreateLinkedAccount
 }
 
@@ -534,22 +532,22 @@ func (r UsersAPILinkAccountRequest) Execute() (*http.Response, error) {
 /*
 LinkAccount Link account
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return UsersAPILinkAccountRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return UsersAPILinkAccountRequest
 */
 func (a *UsersAPIService) LinkAccount(ctx context.Context) UsersAPILinkAccountRequest {
 	return UsersAPILinkAccountRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
 func (a *UsersAPIService) LinkAccountExecute(r UsersAPILinkAccountRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod = http.MethodPost
-		localVarPostBody   interface{}
-		formFiles          []formFile
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "UsersAPIService.LinkAccount")
@@ -614,7 +612,7 @@ func (a *UsersAPIService) LinkAccountExecute(r UsersAPILinkAccountRequest) (*htt
 }
 
 type UsersAPIListUsersRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService UsersAPI
 }
 
@@ -625,22 +623,22 @@ func (r UsersAPIListUsersRequest) Execute() (*http.Response, error) {
 /*
 ListUsers List all users
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return UsersAPIListUsersRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return UsersAPIListUsersRequest
 */
 func (a *UsersAPIService) ListUsers(ctx context.Context) UsersAPIListUsersRequest {
 	return UsersAPIListUsersRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
 func (a *UsersAPIService) ListUsersExecute(r UsersAPIListUsersRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod = http.MethodGet
-		localVarPostBody   interface{}
-		formFiles          []formFile
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "UsersAPIService.ListUsers")
@@ -700,9 +698,9 @@ func (a *UsersAPIService) ListUsersExecute(r UsersAPIListUsersRequest) (*http.Re
 }
 
 type UsersAPIRegenerateKeyPairRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService UsersAPI
-	id         string
+	id string
 }
 
 func (r UsersAPIRegenerateKeyPairRequest) Execute() (*http.Response, error) {
@@ -712,24 +710,24 @@ func (r UsersAPIRegenerateKeyPairRequest) Execute() (*http.Response, error) {
 /*
 RegenerateKeyPair Regenerate user key pair
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param id
-	@return UsersAPIRegenerateKeyPairRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param id
+ @return UsersAPIRegenerateKeyPairRequest
 */
 func (a *UsersAPIService) RegenerateKeyPair(ctx context.Context, id string) UsersAPIRegenerateKeyPairRequest {
 	return UsersAPIRegenerateKeyPairRequest{
 		ApiService: a,
-		ctx:        ctx,
-		id:         id,
+		ctx: ctx,
+		id: id,
 	}
 }
 
 // Execute executes the request
 func (a *UsersAPIService) RegenerateKeyPairExecute(r UsersAPIRegenerateKeyPairRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod = http.MethodPost
-		localVarPostBody   interface{}
-		formFiles          []formFile
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "UsersAPIService.RegenerateKeyPair")
@@ -790,9 +788,9 @@ func (a *UsersAPIService) RegenerateKeyPairExecute(r UsersAPIRegenerateKeyPairRe
 }
 
 type UsersAPIUnlinkAccountRequest struct {
-	ctx            context.Context
-	ApiService     UsersAPI
-	provider       string
+	ctx context.Context
+	ApiService UsersAPI
+	provider string
 	providerUserId string
 }
 
@@ -803,16 +801,16 @@ func (r UsersAPIUnlinkAccountRequest) Execute() (*http.Response, error) {
 /*
 UnlinkAccount Unlink account
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param provider
-	@param providerUserId
-	@return UsersAPIUnlinkAccountRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param provider
+ @param providerUserId
+ @return UsersAPIUnlinkAccountRequest
 */
 func (a *UsersAPIService) UnlinkAccount(ctx context.Context, provider string, providerUserId string) UsersAPIUnlinkAccountRequest {
 	return UsersAPIUnlinkAccountRequest{
-		ApiService:     a,
-		ctx:            ctx,
-		provider:       provider,
+		ApiService: a,
+		ctx: ctx,
+		provider: provider,
 		providerUserId: providerUserId,
 	}
 }
@@ -820,9 +818,9 @@ func (a *UsersAPIService) UnlinkAccount(ctx context.Context, provider string, pr
 // Execute executes the request
 func (a *UsersAPIService) UnlinkAccountExecute(r UsersAPIUnlinkAccountRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod = http.MethodDelete
-		localVarPostBody   interface{}
-		formFiles          []formFile
+		localVarHTTPMethod   = http.MethodDelete
+		localVarPostBody     interface{}
+		formFiles            []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "UsersAPIService.UnlinkAccount")

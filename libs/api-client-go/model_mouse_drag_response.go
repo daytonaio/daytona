@@ -12,8 +12,8 @@ Contact: support@daytona.com
 package daytonaapiclient
 
 import (
-	"bytes"
 	"encoding/json"
+	"bytes"
 	"fmt"
 )
 
@@ -22,12 +22,12 @@ var _ MappedNullable = &MouseDragResponse{}
 
 // MouseDragResponse struct for MouseDragResponse
 type MouseDragResponse struct {
-	Success bool                   `json:"success"`
-	Action  string                 `json:"action"`
-	From    map[string]interface{} `json:"from"`
-	To      map[string]interface{} `json:"to"`
-	ActualX float32                `json:"actual_x"`
-	ActualY float32                `json:"actual_y"`
+	Success bool `json:"success"`
+	Action string `json:"action"`
+	From map[string]interface{} `json:"from"`
+	To map[string]interface{} `json:"to"`
+	ActualX float32 `json:"actual_x"`
+	ActualY float32 `json:"actual_y"`
 }
 
 type _MouseDragResponse MouseDragResponse
@@ -200,7 +200,7 @@ func (o *MouseDragResponse) SetActualY(v float32) {
 }
 
 func (o MouseDragResponse) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
+	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -236,10 +236,10 @@ func (o *MouseDragResponse) UnmarshalJSON(data []byte) (err error) {
 	err = json.Unmarshal(data, &allProperties)
 
 	if err != nil {
-		return err
+		return err;
 	}
 
-	for _, requiredProperty := range requiredProperties {
+	for _, requiredProperty := range(requiredProperties) {
 		if _, exists := allProperties[requiredProperty]; !exists {
 			return fmt.Errorf("no value given for required property %v", requiredProperty)
 		}
@@ -295,3 +295,5 @@ func (v *NullableMouseDragResponse) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

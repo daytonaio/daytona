@@ -12,8 +12,8 @@ Contact: support@daytona.com
 package daytonaapiclient
 
 import (
-	"bytes"
 	"encoding/json"
+	"bytes"
 	"fmt"
 )
 
@@ -22,12 +22,12 @@ var _ MappedNullable = &CreateUser{}
 
 // CreateUser struct for CreateUser
 type CreateUser struct {
-	Id                        string                   `json:"id"`
-	Name                      string                   `json:"name"`
-	Email                     *string                  `json:"email,omitempty"`
+	Id string `json:"id"`
+	Name string `json:"name"`
+	Email *string `json:"email,omitempty"`
 	PersonalOrganizationQuota *CreateOrganizationQuota `json:"personalOrganizationQuota,omitempty"`
-	Role                      *string                  `json:"role,omitempty"`
-	EmailVerified             *bool                    `json:"emailVerified,omitempty"`
+	Role *string `json:"role,omitempty"`
+	EmailVerified *bool `json:"emailVerified,omitempty"`
 }
 
 type _CreateUser CreateUser
@@ -228,7 +228,7 @@ func (o *CreateUser) SetEmailVerified(v bool) {
 }
 
 func (o CreateUser) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
+	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -268,10 +268,10 @@ func (o *CreateUser) UnmarshalJSON(data []byte) (err error) {
 	err = json.Unmarshal(data, &allProperties)
 
 	if err != nil {
-		return err
+		return err;
 	}
 
-	for _, requiredProperty := range requiredProperties {
+	for _, requiredProperty := range(requiredProperties) {
 		if _, exists := allProperties[requiredProperty]; !exists {
 			return fmt.Errorf("no value given for required property %v", requiredProperty)
 		}
@@ -327,3 +327,5 @@ func (v *NullableCreateUser) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

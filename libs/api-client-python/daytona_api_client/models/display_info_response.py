@@ -23,12 +23,10 @@ from typing import Any, ClassVar, Dict, List, Union
 from typing import Optional, Set
 from typing_extensions import Self
 
-
 class DisplayInfoResponse(BaseModel):
     """
     DisplayInfoResponse
-    """  # noqa: E501
-
+    """ # noqa: E501
     primary_display: Dict[str, Any]
     displays: List[Dict[str, Any]]
     total_displays: Union[StrictFloat, StrictInt]
@@ -40,6 +38,7 @@ class DisplayInfoResponse(BaseModel):
         validate_assignment=True,
         protected_namespaces=(),
     )
+
 
     def to_str(self) -> str:
         """Returns the string representation of the model using alias"""
@@ -66,11 +65,9 @@ class DisplayInfoResponse(BaseModel):
           are ignored.
         * Fields in `self.additional_properties` are added to the output dict.
         """
-        excluded_fields: Set[str] = set(
-            [
-                "additional_properties",
-            ]
-        )
+        excluded_fields: Set[str] = set([
+            "additional_properties",
+        ])
 
         _dict = self.model_dump(
             by_alias=True,
@@ -93,16 +90,16 @@ class DisplayInfoResponse(BaseModel):
         if not isinstance(obj, dict):
             return cls.model_validate(obj)
 
-        _obj = cls.model_validate(
-            {
-                "primary_display": obj.get("primary_display"),
-                "displays": obj.get("displays"),
-                "total_displays": obj.get("total_displays"),
-            }
-        )
+        _obj = cls.model_validate({
+            "primary_display": obj.get("primary_display"),
+            "displays": obj.get("displays"),
+            "total_displays": obj.get("total_displays")
+        })
         # store additional fields in additional_properties
         for _key in obj.keys():
             if _key not in cls.__properties:
                 _obj.additional_properties[_key] = obj.get(_key)
 
         return _obj
+
+

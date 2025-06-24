@@ -23,12 +23,10 @@ from typing import Any, ClassVar, Dict, List, Optional, Union
 from typing import Optional, Set
 from typing_extensions import Self
 
-
 class ScreenshotResponse(BaseModel):
     """
     ScreenshotResponse
-    """  # noqa: E501
-
+    """ # noqa: E501
     screenshot: StrictStr
     width: Union[StrictFloat, StrictInt]
     height: Union[StrictFloat, StrictInt]
@@ -41,6 +39,7 @@ class ScreenshotResponse(BaseModel):
         validate_assignment=True,
         protected_namespaces=(),
     )
+
 
     def to_str(self) -> str:
         """Returns the string representation of the model using alias"""
@@ -67,11 +66,9 @@ class ScreenshotResponse(BaseModel):
           are ignored.
         * Fields in `self.additional_properties` are added to the output dict.
         """
-        excluded_fields: Set[str] = set(
-            [
-                "additional_properties",
-            ]
-        )
+        excluded_fields: Set[str] = set([
+            "additional_properties",
+        ])
 
         _dict = self.model_dump(
             by_alias=True,
@@ -94,17 +91,17 @@ class ScreenshotResponse(BaseModel):
         if not isinstance(obj, dict):
             return cls.model_validate(obj)
 
-        _obj = cls.model_validate(
-            {
-                "screenshot": obj.get("screenshot"),
-                "width": obj.get("width"),
-                "height": obj.get("height"),
-                "cursor_position": obj.get("cursor_position"),
-            }
-        )
+        _obj = cls.model_validate({
+            "screenshot": obj.get("screenshot"),
+            "width": obj.get("width"),
+            "height": obj.get("height"),
+            "cursor_position": obj.get("cursor_position")
+        })
         # store additional fields in additional_properties
         for _key in obj.keys():
             if _key not in cls.__properties:
                 _obj.additional_properties[_key] = obj.get(_key)
 
         return _obj
+
+
