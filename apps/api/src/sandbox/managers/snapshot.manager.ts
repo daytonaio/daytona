@@ -868,7 +868,7 @@ export class SnapshotManager {
             createdAt: LessThan(sevenDaysAgo),
           },
         ],
-        take: 1000,
+        take: 100,
       })
 
       if (oldSnapshots.length === 0) {
