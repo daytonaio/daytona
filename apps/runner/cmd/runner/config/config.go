@@ -24,6 +24,7 @@ type Config struct {
 	CacheRetentionDays int    `envconfig:"CACHE_RETENTION_DAYS"`
 	Environment        string `envconfig:"ENVIRONMENT"`
 	ContainerRuntime   string `envconfig:"CONTAINER_RUNTIME"`
+	ContainerNetwork   string `envconfig:"CONTAINER_NETWORK"`
 	LogFilePath        string `envconfig:"LOG_FILE_PATH"`
 	AWSRegion          string `envconfig:"AWS_REGION"`
 	AWSEndpointUrl     string `envconfig:"AWS_ENDPOINT_URL"`
@@ -70,6 +71,10 @@ func GetConfig() (*Config, error) {
 
 func GetContainerRuntime() string {
 	return config.ContainerRuntime
+}
+
+func GetContainerNetwork() string {
+	return config.ContainerNetwork
 }
 
 func GetEnvironment() string {
