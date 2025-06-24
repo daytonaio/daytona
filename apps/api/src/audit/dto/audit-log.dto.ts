@@ -51,7 +51,7 @@ export class AuditLogDto {
   createdAt: Date
 
   static fromAuditLog(auditLog: AuditLog): AuditLogDto {
-    const dto: AuditLogDto = {
+    return {
       id: auditLog.id,
       actorId: auditLog.actorId,
       actorEmail: auditLog.actorEmail,
@@ -67,7 +67,5 @@ export class AuditLogDto {
       metadata: auditLog.metadata,
       createdAt: auditLog.createdAt,
     }
-
-    return dto
   }
 }
