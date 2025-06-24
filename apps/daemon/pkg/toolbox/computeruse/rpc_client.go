@@ -60,81 +60,92 @@ func (m *ComputerUseRPCClient) GetProcessErrors(req *ProcessRequest) (string, er
 }
 
 // Screenshot methods
-func (m *ComputerUseRPCClient) TakeScreenshot(request *ComputerUseRequest) (*Empty, error) {
-	err := m.client.Call("Plugin.TakeScreenshot", request, new(Empty))
-	return new(Empty), err
+func (m *ComputerUseRPCClient) TakeScreenshot(request *ScreenshotRequest) (*ScreenshotResponse, error) {
+	var resp ScreenshotResponse
+	err := m.client.Call("Plugin.TakeScreenshot", request, &resp)
+	return &resp, err
 }
 
-func (m *ComputerUseRPCClient) TakeRegionScreenshot(request *ComputerUseRequest) (*Empty, error) {
-	err := m.client.Call("Plugin.TakeRegionScreenshot", request, new(Empty))
-	return new(Empty), err
+func (m *ComputerUseRPCClient) TakeRegionScreenshot(request *RegionScreenshotRequest) (*ScreenshotResponse, error) {
+	var resp ScreenshotResponse
+	err := m.client.Call("Plugin.TakeRegionScreenshot", request, &resp)
+	return &resp, err
 }
 
-func (m *ComputerUseRPCClient) TakeCompressedScreenshot(request *ComputerUseRequest) (*Empty, error) {
-	err := m.client.Call("Plugin.TakeCompressedScreenshot", request, new(Empty))
-	return new(Empty), err
+func (m *ComputerUseRPCClient) TakeCompressedScreenshot(request *CompressedScreenshotRequest) (*ScreenshotResponse, error) {
+	var resp ScreenshotResponse
+	err := m.client.Call("Plugin.TakeCompressedScreenshot", request, &resp)
+	return &resp, err
 }
 
-func (m *ComputerUseRPCClient) TakeCompressedRegionScreenshot(request *ComputerUseRequest) (*Empty, error) {
-	err := m.client.Call("Plugin.TakeCompressedRegionScreenshot", request, new(Empty))
-	return new(Empty), err
+func (m *ComputerUseRPCClient) TakeCompressedRegionScreenshot(request *CompressedRegionScreenshotRequest) (*ScreenshotResponse, error) {
+	var resp ScreenshotResponse
+	err := m.client.Call("Plugin.TakeCompressedRegionScreenshot", request, &resp)
+	return &resp, err
 }
 
 // Mouse control methods
-func (m *ComputerUseRPCClient) GetMousePosition(request *ComputerUseRequest) (*Empty, error) {
-	err := m.client.Call("Plugin.GetMousePosition", request, new(Empty))
-	return new(Empty), err
+func (m *ComputerUseRPCClient) GetMousePosition() (*MousePositionResponse, error) {
+	var resp MousePositionResponse
+	err := m.client.Call("Plugin.GetMousePosition", new(any), &resp)
+	return &resp, err
 }
 
-func (m *ComputerUseRPCClient) MoveMouse(request *ComputerUseRequest) (*Empty, error) {
-	err := m.client.Call("Plugin.MoveMouse", request, new(Empty))
-	return new(Empty), err
+func (m *ComputerUseRPCClient) MoveMouse(request *MoveMouseRequest) (*MousePositionResponse, error) {
+	var resp MousePositionResponse
+	err := m.client.Call("Plugin.MoveMouse", request, &resp)
+	return &resp, err
 }
 
-func (m *ComputerUseRPCClient) Click(request *ComputerUseRequest) (*Empty, error) {
-	err := m.client.Call("Plugin.Click", request, new(Empty))
-	return new(Empty), err
+func (m *ComputerUseRPCClient) Click(request *ClickRequest) (*MousePositionResponse, error) {
+	var resp MousePositionResponse
+	err := m.client.Call("Plugin.Click", request, &resp)
+	return &resp, err
 }
 
-func (m *ComputerUseRPCClient) Drag(request *ComputerUseRequest) (*Empty, error) {
-	err := m.client.Call("Plugin.Drag", request, new(Empty))
-	return new(Empty), err
+func (m *ComputerUseRPCClient) Drag(request *DragRequest) (*MousePositionResponse, error) {
+	var resp MousePositionResponse
+	err := m.client.Call("Plugin.Drag", request, &resp)
+	return &resp, err
 }
 
-func (m *ComputerUseRPCClient) Scroll(request *ComputerUseRequest) (*Empty, error) {
+func (m *ComputerUseRPCClient) Scroll(request *ScrollRequest) (*Empty, error) {
 	err := m.client.Call("Plugin.Scroll", request, new(Empty))
 	return new(Empty), err
 }
 
 // Keyboard control methods
-func (m *ComputerUseRPCClient) TypeText(request *ComputerUseRequest) (*Empty, error) {
+func (m *ComputerUseRPCClient) TypeText(request *TypeTextRequest) (*Empty, error) {
 	err := m.client.Call("Plugin.TypeText", request, new(Empty))
 	return new(Empty), err
 }
 
-func (m *ComputerUseRPCClient) PressKey(request *ComputerUseRequest) (*Empty, error) {
+func (m *ComputerUseRPCClient) PressKey(request *PressKeyRequest) (*Empty, error) {
 	err := m.client.Call("Plugin.PressKey", request, new(Empty))
 	return new(Empty), err
 }
 
-func (m *ComputerUseRPCClient) PressHotkey(request *ComputerUseRequest) (*Empty, error) {
+func (m *ComputerUseRPCClient) PressHotkey(request *PressHotkeyRequest) (*Empty, error) {
 	err := m.client.Call("Plugin.PressHotkey", request, new(Empty))
 	return new(Empty), err
 }
 
 // Display info methods
-func (m *ComputerUseRPCClient) GetDisplayInfo(request *ComputerUseRequest) (*Empty, error) {
-	err := m.client.Call("Plugin.GetDisplayInfo", request, new(Empty))
-	return new(Empty), err
+func (m *ComputerUseRPCClient) GetDisplayInfo() (*DisplayInfoResponse, error) {
+	var resp DisplayInfoResponse
+	err := m.client.Call("Plugin.GetDisplayInfo", new(any), &resp)
+	return &resp, err
 }
 
-func (m *ComputerUseRPCClient) GetWindows(request *ComputerUseRequest) (*Empty, error) {
-	err := m.client.Call("Plugin.GetWindows", request, new(Empty))
-	return new(Empty), err
+func (m *ComputerUseRPCClient) GetWindows() (*WindowsResponse, error) {
+	var resp WindowsResponse
+	err := m.client.Call("Plugin.GetWindows", new(any), &resp)
+	return &resp, err
 }
 
 // Status method
-func (m *ComputerUseRPCClient) GetStatus(request *ComputerUseRequest) (*Empty, error) {
-	err := m.client.Call("Plugin.GetStatus", request, new(Empty))
-	return new(Empty), err
+func (m *ComputerUseRPCClient) GetStatus() (*StatusResponse, error) {
+	var resp StatusResponse
+	err := m.client.Call("Plugin.GetStatus", new(any), &resp)
+	return &resp, err
 }

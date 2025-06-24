@@ -1,42 +1,29 @@
+//go:build !no_gui
+// +build !no_gui
+
 // Copyright 2025 Daytona Platforms Inc.
 // SPDX-License-Identifier: AGPL-3.0
 
 package computeruse
 
 import (
-	"net/http"
 	"time"
 
 	"github.com/daytonaio/daemon/pkg/toolbox/computeruse"
-	"github.com/gin-gonic/gin"
 	"github.com/go-vgo/robotgo"
 )
 
-func (u *ComputerUse) GetMousePosition(req *computeruse.ComputerUseRequest) (*computeruse.Empty, error) {
+func (u *ComputerUse) GetMousePosition() (*computeruse.MousePositionResponse, error) {
 	x, y := robotgo.Location()
 
-	req.RequestContext.JSON(http.StatusOK, gin.H{
-		"x": x,
-		"y": y,
-	})
-
-	return new(computeruse.Empty), nil
+	return &computeruse.MousePositionResponse{
+		X: x,
+		Y: y,
+	}, nil
 }
 
-func (u *ComputerUse) MoveMouse(req *computeruse.ComputerUseRequest) (*computeruse.Empty, error) {
-	var coords struct {
-		X int `json:"x"`
-		Y int `json:"y"`
-	}
-
-	if err := req.RequestContext.ShouldBindJSON(&coords); err != nil {
-		req.RequestContext.JSON(http.StatusBadRequest, gin.H{
-			"error": "Invalid coordinates",
-		})
-		return new(computeruse.Empty), nil
-	}
-
-	robotgo.MoveMouse(coords.X, coords.Y)
+func (u *ComputerUse) MoveMouse(req *computeruse.MoveMouseRequest) (*computeruse.MousePositionResponse, error) {
+	robotgo.MoveMouse(req.X, req.Y)
 
 	// Small delay to ensure movement completes
 	time.Sleep(50 * time.Millisecond)
@@ -44,63 +31,45 @@ func (u *ComputerUse) MoveMouse(req *computeruse.ComputerUseRequest) (*computeru
 	// Verify the mouse actually moved
 	actualX, actualY := robotgo.GetMousePos()
 
-	req.RequestContext.JSON(http.StatusOK, gin.H{
-		"success":  true,
-		"x":        coords.X,
-		"y":        coords.Y,
-		"actual_x": actualX,
-		"actual_y": actualY,
-	})
-
-	return new(computeruse.Empty), nil
+	return &computeruse.MousePositionResponse{
+		Success: true,
+		X:       req.X,
+		Y:       req.Y,
+		ActualX: actualX,
+		ActualY: actualY,
+	}, nil
 }
 
-func (u *ComputerUse) Click(req *computeruse.ComputerUseRequest) (*computeruse.Empty, error) {
-	var click struct {
-		X      int    `json:"x"`
-		Y      int    `json:"y"`
-		Button string `json:"button"` // left, right, middle
-		Double bool   `json:"double"`
-	}
-
-	if err := req.RequestContext.ShouldBindJSON(&click); err != nil {
-		req.RequestContext.JSON(http.StatusBadRequest, gin.H{
-			"error": "Invalid click parameters",
-		})
-		return new(computeruse.Empty), nil
-	}
-
+func (u *ComputerUse) Click(req *computeruse.ClickRequest) (*computeruse.MousePositionResponse, error) {
 	// Default to left button
-	if click.Button == "" {
-		click.Button = "left"
+	if req.Button == "" {
+		req.Button = "left"
 	}
 
 	// Move mouse to position first
-	robotgo.MoveMouse(click.X, click.Y)
+	robotgo.MoveMouse(req.X, req.Y)
 	time.Sleep(100 * time.Millisecond) // Wait for mouse to move
 
 	// Perform the click
-	if click.Double {
-		robotgo.Click(click.Button, true)
+	if req.Double {
+		robotgo.Click(req.Button, true)
 	} else {
-		robotgo.Click(click.Button, false)
+		robotgo.Click(req.Button, false)
 	}
 
 	// Verify position after click
 	actualX, actualY := robotgo.GetMousePos()
 
-	req.RequestContext.JSON(http.StatusOK, gin.H{
-		"success":  true,
-		"action":   "click",
-		"button":   click.Button,
-		"double":   click.Double,
-		"x":        click.X,
-		"y":        click.Y,
-		"actual_x": actualX,
-		"actual_y": actualY,
-	})
-
-	return new(computeruse.Empty), nil
+	return &computeruse.MousePositionResponse{
+		Success: true,
+		Action:  "click",
+		Button:  req.Button,
+		Double:  req.Double,
+		X:       req.X,
+		Y:       req.Y,
+		ActualX: actualX,
+		ActualY: actualY,
+	}, nil
 }
 
 // Helper function to move mouse smoothly in steps
@@ -115,110 +84,71 @@ func moveMouseSmoothly(startX, startY, endX, endY, steps int) {
 	}
 }
 
-func (u *ComputerUse) Drag(req *computeruse.ComputerUseRequest) (*computeruse.Empty, error) {
-	var drag struct {
-		StartX int    `json:"startX"`
-		StartY int    `json:"startY"`
-		EndX   int    `json:"endX"`
-		EndY   int    `json:"endY"`
-		Button string `json:"button"`
-	}
-
-	if err := req.RequestContext.ShouldBindJSON(&drag); err != nil {
-		req.RequestContext.JSON(http.StatusBadRequest, gin.H{
-			"error": "Invalid drag parameters",
-		})
-		return new(computeruse.Empty), nil
-	}
-
+func (u *ComputerUse) Drag(req *computeruse.DragRequest) (*computeruse.MousePositionResponse, error) {
 	// Default to left button
-	if drag.Button == "" {
-		drag.Button = "left"
+	if req.Button == "" {
+		req.Button = "left"
 	}
 
 	// Move to start position
-	robotgo.MoveMouse(drag.StartX, drag.StartY)
+	robotgo.MoveMouse(req.StartX, req.StartY)
 	time.Sleep(100 * time.Millisecond)
 
 	// Click to focus window before drag
-	robotgo.Click(drag.Button, false)
+	robotgo.Click(req.Button, false)
 	time.Sleep(100 * time.Millisecond)
 
 	// Ensure mouse button is up before starting
-	robotgo.MouseUp(drag.Button)
+	robotgo.MouseUp(req.Button)
 	time.Sleep(50 * time.Millisecond)
 
 	// Press and hold mouse button
-	robotgo.MouseDown(drag.Button)
+	robotgo.MouseDown(req.Button)
 	time.Sleep(300 * time.Millisecond) // Increased delay
 
 	// Move to end position while holding (smoothly)
-	moveMouseSmoothly(drag.StartX, drag.StartY, drag.EndX, drag.EndY, 20)
+	moveMouseSmoothly(req.StartX, req.StartY, req.EndX, req.EndY, 20)
 	time.Sleep(100 * time.Millisecond)
 
 	// Release mouse button
-	robotgo.MouseUp(drag.Button)
+	robotgo.MouseUp(req.Button)
 	time.Sleep(50 * time.Millisecond)
 
 	// Verify final position
 	actualX, actualY := robotgo.GetMousePos()
 
-	req.RequestContext.JSON(http.StatusOK, gin.H{
-		"success":  true,
-		"action":   "drag",
-		"from":     gin.H{"x": drag.StartX, "y": drag.StartY},
-		"to":       gin.H{"x": drag.EndX, "y": drag.EndY},
-		"actual_x": actualX,
-		"actual_y": actualY,
-	})
-
-	return new(computeruse.Empty), nil
+	return &computeruse.MousePositionResponse{
+		Success: true,
+		Action:  "drag",
+		From: &computeruse.MousePositionResponse{
+			X: req.StartX,
+			Y: req.StartY,
+		},
+		To: &computeruse.MousePositionResponse{
+			X: req.EndX,
+			Y: req.EndY,
+		},
+		ActualX: actualX,
+		ActualY: actualY,
+	}, nil
 }
 
-func (u *ComputerUse) Scroll(req *computeruse.ComputerUseRequest) (*computeruse.Empty, error) {
-	var scroll struct {
-		X         int    `json:"x"`
-		Y         int    `json:"y"`
-		Direction string `json:"direction"` // up, down
-		Amount    int    `json:"amount"`
-	}
-
-	if err := req.RequestContext.ShouldBindJSON(&scroll); err != nil {
-		req.RequestContext.JSON(http.StatusBadRequest, gin.H{
-			"error": "Invalid scroll parameters",
-		})
-		return new(computeruse.Empty), nil
-	}
-
+func (u *ComputerUse) Scroll(req *computeruse.ScrollRequest) (*computeruse.Empty, error) {
 	// Default amount if not specified
-	if scroll.Amount == 0 {
-		scroll.Amount = 3
+	if req.Amount == 0 {
+		req.Amount = 3
 	}
 
 	// Move mouse to scroll position
-	robotgo.MoveMouse(scroll.X, scroll.Y)
+	robotgo.MoveMouse(req.X, req.Y)
 	time.Sleep(50 * time.Millisecond)
 
 	// Perform scroll
-	if scroll.Direction == "up" {
-		robotgo.Scroll(0, scroll.Amount)
-	} else if scroll.Direction == "down" {
-		robotgo.Scroll(0, -scroll.Amount)
+	if req.Direction == "up" {
+		robotgo.ScrollSmooth(req.Amount, 0)
 	} else {
-		req.RequestContext.JSON(http.StatusBadRequest, gin.H{
-			"error": "Invalid scroll direction. Use 'up' or 'down'",
-		})
-		return new(computeruse.Empty), nil
+		robotgo.ScrollSmooth(-req.Amount, 0)
 	}
-
-	req.RequestContext.JSON(http.StatusOK, gin.H{
-		"success":   true,
-		"action":    "scroll",
-		"direction": scroll.Direction,
-		"amount":    scroll.Amount,
-		"x":         scroll.X,
-		"y":         scroll.Y,
-	})
 
 	return new(computeruse.Empty), nil
 }

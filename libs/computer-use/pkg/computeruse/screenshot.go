@@ -1,3 +1,6 @@
+//go:build !no_gui
+// +build !no_gui
+
 // Copyright 2025 Daytona Platforms Inc.
 // SPDX-License-Identifier: AGPL-3.0
 
@@ -10,10 +13,8 @@ import (
 	"image/color"
 	"image/draw"
 	"image/png"
-	"net/http"
 
 	"github.com/daytonaio/daemon/pkg/toolbox/computeruse"
-	"github.com/gin-gonic/gin"
 	"github.com/go-vgo/robotgo"
 	"github.com/kbinani/screenshot"
 )
@@ -74,18 +75,11 @@ func drawCursor(img *image.RGBA, x, y int) {
 	}
 }
 
-func (u *ComputerUse) TakeScreenshot(req *computeruse.ComputerUseRequest) (*computeruse.Empty, error) {
-	// Check if we should show cursor
-	showCursor := req.RequestContext.Query("show_cursor") == "true"
-
+func (u *ComputerUse) TakeScreenshot(req *computeruse.ScreenshotRequest) (*computeruse.ScreenshotResponse, error) {
 	bounds := screenshot.GetDisplayBounds(0)
 	img, err := screenshot.CaptureRect(bounds)
 	if err != nil {
-		req.RequestContext.JSON(http.StatusInternalServerError, gin.H{
-			"error":   "Failed to capture screenshot",
-			"details": err.Error(),
-		})
-		return new(computeruse.Empty), nil
+		return nil, err
 	}
 
 	// Convert to RGBA for drawing
@@ -94,7 +88,7 @@ func (u *ComputerUse) TakeScreenshot(req *computeruse.ComputerUseRequest) (*comp
 
 	// Draw cursor if requested
 	mouseX, mouseY := 0, 0
-	if showCursor {
+	if req.ShowCursor {
 		mouseX, mouseY = robotgo.GetMousePos()
 		drawCursor(rgbaImg, mouseX, mouseY)
 	}
@@ -102,56 +96,32 @@ func (u *ComputerUse) TakeScreenshot(req *computeruse.ComputerUseRequest) (*comp
 	// Convert to base64
 	var buf bytes.Buffer
 	if err := png.Encode(&buf, rgbaImg); err != nil {
-		req.RequestContext.JSON(http.StatusInternalServerError, gin.H{
-			"error": "Failed to encode image",
-		})
-		return new(computeruse.Empty), nil
+		return nil, err
 	}
 
 	base64Str := base64.StdEncoding.EncodeToString(buf.Bytes())
 
-	response := gin.H{
-		"screenshot": base64Str,
-		"width":      bounds.Dx(),
-		"height":     bounds.Dy(),
+	response := &computeruse.ScreenshotResponse{
+		Screenshot: base64Str,
+		Width:      bounds.Dx(),
+		Height:     bounds.Dy(),
 	}
 
-	if showCursor {
-		response["cursor_position"] = gin.H{
-			"x": mouseX,
-			"y": mouseY,
+	if req.ShowCursor {
+		response.CursorPosition = &computeruse.MousePositionResponse{
+			X: mouseX,
+			Y: mouseY,
 		}
 	}
 
-	req.RequestContext.JSON(http.StatusOK, response)
-
-	return new(computeruse.Empty), nil
+	return response, nil
 }
 
-func (u *ComputerUse) TakeRegionScreenshot(req *computeruse.ComputerUseRequest) (*computeruse.Empty, error) {
-	var region struct {
-		X      int `form:"x"`
-		Y      int `form:"y"`
-		Width  int `form:"width"`
-		Height int `form:"height"`
-	}
-
-	if err := req.RequestContext.ShouldBindQuery(&region); err != nil {
-		req.RequestContext.JSON(http.StatusBadRequest, gin.H{
-			"error": "Invalid parameters",
-		})
-		return new(computeruse.Empty), nil
-	}
-
-	showCursor := req.RequestContext.Query("show_cursor") == "true"
-
-	rect := image.Rect(region.X, region.Y, region.X+region.Width, region.Y+region.Height)
+func (u *ComputerUse) TakeRegionScreenshot(req *computeruse.RegionScreenshotRequest) (*computeruse.ScreenshotResponse, error) {
+	rect := image.Rect(req.X, req.Y, req.X+req.Width, req.Y+req.Height)
 	img, err := screenshot.CaptureRect(rect)
 	if err != nil {
-		req.RequestContext.JSON(http.StatusInternalServerError, gin.H{
-			"error": "Failed to capture region",
-		})
-		return new(computeruse.Empty), nil
+		return nil, err
 	}
 
 	// Convert to RGBA for drawing
@@ -160,41 +130,38 @@ func (u *ComputerUse) TakeRegionScreenshot(req *computeruse.ComputerUseRequest) 
 
 	// Draw cursor if requested and it's within the region
 	mouseX, mouseY := 0, 0
-	if showCursor {
+	if req.ShowCursor {
 		absoluteMouseX, absoluteMouseY := robotgo.GetMousePos()
 		// Convert to relative coordinates within the region
-		mouseX = absoluteMouseX - region.X
-		mouseY = absoluteMouseY - region.Y
+		mouseX = absoluteMouseX - req.X
+		mouseY = absoluteMouseY - req.Y
 
 		// Only draw if cursor is within the region
-		if mouseX >= 0 && mouseX < region.Width && mouseY >= 0 && mouseY < region.Height {
+		if mouseX >= 0 && mouseX < req.Width && mouseY >= 0 && mouseY < req.Height {
 			drawCursor(rgbaImg, mouseX, mouseY)
 		}
 	}
 
 	var buf bytes.Buffer
 	if err := png.Encode(&buf, rgbaImg); err != nil {
-		req.RequestContext.JSON(http.StatusInternalServerError, gin.H{
-			"error": "Failed to encode image",
-		})
-		return new(computeruse.Empty), nil
+		return nil, err
 	}
 
 	base64Str := base64.StdEncoding.EncodeToString(buf.Bytes())
 
-	response := gin.H{
-		"screenshot": base64Str,
-		"region":     region,
+	response := &computeruse.ScreenshotResponse{
+		Screenshot: base64Str,
+		Width:      req.Width,
+		Height:     req.Height,
+		Region:     req,
 	}
 
-	if showCursor {
-		response["cursor_position"] = gin.H{
-			"x": mouseX + region.X,
-			"y": mouseY + region.Y,
+	if req.ShowCursor {
+		response.CursorPosition = &computeruse.MousePositionResponse{
+			X: mouseX + req.X,
+			Y: mouseY + req.Y,
 		}
 	}
 
-	req.RequestContext.JSON(http.StatusOK, response)
-
-	return new(computeruse.Empty), nil
+	return response, nil
 }

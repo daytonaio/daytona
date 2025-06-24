@@ -65,81 +65,125 @@ func (m *ComputerUseRPCServer) GetProcessErrors(arg *ProcessRequest, resp *strin
 }
 
 // Screenshot methods
-func (m *ComputerUseRPCServer) TakeScreenshot(arg *ComputerUseRequest, resp *Empty) error {
-	_, err := m.Impl.TakeScreenshot(arg)
-	return err
+func (m *ComputerUseRPCServer) TakeScreenshot(arg *ScreenshotRequest, resp *ScreenshotResponse) error {
+	response, err := m.Impl.TakeScreenshot(arg)
+	if err != nil {
+		return err
+	}
+	*resp = *response
+	return nil
 }
 
-func (m *ComputerUseRPCServer) TakeRegionScreenshot(arg *ComputerUseRequest, resp *Empty) error {
-	_, err := m.Impl.TakeRegionScreenshot(arg)
-	return err
+func (m *ComputerUseRPCServer) TakeRegionScreenshot(arg *RegionScreenshotRequest, resp *ScreenshotResponse) error {
+	response, err := m.Impl.TakeRegionScreenshot(arg)
+	if err != nil {
+		return err
+	}
+	*resp = *response
+	return nil
 }
 
-func (m *ComputerUseRPCServer) TakeCompressedScreenshot(arg *ComputerUseRequest, resp *Empty) error {
-	_, err := m.Impl.TakeCompressedScreenshot(arg)
-	return err
+func (m *ComputerUseRPCServer) TakeCompressedScreenshot(arg *CompressedScreenshotRequest, resp *ScreenshotResponse) error {
+	response, err := m.Impl.TakeCompressedScreenshot(arg)
+	if err != nil {
+		return err
+	}
+	*resp = *response
+	return nil
 }
 
-func (m *ComputerUseRPCServer) TakeCompressedRegionScreenshot(arg *ComputerUseRequest, resp *Empty) error {
-	_, err := m.Impl.TakeCompressedRegionScreenshot(arg)
-	return err
+func (m *ComputerUseRPCServer) TakeCompressedRegionScreenshot(arg *CompressedRegionScreenshotRequest, resp *ScreenshotResponse) error {
+	response, err := m.Impl.TakeCompressedRegionScreenshot(arg)
+	if err != nil {
+		return err
+	}
+	*resp = *response
+	return nil
 }
 
 // Mouse control methods
-func (m *ComputerUseRPCServer) GetMousePosition(arg *ComputerUseRequest, resp *Empty) error {
-	_, err := m.Impl.GetMousePosition(arg)
-	return err
+func (m *ComputerUseRPCServer) GetMousePosition(arg any, resp *MousePositionResponse) error {
+	response, err := m.Impl.GetMousePosition()
+	if err != nil {
+		return err
+	}
+	*resp = *response
+	return nil
 }
 
-func (m *ComputerUseRPCServer) MoveMouse(arg *ComputerUseRequest, resp *Empty) error {
-	_, err := m.Impl.MoveMouse(arg)
-	return err
+func (m *ComputerUseRPCServer) MoveMouse(arg *MoveMouseRequest, resp *MousePositionResponse) error {
+	response, err := m.Impl.MoveMouse(arg)
+	if err != nil {
+		return err
+	}
+	*resp = *response
+	return nil
 }
 
-func (m *ComputerUseRPCServer) Click(arg *ComputerUseRequest, resp *Empty) error {
-	_, err := m.Impl.Click(arg)
-	return err
+func (m *ComputerUseRPCServer) Click(arg *ClickRequest, resp *MousePositionResponse) error {
+	response, err := m.Impl.Click(arg)
+	if err != nil {
+		return err
+	}
+	*resp = *response
+	return nil
 }
 
-func (m *ComputerUseRPCServer) Drag(arg *ComputerUseRequest, resp *Empty) error {
-	_, err := m.Impl.Drag(arg)
-	return err
+func (m *ComputerUseRPCServer) Drag(arg *DragRequest, resp *MousePositionResponse) error {
+	response, err := m.Impl.Drag(arg)
+	if err != nil {
+		return err
+	}
+	*resp = *response
+	return nil
 }
 
-func (m *ComputerUseRPCServer) Scroll(arg *ComputerUseRequest, resp *Empty) error {
+func (m *ComputerUseRPCServer) Scroll(arg *ScrollRequest, resp *Empty) error {
 	_, err := m.Impl.Scroll(arg)
 	return err
 }
 
 // Keyboard control methods
-func (m *ComputerUseRPCServer) TypeText(arg *ComputerUseRequest, resp *Empty) error {
+func (m *ComputerUseRPCServer) TypeText(arg *TypeTextRequest, resp *Empty) error {
 	_, err := m.Impl.TypeText(arg)
 	return err
 }
 
-func (m *ComputerUseRPCServer) PressKey(arg *ComputerUseRequest, resp *Empty) error {
+func (m *ComputerUseRPCServer) PressKey(arg *PressKeyRequest, resp *Empty) error {
 	_, err := m.Impl.PressKey(arg)
 	return err
 }
 
-func (m *ComputerUseRPCServer) PressHotkey(arg *ComputerUseRequest, resp *Empty) error {
+func (m *ComputerUseRPCServer) PressHotkey(arg *PressHotkeyRequest, resp *Empty) error {
 	_, err := m.Impl.PressHotkey(arg)
 	return err
 }
 
 // Display info methods
-func (m *ComputerUseRPCServer) GetDisplayInfo(arg *ComputerUseRequest, resp *Empty) error {
-	_, err := m.Impl.GetDisplayInfo(arg)
-	return err
+func (m *ComputerUseRPCServer) GetDisplayInfo(arg any, resp *DisplayInfoResponse) error {
+	response, err := m.Impl.GetDisplayInfo()
+	if err != nil {
+		return err
+	}
+	*resp = *response
+	return nil
 }
 
-func (m *ComputerUseRPCServer) GetWindows(arg *ComputerUseRequest, resp *Empty) error {
-	_, err := m.Impl.GetWindows(arg)
-	return err
+func (m *ComputerUseRPCServer) GetWindows(arg any, resp *WindowsResponse) error {
+	response, err := m.Impl.GetWindows()
+	if err != nil {
+		return err
+	}
+	*resp = *response
+	return nil
 }
 
 // Status method
-func (m *ComputerUseRPCServer) GetStatus(arg *ComputerUseRequest, resp *Empty) error {
-	_, err := m.Impl.GetStatus(arg)
-	return err
+func (m *ComputerUseRPCServer) GetStatus(arg any, resp *StatusResponse) error {
+	response, err := m.Impl.GetStatus()
+	if err != nil {
+		return err
+	}
+	*resp = *response
+	return nil
 }

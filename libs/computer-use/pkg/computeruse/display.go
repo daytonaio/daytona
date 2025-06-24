@@ -1,3 +1,6 @@
+//go:build !no_gui
+// +build !no_gui
+
 // Copyright 2025 Daytona Platforms Inc.
 // SPDX-License-Identifier: AGPL-3.0
 
@@ -10,11 +13,8 @@ import (
 	"image/draw"
 	"image/jpeg"
 	"image/png"
-	"net/http"
-	"strconv"
 
 	"github.com/daytonaio/daemon/pkg/toolbox/computeruse"
-	"github.com/gin-gonic/gin"
 	"github.com/go-vgo/robotgo"
 	"github.com/kbinani/screenshot"
 )
@@ -24,40 +24,6 @@ type ImageCompressionParams struct {
 	Format  string  `form:"format" json:"format"`   // "png" or "jpeg"
 	Quality int     `form:"quality" json:"quality"` // 1-100 for JPEG quality
 	Scale   float64 `form:"scale" json:"scale"`     // 0.1-1.0 for scaling down
-}
-
-// getCompressionParams extracts and validates compression parameters from query
-func getCompressionParams(c *gin.Context) ImageCompressionParams {
-	params := ImageCompressionParams{
-		Format:  "png",
-		Quality: 85,
-		Scale:   1.0,
-	}
-
-	// Parse format
-	if format := c.Query("format"); format == "jpeg" || format == "jpg" {
-		params.Format = "jpeg"
-	}
-
-	// Parse quality (for JPEG)
-	if qualityStr := c.Query("quality"); qualityStr != "" {
-		if quality, err := strconv.Atoi(qualityStr); err == nil {
-			if quality >= 1 && quality <= 100 {
-				params.Quality = quality
-			}
-		}
-	}
-
-	// Parse scale
-	if scaleStr := c.Query("scale"); scaleStr != "" {
-		if scale, err := strconv.ParseFloat(scaleStr, 64); err == nil {
-			if scale >= 0.1 && scale <= 1.0 {
-				params.Scale = scale
-			}
-		}
-	}
-
-	return params
 }
 
 // encodeImageWithCompression encodes an image with the specified compression settings
@@ -96,18 +62,17 @@ func encodeImageWithCompression(img image.Image, params ImageCompressionParams) 
 }
 
 // TakeCompressedScreenshot takes a screenshot with compression options
-func (u *ComputerUse) TakeCompressedScreenshot(req *computeruse.ComputerUseRequest) (*computeruse.Empty, error) {
-	showCursor := req.RequestContext.Query("show_cursor") == "true"
-	params := getCompressionParams(req.RequestContext)
+func (u *ComputerUse) TakeCompressedScreenshot(req *computeruse.CompressedScreenshotRequest) (*computeruse.ScreenshotResponse, error) {
+	params := ImageCompressionParams{
+		Format:  req.Format,
+		Quality: req.Quality,
+		Scale:   req.Scale,
+	}
 
 	bounds := screenshot.GetDisplayBounds(0)
 	img, err := screenshot.CaptureRect(bounds)
 	if err != nil {
-		req.RequestContext.JSON(http.StatusInternalServerError, gin.H{
-			"error":   "Failed to capture screenshot",
-			"details": err.Error(),
-		})
-		return new(computeruse.Empty), nil
+		return nil, err
 	}
 
 	// Convert to RGBA for drawing
@@ -116,7 +81,7 @@ func (u *ComputerUse) TakeCompressedScreenshot(req *computeruse.ComputerUseReque
 
 	// Draw cursor if requested
 	mouseX, mouseY := 0, 0
-	if showCursor {
+	if req.ShowCursor {
 		mouseX, mouseY = robotgo.GetMousePos()
 		drawCursor(rgbaImg, mouseX, mouseY)
 	}
@@ -124,61 +89,43 @@ func (u *ComputerUse) TakeCompressedScreenshot(req *computeruse.ComputerUseReque
 	// Encode with compression
 	imageData, err := encodeImageWithCompression(rgbaImg, params)
 	if err != nil {
-		req.RequestContext.JSON(http.StatusInternalServerError, gin.H{
-			"error": "Failed to encode image",
-		})
-		return new(computeruse.Empty), nil
+		return nil, err
 	}
 
 	base64Str := base64.StdEncoding.EncodeToString(imageData)
 
-	response := gin.H{
-		"screenshot": base64Str,
-		"width":      int(float64(bounds.Dx()) * params.Scale),
-		"height":     int(float64(bounds.Dy()) * params.Scale),
-		"format":     params.Format,
-		"quality":    params.Quality,
-		"scale":      params.Scale,
-		"size_bytes": len(imageData),
+	response := &computeruse.ScreenshotResponse{
+		Screenshot: base64Str,
+		Width:      int(float64(bounds.Dx()) * params.Scale),
+		Height:     int(float64(bounds.Dy()) * params.Scale),
+		Format:     params.Format,
+		Quality:    params.Quality,
+		Scale:      params.Scale,
+		SizeBytes:  len(imageData),
 	}
 
-	if showCursor {
-		response["cursor_position"] = gin.H{
-			"x": int(float64(mouseX) * params.Scale),
-			"y": int(float64(mouseY) * params.Scale),
+	if req.ShowCursor {
+		response.CursorPosition = &computeruse.MousePositionResponse{
+			X: int(float64(mouseX) * params.Scale),
+			Y: int(float64(mouseY) * params.Scale),
 		}
 	}
 
-	req.RequestContext.JSON(http.StatusOK, response)
-	return new(computeruse.Empty), nil
+	return response, nil
 }
 
 // TakeCompressedRegionScreenshot takes a region screenshot with compression options
-func (u *ComputerUse) TakeCompressedRegionScreenshot(req *computeruse.ComputerUseRequest) (*computeruse.Empty, error) {
-	var region struct {
-		X      int `form:"x"`
-		Y      int `form:"y"`
-		Width  int `form:"width"`
-		Height int `form:"height"`
+func (u *ComputerUse) TakeCompressedRegionScreenshot(req *computeruse.CompressedRegionScreenshotRequest) (*computeruse.ScreenshotResponse, error) {
+	params := ImageCompressionParams{
+		Format:  req.Format,
+		Quality: req.Quality,
+		Scale:   req.Scale,
 	}
 
-	if err := req.RequestContext.ShouldBindQuery(&region); err != nil {
-		req.RequestContext.JSON(http.StatusBadRequest, gin.H{
-			"error": "Invalid parameters",
-		})
-		return new(computeruse.Empty), nil
-	}
-
-	showCursor := req.RequestContext.Query("show_cursor") == "true"
-	params := getCompressionParams(req.RequestContext)
-
-	rect := image.Rect(region.X, region.Y, region.X+region.Width, region.Y+region.Height)
+	rect := image.Rect(req.X, req.Y, req.X+req.Width, req.Y+req.Height)
 	img, err := screenshot.CaptureRect(rect)
 	if err != nil {
-		req.RequestContext.JSON(http.StatusInternalServerError, gin.H{
-			"error": "Failed to capture region",
-		})
-		return new(computeruse.Empty), nil
+		return nil, err
 	}
 
 	// Convert to RGBA for drawing
@@ -187,12 +134,12 @@ func (u *ComputerUse) TakeCompressedRegionScreenshot(req *computeruse.ComputerUs
 
 	// Draw cursor if requested and it's within the region
 	mouseX, mouseY := 0, 0
-	if showCursor {
+	if req.ShowCursor {
 		absoluteMouseX, absoluteMouseY := robotgo.GetMousePos()
-		mouseX = absoluteMouseX - region.X
-		mouseY = absoluteMouseY - region.Y
+		mouseX = absoluteMouseX - req.X
+		mouseY = absoluteMouseY - req.Y
 
-		if mouseX >= 0 && mouseX < region.Width && mouseY >= 0 && mouseY < region.Height {
+		if mouseX >= 0 && mouseX < req.Width && mouseY >= 0 && mouseY < req.Height {
 			drawCursor(rgbaImg, mouseX, mouseY)
 		}
 	}
@@ -200,93 +147,89 @@ func (u *ComputerUse) TakeCompressedRegionScreenshot(req *computeruse.ComputerUs
 	// Encode with compression
 	imageData, err := encodeImageWithCompression(rgbaImg, params)
 	if err != nil {
-		req.RequestContext.JSON(http.StatusInternalServerError, gin.H{
-			"error": "Failed to encode image",
-		})
-		return new(computeruse.Empty), nil
+		return nil, err
 	}
 
 	base64Str := base64.StdEncoding.EncodeToString(imageData)
 
-	response := gin.H{
-		"screenshot": base64Str,
-		"region": gin.H{
-			"x":      region.X,
-			"y":      region.Y,
-			"width":  int(float64(region.Width) * params.Scale),
-			"height": int(float64(region.Height) * params.Scale),
-		},
-		"format":     params.Format,
-		"quality":    params.Quality,
-		"scale":      params.Scale,
-		"size_bytes": len(imageData),
+	region := &computeruse.RegionScreenshotRequest{
+		X:          req.X,
+		Y:          req.Y,
+		Width:      int(float64(req.Width) * params.Scale),
+		Height:     int(float64(req.Height) * params.Scale),
+		ShowCursor: req.ShowCursor,
 	}
 
-	if showCursor {
-		response["cursor_position"] = gin.H{
-			"x": region.X + int(float64(mouseX)*params.Scale),
-			"y": region.Y + int(float64(mouseY)*params.Scale),
+	response := &computeruse.ScreenshotResponse{
+		Screenshot: base64Str,
+		Width:      int(float64(req.Width) * params.Scale),
+		Height:     int(float64(req.Height) * params.Scale),
+		Region:     region,
+		Format:     params.Format,
+		Quality:    params.Quality,
+		Scale:      params.Scale,
+		SizeBytes:  len(imageData),
+	}
+
+	if req.ShowCursor {
+		response.CursorPosition = &computeruse.MousePositionResponse{
+			X: req.X + int(float64(mouseX)*params.Scale),
+			Y: req.Y + int(float64(mouseY)*params.Scale),
 		}
 	}
 
-	req.RequestContext.JSON(http.StatusOK, response)
-	return new(computeruse.Empty), nil
+	return response, nil
 }
 
-func (u *ComputerUse) GetDisplayInfo(req *computeruse.ComputerUseRequest) (*computeruse.Empty, error) {
+func (u *ComputerUse) GetDisplayInfo() (*computeruse.DisplayInfoResponse, error) {
 	n := screenshot.NumActiveDisplays()
-	displays := make([]gin.H, n)
+	displays := make([]computeruse.DisplayInfo, n)
 
 	for i := 0; i < n; i++ {
 		bounds := screenshot.GetDisplayBounds(i)
-		displays[i] = gin.H{
-			"id":     i,
-			"x":      bounds.Min.X,
-			"y":      bounds.Min.Y,
-			"width":  bounds.Dx(),
-			"height": bounds.Dy(),
+		displays[i] = computeruse.DisplayInfo{
+			ID:       i,
+			X:        bounds.Min.X,
+			Y:        bounds.Min.Y,
+			Width:    bounds.Dx(),
+			Height:   bounds.Dy(),
+			IsActive: true, // Assuming all detected displays are active
 		}
 	}
 
-	sx, sy := robotgo.GetScreenSize()
-
-	req.RequestContext.JSON(http.StatusOK, gin.H{
-		"primary_display": gin.H{
-			"width":  sx,
-			"height": sy,
-		},
-		"displays":       displays,
-		"total_displays": n,
-	})
-	return new(computeruse.Empty), nil
+	return &computeruse.DisplayInfoResponse{
+		Displays: displays,
+	}, nil
 }
 
-func (u *ComputerUse) GetWindows(req *computeruse.ComputerUseRequest) (*computeruse.Empty, error) {
+func (u *ComputerUse) GetWindows() (*computeruse.WindowsResponse, error) {
 	// This is a simplified version - robotgo's window functions
 	// might need additional setup depending on the platform
 
 	titles, err := robotgo.FindIds("")
 	if err != nil {
-		req.RequestContext.JSON(http.StatusInternalServerError, gin.H{
-			"error": "Failed to get windows",
-		})
-		return new(computeruse.Empty), nil
+		return nil, err
 	}
 
-	windows := make([]gin.H, 0)
+	windows := make([]computeruse.WindowInfo, 0)
 	for _, id := range titles {
 		title := robotgo.GetTitle(id)
 		if title != "" {
-			windows = append(windows, gin.H{
-				"id":    id,
-				"title": title,
+			// Get window position and size (this might need platform-specific implementation)
+			// For now, we'll use placeholder values
+			windows = append(windows, computeruse.WindowInfo{
+				ID:       id,
+				Title:    title,
+				X:        0,     // Would need platform-specific implementation
+				Y:        0,     // Would need platform-specific implementation
+				Width:    0,     // Would need platform-specific implementation
+				Height:   0,     // Would need platform-specific implementation
+				IsActive: false, // Would need platform-specific implementation
 			})
 		}
 	}
 
-	req.RequestContext.JSON(http.StatusOK, gin.H{
-		"windows": windows,
-		"count":   len(windows),
-	})
-	return new(computeruse.Empty), nil
+	return &computeruse.WindowsResponse{
+		Windows: windows,
+	}, nil
 }
