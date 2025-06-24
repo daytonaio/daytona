@@ -59,10 +59,10 @@ export class ObjectStorage {
    *
    * @param {string} path - The path to the file or directory to upload.
    * @param {string} organizationId - The organization ID to use for the upload.
-   * @param {string} [archiveBasePath] - The base path to use for the archive.
+   * @param {string} archiveBasePath - The base path to use for the archive.
    * @returns {Promise<string>} The hash of the uploaded file or directory.
    */
-  async upload(path: string, organizationId: string, archiveBasePath?: string): Promise<string> {
+  async upload(path: string, organizationId: string, archiveBasePath: string): Promise<string> {
     if (!fs.existsSync(path)) {
       const errMsg = `Path does not exist: ${path}`
       throw new DaytonaError(errMsg)
@@ -90,16 +90,13 @@ export class ObjectStorage {
    * Compute a hash for a file or directory.
    *
    * @param {string} pathStr - The path to the file or directory to hash.
-   * @param {string} [archiveBasePath] - The base path to use for the archive.
+   * @param {string} archiveBasePath - The base path to use for the archive.
    * @returns {Promise<string>} The hash of the file or directory.
    */
-  private async computeHashForPathMd5(pathStr: string, archiveBasePath?: string): Promise<string> {
+  private async computeHashForPathMd5(pathStr: string, archiveBasePath: string): Promise<string> {
     const md5Hasher = crypto.createHash('md5')
     const absPathStr = path.resolve(pathStr)
 
-    if (!archiveBasePath) {
-      archiveBasePath = ObjectStorage.computeArchiveBasePath(pathStr)
-    }
     md5Hasher.update(archiveBasePath)
 
     if (fs.statSync(absPathStr).isFile()) {
@@ -186,20 +183,31 @@ export class ObjectStorage {
    *
    * @param {string} s3Key - The key to use for the uploaded file.
    * @param {string} sourcePath - The path to the file or directory to upload.
-   * @param {string} [archiveBasePath] - The base path to use for the archive.
+   * @param {string} archiveBasePath - The base path to use for the archive.
    */
-  private async uploadAsTar(s3Key: string, sourcePath: string, archiveBasePath?: string) {
+  private async uploadAsTar(s3Key: string, sourcePath: string, archiveBasePath: string) {
     sourcePath = path.resolve(sourcePath)
-    archiveBasePath ??= ObjectStorage.computeArchiveBasePath(sourcePath)
+
+    const normalizedSourcePath = path.normalize(sourcePath)
+    const normalizedArchiveBasePath = path.normalize(archiveBasePath)
+
+    let basePrefix: string
+
+    if (normalizedArchiveBasePath === '.') {
+      // When archiveBasePath is empty (normalized to '.'), use the normalizedSourcePath as cwd and the '.' as target
+      basePrefix = normalizedSourcePath
+    } else {
+      // Normal case: extract the base prefix by removing archiveBasePath from the end
+      basePrefix = normalizedSourcePath.slice(0, normalizedSourcePath.length - normalizedArchiveBasePath.length)
+    }
 
     const tarStream = tar.create(
       {
-        cwd: path.dirname(sourcePath),
+        cwd: basePrefix,
         portable: true,
         gzip: false,
-        prefix: archiveBasePath,
       },
-      [sourcePath],
+      [normalizedArchiveBasePath],
     )
 
     const pass = new PassThrough()
@@ -220,28 +228,5 @@ export class ObjectStorage {
   private extractAwsRegion(endpoint: string): string | undefined {
     const match = endpoint.match(/s3[.-]([a-z0-9-]+)\.amazonaws\.com/)
     return match?.[1]
-  }
-
-  /**
-   * Compute the base path for an archive. Returns normalized path without the root (drive letter or leading slash).
-   *
-   * @param {string} pathStr - The path to compute the base path for.
-   * @returns {string} The base path for the archive.
-   */
-  static computeArchiveBasePath(pathStr: string): string {
-    // Normalize the path to remove redundant segments
-    pathStr = path.normalize(pathStr)
-
-    // On Windows, path.parse().root includes the drive letter (e.g., 'C:\\')
-    const parsedPath = path.parse(pathStr)
-    const root = parsedPath.root
-
-    // Remove the root (drive letter or leading slash) from the path
-    let pathWithoutRoot = pathStr.slice(root.length)
-
-    // Remove any leading slashes or backslashes
-    pathWithoutRoot = pathWithoutRoot.replace(/^[/\\]+/, '')
-
-    return pathWithoutRoot
   }
 }
