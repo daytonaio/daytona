@@ -1723,6 +1723,36 @@ paths:
       summary: Get runner by sandbox ID
       tags:
         - runners
+  /runners/by-snapshot:
+    get:
+      operationId: getRunnersBySnapshotInternalName
+      parameters:
+        - description: Internal name of the snapshot
+          explode: true
+          in: query
+          name: internalName
+          required: true
+          schema:
+            type: string
+          style: form
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/RunnerSnapshotDto'
+                type: array
+          description: Runners found for the snapshot
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Get runners by snapshot internal name
+      tags:
+        - runners
   /toolbox/{sandboxId}/toolbox/project-dir:
     get:
       operationId: getProjectDir
@@ -6191,6 +6221,29 @@ components:
         - unschedulable
         - updatedAt
         - used
+      type: object
+    RunnerSnapshotDto:
+      example:
+        runnerDomain: runner.example.com
+        runnerId: 123e4567-e89b-12d3-a456-426614174000
+        runnerSnapshotId: 123e4567-e89b-12d3-a456-426614174000
+      properties:
+        runnerSnapshotId:
+          description: Runner snapshot ID
+          example: 123e4567-e89b-12d3-a456-426614174000
+          type: string
+        runnerId:
+          description: Runner ID
+          example: 123e4567-e89b-12d3-a456-426614174000
+          type: string
+        runnerDomain:
+          description: Runner domain
+          example: runner.example.com
+          type: string
+      required:
+        - runnerDomain
+        - runnerId
+        - runnerSnapshotId
       type: object
     ProjectDirResponse:
       example:
