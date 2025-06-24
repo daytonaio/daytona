@@ -135,6 +135,12 @@ export class SnapshotManager {
       runnerSnapshots.map((snapshotRunner) => {
         return this.syncRunnerSnapshotState(snapshotRunner).catch((err) => {
           if (err.code !== 'ECONNRESET') {
+            if (err instanceof RunnerNotReadyError) {
+              this.logger.debug(
+                `Runner ${snapshotRunner.runnerId} is not ready while trying to sync snapshot runner ${snapshotRunner.id}: ${err}`,
+              )
+              return
+            }
             this.logger.error(`Error syncing runner snapshot state ${snapshotRunner.id}: ${fromAxiosError(err)}`)
             this.snapshotRunnerRepository.update(snapshotRunner.id, {
               state: SnapshotRunnerState.ERROR,
