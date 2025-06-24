@@ -5,7 +5,7 @@
 
 import { ForbiddenException, Injectable, Logger, NotFoundException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { Not, Repository, LessThan, In, JsonContains, FindOptionsWhere } from 'typeorm'
+import { Not, Repository, LessThan, In, JsonContains, FindOptionsWhere, Or } from 'typeorm'
 import { Sandbox } from '../entities/sandbox.entity'
 import { CreateSandboxDto } from '../dto/create-sandbox.dto'
 import { SandboxState } from '../enums/sandbox-state.enum'
@@ -225,23 +225,33 @@ export class SandboxService {
     }
 
     const snapshotFilter: FindOptionsWhere<Snapshot>[] = [
-      { organizationId: organization.id, name: snapshotIdOrName, state: SnapshotState.ACTIVE },
-      { general: true, name: snapshotIdOrName, state: SnapshotState.ACTIVE },
+      { organizationId: organization.id, name: snapshotIdOrName },
+      { general: true, name: snapshotIdOrName },
     ]
 
     if (isValidUuid(snapshotIdOrName)) {
       snapshotFilter.push(
-        { organizationId: organization.id, id: snapshotIdOrName, state: SnapshotState.ACTIVE },
-        { general: true, id: snapshotIdOrName, state: SnapshotState.ACTIVE },
+        { organizationId: organization.id, id: snapshotIdOrName },
+        { general: true, id: snapshotIdOrName },
       )
     }
 
-    const snapshot = await this.snapshotRepository.findOne({
+    const snapshots = await this.snapshotRepository.find({
       where: snapshotFilter,
     })
 
-    if (!snapshot) {
+    if (snapshots.length === 0) {
       throw new BadRequestError(`Snapshot ${snapshotIdOrName} not found. Did you add it through the Daytona Dashboard?`)
+    }
+
+    let snapshot = snapshots.find((s) => s.state === SnapshotState.ACTIVE)
+
+    if (!snapshot) {
+      snapshot = snapshots[0]
+    }
+
+    if (snapshot.state !== SnapshotState.ACTIVE) {
+      throw new BadRequestError(`Snapshot ${snapshotIdOrName} is ${snapshot.state}`)
     }
 
     let cpu = snapshot.cpu

@@ -862,16 +862,16 @@ export class SnapshotManager {
     }
 
     try {
-      const sevenDaysAgo = new Date(Date.now() - 7 * 1000 * 60 * 60 * 24)
+      const twoWeeksAgo = new Date(Date.now() - 14 * 1000 * 60 * 60 * 24)
 
-      // Find all active snapshots that haven't been used in over 7 days or have null lastUsedAt
+      // Find all active snapshots that haven't been used in over 14 days or have null lastUsedAt
       const oldSnapshots = await this.snapshotRepository.find({
         where: [
           {
             general: false,
             state: SnapshotState.ACTIVE,
-            lastUsedAt: Or(IsNull(), LessThan(sevenDaysAgo)),
-            createdAt: LessThan(sevenDaysAgo),
+            lastUsedAt: Or(IsNull(), LessThan(twoWeeksAgo)),
+            createdAt: LessThan(twoWeeksAgo),
           },
         ],
         take: 100,
