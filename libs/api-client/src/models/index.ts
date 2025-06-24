@@ -1,8 +1,3 @@
-/*
- * Copyright 2025 Daytona Platforms Inc.
- * SPDX-License-Identifier: Apache-2.0
- */
-
 export * from './account-provider'
 export * from './api-key-list'
 export * from './api-key-response'
@@ -63,6 +58,7 @@ export * from './replace-request'
 export * from './replace-result'
 export * from './runner'
 export * from './runner-region'
+export * from './runner-snapshot-dto'
 export * from './runner-state'
 export * from './sandbox'
 export * from './sandbox-class'

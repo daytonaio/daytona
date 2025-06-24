@@ -1,7 +1,4 @@
 # coding: utf-8
-# Copyright 2025 Daytona Platforms Inc.
-# SPDX-License-Identifier: Apache-2.0
-
 
 # flake8: noqa
 
@@ -106,6 +103,7 @@ from daytona_api_client_async.models.replace_request import ReplaceRequest
 from daytona_api_client_async.models.replace_result import ReplaceResult
 from daytona_api_client_async.models.runner import Runner
 from daytona_api_client_async.models.runner_region import RunnerRegion
+from daytona_api_client_async.models.runner_snapshot_dto import RunnerSnapshotDto
 from daytona_api_client_async.models.runner_state import RunnerState
 from daytona_api_client_async.models.sandbox import Sandbox
 from daytona_api_client_async.models.sandbox_class import SandboxClass
