@@ -125,7 +125,7 @@ jobs:
           python-version: '3.12'
       - name: Build all
         run: |
-          apt-get update && apt-get install -y gcc libx11-dev libxtst-dev
+          sudo apt-get update && sudo apt-get install -y gcc libx11-dev libxtst-dev
           python3 -m pip install build twine
           yarn
           yarn build
