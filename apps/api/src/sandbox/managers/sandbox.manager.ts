@@ -199,7 +199,7 @@ export class SandboxManager {
             lastActivityAt: Raw((alias) => `${alias} < NOW() - INTERVAL '1 minute' * "autoDeleteInterval"`),
           },
           order: {
-            lastBackupAt: 'ASC',
+            lastActivityAt: 'ASC',
           },
           //  todo: increase this number when auto-delete is stable
           take: 10,
