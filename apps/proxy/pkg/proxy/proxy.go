@@ -6,8 +6,10 @@ package proxy
 import (
 	"errors"
 	"fmt"
+	"maps"
 	"net"
 	"net/http"
+	"slices"
 
 	"github.com/daytonaio/daytona/daytonaapiclient"
 	"github.com/daytonaio/proxy/cmd/proxy/config"
@@ -86,10 +88,22 @@ func StartProxy(config *config.Config) error {
 	router := gin.New()
 	router.Use(gin.Recovery())
 
-	corsConfig := cors.DefaultConfig()
-	corsConfig.AllowAllOrigins = true
-	corsConfig.AllowCredentials = true
-	router.Use(cors.New(corsConfig))
+	router.Use(func(ctx *gin.Context) {
+		if ctx.Request.Header.Get("X-Daytona-Disable-CORS") == "true" {
+			ctx.Request.Header.Del("X-Daytona-Disable-CORS")
+			return
+		}
+
+		corsConfig := cors.DefaultConfig()
+		corsConfig.AllowOriginFunc = func(origin string) bool {
+			return true
+		}
+		corsConfig.AllowCredentials = true
+		corsConfig.AllowHeaders = slices.Collect(maps.Keys(ctx.Request.Header))
+		corsConfig.AllowHeaders = append(corsConfig.AllowHeaders, ctx.Request.Header.Values("Access-Control-Request-Headers")...)
+
+		cors.New(corsConfig)(ctx)
+	})
 
 	router.Use(common_errors.NewErrorMiddleware(func(ctx *gin.Context, err error) common_errors.ErrorResponse {
 		return common_errors.ErrorResponse{
