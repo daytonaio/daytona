@@ -163,7 +163,7 @@ func (s *Server) Start() error {
 	}
 
 	if s.ComputerUse != nil {
-		computerUseController := r.Group("/computer")
+		computerUseController := r.Group("/computeruse")
 		{
 			// Computer use status endpoint
 			computerUseController.GET("/status", computeruse.WrapStatusHandler(s.ComputerUse.GetStatus))
