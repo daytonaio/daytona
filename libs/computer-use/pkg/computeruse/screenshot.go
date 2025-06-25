@@ -10,10 +10,12 @@ import (
 	"image/color"
 	"image/draw"
 	"image/png"
+	"os"
 
 	"github.com/daytonaio/daemon/pkg/toolbox/computeruse"
 	"github.com/go-vgo/robotgo"
 	"github.com/kbinani/screenshot"
+	log "github.com/sirupsen/logrus"
 )
 
 // drawCursor draws a simple cursor at the given position
@@ -73,9 +75,14 @@ func drawCursor(img *image.RGBA, x, y int) {
 }
 
 func (u *ComputerUse) TakeScreenshot(req *computeruse.ScreenshotRequest) (*computeruse.ScreenshotResponse, error) {
+	// Debug: Check DISPLAY environment variable
+	display := os.Getenv("DISPLAY")
+	log.Infof("TakeScreenshot: DISPLAY=%s", display)
+
 	bounds := screenshot.GetDisplayBounds(0)
 	img, err := screenshot.CaptureRect(bounds)
 	if err != nil {
+		log.Errorf("TakeScreenshot error: %v", err)
 		return nil, err
 	}
 
@@ -115,9 +122,14 @@ func (u *ComputerUse) TakeScreenshot(req *computeruse.ScreenshotRequest) (*compu
 }
 
 func (u *ComputerUse) TakeRegionScreenshot(req *computeruse.RegionScreenshotRequest) (*computeruse.ScreenshotResponse, error) {
+	// Debug: Check DISPLAY environment variable
+	display := os.Getenv("DISPLAY")
+	log.Infof("TakeRegionScreenshot: DISPLAY=%s", display)
+
 	rect := image.Rect(req.X, req.Y, req.X+req.Width, req.Y+req.Height)
 	img, err := screenshot.CaptureRect(rect)
 	if err != nil {
+		log.Errorf("TakeRegionScreenshot error: %v", err)
 		return nil, err
 	}
 
