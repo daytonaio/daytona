@@ -57,7 +57,9 @@ class CreateSandbox(BaseModel):
         alias="autoArchiveInterval",
     )
     auto_delete_interval: Optional[StrictInt] = Field(
-        default=None, description="Auto-delete interval in minutes (0 means disabled)", alias="autoDeleteInterval"
+        default=None,
+        description="Auto-delete interval in minutes (negative value means disabled, 0 means delete immediately upon stopping)",
+        alias="autoDeleteInterval",
     )
     volumes: Optional[List[SandboxVolume]] = Field(
         default=None, description="Array of volumes to attach to the sandbox"

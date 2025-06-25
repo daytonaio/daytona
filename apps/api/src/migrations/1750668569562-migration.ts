@@ -9,7 +9,7 @@ export class Migration1750668569562 implements MigrationInterface {
   name = 'Migration1750668569562'
 
   public async up(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(`ALTER TABLE "sandbox" ADD "autoDeleteInterval" integer NOT NULL DEFAULT '0'`)
+    await queryRunner.query(`ALTER TABLE "sandbox" ADD "autoDeleteInterval" integer NOT NULL DEFAULT '-1'`)
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {

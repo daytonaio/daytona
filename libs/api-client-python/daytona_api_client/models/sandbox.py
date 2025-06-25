@@ -59,7 +59,9 @@ class Sandbox(BaseModel):
         default=None, description="Auto-archive interval in minutes", alias="autoArchiveInterval"
     )
     auto_delete_interval: Optional[Union[StrictFloat, StrictInt]] = Field(
-        default=None, description="Auto-delete interval in minutes (0 means disabled)", alias="autoDeleteInterval"
+        default=None,
+        description="Auto-delete interval in minutes (negative value means disabled, 0 means delete immediately upon stopping)",
+        alias="autoDeleteInterval",
     )
     runner_domain: Optional[StrictStr] = Field(
         default=None, description="The domain name of the runner", alias="runnerDomain"

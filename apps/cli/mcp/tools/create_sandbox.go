@@ -82,7 +82,7 @@ func CreateSandbox(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallT
 			autoDeleteIntervalValue, err := strconv.Atoi(autoDeleteIntervalStr)
 			if err != nil {
 				log.Error(fmt.Errorf("invalid auto delete interval value, fallback to default (no auto delete)"))
-				autoDeleteIntervalValue = 0
+				autoDeleteIntervalValue = -1
 			}
 
 			createSandbox.SetAutoDeleteInterval(int32(autoDeleteIntervalValue))

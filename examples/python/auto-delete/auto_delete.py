@@ -12,8 +12,12 @@ def main():
     sandbox1.set_auto_delete_interval(60)
     print(sandbox1.auto_delete_interval)
 
-    # Disable auto-delete
+    # Delete immediately upon stopping
     sandbox1.set_auto_delete_interval(0)
+    print(sandbox1.auto_delete_interval)
+
+    # Disable auto-delete
+    sandbox1.set_auto_delete_interval(-1)
     print(sandbox1.auto_delete_interval)
 
     # Auto-delete after the Sandbox has been stopped for 1 day

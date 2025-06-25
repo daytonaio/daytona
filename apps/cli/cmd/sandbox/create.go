@@ -89,9 +89,7 @@ var CreateCmd = &cobra.Command{
 		if autoArchiveFlag >= 0 {
 			createSandbox.SetAutoArchiveInterval(autoArchiveFlag)
 		}
-		if autoDeleteFlag > 0 {
-			createSandbox.SetAutoDeleteInterval(autoDeleteFlag)
-		}
+		createSandbox.SetAutoDeleteInterval(autoDeleteFlag)
 
 		if dockerfileFlag != "" {
 			createBuildInfoDto, err := common.GetCreateBuildInfoDto(ctx, dockerfileFlag, contextFlag)
@@ -221,7 +219,7 @@ func init() {
 	CreateCmd.Flags().Int32Var(&diskFlag, "disk", 0, "Disk space allocated to the sandbox in GB")
 	CreateCmd.Flags().Int32Var(&autoStopFlag, "auto-stop", 0, "Auto-stop interval in minutes (0 means disabled)")
 	CreateCmd.Flags().Int32Var(&autoArchiveFlag, "auto-archive", 10080, "Auto-archive interval in minutes (0 means the maximum interval will be used)")
-	CreateCmd.Flags().Int32Var(&autoDeleteFlag, "auto-delete", 0, "Auto-delete interval in minutes (0 means disabled)")
+	CreateCmd.Flags().Int32Var(&autoDeleteFlag, "auto-delete", -1, "Auto-delete interval in minutes (negative value means disabled, 0 means delete immediately upon stopping)")
 	CreateCmd.Flags().StringArrayVarP(&volumesFlag, "volume", "v", []string{}, "Volumes to mount (format: VOLUME_NAME:MOUNT_PATH)")
 	CreateCmd.Flags().StringVarP(&dockerfileFlag, "dockerfile", "f", "", "Path to Dockerfile for Sandbox snapshot")
 	CreateCmd.Flags().StringArrayVarP(&contextFlag, "context", "c", []string{}, "Files or directories to include in the build context (can be specified multiple times)")

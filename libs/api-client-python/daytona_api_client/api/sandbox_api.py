@@ -2596,7 +2596,10 @@ class SandboxApi:
         self,
         sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
         interval: Annotated[
-            Union[StrictFloat, StrictInt], Field(description="Auto-delete interval in minutes (0 to disable)")
+            Union[StrictFloat, StrictInt],
+            Field(
+                description="Auto-delete interval in minutes (negative value means disabled, 0 means delete immediately upon stopping)"
+            ),
         ],
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
@@ -2616,7 +2619,7 @@ class SandboxApi:
 
         :param sandbox_id: ID of the sandbox (required)
         :type sandbox_id: str
-        :param interval: Auto-delete interval in minutes (0 to disable) (required)
+        :param interval: Auto-delete interval in minutes (negative value means disabled, 0 means delete immediately upon stopping) (required)
         :type interval: float
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
@@ -2667,7 +2670,10 @@ class SandboxApi:
         self,
         sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
         interval: Annotated[
-            Union[StrictFloat, StrictInt], Field(description="Auto-delete interval in minutes (0 to disable)")
+            Union[StrictFloat, StrictInt],
+            Field(
+                description="Auto-delete interval in minutes (negative value means disabled, 0 means delete immediately upon stopping)"
+            ),
         ],
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
@@ -2687,7 +2693,7 @@ class SandboxApi:
 
         :param sandbox_id: ID of the sandbox (required)
         :type sandbox_id: str
-        :param interval: Auto-delete interval in minutes (0 to disable) (required)
+        :param interval: Auto-delete interval in minutes (negative value means disabled, 0 means delete immediately upon stopping) (required)
         :type interval: float
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
@@ -2738,7 +2744,10 @@ class SandboxApi:
         self,
         sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
         interval: Annotated[
-            Union[StrictFloat, StrictInt], Field(description="Auto-delete interval in minutes (0 to disable)")
+            Union[StrictFloat, StrictInt],
+            Field(
+                description="Auto-delete interval in minutes (negative value means disabled, 0 means delete immediately upon stopping)"
+            ),
         ],
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
@@ -2758,7 +2767,7 @@ class SandboxApi:
 
         :param sandbox_id: ID of the sandbox (required)
         :type sandbox_id: str
-        :param interval: Auto-delete interval in minutes (0 to disable) (required)
+        :param interval: Auto-delete interval in minutes (negative value means disabled, 0 means delete immediately upon stopping) (required)
         :type interval: float
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
