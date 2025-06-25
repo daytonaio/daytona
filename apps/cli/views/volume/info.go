@@ -8,13 +8,13 @@ import (
 	"os"
 
 	"github.com/charmbracelet/lipgloss"
+	"github.com/daytonaio/apiclient"
 	"github.com/daytonaio/daytona/cli/views/common"
 	"github.com/daytonaio/daytona/cli/views/util"
-	"github.com/daytonaio/daytona/daytonaapiclient"
 	"golang.org/x/term"
 )
 
-func RenderInfo(volume *daytonaapiclient.VolumeDto, forceUnstyled bool) {
+func RenderInfo(volume *apiclient.VolumeDto, forceUnstyled bool) {
 	var output string
 	nameLabel := "Volume"
 
@@ -58,21 +58,21 @@ func getInfoLine(key, value string) string {
 	return util.PropertyNameStyle.Render(fmt.Sprintf("%-*s", util.PropertyNameWidth, key)) + util.PropertyValueStyle.Render(value) + "\n"
 }
 
-func getStateLabel(state daytonaapiclient.VolumeState) string {
+func getStateLabel(state apiclient.VolumeState) string {
 	switch state {
-	case daytonaapiclient.VOLUMESTATE_PENDING_CREATE:
+	case apiclient.VOLUMESTATE_PENDING_CREATE:
 		return common.CreatingStyle.Render("PENDING CREATE")
-	case daytonaapiclient.VOLUMESTATE_CREATING:
+	case apiclient.VOLUMESTATE_CREATING:
 		return common.CreatingStyle.Render("CREATING")
-	case daytonaapiclient.VOLUMESTATE_READY:
+	case apiclient.VOLUMESTATE_READY:
 		return common.StartedStyle.Render("READY")
-	case daytonaapiclient.VOLUMESTATE_PENDING_DELETE:
+	case apiclient.VOLUMESTATE_PENDING_DELETE:
 		return common.DeletedStyle.Render("PENDING DELETE")
-	case daytonaapiclient.VOLUMESTATE_DELETING:
+	case apiclient.VOLUMESTATE_DELETING:
 		return common.DeletedStyle.Render("DELETING")
-	case daytonaapiclient.VOLUMESTATE_DELETED:
+	case apiclient.VOLUMESTATE_DELETED:
 		return common.DeletedStyle.Render("DELETED")
-	case daytonaapiclient.VOLUMESTATE_ERROR:
+	case apiclient.VOLUMESTATE_ERROR:
 		return common.ErrorStyle.Render("ERROR")
 	default:
 		return common.UndefinedStyle.Render("/")
