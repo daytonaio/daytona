@@ -23,10 +23,12 @@ from typing import Any, ClassVar, Dict, List, Union
 from typing import Optional, Set
 from typing_extensions import Self
 
+
 class MousePosition(BaseModel):
     """
     MousePosition
-    """ # noqa: E501
+    """  # noqa: E501
+
     x: Union[StrictFloat, StrictInt]
     y: Union[StrictFloat, StrictInt]
     additional_properties: Dict[str, Any] = {}
@@ -37,7 +39,6 @@ class MousePosition(BaseModel):
         validate_assignment=True,
         protected_namespaces=(),
     )
-
 
     def to_str(self) -> str:
         """Returns the string representation of the model using alias"""
@@ -64,9 +65,11 @@ class MousePosition(BaseModel):
           are ignored.
         * Fields in `self.additional_properties` are added to the output dict.
         """
-        excluded_fields: Set[str] = set([
-            "additional_properties",
-        ])
+        excluded_fields: Set[str] = set(
+            [
+                "additional_properties",
+            ]
+        )
 
         _dict = self.model_dump(
             by_alias=True,
@@ -89,15 +92,10 @@ class MousePosition(BaseModel):
         if not isinstance(obj, dict):
             return cls.model_validate(obj)
 
-        _obj = cls.model_validate({
-            "x": obj.get("x"),
-            "y": obj.get("y")
-        })
+        _obj = cls.model_validate({"x": obj.get("x"), "y": obj.get("y")})
         # store additional fields in additional_properties
         for _key in obj.keys():
             if _key not in cls.__properties:
                 _obj.additional_properties[_key] = obj.get(_key)
 
         return _obj
-
-

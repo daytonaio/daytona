@@ -12,8 +12,8 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"encoding/json"
 	"bytes"
+	"encoding/json"
 	"fmt"
 )
 
@@ -22,10 +22,10 @@ var _ MappedNullable = &MouseClickRequest{}
 
 // MouseClickRequest struct for MouseClickRequest
 type MouseClickRequest struct {
-	X float32 `json:"x"`
-	Y float32 `json:"y"`
+	X      float32 `json:"x"`
+	Y      float32 `json:"y"`
 	Button *string `json:"button,omitempty"`
-	Double *bool `json:"double,omitempty"`
+	Double *bool   `json:"double,omitempty"`
 }
 
 type _MouseClickRequest MouseClickRequest
@@ -162,7 +162,7 @@ func (o *MouseClickRequest) SetDouble(v bool) {
 }
 
 func (o MouseClickRequest) MarshalJSON() ([]byte, error) {
-	toSerialize,err := o.ToMap()
+	toSerialize, err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -196,10 +196,10 @@ func (o *MouseClickRequest) UnmarshalJSON(data []byte) (err error) {
 	err = json.Unmarshal(data, &allProperties)
 
 	if err != nil {
-		return err;
+		return err
 	}
 
-	for _, requiredProperty := range(requiredProperties) {
+	for _, requiredProperty := range requiredProperties {
 		if _, exists := allProperties[requiredProperty]; !exists {
 			return fmt.Errorf("no value given for required property %v", requiredProperty)
 		}
@@ -255,5 +255,3 @@ func (v *NullableMouseClickRequest) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

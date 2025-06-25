@@ -23,10 +23,12 @@ from typing import Any, ClassVar, Dict, List, Optional, Union
 from typing import Optional, Set
 from typing_extensions import Self
 
+
 class CompressedScreenshotResponse(BaseModel):
     """
     CompressedScreenshotResponse
-    """ # noqa: E501
+    """  # noqa: E501
+
     screenshot: StrictStr
     width: Union[StrictFloat, StrictInt]
     height: Union[StrictFloat, StrictInt]
@@ -36,14 +38,22 @@ class CompressedScreenshotResponse(BaseModel):
     size_bytes: Union[StrictFloat, StrictInt]
     cursor_position: Optional[Dict[str, Any]] = None
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["screenshot", "width", "height", "format", "quality", "scale", "size_bytes", "cursor_position"]
+    __properties: ClassVar[List[str]] = [
+        "screenshot",
+        "width",
+        "height",
+        "format",
+        "quality",
+        "scale",
+        "size_bytes",
+        "cursor_position",
+    ]
 
     model_config = ConfigDict(
         populate_by_name=True,
         validate_assignment=True,
         protected_namespaces=(),
     )
-
 
     def to_str(self) -> str:
         """Returns the string representation of the model using alias"""
@@ -70,9 +80,11 @@ class CompressedScreenshotResponse(BaseModel):
           are ignored.
         * Fields in `self.additional_properties` are added to the output dict.
         """
-        excluded_fields: Set[str] = set([
-            "additional_properties",
-        ])
+        excluded_fields: Set[str] = set(
+            [
+                "additional_properties",
+            ]
+        )
 
         _dict = self.model_dump(
             by_alias=True,
@@ -95,21 +107,21 @@ class CompressedScreenshotResponse(BaseModel):
         if not isinstance(obj, dict):
             return cls.model_validate(obj)
 
-        _obj = cls.model_validate({
-            "screenshot": obj.get("screenshot"),
-            "width": obj.get("width"),
-            "height": obj.get("height"),
-            "format": obj.get("format"),
-            "quality": obj.get("quality"),
-            "scale": obj.get("scale"),
-            "size_bytes": obj.get("size_bytes"),
-            "cursor_position": obj.get("cursor_position")
-        })
+        _obj = cls.model_validate(
+            {
+                "screenshot": obj.get("screenshot"),
+                "width": obj.get("width"),
+                "height": obj.get("height"),
+                "format": obj.get("format"),
+                "quality": obj.get("quality"),
+                "scale": obj.get("scale"),
+                "size_bytes": obj.get("size_bytes"),
+                "cursor_position": obj.get("cursor_position"),
+            }
+        )
         # store additional fields in additional_properties
         for _key in obj.keys():
             if _key not in cls.__properties:
                 _obj.additional_properties[_key] = obj.get(_key)
 
         return _obj
-
-

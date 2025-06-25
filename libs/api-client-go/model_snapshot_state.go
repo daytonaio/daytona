@@ -21,17 +21,17 @@ type SnapshotState string
 
 // List of SnapshotState
 const (
-	SNAPSHOTSTATE_BUILD_PENDING SnapshotState = "build_pending"
-	SNAPSHOTSTATE_BUILDING SnapshotState = "building"
-	SNAPSHOTSTATE_PENDING SnapshotState = "pending"
-	SNAPSHOTSTATE_PULLING SnapshotState = "pulling"
+	SNAPSHOTSTATE_BUILD_PENDING      SnapshotState = "build_pending"
+	SNAPSHOTSTATE_BUILDING           SnapshotState = "building"
+	SNAPSHOTSTATE_PENDING            SnapshotState = "pending"
+	SNAPSHOTSTATE_PULLING            SnapshotState = "pulling"
 	SNAPSHOTSTATE_PENDING_VALIDATION SnapshotState = "pending_validation"
-	SNAPSHOTSTATE_VALIDATING SnapshotState = "validating"
-	SNAPSHOTSTATE_ACTIVE SnapshotState = "active"
-	SNAPSHOTSTATE_INACTIVE SnapshotState = "inactive"
-	SNAPSHOTSTATE_ERROR SnapshotState = "error"
-	SNAPSHOTSTATE_BUILD_FAILED SnapshotState = "build_failed"
-	SNAPSHOTSTATE_REMOVING SnapshotState = "removing"
+	SNAPSHOTSTATE_VALIDATING         SnapshotState = "validating"
+	SNAPSHOTSTATE_ACTIVE             SnapshotState = "active"
+	SNAPSHOTSTATE_INACTIVE           SnapshotState = "inactive"
+	SNAPSHOTSTATE_ERROR              SnapshotState = "error"
+	SNAPSHOTSTATE_BUILD_FAILED       SnapshotState = "build_failed"
+	SNAPSHOTSTATE_REMOVING           SnapshotState = "removing"
 )
 
 // All allowed values of SnapshotState enum
@@ -127,4 +127,3 @@ func (v *NullableSnapshotState) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-

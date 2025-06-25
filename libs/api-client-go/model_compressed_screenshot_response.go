@@ -12,8 +12,8 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"encoding/json"
 	"bytes"
+	"encoding/json"
 	"fmt"
 )
 
@@ -22,13 +22,13 @@ var _ MappedNullable = &CompressedScreenshotResponse{}
 
 // CompressedScreenshotResponse struct for CompressedScreenshotResponse
 type CompressedScreenshotResponse struct {
-	Screenshot string `json:"screenshot"`
-	Width float32 `json:"width"`
-	Height float32 `json:"height"`
-	Format string `json:"format"`
-	Quality float32 `json:"quality"`
-	Scale float32 `json:"scale"`
-	SizeBytes float32 `json:"size_bytes"`
+	Screenshot     string                 `json:"screenshot"`
+	Width          float32                `json:"width"`
+	Height         float32                `json:"height"`
+	Format         string                 `json:"format"`
+	Quality        float32                `json:"quality"`
+	Scale          float32                `json:"scale"`
+	SizeBytes      float32                `json:"size_bytes"`
 	CursorPosition map[string]interface{} `json:"cursor_position,omitempty"`
 }
 
@@ -259,7 +259,7 @@ func (o *CompressedScreenshotResponse) SetCursorPosition(v map[string]interface{
 }
 
 func (o CompressedScreenshotResponse) MarshalJSON() ([]byte, error) {
-	toSerialize,err := o.ToMap()
+	toSerialize, err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -300,10 +300,10 @@ func (o *CompressedScreenshotResponse) UnmarshalJSON(data []byte) (err error) {
 	err = json.Unmarshal(data, &allProperties)
 
 	if err != nil {
-		return err;
+		return err
 	}
 
-	for _, requiredProperty := range(requiredProperties) {
+	for _, requiredProperty := range requiredProperties {
 		if _, exists := allProperties[requiredProperty]; !exists {
 			return fmt.Errorf("no value given for required property %v", requiredProperty)
 		}
@@ -359,5 +359,3 @@ func (v *NullableCompressedScreenshotResponse) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

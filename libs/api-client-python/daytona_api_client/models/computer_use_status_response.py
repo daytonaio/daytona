@@ -23,10 +23,12 @@ from typing import Any, ClassVar, Dict, List
 from typing import Optional, Set
 from typing_extensions import Self
 
+
 class ComputerUseStatusResponse(BaseModel):
     """
     ComputerUseStatusResponse
-    """ # noqa: E501
+    """  # noqa: E501
+
     status: Dict[str, Any]
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["status"]
@@ -36,7 +38,6 @@ class ComputerUseStatusResponse(BaseModel):
         validate_assignment=True,
         protected_namespaces=(),
     )
-
 
     def to_str(self) -> str:
         """Returns the string representation of the model using alias"""
@@ -63,9 +64,11 @@ class ComputerUseStatusResponse(BaseModel):
           are ignored.
         * Fields in `self.additional_properties` are added to the output dict.
         """
-        excluded_fields: Set[str] = set([
-            "additional_properties",
-        ])
+        excluded_fields: Set[str] = set(
+            [
+                "additional_properties",
+            ]
+        )
 
         _dict = self.model_dump(
             by_alias=True,
@@ -88,14 +91,10 @@ class ComputerUseStatusResponse(BaseModel):
         if not isinstance(obj, dict):
             return cls.model_validate(obj)
 
-        _obj = cls.model_validate({
-            "status": obj.get("status")
-        })
+        _obj = cls.model_validate({"status": obj.get("status")})
         # store additional fields in additional_properties
         for _key in obj.keys():
             if _key not in cls.__properties:
                 _obj.additional_properties[_key] = obj.get(_key)
 
         return _obj
-
-

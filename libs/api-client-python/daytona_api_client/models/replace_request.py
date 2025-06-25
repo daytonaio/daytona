@@ -23,10 +23,12 @@ from typing import Any, ClassVar, Dict, List
 from typing import Optional, Set
 from typing_extensions import Self
 
+
 class ReplaceRequest(BaseModel):
     """
     ReplaceRequest
-    """ # noqa: E501
+    """  # noqa: E501
+
     files: List[StrictStr]
     pattern: StrictStr
     new_value: StrictStr = Field(alias="newValue")
@@ -38,7 +40,6 @@ class ReplaceRequest(BaseModel):
         validate_assignment=True,
         protected_namespaces=(),
     )
-
 
     def to_str(self) -> str:
         """Returns the string representation of the model using alias"""
@@ -65,9 +66,11 @@ class ReplaceRequest(BaseModel):
           are ignored.
         * Fields in `self.additional_properties` are added to the output dict.
         """
-        excluded_fields: Set[str] = set([
-            "additional_properties",
-        ])
+        excluded_fields: Set[str] = set(
+            [
+                "additional_properties",
+            ]
+        )
 
         _dict = self.model_dump(
             by_alias=True,
@@ -90,16 +93,12 @@ class ReplaceRequest(BaseModel):
         if not isinstance(obj, dict):
             return cls.model_validate(obj)
 
-        _obj = cls.model_validate({
-            "files": obj.get("files"),
-            "pattern": obj.get("pattern"),
-            "newValue": obj.get("newValue")
-        })
+        _obj = cls.model_validate(
+            {"files": obj.get("files"), "pattern": obj.get("pattern"), "newValue": obj.get("newValue")}
+        )
         # store additional fields in additional_properties
         for _key in obj.keys():
             if _key not in cls.__properties:
                 _obj.additional_properties[_key] = obj.get(_key)
 
         return _obj
-
-

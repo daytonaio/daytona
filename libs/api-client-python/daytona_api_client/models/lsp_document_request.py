@@ -23,10 +23,12 @@ from typing import Any, ClassVar, Dict, List
 from typing import Optional, Set
 from typing_extensions import Self
 
+
 class LspDocumentRequest(BaseModel):
     """
     LspDocumentRequest
-    """ # noqa: E501
+    """  # noqa: E501
+
     language_id: StrictStr = Field(description="Language identifier", alias="languageId")
     path_to_project: StrictStr = Field(description="Path to the project", alias="pathToProject")
     uri: StrictStr = Field(description="Document URI")
@@ -38,7 +40,6 @@ class LspDocumentRequest(BaseModel):
         validate_assignment=True,
         protected_namespaces=(),
     )
-
 
     def to_str(self) -> str:
         """Returns the string representation of the model using alias"""
@@ -65,9 +66,11 @@ class LspDocumentRequest(BaseModel):
           are ignored.
         * Fields in `self.additional_properties` are added to the output dict.
         """
-        excluded_fields: Set[str] = set([
-            "additional_properties",
-        ])
+        excluded_fields: Set[str] = set(
+            [
+                "additional_properties",
+            ]
+        )
 
         _dict = self.model_dump(
             by_alias=True,
@@ -90,16 +93,12 @@ class LspDocumentRequest(BaseModel):
         if not isinstance(obj, dict):
             return cls.model_validate(obj)
 
-        _obj = cls.model_validate({
-            "languageId": obj.get("languageId"),
-            "pathToProject": obj.get("pathToProject"),
-            "uri": obj.get("uri")
-        })
+        _obj = cls.model_validate(
+            {"languageId": obj.get("languageId"), "pathToProject": obj.get("pathToProject"), "uri": obj.get("uri")}
+        )
         # store additional fields in additional_properties
         for _key in obj.keys():
             if _key not in cls.__properties:
                 _obj.additional_properties[_key] = obj.get(_key)
 
         return _obj
-
-

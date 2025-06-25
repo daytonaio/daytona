@@ -17,21 +17,20 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-	"strings"
 	"os"
+	"strings"
 )
-
 
 type ToolboxAPI interface {
 
 	/*
-	ClickMouse Click mouse
+		ClickMouse Click mouse
 
-	Click mouse at specified coordinates
+		Click mouse at specified coordinates
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPIClickMouseRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPIClickMouseRequest
 	*/
 	ClickMouse(ctx context.Context, sandboxId string) ToolboxAPIClickMouseRequest
 
@@ -40,13 +39,13 @@ type ToolboxAPI interface {
 	ClickMouseExecute(r ToolboxAPIClickMouseRequest) (*MouseClickResponse, *http.Response, error)
 
 	/*
-	CreateFolder Create folder
+		CreateFolder Create folder
 
-	Create folder inside sandbox
+		Create folder inside sandbox
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPICreateFolderRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPICreateFolderRequest
 	*/
 	CreateFolder(ctx context.Context, sandboxId string) ToolboxAPICreateFolderRequest
 
@@ -54,13 +53,13 @@ type ToolboxAPI interface {
 	CreateFolderExecute(r ToolboxAPICreateFolderRequest) (*http.Response, error)
 
 	/*
-	CreateSession Create session
+		CreateSession Create session
 
-	Create a new session in the sandbox
+		Create a new session in the sandbox
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPICreateSessionRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPICreateSessionRequest
 	*/
 	CreateSession(ctx context.Context, sandboxId string) ToolboxAPICreateSessionRequest
 
@@ -68,13 +67,13 @@ type ToolboxAPI interface {
 	CreateSessionExecute(r ToolboxAPICreateSessionRequest) (*http.Response, error)
 
 	/*
-	DeleteFile Delete file
+		DeleteFile Delete file
 
-	Delete file inside sandbox
+		Delete file inside sandbox
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPIDeleteFileRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPIDeleteFileRequest
 	*/
 	DeleteFile(ctx context.Context, sandboxId string) ToolboxAPIDeleteFileRequest
 
@@ -82,14 +81,14 @@ type ToolboxAPI interface {
 	DeleteFileExecute(r ToolboxAPIDeleteFileRequest) (*http.Response, error)
 
 	/*
-	DeleteSession Delete session
+		DeleteSession Delete session
 
-	Delete a specific session
+		Delete a specific session
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@param sessionId
-	@return ToolboxAPIDeleteSessionRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@param sessionId
+		@return ToolboxAPIDeleteSessionRequest
 	*/
 	DeleteSession(ctx context.Context, sandboxId string, sessionId string) ToolboxAPIDeleteSessionRequest
 
@@ -97,13 +96,13 @@ type ToolboxAPI interface {
 	DeleteSessionExecute(r ToolboxAPIDeleteSessionRequest) (*http.Response, error)
 
 	/*
-	DownloadFile Download file
+		DownloadFile Download file
 
-	Download file from sandbox
+		Download file from sandbox
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPIDownloadFileRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPIDownloadFileRequest
 	*/
 	DownloadFile(ctx context.Context, sandboxId string) ToolboxAPIDownloadFileRequest
 
@@ -112,13 +111,13 @@ type ToolboxAPI interface {
 	DownloadFileExecute(r ToolboxAPIDownloadFileRequest) (*os.File, *http.Response, error)
 
 	/*
-	DragMouse Drag mouse
+		DragMouse Drag mouse
 
-	Drag mouse from start to end coordinates
+		Drag mouse from start to end coordinates
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPIDragMouseRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPIDragMouseRequest
 	*/
 	DragMouse(ctx context.Context, sandboxId string) ToolboxAPIDragMouseRequest
 
@@ -127,13 +126,13 @@ type ToolboxAPI interface {
 	DragMouseExecute(r ToolboxAPIDragMouseRequest) (*MouseDragResponse, *http.Response, error)
 
 	/*
-	ExecuteCommand Execute command
+		ExecuteCommand Execute command
 
-	Execute command synchronously inside sandbox
+		Execute command synchronously inside sandbox
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPIExecuteCommandRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPIExecuteCommandRequest
 	*/
 	ExecuteCommand(ctx context.Context, sandboxId string) ToolboxAPIExecuteCommandRequest
 
@@ -142,14 +141,14 @@ type ToolboxAPI interface {
 	ExecuteCommandExecute(r ToolboxAPIExecuteCommandRequest) (*ExecuteResponse, *http.Response, error)
 
 	/*
-	ExecuteSessionCommand Execute command in session
+		ExecuteSessionCommand Execute command in session
 
-	Execute a command in a specific session
+		Execute a command in a specific session
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@param sessionId
-	@return ToolboxAPIExecuteSessionCommandRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@param sessionId
+		@return ToolboxAPIExecuteSessionCommandRequest
 	*/
 	ExecuteSessionCommand(ctx context.Context, sandboxId string, sessionId string) ToolboxAPIExecuteSessionCommandRequest
 
@@ -158,13 +157,13 @@ type ToolboxAPI interface {
 	ExecuteSessionCommandExecute(r ToolboxAPIExecuteSessionCommandRequest) (*SessionExecuteResponse, *http.Response, error)
 
 	/*
-	FindInFiles Search for text/pattern in files
+		FindInFiles Search for text/pattern in files
 
-	Search for text/pattern inside sandbox files
+		Search for text/pattern inside sandbox files
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPIFindInFilesRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPIFindInFilesRequest
 	*/
 	FindInFiles(ctx context.Context, sandboxId string) ToolboxAPIFindInFilesRequest
 
@@ -173,13 +172,13 @@ type ToolboxAPI interface {
 	FindInFilesExecute(r ToolboxAPIFindInFilesRequest) ([]Match, *http.Response, error)
 
 	/*
-	GetComputerUseStatus Get computer use status
+		GetComputerUseStatus Get computer use status
 
-	Get status of all VNC desktop processes
+		Get status of all VNC desktop processes
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPIGetComputerUseStatusRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPIGetComputerUseStatusRequest
 	*/
 	GetComputerUseStatus(ctx context.Context, sandboxId string) ToolboxAPIGetComputerUseStatusRequest
 
@@ -188,13 +187,13 @@ type ToolboxAPI interface {
 	GetComputerUseStatusExecute(r ToolboxAPIGetComputerUseStatusRequest) (*ComputerUseStatusResponse, *http.Response, error)
 
 	/*
-	GetDisplayInfo Get display info
+		GetDisplayInfo Get display info
 
-	Get information about displays
+		Get information about displays
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPIGetDisplayInfoRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPIGetDisplayInfoRequest
 	*/
 	GetDisplayInfo(ctx context.Context, sandboxId string) ToolboxAPIGetDisplayInfoRequest
 
@@ -203,13 +202,13 @@ type ToolboxAPI interface {
 	GetDisplayInfoExecute(r ToolboxAPIGetDisplayInfoRequest) (*DisplayInfoResponse, *http.Response, error)
 
 	/*
-	GetFileInfo Get file info
+		GetFileInfo Get file info
 
-	Get file info inside sandbox
+		Get file info inside sandbox
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPIGetFileInfoRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPIGetFileInfoRequest
 	*/
 	GetFileInfo(ctx context.Context, sandboxId string) ToolboxAPIGetFileInfoRequest
 
@@ -218,13 +217,13 @@ type ToolboxAPI interface {
 	GetFileInfoExecute(r ToolboxAPIGetFileInfoRequest) (*FileInfo, *http.Response, error)
 
 	/*
-	GetMousePosition Get mouse position
+		GetMousePosition Get mouse position
 
-	Get current mouse cursor position
+		Get current mouse cursor position
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPIGetMousePositionRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPIGetMousePositionRequest
 	*/
 	GetMousePosition(ctx context.Context, sandboxId string) ToolboxAPIGetMousePositionRequest
 
@@ -233,14 +232,14 @@ type ToolboxAPI interface {
 	GetMousePositionExecute(r ToolboxAPIGetMousePositionRequest) (*MousePosition, *http.Response, error)
 
 	/*
-	GetProcessErrors Get process errors
+		GetProcessErrors Get process errors
 
-	Get error logs for a specific VNC process
+		Get error logs for a specific VNC process
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param processName
-	@param sandboxId
-	@return ToolboxAPIGetProcessErrorsRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param processName
+		@param sandboxId
+		@return ToolboxAPIGetProcessErrorsRequest
 	*/
 	GetProcessErrors(ctx context.Context, processName string, sandboxId string) ToolboxAPIGetProcessErrorsRequest
 
@@ -249,14 +248,14 @@ type ToolboxAPI interface {
 	GetProcessErrorsExecute(r ToolboxAPIGetProcessErrorsRequest) (*ProcessErrorsResponse, *http.Response, error)
 
 	/*
-	GetProcessLogs Get process logs
+		GetProcessLogs Get process logs
 
-	Get logs for a specific VNC process
+		Get logs for a specific VNC process
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param processName
-	@param sandboxId
-	@return ToolboxAPIGetProcessLogsRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param processName
+		@param sandboxId
+		@return ToolboxAPIGetProcessLogsRequest
 	*/
 	GetProcessLogs(ctx context.Context, processName string, sandboxId string) ToolboxAPIGetProcessLogsRequest
 
@@ -265,14 +264,14 @@ type ToolboxAPI interface {
 	GetProcessLogsExecute(r ToolboxAPIGetProcessLogsRequest) (*ProcessLogsResponse, *http.Response, error)
 
 	/*
-	GetProcessStatus Get process status
+		GetProcessStatus Get process status
 
-	Get status of a specific VNC process
+		Get status of a specific VNC process
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param processName
-	@param sandboxId
-	@return ToolboxAPIGetProcessStatusRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param processName
+		@param sandboxId
+		@return ToolboxAPIGetProcessStatusRequest
 	*/
 	GetProcessStatus(ctx context.Context, processName string, sandboxId string) ToolboxAPIGetProcessStatusRequest
 
@@ -281,11 +280,11 @@ type ToolboxAPI interface {
 	GetProcessStatusExecute(r ToolboxAPIGetProcessStatusRequest) (*ProcessStatusResponse, *http.Response, error)
 
 	/*
-	GetProjectDir Get sandbox project dir
+		GetProjectDir Get sandbox project dir
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPIGetProjectDirRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPIGetProjectDirRequest
 	*/
 	GetProjectDir(ctx context.Context, sandboxId string) ToolboxAPIGetProjectDirRequest
 
@@ -294,14 +293,14 @@ type ToolboxAPI interface {
 	GetProjectDirExecute(r ToolboxAPIGetProjectDirRequest) (*ProjectDirResponse, *http.Response, error)
 
 	/*
-	GetSession Get session
+		GetSession Get session
 
-	Get session by ID
+		Get session by ID
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@param sessionId
-	@return ToolboxAPIGetSessionRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@param sessionId
+		@return ToolboxAPIGetSessionRequest
 	*/
 	GetSession(ctx context.Context, sandboxId string, sessionId string) ToolboxAPIGetSessionRequest
 
@@ -310,15 +309,15 @@ type ToolboxAPI interface {
 	GetSessionExecute(r ToolboxAPIGetSessionRequest) (*Session, *http.Response, error)
 
 	/*
-	GetSessionCommand Get session command
+		GetSessionCommand Get session command
 
-	Get session command by ID
+		Get session command by ID
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@param sessionId
-	@param commandId
-	@return ToolboxAPIGetSessionCommandRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@param sessionId
+		@param commandId
+		@return ToolboxAPIGetSessionCommandRequest
 	*/
 	GetSessionCommand(ctx context.Context, sandboxId string, sessionId string, commandId string) ToolboxAPIGetSessionCommandRequest
 
@@ -327,15 +326,15 @@ type ToolboxAPI interface {
 	GetSessionCommandExecute(r ToolboxAPIGetSessionCommandRequest) (*Command, *http.Response, error)
 
 	/*
-	GetSessionCommandLogs Get command logs
+		GetSessionCommandLogs Get command logs
 
-	Get logs for a specific command in a session
+		Get logs for a specific command in a session
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@param sessionId
-	@param commandId
-	@return ToolboxAPIGetSessionCommandLogsRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@param sessionId
+		@param commandId
+		@return ToolboxAPIGetSessionCommandLogsRequest
 	*/
 	GetSessionCommandLogs(ctx context.Context, sandboxId string, sessionId string, commandId string) ToolboxAPIGetSessionCommandLogsRequest
 
@@ -344,13 +343,13 @@ type ToolboxAPI interface {
 	GetSessionCommandLogsExecute(r ToolboxAPIGetSessionCommandLogsRequest) (string, *http.Response, error)
 
 	/*
-	GetWindows Get windows
+		GetWindows Get windows
 
-	Get list of open windows
+		Get list of open windows
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPIGetWindowsRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPIGetWindowsRequest
 	*/
 	GetWindows(ctx context.Context, sandboxId string) ToolboxAPIGetWindowsRequest
 
@@ -359,13 +358,13 @@ type ToolboxAPI interface {
 	GetWindowsExecute(r ToolboxAPIGetWindowsRequest) (*WindowsResponse, *http.Response, error)
 
 	/*
-	GitAddFiles Add files
+		GitAddFiles Add files
 
-	Add files to git commit
+		Add files to git commit
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPIGitAddFilesRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPIGitAddFilesRequest
 	*/
 	GitAddFiles(ctx context.Context, sandboxId string) ToolboxAPIGitAddFilesRequest
 
@@ -373,13 +372,13 @@ type ToolboxAPI interface {
 	GitAddFilesExecute(r ToolboxAPIGitAddFilesRequest) (*http.Response, error)
 
 	/*
-	GitCheckoutBranch Checkout branch
+		GitCheckoutBranch Checkout branch
 
-	Checkout branch or commit in git repository
+		Checkout branch or commit in git repository
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPIGitCheckoutBranchRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPIGitCheckoutBranchRequest
 	*/
 	GitCheckoutBranch(ctx context.Context, sandboxId string) ToolboxAPIGitCheckoutBranchRequest
 
@@ -387,13 +386,13 @@ type ToolboxAPI interface {
 	GitCheckoutBranchExecute(r ToolboxAPIGitCheckoutBranchRequest) (*http.Response, error)
 
 	/*
-	GitCloneRepository Clone repository
+		GitCloneRepository Clone repository
 
-	Clone git repository
+		Clone git repository
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPIGitCloneRepositoryRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPIGitCloneRepositoryRequest
 	*/
 	GitCloneRepository(ctx context.Context, sandboxId string) ToolboxAPIGitCloneRepositoryRequest
 
@@ -401,13 +400,13 @@ type ToolboxAPI interface {
 	GitCloneRepositoryExecute(r ToolboxAPIGitCloneRepositoryRequest) (*http.Response, error)
 
 	/*
-	GitCommitChanges Commit changes
+		GitCommitChanges Commit changes
 
-	Commit changes to git repository
+		Commit changes to git repository
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPIGitCommitChangesRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPIGitCommitChangesRequest
 	*/
 	GitCommitChanges(ctx context.Context, sandboxId string) ToolboxAPIGitCommitChangesRequest
 
@@ -416,13 +415,13 @@ type ToolboxAPI interface {
 	GitCommitChangesExecute(r ToolboxAPIGitCommitChangesRequest) (*GitCommitResponse, *http.Response, error)
 
 	/*
-	GitCreateBranch Create branch
+		GitCreateBranch Create branch
 
-	Create branch on git repository
+		Create branch on git repository
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPIGitCreateBranchRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPIGitCreateBranchRequest
 	*/
 	GitCreateBranch(ctx context.Context, sandboxId string) ToolboxAPIGitCreateBranchRequest
 
@@ -430,13 +429,13 @@ type ToolboxAPI interface {
 	GitCreateBranchExecute(r ToolboxAPIGitCreateBranchRequest) (*http.Response, error)
 
 	/*
-	GitDeleteBranch Delete branch
+		GitDeleteBranch Delete branch
 
-	Delete branch on git repository
+		Delete branch on git repository
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPIGitDeleteBranchRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPIGitDeleteBranchRequest
 	*/
 	GitDeleteBranch(ctx context.Context, sandboxId string) ToolboxAPIGitDeleteBranchRequest
 
@@ -444,13 +443,13 @@ type ToolboxAPI interface {
 	GitDeleteBranchExecute(r ToolboxAPIGitDeleteBranchRequest) (*http.Response, error)
 
 	/*
-	GitGetHistory Get commit history
+		GitGetHistory Get commit history
 
-	Get commit history from git repository
+		Get commit history from git repository
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPIGitGetHistoryRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPIGitGetHistoryRequest
 	*/
 	GitGetHistory(ctx context.Context, sandboxId string) ToolboxAPIGitGetHistoryRequest
 
@@ -459,13 +458,13 @@ type ToolboxAPI interface {
 	GitGetHistoryExecute(r ToolboxAPIGitGetHistoryRequest) ([]GitCommitInfo, *http.Response, error)
 
 	/*
-	GitGetStatus Get git status
+		GitGetStatus Get git status
 
-	Get status from git repository
+		Get status from git repository
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPIGitGetStatusRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPIGitGetStatusRequest
 	*/
 	GitGetStatus(ctx context.Context, sandboxId string) ToolboxAPIGitGetStatusRequest
 
@@ -474,13 +473,13 @@ type ToolboxAPI interface {
 	GitGetStatusExecute(r ToolboxAPIGitGetStatusRequest) (*GitStatus, *http.Response, error)
 
 	/*
-	GitListBranches Get branch list
+		GitListBranches Get branch list
 
-	Get branch list from git repository
+		Get branch list from git repository
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPIGitListBranchesRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPIGitListBranchesRequest
 	*/
 	GitListBranches(ctx context.Context, sandboxId string) ToolboxAPIGitListBranchesRequest
 
@@ -489,13 +488,13 @@ type ToolboxAPI interface {
 	GitListBranchesExecute(r ToolboxAPIGitListBranchesRequest) (*ListBranchResponse, *http.Response, error)
 
 	/*
-	GitPullChanges Pull changes
+		GitPullChanges Pull changes
 
-	Pull changes from remote
+		Pull changes from remote
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPIGitPullChangesRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPIGitPullChangesRequest
 	*/
 	GitPullChanges(ctx context.Context, sandboxId string) ToolboxAPIGitPullChangesRequest
 
@@ -503,13 +502,13 @@ type ToolboxAPI interface {
 	GitPullChangesExecute(r ToolboxAPIGitPullChangesRequest) (*http.Response, error)
 
 	/*
-	GitPushChanges Push changes
+		GitPushChanges Push changes
 
-	Push changes to remote
+		Push changes to remote
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPIGitPushChangesRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPIGitPushChangesRequest
 	*/
 	GitPushChanges(ctx context.Context, sandboxId string) ToolboxAPIGitPushChangesRequest
 
@@ -517,11 +516,11 @@ type ToolboxAPI interface {
 	GitPushChangesExecute(r ToolboxAPIGitPushChangesRequest) (*http.Response, error)
 
 	/*
-	ListFiles List files
+		ListFiles List files
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPIListFilesRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPIListFilesRequest
 	*/
 	ListFiles(ctx context.Context, sandboxId string) ToolboxAPIListFilesRequest
 
@@ -530,13 +529,13 @@ type ToolboxAPI interface {
 	ListFilesExecute(r ToolboxAPIListFilesRequest) ([]FileInfo, *http.Response, error)
 
 	/*
-	ListSessions List sessions
+		ListSessions List sessions
 
-	List all active sessions in the sandbox
+		List all active sessions in the sandbox
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPIListSessionsRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPIListSessionsRequest
 	*/
 	ListSessions(ctx context.Context, sandboxId string) ToolboxAPIListSessionsRequest
 
@@ -545,13 +544,13 @@ type ToolboxAPI interface {
 	ListSessionsExecute(r ToolboxAPIListSessionsRequest) ([]Session, *http.Response, error)
 
 	/*
-	LspCompletions Get Lsp Completions
+		LspCompletions Get Lsp Completions
 
-	The Completion request is sent from the client to the server to compute completion items at a given cursor position.
+		The Completion request is sent from the client to the server to compute completion items at a given cursor position.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPILspCompletionsRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPILspCompletionsRequest
 	*/
 	LspCompletions(ctx context.Context, sandboxId string) ToolboxAPILspCompletionsRequest
 
@@ -560,13 +559,13 @@ type ToolboxAPI interface {
 	LspCompletionsExecute(r ToolboxAPILspCompletionsRequest) (*CompletionList, *http.Response, error)
 
 	/*
-	LspDidClose Call Lsp DidClose
+		LspDidClose Call Lsp DidClose
 
-	The document close notification is sent from the client to the server when the document got closed in the client.
+		The document close notification is sent from the client to the server when the document got closed in the client.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPILspDidCloseRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPILspDidCloseRequest
 	*/
 	LspDidClose(ctx context.Context, sandboxId string) ToolboxAPILspDidCloseRequest
 
@@ -574,13 +573,13 @@ type ToolboxAPI interface {
 	LspDidCloseExecute(r ToolboxAPILspDidCloseRequest) (*http.Response, error)
 
 	/*
-	LspDidOpen Call Lsp DidOpen
+		LspDidOpen Call Lsp DidOpen
 
-	The document open notification is sent from the client to the server to signal newly opened text documents.
+		The document open notification is sent from the client to the server to signal newly opened text documents.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPILspDidOpenRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPILspDidOpenRequest
 	*/
 	LspDidOpen(ctx context.Context, sandboxId string) ToolboxAPILspDidOpenRequest
 
@@ -588,13 +587,13 @@ type ToolboxAPI interface {
 	LspDidOpenExecute(r ToolboxAPILspDidOpenRequest) (*http.Response, error)
 
 	/*
-	LspDocumentSymbols Call Lsp DocumentSymbols
+		LspDocumentSymbols Call Lsp DocumentSymbols
 
-	The document symbol request is sent from the client to the server.
+		The document symbol request is sent from the client to the server.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPILspDocumentSymbolsRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPILspDocumentSymbolsRequest
 	*/
 	LspDocumentSymbols(ctx context.Context, sandboxId string) ToolboxAPILspDocumentSymbolsRequest
 
@@ -603,13 +602,13 @@ type ToolboxAPI interface {
 	LspDocumentSymbolsExecute(r ToolboxAPILspDocumentSymbolsRequest) ([]LspSymbol, *http.Response, error)
 
 	/*
-	LspStart Start Lsp server
+		LspStart Start Lsp server
 
-	Start Lsp server process inside sandbox project
+		Start Lsp server process inside sandbox project
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPILspStartRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPILspStartRequest
 	*/
 	LspStart(ctx context.Context, sandboxId string) ToolboxAPILspStartRequest
 
@@ -617,13 +616,13 @@ type ToolboxAPI interface {
 	LspStartExecute(r ToolboxAPILspStartRequest) (*http.Response, error)
 
 	/*
-	LspStop Stop Lsp server
+		LspStop Stop Lsp server
 
-	Stop Lsp server process inside sandbox project
+		Stop Lsp server process inside sandbox project
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPILspStopRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPILspStopRequest
 	*/
 	LspStop(ctx context.Context, sandboxId string) ToolboxAPILspStopRequest
 
@@ -631,13 +630,13 @@ type ToolboxAPI interface {
 	LspStopExecute(r ToolboxAPILspStopRequest) (*http.Response, error)
 
 	/*
-	LspWorkspaceSymbols Call Lsp WorkspaceSymbols
+		LspWorkspaceSymbols Call Lsp WorkspaceSymbols
 
-	The workspace symbol request is sent from the client to the server to list project-wide symbols matching the query string.
+		The workspace symbol request is sent from the client to the server to list project-wide symbols matching the query string.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPILspWorkspaceSymbolsRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPILspWorkspaceSymbolsRequest
 	*/
 	LspWorkspaceSymbols(ctx context.Context, sandboxId string) ToolboxAPILspWorkspaceSymbolsRequest
 
@@ -646,13 +645,13 @@ type ToolboxAPI interface {
 	LspWorkspaceSymbolsExecute(r ToolboxAPILspWorkspaceSymbolsRequest) ([]LspSymbol, *http.Response, error)
 
 	/*
-	MoveFile Move file
+		MoveFile Move file
 
-	Move file inside sandbox
+		Move file inside sandbox
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPIMoveFileRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPIMoveFileRequest
 	*/
 	MoveFile(ctx context.Context, sandboxId string) ToolboxAPIMoveFileRequest
 
@@ -660,13 +659,13 @@ type ToolboxAPI interface {
 	MoveFileExecute(r ToolboxAPIMoveFileRequest) (*http.Response, error)
 
 	/*
-	MoveMouse Move mouse
+		MoveMouse Move mouse
 
-	Move mouse cursor to specified coordinates
+		Move mouse cursor to specified coordinates
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPIMoveMouseRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPIMoveMouseRequest
 	*/
 	MoveMouse(ctx context.Context, sandboxId string) ToolboxAPIMoveMouseRequest
 
@@ -675,13 +674,13 @@ type ToolboxAPI interface {
 	MoveMouseExecute(r ToolboxAPIMoveMouseRequest) (*MouseMoveResponse, *http.Response, error)
 
 	/*
-	PressHotkey Press hotkey
+		PressHotkey Press hotkey
 
-	Press a hotkey combination
+		Press a hotkey combination
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPIPressHotkeyRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPIPressHotkeyRequest
 	*/
 	PressHotkey(ctx context.Context, sandboxId string) ToolboxAPIPressHotkeyRequest
 
@@ -690,13 +689,13 @@ type ToolboxAPI interface {
 	PressHotkeyExecute(r ToolboxAPIPressHotkeyRequest) (*EmptyResponse, *http.Response, error)
 
 	/*
-	PressKey Press key
+		PressKey Press key
 
-	Press a key with optional modifiers
+		Press a key with optional modifiers
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPIPressKeyRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPIPressKeyRequest
 	*/
 	PressKey(ctx context.Context, sandboxId string) ToolboxAPIPressKeyRequest
 
@@ -705,13 +704,13 @@ type ToolboxAPI interface {
 	PressKeyExecute(r ToolboxAPIPressKeyRequest) (*EmptyResponse, *http.Response, error)
 
 	/*
-	ReplaceInFiles Replace in files
+		ReplaceInFiles Replace in files
 
-	Replace text/pattern in multiple files inside sandbox
+		Replace text/pattern in multiple files inside sandbox
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPIReplaceInFilesRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPIReplaceInFilesRequest
 	*/
 	ReplaceInFiles(ctx context.Context, sandboxId string) ToolboxAPIReplaceInFilesRequest
 
@@ -720,14 +719,14 @@ type ToolboxAPI interface {
 	ReplaceInFilesExecute(r ToolboxAPIReplaceInFilesRequest) ([]ReplaceResult, *http.Response, error)
 
 	/*
-	RestartProcess Restart process
+		RestartProcess Restart process
 
-	Restart a specific VNC process
+		Restart a specific VNC process
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param processName
-	@param sandboxId
-	@return ToolboxAPIRestartProcessRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param processName
+		@param sandboxId
+		@return ToolboxAPIRestartProcessRequest
 	*/
 	RestartProcess(ctx context.Context, processName string, sandboxId string) ToolboxAPIRestartProcessRequest
 
@@ -736,13 +735,13 @@ type ToolboxAPI interface {
 	RestartProcessExecute(r ToolboxAPIRestartProcessRequest) (*ProcessRestartResponse, *http.Response, error)
 
 	/*
-	ScrollMouse Scroll mouse
+		ScrollMouse Scroll mouse
 
-	Scroll mouse at specified coordinates
+		Scroll mouse at specified coordinates
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPIScrollMouseRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPIScrollMouseRequest
 	*/
 	ScrollMouse(ctx context.Context, sandboxId string) ToolboxAPIScrollMouseRequest
 
@@ -751,13 +750,13 @@ type ToolboxAPI interface {
 	ScrollMouseExecute(r ToolboxAPIScrollMouseRequest) (*EmptyResponse, *http.Response, error)
 
 	/*
-	SearchFiles Search files
+		SearchFiles Search files
 
-	Search for files inside sandbox
+		Search for files inside sandbox
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPISearchFilesRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPISearchFilesRequest
 	*/
 	SearchFiles(ctx context.Context, sandboxId string) ToolboxAPISearchFilesRequest
 
@@ -766,13 +765,13 @@ type ToolboxAPI interface {
 	SearchFilesExecute(r ToolboxAPISearchFilesRequest) (*SearchFilesResponse, *http.Response, error)
 
 	/*
-	SetFilePermissions Set file permissions
+		SetFilePermissions Set file permissions
 
-	Set file owner/group/permissions inside sandbox
+		Set file owner/group/permissions inside sandbox
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPISetFilePermissionsRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPISetFilePermissionsRequest
 	*/
 	SetFilePermissions(ctx context.Context, sandboxId string) ToolboxAPISetFilePermissionsRequest
 
@@ -780,13 +779,13 @@ type ToolboxAPI interface {
 	SetFilePermissionsExecute(r ToolboxAPISetFilePermissionsRequest) (*http.Response, error)
 
 	/*
-	StartComputerUse Start computer use processes
+		StartComputerUse Start computer use processes
 
-	Start all VNC desktop processes (Xvfb, xfce4, x11vnc, novnc)
+		Start all VNC desktop processes (Xvfb, xfce4, x11vnc, novnc)
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPIStartComputerUseRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPIStartComputerUseRequest
 	*/
 	StartComputerUse(ctx context.Context, sandboxId string) ToolboxAPIStartComputerUseRequest
 
@@ -795,13 +794,13 @@ type ToolboxAPI interface {
 	StartComputerUseExecute(r ToolboxAPIStartComputerUseRequest) (*ComputerUseStartResponse, *http.Response, error)
 
 	/*
-	StopComputerUse Stop computer use processes
+		StopComputerUse Stop computer use processes
 
-	Stop all VNC desktop processes (Xvfb, xfce4, x11vnc, novnc)
+		Stop all VNC desktop processes (Xvfb, xfce4, x11vnc, novnc)
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPIStopComputerUseRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPIStopComputerUseRequest
 	*/
 	StopComputerUse(ctx context.Context, sandboxId string) ToolboxAPIStopComputerUseRequest
 
@@ -810,13 +809,13 @@ type ToolboxAPI interface {
 	StopComputerUseExecute(r ToolboxAPIStopComputerUseRequest) (*ComputerUseStopResponse, *http.Response, error)
 
 	/*
-	TakeCompressedRegionScreenshot Take compressed region screenshot
+		TakeCompressedRegionScreenshot Take compressed region screenshot
 
-	Take a compressed screenshot of a specific region
+		Take a compressed screenshot of a specific region
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPITakeCompressedRegionScreenshotRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPITakeCompressedRegionScreenshotRequest
 	*/
 	TakeCompressedRegionScreenshot(ctx context.Context, sandboxId string) ToolboxAPITakeCompressedRegionScreenshotRequest
 
@@ -825,13 +824,13 @@ type ToolboxAPI interface {
 	TakeCompressedRegionScreenshotExecute(r ToolboxAPITakeCompressedRegionScreenshotRequest) (*CompressedScreenshotResponse, *http.Response, error)
 
 	/*
-	TakeCompressedScreenshot Take compressed screenshot
+		TakeCompressedScreenshot Take compressed screenshot
 
-	Take a compressed screenshot with format, quality, and scale options
+		Take a compressed screenshot with format, quality, and scale options
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPITakeCompressedScreenshotRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPITakeCompressedScreenshotRequest
 	*/
 	TakeCompressedScreenshot(ctx context.Context, sandboxId string) ToolboxAPITakeCompressedScreenshotRequest
 
@@ -840,13 +839,13 @@ type ToolboxAPI interface {
 	TakeCompressedScreenshotExecute(r ToolboxAPITakeCompressedScreenshotRequest) (*CompressedScreenshotResponse, *http.Response, error)
 
 	/*
-	TakeRegionScreenshot Take region screenshot
+		TakeRegionScreenshot Take region screenshot
 
-	Take a screenshot of a specific region
+		Take a screenshot of a specific region
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPITakeRegionScreenshotRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPITakeRegionScreenshotRequest
 	*/
 	TakeRegionScreenshot(ctx context.Context, sandboxId string) ToolboxAPITakeRegionScreenshotRequest
 
@@ -855,13 +854,13 @@ type ToolboxAPI interface {
 	TakeRegionScreenshotExecute(r ToolboxAPITakeRegionScreenshotRequest) (*RegionScreenshotResponse, *http.Response, error)
 
 	/*
-	TakeScreenshot Take screenshot
+		TakeScreenshot Take screenshot
 
-	Take a screenshot of the entire screen
+		Take a screenshot of the entire screen
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPITakeScreenshotRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPITakeScreenshotRequest
 	*/
 	TakeScreenshot(ctx context.Context, sandboxId string) ToolboxAPITakeScreenshotRequest
 
@@ -870,13 +869,13 @@ type ToolboxAPI interface {
 	TakeScreenshotExecute(r ToolboxAPITakeScreenshotRequest) (*ScreenshotResponse, *http.Response, error)
 
 	/*
-	TypeText Type text
+		TypeText Type text
 
-	Type text using keyboard
+		Type text using keyboard
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPITypeTextRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPITypeTextRequest
 	*/
 	TypeText(ctx context.Context, sandboxId string) ToolboxAPITypeTextRequest
 
@@ -885,15 +884,15 @@ type ToolboxAPI interface {
 	TypeTextExecute(r ToolboxAPITypeTextRequest) (*EmptyResponse, *http.Response, error)
 
 	/*
-	UploadFile Upload file
+		UploadFile Upload file
 
-	Upload file inside sandbox
+		Upload file inside sandbox
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPIUploadFileRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPIUploadFileRequest
 
-	Deprecated
+		Deprecated
 	*/
 	UploadFile(ctx context.Context, sandboxId string) ToolboxAPIUploadFileRequest
 
@@ -902,13 +901,13 @@ type ToolboxAPI interface {
 	UploadFileExecute(r ToolboxAPIUploadFileRequest) (*http.Response, error)
 
 	/*
-	UploadFiles Upload multiple files
+		UploadFiles Upload multiple files
 
-	Upload multiple files inside sandbox
+		Upload multiple files inside sandbox
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPIUploadFilesRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPIUploadFilesRequest
 	*/
 	UploadFiles(ctx context.Context, sandboxId string) ToolboxAPIUploadFilesRequest
 
@@ -920,10 +919,10 @@ type ToolboxAPI interface {
 type ToolboxAPIService service
 
 type ToolboxAPIClickMouseRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	mouseClickRequest *MouseClickRequest
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	mouseClickRequest      *MouseClickRequest
 	xDaytonaOrganizationID *string
 }
 
@@ -947,26 +946,27 @@ ClickMouse Click mouse
 
 Click mouse at specified coordinates
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPIClickMouseRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPIClickMouseRequest
 */
 func (a *ToolboxAPIService) ClickMouse(ctx context.Context, sandboxId string) ToolboxAPIClickMouseRequest {
 	return ToolboxAPIClickMouseRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
 // Execute executes the request
-//  @return MouseClickResponse
+//
+//	@return MouseClickResponse
 func (a *ToolboxAPIService) ClickMouseExecute(r ToolboxAPIClickMouseRequest) (*MouseClickResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *MouseClickResponse
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *MouseClickResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.ClickMouse")
@@ -1044,11 +1044,11 @@ func (a *ToolboxAPIService) ClickMouseExecute(r ToolboxAPIClickMouseRequest) (*M
 }
 
 type ToolboxAPICreateFolderRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	path *string
-	mode *string
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	path                   *string
+	mode                   *string
 	xDaytonaOrganizationID *string
 }
 
@@ -1077,24 +1077,24 @@ CreateFolder Create folder
 
 Create folder inside sandbox
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPICreateFolderRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPICreateFolderRequest
 */
 func (a *ToolboxAPIService) CreateFolder(ctx context.Context, sandboxId string) ToolboxAPICreateFolderRequest {
 	return ToolboxAPICreateFolderRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
 // Execute executes the request
 func (a *ToolboxAPIService) CreateFolderExecute(r ToolboxAPICreateFolderRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.CreateFolder")
@@ -1166,10 +1166,10 @@ func (a *ToolboxAPIService) CreateFolderExecute(r ToolboxAPICreateFolderRequest)
 }
 
 type ToolboxAPICreateSessionRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	createSessionRequest *CreateSessionRequest
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	createSessionRequest   *CreateSessionRequest
 	xDaytonaOrganizationID *string
 }
 
@@ -1193,24 +1193,24 @@ CreateSession Create session
 
 Create a new session in the sandbox
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPICreateSessionRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPICreateSessionRequest
 */
 func (a *ToolboxAPIService) CreateSession(ctx context.Context, sandboxId string) ToolboxAPICreateSessionRequest {
 	return ToolboxAPICreateSessionRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
 // Execute executes the request
 func (a *ToolboxAPIService) CreateSessionExecute(r ToolboxAPICreateSessionRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.CreateSession")
@@ -1279,10 +1279,10 @@ func (a *ToolboxAPIService) CreateSessionExecute(r ToolboxAPICreateSessionReques
 }
 
 type ToolboxAPIDeleteFileRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	path *string
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	path                   *string
 	xDaytonaOrganizationID *string
 }
 
@@ -1306,24 +1306,24 @@ DeleteFile Delete file
 
 Delete file inside sandbox
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPIDeleteFileRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPIDeleteFileRequest
 */
 func (a *ToolboxAPIService) DeleteFile(ctx context.Context, sandboxId string) ToolboxAPIDeleteFileRequest {
 	return ToolboxAPIDeleteFileRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
 // Execute executes the request
 func (a *ToolboxAPIService) DeleteFileExecute(r ToolboxAPIDeleteFileRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodDelete
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.DeleteFile")
@@ -1391,10 +1391,10 @@ func (a *ToolboxAPIService) DeleteFileExecute(r ToolboxAPIDeleteFileRequest) (*h
 }
 
 type ToolboxAPIDeleteSessionRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	sessionId string
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	sessionId              string
 	xDaytonaOrganizationID *string
 }
 
@@ -1413,26 +1413,26 @@ DeleteSession Delete session
 
 Delete a specific session
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @param sessionId
- @return ToolboxAPIDeleteSessionRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@param sessionId
+	@return ToolboxAPIDeleteSessionRequest
 */
 func (a *ToolboxAPIService) DeleteSession(ctx context.Context, sandboxId string, sessionId string) ToolboxAPIDeleteSessionRequest {
 	return ToolboxAPIDeleteSessionRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
-		sessionId: sessionId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
+		sessionId:  sessionId,
 	}
 }
 
 // Execute executes the request
 func (a *ToolboxAPIService) DeleteSessionExecute(r ToolboxAPIDeleteSessionRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodDelete
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.DeleteSession")
@@ -1497,10 +1497,10 @@ func (a *ToolboxAPIService) DeleteSessionExecute(r ToolboxAPIDeleteSessionReques
 }
 
 type ToolboxAPIDownloadFileRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	path *string
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	path                   *string
 	xDaytonaOrganizationID *string
 }
 
@@ -1524,26 +1524,27 @@ DownloadFile Download file
 
 Download file from sandbox
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPIDownloadFileRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPIDownloadFileRequest
 */
 func (a *ToolboxAPIService) DownloadFile(ctx context.Context, sandboxId string) ToolboxAPIDownloadFileRequest {
 	return ToolboxAPIDownloadFileRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
 // Execute executes the request
-//  @return *os.File
+//
+//	@return *os.File
 func (a *ToolboxAPIService) DownloadFileExecute(r ToolboxAPIDownloadFileRequest) (*os.File, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *os.File
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *os.File
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.DownloadFile")
@@ -1620,10 +1621,10 @@ func (a *ToolboxAPIService) DownloadFileExecute(r ToolboxAPIDownloadFileRequest)
 }
 
 type ToolboxAPIDragMouseRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	mouseDragRequest *MouseDragRequest
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	mouseDragRequest       *MouseDragRequest
 	xDaytonaOrganizationID *string
 }
 
@@ -1647,26 +1648,27 @@ DragMouse Drag mouse
 
 Drag mouse from start to end coordinates
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPIDragMouseRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPIDragMouseRequest
 */
 func (a *ToolboxAPIService) DragMouse(ctx context.Context, sandboxId string) ToolboxAPIDragMouseRequest {
 	return ToolboxAPIDragMouseRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
 // Execute executes the request
-//  @return MouseDragResponse
+//
+//	@return MouseDragResponse
 func (a *ToolboxAPIService) DragMouseExecute(r ToolboxAPIDragMouseRequest) (*MouseDragResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *MouseDragResponse
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *MouseDragResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.DragMouse")
@@ -1744,10 +1746,10 @@ func (a *ToolboxAPIService) DragMouseExecute(r ToolboxAPIDragMouseRequest) (*Mou
 }
 
 type ToolboxAPIExecuteCommandRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	executeRequest *ExecuteRequest
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	executeRequest         *ExecuteRequest
 	xDaytonaOrganizationID *string
 }
 
@@ -1771,26 +1773,27 @@ ExecuteCommand Execute command
 
 Execute command synchronously inside sandbox
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPIExecuteCommandRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPIExecuteCommandRequest
 */
 func (a *ToolboxAPIService) ExecuteCommand(ctx context.Context, sandboxId string) ToolboxAPIExecuteCommandRequest {
 	return ToolboxAPIExecuteCommandRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
 // Execute executes the request
-//  @return ExecuteResponse
+//
+//	@return ExecuteResponse
 func (a *ToolboxAPIService) ExecuteCommandExecute(r ToolboxAPIExecuteCommandRequest) (*ExecuteResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ExecuteResponse
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ExecuteResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.ExecuteCommand")
@@ -1868,11 +1871,11 @@ func (a *ToolboxAPIService) ExecuteCommandExecute(r ToolboxAPIExecuteCommandRequ
 }
 
 type ToolboxAPIExecuteSessionCommandRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	sessionId string
-	sessionExecuteRequest *SessionExecuteRequest
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	sessionId              string
+	sessionExecuteRequest  *SessionExecuteRequest
 	xDaytonaOrganizationID *string
 }
 
@@ -1896,28 +1899,29 @@ ExecuteSessionCommand Execute command in session
 
 Execute a command in a specific session
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @param sessionId
- @return ToolboxAPIExecuteSessionCommandRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@param sessionId
+	@return ToolboxAPIExecuteSessionCommandRequest
 */
 func (a *ToolboxAPIService) ExecuteSessionCommand(ctx context.Context, sandboxId string, sessionId string) ToolboxAPIExecuteSessionCommandRequest {
 	return ToolboxAPIExecuteSessionCommandRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
-		sessionId: sessionId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
+		sessionId:  sessionId,
 	}
 }
 
 // Execute executes the request
-//  @return SessionExecuteResponse
+//
+//	@return SessionExecuteResponse
 func (a *ToolboxAPIService) ExecuteSessionCommandExecute(r ToolboxAPIExecuteSessionCommandRequest) (*SessionExecuteResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *SessionExecuteResponse
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *SessionExecuteResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.ExecuteSessionCommand")
@@ -1996,11 +2000,11 @@ func (a *ToolboxAPIService) ExecuteSessionCommandExecute(r ToolboxAPIExecuteSess
 }
 
 type ToolboxAPIFindInFilesRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	path *string
-	pattern *string
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	path                   *string
+	pattern                *string
 	xDaytonaOrganizationID *string
 }
 
@@ -2029,26 +2033,27 @@ FindInFiles Search for text/pattern in files
 
 Search for text/pattern inside sandbox files
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPIFindInFilesRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPIFindInFilesRequest
 */
 func (a *ToolboxAPIService) FindInFiles(ctx context.Context, sandboxId string) ToolboxAPIFindInFilesRequest {
 	return ToolboxAPIFindInFilesRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
 // Execute executes the request
-//  @return []Match
+//
+//	@return []Match
 func (a *ToolboxAPIService) FindInFilesExecute(r ToolboxAPIFindInFilesRequest) ([]Match, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  []Match
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue []Match
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.FindInFiles")
@@ -2129,9 +2134,9 @@ func (a *ToolboxAPIService) FindInFilesExecute(r ToolboxAPIFindInFilesRequest) (
 }
 
 type ToolboxAPIGetComputerUseStatusRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
 	xDaytonaOrganizationID *string
 }
 
@@ -2150,26 +2155,27 @@ GetComputerUseStatus Get computer use status
 
 Get status of all VNC desktop processes
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPIGetComputerUseStatusRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPIGetComputerUseStatusRequest
 */
 func (a *ToolboxAPIService) GetComputerUseStatus(ctx context.Context, sandboxId string) ToolboxAPIGetComputerUseStatusRequest {
 	return ToolboxAPIGetComputerUseStatusRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
 // Execute executes the request
-//  @return ComputerUseStatusResponse
+//
+//	@return ComputerUseStatusResponse
 func (a *ToolboxAPIService) GetComputerUseStatusExecute(r ToolboxAPIGetComputerUseStatusRequest) (*ComputerUseStatusResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComputerUseStatusResponse
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComputerUseStatusResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.GetComputerUseStatus")
@@ -2242,9 +2248,9 @@ func (a *ToolboxAPIService) GetComputerUseStatusExecute(r ToolboxAPIGetComputerU
 }
 
 type ToolboxAPIGetDisplayInfoRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
 	xDaytonaOrganizationID *string
 }
 
@@ -2263,26 +2269,27 @@ GetDisplayInfo Get display info
 
 Get information about displays
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPIGetDisplayInfoRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPIGetDisplayInfoRequest
 */
 func (a *ToolboxAPIService) GetDisplayInfo(ctx context.Context, sandboxId string) ToolboxAPIGetDisplayInfoRequest {
 	return ToolboxAPIGetDisplayInfoRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
 // Execute executes the request
-//  @return DisplayInfoResponse
+//
+//	@return DisplayInfoResponse
 func (a *ToolboxAPIService) GetDisplayInfoExecute(r ToolboxAPIGetDisplayInfoRequest) (*DisplayInfoResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *DisplayInfoResponse
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *DisplayInfoResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.GetDisplayInfo")
@@ -2355,10 +2362,10 @@ func (a *ToolboxAPIService) GetDisplayInfoExecute(r ToolboxAPIGetDisplayInfoRequ
 }
 
 type ToolboxAPIGetFileInfoRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	path *string
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	path                   *string
 	xDaytonaOrganizationID *string
 }
 
@@ -2382,26 +2389,27 @@ GetFileInfo Get file info
 
 Get file info inside sandbox
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPIGetFileInfoRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPIGetFileInfoRequest
 */
 func (a *ToolboxAPIService) GetFileInfo(ctx context.Context, sandboxId string) ToolboxAPIGetFileInfoRequest {
 	return ToolboxAPIGetFileInfoRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
 // Execute executes the request
-//  @return FileInfo
+//
+//	@return FileInfo
 func (a *ToolboxAPIService) GetFileInfoExecute(r ToolboxAPIGetFileInfoRequest) (*FileInfo, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *FileInfo
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *FileInfo
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.GetFileInfo")
@@ -2478,9 +2486,9 @@ func (a *ToolboxAPIService) GetFileInfoExecute(r ToolboxAPIGetFileInfoRequest) (
 }
 
 type ToolboxAPIGetMousePositionRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
 	xDaytonaOrganizationID *string
 }
 
@@ -2499,26 +2507,27 @@ GetMousePosition Get mouse position
 
 Get current mouse cursor position
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPIGetMousePositionRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPIGetMousePositionRequest
 */
 func (a *ToolboxAPIService) GetMousePosition(ctx context.Context, sandboxId string) ToolboxAPIGetMousePositionRequest {
 	return ToolboxAPIGetMousePositionRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
 // Execute executes the request
-//  @return MousePosition
+//
+//	@return MousePosition
 func (a *ToolboxAPIService) GetMousePositionExecute(r ToolboxAPIGetMousePositionRequest) (*MousePosition, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *MousePosition
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *MousePosition
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.GetMousePosition")
@@ -2591,10 +2600,10 @@ func (a *ToolboxAPIService) GetMousePositionExecute(r ToolboxAPIGetMousePosition
 }
 
 type ToolboxAPIGetProcessErrorsRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	processName string
-	sandboxId string
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	processName            string
+	sandboxId              string
 	xDaytonaOrganizationID *string
 }
 
@@ -2613,28 +2622,29 @@ GetProcessErrors Get process errors
 
 Get error logs for a specific VNC process
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param processName
- @param sandboxId
- @return ToolboxAPIGetProcessErrorsRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param processName
+	@param sandboxId
+	@return ToolboxAPIGetProcessErrorsRequest
 */
 func (a *ToolboxAPIService) GetProcessErrors(ctx context.Context, processName string, sandboxId string) ToolboxAPIGetProcessErrorsRequest {
 	return ToolboxAPIGetProcessErrorsRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:  a,
+		ctx:         ctx,
 		processName: processName,
-		sandboxId: sandboxId,
+		sandboxId:   sandboxId,
 	}
 }
 
 // Execute executes the request
-//  @return ProcessErrorsResponse
+//
+//	@return ProcessErrorsResponse
 func (a *ToolboxAPIService) GetProcessErrorsExecute(r ToolboxAPIGetProcessErrorsRequest) (*ProcessErrorsResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ProcessErrorsResponse
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ProcessErrorsResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.GetProcessErrors")
@@ -2708,10 +2718,10 @@ func (a *ToolboxAPIService) GetProcessErrorsExecute(r ToolboxAPIGetProcessErrors
 }
 
 type ToolboxAPIGetProcessLogsRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	processName string
-	sandboxId string
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	processName            string
+	sandboxId              string
 	xDaytonaOrganizationID *string
 }
 
@@ -2730,28 +2740,29 @@ GetProcessLogs Get process logs
 
 Get logs for a specific VNC process
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param processName
- @param sandboxId
- @return ToolboxAPIGetProcessLogsRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param processName
+	@param sandboxId
+	@return ToolboxAPIGetProcessLogsRequest
 */
 func (a *ToolboxAPIService) GetProcessLogs(ctx context.Context, processName string, sandboxId string) ToolboxAPIGetProcessLogsRequest {
 	return ToolboxAPIGetProcessLogsRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:  a,
+		ctx:         ctx,
 		processName: processName,
-		sandboxId: sandboxId,
+		sandboxId:   sandboxId,
 	}
 }
 
 // Execute executes the request
-//  @return ProcessLogsResponse
+//
+//	@return ProcessLogsResponse
 func (a *ToolboxAPIService) GetProcessLogsExecute(r ToolboxAPIGetProcessLogsRequest) (*ProcessLogsResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ProcessLogsResponse
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ProcessLogsResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.GetProcessLogs")
@@ -2825,10 +2836,10 @@ func (a *ToolboxAPIService) GetProcessLogsExecute(r ToolboxAPIGetProcessLogsRequ
 }
 
 type ToolboxAPIGetProcessStatusRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	processName string
-	sandboxId string
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	processName            string
+	sandboxId              string
 	xDaytonaOrganizationID *string
 }
 
@@ -2847,28 +2858,29 @@ GetProcessStatus Get process status
 
 Get status of a specific VNC process
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param processName
- @param sandboxId
- @return ToolboxAPIGetProcessStatusRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param processName
+	@param sandboxId
+	@return ToolboxAPIGetProcessStatusRequest
 */
 func (a *ToolboxAPIService) GetProcessStatus(ctx context.Context, processName string, sandboxId string) ToolboxAPIGetProcessStatusRequest {
 	return ToolboxAPIGetProcessStatusRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:  a,
+		ctx:         ctx,
 		processName: processName,
-		sandboxId: sandboxId,
+		sandboxId:   sandboxId,
 	}
 }
 
 // Execute executes the request
-//  @return ProcessStatusResponse
+//
+//	@return ProcessStatusResponse
 func (a *ToolboxAPIService) GetProcessStatusExecute(r ToolboxAPIGetProcessStatusRequest) (*ProcessStatusResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ProcessStatusResponse
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ProcessStatusResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.GetProcessStatus")
@@ -2942,9 +2954,9 @@ func (a *ToolboxAPIService) GetProcessStatusExecute(r ToolboxAPIGetProcessStatus
 }
 
 type ToolboxAPIGetProjectDirRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
 	xDaytonaOrganizationID *string
 }
 
@@ -2961,26 +2973,27 @@ func (r ToolboxAPIGetProjectDirRequest) Execute() (*ProjectDirResponse, *http.Re
 /*
 GetProjectDir Get sandbox project dir
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPIGetProjectDirRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPIGetProjectDirRequest
 */
 func (a *ToolboxAPIService) GetProjectDir(ctx context.Context, sandboxId string) ToolboxAPIGetProjectDirRequest {
 	return ToolboxAPIGetProjectDirRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
 // Execute executes the request
-//  @return ProjectDirResponse
+//
+//	@return ProjectDirResponse
 func (a *ToolboxAPIService) GetProjectDirExecute(r ToolboxAPIGetProjectDirRequest) (*ProjectDirResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ProjectDirResponse
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ProjectDirResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.GetProjectDir")
@@ -3053,10 +3066,10 @@ func (a *ToolboxAPIService) GetProjectDirExecute(r ToolboxAPIGetProjectDirReques
 }
 
 type ToolboxAPIGetSessionRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	sessionId string
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	sessionId              string
 	xDaytonaOrganizationID *string
 }
 
@@ -3075,28 +3088,29 @@ GetSession Get session
 
 Get session by ID
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @param sessionId
- @return ToolboxAPIGetSessionRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@param sessionId
+	@return ToolboxAPIGetSessionRequest
 */
 func (a *ToolboxAPIService) GetSession(ctx context.Context, sandboxId string, sessionId string) ToolboxAPIGetSessionRequest {
 	return ToolboxAPIGetSessionRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
-		sessionId: sessionId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
+		sessionId:  sessionId,
 	}
 }
 
 // Execute executes the request
-//  @return Session
+//
+//	@return Session
 func (a *ToolboxAPIService) GetSessionExecute(r ToolboxAPIGetSessionRequest) (*Session, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *Session
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *Session
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.GetSession")
@@ -3170,11 +3184,11 @@ func (a *ToolboxAPIService) GetSessionExecute(r ToolboxAPIGetSessionRequest) (*S
 }
 
 type ToolboxAPIGetSessionCommandRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	sessionId string
-	commandId string
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	sessionId              string
+	commandId              string
 	xDaytonaOrganizationID *string
 }
 
@@ -3193,30 +3207,31 @@ GetSessionCommand Get session command
 
 Get session command by ID
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @param sessionId
- @param commandId
- @return ToolboxAPIGetSessionCommandRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@param sessionId
+	@param commandId
+	@return ToolboxAPIGetSessionCommandRequest
 */
 func (a *ToolboxAPIService) GetSessionCommand(ctx context.Context, sandboxId string, sessionId string, commandId string) ToolboxAPIGetSessionCommandRequest {
 	return ToolboxAPIGetSessionCommandRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
-		sessionId: sessionId,
-		commandId: commandId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
+		sessionId:  sessionId,
+		commandId:  commandId,
 	}
 }
 
 // Execute executes the request
-//  @return Command
+//
+//	@return Command
 func (a *ToolboxAPIService) GetSessionCommandExecute(r ToolboxAPIGetSessionCommandRequest) (*Command, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *Command
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *Command
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.GetSessionCommand")
@@ -3291,13 +3306,13 @@ func (a *ToolboxAPIService) GetSessionCommandExecute(r ToolboxAPIGetSessionComma
 }
 
 type ToolboxAPIGetSessionCommandLogsRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	sessionId string
-	commandId string
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	sessionId              string
+	commandId              string
 	xDaytonaOrganizationID *string
-	follow *bool
+	follow                 *bool
 }
 
 // Use with JWT to specify the organization ID
@@ -3320,30 +3335,31 @@ GetSessionCommandLogs Get command logs
 
 Get logs for a specific command in a session
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @param sessionId
- @param commandId
- @return ToolboxAPIGetSessionCommandLogsRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@param sessionId
+	@param commandId
+	@return ToolboxAPIGetSessionCommandLogsRequest
 */
 func (a *ToolboxAPIService) GetSessionCommandLogs(ctx context.Context, sandboxId string, sessionId string, commandId string) ToolboxAPIGetSessionCommandLogsRequest {
 	return ToolboxAPIGetSessionCommandLogsRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
-		sessionId: sessionId,
-		commandId: commandId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
+		sessionId:  sessionId,
+		commandId:  commandId,
 	}
 }
 
 // Execute executes the request
-//  @return string
+//
+//	@return string
 func (a *ToolboxAPIService) GetSessionCommandLogsExecute(r ToolboxAPIGetSessionCommandLogsRequest) (string, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  string
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue string
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.GetSessionCommandLogs")
@@ -3421,9 +3437,9 @@ func (a *ToolboxAPIService) GetSessionCommandLogsExecute(r ToolboxAPIGetSessionC
 }
 
 type ToolboxAPIGetWindowsRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
 	xDaytonaOrganizationID *string
 }
 
@@ -3442,26 +3458,27 @@ GetWindows Get windows
 
 Get list of open windows
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPIGetWindowsRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPIGetWindowsRequest
 */
 func (a *ToolboxAPIService) GetWindows(ctx context.Context, sandboxId string) ToolboxAPIGetWindowsRequest {
 	return ToolboxAPIGetWindowsRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
 // Execute executes the request
-//  @return WindowsResponse
+//
+//	@return WindowsResponse
 func (a *ToolboxAPIService) GetWindowsExecute(r ToolboxAPIGetWindowsRequest) (*WindowsResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *WindowsResponse
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *WindowsResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.GetWindows")
@@ -3534,10 +3551,10 @@ func (a *ToolboxAPIService) GetWindowsExecute(r ToolboxAPIGetWindowsRequest) (*W
 }
 
 type ToolboxAPIGitAddFilesRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	gitAddRequest *GitAddRequest
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	gitAddRequest          *GitAddRequest
 	xDaytonaOrganizationID *string
 }
 
@@ -3561,24 +3578,24 @@ GitAddFiles Add files
 
 Add files to git commit
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPIGitAddFilesRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPIGitAddFilesRequest
 */
 func (a *ToolboxAPIService) GitAddFiles(ctx context.Context, sandboxId string) ToolboxAPIGitAddFilesRequest {
 	return ToolboxAPIGitAddFilesRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
 // Execute executes the request
 func (a *ToolboxAPIService) GitAddFilesExecute(r ToolboxAPIGitAddFilesRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.GitAddFiles")
@@ -3647,10 +3664,10 @@ func (a *ToolboxAPIService) GitAddFilesExecute(r ToolboxAPIGitAddFilesRequest) (
 }
 
 type ToolboxAPIGitCheckoutBranchRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	gitCheckoutRequest *GitCheckoutRequest
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	gitCheckoutRequest     *GitCheckoutRequest
 	xDaytonaOrganizationID *string
 }
 
@@ -3674,24 +3691,24 @@ GitCheckoutBranch Checkout branch
 
 Checkout branch or commit in git repository
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPIGitCheckoutBranchRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPIGitCheckoutBranchRequest
 */
 func (a *ToolboxAPIService) GitCheckoutBranch(ctx context.Context, sandboxId string) ToolboxAPIGitCheckoutBranchRequest {
 	return ToolboxAPIGitCheckoutBranchRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
 // Execute executes the request
 func (a *ToolboxAPIService) GitCheckoutBranchExecute(r ToolboxAPIGitCheckoutBranchRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.GitCheckoutBranch")
@@ -3760,10 +3777,10 @@ func (a *ToolboxAPIService) GitCheckoutBranchExecute(r ToolboxAPIGitCheckoutBran
 }
 
 type ToolboxAPIGitCloneRepositoryRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	gitCloneRequest *GitCloneRequest
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	gitCloneRequest        *GitCloneRequest
 	xDaytonaOrganizationID *string
 }
 
@@ -3787,24 +3804,24 @@ GitCloneRepository Clone repository
 
 Clone git repository
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPIGitCloneRepositoryRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPIGitCloneRepositoryRequest
 */
 func (a *ToolboxAPIService) GitCloneRepository(ctx context.Context, sandboxId string) ToolboxAPIGitCloneRepositoryRequest {
 	return ToolboxAPIGitCloneRepositoryRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
 // Execute executes the request
 func (a *ToolboxAPIService) GitCloneRepositoryExecute(r ToolboxAPIGitCloneRepositoryRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.GitCloneRepository")
@@ -3873,10 +3890,10 @@ func (a *ToolboxAPIService) GitCloneRepositoryExecute(r ToolboxAPIGitCloneReposi
 }
 
 type ToolboxAPIGitCommitChangesRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	gitCommitRequest *GitCommitRequest
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	gitCommitRequest       *GitCommitRequest
 	xDaytonaOrganizationID *string
 }
 
@@ -3900,26 +3917,27 @@ GitCommitChanges Commit changes
 
 Commit changes to git repository
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPIGitCommitChangesRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPIGitCommitChangesRequest
 */
 func (a *ToolboxAPIService) GitCommitChanges(ctx context.Context, sandboxId string) ToolboxAPIGitCommitChangesRequest {
 	return ToolboxAPIGitCommitChangesRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
 // Execute executes the request
-//  @return GitCommitResponse
+//
+//	@return GitCommitResponse
 func (a *ToolboxAPIService) GitCommitChangesExecute(r ToolboxAPIGitCommitChangesRequest) (*GitCommitResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *GitCommitResponse
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *GitCommitResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.GitCommitChanges")
@@ -3997,10 +4015,10 @@ func (a *ToolboxAPIService) GitCommitChangesExecute(r ToolboxAPIGitCommitChanges
 }
 
 type ToolboxAPIGitCreateBranchRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	gitBranchRequest *GitBranchRequest
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	gitBranchRequest       *GitBranchRequest
 	xDaytonaOrganizationID *string
 }
 
@@ -4024,24 +4042,24 @@ GitCreateBranch Create branch
 
 Create branch on git repository
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPIGitCreateBranchRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPIGitCreateBranchRequest
 */
 func (a *ToolboxAPIService) GitCreateBranch(ctx context.Context, sandboxId string) ToolboxAPIGitCreateBranchRequest {
 	return ToolboxAPIGitCreateBranchRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
 // Execute executes the request
 func (a *ToolboxAPIService) GitCreateBranchExecute(r ToolboxAPIGitCreateBranchRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.GitCreateBranch")
@@ -4110,9 +4128,9 @@ func (a *ToolboxAPIService) GitCreateBranchExecute(r ToolboxAPIGitCreateBranchRe
 }
 
 type ToolboxAPIGitDeleteBranchRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
 	gitDeleteBranchRequest *GitDeleteBranchRequest
 	xDaytonaOrganizationID *string
 }
@@ -4137,24 +4155,24 @@ GitDeleteBranch Delete branch
 
 Delete branch on git repository
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPIGitDeleteBranchRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPIGitDeleteBranchRequest
 */
 func (a *ToolboxAPIService) GitDeleteBranch(ctx context.Context, sandboxId string) ToolboxAPIGitDeleteBranchRequest {
 	return ToolboxAPIGitDeleteBranchRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
 // Execute executes the request
 func (a *ToolboxAPIService) GitDeleteBranchExecute(r ToolboxAPIGitDeleteBranchRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodDelete
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.GitDeleteBranch")
@@ -4223,10 +4241,10 @@ func (a *ToolboxAPIService) GitDeleteBranchExecute(r ToolboxAPIGitDeleteBranchRe
 }
 
 type ToolboxAPIGitGetHistoryRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	path *string
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	path                   *string
 	xDaytonaOrganizationID *string
 }
 
@@ -4250,26 +4268,27 @@ GitGetHistory Get commit history
 
 Get commit history from git repository
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPIGitGetHistoryRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPIGitGetHistoryRequest
 */
 func (a *ToolboxAPIService) GitGetHistory(ctx context.Context, sandboxId string) ToolboxAPIGitGetHistoryRequest {
 	return ToolboxAPIGitGetHistoryRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
 // Execute executes the request
-//  @return []GitCommitInfo
+//
+//	@return []GitCommitInfo
 func (a *ToolboxAPIService) GitGetHistoryExecute(r ToolboxAPIGitGetHistoryRequest) ([]GitCommitInfo, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  []GitCommitInfo
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue []GitCommitInfo
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.GitGetHistory")
@@ -4346,10 +4365,10 @@ func (a *ToolboxAPIService) GitGetHistoryExecute(r ToolboxAPIGitGetHistoryReques
 }
 
 type ToolboxAPIGitGetStatusRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	path *string
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	path                   *string
 	xDaytonaOrganizationID *string
 }
 
@@ -4373,26 +4392,27 @@ GitGetStatus Get git status
 
 Get status from git repository
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPIGitGetStatusRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPIGitGetStatusRequest
 */
 func (a *ToolboxAPIService) GitGetStatus(ctx context.Context, sandboxId string) ToolboxAPIGitGetStatusRequest {
 	return ToolboxAPIGitGetStatusRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
 // Execute executes the request
-//  @return GitStatus
+//
+//	@return GitStatus
 func (a *ToolboxAPIService) GitGetStatusExecute(r ToolboxAPIGitGetStatusRequest) (*GitStatus, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *GitStatus
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *GitStatus
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.GitGetStatus")
@@ -4469,10 +4489,10 @@ func (a *ToolboxAPIService) GitGetStatusExecute(r ToolboxAPIGitGetStatusRequest)
 }
 
 type ToolboxAPIGitListBranchesRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	path *string
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	path                   *string
 	xDaytonaOrganizationID *string
 }
 
@@ -4496,26 +4516,27 @@ GitListBranches Get branch list
 
 Get branch list from git repository
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPIGitListBranchesRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPIGitListBranchesRequest
 */
 func (a *ToolboxAPIService) GitListBranches(ctx context.Context, sandboxId string) ToolboxAPIGitListBranchesRequest {
 	return ToolboxAPIGitListBranchesRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
 // Execute executes the request
-//  @return ListBranchResponse
+//
+//	@return ListBranchResponse
 func (a *ToolboxAPIService) GitListBranchesExecute(r ToolboxAPIGitListBranchesRequest) (*ListBranchResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ListBranchResponse
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ListBranchResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.GitListBranches")
@@ -4592,10 +4613,10 @@ func (a *ToolboxAPIService) GitListBranchesExecute(r ToolboxAPIGitListBranchesRe
 }
 
 type ToolboxAPIGitPullChangesRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	gitRepoRequest *GitRepoRequest
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	gitRepoRequest         *GitRepoRequest
 	xDaytonaOrganizationID *string
 }
 
@@ -4619,24 +4640,24 @@ GitPullChanges Pull changes
 
 Pull changes from remote
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPIGitPullChangesRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPIGitPullChangesRequest
 */
 func (a *ToolboxAPIService) GitPullChanges(ctx context.Context, sandboxId string) ToolboxAPIGitPullChangesRequest {
 	return ToolboxAPIGitPullChangesRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
 // Execute executes the request
 func (a *ToolboxAPIService) GitPullChangesExecute(r ToolboxAPIGitPullChangesRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.GitPullChanges")
@@ -4705,10 +4726,10 @@ func (a *ToolboxAPIService) GitPullChangesExecute(r ToolboxAPIGitPullChangesRequ
 }
 
 type ToolboxAPIGitPushChangesRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	gitRepoRequest *GitRepoRequest
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	gitRepoRequest         *GitRepoRequest
 	xDaytonaOrganizationID *string
 }
 
@@ -4732,24 +4753,24 @@ GitPushChanges Push changes
 
 Push changes to remote
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPIGitPushChangesRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPIGitPushChangesRequest
 */
 func (a *ToolboxAPIService) GitPushChanges(ctx context.Context, sandboxId string) ToolboxAPIGitPushChangesRequest {
 	return ToolboxAPIGitPushChangesRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
 // Execute executes the request
 func (a *ToolboxAPIService) GitPushChangesExecute(r ToolboxAPIGitPushChangesRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.GitPushChanges")
@@ -4818,11 +4839,11 @@ func (a *ToolboxAPIService) GitPushChangesExecute(r ToolboxAPIGitPushChangesRequ
 }
 
 type ToolboxAPIListFilesRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
 	xDaytonaOrganizationID *string
-	path *string
+	path                   *string
 }
 
 // Use with JWT to specify the organization ID
@@ -4843,26 +4864,27 @@ func (r ToolboxAPIListFilesRequest) Execute() ([]FileInfo, *http.Response, error
 /*
 ListFiles List files
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPIListFilesRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPIListFilesRequest
 */
 func (a *ToolboxAPIService) ListFiles(ctx context.Context, sandboxId string) ToolboxAPIListFilesRequest {
 	return ToolboxAPIListFilesRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
 // Execute executes the request
-//  @return []FileInfo
+//
+//	@return []FileInfo
 func (a *ToolboxAPIService) ListFilesExecute(r ToolboxAPIListFilesRequest) ([]FileInfo, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  []FileInfo
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue []FileInfo
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.ListFiles")
@@ -4938,9 +4960,9 @@ func (a *ToolboxAPIService) ListFilesExecute(r ToolboxAPIListFilesRequest) ([]Fi
 }
 
 type ToolboxAPIListSessionsRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
 	xDaytonaOrganizationID *string
 }
 
@@ -4959,26 +4981,27 @@ ListSessions List sessions
 
 List all active sessions in the sandbox
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPIListSessionsRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPIListSessionsRequest
 */
 func (a *ToolboxAPIService) ListSessions(ctx context.Context, sandboxId string) ToolboxAPIListSessionsRequest {
 	return ToolboxAPIListSessionsRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
 // Execute executes the request
-//  @return []Session
+//
+//	@return []Session
 func (a *ToolboxAPIService) ListSessionsExecute(r ToolboxAPIListSessionsRequest) ([]Session, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  []Session
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue []Session
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.ListSessions")
@@ -5051,10 +5074,10 @@ func (a *ToolboxAPIService) ListSessionsExecute(r ToolboxAPIListSessionsRequest)
 }
 
 type ToolboxAPILspCompletionsRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	lspCompletionParams *LspCompletionParams
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	lspCompletionParams    *LspCompletionParams
 	xDaytonaOrganizationID *string
 }
 
@@ -5078,26 +5101,27 @@ LspCompletions Get Lsp Completions
 
 The Completion request is sent from the client to the server to compute completion items at a given cursor position.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPILspCompletionsRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPILspCompletionsRequest
 */
 func (a *ToolboxAPIService) LspCompletions(ctx context.Context, sandboxId string) ToolboxAPILspCompletionsRequest {
 	return ToolboxAPILspCompletionsRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
 // Execute executes the request
-//  @return CompletionList
+//
+//	@return CompletionList
 func (a *ToolboxAPIService) LspCompletionsExecute(r ToolboxAPILspCompletionsRequest) (*CompletionList, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *CompletionList
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *CompletionList
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.LspCompletions")
@@ -5175,10 +5199,10 @@ func (a *ToolboxAPIService) LspCompletionsExecute(r ToolboxAPILspCompletionsRequ
 }
 
 type ToolboxAPILspDidCloseRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	lspDocumentRequest *LspDocumentRequest
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	lspDocumentRequest     *LspDocumentRequest
 	xDaytonaOrganizationID *string
 }
 
@@ -5202,24 +5226,24 @@ LspDidClose Call Lsp DidClose
 
 The document close notification is sent from the client to the server when the document got closed in the client.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPILspDidCloseRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPILspDidCloseRequest
 */
 func (a *ToolboxAPIService) LspDidClose(ctx context.Context, sandboxId string) ToolboxAPILspDidCloseRequest {
 	return ToolboxAPILspDidCloseRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
 // Execute executes the request
 func (a *ToolboxAPIService) LspDidCloseExecute(r ToolboxAPILspDidCloseRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.LspDidClose")
@@ -5288,10 +5312,10 @@ func (a *ToolboxAPIService) LspDidCloseExecute(r ToolboxAPILspDidCloseRequest) (
 }
 
 type ToolboxAPILspDidOpenRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	lspDocumentRequest *LspDocumentRequest
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	lspDocumentRequest     *LspDocumentRequest
 	xDaytonaOrganizationID *string
 }
 
@@ -5315,24 +5339,24 @@ LspDidOpen Call Lsp DidOpen
 
 The document open notification is sent from the client to the server to signal newly opened text documents.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPILspDidOpenRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPILspDidOpenRequest
 */
 func (a *ToolboxAPIService) LspDidOpen(ctx context.Context, sandboxId string) ToolboxAPILspDidOpenRequest {
 	return ToolboxAPILspDidOpenRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
 // Execute executes the request
 func (a *ToolboxAPIService) LspDidOpenExecute(r ToolboxAPILspDidOpenRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.LspDidOpen")
@@ -5401,12 +5425,12 @@ func (a *ToolboxAPIService) LspDidOpenExecute(r ToolboxAPILspDidOpenRequest) (*h
 }
 
 type ToolboxAPILspDocumentSymbolsRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	languageId *string
-	pathToProject *string
-	uri *string
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	languageId             *string
+	pathToProject          *string
+	uri                    *string
 	xDaytonaOrganizationID *string
 }
 
@@ -5440,26 +5464,27 @@ LspDocumentSymbols Call Lsp DocumentSymbols
 
 The document symbol request is sent from the client to the server.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPILspDocumentSymbolsRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPILspDocumentSymbolsRequest
 */
 func (a *ToolboxAPIService) LspDocumentSymbols(ctx context.Context, sandboxId string) ToolboxAPILspDocumentSymbolsRequest {
 	return ToolboxAPILspDocumentSymbolsRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
 // Execute executes the request
-//  @return []LspSymbol
+//
+//	@return []LspSymbol
 func (a *ToolboxAPIService) LspDocumentSymbolsExecute(r ToolboxAPILspDocumentSymbolsRequest) ([]LspSymbol, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  []LspSymbol
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue []LspSymbol
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.LspDocumentSymbols")
@@ -5544,10 +5569,10 @@ func (a *ToolboxAPIService) LspDocumentSymbolsExecute(r ToolboxAPILspDocumentSym
 }
 
 type ToolboxAPILspStartRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	lspServerRequest *LspServerRequest
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	lspServerRequest       *LspServerRequest
 	xDaytonaOrganizationID *string
 }
 
@@ -5571,24 +5596,24 @@ LspStart Start Lsp server
 
 Start Lsp server process inside sandbox project
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPILspStartRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPILspStartRequest
 */
 func (a *ToolboxAPIService) LspStart(ctx context.Context, sandboxId string) ToolboxAPILspStartRequest {
 	return ToolboxAPILspStartRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
 // Execute executes the request
 func (a *ToolboxAPIService) LspStartExecute(r ToolboxAPILspStartRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.LspStart")
@@ -5657,10 +5682,10 @@ func (a *ToolboxAPIService) LspStartExecute(r ToolboxAPILspStartRequest) (*http.
 }
 
 type ToolboxAPILspStopRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	lspServerRequest *LspServerRequest
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	lspServerRequest       *LspServerRequest
 	xDaytonaOrganizationID *string
 }
 
@@ -5684,24 +5709,24 @@ LspStop Stop Lsp server
 
 Stop Lsp server process inside sandbox project
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPILspStopRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPILspStopRequest
 */
 func (a *ToolboxAPIService) LspStop(ctx context.Context, sandboxId string) ToolboxAPILspStopRequest {
 	return ToolboxAPILspStopRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
 // Execute executes the request
 func (a *ToolboxAPIService) LspStopExecute(r ToolboxAPILspStopRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.LspStop")
@@ -5770,12 +5795,12 @@ func (a *ToolboxAPIService) LspStopExecute(r ToolboxAPILspStopRequest) (*http.Re
 }
 
 type ToolboxAPILspWorkspaceSymbolsRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	languageId *string
-	pathToProject *string
-	query *string
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	languageId             *string
+	pathToProject          *string
+	query                  *string
 	xDaytonaOrganizationID *string
 }
 
@@ -5809,26 +5834,27 @@ LspWorkspaceSymbols Call Lsp WorkspaceSymbols
 
 The workspace symbol request is sent from the client to the server to list project-wide symbols matching the query string.
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPILspWorkspaceSymbolsRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPILspWorkspaceSymbolsRequest
 */
 func (a *ToolboxAPIService) LspWorkspaceSymbols(ctx context.Context, sandboxId string) ToolboxAPILspWorkspaceSymbolsRequest {
 	return ToolboxAPILspWorkspaceSymbolsRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
 // Execute executes the request
-//  @return []LspSymbol
+//
+//	@return []LspSymbol
 func (a *ToolboxAPIService) LspWorkspaceSymbolsExecute(r ToolboxAPILspWorkspaceSymbolsRequest) ([]LspSymbol, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  []LspSymbol
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue []LspSymbol
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.LspWorkspaceSymbols")
@@ -5913,11 +5939,11 @@ func (a *ToolboxAPIService) LspWorkspaceSymbolsExecute(r ToolboxAPILspWorkspaceS
 }
 
 type ToolboxAPIMoveFileRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	source *string
-	destination *string
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	source                 *string
+	destination            *string
 	xDaytonaOrganizationID *string
 }
 
@@ -5946,24 +5972,24 @@ MoveFile Move file
 
 Move file inside sandbox
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPIMoveFileRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPIMoveFileRequest
 */
 func (a *ToolboxAPIService) MoveFile(ctx context.Context, sandboxId string) ToolboxAPIMoveFileRequest {
 	return ToolboxAPIMoveFileRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
 // Execute executes the request
 func (a *ToolboxAPIService) MoveFileExecute(r ToolboxAPIMoveFileRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.MoveFile")
@@ -6035,10 +6061,10 @@ func (a *ToolboxAPIService) MoveFileExecute(r ToolboxAPIMoveFileRequest) (*http.
 }
 
 type ToolboxAPIMoveMouseRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	mouseMoveRequest *MouseMoveRequest
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	mouseMoveRequest       *MouseMoveRequest
 	xDaytonaOrganizationID *string
 }
 
@@ -6062,26 +6088,27 @@ MoveMouse Move mouse
 
 Move mouse cursor to specified coordinates
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPIMoveMouseRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPIMoveMouseRequest
 */
 func (a *ToolboxAPIService) MoveMouse(ctx context.Context, sandboxId string) ToolboxAPIMoveMouseRequest {
 	return ToolboxAPIMoveMouseRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
 // Execute executes the request
-//  @return MouseMoveResponse
+//
+//	@return MouseMoveResponse
 func (a *ToolboxAPIService) MoveMouseExecute(r ToolboxAPIMoveMouseRequest) (*MouseMoveResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *MouseMoveResponse
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *MouseMoveResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.MoveMouse")
@@ -6159,10 +6186,10 @@ func (a *ToolboxAPIService) MoveMouseExecute(r ToolboxAPIMoveMouseRequest) (*Mou
 }
 
 type ToolboxAPIPressHotkeyRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	keyboardHotkeyRequest *KeyboardHotkeyRequest
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	keyboardHotkeyRequest  *KeyboardHotkeyRequest
 	xDaytonaOrganizationID *string
 }
 
@@ -6186,26 +6213,27 @@ PressHotkey Press hotkey
 
 Press a hotkey combination
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPIPressHotkeyRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPIPressHotkeyRequest
 */
 func (a *ToolboxAPIService) PressHotkey(ctx context.Context, sandboxId string) ToolboxAPIPressHotkeyRequest {
 	return ToolboxAPIPressHotkeyRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
 // Execute executes the request
-//  @return EmptyResponse
+//
+//	@return EmptyResponse
 func (a *ToolboxAPIService) PressHotkeyExecute(r ToolboxAPIPressHotkeyRequest) (*EmptyResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *EmptyResponse
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *EmptyResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.PressHotkey")
@@ -6283,10 +6311,10 @@ func (a *ToolboxAPIService) PressHotkeyExecute(r ToolboxAPIPressHotkeyRequest) (
 }
 
 type ToolboxAPIPressKeyRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	keyboardPressRequest *KeyboardPressRequest
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	keyboardPressRequest   *KeyboardPressRequest
 	xDaytonaOrganizationID *string
 }
 
@@ -6310,26 +6338,27 @@ PressKey Press key
 
 Press a key with optional modifiers
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPIPressKeyRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPIPressKeyRequest
 */
 func (a *ToolboxAPIService) PressKey(ctx context.Context, sandboxId string) ToolboxAPIPressKeyRequest {
 	return ToolboxAPIPressKeyRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
 // Execute executes the request
-//  @return EmptyResponse
+//
+//	@return EmptyResponse
 func (a *ToolboxAPIService) PressKeyExecute(r ToolboxAPIPressKeyRequest) (*EmptyResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *EmptyResponse
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *EmptyResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.PressKey")
@@ -6407,10 +6436,10 @@ func (a *ToolboxAPIService) PressKeyExecute(r ToolboxAPIPressKeyRequest) (*Empty
 }
 
 type ToolboxAPIReplaceInFilesRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	replaceRequest *ReplaceRequest
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	replaceRequest         *ReplaceRequest
 	xDaytonaOrganizationID *string
 }
 
@@ -6434,26 +6463,27 @@ ReplaceInFiles Replace in files
 
 Replace text/pattern in multiple files inside sandbox
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPIReplaceInFilesRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPIReplaceInFilesRequest
 */
 func (a *ToolboxAPIService) ReplaceInFiles(ctx context.Context, sandboxId string) ToolboxAPIReplaceInFilesRequest {
 	return ToolboxAPIReplaceInFilesRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
 // Execute executes the request
-//  @return []ReplaceResult
+//
+//	@return []ReplaceResult
 func (a *ToolboxAPIService) ReplaceInFilesExecute(r ToolboxAPIReplaceInFilesRequest) ([]ReplaceResult, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  []ReplaceResult
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue []ReplaceResult
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.ReplaceInFiles")
@@ -6531,10 +6561,10 @@ func (a *ToolboxAPIService) ReplaceInFilesExecute(r ToolboxAPIReplaceInFilesRequ
 }
 
 type ToolboxAPIRestartProcessRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	processName string
-	sandboxId string
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	processName            string
+	sandboxId              string
 	xDaytonaOrganizationID *string
 }
 
@@ -6553,28 +6583,29 @@ RestartProcess Restart process
 
 Restart a specific VNC process
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param processName
- @param sandboxId
- @return ToolboxAPIRestartProcessRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param processName
+	@param sandboxId
+	@return ToolboxAPIRestartProcessRequest
 */
 func (a *ToolboxAPIService) RestartProcess(ctx context.Context, processName string, sandboxId string) ToolboxAPIRestartProcessRequest {
 	return ToolboxAPIRestartProcessRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:  a,
+		ctx:         ctx,
 		processName: processName,
-		sandboxId: sandboxId,
+		sandboxId:   sandboxId,
 	}
 }
 
 // Execute executes the request
-//  @return ProcessRestartResponse
+//
+//	@return ProcessRestartResponse
 func (a *ToolboxAPIService) RestartProcessExecute(r ToolboxAPIRestartProcessRequest) (*ProcessRestartResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ProcessRestartResponse
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ProcessRestartResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.RestartProcess")
@@ -6648,10 +6679,10 @@ func (a *ToolboxAPIService) RestartProcessExecute(r ToolboxAPIRestartProcessRequ
 }
 
 type ToolboxAPIScrollMouseRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	mouseScrollRequest *MouseScrollRequest
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	mouseScrollRequest     *MouseScrollRequest
 	xDaytonaOrganizationID *string
 }
 
@@ -6675,26 +6706,27 @@ ScrollMouse Scroll mouse
 
 Scroll mouse at specified coordinates
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPIScrollMouseRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPIScrollMouseRequest
 */
 func (a *ToolboxAPIService) ScrollMouse(ctx context.Context, sandboxId string) ToolboxAPIScrollMouseRequest {
 	return ToolboxAPIScrollMouseRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
 // Execute executes the request
-//  @return EmptyResponse
+//
+//	@return EmptyResponse
 func (a *ToolboxAPIService) ScrollMouseExecute(r ToolboxAPIScrollMouseRequest) (*EmptyResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *EmptyResponse
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *EmptyResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.ScrollMouse")
@@ -6772,11 +6804,11 @@ func (a *ToolboxAPIService) ScrollMouseExecute(r ToolboxAPIScrollMouseRequest) (
 }
 
 type ToolboxAPISearchFilesRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	path *string
-	pattern *string
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	path                   *string
+	pattern                *string
 	xDaytonaOrganizationID *string
 }
 
@@ -6805,26 +6837,27 @@ SearchFiles Search files
 
 Search for files inside sandbox
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPISearchFilesRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPISearchFilesRequest
 */
 func (a *ToolboxAPIService) SearchFiles(ctx context.Context, sandboxId string) ToolboxAPISearchFilesRequest {
 	return ToolboxAPISearchFilesRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
 // Execute executes the request
-//  @return SearchFilesResponse
+//
+//	@return SearchFilesResponse
 func (a *ToolboxAPIService) SearchFilesExecute(r ToolboxAPISearchFilesRequest) (*SearchFilesResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *SearchFilesResponse
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *SearchFilesResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.SearchFiles")
@@ -6905,14 +6938,14 @@ func (a *ToolboxAPIService) SearchFilesExecute(r ToolboxAPISearchFilesRequest) (
 }
 
 type ToolboxAPISetFilePermissionsRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	path *string
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	path                   *string
 	xDaytonaOrganizationID *string
-	owner *string
-	group *string
-	mode *string
+	owner                  *string
+	group                  *string
+	mode                   *string
 }
 
 func (r ToolboxAPISetFilePermissionsRequest) Path(path string) ToolboxAPISetFilePermissionsRequest {
@@ -6950,24 +6983,24 @@ SetFilePermissions Set file permissions
 
 Set file owner/group/permissions inside sandbox
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPISetFilePermissionsRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPISetFilePermissionsRequest
 */
 func (a *ToolboxAPIService) SetFilePermissions(ctx context.Context, sandboxId string) ToolboxAPISetFilePermissionsRequest {
 	return ToolboxAPISetFilePermissionsRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
 // Execute executes the request
 func (a *ToolboxAPIService) SetFilePermissionsExecute(r ToolboxAPISetFilePermissionsRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.SetFilePermissions")
@@ -7044,9 +7077,9 @@ func (a *ToolboxAPIService) SetFilePermissionsExecute(r ToolboxAPISetFilePermiss
 }
 
 type ToolboxAPIStartComputerUseRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
 	xDaytonaOrganizationID *string
 }
 
@@ -7065,26 +7098,27 @@ StartComputerUse Start computer use processes
 
 Start all VNC desktop processes (Xvfb, xfce4, x11vnc, novnc)
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPIStartComputerUseRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPIStartComputerUseRequest
 */
 func (a *ToolboxAPIService) StartComputerUse(ctx context.Context, sandboxId string) ToolboxAPIStartComputerUseRequest {
 	return ToolboxAPIStartComputerUseRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
 // Execute executes the request
-//  @return ComputerUseStartResponse
+//
+//	@return ComputerUseStartResponse
 func (a *ToolboxAPIService) StartComputerUseExecute(r ToolboxAPIStartComputerUseRequest) (*ComputerUseStartResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComputerUseStartResponse
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComputerUseStartResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.StartComputerUse")
@@ -7157,9 +7191,9 @@ func (a *ToolboxAPIService) StartComputerUseExecute(r ToolboxAPIStartComputerUse
 }
 
 type ToolboxAPIStopComputerUseRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
 	xDaytonaOrganizationID *string
 }
 
@@ -7178,26 +7212,27 @@ StopComputerUse Stop computer use processes
 
 Stop all VNC desktop processes (Xvfb, xfce4, x11vnc, novnc)
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPIStopComputerUseRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPIStopComputerUseRequest
 */
 func (a *ToolboxAPIService) StopComputerUse(ctx context.Context, sandboxId string) ToolboxAPIStopComputerUseRequest {
 	return ToolboxAPIStopComputerUseRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
 // Execute executes the request
-//  @return ComputerUseStopResponse
+//
+//	@return ComputerUseStopResponse
 func (a *ToolboxAPIService) StopComputerUseExecute(r ToolboxAPIStopComputerUseRequest) (*ComputerUseStopResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ComputerUseStopResponse
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ComputerUseStopResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.StopComputerUse")
@@ -7270,18 +7305,18 @@ func (a *ToolboxAPIService) StopComputerUseExecute(r ToolboxAPIStopComputerUseRe
 }
 
 type ToolboxAPITakeCompressedRegionScreenshotRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	height *float32
-	width *float32
-	y *float32
-	x *float32
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	height                 *float32
+	width                  *float32
+	y                      *float32
+	x                      *float32
 	xDaytonaOrganizationID *string
-	scale *float32
-	quality *float32
-	format *string
-	showCursor *bool
+	scale                  *float32
+	quality                *float32
+	format                 *string
+	showCursor             *bool
 }
 
 func (r ToolboxAPITakeCompressedRegionScreenshotRequest) Height(height float32) ToolboxAPITakeCompressedRegionScreenshotRequest {
@@ -7339,26 +7374,27 @@ TakeCompressedRegionScreenshot Take compressed region screenshot
 
 Take a compressed screenshot of a specific region
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPITakeCompressedRegionScreenshotRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPITakeCompressedRegionScreenshotRequest
 */
 func (a *ToolboxAPIService) TakeCompressedRegionScreenshot(ctx context.Context, sandboxId string) ToolboxAPITakeCompressedRegionScreenshotRequest {
 	return ToolboxAPITakeCompressedRegionScreenshotRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
 // Execute executes the request
-//  @return CompressedScreenshotResponse
+//
+//	@return CompressedScreenshotResponse
 func (a *ToolboxAPIService) TakeCompressedRegionScreenshotExecute(r ToolboxAPITakeCompressedRegionScreenshotRequest) (*CompressedScreenshotResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *CompressedScreenshotResponse
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *CompressedScreenshotResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.TakeCompressedRegionScreenshot")
@@ -7459,14 +7495,14 @@ func (a *ToolboxAPIService) TakeCompressedRegionScreenshotExecute(r ToolboxAPITa
 }
 
 type ToolboxAPITakeCompressedScreenshotRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
 	xDaytonaOrganizationID *string
-	scale *float32
-	quality *float32
-	format *string
-	showCursor *bool
+	scale                  *float32
+	quality                *float32
+	format                 *string
+	showCursor             *bool
 }
 
 // Use with JWT to specify the organization ID
@@ -7504,26 +7540,27 @@ TakeCompressedScreenshot Take compressed screenshot
 
 Take a compressed screenshot with format, quality, and scale options
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPITakeCompressedScreenshotRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPITakeCompressedScreenshotRequest
 */
 func (a *ToolboxAPIService) TakeCompressedScreenshot(ctx context.Context, sandboxId string) ToolboxAPITakeCompressedScreenshotRequest {
 	return ToolboxAPITakeCompressedScreenshotRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
 // Execute executes the request
-//  @return CompressedScreenshotResponse
+//
+//	@return CompressedScreenshotResponse
 func (a *ToolboxAPIService) TakeCompressedScreenshotExecute(r ToolboxAPITakeCompressedScreenshotRequest) (*CompressedScreenshotResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *CompressedScreenshotResponse
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *CompressedScreenshotResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.TakeCompressedScreenshot")
@@ -7608,15 +7645,15 @@ func (a *ToolboxAPIService) TakeCompressedScreenshotExecute(r ToolboxAPITakeComp
 }
 
 type ToolboxAPITakeRegionScreenshotRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	height *float32
-	width *float32
-	y *float32
-	x *float32
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	height                 *float32
+	width                  *float32
+	y                      *float32
+	x                      *float32
 	xDaytonaOrganizationID *string
-	showCursor *bool
+	showCursor             *bool
 }
 
 func (r ToolboxAPITakeRegionScreenshotRequest) Height(height float32) ToolboxAPITakeRegionScreenshotRequest {
@@ -7659,26 +7696,27 @@ TakeRegionScreenshot Take region screenshot
 
 Take a screenshot of a specific region
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPITakeRegionScreenshotRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPITakeRegionScreenshotRequest
 */
 func (a *ToolboxAPIService) TakeRegionScreenshot(ctx context.Context, sandboxId string) ToolboxAPITakeRegionScreenshotRequest {
 	return ToolboxAPITakeRegionScreenshotRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
 // Execute executes the request
-//  @return RegionScreenshotResponse
+//
+//	@return RegionScreenshotResponse
 func (a *ToolboxAPIService) TakeRegionScreenshotExecute(r ToolboxAPITakeRegionScreenshotRequest) (*RegionScreenshotResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *RegionScreenshotResponse
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *RegionScreenshotResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.TakeRegionScreenshot")
@@ -7770,11 +7808,11 @@ func (a *ToolboxAPIService) TakeRegionScreenshotExecute(r ToolboxAPITakeRegionSc
 }
 
 type ToolboxAPITakeScreenshotRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
 	xDaytonaOrganizationID *string
-	showCursor *bool
+	showCursor             *bool
 }
 
 // Use with JWT to specify the organization ID
@@ -7797,26 +7835,27 @@ TakeScreenshot Take screenshot
 
 Take a screenshot of the entire screen
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPITakeScreenshotRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPITakeScreenshotRequest
 */
 func (a *ToolboxAPIService) TakeScreenshot(ctx context.Context, sandboxId string) ToolboxAPITakeScreenshotRequest {
 	return ToolboxAPITakeScreenshotRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
 // Execute executes the request
-//  @return ScreenshotResponse
+//
+//	@return ScreenshotResponse
 func (a *ToolboxAPIService) TakeScreenshotExecute(r ToolboxAPITakeScreenshotRequest) (*ScreenshotResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *ScreenshotResponse
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ScreenshotResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.TakeScreenshot")
@@ -7892,10 +7931,10 @@ func (a *ToolboxAPIService) TakeScreenshotExecute(r ToolboxAPITakeScreenshotRequ
 }
 
 type ToolboxAPITypeTextRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	keyboardTypeRequest *KeyboardTypeRequest
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	keyboardTypeRequest    *KeyboardTypeRequest
 	xDaytonaOrganizationID *string
 }
 
@@ -7919,26 +7958,27 @@ TypeText Type text
 
 Type text using keyboard
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPITypeTextRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPITypeTextRequest
 */
 func (a *ToolboxAPIService) TypeText(ctx context.Context, sandboxId string) ToolboxAPITypeTextRequest {
 	return ToolboxAPITypeTextRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
 // Execute executes the request
-//  @return EmptyResponse
+//
+//	@return EmptyResponse
 func (a *ToolboxAPIService) TypeTextExecute(r ToolboxAPITypeTextRequest) (*EmptyResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *EmptyResponse
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *EmptyResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.TypeText")
@@ -8016,12 +8056,12 @@ func (a *ToolboxAPIService) TypeTextExecute(r ToolboxAPITypeTextRequest) (*Empty
 }
 
 type ToolboxAPIUploadFileRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
-	path *string
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	path                   *string
 	xDaytonaOrganizationID *string
-	file *os.File
+	file                   *os.File
 }
 
 func (r ToolboxAPIUploadFileRequest) Path(path string) ToolboxAPIUploadFileRequest {
@@ -8049,17 +8089,17 @@ UploadFile Upload file
 
 Upload file inside sandbox
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPIUploadFileRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPIUploadFileRequest
 
 Deprecated
 */
 func (a *ToolboxAPIService) UploadFile(ctx context.Context, sandboxId string) ToolboxAPIUploadFileRequest {
 	return ToolboxAPIUploadFileRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
@@ -8067,9 +8107,9 @@ func (a *ToolboxAPIService) UploadFile(ctx context.Context, sandboxId string) To
 // Deprecated
 func (a *ToolboxAPIService) UploadFileExecute(r ToolboxAPIUploadFileRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.UploadFile")
@@ -8109,8 +8149,8 @@ func (a *ToolboxAPIService) UploadFileExecute(r ToolboxAPIUploadFileRequest) (*h
 		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Daytona-Organization-ID", r.xDaytonaOrganizationID, "simple", "")
 	}
 	var fileLocalVarFormFileName string
-	var fileLocalVarFileName     string
-	var fileLocalVarFileBytes    []byte
+	var fileLocalVarFileName string
+	var fileLocalVarFileBytes []byte
 
 	fileLocalVarFormFileName = "file"
 	fileLocalVarFile := r.file
@@ -8152,9 +8192,9 @@ func (a *ToolboxAPIService) UploadFileExecute(r ToolboxAPIUploadFileRequest) (*h
 }
 
 type ToolboxAPIUploadFilesRequest struct {
-	ctx context.Context
-	ApiService ToolboxAPI
-	sandboxId string
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
 	xDaytonaOrganizationID *string
 }
 
@@ -8173,24 +8213,24 @@ UploadFiles Upload multiple files
 
 Upload multiple files inside sandbox
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId
- @return ToolboxAPIUploadFilesRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPIUploadFilesRequest
 */
 func (a *ToolboxAPIService) UploadFiles(ctx context.Context, sandboxId string) ToolboxAPIUploadFilesRequest {
 	return ToolboxAPIUploadFilesRequest{
 		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
 // Execute executes the request
 func (a *ToolboxAPIService) UploadFilesExecute(r ToolboxAPIUploadFilesRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.UploadFiles")
