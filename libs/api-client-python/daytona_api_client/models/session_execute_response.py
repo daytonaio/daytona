@@ -23,13 +23,17 @@ from typing import Any, ClassVar, Dict, List, Optional, Union
 from typing import Optional, Set
 from typing_extensions import Self
 
+
 class SessionExecuteResponse(BaseModel):
     """
     SessionExecuteResponse
-    """ # noqa: E501
+    """  # noqa: E501
+
     cmd_id: Optional[StrictStr] = Field(default=None, description="The ID of the executed command", alias="cmdId")
     output: Optional[StrictStr] = Field(default=None, description="The output of the executed command")
-    exit_code: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="The exit code of the executed command", alias="exitCode")
+    exit_code: Optional[Union[StrictFloat, StrictInt]] = Field(
+        default=None, description="The exit code of the executed command", alias="exitCode"
+    )
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["cmdId", "output", "exitCode"]
 
@@ -38,7 +42,6 @@ class SessionExecuteResponse(BaseModel):
         validate_assignment=True,
         protected_namespaces=(),
     )
-
 
     def to_str(self) -> str:
         """Returns the string representation of the model using alias"""
@@ -65,9 +68,11 @@ class SessionExecuteResponse(BaseModel):
           are ignored.
         * Fields in `self.additional_properties` are added to the output dict.
         """
-        excluded_fields: Set[str] = set([
-            "additional_properties",
-        ])
+        excluded_fields: Set[str] = set(
+            [
+                "additional_properties",
+            ]
+        )
 
         _dict = self.model_dump(
             by_alias=True,
@@ -90,16 +95,12 @@ class SessionExecuteResponse(BaseModel):
         if not isinstance(obj, dict):
             return cls.model_validate(obj)
 
-        _obj = cls.model_validate({
-            "cmdId": obj.get("cmdId"),
-            "output": obj.get("output"),
-            "exitCode": obj.get("exitCode")
-        })
+        _obj = cls.model_validate(
+            {"cmdId": obj.get("cmdId"), "output": obj.get("output"), "exitCode": obj.get("exitCode")}
+        )
         # store additional fields in additional_properties
         for _key in obj.keys():
             if _key not in cls.__properties:
                 _obj.additional_properties[_key] = obj.get(_key)
 
         return _obj
-
-

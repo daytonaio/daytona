@@ -29,7 +29,7 @@
     "format": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "cd {projectRoot} && go fmt ./... && prettier --write \"**/*.{yaml,html}\""
+        "command": "cd {projectRoot} && go fmt ./..."
       }
     },
     "test": {

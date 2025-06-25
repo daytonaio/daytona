@@ -24,10 +24,12 @@ from daytona_api_client.models.completion_item import CompletionItem
 from typing import Optional, Set
 from typing_extensions import Self
 
+
 class CompletionList(BaseModel):
     """
     CompletionList
-    """ # noqa: E501
+    """  # noqa: E501
+
     is_incomplete: StrictBool = Field(alias="isIncomplete")
     items: List[CompletionItem]
     additional_properties: Dict[str, Any] = {}
@@ -38,7 +40,6 @@ class CompletionList(BaseModel):
         validate_assignment=True,
         protected_namespaces=(),
     )
-
 
     def to_str(self) -> str:
         """Returns the string representation of the model using alias"""
@@ -65,9 +66,11 @@ class CompletionList(BaseModel):
           are ignored.
         * Fields in `self.additional_properties` are added to the output dict.
         """
-        excluded_fields: Set[str] = set([
-            "additional_properties",
-        ])
+        excluded_fields: Set[str] = set(
+            [
+                "additional_properties",
+            ]
+        )
 
         _dict = self.model_dump(
             by_alias=True,
@@ -80,7 +83,7 @@ class CompletionList(BaseModel):
             for _item_items in self.items:
                 if _item_items:
                     _items.append(_item_items.to_dict())
-            _dict['items'] = _items
+            _dict["items"] = _items
         # puts key-value pairs in additional_properties in the top level
         if self.additional_properties is not None:
             for _key, _value in self.additional_properties.items():
@@ -97,15 +100,17 @@ class CompletionList(BaseModel):
         if not isinstance(obj, dict):
             return cls.model_validate(obj)
 
-        _obj = cls.model_validate({
-            "isIncomplete": obj.get("isIncomplete"),
-            "items": [CompletionItem.from_dict(_item) for _item in obj["items"]] if obj.get("items") is not None else None
-        })
+        _obj = cls.model_validate(
+            {
+                "isIncomplete": obj.get("isIncomplete"),
+                "items": [CompletionItem.from_dict(_item) for _item in obj["items"]]
+                if obj.get("items") is not None
+                else None,
+            }
+        )
         # store additional fields in additional_properties
         for _key in obj.keys():
             if _key not in cls.__properties:
                 _obj.additional_properties[_key] = obj.get(_key)
 
         return _obj
-
-

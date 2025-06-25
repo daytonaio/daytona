@@ -23,10 +23,12 @@ from typing import Any, ClassVar, Dict, List, Union
 from typing import Optional, Set
 from typing_extensions import Self
 
+
 class MouseDragResponse(BaseModel):
     """
     MouseDragResponse
-    """ # noqa: E501
+    """  # noqa: E501
+
     success: StrictBool
     action: StrictStr
     var_from: Dict[str, Any] = Field(alias="from")
@@ -41,7 +43,6 @@ class MouseDragResponse(BaseModel):
         validate_assignment=True,
         protected_namespaces=(),
     )
-
 
     def to_str(self) -> str:
         """Returns the string representation of the model using alias"""
@@ -68,9 +69,11 @@ class MouseDragResponse(BaseModel):
           are ignored.
         * Fields in `self.additional_properties` are added to the output dict.
         """
-        excluded_fields: Set[str] = set([
-            "additional_properties",
-        ])
+        excluded_fields: Set[str] = set(
+            [
+                "additional_properties",
+            ]
+        )
 
         _dict = self.model_dump(
             by_alias=True,
@@ -93,19 +96,19 @@ class MouseDragResponse(BaseModel):
         if not isinstance(obj, dict):
             return cls.model_validate(obj)
 
-        _obj = cls.model_validate({
-            "success": obj.get("success"),
-            "action": obj.get("action"),
-            "from": obj.get("from"),
-            "to": obj.get("to"),
-            "actual_x": obj.get("actual_x"),
-            "actual_y": obj.get("actual_y")
-        })
+        _obj = cls.model_validate(
+            {
+                "success": obj.get("success"),
+                "action": obj.get("action"),
+                "from": obj.get("from"),
+                "to": obj.get("to"),
+                "actual_x": obj.get("actual_x"),
+                "actual_y": obj.get("actual_y"),
+            }
+        )
         # store additional fields in additional_properties
         for _key in obj.keys():
             if _key not in cls.__properties:
                 _obj.additional_properties[_key] = obj.get(_key)
 
         return _obj
-
-

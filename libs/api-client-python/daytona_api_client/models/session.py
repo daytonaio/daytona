@@ -24,10 +24,12 @@ from daytona_api_client.models.command import Command
 from typing import Optional, Set
 from typing_extensions import Self
 
+
 class Session(BaseModel):
     """
     Session
-    """ # noqa: E501
+    """  # noqa: E501
+
     session_id: StrictStr = Field(description="The ID of the session", alias="sessionId")
     commands: Optional[List[Command]] = Field(description="The list of commands executed in this session")
     additional_properties: Dict[str, Any] = {}
@@ -38,7 +40,6 @@ class Session(BaseModel):
         validate_assignment=True,
         protected_namespaces=(),
     )
-
 
     def to_str(self) -> str:
         """Returns the string representation of the model using alias"""
@@ -65,9 +66,11 @@ class Session(BaseModel):
           are ignored.
         * Fields in `self.additional_properties` are added to the output dict.
         """
-        excluded_fields: Set[str] = set([
-            "additional_properties",
-        ])
+        excluded_fields: Set[str] = set(
+            [
+                "additional_properties",
+            ]
+        )
 
         _dict = self.model_dump(
             by_alias=True,
@@ -80,7 +83,7 @@ class Session(BaseModel):
             for _item_commands in self.commands:
                 if _item_commands:
                     _items.append(_item_commands.to_dict())
-            _dict['commands'] = _items
+            _dict["commands"] = _items
         # puts key-value pairs in additional_properties in the top level
         if self.additional_properties is not None:
             for _key, _value in self.additional_properties.items():
@@ -89,7 +92,7 @@ class Session(BaseModel):
         # set to None if commands (nullable) is None
         # and model_fields_set contains the field
         if self.commands is None and "commands" in self.model_fields_set:
-            _dict['commands'] = None
+            _dict["commands"] = None
 
         return _dict
 
@@ -102,15 +105,17 @@ class Session(BaseModel):
         if not isinstance(obj, dict):
             return cls.model_validate(obj)
 
-        _obj = cls.model_validate({
-            "sessionId": obj.get("sessionId"),
-            "commands": [Command.from_dict(_item) for _item in obj["commands"]] if obj.get("commands") is not None else None
-        })
+        _obj = cls.model_validate(
+            {
+                "sessionId": obj.get("sessionId"),
+                "commands": [Command.from_dict(_item) for _item in obj["commands"]]
+                if obj.get("commands") is not None
+                else None,
+            }
+        )
         # store additional fields in additional_properties
         for _key in obj.keys():
             if _key not in cls.__properties:
                 _obj.additional_properties[_key] = obj.get(_key)
 
         return _obj
-
-

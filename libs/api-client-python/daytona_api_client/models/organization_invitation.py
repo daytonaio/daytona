@@ -25,10 +25,12 @@ from daytona_api_client.models.organization_role import OrganizationRole
 from typing import Optional, Set
 from typing_extensions import Self
 
+
 class OrganizationInvitation(BaseModel):
     """
     OrganizationInvitation
-    """ # noqa: E501
+    """  # noqa: E501
+
     id: StrictStr = Field(description="Invitation ID")
     email: StrictStr = Field(description="Email address of the invitee")
     invited_by: StrictStr = Field(description="Email address of the inviter", alias="invitedBy")
@@ -41,19 +43,31 @@ class OrganizationInvitation(BaseModel):
     created_at: datetime = Field(description="Creation timestamp", alias="createdAt")
     updated_at: datetime = Field(description="Last update timestamp", alias="updatedAt")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["id", "email", "invitedBy", "organizationId", "organizationName", "expiresAt", "status", "role", "assignedRoles", "createdAt", "updatedAt"]
+    __properties: ClassVar[List[str]] = [
+        "id",
+        "email",
+        "invitedBy",
+        "organizationId",
+        "organizationName",
+        "expiresAt",
+        "status",
+        "role",
+        "assignedRoles",
+        "createdAt",
+        "updatedAt",
+    ]
 
-    @field_validator('status')
+    @field_validator("status")
     def status_validate_enum(cls, value):
         """Validates the enum"""
-        if value not in set(['pending', 'accepted', 'declined', 'cancelled']):
+        if value not in set(["pending", "accepted", "declined", "cancelled"]):
             raise ValueError("must be one of enum values ('pending', 'accepted', 'declined', 'cancelled')")
         return value
 
-    @field_validator('role')
+    @field_validator("role")
     def role_validate_enum(cls, value):
         """Validates the enum"""
-        if value not in set(['owner', 'member']):
+        if value not in set(["owner", "member"]):
             raise ValueError("must be one of enum values ('owner', 'member')")
         return value
 
@@ -62,7 +76,6 @@ class OrganizationInvitation(BaseModel):
         validate_assignment=True,
         protected_namespaces=(),
     )
-
 
     def to_str(self) -> str:
         """Returns the string representation of the model using alias"""
@@ -89,9 +102,11 @@ class OrganizationInvitation(BaseModel):
           are ignored.
         * Fields in `self.additional_properties` are added to the output dict.
         """
-        excluded_fields: Set[str] = set([
-            "additional_properties",
-        ])
+        excluded_fields: Set[str] = set(
+            [
+                "additional_properties",
+            ]
+        )
 
         _dict = self.model_dump(
             by_alias=True,
@@ -104,7 +119,7 @@ class OrganizationInvitation(BaseModel):
             for _item_assigned_roles in self.assigned_roles:
                 if _item_assigned_roles:
                     _items.append(_item_assigned_roles.to_dict())
-            _dict['assignedRoles'] = _items
+            _dict["assignedRoles"] = _items
         # puts key-value pairs in additional_properties in the top level
         if self.additional_properties is not None:
             for _key, _value in self.additional_properties.items():
@@ -121,24 +136,26 @@ class OrganizationInvitation(BaseModel):
         if not isinstance(obj, dict):
             return cls.model_validate(obj)
 
-        _obj = cls.model_validate({
-            "id": obj.get("id"),
-            "email": obj.get("email"),
-            "invitedBy": obj.get("invitedBy"),
-            "organizationId": obj.get("organizationId"),
-            "organizationName": obj.get("organizationName"),
-            "expiresAt": obj.get("expiresAt"),
-            "status": obj.get("status"),
-            "role": obj.get("role"),
-            "assignedRoles": [OrganizationRole.from_dict(_item) for _item in obj["assignedRoles"]] if obj.get("assignedRoles") is not None else None,
-            "createdAt": obj.get("createdAt"),
-            "updatedAt": obj.get("updatedAt")
-        })
+        _obj = cls.model_validate(
+            {
+                "id": obj.get("id"),
+                "email": obj.get("email"),
+                "invitedBy": obj.get("invitedBy"),
+                "organizationId": obj.get("organizationId"),
+                "organizationName": obj.get("organizationName"),
+                "expiresAt": obj.get("expiresAt"),
+                "status": obj.get("status"),
+                "role": obj.get("role"),
+                "assignedRoles": [OrganizationRole.from_dict(_item) for _item in obj["assignedRoles"]]
+                if obj.get("assignedRoles") is not None
+                else None,
+                "createdAt": obj.get("createdAt"),
+                "updatedAt": obj.get("updatedAt"),
+            }
+        )
         # store additional fields in additional_properties
         for _key in obj.keys():
             if _key not in cls.__properties:
                 _obj.additional_properties[_key] = obj.get(_key)
 
         return _obj
-
-
