@@ -64,7 +64,7 @@ jobs:
           cache: false
       - name: format
         run: |
-          apt-get update && apt-get install -y gcc libx11-dev libxtst-dev
+          sudo apt-get update && sudo apt-get install -y gcc libx11-dev libxtst-dev
           cd libs/computer-use
           go fmt ./...
           git diff --exit-code '**/*.go' || (echo "Code is not formatted! Please run 'go fmt ./...' and commit" && exit 1)
