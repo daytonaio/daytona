@@ -390,21 +390,19 @@ export class Sandbox implements SandboxDto {
    * The Sandbox will automatically delete after being continuously stopped for the specified interval.
    *
    * @param {number} interval - Number of minutes after which a continuously stopped Sandbox will be auto-deleted.
-   *                           Set to 0 to disable auto-delete. By default, auto-delete is disabled.
+   *                           Set to negative value to disable auto-delete. Set to 0 to delete immediately upon stopping.
+   *                           By default, auto-delete is disabled.
    * @returns {Promise<void>}
-   * @throws {DaytonaError} - `DaytonaError` - If interval is not a non-negative integer
    *
    * @example
    * // Auto-delete after 1 hour
    * await sandbox.setAutoDeleteInterval(60);
-   * // Or disable auto-delete
+   * // Or delete immediately upon stopping
    * await sandbox.setAutoDeleteInterval(0);
+   * // Or disable auto-delete
+   * await sandbox.setAutoDeleteInterval(-1);
    */
   public async setAutoDeleteInterval(interval: number): Promise<void> {
-    if (!Number.isInteger(interval) || interval < 0) {
-      throw new DaytonaError('autoDeleteInterval must be a non-negative integer')
-    }
-
     await this.sandboxApi.setAutoDeleteInterval(this.id, interval)
     this.autoDeleteInterval = interval
   }

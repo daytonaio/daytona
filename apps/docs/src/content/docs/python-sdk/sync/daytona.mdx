@@ -106,7 +106,7 @@ including language, image, environment variables, and volumes.
 
 **Raises**:
 
-- `DaytonaError` - If timeout, auto_stop_interval, auto_archive_interval or auto_delete_interval is negative;
+- `DaytonaError` - If timeout, auto_stop_interval or auto_archive_interval is negative;
   If sandbox fails to start or times out
   
 
@@ -159,7 +159,7 @@ and volumes. Daytona creates snapshot from provided image and uses it to create 
 
 **Raises**:
 
-- `DaytonaError` - If timeout, auto_stop_interval, auto_archive_interval or auto_delete_interval is negative;
+- `DaytonaError` - If timeout, auto_stop_interval or auto_archive_interval is negative;
   If sandbox fails to start or times out
   
 
@@ -422,7 +422,7 @@ Base parameters for creating a new Sandbox.
   0 means the maximum interval will be used.
 - `auto_delete_interval` _Optional[int]_ - Interval in minutes after which a continuously stopped Sandbox will
   automatically be deleted. By default, auto-delete is disabled.
-  0 means no auto-delete.
+  Negative value means disabled, 0 means delete immediately upon stopping.
 
 ## CreateSandboxFromImageParams
 

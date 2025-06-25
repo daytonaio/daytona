@@ -170,7 +170,8 @@ export class SandboxDto {
   autoArchiveInterval?: number
 
   @ApiPropertyOptional({
-    description: 'Auto-delete interval in minutes (0 means disabled)',
+    description:
+      'Auto-delete interval in minutes (negative value means disabled, 0 means delete immediately upon stopping)',
     example: 30,
     required: false,
   })

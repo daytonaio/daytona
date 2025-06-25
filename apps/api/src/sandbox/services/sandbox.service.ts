@@ -330,7 +330,7 @@ export class SandboxService {
     }
 
     if (createSandboxDto.autoDeleteInterval !== undefined) {
-      sandbox.autoDeleteInterval = this.resolveAutoDeleteInterval(createSandboxDto.autoDeleteInterval)
+      sandbox.autoDeleteInterval = createSandboxDto.autoDeleteInterval
     }
 
     sandbox.runnerId = runner.id
@@ -358,7 +358,7 @@ export class SandboxService {
     }
 
     if (createSandboxDto.autoDeleteInterval !== undefined) {
-      warmPoolSandbox.autoDeleteInterval = this.resolveAutoDeleteInterval(createSandboxDto.autoDeleteInterval)
+      warmPoolSandbox.autoDeleteInterval = createSandboxDto.autoDeleteInterval
     }
 
     const runner = await this.runnerService.findOne(warmPoolSandbox.runnerId)
@@ -414,7 +414,7 @@ export class SandboxService {
     }
 
     if (createSandboxDto.autoDeleteInterval !== undefined) {
-      sandbox.autoDeleteInterval = this.resolveAutoDeleteInterval(createSandboxDto.autoDeleteInterval)
+      sandbox.autoDeleteInterval = createSandboxDto.autoDeleteInterval
     }
 
     const buildInfoSnapshotRef = generateBuildSnapshotRef(
@@ -752,7 +752,7 @@ export class SandboxService {
       throw new NotFoundException(`Sandbox with ID ${sandboxId} not found`)
     }
 
-    sandbox.autoDeleteInterval = this.resolveAutoDeleteInterval(interval)
+    sandbox.autoDeleteInterval = interval
     await this.sandboxRepository.save(sandbox)
   }
 
@@ -834,13 +834,5 @@ export class SandboxService {
     }
 
     return Math.min(autoArchiveInterval, maxAutoArchiveInterval)
-  }
-
-  private resolveAutoDeleteInterval(autoDeleteInterval: number): number {
-    if (autoDeleteInterval < 0) {
-      throw new BadRequestError('Auto-delete interval must be non-negative')
-    }
-
-    return autoDeleteInterval
   }
 }

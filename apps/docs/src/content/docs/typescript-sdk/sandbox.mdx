@@ -355,23 +355,22 @@ The Sandbox will automatically delete after being continuously stopped for the s
 **Parameters**:
 
 - `interval` _number_ - Number of minutes after which a continuously stopped Sandbox will be auto-deleted.
-  Set to 0 to disable auto-delete. By default, auto-delete is disabled.
+  Set to negative value to disable auto-delete. Set to 0 to delete immediately upon stopping.
+  By default, auto-delete is disabled.
 
 **Returns**:
 
 - `Promise<void>`
-
-**Throws**:
-
-- `DaytonaError` - If interval is not a non-negative integer
 
 **Example:**
 
 ```ts
 // Auto-delete after 1 hour
 await sandbox.setAutoDeleteInterval(60)
-// Or disable auto-delete
+// Or delete immediately upon stopping
 await sandbox.setAutoDeleteInterval(0)
+// Or disable auto-delete
+await sandbox.setAutoDeleteInterval(-1)
 ```
 
 ---

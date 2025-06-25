@@ -333,7 +333,7 @@ Base parameters for creating a new Sandbox.
 **Properties**:
 
 - `autoArchiveInterval?` _number_ - Auto-archive interval in minutes (0 means the maximum interval will be used). Default is 7 days.
-- `autoDeleteInterval?` _number_ - Auto-delete interval in minutes (0 means disabled). By default, auto-delete is disabled.
+- `autoDeleteInterval?` _number_ - Auto-delete interval in minutes (negative value means disabled, 0 means delete immediately upon stopping). By default, auto-delete is disabled.
 - `autoStopInterval?` _number_ - Auto-stop interval in minutes (0 means disabled). Default is 15 minutes.
 - `envVars?` _Record\<string, string\>_ - Optional environment variables to set in the Sandbox
 - `labels?` _Record\<string, string\>_ - Sandbox labels

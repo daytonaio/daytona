@@ -1553,7 +1553,8 @@ paths:
           schema:
             type: string
           style: simple
-        - description: Auto-delete interval in minutes (0 to disable)
+        - description: "Auto-delete interval in minutes (negative value means disabled,\
+            \ 0 means delete immediately upon stopping)"
           explode: false
           in: path
           name: interval
@@ -6872,7 +6873,8 @@ components:
           example: 10080
           type: number
         autoDeleteInterval:
-          description: Auto-delete interval in minutes (0 means disabled)
+          description: "Auto-delete interval in minutes (negative value means disabled,\
+            \ 0 means delete immediately upon stopping)"
           example: 30
           type: number
         runnerDomain:
@@ -7037,7 +7039,8 @@ components:
           example: 10080
           type: integer
         autoDeleteInterval:
-          description: Auto-delete interval in minutes (0 means disabled)
+          description: "Auto-delete interval in minutes (negative value means disabled,\
+            \ 0 means delete immediately upon stopping)"
           example: 30
           type: integer
         volumes:
@@ -8936,7 +8939,8 @@ components:
           example: 10080
           type: number
         autoDeleteInterval:
-          description: Auto-delete interval in minutes (0 means disabled)
+          description: "Auto-delete interval in minutes (negative value means disabled,\
+            \ 0 means delete immediately upon stopping)"
           example: 30
           type: number
         runnerDomain:

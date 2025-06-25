@@ -358,19 +358,18 @@ The Sandbox will automatically delete after being continuously stopped for the s
 **Arguments**:
 
 - `interval` _int_ - Number of minutes after which a continuously stopped Sandbox will be auto-deleted.
-  Set to 0 to disable auto-stop. By default, auto-delete is disabled.
-
-**Raises**:
-
-- `DaytonaError` - If interval is negative
+  Set to negative value to disable auto-delete. Set to 0 to delete immediately upon stopping.
+  By default, auto-delete is disabled.
 
 **Example**:
 
 ```python
 # Auto-delete after 1 hour
 sandbox.set_auto_delete_interval(60)
-# Or disable auto-delete
+# Or delete immediately upon stopping
 sandbox.set_auto_delete_interval(0)
+# Or disable auto-delete
+sandbox.set_auto_delete_interval(-1)
 ```
 
 #### Sandbox.get\_preview\_link

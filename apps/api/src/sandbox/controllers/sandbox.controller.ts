@@ -420,7 +420,8 @@ export class SandboxController {
   })
   @ApiParam({
     name: 'interval',
-    description: 'Auto-delete interval in minutes (0 to disable)',
+    description:
+      'Auto-delete interval in minutes (negative value means disabled, 0 means delete immediately upon stopping)',
     type: 'number',
   })
   @ApiResponse({

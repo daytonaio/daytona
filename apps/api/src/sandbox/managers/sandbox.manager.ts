@@ -6,7 +6,7 @@
 import { Injectable, Logger } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Cron, CronExpression } from '@nestjs/schedule'
-import { In, Not, Raw, Repository } from 'typeorm'
+import { In, MoreThanOrEqual, Not, Raw, Repository } from 'typeorm'
 import { Sandbox } from '../entities/sandbox.entity'
 import { SandboxState } from '../enums/sandbox-state.enum'
 import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
@@ -195,7 +195,7 @@ export class SandboxManager {
             state: SandboxState.STOPPED,
             desiredState: SandboxDesiredState.STOPPED,
             pending: false,
-            autoDeleteInterval: Not(0),
+            autoDeleteInterval: MoreThanOrEqual(0),
             lastActivityAt: Raw((alias) => `${alias} < NOW() - INTERVAL '1 minute' * "autoDeleteInterval"`),
           },
           order: {

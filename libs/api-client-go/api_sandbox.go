@@ -153,7 +153,7 @@ type SandboxAPI interface {
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 		@param sandboxId ID of the sandbox
-		@param interval Auto-delete interval in minutes (0 to disable)
+		@param interval Auto-delete interval in minutes (negative value means disabled, 0 means delete immediately upon stopping)
 		@return SandboxAPISetAutoDeleteIntervalRequest
 	*/
 	SetAutoDeleteInterval(ctx context.Context, sandboxId string, interval float32) SandboxAPISetAutoDeleteIntervalRequest
@@ -1393,7 +1393,7 @@ SetAutoDeleteInterval Set sandbox auto-delete interval
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param sandboxId ID of the sandbox
-	@param interval Auto-delete interval in minutes (0 to disable)
+	@param interval Auto-delete interval in minutes (negative value means disabled, 0 means delete immediately upon stopping)
 	@return SandboxAPISetAutoDeleteIntervalRequest
 */
 func (a *SandboxAPIService) SetAutoDeleteInterval(ctx context.Context, sandboxId string, interval float32) SandboxAPISetAutoDeleteIntervalRequest {

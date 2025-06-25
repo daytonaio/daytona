@@ -390,22 +390,19 @@ class Sandbox(SandboxDto):
 
         Args:
             interval (int): Number of minutes after which a continuously stopped Sandbox will be auto-deleted.
-                Set to 0 to disable auto-stop. By default, auto-delete is disabled.
-
-        Raises:
-            DaytonaError: If interval is negative
+                Set to negative value to disable auto-delete. Set to 0 to delete immediately upon stopping.
+                By default, auto-delete is disabled.
 
         Example:
             ```python
             # Auto-delete after 1 hour
             sandbox.set_auto_delete_interval(60)
-            # Or disable auto-delete
+            # Or delete immediately upon stopping
             sandbox.set_auto_delete_interval(0)
+            # Or disable auto-delete
+            sandbox.set_auto_delete_interval(-1)
             ```
         """
-        if not isinstance(interval, int) or interval < 0:
-            raise DaytonaError("Auto-delete interval must be a non-negative integer")
-
         self._sandbox_api.set_auto_delete_interval(self.id, interval)
         self.auto_delete_interval = interval
 

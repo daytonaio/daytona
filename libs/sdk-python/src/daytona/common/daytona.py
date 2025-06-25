@@ -107,7 +107,7 @@ class CreateSandboxBaseParams(BaseModel):
             0 means the maximum interval will be used.
         auto_delete_interval (Optional[int]): Interval in minutes after which a continuously stopped Sandbox will
             automatically be deleted. By default, auto-delete is disabled.
-            0 means no auto-delete.
+            Negative value means disabled, 0 means delete immediately upon stopping.
     """
 
     language: Optional[CodeLanguage] = None
