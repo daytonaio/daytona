@@ -285,20 +285,20 @@ func GetComputerUse(path string) (computeruse.IComputerUse, error) {
 
 		switch pluginErr.Type {
 		case "dependency":
-			log.Warnf(pluginErr.Message)
-			log.Infof(pluginErr.Details)
+			log.Warn(pluginErr.Message)
+			log.Info(pluginErr.Details)
 			log.Info("Continuing without computer-use functionality...")
 			return nil, nil // Return nil to continue without the plugin
 
 		case "system":
-			log.Errorf(pluginErr.Message)
-			log.Infof(pluginErr.Details)
+			log.Error(pluginErr.Message)
+			log.Info(pluginErr.Details)
 			log.Info("Continuing without computer-use functionality...")
 			return nil, nil // Return nil to continue without the plugin
 
 		default:
-			log.Errorf(pluginErr.Message)
-			log.Infof(pluginErr.Details)
+			log.Error(pluginErr.Message)
+			log.Info(pluginErr.Details)
 			log.Info("Continuing without computer-use functionality...")
 			return nil, nil // Return nil to continue without the plugin
 		}

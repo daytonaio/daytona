@@ -82,7 +82,7 @@ func (u *ComputerUse) TakeCompressedScreenshot(req *computeruse.CompressedScreen
 	// Draw cursor if requested
 	mouseX, mouseY := 0, 0
 	if req.ShowCursor {
-		mouseX, mouseY = robotgo.GetMousePos()
+		mouseX, mouseY = robotgo.Location()
 		drawCursor(rgbaImg, mouseX, mouseY)
 	}
 
@@ -135,7 +135,7 @@ func (u *ComputerUse) TakeCompressedRegionScreenshot(req *computeruse.Compressed
 	// Draw cursor if requested and it's within the region
 	mouseX, mouseY := 0, 0
 	if req.ShowCursor {
-		absoluteMouseX, absoluteMouseY := robotgo.GetMousePos()
+		absoluteMouseX, absoluteMouseY := robotgo.Location()
 		mouseX = absoluteMouseX - req.X
 		mouseY = absoluteMouseY - req.Y
 

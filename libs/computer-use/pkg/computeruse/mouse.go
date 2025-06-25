@@ -23,13 +23,13 @@ func (u *ComputerUse) GetMousePosition() (*computeruse.MousePositionResponse, er
 }
 
 func (u *ComputerUse) MoveMouse(req *computeruse.MoveMouseRequest) (*computeruse.MousePositionResponse, error) {
-	robotgo.MoveMouse(req.X, req.Y)
+	robotgo.Move(req.X, req.Y)
 
 	// Small delay to ensure movement completes
 	time.Sleep(50 * time.Millisecond)
 
 	// Verify the mouse actually moved
-	actualX, actualY := robotgo.GetMousePos()
+	actualX, actualY := robotgo.Location()
 
 	return &computeruse.MousePositionResponse{
 		Success: true,
@@ -47,7 +47,7 @@ func (u *ComputerUse) Click(req *computeruse.ClickRequest) (*computeruse.MousePo
 	}
 
 	// Move mouse to position first
-	robotgo.MoveMouse(req.X, req.Y)
+	robotgo.Move(req.X, req.Y)
 	time.Sleep(100 * time.Millisecond) // Wait for mouse to move
 
 	// Perform the click
@@ -58,7 +58,7 @@ func (u *ComputerUse) Click(req *computeruse.ClickRequest) (*computeruse.MousePo
 	}
 
 	// Verify position after click
-	actualX, actualY := robotgo.GetMousePos()
+	actualX, actualY := robotgo.Location()
 
 	return &computeruse.MousePositionResponse{
 		Success: true,
@@ -79,7 +79,7 @@ func moveMouseSmoothly(startX, startY, endX, endY, steps int) {
 	for i := 1; i <= steps; i++ {
 		x := int(float64(startX) + dx*float64(i))
 		y := int(float64(startY) + dy*float64(i))
-		robotgo.MoveMouse(x, y)
+		robotgo.Move(x, y)
 		time.Sleep(2 * time.Millisecond)
 	}
 }
@@ -91,7 +91,7 @@ func (u *ComputerUse) Drag(req *computeruse.DragRequest) (*computeruse.MousePosi
 	}
 
 	// Move to start position
-	robotgo.MoveMouse(req.StartX, req.StartY)
+	robotgo.Move(req.StartX, req.StartY)
 	time.Sleep(100 * time.Millisecond)
 
 	// Click to focus window before drag
@@ -99,11 +99,17 @@ func (u *ComputerUse) Drag(req *computeruse.DragRequest) (*computeruse.MousePosi
 	time.Sleep(100 * time.Millisecond)
 
 	// Ensure mouse button is up before starting
-	robotgo.MouseUp(req.Button)
+	err := robotgo.MouseUp(req.Button)
+	if err != nil {
+		return nil, err
+	}
 	time.Sleep(50 * time.Millisecond)
 
 	// Press and hold mouse button
-	robotgo.MouseDown(req.Button)
+	err = robotgo.MouseDown(req.Button)
+	if err != nil {
+		return nil, err
+	}
 	time.Sleep(300 * time.Millisecond) // Increased delay
 
 	// Move to end position while holding (smoothly)
@@ -111,11 +117,14 @@ func (u *ComputerUse) Drag(req *computeruse.DragRequest) (*computeruse.MousePosi
 	time.Sleep(100 * time.Millisecond)
 
 	// Release mouse button
-	robotgo.MouseUp(req.Button)
+	err = robotgo.MouseUp(req.Button)
+	if err != nil {
+		return nil, err
+	}
 	time.Sleep(50 * time.Millisecond)
 
 	// Verify final position
-	actualX, actualY := robotgo.GetMousePos()
+	actualX, actualY := robotgo.Location()
 
 	return &computeruse.MousePositionResponse{
 		Success: true,
@@ -140,7 +149,7 @@ func (u *ComputerUse) Scroll(req *computeruse.ScrollRequest) (*computeruse.Empty
 	}
 
 	// Move mouse to scroll position
-	robotgo.MoveMouse(req.X, req.Y)
+	robotgo.Move(req.X, req.Y)
 	time.Sleep(50 * time.Millisecond)
 
 	// Perform scroll
