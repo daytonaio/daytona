@@ -68,5 +68,9 @@ allowed-redefined-builtins = ["id"]
 =======
 
 [tool.basedpyright]
+<<<<<<< HEAD
 typeCheckingMode = "off"
 >>>>>>> 3f39c443 (feat(api,cli,docs): auto-delete sandbox interval)
+=======
+typeCheckingMode = "off"
+>>>>>>> 6663aee7 (refactor(api): negative auto-delete interval means disabled, 0 means delete immediately after stopping)

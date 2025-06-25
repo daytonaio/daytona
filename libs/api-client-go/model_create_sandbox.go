@@ -46,7 +46,7 @@ type CreateSandbox struct {
 	AutoStopInterval *int32 `json:"autoStopInterval,omitempty"`
 	// Auto-archive interval in minutes (0 means the maximum interval will be used)
 	AutoArchiveInterval *int32 `json:"autoArchiveInterval,omitempty"`
-	// Auto-delete interval in minutes (0 means disabled)
+	// Auto-delete interval in minutes (negative value means disabled, 0 means delete immediately upon stopping)
 	AutoDeleteInterval *int32 `json:"autoDeleteInterval,omitempty"`
 	// Array of volumes to attach to the sandbox
 	Volumes []SandboxVolume `json:"volumes,omitempty"`

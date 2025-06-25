@@ -60,7 +60,7 @@ type Sandbox struct {
 	AutoStopInterval *float32 `json:"autoStopInterval,omitempty"`
 	// Auto-archive interval in minutes
 	AutoArchiveInterval *float32 `json:"autoArchiveInterval,omitempty"`
-	// Auto-delete interval in minutes (0 means disabled)
+	// Auto-delete interval in minutes (negative value means disabled, 0 means delete immediately upon stopping)
 	AutoDeleteInterval *float32 `json:"autoDeleteInterval,omitempty"`
 	// The domain name of the runner
 	RunnerDomain *string `json:"runnerDomain,omitempty"`

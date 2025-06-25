@@ -204,7 +204,7 @@ class Daytona:
             Sandbox: The created Sandbox instance.
 
         Raises:
-            DaytonaError: If timeout, auto_stop_interval, auto_archive_interval or auto_delete_interval is negative;
+            DaytonaError: If timeout, auto_stop_interval or auto_archive_interval is negative;
                 If sandbox fails to start or times out
 
         Example:
@@ -249,7 +249,7 @@ class Daytona:
             Sandbox: The created Sandbox instance.
 
         Raises:
-            DaytonaError: If timeout, auto_stop_interval, auto_archive_interval or auto_delete_interval is negative;
+            DaytonaError: If timeout, auto_stop_interval or auto_archive_interval is negative;
                 If sandbox fails to start or times out
 
         Example:
@@ -320,9 +320,6 @@ class Daytona:
 
         if params.auto_archive_interval is not None and params.auto_archive_interval < 0:
             raise DaytonaError("auto_archive_interval must be a non-negative integer")
-
-        if params.auto_delete_interval is not None and params.auto_delete_interval < 0:
-            raise DaytonaError("auto_delete_interval must be a non-negative integer")
 
         target = self._target
 

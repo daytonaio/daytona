@@ -125,7 +125,7 @@ export interface Resources {
  * @property {boolean} [public] - Is the Sandbox port preview public
  * @property {number} [autoStopInterval] - Auto-stop interval in minutes (0 means disabled). Default is 15 minutes.
  * @property {number} [autoArchiveInterval] - Auto-archive interval in minutes (0 means the maximum interval will be used). Default is 7 days.
- * @property {number} [autoDeleteInterval] - Auto-delete interval in minutes (0 means disabled). By default, auto-delete is disabled.
+ * @property {number} [autoDeleteInterval] - Auto-delete interval in minutes (negative value means disabled, 0 means delete immediately upon stopping). By default, auto-delete is disabled.
  */
 export type CreateSandboxBaseParams = {
   user?: string
@@ -410,13 +410,6 @@ export class Daytona {
       (!Number.isInteger(params.autoArchiveInterval) || params.autoArchiveInterval < 0)
     ) {
       throw new DaytonaError('autoArchiveInterval must be a non-negative integer')
-    }
-
-    if (
-      params.autoDeleteInterval !== undefined &&
-      (!Number.isInteger(params.autoDeleteInterval) || params.autoDeleteInterval < 0)
-    ) {
-      throw new DaytonaError('autoDeleteInterval must be a non-negative integer')
     }
 
     const codeToolbox = this.getCodeToolbox(params.language as CodeLanguage)

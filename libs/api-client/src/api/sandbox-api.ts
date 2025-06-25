@@ -567,7 +567,7 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
      *
      * @summary Set sandbox auto-delete interval
      * @param {string} sandboxId ID of the sandbox
-     * @param {number} interval Auto-delete interval in minutes (0 to disable)
+     * @param {number} interval Auto-delete interval in minutes (negative value means disabled, 0 means delete immediately upon stopping)
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -1136,7 +1136,7 @@ export const SandboxApiFp = function (configuration?: Configuration) {
      *
      * @summary Set sandbox auto-delete interval
      * @param {string} sandboxId ID of the sandbox
-     * @param {number} interval Auto-delete interval in minutes (0 to disable)
+     * @param {number} interval Auto-delete interval in minutes (negative value means disabled, 0 means delete immediately upon stopping)
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -1478,7 +1478,7 @@ export const SandboxApiFactory = function (configuration?: Configuration, basePa
      *
      * @summary Set sandbox auto-delete interval
      * @param {string} sandboxId ID of the sandbox
-     * @param {number} interval Auto-delete interval in minutes (0 to disable)
+     * @param {number} interval Auto-delete interval in minutes (negative value means disabled, 0 means delete immediately upon stopping)
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -1773,7 +1773,7 @@ export class SandboxApi extends BaseAPI {
    *
    * @summary Set sandbox auto-delete interval
    * @param {string} sandboxId ID of the sandbox
-   * @param {number} interval Auto-delete interval in minutes (0 to disable)
+   * @param {number} interval Auto-delete interval in minutes (negative value means disabled, 0 means delete immediately upon stopping)
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}

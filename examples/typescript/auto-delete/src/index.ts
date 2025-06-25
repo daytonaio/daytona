@@ -11,8 +11,12 @@ async function main() {
   await sandbox1.setAutoDeleteInterval(60)
   console.log(sandbox1.autoDeleteInterval)
 
-  // Disable auto-delete
+  // Delete immediately upon stopping
   await sandbox1.setAutoDeleteInterval(0)
+  console.log(sandbox1.autoDeleteInterval)
+
+  // Disable auto-delete
+  await sandbox1.setAutoDeleteInterval(-1)
   console.log(sandbox1.autoDeleteInterval)
 
   // Auto-delete after the Sandbox has been stopped for 1 day
