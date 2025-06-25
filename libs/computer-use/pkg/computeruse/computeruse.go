@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"sync"
 	"time"
 
@@ -54,6 +55,25 @@ func (c *ComputerUse) Initialize() (*computeruse.Empty, error) {
 		return new(computeruse.Empty), fmt.Errorf("failed to create config directory: %v", err)
 	}
 
+	// Start a D-Bus session and set env vars globally
+	cmd := exec.Command("dbus-launch")
+	output, err := cmd.Output()
+	if err != nil {
+		log.Errorf("Failed to start dbus-launch: %v", err)
+	} else {
+		for _, line := range strings.Split(string(output), "\n") {
+			if strings.HasPrefix(line, "DBUS_SESSION_BUS_ADDRESS=") || strings.HasPrefix(line, "DBUS_SESSION_BUS_PID=") {
+				parts := strings.SplitN(line, ";", 2)
+				for _, part := range parts {
+					kv := strings.SplitN(part, "=", 2)
+					if len(kv) == 2 {
+						os.Setenv(strings.TrimSpace(kv[0]), strings.TrimSpace(kv[1]))
+					}
+				}
+			}
+		}
+	}
+
 	c.initializeProcesses()
 
 	return new(computeruse.Empty), nil
@@ -63,7 +83,7 @@ func (c *ComputerUse) Start() (*computeruse.Empty, error) {
 	// Set DISPLAY environment variable in the main process
 	display := os.Getenv("DISPLAY")
 	if display == "" {
-		display = ":1"
+		display = ":0"
 	}
 	os.Setenv("DISPLAY", display)
 	log.Infof("Set DISPLAY environment variable to: %s", display)
@@ -78,7 +98,7 @@ func (c *ComputerUse) initializeProcesses() {
 	// Get environment variables from Dockerfile or use defaults
 	vncResolution := os.Getenv("VNC_RESOLUTION")
 	if vncResolution == "" {
-		vncResolution = "1920x1080"
+		vncResolution = "1024x768"
 	}
 
 	vncPort := os.Getenv("VNC_PORT")
@@ -93,17 +113,23 @@ func (c *ComputerUse) initializeProcesses() {
 
 	display := os.Getenv("DISPLAY")
 	if display == "" {
-		display = ":1"
+		display = ":0"
 	}
 
 	// Get user from environment or default to "daytona" (from Dockerfile)
 	user := os.Getenv("VNC_USER")
 	if user == "" {
-		user = "daytona"
+		user = os.Getenv("DAYTONA_SANDBOX_USER")
+		if user == "" {
+			user = "root"
+		}
 	}
 
 	// Get home directory for the user
 	homeDir := fmt.Sprintf("/home/%s", user)
+
+	// Get D-Bus session address from environment
+	dbusAddress := os.Getenv("DBUS_SESSION_BUS_ADDRESS")
 
 	// Process 1: Xvfb (X Virtual Framebuffer)
 	c.processes["xvfb"] = &Process{
@@ -130,7 +156,7 @@ func (c *ComputerUse) initializeProcesses() {
 			"DISPLAY":                  display,
 			"HOME":                     homeDir,
 			"USER":                     user,
-			"DBUS_SESSION_BUS_ADDRESS": "unix:path=/tmp/dbus-session",
+			"DBUS_SESSION_BUS_ADDRESS": dbusAddress,
 		},
 		LogFile: filepath.Join(c.configDir, "xfce4.log"),
 		ErrFile: filepath.Join(c.configDir, "xfce4.err"),
