@@ -12,6 +12,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/cakturk/go-netstat/netstat"
 	"github.com/gin-gonic/gin"
 	cmap "github.com/orcaman/concurrent-map/v2"
 )
@@ -27,27 +28,34 @@ func NewPortsDetector() *portsDetector {
 }
 
 func (d *portsDetector) Start(ctx context.Context) {
-
 	for {
 		select {
 		case <-ctx.Done():
 			return
 		default:
 			time.Sleep(1 * time.Second)
-			for port := uint(3000); port <= 9999; port++ {
-				if isPortInUse(port) {
-					d.portMap.Set(strconv.Itoa(int(port)), true)
-				} else {
-					d.portMap.Remove(strconv.Itoa(int(port)))
+			// get only listening TCP sockets
+			tabs, err := netstat.TCPSocks(func(s *netstat.SockTabEntry) bool {
+				return s.State == netstat.Listen
+			})
+			if err != nil {
+				continue
+			}
+
+			freshMap := map[string]bool{}
+			for _, e := range tabs {
+				s := strconv.Itoa(int(e.LocalAddr.Port))
+				freshMap[s] = true
+				d.portMap.Set(s, true)
+			}
+
+			for _, port := range d.portMap.Keys() {
+				if !freshMap[port] {
+					d.portMap.Remove(port)
 				}
 			}
 		}
 	}
-}
-
-func isPortInUse(port uint) bool {
-	_, err := net.DialTimeout("tcp", fmt.Sprintf("localhost:%d", port), 50*time.Millisecond)
-	return err == nil
 }
 
 func (d *portsDetector) GetPorts(c *gin.Context) {
