@@ -17,14 +17,9 @@
       "dependsOn": ["build-amd64"]
     },
     "build-amd64": {
-      "executor": "@nx-go/nx-go:build",
+      "executor": "nx:run-commands",
       "options": {
-        "main": "{projectRoot}/main.go",
-        "outputPath": "dist/libs/computer-use-amd64",
-        "env": {
-          "GOARCH": "amd64",
-          "GOOS": "linux"
-        }
+        "command": "./hack/build-computer-use-amd64.sh"
       }
     },
     "format": {
