@@ -116,7 +116,7 @@ func (c *ComputerUse) initializeProcesses() {
 		display = ":0"
 	}
 
-	// Get user from environment or default to "daytona" (from Dockerfile)
+	// Get user from environment, fallback to DAYTONA_SANDBOX_USER or default to "root" (just in case, but should not happen)
 	user := os.Getenv("VNC_USER")
 	if user == "" {
 		user = os.Getenv("DAYTONA_SANDBOX_USER")
