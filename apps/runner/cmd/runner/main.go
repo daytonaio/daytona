@@ -74,15 +74,15 @@ func main() {
 	}
 
 	dockerClient := docker.NewDockerClient(docker.DockerClientConfig{
-		ApiClient:          cli,
-		Cache:              runnerCache,
-		LogWriter:          os.Stdout,
-		AWSRegion:          cfg.AWSRegion,
-		AWSEndpointUrl:     cfg.AWSEndpointUrl,
-		AWSAccessKeyId:     cfg.AWSAccessKeyId,
-		AWSSecretAccessKey: cfg.AWSSecretAccessKey,
-		DaemonPath:         daemonPath,
-		PluginPath:         pluginPath,
+		ApiClient:             cli,
+		Cache:                 runnerCache,
+		LogWriter:             os.Stdout,
+		AWSRegion:             cfg.AWSRegion,
+		AWSEndpointUrl:        cfg.AWSEndpointUrl,
+		AWSAccessKeyId:        cfg.AWSAccessKeyId,
+		AWSSecretAccessKey:    cfg.AWSSecretAccessKey,
+		DaemonPath:            daemonPath,
+		ComputerUsePluginPath: pluginPath,
 	})
 
 	sandboxService := services.NewSandboxService(runnerCache, dockerClient)
