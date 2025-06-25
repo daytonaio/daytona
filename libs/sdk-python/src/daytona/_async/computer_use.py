@@ -5,13 +5,13 @@ from typing import List, Optional
 
 from daytona_api_client_async import (
     CompressedScreenshotResponse,
+    ComputerUseStartResponse,
+    ComputerUseStatusResponse,
+    ComputerUseStopResponse,
     DisplayInfoResponse,
     KeyboardHotkeyRequest,
-    KeyboardHotkeyResponse,
     KeyboardPressRequest,
-    KeyboardPressResponse,
     KeyboardTypeRequest,
-    KeyboardTypeResponse,
     MouseClickRequest,
     MouseClickResponse,
     MouseDragRequest,
@@ -20,7 +20,10 @@ from daytona_api_client_async import (
     MouseMoveResponse,
     MousePosition,
     MouseScrollRequest,
-    MouseScrollResponse,
+    ProcessErrorsResponse,
+    ProcessLogsResponse,
+    ProcessRestartResponse,
+    ProcessStatusResponse,
     RegionScreenshotResponse,
     ScreenshotResponse,
     ToolboxApi,
@@ -129,7 +132,7 @@ class AsyncMouse:
         return response
 
     @intercept_errors(message_prefix="Failed to scroll mouse: ")
-    async def scroll(self, x: int, y: int, direction: str, amount: int = 1) -> MouseScrollResponse:
+    async def scroll(self, x: int, y: int, direction: str, amount: int = 1) -> bool:
         """Scrolls the mouse wheel at the specified coordinates.
 
         Args:
@@ -139,7 +142,7 @@ class AsyncMouse:
             amount (int): The amount to scroll.
 
         Returns:
-            MouseScrollResponse: Scroll operation result.
+            bool: Whether the scroll operation was successful.
 
         Example:
             ```python
@@ -163,7 +166,7 @@ class AsyncKeyboard:
         self._toolbox_api = toolbox_api
 
     @intercept_errors(message_prefix="Failed to type text: ")
-    async def type(self, text: str, delay: Optional[int] = None) -> KeyboardTypeResponse:
+    async def type(self, text: str, delay: Optional[int] = None) -> bool:
         """Types the specified text.
 
         Args:
@@ -171,12 +174,12 @@ class AsyncKeyboard:
             delay (int): Delay between characters in milliseconds.
 
         Returns:
-            KeyboardTypeResponse: Type operation result.
+            bool: Whether the type operation was successful.
 
         Example:
             ```python
             result = await sandbox.computer_use.keyboard.type("Hello, World!")
-            print(f"Typed: {result.typed}")
+            print(f"Operation success: {result}")
 
             # With delay between characters
             slow_type = await sandbox.computer_use.keyboard.type("Slow typing", 100)
@@ -187,7 +190,7 @@ class AsyncKeyboard:
         return response
 
     @intercept_errors(message_prefix="Failed to press key: ")
-    async def press(self, key: str, modifiers: Optional[List[str]] = None) -> KeyboardPressResponse:
+    async def press(self, key: str, modifiers: Optional[List[str]] = None) -> bool:
         """Presses a key with optional modifiers.
 
         Args:
@@ -195,7 +198,7 @@ class AsyncKeyboard:
             modifiers (List[str]): Modifier keys ('ctrl', 'alt', 'meta', 'shift').
 
         Returns:
-            KeyboardPressResponse: Press operation result.
+            bool: Whether the press operation was successful.
 
         Example:
             ```python
@@ -214,14 +217,14 @@ class AsyncKeyboard:
         return response
 
     @intercept_errors(message_prefix="Failed to press hotkey: ")
-    async def hotkey(self, keys: str) -> KeyboardHotkeyResponse:
+    async def hotkey(self, keys: str) -> bool:
         """Presses a hotkey combination.
 
         Args:
             keys (str): The hotkey combination (e.g., 'ctrl+c', 'alt+tab', 'cmd+shift+t').
 
         Returns:
-            KeyboardHotkeyResponse: Hotkey operation result.
+            bool: Whether the hotkey operation was successful.
 
         Example:
             ```python
@@ -438,35 +441,43 @@ class AsyncComputerUse:
         self.display = AsyncDisplay(sandbox_id, toolbox_api)
 
     @intercept_errors(message_prefix="Failed to start computer use: ")
-    async def start(self) -> None:
+    async def start(self) -> ComputerUseStartResponse:
         """Starts all computer use processes (Xvfb, xfce4, x11vnc, novnc).
 
+        Returns:
+            ComputerUseStartResponse: Computer use start response.
+
         Example:
             ```python
-            await sandbox.computer_use.start()
-            print("Computer use processes started")
+            result = await sandbox.computer_use.start()
+            print("Computer use processes started:", result.message)
             ```
         """
-        await self._toolbox_api.start_computer_use(self._sandbox_id)
+        response = await self._toolbox_api.start_computer_use(self._sandbox_id)
+        return response
 
     @intercept_errors(message_prefix="Failed to stop computer use: ")
-    async def stop(self) -> None:
+    async def stop(self) -> ComputerUseStopResponse:
         """Stops all computer use processes.
+
+        Returns:
+            ComputerUseStopResponse: Computer use stop response.
 
         Example:
             ```python
-            await sandbox.computer_use.stop()
-            print("Computer use processes stopped")
+            result = await sandbox.computer_use.stop()
+            print("Computer use processes stopped:", result.message)
             ```
         """
-        await self._toolbox_api.stop_computer_use(self._sandbox_id)
+        response = await self._toolbox_api.stop_computer_use(self._sandbox_id)
+        return response
 
     @intercept_errors(message_prefix="Failed to get computer use status: ")
-    async def get_status(self) -> None:
+    async def get_status(self) -> ComputerUseStatusResponse:
         """Gets the status of all computer use processes.
 
         Returns:
-            Status information about all VNC desktop processes.
+            ComputerUseStatusResponse: Status information about all VNC desktop processes.
 
         Example:
             ```python
@@ -478,14 +489,14 @@ class AsyncComputerUse:
         return response
 
     @intercept_errors(message_prefix="Failed to get process status: ")
-    async def get_process_status(self, process_name: str) -> None:
+    async def get_process_status(self, process_name: str) -> ProcessStatusResponse:
         """Gets the status of a specific VNC process.
 
         Args:
             process_name (str): Name of the process to check.
 
         Returns:
-            Status information about the specific process.
+            ProcessStatusResponse: Status information about the specific process.
 
         Example:
             ```python
@@ -497,29 +508,33 @@ class AsyncComputerUse:
         return response
 
     @intercept_errors(message_prefix="Failed to restart process: ")
-    async def restart_process(self, process_name: str) -> None:
+    async def restart_process(self, process_name: str) -> ProcessRestartResponse:
         """Restarts a specific VNC process.
 
         Args:
             process_name (str): Name of the process to restart.
 
+        Returns:
+            ProcessRestartResponse: Process restart response.
+
         Example:
             ```python
-            await sandbox.computer_use.restart_process("xfce4")
-            print("XFCE4 process restarted")
+            result = await sandbox.computer_use.restart_process("xfce4")
+            print("XFCE4 process restarted:", result.message)
             ```
         """
-        await self._toolbox_api.restart_process(process_name, self._sandbox_id)
+        response = await self._toolbox_api.restart_process(process_name, self._sandbox_id)
+        return response
 
     @intercept_errors(message_prefix="Failed to get process logs: ")
-    async def get_process_logs(self, process_name: str) -> None:
+    async def get_process_logs(self, process_name: str) -> ProcessLogsResponse:
         """Gets logs for a specific VNC process.
 
         Args:
             process_name (str): Name of the process to get logs for.
 
         Returns:
-            Process logs.
+            ProcessLogsResponse: Process logs.
 
         Example:
             ```python
@@ -531,14 +546,14 @@ class AsyncComputerUse:
         return response
 
     @intercept_errors(message_prefix="Failed to get process errors: ")
-    async def get_process_errors(self, process_name: str) -> None:
+    async def get_process_errors(self, process_name: str) -> ProcessErrorsResponse:
         """Gets error logs for a specific VNC process.
 
         Args:
             process_name (str): Name of the process to get error logs for.
 
         Returns:
-            Process error logs.
+            ProcessErrorsResponse: Process error logs.
 
         Example:
             ```python

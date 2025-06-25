@@ -25,46 +25,54 @@ for automating desktop interactions within a sandbox.
 
 ```python
 @intercept_errors(message_prefix="Failed to start computer use: ")
-def start() -> None
+def start() -> ComputerUseStartResponse
 ```
 
 Starts all computer use processes (Xvfb, xfce4, x11vnc, novnc).
 
+**Returns**:
+
+- `ComputerUseStartResponse` - Computer use start response.
+
 **Example**:
 
 ```python
-sandbox.computer_use.start()
-print("Computer use processes started")
+result = sandbox.computer_use.start()
+print("Computer use processes started:", result.message)
 ```
 
 #### ComputerUse.stop
 
 ```python
 @intercept_errors(message_prefix="Failed to stop computer use: ")
-def stop() -> None
+def stop() -> ComputerUseStopResponse
 ```
 
 Stops all computer use processes.
 
+**Returns**:
+
+- `ComputerUseStopResponse` - Computer use stop response.
+
 **Example**:
 
 ```python
-sandbox.computer_use.stop()
-print("Computer use processes stopped")
+result = sandbox.computer_use.stop()
+print("Computer use processes stopped:", result.message)
 ```
 
 #### ComputerUse.get_status
 
 ```python
 @intercept_errors(message_prefix="Failed to get computer use status: ")
-def get_status() -> None
+def get_status() -> ComputerUseStatusResponse
 ```
 
 Gets the status of all computer use processes.
 
 **Returns**:
 
-Status information about all VNC desktop processes.
+- `ComputerUseStatusResponse` - Status information about all VNC desktop processes.
 
 **Example**:
 
@@ -77,7 +85,7 @@ print("Computer use status:", status)
 
 ```python
 @intercept_errors(message_prefix="Failed to get process status: ")
-def get_process_status(process_name: str) -> None
+def get_process_status(process_name: str) -> ProcessStatusResponse
 ```
 
 Gets the status of a specific VNC process.
@@ -88,7 +96,7 @@ Gets the status of a specific VNC process.
 
 **Returns**:
 
-Status information about the specific process.
+- `ProcessStatusResponse` - Status information about the specific process.
 
 **Example**:
 
@@ -101,7 +109,7 @@ no_vnc_status = sandbox.computer_use.get_process_status("novnc")
 
 ```python
 @intercept_errors(message_prefix="Failed to restart process: ")
-def restart_process(process_name: str) -> None
+def restart_process(process_name: str) -> ProcessRestartResponse
 ```
 
 Restarts a specific VNC process.
@@ -110,18 +118,22 @@ Restarts a specific VNC process.
 
 - `process_name` _str_ - Name of the process to restart.
 
+**Returns**:
+
+- `ProcessRestartResponse` - Process restart response.
+
 **Example**:
 
 ```python
-sandbox.computer_use.restart_process("xfce4")
-print("XFCE4 process restarted")
+result = sandbox.computer_use.restart_process("xfce4")
+print("XFCE4 process restarted:", result.message)
 ```
 
 #### ComputerUse.get_process_logs
 
 ```python
 @intercept_errors(message_prefix="Failed to get process logs: ")
-def get_process_logs(process_name: str) -> None
+def get_process_logs(process_name: str) -> ProcessLogsResponse
 ```
 
 Gets logs for a specific VNC process.
@@ -132,7 +144,7 @@ Gets logs for a specific VNC process.
 
 **Returns**:
 
-Process logs.
+- `ProcessLogsResponse` - Process logs.
 
 **Example**:
 
@@ -145,7 +157,7 @@ print("NoVNC logs:", logs)
 
 ```python
 @intercept_errors(message_prefix="Failed to get process errors: ")
-def get_process_errors(process_name: str) -> None
+def get_process_errors(process_name: str) -> ProcessErrorsResponse
 ```
 
 Gets error logs for a specific VNC process.
@@ -156,7 +168,7 @@ Gets error logs for a specific VNC process.
 
 **Returns**:
 
-Process error logs.
+- `ProcessErrorsResponse` - Process error logs.
 
 **Example**:
 
@@ -290,10 +302,7 @@ print(f"Dragged from {result.from_x},{result.from_y} to {result.to_x},{result.to
 
 ```python
 @intercept_errors(message_prefix="Failed to scroll mouse: ")
-def scroll(x: int,
-           y: int,
-           direction: str,
-           amount: int = 1) -> MouseScrollResponse
+def scroll(x: int, y: int, direction: str, amount: int = 1) -> bool
 ```
 
 Scrolls the mouse wheel at the specified coordinates.
@@ -307,7 +316,7 @@ Scrolls the mouse wheel at the specified coordinates.
 
 **Returns**:
 
-- `MouseScrollResponse` - Scroll operation result.
+- `bool` - Whether the scroll operation was successful.
 
 **Example**:
 
@@ -331,7 +340,7 @@ Keyboard operations for computer use functionality.
 
 ```python
 @intercept_errors(message_prefix="Failed to type text: ")
-def type(text: str, delay: Optional[int] = None) -> KeyboardTypeResponse
+def type(text: str, delay: Optional[int] = None) -> bool
 ```
 
 Types the specified text.
@@ -343,13 +352,13 @@ Types the specified text.
 
 **Returns**:
 
-- `KeyboardTypeResponse` - Type operation result.
+- `bool` - Whether the type operation was successful.
 
 **Example**:
 
 ```python
 result = sandbox.computer_use.keyboard.type("Hello, World!")
-print(f"Typed: {result.typed}")
+print(f"Operation success: {result}")
 
 # With delay between characters
 slow_type = sandbox.computer_use.keyboard.type("Slow typing", 100)
@@ -359,8 +368,7 @@ slow_type = sandbox.computer_use.keyboard.type("Slow typing", 100)
 
 ```python
 @intercept_errors(message_prefix="Failed to press key: ")
-def press(key: str,
-          modifiers: Optional[List[str]] = None) -> KeyboardPressResponse
+def press(key: str, modifiers: Optional[List[str]] = None) -> bool
 ```
 
 Presses a key with optional modifiers.
@@ -372,7 +380,7 @@ Presses a key with optional modifiers.
 
 **Returns**:
 
-- `KeyboardPressResponse` - Press operation result.
+- `bool` - Whether the press operation was successful.
 
 **Example**:
 
@@ -391,7 +399,7 @@ new_tab = sandbox.computer_use.keyboard.press("t", ["ctrl", "shift"])
 
 ```python
 @intercept_errors(message_prefix="Failed to press hotkey: ")
-def hotkey(keys: str) -> KeyboardHotkeyResponse
+def hotkey(keys: str) -> bool
 ```
 
 Presses a hotkey combination.
@@ -402,7 +410,7 @@ Presses a hotkey combination.
 
 **Returns**:
 
-- `KeyboardHotkeyResponse` - Hotkey operation result.
+- `bool` - Whether the hotkey operation was successful.
 
 **Example**:
 

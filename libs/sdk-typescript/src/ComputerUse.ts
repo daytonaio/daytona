@@ -13,18 +13,21 @@ import {
   MouseDragRequest,
   MouseDragResponse,
   MouseScrollRequest,
-  MouseScrollResponse,
   KeyboardTypeRequest,
-  KeyboardTypeResponse,
   KeyboardPressRequest,
-  KeyboardPressResponse,
   KeyboardHotkeyRequest,
-  KeyboardHotkeyResponse,
   ScreenshotResponse,
   RegionScreenshotResponse,
   CompressedScreenshotResponse,
   DisplayInfoResponse,
   WindowsResponse,
+  ComputerUseStartResponse,
+  ComputerUseStopResponse,
+  ComputerUseStatusResponse,
+  ProcessStatusResponse,
+  ProcessRestartResponse,
+  ProcessLogsResponse,
+  ProcessErrorsResponse,
 } from '@daytonaio/api-client'
 
 /**
@@ -153,7 +156,7 @@ export class Mouse {
    * @param {number} y - The y coordinate to scroll at
    * @param {'up' | 'down'} direction - The direction to scroll
    * @param {number} [amount=1] - The amount to scroll
-   * @returns {Promise<MouseScrollResponse>} Scroll operation result
+   * @returns {Promise<boolean>} Whether the scroll operation was successful
    *
    * @example
    * ```typescript
@@ -164,10 +167,10 @@ export class Mouse {
    * const scrollDown = await sandbox.computerUse.mouse.scroll(100, 200, 'down', 5);
    * ```
    */
-  public async scroll(x: number, y: number, direction: 'up' | 'down', amount = 1): Promise<MouseScrollResponse> {
+  public async scroll(x: number, y: number, direction: 'up' | 'down', amount = 1): Promise<boolean> {
     const request: MouseScrollRequest = { x, y, direction, amount }
     const response = await this.toolboxApi.scrollMouse(this.sandboxId, request)
-    return response.data
+    return response.data.success
   }
 }
 
@@ -185,7 +188,7 @@ export class Keyboard {
    *
    * @param {string} text - The text to type
    * @param {number} [delay=0] - Delay between characters in milliseconds
-   * @returns {Promise<KeyboardTypeResponse>} Type operation result
+   * @returns {Promise<boolean>} Whether the type operation was successful
    *
    * @example
    * ```typescript
@@ -196,10 +199,10 @@ export class Keyboard {
    * const slowType = await sandbox.computerUse.keyboard.type('Slow typing', 100);
    * ```
    */
-  public async type(text: string, delay?: number): Promise<KeyboardTypeResponse> {
+  public async type(text: string, delay?: number): Promise<boolean> {
     const request: KeyboardTypeRequest = { text, delay }
     const response = await this.toolboxApi.typeText(this.sandboxId, request)
-    return response.data
+    return response.data.success
   }
 
   /**
@@ -207,7 +210,7 @@ export class Keyboard {
    *
    * @param {string} key - The key to press (e.g., 'Enter', 'Escape', 'Tab', 'a', 'A')
    * @param {string[]} [modifiers=[]] - Modifier keys ('ctrl', 'alt', 'meta', 'shift')
-   * @returns {Promise<KeyboardPressResponse>} Press operation result
+   * @returns {Promise<boolean>} Whether the press operation was successful
    *
    * @example
    * ```typescript
@@ -221,17 +224,17 @@ export class Keyboard {
    * const newTab = await sandbox.computerUse.keyboard.press('t', ['ctrl', 'shift']);
    * ```
    */
-  public async press(key: string, modifiers: string[] = []): Promise<KeyboardPressResponse> {
+  public async press(key: string, modifiers: string[] = []): Promise<boolean> {
     const request: KeyboardPressRequest = { key, modifiers }
     const response = await this.toolboxApi.pressKey(this.sandboxId, request)
-    return response.data
+    return response.data.success
   }
 
   /**
    * Presses a hotkey combination
    *
    * @param {string} keys - The hotkey combination (e.g., 'ctrl+c', 'alt+tab', 'cmd+shift+t')
-   * @returns {Promise<KeyboardHotkeyResponse>} Hotkey operation result
+   * @returns {Promise<boolean>} Whether the hotkey operation was successful
    *
    * @example
    * ```typescript
@@ -245,10 +248,10 @@ export class Keyboard {
    * const altTab = await sandbox.computerUse.keyboard.hotkey('alt+tab');
    * ```
    */
-  public async hotkey(keys: string): Promise<KeyboardHotkeyResponse> {
+  public async hotkey(keys: string): Promise<boolean> {
     const request: KeyboardHotkeyRequest = { keys }
     const response = await this.toolboxApi.pressHotkey(this.sandboxId, request)
-    return response.data
+    return response.data.success
   }
 }
 
@@ -464,45 +467,47 @@ export class ComputerUse {
   /**
    * Starts all computer use processes (Xvfb, xfce4, x11vnc, novnc)
    *
-   * @returns {Promise<void>}
+   * @returns {Promise<ComputerUseStartResponse>} Computer use start response
    *
    * @example
    * ```typescript
-   * await sandbox.computerUse.start();
-   * console.log('Computer use processes started');
+   * const result = await sandbox.computerUse.start();
+   * console.log('Computer use processes started:', result.message);
    * ```
    */
-  public async start(): Promise<void> {
-    await this.toolboxApi.startComputerUse(this.sandboxId)
+  public async start(): Promise<ComputerUseStartResponse> {
+    const response = await this.toolboxApi.startComputerUse(this.sandboxId)
+    return response.data
   }
 
   /**
    * Stops all computer use processes
    *
-   * @returns {Promise<void>}
+   * @returns {Promise<ComputerUseStopResponse>} Computer use stop response
    *
    * @example
    * ```typescript
-   * await sandbox.computerUse.stop();
-   * console.log('Computer use processes stopped');
+   * const result = await sandbox.computerUse.stop();
+   * console.log('Computer use processes stopped:', result.message);
    * ```
    */
-  public async stop(): Promise<void> {
-    await this.toolboxApi.stopComputerUse(this.sandboxId)
+  public async stop(): Promise<ComputerUseStopResponse> {
+    const response = await this.toolboxApi.stopComputerUse(this.sandboxId)
+    return response.data
   }
 
   /**
    * Gets the status of all computer use processes
    *
-   * @returns {Promise<void>} Status information about all VNC desktop processes
+   * @returns {Promise<ComputerUseStatusResponse>} Status information about all VNC desktop processes
    *
    * @example
    * ```typescript
    * const status = await sandbox.computerUse.getStatus();
-   * console.log('Computer use status:', status);
+   * console.log('Computer use status:', status.status);
    * ```
    */
-  public async getStatus(): Promise<void> {
+  public async getStatus(): Promise<ComputerUseStatusResponse> {
     const response = await this.toolboxApi.getComputerUseStatus(this.sandboxId)
     return response.data
   }
@@ -511,7 +516,7 @@ export class ComputerUse {
    * Gets the status of a specific VNC process
    *
    * @param {string} processName - Name of the process to check
-   * @returns {Promise<void>} Status information about the specific process
+   * @returns {Promise<ProcessStatusResponse>} Status information about the specific process
    *
    * @example
    * ```typescript
@@ -519,7 +524,7 @@ export class ComputerUse {
    * const noVncStatus = await sandbox.computerUse.getProcessStatus('novnc');
    * ```
    */
-  public async getProcessStatus(processName: string): Promise<void> {
+  public async getProcessStatus(processName: string): Promise<ProcessStatusResponse> {
     const response = await this.toolboxApi.getProcessStatus(processName, this.sandboxId)
     return response.data
   }
@@ -528,31 +533,32 @@ export class ComputerUse {
    * Restarts a specific VNC process
    *
    * @param {string} processName - Name of the process to restart
-   * @returns {Promise<void>}
+   * @returns {Promise<ProcessRestartResponse>} Process restart response
    *
    * @example
    * ```typescript
-   * await sandbox.computerUse.restartProcess('xfce4');
-   * console.log('XFCE4 process restarted');
+   * const result = await sandbox.computerUse.restartProcess('xfce4');
+   * console.log('XFCE4 process restarted:', result.message);
    * ```
    */
-  public async restartProcess(processName: string): Promise<void> {
-    await this.toolboxApi.restartProcess(processName, this.sandboxId)
+  public async restartProcess(processName: string): Promise<ProcessRestartResponse> {
+    const response = await this.toolboxApi.restartProcess(processName, this.sandboxId)
+    return response.data
   }
 
   /**
    * Gets logs for a specific VNC process
    *
    * @param {string} processName - Name of the process to get logs for
-   * @returns {Promise<void>} Process logs
+   * @returns {Promise<ProcessLogsResponse>} Process logs
    *
    * @example
    * ```typescript
-   * const logs = await sandbox.computerUse.getProcessLogs('novnc');
-   * console.log('NoVNC logs:', logs);
+   * const logsResp = await sandbox.computerUse.getProcessLogs('novnc');
+   * console.log('NoVNC logs:', logsResp.logs);
    * ```
    */
-  public async getProcessLogs(processName: string): Promise<void> {
+  public async getProcessLogs(processName: string): Promise<ProcessLogsResponse> {
     const response = await this.toolboxApi.getProcessLogs(processName, this.sandboxId)
     return response.data
   }
@@ -561,15 +567,15 @@ export class ComputerUse {
    * Gets error logs for a specific VNC process
    *
    * @param {string} processName - Name of the process to get error logs for
-   * @returns {Promise<void>} Process error logs
+   * @returns {Promise<ProcessErrorsResponse>} Process error logs
    *
    * @example
    * ```typescript
-   * const errors = await sandbox.computerUse.getProcessErrors('x11vnc');
-   * console.log('X11VNC errors:', errors);
+   * const errorsResp = await sandbox.computerUse.getProcessErrors('x11vnc');
+   * console.log('X11VNC errors:', errorsResp.errors);
    * ```
    */
-  public async getProcessErrors(processName: string): Promise<void> {
+  public async getProcessErrors(processName: string): Promise<ProcessErrorsResponse> {
     const response = await this.toolboxApi.getProcessErrors(processName, this.sandboxId)
     return response.data
   }
