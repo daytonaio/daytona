@@ -1,9 +1,6 @@
 // Copyright 2025 Daytona Platforms Inc.
 // SPDX-License-Identifier: AGPL-3.0
 
-//go:build !no_gui
-// +build !no_gui
-
 package computeruse
 
 import (
