@@ -77,6 +77,9 @@ const configuration = {
   },
   audit: {
     logToolboxRequestMetadata: process.env.AUDIT_LOG_TOOLBOX_REQUEST_METADATA === 'true',
+    retentionDays: process.env.AUDIT_LOG_RETENTION_DAYS
+      ? parseInt(process.env.AUDIT_LOG_RETENTION_DAYS, 10)
+      : undefined,
   },
 }
 

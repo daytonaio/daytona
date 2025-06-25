@@ -10,11 +10,12 @@ import { AuditLog } from './entities/audit-log.entity'
 import { AuditInterceptor } from './interceptors/audit.interceptor'
 import { AuditService } from './services/audit.service'
 import { AuditLogSubscriber } from './subscribers/audit-log.subscriber'
+import { RedisLockProvider } from '../sandbox/common/redis-lock.provider'
 
 @Module({
   imports: [TypeOrmModule.forFeature([AuditLog])],
   controllers: [AuditController],
-  providers: [AuditService, AuditInterceptor, AuditLogSubscriber],
+  providers: [AuditService, AuditInterceptor, AuditLogSubscriber, RedisLockProvider],
   exports: [AuditService, AuditInterceptor],
 })
 export class AuditModule {}
