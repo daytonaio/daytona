@@ -1,7 +1,9 @@
 FROM mcr.microsoft.com/devcontainers/python
 
 # Update package list and install required dependencies
-RUN apt-get update && apt-get install -y curl sudo python3-pip python3-venv && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y \
+    curl sudo python3-pip python3-venv ripgrep && \
+    rm -rf /var/lib/apt/lists/*
 
 # Install pipx and uv
 RUN python3 -m pip install pipx && pipx ensurepath && pipx install uv
