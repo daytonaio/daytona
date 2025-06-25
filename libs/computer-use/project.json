@@ -9,8 +9,7 @@
       "executor": "@nx-go/nx-go:build",
       "options": {
         "main": "{projectRoot}/main.go",
-        "outputPath": "dist/libs/computer-use",
-        "flags": ["-tags=no_gui"]
+        "outputPath": "dist/libs/computer-use"
       },
       "configurations": {
         "production": {}
@@ -25,18 +24,7 @@
         "env": {
           "GOARCH": "amd64",
           "GOOS": "linux"
-        },
-        "flags": ["-tags=no_gui"]
-      }
-    },
-    "build:full": {
-      "executor": "@nx-go/nx-go:build",
-      "options": {
-        "main": "{projectRoot}/main.go",
-        "outputPath": "dist/libs/computer-use"
-      },
-      "configurations": {
-        "production": {}
+        }
       }
     },
     "format": {
