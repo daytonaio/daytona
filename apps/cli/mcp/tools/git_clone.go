@@ -7,15 +7,15 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/daytonaio/daytona/cli/apiclient"
-	daytonaapiclient "github.com/daytonaio/daytona/daytonaapiclient"
+	"github.com/daytonaio/apiclient"
+	apiclient_cli "github.com/daytonaio/daytona/cli/apiclient"
 	"github.com/mark3labs/mcp-go/mcp"
 
 	log "github.com/sirupsen/logrus"
 )
 
 func GitClone(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	apiClient, err := apiclient.GetApiClient(nil, daytonaMCPHeaders)
+	apiClient, err := apiclient_cli.GetApiClient(nil, daytonaMCPHeaders)
 	if err != nil {
 		return &mcp.CallToolResult{IsError: true}, err
 	}
@@ -46,8 +46,8 @@ func GitClone(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolRe
 	return mcp.NewToolResultText(fmt.Sprintf("Cloned repository: %s to %s", gitCloneRequest.Url, gitCloneRequest.Path)), nil
 }
 
-func getGitCloneRequest(request mcp.CallToolRequest) (*daytonaapiclient.GitCloneRequest, error) {
-	gitCloneRequest := daytonaapiclient.GitCloneRequest{}
+func getGitCloneRequest(request mcp.CallToolRequest) (*apiclient.GitCloneRequest, error) {
+	gitCloneRequest := apiclient.GitCloneRequest{}
 
 	url, ok := request.Params.Arguments["url"].(string)
 	if !ok {

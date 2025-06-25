@@ -9,13 +9,13 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/lipgloss"
+	apiclient "github.com/daytonaio/apiclient"
 	"github.com/daytonaio/daytona/cli/views/common"
 	"github.com/daytonaio/daytona/cli/views/util"
-	"github.com/daytonaio/daytona/daytonaapiclient"
 	"golang.org/x/term"
 )
 
-func RenderInfo(sandbox *daytonaapiclient.Sandbox, forceUnstyled bool) {
+func RenderInfo(sandbox *apiclient.Sandbox, forceUnstyled bool) {
 	var output string
 
 	output += "\n"
@@ -93,35 +93,35 @@ func getInfoLine(key, value string) string {
 	return util.PropertyNameStyle.Render(fmt.Sprintf("%-*s", util.PropertyNameWidth, key)) + util.PropertyValueStyle.Render(value) + "\n"
 }
 
-func getStateLabel(state daytonaapiclient.SandboxState) string {
+func getStateLabel(state apiclient.SandboxState) string {
 	switch state {
-	case daytonaapiclient.SANDBOXSTATE_CREATING:
+	case apiclient.SANDBOXSTATE_CREATING:
 		return common.CreatingStyle.Render("CREATING")
-	case daytonaapiclient.SANDBOXSTATE_RESTORING:
+	case apiclient.SANDBOXSTATE_RESTORING:
 		return common.CreatingStyle.Render("RESTORING")
-	case daytonaapiclient.SANDBOXSTATE_DESTROYED:
+	case apiclient.SANDBOXSTATE_DESTROYED:
 		return common.DeletedStyle.Render("DESTROYED")
-	case daytonaapiclient.SANDBOXSTATE_DESTROYING:
+	case apiclient.SANDBOXSTATE_DESTROYING:
 		return common.DeletedStyle.Render("DESTROYING")
-	case daytonaapiclient.SANDBOXSTATE_STARTED:
+	case apiclient.SANDBOXSTATE_STARTED:
 		return common.StartedStyle.Render("STARTED")
-	case daytonaapiclient.SANDBOXSTATE_STOPPED:
+	case apiclient.SANDBOXSTATE_STOPPED:
 		return common.StoppedStyle.Render("STOPPED")
-	case daytonaapiclient.SANDBOXSTATE_STARTING:
+	case apiclient.SANDBOXSTATE_STARTING:
 		return common.StartingStyle.Render("STARTING")
-	case daytonaapiclient.SANDBOXSTATE_STOPPING:
+	case apiclient.SANDBOXSTATE_STOPPING:
 		return common.StoppingStyle.Render("STOPPING")
-	case daytonaapiclient.SANDBOXSTATE_PULLING_SNAPSHOT:
+	case apiclient.SANDBOXSTATE_PULLING_SNAPSHOT:
 		return common.CreatingStyle.Render("PULLING SNAPSHOT")
-	case daytonaapiclient.SANDBOXSTATE_ARCHIVING:
+	case apiclient.SANDBOXSTATE_ARCHIVING:
 		return common.CreatingStyle.Render("ARCHIVING")
-	case daytonaapiclient.SANDBOXSTATE_ARCHIVED:
+	case apiclient.SANDBOXSTATE_ARCHIVED:
 		return common.StoppedStyle.Render("ARCHIVED")
-	case daytonaapiclient.SANDBOXSTATE_ERROR:
+	case apiclient.SANDBOXSTATE_ERROR:
 		return common.ErrorStyle.Render("ERROR")
-	case daytonaapiclient.SANDBOXSTATE_BUILD_FAILED:
+	case apiclient.SANDBOXSTATE_BUILD_FAILED:
 		return common.ErrorStyle.Render("BUILD FAILED")
-	case daytonaapiclient.SANDBOXSTATE_UNKNOWN:
+	case apiclient.SANDBOXSTATE_UNKNOWN:
 		return common.UndefinedStyle.Render("UNKNOWN")
 	default:
 		return common.UndefinedStyle.Render("/")

@@ -7,9 +7,9 @@ import (
 	"fmt"
 	"sort"
 
+	"github.com/daytonaio/apiclient"
 	"github.com/daytonaio/daytona/cli/views/common"
 	"github.com/daytonaio/daytona/cli/views/util"
-	"github.com/daytonaio/daytona/daytonaapiclient"
 )
 
 type RowData struct {
@@ -18,7 +18,7 @@ type RowData struct {
 	Created string
 }
 
-func ListOrganizations(organizationList []daytonaapiclient.Organization, activeOrganizationId *string) {
+func ListOrganizations(organizationList []apiclient.Organization, activeOrganizationId *string) {
 	if len(organizationList) == 0 {
 		util.NotifyEmptyOrganizationList(true)
 		return
@@ -46,13 +46,13 @@ func ListOrganizations(organizationList []daytonaapiclient.Organization, activeO
 	fmt.Println(table)
 }
 
-func SortOrganizations(organizationList *[]daytonaapiclient.Organization) {
+func SortOrganizations(organizationList *[]apiclient.Organization) {
 	sort.Slice(*organizationList, func(i, j int) bool {
 		return (*organizationList)[i].CreatedAt.After((*organizationList)[j].CreatedAt)
 	})
 }
 
-func getTableRowData(organization daytonaapiclient.Organization, activeOrganizationId *string) *RowData {
+func getTableRowData(organization apiclient.Organization, activeOrganizationId *string) *RowData {
 	rowData := RowData{"", "", ""}
 	rowData.Name = organization.Name + util.AdditionalPropertyPadding
 
@@ -66,7 +66,7 @@ func getTableRowData(organization daytonaapiclient.Organization, activeOrganizat
 	return &rowData
 }
 
-func renderUnstyledList(organizationList []daytonaapiclient.Organization) {
+func renderUnstyledList(organizationList []apiclient.Organization) {
 	for _, organization := range organizationList {
 		RenderInfo(&organization, true)
 

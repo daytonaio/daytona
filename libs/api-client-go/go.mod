@@ -1,4 +1,4 @@
-module github.com/daytonaio/daytona
+module github.com/daytonaio/apiclient
 
 go 1.18
 
