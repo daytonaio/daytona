@@ -32,8 +32,10 @@ func (u *ComputerUse) TakeScreenshot(req *computeruse.ScreenshotRequest) (*compu
 
 	return &computeruse.ScreenshotResponse{
 		Screenshot: base64Str,
-		Width:      1,
-		Height:     1,
+		Size: computeruse.Size{
+			Width:  1,
+			Height: 1,
+		},
 	}, nil
 }
 
@@ -55,9 +57,11 @@ func (u *ComputerUse) TakeRegionScreenshot(req *computeruse.RegionScreenshotRequ
 
 	return &computeruse.ScreenshotResponse{
 		Screenshot: base64Str,
-		Width:      req.Width,
-		Height:     req.Height,
-		Region:     req,
+		Size: computeruse.Size{
+			Width:  req.Width,
+			Height: req.Height,
+		},
+		Region: req,
 	}, nil
 }
 
@@ -79,12 +83,14 @@ func (u *ComputerUse) TakeCompressedScreenshot(req *computeruse.CompressedScreen
 
 	return &computeruse.ScreenshotResponse{
 		Screenshot: base64Str,
-		Width:      1920,
-		Height:     1080,
-		Format:     req.Format,
-		Quality:    req.Quality,
-		Scale:      req.Scale,
-		SizeBytes:  len(buf.Bytes()),
+		Size: computeruse.Size{
+			Width:  1920,
+			Height: 1080,
+		},
+		Format:    req.Format,
+		Quality:   req.Quality,
+		Scale:     req.Scale,
+		SizeBytes: len(buf.Bytes()),
 	}, nil
 }
 
@@ -105,105 +111,123 @@ func (u *ComputerUse) TakeCompressedRegionScreenshot(req *computeruse.Compressed
 	base64Str := base64.StdEncoding.EncodeToString(buf.Bytes())
 
 	region := &computeruse.RegionScreenshotRequest{
-		X:          req.X,
-		Y:          req.Y,
-		Width:      req.Width,
-		Height:     req.Height,
+		Position: computeruse.Position{
+			X: req.X,
+			Y: req.Y,
+		},
+		Size: computeruse.Size{
+			Width:  req.Width,
+			Height: req.Height,
+		},
 		ShowCursor: req.ShowCursor,
 	}
 
 	return &computeruse.ScreenshotResponse{
 		Screenshot: base64Str,
-		Width:      req.Width,
-		Height:     req.Height,
-		Region:     region,
-		Format:     req.Format,
-		Quality:    req.Quality,
-		Scale:      req.Scale,
-		SizeBytes:  len(buf.Bytes()),
+		Size: computeruse.Size{
+			Width:  req.Width,
+			Height: req.Height,
+		},
+		Region:    region,
+		Format:    req.Format,
+		Quality:   req.Quality,
+		Scale:     req.Scale,
+		SizeBytes: len(buf.Bytes()),
 	}, nil
 }
 
 func (u *ComputerUse) GetMousePosition() (*computeruse.MousePositionResponse, error) {
 	return &computeruse.MousePositionResponse{
-		X: 0,
-		Y: 0,
+		Position: computeruse.Position{
+			X: 0,
+			Y: 0,
+		},
 	}, nil
 }
 
 func (u *ComputerUse) MoveMouse(req *computeruse.MoveMouseRequest) (*computeruse.MousePositionResponse, error) {
 	return &computeruse.MousePositionResponse{
-		Success: true,
-		X:       req.X,
-		Y:       req.Y,
-		ActualX: req.X,
-		ActualY: req.Y,
+		Position: computeruse.Position{
+			X: req.X,
+			Y: req.Y,
+		},
 	}, nil
 }
 
-func (u *ComputerUse) Click(req *computeruse.ClickRequest) (*computeruse.MousePositionResponse, error) {
+func (u *ComputerUse) Click(req *computeruse.ClickRequest) (*computeruse.MouseClickResponse, error) {
 	if req.Button == "" {
 		req.Button = "left"
 	}
 
-	return &computeruse.MousePositionResponse{
-		Success: true,
-		Action:  "click",
-		Button:  req.Button,
-		Double:  req.Double,
-		X:       req.X,
-		Y:       req.Y,
-		ActualX: req.X,
-		ActualY: req.Y,
+	return &computeruse.MouseClickResponse{
+		Position: computeruse.Position{
+			X: req.X,
+			Y: req.Y,
+		},
+		Button: req.Button,
+		Double: req.Double,
 	}, nil
 }
 
-func (u *ComputerUse) Drag(req *computeruse.DragRequest) (*computeruse.MousePositionResponse, error) {
+func (u *ComputerUse) Drag(req *computeruse.DragRequest) (*computeruse.MouseDragResponse, error) {
 	if req.Button == "" {
 		req.Button = "left"
 	}
 
-	return &computeruse.MousePositionResponse{
-		Success: true,
-		Action:  "drag",
-		From: &computeruse.MousePositionResponse{
+	return &computeruse.MouseDragResponse{
+		From: computeruse.Position{
 			X: req.StartX,
 			Y: req.StartY,
 		},
-		To: &computeruse.MousePositionResponse{
+		To: computeruse.Position{
 			X: req.EndX,
 			Y: req.EndY,
 		},
-		ActualX: req.EndX,
-		ActualY: req.EndY,
+		Position: computeruse.Position{
+			X: req.EndX,
+			Y: req.EndY,
+		},
 	}, nil
 }
 
-func (u *ComputerUse) Scroll(req *computeruse.ScrollRequest) (*computeruse.Empty, error) {
-	return new(computeruse.Empty), nil
+func (u *ComputerUse) Scroll(req *computeruse.ScrollRequest) (*computeruse.ScrollResponse, error) {
+	return &computeruse.ScrollResponse{
+		Success: true,
+	}, nil
 }
 
-func (u *ComputerUse) TypeText(req *computeruse.TypeTextRequest) (*computeruse.Empty, error) {
-	return new(computeruse.Empty), nil
+func (u *ComputerUse) TypeText(req *computeruse.TypeTextRequest) (*computeruse.TypeTextResponse, error) {
+	return &computeruse.TypeTextResponse{
+		Typed: req.Text,
+	}, nil
 }
 
-func (u *ComputerUse) PressKey(req *computeruse.PressKeyRequest) (*computeruse.Empty, error) {
-	return new(computeruse.Empty), nil
+func (u *ComputerUse) PressKey(req *computeruse.PressKeyRequest) (*computeruse.PressKeyResponse, error) {
+	return &computeruse.PressKeyResponse{
+		Key:       req.Key,
+		Modifiers: req.Modifiers,
+	}, nil
 }
 
-func (u *ComputerUse) PressHotkey(req *computeruse.PressHotkeyRequest) (*computeruse.Empty, error) {
-	return new(computeruse.Empty), nil
+func (u *ComputerUse) PressHotkey(req *computeruse.PressHotkeyRequest) (*computeruse.PressHotkeyResponse, error) {
+	return &computeruse.PressHotkeyResponse{
+		Hotkey: req.Keys,
+	}, nil
 }
 
 func (u *ComputerUse) GetDisplayInfo() (*computeruse.DisplayInfoResponse, error) {
 	return &computeruse.DisplayInfoResponse{
 		Displays: []computeruse.DisplayInfo{
 			{
-				ID:       0,
-				X:        0,
-				Y:        0,
-				Width:    1920,
-				Height:   1080,
+				ID: 0,
+				Position: computeruse.Position{
+					X: 0,
+					Y: 0,
+				},
+				Size: computeruse.Size{
+					Width:  1920,
+					Height: 1080,
+				},
 				IsActive: true,
 			},
 		},
@@ -214,12 +238,16 @@ func (u *ComputerUse) GetWindows() (*computeruse.WindowsResponse, error) {
 	return &computeruse.WindowsResponse{
 		Windows: []computeruse.WindowInfo{
 			{
-				ID:       1,
-				Title:    "Mock Window",
-				X:        0,
-				Y:        0,
-				Width:    800,
-				Height:   600,
+				ID:    1,
+				Title: "Mock Window",
+				Position: computeruse.Position{
+					X: 0,
+					Y: 0,
+				},
+				Size: computeruse.Size{
+					Width:  800,
+					Height: 600,
+				},
 				IsActive: true,
 			},
 		},

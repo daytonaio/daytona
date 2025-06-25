@@ -71,7 +71,7 @@ class AsyncMouse:
         Example:
             ```python
             result = await sandbox.computer_use.mouse.move(100, 200)
-            print(f"Mouse moved to: {result.actual_x}, {result.actual_y}")
+            print(f"Mouse moved to: {result.x}, {result.y}")
             ```
         """
         request = MouseMoveRequest(x=x, y=y)

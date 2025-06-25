@@ -16,49 +16,75 @@ import (
 	"github.com/kbinani/screenshot"
 )
 
-// ImageCompressionParams holds compression settings
+// ImageCompressionParams holds parameters for image compression
 type ImageCompressionParams struct {
-	Format  string  `form:"format" json:"format"`   // "png" or "jpeg"
-	Quality int     `form:"quality" json:"quality"` // 1-100 for JPEG quality
-	Scale   float64 `form:"scale" json:"scale"`     // 0.1-1.0 for scaling down
+	Format  string  // "png", "jpeg", "webp"
+	Quality int     // 1-100 for JPEG quality
+	Scale   float64 // 0.1-1.0 for scaling down
 }
 
-// encodeImageWithCompression encodes an image with the specified compression settings
-func encodeImageWithCompression(img image.Image, params ImageCompressionParams) ([]byte, error) {
+// encodeImageWithCompression encodes an image with the specified compression parameters
+func encodeImageWithCompression(img *image.RGBA, params ImageCompressionParams) ([]byte, error) {
 	var buf bytes.Buffer
 
-	// Scale image if needed
-	if params.Scale < 1.0 {
-		bounds := img.Bounds()
-		newWidth := int(float64(bounds.Dx()) * params.Scale)
-		newHeight := int(float64(bounds.Dy()) * params.Scale)
-
-		// Create scaled image
-		scaledImg := image.NewRGBA(image.Rect(0, 0, newWidth, newHeight))
-
-		// Simple nearest neighbor scaling
-		for y := 0; y < newHeight; y++ {
-			for x := 0; x < newWidth; x++ {
-				srcX := int(float64(x) / params.Scale)
-				srcY := int(float64(y) / params.Scale)
-				scaledImg.Set(x, y, img.At(srcX, srcY))
-			}
-		}
-		img = scaledImg
-	}
-
-	// Encode based on format
 	switch params.Format {
 	case "jpeg":
-		err := jpeg.Encode(&buf, img, &jpeg.Options{Quality: params.Quality})
-		return buf.Bytes(), err
-	default: // png
+		// Scale the image if needed
+		var scaledImg image.Image = img
+		if params.Scale != 1.0 {
+			scaledImg = scaleImage(img, params.Scale)
+		}
+		err := jpeg.Encode(&buf, scaledImg, &jpeg.Options{Quality: params.Quality})
+		if err != nil {
+			return nil, err
+		}
+	case "png":
+		// Scale the image if needed
+		var scaledImg image.Image = img
+		if params.Scale != 1.0 {
+			scaledImg = scaleImage(img, params.Scale)
+		}
+		err := png.Encode(&buf, scaledImg)
+		if err != nil {
+			return nil, err
+		}
+	default:
+		// Default to PNG
 		err := png.Encode(&buf, img)
-		return buf.Bytes(), err
+		if err != nil {
+			return nil, err
+		}
 	}
+
+	return buf.Bytes(), nil
 }
 
-// TakeCompressedScreenshot takes a screenshot with compression options
+// scaleImage scales an image by the given factor
+func scaleImage(img *image.RGBA, scale float64) image.Image {
+	if scale == 1.0 {
+		return img
+	}
+
+	// Simple nearest neighbor scaling
+	oldBounds := img.Bounds()
+	newWidth := int(float64(oldBounds.Dx()) * scale)
+	newHeight := int(float64(oldBounds.Dy()) * scale)
+
+	scaledImg := image.NewRGBA(image.Rect(0, 0, newWidth, newHeight))
+
+	for y := 0; y < newHeight; y++ {
+		for x := 0; x < newWidth; x++ {
+			oldX := int(float64(x) / scale)
+			oldY := int(float64(y) / scale)
+			if oldX < oldBounds.Dx() && oldY < oldBounds.Dy() {
+				scaledImg.Set(x, y, img.At(oldX, oldY))
+			}
+		}
+	}
+
+	return scaledImg
+}
+
 func (u *ComputerUse) TakeCompressedScreenshot(req *computeruse.CompressedScreenshotRequest) (*computeruse.ScreenshotResponse, error) {
 	params := ImageCompressionParams{
 		Format:  req.Format,
@@ -93,16 +119,18 @@ func (u *ComputerUse) TakeCompressedScreenshot(req *computeruse.CompressedScreen
 
 	response := &computeruse.ScreenshotResponse{
 		Screenshot: base64Str,
-		Width:      int(float64(bounds.Dx()) * params.Scale),
-		Height:     int(float64(bounds.Dy()) * params.Scale),
-		Format:     params.Format,
-		Quality:    params.Quality,
-		Scale:      params.Scale,
-		SizeBytes:  len(imageData),
+		Size: computeruse.Size{
+			Width:  int(float64(bounds.Dx()) * params.Scale),
+			Height: int(float64(bounds.Dy()) * params.Scale),
+		},
+		Format:    params.Format,
+		Quality:   params.Quality,
+		Scale:     params.Scale,
+		SizeBytes: len(imageData),
 	}
 
 	if req.ShowCursor {
-		response.CursorPosition = &computeruse.MousePositionResponse{
+		response.CursorPosition = &computeruse.Position{
 			X: int(float64(mouseX) * params.Scale),
 			Y: int(float64(mouseY) * params.Scale),
 		}
@@ -150,26 +178,32 @@ func (u *ComputerUse) TakeCompressedRegionScreenshot(req *computeruse.Compressed
 	base64Str := base64.StdEncoding.EncodeToString(imageData)
 
 	region := &computeruse.RegionScreenshotRequest{
-		X:          req.X,
-		Y:          req.Y,
-		Width:      int(float64(req.Width) * params.Scale),
-		Height:     int(float64(req.Height) * params.Scale),
+		Position: computeruse.Position{
+			X: req.X,
+			Y: req.Y,
+		},
+		Size: computeruse.Size{
+			Width:  int(float64(req.Width) * params.Scale),
+			Height: int(float64(req.Height) * params.Scale),
+		},
 		ShowCursor: req.ShowCursor,
 	}
 
 	response := &computeruse.ScreenshotResponse{
 		Screenshot: base64Str,
-		Width:      int(float64(req.Width) * params.Scale),
-		Height:     int(float64(req.Height) * params.Scale),
-		Region:     region,
-		Format:     params.Format,
-		Quality:    params.Quality,
-		Scale:      params.Scale,
-		SizeBytes:  len(imageData),
+		Size: computeruse.Size{
+			Width:  int(float64(req.Width) * params.Scale),
+			Height: int(float64(req.Height) * params.Scale),
+		},
+		Region:    region,
+		Format:    params.Format,
+		Quality:   params.Quality,
+		Scale:     params.Scale,
+		SizeBytes: len(imageData),
 	}
 
 	if req.ShowCursor {
-		response.CursorPosition = &computeruse.MousePositionResponse{
+		response.CursorPosition = &computeruse.Position{
 			X: req.X + int(float64(mouseX)*params.Scale),
 			Y: req.Y + int(float64(mouseY)*params.Scale),
 		}
@@ -185,11 +219,15 @@ func (u *ComputerUse) GetDisplayInfo() (*computeruse.DisplayInfoResponse, error)
 	for i := 0; i < n; i++ {
 		bounds := screenshot.GetDisplayBounds(i)
 		displays[i] = computeruse.DisplayInfo{
-			ID:       i,
-			X:        bounds.Min.X,
-			Y:        bounds.Min.Y,
-			Width:    bounds.Dx(),
-			Height:   bounds.Dy(),
+			ID: i,
+			Position: computeruse.Position{
+				X: bounds.Min.X,
+				Y: bounds.Min.Y,
+			},
+			Size: computeruse.Size{
+				Width:  bounds.Dx(),
+				Height: bounds.Dy(),
+			},
 			IsActive: true, // Assuming all detected displays are active
 		}
 	}
@@ -215,12 +253,16 @@ func (u *ComputerUse) GetWindows() (*computeruse.WindowsResponse, error) {
 			// Get window position and size (this might need platform-specific implementation)
 			// For now, we'll use placeholder values
 			windows = append(windows, computeruse.WindowInfo{
-				ID:       id,
-				Title:    title,
-				X:        0,     // Would need platform-specific implementation
-				Y:        0,     // Would need platform-specific implementation
-				Width:    0,     // Would need platform-specific implementation
-				Height:   0,     // Would need platform-specific implementation
+				ID:    id,
+				Title: title,
+				Position: computeruse.Position{
+					X: 0, // Would need platform-specific implementation
+					Y: 0, // Would need platform-specific implementation
+				},
+				Size: computeruse.Size{
+					Width:  0, // Would need platform-specific implementation
+					Height: 0, // Would need platform-specific implementation
+				},
 				IsActive: false, // Would need platform-specific implementation
 			})
 		}

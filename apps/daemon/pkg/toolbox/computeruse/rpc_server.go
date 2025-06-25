@@ -120,7 +120,7 @@ func (m *ComputerUseRPCServer) MoveMouse(arg *MoveMouseRequest, resp *MousePosit
 	return nil
 }
 
-func (m *ComputerUseRPCServer) Click(arg *ClickRequest, resp *MousePositionResponse) error {
+func (m *ComputerUseRPCServer) Click(arg *ClickRequest, resp *MouseClickResponse) error {
 	response, err := m.Impl.Click(arg)
 	if err != nil {
 		return err
@@ -129,7 +129,7 @@ func (m *ComputerUseRPCServer) Click(arg *ClickRequest, resp *MousePositionRespo
 	return nil
 }
 
-func (m *ComputerUseRPCServer) Drag(arg *DragRequest, resp *MousePositionResponse) error {
+func (m *ComputerUseRPCServer) Drag(arg *DragRequest, resp *MouseDragResponse) error {
 	response, err := m.Impl.Drag(arg)
 	if err != nil {
 		return err
@@ -138,25 +138,41 @@ func (m *ComputerUseRPCServer) Drag(arg *DragRequest, resp *MousePositionRespons
 	return nil
 }
 
-func (m *ComputerUseRPCServer) Scroll(arg *ScrollRequest, resp *Empty) error {
-	_, err := m.Impl.Scroll(arg)
-	return err
+func (m *ComputerUseRPCServer) Scroll(arg *ScrollRequest, resp *ScrollResponse) error {
+	response, err := m.Impl.Scroll(arg)
+	if err != nil {
+		return err
+	}
+	*resp = *response
+	return nil
 }
 
 // Keyboard control methods
-func (m *ComputerUseRPCServer) TypeText(arg *TypeTextRequest, resp *Empty) error {
-	_, err := m.Impl.TypeText(arg)
-	return err
+func (m *ComputerUseRPCServer) TypeText(arg *TypeTextRequest, resp *TypeTextResponse) error {
+	response, err := m.Impl.TypeText(arg)
+	if err != nil {
+		return err
+	}
+	*resp = *response
+	return nil
 }
 
-func (m *ComputerUseRPCServer) PressKey(arg *PressKeyRequest, resp *Empty) error {
-	_, err := m.Impl.PressKey(arg)
-	return err
+func (m *ComputerUseRPCServer) PressKey(arg *PressKeyRequest, resp *PressKeyResponse) error {
+	response, err := m.Impl.PressKey(arg)
+	if err != nil {
+		return err
+	}
+	*resp = *response
+	return nil
 }
 
-func (m *ComputerUseRPCServer) PressHotkey(arg *PressHotkeyRequest, resp *Empty) error {
-	_, err := m.Impl.PressHotkey(arg)
-	return err
+func (m *ComputerUseRPCServer) PressHotkey(arg *PressHotkeyRequest, resp *PressHotkeyResponse) error {
+	response, err := m.Impl.PressHotkey(arg)
+	if err != nil {
+		return err
+	}
+	*resp = *response
+	return nil
 }
 
 // Display info methods

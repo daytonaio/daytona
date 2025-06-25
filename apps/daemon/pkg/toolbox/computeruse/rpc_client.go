@@ -97,37 +97,41 @@ func (m *ComputerUseRPCClient) MoveMouse(request *MoveMouseRequest) (*MousePosit
 	return &resp, err
 }
 
-func (m *ComputerUseRPCClient) Click(request *ClickRequest) (*MousePositionResponse, error) {
-	var resp MousePositionResponse
+func (m *ComputerUseRPCClient) Click(request *ClickRequest) (*MouseClickResponse, error) {
+	var resp MouseClickResponse
 	err := m.client.Call("Plugin.Click", request, &resp)
 	return &resp, err
 }
 
-func (m *ComputerUseRPCClient) Drag(request *DragRequest) (*MousePositionResponse, error) {
-	var resp MousePositionResponse
+func (m *ComputerUseRPCClient) Drag(request *DragRequest) (*MouseDragResponse, error) {
+	var resp MouseDragResponse
 	err := m.client.Call("Plugin.Drag", request, &resp)
 	return &resp, err
 }
 
-func (m *ComputerUseRPCClient) Scroll(request *ScrollRequest) (*Empty, error) {
-	err := m.client.Call("Plugin.Scroll", request, new(Empty))
-	return new(Empty), err
+func (m *ComputerUseRPCClient) Scroll(request *ScrollRequest) (*ScrollResponse, error) {
+	var resp ScrollResponse
+	err := m.client.Call("Plugin.Scroll", request, &resp)
+	return &resp, err
 }
 
 // Keyboard control methods
-func (m *ComputerUseRPCClient) TypeText(request *TypeTextRequest) (*Empty, error) {
-	err := m.client.Call("Plugin.TypeText", request, new(Empty))
-	return new(Empty), err
+func (m *ComputerUseRPCClient) TypeText(request *TypeTextRequest) (*TypeTextResponse, error) {
+	var resp TypeTextResponse
+	err := m.client.Call("Plugin.TypeText", request, &resp)
+	return &resp, err
 }
 
-func (m *ComputerUseRPCClient) PressKey(request *PressKeyRequest) (*Empty, error) {
-	err := m.client.Call("Plugin.PressKey", request, new(Empty))
-	return new(Empty), err
+func (m *ComputerUseRPCClient) PressKey(request *PressKeyRequest) (*PressKeyResponse, error) {
+	var resp PressKeyResponse
+	err := m.client.Call("Plugin.PressKey", request, &resp)
+	return &resp, err
 }
 
-func (m *ComputerUseRPCClient) PressHotkey(request *PressHotkeyRequest) (*Empty, error) {
-	err := m.client.Call("Plugin.PressHotkey", request, new(Empty))
-	return new(Empty), err
+func (m *ComputerUseRPCClient) PressHotkey(request *PressHotkeyRequest) (*PressHotkeyResponse, error) {
+	var resp PressHotkeyResponse
+	err := m.client.Call("Plugin.PressHotkey", request, &resp)
+	return &resp, err
 }
 
 // Display info methods
