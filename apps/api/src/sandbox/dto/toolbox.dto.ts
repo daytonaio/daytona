@@ -383,373 +383,694 @@ export class SessionDto {
 // Computer Use DTOs
 @ApiSchema({ name: 'MousePosition' })
 export class MousePositionDto {
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The X coordinate of the mouse cursor position',
+    example: 100,
+  })
   x: number
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The Y coordinate of the mouse cursor position',
+    example: 200,
+  })
   y: number
 }
 
 @ApiSchema({ name: 'MouseMoveRequest' })
 export class MouseMoveRequestDto {
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The target X coordinate to move the mouse cursor to',
+    example: 150,
+  })
   x: number
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The target Y coordinate to move the mouse cursor to',
+    example: 250,
+  })
   y: number
 }
 
 @ApiSchema({ name: 'MouseMoveResponse' })
 export class MouseMoveResponseDto {
-  @ApiProperty()
+  @ApiProperty({
+    description: 'Whether the mouse movement operation was successful',
+    example: true,
+  })
   success: boolean
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The requested X coordinate for mouse movement',
+    example: 150,
+  })
   x: number
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The requested Y coordinate for mouse movement',
+    example: 250,
+  })
   y: number
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The actual X coordinate where the mouse cursor ended up',
+    example: 150,
+  })
   actual_x: number
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The actual Y coordinate where the mouse cursor ended up',
+    example: 250,
+  })
   actual_y: number
 }
 
 @ApiSchema({ name: 'MouseClickRequest' })
 export class MouseClickRequestDto {
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The X coordinate where to perform the mouse click',
+    example: 100,
+  })
   x: number
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The Y coordinate where to perform the mouse click',
+    example: 200,
+  })
   y: number
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({
+    description: 'The mouse button to click (left, right, middle). Defaults to left',
+    example: 'left',
+  })
   button?: string
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({
+    description: 'Whether to perform a double-click instead of a single click',
+    example: false,
+  })
   double?: boolean
 }
 
 @ApiSchema({ name: 'MouseClickResponse' })
 export class MouseClickResponseDto {
-  @ApiProperty()
+  @ApiProperty({
+    description: 'Whether the mouse click operation was successful',
+    example: true,
+  })
   success: boolean
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The type of action performed (click, double-click)',
+    example: 'click',
+  })
   action: string
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The mouse button that was clicked',
+    example: 'left',
+  })
   button: string
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'Whether a double-click was performed',
+    example: false,
+  })
   double: boolean
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The X coordinate where the click was performed',
+    example: 100,
+  })
   x: number
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The Y coordinate where the click was performed',
+    example: 200,
+  })
   y: number
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The actual X coordinate where the click occurred',
+    example: 100,
+  })
   actual_x: number
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The actual Y coordinate where the click occurred',
+    example: 200,
+  })
   actual_y: number
 }
 
 @ApiSchema({ name: 'MouseDragRequest' })
 export class MouseDragRequestDto {
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The starting X coordinate for the drag operation',
+    example: 100,
+  })
   startX: number
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The starting Y coordinate for the drag operation',
+    example: 200,
+  })
   startY: number
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The ending X coordinate for the drag operation',
+    example: 300,
+  })
   endX: number
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The ending Y coordinate for the drag operation',
+    example: 400,
+  })
   endY: number
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({
+    description: 'The mouse button to use for dragging (left, right, middle). Defaults to left',
+    example: 'left',
+  })
   button?: string
 }
 
 @ApiSchema({ name: 'MouseDragResponse' })
 export class MouseDragResponseDto {
-  @ApiProperty()
+  @ApiProperty({
+    description: 'Whether the mouse drag operation was successful',
+    example: true,
+  })
   success: boolean
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The type of action performed',
+    example: 'drag',
+  })
   action: string
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The starting coordinates of the drag operation',
+    example: { x: 100, y: 200 },
+  })
   from: { x: number; y: number }
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The ending coordinates of the drag operation',
+    example: { x: 300, y: 400 },
+  })
   to: { x: number; y: number }
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The actual X coordinate where the drag ended',
+    example: 300,
+  })
   actual_x: number
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The actual Y coordinate where the drag ended',
+    example: 400,
+  })
   actual_y: number
 }
 
 @ApiSchema({ name: 'MouseScrollRequest' })
 export class MouseScrollRequestDto {
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The X coordinate where to perform the scroll operation',
+    example: 100,
+  })
   x: number
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The Y coordinate where to perform the scroll operation',
+    example: 200,
+  })
   y: number
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The scroll direction (up, down)',
+    example: 'down',
+  })
   direction: string
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({
+    description: 'The number of scroll units to scroll. Defaults to 1',
+    example: 3,
+  })
   amount?: number
 }
 
 @ApiSchema({ name: 'MouseScrollResponse' })
 export class MouseScrollResponseDto {
-  @ApiProperty()
+  @ApiProperty({
+    description: 'Whether the mouse scroll operation was successful',
+    example: true,
+  })
   success: boolean
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The type of action performed',
+    example: 'scroll',
+  })
   action: string
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The scroll direction that was performed',
+    example: 'down',
+  })
   direction: string
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The number of scroll units that were scrolled',
+    example: 3,
+  })
   amount: number
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The X coordinate where the scroll was performed',
+    example: 100,
+  })
   x: number
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The Y coordinate where the scroll was performed',
+    example: 200,
+  })
   y: number
 }
 
 @ApiSchema({ name: 'KeyboardTypeRequest' })
 export class KeyboardTypeRequestDto {
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The text to type using the keyboard',
+    example: 'Hello, World!',
+  })
   text: string
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({
+    description: 'Delay in milliseconds between keystrokes. Defaults to 0',
+    example: 100,
+  })
   delay?: number
 }
 
 @ApiSchema({ name: 'KeyboardTypeResponse' })
 export class KeyboardTypeResponseDto {
-  @ApiProperty()
+  @ApiProperty({
+    description: 'Whether the keyboard typing operation was successful',
+    example: true,
+  })
   success: boolean
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The text that was actually typed',
+    example: 'Hello, World!',
+  })
   typed: string
 }
 
 @ApiSchema({ name: 'KeyboardPressRequest' })
 export class KeyboardPressRequestDto {
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The key to press (e.g., a, b, c, enter, space, etc.)',
+    example: 'enter',
+  })
   key: string
 
-  @ApiPropertyOptional({ type: [String] })
+  @ApiPropertyOptional({
+    description: 'Array of modifier keys to press along with the main key (ctrl, alt, shift, cmd)',
+    type: [String],
+    example: ['ctrl', 'shift'],
+  })
   modifiers?: string[]
 }
 
 @ApiSchema({ name: 'KeyboardPressResponse' })
 export class KeyboardPressResponseDto {
-  @ApiProperty()
+  @ApiProperty({
+    description: 'Whether the keyboard press operation was successful',
+    example: true,
+  })
   success: boolean
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The key that was pressed',
+    example: 'enter',
+  })
   key: string
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The modifier keys that were pressed along with the main key',
+    type: [String],
+    example: ['ctrl', 'shift'],
+  })
   modifiers: string[]
 }
 
 @ApiSchema({ name: 'KeyboardHotkeyRequest' })
 export class KeyboardHotkeyRequestDto {
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The hotkey combination to press (e.g., "ctrl+c", "cmd+v", "alt+tab")',
+    example: 'ctrl+c',
+  })
   keys: string
 }
 
 @ApiSchema({ name: 'KeyboardHotkeyResponse' })
 export class KeyboardHotkeyResponseDto {
-  @ApiProperty()
+  @ApiProperty({
+    description: 'Whether the hotkey press operation was successful',
+    example: true,
+  })
   success: boolean
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The hotkey combination that was pressed',
+    example: 'ctrl+c',
+  })
   hotkey: string
 }
 
 @ApiSchema({ name: 'ScreenshotResponse' })
 export class ScreenshotResponseDto {
-  @ApiProperty()
+  @ApiProperty({
+    description: 'Base64 encoded screenshot image data',
+    example: 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==',
+  })
   screenshot: string
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The width of the screenshot in pixels',
+    example: 1920,
+  })
   width: number
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The height of the screenshot in pixels',
+    example: 1080,
+  })
   height: number
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({
+    description: 'The current cursor position when the screenshot was taken',
+    example: { x: 500, y: 300 },
+  })
   cursor_position?: { x: number; y: number }
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({
+    description: 'The region coordinates if a region screenshot was taken',
+    example: { x: 100, y: 100, width: 800, height: 600 },
+  })
   region?: { x: number; y: number; width: number; height: number }
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({
+    description: 'The image format of the screenshot (png, jpeg)',
+    example: 'png',
+  })
   format?: string
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({
+    description: 'The quality setting for JPEG format (1-100)',
+    example: 85,
+  })
   quality?: number
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({
+    description: 'The scale factor applied to the screenshot (0.1-1.0)',
+    example: 0.5,
+  })
   scale?: number
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({
+    description: 'The size of the screenshot data in bytes',
+    example: 24576,
+  })
   size_bytes?: number
 }
 
 @ApiSchema({ name: 'RegionScreenshotRequest' })
 export class RegionScreenshotRequestDto {
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The X coordinate of the top-left corner of the region to capture',
+    example: 100,
+  })
   x: number
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The Y coordinate of the top-left corner of the region to capture',
+    example: 100,
+  })
   y: number
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The width of the region to capture in pixels',
+    example: 800,
+  })
   width: number
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The height of the region to capture in pixels',
+    example: 600,
+  })
   height: number
 }
 
 @ApiSchema({ name: 'RegionScreenshotResponse' })
 export class RegionScreenshotResponseDto {
-  @ApiProperty()
+  @ApiProperty({
+    description: 'Base64 encoded screenshot image data of the specified region',
+    example: 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==',
+  })
   screenshot: string
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The region coordinates that were captured',
+    example: { x: 100, y: 100, width: 800, height: 600 },
+  })
   region: { x: number; y: number; width: number; height: number }
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({
+    description: 'The current cursor position when the region screenshot was taken',
+    example: { x: 500, y: 300 },
+  })
   cursor_position?: { x: number; y: number }
 }
 
 @ApiSchema({ name: 'CompressedScreenshotResponse' })
 export class CompressedScreenshotResponseDto {
-  @ApiProperty()
+  @ApiProperty({
+    description: 'Base64 encoded compressed screenshot image data',
+    example: 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==',
+  })
   screenshot: string
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The width of the compressed screenshot in pixels',
+    example: 960,
+  })
   width: number
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The height of the compressed screenshot in pixels',
+    example: 540,
+  })
   height: number
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The image format of the compressed screenshot',
+    example: 'jpeg',
+  })
   format: string
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The quality setting used for compression (1-100)',
+    example: 85,
+  })
   quality: number
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The scale factor applied to the compressed screenshot',
+    example: 0.5,
+  })
   scale: number
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The size of the compressed screenshot data in bytes',
+    example: 12288,
+  })
   size_bytes: number
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({
+    description: 'The current cursor position when the compressed screenshot was taken',
+    example: { x: 250, y: 150 },
+  })
   cursor_position?: { x: number; y: number }
 }
 
 @ApiSchema({ name: 'DisplayInfoResponse' })
 export class DisplayInfoResponseDto {
-  @ApiProperty({ type: [Object] })
+  @ApiProperty({
+    description: 'Array of display information for all connected displays',
+    type: [Object],
+    example: [
+      {
+        id: 0,
+        x: 0,
+        y: 0,
+        width: 1920,
+        height: 1080,
+        is_active: true,
+      },
+    ],
+  })
   displays: Array<{ id: number; x: number; y: number; width: number; height: number; is_active: boolean }>
 }
 
 @ApiSchema({ name: 'WindowsResponse' })
 export class WindowsResponseDto {
-  @ApiProperty({ type: [Object] })
+  @ApiProperty({
+    description: 'Array of window information for all visible windows',
+    type: [Object],
+    example: [
+      {
+        id: 12345,
+        title: 'Terminal',
+      },
+    ],
+  })
   windows: Array<{ id: number; title: string }>
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The total number of windows found',
+    example: 5,
+  })
   count: number
 }
 
 // Computer Use Management Response DTOs
 @ApiSchema({ name: 'EmptyResponse' })
 export class EmptyResponseDto {
-  @ApiProperty()
+  @ApiProperty({
+    description: 'Whether the operation was successful',
+    example: true,
+  })
   success: boolean
 }
 
 @ApiSchema({ name: 'ComputerUseStartResponse' })
 export class ComputerUseStartResponseDto {
-  @ApiProperty()
+  @ApiProperty({
+    description: 'A message indicating the result of starting computer use processes',
+    example: 'Computer use processes started successfully',
+  })
   message: string
 
-  @ApiProperty({ type: Object })
+  @ApiProperty({
+    description: 'Status information about all VNC desktop processes after starting',
+    type: Object,
+    example: {
+      xvfb: { running: true, priority: 100, autoRestart: true, pid: 12345 },
+      xfce4: { running: true, priority: 200, autoRestart: true, pid: 12346 },
+      x11vnc: { running: true, priority: 300, autoRestart: true, pid: 12347 },
+      novnc: { running: true, priority: 400, autoRestart: true, pid: 12348 },
+    },
+  })
   status: Record<string, any>
 }
 
 @ApiSchema({ name: 'ComputerUseStopResponse' })
 export class ComputerUseStopResponseDto {
-  @ApiProperty()
+  @ApiProperty({
+    description: 'A message indicating the result of stopping computer use processes',
+    example: 'Computer use processes stopped successfully',
+  })
   message: string
 
-  @ApiProperty({ type: Object })
+  @ApiProperty({
+    description: 'Status information about all VNC desktop processes after stopping',
+    type: Object,
+    example: {
+      xvfb: { running: false, priority: 100, autoRestart: true },
+      xfce4: { running: false, priority: 200, autoRestart: true },
+      x11vnc: { running: false, priority: 300, autoRestart: true },
+      novnc: { running: false, priority: 400, autoRestart: true },
+    },
+  })
   status: Record<string, any>
 }
 
 @ApiSchema({ name: 'ComputerUseStatusResponse' })
 export class ComputerUseStatusResponseDto {
-  @ApiProperty({ type: Object })
+  @ApiProperty({
+    description: 'Status information about all VNC desktop processes',
+    type: Object,
+    example: {
+      xvfb: { running: true, priority: 100, autoRestart: true, pid: 12345 },
+      xfce4: { running: true, priority: 200, autoRestart: true, pid: 12346 },
+      x11vnc: { running: true, priority: 300, autoRestart: true, pid: 12347 },
+      novnc: { running: true, priority: 400, autoRestart: true, pid: 12348 },
+    },
+  })
   status: Record<string, any>
 }
 
 @ApiSchema({ name: 'ProcessStatusResponse' })
 export class ProcessStatusResponseDto {
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The name of the VNC process being checked',
+    example: 'xfce4',
+  })
   processName: string
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'Whether the specified VNC process is currently running',
+    example: true,
+  })
   running: boolean
 }
 
 @ApiSchema({ name: 'ProcessRestartResponse' })
 export class ProcessRestartResponseDto {
-  @ApiProperty()
+  @ApiProperty({
+    description: 'A message indicating the result of restarting the process',
+    example: 'Process xfce4 restarted successfully',
+  })
   message: string
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The name of the VNC process that was restarted',
+    example: 'xfce4',
+  })
   processName: string
 }
 
 @ApiSchema({ name: 'ProcessLogsResponse' })
 export class ProcessLogsResponseDto {
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The name of the VNC process whose logs were retrieved',
+    example: 'novnc',
+  })
   processName: string
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The log output from the specified VNC process',
+    example: '2024-01-15 10:30:45 [INFO] NoVNC server started on port 6901',
+  })
   logs: string
 }
 
 @ApiSchema({ name: 'ProcessErrorsResponse' })
 export class ProcessErrorsResponseDto {
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The name of the VNC process whose error logs were retrieved',
+    example: 'x11vnc',
+  })
   processName: string
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'The error log output from the specified VNC process',
+    example: '2024-01-15 10:30:45 [ERROR] Failed to bind to port 5901',
+  })
   errors: string
 }
