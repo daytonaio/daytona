@@ -60,6 +60,14 @@ func (c *ComputerUse) Initialize() (*computeruse.Empty, error) {
 }
 
 func (c *ComputerUse) Start() (*computeruse.Empty, error) {
+	// Set DISPLAY environment variable in the main process
+	display := os.Getenv("DISPLAY")
+	if display == "" {
+		display = ":1"
+	}
+	os.Setenv("DISPLAY", display)
+	log.Infof("Set DISPLAY environment variable to: %s", display)
+
 	// Start all processes in order of priority
 	c.startAllProcesses()
 

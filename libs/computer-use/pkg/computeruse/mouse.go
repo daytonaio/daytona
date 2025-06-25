@@ -4,13 +4,19 @@
 package computeruse
 
 import (
+	"os"
 	"time"
 
 	"github.com/daytonaio/daemon/pkg/toolbox/computeruse"
 	"github.com/go-vgo/robotgo"
+	log "github.com/sirupsen/logrus"
 )
 
 func (u *ComputerUse) GetMousePosition() (*computeruse.MousePositionResponse, error) {
+	// Debug: Check DISPLAY environment variable
+	display := os.Getenv("DISPLAY")
+	log.Infof("GetMousePosition: DISPLAY=%s", display)
+
 	x, y := robotgo.Location()
 
 	return &computeruse.MousePositionResponse{
