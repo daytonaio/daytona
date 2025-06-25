@@ -55,8 +55,8 @@ func (d *DockerClient) getContainerHostConfig(ctx context.Context, sandboxDto dt
 	binds = append(binds, fmt.Sprintf("%s:/usr/local/bin/daytona:ro", d.daemonPath))
 
 	// Mount the plugin if available
-	if d.pluginPath != "" {
-		binds = append(binds, fmt.Sprintf("%s:/usr/local/lib/daytona-computer-use:ro", d.pluginPath))
+	if d.computerUsePluginPath != "" {
+		binds = append(binds, fmt.Sprintf("%s:/usr/local/lib/daytona-computer-use:ro", d.computerUsePluginPath))
 	}
 
 	if len(volumeMountPathBinds) > 0 {
