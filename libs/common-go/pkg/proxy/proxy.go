@@ -145,7 +145,7 @@ func NewProxyRequestHandler(getProxyTarget func(*gin.Context) (*url.URL, string,
 		// Execute the request with our custom client that handles redirects
 		resp, err := proxyClient.Do(outReq)
 		if err != nil {
-			ctx.Error(fmt.Errorf("proxy request failed: %w", err))
+			ctx.AbortWithError(http.StatusBadGateway, fmt.Errorf("proxy request failed: %w", err))
 			return
 		}
 		defer resp.Body.Close()
