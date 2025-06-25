@@ -15,9 +15,9 @@ import (
 
 func AuthMiddleware() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		authHeader := ctx.GetHeader(constants.AUTHORIZATION_HEADER)
+		authHeader := ctx.GetHeader(constants.DAYTONA_AUTHORIZATION_HEADER)
 		if authHeader == "" {
-			authHeader = ctx.GetHeader(constants.DAYTONA_AUTHORIZATION_HEADER)
+			authHeader = ctx.GetHeader(constants.AUTHORIZATION_HEADER)
 		}
 
 		if authHeader == "" {
