@@ -74,7 +74,7 @@ func (c *ComputerUse) Initialize() (*computeruse.Empty, error) {
 		}
 	}
 
-	c.initializeProcesses()
+	c.initializeProcesses(homeDir)
 
 	return new(computeruse.Empty), nil
 }
@@ -94,7 +94,7 @@ func (c *ComputerUse) Start() (*computeruse.Empty, error) {
 	return new(computeruse.Empty), nil
 }
 
-func (c *ComputerUse) initializeProcesses() {
+func (c *ComputerUse) initializeProcesses(homeDir string) {
 	// Get environment variables from Dockerfile or use defaults
 	vncResolution := os.Getenv("VNC_RESOLUTION")
 	if vncResolution == "" {
@@ -124,9 +124,6 @@ func (c *ComputerUse) initializeProcesses() {
 			user = "root"
 		}
 	}
-
-	// Get home directory for the user
-	homeDir := fmt.Sprintf("/home/%s", user)
 
 	// Get D-Bus session address from environment
 	dbusAddress := os.Getenv("DBUS_SESSION_BUS_ADDRESS")
