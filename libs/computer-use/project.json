@@ -14,6 +14,19 @@
       },
       "configurations": {
         "production": {}
+      },
+      "dependsOn": ["build-amd64"]
+    },
+    "build-amd64": {
+      "executor": "@nx-go/nx-go:build",
+      "options": {
+        "main": "{projectRoot}/main.go",
+        "outputPath": "dist/libs/computer-use-amd64",
+        "env": {
+          "GOARCH": "amd64",
+          "GOOS": "linux"
+        },
+        "flags": ["-tags=no_gui"]
       }
     },
     "build:full": {
