@@ -27,5 +27,8 @@ RUN npm install -g ts-node typescript typescript-language-server
 # Switch to Daytona user
 USER daytona
 
+# Create .zshrc to suppress zsh-newuser-install prompt
+RUN touch ~/.zshrc
+
 # Keep the container running indefinitely
 ENTRYPOINT [ "sleep", "infinity" ]
