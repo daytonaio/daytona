@@ -70,12 +70,12 @@ func (d *DockerClient) Create(ctx context.Context, sandboxDto dto.CreateSandboxD
 		}
 	}
 
-	containerConfig, hostConfig, err := d.getContainerConfigs(ctx, sandboxDto, volumeMountPathBinds)
+	containerConfig, hostConfig, networkingConfig, err := d.getContainerConfigs(ctx, sandboxDto, volumeMountPathBinds)
 	if err != nil {
 		return "", err
 	}
 
-	c, err := d.apiClient.ContainerCreate(ctx, containerConfig, hostConfig, nil, nil, sandboxDto.Id)
+	c, err := d.apiClient.ContainerCreate(ctx, containerConfig, hostConfig, networkingConfig, nil, sandboxDto.Id)
 	if err != nil {
 		return "", err
 	}

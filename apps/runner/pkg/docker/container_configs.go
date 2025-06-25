@@ -10,19 +10,21 @@ import (
 
 	"github.com/daytonaio/runner/cmd/runner/config"
 	"github.com/daytonaio/runner/pkg/api/dto"
+	"github.com/docker/docker/api/types/network"
 
 	"github.com/docker/docker/api/types/container"
 )
 
-func (d *DockerClient) getContainerConfigs(ctx context.Context, sandboxDto dto.CreateSandboxDTO, volumeMountPathBinds []string) (*container.Config, *container.HostConfig, error) {
+func (d *DockerClient) getContainerConfigs(ctx context.Context, sandboxDto dto.CreateSandboxDTO, volumeMountPathBinds []string) (*container.Config, *container.HostConfig, *network.NetworkingConfig, error) {
 	containerConfig := d.getContainerCreateConfig(sandboxDto)
 
 	hostConfig, err := d.getContainerHostConfig(ctx, sandboxDto, volumeMountPathBinds)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 
-	return containerConfig, hostConfig, nil
+	networkingConfig := d.getContainerNetworkingConfig(ctx)
+	return containerConfig, hostConfig, networkingConfig, nil
 }
 
 func (d *DockerClient) getContainerCreateConfig(sandboxDto dto.CreateSandboxDTO) *container.Config {
@@ -85,6 +87,18 @@ func (d *DockerClient) getContainerHostConfig(ctx context.Context, sandboxDto dt
 	}
 
 	return hostConfig, nil
+}
+
+func (d *DockerClient) getContainerNetworkingConfig(_ context.Context) *network.NetworkingConfig {
+	containerNetwork := config.GetContainerNetwork()
+	if containerNetwork != "" {
+		return &network.NetworkingConfig{
+			EndpointsConfig: map[string]*network.EndpointSettings{
+				containerNetwork: {},
+			},
+		}
+	}
+	return nil
 }
 
 func (d *DockerClient) getFilesystem(ctx context.Context) (string, error) {
