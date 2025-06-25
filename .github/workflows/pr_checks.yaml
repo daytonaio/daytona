@@ -62,7 +62,7 @@ jobs:
       - name: generate-api-clients
         run: |
           go install github.com/swaggo/swag/cmd/swag@v1.16.4
-          echo -e 'DEFAULT_PACKAGE_VERSION=0.0.0-dev' > .env
+          echo -e 'DEFAULT_PACKAGE_VERSION=0.0.0-dev\n\nPYPI_PKG_VERSION=\nNPM_PKG_VERSION=\nNPM_TAG=\nPYPI_TOKEN=\nNPM_TOKEN=' > .env
           yarn
           mkdir -p dist/apps/api
           yarn generate:openapi && yarn nx run-many --target=generate:api-client --all --parallel=false
@@ -89,7 +89,7 @@ jobs:
           python-version: '3.12'
       - name: Build all
         run: |
-          python3 -m pip install build twine
+          python3 -m pip install poetry==2.1.3
           yarn
           yarn build
 
