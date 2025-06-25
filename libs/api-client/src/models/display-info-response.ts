@@ -20,20 +20,8 @@
 export interface DisplayInfoResponse {
   /**
    *
-   * @type {object}
-   * @memberof DisplayInfoResponse
-   */
-  primary_display: object
-  /**
-   *
    * @type {Array<object>}
    * @memberof DisplayInfoResponse
    */
   displays: Array<object>
-  /**
-   *
-   * @type {number}
-   * @memberof DisplayInfoResponse
-   */
-  total_displays: number
 }

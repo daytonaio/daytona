@@ -42,4 +42,34 @@ export interface ScreenshotResponse {
    * @memberof ScreenshotResponse
    */
   cursor_position?: object
+  /**
+   *
+   * @type {object}
+   * @memberof ScreenshotResponse
+   */
+  region?: object
+  /**
+   *
+   * @type {string}
+   * @memberof ScreenshotResponse
+   */
+  format?: string
+  /**
+   *
+   * @type {number}
+   * @memberof ScreenshotResponse
+   */
+  quality?: number
+  /**
+   *
+   * @type {number}
+   * @memberof ScreenshotResponse
+   */
+  scale?: number
+  /**
+   *
+   * @type {number}
+   * @memberof ScreenshotResponse
+   */
+  size_bytes?: number
 }

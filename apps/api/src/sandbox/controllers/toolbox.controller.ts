@@ -65,19 +65,23 @@ import {
   MouseDragRequestDto,
   MouseDragResponseDto,
   MouseScrollRequestDto,
-  MouseScrollResponseDto,
   KeyboardTypeRequestDto,
-  KeyboardTypeResponseDto,
   KeyboardPressRequestDto,
-  KeyboardPressResponseDto,
   KeyboardHotkeyRequestDto,
-  KeyboardHotkeyResponseDto,
   ScreenshotResponseDto,
   RegionScreenshotRequestDto,
   RegionScreenshotResponseDto,
   CompressedScreenshotResponseDto,
   DisplayInfoResponseDto,
   WindowsResponseDto,
+  ComputerUseStartResponseDto,
+  ComputerUseStopResponseDto,
+  ComputerUseStatusResponseDto,
+  ProcessStatusResponseDto,
+  ProcessRestartResponseDto,
+  ProcessLogsResponseDto,
+  ProcessErrorsResponseDto,
+  EmptyResponseDto,
 } from '../dto/toolbox.dto'
 import { ToolboxService } from '../services/toolbox.service'
 import { ContentTypeInterceptor } from '../../common/interceptors/content-type.interceptors'
@@ -1124,6 +1128,7 @@ export class ToolboxController {
   @ApiResponse({
     status: 200,
     description: 'Computer use processes started successfully',
+    type: ComputerUseStartResponseDto,
   })
   @ApiParam({ name: 'sandboxId', type: String, required: true })
   async startComputerUse(
@@ -1145,6 +1150,7 @@ export class ToolboxController {
   @ApiResponse({
     status: 200,
     description: 'Computer use processes stopped successfully',
+    type: ComputerUseStopResponseDto,
   })
   @ApiParam({ name: 'sandboxId', type: String, required: true })
   async stopComputerUse(
@@ -1164,6 +1170,7 @@ export class ToolboxController {
   @ApiResponse({
     status: 200,
     description: 'Computer use status retrieved successfully',
+    type: ComputerUseStatusResponseDto,
   })
   @ApiParam({ name: 'sandboxId', type: String, required: true })
   async getComputerUseStatus(
@@ -1183,6 +1190,7 @@ export class ToolboxController {
   @ApiResponse({
     status: 200,
     description: 'Process status retrieved successfully',
+    type: ProcessStatusResponseDto,
   })
   @ApiParam({ name: 'sandboxId', type: String, required: true })
   @ApiParam({ name: 'processName', type: String, required: true })
@@ -1205,6 +1213,7 @@ export class ToolboxController {
   @ApiResponse({
     status: 200,
     description: 'Process restarted successfully',
+    type: ProcessRestartResponseDto,
   })
   @ApiParam({ name: 'sandboxId', type: String, required: true })
   @ApiParam({ name: 'processName', type: String, required: true })
@@ -1225,6 +1234,7 @@ export class ToolboxController {
   @ApiResponse({
     status: 200,
     description: 'Process logs retrieved successfully',
+    type: ProcessLogsResponseDto,
   })
   @ApiParam({ name: 'sandboxId', type: String, required: true })
   @ApiParam({ name: 'processName', type: String, required: true })
@@ -1245,6 +1255,7 @@ export class ToolboxController {
   @ApiResponse({
     status: 200,
     description: 'Process errors retrieved successfully',
+    type: ProcessErrorsResponseDto,
   })
   @ApiParam({ name: 'sandboxId', type: String, required: true })
   @ApiParam({ name: 'processName', type: String, required: true })
@@ -1363,7 +1374,7 @@ export class ToolboxController {
   @ApiResponse({
     status: 200,
     description: 'Mouse scrolled successfully',
-    type: MouseScrollResponseDto,
+    type: EmptyResponseDto,
   })
   @ApiBody({
     type: MouseScrollRequestDto,
@@ -1389,7 +1400,7 @@ export class ToolboxController {
   @ApiResponse({
     status: 200,
     description: 'Text typed successfully',
-    type: KeyboardTypeResponseDto,
+    type: EmptyResponseDto,
   })
   @ApiBody({
     type: KeyboardTypeRequestDto,
@@ -1414,7 +1425,7 @@ export class ToolboxController {
   @ApiResponse({
     status: 200,
     description: 'Key pressed successfully',
-    type: KeyboardPressResponseDto,
+    type: EmptyResponseDto,
   })
   @ApiBody({
     type: KeyboardPressRequestDto,
@@ -1439,7 +1450,7 @@ export class ToolboxController {
   @ApiResponse({
     status: 200,
     description: 'Hotkey pressed successfully',
-    type: KeyboardHotkeyResponseDto,
+    type: EmptyResponseDto,
   })
   @ApiBody({
     type: KeyboardHotkeyRequestDto,

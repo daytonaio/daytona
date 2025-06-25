@@ -38,9 +38,17 @@ import type { CompletionList } from '../models'
 // @ts-ignore
 import type { CompressedScreenshotResponse } from '../models'
 // @ts-ignore
+import type { ComputerUseStartResponse } from '../models'
+// @ts-ignore
+import type { ComputerUseStatusResponse } from '../models'
+// @ts-ignore
+import type { ComputerUseStopResponse } from '../models'
+// @ts-ignore
 import type { CreateSessionRequest } from '../models'
 // @ts-ignore
 import type { DisplayInfoResponse } from '../models'
+// @ts-ignore
+import type { EmptyResponse } from '../models'
 // @ts-ignore
 import type { ExecuteRequest } from '../models'
 // @ts-ignore
@@ -70,15 +78,9 @@ import type { GitStatus } from '../models'
 // @ts-ignore
 import type { KeyboardHotkeyRequest } from '../models'
 // @ts-ignore
-import type { KeyboardHotkeyResponse } from '../models'
-// @ts-ignore
 import type { KeyboardPressRequest } from '../models'
 // @ts-ignore
-import type { KeyboardPressResponse } from '../models'
-// @ts-ignore
 import type { KeyboardTypeRequest } from '../models'
-// @ts-ignore
-import type { KeyboardTypeResponse } from '../models'
 // @ts-ignore
 import type { ListBranchResponse } from '../models'
 // @ts-ignore
@@ -108,7 +110,13 @@ import type { MousePosition } from '../models'
 // @ts-ignore
 import type { MouseScrollRequest } from '../models'
 // @ts-ignore
-import type { MouseScrollResponse } from '../models'
+import type { ProcessErrorsResponse } from '../models'
+// @ts-ignore
+import type { ProcessLogsResponse } from '../models'
+// @ts-ignore
+import type { ProcessRestartResponse } from '../models'
+// @ts-ignore
+import type { ProcessStatusResponse } from '../models'
 // @ts-ignore
 import type { ProjectDirResponse } from '../models'
 // @ts-ignore
@@ -3912,7 +3920,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
       sandboxId: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ComputerUseStatusResponse>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.getComputerUseStatus(
         sandboxId,
         xDaytonaOrganizationID,
@@ -4033,7 +4041,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
       sandboxId: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ProcessErrorsResponse>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.getProcessErrors(
         processName,
         sandboxId,
@@ -4065,7 +4073,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
       sandboxId: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ProcessLogsResponse>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.getProcessLogs(
         processName,
         sandboxId,
@@ -4097,7 +4105,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
       sandboxId: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ProcessStatusResponse>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.getProcessStatus(
         processName,
         sandboxId,
@@ -5000,7 +5008,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
       keyboardHotkeyRequest: KeyboardHotkeyRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<KeyboardHotkeyResponse>> {
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<EmptyResponse>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.pressHotkey(
         sandboxId,
         keyboardHotkeyRequest,
@@ -5032,7 +5040,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
       keyboardPressRequest: KeyboardPressRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<KeyboardPressResponse>> {
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<EmptyResponse>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.pressKey(
         sandboxId,
         keyboardPressRequest,
@@ -5096,7 +5104,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
       sandboxId: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ProcessRestartResponse>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.restartProcess(
         processName,
         sandboxId,
@@ -5128,7 +5136,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
       mouseScrollRequest: MouseScrollRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<MouseScrollResponse>> {
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<EmptyResponse>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.scrollMouse(
         sandboxId,
         mouseScrollRequest,
@@ -5234,7 +5242,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
       sandboxId: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ComputerUseStartResponse>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.startComputerUse(
         sandboxId,
         xDaytonaOrganizationID,
@@ -5263,7 +5271,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
       sandboxId: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ComputerUseStopResponse>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.stopComputerUse(
         sandboxId,
         xDaytonaOrganizationID,
@@ -5464,7 +5472,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
       keyboardTypeRequest: KeyboardTypeRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<KeyboardTypeResponse>> {
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<EmptyResponse>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.typeText(
         sandboxId,
         keyboardTypeRequest,
@@ -5761,7 +5769,7 @@ export const ToolboxApiFactory = function (configuration?: Configuration, basePa
       sandboxId: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
-    ): AxiosPromise<void> {
+    ): AxiosPromise<ComputerUseStatusResponse> {
       return localVarFp
         .getComputerUseStatus(sandboxId, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
@@ -5833,7 +5841,7 @@ export const ToolboxApiFactory = function (configuration?: Configuration, basePa
       sandboxId: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
-    ): AxiosPromise<void> {
+    ): AxiosPromise<ProcessErrorsResponse> {
       return localVarFp
         .getProcessErrors(processName, sandboxId, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
@@ -5852,7 +5860,7 @@ export const ToolboxApiFactory = function (configuration?: Configuration, basePa
       sandboxId: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
-    ): AxiosPromise<void> {
+    ): AxiosPromise<ProcessLogsResponse> {
       return localVarFp
         .getProcessLogs(processName, sandboxId, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
@@ -5871,7 +5879,7 @@ export const ToolboxApiFactory = function (configuration?: Configuration, basePa
       sandboxId: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
-    ): AxiosPromise<void> {
+    ): AxiosPromise<ProcessStatusResponse> {
       return localVarFp
         .getProcessStatus(processName, sandboxId, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
@@ -6413,7 +6421,7 @@ export const ToolboxApiFactory = function (configuration?: Configuration, basePa
       keyboardHotkeyRequest: KeyboardHotkeyRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
-    ): AxiosPromise<KeyboardHotkeyResponse> {
+    ): AxiosPromise<EmptyResponse> {
       return localVarFp
         .pressHotkey(sandboxId, keyboardHotkeyRequest, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
@@ -6432,7 +6440,7 @@ export const ToolboxApiFactory = function (configuration?: Configuration, basePa
       keyboardPressRequest: KeyboardPressRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
-    ): AxiosPromise<KeyboardPressResponse> {
+    ): AxiosPromise<EmptyResponse> {
       return localVarFp
         .pressKey(sandboxId, keyboardPressRequest, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
@@ -6470,7 +6478,7 @@ export const ToolboxApiFactory = function (configuration?: Configuration, basePa
       sandboxId: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
-    ): AxiosPromise<void> {
+    ): AxiosPromise<ProcessRestartResponse> {
       return localVarFp
         .restartProcess(processName, sandboxId, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
@@ -6489,7 +6497,7 @@ export const ToolboxApiFactory = function (configuration?: Configuration, basePa
       mouseScrollRequest: MouseScrollRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
-    ): AxiosPromise<MouseScrollResponse> {
+    ): AxiosPromise<EmptyResponse> {
       return localVarFp
         .scrollMouse(sandboxId, mouseScrollRequest, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
@@ -6552,7 +6560,7 @@ export const ToolboxApiFactory = function (configuration?: Configuration, basePa
       sandboxId: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
-    ): AxiosPromise<void> {
+    ): AxiosPromise<ComputerUseStartResponse> {
       return localVarFp
         .startComputerUse(sandboxId, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
@@ -6569,7 +6577,7 @@ export const ToolboxApiFactory = function (configuration?: Configuration, basePa
       sandboxId: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
-    ): AxiosPromise<void> {
+    ): AxiosPromise<ComputerUseStopResponse> {
       return localVarFp
         .stopComputerUse(sandboxId, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
@@ -6704,7 +6712,7 @@ export const ToolboxApiFactory = function (configuration?: Configuration, basePa
       keyboardTypeRequest: KeyboardTypeRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
-    ): AxiosPromise<KeyboardTypeResponse> {
+    ): AxiosPromise<EmptyResponse> {
       return localVarFp
         .typeText(sandboxId, keyboardTypeRequest, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))

@@ -18,8 +18,8 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, StrictFloat, StrictInt
-from typing import Any, ClassVar, Dict, List, Union
+from pydantic import BaseModel, ConfigDict
+from typing import Any, ClassVar, Dict, List
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -27,11 +27,9 @@ class DisplayInfoResponse(BaseModel):
     """
     DisplayInfoResponse
     """ # noqa: E501
-    primary_display: Dict[str, Any]
     displays: List[Dict[str, Any]]
-    total_displays: Union[StrictFloat, StrictInt]
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["primary_display", "displays", "total_displays"]
+    __properties: ClassVar[List[str]] = ["displays"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -91,9 +89,7 @@ class DisplayInfoResponse(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "primary_display": obj.get("primary_display"),
-            "displays": obj.get("displays"),
-            "total_displays": obj.get("total_displays")
+            "displays": obj.get("displays")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

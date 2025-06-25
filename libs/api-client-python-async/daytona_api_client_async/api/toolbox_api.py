@@ -23,8 +23,12 @@ from typing_extensions import Annotated
 from daytona_api_client_async.models.command import Command
 from daytona_api_client_async.models.completion_list import CompletionList
 from daytona_api_client_async.models.compressed_screenshot_response import CompressedScreenshotResponse
+from daytona_api_client_async.models.computer_use_start_response import ComputerUseStartResponse
+from daytona_api_client_async.models.computer_use_status_response import ComputerUseStatusResponse
+from daytona_api_client_async.models.computer_use_stop_response import ComputerUseStopResponse
 from daytona_api_client_async.models.create_session_request import CreateSessionRequest
 from daytona_api_client_async.models.display_info_response import DisplayInfoResponse
+from daytona_api_client_async.models.empty_response import EmptyResponse
 from daytona_api_client_async.models.execute_request import ExecuteRequest
 from daytona_api_client_async.models.execute_response import ExecuteResponse
 from daytona_api_client_async.models.file_info import FileInfo
@@ -39,11 +43,8 @@ from daytona_api_client_async.models.git_delete_branch_request import GitDeleteB
 from daytona_api_client_async.models.git_repo_request import GitRepoRequest
 from daytona_api_client_async.models.git_status import GitStatus
 from daytona_api_client_async.models.keyboard_hotkey_request import KeyboardHotkeyRequest
-from daytona_api_client_async.models.keyboard_hotkey_response import KeyboardHotkeyResponse
 from daytona_api_client_async.models.keyboard_press_request import KeyboardPressRequest
-from daytona_api_client_async.models.keyboard_press_response import KeyboardPressResponse
 from daytona_api_client_async.models.keyboard_type_request import KeyboardTypeRequest
-from daytona_api_client_async.models.keyboard_type_response import KeyboardTypeResponse
 from daytona_api_client_async.models.list_branch_response import ListBranchResponse
 from daytona_api_client_async.models.lsp_completion_params import LspCompletionParams
 from daytona_api_client_async.models.lsp_document_request import LspDocumentRequest
@@ -58,7 +59,10 @@ from daytona_api_client_async.models.mouse_move_request import MouseMoveRequest
 from daytona_api_client_async.models.mouse_move_response import MouseMoveResponse
 from daytona_api_client_async.models.mouse_position import MousePosition
 from daytona_api_client_async.models.mouse_scroll_request import MouseScrollRequest
-from daytona_api_client_async.models.mouse_scroll_response import MouseScrollResponse
+from daytona_api_client_async.models.process_errors_response import ProcessErrorsResponse
+from daytona_api_client_async.models.process_logs_response import ProcessLogsResponse
+from daytona_api_client_async.models.process_restart_response import ProcessRestartResponse
+from daytona_api_client_async.models.process_status_response import ProcessStatusResponse
 from daytona_api_client_async.models.project_dir_response import ProjectDirResponse
 from daytona_api_client_async.models.region_screenshot_response import RegionScreenshotResponse
 from daytona_api_client_async.models.replace_request import ReplaceRequest
@@ -3122,7 +3126,7 @@ class ToolboxApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> None:
+    ) -> ComputerUseStatusResponse:
         """Get computer use status
 
         Get status of all VNC desktop processes
@@ -3163,7 +3167,7 @@ class ToolboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            '200': "ComputerUseStatusResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -3193,7 +3197,7 @@ class ToolboxApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[None]:
+    ) -> ApiResponse[ComputerUseStatusResponse]:
         """Get computer use status
 
         Get status of all VNC desktop processes
@@ -3234,7 +3238,7 @@ class ToolboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            '200': "ComputerUseStatusResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -3305,7 +3309,7 @@ class ToolboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            '200': "ComputerUseStatusResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -3349,6 +3353,13 @@ class ToolboxApi:
         # process the body parameter
 
 
+        # set the HTTP header `Accept`
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
+                [
+                    'application/json'
+                ]
+            )
 
 
         # authentication setting
@@ -4241,7 +4252,7 @@ class ToolboxApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> None:
+    ) -> ProcessErrorsResponse:
         """Get process errors
 
         Get error logs for a specific VNC process
@@ -4285,7 +4296,7 @@ class ToolboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            '200': "ProcessErrorsResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -4316,7 +4327,7 @@ class ToolboxApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[None]:
+    ) -> ApiResponse[ProcessErrorsResponse]:
         """Get process errors
 
         Get error logs for a specific VNC process
@@ -4360,7 +4371,7 @@ class ToolboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            '200': "ProcessErrorsResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -4435,7 +4446,7 @@ class ToolboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            '200': "ProcessErrorsResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -4482,6 +4493,13 @@ class ToolboxApi:
         # process the body parameter
 
 
+        # set the HTTP header `Accept`
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
+                [
+                    'application/json'
+                ]
+            )
 
 
         # authentication setting
@@ -4526,7 +4544,7 @@ class ToolboxApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> None:
+    ) -> ProcessLogsResponse:
         """Get process logs
 
         Get logs for a specific VNC process
@@ -4570,7 +4588,7 @@ class ToolboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            '200': "ProcessLogsResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -4601,7 +4619,7 @@ class ToolboxApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[None]:
+    ) -> ApiResponse[ProcessLogsResponse]:
         """Get process logs
 
         Get logs for a specific VNC process
@@ -4645,7 +4663,7 @@ class ToolboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            '200': "ProcessLogsResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -4720,7 +4738,7 @@ class ToolboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            '200': "ProcessLogsResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -4767,6 +4785,13 @@ class ToolboxApi:
         # process the body parameter
 
 
+        # set the HTTP header `Accept`
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
+                [
+                    'application/json'
+                ]
+            )
 
 
         # authentication setting
@@ -4811,7 +4836,7 @@ class ToolboxApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> None:
+    ) -> ProcessStatusResponse:
         """Get process status
 
         Get status of a specific VNC process
@@ -4855,7 +4880,7 @@ class ToolboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            '200': "ProcessStatusResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -4886,7 +4911,7 @@ class ToolboxApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[None]:
+    ) -> ApiResponse[ProcessStatusResponse]:
         """Get process status
 
         Get status of a specific VNC process
@@ -4930,7 +4955,7 @@ class ToolboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            '200': "ProcessStatusResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -5005,7 +5030,7 @@ class ToolboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            '200': "ProcessStatusResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -5052,6 +5077,13 @@ class ToolboxApi:
         # process the body parameter
 
 
+        # set the HTTP header `Accept`
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
+                [
+                    'application/json'
+                ]
+            )
 
 
         # authentication setting
@@ -13173,7 +13205,7 @@ class ToolboxApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> KeyboardHotkeyResponse:
+    ) -> EmptyResponse:
         """Press hotkey
 
         Press a hotkey combination
@@ -13217,7 +13249,7 @@ class ToolboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "KeyboardHotkeyResponse",
+            '200': "EmptyResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -13248,7 +13280,7 @@ class ToolboxApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[KeyboardHotkeyResponse]:
+    ) -> ApiResponse[EmptyResponse]:
         """Press hotkey
 
         Press a hotkey combination
@@ -13292,7 +13324,7 @@ class ToolboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "KeyboardHotkeyResponse",
+            '200': "EmptyResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -13367,7 +13399,7 @@ class ToolboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "KeyboardHotkeyResponse",
+            '200': "EmptyResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -13478,7 +13510,7 @@ class ToolboxApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> KeyboardPressResponse:
+    ) -> EmptyResponse:
         """Press key
 
         Press a key with optional modifiers
@@ -13522,7 +13554,7 @@ class ToolboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "KeyboardPressResponse",
+            '200': "EmptyResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -13553,7 +13585,7 @@ class ToolboxApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[KeyboardPressResponse]:
+    ) -> ApiResponse[EmptyResponse]:
         """Press key
 
         Press a key with optional modifiers
@@ -13597,7 +13629,7 @@ class ToolboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "KeyboardPressResponse",
+            '200': "EmptyResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -13672,7 +13704,7 @@ class ToolboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "KeyboardPressResponse",
+            '200': "EmptyResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -14088,7 +14120,7 @@ class ToolboxApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> None:
+    ) -> ProcessRestartResponse:
         """Restart process
 
         Restart a specific VNC process
@@ -14132,7 +14164,7 @@ class ToolboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            '200': "ProcessRestartResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -14163,7 +14195,7 @@ class ToolboxApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[None]:
+    ) -> ApiResponse[ProcessRestartResponse]:
         """Restart process
 
         Restart a specific VNC process
@@ -14207,7 +14239,7 @@ class ToolboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            '200': "ProcessRestartResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -14282,7 +14314,7 @@ class ToolboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            '200': "ProcessRestartResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -14329,6 +14361,13 @@ class ToolboxApi:
         # process the body parameter
 
 
+        # set the HTTP header `Accept`
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
+                [
+                    'application/json'
+                ]
+            )
 
 
         # authentication setting
@@ -14373,7 +14412,7 @@ class ToolboxApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> MouseScrollResponse:
+    ) -> EmptyResponse:
         """Scroll mouse
 
         Scroll mouse at specified coordinates
@@ -14417,7 +14456,7 @@ class ToolboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "MouseScrollResponse",
+            '200': "EmptyResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -14448,7 +14487,7 @@ class ToolboxApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[MouseScrollResponse]:
+    ) -> ApiResponse[EmptyResponse]:
         """Scroll mouse
 
         Scroll mouse at specified coordinates
@@ -14492,7 +14531,7 @@ class ToolboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "MouseScrollResponse",
+            '200': "EmptyResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -14567,7 +14606,7 @@ class ToolboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "MouseScrollResponse",
+            '200': "EmptyResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -15326,7 +15365,7 @@ class ToolboxApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> None:
+    ) -> ComputerUseStartResponse:
         """Start computer use processes
 
         Start all VNC desktop processes (Xvfb, xfce4, x11vnc, novnc)
@@ -15367,7 +15406,7 @@ class ToolboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            '200': "ComputerUseStartResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -15397,7 +15436,7 @@ class ToolboxApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[None]:
+    ) -> ApiResponse[ComputerUseStartResponse]:
         """Start computer use processes
 
         Start all VNC desktop processes (Xvfb, xfce4, x11vnc, novnc)
@@ -15438,7 +15477,7 @@ class ToolboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            '200': "ComputerUseStartResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -15509,7 +15548,7 @@ class ToolboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            '200': "ComputerUseStartResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -15553,6 +15592,13 @@ class ToolboxApi:
         # process the body parameter
 
 
+        # set the HTTP header `Accept`
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
+                [
+                    'application/json'
+                ]
+            )
 
 
         # authentication setting
@@ -15596,7 +15642,7 @@ class ToolboxApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> None:
+    ) -> ComputerUseStopResponse:
         """Stop computer use processes
 
         Stop all VNC desktop processes (Xvfb, xfce4, x11vnc, novnc)
@@ -15637,7 +15683,7 @@ class ToolboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            '200': "ComputerUseStopResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -15667,7 +15713,7 @@ class ToolboxApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[None]:
+    ) -> ApiResponse[ComputerUseStopResponse]:
         """Stop computer use processes
 
         Stop all VNC desktop processes (Xvfb, xfce4, x11vnc, novnc)
@@ -15708,7 +15754,7 @@ class ToolboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            '200': "ComputerUseStopResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -15779,7 +15825,7 @@ class ToolboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            '200': "ComputerUseStopResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -15823,6 +15869,13 @@ class ToolboxApi:
         # process the body parameter
 
 
+        # set the HTTP header `Accept`
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
+                [
+                    'application/json'
+                ]
+            )
 
 
         # authentication setting
@@ -17281,7 +17334,7 @@ class ToolboxApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> KeyboardTypeResponse:
+    ) -> EmptyResponse:
         """Type text
 
         Type text using keyboard
@@ -17325,7 +17378,7 @@ class ToolboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "KeyboardTypeResponse",
+            '200': "EmptyResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -17356,7 +17409,7 @@ class ToolboxApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[KeyboardTypeResponse]:
+    ) -> ApiResponse[EmptyResponse]:
         """Type text
 
         Type text using keyboard
@@ -17400,7 +17453,7 @@ class ToolboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "KeyboardTypeResponse",
+            '200': "EmptyResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -17475,7 +17528,7 @@ class ToolboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "KeyboardTypeResponse",
+            '200': "EmptyResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
