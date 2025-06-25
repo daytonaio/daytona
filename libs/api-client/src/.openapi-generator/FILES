@@ -27,6 +27,9 @@ models/completion-context.ts
 models/completion-item.ts
 models/completion-list.ts
 models/compressed-screenshot-response.ts
+models/computer-use-start-response.ts
+models/computer-use-status-response.ts
+models/computer-use-stop-response.ts
 models/create-api-key.ts
 models/create-build-info.ts
 models/create-docker-registry.ts
@@ -44,6 +47,7 @@ models/create-volume.ts
 models/create-workspace.ts
 models/display-info-response.ts
 models/docker-registry.ts
+models/empty-response.ts
 models/execute-request.ts
 models/execute-response.ts
 models/file-info.ts
@@ -60,11 +64,8 @@ models/git-repo-request.ts
 models/git-status.ts
 models/index.ts
 models/keyboard-hotkey-request.ts
-models/keyboard-hotkey-response.ts
 models/keyboard-press-request.ts
-models/keyboard-press-response.ts
 models/keyboard-type-request.ts
-models/keyboard-type-response.ts
 models/list-branch-response.ts
 models/lsp-completion-params.ts
 models/lsp-document-request.ts
@@ -80,7 +81,6 @@ models/mouse-move-request.ts
 models/mouse-move-response.ts
 models/mouse-position.ts
 models/mouse-scroll-request.ts
-models/mouse-scroll-response.ts
 models/organization-invitation.ts
 models/organization-role.ts
 models/organization-suspension.ts
@@ -89,6 +89,10 @@ models/organization.ts
 models/paginated-snapshots-dto.ts
 models/port-preview-url.ts
 models/position.ts
+models/process-errors-response.ts
+models/process-logs-response.ts
+models/process-restart-response.ts
+models/process-status-response.ts
 models/project-dir-response.ts
 models/range.ts
 models/region-screenshot-response.ts

@@ -601,6 +601,21 @@ export class ScreenshotResponseDto {
 
   @ApiPropertyOptional()
   cursor_position?: { x: number; y: number }
+
+  @ApiPropertyOptional()
+  region?: { x: number; y: number; width: number; height: number }
+
+  @ApiPropertyOptional()
+  format?: string
+
+  @ApiPropertyOptional()
+  quality?: number
+
+  @ApiPropertyOptional()
+  scale?: number
+
+  @ApiPropertyOptional()
+  size_bytes?: number
 }
 
 @ApiSchema({ name: 'RegionScreenshotRequest' })
@@ -659,14 +674,8 @@ export class CompressedScreenshotResponseDto {
 
 @ApiSchema({ name: 'DisplayInfoResponse' })
 export class DisplayInfoResponseDto {
-  @ApiProperty()
-  primary_display: { width: number; height: number }
-
   @ApiProperty({ type: [Object] })
-  displays: Array<{ id: number; x: number; y: number; width: number; height: number }>
-
-  @ApiProperty()
-  total_displays: number
+  displays: Array<{ id: number; x: number; y: number; width: number; height: number; is_active: boolean }>
 }
 
 @ApiSchema({ name: 'WindowsResponse' })
@@ -676,4 +685,71 @@ export class WindowsResponseDto {
 
   @ApiProperty()
   count: number
+}
+
+// Computer Use Management Response DTOs
+@ApiSchema({ name: 'EmptyResponse' })
+export class EmptyResponseDto {
+  @ApiProperty()
+  success: boolean
+}
+
+@ApiSchema({ name: 'ComputerUseStartResponse' })
+export class ComputerUseStartResponseDto {
+  @ApiProperty()
+  message: string
+
+  @ApiProperty({ type: Object })
+  status: Record<string, any>
+}
+
+@ApiSchema({ name: 'ComputerUseStopResponse' })
+export class ComputerUseStopResponseDto {
+  @ApiProperty()
+  message: string
+
+  @ApiProperty({ type: Object })
+  status: Record<string, any>
+}
+
+@ApiSchema({ name: 'ComputerUseStatusResponse' })
+export class ComputerUseStatusResponseDto {
+  @ApiProperty({ type: Object })
+  status: Record<string, any>
+}
+
+@ApiSchema({ name: 'ProcessStatusResponse' })
+export class ProcessStatusResponseDto {
+  @ApiProperty()
+  processName: string
+
+  @ApiProperty()
+  running: boolean
+}
+
+@ApiSchema({ name: 'ProcessRestartResponse' })
+export class ProcessRestartResponseDto {
+  @ApiProperty()
+  message: string
+
+  @ApiProperty()
+  processName: string
+}
+
+@ApiSchema({ name: 'ProcessLogsResponse' })
+export class ProcessLogsResponseDto {
+  @ApiProperty()
+  processName: string
+
+  @ApiProperty()
+  logs: string
+}
+
+@ApiSchema({ name: 'ProcessErrorsResponse' })
+export class ProcessErrorsResponseDto {
+  @ApiProperty()
+  processName: string
+
+  @ApiProperty()
+  errors: string
 }

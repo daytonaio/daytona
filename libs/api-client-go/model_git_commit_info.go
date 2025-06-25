@@ -12,8 +12,8 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
+	"bytes"
 	"fmt"
 )
 
@@ -22,10 +22,10 @@ var _ MappedNullable = &GitCommitInfo{}
 
 // GitCommitInfo struct for GitCommitInfo
 type GitCommitInfo struct {
-	Hash      string `json:"hash"`
-	Message   string `json:"message"`
-	Author    string `json:"author"`
-	Email     string `json:"email"`
+	Hash string `json:"hash"`
+	Message string `json:"message"`
+	Author string `json:"author"`
+	Email string `json:"email"`
 	Timestamp string `json:"timestamp"`
 }
 
@@ -174,7 +174,7 @@ func (o *GitCommitInfo) SetTimestamp(v string) {
 }
 
 func (o GitCommitInfo) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
+	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -208,10 +208,10 @@ func (o *GitCommitInfo) UnmarshalJSON(data []byte) (err error) {
 	err = json.Unmarshal(data, &allProperties)
 
 	if err != nil {
-		return err
+		return err;
 	}
 
-	for _, requiredProperty := range requiredProperties {
+	for _, requiredProperty := range(requiredProperties) {
 		if _, exists := allProperties[requiredProperty]; !exists {
 			return fmt.Errorf("no value given for required property %v", requiredProperty)
 		}
@@ -267,3 +267,5 @@ func (v *NullableGitCommitInfo) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

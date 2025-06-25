@@ -20,14 +20,15 @@ import (
 	"strings"
 )
 
+
 type SnapshotsAPI interface {
 
 	/*
-		ActivateSnapshot Activate a snapshot
+	ActivateSnapshot Activate a snapshot
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param id Snapshot ID
-		@return SnapshotsAPIActivateSnapshotRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param id Snapshot ID
+	@return SnapshotsAPIActivateSnapshotRequest
 	*/
 	ActivateSnapshot(ctx context.Context, id string) SnapshotsAPIActivateSnapshotRequest
 
@@ -36,10 +37,10 @@ type SnapshotsAPI interface {
 	ActivateSnapshotExecute(r SnapshotsAPIActivateSnapshotRequest) (*SnapshotDto, *http.Response, error)
 
 	/*
-		CreateSnapshot Create a new snapshot
+	CreateSnapshot Create a new snapshot
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@return SnapshotsAPICreateSnapshotRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return SnapshotsAPICreateSnapshotRequest
 	*/
 	CreateSnapshot(ctx context.Context) SnapshotsAPICreateSnapshotRequest
 
@@ -48,10 +49,10 @@ type SnapshotsAPI interface {
 	CreateSnapshotExecute(r SnapshotsAPICreateSnapshotRequest) (*SnapshotDto, *http.Response, error)
 
 	/*
-		GetAllSnapshots List all snapshots
+	GetAllSnapshots List all snapshots
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@return SnapshotsAPIGetAllSnapshotsRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return SnapshotsAPIGetAllSnapshotsRequest
 	*/
 	GetAllSnapshots(ctx context.Context) SnapshotsAPIGetAllSnapshotsRequest
 
@@ -60,11 +61,11 @@ type SnapshotsAPI interface {
 	GetAllSnapshotsExecute(r SnapshotsAPIGetAllSnapshotsRequest) (*PaginatedSnapshotsDto, *http.Response, error)
 
 	/*
-		GetSnapshot Get snapshot by ID or name
+	GetSnapshot Get snapshot by ID or name
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param id Snapshot ID or name
-		@return SnapshotsAPIGetSnapshotRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param id Snapshot ID or name
+	@return SnapshotsAPIGetSnapshotRequest
 	*/
 	GetSnapshot(ctx context.Context, id string) SnapshotsAPIGetSnapshotRequest
 
@@ -73,11 +74,11 @@ type SnapshotsAPI interface {
 	GetSnapshotExecute(r SnapshotsAPIGetSnapshotRequest) (*SnapshotDto, *http.Response, error)
 
 	/*
-		GetSnapshotBuildLogs Get snapshot build logs
+	GetSnapshotBuildLogs Get snapshot build logs
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param id Snapshot ID
-		@return SnapshotsAPIGetSnapshotBuildLogsRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param id Snapshot ID
+	@return SnapshotsAPIGetSnapshotBuildLogsRequest
 	*/
 	GetSnapshotBuildLogs(ctx context.Context, id string) SnapshotsAPIGetSnapshotBuildLogsRequest
 
@@ -85,11 +86,11 @@ type SnapshotsAPI interface {
 	GetSnapshotBuildLogsExecute(r SnapshotsAPIGetSnapshotBuildLogsRequest) (*http.Response, error)
 
 	/*
-		RemoveSnapshot Delete snapshot
+	RemoveSnapshot Delete snapshot
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param id Snapshot ID
-		@return SnapshotsAPIRemoveSnapshotRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param id Snapshot ID
+	@return SnapshotsAPIRemoveSnapshotRequest
 	*/
 	RemoveSnapshot(ctx context.Context, id string) SnapshotsAPIRemoveSnapshotRequest
 
@@ -97,11 +98,11 @@ type SnapshotsAPI interface {
 	RemoveSnapshotExecute(r SnapshotsAPIRemoveSnapshotRequest) (*http.Response, error)
 
 	/*
-		SetSnapshotGeneralStatus Set snapshot general status
+	SetSnapshotGeneralStatus Set snapshot general status
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param id Snapshot ID
-		@return SnapshotsAPISetSnapshotGeneralStatusRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param id Snapshot ID
+	@return SnapshotsAPISetSnapshotGeneralStatusRequest
 	*/
 	SetSnapshotGeneralStatus(ctx context.Context, id string) SnapshotsAPISetSnapshotGeneralStatusRequest
 
@@ -110,11 +111,11 @@ type SnapshotsAPI interface {
 	SetSnapshotGeneralStatusExecute(r SnapshotsAPISetSnapshotGeneralStatusRequest) (*SnapshotDto, *http.Response, error)
 
 	/*
-		ToggleSnapshotState Toggle snapshot state
+	ToggleSnapshotState Toggle snapshot state
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param id Snapshot ID
-		@return SnapshotsAPIToggleSnapshotStateRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param id Snapshot ID
+	@return SnapshotsAPIToggleSnapshotStateRequest
 	*/
 	ToggleSnapshotState(ctx context.Context, id string) SnapshotsAPIToggleSnapshotStateRequest
 
@@ -127,9 +128,9 @@ type SnapshotsAPI interface {
 type SnapshotsAPIService service
 
 type SnapshotsAPIActivateSnapshotRequest struct {
-	ctx                    context.Context
-	ApiService             SnapshotsAPI
-	id                     string
+	ctx context.Context
+	ApiService SnapshotsAPI
+	id string
 	xDaytonaOrganizationID *string
 }
 
@@ -146,27 +147,26 @@ func (r SnapshotsAPIActivateSnapshotRequest) Execute() (*SnapshotDto, *http.Resp
 /*
 ActivateSnapshot Activate a snapshot
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param id Snapshot ID
-	@return SnapshotsAPIActivateSnapshotRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param id Snapshot ID
+ @return SnapshotsAPIActivateSnapshotRequest
 */
 func (a *SnapshotsAPIService) ActivateSnapshot(ctx context.Context, id string) SnapshotsAPIActivateSnapshotRequest {
 	return SnapshotsAPIActivateSnapshotRequest{
 		ApiService: a,
-		ctx:        ctx,
-		id:         id,
+		ctx: ctx,
+		id: id,
 	}
 }
 
 // Execute executes the request
-//
-//	@return SnapshotDto
+//  @return SnapshotDto
 func (a *SnapshotsAPIService) ActivateSnapshotExecute(r SnapshotsAPIActivateSnapshotRequest) (*SnapshotDto, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPost
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *SnapshotDto
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *SnapshotDto
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SnapshotsAPIService.ActivateSnapshot")
@@ -239,9 +239,9 @@ func (a *SnapshotsAPIService) ActivateSnapshotExecute(r SnapshotsAPIActivateSnap
 }
 
 type SnapshotsAPICreateSnapshotRequest struct {
-	ctx                    context.Context
-	ApiService             SnapshotsAPI
-	createSnapshot         *CreateSnapshot
+	ctx context.Context
+	ApiService SnapshotsAPI
+	createSnapshot *CreateSnapshot
 	xDaytonaOrganizationID *string
 }
 
@@ -263,25 +263,24 @@ func (r SnapshotsAPICreateSnapshotRequest) Execute() (*SnapshotDto, *http.Respon
 /*
 CreateSnapshot Create a new snapshot
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return SnapshotsAPICreateSnapshotRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return SnapshotsAPICreateSnapshotRequest
 */
 func (a *SnapshotsAPIService) CreateSnapshot(ctx context.Context) SnapshotsAPICreateSnapshotRequest {
 	return SnapshotsAPICreateSnapshotRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-//
-//	@return SnapshotDto
+//  @return SnapshotDto
 func (a *SnapshotsAPIService) CreateSnapshotExecute(r SnapshotsAPICreateSnapshotRequest) (*SnapshotDto, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPost
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *SnapshotDto
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *SnapshotDto
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SnapshotsAPIService.CreateSnapshot")
@@ -358,11 +357,11 @@ func (a *SnapshotsAPIService) CreateSnapshotExecute(r SnapshotsAPICreateSnapshot
 }
 
 type SnapshotsAPIGetAllSnapshotsRequest struct {
-	ctx                    context.Context
-	ApiService             SnapshotsAPI
+	ctx context.Context
+	ApiService SnapshotsAPI
 	xDaytonaOrganizationID *string
-	limit                  *float32
-	page                   *float32
+	limit *float32
+	page *float32
 }
 
 // Use with JWT to specify the organization ID
@@ -390,25 +389,24 @@ func (r SnapshotsAPIGetAllSnapshotsRequest) Execute() (*PaginatedSnapshotsDto, *
 /*
 GetAllSnapshots List all snapshots
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return SnapshotsAPIGetAllSnapshotsRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return SnapshotsAPIGetAllSnapshotsRequest
 */
 func (a *SnapshotsAPIService) GetAllSnapshots(ctx context.Context) SnapshotsAPIGetAllSnapshotsRequest {
 	return SnapshotsAPIGetAllSnapshotsRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-//
-//	@return PaginatedSnapshotsDto
+//  @return PaginatedSnapshotsDto
 func (a *SnapshotsAPIService) GetAllSnapshotsExecute(r SnapshotsAPIGetAllSnapshotsRequest) (*PaginatedSnapshotsDto, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *PaginatedSnapshotsDto
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *PaginatedSnapshotsDto
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SnapshotsAPIService.GetAllSnapshots")
@@ -486,9 +484,9 @@ func (a *SnapshotsAPIService) GetAllSnapshotsExecute(r SnapshotsAPIGetAllSnapsho
 }
 
 type SnapshotsAPIGetSnapshotRequest struct {
-	ctx                    context.Context
-	ApiService             SnapshotsAPI
-	id                     string
+	ctx context.Context
+	ApiService SnapshotsAPI
+	id string
 	xDaytonaOrganizationID *string
 }
 
@@ -505,27 +503,26 @@ func (r SnapshotsAPIGetSnapshotRequest) Execute() (*SnapshotDto, *http.Response,
 /*
 GetSnapshot Get snapshot by ID or name
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param id Snapshot ID or name
-	@return SnapshotsAPIGetSnapshotRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param id Snapshot ID or name
+ @return SnapshotsAPIGetSnapshotRequest
 */
 func (a *SnapshotsAPIService) GetSnapshot(ctx context.Context, id string) SnapshotsAPIGetSnapshotRequest {
 	return SnapshotsAPIGetSnapshotRequest{
 		ApiService: a,
-		ctx:        ctx,
-		id:         id,
+		ctx: ctx,
+		id: id,
 	}
 }
 
 // Execute executes the request
-//
-//	@return SnapshotDto
+//  @return SnapshotDto
 func (a *SnapshotsAPIService) GetSnapshotExecute(r SnapshotsAPIGetSnapshotRequest) (*SnapshotDto, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *SnapshotDto
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *SnapshotDto
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SnapshotsAPIService.GetSnapshot")
@@ -598,11 +595,11 @@ func (a *SnapshotsAPIService) GetSnapshotExecute(r SnapshotsAPIGetSnapshotReques
 }
 
 type SnapshotsAPIGetSnapshotBuildLogsRequest struct {
-	ctx                    context.Context
-	ApiService             SnapshotsAPI
-	id                     string
+	ctx context.Context
+	ApiService SnapshotsAPI
+	id string
 	xDaytonaOrganizationID *string
-	follow                 *bool
+	follow *bool
 }
 
 // Use with JWT to specify the organization ID
@@ -624,24 +621,24 @@ func (r SnapshotsAPIGetSnapshotBuildLogsRequest) Execute() (*http.Response, erro
 /*
 GetSnapshotBuildLogs Get snapshot build logs
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param id Snapshot ID
-	@return SnapshotsAPIGetSnapshotBuildLogsRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param id Snapshot ID
+ @return SnapshotsAPIGetSnapshotBuildLogsRequest
 */
 func (a *SnapshotsAPIService) GetSnapshotBuildLogs(ctx context.Context, id string) SnapshotsAPIGetSnapshotBuildLogsRequest {
 	return SnapshotsAPIGetSnapshotBuildLogsRequest{
 		ApiService: a,
-		ctx:        ctx,
-		id:         id,
+		ctx: ctx,
+		id: id,
 	}
 }
 
 // Execute executes the request
 func (a *SnapshotsAPIService) GetSnapshotBuildLogsExecute(r SnapshotsAPIGetSnapshotBuildLogsRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod = http.MethodGet
-		localVarPostBody   interface{}
-		formFiles          []formFile
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SnapshotsAPIService.GetSnapshotBuildLogs")
@@ -708,9 +705,9 @@ func (a *SnapshotsAPIService) GetSnapshotBuildLogsExecute(r SnapshotsAPIGetSnaps
 }
 
 type SnapshotsAPIRemoveSnapshotRequest struct {
-	ctx                    context.Context
-	ApiService             SnapshotsAPI
-	id                     string
+	ctx context.Context
+	ApiService SnapshotsAPI
+	id string
 	xDaytonaOrganizationID *string
 }
 
@@ -727,24 +724,24 @@ func (r SnapshotsAPIRemoveSnapshotRequest) Execute() (*http.Response, error) {
 /*
 RemoveSnapshot Delete snapshot
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param id Snapshot ID
-	@return SnapshotsAPIRemoveSnapshotRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param id Snapshot ID
+ @return SnapshotsAPIRemoveSnapshotRequest
 */
 func (a *SnapshotsAPIService) RemoveSnapshot(ctx context.Context, id string) SnapshotsAPIRemoveSnapshotRequest {
 	return SnapshotsAPIRemoveSnapshotRequest{
 		ApiService: a,
-		ctx:        ctx,
-		id:         id,
+		ctx: ctx,
+		id: id,
 	}
 }
 
 // Execute executes the request
 func (a *SnapshotsAPIService) RemoveSnapshotExecute(r SnapshotsAPIRemoveSnapshotRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod = http.MethodDelete
-		localVarPostBody   interface{}
-		formFiles          []formFile
+		localVarHTTPMethod   = http.MethodDelete
+		localVarPostBody     interface{}
+		formFiles            []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SnapshotsAPIService.RemoveSnapshot")
@@ -808,11 +805,11 @@ func (a *SnapshotsAPIService) RemoveSnapshotExecute(r SnapshotsAPIRemoveSnapshot
 }
 
 type SnapshotsAPISetSnapshotGeneralStatusRequest struct {
-	ctx                         context.Context
-	ApiService                  SnapshotsAPI
-	id                          string
+	ctx context.Context
+	ApiService SnapshotsAPI
+	id string
 	setSnapshotGeneralStatusDto *SetSnapshotGeneralStatusDto
-	xDaytonaOrganizationID      *string
+	xDaytonaOrganizationID *string
 }
 
 func (r SnapshotsAPISetSnapshotGeneralStatusRequest) SetSnapshotGeneralStatusDto(setSnapshotGeneralStatusDto SetSnapshotGeneralStatusDto) SnapshotsAPISetSnapshotGeneralStatusRequest {
@@ -833,27 +830,26 @@ func (r SnapshotsAPISetSnapshotGeneralStatusRequest) Execute() (*SnapshotDto, *h
 /*
 SetSnapshotGeneralStatus Set snapshot general status
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param id Snapshot ID
-	@return SnapshotsAPISetSnapshotGeneralStatusRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param id Snapshot ID
+ @return SnapshotsAPISetSnapshotGeneralStatusRequest
 */
 func (a *SnapshotsAPIService) SetSnapshotGeneralStatus(ctx context.Context, id string) SnapshotsAPISetSnapshotGeneralStatusRequest {
 	return SnapshotsAPISetSnapshotGeneralStatusRequest{
 		ApiService: a,
-		ctx:        ctx,
-		id:         id,
+		ctx: ctx,
+		id: id,
 	}
 }
 
 // Execute executes the request
-//
-//	@return SnapshotDto
+//  @return SnapshotDto
 func (a *SnapshotsAPIService) SetSnapshotGeneralStatusExecute(r SnapshotsAPISetSnapshotGeneralStatusRequest) (*SnapshotDto, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPatch
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *SnapshotDto
+		localVarHTTPMethod   = http.MethodPatch
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *SnapshotDto
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SnapshotsAPIService.SetSnapshotGeneralStatus")
@@ -931,10 +927,10 @@ func (a *SnapshotsAPIService) SetSnapshotGeneralStatusExecute(r SnapshotsAPISetS
 }
 
 type SnapshotsAPIToggleSnapshotStateRequest struct {
-	ctx                    context.Context
-	ApiService             SnapshotsAPI
-	id                     string
-	toggleState            *ToggleState
+	ctx context.Context
+	ApiService SnapshotsAPI
+	id string
+	toggleState *ToggleState
 	xDaytonaOrganizationID *string
 }
 
@@ -956,27 +952,26 @@ func (r SnapshotsAPIToggleSnapshotStateRequest) Execute() (*SnapshotDto, *http.R
 /*
 ToggleSnapshotState Toggle snapshot state
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param id Snapshot ID
-	@return SnapshotsAPIToggleSnapshotStateRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param id Snapshot ID
+ @return SnapshotsAPIToggleSnapshotStateRequest
 */
 func (a *SnapshotsAPIService) ToggleSnapshotState(ctx context.Context, id string) SnapshotsAPIToggleSnapshotStateRequest {
 	return SnapshotsAPIToggleSnapshotStateRequest{
 		ApiService: a,
-		ctx:        ctx,
-		id:         id,
+		ctx: ctx,
+		id: id,
 	}
 }
 
 // Execute executes the request
-//
-//	@return SnapshotDto
+//  @return SnapshotDto
 func (a *SnapshotsAPIService) ToggleSnapshotStateExecute(r SnapshotsAPIToggleSnapshotStateRequest) (*SnapshotDto, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPatch
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *SnapshotDto
+		localVarHTTPMethod   = http.MethodPatch
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *SnapshotDto
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SnapshotsAPIService.ToggleSnapshotState")

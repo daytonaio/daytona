@@ -31,8 +31,13 @@ class ScreenshotResponse(BaseModel):
     width: Union[StrictFloat, StrictInt]
     height: Union[StrictFloat, StrictInt]
     cursor_position: Optional[Dict[str, Any]] = None
+    region: Optional[Dict[str, Any]] = None
+    format: Optional[StrictStr] = None
+    quality: Optional[Union[StrictFloat, StrictInt]] = None
+    scale: Optional[Union[StrictFloat, StrictInt]] = None
+    size_bytes: Optional[Union[StrictFloat, StrictInt]] = None
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["screenshot", "width", "height", "cursor_position"]
+    __properties: ClassVar[List[str]] = ["screenshot", "width", "height", "cursor_position", "region", "format", "quality", "scale", "size_bytes"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -95,7 +100,12 @@ class ScreenshotResponse(BaseModel):
             "screenshot": obj.get("screenshot"),
             "width": obj.get("width"),
             "height": obj.get("height"),
-            "cursor_position": obj.get("cursor_position")
+            "cursor_position": obj.get("cursor_position"),
+            "region": obj.get("region"),
+            "format": obj.get("format"),
+            "quality": obj.get("quality"),
+            "scale": obj.get("scale"),
+            "size_bytes": obj.get("size_bytes")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

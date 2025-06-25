@@ -12,8 +12,8 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
+	"bytes"
 	"fmt"
 )
 
@@ -22,9 +22,7 @@ var _ MappedNullable = &DisplayInfoResponse{}
 
 // DisplayInfoResponse struct for DisplayInfoResponse
 type DisplayInfoResponse struct {
-	PrimaryDisplay map[string]interface{}   `json:"primary_display"`
-	Displays       []map[string]interface{} `json:"displays"`
-	TotalDisplays  float32                  `json:"total_displays"`
+	Displays []map[string]interface{} `json:"displays"`
 }
 
 type _DisplayInfoResponse DisplayInfoResponse
@@ -33,11 +31,9 @@ type _DisplayInfoResponse DisplayInfoResponse
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewDisplayInfoResponse(primaryDisplay map[string]interface{}, displays []map[string]interface{}, totalDisplays float32) *DisplayInfoResponse {
+func NewDisplayInfoResponse(displays []map[string]interface{}) *DisplayInfoResponse {
 	this := DisplayInfoResponse{}
-	this.PrimaryDisplay = primaryDisplay
 	this.Displays = displays
-	this.TotalDisplays = totalDisplays
 	return &this
 }
 
@@ -47,30 +43,6 @@ func NewDisplayInfoResponse(primaryDisplay map[string]interface{}, displays []ma
 func NewDisplayInfoResponseWithDefaults() *DisplayInfoResponse {
 	this := DisplayInfoResponse{}
 	return &this
-}
-
-// GetPrimaryDisplay returns the PrimaryDisplay field value
-func (o *DisplayInfoResponse) GetPrimaryDisplay() map[string]interface{} {
-	if o == nil {
-		var ret map[string]interface{}
-		return ret
-	}
-
-	return o.PrimaryDisplay
-}
-
-// GetPrimaryDisplayOk returns a tuple with the PrimaryDisplay field value
-// and a boolean to check if the value has been set.
-func (o *DisplayInfoResponse) GetPrimaryDisplayOk() (map[string]interface{}, bool) {
-	if o == nil {
-		return map[string]interface{}{}, false
-	}
-	return o.PrimaryDisplay, true
-}
-
-// SetPrimaryDisplay sets field value
-func (o *DisplayInfoResponse) SetPrimaryDisplay(v map[string]interface{}) {
-	o.PrimaryDisplay = v
 }
 
 // GetDisplays returns the Displays field value
@@ -97,32 +69,8 @@ func (o *DisplayInfoResponse) SetDisplays(v []map[string]interface{}) {
 	o.Displays = v
 }
 
-// GetTotalDisplays returns the TotalDisplays field value
-func (o *DisplayInfoResponse) GetTotalDisplays() float32 {
-	if o == nil {
-		var ret float32
-		return ret
-	}
-
-	return o.TotalDisplays
-}
-
-// GetTotalDisplaysOk returns a tuple with the TotalDisplays field value
-// and a boolean to check if the value has been set.
-func (o *DisplayInfoResponse) GetTotalDisplaysOk() (*float32, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.TotalDisplays, true
-}
-
-// SetTotalDisplays sets field value
-func (o *DisplayInfoResponse) SetTotalDisplays(v float32) {
-	o.TotalDisplays = v
-}
-
 func (o DisplayInfoResponse) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
+	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -131,9 +79,7 @@ func (o DisplayInfoResponse) MarshalJSON() ([]byte, error) {
 
 func (o DisplayInfoResponse) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	toSerialize["primary_display"] = o.PrimaryDisplay
 	toSerialize["displays"] = o.Displays
-	toSerialize["total_displays"] = o.TotalDisplays
 	return toSerialize, nil
 }
 
@@ -142,9 +88,7 @@ func (o *DisplayInfoResponse) UnmarshalJSON(data []byte) (err error) {
 	// by unmarshalling the object into a generic map with string keys and checking
 	// that every required field exists as a key in the generic map.
 	requiredProperties := []string{
-		"primary_display",
 		"displays",
-		"total_displays",
 	}
 
 	allProperties := make(map[string]interface{})
@@ -152,10 +96,10 @@ func (o *DisplayInfoResponse) UnmarshalJSON(data []byte) (err error) {
 	err = json.Unmarshal(data, &allProperties)
 
 	if err != nil {
-		return err
+		return err;
 	}
 
-	for _, requiredProperty := range requiredProperties {
+	for _, requiredProperty := range(requiredProperties) {
 		if _, exists := allProperties[requiredProperty]; !exists {
 			return fmt.Errorf("no value given for required property %v", requiredProperty)
 		}
@@ -211,3 +155,5 @@ func (v *NullableDisplayInfoResponse) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

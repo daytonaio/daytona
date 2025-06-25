@@ -3476,6 +3476,10 @@ paths:
           style: simple
       responses:
         '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ComputerUseStartResponse'
           description: Computer use processes started successfully
       security:
         - bearer: []
@@ -3508,6 +3512,10 @@ paths:
           style: simple
       responses:
         '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ComputerUseStopResponse'
           description: Computer use processes stopped successfully
       security:
         - bearer: []
@@ -3540,6 +3548,10 @@ paths:
           style: simple
       responses:
         '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ComputerUseStatusResponse'
           description: Computer use status retrieved successfully
       security:
         - bearer: []
@@ -3579,6 +3591,10 @@ paths:
           style: simple
       responses:
         '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProcessStatusResponse'
           description: Process status retrieved successfully
       security:
         - bearer: []
@@ -3618,6 +3634,10 @@ paths:
           style: simple
       responses:
         '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProcessRestartResponse'
           description: Process restarted successfully
       security:
         - bearer: []
@@ -3657,6 +3677,10 @@ paths:
           style: simple
       responses:
         '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProcessLogsResponse'
           description: Process logs retrieved successfully
       security:
         - bearer: []
@@ -3696,6 +3720,10 @@ paths:
           style: simple
       responses:
         '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProcessErrorsResponse'
           description: Process errors retrieved successfully
       security:
         - bearer: []
@@ -3899,7 +3927,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MouseScrollResponse'
+                $ref: '#/components/schemas/EmptyResponse'
           description: Mouse scrolled successfully
       security:
         - bearer: []
@@ -3941,7 +3969,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/KeyboardTypeResponse'
+                $ref: '#/components/schemas/EmptyResponse'
           description: Text typed successfully
       security:
         - bearer: []
@@ -3983,7 +4011,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/KeyboardPressResponse'
+                $ref: '#/components/schemas/EmptyResponse'
           description: Key pressed successfully
       security:
         - bearer: []
@@ -4025,7 +4053,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/KeyboardHotkeyResponse'
+                $ref: '#/components/schemas/EmptyResponse'
           description: Hotkey pressed successfully
       security:
         - bearer: []
@@ -7893,6 +7921,93 @@ components:
         - languageId
         - pathToProject
       type: object
+    ComputerUseStartResponse:
+      example:
+        message: message
+        status: '{}'
+      properties:
+        message:
+          type: string
+        status:
+          type: object
+      required:
+        - message
+        - status
+      type: object
+    ComputerUseStopResponse:
+      example:
+        message: message
+        status: '{}'
+      properties:
+        message:
+          type: string
+        status:
+          type: object
+      required:
+        - message
+        - status
+      type: object
+    ComputerUseStatusResponse:
+      example:
+        status: '{}'
+      properties:
+        status:
+          type: object
+      required:
+        - status
+      type: object
+    ProcessStatusResponse:
+      example:
+        running: true
+        processName: processName
+      properties:
+        processName:
+          type: string
+        running:
+          type: boolean
+      required:
+        - processName
+        - running
+      type: object
+    ProcessRestartResponse:
+      example:
+        processName: processName
+        message: message
+      properties:
+        message:
+          type: string
+        processName:
+          type: string
+      required:
+        - message
+        - processName
+      type: object
+    ProcessLogsResponse:
+      example:
+        processName: processName
+        logs: logs
+      properties:
+        processName:
+          type: string
+        logs:
+          type: string
+      required:
+        - logs
+        - processName
+      type: object
+    ProcessErrorsResponse:
+      example:
+        processName: processName
+        errors: errors
+      properties:
+        processName:
+          type: string
+        errors:
+          type: string
+      required:
+        - errors
+        - processName
+      type: object
     MousePosition:
       example:
         x: 0.8008281904610115
@@ -8073,34 +8188,14 @@ components:
         - x
         - 'y'
       type: object
-    MouseScrollResponse:
+    EmptyResponse:
       example:
-        amount: 0.8008281904610115
         success: true
-        x: 6.027456183070403
-        action: action
-        'y': 1.4658129805029452
-        direction: direction
       properties:
         success:
           type: boolean
-        action:
-          type: string
-        direction:
-          type: string
-        amount:
-          type: number
-        x:
-          type: number
-        'y':
-          type: number
       required:
-        - action
-        - amount
-        - direction
         - success
-        - x
-        - 'y'
       type: object
     KeyboardTypeRequest:
       example:
@@ -8113,19 +8208,6 @@ components:
           type: number
       required:
         - text
-      type: object
-    KeyboardTypeResponse:
-      example:
-        typed: typed
-        success: true
-      properties:
-        success:
-          type: boolean
-        typed:
-          type: string
-      required:
-        - success
-        - typed
       type: object
     KeyboardPressRequest:
       example:
@@ -8143,27 +8225,6 @@ components:
       required:
         - key
       type: object
-    KeyboardPressResponse:
-      example:
-        success: true
-        modifiers:
-          - modifiers
-          - modifiers
-        key: key
-      properties:
-        success:
-          type: boolean
-        key:
-          type: string
-        modifiers:
-          items:
-            type: string
-          type: array
-      required:
-        - key
-        - modifiers
-        - success
-      type: object
     KeyboardHotkeyRequest:
       example:
         keys: keys
@@ -8173,25 +8234,17 @@ components:
       required:
         - keys
       type: object
-    KeyboardHotkeyResponse:
-      example:
-        success: true
-        hotkey: hotkey
-      properties:
-        success:
-          type: boolean
-        hotkey:
-          type: string
-      required:
-        - hotkey
-        - success
-      type: object
     ScreenshotResponse:
       example:
         cursor_position: '{}'
+        size_bytes: 5.637376656633329
         width: 0.8008281904610115
+        format: format
+        scale: 5.962133916683182
         screenshot: screenshot
+        region: '{}'
         height: 6.027456183070403
+        quality: 1.4658129805029452
       properties:
         screenshot:
           type: string
@@ -8201,6 +8254,16 @@ components:
           type: number
         cursor_position:
           type: object
+        region:
+          type: object
+        format:
+          type: string
+        quality:
+          type: number
+        scale:
+          type: number
+        size_bytes:
+          type: number
       required:
         - height
         - screenshot
@@ -8260,24 +8323,16 @@ components:
       type: object
     DisplayInfoResponse:
       example:
-        total_displays: 0.8008281904610115
-        primary_display: '{}'
         displays:
           - '{}'
           - '{}'
       properties:
-        primary_display:
-          type: object
         displays:
           items:
             type: object
           type: array
-        total_displays:
-          type: number
       required:
         - displays
-        - primary_display
-        - total_displays
       type: object
     WindowsResponse:
       example:

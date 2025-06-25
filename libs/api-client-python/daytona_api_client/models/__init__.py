@@ -24,6 +24,9 @@ from daytona_api_client.models.completion_context import CompletionContext
 from daytona_api_client.models.completion_item import CompletionItem
 from daytona_api_client.models.completion_list import CompletionList
 from daytona_api_client.models.compressed_screenshot_response import CompressedScreenshotResponse
+from daytona_api_client.models.computer_use_start_response import ComputerUseStartResponse
+from daytona_api_client.models.computer_use_status_response import ComputerUseStatusResponse
+from daytona_api_client.models.computer_use_stop_response import ComputerUseStopResponse
 from daytona_api_client.models.create_api_key import CreateApiKey
 from daytona_api_client.models.create_build_info import CreateBuildInfo
 from daytona_api_client.models.create_docker_registry import CreateDockerRegistry
@@ -41,6 +44,7 @@ from daytona_api_client.models.create_volume import CreateVolume
 from daytona_api_client.models.create_workspace import CreateWorkspace
 from daytona_api_client.models.display_info_response import DisplayInfoResponse
 from daytona_api_client.models.docker_registry import DockerRegistry
+from daytona_api_client.models.empty_response import EmptyResponse
 from daytona_api_client.models.execute_request import ExecuteRequest
 from daytona_api_client.models.execute_response import ExecuteResponse
 from daytona_api_client.models.file_info import FileInfo
@@ -56,11 +60,8 @@ from daytona_api_client.models.git_delete_branch_request import GitDeleteBranchR
 from daytona_api_client.models.git_repo_request import GitRepoRequest
 from daytona_api_client.models.git_status import GitStatus
 from daytona_api_client.models.keyboard_hotkey_request import KeyboardHotkeyRequest
-from daytona_api_client.models.keyboard_hotkey_response import KeyboardHotkeyResponse
 from daytona_api_client.models.keyboard_press_request import KeyboardPressRequest
-from daytona_api_client.models.keyboard_press_response import KeyboardPressResponse
 from daytona_api_client.models.keyboard_type_request import KeyboardTypeRequest
-from daytona_api_client.models.keyboard_type_response import KeyboardTypeResponse
 from daytona_api_client.models.list_branch_response import ListBranchResponse
 from daytona_api_client.models.lsp_completion_params import LspCompletionParams
 from daytona_api_client.models.lsp_document_request import LspDocumentRequest
@@ -76,7 +77,6 @@ from daytona_api_client.models.mouse_move_request import MouseMoveRequest
 from daytona_api_client.models.mouse_move_response import MouseMoveResponse
 from daytona_api_client.models.mouse_position import MousePosition
 from daytona_api_client.models.mouse_scroll_request import MouseScrollRequest
-from daytona_api_client.models.mouse_scroll_response import MouseScrollResponse
 from daytona_api_client.models.organization import Organization
 from daytona_api_client.models.organization_invitation import OrganizationInvitation
 from daytona_api_client.models.organization_role import OrganizationRole
@@ -85,6 +85,10 @@ from daytona_api_client.models.organization_user import OrganizationUser
 from daytona_api_client.models.paginated_snapshots_dto import PaginatedSnapshotsDto
 from daytona_api_client.models.port_preview_url import PortPreviewUrl
 from daytona_api_client.models.position import Position
+from daytona_api_client.models.process_errors_response import ProcessErrorsResponse
+from daytona_api_client.models.process_logs_response import ProcessLogsResponse
+from daytona_api_client.models.process_restart_response import ProcessRestartResponse
+from daytona_api_client.models.process_status_response import ProcessStatusResponse
 from daytona_api_client.models.project_dir_response import ProjectDirResponse
 from daytona_api_client.models.range import Range
 from daytona_api_client.models.region_screenshot_response import RegionScreenshotResponse
