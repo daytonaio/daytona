@@ -39,7 +39,7 @@ new ComputerUse(sandboxId: string, toolboxApi: ToolboxApi): ComputerUse
 #### getProcessErrors()
 
 ```ts
-getProcessErrors(processName: string): Promise<void>
+getProcessErrors(processName: string): Promise<ProcessErrorsResponse>
 ```
 
 Gets error logs for a specific VNC process
@@ -50,13 +50,13 @@ Gets error logs for a specific VNC process
 
 **Returns**:
 
-- `Promise<void>` - Process error logs
+- `Promise<ProcessErrorsResponse>` - Process error logs
 
 **Example:**
 
 ```typescript
-const errors = await sandbox.computerUse.getProcessErrors('x11vnc')
-console.log('X11VNC errors:', errors)
+const errorsResp = await sandbox.computerUse.getProcessErrors('x11vnc')
+console.log('X11VNC errors:', errorsResp.errors)
 ```
 
 ---
@@ -64,7 +64,7 @@ console.log('X11VNC errors:', errors)
 #### getProcessLogs()
 
 ```ts
-getProcessLogs(processName: string): Promise<void>
+getProcessLogs(processName: string): Promise<ProcessLogsResponse>
 ```
 
 Gets logs for a specific VNC process
@@ -75,13 +75,13 @@ Gets logs for a specific VNC process
 
 **Returns**:
 
-- `Promise<void>` - Process logs
+- `Promise<ProcessLogsResponse>` - Process logs
 
 **Example:**
 
 ```typescript
-const logs = await sandbox.computerUse.getProcessLogs('novnc')
-console.log('NoVNC logs:', logs)
+const logsResp = await sandbox.computerUse.getProcessLogs('novnc')
+console.log('NoVNC logs:', logsResp.logs)
 ```
 
 ---
@@ -89,7 +89,7 @@ console.log('NoVNC logs:', logs)
 #### getProcessStatus()
 
 ```ts
-getProcessStatus(processName: string): Promise<void>
+getProcessStatus(processName: string): Promise<ProcessStatusResponse>
 ```
 
 Gets the status of a specific VNC process
@@ -100,7 +100,7 @@ Gets the status of a specific VNC process
 
 **Returns**:
 
-- `Promise<void>` - Status information about the specific process
+- `Promise<ProcessStatusResponse>` - Status information about the specific process
 
 **Example:**
 
@@ -114,20 +114,20 @@ const noVncStatus = await sandbox.computerUse.getProcessStatus('novnc')
 #### getStatus()
 
 ```ts
-getStatus(): Promise<void>
+getStatus(): Promise<ComputerUseStatusResponse>
 ```
 
 Gets the status of all computer use processes
 
 **Returns**:
 
-- `Promise<void>` - Status information about all VNC desktop processes
+- `Promise<ComputerUseStatusResponse>` - Status information about all VNC desktop processes
 
 **Example:**
 
 ```typescript
 const status = await sandbox.computerUse.getStatus()
-console.log('Computer use status:', status)
+console.log('Computer use status:', status.status)
 ```
 
 ---
@@ -135,7 +135,7 @@ console.log('Computer use status:', status)
 #### restartProcess()
 
 ```ts
-restartProcess(processName: string): Promise<void>
+restartProcess(processName: string): Promise<ProcessRestartResponse>
 ```
 
 Restarts a specific VNC process
@@ -146,13 +146,13 @@ Restarts a specific VNC process
 
 **Returns**:
 
-- `Promise<void>`
+- `Promise<ProcessRestartResponse>` - Process restart response
 
 **Example:**
 
 ```typescript
-await sandbox.computerUse.restartProcess('xfce4')
-console.log('XFCE4 process restarted')
+const result = await sandbox.computerUse.restartProcess('xfce4')
+console.log('XFCE4 process restarted:', result.message)
 ```
 
 ---
@@ -160,20 +160,20 @@ console.log('XFCE4 process restarted')
 #### start()
 
 ```ts
-start(): Promise<void>
+start(): Promise<ComputerUseStartResponse>
 ```
 
 Starts all computer use processes (Xvfb, xfce4, x11vnc, novnc)
 
 **Returns**:
 
-- `Promise<void>`
+- `Promise<ComputerUseStartResponse>` - Computer use start response
 
 **Example:**
 
 ```typescript
-await sandbox.computerUse.start()
-console.log('Computer use processes started')
+const result = await sandbox.computerUse.start()
+console.log('Computer use processes started:', result.message)
 ```
 
 ---
@@ -181,20 +181,20 @@ console.log('Computer use processes started')
 #### stop()
 
 ```ts
-stop(): Promise<void>
+stop(): Promise<ComputerUseStopResponse>
 ```
 
 Stops all computer use processes
 
 **Returns**:
 
-- `Promise<void>`
+- `Promise<ComputerUseStopResponse>` - Computer use stop response
 
 **Example:**
 
 ```typescript
-await sandbox.computerUse.stop()
-console.log('Computer use processes stopped')
+const result = await sandbox.computerUse.stop()
+console.log('Computer use processes stopped:', result.message)
 ```
 
 ## Display
@@ -295,7 +295,7 @@ new Keyboard(sandboxId: string, toolboxApi: ToolboxApi): Keyboard
 #### hotkey()
 
 ```ts
-hotkey(keys: string): Promise<KeyboardHotkeyResponse>
+hotkey(keys: string): Promise<boolean>
 ```
 
 Presses a hotkey combination
@@ -306,7 +306,7 @@ Presses a hotkey combination
 
 **Returns**:
 
-- `Promise<KeyboardHotkeyResponse>` - Hotkey operation result
+- `Promise<boolean>` - Whether the hotkey operation was successful
 
 **Example:**
 
@@ -326,7 +326,7 @@ const altTab = await sandbox.computerUse.keyboard.hotkey('alt+tab')
 #### press()
 
 ```ts
-press(key: string, modifiers?: string[]): Promise<KeyboardPressResponse>
+press(key: string, modifiers?: string[]): Promise<boolean>
 ```
 
 Presses a key with optional modifiers
@@ -338,7 +338,7 @@ Presses a key with optional modifiers
 
 **Returns**:
 
-- `Promise<KeyboardPressResponse>` - Press operation result
+- `Promise<boolean>` - Whether the press operation was successful
 
 **Example:**
 
@@ -358,7 +358,7 @@ const newTab = await sandbox.computerUse.keyboard.press('t', ['ctrl', 'shift'])
 #### type()
 
 ```ts
-type(text: string, delay?: number): Promise<KeyboardTypeResponse>
+type(text: string, delay?: number): Promise<boolean>
 ```
 
 Types the specified text
@@ -370,7 +370,7 @@ Types the specified text
 
 **Returns**:
 
-- `Promise<KeyboardTypeResponse>` - Type operation result
+- `Promise<boolean>` - Whether the type operation was successful
 
 **Example:**
 
@@ -533,7 +533,7 @@ scroll(
    x: number,
    y: number,
    direction: "up" | "down",
-amount?: number): Promise<MouseScrollResponse>
+amount?: number): Promise<boolean>
 ```
 
 Scrolls the mouse wheel at the specified coordinates
@@ -547,7 +547,7 @@ Scrolls the mouse wheel at the specified coordinates
 
 **Returns**:
 
-- `Promise<MouseScrollResponse>` - Scroll operation result
+- `Promise<boolean>` - Whether the scroll operation was successful
 
 **Example:**
 
