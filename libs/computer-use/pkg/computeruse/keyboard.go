@@ -26,12 +26,10 @@ func (u *ComputerUse) TypeText(req *computeruse.TypeTextRequest) (*computeruse.E
 
 func (u *ComputerUse) PressKey(req *computeruse.PressKeyRequest) (*computeruse.Empty, error) {
 	if len(req.Modifiers) > 0 {
-		robotgo.KeyTap(req.Key, req.Modifiers)
-	} else {
-		robotgo.KeyTap(req.Key)
+		return new(computeruse.Empty), robotgo.KeyTap(req.Key, req.Modifiers)
 	}
 
-	return new(computeruse.Empty), nil
+	return new(computeruse.Empty), robotgo.KeyTap(req.Key)
 }
 
 func (u *ComputerUse) PressHotkey(req *computeruse.PressHotkeyRequest) (*computeruse.Empty, error) {
@@ -43,7 +41,5 @@ func (u *ComputerUse) PressHotkey(req *computeruse.PressHotkeyRequest) (*compute
 	mainKey := keys[len(keys)-1]
 	modifiers := keys[:len(keys)-1]
 
-	robotgo.KeyTap(mainKey, modifiers)
-
-	return new(computeruse.Empty), nil
+	return new(computeruse.Empty), robotgo.KeyTap(mainKey, modifiers)
 }
