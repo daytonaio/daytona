@@ -244,18 +244,6 @@ func (s *Server) computerUseDisabledMiddleware() gin.HandlerFunc {
 			"error":    "Computer-use functionality is not available",
 			"details":  "The computer-use plugin failed to initialize. This is usually due to missing X11 dependencies.",
 			"solution": "Install the required dependencies to enable computer-use functionality. Check the daemon logs for specific instructions.",
-			"endpoints": []string{
-				"GET /computer/status - Get computer-use status",
-				"POST /computer/start - Start computer-use processes",
-				"POST /computer/stop - Stop computer-use processes",
-				"GET /computer/screenshot - Take screenshot",
-				"GET /computer/mouse/position - Get mouse position",
-				"POST /computer/mouse/move - Move mouse",
-				"POST /computer/mouse/click - Click mouse",
-				"POST /computer/keyboard/type - Type text",
-				"POST /computer/keyboard/key - Press key",
-				"GET /computer/display/info - Get display info",
-			},
 		})
 		c.Abort()
 	}
