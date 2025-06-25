@@ -414,34 +414,16 @@ export class MouseMoveRequestDto {
 @ApiSchema({ name: 'MouseMoveResponse' })
 export class MouseMoveResponseDto {
   @ApiProperty({
-    description: 'Whether the mouse movement operation was successful',
-    example: true,
-  })
-  success: boolean
-
-  @ApiProperty({
-    description: 'The requested X coordinate for mouse movement',
+    description: 'The actual X coordinate where the mouse cursor ended up',
     example: 150,
   })
   x: number
 
   @ApiProperty({
-    description: 'The requested Y coordinate for mouse movement',
-    example: 250,
-  })
-  y: number
-
-  @ApiProperty({
-    description: 'The actual X coordinate where the mouse cursor ended up',
-    example: 150,
-  })
-  actual_x: number
-
-  @ApiProperty({
     description: 'The actual Y coordinate where the mouse cursor ended up',
     example: 250,
   })
-  actual_y: number
+  y: number
 }
 
 @ApiSchema({ name: 'MouseClickRequest' })
@@ -474,12 +456,6 @@ export class MouseClickRequestDto {
 @ApiSchema({ name: 'MouseClickResponse' })
 export class MouseClickResponseDto {
   @ApiProperty({
-    description: 'Whether the mouse click operation was successful',
-    example: true,
-  })
-  success: boolean
-
-  @ApiProperty({
     description: 'The type of action performed (click, double-click)',
     example: 'click',
   })
@@ -498,28 +474,16 @@ export class MouseClickResponseDto {
   double: boolean
 
   @ApiProperty({
-    description: 'The X coordinate where the click was performed',
+    description: 'The actual X coordinate where the click occurred',
     example: 100,
   })
   x: number
 
   @ApiProperty({
-    description: 'The Y coordinate where the click was performed',
-    example: 200,
-  })
-  y: number
-
-  @ApiProperty({
-    description: 'The actual X coordinate where the click occurred',
-    example: 100,
-  })
-  actual_x: number
-
-  @ApiProperty({
     description: 'The actual Y coordinate where the click occurred',
     example: 200,
   })
-  actual_y: number
+  y: number
 }
 
 @ApiSchema({ name: 'MouseDragRequest' })
@@ -558,12 +522,6 @@ export class MouseDragRequestDto {
 @ApiSchema({ name: 'MouseDragResponse' })
 export class MouseDragResponseDto {
   @ApiProperty({
-    description: 'Whether the mouse drag operation was successful',
-    example: true,
-  })
-  success: boolean
-
-  @ApiProperty({
     description: 'The type of action performed',
     example: 'drag',
   })
@@ -585,13 +543,13 @@ export class MouseDragResponseDto {
     description: 'The actual X coordinate where the drag ended',
     example: 300,
   })
-  actual_x: number
+  x: number
 
   @ApiProperty({
     description: 'The actual Y coordinate where the drag ended',
     example: 400,
   })
-  actual_y: number
+  y: number
 }
 
 @ApiSchema({ name: 'MouseScrollRequest' })

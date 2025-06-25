@@ -33,14 +33,14 @@ type IComputerUse interface {
 	// Mouse control methods
 	GetMousePosition() (*MousePositionResponse, error)
 	MoveMouse(*MoveMouseRequest) (*MousePositionResponse, error)
-	Click(*ClickRequest) (*MousePositionResponse, error)
-	Drag(*DragRequest) (*MousePositionResponse, error)
-	Scroll(*ScrollRequest) (*Empty, error)
+	Click(*ClickRequest) (*MouseClickResponse, error)
+	Drag(*DragRequest) (*MouseDragResponse, error)
+	Scroll(*ScrollRequest) (*ScrollResponse, error)
 
 	// Keyboard control methods
-	TypeText(*TypeTextRequest) (*Empty, error)
-	PressKey(*PressKeyRequest) (*Empty, error)
-	PressHotkey(*PressHotkeyRequest) (*Empty, error)
+	TypeText(*TypeTextRequest) (*TypeTextResponse, error)
+	PressKey(*PressKeyRequest) (*PressKeyResponse, error)
+	PressHotkey(*PressHotkeyRequest) (*PressHotkeyResponse, error)
 
 	// Display info methods
 	GetDisplayInfo() (*DisplayInfoResponse, error)
@@ -54,32 +54,39 @@ type ComputerUsePlugin struct {
 	Impl IComputerUse
 }
 
+// Common structs for better composition
+type Position struct {
+	X int `json:"x"`
+	Y int `json:"y"`
+}
+
+type Size struct {
+	Width  int `json:"width"`
+	Height int `json:"height"`
+}
+
 // Screenshot parameter structs
 type ScreenshotRequest struct {
-	ShowCursor bool `json:"show_cursor"`
+	ShowCursor bool `json:"showCursor"`
 }
 
 type RegionScreenshotRequest struct {
-	X          int  `json:"x"`
-	Y          int  `json:"y"`
-	Width      int  `json:"width"`
-	Height     int  `json:"height"`
-	ShowCursor bool `json:"show_cursor"`
+	Position
+	Size
+	ShowCursor bool `json:"showCursor"`
 }
 
 type CompressedScreenshotRequest struct {
-	ShowCursor bool    `json:"show_cursor"`
+	ShowCursor bool    `json:"showCursor"`
 	Format     string  `json:"format"`  // "png" or "jpeg"
 	Quality    int     `json:"quality"` // 1-100 for JPEG quality
 	Scale      float64 `json:"scale"`   // 0.1-1.0 for scaling down
 }
 
 type CompressedRegionScreenshotRequest struct {
-	X          int     `json:"x"`
-	Y          int     `json:"y"`
-	Width      int     `json:"width"`
-	Height     int     `json:"height"`
-	ShowCursor bool    `json:"show_cursor"`
+	Position
+	Size
+	ShowCursor bool    `json:"showCursor"`
 	Format     string  `json:"format"`  // "png" or "jpeg"
 	Quality    int     `json:"quality"` // 1-100 for JPEG quality
 	Scale      float64 `json:"scale"`   // 0.1-1.0 for scaling down
@@ -87,13 +94,11 @@ type CompressedRegionScreenshotRequest struct {
 
 // Mouse parameter structs
 type MoveMouseRequest struct {
-	X int `json:"x"`
-	Y int `json:"y"`
+	Position
 }
 
 type ClickRequest struct {
-	X      int    `json:"x"`
-	Y      int    `json:"y"`
+	Position
 	Button string `json:"button"` // left, right, middle
 	Double bool   `json:"double"`
 }
@@ -107,8 +112,7 @@ type DragRequest struct {
 }
 
 type ScrollRequest struct {
-	X         int    `json:"x"`
-	Y         int    `json:"y"`
+	Position
 	Direction string `json:"direction"` // up, down
 	Amount    int    `json:"amount"`
 }
@@ -128,30 +132,51 @@ type PressHotkeyRequest struct {
 	Keys string `json:"keys"` // e.g., "ctrl+c", "cmd+v"
 }
 
+// Response structs for keyboard operations
+type TypeTextResponse struct {
+	Typed string `json:"typed"`
+}
+
+type PressKeyResponse struct {
+	Key       string   `json:"key"`
+	Modifiers []string `json:"modifiers"`
+}
+
+type PressHotkeyResponse struct {
+	Hotkey string `json:"hotkey"`
+}
+
+type ScrollResponse struct {
+	Success bool `json:"success"`
+}
+
 // Response structs
 type ScreenshotResponse struct {
-	Screenshot     string                   `json:"screenshot"`
-	Width          int                      `json:"width"`
-	Height         int                      `json:"height"`
-	CursorPosition *MousePositionResponse   `json:"cursor_position,omitempty"`
+	Screenshot string `json:"screenshot"`
+	Size
+	CursorPosition *Position                `json:"cursorPosition,omitempty"`
 	Region         *RegionScreenshotRequest `json:"region,omitempty"`
 	Format         string                   `json:"format,omitempty"`
 	Quality        int                      `json:"quality,omitempty"`
 	Scale          float64                  `json:"scale,omitempty"`
-	SizeBytes      int                      `json:"size_bytes,omitempty"`
+	SizeBytes      int                      `json:"sizeBytes,omitempty"`
 }
 
+// Mouse response structs - separated by operation type
 type MousePositionResponse struct {
-	X       int                    `json:"x"`
-	Y       int                    `json:"y"`
-	ActualX int                    `json:"actual_x,omitempty"`
-	ActualY int                    `json:"actual_y,omitempty"`
-	Success bool                   `json:"success,omitempty"`
-	Action  string                 `json:"action,omitempty"`
-	Button  string                 `json:"button,omitempty"`
-	Double  bool                   `json:"double,omitempty"`
-	From    *MousePositionResponse `json:"from,omitempty"`
-	To      *MousePositionResponse `json:"to,omitempty"`
+	Position
+}
+
+type MouseClickResponse struct {
+	Position
+	Button string `json:"button"`
+	Double bool   `json:"double"`
+}
+
+type MouseDragResponse struct {
+	From     Position `json:"from"`
+	To       Position `json:"to"`
+	Position          // Final position
 }
 
 type DisplayInfoResponse struct {
@@ -159,12 +184,10 @@ type DisplayInfoResponse struct {
 }
 
 type DisplayInfo struct {
-	ID       int  `json:"id"`
-	X        int  `json:"x"`
-	Y        int  `json:"y"`
-	Width    int  `json:"width"`
-	Height   int  `json:"height"`
-	IsActive bool `json:"is_active"`
+	ID int `json:"id"`
+	Position
+	Size
+	IsActive bool `json:"isActive"`
 }
 
 type WindowsResponse struct {
@@ -172,13 +195,11 @@ type WindowsResponse struct {
 }
 
 type WindowInfo struct {
-	ID       int    `json:"id"`
-	Title    string `json:"title"`
-	X        int    `json:"x"`
-	Y        int    `json:"y"`
-	Width    int    `json:"width"`
-	Height   int    `json:"height"`
-	IsActive bool   `json:"is_active"`
+	ID    int    `json:"id"`
+	Title string `json:"title"`
+	Position
+	Size
+	IsActive bool `json:"isActive"`
 }
 
 type StatusResponse struct {
@@ -210,7 +231,7 @@ func (p *ComputerUsePlugin) Client(b *plugin.MuxBroker, c *rpc.Client) (any, err
 func WrapScreenshotHandler(fn func(*ScreenshotRequest) (*ScreenshotResponse, error)) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		req := &ScreenshotRequest{
-			ShowCursor: c.Query("show_cursor") == "true",
+			ShowCursor: c.Query("showCursor") == "true",
 		}
 		response, err := fn(req)
 		if err != nil {
@@ -228,7 +249,7 @@ func WrapRegionScreenshotHandler(fn func(*RegionScreenshotRequest) (*ScreenshotR
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid parameters"})
 			return
 		}
-		req.ShowCursor = c.Query("show_cursor") == "true"
+		req.ShowCursor = c.Query("showCursor") == "true"
 
 		response, err := fn(&req)
 		if err != nil {
@@ -242,7 +263,7 @@ func WrapRegionScreenshotHandler(fn func(*RegionScreenshotRequest) (*ScreenshotR
 func WrapCompressedScreenshotHandler(fn func(*CompressedScreenshotRequest) (*ScreenshotResponse, error)) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		req := &CompressedScreenshotRequest{
-			ShowCursor: c.Query("show_cursor") == "true",
+			ShowCursor: c.Query("showCursor") == "true",
 			Format:     c.Query("format"),
 			Quality:    85,
 			Scale:      1.0,
@@ -278,7 +299,7 @@ func WrapCompressedRegionScreenshotHandler(fn func(*CompressedRegionScreenshotRe
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid parameters"})
 			return
 		}
-		req.ShowCursor = c.Query("show_cursor") == "true"
+		req.ShowCursor = c.Query("showCursor") == "true"
 		req.Format = c.Query("format")
 		req.Quality = 85
 		req.Scale = 1.0
@@ -334,7 +355,7 @@ func WrapMoveMouseHandler(fn func(*MoveMouseRequest) (*MousePositionResponse, er
 	}
 }
 
-func WrapClickHandler(fn func(*ClickRequest) (*MousePositionResponse, error)) gin.HandlerFunc {
+func WrapClickHandler(fn func(*ClickRequest) (*MouseClickResponse, error)) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req ClickRequest
 		if err := c.ShouldBindJSON(&req); err != nil {
@@ -351,7 +372,7 @@ func WrapClickHandler(fn func(*ClickRequest) (*MousePositionResponse, error)) gi
 	}
 }
 
-func WrapDragHandler(fn func(*DragRequest) (*MousePositionResponse, error)) gin.HandlerFunc {
+func WrapDragHandler(fn func(*DragRequest) (*MouseDragResponse, error)) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req DragRequest
 		if err := c.ShouldBindJSON(&req); err != nil {
@@ -368,7 +389,7 @@ func WrapDragHandler(fn func(*DragRequest) (*MousePositionResponse, error)) gin.
 	}
 }
 
-func WrapScrollHandler(fn func(*ScrollRequest) (*Empty, error)) gin.HandlerFunc {
+func WrapScrollHandler(fn func(*ScrollRequest) (*ScrollResponse, error)) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req ScrollRequest
 		if err := c.ShouldBindJSON(&req); err != nil {
@@ -376,16 +397,16 @@ func WrapScrollHandler(fn func(*ScrollRequest) (*Empty, error)) gin.HandlerFunc 
 			return
 		}
 
-		_, err := fn(&req)
+		response, err := fn(&req)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
-		c.JSON(http.StatusOK, gin.H{"success": true})
+		c.JSON(http.StatusOK, response)
 	}
 }
 
-func WrapTypeTextHandler(fn func(*TypeTextRequest) (*Empty, error)) gin.HandlerFunc {
+func WrapTypeTextHandler(fn func(*TypeTextRequest) (*TypeTextResponse, error)) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req TypeTextRequest
 		if err := c.ShouldBindJSON(&req); err != nil {
@@ -393,16 +414,16 @@ func WrapTypeTextHandler(fn func(*TypeTextRequest) (*Empty, error)) gin.HandlerF
 			return
 		}
 
-		_, err := fn(&req)
+		response, err := fn(&req)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
-		c.JSON(http.StatusOK, gin.H{"success": true, "typed": req.Text})
+		c.JSON(http.StatusOK, response)
 	}
 }
 
-func WrapPressKeyHandler(fn func(*PressKeyRequest) (*Empty, error)) gin.HandlerFunc {
+func WrapPressKeyHandler(fn func(*PressKeyRequest) (*PressKeyResponse, error)) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req PressKeyRequest
 		if err := c.ShouldBindJSON(&req); err != nil {
@@ -410,16 +431,16 @@ func WrapPressKeyHandler(fn func(*PressKeyRequest) (*Empty, error)) gin.HandlerF
 			return
 		}
 
-		_, err := fn(&req)
+		response, err := fn(&req)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
-		c.JSON(http.StatusOK, gin.H{"success": true, "key": req.Key, "modifiers": req.Modifiers})
+		c.JSON(http.StatusOK, response)
 	}
 }
 
-func WrapPressHotkeyHandler(fn func(*PressHotkeyRequest) (*Empty, error)) gin.HandlerFunc {
+func WrapPressHotkeyHandler(fn func(*PressHotkeyRequest) (*PressHotkeyResponse, error)) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req PressHotkeyRequest
 		if err := c.ShouldBindJSON(&req); err != nil {
@@ -427,12 +448,12 @@ func WrapPressHotkeyHandler(fn func(*PressHotkeyRequest) (*Empty, error)) gin.Ha
 			return
 		}
 
-		_, err := fn(&req)
+		response, err := fn(&req)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
-		c.JSON(http.StatusOK, gin.H{"success": true, "hotkey": req.Keys})
+		c.JSON(http.StatusOK, response)
 	}
 }
 

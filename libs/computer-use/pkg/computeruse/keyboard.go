@@ -11,25 +11,38 @@ import (
 	"github.com/go-vgo/robotgo"
 )
 
-func (u *ComputerUse) TypeText(req *computeruse.TypeTextRequest) (*computeruse.Empty, error) {
+func (u *ComputerUse) TypeText(req *computeruse.TypeTextRequest) (*computeruse.TypeTextResponse, error) {
 	if req.Delay > 0 {
 		robotgo.TypeStr(req.Text, req.Delay)
 	} else {
 		robotgo.TypeStr(req.Text)
 	}
 
-	return new(computeruse.Empty), nil
+	return &computeruse.TypeTextResponse{
+		Typed: req.Text,
+	}, nil
 }
 
-func (u *ComputerUse) PressKey(req *computeruse.PressKeyRequest) (*computeruse.Empty, error) {
+func (u *ComputerUse) PressKey(req *computeruse.PressKeyRequest) (*computeruse.PressKeyResponse, error) {
 	if len(req.Modifiers) > 0 {
-		return new(computeruse.Empty), robotgo.KeyTap(req.Key, req.Modifiers)
+		err := robotgo.KeyTap(req.Key, req.Modifiers)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		err := robotgo.KeyTap(req.Key)
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	return new(computeruse.Empty), robotgo.KeyTap(req.Key)
+	return &computeruse.PressKeyResponse{
+		Key:       req.Key,
+		Modifiers: req.Modifiers,
+	}, nil
 }
 
-func (u *ComputerUse) PressHotkey(req *computeruse.PressHotkeyRequest) (*computeruse.Empty, error) {
+func (u *ComputerUse) PressHotkey(req *computeruse.PressHotkeyRequest) (*computeruse.PressHotkeyResponse, error) {
 	keys := strings.Split(req.Keys, "+")
 	if len(keys) < 2 {
 		return nil, fmt.Errorf("invalid hotkey format")
@@ -38,5 +51,12 @@ func (u *ComputerUse) PressHotkey(req *computeruse.PressHotkeyRequest) (*compute
 	mainKey := keys[len(keys)-1]
 	modifiers := keys[:len(keys)-1]
 
-	return new(computeruse.Empty), robotgo.KeyTap(mainKey, modifiers)
+	err := robotgo.KeyTap(mainKey, modifiers)
+	if err != nil {
+		return nil, err
+	}
+
+	return &computeruse.PressHotkeyResponse{
+		Hotkey: req.Keys,
+	}, nil
 }

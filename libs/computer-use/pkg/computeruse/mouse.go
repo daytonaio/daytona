@@ -20,8 +20,10 @@ func (u *ComputerUse) GetMousePosition() (*computeruse.MousePositionResponse, er
 	x, y := robotgo.Location()
 
 	return &computeruse.MousePositionResponse{
-		X: x,
-		Y: y,
+		Position: computeruse.Position{
+			X: x,
+			Y: y,
+		},
 	}, nil
 }
 
@@ -35,15 +37,14 @@ func (u *ComputerUse) MoveMouse(req *computeruse.MoveMouseRequest) (*computeruse
 	actualX, actualY := robotgo.Location()
 
 	return &computeruse.MousePositionResponse{
-		Success: true,
-		X:       req.X,
-		Y:       req.Y,
-		ActualX: actualX,
-		ActualY: actualY,
+		Position: computeruse.Position{
+			X: actualX,
+			Y: actualY,
+		},
 	}, nil
 }
 
-func (u *ComputerUse) Click(req *computeruse.ClickRequest) (*computeruse.MousePositionResponse, error) {
+func (u *ComputerUse) Click(req *computeruse.ClickRequest) (*computeruse.MouseClickResponse, error) {
 	// Default to left button
 	if req.Button == "" {
 		req.Button = "left"
@@ -63,15 +64,13 @@ func (u *ComputerUse) Click(req *computeruse.ClickRequest) (*computeruse.MousePo
 	// Verify position after click
 	actualX, actualY := robotgo.Location()
 
-	return &computeruse.MousePositionResponse{
-		Success: true,
-		Action:  "click",
-		Button:  req.Button,
-		Double:  req.Double,
-		X:       req.X,
-		Y:       req.Y,
-		ActualX: actualX,
-		ActualY: actualY,
+	return &computeruse.MouseClickResponse{
+		Position: computeruse.Position{
+			X: actualX,
+			Y: actualY,
+		},
+		Button: req.Button,
+		Double: req.Double,
 	}, nil
 }
 
@@ -87,7 +86,7 @@ func moveMouseSmoothly(startX, startY, endX, endY, steps int) {
 	}
 }
 
-func (u *ComputerUse) Drag(req *computeruse.DragRequest) (*computeruse.MousePositionResponse, error) {
+func (u *ComputerUse) Drag(req *computeruse.DragRequest) (*computeruse.MouseDragResponse, error) {
 	// Default to left button
 	if req.Button == "" {
 		req.Button = "left"
@@ -129,23 +128,23 @@ func (u *ComputerUse) Drag(req *computeruse.DragRequest) (*computeruse.MousePosi
 	// Verify final position
 	actualX, actualY := robotgo.Location()
 
-	return &computeruse.MousePositionResponse{
-		Success: true,
-		Action:  "drag",
-		From: &computeruse.MousePositionResponse{
+	return &computeruse.MouseDragResponse{
+		From: computeruse.Position{
 			X: req.StartX,
 			Y: req.StartY,
 		},
-		To: &computeruse.MousePositionResponse{
+		To: computeruse.Position{
 			X: req.EndX,
 			Y: req.EndY,
 		},
-		ActualX: actualX,
-		ActualY: actualY,
+		Position: computeruse.Position{
+			X: actualX,
+			Y: actualY,
+		},
 	}, nil
 }
 
-func (u *ComputerUse) Scroll(req *computeruse.ScrollRequest) (*computeruse.Empty, error) {
+func (u *ComputerUse) Scroll(req *computeruse.ScrollRequest) (*computeruse.ScrollResponse, error) {
 	// Default amount if not specified
 	if req.Amount == 0 {
 		req.Amount = 3
@@ -162,5 +161,7 @@ func (u *ComputerUse) Scroll(req *computeruse.ScrollRequest) (*computeruse.Empty
 		robotgo.ScrollSmooth(-req.Amount, 0)
 	}
 
-	return new(computeruse.Empty), nil
+	return &computeruse.ScrollResponse{
+		Success: true,
+	}, nil
 }

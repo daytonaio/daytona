@@ -85,7 +85,7 @@ export class Mouse {
    * @example
    * ```typescript
    * const result = await sandbox.computerUse.mouse.move(100, 200);
-   * console.log(`Mouse moved to: ${result.actual_x}, ${result.actual_y}`);
+   * console.log(`Mouse moved to: ${result.x}, ${result.y}`);
    * ```
    */
   public async move(x: number, y: number): Promise<MouseMoveResponse> {
