@@ -80,6 +80,7 @@ const configuration = {
     retentionDays: process.env.AUDIT_LOG_RETENTION_DAYS
       ? parseInt(process.env.AUDIT_LOG_RETENTION_DAYS, 10)
       : undefined,
+    consoleLogEnabled: process.env.AUDIT_CONSOLE_LOG_ENABLED === 'true',
   },
 }
 
