@@ -26,7 +26,11 @@ export default defineConfig((mode) => ({
     react(),
     // Required for @daytonaio/sdk
     nodePolyfills({
-      globals: { global: true, process: true },
+      globals: { global: true, process: true, Buffer: true },
+      // exclude: ['path'],
+      overrides: {
+        path: 'path-browserify-win32',
+      },
     }),
     nxViteTsPaths(),
     nxCopyAssetsPlugin(['*.md']),
@@ -39,15 +43,30 @@ export default defineConfig((mode) => ({
       }),
   ],
   resolve: {
-    alias: {
-      '@daytonaio/sdk': path.resolve(__dirname, '../../node_modules/@daytonaio/sdk/dist'),
-      '@': path.resolve(__dirname, './src'), // Make sure this points to dashboard's src
-    },
+    alias: [
+      // Resolve @daytonaio/sdk to the built distribution
+      {
+        find: '@daytonaio/sdk',
+        replacement: path.resolve(__dirname, '../../libs/sdk-typescript/src'),
+      },
+      // Target @ but not @daytonaio,
+      {
+        // find: /^@(?!daytonaio)/,
+        find: '@',
+        replacement: path.resolve(__dirname, './src'), // Make sure this points to dashboard's src
+      },
+    ],
   },
   // Uncomment this if you are using workers.
   // worker: {
   //  plugins: [ nxViteTsPaths() ],
   // },
+  define: {
+    'process.version': JSON.stringify('v22.11.0'),
+    'process.versions.node': JSON.stringify(process.versions.node),
+    'process.env': {},
+    'process.binding': () => ({}),
+  },
   build: {
     outDir: '../../dist/apps/dashboard',
     emptyOutDir: true,

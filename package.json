@@ -120,6 +120,7 @@
     "passport": "^0.7.0",
     "passport-http-bearer": "^1.0.1",
     "passport-jwt": "^4.0.1",
+    "path-browserify-win32": "^2.0.1",
     "pg": "^8.13.3",
     "posthog-js": "^1.217.6",
     "posthog-node": "^4.10.1",

@@ -16372,6 +16372,7 @@ __metadata:
     passport: "npm:^0.7.0"
     passport-http-bearer: "npm:^1.0.1"
     passport-jwt: "npm:^4.0.1"
+    path-browserify-win32: "npm:^2.0.1"
     pg: "npm:^8.13.3"
     postcss: "npm:8.4.38"
     posthog-js: "npm:^1.217.6"
@@ -26320,6 +26321,13 @@ __metadata:
     pause: "npm:0.0.1"
     utils-merge: "npm:^1.0.1"
   checksum: 10c0/08c940b86e4adbfe43e753f8097300a5a9d1ce9a3aa002d7b12d27770943a1a87202c54597c0f04dbfd4117d67de76303433577512fc19c7e364fec37b0d3fc5
+  languageName: node
+  linkType: hard
+
+"path-browserify-win32@npm:^2.0.1":
+  version: 2.0.1
+  resolution: "path-browserify-win32@npm:2.0.1"
+  checksum: 10c0/f30b3218835e52a04c7ce7dd58b2234e1dae5f6d3ec4ad46068967a5f275ce33e6d8d0fdec6bb74650eb734ed9df6de27a8b7250e100c43b1e1de5c71bfb8539
   languageName: node
   linkType: hard
 
