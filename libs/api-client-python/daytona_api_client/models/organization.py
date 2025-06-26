@@ -24,10 +24,12 @@ from typing import Any, ClassVar, Dict, List
 from typing import Optional, Set
 from typing_extensions import Self
 
+
 class Organization(BaseModel):
     """
     Organization
-    """ # noqa: E501
+    """  # noqa: E501
+
     id: StrictStr = Field(description="Organization ID")
     name: StrictStr = Field(description="Organization name")
     created_by: StrictStr = Field(description="User ID of the organization creator", alias="createdBy")
@@ -39,14 +41,24 @@ class Organization(BaseModel):
     suspension_reason: StrictStr = Field(description="Suspended reason", alias="suspensionReason")
     suspended_until: datetime = Field(description="Suspended until", alias="suspendedUntil")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["id", "name", "createdBy", "personal", "createdAt", "updatedAt", "suspended", "suspendedAt", "suspensionReason", "suspendedUntil"]
+    __properties: ClassVar[List[str]] = [
+        "id",
+        "name",
+        "createdBy",
+        "personal",
+        "createdAt",
+        "updatedAt",
+        "suspended",
+        "suspendedAt",
+        "suspensionReason",
+        "suspendedUntil",
+    ]
 
     model_config = ConfigDict(
         populate_by_name=True,
         validate_assignment=True,
         protected_namespaces=(),
     )
-
 
     def to_str(self) -> str:
         """Returns the string representation of the model using alias"""
@@ -73,9 +85,11 @@ class Organization(BaseModel):
           are ignored.
         * Fields in `self.additional_properties` are added to the output dict.
         """
-        excluded_fields: Set[str] = set([
-            "additional_properties",
-        ])
+        excluded_fields: Set[str] = set(
+            [
+                "additional_properties",
+            ]
+        )
 
         _dict = self.model_dump(
             by_alias=True,
@@ -98,23 +112,23 @@ class Organization(BaseModel):
         if not isinstance(obj, dict):
             return cls.model_validate(obj)
 
-        _obj = cls.model_validate({
-            "id": obj.get("id"),
-            "name": obj.get("name"),
-            "createdBy": obj.get("createdBy"),
-            "personal": obj.get("personal"),
-            "createdAt": obj.get("createdAt"),
-            "updatedAt": obj.get("updatedAt"),
-            "suspended": obj.get("suspended"),
-            "suspendedAt": obj.get("suspendedAt"),
-            "suspensionReason": obj.get("suspensionReason"),
-            "suspendedUntil": obj.get("suspendedUntil")
-        })
+        _obj = cls.model_validate(
+            {
+                "id": obj.get("id"),
+                "name": obj.get("name"),
+                "createdBy": obj.get("createdBy"),
+                "personal": obj.get("personal"),
+                "createdAt": obj.get("createdAt"),
+                "updatedAt": obj.get("updatedAt"),
+                "suspended": obj.get("suspended"),
+                "suspendedAt": obj.get("suspendedAt"),
+                "suspensionReason": obj.get("suspensionReason"),
+                "suspendedUntil": obj.get("suspendedUntil"),
+            }
+        )
         # store additional fields in additional_properties
         for _key in obj.keys():
             if _key not in cls.__properties:
                 _obj.additional_properties[_key] = obj.get(_key)
 
         return _obj
-
-

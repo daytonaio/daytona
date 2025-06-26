@@ -24,10 +24,12 @@ from daytona_api_client.models.user_public_key import UserPublicKey
 from typing import Optional, Set
 from typing_extensions import Self
 
+
 class User(BaseModel):
     """
     User
-    """ # noqa: E501
+    """  # noqa: E501
+
     id: StrictStr = Field(description="User ID")
     name: StrictStr = Field(description="User name")
     email: StrictStr = Field(description="User email")
@@ -40,7 +42,6 @@ class User(BaseModel):
         validate_assignment=True,
         protected_namespaces=(),
     )
-
 
     def to_str(self) -> str:
         """Returns the string representation of the model using alias"""
@@ -67,9 +68,11 @@ class User(BaseModel):
           are ignored.
         * Fields in `self.additional_properties` are added to the output dict.
         """
-        excluded_fields: Set[str] = set([
-            "additional_properties",
-        ])
+        excluded_fields: Set[str] = set(
+            [
+                "additional_properties",
+            ]
+        )
 
         _dict = self.model_dump(
             by_alias=True,
@@ -82,7 +85,7 @@ class User(BaseModel):
             for _item_public_keys in self.public_keys:
                 if _item_public_keys:
                     _items.append(_item_public_keys.to_dict())
-            _dict['publicKeys'] = _items
+            _dict["publicKeys"] = _items
         # puts key-value pairs in additional_properties in the top level
         if self.additional_properties is not None:
             for _key, _value in self.additional_properties.items():
@@ -99,17 +102,19 @@ class User(BaseModel):
         if not isinstance(obj, dict):
             return cls.model_validate(obj)
 
-        _obj = cls.model_validate({
-            "id": obj.get("id"),
-            "name": obj.get("name"),
-            "email": obj.get("email"),
-            "publicKeys": [UserPublicKey.from_dict(_item) for _item in obj["publicKeys"]] if obj.get("publicKeys") is not None else None
-        })
+        _obj = cls.model_validate(
+            {
+                "id": obj.get("id"),
+                "name": obj.get("name"),
+                "email": obj.get("email"),
+                "publicKeys": [UserPublicKey.from_dict(_item) for _item in obj["publicKeys"]]
+                if obj.get("publicKeys") is not None
+                else None,
+            }
+        )
         # store additional fields in additional_properties
         for _key in obj.keys():
             if _key not in cls.__properties:
                 _obj.additional_properties[_key] = obj.get(_key)
 
         return _obj
-
-
