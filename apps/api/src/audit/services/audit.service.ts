@@ -55,14 +55,14 @@ export class AuditService {
   @Cron(CronExpression.EVERY_DAY_AT_2AM)
   async cleanupOldAuditLogs(): Promise<void> {
     const lockKey = 'cleanup-old-audit-logs'
-    if (!(await this.redisLockProvider.lock(lockKey, 300))) {
+    if (!(await this.redisLockProvider.lock(lockKey, 600))) {
       return
     }
 
     try {
       const retentionDays = this.configService.get('audit.retentionDays')
 
-      if (!retentionDays || retentionDays <= 0) {
+      if (!retentionDays) {
         this.logger.debug('Audit log retention not configured, skipping cleanup')
         return
       }
@@ -76,40 +76,38 @@ export class AuditService {
 
       const cutoffDate = new Date(Date.now() - retentionDays * 1000 * 60 * 60 * 24)
 
-      this.logger.log(
-        `Starting cleanup of audit logs older than ${retentionDays} days (before ${cutoffDate.toISOString()})`,
-      )
-
       let totalDeleted = 0
       const batchSize = 1000
 
-      // Delete in batches to avoid locking the table for too long
+      this.logger.log(`Starting cleanup of audit logs older than ${retentionDays} days`)
+
       while (true) {
-        const deletionResult = await this.auditLogRepository.delete({
-          createdAt: LessThan(cutoffDate),
+        // Find batch of audit logs older than the retention period
+        const logsToDelete = await this.auditLogRepository.find({
+          where: {
+            createdAt: LessThan(cutoffDate),
+          },
+          take: batchSize,
         })
 
-        const deletedCount = deletionResult.affected || 0
-        totalDeleted += deletedCount
+        if (logsToDelete.length === 0) {
+          break
+        }
 
-        this.logger.debug(`Deleted ${deletedCount} audit logs in current batch`)
+        const idsToDelete = logsToDelete.map((log) => log.id)
+
+        // Delete batch
+        const result = await this.auditLogRepository.delete(idsToDelete)
+        const deletedCount = result.affected || 0
+        totalDeleted += deletedCount
 
         // If we deleted fewer records than the batch size, we're done
         if (deletedCount < batchSize) {
           break
         }
-
-        // Small delay between batches to reduce database load
-        await new Promise((resolve) => setTimeout(resolve, 100))
       }
 
-      if (totalDeleted > 0) {
-        this.logger.log(
-          `Cleanup completed: deleted ${totalDeleted} audit logs older than ${retentionDays} days (before ${cutoffDate.toISOString()})`,
-        )
-      } else {
-        this.logger.log(`No old audit logs found for cleanup (before ${cutoffDate.toISOString()})`)
-      }
+      this.logger.log(`Completed cleanup of audit logs older than ${retentionDays} days (${totalDeleted} logs deleted)`)
     } catch (error) {
       this.logger.error(`Failed to cleanup old audit logs: ${error.message}`, error.stack)
     } finally {
