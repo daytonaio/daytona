@@ -106,11 +106,6 @@ func (c *ComputerUse) initializeProcesses(homeDir string) {
 		vncPort = "5901"
 	}
 
-	noVncPort := os.Getenv("NO_VNC_PORT")
-	if noVncPort == "" {
-		noVncPort = "6901"
-	}
-
 	display := os.Getenv("DISPLAY")
 	if display == "" {
 		display = ":0"
@@ -139,6 +134,8 @@ func (c *ComputerUse) initializeProcesses(homeDir string) {
 		Env: map[string]string{
 			"DISPLAY": display,
 		},
+		LogFile: filepath.Join(c.configDir, "xvfb.log"),
+		ErrFile: filepath.Join(c.configDir, "xvfb.err"),
 	}
 
 	// Process 2: xfce4 (Desktop Environment)
@@ -170,19 +167,23 @@ func (c *ComputerUse) initializeProcesses(homeDir string) {
 		Env: map[string]string{
 			"DISPLAY": display,
 		},
+		LogFile: filepath.Join(c.configDir, "x11vnc.log"),
+		ErrFile: filepath.Join(c.configDir, "x11vnc.err"),
 	}
 
 	// Process 4: novnc (Web-based VNC client)
 	c.processes["novnc"] = &Process{
 		Name:        "novnc",
-		Command:     "/usr/share/novnc/utils/launch.sh",
-		Args:        []string{"--vnc", fmt.Sprintf("localhost:%s", vncPort), "--listen", noVncPort},
+		Command:     "/usr/share/novnc/utils/novnc_proxy",
+		Args:        []string{"--vnc", "localhost:" + vncPort},
 		User:        user,
 		Priority:    400,
 		AutoRestart: true,
 		Env: map[string]string{
 			"DISPLAY": display,
 		},
+		LogFile: filepath.Join(c.configDir, "novnc.log"),
+		ErrFile: filepath.Join(c.configDir, "novnc.err"),
 	}
 }
 

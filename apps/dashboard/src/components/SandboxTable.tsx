@@ -29,6 +29,7 @@ import {
   Timer,
   ArrowUpDown,
   Archive,
+  Monitor,
 } from 'lucide-react'
 import { TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from './ui/table'
 import { Button } from './ui/button'
@@ -60,6 +61,7 @@ interface DataTableProps {
   handleDelete: (id: string) => void
   handleBulkDelete: (ids: string[]) => void
   handleArchive: (id: string) => void
+  handleVnc: (id: string) => void
 }
 
 export function SandboxTable({
@@ -71,6 +73,7 @@ export function SandboxTable({
   handleDelete,
   handleBulkDelete,
   handleArchive,
+  handleVnc,
 }: DataTableProps) {
   const { authenticatedUserHasPermission } = useSelectedOrganization()
 
@@ -111,6 +114,7 @@ export function SandboxTable({
     handleStop,
     handleDelete,
     handleArchive,
+    handleVnc,
     loadingSandboxes,
     writePermitted,
     deletePermitted,
@@ -320,6 +324,7 @@ const getColumns = ({
   handleStop,
   handleDelete,
   handleArchive,
+  handleVnc,
   loadingSandboxes,
   writePermitted,
   deletePermitted,
@@ -328,6 +333,7 @@ const getColumns = ({
   handleStop: (id: string) => void
   handleDelete: (id: string) => void
   handleArchive: (id: string) => void
+  handleVnc: (id: string) => void
   loadingSandboxes: Record<string, boolean>
   writePermitted: boolean
   deletePermitted: boolean
@@ -586,29 +592,33 @@ const getColumns = ({
       cell: ({ row }) => {
         if (row.original.state !== SandboxState.STARTED) return ''
 
+        let terminalUrl: string | null = null
+
         if (!row.original.daemonVersion) {
-          return (
-            <a
-              href={`https://22222-${row.original.id}.${row.original.runnerDomain}`}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <Terminal className="w-4 h-4" />
-            </a>
-          )
+          terminalUrl = `https://22222-${row.original.id}.${row.original.runnerDomain}`
+        } else {
+          terminalUrl =
+            import.meta.env.VITE_PROXY_TEMPLATE_URL?.replace('{{PORT}}', '22222').replace(
+              '{{sandboxId}}',
+              row.original.id,
+            ) || null
         }
 
-        const terminalUrl = import.meta.env.VITE_PROXY_TEMPLATE_URL?.replace('{{PORT}}', '22222').replace(
-          '{{sandboxId}}',
-          row.original.id,
-        )
-        if (!terminalUrl) {
-          return null
-        }
         return (
-          <a href={terminalUrl} target="_blank" rel="noopener noreferrer">
-            <Terminal className="w-4 h-4" />
-          </a>
+          <div className="flex items-center gap-2">
+            {terminalUrl && (
+              <a href={terminalUrl} target="_blank" rel="noopener noreferrer">
+                <Terminal className="w-4 h-4" />
+              </a>
+            )}
+            <button
+              onClick={() => handleVnc(row.original.id)}
+              disabled={loadingSandboxes[row.original.id]}
+              className="hover:opacity-80 disabled:opacity-50"
+            >
+              <Monitor className="w-4 h-4" />
+            </button>
+          </div>
         )
       },
     },
