@@ -22,8 +22,8 @@ var _ MappedNullable = &ComputerUseStatusResponse{}
 
 // ComputerUseStatusResponse struct for ComputerUseStatusResponse
 type ComputerUseStatusResponse struct {
-	// Status information about all VNC desktop processes
-	Status map[string]interface{} `json:"status"`
+	// Status of computer use services (active, partial, inactive, error)
+	Status string `json:"status"`
 }
 
 type _ComputerUseStatusResponse ComputerUseStatusResponse
@@ -32,7 +32,7 @@ type _ComputerUseStatusResponse ComputerUseStatusResponse
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewComputerUseStatusResponse(status map[string]interface{}) *ComputerUseStatusResponse {
+func NewComputerUseStatusResponse(status string) *ComputerUseStatusResponse {
 	this := ComputerUseStatusResponse{}
 	this.Status = status
 	return &this
@@ -47,9 +47,9 @@ func NewComputerUseStatusResponseWithDefaults() *ComputerUseStatusResponse {
 }
 
 // GetStatus returns the Status field value
-func (o *ComputerUseStatusResponse) GetStatus() map[string]interface{} {
+func (o *ComputerUseStatusResponse) GetStatus() string {
 	if o == nil {
-		var ret map[string]interface{}
+		var ret string
 		return ret
 	}
 
@@ -58,15 +58,15 @@ func (o *ComputerUseStatusResponse) GetStatus() map[string]interface{} {
 
 // GetStatusOk returns a tuple with the Status field value
 // and a boolean to check if the value has been set.
-func (o *ComputerUseStatusResponse) GetStatusOk() (map[string]interface{}, bool) {
+func (o *ComputerUseStatusResponse) GetStatusOk() (*string, bool) {
 	if o == nil {
-		return map[string]interface{}{}, false
+		return nil, false
 	}
-	return o.Status, true
+	return &o.Status, true
 }
 
 // SetStatus sets field value
-func (o *ComputerUseStatusResponse) SetStatus(v map[string]interface{}) {
+func (o *ComputerUseStatusResponse) SetStatus(v string) {
 	o.Status = v
 }
 

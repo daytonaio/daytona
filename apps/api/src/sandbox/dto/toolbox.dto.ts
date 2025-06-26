@@ -777,16 +777,11 @@ export class ComputerUseStopResponseDto {
 @ApiSchema({ name: 'ComputerUseStatusResponse' })
 export class ComputerUseStatusResponseDto {
   @ApiProperty({
-    description: 'Status information about all VNC desktop processes',
-    type: Object,
-    example: {
-      xvfb: { running: true, priority: 100, autoRestart: true, pid: 12345 },
-      xfce4: { running: true, priority: 200, autoRestart: true, pid: 12346 },
-      x11vnc: { running: true, priority: 300, autoRestart: true, pid: 12347 },
-      novnc: { running: true, priority: 400, autoRestart: true, pid: 12348 },
-    },
+    description: 'Status of computer use services (active, partial, inactive, error)',
+    example: 'active',
+    enum: ['active', 'partial', 'inactive', 'error'],
   })
-  status: Record<string, any>
+  status: string
 }
 
 @ApiSchema({ name: 'ProcessStatusResponse' })
