@@ -15,6 +15,8 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+var decoder = NewUTF8Decoder()
+
 var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool {
 		return true // Be careful with this in production
@@ -41,10 +43,6 @@ func StartTerminalServer(port int) error {
 	log.Printf("Starting terminal server on http://localhost%s", addr)
 	return http.ListenAndServe(addr, nil)
 }
-
-// func handleHome(w http.ResponseWriter, r *http.Request) {
-// 	http.ServeFile(w, r, "pkg/terminal/index.html")
-// }
 
 func handleWebSocket(w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
@@ -98,8 +96,11 @@ func handleWebSocket(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			// Change this line to send text message instead of binary
-			err = conn.WriteMessage(websocket.TextMessage, buf[:n])
+			// A multi-byte UTF-8 character can be split across stream reads.
+			// UTF8Decoder buffers incomplete sequences to ensure proper decoding.
+			decoded := decoder.Write(buf[:n])
+
+			err = conn.WriteMessage(websocket.TextMessage, []byte(decoded))
 			if err != nil {
 				log.Printf("Failed to write to websocket: %v", err)
 				return
