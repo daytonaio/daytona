@@ -251,6 +251,9 @@ const Sandboxes: React.FC = () => {
   const handleVnc = async (id: string) => {
     setLoadingSandboxes((prev) => ({ ...prev, [id]: true }))
 
+    // Notify user immediately that we're checking VNC status
+    toast.info('Checking VNC desktop status...')
+
     try {
       // First, check if computer use is already started
       const statusResponse = await toolboxApi.getComputerUseStatus(id, selectedOrganization?.id)
