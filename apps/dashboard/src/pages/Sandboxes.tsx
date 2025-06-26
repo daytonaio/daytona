@@ -232,6 +232,22 @@ const Sandboxes: React.FC = () => {
     }
   }
 
+  const getVncUrl = (sandboxId: string) => {
+    const sandbox = sandboxes.find((s) => s.id === sandboxId)
+    if (!sandbox) {
+      return null
+    }
+
+    if (!sandbox.daemonVersion) {
+      return `https://6080-${sandbox.id}.${sandbox.runnerDomain}/vnc.html`
+    }
+
+    return (
+      import.meta.env.VITE_PROXY_TEMPLATE_URL?.replace('{{PORT}}', '6080').replace('{{sandboxId}}', sandbox.id) +
+      '/vnc.html'
+    )
+  }
+
   const handleVnc = async (id: string) => {
     setLoadingSandboxes((prev) => ({ ...prev, [id]: true }))
 
@@ -252,15 +268,7 @@ const Sandboxes: React.FC = () => {
           return
         }
 
-        let vncUrl: string
-        if (!sandbox.daemonVersion) {
-          vncUrl = `https://6080-${sandbox.id}.${sandbox.runnerDomain}/vnc.html`
-        } else {
-          vncUrl =
-            import.meta.env.VITE_PROXY_TEMPLATE_URL?.replace('{{PORT}}', '6080').replace('{{sandboxId}}', sandbox.id) +
-            '/vnc.html'
-        }
-
+        const vncUrl = getVncUrl(sandbox.id)
         if (vncUrl) {
           window.open(vncUrl, '_blank')
           toast.success('Opening VNC desktop...')
@@ -282,20 +290,16 @@ const Sandboxes: React.FC = () => {
               if (newStatus === 'active') {
                 const sandbox = sandboxes.find((s) => s.id === id)
                 if (sandbox) {
-                  let vncUrl: string
-                  if (!sandbox.daemonVersion) {
-                    vncUrl = `https://6080-${sandbox.id}.${sandbox.runnerDomain}/vnc.html`
-                  } else {
-                    vncUrl =
-                      import.meta.env.VITE_PROXY_TEMPLATE_URL?.replace('{{PORT}}', '6080').replace(
-                        '{{sandboxId}}',
-                        sandbox.id,
-                      ) + '/vnc.html'
-                  }
+                  const vncUrl = getVncUrl(sandbox.id)
 
                   if (vncUrl) {
-                    window.open(vncUrl, '_blank')
-                    toast.success('VNC desktop is ready!')
+                    toast.success('VNC desktop is ready!', {
+                      action: (
+                        <Button variant="secondary" onClick={() => window.open(vncUrl, '_blank')}>
+                          Open in new tab
+                        </Button>
+                      ),
+                    })
                   }
                 }
               } else {
