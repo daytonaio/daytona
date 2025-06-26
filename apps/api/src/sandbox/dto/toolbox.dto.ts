@@ -45,10 +45,88 @@ export class MatchDto {
   content: string
 }
 
-@ApiSchema({ name: 'SearchFilesResponse' })
-export class SearchFilesResponseDto {
-  @ApiProperty({ type: [String] })
-  files: string[]
+@ApiSchema({ name: 'SearchRequest' })
+export class SearchRequestDto {
+  @ApiProperty({ description: 'Search query/pattern' })
+  query: string
+
+  @ApiPropertyOptional({ description: 'Path to search in (default: ".")' })
+  path?: string
+
+  @ApiPropertyOptional({ type: [String], description: 'File types to include (e.g., ["js", "ts"])' })
+  file_types?: string[]
+
+  @ApiPropertyOptional({ type: [String], description: 'Include glob patterns' })
+  include_globs?: string[]
+
+  @ApiPropertyOptional({ type: [String], description: 'Exclude glob patterns' })
+  exclude_globs?: string[]
+
+  @ApiPropertyOptional({ description: 'Case sensitive search (default: true)' })
+  case_sensitive?: boolean
+
+  @ApiPropertyOptional({ description: 'Enable multiline matching' })
+  multiline?: boolean
+
+  @ApiPropertyOptional({ description: 'Lines of context around matches' })
+  context?: number
+
+  @ApiPropertyOptional({ description: 'Return only match counts' })
+  count_only?: boolean
+
+  @ApiPropertyOptional({ description: 'Return only filenames with matches' })
+  filenames_only?: boolean
+
+  @ApiPropertyOptional({ description: 'Return structured JSON output' })
+  json?: boolean
+
+  @ApiPropertyOptional({ description: 'Maximum number of results' })
+  max_results?: number
+
+  @ApiPropertyOptional({ type: [String], description: 'Additional ripgrep arguments' })
+  rg_args?: string[]
+}
+
+@ApiSchema({ name: 'SearchMatch' })
+export class SearchMatchDto {
+  @ApiProperty({ description: 'File path' })
+  file: string
+
+  @ApiProperty({ description: 'Line number' })
+  line_number: number
+
+  @ApiProperty({ description: 'Column number' })
+  column: number
+
+  @ApiProperty({ description: 'Line content' })
+  line: string
+
+  @ApiProperty({ description: 'Matched text' })
+  match: string
+
+  @ApiPropertyOptional({ type: [String], description: 'Context lines before match' })
+  context_before?: string[]
+
+  @ApiPropertyOptional({ type: [String], description: 'Context lines after match' })
+  context_after?: string[]
+}
+
+@ApiSchema({ name: 'SearchResults' })
+export class SearchResultsDto {
+  @ApiProperty({ type: [SearchMatchDto], description: 'Array of matches' })
+  matches: SearchMatchDto[]
+
+  @ApiProperty({ description: 'Total number of matches' })
+  total_matches: number
+
+  @ApiProperty({ description: 'Total number of files with matches' })
+  total_files: number
+
+  @ApiPropertyOptional({ type: [String], description: 'List of files with matches' })
+  files?: string[]
+
+  @ApiPropertyOptional({ description: 'Raw output from search tool' })
+  raw_output?: string
 }
 
 @ApiSchema({ name: 'ReplaceRequest' })

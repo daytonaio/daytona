@@ -88,6 +88,9 @@ models/sandbox-state.ts
 models/sandbox-volume.ts
 models/sandbox.ts
 models/search-files-response.ts
+models/search-match.ts
+models/search-request.ts
+models/search-results.ts
 models/session-execute-request.ts
 models/session-execute-response.ts
 models/session.ts

@@ -32,6 +32,36 @@ type Match struct {
 	Content string `json:"content" validate:"required"`
 } // @name Match
 
-type SearchFilesResponse struct {
-	Files []string `json:"files" validate:"required"`
-} // @name SearchFilesResponse
+type SearchRequest struct {
+	Query         string   `json:"query" validate:"required"`
+	Path          string   `json:"path"`
+	FileTypes     []string `json:"file_types,omitempty"`
+	IncludeGlobs  []string `json:"include_globs,omitempty"`
+	ExcludeGlobs  []string `json:"exclude_globs,omitempty"`
+	CaseSensitive *bool    `json:"case_sensitive,omitempty"`
+	Multiline     *bool    `json:"multiline,omitempty"`
+	Context       *int     `json:"context,omitempty"`
+	CountOnly     *bool    `json:"count_only,omitempty"`
+	FilenamesOnly *bool    `json:"filenames_only,omitempty"`
+	JSON          *bool    `json:"json,omitempty"`
+	MaxResults    *int     `json:"max_results,omitempty"`
+	RgArgs        []string `json:"rg_args,omitempty"`
+} // @name SearchRequest
+
+type SearchMatch struct {
+	File          string   `json:"file" validate:"required"`
+	LineNumber    int      `json:"line_number" validate:"required"`
+	Column        int      `json:"column" validate:"required"`
+	Line          string   `json:"line" validate:"required"`
+	Match         string   `json:"match" validate:"required"`
+	ContextBefore []string `json:"context_before,omitempty"`
+	ContextAfter  []string `json:"context_after,omitempty"`
+} // @name SearchMatch
+
+type SearchResults struct {
+	Matches      []SearchMatch `json:"matches" validate:"required"`
+	TotalMatches int           `json:"total_matches" validate:"required"`
+	TotalFiles   int           `json:"total_files" validate:"required"`
+	Files        []string      `json:"files,omitempty"`
+	RawOutput    string        `json:"raw_output,omitempty"`
+} // @name SearchResults

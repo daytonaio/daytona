@@ -35,7 +35,8 @@ import {
 import {
   FileInfoDto,
   MatchDto,
-  SearchFilesResponseDto,
+  SearchRequestDto,
+  SearchResultsDto,
   ReplaceRequestDto,
   ReplaceResultDto,
   GitAddRequestDto,
@@ -384,19 +385,20 @@ export class ToolboxController {
     return await this.toolboxProxy(req, res, next)
   }
 
-  @Get(':sandboxId/toolbox/files/search')
+  @Post(':sandboxId/toolbox/files/search')
   @ApiOperation({
-    summary: 'Search files',
-    description: 'Search for files inside sandbox',
+    summary: 'Search content in files',
+    description: 'Search for content inside sandbox files using ripgrep or fallback',
     operationId: 'searchFiles',
   })
   @ApiResponse({
     status: 200,
     description: 'Search completed successfully',
-    type: SearchFilesResponseDto,
+    type: SearchResultsDto,
   })
-  @ApiQuery({ name: 'pattern', type: String, required: true })
-  @ApiQuery({ name: 'path', type: String, required: true })
+  @ApiBody({
+    type: SearchRequestDto,
+  })
   @ApiParam({ name: 'sandboxId', type: String, required: true })
   async searchFiles(
     @Request() req: RawBodyRequest<IncomingMessage>,

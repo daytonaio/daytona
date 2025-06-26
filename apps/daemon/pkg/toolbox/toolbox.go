@@ -85,7 +85,7 @@ func (s *Server) Start() error {
 		fsController.GET("/download", fs.DownloadFile)
 		fsController.GET("/find", fs.FindInFiles)
 		fsController.GET("/info", fs.GetFileInfo)
-		fsController.GET("/search", fs.SearchFiles)
+		fsController.POST("/search", fs.SearchFiles)
 
 		// create/modify operations
 		fsController.POST("/folder", fs.CreateFolder)

@@ -84,6 +84,10 @@ import type { ReplaceResult } from '../models'
 // @ts-ignore
 import type { SearchFilesResponse } from '../models'
 // @ts-ignore
+import type { SearchRequest } from '../models'
+// @ts-ignore
+import type { SearchResults } from '../models'
+// @ts-ignore
 import type { Session } from '../models'
 // @ts-ignore
 import type { SessionExecuteRequest } from '../models'
@@ -2076,6 +2080,61 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
       }
     },
     /**
+     * Search for content inside sandbox files using ripgrep or fallback
+     * @summary Search content in files
+     * @param {string} sandboxId
+     * @param {SearchRequest} searchRequest
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    searchContent: async (
+      sandboxId: string,
+      searchRequest: SearchRequest,
+      xDaytonaOrganizationID?: string,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'sandboxId' is not null or undefined
+      assertParamExists('searchContent', 'sandboxId', sandboxId)
+      // verify required parameter 'searchRequest' is not null or undefined
+      assertParamExists('searchContent', 'searchRequest', searchRequest)
+      const localVarPath = `/toolbox/{sandboxId}/toolbox/files/search`.replace(
+        `{${'sandboxId'}}`,
+        encodeURIComponent(String(sandboxId)),
+      )
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      // authentication bearer required
+      // http bearer authentication required
+      await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+      // authentication oauth2 required
+
+      localVarHeaderParameter['Content-Type'] = 'application/json'
+
+      if (xDaytonaOrganizationID != null) {
+        localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
+      }
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+      localVarRequestOptions.data = serializeDataIfNeeded(searchRequest, localVarRequestOptions, configuration)
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
      * Search for files inside sandbox
      * @summary Search files
      * @param {string} sandboxId
@@ -3482,6 +3541,38 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
         )(axios, localVarOperationServerBasePath || basePath)
     },
     /**
+     * Search for content inside sandbox files using ripgrep or fallback
+     * @summary Search content in files
+     * @param {string} sandboxId
+     * @param {SearchRequest} searchRequest
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async searchContent(
+      sandboxId: string,
+      searchRequest: SearchRequest,
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<SearchResults>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.searchContent(
+        sandboxId,
+        searchRequest,
+        xDaytonaOrganizationID,
+        options,
+      )
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['ToolboxApi.searchContent']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
+    /**
      * Search for files inside sandbox
      * @summary Search files
      * @param {string} sandboxId
@@ -4312,6 +4403,25 @@ export const ToolboxApiFactory = function (configuration?: Configuration, basePa
         .then((request) => request(axios, basePath))
     },
     /**
+     * Search for content inside sandbox files using ripgrep or fallback
+     * @summary Search content in files
+     * @param {string} sandboxId
+     * @param {SearchRequest} searchRequest
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    searchContent(
+      sandboxId: string,
+      searchRequest: SearchRequest,
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<SearchResults> {
+      return localVarFp
+        .searchContent(sandboxId, searchRequest, xDaytonaOrganizationID, options)
+        .then((request) => request(axios, basePath))
+    },
+    /**
      * Search for files inside sandbox
      * @summary Search files
      * @param {string} sandboxId
@@ -5138,6 +5248,27 @@ export class ToolboxApi extends BaseAPI {
   ) {
     return ToolboxApiFp(this.configuration)
       .replaceInFiles(sandboxId, replaceRequest, xDaytonaOrganizationID, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   * Search for content inside sandbox files using ripgrep or fallback
+   * @summary Search content in files
+   * @param {string} sandboxId
+   * @param {SearchRequest} searchRequest
+   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof ToolboxApi
+   */
+  public searchContent(
+    sandboxId: string,
+    searchRequest: SearchRequest,
+    xDaytonaOrganizationID?: string,
+    options?: RawAxiosRequestConfig,
+  ) {
+    return ToolboxApiFp(this.configuration)
+      .searchContent(sandboxId, searchRequest, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 

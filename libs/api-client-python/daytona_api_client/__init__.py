@@ -112,6 +112,9 @@ from daytona_api_client.models.sandbox_labels import SandboxLabels
 from daytona_api_client.models.sandbox_state import SandboxState
 from daytona_api_client.models.sandbox_volume import SandboxVolume
 from daytona_api_client.models.search_files_response import SearchFilesResponse
+from daytona_api_client.models.search_match import SearchMatch
+from daytona_api_client.models.search_request import SearchRequest
+from daytona_api_client.models.search_results import SearchResults
 from daytona_api_client.models.session import Session
 from daytona_api_client.models.session_execute_request import SessionExecuteRequest
 from daytona_api_client.models.session_execute_response import SessionExecuteResponse

@@ -3,7 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { FileInfo, Match, ReplaceRequest, ReplaceResult, SearchFilesResponse, ToolboxApi } from '@daytonaio/api-client'
+import {
+  FileInfo,
+  Match,
+  ReplaceRequest,
+  ReplaceResult,
+  SearchRequest,
+  SearchResults,
+  ToolboxApi,
+} from '@daytonaio/api-client'
 import { prefixRelativePath } from './utils/Path'
 import * as fs from 'fs'
 import { Readable } from 'stream'
@@ -282,23 +290,50 @@ export class FileSystem {
   }
 
   /**
-   * Searches for files and directories by name pattern in the Sandbox.
+   * Searches for content within files using ripgrep or fallback implementation.
+   * This method replaces the old file name pattern search with enhanced content search capabilities.
    *
-   * @param {string} path - Directory to search in. Relative paths are resolved based on the user's
-   * @param {string} pattern - File name pattern (supports globs)
-   * @returns {Promise<SearchFilesResponse>} Search results with matching files
+   * @param {SearchRequest} request - Search parameters
+   * @returns {Promise<SearchResults>} Search results with matches and metadata
    *
    * @example
-   * // Find all TypeScript files
-   * const result = await fs.searchFiles('app', '*.ts');
-   * result.files.forEach(file => console.log(file));
+   * // Basic content search
+   * const results = await fs.search({
+   *   query: 'TODO',
+   *   path: 'src/',
+   *   case_sensitive: false
+   * });
+   *
+   * // Search for file names (equivalent to old searchFiles)
+   * const results = await fs.search({
+   *   query: '*.ts',
+   *   path: 'app/',
+   *   filenames_only: true
+   * });
+   *
+   * // Advanced search with file type filtering
+   * const results = await fs.search({
+   *   query: 'function',
+   *   path: '.',
+   *   file_types: ['js', 'ts'],
+   *   include_globs: ['src/**'],
+   *   exclude_globs: ['*.test.*'],
+   *   max_results: 50
+   * });
+   *
+   * results.matches.forEach(match => {
+   *   console.log(`${match.file}:${match.line_number}: ${match.line}`);
+   * });
    */
-  public async searchFiles(path: string, pattern: string): Promise<SearchFilesResponse> {
-    const response = await this.toolboxApi.searchFiles(
-      this.sandboxId,
-      prefixRelativePath(await this.getRootDir(), path),
-      pattern,
-    )
+  public async search(request: SearchRequest): Promise<SearchResults> {
+    // Update the path to be relative to the root directory
+    const searchRequest: SearchRequest = {
+      ...request,
+      path: request.path ? prefixRelativePath(await this.getRootDir(), request.path) : '.',
+    }
+
+    // Use the standard toolbox API method
+    const response = await this.toolboxApi.searchContent(this.sandboxId, searchRequest)
     return response.data
   }
 
