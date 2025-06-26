@@ -145,6 +145,25 @@ export class RunnerService {
     await this.recalculateRunnerUsage(event.sandbox.runnerId)
   }
 
+  private async updateRunnerState(runnerId: string, newState: RunnerState): Promise<void> {
+    const runner = await this.runnerRepository.findOne({ where: { id: runnerId } })
+    if (!runner) {
+      this.logger.error(`Runner ${runnerId} not found when trying to update state`)
+      return
+    }
+
+    // Don't change state if runner is decommissioned
+    if (runner.state === RunnerState.DECOMMISSIONED) {
+      this.logger.debug(`Runner ${runnerId} is decommissioned, not updating state`)
+      return
+    }
+
+    await this.runnerRepository.update(runnerId, {
+      state: newState,
+      lastChecked: new Date(),
+    })
+  }
+
   @Cron('45 * * * * *')
   private async handleCheckRunners() {
     if (this.checkingRunners) {
@@ -162,10 +181,7 @@ export class RunnerService {
         // Do something with the runner
         const runnerApi = this.runnerApiFactory.createRunnerApi(runner)
         await runnerApi.healthCheck()
-        await this.runnerRepository.update(runner.id, {
-          state: RunnerState.READY,
-          lastChecked: new Date(),
-        })
+        await this.updateRunnerState(runner.id, RunnerState.READY)
 
         await this.recalculateRunnerUsage(runner.id)
       } catch (e) {
@@ -176,10 +192,7 @@ export class RunnerService {
           this.logger.error(e)
         }
 
-        await this.runnerRepository.update(runner.id, {
-          state: RunnerState.UNRESPONSIVE,
-          lastChecked: new Date(),
-        })
+        await this.updateRunnerState(runner.id, RunnerState.UNRESPONSIVE)
       }
     }
     this.checkingRunners = false
