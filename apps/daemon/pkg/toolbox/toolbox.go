@@ -162,9 +162,10 @@ func (s *Server) Start() error {
 		log.Info("Continuing without computer-use functionality...")
 	}
 
-	if s.ComputerUse != nil {
-		computerUseController := r.Group("/computeruse")
-		{
+	// Always register computer-use endpoints, but handle the case when plugin is nil
+	computerUseController := r.Group("/computeruse")
+	{
+		if s.ComputerUse != nil {
 			// Computer use status endpoint
 			computerUseController.GET("/status", computeruse.WrapStatusHandler(s.ComputerUse.GetStatus))
 
@@ -198,12 +199,30 @@ func (s *Server) Start() error {
 			// Display info endpoints
 			computerUseController.GET("/display/info", computeruse.WrapDisplayInfoHandler(s.ComputerUse.GetDisplayInfo))
 			computerUseController.GET("/display/windows", computeruse.WrapWindowsHandler(s.ComputerUse.GetWindows))
-		}
-	} else {
-		// Add a disabled computer-use controller that returns helpful error messages
-		computerUseController := r.Group("/computer")
-		{
-			computerUseController.Any("*path", s.computerUseDisabledMiddleware())
+		} else {
+			// Register all endpoints with disabled middleware when plugin is not available
+			computerUseController.GET("/status", s.computerUseDisabledMiddleware())
+			computerUseController.POST("/start", s.computerUseDisabledMiddleware())
+			computerUseController.POST("/stop", s.computerUseDisabledMiddleware())
+			computerUseController.GET("/process-status", s.computerUseDisabledMiddleware())
+			computerUseController.GET("/process/:processName/status", s.computerUseDisabledMiddleware())
+			computerUseController.POST("/process/:processName/restart", s.computerUseDisabledMiddleware())
+			computerUseController.GET("/process/:processName/logs", s.computerUseDisabledMiddleware())
+			computerUseController.GET("/process/:processName/errors", s.computerUseDisabledMiddleware())
+			computerUseController.GET("/screenshot", s.computerUseDisabledMiddleware())
+			computerUseController.GET("/screenshot/region", s.computerUseDisabledMiddleware())
+			computerUseController.GET("/screenshot/compressed", s.computerUseDisabledMiddleware())
+			computerUseController.GET("/screenshot/region/compressed", s.computerUseDisabledMiddleware())
+			computerUseController.GET("/mouse/position", s.computerUseDisabledMiddleware())
+			computerUseController.POST("/mouse/move", s.computerUseDisabledMiddleware())
+			computerUseController.POST("/mouse/click", s.computerUseDisabledMiddleware())
+			computerUseController.POST("/mouse/drag", s.computerUseDisabledMiddleware())
+			computerUseController.POST("/mouse/scroll", s.computerUseDisabledMiddleware())
+			computerUseController.POST("/keyboard/type", s.computerUseDisabledMiddleware())
+			computerUseController.POST("/keyboard/key", s.computerUseDisabledMiddleware())
+			computerUseController.POST("/keyboard/hotkey", s.computerUseDisabledMiddleware())
+			computerUseController.GET("/display/info", s.computerUseDisabledMiddleware())
+			computerUseController.GET("/display/windows", s.computerUseDisabledMiddleware())
 		}
 	}
 
@@ -242,9 +261,9 @@ func (s *Server) Start() error {
 func (s *Server) computerUseDisabledMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.JSON(http.StatusServiceUnavailable, gin.H{
-			"error":    "Computer-use functionality is not available",
-			"details":  "The computer-use plugin failed to initialize. This is usually due to missing X11 dependencies.",
-			"solution": "Install the required dependencies to enable computer-use functionality. Check the daemon logs for specific instructions.",
+			"message":  "Computer-use functionality is not available",
+			"details":  "The computer-use plugin failed to initialize due to missing dependencies in the runtime environment.",
+			"solution": "Install the required X11 dependencies (x11-apps, xvfb, etc.) to enable computer-use functionality. Check the daemon logs for specific error details.",
 		})
 		c.Abort()
 	}

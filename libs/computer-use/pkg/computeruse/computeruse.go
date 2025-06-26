@@ -11,6 +11,7 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+	"syscall"
 	"time"
 
 	"github.com/daytonaio/daemon/pkg/toolbox/computeruse"
@@ -90,6 +91,25 @@ func (c *ComputerUse) Start() (*computeruse.Empty, error) {
 
 	// Start all processes in order of priority
 	c.startAllProcesses()
+
+	// Check process status after starting
+	status, err := c.GetProcessStatus()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get process status after start: %v", err)
+	}
+
+	// Check if all required processes are running
+	required := []string{"xvfb", "xfce4", "x11vnc", "novnc"}
+	var failed []string
+	for _, name := range required {
+		if s, ok := status[name]; !ok || !s.Running {
+			failed = append(failed, name)
+		}
+	}
+
+	if len(failed) > 0 {
+		return nil, fmt.Errorf("failed to start: %v", failed)
+	}
 
 	return new(computeruse.Empty), nil
 }
@@ -354,13 +374,17 @@ func (c *ComputerUse) GetProcessStatus() (map[string]computeruse.ProcessStatus, 
 	for name, process := range c.processes {
 		process.mu.Lock()
 		processStatus := computeruse.ProcessStatus{
-			Running:     process.running,
+			Running:     false,
 			Priority:    process.Priority,
 			AutoRestart: process.AutoRestart,
 		}
 
 		if process.cmd != nil && process.cmd.Process != nil {
-			processStatus.Pid = &process.cmd.Process.Pid
+			// Check if the process is still alive
+			if err := process.cmd.Process.Signal(syscall.Signal(0)); err == nil {
+				processStatus.Running = true
+				processStatus.Pid = &process.cmd.Process.Pid
+			}
 		}
 
 		process.mu.Unlock()
