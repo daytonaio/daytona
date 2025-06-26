@@ -19,13 +19,13 @@
  */
 export interface ProcessRestartResponse {
   /**
-   *
+   * A message indicating the result of restarting the process
    * @type {string}
    * @memberof ProcessRestartResponse
    */
   message: string
   /**
-   *
+   * The name of the VNC process that was restarted
    * @type {string}
    * @memberof ProcessRestartResponse
    */

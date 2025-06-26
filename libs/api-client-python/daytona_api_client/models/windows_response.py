@@ -18,7 +18,7 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, StrictFloat, StrictInt
+from pydantic import BaseModel, ConfigDict, Field, StrictFloat, StrictInt
 from typing import Any, ClassVar, Dict, List, Union
 from typing import Optional, Set
 from typing_extensions import Self
@@ -27,8 +27,8 @@ class WindowsResponse(BaseModel):
     """
     WindowsResponse
     """ # noqa: E501
-    windows: List[Dict[str, Any]]
-    count: Union[StrictFloat, StrictInt]
+    windows: List[Dict[str, Any]] = Field(description="Array of window information for all visible windows")
+    count: Union[StrictFloat, StrictInt] = Field(description="The total number of windows found")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["windows", "count"]
 

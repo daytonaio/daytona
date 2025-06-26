@@ -19,13 +19,13 @@
  */
 export interface ProcessErrorsResponse {
   /**
-   *
+   * The name of the VNC process whose error logs were retrieved
    * @type {string}
    * @memberof ProcessErrorsResponse
    */
   processName: string
   /**
-   *
+   * The error log output from the specified VNC process
    * @type {string}
    * @memberof ProcessErrorsResponse
    */

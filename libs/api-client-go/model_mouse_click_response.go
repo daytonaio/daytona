@@ -22,14 +22,10 @@ var _ MappedNullable = &MouseClickResponse{}
 
 // MouseClickResponse struct for MouseClickResponse
 type MouseClickResponse struct {
-	Success bool `json:"success"`
-	Action string `json:"action"`
-	Button string `json:"button"`
-	Double bool `json:"double"`
+	// The actual X coordinate where the click occurred
 	X float32 `json:"x"`
+	// The actual Y coordinate where the click occurred
 	Y float32 `json:"y"`
-	ActualX float32 `json:"actual_x"`
-	ActualY float32 `json:"actual_y"`
 }
 
 type _MouseClickResponse MouseClickResponse
@@ -38,16 +34,10 @@ type _MouseClickResponse MouseClickResponse
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewMouseClickResponse(success bool, action string, button string, double bool, x float32, y float32, actualX float32, actualY float32) *MouseClickResponse {
+func NewMouseClickResponse(x float32, y float32) *MouseClickResponse {
 	this := MouseClickResponse{}
-	this.Success = success
-	this.Action = action
-	this.Button = button
-	this.Double = double
 	this.X = x
 	this.Y = y
-	this.ActualX = actualX
-	this.ActualY = actualY
 	return &this
 }
 
@@ -57,102 +47,6 @@ func NewMouseClickResponse(success bool, action string, button string, double bo
 func NewMouseClickResponseWithDefaults() *MouseClickResponse {
 	this := MouseClickResponse{}
 	return &this
-}
-
-// GetSuccess returns the Success field value
-func (o *MouseClickResponse) GetSuccess() bool {
-	if o == nil {
-		var ret bool
-		return ret
-	}
-
-	return o.Success
-}
-
-// GetSuccessOk returns a tuple with the Success field value
-// and a boolean to check if the value has been set.
-func (o *MouseClickResponse) GetSuccessOk() (*bool, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.Success, true
-}
-
-// SetSuccess sets field value
-func (o *MouseClickResponse) SetSuccess(v bool) {
-	o.Success = v
-}
-
-// GetAction returns the Action field value
-func (o *MouseClickResponse) GetAction() string {
-	if o == nil {
-		var ret string
-		return ret
-	}
-
-	return o.Action
-}
-
-// GetActionOk returns a tuple with the Action field value
-// and a boolean to check if the value has been set.
-func (o *MouseClickResponse) GetActionOk() (*string, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.Action, true
-}
-
-// SetAction sets field value
-func (o *MouseClickResponse) SetAction(v string) {
-	o.Action = v
-}
-
-// GetButton returns the Button field value
-func (o *MouseClickResponse) GetButton() string {
-	if o == nil {
-		var ret string
-		return ret
-	}
-
-	return o.Button
-}
-
-// GetButtonOk returns a tuple with the Button field value
-// and a boolean to check if the value has been set.
-func (o *MouseClickResponse) GetButtonOk() (*string, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.Button, true
-}
-
-// SetButton sets field value
-func (o *MouseClickResponse) SetButton(v string) {
-	o.Button = v
-}
-
-// GetDouble returns the Double field value
-func (o *MouseClickResponse) GetDouble() bool {
-	if o == nil {
-		var ret bool
-		return ret
-	}
-
-	return o.Double
-}
-
-// GetDoubleOk returns a tuple with the Double field value
-// and a boolean to check if the value has been set.
-func (o *MouseClickResponse) GetDoubleOk() (*bool, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.Double, true
-}
-
-// SetDouble sets field value
-func (o *MouseClickResponse) SetDouble(v bool) {
-	o.Double = v
 }
 
 // GetX returns the X field value
@@ -203,54 +97,6 @@ func (o *MouseClickResponse) SetY(v float32) {
 	o.Y = v
 }
 
-// GetActualX returns the ActualX field value
-func (o *MouseClickResponse) GetActualX() float32 {
-	if o == nil {
-		var ret float32
-		return ret
-	}
-
-	return o.ActualX
-}
-
-// GetActualXOk returns a tuple with the ActualX field value
-// and a boolean to check if the value has been set.
-func (o *MouseClickResponse) GetActualXOk() (*float32, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.ActualX, true
-}
-
-// SetActualX sets field value
-func (o *MouseClickResponse) SetActualX(v float32) {
-	o.ActualX = v
-}
-
-// GetActualY returns the ActualY field value
-func (o *MouseClickResponse) GetActualY() float32 {
-	if o == nil {
-		var ret float32
-		return ret
-	}
-
-	return o.ActualY
-}
-
-// GetActualYOk returns a tuple with the ActualY field value
-// and a boolean to check if the value has been set.
-func (o *MouseClickResponse) GetActualYOk() (*float32, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.ActualY, true
-}
-
-// SetActualY sets field value
-func (o *MouseClickResponse) SetActualY(v float32) {
-	o.ActualY = v
-}
-
 func (o MouseClickResponse) MarshalJSON() ([]byte, error) {
 	toSerialize,err := o.ToMap()
 	if err != nil {
@@ -261,14 +107,8 @@ func (o MouseClickResponse) MarshalJSON() ([]byte, error) {
 
 func (o MouseClickResponse) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	toSerialize["success"] = o.Success
-	toSerialize["action"] = o.Action
-	toSerialize["button"] = o.Button
-	toSerialize["double"] = o.Double
 	toSerialize["x"] = o.X
 	toSerialize["y"] = o.Y
-	toSerialize["actual_x"] = o.ActualX
-	toSerialize["actual_y"] = o.ActualY
 	return toSerialize, nil
 }
 
@@ -277,14 +117,8 @@ func (o *MouseClickResponse) UnmarshalJSON(data []byte) (err error) {
 	// by unmarshalling the object into a generic map with string keys and checking
 	// that every required field exists as a key in the generic map.
 	requiredProperties := []string{
-		"success",
-		"action",
-		"button",
-		"double",
 		"x",
 		"y",
-		"actual_x",
-		"actual_y",
 	}
 
 	allProperties := make(map[string]interface{})

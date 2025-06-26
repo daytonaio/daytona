@@ -80,6 +80,7 @@ daytona_api_client_async/models/mouse_move_request.py
 daytona_api_client_async/models/mouse_move_response.py
 daytona_api_client_async/models/mouse_position.py
 daytona_api_client_async/models/mouse_scroll_request.py
+daytona_api_client_async/models/mouse_scroll_response.py
 daytona_api_client_async/models/organization.py
 daytona_api_client_async/models/organization_invitation.py
 daytona_api_client_async/models/organization_role.py

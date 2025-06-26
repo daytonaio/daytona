@@ -110,6 +110,8 @@ import type { MousePosition } from '../models'
 // @ts-ignore
 import type { MouseScrollRequest } from '../models'
 // @ts-ignore
+import type { MouseScrollResponse } from '../models'
+// @ts-ignore
 import type { ProcessErrorsResponse } from '../models'
 // @ts-ignore
 import type { ProcessLogsResponse } from '../models'
@@ -5136,7 +5138,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
       mouseScrollRequest: MouseScrollRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<EmptyResponse>> {
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<MouseScrollResponse>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.scrollMouse(
         sandboxId,
         mouseScrollRequest,
@@ -6497,7 +6499,7 @@ export const ToolboxApiFactory = function (configuration?: Configuration, basePa
       mouseScrollRequest: MouseScrollRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
-    ): AxiosPromise<EmptyResponse> {
+    ): AxiosPromise<MouseScrollResponse> {
       return localVarFp
         .scrollMouse(sandboxId, mouseScrollRequest, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))

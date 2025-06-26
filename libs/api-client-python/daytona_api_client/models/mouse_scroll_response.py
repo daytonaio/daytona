@@ -18,8 +18,8 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, StrictBool, StrictFloat, StrictInt, StrictStr
-from typing import Any, ClassVar, Dict, List, Union
+from pydantic import BaseModel, ConfigDict, Field, StrictBool
+from typing import Any, ClassVar, Dict, List
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -27,14 +27,9 @@ class MouseScrollResponse(BaseModel):
     """
     MouseScrollResponse
     """ # noqa: E501
-    success: StrictBool
-    action: StrictStr
-    direction: StrictStr
-    amount: Union[StrictFloat, StrictInt]
-    x: Union[StrictFloat, StrictInt]
-    y: Union[StrictFloat, StrictInt]
+    success: StrictBool = Field(description="Whether the mouse scroll operation was successful")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["success", "action", "direction", "amount", "x", "y"]
+    __properties: ClassVar[List[str]] = ["success"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -94,12 +89,7 @@ class MouseScrollResponse(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "success": obj.get("success"),
-            "action": obj.get("action"),
-            "direction": obj.get("direction"),
-            "amount": obj.get("amount"),
-            "x": obj.get("x"),
-            "y": obj.get("y")
+            "success": obj.get("success")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

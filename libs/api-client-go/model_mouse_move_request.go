@@ -22,7 +22,9 @@ var _ MappedNullable = &MouseMoveRequest{}
 
 // MouseMoveRequest struct for MouseMoveRequest
 type MouseMoveRequest struct {
+	// The target X coordinate to move the mouse cursor to
 	X float32 `json:"x"`
+	// The target Y coordinate to move the mouse cursor to
 	Y float32 `json:"y"`
 }
 

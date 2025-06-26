@@ -18,8 +18,8 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, StrictStr
-from typing import Any, ClassVar, Dict, List, Optional
+from pydantic import BaseModel, ConfigDict, Field, StrictFloat, StrictInt, StrictStr
+from typing import Any, ClassVar, Dict, List, Optional, Union
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -27,11 +27,11 @@ class RegionScreenshotResponse(BaseModel):
     """
     RegionScreenshotResponse
     """ # noqa: E501
-    screenshot: StrictStr
-    region: Dict[str, Any]
-    cursor_position: Optional[Dict[str, Any]] = None
+    screenshot: StrictStr = Field(description="Base64 encoded screenshot image data of the specified region")
+    cursor_position: Optional[Dict[str, Any]] = Field(default=None, description="The current cursor position when the region screenshot was taken", alias="cursorPosition")
+    size_bytes: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="The size of the screenshot data in bytes", alias="sizeBytes")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["screenshot", "region", "cursor_position"]
+    __properties: ClassVar[List[str]] = ["screenshot", "cursorPosition", "sizeBytes"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -92,8 +92,8 @@ class RegionScreenshotResponse(BaseModel):
 
         _obj = cls.model_validate({
             "screenshot": obj.get("screenshot"),
-            "region": obj.get("region"),
-            "cursor_position": obj.get("cursor_position")
+            "cursorPosition": obj.get("cursorPosition"),
+            "sizeBytes": obj.get("sizeBytes")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

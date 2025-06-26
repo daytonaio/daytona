@@ -19,51 +19,15 @@
  */
 export interface MouseClickResponse {
   /**
-   *
-   * @type {boolean}
-   * @memberof MouseClickResponse
-   */
-  success: boolean
-  /**
-   *
-   * @type {string}
-   * @memberof MouseClickResponse
-   */
-  action: string
-  /**
-   *
-   * @type {string}
-   * @memberof MouseClickResponse
-   */
-  button: string
-  /**
-   *
-   * @type {boolean}
-   * @memberof MouseClickResponse
-   */
-  double: boolean
-  /**
-   *
+   * The actual X coordinate where the click occurred
    * @type {number}
    * @memberof MouseClickResponse
    */
   x: number
   /**
-   *
+   * The actual Y coordinate where the click occurred
    * @type {number}
    * @memberof MouseClickResponse
    */
   y: number
-  /**
-   *
-   * @type {number}
-   * @memberof MouseClickResponse
-   */
-  actual_x: number
-  /**
-   *
-   * @type {number}
-   * @memberof MouseClickResponse
-   */
-  actual_y: number
 }

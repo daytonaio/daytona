@@ -19,7 +19,7 @@
  */
 export interface KeyboardHotkeyRequest {
   /**
-   *
+   * The hotkey combination to press (e.g., \"ctrl+c\", \"cmd+v\", \"alt+tab\")
    * @type {string}
    * @memberof KeyboardHotkeyRequest
    */

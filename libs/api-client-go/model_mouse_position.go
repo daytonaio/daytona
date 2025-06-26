@@ -22,7 +22,9 @@ var _ MappedNullable = &MousePosition{}
 
 // MousePosition struct for MousePosition
 type MousePosition struct {
+	// The X coordinate of the mouse cursor position
 	X float32 `json:"x"`
+	// The Y coordinate of the mouse cursor position
 	Y float32 `json:"y"`
 }
 

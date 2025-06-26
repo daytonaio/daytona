@@ -19,25 +19,25 @@
  */
 export interface MouseScrollRequest {
   /**
-   *
+   * The X coordinate where to perform the scroll operation
    * @type {number}
    * @memberof MouseScrollRequest
    */
   x: number
   /**
-   *
+   * The Y coordinate where to perform the scroll operation
    * @type {number}
    * @memberof MouseScrollRequest
    */
   y: number
   /**
-   *
+   * The scroll direction (up, down)
    * @type {string}
    * @memberof MouseScrollRequest
    */
   direction: string
   /**
-   *
+   * The number of scroll units to scroll. Defaults to 1
    * @type {number}
    * @memberof MouseScrollRequest
    */

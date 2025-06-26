@@ -22,7 +22,9 @@ var _ MappedNullable = &ProcessLogsResponse{}
 
 // ProcessLogsResponse struct for ProcessLogsResponse
 type ProcessLogsResponse struct {
+	// The name of the VNC process whose logs were retrieved
 	ProcessName string `json:"processName"`
+	// The log output from the specified VNC process
 	Logs string `json:"logs"`
 }
 

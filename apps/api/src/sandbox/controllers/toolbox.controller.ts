@@ -65,6 +65,7 @@ import {
   MouseDragRequestDto,
   MouseDragResponseDto,
   MouseScrollRequestDto,
+  MouseScrollResponseDto,
   KeyboardTypeRequestDto,
   KeyboardPressRequestDto,
   KeyboardHotkeyRequestDto,
@@ -1374,7 +1375,7 @@ export class ToolboxController {
   @ApiResponse({
     status: 200,
     description: 'Mouse scrolled successfully',
-    type: EmptyResponseDto,
+    type: MouseScrollResponseDto,
   })
   @ApiBody({
     type: MouseScrollRequestDto,

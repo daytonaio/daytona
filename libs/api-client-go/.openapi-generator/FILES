@@ -78,6 +78,7 @@ model_mouse_move_request.go
 model_mouse_move_response.go
 model_mouse_position.go
 model_mouse_scroll_request.go
+model_mouse_scroll_response.go
 model_organization.go
 model_organization_invitation.go
 model_organization_role.go

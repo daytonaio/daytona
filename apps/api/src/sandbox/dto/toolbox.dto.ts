@@ -456,24 +456,6 @@ export class MouseClickRequestDto {
 @ApiSchema({ name: 'MouseClickResponse' })
 export class MouseClickResponseDto {
   @ApiProperty({
-    description: 'The type of action performed (click, double-click)',
-    example: 'click',
-  })
-  action: string
-
-  @ApiProperty({
-    description: 'The mouse button that was clicked',
-    example: 'left',
-  })
-  button: string
-
-  @ApiProperty({
-    description: 'Whether a double-click was performed',
-    example: false,
-  })
-  double: boolean
-
-  @ApiProperty({
     description: 'The actual X coordinate where the click occurred',
     example: 100,
   })
@@ -522,24 +504,6 @@ export class MouseDragRequestDto {
 @ApiSchema({ name: 'MouseDragResponse' })
 export class MouseDragResponseDto {
   @ApiProperty({
-    description: 'The type of action performed',
-    example: 'drag',
-  })
-  action: string
-
-  @ApiProperty({
-    description: 'The starting coordinates of the drag operation',
-    example: { x: 100, y: 200 },
-  })
-  from: { x: number; y: number }
-
-  @ApiProperty({
-    description: 'The ending coordinates of the drag operation',
-    example: { x: 300, y: 400 },
-  })
-  to: { x: number; y: number }
-
-  @ApiProperty({
     description: 'The actual X coordinate where the drag ended',
     example: 300,
   })
@@ -586,36 +550,6 @@ export class MouseScrollResponseDto {
     example: true,
   })
   success: boolean
-
-  @ApiProperty({
-    description: 'The type of action performed',
-    example: 'scroll',
-  })
-  action: string
-
-  @ApiProperty({
-    description: 'The scroll direction that was performed',
-    example: 'down',
-  })
-  direction: string
-
-  @ApiProperty({
-    description: 'The number of scroll units that were scrolled',
-    example: 3,
-  })
-  amount: number
-
-  @ApiProperty({
-    description: 'The X coordinate where the scroll was performed',
-    example: 100,
-  })
-  x: number
-
-  @ApiProperty({
-    description: 'The Y coordinate where the scroll was performed',
-    example: 200,
-  })
-  y: number
 }
 
 @ApiSchema({ name: 'KeyboardTypeRequest' })
@@ -631,21 +565,6 @@ export class KeyboardTypeRequestDto {
     example: 100,
   })
   delay?: number
-}
-
-@ApiSchema({ name: 'KeyboardTypeResponse' })
-export class KeyboardTypeResponseDto {
-  @ApiProperty({
-    description: 'Whether the keyboard typing operation was successful',
-    example: true,
-  })
-  success: boolean
-
-  @ApiProperty({
-    description: 'The text that was actually typed',
-    example: 'Hello, World!',
-  })
-  typed: string
 }
 
 @ApiSchema({ name: 'KeyboardPressRequest' })
@@ -664,28 +583,6 @@ export class KeyboardPressRequestDto {
   modifiers?: string[]
 }
 
-@ApiSchema({ name: 'KeyboardPressResponse' })
-export class KeyboardPressResponseDto {
-  @ApiProperty({
-    description: 'Whether the keyboard press operation was successful',
-    example: true,
-  })
-  success: boolean
-
-  @ApiProperty({
-    description: 'The key that was pressed',
-    example: 'enter',
-  })
-  key: string
-
-  @ApiProperty({
-    description: 'The modifier keys that were pressed along with the main key',
-    type: [String],
-    example: ['ctrl', 'shift'],
-  })
-  modifiers: string[]
-}
-
 @ApiSchema({ name: 'KeyboardHotkeyRequest' })
 export class KeyboardHotkeyRequestDto {
   @ApiProperty({
@@ -693,21 +590,6 @@ export class KeyboardHotkeyRequestDto {
     example: 'ctrl+c',
   })
   keys: string
-}
-
-@ApiSchema({ name: 'KeyboardHotkeyResponse' })
-export class KeyboardHotkeyResponseDto {
-  @ApiProperty({
-    description: 'Whether the hotkey press operation was successful',
-    example: true,
-  })
-  success: boolean
-
-  @ApiProperty({
-    description: 'The hotkey combination that was pressed',
-    example: 'ctrl+c',
-  })
-  hotkey: string
 }
 
 @ApiSchema({ name: 'ScreenshotResponse' })
@@ -718,53 +600,17 @@ export class ScreenshotResponseDto {
   })
   screenshot: string
 
-  @ApiProperty({
-    description: 'The width of the screenshot in pixels',
-    example: 1920,
-  })
-  width: number
-
-  @ApiProperty({
-    description: 'The height of the screenshot in pixels',
-    example: 1080,
-  })
-  height: number
-
   @ApiPropertyOptional({
     description: 'The current cursor position when the screenshot was taken',
     example: { x: 500, y: 300 },
   })
-  cursor_position?: { x: number; y: number }
-
-  @ApiPropertyOptional({
-    description: 'The region coordinates if a region screenshot was taken',
-    example: { x: 100, y: 100, width: 800, height: 600 },
-  })
-  region?: { x: number; y: number; width: number; height: number }
-
-  @ApiPropertyOptional({
-    description: 'The image format of the screenshot (png, jpeg)',
-    example: 'png',
-  })
-  format?: string
-
-  @ApiPropertyOptional({
-    description: 'The quality setting for JPEG format (1-100)',
-    example: 85,
-  })
-  quality?: number
-
-  @ApiPropertyOptional({
-    description: 'The scale factor applied to the screenshot (0.1-1.0)',
-    example: 0.5,
-  })
-  scale?: number
+  cursorPosition?: { x: number; y: number }
 
   @ApiPropertyOptional({
     description: 'The size of the screenshot data in bytes',
     example: 24576,
   })
-  size_bytes?: number
+  sizeBytes?: number
 }
 
 @ApiSchema({ name: 'RegionScreenshotRequest' })
@@ -802,17 +648,17 @@ export class RegionScreenshotResponseDto {
   })
   screenshot: string
 
-  @ApiProperty({
-    description: 'The region coordinates that were captured',
-    example: { x: 100, y: 100, width: 800, height: 600 },
-  })
-  region: { x: number; y: number; width: number; height: number }
-
   @ApiPropertyOptional({
     description: 'The current cursor position when the region screenshot was taken',
     example: { x: 500, y: 300 },
   })
-  cursor_position?: { x: number; y: number }
+  cursorPosition?: { x: number; y: number }
+
+  @ApiPropertyOptional({
+    description: 'The size of the screenshot data in bytes',
+    example: 24576,
+  })
+  sizeBytes?: number
 }
 
 @ApiSchema({ name: 'CompressedScreenshotResponse' })
@@ -823,47 +669,17 @@ export class CompressedScreenshotResponseDto {
   })
   screenshot: string
 
-  @ApiProperty({
-    description: 'The width of the compressed screenshot in pixels',
-    example: 960,
-  })
-  width: number
-
-  @ApiProperty({
-    description: 'The height of the compressed screenshot in pixels',
-    example: 540,
-  })
-  height: number
-
-  @ApiProperty({
-    description: 'The image format of the compressed screenshot',
-    example: 'jpeg',
-  })
-  format: string
-
-  @ApiProperty({
-    description: 'The quality setting used for compression (1-100)',
-    example: 85,
-  })
-  quality: number
-
-  @ApiProperty({
-    description: 'The scale factor applied to the compressed screenshot',
-    example: 0.5,
-  })
-  scale: number
-
-  @ApiProperty({
-    description: 'The size of the compressed screenshot data in bytes',
-    example: 12288,
-  })
-  size_bytes: number
-
   @ApiPropertyOptional({
     description: 'The current cursor position when the compressed screenshot was taken',
     example: { x: 250, y: 150 },
   })
-  cursor_position?: { x: number; y: number }
+  cursorPosition?: { x: number; y: number }
+
+  @ApiPropertyOptional({
+    description: 'The size of the compressed screenshot data in bytes',
+    example: 12288,
+  })
+  sizeBytes?: number
 }
 
 @ApiSchema({ name: 'DisplayInfoResponse' })

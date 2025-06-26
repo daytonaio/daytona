@@ -22,6 +22,7 @@ var _ MappedNullable = &KeyboardHotkeyRequest{}
 
 // KeyboardHotkeyRequest struct for KeyboardHotkeyRequest
 type KeyboardHotkeyRequest struct {
+	// The hotkey combination to press (e.g., \"ctrl+c\", \"cmd+v\", \"alt+tab\")
 	Keys string `json:"keys"`
 }
 

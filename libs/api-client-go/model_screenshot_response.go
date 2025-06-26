@@ -22,15 +22,12 @@ var _ MappedNullable = &ScreenshotResponse{}
 
 // ScreenshotResponse struct for ScreenshotResponse
 type ScreenshotResponse struct {
+	// Base64 encoded screenshot image data
 	Screenshot string `json:"screenshot"`
-	Width float32 `json:"width"`
-	Height float32 `json:"height"`
-	CursorPosition map[string]interface{} `json:"cursor_position,omitempty"`
-	Region map[string]interface{} `json:"region,omitempty"`
-	Format *string `json:"format,omitempty"`
-	Quality *float32 `json:"quality,omitempty"`
-	Scale *float32 `json:"scale,omitempty"`
-	SizeBytes *float32 `json:"size_bytes,omitempty"`
+	// The current cursor position when the screenshot was taken
+	CursorPosition map[string]interface{} `json:"cursorPosition,omitempty"`
+	// The size of the screenshot data in bytes
+	SizeBytes *float32 `json:"sizeBytes,omitempty"`
 }
 
 type _ScreenshotResponse ScreenshotResponse
@@ -39,11 +36,9 @@ type _ScreenshotResponse ScreenshotResponse
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewScreenshotResponse(screenshot string, width float32, height float32) *ScreenshotResponse {
+func NewScreenshotResponse(screenshot string) *ScreenshotResponse {
 	this := ScreenshotResponse{}
 	this.Screenshot = screenshot
-	this.Width = width
-	this.Height = height
 	return &this
 }
 
@@ -79,54 +74,6 @@ func (o *ScreenshotResponse) SetScreenshot(v string) {
 	o.Screenshot = v
 }
 
-// GetWidth returns the Width field value
-func (o *ScreenshotResponse) GetWidth() float32 {
-	if o == nil {
-		var ret float32
-		return ret
-	}
-
-	return o.Width
-}
-
-// GetWidthOk returns a tuple with the Width field value
-// and a boolean to check if the value has been set.
-func (o *ScreenshotResponse) GetWidthOk() (*float32, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.Width, true
-}
-
-// SetWidth sets field value
-func (o *ScreenshotResponse) SetWidth(v float32) {
-	o.Width = v
-}
-
-// GetHeight returns the Height field value
-func (o *ScreenshotResponse) GetHeight() float32 {
-	if o == nil {
-		var ret float32
-		return ret
-	}
-
-	return o.Height
-}
-
-// GetHeightOk returns a tuple with the Height field value
-// and a boolean to check if the value has been set.
-func (o *ScreenshotResponse) GetHeightOk() (*float32, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.Height, true
-}
-
-// SetHeight sets field value
-func (o *ScreenshotResponse) SetHeight(v float32) {
-	o.Height = v
-}
-
 // GetCursorPosition returns the CursorPosition field value if set, zero value otherwise.
 func (o *ScreenshotResponse) GetCursorPosition() map[string]interface{} {
 	if o == nil || IsNil(o.CursorPosition) {
@@ -157,134 +104,6 @@ func (o *ScreenshotResponse) HasCursorPosition() bool {
 // SetCursorPosition gets a reference to the given map[string]interface{} and assigns it to the CursorPosition field.
 func (o *ScreenshotResponse) SetCursorPosition(v map[string]interface{}) {
 	o.CursorPosition = v
-}
-
-// GetRegion returns the Region field value if set, zero value otherwise.
-func (o *ScreenshotResponse) GetRegion() map[string]interface{} {
-	if o == nil || IsNil(o.Region) {
-		var ret map[string]interface{}
-		return ret
-	}
-	return o.Region
-}
-
-// GetRegionOk returns a tuple with the Region field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *ScreenshotResponse) GetRegionOk() (map[string]interface{}, bool) {
-	if o == nil || IsNil(o.Region) {
-		return map[string]interface{}{}, false
-	}
-	return o.Region, true
-}
-
-// HasRegion returns a boolean if a field has been set.
-func (o *ScreenshotResponse) HasRegion() bool {
-	if o != nil && !IsNil(o.Region) {
-		return true
-	}
-
-	return false
-}
-
-// SetRegion gets a reference to the given map[string]interface{} and assigns it to the Region field.
-func (o *ScreenshotResponse) SetRegion(v map[string]interface{}) {
-	o.Region = v
-}
-
-// GetFormat returns the Format field value if set, zero value otherwise.
-func (o *ScreenshotResponse) GetFormat() string {
-	if o == nil || IsNil(o.Format) {
-		var ret string
-		return ret
-	}
-	return *o.Format
-}
-
-// GetFormatOk returns a tuple with the Format field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *ScreenshotResponse) GetFormatOk() (*string, bool) {
-	if o == nil || IsNil(o.Format) {
-		return nil, false
-	}
-	return o.Format, true
-}
-
-// HasFormat returns a boolean if a field has been set.
-func (o *ScreenshotResponse) HasFormat() bool {
-	if o != nil && !IsNil(o.Format) {
-		return true
-	}
-
-	return false
-}
-
-// SetFormat gets a reference to the given string and assigns it to the Format field.
-func (o *ScreenshotResponse) SetFormat(v string) {
-	o.Format = &v
-}
-
-// GetQuality returns the Quality field value if set, zero value otherwise.
-func (o *ScreenshotResponse) GetQuality() float32 {
-	if o == nil || IsNil(o.Quality) {
-		var ret float32
-		return ret
-	}
-	return *o.Quality
-}
-
-// GetQualityOk returns a tuple with the Quality field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *ScreenshotResponse) GetQualityOk() (*float32, bool) {
-	if o == nil || IsNil(o.Quality) {
-		return nil, false
-	}
-	return o.Quality, true
-}
-
-// HasQuality returns a boolean if a field has been set.
-func (o *ScreenshotResponse) HasQuality() bool {
-	if o != nil && !IsNil(o.Quality) {
-		return true
-	}
-
-	return false
-}
-
-// SetQuality gets a reference to the given float32 and assigns it to the Quality field.
-func (o *ScreenshotResponse) SetQuality(v float32) {
-	o.Quality = &v
-}
-
-// GetScale returns the Scale field value if set, zero value otherwise.
-func (o *ScreenshotResponse) GetScale() float32 {
-	if o == nil || IsNil(o.Scale) {
-		var ret float32
-		return ret
-	}
-	return *o.Scale
-}
-
-// GetScaleOk returns a tuple with the Scale field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *ScreenshotResponse) GetScaleOk() (*float32, bool) {
-	if o == nil || IsNil(o.Scale) {
-		return nil, false
-	}
-	return o.Scale, true
-}
-
-// HasScale returns a boolean if a field has been set.
-func (o *ScreenshotResponse) HasScale() bool {
-	if o != nil && !IsNil(o.Scale) {
-		return true
-	}
-
-	return false
-}
-
-// SetScale gets a reference to the given float32 and assigns it to the Scale field.
-func (o *ScreenshotResponse) SetScale(v float32) {
-	o.Scale = &v
 }
 
 // GetSizeBytes returns the SizeBytes field value if set, zero value otherwise.
@@ -330,25 +149,11 @@ func (o ScreenshotResponse) MarshalJSON() ([]byte, error) {
 func (o ScreenshotResponse) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["screenshot"] = o.Screenshot
-	toSerialize["width"] = o.Width
-	toSerialize["height"] = o.Height
 	if !IsNil(o.CursorPosition) {
-		toSerialize["cursor_position"] = o.CursorPosition
-	}
-	if !IsNil(o.Region) {
-		toSerialize["region"] = o.Region
-	}
-	if !IsNil(o.Format) {
-		toSerialize["format"] = o.Format
-	}
-	if !IsNil(o.Quality) {
-		toSerialize["quality"] = o.Quality
-	}
-	if !IsNil(o.Scale) {
-		toSerialize["scale"] = o.Scale
+		toSerialize["cursorPosition"] = o.CursorPosition
 	}
 	if !IsNil(o.SizeBytes) {
-		toSerialize["size_bytes"] = o.SizeBytes
+		toSerialize["sizeBytes"] = o.SizeBytes
 	}
 	return toSerialize, nil
 }
@@ -359,8 +164,6 @@ func (o *ScreenshotResponse) UnmarshalJSON(data []byte) (err error) {
 	// that every required field exists as a key in the generic map.
 	requiredProperties := []string{
 		"screenshot",
-		"width",
-		"height",
 	}
 
 	allProperties := make(map[string]interface{})

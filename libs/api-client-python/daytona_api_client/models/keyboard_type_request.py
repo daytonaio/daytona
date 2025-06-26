@@ -18,7 +18,7 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, StrictFloat, StrictInt, StrictStr
+from pydantic import BaseModel, ConfigDict, Field, StrictFloat, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional, Union
 from typing import Optional, Set
 from typing_extensions import Self
@@ -27,8 +27,8 @@ class KeyboardTypeRequest(BaseModel):
     """
     KeyboardTypeRequest
     """ # noqa: E501
-    text: StrictStr
-    delay: Optional[Union[StrictFloat, StrictInt]] = None
+    text: StrictStr = Field(description="The text to type using the keyboard")
+    delay: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Delay in milliseconds between keystrokes. Defaults to 0")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["text", "delay"]
 

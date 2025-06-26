@@ -3939,7 +3939,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/EmptyResponse'
+                $ref: '#/components/schemas/MouseScrollResponse'
           description: Mouse scrolled successfully
       security:
         - bearer: []
@@ -7955,12 +7955,56 @@ components:
       type: object
     ComputerUseStartResponse:
       example:
-        message: message
-        status: '{}'
+        message: Computer use processes started successfully
+        status:
+          xvfb:
+            running: true
+            priority: 100
+            autoRestart: true
+            pid: 12345
+          xfce4:
+            running: true
+            priority: 200
+            autoRestart: true
+            pid: 12346
+          x11vnc:
+            running: true
+            priority: 300
+            autoRestart: true
+            pid: 12347
+          novnc:
+            running: true
+            priority: 400
+            autoRestart: true
+            pid: 12348
       properties:
         message:
+          description: A message indicating the result of starting computer use processes
+          example: Computer use processes started successfully
           type: string
         status:
+          description: Status information about all VNC desktop processes after starting
+          example:
+            xvfb:
+              running: true
+              priority: 100
+              autoRestart: true
+              pid: 12345
+            xfce4:
+              running: true
+              priority: 200
+              autoRestart: true
+              pid: 12346
+            x11vnc:
+              running: true
+              priority: 300
+              autoRestart: true
+              pid: 12347
+            novnc:
+              running: true
+              priority: 400
+              autoRestart: true
+              pid: 12348
           type: object
       required:
         - message
@@ -7968,12 +8012,48 @@ components:
       type: object
     ComputerUseStopResponse:
       example:
-        message: message
-        status: '{}'
+        message: Computer use processes stopped successfully
+        status:
+          xvfb:
+            running: false
+            priority: 100
+            autoRestart: true
+          xfce4:
+            running: false
+            priority: 200
+            autoRestart: true
+          x11vnc:
+            running: false
+            priority: 300
+            autoRestart: true
+          novnc:
+            running: false
+            priority: 400
+            autoRestart: true
       properties:
         message:
+          description: A message indicating the result of stopping computer use processes
+          example: Computer use processes stopped successfully
           type: string
         status:
+          description: Status information about all VNC desktop processes after stopping
+          example:
+            xvfb:
+              running: false
+              priority: 100
+              autoRestart: true
+            xfce4:
+              running: false
+              priority: 200
+              autoRestart: true
+            x11vnc:
+              running: false
+              priority: 300
+              autoRestart: true
+            novnc:
+              running: false
+              priority: 400
+              autoRestart: true
           type: object
       required:
         - message
@@ -7981,9 +8061,51 @@ components:
       type: object
     ComputerUseStatusResponse:
       example:
-        status: '{}'
+        status:
+          xvfb:
+            running: true
+            priority: 100
+            autoRestart: true
+            pid: 12345
+          xfce4:
+            running: true
+            priority: 200
+            autoRestart: true
+            pid: 12346
+          x11vnc:
+            running: true
+            priority: 300
+            autoRestart: true
+            pid: 12347
+          novnc:
+            running: true
+            priority: 400
+            autoRestart: true
+            pid: 12348
       properties:
         status:
+          description: Status information about all VNC desktop processes
+          example:
+            xvfb:
+              running: true
+              priority: 100
+              autoRestart: true
+              pid: 12345
+            xfce4:
+              running: true
+              priority: 200
+              autoRestart: true
+              pid: 12346
+            x11vnc:
+              running: true
+              priority: 300
+              autoRestart: true
+              pid: 12347
+            novnc:
+              running: true
+              priority: 400
+              autoRestart: true
+              pid: 12348
           type: object
       required:
         - status
@@ -7991,11 +8113,15 @@ components:
     ProcessStatusResponse:
       example:
         running: true
-        processName: processName
+        processName: xfce4
       properties:
         processName:
+          description: The name of the VNC process being checked
+          example: xfce4
           type: string
         running:
+          description: Whether the specified VNC process is currently running
+          example: true
           type: boolean
       required:
         - processName
@@ -8003,12 +8129,16 @@ components:
       type: object
     ProcessRestartResponse:
       example:
-        processName: processName
-        message: message
+        processName: xfce4
+        message: Process xfce4 restarted successfully
       properties:
         message:
+          description: A message indicating the result of restarting the process
+          example: Process xfce4 restarted successfully
           type: string
         processName:
+          description: The name of the VNC process that was restarted
+          example: xfce4
           type: string
       required:
         - message
@@ -8016,12 +8146,16 @@ components:
       type: object
     ProcessLogsResponse:
       example:
-        processName: processName
-        logs: logs
+        processName: novnc
+        logs: '2024-01-15 10:30:45 [INFO] NoVNC server started on port 6901'
       properties:
         processName:
+          description: The name of the VNC process whose logs were retrieved
+          example: novnc
           type: string
         logs:
+          description: The log output from the specified VNC process
+          example: '2024-01-15 10:30:45 [INFO] NoVNC server started on port 6901'
           type: string
       required:
         - logs
@@ -8029,12 +8163,16 @@ components:
       type: object
     ProcessErrorsResponse:
       example:
-        processName: processName
-        errors: errors
+        processName: x11vnc
+        errors: '2024-01-15 10:30:45 [ERROR] Failed to bind to port 5901'
       properties:
         processName:
+          description: The name of the VNC process whose error logs were retrieved
+          example: x11vnc
           type: string
         errors:
+          description: The error log output from the specified VNC process
+          example: '2024-01-15 10:30:45 [ERROR] Failed to bind to port 5901'
           type: string
       required:
         - errors
@@ -8042,12 +8180,16 @@ components:
       type: object
     MousePosition:
       example:
-        x: 0.8008281904610115
-        'y': 6.027456183070403
+        x: 100
+        'y': 200
       properties:
         x:
+          description: The X coordinate of the mouse cursor position
+          example: 100
           type: number
         'y':
+          description: The Y coordinate of the mouse cursor position
+          example: 200
           type: number
       required:
         - x
@@ -8055,12 +8197,16 @@ components:
       type: object
     MouseMoveRequest:
       example:
-        x: 0.8008281904610115
-        'y': 6.027456183070403
+        x: 150
+        'y': 250
       properties:
         x:
+          description: The target X coordinate to move the mouse cursor to
+          example: 150
           type: number
         'y':
+          description: The target Y coordinate to move the mouse cursor to
+          example: 250
           type: number
       required:
         - x
@@ -8068,43 +8214,44 @@ components:
       type: object
     MouseMoveResponse:
       example:
-        actual_y: 5.962133916683182
-        success: true
-        x: 0.8008281904610115
-        'y': 6.027456183070403
-        actual_x: 1.4658129805029452
+        x: 150
+        'y': 250
       properties:
-        success:
-          type: boolean
         x:
+          description: The actual X coordinate where the mouse cursor ended up
+          example: 150
           type: number
         'y':
-          type: number
-        actual_x:
-          type: number
-        actual_y:
+          description: The actual Y coordinate where the mouse cursor ended up
+          example: 250
           type: number
       required:
-        - actual_x
-        - actual_y
-        - success
         - x
         - 'y'
       type: object
     MouseClickRequest:
       example:
-        button: button
-        double: true
-        x: 0.8008281904610115
-        'y': 6.027456183070403
+        button: left
+        double: false
+        x: 100
+        'y': 200
       properties:
         x:
+          description: The X coordinate where to perform the mouse click
+          example: 100
           type: number
         'y':
+          description: The Y coordinate where to perform the mouse click
+          example: 200
           type: number
         button:
+          description: "The mouse button to click (left, right, middle). Defaults\
+            \ to left"
+          example: left
           type: string
         double:
+          description: Whether to perform a double-click instead of a single click
+          example: false
           type: boolean
       required:
         - x
@@ -8112,58 +8259,49 @@ components:
       type: object
     MouseClickResponse:
       example:
-        button: button
-        actual_y: 5.962133916683182
-        success: true
-        double: true
-        x: 0.8008281904610115
-        action: action
-        'y': 6.027456183070403
-        actual_x: 1.4658129805029452
+        x: 100
+        'y': 200
       properties:
-        success:
-          type: boolean
-        action:
-          type: string
-        button:
-          type: string
-        double:
-          type: boolean
         x:
+          description: The actual X coordinate where the click occurred
+          example: 100
           type: number
         'y':
-          type: number
-        actual_x:
-          type: number
-        actual_y:
+          description: The actual Y coordinate where the click occurred
+          example: 200
           type: number
       required:
-        - action
-        - actual_x
-        - actual_y
-        - button
-        - double
-        - success
         - x
         - 'y'
       type: object
     MouseDragRequest:
       example:
-        button: button
-        endY: 5.962133916683182
-        endX: 1.4658129805029452
-        startY: 6.027456183070403
-        startX: 0.8008281904610115
+        button: left
+        endY: 400
+        endX: 300
+        startY: 200
+        startX: 100
       properties:
         startX:
+          description: The starting X coordinate for the drag operation
+          example: 100
           type: number
         startY:
+          description: The starting Y coordinate for the drag operation
+          example: 200
           type: number
         endX:
+          description: The ending X coordinate for the drag operation
+          example: 300
           type: number
         endY:
+          description: The ending Y coordinate for the drag operation
+          example: 400
           type: number
         button:
+          description: "The mouse button to use for dragging (left, right, middle).\
+            \ Defaults to left"
+          example: left
           type: string
       required:
         - endX
@@ -8173,84 +8311,104 @@ components:
       type: object
     MouseDragResponse:
       example:
-        actual_y: 6.027456183070403
-        success: true
-        action: action
-        from: '{}'
-        to: '{}'
-        actual_x: 0.8008281904610115
+        x: 300
+        'y': 400
       properties:
-        success:
-          type: boolean
-        action:
-          type: string
-        from:
-          type: object
-        to:
-          type: object
-        actual_x:
+        x:
+          description: The actual X coordinate where the drag ended
+          example: 300
           type: number
-        actual_y:
+        'y':
+          description: The actual Y coordinate where the drag ended
+          example: 400
           type: number
       required:
-        - action
-        - actual_x
-        - actual_y
-        - from
-        - success
-        - to
+        - x
+        - 'y'
       type: object
     MouseScrollRequest:
       example:
-        amount: 1.4658129805029452
-        x: 0.8008281904610115
-        'y': 6.027456183070403
-        direction: direction
+        amount: 3
+        x: 100
+        'y': 200
+        direction: down
       properties:
         x:
+          description: The X coordinate where to perform the scroll operation
+          example: 100
           type: number
         'y':
+          description: The Y coordinate where to perform the scroll operation
+          example: 200
           type: number
         direction:
+          description: 'The scroll direction (up, down)'
+          example: down
           type: string
         amount:
+          description: The number of scroll units to scroll. Defaults to 1
+          example: 3
           type: number
       required:
         - direction
         - x
         - 'y'
       type: object
-    EmptyResponse:
+    MouseScrollResponse:
       example:
         success: true
       properties:
         success:
+          description: Whether the mouse scroll operation was successful
+          example: true
           type: boolean
       required:
         - success
       type: object
     KeyboardTypeRequest:
       example:
-        delay: 0.8008281904610115
-        text: text
+        delay: 100
+        text: 'Hello, World!'
       properties:
         text:
+          description: The text to type using the keyboard
+          example: 'Hello, World!'
           type: string
         delay:
+          description: Delay in milliseconds between keystrokes. Defaults to 0
+          example: 100
           type: number
       required:
         - text
       type: object
+    EmptyResponse:
+      example:
+        success: true
+      properties:
+        success:
+          description: Whether the operation was successful
+          example: true
+          type: boolean
+      required:
+        - success
+      type: object
     KeyboardPressRequest:
       example:
         modifiers:
-          - modifiers
-          - modifiers
-        key: key
+          - ctrl
+          - shift
+        key: enter
       properties:
         key:
+          description: 'The key to press (e.g., a, b, c, enter, space, etc.)'
+          example: enter
           type: string
         modifiers:
+          description: "Array of modifier keys to press along with the main key (ctrl,\
+            \ alt, shift, cmd)"
+          example:
+            - ctrl
+            - shift
           items:
             type: string
           type: array
@@ -8259,107 +8417,112 @@ components:
       type: object
     KeyboardHotkeyRequest:
       example:
-        keys: keys
+        keys: ctrl+c
       properties:
         keys:
+          description: "The hotkey combination to press (e.g., \"ctrl+c\", \"cmd+v\"\
+            , \"alt+tab\")"
+          example: ctrl+c
           type: string
       required:
         - keys
       type: object
     ScreenshotResponse:
       example:
-        cursor_position: '{}'
-        size_bytes: 5.637376656633329
-        width: 0.8008281904610115
-        format: format
-        scale: 5.962133916683182
-        screenshot: screenshot
-        region: '{}'
-        height: 6.027456183070403
-        quality: 1.4658129805029452
+        cursorPosition:
+          x: 500
+          'y': 300
+        screenshot: iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==
+        sizeBytes: 24576
       properties:
         screenshot:
+          description: Base64 encoded screenshot image data
+          example: iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==
           type: string
-        width:
-          type: number
-        height:
-          type: number
-        cursor_position:
+        cursorPosition:
+          description: The current cursor position when the screenshot was taken
+          example:
+            x: 500
+            'y': 300
           type: object
-        region:
-          type: object
-        format:
-          type: string
-        quality:
-          type: number
-        scale:
-          type: number
-        size_bytes:
+        sizeBytes:
+          description: The size of the screenshot data in bytes
+          example: 24576
           type: number
       required:
-        - height
         - screenshot
-        - width
       type: object
     RegionScreenshotResponse:
       example:
-        cursor_position: '{}'
-        screenshot: screenshot
-        region: '{}'
+        cursorPosition:
+          x: 500
+          'y': 300
+        screenshot: iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==
+        sizeBytes: 24576
       properties:
         screenshot:
+          description: Base64 encoded screenshot image data of the specified region
+          example: iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==
           type: string
-        region:
+        cursorPosition:
+          description: The current cursor position when the region screenshot was
+            taken
+          example:
+            x: 500
+            'y': 300
           type: object
-        cursor_position:
-          type: object
+        sizeBytes:
+          description: The size of the screenshot data in bytes
+          example: 24576
+          type: number
       required:
-        - region
         - screenshot
       type: object
     CompressedScreenshotResponse:
       example:
-        cursor_position: '{}'
-        size_bytes: 5.637376656633329
-        width: 0.8008281904610115
-        format: format
-        scale: 5.962133916683182
-        screenshot: screenshot
-        height: 6.027456183070403
-        quality: 1.4658129805029452
+        cursorPosition:
+          x: 250
+          'y': 150
+        screenshot: iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==
+        sizeBytes: 12288
       properties:
         screenshot:
+          description: Base64 encoded compressed screenshot image data
+          example: iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==
           type: string
-        width:
-          type: number
-        height:
-          type: number
-        format:
-          type: string
-        quality:
-          type: number
-        scale:
-          type: number
-        size_bytes:
-          type: number
-        cursor_position:
+        cursorPosition:
+          description: The current cursor position when the compressed screenshot
+            was taken
+          example:
+            x: 250
+            'y': 150
           type: object
+        sizeBytes:
+          description: The size of the compressed screenshot data in bytes
+          example: 12288
+          type: number
       required:
-        - format
-        - height
-        - quality
-        - scale
         - screenshot
-        - size_bytes
-        - width
       type: object
     DisplayInfoResponse:
       example:
         displays:
-          - '{}'
-          - '{}'
+          - id: 0
+            x: 0
+            'y': 0
+            width: 1920
+            height: 1080
+            is_active: true
       properties:
         displays:
+          description: Array of display information for all connected displays
+          example:
+            - id: 0
+              x: 0
+              'y': 0
+              width: 1920
+              height: 1080
+              is_active: true
           items:
             type: object
           type: array
@@ -8368,16 +8531,22 @@ components:
       type: object
     WindowsResponse:
       example:
-        count: 0.8008281904610115
+        count: 5
         windows:
-          - '{}'
-          - '{}'
+          - id: 12345
+            title: Terminal
       properties:
         windows:
+          description: Array of window information for all visible windows
+          example:
+            - id: 12345
+              title: Terminal
           items:
             type: object
           type: array
         count:
+          description: The total number of windows found
+          example: 5
           type: number
       required:
         - count

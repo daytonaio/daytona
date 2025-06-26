@@ -22,11 +22,10 @@ var _ MappedNullable = &MouseMoveResponse{}
 
 // MouseMoveResponse struct for MouseMoveResponse
 type MouseMoveResponse struct {
-	Success bool `json:"success"`
+	// The actual X coordinate where the mouse cursor ended up
 	X float32 `json:"x"`
+	// The actual Y coordinate where the mouse cursor ended up
 	Y float32 `json:"y"`
-	ActualX float32 `json:"actual_x"`
-	ActualY float32 `json:"actual_y"`
 }
 
 type _MouseMoveResponse MouseMoveResponse
@@ -35,13 +34,10 @@ type _MouseMoveResponse MouseMoveResponse
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewMouseMoveResponse(success bool, x float32, y float32, actualX float32, actualY float32) *MouseMoveResponse {
+func NewMouseMoveResponse(x float32, y float32) *MouseMoveResponse {
 	this := MouseMoveResponse{}
-	this.Success = success
 	this.X = x
 	this.Y = y
-	this.ActualX = actualX
-	this.ActualY = actualY
 	return &this
 }
 
@@ -51,30 +47,6 @@ func NewMouseMoveResponse(success bool, x float32, y float32, actualX float32, a
 func NewMouseMoveResponseWithDefaults() *MouseMoveResponse {
 	this := MouseMoveResponse{}
 	return &this
-}
-
-// GetSuccess returns the Success field value
-func (o *MouseMoveResponse) GetSuccess() bool {
-	if o == nil {
-		var ret bool
-		return ret
-	}
-
-	return o.Success
-}
-
-// GetSuccessOk returns a tuple with the Success field value
-// and a boolean to check if the value has been set.
-func (o *MouseMoveResponse) GetSuccessOk() (*bool, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.Success, true
-}
-
-// SetSuccess sets field value
-func (o *MouseMoveResponse) SetSuccess(v bool) {
-	o.Success = v
 }
 
 // GetX returns the X field value
@@ -125,54 +97,6 @@ func (o *MouseMoveResponse) SetY(v float32) {
 	o.Y = v
 }
 
-// GetActualX returns the ActualX field value
-func (o *MouseMoveResponse) GetActualX() float32 {
-	if o == nil {
-		var ret float32
-		return ret
-	}
-
-	return o.ActualX
-}
-
-// GetActualXOk returns a tuple with the ActualX field value
-// and a boolean to check if the value has been set.
-func (o *MouseMoveResponse) GetActualXOk() (*float32, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.ActualX, true
-}
-
-// SetActualX sets field value
-func (o *MouseMoveResponse) SetActualX(v float32) {
-	o.ActualX = v
-}
-
-// GetActualY returns the ActualY field value
-func (o *MouseMoveResponse) GetActualY() float32 {
-	if o == nil {
-		var ret float32
-		return ret
-	}
-
-	return o.ActualY
-}
-
-// GetActualYOk returns a tuple with the ActualY field value
-// and a boolean to check if the value has been set.
-func (o *MouseMoveResponse) GetActualYOk() (*float32, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.ActualY, true
-}
-
-// SetActualY sets field value
-func (o *MouseMoveResponse) SetActualY(v float32) {
-	o.ActualY = v
-}
-
 func (o MouseMoveResponse) MarshalJSON() ([]byte, error) {
 	toSerialize,err := o.ToMap()
 	if err != nil {
@@ -183,11 +107,8 @@ func (o MouseMoveResponse) MarshalJSON() ([]byte, error) {
 
 func (o MouseMoveResponse) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	toSerialize["success"] = o.Success
 	toSerialize["x"] = o.X
 	toSerialize["y"] = o.Y
-	toSerialize["actual_x"] = o.ActualX
-	toSerialize["actual_y"] = o.ActualY
 	return toSerialize, nil
 }
 
@@ -196,11 +117,8 @@ func (o *MouseMoveResponse) UnmarshalJSON(data []byte) (err error) {
 	// by unmarshalling the object into a generic map with string keys and checking
 	// that every required field exists as a key in the generic map.
 	requiredProperties := []string{
-		"success",
 		"x",
 		"y",
-		"actual_x",
-		"actual_y",
 	}
 
 	allProperties := make(map[string]interface{})

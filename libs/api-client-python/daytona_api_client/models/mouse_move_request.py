@@ -18,7 +18,7 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, StrictFloat, StrictInt
+from pydantic import BaseModel, ConfigDict, Field, StrictFloat, StrictInt
 from typing import Any, ClassVar, Dict, List, Union
 from typing import Optional, Set
 from typing_extensions import Self
@@ -27,8 +27,8 @@ class MouseMoveRequest(BaseModel):
     """
     MouseMoveRequest
     """ # noqa: E501
-    x: Union[StrictFloat, StrictInt]
-    y: Union[StrictFloat, StrictInt]
+    x: Union[StrictFloat, StrictInt] = Field(description="The target X coordinate to move the mouse cursor to")
+    y: Union[StrictFloat, StrictInt] = Field(description="The target Y coordinate to move the mouse cursor to")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["x", "y"]
 

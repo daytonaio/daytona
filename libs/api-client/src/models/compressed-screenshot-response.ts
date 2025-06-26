@@ -19,51 +19,21 @@
  */
 export interface CompressedScreenshotResponse {
   /**
-   *
+   * Base64 encoded compressed screenshot image data
    * @type {string}
    * @memberof CompressedScreenshotResponse
    */
   screenshot: string
   /**
-   *
-   * @type {number}
-   * @memberof CompressedScreenshotResponse
-   */
-  width: number
-  /**
-   *
-   * @type {number}
-   * @memberof CompressedScreenshotResponse
-   */
-  height: number
-  /**
-   *
-   * @type {string}
-   * @memberof CompressedScreenshotResponse
-   */
-  format: string
-  /**
-   *
-   * @type {number}
-   * @memberof CompressedScreenshotResponse
-   */
-  quality: number
-  /**
-   *
-   * @type {number}
-   * @memberof CompressedScreenshotResponse
-   */
-  scale: number
-  /**
-   *
-   * @type {number}
-   * @memberof CompressedScreenshotResponse
-   */
-  size_bytes: number
-  /**
-   *
+   * The current cursor position when the compressed screenshot was taken
    * @type {object}
    * @memberof CompressedScreenshotResponse
    */
-  cursor_position?: object
+  cursorPosition?: object
+  /**
+   * The size of the compressed screenshot data in bytes
+   * @type {number}
+   * @memberof CompressedScreenshotResponse
+   */
+  sizeBytes?: number
 }

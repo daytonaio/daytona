@@ -19,13 +19,13 @@
  */
 export interface KeyboardTypeRequest {
   /**
-   *
+   * The text to type using the keyboard
    * @type {string}
    * @memberof KeyboardTypeRequest
    */
   text: string
   /**
-   *
+   * Delay in milliseconds between keystrokes. Defaults to 0
    * @type {number}
    * @memberof KeyboardTypeRequest
    */

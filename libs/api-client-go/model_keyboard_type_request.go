@@ -22,7 +22,9 @@ var _ MappedNullable = &KeyboardTypeRequest{}
 
 // KeyboardTypeRequest struct for KeyboardTypeRequest
 type KeyboardTypeRequest struct {
+	// The text to type using the keyboard
 	Text string `json:"text"`
+	// Delay in milliseconds between keystrokes. Defaults to 0
 	Delay *float32 `json:"delay,omitempty"`
 }
 

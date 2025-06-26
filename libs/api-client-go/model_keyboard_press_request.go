@@ -22,7 +22,9 @@ var _ MappedNullable = &KeyboardPressRequest{}
 
 // KeyboardPressRequest struct for KeyboardPressRequest
 type KeyboardPressRequest struct {
+	// The key to press (e.g., a, b, c, enter, space, etc.)
 	Key string `json:"key"`
+	// Array of modifier keys to press along with the main key (ctrl, alt, shift, cmd)
 	Modifiers []string `json:"modifiers,omitempty"`
 }
 
