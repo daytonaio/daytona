@@ -116,22 +116,19 @@ func (m *ComputerUseRPCClient) Scroll(request *ScrollRequest) (*ScrollResponse, 
 }
 
 // Keyboard control methods
-func (m *ComputerUseRPCClient) TypeText(request *TypeTextRequest) (*TypeTextResponse, error) {
-	var resp TypeTextResponse
-	err := m.client.Call("Plugin.TypeText", request, &resp)
-	return &resp, err
+func (m *ComputerUseRPCClient) TypeText(request *TypeTextRequest) (*Empty, error) {
+	err := m.client.Call("Plugin.TypeText", request, new(Empty))
+	return new(Empty), err
 }
 
-func (m *ComputerUseRPCClient) PressKey(request *PressKeyRequest) (*PressKeyResponse, error) {
-	var resp PressKeyResponse
-	err := m.client.Call("Plugin.PressKey", request, &resp)
-	return &resp, err
+func (m *ComputerUseRPCClient) PressKey(request *PressKeyRequest) (*Empty, error) {
+	err := m.client.Call("Plugin.PressKey", request, new(Empty))
+	return new(Empty), err
 }
 
-func (m *ComputerUseRPCClient) PressHotkey(request *PressHotkeyRequest) (*PressHotkeyResponse, error) {
-	var resp PressHotkeyResponse
-	err := m.client.Call("Plugin.PressHotkey", request, &resp)
-	return &resp, err
+func (m *ComputerUseRPCClient) PressHotkey(request *PressHotkeyRequest) (*Empty, error) {
+	err := m.client.Call("Plugin.PressHotkey", request, new(Empty))
+	return new(Empty), err
 }
 
 // Display info methods

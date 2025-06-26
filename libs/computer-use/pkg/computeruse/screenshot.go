@@ -107,9 +107,9 @@ func (u *ComputerUse) TakeScreenshot(req *computeruse.ScreenshotRequest) (*compu
 
 	response := &computeruse.ScreenshotResponse{
 		Screenshot: base64Str,
-		Size: computeruse.Size{
-			Width:  bounds.Dx(),
-			Height: bounds.Dy(),
+		CursorPosition: &computeruse.Position{
+			X: mouseX,
+			Y: mouseY,
 		},
 	}
 
@@ -162,11 +162,10 @@ func (u *ComputerUse) TakeRegionScreenshot(req *computeruse.RegionScreenshotRequ
 
 	response := &computeruse.ScreenshotResponse{
 		Screenshot: base64Str,
-		Size: computeruse.Size{
-			Width:  req.Width,
-			Height: req.Height,
+		CursorPosition: &computeruse.Position{
+			X: mouseX + req.X,
+			Y: mouseY + req.Y,
 		},
-		Region: req,
 	}
 
 	if req.ShowCursor {

@@ -220,31 +220,34 @@ func testProcessManagement(t *testing.T, plugin computeruse.IComputerUse) {
 // testScreenshotMethods tests all screenshot methods
 func testScreenshotMethods(t *testing.T, plugin computeruse.IComputerUse) {
 	t.Run("TakeScreenshot", func(t *testing.T) {
-		// Test without cursor
-		resp, err := plugin.TakeScreenshot(&computeruse.ScreenshotRequest{ShowCursor: false})
+		req := &computeruse.ScreenshotRequest{
+			ShowCursor: false,
+		}
+
+		resp, err := plugin.TakeScreenshot(req)
 		assert.NoError(t, err)
 		assert.NotNil(t, resp)
 		assert.NotEmpty(t, resp.Screenshot)
-		assert.True(t, resp.Width > 0)
-		assert.True(t, resp.Height > 0)
-		assert.Nil(t, resp.CursorPosition)
 
 		// Test with cursor
-		resp, err = plugin.TakeScreenshot(&computeruse.ScreenshotRequest{ShowCursor: true})
+		req.ShowCursor = true
+		resp, err = plugin.TakeScreenshot(req)
 		assert.NoError(t, err)
 		assert.NotNil(t, resp)
 		assert.NotEmpty(t, resp.Screenshot)
-		assert.True(t, resp.Width > 0)
-		assert.True(t, resp.Height > 0)
-		// Cursor position might be nil in test environment
+		assert.NotNil(t, resp.CursorPosition)
 	})
 
 	t.Run("TakeRegionScreenshot", func(t *testing.T) {
 		req := &computeruse.RegionScreenshotRequest{
-			X:          100,
-			Y:          100,
-			Width:      200,
-			Height:     200,
+			Position: computeruse.Position{
+				X: 50,
+				Y: 50,
+			},
+			Size: computeruse.Size{
+				Width:  100,
+				Height: 100,
+			},
 			ShowCursor: false,
 		}
 
@@ -252,13 +255,6 @@ func testScreenshotMethods(t *testing.T, plugin computeruse.IComputerUse) {
 		assert.NoError(t, err)
 		assert.NotNil(t, resp)
 		assert.NotEmpty(t, resp.Screenshot)
-		assert.Equal(t, req.Width, resp.Width)
-		assert.Equal(t, req.Height, resp.Height)
-		assert.NotNil(t, resp.Region)
-		assert.Equal(t, req.X, resp.Region.X)
-		assert.Equal(t, req.Y, resp.Region.Y)
-		assert.Equal(t, req.Width, resp.Region.Width)
-		assert.Equal(t, req.Height, resp.Region.Height)
 	})
 
 	t.Run("TakeCompressedScreenshot", func(t *testing.T) {
@@ -273,9 +269,6 @@ func testScreenshotMethods(t *testing.T, plugin computeruse.IComputerUse) {
 		assert.NoError(t, err)
 		assert.NotNil(t, resp)
 		assert.NotEmpty(t, resp.Screenshot)
-		assert.Equal(t, req.Format, resp.Format)
-		assert.Equal(t, req.Quality, resp.Quality)
-		assert.Equal(t, req.Scale, resp.Scale)
 		assert.True(t, resp.SizeBytes > 0)
 
 		// Test JPEG format
@@ -284,16 +277,18 @@ func testScreenshotMethods(t *testing.T, plugin computeruse.IComputerUse) {
 		resp, err = plugin.TakeCompressedScreenshot(req)
 		assert.NoError(t, err)
 		assert.NotNil(t, resp)
-		assert.Equal(t, "jpeg", resp.Format)
-		assert.Equal(t, 75, resp.Quality)
 	})
 
 	t.Run("TakeCompressedRegionScreenshot", func(t *testing.T) {
 		req := &computeruse.CompressedRegionScreenshotRequest{
-			X:          50,
-			Y:          50,
-			Width:      100,
-			Height:     100,
+			Position: computeruse.Position{
+				X: 50,
+				Y: 50,
+			},
+			Size: computeruse.Size{
+				Width:  100,
+				Height: 100,
+			},
 			ShowCursor: false,
 			Format:     "png",
 			Quality:    90,
@@ -304,13 +299,7 @@ func testScreenshotMethods(t *testing.T, plugin computeruse.IComputerUse) {
 		assert.NoError(t, err)
 		assert.NotNil(t, resp)
 		assert.NotEmpty(t, resp.Screenshot)
-		assert.Equal(t, req.Format, resp.Format)
-		assert.Equal(t, req.Quality, resp.Quality)
-		assert.Equal(t, req.Scale, resp.Scale)
 		assert.True(t, resp.SizeBytes > 0)
-		assert.NotNil(t, resp.Region)
-		assert.Equal(t, req.X, resp.Region.X)
-		assert.Equal(t, req.Y, resp.Region.Y)
 	})
 }
 
@@ -326,24 +315,25 @@ func testMouseControlMethods(t *testing.T, plugin computeruse.IComputerUse) {
 
 	t.Run("MoveMouse", func(t *testing.T) {
 		req := &computeruse.MoveMouseRequest{
-			X: 500,
-			Y: 300,
+			Position: computeruse.Position{
+				X: 500,
+				Y: 300,
+			},
 		}
 
 		resp, err := plugin.MoveMouse(req)
 		assert.NoError(t, err)
 		assert.NotNil(t, resp)
-		assert.True(t, resp.Success)
-		assert.Equal(t, req.X, resp.X)
-		assert.Equal(t, req.Y, resp.Y)
-		assert.True(t, resp.ActualX >= 0)
-		assert.True(t, resp.ActualY >= 0)
+		assert.True(t, resp.X >= 0)
+		assert.True(t, resp.Y >= 0)
 	})
 
 	t.Run("Click", func(t *testing.T) {
 		req := &computeruse.ClickRequest{
-			X:      400,
-			Y:      200,
+			Position: computeruse.Position{
+				X: 400,
+				Y: 200,
+			},
 			Button: "left",
 			Double: false,
 		}
@@ -351,10 +341,6 @@ func testMouseControlMethods(t *testing.T, plugin computeruse.IComputerUse) {
 		resp, err := plugin.Click(req)
 		assert.NoError(t, err)
 		assert.NotNil(t, resp)
-		assert.True(t, resp.Success)
-		assert.Equal(t, "click", resp.Action)
-		assert.Equal(t, req.Button, resp.Button)
-		assert.Equal(t, req.Double, resp.Double)
 		assert.Equal(t, req.X, resp.X)
 		assert.Equal(t, req.Y, resp.Y)
 
@@ -363,8 +349,6 @@ func testMouseControlMethods(t *testing.T, plugin computeruse.IComputerUse) {
 		resp, err = plugin.Click(req)
 		assert.NoError(t, err)
 		assert.NotNil(t, resp)
-		assert.True(t, resp.Success)
-		assert.True(t, resp.Double)
 
 		// Test right click
 		req.Button = "right"
@@ -372,7 +356,6 @@ func testMouseControlMethods(t *testing.T, plugin computeruse.IComputerUse) {
 		resp, err = plugin.Click(req)
 		assert.NoError(t, err)
 		assert.NotNil(t, resp)
-		assert.Equal(t, "right", resp.Button)
 	})
 
 	t.Run("Drag", func(t *testing.T) {
@@ -387,21 +370,16 @@ func testMouseControlMethods(t *testing.T, plugin computeruse.IComputerUse) {
 		resp, err := plugin.Drag(req)
 		assert.NoError(t, err)
 		assert.NotNil(t, resp)
-		assert.True(t, resp.Success)
-		assert.Equal(t, "drag", resp.Action)
-		assert.Equal(t, req.Button, resp.Button)
-		assert.NotNil(t, resp.From)
-		assert.Equal(t, req.StartX, resp.From.X)
-		assert.Equal(t, req.StartY, resp.From.Y)
-		assert.NotNil(t, resp.To)
-		assert.Equal(t, req.EndX, resp.To.X)
-		assert.Equal(t, req.EndY, resp.To.Y)
+		assert.True(t, resp.X >= 0)
+		assert.True(t, resp.Y >= 0)
 	})
 
 	t.Run("Scroll", func(t *testing.T) {
 		req := &computeruse.ScrollRequest{
-			X:         300,
-			Y:         300,
+			Position: computeruse.Position{
+				X: 300,
+				Y: 300,
+			},
 			Direction: "up",
 			Amount:    3,
 		}
@@ -532,10 +510,10 @@ func TestPluginIntegration(t *testing.T) {
 		assert.NotNil(t, screenshot)
 
 		// 5. Move mouse and click
-		_, err = client.plugin.MoveMouse(&computeruse.MoveMouseRequest{X: 100, Y: 100})
+		_, err = client.plugin.MoveMouse(&computeruse.MoveMouseRequest{Position: computeruse.Position{X: 100, Y: 100}})
 		assert.NoError(t, err)
 
-		_, err = client.plugin.Click(&computeruse.ClickRequest{X: 100, Y: 100, Button: "left"})
+		_, err = client.plugin.Click(&computeruse.ClickRequest{Position: computeruse.Position{X: 200, Y: 200}, Button: "left"})
 		assert.NoError(t, err)
 
 		// 6. Type some text
@@ -593,10 +571,14 @@ func TestErrorHandling(t *testing.T) {
 	t.Run("InvalidRegionScreenshot", func(t *testing.T) {
 		// Test with invalid region (negative coordinates)
 		req := &computeruse.RegionScreenshotRequest{
-			X:      -100,
-			Y:      -100,
-			Width:  100,
-			Height: 100,
+			Position: computeruse.Position{
+				X: -100,
+				Y: -100,
+			},
+			Size: computeruse.Size{
+				Width:  100,
+				Height: 100,
+			},
 		}
 
 		// This might not error in all environments, but should handle gracefully
@@ -661,7 +643,7 @@ func TestConcurrentAccess(t *testing.T) {
 				x := 100 + (id * 50)
 				y := 100 + (id * 50)
 
-				_, err := client.plugin.MoveMouse(&computeruse.MoveMouseRequest{X: x, Y: y})
+				_, err := client.plugin.MoveMouse(&computeruse.MoveMouseRequest{Position: computeruse.Position{X: x, Y: y}})
 				if err != nil {
 					t.Errorf("Goroutine %d: MoveMouse failed: %v", id, err)
 					return
@@ -715,7 +697,7 @@ func TestPerformance(t *testing.T) {
 			x := 100 + (i * 10)
 			y := 100 + (i * 10)
 
-			_, err := client.plugin.MoveMouse(&computeruse.MoveMouseRequest{X: x, Y: y})
+			_, err := client.plugin.MoveMouse(&computeruse.MoveMouseRequest{Position: computeruse.Position{X: x, Y: y}})
 			assert.NoError(t, err)
 		}
 

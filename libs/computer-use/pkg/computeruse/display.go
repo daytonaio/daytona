@@ -119,14 +119,7 @@ func (u *ComputerUse) TakeCompressedScreenshot(req *computeruse.CompressedScreen
 
 	response := &computeruse.ScreenshotResponse{
 		Screenshot: base64Str,
-		Size: computeruse.Size{
-			Width:  int(float64(bounds.Dx()) * params.Scale),
-			Height: int(float64(bounds.Dy()) * params.Scale),
-		},
-		Format:    params.Format,
-		Quality:   params.Quality,
-		Scale:     params.Scale,
-		SizeBytes: len(imageData),
+		SizeBytes:  len(imageData),
 	}
 
 	if req.ShowCursor {
@@ -177,29 +170,9 @@ func (u *ComputerUse) TakeCompressedRegionScreenshot(req *computeruse.Compressed
 
 	base64Str := base64.StdEncoding.EncodeToString(imageData)
 
-	region := &computeruse.RegionScreenshotRequest{
-		Position: computeruse.Position{
-			X: req.X,
-			Y: req.Y,
-		},
-		Size: computeruse.Size{
-			Width:  int(float64(req.Width) * params.Scale),
-			Height: int(float64(req.Height) * params.Scale),
-		},
-		ShowCursor: req.ShowCursor,
-	}
-
 	response := &computeruse.ScreenshotResponse{
 		Screenshot: base64Str,
-		Size: computeruse.Size{
-			Width:  int(float64(req.Width) * params.Scale),
-			Height: int(float64(req.Height) * params.Scale),
-		},
-		Region:    region,
-		Format:    params.Format,
-		Quality:   params.Quality,
-		Scale:     params.Scale,
-		SizeBytes: len(imageData),
+		SizeBytes:  len(imageData),
 	}
 
 	if req.ShowCursor {

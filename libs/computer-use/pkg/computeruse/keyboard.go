@@ -11,19 +11,17 @@ import (
 	"github.com/go-vgo/robotgo"
 )
 
-func (u *ComputerUse) TypeText(req *computeruse.TypeTextRequest) (*computeruse.TypeTextResponse, error) {
+func (u *ComputerUse) TypeText(req *computeruse.TypeTextRequest) (*computeruse.Empty, error) {
 	if req.Delay > 0 {
 		robotgo.TypeStr(req.Text, req.Delay)
 	} else {
 		robotgo.TypeStr(req.Text)
 	}
 
-	return &computeruse.TypeTextResponse{
-		Typed: req.Text,
-	}, nil
+	return new(computeruse.Empty), nil
 }
 
-func (u *ComputerUse) PressKey(req *computeruse.PressKeyRequest) (*computeruse.PressKeyResponse, error) {
+func (u *ComputerUse) PressKey(req *computeruse.PressKeyRequest) (*computeruse.Empty, error) {
 	if len(req.Modifiers) > 0 {
 		err := robotgo.KeyTap(req.Key, req.Modifiers)
 		if err != nil {
@@ -36,13 +34,10 @@ func (u *ComputerUse) PressKey(req *computeruse.PressKeyRequest) (*computeruse.P
 		}
 	}
 
-	return &computeruse.PressKeyResponse{
-		Key:       req.Key,
-		Modifiers: req.Modifiers,
-	}, nil
+	return new(computeruse.Empty), nil
 }
 
-func (u *ComputerUse) PressHotkey(req *computeruse.PressHotkeyRequest) (*computeruse.PressHotkeyResponse, error) {
+func (u *ComputerUse) PressHotkey(req *computeruse.PressHotkeyRequest) (*computeruse.Empty, error) {
 	keys := strings.Split(req.Keys, "+")
 	if len(keys) < 2 {
 		return nil, fmt.Errorf("invalid hotkey format")
@@ -56,7 +51,5 @@ func (u *ComputerUse) PressHotkey(req *computeruse.PressHotkeyRequest) (*compute
 		return nil, err
 	}
 
-	return &computeruse.PressHotkeyResponse{
-		Hotkey: req.Keys,
-	}, nil
+	return new(computeruse.Empty), nil
 }

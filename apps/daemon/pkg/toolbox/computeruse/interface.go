@@ -38,9 +38,9 @@ type IComputerUse interface {
 	Scroll(*ScrollRequest) (*ScrollResponse, error)
 
 	// Keyboard control methods
-	TypeText(*TypeTextRequest) (*TypeTextResponse, error)
-	PressKey(*PressKeyRequest) (*PressKeyResponse, error)
-	PressHotkey(*PressHotkeyRequest) (*PressHotkeyResponse, error)
+	TypeText(*TypeTextRequest) (*Empty, error)
+	PressKey(*PressKeyRequest) (*Empty, error)
+	PressHotkey(*PressHotkeyRequest) (*Empty, error)
 
 	// Display info methods
 	GetDisplayInfo() (*DisplayInfoResponse, error)
@@ -133,33 +133,15 @@ type PressHotkeyRequest struct {
 }
 
 // Response structs for keyboard operations
-type TypeTextResponse struct {
-	Typed string `json:"typed"`
-}
-
-type PressKeyResponse struct {
-	Key       string   `json:"key"`
-	Modifiers []string `json:"modifiers"`
-}
-
-type PressHotkeyResponse struct {
-	Hotkey string `json:"hotkey"`
-}
-
 type ScrollResponse struct {
 	Success bool `json:"success"`
 }
 
 // Response structs
 type ScreenshotResponse struct {
-	Screenshot string `json:"screenshot"`
-	Size
-	CursorPosition *Position                `json:"cursorPosition,omitempty"`
-	Region         *RegionScreenshotRequest `json:"region,omitempty"`
-	Format         string                   `json:"format,omitempty"`
-	Quality        int                      `json:"quality,omitempty"`
-	Scale          float64                  `json:"scale,omitempty"`
-	SizeBytes      int                      `json:"sizeBytes,omitempty"`
+	Screenshot     string    `json:"screenshot"`
+	CursorPosition *Position `json:"cursorPosition,omitempty"`
+	SizeBytes      int       `json:"sizeBytes,omitempty"`
 }
 
 // Mouse response structs - separated by operation type
@@ -169,14 +151,10 @@ type MousePositionResponse struct {
 
 type MouseClickResponse struct {
 	Position
-	Button string `json:"button"`
-	Double bool   `json:"double"`
 }
 
 type MouseDragResponse struct {
-	From     Position `json:"from"`
-	To       Position `json:"to"`
-	Position          // Final position
+	Position // Final position
 }
 
 type DisplayInfoResponse struct {
@@ -406,7 +384,7 @@ func WrapScrollHandler(fn func(*ScrollRequest) (*ScrollResponse, error)) gin.Han
 	}
 }
 
-func WrapTypeTextHandler(fn func(*TypeTextRequest) (*TypeTextResponse, error)) gin.HandlerFunc {
+func WrapTypeTextHandler(fn func(*TypeTextRequest) (*Empty, error)) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req TypeTextRequest
 		if err := c.ShouldBindJSON(&req); err != nil {
@@ -423,7 +401,7 @@ func WrapTypeTextHandler(fn func(*TypeTextRequest) (*TypeTextResponse, error)) g
 	}
 }
 
-func WrapPressKeyHandler(fn func(*PressKeyRequest) (*PressKeyResponse, error)) gin.HandlerFunc {
+func WrapPressKeyHandler(fn func(*PressKeyRequest) (*Empty, error)) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req PressKeyRequest
 		if err := c.ShouldBindJSON(&req); err != nil {
@@ -440,7 +418,7 @@ func WrapPressKeyHandler(fn func(*PressKeyRequest) (*PressKeyResponse, error)) g
 	}
 }
 
-func WrapPressHotkeyHandler(fn func(*PressHotkeyRequest) (*PressHotkeyResponse, error)) gin.HandlerFunc {
+func WrapPressHotkeyHandler(fn func(*PressHotkeyRequest) (*Empty, error)) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req PressHotkeyRequest
 		if err := c.ShouldBindJSON(&req); err != nil {
