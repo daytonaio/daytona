@@ -23,12 +23,10 @@ from typing import Any, ClassVar, Dict, List
 from typing import Optional, Set
 from typing_extensions import Self
 
-
 class ComputerUseStartResponse(BaseModel):
     """
     ComputerUseStartResponse
-    """  # noqa: E501
-
+    """ # noqa: E501
     message: StrictStr = Field(description="A message indicating the result of starting computer use processes")
     status: Dict[str, Any] = Field(description="Status information about all VNC desktop processes after starting")
     additional_properties: Dict[str, Any] = {}
@@ -39,6 +37,7 @@ class ComputerUseStartResponse(BaseModel):
         validate_assignment=True,
         protected_namespaces=(),
     )
+
 
     def to_str(self) -> str:
         """Returns the string representation of the model using alias"""
@@ -65,11 +64,9 @@ class ComputerUseStartResponse(BaseModel):
           are ignored.
         * Fields in `self.additional_properties` are added to the output dict.
         """
-        excluded_fields: Set[str] = set(
-            [
-                "additional_properties",
-            ]
-        )
+        excluded_fields: Set[str] = set([
+            "additional_properties",
+        ])
 
         _dict = self.model_dump(
             by_alias=True,
@@ -92,10 +89,15 @@ class ComputerUseStartResponse(BaseModel):
         if not isinstance(obj, dict):
             return cls.model_validate(obj)
 
-        _obj = cls.model_validate({"message": obj.get("message"), "status": obj.get("status")})
+        _obj = cls.model_validate({
+            "message": obj.get("message"),
+            "status": obj.get("status")
+        })
         # store additional fields in additional_properties
         for _key in obj.keys():
             if _key not in cls.__properties:
                 _obj.additional_properties[_key] = obj.get(_key)
 
         return _obj
+
+

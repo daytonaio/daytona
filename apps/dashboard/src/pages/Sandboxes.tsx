@@ -240,48 +240,74 @@ const Sandboxes: React.FC = () => {
       const statusResponse = await toolboxApi.getComputerUseStatus(id, selectedOrganization?.id)
       const status = statusResponse.data.status
 
-      // Check if any of the VNC processes are running
-      const isRunning = Object.values(status).some((processStatus: any) => processStatus?.running === true)
+      // Check if computer use is active (all processes running)
+      if (status === 'active') {
+        // Computer use is already active, open VNC URL
+        const sandbox = sandboxes.find((s) => s.id === id)
+        if (!sandbox) {
+          toast.error('Sandbox not found')
+          return
+        }
 
-      if (!isRunning) {
-        // Try to start computer use
+        let vncUrl: string
+        if (!sandbox.daemonVersion) {
+          vncUrl = `https://6080-${sandbox.id}.${sandbox.runnerDomain}/vnc.html`
+        } else {
+          vncUrl =
+            import.meta.env.VITE_PROXY_TEMPLATE_URL?.replace('{{PORT}}', '6080').replace('{{sandboxId}}', sandbox.id) +
+            '/vnc.html'
+        }
+
+        if (vncUrl) {
+          window.open(vncUrl, '_blank')
+          toast.success('Opening VNC desktop...')
+        } else {
+          toast.error('Failed to construct VNC URL')
+        }
+      } else {
+        // Computer use is not active, try to start it
         try {
           await toolboxApi.startComputerUse(id, selectedOrganization?.id)
           toast.success('Starting VNC desktop...')
+
+          // Wait a moment for processes to start, then open VNC
+          setTimeout(async () => {
+            try {
+              const newStatusResponse = await toolboxApi.getComputerUseStatus(id, selectedOrganization?.id)
+              const newStatus = newStatusResponse.data.status
+
+              if (newStatus === 'active') {
+                const sandbox = sandboxes.find((s) => s.id === id)
+                if (sandbox) {
+                  let vncUrl: string
+                  if (!sandbox.daemonVersion) {
+                    vncUrl = `https://6080-${sandbox.id}.${sandbox.runnerDomain}/vnc.html`
+                  } else {
+                    vncUrl =
+                      import.meta.env.VITE_PROXY_TEMPLATE_URL?.replace('{{PORT}}', '6080').replace(
+                        '{{sandboxId}}',
+                        sandbox.id,
+                      ) + '/vnc.html'
+                  }
+
+                  if (vncUrl) {
+                    window.open(vncUrl, '_blank')
+                    toast.success('VNC desktop is ready!')
+                  }
+                }
+              } else {
+                toast.error(`VNC desktop failed to start. Status: ${newStatus}`)
+              }
+            } catch (error) {
+              handleApiError(error, 'Failed to check VNC status after start')
+            }
+          }, 5000) // Wait 5 seconds for processes to start
         } catch (startError) {
           handleApiError(startError, 'Failed to start VNC desktop')
-          return
         }
       }
-
-      // Get the sandbox to find the runner domain
-      const sandbox = sandboxes.find((s) => s.id === id)
-      if (!sandbox) {
-        toast.error('Sandbox not found')
-        return
-      }
-
-      // Construct the VNC URL
-      let vncUrl: string
-      if (!sandbox.daemonVersion) {
-        vncUrl = `https://6080-${id}.${sandbox.runnerDomain}/vnc.html`
-      } else {
-        const baseUrl = import.meta.env.VITE_PROXY_TEMPLATE_URL?.replace('{{PORT}}', '6080').replace(
-          '{{sandboxId}}',
-          id,
-        )
-        if (!baseUrl) {
-          toast.error('VNC URL template not configured')
-          return
-        }
-        vncUrl = `${baseUrl}/vnc.html`
-      }
-
-      // Open VNC in new tab
-      window.open(vncUrl, '_blank', 'noopener,noreferrer')
-      toast.success('Opening VNC desktop...')
     } catch (error) {
-      handleApiError(error, 'Failed to access VNC desktop')
+      handleApiError(error, 'Failed to check VNC status')
     } finally {
       setLoadingSandboxes((prev) => ({ ...prev, [id]: false }))
     }

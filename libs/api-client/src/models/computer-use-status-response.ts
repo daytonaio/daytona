@@ -19,9 +19,19 @@
  */
 export interface ComputerUseStatusResponse {
   /**
-   * Status information about all VNC desktop processes
-   * @type {object}
+   * Status of computer use services (active, partial, inactive, error)
+   * @type {string}
    * @memberof ComputerUseStatusResponse
    */
-  status: object
+  status: ComputerUseStatusResponseStatusEnum
 }
+
+export const ComputerUseStatusResponseStatusEnum = {
+  ACTIVE: 'active',
+  PARTIAL: 'partial',
+  INACTIVE: 'inactive',
+  ERROR: 'error',
+} as const
+
+export type ComputerUseStatusResponseStatusEnum =
+  (typeof ComputerUseStatusResponseStatusEnum)[keyof typeof ComputerUseStatusResponseStatusEnum]

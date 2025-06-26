@@ -452,7 +452,47 @@ func (c *ComputerUse) GetProcessErrors(req *computeruse.ProcessRequest) (string,
 }
 
 func (c *ComputerUse) GetStatus() (*computeruse.StatusResponse, error) {
+	// Get the current process status
+	processStatus, err := c.GetProcessStatus()
+	if err != nil {
+		return &computeruse.StatusResponse{
+			Status: "error",
+		}, err
+	}
+
+	// Check if all required processes are running
+	requiredProcesses := []string{"xvfb", "xfce4", "x11vnc", "novnc"}
+	allRunning := true
+
+	for _, processName := range requiredProcesses {
+		if status, exists := processStatus[processName]; !exists || !status.Running {
+			allRunning = false
+			break
+		}
+	}
+
+	if allRunning {
+		return &computeruse.StatusResponse{
+			Status: "active",
+		}, nil
+	}
+
+	// Check if any processes are running
+	anyRunning := false
+	for _, status := range processStatus {
+		if status.Running {
+			anyRunning = true
+			break
+		}
+	}
+
+	if anyRunning {
+		return &computeruse.StatusResponse{
+			Status: "partial",
+		}, nil
+	}
+
 	return &computeruse.StatusResponse{
-		Status: "ok",
+		Status: "inactive",
 	}, nil
 }

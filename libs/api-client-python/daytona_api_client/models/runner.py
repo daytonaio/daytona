@@ -26,12 +26,10 @@ from daytona_api_client.models.sandbox_class import SandboxClass
 from typing import Optional, Set
 from typing_extensions import Self
 
-
 class Runner(BaseModel):
     """
     Runner
-    """  # noqa: E501
-
+    """ # noqa: E501
     id: StrictStr = Field(description="The ID of the runner")
     domain: StrictStr = Field(description="The domain of the runner")
     api_url: StrictStr = Field(description="The API URL of the runner", alias="apiUrl")
@@ -46,39 +44,19 @@ class Runner(BaseModel):
     capacity: Union[StrictFloat, StrictInt] = Field(description="The capacity of the runner")
     region: RunnerRegion = Field(description="The region of the runner")
     state: RunnerState = Field(description="The state of the runner")
-    last_checked: Optional[StrictStr] = Field(
-        default=None, description="The last time the runner was checked", alias="lastChecked"
-    )
+    last_checked: Optional[StrictStr] = Field(default=None, description="The last time the runner was checked", alias="lastChecked")
     unschedulable: StrictBool = Field(description="Whether the runner is unschedulable")
     created_at: StrictStr = Field(description="The creation timestamp of the runner", alias="createdAt")
     updated_at: StrictStr = Field(description="The last update timestamp of the runner", alias="updatedAt")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = [
-        "id",
-        "domain",
-        "apiUrl",
-        "apiKey",
-        "cpu",
-        "memory",
-        "disk",
-        "gpu",
-        "gpuType",
-        "class",
-        "used",
-        "capacity",
-        "region",
-        "state",
-        "lastChecked",
-        "unschedulable",
-        "createdAt",
-        "updatedAt",
-    ]
+    __properties: ClassVar[List[str]] = ["id", "domain", "apiUrl", "apiKey", "cpu", "memory", "disk", "gpu", "gpuType", "class", "used", "capacity", "region", "state", "lastChecked", "unschedulable", "createdAt", "updatedAt"]
 
     model_config = ConfigDict(
         populate_by_name=True,
         validate_assignment=True,
         protected_namespaces=(),
     )
+
 
     def to_str(self) -> str:
         """Returns the string representation of the model using alias"""
@@ -105,11 +83,9 @@ class Runner(BaseModel):
           are ignored.
         * Fields in `self.additional_properties` are added to the output dict.
         """
-        excluded_fields: Set[str] = set(
-            [
-                "additional_properties",
-            ]
-        )
+        excluded_fields: Set[str] = set([
+            "additional_properties",
+        ])
 
         _dict = self.model_dump(
             by_alias=True,
@@ -132,31 +108,31 @@ class Runner(BaseModel):
         if not isinstance(obj, dict):
             return cls.model_validate(obj)
 
-        _obj = cls.model_validate(
-            {
-                "id": obj.get("id"),
-                "domain": obj.get("domain"),
-                "apiUrl": obj.get("apiUrl"),
-                "apiKey": obj.get("apiKey"),
-                "cpu": obj.get("cpu"),
-                "memory": obj.get("memory"),
-                "disk": obj.get("disk"),
-                "gpu": obj.get("gpu"),
-                "gpuType": obj.get("gpuType"),
-                "class": obj.get("class"),
-                "used": obj.get("used"),
-                "capacity": obj.get("capacity"),
-                "region": obj.get("region"),
-                "state": obj.get("state"),
-                "lastChecked": obj.get("lastChecked"),
-                "unschedulable": obj.get("unschedulable"),
-                "createdAt": obj.get("createdAt"),
-                "updatedAt": obj.get("updatedAt"),
-            }
-        )
+        _obj = cls.model_validate({
+            "id": obj.get("id"),
+            "domain": obj.get("domain"),
+            "apiUrl": obj.get("apiUrl"),
+            "apiKey": obj.get("apiKey"),
+            "cpu": obj.get("cpu"),
+            "memory": obj.get("memory"),
+            "disk": obj.get("disk"),
+            "gpu": obj.get("gpu"),
+            "gpuType": obj.get("gpuType"),
+            "class": obj.get("class"),
+            "used": obj.get("used"),
+            "capacity": obj.get("capacity"),
+            "region": obj.get("region"),
+            "state": obj.get("state"),
+            "lastChecked": obj.get("lastChecked"),
+            "unschedulable": obj.get("unschedulable"),
+            "createdAt": obj.get("createdAt"),
+            "updatedAt": obj.get("updatedAt")
+        })
         # store additional fields in additional_properties
         for _key in obj.keys():
             if _key not in cls.__properties:
                 _obj.additional_properties[_key] = obj.get(_key)
 
         return _obj
+
+
