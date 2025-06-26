@@ -305,8 +305,31 @@ const Sandboxes: React.FC = () => {
               handleApiError(error, 'Failed to check VNC status after start')
             }
           }, 5000) // Wait 5 seconds for processes to start
-        } catch (startError) {
-          handleApiError(startError, 'Failed to start VNC desktop')
+        } catch (startError: any) {
+          // Check if this is a computer-use availability error
+          const errorMessage = startError?.response?.data?.message || startError?.message || String(startError)
+
+          if (errorMessage === 'Computer-use functionality is not available') {
+            toast.error('Computer-use functionality is not available', {
+              description: (
+                <div>
+                  <div>Computer-use dependencies are missing in the runtime environment.</div>
+                  <div className="mt-2">
+                    <a
+                      href={`${DAYTONA_DOCS_URL}/getting-started/computer-use`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary hover:underline"
+                    >
+                      See documentation on how to configure the runtime for computer-use
+                    </a>
+                  </div>
+                </div>
+              ),
+            })
+          } else {
+            handleApiError(startError, 'Failed to start VNC desktop')
+          }
         }
       }
     } catch (error) {
