@@ -148,31 +148,19 @@ func (m *ComputerUseRPCServer) Scroll(arg *ScrollRequest, resp *ScrollResponse) 
 }
 
 // Keyboard control methods
-func (m *ComputerUseRPCServer) TypeText(arg *TypeTextRequest, resp *TypeTextResponse) error {
-	response, err := m.Impl.TypeText(arg)
-	if err != nil {
-		return err
-	}
-	*resp = *response
-	return nil
+func (m *ComputerUseRPCServer) TypeText(arg *TypeTextRequest, resp *Empty) error {
+	_, err := m.Impl.TypeText(arg)
+	return err
 }
 
-func (m *ComputerUseRPCServer) PressKey(arg *PressKeyRequest, resp *PressKeyResponse) error {
-	response, err := m.Impl.PressKey(arg)
-	if err != nil {
-		return err
-	}
-	*resp = *response
-	return nil
+func (m *ComputerUseRPCServer) PressKey(arg *PressKeyRequest, resp *Empty) error {
+	_, err := m.Impl.PressKey(arg)
+	return err
 }
 
-func (m *ComputerUseRPCServer) PressHotkey(arg *PressHotkeyRequest, resp *PressHotkeyResponse) error {
-	response, err := m.Impl.PressHotkey(arg)
-	if err != nil {
-		return err
-	}
-	*resp = *response
-	return nil
+func (m *ComputerUseRPCServer) PressHotkey(arg *PressHotkeyRequest, resp *Empty) error {
+	_, err := m.Impl.PressHotkey(arg)
+	return err
 }
 
 // Display info methods

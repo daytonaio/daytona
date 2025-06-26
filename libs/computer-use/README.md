@@ -1,6 +1,6 @@
 # ComputerUse - Process Management for VNC Desktop Environment
 
-This package provides a Go implementation to manage long-running OS processes that were previously managed by supervisor. It handles the startup, monitoring, and shutdown of the VNC desktop environment components.
+This package provides a Computer Use plugin used by the Daytona Daemon to allow agents to control VNC desktop environments.
 
 ## Overview
 

@@ -32,10 +32,6 @@ func (u *ComputerUse) TakeScreenshot(req *computeruse.ScreenshotRequest) (*compu
 
 	return &computeruse.ScreenshotResponse{
 		Screenshot: base64Str,
-		Size: computeruse.Size{
-			Width:  1,
-			Height: 1,
-		},
 	}, nil
 }
 
@@ -57,11 +53,6 @@ func (u *ComputerUse) TakeRegionScreenshot(req *computeruse.RegionScreenshotRequ
 
 	return &computeruse.ScreenshotResponse{
 		Screenshot: base64Str,
-		Size: computeruse.Size{
-			Width:  req.Width,
-			Height: req.Height,
-		},
-		Region: req,
 	}, nil
 }
 
@@ -83,14 +74,7 @@ func (u *ComputerUse) TakeCompressedScreenshot(req *computeruse.CompressedScreen
 
 	return &computeruse.ScreenshotResponse{
 		Screenshot: base64Str,
-		Size: computeruse.Size{
-			Width:  1920,
-			Height: 1080,
-		},
-		Format:    req.Format,
-		Quality:   req.Quality,
-		Scale:     req.Scale,
-		SizeBytes: len(buf.Bytes()),
+		SizeBytes:  len(buf.Bytes()),
 	}, nil
 }
 
@@ -110,29 +94,9 @@ func (u *ComputerUse) TakeCompressedRegionScreenshot(req *computeruse.Compressed
 
 	base64Str := base64.StdEncoding.EncodeToString(buf.Bytes())
 
-	region := &computeruse.RegionScreenshotRequest{
-		Position: computeruse.Position{
-			X: req.X,
-			Y: req.Y,
-		},
-		Size: computeruse.Size{
-			Width:  req.Width,
-			Height: req.Height,
-		},
-		ShowCursor: req.ShowCursor,
-	}
-
 	return &computeruse.ScreenshotResponse{
 		Screenshot: base64Str,
-		Size: computeruse.Size{
-			Width:  req.Width,
-			Height: req.Height,
-		},
-		Region:    region,
-		Format:    req.Format,
-		Quality:   req.Quality,
-		Scale:     req.Scale,
-		SizeBytes: len(buf.Bytes()),
+		SizeBytes:  len(buf.Bytes()),
 	}, nil
 }
 
@@ -155,17 +119,11 @@ func (u *ComputerUse) MoveMouse(req *computeruse.MoveMouseRequest) (*computeruse
 }
 
 func (u *ComputerUse) Click(req *computeruse.ClickRequest) (*computeruse.MouseClickResponse, error) {
-	if req.Button == "" {
-		req.Button = "left"
-	}
-
 	return &computeruse.MouseClickResponse{
 		Position: computeruse.Position{
 			X: req.X,
 			Y: req.Y,
 		},
-		Button: req.Button,
-		Double: req.Double,
 	}, nil
 }
 
@@ -175,14 +133,6 @@ func (u *ComputerUse) Drag(req *computeruse.DragRequest) (*computeruse.MouseDrag
 	}
 
 	return &computeruse.MouseDragResponse{
-		From: computeruse.Position{
-			X: req.StartX,
-			Y: req.StartY,
-		},
-		To: computeruse.Position{
-			X: req.EndX,
-			Y: req.EndY,
-		},
 		Position: computeruse.Position{
 			X: req.EndX,
 			Y: req.EndY,
@@ -196,23 +146,16 @@ func (u *ComputerUse) Scroll(req *computeruse.ScrollRequest) (*computeruse.Scrol
 	}, nil
 }
 
-func (u *ComputerUse) TypeText(req *computeruse.TypeTextRequest) (*computeruse.TypeTextResponse, error) {
-	return &computeruse.TypeTextResponse{
-		Typed: req.Text,
-	}, nil
+func (u *ComputerUse) TypeText(req *computeruse.TypeTextRequest) (*computeruse.Empty, error) {
+	return new(computeruse.Empty), nil
 }
 
-func (u *ComputerUse) PressKey(req *computeruse.PressKeyRequest) (*computeruse.PressKeyResponse, error) {
-	return &computeruse.PressKeyResponse{
-		Key:       req.Key,
-		Modifiers: req.Modifiers,
-	}, nil
+func (u *ComputerUse) PressKey(req *computeruse.PressKeyRequest) (*computeruse.Empty, error) {
+	return new(computeruse.Empty), nil
 }
 
-func (u *ComputerUse) PressHotkey(req *computeruse.PressHotkeyRequest) (*computeruse.PressHotkeyResponse, error) {
-	return &computeruse.PressHotkeyResponse{
-		Hotkey: req.Keys,
-	}, nil
+func (u *ComputerUse) PressHotkey(req *computeruse.PressHotkeyRequest) (*computeruse.Empty, error) {
+	return new(computeruse.Empty), nil
 }
 
 func (u *ComputerUse) GetDisplayInfo() (*computeruse.DisplayInfoResponse, error) {

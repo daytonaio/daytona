@@ -69,8 +69,6 @@ func (u *ComputerUse) Click(req *computeruse.ClickRequest) (*computeruse.MouseCl
 			X: actualX,
 			Y: actualY,
 		},
-		Button: req.Button,
-		Double: req.Double,
 	}, nil
 }
 
@@ -129,14 +127,6 @@ func (u *ComputerUse) Drag(req *computeruse.DragRequest) (*computeruse.MouseDrag
 	actualX, actualY := robotgo.Location()
 
 	return &computeruse.MouseDragResponse{
-		From: computeruse.Position{
-			X: req.StartX,
-			Y: req.StartY,
-		},
-		To: computeruse.Position{
-			X: req.EndX,
-			Y: req.EndY,
-		},
 		Position: computeruse.Position{
 			X: actualX,
 			Y: actualY,
