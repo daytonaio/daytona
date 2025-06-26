@@ -52,9 +52,7 @@ export class AuditService {
     return await this.auditLogRepository.save(auditLog)
   }
 
-  @Cron(CronExpression.EVERY_DAY_AT_2AM, {
-    timeZone: 'America/Los_Angeles',
-  })
+  @Cron(CronExpression.EVERY_DAY_AT_2AM)
   async cleanupOldAuditLogs(): Promise<void> {
     const lockKey = 'cleanup-old-audit-logs'
     if (!(await this.redisLockProvider.lock(lockKey, 300))) {
