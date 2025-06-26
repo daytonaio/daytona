@@ -76,7 +76,7 @@ const configuration = {
     apiKey: process.env.PROXY_API_KEY,
   },
   audit: {
-    logToolboxRequestMetadata: process.env.AUDIT_LOG_TOOLBOX_REQUEST_METADATA === 'true',
+    toolboxRequestsEnabled: process.env.AUDIT_TOOLBOX_REQUESTS_ENABLED === 'true',
     retentionDays: process.env.AUDIT_LOG_RETENTION_DAYS
       ? parseInt(process.env.AUDIT_LOG_RETENTION_DAYS, 10)
       : undefined,

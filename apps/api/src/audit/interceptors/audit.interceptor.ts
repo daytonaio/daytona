@@ -45,7 +45,13 @@ export class AuditInterceptor implements NestInterceptor {
 
     const auditContext = this.reflector.get<AuditContext>(AUDIT_CONTEXT_KEY, context.getHandler())
 
+    // Non-audited request
     if (!auditContext) {
+      return next.handle()
+    }
+
+    // Toolbox requests are not audited by default
+    if (this.isToolboxAction(auditContext.action) && !this.configService.get('audit.toolboxRequestsEnabled')) {
       return next.handle()
     }
 
@@ -124,10 +130,6 @@ export class AuditInterceptor implements NestInterceptor {
 
   private resolveRequestMetadata(auditContext: AuditContext, request: RequestWithUser): AuditLogMetadata | null {
     if (!auditContext.requestMetadata) {
-      return null
-    }
-
-    if (this.isToolboxAction(auditContext.action) && !this.configService.get('audit.logToolboxRequestMetadata')) {
       return null
     }
 
