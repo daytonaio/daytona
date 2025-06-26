@@ -18,7 +18,7 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, StrictStr
+from pydantic import BaseModel, ConfigDict, Field, StrictStr
 from typing import Any, ClassVar, Dict, List
 from typing import Optional, Set
 from typing_extensions import Self
@@ -27,8 +27,8 @@ class ComputerUseStopResponse(BaseModel):
     """
     ComputerUseStopResponse
     """ # noqa: E501
-    message: StrictStr
-    status: Dict[str, Any]
+    message: StrictStr = Field(description="A message indicating the result of stopping computer use processes")
+    status: Dict[str, Any] = Field(description="Status information about all VNC desktop processes after stopping")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["message", "status"]
 

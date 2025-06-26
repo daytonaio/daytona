@@ -19,39 +19,15 @@
  */
 export interface MouseDragResponse {
   /**
-   *
-   * @type {boolean}
-   * @memberof MouseDragResponse
-   */
-  success: boolean
-  /**
-   *
-   * @type {string}
-   * @memberof MouseDragResponse
-   */
-  action: string
-  /**
-   *
-   * @type {object}
-   * @memberof MouseDragResponse
-   */
-  from: object
-  /**
-   *
-   * @type {object}
-   * @memberof MouseDragResponse
-   */
-  to: object
-  /**
-   *
+   * The actual X coordinate where the drag ended
    * @type {number}
    * @memberof MouseDragResponse
    */
-  actual_x: number
+  x: number
   /**
-   *
+   * The actual Y coordinate where the drag ended
    * @type {number}
    * @memberof MouseDragResponse
    */
-  actual_y: number
+  y: number
 }

@@ -29,11 +29,21 @@ class MouseDragRequest(BaseModel):
     MouseDragRequest
     """  # noqa: E501
 
-    start_x: Union[StrictFloat, StrictInt] = Field(alias="startX")
-    start_y: Union[StrictFloat, StrictInt] = Field(alias="startY")
-    end_x: Union[StrictFloat, StrictInt] = Field(alias="endX")
-    end_y: Union[StrictFloat, StrictInt] = Field(alias="endY")
-    button: Optional[StrictStr] = None
+    start_x: Union[StrictFloat, StrictInt] = Field(
+        description="The starting X coordinate for the drag operation", alias="startX"
+    )
+    start_y: Union[StrictFloat, StrictInt] = Field(
+        description="The starting Y coordinate for the drag operation", alias="startY"
+    )
+    end_x: Union[StrictFloat, StrictInt] = Field(
+        description="The ending X coordinate for the drag operation", alias="endX"
+    )
+    end_y: Union[StrictFloat, StrictInt] = Field(
+        description="The ending Y coordinate for the drag operation", alias="endY"
+    )
+    button: Optional[StrictStr] = Field(
+        default=None, description="The mouse button to use for dragging (left, right, middle). Defaults to left"
+    )
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["startX", "startY", "endX", "endY", "button"]
 

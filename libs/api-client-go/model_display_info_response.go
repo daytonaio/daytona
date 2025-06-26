@@ -22,6 +22,7 @@ var _ MappedNullable = &DisplayInfoResponse{}
 
 // DisplayInfoResponse struct for DisplayInfoResponse
 type DisplayInfoResponse struct {
+	// Array of display information for all connected displays
 	Displays []map[string]interface{} `json:"displays"`
 }
 

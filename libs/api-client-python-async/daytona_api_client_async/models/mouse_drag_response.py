@@ -18,7 +18,7 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictFloat, StrictInt, StrictStr
+from pydantic import BaseModel, ConfigDict, Field, StrictFloat, StrictInt
 from typing import Any, ClassVar, Dict, List, Union
 from typing import Optional, Set
 from typing_extensions import Self
@@ -27,14 +27,10 @@ class MouseDragResponse(BaseModel):
     """
     MouseDragResponse
     """ # noqa: E501
-    success: StrictBool
-    action: StrictStr
-    var_from: Dict[str, Any] = Field(alias="from")
-    to: Dict[str, Any]
-    actual_x: Union[StrictFloat, StrictInt]
-    actual_y: Union[StrictFloat, StrictInt]
+    x: Union[StrictFloat, StrictInt] = Field(description="The actual X coordinate where the drag ended")
+    y: Union[StrictFloat, StrictInt] = Field(description="The actual Y coordinate where the drag ended")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["success", "action", "from", "to", "actual_x", "actual_y"]
+    __properties: ClassVar[List[str]] = ["x", "y"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -94,12 +90,8 @@ class MouseDragResponse(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "success": obj.get("success"),
-            "action": obj.get("action"),
-            "from": obj.get("from"),
-            "to": obj.get("to"),
-            "actual_x": obj.get("actual_x"),
-            "actual_y": obj.get("actual_y")
+            "x": obj.get("x"),
+            "y": obj.get("y")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

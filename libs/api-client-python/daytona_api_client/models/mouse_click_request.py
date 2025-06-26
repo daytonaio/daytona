@@ -18,7 +18,7 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, StrictBool, StrictFloat, StrictInt, StrictStr
+from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictFloat, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional, Union
 from typing import Optional, Set
 from typing_extensions import Self
@@ -29,10 +29,14 @@ class MouseClickRequest(BaseModel):
     MouseClickRequest
     """  # noqa: E501
 
-    x: Union[StrictFloat, StrictInt]
-    y: Union[StrictFloat, StrictInt]
-    button: Optional[StrictStr] = None
-    double: Optional[StrictBool] = None
+    x: Union[StrictFloat, StrictInt] = Field(description="The X coordinate where to perform the mouse click")
+    y: Union[StrictFloat, StrictInt] = Field(description="The Y coordinate where to perform the mouse click")
+    button: Optional[StrictStr] = Field(
+        default=None, description="The mouse button to click (left, right, middle). Defaults to left"
+    )
+    double: Optional[StrictBool] = Field(
+        default=None, description="Whether to perform a double-click instead of a single click"
+    )
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["x", "y", "button", "double"]
 

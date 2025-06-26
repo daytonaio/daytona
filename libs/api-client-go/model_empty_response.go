@@ -22,6 +22,7 @@ var _ MappedNullable = &EmptyResponse{}
 
 // EmptyResponse struct for EmptyResponse
 type EmptyResponse struct {
+	// Whether the operation was successful
 	Success bool `json:"success"`
 }
 

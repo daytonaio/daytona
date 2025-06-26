@@ -22,8 +22,10 @@ var _ MappedNullable = &ComputerUseStartResponse{}
 
 // ComputerUseStartResponse struct for ComputerUseStartResponse
 type ComputerUseStartResponse struct {
-	Message string                 `json:"message"`
-	Status  map[string]interface{} `json:"status"`
+	// A message indicating the result of starting computer use processes
+	Message string `json:"message"`
+	// Status information about all VNC desktop processes after starting
+	Status map[string]interface{} `json:"status"`
 }
 
 type _ComputerUseStartResponse ComputerUseStartResponse

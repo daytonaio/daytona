@@ -22,9 +22,12 @@ var _ MappedNullable = &RegionScreenshotResponse{}
 
 // RegionScreenshotResponse struct for RegionScreenshotResponse
 type RegionScreenshotResponse struct {
-	Screenshot     string                 `json:"screenshot"`
-	Region         map[string]interface{} `json:"region"`
-	CursorPosition map[string]interface{} `json:"cursor_position,omitempty"`
+	// Base64 encoded screenshot image data of the specified region
+	Screenshot string `json:"screenshot"`
+	// The current cursor position when the region screenshot was taken
+	CursorPosition map[string]interface{} `json:"cursorPosition,omitempty"`
+	// The size of the screenshot data in bytes
+	SizeBytes *float32 `json:"sizeBytes,omitempty"`
 }
 
 type _RegionScreenshotResponse RegionScreenshotResponse
@@ -33,10 +36,9 @@ type _RegionScreenshotResponse RegionScreenshotResponse
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewRegionScreenshotResponse(screenshot string, region map[string]interface{}) *RegionScreenshotResponse {
+func NewRegionScreenshotResponse(screenshot string) *RegionScreenshotResponse {
 	this := RegionScreenshotResponse{}
 	this.Screenshot = screenshot
-	this.Region = region
 	return &this
 }
 
@@ -72,30 +74,6 @@ func (o *RegionScreenshotResponse) SetScreenshot(v string) {
 	o.Screenshot = v
 }
 
-// GetRegion returns the Region field value
-func (o *RegionScreenshotResponse) GetRegion() map[string]interface{} {
-	if o == nil {
-		var ret map[string]interface{}
-		return ret
-	}
-
-	return o.Region
-}
-
-// GetRegionOk returns a tuple with the Region field value
-// and a boolean to check if the value has been set.
-func (o *RegionScreenshotResponse) GetRegionOk() (map[string]interface{}, bool) {
-	if o == nil {
-		return map[string]interface{}{}, false
-	}
-	return o.Region, true
-}
-
-// SetRegion sets field value
-func (o *RegionScreenshotResponse) SetRegion(v map[string]interface{}) {
-	o.Region = v
-}
-
 // GetCursorPosition returns the CursorPosition field value if set, zero value otherwise.
 func (o *RegionScreenshotResponse) GetCursorPosition() map[string]interface{} {
 	if o == nil || IsNil(o.CursorPosition) {
@@ -128,6 +106,38 @@ func (o *RegionScreenshotResponse) SetCursorPosition(v map[string]interface{}) {
 	o.CursorPosition = v
 }
 
+// GetSizeBytes returns the SizeBytes field value if set, zero value otherwise.
+func (o *RegionScreenshotResponse) GetSizeBytes() float32 {
+	if o == nil || IsNil(o.SizeBytes) {
+		var ret float32
+		return ret
+	}
+	return *o.SizeBytes
+}
+
+// GetSizeBytesOk returns a tuple with the SizeBytes field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *RegionScreenshotResponse) GetSizeBytesOk() (*float32, bool) {
+	if o == nil || IsNil(o.SizeBytes) {
+		return nil, false
+	}
+	return o.SizeBytes, true
+}
+
+// HasSizeBytes returns a boolean if a field has been set.
+func (o *RegionScreenshotResponse) HasSizeBytes() bool {
+	if o != nil && !IsNil(o.SizeBytes) {
+		return true
+	}
+
+	return false
+}
+
+// SetSizeBytes gets a reference to the given float32 and assigns it to the SizeBytes field.
+func (o *RegionScreenshotResponse) SetSizeBytes(v float32) {
+	o.SizeBytes = &v
+}
+
 func (o RegionScreenshotResponse) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -139,9 +149,11 @@ func (o RegionScreenshotResponse) MarshalJSON() ([]byte, error) {
 func (o RegionScreenshotResponse) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["screenshot"] = o.Screenshot
-	toSerialize["region"] = o.Region
 	if !IsNil(o.CursorPosition) {
-		toSerialize["cursor_position"] = o.CursorPosition
+		toSerialize["cursorPosition"] = o.CursorPosition
+	}
+	if !IsNil(o.SizeBytes) {
+		toSerialize["sizeBytes"] = o.SizeBytes
 	}
 	return toSerialize, nil
 }
@@ -152,7 +164,6 @@ func (o *RegionScreenshotResponse) UnmarshalJSON(data []byte) (err error) {
 	// that every required field exists as a key in the generic map.
 	requiredProperties := []string{
 		"screenshot",
-		"region",
 	}
 
 	allProperties := make(map[string]interface{})

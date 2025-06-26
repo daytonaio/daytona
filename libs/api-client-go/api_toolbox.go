@@ -746,8 +746,8 @@ type ToolboxAPI interface {
 	ScrollMouse(ctx context.Context, sandboxId string) ToolboxAPIScrollMouseRequest
 
 	// ScrollMouseExecute executes the request
-	//  @return EmptyResponse
-	ScrollMouseExecute(r ToolboxAPIScrollMouseRequest) (*EmptyResponse, *http.Response, error)
+	//  @return MouseScrollResponse
+	ScrollMouseExecute(r ToolboxAPIScrollMouseRequest) (*MouseScrollResponse, *http.Response, error)
 
 	/*
 		SearchFiles Search files
@@ -6697,7 +6697,7 @@ func (r ToolboxAPIScrollMouseRequest) XDaytonaOrganizationID(xDaytonaOrganizatio
 	return r
 }
 
-func (r ToolboxAPIScrollMouseRequest) Execute() (*EmptyResponse, *http.Response, error) {
+func (r ToolboxAPIScrollMouseRequest) Execute() (*MouseScrollResponse, *http.Response, error) {
 	return r.ApiService.ScrollMouseExecute(r)
 }
 
@@ -6720,13 +6720,13 @@ func (a *ToolboxAPIService) ScrollMouse(ctx context.Context, sandboxId string) T
 
 // Execute executes the request
 //
-//	@return EmptyResponse
-func (a *ToolboxAPIService) ScrollMouseExecute(r ToolboxAPIScrollMouseRequest) (*EmptyResponse, *http.Response, error) {
+//	@return MouseScrollResponse
+func (a *ToolboxAPIService) ScrollMouseExecute(r ToolboxAPIScrollMouseRequest) (*MouseScrollResponse, *http.Response, error) {
 	var (
 		localVarHTTPMethod  = http.MethodPost
 		localVarPostBody    interface{}
 		formFiles           []formFile
-		localVarReturnValue *EmptyResponse
+		localVarReturnValue *MouseScrollResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.ScrollMouse")

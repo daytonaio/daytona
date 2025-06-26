@@ -22,10 +22,14 @@ var _ MappedNullable = &MouseClickRequest{}
 
 // MouseClickRequest struct for MouseClickRequest
 type MouseClickRequest struct {
-	X      float32 `json:"x"`
-	Y      float32 `json:"y"`
+	// The X coordinate where to perform the mouse click
+	X float32 `json:"x"`
+	// The Y coordinate where to perform the mouse click
+	Y float32 `json:"y"`
+	// The mouse button to click (left, right, middle). Defaults to left
 	Button *string `json:"button,omitempty"`
-	Double *bool   `json:"double,omitempty"`
+	// Whether to perform a double-click instead of a single click
+	Double *bool `json:"double,omitempty"`
 }
 
 type _MouseClickRequest MouseClickRequest

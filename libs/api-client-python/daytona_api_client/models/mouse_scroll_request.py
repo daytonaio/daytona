@@ -18,7 +18,7 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, StrictFloat, StrictInt, StrictStr
+from pydantic import BaseModel, ConfigDict, Field, StrictFloat, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional, Union
 from typing import Optional, Set
 from typing_extensions import Self
@@ -29,10 +29,12 @@ class MouseScrollRequest(BaseModel):
     MouseScrollRequest
     """  # noqa: E501
 
-    x: Union[StrictFloat, StrictInt]
-    y: Union[StrictFloat, StrictInt]
-    direction: StrictStr
-    amount: Optional[Union[StrictFloat, StrictInt]] = None
+    x: Union[StrictFloat, StrictInt] = Field(description="The X coordinate where to perform the scroll operation")
+    y: Union[StrictFloat, StrictInt] = Field(description="The Y coordinate where to perform the scroll operation")
+    direction: StrictStr = Field(description="The scroll direction (up, down)")
+    amount: Optional[Union[StrictFloat, StrictInt]] = Field(
+        default=None, description="The number of scroll units to scroll. Defaults to 1"
+    )
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["x", "y", "direction", "amount"]
 

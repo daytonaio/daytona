@@ -59,6 +59,7 @@ from daytona_api_client.models.mouse_move_request import MouseMoveRequest
 from daytona_api_client.models.mouse_move_response import MouseMoveResponse
 from daytona_api_client.models.mouse_position import MousePosition
 from daytona_api_client.models.mouse_scroll_request import MouseScrollRequest
+from daytona_api_client.models.mouse_scroll_response import MouseScrollResponse
 from daytona_api_client.models.process_errors_response import ProcessErrorsResponse
 from daytona_api_client.models.process_logs_response import ProcessLogsResponse
 from daytona_api_client.models.process_restart_response import ProcessRestartResponse
@@ -12840,7 +12841,7 @@ class ToolboxApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> EmptyResponse:
+    ) -> MouseScrollResponse:
         """Scroll mouse
 
         Scroll mouse at specified coordinates
@@ -12884,7 +12885,7 @@ class ToolboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "EmptyResponse",
+            "200": "MouseScrollResponse",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
@@ -12910,7 +12911,7 @@ class ToolboxApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[EmptyResponse]:
+    ) -> ApiResponse[MouseScrollResponse]:
         """Scroll mouse
 
         Scroll mouse at specified coordinates
@@ -12954,7 +12955,7 @@ class ToolboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "EmptyResponse",
+            "200": "MouseScrollResponse",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
@@ -13024,7 +13025,7 @@ class ToolboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "EmptyResponse",
+            "200": "MouseScrollResponse",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         return response_data.response

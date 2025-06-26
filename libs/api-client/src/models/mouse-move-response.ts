@@ -19,33 +19,15 @@
  */
 export interface MouseMoveResponse {
   /**
-   *
-   * @type {boolean}
-   * @memberof MouseMoveResponse
-   */
-  success: boolean
-  /**
-   *
+   * The actual X coordinate where the mouse cursor ended up
    * @type {number}
    * @memberof MouseMoveResponse
    */
   x: number
   /**
-   *
+   * The actual Y coordinate where the mouse cursor ended up
    * @type {number}
    * @memberof MouseMoveResponse
    */
   y: number
-  /**
-   *
-   * @type {number}
-   * @memberof MouseMoveResponse
-   */
-  actual_x: number
-  /**
-   *
-   * @type {number}
-   * @memberof MouseMoveResponse
-   */
-  actual_y: number
 }

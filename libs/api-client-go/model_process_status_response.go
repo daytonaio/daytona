@@ -22,8 +22,10 @@ var _ MappedNullable = &ProcessStatusResponse{}
 
 // ProcessStatusResponse struct for ProcessStatusResponse
 type ProcessStatusResponse struct {
+	// The name of the VNC process being checked
 	ProcessName string `json:"processName"`
-	Running     bool   `json:"running"`
+	// Whether the specified VNC process is currently running
+	Running bool `json:"running"`
 }
 
 type _ProcessStatusResponse ProcessStatusResponse

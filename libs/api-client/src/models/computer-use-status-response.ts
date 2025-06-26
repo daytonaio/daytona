@@ -19,7 +19,7 @@
  */
 export interface ComputerUseStatusResponse {
   /**
-   *
+   * Status information about all VNC desktop processes
    * @type {object}
    * @memberof ComputerUseStatusResponse
    */

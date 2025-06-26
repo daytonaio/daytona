@@ -18,7 +18,7 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, StrictBool
+from pydantic import BaseModel, ConfigDict, Field, StrictBool
 from typing import Any, ClassVar, Dict, List
 from typing import Optional, Set
 from typing_extensions import Self
@@ -29,7 +29,7 @@ class EmptyResponse(BaseModel):
     EmptyResponse
     """  # noqa: E501
 
-    success: StrictBool
+    success: StrictBool = Field(description="Whether the operation was successful")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["success"]
 

@@ -19,13 +19,13 @@
  */
 export interface MouseMoveRequest {
   /**
-   *
+   * The target X coordinate to move the mouse cursor to
    * @type {number}
    * @memberof MouseMoveRequest
    */
   x: number
   /**
-   *
+   * The target Y coordinate to move the mouse cursor to
    * @type {number}
    * @memberof MouseMoveRequest
    */

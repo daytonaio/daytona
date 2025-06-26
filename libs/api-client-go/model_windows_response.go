@@ -22,8 +22,10 @@ var _ MappedNullable = &WindowsResponse{}
 
 // WindowsResponse struct for WindowsResponse
 type WindowsResponse struct {
+	// Array of window information for all visible windows
 	Windows []map[string]interface{} `json:"windows"`
-	Count   float32                  `json:"count"`
+	// The total number of windows found
+	Count float32 `json:"count"`
 }
 
 type _WindowsResponse WindowsResponse

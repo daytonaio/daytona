@@ -18,7 +18,7 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, StrictBool, StrictFloat, StrictInt
+from pydantic import BaseModel, ConfigDict, Field, StrictFloat, StrictInt
 from typing import Any, ClassVar, Dict, List, Union
 from typing import Optional, Set
 from typing_extensions import Self
@@ -29,13 +29,10 @@ class MouseMoveResponse(BaseModel):
     MouseMoveResponse
     """  # noqa: E501
 
-    success: StrictBool
-    x: Union[StrictFloat, StrictInt]
-    y: Union[StrictFloat, StrictInt]
-    actual_x: Union[StrictFloat, StrictInt]
-    actual_y: Union[StrictFloat, StrictInt]
+    x: Union[StrictFloat, StrictInt] = Field(description="The actual X coordinate where the mouse cursor ended up")
+    y: Union[StrictFloat, StrictInt] = Field(description="The actual Y coordinate where the mouse cursor ended up")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["success", "x", "y", "actual_x", "actual_y"]
+    __properties: ClassVar[List[str]] = ["x", "y"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -95,15 +92,7 @@ class MouseMoveResponse(BaseModel):
         if not isinstance(obj, dict):
             return cls.model_validate(obj)
 
-        _obj = cls.model_validate(
-            {
-                "success": obj.get("success"),
-                "x": obj.get("x"),
-                "y": obj.get("y"),
-                "actual_x": obj.get("actual_x"),
-                "actual_y": obj.get("actual_y"),
-            }
-        )
+        _obj = cls.model_validate({"x": obj.get("x"), "y": obj.get("y")})
         # store additional fields in additional_properties
         for _key in obj.keys():
             if _key not in cls.__properties:

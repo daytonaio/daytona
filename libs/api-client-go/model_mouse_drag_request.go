@@ -22,10 +22,15 @@ var _ MappedNullable = &MouseDragRequest{}
 
 // MouseDragRequest struct for MouseDragRequest
 type MouseDragRequest struct {
+	// The starting X coordinate for the drag operation
 	StartX float32 `json:"startX"`
+	// The starting Y coordinate for the drag operation
 	StartY float32 `json:"startY"`
-	EndX   float32 `json:"endX"`
-	EndY   float32 `json:"endY"`
+	// The ending X coordinate for the drag operation
+	EndX float32 `json:"endX"`
+	// The ending Y coordinate for the drag operation
+	EndY float32 `json:"endY"`
+	// The mouse button to use for dragging (left, right, middle). Defaults to left
 	Button *string `json:"button,omitempty"`
 }
 

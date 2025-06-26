@@ -22,7 +22,9 @@ var _ MappedNullable = &ProcessRestartResponse{}
 
 // ProcessRestartResponse struct for ProcessRestartResponse
 type ProcessRestartResponse struct {
-	Message     string `json:"message"`
+	// A message indicating the result of restarting the process
+	Message string `json:"message"`
+	// The name of the VNC process that was restarted
 	ProcessName string `json:"processName"`
 }
 

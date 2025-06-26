@@ -77,6 +77,7 @@ from daytona_api_client.models.mouse_move_request import MouseMoveRequest
 from daytona_api_client.models.mouse_move_response import MouseMoveResponse
 from daytona_api_client.models.mouse_position import MousePosition
 from daytona_api_client.models.mouse_scroll_request import MouseScrollRequest
+from daytona_api_client.models.mouse_scroll_response import MouseScrollResponse
 from daytona_api_client.models.organization import Organization
 from daytona_api_client.models.organization_invitation import OrganizationInvitation
 from daytona_api_client.models.organization_role import OrganizationRole

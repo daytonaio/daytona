@@ -22,10 +22,14 @@ var _ MappedNullable = &MouseScrollRequest{}
 
 // MouseScrollRequest struct for MouseScrollRequest
 type MouseScrollRequest struct {
-	X         float32  `json:"x"`
-	Y         float32  `json:"y"`
-	Direction string   `json:"direction"`
-	Amount    *float32 `json:"amount,omitempty"`
+	// The X coordinate where to perform the scroll operation
+	X float32 `json:"x"`
+	// The Y coordinate where to perform the scroll operation
+	Y float32 `json:"y"`
+	// The scroll direction (up, down)
+	Direction string `json:"direction"`
+	// The number of scroll units to scroll. Defaults to 1
+	Amount *float32 `json:"amount,omitempty"`
 }
 
 type _MouseScrollRequest MouseScrollRequest

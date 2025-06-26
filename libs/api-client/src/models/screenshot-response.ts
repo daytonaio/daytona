@@ -19,57 +19,21 @@
  */
 export interface ScreenshotResponse {
   /**
-   *
+   * Base64 encoded screenshot image data
    * @type {string}
    * @memberof ScreenshotResponse
    */
   screenshot: string
   /**
-   *
-   * @type {number}
-   * @memberof ScreenshotResponse
-   */
-  width: number
-  /**
-   *
-   * @type {number}
-   * @memberof ScreenshotResponse
-   */
-  height: number
-  /**
-   *
+   * The current cursor position when the screenshot was taken
    * @type {object}
    * @memberof ScreenshotResponse
    */
-  cursor_position?: object
+  cursorPosition?: object
   /**
-   *
-   * @type {object}
-   * @memberof ScreenshotResponse
-   */
-  region?: object
-  /**
-   *
-   * @type {string}
-   * @memberof ScreenshotResponse
-   */
-  format?: string
-  /**
-   *
+   * The size of the screenshot data in bytes
    * @type {number}
    * @memberof ScreenshotResponse
    */
-  quality?: number
-  /**
-   *
-   * @type {number}
-   * @memberof ScreenshotResponse
-   */
-  scale?: number
-  /**
-   *
-   * @type {number}
-   * @memberof ScreenshotResponse
-   */
-  size_bytes?: number
+  sizeBytes?: number
 }

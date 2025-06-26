@@ -27,8 +27,8 @@ class ProcessRestartResponse(BaseModel):
     """
     ProcessRestartResponse
     """ # noqa: E501
-    message: StrictStr
-    process_name: StrictStr = Field(alias="processName")
+    message: StrictStr = Field(description="A message indicating the result of restarting the process")
+    process_name: StrictStr = Field(description="The name of the VNC process that was restarted", alias="processName")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["message", "processName"]
 

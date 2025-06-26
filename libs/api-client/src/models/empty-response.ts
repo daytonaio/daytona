@@ -19,7 +19,7 @@
  */
 export interface EmptyResponse {
   /**
-   *
+   * Whether the operation was successful
    * @type {boolean}
    * @memberof EmptyResponse
    */

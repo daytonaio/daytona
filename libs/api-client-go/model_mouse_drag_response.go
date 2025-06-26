@@ -22,12 +22,10 @@ var _ MappedNullable = &MouseDragResponse{}
 
 // MouseDragResponse struct for MouseDragResponse
 type MouseDragResponse struct {
-	Success bool                   `json:"success"`
-	Action  string                 `json:"action"`
-	From    map[string]interface{} `json:"from"`
-	To      map[string]interface{} `json:"to"`
-	ActualX float32                `json:"actual_x"`
-	ActualY float32                `json:"actual_y"`
+	// The actual X coordinate where the drag ended
+	X float32 `json:"x"`
+	// The actual Y coordinate where the drag ended
+	Y float32 `json:"y"`
 }
 
 type _MouseDragResponse MouseDragResponse
@@ -36,14 +34,10 @@ type _MouseDragResponse MouseDragResponse
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewMouseDragResponse(success bool, action string, from map[string]interface{}, to map[string]interface{}, actualX float32, actualY float32) *MouseDragResponse {
+func NewMouseDragResponse(x float32, y float32) *MouseDragResponse {
 	this := MouseDragResponse{}
-	this.Success = success
-	this.Action = action
-	this.From = from
-	this.To = to
-	this.ActualX = actualX
-	this.ActualY = actualY
+	this.X = x
+	this.Y = y
 	return &this
 }
 
@@ -55,148 +49,52 @@ func NewMouseDragResponseWithDefaults() *MouseDragResponse {
 	return &this
 }
 
-// GetSuccess returns the Success field value
-func (o *MouseDragResponse) GetSuccess() bool {
-	if o == nil {
-		var ret bool
-		return ret
-	}
-
-	return o.Success
-}
-
-// GetSuccessOk returns a tuple with the Success field value
-// and a boolean to check if the value has been set.
-func (o *MouseDragResponse) GetSuccessOk() (*bool, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.Success, true
-}
-
-// SetSuccess sets field value
-func (o *MouseDragResponse) SetSuccess(v bool) {
-	o.Success = v
-}
-
-// GetAction returns the Action field value
-func (o *MouseDragResponse) GetAction() string {
-	if o == nil {
-		var ret string
-		return ret
-	}
-
-	return o.Action
-}
-
-// GetActionOk returns a tuple with the Action field value
-// and a boolean to check if the value has been set.
-func (o *MouseDragResponse) GetActionOk() (*string, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.Action, true
-}
-
-// SetAction sets field value
-func (o *MouseDragResponse) SetAction(v string) {
-	o.Action = v
-}
-
-// GetFrom returns the From field value
-func (o *MouseDragResponse) GetFrom() map[string]interface{} {
-	if o == nil {
-		var ret map[string]interface{}
-		return ret
-	}
-
-	return o.From
-}
-
-// GetFromOk returns a tuple with the From field value
-// and a boolean to check if the value has been set.
-func (o *MouseDragResponse) GetFromOk() (map[string]interface{}, bool) {
-	if o == nil {
-		return map[string]interface{}{}, false
-	}
-	return o.From, true
-}
-
-// SetFrom sets field value
-func (o *MouseDragResponse) SetFrom(v map[string]interface{}) {
-	o.From = v
-}
-
-// GetTo returns the To field value
-func (o *MouseDragResponse) GetTo() map[string]interface{} {
-	if o == nil {
-		var ret map[string]interface{}
-		return ret
-	}
-
-	return o.To
-}
-
-// GetToOk returns a tuple with the To field value
-// and a boolean to check if the value has been set.
-func (o *MouseDragResponse) GetToOk() (map[string]interface{}, bool) {
-	if o == nil {
-		return map[string]interface{}{}, false
-	}
-	return o.To, true
-}
-
-// SetTo sets field value
-func (o *MouseDragResponse) SetTo(v map[string]interface{}) {
-	o.To = v
-}
-
-// GetActualX returns the ActualX field value
-func (o *MouseDragResponse) GetActualX() float32 {
+// GetX returns the X field value
+func (o *MouseDragResponse) GetX() float32 {
 	if o == nil {
 		var ret float32
 		return ret
 	}
 
-	return o.ActualX
+	return o.X
 }
 
-// GetActualXOk returns a tuple with the ActualX field value
+// GetXOk returns a tuple with the X field value
 // and a boolean to check if the value has been set.
-func (o *MouseDragResponse) GetActualXOk() (*float32, bool) {
+func (o *MouseDragResponse) GetXOk() (*float32, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return &o.ActualX, true
+	return &o.X, true
 }
 
-// SetActualX sets field value
-func (o *MouseDragResponse) SetActualX(v float32) {
-	o.ActualX = v
+// SetX sets field value
+func (o *MouseDragResponse) SetX(v float32) {
+	o.X = v
 }
 
-// GetActualY returns the ActualY field value
-func (o *MouseDragResponse) GetActualY() float32 {
+// GetY returns the Y field value
+func (o *MouseDragResponse) GetY() float32 {
 	if o == nil {
 		var ret float32
 		return ret
 	}
 
-	return o.ActualY
+	return o.Y
 }
 
-// GetActualYOk returns a tuple with the ActualY field value
+// GetYOk returns a tuple with the Y field value
 // and a boolean to check if the value has been set.
-func (o *MouseDragResponse) GetActualYOk() (*float32, bool) {
+func (o *MouseDragResponse) GetYOk() (*float32, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return &o.ActualY, true
+	return &o.Y, true
 }
 
-// SetActualY sets field value
-func (o *MouseDragResponse) SetActualY(v float32) {
-	o.ActualY = v
+// SetY sets field value
+func (o *MouseDragResponse) SetY(v float32) {
+	o.Y = v
 }
 
 func (o MouseDragResponse) MarshalJSON() ([]byte, error) {
@@ -209,12 +107,8 @@ func (o MouseDragResponse) MarshalJSON() ([]byte, error) {
 
 func (o MouseDragResponse) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	toSerialize["success"] = o.Success
-	toSerialize["action"] = o.Action
-	toSerialize["from"] = o.From
-	toSerialize["to"] = o.To
-	toSerialize["actual_x"] = o.ActualX
-	toSerialize["actual_y"] = o.ActualY
+	toSerialize["x"] = o.X
+	toSerialize["y"] = o.Y
 	return toSerialize, nil
 }
 
@@ -223,12 +117,8 @@ func (o *MouseDragResponse) UnmarshalJSON(data []byte) (err error) {
 	// by unmarshalling the object into a generic map with string keys and checking
 	// that every required field exists as a key in the generic map.
 	requiredProperties := []string{
-		"success",
-		"action",
-		"from",
-		"to",
-		"actual_x",
-		"actual_y",
+		"x",
+		"y",
 	}
 
 	allProperties := make(map[string]interface{})

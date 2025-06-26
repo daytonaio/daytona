@@ -18,7 +18,7 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, StrictFloat, StrictInt, StrictStr
+from pydantic import BaseModel, ConfigDict, Field, StrictFloat, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional, Union
 from typing import Optional, Set
 from typing_extensions import Self
@@ -29,25 +29,17 @@ class CompressedScreenshotResponse(BaseModel):
     CompressedScreenshotResponse
     """  # noqa: E501
 
-    screenshot: StrictStr
-    width: Union[StrictFloat, StrictInt]
-    height: Union[StrictFloat, StrictInt]
-    format: StrictStr
-    quality: Union[StrictFloat, StrictInt]
-    scale: Union[StrictFloat, StrictInt]
-    size_bytes: Union[StrictFloat, StrictInt]
-    cursor_position: Optional[Dict[str, Any]] = None
+    screenshot: StrictStr = Field(description="Base64 encoded compressed screenshot image data")
+    cursor_position: Optional[Dict[str, Any]] = Field(
+        default=None,
+        description="The current cursor position when the compressed screenshot was taken",
+        alias="cursorPosition",
+    )
+    size_bytes: Optional[Union[StrictFloat, StrictInt]] = Field(
+        default=None, description="The size of the compressed screenshot data in bytes", alias="sizeBytes"
+    )
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = [
-        "screenshot",
-        "width",
-        "height",
-        "format",
-        "quality",
-        "scale",
-        "size_bytes",
-        "cursor_position",
-    ]
+    __properties: ClassVar[List[str]] = ["screenshot", "cursorPosition", "sizeBytes"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -110,13 +102,8 @@ class CompressedScreenshotResponse(BaseModel):
         _obj = cls.model_validate(
             {
                 "screenshot": obj.get("screenshot"),
-                "width": obj.get("width"),
-                "height": obj.get("height"),
-                "format": obj.get("format"),
-                "quality": obj.get("quality"),
-                "scale": obj.get("scale"),
-                "size_bytes": obj.get("size_bytes"),
-                "cursor_position": obj.get("cursor_position"),
+                "cursorPosition": obj.get("cursorPosition"),
+                "sizeBytes": obj.get("sizeBytes"),
             }
         )
         # store additional fields in additional_properties

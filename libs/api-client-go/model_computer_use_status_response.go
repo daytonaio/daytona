@@ -22,6 +22,7 @@ var _ MappedNullable = &ComputerUseStatusResponse{}
 
 // ComputerUseStatusResponse struct for ComputerUseStatusResponse
 type ComputerUseStatusResponse struct {
+	// Status information about all VNC desktop processes
 	Status map[string]interface{} `json:"status"`
 }
 

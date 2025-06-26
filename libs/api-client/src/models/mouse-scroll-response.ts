@@ -19,39 +19,9 @@
  */
 export interface MouseScrollResponse {
   /**
-   *
+   * Whether the mouse scroll operation was successful
    * @type {boolean}
    * @memberof MouseScrollResponse
    */
   success: boolean
-  /**
-   *
-   * @type {string}
-   * @memberof MouseScrollResponse
-   */
-  action: string
-  /**
-   *
-   * @type {string}
-   * @memberof MouseScrollResponse
-   */
-  direction: string
-  /**
-   *
-   * @type {number}
-   * @memberof MouseScrollResponse
-   */
-  amount: number
-  /**
-   *
-   * @type {number}
-   * @memberof MouseScrollResponse
-   */
-  x: number
-  /**
-   *
-   * @type {number}
-   * @memberof MouseScrollResponse
-   */
-  y: number
 }

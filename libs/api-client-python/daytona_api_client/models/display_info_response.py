@@ -18,7 +18,7 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 from typing import Any, ClassVar, Dict, List
 from typing import Optional, Set
 from typing_extensions import Self
@@ -29,7 +29,7 @@ class DisplayInfoResponse(BaseModel):
     DisplayInfoResponse
     """  # noqa: E501
 
-    displays: List[Dict[str, Any]]
+    displays: List[Dict[str, Any]] = Field(description="Array of display information for all connected displays")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["displays"]
 

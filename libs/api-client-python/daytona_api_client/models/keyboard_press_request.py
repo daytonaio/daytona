@@ -18,7 +18,7 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, StrictStr
+from pydantic import BaseModel, ConfigDict, Field, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
 from typing import Optional, Set
 from typing_extensions import Self
@@ -29,8 +29,10 @@ class KeyboardPressRequest(BaseModel):
     KeyboardPressRequest
     """  # noqa: E501
 
-    key: StrictStr
-    modifiers: Optional[List[StrictStr]] = None
+    key: StrictStr = Field(description="The key to press (e.g., a, b, c, enter, space, etc.)")
+    modifiers: Optional[List[StrictStr]] = Field(
+        default=None, description="Array of modifier keys to press along with the main key (ctrl, alt, shift, cmd)"
+    )
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["key", "modifiers"]
 

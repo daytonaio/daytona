@@ -81,6 +81,7 @@ models/mouse-move-request.ts
 models/mouse-move-response.ts
 models/mouse-position.ts
 models/mouse-scroll-request.ts
+models/mouse-scroll-response.ts
 models/organization-invitation.ts
 models/organization-role.ts
 models/organization-suspension.ts
