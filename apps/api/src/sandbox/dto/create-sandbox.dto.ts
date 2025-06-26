@@ -129,6 +129,16 @@ export class CreateSandboxDto {
   autoArchiveInterval?: number
 
   @ApiPropertyOptional({
+    description:
+      'Auto-delete interval in minutes (negative value means disabled, 0 means delete immediately upon stopping)',
+    example: 30,
+    type: 'integer',
+  })
+  @IsOptional()
+  @IsNumber()
+  autoDeleteInterval?: number
+
+  @ApiPropertyOptional({
     description: 'Array of volumes to attach to the sandbox',
     type: [SandboxVolume],
     required: false,

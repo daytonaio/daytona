@@ -58,6 +58,11 @@ class Sandbox(BaseModel):
     auto_archive_interval: Optional[Union[StrictFloat, StrictInt]] = Field(
         default=None, description="Auto-archive interval in minutes", alias="autoArchiveInterval"
     )
+    auto_delete_interval: Optional[Union[StrictFloat, StrictInt]] = Field(
+        default=None,
+        description="Auto-delete interval in minutes (negative value means disabled, 0 means delete immediately upon stopping)",
+        alias="autoDeleteInterval",
+    )
     runner_domain: Optional[StrictStr] = Field(
         default=None, description="The domain name of the runner", alias="runnerDomain"
     )
@@ -95,6 +100,7 @@ class Sandbox(BaseModel):
         "backupCreatedAt",
         "autoStopInterval",
         "autoArchiveInterval",
+        "autoDeleteInterval",
         "runnerDomain",
         "volumes",
         "buildInfo",
@@ -212,6 +218,7 @@ class Sandbox(BaseModel):
                 "backupCreatedAt": obj.get("backupCreatedAt"),
                 "autoStopInterval": obj.get("autoStopInterval"),
                 "autoArchiveInterval": obj.get("autoArchiveInterval"),
+                "autoDeleteInterval": obj.get("autoDeleteInterval"),
                 "runnerDomain": obj.get("runnerDomain"),
                 "volumes": [SandboxVolume.from_dict(_item) for _item in obj["volumes"]]
                 if obj.get("volumes") is not None

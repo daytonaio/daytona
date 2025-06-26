@@ -85,6 +85,7 @@ async function main() {
       language: 'typescript',
       autoStopInterval: 60,
       autoArchiveInterval: 60,
+      autoDeleteInterval: 120,
     },
     {
       onSnapshotCreateLogs: console.log,

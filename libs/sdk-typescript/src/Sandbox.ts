@@ -12,7 +12,6 @@ import {
   SandboxVolume,
   BuildInfo,
   SandboxBackupStateEnum,
-  SandboxLabels,
 } from '@daytonaio/api-client'
 import { FileSystem } from './FileSystem'
 import { Git } from './Git'
@@ -54,6 +53,7 @@ export interface SandboxCodeToolbox {
  * @property {string} [backupCreatedAt] - When the backup was created
  * @property {number} [autoStopInterval] - Auto-stop interval in minutes
  * @property {number} [autoArchiveInterval] - Auto-archive interval in minutes
+ * @property {number} [autoDeleteInterval] - Auto-delete interval in minutes
  * @property {string} [runnerDomain] - Domain name of the Sandbox runner
  * @property {Array<SandboxVolume>} [volumes] - Volumes attached to the Sandbox
  * @property {BuildInfo} [buildInfo] - Build information for the Sandbox if it was created from dynamic build
@@ -85,6 +85,7 @@ export class Sandbox implements SandboxDto {
   public backupCreatedAt?: string
   public autoStopInterval?: number
   public autoArchiveInterval?: number
+  public autoDeleteInterval?: number
   public runnerDomain?: string
   public volumes?: Array<SandboxVolume>
   public buildInfo?: BuildInfo
@@ -370,6 +371,29 @@ export class Sandbox implements SandboxDto {
   }
 
   /**
+   * Set the auto-delete interval for the Sandbox.
+   *
+   * The Sandbox will automatically delete after being continuously stopped for the specified interval.
+   *
+   * @param {number} interval - Number of minutes after which a continuously stopped Sandbox will be auto-deleted.
+   *                           Set to negative value to disable auto-delete. Set to 0 to delete immediately upon stopping.
+   *                           By default, auto-delete is disabled.
+   * @returns {Promise<void>}
+   *
+   * @example
+   * // Auto-delete after 1 hour
+   * await sandbox.setAutoDeleteInterval(60);
+   * // Or delete immediately upon stopping
+   * await sandbox.setAutoDeleteInterval(0);
+   * // Or disable auto-delete
+   * await sandbox.setAutoDeleteInterval(-1);
+   */
+  public async setAutoDeleteInterval(interval: number): Promise<void> {
+    await this.sandboxApi.setAutoDeleteInterval(this.id, interval)
+    this.autoDeleteInterval = interval
+  }
+
+  /**
    * Retrieves the preview link for the sandbox at the specified port. If the port is closed,
    * it will be opened automatically. For private sandboxes, a token is included to grant access
    * to the URL.
@@ -430,6 +454,7 @@ export class Sandbox implements SandboxDto {
     this.backupCreatedAt = sandboxDto.backupCreatedAt
     this.autoStopInterval = sandboxDto.autoStopInterval
     this.autoArchiveInterval = sandboxDto.autoArchiveInterval
+    this.autoDeleteInterval = sandboxDto.autoDeleteInterval
     this.runnerDomain = sandboxDto.runnerDomain
     this.volumes = sandboxDto.volumes
     this.buildInfo = sandboxDto.buildInfo

@@ -159,6 +159,15 @@ export class SandboxDto {
   autoArchiveInterval?: number
 
   @ApiPropertyOptional({
+    description:
+      'Auto-delete interval in minutes (negative value means disabled, 0 means delete immediately upon stopping)',
+    example: 30,
+    required: false,
+  })
+  @IsOptional()
+  autoDeleteInterval?: number
+
+  @ApiPropertyOptional({
     description: 'The domain name of the runner',
     example: 'runner.example.com',
     required: false,
@@ -238,6 +247,7 @@ export class SandboxDto {
       backupCreatedAt: sandbox.lastBackupAt?.toISOString(),
       autoStopInterval: sandbox.autoStopInterval,
       autoArchiveInterval: sandbox.autoArchiveInterval,
+      autoDeleteInterval: sandbox.autoDeleteInterval,
       class: sandbox.class,
       createdAt: sandbox.createdAt?.toISOString(),
       updatedAt: sandbox.updatedAt?.toISOString(),
