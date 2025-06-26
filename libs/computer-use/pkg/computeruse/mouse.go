@@ -33,7 +33,7 @@ func (u *ComputerUse) MoveMouse(req *computeruse.MoveMouseRequest) (*computeruse
 	// Small delay to ensure movement completes
 	time.Sleep(50 * time.Millisecond)
 
-	// Verify the mouse actually moved
+	// Get the mouse position after move
 	actualX, actualY := robotgo.Location()
 
 	return &computeruse.MousePositionResponse{
@@ -61,7 +61,7 @@ func (u *ComputerUse) Click(req *computeruse.ClickRequest) (*computeruse.MouseCl
 		robotgo.Click(req.Button, false)
 	}
 
-	// Verify position after click
+	// Get position after click
 	actualX, actualY := robotgo.Location()
 
 	return &computeruse.MouseClickResponse{
@@ -123,7 +123,7 @@ func (u *ComputerUse) Drag(req *computeruse.DragRequest) (*computeruse.MouseDrag
 	}
 	time.Sleep(50 * time.Millisecond)
 
-	// Verify final position
+	// Get final position
 	actualX, actualY := robotgo.Location()
 
 	return &computeruse.MouseDragResponse{
