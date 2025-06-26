@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+# Copyright 2025 Daytona Platforms Inc.
+# SPDX-License-Identifier: AGPL-3.0
+
 """
 Test script to verify the search endpoint changes:
 1. Only accepts POST requests
