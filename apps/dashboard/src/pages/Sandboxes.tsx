@@ -277,14 +277,7 @@ const Sandboxes: React.FC = () => {
 
       // Check if computer use is active (all processes running)
       if (status === 'active') {
-        // Computer use is already active, open VNC URL
-        const sandbox = sandboxes.find((s) => s.id === id)
-        if (!sandbox) {
-          toast.error('Sandbox not found')
-          return
-        }
-
-        const vncUrl = getVncUrl(sandbox.id)
+        const vncUrl = getVncUrl(id)
         if (vncUrl) {
           window.open(vncUrl, '_blank')
           toast.success('Opening VNC desktop...')
@@ -298,33 +291,31 @@ const Sandboxes: React.FC = () => {
           toast.success('Starting VNC desktop...')
 
           // Wait a moment for processes to start, then open VNC
-          setTimeout(async () => {
-            try {
-              const newStatusResponse = await toolboxApi.getComputerUseStatus(id, selectedOrganization?.id)
-              const newStatus = newStatusResponse.data.status
+          await new Promise((resolve) => setTimeout(resolve, 5000))
 
-              if (newStatus === 'active') {
-                const sandbox = sandboxes.find((s) => s.id === id)
-                if (sandbox) {
-                  const vncUrl = getVncUrl(sandbox.id)
+          try {
+            const newStatusResponse = await toolboxApi.getComputerUseStatus(id, selectedOrganization?.id)
+            const newStatus = newStatusResponse.data.status
 
-                  if (vncUrl) {
-                    toast.success('VNC desktop is ready!', {
-                      action: (
-                        <Button variant="secondary" onClick={() => window.open(vncUrl, '_blank')}>
-                          Open in new tab
-                        </Button>
-                      ),
-                    })
-                  }
-                }
-              } else {
-                toast.error(`VNC desktop failed to start. Status: ${newStatus}`)
+            if (newStatus === 'active') {
+              const vncUrl = getVncUrl(id)
+
+              if (vncUrl) {
+                window.open(vncUrl, '_blank')
+                toast.success('VNC desktop is ready!', {
+                  action: (
+                    <Button variant="secondary" onClick={() => window.open(vncUrl, '_blank')}>
+                      Open in new tab
+                    </Button>
+                  ),
+                })
               }
-            } catch (error) {
-              handleApiError(error, 'Failed to check VNC status after start')
+            } else {
+              toast.error(`VNC desktop failed to start. Status: ${newStatus}`)
             }
-          }, 5000) // Wait 5 seconds for processes to start
+          } catch (error) {
+            handleApiError(error, 'Failed to check VNC status after start')
+          }
         } catch (startError: any) {
           // Check if this is a computer-use availability error
           const errorMessage = startError?.response?.data?.message || startError?.message || String(startError)
