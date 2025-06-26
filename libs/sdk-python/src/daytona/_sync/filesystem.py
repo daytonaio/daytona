@@ -11,7 +11,7 @@ from contextlib import ExitStack
 from typing import Callable, List, Union, overload
 
 import httpx
-from daytona_api_client import FileInfo, Match, ReplaceRequest, ReplaceResult, SearchFilesResponse, ToolboxApi
+from daytona_api_client import FileInfo, Match, ReplaceRequest, ReplaceResult, SearchRequest, SearchResults, ToolboxApi
 
 from .._utils.errors import intercept_errors
 from .._utils.path import prefix_relative_path
@@ -344,38 +344,56 @@ class FileSystem:
 
         return self._toolbox_api.replace_in_files(self._sandbox_id, replace_request=replace_request)
 
-    @intercept_errors(message_prefix="Failed to search files: ")
-    def search_files(self, path: str, pattern: str) -> SearchFilesResponse:
-        """Searches for files and directories whose names match the
-        specified pattern. The pattern can be a simple string or a glob pattern.
+    @intercept_errors(message_prefix="Failed to search content: ")
+    def search(self, request: SearchRequest) -> SearchResults:
+        """Searches for content within files using ripgrep or fallback implementation.
+        This method replaces the old file name pattern search with enhanced content search capabilities.
 
         Args:
-            path (str): Path to the root directory to start search from. Relative paths are resolved based on the user's
-            root directory.
-            pattern (str): Pattern to match against file names. Supports glob
-                patterns (e.g., "*.py" for Python files).
+            request (SearchRequest): Search parameters including query, path, file types,
+                and various search options.
 
         Returns:
-            SearchFilesResponse: Search results containing:
-                - files: List of matching file and directory paths
+            SearchResults: Search results containing matches and metadata.
 
         Example:
             ```python
-            # Find all Python files
-            result = sandbox.fs.search_files("workspace", "*.py")
-            for file in result.files:
-                print(file)
+            # Basic content search
+            results = sandbox.fs.search(SearchRequest(
+                query="TODO",
+                path="src/",
+                case_sensitive=False
+            ))
 
-            # Find files with specific prefix
-            result = sandbox.fs.search_files("workspace/data", "test_*")
-            print(f"Found {len(result.files)} test files")
+            # Search for file names (equivalent to old search_files)
+            results = sandbox.fs.search(SearchRequest(
+                query="*.py",
+                path="workspace/",
+                filenames_only=True
+            ))
+
+            # Advanced search with file type filtering
+            results = sandbox.fs.search(SearchRequest(
+                query="function",
+                path=".",
+                file_types=["py", "js"],
+                include_globs=["src/**"],
+                exclude_globs=["*test*"],
+                max_results=50
+            ))
+
+            for match in results.matches:
+                print(f"{match.file}:{match.line_number}: {match.line}")
             ```
         """
-        return self._toolbox_api.search_files(
-            self._sandbox_id,
-            path=prefix_relative_path(self._get_root_dir(), path),
-            pattern=pattern,
-        )
+        # Update the path to be relative to the root directory
+        if request.path:
+            request.path = prefix_relative_path(self._get_root_dir(), request.path)
+        else:
+            request.path = "."
+
+        # Use the standard toolbox API method
+        return self._toolbox_api.search_content(self._sandbox_id, search_request=request)
 
     @intercept_errors(message_prefix="Failed to set file permissions: ")
     def set_file_permissions(self, path: str, mode: str = None, owner: str = None, group: str = None) -> None:

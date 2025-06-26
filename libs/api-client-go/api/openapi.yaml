@@ -2255,6 +2255,47 @@ paths:
       summary: Search files
       tags:
         - toolbox
+    post:
+      description: Search for content inside sandbox files using ripgrep or fallback
+      operationId: searchContent
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: sandboxId
+          required: true
+          schema:
+            type: string
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SearchRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchResults'
+          description: Content search completed successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Search content in files
+      tags:
+        - toolbox
   /toolbox/{sandboxId}/toolbox/files/upload:
     post:
       deprecated: true
@@ -6393,6 +6434,182 @@ components:
           type: array
       required:
         - files
+      type: object
+    SearchRequest:
+      example:
+        exclude_globs:
+          - exclude_globs
+          - exclude_globs
+        query: query
+        include_globs:
+          - include_globs
+          - include_globs
+        path: path
+        rg_args:
+          - rg_args
+          - rg_args
+        file_types:
+          - file_types
+          - file_types
+        count_only: true
+        case_sensitive: true
+        multiline: true
+        context: 0.8008281904610115
+        filenames_only: true
+        json: true
+        max_results: 6.027456183070403
+      properties:
+        query:
+          description: Search query/pattern
+          type: string
+        path:
+          description: 'Path to search in (default: ".")'
+          type: string
+        file_types:
+          description: 'File types to include (e.g., ["js", "ts"])'
+          items:
+            type: string
+          type: array
+        include_globs:
+          description: Include glob patterns
+          items:
+            type: string
+          type: array
+        exclude_globs:
+          description: Exclude glob patterns
+          items:
+            type: string
+          type: array
+        case_sensitive:
+          description: 'Case sensitive search (default: true)'
+          type: boolean
+        multiline:
+          description: Enable multiline matching
+          type: boolean
+        context:
+          description: Lines of context around matches
+          type: number
+        count_only:
+          description: Return only match counts
+          type: boolean
+        filenames_only:
+          description: Return only filenames with matches
+          type: boolean
+        json:
+          description: Return structured JSON output
+          type: boolean
+        max_results:
+          description: Maximum number of results
+          type: number
+        rg_args:
+          description: Additional ripgrep arguments
+          items:
+            type: string
+          type: array
+      required:
+        - query
+      type: object
+    SearchMatch:
+      example:
+        file: file
+        context_before:
+          - context_before
+          - context_before
+        line_number: 0.8008281904610115
+        line: line
+        column: 6.027456183070403
+        match: match
+        context_after:
+          - context_after
+          - context_after
+      properties:
+        file:
+          description: File path
+          type: string
+        line_number:
+          description: Line number
+          type: number
+        column:
+          description: Column number
+          type: number
+        line:
+          description: Line content
+          type: string
+        match:
+          description: Matched text
+          type: string
+        context_before:
+          description: Context lines before match
+          items:
+            type: string
+          type: array
+        context_after:
+          description: Context lines after match
+          items:
+            type: string
+          type: array
+      required:
+        - column
+        - file
+        - line
+        - line_number
+        - match
+      type: object
+    SearchResults:
+      example:
+        total_files: 5.962133916683182
+        raw_output: raw_output
+        files:
+          - files
+          - files
+        matches:
+          - file: file
+            context_before:
+              - context_before
+              - context_before
+            line_number: 0.8008281904610115
+            line: line
+            column: 6.027456183070403
+            match: match
+            context_after:
+              - context_after
+              - context_after
+          - file: file
+            context_before:
+              - context_before
+              - context_before
+            line_number: 0.8008281904610115
+            line: line
+            column: 6.027456183070403
+            match: match
+            context_after:
+              - context_after
+              - context_after
+        total_matches: 1.4658129805029452
+      properties:
+        matches:
+          description: Array of matches
+          items:
+            $ref: '#/components/schemas/SearchMatch'
+          type: array
+        total_matches:
+          description: Total number of matches
+          type: number
+        total_files:
+          description: Total number of files with matches
+          type: number
+        files:
+          description: List of files with matches
+          items:
+            type: string
+          type: array
+        raw_output:
+          description: Raw output from search tool
+          type: string
+      required:
+        - matches
+        - total_files
+        - total_matches
       type: object
     UploadFile:
       properties:
