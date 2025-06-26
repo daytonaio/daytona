@@ -30,7 +30,7 @@ import { getLocalStorageItem, setLocalStorageItem } from '@/lib/local-storage'
 import { DAYTONA_DOCS_URL } from '@/constants/ExternalLinks'
 
 const Sandboxes: React.FC = () => {
-  const { sandboxApi, apiKeyApi } = useApi()
+  const { sandboxApi, apiKeyApi, toolboxApi } = useApi()
   const { user } = useAuth()
   const { notificationSocket } = useNotificationSocket()
 
@@ -248,6 +248,61 @@ const Sandboxes: React.FC = () => {
     }
   }
 
+  const handleVnc = async (id: string) => {
+    setLoadingSandboxes((prev) => ({ ...prev, [id]: true }))
+
+    try {
+      // First, check if computer use is already started
+      const statusResponse = await toolboxApi.getComputerUseStatus(id, selectedOrganization?.id)
+      const status = statusResponse.data.status
+
+      // Check if any of the VNC processes are running
+      const isRunning = Object.values(status).some((processStatus: any) => processStatus?.running === true)
+
+      if (!isRunning) {
+        // Try to start computer use
+        try {
+          await toolboxApi.startComputerUse(id, selectedOrganization?.id)
+          toast.success('Starting VNC desktop...')
+        } catch (startError) {
+          handleApiError(startError, 'Failed to start VNC desktop')
+          return
+        }
+      }
+
+      // Get the sandbox to find the runner domain
+      const sandbox = sandboxes.find((s) => s.id === id)
+      if (!sandbox) {
+        toast.error('Sandbox not found')
+        return
+      }
+
+      // Construct the VNC URL
+      let vncUrl: string
+      if (!sandbox.daemonVersion) {
+        vncUrl = `https://6080-${id}.${sandbox.runnerDomain}/vnc.html`
+      } else {
+        const baseUrl = import.meta.env.VITE_PROXY_TEMPLATE_URL?.replace('{{PORT}}', '6080').replace(
+          '{{sandboxId}}',
+          id,
+        )
+        if (!baseUrl) {
+          toast.error('VNC URL template not configured')
+          return
+        }
+        vncUrl = `${baseUrl}/vnc.html`
+      }
+
+      // Open VNC in new tab
+      window.open(vncUrl, '_blank', 'noopener,noreferrer')
+      toast.success('Opening VNC desktop...')
+    } catch (error) {
+      handleApiError(error, 'Failed to access VNC desktop')
+    } finally {
+      setLoadingSandboxes((prev) => ({ ...prev, [id]: false }))
+    }
+  }
+
   // Redirect user to the onboarding page if they haven't created an api key yet
   // Perform only once per user
   useEffect(() => {
@@ -308,6 +363,7 @@ const Sandboxes: React.FC = () => {
         }}
         handleBulkDelete={handleBulkDelete}
         handleArchive={handleArchive}
+        handleVnc={handleVnc}
         data={sandboxes}
         loading={loadingTable}
       />

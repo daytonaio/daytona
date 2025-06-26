@@ -13,6 +13,7 @@ import {
   UsersApi,
   VolumesApi,
   SandboxApi,
+  ToolboxApi,
 } from '@daytonaio/api-client'
 import axios, { AxiosError } from 'axios'
 import { DaytonaError } from './errors'
@@ -27,6 +28,7 @@ export class ApiClient {
   private _organizationsApi: OrganizationsApi
   private _billingApi: BillingApiClient
   private _volumeApi: VolumesApi
+  private _toolboxApi: ToolboxApi
 
   constructor(accessToken: string) {
     this.config = new Configuration({
@@ -61,6 +63,7 @@ export class ApiClient {
     this._organizationsApi = new OrganizationsApi(this.config, undefined, axiosInstance)
     this._billingApi = new BillingApiClient(import.meta.env.VITE_BILLING_API_URL || window.location.origin, accessToken)
     this._volumeApi = new VolumesApi(this.config, undefined, axiosInstance)
+    this._toolboxApi = new ToolboxApi(this.config, undefined, axiosInstance)
   }
 
   public setAccessToken(accessToken: string) {
@@ -97,5 +100,9 @@ export class ApiClient {
 
   public get volumeApi() {
     return this._volumeApi
+  }
+
+  public get toolboxApi() {
+    return this._toolboxApi
   }
 }
