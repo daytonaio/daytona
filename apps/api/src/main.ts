@@ -32,7 +32,7 @@ const httpsOptions: HttpsOptions = {
 }
 
 // Default log level
-const logLevels: LogLevel[] = ['log', 'error']
+const logLevels: LogLevel[] = ['log', 'error', 'warn']
 if (process.env.LOG_LEVEL) {
   logLevels.push(process.env.LOG_LEVEL as LogLevel)
 }
