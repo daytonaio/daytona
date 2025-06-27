@@ -10,15 +10,15 @@ import (
 	"strings"
 	"time"
 
-	"github.com/daytonaio/daytona/cli/apiclient"
-	daytonaapiclient "github.com/daytonaio/daytona/daytonaapiclient"
+	"github.com/daytonaio/apiclient"
+	apiclient_cli "github.com/daytonaio/daytona/cli/apiclient"
 	"github.com/mark3labs/mcp-go/mcp"
 
 	log "github.com/sirupsen/logrus"
 )
 
 func CreateSandbox(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	apiClient, err := apiclient.GetApiClient(nil, daytonaMCPHeaders)
+	apiClient, err := apiclient_cli.GetApiClient(nil, daytonaMCPHeaders)
 	if err != nil {
 		return &mcp.CallToolResult{IsError: true}, err
 	}
@@ -32,14 +32,14 @@ func CreateSandbox(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallT
 
 	if sandboxId != "" {
 		sandbox, _, err := apiClient.SandboxAPI.GetSandbox(ctx, sandboxId).Execute()
-		if err == nil && sandbox.State != nil && *sandbox.State == daytonaapiclient.SANDBOXSTATE_STARTED {
+		if err == nil && sandbox.State != nil && *sandbox.State == apiclient.SANDBOXSTATE_STARTED {
 			return mcp.NewToolResultText(fmt.Sprintf("Reusing existing sandbox %s", sandboxId)), nil
 		}
 
 		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("sandbox %s not found or not running", sandboxId)
 	}
 
-	createSandbox := daytonaapiclient.NewCreateSandbox()
+	createSandbox := apiclient.NewCreateSandbox()
 
 	if snapshot, ok := request.Params.Arguments["snapshot"]; ok && snapshot != nil {
 		if snapshotStr, ok := snapshot.(string); ok && snapshotStr != "" {

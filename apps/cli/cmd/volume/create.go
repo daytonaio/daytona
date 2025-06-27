@@ -7,10 +7,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/daytonaio/daytona/cli/apiclient"
+	"github.com/daytonaio/apiclient"
+	apiclient_cli "github.com/daytonaio/daytona/cli/apiclient"
 	"github.com/daytonaio/daytona/cli/cmd/common"
 	view_common "github.com/daytonaio/daytona/cli/views/common"
-	"github.com/daytonaio/daytona/daytonaapiclient"
 	"github.com/spf13/cobra"
 )
 
@@ -22,16 +22,16 @@ var CreateCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 
-		apiClient, err := apiclient.GetApiClient(nil, nil)
+		apiClient, err := apiclient_cli.GetApiClient(nil, nil)
 		if err != nil {
 			return err
 		}
 
-		volume, res, err := apiClient.VolumesAPI.CreateVolume(ctx).CreateVolume(daytonaapiclient.CreateVolume{
+		volume, res, err := apiClient.VolumesAPI.CreateVolume(ctx).CreateVolume(apiclient.CreateVolume{
 			Name: args[0],
 		}).Execute()
 		if err != nil {
-			return apiclient.HandleErrorResponse(res, err)
+			return apiclient_cli.HandleErrorResponse(res, err)
 		}
 
 		view_common.RenderInfoMessageBold(fmt.Sprintf("Volume %s successfully created", volume.Name))

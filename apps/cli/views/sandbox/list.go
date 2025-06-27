@@ -7,9 +7,9 @@ import (
 	"fmt"
 	"sort"
 
+	"github.com/daytonaio/apiclient"
 	"github.com/daytonaio/daytona/cli/views/common"
 	"github.com/daytonaio/daytona/cli/views/util"
-	"github.com/daytonaio/daytona/daytonaapiclient"
 )
 
 type RowData struct {
@@ -20,7 +20,7 @@ type RowData struct {
 	LastEvent string
 }
 
-func ListSandboxes(sandboxList []daytonaapiclient.Sandbox, activeOrganizationName *string) {
+func ListSandboxes(sandboxList []apiclient.Sandbox, activeOrganizationName *string) {
 	if len(sandboxList) == 0 {
 		util.NotifyEmptySandboxList(true)
 		return
@@ -46,7 +46,7 @@ func ListSandboxes(sandboxList []daytonaapiclient.Sandbox, activeOrganizationNam
 	fmt.Println(table)
 }
 
-func SortSandboxes(sandboxList *[]daytonaapiclient.Sandbox) {
+func SortSandboxes(sandboxList *[]apiclient.Sandbox) {
 	sort.Slice(*sandboxList, func(i, j int) bool {
 		pi, pj := getStateSortPriorities(*(*sandboxList)[i].State, *(*sandboxList)[j].State)
 		if pi != pj {
@@ -62,7 +62,7 @@ func SortSandboxes(sandboxList *[]daytonaapiclient.Sandbox) {
 	})
 }
 
-func getTableRowData(sandbox daytonaapiclient.Sandbox) *RowData {
+func getTableRowData(sandbox apiclient.Sandbox) *RowData {
 	rowData := RowData{"", "", "", "", ""}
 	rowData.Name = sandbox.Id + util.AdditionalPropertyPadding
 	if sandbox.State != nil {
@@ -81,7 +81,7 @@ func getTableRowData(sandbox daytonaapiclient.Sandbox) *RowData {
 	return &rowData
 }
 
-func renderUnstyledList(sandboxList []daytonaapiclient.Sandbox) {
+func renderUnstyledList(sandboxList []apiclient.Sandbox) {
 	for _, sandbox := range sandboxList {
 		RenderInfo(&sandbox, true)
 
@@ -104,7 +104,7 @@ func getRowFromRowData(rowData RowData) []string {
 	return row
 }
 
-func getStateSortPriorities(state1, state2 daytonaapiclient.SandboxState) (int, int) {
+func getStateSortPriorities(state1, state2 apiclient.SandboxState) (int, int) {
 	pi, ok := sandboxListStatePriorities[state1]
 	if !ok {
 		pi = 99
@@ -118,7 +118,7 @@ func getStateSortPriorities(state1, state2 daytonaapiclient.SandboxState) (int, 
 }
 
 // Sandboxes that have actions being performed on them have a higher priority when listing
-var sandboxListStatePriorities = map[daytonaapiclient.SandboxState]int{
+var sandboxListStatePriorities = map[apiclient.SandboxState]int{
 	"pending":       1,
 	"pending-start": 1,
 	"deleting":      1,

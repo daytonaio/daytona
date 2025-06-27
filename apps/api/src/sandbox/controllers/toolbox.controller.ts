@@ -57,6 +57,31 @@ import {
   SessionExecuteResponseDto,
   SessionDto,
   CommandDto,
+  MousePositionDto,
+  MouseMoveRequestDto,
+  MouseMoveResponseDto,
+  MouseClickRequestDto,
+  MouseClickResponseDto,
+  MouseDragRequestDto,
+  MouseDragResponseDto,
+  MouseScrollRequestDto,
+  MouseScrollResponseDto,
+  KeyboardTypeRequestDto,
+  KeyboardPressRequestDto,
+  KeyboardHotkeyRequestDto,
+  ScreenshotResponseDto,
+  RegionScreenshotRequestDto,
+  RegionScreenshotResponseDto,
+  CompressedScreenshotResponseDto,
+  DisplayInfoResponseDto,
+  WindowsResponseDto,
+  ComputerUseStartResponseDto,
+  ComputerUseStopResponseDto,
+  ComputerUseStatusResponseDto,
+  ProcessStatusResponseDto,
+  ProcessRestartResponseDto,
+  ProcessLogsResponseDto,
+  ProcessErrorsResponseDto,
 } from '../dto/toolbox.dto'
 import { ToolboxService } from '../services/toolbox.service'
 import { ContentTypeInterceptor } from '../../common/interceptors/content-type.interceptors'
@@ -1082,6 +1107,493 @@ export class ToolboxController {
   @ApiQuery({ name: 'languageId', type: String, required: true })
   @ApiParam({ name: 'sandboxId', type: String, required: true })
   async getLspWorkspaceSymbols(
+    @Request() req: RawBodyRequest<IncomingMessage>,
+    @Res() res: ServerResponse<IncomingMessage>,
+    @Next() next: NextFunction,
+  ): Promise<void> {
+    return await this.toolboxProxy(req, res, next)
+  }
+
+  // Computer Use endpoints
+
+  // Computer use management endpoints
+  @Post(':sandboxId/toolbox/computeruse/start')
+  @HttpCode(200)
+  @UseInterceptors(ContentTypeInterceptor)
+  @ApiOperation({
+    summary: 'Start computer use processes',
+    description: 'Start all VNC desktop processes (Xvfb, xfce4, x11vnc, novnc)',
+    operationId: 'startComputerUse',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Computer use processes started successfully',
+    type: ComputerUseStartResponseDto,
+  })
+  @ApiParam({ name: 'sandboxId', type: String, required: true })
+  async startComputerUse(
+    @Request() req: RawBodyRequest<IncomingMessage>,
+    @Res() res: ServerResponse<IncomingMessage>,
+    @Next() next: NextFunction,
+  ): Promise<void> {
+    return await this.toolboxProxy(req, res, next)
+  }
+
+  @Post(':sandboxId/toolbox/computeruse/stop')
+  @HttpCode(200)
+  @UseInterceptors(ContentTypeInterceptor)
+  @ApiOperation({
+    summary: 'Stop computer use processes',
+    description: 'Stop all VNC desktop processes (Xvfb, xfce4, x11vnc, novnc)',
+    operationId: 'stopComputerUse',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Computer use processes stopped successfully',
+    type: ComputerUseStopResponseDto,
+  })
+  @ApiParam({ name: 'sandboxId', type: String, required: true })
+  async stopComputerUse(
+    @Request() req: RawBodyRequest<IncomingMessage>,
+    @Res() res: ServerResponse<IncomingMessage>,
+    @Next() next: NextFunction,
+  ): Promise<void> {
+    return await this.toolboxProxy(req, res, next)
+  }
+
+  @Get(':sandboxId/toolbox/computeruse/status')
+  @ApiOperation({
+    summary: 'Get computer use status',
+    description: 'Get status of all VNC desktop processes',
+    operationId: 'getComputerUseStatus',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Computer use status retrieved successfully',
+    type: ComputerUseStatusResponseDto,
+  })
+  @ApiParam({ name: 'sandboxId', type: String, required: true })
+  async getComputerUseStatus(
+    @Request() req: RawBodyRequest<IncomingMessage>,
+    @Res() res: ServerResponse<IncomingMessage>,
+    @Next() next: NextFunction,
+  ): Promise<void> {
+    return await this.toolboxProxy(req, res, next)
+  }
+
+  @Get(':sandboxId/toolbox/computeruse/process/:processName/status')
+  @ApiOperation({
+    summary: 'Get process status',
+    description: 'Get status of a specific VNC process',
+    operationId: 'getProcessStatus',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Process status retrieved successfully',
+    type: ProcessStatusResponseDto,
+  })
+  @ApiParam({ name: 'sandboxId', type: String, required: true })
+  @ApiParam({ name: 'processName', type: String, required: true })
+  async getProcessStatus(
+    @Request() req: RawBodyRequest<IncomingMessage>,
+    @Res() res: ServerResponse<IncomingMessage>,
+    @Next() next: NextFunction,
+  ): Promise<void> {
+    return await this.toolboxProxy(req, res, next)
+  }
+
+  @Post(':sandboxId/toolbox/computeruse/process/:processName/restart')
+  @HttpCode(200)
+  @UseInterceptors(ContentTypeInterceptor)
+  @ApiOperation({
+    summary: 'Restart process',
+    description: 'Restart a specific VNC process',
+    operationId: 'restartProcess',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Process restarted successfully',
+    type: ProcessRestartResponseDto,
+  })
+  @ApiParam({ name: 'sandboxId', type: String, required: true })
+  @ApiParam({ name: 'processName', type: String, required: true })
+  async restartProcess(
+    @Request() req: RawBodyRequest<IncomingMessage>,
+    @Res() res: ServerResponse<IncomingMessage>,
+    @Next() next: NextFunction,
+  ): Promise<void> {
+    return await this.toolboxProxy(req, res, next)
+  }
+
+  @Get(':sandboxId/toolbox/computeruse/process/:processName/logs')
+  @ApiOperation({
+    summary: 'Get process logs',
+    description: 'Get logs for a specific VNC process',
+    operationId: 'getProcessLogs',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Process logs retrieved successfully',
+    type: ProcessLogsResponseDto,
+  })
+  @ApiParam({ name: 'sandboxId', type: String, required: true })
+  @ApiParam({ name: 'processName', type: String, required: true })
+  async getProcessLogs(
+    @Request() req: RawBodyRequest<IncomingMessage>,
+    @Res() res: ServerResponse<IncomingMessage>,
+    @Next() next: NextFunction,
+  ): Promise<void> {
+    return await this.toolboxProxy(req, res, next)
+  }
+
+  @Get(':sandboxId/toolbox/computeruse/process/:processName/errors')
+  @ApiOperation({
+    summary: 'Get process errors',
+    description: 'Get error logs for a specific VNC process',
+    operationId: 'getProcessErrors',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Process errors retrieved successfully',
+    type: ProcessErrorsResponseDto,
+  })
+  @ApiParam({ name: 'sandboxId', type: String, required: true })
+  @ApiParam({ name: 'processName', type: String, required: true })
+  async getProcessErrors(
+    @Request() req: RawBodyRequest<IncomingMessage>,
+    @Res() res: ServerResponse<IncomingMessage>,
+    @Next() next: NextFunction,
+  ): Promise<void> {
+    return await this.toolboxProxy(req, res, next)
+  }
+
+  // Mouse endpoints
+  @Get(':sandboxId/toolbox/computeruse/mouse/position')
+  @ApiOperation({
+    summary: 'Get mouse position',
+    description: 'Get current mouse cursor position',
+    operationId: 'getMousePosition',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Mouse position retrieved successfully',
+    type: MousePositionDto,
+  })
+  @ApiParam({ name: 'sandboxId', type: String, required: true })
+  async getMousePosition(
+    @Request() req: RawBodyRequest<IncomingMessage>,
+    @Res() res: ServerResponse<IncomingMessage>,
+    @Next() next: NextFunction,
+  ): Promise<void> {
+    return await this.toolboxProxy(req, res, next)
+  }
+
+  @Post(':sandboxId/toolbox/computeruse/mouse/move')
+  @HttpCode(200)
+  @UseInterceptors(ContentTypeInterceptor)
+  @ApiOperation({
+    summary: 'Move mouse',
+    description: 'Move mouse cursor to specified coordinates',
+    operationId: 'moveMouse',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Mouse moved successfully',
+    type: MouseMoveResponseDto,
+  })
+  @ApiBody({
+    type: MouseMoveRequestDto,
+  })
+  @ApiParam({ name: 'sandboxId', type: String, required: true })
+  async moveMouse(
+    @Request() req: RawBodyRequest<IncomingMessage>,
+    @Res() res: ServerResponse<IncomingMessage>,
+    @Next() next: NextFunction,
+  ): Promise<void> {
+    return await this.toolboxProxy(req, res, next)
+  }
+
+  @Post(':sandboxId/toolbox/computeruse/mouse/click')
+  @HttpCode(200)
+  @UseInterceptors(ContentTypeInterceptor)
+  @ApiOperation({
+    summary: 'Click mouse',
+    description: 'Click mouse at specified coordinates',
+    operationId: 'clickMouse',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Mouse clicked successfully',
+    type: MouseClickResponseDto,
+  })
+  @ApiBody({
+    type: MouseClickRequestDto,
+  })
+  @ApiParam({ name: 'sandboxId', type: String, required: true })
+  async clickMouse(
+    @Request() req: RawBodyRequest<IncomingMessage>,
+    @Res() res: ServerResponse<IncomingMessage>,
+    @Next() next: NextFunction,
+  ): Promise<void> {
+    return await this.toolboxProxy(req, res, next)
+  }
+
+  @Post(':sandboxId/toolbox/computeruse/mouse/drag')
+  @HttpCode(200)
+  @UseInterceptors(ContentTypeInterceptor)
+  @ApiOperation({
+    summary: 'Drag mouse',
+    description: 'Drag mouse from start to end coordinates',
+    operationId: 'dragMouse',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Mouse dragged successfully',
+    type: MouseDragResponseDto,
+  })
+  @ApiBody({
+    type: MouseDragRequestDto,
+  })
+  @ApiParam({ name: 'sandboxId', type: String, required: true })
+  async dragMouse(
+    @Request() req: RawBodyRequest<IncomingMessage>,
+    @Res() res: ServerResponse<IncomingMessage>,
+    @Next() next: NextFunction,
+  ): Promise<void> {
+    return await this.toolboxProxy(req, res, next)
+  }
+
+  @Post(':sandboxId/toolbox/computeruse/mouse/scroll')
+  @HttpCode(200)
+  @UseInterceptors(ContentTypeInterceptor)
+  @ApiOperation({
+    summary: 'Scroll mouse',
+    description: 'Scroll mouse at specified coordinates',
+    operationId: 'scrollMouse',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Mouse scrolled successfully',
+    type: MouseScrollResponseDto,
+  })
+  @ApiBody({
+    type: MouseScrollRequestDto,
+  })
+  @ApiParam({ name: 'sandboxId', type: String, required: true })
+  async scrollMouse(
+    @Request() req: RawBodyRequest<IncomingMessage>,
+    @Res() res: ServerResponse<IncomingMessage>,
+    @Next() next: NextFunction,
+  ): Promise<void> {
+    return await this.toolboxProxy(req, res, next)
+  }
+
+  // Keyboard endpoints
+  @Post(':sandboxId/toolbox/computeruse/keyboard/type')
+  @HttpCode(200)
+  @UseInterceptors(ContentTypeInterceptor)
+  @ApiOperation({
+    summary: 'Type text',
+    description: 'Type text using keyboard',
+    operationId: 'typeText',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Text typed successfully',
+  })
+  @ApiBody({
+    type: KeyboardTypeRequestDto,
+  })
+  @ApiParam({ name: 'sandboxId', type: String, required: true })
+  async typeText(
+    @Request() req: RawBodyRequest<IncomingMessage>,
+    @Res() res: ServerResponse<IncomingMessage>,
+    @Next() next: NextFunction,
+  ): Promise<void> {
+    return await this.toolboxProxy(req, res, next)
+  }
+
+  @Post(':sandboxId/toolbox/computeruse/keyboard/key')
+  @HttpCode(200)
+  @UseInterceptors(ContentTypeInterceptor)
+  @ApiOperation({
+    summary: 'Press key',
+    description: 'Press a key with optional modifiers',
+    operationId: 'pressKey',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Key pressed successfully',
+  })
+  @ApiBody({
+    type: KeyboardPressRequestDto,
+  })
+  @ApiParam({ name: 'sandboxId', type: String, required: true })
+  async pressKey(
+    @Request() req: RawBodyRequest<IncomingMessage>,
+    @Res() res: ServerResponse<IncomingMessage>,
+    @Next() next: NextFunction,
+  ): Promise<void> {
+    return await this.toolboxProxy(req, res, next)
+  }
+
+  @Post(':sandboxId/toolbox/computeruse/keyboard/hotkey')
+  @HttpCode(200)
+  @UseInterceptors(ContentTypeInterceptor)
+  @ApiOperation({
+    summary: 'Press hotkey',
+    description: 'Press a hotkey combination',
+    operationId: 'pressHotkey',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Hotkey pressed successfully',
+  })
+  @ApiBody({
+    type: KeyboardHotkeyRequestDto,
+  })
+  @ApiParam({ name: 'sandboxId', type: String, required: true })
+  async pressHotkey(
+    @Request() req: RawBodyRequest<IncomingMessage>,
+    @Res() res: ServerResponse<IncomingMessage>,
+    @Next() next: NextFunction,
+  ): Promise<void> {
+    return await this.toolboxProxy(req, res, next)
+  }
+
+  // Screenshot endpoints
+  @Get(':sandboxId/toolbox/computeruse/screenshot')
+  @ApiOperation({
+    summary: 'Take screenshot',
+    description: 'Take a screenshot of the entire screen',
+    operationId: 'takeScreenshot',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Screenshot taken successfully',
+    type: ScreenshotResponseDto,
+  })
+  @ApiQuery({ name: 'show_cursor', type: Boolean, required: false })
+  @ApiParam({ name: 'sandboxId', type: String, required: true })
+  async takeScreenshot(
+    @Request() req: RawBodyRequest<IncomingMessage>,
+    @Res() res: ServerResponse<IncomingMessage>,
+    @Next() next: NextFunction,
+  ): Promise<void> {
+    return await this.toolboxProxy(req, res, next)
+  }
+
+  @Get(':sandboxId/toolbox/computeruse/screenshot/region')
+  @ApiOperation({
+    summary: 'Take region screenshot',
+    description: 'Take a screenshot of a specific region',
+    operationId: 'takeRegionScreenshot',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Region screenshot taken successfully',
+    type: RegionScreenshotResponseDto,
+  })
+  @ApiQuery({ name: 'x', type: Number, required: true })
+  @ApiQuery({ name: 'y', type: Number, required: true })
+  @ApiQuery({ name: 'width', type: Number, required: true })
+  @ApiQuery({ name: 'height', type: Number, required: true })
+  @ApiQuery({ name: 'show_cursor', type: Boolean, required: false })
+  @ApiParam({ name: 'sandboxId', type: String, required: true })
+  async takeRegionScreenshot(
+    @Request() req: RawBodyRequest<IncomingMessage>,
+    @Res() res: ServerResponse<IncomingMessage>,
+    @Next() next: NextFunction,
+  ): Promise<void> {
+    return await this.toolboxProxy(req, res, next)
+  }
+
+  @Get(':sandboxId/toolbox/computeruse/screenshot/compressed')
+  @ApiOperation({
+    summary: 'Take compressed screenshot',
+    description: 'Take a compressed screenshot with format, quality, and scale options',
+    operationId: 'takeCompressedScreenshot',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Compressed screenshot taken successfully',
+    type: CompressedScreenshotResponseDto,
+  })
+  @ApiQuery({ name: 'show_cursor', type: Boolean, required: false })
+  @ApiQuery({ name: 'format', type: String, required: false })
+  @ApiQuery({ name: 'quality', type: Number, required: false })
+  @ApiQuery({ name: 'scale', type: Number, required: false })
+  @ApiParam({ name: 'sandboxId', type: String, required: true })
+  async takeCompressedScreenshot(
+    @Request() req: RawBodyRequest<IncomingMessage>,
+    @Res() res: ServerResponse<IncomingMessage>,
+    @Next() next: NextFunction,
+  ): Promise<void> {
+    return await this.toolboxProxy(req, res, next)
+  }
+
+  @Get(':sandboxId/toolbox/computeruse/screenshot/region/compressed')
+  @ApiOperation({
+    summary: 'Take compressed region screenshot',
+    description: 'Take a compressed screenshot of a specific region',
+    operationId: 'takeCompressedRegionScreenshot',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Compressed region screenshot taken successfully',
+    type: CompressedScreenshotResponseDto,
+  })
+  @ApiQuery({ name: 'x', type: Number, required: true })
+  @ApiQuery({ name: 'y', type: Number, required: true })
+  @ApiQuery({ name: 'width', type: Number, required: true })
+  @ApiQuery({ name: 'height', type: Number, required: true })
+  @ApiQuery({ name: 'show_cursor', type: Boolean, required: false })
+  @ApiQuery({ name: 'format', type: String, required: false })
+  @ApiQuery({ name: 'quality', type: Number, required: false })
+  @ApiQuery({ name: 'scale', type: Number, required: false })
+  @ApiParam({ name: 'sandboxId', type: String, required: true })
+  async takeCompressedRegionScreenshot(
+    @Request() req: RawBodyRequest<IncomingMessage>,
+    @Res() res: ServerResponse<IncomingMessage>,
+    @Next() next: NextFunction,
+  ): Promise<void> {
+    return await this.toolboxProxy(req, res, next)
+  }
+
+  // Display endpoints
+  @Get(':sandboxId/toolbox/computeruse/display/info')
+  @ApiOperation({
+    summary: 'Get display info',
+    description: 'Get information about displays',
+    operationId: 'getDisplayInfo',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Display info retrieved successfully',
+    type: DisplayInfoResponseDto,
+  })
+  @ApiParam({ name: 'sandboxId', type: String, required: true })
+  async getDisplayInfo(
+    @Request() req: RawBodyRequest<IncomingMessage>,
+    @Res() res: ServerResponse<IncomingMessage>,
+    @Next() next: NextFunction,
+  ): Promise<void> {
+    return await this.toolboxProxy(req, res, next)
+  }
+
+  @Get(':sandboxId/toolbox/computeruse/display/windows')
+  @ApiOperation({
+    summary: 'Get windows',
+    description: 'Get list of open windows',
+    operationId: 'getWindows',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Windows list retrieved successfully',
+    type: WindowsResponseDto,
+  })
+  @ApiParam({ name: 'sandboxId', type: String, required: true })
+  async getWindows(
     @Request() req: RawBodyRequest<IncomingMessage>,
     @Res() res: ServerResponse<IncomingMessage>,
     @Next() next: NextFunction,

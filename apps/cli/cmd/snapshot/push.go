@@ -12,12 +12,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/daytonaio/daytona/cli/apiclient"
+	"github.com/daytonaio/apiclient"
+	apiclient_cli "github.com/daytonaio/daytona/cli/apiclient"
 	"github.com/daytonaio/daytona/cli/cmd/common"
 	"github.com/daytonaio/daytona/cli/docker"
 	views_common "github.com/daytonaio/daytona/cli/views/common"
 	views_util "github.com/daytonaio/daytona/cli/views/util"
-	"github.com/daytonaio/daytona/daytonaapiclient"
 	"github.com/docker/docker/api/types/image"
 	"github.com/docker/docker/api/types/registry"
 	"github.com/docker/docker/client"
@@ -64,14 +64,14 @@ var PushCmd = &cobra.Command{
 			return fmt.Errorf("image '%s' is not compatible with AMD architecture", sourceImage)
 		}
 
-		apiClient, err := apiclient.GetApiClient(nil, nil)
+		apiClient, err := apiclient_cli.GetApiClient(nil, nil)
 		if err != nil {
 			return err
 		}
 
 		tokenResponse, res, err := apiClient.DockerRegistryAPI.GetTransientPushAccess(ctx).Execute()
 		if err != nil {
-			return apiclient.HandleErrorResponse(res, err)
+			return apiclient_cli.HandleErrorResponse(res, err)
 		}
 
 		encodedAuthConfig, err := json.Marshal(registry.AuthConfig{
@@ -104,7 +104,7 @@ var PushCmd = &cobra.Command{
 			return err
 		}
 
-		createSnapshot := daytonaapiclient.NewCreateSnapshot(nameFlag)
+		createSnapshot := apiclient.NewCreateSnapshot(nameFlag)
 
 		createSnapshot.SetImageName(targetImage)
 
@@ -135,13 +135,13 @@ var PushCmd = &cobra.Command{
 
 		_, res, err = apiClient.SnapshotsAPI.CreateSnapshot(ctx).CreateSnapshot(*createSnapshot).Execute()
 		if err != nil {
-			return apiclient.HandleErrorResponse(res, err)
+			return apiclient_cli.HandleErrorResponse(res, err)
 		}
 
 		views_common.RenderInfoMessageBold(fmt.Sprintf("Successfully pushed %s to Daytona", sourceImage))
 
 		err = views_util.WithInlineSpinner("Waiting for the snapshot to be validated", func() error {
-			return common.AwaitSnapshotState(ctx, apiClient, nameFlag, daytonaapiclient.SNAPSHOTSTATE_ACTIVE)
+			return common.AwaitSnapshotState(ctx, apiClient, nameFlag, apiclient.SNAPSHOTSTATE_ACTIVE)
 		})
 		if err != nil {
 			return err

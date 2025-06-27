@@ -16,5 +16,8 @@ func main() {
 		log.Fatal(err)
 	}
 
-	proxy.StartProxy(config)
+	err = proxy.StartProxy(config)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
