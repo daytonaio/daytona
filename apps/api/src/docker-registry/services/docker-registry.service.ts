@@ -128,8 +128,12 @@ export class DockerRegistryService {
   }
 
   async findOneBySnapshotImageName(imageName: string, organizationId?: string): Promise<DockerRegistry | null> {
+    const whereCondition = organizationId
+      ? [{ organizationId }, { organizationId: IsNull() }]
+      : [{ organizationId: IsNull() }]
+
     const registries = await this.dockerRegistryRepository.find({
-      where: [...(organizationId && [{ organizationId }]), { organizationId: IsNull() }],
+      where: whereCondition,
     })
 
     // Try to find a registry that matches the snapshot image name pattern
