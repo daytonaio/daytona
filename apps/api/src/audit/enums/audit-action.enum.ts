@@ -45,6 +45,7 @@ export enum AuditAction {
   SANDBOX_SET_AUTO_STOP_INTERVAL = 'sandbox_set_auto_stop_interval',
   SANDBOX_SET_AUTO_ARCHIVE_INTERVAL = 'sandbox_set_auto_archive_interval',
   SANDBOX_ARCHIVE = 'sandbox_archive',
+  SANDBOX_GET_PORT_PREVIEW_URL = 'sandbox_get_port_preview_url',
 
   // snapshot
   SNAPSHOT_TOGGLE_STATE = 'snapshot_toggle_state',

@@ -232,6 +232,19 @@ const Sandboxes: React.FC = () => {
     }
   }
 
+  const handleOpenWebTerminal = async (id: string) => {
+    setLoadingSandboxes((prev) => ({ ...prev, [id]: true }))
+
+    try {
+      const portPreviewUrl = (await sandboxApi.getPortPreviewUrl(id, 22222, selectedOrganization?.id)).data.url
+      window.open(portPreviewUrl, '_blank')
+    } catch (error) {
+      handleApiError(error, 'Failed to open web terminal')
+    } finally {
+      setLoadingSandboxes((prev) => ({ ...prev, [id]: false }))
+    }
+  }
+
   // Redirect user to the onboarding page if they haven't created an api key yet
   // Perform only once per user
   useEffect(() => {
@@ -292,6 +305,7 @@ const Sandboxes: React.FC = () => {
         }}
         handleBulkDelete={handleBulkDelete}
         handleArchive={handleArchive}
+        handleOpenWebTerminal={handleOpenWebTerminal}
         data={sandboxes}
         loading={loadingTable}
       />

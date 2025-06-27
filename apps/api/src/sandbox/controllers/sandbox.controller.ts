@@ -518,6 +518,16 @@ export class SandboxController {
     type: PortPreviewUrlDto,
   })
   @UseGuards(SandboxAccessGuard)
+  @Audit({
+    action: AuditAction.SANDBOX_GET_PORT_PREVIEW_URL,
+    targetType: AuditTarget.SANDBOX,
+    targetIdFromRequest: (req) => req.params.sandboxId,
+    requestMetadata: {
+      params: (req) => ({
+        port: req.params.port,
+      }),
+    },
+  })
   async getPortPreviewUrl(
     @Param('sandboxId') sandboxId: string,
     @Param('port') port: number,
