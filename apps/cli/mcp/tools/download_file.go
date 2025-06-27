@@ -15,7 +15,7 @@ import (
 	"github.com/mark3labs/mcp-go/mcp"
 )
 
-type DownloadFileArgs struct {
+type FileDownloadArgs struct {
 	Id       *string `json:"id,omitempty"`
 	FilePath *string `json:"file_path,omitempty"`
 }
@@ -26,15 +26,15 @@ type Content struct {
 	Data string `json:"data,omitempty"`
 }
 
-func GetDownloadFileTool() mcp.Tool {
-	return mcp.NewTool("download_file",
+func GetFileDownloadTool() mcp.Tool {
+	return mcp.NewTool("file_download",
 		mcp.WithDescription("Download a file from the Daytona sandbox. Returns the file content either as text or as a base64 encoded image. Handles special cases like matplotlib plots stored as JSON with embedded base64 images."),
 		mcp.WithString("file_path", mcp.Required(), mcp.Description("Path to the file to download.")),
 		mcp.WithString("id", mcp.Required(), mcp.Description("ID of the sandbox to download the file from.")),
 	)
 }
 
-func DownloadCommand(ctx context.Context, request mcp.CallToolRequest, args DownloadFileArgs) (*mcp.CallToolResult, error) {
+func FileDownload(ctx context.Context, request mcp.CallToolRequest, args FileDownloadArgs) (*mcp.CallToolResult, error) {
 	apiClient, err := apiclient.GetApiClient(nil, daytonaMCPHeaders)
 	if err != nil {
 		return &mcp.CallToolResult{IsError: true}, err

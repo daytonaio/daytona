@@ -14,12 +14,12 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-type GetFileInfoArgs struct {
+type FileInfoArgs struct {
 	Id       *string `json:"id,omitempty"`
 	FilePath *string `json:"file_path,omitempty"`
 }
 
-func GetGetFileInfoTool() mcp.Tool {
+func GetFileInfoTool() mcp.Tool {
 	return mcp.NewTool("get_file_info",
 		mcp.WithDescription("Get information about a file in the Daytona sandbox."),
 		mcp.WithString("file_path", mcp.Required(), mcp.Description("Path to the file to get information about.")),
@@ -27,7 +27,7 @@ func GetGetFileInfoTool() mcp.Tool {
 	)
 }
 
-func GetFileInfo(ctx context.Context, request mcp.CallToolRequest, args GetFileInfoArgs) (*mcp.CallToolResult, error) {
+func FileInfo(ctx context.Context, request mcp.CallToolRequest, args FileInfoArgs) (*mcp.CallToolResult, error) {
 	apiClient, err := apiclient.GetApiClient(nil, daytonaMCPHeaders)
 	if err != nil {
 		return &mcp.CallToolResult{IsError: true}, err
