@@ -157,7 +157,7 @@ class AsyncFileSystem:
         )
 
         async with httpx.AsyncClient(timeout=timeout or None) as client:
-            async with client.stream(method, url, headers) as response:
+            async with client.stream(method, url, headers=headers) as response:
                 response.raise_for_status()
                 parent = os.path.dirname(local_path)
                 if parent:
