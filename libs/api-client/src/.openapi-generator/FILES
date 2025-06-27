@@ -2,6 +2,7 @@
 .npmignore
 api.ts
 api/api-keys-api.ts
+api/audit-api.ts
 api/docker-registry-api.ts
 api/object-storage-api.ts
 api/organizations-api.ts
@@ -21,12 +22,14 @@ index.ts
 models/account-provider.ts
 models/api-key-list.ts
 models/api-key-response.ts
+models/audit-log.ts
 models/build-info.ts
 models/command.ts
 models/completion-context.ts
 models/completion-item.ts
 models/completion-list.ts
 models/create-api-key.ts
+models/create-audit-log.ts
 models/create-build-info.ts
 models/create-docker-registry.ts
 models/create-linked-account.ts
