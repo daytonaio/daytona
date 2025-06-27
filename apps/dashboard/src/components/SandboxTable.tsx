@@ -17,7 +17,7 @@ import {
   SortingState,
   useReactTable,
 } from '@tanstack/react-table'
-import {
+import { usePersistedTableSort } from '@/hooks/usePersistedTableSort'
   Loader2,
   Terminal,
   AlertTriangle,
@@ -84,7 +84,7 @@ export function SandboxTable({
     [authenticatedUserHasPermission],
   )
 
-  const [sorting, setSorting] = useState<SortingState>([
+  const [sorting, setSorting] = usePersistedTableSort('sandbox', [
     {
       id: 'state',
       desc: false,

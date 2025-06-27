@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
+import { usePersistedTableSort } from '@/hooks/usePersistedTableSort'
 import { Loader2, AlertTriangle, MoreHorizontal, CheckCircle, Timer } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { OrganizationRolePermissionsEnum, VolumeDto, VolumeState } from '@daytonaio/api-client'
@@ -49,7 +50,7 @@ export function VolumeTable({ data, loading, processingVolumeAction, onDelete, o
     [authenticatedUserHasPermission],
   )
 
-  const [sorting, setSorting] = useState<SortingState>([])
+  const [sorting, setSorting] = usePersistedTableSort('volume')
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
 
   const columns = getColumns({
