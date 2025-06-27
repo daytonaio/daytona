@@ -1,6 +1,7 @@
 # Copyright 2025 Daytona Platforms Inc.
 # SPDX-License-Identifier: Apache-2.0
 
+import json
 from typing import List, Optional
 
 from daytona_api_client_async import (
@@ -166,81 +167,107 @@ class AsyncKeyboard:
         self._toolbox_api = toolbox_api
 
     @intercept_errors(message_prefix="Failed to type text: ")
-    async def type(self, text: str, delay: Optional[int] = None) -> bool:
+    async def type(self, text: str, delay: Optional[int] = None) -> None:
         """Types the specified text.
 
         Args:
             text (str): The text to type.
             delay (int): Delay between characters in milliseconds.
 
-        Returns:
-            bool: Whether the type operation was successful.
+        Raises:
+            DaytonaError: If the type operation fails.
 
         Example:
             ```python
-            result = await sandbox.computer_use.keyboard.type("Hello, World!")
-            print(f"Operation success: {result}")
+            try:
+                await sandbox.computer_use.keyboard.type("Hello, World!")
+                print(f"Operation success")
+            except Exception as e:
+                print(f"Operation failed: {e}")
 
             # With delay between characters
-            slow_type = await sandbox.computer_use.keyboard.type("Slow typing", 100)
+            try:
+                await sandbox.computer_use.keyboard.type("Slow typing", 100)
+                print(f"Operation success")
+            except Exception as e:
+                print(f"Operation failed: {e}")
             ```
         """
         request = KeyboardTypeRequest(text=text, delay=delay)
-        response = await self._toolbox_api.type_text(self._sandbox_id, request)
-        return response
+        await self._toolbox_api.type_text(self._sandbox_id, request)
 
     @intercept_errors(message_prefix="Failed to press key: ")
-    async def press(self, key: str, modifiers: Optional[List[str]] = None) -> bool:
+    async def press(self, key: str, modifiers: Optional[List[str]] = None) -> None:
         """Presses a key with optional modifiers.
 
         Args:
             key (str): The key to press (e.g., 'Enter', 'Escape', 'Tab', 'a', 'A').
             modifiers (List[str]): Modifier keys ('ctrl', 'alt', 'meta', 'shift').
 
-        Returns:
-            bool: Whether the press operation was successful.
+        Raises:
+            DaytonaError: If the press operation fails.
 
         Example:
             ```python
             # Press Enter
-            enter = await sandbox.computer_use.keyboard.press("Return")
+            try:
+                await sandbox.computer_use.keyboard.press("Return")
+                print(f"Operation success")
+            except Exception as e:
+                print(f"Operation failed: {e}")
 
             # Press Ctrl+C
-            copy = await sandbox.computer_use.keyboard.press("c", ["ctrl"])
+            try:
+                await sandbox.computer_use.keyboard.press("c", ["ctrl"])
+                print(f"Operation success")
 
             # Press Ctrl+Shift+T
-            new_tab = await sandbox.computer_use.keyboard.press("t", ["ctrl", "shift"])
+            try:
+                await sandbox.computer_use.keyboard.press("t", ["ctrl", "shift"])
+                print(f"Operation success")
+            except Exception as e:
+                print(f"Operation failed: {e}")
             ```
         """
         request = KeyboardPressRequest(key=key, modifiers=modifiers or [])
-        response = await self._toolbox_api.press_key(self._sandbox_id, request)
-        return response
+        await self._toolbox_api.press_key(self._sandbox_id, request)
 
     @intercept_errors(message_prefix="Failed to press hotkey: ")
-    async def hotkey(self, keys: str) -> bool:
+    async def hotkey(self, keys: str) -> None:
         """Presses a hotkey combination.
 
         Args:
             keys (str): The hotkey combination (e.g., 'ctrl+c', 'alt+tab', 'cmd+shift+t').
 
-        Returns:
-            bool: Whether the hotkey operation was successful.
+        Raises:
+            DaytonaError: If the hotkey operation fails.
 
         Example:
             ```python
             # Copy
-            copy = await sandbox.computer_use.keyboard.hotkey("ctrl+c")
+            try:
+                await sandbox.computer_use.keyboard.hotkey("ctrl+c")
+                print(f"Operation success")
+            except Exception as e:
+                print(f"Operation failed: {e}")
 
             # Paste
-            paste = await sandbox.computer_use.keyboard.hotkey("ctrl+v")
+            try:
+                await sandbox.computer_use.keyboard.hotkey("ctrl+v")
+                print(f"Operation success")
+            except Exception as e:
+                print(f"Operation failed: {e}")
 
             # Alt+Tab
-            alt_tab = await sandbox.computer_use.keyboard.hotkey("alt+tab")
+            try:
+                await sandbox.computer_use.keyboard.hotkey("alt+tab")
+                print(f"Operation success")
+            except Exception as e:
+                print(f"Operation failed: {e}")
             ```
         """
         request = KeyboardHotkeyRequest(keys=keys)
-        response = await self._toolbox_api.press_hotkey(self._sandbox_id, request)
-        return response
+        await self._toolbox_api.press_hotkey(self._sandbox_id, request)
 
 
 class AsyncScreenshot:
@@ -481,12 +508,13 @@ class AsyncComputerUse:
 
         Example:
             ```python
-            status = await sandbox.computer_use.get_status()
-            print("Computer use status:", status)
+            response = await sandbox.computer_use.get_status()
+            print("Computer use status:", response.status)
             ```
         """
-        response = await self._toolbox_api.get_computer_use_status(self._sandbox_id)
-        return response
+        response = await self._toolbox_api.get_computer_use_status_without_preload_content(self._sandbox_id)
+        data_dict = json.loads(response.data)
+        return ComputerUseStatusResponse(status=data_dict)
 
     @intercept_errors(message_prefix="Failed to get process status: ")
     async def get_process_status(self, process_name: str) -> ProcessStatusResponse:

@@ -295,7 +295,7 @@ new Keyboard(sandboxId: string, toolboxApi: ToolboxApi): Keyboard
 #### hotkey()
 
 ```ts
-hotkey(keys: string): Promise<boolean>
+hotkey(keys: string): Promise<void>
 ```
 
 Presses a hotkey combination
@@ -306,19 +306,38 @@ Presses a hotkey combination
 
 **Returns**:
 
-- `Promise<boolean>` - Whether the hotkey operation was successful
+- `Promise<void>`
+
+**Throws**:
+
+If the hotkey operation fails
 
 **Example:**
 
 ```typescript
 // Copy
-const copy = await sandbox.computerUse.keyboard.hotkey('ctrl+c')
+try {
+  await sandbox.computerUse.keyboard.hotkey('ctrl+c')
+  console.log('Operation success')
+} catch (e) {
+  console.log('Operation failed:', e)
+}
 
 // Paste
-const paste = await sandbox.computerUse.keyboard.hotkey('ctrl+v')
+try {
+  await sandbox.computerUse.keyboard.hotkey('ctrl+v')
+  console.log('Operation success')
+} catch (e) {
+  console.log('Operation failed:', e)
+}
 
 // Alt+Tab
-const altTab = await sandbox.computerUse.keyboard.hotkey('alt+tab')
+try {
+  await sandbox.computerUse.keyboard.hotkey('alt+tab')
+  console.log('Operation success')
+} catch (e) {
+  console.log('Operation failed:', e)
+}
 ```
 
 ---
@@ -326,7 +345,7 @@ const altTab = await sandbox.computerUse.keyboard.hotkey('alt+tab')
 #### press()
 
 ```ts
-press(key: string, modifiers?: string[]): Promise<boolean>
+press(key: string, modifiers?: string[]): Promise<void>
 ```
 
 Presses a key with optional modifiers
@@ -338,19 +357,38 @@ Presses a key with optional modifiers
 
 **Returns**:
 
-- `Promise<boolean>` - Whether the press operation was successful
+- `Promise<void>`
+
+**Throws**:
+
+If the press operation fails
 
 **Example:**
 
 ```typescript
 // Press Enter
-const enter = await sandbox.computerUse.keyboard.press('Return')
+try {
+  await sandbox.computerUse.keyboard.press('Return')
+  console.log('Operation success')
+} catch (e) {
+  console.log('Operation failed:', e)
+}
 
 // Press Ctrl+C
-const copy = await sandbox.computerUse.keyboard.press('c', ['ctrl'])
+try {
+  await sandbox.computerUse.keyboard.press('c', ['ctrl'])
+  console.log('Operation success')
+} catch (e) {
+  console.log('Operation failed:', e)
+}
 
 // Press Ctrl+Shift+T
-const newTab = await sandbox.computerUse.keyboard.press('t', ['ctrl', 'shift'])
+try {
+  await sandbox.computerUse.keyboard.press('t', ['ctrl', 'shift'])
+  console.log('Operation success')
+} catch (e) {
+  console.log('Operation failed:', e)
+}
 ```
 
 ---
@@ -358,7 +396,7 @@ const newTab = await sandbox.computerUse.keyboard.press('t', ['ctrl', 'shift'])
 #### type()
 
 ```ts
-type(text: string, delay?: number): Promise<boolean>
+type(text: string, delay?: number): Promise<void>
 ```
 
 Types the specified text
@@ -370,16 +408,29 @@ Types the specified text
 
 **Returns**:
 
-- `Promise<boolean>` - Whether the type operation was successful
+- `Promise<void>`
+
+**Throws**:
+
+If the type operation fails
 
 **Example:**
 
 ```typescript
-const result = await sandbox.computerUse.keyboard.type('Hello, World!')
-console.log(`Typed: ${result.typed}`)
+try {
+  await sandbox.computerUse.keyboard.type('Hello, World!')
+  console.log('Operation success')
+} catch (e) {
+  console.log('Operation failed:', e)
+}
 
 // With delay between characters
-const slowType = await sandbox.computerUse.keyboard.type('Slow typing', 100)
+try {
+  await sandbox.computerUse.keyboard.type('Slow typing', 100)
+  console.log('Operation success')
+} catch (e) {
+  console.log('Operation failed:', e)
+}
 ```
 
 ---
@@ -521,7 +572,7 @@ Moves the mouse cursor to the specified coordinates
 
 ```typescript
 const result = await sandbox.computerUse.mouse.move(100, 200)
-console.log(`Mouse moved to: ${result.actual_x}, ${result.actual_y}`)
+console.log(`Mouse moved to: ${result.x}, ${result.y}`)
 ```
 
 ---

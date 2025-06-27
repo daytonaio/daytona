@@ -28,7 +28,6 @@ from daytona_api_client_async.models.computer_use_status_response import Compute
 from daytona_api_client_async.models.computer_use_stop_response import ComputerUseStopResponse
 from daytona_api_client_async.models.create_session_request import CreateSessionRequest
 from daytona_api_client_async.models.display_info_response import DisplayInfoResponse
-from daytona_api_client_async.models.empty_response import EmptyResponse
 from daytona_api_client_async.models.execute_request import ExecuteRequest
 from daytona_api_client_async.models.execute_response import ExecuteResponse
 from daytona_api_client_async.models.file_info import FileInfo
@@ -6569,7 +6568,7 @@ class ToolboxApi:
 
         return self.api_client.param_serialize(
             method='GET',
-            resource_path='/toolbox/{sandboxId}/toolbox/computeruse/windows',
+            resource_path='/toolbox/{sandboxId}/toolbox/computeruse/display/windows',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -13206,7 +13205,7 @@ class ToolboxApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> EmptyResponse:
+    ) -> None:
         """Press hotkey
 
         Press a hotkey combination
@@ -13250,7 +13249,7 @@ class ToolboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "EmptyResponse",
+            '200': None,
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -13281,7 +13280,7 @@ class ToolboxApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[EmptyResponse]:
+    ) -> ApiResponse[None]:
         """Press hotkey
 
         Press a hotkey combination
@@ -13325,7 +13324,7 @@ class ToolboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "EmptyResponse",
+            '200': None,
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -13400,7 +13399,7 @@ class ToolboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "EmptyResponse",
+            '200': None,
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -13447,13 +13446,6 @@ class ToolboxApi:
             _body_params = keyboard_hotkey_request
 
 
-        # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
-                [
-                    'application/json'
-                ]
-            )
 
         # set the HTTP header `Content-Type`
         if _content_type:
@@ -13511,7 +13503,7 @@ class ToolboxApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> EmptyResponse:
+    ) -> None:
         """Press key
 
         Press a key with optional modifiers
@@ -13555,7 +13547,7 @@ class ToolboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "EmptyResponse",
+            '200': None,
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -13586,7 +13578,7 @@ class ToolboxApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[EmptyResponse]:
+    ) -> ApiResponse[None]:
         """Press key
 
         Press a key with optional modifiers
@@ -13630,7 +13622,7 @@ class ToolboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "EmptyResponse",
+            '200': None,
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -13705,7 +13697,7 @@ class ToolboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "EmptyResponse",
+            '200': None,
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -13752,13 +13744,6 @@ class ToolboxApi:
             _body_params = keyboard_press_request
 
 
-        # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
-                [
-                    'application/json'
-                ]
-            )
 
         # set the HTTP header `Content-Type`
         if _content_type:
@@ -13782,7 +13767,7 @@ class ToolboxApi:
 
         return self.api_client.param_serialize(
             method='POST',
-            resource_path='/toolbox/{sandboxId}/toolbox/computeruse/keyboard/press',
+            resource_path='/toolbox/{sandboxId}/toolbox/computeruse/keyboard/key',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -17335,7 +17320,7 @@ class ToolboxApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> EmptyResponse:
+    ) -> None:
         """Type text
 
         Type text using keyboard
@@ -17379,7 +17364,7 @@ class ToolboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "EmptyResponse",
+            '200': None,
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -17410,7 +17395,7 @@ class ToolboxApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[EmptyResponse]:
+    ) -> ApiResponse[None]:
         """Type text
 
         Type text using keyboard
@@ -17454,7 +17439,7 @@ class ToolboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "EmptyResponse",
+            '200': None,
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -17529,7 +17514,7 @@ class ToolboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "EmptyResponse",
+            '200': None,
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -17576,13 +17561,6 @@ class ToolboxApi:
             _body_params = keyboard_type_request
 
 
-        # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
-                [
-                    'application/json'
-                ]
-            )
 
         # set the HTTP header `Content-Type`
         if _content_type:

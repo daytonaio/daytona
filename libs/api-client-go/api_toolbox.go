@@ -685,8 +685,7 @@ type ToolboxAPI interface {
 	PressHotkey(ctx context.Context, sandboxId string) ToolboxAPIPressHotkeyRequest
 
 	// PressHotkeyExecute executes the request
-	//  @return EmptyResponse
-	PressHotkeyExecute(r ToolboxAPIPressHotkeyRequest) (*EmptyResponse, *http.Response, error)
+	PressHotkeyExecute(r ToolboxAPIPressHotkeyRequest) (*http.Response, error)
 
 	/*
 		PressKey Press key
@@ -700,8 +699,7 @@ type ToolboxAPI interface {
 	PressKey(ctx context.Context, sandboxId string) ToolboxAPIPressKeyRequest
 
 	// PressKeyExecute executes the request
-	//  @return EmptyResponse
-	PressKeyExecute(r ToolboxAPIPressKeyRequest) (*EmptyResponse, *http.Response, error)
+	PressKeyExecute(r ToolboxAPIPressKeyRequest) (*http.Response, error)
 
 	/*
 		ReplaceInFiles Replace in files
@@ -880,8 +878,7 @@ type ToolboxAPI interface {
 	TypeText(ctx context.Context, sandboxId string) ToolboxAPITypeTextRequest
 
 	// TypeTextExecute executes the request
-	//  @return EmptyResponse
-	TypeTextExecute(r ToolboxAPITypeTextRequest) (*EmptyResponse, *http.Response, error)
+	TypeTextExecute(r ToolboxAPITypeTextRequest) (*http.Response, error)
 
 	/*
 		UploadFile Upload file
@@ -3486,7 +3483,7 @@ func (a *ToolboxAPIService) GetWindowsExecute(r ToolboxAPIGetWindowsRequest) (*W
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/toolbox/{sandboxId}/toolbox/computeruse/windows"
+	localVarPath := localBasePath + "/toolbox/{sandboxId}/toolbox/computeruse/display/windows"
 	localVarPath = strings.Replace(localVarPath, "{"+"sandboxId"+"}", url.PathEscape(parameterValueToString(r.sandboxId, "sandboxId")), -1)
 
 	localVarHeaderParams := make(map[string]string)
@@ -6204,7 +6201,7 @@ func (r ToolboxAPIPressHotkeyRequest) XDaytonaOrganizationID(xDaytonaOrganizatio
 	return r
 }
 
-func (r ToolboxAPIPressHotkeyRequest) Execute() (*EmptyResponse, *http.Response, error) {
+func (r ToolboxAPIPressHotkeyRequest) Execute() (*http.Response, error) {
 	return r.ApiService.PressHotkeyExecute(r)
 }
 
@@ -6226,19 +6223,16 @@ func (a *ToolboxAPIService) PressHotkey(ctx context.Context, sandboxId string) T
 }
 
 // Execute executes the request
-//
-//	@return EmptyResponse
-func (a *ToolboxAPIService) PressHotkeyExecute(r ToolboxAPIPressHotkeyRequest) (*EmptyResponse, *http.Response, error) {
+func (a *ToolboxAPIService) PressHotkeyExecute(r ToolboxAPIPressHotkeyRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPost
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *EmptyResponse
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.PressHotkey")
 	if err != nil {
-		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+		return nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
 	localVarPath := localBasePath + "/toolbox/{sandboxId}/toolbox/computeruse/keyboard/hotkey"
@@ -6248,7 +6242,7 @@ func (a *ToolboxAPIService) PressHotkeyExecute(r ToolboxAPIPressHotkeyRequest) (
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
 	if r.keyboardHotkeyRequest == nil {
-		return localVarReturnValue, nil, reportError("keyboardHotkeyRequest is required and must be specified")
+		return nil, reportError("keyboardHotkeyRequest is required and must be specified")
 	}
 
 	// to determine the Content-Type header
@@ -6261,7 +6255,7 @@ func (a *ToolboxAPIService) PressHotkeyExecute(r ToolboxAPIPressHotkeyRequest) (
 	}
 
 	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{"application/json"}
+	localVarHTTPHeaderAccepts := []string{}
 
 	// set Accept header
 	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
@@ -6275,19 +6269,19 @@ func (a *ToolboxAPIService) PressHotkeyExecute(r ToolboxAPIPressHotkeyRequest) (
 	localVarPostBody = r.keyboardHotkeyRequest
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
-		return localVarReturnValue, nil, err
+		return nil, err
 	}
 
 	localVarHTTPResponse, err := a.client.callAPI(req)
 	if err != nil || localVarHTTPResponse == nil {
-		return localVarReturnValue, localVarHTTPResponse, err
+		return localVarHTTPResponse, err
 	}
 
 	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
 	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
-		return localVarReturnValue, localVarHTTPResponse, err
+		return localVarHTTPResponse, err
 	}
 
 	if localVarHTTPResponse.StatusCode >= 300 {
@@ -6295,19 +6289,10 @@ func (a *ToolboxAPIService) PressHotkeyExecute(r ToolboxAPIPressHotkeyRequest) (
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
-		return localVarReturnValue, localVarHTTPResponse, newErr
+		return localVarHTTPResponse, newErr
 	}
 
-	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-	if err != nil {
-		newErr := &GenericOpenAPIError{
-			body:  localVarBody,
-			error: err.Error(),
-		}
-		return localVarReturnValue, localVarHTTPResponse, newErr
-	}
-
-	return localVarReturnValue, localVarHTTPResponse, nil
+	return localVarHTTPResponse, nil
 }
 
 type ToolboxAPIPressKeyRequest struct {
@@ -6329,7 +6314,7 @@ func (r ToolboxAPIPressKeyRequest) XDaytonaOrganizationID(xDaytonaOrganizationID
 	return r
 }
 
-func (r ToolboxAPIPressKeyRequest) Execute() (*EmptyResponse, *http.Response, error) {
+func (r ToolboxAPIPressKeyRequest) Execute() (*http.Response, error) {
 	return r.ApiService.PressKeyExecute(r)
 }
 
@@ -6351,29 +6336,26 @@ func (a *ToolboxAPIService) PressKey(ctx context.Context, sandboxId string) Tool
 }
 
 // Execute executes the request
-//
-//	@return EmptyResponse
-func (a *ToolboxAPIService) PressKeyExecute(r ToolboxAPIPressKeyRequest) (*EmptyResponse, *http.Response, error) {
+func (a *ToolboxAPIService) PressKeyExecute(r ToolboxAPIPressKeyRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPost
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *EmptyResponse
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.PressKey")
 	if err != nil {
-		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+		return nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/toolbox/{sandboxId}/toolbox/computeruse/keyboard/press"
+	localVarPath := localBasePath + "/toolbox/{sandboxId}/toolbox/computeruse/keyboard/key"
 	localVarPath = strings.Replace(localVarPath, "{"+"sandboxId"+"}", url.PathEscape(parameterValueToString(r.sandboxId, "sandboxId")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
 	if r.keyboardPressRequest == nil {
-		return localVarReturnValue, nil, reportError("keyboardPressRequest is required and must be specified")
+		return nil, reportError("keyboardPressRequest is required and must be specified")
 	}
 
 	// to determine the Content-Type header
@@ -6386,7 +6368,7 @@ func (a *ToolboxAPIService) PressKeyExecute(r ToolboxAPIPressKeyRequest) (*Empty
 	}
 
 	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{"application/json"}
+	localVarHTTPHeaderAccepts := []string{}
 
 	// set Accept header
 	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
@@ -6400,19 +6382,19 @@ func (a *ToolboxAPIService) PressKeyExecute(r ToolboxAPIPressKeyRequest) (*Empty
 	localVarPostBody = r.keyboardPressRequest
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
-		return localVarReturnValue, nil, err
+		return nil, err
 	}
 
 	localVarHTTPResponse, err := a.client.callAPI(req)
 	if err != nil || localVarHTTPResponse == nil {
-		return localVarReturnValue, localVarHTTPResponse, err
+		return localVarHTTPResponse, err
 	}
 
 	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
 	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
-		return localVarReturnValue, localVarHTTPResponse, err
+		return localVarHTTPResponse, err
 	}
 
 	if localVarHTTPResponse.StatusCode >= 300 {
@@ -6420,19 +6402,10 @@ func (a *ToolboxAPIService) PressKeyExecute(r ToolboxAPIPressKeyRequest) (*Empty
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
-		return localVarReturnValue, localVarHTTPResponse, newErr
+		return localVarHTTPResponse, newErr
 	}
 
-	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-	if err != nil {
-		newErr := &GenericOpenAPIError{
-			body:  localVarBody,
-			error: err.Error(),
-		}
-		return localVarReturnValue, localVarHTTPResponse, newErr
-	}
-
-	return localVarReturnValue, localVarHTTPResponse, nil
+	return localVarHTTPResponse, nil
 }
 
 type ToolboxAPIReplaceInFilesRequest struct {
@@ -7949,7 +7922,7 @@ func (r ToolboxAPITypeTextRequest) XDaytonaOrganizationID(xDaytonaOrganizationID
 	return r
 }
 
-func (r ToolboxAPITypeTextRequest) Execute() (*EmptyResponse, *http.Response, error) {
+func (r ToolboxAPITypeTextRequest) Execute() (*http.Response, error) {
 	return r.ApiService.TypeTextExecute(r)
 }
 
@@ -7971,19 +7944,16 @@ func (a *ToolboxAPIService) TypeText(ctx context.Context, sandboxId string) Tool
 }
 
 // Execute executes the request
-//
-//	@return EmptyResponse
-func (a *ToolboxAPIService) TypeTextExecute(r ToolboxAPITypeTextRequest) (*EmptyResponse, *http.Response, error) {
+func (a *ToolboxAPIService) TypeTextExecute(r ToolboxAPITypeTextRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPost
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *EmptyResponse
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.TypeText")
 	if err != nil {
-		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+		return nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
 	localVarPath := localBasePath + "/toolbox/{sandboxId}/toolbox/computeruse/keyboard/type"
@@ -7993,7 +7963,7 @@ func (a *ToolboxAPIService) TypeTextExecute(r ToolboxAPITypeTextRequest) (*Empty
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
 	if r.keyboardTypeRequest == nil {
-		return localVarReturnValue, nil, reportError("keyboardTypeRequest is required and must be specified")
+		return nil, reportError("keyboardTypeRequest is required and must be specified")
 	}
 
 	// to determine the Content-Type header
@@ -8006,7 +7976,7 @@ func (a *ToolboxAPIService) TypeTextExecute(r ToolboxAPITypeTextRequest) (*Empty
 	}
 
 	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{"application/json"}
+	localVarHTTPHeaderAccepts := []string{}
 
 	// set Accept header
 	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
@@ -8020,19 +7990,19 @@ func (a *ToolboxAPIService) TypeTextExecute(r ToolboxAPITypeTextRequest) (*Empty
 	localVarPostBody = r.keyboardTypeRequest
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
-		return localVarReturnValue, nil, err
+		return nil, err
 	}
 
 	localVarHTTPResponse, err := a.client.callAPI(req)
 	if err != nil || localVarHTTPResponse == nil {
-		return localVarReturnValue, localVarHTTPResponse, err
+		return localVarHTTPResponse, err
 	}
 
 	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
 	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
-		return localVarReturnValue, localVarHTTPResponse, err
+		return localVarHTTPResponse, err
 	}
 
 	if localVarHTTPResponse.StatusCode >= 300 {
@@ -8040,19 +8010,10 @@ func (a *ToolboxAPIService) TypeTextExecute(r ToolboxAPITypeTextRequest) (*Empty
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
-		return localVarReturnValue, localVarHTTPResponse, newErr
+		return localVarHTTPResponse, newErr
 	}
 
-	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-	if err != nil {
-		newErr := &GenericOpenAPIError{
-			body:  localVarBody,
-			error: err.Error(),
-		}
-		return localVarReturnValue, localVarHTTPResponse, newErr
-	}
-
-	return localVarReturnValue, localVarHTTPResponse, nil
+	return localVarHTTPResponse, nil
 }
 
 type ToolboxAPIUploadFileRequest struct {

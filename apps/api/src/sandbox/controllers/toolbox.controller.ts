@@ -82,7 +82,6 @@ import {
   ProcessRestartResponseDto,
   ProcessLogsResponseDto,
   ProcessErrorsResponseDto,
-  EmptyResponseDto,
 } from '../dto/toolbox.dto'
 import { ToolboxService } from '../services/toolbox.service'
 import { ContentTypeInterceptor } from '../../common/interceptors/content-type.interceptors'
@@ -1401,7 +1400,6 @@ export class ToolboxController {
   @ApiResponse({
     status: 200,
     description: 'Text typed successfully',
-    type: EmptyResponseDto,
   })
   @ApiBody({
     type: KeyboardTypeRequestDto,
@@ -1415,7 +1413,7 @@ export class ToolboxController {
     return await this.toolboxProxy(req, res, next)
   }
 
-  @Post(':sandboxId/toolbox/computeruse/keyboard/press')
+  @Post(':sandboxId/toolbox/computeruse/keyboard/key')
   @HttpCode(200)
   @UseInterceptors(ContentTypeInterceptor)
   @ApiOperation({
@@ -1426,7 +1424,6 @@ export class ToolboxController {
   @ApiResponse({
     status: 200,
     description: 'Key pressed successfully',
-    type: EmptyResponseDto,
   })
   @ApiBody({
     type: KeyboardPressRequestDto,
@@ -1451,7 +1448,6 @@ export class ToolboxController {
   @ApiResponse({
     status: 200,
     description: 'Hotkey pressed successfully',
-    type: EmptyResponseDto,
   })
   @ApiBody({
     type: KeyboardHotkeyRequestDto,
@@ -1585,7 +1581,7 @@ export class ToolboxController {
     return await this.toolboxProxy(req, res, next)
   }
 
-  @Get(':sandboxId/toolbox/computeruse/windows')
+  @Get(':sandboxId/toolbox/computeruse/display/windows')
   @ApiOperation({
     summary: 'Get windows',
     description: 'Get list of open windows',
