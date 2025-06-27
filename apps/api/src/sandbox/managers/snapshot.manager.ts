@@ -256,6 +256,10 @@ export class SnapshotManager {
       }
     }
 
+    console.log(dockerRegistry.url)
+    console.log(dockerRegistry.username)
+    console.log(dockerRegistry.password)
+
     const snapshotApi = this.runnerApiFactory.createSnapshotApi(runner)
 
     let retries = 0
