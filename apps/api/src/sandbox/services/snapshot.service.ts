@@ -97,7 +97,8 @@ export class SnapshotService {
         organizationId: organization.id,
         ...createSnapshotDto,
         mem: createSnapshotDto.memory, // Map memory to mem
-        state: createSnapshotDto.buildInfo ? SnapshotState.BUILD_PENDING : SnapshotState.PENDING,
+        state: SnapshotState.PENDING,
+        desiredPropagation: organization.basePropagationFactor,
         general,
       })
 

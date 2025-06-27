@@ -21,7 +21,6 @@ import { Redis } from 'ioredis'
 import { SnapshotService } from '../services/snapshot.service'
 import { RedisLockProvider } from '../common/redis-lock.provider'
 import { SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION } from '../constants/sandbox.constants'
-import { DockerProvider } from '../docker/docker-provider'
 import { SnapshotRunnerState } from '../enums/snapshot-runner-state.enum'
 import { BuildInfo } from '../entities/build-info.entity'
 import { CreateSandboxDTO } from '@daytonaio/runner-api-client'
@@ -57,7 +56,6 @@ export class SandboxManager {
     @InjectRedis() private readonly redis: Redis,
     private readonly snapshotService: SnapshotService,
     private readonly redisLockProvider: RedisLockProvider,
-    private readonly dockerProvider: DockerProvider,
   ) {}
 
   @Cron(CronExpression.EVERY_MINUTE, { name: 'auto-stop-check' })
@@ -740,19 +738,16 @@ export class SandboxManager {
     if (!sandbox.buildInfo) {
       //  get internal snapshot name
       const snapshot = await this.snapshotService.getSnapshotByName(sandbox.snapshot, sandbox.organizationId)
-      const internalSnapshotName = snapshot.internalName
+      const snapshotRef = snapshot.ref
 
-      const registry = await this.dockerRegistryService.findOneBySnapshotImageName(
-        internalSnapshotName,
-        sandbox.organizationId,
-      )
+      const registry = await this.dockerRegistryService.findOneBySnapshotImageName(snapshotRef, sandbox.organizationId)
       if (!registry) {
         throw new Error('No registry found for snapshot')
       }
 
       createSandboxDto = {
         ...createSandboxDto,
-        snapshot: internalSnapshotName,
+        snapshot: snapshotRef,
         entrypoint: snapshot.entrypoint,
         registry: {
           url: registry.url,
@@ -907,7 +902,7 @@ export class SandboxManager {
           } else {
             validBackup = existingBackups.pop()
           }
-          if (await this.dockerProvider.checkImageExistsInRegistry(validBackup, registry)) {
+          if (await this.dockerRegistryService.checkImageExistsInRegistry(validBackup, registry)) {
             exists = true
             break
           }

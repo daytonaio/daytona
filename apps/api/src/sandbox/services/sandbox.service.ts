@@ -190,8 +190,8 @@ export class SandboxService {
 
     const snapshot = await this.snapshotRepository.findOne({
       where: [
-        { organizationId: sandbox.organizationId, name: sandbox.snapshot, state: SnapshotState.ACTIVE },
-        { general: true, name: sandbox.snapshot, state: SnapshotState.ACTIVE },
+        { organizationId: sandbox.organizationId, name: sandbox.snapshot, state: SnapshotState.HOT },
+        { general: true, name: sandbox.snapshot, state: SnapshotState.HOT },
       ],
     })
     if (!snapshot) {
@@ -201,7 +201,7 @@ export class SandboxService {
     const runner = await this.runnerService.getRandomAvailableRunner({
       region: sandbox.region,
       sandboxClass: sandbox.class,
-      snapshotRef: snapshot.internalName,
+      snapshotRef: snapshot.ref,
     })
 
     sandbox.runnerId = runner.id
@@ -293,7 +293,7 @@ export class SandboxService {
     const runner = await this.runnerService.getRandomAvailableRunner({
       region,
       sandboxClass,
-      snapshotRef: snapshot.internalName,
+      snapshotRef: snapshot.ref,
     })
 
     if (warmPoolSandbox) {
@@ -671,16 +671,17 @@ export class SandboxService {
 
   @Cron(CronExpression.EVERY_10_MINUTES)
   async cleanupDestroyedSandboxs() {
-    const twentyFourHoursAgo = new Date()
-    twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24)
+    // Setting retention to five days to make more informed decisions for snapshot runner scaling
+    const fiveDaysAgo = new Date()
+    fiveDaysAgo.setDate(fiveDaysAgo.getDate() - 5)
 
     const destroyedSandboxs = await this.sandboxRepository.delete({
       state: SandboxState.DESTROYED,
-      updatedAt: LessThan(twentyFourHoursAgo),
+      updatedAt: LessThan(fiveDaysAgo),
     })
 
     if (destroyedSandboxs.affected > 0) {
-      this.logger.debug(`Cleaned up ${destroyedSandboxs.affected} destroyed sandboxs`)
+      this.logger.debug(`Cleaned up ${destroyedSandboxs.affected} destroyed sandboxes`)
     }
   }
 

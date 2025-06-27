@@ -1725,12 +1725,12 @@ paths:
         - runners
   /runners/by-snapshot:
     get:
-      operationId: getRunnersBySnapshotInternalName
+      operationId: getRunnersBySnapshotRef
       parameters:
         - description: Internal name of the snapshot
           explode: true
           in: query
-          name: internalName
+          name: ref
           required: true
           schema:
             type: string
@@ -7023,14 +7023,16 @@ components:
       type: object
     SnapshotState:
       enum:
-        - build_pending
-        - building
         - pending
         - pulling
         - pending_validation
         - validating
         - active
         - inactive
+        - building
+        - warm
+        - hot
+        - cold
         - error
         - build_failed
         - removing

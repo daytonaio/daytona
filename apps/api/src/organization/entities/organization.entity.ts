@@ -92,6 +92,13 @@ export class Organization {
   })
   volumeQuota: number
 
+  @Column({
+    type: 'int',
+    default: 5,
+    name: 'base_propagation_factor',
+  })
+  basePropagationFactor: number
+
   @OneToMany(() => OrganizationRole, (organizationRole) => organizationRole.organization, {
     cascade: true,
     onDelete: 'CASCADE',

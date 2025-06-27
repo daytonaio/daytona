@@ -10,7 +10,6 @@ import { In, IsNull, LessThan, Not, Or, Repository } from 'typeorm'
 import { DockerRegistryService } from '../../docker-registry/services/docker-registry.service'
 import { Snapshot } from '../entities/snapshot.entity'
 import { SnapshotState } from '../enums/snapshot-state.enum'
-import { DockerProvider } from '../docker/docker-provider'
 import { SnapshotRunner } from '../entities/snapshot-runner.entity'
 import { Runner } from '../entities/runner.entity'
 import { RunnerState } from '../enums/runner-state.enum'
@@ -21,12 +20,18 @@ import { RunnerNotReadyError } from '../errors/runner-not-ready.error'
 import { RegistryType } from '../../docker-registry/enums/registry-type.enum'
 import { RedisLockProvider } from '../common/redis-lock.provider'
 import { OrganizationService } from '../../organization/services/organization.service'
-import { DockerRegistry } from '../../docker-registry/entities/docker-registry.entity'
 import { BuildInfo } from '../entities/build-info.entity'
 import { fromAxiosError } from '../../common/utils/from-axios-error'
 import { InjectRedis } from '@nestjs-modules/ioredis'
 import { Redis } from 'ioredis'
 import { RunnerService } from '../services/runner.service'
+import { DockerRegistry } from '../../docker-registry/entities/docker-registry.entity'
+
+const SYNC_WARM_RUNNER_SNAPSHOTS_LOCK_KEY = 'sync-warm-runner-snapshots-lock'
+const SYNC_WARM_RUNNER_SNAPSHOTS_SKIP_KEY = 'sync-warm-runner-snapshots-skip'
+const SYNC_ACTIVE_RUNNER_SNAPSHOTS_LOCK_KEY = 'sync-active-runner-snapshots-lock'
+const RUNNER_USAGE_THRESHOLD = 0.75
+
 @Injectable()
 export class SnapshotManager {
   private readonly logger = new Logger(SnapshotManager.name)
@@ -46,65 +51,55 @@ export class SnapshotManager {
     private readonly buildInfoRepository: Repository<BuildInfo>,
     private readonly runnerService: RunnerService,
     private readonly dockerRegistryService: DockerRegistryService,
-    private readonly dockerProvider: DockerProvider,
     private readonly runnerApiFactory: RunnerApiFactory,
     private readonly redisLockProvider: RedisLockProvider,
     private readonly organizationService: OrganizationService,
   ) {}
 
   @Cron(CronExpression.EVERY_5_SECONDS)
-  async syncRunnerSnapshots() {
-    const lockKey = 'sync-runner-snapshots-lock'
-    if (!(await this.redisLockProvider.lock(lockKey, 30))) {
+  async syncLiveRunnerSnapshots() {
+    if (!(await this.redisLockProvider.lock(SYNC_WARM_RUNNER_SNAPSHOTS_LOCK_KEY, 30))) {
       return
     }
 
-    const skip = (await this.redis.get('sync-runner-snapshots-skip')) || 0
+    const skip = (await this.redis.get(SYNC_WARM_RUNNER_SNAPSHOTS_SKIP_KEY)) || 0
 
-    const totalRunners = await this.runnerRepository.count({
-      where: {
-        state: RunnerState.READY,
-        unschedulable: false,
-      },
-    })
-
-    const snapshots = await this.snapshotRepository
-      .createQueryBuilder('snapshot')
-      .innerJoin('organization', 'org', 'org.id = snapshot.organizationId')
-      .where('snapshot.state = :snapshotState', { snapshotState: SnapshotState.ACTIVE })
-      .andWhere('org.suspended = false')
-      .orderBy('snapshot.createdAt', 'ASC')
+    // Use the optimized query to find snapshots that need propagation
+    const snapshotsNeedingPropagation = await this.snapshotRepository
+      .createQueryBuilder('s')
+      .select('s.ref', 'snapshotRef')
+      .addSelect('(s.desiredPropagation - COUNT(sr.id))', 'remainingPropagation')
+      .innerJoin('organization', 'o', 'o.id = s.organizationId')
+      .leftJoin('snapshot_runner', 'sr', 'sr.snapshotRef = s.ref AND sr.state = :readyState', {
+        readyState: SnapshotRunnerState.READY,
+      })
+      .where('s.state IN (:...snapshotStates)', {
+        snapshotStates: [SnapshotState.WARMING_UP, SnapshotState.ACTIVE],
+      })
+      .andWhere('o.suspended = false')
+      .groupBy('s.id')
+      .having('COUNT(sr.id) < s.desiredPropagation')
+      .orderBy('s.createdAt', 'ASC')
       .take(100)
       .skip(Number(skip))
-      .getMany()
+      .getRawMany()
 
-    if (snapshots.length === 0) {
-      await this.redis.set('sync-runner-snapshots-skip', 0)
+    if (snapshotsNeedingPropagation.length === 0) {
+      await this.redis.set(SYNC_WARM_RUNNER_SNAPSHOTS_SKIP_KEY, 0)
       return
     }
 
-    await this.redis.set('sync-runner-snapshots-skip', Number(skip) + snapshots.length)
-
-    const snapshotRunners = await this.snapshotRunnerRepository.count({
-      where: {
-        snapshotRef: In(snapshots.map((snapshot) => snapshot.internalName)),
-        state: SnapshotRunnerState.READY,
-      },
-    })
-
-    if (snapshotRunners === totalRunners) {
-      return
-    }
+    await this.redis.set(SYNC_WARM_RUNNER_SNAPSHOTS_SKIP_KEY, Number(skip) + snapshotsNeedingPropagation.length)
 
     await Promise.all(
-      snapshots.map((snapshot) => {
-        this.propagateSnapshotToRunners(snapshot.internalName).catch((err) => {
-          this.logger.error(`Error propagating snapshot ${snapshot.id} to runners: ${err}`)
+      snapshotsNeedingPropagation.map((item) => {
+        this.propagateSnapshotToRunners(item.snapshotRef).catch((err) => {
+          this.logger.error(`Error propagating snapshot with ref ${item.snapshotRef} to runners: ${err}`)
         })
       }),
     )
 
-    await this.redisLockProvider.unlock(lockKey)
+    await this.redisLockProvider.unlock(SYNC_WARM_RUNNER_SNAPSHOTS_LOCK_KEY)
   }
 
   @Cron(CronExpression.EVERY_10_SECONDS)
@@ -190,7 +185,7 @@ export class SnapshotManager {
     }
   }
 
-  async propagateSnapshotToRunners(internalSnapshotName: string) {
+  async propagateSnapshotToRunners(snapshotRef: string) {
     //  todo: remove try catch block and implement error handling
     try {
       const runners = await this.runnerRepository.find({
@@ -202,12 +197,7 @@ export class SnapshotManager {
 
       const results = await Promise.allSettled(
         runners.map(async (runner) => {
-          let snapshotRunner = await this.snapshotRunnerRepository.findOne({
-            where: {
-              snapshotRef: internalSnapshotName,
-              runnerId: runner.id,
-            },
-          })
+          const snapshotRunner = await this.runnerService.getSnapshotRunner(runner.id, snapshotRef)
 
           try {
             if (snapshotRunner && !snapshotRunner.snapshotRef) {
@@ -217,12 +207,12 @@ export class SnapshotManager {
             }
 
             if (!snapshotRunner) {
-              snapshotRunner = new SnapshotRunner()
-              snapshotRunner.snapshotRef = internalSnapshotName
-              snapshotRunner.runnerId = runner.id
-              snapshotRunner.state = SnapshotRunnerState.PULLING_SNAPSHOT
-              await this.snapshotRunnerRepository.save(snapshotRunner)
-              await this.propagateSnapshotToRunner(internalSnapshotName, runner)
+              await this.runnerService.createSnapshotRunner(
+                runner.id,
+                snapshotRef,
+                SnapshotRunnerState.PULLING_SNAPSHOT,
+              )
+              await this.propagateSnapshotToRunner(snapshotRef, runner)
             } else if (snapshotRunner.state === SnapshotRunnerState.PULLING_SNAPSHOT) {
               await this.handleSnapshotRunnerStatePullingSnapshot(snapshotRunner)
             }
@@ -245,7 +235,7 @@ export class SnapshotManager {
     }
   }
 
-  async propagateSnapshotToRunner(internalSnapshotName: string, runner: Runner) {
+  async propagateSnapshotToRunner(snapshotRef: string, runner: Runner) {
     const dockerRegistry = await this.dockerRegistryService.getDefaultInternalRegistry()
 
     const snapshotApi = this.runnerApiFactory.createSnapshotApi(runner)
@@ -254,8 +244,8 @@ export class SnapshotManager {
     while (retries < 10) {
       try {
         await snapshotApi.pullSnapshot({
-          snapshot: internalSnapshotName,
-          registry: {
+          snapshot: snapshotRef,
+          sourceRegistry: {
             url: dockerRegistry.url,
             username: dockerRegistry.username,
             password: dockerRegistry.password,
@@ -337,7 +327,7 @@ export class SnapshotManager {
       snapshots.map(async (snapshot) => {
         await this.snapshotRunnerRepository.update(
           {
-            snapshotRef: snapshot.internalName,
+            snapshotRef: snapshot.ref,
           },
           {
             state: SnapshotRunnerState.REMOVING,
@@ -353,11 +343,6 @@ export class SnapshotManager {
 
   @Cron(CronExpression.EVERY_10_SECONDS)
   async checkSnapshotState() {
-    //  the first time the snapshot is created it needs to be validated and pushed to the internal registry
-    //  before propagating to the runners
-    //  this cron job will process the snapshot states until the snapshot is active (or error)
-
-    //  get all snapshots
     const snapshots = await this.snapshotRepository.find({
       where: {
         state: Not(In([SnapshotState.ACTIVE, SnapshotState.ERROR, SnapshotState.BUILD_FAILED, SnapshotState.INACTIVE])),
@@ -373,35 +358,14 @@ export class SnapshotManager {
 
         try {
           switch (snapshot.state) {
-            case SnapshotState.BUILD_PENDING:
-              await this.handleSnapshotStateBuildPending(snapshot)
-              break
-            case SnapshotState.BUILDING:
-              await this.handleSnapshotStateBuilding(snapshot)
-              break
             case SnapshotState.PENDING:
               await this.handleSnapshotStatePending(snapshot)
               break
-            case SnapshotState.PULLING:
-              await this.handleSnapshotStatePulling(snapshot)
+            case SnapshotState.PULLING || SnapshotState.BUILDING:
+              await this.handleCheckInitialRunnerSnapshot(snapshot)
               break
-            case SnapshotState.PENDING_VALIDATION:
-              //  temp workaround to avoid race condition between api instances
-              {
-                let imageName = snapshot.imageName
-                if (snapshot.buildInfo) {
-                  imageName = snapshot.internalName
-                }
-                if (!(await this.dockerProvider.imageExists(imageName))) {
-                  await this.redisLockProvider.unlock(lockKey)
-                  return
-                }
-              }
-
-              await this.handleSnapshotStatePendingValidation(snapshot)
-              break
-            case SnapshotState.VALIDATING:
-              await this.handleSnapshotStateValidating(snapshot)
+            case SnapshotState.WARMING_UP:
+              await this.handleSnapshotStateWarmingUp(snapshot)
               break
             case SnapshotState.REMOVING:
               await this.handleSnapshotStateRemoving(snapshot)
@@ -421,13 +385,6 @@ export class SnapshotManager {
         await this.redisLockProvider.unlock(lockKey)
       }),
     )
-  }
-
-  @Cron(CronExpression.EVERY_30_MINUTES, {
-    name: 'cleanup-local-snapshots',
-  })
-  async cleanupLocalSnapshots() {
-    await this.dockerProvider.imagePrune()
   }
 
   async removeSnapshotFromRunner(runner: Runner, snapshotRunner: SnapshotRunner) {
@@ -496,7 +453,7 @@ export class SnapshotManager {
   async handleSnapshotStateRemoving(snapshot: Snapshot) {
     const snapshotRunnerItems = await this.snapshotRunnerRepository.find({
       where: {
-        snapshotRef: snapshot.internalName,
+        snapshotRef: snapshot.ref,
       },
     })
 
@@ -505,11 +462,129 @@ export class SnapshotManager {
     }
   }
 
-  async handleSnapshotStateBuildPending(snapshot: Snapshot) {
-    await this.updateSnapshotState(snapshot.id, SnapshotState.BUILDING)
+  async handleCheckInitialRunnerSnapshot(snapshot: Snapshot) {
+    // Check for timeout - allow up to 30 minutes
+    const timeoutMinutes = 30
+    const timeoutMs = timeoutMinutes * 60 * 1000
+    if (Date.now() - snapshot.createdAt.getTime() > timeoutMs) {
+      await this.updateSnapshotState(snapshot.id, SnapshotState.ERROR, 'Timeout while checking initial runner snapshot')
+      return
+    }
+
+    const snapshotRunner = await this.snapshotRunnerRepository.findOne({
+      where: {
+        snapshotRef: snapshot.ref,
+        runnerId: snapshot.initialRunnerId,
+      },
+    })
+
+    // If no snapshot runner found or it's not in READY/ERROR state, just return
+    if (!snapshotRunner) {
+      return
+    }
+
+    if (snapshotRunner.state === SnapshotRunnerState.READY) {
+      const runner = await this.runnerRepository.findOneOrFail({
+        where: {
+          id: snapshot.initialRunnerId,
+        },
+      })
+
+      const snapshotApi = this.runnerApiFactory.createSnapshotApi(runner)
+
+      const snapshotInfoResponse = (await snapshotApi.getSnapshotInfo(snapshot.ref)).data
+
+      const organization = await this.organizationService.findOne(snapshot.organizationId)
+      if (!organization) {
+        throw new NotFoundException(`Organization with ID ${snapshot.organizationId} not found`)
+      }
+
+      const MAX_SIZE_GB = organization.maxSnapshotSize
+
+      if (snapshotInfoResponse.sizeGB > MAX_SIZE_GB) {
+        await this.updateSnapshotState(
+          snapshot.id,
+          SnapshotState.ERROR,
+          `Snapshot size (${snapshotInfoResponse.sizeGB.toFixed(2)}GB) exceeds maximum allowed size of ${MAX_SIZE_GB}GB`,
+        )
+        return
+      }
+
+      snapshot.size = snapshotInfoResponse.sizeGB
+      snapshot.state = SnapshotState.WARMING_UP
+
+      // Ensure entrypoint is set
+      if (!snapshot.entrypoint) {
+        if (snapshotInfoResponse.entrypoint) {
+          if (Array.isArray(snapshotInfoResponse.entrypoint)) {
+            snapshot.entrypoint = snapshotInfoResponse.entrypoint
+          } else {
+            snapshot.entrypoint = [snapshotInfoResponse.entrypoint]
+          }
+        } else {
+          snapshot.entrypoint = ['sleep', 'infinity']
+        }
+      }
+
+      await this.snapshotRepository.save(snapshot)
+    } else if (snapshotRunner.state === SnapshotRunnerState.ERROR) {
+      await this.updateSnapshotState(snapshot.id, SnapshotState.ERROR, snapshotRunner.errorReason)
+      return
+    }
+
+    // Best effort removal of old snapshot from transient registry
+    const registry = await this.dockerRegistryService.findOneBySnapshotImageName(
+      snapshot.imageName,
+      snapshot.organizationId,
+    )
+    if (registry && registry.registryType === RegistryType.TRANSIENT) {
+      try {
+        await this.dockerRegistryService.removeImage(snapshot.imageName, registry.id)
+      } catch (error) {
+        if (error.statusCode === 404) {
+          //  snapshot not found, just return
+          return
+        }
+        this.logger.error('Failed to remove old snapshot:', fromAxiosError(error))
+      }
+    }
   }
 
-  async handleSnapshotStateBuilding(snapshot: Snapshot) {
+  async prepareSnapshotOnInitialRunner(snapshot: Snapshot) {
+    const runner = await this.runnerRepository.findOneOrFail({
+      where: {
+        id: snapshot.initialRunnerId,
+      },
+    })
+
+    const snapshotApi = this.runnerApiFactory.createSnapshotApi(runner)
+
+    const sourceRegistry = await this.dockerRegistryService.findOneBySnapshotImageName(
+      snapshot.imageName,
+      snapshot.organizationId,
+    )
+    const destinationRegistry = await this.dockerRegistryService.getDefaultInternalRegistry()
+
+    //  await this.redis.setex(lockKey, 360, this.instanceId)
+
+    await snapshotApi.pullSnapshot({
+      snapshot: snapshot.ref,
+      sourceRegistry: {
+        url: sourceRegistry.url,
+        username: sourceRegistry.username,
+        password: sourceRegistry.password,
+      },
+      destinationRegistry: {
+        url: destinationRegistry.url,
+        username: destinationRegistry.username,
+        password: destinationRegistry.password,
+      },
+    })
+  }
+
+  async buildSnapshotOnRunner(snapshot: Snapshot) {
+    // todo: split dockerfile by FROM's and pass all docker registry creds to the building process
+
     // Check if build has timed out
     const timeoutMinutes = 30
     const timeoutMs = timeoutMinutes * 60 * 1000
@@ -540,7 +615,7 @@ export class SnapshotManager {
       }
 
       // Assign the runner ID to the snapshot for tracking build progress
-      snapshot.buildRunnerId = runner.id
+      snapshot.initialRunnerId = runner.id
       await this.snapshotRepository.save(snapshot)
 
       const registry = await this.dockerRegistryService.getDefaultInternalRegistry()
@@ -563,9 +638,9 @@ export class SnapshotManager {
 
       // save snapshotRunner
 
-      const internalSnapshotName = `${registry.url}/${registry.project}/${snapshot.buildInfo.snapshotRef}`
+      const snapshotRef = `${registry.url}/${registry.project}/${snapshot.buildInfo.snapshotRef}`
 
-      snapshot.internalName = internalSnapshotName
+      snapshot.ref = snapshotRef
       await this.snapshotRepository.save(snapshot)
 
       // Wait for 30 seconds because of Harbor's delay at making newly created snapshots available
@@ -585,199 +660,22 @@ export class SnapshotManager {
   }
 
   async handleSnapshotStatePending(snapshot: Snapshot) {
-    let dockerRegistry: DockerRegistry
+    snapshot.initialRunnerId = 'test' // TODO: get random free runner
+
+    if (!snapshot.buildInfo) {
+      await this.updateSnapshotState(snapshot.id, SnapshotState.BUILDING)
+      await this.buildSnapshotOnRunner(snapshot)
+      return
+    }
 
     await this.updateSnapshotState(snapshot.id, SnapshotState.PULLING)
-
-    let localImageName = snapshot.imageName
-
-    if (snapshot.buildInfo) {
-      //  get the default internal registry
-      dockerRegistry = await this.dockerRegistryService.getDefaultInternalRegistry()
-      localImageName = snapshot.internalName
-    } else {
-      //  find docker registry based on snapshot name and organization id
-      dockerRegistry = await this.dockerRegistryService.findOneBySnapshotImageName(
-        snapshot.imageName,
-        snapshot.organizationId,
-      )
-    }
-
-    // Use the dockerRegistry for pulling the snapshot
-    await this.dockerProvider.pullImage(localImageName, dockerRegistry)
+    await this.prepareSnapshotOnInitialRunner(snapshot)
   }
 
-  async handleSnapshotStatePulling(snapshot: Snapshot) {
-    const localImageName = snapshot.buildInfo ? snapshot.internalName : snapshot.imageName
-    // Check timeout first
-    const timeoutMinutes = 15
-    const timeoutMs = timeoutMinutes * 60 * 1000
-    if (Date.now() - snapshot.createdAt.getTime() > timeoutMs) {
-      await this.updateSnapshotState(snapshot.id, SnapshotState.ERROR, 'Timeout while pulling snapshot')
-      return
-    }
-
-    const snapshotExists = await this.dockerProvider.imageExists(localImageName)
-    if (!snapshotExists) {
-      //  retry until the snapshot exists (or eventually timeout)
-      return
-    }
-
-    //  sleep for 30 seconds
-    //  workaround for docker snapshot not being ready, but exists
-    await new Promise((resolve) => setTimeout(resolve, 30000))
-
-    //  get the organization
-    const organization = await this.organizationService.findOne(snapshot.organizationId)
-    if (!organization) {
-      throw new NotFoundException(`Organization with ID ${snapshot.organizationId} not found`)
-    }
-
-    // Check snapshot size
-    const snapshotInfo = await this.dockerProvider.getImageInfo(localImageName)
-    const MAX_SIZE_GB = organization.maxSnapshotSize
-
-    if (snapshotInfo.sizeGB > MAX_SIZE_GB) {
-      await this.updateSnapshotState(
-        snapshot.id,
-        SnapshotState.ERROR,
-        `Snapshot size (${snapshotInfo.sizeGB.toFixed(2)}GB) exceeds maximum allowed size of ${MAX_SIZE_GB}GB`,
-      )
-      return
-    }
-
-    snapshot.size = snapshotInfo.sizeGB
-    snapshot.state = SnapshotState.PENDING_VALIDATION
-
-    // Ensure entrypoint is set
-    if (!snapshot.entrypoint) {
-      if (snapshotInfo.entrypoint) {
-        if (Array.isArray(snapshotInfo.entrypoint)) {
-          snapshot.entrypoint = snapshotInfo.entrypoint
-        } else {
-          snapshot.entrypoint = [snapshotInfo.entrypoint]
-        }
-      } else {
-        snapshot.entrypoint = ['sleep', 'infinity']
-      }
-    }
-
-    await this.snapshotRepository.save(snapshot)
-  }
-
-  async handleSnapshotStatePendingValidation(snapshot: Snapshot) {
-    try {
-      await this.updateSnapshotState(snapshot.id, SnapshotState.VALIDATING)
-
-      await this.validateSnapshotRuntime(snapshot.id)
-
-      if (!snapshot.buildInfo) {
-        // Snapshots that have gone through the build process are already in the internal registry
-        await this.pushSnapshotToInternalRegistry(snapshot.id)
-      }
-      await this.propagateSnapshotToRunners(snapshot.internalName)
-      await this.updateSnapshotState(snapshot.id, SnapshotState.ACTIVE)
-
-      // Best effort removal of old snapshot from transient registry
-      const registry = await this.dockerRegistryService.findOneBySnapshotImageName(
-        snapshot.imageName,
-        snapshot.organizationId,
-      )
-      if (registry && registry.registryType === RegistryType.TRANSIENT) {
-        try {
-          await this.dockerRegistryService.removeImage(snapshot.imageName, registry.id)
-        } catch (error) {
-          if (error.statusCode === 404) {
-            //  snapshot not found, just return
-            return
-          }
-          this.logger.error('Failed to remove old snapshot:', fromAxiosError(error))
-        }
-      }
-    } catch (error) {
-      // workaround when app runners don't use a single docker host instance
-      if (error.statusCode === 404 || error.message?.toLowerCase().includes('no such snapshot')) {
-        return
-      }
-      await this.updateSnapshotState(snapshot.id, SnapshotState.ERROR, error.message)
-    }
-  }
-
-  async handleSnapshotStateValidating(snapshot: Snapshot) {
-    //  check the timeout
-    const timeoutMinutes = 10
-    const timeoutMs = timeoutMinutes * 60 * 1000
-    if (Date.now() - snapshot.createdAt.getTime() > timeoutMs) {
-      await this.updateSnapshotState(snapshot.id, SnapshotState.ERROR, 'Timeout while validating snapshot')
-      return
-    }
-  }
-
-  async validateSnapshotRuntime(snapshotId: string): Promise<void> {
-    const snapshot = await this.snapshotRepository.findOneOrFail({
-      where: {
-        id: snapshotId,
-      },
-    })
-
-    let containerId: string | null = null
-
-    try {
-      const localImageName = snapshot.buildInfo ? snapshot.internalName : snapshot.imageName
-
-      // Create and start the container
-      containerId = await this.dockerProvider.create(localImageName, snapshot.entrypoint)
-
-      // Wait for 1 minute while checking container state
-      const startTime = Date.now()
-      const checkDuration = 60 * 1000 // 1 minute in milliseconds
-
-      while (Date.now() - startTime < checkDuration) {
-        const isRunning = await this.dockerProvider.isRunning(containerId)
-        if (!isRunning) {
-          throw new Error('Container exited')
-        }
-        await new Promise((resolve) => setTimeout(resolve, 2000))
-      }
-    } catch (error) {
-      this.logger.debug('Error validating snapshot runtime:', error)
-      throw error
-    } finally {
-      // Cleanup: Destroy the container
-      if (containerId) {
-        try {
-          await this.dockerProvider.remove(containerId)
-        } catch (cleanupError) {
-          this.logger.error('Error cleaning up container:', fromAxiosError(cleanupError))
-        }
-      }
-    }
-  }
-
-  async pushSnapshotToInternalRegistry(snapshotId: string) {
-    const snapshot = await this.snapshotRepository.findOneOrFail({
-      where: {
-        id: snapshotId,
-      },
-    })
-
-    const registry = await this.dockerRegistryService.getDefaultInternalRegistry()
-    if (!registry) {
-      throw new Error('No default internal registry configured')
-    }
-
-    //  get tag from snapshot name
-    const tag = snapshot.imageName.split(':')[1]
-    const internalSnapshotName = `${registry.url}/${registry.project}/${snapshot.id}:${tag}`
-
-    snapshot.internalName = internalSnapshotName
-    await this.snapshotRepository.save(snapshot)
-
-    // Tag the snapshot with the internal registry name
-    await this.dockerProvider.tagImage(snapshot.imageName, internalSnapshotName)
-
-    // Push the newly tagged snapshot
-    await this.dockerProvider.pushImage(internalSnapshotName, registry)
+  async handleSnapshotStateWarmingUp(snapshot: Snapshot) {
+    // check if all needed runners have snapshot
+    // if yes, change state to active
+    // if timeout 30 minutes - error
   }
 
   async retrySnapshotRunnerPull(snapshotRunner: SnapshotRunner) {
@@ -794,7 +692,7 @@ export class SnapshotManager {
 
     await snapshotApi.pullSnapshot({
       snapshot: snapshotRunner.snapshotRef,
-      registry: {
+      sourceRegistry: {
         url: dockerRegistry.url,
         username: dockerRegistry.username,
         password: dockerRegistry.password,
@@ -886,12 +784,12 @@ export class SnapshotManager {
       await this.snapshotRepository.update({ id: In(snapshotIds) }, { state: SnapshotState.INACTIVE })
 
       // Get internal names of deactivated snapshots
-      const internalNames = oldSnapshots.map((snapshot) => snapshot.internalName).filter((name) => name) // Filter out null/undefined values
+      const refs = oldSnapshots.map((snapshot) => snapshot.ref).filter((name) => name) // Filter out null/undefined values
 
-      if (internalNames.length > 0) {
+      if (refs.length > 0) {
         // Set associated SnapshotRunner records to REMOVING state
         const result = await this.snapshotRunnerRepository.update(
-          { snapshotRef: In(internalNames) },
+          { snapshotRef: In(refs) },
           { state: SnapshotRunnerState.REMOVING },
         )
 
@@ -901,6 +799,110 @@ export class SnapshotManager {
       }
     } catch (error) {
       this.logger.error(`Failed to deactivate old snapshots: ${fromAxiosError(error)}`)
+    } finally {
+      await this.redisLockProvider.unlock(lockKey)
+    }
+  }
+
+  @Cron(CronExpression.EVERY_30_SECONDS)
+  async scaleOverusedSnapshots() {
+    const lockKey = 'scale-overused-snapshots-lock'
+    if (!(await this.redisLockProvider.lock(lockKey, 30))) {
+      return
+    }
+
+    try {
+      // First check the average usage of all schedulable runners
+      const avgUsageResult = await this.runnerRepository.query(`
+        SELECT AVG(used * 1.0 / capacity) as avg_usage
+        FROM runner
+        WHERE state = 'ready' AND capacity > 0 AND unschedulable = false
+      `)
+
+      const avgUsage = parseFloat(avgUsageResult[0]?.avg_usage || '0')
+
+      // Only proceed if average usage is less than 75%
+      if (avgUsage >= RUNNER_USAGE_THRESHOLD) {
+        this.logger.debug(
+          `Skipping scaling overused snapshots as overall runner usage is high (≥${RUNNER_USAGE_THRESHOLD * 100}%)`,
+        )
+        return
+      }
+
+      // Find overused snapshots and increase their desired propagation
+      await this.snapshotRepository.query(`
+        WITH overused_snapshots AS (
+          SELECT sr.snapshot_ref
+          FROM snapshot_runner sr
+          JOIN runner r ON sr.runner_id = r.id
+          WHERE sr.state = 'ready' AND r.capacity > 0 AND r.unschedulable = false
+          GROUP BY sr.snapshot_ref
+          HAVING AVG(r.used * 1.0 / r.capacity) > ${RUNNER_USAGE_THRESHOLD}
+        )
+        UPDATE snapshot s
+        SET desired_propagation = s.desired_propagation + o.base_propagation_factor
+        FROM organization o, overused_snapshots os
+        WHERE s.organization_id = o.id
+          AND s.ref = os.snapshot_ref
+      `)
+
+      this.logger.debug('Scaled up overused snapshots')
+    } catch (error) {
+      this.logger.error(`Error scaling overused snapshots: ${fromAxiosError(error)}`)
+    } finally {
+      await this.redisLockProvider.unlock(lockKey)
+    }
+  }
+
+  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
+  async scaleDownUnusedSnapshots() {
+    const lockKey = 'scale-down-unused-snapshots-lock'
+    if (!(await this.redisLockProvider.lock(lockKey, 300))) {
+      return
+    }
+
+    try {
+      const fiveDaysAgo = new Date(Date.now() - 5 * 24 * 60 * 60 * 1000)
+      const usageMultiplier = 10 // Multiplier for desired propagation to determine usage threshold
+
+      // Find and scale down snapshots based on sandbox creation count in the past 5 days
+      const result = await this.snapshotRepository.query(
+        `
+        WITH snapshot_usage AS (
+          SELECT 
+            s.snapshot as snapshot_name,
+            COUNT(sb.id) as sandbox_count
+          FROM 
+            sandbox sb
+          JOIN
+            snapshot s ON sb.snapshot = s.name
+          WHERE 
+            sb.created_at > $1
+          GROUP BY 
+            s.snapshot
+        )
+        UPDATE snapshot s
+        SET desired_propagation = GREATEST(1, s.desired_propagation - o.base_propagation_factor)
+        FROM organization o
+        LEFT JOIN snapshot_usage su ON s.name = su.snapshot_name
+        WHERE 
+          s.organization_id = o.id
+          AND s.state = 'active'
+          AND (
+            su.sandbox_count IS NULL 
+            OR su.sandbox_count < (s.desired_propagation * $2)
+          )
+          AND s.desired_propagation > o.base_propagation_factor
+        RETURNING s.id, s.name, s.desired_propagation, COALESCE(su.sandbox_count, 0) as sandbox_count
+      `,
+        [fiveDaysAgo, usageMultiplier],
+      )
+
+      if (result.length > 0) {
+        this.logger.debug(`Scaled down ${result.length} underutilized snapshots based on sandbox creation count`)
+      }
+    } catch (error) {
+      this.logger.error(`Error scaling down unused snapshots: ${fromAxiosError(error)}`)
     } finally {
       await this.redisLockProvider.unlock(lockKey)
     }

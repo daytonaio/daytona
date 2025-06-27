@@ -22,7 +22,7 @@ import { SandboxState } from '../../sandbox/enums/sandbox-state.enum'
 import { EventEmitter2 } from '@nestjs/event-emitter'
 import { OrganizationEvents } from '../constants/organization-events.constant'
 import { CreateOrganizationQuotaDto } from '../dto/create-organization-quota.dto'
-import { DEFAULT_ORGANIZATION_QUOTA } from '../../common/constants/default-organization-quota'
+import { DEFAULT_ORGANIZATION_QUOTA } from '../../common/constants/organization-defaults'
 import { ConfigService } from '@nestjs/config'
 import { UserEmailVerifiedEvent } from '../../user/events/user-email-verified.event'
 import { Volume } from '../../sandbox/entities/volume.entity'
@@ -364,7 +364,7 @@ export class OrganizationService implements OnModuleInit {
 
     const snapshotRunners = await this.snapshotRunnerRepository
       .createQueryBuilder('snapshotRunner')
-      .innerJoin('snapshot', 'snapshot', 'snapshot.internalName = snapshotRunner.snapshotRef')
+      .innerJoin('snapshot', 'snapshot', 'snapshot.ref = snapshotRunner.snapshotRef')
       .where('snapshot.general = false')
       .andWhere('snapshot.organizationId IN (:...suspendedOrgIds)', { suspendedOrgIds: suspendedOrganizationIds })
       .orderBy('snapshotRunner.createdAt', 'ASC')

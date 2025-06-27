@@ -41,7 +41,7 @@ export class Snapshot {
   imageName: string
 
   @Column({ nullable: true })
-  internalName?: string
+  ref?: string
 
   @Column({ default: true })
   enabled: boolean
@@ -97,5 +97,8 @@ export class Snapshot {
   buildInfo?: BuildInfo
 
   @Column({ nullable: true })
-  buildRunnerId?: string
+  initialRunnerId?: string
+
+  @Column({ type: 'int', default: 5 })
+  desiredPropagation: number
 }

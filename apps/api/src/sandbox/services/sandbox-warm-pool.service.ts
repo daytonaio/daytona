@@ -72,14 +72,14 @@ export class SandboxWarmPoolService {
     const sandboxSnapshot = params.snapshot || this.configService.get<string>('DEFAULT_SNAPSHOT')
 
     const snapshotFilter: FindOptionsWhere<Snapshot>[] = [
-      { organizationId: params.organizationId, name: sandboxSnapshot, state: SnapshotState.ACTIVE },
-      { general: true, name: sandboxSnapshot, state: SnapshotState.ACTIVE },
+      { organizationId: params.organizationId, name: sandboxSnapshot, state: SnapshotState.HOT },
+      { general: true, name: sandboxSnapshot, state: SnapshotState.HOT },
     ]
 
     if (isValidUuid(sandboxSnapshot)) {
       snapshotFilter.push(
-        { organizationId: params.organizationId, id: sandboxSnapshot, state: SnapshotState.ACTIVE },
-        { general: true, id: sandboxSnapshot, state: SnapshotState.ACTIVE },
+        { organizationId: params.organizationId, id: sandboxSnapshot, state: SnapshotState.HOT },
+        { general: true, id: sandboxSnapshot, state: SnapshotState.HOT },
       )
     }
 
