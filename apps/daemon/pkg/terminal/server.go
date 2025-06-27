@@ -15,8 +15,6 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-var decoder = NewUTF8Decoder()
-
 var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool {
 		return true // Be careful with this in production
@@ -51,6 +49,9 @@ func handleWebSocket(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer conn.Close()
+
+	// Create a new UTF8Decoder instance for this connection
+	decoder := NewUTF8Decoder()
 
 	sizeCh := make(chan common.TTYSize)
 	stdInReader, stdInWriter := io.Pipe()
