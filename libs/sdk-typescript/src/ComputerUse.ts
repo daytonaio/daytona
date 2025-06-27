@@ -188,21 +188,29 @@ export class Keyboard {
    *
    * @param {string} text - The text to type
    * @param {number} [delay=0] - Delay between characters in milliseconds
-   * @returns {Promise<boolean>} Whether the type operation was successful
+   * @throws {DaytonaError} If the type operation fails
    *
    * @example
    * ```typescript
-   * const result = await sandbox.computerUse.keyboard.type('Hello, World!');
-   * console.log(`Typed: ${result.typed}`);
+   * try {
+   *   await sandbox.computerUse.keyboard.type('Hello, World!');
+   *   console.log('Operation success');
+   * } catch (e) {
+   *   console.log('Operation failed:', e);
+   * }
    *
    * // With delay between characters
-   * const slowType = await sandbox.computerUse.keyboard.type('Slow typing', 100);
+   * try {
+   *   await sandbox.computerUse.keyboard.type('Slow typing', 100);
+   *   console.log('Operation success');
+   * } catch (e) {
+   *   console.log('Operation failed:', e);
+   * }
    * ```
    */
-  public async type(text: string, delay?: number): Promise<boolean> {
+  public async type(text: string, delay?: number): Promise<void> {
     const request: KeyboardTypeRequest = { text, delay }
-    const response = await this.toolboxApi.typeText(this.sandboxId, request)
-    return response.data.success
+    await this.toolboxApi.typeText(this.sandboxId, request)
   }
 
   /**
@@ -210,48 +218,76 @@ export class Keyboard {
    *
    * @param {string} key - The key to press (e.g., 'Enter', 'Escape', 'Tab', 'a', 'A')
    * @param {string[]} [modifiers=[]] - Modifier keys ('ctrl', 'alt', 'meta', 'shift')
-   * @returns {Promise<boolean>} Whether the press operation was successful
+   * @throws {DaytonaError} If the press operation fails
    *
    * @example
    * ```typescript
    * // Press Enter
-   * const enter = await sandbox.computerUse.keyboard.press('Return');
+   * try {
+   *   await sandbox.computerUse.keyboard.press('Return');
+   *   console.log('Operation success');
+   * } catch (e) {
+   *   console.log('Operation failed:', e);
+   * }
    *
    * // Press Ctrl+C
-   * const copy = await sandbox.computerUse.keyboard.press('c', ['ctrl']);
+   * try {
+   *   await sandbox.computerUse.keyboard.press('c', ['ctrl']);
+   *   console.log('Operation success');
+   * } catch (e) {
+   *   console.log('Operation failed:', e);
+   * }
    *
    * // Press Ctrl+Shift+T
-   * const newTab = await sandbox.computerUse.keyboard.press('t', ['ctrl', 'shift']);
+   * try {
+   *   await sandbox.computerUse.keyboard.press('t', ['ctrl', 'shift']);
+   *   console.log('Operation success');
+   * } catch (e) {
+   *   console.log('Operation failed:', e);
+   * }
    * ```
    */
-  public async press(key: string, modifiers: string[] = []): Promise<boolean> {
+  public async press(key: string, modifiers: string[] = []): Promise<void> {
     const request: KeyboardPressRequest = { key, modifiers }
-    const response = await this.toolboxApi.pressKey(this.sandboxId, request)
-    return response.data.success
+    await this.toolboxApi.pressKey(this.sandboxId, request)
   }
 
   /**
    * Presses a hotkey combination
    *
    * @param {string} keys - The hotkey combination (e.g., 'ctrl+c', 'alt+tab', 'cmd+shift+t')
-   * @returns {Promise<boolean>} Whether the hotkey operation was successful
+   * @throws {DaytonaError} If the hotkey operation fails
    *
    * @example
    * ```typescript
    * // Copy
-   * const copy = await sandbox.computerUse.keyboard.hotkey('ctrl+c');
+   * try {
+   *   await sandbox.computerUse.keyboard.hotkey('ctrl+c');
+   *   console.log('Operation success');
+   * } catch (e) {
+   *   console.log('Operation failed:', e);
+   * }
    *
    * // Paste
-   * const paste = await sandbox.computerUse.keyboard.hotkey('ctrl+v');
+   * try {
+   *   await sandbox.computerUse.keyboard.hotkey('ctrl+v');
+   *   console.log('Operation success');
+   * } catch (e) {
+   *   console.log('Operation failed:', e);
+   * }
    *
    * // Alt+Tab
-   * const altTab = await sandbox.computerUse.keyboard.hotkey('alt+tab');
+   * try {
+   *   await sandbox.computerUse.keyboard.hotkey('alt+tab');
+   *   console.log('Operation success');
+   * } catch (e) {
+   *   console.log('Operation failed:', e);
+   * }
    * ```
    */
-  public async hotkey(keys: string): Promise<boolean> {
+  public async hotkey(keys: string): Promise<void> {
     const request: KeyboardHotkeyRequest = { keys }
-    const response = await this.toolboxApi.pressHotkey(this.sandboxId, request)
-    return response.data.success
+    await this.toolboxApi.pressHotkey(this.sandboxId, request)
   }
 }
 

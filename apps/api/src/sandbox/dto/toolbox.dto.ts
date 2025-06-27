@@ -723,14 +723,6 @@ export class WindowsResponseDto {
 }
 
 // Computer Use Management Response DTOs
-@ApiSchema({ name: 'EmptyResponse' })
-export class EmptyResponseDto {
-  @ApiProperty({
-    description: 'Whether the operation was successful',
-    example: true,
-  })
-  success: boolean
-}
 
 @ApiSchema({ name: 'ComputerUseStartResponse' })
 export class ComputerUseStartResponseDto {

@@ -48,8 +48,6 @@ import type { CreateSessionRequest } from '../models'
 // @ts-ignore
 import type { DisplayInfoResponse } from '../models'
 // @ts-ignore
-import type { EmptyResponse } from '../models'
-// @ts-ignore
 import type { ExecuteRequest } from '../models'
 // @ts-ignore
 import type { ExecuteResponse } from '../models'
@@ -1299,7 +1297,7 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
     ): Promise<RequestArgs> => {
       // verify required parameter 'sandboxId' is not null or undefined
       assertParamExists('getWindows', 'sandboxId', sandboxId)
-      const localVarPath = `/toolbox/{sandboxId}/toolbox/computeruse/windows`.replace(
+      const localVarPath = `/toolbox/{sandboxId}/toolbox/computeruse/display/windows`.replace(
         `{${'sandboxId'}}`,
         encodeURIComponent(String(sandboxId)),
       )
@@ -2654,7 +2652,7 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
       assertParamExists('pressKey', 'sandboxId', sandboxId)
       // verify required parameter 'keyboardPressRequest' is not null or undefined
       assertParamExists('pressKey', 'keyboardPressRequest', keyboardPressRequest)
-      const localVarPath = `/toolbox/{sandboxId}/toolbox/computeruse/keyboard/press`.replace(
+      const localVarPath = `/toolbox/{sandboxId}/toolbox/computeruse/keyboard/key`.replace(
         `{${'sandboxId'}}`,
         encodeURIComponent(String(sandboxId)),
       )
@@ -5010,7 +5008,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
       keyboardHotkeyRequest: KeyboardHotkeyRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<EmptyResponse>> {
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.pressHotkey(
         sandboxId,
         keyboardHotkeyRequest,
@@ -5042,7 +5040,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
       keyboardPressRequest: KeyboardPressRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<EmptyResponse>> {
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.pressKey(
         sandboxId,
         keyboardPressRequest,
@@ -5474,7 +5472,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
       keyboardTypeRequest: KeyboardTypeRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<EmptyResponse>> {
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.typeText(
         sandboxId,
         keyboardTypeRequest,
@@ -6423,7 +6421,7 @@ export const ToolboxApiFactory = function (configuration?: Configuration, basePa
       keyboardHotkeyRequest: KeyboardHotkeyRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
-    ): AxiosPromise<EmptyResponse> {
+    ): AxiosPromise<void> {
       return localVarFp
         .pressHotkey(sandboxId, keyboardHotkeyRequest, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
@@ -6442,7 +6440,7 @@ export const ToolboxApiFactory = function (configuration?: Configuration, basePa
       keyboardPressRequest: KeyboardPressRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
-    ): AxiosPromise<EmptyResponse> {
+    ): AxiosPromise<void> {
       return localVarFp
         .pressKey(sandboxId, keyboardPressRequest, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
@@ -6714,7 +6712,7 @@ export const ToolboxApiFactory = function (configuration?: Configuration, basePa
       keyboardTypeRequest: KeyboardTypeRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
-    ): AxiosPromise<EmptyResponse> {
+    ): AxiosPromise<void> {
       return localVarFp
         .typeText(sandboxId, keyboardTypeRequest, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))

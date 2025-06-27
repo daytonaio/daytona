@@ -77,8 +77,8 @@ Gets the status of all computer use processes.
 **Example**:
 
 ```python
-status = await sandbox.computer_use.get_status()
-print("Computer use status:", status)
+response = await sandbox.computer_use.get_status()
+print("Computer use status:", response.status)
 ```
 
 #### AsyncComputerUse.get_process_status
@@ -227,7 +227,7 @@ Moves the mouse cursor to the specified coordinates.
 
 ```python
 result = await sandbox.computer_use.mouse.move(100, 200)
-print(f"Mouse moved to: {result.actual_x}, {result.actual_y}")
+print(f"Mouse moved to: {result.x}, {result.y}")
 ```
 
 #### AsyncMouse.click
@@ -340,7 +340,7 @@ Keyboard operations for computer use functionality.
 
 ```python
 @intercept_errors(message_prefix="Failed to type text: ")
-async def type(text: str, delay: Optional[int] = None) -> bool
+async def type(text: str, delay: Optional[int] = None) -> None
 ```
 
 Types the specified text.
@@ -350,25 +350,32 @@ Types the specified text.
 - `text` _str_ - The text to type.
 - `delay` _int_ - Delay between characters in milliseconds.
 
-**Returns**:
+**Raises**:
 
-- `bool` - Whether the type operation was successful.
+- `DaytonaError` - If the type operation fails.
 
 **Example**:
 
 ```python
-result = await sandbox.computer_use.keyboard.type("Hello, World!")
-print(f"Operation success: {result}")
+try:
+    await sandbox.computer_use.keyboard.type("Hello, World!")
+    print(f"Operation success")
+except Exception as e:
+    print(f"Operation failed: {e}")
 
 # With delay between characters
-slow_type = await sandbox.computer_use.keyboard.type("Slow typing", 100)
+try:
+    await sandbox.computer_use.keyboard.type("Slow typing", 100)
+    print(f"Operation success")
+except Exception as e:
+    print(f"Operation failed: {e}")
 ```
 
 #### AsyncKeyboard.press
 
 ```python
 @intercept_errors(message_prefix="Failed to press key: ")
-async def press(key: str, modifiers: Optional[List[str]] = None) -> bool
+async def press(key: str, modifiers: Optional[List[str]] = None) -> None
 ```
 
 Presses a key with optional modifiers.
@@ -378,28 +385,38 @@ Presses a key with optional modifiers.
 - `key` _str_ - The key to press (e.g., 'Enter', 'Escape', 'Tab', 'a', 'A').
 - `modifiers` _List[str]_ - Modifier keys ('ctrl', 'alt', 'meta', 'shift').
 
-**Returns**:
+**Raises**:
 
-- `bool` - Whether the press operation was successful.
+- `DaytonaError` - If the press operation fails.
 
 **Example**:
 
 ```python
 # Press Enter
-enter = await sandbox.computer_use.keyboard.press("Return")
+try:
+    await sandbox.computer_use.keyboard.press("Return")
+    print(f"Operation success")
+except Exception as e:
+    print(f"Operation failed: {e}")
 
 # Press Ctrl+C
-copy = await sandbox.computer_use.keyboard.press("c", ["ctrl"])
+try:
+    await sandbox.computer_use.keyboard.press("c", ["ctrl"])
+    print(f"Operation success")
 
 # Press Ctrl+Shift+T
-new_tab = await sandbox.computer_use.keyboard.press("t", ["ctrl", "shift"])
+try:
+    await sandbox.computer_use.keyboard.press("t", ["ctrl", "shift"])
+    print(f"Operation success")
+except Exception as e:
+    print(f"Operation failed: {e}")
 ```
 
 #### AsyncKeyboard.hotkey
 
 ```python
 @intercept_errors(message_prefix="Failed to press hotkey: ")
-async def hotkey(keys: str) -> bool
+async def hotkey(keys: str) -> None
 ```
 
 Presses a hotkey combination.
@@ -408,21 +425,33 @@ Presses a hotkey combination.
 
 - `keys` _str_ - The hotkey combination (e.g., 'ctrl+c', 'alt+tab', 'cmd+shift+t').
 
-**Returns**:
+**Raises**:
 
-- `bool` - Whether the hotkey operation was successful.
+- `DaytonaError` - If the hotkey operation fails.
 
 **Example**:
 
 ```python
 # Copy
-copy = await sandbox.computer_use.keyboard.hotkey("ctrl+c")
+try:
+    await sandbox.computer_use.keyboard.hotkey("ctrl+c")
+    print(f"Operation success")
+except Exception as e:
+    print(f"Operation failed: {e}")
 
 # Paste
-paste = await sandbox.computer_use.keyboard.hotkey("ctrl+v")
+try:
+    await sandbox.computer_use.keyboard.hotkey("ctrl+v")
+    print(f"Operation success")
+except Exception as e:
+    print(f"Operation failed: {e}")
 
 # Alt+Tab
-alt_tab = await sandbox.computer_use.keyboard.hotkey("alt+tab")
+try:
+    await sandbox.computer_use.keyboard.hotkey("alt+tab")
+    print(f"Operation success")
+except Exception as e:
+    print(f"Operation failed: {e}")
 ```
 
 ## AsyncScreenshot

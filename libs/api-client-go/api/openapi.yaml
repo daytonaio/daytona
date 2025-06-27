@@ -3978,10 +3978,6 @@ paths:
         required: true
       responses:
         '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EmptyResponse'
           description: Text typed successfully
       security:
         - bearer: []
@@ -3992,7 +3988,7 @@ paths:
       summary: Type text
       tags:
         - toolbox
-  /toolbox/{sandboxId}/toolbox/computeruse/keyboard/press:
+  /toolbox/{sandboxId}/toolbox/computeruse/keyboard/key:
     post:
       description: Press a key with optional modifiers
       operationId: pressKey
@@ -4020,10 +4016,6 @@ paths:
         required: true
       responses:
         '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EmptyResponse'
           description: Key pressed successfully
       security:
         - bearer: []
@@ -4062,10 +4054,6 @@ paths:
         required: true
       responses:
         '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EmptyResponse'
           description: Hotkey pressed successfully
       security:
         - bearer: []
@@ -4382,7 +4370,7 @@ paths:
       summary: Get display info
       tags:
         - toolbox
-  /toolbox/{sandboxId}/toolbox/computeruse/windows:
+  /toolbox/{sandboxId}/toolbox/computeruse/display/windows:
     get:
       description: Get list of open windows
       operationId: getWindows
@@ -8346,17 +8334,6 @@ components:
           type: number
       required:
         - text
-      type: object
-    EmptyResponse:
-      example:
-        success: true
-      properties:
-        success:
-          description: Whether the operation was successful
-          example: true
-          type: boolean
-      required:
-        - success
       type: object
     KeyboardPressRequest:
       example:
