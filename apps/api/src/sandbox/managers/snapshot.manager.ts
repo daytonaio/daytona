@@ -246,7 +246,15 @@ export class SnapshotManager {
   }
 
   async propagateSnapshotToRunner(internalSnapshotName: string, runner: Runner) {
-    const dockerRegistry = await this.dockerRegistryService.getDefaultInternalRegistry()
+    let dockerRegistry = await this.dockerRegistryService.findOneBySnapshotImageName(internalSnapshotName)
+
+    // If no registry found by image name, use the default internal registry
+    if (!dockerRegistry) {
+      dockerRegistry = await this.dockerRegistryService.getDefaultInternalRegistry()
+      if (!dockerRegistry) {
+        throw new Error('No registry found for snapshot and no default internal registry configured')
+      }
+    }
 
     const snapshotApi = this.runnerApiFactory.createSnapshotApi(runner)
 
