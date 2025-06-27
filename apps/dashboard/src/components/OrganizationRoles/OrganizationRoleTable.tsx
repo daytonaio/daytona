@@ -11,7 +11,6 @@ import {
   getCoreRowModel,
   getPaginationRowModel,
   getSortedRowModel,
-  SortingState,
   useReactTable,
 } from '@tanstack/react-table'
 import { OrganizationRole, OrganizationRolePermissionsEnum } from '@daytonaio/api-client'
@@ -24,6 +23,7 @@ import { DeleteOrganizationRoleDialog } from '@/components/OrganizationRoles/Del
 import { UpdateOrganizationRoleDialog } from '@/components/OrganizationRoles/UpdateOrganizationRoleDialog'
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 import { TableEmptyState } from '../TableEmptyState'
+import { useTableSorting } from '@/hooks/useTableSorting'
 
 interface DataTableProps {
   data: OrganizationRole[]
@@ -45,11 +45,11 @@ export function OrganizationRoleTable({
   onDeleteRole,
   loadingRoleAction,
 }: DataTableProps) {
-  const [sorting, setSorting] = useState<SortingState>([])
   const [roleToDelete, setRoleToDelete] = useState<string | null>(null)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [roleToUpdate, setRoleToUpdate] = useState<OrganizationRole | null>(null)
   const [isUpdateDialogOpen, setIsUpdateDialogOpen] = useState(false)
+  const [sorting, setSorting] = useTableSorting('organization-role')
 
   const columns = getColumns({
     onUpdate: (role) => {
