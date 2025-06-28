@@ -5,7 +5,7 @@
 
 import { ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { IsNull, Repository } from 'typeorm'
+import { In, IsNull, Repository } from 'typeorm'
 import { DockerRegistry } from '../entities/docker-registry.entity'
 import { CreateDockerRegistryDto } from '../dto/create-docker-registry.dto'
 import { UpdateDockerRegistryDto } from '../dto/update-docker-registry.dto'
@@ -129,8 +129,11 @@ export class DockerRegistryService {
 
   async findOneBySnapshotImageName(imageName: string, organizationId?: string): Promise<DockerRegistry | null> {
     const whereCondition = organizationId
-      ? [{ organizationId }, { organizationId: IsNull() }]
-      : [{ organizationId: IsNull() }]
+      ? [
+          { organizationId, registryType: In([RegistryType.INTERNAL, RegistryType.ORGANIZATION]) },
+          { organizationId: IsNull(), registryType: In([RegistryType.INTERNAL, RegistryType.ORGANIZATION]) },
+        ]
+      : [{ organizationId: IsNull(), registryType: In([RegistryType.INTERNAL, RegistryType.ORGANIZATION]) }]
 
     const registries = await this.dockerRegistryRepository.find({
       where: whereCondition,
