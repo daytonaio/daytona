@@ -14,13 +14,9 @@
     "openapi-generator",
     "@daytonaio/api-client"
   ],
-  "license": "Unlicense",
+  "license": "Apache-2.0",
   "main": "./src/index.js",
   "types": "./src/index.d.ts",
-  "scripts": {
-    "build": "tsc && tsc -p tsconfig.esm.json",
-    "prepare": "npm run build"
-  },
   "dependencies": {
     "axios": "^1.6.1"
   },

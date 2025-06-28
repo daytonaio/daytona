@@ -1,6 +1,6 @@
 [build-system]
-requires = ["setuptools>=68.0.0", "wheel>=0.41.2", "build>=1.0.3"]
-build-backend = "setuptools.build_meta"
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
 
 [project]
 name = "daytona"
@@ -10,52 +10,27 @@ authors = [
 ]
 description = "Python SDK for Daytona"
 readme = "README.md"
-requires-python = ">=3.7"
+requires-python = ">=3.8,<4.0"
 dependencies = [
-    "daytona_api_client>=0.21.0,<0.22.0",
-    "daytona_api_client_async>=0.21.0,<0.22.0",
-    "environs>=9.5.0,<10.0.0",
-    "marshmallow>=3.19.0,<4.0.0",
+    "environs>=10.0.0,<15.0.0",
     "pydantic>=2.4.2,<3.0.0",
-    "python-dateutil>=2.8.2,<3.0.0",
-    "urllib3>=2.0.7,<3.0.0",
     "Deprecated>=1.2.18,<2.0.0",
     "httpx>=0.28.0,<0.29.0",
     "aiofiles>=24.1.0,<24.2.0",
-    "aiohttp>=3.12.0,<4.0.0",
-    "aiohttp_retry>=2.9.0,<3.0.0",
     "toml>=0.10.0,<0.11.0",
-    "aioboto3>=14.0.0,<15.0.0",
+    "aioboto3>=13.0.0,<15.0.0",
     "boto3>=1.0.0,<2.0.0",
-    "importlib-metadata>=1.0.0,<6.0.0; python_version<'3.8'"
 ]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
 ]
 keywords = ["daytona", "sdk"]
 license = {text = "Apache-2.0"}
 
-[project.urls]
-Documentation = "https://www.daytona.io/docs"
-Repository = "https://github.com/daytonaio/daytona"
-Issues = "https://github.com/daytonaio/daytona/issues"
-
-[project.optional-dependencies]
-dev = [
-    "pydoc-markdown>=4.8.2",
-    "build>=1.0.3",
-    "wheel>=0.41.2",
-    "setuptools>=68.0.0",
-    "twine>=4.0.2",
-    "nbqa>=1.9.1,<2.0.0 ",
-    "black[jupyter]>=23.1.0,<24.0.0",
-    "pylint>=3.3.4,<4.0.0",
-    "isort>=5.10.0,<6.0.0",
-    "matplotlib>=3.10.0,<3.11.0",
-    "unasync>=0.6.0,<0.7.0"
-]
+[tool.deptry]
+exclude = ["src/daytona/_utils/chart_data_extractor_wrapper.py", "scripts/sync_generator.py"]

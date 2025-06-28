@@ -4,13 +4,8 @@
 import asyncio
 import json
 import warnings
+from importlib.metadata import version
 from typing import Callable, Dict, List, Optional, Union, overload
-
-try:
-    from importlib.metadata import version
-except ImportError:
-    # Fallback for Python < 3.8
-    from importlib_metadata import version
 
 from daytona_api_client_async import (
     ApiClient,

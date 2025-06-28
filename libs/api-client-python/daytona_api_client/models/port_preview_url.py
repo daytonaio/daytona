@@ -23,12 +23,10 @@ from typing import Any, ClassVar, Dict, List
 from typing import Optional, Set
 from typing_extensions import Self
 
-
 class PortPreviewUrl(BaseModel):
     """
     PortPreviewUrl
-    """  # noqa: E501
-
+    """ # noqa: E501
     url: StrictStr = Field(description="Preview url")
     token: StrictStr = Field(description="Access token")
     additional_properties: Dict[str, Any] = {}
@@ -39,6 +37,7 @@ class PortPreviewUrl(BaseModel):
         validate_assignment=True,
         protected_namespaces=(),
     )
+
 
     def to_str(self) -> str:
         """Returns the string representation of the model using alias"""
@@ -65,11 +64,9 @@ class PortPreviewUrl(BaseModel):
           are ignored.
         * Fields in `self.additional_properties` are added to the output dict.
         """
-        excluded_fields: Set[str] = set(
-            [
-                "additional_properties",
-            ]
-        )
+        excluded_fields: Set[str] = set([
+            "additional_properties",
+        ])
 
         _dict = self.model_dump(
             by_alias=True,
@@ -92,10 +89,15 @@ class PortPreviewUrl(BaseModel):
         if not isinstance(obj, dict):
             return cls.model_validate(obj)
 
-        _obj = cls.model_validate({"url": obj.get("url"), "token": obj.get("token")})
+        _obj = cls.model_validate({
+            "url": obj.get("url"),
+            "token": obj.get("token")
+        })
         # store additional fields in additional_properties
         for _key in obj.keys():
             if _key not in cls.__properties:
                 _obj.additional_properties[_key] = obj.get(_key)
 
         return _obj
+
+
