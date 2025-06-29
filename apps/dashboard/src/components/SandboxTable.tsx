@@ -29,6 +29,7 @@ import {
   Timer,
   ArrowUpDown,
   Archive,
+  Container,
 } from 'lucide-react'
 import { TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from './ui/table'
 import { Button } from './ui/button'
@@ -196,7 +197,28 @@ export function SandboxTable({
                 </TableRow>
               ))
             ) : (
-              <TableEmptyState colSpan={columns.length} message="No Sandboxes found." />
+              <TableEmptyState
+                colSpan={columns.length}
+                message="No Sandboxes yet."
+                icon={<Container className="w-8 h-8" />}
+                description={
+                  <div className="space-y-2">
+                    <p>Spin up a Sandbox to run code in an isolated environment.</p>
+                    <p>Use the Daytona SDK or CLI to create one.</p>
+                    <p>
+                      <a
+                        href="https://www.daytona.io/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary hover:underline font-medium"
+                      >
+                        Check out the Onboarding guide
+                      </a>{' '}
+                      to learn more.
+                    </p>
+                  </div>
+                }
+              />
             )}
           </TableBody>
         </Table>
