@@ -18,6 +18,7 @@ import { OrganizationRole, OrganizationUser, OrganizationUserRoleEnum } from '@d
 import { Pagination } from '@/components/Pagination'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { usePersistedTableSorting } from '@/hooks/usePersistedTableSorting'
 import { TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from '@/components/ui/table'
 import { RemoveOrganizationMemberDialog } from '@/components/OrganizationMembers/RemoveOrganizationMemberDialog'
 import { UpdateOrganizationMemberRoleDialog } from '@/components/OrganizationMembers/UpdateOrganizationMemberRoleDialog'
@@ -49,7 +50,10 @@ export function OrganizationMemberTable({
   loadingMemberAction,
   ownerMode,
 }: DataTableProps) {
-  const [sorting, setSorting] = useState<SortingState>([])
+  const { sorting, setSorting } = usePersistedTableSorting({
+    tableId: 'organization-members',
+    defaultSorting: [{ id: 'email', desc: false }], // alphabetical by email
+  })
   const [memberToUpdate, setMemberToUpdate] = useState<OrganizationUser | null>(null)
   const [isUpdateMemberRoleDialogOpen, setIsUpdateMemberRoleDialogOpen] = useState(false)
   const [isUpdateAssignedRolesDialogOpen, setIsUpdateAssignedRolesDialogOpen] = useState(false)

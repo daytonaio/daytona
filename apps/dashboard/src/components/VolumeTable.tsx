@@ -32,6 +32,7 @@ import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { getRelativeTimeString } from '@/lib/utils'
 import { TableEmptyState } from './TableEmptyState'
+import { usePersistedTableSorting } from '@/hooks/usePersistedTableSorting'
 
 interface VolumeTableProps {
   data: VolumeDto[]
@@ -49,7 +50,10 @@ export function VolumeTable({ data, loading, processingVolumeAction, onDelete, o
     [authenticatedUserHasPermission],
   )
 
-  const [sorting, setSorting] = useState<SortingState>([])
+  const { sorting, setSorting } = usePersistedTableSorting({
+    tableId: 'volume-table',
+    defaultSorting: [{ id: 'createdAt', desc: true }],
+  })
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
 
   const columns = getColumns({
