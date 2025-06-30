@@ -78,6 +78,12 @@ class Daytona:
         ```
     """
 
+    _api_key: Optional[str] = None
+    _jwt_token: Optional[str] = None
+    _organization_id: Optional[str] = None
+    _api_url: str
+    _target: Optional[str] = None
+
     def __init__(self, config: Optional[DaytonaConfig] = None):
         """Initializes Daytona instance with optional configuration.
 
@@ -111,29 +117,37 @@ class Daytona:
 
         default_api_url = "https://app.daytona.io/api"
         self.default_language = CodeLanguage.PYTHON
+        api_url = None
+
+        if config:
+            self._api_key = None if (not config.api_key and config.jwt_token) else config.api_key
+            self._jwt_token = config.jwt_token
+            self._organization_id = config.organization_id
+            api_url = config.api_url or config.server_url
+            self._target = config.target
 
         if config is None or (
-            not all([config.api_key, config.api_url, config.target])
+            not all([self._api_key, api_url, self._target])
             and not all(
                 [
-                    config.jwt_token,
-                    config.organization_id,
-                    config.api_url,
-                    config.target,
+                    self._jwt_token,
+                    self._organization_id,
+                    api_url,
+                    self._target,
                 ]
             )
         ):
             # Initialize env - it automatically reads from .env and .env.local
             env = Env()
-            env.read_env()  # reads .env
-            # reads .env.local and overrides values
+            env.read_env()
+            env.read_env(".env", override=True)
             env.read_env(".env.local", override=True)
 
-            self._api_key = env.str("DAYTONA_API_KEY", None)
-            self._jwt_token = env.str("DAYTONA_JWT_TOKEN", None)
-            self._organization_id = env.str("DAYTONA_ORGANIZATION_ID", None)
-            self._api_url = env.str("DAYTONA_API_URL", None) or env.str("DAYTONA_SERVER_URL", default_api_url)
-            self._target = env.str("DAYTONA_TARGET", None)
+            self._api_key = self._api_key or (env.str("DAYTONA_API_KEY", None) if not self._jwt_token else None)
+            self._jwt_token = self._jwt_token or env.str("DAYTONA_JWT_TOKEN", None)
+            self._organization_id = self._organization_id or env.str("DAYTONA_ORGANIZATION_ID", None)
+            api_url = api_url or env.str("DAYTONA_API_URL", None) or env.str("DAYTONA_SERVER_URL", default_api_url)
+            self._target = self._target or env.str("DAYTONA_TARGET", None)
 
             if env.str("DAYTONA_SERVER_URL", None) and not env.str("DAYTONA_API_URL", None):
                 warnings.warn(
@@ -143,15 +157,7 @@ class Daytona:
                     stacklevel=2,
                 )
 
-        if config:
-            if not config.api_key and config.jwt_token:
-                self._api_key = None
-            else:
-                self._api_key = config.api_key or getattr(self, "_api_key", None)
-            self._jwt_token = config.jwt_token or getattr(self, "_jwt_token", None)
-            self._organization_id = config.organization_id or getattr(self, "_organization_id", None)
-            self._api_url = config.api_url or self._api_url
-            self._target = config.target or self._target
+        self._api_url = api_url
 
         if not self._api_key and not self._jwt_token:
             raise DaytonaError("API key or JWT token is required")
