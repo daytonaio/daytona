@@ -206,7 +206,7 @@ export class Daytona {
   private readonly apiKey?: string
   private readonly jwtToken?: string
   private readonly organizationId?: string
-  private readonly apiUrl: string
+  private readonly apiUrl?: string
   public readonly volume: VolumeService
   public readonly snapshot: SnapshotService
 
@@ -217,34 +217,37 @@ export class Daytona {
    * @throws {DaytonaError} - `DaytonaError` - When API key is missing
    */
   constructor(config?: DaytonaConfig) {
-    dotenv.config()
-    dotenv.config({ path: '.env.local', override: true })
-    const apiKey = !config?.apiKey && config?.jwtToken ? undefined : config?.apiKey || process?.env['DAYTONA_API_KEY']
-    const jwtToken = config?.jwtToken || process?.env['DAYTONA_JWT_TOKEN']
-    const organizationId = config?.organizationId || process?.env['DAYTONA_ORGANIZATION_ID']
-    if (!apiKey && !jwtToken) {
-      throw new DaytonaError('API key or JWT token is required')
-    }
-    const apiUrl =
-      config?.apiUrl ||
-      config?.serverUrl ||
-      process?.env['DAYTONA_API_URL'] ||
-      process?.env['DAYTONA_SERVER_URL'] ||
-      'https://app.daytona.io/api'
-    const envTarget = process?.env['DAYTONA_TARGET']
-    const target = config?.target || envTarget
-
-    if (process?.env['DAYTONA_SERVER_URL'] && !process?.env['DAYTONA_API_URL']) {
-      console.warn(
-        '[Deprecation Warning] Environment variable `DAYTONA_SERVER_URL` is deprecated and will be removed in future versions. Use `DAYTONA_API_URL` instead.',
-      )
+    if (config) {
+      this.apiKey = !config?.apiKey && config?.jwtToken ? undefined : config?.apiKey
+      this.jwtToken = config?.jwtToken
+      this.organizationId = config?.organizationId
+      this.apiUrl = config?.apiUrl || config?.serverUrl
+      this.target = config?.target
     }
 
-    this.apiKey = apiKey
-    this.jwtToken = jwtToken
-    this.organizationId = organizationId
-    this.apiUrl = apiUrl
-    this.target = target
+    if (
+      !config ||
+      (!(this.apiKey && this.apiUrl && this.target) &&
+        !(this.jwtToken && this.organizationId && this.apiUrl && this.target))
+    ) {
+      dotenv.config()
+      dotenv.config({ path: '.env.local', override: true })
+      this.apiKey = this.apiKey || (this.jwtToken ? undefined : process?.env['DAYTONA_API_KEY'])
+      this.jwtToken = this.jwtToken || process?.env['DAYTONA_JWT_TOKEN']
+      this.organizationId = this.organizationId || process?.env['DAYTONA_ORGANIZATION_ID']
+      this.apiUrl =
+        this.apiUrl ||
+        process?.env['DAYTONA_API_URL'] ||
+        process?.env['DAYTONA_SERVER_URL'] ||
+        'https://app.daytona.io/api'
+      this.target = this.target || process?.env['DAYTONA_TARGET']
+
+      if (process?.env['DAYTONA_SERVER_URL'] && !process?.env['DAYTONA_API_URL']) {
+        console.warn(
+          '[Deprecation Warning] Environment variable `DAYTONA_SERVER_URL` is deprecated and will be removed in future versions. Use `DAYTONA_API_URL` instead.',
+        )
+      }
+    }
 
     const orgHeader: Record<string, string> = {}
     if (!this.apiKey) {
