@@ -206,7 +206,7 @@ export class Daytona {
   private readonly apiKey?: string
   private readonly jwtToken?: string
   private readonly organizationId?: string
-  private readonly apiUrl?: string
+  private readonly apiUrl: string
   public readonly volume: VolumeService
   public readonly snapshot: SnapshotService
 
@@ -217,29 +217,26 @@ export class Daytona {
    * @throws {DaytonaError} - `DaytonaError` - When API key is missing
    */
   constructor(config?: DaytonaConfig) {
+    let apiUrl: string | undefined
     if (config) {
       this.apiKey = !config?.apiKey && config?.jwtToken ? undefined : config?.apiKey
       this.jwtToken = config?.jwtToken
       this.organizationId = config?.organizationId
-      this.apiUrl = config?.apiUrl || config?.serverUrl
+      apiUrl = config?.apiUrl || config?.serverUrl
       this.target = config?.target
     }
 
     if (
       !config ||
-      (!(this.apiKey && this.apiUrl && this.target) &&
-        !(this.jwtToken && this.organizationId && this.apiUrl && this.target))
+      (!(this.apiKey && apiUrl && this.target) && !(this.jwtToken && this.organizationId && apiUrl && this.target))
     ) {
       dotenv.config()
       dotenv.config({ path: '.env.local', override: true })
       this.apiKey = this.apiKey || (this.jwtToken ? undefined : process?.env['DAYTONA_API_KEY'])
       this.jwtToken = this.jwtToken || process?.env['DAYTONA_JWT_TOKEN']
       this.organizationId = this.organizationId || process?.env['DAYTONA_ORGANIZATION_ID']
-      this.apiUrl =
-        this.apiUrl ||
-        process?.env['DAYTONA_API_URL'] ||
-        process?.env['DAYTONA_SERVER_URL'] ||
-        'https://app.daytona.io/api'
+      apiUrl =
+        apiUrl || process?.env['DAYTONA_API_URL'] || process?.env['DAYTONA_SERVER_URL'] || 'https://app.daytona.io/api'
       this.target = this.target || process?.env['DAYTONA_TARGET']
 
       if (process?.env['DAYTONA_SERVER_URL'] && !process?.env['DAYTONA_API_URL']) {
@@ -248,6 +245,8 @@ export class Daytona {
         )
       }
     }
+
+    this.apiUrl = apiUrl
 
     const orgHeader: Record<string, string> = {}
     if (!this.apiKey) {
