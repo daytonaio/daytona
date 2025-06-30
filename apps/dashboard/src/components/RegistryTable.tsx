@@ -16,7 +16,7 @@ import {
 import { TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from './ui/table'
 import { Button } from './ui/button'
 import { useMemo, useState } from 'react'
-import { MoreHorizontal } from 'lucide-react'
+import { MoreHorizontal, Package } from 'lucide-react'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -105,6 +105,7 @@ export function RegistryTable({ data, loading, onDelete, onEdit }: DataTableProp
               <TableEmptyState
                 colSpan={columns.length}
                 message="No Container registries found."
+                icon={<Package className="w-8 h-8" />}
                 description="Connect to external container registries (e.g., Docker Hub, GCR, ECR) to pull images for your Sandboxes."
               />
             )}

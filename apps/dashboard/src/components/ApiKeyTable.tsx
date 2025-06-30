@@ -28,7 +28,7 @@ import {
 } from './ui/dialog'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip'
 import { Pagination } from './Pagination'
-import { Loader2 } from 'lucide-react'
+import { Loader2, KeyRound } from 'lucide-react'
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 import { getRelativeTimeString } from '@/lib/utils'
 import { TableEmptyState } from './TableEmptyState'
@@ -97,7 +97,28 @@ export function ApiKeyTable({ data, loading, loadingKeys, onRevoke }: DataTableP
                 </TableRow>
               ))
             ) : (
-              <TableEmptyState colSpan={columns.length} message="No API Keys found." />
+              <TableEmptyState
+                colSpan={columns.length}
+                message="No API Keys yet."
+                icon={<KeyRound className="w-8 h-8" />}
+                description={
+                  <div className="space-y-2">
+                    <p>API Keys authenticate requests made through the Daytona SDK or CLI.</p>
+                    <p>
+                      Generate one and{' '}
+                      <a
+                        href="https://www.daytona.io/docs/api-keys"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary hover:underline font-medium"
+                      >
+                        check out the API Key setup guide
+                      </a>
+                      .
+                    </p>
+                  </div>
+                }
+              />
             )}
           </TableBody>
         </Table>
