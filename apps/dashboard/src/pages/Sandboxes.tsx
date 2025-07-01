@@ -6,18 +6,15 @@
 import React, { useEffect, useState, useCallback } from 'react'
 import { useApi } from '@/hooks/useApi'
 import { OrganizationSuspendedError } from '@/api/errors'
-import { OrganizationUserRoleEnum, Sandbox, SandboxState } from '@daytonaio/api-client'
-import { SandboxTable } from '@/components/SandboxTable'
 import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
+  OrganizationUserRoleEnum,
+  Sandbox,
+  SandboxState,
+  OrganizationRolePermissionsEnum,
+  SnapshotDto,
+} from '@daytonaio/api-client'
+import { SandboxTable } from '@/components/SandboxTable/index'
+import { Button, buttonVariants } from '@/components/ui/button'
 import { toast } from 'sonner'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { useNavigate } from 'react-router-dom'
@@ -28,21 +25,51 @@ import { useAuth } from 'react-oidc-context'
 import { LocalStorageKey } from '@/enums/LocalStorageKey'
 import { getLocalStorageItem, setLocalStorageItem } from '@/lib/local-storage'
 import { DAYTONA_DOCS_URL } from '@/constants/ExternalLinks'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
+import SandboxDetailsSheet from '@/components/SandboxDetailsSheet'
 
 const Sandboxes: React.FC = () => {
-  const { sandboxApi, apiKeyApi } = useApi()
+  const { sandboxApi, apiKeyApi, snapshotApi } = useApi()
   const { user } = useAuth()
   const { notificationSocket } = useNotificationSocket()
 
   const [sandboxes, setSandboxes] = useState<Sandbox[]>([])
+  const [snapshots, setSnapshots] = useState<SnapshotDto[]>([])
   const [loadingSandboxes, setLoadingSandboxes] = useState<Record<string, boolean>>({})
   const [loadingTable, setLoadingTable] = useState(true)
+  const [loadingSnapshots, setLoadingSnapshots] = useState(true)
   const [sandboxToDelete, setSandboxToDelete] = useState<string | null>(null)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [selectedSandbox, setSelectedSandbox] = useState<Sandbox | null>(null)
+  const [showSandboxDetails, setShowSandboxDetails] = useState(false)
 
   const navigate = useNavigate()
 
   const { selectedOrganization, authenticatedUserOrganizationMember } = useSelectedOrganization()
+
+  const fetchSnapshots = useCallback(async () => {
+    if (!selectedOrganization) {
+      return
+    }
+    setLoadingSnapshots(true)
+    try {
+      const response = await snapshotApi.getAllSnapshots(selectedOrganization.id)
+      setSnapshots(response.data.items ?? [])
+    } catch (error) {
+      console.error('Failed to fetch snapshots', error)
+    } finally {
+      setLoadingSnapshots(false)
+    }
+  }, [selectedOrganization, snapshotApi])
 
   const fetchSandboxes = useCallback(
     async (showTableLoadingState = true) => {
@@ -66,7 +93,24 @@ const Sandboxes: React.FC = () => {
 
   useEffect(() => {
     fetchSandboxes()
-  }, [fetchSandboxes])
+    fetchSnapshots()
+  }, [fetchSandboxes, fetchSnapshots])
+
+  useEffect(() => {
+    if (selectedSandbox) {
+      const updatedSandbox = sandboxes.find((s) => s.id === selectedSandbox.id)
+      if (updatedSandbox && updatedSandbox !== selectedSandbox) {
+        setSelectedSandbox(updatedSandbox)
+      }
+    }
+  }, [sandboxes, selectedSandbox])
+
+  useEffect(() => {
+    if (selectedSandbox && !sandboxes.some((s) => s.id === selectedSandbox.id)) {
+      setSelectedSandbox(null)
+      setShowSandboxDetails(false)
+    }
+  }, [sandboxes, selectedSandbox])
 
   useEffect(() => {
     const handleSandboxCreatedEvent = (sandbox: Sandbox) => {
@@ -101,12 +145,14 @@ const Sandboxes: React.FC = () => {
   const handleStart = async (id: string) => {
     setLoadingSandboxes((prev) => ({ ...prev, [id]: true }))
 
-    // Save the current state
     const sandboxToStart = sandboxes.find((s) => s.id === id)
     const previousState = sandboxToStart?.state
 
-    // Optimistically update the sandbox state
     setSandboxes((prev) => prev.map((s) => (s.id === id ? { ...s, state: SandboxState.STARTING } : s)))
+
+    if (selectedSandbox?.id === id) {
+      setSelectedSandbox((prev) => (prev ? { ...prev, state: SandboxState.STARTING } : null))
+    }
 
     try {
       await sandboxApi.startSandbox(id, selectedOrganization?.id)
@@ -123,8 +169,10 @@ const Sandboxes: React.FC = () => {
           </Button>
         ) : undefined,
       )
-      // Revert the optimistic update
       setSandboxes((prev) => prev.map((s) => (s.id === id ? { ...s, state: previousState } : s)))
+      if (selectedSandbox?.id === id && previousState) {
+        setSelectedSandbox((prev) => (prev ? { ...prev, state: previousState } : null))
+      }
     } finally {
       setLoadingSandboxes((prev) => ({ ...prev, [id]: false }))
     }
@@ -133,20 +181,24 @@ const Sandboxes: React.FC = () => {
   const handleStop = async (id: string) => {
     setLoadingSandboxes((prev) => ({ ...prev, [id]: true }))
 
-    // Save the current state
     const sandboxToStop = sandboxes.find((s) => s.id === id)
     const previousState = sandboxToStop?.state
 
-    // Optimistically update the sandbox state
     setSandboxes((prev) => prev.map((s) => (s.id === id ? { ...s, state: SandboxState.STOPPING } : s)))
+
+    if (selectedSandbox?.id === id) {
+      setSelectedSandbox((prev) => (prev ? { ...prev, state: SandboxState.STOPPING } : null))
+    }
 
     try {
       await sandboxApi.stopSandbox(id, selectedOrganization?.id)
       toast.success(`Stopping sandbox with ID: ${id}`)
     } catch (error) {
       handleApiError(error, 'Failed to stop sandbox')
-      // Revert the optimistic update
       setSandboxes((prev) => prev.map((s) => (s.id === id ? { ...s, state: previousState } : s)))
+      if (selectedSandbox?.id === id && previousState) {
+        setSelectedSandbox((prev) => (prev ? { ...prev, state: previousState } : null))
+      }
     } finally {
       setLoadingSandboxes((prev) => ({ ...prev, [id]: false }))
     }
@@ -155,22 +207,32 @@ const Sandboxes: React.FC = () => {
   const handleDelete = async (id: string) => {
     setLoadingSandboxes((prev) => ({ ...prev, [id]: true }))
 
-    // Save the current state
     const sandboxToDelete = sandboxes.find((s) => s.id === id)
     const previousState = sandboxToDelete?.state
 
-    // Optimistically update the sandbox state
     setSandboxes((prev) => prev.map((s) => (s.id === id ? { ...s, state: SandboxState.DESTROYING } : s)))
+
+    if (selectedSandbox?.id === id) {
+      setSelectedSandbox((prev) => (prev ? { ...prev, state: SandboxState.DESTROYING } : null))
+    }
 
     try {
       await sandboxApi.deleteSandbox(id, true, selectedOrganization?.id)
       setSandboxToDelete(null)
       setShowDeleteDialog(false)
+
+      if (selectedSandbox?.id === id) {
+        setShowSandboxDetails(false)
+        setSelectedSandbox(null)
+      }
+
       toast.success(`Deleting sandbox with ID:  ${id}`)
     } catch (error) {
       handleApiError(error, 'Failed to delete sandbox')
-      // Revert the optimistic update
       setSandboxes((prev) => prev.map((s) => (s.id === id ? { ...s, state: previousState } : s)))
+      if (selectedSandbox?.id === id && previousState) {
+        setSelectedSandbox((prev) => (prev ? { ...prev, state: previousState } : null))
+      }
     } finally {
       setLoadingSandboxes((prev) => ({ ...prev, [id]: false }))
     }
@@ -179,13 +241,17 @@ const Sandboxes: React.FC = () => {
   const handleBulkDelete = async (ids: string[]) => {
     setLoadingSandboxes((prev) => ({ ...prev, ...ids.reduce((acc, id) => ({ ...acc, [id]: true }), {}) }))
 
+    const selectedSandboxInBulk = selectedSandbox && ids.includes(selectedSandbox.id)
+
     for (const id of ids) {
-      // Save the current state
       const sandboxToDelete = sandboxes.find((s) => s.id === id)
       const previousState = sandboxToDelete?.state
 
-      // Optimistically update the sandbox state
       setSandboxes((prev) => prev.map((s) => (s.id === id ? { ...s, state: SandboxState.DESTROYING } : s)))
+
+      if (selectedSandbox?.id === id) {
+        setSelectedSandbox((prev) => (prev ? { ...prev, state: SandboxState.DESTROYING } : null))
+      }
 
       try {
         await sandboxApi.deleteSandbox(id, true, selectedOrganization?.id)
@@ -193,10 +259,11 @@ const Sandboxes: React.FC = () => {
       } catch (error) {
         handleApiError(error, 'Failed to delete sandbox')
 
-        // Revert the optimistic update
         setSandboxes((prev) => prev.map((s) => (s.id === id ? { ...s, state: previousState } : s)))
+        if (selectedSandbox?.id === id && previousState) {
+          setSelectedSandbox((prev) => (prev ? { ...prev, state: previousState } : null))
+        }
 
-        // Wait for user decision
         const shouldContinue = window.confirm(
           `Failed to delete sandbox with ID: ${id}. Do you want to continue with the remaining sandboxes?`,
         )
@@ -208,32 +275,39 @@ const Sandboxes: React.FC = () => {
         setLoadingSandboxes((prev) => ({ ...prev, ...ids.reduce((acc, id) => ({ ...acc, [id]: false }), {}) }))
       }
     }
+
+    if (selectedSandboxInBulk) {
+      setShowSandboxDetails(false)
+      setSelectedSandbox(null)
+    }
   }
 
   const handleArchive = async (id: string) => {
     setLoadingSandboxes((prev) => ({ ...prev, [id]: true }))
 
-    // Save the current state
     const sandboxToArchive = sandboxes.find((s) => s.id === id)
     const previousState = sandboxToArchive?.state
 
-    // Optimistically update the sandbox state
     setSandboxes((prev) => prev.map((s) => (s.id === id ? { ...s, state: SandboxState.ARCHIVING } : s)))
+
+    if (selectedSandbox?.id === id) {
+      setSelectedSandbox((prev) => (prev ? { ...prev, state: SandboxState.ARCHIVING } : null))
+    }
 
     try {
       await sandboxApi.archiveSandbox(id, selectedOrganization?.id)
       toast.success(`Archiving sandbox with ID: ${id}`)
     } catch (error) {
       handleApiError(error, 'Failed to archive sandbox')
-      // Revert the optimistic update
       setSandboxes((prev) => prev.map((s) => (s.id === id ? { ...s, state: previousState } : s)))
+      if (selectedSandbox?.id === id && previousState) {
+        setSelectedSandbox((prev) => (prev ? { ...prev, state: previousState } : null))
+      }
     } finally {
       setLoadingSandboxes((prev) => ({ ...prev, [id]: false }))
     }
   }
 
-  // Redirect user to the onboarding page if they haven't created an api key yet
-  // Perform only once per user
   useEffect(() => {
     const onboardIfNeeded = async () => {
       if (!selectedOrganization) {
@@ -253,7 +327,6 @@ const Sandboxes: React.FC = () => {
           setLocalStorageItem(skipOnboardingKey, 'true')
           navigate(RoutePath.ONBOARDING)
         } else {
-          // Future onboarding checks can be skipped for this user because they already created an api key
           setLocalStorageItem(skipOnboardingKey, 'true')
         }
       } catch (error) {
@@ -265,28 +338,28 @@ const Sandboxes: React.FC = () => {
   }, [navigate, user, selectedOrganization, apiKeyApi])
 
   return (
-    <div className="p-6">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold">Sandboxes</h1>
+    <div className="flex flex-col h-dvh px-6 py-2 ">
+      <div className="mb-2 h-12 flex items-center justify-between">
+        <h1 className="text-2xl font-medium">Sandboxes</h1>
         {!loadingTable && sandboxes.length === 0 && (
-          <p className="text-sm text-muted-foreground mt-1">
-            To get started, check out the{' '}
-            <button className="text-primary" onClick={() => navigate(RoutePath.ONBOARDING)}>
-              Onboarding
-            </button>{' '}
-            guide. For more examples, check out the{' '}
-            <a href={DAYTONA_DOCS_URL} target="_blank" rel="noopener noreferrer" className="text-primary">
-              Docs
-            </a>
-            .
-          </p>
+          <div className="flex items-center gap-2">
+            <Button variant="link" className="text-primary" onClick={() => navigate(RoutePath.ONBOARDING)}>
+              Onboarding guide
+            </Button>
+            <Button variant="link" className="text-primary" asChild>
+              <a href={DAYTONA_DOCS_URL} target="_blank" rel="noopener noreferrer" className="text-primary">
+                Docs
+              </a>
+            </Button>
+          </div>
         )}
       </div>
+
       <SandboxTable
         loadingSandboxes={loadingSandboxes}
         handleStart={handleStart}
         handleStop={handleStop}
-        handleDelete={(id) => {
+        handleDelete={(id: string) => {
           setSandboxToDelete(id)
           setShowDeleteDialog(true)
         }}
@@ -294,10 +367,16 @@ const Sandboxes: React.FC = () => {
         handleArchive={handleArchive}
         data={sandboxes}
         loading={loadingTable}
+        snapshots={snapshots}
+        loadingSnapshots={loadingSnapshots}
+        onRowClick={(sandbox: Sandbox) => {
+          setSelectedSandbox(sandbox)
+          setShowSandboxDetails(true)
+        }}
       />
 
       {sandboxToDelete && (
-        <Dialog
+        <AlertDialog
           open={showDeleteDialog}
           onOpenChange={(isOpen) => {
             setShowDeleteDialog(isOpen)
@@ -306,30 +385,43 @@ const Sandboxes: React.FC = () => {
             }
           }}
         >
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Confirm Sandbox Deletion</DialogTitle>
-              <DialogDescription>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Confirm Sandbox Deletion</AlertDialogTitle>
+              <AlertDialogDescription>
                 Are you sure you want to delete this sandbox? This action cannot be undone.
-              </DialogDescription>
-            </DialogHeader>
-            <DialogFooter>
-              <DialogClose asChild>
-                <Button type="button" variant="secondary">
-                  Cancel
-                </Button>
-              </DialogClose>
-              <Button
-                variant="destructive"
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                className={buttonVariants({ variant: 'destructive' })}
                 onClick={() => handleDelete(sandboxToDelete)}
                 disabled={loadingSandboxes[sandboxToDelete]}
               >
                 {loadingSandboxes[sandboxToDelete] ? 'Deleting...' : 'Delete'}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       )}
+
+      <SandboxDetailsSheet
+        sandbox={selectedSandbox}
+        open={showSandboxDetails}
+        onOpenChange={setShowSandboxDetails}
+        loadingSandboxes={loadingSandboxes}
+        handleStart={handleStart}
+        handleStop={handleStop}
+        handleDelete={(id) => {
+          setSandboxToDelete(id)
+          setShowDeleteDialog(true)
+          setShowSandboxDetails(false)
+        }}
+        handleArchive={handleArchive}
+        writePermitted={authenticatedUserOrganizationMember?.role === OrganizationUserRoleEnum.OWNER}
+        deletePermitted={authenticatedUserOrganizationMember?.role === OrganizationUserRoleEnum.OWNER}
+      />
     </div>
   )
 }
