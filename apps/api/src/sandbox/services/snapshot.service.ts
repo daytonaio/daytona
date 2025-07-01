@@ -74,7 +74,7 @@ export class SnapshotService {
       }
     }
 
-    await this.organizationService.assertOrganizationIsNotSuspended(organization)
+    this.organizationService.assertOrganizationIsNotSuspended(organization)
 
     // check if the organization has reached the snapshot quota
     const snapshots = await this.snapshotRepository.find({

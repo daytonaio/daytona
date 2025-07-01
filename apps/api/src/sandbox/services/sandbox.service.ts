@@ -77,7 +77,7 @@ export class SandboxService {
     disk: number,
     excludeSandboxId?: string,
   ): Promise<void> {
-    await this.organizationService.assertOrganizationIsNotSuspended(organization)
+    this.organizationService.assertOrganizationIsNotSuspended(organization)
 
     // Check per-sandbox resource limits
     if (cpu > organization.maxCpuPerSandbox) {
@@ -563,7 +563,7 @@ export class SandboxService {
       throw new SandboxError('Sandbox is not in valid state')
     }
 
-    await this.organizationService.assertOrganizationIsNotSuspended(organization)
+    this.organizationService.assertOrganizationIsNotSuspended(organization)
 
     if (sandbox.runnerId) {
       // Add runner readiness check
