@@ -565,16 +565,14 @@ export class SandboxService {
 
     await this.organizationService.assertOrganizationIsNotSuspended(organization)
 
+    await this.validateOrganizationQuotas(organization, sandbox.cpu, sandbox.mem, sandbox.disk, sandbox.id)
+
     if (sandbox.runnerId) {
       // Add runner readiness check
       const runner = await this.runnerService.findOne(sandbox.runnerId)
       if (runner.state !== RunnerState.READY) {
         throw new SandboxError('Runner is not ready')
       }
-    } else {
-      //  restore operation
-      //  like a new sandbox creation, we need to validate quotas
-      await this.validateOrganizationQuotas(organization, sandbox.cpu, sandbox.mem, sandbox.disk, sandbox.id)
     }
 
     if (sandbox.pending) {
