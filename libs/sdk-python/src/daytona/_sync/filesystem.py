@@ -157,14 +157,14 @@ class FileSystem:
         )
 
         with httpx.Client(timeout=timeout or None) as client:
-            with client.stream(method, url, headers) as response:
+            with client.stream(method, url, headers=headers) as response:
                 response.raise_for_status()
                 parent = os.path.dirname(local_path)
                 if parent:
                     os.makedirs(parent, exist_ok=True)
 
                 with open(local_path, "wb") as f:
-                    for chunk in response.aiter_bytes(chunk_size=10 * 1024):
+                    for chunk in response.iter_bytes(chunk_size=10 * 1024):
                         if chunk:
                             f.write(chunk)
             return None
