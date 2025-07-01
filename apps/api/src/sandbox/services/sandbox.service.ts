@@ -290,15 +290,15 @@ export class SandboxService {
       state: SandboxState.STARTED,
     })
 
+    if (warmPoolSandbox) {
+      return await this.assignWarmPoolSandbox(warmPoolSandbox, createSandboxDto, organization.id)
+    }
+
     const runner = await this.runnerService.getRandomAvailableRunner({
       region,
       sandboxClass,
       snapshotRef: snapshot.internalName,
     })
-
-    if (warmPoolSandbox) {
-      return await this.assignWarmPoolSandbox(warmPoolSandbox, createSandboxDto, organization.id, runner.domain)
-    }
 
     const sandbox = new Sandbox()
 
@@ -339,7 +339,6 @@ export class SandboxService {
     warmPoolSandbox: Sandbox,
     createSandboxDto: CreateSandboxDto,
     organizationId: string,
-    runnerDomain: string,
   ): Promise<SandboxDto> {
     warmPoolSandbox.public = createSandboxDto.public || false
     warmPoolSandbox.labels = createSandboxDto.labels || {}
@@ -354,6 +353,8 @@ export class SandboxService {
       warmPoolSandbox.autoArchiveInterval = this.resolveAutoArchiveInterval(createSandboxDto.autoArchiveInterval)
     }
 
+    const runner = await this.runnerService.findOne(warmPoolSandbox.runnerId)
+
     const result = await this.sandboxRepository.save(warmPoolSandbox)
 
     // Treat this as a newly started sandbox
@@ -361,7 +362,7 @@ export class SandboxService {
       SandboxEvents.STATE_UPDATED,
       new SandboxStateUpdatedEvent(warmPoolSandbox, SandboxState.STARTED, SandboxState.STARTED),
     )
-    return SandboxDto.fromSandbox(result, runnerDomain)
+    return SandboxDto.fromSandbox(result, runner.domain)
   }
 
   async createFromBuildInfo(createSandboxDto: CreateSandboxDto, organization: Organization): Promise<SandboxDto> {
