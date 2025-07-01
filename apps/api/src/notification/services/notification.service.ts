@@ -22,6 +22,7 @@ import { VolumeCreatedEvent } from '../../sandbox/events/volume-created.event'
 import { VolumeDto } from '../../sandbox/dto/volume.dto'
 import { VolumeStateUpdatedEvent } from '../../sandbox/events/volume-state-updated.event'
 import { VolumeLastUsedAtUpdatedEvent } from '../../sandbox/events/volume-last-used-at-updated.event'
+import { SandboxDesiredStateUpdatedEvent } from '../../sandbox/events/sandbox-desired-state-updated.event'
 
 @Injectable()
 export class NotificationService {
@@ -42,6 +43,13 @@ export class NotificationService {
     const runner = await this.runnerService.findOne(event.sandbox.runnerId)
     const dto = SandboxDto.fromSandbox(event.sandbox, runner.domain)
     this.notificationGateway.emitSandboxStateUpdated(dto, event.oldState, event.newState)
+  }
+
+  @OnEvent(SandboxEvents.DESIRED_STATE_UPDATED)
+  async handleSandboxDesiredStateUpdated(event: SandboxDesiredStateUpdatedEvent) {
+    const runner = await this.runnerService.findOne(event.sandbox.runnerId)
+    const dto = SandboxDto.fromSandbox(event.sandbox, runner.domain)
+    this.notificationGateway.emitSandboxDesiredStateUpdated(dto, event.oldDesiredState, event.newDesiredState)
   }
 
   @OnEvent(SnapshotEvents.CREATED)

@@ -1125,6 +1125,14 @@ paths:
             example: '{"label1": "value1", "label2": "value2"}'
             type: string
           style: form
+        - description: Include errored and deleted sandboxes
+          explode: true
+          in: query
+          name: includeErroredDeleted
+          required: false
+          schema:
+            type: boolean
+          style: form
       responses:
         '200':
           content:
@@ -5696,6 +5704,15 @@ components:
         - archiving
         - archived
       type: string
+    SandboxDesiredState:
+      description: The desired state of the sandbox
+      enum:
+        - destroyed
+        - started
+        - stopped
+        - resized
+        - archived
+      type: string
     SandboxVolume:
       example:
         mountPath: /data
@@ -5758,6 +5775,7 @@ components:
         state: creating
         class: small
         updatedAt: 2024-10-01T12:00:00Z
+        desiredState: destroyed
         volumes:
           - mountPath: /data
             volumeId: volume123
@@ -5837,6 +5855,11 @@ components:
             - $ref: '#/components/schemas/SandboxState'
           description: The state of the sandbox
           example: creating
+        desiredState:
+          allOf:
+            - $ref: '#/components/schemas/SandboxDesiredState'
+          description: The desired state of the sandbox
+          example: destroyed
         errorReason:
           description: The error reason of the sandbox
           example: The sandbox is not running
@@ -7244,6 +7267,7 @@ components:
         class: small
         updatedAt: 2024-10-01T12:00:00Z
         info: ''
+        desiredState: destroyed
         image: daytonaio/workspace:latest
         volumes:
           - mountPath: /data
@@ -7326,6 +7350,11 @@ components:
             - $ref: '#/components/schemas/SandboxState'
           description: The state of the sandbox
           example: creating
+        desiredState:
+          allOf:
+            - $ref: '#/components/schemas/SandboxDesiredState'
+          description: The desired state of the sandbox
+          example: destroyed
         errorReason:
           description: The error reason of the sandbox
           example: The sandbox is not running

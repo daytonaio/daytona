@@ -467,14 +467,40 @@ export class SandboxService {
     this.eventEmitter.emit(SandboxEvents.BACKUP_CREATED, new SandboxBackupCreatedEvent(sandbox))
   }
 
-  async findAll(organizationId: string, labels?: { [key: string]: string }): Promise<Sandbox[]> {
-    return this.sandboxRepository.find({
-      where: {
-        organizationId,
+  async findAll(
+    organizationId: string,
+    labels?: { [key: string]: string },
+    includeErroredDestroyed?: boolean,
+  ): Promise<Sandbox[]> {
+    const baseWhere: FindOptionsWhere<Sandbox> = {
+      organizationId,
+      ...(labels ? { labels: JsonContains(labels) } : {}),
+    }
+    let where: FindOptionsWhere<Sandbox> | FindOptionsWhere<Sandbox>[]
+
+    if (includeErroredDestroyed) {
+      //  return all sandboxes except the ones that are in DESTROYED state
+      where = {
+        ...baseWhere,
         state: Not(SandboxState.DESTROYED),
-        ...(labels ? { labels: JsonContains(labels) } : {}),
-      },
-    })
+      }
+    } else {
+      //  return all sandboxes except the ones that are in DESTROYED state or
+      //  the ones that are in ERROR or BUILD_FAILED state and have desiredState set to DESTROYED
+      where = [
+        {
+          ...baseWhere,
+          state: Not(In([SandboxState.DESTROYED, SandboxState.ERROR, SandboxState.BUILD_FAILED])),
+        },
+        {
+          ...baseWhere,
+          state: In([SandboxState.ERROR, SandboxState.BUILD_FAILED]),
+          desiredState: Not(SandboxDesiredState.DESTROYED),
+        },
+      ]
+    }
+
+    return this.sandboxRepository.find({ where })
   }
 
   async findOne(sandboxId: string, returnDestroyed?: boolean): Promise<Sandbox> {
@@ -485,7 +511,12 @@ export class SandboxService {
       },
     })
 
-    if (!sandbox) {
+    if (
+      !sandbox ||
+      (!returnDestroyed &&
+        [SandboxState.ERROR, SandboxState.BUILD_FAILED].includes(sandbox.state) &&
+        sandbox.desiredState !== SandboxDesiredState.DESTROYED)
+    ) {
       throw new NotFoundException(`Sandbox with ID ${sandboxId} not found`)
     }
 

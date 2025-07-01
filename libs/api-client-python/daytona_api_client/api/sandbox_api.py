@@ -1810,6 +1810,9 @@ class SandboxApi:
         ] = None,
         verbose: Annotated[Optional[StrictBool], Field(description="Include verbose output")] = None,
         labels: Annotated[Optional[StrictStr], Field(description="JSON encoded labels to filter by")] = None,
+        include_errored_deleted: Annotated[
+            Optional[StrictBool], Field(description="Include errored and deleted sandboxes")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1829,6 +1832,8 @@ class SandboxApi:
         :type verbose: bool
         :param labels: JSON encoded labels to filter by
         :type labels: str
+        :param include_errored_deleted: Include errored and deleted sandboxes
+        :type include_errored_deleted: bool
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -1855,6 +1860,7 @@ class SandboxApi:
             x_daytona_organization_id=x_daytona_organization_id,
             verbose=verbose,
             labels=labels,
+            include_errored_deleted=include_errored_deleted,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -1879,6 +1885,9 @@ class SandboxApi:
         ] = None,
         verbose: Annotated[Optional[StrictBool], Field(description="Include verbose output")] = None,
         labels: Annotated[Optional[StrictStr], Field(description="JSON encoded labels to filter by")] = None,
+        include_errored_deleted: Annotated[
+            Optional[StrictBool], Field(description="Include errored and deleted sandboxes")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1898,6 +1907,8 @@ class SandboxApi:
         :type verbose: bool
         :param labels: JSON encoded labels to filter by
         :type labels: str
+        :param include_errored_deleted: Include errored and deleted sandboxes
+        :type include_errored_deleted: bool
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -1924,6 +1935,7 @@ class SandboxApi:
             x_daytona_organization_id=x_daytona_organization_id,
             verbose=verbose,
             labels=labels,
+            include_errored_deleted=include_errored_deleted,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -1948,6 +1960,9 @@ class SandboxApi:
         ] = None,
         verbose: Annotated[Optional[StrictBool], Field(description="Include verbose output")] = None,
         labels: Annotated[Optional[StrictStr], Field(description="JSON encoded labels to filter by")] = None,
+        include_errored_deleted: Annotated[
+            Optional[StrictBool], Field(description="Include errored and deleted sandboxes")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1967,6 +1982,8 @@ class SandboxApi:
         :type verbose: bool
         :param labels: JSON encoded labels to filter by
         :type labels: str
+        :param include_errored_deleted: Include errored and deleted sandboxes
+        :type include_errored_deleted: bool
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -1993,6 +2010,7 @@ class SandboxApi:
             x_daytona_organization_id=x_daytona_organization_id,
             verbose=verbose,
             labels=labels,
+            include_errored_deleted=include_errored_deleted,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -2010,6 +2028,7 @@ class SandboxApi:
         x_daytona_organization_id,
         verbose,
         labels,
+        include_errored_deleted,
         _request_auth,
         _content_type,
         _headers,
@@ -2033,6 +2052,9 @@ class SandboxApi:
 
         if labels is not None:
             _query_params.append(("labels", labels))
+
+        if include_errored_deleted is not None:
+            _query_params.append(("includeErroredDeleted", include_errored_deleted))
 
         # process the header parameters
         if x_daytona_organization_id is not None:

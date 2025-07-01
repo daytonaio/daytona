@@ -80,6 +80,7 @@ model_runner_snapshot_dto.go
 model_runner_state.go
 model_sandbox.go
 model_sandbox_class.go
+model_sandbox_desired_state.go
 model_sandbox_info.go
 model_sandbox_labels.go
 model_sandbox_state.go

@@ -48,6 +48,8 @@ type Workspace struct {
 	Disk float32 `json:"disk"`
 	// The state of the sandbox
 	State *SandboxState `json:"state,omitempty"`
+	// The desired state of the sandbox
+	DesiredState *SandboxDesiredState `json:"desiredState,omitempty"`
 	// The error reason of the sandbox
 	ErrorReason *string `json:"errorReason,omitempty"`
 	// The state of the backup
@@ -444,6 +446,38 @@ func (o *Workspace) HasState() bool {
 // SetState gets a reference to the given SandboxState and assigns it to the State field.
 func (o *Workspace) SetState(v SandboxState) {
 	o.State = &v
+}
+
+// GetDesiredState returns the DesiredState field value if set, zero value otherwise.
+func (o *Workspace) GetDesiredState() SandboxDesiredState {
+	if o == nil || IsNil(o.DesiredState) {
+		var ret SandboxDesiredState
+		return ret
+	}
+	return *o.DesiredState
+}
+
+// GetDesiredStateOk returns a tuple with the DesiredState field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Workspace) GetDesiredStateOk() (*SandboxDesiredState, bool) {
+	if o == nil || IsNil(o.DesiredState) {
+		return nil, false
+	}
+	return o.DesiredState, true
+}
+
+// HasDesiredState returns a boolean if a field has been set.
+func (o *Workspace) HasDesiredState() bool {
+	if o != nil && !IsNil(o.DesiredState) {
+		return true
+	}
+
+	return false
+}
+
+// SetDesiredState gets a reference to the given SandboxDesiredState and assigns it to the DesiredState field.
+func (o *Workspace) SetDesiredState(v SandboxDesiredState) {
+	o.DesiredState = &v
 }
 
 // GetErrorReason returns the ErrorReason field value if set, zero value otherwise.
@@ -1011,6 +1045,9 @@ func (o Workspace) ToMap() (map[string]interface{}, error) {
 	toSerialize["disk"] = o.Disk
 	if !IsNil(o.State) {
 		toSerialize["state"] = o.State
+	}
+	if !IsNil(o.DesiredState) {
+		toSerialize["desiredState"] = o.DesiredState
 	}
 	if !IsNil(o.ErrorReason) {
 		toSerialize["errorReason"] = o.ErrorReason
