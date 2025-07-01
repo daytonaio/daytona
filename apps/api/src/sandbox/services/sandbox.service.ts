@@ -472,33 +472,22 @@ export class SandboxService {
     labels?: { [key: string]: string },
     includeErroredDestroyed?: boolean,
   ): Promise<Sandbox[]> {
-    const baseWhere: FindOptionsWhere<Sandbox> = {
+    const baseFindOptions: FindOptionsWhere<Sandbox> = {
       organizationId,
       ...(labels ? { labels: JsonContains(labels) } : {}),
     }
-    let where: FindOptionsWhere<Sandbox> | FindOptionsWhere<Sandbox>[]
 
-    if (includeErroredDestroyed) {
-      //  return all sandboxes except the ones that are in DESTROYED state
-      where = {
-        ...baseWhere,
-        state: Not(SandboxState.DESTROYED),
-      }
-    } else {
-      //  return all sandboxes except the ones that are in DESTROYED state or
-      //  the ones that are in ERROR or BUILD_FAILED state and have desiredState set to DESTROYED
-      where = [
-        {
-          ...baseWhere,
-          state: Not(In([SandboxState.DESTROYED, SandboxState.ERROR, SandboxState.BUILD_FAILED])),
-        },
-        {
-          ...baseWhere,
-          state: In([SandboxState.ERROR, SandboxState.BUILD_FAILED]),
-          desiredState: Not(SandboxDesiredState.DESTROYED),
-        },
-      ]
-    }
+    const where: FindOptionsWhere<Sandbox>[] = [
+      {
+        ...baseFindOptions,
+        state: Not(In([SandboxState.DESTROYED, SandboxState.ERROR, SandboxState.BUILD_FAILED])),
+      },
+      {
+        ...baseFindOptions,
+        state: In([SandboxState.ERROR, SandboxState.BUILD_FAILED]),
+        ...(includeErroredDestroyed ? {} : { desiredState: Not(SandboxDesiredState.DESTROYED) }),
+      },
+    ]
 
     return this.sandboxRepository.find({ where })
   }
