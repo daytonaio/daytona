@@ -1116,7 +1116,7 @@ export const SandboxApiFp = function (configuration?: Configuration) {
       sandboxId: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Sandbox>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.startSandbox(sandboxId, xDaytonaOrganizationID, options)
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
@@ -1411,7 +1411,7 @@ export const SandboxApiFactory = function (configuration?: Configuration, basePa
       sandboxId: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
-    ): AxiosPromise<void> {
+    ): AxiosPromise<Sandbox> {
       return localVarFp
         .startSandbox(sandboxId, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))

@@ -204,8 +204,8 @@ class AsyncSandbox(SandboxDto):
             print("Sandbox started successfully")
             ```
         """
-        await self._sandbox_api.start_sandbox(self.id, _request_timeout=timeout or None)
-        await self.refresh_data()
+        sandbox = await self._sandbox_api.start_sandbox(self.id, _request_timeout=timeout or None)
+        self.__process_sandbox_dto(sandbox)
         await self.wait_for_sandbox_start()
 
     @intercept_errors(message_prefix="Failed to stop sandbox: ")
@@ -266,6 +266,9 @@ class AsyncSandbox(SandboxDto):
         """
         while self.state != "started":
             await self.refresh_data()
+
+            if self.state == "started":
+                return
 
             if self.state in ["error", "build_failed"]:
                 err_msg = (

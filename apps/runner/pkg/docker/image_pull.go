@@ -10,6 +10,7 @@ import (
 	"io"
 	"strings"
 
+	"github.com/daytonaio/common-go/pkg/timer"
 	"github.com/daytonaio/runner/internal/constants"
 	"github.com/daytonaio/runner/internal/util"
 	"github.com/daytonaio/runner/pkg/api/dto"
@@ -23,6 +24,8 @@ import (
 )
 
 func (d *DockerClient) PullImage(ctx context.Context, imageName string, reg *dto.RegistryDTO) error {
+	defer timer.Timer()()
+
 	tag := "latest"
 	lastColonIndex := strings.LastIndex(imageName, ":")
 	if lastColonIndex != -1 {

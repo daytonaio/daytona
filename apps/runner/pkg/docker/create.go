@@ -5,11 +5,11 @@ package docker
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"strings"
 	"time"
 
+	"github.com/daytonaio/common-go/pkg/timer"
 	"github.com/daytonaio/runner/internal/constants"
 	"github.com/daytonaio/runner/pkg/api/dto"
 	"github.com/daytonaio/runner/pkg/common"
@@ -20,6 +20,8 @@ import (
 )
 
 func (d *DockerClient) Create(ctx context.Context, sandboxDto dto.CreateSandboxDTO) (string, error) {
+	defer timer.Timer()()
+
 	startTime := time.Now()
 	defer func() {
 		obs, err := common.ContainerOperationDuration.GetMetricWithLabelValues("create")
@@ -85,26 +87,12 @@ func (d *DockerClient) Create(ctx context.Context, sandboxDto dto.CreateSandboxD
 		return "", err
 	}
 
-	// wait for the daemon to start listening on port 2280
-	container, err := d.ContainerInspect(ctx, c.ID)
-	if err != nil {
-		return "", common.NewNotFoundError(fmt.Errorf("sandbox container not found: %w", err))
-	}
-
-	var containerIP string
-	for _, network := range container.NetworkSettings.Networks {
-		containerIP = network.IPAddress
-		break
-	}
-
-	if containerIP == "" {
-		return "", errors.New("container has no IP address, it might not be running")
-	}
-
-	return c.ID, d.waitForDaemonRunning(ctx, containerIP, 10*time.Second)
+	return c.ID, nil
 }
 
 func (p *DockerClient) validateImageArchitecture(ctx context.Context, image string) error {
+	defer timer.Timer()()
+
 	inspect, _, err := p.apiClient.ImageInspectWithRaw(ctx, image)
 	if err != nil {
 		if errdefs.IsNotFound(err) {

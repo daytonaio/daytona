@@ -3195,7 +3195,7 @@ class SandboxApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> None:
+    ) -> Sandbox:
         """Start sandbox
 
 
@@ -3235,7 +3235,7 @@ class SandboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            '200': "Sandbox",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -3265,7 +3265,7 @@ class SandboxApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[None]:
+    ) -> ApiResponse[Sandbox]:
         """Start sandbox
 
 
@@ -3305,7 +3305,7 @@ class SandboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            '200': "Sandbox",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -3375,7 +3375,7 @@ class SandboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            '200': "Sandbox",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -3419,6 +3419,13 @@ class SandboxApi:
         # process the body parameter
 
 
+        # set the HTTP header `Accept`
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
+                [
+                    'application/json'
+                ]
+            )
 
 
         # authentication setting

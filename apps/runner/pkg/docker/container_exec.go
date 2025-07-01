@@ -35,8 +35,8 @@ func (d *DockerClient) execSync(ctx context.Context, containerId string, execOpt
 	return result, nil
 }
 
-func (d *DockerClient) inspectExecResp(ctx context.Context, containerId string, execStartOptions container.ExecStartOptions) (*ExecResult, error) {
-	resp, err := d.apiClient.ContainerExecAttach(ctx, containerId, execStartOptions)
+func (d *DockerClient) inspectExecResp(ctx context.Context, execID string, execStartOptions container.ExecStartOptions) (*ExecResult, error) {
+	resp, err := d.apiClient.ContainerExecAttach(ctx, execID, execStartOptions)
 	if err != nil {
 		return nil, err
 	}
@@ -82,7 +82,7 @@ func (d *DockerClient) inspectExecResp(ctx context.Context, containerId string, 
 		return nil, err
 	}
 
-	res, err := d.apiClient.ContainerExecInspect(ctx, containerId)
+	res, err := d.apiClient.ContainerExecInspect(ctx, execID)
 	if err != nil {
 		return nil, err
 	}
