@@ -26,6 +26,10 @@ RUN bash -c "source /usr/local/share/nvm/nvm.sh && nvm install node && nvm use n
 
 RUN npm install -g ts-node typescript typescript-language-server
 
+# Set locale
+ENV LANG=en_US.UTF-8 \
+    LC_ALL=en_US.UTF-8
+
 # Switch to Daytona user
 USER daytona
 
