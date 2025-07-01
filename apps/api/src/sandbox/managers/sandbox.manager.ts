@@ -561,7 +561,8 @@ export class SandboxManager {
           const sandboxInfoResponse = await runnerSandboxApi.info(sandbox.id)
           const sandboxInfo = sandboxInfoResponse.data
           if (sandboxInfo?.state === RunnerSandboxState.SandboxStateDestroyed) {
-            return DONT_SYNC_AGAIN
+            await this.updateSandboxState(sandbox.id, SandboxState.DESTROYING)
+            return SYNC_AGAIN
           }
           await runnerSandboxApi.destroy(sandbox.id)
         } catch (e) {
