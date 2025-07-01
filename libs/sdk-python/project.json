@@ -39,18 +39,15 @@
         "parallel": false
       }
     },
-    "build-for-publish": {
+    "build:_publish": {
       "executor": "nx:run-commands",
       "options": {
-        "cwd": "{projectRoot}",
-        "commands": ["rm -rf dist", "./scripts/build-sdk.sh"],
-        "parallel": false
+        "command": "yarn nx run sdk-python:build"
       },
       "dependsOn": ["deps-check"]
     },
     "publish": {
       "executor": "nx:run-commands",
-      "dependsOnStrict": true,
       "options": {
         "cwd": "{projectRoot}",
         "commands": [
@@ -61,7 +58,7 @@
         ],
         "parallel": false
       },
-      "dependsOn": ["build-for-publish"]
+      "dependsOn": ["build:_publish"]
     },
     "deps-check": {
       "executor": "nx:run-commands",
