@@ -148,11 +148,15 @@ export class SandboxController {
       if (createSandboxDto.cpu || createSandboxDto.gpu || createSandboxDto.memory || createSandboxDto.disk) {
         throw new BadRequestError('Cannot specify Sandbox resources when using a snapshot')
       }
-      const waitForStarted = new Promise<void>((resolve) => {
+      const waitForStarted = new Promise<void>((resolve, reject) => {
         const handleStateUpdated = (event: SandboxStateUpdatedEvent) => {
           if (event.sandbox.state === SandboxState.STARTED) {
-            resolve()
             this.eventEmitter.off(SandboxEvents.STATE_UPDATED, handleStateUpdated)
+            resolve()
+          }
+          if (event.sandbox.state === SandboxState.ERROR || event.sandbox.state === SandboxState.BUILD_FAILED) {
+            this.eventEmitter.off(SandboxEvents.STATE_UPDATED, handleStateUpdated)
+            reject(new BadRequestError(`Sandbox failed to start: ${event.sandbox.errorReason}`))
           }
         }
 
@@ -255,12 +259,16 @@ export class SandboxController {
     @Param('sandboxId') sandboxId: string,
   ): Promise<SandboxDto> {
     let sandbox: SandboxEntity
-    const waitForStarted = new Promise<void>((resolve) => {
+    const waitForStarted = new Promise<void>((resolve, reject) => {
       const handleStateUpdated = (event: SandboxStateUpdatedEvent) => {
         if (event.sandbox.state === SandboxState.STARTED) {
           sandbox = event.sandbox
           this.eventEmitter.off(SandboxEvents.STATE_UPDATED, handleStateUpdated)
           resolve()
+        }
+        if (event.sandbox.state === SandboxState.ERROR || event.sandbox.state === SandboxState.BUILD_FAILED) {
+          this.eventEmitter.off(SandboxEvents.STATE_UPDATED, handleStateUpdated)
+          reject(new BadRequestError(`Sandbox failed to start: ${event.sandbox.errorReason}`))
         }
       }
 
