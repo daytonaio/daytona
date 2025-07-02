@@ -22,6 +22,7 @@ import { RunnerRegion } from './sandbox/enums/runner-region.enum'
 import { SandboxClass } from './sandbox/enums/sandbox-class.enum'
 import { getOpenApiConfig } from './openapi.config'
 import { SchedulerRegistry } from '@nestjs/schedule'
+import { EventEmitter2 } from '@nestjs/event-emitter'
 
 // https options
 const httpsEnabled = process.env.CERT_PATH && process.env.CERT_KEY_PATH
@@ -56,6 +57,9 @@ async function bootstrap() {
   app.useGlobalFilters(new NotFoundExceptionFilter())
   app.useGlobalInterceptors(new MetricsInterceptor())
   app.useGlobalPipes(new ValidationPipe())
+
+  const eventEmitter = app.get(EventEmitter2)
+  eventEmitter.setMaxListeners(100)
 
   // Runtime flags for migrations for run and revert migrations
   if (process.argv.length > 2 && process.argv[2].startsWith('--migration-')) {
