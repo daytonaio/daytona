@@ -257,7 +257,7 @@ export class SandboxManager {
       id: sandboxId,
     })
 
-    if (sandbox.state === SandboxState.ERROR || sandbox.state === SandboxState.BUILD_FAILED) {
+    if ([SandboxState.DESTROYED, SandboxState.ERROR, SandboxState.BUILD_FAILED].includes(sandbox.state)) {
       await this.redisLockProvider.unlock(lockKey)
       return
     }
