@@ -441,7 +441,7 @@ export class Daytona {
           buildInfo,
           user: params.user,
           env: params.envVars || {},
-          labels: params.labels,
+          labels: labels,
           public: params.public,
           target: this.target as CreateSandboxTargetEnum,
           cpu: resources?.cpu,
