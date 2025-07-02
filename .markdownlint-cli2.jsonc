@@ -17,6 +17,7 @@
     "table-column-count": false,
     "table-pipe-style": false,
     "no-empty-links": false,
+    "code-block-style": false,
   },
   "ignores": ["**/node_modules/**"],
 }

@@ -1,0 +1,257 @@
+---
+title: Process and Code Execution
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+The Daytona SDK provides powerful process and code execution capabilities through the `process` module in Sandboxes. This guide covers all available process operations and best practices.
+
+## Code Execution
+
+Daytona SDK provides an option to execute code in Python and TypeScript.
+
+### Running Code
+
+Daytona SDK provides an option to run code snippets in Python and TypeScript. You can execute code with input, timeout, and environment variables.
+
+<Tabs>
+<TabItem label="Python" icon="seti:python">
+```python
+# Run Python code
+response = sandbox.process.code_run('''
+def greet(name):
+    return f"Hello, {name}!"
+
+print(greet("Daytona"))
+''')
+
+print(response.result)
+
+```
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+```typescript
+// Run TypeScript code
+let response = await sandbox.process.codeRun(`
+function greet(name: string): string {
+    return \`Hello, \${name}!\`;
+}
+
+console.log(greet("Daytona"));
+`);
+console.log(response.result);
+
+// Run code with argv and environment variables
+response = await sandbox.process.codeRun(
+    `
+    console.log(\`Hello, \${process.argv[2]}!\`);
+    console.log(\`FOO: \${process.env.FOO}\`);
+    `,
+    { 
+      argv: ["Daytona"],
+      env: { FOO: "BAR" }
+    }
+);
+console.log(response.result);
+
+// Run code with timeout
+response = await sandbox.process.codeRun(
+    'setTimeout(() => console.log("Done"), 2000);',
+    undefined,
+    5000
+);
+console.log(response.result);
+```
+
+</TabItem>
+</Tabs>
+
+## Process Execution
+
+Daytona SDK provides an option to execute shell commands and manage background processes in Sandboxes. The workdir for executing defaults to the current Sandbox user's root - e.g. `workspace/repo` implies `/home/[username]/workspace/repo`, but you can override it with an absolute path (by starting the path with `/`).
+
+### Running Commands
+
+Daytona SDK provides an option to execute shell commands in Python and TypeScript. You can run commands with input, timeout, and environment variables.
+
+<Tabs>
+<TabItem label="Python" icon="seti:python">
+```python
+# Execute any shell command
+response = sandbox.process.exec("ls -la")
+print(response.result)
+
+# Setting a working directory and a timeout
+
+response = sandbox.process.exec("sleep 3", cwd="workspace/src", timeout=5)
+print(response.result)
+
+# Passing environment variables
+
+response = sandbox.process.exec("echo $CUSTOM_SECRET", env={
+        "CUSTOM_SECRET": "DAYTONA"
+    }
+)
+print(response.result)
+
+```
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+```typescript
+
+// Execute any shell command
+const response = await sandbox.process.executeCommand("ls -la");
+console.log(response.result);
+
+// Setting a working directory and a timeout
+const response2 = await sandbox.process.executeCommand("sleep 3", "workspace/src", undefined, 5);
+console.log(response2.result);
+
+// Passing environment variables
+const response3 = await sandbox.process.executeCommand("echo $CUSTOM_SECRET", "~", {
+        "CUSTOM_SECRET": "DAYTONA"
+    }
+);
+console.log(response3.result);
+
+```
+
+</TabItem>
+</Tabs>
+
+## Sessions (Background Processes)
+
+Daytona SDK provides an option to start, stop, and manage background process sessions in Sandboxes. You can run long-running commands, monitor process status, and list all running processes.
+
+### Managing Long-Running Processes
+
+Daytona SDK provides an option to start and stop background processes. You can run long-running commands and monitor process status.
+
+<Tabs>
+<TabItem label="Python" icon="seti:python">
+```python
+# Check session's executed commands
+session = sandbox.process.get_session(session_id)
+print(f"Session {process_id}:")
+for command in session.commands:
+    print(f"Command: {command.command}, Exit Code: {command.exit_code}")
+
+# List all running sessions
+
+sessions = sandbox.process.list_sessions()
+for session in sessions:
+    print(f"PID: {session.id}, Commands: {session.commands}")
+
+```
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+```typescript
+// Check session's executed commands
+const session = await sandbox.process.getSession(sessionId);
+console.log(`Session ${sessionId}:`);
+for (const command of session.commands) {
+    console.log(`Command: ${command.command}, Exit Code: ${command.exitCode}`);
+}
+
+// List all running sessions
+const sessions = await sandbox.process.listSessions();
+for (const session of sessions) {
+    console.log(`PID: ${session.id}, Commands: ${session.commands}`);
+}
+
+```
+
+</TabItem>
+</Tabs>
+
+## Best Practices
+
+Daytona SDK provides best practices for process and code execution in Sandboxes.
+
+1. **Resource Management**
+
+- Use sessions for long-running operations
+- Clean up sessions after execution
+- Handle session exceptions properly
+
+<Tabs>
+<TabItem label="Python" icon="seti:python">
+   ```python
+   # Python - Clean up session
+   session_id = "long-running-cmd"
+   try:
+       sandbox.process.create_session(session_id)
+       session = sandbox.process.get_session(session_id)
+       # Do work...
+   finally:
+       sandbox.process.delete_session(session.session_id)
+   ```
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+   ```typescript
+   // TypeScript - Clean up session
+   const sessionId = "long-running-cmd";
+   try {
+       await sandbox.process.createSession(sessionId);
+       const session = await sandbox.process.getSession(sessionId);
+       // Do work...
+   } finally {
+       await sandbox.process.deleteSession(session.sessionId);
+   }
+   ```
+</TabItem>
+</Tabs>
+
+2. **Error Handling**
+
+- Handle process exceptions properly
+- Log error details for debugging
+- Use try-catch blocks for error handling
+
+<Tabs>
+<TabItem label="Python" icon="seti:python">
+```python
+try:
+    response = sandbox.process.code_run("invalid python code")
+except ProcessExecutionError as e:
+    print(f"Execution failed: {e}")
+    print(f"Exit code: {e.exit_code}")
+    print(f"Error output: {e.stderr}")
+```
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+```typescript
+try {
+    const response = await sandbox.process.codeRun("invalid typescript code");
+} catch (e) {
+    if (e instanceof ProcessExecutionError) {
+        console.error("Execution failed:", e);
+        console.error("Exit code:", e.exitCode);
+        console.error("Error output:", e.stderr);
+    }
+}
+```
+</TabItem>
+</Tabs>
+
+## Common Issues
+
+Daytona SDK provides an option to troubleshoot common issues related to process execution and code execution.
+
+### Process Execution Failed
+
+- Check command syntax
+- Verify required dependencies
+- Ensure sufficient permissions
+
+### Process Timeout
+
+- Adjust timeout settings
+- Optimize long-running operations
+- Consider using background processes
+
+### Resource Limits
+
+- Monitor process memory usage
+- Handle process cleanup properly
+- Use appropriate resource constraints
