@@ -87,6 +87,9 @@ daytona_api_client/models/sandbox_labels.py
 daytona_api_client/models/sandbox_state.py
 daytona_api_client/models/sandbox_volume.py
 daytona_api_client/models/search_files_response.py
+daytona_api_client/models/search_match.py
+daytona_api_client/models/search_request.py
+daytona_api_client/models/search_results.py
 daytona_api_client/models/session.py
 daytona_api_client/models/session_execute_request.py
 daytona_api_client/models/session_execute_response.py

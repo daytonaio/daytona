@@ -536,6 +536,21 @@ type ToolboxAPI interface {
 	ReplaceInFilesExecute(r ToolboxAPIReplaceInFilesRequest) ([]ReplaceResult, *http.Response, error)
 
 	/*
+		SearchContent Search content in files
+
+		Search for content inside sandbox files using ripgrep or fallback
+
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPISearchContentRequest
+	*/
+	SearchContent(ctx context.Context, sandboxId string) ToolboxAPISearchContentRequest
+
+	// SearchContentExecute executes the request
+	//  @return SearchResults
+	SearchContentExecute(r ToolboxAPISearchContentRequest) (*SearchResults, *http.Response, error)
+
+	/*
 		SearchFiles Search files
 
 		Search for files inside sandbox
@@ -4769,6 +4784,131 @@ func (a *ToolboxAPIService) ReplaceInFilesExecute(r ToolboxAPIReplaceInFilesRequ
 	}
 	// body params
 	localVarPostBody = r.replaceRequest
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ToolboxAPISearchContentRequest struct {
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	searchRequest          *SearchRequest
+	xDaytonaOrganizationID *string
+}
+
+func (r ToolboxAPISearchContentRequest) SearchRequest(searchRequest SearchRequest) ToolboxAPISearchContentRequest {
+	r.searchRequest = &searchRequest
+	return r
+}
+
+// Use with JWT to specify the organization ID
+func (r ToolboxAPISearchContentRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) ToolboxAPISearchContentRequest {
+	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
+	return r
+}
+
+func (r ToolboxAPISearchContentRequest) Execute() (*SearchResults, *http.Response, error) {
+	return r.ApiService.SearchContentExecute(r)
+}
+
+/*
+SearchContent Search content in files
+
+Search for content inside sandbox files using ripgrep or fallback
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPISearchContentRequest
+*/
+func (a *ToolboxAPIService) SearchContent(ctx context.Context, sandboxId string) ToolboxAPISearchContentRequest {
+	return ToolboxAPISearchContentRequest{
+		ApiService: a,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
+	}
+}
+
+// Execute executes the request
+//
+//	@return SearchResults
+func (a *ToolboxAPIService) SearchContentExecute(r ToolboxAPISearchContentRequest) (*SearchResults, *http.Response, error) {
+	var (
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *SearchResults
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.SearchContent")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/toolbox/{sandboxId}/toolbox/files/search"
+	localVarPath = strings.Replace(localVarPath, "{"+"sandboxId"+"}", url.PathEscape(parameterValueToString(r.sandboxId, "sandboxId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.searchRequest == nil {
+		return localVarReturnValue, nil, reportError("searchRequest is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.xDaytonaOrganizationID != nil {
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Daytona-Organization-ID", r.xDaytonaOrganizationID, "simple", "")
+	}
+	// body params
+	localVarPostBody = r.searchRequest
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
 		return localVarReturnValue, nil, err
