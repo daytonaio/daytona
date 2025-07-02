@@ -148,27 +148,12 @@ export class SandboxController {
       if (createSandboxDto.cpu || createSandboxDto.gpu || createSandboxDto.memory || createSandboxDto.disk) {
         throw new BadRequestError('Cannot specify Sandbox resources when using a snapshot')
       }
-      const waitForStarted = new Promise<void>((resolve, reject) => {
-        const handleStateUpdated = (event: SandboxStateUpdatedEvent) => {
-          if (event.sandbox.state === SandboxState.STARTED) {
-            this.eventEmitter.off(SandboxEvents.STATE_UPDATED, handleStateUpdated)
-            resolve()
-          }
-          if (event.sandbox.state === SandboxState.ERROR || event.sandbox.state === SandboxState.BUILD_FAILED) {
-            this.eventEmitter.off(SandboxEvents.STATE_UPDATED, handleStateUpdated)
-            reject(new BadRequestError(`Sandbox failed to start: ${event.sandbox.errorReason}`))
-          }
-        }
-
-        this.eventEmitter.on(SandboxEvents.STATE_UPDATED, handleStateUpdated)
-      })
-
       sandbox = await this.sandboxService.createFromSnapshot(createSandboxDto, organization)
       if (sandbox.state === SandboxState.STARTED) {
         return sandbox
       }
 
-      await waitForStarted
+      await this.waitForSandboxStarted(sandbox.id, 30)
       sandbox.state = SandboxState.STARTED
     }
 
@@ -258,30 +243,19 @@ export class SandboxController {
     @AuthContext() authContext: OrganizationAuthContext,
     @Param('sandboxId') sandboxId: string,
   ): Promise<SandboxDto> {
-    let sandbox: SandboxEntity
-    const waitForStarted = new Promise<void>((resolve, reject) => {
-      const handleStateUpdated = (event: SandboxStateUpdatedEvent) => {
-        if (event.sandbox.state === SandboxState.STARTED) {
-          sandbox = event.sandbox
-          this.eventEmitter.off(SandboxEvents.STATE_UPDATED, handleStateUpdated)
-          resolve()
-        }
-        if (event.sandbox.state === SandboxState.ERROR || event.sandbox.state === SandboxState.BUILD_FAILED) {
-          this.eventEmitter.off(SandboxEvents.STATE_UPDATED, handleStateUpdated)
-          reject(new BadRequestError(`Sandbox failed to start: ${event.sandbox.errorReason}`))
-        }
-      }
-
-      this.eventEmitter.on(SandboxEvents.STATE_UPDATED, handleStateUpdated)
-    })
-
     await this.sandboxService.start(sandboxId, authContext.organization)
 
-    await waitForStarted
+    const sandbox = await this.waitForSandboxStarted(sandboxId, 30)
 
-    const runner = await this.runnerService.findOne(sandbox.runnerId)
+    if (!sandbox.runnerDomain) {
+      const runner = await this.runnerService.findBySandboxId(sandboxId)
+      if (!runner) {
+        throw new NotFoundException(`Runner for sandbox ${sandboxId} not found`)
+      }
+      sandbox.runnerDomain = runner.domain
+    }
 
-    return SandboxDto.fromSandbox(sandbox, runner?.domain)
+    return sandbox
   }
 
   @Post(':sandboxId/stop')
@@ -545,5 +519,35 @@ export class SandboxController {
       next,
     )
     return logProxy.create()
+  }
+
+  private async waitForSandboxStarted(sandboxId: string, timeoutSeconds: number): Promise<SandboxDto> {
+    const waitForStarted = new Promise<SandboxDto>((resolve, reject) => {
+      // eslint-disable-next-line
+      let timeout: NodeJS.Timeout
+      const handleStateUpdated = (event: SandboxStateUpdatedEvent) => {
+        if (event.sandbox.id !== sandboxId) {
+          return
+        }
+        if (event.sandbox.state === SandboxState.STARTED) {
+          this.eventEmitter.off(SandboxEvents.STATE_UPDATED, handleStateUpdated)
+          clearTimeout(timeout)
+          resolve(SandboxDto.fromSandbox(event.sandbox, ''))
+        }
+        if (event.sandbox.state === SandboxState.ERROR || event.sandbox.state === SandboxState.BUILD_FAILED) {
+          this.eventEmitter.off(SandboxEvents.STATE_UPDATED, handleStateUpdated)
+          clearTimeout(timeout)
+          reject(new BadRequestError(`Sandbox failed to start: ${event.sandbox.errorReason}`))
+        }
+      }
+
+      this.eventEmitter.on(SandboxEvents.STATE_UPDATED, handleStateUpdated)
+      timeout = setTimeout(() => {
+        this.eventEmitter.off(SandboxEvents.STATE_UPDATED, handleStateUpdated)
+        reject(new BadRequestError(`Sandbox failed to start: Timeout after ${timeoutSeconds} seconds`))
+      }, timeoutSeconds * 1000)
+    })
+
+    return waitForStarted
   }
 }
