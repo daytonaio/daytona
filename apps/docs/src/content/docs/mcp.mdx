@@ -1,0 +1,216 @@
+---
+title: Daytona MCP Server
+---
+
+import { TabItem, Tabs } from '@astrojs/starlight/components'
+
+The Daytona Model Context Protocol (MCP) Server enables AI agents to interact with Daytona's features programmatically. This guide covers how to set up and use the MCP server with various AI agents.
+
+## Prerequisites
+
+Before getting started, ensure you have:
+
+- A Daytona account
+- Daytona CLI installed
+- A compatible AI agent (Claude Desktop App, Claude Code, Cursor, or Windsurf)
+
+## Installation and Setup
+
+### 1. Install Daytona CLI
+
+<Tabs>
+<TabItem label="Mac/Linux">
+```bash
+brew install daytonaio/cli/daytona
+```
+
+</TabItem>
+<TabItem label="Windows">
+```bash
+powershell -Command "irm https://get.daytona.io/windows | iex"
+```
+</TabItem>
+</Tabs>
+
+### 2. Authenticate with Daytona
+
+```bash
+daytona login
+```
+
+### 3. Initialize MCP Server
+
+Initialize the Daytona MCP server with your preferred AI agent:
+
+```bash
+daytona mcp init [claude/cursor/windsurf]
+```
+
+### 4. Open Your AI Agent
+
+After initialization, open your AI agent application to begin using Daytona features.
+
+## Integration with Other AI Agents
+
+To integrate Daytona MCP with other AI agents, follow these steps:
+
+1. Generate the MCP configuration:
+
+```bash
+daytona mcp config
+```
+
+This command outputs a JSON configuration that you can copy into your agent's settings:
+
+```json
+{
+  "mcpServers": {
+    "daytona-mcp": {
+      "command": "daytona",
+      "args": ["mcp", "start"],
+      "env": {
+        "HOME": "${HOME}",
+        "PATH": "${HOME}:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/homebrew/bin"
+      },
+      "logFile": "${HOME}/Library/Logs/daytona/daytona-mcp-server.log"
+    }
+  }
+}
+```
+
+:::note
+For Windows users, add the following to the `env` field:
+
+```json
+"APPDATA": "${APPDATA}"
+```
+
+:::
+
+2. Open or restart your AI agent to apply the configuration.
+
+## Available Tools
+
+### Sandbox Management
+
+- **Create Sandbox**
+
+  - Creates a new Daytona sandbox
+  - Parameters:
+    - `target` (default: "us"): Target region
+    - `snapshot`: Snapshot for the sandbox (optional)
+    - `auto_stop_interval` (default: "15"): Auto-stop interval in minutes (0 disables)
+    - `auto_archive_interval` (default: "10080"): Auto-archive interval in minutes (0 means the maximum interval will be used)
+
+- **Destroy Sandbox**
+  - Removes an existing Daytona sandbox
+
+### File Operations
+
+- **Download File**
+
+  - Downloads a file from the Daytona sandbox
+  - Returns content as text or base64 encoded image
+  - Parameters:
+    - `file_path`: Path to the file
+
+- **Upload File**
+
+  - Uploads a file to the Daytona sandbox
+  - Supports text or base64-encoded binary content
+  - Creates necessary parent directories automatically
+  - Files persist during the session with appropriate permissions
+  - Supports overwrite controls and maintains original file formats
+  - Parameters:
+    - `file_path`: Path to the file to upload
+    - `content`: Content of the file to upload
+    - `encoding`: Encoding of the file to upload
+    - `overwrite`: Overwrite the file if it already exists
+
+- **Create Folder**
+
+  - Creates a new directory in the sandbox
+  - Parameters:
+    - `folder_path`: Path to create
+    - `mode`: Directory permissions (default: 0755)
+
+- **Get File Info**
+
+  - Retrieves information about a file
+  - Parameters:
+    - `file_path`: Path to the file
+
+- **List Files**
+
+  - Lists contents of a directory
+  - Parameters:
+    - `path`: Directory path (defaults to current directory)
+
+- **Move File**
+
+  - Moves or renames a file
+  - Parameters:
+    - `source_path`: Source location
+    - `dest_path`: Destination location
+
+- **Delete File**
+  - Removes a file or directory
+  - Parameters:
+    - `file_path`: Path to delete
+
+### Preview
+
+- **Preview Link**
+  - Generates accessible preview URLs for web applications
+  - Creates secure tunnels to expose local ports externally
+  - Validates server status on specified ports
+  - Provides diagnostic information for troubleshooting
+  - Supports custom descriptions and metadata for service organization
+  - Parameters:
+    - `port`: Port to expose
+    - `description`: Description of the service
+    - `check_server`: Check if a server is running on the port
+
+### Git Operations
+
+- **Git Clone**
+  - Clones a Git repository
+  - Parameters:
+    - `url`: Repository URL
+    - `path`: Target directory (defaults to current)
+    - `branch`: Branch to clone
+    - `commit_id`: Specific commit to clone
+    - `username`: Git username
+    - `password`: Git password
+
+### Command Execution
+
+- **Execute Command**
+  - Runs shell commands in the Daytona environment
+  - Returns stdout, stderr, and exit code
+  - Commands run with sandbox user permissions
+  - Parameters:
+    - `command`: Command to execute
+
+## Troubleshooting
+
+Common issues and solutions:
+
+- **Authentication Issues**
+
+  - Run `daytona login` to refresh credentials
+
+- **Connection Errors**
+
+  - Verify MCP server configuration
+  - Check server status
+
+- **Sandbox Errors**
+  - Use `daytona sandbox list` to check sandbox status
+
+## Support
+
+For additional assistance:
+
+- Visit [daytona.io](https://daytona.io)
+- Contact support at support@daytona.io

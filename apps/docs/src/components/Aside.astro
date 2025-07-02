@@ -1,0 +1,44 @@
+---
+import { AstroError } from 'astro/errors'
+import bookmarkIcon from '@assets/icons/bookmark.svg?raw'
+import warningIcon from '@assets/icons/warning.svg?raw'
+import circleInfoIcon from '@assets/icons/circle-information.svg?raw'
+import circleErrorIcon from '@assets/icons/circle-error.svg?raw'
+
+const asideVariants = ['note', 'tip', 'caution', 'danger'] as const
+const icons = {
+  note: circleInfoIcon,
+  tip: bookmarkIcon,
+  caution: warningIcon,
+  danger: circleErrorIcon,
+} as const
+
+interface Props {
+  type?: (typeof asideVariants)[number]
+  title?: string
+}
+
+let { type = 'note', title } = Astro.props
+
+if (!asideVariants.includes(type)) {
+  throw new AstroError(
+    'Invalid `type` prop passed to the `<Aside>` component.\n',
+    `Received: ${JSON.stringify(type)}\n` +
+      `Expected one of ${asideVariants.map(i => JSON.stringify(i)).join(', ')}`
+  )
+}
+
+if (!title) {
+  title = type
+}
+---
+
+<aside aria-label={title} class={`starlight-aside starlight-aside--${type}`}>
+  <p class="starlight-aside__title" aria-hidden="true">
+    <Fragment set:html={icons[type]} />
+    {title}
+  </p>
+  <section class="starlight-aside__content">
+    <slot />
+  </section>
+</aside>

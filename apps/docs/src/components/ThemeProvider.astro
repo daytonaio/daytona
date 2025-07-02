@@ -1,0 +1,27 @@
+<script is:inline>
+  window.ThemeProvider = (() => {
+    const storedTheme =
+      typeof localStorage !== 'undefined' && localStorage.getItem('theme')
+    const theme =
+      storedTheme ||
+      (window.matchMedia('(prefers-color-scheme: light)').matches
+        ? 'light'
+        : 'dark')
+    document.documentElement.dataset.theme =
+      theme === 'light' ? 'light' : 'dark'
+    return {
+      updatePickers(theme = storedTheme || 'auto') {
+        document.querySelectorAll('theme-select').forEach(picker => {
+          const buttons = picker.querySelectorAll('button')
+          buttons.forEach(button => {
+            if (button.id === theme) {
+              button.classList.add('theme-select-button-active')
+            } else {
+              button.classList.remove('theme-select-button-active')
+            }
+          })
+        })
+      },
+    }
+  })()
+</script>

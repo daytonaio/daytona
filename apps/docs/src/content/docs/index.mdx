@@ -1,0 +1,128 @@
+---
+title: Daytona Documentation
+description: Start managing your Sandboxes with Daytona.
+template: doc
+head:
+  - tag: title
+    content: Documentation · Daytona
+  - tag: meta
+    attrs:
+      property: og:title
+      content: Documentation · Daytona
+  - tag: meta
+    attrs:
+      name: twitter:title
+      content: Documentation · Daytona
+tableOfContents: false
+---
+
+import { TabItem, Tabs } from '@astrojs/starlight/components'
+import ExploreMore from '@components/ExploreMore.astro'
+
+The Daytona SDK provides official Python and TypeScript interfaces for interacting with Daytona,
+enabling you to programmatically manage development environments and execute code.
+
+### Quick Start
+
+Run your first line of code in a Daytona Sandbox. Use our [LLMs context files](/docs/getting-started#additional-examples) for faster development with AI assistants.
+
+#### 1. Get Your API Key
+
+- Go to the Daytona [Dashboard](https://app.daytona.io/dashboard).
+- Create a new [API key](https://app.daytona.io/dashboard/keys). Make sure to save it securely,
+  as it won't be shown again.
+
+#### 2. Install the SDK
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```bash pip install daytona ```
+  </TabItem>
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```bash npm install @daytonaio/sdk ```
+  </TabItem>
+</Tabs>
+
+#### 3. Write Your Code
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+  Create a file named: `main.py`
+  ```python
+  from daytona import Daytona, DaytonaConfig
+
+# Define the configuration
+
+config = DaytonaConfig(api_key="your-api-key")
+
+# Initialize the Daytona client
+
+daytona = Daytona(config)
+
+# Create the Sandbox instance
+
+sandbox = daytona.create()
+
+# Run the code securely inside the Sandbox
+
+response = sandbox.process.code_run('print("Hello World from code!")')
+if response.exit_code != 0:
+print(f"Error: {response.exit_code} {response.result}")
+else:
+print(response.result)
+
+# Clean up
+
+sandbox.delete()
+
+```
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+Create a file named: `index.mts`
+```typescript
+import { Daytona } from '@daytonaio/sdk';
+
+// Initialize the Daytona client
+const daytona = new Daytona({ apiKey: 'your-api-key' });
+
+// Create the Sandbox instance
+const sandbox = await daytona.create({
+  language: 'typescript',
+});
+
+// Run the code securely inside the Sandbox
+const response = await sandbox.process.codeRun('console.log("Hello World from code!")')
+console.log(response.result);
+
+// Clean up
+await sandbox.delete()
+```
+
+  </TabItem>
+</Tabs>
+
+:::note
+Replace `your-api-key` with the value from your Daytona dashboard.
+:::
+
+#### 4. Run It
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```bash python main.py ```
+  </TabItem>
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```bash npx tsx index.mts ```
+  </TabItem>
+</Tabs>
+
+#### ✅ What You Just Did
+
+- Installed the Daytona SDK.
+- Created a secure sandbox environment.
+- Executed code remotely inside that sandbox.
+- Retrieved and displayed the output locally.
+
+You're now ready to use Daytona for secure, isolated code execution.
+
+<ExploreMore />

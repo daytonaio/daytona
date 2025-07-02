@@ -1,0 +1,30 @@
+---
+interface Props {
+  contents: string | string[] | HTMLElement | HTMLSpanElement
+}
+const { contents } = Astro.props
+// This thing needs to be fixed, problem: 1. HTMLElement can't be rendered as props, ideally they should be 2. Array are not getting rendered correctly, current implementation is a temporary fix
+---
+
+{
+  !Array.isArray(contents) ? (
+    <tr class="table-row">
+      <td class="table-data">{contents ? contents : <slot />}</td>
+      {<slot name="html" /> && (
+        <td>
+          <slot name="html" />
+        </td>
+      )}
+    </tr>
+  ) : (
+    <tr class="table-row">
+      {contents ? (
+        contents.map(content => {
+          ;<td class="table-data">{content}</td>
+        })
+      ) : (
+        <slot />
+      )}
+    </tr>
+  )
+}

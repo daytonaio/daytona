@@ -19,5 +19,6 @@ header:
     - 'libs/api-client-go/**'
     - 'libs/api-client-python/**'
     - 'libs/api-client-python-async/**'
+    - 'apps/docs/**'
 
   comment: on-failure

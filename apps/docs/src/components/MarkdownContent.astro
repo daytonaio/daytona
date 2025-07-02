@@ -1,0 +1,18 @@
+<div class="markdown-content"><slot /></div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    let tables = document.querySelectorAll('table')
+
+    if (tables.length > 0) {
+      tables.forEach(table => {
+        let wrapperDiv = document.createElement('div')
+        wrapperDiv.classList.add('table-wrapper')
+        if (table.parentNode) {
+          table.parentNode.insertBefore(wrapperDiv, table)
+          wrapperDiv.appendChild(table)
+        }
+      })
+    }
+  })
+</script>

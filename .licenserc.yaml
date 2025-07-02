@@ -18,5 +18,6 @@ header:
     - 'apps/api/src/generate-openapi.ts'
     - 'apps/runner/pkg/api/docs/docs.go'
     - 'examples/**'
+    - 'apps/docs/**'
 
   comment: on-failure

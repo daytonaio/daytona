@@ -1,0 +1,61 @@
+---
+title: Organizations
+---
+
+import { TabItem, Tabs } from '@astrojs/starlight/components'
+
+Organizations in Daytona are a way to group resources and easily collaborate with other users.
+Users in an Organization, depending on their permissions, view and manage the same set of key
+resources such as Sandboxes, Snapshots and Registries, as well as consume the same quotas for these resources.
+
+After signing up to Daytona, users are assigned a Personal Organization. This default Organization
+cannot take new members and cannot be deleted. It has separate billing and will most commonly be used
+as a testing playground or by solo developers. Switching between organizations is done by selecting
+an option from the dropdown menu on the top of the sidebar.
+
+## Organization Roles
+
+Users within an Organization can have one of two different **Roles**: `Owner` and `Member`. `Owners` have full
+administrative access to the Organization and its resources. `Members` have no administrative access
+to the Organization, while their access to Organization resources is based on **Assignments**.
+
+### Administrative Actions
+
+Organization `Owners` can perform administrative actions such as:
+
+- Invite new users to the Organization
+- Manage pending invitations
+- Change Role of a user in the Organization
+- Update Assignments for an Organization Member
+- Remove user from the Organization
+- Delete Organization
+
+## Inviting New Users
+
+As an Organization `Owner`, to invite a new user to your Organization, navigate to the _Members page_,
+click on _Invite Member_, enter the email address of the user you want to invite, and choose a **Role**.
+If you select the `Member` role, you can also define their **Assignments**.
+
+## Available Assignments
+
+The list of available **Assignments** includes:
+
+| Assignment              | Description                                                         |
+| ----------------------- | ------------------------------------------------------------------- |
+| **`Viewer (required)`** | Grants read access to all resources in the organization             |
+| **`Developer`**         | Grants the ability to create sandboxes and keys in the organization |
+| **`Sandboxes Admin`**   | Grants admin access to sandboxes in the organization                |
+| **`Snapshots Admin`**   | Grants admin access to snapshots in the organization                |
+| **`Registries Admin`**  | Grants admin access to registries in the organization               |
+| **`Super Admin`**       | Grants full access to all resources in the organization             |
+
+## Managing Invitations
+
+To view their pending invitations to join other Organizations, users can navigate to the _Invitations
+page_ by expanding the dropdown at the bottom of the sidebar, and clicking on _Invitations_. Once a user
+accepts an invitation to join an Organization, they get access to resource quotas assigned to that
+Organization and they may proceed by issuing a new API key and creating sandboxes.
+
+## Settings
+
+The Settings subpage in the Dashboard allows you to view the Organization ID and Name and to delete the Organization if you don't need it anymore. This action is irreversible, so please proceed with caution. Personal Organizations are there by default and cannot be deleted.

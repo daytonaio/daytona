@@ -1,0 +1,117 @@
+---
+import { Image } from 'astro:assets'
+import darkThemeIcon from '@assets/icons/dark-moon.svg?raw'
+import defaultThemeIcon from '@assets/icons/default-mood.svg?raw'
+import lightThemeIcon from '@assets/icons/light-sun.svg?raw'
+---
+
+<theme-select class="theme-select-container">
+  <button type="button" id="dark" aria-label="dark theme">
+    <Fragment set:html={darkThemeIcon} />
+  </button>
+  <button type="button" id="light" aria-label="light theme">
+    <Fragment set:html={lightThemeIcon} />
+  </button>
+  <button type="button" id="auto" aria-label="default theme">
+    <Fragment set:html={defaultThemeIcon} />
+  </button>
+</theme-select>
+
+<script is:inline>
+  ThemeProvider.updatePickers()
+</script>
+
+<script>
+  type Theme = 'auto' | 'dark' | 'light'
+
+  class ThemeSelect extends HTMLElement {
+    #key = 'theme'
+
+    constructor() {
+      super()
+      this.#onThemeChange(this.#loadTheme())
+      const buttons = this.querySelectorAll('button')
+      buttons.forEach(button => {
+        button.addEventListener('click', () => {
+          const theme = button.id as Theme
+          this.#onThemeChange(theme)
+        })
+      })
+    }
+
+    /** Get a typesafe theme string from any JS value (unknown values are coerced to `'auto'`). */
+    #parseTheme(theme: unknown): Theme {
+      if (theme === 'auto' || theme === 'dark' || theme === 'light') {
+        return theme
+      } else {
+        return 'auto'
+      }
+    }
+
+    /** Get the preferred system color scheme. */
+    #getPreferredColorScheme(): Theme {
+      return matchMedia('(prefers-color-scheme: light)').matches
+        ? 'light'
+        : 'dark'
+    }
+
+    /** Update select menu UI, document theme, and local storage state. */
+    #onThemeChange(theme: Theme): void {
+      ThemeProvider.updatePickers(theme)
+      document.documentElement.dataset.theme =
+        theme === 'auto' ? this.#getPreferredColorScheme() : theme
+      this.#storeTheme(theme)
+    }
+
+    /** Store the user’s preference in `localStorage`. */
+    #storeTheme(theme: Theme): void {
+      if (typeof localStorage !== 'undefined') {
+        if (theme === 'light' || theme === 'dark') {
+          localStorage.setItem(this.#key, theme)
+        } else {
+          localStorage.removeItem(this.#key)
+        }
+      }
+    }
+
+    /** Load the user’s preference from `localStorage`. */
+    #loadTheme(): Theme {
+      const theme =
+        typeof localStorage !== 'undefined' && localStorage.getItem(this.#key)
+      return this.#parseTheme(theme)
+    }
+  }
+
+  customElements.define('theme-select', ThemeSelect)
+</script>
+
+<style>
+  .theme-select-container {
+    display: flex;
+    text-align: center;
+    gap: 4px;
+    order: 2;
+    margin-left: auto;
+
+    .theme-select-button-active {
+      background-color: var(--block-bg-color);
+      border-radius: 3px;
+      border: var(--active-border);
+      > svg path {
+        fill: var(--primary-text-color);
+      }
+    }
+    > button {
+      background: none;
+      border: none;
+      padding: 4px;
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      &:hover {
+        background: var(--block-bg-color);
+        border-radius: 3px;
+      }
+    }
+  }
+</style>

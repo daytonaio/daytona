@@ -1,0 +1,322 @@
+.navbar {
+  background: var(--bg-color);
+
+  @include for-pc-screen-sizes {
+    margin: 0 80px;
+  }
+
+  @include for-laptop-screen-sizes {
+    margin: 0 40px;
+  }
+
+  @include for-mobile-screen-sizes {
+    margin: 0 20px;
+  }
+
+  nav {
+    border-bottom: var(--border);
+  }
+
+  .logo-divider {
+    display: flex;
+    &:after {
+      /* Change to "/" when needed */
+      content: '';
+      font-family: 'Berkeley Mono', monospace;
+      font-size: 0.875rem;
+      line-height: 1.38;
+      letter-spacing: -0.035rem;
+      color: var(--border-color);
+      align-self: center;
+      padding: 0 16px;
+    }
+  }
+
+  .daytona-logo {
+    display: flex;
+
+    & svg {
+      width: 115px;
+      height: 24px;
+    }
+
+    & svg path {
+      fill: var(--primary-text-color);
+    }
+
+    & svg rect {
+      stroke: var(--primary-text-color);
+    }
+
+    @include for-hover-state {
+      &:hover svg {
+        opacity: 0.6;
+      }
+    }
+
+    @include for-tablet-screen-sizes {
+      display: grid;
+      grid-template-columns: 24px 1fr;
+      align-items: center;
+      svg {
+        width: 26px;
+        height: 26px;
+      }
+    }
+  }
+  .dotfiles-logo {
+    font-family: 'Berkeley Mono', monospace;
+    font-weight: 400;
+    font-size: 1rem;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+    display: flex;
+    align-items: center;
+    color: var(--primary-text-color);
+    padding-right: 4px;
+
+    & svg {
+      margin-right: 0.5rem;
+      > path,
+      circle {
+        transition: 0.6s;
+        stroke: var(--hover-color);
+      }
+    }
+    @include for-tablet-screen-sizes {
+      > svg {
+        display: none;
+      }
+    }
+
+    @include for-hover-state {
+      &:hover {
+        opacity: 0.6;
+      }
+    }
+  }
+
+  .navbar-item {
+    font-family: 'Berkeley Mono', monospace;
+    font-size: 0.875rem;
+    line-height: 1.4;
+    font-weight: 400;
+    letter-spacing: -0.04em;
+    text-transform: uppercase;
+    color: var(--primary-text-color);
+    padding-right: 8px;
+    padding-left: 8px;
+
+    @include for-hover-state {
+      &:hover {
+        opacity: 0.6;
+      }
+    }
+  }
+
+  .desktop-only {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 20px 0;
+    max-width: 1248px;
+    margin: auto;
+
+    @include for-tablet-screen-sizes {
+      display: none;
+    }
+  }
+
+  .nav__items_menu {
+    display: flex;
+    font-family: 'Berkeley Mono', monospace;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    list-style: none;
+    text-decoration: none;
+    line-height: 1.3;
+    letter-spacing: -0.035rem;
+    transition: 0.6s;
+    &:before {
+      content: '/';
+      font-family: 'Berkeley Mono', monospace;
+      font-size: 0.875rem;
+      line-height: 1.38;
+      letter-spacing: -0.035rem;
+      color: var(--border-color);
+      align-self: center;
+      padding: 0 16px;
+    }
+
+    ul {
+      display: flex;
+      column-gap: 16px;
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    a {
+      @include for-hover-state {
+        &:hover {
+          color: var(--hover-color);
+        }
+      }
+    }
+  }
+}
+
+.nav__items_side_menu {
+  display: flex;
+  flex-shrink: 0;
+  margin-left: auto;
+  column-gap: 8px;
+  align-items: center;
+
+  .nav__item_search {
+    @include for-tablet-screen-sizes {
+      border: var(--border);
+    }
+
+    @include for-hover-state {
+      &:hover button {
+        cursor: pointer;
+      }
+    }
+
+    .nav__link {
+      display: inline;
+      vertical-align: middle;
+      padding: 7px 0;
+
+      & svg {
+        @include for-tablet-screen-sizes {
+          width: 12px;
+          height: 12px;
+        }
+
+        path {
+          transition: 0.6s;
+          fill: var(--primary-text-color);
+        }
+      }
+
+      @include for-hover-state {
+        &:hover svg path {
+          opacity: 0.6;
+          transition: 0.6s;
+          cursor: pointer;
+        }
+      }
+
+      @include for-tablet-screen-sizes {
+        display: grid;
+        justify-content: center;
+        align-items: center;
+        padding: 1px 0 0;
+        width: 29px;
+        height: 29px;
+      }
+
+      @include for-mobile-screen-sizes {
+        width: 28px;
+        height: 28px;
+        justify-content: center;
+
+        & svg {
+          width: 11px;
+          height: 11px;
+        }
+      }
+    }
+  }
+
+  .nav__item_search,
+  .nav__item_hamburger__menu {
+    a {
+      text-align: center;
+      justify-content: center;
+      line-height: 0;
+      text-transform: uppercase;
+    }
+  }
+
+  .nav__item_hamburger__menu {
+    display: flex;
+    align-items: center;
+  }
+
+  .call,
+  .github {
+    border-radius: 3px;
+    transition: 0.6s;
+
+    a {
+      font-size: 0.875rem;
+      font-family: 'Berkeley Mono', monospace;
+      font-weight: 400;
+      line-height: 2.14;
+      padding: 0 17px;
+      border-radius: 3px;
+      height: 30px;
+      display: inline-block;
+      text-transform: none;
+    }
+  }
+
+  .call {
+    background: #007fff33;
+    padding: 1px 0;
+
+    a {
+      color: #007fff;
+    }
+
+    @include for-hover-state {
+      &:hover {
+        background: #007fff99;
+
+        a {
+          color: #fff;
+        }
+      }
+    }
+  }
+
+  .github {
+    background: var(--block-bg-color);
+    border: var(--border);
+    border-color: var(--block-bg-color);
+
+    a {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      color: var(--primary-text-color);
+    }
+
+    & svg path {
+      transition: 0.6s;
+      fill: var(--secondary-text-color);
+    }
+
+    @include for-hover-state {
+      &:hover {
+        background: var(--secondary-text-color);
+        border-color: var(--secondary-text-color);
+
+        a {
+          color: var(--white);
+        }
+
+        & svg path {
+          fill: var(--white);
+        }
+      }
+    }
+
+    img {
+      display: block;
+    }
+  }
+}

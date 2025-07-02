@@ -1,0 +1,90 @@
+---
+import type { TocItem } from '@astrojs/starlight/utils/generateToC'
+
+interface Props {
+  toc: TocItem[]
+  depth?: number
+  isMobile?: boolean
+}
+
+const { toc, isMobile = false, depth = 0 } = Astro.props
+---
+
+<ul class:list={{ isMobile }}>
+  {
+    toc.map(heading => (
+      <li>
+        <a href={'#' + heading.slug} style={`padding-left: ${depth * 8}px;`}>
+          <span>{heading.text}</span>
+        </a>
+        {heading.children.length > 0 && (
+          <Astro.self
+            toc={heading.children}
+            depth={depth + 1}
+            isMobile={isMobile}
+          />
+        )}
+      </li>
+    ))
+  }
+</ul>
+
+<style define:vars={{ depth }}>
+  ul {
+    padding: 0;
+    list-style: none;
+    row-gap: 4px;
+  }
+  a {
+    color: var(--secondary-text-color);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 500;
+    line-height: 1.4;
+    letter-spacing: -0.015rem;
+    margin-bottom: 10px;
+    transition: color 0.1s ease-in-out;
+    &:hover {
+      text-decoration: underline;
+      color: var(--primary-text-color) !important;
+      text-decoration-color: var(--hover-color) !important;
+      text-underline-offset: 3.2px;
+    }
+  }
+  a[aria-current='true'] {
+    color: var(--primary-text-color) !important;
+    :before {
+      content: '_';
+    }
+  }
+  .isMobile a {
+    --pad-inline: 1rem;
+    display: flex;
+    justify-content: space-between;
+    gap: var(--pad-inline);
+    border-top: var(--border);
+    border-radius: 0;
+    padding-block: 0.5rem;
+    text-decoration: none;
+    outline-offset: var(--sl-outline-offset-inside);
+  }
+  .isMobile:first-child > li:first-child > a {
+    border-top: 0;
+  }
+  .isMobile a[aria-current='true'],
+  .isMobile a[aria-current='true']:hover,
+  .isMobile a[aria-current='true']:focus {
+    color: var(--primary-text-color);
+    background-color: unset;
+  }
+  .isMobile a[aria-current='true']::after {
+    content: '';
+    width: 1rem;
+    /* Check mark SVG icon */
+    -webkit-mask-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCAxNCAxNCc+PHBhdGggZD0nTTEwLjkxNCA0LjIwNmEuNTgzLjU4MyAwIDAgMC0uODI4IDBMNS43NCA4LjU1NyAzLjkxNCA2LjcyNmEuNTk2LjU5NiAwIDAgMC0uODI4Ljg1N2wyLjI0IDIuMjRhLjU4My41ODMgMCAwIDAgLjgyOCAwbDQuNzYtNC43NmEuNTgzLjU4MyAwIDAgMCAwLS44NTdaJy8+PC9zdmc+Cg==');
+    mask-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCAxNCAxNCc+PHBhdGggZD0nTTEwLjkxNCA0LjIwNmEuNTgzLjU4MyAwIDAgMC0uODI4IDBMNS43NCA4LjU1NyAzLjkxNCA2LjcyNmEuNTk2LjU5NiAwIDAgMC0uODI4Ljg1N2wyLjI0IDIuMjRhLjU4My41ODMgMCAwIDAgLjgyOCAwbDQuNzYtNC43NmEuNTgzLjU4MyAwIDAgMCAwLS44NTdaJy8+PC9zdmc+Cg==');
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    flex-shrink: 0;
+  }
+</style>

@@ -15,7 +15,7 @@
   },
   "homepage": "https://www.daytona.io/docs",
   "config": {
-    "docsDir": "../../apps/docs/content/sdk-typescript"
+    "docsDir": "../../apps/docs/src/content/docs/typescript-sdk"
   },
   "scripts": {
     "docs": "bash -O extglob -c 'rm -rf $npm_package_config_docsDir/!(index.mdx)' && typedoc && rm -f $npm_package_config_docsDir/readme.mdx"
