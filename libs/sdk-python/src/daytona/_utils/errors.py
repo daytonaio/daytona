@@ -2,10 +2,12 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import functools
+import inspect
 import json
-from typing import Callable, ParamSpec, TypeVar
+from typing import Callable, NoReturn, ParamSpec, TypeVar, Union
 
 from daytona_api_client.exceptions import OpenApiException
+from daytona_api_client_async.exceptions import OpenApiException as OpenApiExceptionAsync
 
 from ..common.errors import DaytonaError
 
@@ -24,26 +26,40 @@ def intercept_errors(
     """
 
     def decorator(func: Callable[P, T]) -> Callable[P, T]:
+        def process_n_raise_exception(e: Exception) -> NoReturn:
+            if isinstance(e, (OpenApiException, OpenApiExceptionAsync)):
+                msg = _get_open_api_exception_message(e)
+                raise DaytonaError(f"{message_prefix}{msg}") from None
+
+            if message_prefix:
+                msg = f"{message_prefix}{str(e)}"
+                raise DaytonaError(msg)  # pylint: disable=raise-missing-from
+            raise DaytonaError(str(e))  # pylint: disable=raise-missing-from
+
+        if inspect.iscoroutinefunction(func):
+
+            @functools.wraps(func)
+            async def async_wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
+                try:
+                    return await func(*args, **kwargs)
+                except Exception as e:
+                    process_n_raise_exception(e)
+
+            return async_wrapper
+
         @functools.wraps(func)
-        def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
+        def sync_wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
             try:
                 return func(*args, **kwargs)
-            except OpenApiException as e:
-                message = _get_open_api_exception_message(e)
-
-                raise DaytonaError(f"{message_prefix}{message}") from None
             except Exception as e:
-                if message_prefix:
-                    message = f"{message_prefix}{str(e)}"
-                    raise DaytonaError(message)  # pylint: disable=raise-missing-from
-                raise DaytonaError(str(e))  # pylint: disable=raise-missing-from
+                process_n_raise_exception(e)
 
-        return wrapper
+        return sync_wrapper
 
     return decorator
 
 
-def _get_open_api_exception_message(exception: OpenApiException) -> str:
+def _get_open_api_exception_message(exception: Union[OpenApiException, OpenApiExceptionAsync]) -> str:
     """Process API exceptions to extract the most meaningful error message.
 
     This method examines the exception's body attribute and attempts to extract

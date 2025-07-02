@@ -1,8 +1,10 @@
 # Copyright 2025 Daytona Platforms Inc.
 # SPDX-License-Identifier: Apache-2.0
 
+import asyncio
 import concurrent.futures
 import functools
+import inspect
 from typing import Any, Callable, Optional, ParamSpec, TypeVar
 
 from .._utils.errors import DaytonaError
@@ -22,22 +24,43 @@ def with_timeout(
     """
 
     def decorator(func: Callable[P, T]) -> Callable[P, T]:
+        # pull out `self` and `timeout` from args/kwargs
+        def _extract(args: tuple, kwargs: dict) -> tuple[Any, Optional[float]]:
+            names = func.__code__.co_varnames[: func.__code__.co_argcount]
+            bound = dict(zip(names, args))
+            self_inst = args[0] if args else None
+            return self_inst, kwargs.get("timeout", bound.get("timeout", None))
+
+        # produce the final TimeoutError message
+        def _format_msg(self_inst: Any, timeout: float) -> str:
+            return (
+                error_message(self_inst, timeout)
+                if error_message
+                else f"Function '{func.__name__}' exceeded timeout of {timeout} seconds."
+            )
+
+        if inspect.iscoroutinefunction(func):
+
+            @functools.wraps(func)
+            async def async_wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
+                self_inst, timeout = _extract(args, kwargs)
+                if timeout is None or timeout == 0:
+                    return await func(*args, **kwargs)
+                if timeout < 0:
+                    raise DaytonaError("Timeout must be a non-negative number or None.")
+
+                try:
+                    return await asyncio.wait_for(func(*args, **kwargs), timeout)
+                except asyncio.TimeoutError:
+                    raise TimeoutError(_format_msg(self_inst, timeout))  # pylint: disable=raise-missing-from
+
+            return async_wrapper
+
         @functools.wraps(func)
-        def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
-            # Get function argument names
-            arg_names = func.__code__.co_varnames[: func.__code__.co_argcount]
-            arg_dict = dict(zip(arg_names, args))
-
-            # Extract self if method is bound
-            self_instance = args[0] if args else None
-
-            # Check for 'timeout' in kwargs first, then in positional arguments
-            timeout = kwargs.get("timeout", arg_dict.get("timeout", None))
-
+        def sync_wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
+            self_inst, timeout = _extract(args, kwargs)
             if timeout is None or timeout == 0:
-                # If timeout is None or 0, run the function normally
                 return func(*args, **kwargs)
-
             if timeout < 0:
                 raise DaytonaError("Timeout must be a non-negative number or None.")
 
@@ -46,14 +69,8 @@ def with_timeout(
                 try:
                     return future.result(timeout=timeout)
                 except concurrent.futures.TimeoutError:
-                    # Use custom error message if provided, otherwise default
-                    msg = (
-                        error_message(self_instance, timeout)
-                        if error_message
-                        else f"Function '{func.__name__}' exceeded timeout of {timeout} seconds."
-                    )
-                    raise TimeoutError(msg)  # pylint: disable=raise-missing-from
+                    raise TimeoutError(_format_msg(self_inst, timeout))  # pylint: disable=raise-missing-from
 
-        return wrapper
+        return sync_wrapper
 
     return decorator

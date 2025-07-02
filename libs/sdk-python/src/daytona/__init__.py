@@ -7,9 +7,6 @@ from ._async.daytona import AsyncDaytona
 from ._async.sandbox import AsyncSandbox
 from ._sync.daytona import Daytona
 from ._sync.sandbox import Sandbox
-
-# Create deprecated aliases with proper warnings
-from ._utils.deprecation import deprecated_alias
 from .common.charts import (
     BarChart,
     BoxAndWhiskerChart,
