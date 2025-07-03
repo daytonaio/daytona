@@ -192,8 +192,8 @@ export class Sandbox implements SandboxDto {
       throw new DaytonaError('Timeout must be a non-negative number')
     }
     const startTime = Date.now()
-    await this.sandboxApi.startSandbox(this.id, undefined, { timeout: timeout * 1000 })
-    await this.refreshData()
+    const response = await this.sandboxApi.startSandbox(this.id, undefined, { timeout: timeout * 1000 })
+    this.processSandboxDto(response.data)
     const timeElapsed = Date.now() - startTime
     await this.waitUntilStarted(timeout ? timeout - timeElapsed / 1000 : 0)
   }
@@ -254,6 +254,11 @@ export class Sandbox implements SandboxDto {
     while (this.state !== 'started') {
       await this.refreshData()
 
+      // @ts-expect-error this.refreshData() can modify this.state so this check is fine
+      if (this.state === 'started') {
+        return
+      }
+
       if (this.state === 'error') {
         const errMsg = `Sandbox ${this.id} failed to start with status: ${this.state}, error reason: ${this.errorReason}`
         throw new DaytonaError(errMsg)
@@ -288,6 +293,11 @@ export class Sandbox implements SandboxDto {
 
     while (this.state !== 'stopped') {
       await this.refreshData()
+
+      // @ts-expect-error this.refreshData() can modify this.state so this check is fine
+      if (this.state === 'stopped') {
+        return
+      }
 
       if (this.state === 'error') {
         const errMsg = `Sandbox failed to stop with status: ${this.state}, error reason: ${this.errorReason}`

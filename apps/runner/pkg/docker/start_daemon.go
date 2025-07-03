@@ -6,14 +6,17 @@ package docker
 import (
 	"context"
 
+	"github.com/daytonaio/common-go/pkg/timer"
 	"github.com/docker/docker/api/types/container"
 
 	log "github.com/sirupsen/logrus"
 )
 
 func (d *DockerClient) startDaytonaDaemon(ctx context.Context, containerId string) error {
+	defer timer.Timer()()
+
 	execOptions := container.ExecOptions{
-		Cmd:          []string{"sh", "-c", "daytona"},
+		Cmd:          []string{"sh", "-c", "/usr/local/bin/daytona"},
 		AttachStdout: true,
 		AttachStderr: true,
 		Tty:          true,
