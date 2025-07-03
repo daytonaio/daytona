@@ -1,0 +1,32 @@
+{
+  "name": "daytona-expo-examples",
+  "version": "1.0.0",
+  "description": "Examples demonstrating Expo development with Daytona",
+  "main": "expo-daytona-example.ts",
+  "scripts": {
+    "start": "tsx expo-daytona-example.ts",
+    "quick-start": "tsx expo-quickstart.ts",
+    "build": "tsc",
+    "dev": "tsx --watch expo-daytona-example.ts"
+  },
+  "keywords": [
+    "daytona",
+    "expo",
+    "react-native",
+    "sandbox",
+    "development"
+  ],
+  "author": "Daytona",
+  "license": "MIT",
+  "dependencies": {
+    "@daytonaio/sdk": "latest"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+} 

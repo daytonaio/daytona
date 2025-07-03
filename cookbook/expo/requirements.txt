@@ -1,0 +1,2 @@
+# Daytona + Expo Examples Requirements
+daytona>=0.11.0 
