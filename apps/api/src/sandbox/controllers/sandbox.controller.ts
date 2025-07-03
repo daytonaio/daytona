@@ -99,13 +99,20 @@ export class SandboxController {
     example: '{"label1": "value1", "label2": "value2"}',
     description: 'JSON encoded labels to filter by',
   })
+  @ApiQuery({
+    name: 'includeErroredDeleted',
+    required: false,
+    type: Boolean,
+    description: 'Include errored and deleted sandboxes',
+  })
   async listSandboxes(
     @AuthContext() authContext: OrganizationAuthContext,
     @Query('verbose') verbose?: boolean,
     @Query('labels') labelsQuery?: string,
+    @Query('includeErroredDeleted') includeErroredDeleted?: boolean,
   ): Promise<SandboxDto[]> {
     const labels = labelsQuery ? JSON.parse(labelsQuery) : {}
-    const sandboxes = await this.sandboxService.findAll(authContext.organizationId, labels)
+    const sandboxes = await this.sandboxService.findAll(authContext.organizationId, labels, includeErroredDeleted)
     const dtos = sandboxes.map(async (sandbox) => {
       const runner = await this.runnerService.findOne(sandbox.runnerId)
       const dto = SandboxDto.fromSandbox(sandbox, runner.domain)

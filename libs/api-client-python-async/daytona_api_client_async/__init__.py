@@ -107,6 +107,7 @@ from daytona_api_client_async.models.runner_snapshot_dto import RunnerSnapshotDt
 from daytona_api_client_async.models.runner_state import RunnerState
 from daytona_api_client_async.models.sandbox import Sandbox
 from daytona_api_client_async.models.sandbox_class import SandboxClass
+from daytona_api_client_async.models.sandbox_desired_state import SandboxDesiredState
 from daytona_api_client_async.models.sandbox_info import SandboxInfo
 from daytona_api_client_async.models.sandbox_labels import SandboxLabels
 from daytona_api_client_async.models.sandbox_state import SandboxState

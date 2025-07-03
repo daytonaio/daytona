@@ -404,6 +404,7 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {boolean} [verbose] Include verbose output
      * @param {string} [labels] JSON encoded labels to filter by
+     * @param {boolean} [includeErroredDeleted] Include errored and deleted sandboxes
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
@@ -411,6 +412,7 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
       xDaytonaOrganizationID?: string,
       verbose?: boolean,
       labels?: string,
+      includeErroredDeleted?: boolean,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       const localVarPath = `/sandbox`
@@ -437,6 +439,10 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
 
       if (labels !== undefined) {
         localVarQueryParameter['labels'] = labels
+      }
+
+      if (includeErroredDeleted !== undefined) {
+        localVarQueryParameter['includeErroredDeleted'] = includeErroredDeleted
       }
 
       if (xDaytonaOrganizationID != null) {
@@ -982,6 +988,7 @@ export const SandboxApiFp = function (configuration?: Configuration) {
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {boolean} [verbose] Include verbose output
      * @param {string} [labels] JSON encoded labels to filter by
+     * @param {boolean} [includeErroredDeleted] Include errored and deleted sandboxes
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
@@ -989,12 +996,14 @@ export const SandboxApiFp = function (configuration?: Configuration) {
       xDaytonaOrganizationID?: string,
       verbose?: boolean,
       labels?: string,
+      includeErroredDeleted?: boolean,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Sandbox>>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.listSandboxes(
         xDaytonaOrganizationID,
         verbose,
         labels,
+        includeErroredDeleted,
         options,
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
@@ -1329,6 +1338,7 @@ export const SandboxApiFactory = function (configuration?: Configuration, basePa
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {boolean} [verbose] Include verbose output
      * @param {string} [labels] JSON encoded labels to filter by
+     * @param {boolean} [includeErroredDeleted] Include errored and deleted sandboxes
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
@@ -1336,10 +1346,11 @@ export const SandboxApiFactory = function (configuration?: Configuration, basePa
       xDaytonaOrganizationID?: string,
       verbose?: boolean,
       labels?: string,
+      includeErroredDeleted?: boolean,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<Array<Sandbox>> {
       return localVarFp
-        .listSandboxes(xDaytonaOrganizationID, verbose, labels, options)
+        .listSandboxes(xDaytonaOrganizationID, verbose, labels, includeErroredDeleted, options)
         .then((request) => request(axios, basePath))
     },
     /**
@@ -1597,6 +1608,7 @@ export class SandboxApi extends BaseAPI {
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {boolean} [verbose] Include verbose output
    * @param {string} [labels] JSON encoded labels to filter by
+   * @param {boolean} [includeErroredDeleted] Include errored and deleted sandboxes
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof SandboxApi
@@ -1605,10 +1617,11 @@ export class SandboxApi extends BaseAPI {
     xDaytonaOrganizationID?: string,
     verbose?: boolean,
     labels?: string,
+    includeErroredDeleted?: boolean,
     options?: RawAxiosRequestConfig,
   ) {
     return SandboxApiFp(this.configuration)
-      .listSandboxes(xDaytonaOrganizationID, verbose, labels, options)
+      .listSandboxes(xDaytonaOrganizationID, verbose, labels, includeErroredDeleted, options)
       .then((request) => request(this.axios, this.basePath))
   }
 

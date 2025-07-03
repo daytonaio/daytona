@@ -6,7 +6,7 @@
 import React, { useEffect, useState, useCallback } from 'react'
 import { useApi } from '@/hooks/useApi'
 import { OrganizationSuspendedError } from '@/api/errors'
-import { OrganizationUserRoleEnum, Sandbox, SandboxState } from '@daytonaio/api-client'
+import { OrganizationUserRoleEnum, Sandbox, SandboxDesiredState, SandboxState } from '@daytonaio/api-client'
 import { SandboxTable } from '@/components/SandboxTable'
 import {
   Dialog,
@@ -89,12 +89,28 @@ const Sandboxes: React.FC = () => {
       }
     }
 
+    const handleSandboxDesiredStateUpdatedEvent = (data: {
+      sandbox: Sandbox
+      oldDesiredState: SandboxDesiredState
+      newDesiredState: SandboxDesiredState
+    }) => {
+      if (
+        data.newDesiredState === SandboxDesiredState.DESTROYED &&
+        data.sandbox.state &&
+        ([SandboxState.ERROR, SandboxState.BUILD_FAILED] as SandboxState[]).includes(data.sandbox.state)
+      ) {
+        setSandboxes((prev) => prev.filter((s) => s.id !== data.sandbox.id))
+      }
+    }
+
     notificationSocket.on('sandbox.created', handleSandboxCreatedEvent)
     notificationSocket.on('sandbox.state.updated', handleSandboxStateUpdatedEvent)
+    notificationSocket.on('sandbox.desired-state.updated', handleSandboxDesiredStateUpdatedEvent)
 
     return () => {
       notificationSocket.off('sandbox.created', handleSandboxCreatedEvent)
       notificationSocket.off('sandbox.state.updated', handleSandboxStateUpdatedEvent)
+      notificationSocket.off('sandbox.desired-state.updated', handleSandboxDesiredStateUpdatedEvent)
     }
   }, [notificationSocket, sandboxes])
 

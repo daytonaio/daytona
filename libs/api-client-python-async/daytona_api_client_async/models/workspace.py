@@ -21,6 +21,7 @@ import json
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictFloat, StrictInt, StrictStr, field_validator
 from typing import Any, ClassVar, Dict, List, Optional, Union
 from daytona_api_client_async.models.build_info import BuildInfo
+from daytona_api_client_async.models.sandbox_desired_state import SandboxDesiredState
 from daytona_api_client_async.models.sandbox_info import SandboxInfo
 from daytona_api_client_async.models.sandbox_state import SandboxState
 from daytona_api_client_async.models.sandbox_volume import SandboxVolume
@@ -44,6 +45,7 @@ class Workspace(BaseModel):
     memory: Union[StrictFloat, StrictInt] = Field(description="The memory quota for the sandbox")
     disk: Union[StrictFloat, StrictInt] = Field(description="The disk quota for the sandbox")
     state: Optional[SandboxState] = Field(default=None, description="The state of the sandbox")
+    desired_state: Optional[SandboxDesiredState] = Field(default=None, description="The desired state of the sandbox", alias="desiredState")
     error_reason: Optional[StrictStr] = Field(default=None, description="The error reason of the sandbox", alias="errorReason")
     backup_state: Optional[StrictStr] = Field(default=None, description="The state of the backup", alias="backupState")
     backup_created_at: Optional[StrictStr] = Field(default=None, description="The creation timestamp of the last backup", alias="backupCreatedAt")
@@ -62,7 +64,7 @@ class Workspace(BaseModel):
     snapshot_created_at: Optional[StrictStr] = Field(default=None, description="The creation timestamp of the last snapshot", alias="snapshotCreatedAt")
     info: Optional[SandboxInfo] = Field(default=None, description="Additional information about the sandbox")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["id", "organizationId", "snapshot", "user", "env", "labels", "public", "target", "cpu", "gpu", "memory", "disk", "state", "errorReason", "backupState", "backupCreatedAt", "autoStopInterval", "autoArchiveInterval", "runnerDomain", "volumes", "buildInfo", "createdAt", "updatedAt", "class", "daemonVersion", "name", "image", "snapshotState", "snapshotCreatedAt", "info"]
+    __properties: ClassVar[List[str]] = ["id", "organizationId", "snapshot", "user", "env", "labels", "public", "target", "cpu", "gpu", "memory", "disk", "state", "desiredState", "errorReason", "backupState", "backupCreatedAt", "autoStopInterval", "autoArchiveInterval", "runnerDomain", "volumes", "buildInfo", "createdAt", "updatedAt", "class", "daemonVersion", "name", "image", "snapshotState", "snapshotCreatedAt", "info"]
 
     @field_validator('backup_state')
     def backup_state_validate_enum(cls, value):
@@ -178,6 +180,7 @@ class Workspace(BaseModel):
             "memory": obj.get("memory"),
             "disk": obj.get("disk"),
             "state": obj.get("state"),
+            "desiredState": obj.get("desiredState"),
             "errorReason": obj.get("errorReason"),
             "backupState": obj.get("backupState"),
             "backupCreatedAt": obj.get("backupCreatedAt"),
