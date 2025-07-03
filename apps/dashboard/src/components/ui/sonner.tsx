@@ -25,7 +25,6 @@ const Toaster = ({ ...props }: ToasterProps) => {
           closeButton: 'group-[.toast]:border',
         },
       }}
-      closeButton
       {...props}
     />
   )
