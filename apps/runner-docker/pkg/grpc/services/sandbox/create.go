@@ -15,16 +15,14 @@ import (
 	"sync"
 	"time"
 
-	"github.com/daytonaio/runner-docker/cmd/config"
 	pb "github.com/daytonaio/runner-docker/gen/pb/runner/v1"
+	"github.com/daytonaio/runner-docker/internal/config"
 	"github.com/daytonaio/runner-docker/internal/constants"
 	"github.com/daytonaio/runner-docker/internal/metrics"
 	"github.com/daytonaio/runner-docker/internal/util"
-	"github.com/daytonaio/runner-docker/pkg/services/common"
-	"github.com/daytonaio/runner-docker/pkg/services/snapshot"
+	"github.com/daytonaio/runner-docker/pkg/common"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/network"
-	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -72,13 +70,7 @@ func (s *SandboxService) CreateSandbox(ctx context.Context, req *pb.CreateSandbo
 	// TODO: Check how to handle this pull snapshot call, ln 68 - 82
 	ctx = context.WithValue(ctx, constants.ID_KEY, req.GetId())
 
-	snapshotService := snapshot.NewSnapshotService(snapshot.SnapshotServiceConfig{
-		DockerClient: s.dockerClient,
-		Cache:        s.cache,
-		LogWriter:    s.logWriter,
-	})
-
-	_, err = snapshotService.PullSnapshot(ctx, &pb.PullSnapshotRequest{
+	_, err = s.snapshotService.PullSnapshot(ctx, &pb.PullSnapshotRequest{
 		Snapshot: req.GetSnapshot(),
 		Registry: req.GetRegistry(),
 	})
@@ -294,7 +286,7 @@ func (s *SandboxService) getVolumesMountPathBinds(ctx context.Context, volumes [
 		defer volumeMutex.Unlock()
 
 		if s.isDirectoryMounted(nodeVolumeMountPath) {
-			log.Infof("volume %s is already mounted to %s", volumeIdPrefixed, nodeVolumeMountPath)
+			s.log.Info("volume is already mounted", "volumeIdPrefixed", volumeIdPrefixed, "nodeVolumeMountPath", nodeVolumeMountPath)
 			volumeMountPathBinds = append(volumeMountPathBinds, fmt.Sprintf("%s/:%s/", nodeVolumeMountPath, vol.MountPath))
 			continue
 		}
@@ -304,7 +296,7 @@ func (s *SandboxService) getVolumesMountPathBinds(ctx context.Context, volumes [
 			return nil, fmt.Errorf("failed to create mount directory %s: %s", nodeVolumeMountPath, err)
 		}
 
-		log.Infof("mounting S3 volume %s to %s", volumeIdPrefixed, nodeVolumeMountPath)
+		s.log.Info("mounting S3 volume", "volumeIdPrefixed", volumeIdPrefixed, "nodeVolumeMountPath", nodeVolumeMountPath)
 
 		cmd := s.getMountCmd(ctx, volumeIdPrefixed, nodeVolumeMountPath)
 		err = cmd.Run()
@@ -312,7 +304,7 @@ func (s *SandboxService) getVolumesMountPathBinds(ctx context.Context, volumes [
 			return nil, fmt.Errorf("failed to mount S3 volume %s to %s: %s", volumeIdPrefixed, nodeVolumeMountPath, err)
 		}
 
-		log.Infof("mounted S3 volume %s to %s", volumeIdPrefixed, nodeVolumeMountPath)
+		s.log.Info("mounted S3 volume", "volumeIdPrefixed", volumeIdPrefixed, "nodeVolumeMountPath", nodeVolumeMountPath)
 
 		volumeMountPathBinds = append(volumeMountPathBinds, fmt.Sprintf("%s/:%s/", nodeVolumeMountPath, vol.MountPath))
 	}

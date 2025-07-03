@@ -13,7 +13,7 @@ import { UserModule } from '../user/user.module'
 import { RunnerService } from './services/runner.service'
 import { Runner } from './entities/runner.entity'
 import { RunnerController } from './controllers/runner.controller'
-import { RunnerApiFactory } from './runner-adapter/runnerApi'
+import { RunnerAdapterFactory } from './runner-adapter/runnerAdapter'
 import { AuthModule } from '../auth/auth.module'
 import { ToolboxService } from './services/toolbox.service'
 import { DockerRegistryModule } from '../docker-registry/docker-registry.module'
@@ -66,7 +66,7 @@ import { SnapshotRunnerService } from './services/snapshot-runner.service'
     BackupManager,
     SandboxWarmPoolService,
     RunnerService,
-    RunnerApiFactory,
+    RunnerAdapterFactory,
     ToolboxService,
     SnapshotService,
     SnapshotManager,

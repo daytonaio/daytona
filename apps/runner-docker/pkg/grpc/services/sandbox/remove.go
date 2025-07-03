@@ -8,10 +8,9 @@ import (
 	"fmt"
 
 	pb "github.com/daytonaio/runner-docker/gen/pb/runner/v1"
-	"github.com/daytonaio/runner-docker/pkg/services/common"
+	"github.com/daytonaio/runner-docker/pkg/common"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/errdefs"
-	log "github.com/sirupsen/logrus"
 )
 
 func (s *SandboxService) RemoveDestroyedSandbox(ctx context.Context, req *pb.RemoveDestroyedSandboxRequest) (*pb.RemoveDestroyedSandboxResponse, error) {
@@ -41,7 +40,7 @@ func (s *SandboxService) RemoveDestroyedSandbox(ctx context.Context, req *pb.Rem
 		return nil, common.MapDockerError(err)
 	}
 
-	log.Infof("Destroyed sandbox %s removed successfully", req.GetSandboxId())
+	s.log.Info("Destroyed sandbox removed successfully", "sandboxId", req.GetSandboxId())
 
 	return &pb.RemoveDestroyedSandboxResponse{
 		Message: fmt.Sprintf("Destroyed sandbox %s removed", req.GetSandboxId()),

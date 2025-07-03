@@ -5,267 +5,154 @@ package main
 
 import (
 	"context"
-	"crypto/tls"
 	"fmt"
-	"io"
-	"net"
+	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
-	"path/filepath"
 	"syscall"
 	"time"
 
-	pb "github.com/daytonaio/runner-docker/gen/pb/runner/v1"
-
-	"github.com/daytonaio/runner-docker/cmd/config"
-	"github.com/daytonaio/runner-docker/internal/util"
+	"github.com/daytonaio/runner-docker/internal/config"
 	"github.com/daytonaio/runner-docker/pkg/cache"
 	"github.com/daytonaio/runner-docker/pkg/daemon"
-	"github.com/daytonaio/runner-docker/pkg/interceptors"
+	"github.com/daytonaio/runner-docker/pkg/grpc"
 	"github.com/daytonaio/runner-docker/pkg/proxy"
-	"github.com/daytonaio/runner-docker/pkg/services/health"
-	"github.com/daytonaio/runner-docker/pkg/services/sandbox"
-	"github.com/daytonaio/runner-docker/pkg/services/snapshot"
 	"github.com/docker/docker/client"
+	"github.com/lmittmann/tint"
+	"github.com/mattn/go-isatty"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials"
-
-	"github.com/rs/zerolog"
-	zlog "github.com/rs/zerolog/log"
-
-	log "github.com/sirupsen/logrus"
-
-	golog "log"
 )
 
 func main() {
+
+	// Setup logging
+	log := slog.New(tint.NewHandler(os.Stdout, &tint.Options{
+		NoColor:    !isatty.IsTerminal(os.Stdout.Fd()),
+		TimeFormat: time.RFC3339,
+	}))
+
+	// Load config
 	cfg, err := config.GetConfig()
 	if err != nil {
-		log.Error(err)
+		log.Error("Error loading config", "error", err)
 		return
 	}
 
-	log.Info("Config loaded")
-
+	// Create Docker APIClient
 	dockerClient, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
-		log.Error(err)
+		log.Error("Error creating Docker APIClient", "error", err)
 		return
 	}
 
-	log.Info("Docker APIClient created")
-
+	// Create cache
 	cache := cache.NewInMemoryRunnerCache(cache.InMemoryRunnerCacheConfig{
 		Cache:         make(map[string]*cache.CacheData),
 		RetentionDays: cfg.CacheRetentionDays,
 	})
 
-	log.Info("Cache created")
-
-	// Start cleanup job with a cancellable context
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
-	cache.Cleanup(ctx)
-
-	log.Info("Cache cleanup started")
+	cache.Cleanup(context.Background())
 
 	daemonPath, err := daemon.WriteDaemonBinary()
 	if err != nil {
-		log.Error(err)
+		log.Error("Error writing daemon binary", "error", err)
 		return
 	}
 
-	log.Info("Daemon copied")
+	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	defer stop()
 
-	healthService := health.NewHealthService()
-	sandboxService := sandbox.NewSandboxService(sandbox.SandboxServiceConfig{
+	// Create gRPC server
+	grpcServer := grpc.New(grpc.ServerConfig{
+		Address:            fmt.Sprintf(":%d", cfg.Port),
 		DockerClient:       dockerClient,
-		Cache:              cache,
-		LogWriter:          os.Stdout,
+		RunnerCache:        &cache,
 		DaemonPath:         daemonPath,
 		AWSAccessKeyId:     cfg.AWSAccessKeyId,
 		AWSSecretAccessKey: cfg.AWSSecretAccessKey,
 		AWSRegion:          cfg.AWSRegion,
 		AWSEndpointUrl:     cfg.AWSEndpointUrl,
-	})
-	snapshotService := snapshot.NewSnapshotService(snapshot.SnapshotServiceConfig{
-		DockerClient: dockerClient,
-		Cache:        cache,
-		LogWriter:    os.Stdout,
+		Log:                log,
 	})
 
-	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", cfg.Port))
-	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
-	}
-
-	s := grpc.NewServer(
-		grpc.UnaryInterceptor(
-			interceptors.ChainUnaryServer(
-				interceptors.GetDefaultInterceptors()...,
-			),
-		),
-	)
-	if cfg.EnableTLS {
-		log.Info("Enabling TLS")
-		// Load TLS certificates
-		cert, err := tls.LoadX509KeyPair(cfg.TLSCertFile, cfg.TLSKeyFile)
-		if err != nil {
-			log.Fatalf("failed to load certificates: %v", err)
-		}
-
-		// Create TLS config
-		tlsCfg := &tls.Config{
-			Certificates: []tls.Certificate{cert},
-			ClientAuth:   tls.NoClientCert, // or tls.RequireAndVerifyClientCert for mutual TLS
-		}
-
-		// Create credentials
-		creds := credentials.NewTLS(tlsCfg)
-
-		// Create gRPC server with TLS
-		s = grpc.NewServer(
-			grpc.Creds(creds),
-			grpc.UnaryInterceptor(
-				interceptors.ChainUnaryServer(
-					interceptors.GetDefaultInterceptors()...,
-				),
-			),
-		)
-	}
-
-	s.RegisterService(&pb.HealthService_ServiceDesc, healthService)
-	s.RegisterService(&pb.SandboxService_ServiceDesc, sandboxService)
-	s.RegisterService(&pb.SnapshotService_ServiceDesc, snapshotService)
-
-	log.Info("Created Runner gRPC server")
-
-	// Create a channel to listen for errors coming from the listener.
-	serverErrors := make(chan error, 1)
-
-	// Start the service listening for requests.
-	go func() {
-		log.Printf("Server listening at %v", lis.Addr())
-		serverErrors <- s.Serve(lis)
-	}()
-
-	// Create and start metrics server
+	// Create metrics server
 	metricsServer := &http.Server{
 		Addr:    fmt.Sprintf(":%d", cfg.MetricsPort),
 		Handler: promhttp.Handler(),
 	}
 
-	metricsErrors := make(chan error, 1)
+	// Create proxy server
+	proxyServer := proxy.New(proxy.ProxyServerConfig{
+		DockerClient: dockerClient,
+		Port:         cfg.ProxyPort,
+		Log:          log,
+	})
+
+	errChan := make(chan error, 3)
+
+	// Start gRPC server
 	go func() {
-		log.Printf("Metrics server listening at %s", metricsServer.Addr)
-		metricsErrors <- metricsServer.ListenAndServe()
+		log.Info("Starting gRPC server", "address", fmt.Sprintf(":%d", cfg.Port))
+		errChan <- grpcServer.Start()
 	}()
 
-	proxyServer := &http.Server{
-		Addr:    fmt.Sprintf(":%d", cfg.ProxyPort),
-		Handler: http.HandlerFunc(proxy.ProxyRequest),
-	}
-
-	proxyErrors := make(chan error, 1)
+	// Start proxy server
 	go func() {
-		log.Infof("Starting proxy server on port %d", cfg.ProxyPort)
-		proxyErrors <- proxyServer.ListenAndServe()
+		log.Info("Starting proxy server", "address", fmt.Sprintf(":%d", cfg.ProxyPort))
+		errChan <- proxyServer.Start()
 	}()
 
-	// Create a channel to listen for an interrupt or terminate signal from the OS.
-	// Use a buffered channel because the signal package requires it.
-	shutdown := make(chan os.Signal, 1)
-	signal.Notify(shutdown, os.Interrupt, syscall.SIGTERM)
+	// Start metrics server
+	go func() {
+		log.Info("Starting metrics server", "address", fmt.Sprintf(":%d", cfg.MetricsPort))
+		errChan <- metricsServer.ListenAndServe()
+	}()
 
 	// Blocking main and waiting for shutdown.
 	select {
-	case err := <-serverErrors:
-		log.Fatalf("Error starting gRPC server: %v", err)
-	case err := <-metricsErrors:
-		log.Fatalf("Error starting metrics server: %v", err)
-	case sig := <-shutdown:
-		log.Printf("Server is shutting down due to %v signal", sig)
+	case <-ctx.Done():
+		log.Info("Received shutdown signal.")
+	case err := <-errChan:
+		if err != nil {
+			log.Error("Server error", "error", err)
+		} else {
+			log.Info("Server exited cleanly.")
+		}
+		stop() // stop signal.NotifyContext
+	}
 
-		// Give outstanding requests 5 seconds to complete.
-		shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 5*time.Second)
-		defer shutdownCancel()
+	// Graceful shutdown with timeout enforcement
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 
-		// Asking listener to stop accepting new connections.
-		if err := lis.Close(); err != nil {
-			log.Printf("Error closing gRPC listener: %v", err)
+	// Create a channel to track shutdown completion
+	shutdownDone := make(chan struct{})
+
+	// Start shutdown in a goroutine
+	go func() {
+		log.Info("Shutting down gRPC server...")
+		grpcServer.Shutdown(shutdownCtx)
+
+		log.Info("Shutting down Proxy server...")
+		if err := proxyServer.Shutdown(shutdownCtx); err != nil {
+			log.Error("Proxy server shutdown error", "error", err)
 		}
 
-		// Asking gRPC server to stop accepting new requests and wait for existing ones to complete.
-		stopped := make(chan struct{})
-		go func() {
-			s.GracefulStop()
-			close(stopped)
-		}()
-
-		// Shutdown metrics server
+		log.Info("Shutting down Metrics server...")
 		if err := metricsServer.Shutdown(shutdownCtx); err != nil {
-			log.Printf("Error shutting down metrics server: %v", err)
+			log.Error("Metrics server shutdown error", "error", err)
 		}
 
-		// Wait for graceful shutdown or timeout
-		select {
-		case <-shutdownCtx.Done():
-			log.Printf("Shutdown timeout reached, forcing stop")
-			s.Stop()
-		case <-stopped:
-			log.Printf("Server stopped gracefully")
-		}
+		close(shutdownDone)
+	}()
+
+	// Wait for either shutdown completion or timeout
+	select {
+	case <-shutdownDone:
+		log.Info("All servers shut down gracefully")
+	case <-shutdownCtx.Done():
+		log.Error("Shutdown timeout reached, forcing exit")
+		os.Exit(1)
 	}
-}
-
-func init() {
-	logLevel := log.WarnLevel
-
-	logLevelEnv, logLevelSet := os.LookupEnv("LOG_LEVEL")
-
-	if logLevelSet {
-		var err error
-		logLevel, err = log.ParseLevel(logLevelEnv)
-		if err != nil {
-			logLevel = log.WarnLevel
-		}
-	}
-
-	log.SetLevel(logLevel)
-
-	log.SetOutput(os.Stdout)
-
-	logFilePath, logFilePathSet := os.LookupEnv("LOG_FILE_PATH")
-	if logFilePathSet {
-		logDir := filepath.Dir(logFilePath)
-		if err := os.MkdirAll(logDir, 0755); err != nil {
-			log.Error("Failed to create log directory:", err)
-			os.Exit(1)
-		}
-
-		file, err := os.OpenFile(logFilePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
-		if err != nil {
-			log.Error(err)
-			os.Exit(1)
-		}
-
-		log.SetOutput(io.MultiWriter(os.Stdout, file))
-	}
-
-	zerologLevel, err := zerolog.ParseLevel(logLevel.String())
-	if err != nil {
-		zerologLevel = zerolog.ErrorLevel
-	}
-
-	zerolog.SetGlobalLevel(zerologLevel)
-	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
-	zlog.Logger = zlog.Output(zerolog.ConsoleWriter{
-		Out:        &util.DebugLogWriter{},
-		TimeFormat: time.RFC3339,
-	})
-
-	golog.SetOutput(&util.DebugLogWriter{})
 }

@@ -13,13 +13,11 @@ import (
 	"time"
 
 	pb "github.com/daytonaio/runner-docker/gen/pb/runner/v1"
-	"github.com/daytonaio/runner-docker/pkg/services/common"
+	"github.com/daytonaio/runner-docker/pkg/common"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/pkg/stdcopy"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-
-	log "github.com/sirupsen/logrus"
 )
 
 func (s *SandboxService) StartSandbox(ctx context.Context, req *pb.StartSandboxRequest) (*pb.StartSandboxResponse, error) {
@@ -61,7 +59,7 @@ func (s *SandboxService) StartSandbox(ctx context.Context, req *pb.StartSandboxR
 
 	go func() {
 		if err := s.startDaytonaDaemon(processesCtx, req.SandboxId); err != nil {
-			log.Errorf("Failed to start Daytona daemon: %s\n", err.Error())
+			s.log.Error("Failed to start Daytona daemon", "error", err)
 		}
 	}()
 
@@ -131,12 +129,12 @@ func (s *SandboxService) startDaytonaDaemon(ctx context.Context, sandboxId strin
 
 	result, err := s.execSync(ctx, sandboxId, execOptions, execStartOptions)
 	if err != nil {
-		log.Errorf("Error starting Daytona daemon: %s", err.Error())
+		s.log.Error("Error starting Daytona daemon", "error", err)
 		return nil
 	}
 
 	if result.ExitCode != 0 && result.StdErr != "" {
-		log.Errorf("Error starting Daytona daemon: %s", string(result.StdErr))
+		s.log.Error("Error starting Daytona daemon", "error", string(result.StdErr))
 		return nil
 	}
 

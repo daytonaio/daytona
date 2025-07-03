@@ -5,6 +5,7 @@ package snapshot
 
 import (
 	"io"
+	"log/slog"
 
 	pb "github.com/daytonaio/runner-docker/gen/pb/runner/v1"
 	"github.com/daytonaio/runner-docker/pkg/cache"
@@ -15,6 +16,7 @@ type SnapshotServiceConfig struct {
 	DockerClient client.APIClient
 	Cache        cache.IRunnerCache
 	LogWriter    io.Writer
+	Log          *slog.Logger
 }
 
 type SnapshotService struct {
@@ -22,6 +24,7 @@ type SnapshotService struct {
 	dockerClient client.APIClient
 	cache        cache.IRunnerCache
 	logWriter    io.Writer
+	log          *slog.Logger
 }
 
 func NewSnapshotService(config SnapshotServiceConfig) *SnapshotService {
@@ -29,5 +32,6 @@ func NewSnapshotService(config SnapshotServiceConfig) *SnapshotService {
 		dockerClient: config.DockerClient,
 		cache:        config.Cache,
 		logWriter:    config.LogWriter,
+		log:          config.Log.With("service", "snapshot"),
 	}
 }

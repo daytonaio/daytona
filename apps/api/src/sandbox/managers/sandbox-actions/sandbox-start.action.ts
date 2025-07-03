@@ -390,6 +390,7 @@ export class SandboxStartAction extends SandboxAction {
       case SandboxState.STARTED: {
         let daemonVersion: string | undefined
         try {
+          // @ts-ignore
           daemonVersion = await runnerAdapter.getDaemonVersion(sandbox)
         } catch (e) {
           this.logger.error(`Failed to get sandbox daemon version for sandbox ${sandbox.id}:`, e)

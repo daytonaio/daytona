@@ -10,7 +10,7 @@ import (
 
 	pb "github.com/daytonaio/runner-docker/gen/pb/runner/v1"
 	"github.com/daytonaio/runner-docker/internal/metrics"
-	"github.com/daytonaio/runner-docker/pkg/services/common"
+	"github.com/daytonaio/runner-docker/pkg/common"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/errdefs"
 )

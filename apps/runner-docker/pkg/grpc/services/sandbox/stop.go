@@ -9,7 +9,7 @@ import (
 	"time"
 
 	pb "github.com/daytonaio/runner-docker/gen/pb/runner/v1"
-	"github.com/daytonaio/runner-docker/pkg/services/common"
+	"github.com/daytonaio/runner-docker/pkg/common"
 	"github.com/docker/docker/api/types/container"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"

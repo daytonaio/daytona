@@ -10,21 +10,19 @@ import (
 
 	pb "github.com/daytonaio/runner-docker/gen/pb/runner/v1"
 	"github.com/daytonaio/runner-docker/internal/util"
-	"github.com/daytonaio/runner-docker/pkg/services/common"
+	"github.com/daytonaio/runner-docker/pkg/common"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/image"
 	"github.com/docker/docker/errdefs"
 	"github.com/docker/docker/pkg/jsonmessage"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-
-	log "github.com/sirupsen/logrus"
 )
 
 func (s *SandboxService) CreateBackup(ctx context.Context, req *pb.CreateBackupRequest) (*pb.CreateBackupResponse, error) {
 	s.cache.SetBackupState(ctx, req.GetSandboxId(), pb.BackupState_BACKUP_STATE_PENDING)
 
-	log.Infof("Creating snapshot for container %s...", req.GetSandboxId())
+	s.log.Info("Creating snapshot for container", "sandboxId", req.GetSandboxId())
 
 	s.cache.SetBackupState(ctx, req.GetSandboxId(), pb.BackupState_BACKUP_STATE_IN_PROGRESS)
 
@@ -56,7 +54,7 @@ func (s *SandboxService) CreateBackup(ctx context.Context, req *pb.CreateBackupR
 
 	s.cache.SetBackupState(ctx, req.GetSandboxId(), pb.BackupState_BACKUP_STATE_COMPLETED)
 
-	log.Infof("Backup (%s) for sandbox %s created successfully", req.GetSnapshot(), req.GetSandboxId())
+	s.log.Info("Backup created successfully", "snapshot", req.GetSnapshot(), "sandboxId", req.GetSandboxId())
 
 	// TODO: Duplicate code from RemoveSnapshot, check later
 	_, err = s.dockerClient.ImageRemove(ctx, req.GetSnapshot(), image.RemoveOptions{
@@ -65,11 +63,11 @@ func (s *SandboxService) CreateBackup(ctx context.Context, req *pb.CreateBackupR
 	})
 	if err != nil {
 		if errdefs.IsNotFound(err) {
-			log.Infof("Snapshot %s already removed and not found", req.GetSnapshot())
+			s.log.Info("Snapshot already removed and not found", "snapshot", req.GetSnapshot())
 		}
-		log.Errorf("Error removing snapshot %s: %v", req.GetSnapshot(), err)
+		s.log.Error("Error removing snapshot", "snapshot", req.GetSnapshot(), "error", err)
 	} else {
-		log.Infof("Snapshot %s removed successfully", req.GetSnapshot())
+		s.log.Info("Snapshot removed successfully", "snapshot", req.GetSnapshot())
 	}
 
 	return &pb.CreateBackupResponse{
@@ -81,19 +79,19 @@ func (s *SandboxService) commitContainer(ctx context.Context, sandboxId, snapsho
 	const maxRetries = 3
 
 	for attempt := 1; attempt <= maxRetries; attempt++ {
-		log.Infof("Committing container %s (attempt %d/%d)...", sandboxId, attempt, maxRetries)
+		s.log.Info("Committing container", "sandboxId", sandboxId, "attempt", attempt, "maxRetries", maxRetries)
 
 		commitResp, err := s.dockerClient.ContainerCommit(ctx, sandboxId, container.CommitOptions{
 			Reference: snapshot,
 			Pause:     false,
 		})
 		if err == nil {
-			log.Infof("Container %s committed successfully with snapshot ID: %s", sandboxId, commitResp.ID)
+			s.log.Info("Container committed successfully", "sandboxId", sandboxId, "snapshotId", commitResp.ID)
 			return nil
 		}
 
 		if attempt < maxRetries {
-			log.Warnf("Failed to commit container %s (attempt %d/%d): %v", sandboxId, attempt, maxRetries, err)
+			s.log.Warn("Failed to commit container", "sandboxId", sandboxId, "attempt", attempt, "maxRetries", maxRetries, "error", err)
 			continue
 		}
 

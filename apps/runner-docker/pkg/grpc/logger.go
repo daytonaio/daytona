@@ -1,18 +1,18 @@
 // Copyright 2025 Daytona Platforms Inc.
 // SPDX-License-Identifier: AGPL-3.0
 
-package interceptors
+package grpc
 
 import (
 	"context"
+	"log/slog"
 
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
-	"github.com/rs/zerolog"
 )
 
-func interceptorLogger(l *zerolog.Logger) logging.Logger {
+func interceptorLogger(l *slog.Logger) logging.Logger {
 	return logging.LoggerFunc(func(ctx context.Context, level logging.Level, msg string, fields ...any) {
-		logger := l.With().Fields(fields).Logger()
-		logger.Info().Msg(msg)
+		logger := l.With(fields...)
+		logger.Info(msg)
 	})
 }

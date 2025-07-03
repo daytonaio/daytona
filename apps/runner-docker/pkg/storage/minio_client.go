@@ -9,7 +9,7 @@ import (
 	"io"
 	"strings"
 
-	"github.com/daytonaio/runner-docker/cmd/config"
+	"github.com/daytonaio/runner-docker/internal/config"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 )
