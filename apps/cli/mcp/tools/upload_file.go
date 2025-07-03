@@ -18,7 +18,7 @@ import (
 
 type FileUploadArgs struct {
 	Id        *string `json:"id,omitempty"`
-	FilePath  *string `json:"file_path,omitempty"`
+	FilePath  *string `json:"filePath,omitempty"`
 	Content   *string `json:"content,omitempty"`
 	Encoding  *string `json:"encoding,omitempty"`
 	Overwrite *bool   `json:"overwrite,omitempty"`
@@ -27,7 +27,7 @@ type FileUploadArgs struct {
 func GetFileUploadTool() mcp.Tool {
 	return mcp.NewTool("file_upload",
 		mcp.WithDescription("Upload files to the Daytona sandbox from text or base64-encoded binary content. Creates necessary parent directories automatically and verifies successful writes. Files persist during the session and have appropriate permissions for further tool operations. Supports overwrite controls and maintains original file formats."),
-		mcp.WithString("file_path", mcp.Required(), mcp.Description("Path to the file to upload. Files should always be uploaded to the /tmp directory if user doesn't specify otherwise.")),
+		mcp.WithString("filePath", mcp.Required(), mcp.Description("Path to the file to upload. Files should always be uploaded to the /tmp directory if user doesn't specify otherwise.")),
 		mcp.WithString("content", mcp.Required(), mcp.Description("Content of the file to upload.")),
 		mcp.WithString("encoding", mcp.Required(), mcp.Description("Encoding of the file to upload.")),
 		mcp.WithBoolean("overwrite", mcp.Required(), mcp.Description("Overwrite the file if it already exists.")),
@@ -46,7 +46,7 @@ func FileUpload(ctx context.Context, request mcp.CallToolRequest, args FileUploa
 	}
 
 	if args.FilePath == nil || *args.FilePath == "" {
-		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("file_path parameter is required")
+		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("filePath parameter is required")
 	}
 
 	if args.Content == nil || *args.Content == "" {
