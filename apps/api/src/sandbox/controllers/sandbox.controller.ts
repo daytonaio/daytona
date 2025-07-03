@@ -59,6 +59,9 @@ import { NextFunction } from 'http-proxy-middleware/dist/types'
 import { LogProxy } from '../proxy/log-proxy'
 import { BadRequestError } from '../../exceptions/bad-request.exception'
 import { TypedConfigService } from '../../config/typed-config.service'
+import { EventEmitter2 } from '@nestjs/event-emitter'
+import { SandboxEvents } from '../constants/sandbox-events.constants'
+import { SandboxStateUpdatedEvent } from '../events/sandbox-state-updated.event'
 
 @ApiTags('sandbox')
 @Controller('sandbox')
@@ -74,6 +77,7 @@ export class SandboxController {
     private readonly runnerService: RunnerService,
     private readonly sandboxService: SandboxService,
     private readonly configService: TypedConfigService,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   @Get()
@@ -152,14 +156,12 @@ export class SandboxController {
         throw new BadRequestError('Cannot specify Sandbox resources when using a snapshot')
       }
       sandbox = await this.sandboxService.createFromSnapshot(createSandboxDto, organization)
+      if (sandbox.state === SandboxState.STARTED) {
+        return sandbox
+      }
 
-      // Wait for the sandbox to start
-      const sandboxState = await this.waitForSandboxState(
-        sandbox.id,
-        SandboxState.STARTED,
-        30000, // 30 seconds timeout
-      )
-      sandbox.state = sandboxState
+      await this.waitForSandboxStarted(sandbox.id, 30)
+      sandbox.state = SandboxState.STARTED
     }
 
     return sandbox
@@ -239,6 +241,7 @@ export class SandboxController {
   @ApiResponse({
     status: 200,
     description: 'Sandbox has been started',
+    type: SandboxDto,
   })
   @Throttle({ default: { limit: 100 } })
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
@@ -246,8 +249,20 @@ export class SandboxController {
   async startSandbox(
     @AuthContext() authContext: OrganizationAuthContext,
     @Param('sandboxId') sandboxId: string,
-  ): Promise<void> {
-    return this.sandboxService.start(sandboxId, authContext.organization)
+  ): Promise<SandboxDto> {
+    await this.sandboxService.start(sandboxId, authContext.organization)
+
+    const sandbox = await this.waitForSandboxStarted(sandboxId, 30)
+
+    if (!sandbox.runnerDomain) {
+      const runner = await this.runnerService.findBySandboxId(sandboxId)
+      if (!runner) {
+        throw new NotFoundException(`Runner for sandbox ${sandboxId} not found`)
+      }
+      sandbox.runnerDomain = runner.domain
+    }
+
+    return sandbox
   }
 
   @Post(':sandboxId/stop')
@@ -513,27 +528,33 @@ export class SandboxController {
     return logProxy.create()
   }
 
-  private async waitForSandboxState(
-    sandboxId: string,
-    desiredState: SandboxState,
-    timeout: number,
-  ): Promise<SandboxState> {
-    const startTime = Date.now()
-
-    let sandboxState: SandboxState
-    while (Date.now() - startTime < timeout) {
-      const sandbox = await this.sandboxService.findOne(sandboxId)
-      sandboxState = sandbox.state
-      if (
-        sandboxState === desiredState ||
-        sandboxState === SandboxState.ERROR ||
-        sandboxState === SandboxState.BUILD_FAILED
-      ) {
-        return sandboxState
+  private async waitForSandboxStarted(sandboxId: string, timeoutSeconds: number): Promise<SandboxDto> {
+    const waitForStarted = new Promise<SandboxDto>((resolve, reject) => {
+      // eslint-disable-next-line
+      let timeout: NodeJS.Timeout
+      const handleStateUpdated = (event: SandboxStateUpdatedEvent) => {
+        if (event.sandbox.id !== sandboxId) {
+          return
+        }
+        if (event.sandbox.state === SandboxState.STARTED) {
+          this.eventEmitter.off(SandboxEvents.STATE_UPDATED, handleStateUpdated)
+          clearTimeout(timeout)
+          resolve(SandboxDto.fromSandbox(event.sandbox, ''))
+        }
+        if (event.sandbox.state === SandboxState.ERROR || event.sandbox.state === SandboxState.BUILD_FAILED) {
+          this.eventEmitter.off(SandboxEvents.STATE_UPDATED, handleStateUpdated)
+          clearTimeout(timeout)
+          reject(new BadRequestError(`Sandbox failed to start: ${event.sandbox.errorReason}`))
+        }
       }
-      await new Promise((resolve) => setTimeout(resolve, 100)) // Wait 100 ms before checking again
-    }
 
-    return sandboxState
+      this.eventEmitter.on(SandboxEvents.STATE_UPDATED, handleStateUpdated)
+      timeout = setTimeout(() => {
+        this.eventEmitter.off(SandboxEvents.STATE_UPDATED, handleStateUpdated)
+        reject(new BadRequestError(`Sandbox failed to start: Timeout after ${timeoutSeconds} seconds`))
+      }, timeoutSeconds * 1000)
+    })
+
+    return waitForStarted
   }
 }

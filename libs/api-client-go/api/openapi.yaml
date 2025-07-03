@@ -1288,6 +1288,10 @@ paths:
           style: simple
       responses:
         '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Sandbox'
           description: Sandbox has been started
       security:
         - bearer: []
