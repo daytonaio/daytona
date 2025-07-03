@@ -1,6 +1,37 @@
 [build-system]
-requires = ["setuptools>=61.0"]
-build-backend = "setuptools.build_meta"
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[project]
+name = "monorepo"
+version = "0.0.0-dev"
+requires-python = "^3.9"
+
+[tool.poetry]
+package-mode = false
+
+[tool.poetry.dependencies]
+daytona = {path = "libs/sdk-python", develop = true}
+daytona_api_client = {path = "libs/api-client-python", develop = true}
+daytona_api_client_async = {path = "libs/api-client-python-async", develop = true}
+
+[tool.poetry.group.dev.dependencies]
+pydoc-markdown = ">=4.8.0,<5.0.0"
+build = ">=1.0.3"
+wheel = ">=0.41.2"
+setuptools = ">=68.0.0"
+twine = ">=4.0.2"
+nbqa = ">=1.0.0,<2.0.0"
+black = {extras = ["jupyter"], version = ">=23.1.0,<24.0.0"}
+pylint = ">=3.0.0,<4.0.0"
+isort = ">=5.10.0,<6.0.0"
+matplotlib = ">=3.0.0,<4.0.0"
+unasync = ">=0.6.0,<0.7.0"
+docutils = "!=0.21.post1"
+deptry = "^0.23.0"
+
+[tool.basedpyright]
+typeCheckingMode = "off"
 
 [tool.black]
 target-version = ['py310']
@@ -33,6 +64,3 @@ disable = [
 ]
 const-rgx = "(([A-Z_][A-Z0-9_]*)|([a-z_][a-z0-9_]*))"
 allowed-redefined-builtins = ["id"]
-
-[tool.basedpyright]
-typeCheckingMode = "off"

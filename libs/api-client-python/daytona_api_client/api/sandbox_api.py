@@ -42,17 +42,19 @@ class SandboxApi:
             api_client = ApiClient.get_default()
         self.api_client = api_client
 
+
     @validate_call
     def archive_sandbox(
         self,
         sandbox_id: StrictStr,
-        x_daytona_organization_id: Annotated[
-            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
-        ] = None,
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -86,7 +88,7 @@ class SandboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """  # noqa: E501
+        """ # noqa: E501
 
         _param = self._archive_sandbox_serialize(
             sandbox_id=sandbox_id,
@@ -94,30 +96,35 @@ class SandboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index,
+            _host_index=_host_index
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": None,
+            '200': None,
         }
-        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         ).data
 
+
     @validate_call
     def archive_sandbox_with_http_info(
         self,
         sandbox_id: StrictStr,
-        x_daytona_organization_id: Annotated[
-            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
-        ] = None,
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -151,7 +158,7 @@ class SandboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """  # noqa: E501
+        """ # noqa: E501
 
         _param = self._archive_sandbox_serialize(
             sandbox_id=sandbox_id,
@@ -159,30 +166,35 @@ class SandboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index,
+            _host_index=_host_index
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": None,
+            '200': None,
         }
-        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         )
 
+
     @validate_call
     def archive_sandbox_without_preload_content(
         self,
         sandbox_id: StrictStr,
-        x_daytona_organization_id: Annotated[
-            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
-        ] = None,
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -216,7 +228,7 @@ class SandboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """  # noqa: E501
+        """ # noqa: E501
 
         _param = self._archive_sandbox_serialize(
             sandbox_id=sandbox_id,
@@ -224,14 +236,18 @@ class SandboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index,
+            _host_index=_host_index
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": None,
+            '200': None,
         }
-        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
         return response_data.response
+
 
     def _archive_sandbox_serialize(
         self,
@@ -242,33 +258,43 @@ class SandboxApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
+
         _host = None
 
-        _collection_formats: Dict[str, str] = {}
+        _collection_formats: Dict[str, str] = {
+        }
 
         _path_params: Dict[str, str] = {}
         _query_params: List[Tuple[str, str]] = []
         _header_params: Dict[str, Optional[str]] = _headers or {}
         _form_params: List[Tuple[str, str]] = []
-        _files: Dict[str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]] = {}
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        ] = {}
         _body_params: Optional[bytes] = None
 
         # process the path parameters
         if sandbox_id is not None:
-            _path_params["sandboxId"] = sandbox_id
+            _path_params['sandboxId'] = sandbox_id
         # process the query parameters
         # process the header parameters
         if x_daytona_organization_id is not None:
-            _header_params["X-Daytona-Organization-ID"] = x_daytona_organization_id
+            _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id
         # process the form parameters
         # process the body parameter
 
+
+
+
         # authentication setting
-        _auth_settings: List[str] = ["bearer", "oauth2"]
+        _auth_settings: List[str] = [
+            'bearer', 
+            'oauth2'
+        ]
 
         return self.api_client.param_serialize(
-            method="POST",
-            resource_path="/sandbox/{sandboxId}/archive",
+            method='POST',
+            resource_path='/sandbox/{sandboxId}/archive',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -278,20 +304,24 @@ class SandboxApi:
             auth_settings=_auth_settings,
             collection_formats=_collection_formats,
             _host=_host,
-            _request_auth=_request_auth,
+            _request_auth=_request_auth
         )
+
+
+
 
     @validate_call
     def create_backup(
         self,
         sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
-        x_daytona_organization_id: Annotated[
-            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
-        ] = None,
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -325,7 +355,7 @@ class SandboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """  # noqa: E501
+        """ # noqa: E501
 
         _param = self._create_backup_serialize(
             sandbox_id=sandbox_id,
@@ -333,30 +363,35 @@ class SandboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index,
+            _host_index=_host_index
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "Sandbox",
+            '200': "Sandbox",
         }
-        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         ).data
 
+
     @validate_call
     def create_backup_with_http_info(
         self,
         sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
-        x_daytona_organization_id: Annotated[
-            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
-        ] = None,
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -390,7 +425,7 @@ class SandboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """  # noqa: E501
+        """ # noqa: E501
 
         _param = self._create_backup_serialize(
             sandbox_id=sandbox_id,
@@ -398,30 +433,35 @@ class SandboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index,
+            _host_index=_host_index
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "Sandbox",
+            '200': "Sandbox",
         }
-        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         )
 
+
     @validate_call
     def create_backup_without_preload_content(
         self,
         sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
-        x_daytona_organization_id: Annotated[
-            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
-        ] = None,
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -455,7 +495,7 @@ class SandboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """  # noqa: E501
+        """ # noqa: E501
 
         _param = self._create_backup_serialize(
             sandbox_id=sandbox_id,
@@ -463,14 +503,18 @@ class SandboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index,
+            _host_index=_host_index
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "Sandbox",
+            '200': "Sandbox",
         }
-        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
         return response_data.response
+
 
     def _create_backup_serialize(
         self,
@@ -481,37 +525,50 @@ class SandboxApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
+
         _host = None
 
-        _collection_formats: Dict[str, str] = {}
+        _collection_formats: Dict[str, str] = {
+        }
 
         _path_params: Dict[str, str] = {}
         _query_params: List[Tuple[str, str]] = []
         _header_params: Dict[str, Optional[str]] = _headers or {}
         _form_params: List[Tuple[str, str]] = []
-        _files: Dict[str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]] = {}
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        ] = {}
         _body_params: Optional[bytes] = None
 
         # process the path parameters
         if sandbox_id is not None:
-            _path_params["sandboxId"] = sandbox_id
+            _path_params['sandboxId'] = sandbox_id
         # process the query parameters
         # process the header parameters
         if x_daytona_organization_id is not None:
-            _header_params["X-Daytona-Organization-ID"] = x_daytona_organization_id
+            _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id
         # process the form parameters
         # process the body parameter
 
+
         # set the HTTP header `Accept`
-        if "Accept" not in _header_params:
-            _header_params["Accept"] = self.api_client.select_header_accept(["application/json"])
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
+                [
+                    'application/json'
+                ]
+            )
+
 
         # authentication setting
-        _auth_settings: List[str] = ["bearer", "oauth2"]
+        _auth_settings: List[str] = [
+            'bearer', 
+            'oauth2'
+        ]
 
         return self.api_client.param_serialize(
-            method="POST",
-            resource_path="/sandbox/{sandboxId}/backup",
+            method='POST',
+            resource_path='/sandbox/{sandboxId}/backup',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -521,20 +578,24 @@ class SandboxApi:
             auth_settings=_auth_settings,
             collection_formats=_collection_formats,
             _host=_host,
-            _request_auth=_request_auth,
+            _request_auth=_request_auth
         )
+
+
+
 
     @validate_call
     def create_sandbox(
         self,
         create_sandbox: CreateSandbox,
-        x_daytona_organization_id: Annotated[
-            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
-        ] = None,
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -568,7 +629,7 @@ class SandboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """  # noqa: E501
+        """ # noqa: E501
 
         _param = self._create_sandbox_serialize(
             create_sandbox=create_sandbox,
@@ -576,30 +637,35 @@ class SandboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index,
+            _host_index=_host_index
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "Sandbox",
+            '200': "Sandbox",
         }
-        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         ).data
 
+
     @validate_call
     def create_sandbox_with_http_info(
         self,
         create_sandbox: CreateSandbox,
-        x_daytona_organization_id: Annotated[
-            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
-        ] = None,
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -633,7 +699,7 @@ class SandboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """  # noqa: E501
+        """ # noqa: E501
 
         _param = self._create_sandbox_serialize(
             create_sandbox=create_sandbox,
@@ -641,30 +707,35 @@ class SandboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index,
+            _host_index=_host_index
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "Sandbox",
+            '200': "Sandbox",
         }
-        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         )
 
+
     @validate_call
     def create_sandbox_without_preload_content(
         self,
         create_sandbox: CreateSandbox,
-        x_daytona_organization_id: Annotated[
-            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
-        ] = None,
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -698,7 +769,7 @@ class SandboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """  # noqa: E501
+        """ # noqa: E501
 
         _param = self._create_sandbox_serialize(
             create_sandbox=create_sandbox,
@@ -706,14 +777,18 @@ class SandboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index,
+            _host_index=_host_index
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "Sandbox",
+            '200': "Sandbox",
         }
-        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
         return response_data.response
+
 
     def _create_sandbox_serialize(
         self,
@@ -724,45 +799,63 @@ class SandboxApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
+
         _host = None
 
-        _collection_formats: Dict[str, str] = {}
+        _collection_formats: Dict[str, str] = {
+        }
 
         _path_params: Dict[str, str] = {}
         _query_params: List[Tuple[str, str]] = []
         _header_params: Dict[str, Optional[str]] = _headers or {}
         _form_params: List[Tuple[str, str]] = []
-        _files: Dict[str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]] = {}
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        ] = {}
         _body_params: Optional[bytes] = None
 
         # process the path parameters
         # process the query parameters
         # process the header parameters
         if x_daytona_organization_id is not None:
-            _header_params["X-Daytona-Organization-ID"] = x_daytona_organization_id
+            _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id
         # process the form parameters
         # process the body parameter
         if create_sandbox is not None:
             _body_params = create_sandbox
 
+
         # set the HTTP header `Accept`
-        if "Accept" not in _header_params:
-            _header_params["Accept"] = self.api_client.select_header_accept(["application/json"])
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
+                [
+                    'application/json'
+                ]
+            )
 
         # set the HTTP header `Content-Type`
         if _content_type:
-            _header_params["Content-Type"] = _content_type
+            _header_params['Content-Type'] = _content_type
         else:
-            _default_content_type = self.api_client.select_header_content_type(["application/json"])
+            _default_content_type = (
+                self.api_client.select_header_content_type(
+                    [
+                        'application/json'
+                    ]
+                )
+            )
             if _default_content_type is not None:
-                _header_params["Content-Type"] = _default_content_type
+                _header_params['Content-Type'] = _default_content_type
 
         # authentication setting
-        _auth_settings: List[str] = ["bearer", "oauth2"]
+        _auth_settings: List[str] = [
+            'bearer', 
+            'oauth2'
+        ]
 
         return self.api_client.param_serialize(
-            method="POST",
-            resource_path="/sandbox",
+            method='POST',
+            resource_path='/sandbox',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -772,21 +865,25 @@ class SandboxApi:
             auth_settings=_auth_settings,
             collection_formats=_collection_formats,
             _host=_host,
-            _request_auth=_request_auth,
+            _request_auth=_request_auth
         )
+
+
+
 
     @validate_call
     def delete_sandbox(
         self,
         sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
         force: StrictBool,
-        x_daytona_organization_id: Annotated[
-            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
-        ] = None,
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -822,7 +919,7 @@ class SandboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """  # noqa: E501
+        """ # noqa: E501
 
         _param = self._delete_sandbox_serialize(
             sandbox_id=sandbox_id,
@@ -831,31 +928,36 @@ class SandboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index,
+            _host_index=_host_index
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": None,
+            '200': None,
         }
-        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         ).data
 
+
     @validate_call
     def delete_sandbox_with_http_info(
         self,
         sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
         force: StrictBool,
-        x_daytona_organization_id: Annotated[
-            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
-        ] = None,
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -891,7 +993,7 @@ class SandboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """  # noqa: E501
+        """ # noqa: E501
 
         _param = self._delete_sandbox_serialize(
             sandbox_id=sandbox_id,
@@ -900,31 +1002,36 @@ class SandboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index,
+            _host_index=_host_index
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": None,
+            '200': None,
         }
-        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         )
 
+
     @validate_call
     def delete_sandbox_without_preload_content(
         self,
         sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
         force: StrictBool,
-        x_daytona_organization_id: Annotated[
-            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
-        ] = None,
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -960,7 +1067,7 @@ class SandboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """  # noqa: E501
+        """ # noqa: E501
 
         _param = self._delete_sandbox_serialize(
             sandbox_id=sandbox_id,
@@ -969,14 +1076,18 @@ class SandboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index,
+            _host_index=_host_index
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": None,
+            '200': None,
         }
-        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
         return response_data.response
+
 
     def _delete_sandbox_serialize(
         self,
@@ -988,36 +1099,47 @@ class SandboxApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
+
         _host = None
 
-        _collection_formats: Dict[str, str] = {}
+        _collection_formats: Dict[str, str] = {
+        }
 
         _path_params: Dict[str, str] = {}
         _query_params: List[Tuple[str, str]] = []
         _header_params: Dict[str, Optional[str]] = _headers or {}
         _form_params: List[Tuple[str, str]] = []
-        _files: Dict[str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]] = {}
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        ] = {}
         _body_params: Optional[bytes] = None
 
         # process the path parameters
         if sandbox_id is not None:
-            _path_params["sandboxId"] = sandbox_id
+            _path_params['sandboxId'] = sandbox_id
         # process the query parameters
         if force is not None:
-            _query_params.append(("force", force))
-
+            
+            _query_params.append(('force', force))
+            
         # process the header parameters
         if x_daytona_organization_id is not None:
-            _header_params["X-Daytona-Organization-ID"] = x_daytona_organization_id
+            _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id
         # process the form parameters
         # process the body parameter
 
+
+
+
         # authentication setting
-        _auth_settings: List[str] = ["bearer", "oauth2"]
+        _auth_settings: List[str] = [
+            'bearer', 
+            'oauth2'
+        ]
 
         return self.api_client.param_serialize(
-            method="DELETE",
-            resource_path="/sandbox/{sandboxId}",
+            method='DELETE',
+            resource_path='/sandbox/{sandboxId}',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -1027,21 +1149,25 @@ class SandboxApi:
             auth_settings=_auth_settings,
             collection_formats=_collection_formats,
             _host=_host,
-            _request_auth=_request_auth,
+            _request_auth=_request_auth
         )
+
+
+
 
     @validate_call
     def get_build_logs(
         self,
         sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
-        x_daytona_organization_id: Annotated[
-            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
-        ] = None,
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         follow: Annotated[Optional[StrictBool], Field(description="Whether to follow the logs stream")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -1077,7 +1203,7 @@ class SandboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """  # noqa: E501
+        """ # noqa: E501
 
         _param = self._get_build_logs_serialize(
             sandbox_id=sandbox_id,
@@ -1086,31 +1212,36 @@ class SandboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index,
+            _host_index=_host_index
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": None,
+            '200': None,
         }
-        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         ).data
 
+
     @validate_call
     def get_build_logs_with_http_info(
         self,
         sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
-        x_daytona_organization_id: Annotated[
-            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
-        ] = None,
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         follow: Annotated[Optional[StrictBool], Field(description="Whether to follow the logs stream")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -1146,7 +1277,7 @@ class SandboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """  # noqa: E501
+        """ # noqa: E501
 
         _param = self._get_build_logs_serialize(
             sandbox_id=sandbox_id,
@@ -1155,31 +1286,36 @@ class SandboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index,
+            _host_index=_host_index
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": None,
+            '200': None,
         }
-        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         )
 
+
     @validate_call
     def get_build_logs_without_preload_content(
         self,
         sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
-        x_daytona_organization_id: Annotated[
-            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
-        ] = None,
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         follow: Annotated[Optional[StrictBool], Field(description="Whether to follow the logs stream")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -1215,7 +1351,7 @@ class SandboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """  # noqa: E501
+        """ # noqa: E501
 
         _param = self._get_build_logs_serialize(
             sandbox_id=sandbox_id,
@@ -1224,14 +1360,18 @@ class SandboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index,
+            _host_index=_host_index
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": None,
+            '200': None,
         }
-        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
         return response_data.response
+
 
     def _get_build_logs_serialize(
         self,
@@ -1243,36 +1383,47 @@ class SandboxApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
+
         _host = None
 
-        _collection_formats: Dict[str, str] = {}
+        _collection_formats: Dict[str, str] = {
+        }
 
         _path_params: Dict[str, str] = {}
         _query_params: List[Tuple[str, str]] = []
         _header_params: Dict[str, Optional[str]] = _headers or {}
         _form_params: List[Tuple[str, str]] = []
-        _files: Dict[str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]] = {}
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        ] = {}
         _body_params: Optional[bytes] = None
 
         # process the path parameters
         if sandbox_id is not None:
-            _path_params["sandboxId"] = sandbox_id
+            _path_params['sandboxId'] = sandbox_id
         # process the query parameters
         if follow is not None:
-            _query_params.append(("follow", follow))
-
+            
+            _query_params.append(('follow', follow))
+            
         # process the header parameters
         if x_daytona_organization_id is not None:
-            _header_params["X-Daytona-Organization-ID"] = x_daytona_organization_id
+            _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id
         # process the form parameters
         # process the body parameter
 
+
+
+
         # authentication setting
-        _auth_settings: List[str] = ["bearer", "oauth2"]
+        _auth_settings: List[str] = [
+            'bearer', 
+            'oauth2'
+        ]
 
         return self.api_client.param_serialize(
-            method="GET",
-            resource_path="/sandbox/{sandboxId}/build-logs",
+            method='GET',
+            resource_path='/sandbox/{sandboxId}/build-logs',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -1282,21 +1433,25 @@ class SandboxApi:
             auth_settings=_auth_settings,
             collection_formats=_collection_formats,
             _host=_host,
-            _request_auth=_request_auth,
+            _request_auth=_request_auth
         )
+
+
+
 
     @validate_call
     def get_port_preview_url(
         self,
         sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
         port: Annotated[Union[StrictFloat, StrictInt], Field(description="Port number to get preview URL for")],
-        x_daytona_organization_id: Annotated[
-            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
-        ] = None,
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -1332,7 +1487,7 @@ class SandboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """  # noqa: E501
+        """ # noqa: E501
 
         _param = self._get_port_preview_url_serialize(
             sandbox_id=sandbox_id,
@@ -1341,31 +1496,36 @@ class SandboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index,
+            _host_index=_host_index
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "PortPreviewUrl",
+            '200': "PortPreviewUrl",
         }
-        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         ).data
 
+
     @validate_call
     def get_port_preview_url_with_http_info(
         self,
         sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
         port: Annotated[Union[StrictFloat, StrictInt], Field(description="Port number to get preview URL for")],
-        x_daytona_organization_id: Annotated[
-            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
-        ] = None,
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -1401,7 +1561,7 @@ class SandboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """  # noqa: E501
+        """ # noqa: E501
 
         _param = self._get_port_preview_url_serialize(
             sandbox_id=sandbox_id,
@@ -1410,31 +1570,36 @@ class SandboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index,
+            _host_index=_host_index
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "PortPreviewUrl",
+            '200': "PortPreviewUrl",
         }
-        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         )
 
+
     @validate_call
     def get_port_preview_url_without_preload_content(
         self,
         sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
         port: Annotated[Union[StrictFloat, StrictInt], Field(description="Port number to get preview URL for")],
-        x_daytona_organization_id: Annotated[
-            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
-        ] = None,
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -1470,7 +1635,7 @@ class SandboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """  # noqa: E501
+        """ # noqa: E501
 
         _param = self._get_port_preview_url_serialize(
             sandbox_id=sandbox_id,
@@ -1479,14 +1644,18 @@ class SandboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index,
+            _host_index=_host_index
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "PortPreviewUrl",
+            '200': "PortPreviewUrl",
         }
-        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
         return response_data.response
+
 
     def _get_port_preview_url_serialize(
         self,
@@ -1498,39 +1667,52 @@ class SandboxApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
+
         _host = None
 
-        _collection_formats: Dict[str, str] = {}
+        _collection_formats: Dict[str, str] = {
+        }
 
         _path_params: Dict[str, str] = {}
         _query_params: List[Tuple[str, str]] = []
         _header_params: Dict[str, Optional[str]] = _headers or {}
         _form_params: List[Tuple[str, str]] = []
-        _files: Dict[str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]] = {}
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        ] = {}
         _body_params: Optional[bytes] = None
 
         # process the path parameters
         if sandbox_id is not None:
-            _path_params["sandboxId"] = sandbox_id
+            _path_params['sandboxId'] = sandbox_id
         if port is not None:
-            _path_params["port"] = port
+            _path_params['port'] = port
         # process the query parameters
         # process the header parameters
         if x_daytona_organization_id is not None:
-            _header_params["X-Daytona-Organization-ID"] = x_daytona_organization_id
+            _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id
         # process the form parameters
         # process the body parameter
 
+
         # set the HTTP header `Accept`
-        if "Accept" not in _header_params:
-            _header_params["Accept"] = self.api_client.select_header_accept(["application/json"])
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
+                [
+                    'application/json'
+                ]
+            )
+
 
         # authentication setting
-        _auth_settings: List[str] = ["bearer", "oauth2"]
+        _auth_settings: List[str] = [
+            'bearer', 
+            'oauth2'
+        ]
 
         return self.api_client.param_serialize(
-            method="GET",
-            resource_path="/sandbox/{sandboxId}/ports/{port}/preview-url",
+            method='GET',
+            resource_path='/sandbox/{sandboxId}/ports/{port}/preview-url',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -1540,21 +1722,25 @@ class SandboxApi:
             auth_settings=_auth_settings,
             collection_formats=_collection_formats,
             _host=_host,
-            _request_auth=_request_auth,
+            _request_auth=_request_auth
         )
+
+
+
 
     @validate_call
     def get_sandbox(
         self,
         sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
-        x_daytona_organization_id: Annotated[
-            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
-        ] = None,
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         verbose: Annotated[Optional[StrictBool], Field(description="Include verbose output")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -1590,7 +1776,7 @@ class SandboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """  # noqa: E501
+        """ # noqa: E501
 
         _param = self._get_sandbox_serialize(
             sandbox_id=sandbox_id,
@@ -1599,31 +1785,36 @@ class SandboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index,
+            _host_index=_host_index
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "Sandbox",
+            '200': "Sandbox",
         }
-        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         ).data
 
+
     @validate_call
     def get_sandbox_with_http_info(
         self,
         sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
-        x_daytona_organization_id: Annotated[
-            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
-        ] = None,
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         verbose: Annotated[Optional[StrictBool], Field(description="Include verbose output")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -1659,7 +1850,7 @@ class SandboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """  # noqa: E501
+        """ # noqa: E501
 
         _param = self._get_sandbox_serialize(
             sandbox_id=sandbox_id,
@@ -1668,31 +1859,36 @@ class SandboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index,
+            _host_index=_host_index
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "Sandbox",
+            '200': "Sandbox",
         }
-        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         )
 
+
     @validate_call
     def get_sandbox_without_preload_content(
         self,
         sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
-        x_daytona_organization_id: Annotated[
-            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
-        ] = None,
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         verbose: Annotated[Optional[StrictBool], Field(description="Include verbose output")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -1728,7 +1924,7 @@ class SandboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """  # noqa: E501
+        """ # noqa: E501
 
         _param = self._get_sandbox_serialize(
             sandbox_id=sandbox_id,
@@ -1737,14 +1933,18 @@ class SandboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index,
+            _host_index=_host_index
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "Sandbox",
+            '200': "Sandbox",
         }
-        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
         return response_data.response
+
 
     def _get_sandbox_serialize(
         self,
@@ -1756,40 +1956,54 @@ class SandboxApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
+
         _host = None
 
-        _collection_formats: Dict[str, str] = {}
+        _collection_formats: Dict[str, str] = {
+        }
 
         _path_params: Dict[str, str] = {}
         _query_params: List[Tuple[str, str]] = []
         _header_params: Dict[str, Optional[str]] = _headers or {}
         _form_params: List[Tuple[str, str]] = []
-        _files: Dict[str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]] = {}
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        ] = {}
         _body_params: Optional[bytes] = None
 
         # process the path parameters
         if sandbox_id is not None:
-            _path_params["sandboxId"] = sandbox_id
+            _path_params['sandboxId'] = sandbox_id
         # process the query parameters
         if verbose is not None:
-            _query_params.append(("verbose", verbose))
-
+            
+            _query_params.append(('verbose', verbose))
+            
         # process the header parameters
         if x_daytona_organization_id is not None:
-            _header_params["X-Daytona-Organization-ID"] = x_daytona_organization_id
+            _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id
         # process the form parameters
         # process the body parameter
 
+
         # set the HTTP header `Accept`
-        if "Accept" not in _header_params:
-            _header_params["Accept"] = self.api_client.select_header_accept(["application/json"])
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
+                [
+                    'application/json'
+                ]
+            )
+
 
         # authentication setting
-        _auth_settings: List[str] = ["bearer", "oauth2"]
+        _auth_settings: List[str] = [
+            'bearer', 
+            'oauth2'
+        ]
 
         return self.api_client.param_serialize(
-            method="GET",
-            resource_path="/sandbox/{sandboxId}",
+            method='GET',
+            resource_path='/sandbox/{sandboxId}',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -1799,24 +2013,26 @@ class SandboxApi:
             auth_settings=_auth_settings,
             collection_formats=_collection_formats,
             _host=_host,
-            _request_auth=_request_auth,
+            _request_auth=_request_auth
         )
+
+
+
 
     @validate_call
     def list_sandboxes(
         self,
-        x_daytona_organization_id: Annotated[
-            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
-        ] = None,
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         verbose: Annotated[Optional[StrictBool], Field(description="Include verbose output")] = None,
         labels: Annotated[Optional[StrictStr], Field(description="JSON encoded labels to filter by")] = None,
-        include_errored_deleted: Annotated[
-            Optional[StrictBool], Field(description="Include errored and deleted sandboxes")
-        ] = None,
+        include_errored_deleted: Annotated[Optional[StrictBool], Field(description="Include errored and deleted sandboxes")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -1854,7 +2070,7 @@ class SandboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """  # noqa: E501
+        """ # noqa: E501
 
         _param = self._list_sandboxes_serialize(
             x_daytona_organization_id=x_daytona_organization_id,
@@ -1864,34 +2080,37 @@ class SandboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index,
+            _host_index=_host_index
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "List[Sandbox]",
+            '200': "List[Sandbox]",
         }
-        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         ).data
 
+
     @validate_call
     def list_sandboxes_with_http_info(
         self,
-        x_daytona_organization_id: Annotated[
-            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
-        ] = None,
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         verbose: Annotated[Optional[StrictBool], Field(description="Include verbose output")] = None,
         labels: Annotated[Optional[StrictStr], Field(description="JSON encoded labels to filter by")] = None,
-        include_errored_deleted: Annotated[
-            Optional[StrictBool], Field(description="Include errored and deleted sandboxes")
-        ] = None,
+        include_errored_deleted: Annotated[Optional[StrictBool], Field(description="Include errored and deleted sandboxes")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -1929,7 +2148,7 @@ class SandboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """  # noqa: E501
+        """ # noqa: E501
 
         _param = self._list_sandboxes_serialize(
             x_daytona_organization_id=x_daytona_organization_id,
@@ -1939,34 +2158,37 @@ class SandboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index,
+            _host_index=_host_index
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "List[Sandbox]",
+            '200': "List[Sandbox]",
         }
-        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         )
 
+
     @validate_call
     def list_sandboxes_without_preload_content(
         self,
-        x_daytona_organization_id: Annotated[
-            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
-        ] = None,
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         verbose: Annotated[Optional[StrictBool], Field(description="Include verbose output")] = None,
         labels: Annotated[Optional[StrictStr], Field(description="JSON encoded labels to filter by")] = None,
-        include_errored_deleted: Annotated[
-            Optional[StrictBool], Field(description="Include errored and deleted sandboxes")
-        ] = None,
+        include_errored_deleted: Annotated[Optional[StrictBool], Field(description="Include errored and deleted sandboxes")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -2004,7 +2226,7 @@ class SandboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """  # noqa: E501
+        """ # noqa: E501
 
         _param = self._list_sandboxes_serialize(
             x_daytona_organization_id=x_daytona_organization_id,
@@ -2014,14 +2236,18 @@ class SandboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index,
+            _host_index=_host_index
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "List[Sandbox]",
+            '200': "List[Sandbox]",
         }
-        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
         return response_data.response
+
 
     def _list_sandboxes_serialize(
         self,
@@ -2034,44 +2260,60 @@ class SandboxApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
+
         _host = None
 
-        _collection_formats: Dict[str, str] = {}
+        _collection_formats: Dict[str, str] = {
+        }
 
         _path_params: Dict[str, str] = {}
         _query_params: List[Tuple[str, str]] = []
         _header_params: Dict[str, Optional[str]] = _headers or {}
         _form_params: List[Tuple[str, str]] = []
-        _files: Dict[str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]] = {}
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        ] = {}
         _body_params: Optional[bytes] = None
 
         # process the path parameters
         # process the query parameters
         if verbose is not None:
-            _query_params.append(("verbose", verbose))
-
+            
+            _query_params.append(('verbose', verbose))
+            
         if labels is not None:
-            _query_params.append(("labels", labels))
-
+            
+            _query_params.append(('labels', labels))
+            
         if include_errored_deleted is not None:
-            _query_params.append(("includeErroredDeleted", include_errored_deleted))
-
+            
+            _query_params.append(('includeErroredDeleted', include_errored_deleted))
+            
         # process the header parameters
         if x_daytona_organization_id is not None:
-            _header_params["X-Daytona-Organization-ID"] = x_daytona_organization_id
+            _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id
         # process the form parameters
         # process the body parameter
 
+
         # set the HTTP header `Accept`
-        if "Accept" not in _header_params:
-            _header_params["Accept"] = self.api_client.select_header_accept(["application/json"])
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
+                [
+                    'application/json'
+                ]
+            )
+
 
         # authentication setting
-        _auth_settings: List[str] = ["bearer", "oauth2"]
+        _auth_settings: List[str] = [
+            'bearer', 
+            'oauth2'
+        ]
 
         return self.api_client.param_serialize(
-            method="GET",
-            resource_path="/sandbox",
+            method='GET',
+            resource_path='/sandbox',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -2081,21 +2323,25 @@ class SandboxApi:
             auth_settings=_auth_settings,
             collection_formats=_collection_formats,
             _host=_host,
-            _request_auth=_request_auth,
+            _request_auth=_request_auth
         )
+
+
+
 
     @validate_call
     def replace_labels(
         self,
         sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
         sandbox_labels: SandboxLabels,
-        x_daytona_organization_id: Annotated[
-            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
-        ] = None,
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -2131,7 +2377,7 @@ class SandboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """  # noqa: E501
+        """ # noqa: E501
 
         _param = self._replace_labels_serialize(
             sandbox_id=sandbox_id,
@@ -2140,31 +2386,36 @@ class SandboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index,
+            _host_index=_host_index
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "SandboxLabels",
+            '200': "SandboxLabels",
         }
-        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         ).data
 
+
     @validate_call
     def replace_labels_with_http_info(
         self,
         sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
         sandbox_labels: SandboxLabels,
-        x_daytona_organization_id: Annotated[
-            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
-        ] = None,
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -2200,7 +2451,7 @@ class SandboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """  # noqa: E501
+        """ # noqa: E501
 
         _param = self._replace_labels_serialize(
             sandbox_id=sandbox_id,
@@ -2209,31 +2460,36 @@ class SandboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index,
+            _host_index=_host_index
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "SandboxLabels",
+            '200': "SandboxLabels",
         }
-        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         )
 
+
     @validate_call
     def replace_labels_without_preload_content(
         self,
         sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
         sandbox_labels: SandboxLabels,
-        x_daytona_organization_id: Annotated[
-            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
-        ] = None,
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -2269,7 +2525,7 @@ class SandboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """  # noqa: E501
+        """ # noqa: E501
 
         _param = self._replace_labels_serialize(
             sandbox_id=sandbox_id,
@@ -2278,14 +2534,18 @@ class SandboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index,
+            _host_index=_host_index
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "SandboxLabels",
+            '200': "SandboxLabels",
         }
-        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
         return response_data.response
+
 
     def _replace_labels_serialize(
         self,
@@ -2297,47 +2557,65 @@ class SandboxApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
+
         _host = None
 
-        _collection_formats: Dict[str, str] = {}
+        _collection_formats: Dict[str, str] = {
+        }
 
         _path_params: Dict[str, str] = {}
         _query_params: List[Tuple[str, str]] = []
         _header_params: Dict[str, Optional[str]] = _headers or {}
         _form_params: List[Tuple[str, str]] = []
-        _files: Dict[str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]] = {}
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        ] = {}
         _body_params: Optional[bytes] = None
 
         # process the path parameters
         if sandbox_id is not None:
-            _path_params["sandboxId"] = sandbox_id
+            _path_params['sandboxId'] = sandbox_id
         # process the query parameters
         # process the header parameters
         if x_daytona_organization_id is not None:
-            _header_params["X-Daytona-Organization-ID"] = x_daytona_organization_id
+            _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id
         # process the form parameters
         # process the body parameter
         if sandbox_labels is not None:
             _body_params = sandbox_labels
 
+
         # set the HTTP header `Accept`
-        if "Accept" not in _header_params:
-            _header_params["Accept"] = self.api_client.select_header_accept(["application/json"])
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
+                [
+                    'application/json'
+                ]
+            )
 
         # set the HTTP header `Content-Type`
         if _content_type:
-            _header_params["Content-Type"] = _content_type
+            _header_params['Content-Type'] = _content_type
         else:
-            _default_content_type = self.api_client.select_header_content_type(["application/json"])
+            _default_content_type = (
+                self.api_client.select_header_content_type(
+                    [
+                        'application/json'
+                    ]
+                )
+            )
             if _default_content_type is not None:
-                _header_params["Content-Type"] = _default_content_type
+                _header_params['Content-Type'] = _default_content_type
 
         # authentication setting
-        _auth_settings: List[str] = ["bearer", "oauth2"]
+        _auth_settings: List[str] = [
+            'bearer', 
+            'oauth2'
+        ]
 
         return self.api_client.param_serialize(
-            method="PUT",
-            resource_path="/sandbox/{sandboxId}/labels",
+            method='PUT',
+            resource_path='/sandbox/{sandboxId}/labels',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -2347,24 +2625,25 @@ class SandboxApi:
             auth_settings=_auth_settings,
             collection_formats=_collection_formats,
             _host=_host,
-            _request_auth=_request_auth,
+            _request_auth=_request_auth
         )
+
+
+
 
     @validate_call
     def set_auto_archive_interval(
         self,
         sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
-        interval: Annotated[
-            Union[StrictFloat, StrictInt],
-            Field(description="Auto-archive interval in minutes (0 means the maximum interval will be used)"),
-        ],
-        x_daytona_organization_id: Annotated[
-            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
-        ] = None,
+        interval: Annotated[Union[StrictFloat, StrictInt], Field(description="Auto-archive interval in minutes (0 means the maximum interval will be used)")],
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -2400,7 +2679,7 @@ class SandboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """  # noqa: E501
+        """ # noqa: E501
 
         _param = self._set_auto_archive_interval_serialize(
             sandbox_id=sandbox_id,
@@ -2409,34 +2688,36 @@ class SandboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index,
+            _host_index=_host_index
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": None,
+            '200': None,
         }
-        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         ).data
 
+
     @validate_call
     def set_auto_archive_interval_with_http_info(
         self,
         sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
-        interval: Annotated[
-            Union[StrictFloat, StrictInt],
-            Field(description="Auto-archive interval in minutes (0 means the maximum interval will be used)"),
-        ],
-        x_daytona_organization_id: Annotated[
-            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
-        ] = None,
+        interval: Annotated[Union[StrictFloat, StrictInt], Field(description="Auto-archive interval in minutes (0 means the maximum interval will be used)")],
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -2472,7 +2753,7 @@ class SandboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """  # noqa: E501
+        """ # noqa: E501
 
         _param = self._set_auto_archive_interval_serialize(
             sandbox_id=sandbox_id,
@@ -2481,34 +2762,36 @@ class SandboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index,
+            _host_index=_host_index
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": None,
+            '200': None,
         }
-        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         )
 
+
     @validate_call
     def set_auto_archive_interval_without_preload_content(
         self,
         sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
-        interval: Annotated[
-            Union[StrictFloat, StrictInt],
-            Field(description="Auto-archive interval in minutes (0 means the maximum interval will be used)"),
-        ],
-        x_daytona_organization_id: Annotated[
-            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
-        ] = None,
+        interval: Annotated[Union[StrictFloat, StrictInt], Field(description="Auto-archive interval in minutes (0 means the maximum interval will be used)")],
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -2544,7 +2827,7 @@ class SandboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """  # noqa: E501
+        """ # noqa: E501
 
         _param = self._set_auto_archive_interval_serialize(
             sandbox_id=sandbox_id,
@@ -2553,14 +2836,18 @@ class SandboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index,
+            _host_index=_host_index
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": None,
+            '200': None,
         }
-        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
         return response_data.response
+
 
     def _set_auto_archive_interval_serialize(
         self,
@@ -2572,35 +2859,45 @@ class SandboxApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
+
         _host = None
 
-        _collection_formats: Dict[str, str] = {}
+        _collection_formats: Dict[str, str] = {
+        }
 
         _path_params: Dict[str, str] = {}
         _query_params: List[Tuple[str, str]] = []
         _header_params: Dict[str, Optional[str]] = _headers or {}
         _form_params: List[Tuple[str, str]] = []
-        _files: Dict[str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]] = {}
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        ] = {}
         _body_params: Optional[bytes] = None
 
         # process the path parameters
         if sandbox_id is not None:
-            _path_params["sandboxId"] = sandbox_id
+            _path_params['sandboxId'] = sandbox_id
         if interval is not None:
-            _path_params["interval"] = interval
+            _path_params['interval'] = interval
         # process the query parameters
         # process the header parameters
         if x_daytona_organization_id is not None:
-            _header_params["X-Daytona-Organization-ID"] = x_daytona_organization_id
+            _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id
         # process the form parameters
         # process the body parameter
 
+
+
+
         # authentication setting
-        _auth_settings: List[str] = ["bearer", "oauth2"]
+        _auth_settings: List[str] = [
+            'bearer', 
+            'oauth2'
+        ]
 
         return self.api_client.param_serialize(
-            method="POST",
-            resource_path="/sandbox/{sandboxId}/autoarchive/{interval}",
+            method='POST',
+            resource_path='/sandbox/{sandboxId}/autoarchive/{interval}',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -2610,23 +2907,25 @@ class SandboxApi:
             auth_settings=_auth_settings,
             collection_formats=_collection_formats,
             _host=_host,
-            _request_auth=_request_auth,
+            _request_auth=_request_auth
         )
+
+
+
 
     @validate_call
     def set_autostop_interval(
         self,
         sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
-        interval: Annotated[
-            Union[StrictFloat, StrictInt], Field(description="Auto-stop interval in minutes (0 to disable)")
-        ],
-        x_daytona_organization_id: Annotated[
-            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
-        ] = None,
+        interval: Annotated[Union[StrictFloat, StrictInt], Field(description="Auto-stop interval in minutes (0 to disable)")],
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -2662,7 +2961,7 @@ class SandboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """  # noqa: E501
+        """ # noqa: E501
 
         _param = self._set_autostop_interval_serialize(
             sandbox_id=sandbox_id,
@@ -2671,33 +2970,36 @@ class SandboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index,
+            _host_index=_host_index
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": None,
+            '200': None,
         }
-        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         ).data
 
+
     @validate_call
     def set_autostop_interval_with_http_info(
         self,
         sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
-        interval: Annotated[
-            Union[StrictFloat, StrictInt], Field(description="Auto-stop interval in minutes (0 to disable)")
-        ],
-        x_daytona_organization_id: Annotated[
-            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
-        ] = None,
+        interval: Annotated[Union[StrictFloat, StrictInt], Field(description="Auto-stop interval in minutes (0 to disable)")],
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -2733,7 +3035,7 @@ class SandboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """  # noqa: E501
+        """ # noqa: E501
 
         _param = self._set_autostop_interval_serialize(
             sandbox_id=sandbox_id,
@@ -2742,33 +3044,36 @@ class SandboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index,
+            _host_index=_host_index
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": None,
+            '200': None,
         }
-        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         )
 
+
     @validate_call
     def set_autostop_interval_without_preload_content(
         self,
         sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
-        interval: Annotated[
-            Union[StrictFloat, StrictInt], Field(description="Auto-stop interval in minutes (0 to disable)")
-        ],
-        x_daytona_organization_id: Annotated[
-            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
-        ] = None,
+        interval: Annotated[Union[StrictFloat, StrictInt], Field(description="Auto-stop interval in minutes (0 to disable)")],
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -2804,7 +3109,7 @@ class SandboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """  # noqa: E501
+        """ # noqa: E501
 
         _param = self._set_autostop_interval_serialize(
             sandbox_id=sandbox_id,
@@ -2813,14 +3118,18 @@ class SandboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index,
+            _host_index=_host_index
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": None,
+            '200': None,
         }
-        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
         return response_data.response
+
 
     def _set_autostop_interval_serialize(
         self,
@@ -2832,35 +3141,45 @@ class SandboxApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
+
         _host = None
 
-        _collection_formats: Dict[str, str] = {}
+        _collection_formats: Dict[str, str] = {
+        }
 
         _path_params: Dict[str, str] = {}
         _query_params: List[Tuple[str, str]] = []
         _header_params: Dict[str, Optional[str]] = _headers or {}
         _form_params: List[Tuple[str, str]] = []
-        _files: Dict[str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]] = {}
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        ] = {}
         _body_params: Optional[bytes] = None
 
         # process the path parameters
         if sandbox_id is not None:
-            _path_params["sandboxId"] = sandbox_id
+            _path_params['sandboxId'] = sandbox_id
         if interval is not None:
-            _path_params["interval"] = interval
+            _path_params['interval'] = interval
         # process the query parameters
         # process the header parameters
         if x_daytona_organization_id is not None:
-            _header_params["X-Daytona-Organization-ID"] = x_daytona_organization_id
+            _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id
         # process the form parameters
         # process the body parameter
 
+
+
+
         # authentication setting
-        _auth_settings: List[str] = ["bearer", "oauth2"]
+        _auth_settings: List[str] = [
+            'bearer', 
+            'oauth2'
+        ]
 
         return self.api_client.param_serialize(
-            method="POST",
-            resource_path="/sandbox/{sandboxId}/autostop/{interval}",
+            method='POST',
+            resource_path='/sandbox/{sandboxId}/autostop/{interval}',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -2870,20 +3189,24 @@ class SandboxApi:
             auth_settings=_auth_settings,
             collection_formats=_collection_formats,
             _host=_host,
-            _request_auth=_request_auth,
+            _request_auth=_request_auth
         )
+
+
+
 
     @validate_call
     def start_sandbox(
         self,
         sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
-        x_daytona_organization_id: Annotated[
-            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
-        ] = None,
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -2917,7 +3240,7 @@ class SandboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """  # noqa: E501
+        """ # noqa: E501
 
         _param = self._start_sandbox_serialize(
             sandbox_id=sandbox_id,
@@ -2925,30 +3248,35 @@ class SandboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index,
+            _host_index=_host_index
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "Sandbox",
+            '200': "Sandbox",
         }
-        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         ).data
 
+
     @validate_call
     def start_sandbox_with_http_info(
         self,
         sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
-        x_daytona_organization_id: Annotated[
-            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
-        ] = None,
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -2982,7 +3310,7 @@ class SandboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """  # noqa: E501
+        """ # noqa: E501
 
         _param = self._start_sandbox_serialize(
             sandbox_id=sandbox_id,
@@ -2990,30 +3318,35 @@ class SandboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index,
+            _host_index=_host_index
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "Sandbox",
+            '200': "Sandbox",
         }
-        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         )
 
+
     @validate_call
     def start_sandbox_without_preload_content(
         self,
         sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
-        x_daytona_organization_id: Annotated[
-            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
-        ] = None,
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -3047,7 +3380,7 @@ class SandboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """  # noqa: E501
+        """ # noqa: E501
 
         _param = self._start_sandbox_serialize(
             sandbox_id=sandbox_id,
@@ -3055,14 +3388,18 @@ class SandboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index,
+            _host_index=_host_index
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "Sandbox",
+            '200': "Sandbox",
         }
-        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
         return response_data.response
+
 
     def _start_sandbox_serialize(
         self,
@@ -3073,37 +3410,50 @@ class SandboxApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
+
         _host = None
 
-        _collection_formats: Dict[str, str] = {}
+        _collection_formats: Dict[str, str] = {
+        }
 
         _path_params: Dict[str, str] = {}
         _query_params: List[Tuple[str, str]] = []
         _header_params: Dict[str, Optional[str]] = _headers or {}
         _form_params: List[Tuple[str, str]] = []
-        _files: Dict[str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]] = {}
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        ] = {}
         _body_params: Optional[bytes] = None
 
         # process the path parameters
         if sandbox_id is not None:
-            _path_params["sandboxId"] = sandbox_id
+            _path_params['sandboxId'] = sandbox_id
         # process the query parameters
         # process the header parameters
         if x_daytona_organization_id is not None:
-            _header_params["X-Daytona-Organization-ID"] = x_daytona_organization_id
+            _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id
         # process the form parameters
         # process the body parameter
 
+
         # set the HTTP header `Accept`
-        if "Accept" not in _header_params:
-            _header_params["Accept"] = self.api_client.select_header_accept(["application/json"])
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
+                [
+                    'application/json'
+                ]
+            )
+
 
         # authentication setting
-        _auth_settings: List[str] = ["bearer", "oauth2"]
+        _auth_settings: List[str] = [
+            'bearer', 
+            'oauth2'
+        ]
 
         return self.api_client.param_serialize(
-            method="POST",
-            resource_path="/sandbox/{sandboxId}/start",
+            method='POST',
+            resource_path='/sandbox/{sandboxId}/start',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -3113,20 +3463,24 @@ class SandboxApi:
             auth_settings=_auth_settings,
             collection_formats=_collection_formats,
             _host=_host,
-            _request_auth=_request_auth,
+            _request_auth=_request_auth
         )
+
+
+
 
     @validate_call
     def stop_sandbox(
         self,
         sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
-        x_daytona_organization_id: Annotated[
-            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
-        ] = None,
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -3160,7 +3514,7 @@ class SandboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """  # noqa: E501
+        """ # noqa: E501
 
         _param = self._stop_sandbox_serialize(
             sandbox_id=sandbox_id,
@@ -3168,30 +3522,35 @@ class SandboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index,
+            _host_index=_host_index
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": None,
+            '200': None,
         }
-        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         ).data
 
+
     @validate_call
     def stop_sandbox_with_http_info(
         self,
         sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
-        x_daytona_organization_id: Annotated[
-            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
-        ] = None,
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -3225,7 +3584,7 @@ class SandboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """  # noqa: E501
+        """ # noqa: E501
 
         _param = self._stop_sandbox_serialize(
             sandbox_id=sandbox_id,
@@ -3233,30 +3592,35 @@ class SandboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index,
+            _host_index=_host_index
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": None,
+            '200': None,
         }
-        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         )
 
+
     @validate_call
     def stop_sandbox_without_preload_content(
         self,
         sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
-        x_daytona_organization_id: Annotated[
-            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
-        ] = None,
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -3290,7 +3654,7 @@ class SandboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """  # noqa: E501
+        """ # noqa: E501
 
         _param = self._stop_sandbox_serialize(
             sandbox_id=sandbox_id,
@@ -3298,14 +3662,18 @@ class SandboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index,
+            _host_index=_host_index
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": None,
+            '200': None,
         }
-        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
         return response_data.response
+
 
     def _stop_sandbox_serialize(
         self,
@@ -3316,33 +3684,43 @@ class SandboxApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
+
         _host = None
 
-        _collection_formats: Dict[str, str] = {}
+        _collection_formats: Dict[str, str] = {
+        }
 
         _path_params: Dict[str, str] = {}
         _query_params: List[Tuple[str, str]] = []
         _header_params: Dict[str, Optional[str]] = _headers or {}
         _form_params: List[Tuple[str, str]] = []
-        _files: Dict[str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]] = {}
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        ] = {}
         _body_params: Optional[bytes] = None
 
         # process the path parameters
         if sandbox_id is not None:
-            _path_params["sandboxId"] = sandbox_id
+            _path_params['sandboxId'] = sandbox_id
         # process the query parameters
         # process the header parameters
         if x_daytona_organization_id is not None:
-            _header_params["X-Daytona-Organization-ID"] = x_daytona_organization_id
+            _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id
         # process the form parameters
         # process the body parameter
 
+
+
+
         # authentication setting
-        _auth_settings: List[str] = ["bearer", "oauth2"]
+        _auth_settings: List[str] = [
+            'bearer', 
+            'oauth2'
+        ]
 
         return self.api_client.param_serialize(
-            method="POST",
-            resource_path="/sandbox/{sandboxId}/stop",
+            method='POST',
+            resource_path='/sandbox/{sandboxId}/stop',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -3352,21 +3730,25 @@ class SandboxApi:
             auth_settings=_auth_settings,
             collection_formats=_collection_formats,
             _host=_host,
-            _request_auth=_request_auth,
+            _request_auth=_request_auth
         )
+
+
+
 
     @validate_call
     def update_public_status(
         self,
         sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
         is_public: Annotated[StrictBool, Field(description="Public status to set")],
-        x_daytona_organization_id: Annotated[
-            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
-        ] = None,
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -3402,7 +3784,7 @@ class SandboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """  # noqa: E501
+        """ # noqa: E501
 
         _param = self._update_public_status_serialize(
             sandbox_id=sandbox_id,
@@ -3411,31 +3793,36 @@ class SandboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index,
+            _host_index=_host_index
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "201": None,
+            '201': None,
         }
-        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         ).data
 
+
     @validate_call
     def update_public_status_with_http_info(
         self,
         sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
         is_public: Annotated[StrictBool, Field(description="Public status to set")],
-        x_daytona_organization_id: Annotated[
-            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
-        ] = None,
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -3471,7 +3858,7 @@ class SandboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """  # noqa: E501
+        """ # noqa: E501
 
         _param = self._update_public_status_serialize(
             sandbox_id=sandbox_id,
@@ -3480,31 +3867,36 @@ class SandboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index,
+            _host_index=_host_index
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "201": None,
+            '201': None,
         }
-        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         )
 
+
     @validate_call
     def update_public_status_without_preload_content(
         self,
         sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
         is_public: Annotated[StrictBool, Field(description="Public status to set")],
-        x_daytona_organization_id: Annotated[
-            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
-        ] = None,
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -3540,7 +3932,7 @@ class SandboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """  # noqa: E501
+        """ # noqa: E501
 
         _param = self._update_public_status_serialize(
             sandbox_id=sandbox_id,
@@ -3549,14 +3941,18 @@ class SandboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index,
+            _host_index=_host_index
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "201": None,
+            '201': None,
         }
-        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
         return response_data.response
+
 
     def _update_public_status_serialize(
         self,
@@ -3568,35 +3964,45 @@ class SandboxApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
+
         _host = None
 
-        _collection_formats: Dict[str, str] = {}
+        _collection_formats: Dict[str, str] = {
+        }
 
         _path_params: Dict[str, str] = {}
         _query_params: List[Tuple[str, str]] = []
         _header_params: Dict[str, Optional[str]] = _headers or {}
         _form_params: List[Tuple[str, str]] = []
-        _files: Dict[str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]] = {}
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        ] = {}
         _body_params: Optional[bytes] = None
 
         # process the path parameters
         if sandbox_id is not None:
-            _path_params["sandboxId"] = sandbox_id
+            _path_params['sandboxId'] = sandbox_id
         if is_public is not None:
-            _path_params["isPublic"] = is_public
+            _path_params['isPublic'] = is_public
         # process the query parameters
         # process the header parameters
         if x_daytona_organization_id is not None:
-            _header_params["X-Daytona-Organization-ID"] = x_daytona_organization_id
+            _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id
         # process the form parameters
         # process the body parameter
 
+
+
+
         # authentication setting
-        _auth_settings: List[str] = ["bearer", "oauth2"]
+        _auth_settings: List[str] = [
+            'bearer', 
+            'oauth2'
+        ]
 
         return self.api_client.param_serialize(
-            method="POST",
-            resource_path="/sandbox/{sandboxId}/public/{isPublic}",
+            method='POST',
+            resource_path='/sandbox/{sandboxId}/public/{isPublic}',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -3606,5 +4012,7 @@ class SandboxApi:
             auth_settings=_auth_settings,
             collection_formats=_collection_formats,
             _host=_host,
-            _request_auth=_request_auth,
+            _request_auth=_request_auth
         )
+
+

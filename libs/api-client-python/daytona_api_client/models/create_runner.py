@@ -23,12 +23,10 @@ from typing import Any, ClassVar, Dict, List, Union
 from typing import Optional, Set
 from typing_extensions import Self
 
-
 class CreateRunner(BaseModel):
     """
     CreateRunner
-    """  # noqa: E501
-
+    """ # noqa: E501
     domain: StrictStr
     api_url: StrictStr = Field(alias="apiUrl")
     api_key: StrictStr = Field(alias="apiKey")
@@ -41,31 +39,19 @@ class CreateRunner(BaseModel):
     capacity: Union[StrictFloat, StrictInt]
     region: StrictStr
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = [
-        "domain",
-        "apiUrl",
-        "apiKey",
-        "cpu",
-        "memory",
-        "disk",
-        "gpu",
-        "gpuType",
-        "class",
-        "capacity",
-        "region",
-    ]
+    __properties: ClassVar[List[str]] = ["domain", "apiUrl", "apiKey", "cpu", "memory", "disk", "gpu", "gpuType", "class", "capacity", "region"]
 
-    @field_validator("var_class")
+    @field_validator('var_class')
     def var_class_validate_enum(cls, value):
         """Validates the enum"""
-        if value not in set(["small", "medium", "large"]):
+        if value not in set(['small', 'medium', 'large']):
             raise ValueError("must be one of enum values ('small', 'medium', 'large')")
         return value
 
-    @field_validator("region")
+    @field_validator('region')
     def region_validate_enum(cls, value):
         """Validates the enum"""
-        if value not in set(["eu", "us", "asia"]):
+        if value not in set(['eu', 'us', 'asia']):
             raise ValueError("must be one of enum values ('eu', 'us', 'asia')")
         return value
 
@@ -74,6 +60,7 @@ class CreateRunner(BaseModel):
         validate_assignment=True,
         protected_namespaces=(),
     )
+
 
     def to_str(self) -> str:
         """Returns the string representation of the model using alias"""
@@ -100,11 +87,9 @@ class CreateRunner(BaseModel):
           are ignored.
         * Fields in `self.additional_properties` are added to the output dict.
         """
-        excluded_fields: Set[str] = set(
-            [
-                "additional_properties",
-            ]
-        )
+        excluded_fields: Set[str] = set([
+            "additional_properties",
+        ])
 
         _dict = self.model_dump(
             by_alias=True,
@@ -127,24 +112,24 @@ class CreateRunner(BaseModel):
         if not isinstance(obj, dict):
             return cls.model_validate(obj)
 
-        _obj = cls.model_validate(
-            {
-                "domain": obj.get("domain"),
-                "apiUrl": obj.get("apiUrl"),
-                "apiKey": obj.get("apiKey"),
-                "cpu": obj.get("cpu"),
-                "memory": obj.get("memory"),
-                "disk": obj.get("disk"),
-                "gpu": obj.get("gpu"),
-                "gpuType": obj.get("gpuType"),
-                "class": obj.get("class"),
-                "capacity": obj.get("capacity"),
-                "region": obj.get("region"),
-            }
-        )
+        _obj = cls.model_validate({
+            "domain": obj.get("domain"),
+            "apiUrl": obj.get("apiUrl"),
+            "apiKey": obj.get("apiKey"),
+            "cpu": obj.get("cpu"),
+            "memory": obj.get("memory"),
+            "disk": obj.get("disk"),
+            "gpu": obj.get("gpu"),
+            "gpuType": obj.get("gpuType"),
+            "class": obj.get("class"),
+            "capacity": obj.get("capacity"),
+            "region": obj.get("region")
+        })
         # store additional fields in additional_properties
         for _key in obj.keys():
             if _key not in cls.__properties:
                 _obj.additional_properties[_key] = obj.get(_key)
 
         return _obj
+
+

@@ -26,12 +26,10 @@ from daytona_api_client.models.snapshot_state import SnapshotState
 from typing import Optional, Set
 from typing_extensions import Self
 
-
 class SnapshotDto(BaseModel):
     """
     SnapshotDto
-    """  # noqa: E501
-
+    """ # noqa: E501
     id: StrictStr
     organization_id: Optional[StrictStr] = Field(default=None, alias="organizationId")
     general: StrictBool
@@ -49,36 +47,16 @@ class SnapshotDto(BaseModel):
     created_at: datetime = Field(alias="createdAt")
     updated_at: datetime = Field(alias="updatedAt")
     last_used_at: Optional[datetime] = Field(alias="lastUsedAt")
-    build_info: Optional[BuildInfo] = Field(
-        default=None, description="Build information for the snapshot", alias="buildInfo"
-    )
+    build_info: Optional[BuildInfo] = Field(default=None, description="Build information for the snapshot", alias="buildInfo")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = [
-        "id",
-        "organizationId",
-        "general",
-        "name",
-        "imageName",
-        "enabled",
-        "state",
-        "size",
-        "entrypoint",
-        "cpu",
-        "gpu",
-        "mem",
-        "disk",
-        "errorReason",
-        "createdAt",
-        "updatedAt",
-        "lastUsedAt",
-        "buildInfo",
-    ]
+    __properties: ClassVar[List[str]] = ["id", "organizationId", "general", "name", "imageName", "enabled", "state", "size", "entrypoint", "cpu", "gpu", "mem", "disk", "errorReason", "createdAt", "updatedAt", "lastUsedAt", "buildInfo"]
 
     model_config = ConfigDict(
         populate_by_name=True,
         validate_assignment=True,
         protected_namespaces=(),
     )
+
 
     def to_str(self) -> str:
         """Returns the string representation of the model using alias"""
@@ -105,11 +83,9 @@ class SnapshotDto(BaseModel):
           are ignored.
         * Fields in `self.additional_properties` are added to the output dict.
         """
-        excluded_fields: Set[str] = set(
-            [
-                "additional_properties",
-            ]
-        )
+        excluded_fields: Set[str] = set([
+            "additional_properties",
+        ])
 
         _dict = self.model_dump(
             by_alias=True,
@@ -118,7 +94,7 @@ class SnapshotDto(BaseModel):
         )
         # override the default output from pydantic by calling `to_dict()` of build_info
         if self.build_info:
-            _dict["buildInfo"] = self.build_info.to_dict()
+            _dict['buildInfo'] = self.build_info.to_dict()
         # puts key-value pairs in additional_properties in the top level
         if self.additional_properties is not None:
             for _key, _value in self.additional_properties.items():
@@ -127,22 +103,22 @@ class SnapshotDto(BaseModel):
         # set to None if size (nullable) is None
         # and model_fields_set contains the field
         if self.size is None and "size" in self.model_fields_set:
-            _dict["size"] = None
+            _dict['size'] = None
 
         # set to None if entrypoint (nullable) is None
         # and model_fields_set contains the field
         if self.entrypoint is None and "entrypoint" in self.model_fields_set:
-            _dict["entrypoint"] = None
+            _dict['entrypoint'] = None
 
         # set to None if error_reason (nullable) is None
         # and model_fields_set contains the field
         if self.error_reason is None and "error_reason" in self.model_fields_set:
-            _dict["errorReason"] = None
+            _dict['errorReason'] = None
 
         # set to None if last_used_at (nullable) is None
         # and model_fields_set contains the field
         if self.last_used_at is None and "last_used_at" in self.model_fields_set:
-            _dict["lastUsedAt"] = None
+            _dict['lastUsedAt'] = None
 
         return _dict
 
@@ -155,31 +131,31 @@ class SnapshotDto(BaseModel):
         if not isinstance(obj, dict):
             return cls.model_validate(obj)
 
-        _obj = cls.model_validate(
-            {
-                "id": obj.get("id"),
-                "organizationId": obj.get("organizationId"),
-                "general": obj.get("general"),
-                "name": obj.get("name"),
-                "imageName": obj.get("imageName"),
-                "enabled": obj.get("enabled"),
-                "state": obj.get("state"),
-                "size": obj.get("size"),
-                "entrypoint": obj.get("entrypoint"),
-                "cpu": obj.get("cpu"),
-                "gpu": obj.get("gpu"),
-                "mem": obj.get("mem"),
-                "disk": obj.get("disk"),
-                "errorReason": obj.get("errorReason"),
-                "createdAt": obj.get("createdAt"),
-                "updatedAt": obj.get("updatedAt"),
-                "lastUsedAt": obj.get("lastUsedAt"),
-                "buildInfo": BuildInfo.from_dict(obj["buildInfo"]) if obj.get("buildInfo") is not None else None,
-            }
-        )
+        _obj = cls.model_validate({
+            "id": obj.get("id"),
+            "organizationId": obj.get("organizationId"),
+            "general": obj.get("general"),
+            "name": obj.get("name"),
+            "imageName": obj.get("imageName"),
+            "enabled": obj.get("enabled"),
+            "state": obj.get("state"),
+            "size": obj.get("size"),
+            "entrypoint": obj.get("entrypoint"),
+            "cpu": obj.get("cpu"),
+            "gpu": obj.get("gpu"),
+            "mem": obj.get("mem"),
+            "disk": obj.get("disk"),
+            "errorReason": obj.get("errorReason"),
+            "createdAt": obj.get("createdAt"),
+            "updatedAt": obj.get("updatedAt"),
+            "lastUsedAt": obj.get("lastUsedAt"),
+            "buildInfo": BuildInfo.from_dict(obj["buildInfo"]) if obj.get("buildInfo") is not None else None
+        })
         # store additional fields in additional_properties
         for _key in obj.keys():
             if _key not in cls.__properties:
                 _obj.additional_properties[_key] = obj.get(_key)
 
         return _obj
+
+

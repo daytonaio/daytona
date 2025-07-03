@@ -27,19 +27,21 @@ class SnapshotState(str, Enum):
     """
     allowed enum values
     """
-    BUILD_PENDING = "build_pending"
-    BUILDING = "building"
-    PENDING = "pending"
-    PULLING = "pulling"
-    PENDING_VALIDATION = "pending_validation"
-    VALIDATING = "validating"
-    ACTIVE = "active"
-    INACTIVE = "inactive"
-    ERROR = "error"
-    BUILD_FAILED = "build_failed"
-    REMOVING = "removing"
+    BUILD_PENDING = 'build_pending'
+    BUILDING = 'building'
+    PENDING = 'pending'
+    PULLING = 'pulling'
+    PENDING_VALIDATION = 'pending_validation'
+    VALIDATING = 'validating'
+    ACTIVE = 'active'
+    INACTIVE = 'inactive'
+    ERROR = 'error'
+    BUILD_FAILED = 'build_failed'
+    REMOVING = 'removing'
 
     @classmethod
     def from_json(cls, json_str: str) -> Self:
         """Create an instance of SnapshotState from a JSON string"""
         return cls(json.loads(json_str))
+
+

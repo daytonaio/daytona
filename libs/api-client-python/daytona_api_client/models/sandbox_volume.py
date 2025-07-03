@@ -23,12 +23,10 @@ from typing import Any, ClassVar, Dict, List
 from typing import Optional, Set
 from typing_extensions import Self
 
-
 class SandboxVolume(BaseModel):
     """
     SandboxVolume
-    """  # noqa: E501
-
+    """ # noqa: E501
     volume_id: StrictStr = Field(description="The ID of the volume", alias="volumeId")
     mount_path: StrictStr = Field(description="The mount path for the volume", alias="mountPath")
     additional_properties: Dict[str, Any] = {}
@@ -39,6 +37,7 @@ class SandboxVolume(BaseModel):
         validate_assignment=True,
         protected_namespaces=(),
     )
+
 
     def to_str(self) -> str:
         """Returns the string representation of the model using alias"""
@@ -65,11 +64,9 @@ class SandboxVolume(BaseModel):
           are ignored.
         * Fields in `self.additional_properties` are added to the output dict.
         """
-        excluded_fields: Set[str] = set(
-            [
-                "additional_properties",
-            ]
-        )
+        excluded_fields: Set[str] = set([
+            "additional_properties",
+        ])
 
         _dict = self.model_dump(
             by_alias=True,
@@ -92,10 +89,15 @@ class SandboxVolume(BaseModel):
         if not isinstance(obj, dict):
             return cls.model_validate(obj)
 
-        _obj = cls.model_validate({"volumeId": obj.get("volumeId"), "mountPath": obj.get("mountPath")})
+        _obj = cls.model_validate({
+            "volumeId": obj.get("volumeId"),
+            "mountPath": obj.get("mountPath")
+        })
         # store additional fields in additional_properties
         for _key in obj.keys():
             if _key not in cls.__properties:
                 _obj.additional_properties[_key] = obj.get(_key)
 
         return _obj
+
+

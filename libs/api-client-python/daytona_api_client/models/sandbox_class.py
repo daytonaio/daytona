@@ -27,11 +27,13 @@ class SandboxClass(str, Enum):
     """
     allowed enum values
     """
-    SMALL = "small"
-    MEDIUM = "medium"
-    LARGE = "large"
+    SMALL = 'small'
+    MEDIUM = 'medium'
+    LARGE = 'large'
 
     @classmethod
     def from_json(cls, json_str: str) -> Self:
         """Create an instance of SandboxClass from a JSON string"""
         return cls(json.loads(json_str))
+
+

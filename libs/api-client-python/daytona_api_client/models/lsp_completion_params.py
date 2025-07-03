@@ -25,12 +25,10 @@ from daytona_api_client.models.position import Position
 from typing import Optional, Set
 from typing_extensions import Self
 
-
 class LspCompletionParams(BaseModel):
     """
     LspCompletionParams
-    """  # noqa: E501
-
+    """ # noqa: E501
     language_id: StrictStr = Field(description="Language identifier", alias="languageId")
     path_to_project: StrictStr = Field(description="Path to the project", alias="pathToProject")
     uri: StrictStr = Field(description="Document URI")
@@ -44,6 +42,7 @@ class LspCompletionParams(BaseModel):
         validate_assignment=True,
         protected_namespaces=(),
     )
+
 
     def to_str(self) -> str:
         """Returns the string representation of the model using alias"""
@@ -70,11 +69,9 @@ class LspCompletionParams(BaseModel):
           are ignored.
         * Fields in `self.additional_properties` are added to the output dict.
         """
-        excluded_fields: Set[str] = set(
-            [
-                "additional_properties",
-            ]
-        )
+        excluded_fields: Set[str] = set([
+            "additional_properties",
+        ])
 
         _dict = self.model_dump(
             by_alias=True,
@@ -83,10 +80,10 @@ class LspCompletionParams(BaseModel):
         )
         # override the default output from pydantic by calling `to_dict()` of position
         if self.position:
-            _dict["position"] = self.position.to_dict()
+            _dict['position'] = self.position.to_dict()
         # override the default output from pydantic by calling `to_dict()` of context
         if self.context:
-            _dict["context"] = self.context.to_dict()
+            _dict['context'] = self.context.to_dict()
         # puts key-value pairs in additional_properties in the top level
         if self.additional_properties is not None:
             for _key, _value in self.additional_properties.items():
@@ -103,18 +100,18 @@ class LspCompletionParams(BaseModel):
         if not isinstance(obj, dict):
             return cls.model_validate(obj)
 
-        _obj = cls.model_validate(
-            {
-                "languageId": obj.get("languageId"),
-                "pathToProject": obj.get("pathToProject"),
-                "uri": obj.get("uri"),
-                "position": Position.from_dict(obj["position"]) if obj.get("position") is not None else None,
-                "context": CompletionContext.from_dict(obj["context"]) if obj.get("context") is not None else None,
-            }
-        )
+        _obj = cls.model_validate({
+            "languageId": obj.get("languageId"),
+            "pathToProject": obj.get("pathToProject"),
+            "uri": obj.get("uri"),
+            "position": Position.from_dict(obj["position"]) if obj.get("position") is not None else None,
+            "context": CompletionContext.from_dict(obj["context"]) if obj.get("context") is not None else None
+        })
         # store additional fields in additional_properties
         for _key in obj.keys():
             if _key not in cls.__properties:
                 _obj.additional_properties[_key] = obj.get(_key)
 
         return _obj
+
+

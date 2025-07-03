@@ -23,12 +23,10 @@ from typing import Any, ClassVar, Dict, List, Union
 from typing import Optional, Set
 from typing_extensions import Self
 
-
 class FileInfo(BaseModel):
     """
     FileInfo
-    """  # noqa: E501
-
+    """ # noqa: E501
     name: StrictStr
     is_dir: StrictBool = Field(alias="isDir")
     size: Union[StrictFloat, StrictInt]
@@ -45,6 +43,7 @@ class FileInfo(BaseModel):
         validate_assignment=True,
         protected_namespaces=(),
     )
+
 
     def to_str(self) -> str:
         """Returns the string representation of the model using alias"""
@@ -71,11 +70,9 @@ class FileInfo(BaseModel):
           are ignored.
         * Fields in `self.additional_properties` are added to the output dict.
         """
-        excluded_fields: Set[str] = set(
-            [
-                "additional_properties",
-            ]
-        )
+        excluded_fields: Set[str] = set([
+            "additional_properties",
+        ])
 
         _dict = self.model_dump(
             by_alias=True,
@@ -98,21 +95,21 @@ class FileInfo(BaseModel):
         if not isinstance(obj, dict):
             return cls.model_validate(obj)
 
-        _obj = cls.model_validate(
-            {
-                "name": obj.get("name"),
-                "isDir": obj.get("isDir"),
-                "size": obj.get("size"),
-                "modTime": obj.get("modTime"),
-                "mode": obj.get("mode"),
-                "permissions": obj.get("permissions"),
-                "owner": obj.get("owner"),
-                "group": obj.get("group"),
-            }
-        )
+        _obj = cls.model_validate({
+            "name": obj.get("name"),
+            "isDir": obj.get("isDir"),
+            "size": obj.get("size"),
+            "modTime": obj.get("modTime"),
+            "mode": obj.get("mode"),
+            "permissions": obj.get("permissions"),
+            "owner": obj.get("owner"),
+            "group": obj.get("group")
+        })
         # store additional fields in additional_properties
         for _key in obj.keys():
             if _key not in cls.__properties:
                 _obj.additional_properties[_key] = obj.get(_key)
 
         return _obj
+
+
