@@ -941,6 +941,8 @@ export class SandboxManager {
 
       const runnerSandboxApi = this.runnerApiFactory.createSandboxApi(runner)
 
+      await this.updateSandboxState(sandbox.id, SandboxState.RESTORING, runnerId)
+
       await runnerSandboxApi.create({
         id: sandbox.id,
         snapshot: validBackup,
@@ -959,8 +961,6 @@ export class SandboxManager {
           password: registry.password,
         },
       })
-
-      await this.updateSandboxState(sandbox.id, SandboxState.RESTORING, runnerId)
     } else {
       // if sandbox has runner, start sandbox
       const runner = await this.runnerService.findOne(sandbox.runnerId)
