@@ -8,10 +8,9 @@ import (
 	"fmt"
 
 	pb "github.com/daytonaio/runner-docker/gen/pb/runner/v1"
-	"github.com/daytonaio/runner-docker/pkg/services/common"
+	"github.com/daytonaio/runner-docker/pkg/common"
 	"github.com/docker/docker/api/types/image"
 	"github.com/docker/docker/errdefs"
-	log "github.com/sirupsen/logrus"
 )
 
 func (s *SnapshotService) RemoveSnapshot(ctx context.Context, req *pb.RemoveSnapshotRequest) (*pb.RemoveSnapshotResponse, error) {
@@ -21,7 +20,7 @@ func (s *SnapshotService) RemoveSnapshot(ctx context.Context, req *pb.RemoveSnap
 	})
 	if err != nil {
 		if errdefs.IsNotFound(err) {
-			log.Infof("Snapshot %s already removed and not found", req.GetSnapshot())
+			s.log.Info("Snapshot already removed and not found", "snapshot", req.GetSnapshot())
 			return &pb.RemoveSnapshotResponse{
 				Message: fmt.Sprintf("Snapshot %s already removed or not found", req.GetSnapshot()),
 			}, nil
@@ -29,7 +28,7 @@ func (s *SnapshotService) RemoveSnapshot(ctx context.Context, req *pb.RemoveSnap
 		return nil, common.MapDockerError(err)
 	}
 
-	log.Infof("Snapshot %s removed successfully", req.GetSnapshot())
+	s.log.Info("Snapshot removed successfully", "snapshot", req.GetSnapshot())
 
 	return &pb.RemoveSnapshotResponse{
 		Message: fmt.Sprintf("Snapshot %s removed", req.GetSnapshot()),

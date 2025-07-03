@@ -8,9 +8,8 @@ import (
 	"strings"
 
 	pb "github.com/daytonaio/runner-docker/gen/pb/runner/v1"
-	"github.com/daytonaio/runner-docker/pkg/services/common"
+	"github.com/daytonaio/runner-docker/pkg/common"
 	"github.com/docker/docker/api/types/image"
-	log "github.com/sirupsen/logrus"
 )
 
 func (s *SnapshotService) SnapshotExists(ctx context.Context, req *pb.SnapshotExistsRequest) (*pb.SnapshotExistsResponse, error) {
@@ -40,7 +39,7 @@ func (s *SnapshotService) SnapshotExists(ctx context.Context, req *pb.SnapshotEx
 	}
 
 	if found {
-		log.Debugf("Image %s already pulled", snapshotName)
+		s.log.Debug("Image already pulled", "snapshotName", snapshotName)
 	}
 
 	return &pb.SnapshotExistsResponse{

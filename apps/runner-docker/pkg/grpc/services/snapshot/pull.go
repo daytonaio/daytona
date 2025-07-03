@@ -12,10 +12,9 @@ import (
 	pb "github.com/daytonaio/runner-docker/gen/pb/runner/v1"
 	"github.com/daytonaio/runner-docker/internal/constants"
 	"github.com/daytonaio/runner-docker/internal/util"
-	"github.com/daytonaio/runner-docker/pkg/services/common"
+	"github.com/daytonaio/runner-docker/pkg/common"
 	"github.com/docker/docker/api/types/image"
 	"github.com/docker/docker/pkg/jsonmessage"
-	log "github.com/sirupsen/logrus"
 )
 
 func (s *SnapshotService) PullSnapshot(ctx context.Context, req *pb.PullSnapshotRequest) (*pb.PullSnapshotResponse, error) {
@@ -41,7 +40,7 @@ func (s *SnapshotService) PullSnapshot(ctx context.Context, req *pb.PullSnapshot
 		}
 	}
 
-	log.Infof("Pulling snapshot %s...", req.GetSnapshot())
+	s.log.Info("Pulling snapshot", "snapshot", req.GetSnapshot())
 
 	sandboxIdValue := ctx.Value(constants.ID_KEY)
 
@@ -63,7 +62,7 @@ func (s *SnapshotService) PullSnapshot(ctx context.Context, req *pb.PullSnapshot
 		return nil, err
 	}
 
-	log.Infof("Snapshot %s pulled successfully", req.GetSnapshot())
+	s.log.Info("Snapshot pulled successfully", "snapshot", req.GetSnapshot())
 
 	return &pb.PullSnapshotResponse{
 		Message: fmt.Sprintf("Snapshot %s pulled", req.GetSnapshot()),

@@ -5,15 +5,18 @@ package sandbox
 
 import (
 	"io"
+	"log/slog"
 	"sync"
 
 	pb "github.com/daytonaio/runner-docker/gen/pb/runner/v1"
 	"github.com/daytonaio/runner-docker/pkg/cache"
+	"github.com/daytonaio/runner-docker/pkg/grpc/services/snapshot"
 	"github.com/docker/docker/client"
 )
 
 type SandboxServiceConfig struct {
 	DockerClient       client.APIClient
+	SnapshotService    *snapshot.SnapshotService
 	Cache              cache.IRunnerCache
 	LogWriter          io.Writer
 	DaemonPath         string
@@ -21,10 +24,12 @@ type SandboxServiceConfig struct {
 	AWSSecretAccessKey string
 	AWSRegion          string
 	AWSEndpointUrl     string
+	Log                *slog.Logger
 }
 
 type SandboxService struct {
 	pb.UnimplementedSandboxServiceServer
+	snapshotService    *snapshot.SnapshotService
 	dockerClient       client.APIClient
 	cache              cache.IRunnerCache
 	logWriter          io.Writer
@@ -35,11 +40,13 @@ type SandboxService struct {
 	awsRegion          string
 	volumeMutexes      map[string]*sync.Mutex
 	volumeMutexesMutex sync.Mutex
+	log                *slog.Logger
 }
 
 func NewSandboxService(config SandboxServiceConfig) *SandboxService {
 	return &SandboxService{
 		dockerClient:       config.DockerClient,
+		snapshotService:    config.SnapshotService,
 		cache:              config.Cache,
 		logWriter:          config.LogWriter,
 		daemonPath:         config.DaemonPath,
@@ -49,5 +56,6 @@ func NewSandboxService(config SandboxServiceConfig) *SandboxService {
 		awsRegion:          config.AWSRegion,
 		volumeMutexes:      make(map[string]*sync.Mutex),
 		volumeMutexesMutex: sync.Mutex{},
+		log:                config.Log.With("service", "sandbox"),
 	}
 }

@@ -12,15 +12,14 @@ import (
 	"os"
 	"strings"
 
-	"github.com/daytonaio/runner-docker/cmd/config"
 	pb "github.com/daytonaio/runner-docker/gen/pb/runner/v1"
+	"github.com/daytonaio/runner-docker/internal/config"
 	"github.com/daytonaio/runner-docker/internal/util"
-	"github.com/daytonaio/runner-docker/pkg/services/common"
+	"github.com/daytonaio/runner-docker/pkg/common"
 	"github.com/daytonaio/runner-docker/pkg/storage"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/image"
 	"github.com/docker/docker/pkg/jsonmessage"
-	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -174,7 +173,7 @@ func (s *SnapshotService) BuildSnapshot(ctx context.Context, req *pb.BuildSnapsh
 
 	logFile, err := os.OpenFile(logFilePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
 	if err != nil {
-		log.Errorf("Failed to open log file: %v", err)
+		s.log.Error("Failed to open log file", "error", err)
 	}
 	defer logFile.Close()
 

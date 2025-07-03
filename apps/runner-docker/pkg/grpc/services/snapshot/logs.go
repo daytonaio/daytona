@@ -10,9 +10,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/daytonaio/runner-docker/cmd/config"
 	pb "github.com/daytonaio/runner-docker/gen/pb/runner/v1"
-	log "github.com/sirupsen/logrus"
+	"github.com/daytonaio/runner-docker/internal/config"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
@@ -69,14 +68,14 @@ func (s *SnapshotService) GetSnapshotLogs(req *pb.GetSnapshotLogsRequest, stream
 		for {
 			line, err := reader.ReadBytes('\n')
 			if err != nil && err != io.EOF {
-				log.Errorf("Error reading log file: %v", err)
+				s.log.Error("Error reading log file", "error", err)
 				break
 			}
 
 			if len(line) > 0 {
 				err := stream.Send(&pb.GetSnapshotLogsResponse{Content: string(line)})
 				if err != nil {
-					log.Errorf("Error writing to response: %v", err)
+					s.log.Error("Error writing to response", "error", err)
 					break
 				}
 			}
@@ -88,7 +87,7 @@ func (s *SnapshotService) GetSnapshotLogs(req *pb.GetSnapshotLogsRequest, stream
 			Snapshot: checkSnapshotRef,
 		})
 		if err != nil {
-			log.Errorf("Error checking build status: %v", err)
+			s.log.Error("Error checking build status", "error", err)
 			break
 		}
 

@@ -19,7 +19,7 @@
         "assets": [
           {
             "input": "apps/api/src/assets",
-            
+            "glob": "**/*",
             "output": "./assets/"
           },
           {
