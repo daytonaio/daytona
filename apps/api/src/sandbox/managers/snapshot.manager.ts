@@ -515,7 +515,7 @@ export class SnapshotManager {
     const timeoutMinutes = 30
     const timeoutMs = timeoutMinutes * 60 * 1000
     if (Date.now() - snapshot.createdAt.getTime() > timeoutMs) {
-      await this.updateSnapshotState(snapshot.id, SnapshotState.ERROR, 'Timeout while checking initial runner snapshot')
+      await this.updateSnapshotState(snapshot.id, SnapshotState.ERROR, 'Timeout processing snapshot on initial runner')
       return
     }
 
@@ -656,40 +656,9 @@ export class SnapshotManager {
   async processBuildOnRunner(snapshot: Snapshot) {
     // todo: split dockerfile by FROM's and pass all docker registry creds to the building process
 
-    // Check if build has timed out
-    const timeoutMinutes = 30
-    const timeoutMs = timeoutMinutes * 60 * 1000
-    if (Date.now() - snapshot.createdAt.getTime() > timeoutMs) {
-      await this.updateSnapshotState(snapshot.id, SnapshotState.BUILD_FAILED, 'Timeout while building snapshot')
-      return
-    }
-
-    // Get build info
-    if (!snapshot.buildInfo) {
-      await this.updateSnapshotState(snapshot.id, SnapshotState.BUILD_FAILED, 'Missing build information')
-      return
-    }
-
     try {
-      const excludedRunnerIds = await this.runnerService.getRunnersWithMultipleSnapshotsBuilding()
-
-      // Find a runner to build the snapshot on
-      const runner = await this.runnerService.getRandomAvailableRunner({
-        excludedRunnerIds: excludedRunnerIds,
-      })
-
-      // TODO: get only runners where the base snapshot is available (extract from buildInfo)
-
-      if (!runner) {
-        // No ready runners available, retry later
-        return
-      }
-
-      // Assign the runner ID to the snapshot for tracking build progress
-      snapshot.initialRunnerId = runner.id
-      await this.snapshotRepository.save(snapshot)
-
       const registry = await this.dockerRegistryService.getDefaultInternalRegistry()
+      const runner = await this.runnerService.findOne(snapshot.initialRunnerId)
 
       const runnerSnapshotApi = this.runnerApiFactory.createSnapshotApi(runner)
 
@@ -731,10 +700,24 @@ export class SnapshotManager {
   }
 
   async handleSnapshotStatePending(snapshot: Snapshot) {
-    // We default the initial snapshot runner to be US
+    let excludedRunnerIds = []
+
+    if (snapshot.buildInfo) {
+      // TODO: get only runners where the base snapshot is available (extract from buildInfo)
+      excludedRunnerIds = await this.runnerService.getRunnersWithMultipleSnapshotsBuilding()
+    } else {
+      excludedRunnerIds = await this.runnerService.getRunnersWithMultipleSnapshotsPulling()
+    }
+
     const initialRunner = await this.runnerService.getRandomAvailableRunner({
       region: RunnerRegion.US,
+      excludedRunnerIds: excludedRunnerIds,
     })
+
+    if (!initialRunner) {
+      // No runners available, retry later
+      return
+    }
 
     snapshot.initialRunnerId = initialRunner.id
 
