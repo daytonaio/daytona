@@ -17,6 +17,9 @@
 import type { BuildInfo } from './build-info'
 // May contain unused imports in some cases
 // @ts-ignore
+import type { SandboxDesiredState } from './sandbox-desired-state'
+// May contain unused imports in some cases
+// @ts-ignore
 import type { SandboxInfo } from './sandbox-info'
 // May contain unused imports in some cases
 // @ts-ignore
@@ -109,6 +112,12 @@ export interface Workspace {
    * @memberof Workspace
    */
   state?: SandboxState
+  /**
+   * The desired state of the sandbox
+   * @type {SandboxDesiredState}
+   * @memberof Workspace
+   */
+  desiredState?: SandboxDesiredState
   /**
    * The error reason of the sandbox
    * @type {string}

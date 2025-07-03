@@ -82,6 +82,7 @@ models/runner-snapshot-dto.ts
 models/runner-state.ts
 models/runner.ts
 models/sandbox-class.ts
+models/sandbox-desired-state.ts
 models/sandbox-info.ts
 models/sandbox-labels.ts
 models/sandbox-state.ts

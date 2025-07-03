@@ -117,6 +117,17 @@ export class SandboxDto {
   state?: SandboxState
 
   @ApiPropertyOptional({
+    description: 'The desired state of the sandbox',
+    enum: SandboxDesiredState,
+    enumName: 'SandboxDesiredState',
+    example: Object.values(SandboxDesiredState)[0],
+    required: false,
+  })
+  @IsEnum(SandboxDesiredState)
+  @IsOptional()
+  desiredState?: SandboxDesiredState
+
+  @ApiPropertyOptional({
     description: 'The error reason of the sandbox',
     example: 'The sandbox is not running',
     required: false,
@@ -233,6 +244,7 @@ export class SandboxDto {
       labels: sandbox.labels,
       volumes: sandbox.volumes,
       state: this.getSandboxState(sandbox),
+      desiredState: sandbox.desiredState,
       errorReason: sandbox.errorReason,
       backupState: sandbox.backupState,
       backupCreatedAt: sandbox.lastBackupAt?.toISOString(),

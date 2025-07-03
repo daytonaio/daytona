@@ -82,6 +82,7 @@ daytona_api_client_async/models/runner_snapshot_dto.py
 daytona_api_client_async/models/runner_state.py
 daytona_api_client_async/models/sandbox.py
 daytona_api_client_async/models/sandbox_class.py
+daytona_api_client_async/models/sandbox_desired_state.py
 daytona_api_client_async/models/sandbox_info.py
 daytona_api_client_async/models/sandbox_labels.py
 daytona_api_client_async/models/sandbox_state.py

@@ -468,14 +468,29 @@ export class SandboxService {
     this.eventEmitter.emit(SandboxEvents.BACKUP_CREATED, new SandboxBackupCreatedEvent(sandbox))
   }
 
-  async findAll(organizationId: string, labels?: { [key: string]: string }): Promise<Sandbox[]> {
-    return this.sandboxRepository.find({
-      where: {
-        organizationId,
-        state: Not(SandboxState.DESTROYED),
-        ...(labels ? { labels: JsonContains(labels) } : {}),
+  async findAll(
+    organizationId: string,
+    labels?: { [key: string]: string },
+    includeErroredDestroyed?: boolean,
+  ): Promise<Sandbox[]> {
+    const baseFindOptions: FindOptionsWhere<Sandbox> = {
+      organizationId,
+      ...(labels ? { labels: JsonContains(labels) } : {}),
+    }
+
+    const where: FindOptionsWhere<Sandbox>[] = [
+      {
+        ...baseFindOptions,
+        state: Not(In([SandboxState.DESTROYED, SandboxState.ERROR, SandboxState.BUILD_FAILED])),
       },
-    })
+      {
+        ...baseFindOptions,
+        state: In([SandboxState.ERROR, SandboxState.BUILD_FAILED]),
+        ...(includeErroredDestroyed ? {} : { desiredState: Not(SandboxDesiredState.DESTROYED) }),
+      },
+    ]
+
+    return this.sandboxRepository.find({ where })
   }
 
   async findOne(sandboxId: string, returnDestroyed?: boolean): Promise<Sandbox> {
@@ -486,7 +501,12 @@ export class SandboxService {
       },
     })
 
-    if (!sandbox) {
+    if (
+      !sandbox ||
+      (!returnDestroyed &&
+        [SandboxState.ERROR, SandboxState.BUILD_FAILED].includes(sandbox.state) &&
+        sandbox.desiredState !== SandboxDesiredState.DESTROYED)
+    ) {
       throw new NotFoundException(`Sandbox with ID ${sandboxId} not found`)
     }
 

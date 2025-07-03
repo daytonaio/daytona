@@ -20,6 +20,7 @@ import { JwtStrategy } from '../../auth/jwt.strategy'
 import { VolumeEvents } from '../../sandbox/constants/volume-events'
 import { VolumeDto } from '../../sandbox/dto/volume.dto'
 import { VolumeState } from '../../sandbox/enums/volume-state.enum'
+import { SandboxDesiredState } from '../../sandbox/enums/sandbox-desired-state.enum'
 
 @WebSocketGateway({
   path: '/api/socket.io/',
@@ -74,6 +75,16 @@ export class NotificationGateway implements OnGatewayInit, OnModuleInit {
 
   emitSandboxStateUpdated(sandbox: SandboxDto, oldState: SandboxState, newState: SandboxState) {
     this.server.to(sandbox.organizationId).emit(SandboxEvents.STATE_UPDATED, { sandbox, oldState, newState })
+  }
+
+  emitSandboxDesiredStateUpdated(
+    sandbox: SandboxDto,
+    oldDesiredState: SandboxDesiredState,
+    newDesiredState: SandboxDesiredState,
+  ) {
+    this.server
+      .to(sandbox.organizationId)
+      .emit(SandboxEvents.DESIRED_STATE_UPDATED, { sandbox, oldDesiredState, newDesiredState })
   }
 
   emitSnapshotCreated(snapshot: SnapshotDto) {

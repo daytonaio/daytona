@@ -21,6 +21,7 @@ import json
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictFloat, StrictInt, StrictStr, field_validator
 from typing import Any, ClassVar, Dict, List, Optional, Union
 from daytona_api_client.models.build_info import BuildInfo
+from daytona_api_client.models.sandbox_desired_state import SandboxDesiredState
 from daytona_api_client.models.sandbox_info import SandboxInfo
 from daytona_api_client.models.sandbox_state import SandboxState
 from daytona_api_client.models.sandbox_volume import SandboxVolume
@@ -46,6 +47,9 @@ class Workspace(BaseModel):
     memory: Union[StrictFloat, StrictInt] = Field(description="The memory quota for the sandbox")
     disk: Union[StrictFloat, StrictInt] = Field(description="The disk quota for the sandbox")
     state: Optional[SandboxState] = Field(default=None, description="The state of the sandbox")
+    desired_state: Optional[SandboxDesiredState] = Field(
+        default=None, description="The desired state of the sandbox", alias="desiredState"
+    )
     error_reason: Optional[StrictStr] = Field(
         default=None, description="The error reason of the sandbox", alias="errorReason"
     )
@@ -100,6 +104,7 @@ class Workspace(BaseModel):
         "memory",
         "disk",
         "state",
+        "desiredState",
         "errorReason",
         "backupState",
         "backupCreatedAt",
@@ -235,6 +240,7 @@ class Workspace(BaseModel):
                 "memory": obj.get("memory"),
                 "disk": obj.get("disk"),
                 "state": obj.get("state"),
+                "desiredState": obj.get("desiredState"),
                 "errorReason": obj.get("errorReason"),
                 "backupState": obj.get("backupState"),
                 "backupCreatedAt": obj.get("backupCreatedAt"),

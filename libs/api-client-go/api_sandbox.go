@@ -997,6 +997,7 @@ type SandboxAPIListSandboxesRequest struct {
 	xDaytonaOrganizationID *string
 	verbose                *bool
 	labels                 *string
+	includeErroredDeleted  *bool
 }
 
 // Use with JWT to specify the organization ID
@@ -1014,6 +1015,12 @@ func (r SandboxAPIListSandboxesRequest) Verbose(verbose bool) SandboxAPIListSand
 // JSON encoded labels to filter by
 func (r SandboxAPIListSandboxesRequest) Labels(labels string) SandboxAPIListSandboxesRequest {
 	r.labels = &labels
+	return r
+}
+
+// Include errored and deleted sandboxes
+func (r SandboxAPIListSandboxesRequest) IncludeErroredDeleted(includeErroredDeleted bool) SandboxAPIListSandboxesRequest {
+	r.includeErroredDeleted = &includeErroredDeleted
 	return r
 }
 
@@ -1061,6 +1068,9 @@ func (a *SandboxAPIService) ListSandboxesExecute(r SandboxAPIListSandboxesReques
 	}
 	if r.labels != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "labels", r.labels, "form", "")
+	}
+	if r.includeErroredDeleted != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "includeErroredDeleted", r.includeErroredDeleted, "form", "")
 	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
