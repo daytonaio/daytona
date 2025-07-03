@@ -1,7 +1,7 @@
 name: daytona
 services:
   api:
-    image: daytonaio/daytona-api:0.2.2
+    image: daytonaio/daytona-api:0.2.3
     privileged: true
     ports:
       - 3000:3000
@@ -15,7 +15,7 @@ services:
     network_mode: service:api
 
   runner:
-    image: daytonaio/daytona-runner:0.2.1
+    image: daytonaio/daytona-runner:0.2.2
     privileged: true
     network_mode: service:api
 
