@@ -16,7 +16,7 @@ import (
 
 type FileDownloadArgs struct {
 	Id       *string `json:"id,omitempty"`
-	FilePath *string `json:"file_path,omitempty"`
+	FilePath *string `json:"filePath,omitempty"`
 }
 
 type Content struct {
@@ -28,7 +28,7 @@ type Content struct {
 func GetFileDownloadTool() mcp.Tool {
 	return mcp.NewTool("file_download",
 		mcp.WithDescription("Download a file from the Daytona sandbox. Returns the file content either as text or as a base64 encoded image. Handles special cases like matplotlib plots stored as JSON with embedded base64 images."),
-		mcp.WithString("file_path", mcp.Required(), mcp.Description("Path to the file to download.")),
+		mcp.WithString("filePath", mcp.Required(), mcp.Description("Path to the file to download.")),
 		mcp.WithString("id", mcp.Required(), mcp.Description("ID of the sandbox to download the file from.")),
 	)
 }
@@ -44,7 +44,7 @@ func FileDownload(ctx context.Context, request mcp.CallToolRequest, args FileDow
 	}
 
 	if args.FilePath == nil || *args.FilePath == "" {
-		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("file_path parameter is required")
+		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("filePath parameter is required")
 	}
 
 	// Download the file
