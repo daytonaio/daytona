@@ -14,38 +14,42 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func DeleteFile(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+type DeleteFileArgs struct {
+	Id       *string `json:"id,omitempty"`
+	FilePath *string `json:"file_path,omitempty"`
+}
+
+func GetDeleteFileTool() mcp.Tool {
+	return mcp.NewTool("delete_file",
+		mcp.WithDescription("Delete a file or directory in the Daytona sandbox."),
+		mcp.WithString("file_path", mcp.Required(), mcp.Description("Path to the file or directory to delete.")),
+		mcp.WithString("id", mcp.Required(), mcp.Description("ID of the sandbox to delete the file in.")),
+	)
+}
+
+func DeleteFile(ctx context.Context, request mcp.CallToolRequest, args DeleteFileArgs) (*mcp.CallToolResult, error) {
 	apiClient, err := apiclient.GetApiClient(nil, daytonaMCPHeaders)
 	if err != nil {
 		return &mcp.CallToolResult{IsError: true}, err
 	}
 
-	sandboxId := ""
-	if id, ok := request.Params.Arguments["id"]; ok && id != nil {
-		if idStr, ok := id.(string); ok && idStr != "" {
-			sandboxId = idStr
-		}
-	}
-
-	if sandboxId == "" {
+	if args.Id == nil || *args.Id == "" {
 		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("sandbox ID is required")
 	}
 
-	// Get file path from request arguments
-	filePath, ok := request.Params.Arguments["file_path"].(string)
-	if !ok {
+	if args.FilePath == nil || *args.FilePath == "" {
 		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("file_path parameter is required")
 	}
 
 	// Execute delete command
-	execResponse, _, err := apiClient.ToolboxAPI.ExecuteCommand(ctx, sandboxId).
-		ExecuteRequest(*daytonaapiclient.NewExecuteRequest(fmt.Sprintf("rm -rf %s", filePath))).
+	execResponse, _, err := apiClient.ToolboxAPI.ExecuteCommand(ctx, *args.Id).
+		ExecuteRequest(*daytonaapiclient.NewExecuteRequest(fmt.Sprintf("rm -rf %s", *args.FilePath))).
 		Execute()
 	if err != nil {
 		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("error deleting file: %v", err)
 	}
 
-	log.Infof("Deleted file: %s", filePath)
+	log.Infof("Deleted file: %s", *args.FilePath)
 
-	return mcp.NewToolResultText(fmt.Sprintf("Deleted file: %s\nOutput: %s", filePath, execResponse.Result)), nil
+	return mcp.NewToolResultText(fmt.Sprintf("Deleted file: %s\nOutput: %s", *args.FilePath, execResponse.Result)), nil
 }

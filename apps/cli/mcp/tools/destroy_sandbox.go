@@ -14,22 +14,25 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func DestroySandbox(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+type DestroySandboxArgs struct {
+	Id *string `json:"id,omitempty"`
+}
+
+func GetDestroySandboxTool() mcp.Tool {
+	return mcp.NewTool("destroy_sandbox",
+		mcp.WithDescription("Destroy a sandbox with Daytona"),
+		mcp.WithString("id", mcp.Required(), mcp.Description("ID of the sandbox to destroy.")),
+	)
+}
+
+func DestroySandbox(ctx context.Context, request mcp.CallToolRequest, args DestroySandboxArgs) (*mcp.CallToolResult, error) {
 	apiClient, err := apiclient.GetApiClient(nil, daytonaMCPHeaders)
 	if err != nil {
 		return &mcp.CallToolResult{IsError: true}, err
 	}
 
-	// Check for existing sandbox from tracking file
-	sandboxId := ""
-	if id, ok := request.Params.Arguments["id"]; ok && id != nil {
-		if idStr, ok := id.(string); ok && idStr != "" {
-			sandboxId = idStr
-		}
-	}
-
-	if sandboxId == "" {
-		return mcp.NewToolResultText("No latest sandbox was found to destroy."), nil
+	if args.Id == nil || *args.Id == "" {
+		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("sandbox ID is required")
 	}
 
 	// Destroy sandbox with retries
@@ -37,7 +40,7 @@ func DestroySandbox(ctx context.Context, request mcp.CallToolRequest) (*mcp.Call
 	retryDelay := time.Second * 2
 
 	for retry := range maxRetries {
-		_, err := apiClient.SandboxAPI.DeleteSandbox(ctx, sandboxId).Force(true).Execute()
+		_, err := apiClient.SandboxAPI.DeleteSandbox(ctx, *args.Id).Force(true).Execute()
 		if err != nil {
 			if retry == maxRetries-1 {
 				return &mcp.CallToolResult{IsError: true}, fmt.Errorf("failed to destroy sandbox after %d retries: %v", maxRetries, err)
@@ -50,9 +53,9 @@ func DestroySandbox(ctx context.Context, request mcp.CallToolRequest) (*mcp.Call
 			continue
 		}
 
-		log.Infof("Destroyed sandbox with ID: %s", sandboxId)
+		log.Infof("Destroyed sandbox with ID: %s", *args.Id)
 
-		return mcp.NewToolResultText(fmt.Sprintf("Destroyed sandbox with ID %s", sandboxId)), nil
+		return mcp.NewToolResultText(fmt.Sprintf("Destroyed sandbox with ID %s", *args.Id)), nil
 	}
 
 	return &mcp.CallToolResult{IsError: true}, fmt.Errorf("failed to destroy sandbox after %d retries", maxRetries)
