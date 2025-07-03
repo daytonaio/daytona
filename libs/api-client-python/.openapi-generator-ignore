@@ -31,3 +31,4 @@ test/*
 .github/**
 docs/*
 README.md
+setup.cfg

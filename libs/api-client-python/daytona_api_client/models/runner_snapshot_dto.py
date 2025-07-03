@@ -23,12 +23,10 @@ from typing import Any, ClassVar, Dict, List
 from typing import Optional, Set
 from typing_extensions import Self
 
-
 class RunnerSnapshotDto(BaseModel):
     """
     RunnerSnapshotDto
-    """  # noqa: E501
-
+    """ # noqa: E501
     runner_snapshot_id: StrictStr = Field(description="Runner snapshot ID", alias="runnerSnapshotId")
     runner_id: StrictStr = Field(description="Runner ID", alias="runnerId")
     runner_domain: StrictStr = Field(description="Runner domain", alias="runnerDomain")
@@ -40,6 +38,7 @@ class RunnerSnapshotDto(BaseModel):
         validate_assignment=True,
         protected_namespaces=(),
     )
+
 
     def to_str(self) -> str:
         """Returns the string representation of the model using alias"""
@@ -66,11 +65,9 @@ class RunnerSnapshotDto(BaseModel):
           are ignored.
         * Fields in `self.additional_properties` are added to the output dict.
         """
-        excluded_fields: Set[str] = set(
-            [
-                "additional_properties",
-            ]
-        )
+        excluded_fields: Set[str] = set([
+            "additional_properties",
+        ])
 
         _dict = self.model_dump(
             by_alias=True,
@@ -93,16 +90,16 @@ class RunnerSnapshotDto(BaseModel):
         if not isinstance(obj, dict):
             return cls.model_validate(obj)
 
-        _obj = cls.model_validate(
-            {
-                "runnerSnapshotId": obj.get("runnerSnapshotId"),
-                "runnerId": obj.get("runnerId"),
-                "runnerDomain": obj.get("runnerDomain"),
-            }
-        )
+        _obj = cls.model_validate({
+            "runnerSnapshotId": obj.get("runnerSnapshotId"),
+            "runnerId": obj.get("runnerId"),
+            "runnerDomain": obj.get("runnerDomain")
+        })
         # store additional fields in additional_properties
         for _key in obj.keys():
             if _key not in cls.__properties:
                 _obj.additional_properties[_key] = obj.get(_key)
 
         return _obj
+
+

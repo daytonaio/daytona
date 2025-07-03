@@ -24,12 +24,10 @@ from typing import Any, ClassVar, Dict, List
 from typing import Optional, Set
 from typing_extensions import Self
 
-
 class OrganizationSuspension(BaseModel):
     """
     OrganizationSuspension
-    """  # noqa: E501
-
+    """ # noqa: E501
     reason: StrictStr = Field(description="Suspension reason")
     until: datetime = Field(description="Suspension until")
     additional_properties: Dict[str, Any] = {}
@@ -40,6 +38,7 @@ class OrganizationSuspension(BaseModel):
         validate_assignment=True,
         protected_namespaces=(),
     )
+
 
     def to_str(self) -> str:
         """Returns the string representation of the model using alias"""
@@ -66,11 +65,9 @@ class OrganizationSuspension(BaseModel):
           are ignored.
         * Fields in `self.additional_properties` are added to the output dict.
         """
-        excluded_fields: Set[str] = set(
-            [
-                "additional_properties",
-            ]
-        )
+        excluded_fields: Set[str] = set([
+            "additional_properties",
+        ])
 
         _dict = self.model_dump(
             by_alias=True,
@@ -93,10 +90,15 @@ class OrganizationSuspension(BaseModel):
         if not isinstance(obj, dict):
             return cls.model_validate(obj)
 
-        _obj = cls.model_validate({"reason": obj.get("reason"), "until": obj.get("until")})
+        _obj = cls.model_validate({
+            "reason": obj.get("reason"),
+            "until": obj.get("until")
+        })
         # store additional fields in additional_properties
         for _key in obj.keys():
             if _key not in cls.__properties:
                 _obj.additional_properties[_key] = obj.get(_key)
 
         return _obj
+
+

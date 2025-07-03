@@ -26,16 +26,9 @@ import urllib3
 
 
 JSON_SCHEMA_VALIDATION_KEYWORDS = {
-    "multipleOf",
-    "maximum",
-    "exclusiveMaximum",
-    "minimum",
-    "exclusiveMinimum",
-    "maxLength",
-    "minLength",
-    "pattern",
-    "maxItems",
-    "minItems",
+    'multipleOf', 'maximum', 'exclusiveMaximum',
+    'minimum', 'exclusiveMinimum', 'maxLength',
+    'minLength', 'pattern', 'maxItems', 'minItems'
 }
 
 ServerVariablesT = Dict[str, str]
@@ -179,24 +172,25 @@ class Configuration:
 
     def __init__(
         self,
-        host: Optional[str] = None,
-        api_key: Optional[Dict[str, str]] = None,
-        api_key_prefix: Optional[Dict[str, str]] = None,
-        username: Optional[str] = None,
-        password: Optional[str] = None,
-        access_token: Optional[str] = None,
-        server_index: Optional[int] = None,
-        server_variables: Optional[ServerVariablesT] = None,
-        server_operation_index: Optional[Dict[int, int]] = None,
-        server_operation_variables: Optional[Dict[int, ServerVariablesT]] = None,
-        ignore_operation_servers: bool = False,
-        ssl_ca_cert: Optional[str] = None,
+        host: Optional[str]=None,
+        api_key: Optional[Dict[str, str]]=None,
+        api_key_prefix: Optional[Dict[str, str]]=None,
+        username: Optional[str]=None,
+        password: Optional[str]=None,
+        access_token: Optional[str]=None,
+        server_index: Optional[int]=None,
+        server_variables: Optional[ServerVariablesT]=None,
+        server_operation_index: Optional[Dict[int, int]]=None,
+        server_operation_variables: Optional[Dict[int, ServerVariablesT]]=None,
+        ignore_operation_servers: bool=False,
+        ssl_ca_cert: Optional[str]=None,
         retries: Optional[int] = None,
         ca_cert_data: Optional[Union[str, bytes]] = None,
         *,
         debug: Optional[bool] = None,
     ) -> None:
-        """Constructor"""
+        """Constructor
+        """
         self._base_path = "http://localhost:3000" if host is None else host
         """Default Base url
         """
@@ -242,7 +236,7 @@ class Configuration:
         """
         self.logger["package_logger"] = logging.getLogger("daytona_api_client")
         self.logger["urllib3_logger"] = logging.getLogger("urllib3")
-        self.logger_format = "%(asctime)s %(levelname)s %(message)s"
+        self.logger_format = '%(asctime)s %(levelname)s %(message)s'
         """Log format
         """
         self.logger_stream_handler = None
@@ -301,7 +295,7 @@ class Configuration:
         self.proxy_headers = None
         """Proxy headers
         """
-        self.safe_chars_for_path_param = ""
+        self.safe_chars_for_path_param = ''
         """Safe chars for path_param
         """
         self.retries = retries
@@ -322,12 +316,12 @@ class Configuration:
         """date format
         """
 
-    def __deepcopy__(self, memo: Dict[int, Any]) -> Self:
+    def __deepcopy__(self, memo:  Dict[int, Any]) -> Self:
         cls = self.__class__
         result = cls.__new__(cls)
         memo[id(self)] = result
         for k, v in self.__dict__.items():
-            if k not in ("logger", "logger_file_handler"):
+            if k not in ('logger', 'logger_file_handler'):
                 setattr(result, k, copy.deepcopy(v, memo))
         # shallow copy of loggers
         result.logger = copy.copy(self.logger)
@@ -459,7 +453,7 @@ class Configuration:
         self.__logger_format = value
         self.logger_formatter = logging.Formatter(self.__logger_format)
 
-    def get_api_key_with_prefix(self, identifier: str, alias: Optional[str] = None) -> Optional[str]:
+    def get_api_key_with_prefix(self, identifier: str, alias: Optional[str]=None) -> Optional[str]:
         """Gets API key (with prefix if set).
 
         :param identifier: The identifier of apiKey.
@@ -489,21 +483,23 @@ class Configuration:
         password = ""
         if self.password is not None:
             password = self.password
-        return urllib3.util.make_headers(basic_auth=username + ":" + password).get("authorization")
+        return urllib3.util.make_headers(
+            basic_auth=username + ':' + password
+        ).get('authorization')
 
-    def auth_settings(self) -> AuthSettings:
+    def auth_settings(self)-> AuthSettings:
         """Gets Auth Settings dict for api client.
 
         :return: The Auth Settings information dict.
         """
         auth: AuthSettings = {}
         if self.access_token is not None:
-            auth["bearer"] = {
-                "type": "bearer",
-                "in": "header",
-                "format": "JWT",
-                "key": "Authorization",
-                "value": "Bearer " + self.access_token,
+            auth['bearer'] = {
+                'type': 'bearer',
+                'in': 'header',
+                'format': 'JWT',
+                'key': 'Authorization',
+                'value': 'Bearer ' + self.access_token
             }
         return auth
 
@@ -512,13 +508,12 @@ class Configuration:
 
         :return: The report for debugging.
         """
-        return (
-            "Python SDK Debug Report:\n"
-            "OS: {env}\n"
-            "Python Version: {pyversion}\n"
-            "Version of the API: 1.0\n"
-            "SDK Package Version: 0.0.0-dev".format(env=sys.platform, pyversion=sys.version)
-        )
+        return "Python SDK Debug Report:\n"\
+               "OS: {env}\n"\
+               "Python Version: {pyversion}\n"\
+               "Version of the API: 1.0\n"\
+               "SDK Package Version: 0.0.0-dev".\
+               format(env=sys.platform, pyversion=sys.version)
 
     def get_host_settings(self) -> List[HostSetting]:
         """Gets an array of host settings
@@ -527,16 +522,16 @@ class Configuration:
         """
         return [
             {
-                "url": "http://localhost:3000",
-                "description": "No description provided",
+                'url': "http://localhost:3000",
+                'description': "No description provided",
             }
         ]
 
     def get_host_from_settings(
         self,
         index: Optional[int],
-        variables: Optional[ServerVariablesT] = None,
-        servers: Optional[List[HostSetting]] = None,
+        variables: Optional[ServerVariablesT]=None,
+        servers: Optional[List[HostSetting]]=None,
     ) -> str:
         """Gets host URL based on the index and variables
         :param index: array index of the host settings
@@ -555,20 +550,22 @@ class Configuration:
         except IndexError:
             raise ValueError(
                 "Invalid index {0} when selecting the host settings. "
-                "Must be less than {1}".format(index, len(servers))
-            )
+                "Must be less than {1}".format(index, len(servers)))
 
-        url = server["url"]
+        url = server['url']
 
         # go through variables and replace placeholders
-        for variable_name, variable in server.get("variables", {}).items():
-            used_value = variables.get(variable_name, variable["default_value"])
+        for variable_name, variable in server.get('variables', {}).items():
+            used_value = variables.get(
+                variable_name, variable['default_value'])
 
-            if "enum_values" in variable and used_value not in variable["enum_values"]:
+            if 'enum_values' in variable \
+                    and used_value not in variable['enum_values']:
                 raise ValueError(
                     "The variable `{0}` in the host URL has invalid value "
-                    "{1}. Must be {2}.".format(variable_name, variables[variable_name], variable["enum_values"])
-                )
+                    "{1}. Must be {2}.".format(
+                        variable_name, variables[variable_name],
+                        variable['enum_values']))
 
             url = url.replace("{" + variable_name + "}", used_value)
 

@@ -27,13 +27,15 @@ class RunnerState(str, Enum):
     """
     allowed enum values
     """
-    INITIALIZING = "initializing"
-    READY = "ready"
-    DISABLED = "disabled"
-    DECOMMISSIONED = "decommissioned"
-    UNRESPONSIVE = "unresponsive"
+    INITIALIZING = 'initializing'
+    READY = 'ready'
+    DISABLED = 'disabled'
+    DECOMMISSIONED = 'decommissioned'
+    UNRESPONSIVE = 'unresponsive'
 
     @classmethod
     def from_json(cls, json_str: str) -> Self:
         """Create an instance of RunnerState from a JSON string"""
         return cls(json.loads(json_str))
+
+

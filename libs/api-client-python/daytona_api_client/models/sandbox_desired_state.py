@@ -27,13 +27,15 @@ class SandboxDesiredState(str, Enum):
     """
     allowed enum values
     """
-    DESTROYED = "destroyed"
-    STARTED = "started"
-    STOPPED = "stopped"
-    RESIZED = "resized"
-    ARCHIVED = "archived"
+    DESTROYED = 'destroyed'
+    STARTED = 'started'
+    STOPPED = 'stopped'
+    RESIZED = 'resized'
+    ARCHIVED = 'archived'
 
     @classmethod
     def from_json(cls, json_str: str) -> Self:
         """Create an instance of SandboxDesiredState from a JSON string"""
         return cls(json.loads(json_str))
+
+

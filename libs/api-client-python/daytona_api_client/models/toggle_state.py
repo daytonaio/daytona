@@ -23,12 +23,10 @@ from typing import Any, ClassVar, Dict, List
 from typing import Optional, Set
 from typing_extensions import Self
 
-
 class ToggleState(BaseModel):
     """
     ToggleState
-    """  # noqa: E501
-
+    """ # noqa: E501
     enabled: StrictBool = Field(description="Enable or disable the snapshot/tag")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["enabled"]
@@ -38,6 +36,7 @@ class ToggleState(BaseModel):
         validate_assignment=True,
         protected_namespaces=(),
     )
+
 
     def to_str(self) -> str:
         """Returns the string representation of the model using alias"""
@@ -64,11 +63,9 @@ class ToggleState(BaseModel):
           are ignored.
         * Fields in `self.additional_properties` are added to the output dict.
         """
-        excluded_fields: Set[str] = set(
-            [
-                "additional_properties",
-            ]
-        )
+        excluded_fields: Set[str] = set([
+            "additional_properties",
+        ])
 
         _dict = self.model_dump(
             by_alias=True,
@@ -91,10 +88,14 @@ class ToggleState(BaseModel):
         if not isinstance(obj, dict):
             return cls.model_validate(obj)
 
-        _obj = cls.model_validate({"enabled": obj.get("enabled")})
+        _obj = cls.model_validate({
+            "enabled": obj.get("enabled")
+        })
         # store additional fields in additional_properties
         for _key in obj.keys():
             if _key not in cls.__properties:
                 _obj.additional_properties[_key] = obj.get(_key)
 
         return _obj
+
+

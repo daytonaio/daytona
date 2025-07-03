@@ -23,12 +23,10 @@ from typing import Any, ClassVar, Dict, List
 from typing import Optional, Set
 from typing_extensions import Self
 
-
 class CreateDockerRegistry(BaseModel):
     """
     CreateDockerRegistry
-    """  # noqa: E501
-
+    """ # noqa: E501
     name: StrictStr = Field(description="Registry name")
     url: StrictStr = Field(description="Registry URL")
     username: StrictStr = Field(description="Registry username")
@@ -39,10 +37,10 @@ class CreateDockerRegistry(BaseModel):
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["name", "url", "username", "password", "project", "registryType", "isDefault"]
 
-    @field_validator("registry_type")
+    @field_validator('registry_type')
     def registry_type_validate_enum(cls, value):
         """Validates the enum"""
-        if value not in set(["internal", "organization", "public", "transient"]):
+        if value not in set(['internal', 'organization', 'public', 'transient']):
             raise ValueError("must be one of enum values ('internal', 'organization', 'public', 'transient')")
         return value
 
@@ -51,6 +49,7 @@ class CreateDockerRegistry(BaseModel):
         validate_assignment=True,
         protected_namespaces=(),
     )
+
 
     def to_str(self) -> str:
         """Returns the string representation of the model using alias"""
@@ -77,11 +76,9 @@ class CreateDockerRegistry(BaseModel):
           are ignored.
         * Fields in `self.additional_properties` are added to the output dict.
         """
-        excluded_fields: Set[str] = set(
-            [
-                "additional_properties",
-            ]
-        )
+        excluded_fields: Set[str] = set([
+            "additional_properties",
+        ])
 
         _dict = self.model_dump(
             by_alias=True,
@@ -104,20 +101,20 @@ class CreateDockerRegistry(BaseModel):
         if not isinstance(obj, dict):
             return cls.model_validate(obj)
 
-        _obj = cls.model_validate(
-            {
-                "name": obj.get("name"),
-                "url": obj.get("url"),
-                "username": obj.get("username"),
-                "password": obj.get("password"),
-                "project": obj.get("project"),
-                "registryType": obj.get("registryType") if obj.get("registryType") is not None else "internal",
-                "isDefault": obj.get("isDefault") if obj.get("isDefault") is not None else False,
-            }
-        )
+        _obj = cls.model_validate({
+            "name": obj.get("name"),
+            "url": obj.get("url"),
+            "username": obj.get("username"),
+            "password": obj.get("password"),
+            "project": obj.get("project"),
+            "registryType": obj.get("registryType") if obj.get("registryType") is not None else 'internal',
+            "isDefault": obj.get("isDefault") if obj.get("isDefault") is not None else False
+        })
         # store additional fields in additional_properties
         for _key in obj.keys():
             if _key not in cls.__properties:
                 _obj.additional_properties[_key] = obj.get(_key)
 
         return _obj
+
+
