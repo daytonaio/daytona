@@ -45,16 +45,8 @@ class Workspace(BaseModel):
     memory: Union[StrictFloat, StrictInt] = Field(description="The memory quota for the sandbox")
     disk: Union[StrictFloat, StrictInt] = Field(description="The disk quota for the sandbox")
     state: Optional[SandboxState] = Field(default=None, description="The state of the sandbox")
-<<<<<<< HEAD
-    desired_state: Optional[SandboxDesiredState] = Field(
-        default=None, description="The desired state of the sandbox", alias="desiredState"
-    )
-    error_reason: Optional[StrictStr] = Field(
-        default=None, description="The error reason of the sandbox", alias="errorReason"
-    )
-=======
+    desired_state: Optional[SandboxDesiredState] = Field(default=None, description="The desired state of the sandbox", alias="desiredState")
     error_reason: Optional[StrictStr] = Field(default=None, description="The error reason of the sandbox", alias="errorReason")
->>>>>>> 02989cbf (refactor: nx setup; local pipeline for package publishing)
     backup_state: Optional[StrictStr] = Field(default=None, description="The state of the backup", alias="backupState")
     backup_created_at: Optional[StrictStr] = Field(default=None, description="The creation timestamp of the last backup", alias="backupCreatedAt")
     auto_stop_interval: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Auto-stop interval in minutes (0 means disabled)", alias="autoStopInterval")
@@ -72,43 +64,7 @@ class Workspace(BaseModel):
     snapshot_created_at: Optional[StrictStr] = Field(default=None, description="The creation timestamp of the last snapshot", alias="snapshotCreatedAt")
     info: Optional[SandboxInfo] = Field(default=None, description="Additional information about the sandbox")
     additional_properties: Dict[str, Any] = {}
-<<<<<<< HEAD
-    __properties: ClassVar[List[str]] = [
-        "id",
-        "organizationId",
-        "snapshot",
-        "user",
-        "env",
-        "labels",
-        "public",
-        "target",
-        "cpu",
-        "gpu",
-        "memory",
-        "disk",
-        "state",
-        "desiredState",
-        "errorReason",
-        "backupState",
-        "backupCreatedAt",
-        "autoStopInterval",
-        "autoArchiveInterval",
-        "runnerDomain",
-        "volumes",
-        "buildInfo",
-        "createdAt",
-        "updatedAt",
-        "class",
-        "daemonVersion",
-        "name",
-        "image",
-        "snapshotState",
-        "snapshotCreatedAt",
-        "info",
-    ]
-=======
-    __properties: ClassVar[List[str]] = ["id", "organizationId", "snapshot", "user", "env", "labels", "public", "target", "cpu", "gpu", "memory", "disk", "state", "errorReason", "backupState", "backupCreatedAt", "autoStopInterval", "autoArchiveInterval", "runnerDomain", "volumes", "buildInfo", "createdAt", "updatedAt", "class", "daemonVersion", "name", "image", "snapshotState", "snapshotCreatedAt", "info"]
->>>>>>> 02989cbf (refactor: nx setup; local pipeline for package publishing)
+    __properties: ClassVar[List[str]] = ["id", "organizationId", "snapshot", "user", "env", "labels", "public", "target", "cpu", "gpu", "memory", "disk", "state", "desiredState", "errorReason", "backupState", "backupCreatedAt", "autoStopInterval", "autoArchiveInterval", "runnerDomain", "volumes", "buildInfo", "createdAt", "updatedAt", "class", "daemonVersion", "name", "image", "snapshotState", "snapshotCreatedAt", "info"]
 
     @field_validator('backup_state')
     def backup_state_validate_enum(cls, value):
@@ -210,45 +166,6 @@ class Workspace(BaseModel):
         if not isinstance(obj, dict):
             return cls.model_validate(obj)
 
-<<<<<<< HEAD
-        _obj = cls.model_validate(
-            {
-                "id": obj.get("id"),
-                "organizationId": obj.get("organizationId"),
-                "snapshot": obj.get("snapshot"),
-                "user": obj.get("user"),
-                "env": obj.get("env"),
-                "labels": obj.get("labels"),
-                "public": obj.get("public"),
-                "target": obj.get("target"),
-                "cpu": obj.get("cpu"),
-                "gpu": obj.get("gpu"),
-                "memory": obj.get("memory"),
-                "disk": obj.get("disk"),
-                "state": obj.get("state"),
-                "desiredState": obj.get("desiredState"),
-                "errorReason": obj.get("errorReason"),
-                "backupState": obj.get("backupState"),
-                "backupCreatedAt": obj.get("backupCreatedAt"),
-                "autoStopInterval": obj.get("autoStopInterval"),
-                "autoArchiveInterval": obj.get("autoArchiveInterval"),
-                "runnerDomain": obj.get("runnerDomain"),
-                "volumes": [SandboxVolume.from_dict(_item) for _item in obj["volumes"]]
-                if obj.get("volumes") is not None
-                else None,
-                "buildInfo": BuildInfo.from_dict(obj["buildInfo"]) if obj.get("buildInfo") is not None else None,
-                "createdAt": obj.get("createdAt"),
-                "updatedAt": obj.get("updatedAt"),
-                "class": obj.get("class"),
-                "daemonVersion": obj.get("daemonVersion"),
-                "name": obj.get("name") if obj.get("name") is not None else "",
-                "image": obj.get("image"),
-                "snapshotState": obj.get("snapshotState"),
-                "snapshotCreatedAt": obj.get("snapshotCreatedAt"),
-                "info": SandboxInfo.from_dict(obj["info"]) if obj.get("info") is not None else None,
-            }
-        )
-=======
         _obj = cls.model_validate({
             "id": obj.get("id"),
             "organizationId": obj.get("organizationId"),
@@ -263,6 +180,7 @@ class Workspace(BaseModel):
             "memory": obj.get("memory"),
             "disk": obj.get("disk"),
             "state": obj.get("state"),
+            "desiredState": obj.get("desiredState"),
             "errorReason": obj.get("errorReason"),
             "backupState": obj.get("backupState"),
             "backupCreatedAt": obj.get("backupCreatedAt"),
@@ -281,7 +199,6 @@ class Workspace(BaseModel):
             "snapshotCreatedAt": obj.get("snapshotCreatedAt"),
             "info": SandboxInfo.from_dict(obj["info"]) if obj.get("info") is not None else None
         })
->>>>>>> 02989cbf (refactor: nx setup; local pipeline for package publishing)
         # store additional fields in additional_properties
         for _key in obj.keys():
             if _key not in cls.__properties:

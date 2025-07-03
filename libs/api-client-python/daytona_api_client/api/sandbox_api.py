@@ -2025,9 +2025,7 @@ class SandboxApi:
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         verbose: Annotated[Optional[StrictBool], Field(description="Include verbose output")] = None,
         labels: Annotated[Optional[StrictStr], Field(description="JSON encoded labels to filter by")] = None,
-        include_errored_deleted: Annotated[
-            Optional[StrictBool], Field(description="Include errored and deleted sandboxes")
-        ] = None,
+        include_errored_deleted: Annotated[Optional[StrictBool], Field(description="Include errored and deleted sandboxes")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2105,9 +2103,7 @@ class SandboxApi:
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         verbose: Annotated[Optional[StrictBool], Field(description="Include verbose output")] = None,
         labels: Annotated[Optional[StrictStr], Field(description="JSON encoded labels to filter by")] = None,
-        include_errored_deleted: Annotated[
-            Optional[StrictBool], Field(description="Include errored and deleted sandboxes")
-        ] = None,
+        include_errored_deleted: Annotated[Optional[StrictBool], Field(description="Include errored and deleted sandboxes")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2185,9 +2181,7 @@ class SandboxApi:
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         verbose: Annotated[Optional[StrictBool], Field(description="Include verbose output")] = None,
         labels: Annotated[Optional[StrictStr], Field(description="JSON encoded labels to filter by")] = None,
-        include_errored_deleted: Annotated[
-            Optional[StrictBool], Field(description="Include errored and deleted sandboxes")
-        ] = None,
+        include_errored_deleted: Annotated[Optional[StrictBool], Field(description="Include errored and deleted sandboxes")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2288,11 +2282,13 @@ class SandboxApi:
             _query_params.append(('verbose', verbose))
             
         if labels is not None:
-            _query_params.append(("labels", labels))
-
+            
+            _query_params.append(('labels', labels))
+            
         if include_errored_deleted is not None:
-            _query_params.append(("includeErroredDeleted", include_errored_deleted))
-
+            
+            _query_params.append(('includeErroredDeleted', include_errored_deleted))
+            
         # process the header parameters
         if x_daytona_organization_id is not None:
             _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id
@@ -3256,11 +3252,7 @@ class SandboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-<<<<<<< HEAD
-            "200": "Sandbox",
-=======
-            '200': None,
->>>>>>> dcecde66 (refactor: nx setup; local pipeline for package publishing)
+            '200': "Sandbox",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -3330,11 +3322,7 @@ class SandboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-<<<<<<< HEAD
-            "200": "Sandbox",
-=======
-            '200': None,
->>>>>>> dcecde66 (refactor: nx setup; local pipeline for package publishing)
+            '200': "Sandbox",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -3404,11 +3392,7 @@ class SandboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-<<<<<<< HEAD
-            "200": "Sandbox",
-=======
-            '200': None,
->>>>>>> dcecde66 (refactor: nx setup; local pipeline for package publishing)
+            '200': "Sandbox",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -3451,14 +3435,15 @@ class SandboxApi:
         # process the form parameters
         # process the body parameter
 
-<<<<<<< HEAD
+
         # set the HTTP header `Accept`
-        if "Accept" not in _header_params:
-            _header_params["Accept"] = self.api_client.select_header_accept(["application/json"])
-=======
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
+                [
+                    'application/json'
+                ]
+            )
 
-
->>>>>>> dcecde66 (refactor: nx setup; local pipeline for package publishing)
 
         # authentication setting
         _auth_settings: List[str] = [
