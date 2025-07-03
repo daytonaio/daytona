@@ -38,6 +38,7 @@ daytona_api_client_async/models/create_runner.py
 daytona_api_client_async/models/create_sandbox.py
 daytona_api_client_async/models/create_session_request.py
 daytona_api_client_async/models/create_snapshot.py
+daytona_api_client_async/models/create_snapshot_target_propagation.py
 daytona_api_client_async/models/create_user.py
 daytona_api_client_async/models/create_volume.py
 daytona_api_client_async/models/create_workspace.py
@@ -91,8 +92,11 @@ daytona_api_client_async/models/session.py
 daytona_api_client_async/models/session_execute_request.py
 daytona_api_client_async/models/session_execute_response.py
 daytona_api_client_async/models/set_snapshot_general_status_dto.py
+daytona_api_client_async/models/set_snapshot_target_propagation_dto.py
+daytona_api_client_async/models/set_snapshot_target_propagations_dto.py
 daytona_api_client_async/models/snapshot_dto.py
 daytona_api_client_async/models/snapshot_state.py
+daytona_api_client_async/models/snapshot_target_propagation_dto.py
 daytona_api_client_async/models/storage_access_dto.py
 daytona_api_client_async/models/toggle_state.py
 daytona_api_client_async/models/update_assigned_organization_roles.py

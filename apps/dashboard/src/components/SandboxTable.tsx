@@ -483,6 +483,7 @@ const getColumns = ({
           [SandboxState.DESTROYING]: 7,
           [SandboxState.DESTROYED]: 7,
           [SandboxState.PULLING_SNAPSHOT]: 7,
+          [SandboxState.PENDING_PULL]: 7,
           [SandboxState.UNKNOWN]: 7,
         }
 

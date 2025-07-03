@@ -42,17 +42,19 @@ class DockerRegistryApi:
             api_client = ApiClient.get_default()
         self.api_client = api_client
 
+
     @validate_call
     def create_registry(
         self,
         create_docker_registry: CreateDockerRegistry,
-        x_daytona_organization_id: Annotated[
-            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
-        ] = None,
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -86,7 +88,7 @@ class DockerRegistryApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """  # noqa: E501
+        """ # noqa: E501
 
         _param = self._create_registry_serialize(
             create_docker_registry=create_docker_registry,
@@ -94,30 +96,35 @@ class DockerRegistryApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index,
+            _host_index=_host_index
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "201": "DockerRegistry",
+            '201': "DockerRegistry",
         }
-        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         ).data
 
+
     @validate_call
     def create_registry_with_http_info(
         self,
         create_docker_registry: CreateDockerRegistry,
-        x_daytona_organization_id: Annotated[
-            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
-        ] = None,
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -151,7 +158,7 @@ class DockerRegistryApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """  # noqa: E501
+        """ # noqa: E501
 
         _param = self._create_registry_serialize(
             create_docker_registry=create_docker_registry,
@@ -159,30 +166,35 @@ class DockerRegistryApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index,
+            _host_index=_host_index
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "201": "DockerRegistry",
+            '201': "DockerRegistry",
         }
-        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         )
 
+
     @validate_call
     def create_registry_without_preload_content(
         self,
         create_docker_registry: CreateDockerRegistry,
-        x_daytona_organization_id: Annotated[
-            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
-        ] = None,
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -216,7 +228,7 @@ class DockerRegistryApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """  # noqa: E501
+        """ # noqa: E501
 
         _param = self._create_registry_serialize(
             create_docker_registry=create_docker_registry,
@@ -224,14 +236,18 @@ class DockerRegistryApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index,
+            _host_index=_host_index
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "201": "DockerRegistry",
+            '201': "DockerRegistry",
         }
-        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
         return response_data.response
+
 
     def _create_registry_serialize(
         self,
@@ -242,45 +258,63 @@ class DockerRegistryApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
+
         _host = None
 
-        _collection_formats: Dict[str, str] = {}
+        _collection_formats: Dict[str, str] = {
+        }
 
         _path_params: Dict[str, str] = {}
         _query_params: List[Tuple[str, str]] = []
         _header_params: Dict[str, Optional[str]] = _headers or {}
         _form_params: List[Tuple[str, str]] = []
-        _files: Dict[str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]] = {}
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        ] = {}
         _body_params: Optional[bytes] = None
 
         # process the path parameters
         # process the query parameters
         # process the header parameters
         if x_daytona_organization_id is not None:
-            _header_params["X-Daytona-Organization-ID"] = x_daytona_organization_id
+            _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id
         # process the form parameters
         # process the body parameter
         if create_docker_registry is not None:
             _body_params = create_docker_registry
 
+
         # set the HTTP header `Accept`
-        if "Accept" not in _header_params:
-            _header_params["Accept"] = self.api_client.select_header_accept(["application/json"])
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
+                [
+                    'application/json'
+                ]
+            )
 
         # set the HTTP header `Content-Type`
         if _content_type:
-            _header_params["Content-Type"] = _content_type
+            _header_params['Content-Type'] = _content_type
         else:
-            _default_content_type = self.api_client.select_header_content_type(["application/json"])
+            _default_content_type = (
+                self.api_client.select_header_content_type(
+                    [
+                        'application/json'
+                    ]
+                )
+            )
             if _default_content_type is not None:
-                _header_params["Content-Type"] = _default_content_type
+                _header_params['Content-Type'] = _default_content_type
 
         # authentication setting
-        _auth_settings: List[str] = ["bearer", "oauth2"]
+        _auth_settings: List[str] = [
+            'bearer', 
+            'oauth2'
+        ]
 
         return self.api_client.param_serialize(
-            method="POST",
-            resource_path="/docker-registry",
+            method='POST',
+            resource_path='/docker-registry',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -290,20 +324,24 @@ class DockerRegistryApi:
             auth_settings=_auth_settings,
             collection_formats=_collection_formats,
             _host=_host,
-            _request_auth=_request_auth,
+            _request_auth=_request_auth
         )
+
+
+
 
     @validate_call
     def delete_registry(
         self,
         id: Annotated[StrictStr, Field(description="ID of the docker registry")],
-        x_daytona_organization_id: Annotated[
-            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
-        ] = None,
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -337,7 +375,7 @@ class DockerRegistryApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """  # noqa: E501
+        """ # noqa: E501
 
         _param = self._delete_registry_serialize(
             id=id,
@@ -345,30 +383,35 @@ class DockerRegistryApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index,
+            _host_index=_host_index
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "204": None,
+            '204': None,
         }
-        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         ).data
 
+
     @validate_call
     def delete_registry_with_http_info(
         self,
         id: Annotated[StrictStr, Field(description="ID of the docker registry")],
-        x_daytona_organization_id: Annotated[
-            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
-        ] = None,
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -402,7 +445,7 @@ class DockerRegistryApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """  # noqa: E501
+        """ # noqa: E501
 
         _param = self._delete_registry_serialize(
             id=id,
@@ -410,30 +453,35 @@ class DockerRegistryApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index,
+            _host_index=_host_index
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "204": None,
+            '204': None,
         }
-        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         )
 
+
     @validate_call
     def delete_registry_without_preload_content(
         self,
         id: Annotated[StrictStr, Field(description="ID of the docker registry")],
-        x_daytona_organization_id: Annotated[
-            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
-        ] = None,
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -467,7 +515,7 @@ class DockerRegistryApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """  # noqa: E501
+        """ # noqa: E501
 
         _param = self._delete_registry_serialize(
             id=id,
@@ -475,14 +523,18 @@ class DockerRegistryApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index,
+            _host_index=_host_index
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "204": None,
+            '204': None,
         }
-        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
         return response_data.response
+
 
     def _delete_registry_serialize(
         self,
@@ -493,33 +545,43 @@ class DockerRegistryApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
+
         _host = None
 
-        _collection_formats: Dict[str, str] = {}
+        _collection_formats: Dict[str, str] = {
+        }
 
         _path_params: Dict[str, str] = {}
         _query_params: List[Tuple[str, str]] = []
         _header_params: Dict[str, Optional[str]] = _headers or {}
         _form_params: List[Tuple[str, str]] = []
-        _files: Dict[str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]] = {}
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        ] = {}
         _body_params: Optional[bytes] = None
 
         # process the path parameters
         if id is not None:
-            _path_params["id"] = id
+            _path_params['id'] = id
         # process the query parameters
         # process the header parameters
         if x_daytona_organization_id is not None:
-            _header_params["X-Daytona-Organization-ID"] = x_daytona_organization_id
+            _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id
         # process the form parameters
         # process the body parameter
 
+
+
+
         # authentication setting
-        _auth_settings: List[str] = ["bearer", "oauth2"]
+        _auth_settings: List[str] = [
+            'bearer', 
+            'oauth2'
+        ]
 
         return self.api_client.param_serialize(
-            method="DELETE",
-            resource_path="/docker-registry/{id}",
+            method='DELETE',
+            resource_path='/docker-registry/{id}',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -529,20 +591,24 @@ class DockerRegistryApi:
             auth_settings=_auth_settings,
             collection_formats=_collection_formats,
             _host=_host,
-            _request_auth=_request_auth,
+            _request_auth=_request_auth
         )
+
+
+
 
     @validate_call
     def get_registry(
         self,
         id: Annotated[StrictStr, Field(description="ID of the docker registry")],
-        x_daytona_organization_id: Annotated[
-            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
-        ] = None,
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -576,7 +642,7 @@ class DockerRegistryApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """  # noqa: E501
+        """ # noqa: E501
 
         _param = self._get_registry_serialize(
             id=id,
@@ -584,30 +650,35 @@ class DockerRegistryApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index,
+            _host_index=_host_index
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "DockerRegistry",
+            '200': "DockerRegistry",
         }
-        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         ).data
 
+
     @validate_call
     def get_registry_with_http_info(
         self,
         id: Annotated[StrictStr, Field(description="ID of the docker registry")],
-        x_daytona_organization_id: Annotated[
-            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
-        ] = None,
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -641,7 +712,7 @@ class DockerRegistryApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """  # noqa: E501
+        """ # noqa: E501
 
         _param = self._get_registry_serialize(
             id=id,
@@ -649,30 +720,35 @@ class DockerRegistryApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index,
+            _host_index=_host_index
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "DockerRegistry",
+            '200': "DockerRegistry",
         }
-        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         )
 
+
     @validate_call
     def get_registry_without_preload_content(
         self,
         id: Annotated[StrictStr, Field(description="ID of the docker registry")],
-        x_daytona_organization_id: Annotated[
-            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
-        ] = None,
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -706,7 +782,7 @@ class DockerRegistryApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """  # noqa: E501
+        """ # noqa: E501
 
         _param = self._get_registry_serialize(
             id=id,
@@ -714,14 +790,18 @@ class DockerRegistryApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index,
+            _host_index=_host_index
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "DockerRegistry",
+            '200': "DockerRegistry",
         }
-        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
         return response_data.response
+
 
     def _get_registry_serialize(
         self,
@@ -732,37 +812,50 @@ class DockerRegistryApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
+
         _host = None
 
-        _collection_formats: Dict[str, str] = {}
+        _collection_formats: Dict[str, str] = {
+        }
 
         _path_params: Dict[str, str] = {}
         _query_params: List[Tuple[str, str]] = []
         _header_params: Dict[str, Optional[str]] = _headers or {}
         _form_params: List[Tuple[str, str]] = []
-        _files: Dict[str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]] = {}
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        ] = {}
         _body_params: Optional[bytes] = None
 
         # process the path parameters
         if id is not None:
-            _path_params["id"] = id
+            _path_params['id'] = id
         # process the query parameters
         # process the header parameters
         if x_daytona_organization_id is not None:
-            _header_params["X-Daytona-Organization-ID"] = x_daytona_organization_id
+            _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id
         # process the form parameters
         # process the body parameter
 
+
         # set the HTTP header `Accept`
-        if "Accept" not in _header_params:
-            _header_params["Accept"] = self.api_client.select_header_accept(["application/json"])
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
+                [
+                    'application/json'
+                ]
+            )
+
 
         # authentication setting
-        _auth_settings: List[str] = ["bearer", "oauth2"]
+        _auth_settings: List[str] = [
+            'bearer', 
+            'oauth2'
+        ]
 
         return self.api_client.param_serialize(
-            method="GET",
-            resource_path="/docker-registry/{id}",
+            method='GET',
+            resource_path='/docker-registry/{id}',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -772,19 +865,23 @@ class DockerRegistryApi:
             auth_settings=_auth_settings,
             collection_formats=_collection_formats,
             _host=_host,
-            _request_auth=_request_auth,
+            _request_auth=_request_auth
         )
+
+
+
 
     @validate_call
     def get_transient_push_access(
         self,
-        x_daytona_organization_id: Annotated[
-            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
-        ] = None,
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -816,36 +913,41 @@ class DockerRegistryApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """  # noqa: E501
+        """ # noqa: E501
 
         _param = self._get_transient_push_access_serialize(
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index,
+            _host_index=_host_index
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "RegistryPushAccessDto",
+            '200': "RegistryPushAccessDto",
         }
-        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         ).data
 
+
     @validate_call
     def get_transient_push_access_with_http_info(
         self,
-        x_daytona_organization_id: Annotated[
-            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
-        ] = None,
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -877,36 +979,41 @@ class DockerRegistryApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """  # noqa: E501
+        """ # noqa: E501
 
         _param = self._get_transient_push_access_serialize(
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index,
+            _host_index=_host_index
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "RegistryPushAccessDto",
+            '200': "RegistryPushAccessDto",
         }
-        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         )
 
+
     @validate_call
     def get_transient_push_access_without_preload_content(
         self,
-        x_daytona_organization_id: Annotated[
-            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
-        ] = None,
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -938,21 +1045,25 @@ class DockerRegistryApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """  # noqa: E501
+        """ # noqa: E501
 
         _param = self._get_transient_push_access_serialize(
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index,
+            _host_index=_host_index
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "RegistryPushAccessDto",
+            '200': "RegistryPushAccessDto",
         }
-        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
         return response_data.response
+
 
     def _get_transient_push_access_serialize(
         self,
@@ -962,35 +1073,48 @@ class DockerRegistryApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
+
         _host = None
 
-        _collection_formats: Dict[str, str] = {}
+        _collection_formats: Dict[str, str] = {
+        }
 
         _path_params: Dict[str, str] = {}
         _query_params: List[Tuple[str, str]] = []
         _header_params: Dict[str, Optional[str]] = _headers or {}
         _form_params: List[Tuple[str, str]] = []
-        _files: Dict[str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]] = {}
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        ] = {}
         _body_params: Optional[bytes] = None
 
         # process the path parameters
         # process the query parameters
         # process the header parameters
         if x_daytona_organization_id is not None:
-            _header_params["X-Daytona-Organization-ID"] = x_daytona_organization_id
+            _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id
         # process the form parameters
         # process the body parameter
 
+
         # set the HTTP header `Accept`
-        if "Accept" not in _header_params:
-            _header_params["Accept"] = self.api_client.select_header_accept(["application/json"])
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
+                [
+                    'application/json'
+                ]
+            )
+
 
         # authentication setting
-        _auth_settings: List[str] = ["bearer", "oauth2"]
+        _auth_settings: List[str] = [
+            'bearer', 
+            'oauth2'
+        ]
 
         return self.api_client.param_serialize(
-            method="GET",
-            resource_path="/docker-registry/registry-push-access",
+            method='GET',
+            resource_path='/docker-registry/registry-push-access',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -1000,19 +1124,23 @@ class DockerRegistryApi:
             auth_settings=_auth_settings,
             collection_formats=_collection_formats,
             _host=_host,
-            _request_auth=_request_auth,
+            _request_auth=_request_auth
         )
+
+
+
 
     @validate_call
     def list_registries(
         self,
-        x_daytona_organization_id: Annotated[
-            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
-        ] = None,
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -1044,36 +1172,41 @@ class DockerRegistryApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """  # noqa: E501
+        """ # noqa: E501
 
         _param = self._list_registries_serialize(
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index,
+            _host_index=_host_index
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "List[DockerRegistry]",
+            '200': "List[DockerRegistry]",
         }
-        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         ).data
 
+
     @validate_call
     def list_registries_with_http_info(
         self,
-        x_daytona_organization_id: Annotated[
-            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
-        ] = None,
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -1105,36 +1238,41 @@ class DockerRegistryApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """  # noqa: E501
+        """ # noqa: E501
 
         _param = self._list_registries_serialize(
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index,
+            _host_index=_host_index
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "List[DockerRegistry]",
+            '200': "List[DockerRegistry]",
         }
-        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         )
 
+
     @validate_call
     def list_registries_without_preload_content(
         self,
-        x_daytona_organization_id: Annotated[
-            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
-        ] = None,
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -1166,21 +1304,25 @@ class DockerRegistryApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """  # noqa: E501
+        """ # noqa: E501
 
         _param = self._list_registries_serialize(
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index,
+            _host_index=_host_index
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "List[DockerRegistry]",
+            '200': "List[DockerRegistry]",
         }
-        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
         return response_data.response
+
 
     def _list_registries_serialize(
         self,
@@ -1190,35 +1332,48 @@ class DockerRegistryApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
+
         _host = None
 
-        _collection_formats: Dict[str, str] = {}
+        _collection_formats: Dict[str, str] = {
+        }
 
         _path_params: Dict[str, str] = {}
         _query_params: List[Tuple[str, str]] = []
         _header_params: Dict[str, Optional[str]] = _headers or {}
         _form_params: List[Tuple[str, str]] = []
-        _files: Dict[str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]] = {}
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        ] = {}
         _body_params: Optional[bytes] = None
 
         # process the path parameters
         # process the query parameters
         # process the header parameters
         if x_daytona_organization_id is not None:
-            _header_params["X-Daytona-Organization-ID"] = x_daytona_organization_id
+            _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id
         # process the form parameters
         # process the body parameter
 
+
         # set the HTTP header `Accept`
-        if "Accept" not in _header_params:
-            _header_params["Accept"] = self.api_client.select_header_accept(["application/json"])
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
+                [
+                    'application/json'
+                ]
+            )
+
 
         # authentication setting
-        _auth_settings: List[str] = ["bearer", "oauth2"]
+        _auth_settings: List[str] = [
+            'bearer', 
+            'oauth2'
+        ]
 
         return self.api_client.param_serialize(
-            method="GET",
-            resource_path="/docker-registry",
+            method='GET',
+            resource_path='/docker-registry',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -1228,20 +1383,24 @@ class DockerRegistryApi:
             auth_settings=_auth_settings,
             collection_formats=_collection_formats,
             _host=_host,
-            _request_auth=_request_auth,
+            _request_auth=_request_auth
         )
+
+
+
 
     @validate_call
     def set_default_registry(
         self,
         id: Annotated[StrictStr, Field(description="ID of the docker registry")],
-        x_daytona_organization_id: Annotated[
-            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
-        ] = None,
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -1275,7 +1434,7 @@ class DockerRegistryApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """  # noqa: E501
+        """ # noqa: E501
 
         _param = self._set_default_registry_serialize(
             id=id,
@@ -1283,30 +1442,35 @@ class DockerRegistryApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index,
+            _host_index=_host_index
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "DockerRegistry",
+            '200': "DockerRegistry",
         }
-        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         ).data
 
+
     @validate_call
     def set_default_registry_with_http_info(
         self,
         id: Annotated[StrictStr, Field(description="ID of the docker registry")],
-        x_daytona_organization_id: Annotated[
-            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
-        ] = None,
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -1340,7 +1504,7 @@ class DockerRegistryApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """  # noqa: E501
+        """ # noqa: E501
 
         _param = self._set_default_registry_serialize(
             id=id,
@@ -1348,30 +1512,35 @@ class DockerRegistryApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index,
+            _host_index=_host_index
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "DockerRegistry",
+            '200': "DockerRegistry",
         }
-        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         )
 
+
     @validate_call
     def set_default_registry_without_preload_content(
         self,
         id: Annotated[StrictStr, Field(description="ID of the docker registry")],
-        x_daytona_organization_id: Annotated[
-            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
-        ] = None,
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -1405,7 +1574,7 @@ class DockerRegistryApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """  # noqa: E501
+        """ # noqa: E501
 
         _param = self._set_default_registry_serialize(
             id=id,
@@ -1413,14 +1582,18 @@ class DockerRegistryApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index,
+            _host_index=_host_index
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "DockerRegistry",
+            '200': "DockerRegistry",
         }
-        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
         return response_data.response
+
 
     def _set_default_registry_serialize(
         self,
@@ -1431,37 +1604,50 @@ class DockerRegistryApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
+
         _host = None
 
-        _collection_formats: Dict[str, str] = {}
+        _collection_formats: Dict[str, str] = {
+        }
 
         _path_params: Dict[str, str] = {}
         _query_params: List[Tuple[str, str]] = []
         _header_params: Dict[str, Optional[str]] = _headers or {}
         _form_params: List[Tuple[str, str]] = []
-        _files: Dict[str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]] = {}
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        ] = {}
         _body_params: Optional[bytes] = None
 
         # process the path parameters
         if id is not None:
-            _path_params["id"] = id
+            _path_params['id'] = id
         # process the query parameters
         # process the header parameters
         if x_daytona_organization_id is not None:
-            _header_params["X-Daytona-Organization-ID"] = x_daytona_organization_id
+            _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id
         # process the form parameters
         # process the body parameter
 
+
         # set the HTTP header `Accept`
-        if "Accept" not in _header_params:
-            _header_params["Accept"] = self.api_client.select_header_accept(["application/json"])
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
+                [
+                    'application/json'
+                ]
+            )
+
 
         # authentication setting
-        _auth_settings: List[str] = ["bearer", "oauth2"]
+        _auth_settings: List[str] = [
+            'bearer', 
+            'oauth2'
+        ]
 
         return self.api_client.param_serialize(
-            method="POST",
-            resource_path="/docker-registry/{id}/set-default",
+            method='POST',
+            resource_path='/docker-registry/{id}/set-default',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -1471,21 +1657,25 @@ class DockerRegistryApi:
             auth_settings=_auth_settings,
             collection_formats=_collection_formats,
             _host=_host,
-            _request_auth=_request_auth,
+            _request_auth=_request_auth
         )
+
+
+
 
     @validate_call
     def update_registry(
         self,
         id: Annotated[StrictStr, Field(description="ID of the docker registry")],
         update_docker_registry: UpdateDockerRegistry,
-        x_daytona_organization_id: Annotated[
-            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
-        ] = None,
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -1521,7 +1711,7 @@ class DockerRegistryApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """  # noqa: E501
+        """ # noqa: E501
 
         _param = self._update_registry_serialize(
             id=id,
@@ -1530,31 +1720,36 @@ class DockerRegistryApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index,
+            _host_index=_host_index
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "DockerRegistry",
+            '200': "DockerRegistry",
         }
-        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         ).data
 
+
     @validate_call
     def update_registry_with_http_info(
         self,
         id: Annotated[StrictStr, Field(description="ID of the docker registry")],
         update_docker_registry: UpdateDockerRegistry,
-        x_daytona_organization_id: Annotated[
-            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
-        ] = None,
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -1590,7 +1785,7 @@ class DockerRegistryApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """  # noqa: E501
+        """ # noqa: E501
 
         _param = self._update_registry_serialize(
             id=id,
@@ -1599,31 +1794,36 @@ class DockerRegistryApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index,
+            _host_index=_host_index
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "DockerRegistry",
+            '200': "DockerRegistry",
         }
-        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         )
 
+
     @validate_call
     def update_registry_without_preload_content(
         self,
         id: Annotated[StrictStr, Field(description="ID of the docker registry")],
         update_docker_registry: UpdateDockerRegistry,
-        x_daytona_organization_id: Annotated[
-            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
-        ] = None,
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -1659,7 +1859,7 @@ class DockerRegistryApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """  # noqa: E501
+        """ # noqa: E501
 
         _param = self._update_registry_serialize(
             id=id,
@@ -1668,14 +1868,18 @@ class DockerRegistryApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index,
+            _host_index=_host_index
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "DockerRegistry",
+            '200': "DockerRegistry",
         }
-        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
         return response_data.response
+
 
     def _update_registry_serialize(
         self,
@@ -1687,47 +1891,65 @@ class DockerRegistryApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
+
         _host = None
 
-        _collection_formats: Dict[str, str] = {}
+        _collection_formats: Dict[str, str] = {
+        }
 
         _path_params: Dict[str, str] = {}
         _query_params: List[Tuple[str, str]] = []
         _header_params: Dict[str, Optional[str]] = _headers or {}
         _form_params: List[Tuple[str, str]] = []
-        _files: Dict[str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]] = {}
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        ] = {}
         _body_params: Optional[bytes] = None
 
         # process the path parameters
         if id is not None:
-            _path_params["id"] = id
+            _path_params['id'] = id
         # process the query parameters
         # process the header parameters
         if x_daytona_organization_id is not None:
-            _header_params["X-Daytona-Organization-ID"] = x_daytona_organization_id
+            _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id
         # process the form parameters
         # process the body parameter
         if update_docker_registry is not None:
             _body_params = update_docker_registry
 
+
         # set the HTTP header `Accept`
-        if "Accept" not in _header_params:
-            _header_params["Accept"] = self.api_client.select_header_accept(["application/json"])
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
+                [
+                    'application/json'
+                ]
+            )
 
         # set the HTTP header `Content-Type`
         if _content_type:
-            _header_params["Content-Type"] = _content_type
+            _header_params['Content-Type'] = _content_type
         else:
-            _default_content_type = self.api_client.select_header_content_type(["application/json"])
+            _default_content_type = (
+                self.api_client.select_header_content_type(
+                    [
+                        'application/json'
+                    ]
+                )
+            )
             if _default_content_type is not None:
-                _header_params["Content-Type"] = _default_content_type
+                _header_params['Content-Type'] = _default_content_type
 
         # authentication setting
-        _auth_settings: List[str] = ["bearer", "oauth2"]
+        _auth_settings: List[str] = [
+            'bearer', 
+            'oauth2'
+        ]
 
         return self.api_client.param_serialize(
-            method="PATCH",
-            resource_path="/docker-registry/{id}",
+            method='PATCH',
+            resource_path='/docker-registry/{id}',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -1737,5 +1959,7 @@ class DockerRegistryApi:
             auth_settings=_auth_settings,
             collection_formats=_collection_formats,
             _host=_host,
-            _request_auth=_request_auth,
+            _request_auth=_request_auth
         )
+
+

@@ -24,12 +24,10 @@ from typing import Any, ClassVar, Dict, List
 from typing import Optional, Set
 from typing_extensions import Self
 
-
 class DockerRegistry(BaseModel):
     """
     DockerRegistry
-    """  # noqa: E501
-
+    """ # noqa: E501
     id: StrictStr = Field(description="Registry ID")
     name: StrictStr = Field(description="Registry name")
     url: StrictStr = Field(description="Registry URL")
@@ -39,21 +37,12 @@ class DockerRegistry(BaseModel):
     created_at: datetime = Field(description="Creation timestamp", alias="createdAt")
     updated_at: datetime = Field(description="Last update timestamp", alias="updatedAt")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = [
-        "id",
-        "name",
-        "url",
-        "username",
-        "project",
-        "registryType",
-        "createdAt",
-        "updatedAt",
-    ]
+    __properties: ClassVar[List[str]] = ["id", "name", "url", "username", "project", "registryType", "createdAt", "updatedAt"]
 
-    @field_validator("registry_type")
+    @field_validator('registry_type')
     def registry_type_validate_enum(cls, value):
         """Validates the enum"""
-        if value not in set(["internal", "organization", "public", "transient"]):
+        if value not in set(['internal', 'organization', 'public', 'transient']):
             raise ValueError("must be one of enum values ('internal', 'organization', 'public', 'transient')")
         return value
 
@@ -62,6 +51,7 @@ class DockerRegistry(BaseModel):
         validate_assignment=True,
         protected_namespaces=(),
     )
+
 
     def to_str(self) -> str:
         """Returns the string representation of the model using alias"""
@@ -88,11 +78,9 @@ class DockerRegistry(BaseModel):
           are ignored.
         * Fields in `self.additional_properties` are added to the output dict.
         """
-        excluded_fields: Set[str] = set(
-            [
-                "additional_properties",
-            ]
-        )
+        excluded_fields: Set[str] = set([
+            "additional_properties",
+        ])
 
         _dict = self.model_dump(
             by_alias=True,
@@ -115,21 +103,21 @@ class DockerRegistry(BaseModel):
         if not isinstance(obj, dict):
             return cls.model_validate(obj)
 
-        _obj = cls.model_validate(
-            {
-                "id": obj.get("id"),
-                "name": obj.get("name"),
-                "url": obj.get("url"),
-                "username": obj.get("username"),
-                "project": obj.get("project"),
-                "registryType": obj.get("registryType"),
-                "createdAt": obj.get("createdAt"),
-                "updatedAt": obj.get("updatedAt"),
-            }
-        )
+        _obj = cls.model_validate({
+            "id": obj.get("id"),
+            "name": obj.get("name"),
+            "url": obj.get("url"),
+            "username": obj.get("username"),
+            "project": obj.get("project"),
+            "registryType": obj.get("registryType"),
+            "createdAt": obj.get("createdAt"),
+            "updatedAt": obj.get("updatedAt")
+        })
         # store additional fields in additional_properties
         for _key in obj.keys():
             if _key not in cls.__properties:
                 _obj.additional_properties[_key] = obj.get(_key)
 
         return _obj
+
+

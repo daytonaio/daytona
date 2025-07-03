@@ -5,6 +5,8 @@
 
 import { CreateOrganizationQuotaDto } from '../../organization/dto/create-organization-quota.dto'
 
+export const DEFAULT_BASE_PROPAGATION_FACTOR = 5
+
 export const DEFAULT_ORGANIZATION_QUOTA: CreateOrganizationQuotaDto = {
   totalCpuQuota: 10,
   totalMemoryQuota: 10,

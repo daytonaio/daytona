@@ -27,11 +27,13 @@ class RunnerRegion(str, Enum):
     """
     allowed enum values
     """
-    EU = "eu"
-    US = "us"
-    ASIA = "asia"
+    EU = 'eu'
+    US = 'us'
+    ASIA = 'asia'
 
     @classmethod
     def from_json(cls, json_str: str) -> Self:
         """Create an instance of RunnerRegion from a JSON string"""
         return cls(json.loads(json_str))
+
+

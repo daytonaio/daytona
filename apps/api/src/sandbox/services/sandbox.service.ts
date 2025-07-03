@@ -201,7 +201,7 @@ export class SandboxService {
     const runner = await this.runnerService.getRandomAvailableRunner({
       region: sandbox.region,
       sandboxClass: sandbox.class,
-      snapshotRef: snapshot.internalName,
+      snapshotRef: snapshot.ref,
     })
 
     sandbox.runnerId = runner.id
@@ -290,17 +290,27 @@ export class SandboxService {
       state: SandboxState.STARTED,
     })
 
-    const runner = await this.runnerService.getRandomAvailableRunner({
-      region,
-      sandboxClass,
-      snapshotRef: snapshot.internalName,
-    })
+    const sandbox = new Sandbox()
+    let runnerDomain = ''
 
-    if (warmPoolSandbox) {
-      return await this.assignWarmPoolSandbox(warmPoolSandbox, createSandboxDto, organization.id, runner.domain)
+    try {
+      const runner = await this.runnerService.getRandomAvailableRunner({
+        region,
+        sandboxClass,
+        snapshotRef: snapshot.ref,
+      })
+      sandbox.runnerId = runner.id
+      runnerDomain = runner.domain
+    } catch (error) {
+      if (error instanceof BadRequestError == false || error.message !== 'No available runners') {
+        throw error
+      }
+      sandbox.state = SandboxState.PENDING_PULL
     }
 
-    const sandbox = new Sandbox()
+    if (warmPoolSandbox) {
+      return await this.assignWarmPoolSandbox(warmPoolSandbox, createSandboxDto, organization.id)
+    }
 
     sandbox.organizationId = organization.id
 
@@ -329,17 +339,14 @@ export class SandboxService {
       sandbox.autoArchiveInterval = this.resolveAutoArchiveInterval(createSandboxDto.autoArchiveInterval)
     }
 
-    sandbox.runnerId = runner.id
-
     await this.sandboxRepository.insert(sandbox)
-    return SandboxDto.fromSandbox(sandbox, runner.domain)
+    return SandboxDto.fromSandbox(sandbox, runnerDomain)
   }
 
   private async assignWarmPoolSandbox(
     warmPoolSandbox: Sandbox,
     createSandboxDto: CreateSandboxDto,
     organizationId: string,
-    runnerDomain: string,
   ): Promise<SandboxDto> {
     warmPoolSandbox.public = createSandboxDto.public || false
     warmPoolSandbox.labels = createSandboxDto.labels || {}
@@ -354,6 +361,8 @@ export class SandboxService {
       warmPoolSandbox.autoArchiveInterval = this.resolveAutoArchiveInterval(createSandboxDto.autoArchiveInterval)
     }
 
+    const runner = await this.runnerService.findOne(warmPoolSandbox.runnerId)
+
     const result = await this.sandboxRepository.save(warmPoolSandbox)
 
     // Treat this as a newly started sandbox
@@ -361,7 +370,7 @@ export class SandboxService {
       SandboxEvents.STATE_UPDATED,
       new SandboxStateUpdatedEvent(warmPoolSandbox, SandboxState.STARTED, SandboxState.STARTED),
     )
-    return SandboxDto.fromSandbox(result, runnerDomain)
+    return SandboxDto.fromSandbox(result, runner.domain)
   }
 
   async createFromBuildInfo(createSandboxDto: CreateSandboxDto, organization: Organization): Promise<SandboxDto> {
@@ -435,7 +444,7 @@ export class SandboxService {
       })
       sandbox.runnerId = runner.id
     } catch (error) {
-      if (error instanceof BadRequestError == false || error.message !== 'No available runners' || !sandbox.buildInfo) {
+      if (error instanceof BadRequestError == false || error.message !== 'No available runners') {
         throw error
       }
       sandbox.state = SandboxState.PENDING_BUILD
@@ -671,16 +680,17 @@ export class SandboxService {
 
   @Cron(CronExpression.EVERY_10_MINUTES)
   async cleanupDestroyedSandboxs() {
-    const twentyFourHoursAgo = new Date()
-    twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24)
+    // Setting retention to five days to make more informed decisions for snapshot runner scaling
+    const fiveDaysAgo = new Date()
+    fiveDaysAgo.setDate(fiveDaysAgo.getDate() - 5)
 
     const destroyedSandboxs = await this.sandboxRepository.delete({
       state: SandboxState.DESTROYED,
-      updatedAt: LessThan(twentyFourHoursAgo),
+      updatedAt: LessThan(fiveDaysAgo),
     })
 
     if (destroyedSandboxs.affected > 0) {
-      this.logger.debug(`Cleaned up ${destroyedSandboxs.affected} destroyed sandboxs`)
+      this.logger.debug(`Cleaned up ${destroyedSandboxs.affected} destroyed sandboxes`)
     }
   }
 

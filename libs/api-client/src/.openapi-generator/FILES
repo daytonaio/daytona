@@ -37,6 +37,7 @@ models/create-organization.ts
 models/create-runner.ts
 models/create-sandbox.ts
 models/create-session-request.ts
+models/create-snapshot-target-propagation.ts
 models/create-snapshot.ts
 models/create-user.ts
 models/create-volume.ts
@@ -92,8 +93,11 @@ models/session-execute-request.ts
 models/session-execute-response.ts
 models/session.ts
 models/set-snapshot-general-status-dto.ts
+models/set-snapshot-target-propagation-dto.ts
+models/set-snapshot-target-propagations-dto.ts
 models/snapshot-dto.ts
 models/snapshot-state.ts
+models/snapshot-target-propagation-dto.ts
 models/storage-access-dto.ts
 models/toggle-state.ts
 models/update-assigned-organization-roles.ts
