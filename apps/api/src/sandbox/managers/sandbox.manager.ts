@@ -83,7 +83,7 @@ export class SandboxManager {
             organizationId: Not(SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION),
             state: SandboxState.STARTED,
             desiredState: SandboxDesiredState.STARTED,
-            pending: false,
+            pending: Not(true),
             autoStopInterval: Not(0),
             lastActivityAt: Raw((alias) => `${alias} < NOW() - INTERVAL '1 minute' * "autoStopInterval"`),
           },
@@ -103,6 +103,7 @@ export class SandboxManager {
             }
 
             try {
+              sandbox.pending = true
               sandbox.desiredState = SandboxDesiredState.STOPPED
               await this.sandboxRepository.save(sandbox)
               await this.redisLockProvider.unlock(lockKey)
@@ -139,7 +140,7 @@ export class SandboxManager {
             organizationId: Not(SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION),
             state: SandboxState.STOPPED,
             desiredState: SandboxDesiredState.STOPPED,
-            pending: false,
+            pending: Not(true),
             lastActivityAt: Raw((alias) => `${alias} < NOW() - INTERVAL '1 minute' * "autoArchiveInterval"`),
           },
           order: {
@@ -159,6 +160,7 @@ export class SandboxManager {
             }
 
             try {
+              sandbox.pending = true
               sandbox.desiredState = SandboxDesiredState.ARCHIVED
               await this.sandboxRepository.save(sandbox)
               await this.redisLockProvider.unlock(lockKey)
