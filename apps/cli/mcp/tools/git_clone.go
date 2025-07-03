@@ -14,29 +14,45 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func GitClone(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+type GitCloneArgs struct {
+	Id       *string `json:"id,omitempty"`
+	Url      *string `json:"url,omitempty"`
+	Path     *string `json:"path,omitempty"`
+	Branch   *string `json:"branch,omitempty"`
+	CommitId *string `json:"commit_id,omitempty"`
+	Username *string `json:"username,omitempty"`
+	Password *string `json:"password,omitempty"`
+}
+
+func GetGitCloneTool() mcp.Tool {
+	return mcp.NewTool("git_clone",
+		mcp.WithDescription("Clone a Git repository into the Daytona sandbox."),
+		mcp.WithString("url", mcp.Required(), mcp.Description("URL of the Git repository to clone.")),
+		mcp.WithString("path", mcp.Description("Directory to clone the repository into (defaults to current directory).")),
+		mcp.WithString("branch", mcp.Description("Branch to clone.")),
+		mcp.WithString("commit_id", mcp.Description("Commit ID to clone.")),
+		mcp.WithString("username", mcp.Description("Username to clone the repository with.")),
+		mcp.WithString("password", mcp.Description("Password to clone the repository with.")),
+		mcp.WithString("id", mcp.Required(), mcp.Description("ID of the sandbox to clone the repository in.")),
+	)
+}
+
+func GitClone(ctx context.Context, request mcp.CallToolRequest, args GitCloneArgs) (*mcp.CallToolResult, error) {
 	apiClient, err := apiclient.GetApiClient(nil, daytonaMCPHeaders)
 	if err != nil {
 		return &mcp.CallToolResult{IsError: true}, err
 	}
 
-	sandboxId := ""
-	if id, ok := request.Params.Arguments["id"]; ok && id != nil {
-		if idStr, ok := id.(string); ok && idStr != "" {
-			sandboxId = idStr
-		}
-	}
-
-	if sandboxId == "" {
+	if args.Id == nil || *args.Id == "" {
 		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("sandbox ID is required")
 	}
 
-	gitCloneRequest, err := getGitCloneRequest(request)
+	gitCloneRequest, err := getGitCloneRequest(args)
 	if err != nil {
 		return &mcp.CallToolResult{IsError: true}, err
 	}
 
-	_, err = apiClient.ToolboxAPI.GitCloneRepository(ctx, sandboxId).GitCloneRequest(*gitCloneRequest).Execute()
+	_, err = apiClient.ToolboxAPI.GitCloneRepository(ctx, *args.Id).GitCloneRequest(*gitCloneRequest).Execute()
 	if err != nil {
 		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("error cloning repository: %v", err)
 	}
@@ -46,40 +62,34 @@ func GitClone(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolRe
 	return mcp.NewToolResultText(fmt.Sprintf("Cloned repository: %s to %s", gitCloneRequest.Url, gitCloneRequest.Path)), nil
 }
 
-func getGitCloneRequest(request mcp.CallToolRequest) (*daytonaapiclient.GitCloneRequest, error) {
+func getGitCloneRequest(args GitCloneArgs) (*daytonaapiclient.GitCloneRequest, error) {
 	gitCloneRequest := daytonaapiclient.GitCloneRequest{}
 
-	url, ok := request.Params.Arguments["url"].(string)
-	if !ok {
+	if args.Url == nil || *args.Url == "" {
 		return nil, fmt.Errorf("url parameter is required")
 	}
 
-	gitCloneRequest.Url = url
+	gitCloneRequest.Url = *args.Url
 
 	gitCloneRequest.Path = "."
-	path, ok := request.Params.Arguments["path"].(string)
-	if ok && path != "" {
-		gitCloneRequest.Path = path
+	if args.Path != nil && *args.Path != "" {
+		gitCloneRequest.Path = *args.Path
 	}
 
-	branch, ok := request.Params.Arguments["branch"].(string)
-	if ok && branch != "" {
-		gitCloneRequest.Branch = &branch
+	if args.Branch != nil && *args.Branch != "" {
+		gitCloneRequest.Branch = args.Branch
 	}
 
-	commitId, ok := request.Params.Arguments["commit_id"].(string)
-	if ok && commitId != "" {
-		gitCloneRequest.CommitId = &commitId
+	if args.CommitId != nil && *args.CommitId != "" {
+		gitCloneRequest.CommitId = args.CommitId
 	}
 
-	username, ok := request.Params.Arguments["username"].(string)
-	if ok && username != "" {
-		gitCloneRequest.Username = &username
+	if args.Username != nil && *args.Username != "" {
+		gitCloneRequest.Username = args.Username
 	}
 
-	password, ok := request.Params.Arguments["password"].(string)
-	if ok && password != "" {
-		gitCloneRequest.Password = &password
+	if args.Password != nil && *args.Password != "" {
+		gitCloneRequest.Password = args.Password
 	}
 
 	return &gitCloneRequest, nil

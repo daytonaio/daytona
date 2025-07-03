@@ -16,30 +16,54 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func FileUpload(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+type FileUploadArgs struct {
+	Id        *string `json:"id,omitempty"`
+	FilePath  *string `json:"file_path,omitempty"`
+	Content   *string `json:"content,omitempty"`
+	Encoding  *string `json:"encoding,omitempty"`
+	Overwrite *bool   `json:"overwrite,omitempty"`
+}
+
+func GetFileUploadTool() mcp.Tool {
+	return mcp.NewTool("file_upload",
+		mcp.WithDescription("Upload files to the Daytona sandbox from text or base64-encoded binary content. Creates necessary parent directories automatically and verifies successful writes. Files persist during the session and have appropriate permissions for further tool operations. Supports overwrite controls and maintains original file formats."),
+		mcp.WithString("file_path", mcp.Required(), mcp.Description("Path to the file to upload. Files should always be uploaded to the /tmp directory if user doesn't specify otherwise.")),
+		mcp.WithString("content", mcp.Required(), mcp.Description("Content of the file to upload.")),
+		mcp.WithString("encoding", mcp.Required(), mcp.Description("Encoding of the file to upload.")),
+		mcp.WithBoolean("overwrite", mcp.Required(), mcp.Description("Overwrite the file if it already exists.")),
+		mcp.WithString("id", mcp.Required(), mcp.Description("ID of the sandbox to upload the file to.")),
+	)
+}
+
+func FileUpload(ctx context.Context, request mcp.CallToolRequest, args FileUploadArgs) (*mcp.CallToolResult, error) {
 	apiClient, err := apiclient.GetApiClient(nil, daytonaMCPHeaders)
 	if err != nil {
 		return nil, err
 	}
 
-	sandboxId := ""
-	if id, ok := request.Params.Arguments["id"]; ok && id != nil {
-		if idStr, ok := id.(string); ok && idStr != "" {
-			sandboxId = idStr
-		}
-	}
-
-	if sandboxId == "" {
+	if args.Id == nil || *args.Id == "" {
 		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("sandbox ID is required")
 	}
 
-	filePath := request.Params.Arguments["file_path"].(string)
-	content := request.Params.Arguments["content"].(string)
-	encoding := request.Params.Arguments["encoding"].(string)
-	overwrite := request.Params.Arguments["overwrite"].(bool)
+	if args.FilePath == nil || *args.FilePath == "" {
+		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("file_path parameter is required")
+	}
+
+	if args.Content == nil || *args.Content == "" {
+		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("content parameter is required")
+	}
+
+	if args.Encoding == nil || *args.Encoding == "" {
+		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("encoding parameter is required")
+	}
+
+	overwrite := false
+	if args.Overwrite != nil && *args.Overwrite {
+		overwrite = *args.Overwrite
+	}
 
 	// Get the sandbox using sandbox ID
-	sandbox, _, err := apiClient.SandboxAPI.GetSandbox(ctx, sandboxId).Execute()
+	sandbox, _, err := apiClient.SandboxAPI.GetSandbox(ctx, *args.Id).Execute()
 	if err != nil {
 		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("failed to get sandbox: %v", err)
 	}
@@ -50,29 +74,29 @@ func FileUpload(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallTool
 
 	// Check if file exists and handle overwrite
 	if !overwrite {
-		fileInfo, _, err := apiClient.ToolboxAPI.GetFileInfo(ctx, sandboxId).Path(filePath).Execute()
+		fileInfo, _, err := apiClient.ToolboxAPI.GetFileInfo(ctx, *args.Id).Path(*args.FilePath).Execute()
 		if err == nil && fileInfo != nil {
-			return &mcp.CallToolResult{IsError: true}, fmt.Errorf("file '%s' already exists and overwrite=false", filePath)
+			return &mcp.CallToolResult{IsError: true}, fmt.Errorf("file '%s' already exists and overwrite=false", *args.FilePath)
 		}
 	}
 
 	// Prepare content based on encoding
 	var binaryContent []byte
-	if encoding == "base64" {
+	if *args.Encoding == "base64" {
 		var err error
-		binaryContent, err = base64.StdEncoding.DecodeString(content)
+		binaryContent, err = base64.StdEncoding.DecodeString(*args.Content)
 		if err != nil {
 			return &mcp.CallToolResult{IsError: true}, fmt.Errorf("invalid base64 encoding: %v", err)
 		}
 	} else {
 		// Default is text encoding
-		binaryContent = []byte(content)
+		binaryContent = []byte(*args.Content)
 	}
 
 	// Create parent directories if they don't exist
-	parentDir := filepath.Dir(filePath)
+	parentDir := filepath.Dir(*args.FilePath)
 	if parentDir != "" {
-		_, err := apiClient.ToolboxAPI.CreateFolder(ctx, sandboxId).Path(parentDir).Mode("0755").Execute()
+		_, err := apiClient.ToolboxAPI.CreateFolder(ctx, *args.Id).Path(parentDir).Mode("0755").Execute()
 		if err != nil {
 			log.Errorf("Error creating parent directory: %v", err)
 			// Continue anyway as upload might handle this
@@ -98,13 +122,13 @@ func FileUpload(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallTool
 	}
 
 	// Upload the file
-	_, err = apiClient.ToolboxAPI.UploadFile(ctx, sandboxId).Path(filePath).File(tempFile).Execute()
+	_, err = apiClient.ToolboxAPI.UploadFile(ctx, *args.Id).Path(*args.FilePath).File(tempFile).Execute()
 	if err != nil {
 		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("error uploading file: %v", err)
 	}
 
 	// Get file info for size
-	fileInfo, _, err := apiClient.ToolboxAPI.GetFileInfo(ctx, sandboxId).Path(filePath).Execute()
+	fileInfo, _, err := apiClient.ToolboxAPI.GetFileInfo(ctx, *args.Id).Path(*args.FilePath).Execute()
 	if err != nil {
 		log.Errorf("Error getting file info after upload: %v", err)
 
@@ -112,7 +136,7 @@ func FileUpload(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallTool
 	}
 
 	fileSizeKB := float64(fileInfo.Size) / 1024
-	log.Infof("File uploaded successfully: %s, size: %.2fKB", filePath, fileSizeKB)
+	log.Infof("File uploaded successfully: %s, size: %.2fKB", *args.FilePath, fileSizeKB)
 
-	return mcp.NewToolResultText(fmt.Sprintf("File uploaded successfully: %s", filePath)), nil
+	return mcp.NewToolResultText(fmt.Sprintf("File uploaded successfully: %s", *args.FilePath)), nil
 }

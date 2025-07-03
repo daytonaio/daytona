@@ -6,7 +6,6 @@ package tools
 import (
 	"context"
 	"fmt"
-	"strconv"
 	"strings"
 	"time"
 
@@ -17,17 +16,54 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func CreateSandbox(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+type CreateSandboxArgs struct {
+	Id                  *string                           `json:"id,omitempty"`
+	Target              *string                           `json:"target,omitempty"`
+	Snapshot            *string                           `json:"snapshot,omitempty"`
+	User                *string                           `json:"user,omitempty"`
+	Env                 *map[string]string                `json:"env,omitempty"`
+	Labels              *map[string]string                `json:"labels,omitempty"`
+	Public              *bool                             `json:"public,omitempty"`
+	Class               *string                           `json:"class,omitempty"`
+	Cpu                 *int32                            `json:"cpu,omitempty"`
+	Memory              *int32                            `json:"memory,omitempty"`
+	Disk                *int32                            `json:"disk,omitempty"`
+	AutoStopInterval    *int32                            `json:"autoStopInterval,omitempty"`
+	AutoArchiveInterval *int32                            `json:"autoArchiveInterval,omitempty"`
+	Volumes             *[]daytonaapiclient.SandboxVolume `json:"volumes,omitempty"`
+	BuildInfo           *daytonaapiclient.CreateBuildInfo `json:"buildInfo,omitempty"`
+}
+
+func GetCreateSandboxTool() mcp.Tool {
+	return mcp.NewTool("create_sandbox",
+		mcp.WithDescription("Create a new sandbox with Daytona"),
+		mcp.WithString("id", mcp.Description("If a sandbox ID is provided it is first checked if it exists and is running, if so, the existing sandbox will be used. However, a model is not able to provide custom sandbox ID but only the ones Daytona commands return and should always leave ID field empty if the intention is to create a new sandbox.")),
+		mcp.WithString("target", mcp.DefaultString("us"), mcp.Description("Target region of the sandbox.")),
+		mcp.WithString("snapshot", mcp.Description("Snapshot of the sandbox (don't specify any if not explicitly instructed from user).")),
+		mcp.WithString("user", mcp.Description("User associated with the sandbox.")),
+		mcp.WithObject("env", mcp.Description("Environment variables for the sandbox. Format: {\"key\": \"value\", \"key2\": \"value2\"}"), mcp.AdditionalProperties(map[string]any{"type": "string"})),
+		mcp.WithObject("labels", mcp.Description("Labels for the sandbox. Format: {\"key\": \"value\", \"key2\": \"value2\"}"), mcp.AdditionalProperties(map[string]any{"type": "string"})),
+		mcp.WithBoolean("public", mcp.Description("Whether the sandbox http preview is publicly accessible.")),
+		mcp.WithString("class", mcp.Description("Class type of the sandbox.")),
+		mcp.WithNumber("cpu", mcp.Description("CPU cores allocated to the sandbox."), mcp.Min(0), mcp.Max(4)),
+		mcp.WithNumber("memory", mcp.Description("Memory allocated to the sandbox in GB."), mcp.Min(0), mcp.Max(8)),
+		mcp.WithNumber("disk", mcp.Description("Disk space allocated to the sandbox in GB."), mcp.Min(0), mcp.Max(10)),
+		mcp.WithNumber("autoStopInterval", mcp.DefaultNumber(15), mcp.Min(0), mcp.Description("Auto-stop interval in minutes (0 means disabled) for the sandbox.")),
+		mcp.WithNumber("autoArchiveInterval", mcp.DefaultNumber(10080), mcp.Min(0), mcp.Description("Auto-archive interval in minutes (0 means the maximum interval will be used) for the sandbox.")),
+		mcp.WithArray("volumes", mcp.Description("Volumes to attach to the sandbox."), mcp.Items(map[string]any{"type": "object", "properties": map[string]any{"volumeId": map[string]any{"type": "string"}, "mountPath": map[string]any{"type": "string"}}})),
+		mcp.WithObject("buildInfo", mcp.Description("Build information for the sandbox."), mcp.Properties(map[string]any{"dockerfile_content": map[string]any{"type": "string"}, "context_hashes": map[string]any{"type": "array", "items": map[string]any{"type": "string"}}})),
+	)
+}
+
+func CreateSandbox(ctx context.Context, request mcp.CallToolRequest, args CreateSandboxArgs) (*mcp.CallToolResult, error) {
 	apiClient, err := apiclient.GetApiClient(nil, daytonaMCPHeaders)
 	if err != nil {
 		return &mcp.CallToolResult{IsError: true}, err
 	}
 
 	sandboxId := ""
-	if id, ok := request.Params.Arguments["id"]; ok && id != nil {
-		if idStr, ok := id.(string); ok && idStr != "" {
-			sandboxId = idStr
-		}
+	if args.Id != nil && *args.Id != "" {
+		sandboxId = *args.Id
 	}
 
 	if sandboxId != "" {
@@ -39,50 +75,14 @@ func CreateSandbox(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallT
 		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("sandbox %s not found or not running", sandboxId)
 	}
 
-	createSandbox := daytonaapiclient.NewCreateSandbox()
-
-	if snapshot, ok := request.Params.Arguments["snapshot"]; ok && snapshot != nil {
-		if snapshotStr, ok := snapshot.(string); ok && snapshotStr != "" {
-			createSandbox.SetSnapshot(snapshotStr)
-		}
-	}
-
-	if target, ok := request.Params.Arguments["target"]; ok && target != nil {
-		if targetStr, ok := target.(string); ok && targetStr != "" {
-			createSandbox.SetTarget(targetStr)
-		}
-	}
-
-	if autoStopInterval, ok := request.Params.Arguments["auto_stop_interval"]; ok && autoStopInterval != nil {
-		if autoStopIntervalStr, ok := autoStopInterval.(string); ok && autoStopIntervalStr != "" {
-			autoStopIntervalValue, err := strconv.Atoi(autoStopIntervalStr)
-			if err != nil {
-				log.Error(fmt.Errorf("invalid auto stop interval value, fallback to default (15m)"))
-				autoStopIntervalValue = 15
-			}
-
-			createSandbox.SetAutoStopInterval(int32(autoStopIntervalValue))
-		}
-	}
-
-	if autoArchiveInterval, ok := request.Params.Arguments["auto_archive_interval"]; ok && autoArchiveInterval != nil {
-		if autoArchiveIntervalStr, ok := autoArchiveInterval.(string); ok && autoArchiveIntervalStr != "" {
-			autoArchiveIntervalValue, err := strconv.Atoi(autoArchiveIntervalStr)
-			if err != nil {
-				log.Error(fmt.Errorf("invalid auto archive interval value, fallback to default (7d)"))
-				autoArchiveIntervalValue = 7 * 24 * 60
-			}
-
-			createSandbox.SetAutoArchiveInterval(int32(autoArchiveIntervalValue))
-		}
-	}
+	createSandboxReq := createSandboxRequest(args)
 
 	// Create new sandbox with retries
 	maxRetries := 3
 	retryDelay := time.Second * 2
 
 	for retry := range maxRetries {
-		sandbox, _, err := apiClient.SandboxAPI.CreateSandbox(ctx).CreateSandbox(*createSandbox).Execute()
+		sandbox, _, err := apiClient.SandboxAPI.CreateSandbox(ctx).CreateSandbox(*createSandboxReq).Execute()
 		if err != nil {
 			if strings.Contains(err.Error(), "Total CPU quota exceeded") {
 				return &mcp.CallToolResult{IsError: true}, fmt.Errorf("CPU quota exceeded. Please delete unused sandboxes or upgrade your plan")
@@ -105,4 +105,66 @@ func CreateSandbox(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallT
 	}
 
 	return &mcp.CallToolResult{IsError: true}, fmt.Errorf("failed to create sandbox after %d retries", maxRetries)
+}
+
+func createSandboxRequest(args CreateSandboxArgs) *daytonaapiclient.CreateSandbox {
+	createSandbox := daytonaapiclient.NewCreateSandbox()
+
+	if args.Snapshot != nil && *args.Snapshot != "" {
+		createSandbox.SetSnapshot(*args.Snapshot)
+	}
+
+	if args.Target != nil && *args.Target != "" {
+		createSandbox.SetTarget(*args.Target)
+	}
+
+	if args.AutoStopInterval != nil {
+		createSandbox.SetAutoStopInterval(*args.AutoStopInterval)
+	}
+
+	if args.AutoArchiveInterval != nil {
+		createSandbox.SetAutoArchiveInterval(*args.AutoArchiveInterval)
+	}
+
+	if args.User != nil && *args.User != "" {
+		createSandbox.SetUser(*args.User)
+	}
+
+	if args.Env != nil {
+		createSandbox.SetEnv(*args.Env)
+	}
+
+	if args.Labels != nil {
+		createSandbox.SetLabels(*args.Labels)
+	}
+
+	if args.Public != nil {
+		createSandbox.SetPublic(*args.Public)
+	}
+
+	if args.Class != nil && *args.Class != "" {
+		createSandbox.SetClass(*args.Class)
+	}
+
+	if args.Cpu != nil {
+		createSandbox.SetCpu(*args.Cpu)
+	}
+
+	if args.Memory != nil {
+		createSandbox.SetMemory(*args.Memory)
+	}
+
+	if args.Disk != nil {
+		createSandbox.SetDisk(*args.Disk)
+	}
+
+	if args.Volumes != nil {
+		createSandbox.SetVolumes(*args.Volumes)
+	}
+
+	if args.BuildInfo != nil {
+		createSandbox.SetBuildInfo(*args.BuildInfo)
+	}
+
+	return createSandbox
 }
