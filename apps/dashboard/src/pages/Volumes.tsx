@@ -182,7 +182,7 @@ const Volumes: React.FC = () => {
   )
 
   return (
-    <div className="p-6">
+    <div className="px-6 py-2">
       <Dialog
         open={showCreateDialog}
         onOpenChange={(isOpen) => {
@@ -193,13 +193,13 @@ const Volumes: React.FC = () => {
           setNewVolumeName('')
         }}
       >
-        <div className="mb-6 flex justify-between items-center">
-          <h1 className="text-2xl font-bold">Volumes</h1>
+        <div className="mb-2 h-12 flex items-center justify-between">
+          <h1 className="text-2xl font-medium">Volumes</h1>
           {writePermitted && (
             <DialogTrigger asChild>
               <Button
                 variant="default"
-                size="icon"
+                size="sm"
                 disabled={loadingVolumes}
                 className="w-auto px-4"
                 title="Create Volume"
@@ -234,16 +234,22 @@ const Volumes: React.FC = () => {
             </form>
             <DialogFooter>
               <DialogClose asChild>
-                <Button type="button" variant="secondary">
+                <Button type="button" size="sm" variant="secondary">
                   Cancel
                 </Button>
               </DialogClose>
               {loadingCreate ? (
-                <Button type="button" variant="default" disabled>
+                <Button type="button" size="sm" variant="default" disabled>
                   Creating...
                 </Button>
               ) : (
-                <Button type="submit" form="create-volume-form" variant="default" disabled={!newVolumeName.trim()}>
+                <Button
+                  type="submit"
+                  size="sm"
+                  form="create-volume-form"
+                  variant="default"
+                  disabled={!newVolumeName.trim()}
+                >
                   Create
                 </Button>
               )}

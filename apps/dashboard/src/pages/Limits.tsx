@@ -109,8 +109,10 @@ const Limits: React.FC = () => {
   }, [user])
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold">Limits</h1>
+    <div className="px-6 py-2">
+      <div className="mb-2 h-12 flex items-center justify-between">
+        <h1 className="text-2xl font-medium">Limits</h1>
+      </div>
 
       <Card className="my-4">
         <CardHeader>
