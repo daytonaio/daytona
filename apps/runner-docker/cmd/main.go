@@ -65,7 +65,7 @@ func main() {
 
 	// Create gRPC server
 	grpcServer := grpc.New(grpc.ServerConfig{
-		Address:            fmt.Sprintf(":%d", cfg.Port),
+		Addr:               fmt.Sprintf(":%d", cfg.Port),
 		DockerClient:       dockerClient,
 		RunnerCache:        &cache,
 		DaemonPath:         daemonPath,
@@ -74,38 +74,44 @@ func main() {
 		AWSRegion:          cfg.AWSRegion,
 		AWSEndpointUrl:     cfg.AWSEndpointUrl,
 		Log:                log,
+		UseTLS:             cfg.EnableTLS,
+		CertFile:           cfg.TLSCertFile,
+		KeyFile:            cfg.TLSKeyFile,
 	})
 
 	// Create metrics server
 	metricsServer := &http.Server{
-		Addr:    fmt.Sprintf(":%d", cfg.MetricsPort),
+		Addr:    fmt.Sprintf("127.0.0.1:%d", cfg.MetricsPort),
 		Handler: promhttp.Handler(),
 	}
 
 	// Create proxy server
 	proxyServer := proxy.New(proxy.ProxyServerConfig{
 		DockerClient: dockerClient,
-		Port:         cfg.ProxyPort,
+		Addr:         fmt.Sprintf(":%d", cfg.ProxyPort),
 		Log:          log,
+		UseTLS:       cfg.EnableTLS,
+		CertFile:     cfg.TLSCertFile,
+		KeyFile:      cfg.TLSKeyFile,
 	})
 
 	errChan := make(chan error, 3)
 
 	// Start gRPC server
 	go func() {
-		log.Info("Starting gRPC server", "address", fmt.Sprintf(":%d", cfg.Port))
+		log.Info("Starting gRPC server", "address", grpcServer.Addr)
 		errChan <- grpcServer.Start()
 	}()
 
 	// Start proxy server
 	go func() {
-		log.Info("Starting proxy server", "address", fmt.Sprintf(":%d", cfg.ProxyPort))
+		log.Info("Starting proxy server", "address", proxyServer.Addr)
 		errChan <- proxyServer.Start()
 	}()
 
 	// Start metrics server
 	go func() {
-		log.Info("Starting metrics server", "address", fmt.Sprintf(":%d", cfg.MetricsPort))
+		log.Info("Starting metrics server", "address", metricsServer.Addr)
 		errChan <- metricsServer.ListenAndServe()
 	}()
 
@@ -132,7 +138,9 @@ func main() {
 	// Start shutdown in a goroutine
 	go func() {
 		log.Info("Shutting down gRPC server...")
-		grpcServer.Shutdown(shutdownCtx)
+		if err := grpcServer.Shutdown(shutdownCtx); err != nil {
+			log.Error("gRPC server shutdown error", "error", err)
+		}
 
 		log.Info("Shutting down Proxy server...")
 		if err := proxyServer.Shutdown(shutdownCtx); err != nil {
