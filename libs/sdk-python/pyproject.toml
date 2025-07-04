@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [project]
 name = "daytona"
-version = "0.0.0-dev"
+version = "0.21.8"
 authors = [
     { name = "Daytona Platforms Inc.", email = "support@daytona.io"  },
 ]
