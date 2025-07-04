@@ -7,8 +7,7 @@ import json
 from typing import Callable, NoReturn, ParamSpec, TypeVar, Union
 
 from daytona_api_client.exceptions import OpenApiException
-from daytona_api_client_async.exceptions import \
-  OpenApiException as OpenApiExceptionAsync
+from daytona_api_client_async.exceptions import OpenApiException as OpenApiExceptionAsync
 
 from ..common.errors import DaytonaError
 
