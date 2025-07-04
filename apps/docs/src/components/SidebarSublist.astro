@@ -1,0 +1,267 @@
+---
+import { comparePaths } from '../utils/navigation'
+
+// Add TypeScript interface declaration for Window
+declare global {
+  interface Window {
+    sidebarStates: { [key: string]: boolean }
+  }
+}
+
+function getSVG(name: string) {
+  const filepath = `/src/assets/sidebar/${name}`
+  const files = import.meta.glob<string>('/src/assets/sidebar/*.svg', {
+    query: '?raw',
+    import: 'default',
+  })
+
+  if (!(filepath in files)) {
+    throw new Error(`${filepath} not found`)
+  }
+
+  return files[filepath]()
+}
+
+interface Props {
+  sublist: any[]
+  nested?: boolean
+  collapse?: boolean
+}
+
+const { sublist = [], nested, collapse = false } = Astro.props
+---
+
+<!-- Pre-render script to set initial states -->
+<script is:inline define:vars={{ sublist }}>
+  // Create a global object to store initial states
+  window.sidebarStates = window.sidebarStates || {}
+  try {
+    // Get all sidebar states from localStorage
+    Object.keys(localStorage).forEach(key => {
+      if (key.startsWith('sidebar-')) {
+        const groupId = key.replace('sidebar-', '')
+        window.sidebarStates[groupId] = localStorage.getItem(key) === 'true'
+      }
+    })
+  } catch (e) {
+    console.error('Failed to access localStorage:', e)
+  }
+</script>
+
+<ul class:list={{ 'top-level': !nested }}>
+  {
+    sublist.map(entry => (
+      <li>
+        {entry.type === 'link' ? (
+          <a
+            href={entry.href}
+            aria-current={entry.isCurrent ? 'page' : undefined}
+            class:list={[
+              entry.attrs?.class,
+              { context: entry.context },
+              { active: comparePaths(entry.href, Astro.url.pathname) },
+            ]}
+          >
+            {entry.attrs?.icon && (
+              <Fragment set:html={getSVG(entry.attrs.icon)} />
+            )}
+            <span>{entry.label}</span>
+          </a>
+        ) : entry.type === 'group' ? (
+          entry.collapse || (collapse && entry.label?.includes('SDK')) ? (
+            <details
+              class="sidebar-group is-collapsible"
+              data-group-id={entry.label}
+              set:html={`<script>
+                if (window.sidebarStates && window.sidebarStates['${entry.label}']) {
+                  document.currentScript.parentElement.setAttribute('open', '');
+                }
+              </script>`}
+            >
+              <summary class="group-label">
+                <span class="large">{entry.label}</span>
+                <svg
+                  class="caret"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M9 18L15 12L9 6"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </summary>
+              <div class="group-content">
+                <Astro.self
+                  sublist={entry.entries}
+                  nested
+                  collapse={collapse}
+                />
+              </div>
+            </details>
+          ) : (
+            <div>
+              <div class="group-label">
+                <span class="large">{entry.label}</span>
+              </div>
+              <Astro.self sublist={entry.entries} nested collapse={collapse} />
+            </div>
+          )
+        ) : null}
+      </li>
+    ))
+  }
+</ul>
+
+<script>
+  // Handle state persistence for collapsible sections
+  const initializeDetails = () => {
+    document
+      .querySelectorAll<HTMLDetailsElement>('details.is-collapsible')
+      .forEach(details => {
+        const groupId = details.getAttribute('data-group-id')
+        if (!groupId) return
+
+        // Store state changes
+        details.addEventListener('toggle', () => {
+          localStorage.setItem(`sidebar-${groupId}`, details.open.toString())
+          window.sidebarStates[groupId] = details.open
+        })
+      })
+  }
+
+  // Run on page transitions
+  document.addEventListener('astro:page-load', initializeDetails)
+  // Run on initial load
+  initializeDetails()
+</script>
+
+<style>
+  ul {
+    --sl-sidebar-item-padding-inline: 0.5rem;
+    list-style: none;
+    padding: 0;
+  }
+
+  li {
+    overflow-wrap: anywhere;
+  }
+
+  .large {
+    font-family: 'Berkeley Mono', monospace;
+    font-size: 0.75rem;
+    font-weight: 400;
+    line-height: 1;
+    letter-spacing: -0.12px;
+    text-transform: uppercase;
+    color: var(--secondary-text-color);
+  }
+
+  .sidebar-group {
+    margin: 8px 0;
+  }
+
+  .sidebar-group.is-collapsible {
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+  }
+
+  .group-label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 24px 0 8px 0;
+  }
+
+  /* Collapsible specific styles */
+  .is-collapsible .group-label {
+    cursor: pointer;
+  }
+
+  .is-collapsible .group-content {
+    padding: 0 8px 8px 8px;
+  }
+
+  .caret {
+    transition: transform 0.2s ease;
+  }
+
+  details[open] .caret {
+    transform: rotate(90deg);
+  }
+
+  summary {
+    list-style: none;
+  }
+  summary::-webkit-details-marker {
+    display: none;
+  }
+
+  li > a {
+    display: flex;
+    align-items: center;
+    font-family: 'Berkeley Mono', monospace;
+    font-size: 1rem;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 1.4;
+    letter-spacing: -0.04rem;
+    text-decoration: none;
+    color: var(--primary-text-color);
+    padding: 8px 0;
+    transition: 0.6s;
+
+    > svg {
+      margin-right: 10px;
+      width: 16px;
+      height: 16px;
+
+      path {
+        transition: 0.6s;
+        fill: var(--primary-text-color);
+      }
+    }
+  }
+
+  .context {
+    color: var(--secondary-hover-color);
+    > svg {
+      path {
+        fill: var(--secondary-hover-color);
+      }
+    }
+  }
+
+  .active,
+  a:focus,
+  a:hover {
+    color: var(--hover-color);
+    > svg {
+      path {
+        fill: var(--hover-color);
+      }
+    }
+  }
+
+  [aria-current='page'],
+  [aria-current='page']:hover,
+  [aria-current='page']:focus {
+    color: var(--hover-color);
+    > svg {
+      path {
+        fill: var(--hover-color);
+      }
+    }
+  }
+
+  a > *:not(:last-child),
+  .group-label > *:not(:last-child) {
+    margin-inline-end: 0.25em;
+  }
+</style>

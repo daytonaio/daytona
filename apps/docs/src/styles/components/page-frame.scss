@@ -1,0 +1,19 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  margin: 0 auto;
+  max-width: 1248px;
+
+  @include for-pc-screen-sizes {
+    margin: 0 80px;
+  }
+
+  @include for-laptop-screen-sizes {
+    margin: 0 40px;
+  }
+
+  @include for-mobile-screen-sizes {
+    margin: 0 20px;
+  }
+}

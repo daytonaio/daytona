@@ -1,0 +1,103 @@
+---
+title: "Errors"
+hideTitleOnPage: true
+---
+
+
+## DaytonaError
+
+Base error for Daytona SDK.
+
+**Extends:**
+
+- `Error`
+
+### Extended by
+
+- `DaytonaNotFoundError`
+
+### Constructors
+
+#### new DaytonaError()
+
+_Inherited from_: `Error.constructor`
+
+```ts
+new DaytonaError(message?: string): DaytonaError
+```
+
+**Parameters**:
+
+- `message?` _string_
+
+
+**Returns**:
+
+- `DaytonaError`
+
+#### new DaytonaError()
+
+_Inherited from_: `Error.constructor`
+
+```ts
+new DaytonaError(message?: string, options?: ErrorOptions): DaytonaError
+```
+
+**Parameters**:
+
+- `message?` _string_
+- `options?` _ErrorOptions_
+
+
+**Returns**:
+
+- `DaytonaError`
+
+***
+
+
+## DaytonaNotFoundError
+
+Base error for Daytona SDK.
+
+**Extends:**
+
+- `DaytonaError`
+
+### Constructors
+
+#### new DaytonaNotFoundError()
+
+_Inherited from_: `DaytonaError.constructor`
+
+```ts
+new DaytonaNotFoundError(message?: string): DaytonaNotFoundError
+```
+
+**Parameters**:
+
+- `message?` _string_
+
+
+**Returns**:
+
+- `DaytonaNotFoundError`
+
+#### new DaytonaNotFoundError()
+
+_Inherited from_: `DaytonaError.constructor`
+
+```ts
+new DaytonaNotFoundError(message?: string, options?: ErrorOptions): DaytonaNotFoundError
+```
+
+**Parameters**:
+
+- `message?` _string_
+- `options?` _ErrorOptions_
+
+
+**Returns**:
+
+- `DaytonaNotFoundError`
+

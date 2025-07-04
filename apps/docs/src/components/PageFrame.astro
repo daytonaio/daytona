@@ -1,0 +1,113 @@
+---
+import MobileMenuToggle from 'virtual:starlight/components/MobileMenuToggle'
+
+const { hasSidebar, labels } = Astro.props
+---
+
+<div class="page sl-flex">
+  <div class="header-wrapper"><slot name="header" /></div>
+  <div class="grid-template">
+    {
+      hasSidebar && (
+        <nav class="sidebar" aria-label={labels['sidebarNav.accessibleLabel']}>
+          <MobileMenuToggle {...Astro.props} />
+          <div id="starlight__sidebar" class="sidebar-pane">
+            <div class="sidebar-content sl-flex">
+              <slot name="sidebar" />
+            </div>
+          </div>
+        </nav>
+      )
+    }
+    <div class="main-frame"><slot /></div>
+  </div>
+</div>
+
+<style>
+  .grid-template {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr 3fr;
+    column-gap: 48px;
+    @media (max-width: 1024px) {
+      grid-template-columns: 100%;
+    }
+  }
+  .header-wrapper {
+    position: fixed;
+    z-index: 4;
+    inset-inline-start: 0;
+    inset-block-start: 0;
+    width: 100%;
+    background-color: var(--bg-color);
+  }
+
+  :global([data-has-sidebar]) .header {
+    padding-inline-end: var(--sl-nav-pad-x);
+    @media (max-width: 1024px) {
+      padding-inline-end: calc(
+        var(--sl-nav-gap) + var(--sl-nav-pad-x) + var(--sl-menu-button-size)
+      );
+    }
+  }
+
+  .sidebar-pane {
+    --sl-sidebar-visibility: visible;
+    visibility: var(--sl-sidebar-visibility, hidden);
+    position: sticky;
+    max-height: 100vh;
+    z-index: 3;
+    inset-block: 0;
+    padding-top: 74px;
+    width: 100%;
+    background-color: var(--bg-color);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+    &::-webkit-scrollbar {
+      display: none;
+    }
+    @media (max-width: 1024px) {
+      display: none;
+      --sl-sidebar-visibility: hidden;
+      z-index: 5;
+      padding-top: 55px;
+      position: fixed;
+      right: 0;
+      width: 75vw;
+      border-left: 1px solid var(--border-extra);
+      padding-left: 20px;
+      padding-right: 20px;
+    }
+  }
+
+  :global([aria-expanded='true']) ~ .sidebar-pane {
+    --sl-sidebar-visibility: visible;
+    display: block;
+  }
+
+  .sidebar-content {
+    min-height: max-content;
+    padding-top: 30px;
+    flex-direction: column;
+    gap: 1rem;
+    &:after {
+      content: '';
+      padding-bottom: 1px;
+    }
+    @media (max-width: 1024px) {
+      padding-top: 20px;
+      &:after {
+        content: unset;
+      }
+    }
+  }
+
+  .main-frame {
+    padding-top: 74px;
+    @media (max-width: 1024px) {
+      padding-top: calc(74px + var(--sl-mobile-toc-height));
+    }
+  }
+</style>

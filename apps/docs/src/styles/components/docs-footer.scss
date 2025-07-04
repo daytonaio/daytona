@@ -1,0 +1,114 @@
+.docs-footer__container {
+  font-family: 'Inter', sans-serif;
+
+  &__support-links,
+  &__bottom-bar {
+    grid-column-start: 2;
+    margin: 0;
+
+    @include for-tablet-screen-sizes {
+      grid-column-start: 1;
+    }
+  }
+
+  &__support-links {
+    border-bottom: var(--border);
+    padding-bottom: 20px;
+    margin-bottom: 20px;
+
+    p {
+      font-size: 0.75rem;
+      line-height: 1.4;
+      color: var(--secondary-text-color);
+      letter-spacing: 0.015rem;
+
+      img {
+        margin-right: 5px;
+      }
+
+      a {
+        font-size: 0.75rem;
+        font-weight: 500;
+        line-height: 1.4;
+        letter-spacing: 0.015rem;
+        color: var(--primary-text-color);
+        transition: 0.6s;
+
+        @include for-hover-state {
+          &:hover {
+            opacity: 0.6;
+          }
+        }
+      }
+    }
+  }
+
+  &__bottom {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    margin: 27px 0 17px;
+    align-items: center;
+    gap: 14px;
+
+    &-block {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+
+      @include for-mobile-screen-sizes {
+        flex: 1 1 50%;
+      }
+
+      p {
+        font-family: 'Berkeley Mono', monospace;
+        font-size: 0.75rem;
+        letter-spacing: -0.0075rem;
+        text-transform: uppercase;
+        color: var(--primary-text-color);
+        line-height: 1;
+      }
+
+      .divider {
+        &::before {
+          content: '/';
+          display: block;
+          color: var(--border-color);
+          font-size: 0.875rem;
+          font-family: 'Berkeley Mono', monospace;
+          font-weight: 400;
+
+          @include for-mobile-screen-sizes {
+            display: none;
+          }
+        }
+      }
+    }
+
+    .menu-list {
+      display: flex;
+      gap: 16px;
+      order: 1;
+
+      @include for-mobile-screen-sizes {
+        order: 2;
+      }
+
+      a {
+        font-size: 0.75rem;
+        line-height: 1.4;
+        letter-spacing: -0.015rem;
+        font-weight: 500;
+        color: var(--secondary-text-color);
+        transition: 0.6s;
+
+        @include for-hover-state {
+          &:hover {
+            opacity: 0.6;
+          }
+        }
+      }
+    }
+  }
+}

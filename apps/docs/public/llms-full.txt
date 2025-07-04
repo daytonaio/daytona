@@ -1,0 +1,3418 @@
+# Daytona Documentation v0.0.0-dev
+# Generated on: 2025-07-04
+
+
+title: API Keys
+
+import { TabItem, Tabs } from '@astrojs/starlight/components'
+
+Daytona API keys are used to authenticate requests to the [Daytona API](/docs/tools/api).
+
+The [Configuration](/docs/configuration) page covers how to set up your environment variables, including the `DAYTONA_API_KEY` environment variable.
+
+To list existing API Keys go to the Keys subpage in the Dashboard. Clicking on `Create Key` will show a modal for creating and copying a new key to your clipboard.
+
+## Expiration
+
+When creating a new API Key you can optionally set an expiration date for the key. If no expiration date is set, the key will never expire.
+
+## Permissions
+
+When adding a new API Key you will be prompted to select a set of permissions for the key:
+
+| Permission       | Description                                        |
+| ---------------- | -------------------------------------------------- |
+| **`Sandboxes`**  | Grants the ability to create and manage Sandboxes  |
+| **`Snapshots`**  | Grants the ability to create and manage Snapshots  |
+| **`Registries`** | Grants the ability to create and manage Registries |
+
+Each of these permissions have scopes for creating and updating resources (e.g. `write:sandboxes`) and delete resources (e.g. `delete:sandboxes`) that can be separately granted.
+
+title: Billing
+
+The Billing subpage in the Dashboard shows billing information for Organizations.
+
+## Wallet
+
+The Wallet section shows the balance of the Organization's wallet and the amount of credits spent this month.
+
+## Automatic Top-Up
+
+The Automatic Top-Up section allows organizations to set automatic top-up rules for their wallets.
+
+The Threshold parameter sets the amount of credits that will trigger a top-up.
+
+The Target parameter sets the amount of credits that will be available in the wallet after the top-up.
+
+Setting Threshold and Target to 0 will disable the automatic top-up.
+
+## Cost Breakdown
+
+The Cost Breakdown chart shows breakdown of costs per resource.
+
+Users can view consumption for CPU, RAM and Disk and toggle between area and bar charts.
+
+title: Configuration
+
+import { TabItem, Tabs } from '@astrojs/starlight/components'
+
+## Set Up Your Environment Variables
+
+To authenticate with Daytona, you need an API key. You can obtain an API key from the Daytona platform.
+
+1. Navigate to the [Daytona Dashboard](https://app.daytona.io/dashboard/).
+2. Go to API Keys.
+3. Click the **`Create Key`** button.
+4. Add your API key to your **`.env`** file by setting the **`DAYTONA_API_KEY`** environment variable.
+5. Define the Daytona API URL in your **`.env`** file by setting the **`DAYTONA_API_URL`** environment variable.
+
+## Configuration Options
+
+Daytona SDK provides an option to configure settings using the `DaytonaConfig` class in Python and TypeScript. The `DaytonaConfig` class accepts the following parameters:
+
+- `api_key`: Your Daytona API key
+- `api_url`: URL of your Daytona API
+- `target`: Daytona Target to create the Sandboxes on.
+
+```python
+from daytona import DaytonaConfig
+
+config = DaytonaConfig(
+api_key="your-api-key",
+api_url="your-api-url",
+target="us"
+)
+
+```
+```typescript
+import { DaytonaConfig } from '@daytonaio/sdk';
+
+const config: DaytonaConfig = {
+    apiKey: "your-api-key",
+    apiUrl: "your-api-url",
+    target: "us"
+};
+```
+
+## Environment Variables
+
+Daytona SDK supports environment variables for configuration. The SDK automatically looks for these environment variables:
+
+| Variable              | Description                                | Optional |
+| --------------------- | ------------------------------------------ | -------- |
+| **`DAYTONA_API_KEY`** | Your Daytona API key.                      |          |
+| **`DAYTONA_API_URL`** | URL of your Daytona API.                   | Yes      |
+| **`DAYTONA_TARGET`**  | Daytona Target to create the Sandboxes on. | Yes      |
+
+### Setting Environment Variables
+
+Daytona SDK can read configuration from environment variables. You can set these environment variables using the following methods:
+
+- [Using a **`.env`** file](#using-a-env-file)
+- [Using Shell Environment](#using-shell-environment)
+
+#### Using a **`.env`** File
+
+Create a `.env` file in your project root directory:
+
+```bash
+DAYTONA_API_KEY=your-api-key
+DAYTONA_API_URL=https://your-api-url
+DAYTONA_TARGET=us
+```
+
+- `DAYTONA_API_KEY`: Your Daytona API key.
+- `DAYTONA_API_URL`: URL of your Daytona API.
+- `DAYTONA_TARGET`: Daytona Target to create the Sandboxes on.
+
+#### Using Shell Environment
+
+Set environment variables in your shell:
+
+    ```bash export DAYTONA_API_KEY=your-api-key export
+    DAYTONA_API_URL=https://your-api-url ```
+    ```bash 
+    $env:DAYTONA_API_KEY="your-api-key"
+    $env:DAYTONA_API_URL="https://your-api-url"
+    ```
+
+## Configuration Precedence
+
+The SDK uses the following precedence order for configuration (highest to lowest):
+
+1. Explicitly passed configuration in code.
+2. Environment variables.
+3. Configuration file.
+4. Default values.
+
+title: Declarative Builder
+
+import { TabItem, Tabs } from '@astrojs/starlight/components'
+
+Daytona's declarative builder provides a powerful, code-first approach to defining dependencies for Sandboxes. Instead of importing images from a container registry, you can programmatically define them using the SDK.
+
+## Overview
+
+The declarative builder system supports two primary workflows:
+
+1. **Dynamic Images**: Build images with varying dependencies _on demand_ when creating Sandboxes
+2. **Pre-built Snapshots**: Create and register _ready-to-use_ Snapshots that can be shared across multiple Sandboxes
+
+It provides the following capabilities. For a complete API reference and method signatures, check the [Python](/docs/python-sdk/common/image) and [TypeScript](/docs/typescript-sdk/image) SDK references.
+
+### Base Image Selection
+
+- **Debian-based environments** with Python and essential preinstalled build tools
+- **Custom base images** from any Docker registry or existing container image
+- **Dockerfile integration** to import and enhance existing Dockerfiles
+
+### Package Management
+
+- **Python package installation** with support for `pip`, `requirements.txt`, and `pyproject.toml`
+- **Advanced pip options** including custom indexes, find-links, and optional dependencies
+
+### File System Operations
+
+- **File copying** from the local development environment to the image
+- **Directory copying** for bulk file transfers and project setup
+- **Working directory configuration** to set the default execution context
+
+### Environment Configuration
+
+- **Environment variables** for application configuration and secrets
+- **Shell command execution** during the image build process
+- **Container runtime settings** including an entrypoint and default commands
+
+For detailed method signatures and usage examples, refer to the [Python](/docs/python-sdk/common/image) and [TypeScript](/docs/typescript-sdk/image) SDK references.
+
+## Dynamic Image Building
+
+Create images on-the-fly when creating Sandboxes. This is useful when you want to create a new Sandbox with specific dependencies that are not part of any existing image.
+
+You can either define an entirely new image or append some specific dependencies to an existing one - e.g. a `pip` package or an `apt-get install` command.
+This eliminates the need to use your own compute for the build process and you can instead offload it to Daytona's infrastructure.
+It doesn't require registering and validating a separate Snapshot for each version. Instead, it allows you to iterate on the dependency list quickly or to have slightly different versions for tens or hundreds of similar usecases/setups.
+
+```python
+# Define the dynamic image
+dynamic_image = (
+    Image.debian_slim("3.12")
+    .pip_install(["pytest", "pytest-cov", "mypy", "ruff", "black", "gunicorn"])
+    .run_commands("apt-get update && apt-get install -y git curl", "mkdir -p /home/daytona/project")
+    .workdir("/home/daytona/project")
+    .env({"ENV_VAR": "My Environment Variable"})
+    .add_local_file("file_example.txt", "/home/daytona/project/file_example.txt")
+)
+
+# Create a new Sandbox with the dynamic image and stream the build logs
+
+sandbox = daytona.create(
+CreateSandboxFromImageParams(
+image=dynamic_image,
+),
+timeout=0,
+on_snapshot_create_logs=print,
+)
+
+```
+```typescript
+// Define the dynamic image
+const dynamicImage = Image.debianSlim('3.13')
+    .pipInstall(['pytest', 'pytest-cov', 'black', 'isort', 'mypy', 'ruff'])
+    .runCommands('apt-get update && apt-get install -y git', 'mkdir -p /home/daytona/project')
+    .workdir('/home/daytona/project')
+    .env({
+      NODE_ENV: 'development',
+    })
+    .addLocalFile('file_example.txt', '/home/daytona/project/file_example.txt')
+
+// Create a new Sandbox with the dynamic image and stream the build logs
+const sandbox = await daytona.create(
+  {
+    image: dynamicImage,
+  },
+  {
+    timeout: 0,
+    onSnapshotCreateLogs: console.log,
+  }
+)
+```
+
+
+:::tip
+Once you've run the Sandbox creation from a dynamic image a single time, the image will get cached for the next 24 hours and any subsequent Sandbox creation that lands on the same Runner will be almost instantaneous.
+
+This means you can use the same script every time and Daytona will take of caching the image properly.
+:::
+
+## Creating Pre-built Snapshots
+
+If you want to prepare a new Daytona Snapshot with specific dependencies and then use it instantly across multiple Sandboxes whenever necessary, you can create a pre-built Snapshot.
+
+This Snapshot will stay visible in the Daytona dashboard and be permanently cached, ensuring that rebuilding it is not needed.
+
+```python
+# Generate a unique name for the Snapshot
+snapshot_name = f"python-example:{int(time.time())}"
+
+# Create a local file with some data to add to the image
+
+with open("file_example.txt", "w") as f:
+f.write("Hello, World!")
+
+# Create a Python image with common data science packages
+
+image = (
+Image.debian_slim("3.12")
+.pip_install(["numpy", "pandas", "matplotlib", "scipy", "scikit-learn", "jupyter"])
+.run_commands(
+"apt-get update && apt-get install -y git",
+"groupadd -r daytona && useradd -r -g daytona -m daytona",
+"mkdir -p /home/daytona/workspace",
+)
+.dockerfile_commands(["USER daytona"])
+.workdir("/home/daytona/workspace")
+.env({"MY_ENV_VAR": "My Environment Variable"})
+.add_local_file("file_example.txt", "/home/daytona/workspace/file_example.txt")
+)
+
+# Create the Snapshot and stream the build logs
+
+print(f"=== Creating Snapshot: {snapshot_name} ===")
+daytona.snapshot.create(
+CreateSnapshotParams(
+name=snapshot_name,
+image=image,
+resources=Resources(
+cpu=1,
+memory=1,
+disk=3,
+),
+),
+on_logs=print,
+)
+
+# Create a new Sandbox using the pre-built Snapshot
+
+sandbox = daytona.create(
+CreateSandboxFromSnapshotParams(
+snapshot=snapshot_name
+)
+)
+
+```
+```typescript
+// Generate a unique name for the image
+const snapshotName = `node-example:${Date.now()}`
+console.log(`Creating Snapshot with name: ${snapshotName}`)
+
+// Create a local file with some data to add to the Snapshot
+const localFilePath = 'file_example.txt'
+const localFileContent = 'Hello, World!'
+fs.writeFileSync(localFilePath, localFileContent)
+
+// Create a Python image with common data science packages
+const image = Image.debianSlim('3.12')
+    .pipInstall(['numpy', 'pandas', 'matplotlib', 'scipy', 'scikit-learn'])
+    .runCommands('apt-get update && apt-get install -y git', 'mkdir -p /home/daytona/workspace')
+    .dockerfileCommands(['USER daytona'])
+    .workdir('/home/daytona/workspace')
+    .env({
+        MY_ENV_VAR: 'My Environment Variable',
+    })
+    .addLocalFile(localFilePath, '/home/daytona/workspace/file_example.txt')
+
+// Create the Snapshot and stream the build logs
+console.log(`=== Creating Snapshot: ${snapshotName} ===`)
+await daytona.snapshot.create(
+    {
+      name: snapshotName,
+      image,
+      resources: {
+        cpu: 1,
+        memory: 1,
+        disk: 3,
+      },
+    },
+    {
+      onLogs: console.log,
+    },
+  )
+
+// Create a new Sandbox using the pre-built Snapshot
+const sandbox = await daytona.create({
+    snapshot: snapshotName,
+})
+```
+
+
+## Using an Existing Dockerfile
+
+If you have an existing Dockerfile that you want to use as the base for your image, you can import it in the following way:
+
+    ```python image =
+    Image.from_dockerfile("app/Dockerfile").pip_install(["numpy"])
+    ```
+    ```typescript
+    const image =
+    Image.fromDockerfile("app/Dockerfile").pipInstall(['numpy'])
+    ```
+
+## Best Practices
+
+1. **Layer Optimization**: Group related operations to minimize Docker layers
+2. **Cache Utilization**: Identical build commands and context will be cached and subsequent builds will be almost instant
+3. **Security**: Create non-root users for application workloads
+4. **Resource Efficiency**: Use slim base images when appropriate
+5. **Context Minimization**: Only include necessary files in the build context
+
+The declarative builder streamlines the development workflow by providing a programmatic, maintainable approach to container image creation while preserving the full power and flexibility of Docker.
+
+title: File System Operations
+
+import { TabItem, Tabs } from '@astrojs/starlight/components'
+
+The Daytona SDK provides comprehensive file system operations through the `fs` module in Sandboxes. This guide covers all available file system operations and best practices.
+
+## Basic Operations
+
+Daytona SDK provides an option to interact with the file system in Sandboxes. You can perform various operations like listing files, creating directories, reading and writing files, and more.
+
+For simplicity, file operations by default assume you are operating in the root directory of the Sandbox user - e.g. `workspace` implies `/home/[username]/workspace`, but you are free to provide an absolute workdir path as well - which should start with a leading slash `/`.
+
+### Listing Files and Directories
+
+Daytona SDK provides an option to list files and directories in a Sandbox using Python and TypeScript.
+
+```python
+# List files in a directory
+files = sandbox.fs.list_files("workspace")
+
+for file in files:
+print(f"Name: {file.name}")
+print(f"Is directory: {file.is_dir}")
+print(f"Size: {file.size}")
+print(f"Modified: {file.mod_time}")
+
+```
+```typescript
+// List files in a directory
+const files = await sandbox.fs.listFiles("workspace")
+
+files.forEach(file => {
+    console.log(`Name: ${file.name}`)
+    console.log(`Is directory: ${file.isDir}`)
+    console.log(`Size: ${file.size}`)
+    console.log(`Modified: ${file.modTime}`)
+})
+```
+
+
+### Creating Directories
+
+Daytona SDK provides an option to create directories with specific permissions using Python and TypeScript.
+
+```python
+# Create with specific permissions
+sandbox.fs.create_folder("workspace/new-dir", "755")
+```
+```typescript
+// Create with specific permissions
+await sandbox.fs.createFolder("workspace/new-dir", "755")
+```
+
+
+### Uploading Files
+
+Daytona SDK provides options to read, write, upload, download, and delete files in Sandboxes using Python and TypeScript.
+
+#### Uploading a Single File
+
+If you want to upload a single file, you can do it as follows:
+
+```python
+# Upload a single file
+with open("local_file.txt", "rb") as f:
+    content = f.read()
+sandbox.fs.upload_file(content, "remote_file.txt")
+```
+```typescript
+// Upload a single file
+const fileContent = Buffer.from('Hello, World!')
+await sandbox.fs.uploadFile(fileContent, "data.txt")
+```
+
+
+#### Uploading Multiple Files
+
+The following example shows how to efficiently upload multiple files with a single method call.
+
+```python
+# Upload multiple files at once
+files_to_upload = []
+
+with open("file1.txt", "rb") as f1:
+files_to_upload.append(FileUpload(
+source=f1.read(),
+destination="data/file1.txt",
+))
+
+with open("file2.txt", "rb") as f2:
+files_to_upload.append(FileUpload(
+source=f2.read(),
+destination="data/file2.txt",
+))
+
+with open("settings.json", "rb") as f3:
+files_to_upload.append(FileUpload(
+source=f3.read(),
+destination="config/settings.json",
+))
+
+sandbox.fs.upload_files(files_to_upload)
+
+```
+```typescript
+// Upload multiple files at once
+const files = [
+    {
+        source: Buffer.from('Content of file 1'),
+        destination: 'data/file1.txt',
+    },
+    {
+        source: Buffer.from('Content of file 2'),
+        destination: 'data/file2.txt',
+    },
+    {
+        source: Buffer.from('{"key": "value"}'),
+        destination: 'config/settings.json',
+    }
+]
+
+await sandbox.fs.uploadFiles(files)
+```
+
+
+### Downloading Files
+
+The following commands downloads the file `file1.txt` from the Sandbox user's root directory and prints out the content:
+
+```python
+
+content = sandbox.fs.download_file("file1.txt")
+
+with open("local_file.txt", "wb") as f:
+f.write(content)
+
+print(content.decode('utf-8'))
+
+```
+```typescript
+
+const downloadedFile = await sandbox.fs.downloadFile("file1.txt")
+
+console.log('File content:', downloadedFile.toString())
+
+```
+
+
+### Deleting files
+
+Once you no longer need them, simply delete files by using the `delete_file` function.
+
+```python
+
+sandbox.fs.delete_file("workspace/file.txt")
+
+```
+```typescript
+
+await sandbox.fs.deleteFile("workspace/file.txt")
+```
+
+
+## Advanced Operations
+
+Daytona SDK provides advanced file system operations like file permissions, search and replace, and more.
+
+### File Permissions
+
+Daytona SDK provides an option to set file permissions, get file permissions, and set directory permissions recursively using Python and TypeScript.
+
+```python
+# Set file permissions
+sandbox.fs.set_file_permissions("workspace/file.txt", "644")
+
+# Get file permissions
+
+file_info = sandbox.fs.get_file_info("workspace/file.txt")
+print(f"Permissions: {file_info.permissions}")
+
+```
+```typescript
+// Set file permissions
+await sandbox.fs.setFilePermissions("workspace/file.txt", { mode: "644" })
+
+// Get file permissions
+const fileInfo = await sandbox.fs.getFileDetails("workspace/file.txt")
+console.log(`Permissions: ${fileInfo.permissions}`)
+```
+
+
+### File Search and Replace
+
+Daytona SDK provides an option to search for text in files and replace text in files using Python and TypeScript.
+
+```python
+# Search for text in files; if a folder is specified, the search is recursive
+results = sandbox.fs.find_files(
+    path="workspace/src",
+    pattern="text-of-interest"
+)
+for match in results:
+    print(f"Absolute file path: {match.file}")
+    print(f"Line number: {match.line}")
+    print(f"Line content: {match.content}")
+    print("\n")
+
+# Replace text in files
+
+sandbox.fs.replace_in_files(
+files=["workspace/file1.txt", "workspace/file2.txt"],
+pattern="old_text",
+new_value="new_text"
+)
+
+```
+```typescript
+// Search for text in files; if a folder is specified, the search is recursive
+const results = await sandbox.fs.findFiles({
+    path="workspace/src",
+    pattern: "text-of-interest"
+})
+results.forEach(match => {
+    console.log('Absolute file path:', match.file)
+    console.log('Line number:', match.line)
+    console.log('Line content:', match.content)
+})
+
+// Replace text in files
+await sandbox.fs.replaceInFiles(
+    ["workspace/file1.txt", "workspace/file2.txt"],
+    "old_text",
+    "new_text"
+)
+```
+
+title: Getting Started
+
+import { TabItem, Tabs } from '@astrojs/starlight/components'
+
+The Daytona SDK provides official [Python](/docs/python-sdk) and [TypeScript](/docs/typescript-sdk) interfaces for interacting with Daytona, enabling you to programmatically manage development environments and execute code. [Python SDK](/docs/python-sdk) supports both sync and async programming models where async classes are prefixed with `Async`.
+
+Follow the step by step guide to create and run your first Daytona Sandbox for an AI Agent.
+
+For steps on additional configuration, including setting environmnent variables as well as accessing experimental features on our staging deployment, visit [Configuration](/docs/configuration).
+
+## Install the Daytona SDK
+
+Daytona provides official Python and TypeScript SDKs for interacting with the Daytona platform. Install the SDK using your preferred method:
+
+```bash
+pip install daytona
+```
+```bash
+# Using npm
+npm install @daytonaio/sdk
+
+# Using yarn
+
+yarn add @daytonaio/sdk
+
+# Using pnpm
+
+pnpm add @daytonaio/sdk
+
+```
+
+## Run Code Inside a Sandbox
+
+Run the following code to create a Daytona Sandbox and execute commands:
+
+```python
+from daytona import Daytona, DaytonaConfig
+
+# Initialize the Daytona client
+daytona = Daytona(DaytonaConfig(api_key="YOUR_API_KEY"))
+
+# Create the Sandbox instance
+sandbox = daytona.create()
+
+# Run code securely inside the Sandbox
+response = sandbox.process.code_run('print("Sum of 3 and 4 is " + str(3 + 4))')
+if response.exit_code != 0:
+    print(f"Error running code: {response.exit_code} {response.result}")
+else:
+    print(response.result)
+
+# Clean up the Sandbox
+sandbox.delete()
+```
+
+```typescript
+import { Daytona } from '@daytonaio/sdk'
+
+async function main() {
+// Initialize the Daytona client
+const daytona = new Daytona({
+apiKey: 'YOUR_API_KEY',
+})
+
+let sandbox;
+try {
+// Create the Sandbox instance
+sandbox = await daytona.create({
+language: "python",
+});
+// Run code securely inside the Sandbox
+const response = await sandbox.process.codeRun(
+'print("Sum of 3 and 4 is " + str(3 + 4))'
+);
+if (response.exitCode !== 0) {
+console.error("Error running code:", response.exitCode, response.result);
+} else {
+console.log(response.result);
+}
+} catch (error) {
+console.error("Sandbox flow error:", error);
+} finally {
+// Clean up the Sandbox
+if (sandbox) {
+await sandbox.delete();
+}
+}
+}
+
+main().catch(console.error)
+
+```
+
+```bash
+python main.py
+```
+
+```bash
+npx tsx ./index.ts
+```
+
+## Preview Your App
+
+The following snippet uploads a file containing a simple Flask app to a Daytona Sandbox. The web server runs on port `3000` and is accessible through the provided preview URL:
+
+```python
+from daytona import Daytona, DaytonaConfig, SessionExecuteRequest
+
+daytona = Daytona(DaytonaConfig(api_key="YOUR_API_KEY"))
+
+sandbox = daytona.create()
+
+app_code = b'''
+from flask import Flask
+
+app = Flask(**name**)
+
+@app.route('/')
+def hello():
+return """
+<!DOCTYPE html>
+<html>
+<head>
+<title>Hello World</title>
+<link rel="icon" href="https://www.daytona.io/favicon.ico">
+</head>
+<body style="display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-color: #0a0a0a; font-family: Arial, sans-serif;">
+<div style="text-align: center; padding: 2rem; border-radius: 10px; background-color: white; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+<img src="https://raw.githubusercontent.com/daytonaio/daytona/main/assets/images/Daytona-logotype-black.png" alt="Daytona Logo" style="width: 180px; margin: 10px 0px;">
+<p>This web app is running in a Daytona sandbox!</p>
+</div>
+</body>
+</html>
+"""
+
+if **name** == '**main**':
+app.run(host='0.0.0.0', port=3000)
+'''
+
+# Save the Flask app to a file
+
+sandbox.fs.upload_file(app_code, "app.py")
+
+# Create a new session and execute a command
+
+exec_session_id = "python-app-session"
+sandbox.process.create_session(exec_session_id)
+
+sandbox.process.execute_session_command(exec_session_id, SessionExecuteRequest(
+command="python /app.py",
+var_async=True
+))
+
+# Get the preview link for the Flask app
+
+preview_info = sandbox.get_preview_link(3000)
+print(f"Flask app is available at: {preview_info.url}")
+
+```
+
+```typescript
+import { Daytona } from '@daytonaio/sdk';
+
+const daytona = new Daytona(({
+  apiKey: "YOUR_API_KEY"
+}));
+
+async function main() {
+  const sandbox = await daytona.create();
+
+  const appCode = Buffer.from(`
+from flask import Flask
+
+app = Flask(__name__)
+
+@app.route('/')
+def hello():
+    return """
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Hello World</title>
+        <link rel="icon" href="https://www.daytona.io/favicon.ico">
+    </head>
+    <body style="display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-color: #0a0a0a; font-family: Arial, sans-serif;">
+        <div style="text-align: center; padding: 2rem; border-radius: 10px; background-color: white; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+            <img src="https://raw.githubusercontent.com/daytonaio/daytona/main/assets/images/Daytona-logotype-black.png" alt="Daytona Logo" style="width: 180px; margin: 10px 0px;">
+            <p>This web app is running in a Daytona sandbox!</p>
+        </div>
+    </body>
+    </html>
+    """
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=3000)
+  `);
+
+  // Save the Flask app to a file
+  await sandbox.fs.uploadFile(appCode, "app.py");
+
+  // Create a new session and execute a command
+  const execSessionId = "python-app-session";
+  await sandbox.process.createSession(execSessionId);
+
+  await sandbox.process.executeSessionCommand(execSessionId, ({
+    command: `python app.py`,
+    async: true,
+  }));
+
+  // Get the preview link for the Flask app
+  const previewInfo = sandbox.getPreviewLink(3000);
+  console.log(`Flask app is available at: ${previewInfo.url}`);
+}
+
+main().catch(error => console.error("Error:", error));
+
+```
+
+
+Need to access this endpoint programmatically? Learn more about [Preview & Authentication](/docs/preview-and-authentication).
+
+:::tip
+You can access the Sandbox [Web Terminal](/docs/web-terminal) by printing out the preview URL for port `22222` or by simply going to Dashboard -> Sandboxes and clicking on the Terminal input sign.
+:::
+
+## Connect to an LLM
+
+The following snippet connects to an LLM using the Anthropic API and asks Claude to generate code for getting the factorial of 25 and then executes it inside of a Daytona Sandbox:
+
+```python
+import os
+import re
+import requests
+from daytona import Daytona, DaytonaConfig
+from dotenv import load_dotenv
+
+load_dotenv()
+
+daytona = Daytona(DaytonaConfig())
+
+sandbox = daytona.create()
+
+def get_claude_response(api_key, prompt):
+url = "https://api.anthropic.com/v1/messages"
+headers = {
+"x-api-key": api_key,
+"anthropic-version": "2023-06-01",
+"Content-Type": "application/json"
+}
+data = {
+"model": "claude-3-7-sonnet-latest",
+"max_tokens": 256,
+"messages": [{"role": "user", "content": prompt}]
+}
+response = requests.post(url, json=data, headers=headers)
+if response.status_code == 200:
+content = response.json().get("content", [])
+return "".join([item["text"] for item in content if item["type"] == "text"])
+else:
+return f"Error {response.status_code}: {response.text}"
+
+prompt = "Python code that returns the factorial of 25. Output only the code. No explanation. No intro. No comments. Just raw code in a single code block."
+
+result = get_claude_response(os.environ["ANTHROPIC_API_KEY"], prompt)
+
+code_match = re.search(r"`python\n(.*?)`", result, re.DOTALL)
+
+code = code_match.group(1) if code_match else result
+code = code.replace('\\', '\\\\')
+
+# Run Python code inside the Sandbox and get the output
+
+response = sandbox.process.code_run(code)
+print("The factorial of 25 is", response.result)
+
+```
+
+Running the snippet:
+
+```bash
+ANTHROPIC_API_KEY="your-anthropic-api-key"
+DAYTONA_API_KEY="your-daytona-api-key"
+DAYTONA_TARGET=us
+python claude-example.py
+```
+
+```bash
+> The factorial of 25 is 15511210043330985984000000
+```
+
+```typescript
+import { Daytona } from '@daytonaio/sdk'
+import * as dotenv from 'dotenv'
+import axios from 'axios'
+
+dotenv.config()
+
+const daytona = new Daytona()
+
+async function getClaudeResponse(apiKey: string, prompt: string): Promise<string> {
+const url = "https://api.anthropic.com/v1/messages"
+const headers = {
+"x-api-key": apiKey,
+"anthropic-version": "2023-06-01",
+"Content-Type": "application/json"
+}
+const data = {
+"model": "claude-3-7-sonnet-latest",
+"max_tokens": 256,
+"messages": [{"role": "user", "content": prompt}]
+}
+
+try {
+const response = await axios.post(url, data, { headers })
+if (response.status === 200) {
+const content = response.data.content || []
+return content
+.filter((item: any) => item.type === "text")
+.map((item: any) => item.text)
+.join("")
+} else {
+return `Error ${response.status}: ${response.statusText}`
+}
+} catch (error: any) {
+return `Error: ${error.message}`
+}
+}
+
+async function main() {
+const sandbox = await daytona.create()
+
+const prompt = "Python code that returns the factorial of 25. Output only the code. No explanation. No intro. No comments. Just raw code in a single code block."
+
+const result = await getClaudeResponse(process.env.ANTHROPIC_API_KEY || "", prompt)
+
+// Extract code from the response using regex
+const codeMatch = result.match(/`python\n(.*?)`/s)
+
+let code = codeMatch ? codeMatch[1] : result
+code = code.replace(/\\/g, '\\\\')
+
+// Run the extracted code in the sandbox
+const response = await sandbox.process.codeRun(code)
+console.log("The factorial of 25 is", response.result)
+}
+
+main().catch(console.error)
+
+```
+
+
+Running the snippet:
+
+```bash
+ANTHROPIC_API_KEY="your-anthropic-api-key"
+DAYTONA_API_KEY="your-daytona-api-key"
+DAYTONA_TARGET=us
+npx ts-node claude-example.ts
+```
+
+```bash
+> The factorial of 25 is 15511210043330985984000000
+```
+
+
+## Additional Examples
+
+Use the Daytona SDK [Python examples](https://github.com/daytonaio/sdk/tree/main/examples/python) or [TypeScript/JavaScript examples](https://github.com/daytonaio/sdk/tree/main/examples/typescript) to create a Sandbox and run your code.
+
+Speed up your development on Daytona using LLMs. Copy the /llms.txt files and include them into your projects or chat context: [llms-full.txt](https://www.daytona.io/docs/llms-full.txt) or [llms.txt](https://www.daytona.io/docs/llms.txt)
+
+Learn more by checkout out the Daytona SDK repository on [GitHub](https://github.com/daytonaio/sdk).
+
+## Setting up the Daytona CLI
+
+If you want to use [images from your local device](/docs/snapshots#using-a-local-image) or simply prefer managing your Sandboxes using the command line interface, install the Daytona CLI by running:
+
+```bash
+brew install daytonaio/cli/daytona
+```
+
+```bash
+powershell -Command "irm https://get.daytona.io/windows | iex"
+```
+
+title: Git Operations
+
+import { TabItem, Tabs } from '@astrojs/starlight/components'
+
+The Daytona SDK provides built-in Git support through the `git` module in Sandboxes. This guide covers all available Git operations and best practices.
+
+## Basic Operations
+
+Daytona SDK provides an option to clone, check status, and manage Git repositories in Sandboxes. You can interact with Git repositories using the `git` module.
+
+Similarly to file operations the starting cloning dir is the current Sandbox user's root - e.g. `workspace/repo` implies `/home/[username]/workspace/repo`, but you are free to provide an absolute workdir path as well (by starting the path with `/`).
+
+### Cloning Repositories
+
+Daytona SDK provides an option to clone Git repositories into Sandboxes using Python and TypeScript. You can clone public or private repositories, specific branches, and authenticate using personal access tokens.
+
+```python
+# Basic clone
+sandbox.git.clone(
+    url="https://github.com/user/repo.git",
+    path="workspace/repo"
+)
+
+# Clone with authentication
+
+sandbox.git.clone(
+url="<https://github.com/user/repo.git>",
+path="workspace/repo",
+username="git",
+password="personal_access_token"
+)
+
+# Clone specific branch
+
+sandbox.git.clone(
+url="<https://github.com/user/repo.git>",
+path="workspace/repo",
+branch="develop"
+)
+
+```
+```typescript
+// Basic clone
+await sandbox.git.clone(
+    "https://github.com/user/repo.git",
+    "workspace/repo"
+);
+
+// Clone with authentication
+await sandbox.git.clone(
+    "https://github.com/user/repo.git",
+    "workspace/repo",
+    undefined,
+    undefined,
+    "git",
+    "personal_access_token"
+);
+
+// Clone specific branch
+await sandbox.git.clone(
+    "https://github.com/user/repo.git",
+    "workspace/repo",
+    "develop"
+);
+```
+
+
+### Repository Status
+
+Daytona SDK provides an option to check the status of Git repositories in Sandboxes. You can get the current branch, modified files, number of commits ahead and behind main branch using Python and TypeScript.
+
+```python
+# Get repository status
+status = sandbox.git.status("workspace/repo")
+print(f"Current branch: {status.current_branch}")
+print(f"Commits ahead: {status.ahead}")
+print(f"Commits behind: {status.behind}")
+for file in status.file_status:
+    print(f"File: {file.name}")
+
+# List branches
+
+response = sandbox.git.branches("workspace/repo")
+for branch in response.branches:
+print(f"Branch: {branch}")
+
+```
+```typescript
+// Get repository status
+const status = await sandbox.git.status("workspace/repo");
+console.log(`Current branch: ${status.currentBranch}`);
+console.log(`Commits ahead: ${status.ahead}`);
+console.log(`Commits behind: ${status.behind}`);
+status['FileStatus[]'].forEach(file => {
+    console.log(`File: ${file.name}`);
+});
+
+// List branches
+const response = await sandbox.git.branches("workspace/repo");
+response.branches.forEach(branch => {
+    console.log(`Branch: ${branch}`);
+});
+```
+
+
+## Branch Operations
+
+Daytona SDK provides an option to manage branches in Git repositories. You can create, switch, and delete branches.
+
+### Managing Branches
+
+Daytona SDK provides an option to create, switch, and delete branches in Git repositories using Python and TypeScript.
+
+```python
+# Create new branch
+sandbox.git.create_branch("workspace/repo", "feature/new-feature")
+
+# Switch branch
+
+sandbox.git.checkout("workspace/repo", "feature/new-feature")
+
+# Delete branch
+
+sandbox.git.delete_branch("workspace/repo", "feature/old-feature")
+
+```
+```typescript
+// Create new branch
+await sandbox.git.createBranch("workspace/repo", "feature/new-feature");
+
+// Switch branch
+await sandbox.git.checkout("workspace/repo", "feature/new-feature");
+
+// Delete branch
+await sandbox.git.deleteBranch("workspace/repo", "feature/old-feature");
+```
+
+
+## Staging and Committing
+
+Daytona SDK provides an option to stage and commit changes in Git repositories. You can stage specific files, all changes, and commit with a message using Python and TypeScript.
+
+### Working with Changes
+
+```python
+# Stage specific files
+sandbox.git.add("workspace/repo", ["file1.txt", "file2.txt"])
+
+# Stage all changes
+
+sandbox.git.add("workspace/repo", ["."])
+
+# Commit changes
+
+sandbox.git.commit("workspace/repo", "feat: add new feature")
+
+# Get commit history
+
+commits = sandbox.git.log("workspace/repo")
+for commit in commits:
+print(f"Commit: {commit.hash}")
+print(f"Author: {commit.author}")
+print(f"Message: {commit.message}")
+
+```
+```typescript
+// Stage specific files
+await sandbox.git.add("workspace/repo", ["file1.txt", "file2.txt"]);
+
+// Stage all changes
+await sandbox.git.add("workspace/repo", ["."]);
+
+// Commit changes
+await sandbox.git.commit("workspace/repo", "feat: add new feature");
+
+// Get commit history
+const commits = await sandbox.git.log("workspace/repo");
+commits.forEach(commit => {
+    console.log(`Commit: ${commit.hash}`);
+    console.log(`Author: ${commit.author}`);
+    console.log(`Message: ${commit.message}`);
+});
+```
+
+
+## Remote Operations
+
+Daytona SDK provides an option to work with remote repositories in Git. You can push changes, pull changes, and list remotes.
+
+### Working with Remotes
+
+Daytona SDK provides an option to push, pull, and list remotes in Git repositories using Python and TypeScript.
+
+```python
+# Push changes
+sandbox.git.push("workspace/repo")
+
+# Pull changes
+
+sandbox.git.pull("workspace/repo")
+
+# List remotes
+
+remotes = sandbox.git.list_remotes("workspace/repo")
+for remote in remotes:
+print(f"Remote: {remote.name} URL: {remote.url}")
+
+```
+```typescript
+// Push changes
+await sandbox.git.push("workspace/repo");
+
+// Push to specific remote and branch
+await sandbox.git.push("workspace/repo", "origin", "feature/new-feature");
+
+// Pull changes
+await sandbox.git.pull("workspace/repo");
+
+// Pull from specific remote and branch
+await sandbox.git.pull("workspace/repo", "origin", "main");
+```
+
+title: Daytona Documentation
+description: Start managing your Sandboxes with Daytona.
+template: doc
+head:
+  - tag: title
+    content: Documentation · Daytona
+  - tag: meta
+    attrs:
+      property: og:title
+      content: Documentation · Daytona
+  - tag: meta
+    attrs:
+      name: twitter:title
+      content: Documentation · Daytona
+tableOfContents: false
+
+import { TabItem, Tabs } from '@astrojs/starlight/components'
+
+The Daytona SDK provides official Python and TypeScript interfaces for interacting with Daytona,
+enabling you to programmatically manage development environments and execute code.
+
+### Quick Start
+
+Run your first line of code in a Daytona Sandbox. Use our [LLMs context files](/docs/getting-started#additional-examples) for faster development with AI assistants.
+
+#### 1. Get Your API Key
+
+- Go to the Daytona [Dashboard](https://app.daytona.io/dashboard).
+- Create a new [API key](https://app.daytona.io/dashboard/keys). Make sure to save it securely,
+  as it won't be shown again.
+
+#### 2. Install the SDK
+
+    ```bash pip install daytona ```
+    ```bash npm install @daytonaio/sdk ```
+
+#### 3. Write Your Code
+
+  Create a file named: `main.py`
+  ```python
+  from daytona import Daytona, DaytonaConfig
+
+# Define the configuration
+
+config = DaytonaConfig(api_key="your-api-key")
+
+# Initialize the Daytona client
+
+daytona = Daytona(config)
+
+# Create the Sandbox instance
+
+sandbox = daytona.create()
+
+# Run the code securely inside the Sandbox
+
+response = sandbox.process.code_run('print("Hello World from code!")')
+if response.exit_code != 0:
+print(f"Error: {response.exit_code} {response.result}")
+else:
+print(response.result)
+
+# Clean up
+
+sandbox.delete()
+
+```
+Create a file named: `index.mts`
+```typescript
+import { Daytona } from '@daytonaio/sdk';
+
+// Initialize the Daytona client
+const daytona = new Daytona({ apiKey: 'your-api-key' });
+
+// Create the Sandbox instance
+const sandbox = await daytona.create({
+  language: 'typescript',
+});
+
+// Run the code securely inside the Sandbox
+const response = await sandbox.process.codeRun('console.log("Hello World from code!")')
+console.log(response.result);
+
+// Clean up
+await sandbox.delete()
+```
+
+
+:::note
+Replace `your-api-key` with the value from your Daytona dashboard.
+:::
+
+#### 4. Run It
+
+    ```bash python main.py ```
+    ```bash npx tsx index.mts ```
+
+#### ✅ What You Just Did
+
+- Installed the Daytona SDK.
+- Created a secure sandbox environment.
+- Executed code remotely inside that sandbox.
+- Retrieved and displayed the output locally.
+
+You're now ready to use Daytona for secure, isolated code execution.
+
+<ExploreMore />
+
+title: Language Server Protocol
+
+import { TabItem, Tabs } from '@astrojs/starlight/components'
+
+The Daytona SDK provides Language Server Protocol (LSP) support through Sandbox instances. This enables advanced language features like code completion, diagnostics, and more.
+
+## Creating LSP Servers
+
+Daytona SDK provides an option to create LSP servers using Python and TypeScript. The `path_to_project` starting point defaults to the current Sandbox user's root - e.g. `workspace/project` implies `/home/[username]/workspace/project`, but by starting with `/`, you may define an absolute path as well.
+
+```python
+from daytona import Daytona, LspLanguageId
+
+# Create Sandbox
+
+daytona = Daytona()
+sandbox = daytona.create()
+
+# Create LSP server for Python
+
+lsp_server = sandbox.create_lsp_server(
+language_id=LspLanguageId.PYTHON,
+path_to_project="workspace/project"
+)
+
+```
+```typescript
+import { Daytona, LspLanguageId } from '@daytonaio/sdk'
+
+// Create sandbox
+const daytona = new Daytona()
+const sandbox = await daytona.create({
+    language: 'typescript'
+})
+
+// Create LSP server for TypeScript
+const lspServer = await sandbox.createLspServer(
+    LspLanguageId.TYPESCRIPT,
+    "workspace/project"
+)
+```
+
+
+## Supported Languages
+
+Daytona SDK provides an option to create LSP servers for various languages through the `LspLanguageId` enum in Python and TypeScript.
+
+```python
+from daytona import LspLanguageId
+
+# Available language IDs
+
+LspLanguageId.PYTHON
+LspLanguageId.TYPESCRIPT
+
+```
+```typescript
+import { LspLanguageId } from '@daytonaio/sdk'
+
+// Available language IDs
+LspLanguageId.PYTHON
+LspLanguageId.TYPESCRIPT
+```
+
+
+- `LspLanguageId.PYTHON`: Python language server.
+- `LspLanguageId.TYPESCRIPT`: TypeScript/JavaScript language server.
+
+## LSP Features
+
+Daytona SDK provides various LSP features for code analysis and editing.
+
+### Code Completion
+
+Daytona SDK provides an option to get code completions for a specific position in a file using Python and TypeScript.
+
+```python
+completions = lsp_server.completions(
+    path="workspace/project/main.py",
+    position={"line": 10, "character": 15}
+)
+print(f"Completions: {completions}")
+```
+```typescript
+const completions = await lspServer.getCompletions({
+    path: "workspace/project/main.ts",
+    position: { line: 10, character: 15 }
+})
+console.log('Completions:', completions)
+```
+
+title: Limits
+
+Daytona enforces resource limits to ensure fair usage and stability across all organizations. Your organization has access to a compute pool consisting of:
+
+- **vCPU** — total CPU cores available
+- **Memory** — total RAM available
+- **Disk** — total disk space across sandboxes
+
+These resources are pooled and shared across all running Sandboxes.  
+The number of Sandboxes you can run at once depends on how much CPU, RAM, and disk each one uses. You can see how to configure and estimate resource usage in the [Sandbox Management docs](https://www.daytona.io/docs/sandbox-management/).
+
+:::tip
+
+### Manage usage dynamically
+
+Only **Running** Sandboxes count against your vCPU, memory, and disk limits.  
+Use **Stop**, **Archive**, or **Delete** to manage resources:
+
+- **Stopped** Sandboxes free up CPU and memory but still consume disk.
+- **Archived** Sandboxes free up all compute and move data to cold storage (no quota impact).
+- **Deleted** Sandboxes are permanently removed and free up all resources, including disk.
+
+:::
+
+Check your current usage and limits in the [Dashboard](https://app.daytona.io/dashboard/limits).
+
+## Tiers & Limit Increases
+
+Organizations are automatically placed into a Tier based on verification status.  
+You can unlock higher limits by completing the following steps:
+
+| Tier   | Compute Pool (vCPU / RAM / Disk) | Access Requirements                                                                                                     |
+| ------ | -------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| Tier 1 | 10 / 10GiB / 30GiB               | Email verified                                                                                                          |
+| Tier 2 | 100 / 200GiB / 300GiB            | Credit card linked, [GitHub connected](https://www.daytona.io/docs/linked-accounts#how-to-link-an-account), $10 top-up. |
+| Tier 3 | Everything bigger 🚀             | Coming soon.                                                                                                            |
+| Custom | Custom limits                    | Contact [support@daytona.io](mailto:support@daytona.io)                                                                 |
+
+You’ll be automatically upgraded once you meet the criteria.
+
+## Need More?
+
+If you need higher or specialized limits, reach out to [support@daytona.io](mailto:support@daytona.io).
+
+title: Linked Accounts
+
+Daytona supports the linking of user accounts from various identity providers. At the moment, the following providers are supported:
+
+- Google
+- GitHub
+
+This allows you to use different providers for logging into your Daytona account.
+
+:::tip
+
+#### Unlock higher usage limits
+
+Linking your GitHub account is one of the requirements to automatically upgrade to Tier 2.
+
+:::
+
+## How to link an account
+
+To link an account, go to the [Linked Accounts](https://app.daytona.io/dashboard/user/linked-accounts) page in the Daytona dashboard and click on the "Link Account" button for the account provider you want to link.
+
+## How to unlink an account
+
+To unlink an account, go to the [Linked Accounts](https://app.daytona.io/dashboard/user/linked-accounts) page in the Daytona dashboard and click on the "Unlink" button for the account provider you want to unlink.
+
+## Need More?
+
+If you need support for other identity providers, reach out to [support@daytona.io](mailto:support@daytona.io).
+
+title: Log Streaming
+
+When executing long-running processes in a sandbox, you’ll often want to access and process their logs in **real time**.
+
+The Daytona SDK supports both:
+
+- `Fetching log snapshot` — retrieve all logs up to a certain point.
+- `Log streaming` — stream logs as they are being produced, while the process is still running.
+
+This guide covers how to use log streaming in both asynchronous and synchronous modes.
+Real-time streaming is especially useful for **debugging**, **monitoring**, or integrating with **observability tools**.
+
+## Asynchronous
+
+If your sandboxed process is part of a larger system and is expected to run for an extended period (or indefinitely),
+you can process logs asynchronously **in the background**, while the rest of your system continues executing.
+
+This is ideal for:
+
+- Continuous monitoring
+- Debugging long-running jobs
+- Live log forwarding or visualizations
+
+import { TabItem, Tabs } from '@astrojs/starlight/components'
+
+```python
+import asyncio
+from daytona import Daytona, SessionExecuteRequest
+
+async def main():
+daytona = Daytona()
+sandbox = daytona.create()
+
+    try:
+        session_id = "exec-session-1"
+        sandbox.process.create_session(session_id)
+
+        command = sandbox.process.execute_session_command(
+            session_id,
+            SessionExecuteRequest(
+                command='for i in {1..10}; do echo "Processing step $i..."; sleep 1; done',
+                var_async=True,
+            ),
+        )
+
+        logs_task = asyncio.create_task(
+            sandbox.process.get_session_command_logs_async(
+                session_id, command.cmd_id, lambda chunk: print(f"Log chunk: {chunk}")
+            )
+        )
+
+        print("Continuing execution while logs are streaming...")
+        await asyncio.sleep(1)
+        print("Other operations completed!")
+
+        print("At the end wait for any asynchronous task to complete and clean up resources...")
+        await logs_task
+    except Exception as e:
+        print(f"Error: {e}")
+    finally:
+        print("Cleaning up sandbox...")
+        sandbox.delete()
+
+if **name** == "**main**":
+asyncio.run(main())
+
+```
+  ```typescript
+  import { Daytona, Sandbox } from '@daytonaio/sdk'
+
+  async function main() {
+    const daytona = new Daytona()
+    const sandbox = await daytona.create()
+
+    try {
+      const sessionId = 'exec-session-async-logs'
+      await sandbox.process.createSession(sessionId)
+
+      const command = await sandbox.process.executeSessionCommand(sessionId, {
+        command: 'for i in {1..10}; do echo "Processing step $i..."; sleep 1; done',
+        async: true,
+      })
+
+      const logTask = sandbox.process.getSessionCommandLogs(sessionId, command.cmdId!, (chunk) => {
+        console.log('Log chunk:', chunk)
+      })
+
+      console.log('Continuing execution while logs are streaming...')
+      sleep(1)
+      console.log('Other operations completed!')
+
+      console.log('At the end wait for any asynchronous task to complete and clean up resources...')
+      await logTask
+    } catch (error) {
+      console.error('Error:', error)
+    } finally {
+      console.log('Cleaning up sandbox...')
+      await sandbox.delete()
+    }
+  }
+
+  main()
+```
+
+
+## Synchronous
+
+If the command has a predictable duration, or if you don't need to run it in the background,
+you can process log stream synchronously. For example, you can write logs to a file or some other storage.
+
+  ```python
+  import asyncio
+  import os
+  from daytona import Daytona, SessionExecuteRequest
+
+async def main():
+daytona = Daytona()
+sandbox = daytona.create()
+
+      try:
+          session_id = "exec-session-1"
+          sandbox.process.create_session(session_id)
+
+          command = sandbox.process.execute_session_command(
+              session_id,
+              SessionExecuteRequest(
+                  command='counter=1; while (( counter <= 5 )); do echo "Count: $counter"; ((counter++)); sleep 2; done',
+                  var_async=True,
+              ),
+          )
+
+          log_file_path = f"./logs/logs-session_{session_id}-command_{command.cmd_id}.log"
+          os.makedirs(os.path.dirname(log_file_path), exist_ok=True)
+
+          with open(log_file_path, "w") as log_file:
+              def handle_chunk(chunk: str):
+                  #  remove null bytes
+                  clean_chunk = chunk.replace("\x00", "")
+                  #  write to file
+                  log_file.write(clean_chunk)
+                  log_file.flush()
+
+              await sandbox.process.get_session_command_logs_async(
+                  session_id, command.cmd_id, handle_chunk
+              )
+      except Exception as e:
+          print(f"Error: {e}")
+      finally:
+          print("Cleaning up sandbox...")
+          sandbox.delete()
+
+if **name** == "**main**":
+asyncio.run(main())
+
+```
+```typescript
+import { Daytona, Sandbox } from '@daytonaio/sdk'
+
+async function main() {
+  const daytona = new Daytona()
+  const sandbox = await daytona.create()
+
+  try {
+    const sessionId = 'exec-session-async-logs'
+    await sandbox.process.createSession(sessionId)
+
+    const command = await sandbox.process.executeSessionCommand(sessionId, {
+      command: 'counter=1; while (( counter <= 5 )); do echo "Count: $counter"; ((counter++)); sleep 2; done',
+      async: true,
+    })
+
+    const logFilePath = `./logs/logs-session-${sessionId}-command-${command.cmdId}.log`
+    const logsDir = path.dirname(logFilePath)
+    if (!fs.existsSync(logsDir)) {
+      fs.mkdirSync(logsDir, { recursive: true })
+    }
+
+    const stream = fs.createWriteStream(logFilePath)
+    await sandbox.process.getSessionCommandLogs(sessionId, command.cmdId!, (chunk) => {
+      const cleanChunk = chunk.replace(/\x00/g, '')
+      stream.write(cleanChunk)
+    })
+    stream.end()
+    await logTask
+  } catch (error) {
+    console.error('Error:', error)
+  } finally {
+    console.log('Cleaning up sandbox...')
+    await sandbox.delete()
+  }
+}
+
+main()
+```
+
+title: Daytona MCP Server
+
+import { TabItem, Tabs } from '@astrojs/starlight/components'
+
+The Daytona Model Context Protocol (MCP) Server enables AI agents to interact with Daytona's features programmatically. This guide covers how to set up and use the MCP server with various AI agents.
+
+## Prerequisites
+
+Before getting started, ensure you have:
+
+- A Daytona account
+- Daytona CLI installed
+- A compatible AI agent (Claude Desktop App, Claude Code, Cursor, or Windsurf)
+
+## Installation and Setup
+
+### 1. Install Daytona CLI
+
+```bash
+brew install daytonaio/cli/daytona
+```
+
+```bash
+powershell -Command "irm https://get.daytona.io/windows | iex"
+```
+
+### 2. Authenticate with Daytona
+
+```bash
+daytona login
+```
+
+### 3. Initialize MCP Server
+
+Initialize the Daytona MCP server with your preferred AI agent:
+
+```bash
+daytona mcp init [claude/cursor/windsurf]
+```
+
+### 4. Open Your AI Agent
+
+After initialization, open your AI agent application to begin using Daytona features.
+
+## Integration with Other AI Agents
+
+To integrate Daytona MCP with other AI agents, follow these steps:
+
+1. Generate the MCP configuration:
+
+```bash
+daytona mcp config
+```
+
+This command outputs a JSON configuration that you can copy into your agent's settings:
+
+```json
+{
+  "mcpServers": {
+    "daytona-mcp": {
+      "command": "daytona",
+      "args": ["mcp", "start"],
+      "env": {
+        "HOME": "${HOME}",
+        "PATH": "${HOME}:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/homebrew/bin"
+      },
+      "logFile": "${HOME}/Library/Logs/daytona/daytona-mcp-server.log"
+    }
+  }
+}
+```
+
+:::note
+For Windows users, add the following to the `env` field:
+
+```json
+"APPDATA": "${APPDATA}"
+```
+
+:::
+
+2. Open or restart your AI agent to apply the configuration.
+
+## Available Tools
+
+### Sandbox Management
+
+- **Create Sandbox**
+
+  - Creates a new Daytona sandbox
+  - Parameters:
+    - `target` (default: "us"): Target region
+    - `snapshot`: Snapshot for the sandbox (optional)
+    - `auto_stop_interval` (default: "15"): Auto-stop interval in minutes (0 disables)
+    - `auto_archive_interval` (default: "10080"): Auto-archive interval in minutes (0 means the maximum interval will be used)
+
+- **Destroy Sandbox**
+  - Removes an existing Daytona sandbox
+
+### File Operations
+
+- **Download File**
+
+  - Downloads a file from the Daytona sandbox
+  - Returns content as text or base64 encoded image
+  - Parameters:
+    - `file_path`: Path to the file
+
+- **Upload File**
+
+  - Uploads a file to the Daytona sandbox
+  - Supports text or base64-encoded binary content
+  - Creates necessary parent directories automatically
+  - Files persist during the session with appropriate permissions
+  - Supports overwrite controls and maintains original file formats
+  - Parameters:
+    - `file_path`: Path to the file to upload
+    - `content`: Content of the file to upload
+    - `encoding`: Encoding of the file to upload
+    - `overwrite`: Overwrite the file if it already exists
+
+- **Create Folder**
+
+  - Creates a new directory in the sandbox
+  - Parameters:
+    - `folder_path`: Path to create
+    - `mode`: Directory permissions (default: 0755)
+
+- **Get File Info**
+
+  - Retrieves information about a file
+  - Parameters:
+    - `file_path`: Path to the file
+
+- **List Files**
+
+  - Lists contents of a directory
+  - Parameters:
+    - `path`: Directory path (defaults to current directory)
+
+- **Move File**
+
+  - Moves or renames a file
+  - Parameters:
+    - `source_path`: Source location
+    - `dest_path`: Destination location
+
+- **Delete File**
+  - Removes a file or directory
+  - Parameters:
+    - `file_path`: Path to delete
+
+### Preview
+
+- **Preview Link**
+  - Generates accessible preview URLs for web applications
+  - Creates secure tunnels to expose local ports externally
+  - Validates server status on specified ports
+  - Provides diagnostic information for troubleshooting
+  - Supports custom descriptions and metadata for service organization
+  - Parameters:
+    - `port`: Port to expose
+    - `description`: Description of the service
+    - `check_server`: Check if a server is running on the port
+
+### Git Operations
+
+- **Git Clone**
+  - Clones a Git repository
+  - Parameters:
+    - `url`: Repository URL
+    - `path`: Target directory (defaults to current)
+    - `branch`: Branch to clone
+    - `commit_id`: Specific commit to clone
+    - `username`: Git username
+    - `password`: Git password
+
+### Command Execution
+
+- **Execute Command**
+  - Runs shell commands in the Daytona environment
+  - Returns stdout, stderr, and exit code
+  - Commands run with sandbox user permissions
+  - Parameters:
+    - `command`: Command to execute
+
+## Troubleshooting
+
+Common issues and solutions:
+
+- **Authentication Issues**
+
+  - Run `daytona login` to refresh credentials
+
+- **Connection Errors**
+
+  - Verify MCP server configuration
+  - Check server status
+
+- **Sandbox Errors**
+  - Use `daytona sandbox list` to check sandbox status
+
+## Support
+
+For additional assistance:
+
+- Visit [daytona.io](https://daytona.io)
+- Contact support at support@daytona.io
+
+title: Organizations
+
+import { TabItem, Tabs } from '@astrojs/starlight/components'
+
+Organizations in Daytona are a way to group resources and easily collaborate with other users.
+Users in an Organization, depending on their permissions, view and manage the same set of key
+resources such as Sandboxes, Snapshots and Registries, as well as consume the same quotas for these resources.
+
+After signing up to Daytona, users are assigned a Personal Organization. This default Organization
+cannot take new members and cannot be deleted. It has separate billing and will most commonly be used
+as a testing playground or by solo developers. Switching between organizations is done by selecting
+an option from the dropdown menu on the top of the sidebar.
+
+## Organization Roles
+
+Users within an Organization can have one of two different **Roles**: `Owner` and `Member`. `Owners` have full
+administrative access to the Organization and its resources. `Members` have no administrative access
+to the Organization, while their access to Organization resources is based on **Assignments**.
+
+### Administrative Actions
+
+Organization `Owners` can perform administrative actions such as:
+
+- Invite new users to the Organization
+- Manage pending invitations
+- Change Role of a user in the Organization
+- Update Assignments for an Organization Member
+- Remove user from the Organization
+- Delete Organization
+
+## Inviting New Users
+
+As an Organization `Owner`, to invite a new user to your Organization, navigate to the _Members page_,
+click on _Invite Member_, enter the email address of the user you want to invite, and choose a **Role**.
+If you select the `Member` role, you can also define their **Assignments**.
+
+## Available Assignments
+
+The list of available **Assignments** includes:
+
+| Assignment              | Description                                                         |
+| ----------------------- | ------------------------------------------------------------------- |
+| **`Viewer (required)`** | Grants read access to all resources in the organization             |
+| **`Developer`**         | Grants the ability to create sandboxes and keys in the organization |
+| **`Sandboxes Admin`**   | Grants admin access to sandboxes in the organization                |
+| **`Snapshots Admin`**   | Grants admin access to snapshots in the organization                |
+| **`Registries Admin`**  | Grants admin access to registries in the organization               |
+| **`Super Admin`**       | Grants full access to all resources in the organization             |
+
+## Managing Invitations
+
+To view their pending invitations to join other Organizations, users can navigate to the _Invitations
+page_ by expanding the dropdown at the bottom of the sidebar, and clicking on _Invitations_. Once a user
+accepts an invitation to join an Organization, they get access to resource quotas assigned to that
+Organization and they may proceed by issuing a new API key and creating sandboxes.
+
+## Settings
+
+The Settings subpage in the Dashboard allows you to view the Organization ID and Name and to delete the Organization if you don't need it anymore. This action is irreversible, so please proceed with caution. Personal Organizations are there by default and cannot be deleted.
+
+title: Preview & Authentication
+
+import { TabItem, Tabs } from '@astrojs/starlight/components'
+
+Processes listening for HTTP traffic in port range `3000-9999` can be previewed using preview links.
+
+A preview link's schema consists of the port, Sandbox ID and Runner combination, e.g.:
+`https://3000-sandbox-123456.h7890.daytona.work`
+
+If the Sandbox has its `public` property set to `true`, these links will be publicly accessible, otherwise the preview link will be available only to the Sandbox Organization users.
+
+For programmatic access (for example, `curl`), use the authorization token to access the preview URL, e.g.:
+`curl -H "x-daytona-preview-token: vg5c0ylmcimr8b_v1ne0u6mdnvit6gc0" https://3000-sandbox-123456.h7890.daytona.work`
+
+To fetch the preview link and the authorization token for a specific port, you can simply use the SDK method:
+
+```python
+
+preview_info = sandbox.get_preview_link(3000)
+
+print(f"Preview link url: {preview_info.url}")
+print(f"Preview link token: {preview_info.token}")
+
+```
+
+```typescript
+
+const previewInfo = await sandbox.getPreviewLink(3000);
+
+console.log(`Preview link url: ${previewInfo.url}`);
+console.log(`Preview link token: ${previewInfo.token}`);
+
+```
+
+title: Process and Code Execution
+
+import { TabItem, Tabs } from '@astrojs/starlight/components'
+
+The Daytona SDK provides powerful process and code execution capabilities through the `process` module in Sandboxes. This guide covers all available process operations and best practices.
+
+## Code Execution
+
+Daytona SDK provides an option to execute code in Python and TypeScript.
+
+### Running Code
+
+Daytona SDK provides an option to run code snippets in Python and TypeScript. You can execute code with input, timeout, and environment variables.
+
+```python
+# Run Python code
+response = sandbox.process.code_run('''
+def greet(name):
+    return f"Hello, {name}!"
+
+print(greet("Daytona"))
+''')
+
+print(response.result)
+
+```
+```typescript
+// Run TypeScript code
+let response = await sandbox.process.codeRun(`
+function greet(name: string): string {
+    return \`Hello, \${name}!\`;
+}
+
+console.log(greet("Daytona"));
+`);
+console.log(response.result);
+
+// Run code with argv and environment variables
+response = await sandbox.process.codeRun(
+    `
+    console.log(\`Hello, \${process.argv[2]}!\`);
+    console.log(\`FOO: \${process.env.FOO}\`);
+    `,
+    {
+      argv: ["Daytona"],
+      env: { FOO: "BAR" }
+    }
+);
+console.log(response.result);
+
+// Run code with timeout
+response = await sandbox.process.codeRun(
+    'setTimeout(() => console.log("Done"), 2000);',
+    undefined,
+    5000
+);
+console.log(response.result);
+```
+
+
+## Process Execution
+
+Daytona SDK provides an option to execute shell commands and manage background processes in Sandboxes. The workdir for executing defaults to the current Sandbox user's root - e.g. `workspace/repo` implies `/home/[username]/workspace/repo`, but you can override it with an absolute path (by starting the path with `/`).
+
+### Running Commands
+
+Daytona SDK provides an option to execute shell commands in Python and TypeScript. You can run commands with input, timeout, and environment variables.
+
+```python
+# Execute any shell command
+response = sandbox.process.exec("ls -la")
+print(response.result)
+
+# Setting a working directory and a timeout
+
+response = sandbox.process.exec("sleep 3", cwd="workspace/src", timeout=5)
+print(response.result)
+
+# Passing environment variables
+
+response = sandbox.process.exec("echo $CUSTOM_SECRET", env={
+"CUSTOM_SECRET": "DAYTONA"
+}
+)
+print(response.result)
+
+```
+```typescript
+
+// Execute any shell command
+const response = await sandbox.process.executeCommand("ls -la");
+console.log(response.result);
+
+// Setting a working directory and a timeout
+const response2 = await sandbox.process.executeCommand("sleep 3", "workspace/src", undefined, 5);
+console.log(response2.result);
+
+// Passing environment variables
+const response3 = await sandbox.process.executeCommand("echo $CUSTOM_SECRET", "~", {
+        "CUSTOM_SECRET": "DAYTONA"
+    }
+);
+console.log(response3.result);
+
+```
+
+
+## Sessions (Background Processes)
+
+Daytona SDK provides an option to start, stop, and manage background process sessions in Sandboxes. You can run long-running commands, monitor process status, and list all running processes.
+
+### Managing Long-Running Processes
+
+Daytona SDK provides an option to start and stop background processes. You can run long-running commands and monitor process status.
+
+```python
+# Check session's executed commands
+session = sandbox.process.get_session(session_id)
+print(f"Session {process_id}:")
+for command in session.commands:
+    print(f"Command: {command.command}, Exit Code: {command.exit_code}")
+
+# List all running sessions
+
+sessions = sandbox.process.list_sessions()
+for session in sessions:
+print(f"PID: {session.id}, Commands: {session.commands}")
+
+```
+```typescript
+// Check session's executed commands
+const session = await sandbox.process.getSession(sessionId);
+console.log(`Session ${sessionId}:`);
+for (const command of session.commands) {
+    console.log(`Command: ${command.command}, Exit Code: ${command.exitCode}`);
+}
+
+// List all running sessions
+const sessions = await sandbox.process.listSessions();
+for (const session of sessions) {
+    console.log(`PID: ${session.id}, Commands: ${session.commands}`);
+}
+
+```
+
+
+## Best Practices
+
+Daytona SDK provides best practices for process and code execution in Sandboxes.
+
+1. **Resource Management**
+
+- Use sessions for long-running operations
+- Clean up sessions after execution
+- Handle session exceptions properly
+
+   ```python
+   # Python - Clean up session
+   session_id = "long-running-cmd"
+   try:
+       sandbox.process.create_session(session_id)
+       session = sandbox.process.get_session(session_id)
+       # Do work...
+   finally:
+       sandbox.process.delete_session(session.session_id)
+   ```
+   ```typescript
+   // TypeScript - Clean up session
+   const sessionId = "long-running-cmd";
+   try {
+       await sandbox.process.createSession(sessionId);
+       const session = await sandbox.process.getSession(sessionId);
+       // Do work...
+   } finally {
+       await sandbox.process.deleteSession(session.sessionId);
+   }
+   ```
+
+2. **Error Handling**
+
+- Handle process exceptions properly
+- Log error details for debugging
+- Use try-catch blocks for error handling
+
+```python
+try:
+    response = sandbox.process.code_run("invalid python code")
+except ProcessExecutionError as e:
+    print(f"Execution failed: {e}")
+    print(f"Exit code: {e.exit_code}")
+    print(f"Error output: {e.stderr}")
+```
+```typescript
+try {
+    const response = await sandbox.process.codeRun("invalid typescript code");
+} catch (e) {
+    if (e instanceof ProcessExecutionError) {
+        console.error("Execution failed:", e);
+        console.error("Exit code:", e.exitCode);
+        console.error("Error output:", e.stderr);
+    }
+}
+```
+
+## Common Issues
+
+Daytona SDK provides an option to troubleshoot common issues related to process execution and code execution.
+
+### Process Execution Failed
+
+- Check command syntax
+- Verify required dependencies
+- Ensure sufficient permissions
+
+### Process Timeout
+
+- Adjust timeout settings
+- Optimize long-running operations
+- Consider using background processes
+
+### Resource Limits
+
+- Monitor process memory usage
+- Handle process cleanup properly
+- Use appropriate resource constraints
+
+title: Region Selection
+
+import { TabItem, Tabs } from '@astrojs/starlight/components'
+
+Daytona is currently available in the following regions:
+
+- United States (US)
+- Europe (EU)
+
+You can select the region during the Daytona [configuration](/docs/configuration) step.
+
+```python
+from daytona import Daytona, DaytonaConfig
+
+config = DaytonaConfig(
+    target="us"
+)
+
+daytona = Daytona(config)
+```
+
+```typescript
+import { Daytona } from '@daytonaio/sdk'
+
+const daytona: Daytona = new Daytona({
+  target: 'eu',
+})
+```
+
+title: Sandbox Management
+
+import { TabItem, Tabs } from '@astrojs/starlight/components'
+import Image from 'astro/components/Image.astro'
+
+Sandboxes are isolated development environments managed by Daytona. This guide covers how to create, manage, and remove Sandboxes using the SDK.
+By default, Sandboxes auto-stop after 15 minutes of inactivity and use **1 vCPU**, **1GB RAM**, and **3GiB disk**.
+
+## Sandbox Lifecycle
+
+Throughout its lifecycle, a Daytona Sandbox can have several different states. The diagram below shows the states and possible transitions between them.
+
+<Fragment set:html={sandboxDiagram} />
+
+By default, sandboxes auto-stop after `15 minutes` of inactivity and auto-archive after `7 days` of being stopped. To keep the Sandbox running indefinitely without interruption, set the auto-stop value to `0` during creation.
+
+## Creating Sandboxes
+
+The Daytona SDK provides an option to create Sandboxes with default or custom configurations. You can specify the language, [Snapshot](/docs/snapshots), resources, environment variables, and volumes for the Sandbox.
+Running Sandboxes utilize CPU, memory, and disk storage. Every resource is charged per second of usage.
+
+:::tip
+If you want to prolong the auto-stop interval, you can [set the auto-stop interval parameter](/docs/sandbox-management#auto-stop-interval) when creating a Sandbox.
+:::
+
+### Basic Sandbox Creation
+
+The Daytona SDK provides methods to create Sandboxes with default configurations, specific languages, or custom labels using Python and TypeScript.
+
+```python
+from daytona import Daytona, CreateSandboxFromSnapshotParams
+
+daytona = Daytona()
+
+# Create a basic Sandbox
+
+sandbox = daytona.create()
+
+# Create a Sandbox with specific language
+
+params = CreateSandboxFromSnapshotParams(language="python")
+sandbox = daytona.create(params)
+
+# Create a Sandbox with custom labels
+
+params = CreateSandboxFromSnapshotParams(labels={"SOME_LABEL": "my-label"})
+sandbox = daytona.create(params)
+
+```
+
+```typescript
+import { Daytona } from '@daytonaio/sdk';
+
+const daytona = new Daytona();
+
+// Create a basic Sandbox
+const sandbox = await daytona.create();
+
+// Create a Sandbox with specific language
+const sandbox = await daytona.create({ language: 'typescript' });
+
+// Create a Sandbox with custom labels
+const sandbox = await daytona.create({ labels: { SOME_LABEL: 'my-label' } });
+```
+
+
+When Sandboxes are not actively used, it is recommended that they be stopped. This can be done manually [using the stop command](/docs/sandbox-management#stop-and-start-sandbox) or automatically by [setting the auto-stop interval](/docs/sandbox-management#auto-stop-and-auto-archive).
+
+:::note
+Daytona keeps a pool of warm Sandboxes using default Snapshots.  
+When available, your Sandbox will launch in milliseconds instead of cold-booting.
+:::
+
+### Sandbox Resources
+
+Daytona Sandboxes come with **1 vCPU**, **1GB RAM**, and **3GiB disk** by default.
+
+Need more power? Use the `Resources` class to define exactly what you need: CPU, memory, and disk space are all customizable.
+
+Check your available resources and limits in the [dashboard](https://app.daytona.io/dashboard/limits).
+
+```python
+from daytona import Daytona, Resources, CreateSandboxFromImageParams, Image
+
+daytona = Daytona()
+
+# Create a Sandbox with custom resources
+
+resources = Resources(
+cpu=2, # 2 CPU cores
+memory=4, # 4GB RAM
+disk=8, # 8GB disk space
+)
+
+params = CreateSandboxFromImageParams(
+image=Image.debian_slim("3.12"),
+resources=resources
+)
+
+sandbox = daytona.create(params)
+
+```
+```typescript
+import { Daytona, Image } from "@daytonaio/sdk";
+
+async function main() {
+  const daytona = new Daytona();
+
+  // Create a Sandbox with custom resources
+  const sandbox = await daytona.create({
+    image: Image.debianSlim("3.13"),
+    resources: {
+      cpu: 2, // 2 CPU cores
+      memory: 4, // 4GB RAM
+      disk: 8, // 8GB disk space
+    },
+  });
+}
+
+main();
+```
+
+
+:::note
+All resource parameters are optional. If not specified, Daytona will use default values appropriate for the selected language and use case.
+:::
+
+## Sandbox Information
+
+The Daytona SDK provides methods to get information about a Sandbox, such as ID, root directory, and status using Python and TypeScript.
+
+```python
+# Get Sandbox ID
+sandbox_id = sandbox.id
+
+# Get the root directory of the Sandbox user
+
+root_dir = sandbox.get_user_root_dir()
+
+# Get the Sandbox id, auto-stop interval and state
+
+print(sandbox.id)
+print(sandbox.auto_stop_interval)
+print(sandbox.state)
+
+```
+
+```typescript
+// Get Sandbox ID
+const sandboxId = sandbox.id;
+
+// Get the root directory of the Sandbox user
+const rootDir = await sandbox.getUserRootDir();
+
+// Get the Sandbox id, auto-stop interval and state
+console.log(sandbox.id)
+console.log(sandbox.autoStopInterval)
+console.log(sandbox.state)
+```
+
+
+To get the preview URL for a specific port, check out [Preview & Authentication](/docs/preview-and-authentication).
+
+## Stop and Start Sandbox
+
+The Daytona SDK provides methods to stop and start Sandboxes using Python and TypeScript.
+
+Stopped Sandboxes maintain filesystem persistence while their memory state is cleared. They incur only disk usage costs and can be started again when needed.
+
+```python
+sandbox = daytona.create(CreateSandboxParams(language="python"))
+
+# Stop Sandbox
+
+sandbox.stop()
+
+print(sandbox.id) # 7cd11133-96c1-4cc8-9baa-c757b8f8c916
+
+# The sandbox ID can later be used to find the sandbox and start it
+
+sandbox = daytona.find_one("7cd11133-96c1-4cc8-9baa-c757b8f8c916")
+
+# Start Sandbox
+
+sandbox.start()
+
+```
+```typescript
+const sandbox = await daytona.create({ language: 'typescript' });
+
+// Stop Sandbox
+await sandbox.stop();
+
+console.log(sandbox.id) // 7cd11133-96c1-4cc8-9baa-c757b8f8c916
+
+// The sandbox ID can later be used to find the sandbox and start it
+
+const sandbox = await daytona.findOne("7cd11133-96c1-4cc8-9baa-c757b8f8c916");
+
+// Start Sandbox
+await sandbox.start();
+```
+
+
+The stopped state should be used when the Sandbox is expected to be started again soon. Otherwise, it is recommended to stop and then archive the Sandbox to eliminate disk usage costs.
+
+## Archive Sandbox
+
+The Daytona SDK provides methods to archive Sandboxes using Python and TypeScript.
+
+When Sandboxes are archived, the entire filesystem state is moved to very cost-effective object storage, making it possible to keep Sandboxes available for an extended period.
+Starting an archived Sandbox takes more time than starting a stopped Sandbox, depending on its size.
+
+A Sandbox must be stopped before it can be archived, and can be started again in the same way as a stopped Sandbox.
+
+    ```python # Archive Sandbox sandbox.archive() ```
+    ```typescript // Archive Sandbox await sandbox.archive(); ```
+
+## Delete Sandbox
+
+The Daytona SDK provides methods to delete Sandboxes using Python and TypeScript.
+
+```python
+# Delete Sandbox
+sandbox.delete()
+```
+```typescript
+// Delete Sandbox
+await sandbox.delete();
+```
+
+
+:::tip
+Check out the [Daytona CLI](/docs/getting-started#setting-up-the-daytona-cli) if you prefer managing Sandboxes through the terminal:
+
+```bash
+daytona sandbox list
+```
+
+```text
+
+    Sandbox               State           Region        Last Event
+    ────────────────────────────────────────────────────────────────────────────────────
+    ugliest_quokka        STARTED         us            1 hour ago
+
+    associated_yak        STARTED         us            14 hours ago
+
+    developed_lemur       STARTED         us            17 hours ago
+
+```
+
+```bash
+daytona sandbox start|stop|remove --all
+```
+
+```text
+All sandboxes have been deleted
+```
+
+:::
+
+## Auto-stop and Auto-archive
+
+Daytona Sandboxes can be automatically stopped and archived based on user-defined intervals.
+
+### Auto-stop Interval
+
+The auto-stop interval parameter sets the amount of time after which a running Sandbox will be automatically stopped.
+
+The parameter can either be set to:
+
+- a time interval in minutes
+- `0`, which disables the auto-stop functionality, allowing the sandbox to run indefinitely
+
+If the parameter is not set, the default interval of `15` minutes will be used.
+
+:::
+
+```python
+sandbox = daytona.create(CreateSandboxFromSnapshotParams(
+    snapshot="my-snapshot-name",
+    auto_stop_interval=0,  # Disables the auto-stop feature - default is 15 minutes
+))
+```
+```typescript
+const sandbox = await daytona.create({
+    snapshot: "my-snapshot-name",
+    autoStopInterval: 0, // Disables the auto-stop feature - default is 15 minutes
+});
+```
+
+
+### Auto-archive Interval
+
+The auto-archive interval parameter sets the amount of time after which a continuously stopped Sandbox will be automatically archived.
+
+The parameter can either be set to:
+
+- a time interval in minutes
+- `0`, which means the maximum interval of `30 days` will be used
+
+If the parameter is not set, the default interval of `7 days` days will be used.
+
+```python
+sandbox = daytona.create(CreateSandboxFromSnapshotParams(
+    snapshot="my-snapshot-name",
+    auto_archive_interval=60 # Auto-archive after a Sandbox has been stopped for 1 hour
+))
+```
+```typescript
+const sandbox = await daytona.create({
+    snapshot: "my-snapshot-name",
+    autoArchiveInterval: 60 // Auto-archive after a Sandbox has been stopped for 1 hour
+});
+```
+
+### Run Indefinitely
+
+By default, Sandboxes auto-stop after 15 minutes of inactivity. To keep a Sandbox running without interruption, set the auto-stop interval to `0` when creating a new Sandbox:
+
+```python
+sandbox = daytona.create(CreateSandboxFromSnapshotParams(
+    snapshot="my-snapshot-name",
+    auto_stop_interval=0,  # Disables the auto-stop feature - default is 15 minutes
+))
+```
+```typescript
+const sandbox = await daytona.create({
+    snapshot: "my-snapshot-name",
+    autoStopInterval: 0, // Disables the auto-stop feature - default is 15 minutes
+});
+```
+
+title: Snapshots
+
+import { TabItem, Tabs } from '@astrojs/starlight/components'
+
+Snapshots are pre-configured templates containing all dependencies, tools, environment settings and resource requirements for your Daytona Sandbox. Daytona supports creating Snapshots from all standard [Docker](https://www.docker.com/) or [OCI](https://opencontainers.org/) compatible images.
+
+## Creating Snapshots
+
+When spinning up a Sandbox, Daytona uses a Snapshot based on a simple image with some useful utilities pre-installed, such as `python`, `node`, `pip` as well as some common pip packages. More information [below](#default-snapshot).
+
+It is possible to override this behavior and create custom Snapshots by visiting the Dashboard, clicking on [Snapshots](https://app.daytona.io/dashboard/snapshots) and on `Create Snapshot`.
+
+For the Snapshot image, you may enter the name and tag of any publicly accessible image from Docker Hub such as `alpine:3.21.3` and `debian:12.10` or from another public container registry - e.g. `my-public-registry.com/custom-alpine:3.21`.
+
+The entrypoint field is optional and if the image hasn't got a long-running entrypoint, Daytona will ensure sure that the resulting container won't exit immediately upon creation by automatically running `sleep infinity`.
+
+:::note
+Since images tagged `latest` get frequent updates, only specific tags (e.g. `0.1.0`) are supported. Same idea applies to tags such as `lts` or `stable` and we recommend avoiding those when defining an image.
+:::
+
+Once the Snapshot is pulled, validated and has an `Active` state, it is ready to be used. Define the `CreateSandboxFromSnapshotParams` object to specify the custom Snapshot to use:
+
+```python
+sandbox = daytona.create(CreateSandboxFromSnapshotParams(
+    snapshot="my-snapshot-name",
+))
+```
+```typescript
+const sandbox = await daytona.create({
+  snapshot: "my-snapshot-name",
+})
+```
+
+Full example:
+
+```python
+from daytona import Daytona, CreateSandboxFromSnapshotParams
+
+daytona = Daytona()
+
+sandbox = daytona.create(CreateSandboxFromSnapshotParams(
+snapshot="my-snapshot-name",
+))
+
+response = sandbox.process.code_run('print("Sum of 3 and 4 is " + str(3 + 4))')
+if response.exit_code != 0:
+print(f"Error running code: {response.exit_code} {response.result}")
+else:
+print(response.result)
+
+sandbox.delete()
+
+```
+
+```typescript
+import { Daytona } from '@daytonaio/sdk'
+
+async function main() {
+  // Initialize the Daytona client
+  const daytona = new Daytona()
+
+  try {
+    // Create the Sandbox instance
+    const sandbox = await daytona.create({
+      snapshot: "my-snapshot-name",
+    })
+    // Run the code securely inside the Sandbox
+    const response = await sandbox.process.codeRun(
+      'print("Sum of 3 and 4 is " + str(3 + 4))',
+    )
+    if (response.exitCode !== 0) {
+      console.error('Error running code:', response.exitCode, response.result)
+    } else {
+      console.log(response.result)
+    }
+  } catch (error) {
+    console.error('Sandbox flow error:', error)
+  } finally {
+    // Clean up the Sandbox
+    await sandbox.delete()
+  }
+}
+
+main()
+```
+
+
+### Snapshot Resources
+
+Snapshots contain the resource requirements for Daytona Sandboxes. By default, Daytona Sandboxes come with **1 vCPU**, **1GB RAM**, and **3GiB disk**.
+
+Need more power? Use the `Resources` class to define exactly what you need: CPU, memory, and disk space are all customizable.
+
+Check your available resources and limits in the [dashboard](https://app.daytona.io/dashboard/limits).
+
+```python
+from daytona import (
+    Daytona,
+    CreateSnapshotParams,
+    Image,
+    Resources,
+    CreateSandboxFromSnapshotParams,
+)
+
+daytona = Daytona()
+
+# Create a Snapshot with custom resources
+
+daytona.snapshot.create(
+CreateSnapshotParams(
+name="my-snapshot",
+image=Image.debian_slim("3.12"),
+resources=Resources(
+cpu=2,
+memory=4,
+disk=8,
+),
+),
+on_logs=print,
+)
+
+# Create a Sandbox with custom Snapshot
+
+sandbox = daytona.create(
+CreateSandboxFromSnapshotParams(
+snapshot="my-snapshot",
+)
+)
+
+```
+```typescript
+import { Daytona, Image } from "@daytonaio/sdk";
+
+async function main() {
+  const daytona = new Daytona();
+
+  // Create a Snapshot with custom resources
+  await daytona.snapshot.create(
+    {
+      name: "my-snapshot",
+      image: Image.debianSlim("3.13"),
+      resources: {
+        cpu: 2,
+        memory: 4,
+        disk: 8,
+      },
+    },
+    { onLogs: console.log }
+  );
+
+  // Create a Sandbox with custom Snapshot
+  const sandbox = await daytona.create({
+    snapshot: "my-snapshot",
+  });
+}
+
+main();
+```
+
+
+:::note
+All resource parameters are optional. If not specified, Daytona will use the default values.
+:::
+
+### Images from Private Registries
+
+To create a Snapshot from an image that is not publicly available, you need to start by adding the image's private Container Registry:
+
+1. Go to the [Registries](https://app.daytona.io/dashboard/registries) page in the Dashboard
+2. Click the `Add Registry` button.
+3. Input the Registry's name and URL, username, password, project, and submit
+4. Once the Container Registry is created, you may go back to the [Snapshots](https://app.daytona.io/dashboard/snapshots) page
+5. When creating the Snapshot, make sure to input the entire private image name, including the registry location and project name - `my-private-registry.com/<my-project>/custom-alpine:3.21`
+
+The next step is the same; simply set the `CreateSandboxFromSnapshotParams` field to use the custom Snapshot and no more authentication is needed.
+
+### Using a Local Image
+
+In order to avoid having to manually set up a private container registry and push your image there, the [Daytona CLI](/docs/getting-started#setting-up-the-daytona-cli) allows you to create a Snapshot from your local image or from a local Dockerfile and use it in your Sandboxes.
+
+After running `docker images` and ensuring the image and tag you want to use is available use the `daytona snapshot push` command to create a Snapshot and push it to Daytona, e.g.:
+
+```bash
+daytona snapshot push custom-alpine:3.21 -n my-snapshot-name
+```
+
+For more information, see the [CLI documentation](/docs/cli#daytona-snapshot-push).
+
+:::tip
+
+Daytona expects the local image to be built for AMD64 architecture. Therefore, the `--platform=linux/amd64` flag is required when building the Docker image if your machine is running on a different architecture.
+
+:::
+
+If you haven't built the desired image yet, and have a Dockerfile ready, you can use the Declarative Builder in our SDK - read more about it [here](/docs/getting-started#declarative-builder).
+
+Alternatively, to do it through the CLI, use the `--dockerfile` flag under `create` to pass the path to the Dockerfile you want to use and Daytona will build the Snapshot for you:
+
+```bash
+daytona snapshot create trying-daytona:0.0.1 --dockerfile ./Dockerfile --context ./requirements.txt
+```
+
+```text
+Building image from /Users/idagelic/docs/Dockerfile
+Step 1/5 : FROM alpine:latest
+
+...
+
+ ⡿  Waiting for the Snapshot to be validated ...
+
+ ...
+
+ ✓  Use 'harbor-transient.internal.daytona.app/daytona/trying-daytona:0.0.1' to create a new sandbox using this Snapshot
+
+```
+
+## Deleting Snapshots
+
+Deleting your custom Snapshots is a straightforward process. Simply go to the [Snapshots](https://app.daytona.io/dashboard/snapshots) page and click on the `Delete` button that shows up when clicking the three dots at the end of a row of the Snapshot you want deleted.
+
+:::tip
+
+To temporarily disable a Snapshot, instead of deleting, you can click `Disable`. This will prevent the Snapshot from being used in any new Sandboxes but will not delete it.
+
+:::
+
+## Default Snapshot
+
+The default Snapshot used by Daytona is based on an image that contains `python`, `node` and their respective LSP's, as well as these pre-installed `pip` packages:
+
+- `beautifulsoup4` (v4.13.3)
+- `django` (v5.1.7)
+- `flask` (v3.1.0)
+- `keras` (v3.9.0)
+- `matplotlib` (v3.10.1)
+- `numpy` (v2.2.3)
+- `openai` (v1.65.4)
+- `opencv-python` (v4.11.0.86)
+- `pandas` (v2.2.3)
+- `pillow` (v11.1.0)
+- `pydantic-ai` (v0.0.35)
+- `requests` (v2.32.3)
+- `scikit-learn` (v1.6.1)
+- `scipy` (v1.15.2)
+- `seaborn` (v0.13.2)
+- `SQLAlchemy` (v2.0.38)
+- `transformers` (v4.49.0)
+- `anthropic` (v0.49.0)
+- `daytona_sdk` (v0.11.1)
+- `huggingface` (v0.0.1)
+- `instructor` (v1.7.3)
+- `langchain` (v0.3.20)
+- `llama-index` (v0.12.22)
+- `ollama` (v0.4.7)
+
+title: CLI
+description: A reference of supported operations using the Daytona CLI.
+sidebar:
+  label: Daytona CLI Reference
+
+The `daytona` command-line tool provides access to Daytona's core features including managing Snapshots and the lifecycle of Daytona Sandboxes. View the installation instructions by clicking [here](/docs/getting-started#setting-up-the-daytona-cli).
+
+This reference lists all commands supported by the `daytona` command-line tool complete with a description of their behaviour, and any supported flags.
+You can access this documentation on a per-command basis by appending the `--help`/`-h` flag when invoking `daytona`.
+
+## daytona version
+Print the version number
+
+```shell
+daytona version [flags]
+```
+
+__Flags__
+| Long | Short | Description |
+| :--- | :---- | :---------- |
+| `--help` |  | help for daytona |
+
+
+## daytona sandbox info
+Get sandbox info
+
+```shell
+daytona sandbox info [SANDBOX_ID] [flags]
+```
+
+__Flags__
+| Long | Short | Description |
+| :--- | :---- | :---------- |
+| `--format` | `-f` | Output format. Must be one of (yaml, json) |
+| `--verbose` | `-v` | Include verbose output |
+| `--help` |  | help for daytona |
+
+
+## daytona sandbox list
+List sandboxes
+
+```shell
+daytona sandbox list [flags]
+```
+
+__Flags__
+| Long | Short | Description |
+| :--- | :---- | :---------- |
+| `--format` | `-f` | Output format. Must be one of (yaml, json) |
+| `--limit` | `-l` | Maximum number of items per page |
+| `--page` | `-p` | Page number for pagination (starting from 1) |
+| `--verbose` | `-v` | Include verbose output |
+| `--help` |  | help for daytona |
+
+
+## daytona sandbox start
+Start a sandbox
+
+```shell
+daytona sandbox start [SANDBOX_ID] [flags]
+```
+
+__Flags__
+| Long | Short | Description |
+| :--- | :---- | :---------- |
+| `--all` | `-a` | Start all sandboxes |
+| `--help` |  | help for daytona |
+
+
+## daytona sandbox stop
+Stop a sandbox
+
+```shell
+daytona sandbox stop [SANDBOX_ID] [flags]
+```
+
+__Flags__
+| Long | Short | Description |
+| :--- | :---- | :---------- |
+| `--all` | `-a` | Stop all sandboxes |
+| `--help` |  | help for daytona |
+
+
+## daytona sandbox
+Manage Daytona sandboxes
+
+```shell
+daytona sandbox [flags]
+```
+
+__Flags__
+| Long | Short | Description |
+| :--- | :---- | :---------- |
+| `--help` |  | help for daytona |
+
+
+## daytona sandbox create
+Create a new sandbox
+
+```shell
+daytona sandbox create [flags]
+```
+
+__Flags__
+| Long | Short | Description |
+| :--- | :---- | :---------- |
+| `--auto-archive` |  | Auto-archive interval in minutes (0 means the maximum interval will be used) |
+| `--auto-stop` |  | Auto-stop interval in minutes (0 means disabled) |
+| `--class` |  | Sandbox class type (small, medium, large) |
+| `--context` | `-c` | Files or directories to include in the build context (can be specified multiple times) |
+| `--cpu` |  | CPU cores allocated to the sandbox |
+| `--disk` |  | Disk space allocated to the sandbox in GB |
+| `--dockerfile` | `-f` | Path to Dockerfile for Sandbox snapshot |
+| `--env` | `-e` | Environment variables (format: KEY=VALUE) |
+| `--gpu` |  | GPU units allocated to the sandbox |
+| `--label` | `-l` | Labels (format: KEY=VALUE) |
+| `--memory` |  | Memory allocated to the sandbox in MB |
+| `--public` |  | Make sandbox publicly accessible |
+| `--snapshot` |  | Snapshot to use for the sandbox |
+| `--target` |  | Target region (eu, us) |
+| `--user` |  | User associated with the sandbox |
+| `--volume` | `-v` | Volumes to mount (format: VOLUME_NAME:MOUNT_PATH) |
+| `--help` |  | help for daytona |
+
+
+## daytona sandbox delete
+Delete a sandbox
+
+```shell
+daytona sandbox delete [SANDBOX_ID] [flags]
+```
+
+__Flags__
+| Long | Short | Description |
+| :--- | :---- | :---------- |
+| `--all` | `-a` | Delete all sandboxes |
+| `--force` | `-f` | Force delete |
+| `--help` |  | help for daytona |
+
+
+## daytona snapshot push
+Push local snapshot
+
+```shell
+daytona snapshot push [SNAPSHOT] [flags]
+```
+
+__Flags__
+| Long | Short | Description |
+| :--- | :---- | :---------- |
+| `--entrypoint` | `-e` | The entrypoint command for the image |
+| `--help` |  | help for daytona |
+
+
+## daytona login
+Log in to Daytona
+
+```shell
+daytona login [flags]
+```
+
+__Flags__
+| Long | Short | Description |
+| :--- | :---- | :---------- |
+| `--api-key` |  | API key to use for authentication |
+| `--help` |  | help for daytona |
+
+
+## daytona logout
+Logout from Daytona
+
+```shell
+daytona logout [flags]
+```
+
+__Flags__
+| Long | Short | Description |
+| :--- | :---- | :---------- |
+| `--help` |  | help for daytona |
+
+
+## daytona snapshot
+Manage Daytona snapshots
+
+```shell
+daytona snapshot [flags]
+```
+
+__Flags__
+| Long | Short | Description |
+| :--- | :---- | :---------- |
+| `--help` |  | help for daytona |
+
+
+## daytona snapshot create
+Create a snapshot
+
+```shell
+daytona snapshot create [SNAPSHOT] [flags]
+```
+
+__Flags__
+| Long | Short | Description |
+| :--- | :---- | :---------- |
+| `--context` | `-c` | Files or directories to include in the build context (can be specified multiple times) |
+| `--dockerfile` | `-f` | Path to Dockerfile to build |
+| `--entrypoint` | `-e` | The entrypoint command for the snapshot |
+| `--image` | `-i` | The image name for the snapshot |
+| `--help` |  | help for daytona |
+
+
+## daytona snapshot delete
+Delete a snapshot
+
+```shell
+daytona snapshot delete [SNAPSHOT_ID] [flags]
+```
+
+__Flags__
+| Long | Short | Description |
+| :--- | :---- | :---------- |
+| `--all` | `-a` | Delete all snapshots |
+| `--help` |  | help for daytona |
+
+
+## daytona snapshot list
+List all snapshots
+
+```shell
+daytona snapshot list [flags]
+```
+
+__Flags__
+| Long | Short | Description |
+| :--- | :---- | :---------- |
+| `--format` | `-f` | Output format. Must be one of (yaml, json) |
+| `--limit` | `-l` | Maximum number of items per page |
+| `--page` | `-p` | Page number for pagination (starting from 1) |
+| `--help` |  | help for daytona |
+
+
+## daytona
+Daytona CLI
+
+```shell
+daytona [flags]
+```
+
+__Flags__
+| Long | Short | Description |
+| :--- | :---- | :---------- |
+| `--help` |  | help for daytona |
+| `--version` | `-v` | Display the version of Daytona |
+
+
+## daytona autocomplete
+Adds a completion script for your shell environment
+
+```shell
+daytona autocomplete [bash|zsh|fish|powershell] [flags]
+```
+
+__Flags__
+| Long | Short | Description |
+| :--- | :---- | :---------- |
+| `--help` |  | help for daytona |
+
+<Aside type="note">
+If using bash shell environment, make sure you have bash-completion installed in order to get full autocompletion functionality.
+Linux Installation: ```sudo apt-get install bash-completion```
+macOS Installation: ```brew install bash-completion```
+</Aside>
+
+## daytona docs
+Opens the Daytona documentation in your default browser.
+
+```shell
+daytona docs [flags]
+```
+
+__Flags__
+| Long | Short | Description |
+| :--- | :---- | :---------- |
+| `--help` |  | help for daytona |
+
+
+## daytona organization
+Manage Daytona organizations
+
+```shell
+daytona organization [flags]
+```
+
+__Flags__
+| Long | Short | Description |
+| :--- | :---- | :---------- |
+| `--help` |  | help for daytona |
+
+
+## daytona organization create
+Create a new organization and set it as active
+
+```shell
+daytona organization create [ORGANIZATION_NAME] [flags]
+```
+
+__Flags__
+| Long | Short | Description |
+| :--- | :---- | :---------- |
+| `--help` |  | help for daytona |
+
+
+## daytona organization delete
+Delete an organization
+
+```shell
+daytona organization delete [ORGANIZATION] [flags]
+```
+
+__Flags__
+| Long | Short | Description |
+| :--- | :---- | :---------- |
+| `--help` |  | help for daytona |
+
+
+## daytona organization list
+List all organizations
+
+```shell
+daytona organization list [flags]
+```
+
+__Flags__
+| Long | Short | Description |
+| :--- | :---- | :---------- |
+| `--format` | `-f` | Output format. Must be one of (yaml, json) |
+| `--help` |  | help for daytona |
+
+
+## daytona organization use
+Set active organization
+
+```shell
+daytona organization use [ORGANIZATION] [flags]
+```
+
+__Flags__
+| Long | Short | Description |
+| :--- | :---- | :---------- |
+| `--help` |  | help for daytona |
+
+
+## daytona mcp
+Manage Daytona MCP Server
+
+```shell
+daytona mcp [flags]
+```
+
+__Flags__
+| Long | Short | Description |
+| :--- | :---- | :---------- |
+| `--help` |  | help for daytona |
+
+
+## daytona mcp init
+Initialize Daytona MCP Server with an agent (currently supported: claude, windsurf, cursor)
+
+
+```shell
+daytona mcp init [AGENT_NAME] [flags]
+```
+
+__Flags__
+| Long | Short | Description |
+| :--- | :---- | :---------- |
+| `--help` |  | help for daytona |
+
+
+## daytona mcp start
+Start Daytona MCP Server
+
+```shell
+daytona mcp start [flags]
+```
+
+__Flags__
+| Long | Short | Description |
+| :--- | :---- | :---------- |
+| `--help` |  | help for daytona |
+
+
+## daytona mcp config
+Outputs JSON configuration for Daytona MCP Server
+
+```shell
+daytona mcp config [AGENT_NAME] [flags]
+```
+
+__Flags__
+| Long | Short | Description |
+| :--- | :---- | :---------- |
+| `--help` |  | help for daytona |
+
+
+## daytona volume
+Manage Daytona volumes
+
+```shell
+daytona volume [flags]
+```
+
+__Flags__
+| Long | Short | Description |
+| :--- | :---- | :---------- |
+| `--help` |  | help for daytona |
+
+
+## daytona volume list
+List all volumes
+
+```shell
+daytona volume list [flags]
+```
+
+__Flags__
+| Long | Short | Description |
+| :--- | :---- | :---------- |
+| `--format` | `-f` | Output format. Must be one of (yaml, json) |
+| `--help` |  | help for daytona |
+
+
+## daytona volume create
+Create a volume
+
+```shell
+daytona volume create [NAME] [flags]
+```
+
+__Flags__
+| Long | Short | Description |
+| :--- | :---- | :---------- |
+| `--size` | `-s` | Size of the volume in GB |
+| `--help` |  | help for daytona |
+
+
+## daytona volume get
+Get volume details
+
+```shell
+daytona volume get [VOLUME_ID] [flags]
+```
+
+__Flags__
+| Long | Short | Description |
+| :--- | :---- | :---------- |
+| `--format` | `-f` | Output format. Must be one of (yaml, json) |
+| `--help` |  | help for daytona |
+
+
+## daytona volume delete
+Delete a volume
+
+```shell
+daytona volume delete [VOLUME_ID] [flags]
+```
+
+__Flags__
+| Long | Short | Description |
+| :--- | :---- | :---------- |
+| `--help` |  | help for daytona |
+
+title: Volumes
+
+import { TabItem, Tabs } from '@astrojs/starlight/components'
+
+Volumes are FUSE-based mounts on the Sandbox file system that enable file sharing between Sandboxes and instant access to existing files already present on the mounted volume.
+Using Volumes the Sandboxes can instantly read from large files eliminating the need to upload them first to the Sandbox file system.
+The volume data is stored on the S3 compatible object store. Multiple volumes can be mounted to a single Sandbox and each volume can be mounted on multiple Sandboxes simultaneously.
+
+## Creating Volumes
+
+In order to mount a volume to a Sandbox, one must be created.
+
+    ```bash
+    volume = daytona.volume.get("my-volume", create=True)
+    ```
+    ```bash
+    const volume = await daytona.volume.get('my-volume', true)
+    ```
+
+## Mounting Volumes to Sandboxes
+
+Once a volume is created, it can be mounted to a Sandbox by specifying it in the `CreateSandboxFromSnapshotParams` object:
+
+```python
+import os
+from daytona import CreateSandboxFromSnapshotParams, Daytona, VolumeMount
+
+daytona = Daytona()
+
+# Create a new volume or get an existing one
+
+volume = daytona.volume.get("my-volume", create=True)
+
+# Mount the volume to the sandbox
+
+mount_dir_1 = "/home/daytona/volume"
+
+params = CreateSandboxFromSnapshotParams(
+language="python",
+volumes=[VolumeMount(volumeId=volume.id, mountPath=mount_dir_1)],
+)
+sandbox = daytona.create(params)
+
+# When you're done with the sandbox, you can remove it
+
+# The volume will persist even after the sandbox is removed
+
+sandbox.delete()
+
+```
+
+```typescript
+import { Daytona } from '@daytonaio/sdk'
+import path from 'path'
+
+async function main() {
+  const daytona = new Daytona()
+
+  //  Create a new volume or get an existing one
+  const volume = await daytona.volume.get('my-volume', true)
+
+  // Mount the volume to the sandbox
+  const mountDir1 = '/home/daytona/volume'
+
+  const sandbox1 = await daytona.create({
+    language: 'typescript',
+    volumes: [{ volumeId: volume.id, mountPath: mountDir1 }],
+  })
+
+  // When you're done with the sandbox, you can remove it
+  // The volume will persist even after the sandbox is removed
+  await daytona.delete(sandbox1)
+}
+
+main()
+
+```
+
+
+## Deleting Volumes
+
+When a volume is no longer needed, it can be removed.
+
+    ```python
+    volume = daytona.volume.get("my-volume", create=True)
+    daytona.volume.delete(volume)
+    ```
+    ```typescript
+    const volume = await daytona.volume.get('my-volume', true)
+    await daytona.volume.delete(volume)
+    ```
+
+## Working with Volumes
+
+Once mounted, you can read from and write to the volume just like any other directory in the Sandbox file system. Files written to the volume persist beyond the lifecycle of any individual Sandbox.
+
+## Limitations
+
+Since volumes are FUSE-based mounts, they can not be used for applications that require block storage access (like database tables).
+Volumes are generally slower for both read and write operations compared to the local Sandbox file system.
+
+title: Web Terminal
+
+import { TabItem, Tabs } from '@astrojs/starlight/components'
+
+Daytona provides a Web Terminal for interacting with your Sandboxes, allowing for a convenient way to view files, run commands, and debug.
+
+You can open it by clicking on the Terminal icon `>_` in the [Sandbox list](https://app.daytona.io/dashboard/sandboxes) under Access for any running Sandbox. It is available by default and is accessible on port `22222`.
+
+```text
+
+ID                    State         Region     Created             Access
+──────────────────────────────────────────────────────────────────────────────
+sandbox-963e3f71      STARTED       us         12 minutes ago      >_
+
+```
+
+:::note
+Since Terminal access is a very sensitive procedure, it is accessible only to users in your Organization, even when setting the `public` parameter to `True` in `CreateSandboxFromSnapshotParams` or `CreateSandboxFromImageParams`.
+:::

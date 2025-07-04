@@ -1,0 +1,42 @@
+---
+import TableOfContents from 'virtual:starlight/components/TableOfContents'
+---
+
+{
+  Astro.props.toc && (
+    <>
+      <div class="right-sidebar-panel">
+        <div class="sl-container">
+          <TableOfContents {...Astro.props} />
+        </div>
+      </div>
+    </>
+  )
+}
+
+<style>
+  .right-sidebar-panel :global(h2) {
+    font-family: 'Berkeley Mono', monospace;
+    font-size: 0.75rem;
+    font-weight: normal;
+    line-height: 1;
+    text-transform: uppercase;
+    color: var(--primary-text-color);
+    letter-spacing: -0.00875rem;
+    padding-bottom: 10px;
+    border-bottom: var(--border);
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+  .right-sidebar-panel :global(a) {
+    display: block;
+    font-size: var(--sl-text-xs);
+    text-decoration: none;
+    color: var(--sl-color-gray-3);
+    overflow-wrap: anywhere;
+    transition: color 0.1s ease-in-out;
+  }
+  .right-sidebar-panel :global(a:hover) {
+    color: var(--sl-color-white);
+  }
+</style>

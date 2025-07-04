@@ -1,0 +1,40 @@
+# build output
+dist/
+# generated types
+.astro/
+
+# dependencies
+node_modules/
+
+.pnpm-store
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+
+# environment variables
+.env
+.env.production
+
+# macOS-specific files
+.DS_Store
+
+
+
+# Idea/Jetbrains
+.idea/
+
+
+# git config
+.gitconfig 
+
+# vscode settings
+.vscode
+.vscode/
+
+# unnecessary lockfiles (only using yarn)
+package-lock.json
+pnpm-lock.yaml
