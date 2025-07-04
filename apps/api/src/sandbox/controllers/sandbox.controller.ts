@@ -462,10 +462,17 @@ export class SandboxController {
         throw new NotFoundException(`Sandbox with ID ${sandboxId} not found`)
       }
 
+      // Get runner info
+      const runner = await this.runnerService.findOne(sandbox.runnerId)
+      if (!runner) {
+        throw new NotFoundException(`Runner not found for sandbox ${sandboxId}`)
+      }
+
       // Return new preview url only for updated sandboxes
       if (sandbox.daemonVersion) {
         return {
-          url: `${proxyProtocol}://${port}-${sandboxId}.${proxyDomain}`,
+          url: `${proxyProtocol}://${port}-${sandbox.id}.${proxyDomain}`,
+          legacyProxyUrl: `https://${port}-${sandbox.id}.${runner.domain}`,
           token: sandbox.authToken,
         }
       }
