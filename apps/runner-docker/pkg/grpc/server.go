@@ -19,6 +19,7 @@ import (
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/recovery"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/reflection"
 )
 
@@ -30,11 +31,11 @@ var (
 
 type Server struct {
 	grpcServer *grpc.Server
-	address    string
+	Addr       string
 }
 
 type ServerConfig struct {
-	Address            string
+	Addr               string
 	DockerClient       *client.Client
 	RunnerCache        *cache.IRunnerCache
 	DaemonPath         string
@@ -43,6 +44,9 @@ type ServerConfig struct {
 	AWSRegion          string
 	AWSEndpointUrl     string
 	Log                *slog.Logger
+	UseTLS             bool
+	CertFile           string
+	KeyFile            string
 }
 
 func New(cfg ServerConfig) *Server {
@@ -59,6 +63,14 @@ func New(cfg ServerConfig) *Server {
 			logging.StreamServerInterceptor(interceptorLogger(log), loggerOpts...),
 			recovery.StreamServerInterceptor(),
 		),
+	}
+
+	if cfg.UseTLS {
+		creds, err := credentials.NewServerTLSFromFile(cfg.CertFile, cfg.KeyFile)
+		if err != nil {
+			panic(err)
+		}
+		opts = append(opts, grpc.Creds(creds))
 	}
 
 	// Create gRPC server
@@ -97,14 +109,14 @@ func New(cfg ServerConfig) *Server {
 
 	return &Server{
 		grpcServer: grpcServer,
-		address:    cfg.Address,
+		Addr:       cfg.Addr,
 	}
 }
 
 // Start server
 func (s *Server) Start() error {
 	// Create the TCP listener when starting the server
-	listener, err := net.Listen("tcp", s.address)
+	listener, err := net.Listen("tcp", s.Addr)
 	if err != nil {
 		return err
 	}
