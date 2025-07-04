@@ -192,7 +192,7 @@ export class SandboxManager {
             organizationId: Not(SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION),
             state: SandboxState.STOPPED,
             desiredState: SandboxDesiredState.STOPPED,
-            pending: false,
+            pending: Not(true),
             autoDeleteInterval: MoreThanOrEqual(0),
             lastActivityAt: Raw((alias) => `${alias} < NOW() - INTERVAL '1 minute' * "autoDeleteInterval"`),
           },
@@ -212,6 +212,7 @@ export class SandboxManager {
             }
 
             try {
+              sandbox.pending = true
               sandbox.desiredState = SandboxDesiredState.DESTROYED
               await this.sandboxRepository.save(sandbox)
               await this.redisLockProvider.unlock(lockKey)
