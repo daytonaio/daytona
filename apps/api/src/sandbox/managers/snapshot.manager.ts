@@ -200,8 +200,29 @@ export class SnapshotManager {
         },
       })
 
+      //  get all runners that have the snapshot in their base image
+      const snapshotRunners = await this.snapshotRunnerRepository.find({
+        where: {
+          snapshotRef: internalSnapshotName,
+          state: In([SnapshotRunnerState.READY, SnapshotRunnerState.PULLING_SNAPSHOT]),
+        },
+      })
+      //  filter duplicate snapshot runner records
+      const snapshotRunnersDistinctRunnersIds = [
+        ...new Set(snapshotRunners.map((snapshotRunner) => snapshotRunner.runnerId)),
+      ]
+
+      const propagateLimit = Math.floor(runners.length / 3) - snapshotRunnersDistinctRunnersIds.length
+      const unallocatedRunners = runners.filter(
+        (runner) => !snapshotRunnersDistinctRunnersIds.some((snapshotRunnerId) => snapshotRunnerId === runner.id),
+      )
+      //  shuffle the runners to propagate to
+      unallocatedRunners.sort(() => Math.random() - 0.5)
+      //  limit the number of runners to propagate to
+      const runnersToPropagateTo = unallocatedRunners.slice(0, propagateLimit)
+
       const results = await Promise.allSettled(
-        runners.map(async (runner) => {
+        runnersToPropagateTo.map(async (runner) => {
           let snapshotRunner = await this.snapshotRunnerRepository.findOne({
             where: {
               snapshotRef: internalSnapshotName,
