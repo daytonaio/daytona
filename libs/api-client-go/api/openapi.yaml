@@ -6080,6 +6080,7 @@ components:
     PortPreviewUrl:
       example:
         url: https://123456-mysandbox.runner.com
+        legacyProxyUrl: https://3000-mysandbox.runner.com
         token: ul67qtv-jl6wb9z5o3eii-ljqt9qed6l
       properties:
         url:
@@ -6089,6 +6090,10 @@ components:
         token:
           description: Access token
           example: ul67qtv-jl6wb9z5o3eii-ljqt9qed6l
+          type: string
+        legacyProxyUrl:
+          description: Legacy preview url using runner domain
+          example: https://3000-mysandbox.runner.com
           type: string
       required:
         - token

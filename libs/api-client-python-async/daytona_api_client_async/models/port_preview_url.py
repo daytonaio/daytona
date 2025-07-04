@@ -19,7 +19,7 @@ import re  # noqa: F401
 import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictStr
-from typing import Any, ClassVar, Dict, List
+from typing import Any, ClassVar, Dict, List, Optional
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -29,8 +29,9 @@ class PortPreviewUrl(BaseModel):
     """ # noqa: E501
     url: StrictStr = Field(description="Preview url")
     token: StrictStr = Field(description="Access token")
+    legacy_proxy_url: Optional[StrictStr] = Field(default=None, description="Legacy preview url using runner domain", alias="legacyProxyUrl")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["url", "token"]
+    __properties: ClassVar[List[str]] = ["url", "token", "legacyProxyUrl"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -91,7 +92,8 @@ class PortPreviewUrl(BaseModel):
 
         _obj = cls.model_validate({
             "url": obj.get("url"),
-            "token": obj.get("token")
+            "token": obj.get("token"),
+            "legacyProxyUrl": obj.get("legacyProxyUrl")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():
