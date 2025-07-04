@@ -1,7 +1,8 @@
 ---
-title: 'Volume'
+title: "Volume"
 hideTitleOnPage: true
 ---
+
 
 ## VolumeService
 
@@ -21,6 +22,7 @@ new VolumeService(volumesApi: VolumesApi): VolumeService
 
 - `volumesApi` _VolumesApi_
 
+
 **Returns**:
 
 - `VolumeService`
@@ -39,6 +41,7 @@ Creates a new Volume with the specified name.
 
 - `name` _string_ - Name for the new Volume
 
+
 **Returns**:
 
 - `Promise<Volume>` - The newly created Volume
@@ -50,12 +53,12 @@ If the Volume cannot be created
 **Example:**
 
 ```ts
-const daytona = new Daytona()
-const volume = await daytona.volume.create('my-data-volume')
-console.log(`Created volume ${volume.name} with ID ${volume.id}`)
+const daytona = new Daytona();
+const volume = await daytona.volume.create("my-data-volume");
+console.log(`Created volume ${volume.name} with ID ${volume.id}`);
 ```
 
----
+***
 
 #### delete()
 
@@ -69,6 +72,7 @@ Deletes a Volume.
 
 - `volume` _Volume_ - Volume to delete
 
+
 **Returns**:
 
 - `Promise<void>`
@@ -80,13 +84,13 @@ If the Volume does not exist or cannot be deleted
 **Example:**
 
 ```ts
-const daytona = new Daytona()
-const volume = await daytona.volume.get('volume-name')
-await daytona.volume.delete(volume)
-console.log('Volume deleted successfully')
+const daytona = new Daytona();
+const volume = await daytona.volume.get("volume-name");
+await daytona.volume.delete(volume);
+console.log("Volume deleted successfully");
 ```
 
----
+***
 
 #### get()
 
@@ -101,6 +105,7 @@ Gets a Volume by its name.
 - `name` _string_ - Name of the Volume to retrieve
 - `create` _boolean = false_ - Whether to create the Volume if it does not exist
 
+
 **Returns**:
 
 - `Promise<Volume>` - The requested Volume
@@ -112,12 +117,12 @@ If the Volume does not exist or cannot be accessed
 **Example:**
 
 ```ts
-const daytona = new Daytona()
-const volume = await daytona.volume.get('volume-name', true)
-console.log(`Volume ${volume.name} is in state ${volume.state}`)
+const daytona = new Daytona();
+const volume = await daytona.volume.get("volume-name", true);
+console.log(`Volume ${volume.name} is in state ${volume.state}`);
 ```
 
----
+***
 
 #### list()
 
@@ -134,20 +139,21 @@ Lists all available Volumes.
 **Example:**
 
 ```ts
-const daytona = new Daytona()
-const volumes = await daytona.volume.list()
-console.log(`Found ${volumes.length} volumes`)
-volumes.forEach(vol => console.log(`${vol.name} (${vol.id})`))
+const daytona = new Daytona();
+const volumes = await daytona.volume.list();
+console.log(`Found ${volumes.length} volumes`);
+volumes.forEach(vol => console.log(`${vol.name} (${vol.id})`));
 ```
 
----
+***
+
 
 ## Volume
 
 ```ts
 type Volume = VolumeDto & {
-  __brand: 'Volume'
-}
+  __brand: "Volume";
+};
 ```
 
 Represents a Daytona Volume which is a shared storage volume for Sandboxes.
@@ -155,3 +161,4 @@ Represents a Daytona Volume which is a shared storage volume for Sandboxes.
 **Type declaration**:
 
 - `\_\_brand` _"Volume"_
+

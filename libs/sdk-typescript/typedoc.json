@@ -7,7 +7,7 @@
   "$schema": "https://typedoc-plugin-markdown.org/schema.json",
   "entryPoints": ["./src/*.ts", "./src/errors/*.ts", "./src/types/*.ts"],
   "exclude": ["src/index.ts"],
-  "out": "../../apps/docs/content/sdk-typescript",
+  "out": "../../apps/docs/src/content/docs/typescript-sdk",
   "excludePrivate": true,
   "excludeProtected": true,
   "excludeExternals": true,

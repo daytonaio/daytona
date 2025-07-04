@@ -1,7 +1,8 @@
 ---
-title: 'ObjectStorage'
+title: "ObjectStorage"
 hideTitleOnPage: true
 ---
+
 
 ## ObjectStorage
 
@@ -23,6 +24,7 @@ new ObjectStorage(config: ObjectStorageConfig): ObjectStorage
 
 - `config` _ObjectStorageConfig_
 
+
 **Returns**:
 
 - `ObjectStorage`
@@ -33,8 +35,8 @@ new ObjectStorage(config: ObjectStorageConfig): ObjectStorage
 
 ```ts
 upload(
-   path: string,
-   organizationId: string,
+   path: string, 
+   organizationId: string, 
 archiveBasePath: string): Promise<string>
 ```
 
@@ -46,11 +48,13 @@ Upload a file or directory to object storage.
 - `organizationId` _string_ - The organization ID to use for the upload.
 - `archiveBasePath` _string_ - The base path to use for the archive.
 
+
 **Returns**:
 
 - `Promise<string>` - The hash of the uploaded file or directory.
 
----
+***
+
 
 ## ObjectStorageConfig
 

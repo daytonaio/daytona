@@ -1,5 +1,5 @@
 ---
-title: 'Sandbox'
+title: "Sandbox"
 hideTitleOnPage: true
 ---
 
@@ -57,7 +57,7 @@ Initialize a new Sandbox instance.
 - `toolbox_api` _ToolboxApi_ - API client for toolbox operations.
 - `code_toolbox` _SandboxCodeToolbox_ - Language-specific toolbox implementation.
 
-#### Sandbox.refresh_data
+#### Sandbox.refresh\_data
 
 ```python
 def refresh_data() -> None
@@ -74,7 +74,7 @@ print(f"State: {sandbox.state}")
 print(f"Resources: {sandbox.cpu} CPU, {sandbox.memory} GiB RAM")
 ```
 
-#### Sandbox.get_user_root_dir
+#### Sandbox.get\_user\_root\_dir
 
 ```python
 @intercept_errors(message_prefix="Failed to get sandbox root directory: ")
@@ -86,6 +86,7 @@ Gets the root directory path for the logged in user inside the Sandbox.
 **Returns**:
 
 - `str` - The absolute path to the Sandbox root directory for the logged in user.
+  
 
 **Example**:
 
@@ -94,7 +95,7 @@ root_dir = sandbox.get_user_root_dir()
 print(f"Sandbox root: {root_dir}")
 ```
 
-#### Sandbox.create_lsp_server
+#### Sandbox.create\_lsp\_server
 
 ```python
 def create_lsp_server(language_id: LspLanguageId,
@@ -111,10 +112,12 @@ diagnostics, and more.
 - `language_id` _LspLanguageId_ - The language server type (e.g., LspLanguageId.PYTHON).
 - `path_to_project` _str_ - Path to the project root directory. Relative paths are resolved based on the user's
   root directory.
+  
 
 **Returns**:
 
 - `LspServer` - A new LSP server instance configured for the specified language.
+  
 
 **Example**:
 
@@ -122,7 +125,7 @@ diagnostics, and more.
 lsp = sandbox.create_lsp_server("python", "workspace/project")
 ```
 
-#### Sandbox.set_labels
+#### Sandbox.set\_labels
 
 ```python
 @intercept_errors(message_prefix="Failed to set labels: ")
@@ -136,10 +139,12 @@ Labels are key-value pairs that can be used to organize and identify Sandboxes.
 **Arguments**:
 
 - `labels` _Dict[str, str]_ - Dictionary of key-value pairs representing Sandbox labels.
+  
 
 **Returns**:
 
-Dict[str, str]: Dictionary containing the updated Sandbox labels.
+  Dict[str, str]: Dictionary containing the updated Sandbox labels.
+  
 
 **Example**:
 
@@ -167,10 +172,12 @@ Starts the Sandbox and waits for it to be ready.
 **Arguments**:
 
 - `timeout` _Optional[float]_ - Maximum time to wait in seconds. 0 means no timeout. Default is 60 seconds.
+  
 
 **Raises**:
 
 - `DaytonaError` - If timeout is negative. If sandbox fails to start or times out.
+  
 
 **Example**:
 
@@ -195,10 +202,12 @@ Stops the Sandbox and waits for it to be fully stopped.
 **Arguments**:
 
 - `timeout` _Optional[float]_ - Maximum time to wait in seconds. 0 means no timeout. Default is 60 seconds.
+  
 
 **Raises**:
 
 - `DaytonaError` - If timeout is negative; If sandbox fails to stop or times out
+  
 
 **Example**:
 
@@ -211,12 +220,18 @@ print("Sandbox stopped successfully")
 #### Sandbox.delete
 
 ```python
-def delete() -> None
+@intercept_errors(message_prefix="Failed to remove sandbox: ")
+def delete(timeout: Optional[float] = 60) -> None
 ```
 
 Deletes the Sandbox.
 
-#### Sandbox.wait_for_sandbox_start
+**Arguments**:
+
+- `timeout` _Optional[float]_ - Timeout (in seconds) for sandbox deletion. 0 means no timeout.
+  Default is 60 seconds.
+
+#### Sandbox.wait\_for\_sandbox\_start
 
 ```python
 @intercept_errors(
@@ -233,12 +248,13 @@ reaches the 'started' state, encounters an error or times out.
 **Arguments**:
 
 - `timeout` _Optional[float]_ - Maximum time to wait in seconds. 0 means no timeout. Default is 60 seconds.
+  
 
 **Raises**:
 
 - `DaytonaError` - If timeout is negative; If Sandbox fails to start or times out
 
-#### Sandbox.wait_for_sandbox_stop
+#### Sandbox.wait\_for\_sandbox\_stop
 
 ```python
 @intercept_errors(
@@ -256,12 +272,13 @@ for the Sandbox to stop.
 **Arguments**:
 
 - `timeout` _Optional[float]_ - Maximum time to wait in seconds. 0 means no timeout. Default is 60 seconds.
+  
 
 **Raises**:
 
 - `DaytonaError` - If timeout is negative. If Sandbox fails to stop or times out.
 
-#### Sandbox.set_autostop_interval
+#### Sandbox.set\_autostop\_interval
 
 ```python
 @intercept_errors(message_prefix="Failed to set auto-stop interval: ")
@@ -278,10 +295,12 @@ Interactions using Sandbox Previews are not included.
 
 - `interval` _int_ - Number of minutes of inactivity before auto-stopping.
   Set to 0 to disable auto-stop. Defaults to 15.
+  
 
 **Raises**:
 
 - `DaytonaError` - If interval is negative
+  
 
 **Example**:
 
@@ -292,7 +311,7 @@ sandbox.set_autostop_interval(60)
 sandbox.set_autostop_interval(0)
 ```
 
-#### Sandbox.set_auto_archive_interval
+#### Sandbox.set\_auto\_archive\_interval
 
 ```python
 @intercept_errors(message_prefix="Failed to set auto-archive interval: ")
@@ -307,10 +326,12 @@ The Sandbox will automatically archive after being continuously stopped for the 
 
 - `interval` _int_ - Number of minutes after which a continuously stopped Sandbox will be auto-archived.
   Set to 0 for the maximum interval. Default is 7 days.
+  
 
 **Raises**:
 
 - `DaytonaError` - If interval is negative
+  
 
 **Example**:
 
@@ -321,7 +342,7 @@ sandbox.set_autoarchive_interval(60)
 sandbox.set_autoarchive_interval(0)
 ```
 
-#### Sandbox.get_preview_link
+#### Sandbox.get\_preview\_link
 
 ```python
 @intercept_errors(message_prefix="Failed to get preview link: ")
@@ -335,11 +356,13 @@ to the URL.
 **Arguments**:
 
 - `port` _int_ - The port to open the preview link on.
+  
 
 **Returns**:
 
 - `PortPreviewUrl` - The response object for the preview link, which includes the `url`
   and the `token` (to access private sandboxes).
+  
 
 **Example**:
 
@@ -362,6 +385,7 @@ possible to keep sandboxes available for an extended period. The tradeoff betwee
 and stopped states is that starting an archived sandbox takes more time, depending on its size.
 Sandbox must be stopped before archiving.
 
+
 ## Resources
 
 ```python
@@ -377,6 +401,7 @@ Resources configuration for Sandbox.
 - `memory` _Optional[int]_ - Amount of memory in GiB to allocate.
 - `disk` _Optional[int]_ - Amount of disk space in GiB to allocate.
 - `gpu` _Optional[int]_ - Number of GPUs to allocate.
+  
 
 **Example**:
 
@@ -388,8 +413,9 @@ resources = Resources(
     gpu=1
 )
 params = CreateSandboxFromImageParams(
-    image=Image.debian_slim("3.12").pip_install(["numpy", "pandas"]),
+    image=Image.debian_slim("3.12"),
     language="python",
     resources=resources
 )
 ```
+

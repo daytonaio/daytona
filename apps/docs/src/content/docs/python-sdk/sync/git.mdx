@@ -1,5 +1,5 @@
 ---
-title: 'Git'
+title: "Git"
 hideTitleOnPage: true
 ---
 
@@ -64,6 +64,7 @@ running 'git add' on the command line.
 - `path` _str_ - Path to the Git repository root. Relative paths are resolved based on the user's
   root directory.
 - `files` _List[str]_ - List of file paths or directories to stage, relative to the repository root.
+  
 
 **Example**:
 
@@ -92,10 +93,12 @@ Lists branches in the repository.
 
 - `path` _str_ - Path to the Git repository root. Relative paths are resolved based on the user's
   root directory.
+  
 
 **Returns**:
 
 - `ListBranchResponse` - List of branches in the repository.
+  
 
 **Example**:
 
@@ -131,6 +134,7 @@ repository if credentials are provided.
   the repository will be left in a detached HEAD state at this commit.
 - `username` _Optional[str]_ - Git username for authentication.
 - `password` _Optional[str]_ - Git password or token for authentication.
+  
 
 **Example**:
 
@@ -176,6 +180,7 @@ changes using the add() method before committing.
 - `message` _str_ - Commit message describing the changes.
 - `author` _str_ - Name of the commit author.
 - `email` _str_ - Email address of the commit author.
+  
 
 **Example**:
 
@@ -209,6 +214,7 @@ username and password/token.
   root directory.
 - `username` _Optional[str]_ - Git username for authentication.
 - `password` _Optional[str]_ - Git password or token for authentication.
+  
 
 **Example**:
 
@@ -242,6 +248,7 @@ provide username and password/token.
   root directory.
 - `username` _Optional[str]_ - Git username for authentication.
 - `password` _Optional[str]_ - Git password or token for authentication.
+  
 
 **Example**:
 
@@ -270,6 +277,7 @@ Gets the current Git repository status.
 
 - `path` _str_ - Path to the Git repository root. Relative paths are resolved based on the user's
   root directory.
+  
 
 **Returns**:
 
@@ -279,6 +287,7 @@ Gets the current Git repository status.
   - ahead: Number of local commits not pushed to remote
   - behind: Number of remote commits not pulled locally
   - branch_published: Whether the branch has been published to the remote repository
+  
 
 **Example**:
 
@@ -288,6 +297,76 @@ print(f"On branch: {status.current_branch}")
 print(f"Commits ahead: {status.ahead}")
 print(f"Commits behind: {status.behind}")
 ```
+
+#### Git.checkout\_branch
+
+```python
+@intercept_errors(message_prefix="Failed to checkout branch: ")
+def checkout_branch(path: str, branch: str) -> None
+```
+
+Checkout branch in the repository.
+
+**Arguments**:
+
+- `path` _str_ - Path to the Git repository root. Relative paths are resolved based on the user's
+  root directory.
+- `branch` _str_ - Name of the branch to checkout
+  
+
+**Example**:
+
+```python
+# Checkout a branch
+sandbox.git.checkout_branch("workspace/repo", "feature-branch")
+```
+
+#### Git.create\_branch
+
+```python
+@intercept_errors(message_prefix="Failed to create branch: ")
+def create_branch(path: str, name: str) -> None
+```
+
+Create branch in the repository.
+
+**Arguments**:
+
+- `path` _str_ - Path to the Git repository root. Relative paths are resolved based on the user's
+  root directory.
+- `name` _str_ - Name of the new branch to create
+  
+
+**Example**:
+
+```python
+# Create a new branch
+sandbox.git.create_branch("workspace/repo", "new-feature")
+```
+
+#### Git.delete\_branch
+
+```python
+@intercept_errors(message_prefix="Failed to delete branch: ")
+def delete_branch(path: str, name: str) -> None
+```
+
+Delete branch in the repository.
+
+**Arguments**:
+
+- `path` _str_ - Path to the Git repository root. Relative paths are resolved based on the user's
+  root directory.
+- `name` _str_ - Name of the branch to delete
+  
+
+**Example**:
+
+```python
+# Delete a branch
+sandbox.git.delete_branch("workspace/repo", "old-feature")
+```
+
 
 ## GitCommitResponse
 
@@ -300,3 +379,4 @@ Response from the git commit.
 **Attributes**:
 
 - `sha` _str_ - The SHA of the commit
+

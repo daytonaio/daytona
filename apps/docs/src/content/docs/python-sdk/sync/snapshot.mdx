@@ -1,5 +1,5 @@
 ---
-title: 'Snapshot'
+title: "Snapshot"
 hideTitleOnPage: true
 ---
 
@@ -31,6 +31,7 @@ Represents a Daytona Snapshot which is a pre-configured sandbox.
 - `updated_at` _StrictStr_ - Timestamp when the Snapshot was last updated.
 - `last_used_at` _StrictStr_ - Timestamp when the Snapshot was last used.
 
+
 ## SnapshotService
 
 ```python
@@ -51,6 +52,7 @@ List all Snapshots.
 **Returns**:
 
 - `List[Snapshot]` - List of all Snapshots.
+  
 
 **Example**:
 
@@ -73,6 +75,7 @@ Delete a Snapshot.
 **Arguments**:
 
 - `snapshot` _Snapshot_ - Snapshot to delete.
+  
 
 **Example**:
 
@@ -95,10 +98,12 @@ Get a Snapshot by name.
 **Arguments**:
 
 - `name` _str_ - Name of the Snapshot to get.
+  
 
 **Returns**:
 
 - `Snapshot` - The Snapshot object.
+  
 
 **Example**:
 
@@ -138,7 +143,7 @@ daytona.snapshot.create(
 )
 ```
 
-#### SnapshotService.process_image_context
+#### SnapshotService.process\_image\_context
 
 ```python
 @staticmethod
@@ -172,3 +177,4 @@ Parameters for creating a new snapshot.
   it will be used to create a new image in Daytona.
 - `resources` _Optional[Resources]_ - Resources of the snapshot.
 - `entrypoint` _Optional[List[str]]_ - Entrypoint of the snapshot.
+
