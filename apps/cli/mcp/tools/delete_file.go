@@ -28,7 +28,7 @@ func GetDeleteFileTool() mcp.Tool {
 }
 
 func DeleteFile(ctx context.Context, request mcp.CallToolRequest, args DeleteFileArgs) (*mcp.CallToolResult, error) {
-	apiClient, err := apiclient.GetApiClient(nil, daytonaMCPHeaders)
+	apiClient, err := apiclient_cli.GetApiClient(nil, daytonaMCPHeaders)
 	if err != nil {
 		return &mcp.CallToolResult{IsError: true}, err
 	}
@@ -43,7 +43,7 @@ func DeleteFile(ctx context.Context, request mcp.CallToolRequest, args DeleteFil
 
 	// Execute delete command
 	execResponse, _, err := apiClient.ToolboxAPI.ExecuteCommand(ctx, *args.Id).
-		ExecuteRequest(*daytonaapiclient.NewExecuteRequest(fmt.Sprintf("rm -rf %s", *args.FilePath))).
+		ExecuteRequest(*apiclient.NewExecuteRequest(fmt.Sprintf("rm -rf %s", *args.FilePath))).
 		Execute()
 	if err != nil {
 		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("error deleting file: %v", err)

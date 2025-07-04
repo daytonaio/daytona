@@ -98,7 +98,7 @@ func (p *Proxy) getRunnerInfo(ctx context.Context, sandboxId string) (*RunnerInf
 		return p.runnerCache.Get(ctx, sandboxId)
 	}
 
-	runner, _, err := p.daytonaApiClient.RunnersAPI.GetRunnerBySandboxId(context.Background(), sandboxId).Execute()
+	runner, _, err := p.apiclient.RunnersAPI.GetRunnerBySandboxId(context.Background(), sandboxId).Execute()
 	if err != nil {
 		return nil, err
 	}
@@ -127,7 +127,7 @@ func (p *Proxy) getSandboxPublic(ctx context.Context, sandboxId string) (*bool, 
 	}
 
 	isPublic := false
-	_, resp, _ := p.daytonaApiClient.PreviewAPI.IsSandboxPublic(context.Background(), sandboxId).Execute()
+	_, resp, _ := p.apiclient.PreviewAPI.IsSandboxPublic(context.Background(), sandboxId).Execute()
 	if resp != nil && resp.StatusCode == http.StatusOK {
 		isPublic = true
 	}
@@ -151,7 +151,7 @@ func (p *Proxy) getSandboxAuthKeyValid(ctx context.Context, sandboxId string, au
 	}
 
 	isValid := false
-	_, resp, _ := p.daytonaApiClient.PreviewAPI.IsValidAuthToken(context.Background(), sandboxId, authKey).Execute()
+	_, resp, _ := p.apiclient.PreviewAPI.IsValidAuthToken(context.Background(), sandboxId, authKey).Execute()
 	if resp != nil && resp.StatusCode == http.StatusOK {
 		isValid = true
 	}

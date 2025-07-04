@@ -37,7 +37,7 @@ func GetExecuteCommandTool() mcp.Tool {
 }
 
 func ExecuteCommand(ctx context.Context, request mcp.CallToolRequest, args ExecuteCommandArgs) (*mcp.CallToolResult, error) {
-	apiClient, err := apiclient.GetApiClient(nil, daytonaMCPHeaders)
+	apiClient, err := apiclient_cli.GetApiClient(nil, daytonaMCPHeaders)
 	if err != nil {
 		return &mcp.CallToolResult{IsError: true}, err
 	}
@@ -61,7 +61,7 @@ func ExecuteCommand(ctx context.Context, request mcp.CallToolRequest, args Execu
 
 	// Execute the command
 	result, _, err := apiClient.ToolboxAPI.ExecuteCommand(ctx, *args.Id).
-		ExecuteRequest(*daytonaapiclient.NewExecuteRequest(command)).
+		ExecuteRequest(*apiclient.NewExecuteRequest(command)).
 		Execute()
 
 	if err != nil {

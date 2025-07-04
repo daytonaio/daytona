@@ -37,7 +37,7 @@ type Proxy struct {
 	config       *config.Config
 	secureCookie *securecookie.SecureCookie
 
-	daytonaApiClient         *apiclient.APIClient
+	apiclient                *apiclient.APIClient
 	runnerCache              cache.ICache[RunnerInfo]
 	sandboxPublicCache       cache.ICache[bool]
 	sandboxAuthKeyValidCache cache.ICache[bool]
@@ -59,9 +59,9 @@ func StartProxy(config *config.Config) error {
 
 	clientConfig.AddDefaultHeader("Authorization", "Bearer "+config.ProxyApiKey)
 
-	proxy.daytonaApiClient = apiclient.NewAPIClient(clientConfig)
+	proxy.apiclient = apiclient.NewAPIClient(clientConfig)
 
-	proxy.daytonaApiClient.GetConfig().HTTPClient = &http.Client{
+	proxy.apiclient.GetConfig().HTTPClient = &http.Client{
 		Transport: http.DefaultTransport,
 	}
 
