@@ -316,7 +316,10 @@ export class RunnerService {
     // Find all snapshot runners for this snapshot
     // Note: snapshotRef contains the internalName, not the snapshot ID
     const snapshotRunners = await this.snapshotRunnerRepository.find({
-      where: { snapshotRef: internalName },
+      where: {
+        snapshotRef: internalName,
+        state: Not(SnapshotRunnerState.ERROR),
+      },
     })
 
     this.logger.debug(`Found ${snapshotRunners.length} snapshot runners for snapshot ${snapshot.id}`)
