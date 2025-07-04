@@ -11,7 +11,7 @@ import (
 	"net/http"
 	"slices"
 
-	"github.com/daytonaio/daytona/daytonaapiclient"
+	apiclient "github.com/daytonaio/apiclient"
 	"github.com/daytonaio/proxy/cmd/proxy/config"
 	"github.com/daytonaio/proxy/pkg/cache"
 	"github.com/gin-contrib/cors"
@@ -37,7 +37,7 @@ type Proxy struct {
 	config       *config.Config
 	secureCookie *securecookie.SecureCookie
 
-	daytonaApiClient         *daytonaapiclient.APIClient
+	apiclient                *apiclient.APIClient
 	runnerCache              cache.ICache[RunnerInfo]
 	sandboxPublicCache       cache.ICache[bool]
 	sandboxAuthKeyValidCache cache.ICache[bool]
@@ -50,8 +50,8 @@ func StartProxy(config *config.Config) error {
 
 	proxy.secureCookie = securecookie.New([]byte(config.ProxyApiKey), nil)
 
-	clientConfig := daytonaapiclient.NewConfiguration()
-	clientConfig.Servers = daytonaapiclient.ServerConfigurations{
+	clientConfig := apiclient.NewConfiguration()
+	clientConfig.Servers = apiclient.ServerConfigurations{
 		{
 			URL: config.DaytonaApiUrl,
 		},
@@ -59,9 +59,9 @@ func StartProxy(config *config.Config) error {
 
 	clientConfig.AddDefaultHeader("Authorization", "Bearer "+config.ProxyApiKey)
 
-	proxy.daytonaApiClient = daytonaapiclient.NewAPIClient(clientConfig)
+	proxy.apiclient = apiclient.NewAPIClient(clientConfig)
 
-	proxy.daytonaApiClient.GetConfig().HTTPClient = &http.Client{
+	proxy.apiclient.GetConfig().HTTPClient = &http.Client{
 		Transport: http.DefaultTransport,
 	}
 

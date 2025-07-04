@@ -14,6 +14,8 @@ import (
 
 	common_errors "github.com/daytonaio/common-go/pkg/errors"
 	"github.com/gin-gonic/gin"
+
+	log "github.com/sirupsen/logrus"
 )
 
 func (p *Proxy) GetProxyTarget(ctx *gin.Context) (*url.URL, string, map[string]string, error) {
@@ -41,7 +43,7 @@ func (p *Proxy) GetProxyTarget(ctx *gin.Context) (*url.URL, string, map[string]s
 		return nil, "", nil, fmt.Errorf("failed to get sandbox public status: %w", err)
 	}
 
-	if !*isPublic || targetPort == "22222" {
+	if !*isPublic || targetPort == "22222" || targetPort == "6080" {
 		err, didRedirect := p.Authenticate(ctx, sandboxID)
 		if err != nil {
 			if !didRedirect {
@@ -96,7 +98,7 @@ func (p *Proxy) getRunnerInfo(ctx context.Context, sandboxId string) (*RunnerInf
 		return p.runnerCache.Get(ctx, sandboxId)
 	}
 
-	runner, _, err := p.daytonaApiClient.RunnersAPI.GetRunnerBySandboxId(context.Background(), sandboxId).Execute()
+	runner, _, err := p.apiclient.RunnersAPI.GetRunnerBySandboxId(context.Background(), sandboxId).Execute()
 	if err != nil {
 		return nil, err
 	}
@@ -106,7 +108,10 @@ func (p *Proxy) getRunnerInfo(ctx context.Context, sandboxId string) (*RunnerInf
 		ApiKey: runner.ApiKey,
 	}
 
-	p.runnerCache.Set(ctx, sandboxId, info, 1*time.Hour)
+	err = p.runnerCache.Set(ctx, sandboxId, info, 1*time.Hour)
+	if err != nil {
+		log.Errorf("Failed to set runner info in cache: %v", err)
+	}
 
 	return &info, nil
 }
@@ -122,12 +127,15 @@ func (p *Proxy) getSandboxPublic(ctx context.Context, sandboxId string) (*bool, 
 	}
 
 	isPublic := false
-	_, resp, _ := p.daytonaApiClient.PreviewAPI.IsSandboxPublic(context.Background(), sandboxId).Execute()
+	_, resp, _ := p.apiclient.PreviewAPI.IsSandboxPublic(context.Background(), sandboxId).Execute()
 	if resp != nil && resp.StatusCode == http.StatusOK {
 		isPublic = true
 	}
 
-	p.sandboxPublicCache.Set(ctx, sandboxId, isPublic, 2*time.Minute)
+	err = p.sandboxPublicCache.Set(ctx, sandboxId, isPublic, 2*time.Minute)
+	if err != nil {
+		log.Errorf("Failed to set sandbox public in cache: %v", err)
+	}
 
 	return &isPublic, nil
 }
@@ -143,12 +151,15 @@ func (p *Proxy) getSandboxAuthKeyValid(ctx context.Context, sandboxId string, au
 	}
 
 	isValid := false
-	_, resp, _ := p.daytonaApiClient.PreviewAPI.IsValidAuthToken(context.Background(), sandboxId, authKey).Execute()
+	_, resp, _ := p.apiclient.PreviewAPI.IsValidAuthToken(context.Background(), sandboxId, authKey).Execute()
 	if resp != nil && resp.StatusCode == http.StatusOK {
 		isValid = true
 	}
 
-	p.sandboxAuthKeyValidCache.Set(ctx, authKey, isValid, 2*time.Minute)
+	err = p.sandboxAuthKeyValidCache.Set(ctx, authKey, isValid, 2*time.Minute)
+	if err != nil {
+		log.Errorf("Failed to set sandbox auth key valid in cache: %v", err)
+	}
 
 	return &isValid, nil
 }

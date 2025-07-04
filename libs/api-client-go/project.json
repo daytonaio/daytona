@@ -21,7 +21,7 @@
     "generate:api-client": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "yarn run openapi-generator-cli generate --git-repo-id=daytona --git-user-id=daytonaio -i dist/apps/api/openapi.json -g go --additional-properties=packageName=daytonaapiclient,moduleVersion=$DEFAULT_PACKAGE_VERSION,generateInterfaces=true,enumClassPrefix=true,structPrefix=true -o libs/api-client-go"
+        "command": "yarn run openapi-generator-cli generate --git-repo-id=apiclient --git-user-id=daytonaio -i dist/apps/api/openapi.json -g go --additional-properties=packageName=apiclient,moduleVersion=$DEFAULT_PACKAGE_VERSION,generateInterfaces=true,enumClassPrefix=true,structPrefix=true -o libs/api-client-go"
       }
     },
     "tidy": {

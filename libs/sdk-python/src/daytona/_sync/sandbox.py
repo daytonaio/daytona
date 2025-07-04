@@ -18,6 +18,7 @@ from .._utils.path import prefix_relative_path
 from .._utils.timeout import with_timeout
 from ..common.errors import DaytonaError
 from ..common.protocols import SandboxCodeToolbox
+from .computer_use import ComputerUse
 from .filesystem import FileSystem
 from .git import Git
 from .lsp_server import LspLanguageId, LspServer
@@ -31,6 +32,7 @@ class Sandbox(SandboxDto):
         fs (FileSystem): File system operations interface.
         git (Git): Git operations interface.
         process (Process): Process execution interface.
+        computer_use (ComputerUse): Computer use operations interface for desktop automation.
         id (str): Unique identifier for the Sandbox.
         organization_id (str): Organization ID of the Sandbox.
         snapshot (str): Daytona snapshot used to create the Sandbox.
@@ -59,6 +61,7 @@ class Sandbox(SandboxDto):
     _fs: FileSystem = PrivateAttr()
     _git: Git = PrivateAttr()
     _process: Process = PrivateAttr()
+    _computer_use: ComputerUse = PrivateAttr()
 
     # TODO: Remove model_config once everything is migrated to pydantic # pylint: disable=fixme
     model_config = ConfigDict(arbitrary_types_allowed=True)
@@ -89,6 +92,7 @@ class Sandbox(SandboxDto):
         self._fs = FileSystem(self.id, toolbox_api, self.__get_root_dir)
         self._git = Git(self.id, toolbox_api, self.__get_root_dir)
         self._process = Process(self.id, code_toolbox, toolbox_api, self.__get_root_dir)
+        self._computer_use = ComputerUse(self.id, toolbox_api)
 
     @property
     def fs(self) -> FileSystem:
@@ -101,6 +105,10 @@ class Sandbox(SandboxDto):
     @property
     def process(self) -> Process:
         return self._process
+
+    @property
+    def computer_use(self) -> ComputerUse:
+        return self._computer_use
 
     def refresh_data(self) -> None:
         """Refreshes the Sandbox data from the API.

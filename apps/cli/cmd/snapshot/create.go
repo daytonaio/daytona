@@ -9,13 +9,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/daytonaio/daytona/cli/apiclient"
+	"github.com/daytonaio/apiclient"
+	apiclient_cli "github.com/daytonaio/daytona/cli/apiclient"
 	"github.com/daytonaio/daytona/cli/cmd/common"
 	"github.com/daytonaio/daytona/cli/config"
 	"github.com/daytonaio/daytona/cli/util"
 	view_common "github.com/daytonaio/daytona/cli/views/common"
 	views_util "github.com/daytonaio/daytona/cli/views/util"
-	"github.com/daytonaio/daytona/daytonaapiclient"
 	"github.com/spf13/cobra"
 )
 
@@ -35,12 +35,12 @@ var CreateCmd = &cobra.Command{
 			return fmt.Errorf("must specify either --dockerfile or --image")
 		}
 
-		apiClient, err := apiclient.GetApiClient(nil, nil)
+		apiClient, err := apiclient_cli.GetApiClient(nil, nil)
 		if err != nil {
 			return err
 		}
 
-		createSnapshot := daytonaapiclient.NewCreateSnapshot(snapshotName)
+		createSnapshot := apiclient.NewCreateSnapshot(snapshotName)
 
 		if cpuFlag != 0 {
 			createSnapshot.SetCpu(cpuFlag)
@@ -74,7 +74,7 @@ var CreateCmd = &cobra.Command{
 		// Send create request
 		snapshot, res, err := apiClient.SnapshotsAPI.CreateSnapshot(ctx).CreateSnapshot(*createSnapshot).Execute()
 		if err != nil {
-			return apiclient.HandleErrorResponse(res, err)
+			return apiclient_cli.HandleErrorResponse(res, err)
 		}
 
 		// If we're building from a Dockerfile, show build logs
@@ -101,7 +101,7 @@ var CreateCmd = &cobra.Command{
 				ResourceType:         common.ResourceTypeSnapshot,
 			})
 
-			err = common.AwaitSnapshotState(ctx, apiClient, snapshotName, daytonaapiclient.SNAPSHOTSTATE_PENDING)
+			err = common.AwaitSnapshotState(ctx, apiClient, snapshotName, apiclient.SNAPSHOTSTATE_PENDING)
 			if err != nil {
 				return err
 			}
@@ -112,7 +112,7 @@ var CreateCmd = &cobra.Command{
 		}
 
 		err = views_util.WithInlineSpinner("Waiting for the snapshot to be validated", func() error {
-			return common.AwaitSnapshotState(ctx, apiClient, snapshotName, daytonaapiclient.SNAPSHOTSTATE_ACTIVE)
+			return common.AwaitSnapshotState(ctx, apiClient, snapshotName, apiclient.SNAPSHOTSTATE_ACTIVE)
 		})
 		if err != nil {
 			return err

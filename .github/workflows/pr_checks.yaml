@@ -14,12 +14,27 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  go-work:
+    name: Go work
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.work
+          cache: false
+      - name: go work
+        run: |
+          go work sync
+          git diff --exit-code go.work || (echo "go.work is not up to date! Please run 'go work sync' and commit" && exit 1)
+          git diff --exit-code go.work.sum || (echo "go.work.sum is not up to date! Please run 'go work sync' and commit" && exit 1)
+
   golangci:
     name: Go lint
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        working-directory: [apps/daemon, apps/runner, apps/cli]
+        working-directory: [apps/daemon, apps/runner, apps/cli, apps/proxy]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
@@ -37,6 +52,28 @@ jobs:
           cd ${{ matrix.working-directory }}
           go fmt ./...
           git diff --exit-code '**/*.go' || (echo "Code is not formatted! Please run 'go fmt ./...' and commit" && exit 1)
+
+  lint-computer-use:
+    name: Go lint (Computer Use)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.work
+          cache: false
+      - name: format
+        run: |
+          sudo apt-get update && sudo apt-get install -y gcc libx11-dev libxtst-dev
+          cd libs/computer-use
+          go fmt ./...
+          git diff --exit-code '**/*.go' || (echo "Code is not formatted! Please run 'go fmt ./...' and commit" && exit 1)
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v4
+        with:
+          version: latest
+          working-directory: libs/computer-use
+          args: --timeout=5m ./...
 
   format-lint-api-clients:
     name: Format, lint and generate API clients
@@ -90,6 +127,7 @@ jobs:
       - name: Build all
         run: |
           python3 -m pip install poetry==2.1.3
+          sudo apt-get update && sudo apt-get install -y gcc libx11-dev libxtst-dev
           yarn
           yarn build
 

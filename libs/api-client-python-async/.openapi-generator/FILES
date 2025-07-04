@@ -26,6 +26,10 @@ daytona_api_client_async/models/command.py
 daytona_api_client_async/models/completion_context.py
 daytona_api_client_async/models/completion_item.py
 daytona_api_client_async/models/completion_list.py
+daytona_api_client_async/models/compressed_screenshot_response.py
+daytona_api_client_async/models/computer_use_start_response.py
+daytona_api_client_async/models/computer_use_status_response.py
+daytona_api_client_async/models/computer_use_stop_response.py
 daytona_api_client_async/models/create_api_key.py
 daytona_api_client_async/models/create_build_info.py
 daytona_api_client_async/models/create_docker_registry.py
@@ -41,6 +45,7 @@ daytona_api_client_async/models/create_snapshot.py
 daytona_api_client_async/models/create_user.py
 daytona_api_client_async/models/create_volume.py
 daytona_api_client_async/models/create_workspace.py
+daytona_api_client_async/models/display_info_response.py
 daytona_api_client_async/models/docker_registry.py
 daytona_api_client_async/models/execute_request.py
 daytona_api_client_async/models/execute_response.py
@@ -56,6 +61,9 @@ daytona_api_client_async/models/git_commit_response.py
 daytona_api_client_async/models/git_delete_branch_request.py
 daytona_api_client_async/models/git_repo_request.py
 daytona_api_client_async/models/git_status.py
+daytona_api_client_async/models/keyboard_hotkey_request.py
+daytona_api_client_async/models/keyboard_press_request.py
+daytona_api_client_async/models/keyboard_type_request.py
 daytona_api_client_async/models/list_branch_response.py
 daytona_api_client_async/models/lsp_completion_params.py
 daytona_api_client_async/models/lsp_document_request.py
@@ -63,6 +71,15 @@ daytona_api_client_async/models/lsp_location.py
 daytona_api_client_async/models/lsp_server_request.py
 daytona_api_client_async/models/lsp_symbol.py
 daytona_api_client_async/models/match.py
+daytona_api_client_async/models/mouse_click_request.py
+daytona_api_client_async/models/mouse_click_response.py
+daytona_api_client_async/models/mouse_drag_request.py
+daytona_api_client_async/models/mouse_drag_response.py
+daytona_api_client_async/models/mouse_move_request.py
+daytona_api_client_async/models/mouse_move_response.py
+daytona_api_client_async/models/mouse_position.py
+daytona_api_client_async/models/mouse_scroll_request.py
+daytona_api_client_async/models/mouse_scroll_response.py
 daytona_api_client_async/models/organization.py
 daytona_api_client_async/models/organization_invitation.py
 daytona_api_client_async/models/organization_role.py
@@ -71,8 +88,13 @@ daytona_api_client_async/models/organization_user.py
 daytona_api_client_async/models/paginated_snapshots_dto.py
 daytona_api_client_async/models/port_preview_url.py
 daytona_api_client_async/models/position.py
+daytona_api_client_async/models/process_errors_response.py
+daytona_api_client_async/models/process_logs_response.py
+daytona_api_client_async/models/process_restart_response.py
+daytona_api_client_async/models/process_status_response.py
 daytona_api_client_async/models/project_dir_response.py
 daytona_api_client_async/models/range.py
+daytona_api_client_async/models/region_screenshot_response.py
 daytona_api_client_async/models/registry_push_access_dto.py
 daytona_api_client_async/models/replace_request.py
 daytona_api_client_async/models/replace_result.py
@@ -87,6 +109,7 @@ daytona_api_client_async/models/sandbox_info.py
 daytona_api_client_async/models/sandbox_labels.py
 daytona_api_client_async/models/sandbox_state.py
 daytona_api_client_async/models/sandbox_volume.py
+daytona_api_client_async/models/screenshot_response.py
 daytona_api_client_async/models/search_files_response.py
 daytona_api_client_async/models/session.py
 daytona_api_client_async/models/session_execute_request.py
@@ -107,6 +130,7 @@ daytona_api_client_async/models/user.py
 daytona_api_client_async/models/user_public_key.py
 daytona_api_client_async/models/volume_dto.py
 daytona_api_client_async/models/volume_state.py
+daytona_api_client_async/models/windows_response.py
 daytona_api_client_async/models/workspace.py
 daytona_api_client_async/py.typed
 daytona_api_client_async/rest.py
