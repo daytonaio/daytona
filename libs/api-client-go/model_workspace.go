@@ -60,6 +60,8 @@ type Workspace struct {
 	AutoStopInterval *float32 `json:"autoStopInterval,omitempty"`
 	// Auto-archive interval in minutes
 	AutoArchiveInterval *float32 `json:"autoArchiveInterval,omitempty"`
+	// Auto-delete interval in minutes (negative value means disabled, 0 means delete immediately upon stopping)
+	AutoDeleteInterval *float32 `json:"autoDeleteInterval,omitempty"`
 	// The domain name of the runner
 	RunnerDomain *string `json:"runnerDomain,omitempty"`
 	// Array of volumes attached to the sandbox
@@ -640,6 +642,38 @@ func (o *Workspace) SetAutoArchiveInterval(v float32) {
 	o.AutoArchiveInterval = &v
 }
 
+// GetAutoDeleteInterval returns the AutoDeleteInterval field value if set, zero value otherwise.
+func (o *Workspace) GetAutoDeleteInterval() float32 {
+	if o == nil || IsNil(o.AutoDeleteInterval) {
+		var ret float32
+		return ret
+	}
+	return *o.AutoDeleteInterval
+}
+
+// GetAutoDeleteIntervalOk returns a tuple with the AutoDeleteInterval field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Workspace) GetAutoDeleteIntervalOk() (*float32, bool) {
+	if o == nil || IsNil(o.AutoDeleteInterval) {
+		return nil, false
+	}
+	return o.AutoDeleteInterval, true
+}
+
+// HasAutoDeleteInterval returns a boolean if a field has been set.
+func (o *Workspace) HasAutoDeleteInterval() bool {
+	if o != nil && !IsNil(o.AutoDeleteInterval) {
+		return true
+	}
+
+	return false
+}
+
+// SetAutoDeleteInterval gets a reference to the given float32 and assigns it to the AutoDeleteInterval field.
+func (o *Workspace) SetAutoDeleteInterval(v float32) {
+	o.AutoDeleteInterval = &v
+}
+
 // GetRunnerDomain returns the RunnerDomain field value if set, zero value otherwise.
 func (o *Workspace) GetRunnerDomain() string {
 	if o == nil || IsNil(o.RunnerDomain) {
@@ -1063,6 +1097,9 @@ func (o Workspace) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.AutoArchiveInterval) {
 		toSerialize["autoArchiveInterval"] = o.AutoArchiveInterval
+	}
+	if !IsNil(o.AutoDeleteInterval) {
+		toSerialize["autoDeleteInterval"] = o.AutoDeleteInterval
 	}
 	if !IsNil(o.RunnerDomain) {
 		toSerialize["runnerDomain"] = o.RunnerDomain

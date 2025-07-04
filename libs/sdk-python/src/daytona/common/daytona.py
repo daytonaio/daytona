@@ -105,6 +105,9 @@ class CreateSandboxBaseParams(BaseModel):
         auto_archive_interval (Optional[int]): Interval in minutes after which a continuously stopped Sandbox will
             automatically archive. Default is 7 days.
             0 means the maximum interval will be used.
+        auto_delete_interval (Optional[int]): Interval in minutes after which a continuously stopped Sandbox will
+            automatically be deleted. By default, auto-delete is disabled.
+            Negative value means disabled, 0 means delete immediately upon stopping.
     """
 
     language: Optional[CodeLanguage] = None
@@ -114,6 +117,7 @@ class CreateSandboxBaseParams(BaseModel):
     public: Optional[bool] = None
     auto_stop_interval: Optional[int] = None
     auto_archive_interval: Optional[int] = None
+    auto_delete_interval: Optional[int] = None
     volumes: Optional[List[VolumeMount]] = None
 
 

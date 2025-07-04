@@ -33,11 +33,16 @@ if [ -n "$DAYTONA_ENV_FILE" ]; then
     fi
 elif load_env_file "${SCRIPT_DIR}/../.env.local"; then
     : # Successfully loaded CLI .env
+elif load_env_file "${SCRIPT_DIR}/../.env"; then
+    : # Successfully loaded CLI .env
 elif load_env_file "${PROJECT_ROOT}/.env.local"; then
+    : # Successfully loaded root .env
+elif load_env_file "${PROJECT_ROOT}/.env"; then
     : # Successfully loaded root .env
 else
     echo "Note: No .env file found, using default values"
 fi
+
 
 # Set default values
 : "${DAYTONA_VERSION:=v0.0.0-dev}"

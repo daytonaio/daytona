@@ -219,7 +219,7 @@ export class SandboxController {
   @Throttle({ default: { limit: 100 } })
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.DELETE_SANDBOXES])
   @UseGuards(SandboxAccessGuard)
-  async removeSandbox(
+  async deleteSandbox(
     @Param('sandboxId') sandboxId: string,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     @Query('force') force?: boolean,
@@ -406,6 +406,35 @@ export class SandboxController {
     @Param('interval') interval: number,
   ): Promise<void> {
     await this.sandboxService.setAutoArchiveInterval(sandboxId, interval)
+  }
+
+  @Post(':sandboxId/autodelete/:interval')
+  @ApiOperation({
+    summary: 'Set sandbox auto-delete interval',
+    operationId: 'setAutoDeleteInterval',
+  })
+  @ApiParam({
+    name: 'sandboxId',
+    description: 'ID of the sandbox',
+    type: 'string',
+  })
+  @ApiParam({
+    name: 'interval',
+    description:
+      'Auto-delete interval in minutes (negative value means disabled, 0 means delete immediately upon stopping)',
+    type: 'number',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Auto-delete interval has been set',
+  })
+  @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
+  @UseGuards(SandboxAccessGuard)
+  async setAutoDeleteInterval(
+    @Param('sandboxId') sandboxId: string,
+    @Param('interval') interval: number,
+  ): Promise<void> {
+    await this.sandboxService.setAutoDeleteInterval(sandboxId, interval)
   }
 
   @Post(':sandboxId/archive')

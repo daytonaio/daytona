@@ -6,7 +6,7 @@
 import { Injectable, Logger } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Cron, CronExpression } from '@nestjs/schedule'
-import { In, Not, Raw, Repository } from 'typeorm'
+import { In, MoreThanOrEqual, Not, Raw, Repository } from 'typeorm'
 import { Sandbox } from '../entities/sandbox.entity'
 import { SandboxState } from '../enums/sandbox-state.enum'
 import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
@@ -65,7 +65,6 @@ export class SandboxManager {
   async autostopCheck(): Promise<void> {
     //  lock the sync to only run one instance at a time
     //  keep the worker selected for 1 minute
-
     if (!(await this.redisLockProvider.lock('auto-stop-check-worker-selected', 60))) {
       return
     }
@@ -77,7 +76,7 @@ export class SandboxManager {
     // Process all runners in parallel
     await Promise.all(
       readyRunners.map(async (runner) => {
-        const sandboxs = await this.sandboxRepository.find({
+        const sandboxes = await this.sandboxRepository.find({
           where: {
             runnerId: runner.id,
             organizationId: Not(SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION),
@@ -95,7 +94,7 @@ export class SandboxManager {
         })
 
         await Promise.all(
-          sandboxs.map(async (sandbox) => {
+          sandboxes.map(async (sandbox) => {
             const lockKey = SYNC_INSTANCE_STATE_LOCK_KEY + sandbox.id
             const acquired = await this.redisLockProvider.lock(lockKey, 30)
             if (!acquired) {
@@ -120,12 +119,10 @@ export class SandboxManager {
   @Cron(CronExpression.EVERY_MINUTE, { name: 'auto-archive-check' })
   async autoArchiveCheck(): Promise<void> {
     //  lock the sync to only run one instance at a time
-    const autoArchiveCheckWorkerSelected = await this.redis.get('auto-archive-check-worker-selected')
-    if (autoArchiveCheckWorkerSelected) {
+    //  keep the worker selected for 1 minute
+    if (!(await this.redisLockProvider.lock('auto-archive-check-worker-selected', 60))) {
       return
     }
-    //  keep the worker selected for 1 minute
-    await this.redis.setex('auto-archive-check-worker-selected', 60, '1')
 
     // Get all ready runners
     const allRunners = await this.runnerService.findAll()
@@ -134,7 +131,7 @@ export class SandboxManager {
     // Process all runners in parallel
     await Promise.all(
       readyRunners.map(async (runner) => {
-        const sandboxs = await this.sandboxRepository.find({
+        const sandboxes = await this.sandboxRepository.find({
           where: {
             runnerId: runner.id,
             organizationId: Not(SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION),
@@ -146,13 +143,13 @@ export class SandboxManager {
           order: {
             lastBackupAt: 'ASC',
           },
-          //  max 3 sandboxs can be archived at the same time on the same runner
+          //  max 3 sandboxes can be archived at the same time on the same runner
           //  this is to prevent the runner from being overloaded
           take: 3,
         })
 
         await Promise.all(
-          sandboxs.map(async (sandbox) => {
+          sandboxes.map(async (sandbox) => {
             const lockKey = SYNC_INSTANCE_STATE_LOCK_KEY + sandbox.id
             const acquired = await this.redisLockProvider.lock(lockKey, 30)
             if (!acquired) {
@@ -174,6 +171,61 @@ export class SandboxManager {
     )
   }
 
+  @Cron(CronExpression.EVERY_MINUTE, { name: 'auto-delete-check' })
+  async autoDeleteCheck(): Promise<void> {
+    //  lock the sync to only run one instance at a time
+    //  keep the worker selected for 1 minute
+    if (!(await this.redisLockProvider.lock('auto-delete-check-worker-selected', 60))) {
+      return
+    }
+
+    // Get all ready runners
+    const allRunners = await this.runnerService.findAll()
+    const readyRunners = allRunners.filter((runner) => runner.state === RunnerState.READY)
+
+    // Process all runners in parallel
+    await Promise.all(
+      readyRunners.map(async (runner) => {
+        const sandboxes = await this.sandboxRepository.find({
+          where: {
+            runnerId: runner.id,
+            organizationId: Not(SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION),
+            state: SandboxState.STOPPED,
+            desiredState: SandboxDesiredState.STOPPED,
+            pending: Not(true),
+            autoDeleteInterval: MoreThanOrEqual(0),
+            lastActivityAt: Raw((alias) => `${alias} < NOW() - INTERVAL '1 minute' * "autoDeleteInterval"`),
+          },
+          order: {
+            lastActivityAt: 'ASC',
+          },
+          //  todo: increase this number when auto-delete is stable
+          take: 10,
+        })
+
+        await Promise.all(
+          sandboxes.map(async (sandbox) => {
+            const lockKey = SYNC_INSTANCE_STATE_LOCK_KEY + sandbox.id
+            const acquired = await this.redisLockProvider.lock(lockKey, 30)
+            if (!acquired) {
+              return
+            }
+
+            try {
+              sandbox.pending = true
+              sandbox.desiredState = SandboxDesiredState.DESTROYED
+              await this.sandboxRepository.save(sandbox)
+              await this.redisLockProvider.unlock(lockKey)
+              this.syncInstanceState(sandbox.id)
+            } catch (error) {
+              this.logger.error(`Error processing auto-delete state for sandbox ${sandbox.id}:`, fromAxiosError(error))
+            }
+          }),
+        )
+      }),
+    )
+  }
+
   @Cron(CronExpression.EVERY_10_SECONDS, { name: 'sync-states' })
   @OtelSpan()
   async syncStates(): Promise<void> {
@@ -182,7 +234,7 @@ export class SandboxManager {
       return
     }
 
-    const sandboxs = await this.sandboxRepository.find({
+    const sandboxes = await this.sandboxRepository.find({
       where: {
         state: Not(In([SandboxState.DESTROYED, SandboxState.ERROR, SandboxState.BUILD_FAILED])),
         desiredState: Raw(
@@ -197,7 +249,7 @@ export class SandboxManager {
     })
 
     await Promise.all(
-      sandboxs.map(async (sandbox) => {
+      sandboxes.map(async (sandbox) => {
         this.syncInstanceState(sandbox.id)
       }),
     )
@@ -219,7 +271,7 @@ export class SandboxManager {
       .having('COUNT(*) >= 3')
       .getRawMany()
 
-    const sandboxs = await this.sandboxRepository.find({
+    const sandboxes = await this.sandboxRepository.find({
       where: [
         {
           state: SandboxState.ARCHIVING,
@@ -240,7 +292,7 @@ export class SandboxManager {
     })
 
     await Promise.all(
-      sandboxs.map(async (sandbox) => {
+      sandboxes.map(async (sandbox) => {
         this.syncInstanceState(sandbox.id)
       }),
     )
@@ -430,7 +482,7 @@ export class SandboxManager {
 
     //  if the sandbox is already in progress, continue
     if (!inProgressOnRunner.find((s) => s.id === sandbox.id)) {
-      //  max 3 sandboxs can be archived at the same time on the same runner
+      //  max 3 sandboxes can be archived at the same time on the same runner
       //  this is to prevent the runner from being overloaded
       if (inProgressOnRunner.length > 2) {
         await this.redisLockProvider.unlock(lockKey)
@@ -853,7 +905,7 @@ export class SandboxManager {
           })
           const lessUsedRunners = availableRunners.filter((runner) => runner.id !== sandbox.runnerId)
 
-          //  temp workaround to move sandboxs to less used runner
+          //  temp workaround to move sandboxes to less used runner
           if (lessUsedRunners.length > 0) {
             await this.sandboxRepository.update(sandbox.id, {
               runnerId: null,
