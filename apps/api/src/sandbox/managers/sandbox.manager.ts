@@ -467,8 +467,8 @@ export class SandboxManager {
           return DONT_SYNC_AGAIN
         }
 
-        // Check for timeout - if more than 30 minutes since last activity
-        const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000)
+        // Check for timeout - if more than 120 minutes since last activity
+        const thirtyMinutesAgo = new Date(Date.now() - 120 * 60 * 1000)
         if (sandbox.lastActivityAt < thirtyMinutesAgo) {
           await this.updateSandboxState(sandbox.id, SandboxState.ERROR, undefined, 'Archiving operation timed out')
           return DONT_SYNC_AGAIN
