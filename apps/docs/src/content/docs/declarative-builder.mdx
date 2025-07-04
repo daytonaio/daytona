@@ -1,0 +1,242 @@
+---
+title: Declarative Builder
+---
+
+import { TabItem, Tabs } from '@astrojs/starlight/components'
+
+Daytona's declarative builder provides a powerful, code-first approach to defining dependencies for Sandboxes. Instead of importing images from a container registry, you can programmatically define them using the SDK.
+
+## Overview
+
+The declarative builder system supports two primary workflows:
+
+1. **Dynamic Images**: Build images with varying dependencies _on demand_ when creating Sandboxes
+2. **Pre-built Snapshots**: Create and register _ready-to-use_ Snapshots that can be shared across multiple Sandboxes
+
+It provides the following capabilities. For a complete API reference and method signatures, check the [Python](/docs/python-sdk/common/image) and [TypeScript](/docs/typescript-sdk/image) SDK references.
+
+### Base Image Selection
+
+- **Debian-based environments** with Python and essential preinstalled build tools
+- **Custom base images** from any Docker registry or existing container image
+- **Dockerfile integration** to import and enhance existing Dockerfiles
+
+### Package Management
+
+- **Python package installation** with support for `pip`, `requirements.txt`, and `pyproject.toml`
+- **Advanced pip options** including custom indexes, find-links, and optional dependencies
+
+### File System Operations
+
+- **File copying** from the local development environment to the image
+- **Directory copying** for bulk file transfers and project setup
+- **Working directory configuration** to set the default execution context
+
+### Environment Configuration
+
+- **Environment variables** for application configuration and secrets
+- **Shell command execution** during the image build process
+- **Container runtime settings** including an entrypoint and default commands
+
+For detailed method signatures and usage examples, refer to the [Python](/docs/python-sdk/common/image) and [TypeScript](/docs/typescript-sdk/image) SDK references.
+
+## Dynamic Image Building
+
+Create images on-the-fly when creating Sandboxes. This is useful when you want to create a new Sandbox with specific dependencies that are not part of any existing image.
+
+You can either define an entirely new image or append some specific dependencies to an existing one - e.g. a `pip` package or an `apt-get install` command.
+This eliminates the need to use your own compute for the build process and you can instead offload it to Daytona's infrastructure.
+It doesn't require registering and validating a separate Snapshot for each version. Instead, it allows you to iterate on the dependency list quickly or to have slightly different versions for tens or hundreds of similar usecases/setups.
+
+<Tabs>
+<TabItem label="Python" icon="seti:python">
+```python
+# Define the dynamic image
+dynamic_image = (
+    Image.debian_slim("3.12")
+    .pip_install(["pytest", "pytest-cov", "mypy", "ruff", "black", "gunicorn"])
+    .run_commands("apt-get update && apt-get install -y git curl", "mkdir -p /home/daytona/project")
+    .workdir("/home/daytona/project")
+    .env({"ENV_VAR": "My Environment Variable"})
+    .add_local_file("file_example.txt", "/home/daytona/project/file_example.txt")
+)
+
+# Create a new Sandbox with the dynamic image and stream the build logs
+
+sandbox = daytona.create(
+CreateSandboxFromImageParams(
+image=dynamic_image,
+),
+timeout=0,
+on_snapshot_create_logs=print,
+)
+
+```
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+```typescript
+// Define the dynamic image
+const dynamicImage = Image.debianSlim('3.13')
+    .pipInstall(['pytest', 'pytest-cov', 'black', 'isort', 'mypy', 'ruff'])
+    .runCommands('apt-get update && apt-get install -y git', 'mkdir -p /home/daytona/project')
+    .workdir('/home/daytona/project')
+    .env({
+      NODE_ENV: 'development',
+    })
+    .addLocalFile('file_example.txt', '/home/daytona/project/file_example.txt')
+
+// Create a new Sandbox with the dynamic image and stream the build logs
+const sandbox = await daytona.create(
+  {
+    image: dynamicImage,
+  },
+  {
+    timeout: 0,
+    onSnapshotCreateLogs: console.log,
+  }
+)
+```
+
+</TabItem>
+</Tabs>
+
+:::tip
+Once you've run the Sandbox creation from a dynamic image a single time, the image will get cached for the next 24 hours and any subsequent Sandbox creation that lands on the same Runner will be almost instantaneous.
+
+This means you can use the same script every time and Daytona will take of caching the image properly.
+:::
+
+## Creating Pre-built Snapshots
+
+If you want to prepare a new Daytona Snapshot with specific dependencies and then use it instantly across multiple Sandboxes whenever necessary, you can create a pre-built Snapshot.
+
+This Snapshot will stay visible in the Daytona dashboard and be permanently cached, ensuring that rebuilding it is not needed.
+
+<Tabs>
+<TabItem label="Python" icon="seti:python">
+```python
+# Generate a unique name for the Snapshot
+snapshot_name = f"python-example:{int(time.time())}"
+
+# Create a local file with some data to add to the image
+
+with open("file_example.txt", "w") as f:
+f.write("Hello, World!")
+
+# Create a Python image with common data science packages
+
+image = (
+Image.debian_slim("3.12")
+.pip_install(["numpy", "pandas", "matplotlib", "scipy", "scikit-learn", "jupyter"])
+.run_commands(
+"apt-get update && apt-get install -y git",
+"groupadd -r daytona && useradd -r -g daytona -m daytona",
+"mkdir -p /home/daytona/workspace",
+)
+.dockerfile_commands(["USER daytona"])
+.workdir("/home/daytona/workspace")
+.env({"MY_ENV_VAR": "My Environment Variable"})
+.add_local_file("file_example.txt", "/home/daytona/workspace/file_example.txt")
+)
+
+# Create the Snapshot and stream the build logs
+
+print(f"=== Creating Snapshot: {snapshot_name} ===")
+daytona.snapshot.create(
+CreateSnapshotParams(
+name=snapshot_name,
+image=image,
+resources=Resources(
+cpu=1,
+memory=1,
+disk=3,
+),
+),
+on_logs=print,
+)
+
+# Create a new Sandbox using the pre-built Snapshot
+
+sandbox = daytona.create(
+CreateSandboxFromSnapshotParams(
+snapshot=snapshot_name
+)
+)
+
+```
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+```typescript
+// Generate a unique name for the image
+const snapshotName = `node-example:${Date.now()}`
+console.log(`Creating Snapshot with name: ${snapshotName}`)
+
+// Create a local file with some data to add to the Snapshot
+const localFilePath = 'file_example.txt'
+const localFileContent = 'Hello, World!'
+fs.writeFileSync(localFilePath, localFileContent)
+
+// Create a Python image with common data science packages
+const image = Image.debianSlim('3.12')
+    .pipInstall(['numpy', 'pandas', 'matplotlib', 'scipy', 'scikit-learn'])
+    .runCommands('apt-get update && apt-get install -y git', 'mkdir -p /home/daytona/workspace')
+    .dockerfileCommands(['USER daytona'])
+    .workdir('/home/daytona/workspace')
+    .env({
+        MY_ENV_VAR: 'My Environment Variable',
+    })
+    .addLocalFile(localFilePath, '/home/daytona/workspace/file_example.txt')
+
+// Create the Snapshot and stream the build logs
+console.log(`=== Creating Snapshot: ${snapshotName} ===`)
+await daytona.snapshot.create(
+    {
+      name: snapshotName,
+      image,
+      resources: {
+        cpu: 1,
+        memory: 1,
+        disk: 3,
+      },
+    },
+    {
+      onLogs: console.log,
+    },
+  )
+
+// Create a new Sandbox using the pre-built Snapshot
+const sandbox = await daytona.create({
+    snapshot: snapshotName,
+})
+```
+
+</TabItem>
+</Tabs>
+
+## Using an Existing Dockerfile
+
+If you have an existing Dockerfile that you want to use as the base for your image, you can import it in the following way:
+
+<Tabs>
+  <TabItem label="Python" icon="seti:python">
+    ```python image =
+    Image.from_dockerfile("app/Dockerfile").pip_install(["numpy"])
+    ```
+  </TabItem>
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    const image =
+    Image.fromDockerfile("app/Dockerfile").pipInstall(['numpy'])
+    ```
+  </TabItem>
+</Tabs>
+
+## Best Practices
+
+1. **Layer Optimization**: Group related operations to minimize Docker layers
+2. **Cache Utilization**: Identical build commands and context will be cached and subsequent builds will be almost instant
+3. **Security**: Create non-root users for application workloads
+4. **Resource Efficiency**: Use slim base images when appropriate
+5. **Context Minimization**: Only include necessary files in the build context
+
+The declarative builder streamlines the development workflow by providing a programmatic, maintainable approach to container image creation while preserving the full power and flexibility of Docker.

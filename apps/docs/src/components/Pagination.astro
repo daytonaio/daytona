@@ -1,0 +1,92 @@
+---
+import arrowRight from '@assets/icons/arrow-right.svg?raw'
+import arrowLeft from '@assets/icons/arrow-left.svg?raw'
+import { getPagination } from '../utils/navigation.js'
+import { sidebarConfig } from '../content/config'
+
+const { dir, labels } = Astro.props
+const isRtl = dir === 'rtl'
+const { prev, next } = getPagination(sidebarConfig, Astro.url.pathname)
+---
+
+<div class="pagination-links" dir={dir}>
+  {
+    prev && (
+      <a href={prev.href} rel="prev">
+        <Fragment set:html={isRtl ? arrowRight : arrowLeft} />
+        <div class="pagination-links__container">
+          <span class="link-description">{labels['page.previousLink']}</span>
+          <span class="link-title">{prev.label}</span>
+        </div>
+      </a>
+    )
+  }
+  {
+    next && (
+      <a href={next.href} rel="next">
+        <Fragment set:html={isRtl ? arrowLeft : arrowRight} />
+        <div class="pagination-links__container">
+          <span class="link-description">{labels['page.nextLink']}</span>
+          <span class="link-title">{next.label}</span>
+        </div>
+      </a>
+    )
+  }
+</div>
+
+<style>
+  .pagination-links {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(18rem, 100%), 1fr));
+    gap: 1rem;
+  }
+
+  a {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 1rem;
+    width: 100%;
+    flex-basis: calc(50% - 0.5rem);
+    flex-grow: 1;
+    border: 1px solid var(--border-extra);
+    border-radius: 0.1875rem;
+    padding: 1rem;
+    text-decoration: none;
+    overflow-wrap: anywhere;
+  }
+  [rel='next'] {
+    justify-content: end;
+    text-align: end;
+    flex-direction: row-reverse;
+  }
+  a:hover {
+    opacity: 0.6;
+  }
+
+  .link-title {
+    font-family: 'Inter', sans-serif;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.6;
+    letter-spacing: -0.01rem;
+    color: var(--primary-text-color);
+    text-transform: initial;
+  }
+
+  svg {
+    flex-shrink: 0;
+  }
+  .pagination-links__container {
+    display: flex;
+    flex-direction: column;
+  }
+  .link-description {
+    font-family: 'Berkeley Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--secondary-text-color);
+    text-transform: uppercase;
+    line-height: 1;
+    letter-spacing: -0.0075rem;
+  }
+</style>

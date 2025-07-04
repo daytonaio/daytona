@@ -1,0 +1,39 @@
+---
+import editIcon from '@assets/icons/edit.svg?raw'
+
+const { editUrl, labels } = Astro.props
+---
+
+{
+  editUrl && (
+    <a href={editUrl} class="edit-link">
+      <Fragment set:html={editIcon} />
+      {labels['page.editLink']}
+    </a>
+  )
+}
+
+<style>
+  .edit-link {
+    display: flex;
+    gap: 8px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    font-size: 0.75rem;
+    line-height: 1.4;
+    letter-spacing: -0.02em;
+    color: var(--primary-text-color);
+    > svg {
+      width: 1rem;
+      height: 1rem;
+
+      > path {
+        fill: var(--primary-text-color);
+      }
+    }
+    &:hover {
+      transition: 0.6s opacity;
+      opacity: 0.6;
+    }
+  }
+</style>

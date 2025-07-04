@@ -1,0 +1,180 @@
+---
+title: "Snapshot"
+hideTitleOnPage: true
+---
+
+## Snapshot
+
+```python
+class Snapshot(SnapshotDto)
+```
+
+Represents a Daytona Snapshot which is a pre-configured sandbox.
+
+**Attributes**:
+
+- `id` _StrictStr_ - Unique identifier for the Snapshot.
+- `organization_id` _Optional[StrictStr]_ - Organization ID of the Snapshot.
+- `general` _Optional[bool]_ - Whether the Snapshot is general.
+- `name` _StrictStr_ - Name of the Snapshot.
+- `image_name` _StrictStr_ - Name of the Image of the Snapshot.
+- `enabled` _StrictBool_ - Whether the Snapshot is enabled.
+- `state` _StrictStr_ - State of the Snapshot.
+- `size` _Optional[Union[StrictFloat, StrictInt]]_ - Size of the Snapshot.
+- `entrypoint` _Optional[List[str]]_ - Entrypoint of the Snapshot.
+- `cpu` _Union[StrictFloat, StrictInt]_ - CPU of the Snapshot.
+- `gpu` _Union[StrictFloat, StrictInt]_ - GPU of the Snapshot.
+- `mem` _Union[StrictFloat, StrictInt]_ - Memory of the Snapshot in GiB.
+- `disk` _Union[StrictFloat, StrictInt]_ - Disk of the Snapshot in GiB.
+- `error_reason` _Optional[StrictStr]_ - Error reason of the Snapshot.
+- `created_at` _StrictStr_ - Timestamp when the Snapshot was created.
+- `updated_at` _StrictStr_ - Timestamp when the Snapshot was last updated.
+- `last_used_at` _StrictStr_ - Timestamp when the Snapshot was last used.
+
+
+## SnapshotService
+
+```python
+class SnapshotService()
+```
+
+Service for managing Daytona Snapshots. Can be used to list, get, create and delete Snapshots.
+
+#### SnapshotService.list
+
+```python
+@intercept_errors(message_prefix="Failed to list snapshots: ")
+def list() -> List[Snapshot]
+```
+
+List all Snapshots.
+
+**Returns**:
+
+- `List[Snapshot]` - List of all Snapshots.
+  
+
+**Example**:
+
+```python
+daytona = Daytona()
+snapshots = daytona.snapshot.list()
+for snapshot in snapshots:
+    print(f"{snapshot.name} ({snapshot.image_name})")
+```
+
+#### SnapshotService.delete
+
+```python
+@intercept_errors(message_prefix="Failed to delete snapshot: ")
+def delete(snapshot: Snapshot) -> None
+```
+
+Delete a Snapshot.
+
+**Arguments**:
+
+- `snapshot` _Snapshot_ - Snapshot to delete.
+  
+
+**Example**:
+
+```python
+daytona = Daytona()
+snapshot = daytona.snapshot.get("test-snapshot")
+daytona.snapshot.delete(snapshot)
+print("Snapshot deleted")
+```
+
+#### SnapshotService.get
+
+```python
+@intercept_errors(message_prefix="Failed to get snapshot: ")
+def get(name: str) -> Snapshot
+```
+
+Get a Snapshot by name.
+
+**Arguments**:
+
+- `name` _str_ - Name of the Snapshot to get.
+  
+
+**Returns**:
+
+- `Snapshot` - The Snapshot object.
+  
+
+**Example**:
+
+```python
+daytona = Daytona()
+snapshot = daytona.snapshot.get("test-snapshot-name")
+print(f"{snapshot.name} ({snapshot.image_name})")
+```
+
+#### SnapshotService.create
+
+```python
+@intercept_errors(message_prefix="Failed to create snapshot: ")
+@with_timeout(error_message=lambda self, timeout: (
+    f"Failed to create snapshot within {timeout} seconds timeout period."))
+def create(params: CreateSnapshotParams,
+           *,
+           on_logs: Callable[[str], None] = None,
+           timeout: Optional[float] = 0) -> Snapshot
+```
+
+Creates and registers a new snapshot from the given Image definition.
+
+**Arguments**:
+
+- `params` _CreateSnapshotParams_ - Parameters for snapshot creation.
+- `on_logs` _Callable[[str], None]_ - This callback function handles snapshot creation logs.
+- `timeout` _Optional[float]_ - Default is no timeout. Timeout in seconds (0 means no timeout).
+
+**Example**:
+
+```python
+image = Image.debianSlim('3.12').pipInstall('numpy')
+daytona.snapshot.create(
+    CreateSnapshotParams(name='my-snapshot', image=image),
+    on_logs=lambda chunk: print(chunk, end=""),
+)
+```
+
+#### SnapshotService.process\_image\_context
+
+```python
+@staticmethod
+def process_image_context(object_storage_api: ObjectStorageApi,
+                          image: Image) -> List[str]
+```
+
+Processes the image context by uploading it to object storage.
+
+**Arguments**:
+
+- `image` _Image_ - The Image instance.
+
+**Returns**:
+
+- `List[str]` - List of context hashes stored in object storage.
+
+## CreateSnapshotParams
+
+```python
+class CreateSnapshotParams(BaseModel)
+```
+
+Parameters for creating a new snapshot.
+
+**Attributes**:
+
+- `name` _Optional[str]_ - Name of the snapshot.
+- `image` _Union[str, Image]_ - Image of the snapshot. If a string is provided,
+  it should be available on some registry. If an Image instance is provided,
+  it will be used to create a new image in Daytona.
+- `resources` _Optional[Resources]_ - Resources of the snapshot.
+- `entrypoint` _Optional[List[str]]_ - Entrypoint of the snapshot.
+

@@ -1,0 +1,68 @@
+---
+import { SideNavLinks } from './menu/SideNavLinks'
+import daytonaLogo from '@assets/icons/daytona-logo.svg?raw'
+import daytonaLogoIcon from '@assets/icons/logo-icon.svg?raw'
+import documentationIcon from '@assets/icons/documentation-icon.svg?raw'
+import searchIcon from '@assets/icons/search.svg?raw'
+import Version from '@components/Version.astro'
+import Search from '@components/Search'
+
+import '../styles/components/search.scss'
+
+const algoliaEnabled =
+  import.meta.env.PUBLIC_ALGOLIA_APP_ID &&
+  import.meta.env.PUBLIC_ALGOLIA_API_KEY
+---
+
+<header class="navbar">
+  <nav class="desktop-only">
+    <div class="logo-divider">
+      <a
+        href="https://www.daytona.io/"
+        aria-label="Daytona"
+        class="daytona-logo"
+      >
+        <Fragment set:html={daytonaLogo} />
+      </a>
+    </div>
+    <div class="logo-divider">
+      <a href={import.meta.env.BASE_URL} class="dotfiles-logo"
+        ><Fragment set:html={documentationIcon} />Documentation
+      </a>
+    </div>
+    <div class="nav__items_side_menu">
+      <a href={import.meta.env.BASE_URL} class="dotfiles-logo">v<Version /> </a>
+      {
+        algoliaEnabled && (
+          <p id="search-icon" class="search-click">
+            <Fragment set:html={searchIcon} />
+          </p>
+        )
+      }
+      <SideNavLinks client:load />
+    </div>
+  </nav>
+  <nav class="mobile-navigation">
+    <div class="logo-divider blur-section">
+      <a
+        href="https://www.daytona.io/"
+        aria-label="Daytona"
+        class="daytona-logo blur-section"
+      >
+        <Fragment set:html={daytonaLogoIcon} />
+      </a>
+    </div>
+    <a href={import.meta.env.BASE_URL} class="dotfiles-logo blur-section"
+      ><Fragment set:html={documentationIcon} />Documentation
+    </a>
+    {
+      algoliaEnabled && (
+        <p id="search-icon-mobile" class="search-click">
+          <Fragment set:html={searchIcon} />
+        </p>
+      )
+    }
+  </nav>
+</header>
+
+{algoliaEnabled && <Search client:load />}

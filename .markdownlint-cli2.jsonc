@@ -18,5 +18,5 @@
     "table-pipe-style": false,
     "no-empty-links": false,
   },
-  "ignores": ["**/node_modules/**"],
+  "ignores": ["**/node_modules/**", "**/apps/docs/**"],
 }

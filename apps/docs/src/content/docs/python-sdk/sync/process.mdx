@@ -1,0 +1,454 @@
+---
+title: "Process"
+hideTitleOnPage: true
+---
+
+## Process
+
+```python
+class Process()
+```
+
+Handles process and code execution within a Sandbox.
+
+#### Process.\_\_init\_\_
+
+```python
+def __init__(sandbox_id: str, code_toolbox: SandboxPythonCodeToolbox,
+             toolbox_api: ToolboxApi, get_root_dir: Callable[[], str])
+```
+
+Initialize a new Process instance.
+
+**Arguments**:
+
+- `sandbox_id` _str_ - The ID of the Sandbox.
+- `code_toolbox` _SandboxPythonCodeToolbox_ - Language-specific code execution toolbox.
+- `toolbox_api` _ToolboxApi_ - API client for Sandbox operations.
+- `get_root_dir` _Callable[[], str]_ - A function to get the default root directory of the Sandbox.
+
+#### Process.exec
+
+```python
+@intercept_errors(message_prefix="Failed to execute command: ")
+def exec(command: str,
+         cwd: Optional[str] = None,
+         env: Optional[Dict[str, str]] = None,
+         timeout: Optional[int] = None) -> ExecuteResponse
+```
+
+Execute a shell command in the Sandbox.
+
+**Arguments**:
+
+- `command` _str_ - Shell command to execute.
+- `cwd` _Optional[str]_ - Working directory for command execution. If not
+  specified, uses the Sandbox root directory. Default is the user's root directory.
+- `env` _Optional[Dict[str, str]]_ - Environment variables to set for the command.
+- `timeout` _Optional[int]_ - Maximum time in seconds to wait for the command
+  to complete. 0 means wait indefinitely.
+  
+
+**Returns**:
+
+- `ExecuteResponse` - Command execution results containing:
+  - exit_code: The command's exit status
+  - result: Standard output from the command
+  - artifacts: ExecutionArtifacts object containing `stdout` (same as result)
+  and `charts` (matplotlib charts metadata)
+  
+
+**Example**:
+
+```python
+# Simple command
+response = sandbox.process.exec("echo 'Hello'")
+print(response.artifacts.stdout)  # Prints: Hello
+
+# Command with working directory
+result = sandbox.process.exec("ls", cwd="workspace/src")
+
+# Command with timeout
+result = sandbox.process.exec("sleep 10", timeout=5)
+```
+
+#### Process.code\_run
+
+```python
+def code_run(code: str,
+             params: Optional[CodeRunParams] = None,
+             timeout: Optional[int] = None) -> ExecuteResponse
+```
+
+Executes code in the Sandbox using the appropriate language runtime.
+
+**Arguments**:
+
+- `code` _str_ - Code to execute.
+- `params` _Optional[CodeRunParams]_ - Parameters for code execution.
+- `timeout` _Optional[int]_ - Maximum time in seconds to wait for the code
+  to complete. 0 means wait indefinitely.
+  
+
+**Returns**:
+
+- `ExecuteResponse` - Code execution result containing:
+  - exit_code: The execution's exit status
+  - result: Standard output from the code
+  - artifacts: ExecutionArtifacts object containing `stdout` (same as result)
+  and `charts` (matplotlib charts metadata)
+  
+
+**Example**:
+
+```python
+# Run Python code
+response = sandbox.process.code_run('''
+    x = 10
+    y = 20
+    print(f"Sum: {x + y}")
+''')
+print(response.artifacts.stdout)  # Prints: Sum: 30
+```
+  
+  Matplotlib charts are automatically detected and returned in the `charts` field
+  of the `ExecutionArtifacts` object.
+```python
+code = '''
+import matplotlib.pyplot as plt
+import numpy as np
+
+x = np.linspace(0, 10, 30)
+y = np.sin(x)
+
+plt.figure(figsize=(8, 5))
+plt.plot(x, y, 'b-', linewidth=2)
+plt.title('Line Chart')
+plt.xlabel('X-axis (seconds)')
+plt.ylabel('Y-axis (amplitude)')
+plt.grid(True)
+plt.show()
+'''
+
+response = sandbox.process.code_run(code)
+chart = response.artifacts.charts[0]
+
+print(f"Type: {chart.type}")
+print(f"Title: {chart.title}")
+if chart.type == ChartType.LINE and isinstance(chart, LineChart):
+    print(f"X Label: {chart.x_label}")
+    print(f"Y Label: {chart.y_label}")
+    print(f"X Ticks: {chart.x_ticks}")
+    print(f"X Tick Labels: {chart.x_tick_labels}")
+    print(f"X Scale: {chart.x_scale}")
+    print(f"Y Ticks: {chart.y_ticks}")
+    print(f"Y Tick Labels: {chart.y_tick_labels}")
+    print(f"Y Scale: {chart.y_scale}")
+    print("Elements:")
+    for element in chart.elements:
+        print(f"Label: {element.label}")
+        print(f"Points: {element.points}")
+```
+
+#### Process.create\_session
+
+```python
+@intercept_errors(message_prefix="Failed to create session: ")
+def create_session(session_id: str) -> None
+```
+
+Creates a new long-running background session in the Sandbox.
+
+Sessions are background processes that maintain state between commands, making them ideal for
+scenarios requiring multiple related commands or persistent environment setup. You can run
+long-running commands and monitor process status.
+
+**Arguments**:
+
+- `session_id` _str_ - Unique identifier for the new session.
+  
+
+**Example**:
+
+```python
+# Create a new session
+session_id = "my-session"
+sandbox.process.create_session(session_id)
+session = sandbox.process.get_session(session_id)
+# Do work...
+sandbox.process.delete_session(session_id)
+```
+
+#### Process.get\_session
+
+```python
+@intercept_errors(message_prefix="Failed to get session: ")
+def get_session(session_id: str) -> Session
+```
+
+Gets a session in the Sandbox.
+
+**Arguments**:
+
+- `session_id` _str_ - Unique identifier of the session to retrieve.
+  
+
+**Returns**:
+
+- `Session` - Session information including:
+  - session_id: The session's unique identifier
+  - commands: List of commands executed in the session
+  
+
+**Example**:
+
+```python
+session = sandbox.process.get_session("my-session")
+for cmd in session.commands:
+    print(f"Command: {cmd.command}")
+```
+
+#### Process.get\_session\_command
+
+```python
+@intercept_errors(message_prefix="Failed to get session command: ")
+def get_session_command(session_id: str, command_id: str) -> Command
+```
+
+Gets information about a specific command executed in a session.
+
+**Arguments**:
+
+- `session_id` _str_ - Unique identifier of the session.
+- `command_id` _str_ - Unique identifier of the command.
+  
+
+**Returns**:
+
+- `Command` - Command information including:
+  - id: The command's unique identifier
+  - command: The executed command string
+  - exit_code: Command's exit status (if completed)
+  
+
+**Example**:
+
+```python
+cmd = sandbox.process.get_session_command("my-session", "cmd-123")
+if cmd.exit_code == 0:
+    print(f"Command {cmd.command} completed successfully")
+```
+
+#### Process.execute\_session\_command
+
+```python
+@intercept_errors(message_prefix="Failed to execute session command: ")
+def execute_session_command(
+        session_id: str,
+        req: SessionExecuteRequest,
+        timeout: Optional[int] = None) -> SessionExecuteResponse
+```
+
+Executes a command in the session.
+
+**Arguments**:
+
+- `session_id` _str_ - Unique identifier of the session to use.
+- `req` _SessionExecuteRequest_ - Command execution request containing:
+  - command: The command to execute
+  - run_async: Whether to execute asynchronously
+  
+
+**Returns**:
+
+- `SessionExecuteResponse` - Command execution results containing:
+  - cmd_id: Unique identifier for the executed command
+  - output: Command output (if synchronous execution)
+  - exit_code: Command exit status (if synchronous execution)
+  
+
+**Example**:
+
+```python
+# Execute commands in sequence, maintaining state
+session_id = "my-session"
+
+# Change directory
+req = SessionExecuteRequest(command="cd /workspace")
+sandbox.process.execute_session_command(session_id, req)
+
+# Create a file
+req = SessionExecuteRequest(command="echo 'Hello' > test.txt")
+sandbox.process.execute_session_command(session_id, req)
+
+# Read the file
+req = SessionExecuteRequest(command="cat test.txt")
+result = sandbox.process.execute_session_command(session_id, req)
+print(result.output)  # Prints: Hello
+```
+
+#### Process.get\_session\_command\_logs
+
+```python
+@intercept_errors(message_prefix="Failed to get session command logs: ")
+def get_session_command_logs(session_id: str, command_id: str) -> str
+```
+
+Get the logs for a command executed in a session. Retrieves the complete output
+(stdout and stderr) from a command executed in a session.
+
+**Arguments**:
+
+- `session_id` _str_ - Unique identifier of the session.
+- `command_id` _str_ - Unique identifier of the command.
+  
+
+**Returns**:
+
+- `str` - Complete command output including both stdout and stderr.
+  
+
+**Example**:
+
+```python
+logs = sandbox.process.get_session_command_logs(
+    "my-session",
+    "cmd-123"
+)
+print(f"Command output: {logs}")
+```
+
+#### Process.get\_session\_command\_logs\_async
+
+```python
+@intercept_errors(message_prefix="Failed to get session command logs: ")
+async def get_session_command_logs_async(
+        session_id: str, command_id: str, on_logs: Callable[[str],
+                                                            None]) -> None
+```
+
+Asynchronously retrieves and processes the logs for a command executed in a session as they become available.
+
+**Arguments**:
+
+- `session_id` _str_ - Unique identifier of the session.
+- `command_id` _str_ - Unique identifier of the command.
+- `on_logs` _Callable[[str], None]_ - Callback function to handle log chunks as they arrive.
+  
+
+**Example**:
+
+```python
+await sandbox.process.get_session_command_logs_async(
+    "my-session",
+    "cmd-123",
+    lambda chunk: print(f"Log chunk: {chunk}")
+)
+```
+
+#### Process.list\_sessions
+
+```python
+@intercept_errors(message_prefix="Failed to list sessions: ")
+def list_sessions() -> List[Session]
+```
+
+Lists all sessions in the Sandbox.
+
+**Returns**:
+
+- `List[Session]` - List of all sessions in the Sandbox.
+  
+
+**Example**:
+
+```python
+sessions = sandbox.process.list_sessions()
+for session in sessions:
+    print(f"Session {session.session_id}:")
+    print(f"  Commands: {len(session.commands)}")
+```
+
+#### Process.delete\_session
+
+```python
+@intercept_errors(message_prefix="Failed to delete session: ")
+def delete_session(session_id: str) -> None
+```
+
+Terminates and removes a session from the Sandbox, cleaning up any resources
+associated with it.
+
+**Arguments**:
+
+- `session_id` _str_ - Unique identifier of the session to delete.
+  
+
+**Example**:
+
+```python
+# Create and use a session
+sandbox.process.create_session("temp-session")
+# ... use the session ...
+
+# Clean up when done
+sandbox.process.delete_session("temp-session")
+```
+
+
+## CodeRunParams
+
+```python
+@dataclass
+class CodeRunParams()
+```
+
+Parameters for code execution.
+
+**Attributes**:
+
+- `argv` _Optional[List[str]]_ - Command line arguments
+- `env` _Optional[Dict[str, str]]_ - Environment variables
+
+## SessionExecuteRequest
+
+```python
+class SessionExecuteRequest(ApiSessionExecuteRequest,
+                            AsyncApiSessionExecuteRequest)
+```
+
+Contains the request for executing a command in a session.
+
+**Attributes**:
+
+- `command` _str_ - The command to execute.
+- `run_async` _Optional[bool]_ - Whether to execute the command asynchronously.
+- `var_async` _Optional[bool]_ - Deprecated. Use `run_async` instead.
+
+## ExecutionArtifacts
+
+```python
+class ExecutionArtifacts()
+```
+
+Artifacts from the command execution.
+
+**Attributes**:
+
+- `stdout` _str_ - Standard output from the command, same as `result` in `ExecuteResponse`
+- `charts` _Optional[List[Chart]]_ - List of chart metadata from matplotlib
+
+## ExecuteResponse
+
+```python
+class ExecuteResponse(ClientExecuteResponse)
+```
+
+Response from the command execution.
+
+**Attributes**:
+
+- `exit_code` _int_ - The exit code from the command execution
+- `result` _str_ - The output from the command execution
+- `artifacts` _Optional[ExecutionArtifacts]_ - Artifacts from the command execution
+

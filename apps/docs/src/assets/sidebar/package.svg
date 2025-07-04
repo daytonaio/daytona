@@ -1,0 +1,14 @@
+<svg width="16" height="16.5" viewBox="0 0 16.5 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <g stroke="currentColor" stroke-width="1.7" fill="none">
+    <!-- Main Cube Outline (Scaled Up Slightly More) -->
+    <polygon points="1,4 8,0.5 15,4 15,12 8,15.5 1,12"/>
+    <!-- Top Face (Clean) -->
+    <line x1="1" y1="4" x2="8" y2="7.5"/>
+    <line x1="8" y1="7.5" x2="15" y2="4"/>
+    <!-- Side Faces -->
+    <line x1="1" y1="4" x2="1" y2="12"/>
+    <line x1="15" y1="4" x2="15" y2="12"/>
+    <!-- Vertical Edge in the Center -->
+    <line x1="8" y1="7.5" x2="8" y2="15.5"/>
+  </g>
+</svg>

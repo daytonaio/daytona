@@ -1,0 +1,305 @@
+---
+title: "LspServer"
+hideTitleOnPage: true
+---
+
+
+## LspServer
+
+Provides Language Server Protocol functionality for code intelligence to provide
+IDE-like features such as code completion, symbol search, and more.
+
+### Constructors
+
+#### new LspServer()
+
+```ts
+new LspServer(
+   languageId: LspLanguageId, 
+   pathToProject: string, 
+   toolboxApi: ToolboxApi, 
+   sandboxId: string): LspServer
+```
+
+**Parameters**:
+
+- `languageId` _LspLanguageId_
+- `pathToProject` _string_
+- `toolboxApi` _ToolboxApi_
+- `sandboxId` _string_
+
+
+**Returns**:
+
+- `LspServer`
+
+### Methods
+
+#### completions()
+
+```ts
+completions(path: string, position: Position): Promise<CompletionList>
+```
+
+Gets completion suggestions at a position in a file.
+
+**Parameters**:
+
+- `path` _string_ - Path to the file. Relative paths are resolved based on the project path
+    set in the LSP server constructor.
+- `position` _Position_ - The position in the file where completion was requested
+
+
+**Returns**:
+
+- `Promise<CompletionList>` - List of completion suggestions. The list includes:
+    - isIncomplete: Whether more items might be available
+    - items: List of completion items, each containing:
+    - label: The text to insert
+    - kind: The kind of completion
+    - detail: Additional details about the item
+    - documentation: Documentation for the item
+    - sortText: Text used to sort the item in the list
+    - filterText: Text used to filter the item
+    - insertText: The actual text to insert (if different from label)
+
+**Example:**
+
+```ts
+// Get completions at a specific position
+const completions = await lsp.completions('workspace/project/src/index.ts', {
+  line: 10,
+  character: 15
+});
+completions.items.forEach(item => {
+  console.log(`${item.label} (${item.kind}): ${item.detail}`);
+});
+```
+
+***
+
+#### didClose()
+
+```ts
+didClose(path: string): Promise<void>
+```
+
+Notifies the language server that a file has been closed, should be called when a file is closed
+in the editor to allow the language server to clean up any resources associated with that file.
+
+**Parameters**:
+
+- `path` _string_ - Path to the closed file. Relative paths are resolved based on the project path
+    set in the LSP server constructor.
+
+
+**Returns**:
+
+- `Promise<void>`
+
+**Example:**
+
+```ts
+// When done editing a file
+await lsp.didClose('workspace/project/src/index.ts');
+```
+
+***
+
+#### didOpen()
+
+```ts
+didOpen(path: string): Promise<void>
+```
+
+Notifies the language server that a file has been opened, enabling
+language features like diagnostics and completions for that file. The server
+will begin tracking the file's contents and providing language features.
+
+**Parameters**:
+
+- `path` _string_ - Path to the opened file. Relative paths are resolved based on the user's
+    root directory.
+
+
+**Returns**:
+
+- `Promise<void>`
+
+**Example:**
+
+```ts
+// When opening a file for editing
+await lsp.didOpen('workspace/project/src/index.ts');
+// Now can get completions, symbols, etc. for this file
+```
+
+***
+
+#### documentSymbols()
+
+```ts
+documentSymbols(path: string): Promise<LspSymbol[]>
+```
+
+Get symbol information (functions, classes, variables, etc.) from a document.
+
+**Parameters**:
+
+- `path` _string_ - Path to the file to get symbols from. Relative paths are resolved based on the project path
+    set in the LSP server constructor.
+
+
+**Returns**:
+
+- `Promise<LspSymbol[]>` - List of symbols in the document. Each symbol includes:
+    - name: The symbol's name
+    - kind: The symbol's kind (function, class, variable, etc.)
+    - location: The location of the symbol in the file
+
+**Example:**
+
+```ts
+// Get all symbols in a file
+const symbols = await lsp.documentSymbols('workspace/project/src/index.ts');
+symbols.forEach(symbol => {
+  console.log(`${symbol.kind} ${symbol.name}: ${symbol.location}`);
+});
+```
+
+***
+
+#### sandboxSymbols()
+
+```ts
+sandboxSymbols(query: string): Promise<LspSymbol[]>
+```
+
+Searches for symbols matching the query string across the entire Sandbox.
+
+**Parameters**:
+
+- `query` _string_ - Search query to match against symbol names
+
+
+**Returns**:
+
+- `Promise<LspSymbol[]>` - List of matching symbols from all files. Each symbol includes:
+    - name: The symbol's name
+    - kind: The symbol's kind (function, class, variable, etc.)
+    - location: The location of the symbol in the file
+
+**Example:**
+
+```ts
+// Search for all symbols containing "User"
+const symbols = await lsp.sandboxSymbols('User');
+symbols.forEach(symbol => {
+  console.log(`${symbol.name} (${symbol.kind}) in ${symbol.location}`);
+});
+```
+
+***
+
+#### start()
+
+```ts
+start(): Promise<void>
+```
+
+Starts the language server, must be called before using any other LSP functionality.
+It initializes the language server for the specified language and project.
+
+**Returns**:
+
+- `Promise<void>`
+
+**Example:**
+
+```ts
+const lsp = await sandbox.createLspServer('typescript', 'workspace/project');
+await lsp.start();  // Initialize the server
+// Now ready for LSP operations
+```
+
+***
+
+#### stop()
+
+```ts
+stop(): Promise<void>
+```
+
+Stops the language server, should be called when the LSP server is no longer needed to
+free up system resources.
+
+**Returns**:
+
+- `Promise<void>`
+
+**Example:**
+
+```ts
+// When done with LSP features
+await lsp.stop();  // Clean up resources
+```
+
+***
+
+#### ~~workspaceSymbols()~~
+
+```ts
+workspaceSymbols(query: string): Promise<LspSymbol[]>
+```
+
+Searches for symbols matching the query string across the entire Sandbox.
+
+**Parameters**:
+
+- `query` _string_ - Search query to match against symbol names
+
+
+**Returns**:
+
+- `Promise<LspSymbol[]>` - List of matching symbols from all files. Each symbol includes:
+    - name: The symbol's name
+    - kind: The symbol's kind (function, class, variable, etc.)
+    - location: The location of the symbol in the file
+
+##### Deprecated
+
+Use `sandboxSymbols` instead. This method will be removed in a future version.
+
+***
+
+
+## LspLanguageId
+
+Supported language server types.
+
+**Enum Members**:
+
+- `JAVASCRIPT` ("javascript")
+- `PYTHON` ("python")
+- `TYPESCRIPT` ("typescript")
+
+## Position
+
+Represents a zero-based position within a text document,
+specified by line number and character offset.
+
+**Properties**:
+
+- `character` _number_ - Zero-based character offset on the line
+- `line` _number_ - Zero-based line number in the document
+
+
+
+**Example:**
+
+```ts
+const position: Position = {
+  line: 10,     // Line 11 (zero-based)
+  character: 15  // Character 16 on the line (zero-based)
+};
+```

@@ -1,0 +1,32 @@
+---
+title: "ExecuteResponse"
+hideTitleOnPage: true
+---
+
+
+## ExecuteResponse
+
+Response from the command execution.
+
+**Properties**:
+
+- `artifacts?` _ExecutionArtifacts_ - Artifacts from the command execution
+- `exitCode` _number_ - The exit code from the command execution
+    
+- `result` _string_ - The output from the command execution
+    
+
+
+
+
+**Extends:**
+
+- `ExecuteResponse`
+## ExecutionArtifacts
+
+Artifacts from the command execution.
+
+**Properties**:
+
+- `charts?` _Chart\[\]_ - List of chart metadata from matplotlib
+- `stdout` _string_ - Standard output from the command, same as `result` in `ExecuteResponse`

@@ -1,0 +1,27 @@
+@font-face {
+  font-family: 'Berkeley Mono';
+  src: url('./BerkeleyMono-Regular.otf');
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Inter';
+  src: url('./Inter-Regular.ttf');
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Inter';
+  src: url('./Inter-Medium.ttf');
+  font-weight: 500;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Inter';
+  src: url('./Inter-SemiBold.ttf');
+  font-weight: 600;
+  font-display: swap;
+}

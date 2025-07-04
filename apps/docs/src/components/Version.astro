@@ -1,0 +1,7 @@
+---
+import { version } from '../../../../package.json'
+import { major, minor } from 'semver'
+const [maj, min] = [major(version), minor(version)]
+---
+
+{maj}.{min}
