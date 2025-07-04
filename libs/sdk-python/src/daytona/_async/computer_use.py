@@ -1,7 +1,6 @@
 # Copyright 2025 Daytona Platforms Inc.
 # SPDX-License-Identifier: Apache-2.0
 
-import json
 from typing import List, Optional
 
 from daytona_api_client_async import (
@@ -512,9 +511,7 @@ class AsyncComputerUse:
             print("Computer use status:", response.status)
             ```
         """
-        response = await self._toolbox_api.get_computer_use_status_without_preload_content(self._sandbox_id)
-        data_dict = json.loads(response.data)
-        return ComputerUseStatusResponse(status=data_dict)
+        return await self._toolbox_api.get_computer_use_status(self._sandbox_id)
 
     @intercept_errors(message_prefix="Failed to get process status: ")
     async def get_process_status(self, process_name: str) -> ProcessStatusResponse:
