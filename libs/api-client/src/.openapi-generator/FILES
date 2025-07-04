@@ -42,6 +42,7 @@ models/create-user.ts
 models/create-volume.ts
 models/create-workspace.ts
 models/docker-registry.ts
+models/download-files.ts
 models/execute-request.ts
 models/execute-response.ts
 models/file-info.ts

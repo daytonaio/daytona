@@ -25,7 +25,7 @@ from .common.daytona import (
     DaytonaConfig,
 )
 from .common.errors import DaytonaError
-from .common.filesystem import FileUpload
+from .common.filesystem import FileDownloadRequest, FileDownloadResponse, FileUpload
 from .common.image import Image
 from .common.lsp_server import LspLanguageId
 from .common.process import CodeRunParams, SessionExecuteRequest
@@ -53,6 +53,8 @@ __all__ = [
     "PieChart",
     "BoxAndWhiskerChart",
     "CompositeChart",
+    "FileDownloadRequest",
+    "FileDownloadResponse",
     "FileUpload",
     "VolumeMount",
     "AsyncDaytona",

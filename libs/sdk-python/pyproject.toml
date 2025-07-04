@@ -20,6 +20,7 @@ dependencies = [
     "toml>=0.10.0,<0.11.0",
     "aioboto3>=13.0.0,<15.0.0",
     "boto3>=1.0.0,<2.0.0",
+    "multipart>=1.0.0,<2.0.0"
 ]
 classifiers = [
     "Development Status :: 3 - Alpha",

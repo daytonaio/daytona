@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from dataclasses import dataclass
-from typing import Union
+from typing import Optional, Union
 
 
 @dataclass
@@ -18,3 +18,24 @@ class FileUpload:
 
     source: Union[bytes, str]
     destination: str
+
+
+@dataclass
+class FileDownloadRequest:
+    """Represents a file to be downloaded from the Sandbox.
+
+    Attributes:
+        source (str): Absolute source path in the Sandbox. Relative paths are resolved based on the user's
+        root directory.
+        destination (Optional[str]): Destination path in the local filesystem where the file content will be streamed to.
+        If not provided, the file will be downloaded in the bytes buffer (make sure it fits into memory).
+    """
+
+    source: str
+    destination: Optional[str] = None
+
+
+@dataclass
+class FileDownloadResponse:
+    source: str
+    result: Union[str, bytes]

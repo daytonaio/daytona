@@ -15,19 +15,13 @@
 /**
  *
  * @export
- * @interface GitBranchRequest
+ * @interface DownloadFiles
  */
-export interface GitBranchRequest {
+export interface DownloadFiles {
   /**
-   *
-   * @type {string}
-   * @memberof GitBranchRequest
+   * List of remote file paths to download
+   * @type {Array<string>}
+   * @memberof DownloadFiles
    */
-  path: string
-  /**
-   *
-   * @type {string}
-   * @memberof GitBranchRequest
-   */
-  name: string
+  paths: Array<string>
 }

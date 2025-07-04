@@ -2,7 +2,7 @@ import json
 import os
 from datetime import datetime
 
-from daytona import CreateSandboxFromSnapshotParams, Daytona, FileUpload
+from daytona import CreateSandboxFromSnapshotParams, Daytona, FileDownloadRequest, FileUpload
 
 
 def main():
@@ -49,38 +49,25 @@ def main():
     ls_result = sandbox.process.exec(f"ls -la {new_dir}")
     print(ls_result.result)
 
-    # Make the script executable
-    sandbox.process.exec(f"chmod +x {os.path.join(new_dir, 'script.sh')}")
-
-    # Run the script
-    print("Running script:")
-    script_result = sandbox.process.exec(f"{os.path.join(new_dir, 'script.sh')}")
-    print(script_result.result)
-
-    # Search for files in the project
-    matches = sandbox.fs.search_files(new_dir, "*.json")
-    print("JSON files found:", matches)
-
-    # Replace content in config file
-    sandbox.fs.replace_in_files([os.path.join(new_dir, "config.json")], '"debug": true', '"debug": false')
-
     # Download the modified config file
     print("Downloading updated config file:")
-    config_content = sandbox.fs.download_file(os.path.join(new_dir, "config.json"))
-    print(config_content.decode("utf-8"))
-
-    # Create a report of all operations
-    report_data = f"""
-    Project Files Report:
-    ---------------------
-    Time: {datetime.now().isoformat()}
-    Files: {len(matches.files)} JSON files found
-    Config: {'Production mode' if b'"debug": false' in config_content else 'Debug mode'}
-    Script: {'Executed successfully' if script_result.exit_code == 0 else 'Failed'}
-    """.strip()
-
-    # Save the report
-    sandbox.fs.upload_file(report_data.encode("utf-8"), os.path.join(new_dir, "report.txt"))
+    download_results = sandbox.fs.download_files(
+        [
+            FileDownloadRequest(
+                source=os.path.join(new_dir, "config.json"),
+                destination="/workspaces/daytona/config.json",
+            ),
+            FileDownloadRequest(
+                source=os.path.join(new_dir, "exampleee.txt"),
+                destination="/workspaces/daytona/example.txt",
+            ),
+            FileDownloadRequest(
+                source=os.path.join(new_dir, "script.sh"),
+            ),
+        ]
+    )
+    for f in download_results:
+        print(f.result)
 
     # Clean up local file
     os.remove(local_file_path)

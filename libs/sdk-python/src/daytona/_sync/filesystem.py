@@ -12,10 +12,11 @@ from typing import Callable, List, Union, overload
 
 import httpx
 from daytona_api_client import FileInfo, Match, ReplaceRequest, ReplaceResult, SearchFilesResponse, ToolboxApi
+from multipart import MultipartPart, PushMultipartParser, parse_options_header
 
-from .._utils.errors import intercept_errors
+from .._utils.errors import DaytonaError, intercept_errors
 from .._utils.path import prefix_relative_path
-from ..common.filesystem import FileUpload
+from ..common.filesystem import FileDownloadRequest, FileDownloadResponse, FileUpload
 
 
 class FileSystem:
@@ -168,6 +169,84 @@ class FileSystem:
                         if chunk:
                             f.write(chunk)
             return None
+
+    def download_files(self, files: List[FileDownloadRequest], timeout: int = 30 * 60) -> List[FileDownloadResponse]:
+        # 1) Remember original sources
+        og_sources = [f.source for f in files]
+
+        # 2) Normalize remote paths
+        for f in files:
+            f.source = prefix_relative_path(self._get_root_dir(), f.source)
+
+        # 3) Prepare request
+        method, url, headers, *_ = self._toolbox_api._download_files_serialize(
+            self._sandbox_id,
+            paths=[f.source for f in files],
+            x_daytona_organization_id=None,
+            _request_auth=None,
+            _content_type=None,
+            _headers=None,
+            _host_index=None,
+        )
+        headers["Accept"] = "multipart/form-data"
+
+        # 4) Fire request and get streaming response
+        with httpx.Client(timeout=timeout) as client:
+            with client.stream(method, url, json={"paths": [f.source for f in files]}, headers=headers) as resp:
+                resp.raise_for_status()
+
+                # 5) Pull boundary from Content-Type
+                ctype = resp.headers.get("Content-Type", "")
+                mtype, params = parse_options_header(ctype)
+                if mtype != "multipart/form-data" or "boundary" not in params:
+                    raise RuntimeError(f"unexpected Content-Type: {ctype}")
+                boundary = params["boundary"]
+
+                # 6) Set up streaming parser
+                parser = PushMultipartParser(boundary)
+
+                # 7) Register parts: file targets and in-memory buffers
+                buffers = {}
+                failures = []
+
+                def make_on_part(part: MultipartPart):
+                    name = part.name  # matches rawPath from server
+                    filename = part.filename or name
+                    # if name == "error", buffer all error text
+                    if name == "error" or filename.endswith(".error.txt"):
+                        text = part.raw.decode(errors="ignore")
+                        failures.extend(text.strip().splitlines())
+                        return
+                    # find corresponding request
+                    for req in files:
+                        if os.path.basename(req.source) == filename:
+                            if req.destination:
+                                # write file payload
+                                os.makedirs(os.path.dirname(req.destination) or ".", exist_ok=True)
+                                with open(req.destination, "wb") as f:
+                                    f.write(part.raw)
+                            else:
+                                buffers[req.source] = part.raw
+                            return
+
+                parser.on_part_finished = make_on_part
+
+                # 8) Feed chunks into parser
+                for chunk in resp.iter_bytes(64 * 1024):
+                    parser.data_received(chunk)
+
+        # 9) If any failures, raise
+        if failures:
+            raise DaytonaError(failures)
+
+        # 10) Build result set
+        results: List[FileDownloadResponse] = []
+        for orig, req in zip(og_sources, files):
+            if req.destination:
+                results.append(FileDownloadResponse(source=orig, result=req.destination))
+            else:
+                results.append(FileDownloadResponse(source=orig, result=buffers.get(req.source, b"")))
+        return results
 
     @intercept_errors(message_prefix="Failed to find files: ")
     def find_files(self, path: str, pattern: str) -> List[Match]:

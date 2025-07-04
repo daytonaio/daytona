@@ -10,10 +10,11 @@ import aiofiles
 import aiofiles.os
 import httpx
 from daytona_api_client_async import FileInfo, Match, ReplaceRequest, ReplaceResult, SearchFilesResponse, ToolboxApi
+from multipart import MultipartPart, PushMultipartParser, parse_options_header, MultipartParser
 
-from .._utils.errors import intercept_errors
+from .._utils.errors import DaytonaError, intercept_errors
 from .._utils.path import prefix_relative_path
-from ..common.filesystem import FileUpload
+from ..common.filesystem import FileDownloadRequest, FileDownloadResponse, FileUpload
 
 
 class AsyncFileSystem:
@@ -168,6 +169,86 @@ class AsyncFileSystem:
                         if chunk:
                             await f.write(chunk)
             return None
+
+    async def download_files(
+        self, files: List[FileDownloadRequest], timeout: int = 30 * 60
+    ) -> List[FileDownloadResponse]:
+        # 1) Remember originals and normalize remote paths
+        originals = [f.source for f in files]
+        for f in files:
+            f.source = prefix_relative_path(await self._get_root_dir(), f.source)
+
+        # 2) Prepare the HTTPX request
+        method, url, headers, *_ = self._toolbox_api._download_files_serialize(
+            self._sandbox_id,
+            download_files=None,
+            x_daytona_organization_id=None,
+            _request_auth=None,
+            _content_type=None,
+            _headers=None,
+            _host_index=None,
+        )
+        headers["Accept"] = "multipart/form-data"
+
+        # Containers for error messages and in-memory buffers
+        failures: List[str] = []
+        buffers: dict[str, bytes] = {}
+
+        # 3) Stream the response and parse multipart/form-data
+        async with httpx.AsyncClient(timeout=timeout) as client:
+            async with client.stream(
+                method, url,
+                json={"paths": [f.source for f in files]},
+                headers=headers,
+            ) as resp:
+                resp.raise_for_status()
+
+                # 4) Extract the boundary from Content-Type
+                content_type = resp.headers.get("Content-Type", "")
+                mtype, params = parse_options_header(content_type)
+                boundary = params.get("boundary")
+                if mtype != "multipart/form-data" or not boundary:
+                    raise RuntimeError(f"Unexpected Content-Type: {content_type}")
+
+                # 5) Initialize PushMultipartParser with the boundary
+                parser = PushMultipartParser(boundary)
+
+                # 6) Register an error target
+                error_target = ValueTarget()
+                parser.register("error", error_target)
+
+                # 7) Register per-file targets
+                for f in files:
+                    name = os.path.basename(f.source)
+                    if f.destination:
+                        os.makedirs(os.path.dirname(f.destination) or ".", exist_ok=True)
+                        parser.register(name, FileTarget(f.destination))
+                    else:
+                        vt = ValueTarget()
+                        parser.register(name, vt)
+                        buffers[f.source] = b""  # placeholder
+
+                # 8) Feed incoming chunks into the parser
+                async for chunk in resp.aiter_bytes(64 * 1024):
+                    parser.data_received(chunk)
+
+        # 9) After streaming, collect errors if any
+        if err_bytes := error_target.value:
+            for line in err_bytes.decode(errors="ignore").splitlines():
+                if line.strip():
+                    failures.append(line.strip())
+        if failures:
+            raise DownloadError(failures)
+
+        # 10) Build and return the results list
+        results: List[FileDownloadResponse] = []
+        for orig, f in zip(originals, files):
+            if f.destination:
+                results.append(FileDownloadResponse(source=orig, result=f.destination))
+            else:
+                vt: ValueTarget = parser.targets[os.path.basename(f.source)]
+                results.append(FileDownloadResponse(source=orig, result=vt.value))
+        return results
 
     @intercept_errors(message_prefix="Failed to find files: ")
     async def find_files(self, path: str, pattern: str) -> List[Match]:
