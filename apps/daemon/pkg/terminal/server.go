@@ -42,10 +42,6 @@ func StartTerminalServer(port int) error {
 	return http.ListenAndServe(addr, nil)
 }
 
-// func handleHome(w http.ResponseWriter, r *http.Request) {
-// 	http.ServeFile(w, r, "pkg/terminal/index.html")
-// }
-
 func handleWebSocket(w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
@@ -53,6 +49,9 @@ func handleWebSocket(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer conn.Close()
+
+	// Create a new UTF8Decoder instance for this connection
+	decoder := NewUTF8Decoder()
 
 	sizeCh := make(chan common.TTYSize)
 	stdInReader, stdInWriter := io.Pipe()
@@ -98,8 +97,11 @@ func handleWebSocket(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			// Change this line to send text message instead of binary
-			err = conn.WriteMessage(websocket.TextMessage, buf[:n])
+			// A multi-byte UTF-8 character can be split across stream reads.
+			// UTF8Decoder buffers incomplete sequences to ensure proper decoding.
+			decoded := decoder.Write(buf[:n])
+
+			err = conn.WriteMessage(websocket.TextMessage, []byte(decoded))
 			if err != nil {
 				log.Printf("Failed to write to websocket: %v", err)
 				return
