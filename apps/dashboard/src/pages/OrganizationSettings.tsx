@@ -66,8 +66,10 @@ const OrganizationSettings: React.FC = () => {
   }
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold">Organization Settings</h1>
+    <div className="px-6 py-2">
+      <div className="mb-2 h-12 flex items-center justify-between">
+        <h1 className="text-2xl font-medium">Organization Settings</h1>
+      </div>
 
       <div className="max-w-2xl mt-4 space-y-6">
         <div className="space-y-3">

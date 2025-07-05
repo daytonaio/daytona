@@ -18,37 +18,37 @@ interface PaginationProps<TData> {
 
 export function Pagination<TData>({ table, selectionEnabled, className, entityName }: PaginationProps<TData>) {
   return (
-    <div className={`flex items-center justify-between px-2 w-full ${className}`}>
-      {selectionEnabled ? (
-        <div className="flex-1 text-sm text-muted-foreground">
-          {table.getFilteredSelectedRowModel().rows.length} of {table.getFilteredRowModel().rows.length} row(s)
-          selected.
-        </div>
-      ) : (
-        <div></div>
-      )}
-      <div className="flex items-center space-x-6 lg:space-x-8">
-        <div className="flex items-center space-x-2">
-          <p className="text-sm font-medium">{entityName ? `${entityName} per page` : 'Rows per page'}</p>
-          <Select
-            value={`${table.getState().pagination.pageSize}`}
-            onValueChange={(value) => {
-              table.setPageSize(Number(value))
-            }}
-          >
-            <SelectTrigger className="h-8 w-[75px]">
-              <SelectValue placeholder={table.getState().pagination.pageSize} />
-            </SelectTrigger>
-            <SelectContent side="top">
-              {PAGE_SIZE_OPTIONS.map((pageSize) => (
-                <SelectItem key={pageSize} value={`${pageSize}`}>
-                  {pageSize}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="flex w-[100px] items-center justify-center text-sm font-medium">
+    <div className={`flex flex-col sm:flex-row gap-2 sm:items-center justify-between w-full ${className}`}>
+      <div className="flex items-center gap-4">
+        <Select
+          value={`${table.getState().pagination.pageSize}`}
+          onValueChange={(value) => {
+            table.setPageSize(Number(value))
+          }}
+        >
+          <SelectTrigger className="h-8 w-[164px]">
+            <SelectValue placeholder={table.getState().pagination.pageSize + 'per page'} />
+          </SelectTrigger>
+          <SelectContent side="top">
+            {PAGE_SIZE_OPTIONS.map((pageSize) => (
+              <SelectItem key={pageSize} value={`${pageSize}`}>
+                {pageSize} per page
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        {selectionEnabled ? (
+          <div className="flex-1 text-sm text-muted-foreground">
+            {table.getFilteredSelectedRowModel().rows.length} of {table.getFilteredRowModel().rows.length} row(s)
+            selected.
+          </div>
+        ) : (
+          <div></div>
+        )}
+      </div>
+      <div className="flex items-center gap-4">
+        <div className="flex items-center justify-end text-sm font-medium text-muted-foreground">
           Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount() || 1}
         </div>
         <div className="flex items-center space-x-2">
