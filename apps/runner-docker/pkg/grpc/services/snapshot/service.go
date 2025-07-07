@@ -17,6 +17,7 @@ type SnapshotServiceConfig struct {
 	Cache        cache.IRunnerCache
 	LogWriter    io.Writer
 	Log          *slog.Logger
+	LogFilePath  string
 }
 
 type SnapshotService struct {
@@ -25,6 +26,7 @@ type SnapshotService struct {
 	cache        cache.IRunnerCache
 	logWriter    io.Writer
 	log          *slog.Logger
+	logFilePath  string
 }
 
 func NewSnapshotService(config SnapshotServiceConfig) *SnapshotService {
@@ -33,5 +35,6 @@ func NewSnapshotService(config SnapshotServiceConfig) *SnapshotService {
 		cache:        config.Cache,
 		logWriter:    config.LogWriter,
 		log:          config.Log.With("service", "snapshot"),
+		logFilePath:  config.LogFilePath,
 	}
 }

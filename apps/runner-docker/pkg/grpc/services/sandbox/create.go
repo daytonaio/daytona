@@ -16,7 +16,6 @@ import (
 	"time"
 
 	pb "github.com/daytonaio/runner-docker/gen/pb/runner/v1"
-	"github.com/daytonaio/runner-docker/internal/config"
 	"github.com/daytonaio/runner-docker/internal/constants"
 	"github.com/daytonaio/runner-docker/internal/metrics"
 	"github.com/daytonaio/runner-docker/internal/util"
@@ -67,7 +66,6 @@ func (s *SandboxService) CreateSandbox(ctx context.Context, req *pb.CreateSandbo
 
 	s.cache.SetSandboxState(ctx, req.GetId(), pb.SandboxState_SANDBOX_STATE_CREATING)
 
-	// TODO: Check how to handle this pull snapshot call, ln 68 - 82
 	ctx = context.WithValue(ctx, constants.ID_KEY, req.GetId())
 
 	_, err = s.snapshotService.PullSnapshot(ctx, &pb.PullSnapshotRequest{
@@ -219,9 +217,8 @@ func (s *SandboxService) getContainerHostConfig(ctx context.Context, req *pb.Cre
 		Binds: binds,
 	}
 
-	containerRuntime := config.GetContainerRuntime()
-	if containerRuntime != "" {
-		hostConfig.Runtime = containerRuntime
+	if s.containerRuntime != "" {
+		hostConfig.Runtime = s.containerRuntime
 	}
 
 	filesystem, err := s.getFilesystem(ctx)
@@ -239,11 +236,10 @@ func (s *SandboxService) getContainerHostConfig(ctx context.Context, req *pb.Cre
 }
 
 func (s *SandboxService) getContainerNetworkingConfig(_ context.Context) *network.NetworkingConfig {
-	containerNetwork := config.GetContainerNetwork()
-	if containerNetwork != "" {
+	if s.containerNetwork != "" {
 		return &network.NetworkingConfig{
 			EndpointsConfig: map[string]*network.EndpointSettings{
-				containerNetwork: {},
+				s.containerNetwork: {},
 			},
 		}
 	}
@@ -314,7 +310,7 @@ func (s *SandboxService) getVolumesMountPathBinds(ctx context.Context, volumes [
 
 func (s *SandboxService) getNodeVolumeMountPath(volumeId string) string {
 	volumePath := filepath.Join("/mnt", volumeId)
-	if config.GetNodeEnv() == "development" {
+	if s.nodeEnv == "development" {
 		volumePath = filepath.Join("/tmp", volumeId)
 	}
 

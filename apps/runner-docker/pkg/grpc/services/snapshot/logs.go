@@ -5,20 +5,21 @@ package snapshot
 
 import (
 	"bufio"
+	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
 	pb "github.com/daytonaio/runner-docker/gen/pb/runner/v1"
-	"github.com/daytonaio/runner-docker/internal/config"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 )
 
 func (s *SnapshotService) GetSnapshotLogs(req *pb.GetSnapshotLogsRequest, stream pb.SnapshotService_GetSnapshotLogsServer) error {
-	logFilePath, err := config.GetBuildLogFilePath(req.GetSnapshotRef())
+	logFilePath, err := s.getBuildLogFilePath(req.GetSnapshotRef())
 	if err != nil {
 		return err
 	}
@@ -103,4 +104,23 @@ func (s *SnapshotService) GetSnapshotLogs(req *pb.GetSnapshotLogsRequest, stream
 	return stream.Send(&pb.GetSnapshotLogsResponse{
 		Content: "Build completed successfully",
 	})
+}
+
+func (s *SnapshotService) getBuildLogFilePath(imageRef string) (string, error) {
+	buildId := imageRef
+	if colonIndex := strings.Index(imageRef, ":"); colonIndex != -1 {
+		buildId = imageRef[:colonIndex]
+	}
+
+	logPath := filepath.Join(filepath.Dir(s.logFilePath), "builds", buildId)
+
+	if err := os.MkdirAll(filepath.Dir(logPath), 0755); err != nil {
+		return "", fmt.Errorf("failed to create log directory: %w", err)
+	}
+
+	if _, err := os.OpenFile(logPath, os.O_CREATE, 0644); err != nil {
+		return "", fmt.Errorf("failed to create log file: %w", err)
+	}
+
+	return logPath, nil
 }

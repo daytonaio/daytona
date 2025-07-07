@@ -44,9 +44,11 @@ type ServerConfig struct {
 	AWSRegion          string
 	AWSEndpointUrl     string
 	Log                *slog.Logger
-	UseTLS             bool
-	CertFile           string
-	KeyFile            string
+	TLSCreds           credentials.TransportCredentials
+	ContainerNetwork   string
+	ContainerRuntime   string
+	NodeEnv            string
+	LogFilePath        string
 }
 
 func New(cfg ServerConfig) *Server {
@@ -65,12 +67,8 @@ func New(cfg ServerConfig) *Server {
 		),
 	}
 
-	if cfg.UseTLS {
-		creds, err := credentials.NewServerTLSFromFile(cfg.CertFile, cfg.KeyFile)
-		if err != nil {
-			panic(err)
-		}
-		opts = append(opts, grpc.Creds(creds))
+	if cfg.TLSCreds != nil {
+		opts = append(opts, grpc.Creds(cfg.TLSCreds))
 	}
 
 	// Create gRPC server
@@ -84,6 +82,7 @@ func New(cfg ServerConfig) *Server {
 		Cache:        *cfg.RunnerCache,
 		LogWriter:    os.Stdout,
 		Log:          log,
+		LogFilePath:  cfg.LogFilePath,
 	})
 
 	sandboxSvc := sandbox.NewSandboxService(sandbox.SandboxServiceConfig{
@@ -97,6 +96,9 @@ func New(cfg ServerConfig) *Server {
 		AWSRegion:          cfg.AWSRegion,
 		AWSEndpointUrl:     cfg.AWSEndpointUrl,
 		Log:                log,
+		ContainerNetwork:   cfg.ContainerNetwork,
+		ContainerRuntime:   cfg.ContainerRuntime,
+		NodeEnv:            cfg.NodeEnv,
 	})
 
 	// Register services

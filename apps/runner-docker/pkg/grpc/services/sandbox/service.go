@@ -24,6 +24,9 @@ type SandboxServiceConfig struct {
 	AWSSecretAccessKey string
 	AWSRegion          string
 	AWSEndpointUrl     string
+	ContainerNetwork   string
+	ContainerRuntime   string
+	NodeEnv            string
 	Log                *slog.Logger
 }
 
@@ -38,6 +41,9 @@ type SandboxService struct {
 	awsAccessKeyId     string
 	awsSecretAccessKey string
 	awsRegion          string
+	containerNetwork   string
+	containerRuntime   string
+	nodeEnv            string
 	volumeMutexes      map[string]*sync.Mutex
 	volumeMutexesMutex sync.Mutex
 	log                *slog.Logger
@@ -54,6 +60,9 @@ func NewSandboxService(config SandboxServiceConfig) *SandboxService {
 		awsAccessKeyId:     config.AWSAccessKeyId,
 		awsSecretAccessKey: config.AWSSecretAccessKey,
 		awsRegion:          config.AWSRegion,
+		containerNetwork:   config.ContainerNetwork,
+		containerRuntime:   config.ContainerRuntime,
+		nodeEnv:            config.NodeEnv,
 		volumeMutexes:      make(map[string]*sync.Mutex),
 		volumeMutexesMutex: sync.Mutex{},
 		log:                config.Log.With("service", "sandbox"),

@@ -4,11 +4,7 @@
 package config
 
 import (
-	"fmt"
 	"log"
-	"os"
-	"path/filepath"
-	"strings"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/joho/godotenv"
@@ -78,40 +74,4 @@ func GetConfig() (*Config, error) {
 	}
 
 	return config, nil
-}
-
-func GetContainerNetwork() string {
-	return config.ContainerNetwork
-}
-
-func GetContainerRuntime() string {
-	return config.ContainerRuntime
-}
-
-func GetNodeEnv() string {
-	return config.NodeEnv
-}
-
-func GetBuildLogFilePath(imageRef string) (string, error) {
-	buildId := imageRef
-	if colonIndex := strings.Index(imageRef, ":"); colonIndex != -1 {
-		buildId = imageRef[:colonIndex]
-	}
-
-	c, err := GetConfig()
-	if err != nil {
-		return "", err
-	}
-
-	logPath := filepath.Join(filepath.Dir(c.LogFilePath), "builds", buildId)
-
-	if err := os.MkdirAll(filepath.Dir(logPath), 0755); err != nil {
-		return "", fmt.Errorf("failed to create log directory: %w", err)
-	}
-
-	if _, err := os.OpenFile(logPath, os.O_CREATE, 0644); err != nil {
-		return "", fmt.Errorf("failed to create log file: %w", err)
-	}
-
-	return logPath, nil
 }

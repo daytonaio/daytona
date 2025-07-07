@@ -22,6 +22,7 @@ import (
 	"github.com/lmittmann/tint"
 	"github.com/mattn/go-isatty"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"google.golang.org/grpc/credentials"
 )
 
 func main() {
@@ -63,6 +64,15 @@ func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 
+	var tlsCreds credentials.TransportCredentials
+	if cfg.EnableTLS {
+		tlsCreds, err = credentials.NewServerTLSFromFile(cfg.TLSCertFile, cfg.TLSKeyFile)
+		if err != nil {
+			log.Error("Error creating TLS credentials", "error", err)
+			return
+		}
+	}
+
 	// Create gRPC server
 	grpcServer := grpc.New(grpc.ServerConfig{
 		Addr:               fmt.Sprintf(":%d", cfg.Port),
@@ -74,9 +84,7 @@ func main() {
 		AWSRegion:          cfg.AWSRegion,
 		AWSEndpointUrl:     cfg.AWSEndpointUrl,
 		Log:                log,
-		UseTLS:             cfg.EnableTLS,
-		CertFile:           cfg.TLSCertFile,
-		KeyFile:            cfg.TLSKeyFile,
+		TLSCreds:           tlsCreds,
 	})
 
 	// Create metrics server

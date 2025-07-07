@@ -13,7 +13,6 @@ import (
 	"strings"
 
 	pb "github.com/daytonaio/runner-docker/gen/pb/runner/v1"
-	"github.com/daytonaio/runner-docker/internal/config"
 	"github.com/daytonaio/runner-docker/internal/util"
 	"github.com/daytonaio/runner-docker/pkg/common"
 	"github.com/daytonaio/runner-docker/pkg/storage"
@@ -166,7 +165,7 @@ func (s *SnapshotService) BuildSnapshot(ctx context.Context, req *pb.BuildSnapsh
 	// Extract snapshot name without tag
 	filePath := req.GetSnapshot()[:strings.LastIndex(req.GetSnapshot(), ":")]
 
-	logFilePath, err := config.GetBuildLogFilePath(filePath)
+	logFilePath, err := s.getBuildLogFilePath(filePath)
 	if err != nil {
 		return nil, err
 	}
