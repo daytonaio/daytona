@@ -634,13 +634,6 @@ const getColumns = ({
                 <Terminal className="w-4 h-4" />
               </a>
             )}
-            <button
-              onClick={() => handleVnc(row.original.id)}
-              disabled={loadingSandboxes[row.original.id]}
-              className="hover:opacity-80 disabled:opacity-50"
-            >
-              <Monitor className="w-4 h-4" />
-            </button>
           </div>
         )
       },
@@ -666,6 +659,15 @@ const getColumns = ({
             <DropdownMenuContent align="end">
               {writePermitted && (
                 <>
+                  {sandbox.state === SandboxState.STARTED && (
+                    <DropdownMenuItem
+                      onClick={() => handleVnc(sandbox.id)}
+                      className="cursor-pointer"
+                      disabled={loadingSandboxes[sandbox.id]}
+                    >
+                      VNC
+                    </DropdownMenuItem>
+                  )}
                   {sandbox.state === SandboxState.STARTED && (
                     <DropdownMenuItem
                       onClick={() => handleStop(sandbox.id)}
