@@ -1,11 +1,26 @@
 import { Injectable } from '@nestjs/common'
 import { Sandbox } from '../../entities/sandbox.entity'
 import { SandboxState } from '../../enums/sandbox-state.enum'
-import { DONT_SYNC_AGAIN, SandboxAction, SYNC_AGAIN } from '../sandbox.manager'
+import { DONT_SYNC_AGAIN, SandboxAction, SYNC_AGAIN } from './sandbox.action'
 import { RunnerState } from '../../enums/runner-state.enum'
+import { ToolboxService } from '../../services/toolbox.service'
+import { RunnerService } from '../../services/runner.service'
+import { RunnerAdapterFactory } from '../../runner-adapter/runnerAdapter'
+import { Repository } from 'typeorm'
+import { InjectRepository } from '@nestjs/typeorm'
 
 @Injectable()
 export class SandboxDestroyAction extends SandboxAction {
+  constructor(
+    protected runnerService: RunnerService,
+    protected runnerAdapterFactory: RunnerAdapterFactory,
+    @InjectRepository(Sandbox)
+    protected sandboxRepository: Repository<Sandbox>,
+    protected toolboxService: ToolboxService,
+  ) {
+    super(runnerService, runnerAdapterFactory, sandboxRepository, toolboxService)
+  }
+
   async run(sandbox: Sandbox) {
     if (sandbox.state === SandboxState.ARCHIVED) {
       await this.updateSandboxState(sandbox.id, SandboxState.DESTROYED)
@@ -45,7 +60,8 @@ export class SandboxDestroyAction extends SandboxAction {
         try {
           const sandboxInfo = await runnerAdapter.info(sandbox.id)
           if (sandboxInfo?.state === SandboxState.DESTROYED) {
-            return DONT_SYNC_AGAIN
+            await this.updateSandboxState(sandbox.id, SandboxState.DESTROYING)
+            return SYNC_AGAIN
           }
           await runnerAdapter.destroy(sandbox.id)
         } catch (e) {

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { Sandbox } from '../../entities/sandbox.entity'
 import { SandboxState } from '../../enums/sandbox-state.enum'
-import { DONT_SYNC_AGAIN, SandboxAction, SYNC_AGAIN } from '../sandbox.manager'
+import { DONT_SYNC_AGAIN, SandboxAction, SYNC_AGAIN } from './sandbox.action'
 import { BackupState } from '../../enums/backup-state.enum'
 import { In, Repository } from 'typeorm'
 import { RedisLockProvider } from '../../common/redis-lock.provider'
@@ -10,6 +10,7 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { InjectRedis } from '@nestjs-modules/ioredis'
 import Redis from 'ioredis'
 import { RunnerAdapterFactory } from '../../runner-adapter/runnerAdapter'
+import { ToolboxService } from '../../services/toolbox.service'
 
 @Injectable()
 export class SandboxArchiveAction extends SandboxAction {
@@ -20,8 +21,9 @@ export class SandboxArchiveAction extends SandboxAction {
     protected sandboxRepository: Repository<Sandbox>,
     private readonly redisLockProvider: RedisLockProvider,
     @InjectRedis() private readonly redis: Redis,
+    protected toolboxService: ToolboxService,
   ) {
-    super(runnerService, runnerAdapterFactory, sandboxRepository)
+    super(runnerService, runnerAdapterFactory, sandboxRepository, toolboxService)
   }
 
   async run(sandbox: Sandbox) {

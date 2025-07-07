@@ -131,7 +131,7 @@ export class RunnerAdapterV1 implements RunnerAdapter {
     )
   }
 
-  async create(sandbox: Sandbox, registry: DockerRegistry): Promise<void> {
+  async create(sandbox: Sandbox, registry: DockerRegistry, entrypoint?: string[]): Promise<void> {
     await firstValueFrom(
       this.sandboxServiceClient.createSandbox(
         {
@@ -150,9 +150,7 @@ export class RunnerAdapterV1 implements RunnerAdapter {
             username: registry.username,
             password: registry.password,
           },
-          // TODO: check what to do with entrypoint
-          // entrypoint: sandbox.entrypoint,
-          entrypoint: [],
+          entrypoint: entrypoint || [],
           volumes: sandbox.volumes,
         },
         this.getMetadata(),

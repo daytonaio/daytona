@@ -1,28 +1,35 @@
 import { Injectable, Logger } from '@nestjs/common'
+import { Repository } from 'typeorm'
 import { Sandbox } from '../../entities/sandbox.entity'
 import { SandboxState } from '../../enums/sandbox-state.enum'
-import { DONT_SYNC_AGAIN, SandboxAction, SYNC_AGAIN, SyncState } from '../sandbox.manager'
+import { DONT_SYNC_AGAIN, SandboxAction, SYNC_AGAIN, SyncState } from './sandbox.action'
 import { SnapshotRunnerState } from '../../enums/snapshot-runner-state.enum'
 import { BackupState } from '../../enums/backup-state.enum'
 import { RunnerState } from '../../enums/runner-state.enum'
-import { CreateSandboxDTO } from '@daytonaio/runner-api-client'
 import { DockerProvider } from '../../docker/docker-provider'
 import { BuildInfo } from '../../entities/build-info.entity'
 import { SnapshotService } from '../../services/snapshot.service'
 import { DockerRegistryService } from '../../../docker-registry/services/docker-registry.service'
+import { DockerRegistry } from '../../../docker-registry/entities/docker-registry.entity'
+import { RunnerService } from '../../services/runner.service'
+import { RunnerAdapterFactory } from '../../runner-adapter/runnerAdapter'
+import { ToolboxService } from '../../services/toolbox.service'
+import { InjectRepository } from '@nestjs/typeorm'
 
 @Injectable()
 export class SandboxStartAction extends SandboxAction {
   protected readonly logger = new Logger(SandboxStartAction.name)
   constructor(
-    runnerService,
-    runnerAdapterFactory,
-    sandboxRepository,
+    protected runnerService: RunnerService,
+    protected runnerAdapterFactory: RunnerAdapterFactory,
+    @InjectRepository(Sandbox)
+    protected sandboxRepository: Repository<Sandbox>,
+    protected toolboxService: ToolboxService,
     protected readonly dockerProvider: DockerProvider,
     protected readonly snapshotService: SnapshotService,
     protected readonly dockerRegistryService: DockerRegistryService,
   ) {
-    super(runnerService, runnerAdapterFactory, sandboxRepository)
+    super(runnerService, runnerAdapterFactory, sandboxRepository, toolboxService)
   }
 
   async run(sandbox: Sandbox) {
@@ -65,6 +72,14 @@ export class SandboxStartAction extends SandboxAction {
           })
           sandboxToUpdate.state = SandboxState.STARTED
           sandboxToUpdate.backupState = BackupState.NONE
+
+          try {
+            const daemonVersion = await this.getSandboxDaemonVersion(sandbox)
+            sandboxToUpdate.daemonVersion = daemonVersion
+          } catch (e) {
+            this.logger.error(`Failed to get sandbox daemon version for sandbox ${sandbox.id}:`, e)
+          }
+
           await this.sandboxRepository.save(sandboxToUpdate)
         }
       }
@@ -156,18 +171,8 @@ export class SandboxStartAction extends SandboxAction {
       return DONT_SYNC_AGAIN
     }
 
-    let createSandboxDto: CreateSandboxDTO = {
-      id: sandbox.id,
-      osUser: sandbox.osUser,
-      snapshot: '',
-      userId: sandbox.organizationId,
-      storageQuota: sandbox.disk,
-      memoryQuota: sandbox.mem,
-      cpuQuota: sandbox.cpu,
-      env: sandbox.env,
-      volumes: sandbox.volumes,
-    }
-
+    let registry: DockerRegistry
+    let entrypoint: string[]
     if (!sandbox.buildInfo) {
       //  get internal snapshot name
       const snapshot = await this.snapshotService.getSnapshotByName(sandbox.snapshot, sandbox.organizationId)
@@ -181,27 +186,15 @@ export class SandboxStartAction extends SandboxAction {
         throw new Error('No registry found for snapshot')
       }
 
-      createSandboxDto = {
-        ...createSandboxDto,
-        snapshot: internalSnapshotName,
-        entrypoint: snapshot.entrypoint,
-        registry: {
-          url: registry.url,
-          username: registry.username,
-          password: registry.password,
-        },
-      }
+      sandbox.snapshot = internalSnapshotName
+      entrypoint = snapshot.entrypoint
     } else {
-      createSandboxDto = {
-        ...createSandboxDto,
-        snapshot: sandbox.buildInfo.snapshotRef,
-        entrypoint: this.getEntrypointFromDockerfile(sandbox.buildInfo.dockerfileContent),
-      }
+      sandbox.snapshot = sandbox.buildInfo.snapshotRef
+      entrypoint = this.getEntrypointFromDockerfile(sandbox.buildInfo.dockerfileContent)
     }
 
     const runnerAdapter = await this.runnerAdapterFactory.create(runner)
-    await runnerAdapter.init(runner)
-    await runnerAdapter.start(sandbox.id)
+    await runnerAdapter.create(sandbox, registry, entrypoint)
     await this.updateSandboxState(sandbox.id, SandboxState.CREATING)
     //  sync states again immediately for sandbox
     return SYNC_AGAIN
@@ -241,11 +234,9 @@ export class SandboxStartAction extends SandboxAction {
         if (runningSandboxsCount > usageThreshold) {
           //  TODO: usage should be based on compute usage
 
-          const snapshot = await this.snapshotService.getSnapshotByName(sandbox.snapshot, sandbox.organizationId)
           const availableRunners = await this.runnerService.findAvailableRunners({
             region: sandbox.region,
             sandboxClass: sandbox.class,
-            snapshotRef: snapshot.internalName,
           })
           const lessUsedRunners = availableRunners.filter((runner) => runner.id !== sandbox.runnerId)
 
@@ -286,27 +277,30 @@ export class SandboxStartAction extends SandboxAction {
 
       const registry = await this.dockerRegistryService.findOne(sandbox.backupRegistryId)
       if (!registry) {
-        throw new Error('No registry found for snapshot')
+        throw new Error('No registry found for backup')
       }
 
-      const existingSnapshots = sandbox.existingBackupSnapshots.map((existingSnapshot) => existingSnapshot.snapshotName)
-      let validBackupSnapshot
+      const existingBackups = sandbox.existingBackupSnapshots.map((existingSnapshot) => existingSnapshot.snapshotName)
+      let validBackup
       let exists = false
 
-      while (existingSnapshots.length > 0) {
+      while (existingBackups.length > 0) {
         try {
-          if (!validBackupSnapshot) {
+          if (!validBackup) {
             //  last snapshot is the current snapshot, so we don't need to check it
             //  just in case, we'll use the value from the backupSnapshot property
-            validBackupSnapshot = sandbox.backupSnapshot
-            existingSnapshots.pop()
+            validBackup = sandbox.backupSnapshot
+            existingBackups.pop()
           } else {
-            validBackupSnapshot = existingSnapshots.pop()
+            validBackup = existingBackups.pop()
           }
-          if (await this.dockerProvider.checkImageExistsInRegistry(validBackupSnapshot, registry)) {
+
+          if (await this.dockerProvider.checkImageExistsInRegistry(validBackup, registry)) {
             exists = true
             break
           }
+
+          sandbox.snapshot = validBackup
         } catch (error) {
           this.logger.error(
             `Failed to check if backup snapshot ${sandbox.backupSnapshot} exists in registry ${registry.id}:`,
@@ -319,14 +313,11 @@ export class SandboxStartAction extends SandboxAction {
         return SYNC_AGAIN
       }
 
-      const snapshot = await this.snapshotService.getSnapshotByName(sandbox.snapshot, sandbox.organizationId)
-
       //  exclude the runner that the last runner sandbox was on
       const availableRunners = (
         await this.runnerService.findAvailableRunners({
           region: sandbox.region,
           sandboxClass: sandbox.class,
-          snapshotRef: snapshot.internalName,
         })
       ).filter((runner) => runner.id != sandbox.prevRunnerId)
 
@@ -334,14 +325,12 @@ export class SandboxStartAction extends SandboxAction {
       const randomRunnerIndex = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1) + min)
       const runnerId = availableRunners[randomRunnerIndex(0, availableRunners.length - 1)].id
 
+      await this.updateSandboxState(sandbox.id, SandboxState.RESTORING, runnerId)
+
       const runner = await this.runnerService.findOne(runnerId)
       const runnerAdapter = await this.runnerAdapterFactory.create(runner)
 
-      const snapshotRegistry = await this.dockerRegistryService.findOneBySnapshotImageName(sandbox.snapshot)
-
-      await runnerAdapter.create(sandbox, snapshotRegistry)
-
-      await this.updateSandboxState(sandbox.id, SandboxState.RESTORING, runnerId)
+      await runnerAdapter.create(sandbox, registry)
     } else {
       // if sandbox has runner, start sandbox
       const runner = await this.runnerService.findOne(sandbox.runnerId)
@@ -390,16 +379,9 @@ export class SandboxStartAction extends SandboxAction {
       case SandboxState.STARTED: {
         let daemonVersion: string | undefined
         try {
-          // @ts-ignore
-          daemonVersion = await runnerAdapter.getDaemonVersion(sandbox)
+          daemonVersion = await this.getSandboxDaemonVersion(sandbox)
         } catch (e) {
           this.logger.error(`Failed to get sandbox daemon version for sandbox ${sandbox.id}:`, e)
-        }
-        if (daemonVersion != sandbox.daemonVersion) {
-          sandbox.daemonVersion = daemonVersion
-          await this.sandboxRepository.update(sandbox.id, {
-            daemonVersion: daemonVersion,
-          })
         }
 
         //  if previous backup state is error or completed, set backup state to none
@@ -411,6 +393,9 @@ export class SandboxStartAction extends SandboxAction {
           })
           sandboxToUpdate.state = SandboxState.STARTED
           sandboxToUpdate.backupState = BackupState.NONE
+          if (daemonVersion) {
+            sandboxToUpdate.daemonVersion = daemonVersion
+          }
           await this.sandboxRepository.save(sandboxToUpdate)
         } else {
           await this.updateSandboxState(sandbox.id, SandboxState.STARTED)
@@ -431,7 +416,9 @@ export class SandboxStartAction extends SandboxAction {
             await this.sandboxRepository.save(sandboxToUpdate)
             break
           }
+
           const runnerAdapter = await this.runnerAdapterFactory.create(runner)
+
           try {
             // First try to destroy the sandbox
             await runnerAdapter.destroy(sandbox.id)

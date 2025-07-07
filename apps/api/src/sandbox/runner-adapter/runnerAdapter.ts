@@ -25,7 +25,7 @@ export interface RunnerAdapter {
   healthCheck(): Promise<void>
 
   info(sandboxId: string): Promise<RunnerSandboxInfo>
-  create(sandbox: Sandbox, registry: DockerRegistry): Promise<void>
+  create(sandbox: Sandbox, registry: DockerRegistry, entrypoint?: string[]): Promise<void>
   createBackup(sandbox: Sandbox, backupSnapshotName: string, registry: DockerRegistry): Promise<void>
   start(sandboxId: string): Promise<void>
   stop(sandboxId: string): Promise<void>
@@ -42,7 +42,8 @@ export interface RunnerAdapter {
 @Injectable()
 export class RunnerAdapterFactory {
   private readonly logger = new Logger(RunnerAdapterFactory.name)
-  private moduleRef: ModuleRef
+
+  constructor(private moduleRef: ModuleRef) {}
 
   async create(runner: Runner): Promise<RunnerAdapter> {
     switch (runner.version) {

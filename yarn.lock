@@ -2715,7 +2715,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@bufbuild/protobuf@npm:^2.5.0":
+"@bufbuild/protobuf@npm:^2.0.0, @bufbuild/protobuf@npm:^2.5.0":
   version: 2.6.0
   resolution: "@bufbuild/protobuf@npm:2.6.0"
   checksum: 10c0/94c6fd63266a78135e3a82cb054dcde66760909948932152069bef3bb68335877b213d80c6983bb609b15f2ea0eb5912621eebd5bd4a98dbb940136ff5161b30
@@ -12039,6 +12039,17 @@ __metadata:
   peerDependencies:
     axios: ">=1.0.0"
   checksum: 10c0/1771805da629d2dce575853940f9231366579a4f849c0779b7d725110caa8b5682b42a34b74fe886246da5ddacd6ec7914dd28586bf9ea092d522b661bc3db21
+  languageName: node
+  linkType: hard
+
+"axios-retry@npm:^4.5.0":
+  version: 4.5.0
+  resolution: "axios-retry@npm:4.5.0"
+  dependencies:
+    is-retry-allowed: "npm:^2.2.0"
+  peerDependencies:
+    axios: 0.x || 1.x
+  checksum: 10c0/574e7b1bf24aad99b560042d232a932d51bfaa29b5a6d4612d748ed799a6f11a5afb2582792492c55d95842200cbdfbe3454027a8c1b9a2d3e895d13c3d03c10
   languageName: node
   linkType: hard
 

@@ -102,9 +102,9 @@ async function bootstrap() {
   if (!configService.get('production')) {
     const runnerService = app.get(RunnerService)
     const runners = await runnerService.findAll()
-    if (!runners.find((runner) => runner.domain === 'localtest.me:3003')) {
+    if (!runners.find((runner) => runner.domain === 'localtest.me:50443')) {
       await runnerService.create({
-        apiUrl: 'http://localhost:3003',
+        apiUrl: 'localhost:50443',
         apiKey: 'secret_api_token',
         cpu: 4,
         memory: 8192,
@@ -114,7 +114,7 @@ async function bootstrap() {
         capacity: 100,
         region: RunnerRegion.US,
         class: SandboxClass.SMALL,
-        domain: 'localtest.me:3003',
+        domain: 'localtest.me:50443',
         version: '1',
       })
     }

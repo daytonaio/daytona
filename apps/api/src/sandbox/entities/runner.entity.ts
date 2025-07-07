@@ -76,7 +76,7 @@ export class Runner {
   unschedulable: boolean
 
   @Column({
-    default: '2',
+    default: '0',
   })
   version: string
 

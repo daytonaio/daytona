@@ -10,6 +10,7 @@ import { Sandbox } from '../entities/sandbox.entity'
 import { Runner } from '../entities/runner.entity'
 import axios from 'axios'
 import { SandboxState } from '../enums/sandbox-state.enum'
+import { config } from 'dotenv'
 
 @Injectable()
 export class ToolboxService {
@@ -96,6 +97,12 @@ export class ToolboxService {
 
       if (sandbox.state !== SandboxState.STARTED) {
         throw new BadRequestException('Sandbox is not running')
+      }
+
+      // TODO: check how to handle versioning for this, also remove hardcoded ports
+      if (runner.version === '1') {
+        runner.apiUrl = runner.apiUrl.replace('50443', '8443')
+        runner.apiUrl = 'http://' + runner.apiUrl
       }
 
       return runner

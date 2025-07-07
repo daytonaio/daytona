@@ -142,7 +142,7 @@ export class RunnerAdapterLegacy implements RunnerAdapter {
     })
   }
 
-  async create(sandbox: Sandbox, registry: DockerRegistry): Promise<void> {
+  async create(sandbox: Sandbox, registry: DockerRegistry, entrypoint?: string[]): Promise<void> {
     await this.apiClientSandbox.create({
       id: sandbox.id,
       snapshot: sandbox.snapshot,
@@ -157,6 +157,8 @@ export class RunnerAdapterLegacy implements RunnerAdapter {
         username: registry.username,
         password: registry.password,
       },
+      entrypoint: entrypoint || [],
+      volumes: sandbox.volumes,
     })
   }
 

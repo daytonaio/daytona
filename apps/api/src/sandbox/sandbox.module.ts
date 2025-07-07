@@ -42,6 +42,10 @@ import { BackupManager } from './managers/backup.manager'
 import { VolumeSubscriber } from './subscribers/volume.subscriber'
 import { WorkspaceController } from './controllers/workspace.deprecated.controller'
 import { SnapshotRunnerService } from './services/snapshot-runner.service'
+import { SandboxStartAction } from './managers/sandbox-actions/sandbox-start.action'
+import { SandboxStopAction } from './managers/sandbox-actions/sandbox-stop.action'
+import { SandboxDestroyAction } from './managers/sandbox-actions/sandbox-destroy.action'
+import { SandboxArchiveAction } from './managers/sandbox-actions/sandbox-archive.action'
 
 @Module({
   imports: [
@@ -78,6 +82,10 @@ import { SnapshotRunnerService } from './services/snapshot-runner.service'
     VolumeManager,
     VolumeSubscriber,
     SnapshotRunnerService,
+    SandboxStartAction,
+    SandboxStopAction,
+    SandboxDestroyAction,
+    SandboxArchiveAction,
   ],
   exports: [
     SandboxService,
