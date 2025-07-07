@@ -19,7 +19,7 @@
     "build-amd64": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "./hack/build-computer-use-amd64.sh"
+        "command": "./hack/computer-use/build-computer-use-amd64.sh"
       }
     },
     "format": {

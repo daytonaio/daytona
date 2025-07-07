@@ -12,7 +12,7 @@ if [ "$(uname -m)" = "x86_64" ]; then
 fi
 
 # Build using docker image builder
-docker build --platform linux/amd64 -t computer-use-amd64:build -f hack/Dockerfile --no-cache .
+docker build --platform linux/amd64 -t computer-use-amd64:build -f hack/computer-use/Dockerfile --no-cache .
 
 # Run the container to copy the amd binary
 docker run --rm -v $(pwd)/dist:/dist computer-use-amd64:build
