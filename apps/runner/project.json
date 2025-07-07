@@ -12,7 +12,7 @@
       },
       "dependsOn": [
         {
-          "target": "build",
+          "target": "build-amd64",
           "projects": "daemon"
         }
       ]
@@ -24,7 +24,7 @@
       },
       "dependsOn": [
         {
-          "target": "build",
+          "target": "build-amd64",
           "projects": "computer-use"
         }
       ]
@@ -38,18 +38,18 @@
       "configurations": {
         "production": {}
       },
-      "dependsOn": [
-        {
-          "target": "build",
-          "projects": "daemon"
-        },
-        {
-          "target": "build-amd64",
-          "projects": "daemon"
-        },
-        "copy-daemon-bin",
-        "copy-computeruse-plugin"
-      ]
+      "dependsOn": ["copy-daemon-bin", "copy-computeruse-plugin"]
+    },
+    "build-amd64": {
+      "executor": "@nx-go/nx-go:build",
+      "options": {
+        "main": "{projectRoot}/cmd/runner/main.go",
+        "outputPath": "dist/apps/runner-amd64",
+        "env": {
+          "GOARCH": "amd64"
+        }
+      },
+      "dependsOn": ["copy-daemon-bin", "copy-computeruse-plugin"]
     },
     "serve": {
       "executor": "@nx-go/nx-go:serve",
