@@ -1,8 +1,7 @@
 ---
-title: "Daytona"
+title: 'Daytona'
 hideTitleOnPage: true
 ---
-
 
 ## Daytona
 
@@ -14,18 +13,14 @@ Can be initialized either with explicit configuration or using environment varia
 
 - `snapshot` _SnapshotService_ - Service for managing Daytona Snapshots
 - `volume` _VolumeService_ - Service for managing Daytona Volumes
-    
-
-
-
 
 **Examples:**
 
 ```ts
 // Using environment variables
 // Uses DAYTONA_API_KEY, DAYTONA_API_URL, DAYTONA_TARGET
-const daytona = new Daytona();
-const sandbox = await daytona.create();
+const daytona = new Daytona()
+const sandbox = await daytona.create()
 ```
 
 ```ts
@@ -53,7 +48,6 @@ Creates a new Daytona client instance.
 **Parameters**:
 
 - `config?` _DaytonaConfig_ - Configuration options
-
 
 **Returns**:
 
@@ -91,21 +85,21 @@ including language, image, environment variables, and volumes.
 **Examples:**
 
 ```ts
-const sandbox = await daytona.create();
+const sandbox = await daytona.create()
 ```
 
 ```ts
 // Create a custom sandbox
 const params: CreateSandboxFromSnapshotParams = {
-    language: 'typescript',
-    snapshot: 'my-snapshot-id',
-    envVars: {
-        NODE_ENV: 'development',
-        DEBUG: 'true'
-    },
-    autoStopInterval: 60
-};
-const sandbox = await daytona.create(params, { timeout: 100 });
+  language: 'typescript',
+  snapshot: 'my-snapshot-id',
+  envVars: {
+    NODE_ENV: 'development',
+    DEBUG: 'true',
+  },
+  autoStopInterval: 60,
+}
+const sandbox = await daytona.create(params, { timeout: 100 })
 ```
 
 ##### Call Signature
@@ -135,29 +129,35 @@ provided image and uses it to create Sandbox.
 **Examples:**
 
 ```ts
-const sandbox = await daytona.create({ image: 'debian:12.9' }, { timeout: 90, onSnapshotCreateLogs: console.log });
+const sandbox = await daytona.create(
+  { image: 'debian:12.9' },
+  { timeout: 90, onSnapshotCreateLogs: console.log }
+)
 ```
 
 ```ts
 // Create a custom sandbox
-const image = Image.base('alpine:3.18').pipInstall('numpy');
+const image = Image.base('alpine:3.18').pipInstall('numpy')
 const params: CreateSandboxFromImageParams = {
-    language: 'typescript',
-    image,
-    envVars: {
-        NODE_ENV: 'development',
-        DEBUG: 'true'
-    },
-    resources: {
-        cpu: 2,
-        memory: 4 // 4GB RAM
-    },
-    autoStopInterval: 60
-};
-const sandbox = await daytona.create(params, { timeout: 100, onSnapshotCreateLogs: console.log });
+  language: 'typescript',
+  image,
+  envVars: {
+    NODE_ENV: 'development',
+    DEBUG: 'true',
+  },
+  resources: {
+    cpu: 2,
+    memory: 4, // 4GB RAM
+  },
+  autoStopInterval: 60,
+}
+const sandbox = await daytona.create(params, {
+  timeout: 100,
+  onSnapshotCreateLogs: console.log,
+})
 ```
 
-***
+---
 
 #### delete()
 
@@ -172,7 +172,6 @@ Deletes a Sandbox.
 - `sandbox` _Sandbox_ - The Sandbox to delete
 - `timeout` _number = 60_ - Timeout in seconds (0 means no timeout, default is 60)
 
-
 **Returns**:
 
 - `Promise<void>`
@@ -180,11 +179,11 @@ Deletes a Sandbox.
 **Example:**
 
 ```ts
-const sandbox = await daytona.get('my-sandbox-id');
-await daytona.delete(sandbox);
+const sandbox = await daytona.get('my-sandbox-id')
+await daytona.delete(sandbox)
 ```
 
-***
+---
 
 #### findOne()
 
@@ -198,7 +197,6 @@ Finds a Sandbox by its ID or labels.
 
 - `filter` _SandboxFilter_ - Filter for Sandboxes
 
-
 **Returns**:
 
 - `Promise<Sandbox>` - First Sandbox that matches the ID or labels.
@@ -206,11 +204,11 @@ Finds a Sandbox by its ID or labels.
 **Example:**
 
 ```ts
-const sandbox = await daytona.findOne({ labels: { 'my-label': 'my-value' } });
-console.log(`Sandbox ID: ${sandbox.id}, State: ${sandbox.state}`);
+const sandbox = await daytona.findOne({ labels: { 'my-label': 'my-value' } })
+console.log(`Sandbox ID: ${sandbox.id}, State: ${sandbox.state}`)
 ```
 
-***
+---
 
 #### get()
 
@@ -224,7 +222,6 @@ Gets a Sandbox by its ID.
 
 - `sandboxId` _string_ - The ID of the Sandbox to retrieve
 
-
 **Returns**:
 
 - `Promise<Sandbox>` - The Sandbox
@@ -232,11 +229,11 @@ Gets a Sandbox by its ID.
 **Example:**
 
 ```ts
-const sandbox = await daytona.get('my-sandbox-id');
-console.log(`Sandbox state: ${sandbox.state}`);
+const sandbox = await daytona.get('my-sandbox-id')
+console.log(`Sandbox state: ${sandbox.state}`)
 ```
 
-***
+---
 
 #### list()
 
@@ -250,7 +247,6 @@ Lists all Sandboxes filtered by labels.
 
 - `labels?` _Record\<string, string\>_ - Labels to filter Sandboxes
 
-
 **Returns**:
 
 - `Promise<Sandbox[]>` - Array of Sandboxes that match the labels.
@@ -258,13 +254,13 @@ Lists all Sandboxes filtered by labels.
 **Example:**
 
 ```ts
-const sandboxes = await daytona.list({ 'my-label': 'my-value' });
+const sandboxes = await daytona.list({ 'my-label': 'my-value' })
 for (const sandbox of sandboxes) {
-    console.log(`${sandbox.id}: ${sandbox.state}`);
+  console.log(`${sandbox.id}: ${sandbox.state}`)
 }
 ```
 
-***
+---
 
 #### start()
 
@@ -279,7 +275,6 @@ Starts a Sandbox and waits for it to be ready.
 - `sandbox` _Sandbox_ - The Sandbox to start
 - `timeout?` _number_ - Optional timeout in seconds (0 means no timeout)
 
-
 **Returns**:
 
 - `Promise<void>`
@@ -287,12 +282,12 @@ Starts a Sandbox and waits for it to be ready.
 **Example:**
 
 ```ts
-const sandbox = await daytona.get('my-sandbox-id');
+const sandbox = await daytona.get('my-sandbox-id')
 // Wait up to 60 seconds for the sandbox to start
-await daytona.start(sandbox, 60);
+await daytona.start(sandbox, 60)
 ```
 
-***
+---
 
 #### stop()
 
@@ -306,7 +301,6 @@ Stops a Sandbox.
 
 - `sandbox` _Sandbox_ - The Sandbox to stop
 
-
 **Returns**:
 
 - `Promise<void>`
@@ -314,9 +308,10 @@ Stops a Sandbox.
 **Example:**
 
 ```ts
-const sandbox = await daytona.get('my-sandbox-id');
-await daytona.stop(sandbox);
+const sandbox = await daytona.get('my-sandbox-id')
+await daytona.stop(sandbox)
 ```
+
 ## CodeLanguage
 
 Supported programming languages for code execution
@@ -341,6 +336,7 @@ Base parameters for creating a new Sandbox.
 - `public?` _boolean_ - Is the Sandbox port preview public
 - `user?` _string_ - Optional os user to use for the Sandbox
 - `volumes?` _VolumeMount\[\]_
+
 ## CreateSandboxFromImageParams
 
 Parameters for creating a new Sandbox.
@@ -351,14 +347,15 @@ Parameters for creating a new Sandbox.
 - `autoStopInterval?` _number_
 - `envVars?` _Record\<string, string\>_
 - `image` _string \| Image_ - Custom Docker image to use for the Sandbox. If an Image object is provided,
-    the image will be dynamically built.
+  the image will be dynamically built.
 - `labels?` _Record\<string, string\>_
 - `language?` _string_
 - `public?` _boolean_
 - `resources?` _Resources_ - Resource allocation for the Sandbox. If not provided, sandbox will
-    have default resources.
+  have default resources.
 - `user?` _string_
 - `volumes?` _VolumeMount\[\]_
+
 ## CreateSandboxFromSnapshotParams
 
 Parameters for creating a new Sandbox from a snapshot.
@@ -374,6 +371,7 @@ Parameters for creating a new Sandbox from a snapshot.
 - `snapshot?` _string_ - Name of the snapshot to use for the Sandbox.
 - `user?` _string_
 - `volumes?` _VolumeMount\[\]_
+
 ## DaytonaConfig
 
 Configuration options for initializing the Daytona client.
@@ -382,28 +380,25 @@ Configuration options for initializing the Daytona client.
 
 - `apiKey?` _string_ - API key for authentication with the Daytona API
 - `apiUrl?` _string_ - URL of the Daytona API. Defaults to 'https://app.daytona.io/api'
-    if not set here and not set in environment variable DAYTONA_API_URL.
+  if not set here and not set in environment variable DAYTONA_API_URL.
 - `jwtToken?` _string_ - JWT token for authentication with the Daytona API. If not set, it must be provided
-    via the environment variable `DAYTONA_JWT_TOKEN`, or an API key must be provided instead.
+  via the environment variable `DAYTONA_JWT_TOKEN`, or an API key must be provided instead.
 - `organizationId?` _string_ - Organization ID used for JWT-based authentication. Required if a JWT token
-    is provided, and must be set either here or in the environment variable `DAYTONA_ORGANIZATION_ID`.
+  is provided, and must be set either here or in the environment variable `DAYTONA_ORGANIZATION_ID`.
 - ~~`serverUrl?`~~ _string_ - **_Deprecated_** - Use `apiUrl` instead. This property will be removed in future versions.
 - `target?` _string_ - Target location for Sandboxes
-    
-
-
-
 
 **Example:**
 
 ```ts
 const config: DaytonaConfig = {
-    apiKey: "your-api-key",
-    apiUrl: "https://your-api.com",
-    target: "us"
-};
-const daytona = new Daytona(config);
+  apiKey: 'your-api-key',
+  apiUrl: 'https://your-api.com',
+  target: 'us',
+}
+const daytona = new Daytona(config)
 ```
+
 ## Resources
 
 Resource allocation for a Sandbox.
@@ -414,20 +409,17 @@ Resource allocation for a Sandbox.
 - `disk?` _number_ - Disk space allocation for the Sandbox in GiB
 - `gpu?` _number_ - GPU allocation for the Sandbox in units
 - `memory?` _number_ - Memory allocation for the Sandbox in GiB
-    
-
-
-
 
 **Example:**
 
 ```ts
 const resources: SandboxResources = {
-    cpu: 2,
-    memory: 4,  // 4GiB RAM
-    disk: 20    // 20GiB disk
-};
+  cpu: 2,
+  memory: 4, // 4GiB RAM
+  disk: 20, // 20GiB disk
+}
 ```
+
 ## SandboxFilter
 
 Filter for Sandboxes.
@@ -436,6 +428,7 @@ Filter for Sandboxes.
 
 - `id?` _string_ - The ID of the Sandbox to retrieve
 - `labels?` _Record\<string, string\>_ - Labels to filter Sandboxes
+
 ## VolumeMount
 
 Represents a volume mount for a Sandbox.
@@ -443,11 +436,7 @@ Represents a volume mount for a Sandbox.
 **Properties**:
 
 - `mountPath` _string_ - Path on the Sandbox to mount the Volume
-    
 - `volumeId` _string_ - ID of the Volume to mount
-    
-
-
 
 **Extends:**
 

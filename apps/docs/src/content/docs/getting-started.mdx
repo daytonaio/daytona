@@ -33,7 +33,7 @@ yarn add @daytonaio/sdk
 
 pnpm add @daytonaio/sdk
 
-```
+````
 </TabItem>
 </Tabs>
 
@@ -61,7 +61,7 @@ else:
 
 # Clean up the Sandbox
 sandbox.delete()
-```
+````
 
 </TabItem>
 <TabItem label="TypeScript" icon="seti:typescript">
@@ -101,7 +101,7 @@ await sandbox.delete();
 
 main().catch(console.error)
 
-```
+````
 </TabItem>
 </Tabs>
 
@@ -109,7 +109,7 @@ main().catch(console.error)
 <TabItem label="Python" icon="seti:python">
 ```bash
 python main.py
-```
+````
 
 </TabItem>
 <TabItem label="TypeScript" icon="seti:typescript">
@@ -140,7 +140,9 @@ app = Flask(**name**)
 @app.route('/')
 def hello():
 return """
+
 <!DOCTYPE html>
+
 <html>
 <head>
 <title>Hello World</title>
@@ -178,7 +180,7 @@ var_async=True
 preview_info = sandbox.get_preview_link(3000)
 print(f"Flask app is available at: {preview_info.url}")
 
-```
+````
 
 </TabItem>
 <TabItem label="TypeScript" icon="seti:typescript">
@@ -238,7 +240,7 @@ if __name__ == '__main__':
 
 main().catch(error => console.error("Error:", error));
 
-```
+````
 
 </TabItem>
 </Tabs>
@@ -301,7 +303,7 @@ code = code.replace('\\', '\\\\')
 response = sandbox.process.code_run(code)
 print("The factorial of 25 is", response.result)
 
-```
+````
 
 Running the snippet:
 
@@ -310,7 +312,7 @@ ANTHROPIC_API_KEY="your-anthropic-api-key"
 DAYTONA_API_KEY="your-daytona-api-key"
 DAYTONA_TARGET=us
 python claude-example.py
-```
+````
 
 ```bash
 > The factorial of 25 is 15511210043330985984000000
@@ -376,7 +378,7 @@ console.log("The factorial of 25 is", response.result)
 
 main().catch(console.error)
 
-```
+````
 
 
 Running the snippet:
@@ -386,7 +388,7 @@ ANTHROPIC_API_KEY="your-anthropic-api-key"
 DAYTONA_API_KEY="your-daytona-api-key"
 DAYTONA_TARGET=us
 npx ts-node claude-example.ts
-```
+````
 
 ```bash
 > The factorial of 25 is 15511210043330985984000000

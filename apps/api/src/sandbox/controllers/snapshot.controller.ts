@@ -113,6 +113,21 @@ export class SnapshotController {
     return SnapshotDto.fromSnapshot(snapshot)
   }
 
+  @Get('reference-list')
+  @ApiOperation({
+    summary: 'Get references of all snapshots in use',
+    operationId: 'getSnapshotReferenceList',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Array of snapshot references',
+    type: [String],
+  })
+  @RequiredSystemRole(SystemRole.ADMIN)
+  async getSnapshotReferenceList(): Promise<string[]> {
+    return this.snapshotService.getAllSnapshotReferences()
+  }
+
   @Get(':id')
   @ApiOperation({
     summary: 'Get snapshot by ID or name',

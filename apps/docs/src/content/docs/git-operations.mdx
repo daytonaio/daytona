@@ -42,7 +42,7 @@ path="workspace/repo",
 branch="develop"
 )
 
-```
+````
 </TabItem>
 <TabItem label="TypeScript" icon="seti:typescript">
 ```typescript
@@ -68,7 +68,7 @@ await sandbox.git.clone(
     "workspace/repo",
     "develop"
 );
-```
+````
 
 </TabItem>
 </Tabs>
@@ -94,7 +94,7 @@ response = sandbox.git.branches("workspace/repo")
 for branch in response.branches:
 print(f"Branch: {branch}")
 
-```
+````
 </TabItem>
 <TabItem label="TypeScript" icon="seti:typescript">
 ```typescript
@@ -112,7 +112,7 @@ const response = await sandbox.git.branches("workspace/repo");
 response.branches.forEach(branch => {
     console.log(`Branch: ${branch}`);
 });
-```
+````
 
 </TabItem>
 </Tabs>
@@ -139,7 +139,7 @@ sandbox.git.checkout("workspace/repo", "feature/new-feature")
 
 sandbox.git.delete_branch("workspace/repo", "feature/old-feature")
 
-```
+````
 </TabItem>
 <TabItem label="TypeScript" icon="seti:typescript">
 ```typescript
@@ -151,7 +151,7 @@ await sandbox.git.checkout("workspace/repo", "feature/new-feature");
 
 // Delete branch
 await sandbox.git.deleteBranch("workspace/repo", "feature/old-feature");
-```
+````
 
 </TabItem>
 </Tabs>
@@ -184,7 +184,7 @@ print(f"Commit: {commit.hash}")
 print(f"Author: {commit.author}")
 print(f"Message: {commit.message}")
 
-```
+````
 </TabItem>
 <TabItem label="TypeScript" icon="seti:typescript">
 ```typescript
@@ -204,7 +204,7 @@ commits.forEach(commit => {
     console.log(`Author: ${commit.author}`);
     console.log(`Message: ${commit.message}`);
 });
-```
+````
 
 </TabItem>
 </Tabs>
@@ -233,7 +233,7 @@ remotes = sandbox.git.list_remotes("workspace/repo")
 for remote in remotes:
 print(f"Remote: {remote.name} URL: {remote.url}")
 
-```
+````
 </TabItem>
 <TabItem label="TypeScript" icon="seti:typescript">
 ```typescript
@@ -248,7 +248,7 @@ await sandbox.git.pull("workspace/repo");
 
 // Pull from specific remote and branch
 await sandbox.git.pull("workspace/repo", "origin", "main");
-```
+````
 
 </TabItem>
 </Tabs>

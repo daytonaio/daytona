@@ -51,7 +51,7 @@ sandbox = daytona.create(params)
 params = CreateSandboxFromSnapshotParams(labels={"SOME_LABEL": "my-label"})
 sandbox = daytona.create(params)
 
-```
+````
 </TabItem>
 
 <TabItem label="TypeScript" icon="seti:typescript">
@@ -68,7 +68,7 @@ const sandbox = await daytona.create({ language: 'typescript' });
 
 // Create a Sandbox with custom labels
 const sandbox = await daytona.create({ labels: { SOME_LABEL: 'my-label' } });
-```
+````
 
 </TabItem>
 </Tabs>
@@ -110,7 +110,7 @@ resources=resources
 
 sandbox = daytona.create(params)
 
-```
+````
 </TabItem>
 <TabItem label="TypeScript" icon="seti:typescript">
 ```typescript
@@ -131,7 +131,7 @@ async function main() {
 }
 
 main();
-```
+````
 
 </TabItem>
 </Tabs>
@@ -160,7 +160,7 @@ print(sandbox.id)
 print(sandbox.auto_stop_interval)
 print(sandbox.state)
 
-```
+````
 
 </TabItem>
 <TabItem label="TypeScript" icon="seti:typescript">
@@ -175,7 +175,7 @@ const rootDir = await sandbox.getUserRootDir();
 console.log(sandbox.id)
 console.log(sandbox.autoStopInterval)
 console.log(sandbox.state)
-```
+````
 
 </TabItem>
 </Tabs>
@@ -207,7 +207,7 @@ sandbox = daytona.find_one("7cd11133-96c1-4cc8-9baa-c757b8f8c916")
 
 sandbox.start()
 
-```
+````
 </TabItem>
 <TabItem label="TypeScript" icon="seti:typescript">
 ```typescript
@@ -224,7 +224,7 @@ const sandbox = await daytona.findOne("7cd11133-96c1-4cc8-9baa-c757b8f8c916");
 
 // Start Sandbox
 await sandbox.start();
-```
+````
 
 </TabItem>
 </Tabs>

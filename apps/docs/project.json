@@ -17,10 +17,7 @@
         "cwd": "{projectRoot}",
         "command": "astro build"
       },
-      "dependsOn": [
-        "update-llms",
-        "update-search"
-      ]
+      "dependsOn": ["update-llms", "update-search"]
     },
     "update-cli-reference": {
       "executor": "nx:run-commands",

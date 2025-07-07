@@ -1,5 +1,5 @@
 ---
-title: "AsyncLspServer"
+title: 'AsyncLspServer'
 hideTitleOnPage: true
 ---
 
@@ -67,7 +67,7 @@ free up system resources.
 await lsp.stop()  # Clean up resources
 ```
 
-#### AsyncLspServer.did\_open
+#### AsyncLspServer.did_open
 
 ```python
 @intercept_errors(message_prefix="Failed to open file: ")
@@ -84,7 +84,6 @@ will begin tracking the file's contents and providing language features.
 
 - `path` _str_ - Path to the opened file. Relative paths are resolved based on the project path
   set in the LSP server constructor.
-  
 
 **Example**:
 
@@ -94,7 +93,7 @@ await lsp.did_open("workspace/project/src/index.ts")
 # Now can get completions, symbols, etc. for this file
 ```
 
-#### AsyncLspServer.did\_close
+#### AsyncLspServer.did_close
 
 ```python
 @intercept_errors(message_prefix="Failed to close file: ")
@@ -110,7 +109,6 @@ the language server to clean up any resources associated with that file.
 
 - `path` _str_ - Path to the closed file. Relative paths are resolved based on the project path
   set in the LSP server constructor.
-  
 
 **Example**:
 
@@ -119,7 +117,7 @@ the language server to clean up any resources associated with that file.
 await lsp.did_close("workspace/project/src/index.ts")
 ```
 
-#### AsyncLspServer.document\_symbols
+#### AsyncLspServer.document_symbols
 
 ```python
 @intercept_errors(message_prefix="Failed to get symbols from document: ")
@@ -132,7 +130,6 @@ Gets symbol information (functions, classes, variables, etc.) from a document.
 
 - `path` _str_ - Path to the file to get symbols from. Relative paths are resolved based on the project path
   set in the LSP server constructor.
-  
 
 **Returns**:
 
@@ -140,7 +137,6 @@ Gets symbol information (functions, classes, variables, etc.) from a document.
   - name: The symbol's name
   - kind: The symbol's kind (function, class, variable, etc.)
   - location: The location of the symbol in the file
-  
 
 **Example**:
 
@@ -151,7 +147,7 @@ for symbol in symbols:
     print(f"{symbol.kind} {symbol.name}: {symbol.location}")
 ```
 
-#### AsyncLspServer.workspace\_symbols
+#### AsyncLspServer.workspace_symbols
 
 ```python
 @deprecated(
@@ -167,13 +163,12 @@ in the Sandbox.
 **Arguments**:
 
 - `query` _str_ - Search query to match against symbol names.
-  
 
 **Returns**:
 
 - `List[LspSymbol]` - List of matching symbols from all files.
 
-#### AsyncLspServer.sandbox\_symbols
+#### AsyncLspServer.sandbox_symbols
 
 ```python
 @intercept_errors(message_prefix="Failed to get symbols from sandbox: ")
@@ -186,7 +181,6 @@ in the Sandbox.
 **Arguments**:
 
 - `query` _str_ - Search query to match against symbol names.
-  
 
 **Returns**:
 
@@ -195,7 +189,6 @@ in the Sandbox.
   - name: The symbol's name
   - kind: The symbol's kind (function, class, variable, etc.)
   - location: The location of the symbol in the file
-  
 
 **Example**:
 
@@ -220,7 +213,6 @@ Gets completion suggestions at a position in a file.
 - `path` _str_ - Path to the file. Relative paths are resolved based on the project path
   set in the LSP server constructor.
 - `position` _Position_ - Cursor position to get completions for.
-  
 
 **Returns**:
 
@@ -234,7 +226,6 @@ Gets completion suggestions at a position in a file.
   - sortText: Text used to sort the item in the list
   - filterText: Text used to filter the item
   - insertText: The actual text to insert (if different from label)
-  
 
 **Example**:
 
@@ -246,7 +237,6 @@ for item in completions.items:
     print(f"{item.label} ({item.kind}): {item.detail}")
 ```
 
-
 ## LspLanguageId
 
 ```python
@@ -255,10 +245,7 @@ class LspLanguageId(Enum)
 
 Language IDs for Language Server Protocol (LSP).
 
-**Enum Members**:
-    - `PYTHON` ("python")
-    - `TYPESCRIPT` ("typescript")
-    - `JAVASCRIPT` ("javascript")
+**Enum Members**: - `PYTHON` ("python") - `TYPESCRIPT` ("typescript") - `JAVASCRIPT` ("javascript")
 
 ## Position
 
@@ -286,4 +273,3 @@ Initialize a new Position instance.
 
 - `line` _int_ - Zero-based line number in the document.
 - `character` _int_ - Zero-based character offset on the line.
-

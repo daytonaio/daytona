@@ -291,6 +291,47 @@ export const SnapshotsApiAxiosParamCreator = function (configuration?: Configura
     },
     /**
      *
+     * @summary Get references of all snapshots in use
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    getSnapshotReferenceList: async (
+      xDaytonaOrganizationID?: string,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      const localVarPath = `/snapshots/reference-list`
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      // authentication bearer required
+      // http bearer authentication required
+      await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+      // authentication oauth2 required
+
+      if (xDaytonaOrganizationID != null) {
+        localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
+      }
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     *
      * @summary Delete snapshot
      * @param {string} id Snapshot ID
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
@@ -597,6 +638,32 @@ export const SnapshotsApiFp = function (configuration?: Configuration) {
     },
     /**
      *
+     * @summary Get references of all snapshots in use
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async getSnapshotReferenceList(
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<string>>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.getSnapshotReferenceList(
+        xDaytonaOrganizationID,
+        options,
+      )
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['SnapshotsApi.getSnapshotReferenceList']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
+    /**
+     *
      * @summary Delete snapshot
      * @param {string} id Snapshot ID
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
@@ -783,6 +850,21 @@ export const SnapshotsApiFactory = function (configuration?: Configuration, base
     },
     /**
      *
+     * @summary Get references of all snapshots in use
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    getSnapshotReferenceList(
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<Array<string>> {
+      return localVarFp
+        .getSnapshotReferenceList(xDaytonaOrganizationID, options)
+        .then((request) => request(axios, basePath))
+    },
+    /**
+     *
      * @summary Delete snapshot
      * @param {string} id Snapshot ID
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
@@ -928,6 +1010,20 @@ export class SnapshotsApi extends BaseAPI {
   ) {
     return SnapshotsApiFp(this.configuration)
       .getSnapshotBuildLogs(id, xDaytonaOrganizationID, follow, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   *
+   * @summary Get references of all snapshots in use
+   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof SnapshotsApi
+   */
+  public getSnapshotReferenceList(xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
+    return SnapshotsApiFp(this.configuration)
+      .getSnapshotReferenceList(xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 

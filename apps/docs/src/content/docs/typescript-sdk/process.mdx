@@ -1,8 +1,7 @@
 ---
-title: "Process"
+title: 'Process'
 hideTitleOnPage: true
 ---
-
 
 ## CodeRunParams
 
@@ -12,10 +11,6 @@ Parameters for code execution.
 
 - `argv?` _string\[\]_ - Command line arguments
 - `env?` _Record\<string, string\>_ - Environment variables
-    
-
-
-
 
 ### Constructors
 
@@ -28,6 +23,7 @@ new CodeRunParams(): CodeRunParams
 **Returns**:
 
 - `CodeRunParams`
+
 ## Process
 
 Handles process and code execution within a Sandbox.
@@ -38,9 +34,9 @@ Handles process and code execution within a Sandbox.
 
 ```ts
 new Process(
-   sandboxId: string, 
-   codeToolbox: SandboxCodeToolbox, 
-   toolboxApi: ToolboxApi, 
+   sandboxId: string,
+   codeToolbox: SandboxCodeToolbox,
+   toolboxApi: ToolboxApi,
    getRootDir: () => Promise<string>): Process
 ```
 
@@ -50,7 +46,6 @@ new Process(
 - `codeToolbox` _SandboxCodeToolbox_
 - `toolboxApi` _ToolboxApi_
 - `getRootDir` _\(\) =\> Promise\<string\>_
-
 
 **Returns**:
 
@@ -62,8 +57,8 @@ new Process(
 
 ```ts
 codeRun(
-   code: string, 
-   params?: CodeRunParams, 
+   code: string,
+   params?: CodeRunParams,
 timeout?: number): Promise<ExecuteResponse>
 ```
 
@@ -75,13 +70,12 @@ Executes code in the Sandbox using the appropriate language runtime.
 - `params?` _CodeRunParams_ - Parameters for code execution
 - `timeout?` _number_ - Maximum time in seconds to wait for execution to complete
 
-
 **Returns**:
 
 - `Promise<ExecuteResponse>` - Code execution results containing:
-    - exitCode: The execution's exit status
-    - result: Standard output from the code
-    - artifacts: ExecutionArtifacts object containing `stdout` (same as result) and `charts` (matplotlib charts metadata)
+  - exitCode: The execution's exit status
+  - result: Standard output from the code
+  - artifacts: ExecutionArtifacts object containing `stdout` (same as result) and `charts` (matplotlib charts metadata)
 
 **Examples:**
 
@@ -91,8 +85,8 @@ const response = await process.codeRun(`
   const x = 10;
   const y = 20;
   console.log(\`Sum: \${x + y}\`);
-`);
-console.log(response.artifacts.stdout);  // Prints: Sum: 30
+`)
+console.log(response.artifacts.stdout) // Prints: Sum: 30
 ```
 
 ```ts
@@ -111,13 +105,13 @@ plt.xlabel('X-axis (seconds)')
 plt.ylabel('Y-axis (amplitude)')
 plt.grid(True)
 plt.show()
-`);
+`)
 
 if (response.artifacts?.charts) {
-  const chart = response.artifacts.charts[0];
+  const chart = response.artifacts.charts[0]
 
-  console.log(`Type: ${chart.type}`);
-  console.log(`Title: ${chart.title}`);
+  console.log(`Type: ${chart.type}`)
+  console.log(`Title: ${chart.title}`)
   if (chart.type === ChartType.LINE) {
     const lineChart = chart as LineChart
     console.log('X Label:', lineChart.x_label)
@@ -134,7 +128,7 @@ if (response.artifacts?.charts) {
 }
 ```
 
-***
+---
 
 #### createSession()
 
@@ -152,7 +146,6 @@ long-running commands and monitor process status.
 
 - `sessionId` _string_ - Unique identifier for the new session
 
-
 **Returns**:
 
 - `Promise<void>`
@@ -161,14 +154,14 @@ long-running commands and monitor process status.
 
 ```ts
 // Create a new session
-const sessionId = 'my-session';
-await process.createSession(sessionId);
-const session = await process.getSession(sessionId);
+const sessionId = 'my-session'
+await process.createSession(sessionId)
+const session = await process.getSession(sessionId)
 // Do work...
-await process.deleteSession(sessionId);
+await process.deleteSession(sessionId)
 ```
 
-***
+---
 
 #### deleteSession()
 
@@ -182,7 +175,6 @@ Delete a session from the Sandbox.
 
 - `sessionId` _string_ - Unique identifier of the session to delete
 
-
 **Returns**:
 
 - `Promise<void>`
@@ -191,18 +183,18 @@ Delete a session from the Sandbox.
 
 ```ts
 // Clean up a completed session
-await process.deleteSession('my-session');
+await process.deleteSession('my-session')
 ```
 
-***
+---
 
 #### executeCommand()
 
 ```ts
 executeCommand(
-   command: string, 
-   cwd?: string, 
-   env?: Record<string, string>, 
+   command: string,
+   cwd?: string,
+   env?: Record<string, string>,
 timeout?: number): Promise<ExecuteResponse>
 ```
 
@@ -212,44 +204,43 @@ Executes a shell command in the Sandbox.
 
 - `command` _string_ - Shell command to execute
 - `cwd?` _string_ - Working directory for command execution. If not specified, uses the Sandbox root directory.
-    Default is the user's root directory.
+  Default is the user's root directory.
 - `env?` _Record\<string, string\>_ - Environment variables to set for the command
 - `timeout?` _number_ - Maximum time in seconds to wait for the command to complete. 0 means wait indefinitely.
-
 
 **Returns**:
 
 - `Promise<ExecuteResponse>` - Command execution results containing:
-    - exitCode: The command's exit status
-    - result: Standard output from the command
-    - artifacts: ExecutionArtifacts object containing `stdout` (same as result) and `charts` (matplotlib charts metadata)
+  - exitCode: The command's exit status
+  - result: Standard output from the command
+  - artifacts: ExecutionArtifacts object containing `stdout` (same as result) and `charts` (matplotlib charts metadata)
 
 **Examples:**
 
 ```ts
 // Simple command
-const response = await process.executeCommand('echo "Hello"');
-console.log(response.artifacts.stdout);  // Prints: Hello
+const response = await process.executeCommand('echo "Hello"')
+console.log(response.artifacts.stdout) // Prints: Hello
 ```
 
 ```ts
 // Command with working directory
-const result = await process.executeCommand('ls', 'workspace/src');
+const result = await process.executeCommand('ls', 'workspace/src')
 ```
 
 ```ts
 // Command with timeout
-const result = await process.executeCommand('sleep 10', undefined, 5);
+const result = await process.executeCommand('sleep 10', undefined, 5)
 ```
 
-***
+---
 
 #### executeSessionCommand()
 
 ```ts
 executeSessionCommand(
-   sessionId: string, 
-   req: SessionExecuteRequest, 
+   sessionId: string,
+   req: SessionExecuteRequest,
 timeout?: number): Promise<SessionExecuteResponse>
 ```
 
@@ -259,37 +250,36 @@ Executes a command in an existing session.
 
 - `sessionId` _string_ - Unique identifier of the session to use
 - `req` _SessionExecuteRequest_ - Command execution request containing:
-    - command: The command to execute
-    - runAsync: Whether to execute asynchronously
+  - command: The command to execute
+  - runAsync: Whether to execute asynchronously
 - `timeout?` _number_ - Timeout in seconds
-
 
 **Returns**:
 
 - `Promise<SessionExecuteResponse>` - Command execution results containing:
-    - cmdId: Unique identifier for the executed command
-    - output: Command output (if synchronous execution)
-    - exitCode: Command exit status (if synchronous execution)
+  - cmdId: Unique identifier for the executed command
+  - output: Command output (if synchronous execution)
+  - exitCode: Command exit status (if synchronous execution)
 
 **Example:**
 
 ```ts
 // Execute commands in sequence, maintaining state
-const sessionId = 'my-session';
+const sessionId = 'my-session'
 
 // Change directory
 await process.executeSessionCommand(sessionId, {
-  command: 'cd /home/daytona'
-});
+  command: 'cd /home/daytona',
+})
 
 // Run command in new directory
 const result = await process.executeSessionCommand(sessionId, {
-  command: 'pwd'
-});
-console.log(result.output);  // Prints: /home/daytona
+  command: 'pwd',
+})
+console.log(result.output) // Prints: /home/daytona
 ```
 
-***
+---
 
 #### getSession()
 
@@ -303,23 +293,22 @@ Get a session in the sandbox.
 
 - `sessionId` _string_ - Unique identifier of the session to retrieve
 
-
 **Returns**:
 
 - `Promise<Session>` - Session information including:
-    - sessionId: The session's unique identifier
-    - commands: List of commands executed in the session
+  - sessionId: The session's unique identifier
+  - commands: List of commands executed in the session
 
 **Example:**
 
 ```ts
-const session = await process.getSession('my-session');
+const session = await process.getSession('my-session')
 session.commands.forEach(cmd => {
-  console.log(`Command: ${cmd.command}`);
-});
+  console.log(`Command: ${cmd.command}`)
+})
 ```
 
-***
+---
 
 #### getSessionCommand()
 
@@ -334,24 +323,23 @@ Gets information about a specific command executed in a session.
 - `sessionId` _string_ - Unique identifier of the session
 - `commandId` _string_ - Unique identifier of the command
 
-
 **Returns**:
 
 - `Promise<Command>` - Command information including:
-    - id: The command's unique identifier
-    - command: The executed command string
-    - exitCode: Command's exit status (if completed)
+  - id: The command's unique identifier
+  - command: The executed command string
+  - exitCode: Command's exit status (if completed)
 
 **Example:**
 
 ```ts
-const cmd = await process.getSessionCommand('my-session', 'cmd-123');
+const cmd = await process.getSessionCommand('my-session', 'cmd-123')
 if (cmd.exitCode === 0) {
-  console.log(`Command ${cmd.command} completed successfully`);
+  console.log(`Command ${cmd.command} completed successfully`)
 }
 ```
 
-***
+---
 
 #### getSessionCommandLogs()
 
@@ -375,16 +363,16 @@ Get the logs for a command executed in a session.
 **Example:**
 
 ```ts
-const logs = await process.getSessionCommandLogs('my-session', 'cmd-123');
-console.log('Command output:', logs);
+const logs = await process.getSessionCommandLogs('my-session', 'cmd-123')
+console.log('Command output:', logs)
 ```
 
 ##### Call Signature
 
 ```ts
 getSessionCommandLogs(
-   sessionId: string, 
-   commandId: string, 
+   sessionId: string,
+   commandId: string,
 onLogs: (chunk: string) => void): Promise<void>
 ```
 
@@ -403,12 +391,16 @@ Asynchronously retrieve and process the logs for a command executed in a session
 **Example:**
 
 ```ts
-const logs = await process.getSessionCommandLogs('my-session', 'cmd-123', (chunk) => {
-  console.log('Log chunk:', chunk);
-});
+const logs = await process.getSessionCommandLogs(
+  'my-session',
+  'cmd-123',
+  chunk => {
+    console.log('Log chunk:', chunk)
+  }
+)
 ```
 
-***
+---
 
 #### listSessions()
 
@@ -425,11 +417,11 @@ Lists all active sessions in the Sandbox.
 **Example:**
 
 ```ts
-const sessions = await process.listSessions();
+const sessions = await process.listSessions()
 sessions.forEach(session => {
-  console.log(`Session ${session.sessionId}:`);
+  console.log(`Session ${session.sessionId}:`)
   session.commands.forEach(cmd => {
-    console.log(`- ${cmd.command} (${cmd.exitCode})`);
-  });
-});
+    console.log(`- ${cmd.command} (${cmd.exitCode})`)
+  })
+})
 ```

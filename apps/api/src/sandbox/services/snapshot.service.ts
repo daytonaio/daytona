@@ -11,7 +11,7 @@ import {
   BadRequestException,
 } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { Repository } from 'typeorm'
+import { Repository, Not, In, IsNull } from 'typeorm'
 import { Snapshot } from '../entities/snapshot.entity'
 import { SnapshotState } from '../enums/snapshot-state.enum'
 import { CreateSnapshotDto } from '../dto/create-snapshot.dto'
@@ -289,5 +289,17 @@ export class SnapshotService {
     snapshot.state = SnapshotState.ACTIVE
     snapshot.lastUsedAt = new Date()
     return await this.snapshotRepository.save(snapshot)
+  }
+
+  async getAllSnapshotReferences(): Promise<string[]> {
+    const snapshots = await this.snapshotRepository.find({
+      where: {
+        state: Not(In([SnapshotState.ERROR, SnapshotState.BUILD_FAILED])),
+        internalName: Not(IsNull()),
+      },
+      select: ['internalName'],
+    })
+
+    return snapshots.map((snapshot) => snapshot.internalName)
   }
 }

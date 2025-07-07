@@ -1,8 +1,7 @@
 ---
-title: "Snapshot"
+title: 'Snapshot'
 hideTitleOnPage: true
 ---
-
 
 ## SnapshotService
 
@@ -20,7 +19,6 @@ new SnapshotService(snapshotsApi: SnapshotsApi, objectStorageApi: ObjectStorageA
 
 - `snapshotsApi` _SnapshotsApi_
 - `objectStorageApi` _ObjectStorageApi_
-
 
 **Returns**:
 
@@ -46,7 +44,6 @@ Creates and registers a new snapshot from the given Image definition.
 - `onLogs?` _\(chunk: string\) =\> void_ - This callback function handles snapshot creation logs.
 - `timeout?` _number_ - Default is no timeout. Timeout in seconds (0 means no timeout).
 
-
 **Returns**:
 
 - `Promise<Snapshot>`
@@ -54,11 +51,14 @@ Creates and registers a new snapshot from the given Image definition.
 **Example:**
 
 ```ts
-const image = Image.debianSlim('3.12').pipInstall('numpy');
-await daytona.snapshot.create({ name: 'my-snapshot', image: image }, { onLogs: console.log });
+const image = Image.debianSlim('3.12').pipInstall('numpy')
+await daytona.snapshot.create(
+  { name: 'my-snapshot', image: image },
+  { onLogs: console.log }
+)
 ```
 
-***
+---
 
 #### delete()
 
@@ -72,7 +72,6 @@ Deletes a Snapshot.
 
 - `snapshot` _Snapshot_ - Snapshot to delete
 
-
 **Returns**:
 
 - `Promise<void>`
@@ -84,13 +83,13 @@ If the Snapshot does not exist or cannot be deleted
 **Example:**
 
 ```ts
-const daytona = new Daytona();
-const snapshot = await daytona.snapshot.get("snapshot-name");
-await daytona.snapshot.delete(snapshot);
-console.log("Snapshot deleted successfully");
+const daytona = new Daytona()
+const snapshot = await daytona.snapshot.get('snapshot-name')
+await daytona.snapshot.delete(snapshot)
+console.log('Snapshot deleted successfully')
 ```
 
-***
+---
 
 #### get()
 
@@ -104,7 +103,6 @@ Gets a Snapshot by its name.
 
 - `name` _string_ - Name of the Snapshot to retrieve
 
-
 **Returns**:
 
 - `Promise<Snapshot>` - The requested Snapshot
@@ -116,12 +114,12 @@ If the Snapshot does not exist or cannot be accessed
 **Example:**
 
 ```ts
-const daytona = new Daytona();
-const snapshot = await daytona.snapshot.get("snapshot-name");
-console.log(`Snapshot ${snapshot.name} is in state ${snapshot.state}`);
+const daytona = new Daytona()
+const snapshot = await daytona.snapshot.get('snapshot-name')
+console.log(`Snapshot ${snapshot.name} is in state ${snapshot.state}`)
 ```
 
-***
+---
 
 #### list()
 
@@ -138,24 +136,25 @@ List all Snapshots.
 **Example:**
 
 ```ts
-const daytona = new Daytona();
-const snapshots = await daytona.snapshot.list();
-console.log(`Found ${snapshots.length} snapshots`);
-snapshots.forEach(snapshot => console.log(`${snapshot.name} (${snapshot.imageName})`));
+const daytona = new Daytona()
+const snapshots = await daytona.snapshot.list()
+console.log(`Found ${snapshots.length} snapshots`)
+snapshots.forEach(snapshot =>
+  console.log(`${snapshot.name} (${snapshot.imageName})`)
+)
 ```
 
-***
-
+---
 
 ## CreateSnapshotParams
 
 ```ts
 type CreateSnapshotParams = {
-  entrypoint: string[];
-  image: string | Image;
-  name: string;
-  resources: Resources;
-};
+  entrypoint: string[]
+  image: string | Image
+  name: string
+  resources: Resources
+}
 ```
 
 Parameters for creating a new snapshot.
@@ -167,13 +166,12 @@ Parameters for creating a new snapshot.
 - `name` _string_
 - `resources?` _Resources_
 
-
 ## Snapshot
 
 ```ts
 type Snapshot = SnapshotDto & {
-  __brand: "Snapshot";
-};
+  __brand: 'Snapshot'
+}
 ```
 
 Represents a Daytona Snapshot which is a pre-configured sandbox.
@@ -181,4 +179,3 @@ Represents a Daytona Snapshot which is a pre-configured sandbox.
 **Type declaration**:
 
 - `\_\_brand` _"Snapshot"_
-

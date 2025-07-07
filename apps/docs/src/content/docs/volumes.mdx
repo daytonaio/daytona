@@ -15,14 +15,10 @@ In order to mount a volume to a Sandbox, one must be created.
 
 <Tabs>
   <TabItem label="Python" icon="seti:python">
-    ```bash
-    volume = daytona.volume.get("my-volume", create=True)
-    ```
+    ```bash volume = daytona.volume.get("my-volume", create=True) ```
   </TabItem>
   <TabItem label="TypeScript" icon="seti:typescript">
-    ```bash
-    const volume = await daytona.volume.get('my-volume', true)
-    ```
+    ```bash const volume = await daytona.volume.get('my-volume', true) ```
   </TabItem>
 </Tabs>
 
@@ -58,7 +54,7 @@ sandbox = daytona.create(params)
 
 sandbox.delete()
 
-```
+````
 
 </TabItem>
 <TabItem label="TypeScript" icon="seti:typescript">
@@ -87,7 +83,7 @@ async function main() {
 
 main()
 
-```
+````
 
 </TabItem>
 </Tabs>
@@ -98,16 +94,12 @@ When a volume is no longer needed, it can be removed.
 
 <Tabs>
   <TabItem label="Python" icon="seti:python">
-    ```python
-    volume = daytona.volume.get("my-volume", create=True)
-    daytona.volume.delete(volume)
-    ```
+    ```python volume = daytona.volume.get("my-volume", create=True)
+    daytona.volume.delete(volume) ```
   </TabItem>
   <TabItem label="TypeScript" icon="seti:typescript">
-    ```typescript
-    const volume = await daytona.volume.get('my-volume', true)
-    await daytona.volume.delete(volume)
-    ```
+    ```typescript const volume = await daytona.volume.get('my-volume', true)
+    await daytona.volume.delete(volume) ```
   </TabItem>
 </Tabs>
 

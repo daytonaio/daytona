@@ -1,5 +1,5 @@
 ---
-title: "AsyncDaytona"
+title: 'AsyncDaytona'
 hideTitleOnPage: true
 ---
 
@@ -18,17 +18,18 @@ It can be initialized either with explicit configuration or using environment va
 
 - `volume` _AsyncVolumeService_ - Service for managing volumes.
 - `snapshot` _AsyncSnapshotService_ - Service for managing snapshots.
-  
 
 **Example**:
 
-  Using environment variables:
+Using environment variables:
+
 ```python
 async with AsyncDaytona() as daytona:  # Uses DAYTONA_API_KEY, DAYTONA_API_URL
     sandbox = await daytona.create()
 ```
-  
-  Using explicit configuration:
+
+Using explicit configuration:
+
 ```python
 config = DaytonaConfig(
     api_key="your-api-key",
@@ -51,6 +52,7 @@ def __init__(config: Optional[DaytonaConfig] = None)
 Initializes Daytona instance with optional configuration.
 
 If no config is provided, reads from environment variables:
+
 - `DAYTONA_API_KEY`: Required API key for authentication
 - `DAYTONA_API_URL`: Required api URL
 - `DAYTONA_TARGET`: Optional target environment (defaults to 'us')
@@ -58,12 +60,10 @@ If no config is provided, reads from environment variables:
 **Arguments**:
 
 - `config` _Optional[DaytonaConfig]_ - Object containing api_key, api_url, and target.
-  
 
 **Raises**:
 
 - `DaytonaError` - If API key is not provided either through config or environment variables
-  
 
 **Example**:
 
@@ -119,8 +119,9 @@ try:
 finally:
     await daytona.close()
 ```
-  
-  Or better yet, use as async context manager:
+
+Or better yet, use as async context manager:
+
 ```python
 async with AsyncDaytona() as daytona:
     sandbox = await daytona.create()
@@ -146,27 +147,26 @@ including language, image, environment variables, and volumes.
   defaults to default Daytona snapshot and Python language.
 - `timeout` _Optional[float]_ - Timeout (in seconds) for sandbox creation. 0 means no timeout.
   Default is 60 seconds.
-  
 
 **Returns**:
 
 - `Sandbox` - The created Sandbox instance.
-  
 
 **Raises**:
 
 - `DaytonaError` - If timeout, auto_stop_interval or auto_archive_interval is negative;
   If sandbox fails to start or times out
-  
 
 **Example**:
 
-  Create a default Python Sandbox:
+Create a default Python Sandbox:
+
 ```python
 sandbox = await daytona.create()
 ```
-  
-  Create a custom Sandbox:
+
+Create a custom Sandbox:
+
 ```python
 params = CreateSandboxFromSnapshotParams(
     language="python",
@@ -199,27 +199,26 @@ and volumes. Daytona creates snapshot from provided image and uses it to create 
 - `timeout` _Optional[float]_ - Timeout (in seconds) for sandbox creation. 0 means no timeout.
   Default is 60 seconds.
 - `on_snapshot_create_logs` _Callable[[str], None]_ - This callback function handles snapshot creation logs.
-  
 
 **Returns**:
 
 - `Sandbox` - The created Sandbox instance.
-  
 
 **Raises**:
 
 - `DaytonaError` - If timeout, auto_stop_interval or auto_archive_interval is negative;
   If sandbox fails to start or times out
-  
 
 **Example**:
 
-  Create a default Python Sandbox from image:
+Create a default Python Sandbox from image:
+
 ```python
 sandbox = await daytona.create(CreateSandboxFromImageParams(image="debian:12.9"))
 ```
-  
-  Create a custom Sandbox from declarative Image definition:
+
+Create a custom Sandbox from declarative Image definition:
+
 ```python
 declarative_image = (
     Image.base("alpine:3.18")
@@ -254,12 +253,10 @@ Deletes a Sandbox.
 - `sandbox` _Sandbox_ - The Sandbox instance to delete.
 - `timeout` _Optional[float]_ - Timeout (in seconds) for sandbox deletion. 0 means no timeout.
   Default is 60 seconds.
-  
 
 **Raises**:
 
 - `DaytonaError` - If sandbox fails to delete or times out
-  
 
 **Example**:
 
@@ -281,17 +278,14 @@ Gets a Sandbox by its ID.
 **Arguments**:
 
 - `sandbox_id` _str_ - The ID of the Sandbox to retrieve.
-  
 
 **Returns**:
 
 - `Sandbox` - The Sandbox instance.
-  
 
 **Raises**:
 
 - `DaytonaError` - If sandbox_id is not provided.
-  
 
 **Example**:
 
@@ -300,7 +294,7 @@ sandbox = await daytona.get("my-sandbox-id")
 print(sandbox.status)
 ```
 
-#### AsyncDaytona.find\_one
+#### AsyncDaytona.find_one
 
 ```python
 @intercept_errors(message_prefix="Failed to find sandbox: ")
@@ -314,17 +308,14 @@ Finds a Sandbox by its ID or labels.
 
 - `sandbox_id` _Optional[str]_ - The ID of the Sandbox to retrieve.
 - `labels` _Optional[Dict[str, str]]_ - Labels to filter Sandboxes.
-  
 
 **Returns**:
 
 - `Sandbox` - First Sandbox that matches the ID or labels.
-  
 
 **Raises**:
 
 - `DaytonaError` - If no Sandbox is found.
-  
 
 **Example**:
 
@@ -345,12 +336,10 @@ Lists Sandboxes filtered by labels.
 **Arguments**:
 
 - `labels` _Optional[Dict[str, str]]_ - Labels to filter Sandboxes.
-  
 
 **Returns**:
 
 - `List[Sandbox]` - List of Sandbox instances that match the labels.
-  
 
 **Example**:
 
@@ -373,7 +362,6 @@ Starts a Sandbox and waits for it to be ready.
 - `sandbox` _Sandbox_ - The Sandbox to start.
 - `timeout` _Optional[float]_ - Optional timeout in seconds to wait for the Sandbox to start.
   0 means no timeout. Default is 60 seconds.
-  
 
 **Raises**:
 
@@ -392,12 +380,10 @@ Stops a Sandbox and waits for it to be stopped.
 - `sandbox` _Sandbox_ - The sandbox to stop
 - `timeout` _Optional[float]_ - Optional timeout (in seconds) for sandbox stop.
   0 means no timeout. Default is 60 seconds.
-  
 
 **Raises**:
 
 - `DaytonaError` - If timeout is negative; If Sandbox fails to stop or times out
-
 
 ## CodeLanguage
 
@@ -408,10 +394,7 @@ class CodeLanguage(Enum)
 
 Programming languages supported by Daytona
 
-**Enum Members**:
-    - `PYTHON` ("python")
-    - `TYPESCRIPT` ("typescript")
-    - `JAVASCRIPT` ("javascript")
+**Enum Members**: - `PYTHON` ("python") - `TYPESCRIPT` ("typescript") - `JAVASCRIPT` ("javascript")
 
 ## DaytonaConfig
 
@@ -435,13 +418,13 @@ Configuration options for initializing the Daytona client.
   in a future version.
 - `target` _Optional[str]_ - Target runner location for the Sandbox. Defaults to `'us'` if not set here
   or in the environment variable `DAYTONA_TARGET`.
-  
 
 **Example**:
 
 ```python
 config = DaytonaConfig(api_key="your-api-key")
 ```
+
 ```python
 config = DaytonaConfig(jwt_token="your-jwt-token", organization_id="your-organization-id")
 ```
@@ -495,4 +478,3 @@ Parameters for creating a new Sandbox from a snapshot.
 **Attributes**:
 
 - `snapshot` _Optional[str]_ - Name of the snapshot to use for the Sandbox.
-

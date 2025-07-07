@@ -71,7 +71,7 @@ timeout=0,
 on_snapshot_create_logs=print,
 )
 
-```
+````
 </TabItem>
 <TabItem label="TypeScript" icon="seti:typescript">
 ```typescript
@@ -95,7 +95,7 @@ const sandbox = await daytona.create(
     onSnapshotCreateLogs: console.log,
   }
 )
-```
+````
 
 </TabItem>
 </Tabs>
@@ -163,7 +163,7 @@ snapshot=snapshot_name
 )
 )
 
-```
+````
 </TabItem>
 <TabItem label="TypeScript" icon="seti:typescript">
 ```typescript
@@ -208,7 +208,7 @@ await daytona.snapshot.create(
 const sandbox = await daytona.create({
     snapshot: snapshotName,
 })
-```
+````
 
 </TabItem>
 </Tabs>
@@ -220,14 +220,11 @@ If you have an existing Dockerfile that you want to use as the base for your ima
 <Tabs>
   <TabItem label="Python" icon="seti:python">
     ```python image =
-    Image.from_dockerfile("app/Dockerfile").pip_install(["numpy"])
-    ```
+    Image.from_dockerfile("app/Dockerfile").pip_install(["numpy"]) ```
   </TabItem>
   <TabItem label="TypeScript" icon="seti:typescript">
-    ```typescript
-    const image =
-    Image.fromDockerfile("app/Dockerfile").pipInstall(['numpy'])
-    ```
+    ```typescript const image =
+    Image.fromDockerfile("app/Dockerfile").pipInstall(['numpy']) ```
   </TabItem>
 </Tabs>
 
