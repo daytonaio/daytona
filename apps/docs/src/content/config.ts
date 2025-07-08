@@ -90,6 +90,14 @@ export const sidebarConfig: NavigationGroup[] = [
     entries: [
       {
         type: 'link',
+        href: '/docs',
+        label: 'Home',
+        attrs: {
+          icon: 'home.svg',
+        },
+      },
+      {
+        type: 'link',
         href: '/docs/getting-started',
         label: 'Getting Started',
         description:
@@ -314,6 +322,11 @@ export const sidebarConfig: NavigationGroup[] = [
     entries: [
       {
         type: 'link',
+        href: '/docs/typescript-sdk',
+        label: 'Home',
+      },
+      {
+        type: 'link',
         href: '/docs/typescript-sdk/daytona',
         label: 'Daytona',
       },
@@ -329,6 +342,13 @@ export const sidebarConfig: NavigationGroup[] = [
     label: 'Python SDK Reference',
     homePageHref: '/docs/python-sdk',
     category: NavigationCategory.PYTHON_SDK,
+    entries: [
+      {
+        type: 'link',
+        href: '/docs/python-sdk',
+        label: 'Home',
+      },
+    ],
   },
   {
     type: 'group',
