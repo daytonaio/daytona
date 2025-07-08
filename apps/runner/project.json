@@ -8,12 +8,24 @@
     "copy-daemon-bin": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "cp dist/apps/daemon-amd64 {projectRoot}/pkg/daemon/static"
+        "command": "cp dist/apps/daemon-amd64 {projectRoot}/pkg/daemon/static/daemon-amd64"
       },
       "dependsOn": [
         {
-          "target": "build",
+          "target": "build-amd64",
           "projects": "daemon"
+        }
+      ]
+    },
+    "copy-computeruse-plugin": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "cp dist/libs/computer-use-amd64 {projectRoot}/pkg/daemon/static/daytona-computer-use"
+      },
+      "dependsOn": [
+        {
+          "target": "build-amd64",
+          "projects": "computer-use"
         }
       ]
     },
@@ -26,17 +38,18 @@
       "configurations": {
         "production": {}
       },
-      "dependsOn": [
-        {
-          "target": "build",
-          "projects": "daemon"
-        },
-        {
-          "target": "build-amd64",
-          "projects": "daemon"
-        },
-        "copy-daemon-bin"
-      ]
+      "dependsOn": ["copy-daemon-bin", "copy-computeruse-plugin"]
+    },
+    "build-amd64": {
+      "executor": "@nx-go/nx-go:build",
+      "options": {
+        "main": "{projectRoot}/cmd/runner/main.go",
+        "outputPath": "dist/apps/runner-amd64",
+        "env": {
+          "GOARCH": "amd64"
+        }
+      },
+      "dependsOn": ["copy-daemon-bin", "copy-computeruse-plugin"]
     },
     "serve": {
       "executor": "@nx-go/nx-go:serve",
@@ -53,7 +66,8 @@
           "target": "build",
           "projects": "daemon"
         },
-        "copy-daemon-bin"
+        "copy-daemon-bin",
+        "copy-computeruse-plugin"
       ]
     },
     "format": {
@@ -75,5 +89,6 @@
         "command": "swag fmt && swag init --parseDependency --parseInternal --parseDepth 1 -o docs -g server.go"
       }
     }
-  }
+  },
+  "implicitDependencies": ["computer-use", "daemon"]
 }

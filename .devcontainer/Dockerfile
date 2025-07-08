@@ -5,7 +5,9 @@ ARG TARGETARCH
 # common tools
 RUN apt update && export DEBIAN_FRONTEND=noninteractive \
     && apt -y install --no-install-recommends apt-utils vim htop telnet socat expect-dev tini psmisc libgit2-dev \
-    python3 python3-pip
+    python3 python3-pip libx11-dev libxtst-dev libxext-dev libxrandr-dev libxinerama-dev libxi-dev \
+    libx11-6 libxrandr2 libxext6 libxrender1 libxfixes3 libxss1 libxtst6 libxi6 \
+    xvfb x11vnc novnc xfce4 xfce4-terminal dbus-x11
 
 # build tools
 RUN apt update && export DEBIAN_FRONTEND=noninteractive \
