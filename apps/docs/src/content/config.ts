@@ -70,7 +70,6 @@ export const sidebarConfig: NavigationGroup[] = [
         attrs: {
           icon: 'server.svg',
         },
-        relatedGroupCategory: NavigationCategory.GENERAL,
       },
       {
         type: 'link',
@@ -80,7 +79,6 @@ export const sidebarConfig: NavigationGroup[] = [
         attrs: {
           icon: 'terminal.svg',
         },
-        relatedGroupCategory: NavigationCategory.GENERAL,
       },
     ],
   },
