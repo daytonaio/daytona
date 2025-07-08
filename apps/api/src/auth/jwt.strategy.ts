@@ -12,7 +12,7 @@ import { UserService } from '../user/user.service'
 import { AuthContext } from '../common/interfaces/auth-context.interface'
 import { Request } from 'express'
 import { CustomHeaders } from '../common/constants/header.constants'
-import { DEFAULT_ORGANIZATION_QUOTA } from '../common/constants/default-organization-quota'
+import { DEFAULT_ORGANIZATION_QUOTA } from '../common/constants/organization-defaults'
 
 interface JwtStrategyConfig {
   jwksUri: string

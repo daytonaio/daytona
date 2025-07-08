@@ -201,6 +201,7 @@ export class Sandbox {
             SandboxState.RESTORING,
             SandboxState.PENDING_BUILD,
             SandboxState.BUILDING_SNAPSHOT,
+            SandboxState.PENDING_PULL,
             SandboxState.PULLING_SNAPSHOT,
             SandboxState.ERROR,
             SandboxState.BUILD_FAILED,

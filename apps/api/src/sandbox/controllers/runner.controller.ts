@@ -73,10 +73,10 @@ export class RunnerController {
   @Get('/by-snapshot')
   @ApiOperation({
     summary: 'Get runners by snapshot internal name',
-    operationId: 'getRunnersBySnapshotInternalName',
+    operationId: 'getRunnersBySnapshotRef',
   })
   @ApiQuery({
-    name: 'internalName',
+    name: 'ref',
     description: 'Internal name of the snapshot',
     type: String,
     required: true,
@@ -86,7 +86,7 @@ export class RunnerController {
     description: 'Runners found for the snapshot',
     type: [RunnerSnapshotDto],
   })
-  async getRunnersBySnapshotInternalName(@Query('internalName') internalName: string): Promise<RunnerSnapshotDto[]> {
-    return this.runnerService.getRunnersBySnapshotInternalName(internalName)
+  async getRunnersBySnapshotRef(@Query('ref') ref: string): Promise<RunnerSnapshotDto[]> {
+    return this.runnerService.getRunnersBySnapshotRef(ref)
   }
 }
