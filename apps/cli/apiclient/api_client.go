@@ -7,16 +7,16 @@ import (
 	"context"
 	"net/http"
 
+	apiclient "github.com/daytonaio/apiclient"
 	"github.com/daytonaio/daytona/cli/auth"
 	"github.com/daytonaio/daytona/cli/config"
-	"github.com/daytonaio/daytona/daytonaapiclient"
 )
 
-var apiClient *daytonaapiclient.APIClient
+var apiClient *apiclient.APIClient
 
 const DaytonaSourceHeader = "X-Daytona-Source"
 
-func GetApiClient(profile *config.Profile, defaultHeaders map[string]string) (*daytonaapiclient.APIClient, error) {
+func GetApiClient(profile *config.Profile, defaultHeaders map[string]string) (*apiclient.APIClient, error) {
 	c, err := config.GetConfig()
 	if err != nil {
 		return nil, err
@@ -42,12 +42,12 @@ func GetApiClient(profile *config.Profile, defaultHeaders map[string]string) (*d
 		return apiClient, nil
 	}
 
-	var newApiClient *daytonaapiclient.APIClient
+	var newApiClient *apiclient.APIClient
 
 	serverUrl := activeProfile.Api.Url
 
-	clientConfig := daytonaapiclient.NewConfiguration()
-	clientConfig.Servers = daytonaapiclient.ServerConfigurations{
+	clientConfig := apiclient.NewConfiguration()
+	clientConfig.Servers = apiclient.ServerConfigurations{
 		{
 			URL: serverUrl,
 		},
@@ -69,7 +69,7 @@ func GetApiClient(profile *config.Profile, defaultHeaders map[string]string) (*d
 		clientConfig.AddDefaultHeader(headerKey, headerValue)
 	}
 
-	newApiClient = daytonaapiclient.NewAPIClient(clientConfig)
+	newApiClient = apiclient.NewAPIClient(clientConfig)
 
 	newApiClient.GetConfig().HTTPClient = &http.Client{
 		Transport: http.DefaultTransport,

@@ -3,6 +3,15 @@
 
 from daytona_api_client import SandboxState, SessionExecuteResponse
 
+from ._async.computer_use import (
+    AsyncComputerUse,
+    AsyncDisplay,
+    AsyncKeyboard,
+    AsyncMouse,
+    AsyncScreenshot,
+    ScreenshotOptions,
+    ScreenshotRegion,
+)
 from ._async.daytona import AsyncDaytona
 from ._async.sandbox import AsyncSandbox
 from ._sync.daytona import Daytona
@@ -57,6 +66,13 @@ __all__ = [
     "VolumeMount",
     "AsyncDaytona",
     "AsyncSandbox",
+    "AsyncComputerUse",
+    "AsyncMouse",
+    "AsyncKeyboard",
+    "AsyncScreenshot",
+    "AsyncDisplay",
+    "ScreenshotRegion",
+    "ScreenshotOptions",
     "Image",
     "CreateSandboxBaseParams",
     "CreateSandboxFromImageParams",

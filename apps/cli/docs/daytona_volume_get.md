@@ -20,4 +20,4 @@ daytona volume get [VOLUME_ID] [flags]
 
 ### SEE ALSO
 
-* [daytona volume](daytona_volume.md)  - Manage Daytona volumes
+- [daytona volume](daytona_volume.md) - Manage Daytona volumes

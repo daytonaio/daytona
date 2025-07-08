@@ -61,21 +61,28 @@ func main() {
 
 	runnerCache.Cleanup(ctx)
 
-	daemonPath, err := daemon.WriteDaemonBinary()
+	daemonPath, err := daemon.WriteStaticBinary("daemon-amd64")
+	if err != nil {
+		log.Error(err)
+		return
+	}
+
+	pluginPath, err := daemon.WriteStaticBinary("daytona-computer-use")
 	if err != nil {
 		log.Error(err)
 		return
 	}
 
 	dockerClient := docker.NewDockerClient(docker.DockerClientConfig{
-		ApiClient:          cli,
-		Cache:              runnerCache,
-		LogWriter:          os.Stdout,
-		AWSRegion:          cfg.AWSRegion,
-		AWSEndpointUrl:     cfg.AWSEndpointUrl,
-		AWSAccessKeyId:     cfg.AWSAccessKeyId,
-		AWSSecretAccessKey: cfg.AWSSecretAccessKey,
-		DaemonPath:         daemonPath,
+		ApiClient:             cli,
+		Cache:                 runnerCache,
+		LogWriter:             os.Stdout,
+		AWSRegion:             cfg.AWSRegion,
+		AWSEndpointUrl:        cfg.AWSEndpointUrl,
+		AWSAccessKeyId:        cfg.AWSAccessKeyId,
+		AWSSecretAccessKey:    cfg.AWSSecretAccessKey,
+		DaemonPath:            daemonPath,
+		ComputerUsePluginPath: pluginPath,
 	})
 
 	sandboxService := services.NewSandboxService(runnerCache, dockerClient)

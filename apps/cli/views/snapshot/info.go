@@ -8,13 +8,13 @@ import (
 	"os"
 
 	"github.com/charmbracelet/lipgloss"
+	apiclient "github.com/daytonaio/apiclient"
 	"github.com/daytonaio/daytona/cli/views/common"
 	"github.com/daytonaio/daytona/cli/views/util"
-	"github.com/daytonaio/daytona/daytonaapiclient"
 	"golang.org/x/term"
 )
 
-func RenderInfo(snapshot *daytonaapiclient.SnapshotDto, forceUnstyled bool) {
+func RenderInfo(snapshot *apiclient.SnapshotDto, forceUnstyled bool) {
 	var output string
 	nameLabel := "Snapshot"
 
@@ -65,21 +65,21 @@ func getInfoLine(key, value string) string {
 	return util.PropertyNameStyle.Render(fmt.Sprintf("%-*s", util.PropertyNameWidth, key)) + util.PropertyValueStyle.Render(value) + "\n"
 }
 
-func getStateLabel(state daytonaapiclient.SnapshotState) string {
+func getStateLabel(state apiclient.SnapshotState) string {
 	switch state {
-	case daytonaapiclient.SNAPSHOTSTATE_PENDING:
+	case apiclient.SNAPSHOTSTATE_PENDING:
 		return common.CreatingStyle.Render("PENDING")
-	case daytonaapiclient.SNAPSHOTSTATE_PULLING:
+	case apiclient.SNAPSHOTSTATE_PULLING:
 		return common.CreatingStyle.Render("PULLING SNAPSHOT")
-	case daytonaapiclient.SNAPSHOTSTATE_VALIDATING:
+	case apiclient.SNAPSHOTSTATE_VALIDATING:
 		return common.CreatingStyle.Render("VALIDATING")
-	case daytonaapiclient.SNAPSHOTSTATE_ACTIVE:
+	case apiclient.SNAPSHOTSTATE_ACTIVE:
 		return common.StartedStyle.Render("ACTIVE")
-	case daytonaapiclient.SNAPSHOTSTATE_ERROR:
+	case apiclient.SNAPSHOTSTATE_ERROR:
 		return common.ErrorStyle.Render("ERROR")
-	case daytonaapiclient.SNAPSHOTSTATE_BUILD_FAILED:
+	case apiclient.SNAPSHOTSTATE_BUILD_FAILED:
 		return common.ErrorStyle.Render("BUILD FAILED")
-	case daytonaapiclient.SNAPSHOTSTATE_REMOVING:
+	case apiclient.SNAPSHOTSTATE_REMOVING:
 		return common.DeletedStyle.Render("REMOVING")
 	default:
 		return common.UndefinedStyle.Render("/")

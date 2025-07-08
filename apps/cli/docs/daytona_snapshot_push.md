@@ -28,4 +28,4 @@ daytona snapshot push [SNAPSHOT] [flags]
 
 ### SEE ALSO
 
-* [daytona snapshot](daytona_snapshot.md)  - Manage Daytona snapshots
+- [daytona snapshot](daytona_snapshot.md) - Manage Daytona snapshots

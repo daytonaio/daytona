@@ -36,7 +36,17 @@ import type { Command } from '../models'
 // @ts-ignore
 import type { CompletionList } from '../models'
 // @ts-ignore
+import type { CompressedScreenshotResponse } from '../models'
+// @ts-ignore
+import type { ComputerUseStartResponse } from '../models'
+// @ts-ignore
+import type { ComputerUseStatusResponse } from '../models'
+// @ts-ignore
+import type { ComputerUseStopResponse } from '../models'
+// @ts-ignore
 import type { CreateSessionRequest } from '../models'
+// @ts-ignore
+import type { DisplayInfoResponse } from '../models'
 // @ts-ignore
 import type { ExecuteRequest } from '../models'
 // @ts-ignore
@@ -64,6 +74,12 @@ import type { GitRepoRequest } from '../models'
 // @ts-ignore
 import type { GitStatus } from '../models'
 // @ts-ignore
+import type { KeyboardHotkeyRequest } from '../models'
+// @ts-ignore
+import type { KeyboardPressRequest } from '../models'
+// @ts-ignore
+import type { KeyboardTypeRequest } from '../models'
+// @ts-ignore
 import type { ListBranchResponse } from '../models'
 // @ts-ignore
 import type { LspCompletionParams } from '../models'
@@ -76,11 +92,41 @@ import type { LspSymbol } from '../models'
 // @ts-ignore
 import type { Match } from '../models'
 // @ts-ignore
+import type { MouseClickRequest } from '../models'
+// @ts-ignore
+import type { MouseClickResponse } from '../models'
+// @ts-ignore
+import type { MouseDragRequest } from '../models'
+// @ts-ignore
+import type { MouseDragResponse } from '../models'
+// @ts-ignore
+import type { MouseMoveRequest } from '../models'
+// @ts-ignore
+import type { MouseMoveResponse } from '../models'
+// @ts-ignore
+import type { MousePosition } from '../models'
+// @ts-ignore
+import type { MouseScrollRequest } from '../models'
+// @ts-ignore
+import type { MouseScrollResponse } from '../models'
+// @ts-ignore
+import type { ProcessErrorsResponse } from '../models'
+// @ts-ignore
+import type { ProcessLogsResponse } from '../models'
+// @ts-ignore
+import type { ProcessRestartResponse } from '../models'
+// @ts-ignore
+import type { ProcessStatusResponse } from '../models'
+// @ts-ignore
 import type { ProjectDirResponse } from '../models'
+// @ts-ignore
+import type { RegionScreenshotResponse } from '../models'
 // @ts-ignore
 import type { ReplaceRequest } from '../models'
 // @ts-ignore
 import type { ReplaceResult } from '../models'
+// @ts-ignore
+import type { ScreenshotResponse } from '../models'
 // @ts-ignore
 import type { SearchFilesResponse } from '../models'
 // @ts-ignore
@@ -89,12 +135,69 @@ import type { Session } from '../models'
 import type { SessionExecuteRequest } from '../models'
 // @ts-ignore
 import type { SessionExecuteResponse } from '../models'
+// @ts-ignore
+import type { WindowsResponse } from '../models'
 /**
  * ToolboxApi - axios parameter creator
  * @export
  */
 export const ToolboxApiAxiosParamCreator = function (configuration?: Configuration) {
   return {
+    /**
+     * Click mouse at specified coordinates
+     * @summary Click mouse
+     * @param {string} sandboxId
+     * @param {MouseClickRequest} mouseClickRequest
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    clickMouse: async (
+      sandboxId: string,
+      mouseClickRequest: MouseClickRequest,
+      xDaytonaOrganizationID?: string,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'sandboxId' is not null or undefined
+      assertParamExists('clickMouse', 'sandboxId', sandboxId)
+      // verify required parameter 'mouseClickRequest' is not null or undefined
+      assertParamExists('clickMouse', 'mouseClickRequest', mouseClickRequest)
+      const localVarPath = `/toolbox/{sandboxId}/toolbox/computeruse/mouse/click`.replace(
+        `{${'sandboxId'}}`,
+        encodeURIComponent(String(sandboxId)),
+      )
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      // authentication bearer required
+      // http bearer authentication required
+      await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+      // authentication oauth2 required
+
+      localVarHeaderParameter['Content-Type'] = 'application/json'
+
+      if (xDaytonaOrganizationID != null) {
+        localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
+      }
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+      localVarRequestOptions.data = serializeDataIfNeeded(mouseClickRequest, localVarRequestOptions, configuration)
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
     /**
      * Create folder inside sandbox
      * @summary Create folder
@@ -378,6 +481,61 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
       }
     },
     /**
+     * Drag mouse from start to end coordinates
+     * @summary Drag mouse
+     * @param {string} sandboxId
+     * @param {MouseDragRequest} mouseDragRequest
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    dragMouse: async (
+      sandboxId: string,
+      mouseDragRequest: MouseDragRequest,
+      xDaytonaOrganizationID?: string,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'sandboxId' is not null or undefined
+      assertParamExists('dragMouse', 'sandboxId', sandboxId)
+      // verify required parameter 'mouseDragRequest' is not null or undefined
+      assertParamExists('dragMouse', 'mouseDragRequest', mouseDragRequest)
+      const localVarPath = `/toolbox/{sandboxId}/toolbox/computeruse/mouse/drag`.replace(
+        `{${'sandboxId'}}`,
+        encodeURIComponent(String(sandboxId)),
+      )
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      // authentication bearer required
+      // http bearer authentication required
+      await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+      // authentication oauth2 required
+
+      localVarHeaderParameter['Content-Type'] = 'application/json'
+
+      if (xDaytonaOrganizationID != null) {
+        localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
+      }
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+      localVarRequestOptions.data = serializeDataIfNeeded(mouseDragRequest, localVarRequestOptions, configuration)
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
      * Execute command synchronously inside sandbox
      * @summary Execute command
      * @param {string} sandboxId
@@ -555,6 +713,102 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
       }
     },
     /**
+     * Get status of all VNC desktop processes
+     * @summary Get computer use status
+     * @param {string} sandboxId
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    getComputerUseStatus: async (
+      sandboxId: string,
+      xDaytonaOrganizationID?: string,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'sandboxId' is not null or undefined
+      assertParamExists('getComputerUseStatus', 'sandboxId', sandboxId)
+      const localVarPath = `/toolbox/{sandboxId}/toolbox/computeruse/status`.replace(
+        `{${'sandboxId'}}`,
+        encodeURIComponent(String(sandboxId)),
+      )
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      // authentication bearer required
+      // http bearer authentication required
+      await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+      // authentication oauth2 required
+
+      if (xDaytonaOrganizationID != null) {
+        localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
+      }
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     * Get information about displays
+     * @summary Get display info
+     * @param {string} sandboxId
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    getDisplayInfo: async (
+      sandboxId: string,
+      xDaytonaOrganizationID?: string,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'sandboxId' is not null or undefined
+      assertParamExists('getDisplayInfo', 'sandboxId', sandboxId)
+      const localVarPath = `/toolbox/{sandboxId}/toolbox/computeruse/display/info`.replace(
+        `{${'sandboxId'}}`,
+        encodeURIComponent(String(sandboxId)),
+      )
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      // authentication bearer required
+      // http bearer authentication required
+      await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+      // authentication oauth2 required
+
+      if (xDaytonaOrganizationID != null) {
+        localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
+      }
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
      * Get file info inside sandbox
      * @summary Get file info
      * @param {string} sandboxId
@@ -597,6 +851,207 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
       if (path !== undefined) {
         localVarQueryParameter['path'] = path
       }
+
+      if (xDaytonaOrganizationID != null) {
+        localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
+      }
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     * Get current mouse cursor position
+     * @summary Get mouse position
+     * @param {string} sandboxId
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    getMousePosition: async (
+      sandboxId: string,
+      xDaytonaOrganizationID?: string,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'sandboxId' is not null or undefined
+      assertParamExists('getMousePosition', 'sandboxId', sandboxId)
+      const localVarPath = `/toolbox/{sandboxId}/toolbox/computeruse/mouse/position`.replace(
+        `{${'sandboxId'}}`,
+        encodeURIComponent(String(sandboxId)),
+      )
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      // authentication bearer required
+      // http bearer authentication required
+      await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+      // authentication oauth2 required
+
+      if (xDaytonaOrganizationID != null) {
+        localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
+      }
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     * Get error logs for a specific VNC process
+     * @summary Get process errors
+     * @param {string} processName
+     * @param {string} sandboxId
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    getProcessErrors: async (
+      processName: string,
+      sandboxId: string,
+      xDaytonaOrganizationID?: string,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'processName' is not null or undefined
+      assertParamExists('getProcessErrors', 'processName', processName)
+      // verify required parameter 'sandboxId' is not null or undefined
+      assertParamExists('getProcessErrors', 'sandboxId', sandboxId)
+      const localVarPath = `/toolbox/{sandboxId}/toolbox/computeruse/process/{processName}/errors`
+        .replace(`{${'processName'}}`, encodeURIComponent(String(processName)))
+        .replace(`{${'sandboxId'}}`, encodeURIComponent(String(sandboxId)))
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      // authentication bearer required
+      // http bearer authentication required
+      await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+      // authentication oauth2 required
+
+      if (xDaytonaOrganizationID != null) {
+        localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
+      }
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     * Get logs for a specific VNC process
+     * @summary Get process logs
+     * @param {string} processName
+     * @param {string} sandboxId
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    getProcessLogs: async (
+      processName: string,
+      sandboxId: string,
+      xDaytonaOrganizationID?: string,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'processName' is not null or undefined
+      assertParamExists('getProcessLogs', 'processName', processName)
+      // verify required parameter 'sandboxId' is not null or undefined
+      assertParamExists('getProcessLogs', 'sandboxId', sandboxId)
+      const localVarPath = `/toolbox/{sandboxId}/toolbox/computeruse/process/{processName}/logs`
+        .replace(`{${'processName'}}`, encodeURIComponent(String(processName)))
+        .replace(`{${'sandboxId'}}`, encodeURIComponent(String(sandboxId)))
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      // authentication bearer required
+      // http bearer authentication required
+      await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+      // authentication oauth2 required
+
+      if (xDaytonaOrganizationID != null) {
+        localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
+      }
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     * Get status of a specific VNC process
+     * @summary Get process status
+     * @param {string} processName
+     * @param {string} sandboxId
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    getProcessStatus: async (
+      processName: string,
+      sandboxId: string,
+      xDaytonaOrganizationID?: string,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'processName' is not null or undefined
+      assertParamExists('getProcessStatus', 'processName', processName)
+      // verify required parameter 'sandboxId' is not null or undefined
+      assertParamExists('getProcessStatus', 'sandboxId', sandboxId)
+      const localVarPath = `/toolbox/{sandboxId}/toolbox/computeruse/process/{processName}/status`
+        .replace(`{${'processName'}}`, encodeURIComponent(String(processName)))
+        .replace(`{${'sandboxId'}}`, encodeURIComponent(String(sandboxId)))
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      // authentication bearer required
+      // http bearer authentication required
+      await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+      // authentication oauth2 required
 
       if (xDaytonaOrganizationID != null) {
         localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
@@ -814,6 +1269,54 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
       if (follow !== undefined) {
         localVarQueryParameter['follow'] = follow
       }
+
+      if (xDaytonaOrganizationID != null) {
+        localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
+      }
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     * Get list of open windows
+     * @summary Get windows
+     * @param {string} sandboxId
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    getWindows: async (
+      sandboxId: string,
+      xDaytonaOrganizationID?: string,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'sandboxId' is not null or undefined
+      assertParamExists('getWindows', 'sandboxId', sandboxId)
+      const localVarPath = `/toolbox/{sandboxId}/toolbox/computeruse/display/windows`.replace(
+        `{${'sandboxId'}}`,
+        encodeURIComponent(String(sandboxId)),
+      )
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      // authentication bearer required
+      // http bearer authentication required
+      await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+      // authentication oauth2 required
 
       if (xDaytonaOrganizationID != null) {
         localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
@@ -2021,6 +2524,171 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
       }
     },
     /**
+     * Move mouse cursor to specified coordinates
+     * @summary Move mouse
+     * @param {string} sandboxId
+     * @param {MouseMoveRequest} mouseMoveRequest
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    moveMouse: async (
+      sandboxId: string,
+      mouseMoveRequest: MouseMoveRequest,
+      xDaytonaOrganizationID?: string,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'sandboxId' is not null or undefined
+      assertParamExists('moveMouse', 'sandboxId', sandboxId)
+      // verify required parameter 'mouseMoveRequest' is not null or undefined
+      assertParamExists('moveMouse', 'mouseMoveRequest', mouseMoveRequest)
+      const localVarPath = `/toolbox/{sandboxId}/toolbox/computeruse/mouse/move`.replace(
+        `{${'sandboxId'}}`,
+        encodeURIComponent(String(sandboxId)),
+      )
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      // authentication bearer required
+      // http bearer authentication required
+      await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+      // authentication oauth2 required
+
+      localVarHeaderParameter['Content-Type'] = 'application/json'
+
+      if (xDaytonaOrganizationID != null) {
+        localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
+      }
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+      localVarRequestOptions.data = serializeDataIfNeeded(mouseMoveRequest, localVarRequestOptions, configuration)
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     * Press a hotkey combination
+     * @summary Press hotkey
+     * @param {string} sandboxId
+     * @param {KeyboardHotkeyRequest} keyboardHotkeyRequest
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    pressHotkey: async (
+      sandboxId: string,
+      keyboardHotkeyRequest: KeyboardHotkeyRequest,
+      xDaytonaOrganizationID?: string,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'sandboxId' is not null or undefined
+      assertParamExists('pressHotkey', 'sandboxId', sandboxId)
+      // verify required parameter 'keyboardHotkeyRequest' is not null or undefined
+      assertParamExists('pressHotkey', 'keyboardHotkeyRequest', keyboardHotkeyRequest)
+      const localVarPath = `/toolbox/{sandboxId}/toolbox/computeruse/keyboard/hotkey`.replace(
+        `{${'sandboxId'}}`,
+        encodeURIComponent(String(sandboxId)),
+      )
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      // authentication bearer required
+      // http bearer authentication required
+      await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+      // authentication oauth2 required
+
+      localVarHeaderParameter['Content-Type'] = 'application/json'
+
+      if (xDaytonaOrganizationID != null) {
+        localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
+      }
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+      localVarRequestOptions.data = serializeDataIfNeeded(keyboardHotkeyRequest, localVarRequestOptions, configuration)
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     * Press a key with optional modifiers
+     * @summary Press key
+     * @param {string} sandboxId
+     * @param {KeyboardPressRequest} keyboardPressRequest
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    pressKey: async (
+      sandboxId: string,
+      keyboardPressRequest: KeyboardPressRequest,
+      xDaytonaOrganizationID?: string,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'sandboxId' is not null or undefined
+      assertParamExists('pressKey', 'sandboxId', sandboxId)
+      // verify required parameter 'keyboardPressRequest' is not null or undefined
+      assertParamExists('pressKey', 'keyboardPressRequest', keyboardPressRequest)
+      const localVarPath = `/toolbox/{sandboxId}/toolbox/computeruse/keyboard/key`.replace(
+        `{${'sandboxId'}}`,
+        encodeURIComponent(String(sandboxId)),
+      )
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      // authentication bearer required
+      // http bearer authentication required
+      await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+      // authentication oauth2 required
+
+      localVarHeaderParameter['Content-Type'] = 'application/json'
+
+      if (xDaytonaOrganizationID != null) {
+        localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
+      }
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+      localVarRequestOptions.data = serializeDataIfNeeded(keyboardPressRequest, localVarRequestOptions, configuration)
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
      * Replace text/pattern in multiple files inside sandbox
      * @summary Replace in files
      * @param {string} sandboxId
@@ -2069,6 +2737,112 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
       localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
       localVarRequestOptions.data = serializeDataIfNeeded(replaceRequest, localVarRequestOptions, configuration)
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     * Restart a specific VNC process
+     * @summary Restart process
+     * @param {string} processName
+     * @param {string} sandboxId
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    restartProcess: async (
+      processName: string,
+      sandboxId: string,
+      xDaytonaOrganizationID?: string,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'processName' is not null or undefined
+      assertParamExists('restartProcess', 'processName', processName)
+      // verify required parameter 'sandboxId' is not null or undefined
+      assertParamExists('restartProcess', 'sandboxId', sandboxId)
+      const localVarPath = `/toolbox/{sandboxId}/toolbox/computeruse/process/{processName}/restart`
+        .replace(`{${'processName'}}`, encodeURIComponent(String(processName)))
+        .replace(`{${'sandboxId'}}`, encodeURIComponent(String(sandboxId)))
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      // authentication bearer required
+      // http bearer authentication required
+      await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+      // authentication oauth2 required
+
+      if (xDaytonaOrganizationID != null) {
+        localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
+      }
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     * Scroll mouse at specified coordinates
+     * @summary Scroll mouse
+     * @param {string} sandboxId
+     * @param {MouseScrollRequest} mouseScrollRequest
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    scrollMouse: async (
+      sandboxId: string,
+      mouseScrollRequest: MouseScrollRequest,
+      xDaytonaOrganizationID?: string,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'sandboxId' is not null or undefined
+      assertParamExists('scrollMouse', 'sandboxId', sandboxId)
+      // verify required parameter 'mouseScrollRequest' is not null or undefined
+      assertParamExists('scrollMouse', 'mouseScrollRequest', mouseScrollRequest)
+      const localVarPath = `/toolbox/{sandboxId}/toolbox/computeruse/mouse/scroll`.replace(
+        `{${'sandboxId'}}`,
+        encodeURIComponent(String(sandboxId)),
+      )
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      // authentication bearer required
+      // http bearer authentication required
+      await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+      // authentication oauth2 required
+
+      localVarHeaderParameter['Content-Type'] = 'application/json'
+
+      if (xDaytonaOrganizationID != null) {
+        localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
+      }
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+      localVarRequestOptions.data = serializeDataIfNeeded(mouseScrollRequest, localVarRequestOptions, configuration)
 
       return {
         url: toPathString(localVarUrlObj),
@@ -2214,6 +2988,473 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
       }
     },
     /**
+     * Start all VNC desktop processes (Xvfb, xfce4, x11vnc, novnc)
+     * @summary Start computer use processes
+     * @param {string} sandboxId
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    startComputerUse: async (
+      sandboxId: string,
+      xDaytonaOrganizationID?: string,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'sandboxId' is not null or undefined
+      assertParamExists('startComputerUse', 'sandboxId', sandboxId)
+      const localVarPath = `/toolbox/{sandboxId}/toolbox/computeruse/start`.replace(
+        `{${'sandboxId'}}`,
+        encodeURIComponent(String(sandboxId)),
+      )
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      // authentication bearer required
+      // http bearer authentication required
+      await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+      // authentication oauth2 required
+
+      if (xDaytonaOrganizationID != null) {
+        localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
+      }
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     * Stop all VNC desktop processes (Xvfb, xfce4, x11vnc, novnc)
+     * @summary Stop computer use processes
+     * @param {string} sandboxId
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    stopComputerUse: async (
+      sandboxId: string,
+      xDaytonaOrganizationID?: string,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'sandboxId' is not null or undefined
+      assertParamExists('stopComputerUse', 'sandboxId', sandboxId)
+      const localVarPath = `/toolbox/{sandboxId}/toolbox/computeruse/stop`.replace(
+        `{${'sandboxId'}}`,
+        encodeURIComponent(String(sandboxId)),
+      )
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      // authentication bearer required
+      // http bearer authentication required
+      await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+      // authentication oauth2 required
+
+      if (xDaytonaOrganizationID != null) {
+        localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
+      }
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     * Take a compressed screenshot of a specific region
+     * @summary Take compressed region screenshot
+     * @param {string} sandboxId
+     * @param {number} height
+     * @param {number} width
+     * @param {number} y
+     * @param {number} x
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {number} [scale]
+     * @param {number} [quality]
+     * @param {string} [format]
+     * @param {boolean} [showCursor]
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    takeCompressedRegionScreenshot: async (
+      sandboxId: string,
+      height: number,
+      width: number,
+      y: number,
+      x: number,
+      xDaytonaOrganizationID?: string,
+      scale?: number,
+      quality?: number,
+      format?: string,
+      showCursor?: boolean,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'sandboxId' is not null or undefined
+      assertParamExists('takeCompressedRegionScreenshot', 'sandboxId', sandboxId)
+      // verify required parameter 'height' is not null or undefined
+      assertParamExists('takeCompressedRegionScreenshot', 'height', height)
+      // verify required parameter 'width' is not null or undefined
+      assertParamExists('takeCompressedRegionScreenshot', 'width', width)
+      // verify required parameter 'y' is not null or undefined
+      assertParamExists('takeCompressedRegionScreenshot', 'y', y)
+      // verify required parameter 'x' is not null or undefined
+      assertParamExists('takeCompressedRegionScreenshot', 'x', x)
+      const localVarPath = `/toolbox/{sandboxId}/toolbox/computeruse/screenshot/region/compressed`.replace(
+        `{${'sandboxId'}}`,
+        encodeURIComponent(String(sandboxId)),
+      )
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      // authentication bearer required
+      // http bearer authentication required
+      await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+      // authentication oauth2 required
+
+      if (scale !== undefined) {
+        localVarQueryParameter['scale'] = scale
+      }
+
+      if (quality !== undefined) {
+        localVarQueryParameter['quality'] = quality
+      }
+
+      if (format !== undefined) {
+        localVarQueryParameter['format'] = format
+      }
+
+      if (showCursor !== undefined) {
+        localVarQueryParameter['show_cursor'] = showCursor
+      }
+
+      if (height !== undefined) {
+        localVarQueryParameter['height'] = height
+      }
+
+      if (width !== undefined) {
+        localVarQueryParameter['width'] = width
+      }
+
+      if (y !== undefined) {
+        localVarQueryParameter['y'] = y
+      }
+
+      if (x !== undefined) {
+        localVarQueryParameter['x'] = x
+      }
+
+      if (xDaytonaOrganizationID != null) {
+        localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
+      }
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     * Take a compressed screenshot with format, quality, and scale options
+     * @summary Take compressed screenshot
+     * @param {string} sandboxId
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {number} [scale]
+     * @param {number} [quality]
+     * @param {string} [format]
+     * @param {boolean} [showCursor]
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    takeCompressedScreenshot: async (
+      sandboxId: string,
+      xDaytonaOrganizationID?: string,
+      scale?: number,
+      quality?: number,
+      format?: string,
+      showCursor?: boolean,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'sandboxId' is not null or undefined
+      assertParamExists('takeCompressedScreenshot', 'sandboxId', sandboxId)
+      const localVarPath = `/toolbox/{sandboxId}/toolbox/computeruse/screenshot/compressed`.replace(
+        `{${'sandboxId'}}`,
+        encodeURIComponent(String(sandboxId)),
+      )
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      // authentication bearer required
+      // http bearer authentication required
+      await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+      // authentication oauth2 required
+
+      if (scale !== undefined) {
+        localVarQueryParameter['scale'] = scale
+      }
+
+      if (quality !== undefined) {
+        localVarQueryParameter['quality'] = quality
+      }
+
+      if (format !== undefined) {
+        localVarQueryParameter['format'] = format
+      }
+
+      if (showCursor !== undefined) {
+        localVarQueryParameter['show_cursor'] = showCursor
+      }
+
+      if (xDaytonaOrganizationID != null) {
+        localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
+      }
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     * Take a screenshot of a specific region
+     * @summary Take region screenshot
+     * @param {string} sandboxId
+     * @param {number} height
+     * @param {number} width
+     * @param {number} y
+     * @param {number} x
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {boolean} [showCursor]
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    takeRegionScreenshot: async (
+      sandboxId: string,
+      height: number,
+      width: number,
+      y: number,
+      x: number,
+      xDaytonaOrganizationID?: string,
+      showCursor?: boolean,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'sandboxId' is not null or undefined
+      assertParamExists('takeRegionScreenshot', 'sandboxId', sandboxId)
+      // verify required parameter 'height' is not null or undefined
+      assertParamExists('takeRegionScreenshot', 'height', height)
+      // verify required parameter 'width' is not null or undefined
+      assertParamExists('takeRegionScreenshot', 'width', width)
+      // verify required parameter 'y' is not null or undefined
+      assertParamExists('takeRegionScreenshot', 'y', y)
+      // verify required parameter 'x' is not null or undefined
+      assertParamExists('takeRegionScreenshot', 'x', x)
+      const localVarPath = `/toolbox/{sandboxId}/toolbox/computeruse/screenshot/region`.replace(
+        `{${'sandboxId'}}`,
+        encodeURIComponent(String(sandboxId)),
+      )
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      // authentication bearer required
+      // http bearer authentication required
+      await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+      // authentication oauth2 required
+
+      if (showCursor !== undefined) {
+        localVarQueryParameter['show_cursor'] = showCursor
+      }
+
+      if (height !== undefined) {
+        localVarQueryParameter['height'] = height
+      }
+
+      if (width !== undefined) {
+        localVarQueryParameter['width'] = width
+      }
+
+      if (y !== undefined) {
+        localVarQueryParameter['y'] = y
+      }
+
+      if (x !== undefined) {
+        localVarQueryParameter['x'] = x
+      }
+
+      if (xDaytonaOrganizationID != null) {
+        localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
+      }
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     * Take a screenshot of the entire screen
+     * @summary Take screenshot
+     * @param {string} sandboxId
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {boolean} [showCursor]
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    takeScreenshot: async (
+      sandboxId: string,
+      xDaytonaOrganizationID?: string,
+      showCursor?: boolean,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'sandboxId' is not null or undefined
+      assertParamExists('takeScreenshot', 'sandboxId', sandboxId)
+      const localVarPath = `/toolbox/{sandboxId}/toolbox/computeruse/screenshot`.replace(
+        `{${'sandboxId'}}`,
+        encodeURIComponent(String(sandboxId)),
+      )
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      // authentication bearer required
+      // http bearer authentication required
+      await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+      // authentication oauth2 required
+
+      if (showCursor !== undefined) {
+        localVarQueryParameter['show_cursor'] = showCursor
+      }
+
+      if (xDaytonaOrganizationID != null) {
+        localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
+      }
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     * Type text using keyboard
+     * @summary Type text
+     * @param {string} sandboxId
+     * @param {KeyboardTypeRequest} keyboardTypeRequest
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    typeText: async (
+      sandboxId: string,
+      keyboardTypeRequest: KeyboardTypeRequest,
+      xDaytonaOrganizationID?: string,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'sandboxId' is not null or undefined
+      assertParamExists('typeText', 'sandboxId', sandboxId)
+      // verify required parameter 'keyboardTypeRequest' is not null or undefined
+      assertParamExists('typeText', 'keyboardTypeRequest', keyboardTypeRequest)
+      const localVarPath = `/toolbox/{sandboxId}/toolbox/computeruse/keyboard/type`.replace(
+        `{${'sandboxId'}}`,
+        encodeURIComponent(String(sandboxId)),
+      )
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      // authentication bearer required
+      // http bearer authentication required
+      await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+      // authentication oauth2 required
+
+      localVarHeaderParameter['Content-Type'] = 'application/json'
+
+      if (xDaytonaOrganizationID != null) {
+        localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
+      }
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+      localVarRequestOptions.data = serializeDataIfNeeded(keyboardTypeRequest, localVarRequestOptions, configuration)
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
      * Upload file inside sandbox
      * @summary Upload file
      * @param {string} sandboxId
@@ -2338,6 +3579,38 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
 export const ToolboxApiFp = function (configuration?: Configuration) {
   const localVarAxiosParamCreator = ToolboxApiAxiosParamCreator(configuration)
   return {
+    /**
+     * Click mouse at specified coordinates
+     * @summary Click mouse
+     * @param {string} sandboxId
+     * @param {MouseClickRequest} mouseClickRequest
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async clickMouse(
+      sandboxId: string,
+      mouseClickRequest: MouseClickRequest,
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<MouseClickResponse>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.clickMouse(
+        sandboxId,
+        mouseClickRequest,
+        xDaytonaOrganizationID,
+        options,
+      )
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['ToolboxApi.clickMouse']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
     /**
      * Create folder inside sandbox
      * @summary Create folder
@@ -2502,6 +3775,38 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
         )(axios, localVarOperationServerBasePath || basePath)
     },
     /**
+     * Drag mouse from start to end coordinates
+     * @summary Drag mouse
+     * @param {string} sandboxId
+     * @param {MouseDragRequest} mouseDragRequest
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async dragMouse(
+      sandboxId: string,
+      mouseDragRequest: MouseDragRequest,
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<MouseDragResponse>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.dragMouse(
+        sandboxId,
+        mouseDragRequest,
+        xDaytonaOrganizationID,
+        options,
+      )
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['ToolboxApi.dragMouse']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
+    /**
      * Execute command synchronously inside sandbox
      * @summary Execute command
      * @param {string} sandboxId
@@ -2604,6 +3909,64 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
         )(axios, localVarOperationServerBasePath || basePath)
     },
     /**
+     * Get status of all VNC desktop processes
+     * @summary Get computer use status
+     * @param {string} sandboxId
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async getComputerUseStatus(
+      sandboxId: string,
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ComputerUseStatusResponse>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.getComputerUseStatus(
+        sandboxId,
+        xDaytonaOrganizationID,
+        options,
+      )
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['ToolboxApi.getComputerUseStatus']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
+    /**
+     * Get information about displays
+     * @summary Get display info
+     * @param {string} sandboxId
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async getDisplayInfo(
+      sandboxId: string,
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<DisplayInfoResponse>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.getDisplayInfo(
+        sandboxId,
+        xDaytonaOrganizationID,
+        options,
+      )
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['ToolboxApi.getDisplayInfo']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
+    /**
      * Get file info inside sandbox
      * @summary Get file info
      * @param {string} sandboxId
@@ -2627,6 +3990,131 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
         operationServerMap['ToolboxApi.getFileInfo']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
+    /**
+     * Get current mouse cursor position
+     * @summary Get mouse position
+     * @param {string} sandboxId
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async getMousePosition(
+      sandboxId: string,
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<MousePosition>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.getMousePosition(
+        sandboxId,
+        xDaytonaOrganizationID,
+        options,
+      )
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['ToolboxApi.getMousePosition']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
+    /**
+     * Get error logs for a specific VNC process
+     * @summary Get process errors
+     * @param {string} processName
+     * @param {string} sandboxId
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async getProcessErrors(
+      processName: string,
+      sandboxId: string,
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ProcessErrorsResponse>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.getProcessErrors(
+        processName,
+        sandboxId,
+        xDaytonaOrganizationID,
+        options,
+      )
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['ToolboxApi.getProcessErrors']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
+    /**
+     * Get logs for a specific VNC process
+     * @summary Get process logs
+     * @param {string} processName
+     * @param {string} sandboxId
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async getProcessLogs(
+      processName: string,
+      sandboxId: string,
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ProcessLogsResponse>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.getProcessLogs(
+        processName,
+        sandboxId,
+        xDaytonaOrganizationID,
+        options,
+      )
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['ToolboxApi.getProcessLogs']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
+    /**
+     * Get status of a specific VNC process
+     * @summary Get process status
+     * @param {string} processName
+     * @param {string} sandboxId
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async getProcessStatus(
+      processName: string,
+      sandboxId: string,
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ProcessStatusResponse>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.getProcessStatus(
+        processName,
+        sandboxId,
+        xDaytonaOrganizationID,
+        options,
+      )
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['ToolboxApi.getProcessStatus']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -2761,6 +4249,31 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
         operationServerMap['ToolboxApi.getSessionCommandLogs']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
+    /**
+     * Get list of open windows
+     * @summary Get windows
+     * @param {string} sandboxId
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async getWindows(
+      sandboxId: string,
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<WindowsResponse>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.getWindows(sandboxId, xDaytonaOrganizationID, options)
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['ToolboxApi.getWindows']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -3450,6 +4963,102 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
         )(axios, localVarOperationServerBasePath || basePath)
     },
     /**
+     * Move mouse cursor to specified coordinates
+     * @summary Move mouse
+     * @param {string} sandboxId
+     * @param {MouseMoveRequest} mouseMoveRequest
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async moveMouse(
+      sandboxId: string,
+      mouseMoveRequest: MouseMoveRequest,
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<MouseMoveResponse>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.moveMouse(
+        sandboxId,
+        mouseMoveRequest,
+        xDaytonaOrganizationID,
+        options,
+      )
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['ToolboxApi.moveMouse']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
+    /**
+     * Press a hotkey combination
+     * @summary Press hotkey
+     * @param {string} sandboxId
+     * @param {KeyboardHotkeyRequest} keyboardHotkeyRequest
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async pressHotkey(
+      sandboxId: string,
+      keyboardHotkeyRequest: KeyboardHotkeyRequest,
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.pressHotkey(
+        sandboxId,
+        keyboardHotkeyRequest,
+        xDaytonaOrganizationID,
+        options,
+      )
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['ToolboxApi.pressHotkey']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
+    /**
+     * Press a key with optional modifiers
+     * @summary Press key
+     * @param {string} sandboxId
+     * @param {KeyboardPressRequest} keyboardPressRequest
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async pressKey(
+      sandboxId: string,
+      keyboardPressRequest: KeyboardPressRequest,
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.pressKey(
+        sandboxId,
+        keyboardPressRequest,
+        xDaytonaOrganizationID,
+        options,
+      )
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['ToolboxApi.pressKey']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
+    /**
      * Replace text/pattern in multiple files inside sandbox
      * @summary Replace in files
      * @param {string} sandboxId
@@ -3473,6 +5082,70 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
         operationServerMap['ToolboxApi.replaceInFiles']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
+    /**
+     * Restart a specific VNC process
+     * @summary Restart process
+     * @param {string} processName
+     * @param {string} sandboxId
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async restartProcess(
+      processName: string,
+      sandboxId: string,
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ProcessRestartResponse>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.restartProcess(
+        processName,
+        sandboxId,
+        xDaytonaOrganizationID,
+        options,
+      )
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['ToolboxApi.restartProcess']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
+    /**
+     * Scroll mouse at specified coordinates
+     * @summary Scroll mouse
+     * @param {string} sandboxId
+     * @param {MouseScrollRequest} mouseScrollRequest
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async scrollMouse(
+      sandboxId: string,
+      mouseScrollRequest: MouseScrollRequest,
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<MouseScrollResponse>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.scrollMouse(
+        sandboxId,
+        mouseScrollRequest,
+        xDaytonaOrganizationID,
+        options,
+      )
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['ToolboxApi.scrollMouse']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -3558,6 +5231,266 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
         )(axios, localVarOperationServerBasePath || basePath)
     },
     /**
+     * Start all VNC desktop processes (Xvfb, xfce4, x11vnc, novnc)
+     * @summary Start computer use processes
+     * @param {string} sandboxId
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async startComputerUse(
+      sandboxId: string,
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ComputerUseStartResponse>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.startComputerUse(
+        sandboxId,
+        xDaytonaOrganizationID,
+        options,
+      )
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['ToolboxApi.startComputerUse']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
+    /**
+     * Stop all VNC desktop processes (Xvfb, xfce4, x11vnc, novnc)
+     * @summary Stop computer use processes
+     * @param {string} sandboxId
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async stopComputerUse(
+      sandboxId: string,
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ComputerUseStopResponse>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.stopComputerUse(
+        sandboxId,
+        xDaytonaOrganizationID,
+        options,
+      )
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['ToolboxApi.stopComputerUse']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
+    /**
+     * Take a compressed screenshot of a specific region
+     * @summary Take compressed region screenshot
+     * @param {string} sandboxId
+     * @param {number} height
+     * @param {number} width
+     * @param {number} y
+     * @param {number} x
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {number} [scale]
+     * @param {number} [quality]
+     * @param {string} [format]
+     * @param {boolean} [showCursor]
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async takeCompressedRegionScreenshot(
+      sandboxId: string,
+      height: number,
+      width: number,
+      y: number,
+      x: number,
+      xDaytonaOrganizationID?: string,
+      scale?: number,
+      quality?: number,
+      format?: string,
+      showCursor?: boolean,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CompressedScreenshotResponse>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.takeCompressedRegionScreenshot(
+        sandboxId,
+        height,
+        width,
+        y,
+        x,
+        xDaytonaOrganizationID,
+        scale,
+        quality,
+        format,
+        showCursor,
+        options,
+      )
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['ToolboxApi.takeCompressedRegionScreenshot']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
+    /**
+     * Take a compressed screenshot with format, quality, and scale options
+     * @summary Take compressed screenshot
+     * @param {string} sandboxId
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {number} [scale]
+     * @param {number} [quality]
+     * @param {string} [format]
+     * @param {boolean} [showCursor]
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async takeCompressedScreenshot(
+      sandboxId: string,
+      xDaytonaOrganizationID?: string,
+      scale?: number,
+      quality?: number,
+      format?: string,
+      showCursor?: boolean,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CompressedScreenshotResponse>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.takeCompressedScreenshot(
+        sandboxId,
+        xDaytonaOrganizationID,
+        scale,
+        quality,
+        format,
+        showCursor,
+        options,
+      )
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['ToolboxApi.takeCompressedScreenshot']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
+    /**
+     * Take a screenshot of a specific region
+     * @summary Take region screenshot
+     * @param {string} sandboxId
+     * @param {number} height
+     * @param {number} width
+     * @param {number} y
+     * @param {number} x
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {boolean} [showCursor]
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async takeRegionScreenshot(
+      sandboxId: string,
+      height: number,
+      width: number,
+      y: number,
+      x: number,
+      xDaytonaOrganizationID?: string,
+      showCursor?: boolean,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<RegionScreenshotResponse>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.takeRegionScreenshot(
+        sandboxId,
+        height,
+        width,
+        y,
+        x,
+        xDaytonaOrganizationID,
+        showCursor,
+        options,
+      )
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['ToolboxApi.takeRegionScreenshot']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
+    /**
+     * Take a screenshot of the entire screen
+     * @summary Take screenshot
+     * @param {string} sandboxId
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {boolean} [showCursor]
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async takeScreenshot(
+      sandboxId: string,
+      xDaytonaOrganizationID?: string,
+      showCursor?: boolean,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ScreenshotResponse>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.takeScreenshot(
+        sandboxId,
+        xDaytonaOrganizationID,
+        showCursor,
+        options,
+      )
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['ToolboxApi.takeScreenshot']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
+    /**
+     * Type text using keyboard
+     * @summary Type text
+     * @param {string} sandboxId
+     * @param {KeyboardTypeRequest} keyboardTypeRequest
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async typeText(
+      sandboxId: string,
+      keyboardTypeRequest: KeyboardTypeRequest,
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.typeText(
+        sandboxId,
+        keyboardTypeRequest,
+        xDaytonaOrganizationID,
+        options,
+      )
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['ToolboxApi.typeText']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
+    /**
      * Upload file inside sandbox
      * @summary Upload file
      * @param {string} sandboxId
@@ -3628,6 +5561,25 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
 export const ToolboxApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
   const localVarFp = ToolboxApiFp(configuration)
   return {
+    /**
+     * Click mouse at specified coordinates
+     * @summary Click mouse
+     * @param {string} sandboxId
+     * @param {MouseClickRequest} mouseClickRequest
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    clickMouse(
+      sandboxId: string,
+      mouseClickRequest: MouseClickRequest,
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<MouseClickResponse> {
+      return localVarFp
+        .clickMouse(sandboxId, mouseClickRequest, xDaytonaOrganizationID, options)
+        .then((request) => request(axios, basePath))
+    },
     /**
      * Create folder inside sandbox
      * @summary Create folder
@@ -3726,6 +5678,25 @@ export const ToolboxApiFactory = function (configuration?: Configuration, basePa
         .then((request) => request(axios, basePath))
     },
     /**
+     * Drag mouse from start to end coordinates
+     * @summary Drag mouse
+     * @param {string} sandboxId
+     * @param {MouseDragRequest} mouseDragRequest
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    dragMouse(
+      sandboxId: string,
+      mouseDragRequest: MouseDragRequest,
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<MouseDragResponse> {
+      return localVarFp
+        .dragMouse(sandboxId, mouseDragRequest, xDaytonaOrganizationID, options)
+        .then((request) => request(axios, basePath))
+    },
+    /**
      * Execute command synchronously inside sandbox
      * @summary Execute command
      * @param {string} sandboxId
@@ -3787,6 +5758,40 @@ export const ToolboxApiFactory = function (configuration?: Configuration, basePa
         .then((request) => request(axios, basePath))
     },
     /**
+     * Get status of all VNC desktop processes
+     * @summary Get computer use status
+     * @param {string} sandboxId
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    getComputerUseStatus(
+      sandboxId: string,
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<ComputerUseStatusResponse> {
+      return localVarFp
+        .getComputerUseStatus(sandboxId, xDaytonaOrganizationID, options)
+        .then((request) => request(axios, basePath))
+    },
+    /**
+     * Get information about displays
+     * @summary Get display info
+     * @param {string} sandboxId
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    getDisplayInfo(
+      sandboxId: string,
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<DisplayInfoResponse> {
+      return localVarFp
+        .getDisplayInfo(sandboxId, xDaytonaOrganizationID, options)
+        .then((request) => request(axios, basePath))
+    },
+    /**
      * Get file info inside sandbox
      * @summary Get file info
      * @param {string} sandboxId
@@ -3803,6 +5808,80 @@ export const ToolboxApiFactory = function (configuration?: Configuration, basePa
     ): AxiosPromise<FileInfo> {
       return localVarFp
         .getFileInfo(sandboxId, path, xDaytonaOrganizationID, options)
+        .then((request) => request(axios, basePath))
+    },
+    /**
+     * Get current mouse cursor position
+     * @summary Get mouse position
+     * @param {string} sandboxId
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    getMousePosition(
+      sandboxId: string,
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<MousePosition> {
+      return localVarFp
+        .getMousePosition(sandboxId, xDaytonaOrganizationID, options)
+        .then((request) => request(axios, basePath))
+    },
+    /**
+     * Get error logs for a specific VNC process
+     * @summary Get process errors
+     * @param {string} processName
+     * @param {string} sandboxId
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    getProcessErrors(
+      processName: string,
+      sandboxId: string,
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<ProcessErrorsResponse> {
+      return localVarFp
+        .getProcessErrors(processName, sandboxId, xDaytonaOrganizationID, options)
+        .then((request) => request(axios, basePath))
+    },
+    /**
+     * Get logs for a specific VNC process
+     * @summary Get process logs
+     * @param {string} processName
+     * @param {string} sandboxId
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    getProcessLogs(
+      processName: string,
+      sandboxId: string,
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<ProcessLogsResponse> {
+      return localVarFp
+        .getProcessLogs(processName, sandboxId, xDaytonaOrganizationID, options)
+        .then((request) => request(axios, basePath))
+    },
+    /**
+     * Get status of a specific VNC process
+     * @summary Get process status
+     * @param {string} processName
+     * @param {string} sandboxId
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    getProcessStatus(
+      processName: string,
+      sandboxId: string,
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<ProcessStatusResponse> {
+      return localVarFp
+        .getProcessStatus(processName, sandboxId, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
@@ -3883,6 +5962,23 @@ export const ToolboxApiFactory = function (configuration?: Configuration, basePa
     ): AxiosPromise<string> {
       return localVarFp
         .getSessionCommandLogs(sandboxId, sessionId, commandId, xDaytonaOrganizationID, follow, options)
+        .then((request) => request(axios, basePath))
+    },
+    /**
+     * Get list of open windows
+     * @summary Get windows
+     * @param {string} sandboxId
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    getWindows(
+      sandboxId: string,
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<WindowsResponse> {
+      return localVarFp
+        .getWindows(sandboxId, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
@@ -4293,6 +6389,63 @@ export const ToolboxApiFactory = function (configuration?: Configuration, basePa
         .then((request) => request(axios, basePath))
     },
     /**
+     * Move mouse cursor to specified coordinates
+     * @summary Move mouse
+     * @param {string} sandboxId
+     * @param {MouseMoveRequest} mouseMoveRequest
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    moveMouse(
+      sandboxId: string,
+      mouseMoveRequest: MouseMoveRequest,
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<MouseMoveResponse> {
+      return localVarFp
+        .moveMouse(sandboxId, mouseMoveRequest, xDaytonaOrganizationID, options)
+        .then((request) => request(axios, basePath))
+    },
+    /**
+     * Press a hotkey combination
+     * @summary Press hotkey
+     * @param {string} sandboxId
+     * @param {KeyboardHotkeyRequest} keyboardHotkeyRequest
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    pressHotkey(
+      sandboxId: string,
+      keyboardHotkeyRequest: KeyboardHotkeyRequest,
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<void> {
+      return localVarFp
+        .pressHotkey(sandboxId, keyboardHotkeyRequest, xDaytonaOrganizationID, options)
+        .then((request) => request(axios, basePath))
+    },
+    /**
+     * Press a key with optional modifiers
+     * @summary Press key
+     * @param {string} sandboxId
+     * @param {KeyboardPressRequest} keyboardPressRequest
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    pressKey(
+      sandboxId: string,
+      keyboardPressRequest: KeyboardPressRequest,
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<void> {
+      return localVarFp
+        .pressKey(sandboxId, keyboardPressRequest, xDaytonaOrganizationID, options)
+        .then((request) => request(axios, basePath))
+    },
+    /**
      * Replace text/pattern in multiple files inside sandbox
      * @summary Replace in files
      * @param {string} sandboxId
@@ -4309,6 +6462,44 @@ export const ToolboxApiFactory = function (configuration?: Configuration, basePa
     ): AxiosPromise<Array<ReplaceResult>> {
       return localVarFp
         .replaceInFiles(sandboxId, replaceRequest, xDaytonaOrganizationID, options)
+        .then((request) => request(axios, basePath))
+    },
+    /**
+     * Restart a specific VNC process
+     * @summary Restart process
+     * @param {string} processName
+     * @param {string} sandboxId
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    restartProcess(
+      processName: string,
+      sandboxId: string,
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<ProcessRestartResponse> {
+      return localVarFp
+        .restartProcess(processName, sandboxId, xDaytonaOrganizationID, options)
+        .then((request) => request(axios, basePath))
+    },
+    /**
+     * Scroll mouse at specified coordinates
+     * @summary Scroll mouse
+     * @param {string} sandboxId
+     * @param {MouseScrollRequest} mouseScrollRequest
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    scrollMouse(
+      sandboxId: string,
+      mouseScrollRequest: MouseScrollRequest,
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<MouseScrollResponse> {
+      return localVarFp
+        .scrollMouse(sandboxId, mouseScrollRequest, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
@@ -4355,6 +6546,175 @@ export const ToolboxApiFactory = function (configuration?: Configuration, basePa
     ): AxiosPromise<void> {
       return localVarFp
         .setFilePermissions(sandboxId, path, xDaytonaOrganizationID, owner, group, mode, options)
+        .then((request) => request(axios, basePath))
+    },
+    /**
+     * Start all VNC desktop processes (Xvfb, xfce4, x11vnc, novnc)
+     * @summary Start computer use processes
+     * @param {string} sandboxId
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    startComputerUse(
+      sandboxId: string,
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<ComputerUseStartResponse> {
+      return localVarFp
+        .startComputerUse(sandboxId, xDaytonaOrganizationID, options)
+        .then((request) => request(axios, basePath))
+    },
+    /**
+     * Stop all VNC desktop processes (Xvfb, xfce4, x11vnc, novnc)
+     * @summary Stop computer use processes
+     * @param {string} sandboxId
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    stopComputerUse(
+      sandboxId: string,
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<ComputerUseStopResponse> {
+      return localVarFp
+        .stopComputerUse(sandboxId, xDaytonaOrganizationID, options)
+        .then((request) => request(axios, basePath))
+    },
+    /**
+     * Take a compressed screenshot of a specific region
+     * @summary Take compressed region screenshot
+     * @param {string} sandboxId
+     * @param {number} height
+     * @param {number} width
+     * @param {number} y
+     * @param {number} x
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {number} [scale]
+     * @param {number} [quality]
+     * @param {string} [format]
+     * @param {boolean} [showCursor]
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    takeCompressedRegionScreenshot(
+      sandboxId: string,
+      height: number,
+      width: number,
+      y: number,
+      x: number,
+      xDaytonaOrganizationID?: string,
+      scale?: number,
+      quality?: number,
+      format?: string,
+      showCursor?: boolean,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<CompressedScreenshotResponse> {
+      return localVarFp
+        .takeCompressedRegionScreenshot(
+          sandboxId,
+          height,
+          width,
+          y,
+          x,
+          xDaytonaOrganizationID,
+          scale,
+          quality,
+          format,
+          showCursor,
+          options,
+        )
+        .then((request) => request(axios, basePath))
+    },
+    /**
+     * Take a compressed screenshot with format, quality, and scale options
+     * @summary Take compressed screenshot
+     * @param {string} sandboxId
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {number} [scale]
+     * @param {number} [quality]
+     * @param {string} [format]
+     * @param {boolean} [showCursor]
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    takeCompressedScreenshot(
+      sandboxId: string,
+      xDaytonaOrganizationID?: string,
+      scale?: number,
+      quality?: number,
+      format?: string,
+      showCursor?: boolean,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<CompressedScreenshotResponse> {
+      return localVarFp
+        .takeCompressedScreenshot(sandboxId, xDaytonaOrganizationID, scale, quality, format, showCursor, options)
+        .then((request) => request(axios, basePath))
+    },
+    /**
+     * Take a screenshot of a specific region
+     * @summary Take region screenshot
+     * @param {string} sandboxId
+     * @param {number} height
+     * @param {number} width
+     * @param {number} y
+     * @param {number} x
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {boolean} [showCursor]
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    takeRegionScreenshot(
+      sandboxId: string,
+      height: number,
+      width: number,
+      y: number,
+      x: number,
+      xDaytonaOrganizationID?: string,
+      showCursor?: boolean,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<RegionScreenshotResponse> {
+      return localVarFp
+        .takeRegionScreenshot(sandboxId, height, width, y, x, xDaytonaOrganizationID, showCursor, options)
+        .then((request) => request(axios, basePath))
+    },
+    /**
+     * Take a screenshot of the entire screen
+     * @summary Take screenshot
+     * @param {string} sandboxId
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {boolean} [showCursor]
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    takeScreenshot(
+      sandboxId: string,
+      xDaytonaOrganizationID?: string,
+      showCursor?: boolean,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<ScreenshotResponse> {
+      return localVarFp
+        .takeScreenshot(sandboxId, xDaytonaOrganizationID, showCursor, options)
+        .then((request) => request(axios, basePath))
+    },
+    /**
+     * Type text using keyboard
+     * @summary Type text
+     * @param {string} sandboxId
+     * @param {KeyboardTypeRequest} keyboardTypeRequest
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    typeText(
+      sandboxId: string,
+      keyboardTypeRequest: KeyboardTypeRequest,
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<void> {
+      return localVarFp
+        .typeText(sandboxId, keyboardTypeRequest, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
@@ -4406,6 +6766,27 @@ export const ToolboxApiFactory = function (configuration?: Configuration, basePa
  * @extends {BaseAPI}
  */
 export class ToolboxApi extends BaseAPI {
+  /**
+   * Click mouse at specified coordinates
+   * @summary Click mouse
+   * @param {string} sandboxId
+   * @param {MouseClickRequest} mouseClickRequest
+   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof ToolboxApi
+   */
+  public clickMouse(
+    sandboxId: string,
+    mouseClickRequest: MouseClickRequest,
+    xDaytonaOrganizationID?: string,
+    options?: RawAxiosRequestConfig,
+  ) {
+    return ToolboxApiFp(this.configuration)
+      .clickMouse(sandboxId, mouseClickRequest, xDaytonaOrganizationID, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
   /**
    * Create folder inside sandbox
    * @summary Create folder
@@ -4509,6 +6890,27 @@ export class ToolboxApi extends BaseAPI {
   }
 
   /**
+   * Drag mouse from start to end coordinates
+   * @summary Drag mouse
+   * @param {string} sandboxId
+   * @param {MouseDragRequest} mouseDragRequest
+   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof ToolboxApi
+   */
+  public dragMouse(
+    sandboxId: string,
+    mouseDragRequest: MouseDragRequest,
+    xDaytonaOrganizationID?: string,
+    options?: RawAxiosRequestConfig,
+  ) {
+    return ToolboxApiFp(this.configuration)
+      .dragMouse(sandboxId, mouseDragRequest, xDaytonaOrganizationID, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
    * Execute command synchronously inside sandbox
    * @summary Execute command
    * @param {string} sandboxId
@@ -4576,6 +6978,36 @@ export class ToolboxApi extends BaseAPI {
   }
 
   /**
+   * Get status of all VNC desktop processes
+   * @summary Get computer use status
+   * @param {string} sandboxId
+   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof ToolboxApi
+   */
+  public getComputerUseStatus(sandboxId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
+    return ToolboxApiFp(this.configuration)
+      .getComputerUseStatus(sandboxId, xDaytonaOrganizationID, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   * Get information about displays
+   * @summary Get display info
+   * @param {string} sandboxId
+   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof ToolboxApi
+   */
+  public getDisplayInfo(sandboxId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
+    return ToolboxApiFp(this.configuration)
+      .getDisplayInfo(sandboxId, xDaytonaOrganizationID, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
    * Get file info inside sandbox
    * @summary Get file info
    * @param {string} sandboxId
@@ -4593,6 +7025,84 @@ export class ToolboxApi extends BaseAPI {
   ) {
     return ToolboxApiFp(this.configuration)
       .getFileInfo(sandboxId, path, xDaytonaOrganizationID, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   * Get current mouse cursor position
+   * @summary Get mouse position
+   * @param {string} sandboxId
+   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof ToolboxApi
+   */
+  public getMousePosition(sandboxId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
+    return ToolboxApiFp(this.configuration)
+      .getMousePosition(sandboxId, xDaytonaOrganizationID, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   * Get error logs for a specific VNC process
+   * @summary Get process errors
+   * @param {string} processName
+   * @param {string} sandboxId
+   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof ToolboxApi
+   */
+  public getProcessErrors(
+    processName: string,
+    sandboxId: string,
+    xDaytonaOrganizationID?: string,
+    options?: RawAxiosRequestConfig,
+  ) {
+    return ToolboxApiFp(this.configuration)
+      .getProcessErrors(processName, sandboxId, xDaytonaOrganizationID, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   * Get logs for a specific VNC process
+   * @summary Get process logs
+   * @param {string} processName
+   * @param {string} sandboxId
+   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof ToolboxApi
+   */
+  public getProcessLogs(
+    processName: string,
+    sandboxId: string,
+    xDaytonaOrganizationID?: string,
+    options?: RawAxiosRequestConfig,
+  ) {
+    return ToolboxApiFp(this.configuration)
+      .getProcessLogs(processName, sandboxId, xDaytonaOrganizationID, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   * Get status of a specific VNC process
+   * @summary Get process status
+   * @param {string} processName
+   * @param {string} sandboxId
+   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof ToolboxApi
+   */
+  public getProcessStatus(
+    processName: string,
+    sandboxId: string,
+    xDaytonaOrganizationID?: string,
+    options?: RawAxiosRequestConfig,
+  ) {
+    return ToolboxApiFp(this.configuration)
+      .getProcessStatus(processName, sandboxId, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
@@ -4677,6 +7187,21 @@ export class ToolboxApi extends BaseAPI {
   ) {
     return ToolboxApiFp(this.configuration)
       .getSessionCommandLogs(sandboxId, sessionId, commandId, xDaytonaOrganizationID, follow, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   * Get list of open windows
+   * @summary Get windows
+   * @param {string} sandboxId
+   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof ToolboxApi
+   */
+  public getWindows(sandboxId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
+    return ToolboxApiFp(this.configuration)
+      .getWindows(sandboxId, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
@@ -5121,6 +7646,69 @@ export class ToolboxApi extends BaseAPI {
   }
 
   /**
+   * Move mouse cursor to specified coordinates
+   * @summary Move mouse
+   * @param {string} sandboxId
+   * @param {MouseMoveRequest} mouseMoveRequest
+   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof ToolboxApi
+   */
+  public moveMouse(
+    sandboxId: string,
+    mouseMoveRequest: MouseMoveRequest,
+    xDaytonaOrganizationID?: string,
+    options?: RawAxiosRequestConfig,
+  ) {
+    return ToolboxApiFp(this.configuration)
+      .moveMouse(sandboxId, mouseMoveRequest, xDaytonaOrganizationID, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   * Press a hotkey combination
+   * @summary Press hotkey
+   * @param {string} sandboxId
+   * @param {KeyboardHotkeyRequest} keyboardHotkeyRequest
+   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof ToolboxApi
+   */
+  public pressHotkey(
+    sandboxId: string,
+    keyboardHotkeyRequest: KeyboardHotkeyRequest,
+    xDaytonaOrganizationID?: string,
+    options?: RawAxiosRequestConfig,
+  ) {
+    return ToolboxApiFp(this.configuration)
+      .pressHotkey(sandboxId, keyboardHotkeyRequest, xDaytonaOrganizationID, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   * Press a key with optional modifiers
+   * @summary Press key
+   * @param {string} sandboxId
+   * @param {KeyboardPressRequest} keyboardPressRequest
+   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof ToolboxApi
+   */
+  public pressKey(
+    sandboxId: string,
+    keyboardPressRequest: KeyboardPressRequest,
+    xDaytonaOrganizationID?: string,
+    options?: RawAxiosRequestConfig,
+  ) {
+    return ToolboxApiFp(this.configuration)
+      .pressKey(sandboxId, keyboardPressRequest, xDaytonaOrganizationID, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
    * Replace text/pattern in multiple files inside sandbox
    * @summary Replace in files
    * @param {string} sandboxId
@@ -5138,6 +7726,48 @@ export class ToolboxApi extends BaseAPI {
   ) {
     return ToolboxApiFp(this.configuration)
       .replaceInFiles(sandboxId, replaceRequest, xDaytonaOrganizationID, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   * Restart a specific VNC process
+   * @summary Restart process
+   * @param {string} processName
+   * @param {string} sandboxId
+   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof ToolboxApi
+   */
+  public restartProcess(
+    processName: string,
+    sandboxId: string,
+    xDaytonaOrganizationID?: string,
+    options?: RawAxiosRequestConfig,
+  ) {
+    return ToolboxApiFp(this.configuration)
+      .restartProcess(processName, sandboxId, xDaytonaOrganizationID, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   * Scroll mouse at specified coordinates
+   * @summary Scroll mouse
+   * @param {string} sandboxId
+   * @param {MouseScrollRequest} mouseScrollRequest
+   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof ToolboxApi
+   */
+  public scrollMouse(
+    sandboxId: string,
+    mouseScrollRequest: MouseScrollRequest,
+    xDaytonaOrganizationID?: string,
+    options?: RawAxiosRequestConfig,
+  ) {
+    return ToolboxApiFp(this.configuration)
+      .scrollMouse(sandboxId, mouseScrollRequest, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
@@ -5188,6 +7818,181 @@ export class ToolboxApi extends BaseAPI {
   ) {
     return ToolboxApiFp(this.configuration)
       .setFilePermissions(sandboxId, path, xDaytonaOrganizationID, owner, group, mode, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   * Start all VNC desktop processes (Xvfb, xfce4, x11vnc, novnc)
+   * @summary Start computer use processes
+   * @param {string} sandboxId
+   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof ToolboxApi
+   */
+  public startComputerUse(sandboxId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
+    return ToolboxApiFp(this.configuration)
+      .startComputerUse(sandboxId, xDaytonaOrganizationID, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   * Stop all VNC desktop processes (Xvfb, xfce4, x11vnc, novnc)
+   * @summary Stop computer use processes
+   * @param {string} sandboxId
+   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof ToolboxApi
+   */
+  public stopComputerUse(sandboxId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
+    return ToolboxApiFp(this.configuration)
+      .stopComputerUse(sandboxId, xDaytonaOrganizationID, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   * Take a compressed screenshot of a specific region
+   * @summary Take compressed region screenshot
+   * @param {string} sandboxId
+   * @param {number} height
+   * @param {number} width
+   * @param {number} y
+   * @param {number} x
+   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+   * @param {number} [scale]
+   * @param {number} [quality]
+   * @param {string} [format]
+   * @param {boolean} [showCursor]
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof ToolboxApi
+   */
+  public takeCompressedRegionScreenshot(
+    sandboxId: string,
+    height: number,
+    width: number,
+    y: number,
+    x: number,
+    xDaytonaOrganizationID?: string,
+    scale?: number,
+    quality?: number,
+    format?: string,
+    showCursor?: boolean,
+    options?: RawAxiosRequestConfig,
+  ) {
+    return ToolboxApiFp(this.configuration)
+      .takeCompressedRegionScreenshot(
+        sandboxId,
+        height,
+        width,
+        y,
+        x,
+        xDaytonaOrganizationID,
+        scale,
+        quality,
+        format,
+        showCursor,
+        options,
+      )
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   * Take a compressed screenshot with format, quality, and scale options
+   * @summary Take compressed screenshot
+   * @param {string} sandboxId
+   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+   * @param {number} [scale]
+   * @param {number} [quality]
+   * @param {string} [format]
+   * @param {boolean} [showCursor]
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof ToolboxApi
+   */
+  public takeCompressedScreenshot(
+    sandboxId: string,
+    xDaytonaOrganizationID?: string,
+    scale?: number,
+    quality?: number,
+    format?: string,
+    showCursor?: boolean,
+    options?: RawAxiosRequestConfig,
+  ) {
+    return ToolboxApiFp(this.configuration)
+      .takeCompressedScreenshot(sandboxId, xDaytonaOrganizationID, scale, quality, format, showCursor, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   * Take a screenshot of a specific region
+   * @summary Take region screenshot
+   * @param {string} sandboxId
+   * @param {number} height
+   * @param {number} width
+   * @param {number} y
+   * @param {number} x
+   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+   * @param {boolean} [showCursor]
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof ToolboxApi
+   */
+  public takeRegionScreenshot(
+    sandboxId: string,
+    height: number,
+    width: number,
+    y: number,
+    x: number,
+    xDaytonaOrganizationID?: string,
+    showCursor?: boolean,
+    options?: RawAxiosRequestConfig,
+  ) {
+    return ToolboxApiFp(this.configuration)
+      .takeRegionScreenshot(sandboxId, height, width, y, x, xDaytonaOrganizationID, showCursor, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   * Take a screenshot of the entire screen
+   * @summary Take screenshot
+   * @param {string} sandboxId
+   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+   * @param {boolean} [showCursor]
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof ToolboxApi
+   */
+  public takeScreenshot(
+    sandboxId: string,
+    xDaytonaOrganizationID?: string,
+    showCursor?: boolean,
+    options?: RawAxiosRequestConfig,
+  ) {
+    return ToolboxApiFp(this.configuration)
+      .takeScreenshot(sandboxId, xDaytonaOrganizationID, showCursor, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   * Type text using keyboard
+   * @summary Type text
+   * @param {string} sandboxId
+   * @param {KeyboardTypeRequest} keyboardTypeRequest
+   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof ToolboxApi
+   */
+  public typeText(
+    sandboxId: string,
+    keyboardTypeRequest: KeyboardTypeRequest,
+    xDaytonaOrganizationID?: string,
+    options?: RawAxiosRequestConfig,
+  ) {
+    return ToolboxApiFp(this.configuration)
+      .typeText(sandboxId, keyboardTypeRequest, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
