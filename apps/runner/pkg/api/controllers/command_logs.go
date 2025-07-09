@@ -17,20 +17,20 @@ import (
 )
 
 func ProxyCommandLogsStream(ctx *gin.Context) {
-	targetURL, fullTargetURL, extraHeaders, err := getProxyTarget(ctx)
+	targetURL, extraHeaders, err := getProxyTarget(ctx)
 	if err != nil {
 		// Error already sent to the context
 		return
 	}
 
 	if ctx.Query("follow") != "true" {
-		proxy.NewProxyRequestHandler(func(ctx *gin.Context) (*url.URL, string, map[string]string, error) {
-			return targetURL, fullTargetURL, extraHeaders, nil
+		proxy.NewProxyRequestHandler(func(ctx *gin.Context) (*url.URL, map[string]string, error) {
+			return targetURL, extraHeaders, nil
 		})(ctx)
 		return
 	}
 
-	fullTargetURL = strings.Replace(fullTargetURL, "http://", "ws://", 1)
+	fullTargetURL := strings.Replace(targetURL.String(), "http://", "ws://", 1)
 
 	ws, _, err := websocket.DefaultDialer.DialContext(ctx, fullTargetURL, nil)
 	if err != nil {
