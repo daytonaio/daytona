@@ -67,6 +67,23 @@ type ToolboxAPI interface {
 	CreateSessionExecute(r ToolboxAPICreateSessionRequest) (*http.Response, error)
 
 	/*
+		CreateSessionDeprecated Create session
+
+		Create a new session in the sandbox
+
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPICreateSessionDeprecatedRequest
+
+		Deprecated
+	*/
+	CreateSessionDeprecated(ctx context.Context, sandboxId string) ToolboxAPICreateSessionDeprecatedRequest
+
+	// CreateSessionDeprecatedExecute executes the request
+	// Deprecated
+	CreateSessionDeprecatedExecute(r ToolboxAPICreateSessionDeprecatedRequest) (*http.Response, error)
+
+	/*
 		DeleteFile Delete file
 
 		Delete file inside sandbox
@@ -285,11 +302,14 @@ type ToolboxAPI interface {
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 		@param sandboxId
 		@return ToolboxAPIGetProjectDirRequest
+
+		Deprecated
 	*/
 	GetProjectDir(ctx context.Context, sandboxId string) ToolboxAPIGetProjectDirRequest
 
 	// GetProjectDirExecute executes the request
 	//  @return ProjectDirResponse
+	// Deprecated
 	GetProjectDirExecute(r ToolboxAPIGetProjectDirRequest) (*ProjectDirResponse, *http.Response, error)
 
 	/*
@@ -369,6 +389,19 @@ type ToolboxAPI interface {
 	// GetWindowsExecute executes the request
 	//  @return WindowsResponse
 	GetWindowsExecute(r ToolboxAPIGetWindowsRequest) (*WindowsResponse, *http.Response, error)
+
+	/*
+		GetWorkdir Get sandbox workdir
+
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPIGetWorkdirRequest
+	*/
+	GetWorkdir(ctx context.Context, sandboxId string) ToolboxAPIGetWorkdirRequest
+
+	// GetWorkdirExecute executes the request
+	//  @return WorkdirResponse
+	GetWorkdirExecute(r ToolboxAPIGetWorkdirRequest) (*WorkdirResponse, *http.Response, error)
 
 	/*
 		GitAddFiles Add files
@@ -1224,6 +1257,122 @@ func (a *ToolboxAPIService) CreateSessionExecute(r ToolboxAPICreateSessionReques
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.CreateSession")
+	if err != nil {
+		return nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/toolbox/{sandboxId}/toolbox/process/session/v2"
+	localVarPath = strings.Replace(localVarPath, "{"+"sandboxId"+"}", url.PathEscape(parameterValueToString(r.sandboxId, "sandboxId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.createSessionRequest == nil {
+		return nil, reportError("createSessionRequest is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.xDaytonaOrganizationID != nil {
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Daytona-Organization-ID", r.xDaytonaOrganizationID, "simple", "")
+	}
+	// body params
+	localVarPostBody = r.createSessionRequest
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarHTTPResponse, newErr
+	}
+
+	return localVarHTTPResponse, nil
+}
+
+type ToolboxAPICreateSessionDeprecatedRequest struct {
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	createSessionRequest   *CreateSessionRequest
+	xDaytonaOrganizationID *string
+}
+
+func (r ToolboxAPICreateSessionDeprecatedRequest) CreateSessionRequest(createSessionRequest CreateSessionRequest) ToolboxAPICreateSessionDeprecatedRequest {
+	r.createSessionRequest = &createSessionRequest
+	return r
+}
+
+// Use with JWT to specify the organization ID
+func (r ToolboxAPICreateSessionDeprecatedRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) ToolboxAPICreateSessionDeprecatedRequest {
+	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
+	return r
+}
+
+func (r ToolboxAPICreateSessionDeprecatedRequest) Execute() (*http.Response, error) {
+	return r.ApiService.CreateSessionDeprecatedExecute(r)
+}
+
+/*
+CreateSessionDeprecated Create session
+
+Create a new session in the sandbox
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPICreateSessionDeprecatedRequest
+
+Deprecated
+*/
+func (a *ToolboxAPIService) CreateSessionDeprecated(ctx context.Context, sandboxId string) ToolboxAPICreateSessionDeprecatedRequest {
+	return ToolboxAPICreateSessionDeprecatedRequest{
+		ApiService: a,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
+	}
+}
+
+// Execute executes the request
+// Deprecated
+func (a *ToolboxAPIService) CreateSessionDeprecatedExecute(r ToolboxAPICreateSessionDeprecatedRequest) (*http.Response, error) {
+	var (
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.CreateSessionDeprecated")
 	if err != nil {
 		return nil, &GenericOpenAPIError{error: err.Error()}
 	}
@@ -2986,6 +3135,8 @@ GetProjectDir Get sandbox project dir
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param sandboxId
 	@return ToolboxAPIGetProjectDirRequest
+
+Deprecated
 */
 func (a *ToolboxAPIService) GetProjectDir(ctx context.Context, sandboxId string) ToolboxAPIGetProjectDirRequest {
 	return ToolboxAPIGetProjectDirRequest{
@@ -2998,6 +3149,8 @@ func (a *ToolboxAPIService) GetProjectDir(ctx context.Context, sandboxId string)
 // Execute executes the request
 //
 //	@return ProjectDirResponse
+//
+// Deprecated
 func (a *ToolboxAPIService) GetProjectDirExecute(r ToolboxAPIGetProjectDirRequest) (*ProjectDirResponse, *http.Response, error) {
 	var (
 		localVarHTTPMethod  = http.MethodGet
@@ -3609,6 +3762,118 @@ func (a *ToolboxAPIService) GetWindowsExecute(r ToolboxAPIGetWindowsRequest) (*W
 	}
 
 	localVarPath := localBasePath + "/toolbox/{sandboxId}/toolbox/computeruse/display/windows"
+	localVarPath = strings.Replace(localVarPath, "{"+"sandboxId"+"}", url.PathEscape(parameterValueToString(r.sandboxId, "sandboxId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.xDaytonaOrganizationID != nil {
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Daytona-Organization-ID", r.xDaytonaOrganizationID, "simple", "")
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ToolboxAPIGetWorkdirRequest struct {
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	xDaytonaOrganizationID *string
+}
+
+// Use with JWT to specify the organization ID
+func (r ToolboxAPIGetWorkdirRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) ToolboxAPIGetWorkdirRequest {
+	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
+	return r
+}
+
+func (r ToolboxAPIGetWorkdirRequest) Execute() (*WorkdirResponse, *http.Response, error) {
+	return r.ApiService.GetWorkdirExecute(r)
+}
+
+/*
+GetWorkdir Get sandbox workdir
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPIGetWorkdirRequest
+*/
+func (a *ToolboxAPIService) GetWorkdir(ctx context.Context, sandboxId string) ToolboxAPIGetWorkdirRequest {
+	return ToolboxAPIGetWorkdirRequest{
+		ApiService: a,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
+	}
+}
+
+// Execute executes the request
+//
+//	@return WorkdirResponse
+func (a *ToolboxAPIService) GetWorkdirExecute(r ToolboxAPIGetWorkdirRequest) (*WorkdirResponse, *http.Response, error) {
+	var (
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *WorkdirResponse
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.GetWorkdir")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/toolbox/{sandboxId}/toolbox/workdir"
 	localVarPath = strings.Replace(localVarPath, "{"+"sandboxId"+"}", url.PathEscape(parameterValueToString(r.sandboxId, "sandboxId")), -1)
 
 	localVarHeaderParams := make(map[string]string)

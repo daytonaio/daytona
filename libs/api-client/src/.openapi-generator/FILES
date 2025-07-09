@@ -133,4 +133,5 @@ models/user.ts
 models/volume-dto.ts
 models/volume-state.ts
 models/windows-response.ts
+models/workdir-response.ts
 models/workspace.ts

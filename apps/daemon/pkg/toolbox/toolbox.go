@@ -35,16 +35,16 @@ type Server struct {
 	ComputerUse computeruse.IComputerUse
 }
 
-type ProjectDirResponse struct {
+type WorkdirResponse struct {
 	Dir string `json:"dir"`
-} // @name ProjectDirResponse
+} // @name WorkdirResponse
 
 type UserHomeDirResponse struct {
 	Dir string `json:"dir"`
 } // @name UserHomeDirResponse
 
-func (s *Server) GetProjectDir(ctx *gin.Context) {
-	projectDir := ProjectDirResponse{
+func (s *Server) GetWorkdir(ctx *gin.Context) {
+	projectDir := WorkdirResponse{
 		Dir: s.ProjectDir,
 	}
 
@@ -82,8 +82,10 @@ func (s *Server) Start() error {
 		})
 	})
 
-	r.GET("/project-dir", s.GetProjectDir)
+	// keep /project-dir old behavior for backward compatibility
+	r.GET("/project-dir", s.GetUserHomeDir)
 	r.GET("/user-home-dir", s.GetUserHomeDir)
+	r.GET("/workdir", s.GetWorkdir)
 
 	dirname, err := os.UserHomeDir()
 	if err != nil {
@@ -127,7 +129,8 @@ func (s *Server) Start() error {
 		sessionGroup := processController.Group("/session")
 		{
 			sessionGroup.GET("", sessionController.ListSessions)
-			sessionGroup.POST("", sessionController.CreateSession)
+			sessionGroup.POST("", sessionController.CreateSession) // deprecated
+			sessionGroup.POST("/v2", sessionController.CreateSession)
 			sessionGroup.POST("/:sessionId/exec", sessionController.SessionExecuteCommand)
 			sessionGroup.GET("/:sessionId", sessionController.GetSession)
 			sessionGroup.DELETE("/:sessionId", sessionController.DeleteSession)

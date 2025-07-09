@@ -83,6 +83,7 @@ import {
   ProcessLogsResponseDto,
   ProcessErrorsResponseDto,
   UserHomeDirResponseDto,
+  WorkdirResponseDto,
 } from '../dto/toolbox.dto'
 import { ToolboxService } from '../services/toolbox.service'
 import { ContentTypeInterceptor } from '../../common/interceptors/content-type.interceptors'
@@ -209,6 +210,7 @@ export class ToolboxController {
   @ApiOperation({
     summary: 'Get sandbox project dir',
     operationId: 'getProjectDir',
+    deprecated: true,
   })
   @ApiResponse({
     status: 200,
@@ -236,6 +238,25 @@ export class ToolboxController {
   })
   @ApiParam({ name: 'sandboxId', type: String, required: true })
   async getUserHomeDir(
+    @Request() req: RawBodyRequest<IncomingMessage>,
+    @Res() res: ServerResponse<IncomingMessage>,
+    @Next() next: NextFunction,
+  ): Promise<void> {
+    return await this.toolboxProxy(req, res, next)
+  }
+
+  @Get(':sandboxId/toolbox/workdir')
+  @ApiOperation({
+    summary: 'Get sandbox workdir',
+    operationId: 'getWorkdir',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Workdir retrieved successfully',
+    type: WorkdirResponseDto,
+  })
+  @ApiParam({ name: 'sandboxId', type: String, required: true })
+  async getWorkdir(
     @Request() req: RawBodyRequest<IncomingMessage>,
     @Res() res: ServerResponse<IncomingMessage>,
     @Next() next: NextFunction,
@@ -855,6 +876,30 @@ export class ToolboxController {
   }
 
   @Post(':sandboxId/toolbox/process/session')
+  @HttpCode(200)
+  @UseInterceptors(ContentTypeInterceptor)
+  @ApiOperation({
+    summary: 'Create session',
+    description: 'Create a new session in the sandbox',
+    operationId: 'createSessionDeprecated',
+    deprecated: true,
+  })
+  @ApiResponse({
+    status: 200,
+  })
+  @ApiBody({
+    type: CreateSessionRequestDto,
+  })
+  @ApiParam({ name: 'sandboxId', type: String, required: true })
+  async createSessionDeprecated(
+    @Request() req: RawBodyRequest<IncomingMessage>,
+    @Res() res: ServerResponse<IncomingMessage>,
+    @Next() next: NextFunction,
+  ): Promise<void> {
+    return await this.toolboxProxy(req, res, next)
+  }
+
+  @Post(':sandboxId/toolbox/process/session/v2')
   @HttpCode(200)
   @UseInterceptors(ContentTypeInterceptor)
   @ApiOperation({

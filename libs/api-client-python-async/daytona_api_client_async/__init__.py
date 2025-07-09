@@ -157,4 +157,5 @@ from daytona_api_client_async.models.user_public_key import UserPublicKey
 from daytona_api_client_async.models.volume_dto import VolumeDto
 from daytona_api_client_async.models.volume_state import VolumeState
 from daytona_api_client_async.models.windows_response import WindowsResponse
+from daytona_api_client_async.models.workdir_response import WorkdirResponse
 from daytona_api_client_async.models.workspace import Workspace

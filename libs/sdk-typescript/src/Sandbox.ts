@@ -128,6 +128,13 @@ export class Sandbox implements SandboxDto {
   }
 
   /**
+   * @deprecated Use `getUserHomeDir` instead. This method will be removed in a future version.
+   */
+  public async getUserRootDir(): Promise<string | undefined> {
+    return this.getUserHomeDir()
+  }
+
+  /**
    * Gets the workdir path inside the Sandbox.
    *
    * @returns {Promise<string | undefined>} The absolute path to the Sandbox workdir. Uses the WORKDIR specified
@@ -138,7 +145,7 @@ export class Sandbox implements SandboxDto {
    * console.log(`Sandbox workdir: ${workdir}`);
    */
   public async getWorkdir(): Promise<string | undefined> {
-    const response = await this.toolboxApi.getProjectDir(this.id)
+    const response = await this.toolboxApi.getWorkdir(this.id)
     return response.data.dir
   }
 

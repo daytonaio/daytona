@@ -11,6 +11,7 @@ from typing import Dict, Optional
 from daytona_api_client import PortPreviewUrl
 from daytona_api_client import Sandbox as SandboxDto
 from daytona_api_client import SandboxApi, ToolboxApi
+from deprecated import deprecated
 from pydantic import ConfigDict, PrivateAttr
 
 from .._utils.errors import intercept_errors
@@ -138,6 +139,14 @@ class Sandbox(SandboxDto):
         response = self._toolbox_api.get_user_home_dir(self.id)
         return response.dir
 
+    @deprecated(
+        reason=(
+            "Method is deprecated. Use `get_user_home_dir` instead. This method will be removed in a future version."
+        )
+    )
+    def get_user_root_dir(self) -> str:
+        return self.get_user_home_dir()
+
     @intercept_errors(message_prefix="Failed to get workdir path: ")
     def get_workdir(self) -> str:
         """Gets the workdir path inside the Sandbox.
@@ -152,7 +161,7 @@ class Sandbox(SandboxDto):
             print(f"Sandbox workdir: {workdir}")
             ```
         """
-        response = self._toolbox_api.get_project_dir(self.id)
+        response = self._toolbox_api.get_workdir(self.id)
         return response.dir
 
     def create_lsp_server(self, language_id: LspLanguageId, path_to_project: str) -> LspServer:

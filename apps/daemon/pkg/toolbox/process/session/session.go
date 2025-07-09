@@ -25,6 +25,17 @@ func (s *SessionController) CreateSession(c *gin.Context) {
 	cmd := exec.CommandContext(ctx, common.GetShell())
 	cmd.Env = os.Environ()
 
+	// for backward compatibility, we use the home directory as the default directory
+	if !strings.Contains(c.Request.URL.Path, "/v2") {
+		homeDir, err := os.UserHomeDir()
+		if err != nil {
+			c.AbortWithError(http.StatusInternalServerError, err)
+			cancel()
+			return
+		}
+		cmd.Dir = homeDir
+	}
+
 	var request CreateSessionRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
 		c.AbortWithError(http.StatusBadRequest, fmt.Errorf("invalid request body: %w", err))

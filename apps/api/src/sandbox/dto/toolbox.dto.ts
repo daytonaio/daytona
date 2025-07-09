@@ -272,6 +272,12 @@ export class UserHomeDirResponseDto {
   dir?: string
 }
 
+@ApiSchema({ name: 'WorkdirResponse' })
+export class WorkdirResponseDto {
+  @ApiPropertyOptional()
+  dir?: string
+}
+
 @ApiSchema({ name: 'CreateSessionRequest' })
 export class CreateSessionRequestDto {
   @ApiProperty({
