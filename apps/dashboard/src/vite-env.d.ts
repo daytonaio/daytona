@@ -22,7 +22,6 @@ interface ImportMetaEnv {
   readonly VITE_ANNOUNCEMENT_BANNER_TEXT: string | undefined
   readonly VITE_ANNOUNCEMENT_BANNER_LEARN_MORE_URL: string | undefined
   readonly VITE_PYLON_APP_ID: string | undefined
-  readonly VITE_PROXY_TEMPLATE_URL: string | undefined
 }
 
 interface ImportMeta {
