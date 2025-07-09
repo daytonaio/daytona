@@ -33,6 +33,14 @@ type UsageChartProps = {
   title?: string
 }
 
+const getShortDate = (value: string) => {
+  const date = new Date(value)
+  return date.toLocaleDateString('en-US', {
+    month: 'short',
+    year: 'numeric',
+  })
+}
+
 export function UsageChart({ usageData, showTotal, title }: UsageChartProps) {
   const [timeRange, setTimeRange] = React.useState(12)
   const [chartType, setChartType] = React.useState<'bar' | 'area'>('area')
@@ -46,17 +54,18 @@ export function UsageChart({ usageData, showTotal, title }: UsageChartProps) {
   )
 
   const data = useMemo(() => {
+    const referenceDate = new Date(Date.now())
+
+    let monthsToSubtract = 12
+    if (timeRange === 6) {
+      monthsToSubtract = 6
+    } else if (timeRange === 3) {
+      monthsToSubtract = 3
+    }
+    const startDate = subMonths(new Date(referenceDate), monthsToSubtract)
+
     const filteredData = usageData.filter((usage) => {
       const date = new Date(usage.date)
-      const referenceDate = new Date(Date.now())
-
-      let monthsToSubtract = 12
-      if (timeRange === 6) {
-        monthsToSubtract = 6
-      } else if (timeRange === 3) {
-        monthsToSubtract = 3
-      }
-      const startDate = subMonths(new Date(referenceDate), monthsToSubtract)
       return date >= startDate
     })
 
@@ -162,19 +171,7 @@ export function UsageChart({ usageData, showTotal, title }: UsageChartProps) {
           <ChartContainer config={chartConfig as ChartConfig} className="aspect-auto h-[300px] w-full">
             <BarChart accessibilityLayer data={data}>
               <CartesianGrid vertical={false} />
-              <XAxis
-                dataKey="date"
-                tickLine={false}
-                tickMargin={10}
-                axisLine={false}
-                tickFormatter={(value) => {
-                  const date = new Date(value)
-                  return date.toLocaleDateString('en-US', {
-                    month: 'short',
-                    year: 'numeric',
-                  })
-                }}
-              />
+              <XAxis dataKey="date" tickLine={false} tickMargin={10} axisLine={false} tickFormatter={getShortDate} />
               <YAxis
                 tickLine={false}
                 axisLine={false}
@@ -195,7 +192,7 @@ export function UsageChart({ usageData, showTotal, title }: UsageChartProps) {
                     indicator="dot"
                     hideLabel={!showTotal}
                     labelFormatter={(label, payload) => {
-                      return `Total: $${payload.reduce((acc, curr) => acc + (curr.value as number), 0)}`
+                      return `${getShortDate(label)}: $${payload.reduce((acc, curr) => acc + (curr.value as number), 0)}`
                     }}
                   />
                 }
@@ -235,13 +232,7 @@ export function UsageChart({ usageData, showTotal, title }: UsageChartProps) {
                 axisLine={false}
                 tickMargin={8}
                 minTickGap={32}
-                tickFormatter={(value) => {
-                  const date = new Date(value)
-                  return date.toLocaleDateString('en-US', {
-                    month: 'short',
-                    year: 'numeric',
-                  })
-                }}
+                tickFormatter={getShortDate}
               />
               <YAxis
                 tickLine={false}
@@ -258,7 +249,7 @@ export function UsageChart({ usageData, showTotal, title }: UsageChartProps) {
                   <ChartTooltipContent
                     indicator="dot"
                     labelFormatter={(label, payload) => {
-                      return `Total: $${payload.reduce((acc, curr) => acc + (curr.value as number), 0)}`
+                      return `${getShortDate(label)}: $${payload.reduce((acc, curr) => acc + (curr.value as number), 0)}`
                     }}
                   />
                 }

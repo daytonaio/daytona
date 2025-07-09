@@ -438,7 +438,7 @@ const UsageContainer = () => {
     setPastOrganizationUsageLoading(true)
     try {
       const data = await billingApi.getPastOrganizationUsage(selectedOrganization.id)
-      setPastOrganizationUsage(data)
+      setPastOrganizationUsage(data.sort((a, b) => new Date(a.from).getTime() - new Date(b.from).getTime()))
     } catch (error) {
       console.error('Failed to fetch past organization usage data:', error)
     } finally {
