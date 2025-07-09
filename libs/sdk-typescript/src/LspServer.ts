@@ -4,7 +4,6 @@
  */
 
 import { CompletionList, LspSymbol, ToolboxApi } from '@daytonaio/api-client'
-import { prefixRelativePath } from './utils/Path'
 
 /**
  * Supported language server types.
@@ -41,7 +40,7 @@ export type Position = {
  * IDE-like features such as code completion, symbol search, and more.
  *
  * @property {LspLanguageId} languageId - The language server type (e.g., "typescript")
- * @property {string} pathToProject - Absolute path to the project root directory
+ * @property {string} pathToProject - Path to the project root directory. Relative paths are resolved based on the sandbox workdir.
  * @property {ToolboxApi} toolboxApi - API client for Sandbox operations
  * @property {SandboxInstance} instance - The Sandbox instance this server belongs to
  *
@@ -101,8 +100,7 @@ export class LspServer {
    * language features like diagnostics and completions for that file. The server
    * will begin tracking the file's contents and providing language features.
    *
-   * @param {string} path - Path to the opened file. Relative paths are resolved based on the user's
-   * root directory.
+   * @param {string} path - Path to the opened file. Relative paths are resolved based on the sandbox workdir.
    * @returns {Promise<void>}
    *
    * @example
@@ -114,7 +112,7 @@ export class LspServer {
     await this.toolboxApi.lspDidOpen(this.sandboxId, {
       languageId: this.languageId,
       pathToProject: this.pathToProject,
-      uri: 'file://' + prefixRelativePath(this.pathToProject, path),
+      uri: 'file://' + path,
     })
   }
 
@@ -134,7 +132,7 @@ export class LspServer {
     await this.toolboxApi.lspDidClose(this.sandboxId, {
       languageId: this.languageId,
       pathToProject: this.pathToProject,
-      uri: 'file://' + prefixRelativePath(this.pathToProject, path),
+      uri: 'file://' + path,
     })
   }
 
@@ -160,7 +158,7 @@ export class LspServer {
       this.sandboxId,
       this.languageId,
       this.pathToProject,
-      'file://' + prefixRelativePath(this.pathToProject, path),
+      'file://' + path,
     )
     return response.data
   }
@@ -237,7 +235,7 @@ export class LspServer {
     const response = await this.toolboxApi.lspCompletions(this.sandboxId, {
       languageId: this.languageId,
       pathToProject: this.pathToProject,
-      uri: 'file://' + prefixRelativePath(this.pathToProject, path),
+      uri: 'file://' + path,
       position,
     })
     return response.data

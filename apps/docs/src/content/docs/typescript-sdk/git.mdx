@@ -13,17 +13,13 @@ Provides Git operations within a Sandbox.
 #### new Git()
 
 ```ts
-new Git(
-   sandboxId: string, 
-   toolboxApi: ToolboxApi, 
-   getRootDir: () => Promise<string>): Git
+new Git(sandboxId: string, toolboxApi: ToolboxApi): Git
 ```
 
 **Parameters**:
 
 - `sandboxId` _string_
 - `toolboxApi` _ToolboxApi_
-- `getRootDir` _\(\) =\> Promise\<string\>_
 
 
 **Returns**:
@@ -43,8 +39,7 @@ running 'git add' on the command line.
 
 **Parameters**:
 
-- `path` _string_ - Path to the Git repository root. Relative paths are resolved based on the user's
-    root directory.
+- `path` _string_ - Path to the Git repository root. Relative paths are resolved based on the sandbox workdir.
 - `files` _string\[\]_ - List of file paths or directories to stage, relative to the repository root
 
 
@@ -76,8 +71,7 @@ List branches in the repository.
 
 **Parameters**:
 
-- `path` _string_ - Path to the Git repository root. Relative paths are resolved based on the user's
-    root directory.
+- `path` _string_ - Path to the Git repository root. Relative paths are resolved based on the sandbox workdir.
 
 
 **Returns**:
@@ -103,8 +97,7 @@ Checkout branche in the repository.
 
 **Parameters**:
 
-- `path` _string_ - Path to the Git repository root. Relative paths are resolved based on the user's
-    root directory.
+- `path` _string_ - Path to the Git repository root. Relative paths are resolved based on the sandbox workdir.
 - `branch` _string_ - Name of the branch to checkout
 
 
@@ -139,8 +132,7 @@ repository if credentials are provided.
 **Parameters**:
 
 - `url` _string_ - Repository URL to clone from
-- `path` _string_ - Path where the repository should be cloned. Relative paths are resolved based on the user's
-    root directory.
+- `path` _string_ - Path where the repository should be cloned. Relative paths are resolved based on the sandbox workdir.
 - `branch?` _string_ - Specific branch to clone. If not specified, clones the default branch
 - `commitId?` _string_ - Specific commit to clone. If specified, the repository will be left in a detached HEAD state at this commit
 - `username?` _string_ - Git username for authentication
@@ -197,8 +189,7 @@ Commits staged changes.
 
 **Parameters**:
 
-- `path` _string_ - Path to the Git repository root. Relative paths are resolved based on the user's
-    root directory.
+- `path` _string_ - Path to the Git repository root. Relative paths are resolved based on the sandbox workdir.
 - `message` _string_ - Commit message describing the changes
 - `author` _string_ - Name of the commit author
 - `email` _string_ - Email address of the commit author
@@ -233,8 +224,7 @@ Create branche in the repository.
 
 **Parameters**:
 
-- `path` _string_ - Path to the Git repository root. Relative paths are resolved based on the user's
-    root directory.
+- `path` _string_ - Path to the Git repository root. Relative paths are resolved based on the sandbox workdir.
 - `name` _string_ - Name of the new branch to create
 
 
@@ -260,8 +250,7 @@ Delete branche in the repository.
 
 **Parameters**:
 
-- `path` _string_ - Path to the Git repository root. Relative paths are resolved based on the user's
-    root directory.
+- `path` _string_ - Path to the Git repository root. Relative paths are resolved based on the sandbox workdir.
 - `name` _string_ - Name of the branch to delete
 
 
@@ -290,8 +279,7 @@ Pulls changes from the remote repository.
 
 **Parameters**:
 
-- `path` _string_ - Path to the Git repository root. Relative paths are resolved based on the user's
-    root directory.
+- `path` _string_ - Path to the Git repository root. Relative paths are resolved based on the sandbox workdir.
 - `username?` _string_ - Git username for authentication
 - `password?` _string_ - Git password or token for authentication
 
@@ -331,8 +319,7 @@ Push local changes to the remote repository.
 
 **Parameters**:
 
-- `path` _string_ - Path to the Git repository root. Relative paths are resolved based on the user's
-    root directory.
+- `path` _string_ - Path to the Git repository root. Relative paths are resolved based on the sandbox workdir.
 - `username?` _string_ - Git username for authentication
 - `password?` _string_ - Git password or token for authentication
 
@@ -369,8 +356,7 @@ Gets the current status of the Git repository.
 
 **Parameters**:
 
-- `path` _string_ - Path to the Git repository root. Relative paths are resolved based on the user's
-    root directory.
+- `path` _string_ - Path to the Git repository root. Relative paths are resolved based on the sandbox workdir.
 
 
 **Returns**:

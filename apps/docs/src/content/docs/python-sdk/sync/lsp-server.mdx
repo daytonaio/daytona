@@ -24,7 +24,8 @@ Initializes a new LSP server instance.
 **Arguments**:
 
 - `language_id` _LspLanguageId_ - The language server type (e.g., LspLanguageId.TYPESCRIPT).
-- `path_to_project` _str_ - Absolute path to the project root directory.
+- `path_to_project` _str_ - Path to the project root directory. Relative paths are resolved
+  based on the sandbox workdir.
 - `toolbox_api` _ToolboxApi_ - API client for Sandbox operations.
 - `instance` _SandboxInstance_ - The Sandbox instance this server belongs to.
 

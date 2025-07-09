@@ -1,7 +1,7 @@
 # Copyright 2025 Daytona Platforms Inc.
 # SPDX-License-Identifier: Apache-2.0
 
-from typing import Awaitable, Callable, List, Optional
+from typing import List, Optional
 
 from daytona_api_client_async import (
     GitAddRequest,
@@ -17,7 +17,6 @@ from daytona_api_client_async import (
 )
 
 from .._utils.errors import intercept_errors
-from .._utils.path import prefix_relative_path
 from ..common.git import GitCommitResponse
 
 
@@ -51,18 +50,15 @@ class AsyncGit:
         self,
         sandbox_id: str,
         toolbox_api: ToolboxApi,
-        get_root_dir: Callable[[], Awaitable[str]],
     ):
         """Initializes a new Git handler instance.
 
         Args:
             sandbox_id (str): The Sandbox ID.
             toolbox_api (ToolboxApi): API client for Sandbox operations.
-            get_root_dir (Callable[[], str]): A function to get the default root directory of the Sandbox.
         """
         self._sandbox_id = sandbox_id
         self._toolbox_api = toolbox_api
-        self._get_root_dir = get_root_dir
 
     @intercept_errors(message_prefix="Failed to add files: ")
     async def add(self, path: str, files: List[str]) -> None:
@@ -70,8 +66,7 @@ class AsyncGit:
         running 'git add' on the command line.
 
         Args:
-            path (str): Path to the Git repository root. Relative paths are resolved based on the user's
-            root directory.
+            path (str): Path to the Git repository root. Relative paths are resolved based on the sandbox workdir.
             files (List[str]): List of file paths or directories to stage, relative to the repository root.
 
         Example:
@@ -89,7 +84,7 @@ class AsyncGit:
         """
         await self._toolbox_api.git_add_files(
             self._sandbox_id,
-            git_add_request=GitAddRequest(path=prefix_relative_path(await self._get_root_dir(), path), files=files),
+            git_add_request=GitAddRequest(path=path, files=files),
         )
 
     @intercept_errors(message_prefix="Failed to list branches: ")
@@ -97,8 +92,7 @@ class AsyncGit:
         """Lists branches in the repository.
 
         Args:
-            path (str): Path to the Git repository root. Relative paths are resolved based on the user's
-            root directory.
+            path (str): Path to the Git repository root. Relative paths are resolved based on the sandbox workdir.
 
         Returns:
             ListBranchResponse: List of branches in the repository.
@@ -111,7 +105,7 @@ class AsyncGit:
         """
         return await self._toolbox_api.git_list_branches(
             self._sandbox_id,
-            path=prefix_relative_path(await self._get_root_dir(), path),
+            path=path,
         )
 
     @intercept_errors(message_prefix="Failed to clone repository: ")
@@ -130,8 +124,8 @@ class AsyncGit:
 
         Args:
             url (str): Repository URL to clone from.
-            path (str): Path where the repository should be cloned. Relative paths are resolved based on the user's
-            root directory.
+            path (str): Path where the repository should be cloned. Relative paths are resolved
+            based on the sandbox workdir.
             branch (Optional[str]): Specific branch to clone. If not specified,
                 clones the default branch.
             commit_id (Optional[str]): Specific commit to clone. If specified,
@@ -169,7 +163,7 @@ class AsyncGit:
             git_clone_request=GitCloneRequest(
                 url=url,
                 branch=branch,
-                path=prefix_relative_path(await self._get_root_dir(), path),
+                path=path,
                 username=username,
                 password=password,
                 commitId=commit_id,
@@ -182,8 +176,7 @@ class AsyncGit:
         changes using the add() method before committing.
 
         Args:
-            path (str): Path to the Git repository root. Relative paths are resolved based on the user's
-            root directory.
+            path (str): Path to the Git repository root. Relative paths are resolved based on the sandbox workdir.
             message (str): Commit message describing the changes.
             author (str): Name of the commit author.
             email (str): Email address of the commit author.
@@ -203,7 +196,7 @@ class AsyncGit:
         response = await self._toolbox_api.git_commit_changes(
             self._sandbox_id,
             git_commit_request=GitCommitRequest(
-                path=prefix_relative_path(await self._get_root_dir(), path),
+                path=path,
                 message=message,
                 author=author,
                 email=email,
@@ -223,8 +216,7 @@ class AsyncGit:
         username and password/token.
 
         Args:
-            path (str): Path to the Git repository root. Relative paths are resolved based on the user's
-            root directory.
+            path (str): Path to the Git repository root. Relative paths are resolved based on the sandbox workdir.
             username (Optional[str]): Git username for authentication.
             password (Optional[str]): Git password or token for authentication.
 
@@ -244,7 +236,7 @@ class AsyncGit:
         await self._toolbox_api.git_push_changes(
             self._sandbox_id,
             git_repo_request=GitRepoRequest(
-                path=prefix_relative_path(await self._get_root_dir(), path),
+                path=path,
                 username=username,
                 password=password,
             ),
@@ -261,8 +253,7 @@ class AsyncGit:
         provide username and password/token.
 
         Args:
-            path (str): Path to the Git repository root. Relative paths are resolved based on the user's
-            root directory.
+            path (str): Path to the Git repository root. Relative paths are resolved based on the sandbox workdir.
             username (Optional[str]): Git username for authentication.
             password (Optional[str]): Git password or token for authentication.
 
@@ -282,7 +273,7 @@ class AsyncGit:
         await self._toolbox_api.git_pull_changes(
             self._sandbox_id,
             git_repo_request=GitRepoRequest(
-                path=prefix_relative_path(await self._get_root_dir(), path),
+                path=path,
                 username=username,
                 password=password,
             ),
@@ -293,8 +284,7 @@ class AsyncGit:
         """Gets the current Git repository status.
 
         Args:
-            path (str): Path to the Git repository root. Relative paths are resolved based on the user's
-            root directory.
+            path (str): Path to the Git repository root. Relative paths are resolved based on the sandbox workdir.
 
         Returns:
             GitStatus: Repository status information including:
@@ -314,7 +304,7 @@ class AsyncGit:
         """
         return await self._toolbox_api.git_get_status(
             self._sandbox_id,
-            path=prefix_relative_path(await self._get_root_dir(), path),
+            path=path,
         )
 
     @intercept_errors(message_prefix="Failed to checkout branch: ")
@@ -322,8 +312,7 @@ class AsyncGit:
         """Checkout branch in the repository.
 
         Args:
-            path (str): Path to the Git repository root. Relative paths are resolved based on the user's
-                root directory.
+            path (str): Path to the Git repository root. Relative paths are resolved based on the sandbox workdir.
             branch (str): Name of the branch to checkout
 
         Example:
@@ -335,7 +324,7 @@ class AsyncGit:
         await self._toolbox_api.git_checkout_branch(
             self._sandbox_id,
             git_checkout_request=GitCheckoutRequest(
-                path=prefix_relative_path(await self._get_root_dir(), path),
+                path=path,
                 branch=branch,
             ),
         )
@@ -345,8 +334,7 @@ class AsyncGit:
         """Create branch in the repository.
 
         Args:
-            path (str): Path to the Git repository root. Relative paths are resolved based on the user's
-                root directory.
+            path (str): Path to the Git repository root. Relative paths are resolved based on the sandbox workdir.
             name (str): Name of the new branch to create
 
         Example:
@@ -358,7 +346,7 @@ class AsyncGit:
         await self._toolbox_api.git_create_branch(
             self._sandbox_id,
             git_branch_request=GitBranchRequest(
-                path=prefix_relative_path(await self._get_root_dir(), path),
+                path=path,
                 name=name,
             ),
         )
@@ -368,8 +356,7 @@ class AsyncGit:
         """Delete branch in the repository.
 
         Args:
-            path (str): Path to the Git repository root. Relative paths are resolved based on the user's
-                root directory.
+            path (str): Path to the Git repository root. Relative paths are resolved based on the sandbox
             name (str): Name of the branch to delete
 
         Example:
@@ -381,7 +368,7 @@ class AsyncGit:
         await self._toolbox_api.git_delete_branch(
             self._sandbox_id,
             git_delete_branch_request=GitDeleteBranchRequest(
-                path=prefix_relative_path(await self._get_root_dir(), path),
+                path=path,
                 name=name,
             ),
         )

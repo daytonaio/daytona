@@ -136,6 +136,8 @@ import type { SessionExecuteRequest } from '../models'
 // @ts-ignore
 import type { SessionExecuteResponse } from '../models'
 // @ts-ignore
+import type { UserHomeDirResponse } from '../models'
+// @ts-ignore
 import type { WindowsResponse } from '../models'
 /**
  * ToolboxApi - axios parameter creator
@@ -1269,6 +1271,54 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
       if (follow !== undefined) {
         localVarQueryParameter['follow'] = follow
       }
+
+      if (xDaytonaOrganizationID != null) {
+        localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
+      }
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     *
+     * @summary Get sandbox user home dir
+     * @param {string} sandboxId
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    getUserHomeDir: async (
+      sandboxId: string,
+      xDaytonaOrganizationID?: string,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'sandboxId' is not null or undefined
+      assertParamExists('getUserHomeDir', 'sandboxId', sandboxId)
+      const localVarPath = `/toolbox/{sandboxId}/toolbox/user-home-dir`.replace(
+        `{${'sandboxId'}}`,
+        encodeURIComponent(String(sandboxId)),
+      )
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      // authentication bearer required
+      // http bearer authentication required
+      await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+      // authentication oauth2 required
 
       if (xDaytonaOrganizationID != null) {
         localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
@@ -4258,6 +4308,35 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
         )(axios, localVarOperationServerBasePath || basePath)
     },
     /**
+     *
+     * @summary Get sandbox user home dir
+     * @param {string} sandboxId
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async getUserHomeDir(
+      sandboxId: string,
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<UserHomeDirResponse>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.getUserHomeDir(
+        sandboxId,
+        xDaytonaOrganizationID,
+        options,
+      )
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['ToolboxApi.getUserHomeDir']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
+    /**
      * Get list of open windows
      * @summary Get windows
      * @param {string} sandboxId
@@ -5965,6 +6044,23 @@ export const ToolboxApiFactory = function (configuration?: Configuration, basePa
         .then((request) => request(axios, basePath))
     },
     /**
+     *
+     * @summary Get sandbox user home dir
+     * @param {string} sandboxId
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    getUserHomeDir(
+      sandboxId: string,
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<UserHomeDirResponse> {
+      return localVarFp
+        .getUserHomeDir(sandboxId, xDaytonaOrganizationID, options)
+        .then((request) => request(axios, basePath))
+    },
+    /**
      * Get list of open windows
      * @summary Get windows
      * @param {string} sandboxId
@@ -7187,6 +7283,21 @@ export class ToolboxApi extends BaseAPI {
   ) {
     return ToolboxApiFp(this.configuration)
       .getSessionCommandLogs(sandboxId, sessionId, commandId, xDaytonaOrganizationID, follow, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   *
+   * @summary Get sandbox user home dir
+   * @param {string} sandboxId
+   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof ToolboxApi
+   */
+  public getUserHomeDir(sandboxId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
+    return ToolboxApiFp(this.configuration)
+      .getUserHomeDir(sandboxId, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 

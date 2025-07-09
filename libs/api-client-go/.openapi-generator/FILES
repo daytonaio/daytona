@@ -125,6 +125,7 @@ model_update_organization_quota.go
 model_update_organization_role.go
 model_usage_overview.go
 model_user.go
+model_user_home_dir_response.go
 model_user_public_key.go
 model_volume_dto.go
 model_volume_state.go

@@ -127,6 +127,7 @@ models/update-organization-member-role.ts
 models/update-organization-quota.ts
 models/update-organization-role.ts
 models/usage-overview.ts
+models/user-home-dir-response.ts
 models/user-public-key.ts
 models/user.ts
 models/volume-dto.ts

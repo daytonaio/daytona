@@ -82,6 +82,7 @@ import {
   ProcessRestartResponseDto,
   ProcessLogsResponseDto,
   ProcessErrorsResponseDto,
+  UserHomeDirResponseDto,
 } from '../dto/toolbox.dto'
 import { ToolboxService } from '../services/toolbox.service'
 import { ContentTypeInterceptor } from '../../common/interceptors/content-type.interceptors'
@@ -220,7 +221,26 @@ export class ToolboxController {
     @Res() res: ServerResponse<IncomingMessage>,
     @Next() next: NextFunction,
   ): Promise<void> {
-    return this.toolboxProxy(req, res, next)
+    return await this.toolboxProxy(req, res, next)
+  }
+
+  @Get(':sandboxId/toolbox/user-home-dir')
+  @ApiOperation({
+    summary: 'Get sandbox user home dir',
+    operationId: 'getUserHomeDir',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'User home directory retrieved successfully',
+    type: UserHomeDirResponseDto,
+  })
+  @ApiParam({ name: 'sandboxId', type: String, required: true })
+  async getUserHomeDir(
+    @Request() req: RawBodyRequest<IncomingMessage>,
+    @Res() res: ServerResponse<IncomingMessage>,
+    @Next() next: NextFunction,
+  ): Promise<void> {
+    return await this.toolboxProxy(req, res, next)
   }
 
   @Get(':sandboxId/toolbox/files')

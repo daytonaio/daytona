@@ -6,11 +6,6 @@ package toolbox
 import (
 	"context"
 	"fmt"
-	"net"
-	"net/http"
-	"os"
-	"path"
-
 	common_proxy "github.com/daytonaio/common-go/pkg/proxy"
 	"github.com/daytonaio/daemon/internal"
 	"github.com/daytonaio/daemon/pkg/toolbox/computeruse"
@@ -24,6 +19,10 @@ import (
 	"github.com/daytonaio/daemon/pkg/toolbox/process"
 	"github.com/daytonaio/daemon/pkg/toolbox/process/session"
 	"github.com/daytonaio/daemon/pkg/toolbox/proxy"
+	"net"
+	"net/http"
+	"os"
+	"path"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
@@ -40,12 +39,29 @@ type ProjectDirResponse struct {
 	Dir string `json:"dir"`
 } // @name ProjectDirResponse
 
+type UserHomeDirResponse struct {
+	Dir string `json:"dir"`
+} // @name UserHomeDirResponse
+
 func (s *Server) GetProjectDir(ctx *gin.Context) {
 	projectDir := ProjectDirResponse{
 		Dir: s.ProjectDir,
 	}
 
 	ctx.JSON(http.StatusOK, projectDir)
+}
+
+func (s *Server) GetUserHomeDir(ctx *gin.Context) {
+	userHomeDir, err := os.UserHomeDir()
+	if err != nil {
+		ctx.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+	userHomeDirResponse := UserHomeDirResponse{
+		Dir: userHomeDir,
+	}
+
+	ctx.JSON(http.StatusOK, userHomeDirResponse)
 }
 
 func (s *Server) Start() error {
@@ -67,6 +83,7 @@ func (s *Server) Start() error {
 	})
 
 	r.GET("/project-dir", s.GetProjectDir)
+	r.GET("/user-home-dir", s.GetUserHomeDir)
 
 	dirname, err := os.UserHomeDir()
 	if err != nil {

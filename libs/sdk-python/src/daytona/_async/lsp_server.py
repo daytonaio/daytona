@@ -14,7 +14,6 @@ from daytona_api_client_async import (
 from deprecated import deprecated
 
 from .._utils.errors import intercept_errors
-from .._utils.path import prefix_relative_path
 from ..common.lsp_server import LspLanguageId, Position
 
 
@@ -34,7 +33,8 @@ class AsyncLspServer:
 
         Args:
             language_id (LspLanguageId): The language server type (e.g., LspLanguageId.TYPESCRIPT).
-            path_to_project (str): Absolute path to the project root directory.
+            path_to_project (str): Path to the project root directory. Relative paths are resolved
+            based on the sandbox workdir.
             toolbox_api (ToolboxApi): API client for Sandbox operations.
             instance (SandboxInstance): The Sandbox instance this server belongs to.
         """
@@ -105,7 +105,6 @@ class AsyncLspServer:
             # Now can get completions, symbols, etc. for this file
             ```
         """
-        path = prefix_relative_path(self._path_to_project, path)
         await self._toolbox_api.lsp_did_open(
             self._sandbox_id,
             lsp_document_request=LspDocumentRequest(
@@ -137,7 +136,7 @@ class AsyncLspServer:
             lsp_document_request=LspDocumentRequest(
                 language_id=self._language_id,
                 path_to_project=self._path_to_project,
-                uri=f"file://{prefix_relative_path(self._path_to_project, path)}",
+                uri=f"file://{path}",
             ),
         )
 
@@ -167,7 +166,7 @@ class AsyncLspServer:
             self._sandbox_id,
             language_id=self._language_id,
             path_to_project=self._path_to_project,
-            uri=f"file://{prefix_relative_path(self._path_to_project, path)}",
+            uri=f"file://{path}",
         )
 
     @deprecated(
@@ -250,7 +249,7 @@ class AsyncLspServer:
             lsp_completion_params=LspCompletionParams(
                 language_id=self._language_id,
                 path_to_project=self._path_to_project,
-                uri=f"file://{prefix_relative_path(self._path_to_project, path)}",
+                uri=f"file://{path}",
                 position=position,
             ),
         )

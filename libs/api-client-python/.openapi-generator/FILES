@@ -127,6 +127,7 @@ daytona_api_client/models/update_organization_quota.py
 daytona_api_client/models/update_organization_role.py
 daytona_api_client/models/usage_overview.py
 daytona_api_client/models/user.py
+daytona_api_client/models/user_home_dir_response.py
 daytona_api_client/models/user_public_key.py
 daytona_api_client/models/volume_dto.py
 daytona_api_client/models/volume_state.py

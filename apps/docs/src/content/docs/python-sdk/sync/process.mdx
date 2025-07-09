@@ -15,7 +15,7 @@ Handles process and code execution within a Sandbox.
 
 ```python
 def __init__(sandbox_id: str, code_toolbox: SandboxPythonCodeToolbox,
-             toolbox_api: ToolboxApi, get_root_dir: Callable[[], str])
+             toolbox_api: ToolboxApi)
 ```
 
 Initialize a new Process instance.
@@ -25,7 +25,6 @@ Initialize a new Process instance.
 - `sandbox_id` _str_ - The ID of the Sandbox.
 - `code_toolbox` _SandboxPythonCodeToolbox_ - Language-specific code execution toolbox.
 - `toolbox_api` _ToolboxApi_ - API client for Sandbox operations.
-- `get_root_dir` _Callable[[], str]_ - A function to get the default root directory of the Sandbox.
 
 #### Process.exec
 
@@ -43,7 +42,7 @@ Execute a shell command in the Sandbox.
 
 - `command` _str_ - Shell command to execute.
 - `cwd` _Optional[str]_ - Working directory for command execution. If not
-  specified, uses the Sandbox root directory. Default is the user's root directory.
+  specified, uses the sandbox workdir.
 - `env` _Optional[Dict[str, str]]_ - Environment variables to set for the command.
 - `timeout` _Optional[int]_ - Maximum time in seconds to wait for the command
   to complete. 0 means wait indefinitely.

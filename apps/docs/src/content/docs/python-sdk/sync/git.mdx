@@ -37,8 +37,7 @@ sandbox.git.commit(
 #### Git.\_\_init\_\_
 
 ```python
-def __init__(sandbox_id: str, toolbox_api: ToolboxApi,
-             get_root_dir: Callable[[], str])
+def __init__(sandbox_id: str, toolbox_api: ToolboxApi)
 ```
 
 Initializes a new Git handler instance.
@@ -47,7 +46,6 @@ Initializes a new Git handler instance.
 
 - `sandbox_id` _str_ - The Sandbox ID.
 - `toolbox_api` _ToolboxApi_ - API client for Sandbox operations.
-- `get_root_dir` _Callable[[], str]_ - A function to get the default root directory of the Sandbox.
 
 #### Git.add
 
@@ -61,8 +59,7 @@ running 'git add' on the command line.
 
 **Arguments**:
 
-- `path` _str_ - Path to the Git repository root. Relative paths are resolved based on the user's
-  root directory.
+- `path` _str_ - Path to the Git repository root. Relative paths are resolved based on the sandbox workdir.
 - `files` _List[str]_ - List of file paths or directories to stage, relative to the repository root.
   
 
@@ -91,8 +88,7 @@ Lists branches in the repository.
 
 **Arguments**:
 
-- `path` _str_ - Path to the Git repository root. Relative paths are resolved based on the user's
-  root directory.
+- `path` _str_ - Path to the Git repository root. Relative paths are resolved based on the sandbox workdir.
   
 
 **Returns**:
@@ -126,8 +122,8 @@ repository if credentials are provided.
 **Arguments**:
 
 - `url` _str_ - Repository URL to clone from.
-- `path` _str_ - Path where the repository should be cloned. Relative paths are resolved based on the user's
-  root directory.
+- `path` _str_ - Path where the repository should be cloned. Relative paths are resolved
+  based on the sandbox workdir.
 - `branch` _Optional[str]_ - Specific branch to clone. If not specified,
   clones the default branch.
 - `commit_id` _Optional[str]_ - Specific commit to clone. If specified,
@@ -175,8 +171,7 @@ changes using the add() method before committing.
 
 **Arguments**:
 
-- `path` _str_ - Path to the Git repository root. Relative paths are resolved based on the user's
-  root directory.
+- `path` _str_ - Path to the Git repository root. Relative paths are resolved based on the sandbox workdir.
 - `message` _str_ - Commit message describing the changes.
 - `author` _str_ - Name of the commit author.
 - `email` _str_ - Email address of the commit author.
@@ -210,8 +205,7 @@ username and password/token.
 
 **Arguments**:
 
-- `path` _str_ - Path to the Git repository root. Relative paths are resolved based on the user's
-  root directory.
+- `path` _str_ - Path to the Git repository root. Relative paths are resolved based on the sandbox workdir.
 - `username` _Optional[str]_ - Git username for authentication.
 - `password` _Optional[str]_ - Git password or token for authentication.
   
@@ -244,8 +238,7 @@ provide username and password/token.
 
 **Arguments**:
 
-- `path` _str_ - Path to the Git repository root. Relative paths are resolved based on the user's
-  root directory.
+- `path` _str_ - Path to the Git repository root. Relative paths are resolved based on the sandbox workdir.
 - `username` _Optional[str]_ - Git username for authentication.
 - `password` _Optional[str]_ - Git password or token for authentication.
   
@@ -275,8 +268,7 @@ Gets the current Git repository status.
 
 **Arguments**:
 
-- `path` _str_ - Path to the Git repository root. Relative paths are resolved based on the user's
-  root directory.
+- `path` _str_ - Path to the Git repository root. Relative paths are resolved based on the sandbox workdir.
   
 
 **Returns**:
@@ -309,8 +301,7 @@ Checkout branch in the repository.
 
 **Arguments**:
 
-- `path` _str_ - Path to the Git repository root. Relative paths are resolved based on the user's
-  root directory.
+- `path` _str_ - Path to the Git repository root. Relative paths are resolved based on the sandbox workdir.
 - `branch` _str_ - Name of the branch to checkout
   
 
@@ -332,8 +323,7 @@ Create branch in the repository.
 
 **Arguments**:
 
-- `path` _str_ - Path to the Git repository root. Relative paths are resolved based on the user's
-  root directory.
+- `path` _str_ - Path to the Git repository root. Relative paths are resolved based on the sandbox workdir.
 - `name` _str_ - Name of the new branch to create
   
 
@@ -355,8 +345,7 @@ Delete branch in the repository.
 
 **Arguments**:
 
-- `path` _str_ - Path to the Git repository root. Relative paths are resolved based on the user's
-  root directory.
+- `path` _str_ - Path to the Git repository root. Relative paths are resolved based on the sandbox
 - `name` _str_ - Name of the branch to delete
   
 

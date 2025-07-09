@@ -68,7 +68,8 @@ console.log(response.result);
 
 ## Process Execution
 
-Daytona SDK provides an option to execute shell commands and manage background processes in Sandboxes. The workdir for executing defaults to the current Sandbox user's root - e.g. `workspace/repo` implies `/home/[username]/workspace/repo`, but you can override it with an absolute path (by starting the path with `/`).
+Daytona SDK provides an option to execute shell commands and manage background processes in Sandboxes. The workdir for executing defaults to the current Sandbox working directory. Uses the WORKDIR specified in
+the Dockerfile if present, or falling back to the user's home directory if not - e.g. `workspace/repo` implies `/my-workdir/workspace/repo`, but you can override it with an absolute path (by starting the path with `/`).
 
 ### Running Commands
 
@@ -108,7 +109,7 @@ const response2 = await sandbox.process.executeCommand("sleep 3", "workspace/src
 console.log(response2.result);
 
 // Passing environment variables
-const response3 = await sandbox.process.executeCommand("echo $CUSTOM_SECRET", "~", {
+const response3 = await sandbox.process.executeCommand("echo $CUSTOM_SECRET", ".", {
         "CUSTOM_SECRET": "DAYTONA"
     }
 );

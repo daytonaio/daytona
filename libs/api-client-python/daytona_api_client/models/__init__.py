@@ -124,6 +124,7 @@ from daytona_api_client.models.update_organization_quota import UpdateOrganizati
 from daytona_api_client.models.update_organization_role import UpdateOrganizationRole
 from daytona_api_client.models.usage_overview import UsageOverview
 from daytona_api_client.models.user import User
+from daytona_api_client.models.user_home_dir_response import UserHomeDirResponse
 from daytona_api_client.models.user_public_key import UserPublicKey
 from daytona_api_client.models.volume_dto import VolumeDto
 from daytona_api_client.models.volume_state import VolumeState

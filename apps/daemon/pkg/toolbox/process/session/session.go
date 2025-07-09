@@ -24,7 +24,6 @@ func (s *SessionController) CreateSession(c *gin.Context) {
 
 	cmd := exec.CommandContext(ctx, common.GetShell())
 	cmd.Env = os.Environ()
-	cmd.Dir = s.projectDir
 
 	var request CreateSessionRequest
 	if err := c.ShouldBindJSON(&request); err != nil {

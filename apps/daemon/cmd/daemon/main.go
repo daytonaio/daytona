@@ -8,7 +8,6 @@ import (
 	"io"
 	"os"
 	"os/signal"
-	"path/filepath"
 	"syscall"
 
 	golog "log"
@@ -24,15 +23,15 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	c.ProjectDir = filepath.Join(os.Getenv("HOME"))
 
-	if projectDir := os.Getenv("DAYTONA_PROJECT_DIR"); projectDir != "" {
-		c.ProjectDir = projectDir
-	}
-
-	if _, err := os.Stat(c.ProjectDir); os.IsNotExist(err) {
-		if err := os.MkdirAll(c.ProjectDir, 0755); err != nil {
-			panic(fmt.Errorf("failed to create project directory: %w", err))
+	if os.Getenv("DAYTONA_USER_HOME_AS_WORKDIR") == "true" {
+		userHomeDir, err := os.UserHomeDir()
+		if err != nil {
+			panic(fmt.Errorf("failed to get user home directory: %w", err))
+		}
+		err = os.Chdir(userHomeDir)
+		if err != nil {
+			panic(fmt.Errorf("failed to change directory to home: %w", err))
 		}
 	}
 
@@ -51,8 +50,13 @@ func main() {
 
 	errChan := make(chan error)
 
+	projectDir, err := os.Getwd()
+	if err != nil {
+		panic(fmt.Errorf("failed to get current working directory: %w", err))
+	}
+
 	toolBoxServer := &toolbox.Server{
-		ProjectDir: c.ProjectDir,
+		ProjectDir: projectDir,
 	}
 
 	// Start the toolbox server in a go routine

@@ -8,13 +8,12 @@
 import io
 import os
 from contextlib import ExitStack
-from typing import Callable, List, Union, overload
+from typing import List, Union, overload
 
 import httpx
 from daytona_api_client import FileInfo, Match, ReplaceRequest, ReplaceResult, SearchFilesResponse, ToolboxApi
 
 from .._utils.errors import intercept_errors
-from .._utils.path import prefix_relative_path
 from ..common.filesystem import FileUpload
 
 
@@ -29,18 +28,15 @@ class FileSystem:
         self,
         sandbox_id: str,
         toolbox_api: ToolboxApi,
-        get_root_dir: Callable[[], str],
     ):
         """Initializes a new FileSystem instance.
 
         Args:
             sandbox_id (str): The Sandbox ID.
             toolbox_api (ToolboxApi): API client for Sandbox operations.
-            get_root_dir (Callable[[], str]): A function to get the default root directory of the Sandbox.
         """
         self._sandbox_id = sandbox_id
         self._toolbox_api = toolbox_api
-        self._get_root_dir = get_root_dir
 
     @intercept_errors(message_prefix="Failed to create folder: ")
     def create_folder(self, path: str, mode: str) -> None:
@@ -49,7 +45,7 @@ class FileSystem:
 
         Args:
             path (str): Path where the folder should be created. Relative paths are resolved based
-            on the user's root directory.
+            on the sandbox workdir.
             mode (str): Folder permissions in octal format (e.g., "755" for rwxr-xr-x).
 
         Example:
@@ -61,7 +57,6 @@ class FileSystem:
             sandbox.fs.create_folder("workspace/secrets", "700")
             ```
         """
-        path = prefix_relative_path(self._get_root_dir(), path)
         print(f"Creating folder {path} with mode {mode}")
         self._toolbox_api.create_folder(
             self._sandbox_id,
@@ -74,7 +69,7 @@ class FileSystem:
         """Deletes a file from the Sandbox.
 
         Args:
-            path (str): Absolute path to the file to delete.
+            path (str): Path to the file to delete. Relative paths are resolved based on the sandbox workdir.
 
         Example:
             ```python
@@ -82,7 +77,7 @@ class FileSystem:
             sandbox.fs.delete_file("workspace/data/old_file.txt")
             ```
         """
-        self._toolbox_api.delete_file(self._sandbox_id, path=prefix_relative_path(self._get_root_dir(), path))
+        self._toolbox_api.delete_file(self._sandbox_id, path=path)
 
     @overload
     def download_file(self, remote_path: str, timeout: int = 30 * 60) -> bytes:
@@ -91,8 +86,8 @@ class FileSystem:
         It can only be used for smaller files.
 
         Args:
-            remote_path (str): Path to the file in the Sandbox. Relative paths are resolved based on the user's
-            root directory.
+            remote_path (str): Path to the file in the Sandbox. Relative paths are resolved based
+            on the sandbox workdir.
             timeout (int): Timeout for the download operation in seconds. 0 means no timeout. Default is 30 minutes.
 
         Returns:
@@ -117,8 +112,8 @@ class FileSystem:
         This method is useful when you want to download larger files that may not fit into memory.
 
         Args:
-            remote_path (str): Path to the file in the Sandbox. Relative paths are resolved based on the user's
-            root directory.
+            remote_path (str): Path to the file in the Sandbox. Relative paths are resolved based
+            on the sandbox workdir.
             local_path (str): Path to save the file locally.
             timeout (int): Timeout for the download operation in seconds. 0 means no timeout. Default is 30 minutes.
 
@@ -138,7 +133,7 @@ class FileSystem:
             timeout = args[1] if len(args) == 2 else 30 * 60
             return self._toolbox_api.download_file(
                 self._sandbox_id,
-                path=prefix_relative_path(self._get_root_dir(), remote_path),
+                path=remote_path,
                 _request_timeout=timeout or None,
             )
 
@@ -148,7 +143,7 @@ class FileSystem:
         # pylint: disable=protected-access
         method, url, headers, *_ = self._toolbox_api._download_file_serialize(
             self._sandbox_id,
-            path=prefix_relative_path(self._get_root_dir(), remote_path),
+            path=remote_path,
             x_daytona_organization_id=None,
             _request_auth=None,
             _content_type=None,
@@ -176,8 +171,7 @@ class FileSystem:
 
         Args:
             path (str): Path to the file or directory to search. If the path is a directory,
-                the search will be performed recursively. Relative paths are resolved based on the user's
-                root directory.
+                the search will be performed recursively. Relative paths are resolved based on the sandbox workdir.
             pattern (str): Search pattern to match against file contents.
 
         Returns:
@@ -196,7 +190,7 @@ class FileSystem:
         """
         return self._toolbox_api.find_in_files(
             self._sandbox_id,
-            path=prefix_relative_path(self._get_root_dir(), path),
+            path=path,
             pattern=pattern,
         )
 
@@ -206,8 +200,7 @@ class FileSystem:
         size, permissions, and timestamps.
 
         Args:
-            path (str): Path to the file or directory. Relative paths are resolved based on the user's
-            root directory.
+            path (str): Path to the file or directory. Relative paths are resolved based on the sandbox workdir.
 
         Returns:
             FileInfo: Detailed file information including:
@@ -234,15 +227,15 @@ class FileSystem:
                 print("Path is a directory")
             ```
         """
-        return self._toolbox_api.get_file_info(self._sandbox_id, path=prefix_relative_path(self._get_root_dir(), path))
+        return self._toolbox_api.get_file_info(self._sandbox_id, path=path)
 
     @intercept_errors(message_prefix="Failed to list files: ")
     def list_files(self, path: str) -> List[FileInfo]:
         """Lists files and directories in a given path and returns their information, similar to the ls -l command.
 
         Args:
-            path (str): Path to the directory to list contents from. Relative paths are resolved based on the user's
-            root directory.
+            path (str): Path to the directory to list contents from. Relative paths are resolved
+            based on the sandbox workdir.
 
         Returns:
             List[FileInfo]: List of file and directory information. Each FileInfo
@@ -263,17 +256,16 @@ class FileSystem:
             print("Subdirectories:", ", ".join(d.name for d in dirs))
             ```
         """
-        return self._toolbox_api.list_files(self._sandbox_id, path=prefix_relative_path(self._get_root_dir(), path))
+        return self._toolbox_api.list_files(self._sandbox_id, path=path)
 
     @intercept_errors(message_prefix="Failed to move files: ")
     def move_files(self, source: str, destination: str) -> None:
         """Moves or renames a file or directory. The parent directory of the destination must exist.
 
         Args:
-            source (str): Path to the source file or directory. Relative paths are resolved based on the user's
-            root directory.
-            destination (str): Path to the destination. Relative paths are resolved based on the user's
-            root directory.
+            source (str): Path to the source file or directory. Relative paths are resolved
+            based on the sandbox workdir.
+            destination (str): Path to the destination. Relative paths are resolved based on the sandbox workdir.
 
         Example:
             ```python
@@ -298,8 +290,8 @@ class FileSystem:
         """
         self._toolbox_api.move_file(
             self._sandbox_id,
-            source=prefix_relative_path(self._get_root_dir(), source),
-            destination=prefix_relative_path(self._get_root_dir(), destination),
+            source=source,
+            destination=destination,
         )
 
     @intercept_errors(message_prefix="Failed to replace in files: ")
@@ -308,8 +300,7 @@ class FileSystem:
 
         Args:
             files (List[str]): List of file paths to perform replacements in. Relative paths are
-            resolved based on the user's
-            root directory.
+            resolved based on the sandbox workdir.
             pattern (str): Pattern to search for.
             new_value (str): Text to replace matches with.
 
@@ -338,7 +329,7 @@ class FileSystem:
             ```
         """
         for i, file in enumerate(files):
-            files[i] = prefix_relative_path(self._get_root_dir(), file)
+            files[i] = file
 
         replace_request = ReplaceRequest(files=files, new_value=new_value, pattern=pattern)
 
@@ -350,8 +341,8 @@ class FileSystem:
         specified pattern. The pattern can be a simple string or a glob pattern.
 
         Args:
-            path (str): Path to the root directory to start search from. Relative paths are resolved based on the user's
-            root directory.
+            path (str): Path to the root directory to start search from. Relative paths are resolved
+            based on the sandbox workdir.
             pattern (str): Pattern to match against file names. Supports glob
                 patterns (e.g., "*.py" for Python files).
 
@@ -373,7 +364,7 @@ class FileSystem:
         """
         return self._toolbox_api.search_files(
             self._sandbox_id,
-            path=prefix_relative_path(self._get_root_dir(), path),
+            path=path,
             pattern=pattern,
         )
 
@@ -383,8 +374,7 @@ class FileSystem:
         to leave that attribute unchanged.
 
         Args:
-            path (str): Path to the file or directory. Relative paths are resolved based on the user's
-            root directory.
+            path (str): Path to the file or directory. Relative paths are resolved based on the sandbox workdir.
             mode (Optional[str]): File mode/permissions in octal format
                 (e.g., "644" for rw-r--r--).
             owner (Optional[str]): User owner of the file.
@@ -408,7 +398,7 @@ class FileSystem:
         """
         self._toolbox_api.set_file_permissions(
             self._sandbox_id,
-            path=prefix_relative_path(self._get_root_dir(), path),
+            path=path,
             mode=mode,
             owner=owner,
             group=group,
@@ -422,8 +412,7 @@ class FileSystem:
 
         Args:
             file (bytes): File contents as a bytes object.
-            remote_path (str): Path to the destination file. Relative paths are resolved based on the user's
-            root directory.
+            remote_path (str): Path to the destination file. Relative paths are resolved based on the sandbox workdir.
             timeout (int): Timeout for the upload operation in seconds. 0 means no timeout. Default is 30 minutes.
 
         Example:
@@ -455,7 +444,7 @@ class FileSystem:
         Args:
             local_path (str): Path to the local file to upload.
             remote_path (str): Path to the destination file in the Sandbox. Relative paths are
-            resolved based on the user's root directory.
+            resolved based on the sandbox workdir.
             timeout (int): Timeout for the upload operation in seconds. 0 means no timeout. Default is 30 minutes.
 
         Example:
@@ -500,15 +489,14 @@ class FileSystem:
 
         with ExitStack() as stack:
             for i, f in enumerate(files):
-                dst = prefix_relative_path(self._get_root_dir(), f.destination)
-                data_fields[f"files[{i}].path"] = dst
+                data_fields[f"files[{i}].path"] = f.destination
 
                 if isinstance(f.source, (bytes, bytearray)):
                     stream = io.BytesIO(f.source)
-                    filename = dst
+                    filename = f.destination
                 else:
                     stream = stack.enter_context(open(f.source, "rb"))
-                    filename = dst
+                    filename = f.destination
 
                 # HTTPX will stream this file object in 64 KiB chunks :contentReference[oaicite:1]{index=1}
                 file_fields[f"files[{i}].file"] = (filename, stream)

@@ -4,13 +4,11 @@
 package session
 
 type SessionController struct {
-	configDir  string
-	projectDir string
+	configDir string
 }
 
 func NewSessionController(configDir, projectDir string) *SessionController {
 	return &SessionController{
-		configDir:  configDir,
-		projectDir: projectDir,
+		configDir: configDir,
 	}
 }
