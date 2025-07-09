@@ -212,7 +212,7 @@ export class SnapshotManager {
         ...new Set(snapshotRunners.map((snapshotRunner) => snapshotRunner.runnerId)),
       ]
 
-      const propagateLimit = Math.floor(runners.length / 3) - snapshotRunnersDistinctRunnersIds.length
+      const propagateLimit = Math.ceil(runners.length / 3) - snapshotRunnersDistinctRunnersIds.length
       const unallocatedRunners = runners.filter(
         (runner) => !snapshotRunnersDistinctRunnersIds.some((snapshotRunnerId) => snapshotRunnerId === runner.id),
       )
