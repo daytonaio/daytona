@@ -13,20 +13,15 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func GetProxyTarget(ctx *gin.Context) (*url.URL, string, map[string]string, error) {
+func GetProxyTarget(ctx *gin.Context) (*url.URL, map[string]string, error) {
 	targetPort := ctx.Param("port")
 	if targetPort == "" {
 		ctx.Error(common_errors.NewBadRequestError(errors.New("target port is required")))
-		return nil, "", nil, errors.New("target port is required")
+		return nil, nil, errors.New("target port is required")
 	}
 
 	// Build the target URL
 	targetURL := fmt.Sprintf("http://localhost:%s", targetPort)
-	target, err := url.Parse(targetURL)
-	if err != nil {
-		ctx.Error(common_errors.NewBadRequestError(fmt.Errorf("failed to parse target URL: %w", err)))
-		return nil, "", nil, fmt.Errorf("failed to parse target URL: %w", err)
-	}
 
 	// Get the wildcard path and normalize it
 	path := ctx.Param("path")
@@ -39,10 +34,11 @@ func GetProxyTarget(ctx *gin.Context) (*url.URL, string, map[string]string, erro
 	}
 
 	// Create the complete target URL with path
-	fullTargetURL := fmt.Sprintf("%s%s", targetURL, path)
-	if ctx.Request.URL.RawQuery != "" {
-		fullTargetURL = fmt.Sprintf("%s?%s", fullTargetURL, ctx.Request.URL.RawQuery)
+	target, err := url.Parse(fmt.Sprintf("%s%s", targetURL, path))
+	if err != nil {
+		ctx.Error(common_errors.NewBadRequestError(fmt.Errorf("failed to parse target URL: %w", err)))
+		return nil, nil, fmt.Errorf("failed to parse target URL: %w", err)
 	}
 
-	return target, fullTargetURL, nil, nil
+	return target, nil, nil
 }
