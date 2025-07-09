@@ -24,6 +24,7 @@ export class UsageService {
     @InjectRepository(SandboxUsagePeriod)
     private sandboxUsagePeriodRepository: Repository<SandboxUsagePeriod>,
     private readonly redisLockProvider: RedisLockProvider,
+    @InjectRepository(Sandbox)
     private readonly sandboxRepository: Repository<Sandbox>,
   ) {}
 
