@@ -7,7 +7,7 @@ import React, { useEffect, useState } from 'react'
 import { Outlet } from 'react-router-dom'
 
 import { Sidebar } from '@/components/Sidebar'
-import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
+import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
 import { Toaster } from '@/components/ui/sonner'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { VerifyEmailDialog } from '@/components/VerifyEmailDialog'
@@ -58,12 +58,18 @@ const Dashboard: React.FC = () => {
       {isBannerVisible && bannerText && (
         <AnnouncementBanner text={bannerText} onDismiss={handleDismissBanner} learnMoreUrl={bannerLearnMoreUrl} />
       )}
-      <SidebarProvider isBannerVisible={isBannerVisible}>
+      <SidebarProvider isBannerVisible={isBannerVisible} defaultOpen={true}>
         <Sidebar isBannerVisible={isBannerVisible} />
-        <SidebarTrigger className="md:hidden" />
-        <div className={cn('w-full', isBannerVisible ? 'md:pt-12' : '')}>
-          <Outlet />
-        </div>
+
+        <SidebarInset className="overflow-hidden">
+          <div className="relative md:hidden px-6 pt-4">
+            <SidebarTrigger className="[&_svg]:size-5" />
+          </div>
+          <div className={cn('w-full min-h-screen overscroll-none', isBannerVisible ? 'md:pt-12' : '')}>
+            <Outlet />
+          </div>
+        </SidebarInset>
+
         <Toaster />
         <VerifyEmailDialog open={showVerifyEmailDialog} onOpenChange={setShowVerifyEmailDialog} />
       </SidebarProvider>
