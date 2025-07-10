@@ -113,10 +113,10 @@ export class SnapshotController {
     return SnapshotDto.fromSnapshot(snapshot)
   }
 
-  @Get('check-image-cleanup')
+  @Get('can-cleanup-image')
   @ApiOperation({
     summary: 'Check if an image can be cleaned up',
-    operationId: 'checkImageCleanup',
+    operationId: 'canCleanupImage',
   })
   @ApiQuery({
     name: 'imageName',
@@ -130,8 +130,8 @@ export class SnapshotController {
     type: Boolean,
   })
   @RequiredSystemRole(SystemRole.ADMIN)
-  async checkImageCleanup(@Query('imageName') imageName: string): Promise<boolean> {
-    return this.snapshotService.checkImageCleanup(imageName)
+  async canCleanupImage(@Query('imageName') imageName: string): Promise<boolean> {
+    return this.snapshotService.canCleanupImage(imageName)
   }
 
   @Get(':id')

@@ -295,7 +295,7 @@ export class SnapshotService {
     return await this.snapshotRepository.save(snapshot)
   }
 
-  async checkImageCleanup(imageName: string): Promise<boolean> {
+  async canCleanupImage(imageName: string): Promise<boolean> {
     const snapshot = await this.snapshotRepository.findOne({
       where: {
         state: Not(In([SnapshotState.ERROR, SnapshotState.BUILD_FAILED])),
