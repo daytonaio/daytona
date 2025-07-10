@@ -152,6 +152,15 @@ export class ToolboxController {
         const routePath = path.split(`/api/toolbox/${sandboxId}/toolbox`)[1]
         const newPath = `/sandboxes/${sandboxId}/toolbox${routePath}`
 
+        // Handle files path which is served on /files/ in the daemon
+        // TODO: Circle back to this after daemon versioning
+        // We can then switch /files/ to /files and only perform this for older daemon versions
+        const url = new URL(`http://runner${newPath}`)
+        if (url.pathname.endsWith('/files')) {
+          url.pathname = url.pathname + '/'
+          return url.toString().replace('http://runner', '')
+        }
+
         return newPath
       },
       changeOrigin: true,
@@ -170,8 +179,16 @@ export class ToolboxController {
           // @ts-expect-error - set when routing
           const runnerApiKey = req._runnerApiKey
 
-          proxyReq.setHeader('Authorization', `Bearer ${runnerApiKey}`)
+          try {
+            proxyReq.setHeader('Authorization', `Bearer ${runnerApiKey}`)
+          } catch {
+            // Ignore error - headers are already set
+            return
+          }
           fixRequestBody(proxyReq, req)
+        },
+        proxyRes: (proxyRes, req, res) => {
+          // console.log('proxyRes', proxyRes)
         },
       },
     }
