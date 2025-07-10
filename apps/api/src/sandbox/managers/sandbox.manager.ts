@@ -106,10 +106,11 @@ export class SandboxManager {
               sandbox.pending = true
               sandbox.desiredState = SandboxDesiredState.STOPPED
               await this.sandboxRepository.save(sandbox)
-              await this.redisLockProvider.unlock(lockKey)
               this.syncInstanceState(sandbox.id)
             } catch (error) {
               this.logger.error(`Error processing auto-stop state for sandbox ${sandbox.id}:`, fromAxiosError(error))
+            } finally {
+              await this.redisLockProvider.unlock(lockKey)
             }
           }),
         )
@@ -163,10 +164,11 @@ export class SandboxManager {
               sandbox.pending = true
               sandbox.desiredState = SandboxDesiredState.ARCHIVED
               await this.sandboxRepository.save(sandbox)
-              await this.redisLockProvider.unlock(lockKey)
               this.syncInstanceState(sandbox.id)
             } catch (error) {
               this.logger.error(`Error processing auto-archive state for sandbox ${sandbox.id}:`, fromAxiosError(error))
+            } finally {
+              await this.redisLockProvider.unlock(lockKey)
             }
           }),
         )
