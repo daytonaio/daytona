@@ -4,6 +4,7 @@
 package controllers
 
 import (
+	"context"
 	"fmt"
 	"net/url"
 	"strings"
@@ -32,7 +33,7 @@ func ProxyCommandLogsStream(ctx *gin.Context) {
 
 	fullTargetURL := strings.Replace(targetURL.String(), "http://", "ws://", 1)
 
-	ws, _, err := websocket.DefaultDialer.DialContext(ctx, fullTargetURL, nil)
+	ws, _, err := websocket.DefaultDialer.DialContext(context.Background(), fullTargetURL+"?follow=true", nil)
 	if err != nil {
 		ctx.Error(errors.NewBadRequestError(fmt.Errorf("failed to create outgoing request: %w", err)))
 		return
@@ -41,16 +42,25 @@ func ProxyCommandLogsStream(ctx *gin.Context) {
 	ctx.Header("Content-Type", "application/octet-stream")
 
 	ws.SetCloseHandler(func(code int, text string) error {
+		if code == websocket.CloseNormalClosure {
+			return nil
+		}
 		ctx.AbortWithStatus(code)
 		return nil
 	})
 
 	defer ws.Close()
 
-	go func() {
-		for {
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		default:
 			_, msg, err := ws.ReadMessage()
 			if err != nil {
+				if websocket.IsCloseError(err, websocket.CloseNormalClosure) {
+					return
+				}
 				log.Errorf("Error reading message: %v", err)
 				ws.Close()
 				return
@@ -64,7 +74,5 @@ func ProxyCommandLogsStream(ctx *gin.Context) {
 			}
 			ctx.Writer.Flush()
 		}
-	}()
-
-	<-ctx.Done()
+	}
 }
