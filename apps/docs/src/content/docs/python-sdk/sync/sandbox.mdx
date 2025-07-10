@@ -344,7 +344,7 @@ sandbox.set_auto_archive_interval(60)
 sandbox.set_auto_archive_interval(0)
 ```
 
-#### Sandbox.set_auto_delete_interval
+#### Sandbox.set\_auto\_delete\_interval
 
 ```python
 @intercept_errors(message_prefix="Failed to set auto-delete interval: ")
@@ -360,6 +360,7 @@ The Sandbox will automatically delete after being continuously stopped for the s
 - `interval` _int_ - Number of minutes after which a continuously stopped Sandbox will be auto-deleted.
   Set to negative value to disable auto-delete. Set to 0 to delete immediately upon stopping.
   By default, auto-delete is disabled.
+  
 
 **Example**:
 
