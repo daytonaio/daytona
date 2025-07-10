@@ -217,10 +217,11 @@ export class SandboxManager {
               sandbox.pending = true
               sandbox.desiredState = SandboxDesiredState.DESTROYED
               await this.sandboxRepository.save(sandbox)
-              await this.redisLockProvider.unlock(lockKey)
               this.syncInstanceState(sandbox.id)
             } catch (error) {
               this.logger.error(`Error processing auto-delete state for sandbox ${sandbox.id}:`, fromAxiosError(error))
+            } finally {
+              await this.redisLockProvider.unlock(lockKey)
             }
           }),
         )
