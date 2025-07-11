@@ -821,28 +821,28 @@ export class SandboxManager {
     //  this will assign a new runner to the sandbox and restore the sandbox from the latest backup
     if (sandbox.runnerId) {
       const runner = await this.runnerService.findOne(sandbox.runnerId)
-      if (runner.unschedulable) {
-        //  check if sandbox has a valid backup
-        if (sandbox.backupState !== BackupState.COMPLETED) {
-          //  if not, keep sandbox on the same runner
-        } else {
-          sandbox.prevRunnerId = sandbox.runnerId
+      const originalRunnerId = sandbox.runnerId  // Store original value
+
+      // if the runner is unschedulable and sandbox has a valid backup, move sandbox to prevRunnerId
+      if (runner.unschedulable && sandbox.backupState === BackupState.COMPLETED) {
+          sandbox.prevRunnerId = originalRunnerId
           sandbox.runnerId = null
 
           const sandboxToUpdate = await this.sandboxRepository.findOneByOrFail({
             id: sandbox.id,
           })
-          sandboxToUpdate.prevRunnerId = sandbox.runnerId
+          sandboxToUpdate.prevRunnerId = originalRunnerId
           sandboxToUpdate.runnerId = null
           await this.sandboxRepository.save(sandboxToUpdate)
-        }
       }
 
+      // If the sandbox is on a runner and its backupState is COMPLETED
+      // but there are too many running sandboxes on that runner, move it to a less used runner
       if (sandbox.backupState === BackupState.COMPLETED) {
         const usageThreshold = 35
         const runningSandboxsCount = await this.sandboxRepository.count({
           where: {
-            runnerId: sandbox.runnerId,
+            runnerId: originalRunnerId,
             state: SandboxState.STARTED,
           },
         })
@@ -853,13 +853,13 @@ export class SandboxManager {
             region: sandbox.region,
             sandboxClass: sandbox.class,
           })
-          const lessUsedRunners = availableRunners.filter((runner) => runner.id !== sandbox.runnerId)
+          const lessUsedRunners = availableRunners.filter((runner) => runner.id !== originalRunnerId)
 
           //  temp workaround to move sandboxs to less used runner
           if (lessUsedRunners.length > 0) {
             await this.sandboxRepository.update(sandbox.id, {
               runnerId: null,
-              prevRunnerId: sandbox.runnerId,
+              prevRunnerId: originalRunnerId,
             })
             try {
               const runnerSandboxApi = this.runnerApiFactory.createSandboxApi(runner)
@@ -870,7 +870,7 @@ export class SandboxManager {
                 fromAxiosError(e),
               )
             }
-            sandbox.prevRunnerId = sandbox.runnerId
+            sandbox.prevRunnerId = originalRunnerId
             sandbox.runnerId = null
           }
         }
