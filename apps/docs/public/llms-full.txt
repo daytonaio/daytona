@@ -971,11 +971,11 @@ npx ts-node claude-example.ts
 
 ## Additional Examples
 
-Use the Daytona SDK [Python examples](https://github.com/daytonaio/sdk/tree/main/examples/python) or [TypeScript/JavaScript examples](https://github.com/daytonaio/sdk/tree/main/examples/typescript) to create a Sandbox and run your code.
+Use the Daytona SDK [Python examples](https://github.com/daytonaio/daytona/tree/main/examples/python) or [TypeScript/JavaScript examples](https://github.com/daytonaio/daytona/tree/main/examples/typescript) to create a Sandbox and run your code.
 
 Speed up your development on Daytona using LLMs. Copy the /llms.txt files and include them into your projects or chat context: [llms-full.txt](https://www.daytona.io/docs/llms-full.txt) or [llms.txt](https://www.daytona.io/docs/llms.txt)
 
-Learn more by checkout out the Daytona SDK repository on [GitHub](https://github.com/daytonaio/sdk).
+Learn more by checking out the Daytona SDK repository on [GitHub](https://github.com/daytonaio/daytona).
 
 ## Setting up the Daytona CLI
 
@@ -2755,7 +2755,7 @@ After running `docker images` and ensuring the image and tag you want to use is 
 daytona snapshot push custom-alpine:3.21 -n my-snapshot-name
 ```
 
-For more information, see the [CLI documentation](/docs/cli#daytona-snapshot-push).
+For more information, see the [CLI documentation](/docs/tools/cli#daytona-snapshot-push).
 
 :::tip
 
