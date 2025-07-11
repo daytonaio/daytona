@@ -103,6 +103,7 @@ import { RequiredOrganizationResourcePermissions } from '../../organization/deco
 import { OrganizationResourcePermission } from '../../organization/enums/organization-resource-permission.enum'
 import followRedirects from 'follow-redirects'
 import { UploadFileDto } from '../dto/upload-file.dto'
+import { DownloadFilesDto } from '../dto/download-files.dto'
 
 followRedirects.maxRedirects = 10
 followRedirects.maxBodyLength = 50 * 1024 * 1024
@@ -268,6 +269,7 @@ export class ToolboxController {
     summary: 'Download file',
     description: 'Download file from sandbox',
     operationId: 'downloadFile',
+    deprecated: true,
   })
   @ApiResponse({
     status: 200,
@@ -280,6 +282,32 @@ export class ToolboxController {
   @ApiQuery({ name: 'path', type: String, required: true })
   @ApiParam({ name: 'sandboxId', type: String, required: true })
   async downloadFile(
+    @Request() req: RawBodyRequest<IncomingMessage>,
+    @Res() res: ServerResponse<IncomingMessage>,
+    @Next() next: NextFunction,
+  ): Promise<void> {
+    return await this.toolboxProxy(req, res, next)
+  }
+
+  @Post(':sandboxId/toolbox/files/bulk-download')
+  @ApiOperation({
+    summary: 'Download multiple files',
+    description: 'Streams back a multipart/form-data bundle of the requested paths',
+    operationId: 'downloadFiles',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'A multipart/form-data response with each file as a part',
+    schema: {
+      type: 'string',
+      format: 'binary',
+    },
+  })
+  @ApiBody({
+    type: DownloadFilesDto,
+  })
+  @ApiParam({ name: 'sandboxId', type: String, required: true })
+  async downloadFiles(
     @Request() req: RawBodyRequest<IncomingMessage>,
     @Res() res: ServerResponse<IncomingMessage>,
     @Next() next: NextFunction,

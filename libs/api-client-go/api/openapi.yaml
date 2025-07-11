@@ -1884,6 +1884,7 @@ paths:
         - toolbox
   /toolbox/{sandboxId}/toolbox/files/download:
     get:
+      deprecated: true
       description: Download file from sandbox
       operationId: downloadFile
       parameters:
@@ -1924,6 +1925,49 @@ paths:
             - profile
             - email
       summary: Download file
+      tags:
+        - toolbox
+  /toolbox/{sandboxId}/toolbox/files/bulk-download:
+    post:
+      description: Streams back a multipart/form-data bundle of the requested paths
+      operationId: downloadFiles
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: sandboxId
+          required: true
+          schema:
+            type: string
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DownloadFiles'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                format: binary
+                type: string
+          description: A multipart/form-data response with each file as a part
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Download multiple files
       tags:
         - toolbox
   /toolbox/{sandboxId}/toolbox/files/find:
@@ -7301,6 +7345,20 @@ components:
         - owner
         - permissions
         - size
+      type: object
+    DownloadFiles:
+      example:
+        paths:
+          - paths
+          - paths
+      properties:
+        paths:
+          description: List of remote file paths to download
+          items:
+            type: string
+          type: array
+      required:
+        - paths
       type: object
     Match:
       example:

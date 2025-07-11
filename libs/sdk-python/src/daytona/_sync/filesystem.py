@@ -11,11 +11,20 @@ from contextlib import ExitStack
 from typing import Callable, List, Union, overload
 
 import httpx
-from daytona_api_client import FileInfo, Match, ReplaceRequest, ReplaceResult, SearchFilesResponse, ToolboxApi
+from daytona_api_client import (
+    DownloadFiles,
+    FileInfo,
+    Match,
+    ReplaceRequest,
+    ReplaceResult,
+    SearchFilesResponse,
+    ToolboxApi,
+)
+from multipart import MultipartSegment, PushMultipartParser, parse_options_header
 
-from .._utils.errors import intercept_errors
+from .._utils.errors import DaytonaError, intercept_errors
 from .._utils.path import prefix_relative_path
-from ..common.filesystem import FileUpload
+from ..common.filesystem import FileDownloadRequest, FileDownloadResponse, FileUpload
 
 
 class FileSystem:
@@ -136,19 +145,74 @@ class FileSystem:
         if len(args) == 1 or (len(args) == 2 and isinstance(args[1], int)):
             remote_path = args[0]
             timeout = args[1] if len(args) == 2 else 30 * 60
-            return self._toolbox_api.download_file(
-                self._sandbox_id,
-                path=prefix_relative_path(self._get_root_dir(), remote_path),
-                _request_timeout=timeout or None,
-            )
+            response = (self.download_files([FileDownloadRequest(source=remote_path)], timeout=timeout))[0]
+            if response.error:
+                raise DaytonaError(response.error)
+            return response.result
 
         remote_path = args[0]
         local_path = args[1]
         timeout = args[2] if len(args) == 3 else 30 * 60
         # pylint: disable=protected-access
-        method, url, headers, *_ = self._toolbox_api._download_file_serialize(
+        response = self.download_files(
+            [FileDownloadRequest(source=remote_path, destination=local_path)], timeout=timeout
+        )[0]
+        if response.error:
+            raise DaytonaError(response.error)
+        return None
+
+    @intercept_errors(message_prefix="Failed to download files: ")
+    def download_files(self, files: List[FileDownloadRequest], timeout: int = 30 * 60) -> List[FileDownloadResponse]:
+        """Downloads multiple files from the Sandbox. If the files already exist locally, they will be overwritten.
+
+        Args:
+            files (List[FileDownloadRequest]): List of files to download.
+            timeout (int): Timeout for the download operation in seconds. 0 means no timeout. Default is 30 minutes.
+
+        Returns:
+            List[FileDownloadResponse]: List of download results.
+
+        Raises:
+            Exception: Only if the request itself fails (network issues, invalid request/response, etc.). Individual
+            file download errors are returned in the `FileDownloadResponse.error` field.
+
+        Example:
+            ```python
+            # Download multiple files
+            results = sandbox.fs.download_files([
+                FileDownloadRequest(source="tmp/data.json"),
+                FileDownloadRequest(source="tmp/config.json", destination="local_config.json")
+            ])
+            for result in results:
+                if result.error:
+                    print(f"Error downloading {result.source}: {result.error}")
+                elif result.result:
+                    print(f"Downloaded {result.source} to {result.result}")
+            ```
+        """
+        if not files:
+            return []
+
+        class FileMeta:
+            def __init__(self, abs_path: str, dst: str | None):
+                self.abs_path = abs_path
+                self.dst = dst
+                self.error: str | None = None
+                self.result: str | bytes | None = None
+
+        root = self._get_root_dir()
+        src_file_meta_dict = {}
+        abs_path_to_source = {}
+        file_writers = []
+        for f in files:
+            abs_path = prefix_relative_path(root, f.source)
+            src_file_meta_dict[f.source] = FileMeta(abs_path=abs_path, dst=f.destination)
+            abs_path_to_source[abs_path] = f.source
+
+        # pylint: disable=protected-access
+        method, url, headers, body, *_ = self._toolbox_api._download_files_serialize(
             self._sandbox_id,
-            path=prefix_relative_path(self._get_root_dir(), remote_path),
+            download_files=DownloadFiles(paths=list(abs_path_to_source.keys())),
             x_daytona_organization_id=None,
             _request_auth=None,
             _content_type=None,
@@ -156,18 +220,102 @@ class FileSystem:
             _host_index=None,
         )
 
-        with httpx.Client(timeout=timeout or None) as client:
-            with client.stream(method, url, headers=headers) as response:
-                response.raise_for_status()
-                parent = os.path.dirname(local_path)
-                if parent:
-                    os.makedirs(parent, exist_ok=True)
+        try:
+            with httpx.Client(timeout=timeout) as client:
+                with client.stream(
+                    method,
+                    url,
+                    json=body,
+                    headers=headers,
+                ) as resp:
+                    resp.raise_for_status()
 
-                with open(local_path, "wb") as f:
-                    for chunk in response.iter_bytes(chunk_size=10 * 1024):
-                        if chunk:
-                            f.write(chunk)
-            return None
+                    content_type, options = parse_options_header(resp.headers.get("Content-Type", ""))
+                    if not (content_type == "multipart/form-data" and "boundary" in options):
+                        raise DaytonaError(f"Unexpected Content-Type: {content_type}")
+                    boundary = options["boundary"]
+
+                    with PushMultipartParser(boundary) as parser:
+                        writer = None
+                        mode = None  # "file" or "error"
+                        source = None
+
+                        for chunk in resp.iter_bytes(64 * 1024):
+                            if parser.closed:
+                                raise DaytonaError("Unexpected end of multipart data")
+
+                            for result in parser.parse(chunk):
+                                if isinstance(result, MultipartSegment):  # New part starting
+                                    writer = None
+                                    mode = None
+                                    source = abs_path_to_source.get(result.filename)
+                                    if not source:
+                                        raise DaytonaError(f"No source path found for this file {result.filename}")
+
+                                    if result.name == "error":
+                                        mode = "error"
+                                    elif result.name == "file":
+                                        mode = "file"
+                                        meta = src_file_meta_dict[source]
+                                        if meta.dst:
+                                            parent = os.path.dirname(meta.dst)
+                                            if parent:
+                                                os.makedirs(parent, exist_ok=True)
+                                            # pylint: disable=consider-using-with
+                                            writer = open(meta.dst, mode="wb")
+                                            file_writers.append(writer)
+                                            meta.result = meta.dst
+                                        else:
+                                            writer = io.BytesIO()
+                                            meta.result = writer
+
+                                elif result:  # Non-empty bytearray with content
+                                    if mode == "error":
+                                        error_text = bytes(result).decode("utf-8", errors="ignore").strip()
+                                        src_file_meta_dict[source].error = error_text
+                                    elif mode == "file":
+                                        try:
+                                            if isinstance(writer, io.BytesIO):
+                                                writer.write(bytes(result))
+                                            else:
+                                                writer.write(bytes(result))
+                                        except Exception as e:
+                                            src_file_meta_dict[source].error = f"Write failed: {e}"
+                                            mode = None
+
+                                else:  # None - end of current part
+                                    if writer and not isinstance(writer, io.BytesIO):
+                                        writer.close()
+                                    writer = None
+                                    mode = None
+                                    source = None
+        finally:
+            for writer in file_writers:
+                writer.close()
+
+        # Build results for all requested files
+        results = []
+        for f in files:
+            meta = src_file_meta_dict[f.source]
+            # see if there's an explicit error; if not, but no data, set a default error
+            err = meta.error
+            if not err and not meta.result:
+                err = "No data received for this file"
+            # only fetch the value if there was no error
+            res = None
+            if err is None:
+                res = meta.result
+                if isinstance(res, io.BytesIO):
+                    res = res.getvalue()
+            results.append(
+                FileDownloadResponse(
+                    source=f.source,
+                    result=res,
+                    error=err,
+                )
+            )
+
+        return results
 
     @intercept_errors(message_prefix="Failed to find files: ")
     def find_files(self, path: str, pattern: str) -> List[Match]:

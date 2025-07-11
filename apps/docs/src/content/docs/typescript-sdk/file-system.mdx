@@ -150,6 +150,49 @@ await fs.downloadFile('tmp/data.json', 'local_file.json');
 
 ***
 
+#### downloadFiles()
+
+```ts
+downloadFiles(files: FileDownloadRequest[], timeoutSec?: number): Promise<FileDownloadResponse[]>
+```
+
+Downloads multiple files from the Sandbox. If the files already exist locally, they will be overwritten.
+
+**Parameters**:
+
+- `files` _FileDownloadRequest\[\]_ - Array of file download requests.
+- `timeoutSec?` _number = ..._ - Timeout for the download operation in seconds. 0 means no timeout.
+    Default is 30 minutes.
+
+
+**Returns**:
+
+- `Promise<FileDownloadResponse[]>` - Array of download results.
+
+**Throws**:
+
+If the request itself fails (network issues, invalid request/response, etc.). Individual
+file download errors are returned in the `FileDownloadResponse.error` field.
+
+**Example:**
+
+```ts
+// Download multiple files
+const results = await fs.downloadFiles([
+  { source: 'tmp/data.json' },
+  { source: 'tmp/config.json', destination: 'local_config.json' }
+]);
+results.forEach(result => {
+  if (result.error) {
+    console.error(`Error downloading ${result.source}: ${result.error}`);
+  } else if (result.result) {
+    console.log(`Downloaded ${result.source} to ${result.result}`);
+  }
+});
+```
+
+***
+
 #### findFiles()
 
 ```ts

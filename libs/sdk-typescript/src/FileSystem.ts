@@ -6,8 +6,11 @@
 import { FileInfo, Match, ReplaceRequest, ReplaceResult, SearchFilesResponse, ToolboxApi } from '@daytonaio/api-client'
 import { prefixRelativePath } from './utils/Path'
 import * as fs from 'fs'
+import * as path from 'path'
 import { Readable } from 'stream'
 import FormData from 'form-data'
+import busboy from 'busboy'
+import { DaytonaError } from './errors/DaytonaError'
 
 /**
  * Parameters for setting file permissions in the Sandbox.
@@ -45,6 +48,35 @@ export type FilePermissionsParams = {
 export interface FileUpload {
   source: string | Buffer
   destination: string
+}
+
+/**
+ * Represents a request to download a single file from the Sandbox.
+ *
+ * @interface
+ * @property {string} source - Source path in the Sandbox. Relative paths are resolved based on the user's
+ * root directory.
+ * @property {string} [destination] - Destination path in the local filesystem where the file content will be
+ * streamed to. If not provided, the file will be downloaded in the bytes buffer (might cause memory issues if the file is large).
+ */
+interface FileDownloadRequest {
+  source: string
+  destination?: string
+}
+
+/**
+ * Represents the response to a single file download request.
+ *
+ * @interface
+ * @property {string} source - The original source path requested for download.
+ * @property {Buffer | string | undefined} [result] - The download result - file path (if destination provided in the request)
+ * or bytes content (if no destination in the request), undefined if failed or no data received.
+ * @property {string | undefined} [error] - Error message if the download failed, undefined if successful.
+ */
+interface FileDownloadResponse {
+  source: string
+  result?: Buffer | string
+  error?: string
 }
 
 /**
@@ -132,33 +164,189 @@ export class FileSystem {
     const remotePath = prefixRelativePath(await this.getRootDir(), src)
 
     if (typeof dst !== 'string') {
-      timeout = dst as number
-      const { data } = await this.toolboxApi.downloadFile(this.sandboxId, remotePath, undefined, {
-        responseType: 'arraybuffer',
-        timeout: timeout * 1000,
-      })
-
-      if (Buffer.isBuffer(data)) {
-        return data
+      if (dst) {
+        timeout = dst as number
       }
 
-      if (data instanceof ArrayBuffer) {
-        return Buffer.from(data)
+      const response = await this.downloadFiles([{ source: remotePath }], timeout)
+
+      if (response[0].error) {
+        throw new DaytonaError(response[0].error)
       }
 
-      return Buffer.from(await data.arrayBuffer())
+      return response[0].result as Buffer
     }
 
-    const response = await this.toolboxApi.downloadFile(this.sandboxId, remotePath, undefined, {
-      responseType: 'stream',
-      timeout: timeout * 1000,
-    })
-    const writer = fs.createWriteStream(dst)
-    ;(response.data as any).pipe(writer)
+    const response = await this.downloadFiles([{ source: remotePath, destination: dst }], timeout)
+
+    if (response[0].error) {
+      throw new DaytonaError(response[0].error)
+    }
+  }
+
+  /**
+   * Downloads multiple files from the Sandbox. If the files already exist locally, they will be overwritten.
+   *
+   * @param {FileDownloadRequest[]} files - Array of file download requests.
+   * @param {number} [timeoutSec] - Timeout for the download operation in seconds. 0 means no timeout.
+   * Default is 30 minutes.
+   * @returns {Promise<FileDownloadResponse[]>} Array of download results.
+   *
+   * @throws {DaytonaError} If the request itself fails (network issues, invalid request/response, etc.). Individual
+   * file download errors are returned in the `FileDownloadResponse.error` field.
+   *
+   * @example
+   * // Download multiple files
+   * const results = await fs.downloadFiles([
+   *   { source: 'tmp/data.json' },
+   *   { source: 'tmp/config.json', destination: 'local_config.json' }
+   * ]);
+   * results.forEach(result => {
+   *   if (result.error) {
+   *     console.error(`Error downloading ${result.source}: ${result.error}`);
+   *   } else if (result.result) {
+   *     console.log(`Downloaded ${result.source} to ${result.result}`);
+   *   }
+   * });
+   */
+  public async downloadFiles(
+    files: FileDownloadRequest[],
+    timeoutSec: number = 30 * 60,
+  ): Promise<FileDownloadResponse[]> {
+    if (files.length === 0) return []
+
+    const root = await this.getRootDir()
+    const srcFileMetaMap = new Map<
+      string,
+      { absPath: string; dst?: string; error?: string; result?: Buffer | string }
+    >()
+    const absPathToSource = new Map<string, string>()
+    const fileTasks: Promise<void>[] = []
+
+    for (const f of files) {
+      const abs = prefixRelativePath(root, f.source)
+      srcFileMetaMap.set(f.source, { absPath: abs, dst: f.destination })
+      absPathToSource.set(abs, f.source)
+      if (f.destination) {
+        await fs.promises.mkdir(path.dirname(f.destination), { recursive: true })
+      }
+    }
+
+    const response = await this.toolboxApi.downloadFiles(
+      this.sandboxId,
+      { paths: Array.from(absPathToSource.keys()) },
+      undefined,
+      {
+        responseType: 'stream',
+        timeout: timeoutSec * 1000,
+      },
+    )
+    const responseData = response.data as any
+
     await new Promise<void>((resolve, reject) => {
-      writer.on('finish', () => resolve())
-      writer.on('error', (err) => reject(err))
+      const bb = busboy({
+        headers: response.headers as Record<string, string>,
+        preservePath: true,
+      })
+
+      bb.on('file', (partType, fileStream, fileInfo) => {
+        const source = absPathToSource.get(fileInfo.filename)
+
+        if (!source) {
+          // Unexpected file from upstream, reject the request
+          responseData.destroy()
+          reject(new DaytonaError(`Received unexpected file "${fileInfo.filename}".`))
+          return
+        }
+
+        const meta = srcFileMetaMap.get(source)
+        if (!meta) {
+          responseData.destroy()
+          reject(new DaytonaError(`Target metadata missing for valid source: ${source}`))
+          return
+        }
+
+        if (partType === 'error') {
+          let buf = Buffer.alloc(0)
+          fileStream.on('data', (chunk) => {
+            buf = Buffer.concat([buf, chunk])
+          })
+          fileStream.on('end', () => {
+            meta.error = buf.toString('utf-8').trim()
+          })
+          fileStream.on('error', (err) => {
+            meta.error = `Stream error: ${err.message}`
+          })
+        } else if (partType === 'file') {
+          if (meta.dst) {
+            fileTasks.push(
+              new Promise((resolve) => {
+                const writeStream = fs.createWriteStream(meta.dst!, { autoClose: true })
+                fileStream.pipe(writeStream)
+                writeStream.on('finish', () => {
+                  meta.result = meta.dst
+                  resolve()
+                })
+                writeStream.on('error', (err) => {
+                  meta.error = `Write stream failed: ${err.message}`
+                  resolve()
+                })
+                fileStream.on('error', (err) => {
+                  meta.error = `Read stream failed: ${err.message}`
+                })
+              }),
+            )
+          } else {
+            const chunks: Buffer[] = []
+            fileStream.on('data', (chunk) => {
+              chunks.push(chunk)
+            })
+            fileStream.on('end', () => {
+              meta.result = Buffer.concat(chunks)
+            })
+            fileStream.on('error', (err) => {
+              meta.error = `Read failed: ${err.message}`
+            })
+          }
+        } else {
+          fileStream.resume()
+        }
+      })
+
+      bb.on('error', (err) => {
+        responseData.destroy()
+        reject(err)
+      })
+
+      bb.on('finish', resolve)
+      responseData.pipe(bb)
     })
+    await Promise.all(fileTasks)
+
+    const results: FileDownloadResponse[] = []
+
+    for (const f of files) {
+      const meta = srcFileMetaMap.get(f.source)
+      let err = meta?.error
+      if (!err && !meta?.result) {
+        err = 'No data received for this file'
+      }
+      let res: Buffer | string | undefined
+
+      if (!err && meta) {
+        res = meta.result
+      } else if (!meta) {
+        err = 'No writer metadata found'
+      }
+
+      results.push({
+        source: f.source,
+        result: res,
+        error: err,
+      })
+    }
+
+    return results
   }
 
   /**

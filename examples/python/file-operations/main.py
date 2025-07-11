@@ -2,7 +2,7 @@ import json
 import os
 from datetime import datetime
 
-from daytona import CreateSandboxFromSnapshotParams, Daytona, FileUpload
+from daytona import CreateSandboxFromSnapshotParams, Daytona, FileDownloadRequest, FileUpload
 
 
 def main():
@@ -64,10 +64,28 @@ def main():
     # Replace content in config file
     sandbox.fs.replace_in_files([os.path.join(new_dir, "config.json")], '"debug": true', '"debug": false')
 
-    # Download the modified config file
-    print("Downloading updated config file:")
+    # Download multiple files - mix of local file and memory download
+    print("Downloading multiple files:")
+    download_results = sandbox.fs.download_files(
+        [
+            FileDownloadRequest(source=os.path.join(new_dir, "config.json"), destination="local-config.json"),
+            FileDownloadRequest(source=os.path.join(new_dir, "example.txt")),
+            FileDownloadRequest(source=os.path.join(new_dir, "script.sh"), destination="local-script.sh"),
+        ]
+    )
+
+    for result in download_results:
+        if result.error:
+            print(f"Error downloading {result.source}: {result.error}")
+        elif isinstance(result.result, str):
+            print(f"Downloaded {result.source} to {result.result}")
+        else:
+            print(f"Downloaded {result.source} to memory ({len(result.result)} bytes)")
+
+    # Single file download example
+    print("Single file download example:")
     config_content = sandbox.fs.download_file(os.path.join(new_dir, "config.json"))
-    print(config_content.decode("utf-8"))
+    print("Config content:", config_content.decode("utf-8"))
 
     # Create a report of all operations
     report_data = f"""
@@ -84,6 +102,10 @@ def main():
 
     # Clean up local file
     os.remove(local_file_path)
+    if os.path.exists("local-config.json"):
+        os.remove("local-config.json")
+    if os.path.exists("local-script.sh"):
+        os.remove("local-script.sh")
 
     # Delete the sandbox
     daytona.delete(sandbox)

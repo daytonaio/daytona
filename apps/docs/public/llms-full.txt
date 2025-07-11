@@ -495,14 +495,16 @@ await sandbox.fs.uploadFiles(files)
 
 ### Downloading Files
 
-The following commands downloads the file `file1.txt` from the Sandbox user's root directory and prints out the content:
+#### Downloading a Single File
+
+The following commands downloads a single file `file1.txt` from the Sandbox user's root directory and prints out the content:
 
 ```python
 
 content = sandbox.fs.download_file("file1.txt")
 
 with open("local_file.txt", "wb") as f:
-f.write(content)
+    f.write(content)
 
 print(content.decode('utf-8'))
 
@@ -515,6 +517,44 @@ console.log('File content:', downloadedFile.toString())
 
 ```
 
+
+#### Downloading Multiple Files
+
+The following example shows how to efficiently download multiple files with a single method call.
+
+```python
+# Download multiple files at once
+files_to_download = [
+    FileDownloadRequest(source="data/file1.txt"), # No destination - download to memory
+    FileDownloadRequest(source="data/file2.txt", destination="local_file2.txt"), # Download to local file
+]
+
+results = sandbox.fs.download_files(files_to_download)
+
+for result in results:
+    if result.error:
+        print(f"Error downloading {result.source}: {result.error}")
+    elif result.result:
+        print(f"Downloaded {result.source} to {result.result}")
+
+```
+```typescript
+// Download multiple files at once
+const files = [
+    { source: "data/file1.txt" }, // No destination - download to memory
+    { source: "data/file2.txt", destination: "local_file2.txt" }, // Download to local file
+]
+
+const results = await sandbox.fs.downloadFiles(files)
+
+results.forEach(result => {
+    if (result.error) {
+        console.error(`Error downloading ${result.source}: ${result.error}`)
+    } else if (result.result) {
+        console.log(`Downloaded ${result.source} to ${result.result}`)
+    }
+})
+```
 
 ### Deleting files
 
@@ -724,7 +764,9 @@ app = Flask(**name**)
 @app.route('/')
 def hello():
 return """
+
 <!DOCTYPE html>
+
 <html>
 <head>
 <title>Hello World</title>
@@ -814,7 +856,7 @@ if __name__ == '__main__':
   }));
 
   // Get the preview link for the Flask app
-  const previewInfo = sandbox.getPreviewLink(3000);
+  const previewInfo = await sandbox.getPreviewLink(3000);
   console.log(`Flask app is available at: ${previewInfo.url}`);
 }
 

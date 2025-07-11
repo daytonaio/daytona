@@ -142,6 +142,48 @@ size_mb = os.path.getsize(local_path) / 1024 / 1024
 print(f"Size of the downloaded file {local_path}: {size_mb} MB")
 ```
 
+#### AsyncFileSystem.download\_files
+
+```python
+@intercept_errors(message_prefix="Failed to download files: ")
+async def download_files(files: List[FileDownloadRequest],
+                         timeout: int = 30 * 60) -> List[FileDownloadResponse]
+```
+
+Downloads multiple files from the Sandbox. If the files already exist locally, they will be overwritten.
+
+**Arguments**:
+
+- `files` _List[FileDownloadRequest]_ - List of files to download.
+- `timeout` _int_ - Timeout for the download operation in seconds. 0 means no timeout. Default is 30 minutes.
+  
+
+**Returns**:
+
+- `List[FileDownloadResponse]` - List of download results.
+  
+
+**Raises**:
+
+- `Exception` - Only if the request itself fails (network issues, invalid request/response, etc.). Individual
+  file download errors are returned in the `FileDownloadResponse.error` field.
+  
+
+**Example**:
+
+```python
+# Download multiple files
+results = await sandbox.fs.download_files([
+    FileDownloadRequest(source="tmp/data.json"),
+    FileDownloadRequest(source="tmp/config.json", destination="local_config.json")
+])
+for result in results:
+    if result.error:
+        print(f"Error downloading {result.source}: {result.error}")
+    elif result.result:
+        print(f"Downloaded {result.source} to {result.result}")
+```
+
 #### AsyncFileSystem.find\_files
 
 ```python
@@ -541,4 +583,37 @@ Represents a file to be uploaded to the Sandbox.
   make sure it fits into memory, otherwise use the local file path which content will be streamed to the Sandbox.
 - `destination` _str_ - Absolute destination path in the Sandbox. Relative paths are resolved based on the user's
   root directory.
+
+## FileDownloadRequest
+
+```python
+@dataclass
+class FileDownloadRequest()
+```
+
+Represents a request to download a single file from the Sandbox.
+
+**Attributes**:
+
+- `source` _str_ - Source path in the Sandbox. Relative paths are resolved based on the user's
+  root directory.
+- `destination` _Optional[str]_ - Destination path in the local filesystem where the file content will be
+  streamed to. If not provided, the file will be downloaded in the bytes buffer
+  (might cause memory issues if the file is large).
+
+## FileDownloadResponse
+
+```python
+@dataclass
+class FileDownloadResponse()
+```
+
+Represents the response to a single file download request.
+
+**Attributes**:
+
+- `source` _str_ - The original source path requested for download.
+- `result` _Union[str, bytes, None]_ - The download result - file path (if destination provided in the request)
+  or bytes content (if no destination in the request), None if failed or no data received.
+- `error` _Optional[str]_ - Error message if the download failed, None if successful.
 

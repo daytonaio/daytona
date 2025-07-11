@@ -48,6 +48,8 @@ import type { CreateSessionRequest } from '../models'
 // @ts-ignore
 import type { DisplayInfoResponse } from '../models'
 // @ts-ignore
+import type { DownloadFiles } from '../models'
+// @ts-ignore
 import type { ExecuteRequest } from '../models'
 // @ts-ignore
 import type { ExecuteResponse } from '../models'
@@ -431,6 +433,7 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
      * @param {string} path
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
     downloadFile: async (
@@ -474,6 +477,61 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
       setSearchParams(localVarUrlObj, localVarQueryParameter)
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
       localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     * Streams back a multipart/form-data bundle of the requested paths
+     * @summary Download multiple files
+     * @param {string} sandboxId
+     * @param {DownloadFiles} downloadFiles
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    downloadFiles: async (
+      sandboxId: string,
+      downloadFiles: DownloadFiles,
+      xDaytonaOrganizationID?: string,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'sandboxId' is not null or undefined
+      assertParamExists('downloadFiles', 'sandboxId', sandboxId)
+      // verify required parameter 'downloadFiles' is not null or undefined
+      assertParamExists('downloadFiles', 'downloadFiles', downloadFiles)
+      const localVarPath = `/toolbox/{sandboxId}/toolbox/files/bulk-download`.replace(
+        `{${'sandboxId'}}`,
+        encodeURIComponent(String(sandboxId)),
+      )
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      // authentication bearer required
+      // http bearer authentication required
+      await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+      // authentication oauth2 required
+
+      localVarHeaderParameter['Content-Type'] = 'application/json'
+
+      if (xDaytonaOrganizationID != null) {
+        localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
+      }
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+      localVarRequestOptions.data = serializeDataIfNeeded(downloadFiles, localVarRequestOptions, configuration)
 
       return {
         url: toPathString(localVarUrlObj),
@@ -3749,6 +3807,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
      * @param {string} path
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
     async downloadFile(
@@ -3766,6 +3825,38 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
         operationServerMap['ToolboxApi.downloadFile']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
+    /**
+     * Streams back a multipart/form-data bundle of the requested paths
+     * @summary Download multiple files
+     * @param {string} sandboxId
+     * @param {DownloadFiles} downloadFiles
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async downloadFiles(
+      sandboxId: string,
+      downloadFiles: DownloadFiles,
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<File>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.downloadFiles(
+        sandboxId,
+        downloadFiles,
+        xDaytonaOrganizationID,
+        options,
+      )
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['ToolboxApi.downloadFiles']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -5665,6 +5756,7 @@ export const ToolboxApiFactory = function (configuration?: Configuration, basePa
      * @param {string} path
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
     downloadFile(
@@ -5675,6 +5767,25 @@ export const ToolboxApiFactory = function (configuration?: Configuration, basePa
     ): AxiosPromise<File> {
       return localVarFp
         .downloadFile(sandboxId, path, xDaytonaOrganizationID, options)
+        .then((request) => request(axios, basePath))
+    },
+    /**
+     * Streams back a multipart/form-data bundle of the requested paths
+     * @summary Download multiple files
+     * @param {string} sandboxId
+     * @param {DownloadFiles} downloadFiles
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    downloadFiles(
+      sandboxId: string,
+      downloadFiles: DownloadFiles,
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<File> {
+      return localVarFp
+        .downloadFiles(sandboxId, downloadFiles, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
@@ -6875,6 +6986,7 @@ export class ToolboxApi extends BaseAPI {
    * @param {string} path
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
+   * @deprecated
    * @throws {RequiredError}
    * @memberof ToolboxApi
    */
@@ -6886,6 +6998,27 @@ export class ToolboxApi extends BaseAPI {
   ) {
     return ToolboxApiFp(this.configuration)
       .downloadFile(sandboxId, path, xDaytonaOrganizationID, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   * Streams back a multipart/form-data bundle of the requested paths
+   * @summary Download multiple files
+   * @param {string} sandboxId
+   * @param {DownloadFiles} downloadFiles
+   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof ToolboxApi
+   */
+  public downloadFiles(
+    sandboxId: string,
+    downloadFiles: DownloadFiles,
+    xDaytonaOrganizationID?: string,
+    options?: RawAxiosRequestConfig,
+  ) {
+    return ToolboxApiFp(this.configuration)
+      .downloadFiles(sandboxId, downloadFiles, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 

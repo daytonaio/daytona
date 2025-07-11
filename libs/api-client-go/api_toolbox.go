@@ -103,12 +103,30 @@ type ToolboxAPI interface {
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 		@param sandboxId
 		@return ToolboxAPIDownloadFileRequest
+
+		Deprecated
 	*/
 	DownloadFile(ctx context.Context, sandboxId string) ToolboxAPIDownloadFileRequest
 
 	// DownloadFileExecute executes the request
 	//  @return *os.File
+	// Deprecated
 	DownloadFileExecute(r ToolboxAPIDownloadFileRequest) (*os.File, *http.Response, error)
+
+	/*
+		DownloadFiles Download multiple files
+
+		Streams back a multipart/form-data bundle of the requested paths
+
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPIDownloadFilesRequest
+	*/
+	DownloadFiles(ctx context.Context, sandboxId string) ToolboxAPIDownloadFilesRequest
+
+	// DownloadFilesExecute executes the request
+	//  @return *os.File
+	DownloadFilesExecute(r ToolboxAPIDownloadFilesRequest) (*os.File, *http.Response, error)
 
 	/*
 		DragMouse Drag mouse
@@ -1524,6 +1542,8 @@ Download file from sandbox
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param sandboxId
 	@return ToolboxAPIDownloadFileRequest
+
+Deprecated
 */
 func (a *ToolboxAPIService) DownloadFile(ctx context.Context, sandboxId string) ToolboxAPIDownloadFileRequest {
 	return ToolboxAPIDownloadFileRequest{
@@ -1536,6 +1556,8 @@ func (a *ToolboxAPIService) DownloadFile(ctx context.Context, sandboxId string) 
 // Execute executes the request
 //
 //	@return *os.File
+//
+// Deprecated
 func (a *ToolboxAPIService) DownloadFileExecute(r ToolboxAPIDownloadFileRequest) (*os.File, *http.Response, error) {
 	var (
 		localVarHTTPMethod  = http.MethodGet
@@ -1580,6 +1602,131 @@ func (a *ToolboxAPIService) DownloadFileExecute(r ToolboxAPIDownloadFileRequest)
 	if r.xDaytonaOrganizationID != nil {
 		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Daytona-Organization-ID", r.xDaytonaOrganizationID, "simple", "")
 	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ToolboxAPIDownloadFilesRequest struct {
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	downloadFiles          *DownloadFiles
+	xDaytonaOrganizationID *string
+}
+
+func (r ToolboxAPIDownloadFilesRequest) DownloadFiles(downloadFiles DownloadFiles) ToolboxAPIDownloadFilesRequest {
+	r.downloadFiles = &downloadFiles
+	return r
+}
+
+// Use with JWT to specify the organization ID
+func (r ToolboxAPIDownloadFilesRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) ToolboxAPIDownloadFilesRequest {
+	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
+	return r
+}
+
+func (r ToolboxAPIDownloadFilesRequest) Execute() (*os.File, *http.Response, error) {
+	return r.ApiService.DownloadFilesExecute(r)
+}
+
+/*
+DownloadFiles Download multiple files
+
+Streams back a multipart/form-data bundle of the requested paths
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPIDownloadFilesRequest
+*/
+func (a *ToolboxAPIService) DownloadFiles(ctx context.Context, sandboxId string) ToolboxAPIDownloadFilesRequest {
+	return ToolboxAPIDownloadFilesRequest{
+		ApiService: a,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
+	}
+}
+
+// Execute executes the request
+//
+//	@return *os.File
+func (a *ToolboxAPIService) DownloadFilesExecute(r ToolboxAPIDownloadFilesRequest) (*os.File, *http.Response, error) {
+	var (
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *os.File
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.DownloadFiles")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/toolbox/{sandboxId}/toolbox/files/bulk-download"
+	localVarPath = strings.Replace(localVarPath, "{"+"sandboxId"+"}", url.PathEscape(parameterValueToString(r.sandboxId, "sandboxId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.downloadFiles == nil {
+		return localVarReturnValue, nil, reportError("downloadFiles is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.xDaytonaOrganizationID != nil {
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Daytona-Organization-ID", r.xDaytonaOrganizationID, "simple", "")
+	}
+	// body params
+	localVarPostBody = r.downloadFiles
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
 		return localVarReturnValue, nil, err
