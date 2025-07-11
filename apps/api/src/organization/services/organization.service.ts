@@ -7,7 +7,7 @@ import { ForbiddenException, Injectable, NotFoundException, Logger, OnModuleInit
 import { InjectRepository } from '@nestjs/typeorm'
 import { EntityManager, In, IsNull, LessThan, MoreThan, Not, Or, Repository } from 'typeorm'
 import { CreateOrganizationDto } from '../dto/create-organization.dto'
-import { OverviewDto } from '../dto/overview.dto'
+import { OrganizationUsageOverviewDto } from '../dto/organization-usage-overview.dto'
 import { UpdateOrganizationQuotaDto } from '../dto/update-organization-quota.dto'
 import { Organization } from '../entities/organization.entity'
 import { OrganizationUser } from '../entities/organization-user.entity'
@@ -113,7 +113,7 @@ export class OrganizationService implements OnModuleInit {
     return this.removeWithEntityManager(this.organizationRepository.manager, organization)
   }
 
-  async getUsageOverview(organizationId: string): Promise<OverviewDto> {
+  async getUsageOverview(organizationId: string): Promise<OrganizationUsageOverviewDto> {
     const organization = await this.organizationRepository.findOne({ where: { id: organizationId } })
     if (!organization) {
       throw new NotFoundException(`Organization with ID ${organizationId} not found`)

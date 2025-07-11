@@ -85,6 +85,7 @@ model_organization.go
 model_organization_invitation.go
 model_organization_role.go
 model_organization_suspension.go
+model_organization_usage_overview.go
 model_organization_user.go
 model_paginated_audit_logs.go
 model_paginated_snapshots_dto.go
@@ -125,7 +126,6 @@ model_update_organization_invitation.go
 model_update_organization_member_role.go
 model_update_organization_quota.go
 model_update_organization_role.go
-model_usage_overview.go
 model_user.go
 model_user_public_key.go
 model_volume_dto.go
