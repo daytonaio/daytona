@@ -1,7 +1,7 @@
 {
   "name": "daytona-code-light",
   "colors": {
-    "editor.background": "#0A0A0A",
+    "editor.background": "#ffffff",
     "editor.foreground": "#000",
     "activityBarBadge.background": "#007acc",
     "sideBarTitle.foreground": "#bbbbbb"
