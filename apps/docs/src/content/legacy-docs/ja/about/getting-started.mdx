@@ -1,0 +1,473 @@
+---
+title: はじめに
+description: Daytonaのセットアップと使用開始方法を学びます。
+---
+
+import Aside from '@components/Aside.astro'
+// import DocumentList from "@components/DocumentList.astro";
+// import DocumentListItem from "@components/DocumentListItem.astro";
+import CardGrid from '@components/cards/CardGrid.astro';
+import TitleCard from '@components/cards/TitleCard.astro';
+import ImageCard from '@components/cards/ImageCard.astro';
+import Image from '@components/Image.astro';
+import Keyboard from "@components/Keyboard.astro"
+import bitbucketLogo from '@assets/index/icons/Bitbucket.svg?raw';
+import githubLogo from '@assets/index/icons/GitHub.svg?raw';
+import gitlabLogo from '@assets/index/icons/GitLab.svg?raw';
+import VSlogo from '@assets/index/icons/VS.svg?url';
+import PClogo from '@assets/index/images/pycharm.png';
+import IJlogo from '@assets/index/images/intelliJ.png';
+import WSlogo from '@assets/index/images/webstorm.png';
+import GOlogo from '@assets/index/images/goLand.png';
+import CLlogo from '@assets/index/images/clion.png';
+import RDlogo from '@assets/index/images/rider.png';
+import RMlogo from '@assets/index/images/rubyMine.png';
+import TerminalSSHlogo from '@assets/index/icons/terminal.svg';
+
+Daytonaへようこそ！このガイドでは、開発環境の作成、管理、デプロイメントを簡素化するために設計されたオープンソースの開発環境マネージャー（DEM）であるDaytonaの使用開始方法をご案内します。
+
+## Daytonaについて理解する
+
+DaytonaはApache License 2.0の下でライセンスされたオープンソースの開発環境マネージャー（DEM）です。Daytonaを使用すると、[Workspaces](/docs/ja/usage/workspaces)を管理およびデプロイできます。これらは標準のOCIコンテナに基づく再現可能な開発環境で、Dev Container標準の組み込みサポートを備えています。
+
+## 始める前に
+
+Daytonaをインストールして使用する前に、お使いのオペレーティングシステムが必要な要件、依存関係、およびツールを満たしていることを確認してください。
+
+### システム要件
+
+Daytonaは複数のオペレーティングシステムとアーキテクチャをサポートしています。お使いのシステムが以下の仕様のいずれかと一致することを確認してください：
+
+| **オペレーティングシステム**                         | **アーキテクチャ**                                   |
+|-----------------------------------------------| --------------------------------------------------|
+| [**Linux**](/docs/ja/installation/installation)      | **`x86_64`** または **`ARM64`**                               |
+| [**macOS**](/docs/ja/installation/installation)      | **`x86_64 (Intel-based)`** または **`ARM64 (Apple Silicon)`** |
+| [**Windows**](/docs/ja/installation/installation)  | **`x86_64`** または **`ARM64`**                               |
+
+### 依存関係
+
+Daytonaは開発環境の操作と管理をサポートするために、特定の依存関係がシステムにインストールされている必要があります。これらの依存関係がシステムにインストールされ、適切に設定されていることを確認してください：
+
+| **依存関係**            | **説明**                                                                                 |
+|---------------------------|-------------------------------------------------------------------------------------------------|
+| <u>[**Docker**](https://docs.docker.com/engine/install/)</u> | Daytonaは分離された開発環境を作成・管理するためにDockerを使用します。                     |
+| 管理者権限  | システムにDaytonaをインストールして設定するために必要な権限があることを確認してください。 |
+
+### ツール
+
+Daytonaは開発環境のセットアップと管理を最適化するために、特定のツールがシステムにインストールされている必要があります。これらのツールがシステムにインストールされ、適切に設定されていることを確認してください：
+
+| **ツール**                          | **説明**                                                                                                                                 |
+|-----------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------|
+| テキストエディタ / IDE                 | 設定ファイルの編集やDaytona Workspace内でのコード作業に推奨されます。                                                    |
+| SSHクライアント                        | リモートサーバーへのアクセスに必要です。特にリモートDockerインストール上でWorkspaceをデプロイする場合や、リモートGitリポジトリにアクセスする場合に必要です。 |
+
+## Daytonaのインストール
+
+お使いのオペレーティングシステムにDaytonaをインストールするには、[インストール](/docs/ja/installation/installation)ガイドに記載されている手順に従ってください。このガイドには、Linux、macOS、およびWindowsオペレーティングシステムでDaytonaをインストールするための詳細な手順が含まれています。
+
+インストールプロセスは、お使いのオペレーティングシステムと特定の環境によって異なる場合があります。お使いのセットアップに合わせた包括的な手順については、ガイドを参照してください。
+
+<DocumentList>
+<DocumentListItem
+    title="Linuxインストール"
+    href="/docs/installation/installation"
+  />
+  <DocumentListItem
+    title="macOSインストール"
+    href="/docs/installation/installation"
+  />
+  <DocumentListItem
+    title="Windowsインストール"
+    href="/docs/installation/installation"
+  />
+</DocumentList>
+
+インストールが完了すると、Daytonaを使用して開発環境の管理と開発を開始する準備が整います。インストール中に問題が発生した場合は、Daytonaの[Slackコミュニティ](https://go.daytona.io/slack)にお問い合わせください。
+
+## CLIの使用
+
+Daytona Command-Line Interface（CLI）は、Daytonaプラットフォームとやり取りする主要な方法です。CLIは、Workspace、Provider、その他のシステム設定を管理できる包括的なコマンドセットを提供します。
+
+Daytona CLIにアクセスするには、ターミナルを開き、`daytona`コマンドに続けて目的のサブコマンドを使用します。CLIは幅広いコマンドを提供し、それぞれがWorkspaceの作成、Providerの管理、Targetの設定、システム設定の構成など、特定の目的を果たします。
+
+利用可能なコマンドとその説明の完全なリストについては、[CLI Reference](/docs/ja/tools/cli)を参照してください。このリファレンスガイドでは、使用例やコマンドオプションを含む各コマンドの詳細情報を提供し、Daytona CLIの潜在能力を最大限に活用できるよう支援します。
+
+`daytona --help`コマンドを使用してすべてのコマンドを一覧表示し、利用可能なオプションを探索する便利な方法を提供します。
+
+<DocumentList>
+<DocumentListItem
+    title="CLI Reference"
+    subtitle="Daytona Command-Line Interface（CLI）を使用して開発環境を管理する方法を学びます。"
+    href="/docs/tools/cli"
+    expanded
+  />
+</DocumentList>
+
+## Git Providerの追加
+
+Daytonaは、お好みの[Git Provider](/docs/ja/configuration/git-providers)を統合するオプションを提供し、開発ワークフローを向上させます。この統合により、Daytona内で直接リポジトリにアクセスし、管理することができ、既存のプロジェクトからのワークスペース作成を簡素化します。
+
+Daytonaは、[GitHub](/docs/ja/configuration/git-providers#github)、[GitLab](/docs/ja/configuration/git-providers#gitlab)、[Bitbucket](/docs/ja/configuration/git-providers#bitbucket)、[GitHub Enterprise Server](/docs/ja/configuration/git-providers#github-enterprise-server)、[GitLab Self-Managed](/docs/ja/configuration/git-providers#gitlab-self-managed)、[Bitbucket Server](/docs/ja/configuration/git-providers#bitbucket-server)、[Codeberg](/docs/ja/configuration/git-providers#codeberg)、[Gitea](/docs/ja/configuration/git-providers#gitea)、[Gitness](/docs/ja/configuration/git-providers#gitness)、[Azure DevOps](/docs/ja/configuration/git-providers#azure-devops)、[AWS CodeCommit](/docs/ja/configuration/git-providers#aws-codecommit)、[Gogs](/docs/ja/configuration/git-providers#gogs)、[Gitee](/docs/ja/configuration/git-providers#gitee)を含む、さまざまなGit Providerをサポートしています。
+
+1. 以下のコマンドを実行してGit Providerを追加します：
+
+```shell
+daytona git-providers add
+```
+
+2. リストから追加したいGit Providerを選択します。
+
+3. Daytonaが認証し、リポジトリへの安全なアクセスを有効にするために、Git Providerの認証情報を入力します。
+
+認証が成功すると、DaytonaはGit Providerを登録し、Daytonaから直接リポジトリとやり取りできるようになります。
+
+```text
+Git provider has been registered
+```
+
+複数のプラットフォームやアカウントにわたって複数のリポジトリを管理するために、追加の[Git Providers](/docs/ja/configuration/git-providers)をインストールできます。
+
+`daytona git-providers --help`コマンドを使用して、Git Provider設定の管理とリポジトリとのやり取りに利用可能なオプションを表示します。
+
+<DocumentList>
+<DocumentListItem
+    title="Git Providerの追加"
+    subtitle="DaytonaにGit Providerを追加し、リポジトリを効果的に管理する方法を学びます。"
+    href="/docs/configuration/git-providers#add-a-git-provider"
+    expanded
+  />
+</DocumentList>
+
+## Providerのインストール
+
+[Providers](/docs/ja/configuration/providers)は、Daytonaが様々な技術と統合して開発環境を作成・管理するためのプラグインです。Providerは基盤技術の複雑さを抽象化し、Daytonaがコンテナ化、オーケストレーション、またはクラウドベースの仮想マシンを通じて環境をデプロイ・実行するために活用する基盤エンジンとして機能します。
+
+Daytonaは[Docker](/docs/ja/configuration/providers#docker)、[DigitalOcean](/docs/ja/configuration/providers#digitalocean)、[AWS](/docs/ja/configuration/providers#aws)、[Azure](/docs/ja/configuration/providers#azure)、[GCP](/docs/ja/configuration/providers#gcp)、[Hetzner](/docs/ja/configuration/providers#hetzner)、[Fly](/docs/ja/configuration/providers#fly)を含む様々なProviderをサポートしています。
+
+1. 次のコマンドを実行してProviderをインストールします：
+
+  ```shell
+  daytona provider install
+  ```
+
+2. リストからインストールしたいProviderを選択します。
+
+Providerを選択すると、Daytonaは選択されたProviderをインストール・設定し、開発環境の管理とデプロイに利用できるようにします。
+
+```text
+Provider <provider> has been successfully installed
+```
+
+追加の[Providers](/docs/ja/configuration/providers)をインストールして、Daytonaの機能を拡張し、幅広いコンテナ管理プラットフォームやクラウドホスティングサービスをサポートできます。
+
+<DocumentList>
+<DocumentListItem
+    title="Providerのインストール"
+    subtitle="ProviderをインストールしてDaytona Serverとインターフェースする方法を学びます。"
+    href="/docs/configuration/providers"
+    expanded
+  />
+</DocumentList>
+
+## Target Configurationの作成
+
+[Target Configuration](/docs/ja/configuration/target-config)とは、様々な[Providers](/docs/ja/configuration/providers)によって促進される開発セットアップがデプロイされ、管理される特定の宛先または環境を指します。Providersは環境を作成するために使用される方法と技術を定義し、Target Configurationsはこれらの環境が存在する正確な場所またはプラットフォームを指定します。
+
+Target Configurationは、ローカルマシン、リモートサーバー、またはクラウドインスタンスにすることができ、選択されたProviderに基づいて変わることがあります。Target Configurationsは、Daytonaが提供する統一されたインターフェース内で、異なるプラットフォームやアカウント間で環境をデプロイし、管理する柔軟性を提供します。
+
+サポートされているTarget Configurationsには、[Docker (Local)](/docs/ja/configuration/target-config#docker-local)、[Docker (Remote)](/docs/ja/configuration/target-config#docker-remote)、[DigitalOcean](/docs/ja/configuration/target-config#digitalocean)、[AWS](/docs/ja/configuration/target-config#aws)、[Azure](/docs/ja/configuration/target-config#azure)、[GCP](/docs/ja/configuration/target-config#gcp)、[Hetzner](/docs/ja/configuration/target-config#hetzner)、および[Fly](/docs/ja/configuration/target-config#fly)があります。
+
+1. 以下のコマンドを実行してTarget Configurationを作成します：
+
+```shell
+daytona target-config create
+```
+
+2. デプロイしたい環境に適したProviderを選択します。
+
+3. Target Configurationの名前を入力します。
+
+4. プロンプトが表示されたら、適切な設定オプションを入力します。設定オプションは選択されたProviderによって異なります。
+
+5. **`Enter`**をクリックしてTarget Configurationの追加を確認します。
+
+```text
+Target Config <target_config> created successfully
+```
+
+Target Configurationを設定するための利用可能な設定オプションを表示するには、`daytona target-config --help`コマンドを使用してください。
+
+<DocumentList>
+<DocumentListItem
+    title="Target Configurationの作成"
+    subtitle="開発環境がデプロイされる場所を定義するTarget Configurationの作成方法を学びます。"
+    href="/docs/configuration/target-config"
+    expanded
+  />
+</DocumentList>
+
+## コンテナレジストリの設定
+
+[コンテナレジストリ](/docs/ja/configuration/container-registries)は、指定されたレジストリサーバーからコンテナイメージをプルするために使用される認証情報を保存します。コンテナレジストリの認証情報を追加することは、プライベートイメージやプライベートレジストリでホストされているイメージからワークスペースを作成したいユーザーにとって有用です。
+
+1. 以下のコマンドを実行して、コンテナレジストリの環境変数を設定します：
+
+```shell
+daytona env set
+```
+
+2. コンテナレジストリのサーバー環境変数キーを設定します。
+
+3. コンテナレジストリのサーバー環境変数値を設定します。
+
+4. 別の環境変数を追加するかどうかを選択します。
+
+選択すると、Daytonaはワークスペース用のコンテナレジストリ環境変数を設定します。
+
+```text
+Server environment variables have been set successfully
+```
+
+`daytona env --help`コマンドを使用して、環境変数設定の利用可能な設定オプションを表示します。
+
+<DocumentList>
+<DocumentListItem
+    title="コンテナレジストリの設定"
+    subtitle="ワークスペース用の環境変数を通じてコンテナレジストリを設定する方法を学びます。"
+    href="/docs/configuration/container-registries"
+    expanded
+  />
+</DocumentList>
+
+## Workspace Templateの作成
+
+[Workspace Template](/docs/ja/configuration/workspace-templates)は、開発環境の管理を簡素化するために設計されており、新しいWorkspaceに簡単に適用できる設定を事前に定義することができます。
+
+Workspace Templateには、Workspace内でWorkspaceを定義および管理するために必要なすべてのプロパティが含まれています。リポジトリURL、ビルド設定、環境変数などの情報を保存します。これにより、以前に設定したテンプレートを簡単に再利用でき、複数のWorkspace間で一貫性があり再現可能なセットアップを確保できます。
+
+1. 次のコマンドを実行してWorkspace Templateを追加します：
+
+```shell
+daytona workspace-template add
+```
+
+2. Workspace Templateを作成するために提供されている2つのオプションのうち1つを選択します：
+
+- **カスタムリポジトリURLを入力**
+
+   リポジトリがGit Providerアカウントにリストされていない場合や外部ソースからのものである場合に、カスタムリポジトリURLを手動で入力するオプションです。
+
+- **サンプルから作成**
+
+   Gitリポジトリの準備ができていない場合は、Daytonaが提供するサンプルプロジェクトからWorkspace Templateを作成できます。
+
+3. 設定したいWorkspaceのリポジトリURLを入力するか、サンプルプロジェクトからWorkspace Templateを作成することを選択します。
+
+4. Workspace Templateの名前を入力します。
+
+5. Workspaceのビルド設定を選択します。
+
+6. **`KEY=VALUE`**形式でWorkspaceの環境変数を入力します。
+
+完了すると、DaytonaはWorkspace Templateの概要を出力し、保存前にプロパティを確認できるようになります。
+
+```text
+SUMMARY - Workspace Template
+
+Workspace - MyWorkspace
+Repository  https://github.com/daytonaio/docs
+Branch      main 
+Build       Automatic
+Image       daytonaio/workspace-project:latest
+User        daytona
+```
+
+7. **`Create`**をクリックしてWorkspace Templateを保存するか、**`Configure`**をクリックしてWorkspace Templateに変更を加えます。
+
+```text
+Workspace template <workspace_template> added successfully
+```
+
+`daytona workspace-template --help`コマンドを使用して、Workspace Templateを作成するための利用可能な設定オプションを表示します。
+
+<DocumentList>
+<DocumentListItem
+    title="Workspace Templateの作成"
+    subtitle="開発環境を効果的に管理するためのWorkspace Templateの作成方法を学びます。"
+    href="/docs/configuration/workspace-templates"
+    expanded
+  />
+</DocumentList>
+
+## Targetの設定
+
+[Target](/docs/ja/usage/targets)は、Workspaceが実行される独立した処理単位です。クラウドベースやオンプレミス環境を含む、さまざまなインフラストラクチャ上で動作できます。Targetは、定義されたインフラストラクチャ内で必要な計算リソースを提供し、セキュリティ要件を満たします。
+
+1. 以下のコマンドを実行してTargetを作成します：
+
+```shell
+daytona target create
+```
+
+2. Targetに使用する[Target Configuration](/docs/ja/configuration/target-config)を選択します。
+
+3. デプロイ先の環境用の[Provider](/docs/ja/configuration/providers)を選択します。
+
+4. Targetの名前を入力します。
+
+5. プロンプトが表示されたら、適切な設定オプションを入力します。設定オプションは選択したProviderによって異なります。
+
+```text
+✓ Request submitted
+Creating target <target_name>
+```
+
+異なる開発環境用に追加の[Targets](/docs/ja/usage/targets)を設定し、必要に応じてそれらを管理および切り替えることができます。
+
+`daytona target --help`コマンドを使用して、Target設定に利用可能な設定オプションを確認してください。
+
+<DocumentList>
+<DocumentListItem
+    title="Targetの管理"
+    subtitle="開発環境が実行される場所を定義するためのTargetの管理方法を学びます。"
+    href="/docs/usage/targets"
+    expanded
+  />
+</DocumentList>
+
+## Runnerの作成
+
+Runnerは、どこにでもデプロイできるスタンドアロンサービスです。ユーザーは、Runner登録時に生成される一連の指示とコマンドを実行することで、ターゲットシステムにRunnerをデプロイできます。
+
+1. 新しいRunnerを作成するには、以下のコマンドを実行します：
+
+```shell
+daytona server runner create
+```
+
+コマンドを実行すると、DaytonaはターゲットシステムにRunnerをデプロイするために必要なサーバーAPI URLとAPIキーを含むコードスニペットを生成します。
+
+2. コードスニペットをターゲットシステムのターミナルに貼り付けて実行し、Runnerを設定します。
+
+<DocumentList>
+<DocumentListItem
+    title="Runnerの作成"
+    subtitle="新しいRunnerを作成し、ターゲットシステムにデプロイする方法を学びます。"
+    href="/docs/usage/runners"
+    expanded
+  />
+</DocumentList>
+
+## デフォルトIDEの選択
+
+[Visual Studio Code (VSCode)](/docs/ja/usage/ide#vs-code)、[Visual Studio Code Insiders](/docs/ja/usage/ide#vs-code-insider)、[VSCodium](/docs/ja/usage/ide#vscodium)、JetBrains IDE、[Jupyter](/docs/ja/usage/ide#jupyter)、[Zed](/docs/ja/usage/ide#zed)、[Cursor](/docs/ja/usage/ide#cursor)、[Windsurf](/docs/ja/usage/ide#windsurf)、[Terminal SSH](/docs/ja/usage/ide#terminal-ssh)などの人気のオプションを含む、さまざまな[IDE](/docs/ja/usage/ide)を使用して開発環境に接続できます。
+
+デフォルトIDEを設定することで、お好みの環境で開発環境を自動的に開くことができ、ワークフローを最適化し、セットアップ時間を短縮できます。
+
+<br />
+
+<CardGrid gridNumber={9} mobileGridNumber={2} colsMinWidth='16px' colsMinWidthMobile='98px'>
+  <ImageCard icon={VSlogo} link="/usage/ide#vs-code" imageAlt="Visual Studio logo" />
+  <ImageCard imageDark={PClogo} link="/usage/ide#jetbrains-pycharm-professional" imageAlt="PyCharm logo" />
+  <ImageCard imageDark={IJlogo} link="/usage/ide#jetbrains-intellij-idea-ultimate" imageAlt="IntelliJ logo" />
+  <ImageCard imageDark={WSlogo} link="/usage/ide#jetbrains-webstorm" imageAlt="WebStorm logo" />
+  <ImageCard imageDark={GOlogo} link="/usage/ide#jetbrains-goland" imageAlt="GoLand logo" />
+  <ImageCard imageDark={CLlogo} link="/usage/ide#jetbrains-clion" imageAlt="CLion logo" />
+  <ImageCard imageDark={RDlogo} link="/usage/ide#jetbrains-rider" imageAlt="Rider logo" />
+  <ImageCard imageDark={RMlogo} link="/usage/ide#jetbrains-rubymine" imageAlt="RubyMine logo"/>
+  <ImageCard imageDark={TerminalSSHlogo} link="/usage/ide#terminal-ssh" imageAlt="Terminal SSH logo"/>
+</CardGrid>
+
+1. 以下のコマンドを実行してデフォルトIDEを設定します：
+
+```shell
+daytona ide
+```
+
+2. 表示されたリストからお好みのIDEを選択します。選択すると、DaytonaがそれをデフォルトIDEとして設定し、確認メッセージを表示します。
+
+```text
+Default IDE:  <IDE>
+```
+
+`daytona code`コマンドを使用して、Workspaceに既に接続されているデフォルトIDEを自動的に開きます。
+
+追加の[IDE](/docs/ja/configuration/git-providers)を選択し、開発環境のデフォルトとして設定できます。
+
+`daytona ide --help`コマンドを使用して、IDEで利用可能な設定オプションを表示します。
+
+<DocumentList>
+<DocumentListItem
+    title="デフォルトIDEの設定"
+    subtitle="開発環境を自動的に開くためのデフォルトIDEの設定方法を学びます。"
+    href="/docs/usage/ide#set-the-default-ide"
+    expanded
+  />
+</DocumentList>
+
+## Workspaceの作成
+
+Daytonaを使用して開発環境を管理するために[Workspaceを作成](/docs/ja/usage/workspaces#create-a-workspace)します。Workspaceは、コードの管理、プロジェクトのビルド、チームとの連携を行うことができる独立した開発環境を表します。
+
+Workspaceを作成するには、`daytona create`コマンドを使用し、プロンプトに従ってWorkspace設定を構成します。作成後、Workspaceにアクセスしてコードベースと連携できます。
+
+1. 次のコマンドを実行して、ガイド付きWorkspace作成プロセスを開始します：
+
+```shell
+daytona create
+```
+
+2. 提供される3つのオプションのうち1つを選択します：
+
+- **リポジトリのリストから選択**
+- **カスタムリポジトリURLを入力**
+- **サンプルから作成**
+
+3. リストからGitリポジトリを選択するか、WorkspaceにリンクしたいGitリポジトリのURLを入力するか、サンプルプロジェクトからWorkspaceを作成することを選択します。
+
+4. Workspaceの名前を入力します。
+
+5. Workspaceをデプロイする[Target](/docs/ja/usage/targets)を選択します。Targetを選択すると、[Target Configuration](/docs/ja/configuration/target-config)の入力を求められます。設定は選択したTargetによって異なります。
+
+Targetの選択と設定が完了すると、Daytonaは指定されたGitリポジトリをクローンし、その内容に基づいて新しいWorkspaceをセットアップします。ターミナルにWorkspace作成プロセスの進行状況が表示されます。
+
+```text
+<Target>    | ✓ Request submitted
+<Workspace> | Creating workspace <workspace> (<workspace_id>)
+<Workspace> | Pulling image...
+<Workspace> | Pulling from daytonaio/workspace-project
+<Workspace> | Digest: sha256:<sha256>
+<Workspace> | Status: Image is up to date for daytonaio/workspace-project:latest
+<Workspace> | ✓ Image pulled successfully
+<Workspace> | UIDs and GIDs are the same (1000:1000).
+<Workspace> | Cloning into '/workdir/<workspace>'...
+<Workspace> | UIDs and GIDs are the same (1000:1000).
+<Workspace> | ✓ Workspace <workspace> created
+```
+
+`daytona create --help`コマンドを使用して、Workspace作成時に利用可能な設定オプションを確認できます。
+
+<DocumentList>
+<DocumentListItem
+    title="Workspaceの作成"
+    subtitle="Daytonaを使用してWorkspaceを作成する方法を学びます。"
+    href="/docs/usage/workspaces#create-a-workspace"
+    expanded
+  />
+</DocumentList>
+
+## Workspaceとの対話
+
+[Agent Toolbox](/docs/ja/usage/agent-toolbox)を使用すると、Workspace環境内でさまざまな操作を実行するためのWorkspace Toolbox APIを提供することで、プログラム的にWorkspaceと対話できます。
+
+Workspace Toolbox APIは、ファイルシステム、Git、およびプロセス操作を提供し、Workspace内でファイルの管理、Gitコマンドの実行、プロセスの実行を可能にします。
+
+<DocumentList>
+<DocumentListItem
+    title="Workspaceとの対話"
+    subtitle="Workspace Toolbox APIを使用してプログラム的にWorkspaceと対話する方法を学びます。"
+    href="/docs/usage/agent-toolbox"
+    expanded
+  />
+</DocumentList>

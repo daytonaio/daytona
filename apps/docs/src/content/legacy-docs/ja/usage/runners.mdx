@@ -1,0 +1,188 @@
+---
+title: Runners
+description: DaytonaでRunnersを使用し、管理する方法を学びます。
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+Runnerは、どこにでもデプロイできるスタンドアロンサービスです。ユーザーは、Runner登録時に生成される一連の指示とコマンドを実行することで、ターゲットシステムにRunnerをデプロイできます。
+
+デプロイされると、Runnerが起動し、[Daytona Server](/docs/ja/usage/server)に接続します。この時点で、そのステータスは`Running`としてマークされます。
+
+Runnerがすべてのリクエストを送信し、Serverは応答のみを行います。Runnerは、_Heartbeat_（ステータスを共有するため）や_Job Requests_（割り当てられたジョブをDaytona Serverに要求するため）などのリクエストを送信します。
+
+単一のRunnerは、デプロイ時または後でジョブを通じて設定される複数の[Providers](/docs/ja/configuration/providers)を使用でき、さまざまな環境に対する柔軟性を可能にします。
+
+## Runnerの作成
+
+Daytonaは新しいRunnerを作成するオプションを提供し、ターゲットシステムにデプロイしてDaytona Serverに接続することを可能にします。
+
+1. 以下のコマンドを実行して新しいRunnerを作成します：
+
+```shell
+daytona server runner create
+```
+
+コマンドを実行すると、DaytonaはターゲットシステムにRunnerをデプロイするために必要なサーバーAPI URLとAPIキーを含むコードスニペットを生成します。
+
+2. コードスニペットをターゲットシステムのターミナルに貼り付けて実行し、Runnerを設定します。
+
+## Runner の開始 / 提供
+
+Daytona は、Runner をフォアグラウンドで提供するか、Runner をデーモン/バックグラウンドプロセスとして開始するオプションを提供します。要件に最も適した方法を使用してください。
+
+<Tabs>
+<TabItem label="フォアグラウンド">
+```shell
+daytona runner serve
+```
+</TabItem>
+<TabItem label="デーモン/バックグラウンド">
+```shell
+daytona runner start
+```
+</TabItem>
+</Tabs>
+
+Runner は Daytona Server に接続し、そのステータスは `Running` としてマークされます。
+
+## Runnerの設定
+
+Daytonaは、Runnerを設定するオプションを提供し、設定を更新することができます。
+
+1. 次のコマンドを実行してRunnerを設定します：
+
+```shell
+daytona runner configure
+```
+
+コマンドを実行すると、Daytonaは現在のRunner設定を表示し、更新を促します。
+
+```text
+ID
+Daytona Serverによって生成される一意のID
+>
+
+Name
+Daytona Serverで設定される一意の名前
+>
+
+Runner API Port
+Runnerヘルスチェックエンドポイントを公開するために使用されるポート
+> 3983
+
+Server API URL
+>
+
+Server API Key
+>
+
+Providers Directory
+存在しない場合はディレクトリが作成されます
+> /Users/<user>/Library/Application Support/daytona-runner/providers
+
+Telemetry Enabled
+[Yes]     [No]
+
+Log File Path
+存在しない場合はファイルが作成されます
+> /Users/<user>/Library/Application Support/daytona-runner/log
+
+Log File Max Size
+メガバイト単位
+> 100
+
+Log File Backups
+> 7
+
+Log File Max Age
+日数
+> 15
+
+Log File Local Time
+ファイルのタイムスタンプに使用されます。デフォルトはUTC時間です。
+[Yes]     [No]
+
+Log File Compress
+
+[Yes]     [No]
+```
+
+Runnerの設定が完了すると、DaytonaはRunner設定を更新し、次のメッセージを表示します：
+
+```text
+Runner configuration updated. To start running jobs, run 'daytona runner start'.
+```
+
+:::tip
+次のコマンドを実行して現在のRunner設定を表示します：
+
+<br />
+
+```shell
+daytona runner config
+```
+
+コマンドを実行すると、Daytonaは現在のRunner設定を表示します。
+:::
+
+## Runnerをパージする
+
+DaytonaはRunnerをパージするオプションを提供し、Daytona Serverから削除することができます。
+
+1. 次のコマンドを実行してRunnerをパージします：
+
+```shell
+daytona runner purge
+```
+
+コマンドを実行すると、DaytonaはRunnerのリストを表示し、パージしたいRunnerを選択するよう促します。
+
+```text
+Purging will remove the entire Daytona Runner configuration from the system, are you sure you want to continue?
+This action is irreversible.
+
+[Yes]     [No]
+```
+
+2. **`Yes`**を選択してアクションを確認します。
+
+```text
+The Daytona Runner has been purged from this device.
+```
+
+## Runnerを再起動する
+
+Daytonaは、Runnerを再起動するオプションを提供し、ターゲットシステム上でRunnerを再起動することができます。
+
+1. 次のコマンドを実行してRunnerを再起動します：
+
+```shell
+daytona runner restart
+```
+
+このコマンドを実行すると、Daytonaはターゲットシステム上でRunnerを再起動します。
+
+## Runnerを停止する
+
+Daytonaは、Runnerを停止するオプションを提供し、ターゲットシステム上でRunnerを停止することができます。
+
+1. 次のコマンドを実行してRunnerを停止します：
+
+```shell
+daytona runner stop
+```
+
+このコマンドを実行すると、Daytonaはターゲットシステム上のRunnerを停止します。
+
+## Runner ログ
+
+Daytonaは、Runnerのログを表示するオプションを提供し、その活動を監視できるようにします。
+
+1. 次のコマンドを実行してRunnerのログを表示します：
+
+```shell
+daytona runner logs
+```
+
+このコマンドを実行すると、DaytonaはRunnerのログを表示します。

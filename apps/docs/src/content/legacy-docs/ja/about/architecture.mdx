@@ -1,0 +1,138 @@
+---
+title: アーキテクチャ
+description: Daytonaのアーキテクチャとそのコンポーネントについて学びます。
+---
+
+import Label from '@components/Label.astro'
+import Image from '@components/Image.astro';
+// import DocumentList from "@components/DocumentList.astro";
+// import DocumentListItem from "@components/DocumentListItem.astro";
+import ArchitectureDiagramLight from '@assets/index/images/architecture-diagram-light.png';
+import ArchitectureDiagramDark from '@assets/index/images/architecture-diagram-dark.png';
+
+<Label>
+  配布形態: **オープンソース**, **クラウド**, **セルフマネージド**
+</Label>
+
+Daytonaアーキテクチャ図は、[オープンソース](#open-source)および[エンタープライズ](#enterprise)配布版で利用可能なコンポーネントとサービスを特徴とするDaytonaプラットフォームを表しています。Daytonaオープンソースは開発のためのコア機能を提供するように設計されており、Daytonaエンタープライズはこの基盤の上に、認証、認可、ダッシュボード、可観測性機能、リソース管理など、大規模組織向けに調整された拡張機能を構築しています。
+
+<br />
+
+<Image
+  iconLight={ArchitectureDiagramLight}
+  iconDark={ArchitectureDiagramDark}
+  height="100%"
+  width="100%"
+  imageAlt="Daytonaアーキテクチャ図"
+/>
+
+## オープンソース
+
+Daytonaオープンソースには[Daytona API](/docs/ja/tools/api)が含まれており、これはDaytonaとプログラム的にやり取りするための中央インターフェースとして機能します。オープンソース版では、[インターフェース](#interfaces)、[Gitプロバイダー](#git-providers)、[コンテナレジストリ](#container-registries)、[プロバイダー](#providers)、[ターゲット](#targets)を含む、開発環境を管理するための包括的な機能とツールセットを提供します。
+
+### インターフェース
+
+Daytonaオープンソースは、プラットフォームとやり取りし、開発環境を管理するための様々な[インターフェース](/docs/ja/usage/ide)を提供します。インターフェースはDaytonaとやり取りする異なる方法を提供し、開発者が自分の好みやワークフローに基づいて最も適切な方法を選択できるようにします。
+
+これらには、直接制御のための[コマンドラインインターフェース（CLI）](/docs/ja/tools/cli)、[Visual Studio Code（VSCode）](/docs/ja/usage/ide#vs-code)、[Visual Studio Code（VSCode）ブラウザ](/docs/ja/usage/ide#vs-code-browser)、[Visual Studio Code Insiders](/docs/ja/usage/ide#vs-code-insiders)、[Visual Studio Codium](/docs/ja/usage/ide#vscodium)、[Jupyter](/docs/ja/usage/ide#jupyter)、[Zed](/docs/ja/usage/ide#zed)、[Cursor](/docs/ja/usage/ide#cursor)、[Headless](/docs/ja/usage/ide#headless)、[Windsurf](/docs/ja/usage/ide#windsurf)などの[IDE](/docs/ja/usage/ide)、統合開発のためのJetBrains IDE、および[Terminal SSH](/docs/ja/usage/ide#terminal-ssh)が含まれます。
+
+さらに、開発者がカスタム統合を作成し、プラットフォーム機能を拡張できるように[Daytona SDK](/docs/ja/sdk)が提供されています。
+
+<DocumentList>
+<DocumentListItem
+    title="Daytona SDK"
+    subtitle="Daytona SDKを使用してカスタム統合を作成し、プラットフォーム機能を拡張する方法を学びます。"
+    href="/docs/sdk"
+    expanded
+  />
+</DocumentList>
+
+### Gitプロバイダー
+
+Daytonaオープンソースは、バージョン管理操作を管理し、Gitリポジトリとやり取りするためにGitプロバイダーを統合します。Gitプロバイダーは、効率的なソースコード管理とワークスペースとの同期を可能にします。
+
+サポートされているGitプロバイダーには、[GitHub](/docs/ja/configuration/git-providers#github)、[GitLab](/docs/ja/configuration/git-providers#gitlab)、[Bitbucket](/docs/ja/configuration/git-providers#bitbucket)、[GitHub Enterprise Server](/docs/ja/configuration/git-providers#github-enterprise-server)、[GitLab Self-Managed](/docs/ja/configuration/git-providers#gitlab-self-managed)、[Bitbucket Server](/docs/ja/configuration/git-providers#bitbucket-server)、[Codeberg](/docs/ja/configuration/git-providers#codeberg)、[Gitea](/docs/ja/configuration/git-providers#gitea)、[Gitness](/docs/ja/configuration/git-providers#gitness)、[Azure DevOps](/docs/ja/configuration/git-providers#azure-devops)、[AWS CodeCommit](/docs/ja/configuration/git-providers#aws-codecommit)、[Gogs](/docs/ja/configuration/git-providers#gogs)、[Gitee](/docs/ja/configuration/git-providers#gitee)があります。
+
+Gitプロバイダーの統合は、協調開発ワークフローを促進し、リポジトリと開発環境間の接続を合理化します。
+
+<DocumentList>
+<DocumentListItem
+    title="Gitプロバイダーを追加する"
+    subtitle="DaytonaにGitプロバイダーを追加し、リポジトリを効果的に管理する方法を学びます。"
+    href="/docs/configuration/git-providers#add-a-git-provider"
+    expanded
+  />
+</DocumentList>
+
+### コンテナレジストリ
+
+[コンテナレジストリ](/docs/ja/configuration/container-registries)は、指定されたレジストリサーバーからコンテナイメージをプルするために使用される認証情報を保存します。コンテナレジストリの認証情報を追加することは、プライベートイメージやプライベートレジストリでホストされているイメージからワークスペースを作成したいユーザーにとって有用です。
+
+<DocumentList>
+<DocumentListItem
+    title="コンテナレジストリを設定する"
+    subtitle="ワークスペース用の環境変数を通じてコンテナレジストリを設定する方法を学びます。"
+    href="/docs/configuration/container-registries"
+    expanded
+  />
+</DocumentList>
+
+### Providers
+
+Daytona Open Sourceは[Providers](/docs/ja/configuration/providers)を使用して、開発環境の作成と管理のためのさまざまなテクノロジーとの統合を可能にします。Providersは基盤となるテクノロジーの複雑さを抽象化し、Daytonaが環境をデプロイして実行するために活用する基盤エンジンとして機能します。
+
+サポートされているProvidersには[Docker](/docs/ja/configuration/providers#docker)、[DigitalOcean](/docs/ja/configuration/providers#digitalocean)、[AWS](/docs/ja/configuration/providers#aws)、[Azure](/docs/ja/configuration/providers#azure)、[GCP](/docs/ja/configuration/providers#gcp)、[Hetzner](/docs/ja/configuration/providers#hetzner)、[Fly](/docs/ja/configuration/providers#fly)があります。
+
+<DocumentList>
+<DocumentListItem
+    title="Providerのインストール"
+    subtitle="ProviderをインストールしてDaytona Serverとインターフェースする方法を学びます。"
+    href="/docs/configuration/providers"
+    expanded
+  />
+</DocumentList>
+
+### Targets
+
+[Targets](/docs/ja/usage/targets)は、Workspacesが実行される分離された処理ユニットを表します。クラウドベースやオンプレミス環境を含む、さまざまなインフラストラクチャで動作できます。Targetsは必要な計算リソースを提供し、定義されたインフラストラクチャ内でセキュリティ要件を満たします。
+
+<DocumentList>
+<DocumentListItem
+    title="Targetの管理"
+    subtitle="開発環境が実行される場所を定義するためのTargetの管理方法を学びます。"
+    href="/docs/usage/targets"
+    expanded
+  />
+</DocumentList>
+
+## Enterprise
+
+DaytonaのEnterprise版は、オープンソース版の機能を拡張し、エンタープライズグレードの開発環境に特化した追加機能とサービスを提供します。これらの機能強化には、高度なセキュリティ、認証、認可メカニズム、さらにワークスペースのパフォーマンスと利用率を最適化する可視性とリソース管理ツールが含まれます。
+
+### Dashboard
+
+Enterprise版では、プラットフォームの管理と監視のための一元化されたインターフェースを提供するDashboardが導入され、開発環境の可視性と制御が向上します。
+
+### Authentication
+
+認証機能は、シングルサインオン（SSO）およびSecurity Assertion Markup Language（SAML）やSystem for Cross-domain Identity Management（SCIM）などの標準をサポートし、プラットフォームへの安全なアクセスを確保します。これにより、エンタープライズアイデンティティシステムとのシームレスな統合が可能になり、ユーザー管理が簡素化されます。
+
+### Authorization
+
+認可機能により、ユーザー、チーム、組織、プロジェクト全体でアクセスと権限の詳細な制御が可能になります。これにより、ロールベースのアクセス管理を提供することで、安全なコラボレーションと組織ポリシーの遵守が確保されます。
+
+### Observability
+
+可視性ツールは、Workspacesと開発活動に対する強化された監視、ログ記録、トレース機能を提供します。これにより、チームはシステムパフォーマンスを追跡し、問題を効果的にデバッグし、環境に関する運用インサイトを維持できます。
+
+### Resource Management
+
+Resource Managementは、エンタープライズ機能により拡張され、大規模な組織全体の要件を満たすためにワークスペースクラスとクォータ管理が強化されます。
+
+### Identity Providers
+
+Enterprise版は、認証とアイデンティティ管理を強化するためにIdentity Providers（IDP）と統合されます。サポートされるIDPには、EntraID、Cognito、Okta、OpenID、Google、その他が含まれます。これらの統合により、企業は既存のアイデンティティシステムを使用してユーザー認証を管理でき、プラットフォームへの安全で準拠したアクセスが可能になります。
+
+### Security
+
+Daytona Enterpriseは、高度なセキュリティツールとサービスとの統合により、セキュリティを強化します。これらには、JFrog、Snyk、Sonatype、その他が含まれ、依存関係とコンテナ化された環境の脆弱性が特定され、軽減されることを確保します。これらのセキュリティ統合は、自動スキャン、レポート、修復を提供し、開発ワークフローとアプリケーションの整合性を強化します。

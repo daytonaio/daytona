@@ -1,0 +1,36 @@
+---
+title: Homebrewインストール
+---
+import Aside from '@components/Aside.astro'
+export const partial = true;
+
+以下のコマンドを使用してHomebrewパッケージマネージャー経由でDaytonaをインストールします：
+
+```shell
+brew tap daytonaio/tap
+brew install daytona
+```
+
+### Homebrew経由でDaytonaをアンインストール
+
+<Aside type="caution">
+この手順は破壊的で元に戻すことができません。
+続行する前に、ワークスペースデータと関連する設定のバックアップがあることを確認してください。
+</Aside>
+
+<br />
+
+以下のコマンドを実行してDaytonaをアンインストールします：
+
+```shell
+brew uninstall daytona
+```
+
+### Homebrew経由でDaytonaを更新
+
+以下のコマンドを実行してDaytonaを更新します：
+
+```shell
+brew update
+brew upgrade daytona
+```

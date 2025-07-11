@@ -1,0 +1,129 @@
+---
+title: サンプル
+description: Daytonaでサンプルを作成・管理する方法を学びます。
+sidebar:
+  label: サンプル
+---
+
+import Label from '@components/Label.astro'
+
+import Keyboard from '../../../../components/Keyboard.astro'
+
+<Label>Distribution: **Open Source**, **Cloud**, **Self-Managed**</Label>
+
+サンプルは、事前定義された開発設定、環境、依存関係を含むクイックスタートリポジトリで、Workspaceの作成に使用されます。
+
+## カスタムサンプル
+
+Daytonaは、Workspaceを作成するためにカスタムサンプルを使用するオプションを提供します。カスタムサンプルの作成は、以下を含む2段階のプロセスです：
+
+- [**サンプルリポジトリ**](#sample-repository)
+
+  サンプルコードと開発環境を定義する`devcontainer.json`ファイルを含むリポジトリ。
+
+- [**サンプルインデックス**](#samples-index)
+
+  Workspaceを作成するために利用可能なサンプルのレジストリとして機能するサンプルインデックス（`index.json`）ファイル。
+
+### サンプルリポジトリ
+
+カスタムサンプルリポジトリは、サンプルコードと開発環境を定義する`devcontainer.json`ファイルを含むGitリポジトリです。このリポジトリはサンプルのコアコンテンツとして機能し、Workspaceの作成に使用されます。
+
+1. カスタムサンプルを表すリポジトリを作成します。
+
+2. カスタムサンプルコード、開発設定、および依存関係を定義します。
+
+3. 開発環境を定義する**`devcontainer.json`**ファイルを作成します。
+
+- [開発コンテナ標準](https://containers.dev/)を使用して開発環境を定義します。開発コンテナは、サンプル内で使用されるプログラミング言語、設定、およびツールによって異なります。
+
+Go プログラミング言語を使用した開発環境の**`devcontainer.json`**ファイルの例：
+
+```json
+{
+  "name": "Go",
+  "image": "mcr.microsoft.com/devcontainers/go:1-1.21-bookworm",
+  "customizations": {
+    "vscode": {
+      "extensions": ["golang.Go"]
+    }
+  },
+  "postCreateCommand": "go test -v"
+}
+```
+
+4. サンプルリポジトリをGitリポジトリまたは他のプラットフォームでホストします。
+
+5. [サンプルインデックス](#samples-index)にサンプルプロパティを追加します。
+
+サンプルは、リポジトリをクローンし、`devcontainer.json`ファイルを使用して開発環境を定義することでWorkspaceを作成するために使用されます。
+
+### サンプルインデックス
+
+サンプルには、Workspaceを作成するために利用可能なサンプルのレジストリとして機能するサンプルインデックス（`index.json`）ファイルが必要です。サンプルインデックスは、Workspaceを作成する際に利用可能なサンプルを表示するために使用されます。
+
+1. サンプルインデックスを表す**`index.json`**ファイルを作成します。
+
+2. サンプルを表すJSONオブジェクトの配列を定義します。
+
+   配列内の各JSONオブジェクトはサンプルを表します：
+
+```json
+[
+  {
+    "name": "My Custom Sample",
+    "description": "My custom Samples description",
+    "gitUrl": "https://github.com/<username>/<repository>"
+  }
+]
+```
+
+- **`name`**
+
+  サンプルの名前。
+
+- **`gitUrl`**
+
+  公開されているサンプルリポジトリへのリンク。
+
+3. **`index.json`**ファイルをGitリポジトリまたは他のプラットフォームで公開ホストします。
+
+4. 以下のコマンドを実行してサンプルインデックスURLを設定します：
+
+```sh
+daytona server configure
+```
+
+5. **`Samples Index URL`**フィールドに**`index.json`**ファイルの公開rawURLを入力します。
+
+```text
+Samples Index URL
+Leave empty to disable samples
+https://raw.githubusercontent.com/<username>/<repository>/<path>/index.json
+```
+
+```text
+Server configuration updated. You need to restart the server for the changes to take effect.
+```
+
+6. 変更を適用するためにDaytonaサーバーを再起動します。
+
+```sh
+daytona server restart
+```
+
+カスタムサンプルは、Workspaceを作成する際に利用可能になります。選択されたサンプルはクローンされ、Workspaceの作成に使用されます。
+
+## Daytona Samples
+
+Daytonaは、事前定義された開発設定、環境、依存関係を含むデフォルトSamplesのコレクションを提供します。Daytona SamplesはWorkspaceを作成する際に選択できます。
+
+Daytona SamplesはSamples Index（`index.json`）ファイルを通じて統合されており、このファイルはWorkspace作成用の利用可能なDaytona Samplesのレジストリとして機能します。
+
+選択されたSampleはクローンされ、Workspaceの作成に使用されます。Daytona SampleリポジトリはWorkspace作成に使用されるSampleのコアコンテンツとして機能します。
+
+利用可能なDaytona Samplesのリストは[Samples Index](https://github.com/daytonaio/daytona/blob/main/hack/samples/index.json)で確認できます。
+
+:::tip
+[Daytona Samples Index](https://github.com/daytonaio/daytona/blob/main/hack/samples/index.json)に追加する新しいSamplesを提案することで、Daytona Samplesに貢献できます。
+:::

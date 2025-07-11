@@ -1,0 +1,261 @@
+---
+title: Targets
+description: Workspace全体でのTarget設定の管理方法を学びます。
+sidebar:
+  label: Targets
+---
+
+import Label from '@components/Label.astro'
+
+<Label>
+  Distribution: **Open Source**
+</Label>
+
+Targetは、Workspaceが実行される独立した処理ユニットです。クラウドベースやオンプレミス環境を含む、さまざまなインフラストラクチャ上で動作できます。Targetは、定義されたインフラストラクチャ内で必要な計算リソースを提供し、セキュリティ要件を満たします。
+
+## Targetを作成する
+
+DaytonaはTargetを作成するオプションを提供します。Targetを作成するには、Target Configurationを作成し、使用するProviderを指定する必要があります。
+
+1. 次のコマンドを実行してTargetを作成します：
+
+```shell
+daytona target create
+```
+
+2. Targetに使用する[Target Configuration](/docs/ja/configuration/target-config)を選択します。
+
+3. デプロイしたい環境の[Provider](/docs/ja/configuration/providers)を選択します。
+
+4. Targetの名前を入力します。
+
+```text
+Target Name
+>
+```
+
+5. プロンプトが表示されたら、適切な設定オプションを入力します。設定オプションは選択したProviderによって異なります。次の例は[local Docker Target Configuration](/docs/ja/configuration/target-config#docker-local)を追加する場合を示しています。
+
+```text
+Sock Path
+> /var/run/docker.sock
+```
+
+6. Targetの名前を入力します。
+
+```text
+Target Name
+>
+```
+
+```text
+✓ Request submitted
+Creating target <target_name>
+```
+
+## Targetを開始する
+
+DaytonaはTargetを開始するオプションを提供します。
+
+1. 次のコマンドを実行してTargetを開始します：
+
+```shell
+daytona target start
+```
+
+2. 開始したいTargetを選択します。
+
+```text
+Select Targets to Start
+===
+local (default)
+<target_id>
+Docker (local)
+```
+
+## Targetを停止する
+
+DaytonaはTargetを停止するオプションを提供します。
+
+1. 次のコマンドを実行してTargetを停止します：
+
+```shell
+daytona target stop
+```
+
+2. 停止したいTargetを選択します。
+
+```text
+Select Targets to Stop
+===
+local (default)
+<target_id>
+Docker (local)
+```
+
+## Targetの一覧表示
+
+Daytonaは、すべてのTargetを一覧表示するオプションを提供します。
+
+1. すべてのTargetを一覧表示するには、以下のコマンドを実行してください：
+
+```shell
+daytona target list
+```
+
+コマンドを実行すると、DaytonaはすべてのTargetとその設定の一覧を表示します。
+
+```text
+Target          Config Name     # Workspaces    Default     Status
+local (Docker)  local           0               Yes         /
+AWS             aws             0               No          Started
+```
+
+## Targetを再起動する
+
+DaytonaはTargetを再起動するオプションを提供します。
+
+1. 次のコマンドを実行してTargetを再起動します：
+
+```shell
+daytona target restart
+```
+
+## Targetを削除する
+
+DaytonaはTargetを削除するオプションを提供します。
+
+1. 次のコマンドを実行してTargetを削除します：
+
+```shell
+daytona target delete
+```
+
+2. 削除したいTargetを選択します。
+
+```text
+Select Targets to Delete
+===
+local (default)
+<target_id>
+Docker (local)
+```
+
+## Targets情報
+
+DaytonaはTargetに関する詳細情報を表示するオプションを提供します。
+
+1. 次のコマンドを実行してTargetの詳細情報を表示します：
+
+```shell
+daytona target info
+```
+
+2. 情報を表示したいTargetを選択します。
+
+```text
+Select Target to View
+===
+local (default)
+<target_id>
+Docker (local)
+```
+
+コマンドを実行すると、Daytonaは選択されたTargetの詳細情報を表示します。
+
+```text
+Name:             local
+ID:               <target_id>
+Provider:         Docker
+Runner:           local
+Default:          Yes
+State:            Running
+# Workspaces:     1
+```
+
+2. 再起動したいTargetを選択します。
+
+```text
+Select Targets to Restart
+===
+local (default)
+<target_id>
+Docker (local)
+```
+
+コマンドを実行すると、Daytonaは選択されたTargetを再起動します。
+
+## デフォルトターゲットの設定
+
+Daytonaは、ターゲットをデフォルトターゲットとして設定するオプションを提供します。
+
+1. 次のコマンドを実行して、ターゲットをデフォルトターゲットとして設定します：
+
+```shell
+daytona target set-default
+```
+
+2. デフォルトターゲットとして設定したいターゲットを選択します。
+
+```text
+Select a Target To Set As Default
+===
+local (default)
+<target_id>
+Docker (local)
+```
+
+コマンドを実行すると、Daytonaは選択されたターゲットをデフォルトターゲットとして設定します。
+
+```text
+Target 'local' set as default
+```
+
+## ターゲットにSSH接続する
+
+DaytonaはターゲットにSSH接続するオプションを提供します。
+
+1. 次のコマンドを実行してターゲットにSSH接続します：
+
+```shell
+daytona target ssh
+```
+
+2. SSH接続したいターゲットを選択します。
+
+```text
+Select a Target To SSH Into
+===
+local (default)
+<target_id>
+Docker (local)
+```
+
+コマンドを実行すると、Daytonaは選択されたターゲットにSSH接続します。
+
+## Target ログ
+
+DaytonaはTargetのログを表示するオプションを提供します。
+
+1. 次のコマンドを実行してTargetのログを表示します：
+
+```shell
+daytona target logs
+```
+
+2. ログを表示したいTargetを選択します。
+
+```text
+Select a Target To View Logs
+===
+local (default)
+<target_id>
+Docker (local)
+```
+
+コマンドを実行すると、Daytonaは選択されたTargetのログを表示します。
+
+```text
+local | Creating target local (<target_id>)
+local | ✓ Target creation complete
+```

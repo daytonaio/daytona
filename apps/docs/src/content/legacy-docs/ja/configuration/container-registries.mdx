@@ -1,0 +1,116 @@
+---
+title: コンテナレジストリ
+description: Daytonaでワークスペース用のコンテナレジストリを設定する
+---
+
+import Label from '@components/Label.astro'
+
+<Label>
+  Distribution: **Open Source**
+</Label>
+
+コンテナレジストリは、指定されたレジストリサーバーからコンテナイメージをプルするために使用される認証情報を保存します。コンテナレジストリの認証情報を追加することは、プライベートイメージやプライベートレジストリでホストされているイメージからワークスペースを作成したいユーザーにとって有用です。
+
+コンテナレジストリは環境変数を通じて管理され、認証情報を安全に保存・管理することができます。Daytonaは、ワークスペース用のコンテナレジストリを設定、一覧表示、削除するオプションを提供します。
+
+Daytonaは、すべてのワークスペースに適用されるグローバル環境変数を設定するオプション、または特定のワークスペース用の環境変数を設定するオプションを提供します。特定のワークスペース用の環境変数を設定するには、新しいワークスペースを作成する際に`--env`フラグを使用するか、ワークスペースのテンプレートで環境変数を設定します。すべての新しいワークスペースに適用されるサーバー全体の環境変数については、`daytona env`コマンドを使用します。
+
+## コンテナレジストリの設定
+
+Daytonaでは、Workspace用の環境変数を通じてコンテナレジストリを設定するオプションを提供しています。
+
+1. 以下のコマンドを実行して、コンテナレジストリの環境変数を設定します：
+
+```shell
+daytona env set
+```
+
+2. コンテナレジストリのサーバー環境変数キーを設定します：
+
+```text
+Set server environment variable
+Key
+>
+```
+
+:::tip
+コンテナレジストリを設定するには、以下の環境変数を追加してください：
+
+- **`<*>_CONTAINER_REGISTRY_SERVER`**
+
+  コンテナレジストリのURL。
+
+- **`<*>_CONTAINER_REGISTRY_USERNAME`**
+
+  コンテナレジストリで認証するためのユーザー名。
+
+- **`<*>_CONTAINER_REGISTRY_PASSWORD`**
+
+  コンテナレジストリで認証するためのパスワード。
+
+:::
+
+<br />
+
+3. コンテナレジストリのサーバー環境変数値を設定します：
+
+```text
+Value
+>
+```
+
+4. 別の環境変数を追加するかどうかを選択します：
+
+```text
+Add another environment variable?
+
+[Yes]     [No]
+```
+
+選択すると、DaytonaはWorkspace用のコンテナレジストリ環境変数を設定します。
+
+```text
+Server environment variables have been set successfully
+```
+
+## コンテナレジストリの一覧表示
+
+Daytonaは、ワークスペース用に設定されたコンテナレジストリを一覧表示するオプションを提供します。
+
+1. 以下のコマンドを実行してコンテナレジストリを一覧表示します：
+
+```shell
+daytona env list
+```
+
+このコマンドを実行すると、Daytonaは設定されたコンテナレジストリの環境変数のリストを表示します。
+
+```text
+Key                         Value
+────────────────────────────────────  
+MyEnvVariable               ********
+```
+
+## コンテナレジストリの削除
+
+Daytonaでは、ワークスペースからコンテナレジストリを削除するオプションを提供しています。
+
+1. 以下のコマンドを実行してコンテナレジストリを削除します：
+
+```shell
+daytona env delete
+```
+
+このコマンドを実行すると、削除したいコンテナレジストリを選択するよう求められます。
+
+```text
+Select Server Environment Variables To Delete
+1 item
+===
+MyEnvVariable
+********
+```
+
+```text
+Server environment variables have been successfully removed
+```

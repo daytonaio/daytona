@@ -1,0 +1,48 @@
+---
+title: Uninstallation Windows
+---
+import Aside from "@components/Aside.astro";
+export const partial = true;
+
+<br />
+
+:::caution
+This procedure is destructive and irreversible.
+Ensure you have a backup of any Workspace data and relevant configuration before proceeding.
+:::
+
+<br />
+
+Run the following commands to purge local Daytona data:
+
+```shell
+rmdir /s /q "%LOCALAPPDATA%\daytona"
+```
+
+Run the following command to remove the Daytona binary:
+
+```shell
+where daytona > nul && del /f /q "$(where daytona)"
+```
+
+Run the following command to remove the Daytona SSH configuration file:
+
+```shell
+del /f /q "%USERPROFILE%\.ssh\daytona_config"
+```
+
+Edit your `%USERPROFILE%\.ssh\config` file to remove the `Include daytona_config entry`. You can do this manually by opening the file in a text editor (e.g., Notepad):
+
+```shell
+notepad "%USERPROFILE%\.ssh\config"
+```
+
+Run the following command to remove the Daytona registry container:
+
+```shell
+docker rm /daytona-registry
+```
+
+If you have generated any autocomplete scripts for Daytona, you will need to remove them manually from your shell configuration files (e.g., `%USERPROFILE%\.bashrc`, `%USERPROFILE%\.zshrc`).
+
+To ensure all traces of Daytona are removed from your system, check and delete any related files or directories in `C:\Program Files\`, `C:\Program Files (x86)\`, and `C:\Users\%USERNAME%\AppData\Local\Temp\` directories.

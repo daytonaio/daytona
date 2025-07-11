@@ -1,0 +1,115 @@
+---
+title: Language Server Protocol
+---
+
+import Label from '@components/Label.astro'
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+<Label>
+  Distribution: **オープンソース**
+</Label>
+
+Daytona SDKは、Sandboxインスタンスを通じてLanguage Server Protocol（LSP）サポートを提供します。これにより、コード補完、診断などの高度な言語機能が有効になります。
+
+## LSPサーバーの作成
+
+Daytona SDKは、PythonとTypeScriptを使用してLSPサーバーを作成するオプションを提供します。
+
+<Tabs>
+<TabItem label="Python" icon="seti:python">
+```python
+from daytona_sdk import Daytona, LspLanguageId
+
+# Create Sandbox
+
+daytona = Daytona()
+workspace = daytona.create()
+
+# Create LSP server for Python
+
+lsp_server = workspace.create_lsp_server(
+    language_id=LspLanguageId.PYTHON,
+    path_to_project="/workspace/project"
+)
+
+```
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+```typescript
+import { Daytona, LspLanguageId } from '@daytonaio/sdk'
+
+// Create workspace
+const daytona = new Daytona()
+const workspace = await daytona.create({
+    language: 'typescript'
+})
+
+// Create LSP server for TypeScript
+const lspServer = workspace.createLspServer(
+    LspLanguageId.TYPESCRIPT,
+    "/workspace/project"
+)
+```
+
+</TabItem>
+</Tabs>
+
+## サポートされている言語
+
+Daytona SDKは、PythonとTypeScriptの`LspLanguageId`列挙型を通じて、さまざまな言語のLSPサーバーを作成するオプションを提供します。
+
+<Tabs>
+<TabItem label="Python" icon="seti:python">
+```python
+from daytona_sdk import LspLanguageId
+
+# Available language IDs
+
+LspLanguageId.PYTHON
+LspLanguageId.TYPESCRIPT
+
+```
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+```typescript
+import { LspLanguageId } from '@daytonaio/sdk'
+
+// Available language IDs
+LspLanguageId.PYTHON      
+LspLanguageId.TYPESCRIPT    
+```
+
+</TabItem>
+</Tabs>
+
+- `LspLanguageId.PYTHON`: Python言語サーバー。
+- `LspLanguageId.TYPESCRIPT`: TypeScript/JavaScript言語サーバー。
+
+## LSP機能
+
+Daytona SDKは、コード解析と編集のための様々なLSP機能を提供します。
+
+### コード補完
+
+Daytona SDKは、PythonとTypeScriptを使用してファイル内の特定の位置でコード補完を取得するオプションを提供します。
+
+<Tabs>
+<TabItem label="Python" icon="seti:python">
+```python
+completions = lsp_server.completions(
+    path="/workspace/project/main.py",
+    position={"line": 10, "character": 15}
+)
+print(f"Completions: {completions}")
+```
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+```typescript
+const completions = await lspServer.getCompletions({
+    path: "/workspace/project/main.ts",
+    position: { line: 10, character: 15 }
+})
+console.log('Completions:', completions)
+```
+</TabItem>
+</Tabs>

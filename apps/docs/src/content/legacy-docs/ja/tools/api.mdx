@@ -1,0 +1,1924 @@
+---
+title: API
+description: Daytona APIを使用してサポートされている操作のリファレンス。
+---
+
+import Label from '@components/Label.astro'
+
+<Label>
+  Distribution: **オープンソース**
+</Label>
+
+## GET /apikey
+
+APIキーを一覧表示
+
+### レスポンス
+
+| ステータスコード | 説明 |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## POST /apikey/\{apiKeyName\}
+
+APIキーを作成する
+
+### パラメータ
+
+| 名前 | 場所 | 必須 | 型 | 説明 |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`apiKeyName`** | path | true | string | APIキー名 |
+
+### レスポンス
+
+| ステータスコード | 説明 |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## DELETE /apikey/\{apiKeyName\}
+
+APIキーを削除
+
+### パラメータ
+
+| 名前 | 場所 | 必須 | 型 | 説明 |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`apiKeyName`** | path | true | string | APIキー名 |
+
+### レスポンス
+
+| ステータスコード | 説明 |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## GET /build
+
+ビルドを一覧表示
+
+### レスポンス
+
+| ステータスコード | 説明 |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## POST /build
+
+ビルドを作成
+
+### パラメータ
+
+| 名前 | 場所 | 必須 | 型 | 説明 |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`createBuildDto`** | body | true | undefined | Create Build DTO |
+
+### レスポンス
+
+| ステータスコード | 説明 |
+| :-------- | :---------- |
+| **`201`** | 作成済み |
+
+## DELETE /build
+
+すべてのビルドを削除
+
+### パラメータ
+
+| 名前 | 場所 | 必須 | 型 | 説明 |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`force`** | query | undefined | boolean | 強制実行 |
+
+### レスポンス
+
+| ステータスコード | 説明 |
+| :-------- | :---------- |
+| **`204`** | コンテンツなし |
+
+## DELETE /build/prebuild/\{prebuildId\}
+
+ビルドを削除
+
+### Parameters
+
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`prebuildId`** | path | true | string | Prebuild ID |
+| **`force`** | query | undefined | boolean | 強制 |
+
+### Responses
+
+| Status Code | Description |
+| :-------- | :---------- |
+| **`204`** | No Content |
+
+## GET /build/successful/\{repoUrl\}
+
+Gitリポジトリの成功したビルドを一覧表示
+
+### Parameters
+
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`repoUrl`** | path | true | string | リポジトリURL |
+
+### Responses
+
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## GET /build/\{buildId\}
+
+ビルドを検索
+
+### パラメータ
+
+| 名前 | 場所 | 必須 | 型 | 説明 |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`buildId`** | path | true | string | ビルドID |
+
+### レスポンス
+
+| ステータスコード | 説明 |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## DELETE /build/\{buildId\}
+
+ビルドを削除
+
+### パラメータ
+
+| 名前 | 場所 | 必須 | 型 | 説明 |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`buildId`** | path | true | string | ビルドID |
+| **`force`** | query | undefined | boolean | 強制実行 |
+
+### レスポンス
+
+| ステータスコード | 説明 |
+| :-------- | :---------- |
+| **`204`** | コンテンツなし |
+
+## GET /container-registry/\{server\}
+
+コンテナレジストリを検索
+
+### パラメータ
+
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`server`** | path | true | string | コンテナレジストリサーバー |
+| **`workspaceId`** | query | undefined | string | ワークスペースIDまたは名前 |
+
+### レスポンス
+
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## GET /env
+
+環境変数を一覧表示
+
+### レスポンス
+
+| ステータスコード | 説明 |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## PUT /env
+
+環境変数を保存
+
+### パラメータ
+
+| 名前 | 場所 | 必須 | 型 | 説明 |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`environmentVariable`** | body | true | undefined | 環境変数 |
+
+### レスポンス
+
+| ステータスコード | 説明 |
+| :-------- | :---------- |
+| **`201`** | 作成済み |
+
+## DELETE /env/\{key\}
+
+環境変数を削除
+
+### パラメータ
+
+| 名前 | 場所 | 必須 | 型 | 説明 |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`key`** | path | true | string | 環境変数キー |
+
+### レスポンス
+
+| ステータスコード | 説明 |
+| :-------- | :---------- |
+| **`204`** | コンテンツなし |
+
+## GET /gitprovider
+
+Gitプロバイダーを一覧表示
+
+### レスポンス
+
+| ステータスコード | 説明 |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## PUT /gitprovider
+
+Gitプロバイダーを保存
+
+### パラメータ
+
+| 名前 | 場所 | 必須 | 型 | 説明 |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`gitProviderConfig`** | body | true | undefined | Gitプロバイダー |
+
+### レスポンス
+
+| ステータスコード | 説明 |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## POST /gitprovider/context
+
+Gitコンテキストを取得
+
+### パラメータ
+
+| 名前 | 場所 | 必須 | 型 | 説明 |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`repository`** | body | true | undefined | リポジトリコンテキストを取得 |
+
+### レスポンス
+
+| ステータスコード | 説明 |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## POST /gitprovider/context/url
+
+GitリポジトリからURLを取得
+
+### Parameters
+
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`repository`** | body | true | undefined | Gitリポジトリ |
+
+### Responses
+
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## GET /gitprovider/for-url/\{url\}
+
+URLのGitプロバイダーを一覧表示
+
+### パラメータ
+
+| 名前 | 場所 | 必須 | 型 | 説明 |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`url`** | path | true | string | URL |
+
+### レスポンス
+
+| ステータスコード | 説明 |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## GET /gitprovider/id-for-url/\{url\}
+
+Git プロバイダー ID を検索
+
+### パラメータ
+
+| 名前 | 場所 | 必須 | 型 | 説明 |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`url`** | path | true | string | URL |
+
+### レスポンス
+
+| ステータスコード | 説明 |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## GET /gitprovider/\{gitProviderId\}
+
+Git プロバイダーを検索
+
+### パラメータ
+
+| 名前 | 場所 | 必須 | 型 | 説明 |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`gitProviderId`** | path | true | string | ID |
+
+### レスポンス
+
+| ステータスコード | 説明 |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## DELETE /gitprovider/\{gitProviderId\}
+
+Gitプロバイダーを削除
+
+### パラメータ
+
+| 名前 | 場所 | 必須 | 型 | 説明 |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`gitProviderId`** | path | true | string | Gitプロバイダー |
+
+### レスポンス
+
+| ステータスコード | 説明 |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## GET /gitprovider/\{gitProviderId\}/namespaces
+
+Git名前空間を取得
+
+### パラメータ
+
+| 名前 | 場所 | 必須 | 型 | 説明 |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`gitProviderId`** | path | true | string | Gitプロバイダー |
+| **`page`** | query | undefined | integer | ページ番号 |
+| **`per_page`** | query | undefined | integer | ページあたりのアイテム数 |
+
+### レスポンス
+
+| ステータスコード | 説明 |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## GET /gitprovider/\{gitProviderId\}/user
+
+Gitコンテキストを取得
+
+### パラメータ
+
+| 名前 | 場所 | 必須 | 型 | 説明 |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`gitProviderId`** | path | true | string | Git Provider Id |
+
+### レスポンス
+
+| ステータスコード | 説明 |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## GET /gitprovider/\{gitProviderId\}/\{namespaceId\}/repositories
+
+Gitリポジトリを取得
+
+### パラメータ
+
+| 名前 | 場所 | 必須 | 型 | 説明 |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`gitProviderId`** | path | true | string | Gitプロバイダー |
+| **`namespaceId`** | path | true | string | 名前空間 |
+| **`page`** | query | undefined | integer | ページ番号 |
+| **`per_page`** | query | undefined | integer | ページあたりのアイテム数 |
+
+### レスポンス
+
+| ステータスコード | 説明 |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## GET /gitprovider/\{gitProviderId\}/\{namespaceId\}/\{repositoryId\}/branches
+
+Gitリポジトリのブランチを取得
+
+### パラメータ
+
+| 名前 | 場所 | 必須 | 型 | 説明 |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`gitProviderId`** | path | true | string | Gitプロバイダー |
+| **`namespaceId`** | path | true | string | ネームスペース |
+| **`repositoryId`** | path | true | string | リポジトリ |
+| **`page`** | query | undefined | integer | ページ番号 |
+| **`per_page`** | query | undefined | integer | 1ページあたりのアイテム数 |
+
+### レスポンス
+
+| ステータスコード | 説明 |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## GET /gitprovider/\{gitProviderId\}/\{namespaceId\}/\{repositoryId\}/pull-requests
+
+GitリポジトリのPRを取得
+
+### パラメータ
+
+| 名前 | 場所 | 必須 | 型 | 説明 |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`gitProviderId`** | path | true | string | Gitプロバイダー |
+| **`namespaceId`** | path | true | string | 名前空間 |
+| **`repositoryId`** | path | true | string | リポジトリ |
+| **`page`** | query | undefined | integer | ページ番号 |
+| **`per_page`** | query | undefined | integer | 1ページあたりのアイテム数 |
+
+### レスポンス
+
+| ステータスコード | 説明 |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## GET /health
+
+ヘルスチェック
+
+### レスポンス
+
+| ステータスコード | 説明 |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## GET /job
+
+ジョブを一覧表示
+
+### パラメータ
+
+| 名前 | 場所 | 必須 | 型 | 説明 |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`states`** | query | undefined | array | ジョブの状態 |
+| **`actions`** | query | undefined | array | ジョブのアクション |
+| **`resourceId`** | query | undefined | string | リソースID |
+| **`resourceType`** | query | undefined | string | リソースタイプ |
+
+### レスポンス
+
+| ステータスコード | 説明 |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## GET /runner
+
+ランナーを一覧表示
+
+### レスポンス
+
+| ステータスコード | 説明 |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## POST /runner
+
+ランナーを作成する
+
+### パラメータ
+
+| 名前 | 場所 | 必須 | 型 | 説明 |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`runner`** | body | true | undefined | ランナー |
+
+### レスポンス
+
+| ステータスコード | 説明 |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## GET /runner/provider
+
+プロバイダーを一覧表示
+
+### パラメータ
+
+| 名前 | 場所 | 必須 | 型 | 説明 |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`runnerId`** | query | undefined | string | Runner ID |
+
+### レスポンス
+
+| ステータスコード | 説明 |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## GET /runner/provider/for-install
+
+インストール可能なプロバイダーを一覧表示
+
+### レスポンス
+
+| ステータスコード | 説明 |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## GET /runner/\{runnerId\}
+
+ランナーを検索
+
+### パラメータ
+
+| 名前 | 場所 | 必須 | 型 | 説明 |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`runnerId`** | path | true | string | ランナーID |
+
+### レスポンス
+
+| ステータスコード | 説明 |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## DELETE /runner/\{runnerId\}
+
+ランナーを削除
+
+### パラメータ
+
+| 名前 | 場所 | 必須 | 型 | 説明 |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`runnerId`** | path | true | string | ランナーID |
+
+### レスポンス
+
+| ステータスコード | 説明 |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## GET /runner/\{runnerId\}/jobs
+
+ランナージョブを一覧表示
+
+### パラメータ
+
+| 名前 | 場所 | 必須 | 型 | 説明 |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`runnerId`** | path | true | string | ランナーID |
+
+### レスポンス
+
+| ステータスコード | 説明 |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## POST /runner/\{runnerId\}/jobs/\{jobId\}/state
+
+ジョブの状態を更新
+
+### Parameters
+
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`runnerId`** | path | true | string | Runner ID |
+| **`jobId`** | path | true | string | Job ID |
+| **`updateJobState`** | body | true | undefined | ジョブの状態を更新 |
+
+### Responses
+
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## POST /runner/\{runnerId\}/metadata
+
+ランナーメタデータを更新
+
+### パラメータ
+
+| 名前 | 場所 | 必須 | 型 | 説明 |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`runnerId`** | path | true | string | ランナーID |
+| **`runnerMetadata`** | body | true | undefined | ランナーメタデータ |
+
+### レスポンス
+
+| ステータスコード | 説明 |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## GET /runner/\{runnerId\}/provider
+
+ランナープロバイダーを取得
+
+### パラメータ
+
+| 名前 | 場所 | 必須 | 型 | 説明 |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`runnerId`** | path | true | string | ランナーID |
+
+### レスポンス
+
+| ステータスコード | 説明 |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## POST /runner/\{runnerId\}/provider/\{providerName\}/install
+
+プロバイダーをインストール
+
+### パラメータ
+
+| 名前 | 場所 | 必須 | 型 | 説明 |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`runnerId`** | path | true | string | ランナーID |
+| **`providerName`** | path | true | string | プロバイダー名 |
+| **`providerVersion`** | query | undefined | string | プロバイダーバージョン - デフォルトは 'latest' |
+
+### レスポンス
+
+| ステータスコード | 説明 |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## POST /runner/\{runnerId\}/provider/\{providerName\}/uninstall
+
+プロバイダーをアンインストール
+
+### Parameters
+
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`runnerId`** | path | true | string | ランナーID |
+| **`providerName`** | path | true | string | プロバイダー名 |
+
+### Responses
+
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## POST /runner/\{runnerId\}/provider/\{providerName\}/update
+
+プロバイダーを更新
+
+### パラメータ
+
+| 名前 | 場所 | 必須 | 型 | 説明 |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`runnerId`** | path | true | string | ランナーID |
+| **`providerName`** | path | true | string | プロバイダー名 |
+| **`providerVersion`** | query | undefined | string | プロバイダーバージョン - デフォルトは 'latest' |
+
+### レスポンス
+
+| ステータスコード | 説明 |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## GET /sample
+
+サンプルを一覧表示
+
+### レスポンス
+
+| ステータスコード | 説明 |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## GET /server/config
+
+サーバー設定を取得する
+
+### レスポンス
+
+| ステータスコード | 説明 |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## PUT /server/config
+
+サーバー設定を保存する
+
+### パラメータ
+
+| 名前 | 場所 | 必須 | 型 | 説明 |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`config`** | body | true | undefined | サーバー設定 |
+
+### レスポンス
+
+| ステータスコード | 説明 |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## GET /server/logs
+
+サーバーログファイルを取得
+
+### レスポンス
+
+| ステータスコード | 説明 |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## POST /server/network-key
+
+新しい認証キーを作成する
+
+### レスポンス
+
+| ステータスコード | 説明 |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## GET /target
+
+ターゲットを一覧表示
+
+### パラメータ
+
+| 名前 | 場所 | 必須 | 型 | 説明 |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`showOptions`** | query | undefined | boolean | ターゲット設定オプションを表示 |
+
+### レスポンス
+
+| ステータスコード | 説明 |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## POST /target
+
+ターゲットを作成
+
+### パラメータ
+
+| 名前 | 場所 | 必須 | 型 | 説明 |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`target`** | body | true | undefined | ターゲットを作成 |
+
+### レスポンス
+
+| ステータスコード | 説明 |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## GET /target-config
+
+ターゲット設定を一覧表示
+
+### パラメータ
+
+| 名前 | 場所 | 必須 | 型 | 説明 |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`showOptions`** | query | undefined | boolean | ターゲット設定オプションを表示 |
+
+### レスポンス
+
+| ステータスコード | 説明 |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## POST /target-config
+
+ターゲット設定を作成
+
+### パラメータ
+
+| 名前 | 場所 | 必須 | 型 | 説明 |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`targetConfig`** | body | true | undefined | 作成するターゲット設定 |
+| **`showOptions`** | query | undefined | boolean | ターゲット設定オプションを表示 |
+
+### レスポンス
+
+| ステータスコード | 説明 |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## DELETE /target-config/\{configId\}
+
+ターゲット設定を削除する
+
+### パラメータ
+
+| 名前 | 場所 | 必須 | 型 | 説明 |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`configId`** | path | true | string | ターゲット設定ID |
+
+### レスポンス
+
+| ステータスコード | 説明 |
+| :-------- | :---------- |
+| **`204`** | コンテンツなし |
+
+## GET /target/\{targetId\}
+
+ターゲットを検索
+
+### パラメータ
+
+| 名前 | 場所 | 必須 | 型 | 説明 |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`targetId`** | path | true | string | ターゲットIDまたは名前 |
+| **`showOptions`** | query | undefined | boolean | ターゲット設定オプションを表示 |
+
+### レスポンス
+
+| ステータスコード | 説明 |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## DELETE /target/\{targetId\}
+
+ターゲットを削除
+
+### パラメータ
+
+| 名前 | 場所 | 必須 | 型 | 説明 |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`targetId`** | path | true | string | ターゲットID |
+| **`force`** | query | undefined | boolean | 強制実行 |
+
+### レスポンス
+
+| ステータスコード | 説明 |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## POST /target/\{targetId\}/handle-successful-creation
+
+ターゲットの作成成功を処理します
+
+### パラメータ
+
+| 名前 | 場所 | 必須 | 型 | 説明 |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`targetId`** | path | true | string | ターゲットIDまたは名前 |
+
+### レスポンス
+
+| ステータスコード | 説明 |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## POST /target/\{targetId\}/metadata
+
+ターゲットメタデータを更新
+
+### パラメータ
+
+| 名前 | 場所 | 必須 | 型 | 説明 |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`targetId`** | path | true | string | ターゲットID |
+| **`targetMetadata`** | body | true | undefined | ターゲットメタデータ |
+
+### レスポンス
+
+| ステータスコード | 説明 |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## POST /target/\{targetId\}/provider-metadata
+
+ターゲットプロバイダーメタデータを更新
+
+### Parameters
+
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`targetId`** | path | true | string | ターゲットID |
+| **`metadata`** | body | true | undefined | プロバイダーメタデータ |
+
+### Responses
+
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## POST /target/\{targetId\}/restart
+
+ターゲットを再起動
+
+### パラメータ
+
+| 名前 | 場所 | 必須 | 型 | 説明 |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`targetId`** | path | true | string | ターゲットIDまたは名前 |
+
+### レスポンス
+
+| ステータスコード | 説明 |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## PATCH /target/\{targetId\}/set-default
+
+デフォルトで使用するターゲットを設定
+
+### Parameters
+
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`targetId`** | path | true | string | ターゲットIDまたは名前 |
+
+### Responses
+
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## POST /target/\{targetId\}/start
+
+ターゲットを開始
+
+### パラメータ
+
+| 名前 | 場所 | 必須 | 型 | 説明 |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`targetId`** | path | true | string | ターゲットIDまたは名前 |
+
+### レスポンス
+
+| ステータスコード | 説明 |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## GET /target/\{targetId\}/state
+
+ターゲットの状態を取得
+
+### パラメータ
+
+| 名前 | 場所 | 必須 | 型 | 説明 |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`targetId`** | path | true | string | ターゲットIDまたは名前 |
+
+### レスポンス
+
+| ステータスコード | 説明 |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## POST /target/\{targetId\}/stop
+
+ターゲットを停止
+
+### パラメータ
+
+| 名前 | 場所 | 必須 | 型 | 説明 |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`targetId`** | path | true | string | ターゲットIDまたは名前 |
+
+### レスポンス
+
+| ステータスコード | 説明 |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## GET /workspace
+
+ワークスペースを一覧表示
+
+### パラメータ
+
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`labels`** | query | undefined | string | JSON エンコードされたラベル |
+
+### レスポンス
+
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## POST /workspace
+
+ワークスペースを作成する
+
+### パラメータ
+
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`workspace`** | body | true | undefined | ワークスペースを作成 |
+
+### レスポンス
+
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## GET /workspace-template
+
+ワークスペーステンプレートを一覧表示
+
+### レスポンス
+
+| ステータスコード | 説明 |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## PUT /workspace-template
+
+ワークスペーステンプレートデータを設定
+
+### パラメータ
+
+| 名前 | 場所 | 必須 | 型 | 説明 |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`workspaceTemplate`** | body | true | undefined | ワークスペーステンプレート |
+
+### レスポンス
+
+| ステータスコード | 説明 |
+| :-------- | :---------- |
+| **`201`** | 作成済み |
+
+## GET /workspace-template/default/\{gitUrl\}
+
+Git URLによってデフォルトのワークスペーステンプレートを取得
+
+### パラメータ
+
+| 名前 | 場所 | 必須 | 型 | 説明 |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`gitUrl`** | path | true | string | Git URL |
+
+### レスポンス
+
+| ステータスコード | 説明 |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## GET /workspace-template/prebuild
+
+プリビルドを一覧表示
+
+### レスポンス
+
+| ステータスコード | 説明 |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## POST /workspace-template/prebuild/process-git-event
+
+ProcessGitEvent
+
+### パラメータ
+
+| 名前 | 場所 | 必須 | 型 | 説明 |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`body`** | body | true | undefined | Webhookイベント |
+
+### レスポンス
+
+| ステータスコード | 説明 |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## GET /workspace-template/\{templateName\}
+
+ワークスペーステンプレートを検索
+
+### パラメータ
+
+| 名前 | 場所 | 必須 | 型 | 説明 |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`templateName`** | path | true | string | テンプレート名 |
+
+### レスポンス
+
+| ステータスコード | 説明 |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## DELETE /workspace-template/\{templateName\}
+
+ワークスペーステンプレートデータを削除
+
+### パラメータ
+
+| 名前 | 場所 | 必須 | 型 | 説明 |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`templateName`** | path | true | string | テンプレート名 |
+| **`force`** | query | undefined | boolean | 強制実行 |
+
+### レスポンス
+
+| ステータスコード | 説明 |
+| :-------- | :---------- |
+| **`204`** | No Content |
+
+## GET /workspace-template/\{templateName\}/prebuild
+
+ワークスペーステンプレートのプリビルドを一覧表示
+
+### Parameters
+
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`templateName`** | path | true | string | テンプレート名 |
+
+### Responses
+
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## PUT /workspace-template/\{templateName\}/prebuild
+
+プリビルドを保存
+
+### パラメータ
+
+| 名前 | 場所 | 必須 | 型 | 説明 |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`templateName`** | path | true | string | テンプレート名 |
+| **`prebuild`** | body | true | undefined | プリビルド |
+
+### レスポンス
+
+| ステータスコード | 説明 |
+| :-------- | :---------- |
+| **`201`** | 作成済み |
+
+## GET /workspace-template/\{templateName\}/prebuild/\{prebuildId\}
+
+プリビルドを検索
+
+### パラメータ
+
+| 名前 | 場所 | 必須 | 型 | 説明 |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`templateName`** | path | true | string | ワークスペーステンプレート名 |
+| **`prebuildId`** | path | true | string | プリビルドID |
+
+### レスポンス
+
+| ステータスコード | 説明 |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## DELETE /workspace-template/\{templateName\}/prebuild/\{prebuildId\}
+
+プリビルドを削除
+
+### パラメータ
+
+| 名前 | 場所 | 必須 | 型 | 説明 |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`templateName`** | path | true | string | ワークスペーステンプレート名 |
+| **`prebuildId`** | path | true | string | プリビルドID |
+| **`force`** | query | undefined | boolean | 強制実行 |
+
+### レスポンス
+
+| ステータスコード | 説明 |
+| :-------- | :---------- |
+| **`204`** | コンテンツなし |
+
+## PATCH /workspace-template/\{templateName\}/set-default
+
+ワークスペーステンプレートをデフォルトに設定
+
+### Parameters
+
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`templateName`** | path | true | string | テンプレート名 |
+
+### Responses
+
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## GET /workspace/\{workspaceId\}
+
+ワークスペースを検索
+
+### パラメータ
+
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`workspaceId`** | path | true | string | ワークスペースIDまたは名前 |
+
+### レスポンス
+
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## DELETE /workspace/\{workspaceId\}
+
+ワークスペースを削除
+
+### パラメータ
+
+| 名前 | 場所 | 必須 | 型 | 説明 |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`workspaceId`** | path | true | string | ワークスペースID |
+| **`force`** | query | undefined | boolean | 強制実行 |
+
+### レスポンス
+
+| ステータスコード | 説明 |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## POST /workspace/\{workspaceId\}/labels
+
+ワークスペースラベルを更新
+
+### パラメータ
+
+| 名前 | 場所 | 必須 | 型 | 説明 |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`workspaceId`** | path | true | string | ワークスペースIDまたは名前 |
+| **`labels`** | body | true | undefined | ラベル |
+
+### レスポンス
+
+| ステータスコード | 説明 |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## POST /workspace/\{workspaceId\}/metadata
+
+ワークスペースメタデータを更新
+
+### Parameters
+
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`workspaceId`** | path | true | string | ワークスペースID |
+| **`workspaceMetadata`** | body | true | undefined | ワークスペースメタデータ |
+
+### Responses
+
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## POST /workspace/\{workspaceId\}/provider-metadata
+
+ワークスペースプロバイダーメタデータを更新
+
+### パラメータ
+
+| 名前 | 場所 | 必須 | 型 | 説明 |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`workspaceId`** | path | true | string | ワークスペースID |
+| **`metadata`** | body | true | undefined | プロバイダーメタデータ |
+
+### レスポンス
+
+| ステータスコード | 説明 |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## POST /workspace/\{workspaceId\}/restart
+
+ワークスペースを再起動
+
+### パラメータ
+
+| 名前 | 場所 | 必須 | 型 | 説明 |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`workspaceId`** | path | true | string | ワークスペースIDまたは名前 |
+
+### レスポンス
+
+| ステータスコード | 説明 |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## POST /workspace/\{workspaceId\}/start
+
+ワークスペースを開始
+
+### パラメータ
+
+| 名前 | 場所 | 必須 | 型 | 説明 |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`workspaceId`** | path | true | string | ワークスペースIDまたは名前 |
+
+### レスポンス
+
+| ステータスコード | 説明 |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## GET /workspace/\{workspaceId\}/state
+
+ワークスペースの状態を取得
+
+### パラメータ
+
+| 名前 | 場所 | 必須 | 型 | 説明 |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`workspaceId`** | path | true | string | ワークスペースIDまたは名前 |
+
+### レスポンス
+
+| ステータスコード | 説明 |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## POST /workspace/\{workspaceId\}/stop
+
+ワークスペースを停止
+
+### パラメータ
+
+| 名前 | 場所 | 必須 | 型 | 説明 |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`workspaceId`** | path | true | string | ワークスペースIDまたは名前 |
+
+### レスポンス
+
+| ステータスコード | 説明 |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## GET /workspace/\{workspaceId\}/toolbox/files
+
+ワークスペース内のファイルを一覧表示
+
+### パラメータ
+
+| 名前 | 場所 | 必須 | 型 | 説明 |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`workspaceId`** | path | true | string | ワークスペースIDまたは名前 |
+| **`path`** | query | undefined | string | パス |
+
+### レスポンス
+
+| ステータスコード | 説明 |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## DELETE /workspace/\{workspaceId\}/toolbox/files
+
+ワークスペース内のファイルを削除
+
+### Parameters
+
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`workspaceId`** | path | true | string | ワークスペースIDまたは名前 |
+| **`path`** | query | true | string | パス |
+
+### Responses
+
+| Status Code | Description |
+| :-------- | :---------- |
+| **`204`** | No Content |
+
+## GET /workspace/\{workspaceId\}/toolbox/files/download
+
+ワークスペースからファイルをダウンロード
+
+### Parameters
+
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`workspaceId`** | path | true | string | ワークスペースIDまたは名前 |
+| **`path`** | query | true | string | パス |
+
+### Responses
+
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | レスポンスにファイルが含まれます |
+
+## GET /workspace/\{workspaceId\}/toolbox/files/find
+
+ワークスペースファイル内のテキスト/パターンを検索
+
+### Parameters
+
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`workspaceId`** | path | true | string | ワークスペースIDまたは名前 |
+| **`path`** | query | true | string | パス |
+| **`pattern`** | query | true | string | パターン |
+
+### Responses
+
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## POST /workspace/\{workspaceId\}/toolbox/files/folder
+
+ワークスペース内にフォルダを作成
+
+### Parameters
+
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`workspaceId`** | path | true | string | ワークスペースIDまたは名前 |
+| **`path`** | query | true | string | パス |
+| **`mode`** | query | true | string | モード |
+
+### Responses
+
+| Status Code | Description |
+| :-------- | :---------- |
+| **`201`** | 作成済み |
+
+## GET /workspace/\{workspaceId\}/toolbox/files/info
+
+ワークスペース内のファイル情報を取得
+
+### Parameters
+
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`workspaceId`** | path | true | string | ワークスペースIDまたは名前 |
+| **`path`** | query | true | string | パス |
+
+### Responses
+
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## POST /workspace/\{workspaceId\}/toolbox/files/move
+
+ワークスペース内にフォルダを作成
+
+### パラメータ
+
+| 名前 | 場所 | 必須 | 型 | 説明 |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`workspaceId`** | path | true | string | ワークスペースIDまたは名前 |
+| **`source`** | query | true | string | ソースパス |
+| **`destination`** | query | true | string | 宛先パス |
+
+### レスポンス
+
+| ステータスコード | 説明 |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## POST /workspace/\{workspaceId\}/toolbox/files/permissions
+
+ワークスペース内のファイル所有者/グループ/権限を設定
+
+### Parameters
+
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`workspaceId`** | path | true | string | ワークスペースIDまたは名前 |
+| **`path`** | query | true | string | パス |
+| **`owner`** | query | undefined | string | 所有者 |
+| **`group`** | query | undefined | string | グループ |
+| **`mode`** | query | undefined | string | モード |
+
+### Responses
+
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## POST /workspace/\{workspaceId\}/toolbox/files/replace
+
+ワークスペース内の複数ファイルでテキスト/パターンを置換する
+
+### Parameters
+
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`workspaceId`** | path | true | string | ワークスペースIDまたは名前 |
+| **`replace`** | body | true | undefined | ReplaceParams |
+
+### Responses
+
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## GET /workspace/\{workspaceId\}/toolbox/files/search
+
+ワークスペース内のファイルを検索
+
+### Parameters
+
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`workspaceId`** | path | true | string | ワークスペースIDまたは名前 |
+| **`path`** | query | true | string | パス |
+| **`pattern`** | query | true | string | パターン |
+
+### Responses
+
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## POST /workspace/\{workspaceId\}/toolbox/files/upload
+
+ワークスペース内にファイルをアップロードする
+
+### Parameters
+
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`workspaceId`** | path | true | string | ワークスペースIDまたは名前 |
+| **`path`** | query | true | string | パス |
+| **`file`** | formData | true | file | ファイル |
+
+### Responses
+
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## POST /workspace/\{workspaceId\}/toolbox/git/add
+
+gitコミットにファイルを追加
+
+### Parameters
+
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`workspaceId`** | path | true | string | ワークスペースIDまたは名前 |
+| **`params`** | body | true | undefined | GitAddRequest |
+
+### Responses
+
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## GET /workspace/\{workspaceId\}/toolbox/git/branches
+
+ワークスペース内のgitリポジトリからブランチリストを取得
+
+### Parameters
+
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`workspaceId`** | path | true | string | ワークスペースIDまたは名前 |
+| **`path`** | query | true | string | gitリポジトリへのパス |
+
+### Responses
+
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## POST /workspace/\{workspaceId\}/toolbox/git/branches
+
+ワークスペース内のgitリポジトリにブランチを作成
+
+### Parameters
+
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`workspaceId`** | path | true | string | ワークスペースIDまたは名前 |
+| **`params`** | body | true | undefined | GitBranchRequest |
+
+### Responses
+
+| Status Code | Description |
+| :-------- | :---------- |
+| **`201`** | 作成済み |
+
+## POST /workspace/\{workspaceId\}/toolbox/git/clone
+
+ワークスペース内でgitリポジトリをクローンする
+
+### Parameters
+
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`workspaceId`** | path | true | string | ワークスペースIDまたは名前 |
+| **`params`** | body | true | undefined | GitCloneRequest |
+
+### Responses
+
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## POST /workspace/\{workspaceId\}/toolbox/git/commit
+
+ワークスペース内のgitリポジトリに変更をコミットします
+
+### Parameters
+
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`workspaceId`** | path | true | string | ワークスペースIDまたは名前 |
+| **`params`** | body | true | undefined | GitCommitRequest |
+
+### Responses
+
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## GET /workspace/\{workspaceId\}/toolbox/git/history
+
+ワークスペース内のgitリポジトリからコミット履歴を取得する
+
+### Parameters
+
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`workspaceId`** | path | true | string | ワークスペースIDまたは名前 |
+| **`path`** | query | true | string | gitリポジトリへのパス |
+
+### Responses
+
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## POST /workspace/\{workspaceId\}/toolbox/git/pull
+
+ワークスペース内のgitリポジトリにリモートから変更をプルします
+
+### Parameters
+
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`workspaceId`** | path | true | string | ワークスペースIDまたは名前 |
+| **`params`** | body | true | undefined | Gitプルリクエスト |
+
+### Responses
+
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## POST /workspace/\{workspaceId\}/toolbox/git/push
+
+ワークスペース内のgitリポジトリからリモートに変更をプッシュします
+
+### Parameters
+
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`workspaceId`** | path | true | string | ワークスペースIDまたは名前 |
+| **`params`** | body | true | undefined | Gitプッシュリクエスト |
+
+### Responses
+
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## GET /workspace/\{workspaceId\}/toolbox/git/status
+
+ワークスペース内のgitリポジトリからステータスを取得
+
+### Parameters
+
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`workspaceId`** | path | true | string | ワークスペースIDまたは名前 |
+| **`path`** | query | true | string | gitリポジトリへのパス |
+
+### Responses
+
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## POST /workspace/\{workspaceId\}/toolbox/lsp/completions
+
+Completionリクエストは、指定されたカーソル位置での補完項目を計算するために、クライアントからサーバーに送信されます。
+
+### Parameters
+
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`workspaceId`** | path | true | string | ワークスペースIDまたは名前 |
+| **`params`** | body | true | undefined | LspCompletionParams |
+
+### Responses
+
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## POST /workspace/\{workspaceId\}/toolbox/lsp/did-close
+
+ドキュメントクローズ通知は、クライアントでドキュメントが閉じられた際にクライアントからサーバーに送信されます。
+
+### Parameters
+
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`workspaceId`** | path | true | string | ワークスペースIDまたは名前 |
+| **`params`** | body | true | undefined | LspDocumentRequest |
+
+### Responses
+
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## POST /workspace/\{workspaceId\}/toolbox/lsp/did-open
+
+ドキュメントオープン通知は、新しく開かれたテキストドキュメントを知らせるために、クライアントからサーバーに送信されます。
+
+### Parameters
+
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`workspaceId`** | path | true | string | ワークスペースIDまたは名前 |
+| **`params`** | body | true | undefined | LspDocumentRequest |
+
+### Responses
+
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## GET /workspace/\{workspaceId\}/toolbox/lsp/document-symbols
+
+ドキュメントシンボルリクエストは、クライアントからサーバーに送信されます。
+
+### Parameters
+
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`workspaceId`** | path | true | string | ワークスペースIDまたは名前 |
+| **`languageId`** | query | true | string | 言語ID |
+| **`pathToProject`** | query | true | string | プロジェクトへのパス |
+| **`uri`** | query | true | string | ドキュメントURI |
+
+### Responses
+
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## POST /workspace/\{workspaceId\}/toolbox/lsp/start
+
+ワークスペース内でLspサーバープロセスを開始する
+
+### Parameters
+
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`workspaceId`** | path | true | string | ワークスペースIDまたは名前 |
+| **`params`** | body | true | undefined | LspServerRequest |
+
+### Responses
+
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## POST /workspace/\{workspaceId\}/toolbox/lsp/stop
+
+ワークスペース内のLspサーバープロセスを停止します
+
+### Parameters
+
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`workspaceId`** | path | true | string | ワークスペースIDまたは名前 |
+| **`params`** | body | true | undefined | LspServerRequest |
+
+### Responses
+
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## GET /workspace/\{workspaceId\}/toolbox/lsp/workspace-symbols
+
+ワークスペースシンボルリクエストは、クエリ文字列にマッチするプロジェクト全体のシンボルをリストするために、クライアントからサーバーに送信されます。
+
+### Parameters
+
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`workspaceId`** | path | true | string | ワークスペースIDまたは名前 |
+| **`languageId`** | query | true | string | 言語ID |
+| **`pathToProject`** | query | true | string | プロジェクトへのパス |
+| **`query`** | query | true | string | シンボルクエリ |
+
+### Responses
+
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## POST /workspace/\{workspaceId\}/toolbox/process/execute
+
+ワークスペース内でコマンドを同期的に実行する
+
+### Parameters
+
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`workspaceId`** | path | true | string | ワークスペースIDまたは名前 |
+| **`params`** | body | true | undefined | コマンド実行リクエスト |
+
+### Responses
+
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## GET /workspace/\{workspaceId\}/toolbox/process/session
+
+ワークスペースプロジェクト内のセッションを一覧表示
+
+### Parameters
+
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`workspaceId`** | path | true | string | ワークスペースIDまたは名前 |
+
+### Responses
+
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## POST /workspace/\{workspaceId\}/toolbox/process/session
+
+ワークスペースプロジェクト内でexecセッションを作成
+
+### Parameters
+
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`workspaceId`** | path | true | string | ワークスペースIDまたは名前 |
+| **`params`** | body | true | undefined | セッション作成リクエスト |
+
+### Responses
+
+| Status Code | Description |
+| :-------- | :---------- |
+| **`201`** | 作成済み |
+
+## DELETE /workspace/\{workspaceId\}/toolbox/process/session/\{sessionId\}
+
+ワークスペースプロジェクト内のセッションを削除する
+
+### Parameters
+
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`workspaceId`** | path | true | string | ワークスペースIDまたは名前 |
+| **`sessionId`** | path | true | string | セッションID |
+
+### Responses
+
+| Status Code | Description |
+| :-------- | :---------- |
+| **`204`** | コンテンツなし |
+
+## GET /workspace/\{workspaceId\}/toolbox/process/session/\{sessionId\}/command/\{commandId\}/logs
+
+ワークスペースプロジェクト内のセッション内のコマンドのログを取得します
+websocketに接続してログのストリームを取得します
+
+### Parameters
+
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`workspaceId`** | path | true | string | ワークスペースIDまたは名前 |
+| **`sessionId`** | path | true | string | セッションID |
+| **`commandId`** | path | true | string | コマンドID |
+
+### Responses
+
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | コマンドログ |
+
+## POST /workspace/\{workspaceId\}/toolbox/process/session/\{sessionId\}/exec
+
+ワークスペースプロジェクト内のセッション内でコマンドを実行する
+
+### Parameters
+
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`workspaceId`** | path | true | string | ワークスペースIDまたは名前 |
+| **`sessionId`** | path | true | string | セッションID |
+| **`params`** | body | true | undefined | コマンド実行リクエスト |
+
+### Responses
+
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | OK |
+
+## GET /workspace/\{workspaceId\}/toolbox/workspace-dir
+
+ワークスペースディレクトリを取得
+
+### パラメータ
+
+| 名前 | 場所 | 必須 | 型 | 説明 |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`workspaceId`** | path | true | string | ワークスペースIDまたは名前 |
+
+### レスポンス
+
+| ステータスコード | 説明 |
+| :-------- | :---------- |
+| **`200`** | OK |

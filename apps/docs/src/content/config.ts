@@ -1,5 +1,7 @@
 import { docsSchema, i18nSchema } from '@astrojs/starlight/schema'
 import { defineCollection, z } from 'astro:content'
+import { generateI18nSchema } from 'src/i18n/generateI18nSchema'
+import { localizePath } from 'src/i18n/utils'
 
 import type { NavigationGroup } from '../utils/navigation'
 
@@ -13,7 +15,12 @@ export const collections = {
       }),
     }),
   }),
-  i18n: defineCollection({ type: 'data', schema: i18nSchema() }),
+  i18n: defineCollection({
+    type: 'data',
+    schema: i18nSchema({
+      extend: generateI18nSchema(),
+    }),
+  }),
 }
 
 export enum NavigationCategory {
@@ -30,351 +37,347 @@ export enum NavigationCategory {
  * disablePagination - Applicable to all links. If true, the pagination component will not be shown for the link.
  * autopopulateFromDir - Applicable to groups. If set, the group will be populated with all the files (except index file) in the directory.
  */
-export const sidebarConfig: NavigationGroup[] = [
-  {
-    type: 'group',
-    category: NavigationCategory.MAIN,
-    entries: [
-      {
-        type: 'link',
-        href: '/docs',
-        label: 'Documentation',
-        attrs: {
-          icon: 'home.svg',
+export const getSidebarConfig = (
+  locale: string,
+  labels: Record<string, string>
+): NavigationGroup[] => {
+  if (!labels) return []
+  return [
+    {
+      type: 'group',
+      category: NavigationCategory.MAIN,
+      entries: [
+        {
+          type: 'link',
+          href: localizePath('/docs', locale),
+          label: labels['sidebarconfig.documentation'],
+          attrs: {
+            icon: 'home.svg',
+          },
+          relatedGroupCategory: NavigationCategory.GENERAL,
         },
-        relatedGroupCategory: NavigationCategory.GENERAL,
-      },
-      {
-        type: 'link',
-        href: '/docs/typescript-sdk',
-        label: 'TS SDK Reference',
-        attrs: {
-          icon: 'package.svg',
+        {
+          type: 'link',
+          href: localizePath('/docs/typescript-sdk', locale),
+          label: labels['sidebarconfig.tsSdkReference'],
+          attrs: {
+            icon: 'package.svg',
+          },
+          relatedGroupCategory: NavigationCategory.TYPESCRIPT_SDK,
         },
-        relatedGroupCategory: NavigationCategory.TYPESCRIPT_SDK,
-      },
-      {
-        type: 'link',
-        href: '/docs/python-sdk',
-        label: 'Python SDK Reference',
-        attrs: {
-          icon: 'package.svg',
+        {
+          type: 'link',
+          href: localizePath('/docs/python-sdk', locale),
+          label: labels['sidebarconfig.pythonSdkReference'],
+          attrs: {
+            icon: 'package.svg',
+          },
+          relatedGroupCategory: NavigationCategory.PYTHON_SDK,
         },
-        relatedGroupCategory: NavigationCategory.PYTHON_SDK,
-      },
-      {
-        type: 'link',
-        href: '/docs/tools/api',
-        label: 'API Reference',
-        disablePagination: true,
-        attrs: {
-          icon: 'server.svg',
+        {
+          type: 'link',
+          href: localizePath('/docs/tools/api', locale),
+          label: labels['sidebarconfig.apiReference'],
+          disablePagination: true,
+          attrs: {
+            icon: 'server.svg',
+          },
+          relatedGroupCategory: NavigationCategory.GENERAL,
         },
-        relatedGroupCategory: NavigationCategory.GENERAL,
-      },
-      {
-        type: 'link',
-        href: '/docs/tools/cli',
-        label: 'CLI Reference',
-        disablePagination: true,
-        attrs: {
-          icon: 'terminal.svg',
+        {
+          type: 'link',
+          href: localizePath('/docs/tools/cli', locale),
+          label: labels['sidebarconfig.cliReference'],
+          disablePagination: true,
+          attrs: {
+            icon: 'terminal.svg',
+          },
+          relatedGroupCategory: NavigationCategory.GENERAL,
         },
-        relatedGroupCategory: NavigationCategory.GENERAL,
-      },
-    ],
-  },
-  {
-    type: 'group',
-    label: 'Introduction',
-    homePageHref: '/docs',
-    category: NavigationCategory.GENERAL,
-    entries: [
-      {
-        type: 'link',
-        href: '/docs/getting-started',
-        label: 'Getting Started',
-        description:
-          'Learn about Daytona SDK and how it can help you manage your development environments.',
-        attrs: {
-          icon: 'bookmark.svg',
+      ],
+    },
+    {
+      type: 'group',
+      label: labels['sidebarconfig.introduction'],
+      homePageHref: localizePath('/docs', locale),
+      category: NavigationCategory.GENERAL,
+      entries: [
+        {
+          type: 'link',
+          href: localizePath('/docs/getting-started', locale),
+          label: labels['sidebarconfig.gettingStarted'],
+          description: labels['sidebarconfig.gettingStartedDescription'],
+          attrs: {
+            icon: 'bookmark.svg',
+          },
         },
-      },
-      {
-        type: 'link',
-        href: '/docs/configuration',
-        label: 'Configuration',
-        description:
-          'Get started with Daytona SDK and learn how to use and configure your development environments.',
-        attrs: {
-          icon: 'git-commit.svg',
+        {
+          type: 'link',
+          href: localizePath('/docs/configuration', locale),
+          label: labels['sidebarconfig.configuration'],
+          description: labels['sidebarconfig.configurationDescription'],
+          attrs: {
+            icon: 'git-commit.svg',
+          },
         },
-      },
-      {
-        type: 'link',
-        href: '/docs/sandbox-management',
-        label: 'Sandboxes',
-        description:
-          'Learn how to create, manage, and remove Sandboxes using the Daytona SDK.',
-        attrs: {
-          icon: 'rectangle.svg',
+        {
+          type: 'link',
+          href: localizePath('/docs/sandbox-management', locale),
+          label: labels['sidebarconfig.sandboxes'],
+          description: labels['sidebarconfig.sandboxesDescription'],
+          attrs: {
+            icon: 'rectangle.svg',
+          },
         },
-      },
-      {
-        type: 'link',
-        href: '/docs/snapshots',
-        label: 'Snapshots',
-        description:
-          'Learn how to create, manage and remove Snapshots using the Daytona SDK.',
-        attrs: {
-          icon: 'layers.svg',
+        {
+          type: 'link',
+          href: localizePath('/docs/snapshots', locale),
+          label: labels['sidebarconfig.snapshots'],
+          description: labels['sidebarconfig.snapshotsDescription'],
+          attrs: {
+            icon: 'layers.svg',
+          },
         },
-      },
-      {
-        type: 'link',
-        href: '/docs/declarative-builder',
-        label: 'Declarative Builder',
-        description:
-          'Learn how to dynamically build Snapshots from Docker/OCI compatible images using the Daytona SDK.',
-        attrs: {
-          icon: 'prebuilds.svg',
+        {
+          type: 'link',
+          href: localizePath('/docs/declarative-builder', locale),
+          label: labels['sidebarconfig.declarativeBuilder'],
+          description: labels['sidebarconfig.declarativeBuilderDescription'],
+          attrs: {
+            icon: 'prebuilds.svg',
+          },
         },
-      },
-      {
-        type: 'link',
-        href: '/docs/volumes',
-        label: 'Volumes',
-        description: 'Learn how to manage volumes in your Daytona Sandboxes.',
-        attrs: {
-          icon: 'container-registries.svg',
+        {
+          type: 'link',
+          href: localizePath('/docs/volumes', locale),
+          label: labels['sidebarconfig.volumes'],
+          description: labels['sidebarconfig.volumesDescription'],
+          attrs: {
+            icon: 'container-registries.svg',
+          },
         },
-      },
-    ],
-  },
-  {
-    type: 'group',
-    label: 'Account management',
-    homePageHref: '/docs',
-    category: NavigationCategory.GENERAL,
-    entries: [
-      {
-        type: 'link',
-        href: '/docs/api-keys',
-        label: 'API Keys',
-        description: 'Daytona API Key management and scopes.',
-        attrs: {
-          icon: 'tag.svg',
+      ],
+    },
+    {
+      type: 'group',
+      label: labels['sidebarconfig.accountManagement'],
+      homePageHref: localizePath('/docs', locale),
+      category: NavigationCategory.GENERAL,
+      entries: [
+        {
+          type: 'link',
+          href: localizePath('/docs/api-keys', locale),
+          label: labels['sidebarconfig.apiKeys'],
+          description: labels['sidebarconfig.apiKeysDescription'],
+          attrs: {
+            icon: 'tag.svg',
+          },
         },
-      },
-      {
-        type: 'link',
-        href: '/docs/organizations',
-        label: 'Organizations',
-        description:
-          'Learn how to create, manage, and remove Organizations using the Daytona SDK.',
-        attrs: {
-          icon: 'building.svg',
+        {
+          type: 'link',
+          href: localizePath('/docs/organizations', locale),
+          label: labels['sidebarconfig.organizations'],
+          description: labels['sidebarconfig.organizationsDescription'],
+          attrs: {
+            icon: 'building.svg',
+          },
         },
-      },
-      {
-        type: 'link',
-        href: '/docs/limits',
-        label: 'Limits',
-        description: 'Limits and tiers assigned to Organizations.',
-        attrs: {
-          icon: 'log.svg',
+        {
+          type: 'link',
+          href: localizePath('/docs/limits', locale),
+          label: labels['sidebarconfig.limits'],
+          description: labels['sidebarconfig.limitsDescription'],
+          attrs: {
+            icon: 'log.svg',
+          },
         },
-      },
-      {
-        type: 'link',
-        href: '/docs/billing',
-        label: 'Billing',
-        description: 'Billing management for Organizations.',
-        attrs: {
-          icon: 'credit-card.svg',
+        {
+          type: 'link',
+          href: localizePath('/docs/billing', locale),
+          label: labels['sidebarconfig.billing'],
+          description: labels['sidebarconfig.billingDescription'],
+          attrs: {
+            icon: 'credit-card.svg',
+          },
         },
-      },
-      {
-        type: 'link',
-        href: '/docs/linked-accounts',
-        label: 'Linked Accounts',
-        description: 'Linked Accounts for Users.',
-        attrs: {
-          icon: 'link.svg',
+        {
+          type: 'link',
+          href: localizePath('/docs/linked-accounts', locale),
+          label: labels['sidebarconfig.linkedAccounts'],
+          description: labels['sidebarconfig.linkedAccountsDescription'],
+          attrs: {
+            icon: 'link.svg',
+          },
         },
-      },
-    ],
-  },
-  {
-    type: 'group',
-    label: 'Agent Toolbox',
-    homePageHref: '/docs',
-    category: NavigationCategory.GENERAL,
-    entries: [
-      {
-        type: 'link',
-        href: '/docs/file-system-operations',
-        label: 'File System',
-        description:
-          'Learn how to manage files and directories in your Sandboxes using the Daytona SDK.',
-        attrs: {
-          icon: 'folder.svg',
+      ],
+    },
+    {
+      type: 'group',
+      label: labels['sidebarconfig.agentToolbox'],
+      homePageHref: localizePath('/docs', locale),
+      category: NavigationCategory.GENERAL,
+      entries: [
+        {
+          type: 'link',
+          href: localizePath('/docs/file-system-operations', locale),
+          label: labels['sidebarconfig.fileSystem'],
+          description: labels['sidebarconfig.fileSystemDescription'],
+          attrs: {
+            icon: 'folder.svg',
+          },
         },
-      },
-      {
-        type: 'link',
-        href: '/docs/git-operations',
-        label: 'Git Operations',
-        description:
-          'Learn how to manage Git repositories in your Sandboxes using the Daytona SDK.',
-        attrs: {
-          icon: 'git-branch.svg',
+        {
+          type: 'link',
+          href: localizePath('/docs/git-operations', locale),
+          label: labels['sidebarconfig.gitOperations'],
+          description: labels['sidebarconfig.gitOperationsDescription'],
+          attrs: {
+            icon: 'git-branch.svg',
+          },
         },
-      },
-      {
-        type: 'link',
-        href: '/docs/language-server-protocol',
-        label: 'Language Server Protocol',
-        description:
-          'Learn how to use Language Server Protocol (LSP) support in your Sandboxes using the Daytona SDK.',
-        attrs: {
-          icon: 'pulse.svg',
+        {
+          type: 'link',
+          href: localizePath('/docs/language-server-protocol', locale),
+          label: labels['sidebarconfig.languageServerProtocol'],
+          description:
+            labels['sidebarconfig.languageServerProtocolDescription'],
+          attrs: {
+            icon: 'pulse.svg',
+          },
         },
-      },
-      {
-        type: 'link',
-        href: '/docs/process-code-execution',
-        label: 'Process & Code Execution',
-        description:
-          'Learn about running commands and code in isolated environments using the Daytona SDK.',
-        attrs: {
-          icon: 'computer.svg',
+        {
+          type: 'link',
+          href: localizePath('/docs/process-code-execution', locale),
+          label: labels['sidebarconfig.processCodeExecution'],
+          description: labels['sidebarconfig.processCodeExecutionDescription'],
+          attrs: {
+            icon: 'computer.svg',
+          },
         },
-      },
-      {
-        type: 'link',
-        href: '/docs/log-streaming',
-        label: 'Log Streaming',
-        description:
-          'Learn how to stream logs from your Sandboxes using the Daytona SDK.',
-        attrs: {
-          icon: 'log.svg',
+        {
+          type: 'link',
+          href: localizePath('/docs/log-streaming', locale),
+          label: labels['sidebarconfig.logStreaming'],
+          description: labels['sidebarconfig.logStreamingDescription'],
+          attrs: {
+            icon: 'log.svg',
+          },
         },
-      },
-    ],
-  },
-  {
-    type: 'group',
-    label: 'Other',
-    homePageHref: '/docs',
-    category: NavigationCategory.GENERAL,
-    entries: [
-      {
-        type: 'link',
-        href: '/docs/web-terminal',
-        label: 'Web Terminal',
-        description: 'Web Terminal access to Daytona Sandboxes.',
-        attrs: {
-          icon: 'terminal.svg',
+      ],
+    },
+    {
+      type: 'group',
+      label: labels['sidebarconfig.other'],
+      homePageHref: localizePath('/docs', locale),
+      category: NavigationCategory.GENERAL,
+      entries: [
+        {
+          type: 'link',
+          href: localizePath('/docs/web-terminal', locale),
+          label: labels['sidebarconfig.webTerminal'],
+          description: labels['sidebarconfig.webTerminalDescription'],
+          attrs: {
+            icon: 'terminal.svg',
+          },
         },
-      },
-      {
-        type: 'link',
-        href: '/docs/preview-and-authentication',
-        label: 'Preview & Authentication',
-        description: 'Preview URLs and authentication tokens.',
-        attrs: {
-          icon: 'shield.svg',
+        {
+          type: 'link',
+          href: localizePath('/docs/preview-and-authentication', locale),
+          label: labels['sidebarconfig.previewAuthentication'],
+          description: labels['sidebarconfig.previewAuthenticationDescription'],
+          attrs: {
+            icon: 'shield.svg',
+          },
         },
-      },
-      {
-        type: 'link',
-        href: '/docs/regions',
-        label: 'Regions',
-        description: 'Setting the region to spin up Daytona Sandboxes in.',
-        attrs: {
-          icon: 'globe.svg',
+        {
+          type: 'link',
+          href: localizePath('/docs/regions', locale),
+          label: labels['sidebarconfig.regions'],
+          description: labels['sidebarconfig.regionsDescription'],
+          attrs: {
+            icon: 'globe.svg',
+          },
         },
-      },
-      {
-        type: 'link',
-        href: '/docs/mcp',
-        label: 'MCP Server',
-        disablePagination: true,
-        attrs: {
-          icon: 'server.svg',
+        {
+          type: 'link',
+          href: localizePath('/docs/mcp', locale),
+          label: labels['sidebarconfig.mcpServer'],
+          disablePagination: true,
+          attrs: {
+            icon: 'server.svg',
+          },
         },
-      },
-    ],
-  },
-  {
-    type: 'group',
-    label: 'TS SDK Reference',
-    homePageHref: '/docs/typescript-sdk',
-    category: NavigationCategory.TYPESCRIPT_SDK,
-    autopopulateFromDir: '/docs/typescript-sdk',
-    entries: [
-      {
-        type: 'link',
-        href: '/docs/typescript-sdk/daytona',
-        label: 'Daytona',
-      },
-      {
-        type: 'link',
-        href: '/docs/typescript-sdk/sandbox',
-        label: 'Sandbox',
-      },
-    ],
-  },
-  {
-    type: 'group',
-    label: 'Python SDK Reference',
-    homePageHref: '/docs/python-sdk',
-    category: NavigationCategory.PYTHON_SDK,
-  },
-  {
-    type: 'group',
-    label: 'Common',
-    homePageHref: '/docs/python-sdk',
-    category: NavigationCategory.PYTHON_SDK,
-    autopopulateFromDir: '/docs/python-sdk/common',
-  },
-  {
-    type: 'group',
-    label: 'Sync Python',
-    homePageHref: '/docs/python-sdk',
-    category: NavigationCategory.PYTHON_SDK,
-    autopopulateFromDir: '/docs/python-sdk/sync',
-    entries: [
-      {
-        type: 'link',
-        href: '/docs/python-sdk/sync/daytona',
-        label: 'Daytona',
-      },
-      {
-        type: 'link',
-        href: '/docs/python-sdk/sync/sandbox',
-        label: 'Sandbox',
-      },
-    ],
-  },
-  {
-    type: 'group',
-    label: 'Async Python',
-    homePageHref: '/docs/python-sdk',
-    category: NavigationCategory.PYTHON_SDK,
-    autopopulateFromDir: '/docs/python-sdk/async',
-    entries: [
-      {
-        type: 'link',
-        href: '/docs/python-sdk/async/async-daytona',
-        label: 'AsyncDaytona',
-      },
-      {
-        type: 'link',
-        href: '/docs/python-sdk/async/async-sandbox',
-        label: 'AsyncSandbox',
-      },
-    ],
-  },
-]
+      ],
+    },
+    {
+      type: 'group',
+      label: labels['sidebarconfig.tsSdkReference'],
+      homePageHref: localizePath('/docs/typescript-sdk', locale),
+      category: NavigationCategory.TYPESCRIPT_SDK,
+      autopopulateFromDir: localizePath('/docs/typescript-sdk', locale),
+      entries: [
+        {
+          type: 'link',
+          href: localizePath('/docs/typescript-sdk/daytona', locale),
+          label: labels['sidebarconfig.daytona'],
+        },
+        {
+          type: 'link',
+          href: localizePath('/docs/typescript-sdk/sandbox', locale),
+          label: labels['sidebarconfig.sandbox'],
+        },
+      ],
+    },
+    {
+      type: 'group',
+      label: labels['sidebarconfig.pythonSdkReference'],
+      homePageHref: localizePath('/docs/python-sdk', locale),
+      category: NavigationCategory.PYTHON_SDK,
+    },
+    {
+      type: 'group',
+      label: labels['sidebarconfig.common'],
+      homePageHref: localizePath('/docs/python-sdk', locale),
+      category: NavigationCategory.PYTHON_SDK,
+      autopopulateFromDir: localizePath('/docs/python-sdk/common', locale),
+    },
+    {
+      type: 'group',
+      label: labels['sidebarconfig.syncPython'],
+      homePageHref: localizePath('/docs/python-sdk', locale),
+      category: NavigationCategory.PYTHON_SDK,
+      autopopulateFromDir: localizePath('/docs/python-sdk/sync', locale),
+      entries: [
+        {
+          type: 'link',
+          href: localizePath('/docs/python-sdk/sync/daytona', locale),
+          label: labels['sidebarconfig.daytona'],
+        },
+        {
+          type: 'link',
+          href: localizePath('/docs/python-sdk/sync/sandbox', locale),
+          label: labels['sidebarconfig.sandbox'],
+        },
+      ],
+    },
+    {
+      type: 'group',
+      label: labels['sidebarconfig.asyncPython'],
+      homePageHref: localizePath('/docs/python-sdk', locale),
+      category: NavigationCategory.PYTHON_SDK,
+      autopopulateFromDir: localizePath('/docs/python-sdk/async', locale),
+      entries: [
+        {
+          type: 'link',
+          href: localizePath('/docs/python-sdk/async/async-daytona', locale),
+          label: labels['sidebarconfig.asyncDaytona'],
+        },
+        {
+          type: 'link',
+          href: localizePath('/docs/python-sdk/async/async-sandbox', locale),
+          label: labels['sidebarconfig.asyncSandbox'],
+        },
+      ],
+    },
+  ]
+}

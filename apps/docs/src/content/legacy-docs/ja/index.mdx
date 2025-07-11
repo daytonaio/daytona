@@ -1,0 +1,137 @@
+---
+title: ドキュメントホーム
+description: Daytonaでワークスペースの管理を始めましょう。
+template: doc
+head:
+  - tag: title
+    content: ドキュメント · Daytona
+  - tag: meta
+    attrs:
+        property: og:title
+        content: ドキュメント · Daytona
+  - tag: meta
+    attrs:
+        name: twitter:title
+        content: ドキュメント · Daytona
+tableOfContents: false
+---
+
+// import DocumentList from "@components/DocumentList.astro";
+// import DocumentListItem from "@components/DocumentListItem.astro";
+
+<DocumentList title="ここから始める">
+  <DocumentListItem
+    title="Daytonaとは？"
+    subtitle="Daytonaについて学び、開発環境の管理にどのように役立つかを理解しましょう。"
+    href="about/what-is-daytona"
+  />
+  <DocumentListItem
+    title="アーキテクチャ概要"
+    subtitle="Daytonaのアーキテクチャとワークスペースの管理方法を理解しましょう。"
+    href="about/architecture"
+  />
+  <DocumentListItem
+    title="はじめに"
+    subtitle="Daytonaを始めて、開発環境の使用と設定方法を学びましょう。"
+    href="about/getting-started"
+  />
+  <DocumentListItem
+    title="Daytonaのインストール"
+    subtitle="Linux、macOS、またはWindowsオペレーティングシステムにDaytonaをインストールします。"
+    href="installation/installation"
+  />
+</DocumentList>
+
+<DocumentList title="設定">
+  <DocumentListItem
+    title="Gitプロバイダーの追加"
+    subtitle="GitHub、GitLab、Bitbucketなどでホストされているリポジトリからワークスペースを作成します。"
+    href="configuration/git-providers#add-a-git-provider"
+  />
+  <DocumentListItem
+    title="プロバイダーのインストール"
+    subtitle="新しいプロバイダーをインストールして、Daytonaサーバーとインターフェースし、ワークスペースを管理します。"
+    href="configuration/providers#managing-providers"
+  />
+  <DocumentListItem
+    title="ターゲット設定の設定"
+    subtitle="Daytonaがワークスペースを管理・デプロイする方法を制御するターゲット設定を設定します。"
+    href="configuration/target-config"
+  />
+  <DocumentListItem
+    title="コンテナレジストリの設定"
+    subtitle="指定されたレジストリサーバーからコンテナイメージをプルするために使用される認証情報を保存するコンテナレジストリを設定します。"
+    href="configuration/container-registries"
+  />
+  <DocumentListItem
+    title="ワークスペーステンプレートの作成"
+    subtitle="複数のワークスペース間でワークスペーステンプレートを管理・再利用します。"
+    href="configuration/workspace-templates"
+  />
+  <DocumentListItem
+    title="Daytonaサーバーの設定"
+    subtitle="Daytonaサーバーはあなたのマシン上で動作し、ワークスペースに関連するアクションを処理します。"
+    href="configuration/server"
+  />
+</DocumentList>
+
+<DocumentList title="使用">
+  <DocumentListItem
+    title="ワークスペースの作成"
+    subtitle="Gitリポジトリから開発環境を作成し、デプロイを開始します。"
+    href="usage/workspaces"
+  />
+  <DocumentListItem
+    title="ターゲットの設定"
+    subtitle="ワークスペースのターゲットを設定し、その設定を管理する方法を学びます。"
+    href="usage/targets"
+  />
+  <DocumentListItem
+    title="Agent Toolboxとの連携"
+    subtitle="Agent Toolboxを使用してワークスペースを管理・操作する方法を学びます。"
+    href="usage/agent-toolbox"
+  />
+  <DocumentListItem
+    title="ワークスペースのプリビルド"
+    subtitle="ワークスペース間でプリビルドを管理・再利用する方法を学びます。"
+    href="usage/prebuilds"
+  />
+  <DocumentListItem
+    title="デフォルトIDEの設定"
+    subtitle="お好みのIDEでワークスペースを自動的に開きます。"
+    href="usage/ide#set-the-default-ide"
+  />
+  <DocumentListItem
+    title="カスタムサンプルの追加"
+    subtitle="事前定義された開発設定と環境を持つクイックスタートリポジトリを使用してワークスペースを作成します。"
+    href="usage/samples"
+  />
+  <DocumentListItem
+    title="コンテナイメージのビルド"
+    subtitle="ビルダーを使用してワークスペース用の開発コンテナイメージを作成します。"
+    href="usage/builders"
+  />
+  <DocumentListItem
+    title="ランナーのデプロイ"
+    subtitle="Daytonaでランナーを使用・管理する方法を学びます。"
+    href="usage/runners"
+  />
+</DocumentList>
+
+<DocumentList title="詳しく学ぶ">
+  <DocumentListItem
+    title="CLIリファレンス"
+    subtitle="Daytona CLIについて学び、コマンドラインからDaytonaと連携する方法を理解します。"
+    href="tools/cli"
+  />
+  <DocumentListItem
+    title="APIリファレンス"
+    subtitle="Daytona APIを探索し、プログラムでDaytonaと連携する方法を学びます。"
+    href="tools/api"
+  />
+  <DocumentListItem
+    title="Docker拡張機能"
+    subtitle="Docker Desktop内で直接Daytonaクライアントとサーバーツールの組み込みバージョンを使用します。"
+    href="tools/docker-extension"
+  />
+</DocumentList>

@@ -1,0 +1,137 @@
+---
+title: Documentation Home
+description: Start managing your Workspaces with Daytona.
+template: doc
+head:
+  - tag: title
+    content: Documentation · Daytona
+  - tag: meta
+    attrs:
+        property: og:title
+        content: Documentation · Daytona
+  - tag: meta
+    attrs:
+        name: twitter:title
+        content: Documentation · Daytona
+tableOfContents: false
+---
+
+// import DocumentList from "@components/DocumentList.astro";
+// import DocumentListItem from "@components/DocumentListItem.astro";
+
+<DocumentList title="Start Here">
+  <DocumentListItem
+    title="What is Daytona?"
+    subtitle="Learn about Daytona and how it can help you manage your development environments."
+    href="about/what-is-daytona"
+  />
+  <DocumentListItem
+    title="Architecture Overview"
+    subtitle="Understand the architecture of Daytona and how it manages Workspaces."
+    href="about/architecture"
+  />
+  <DocumentListItem
+    title="Getting Started"
+    subtitle="Get started with Daytona and learn how to use and configure your development environments."
+    href="about/getting-started"
+  />
+  <DocumentListItem
+    title="Install Daytona"
+    subtitle="Install Daytona on Linux, macOS, or Windows operating system."
+    href="installation/installation"
+  />
+</DocumentList>
+
+<DocumentList title="Configure">
+  <DocumentListItem
+    title="Add a Git Provider"
+    subtitle="Create Workspaces from repositories hosted across GitHub, GitLab, Bitbucket, and others."
+    href="configuration/git-providers#add-a-git-provider"
+  />
+  <DocumentListItem
+    title="Install a Provider"
+    subtitle="Install a new Provider to interface with the Daytona Server and manage your Workspaces."
+    href="configuration/providers#managing-providers"
+  />
+  <DocumentListItem
+    title="Set a Target Configuration"
+    subtitle="Set a Target configuration that governs how Daytona manages and deploys Workspaces."
+    href="configuration/target-config"
+  />
+  <DocumentListItem
+    title="Set a Container Registry"
+    subtitle="Set a Container Registry to store credentials used to pull container images from specified registry servers."
+    href="configuration/container-registries"
+  />
+  <DocumentListItem
+    title="Create Workspace Templates"
+    subtitle="Manage and reuse Workspace Templates across multiple Workspaces."
+    href="configuration/workspace-templates"
+  />
+  <DocumentListItem
+    title="Configure Daytona Server"
+    subtitle="Daytona Server runs on your machine and handles actions relating to Workspaces."
+    href="configuration/server"
+  />
+</DocumentList>
+
+<DocumentList title="Use">
+  <DocumentListItem
+    title="Create a Workspace"
+    subtitle="Create a development environment from a Git repository and start deploying."
+    href="usage/workspaces"
+  />
+  <DocumentListItem
+    title="Set a Target"
+    subtitle="Learn how to set a Target for your Workspace and manage its configuration."
+    href="usage/targets"
+  />
+  <DocumentListItem
+    title="Interact with Agent Toolbox"
+    subtitle="Learn how to use the Agent Toolbox to manage and interact with your Workspaces."
+    href="usage/agent-toolbox"
+  />
+  <DocumentListItem
+    title="Pre-build your Workspace"
+    subtitle="Learn how to manage and reuse Prebuilds across Workspaces."
+    href="usage/prebuilds"
+  />
+  <DocumentListItem
+    title="Set Default IDE"
+    subtitle="Automatically open your Workspace in your preferred IDE."
+    href="usage/ide#set-the-default-ide"
+  />
+  <DocumentListItem
+    title="Add Custom Samples"
+    subtitle="Use quick-start repositories with predefined development configurations and environments to create Workspaces."
+    href="usage/samples"
+  />
+  <DocumentListItem
+    title="Build a Container Image"
+    subtitle="Use Builders to create a development container image for your Workspace."
+    href="usage/builders"
+  />
+  <DocumentListItem
+    title="Deploy a Runner"
+    subtitle="Learn how to use and manage Runners in Daytona."
+    href="usage/runners"
+  />
+</DocumentList>
+
+<DocumentList title="Dive Deeper">
+  <DocumentListItem
+    title="CLI Reference"
+    subtitle="Learn about the Daytona CLI and how to interact with Daytona from the command line."
+    href="tools/cli"
+  />
+  <DocumentListItem
+    title="API Reference"
+    subtitle="Explore the Daytona API and learn how to interact with Daytona programmatically."
+    href="tools/api"
+  />
+  <DocumentListItem
+    title="Docker Extension"
+    subtitle="Use an embedded version of the Daytona client and server tools directly within Docker Desktop."
+    href="tools/docker-extension"
+  />
+</DocumentList>

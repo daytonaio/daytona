@@ -1,0 +1,208 @@
+---
+title: File System Operations
+---
+
+import Label from '@components/Label.astro'
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+<Label>
+  Distribution: **Open Source**
+</Label>
+
+The Daytona SDK provides comprehensive file system operations through the `fs` module in Sandboxes. This guide covers all available file system operations and best practices.
+
+## Basic Operations
+
+Daytona SDK provides an option to interact with the file system in Sandboxes. You can perform various operations like listing files, creating directories, reading and writing files, and more.
+
+### Listing Files and Directories
+
+Daytona SDK provides an option to list files and directories in a Sandbox using Python and TypeScript.
+
+<Tabs>
+<TabItem label="Python" icon="seti:python">
+```python
+# List files in a directory
+files = workspace.fs.list_files("/workspace")
+for file in files:
+    print(f"Name: {file.name}")
+    print(f"Is directory: {file.is_dir}")
+    print(f"Size: {file.size}")
+    print(f"Modified: {file.mod_time}")
+
+```
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+```typescript
+// List files in a directory
+const files = await workspace.fs.listFiles("/workspace");
+
+files.forEach(file => {
+    console.log(`Name: ${file.name}`);
+    console.log(`Is directory: ${file.isDir}`);
+    console.log(`Size: ${file.size}`);
+    console.log(`Modified: ${file.modTime}`);
+});
+```
+
+</TabItem>
+</Tabs>
+
+### Creating Directories
+
+Daytona SDK provides an option to create directories with specific permissions using Python and TypeScript.
+
+<Tabs>
+<TabItem label="Python" icon="seti:python">
+```python
+# Create a directory
+workspace.fs.create_folder("/workspace/new-dir")
+
+# Create with specific permissions
+
+workspace.fs.create_folder("/workspace/new-dir", "755")
+
+```
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+```typescript
+// Create a directory
+await workspace.fs.createFolder("/workspace/new-dir");
+
+// Create with specific permissions
+await workspace.fs.createFolder("/workspace/new-dir", "755");
+```
+
+</TabItem>
+</Tabs>
+
+### File Operations
+
+Daytona SDK provides options to read, write, upload, download, and delete files in Sandboxes using Python and TypeScript.
+
+<Tabs>
+<TabItem label="Python" icon="seti:python">
+```python
+# Upload a file
+with open("local_file.txt", "rb") as f:
+    content = f.read()
+workspace.fs.upload_file("/workspace/remote_file.txt", content)
+
+# Download a file
+
+content = workspace.fs.download_file("/workspace/remote_file.txt")
+with open("local_file.txt", "wb") as f:
+    f.write(content)
+
+# Delete a file
+
+workspace.fs.delete_file("/workspace/file.txt")
+
+```
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+```typescript
+// Upload a file
+const fileContent = new File(
+    [Buffer.from('Hello, World!')],
+    'data.txt',
+    { type: 'text/plain' }
+);
+await workspace.fs.uploadFile("/workspace/remote_file.txt", fileContent);
+
+// Download a file
+const downloadedFile = await workspace.fs.downloadFile("/workspace/remote_file.txt");
+console.log('File content:', downloadedFile.toString())
+
+// Delete a file
+await workspace.fs.deleteFile("/workspace/file.txt");
+```
+
+</TabItem>
+</Tabs>
+
+## Advanced Operations
+
+Daytona SDK provides advanced file system operations like file permissions, search and replace, and more.
+
+### File Permissions
+
+Daytona SDK provides an option to set file permissions, get file permissions, and set directory permissions recursively using Python and TypeScript.
+
+<Tabs>
+<TabItem label="Python" icon="seti:python">
+```python
+# Set file permissions
+workspace.fs.set_file_permissions("/workspace/file.txt", "644")
+
+# Get file permissions
+
+file_info = workspace.fs.get_file_info("/workspace/file.txt")
+print(f"Permissions: {file_info.permissions}")
+
+```
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+```typescript
+// Set file permissions
+await workspace.fs.setFilePermissions("/workspace/file.txt", { mode: "644" });
+
+// Get file permissions
+const fileInfo = await workspace.fs.getFileDetails("/workspace/file.txt");
+console.log(`Permissions: ${fileInfo.permissions}`);
+```
+
+</TabItem>
+</Tabs>
+
+### File Search and Replace
+
+Daytona SDK provides an option to search for text in files and replace text in files using Python and TypeScript.
+
+<Tabs>
+<TabItem label="Python" icon="seti:python">
+```python
+# Search for text in files; if a folder is specified, the search is recursive
+results = workspace.fs.find_files(
+    path="/workspace/src",
+    pattern="text-of-interest"
+)
+for match in results:
+    print(f"Absolute file path: {match.file}")
+    print(f"Line number: {match.line}")
+    print(f"Line content: {match.content}")
+    print("\n")
+
+# Replace text in files
+
+workspace.fs.replace_in_files(
+    files=["/workspace/file1.txt", "/workspace/file2.txt"],
+    pattern="old_text",
+    new_value="new_text"
+)
+
+```
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+```typescript
+// Search for text in files; if a folder is specified, the search is recursive
+const results = await workspace.fs.findFiles({
+    path="/workspace/src",
+    pattern: "text-of-interest"
+});
+results.forEach(match => {
+    console.log('Absolute file path:', match.file)
+    console.log('Line number:', match.line)
+    console.log('Line content:', match.content)
+});
+
+// Replace text in files
+await workspace.fs.replaceInFiles(
+    ["/workspace/file1.txt", "/workspace/file2.txt"],
+    "old_text",
+    "new_text"
+);
+```
+
+</TabItem>
+</Tabs>

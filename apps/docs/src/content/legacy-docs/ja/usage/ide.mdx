@@ -1,0 +1,574 @@
+---
+title: IDE
+description: デフォルトのIDEを使用してワークスペースに接続します。
+sidebar:
+  label: IDE
+---
+
+import Aside from '@components/Aside.astro'
+import Label from '@components/Label.astro'
+
+<Label>
+  Distribution: **Open Source**, **Cloud**, **Self-Managed**
+</Label>
+
+Daytonaは、デフォルトのIDEを使用して[ワークスペース](/docs/ja/usage/workspaces#open-an-existing-workspace)に接続するオプションを提供します。
+
+標準で、Daytonaは以下のIDEでワークスペースを開くように設定できます：
+
+- **Visual Studio Code (VSCode)**
+
+  - [デスクトップ (Linux, macOS, Windows)](#vs-code)
+  - [ブラウザ](#vs-code-browser)
+
+- **JetBrains IDE**
+  - [CLion](#jetbrains-clion)
+  - [GoLand](#jetbrains-goland)
+  - [IntelliJ IDEA Ultimate](#jetbrains-intellij-idea-ultimate)
+  - [PhpStorm](#jetbrains-phpstorm)
+  - [PyCharm Professional](#jetbrains-pycharm-professional)
+  - [Rider](#jetbrains-rider)
+  - [RubyMine](#jetbrains-rubymine)
+  - [WebStorm](#jetbrains-webstorm)
+  - [Fleet](#jetbrains-fleet)
+
+- [Visual Studio Code Insiders](#vs-code-insiders)
+
+- [VSCodium](#vscodium)
+
+- [Jupyter](#jupyter)
+
+- [Zed](#zed)
+
+- [Cursor](#cursor)
+
+- [Windsurf](#windsurf)
+
+- [Terminal SSH](#terminal-ssh)
+
+## デフォルトIDEの設定
+
+Daytonaで使用するデフォルトIDEを設定できます。
+
+1. 以下のコマンドを実行してデフォルトIDEを設定します：
+
+```shell
+daytona ide
+```
+
+このコマンドを実行すると、Daytonaは利用可能なIDEのリストを表示し、デフォルトの選択肢を選ぶことができます。
+
+```text
+Choose Your Default IDE
+
+VS Code
+VS Code - Browser
+Terminal SSH
+CLion
+GoLand
+...
+```
+
+2. 表示されたリストから希望するIDEを選択します。選択すると、DaytonaはそれをデフォルトIDEとして設定し、確認メッセージを表示します。
+
+```text
+Default IDE:  VS Code
+```
+
+これで`daytona code`コマンドを使用して、Workspaceに既に接続されているデフォルトIDEを自動的に開くことができます。
+
+## VS Code
+
+DaytonaはVisual Studio Code（VSCode）IDEを使用してワークスペースに接続するオプションを提供します。
+
+1. 次のコマンドを実行して、デフォルトIDEをVS Codeに設定します：
+
+```shell
+daytona ide
+```
+
+このコマンドを実行すると、Daytonaは利用可能なIDEのリストを表示し、デフォルトの選択肢として`VS Code`を選択できます。
+
+```text
+Choose Your Default IDE
+
+| VS Code
+```
+
+2. 表示されたリストから**`VS Code`**を選択します。選択すると、DaytonaはそれをデフォルトのIDEとして設定し、確認メッセージを表示します。
+
+```text
+Default IDE:  VS Code
+```
+
+これで`daytona code`コマンドを使用して、ワークスペースに既に接続されたVisual Studio Code IDEを自動的に開くことができます。
+
+## VS Code Browser
+
+DaytonaはVisual Studio Code（VSCode）Browser IDEを使用してワークスペースに接続するオプションを提供します。
+
+1. 次のコマンドを実行して、デフォルトIDEをVSCode Browserに設定します：
+
+```shell
+daytona ide
+```
+
+このコマンドを実行すると、Daytonaは利用可能なIDEのリストを表示し、デフォルトの選択肢として`VS Code - Browser`を選択できます。
+
+```text
+Choose Your Default IDE
+
+| VS Code - Browser
+```
+
+2. 表示されたリストから**`VS Code - Browser`**を選択します。選択すると、DaytonaはそれをデフォルトのIDEとして設定し、確認メッセージを表示します。
+
+```text
+Default IDE:  VS Code - Browser
+```
+
+これで`daytona code`コマンドを使用して、ワークスペースに既に接続されたVS Code - Browser IDEを自動的に開くことができます。
+
+:::note
+`VS Code - Browser`をデフォルトIDEとして`daytona code`コマンドを使用する場合、Daytonaはプロジェクト内にOpenVSCode Serverをインストールし、適切なポートをローカルマシンに転送し、デフォルトブラウザを自動的に開きます。
+:::
+
+## VS Code Insiders
+
+DaytonaはVisual Studio Code Insiders IDEを使用してワークスペースに接続するオプションを提供します。
+
+1. 以下のコマンドを実行して、デフォルトIDEをVS Code Insidersに設定します：
+
+```shell
+daytona ide
+```
+
+このコマンドを実行すると、Daytonaは利用可能なIDEのリストを表示し、デフォルトの選択肢として`VS Code Insiders`を選択できます。
+
+```text
+Choose Your Default IDE
+
+| VS Code Insiders
+```
+
+2. 表示されたリストから**`VS Code Insiders`**を選択します。選択すると、DaytonaはそれをデフォルトのIDEとして設定し、確認メッセージを表示します。
+
+```text
+Default IDE:  VS Code Insiders
+```
+
+これで`daytona code`コマンドを使用して、ワークスペースに既に接続されたVS Code Insiders IDEを自動的に開くことができます。
+
+:::note
+ローカルマシンに[VS Code Insiders]( https://code.visualstudio.com/insiders/)がインストールされていることを確認してください。VS Code Insiders IDEを既にインストールしている場合は、PATH環境変数に追加されていることを確認してください。ターミナルで以下のコマンドを実行することで確認できます：
+
+<br />
+
+```shell
+code-insiders
+```
+
+:::
+
+## VSCodium
+
+DaytonaはVSCodium IDEを使用してワークスペースに接続するオプションを提供します。
+
+1. 次のコマンドを実行して、デフォルトIDEをVSCodiumに設定します：
+
+```shell
+daytona ide
+```
+
+このコマンドを実行すると、Daytonaは利用可能なIDEのリストを表示し、デフォルトの選択肢として`VSCodium`を選択できます。
+
+```text
+Choose Your Default IDE
+
+| VSCodium
+```
+
+2. 表示されたリストから**`VSCodium`**を選択します。選択すると、DaytonaはそれをデフォルトのIDEとして設定し、確認メッセージを表示します。
+
+```text
+Default IDE:  VSCodium
+```
+
+これで`daytona code`コマンドを使用して、ワークスペースに既に接続されたVS Code Insiders IDEを自動的に開くことができます。
+
+:::note
+ローカルマシンに[VSCodium](https://vscodium.com/)がインストールされていることを確認してください。Visual Studio Code Insiders IDEを既にインストールしている場合は、PATHに追加されていることを確認してください。
+:::
+
+## JetBrains CLion
+
+DaytonaはJetBrains CLion IDEを使用してワークスペースに接続するオプションを提供します。
+
+1. 以下のコマンドを実行して、デフォルトIDEをJetBrains CLionに設定します：
+
+```shell
+daytona ide
+```
+
+このコマンドを実行すると、Daytonaは利用可能なIDEのリストを表示し、デフォルトの選択肢として`CLion`を選択できます。
+
+```text
+Choose Your Default IDE
+
+| CLion
+```
+
+2. 表示されたリストから**`CLion`**を選択します。選択すると、DaytonaはそれをデフォルトIDEとして設定し、確認メッセージを表示します。
+
+```text
+Default IDE:  CLion
+```
+
+これで`daytona code`コマンドを使用して、ワークスペースに既に接続されたJetBrains CLion IDEを自動的に開くことができます。
+
+## JetBrains GoLand
+
+DaytonaはJetBrains GoLand IDEを使用してワークスペースに接続するオプションを提供します。
+
+1. 以下のコマンドを実行して、デフォルトIDEをJetBrains GoLandに設定します：
+
+```shell
+daytona ide
+```
+
+このコマンドを実行すると、Daytonaは利用可能なIDEのリストを表示し、デフォルトの選択肢として`GoLand`を選択できます。
+
+```text
+Choose Your Default IDE
+
+| GoLand
+```
+
+2. 表示されたリストから**`GoLand`**を選択します。選択すると、DaytonaはそれをデフォルトのIDEとして設定し、確認メッセージを表示します。
+
+```text
+Default IDE:  GoLand
+```
+
+これで`daytona code`コマンドを使用して、ワークスペースに既に接続されたJetBrains GoLand IDEを自動的に開くことができます。
+
+## JetBrains IntelliJ IDEA Ultimate
+
+DaytonaはJetBrains IntelliJ IDEA Ultimate IDEを使用してワークスペースに接続するオプションを提供します。
+
+1. 以下のコマンドを実行して、デフォルトIDEをJetBrains IntelliJ IDEA Ultimateに設定します：
+
+```shell
+daytona ide
+```
+
+このコマンドを実行すると、Daytonaは利用可能なIDEのリストを表示し、デフォルトの選択肢として`IntelliJ IDEA Ultimate`を選択できます。
+
+```text
+Choose Your Default IDE
+
+| IntelliJ IDEA Ultimate
+```
+
+2. 表示されたリストから**`IntelliJ IDEA Ultimate`**を選択します。選択すると、DaytonaはそれをデフォルトIDEとして設定し、確認メッセージを表示します。
+
+```text
+Default IDE: IntelliJ IDEA Ultimate
+```
+
+これで`daytona code`コマンドを使用して、ワークスペースに既に接続されたJetBrains IntelliJ IDEA Ultimate IDEを自動的に開くことができます。
+
+## JetBrains PhpStorm
+
+DaytonaはJetBrains PhpStorm IDEを使用してワークスペースに接続するオプションを提供します。
+
+1. 以下のコマンドを実行して、デフォルトIDEをJetBrains PhpStormに設定します：
+
+```shell
+daytona ide
+```
+
+このコマンドを実行すると、Daytonaは利用可能なIDEのリストを表示し、デフォルトの選択肢として`PhpStorm`を選択できます。
+
+```text
+Choose Your Default IDE
+
+| PhpStorm
+```
+
+2. 表示されたリストから**`PhpStorm`**を選択します。選択すると、DaytonaはそれをデフォルトIDEとして設定し、確認メッセージを表示します。
+
+```text
+Default IDE: PhpStorm
+```
+
+これで`daytona code`コマンドを使用して、ワークスペースに既に接続されたJetBrains PhpStorm IDEを自動的に開くことができます。
+
+## JetBrains PyCharm Professional
+
+DaytonaはJetBrains PyCharm Professional IDEを使用してワークスペースに接続するオプションを提供します。
+
+1. 以下のコマンドを実行して、デフォルトIDEをJetBrains PyCharm Professionalに設定します：
+
+```shell
+daytona ide
+```
+
+このコマンドを実行すると、Daytonaは利用可能なIDEのリストを表示し、デフォルトの選択肢として`PyCharm Professional`を選択できます。
+
+```text
+Choose Your Default IDE
+
+| PyCharm Professional
+```
+
+2. 表示されたリストから**`PyCharm Professional`**を選択します。選択すると、DaytonaはそれをデフォルトIDEとして設定し、確認メッセージを表示します。
+
+```text
+Default IDE: PyCharm Professional
+```
+
+これで`daytona code`コマンドを使用して、ワークスペースに既に接続されたJetBrains PyCharm Professional IDEを自動的に開くことができます。
+
+## JetBrains Rider
+
+DaytonaはJetBrains Rider IDEを使用してワークスペースに接続するオプションを提供します。
+
+1. 以下のコマンドを実行して、デフォルトIDEをJetBrains Riderに設定します：
+
+```shell
+daytona ide
+```
+
+このコマンドを実行すると、Daytonaは利用可能なIDEのリストを表示し、デフォルトの選択肢として`Rider`を選択できます。
+
+```text
+Choose Your Default IDE
+
+| Rider
+```
+
+2. 表示されたリストから**`Rider`**を選択します。選択すると、DaytonaはそれをデフォルトIDEとして設定し、確認メッセージを表示します。
+
+```text
+Default IDE: Rider
+```
+
+これで`daytona code`コマンドを使用して、ワークスペースに既に接続されたJetBrains Rider IDEを自動的に開くことができます。
+
+## JetBrains RubyMine
+
+DaytonaはJetBrains RubyMine IDEを使用してワークスペースに接続するオプションを提供します。
+
+1. 以下のコマンドを実行して、デフォルトIDEをJetBrains RubyMineに設定します：
+
+```shell
+daytona ide
+```
+
+このコマンドを実行すると、Daytonaは利用可能なIDEのリストを表示し、デフォルトの選択肢として`RubyMine`を選択できます。
+
+```text
+Choose Your Default IDE
+
+| RubyMine
+```
+
+2. 表示されたリストから**`RubyMine`**を選択します。選択すると、DaytonaはそれをデフォルトIDEとして設定し、確認メッセージを表示します。
+
+```text
+Default IDE: RubyMine
+```
+
+これで`daytona code`コマンドを使用して、ワークスペースに既に接続されたJetBrains RubyMine IDEを自動的に開くことができます。
+
+## JetBrains WebStorm
+
+DaytonaはJetBrains WebStorm IDEを使用してワークスペースに接続するオプションを提供します。
+
+1. 以下のコマンドを実行して、デフォルトIDEをJetBrains WebStormに設定します：
+
+```shell
+daytona ide
+```
+
+このコマンドを実行すると、Daytonaは利用可能なIDEのリストを表示し、デフォルトの選択肢として`WebStorm`を選択できます。
+
+```text
+Choose Your Default IDE
+
+| WebStorm
+```
+
+2. 表示されたリストから**`WebStorm`**を選択します。選択すると、DaytonaはそれをデフォルトIDEとして設定し、確認メッセージを表示します。
+
+```text
+Default IDE: WebStorm
+```
+
+これで`daytona code`コマンドを使用して、ワークスペースに既に接続されたJetBrains WebStorm IDEを自動的に開くことができます。
+
+## JetBrains Fleet
+
+DaytonaはJetBrains Fleet IDEを使用してワークスペースに接続するオプションを提供します。
+
+1. 以下のコマンドを実行して、デフォルトIDEをJetBrains Fleetに設定します：
+
+```shell
+daytona ide
+```
+
+このコマンドを実行すると、Daytonaは利用可能なIDEのリストを表示し、デフォルトの選択肢として`Fleet`を選択できます。
+
+```text
+Choose Your Default IDE
+
+| Fleet
+```
+
+2. 表示されたリストから**`Fleet`**を選択します。選択すると、DaytonaはそれをデフォルトのIDEとして設定し、確認メッセージを表示します。
+
+```text
+Default IDE: Fleet
+```
+
+以下の手順に従って、`daytona code`コマンドを使用してワークスペースに既に接続されたJetBrains WebStorm IDEを自動的に開くことができます：
+
+- [JetBrains Toolbox](https://www.jetbrains.com/toolbox-app/)をインストールします。
+
+- JetBrains Toolboxを使用してJetBrains Fleet IDEをインストールします。
+
+- JetBrains Fleet IDEが`PATH`に含まれていることを確認し、シェルスクリプトに`fleet`という名前を付けます。詳細については、公式の[Launch JetBrains Fleet from CLI](https://www.jetbrains.com/help/fleet/launch-from-cli.html)ガイドをご覧ください。
+
+## Jupyter
+
+DaytonaはJupyter IDEを使用してワークスペースに接続するオプションを提供します。
+
+1. 以下のコマンドを実行して、デフォルトIDEをJupyterに設定します：
+
+このコマンドを実行すると、Daytonaは利用可能なIDEのリストを表示し、デフォルトの選択肢として`Jupyter`を選択できます。
+
+```text
+Choose Your Default IDE
+
+| Jupyter
+```
+
+2. 表示されたリストから**`Jupyter`**を選択します。選択すると、DaytonaはそれをデフォルトのIDEとして設定し、確認メッセージを表示します。
+
+```text
+Default IDE: Jupyter
+```
+
+これで`daytona code`コマンドを使用して、ワークスペースに既に接続されたJupyter IDEを自動的に開くことができます。
+
+## Zed
+
+DaytonaはZed IDEを使用してワークスペースに接続するオプションを提供します。
+
+1. 以下のコマンドを実行して、デフォルトIDEをZedに設定します：
+
+このコマンドを実行すると、Daytonaは利用可能なIDEのリストを表示し、デフォルトの選択肢として`Zed`を選択できます。
+
+```text
+Choose Your Default IDE
+
+| Zed
+```
+
+2. 表示されたリストから**`Zed`**を選択します。選択すると、DaytonaはそれをデフォルトのIDEとして設定し、確認メッセージを表示します。
+
+```text
+Default IDE: Zed
+```
+
+これで`daytona code`コマンドを使用して、ワークスペースに既に接続されたZed IDEを自動的に開くことができます。
+
+## Cursor
+
+DaytonaはCursor IDEを使用してワークスペースに接続するオプションを提供します。
+
+:::note
+[Cursor](https://www.cursor.com/) IDEをインストールした後、コマンドパレットから`Install 'cursor' command`を実行してください。
+:::
+
+<br />
+
+1. 以下のコマンドを実行して、デフォルトIDEをCursorに設定します：
+
+このコマンドを実行すると、Daytonaは利用可能なIDEのリストを表示し、デフォルトの選択肢として`Cursor`を選択できます。
+
+```text
+Choose Your Default IDE
+| Cursor
+```
+
+2. 表示されたリストから**`Cursor`**を選択します。選択すると、DaytonaはそれをデフォルトIDEとして設定し、確認メッセージを表示します。
+
+```text
+Default IDE: Cursor
+```
+
+これで`daytona code`コマンドを使用して、ワークスペースに既に接続されたCursor IDEを自動的に開くことができます。
+
+## Headless
+
+Daytonaは、Headless IDEを使用して[Workspace Toolbox](/docs/ja/usage/workspaces#workspace-toolbox)に接続するオプションを提供します。
+
+Headless IDEは、シームレスな開発体験を提供し、Workspace環境内で直接操作を実行できるようにします。
+
+## Windsurf
+
+DaytonaはWindsurf IDEを使用してワークスペースに接続するオプションを提供します。
+
+1. 以下のコマンドを実行して、デフォルトIDEをWindsurfに設定します：
+
+```shell
+daytona ide
+```
+
+このコマンドを実行すると、Daytonaは利用可能なIDEのリストを表示し、デフォルトの選択肢として`Windsurf`を選択できます。
+
+```text
+Choose Your Default IDE
+
+| Windsurf
+```
+
+2. 表示されたリストから**`Windsurf`**を選択します。選択すると、DaytonaはそれをデフォルトのIDEとして設定し、確認メッセージを表示します。
+
+```text
+Default IDE:  Windsurf
+```
+
+これで`daytona code`コマンドを使用して、ワークスペースに既に接続されたWindsurf IDEを自動的に開くことができます。
+
+:::note
+ローカルマシンに[Windsurf](https://codeium.com/windsurf/download)がインストールされていることを確認してください。Windsurf IDEを既にインストールしている場合は、PATHに追加されていることを確認してください。
+:::
+
+## Terminal SSH
+
+DaytonaはTerminal SSHを通じてワークスペースに接続するオプションを提供します。
+
+1. 以下のコマンドを実行して、デフォルトIDEをTerminal SSHに設定します：
+
+```shell
+daytona ide
+```
+
+このコマンドを実行すると、Daytonaは利用可能なIDEのリストを表示し、デフォルトの選択肢として`Terminal SSH`を選択できます。
+
+```text
+Choose Your Default IDE
+
+| Terminal SSH
+```
+
+2. 表示されたリストから**`Terminal SSH`**を選択します。選択すると、DaytonaはそれをデフォルトのIDEとして設定し、確認メッセージを表示します。
+
+```text
+Default IDE: Terminal SSH
+```
+
+これで`daytona code`コマンドを使用して、ワークスペースに既に接続されたSSHセッションを自動的に開始できます。

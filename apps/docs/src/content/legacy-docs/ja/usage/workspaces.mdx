@@ -1,0 +1,344 @@
+---
+title: Workspaces
+description: Daytonaを使用してWorkspacesを作成・管理する方法を学びます。
+sidebar:
+  label: Workspaces
+---
+
+import Aside from '@components/Aside.astro'
+import Label from '@components/Label.astro'
+
+<Label>
+  Distribution: **Open Source**, **Cloud**, **Self-Managed**
+</Label>
+
+Workspacesは、プロジェクトのコードベース、依存関係、パッケージ、設定を含む分離された開発環境であり、開発、テスト、デプロイメントのための一貫性があり再現可能なセットアップを提供します。
+
+Workspacesは、Daytonaの中核コンポーネントとして機能し、制御された安全な環境でプロジェクトを作成、管理、共同作業することを可能にします。
+
+Workspacesは、クラウドベースやオンプレミス環境などの適切な[Target](/docs/ja/usage/targets)インフラストラクチャを使用してホストされます。これにより、あるプロジェクトでの変更が他のプロジェクトに意図せず影響を与えることを防ぎ、より安定で信頼性の高いワークフローを促進します。これは特に共同作業環境において有益で、すべてのチームメンバーが同じ設定で作業することを保証し、環境関連の問題が発生する可能性を減らします。
+
+## Workspaceの作成
+
+DaytonaでWorkspaceを作成することは、プロジェクト用の専用開発環境を確保するための簡単なプロセスです。
+
+Daytonaは、Workspaceを作成するための2つの主要な方法を提供しています：
+
+- [**Gitリポジトリから**](#from-a-git-repository)
+- [**任意のGit URLから**](#from-an-arbitrary-git-url)
+
+### Gitリポジトリから
+
+Gitリポジトリからワークスペースを作成すると、[接続されたGit Provider](/docs/ja/configuration/git-providers)またはカスタムGitリポジトリURLを使用して新しい開発環境がセットアップされます。
+
+1. 次のコマンドを実行して、GitリポジトリからWorkspaceを作成します：
+
+```shell
+daytona create
+```
+
+<Aside type="tip">
+`--no-ide`フラグを使用して、[IDE](/docs/ja/usage/ide)でWorkspaceを自動的に開くことをスキップします。
+
+```shell
+daytona create --no-ide
+```
+
+</Aside>
+
+<br />
+
+2. 提供される3つのオプションのうち1つを選択します：
+
+- **リポジトリのリストから選択**
+
+   [Git Providerを接続](/docs/ja/configuration/git-providers)している場合、Workspaceと接続するために選択できるリポジトリのリストが表示されます。
+
+- **カスタムリポジトリURLを入力**
+
+   または、リポジトリがGit Providerアカウントにリストされていない場合や外部ソースからのものである場合は、カスタムリポジトリURLを手動で入力するオプションを選択します。
+
+- **サンプルから作成**
+
+   準備されたGitリポジトリがない場合は、Daytonaが提供するサンプルプロジェクトからWorkspaceを作成できます。このオプションは、クイックスタートテンプレートを使用して新しい開発環境をセットアップします。
+
+```text
+Choose a Git Provider
+3 items
+===
+GitHub
+Enter a custom repository URL
+Create from Sample
+```
+
+3. Workspaceの名前を入力します。
+
+```text
+Workspace name
+>
+```
+
+<Aside type="tip">
+   `F10`を押してWorkspaceの詳細設定を構成します。
+   [Builder](/docs/ja/usage/builders)の設定も含まれます。
+</Aside>
+
+<br />
+
+4. WorkspaceをデプロイするTargetを選択します。Targetを選択すると、[Target設定](/docs/ja/configuration/target-config)の入力が求められます。設定は選択されたTargetによって異なります。
+
+Targetの選択と設定が完了すると、Daytonaは指定されたGitリポジトリをクローンし、その内容に基づいて新しいWorkspaceをセットアップします。ターミナルにWorkspace作成プロセスを示す進行状況情報が表示されます。
+
+```text
+<Target>    | ✓ Request submitted
+<Workspace> | Creating workspace <workspace> (<workspace_id>)
+<Workspace> | Pulling image...
+<Workspace> | Pulling from daytonaio/workspace-project
+<Workspace> | Digest: sha256:<sha256>
+<Workspace> | Status: Image is up to date for daytonaio/workspace-project:latest
+<Workspace> | ✓ Image pulled successfully
+<Workspace> | UIDs and GIDs are the same (1000:1000).
+<Workspace> | Cloning into '/workdir/<workspace>'...
+<Workspace> | UIDs and GIDs are the same (1000:1000).
+<Workspace> | ✓ Workspace <workspace> created
+```
+
+### 任意のGit URLから
+
+任意のGit URLからWorkspaceを作成すると、リモートリポジトリのURLを直接指定して新しい開発環境がセットアップされます。
+
+1. 次のコマンドを実行して、リモートGitリポジトリからWorkspaceを作成します：
+
+```shell
+daytona create <REPO_URL>
+```
+
+**例**
+
+```shell
+daytona create https://github.com/daytonaio/daytona.git
+```
+
+2. WorkspaceをデプロイするTargetを選択します。Targetを選択すると、[Target設定](/docs/ja/configuration/target-config)の入力が求められます。設定は選択されたTargetによって異なります。
+
+Targetの選択と設定が完了すると、Daytonaは指定されたGitリポジトリをクローンし、その内容に基づいて新しいWorkspaceをセットアップします。ターミナルにWorkspace作成プロセスを示す進行状況情報が表示されます。
+
+完了すると、指定されたリポジトリと設定でWorkspaceが使用可能になります。
+
+```text
+<Target>    | ✓ Request submitted
+<Workspace> | Creating workspace <workspace> (<workspace_id>)
+<Workspace> | Pulling image...
+<Workspace> | Pulling from daytonaio/workspace-project
+<Workspace> | Digest: sha256:<sha256>
+<Workspace> | Status: Image is up to date for daytonaio/workspace-project:latest
+<Workspace> | ✓ Image pulled successfully
+<Workspace> | UIDs and GIDs are the same (1000:1000).
+<Workspace> | Cloning into '/workdir/<workspace>'...
+<Workspace> | UIDs and GIDs are the same (1000:1000).
+<Workspace> | ✓ Workspace <workspace> created
+```
+
+<Aside type="tip">
+コマンドラインフラグを使用して、ワークスペース作成時にProject Builderを設定します。詳細については、**[Builders](/docs/ja/usage/builders)**を参照してください。
+</Aside>
+
+## Workspaceの一覧表示
+
+Daytonaは、以前に作成したすべてのWorkspaceを一覧表示することで、開発環境を追跡するオプションを提供します。これにより、複数の開発環境を管理し、Workspaceに簡単にアクセスして維持できることを確実にします。
+
+1. すべてのWorkspaceを一覧表示するには、次のコマンドを実行します：
+
+```shell
+daytona list
+```
+
+このコマンドを実行すると、DaytonaはWorkspaceの詳細とともに一覧を表示します。Workspace名、接続されているリポジトリ、Workspaceのターゲット、およびそのステータスを確認できます。
+
+```text
+Workspace    Repository       Target  Status               Branch
+─────────────────────────────────────────────────────────────────
+MyWorkspace  user/repository  local   STARTED (30 minutes) master
+```
+
+## 既存のワークスペースを開く
+
+Daytonaは、既存のワークスペースをIDEで開くオプションを提供します。これにより、お好みの開発環境でワークスペースに素早くアクセスして作業することができます。Daytonaを使用すると、異なるワークスペース間を簡単に切り替えて、効率的なワークフローを維持できます。
+
+1. 既存のワークスペースを開くには、以下のコマンドを実行します：
+
+```shell
+daytona code
+```
+
+このコマンドを実行すると、Daytonaはワークスペースの詳細とともにワークスペースのリストを表示します。ワークスペース名、ワークスペースの一意識別子、および接続されているリポジトリを確認できます。
+
+```text
+Select a Workspace To Open
+1 item
+
+MyProject
+abcdefg12hi3 (local)
+github.com/username/MyProject.git
+```
+
+2. 開きたいワークスペースを選択します。
+
+:::note
+お好みのIDEを使用するようにDaytonaを設定してください。
+詳細については、**[デフォルトIDEの設定](/docs/ja/usage/ide#set-the-default-ide)**を参照してください。
+:::
+
+## Workspaceの削除
+
+Daytonaは1つまたは複数のWorkspaceを削除するオプションを提供し、不要になった開発環境を削除することで開発環境の管理を支援します。
+
+1. 次のコマンドを実行してWorkspaceを削除します：
+
+```shell
+daytona delete
+```
+
+このコマンドを実行すると、DaytonaはWorkspaceの一覧とその詳細を表示します。Workspace名、Workspaceの一意識別子、および接続されているリポジトリを確認できます。
+
+```text
+Select Workspaces To Delete
+1 item
+
+MyWorkspace
+abcdefg12hi3 (local)
+github.com/username/MyProject.git
+```
+
+2. 削除するWorkspaceをハイライトして`x`を押すことでマークします。
+
+3. 選択したWorkspaceで`Enter`を押して削除します。
+
+```text
+Delete: MyWorkspace
+
+abcdefg12hi3 (local)
+github.com/username/MyProject.git
+```
+
+4. アクションを確認します。
+
+```text
+Delete workspace(s): [MyWorkspace]?
+Are you sure you want to delete the workspace(s): [MyWorkspace]?
+
+[Yes]   [No]
+```
+
+```text
+Workspace MyWorkspace successfully deleted
+```
+
+### 非対話的に
+
+Daytonaは既存の1つまたは複数のWorkspaceを非対話的に削除するオプションを提供し、手動選択なしで開発環境の迅速で自動化されたクリーンアップを可能にします。
+
+1. 次のコマンドを実行し、削除するワークスペース名/UUIDを指定します：
+
+```shell
+daytona delete WORKSPACE_1 WORKSPACE_2
+```
+
+このコマンドを実行すると、Daytonaは指定されたWorkspaceの削除を確認するプロンプトを表示します。削除しようとしているWorkspace名を確認でき、アクションを確認またはキャンセルするオプションがあります。
+
+```text
+Delete workspace(s): [MyWorkspace]?
+Are you sure you want to delete the workspace(s): [MyWorkspace]?
+
+[Yes]   [No]
+```
+
+2. アクションを確認して選択したWorkspaceを削除します。
+
+```text
+Workspace MyWorkspace successfully deleted
+```
+
+## Workspaceからポートを転送する
+
+Daytonaは柔軟なポート転送をサポートしており、Workspaceで実行されているサービスにローカルまたは共有可能なパブリックURL経由でアクセスできます。
+ポート転送により、Workspaceでプロジェクトを作業し、外部でコードをテストできます。
+
+### ポートにローカルでアクセスする
+
+Workspaceで実行されているサービスにローカルマシンからアクセスできます。
+
+**前提条件**
+
+- TCP/UDP経由でアクセス可能な少なくとも1つのサービスを持つ実行中のWorkspace。
+
+1. 実行中のWorkspaceからローカルマシンにポートを転送するには、以下のコマンドを実行します：
+
+```shell
+daytona forward <PORT> <WORKSPACE>
+```
+
+**例：** `example-dev-env` Workspaceのポート4321へのローカルアクセスを許可する。
+
+```shell
+daytona forward 4321 example-dev-env
+```
+
+このコマンドを実行すると、DaytonaはWorkspace内の指定されたポートからローカルマシンへのポート転送接続を確立します。ターミナルには、転送された接続が利用可能なローカルポートを示すメッセージが表示されます：
+
+```text
+Port available at http://localhost:4321
+```
+
+### パブリックURL経由でポートにアクセスする
+
+生成されたパブリックURL経由でWorkspaceで実行されているサービスにアクセスできます。
+これにより、リアルタイムで他の人と作業を共有できます。
+
+:::note
+この機能は、Daytona Platforms, Inc.がホストする無料のパブリックプロキシサービスを使用します。
+この機能を使用することで、あなたのデータがDaytonaの[プライバシーポリシー](https://www.daytona.io/company/privacy-policy)および[利用規約](https://www.daytona.io/company/terms-of-service)に従って処理されることを承認したものとします。
+:::
+
+**前提条件**
+
+- TCP/UDP経由でアクセス可能な少なくとも1つのサービスを持つ実行中のWorkspace。
+
+1. 実行中のWorkspaceのポートに対してパブリックURLを生成するには、以下のコマンドを実行します：
+
+```shell
+daytona forward <PORT> <WORKSPACE> <PROJECT> --public
+```
+
+**例：** `example-dev-env` Workspaceのポート4321にアクセスするためのURLを生成する。
+
+```shell
+daytona forward 4321 example-dev-env --public
+```
+
+このコマンドを実行すると、Daytonaはまずローカルポート転送接続を確立し、転送された接続が利用可能なローカルポートを示すメッセージを表示します。
+
+```text
+Port available at http://localhost:4321
+```
+
+その後、DaytonaはポートをパブリックURLに転送します。ターミナルには進行状況情報が表示され、完了時に生成されたパブリックURLが提供されます。
+
+```text
+Forwarding port to a public URL...
+Port available at:
+https://4321-ABC1DeF2GhI3JkLmNoP4RSTuVZ5.try-eu.daytona.app
+```
+
+このURLは他の人と共有して、Workspace内の指定されたポートで実行されているサービスへのリアルタイムアクセスを提供できます。
+
+<Aside type="tip">
+または、WorkspaceのシェルでNext以下のコマンドを実行してパブリックURLを生成することもできます：
+
+<br />
+
+```shell
+daytona forward <PORT>
+```
+
+</Aside>

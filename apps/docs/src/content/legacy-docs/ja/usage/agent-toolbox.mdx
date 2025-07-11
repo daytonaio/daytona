@@ -1,0 +1,202 @@
+---
+title: Agent Toolbox
+description: Workspace Toolbox APIを使用してWorkspaceをプログラム的に操作する方法を学びます。
+---
+
+Agent Toolboxは、[Workspace Toolbox API](/docs/ja/tools/api#get-workspaceworkspaceidprojectidtoolboxfiles)を提供することで、[Workspace](/docs/ja/usage/workspaces)をプログラム的に操作し、Workspace環境内でさまざまな操作を実行できるようにします。
+
+Workspace Toolbox APIは、ファイルシステム、Git、およびプロセス操作を提供し、Workspace内でファイルの管理、Gitコマンドの実行、プロセスの実行を可能にします。
+
+## ファイルシステム操作
+
+DaytonaはWorkspace Toolbox APIを使用してWorkspaceファイルシステムとプログラム的に対話するオプションを提供します。このAPIは以下のファイルシステム操作を提供します：
+
+### ファイル一覧
+
+Daytonaは`/workspace/{workspaceId}/{projectId}/toolbox/files`エンドポイントで`GET` HTTPメソッドを使用してWorkspace内のファイルを一覧表示するオプションを提供します。
+
+このAPIはWorkspace内に存在するファイルとディレクトリのリストを返します。
+
+### ファイル削除
+
+Daytonaは`/workspace/{workspaceId}/{projectId}/toolbox/files`エンドポイントで`DELETE` HTTPメソッドを使用してWorkspace内のファイルを削除するオプションを提供します。
+
+このAPIは指定されたファイルまたはディレクトリをWorkspaceから削除します。
+
+### フォルダ作成
+
+Daytonaは`/workspace/{workspaceId}/{projectId}/toolbox/createfolder`エンドポイントで`POST` HTTPメソッドを使用してWorkspace内に新しいフォルダを作成するオプションを提供します。
+
+このAPIは指定された名前でWorkspace内に新しいフォルダを作成します。
+
+### ファイルダウンロード
+
+Daytonaは`/workspace/{workspaceId}/{projectId}/toolbox/download`エンドポイントで`GET` HTTPメソッドを使用してWorkspaceからファイルをダウンロードするオプションを提供します。
+
+このAPIは指定されたファイルをWorkspaceからダウンロードします。
+
+### ファイル検索
+
+Daytonaは`/workspace/{workspaceId}/{projectId}/toolbox/find`エンドポイントで`GET` HTTPメソッドを使用してWorkspace内のファイルを検索するオプションを提供します。
+
+このAPIはWorkspace内で指定された名前のファイルを検索します。
+
+### ファイル情報
+
+Daytonaは`/workspace/{workspaceId}/{projectId}/toolbox/info`エンドポイントで`GET` HTTPメソッドを使用してWorkspace内のファイルに関する情報を取得するオプションを提供します。
+
+このAPIはWorkspace内の指定されたファイルに関する情報を返します。
+
+### ファイル移動
+
+Daytonaは`/workspace/{workspaceId}/{projectId}/toolbox/move`エンドポイントで`POST` HTTPメソッドを使用してWorkspace内のファイルを移動するオプションを提供します。
+
+このAPIは指定されたファイルをWorkspace内の指定された宛先に移動します。
+
+### ファイル権限
+
+Daytonaは`/workspace/{workspaceId}/{projectId}/toolbox/permissions`エンドポイントで`POST` HTTPメソッドを使用してWorkspace内のファイル権限を設定するオプションを提供します。
+
+このAPIはWorkspace内の指定されたファイルに対して指定された権限を設定します。
+
+### ファイル置換
+
+Daytonaは`/workspace/{workspaceId}/{projectId}/toolbox/replace`エンドポイントで`POST` HTTPメソッドを使用してWorkspace内のファイルを置換するオプションを提供します。
+
+このAPIはWorkspace内の指定されたファイルを指定されたコンテンツで置換します。
+
+### ファイル検索
+
+Daytonaは`/workspace/{workspaceId}/{projectId}/toolbox/search`エンドポイントで`GET` HTTPメソッドを使用してWorkspace内のファイルを検索するオプションを提供します。
+
+このAPIはWorkspace内で指定されたコンテンツを含むファイルを検索します。
+
+### ファイルアップロード
+
+Daytonaは`/workspace/{workspaceId}/{projectId}/toolbox/upload`エンドポイントで`POST` HTTPメソッドを使用してWorkspaceにファイルをアップロードするオプションを提供します。
+
+このAPIは指定されたファイルをWorkspaceにアップロードします。
+
+## Git操作
+
+DaytonaはWorkspace Toolbox APIを使用してワークスペースのGitリポジトリとプログラム的に対話するオプションを提供します。このAPIは以下のGit操作を提供します：
+
+### ファイルの追加
+
+Daytonaは`/workspace/{workspaceId}/{projectId}/toolbox/git/add`エンドポイントで`POST` HTTPメソッドを使用してワークスペースのGitリポジトリにファイルを追加するオプションを提供します。
+
+このAPIは指定されたファイルをGitリポジトリに追加します。
+
+### ブランチの一覧表示
+
+Daytonaは`/workspace/{workspaceId}/{projectId}/toolbox/git/branches`エンドポイントで`GET` HTTPメソッドを使用してワークスペースのGitリポジトリのブランチを一覧表示するオプションを提供します。
+
+このAPIはGitリポジトリに存在するブランチのリストを返します。
+
+### ブランチの作成
+
+Daytonaは`/workspace/{workspaceId}/{projectId}/toolbox/git/createbranch`エンドポイントで`POST` HTTPメソッドを使用してワークスペースのGitリポジトリに新しいブランチを作成するオプションを提供します。
+
+このAPIはGitリポジトリに指定された名前で新しいブランチを作成します。
+
+### リポジトリのクローン
+
+Daytonaは`/workspace/{workspaceId}/{projectId}/toolbox/git/clone`エンドポイントで`POST` HTTPメソッドを使用してGitリポジトリをワークスペースにクローンするオプションを提供します。
+
+このAPIは指定されたGitリポジトリをワークスペースにクローンします。
+
+### 変更のコミット
+
+Daytonaは`/workspace/{workspaceId}/{projectId}/toolbox/git/commit`エンドポイントで`POST` HTTPメソッドを使用してワークスペースのGitリポジトリに変更をコミットするオプションを提供します。
+
+このAPIは指定されたメッセージでGitリポジトリに変更をコミットします。
+
+### コミット履歴
+
+Daytonaは`/workspace/{workspaceId}/{projectId}/toolbox/git/history`エンドポイントで`GET` HTTPメソッドを使用してワークスペースのGitリポジトリのコミット履歴を取得するオプションを提供します。
+
+このAPIはGitリポジトリのコミット履歴を返します。
+
+### 変更のプル
+
+Daytonaは`/workspace/{workspaceId}/{projectId}/toolbox/git/pull`エンドポイントで`POST` HTTPメソッドを使用してリモートGitリポジトリからワークスペースに変更をプルするオプションを提供します。
+
+このAPIはリモートリポジトリからワークスペースに変更をプルします。
+
+### 変更のプッシュ
+
+Daytonaは`/workspace/{workspaceId}/{projectId}/toolbox/git/push`エンドポイントで`POST` HTTPメソッドを使用してワークスペースのGitリポジトリからリモートリポジトリに変更をプッシュするオプションを提供します。
+
+このAPIはワークスペースからリモートリポジトリに変更をプッシュします。
+
+### Gitステータス
+
+Daytonaは`/workspace/{workspaceId}/{projectId}/toolbox/git/status`エンドポイントで`GET` HTTPメソッドを使用してワークスペースのGitリポジトリのステータスを取得するオプションを提供します。
+
+このAPIはGitリポジトリのステータスを返します。
+
+## Language Server Protocol (LSP)
+
+DaytonaはWorkspace Toolbox APIを使用してLanguage Server Protocol (LSP)とプログラム的に対話するオプションを提供します。このAPIは以下のLSP操作を提供します：
+
+### LSP補完
+
+Daytonaは`/workspace/{workspaceId}/{projectId}/toolbox/lsp/completions`エンドポイントで`POST` HTTPメソッドを使用して、指定されたテキストの補完を取得するオプションを提供します。
+
+このAPIは指定されたテキストの補完を返します。
+
+### LSP DidClose
+
+Daytonaは`/workspace/{workspaceId}/{projectId}/toolbox/lsp/didclose`エンドポイントで`POST` HTTPメソッドを使用して、ファイルが閉じられたことをLanguage Serverに通知するオプションを提供します。
+
+このAPIは指定されたファイルが閉じられたことをLanguage Serverに通知します。
+
+### LSP DidOpen
+
+Daytonaは`/workspace/{workspaceId}/{projectId}/toolbox/lsp/didopen`エンドポイントで`POST` HTTPメソッドを使用して、ファイルが開かれたことをLanguage Serverに通知するオプションを提供します。
+
+このAPIは指定されたファイルが開かれたことをLanguage Serverに通知します。
+
+### LSPドキュメントシンボル
+
+Daytonaは`/workspace/{workspaceId}/{projectId}/toolbox/lsp/documentsymbols`エンドポイントで`GET` HTTPメソッドを使用して、指定されたテキストのドキュメントシンボルを取得するオプションを提供します。
+
+このAPIは指定されたテキストのドキュメントシンボルを返します。
+
+### LSPサーバーの開始
+
+Daytonaは`/workspace/{workspaceId}/{projectId}/toolbox/lsp/start`エンドポイントで`POST` HTTPメソッドを使用してLanguage Serverを開始するオプションを提供します。
+
+このAPIはWorkspace内でLanguage Serverを開始します。
+
+### LSPサーバーの停止
+
+Daytonaは`/workspace/{workspaceId}/{projectId}/toolbox/lsp/stop`エンドポイントで`POST` HTTPメソッドを使用してLanguage Serverを停止するオプションを提供します。
+
+このAPIはWorkspace内でLanguage Serverを停止します。
+
+### Workspaceシンボル
+
+Daytonaは`/workspace/{workspaceId}/{projectId}/toolbox/lsp/workspacesymbols`エンドポイントで`GET` HTTPメソッドを使用して、指定されたテキストのWorkspaceシンボルを取得するオプションを提供します。
+
+このAPIは指定されたテキストのWorkspaceシンボルを返します。
+
+## プロセス操作
+
+DaytonaはWorkspace Toolbox APIを使用してワークスペースプロセスとプログラム的に対話するオプションを提供します。このAPIは以下のプロセス操作を提供します：
+
+### コマンド実行
+
+Daytonaは`/workspace/{workspaceId}/{projectId}/toolbox/execute`エンドポイントで`POST` HTTPメソッドを使用してワークスペース内でコマンドを実行するオプションを提供します。
+
+このAPIはワークスペース内で指定されたコマンドを実行します。
+
+## プロジェクトディレクトリ
+
+DaytonaはWorkspace Toolbox APIを使用してプロジェクトディレクトリとプログラム的にやり取りするオプションを提供します。このAPIは以下のプロジェクトディレクトリ操作を提供します：
+
+### プロジェクトディレクトリの取得
+
+Daytonaは`/workspace/{workspaceId}/{projectId}/toolbox/projectdir`エンドポイントで`GET` HTTPメソッドを使用してプロジェクトディレクトリパスを取得するオプションを提供します。
+
+このAPIはワークスペース内のプロジェクトディレクトリのパスを返します。

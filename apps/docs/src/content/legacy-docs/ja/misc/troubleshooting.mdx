@@ -1,0 +1,72 @@
+---
+title: トラブルシューティング
+description: Daytonaのトラブルシューティング
+sidebar:
+  label: トラブルシューティング
+---
+
+以下のトラブルシューティングのヒントを使用して、Daytonaでよくある問題を解決できます。
+
+## 接続の問題
+
+### VPNとファイアウォール
+
+VPNがすべてのIPトラフィックを処理するように設定されている場合、またはファイアウォールが特定のIPアドレスをブロックするように設定されている場合、Daytonaがリバースプロキシサービスに正常に接続できない可能性があります。
+この問題は、以下を含むさまざまな方法で現れる可能性があります：
+
+- `control not running`エラーによりDaytona Serverを開始できない。
+- `Failed to connect to server: Get "http://server/health": lookup server...`エラーによりワークスペースの作成に失敗する。
+- Tailscale接続の確立時のタイムアウトにより、`daytona code`または`daytona ssh`を使用してワークスペースに入ることができない。
+
+この問題を回避するには、VPNまたはファイアウォールに以下のIPアドレス例外を追加する必要がある場合があります：
+
+- `35.198.165.62` - ヨーロッパベースのリバースプロキシ
+- `34.133.75.4` - アメリカベースのリバースプロキシ
+
+## WSL2 with Visual Studio Code
+
+### 説明
+
+WSL2でDaytonaを実行すると、Visual Studio Code IDEとシームレスに動作しません。この問題は、Visual Studio CodeがネイティブWindows SSHクライアントに依存している一方で、Daytonaがワークスペース固有のSSH接続設定を設定するためにLinux SSH設定ファイルを変更することから生じます。
+
+DaytonaはSSH設定で定義されている`daytona ssh-proxy`を呼び出すProxyCommandを使用します。この設定は、DaytonaバイナリがLinuxファイルシステム内に配置されていることを前提としており、これがVisual Studio CodeのWindows環境への依存と競合を生み出します。
+
+この問題はDaytona固有のものではなく、Visual Studio Codeリモート開発プラグインの制限に起因しています。このプラグインは現在、`code` CLIを呼び出す際にカスタムの「remote SSH path」フラグを渡すことをサポートしていません。この機能がないため、DaytonaのLinux固有設定への依存がVisual Studio CodeのWindows ネイティブツールへの依存と競合します。
+
+### 解決策
+
+Visual Studio Codeプラグインで「remote SSH path」フラグの公式サポートを待つ間、以下の回避策でこの問題に対処できます。この解決策では、WindowsとLinux SSHクライアントをシームレスな動作のために調整するスクリプトの作成と設定の変更が含まれます。
+
+1. 以下の内容で**`wsl_ssh.bat`**スクリプトを作成します：
+
+```bash
+C:\Windows\system32\wsl.exe ssh %*
+```
+
+2. **`wsl_ssh.bat`**スクリプトを以下のディレクトリに保存します：
+
+```text
+C:\Users\<USERNAME>\AppData\Roaming\bin\wsl_ssh.bat
+```
+
+3. Visual Studio Codeの**`settings.json`**ファイルを更新して、**`wsl_ssh.bat`**スクリプトをSSHパスとして使用するようにします：
+
+```sh
+"remote.SSH.path": "C:\\Users\\<USERNAME>\\AppData\\Roaming\\bin\\wsl_ssh.bat"
+```
+
+:::tip
+`settings.json`ファイルは以下のディレクトリにあります：
+
+`C:\Users\<USERNAME>\AppData\Roaming\Code\User\settings.json`
+:::
+
+<br />
+
+4. ネイティブSSH設定をWSL2 SSH設定と同期するためのシンボリックリンクを作成します：
+
+```sh
+ln -s /mnt/c/Users/<USERNAME>/.ssh/config config
+```
+
+これにより、環境間でSSH設定の一貫性が保たれます。

@@ -119,7 +119,7 @@ function Search() {
         <InstantSearch indexName="docs" searchClient={searchClient}>
           <div className="search-bar-container">
             <SearchBox
-              translations={{ placeholder: 'Search daytona.io' }}
+              translations={{ placeholder: t('search.placeholder') }}
               autoFocus
               onChange={event => setSearchQuery(event.currentTarget.value)}
               value={searchQuery}

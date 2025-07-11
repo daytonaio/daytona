@@ -1,0 +1,112 @@
+---
+title: APIキー
+description: Daytona APIキーの作成と管理方法を学びます。
+---
+
+import Label from '@components/Label.astro'
+
+<Label>
+  Distribution: **Open Source**
+</Label>
+
+Daytona APIキーは、[Daytona API](/docs/ja/tools/api)へのリクエストを認証するために使用されます。Daytonaは、APIリクエストを管理するためのAPIキーの生成、生成されたすべてのAPIキーの一覧表示、およびAPIキーの取り消しのオプションを提供します。
+
+## API キーの生成
+
+Daytona は API キーを生成するオプションを提供します。
+
+1. 以下のコマンドを実行して API キーを生成します：
+
+```bash
+daytona api-key generate
+```
+
+このコマンドを実行すると、Daytona は API キーの名前を入力するよう求めます。
+
+```text
+Name
+>
+```
+
+API キーの生成が成功すると、Daytona は以下の確認メッセージを表示します：
+
+```text
+You have successfully generated a new API Key and Server URL, which you can find below:
+
+DAYTONA_API_KEY=your-api-key
+DAYTONA_SERVER_URL=your-server-url
+```
+
+Daytona は、以下のコマンドを実行することで、クライアントマシンから Daytona Server に即座に接続するオプションを提供します：
+
+```bash
+daytona profile add -a <your-server-url> -k <your-api-key>
+```
+
+## API キーの一覧表示
+
+Daytona は生成されたすべての API キーを一覧表示するオプションを提供します。
+
+1. 生成されたすべての API キーを一覧表示するには、以下のコマンドを実行してください：
+
+```bash
+daytona api-key list
+```
+
+このコマンドを実行すると、Daytona は生成されたすべての API キーの一覧を表示します。
+
+```text
+Name                                Type
+──────────────────────────────────────────
+default                             client
+```
+
+:::tip
+Daytona は既存の Daytona Server API URL を表示するオプションを提供します。
+
+<br />
+
+```bash
+daytona server config
+```
+
+```text
+API URL:  https://<server-id>.try-eu.daytona.app
+```
+
+:::
+
+## API キーの取り消し
+
+Daytona では API キーを取り消すオプションが提供されています。
+
+1. 以下のコマンドを実行して API キーを取り消します：
+
+```bash
+daytona api-key revoke
+```
+
+このコマンドを実行すると、Daytona は取り消したい API キーの名前を入力するよう求めます。
+
+```text
+Select an API key to revoke
+1 item
+===
+MyAPIKey
+client
+```
+
+3. 選択した API キーで **`Enter`** を押して取り消します。
+
+4. **`Yes`** または **`No`** を選択して取り消しを確認します。
+
+```text
+Revoke API Key 'test'?
+Are you sure you want to revoke 'test'?
+
+[Yes]     [No]
+```
+
+```text
+API key revoked
+```

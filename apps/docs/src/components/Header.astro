@@ -6,7 +6,6 @@ import documentationIcon from '@assets/icons/documentation-icon.svg?raw'
 import searchIcon from '@assets/icons/search.svg?raw'
 import Version from '@components/Version.astro'
 import Search from '@components/Search'
-
 import '../styles/components/search.scss'
 
 const algoliaEnabled =
@@ -27,7 +26,9 @@ const algoliaEnabled =
     </div>
     <div class="logo-divider">
       <a href={import.meta.env.BASE_URL} class="dotfiles-logo"
-        ><Fragment set:html={documentationIcon} />Documentation
+        ><Fragment set:html={documentationIcon} />{
+          Astro.props.labels['header.documentation']
+        }
       </a>
     </div>
     <div class="nav__items_side_menu">
@@ -39,7 +40,7 @@ const algoliaEnabled =
           </p>
         )
       }
-      <SideNavLinks client:load />
+      <SideNavLinks client:load locale={Astro.props.lang} />
     </div>
   </nav>
   <nav class="mobile-navigation">

@@ -1,0 +1,105 @@
+---
+title: Docker Extension
+description: Daytona Docker extensionを使用してWorkspaceの作成、オープン、一覧表示、削除を行う方法を学びます。
+---
+
+import Label from '@components/Label.astro'
+
+<Label>
+  Distribution: **Open Source**, **Self-Managed**
+</Label>
+
+DaytonaはDocker Desktop内で直接Daytonaクライアントとサーバーツールの組み込みバージョンを使用するためのDocker Extensionを提供しています。
+
+Docker Extensionは[Workspaces](/docs/ja/usage/workspaces)の作成、オープン、一覧表示、削除のオプションを提供します。
+
+Daytona Docker Extensionは[Docker Desktop Extensions Marketplace](https://open.docker.com/extensions/marketplace?extensionId=daytonaio/docker-extension&tag=0.44.0)または[GitHubリポジトリ](https://open.docker.com/extensions/marketplace?extensionId=daytonaio/docker-extension&tag=0.44.0)でご覧いただけます。
+
+## 前提条件
+
+- マシンに[Docker Desktop](https://www.docker.com/products/docker-desktop)がインストールされていること。
+
+## インストール
+
+{/* Install the Daytona Docker Extension from the [Docker Desktop Extensions Marketplace](https://open.docker.com/extensions/marketplace?extensionId=daytonaio/docker-extension&tag=0.44.0).
+
+### Manual */}
+
+1. 以下のコマンドを実行してDaytona Docker Extensionをインストールします
+
+```sh
+docker extension install daytonaio/docker-extension
+```
+
+:::note
+Daytona Docker extensionをインストールするには、Docker desktopの設定でマーケットプレイス以外の拡張機能を許可してください。
+:::
+
+Daytona Docker ExtensionがWorkspaceをセットアップするまでお待ちください。環境の初期化と設定をすべて処理します。
+
+## ワークスペースを作成する
+
+Docker Desktop内のDaytona Docker Extensionを使用して新しいワークスペースを作成します。
+
+1. **`Create Workspace`**をクリックして新しいワークスペースの作成を開始します。
+2. ワークスペースリソースを選択します。以下のオプションから選択できます：
+
+- Gitリポジトリを参照する。
+- 事前定義されたサンプルを選択する。
+- URLで検索する。
+
+3. ドロップダウンリストから**`IDE`**を選択します。
+4. ドロップダウンリストから**`Target`**を選択します。
+5. **`Next`**をクリックして続行します。
+
+```text
+Opening the project <project> from workspace <workspace> in <IDE>
+
+Setting up IDE customizations...
+Waiting for code server to install...
+Installing extensions...
+Setting up IDE settings...
+...
+```
+
+Daytona Docker Extensionは選択した設定で新しいワークスペースを作成します。これで[ワークスペースを開いて](#open-an-existing-workspace)プロジェクトでの作業を開始できます。
+
+## 既存のワークスペースを開く
+
+Daytona Docker Extensionは、既存のワークスペースをIDEで開くオプションを提供します。これにより、お好みの開発環境でプロジェクトに素早くアクセスして作業することができます。Daytona Docker Extensionを使用すると、異なるワークスペース間を簡単に切り替えて、効率的なワークフローを維持できます。
+
+1. 開きたいワークスペースのIDEボタンをクリックします。
+
+    これにより、選択したIDEでワークスペースが自動的に起動されます。
+
+## ワークスペースの管理
+
+Daytona Docker Extensionは、ワークスペースにアクセスして管理するオプションを提供し、ワークスペース設定の詳細な概要を提供します。
+
+ワークスペースが作成されると、以下のオプションと情報が表示されます：
+
+- **名前**
+
+    ワークスペースの名前と、関連付けられているGitHubリポジトリ。
+
+- **ステータス**
+
+    `Running`や`Stopped`など、ワークスペースの現在のステータス。
+
+- **ターゲット**
+
+    ワークスペースのターゲット環境。
+
+- **IDE**
+
+    ワークスペースを開くために使用されるIDE。
+
+- [**削除**](#delete-a-workspace)
+
+    ゴミ箱アイコンをクリックして、Daytona Docker Extensionからワークスペースを削除します。
+
+## Workspaceを削除する
+
+Daytona Docker Extensionは、1つまたは複数のWorkspaceを削除するオプションを提供し、不要になった開発環境を削除することで開発環境の管理を支援します。
+
+1. ゴミ箱アイコンをクリックしてWorkspaceを削除します。

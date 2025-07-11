@@ -1,0 +1,296 @@
+---
+title: Server
+description: Daytonaサーバーのリファレンス。
+sidebar:
+  label: Server 
+---
+
+import Label from '@components/Label.astro'
+
+<Label>
+  Distribution: **Open Source**
+</Label>
+
+Daytona Serverは、あなたのマシン上で動作し、[Workspaces](/docs/ja/usage/workspaces)関連のアクションを処理するデーモンです。
+サーバー操作の[開始](#start-the-server)、[設定](#configure-the-server)、[停止](#stop-the-server)の機能を提供します。
+サーバーとやり取りする主な方法は、Daytona CLIを通じてです。ユーザーは、HTTPインターフェースを使用してDaytona Serverとやり取りすることもできます。
+
+## サーバーを開始する
+
+以下のコマンドを実行してDaytonaサーバーを開始します：
+
+```shell
+daytona server start
+```
+
+このコマンドを実行すると、DaytonaはDaytonaサーバーデーモンを開始します。
+
+```text
+Starting the Daytona Server daemon...
+```
+
+## サーバーの設定
+
+Daytonaサーバーの設定は、お使いのオペレーティングシステムによって異なるディレクトリに配置されています。
+
+- macOSでは、設定ファイルは以下の場所にあります：
+
+    `~/Library/Application\ Support/daytona/server/config.json`
+
+- Linuxでは、設定ファイルは以下の場所にあります：
+
+    `~/.config/daytona/server/config.json`
+
+- Windowsでは、設定ファイルは以下の場所にあります：
+
+    `C:\Users\YOUR_USERNAME\AppData\Roaming\daytona\server\config.json`
+
+Daytonaサーバーの設定は、すべてのオペレーティングシステムで以下のコマンドを使用して確認できます：
+
+```shell
+daytona server config
+```
+
+Daytonaサーバーの設定には以下のプロパティが含まれています：
+
+- **Server ID**
+
+    Daytonaサーバーインスタンスの一意の識別子です。
+
+    例：`12a34bc5-d67e-890f-1gh2-34i5jk6l7m89`
+
+- **API URL**
+
+    Daytona APIのURLエンドポイントです。
+
+    例：`https://api-12a34bc5-d67e-890f-1gh2-34i5jk6l7m89.try-eu.daytona.app`
+
+    API URLプロパティは手動で編集することはできませんが、他のクライアントでDaytonaに接続する際に使用できます。
+
+- **API Port**
+
+    Daytona APIがアクセス可能なポート番号です。
+
+    例：`3986`
+
+    ポート3986で何かが実行されている場合は、利用可能なポートに変更できます。
+
+- **Default Project Image**
+
+    プロジェクトで使用されるデフォルトのDockerイメージです。
+
+    例：`daytonaio/workspace-project:latest`
+
+    Default Project Imageプロパティは、異なるデフォルトプロジェクトイメージを使用するために手動で編集できます。
+
+- **Default Project User**
+
+    プロジェクトのデフォルトユーザーです。
+
+    例：`daytona`
+
+    Default Project Userプロパティは、異なるデフォルトプロジェクトユーザーを使用するために手動で編集できます。
+
+- **FRPS Domain**
+
+    FRP（Fast Reverse Proxy）サーバーで使用されるドメインです。
+
+    例：`try-eu.daytona.app`
+
+    FRPS Domainプロパティは、異なるFRPドメインを使用するために手動で編集できます。
+
+- **FRPS Port**
+
+    FRP（Fast Reverse Proxy）サーバーで使用されるポートです。
+
+    例：`7000`
+
+    FRPS Portプロパティは、異なるFRPポートを使用するために手動で編集できます。
+
+- **FRPS Protocol**
+
+    FRP（Fast Reverse Proxy）サーバーで使用されるプロトコルです。
+
+    例：`https`
+
+    FRPS Protocolプロパティは、異なるFRPプロトコルを使用するために手動で編集できます。
+
+- **Headscale Port**
+
+    Headscaleサービスのポート番号です。
+
+    例：`3987`
+
+    Headscale Portプロパティは、異なるHeadscaleポートを使用するために手動で編集できます。
+
+- **Binaries Path**
+
+    サーバーバイナリが保存されるディレクトリパスです。
+
+    例：`/Users/Library/Application Support/daytona/server/binaries`
+
+    Binaries Pathディレクトリは存在しない場合に作成され、このプロパティは異なるバイナリパスを使用するために手動で編集できます。
+
+- **Log File Path**
+
+    サーバーログが保存されるディレクトリパスです。
+
+    例：`/Users/Library/Application Support/daytona/server/daytona.log`
+
+    Log File Pathファイルは存在しない場合に作成され、このプロパティは異なるログファイルパスを使用するために手動で編集できます。
+
+- **Builder Image**
+
+    ローカルビルダーで使用されるDockerイメージです。
+
+    例：`daytonaio/workspace-project:latest`
+
+    Builder Imageプロパティは、異なるビルダーイメージを使用するために手動で編集できます。
+
+- **Local Builder Registry Port**
+
+    ローカルビルダーレジストリのポート番号です。
+
+    例：`3988`
+
+    Local Builder Registry Portプロパティは、Builder Registryがローカルに設定されている場合のみ表示されます。異なるローカルビルダーレジストリポートを使用するために手動で編集できます。
+
+- **Local Builder Registry Image**
+
+    ローカルビルダーレジストリで使用されるレジストリイメージです。
+
+    例：`registry:2.3.8`
+
+    Local Builder Registry Imageプロパティは、Builder Registryがローカルに設定されている場合のみ表示されます。異なるローカルビルダーレジストリイメージを使用するために手動で編集できます。
+
+- **Build Image Namespace**
+
+    ビルドイメージの名前空間です。これは特定のスコープ内でイメージを整理および管理するために使用されます。
+
+    例：`daytona`
+
+    Build Image Namespaceプロパティは、異なるビルドイメージ名前空間を使用するために手動で編集できます。
+
+- **Providers Dir**
+
+    プロバイダー設定が保存されるディレクトリパスです。
+
+    例：`/Users/Library/Application Support/daytona/providers`
+
+- **Registry URL**
+
+    DaytonaレジストリのURLです。
+
+    例：`https://download.daytona.io/daytona`
+
+- **Server Download URL**
+
+    DaytonaサーバーをダウンロードするためのURLです。
+
+    例：`https://download.daytona.io/daytona/install.sh`
+
+Daytonaサーバーの設定は、以下のコマンドを使用して手動で編集できます：
+
+```shell
+daytona server configure
+```
+
+```text  
+Providers Directory
+Directory will be created if it does not exist
+> /Users/Library/Application Support/daytona/providers
+
+Providers Directory
+> /Users/Library/Application Support/daytona/providers
+
+Registry URL
+> https://download.daytona.io/daytona
+
+Server Download URL
+> https://download.daytona.io/daytona/install.sh
+
+Default Project Image
+> daytonaio/workspace-project:latest
+
+Default Project User
+> daytona
+
+Builder Image
+Image dependencies: docker, @devcontainers/cli (node package)
+> daytonaio/workspace-project:latest
+
+Builder Registry
+To add options, add a container registry with 'daytona cr set'
+> Local registry managed by Daytona
+
+Build Image Namespace
+Namespace to be used when tagging and pushing build images
+>
+
+Local Builder Registry Port
+> 3988
+
+Local Builder Registry Image
+> registry:0.0.0
+
+API Port
+> 3986
+
+Headscale Port
+> 3987
+
+Binaries Path
+Directory will be created if it does not exist
+> /Users/Library/Application Support/daytona/server/binaries
+
+Log File Path
+File will be created if it does not exist
+> /Users/Library/Application Support/daytona/server/daytona.log
+
+Frps Domain
+> try-eu.daytona.app
+
+Frps Port
+> 7000
+
+Frps Protocol
+> https
+```
+
+設定が正常に完了すると、Daytonaは設定を検証し、指定されたすべてのディレクトリとファイルが正しく設定されていることを確認し、サーバーを最適な動作のために準備します。
+
+```text
+Server configuration updated. You need to restart the server for the changes to take effect.
+```
+
+変更を有効にするには、`daytona server restart`コマンドを使用してサーバーを再起動してください。
+
+## サーバーの再起動
+
+Daytonaサーバーを再起動するには、以下のコマンドを実行してください：
+
+```shell
+daytona server restart
+```
+
+このコマンドを実行すると、DaytonaはDaytonaサーバーデーモンを自動的に停止し、開始します。
+
+```text
+Stopping the Daytona Server daemon...
+Starting the Daytona Server daemon...
+Daytona Server daemon restarted successfully
+```
+
+## サーバーを停止する
+
+Daytonaサーバーを停止するには、以下のコマンドを実行してください：
+
+```shell
+daytona server stop
+```
+
+このコマンドを実行すると、DaytonaはDaytonaサーバーデーモンを停止します。
+
+```text
+Stopping the Daytona Server daemon...
+```

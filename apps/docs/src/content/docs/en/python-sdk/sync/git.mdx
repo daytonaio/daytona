@@ -1,0 +1,382 @@
+---
+title: "Git"
+hideTitleOnPage: true
+---
+
+## Git
+
+```python
+class Git()
+```
+
+Provides Git operations within a Sandbox.
+
+**Example**:
+
+```python
+# Clone a repository
+sandbox.git.clone(
+    url="https://github.com/user/repo.git",
+    path="workspace/repo"
+)
+
+# Check repository status
+status = sandbox.git.status("workspace/repo")
+print(f"Modified files: {status.modified}")
+
+# Stage and commit changes
+sandbox.git.add("workspace/repo", ["file.txt"])
+sandbox.git.commit(
+    path="workspace/repo",
+    message="Update file",
+    author="John Doe",
+    email="john@example.com"
+)
+```
+
+#### Git.\_\_init\_\_
+
+```python
+def __init__(sandbox_id: str, toolbox_api: ToolboxApi,
+             get_root_dir: Callable[[], str])
+```
+
+Initializes a new Git handler instance.
+
+**Arguments**:
+
+- `sandbox_id` _str_ - The Sandbox ID.
+- `toolbox_api` _ToolboxApi_ - API client for Sandbox operations.
+- `get_root_dir` _Callable[[], str]_ - A function to get the default root directory of the Sandbox.
+
+#### Git.add
+
+```python
+@intercept_errors(message_prefix="Failed to add files: ")
+def add(path: str, files: List[str]) -> None
+```
+
+Stages the specified files for the next commit, similar to
+running 'git add' on the command line.
+
+**Arguments**:
+
+- `path` _str_ - Path to the Git repository root. Relative paths are resolved based on the user's
+  root directory.
+- `files` _List[str]_ - List of file paths or directories to stage, relative to the repository root.
+  
+
+**Example**:
+
+```python
+# Stage a single file
+sandbox.git.add("workspace/repo", ["file.txt"])
+
+# Stage multiple files
+sandbox.git.add("workspace/repo", [
+    "src/main.py",
+    "tests/test_main.py",
+    "README.md"
+])
+```
+
+#### Git.branches
+
+```python
+@intercept_errors(message_prefix="Failed to list branches: ")
+def branches(path: str) -> ListBranchResponse
+```
+
+Lists branches in the repository.
+
+**Arguments**:
+
+- `path` _str_ - Path to the Git repository root. Relative paths are resolved based on the user's
+  root directory.
+  
+
+**Returns**:
+
+- `ListBranchResponse` - List of branches in the repository.
+  
+
+**Example**:
+
+```python
+response = sandbox.git.branches("workspace/repo")
+print(f"Branches: {response.branches}")
+```
+
+#### Git.clone
+
+```python
+@intercept_errors(message_prefix="Failed to clone repository: ")
+def clone(url: str,
+          path: str,
+          branch: Optional[str] = None,
+          commit_id: Optional[str] = None,
+          username: Optional[str] = None,
+          password: Optional[str] = None) -> None
+```
+
+Clones a Git repository into the specified path. It supports
+cloning specific branches or commits, and can authenticate with the remote
+repository if credentials are provided.
+
+**Arguments**:
+
+- `url` _str_ - Repository URL to clone from.
+- `path` _str_ - Path where the repository should be cloned. Relative paths are resolved based on the user's
+  root directory.
+- `branch` _Optional[str]_ - Specific branch to clone. If not specified,
+  clones the default branch.
+- `commit_id` _Optional[str]_ - Specific commit to clone. If specified,
+  the repository will be left in a detached HEAD state at this commit.
+- `username` _Optional[str]_ - Git username for authentication.
+- `password` _Optional[str]_ - Git password or token for authentication.
+  
+
+**Example**:
+
+```python
+# Clone the default branch
+sandbox.git.clone(
+    url="https://github.com/user/repo.git",
+    path="workspace/repo"
+)
+
+# Clone a specific branch with authentication
+sandbox.git.clone(
+    url="https://github.com/user/private-repo.git",
+    path="workspace/private",
+    branch="develop",
+    username="user",
+    password="token"
+)
+
+# Clone a specific commit
+sandbox.git.clone(
+    url="https://github.com/user/repo.git",
+    path="workspace/repo-old",
+    commit_id="abc123"
+)
+```
+
+#### Git.commit
+
+```python
+@intercept_errors(message_prefix="Failed to commit changes: ")
+def commit(path: str, message: str, author: str,
+           email: str) -> GitCommitResponse
+```
+
+Creates a new commit with the staged changes. Make sure to stage
+changes using the add() method before committing.
+
+**Arguments**:
+
+- `path` _str_ - Path to the Git repository root. Relative paths are resolved based on the user's
+  root directory.
+- `message` _str_ - Commit message describing the changes.
+- `author` _str_ - Name of the commit author.
+- `email` _str_ - Email address of the commit author.
+  
+
+**Example**:
+
+```python
+# Stage and commit changes
+sandbox.git.add("workspace/repo", ["README.md"])
+sandbox.git.commit(
+    path="workspace/repo",
+    message="Update documentation",
+    author="John Doe",
+    email="john@example.com"
+)
+```
+
+#### Git.push
+
+```python
+@intercept_errors(message_prefix="Failed to push changes: ")
+def push(path: str,
+         username: Optional[str] = None,
+         password: Optional[str] = None) -> None
+```
+
+Pushes all local commits on the current branch to the remote
+repository. If the remote repository requires authentication, provide
+username and password/token.
+
+**Arguments**:
+
+- `path` _str_ - Path to the Git repository root. Relative paths are resolved based on the user's
+  root directory.
+- `username` _Optional[str]_ - Git username for authentication.
+- `password` _Optional[str]_ - Git password or token for authentication.
+  
+
+**Example**:
+
+```python
+# Push without authentication (for public repos or SSH)
+sandbox.git.push("workspace/repo")
+
+# Push with authentication
+sandbox.git.push(
+    path="workspace/repo",
+    username="user",
+    password="github_token"
+)
+```
+
+#### Git.pull
+
+```python
+@intercept_errors(message_prefix="Failed to pull changes: ")
+def pull(path: str,
+         username: Optional[str] = None,
+         password: Optional[str] = None) -> None
+```
+
+Pulls changes from the remote repository. If the remote repository requires authentication,
+provide username and password/token.
+
+**Arguments**:
+
+- `path` _str_ - Path to the Git repository root. Relative paths are resolved based on the user's
+  root directory.
+- `username` _Optional[str]_ - Git username for authentication.
+- `password` _Optional[str]_ - Git password or token for authentication.
+  
+
+**Example**:
+
+```python
+# Pull without authentication
+sandbox.git.pull("workspace/repo")
+
+# Pull with authentication
+sandbox.git.pull(
+    path="workspace/repo",
+    username="user",
+    password="github_token"
+)
+```
+
+#### Git.status
+
+```python
+@intercept_errors(message_prefix="Failed to get status: ")
+def status(path: str) -> GitStatus
+```
+
+Gets the current Git repository status.
+
+**Arguments**:
+
+- `path` _str_ - Path to the Git repository root. Relative paths are resolved based on the user's
+  root directory.
+  
+
+**Returns**:
+
+- `GitStatus` - Repository status information including:
+  - current_branch: Current branch name
+  - file_status: List of file statuses
+  - ahead: Number of local commits not pushed to remote
+  - behind: Number of remote commits not pulled locally
+  - branch_published: Whether the branch has been published to the remote repository
+  
+
+**Example**:
+
+```python
+status = sandbox.git.status("workspace/repo")
+print(f"On branch: {status.current_branch}")
+print(f"Commits ahead: {status.ahead}")
+print(f"Commits behind: {status.behind}")
+```
+
+#### Git.checkout\_branch
+
+```python
+@intercept_errors(message_prefix="Failed to checkout branch: ")
+def checkout_branch(path: str, branch: str) -> None
+```
+
+Checkout branch in the repository.
+
+**Arguments**:
+
+- `path` _str_ - Path to the Git repository root. Relative paths are resolved based on the user's
+  root directory.
+- `branch` _str_ - Name of the branch to checkout
+  
+
+**Example**:
+
+```python
+# Checkout a branch
+sandbox.git.checkout_branch("workspace/repo", "feature-branch")
+```
+
+#### Git.create\_branch
+
+```python
+@intercept_errors(message_prefix="Failed to create branch: ")
+def create_branch(path: str, name: str) -> None
+```
+
+Create branch in the repository.
+
+**Arguments**:
+
+- `path` _str_ - Path to the Git repository root. Relative paths are resolved based on the user's
+  root directory.
+- `name` _str_ - Name of the new branch to create
+  
+
+**Example**:
+
+```python
+# Create a new branch
+sandbox.git.create_branch("workspace/repo", "new-feature")
+```
+
+#### Git.delete\_branch
+
+```python
+@intercept_errors(message_prefix="Failed to delete branch: ")
+def delete_branch(path: str, name: str) -> None
+```
+
+Delete branch in the repository.
+
+**Arguments**:
+
+- `path` _str_ - Path to the Git repository root. Relative paths are resolved based on the user's
+  root directory.
+- `name` _str_ - Name of the branch to delete
+  
+
+**Example**:
+
+```python
+# Delete a branch
+sandbox.git.delete_branch("workspace/repo", "old-feature")
+```
+
+
+## GitCommitResponse
+
+```python
+class GitCommitResponse()
+```
+
+Response from the git commit.
+
+**Attributes**:
+
+- `sha` _str_ - The SHA of the commit
+

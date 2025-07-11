@@ -1,0 +1,323 @@
+---
+title: Workspaceテンプレート
+description: 複数のWorkspace間でWorkspaceテンプレートを管理し、再利用する方法を学びます。
+---
+
+import Label from '@components/Label.astro'
+
+<Label>
+  Distribution: **Open Source**
+</Label>
+
+Workspaceテンプレートは、開発環境の管理を簡素化するように設計されており、新しいWorkspaceに簡単に適用できる事前定義された設定を可能にします。
+
+Workspaceテンプレートには、Workspace内でWorkspaceを定義し管理するために必要なすべてのプロパティが含まれています。リポジトリURL、ビルド設定、環境変数などの情報を保存します。これにより、以前に設定されたテンプレートの簡単な再利用が可能になり、複数のWorkspace間で一貫性があり再現可能なセットアップが保証されます。
+
+Workspaceテンプレートは、Workspaceをセットアップするためのすべての重要な要素をカプセル化します：
+
+- **リポジトリURL**
+
+   Workspaceに関連付けられたGitリポジトリのURL。
+
+- **ビルド設定**
+
+   [Automatic](/docs/ja/usage/builders#automatic)は、あなたのWorkspaceに最も適切なBuilderを自動検出します。
+
+   [Devcontainer](/docs/ja/usage/builders#dev-container)は、`devcontainer.json`ファイルで指定された事前定義された開発コンテナを利用します。
+
+   [Custom image](/docs/ja/usage/builders#custom-image)は、カスタムベースコンテナを指定してWorkspaceイメージをビルドします。
+
+   [None](/docs/ja/usage/builders#none)は、デフォルトのベースイメージ（`daytonaio/workspace-project`）を使用してWorkspaceをビルドします。
+
+- **環境変数**
+
+   環境変数は`KEY=VALUE`形式で指定されます。これらの変数は、Workspaceのビルドおよびランタイム環境にとって不可欠です。変数を直接設定するか、実行時にマシンの環境から渡すことができます。
+
+- **Workspaceテンプレート名**
+
+   Workspaceテンプレートの一意の識別子で、システム内の他のテンプレートと区別します。
+
+`daytona workspace-template`コマンドを使用すると、Workspaceテンプレートの追加、表示、更新、一覧表示、デフォルトとして設定、または削除ができ、テンプレートの完全な制御と異なるWorkspace間でのWorkspaceセットアップの再利用が可能になります。
+
+## ワークスペーステンプレートの作成
+
+Daytonaは、ワークスペーステンプレートを追加するオプションを提供し、複数のワークスペース間でワークスペースのプロパティを保存して再利用できるようにします。
+
+1. 以下のコマンドを実行してワークスペーステンプレートを追加します：
+
+```shell
+daytona workspace-template add
+```
+
+2. ワークスペーステンプレートの作成に利用可能な2つの提供されたオプションのうち1つを選択します：
+
+- **カスタムリポジトリURLを入力**
+
+   リポジトリがGitプロバイダーアカウントにリストされていない場合や外部ソースからのものである場合に、カスタムリポジトリURLを手動で入力するオプション。
+
+- **サンプルから作成**
+
+   Gitリポジトリの準備ができていない場合、Daytonaによって提供されるサンプルプロジェクトからワークスペーステンプレートを作成できます。
+
+3. 設定したいワークスペースのリポジトリURLを入力するか、サンプルプロジェクトからワークスペーステンプレートを作成することを選択します。
+
+```text
+Git repository
+>
+```
+
+4. ワークスペーステンプレートの名前を入力します。
+
+```text
+Name
+>
+```
+
+5. ワークスペースのビルド設定を選択します。
+
+```text
+Choose a build configuration
+Automatic
+Devcontainer
+Custom image
+None
+```
+
+6. **`KEY=VALUE`**形式でワークスペースの環境変数を入力します。
+
+```text
+Environment Variables
+Enter environment variables in the format KEY=VALUE
+To pass machine env variables at runtime, use $VALUE
+```
+
+完了すると、Daytonaはワークスペーステンプレートの概要を出力し、保存前にプロパティを確認できるようにします。
+
+```text
+SUMMARY - Workspace Template
+
+Workspace - MyWorkspace
+Repository  https://github.com/daytonaio/docs
+Branch      main 
+Build       Automatic
+Image       daytonaio/workspace-project:latest
+User        daytona
+```
+
+7. **`Create`**をクリックしてワークスペーステンプレートを保存するか、**`Configure`**をクリックしてワークスペーステンプレートに変更を加えます。
+
+```text
+Workspace template <workspace_template> added successfully
+```
+
+## Workspace Templateの一覧表示
+
+Daytonaは、すべてのWorkspace Templateを一覧表示するオプションを提供し、各Template内に保存されているプロパティの概要を確認できます。
+
+1. 次のコマンドを実行して、すべてのWorkspace Templateを一覧表示します：
+
+```shell
+daytona workspace-template list
+```
+
+このコマンドを実行すると、DaytonaはWorkspace Templateのリストを表示します。Workspace Template名、接続されているリポジトリURL、ビルド設定、およびデフォルトTemplateとして設定されているかどうかを確認できます。
+
+```text
+Name                 Repository           Build            Default
+────────────────────────────────────────────────────────────────────
+MyWorkspaceConfig    daytonaio/daytona    Devcontainer     Yes
+```
+
+## Workspace Templateの更新
+
+Daytona は既存の Workspace Template を更新するオプションを提供し、その中に保存されているプロパティを変更することができます。
+
+1. 次のコマンドを実行して Workspace Template を更新します：
+
+```shell
+daytona workspace-template update
+```
+
+2. 更新したい Workspace Template を選択します。
+
+```text
+Select a Workspace Template To Update
+1 item
+MyWorkspaceTemplate
+https://github.com/username/MyWorkspace
+```
+
+```text
+Workspace Template updated successfully
+```
+
+## Workspace Templateの削除
+
+Daytonaは既存のWorkspace Templateを削除するオプションを提供しており、不要になったプロパティを削除することができます。
+
+1. 次のコマンドを実行してWorkspace Templateを削除します：
+
+```shell
+daytona workspace-template delete
+```
+
+2. 削除したいWorkspace Templateを選択します。
+
+```text
+Select a Workspace Template To Delete
+1 item
+MyWorkspaceTemplate
+https://github.com/username/repository
+```
+
+```text
+Workspace Template deleted successfully
+```
+
+## Workspace Template情報
+
+Daytonaは、Workspace Templateの詳細情報を表示するオプションを提供し、その中に保存されているプロパティの概要を確認できます。
+
+1. 次のコマンドを実行して、Workspace Templateの詳細を表示します：
+
+```shell
+daytona workspace-template info
+```
+
+このコマンドを実行すると、DaytonaはWorkspace Templateのリストを表示します。
+
+2. 表示したいWorkspace Templateを選択します。
+
+```text
+Select a Workspace Config To View
+1 item
+MyWorkspaceConfig
+https://github.com/username/MyWorkspace
+```
+
+   Workspace Templateを選択すると、Daytonaは選択されたTemplateの詳細を表示します。Workspace Template名、リンクされているリポジトリURL、ビルド設定、Devcontainerパスを確認できます。
+
+```text
+Workspace Config Info
+Name                    MyWorkspaceConfig
+Repository              https://github.com/username/MyWorkspace
+Build                   Devcontainer
+Devcontainer path       .devcontainer/devcontainer.json
+```
+
+## デフォルトワークスペーステンプレートの設定
+
+Daytonaは、デフォルトのワークスペーステンプレートを設定するオプションを提供しており、新しいワークスペースを作成する際にデフォルトで使用されるテンプレートを定義できます。
+
+1. 以下のコマンドを実行して、デフォルトのワークスペーステンプレートを設定します：
+
+```shell
+daytona workspace-template set-default
+```
+
+2. デフォルトとして設定したいワークスペーステンプレートを選択します。
+
+```text
+Select a Workspace Template To Set As Default
+1 item
+MyWorkspaceTemplate
+https://github.com/username/MyWorkspace
+```
+
+デフォルトのワークスペーステンプレートを選択すると、Daytonaはそれを新しいワークスペースのデフォルトテンプレートとして設定します。
+
+```text
+Workspace Template 'MyWorkspaceTemplate' set as default
+```
+
+3. ワークスペーステンプレートのプロパティを更新します。
+
+```text
+Choose a build configuration
+Automatic
+Devcontainer
+Custom image
+None
+```
+
+```text
+Environment Variables
+Enter environment variables in the format KEY=VALUE
+To pass machine env variables at runtime, use $VALUE
+```
+
+完了すると、Daytonaは更新されたワークスペーステンプレートを保存し、ワークスペース間で再利用できるようになります。
+
+```text
+Workspace Template updated successfully
+```
+
+## Workspace Templateのインポート
+
+Daytonaでは、Workspace Templateをインポートするオプションを提供しており、既存のWorkspaceプロパティを複数のWorkspace間で再利用することができます。
+
+1. 以下のコマンドを実行してWorkspace Templateをインポートします：
+
+```shell
+daytona workspace-template import
+```
+
+2. Workspace TemplateをJSONオブジェクトまたはJSONオブジェクトの配列として入力します。
+
+```text
+Import Workspace Template
+Enter Workspace Template as a JSON object or an array of JSON objects
+```
+
+- JSONオブジェクトプロパティ形式の空の例：
+
+```json
+[
+  {
+    "buildConfig": {},
+    "default": true,
+    "envVars": {},
+    "image": "",
+    "labels": null,
+    "name": "",
+    "repositoryUrl": "",
+    "user": ""
+  }
+]
+```
+
+## Workspace Templateのエクスポート
+
+DaytonaはWorkspace Templateをエクスポートするオプションを提供しており、Workspace TemplateのプロパティをJSONオブジェクトとして保存することができます。
+
+1. 以下のコマンドを実行してWorkspace Templateをエクスポートします：
+
+```shell
+daytona workspace-template export
+```
+
+2. エクスポートしたいWorkspace Templateを選択します。
+
+```text
+Select a Workspace Template To Export
+1 item
+MyWorkspaceTemplate
+https://github.com/username/repository
+```
+
+エクスポートしたいWorkspace Templateを選択すると、Daytonaは選択されたTemplateのプロパティをJSONオブジェクトとして出力します。
+
+```json
+[
+  {
+    "buildConfig": {},
+    "default": true,
+    "envVars": {},
+    "image": "daytonaio/workspace-project:latest",
+    "labels": null,
+    "name": "MyWorkspaceTemplate",
+    "repositoryUrl": "https://github.com/username/repository",
+    "user": "daytona"
+  }
+]
+```

@@ -1,0 +1,44 @@
+---
+title: What is Daytona?
+description: Understand how Daytona can help you manage your development environments.
+sidebar:
+  label: What is Daytona?
+---
+
+Daytona is an open-source Development Environment Manager (DEM) licensed under the Apache License 2.0.
+Daytona allows you to manage and deploy Workspaces — reproducible development environments based on standard OCI containers, with built-in support for the Dev Container standard.
+Daytona's architecture provides the future possibility to base Workspaces on other configuration standards, such as Dockerfiles, Docker Compose, Nix, and Devfile.
+
+By leveraging configuration in a project's remote Git repository, Daytona builds a Workspace and provisions a workspace to a platform of your choice.
+Once provisioned, you can develop and test the project using an IDE supported by Daytona, such as Visual Studio Code.
+
+Daytona's functionality is exposed through a command-line tool that runs on Linux, macOS, and Windows systems, on both x86-64 and AArch64 architectures.
+
+## Features
+
+* __Security__
+
+    Daytona creates a secure VPN connection between the client machine and the remote machine.
+    All ports on the remote machine can be accessed securely without the need for manual port forwarding.
+
+* __Support for Visual Studio Code and JetBrains__
+
+    Daytona supports both Visual Studio Code and the JetBrains line of IDEs, making it easy to develop your project while feeling like everything's local.
+
+* __Connect with GitHub, GitLab, Bitbucket, and Gitea__
+
+    Daytona can create DEs by pulling repositories from your preferred SCM platform. Git operations can be executed within a workspace, allowing you to push your work without context switching.
+
+* __Support for Multi-Project Workspaces__
+
+    Daytona is capable of creating workspaces with multiple projects.
+    Large projects split into micro-services or multiple repositories can be worked on using a single workspace.
+
+* __Reverse Proxy Support__
+
+    Daytona integrates a reverse proxy allowing you to access a workspace on a public or restricted network.
+
+* __Extensible Core__
+
+    Daytona supports plugins developed in Go.
+    Third-party Providers can be added to Daytona, as well as extensions to core functionality.

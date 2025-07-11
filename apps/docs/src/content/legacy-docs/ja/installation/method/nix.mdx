@@ -1,0 +1,24 @@
+---
+title: Nixインストール
+---
+import Aside from '@components/Aside.astro'
+export const partial = true;
+
+Daytonaはnixpkgs unstableで[**`daytona-bin`**](https://search.nixos.org/packages?channel=unstable&show=daytona-bin)として利用可能です。
+
+<br />
+
+### 一時的な使用
+
+システムに永続的にインストールする前にDaytonaを試すには、**`nix-shell`**を使用してください：
+
+```shell
+nix-shell -p daytona-bin
+```
+
+### グローバルインストール
+
+システムにDaytonaを永続的にインストールするには、関連する設定に追加できます。
+
+- NixOSシステムでは、**`/etc/nixos/configuration.nix`**でシステムパッケージとして**`daytona-bin`**を追加してください。
+- その他のLinuxシステムでは、[home-manager](https://github.com/nix-community/home-manager)を使用し、ローカルパッケージとして**`daytona-bin`**を追加してください。

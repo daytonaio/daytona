@@ -1,0 +1,901 @@
+---
+title: Git Providers
+description: DaytonaをGitHub、GitLab、Bitbucket、その他のGit Providersと接続します。
+sidebar:
+  label: プロバイダーを設定
+---
+import Aside from '@components/Aside.astro'
+import Label from '@components/Label.astro'
+
+<Label>
+  Distribution: **Open Source**, **Cloud**, **Self-Managed**
+</Label>
+
+Git Providers（ソフトウェアフォージやSource Code Managers（SCM）とも呼ばれる）は、Gitを使用してコードベースをホストし、共同作業を行うためのツールセットを提供します。
+
+Daytonaでは、お好みのGit Providerを統合することで、開発ワークフローを強化できます。この統合により、Daytona内でリポジトリに直接アクセスし、管理することができ、既存のプロジェクトからのワークスペース作成が簡素化されます。
+
+Git Providerを追加することで、認証情報がワークスペースに安全に埋め込まれます。これにより、繰り返し認証することなく、シームレスなGit操作が可能になります。
+
+## Git Providerの追加
+
+Daytonaは、Git Providerを追加するオプションを提供しており、お好みのGit Providerに接続して、Daytonaから直接リポジトリにアクセスできるようになります。
+
+1. 以下のコマンドを実行してGit Providerを追加します：
+
+```shell
+daytona git-providers add
+```
+
+このコマンドを実行すると、Daytonaは追加したいGit Providerを選択するよう促します。
+
+```text
+Choose a Git provider
+GitHub
+GitLab
+Bitbucket
+Other
+```
+
+2. リストから設定したいGit Providerを選択します：
+
+- __[GitHub](#github)__
+
+    GitHubでリポジトリをホストしている場合に選択します。
+
+- __[GitLab](#gitlab)__
+
+    GitLabでリポジトリをホストしている場合に選択します。
+
+- __[Bitbucket](#bitbucket)__
+
+    AtlassianのBitbucket Cloudプラットフォームでリポジトリをホストしている場合に選択します。
+
+- __[GitHub Enterprise Server](#github-enterprise-server)__
+
+    GitHub Enterprise Serverでリポジトリをホストしている場合に選択します。
+
+- __[GitLab Self-Managed](#gitlab-self-managed)__
+
+    GitLabのセルフホスト型プラットフォームでリポジトリをホストしている場合に選択します。
+
+    セルフホスト型のGitLab Community Edition（CE）インストール、GitLab Self-Managed、およびGitLab Dedicatedプラットフォームがサポートされています。
+
+- __[Bitbucket Server](#bitbucket-server)__
+
+    Bitbucket Serverでリポジトリをホストしている場合に選択します。
+
+- __[Codeberg](#codeberg)__
+
+    Codebergでリポジトリをホストしている場合に選択します。
+
+- __[Gitea](#gitea)__
+
+    Giteaでリポジトリをホストしている場合に選択します。
+
+- __[Gitness](#gitness)__
+
+    Gitnessでリポジトリをホストしている場合に選択します。
+
+- __[Azure DevOps](#azure-devops)__
+
+    Azure DevOpsでリポジトリをホストしている場合に選択します。
+
+- __[AWS CodeCommit](#aws-codecommit)__
+
+    AWS CodeCommitでリポジトリをホストしている場合に選択します。
+
+- __[Gogs](#gogs)__
+
+    Gogsでリポジトリをホストしている場合に選択します。
+
+- __[Gitee](#gitee)__
+
+    Giteeでリポジトリをホストしている場合に選択します。
+
+3. Daytonaが認証を行い、リポジトリへの安全なアクセスを有効にするために、Git Providerの認証情報を入力します。
+
+```text
+Personal access token
+>
+```
+
+一部のGit Providerでは、設定を完了するために_ユーザー名_やセルフマネージドAPIインスタンスの_URL_などの追加情報が必要です。
+
+4. Daytona内でGit Providerを識別するためのエイリアスを入力します。
+
+```text
+Alias                                                                         
+Will default to username if left empty                                        
+>
+```
+
+認証が成功すると、Daytonaは以下のメッセージを表示します：
+
+```text
+Git provider has been registered
+```
+
+## 接続されたGitプロバイダーの一覧表示
+
+Daytonaは、以前に作成されたすべてのGitプロバイダーを一覧表示することで、Gitプロバイダーを追跡するオプションを提供します。
+
+1. 現在接続されているGitプロバイダーを一覧表示するには、次のコマンドを実行します：
+
+```shell
+daytona git-providers list
+```
+
+このコマンドを実行すると、Daytonaは接続されているGitプロバイダーの一覧を表示します。
+
+```text
+GitHub (alias)
+GitLab (alias)
+```
+
+## Git Providerの更新
+
+Daytonaは既存のGit Providerを更新するオプションを提供し、最新の機能強化とバグ修正を適用できます。
+
+1. 以下のコマンドを実行してGit Providerを更新します：
+
+```shell
+daytona git-providers update
+```
+
+このコマンドを実行すると、Daytonaは接続されているGit Providerのリストを表示します。
+
+```text
+Choose a Git provider 
+> github (alias)
+```
+
+2. リストから更新したいGit Providerを選択します。
+
+3. Daytonaが認証を行い、リポジトリへの安全なアクセスを有効にするために、Git Providerの認証情報を入力します。
+
+```text
+Personal access token
+>
+```
+
+一部のGit Providerでは、設定を完了するために_ユーザー名_や自己管理APIインスタンスの_URL_などの追加情報が必要です。
+
+4. Daytona内でGit Providerを識別するためのエイリアスを入力します。
+
+```text
+Alias                                                                         
+Will default to username if left empty                                        
+>
+```
+
+更新が正常に完了すると、Daytonaは以下のメッセージを表示します：
+
+```text
+Git provider has been updated
+```
+
+## Git Providerの削除
+
+DaytonaはGit Providerを削除するオプションを提供し、不要になったものを管理・削除するのに役立ちます。Git Providerが削除されると、別のGit Providerを追加しない限り、Workspaceを管理またはデプロイすることができなくなります。
+
+1. 以下のコマンドを実行してGit Providerを削除します：
+
+```shell
+daytona git-providers delete
+```
+
+このコマンドを実行すると、Daytonaは削除可能な既存のGit Providerのリストを表示します。
+
+```text
+Choose a Git provider
+GitHub
+GitLab
+```
+
+2. 削除したいGit Providerを選択します。
+
+選択が正常に完了すると、Daytonaは以下のメッセージを表示します：
+
+```text
+Git provider has been removed
+```
+
+## GitHub
+
+DaytonaはGitHubアカウントを接続し、Daytonaから直接リポジトリにアクセスするオプションを提供します。
+
+1. 次のコマンドを実行してGitHubをGit Providerとして追加します：
+
+```shell
+daytona git-providers add
+```
+
+このコマンドを実行すると、Daytonaは追加したいGit Providerを選択するよう促します。リストから`GitHub`を選択してください。
+
+```text
+Choose a Git provider
+> GitHub
+```
+
+GitHubをGit Providerとして選択した後、Personal Access Tokenの入力を求められます。
+
+Personal Access Tokenの作成に関する詳細については、GitHubの[Creating a personal access token (classic)][gh-token]ドキュメントをご覧ください。
+
+2. DaytonaがGitHubリポジトリへの認証と安全なアクセスを可能にするため、Personal Access Tokenを入力してください。
+
+```text
+Personal access token
+>
+```
+
+3. Daytona内でGit Providerを識別するためのエイリアスを入力してください。
+
+```text
+Alias                                                                         
+Will default to username if left empty                                        
+>
+```
+
+認証が成功すると、Daytonaは次のメッセージを表示します：
+
+```text
+Git provider has been registered
+```
+
+## GitLab
+
+DaytonaはGitLabアカウントに接続し、Daytonaから直接リポジトリにアクセスするオプションを提供します。
+
+1. 次のコマンドを実行してGitLabをGit Providerとして追加します：
+
+```shell
+daytona git-providers add
+```
+
+このコマンドを実行すると、Daytonaは追加したいGit Providerを選択するよう促します。リストから`GitLab`を選択してください。
+
+```text
+Choose a Git provider
+> GitLab
+```
+
+GitLabをGit Providerとして選択した後、Personal Access Tokenの入力を求められます。
+
+Personal Access Tokenの作成に関する詳細については、GitLabの[Create a personal access token][gl-token]ドキュメントをご覧ください。
+
+2. DaytonaがGitLabリポジトリへの認証と安全なアクセスを可能にするため、Personal Access Tokenを入力してください。
+
+```text
+Personal access token
+>
+```
+
+3. Daytona内で識別するためのGit Providerエイリアスを入力してください。
+
+```text
+Alias                                                                         
+Will default to username if left empty                                        
+>
+```
+
+認証が成功すると、Daytonaは次のメッセージを表示します：
+
+```text
+Git provider has been registered
+```
+
+## Bitbucket
+
+DaytonaはBitbucketアカウントを接続し、Daytonaから直接リポジトリにアクセスするオプションを提供します。
+
+1. 次のコマンドを実行してBitbucketをGit Providerとして追加します：
+
+```shell
+daytona git-providers add
+```
+
+このコマンドを実行すると、Daytonaは追加したいGit Providerを選択するよう促します。リストから`Bitbucket`を選択してください。
+
+```text
+Choose a Git provider
+> Bitbucket
+```
+
+Git ProviderとしてBitbucketを選択した後、ユーザー名（Atlassianユーザー名）とPersonal Access Token（App Password）の入力を求められます。
+
+Personal Access Tokenの作成に関する詳細については、Bitbucketの[Create an App password][bit-token]ドキュメントをご覧ください。
+
+2. DaytonaがBitbucketリポジトリへの認証と安全なアクセスを有効にするために、ユーザー名とPersonal Access Tokenを入力してください。
+
+```text
+Username
+>
+```
+
+```text
+Personal access token
+>
+```
+
+3. Daytona内で識別するためのGit Providerエイリアスを入力してください。
+
+```text
+Alias                                                                         
+Will default to username if left empty                                        
+>
+```
+
+認証が成功すると、Daytonaは次のメッセージを表示します：
+
+```text
+Git provider has been registered
+```
+
+## GitHub Enterprise Server
+
+DaytonaはGitHub Enterprise Serverアカウントに接続し、Daytonaから直接リポジトリにアクセスするオプションを提供します。
+
+1. 次のコマンドを実行して、GitHub Enterprise ServerをGit Providerとして追加します：
+
+```shell
+daytona git-providers add
+```
+
+このコマンドを実行すると、Daytonaは追加したいGit Providerを選択するよう促します。リストから`Other`を選択し、次に`GitHub Enterprise Server`を選択します。
+
+```text
+Choose a Git provider
+> Other
+```
+
+```text
+Choose a Git provider
+> GitHub Enterprise Server
+```
+
+GitHub Enterprise ServerをGit Providerとして選択した後、Self-Managed API URL（GitHub Enterprise ServerインスタンスのAPIのベースURL）とPersonal Access Tokenの入力を求められます。
+
+Personal Access Tokenの作成に関する詳細については、GitHubの[Creating a personal access token (classic)][gh-enterprise-token]ドキュメントをご覧ください。
+
+2. DaytonaがGithub Enterpriseリポジトリへの認証と安全なアクセスを有効にするために、Self-Managed API URLとPersonal Access Tokenを入力します。
+
+```text
+Self-managed API URL
+For example: https://github-host
+>
+```
+
+```text
+Personal access token
+>
+```
+
+3. Daytona内でGit Providerを識別するためのGit Providerエイリアスを入力します。
+
+```text
+Alias                                                                         
+Will default to username if left empty                                        
+>
+```
+
+認証が成功すると、Daytonaは次のメッセージを表示します：
+
+```text
+Git provider has been registered
+```
+
+## GitLab Self-Managed
+
+DaytonaはGitLab Self-Managedアカウントに接続し、Daytonaから直接リポジトリにアクセスするオプションを提供します。
+
+1. 次のコマンドを実行して、GitLab Self-ManagedをGit Providerとして追加します：
+
+```shell
+daytona git-providers add
+```
+
+このコマンドを実行すると、Daytonaは追加したいGit Providerを選択するよう促します。リストから`Other`を選択し、次に`GitLab Self-managed`を選択します。
+
+```text
+Choose a Git provider
+> Other
+```
+
+```text
+Choose a Git provider
+> GitLab Self-managed
+```
+
+GitLab Self-ManagedをGit Providerとして選択した後、Self-Managed API URL（セルフホスト型GitLab APIのベースURL）とPersonal Access Tokenの入力を求められます。
+
+Personal Access Tokenの作成に関する詳細については、GitLabの[Create a personal access token][gl-token]ドキュメントをご覧ください。
+
+2. DaytonaがGitLab Self-Managedリポジトリへの認証と安全なアクセスを有効にするために、Self-Managed API URLとPersonal Access Tokenを入力します。
+
+```text
+Self-managed API URL
+For example: http://gitlab-host/api/v4/ 
+>
+```
+
+```text
+Personal access token
+>
+```
+
+3. Daytona内で識別するためのGit Providerエイリアスを入力します。
+
+```text
+Alias                                                                         
+Will default to username if left empty                                        
+>
+```
+
+認証が成功すると、Daytonaは次のメッセージを表示します：
+
+```text
+Git provider has been registered
+```
+
+## Bitbucket Server
+
+DaytonaはBitbucket Serverアカウントに接続し、Daytonaから直接リポジトリにアクセスするオプションを提供します。
+
+1. 次のコマンドを実行して、Bitbucket ServerをGit Providerとして追加します：
+
+```shell
+daytona git-providers add
+```
+
+このコマンドを実行すると、Daytonaは追加したいGit Providerを選択するよう促します。リストから`Other`を選択し、次に`Bitbucket Server`を選択します。
+
+```text
+Choose a Git provider
+> Other
+```
+
+```text
+Choose a Git provider
+> Bitbucket Server
+```
+
+Bitbucket ServerをGit Providerとして選択した後、Username（Atlassianユーザー名）、Self-managed API URL（Bitbucket ServerインスタンスのAPIのベースURL）、およびPersonal Access Token（App Password）の入力を求められます。
+
+Personal Access Tokenの作成に関する詳細については、Bitbucketの[Create an App password][bit-token]ドキュメントをご覧ください。
+
+2. DaytonaがBitbucket Serverリポジトリへの認証と安全なアクセスを有効にするために、Username、Self-managed API URL、およびPersonal Access Tokenを入力します。
+
+```text
+Username
+>
+```
+
+```text
+Self-managed API URL
+For example: https://bitbucket.host.com/rest
+>
+```
+
+```text
+Personal access token
+>
+```
+
+3. Daytona内で識別するためのGit Providerエイリアスを入力します。
+
+```text
+Alias                                                                         
+Will default to username if left empty                                        
+>
+```
+
+認証が成功すると、Daytonaは次のメッセージを表示します：
+
+```text
+Git provider has been registered
+```
+
+## Codeberg
+
+DaytonaはCodebergアカウントを接続し、Daytonaから直接リポジトリにアクセスするオプションを提供します。
+
+1. 次のコマンドを実行してCodebergをGit Providerとして追加します：
+
+```shell
+daytona git-providers add
+```
+
+このコマンドを実行すると、Daytonaは追加したいGit Providerを選択するよう促します。リストから`Other`を選択し、次に`Codeberg`を選択します。
+
+```text
+Choose a Git provider
+> Other
+```
+
+```text
+Choose a Git provider
+> Codeberg
+```
+
+Git ProviderとしてCodebergを選択した後、Personal Access Tokenの入力を求められます。
+
+Personal Access Tokenの作成に関する詳細については、Codebergの[Generating an Access Token][codeberg-token]ドキュメントをご覧ください。
+
+2. DaytonaがCodebergリポジトリへの認証と安全なアクセスを可能にするため、Personal Access Tokenを入力します。
+
+```text
+Personal access token
+>
+```
+
+3. Daytona内で識別するためのGit Providerエイリアスを入力します。
+
+```text
+Alias                                                                         
+Will default to username if left empty                                        
+>
+```
+
+認証が成功すると、Daytonaは次のメッセージを表示します：
+
+```text
+Git provider has been registered
+```
+
+## Gitea
+
+DaytonaはGiteaアカウントに接続し、Daytonaから直接リポジトリにアクセスするオプションを提供します。
+
+1. 次のコマンドを実行してGiteaをGit Providerとして追加します：
+
+```shell
+daytona git-providers add
+```
+
+このコマンドを実行すると、Daytonaは追加したいGit Providerを選択するよう促します。リストから`Other`を選択し、次に`Gitea`を選択します。
+
+```text
+Choose a Git provider
+> Other
+```
+
+```text
+Choose a Git provider
+> Gitea
+```
+
+GiteaをGit Providerとして選択した後、Self-Managed API URL（GiteaインストールのAPIのベースURL）とPersonal Access Tokenの入力を求められます。
+
+Personal Access Tokenの作成に関する詳細については、Giteaの[Generating and listing API tokens][gitea-token]ドキュメントをご覧ください。
+
+2. DaytonaがGiteaリポジトリへの認証と安全なアクセスを有効にするために、Self-Managed API URLとPersonal Access Tokenを入力します。
+
+```text
+Self-managed API URL
+For example: http://gitea-host
+>
+```
+
+```text
+Personal access token
+>
+```
+
+3. Daytona内でGit Providerを識別するためのエイリアスを入力します。
+
+```text
+Alias                                                                         
+Will default to username if left empty                                        
+>
+```
+
+認証が成功すると、Daytonaは次のメッセージを表示します：
+
+```text
+Git provider has been registered
+```
+
+## Gitness
+
+DaytonaはGitnessアカウントに接続し、Daytonaから直接リポジトリにアクセスするオプションを提供します。
+
+1. 次のコマンドを実行して、GitnessをGit Providerとして追加します：
+
+```shell
+daytona git-providers add
+```
+
+このコマンドを実行すると、Daytonaは追加したいGit Providerを選択するよう促します。リストから`Other`を選択し、次に`Gitness`を選択します。
+
+```text
+Choose a Git provider
+> Other
+```
+
+```text
+Choose a Git provider
+> Gitness
+```
+
+Git ProviderとしてGitnessを選択した後、Self-Managed API URL（Gitnessインストールの API のベース URL）とPersonal Access Tokenの入力を求められます。
+
+Personal Access Tokenの作成に関する詳細については、Gitnessの[Generate user token][gitness-token]ドキュメントをご覧ください。
+
+2. DaytonaがGitnessリポジトリへの認証と安全なアクセスを有効にするために、Self-Managed API URLとPersonal Access Tokenを入力します。
+
+```text
+Self-managed API URL
+For example: http://gitness-host/api/v1/
+>
+```
+
+```text
+Personal access token
+>
+```
+
+3. Daytona内でGit Providerを識別するためのエイリアスを入力します。
+
+```text
+Alias                                                                         
+Will default to username if left empty                                        
+>
+```
+
+認証が成功すると、Daytonaは次のメッセージを表示します：
+
+```text
+Git provider has been registered
+```
+
+## Azure DevOps
+
+DaytonaはAzure DevOpsアカウントに接続し、Daytonaからリポジトリに直接アクセスするオプションを提供します。
+
+1. 次のコマンドを実行してAzure DevOpsをGitプロバイダーとして追加します：
+
+```shell
+daytona git-providers add
+```
+
+このコマンドを実行すると、Daytonaは追加したいGitプロバイダーを選択するよう求めます。リストから`Other`を選択し、次に`Azure DevOps`を選択します。
+
+```text
+Choose a Git provider
+> Other
+```
+
+```text
+Choose a Git provider
+> Azure DevOps
+```
+
+Azure DevOpsをGitプロバイダーとして選択した後、Self-Managed API URL（Azure DevOpsインストールのAPIのベースURL）とPersonal Access Tokenの入力を求められます。
+
+Personal Access Tokenの作成に関する詳細については、Azure DevOpsの[Personal Access Tokenの作成][azuredevops-token]ドキュメントをご覧ください。
+
+2. DaytonaがAzure DevOpsリポジトリへの認証と安全なアクセスを有効にするために、Self-Managed API URLとPersonal Access Tokenを入力します。
+
+```text
+Self-managed API URL
+For example: https://dev.azure.com/organization
+>
+```
+
+```text
+Personal access token
+>
+```
+
+3. Daytona内でGitプロバイダーを識別するためのGitプロバイダーエイリアスを入力します。
+
+```text
+Alias                                                                         
+Will default to username if left empty                                        
+>
+```
+
+認証が成功すると、Daytonaは次のメッセージを表示します：
+
+```text
+Git provider has been registered
+```
+
+## AWS CodeCommit
+
+DaytonaはAWS CodeCommitアカウントに接続し、Daytonaからリポジトリに直接アクセスするオプションを提供します。
+
+1. 次のコマンドを実行してAWS CodeCommitをGit Providerとして追加します：
+
+```shell
+daytona git-providers add
+```
+
+このコマンドを実行すると、Daytonaは追加したいGit Providerを選択するよう促します。リストから`Other`を選択し、次に`AWS CodeCommit`を選択します。
+
+```text
+Choose a Git provider
+> Other
+```
+
+```text
+Choose a Git provider
+> AWS CodeCommit
+```
+
+AWS CodeCommitをGit Providerとして選択した後、ユーザー名、Self-Managed API URL（AWS CodeCommitインストールのAPIのベースURL）、およびPersonal Access Tokenの入力を求められます。
+
+Personal Access Tokenの作成に関する詳細については、AWS CodeCommitの[認証とアクセス制御][awscodecommit-token]ドキュメントをご覧ください。
+
+<Aside type="note">
+ユーザーはAWS認証情報を設定している必要があります：`AWS_ACCESS_KEY_ID`、`AWS_SECRET_ACCESS_KEY`、`AWS_DEFAULT_REGION`、および`iam:GetUser`読み取り権限を持っている必要があります。
+</Aside>
+
+<br />
+
+2. Daytonaが認証を行い、AWS CodeCommitリポジトリへの安全なアクセスを有効にするために、ユーザー名、Self-Managed API URL、およびPersonal Access Tokenを入力します。
+
+```text
+Username
+>
+```
+
+```text
+Self-managed API URL
+For example: https://ap-south-1.console.aws.amazon.com
+>
+```
+
+```text
+Personal access token
+>
+```
+
+3. Daytona内でGit Providerを識別するためのエイリアスを入力します。
+
+```text
+Alias                                                                         
+Will default to username if left empty                                        
+>
+```
+
+認証が成功すると、Daytonaは次のメッセージを表示します：
+
+```text
+Git provider has been registered
+```
+
+## Gogs
+
+DaytonaはGogsアカウントに接続し、Daytonaから直接リポジトリにアクセスするオプションを提供します。
+
+1. 次のコマンドを実行してGogsをGitプロバイダーとして追加します：
+
+```shell
+daytona git-providers add
+```
+
+このコマンドを実行すると、Daytonaは追加したいGitプロバイダーを選択するよう促します。リストから`Other`を選択し、次に`Gogs`を選択します。
+
+```text
+Choose a Git provider
+> Other
+```
+
+```text
+Choose a Git provider
+> Gogs
+```
+
+GitプロバイダーとしてGogsを選択した後、Self-Managed API URL（GogsインストールのAPIのベースURL）とPersonal Access Tokenの入力を求められます。
+
+Personal Access Tokenを作成するには、以下の手順に従ってください：
+
+1. Gogsにログインし、プロフィールアバターをクリックしてユーザーメニューを開きます。
+2. ユーザーメニューで__`Your Settings`__をクリックします。リポジトリへの管理者アクセス権があることを確認してください。
+3. サイドバーの__`Applications`__に移動します。
+4. Manage personal access tokensセクションで、__`Generate New Token`__をクリックします。
+5. トークンの名前を入力し、__`Generate Token`__をクリックします。
+6. トークンをコピーして安全に保存します。
+
+<Aside type="note">
+Gogsは細かい権限設定のトークンをサポートしていません。各Personal Access Tokenはアカウントへの完全なアクセス権を持ちます
+</Aside>
+
+<br />
+
+2. DaytonaがGogsリポジトリへの認証と安全なアクセスを可能にするために、Self-Managed API URLとPersonal Access Tokenを入力します。
+
+```text
+Self-managed API URL
+For example: https://gogs-host.com
+>
+```
+
+```text
+Personal access token
+>
+```
+
+3. Daytona内で識別するためのGitプロバイダーエイリアスを入力します。
+
+```text
+Alias                                                                         
+Will default to username if left empty                                        
+>
+```
+
+認証が成功すると、Daytonaは以下のメッセージを表示します：
+
+```text
+Git provider has been registered
+```
+
+## Gitee
+
+DaytonaはGiteeアカウントを接続し、Daytonaから直接リポジトリにアクセスするオプションを提供します。
+
+1. 次のコマンドを実行してGiteeをGit Providerとして追加します：
+
+```shell
+daytona git-providers add
+```
+
+このコマンドを実行すると、Daytonaは追加したいGit Providerを選択するよう促します。リストから`Other`を選択し、次に`Gitee`を選択します。
+
+```text
+Choose a Git provider
+> Other
+```
+
+```text
+Choose a Git provider
+> Gitee
+```
+
+2. DaytonaがGiteeリポジトリへの認証と安全なアクセスを可能にするため、Personal Access Tokenを入力します。
+
+Personal Access Tokenを作成するには、以下の手順に従ってください：
+
+1. Giteeにログインし、プロフィールアバターをクリックしてユーザーメニューを開きます。
+2. ユーザーメニューで__`Settings`__をクリックします。リポジトリへの管理者アクセス権があることを確認してください。
+3. サイドバーの__`Personal access tokens`__に移動します。
+4. Manage personal access tokensセクションで、Generate New Tokenをクリックします。
+5. トークンの説明を入力し、以下のスコープを選択します：
+    - __`user_info`__
+    - __`projects`__
+    - __`pull_requests`__
+    - __`groups`__
+    - __`emails`__
+6. __`Commit`__をクリックしてトークンを生成します。確認のためパスワードの入力を求められます。
+7. トークンをコピーして安全に保存します。
+
+```text
+Personal access token
+>
+```
+
+3. Daytona内で識別するためのGit Providerエイリアスを入力します。
+
+```text
+Alias                                                                         
+Will default to username if left empty                                        
+>
+```
+
+認証が成功すると、Daytonaは以下のメッセージを表示します：
+
+```text
+Git provider has been registered
+```
+
+[gh-token]: https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-personal-access-token-classic
+[gh-enterprise-token]: https://docs.github.com/en/enterprise-server@3.13/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-personal-access-token-classic
+[gl-token]: https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html#create-a-personal-access-token
+[bit-token]: https://support.atlassian.com/bitbucket-cloud/docs/create-an-app-password/
+[codeberg-token]: https://docs.codeberg.org/advanced/access-token/
+[gitea-token]: https://docs.gitea.com/1.21/development/api-usage#generating-and-listing-api-tokens
+[gitness-token]: https://docs.gitness.com/administration/user-management#generate-user-token
+[azuredevops-token]: https://learn.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate?view=azure-devops&tabs=Windows#create-a-pat
+[awscodecommit-token]: https://docs.aws.amazon.com/codecommit/latest/userguide/auth-and-access-control.html

@@ -1,0 +1,448 @@
+---
+title: Providers
+description: Providersを理解し、新しいTargetsを設定する。
+sidebar:
+  label: Providers
+---
+
+import Label from '@components/Label.astro'
+
+<Label>
+  Distribution: **Open Source**
+</Label>
+
+import Aside from '@components/Aside.astro'
+// import DocumentList from "@components/DocumentList.astro";
+// import DocumentListItem from "@components/DocumentListItem.astro";
+
+Providersは、Daytonaがさまざまなテクノロジーと統合して開発環境を作成・管理するためのプラグインです。Providersは基盤技術の複雑さを抽象化し、コンテナ化、オーケストレーション、またはクラウドベースの仮想マシンを通じて、Daytonaが環境をデプロイし実行するために活用する基盤エンジンとして機能します。
+
+Daytonaのアーキテクチャは、Providerの役割を別のサービスに分散化しています。[Daytona Server](/docs/ja/usage/server)は、Workspaceの作成とライフサイクル管理に関する操作を実行するためにProvidersと通信します。
+
+## Providerをインストールする
+
+DaytonaはDaytona ServerとインターフェースするためのProviderをインストールするオプションを提供します。新しいProviderがインストールされると、Workspaceのデプロイメントとそのライフサイクル管理を行います。
+
+1. 次のコマンドを実行してProviderをインストールします：
+
+```shell
+daytona provider install
+```
+
+:::note
+DaytonaはProviderを管理するための[Runner](/docs/ja/usage/runners)を選択するよう促します。
+:::
+
+<br />
+
+2. リストからインストールしたいProviderを選択するか、特定のバージョンを選択します。
+
+```text
+Choose a Provider to Install
+7 items
+===
+Docker
+v0.0.0
+DigitalOcean
+v0.0.0
+AWS
+v0.0.0
+Azure
+v0.0.0
+GCP
+v0.0.0
+Hetzner
+v0.0.0
+Fly
+v0.0.0
+
+Select a specific version
+```
+
+Providerを選択すると、Daytonaは選択されたProviderをインストールして設定し、Workspaceの管理とデプロイメントに利用できるようにします。これで作成されたProviderで使用する[Target](/docs/ja/usage/targets)を作成できます。
+
+```text
+Provider <provider> has been successfully installed
+```
+
+## Providerの一覧表示
+
+Daytonaは、インストールされているすべてのProviderを一覧表示するオプションを提供し、Workspaceの管理に利用可能なProviderの概要を確認できます。
+
+1. インストールされているすべてのProviderを一覧表示するには、以下のコマンドを実行してください：
+
+```shell
+daytona provider list
+```
+
+このコマンドを実行すると、DaytonaはインストールされているProviderとそれぞれのバージョンの一覧を表示します。
+
+```text
+Name         Runner         Name               Version               
+──────────────────────────────────────────────────────
+Docker       local          docker-provider    v0.0.0
+```
+
+## Providerの更新
+
+Daytonaは既存のProviderを更新するオプションを提供しており、最新の機能強化とバグ修正を適用することができます。
+
+1. 次のコマンドを実行してProviderを更新します：
+
+```shell
+daytona provider update
+```
+
+2. Providerを管理するRunnerを選択します。
+
+```text
+Choose a Runner To Manage Providers
+1 item
+===
+local
+local
+```
+
+3. 更新したいProviderをリストから選択します。
+
+```text
+Choose a provider to update
+1 item
+===
+Docker (Runner <runner>)
+v0.0.0
+```
+
+```text
+Provider docker-provider has been successfully updated
+```
+
+## Providerのアンインストール
+
+Daytonaは既存のProviderをアンインストールするオプションを提供しており、不要になったProviderを削除してProviderを管理するのに役立ちます。
+
+1. 次のコマンドを実行してProviderをアンインストールします：
+
+```shell
+daytona provider uninstall
+```
+
+2. Providerを管理するRunnerを選択します。
+
+```text
+Choose a Runner To Manage Providers
+1 item
+===
+local
+local
+```
+
+3. リストからアンインストールしたいProviderを選択します。
+
+```text
+Choose a provider to uninstall
+1 item
+===
+Docker (Runner <runner>)
+v0.0.0
+```
+
+```text
+Provider docker-provider has been successfully uninstalled
+```
+
+## Docker
+
+Docker Providerを使用すると、DaytonaはWorkspaceプロジェクトをDockerコンテナとして作成できます。Daytonaはデフォルトでdocker-provider用のProviderをインストールし、Docker Providerを使用するデフォルトの[Target](/docs/ja/usage/targets)を追加して、ローカルマシン上でWorkspaceを作成できるようにします。
+
+1. 以下のコマンドを実行してDocker Providerをインストールします：
+
+```shell
+daytona provider install
+```
+
+2. Docker Providerを管理するRunnerを選択します。
+
+```text
+Choose a Runner To Manage Providers
+1 item
+===
+local
+local
+```
+
+3. **`Docker`**を選択してDockerをProviderとしてインストールします。
+
+```text
+Choose a provider to install
+===
+> Docker
+  v0.0.0
+```
+
+Providerを選択すると、Daytonaは選択されたProviderをインストールして設定し、Workspaceの管理とデプロイに使用できるようにします。
+
+```text
+⡿  Installing...
+```
+
+```text
+Provider docker-provider has been successfully installed
+```
+
+## DigitalOcean
+
+DigitalOcean Providerを使用すると、DaytonaはDropletsとして知られるDigitalOcean VM上でWorkspaceプロジェクトを作成できます。このProviderはDaytonaをDigitalOceanと統合し、柔軟でスケーラブルなクラウドプラットフォーム上でWorkspaceを管理できるようにします。
+
+1. 以下のコマンドを実行してDigitalOcean Providerをインストールします：
+
+```shell
+daytona provider install
+```
+
+2. DigitalOcean Providerを管理するRunnerを選択します。
+
+```text
+Choose a Runner To Manage Providers
+1 item
+===
+local
+local
+```
+
+3. **`DigitalOcean`**を選択してDigitalOceanをProviderとしてインストールします。
+
+```text
+Choose a provider to install
+===
+> DigitalOcean
+  v0.0.0
+```
+
+Providerを選択すると、Daytonaは選択されたProviderをインストールして設定し、Workspaceの管理とデプロイに使用できるようにします。
+
+```text
+⡿  Installing...
+```
+
+```text
+Provider digitalocean-provider has been successfully installed
+```
+
+## AWS
+
+AWS Providerを使用すると、DaytonaがAmazon EC2インスタンス上でWorkspaceプロジェクトを作成および管理できるようになります。このProviderはDaytonaをAWSと統合し、スケーラブルで柔軟なクラウド環境でWorkspaceを管理できるようにします。
+
+AWS Providerを使用するには、AWSプログラマティックアクセスユーザーが`AmazonEC2FullAccess`権限を持っていることを確認してください。このポリシーは、EC2インスタンスを管理するために必要な権限を付与し、DaytonaのWorkspaceプロジェクトの作成と管理に不可欠です。
+
+1. 次のコマンドを実行してAWS Providerをインストールします：
+
+```shell
+daytona provider install
+```
+
+2. AWS Providerを管理するRunnerを選択します。
+
+```text
+Choose a Runner To Manage Providers
+1 item
+===
+local
+local
+```
+
+3. **`AWS`**を選択してAWSをProviderとしてインストールします。
+
+```text
+Choose a provider to install
+===
+> AWS
+  v0.0.0
+```
+
+Providerを選択すると、Daytonaは選択されたProviderをインストールして設定し、Workspaceの管理とデプロイに使用できるようにします。
+
+```text
+⡿  Installing...
+```
+
+```text
+Provider aws-provider has been successfully installed
+```
+
+## Azure
+
+Azure Providerを使用すると、DaytonaはAzureコンピュートインスタンス上でWorkspaceプロジェクトを作成できます。ProviderはDaytonaをAzureと統合し、スケーラブルで柔軟なクラウド環境でWorkspaceを管理できるようにします。
+
+1. 次のコマンドを実行してAzure Providerをインストールします：
+
+```shell
+daytona provider install
+```
+
+2. Azure Providerを管理するRunnerを選択します。
+
+```text
+Choose a Runner To Manage Providers
+1 item
+===
+local
+local
+```
+
+3. **`Azure`**を選択してAzureをProviderとしてインストールします。
+
+```text
+Choose a provider to install
+===
+> Azure
+  v0.0.0
+```
+
+Providerを選択すると、Daytonaは選択されたProviderをインストールして設定し、Workspaceの管理とデプロイに使用できるようにします。
+
+```text
+⡿  Installing...
+```
+
+```text
+Provider azure-provider has been successfully installed
+```
+
+:::note
+Azure Providerが適切なAzureサブスクリプションの`Contributor`ロールを持つサービスプリンシパルにリンクされていることを確認してください。
+<br />
+`Contributor`ロールを持つサービスプリンシパルを作成するには、次のAzure CLIコマンドを使用します：
+<br />
+
+```shell
+az ad sp create-for-rbac --role Contributor --scopes /subscriptions/<subscription-id>
+```
+
+サービスプリンシパルの作成と設定に関する詳細な手順は、公式の[Create an Azure service principal with Azure CLI](https://learn.microsoft.com/en-us/cli/azure/azure-cli-sp-tutorial-1?tabs=bash)ドキュメントで確認できます。
+:::
+
+## GCP
+
+GCP Providerを使用すると、DaytonaはGoogle Cloud Platform（GCP）コンピュートインスタンス上でWorkspaceプロジェクトを作成できます。このProviderはDaytonaをGCPと統合し、スケーラブルで柔軟なクラウド環境でWorkspaceを管理できるようにします。
+
+:::note
+GCP Providerを使用する前に、`Compute Admin`ロールを持つGCPサービスアカウントを作成してください。サービスアカウントキーをJSON形式でダウンロードし、認証のためにGCP providerに提供してください。サービスアカウントの作成と設定に関する詳細な手順は[こちら](https://cloud.google.com/iam/docs/service-accounts-create#console)で確認できます。
+:::
+
+<br />
+
+1. 次のコマンドを実行してGCP Providerをインストールします：
+
+```shell
+daytona provider install
+```
+
+2. GCP Providerを管理するRunnerを選択します。
+
+```text
+Choose a Runner To Manage Providers
+1 item
+===
+local
+local
+```
+
+3. **`GCP`**を選択してGCPをProviderとしてインストールします。
+
+```text
+Choose a provider to install
+===
+> GCP
+  v0.0.0
+```
+
+Providerを選択すると、Daytonaは選択されたProviderをインストールして設定し、Workspaceの管理とデプロイに使用できるようにします。
+
+```text
+⡿  Installing...
+```
+
+```text
+Provider gcp-provider has been successfully installed
+```
+
+## Hetzner
+
+Hetzner ProviderはDaytonaがHetzner Cloud VM上でWorkspaceプロジェクトを作成することを可能にします。このProviderはDaytonaとHetznerを統合し、スケーラブルで柔軟なクラウド環境でWorkspaceを管理できるようにします。
+
+<br />
+
+1. 以下のコマンドを実行してHetzner Providerをインストールします：
+
+```shell
+daytona provider install
+```
+
+2. Hetzner Providerを管理するRunnerを選択します。
+
+```text
+Choose a Runner To Manage Providers
+1 item
+===
+local
+local
+```
+
+3. **`Hetzner`**を選択してHetznerをProviderとしてインストールします。
+
+```text
+Choose a provider to install
+===
+> Hetzner
+  v0.0.0
+```
+
+Providerを選択すると、Daytonaは選択されたProviderをインストールして設定し、Workspaceの管理とデプロイに利用できるようにします。
+
+```text
+⡿  Installing...
+```
+
+```text
+Provider hetzner-provider has been successfully installed
+```
+
+## Fly
+
+Fly Providerを使用すると、DaytonaはFly Machine として知られるFly VM上でWorkspaceプロジェクトを作成できます。このProviderはDaytonaをFly.ioプラットフォームと統合し、グローバルに分散されたクラウド環境でWorkspaceを管理できるようにします。
+
+1. 次のコマンドを実行してFly Providerをインストールします：
+
+```shell
+daytona provider install
+```
+
+2. Fly Providerを管理するRunnerを選択します。
+
+```text
+Choose a Runner To Manage Providers
+1 item
+===
+local
+local
+```
+
+3. **`Fly`** を選択してFlyをProviderとしてインストールします。
+
+```text
+Choose a provider to install
+===
+> Fly
+  v0.0.0
+```
+
+Providerを選択すると、Daytonaは選択されたProviderをインストールして設定し、Workspaceの管理とデプロイに使用できるようにします。
+
+```text
+⡿  Installing...
+```
+
+```text
+Provider fly-provider has been successfully installed
+```

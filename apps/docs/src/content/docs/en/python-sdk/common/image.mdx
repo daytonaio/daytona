@@ -1,0 +1,419 @@
+---
+title: "Image"
+hideTitleOnPage: true
+---
+
+## Image
+
+```python
+class Image(BaseModel)
+```
+
+Represents an image definition for a Daytona sandbox.
+Do not construct this class directly. Instead use one of its static factory methods,
+such as `Image.base()`, `Image.debian_slim()`, or `Image.from_dockerfile()`.
+
+#### Image.dockerfile
+
+```python
+def dockerfile() -> str
+```
+
+Returns a generated Dockerfile for the image.
+
+#### Image.pip\_install
+
+```python
+def pip_install(*packages: Union[str, list[str]],
+                find_links: Optional[list[str]] = None,
+                index_url: Optional[str] = None,
+                extra_index_urls: Optional[list[str]] = None,
+                pre: bool = False,
+                extra_options: str = "") -> "Image"
+```
+
+Adds commands to install packages using pip.
+
+**Arguments**:
+
+- `*packages` - The packages to install.
+- `find_links` - Optional[list[str]]: The find-links to use.
+- `index_url` - Optional[str]: The index URL to use.
+- `extra_index_urls` - Optional[list[str]]: The extra index URLs to use.
+- `pre` - bool = False: Whether to install pre-release packages.
+- `extra_options` - str = "": Additional options to pass to pip. Given string is passed
+  directly to the pip install command.
+  
+
+**Returns**:
+
+- `Image` - The image with the pip install commands added.
+  
+
+**Example**:
+
+```python
+image = Image.debian_slim("3.12").pip_install("requests", "pandas")
+```
+
+#### Image.pip\_install\_from\_requirements
+
+```python
+def pip_install_from_requirements(requirements_txt: str,
+                                  find_links: Optional[list[str]] = None,
+                                  index_url: Optional[str] = None,
+                                  extra_index_urls: Optional[list[str]] = None,
+                                  pre: bool = False,
+                                  extra_options: str = "") -> "Image"
+```
+
+Installs dependencies from a requirements.txt file.
+
+**Arguments**:
+
+- `requirements_txt` - str: The path to the requirements.txt file.
+- `find_links` - Optional[list[str]]: The find-links to use.
+- `index_url` - Optional[str]: The index URL to use.
+- `extra_index_urls` - Optional[list[str]]: The extra index URLs to use.
+- `pre` - bool = False: Whether to install pre-release packages.
+- `extra_options` - str = "": Additional options to pass to pip.
+  
+
+**Returns**:
+
+- `Image` - The image with the pip install commands added.
+  
+
+**Example**:
+
+```python
+image = Image.debian_slim("3.12").pip_install_from_requirements("requirements.txt")
+```
+
+#### Image.pip\_install\_from\_pyproject
+
+```python
+def pip_install_from_pyproject(pyproject_toml: str,
+                               optional_dependencies: list[str],
+                               find_links: Optional[str] = None,
+                               index_url: Optional[str] = None,
+                               extra_index_url: Optional[str] = None,
+                               pre: bool = False,
+                               extra_options: str = "") -> "Image"
+```
+
+Installs dependencies from a pyproject.toml file.
+
+**Arguments**:
+
+- `pyproject_toml` - str: The path to the pyproject.toml file.
+- `optional_dependencies` - list[str] = []: The optional dependencies to install from the pyproject.toml file.
+- `find_links` - Optional[str] = None: The find-links to use.
+- `index_url` - Optional[str] = None: The index URL to use.
+- `extra_index_url` - Optional[str] = None: The extra index URL to use.
+- `pre` - bool = False: Whether to install pre-release packages.
+- `extra_options` - str = "": Additional options to pass to pip. Given string is passed
+  directly to the pip install command.
+  
+
+**Returns**:
+
+- `Image` - The image with the pip install commands added.
+  
+
+**Example**:
+
+```python
+image = Image.debian_slim("3.12")                 .pip_install_from_pyproject("pyproject.toml", optional_dependencies=["dev"])
+```
+
+#### Image.add\_local\_file
+
+```python
+def add_local_file(local_path: Union[str, Path], remote_path: str) -> "Image"
+```
+
+Adds a local file to the image.
+
+**Arguments**:
+
+- `local_path` - Union[str, Path]: The path to the local file.
+- `remote_path` - str: The path to the file in the image.
+  
+
+**Returns**:
+
+- `Image` - The image with the local file added.
+  
+
+**Example**:
+
+```python
+image = Image.debian_slim("3.12").add_local_file("package.json", "/home/daytona/package.json")
+```
+
+#### Image.add\_local\_dir
+
+```python
+def add_local_dir(local_path: Union[str, Path], remote_path: str) -> "Image"
+```
+
+Adds a local directory to the image.
+
+**Arguments**:
+
+- `local_path` - Union[str, Path]: The path to the local directory.
+- `remote_path` - str: The path to the directory in the image.
+  
+
+**Returns**:
+
+- `Image` - The image with the local directory added.
+  
+
+**Example**:
+
+```python
+image = Image.debian_slim("3.12").add_local_dir("src", "/home/daytona/src")
+```
+
+#### Image.run\_commands
+
+```python
+def run_commands(*commands: Union[str, list[str]]) -> "Image"
+```
+
+Runs commands in the image.
+
+**Arguments**:
+
+- `*commands` - The commands to run.
+  
+
+**Returns**:
+
+- `Image` - The image with the commands added.
+  
+
+**Example**:
+
+```python
+image = Image.debian_slim("3.12").run_commands(
+    'echo "Hello, world!"',
+    ['bash', '-c', 'echo Hello, world, again!']
+)
+```
+
+#### Image.env
+
+```python
+def env(env_vars: dict[str, str]) -> "Image"
+```
+
+Sets environment variables in the image.
+
+**Arguments**:
+
+- `env_vars` - dict[str, str]: The environment variables to set.
+  
+
+**Returns**:
+
+- `Image` - The image with the environment variables added.
+  
+
+**Example**:
+
+```python
+image = Image.debian_slim("3.12").env({"PROJECT_ROOT": "/home/daytona"})
+```
+
+#### Image.workdir
+
+```python
+def workdir(path: Union[str, Path]) -> "Image"
+```
+
+Sets the working directory in the image.
+
+**Arguments**:
+
+- `path` - Union[str, Path]: The path to the working directory.
+  
+
+**Returns**:
+
+- `Image` - The image with the working directory added.
+  
+
+**Example**:
+
+```python
+image = Image.debian_slim("3.12").workdir("/home/daytona")
+```
+
+#### Image.entrypoint
+
+```python
+def entrypoint(entrypoint_commands: list[str]) -> "Image"
+```
+
+Sets the entrypoint for the image.
+
+**Arguments**:
+
+- `entrypoint_commands` - list[str]: The commands to set as the entrypoint.
+  
+
+**Returns**:
+
+- `Image` - The image with the entrypoint added.
+  
+
+**Example**:
+
+```python
+image = Image.debian_slim("3.12").entrypoint(["/bin/bash"])
+```
+
+#### Image.cmd
+
+```python
+def cmd(cmd: list[str]) -> "Image"
+```
+
+Sets the default command for the image.
+
+**Arguments**:
+
+- `cmd` - list[str]: The commands to set as the default command.
+  
+
+**Returns**:
+
+- `Image` - The image with the default command added.
+  
+
+**Example**:
+
+```python
+image = Image.debian_slim("3.12").cmd(["/bin/bash"])
+```
+
+#### Image.dockerfile\_commands
+
+```python
+def dockerfile_commands(
+        dockerfile_commands: list[str],
+        context_dir: Optional[Union[Path, str]] = None) -> "Image"
+```
+
+Adds arbitrary Dockerfile-like commands to the image.
+
+**Arguments**:
+
+- `*dockerfile_commands` - The commands to add to the Dockerfile.
+- `context_dir` - Optional[Union[Path, str]]: The path to the context directory.
+  
+
+**Returns**:
+
+- `Image` - The image with the Dockerfile commands added.
+  
+
+**Example**:
+
+```python
+image = Image.debian_slim("3.12").dockerfile_commands(["RUN echo 'Hello, world!'"])
+```
+
+#### Image.from\_dockerfile
+
+```python
+@staticmethod
+def from_dockerfile(path: Union[str, Path]) -> "Image"
+```
+
+Creates an Image from an existing Dockerfile.
+
+**Arguments**:
+
+- `path` - Union[str, Path]: The path to the Dockerfile.
+  
+
+**Returns**:
+
+- `Image` - The image with the Dockerfile added.
+  
+
+**Example**:
+
+```python
+image = Image.from_dockerfile("Dockerfile")
+```
+
+#### Image.base
+
+```python
+@staticmethod
+def base(image: str) -> "Image"
+```
+
+Creates an Image from an existing base image.
+
+**Arguments**:
+
+- `image` - str: The base image to use.
+  
+
+**Returns**:
+
+- `Image` - The image with the base image added.
+  
+
+**Example**:
+
+```python
+image = Image.base("python:3.12-slim-bookworm")
+```
+
+#### Image.debian\_slim
+
+```python
+@staticmethod
+def debian_slim(
+        python_version: Optional[SupportedPythonSeries] = None) -> "Image"
+```
+
+Creates a Debian slim image based on the official Python Docker image.
+
+**Arguments**:
+
+- `python_version` - Optional[SupportedPythonSeries]: The Python version to use.
+  
+
+**Returns**:
+
+- `Image` - The image with the Debian slim image added.
+  
+
+**Example**:
+
+```python
+image = Image.debian_slim("3.12")
+```
+
+
+## Context
+
+```python
+class Context(BaseModel)
+```
+
+Context for an image.
+
+**Attributes**:
+
+- `source_path` _str_ - The path to the source file or directory.
+- `archive_path` _Optional[str]_ - The path inside the archive file in object storage.
+

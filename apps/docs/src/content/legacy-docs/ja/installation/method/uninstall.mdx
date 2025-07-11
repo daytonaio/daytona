@@ -1,0 +1,47 @@
+---
+title: アンインストール
+---
+import Aside from "@components/Aside.astro";
+export const partial = true;
+
+<br />
+
+:::caution
+この手順は破壊的で元に戻すことができません。
+続行する前に、ワークスペースデータと関連する設定のバックアップを取得していることを確認してください。
+:::
+
+<br />
+
+ローカルのDaytonaデータを削除し、バイナリを削除するには、以下のコマンドを実行してください：
+
+```shell
+daytona purge
+```
+
+`daytona purge`コマンドが動作しない場合、または手動でローカルのDaytonaデータを削除してバイナリを削除したい場合は、以下のコマンドを実行してください：
+
+```shell
+rm -rf ~/Library/Application\ Support/daytona
+sudo rm $(whereis daytona | awk '{print $2}')
+```
+
+さらに、Daytona関連のすべての設定とコンポーネントを完全に削除するには、以下のコマンドを実行してください：
+
+```shell
+rm -f ~/.ssh/daytona_config
+```
+
+`~/.ssh/config`ファイルを編集して`Include daytona_config entry`を削除してください。以下のコマンドを実行して手動で行うことができます：
+
+```shell
+nano ~/.ssh/config
+```
+
+以下のコマンドを実行して、ローカルのDaytonaレジストリコンテナを削除してください：
+
+```shell
+docker rm /daytona-registry
+```
+
+Daytona用のオートコンプリートスクリプトを生成している場合は、シェル設定ファイル（例：`.bashrc`、`.zshrc`）から手動で削除する必要があります。
