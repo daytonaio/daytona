@@ -642,8 +642,14 @@ export class SandboxService {
     if (sandbox.pending) {
       throw new SandboxError('Sandbox state change in progress')
     }
+
     sandbox.pending = true
-    sandbox.desiredState = SandboxDesiredState.STOPPED
+    //  if auto-delete interval is 0, delete the sandbox immediately
+    if (sandbox.autoDeleteInterval === 0) {
+      sandbox.desiredState = SandboxDesiredState.DESTROYED
+    } else {
+      sandbox.desiredState = SandboxDesiredState.STOPPED
+    }
     await this.sandboxRepository.save(sandbox)
 
     this.eventEmitter.emit(SandboxEvents.STOPPED, new SandboxStoppedEvent(sandbox))

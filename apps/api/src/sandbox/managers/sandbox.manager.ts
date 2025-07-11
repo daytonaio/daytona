@@ -103,7 +103,12 @@ export class SandboxManager {
 
             try {
               sandbox.pending = true
-              sandbox.desiredState = SandboxDesiredState.STOPPED
+              //  if auto-delete interval is 0, delete the sandbox immediately
+              if (sandbox.autoDeleteInterval === 0) {
+                sandbox.desiredState = SandboxDesiredState.DESTROYED
+              } else {
+                sandbox.desiredState = SandboxDesiredState.STOPPED
+              }
               await this.sandboxRepository.save(sandbox)
               this.syncInstanceState(sandbox.id)
             } catch (error) {
