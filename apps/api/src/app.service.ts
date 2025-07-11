@@ -69,7 +69,7 @@ export class AppService implements OnApplicationBootstrap {
       return
     }
 
-    let registryUrl = this.configService.getOrThrow('transientRegistry.url')
+    const registryUrl = this.configService.getOrThrow('transientRegistry.url')
     const registryAdmin = this.configService.getOrThrow('transientRegistry.admin')
     const registryPassword = this.configService.getOrThrow('transientRegistry.password')
     const registryProjectId = this.configService.getOrThrow('transientRegistry.projectId')
@@ -100,7 +100,7 @@ export class AppService implements OnApplicationBootstrap {
       return
     }
 
-    let registryUrl = this.configService.getOrThrow('internalRegistry.url')
+    const registryUrl = this.configService.getOrThrow('internalRegistry.url')
     const registryAdmin = this.configService.getOrThrow('internalRegistry.admin')
     const registryPassword = this.configService.getOrThrow('internalRegistry.password')
     const registryProjectId = this.configService.getOrThrow('internalRegistry.projectId')

@@ -248,8 +248,8 @@ export class DockerRegistryService {
     if (registry.url === 'registry:5000') {
       return 'http://registry:5000'
     }
-  
-    if (registry.url.startsWith("localhost") || registry.url.startsWith("127.0.0.1")) {
+
+    if (registry.url.startsWith('localhost') || registry.url.startsWith('127.0.0.1')) {
       return `http://${registry.url}`
     }
 
