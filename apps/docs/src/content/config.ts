@@ -70,7 +70,6 @@ export const sidebarConfig: NavigationGroup[] = [
         attrs: {
           icon: 'server.svg',
         },
-        relatedGroupCategory: NavigationCategory.GENERAL,
       },
       {
         type: 'link',
@@ -80,7 +79,6 @@ export const sidebarConfig: NavigationGroup[] = [
         attrs: {
           icon: 'terminal.svg',
         },
-        relatedGroupCategory: NavigationCategory.GENERAL,
       },
     ],
   },
@@ -90,6 +88,14 @@ export const sidebarConfig: NavigationGroup[] = [
     homePageHref: '/docs',
     category: NavigationCategory.GENERAL,
     entries: [
+      {
+        type: 'link',
+        href: '/docs',
+        label: 'Home',
+        attrs: {
+          icon: 'home.svg',
+        },
+      },
       {
         type: 'link',
         href: '/docs/getting-started',
@@ -316,6 +322,11 @@ export const sidebarConfig: NavigationGroup[] = [
     entries: [
       {
         type: 'link',
+        href: '/docs/typescript-sdk',
+        label: 'Home',
+      },
+      {
+        type: 'link',
         href: '/docs/typescript-sdk/daytona',
         label: 'Daytona',
       },
@@ -331,6 +342,13 @@ export const sidebarConfig: NavigationGroup[] = [
     label: 'Python SDK Reference',
     homePageHref: '/docs/python-sdk',
     category: NavigationCategory.PYTHON_SDK,
+    entries: [
+      {
+        type: 'link',
+        href: '/docs/python-sdk',
+        label: 'Home',
+      },
+    ],
   },
   {
     type: 'group',
