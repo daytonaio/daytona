@@ -65,7 +65,7 @@ export class Git {
   }
 
   /**
-   * Create branche in the repository.
+   * Create branch in the repository.
    *
    * @param {string} path - Path to the Git repository root. Relative paths are resolved based on the sandbox working directory.
    * @param {string} name - Name of the new branch to create
