@@ -29,12 +29,6 @@ export interface OrganizationUsageOverview {
    * @type {number}
    * @memberof OrganizationUsageOverview
    */
-  totalGpuQuota: number
-  /**
-   *
-   * @type {number}
-   * @memberof OrganizationUsageOverview
-   */
   totalMemoryQuota: number
   /**
    *
@@ -60,4 +54,28 @@ export interface OrganizationUsageOverview {
    * @memberof OrganizationUsageOverview
    */
   currentDiskUsage: number
+  /**
+   *
+   * @type {number}
+   * @memberof OrganizationUsageOverview
+   */
+  totalSnapshotQuota: number
+  /**
+   *
+   * @type {number}
+   * @memberof OrganizationUsageOverview
+   */
+  currentSnapshotUsage: number
+  /**
+   *
+   * @type {number}
+   * @memberof OrganizationUsageOverview
+   */
+  totalVolumeQuota: number
+  /**
+   *
+   * @type {number}
+   * @memberof OrganizationUsageOverview
+   */
+  currentVolumeUsage: number
 }
