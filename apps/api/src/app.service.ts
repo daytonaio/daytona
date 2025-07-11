@@ -58,7 +58,6 @@ export class AppService implements OnApplicationBootstrap {
         volumeQuota: 0,
       },
       role: SystemRole.ADMIN,
-      emailVerified: true,
     })
     const personalOrg = await this.organizationService.findPersonal(user.id)
     await this.apiKeyService.createApiKey(personalOrg.id, user.id, DAYTONA_ADMIN_USER_ID, [])
