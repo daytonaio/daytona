@@ -201,8 +201,7 @@ export class SandboxManager {
           order: {
             lastActivityAt: 'ASC',
           },
-          //  todo: increase this number when auto-delete is stable
-          take: 10,
+          take: 100,
         })
 
         await Promise.all(
