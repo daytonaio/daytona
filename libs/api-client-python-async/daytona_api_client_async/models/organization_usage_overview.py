@@ -28,14 +28,17 @@ class OrganizationUsageOverview(BaseModel):
     OrganizationUsageOverview
     """ # noqa: E501
     total_cpu_quota: Union[StrictFloat, StrictInt] = Field(alias="totalCpuQuota")
-    total_gpu_quota: Union[StrictFloat, StrictInt] = Field(alias="totalGpuQuota")
     total_memory_quota: Union[StrictFloat, StrictInt] = Field(alias="totalMemoryQuota")
     total_disk_quota: Union[StrictFloat, StrictInt] = Field(alias="totalDiskQuota")
     current_cpu_usage: Union[StrictFloat, StrictInt] = Field(alias="currentCpuUsage")
     current_memory_usage: Union[StrictFloat, StrictInt] = Field(alias="currentMemoryUsage")
     current_disk_usage: Union[StrictFloat, StrictInt] = Field(alias="currentDiskUsage")
+    total_snapshot_quota: Union[StrictFloat, StrictInt] = Field(alias="totalSnapshotQuota")
+    current_snapshot_usage: Union[StrictFloat, StrictInt] = Field(alias="currentSnapshotUsage")
+    total_volume_quota: Union[StrictFloat, StrictInt] = Field(alias="totalVolumeQuota")
+    current_volume_usage: Union[StrictFloat, StrictInt] = Field(alias="currentVolumeUsage")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["totalCpuQuota", "totalGpuQuota", "totalMemoryQuota", "totalDiskQuota", "currentCpuUsage", "currentMemoryUsage", "currentDiskUsage"]
+    __properties: ClassVar[List[str]] = ["totalCpuQuota", "totalMemoryQuota", "totalDiskQuota", "currentCpuUsage", "currentMemoryUsage", "currentDiskUsage", "totalSnapshotQuota", "currentSnapshotUsage", "totalVolumeQuota", "currentVolumeUsage"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -96,12 +99,15 @@ class OrganizationUsageOverview(BaseModel):
 
         _obj = cls.model_validate({
             "totalCpuQuota": obj.get("totalCpuQuota"),
-            "totalGpuQuota": obj.get("totalGpuQuota"),
             "totalMemoryQuota": obj.get("totalMemoryQuota"),
             "totalDiskQuota": obj.get("totalDiskQuota"),
             "currentCpuUsage": obj.get("currentCpuUsage"),
             "currentMemoryUsage": obj.get("currentMemoryUsage"),
-            "currentDiskUsage": obj.get("currentDiskUsage")
+            "currentDiskUsage": obj.get("currentDiskUsage"),
+            "totalSnapshotQuota": obj.get("totalSnapshotQuota"),
+            "currentSnapshotUsage": obj.get("currentSnapshotUsage"),
+            "totalVolumeQuota": obj.get("totalVolumeQuota"),
+            "currentVolumeUsage": obj.get("currentVolumeUsage")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():
