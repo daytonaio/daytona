@@ -65,7 +65,7 @@ async def main():
         print("Cleaning up sandbox...")
         sandbox.delete()
 
-if **name** == "**main**":
+if __name__ == "__main__":
     asyncio.run(main())
 
 ```
@@ -159,7 +159,7 @@ you can process log stream synchronously. For example, you can write logs to a f
           print("Cleaning up sandbox...")
           sandbox.delete()
 
-  if **name** == "**main**":
+  if __name__ == "__main__":
       asyncio.run(main())
 
   ```
