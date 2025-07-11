@@ -15,49 +15,49 @@
 /**
  *
  * @export
- * @interface UsageOverview
+ * @interface OrganizationUsageOverview
  */
-export interface UsageOverview {
+export interface OrganizationUsageOverview {
   /**
    *
    * @type {number}
-   * @memberof UsageOverview
+   * @memberof OrganizationUsageOverview
    */
   totalCpuQuota: number
   /**
    *
    * @type {number}
-   * @memberof UsageOverview
+   * @memberof OrganizationUsageOverview
    */
   totalGpuQuota: number
   /**
    *
    * @type {number}
-   * @memberof UsageOverview
+   * @memberof OrganizationUsageOverview
    */
   totalMemoryQuota: number
   /**
    *
    * @type {number}
-   * @memberof UsageOverview
+   * @memberof OrganizationUsageOverview
    */
   totalDiskQuota: number
   /**
    *
    * @type {number}
-   * @memberof UsageOverview
+   * @memberof OrganizationUsageOverview
    */
   currentCpuUsage: number
   /**
    *
    * @type {number}
-   * @memberof UsageOverview
+   * @memberof OrganizationUsageOverview
    */
   currentMemoryUsage: number
   /**
    *
    * @type {number}
-   * @memberof UsageOverview
+   * @memberof OrganizationUsageOverview
    */
   currentDiskUsage: number
 }

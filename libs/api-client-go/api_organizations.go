@@ -183,8 +183,8 @@ type OrganizationsAPI interface {
 	GetOrganizationUsageOverview(ctx context.Context, organizationId string) OrganizationsAPIGetOrganizationUsageOverviewRequest
 
 	// GetOrganizationUsageOverviewExecute executes the request
-	//  @return UsageOverview
-	GetOrganizationUsageOverviewExecute(r OrganizationsAPIGetOrganizationUsageOverviewRequest) (*UsageOverview, *http.Response, error)
+	//  @return OrganizationUsageOverview
+	GetOrganizationUsageOverviewExecute(r OrganizationsAPIGetOrganizationUsageOverviewRequest) (*OrganizationUsageOverview, *http.Response, error)
 
 	/*
 		LeaveOrganization Leave organization
@@ -1553,7 +1553,7 @@ type OrganizationsAPIGetOrganizationUsageOverviewRequest struct {
 	organizationId string
 }
 
-func (r OrganizationsAPIGetOrganizationUsageOverviewRequest) Execute() (*UsageOverview, *http.Response, error) {
+func (r OrganizationsAPIGetOrganizationUsageOverviewRequest) Execute() (*OrganizationUsageOverview, *http.Response, error) {
 	return r.ApiService.GetOrganizationUsageOverviewExecute(r)
 }
 
@@ -1574,13 +1574,13 @@ func (a *OrganizationsAPIService) GetOrganizationUsageOverview(ctx context.Conte
 
 // Execute executes the request
 //
-//	@return UsageOverview
-func (a *OrganizationsAPIService) GetOrganizationUsageOverviewExecute(r OrganizationsAPIGetOrganizationUsageOverviewRequest) (*UsageOverview, *http.Response, error) {
+//	@return OrganizationUsageOverview
+func (a *OrganizationsAPIService) GetOrganizationUsageOverviewExecute(r OrganizationsAPIGetOrganizationUsageOverviewRequest) (*OrganizationUsageOverview, *http.Response, error) {
 	var (
 		localVarHTTPMethod  = http.MethodGet
 		localVarPostBody    interface{}
 		formFiles           []formFile
-		localVarReturnValue *UsageOverview
+		localVarReturnValue *OrganizationUsageOverview
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "OrganizationsAPIService.GetOrganizationUsageOverview")

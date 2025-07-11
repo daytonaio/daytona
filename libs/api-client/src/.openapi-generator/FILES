@@ -87,6 +87,7 @@ models/mouse-scroll-response.ts
 models/organization-invitation.ts
 models/organization-role.ts
 models/organization-suspension.ts
+models/organization-usage-overview.ts
 models/organization-user.ts
 models/organization.ts
 models/paginated-audit-logs.ts
@@ -128,7 +129,6 @@ models/update-organization-invitation.ts
 models/update-organization-member-role.ts
 models/update-organization-quota.ts
 models/update-organization-role.ts
-models/usage-overview.ts
 models/user-public-key.ts
 models/user.ts
 models/volume-dto.ts
