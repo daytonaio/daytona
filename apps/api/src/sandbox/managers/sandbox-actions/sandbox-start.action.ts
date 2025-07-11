@@ -171,6 +171,8 @@ export class SandboxStartAction extends SandboxAction {
       return DONT_SYNC_AGAIN
     }
 
+    const runnerAdapter = await this.runnerAdapterFactory.create(runner)
+
     let registry: DockerRegistry
     let entrypoint: string[]
     if (!sandbox.buildInfo) {
@@ -188,13 +190,15 @@ export class SandboxStartAction extends SandboxAction {
 
       sandbox.snapshot = internalSnapshotName
       entrypoint = snapshot.entrypoint
+
+      await runnerAdapter.create(sandbox, registry, entrypoint)
     } else {
       sandbox.snapshot = sandbox.buildInfo.snapshotRef
       entrypoint = this.getEntrypointFromDockerfile(sandbox.buildInfo.dockerfileContent)
+
+      await runnerAdapter.create(sandbox, registry, entrypoint)
     }
 
-    const runnerAdapter = await this.runnerAdapterFactory.create(runner)
-    await runnerAdapter.create(sandbox, registry, entrypoint)
     await this.updateSandboxState(sandbox.id, SandboxState.CREATING)
     //  sync states again immediately for sandbox
     return SYNC_AGAIN

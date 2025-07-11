@@ -145,7 +145,6 @@ export class RunnerAdapterV1 implements RunnerAdapter {
           gpuQuota: sandbox.gpu,
           env: sandbox.env,
           registry: {
-            project: registry.name,
             url: registry.url,
             username: registry.username,
             password: registry.password,

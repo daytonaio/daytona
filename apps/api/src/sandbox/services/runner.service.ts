@@ -63,6 +63,7 @@ export class RunnerService {
     runner.capacity = createRunnerDto.capacity
     runner.region = createRunnerDto.region
     runner.class = createRunnerDto.class
+    runner.version = createRunnerDto.version
 
     return this.runnerRepository.save(runner)
   }
