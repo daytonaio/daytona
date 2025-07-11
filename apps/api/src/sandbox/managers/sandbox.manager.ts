@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Injectable, Logger } from '@nestjs/common'
+import { Injectable, Logger, NotFoundException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Cron, CronExpression } from '@nestjs/schedule'
 import { In, Not, Raw, Repository } from 'typeorm'
@@ -36,6 +36,7 @@ import { SandboxCreatedEvent } from '../events/sandbox-create.event'
 import { OtelSpan } from '../../common/decorators/otel.decorator'
 import { SnapshotRunner } from '../entities/snapshot-runner.entity'
 import { Runner } from '../entities/runner.entity'
+import { Snapshot } from '../entities/snapshot.entity'
 
 const SYNC_INSTANCE_STATE_LOCK_KEY = 'sync-instance-state-'
 const SYNC_AGAIN = 'sync-again'
@@ -930,9 +931,18 @@ export class SandboxManager {
       }
 
       //  make sure we pick a runner that has the base snapshot
-      const baseSnapshot = sandbox.snapshot
-        ? await this.snapshotService.getSnapshotByName(sandbox.snapshot, sandbox.organizationId)
-        : false
+      let baseSnapshot: Snapshot | null = null
+      try {
+        baseSnapshot = await this.snapshotService.getSnapshotByName(sandbox.snapshot, sandbox.organizationId)
+      } catch (e) {
+        if (e instanceof NotFoundException) {
+          //  if the base snapshot is not found, we'll use any available runner later
+        } else {
+          //  for all other errors, throw them
+          throw e
+        }
+      }
+
       const snapshotRef = baseSnapshot ? baseSnapshot.internalName : null
 
       let availableRunners = []
