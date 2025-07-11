@@ -14,6 +14,8 @@ import { SandboxEvents } from './../../sandbox/constants/sandbox-events.constant
 import { Cron, CronExpression } from '@nestjs/schedule'
 import { RedisLockProvider } from '../../sandbox/common/redis-lock.provider'
 import { SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION } from '../../sandbox/constants/sandbox.constants'
+import { Sandbox } from '../../sandbox/entities/sandbox.entity'
+
 @Injectable()
 export class UsageService {
   private readonly logger = new Logger(UsageService.name)
@@ -22,6 +24,8 @@ export class UsageService {
     @InjectRepository(SandboxUsagePeriod)
     private sandboxUsagePeriodRepository: Repository<SandboxUsagePeriod>,
     private readonly redisLockProvider: RedisLockProvider,
+    @InjectRepository(Sandbox)
+    private readonly sandboxRepository: Repository<Sandbox>,
   ) {}
 
   @OnEvent(SandboxEvents.STATE_UPDATED)
@@ -116,18 +120,27 @@ export class UsageService {
         continue
       }
 
+      // validate that the usage period should remain active just in case
       try {
+        const sandbox = await this.sandboxRepository.findOne({
+          where: {
+            id: usagePeriod.sandboxId,
+          },
+        })
+
         await this.sandboxUsagePeriodRepository.manager.transaction(async (transactionalEntityManager) => {
           // Close usage period
           const closeTime = new Date()
           usagePeriod.endAt = closeTime
           await transactionalEntityManager.save(usagePeriod)
 
-          // Create new usage period
-          const newUsagePeriod = SandboxUsagePeriod.fromUsagePeriod(usagePeriod)
-          newUsagePeriod.startAt = closeTime
-          newUsagePeriod.endAt = null
-          await transactionalEntityManager.save(newUsagePeriod)
+          if (sandbox && (sandbox.state === SandboxState.STARTED || sandbox.state === SandboxState.STOPPED)) {
+            // Create new usage period
+            const newUsagePeriod = SandboxUsagePeriod.fromUsagePeriod(usagePeriod)
+            newUsagePeriod.startAt = closeTime
+            newUsagePeriod.endAt = null
+            await transactionalEntityManager.save(newUsagePeriod)
+          }
         })
       } catch (error) {
         this.logger.error(`Error closing and reopening usage period ${usagePeriod.sandboxId}`, error)

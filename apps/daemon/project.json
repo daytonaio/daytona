@@ -56,7 +56,7 @@
     "format": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "cd {projectRoot} && go fmt ./... && prettier --write \"**/*.{html,js,css,js}\""
+        "command": "cd {projectRoot} && go fmt ./... && prettier --write \"**/*.{yaml,html}\""
       }
     },
     "test": {

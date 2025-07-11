@@ -1,5 +1,5 @@
 # Daytona Documentation v0.0.0-dev
-# Generated on: 2025-07-07
+# Generated on: 2025-07-11
 
 
 title: API Keys
@@ -753,7 +753,7 @@ exec_session_id = "python-app-session"
 sandbox.process.create_session(exec_session_id)
 
 sandbox.process.execute_session_command(exec_session_id, SessionExecuteRequest(
-command="python /app.py",
+command="python app.py",
 var_async=True
 ))
 

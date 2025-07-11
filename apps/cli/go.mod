@@ -6,15 +6,12 @@ toolchain go1.23.5
 
 require (
 	github.com/charmbracelet/bubbletea v1.1.0
-	github.com/daytonaio/daytona/daytonaapiclient v0.0.0-00010101000000-000000000000
 	github.com/docker/docker v27.5.1+incompatible
 	github.com/mark3labs/mcp-go v0.32.0
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/cobra v1.8.1
 	golang.org/x/oauth2 v0.25.0
 )
-
-replace github.com/daytonaio/daytona/daytonaapiclient => ../../libs/api-client-go
 
 require (
 	github.com/Azure/go-ansiterm v0.0.0-20250102033503-faa5f7b0171c // indirect
@@ -41,6 +38,7 @@ require (
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/goccy/go-json v0.10.5 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
+	github.com/google/go-cmp v0.7.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/klauspost/compress v1.18.0 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.10 // indirect
@@ -74,11 +72,11 @@ require (
 	go.opentelemetry.io/otel/metric v1.34.0 // indirect
 	go.opentelemetry.io/otel/sdk v1.34.0 // indirect
 	go.opentelemetry.io/otel/trace v1.34.0 // indirect
-	golang.org/x/crypto v0.37.0 // indirect
-	golang.org/x/net v0.38.0 // indirect
-	golang.org/x/sync v0.13.0 // indirect
-	golang.org/x/sys v0.32.0 // indirect
-	golang.org/x/text v0.24.0 // indirect
+	golang.org/x/crypto v0.39.0 // indirect
+	golang.org/x/net v0.41.0 // indirect
+	golang.org/x/sync v0.15.0 // indirect
+	golang.org/x/sys v0.33.0 // indirect
+	golang.org/x/text v0.26.0 // indirect
 	golang.org/x/time v0.10.0 // indirect
 	google.golang.org/protobuf v1.36.6 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
@@ -95,6 +93,6 @@ require (
 	github.com/minio/minio-go/v7 v7.0.91
 	github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c
 	github.com/spf13/pflag v1.0.6 // indirect
-	golang.org/x/term v0.31.0
+	golang.org/x/term v0.32.0
 	gopkg.in/yaml.v2 v2.4.0
 )

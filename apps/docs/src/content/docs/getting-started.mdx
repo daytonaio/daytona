@@ -169,7 +169,7 @@ exec_session_id = "python-app-session"
 sandbox.process.create_session(exec_session_id)
 
 sandbox.process.execute_session_command(exec_session_id, SessionExecuteRequest(
-command="python /app.py",
+command="python app.py",
 var_async=True
 ))
 
@@ -232,7 +232,7 @@ if __name__ == '__main__':
   }));
 
   // Get the preview link for the Flask app
-  const previewInfo = sandbox.getPreviewLink(3000);
+  const previewInfo = await sandbox.getPreviewLink(3000);
   console.log(`Flask app is available at: ${previewInfo.url}`);
 }
 

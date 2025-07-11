@@ -10,13 +10,13 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/daytonaio/daytona/cli/apiclient"
+	"github.com/daytonaio/apiclient"
+	apiclient_cli "github.com/daytonaio/daytona/cli/apiclient"
 	"github.com/daytonaio/daytona/cli/pkg/minio"
-	"github.com/daytonaio/daytona/daytonaapiclient"
 )
 
 // Create MinIO client from access parameters
-func CreateMinioClient(accessParams *daytonaapiclient.StorageAccessDto) (*minio.Client, error) {
+func CreateMinioClient(accessParams *apiclient.StorageAccessDto) (*minio.Client, error) {
 	storageURL, err := url.Parse(accessParams.StorageUrl)
 	if err != nil {
 		return nil, fmt.Errorf("invalid storage URL: %w", err)
@@ -52,7 +52,7 @@ func ListExistingObjects(ctx context.Context, minioClient *minio.Client, orgID s
 }
 
 // getContextHashes processes context paths and returns their hashes
-func getContextHashes(ctx context.Context, apiClient *daytonaapiclient.APIClient, contextPaths []string) ([]string, error) {
+func getContextHashes(ctx context.Context, apiClient *apiclient.APIClient, contextPaths []string) ([]string, error) {
 	contextHashes := []string{}
 	if len(contextPaths) == 0 {
 		return contextHashes, nil
@@ -61,7 +61,7 @@ func getContextHashes(ctx context.Context, apiClient *daytonaapiclient.APIClient
 	// Get storage access parameters
 	accessParams, res, err := apiClient.ObjectStorageAPI.GetPushAccess(ctx).Execute()
 	if err != nil {
-		return nil, apiclient.HandleErrorResponse(res, err)
+		return nil, apiclient_cli.HandleErrorResponse(res, err)
 	}
 
 	// Create MinIO client
@@ -108,7 +108,7 @@ func getContextHashes(ctx context.Context, apiClient *daytonaapiclient.APIClient
 	return contextHashes, nil
 }
 
-func GetCreateBuildInfoDto(ctx context.Context, dockerfilePath string, contextPaths []string) (*daytonaapiclient.CreateBuildInfo, error) {
+func GetCreateBuildInfoDto(ctx context.Context, dockerfilePath string, contextPaths []string) (*apiclient.CreateBuildInfo, error) {
 	dockerfileAbsPath, err := filepath.Abs(dockerfilePath)
 	if err != nil {
 		return nil, fmt.Errorf("invalid dockerfile path: %w", err)
@@ -123,7 +123,7 @@ func GetCreateBuildInfoDto(ctx context.Context, dockerfilePath string, contextPa
 		return nil, fmt.Errorf("failed to read dockerfile: %w", err)
 	}
 
-	apiClient, err := apiclient.GetApiClient(nil, nil)
+	apiClient, err := apiclient_cli.GetApiClient(nil, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -133,7 +133,7 @@ func GetCreateBuildInfoDto(ctx context.Context, dockerfilePath string, contextPa
 		return nil, err
 	}
 
-	return &daytonaapiclient.CreateBuildInfo{
+	return &apiclient.CreateBuildInfo{
 		DockerfileContent: string(dockerfileContent),
 		ContextHashes:     contextHashes,
 	}, nil

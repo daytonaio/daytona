@@ -34,6 +34,7 @@ import { OrganizationSuspendedSandboxStoppedEvent } from '../events/organization
 import { SandboxDesiredState } from '../../sandbox/enums/sandbox-desired-state.enum'
 import { SnapshotRunner } from '../../sandbox/entities/snapshot-runner.entity'
 import { OrganizationSuspendedSnapshotRunnerRemovedEvent } from '../events/organization-suspended-snapshot-runner-removed'
+import { SystemRole } from '../../user/enums/system-role.enum'
 
 @Injectable()
 export class OrganizationService implements OnModuleInit {
@@ -389,8 +390,8 @@ export class OrganizationService implements OnModuleInit {
       {
         name: 'Personal',
       },
-      payload.userId,
-      payload.emailVerified || false,
+      payload.user.id,
+      payload.user.role === SystemRole.ADMIN ? true : payload.user.emailVerified,
       true,
       payload.personalOrganizationQuota,
     )

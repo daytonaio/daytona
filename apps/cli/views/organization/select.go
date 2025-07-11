@@ -5,11 +5,11 @@ package organization
 
 import (
 	"github.com/charmbracelet/huh"
+	"github.com/daytonaio/apiclient"
 	"github.com/daytonaio/daytona/cli/views/common"
-	"github.com/daytonaio/daytona/daytonaapiclient"
 )
 
-func GetOrganizationIdFromPrompt(organizationList []daytonaapiclient.Organization) (*daytonaapiclient.Organization, error) {
+func GetOrganizationIdFromPrompt(organizationList []apiclient.Organization) (*apiclient.Organization, error) {
 	var chosenOrganizationId string
 	var organizationOptions []huh.Option[string]
 
