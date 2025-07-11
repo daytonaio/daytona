@@ -24,8 +24,8 @@ type CreateSandboxArgs struct {
 	Env                 *map[string]string         `json:"env,omitempty"`
 	Labels              *map[string]string         `json:"labels,omitempty"`
 	Public              *bool                      `json:"public,omitempty"`
-	Class               *string                    `json:"class,omitempty"`
 	Cpu                 *int32                     `json:"cpu,omitempty"`
+	Gpu                 *int32                     `json:"gpu,omitempty"`
 	Memory              *int32                     `json:"memory,omitempty"`
 	Disk                *int32                     `json:"disk,omitempty"`
 	AutoStopInterval    *int32                     `json:"autoStopInterval,omitempty"`
@@ -39,19 +39,19 @@ func GetCreateSandboxTool() mcp.Tool {
 		mcp.WithDescription("Create a new sandbox with Daytona"),
 		mcp.WithString("id", mcp.Description("If a sandbox ID is provided it is first checked if it exists and is running, if so, the existing sandbox will be used. However, a model is not able to provide custom sandbox ID but only the ones Daytona commands return and should always leave ID field empty if the intention is to create a new sandbox.")),
 		mcp.WithString("target", mcp.DefaultString("us"), mcp.Description("Target region of the sandbox.")),
-		mcp.WithString("snapshot", mcp.Description("Snapshot of the sandbox (don't specify any if not explicitly instructed from user).")),
+		mcp.WithString("snapshot", mcp.Description("Snapshot of the sandbox (don't specify any if not explicitly instructed from user). Cannot be specified when using a build info entry.")),
 		mcp.WithString("user", mcp.Description("User associated with the sandbox.")),
 		mcp.WithObject("env", mcp.Description("Environment variables for the sandbox. Format: {\"key\": \"value\", \"key2\": \"value2\"}"), mcp.AdditionalProperties(map[string]any{"type": "string"})),
 		mcp.WithObject("labels", mcp.Description("Labels for the sandbox. Format: {\"key\": \"value\", \"key2\": \"value2\"}"), mcp.AdditionalProperties(map[string]any{"type": "string"})),
 		mcp.WithBoolean("public", mcp.Description("Whether the sandbox http preview is publicly accessible.")),
-		mcp.WithString("class", mcp.Description("Class type of the sandbox.")),
-		mcp.WithNumber("cpu", mcp.Description("CPU cores allocated to the sandbox."), mcp.Min(0), mcp.Max(4)),
-		mcp.WithNumber("memory", mcp.Description("Memory allocated to the sandbox in GB."), mcp.Min(0), mcp.Max(8)),
-		mcp.WithNumber("disk", mcp.Description("Disk space allocated to the sandbox in GB."), mcp.Min(0), mcp.Max(10)),
+		mcp.WithNumber("cpu", mcp.Description("CPU cores allocated to the sandbox. Cannot specify sandbox resources when using a snapshot."), mcp.Max(4)),
+		mcp.WithNumber("gpu", mcp.Description("GPU units allocated to the sandbox. Cannot specify sandbox resources when using a snapshot."), mcp.Max(1)),
+		mcp.WithNumber("memory", mcp.Description("Memory allocated to the sandbox in GB. Cannot specify sandbox resources when using a snapshot."), mcp.Max(8)),
+		mcp.WithNumber("disk", mcp.Description("Disk space allocated to the sandbox in GB. Cannot specify sandbox resources when using a snapshot."), mcp.Max(10)),
 		mcp.WithNumber("autoStopInterval", mcp.DefaultNumber(15), mcp.Min(0), mcp.Description("Auto-stop interval in minutes (0 means disabled) for the sandbox.")),
 		mcp.WithNumber("autoArchiveInterval", mcp.DefaultNumber(10080), mcp.Min(0), mcp.Description("Auto-archive interval in minutes (0 means the maximum interval will be used) for the sandbox.")),
 		mcp.WithArray("volumes", mcp.Description("Volumes to attach to the sandbox."), mcp.Items(map[string]any{"type": "object", "properties": map[string]any{"volumeId": map[string]any{"type": "string"}, "mountPath": map[string]any{"type": "string"}}})),
-		mcp.WithObject("buildInfo", mcp.Description("Build information for the sandbox."), mcp.Properties(map[string]any{"dockerfile_content": map[string]any{"type": "string"}, "context_hashes": map[string]any{"type": "array", "items": map[string]any{"type": "string"}}})),
+		mcp.WithObject("buildInfo", mcp.Description("Build information for the sandbox."), mcp.Properties(map[string]any{"dockerfileContent": map[string]any{"type": "string"}, "contextHashes": map[string]any{"type": "array", "items": map[string]any{"type": "string"}}})),
 	)
 }
 
@@ -75,7 +75,10 @@ func CreateSandbox(ctx context.Context, request mcp.CallToolRequest, args Create
 		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("sandbox %s not found or not running", sandboxId)
 	}
 
-	createSandboxReq := createSandboxRequest(args)
+	createSandboxReq, err := createSandboxRequest(args)
+	if err != nil {
+		return &mcp.CallToolResult{IsError: true}, err
+	}
 
 	// Create new sandbox with retries
 	maxRetries := 3
@@ -107,8 +110,18 @@ func CreateSandbox(ctx context.Context, request mcp.CallToolRequest, args Create
 	return &mcp.CallToolResult{IsError: true}, fmt.Errorf("failed to create sandbox after %d retries", maxRetries)
 }
 
-func createSandboxRequest(args CreateSandboxArgs) *apiclient.CreateSandbox {
+func createSandboxRequest(args CreateSandboxArgs) (*apiclient.CreateSandbox, error) {
 	createSandbox := apiclient.NewCreateSandbox()
+
+	if args.BuildInfo != nil {
+		if args.Snapshot != nil && *args.Snapshot != "" {
+			return nil, fmt.Errorf("cannot specify a snapshot when using a build info entry")
+		}
+	} else {
+		if args.Cpu != nil || args.Gpu != nil || args.Memory != nil || args.Disk != nil {
+			return nil, fmt.Errorf("cannot specify sandbox resources when using a snapshot")
+		}
+	}
 
 	if args.Snapshot != nil && *args.Snapshot != "" {
 		createSandbox.SetSnapshot(*args.Snapshot)
@@ -142,10 +155,6 @@ func createSandboxRequest(args CreateSandboxArgs) *apiclient.CreateSandbox {
 		createSandbox.SetPublic(*args.Public)
 	}
 
-	if args.Class != nil && *args.Class != "" {
-		createSandbox.SetClass(*args.Class)
-	}
-
 	if args.Cpu != nil {
 		createSandbox.SetCpu(*args.Cpu)
 	}
@@ -166,5 +175,5 @@ func createSandboxRequest(args CreateSandboxArgs) *apiclient.CreateSandbox {
 		createSandbox.SetBuildInfo(*args.BuildInfo)
 	}
 
-	return createSandbox
+	return createSandbox, nil
 }
