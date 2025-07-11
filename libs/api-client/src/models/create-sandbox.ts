@@ -104,6 +104,12 @@ export interface CreateSandbox {
    */
   autoArchiveInterval?: number
   /**
+   * Auto-delete interval in minutes (negative value means disabled, 0 means delete immediately upon stopping)
+   * @type {number}
+   * @memberof CreateSandbox
+   */
+  autoDeleteInterval?: number
+  /**
    * Array of volumes to attach to the sandbox
    * @type {Array<SandboxVolume>}
    * @memberof CreateSandbox

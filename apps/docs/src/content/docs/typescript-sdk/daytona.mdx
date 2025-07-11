@@ -103,7 +103,9 @@ const params: CreateSandboxFromSnapshotParams = {
         NODE_ENV: 'development',
         DEBUG: 'true'
     },
-    autoStopInterval: 60
+    autoStopInterval: 60,
+    autoArchiveInterval: 60,
+    autoDeleteInterval: 120
 };
 const sandbox = await daytona.create(params, { timeout: 100 });
 ```
@@ -152,7 +154,9 @@ const params: CreateSandboxFromImageParams = {
         cpu: 2,
         memory: 4 // 4GB RAM
     },
-    autoStopInterval: 60
+    autoStopInterval: 60,
+    autoArchiveInterval: 60,
+    autoDeleteInterval: 120
 };
 const sandbox = await daytona.create(params, { timeout: 100, onSnapshotCreateLogs: console.log });
 ```
@@ -334,6 +338,7 @@ Base parameters for creating a new Sandbox.
 **Properties**:
 
 - `autoArchiveInterval?` _number_ - Auto-archive interval in minutes (0 means the maximum interval will be used). Default is 7 days.
+- `autoDeleteInterval?` _number_ - Auto-delete interval in minutes (negative value means disabled, 0 means delete immediately upon stopping). By default, auto-delete is disabled.
 - `autoStopInterval?` _number_ - Auto-stop interval in minutes (0 means disabled). Default is 15 minutes.
 - `envVars?` _Record\<string, string\>_ - Optional environment variables to set in the Sandbox
 - `labels?` _Record\<string, string\>_ - Sandbox labels
@@ -348,6 +353,7 @@ Parameters for creating a new Sandbox.
 **Properties**:
 
 - `autoArchiveInterval?` _number_
+- `autoDeleteInterval?` _number_
 - `autoStopInterval?` _number_
 - `envVars?` _Record\<string, string\>_
 - `image` _string \| Image_ - Custom Docker image to use for the Sandbox. If an Image object is provided,
@@ -366,6 +372,7 @@ Parameters for creating a new Sandbox from a snapshot.
 **Properties**:
 
 - `autoArchiveInterval?` _number_
+- `autoDeleteInterval?` _number_
 - `autoStopInterval?` _number_
 - `envVars?` _Record\<string, string\>_
 - `labels?` _Record\<string, string\>_
