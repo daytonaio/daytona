@@ -23,7 +23,6 @@ import {
   Next,
   ParseBoolPipe,
 } from '@nestjs/common'
-import Redis from 'ioredis'
 import { CombinedAuthGuard } from '../../auth/combined-auth.guard'
 import { SandboxService } from '../services/sandbox.service'
 import { CreateSandboxDto } from '../dto/create-sandbox.dto'
@@ -44,7 +43,6 @@ import { Sandbox as SandboxEntity } from '../entities/sandbox.entity'
 import { ContentTypeInterceptor } from '../../common/interceptors/content-type.interceptors'
 import { Throttle } from '@nestjs/throttler'
 import { Runner } from '../entities/runner.entity'
-import { InjectRedis } from '@nestjs-modules/ioredis'
 import { Sandbox } from '../decorators/sandbox.decorator'
 import { SandboxAccessGuard } from '../guards/sandbox-access.guard'
 import { CustomHeaders } from '../../common/constants/header.constants'
@@ -76,7 +74,6 @@ export class SandboxController {
   private readonly logger = new Logger(SandboxController.name)
 
   constructor(
-    @InjectRedis() private readonly redis: Redis,
     private readonly runnerService: RunnerService,
     private readonly sandboxService: SandboxService,
     private readonly configService: TypedConfigService,

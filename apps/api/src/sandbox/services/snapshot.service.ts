@@ -12,7 +12,7 @@ import {
   Logger,
 } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { Repository, Not, In, IsNull, Raw, Like, JsonContains } from 'typeorm'
+import { Repository, Not, In, Raw } from 'typeorm'
 import { Snapshot } from '../entities/snapshot.entity'
 import { SnapshotState } from '../enums/snapshot-state.enum'
 import { CreateSnapshotDto } from '../dto/create-snapshot.dto'
@@ -30,6 +30,8 @@ import { OrganizationEvents } from '../../organization/constants/organization-ev
 import { OrganizationSuspendedSnapshotDeactivatedEvent } from '../../organization/events/organization-suspended-snapshot-deactivated.event'
 import { SnapshotRunnerState } from '../enums/snapshot-runner-state.enum'
 import { PaginatedList } from '../../common/interfaces/paginated-list.interface'
+import { InjectRedis } from '@nestjs-modules/ioredis'
+import Redis from 'ioredis'
 
 const IMAGE_NAME_REGEX = /^[a-zA-Z0-9_.\-:]+(\/[a-zA-Z0-9_.\-:]+)*$/
 @Injectable()
@@ -41,11 +43,12 @@ export class SnapshotService {
     private readonly sandboxRepository: Repository<Sandbox>,
     @InjectRepository(Snapshot)
     private readonly snapshotRepository: Repository<Snapshot>,
-    @InjectRepository(BuildInfo)
-    private readonly buildInfoRepository: Repository<BuildInfo>,
     @InjectRepository(SnapshotRunner)
     private readonly snapshotRunnerRepository: Repository<SnapshotRunner>,
+    @InjectRepository(BuildInfo)
+    private readonly buildInfoRepository: Repository<BuildInfo>,
     private readonly organizationService: OrganizationService,
+    @InjectRedis() private readonly redis: Redis,
   ) {}
 
   private validateImageName(name: string): string | null {
@@ -87,16 +90,7 @@ export class SnapshotService {
 
     this.organizationService.assertOrganizationIsNotSuspended(organization)
 
-    // check if the organization has reached the snapshot quota
-    const snapshots = await this.snapshotRepository.find({
-      where: { organizationId: organization.id },
-    })
-
-    if (snapshots.length >= organization.snapshotQuota) {
-      throw new ForbiddenException('Reached the maximum number of snapshots in the organization')
-    }
-
-    await this.validateOrganizationMaxQuotas(
+    await this.validateOrganizationQuotas(
       organization,
       createSnapshotDto.cpu,
       createSnapshotDto.memory,
@@ -246,12 +240,13 @@ export class SnapshotService {
     return await this.snapshotRepository.save(snapshot)
   }
 
-  private async validateOrganizationMaxQuotas(
+  private async validateOrganizationQuotas(
     organization: Organization,
     cpu?: number,
     memory?: number,
     disk?: number,
   ): Promise<void> {
+    // validate per-sandbox quotas
     if (cpu && cpu > organization.maxCpuPerSandbox) {
       throw new ForbiddenException(
         `CPU request ${cpu} exceeds maximum allowed per sandbox (${organization.maxCpuPerSandbox})`,
@@ -267,6 +262,18 @@ export class SnapshotService {
         `Disk request ${disk}GB exceeds maximum allowed per sandbox (${organization.maxDiskPerSandbox}GB)`,
       )
     }
+
+    // validate usage quotas
+    // use optimistic quota guards to protect against race conditions to prevent quota abuse (not 100% correct when close to quota limits)
+    const usageOverview = await this.organizationService.getSnapshotUsageOverview(organization.id, organization)
+
+    const concurrentCountKey = `snapshot-concurrent-${organization.id}`
+    const concurrentCount = await this.redis.incr(concurrentCountKey)
+    await this.redis.expire(concurrentCountKey, 1)
+
+    if (usageOverview.currentSnapshotUsage + concurrentCount > usageOverview.totalSnapshotQuota) {
+      throw new ForbiddenException(`Snapshot quota exceeded. Maximum allowed: ${usageOverview.totalSnapshotQuota}`)
+    }
   }
 
   @OnEvent(SandboxEvents.CREATED)
@@ -280,7 +287,7 @@ export class SnapshotService {
     await this.snapshotRepository.save(snapshot)
   }
 
-  async activateSnapshot(snapshotId: string): Promise<Snapshot> {
+  async activateSnapshot(snapshotId: string, organization: Organization): Promise<Snapshot> {
     const snapshot = await this.snapshotRepository.findOne({
       where: { id: snapshotId },
     })
@@ -296,6 +303,10 @@ export class SnapshotService {
     if (snapshot.state !== SnapshotState.INACTIVE) {
       throw new BadRequestException(`Snapshot ${snapshotId} cannot be activated - it is in ${snapshot.state} state`)
     }
+
+    this.organizationService.assertOrganizationIsNotSuspended(organization)
+
+    await this.validateOrganizationQuotas(organization, snapshot.cpu, snapshot.mem, snapshot.disk)
 
     snapshot.state = SnapshotState.ACTIVE
     snapshot.lastUsedAt = new Date()

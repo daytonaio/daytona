@@ -148,7 +148,8 @@
     "uuid": "^11.0.3",
     "vite-plugin-svgr": "^4.3.0",
     "xml2js": "^0.6.2",
-    "yaml": "^2.8.0"
+    "yaml": "^2.8.0",
+    "zod": "^4.0.5"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.22.0",
