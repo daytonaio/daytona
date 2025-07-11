@@ -87,7 +87,7 @@ class Process:
         Args:
             command (str): Shell command to execute.
             cwd (Optional[str]): Working directory for command execution. If not
-                specified, uses the sandbox workdir.
+                specified, uses the sandbox working directory.
             env (Optional[Dict[str, str]]): Environment variables to set for the command.
             timeout (Optional[int]): Maximum time in seconds to wait for the command
                 to complete. 0 means wait indefinitely.

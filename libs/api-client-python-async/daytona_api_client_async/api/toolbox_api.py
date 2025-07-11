@@ -74,7 +74,7 @@ from daytona_api_client_async.models.session_execute_request import SessionExecu
 from daytona_api_client_async.models.session_execute_response import SessionExecuteResponse
 from daytona_api_client_async.models.user_home_dir_response import UserHomeDirResponse
 from daytona_api_client_async.models.windows_response import WindowsResponse
-from daytona_api_client_async.models.workdir_response import WorkdirResponse
+from daytona_api_client_async.models.work_dir_response import WorkDirResponse
 
 from daytona_api_client_async.api_client import ApiClient, RequestSerialized
 from daytona_api_client_async.api_response import ApiResponse
@@ -925,307 +925,6 @@ class ToolboxApi:
 
 
     def _create_session_serialize(
-        self,
-        sandbox_id,
-        create_session_request,
-        x_daytona_organization_id,
-        _request_auth,
-        _content_type,
-        _headers,
-        _host_index,
-    ) -> RequestSerialized:
-
-        _host = None
-
-        _collection_formats: Dict[str, str] = {
-        }
-
-        _path_params: Dict[str, str] = {}
-        _query_params: List[Tuple[str, str]] = []
-        _header_params: Dict[str, Optional[str]] = _headers or {}
-        _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
-        ] = {}
-        _body_params: Optional[bytes] = None
-
-        # process the path parameters
-        if sandbox_id is not None:
-            _path_params['sandboxId'] = sandbox_id
-        # process the query parameters
-        # process the header parameters
-        if x_daytona_organization_id is not None:
-            _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id
-        # process the form parameters
-        # process the body parameter
-        if create_session_request is not None:
-            _body_params = create_session_request
-
-
-
-        # set the HTTP header `Content-Type`
-        if _content_type:
-            _header_params['Content-Type'] = _content_type
-        else:
-            _default_content_type = (
-                self.api_client.select_header_content_type(
-                    [
-                        'application/json'
-                    ]
-                )
-            )
-            if _default_content_type is not None:
-                _header_params['Content-Type'] = _default_content_type
-
-        # authentication setting
-        _auth_settings: List[str] = [
-            'bearer', 
-            'oauth2'
-        ]
-
-        return self.api_client.param_serialize(
-            method='POST',
-            resource_path='/toolbox/{sandboxId}/toolbox/process/session/v2',
-            path_params=_path_params,
-            query_params=_query_params,
-            header_params=_header_params,
-            body=_body_params,
-            post_params=_form_params,
-            files=_files,
-            auth_settings=_auth_settings,
-            collection_formats=_collection_formats,
-            _host=_host,
-            _request_auth=_request_auth
-        )
-
-
-
-
-    @validate_call
-    async def create_session_deprecated(
-        self,
-        sandbox_id: StrictStr,
-        create_session_request: CreateSessionRequest,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
-        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> None:
-        """(Deprecated) Create session
-
-        Create a new session in the sandbox
-
-        :param sandbox_id: (required)
-        :type sandbox_id: str
-        :param create_session_request: (required)
-        :type create_session_request: CreateSessionRequest
-        :param x_daytona_organization_id: Use with JWT to specify the organization ID
-        :type x_daytona_organization_id: str
-        :param _request_timeout: timeout setting for this request. If one
-                                 number provided, it will be total request
-                                 timeout. It can also be a pair (tuple) of
-                                 (connection, read) timeouts.
-        :type _request_timeout: int, tuple(int, int), optional
-        :param _request_auth: set to override the auth_settings for an a single
-                              request; this effectively ignores the
-                              authentication in the spec for a single request.
-        :type _request_auth: dict, optional
-        :param _content_type: force content-type for the request.
-        :type _content_type: str, Optional
-        :param _headers: set to override the headers for a single
-                         request; this effectively ignores the headers
-                         in the spec for a single request.
-        :type _headers: dict, optional
-        :param _host_index: set to override the host_index for a single
-                            request; this effectively ignores the host_index
-                            in the spec for a single request.
-        :type _host_index: int, optional
-        :return: Returns the result object.
-        """ # noqa: E501
-        warnings.warn("POST /toolbox/{sandboxId}/toolbox/process/session is deprecated.", DeprecationWarning)
-
-        _param = self._create_session_deprecated_serialize(
-            sandbox_id=sandbox_id,
-            create_session_request=create_session_request,
-            x_daytona_organization_id=x_daytona_organization_id,
-            _request_auth=_request_auth,
-            _content_type=_content_type,
-            _headers=_headers,
-            _host_index=_host_index
-        )
-
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
-        }
-        response_data = await self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
-        await response_data.read()
-        return self.api_client.response_deserialize(
-            response_data=response_data,
-            response_types_map=_response_types_map,
-        ).data
-
-
-    @validate_call
-    async def create_session_deprecated_with_http_info(
-        self,
-        sandbox_id: StrictStr,
-        create_session_request: CreateSessionRequest,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
-        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[None]:
-        """(Deprecated) Create session
-
-        Create a new session in the sandbox
-
-        :param sandbox_id: (required)
-        :type sandbox_id: str
-        :param create_session_request: (required)
-        :type create_session_request: CreateSessionRequest
-        :param x_daytona_organization_id: Use with JWT to specify the organization ID
-        :type x_daytona_organization_id: str
-        :param _request_timeout: timeout setting for this request. If one
-                                 number provided, it will be total request
-                                 timeout. It can also be a pair (tuple) of
-                                 (connection, read) timeouts.
-        :type _request_timeout: int, tuple(int, int), optional
-        :param _request_auth: set to override the auth_settings for an a single
-                              request; this effectively ignores the
-                              authentication in the spec for a single request.
-        :type _request_auth: dict, optional
-        :param _content_type: force content-type for the request.
-        :type _content_type: str, Optional
-        :param _headers: set to override the headers for a single
-                         request; this effectively ignores the headers
-                         in the spec for a single request.
-        :type _headers: dict, optional
-        :param _host_index: set to override the host_index for a single
-                            request; this effectively ignores the host_index
-                            in the spec for a single request.
-        :type _host_index: int, optional
-        :return: Returns the result object.
-        """ # noqa: E501
-        warnings.warn("POST /toolbox/{sandboxId}/toolbox/process/session is deprecated.", DeprecationWarning)
-
-        _param = self._create_session_deprecated_serialize(
-            sandbox_id=sandbox_id,
-            create_session_request=create_session_request,
-            x_daytona_organization_id=x_daytona_organization_id,
-            _request_auth=_request_auth,
-            _content_type=_content_type,
-            _headers=_headers,
-            _host_index=_host_index
-        )
-
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
-        }
-        response_data = await self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
-        await response_data.read()
-        return self.api_client.response_deserialize(
-            response_data=response_data,
-            response_types_map=_response_types_map,
-        )
-
-
-    @validate_call
-    async def create_session_deprecated_without_preload_content(
-        self,
-        sandbox_id: StrictStr,
-        create_session_request: CreateSessionRequest,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
-        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> RESTResponseType:
-        """(Deprecated) Create session
-
-        Create a new session in the sandbox
-
-        :param sandbox_id: (required)
-        :type sandbox_id: str
-        :param create_session_request: (required)
-        :type create_session_request: CreateSessionRequest
-        :param x_daytona_organization_id: Use with JWT to specify the organization ID
-        :type x_daytona_organization_id: str
-        :param _request_timeout: timeout setting for this request. If one
-                                 number provided, it will be total request
-                                 timeout. It can also be a pair (tuple) of
-                                 (connection, read) timeouts.
-        :type _request_timeout: int, tuple(int, int), optional
-        :param _request_auth: set to override the auth_settings for an a single
-                              request; this effectively ignores the
-                              authentication in the spec for a single request.
-        :type _request_auth: dict, optional
-        :param _content_type: force content-type for the request.
-        :type _content_type: str, Optional
-        :param _headers: set to override the headers for a single
-                         request; this effectively ignores the headers
-                         in the spec for a single request.
-        :type _headers: dict, optional
-        :param _host_index: set to override the host_index for a single
-                            request; this effectively ignores the host_index
-                            in the spec for a single request.
-        :type _host_index: int, optional
-        :return: Returns the result object.
-        """ # noqa: E501
-        warnings.warn("POST /toolbox/{sandboxId}/toolbox/process/session is deprecated.", DeprecationWarning)
-
-        _param = self._create_session_deprecated_serialize(
-            sandbox_id=sandbox_id,
-            create_session_request=create_session_request,
-            x_daytona_organization_id=x_daytona_organization_id,
-            _request_auth=_request_auth,
-            _content_type=_content_type,
-            _headers=_headers,
-            _host_index=_host_index
-        )
-
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
-        }
-        response_data = await self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
-        return response_data.response
-
-
-    def _create_session_deprecated_serialize(
         self,
         sandbox_id,
         create_session_request,
@@ -7165,7 +6864,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def get_workdir(
+    async def get_work_dir(
         self,
         sandbox_id: StrictStr,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
@@ -7181,8 +6880,8 @@ class ToolboxApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> WorkdirResponse:
-        """Get sandbox workdir
+    ) -> WorkDirResponse:
+        """Get sandbox work-dir
 
 
         :param sandbox_id: (required)
@@ -7211,7 +6910,7 @@ class ToolboxApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._get_workdir_serialize(
+        _param = self._get_work_dir_serialize(
             sandbox_id=sandbox_id,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -7221,7 +6920,7 @@ class ToolboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "WorkdirResponse",
+            '200': "WorkDirResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -7235,7 +6934,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def get_workdir_with_http_info(
+    async def get_work_dir_with_http_info(
         self,
         sandbox_id: StrictStr,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
@@ -7251,8 +6950,8 @@ class ToolboxApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[WorkdirResponse]:
-        """Get sandbox workdir
+    ) -> ApiResponse[WorkDirResponse]:
+        """Get sandbox work-dir
 
 
         :param sandbox_id: (required)
@@ -7281,7 +6980,7 @@ class ToolboxApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._get_workdir_serialize(
+        _param = self._get_work_dir_serialize(
             sandbox_id=sandbox_id,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -7291,7 +6990,7 @@ class ToolboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "WorkdirResponse",
+            '200': "WorkDirResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -7305,7 +7004,7 @@ class ToolboxApi:
 
 
     @validate_call
-    async def get_workdir_without_preload_content(
+    async def get_work_dir_without_preload_content(
         self,
         sandbox_id: StrictStr,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
@@ -7322,7 +7021,7 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Get sandbox workdir
+        """Get sandbox work-dir
 
 
         :param sandbox_id: (required)
@@ -7351,7 +7050,7 @@ class ToolboxApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._get_workdir_serialize(
+        _param = self._get_work_dir_serialize(
             sandbox_id=sandbox_id,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -7361,7 +7060,7 @@ class ToolboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "WorkdirResponse",
+            '200': "WorkDirResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -7370,7 +7069,7 @@ class ToolboxApi:
         return response_data.response
 
 
-    def _get_workdir_serialize(
+    def _get_work_dir_serialize(
         self,
         sandbox_id,
         x_daytona_organization_id,
@@ -7422,7 +7121,7 @@ class ToolboxApi:
 
         return self.api_client.param_serialize(
             method='GET',
-            resource_path='/toolbox/{sandboxId}/toolbox/workdir',
+            resource_path='/toolbox/{sandboxId}/toolbox/work-dir',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,

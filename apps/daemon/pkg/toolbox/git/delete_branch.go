@@ -19,7 +19,7 @@ func DeleteBranch(c *gin.Context) {
 	}
 
 	gitService := git.Service{
-		ProjectDir: req.Path,
+		WorkDir: req.Path,
 	}
 
 	if err := gitService.DeleteBranch(req.Name); err != nil {

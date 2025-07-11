@@ -38,7 +38,7 @@ class LspServer:
         Args:
             language_id (LspLanguageId): The language server type (e.g., LspLanguageId.TYPESCRIPT).
             path_to_project (str): Path to the project root directory. Relative paths are resolved
-            based on the sandbox workdir.
+            based on the sandbox working directory.
             toolbox_api (ToolboxApi): API client for Sandbox operations.
             instance (SandboxInstance): The Sandbox instance this server belongs to.
         """

@@ -59,7 +59,8 @@ running 'git add' on the command line.
 
 **Arguments**:
 
-- `path` _str_ - Path to the Git repository root. Relative paths are resolved based on the sandbox workdir.
+- `path` _str_ - Path to the Git repository root. Relative paths are resolved based on
+  the sandbox working directory.
 - `files` _List[str]_ - List of file paths or directories to stage, relative to the repository root.
   
 
@@ -88,7 +89,8 @@ Lists branches in the repository.
 
 **Arguments**:
 
-- `path` _str_ - Path to the Git repository root. Relative paths are resolved based on the sandbox workdir.
+- `path` _str_ - Path to the Git repository root. Relative paths are resolved based on
+  the sandbox working directory.
   
 
 **Returns**:
@@ -123,7 +125,7 @@ repository if credentials are provided.
 
 - `url` _str_ - Repository URL to clone from.
 - `path` _str_ - Path where the repository should be cloned. Relative paths are resolved
-  based on the sandbox workdir.
+  based on the sandbox working directory.
 - `branch` _Optional[str]_ - Specific branch to clone. If not specified,
   clones the default branch.
 - `commit_id` _Optional[str]_ - Specific commit to clone. If specified,
@@ -171,7 +173,8 @@ changes using the add() method before committing.
 
 **Arguments**:
 
-- `path` _str_ - Path to the Git repository root. Relative paths are resolved based on the sandbox workdir.
+- `path` _str_ - Path to the Git repository root. Relative paths are resolved based on
+  the sandbox working directory.
 - `message` _str_ - Commit message describing the changes.
 - `author` _str_ - Name of the commit author.
 - `email` _str_ - Email address of the commit author.
@@ -205,7 +208,8 @@ username and password/token.
 
 **Arguments**:
 
-- `path` _str_ - Path to the Git repository root. Relative paths are resolved based on the sandbox workdir.
+- `path` _str_ - Path to the Git repository root. Relative paths are resolved based on
+  the sandbox working directory.
 - `username` _Optional[str]_ - Git username for authentication.
 - `password` _Optional[str]_ - Git password or token for authentication.
   
@@ -238,7 +242,8 @@ provide username and password/token.
 
 **Arguments**:
 
-- `path` _str_ - Path to the Git repository root. Relative paths are resolved based on the sandbox workdir.
+- `path` _str_ - Path to the Git repository root. Relative paths are resolved based on
+  the sandbox working directory.
 - `username` _Optional[str]_ - Git username for authentication.
 - `password` _Optional[str]_ - Git password or token for authentication.
   
@@ -268,7 +273,8 @@ Gets the current Git repository status.
 
 **Arguments**:
 
-- `path` _str_ - Path to the Git repository root. Relative paths are resolved based on the sandbox workdir.
+- `path` _str_ - Path to the Git repository root. Relative paths are resolved based on
+  the sandbox working directory.
   
 
 **Returns**:
@@ -301,7 +307,8 @@ Checkout branch in the repository.
 
 **Arguments**:
 
-- `path` _str_ - Path to the Git repository root. Relative paths are resolved based on the sandbox workdir.
+- `path` _str_ - Path to the Git repository root. Relative paths are resolved based on
+  the sandbox working directory.
 - `branch` _str_ - Name of the branch to checkout
   
 
@@ -323,7 +330,8 @@ Create branch in the repository.
 
 **Arguments**:
 
-- `path` _str_ - Path to the Git repository root. Relative paths are resolved based on the sandbox workdir.
+- `path` _str_ - Path to the Git repository root. Relative paths are resolved based on
+  the sandbox working directory.
 - `name` _str_ - Name of the new branch to create
   
 
@@ -345,7 +353,8 @@ Delete branch in the repository.
 
 **Arguments**:
 
-- `path` _str_ - Path to the Git repository root. Relative paths are resolved based on the sandbox
+- `path` _str_ - Path to the Git repository root. Relative paths are resolved based on
+  the sandbox working directory.
 - `name` _str_ - Name of the branch to delete
   
 

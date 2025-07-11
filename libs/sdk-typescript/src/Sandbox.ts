@@ -135,17 +135,17 @@ export class Sandbox implements SandboxDto {
   }
 
   /**
-   * Gets the workdir path inside the Sandbox.
+   * Gets the working directory path inside the Sandbox.
    *
-   * @returns {Promise<string | undefined>} The absolute path to the Sandbox workdir. Uses the WORKDIR specified
+   * @returns {Promise<string | undefined>} The absolute path to the Sandbox working directory. Uses the WORKDIR specified
    * in the Dockerfile if present, or falling back to the user's home directory if not.
    *
    * @example
-   * const workdir = await sandbox.getWorkdir();
-   * console.log(`Sandbox workdir: ${workdir}`);
+   * const workDir = await sandbox.getWorkDir();
+   * console.log(`Sandbox working directory: ${workDir}`);
    */
-  public async getWorkdir(): Promise<string | undefined> {
-    const response = await this.toolboxApi.getWorkdir(this.id)
+  public async getWorkDir(): Promise<string | undefined> {
+    const response = await this.toolboxApi.getWorkDir(this.id)
     return response.data.dir
   }
 
@@ -156,7 +156,7 @@ export class Sandbox implements SandboxDto {
    * diagnostics, and more.
    *
    * @param {LspLanguageId} languageId - The language server type (e.g., "typescript")
-   * @param {string} pathToProject - Path to the project root directory. Relative paths are resolved based on the sandbox workdir.
+   * @param {string} pathToProject - Path to the project root directory. Relative paths are resolved based on the sandbox working directory.
    * @returns {LspServer} A new LSP server instance configured for the specified language
    *
    * @example

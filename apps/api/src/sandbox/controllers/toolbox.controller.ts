@@ -83,7 +83,7 @@ import {
   ProcessLogsResponseDto,
   ProcessErrorsResponseDto,
   UserHomeDirResponseDto,
-  WorkdirResponseDto,
+  WorkDirResponseDto,
 } from '../dto/toolbox.dto'
 import { ToolboxService } from '../services/toolbox.service'
 import { ContentTypeInterceptor } from '../../common/interceptors/content-type.interceptors'
@@ -245,18 +245,18 @@ export class ToolboxController {
     return await this.toolboxProxy(req, res, next)
   }
 
-  @Get(':sandboxId/toolbox/workdir')
+  @Get(':sandboxId/toolbox/work-dir')
   @ApiOperation({
-    summary: 'Get sandbox workdir',
-    operationId: 'getWorkdir',
+    summary: 'Get sandbox work-dir',
+    operationId: 'getWorkDir',
   })
   @ApiResponse({
     status: 200,
-    description: 'Workdir retrieved successfully',
-    type: WorkdirResponseDto,
+    description: 'Work-dir retrieved successfully',
+    type: WorkDirResponseDto,
   })
   @ApiParam({ name: 'sandboxId', type: String, required: true })
-  async getWorkdir(
+  async getWorkDir(
     @Request() req: RawBodyRequest<IncomingMessage>,
     @Res() res: ServerResponse<IncomingMessage>,
     @Next() next: NextFunction,
@@ -876,30 +876,6 @@ export class ToolboxController {
   }
 
   @Post(':sandboxId/toolbox/process/session')
-  @HttpCode(200)
-  @UseInterceptors(ContentTypeInterceptor)
-  @ApiOperation({
-    summary: 'Create session',
-    description: 'Create a new session in the sandbox',
-    operationId: 'createSessionDeprecated',
-    deprecated: true,
-  })
-  @ApiResponse({
-    status: 200,
-  })
-  @ApiBody({
-    type: CreateSessionRequestDto,
-  })
-  @ApiParam({ name: 'sandboxId', type: String, required: true })
-  async createSessionDeprecated(
-    @Request() req: RawBodyRequest<IncomingMessage>,
-    @Res() res: ServerResponse<IncomingMessage>,
-    @Next() next: NextFunction,
-  ): Promise<void> {
-    return await this.toolboxProxy(req, res, next)
-  }
-
-  @Post(':sandboxId/toolbox/process/session/v2')
   @HttpCode(200)
   @UseInterceptors(ContentTypeInterceptor)
   @ApiOperation({

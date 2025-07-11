@@ -1836,9 +1836,9 @@ paths:
       summary: Get sandbox user home dir
       tags:
         - toolbox
-  /toolbox/{sandboxId}/toolbox/workdir:
+  /toolbox/{sandboxId}/toolbox/work-dir:
     get:
-      operationId: getWorkdir
+      operationId: getWorkDir
       parameters:
         - description: Use with JWT to specify the organization ID
           explode: false
@@ -1860,15 +1860,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/WorkdirResponse'
-          description: Workdir retrieved successfully
+                $ref: '#/components/schemas/WorkDirResponse'
+          description: Work-dir retrieved successfully
       security:
         - bearer: []
         - oauth2:
             - openid
             - profile
             - email
-      summary: Get sandbox workdir
+      summary: Get sandbox work-dir
       tags:
         - toolbox
   /toolbox/{sandboxId}/toolbox/files:
@@ -2942,9 +2942,8 @@ paths:
       tags:
         - toolbox
     post:
-      deprecated: true
       description: Create a new session in the sandbox
-      operationId: createSessionDeprecated
+      operationId: createSession
       parameters:
         - description: Use with JWT to specify the organization ID
           explode: false
@@ -3058,44 +3057,6 @@ paths:
             - profile
             - email
       summary: Get session
-      tags:
-        - toolbox
-  /toolbox/{sandboxId}/toolbox/process/session/v2:
-    post:
-      description: Create a new session in the sandbox
-      operationId: createSession
-      parameters:
-        - description: Use with JWT to specify the organization ID
-          explode: false
-          in: header
-          name: X-Daytona-Organization-ID
-          required: false
-          schema:
-            type: string
-          style: simple
-        - explode: false
-          in: path
-          name: sandboxId
-          required: true
-          schema:
-            type: string
-          style: simple
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CreateSessionRequest'
-        required: true
-      responses:
-        '200':
-          description: ''
-      security:
-        - bearer: []
-        - oauth2:
-            - openid
-            - profile
-            - email
-      summary: Create session
       tags:
         - toolbox
   /toolbox/{sandboxId}/toolbox/process/session/{sessionId}/exec:
@@ -7382,7 +7343,7 @@ components:
         dir:
           type: string
       type: object
-    WorkdirResponse:
+    WorkDirResponse:
       example:
         dir: dir
       properties:

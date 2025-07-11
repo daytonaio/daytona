@@ -39,7 +39,7 @@ export class Process {
    * Executes a shell command in the Sandbox.
    *
    * @param {string} command - Shell command to execute
-   * @param {string} [cwd] - Working directory for command execution. If not specified, uses the sandbox workdir.
+   * @param {string} [cwd] - Working directory for command execution. If not specified, uses the sandbox working directory.
    * @param {Record<string, string>} [env] - Environment variables to set for the command
    * @param {number} [timeout] - Maximum time in seconds to wait for the command to complete. 0 means wait indefinitely.
    * @returns {Promise<ExecuteResponse>} Command execution results containing:

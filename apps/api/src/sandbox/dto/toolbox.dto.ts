@@ -272,8 +272,8 @@ export class UserHomeDirResponseDto {
   dir?: string
 }
 
-@ApiSchema({ name: 'WorkdirResponse' })
-export class WorkdirResponseDto {
+@ApiSchema({ name: 'WorkDirResponse' })
+export class WorkDirResponseDto {
   @ApiPropertyOptional()
   dir?: string
 }

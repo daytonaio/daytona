@@ -140,7 +140,7 @@ import type { UserHomeDirResponse } from '../models'
 // @ts-ignore
 import type { WindowsResponse } from '../models'
 // @ts-ignore
-import type { WorkdirResponse } from '../models'
+import type { WorkDirResponse } from '../models'
 /**
  * ToolboxApi - axios parameter creator
  * @export
@@ -285,62 +285,6 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
       assertParamExists('createSession', 'sandboxId', sandboxId)
       // verify required parameter 'createSessionRequest' is not null or undefined
       assertParamExists('createSession', 'createSessionRequest', createSessionRequest)
-      const localVarPath = `/toolbox/{sandboxId}/toolbox/process/session/v2`.replace(
-        `{${'sandboxId'}}`,
-        encodeURIComponent(String(sandboxId)),
-      )
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
-      let baseOptions
-      if (configuration) {
-        baseOptions = configuration.baseOptions
-      }
-
-      const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options }
-      const localVarHeaderParameter = {} as any
-      const localVarQueryParameter = {} as any
-
-      // authentication bearer required
-      // http bearer authentication required
-      await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-      // authentication oauth2 required
-
-      localVarHeaderParameter['Content-Type'] = 'application/json'
-
-      if (xDaytonaOrganizationID != null) {
-        localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
-      }
-      setSearchParams(localVarUrlObj, localVarQueryParameter)
-      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
-      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
-      localVarRequestOptions.data = serializeDataIfNeeded(createSessionRequest, localVarRequestOptions, configuration)
-
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      }
-    },
-    /**
-     * Create a new session in the sandbox
-     * @summary Create session
-     * @param {string} sandboxId
-     * @param {CreateSessionRequest} createSessionRequest
-     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {*} [options] Override http request option.
-     * @deprecated
-     * @throws {RequiredError}
-     */
-    createSessionDeprecated: async (
-      sandboxId: string,
-      createSessionRequest: CreateSessionRequest,
-      xDaytonaOrganizationID?: string,
-      options: RawAxiosRequestConfig = {},
-    ): Promise<RequestArgs> => {
-      // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('createSessionDeprecated', 'sandboxId', sandboxId)
-      // verify required parameter 'createSessionRequest' is not null or undefined
-      assertParamExists('createSessionDeprecated', 'createSessionRequest', createSessionRequest)
       const localVarPath = `/toolbox/{sandboxId}/toolbox/process/session`.replace(
         `{${'sandboxId'}}`,
         encodeURIComponent(String(sandboxId)),
@@ -1441,20 +1385,20 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
     },
     /**
      *
-     * @summary Get sandbox workdir
+     * @summary Get sandbox work-dir
      * @param {string} sandboxId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    getWorkdir: async (
+    getWorkDir: async (
       sandboxId: string,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('getWorkdir', 'sandboxId', sandboxId)
-      const localVarPath = `/toolbox/{sandboxId}/toolbox/workdir`.replace(
+      assertParamExists('getWorkDir', 'sandboxId', sandboxId)
+      const localVarPath = `/toolbox/{sandboxId}/toolbox/work-dir`.replace(
         `{${'sandboxId'}}`,
         encodeURIComponent(String(sandboxId)),
       )
@@ -3836,39 +3780,6 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
         )(axios, localVarOperationServerBasePath || basePath)
     },
     /**
-     * Create a new session in the sandbox
-     * @summary Create session
-     * @param {string} sandboxId
-     * @param {CreateSessionRequest} createSessionRequest
-     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {*} [options] Override http request option.
-     * @deprecated
-     * @throws {RequiredError}
-     */
-    async createSessionDeprecated(
-      sandboxId: string,
-      createSessionRequest: CreateSessionRequest,
-      xDaytonaOrganizationID?: string,
-      options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.createSessionDeprecated(
-        sandboxId,
-        createSessionRequest,
-        xDaytonaOrganizationID,
-        options,
-      )
-      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
-      const localVarOperationServerBasePath =
-        operationServerMap['ToolboxApi.createSessionDeprecated']?.[localVarOperationServerIndex]?.url
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration,
-        )(axios, localVarOperationServerBasePath || basePath)
-    },
-    /**
      * Delete file inside sandbox
      * @summary Delete file
      * @param {string} sandboxId
@@ -4504,21 +4415,21 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
     },
     /**
      *
-     * @summary Get sandbox workdir
+     * @summary Get sandbox work-dir
      * @param {string} sandboxId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    async getWorkdir(
+    async getWorkDir(
       sandboxId: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<WorkdirResponse>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.getWorkdir(sandboxId, xDaytonaOrganizationID, options)
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<WorkDirResponse>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.getWorkDir(sandboxId, xDaytonaOrganizationID, options)
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['ToolboxApi.getWorkdir']?.[localVarOperationServerIndex]?.url
+        operationServerMap['ToolboxApi.getWorkDir']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -5866,26 +5777,6 @@ export const ToolboxApiFactory = function (configuration?: Configuration, basePa
         .then((request) => request(axios, basePath))
     },
     /**
-     * Create a new session in the sandbox
-     * @summary Create session
-     * @param {string} sandboxId
-     * @param {CreateSessionRequest} createSessionRequest
-     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {*} [options] Override http request option.
-     * @deprecated
-     * @throws {RequiredError}
-     */
-    createSessionDeprecated(
-      sandboxId: string,
-      createSessionRequest: CreateSessionRequest,
-      xDaytonaOrganizationID?: string,
-      options?: RawAxiosRequestConfig,
-    ): AxiosPromise<void> {
-      return localVarFp
-        .createSessionDeprecated(sandboxId, createSessionRequest, xDaytonaOrganizationID, options)
-        .then((request) => request(axios, basePath))
-    },
-    /**
      * Delete file inside sandbox
      * @summary Delete file
      * @param {string} sandboxId
@@ -6266,19 +6157,19 @@ export const ToolboxApiFactory = function (configuration?: Configuration, basePa
     },
     /**
      *
-     * @summary Get sandbox workdir
+     * @summary Get sandbox work-dir
      * @param {string} sandboxId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    getWorkdir(
+    getWorkDir(
       sandboxId: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
-    ): AxiosPromise<WorkdirResponse> {
+    ): AxiosPromise<WorkDirResponse> {
       return localVarFp
-        .getWorkdir(sandboxId, xDaytonaOrganizationID, options)
+        .getWorkDir(sandboxId, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
@@ -7132,28 +7023,6 @@ export class ToolboxApi extends BaseAPI {
   }
 
   /**
-   * Create a new session in the sandbox
-   * @summary Create session
-   * @param {string} sandboxId
-   * @param {CreateSessionRequest} createSessionRequest
-   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-   * @param {*} [options] Override http request option.
-   * @deprecated
-   * @throws {RequiredError}
-   * @memberof ToolboxApi
-   */
-  public createSessionDeprecated(
-    sandboxId: string,
-    createSessionRequest: CreateSessionRequest,
-    xDaytonaOrganizationID?: string,
-    options?: RawAxiosRequestConfig,
-  ) {
-    return ToolboxApiFp(this.configuration)
-      .createSessionDeprecated(sandboxId, createSessionRequest, xDaytonaOrganizationID, options)
-      .then((request) => request(this.axios, this.basePath))
-  }
-
-  /**
    * Delete file inside sandbox
    * @summary Delete file
    * @param {string} sandboxId
@@ -7545,16 +7414,16 @@ export class ToolboxApi extends BaseAPI {
 
   /**
    *
-   * @summary Get sandbox workdir
+   * @summary Get sandbox work-dir
    * @param {string} sandboxId
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof ToolboxApi
    */
-  public getWorkdir(sandboxId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
+  public getWorkDir(sandboxId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
     return ToolboxApiFp(this.configuration)
-      .getWorkdir(sandboxId, xDaytonaOrganizationID, options)
+      .getWorkDir(sandboxId, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 

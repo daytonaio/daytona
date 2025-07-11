@@ -40,7 +40,7 @@ export type Position = {
  * IDE-like features such as code completion, symbol search, and more.
  *
  * @property {LspLanguageId} languageId - The language server type (e.g., "typescript")
- * @property {string} pathToProject - Path to the project root directory. Relative paths are resolved based on the sandbox workdir.
+ * @property {string} pathToProject - Path to the project root directory. Relative paths are resolved based on the sandbox working directory.
  * @property {ToolboxApi} toolboxApi - API client for Sandbox operations
  * @property {SandboxInstance} instance - The Sandbox instance this server belongs to
  *
@@ -100,7 +100,7 @@ export class LspServer {
    * language features like diagnostics and completions for that file. The server
    * will begin tracking the file's contents and providing language features.
    *
-   * @param {string} path - Path to the opened file. Relative paths are resolved based on the sandbox workdir.
+   * @param {string} path - Path to the opened file. Relative paths are resolved based on the sandbox working directory.
    * @returns {Promise<void>}
    *
    * @example

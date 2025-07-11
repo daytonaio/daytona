@@ -70,7 +70,8 @@ class Git:
         running 'git add' on the command line.
 
         Args:
-            path (str): Path to the Git repository root. Relative paths are resolved based on the sandbox workdir.
+            path (str): Path to the Git repository root. Relative paths are resolved based on
+            the sandbox working directory.
             files (List[str]): List of file paths or directories to stage, relative to the repository root.
 
         Example:
@@ -96,7 +97,8 @@ class Git:
         """Lists branches in the repository.
 
         Args:
-            path (str): Path to the Git repository root. Relative paths are resolved based on the sandbox workdir.
+            path (str): Path to the Git repository root. Relative paths are resolved based on
+            the sandbox working directory.
 
         Returns:
             ListBranchResponse: List of branches in the repository.
@@ -129,7 +131,7 @@ class Git:
         Args:
             url (str): Repository URL to clone from.
             path (str): Path where the repository should be cloned. Relative paths are resolved
-            based on the sandbox workdir.
+            based on the sandbox working directory.
             branch (Optional[str]): Specific branch to clone. If not specified,
                 clones the default branch.
             commit_id (Optional[str]): Specific commit to clone. If specified,
@@ -180,7 +182,8 @@ class Git:
         changes using the add() method before committing.
 
         Args:
-            path (str): Path to the Git repository root. Relative paths are resolved based on the sandbox workdir.
+            path (str): Path to the Git repository root. Relative paths are resolved based on
+            the sandbox working directory.
             message (str): Commit message describing the changes.
             author (str): Name of the commit author.
             email (str): Email address of the commit author.
@@ -220,7 +223,8 @@ class Git:
         username and password/token.
 
         Args:
-            path (str): Path to the Git repository root. Relative paths are resolved based on the sandbox workdir.
+            path (str): Path to the Git repository root. Relative paths are resolved based on
+            the sandbox working directory.
             username (Optional[str]): Git username for authentication.
             password (Optional[str]): Git password or token for authentication.
 
@@ -257,7 +261,8 @@ class Git:
         provide username and password/token.
 
         Args:
-            path (str): Path to the Git repository root. Relative paths are resolved based on the sandbox workdir.
+            path (str): Path to the Git repository root. Relative paths are resolved based on
+            the sandbox working directory.
             username (Optional[str]): Git username for authentication.
             password (Optional[str]): Git password or token for authentication.
 
@@ -288,7 +293,8 @@ class Git:
         """Gets the current Git repository status.
 
         Args:
-            path (str): Path to the Git repository root. Relative paths are resolved based on the sandbox workdir.
+            path (str): Path to the Git repository root. Relative paths are resolved based on
+            the sandbox working directory.
 
         Returns:
             GitStatus: Repository status information including:
@@ -316,7 +322,8 @@ class Git:
         """Checkout branch in the repository.
 
         Args:
-            path (str): Path to the Git repository root. Relative paths are resolved based on the sandbox workdir.
+            path (str): Path to the Git repository root. Relative paths are resolved based on
+            the sandbox working directory.
             branch (str): Name of the branch to checkout
 
         Example:
@@ -338,7 +345,8 @@ class Git:
         """Create branch in the repository.
 
         Args:
-            path (str): Path to the Git repository root. Relative paths are resolved based on the sandbox workdir.
+            path (str): Path to the Git repository root. Relative paths are resolved based on
+            the sandbox working directory.
             name (str): Name of the new branch to create
 
         Example:
@@ -360,7 +368,8 @@ class Git:
         """Delete branch in the repository.
 
         Args:
-            path (str): Path to the Git repository root. Relative paths are resolved based on the sandbox
+            path (str): Path to the Git repository root. Relative paths are resolved based on
+            the sandbox working directory.
             name (str): Name of the branch to delete
 
         Example:

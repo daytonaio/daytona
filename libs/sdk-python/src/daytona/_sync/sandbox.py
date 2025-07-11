@@ -147,21 +147,21 @@ class Sandbox(SandboxDto):
     def get_user_root_dir(self) -> str:
         return self.get_user_home_dir()
 
-    @intercept_errors(message_prefix="Failed to get workdir path: ")
-    def get_workdir(self) -> str:
-        """Gets the workdir path inside the Sandbox.
+    @intercept_errors(message_prefix="Failed to get working directory path: ")
+    def get_work_dir(self) -> str:
+        """Gets the working directory path inside the Sandbox.
 
         Returns:
-            str: The absolute path to the Sandbox workdir. Uses the WORKDIR specified in
+            str: The absolute path to the Sandbox working directory. Uses the WORKDIR specified in
             the Dockerfile if present, or falling back to the user's home directory if not.
 
         Example:
             ```python
-            workdir = sandbox.get_workdir()
-            print(f"Sandbox workdir: {workdir}")
+            work_dir = sandbox.get_work_dir()
+            print(f"Sandbox working directory: {work_dir}")
             ```
         """
-        response = self._toolbox_api.get_workdir(self.id)
+        response = self._toolbox_api.get_work_dir(self.id)
         return response.dir
 
     def create_lsp_server(self, language_id: LspLanguageId, path_to_project: str) -> LspServer:
@@ -173,7 +173,7 @@ class Sandbox(SandboxDto):
         Args:
             language_id (LspLanguageId): The language server type (e.g., LspLanguageId.PYTHON).
             path_to_project (str): Path to the project root directory. Relative paths are resolved
-            based on the sandbox workdir.
+            based on the sandbox working directory.
 
         Returns:
             LspServer: A new LSP server instance configured for the specified language.

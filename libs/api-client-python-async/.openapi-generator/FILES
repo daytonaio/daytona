@@ -132,7 +132,7 @@ daytona_api_client_async/models/user_public_key.py
 daytona_api_client_async/models/volume_dto.py
 daytona_api_client_async/models/volume_state.py
 daytona_api_client_async/models/windows_response.py
-daytona_api_client_async/models/workdir_response.py
+daytona_api_client_async/models/work_dir_response.py
 daytona_api_client_async/models/workspace.py
 daytona_api_client_async/py.typed
 daytona_api_client_async/rest.py

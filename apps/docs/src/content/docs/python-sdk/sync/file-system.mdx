@@ -40,7 +40,7 @@ permissions.
 **Arguments**:
 
 - `path` _str_ - Path where the folder should be created. Relative paths are resolved based
-  on the sandbox workdir.
+  on the sandbox working directory.
 - `mode` _str_ - Folder permissions in octal format (e.g., "755" for rwxr-xr-x).
   
 
@@ -65,7 +65,7 @@ Deletes a file from the Sandbox.
 
 **Arguments**:
 
-- `path` _str_ - Path to the file to delete. Relative paths are resolved based on the sandbox workdir.
+- `path` _str_ - Path to the file to delete. Relative paths are resolved based on the sandbox working directory.
   
 
 **Example**:
@@ -89,7 +89,7 @@ It can only be used for smaller files.
 **Arguments**:
 
 - `remote_path` _str_ - Path to the file in the Sandbox. Relative paths are resolved based
-  on the sandbox workdir.
+  on the sandbox working directory.
 - `timeout` _int_ - Timeout for the download operation in seconds. 0 means no timeout. Default is 30 minutes.
   
 
@@ -126,7 +126,7 @@ This method is useful when you want to download larger files that may not fit in
 **Arguments**:
 
 - `remote_path` _str_ - Path to the file in the Sandbox. Relative paths are resolved based
-  on the sandbox workdir.
+  on the sandbox working directory.
 - `local_path` _str_ - Path to save the file locally.
 - `timeout` _int_ - Timeout for the download operation in seconds. 0 means no timeout. Default is 30 minutes.
   
@@ -153,7 +153,8 @@ the grep command.
 **Arguments**:
 
 - `path` _str_ - Path to the file or directory to search. If the path is a directory,
-  the search will be performed recursively. Relative paths are resolved based on the sandbox workdir.
+  the search will be performed recursively. Relative paths are resolved based
+  on the sandbox working directory.
 - `pattern` _str_ - Search pattern to match against file contents.
   
 
@@ -186,7 +187,8 @@ size, permissions, and timestamps.
 
 **Arguments**:
 
-- `path` _str_ - Path to the file or directory. Relative paths are resolved based on the sandbox workdir.
+- `path` _str_ - Path to the file or directory. Relative paths are resolved based
+  on the sandbox working directory.
   
 
 **Returns**:
@@ -229,7 +231,7 @@ Lists files and directories in a given path and returns their information, simil
 **Arguments**:
 
 - `path` _str_ - Path to the directory to list contents from. Relative paths are resolved
-  based on the sandbox workdir.
+  based on the sandbox working directory.
   
 
 **Returns**:
@@ -266,8 +268,9 @@ Moves or renames a file or directory. The parent directory of the destination mu
 **Arguments**:
 
 - `source` _str_ - Path to the source file or directory. Relative paths are resolved
-  based on the sandbox workdir.
-- `destination` _str_ - Path to the destination. Relative paths are resolved based on the sandbox workdir.
+  based on the sandbox working directory.
+- `destination` _str_ - Path to the destination. Relative paths are resolved based on
+  the sandbox working directory.
   
 
 **Example**:
@@ -305,7 +308,7 @@ Performs search and replace operations across multiple files.
 **Arguments**:
 
 - `files` _List[str]_ - List of file paths to perform replacements in. Relative paths are
-  resolved based on the sandbox workdir.
+  resolved based on the sandbox working directory.
 - `pattern` _str_ - Pattern to search for.
 - `new_value` _str_ - Text to replace matches with.
   
@@ -350,7 +353,7 @@ specified pattern. The pattern can be a simple string or a glob pattern.
 **Arguments**:
 
 - `path` _str_ - Path to the root directory to start search from. Relative paths are resolved
-  based on the sandbox workdir.
+  based on the sandbox working directory.
 - `pattern` _str_ - Pattern to match against file names. Supports glob
   patterns (e.g., "*.py" for Python files).
   
@@ -389,7 +392,8 @@ to leave that attribute unchanged.
 
 **Arguments**:
 
-- `path` _str_ - Path to the file or directory. Relative paths are resolved based on the sandbox workdir.
+- `path` _str_ - Path to the file or directory. Relative paths are resolved based on
+  the sandbox working directory.
 - `mode` _Optional[str]_ - File mode/permissions in octal format
   (e.g., "644" for rw-r--r--).
 - `owner` _Optional[str]_ - User owner of the file.
@@ -427,7 +431,8 @@ small files that fit into memory.
 **Arguments**:
 
 - `file` _bytes_ - File contents as a bytes object.
-- `remote_path` _str_ - Path to the destination file. Relative paths are resolved based on the sandbox workdir.
+- `remote_path` _str_ - Path to the destination file. Relative paths are resolved based on
+  the sandbox working directory.
 - `timeout` _int_ - Timeout for the upload operation in seconds. 0 means no timeout. Default is 30 minutes.
   
 
@@ -468,7 +473,7 @@ not fit into memory.
 
 - `local_path` _str_ - Path to the local file to upload.
 - `remote_path` _str_ - Path to the destination file in the Sandbox. Relative paths are
-  resolved based on the sandbox workdir.
+  resolved based on the sandbox working directory.
 - `timeout` _int_ - Timeout for the upload operation in seconds. 0 means no timeout. Default is 30 minutes.
   
 
@@ -529,5 +534,5 @@ Represents a file to be uploaded to the Sandbox.
 - `source` _Union[bytes, str]_ - File contents as a bytes object or a local file path. If a bytes object is provided,
   make sure it fits into memory, otherwise use the local file path which content will be streamed to the Sandbox.
 - `destination` _str_ - Absolute destination path in the Sandbox. Relative paths are resolved based on
-  the sandbox workdir.
+  the sandbox working directory.
 

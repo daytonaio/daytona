@@ -7,7 +7,7 @@ type SessionController struct {
 	configDir string
 }
 
-func NewSessionController(configDir, projectDir string) *SessionController {
+func NewSessionController(configDir, workDir string) *SessionController {
 	return &SessionController{
 		configDir: configDir,
 	}

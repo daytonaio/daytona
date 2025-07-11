@@ -43,7 +43,7 @@ class AsyncFileSystem:
 
         Args:
             path (str): Path where the folder should be created. Relative paths are resolved based
-            on the sandbox workdir.
+            on the sandbox working directory.
             mode (str): Folder permissions in octal format (e.g., "755" for rwxr-xr-x).
 
         Example:
@@ -67,7 +67,7 @@ class AsyncFileSystem:
         """Deletes a file from the Sandbox.
 
         Args:
-            path (str): Path to the file to delete. Relative paths are resolved based on the sandbox workdir.
+            path (str): Path to the file to delete. Relative paths are resolved based on the sandbox working directory.
 
         Example:
             ```python
@@ -85,7 +85,7 @@ class AsyncFileSystem:
 
         Args:
             remote_path (str): Path to the file in the Sandbox. Relative paths are resolved based
-            on the sandbox workdir.
+            on the sandbox working directory.
             timeout (int): Timeout for the download operation in seconds. 0 means no timeout. Default is 30 minutes.
 
         Returns:
@@ -111,7 +111,7 @@ class AsyncFileSystem:
 
         Args:
             remote_path (str): Path to the file in the Sandbox. Relative paths are resolved based
-            on the sandbox workdir.
+            on the sandbox working directory.
             local_path (str): Path to save the file locally.
             timeout (int): Timeout for the download operation in seconds. 0 means no timeout. Default is 30 minutes.
 
@@ -169,7 +169,8 @@ class AsyncFileSystem:
 
         Args:
             path (str): Path to the file or directory to search. If the path is a directory,
-                the search will be performed recursively. Relative paths are resolved based on the sandbox workdir.
+                the search will be performed recursively. Relative paths are resolved based
+                on the sandbox working directory.
             pattern (str): Search pattern to match against file contents.
 
         Returns:
@@ -198,7 +199,8 @@ class AsyncFileSystem:
         size, permissions, and timestamps.
 
         Args:
-            path (str): Path to the file or directory. Relative paths are resolved based on the sandbox workdir.
+            path (str): Path to the file or directory. Relative paths are resolved based
+            on the sandbox working directory.
 
         Returns:
             FileInfo: Detailed file information including:
@@ -233,7 +235,7 @@ class AsyncFileSystem:
 
         Args:
             path (str): Path to the directory to list contents from. Relative paths are resolved
-            based on the sandbox workdir.
+            based on the sandbox working directory.
 
         Returns:
             List[FileInfo]: List of file and directory information. Each FileInfo
@@ -262,8 +264,9 @@ class AsyncFileSystem:
 
         Args:
             source (str): Path to the source file or directory. Relative paths are resolved
-            based on the sandbox workdir.
-            destination (str): Path to the destination. Relative paths are resolved based on the sandbox workdir.
+            based on the sandbox working directory.
+            destination (str): Path to the destination. Relative paths are resolved based on
+            the sandbox working directory.
 
         Example:
             ```python
@@ -298,7 +301,7 @@ class AsyncFileSystem:
 
         Args:
             files (List[str]): List of file paths to perform replacements in. Relative paths are
-            resolved based on the sandbox workdir.
+            resolved based on the sandbox working directory.
             pattern (str): Pattern to search for.
             new_value (str): Text to replace matches with.
 
@@ -340,7 +343,7 @@ class AsyncFileSystem:
 
         Args:
             path (str): Path to the root directory to start search from. Relative paths are resolved
-            based on the sandbox workdir.
+            based on the sandbox working directory.
             pattern (str): Pattern to match against file names. Supports glob
                 patterns (e.g., "*.py" for Python files).
 
@@ -372,7 +375,8 @@ class AsyncFileSystem:
         to leave that attribute unchanged.
 
         Args:
-            path (str): Path to the file or directory. Relative paths are resolved based on the sandbox workdir.
+            path (str): Path to the file or directory. Relative paths are resolved based on
+            the sandbox working directory.
             mode (Optional[str]): File mode/permissions in octal format
                 (e.g., "644" for rw-r--r--).
             owner (Optional[str]): User owner of the file.
@@ -410,7 +414,8 @@ class AsyncFileSystem:
 
         Args:
             file (bytes): File contents as a bytes object.
-            remote_path (str): Path to the destination file. Relative paths are resolved based on the sandbox workdir.
+            remote_path (str): Path to the destination file. Relative paths are resolved based on
+            the sandbox working directory.
             timeout (int): Timeout for the upload operation in seconds. 0 means no timeout. Default is 30 minutes.
 
         Example:
@@ -442,7 +447,7 @@ class AsyncFileSystem:
         Args:
             local_path (str): Path to the local file to upload.
             remote_path (str): Path to the destination file in the Sandbox. Relative paths are
-            resolved based on the sandbox workdir.
+            resolved based on the sandbox working directory.
             timeout (int): Timeout for the upload operation in seconds. 0 means no timeout. Default is 30 minutes.
 
         Example:

@@ -50,13 +50,13 @@ func main() {
 
 	errChan := make(chan error)
 
-	projectDir, err := os.Getwd()
+	workDir, err := os.Getwd()
 	if err != nil {
 		panic(fmt.Errorf("failed to get current working directory: %w", err))
 	}
 
 	toolBoxServer := &toolbox.Server{
-		ProjectDir: projectDir,
+		WorkDir: workDir,
 	}
 
 	// Start the toolbox server in a go routine

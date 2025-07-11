@@ -30,7 +30,7 @@ export class Git {
    * Stages the specified files for the next commit, similar to
    * running 'git add' on the command line.
    *
-   * @param {string} path - Path to the Git repository root. Relative paths are resolved based on the sandbox workdir.
+   * @param {string} path - Path to the Git repository root. Relative paths are resolved based on the sandbox working directory.
    * @param {string[]} files - List of file paths or directories to stage, relative to the repository root
    * @returns {Promise<void>}
    *
@@ -52,7 +52,7 @@ export class Git {
   /**
    * List branches in the repository.
    *
-   * @param {string} path - Path to the Git repository root. Relative paths are resolved based on the sandbox workdir.
+   * @param {string} path - Path to the Git repository root. Relative paths are resolved based on the sandbox working directory.
    * @returns {Promise<ListBranchResponse>} List of branches in the repository
    *
    * @example
@@ -67,7 +67,7 @@ export class Git {
   /**
    * Create branche in the repository.
    *
-   * @param {string} path - Path to the Git repository root. Relative paths are resolved based on the sandbox workdir.
+   * @param {string} path - Path to the Git repository root. Relative paths are resolved based on the sandbox working directory.
    * @param {string} name - Name of the new branch to create
    * @returns {Promise<void>}
    *
@@ -85,7 +85,7 @@ export class Git {
   /**
    * Delete branche in the repository.
    *
-   * @param {string} path - Path to the Git repository root. Relative paths are resolved based on the sandbox workdir.
+   * @param {string} path - Path to the Git repository root. Relative paths are resolved based on the sandbox working directory.
    * @param {string} name - Name of the branch to delete
    * @returns {Promise<void>}
    *
@@ -103,7 +103,7 @@ export class Git {
   /**
    * Checkout branche in the repository.
    *
-   * @param {string} path - Path to the Git repository root. Relative paths are resolved based on the sandbox workdir.
+   * @param {string} path - Path to the Git repository root. Relative paths are resolved based on the sandbox working directory.
    * @param {string} branch - Name of the branch to checkout
    * @returns {Promise<void>}
    *
@@ -124,7 +124,7 @@ export class Git {
    * repository if credentials are provided.
    *
    * @param {string} url - Repository URL to clone from
-   * @param {string} path - Path where the repository should be cloned. Relative paths are resolved based on the sandbox workdir.
+   * @param {string} path - Path where the repository should be cloned. Relative paths are resolved based on the sandbox working directory.
    * @param {string} [branch] - Specific branch to clone. If not specified, clones the default branch
    * @param {string} [commitId] - Specific commit to clone. If specified, the repository will be left in a detached HEAD state at this commit
    * @param {string} [username] - Git username for authentication
@@ -177,7 +177,7 @@ export class Git {
   /**
    * Commits staged changes.
    *
-   * @param {string} path - Path to the Git repository root. Relative paths are resolved based on the sandbox workdir.
+   * @param {string} path - Path to the Git repository root. Relative paths are resolved based on the sandbox working directory.
    * @param {string} message - Commit message describing the changes
    * @param {string} author - Name of the commit author
    * @param {string} email - Email address of the commit author
@@ -208,7 +208,7 @@ export class Git {
   /**
    * Push local changes to the remote repository.
    *
-   * @param {string} path - Path to the Git repository root. Relative paths are resolved based on the sandbox workdir.
+   * @param {string} path - Path to the Git repository root. Relative paths are resolved based on the sandbox working directory.
    * @param {string} [username] - Git username for authentication
    * @param {string} [password] - Git password or token for authentication
    * @returns {Promise<void>}
@@ -236,7 +236,7 @@ export class Git {
   /**
    * Pulls changes from the remote repository.
    *
-   * @param {string} path - Path to the Git repository root. Relative paths are resolved based on the sandbox workdir.
+   * @param {string} path - Path to the Git repository root. Relative paths are resolved based on the sandbox working directory.
    * @param {string} [username] - Git username for authentication
    * @param {string} [password] - Git password or token for authentication
    * @returns {Promise<void>}
@@ -264,7 +264,7 @@ export class Git {
   /**
    * Gets the current status of the Git repository.
    *
-   * @param {string} path - Path to the Git repository root. Relative paths are resolved based on the sandbox workdir.
+   * @param {string} path - Path to the Git repository root. Relative paths are resolved based on the sandbox working directory.
    * @returns {Promise<GitStatus>} Current repository status including:
    *                               - currentBranch: Name of the current branch
    *                               - ahead: Number of commits ahead of the remote branch

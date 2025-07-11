@@ -31,24 +31,24 @@ import (
 )
 
 type Server struct {
-	ProjectDir  string
+	WorkDir     string
 	ComputerUse computeruse.IComputerUse
 }
 
-type WorkdirResponse struct {
+type WorkDirResponse struct {
 	Dir string `json:"dir"`
-} // @name WorkdirResponse
+} // @name WorkDirResponse
 
 type UserHomeDirResponse struct {
 	Dir string `json:"dir"`
 } // @name UserHomeDirResponse
 
-func (s *Server) GetWorkdir(ctx *gin.Context) {
-	projectDir := WorkdirResponse{
-		Dir: s.ProjectDir,
+func (s *Server) GetWorkDir(ctx *gin.Context) {
+	workDir := WorkDirResponse{
+		Dir: s.WorkDir,
 	}
 
-	ctx.JSON(http.StatusOK, projectDir)
+	ctx.JSON(http.StatusOK, workDir)
 }
 
 func (s *Server) GetUserHomeDir(ctx *gin.Context) {
@@ -85,7 +85,7 @@ func (s *Server) Start() error {
 	// keep /project-dir old behavior for backward compatibility
 	r.GET("/project-dir", s.GetUserHomeDir)
 	r.GET("/user-home-dir", s.GetUserHomeDir)
-	r.GET("/workdir", s.GetWorkdir)
+	r.GET("/work-dir", s.GetWorkDir)
 
 	dirname, err := os.UserHomeDir()
 	if err != nil {
@@ -125,12 +125,11 @@ func (s *Server) Start() error {
 	{
 		processController.POST("/execute", process.ExecuteCommand)
 
-		sessionController := session.NewSessionController(configDir, s.ProjectDir)
+		sessionController := session.NewSessionController(configDir, s.WorkDir)
 		sessionGroup := processController.Group("/session")
 		{
 			sessionGroup.GET("", sessionController.ListSessions)
-			sessionGroup.POST("", sessionController.CreateSession) // deprecated
-			sessionGroup.POST("/v2", sessionController.CreateSession)
+			sessionGroup.POST("", sessionController.CreateSession)
 			sessionGroup.POST("/:sessionId/exec", sessionController.SessionExecuteCommand)
 			sessionGroup.GET("/:sessionId", sessionController.GetSession)
 			sessionGroup.DELETE("/:sessionId", sessionController.DeleteSession)
