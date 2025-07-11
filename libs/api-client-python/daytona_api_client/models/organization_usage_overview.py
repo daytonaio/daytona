@@ -23,9 +23,9 @@ from typing import Any, ClassVar, Dict, List, Union
 from typing import Optional, Set
 from typing_extensions import Self
 
-class UsageOverview(BaseModel):
+class OrganizationUsageOverview(BaseModel):
     """
-    UsageOverview
+    OrganizationUsageOverview
     """ # noqa: E501
     total_cpu_quota: Union[StrictFloat, StrictInt] = Field(alias="totalCpuQuota")
     total_gpu_quota: Union[StrictFloat, StrictInt] = Field(alias="totalGpuQuota")
@@ -55,7 +55,7 @@ class UsageOverview(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of UsageOverview from a JSON string"""
+        """Create an instance of OrganizationUsageOverview from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -87,7 +87,7 @@ class UsageOverview(BaseModel):
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of UsageOverview from a dict"""
+        """Create an instance of OrganizationUsageOverview from a dict"""
         if obj is None:
             return None
 

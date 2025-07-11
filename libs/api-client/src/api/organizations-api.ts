@@ -46,6 +46,8 @@ import type { OrganizationRole } from '../models'
 // @ts-ignore
 import type { OrganizationSuspension } from '../models'
 // @ts-ignore
+import type { OrganizationUsageOverview } from '../models'
+// @ts-ignore
 import type { OrganizationUser } from '../models'
 // @ts-ignore
 import type { UpdateAssignedOrganizationRoles } from '../models'
@@ -57,8 +59,6 @@ import type { UpdateOrganizationMemberRole } from '../models'
 import type { UpdateOrganizationQuota } from '../models'
 // @ts-ignore
 import type { UpdateOrganizationRole } from '../models'
-// @ts-ignore
-import type { UsageOverview } from '../models'
 /**
  * OrganizationsApi - axios parameter creator
  * @export
@@ -1573,7 +1573,7 @@ export const OrganizationsApiFp = function (configuration?: Configuration) {
     async getOrganizationUsageOverview(
       organizationId: string,
       options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<UsageOverview>> {
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<OrganizationUsageOverview>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.getOrganizationUsageOverview(organizationId, options)
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
@@ -2111,7 +2111,10 @@ export const OrganizationsApiFactory = function (
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    getOrganizationUsageOverview(organizationId: string, options?: RawAxiosRequestConfig): AxiosPromise<UsageOverview> {
+    getOrganizationUsageOverview(
+      organizationId: string,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<OrganizationUsageOverview> {
       return localVarFp
         .getOrganizationUsageOverview(organizationId, options)
         .then((request) => request(axios, basePath))
