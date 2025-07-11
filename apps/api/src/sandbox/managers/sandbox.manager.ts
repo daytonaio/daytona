@@ -951,9 +951,6 @@ export class SandboxManager {
         })
       }
 
-      //  exclude the runner that the last runner sandbox was on
-      availableRunners = availableRunners.filter((runner) => runner.id != sandbox.prevRunnerId)
-
       //  check if we have any available runners after filtering
       if (availableRunners.length === 0) {
         await this.updateSandboxState(
