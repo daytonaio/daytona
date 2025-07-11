@@ -821,19 +821,19 @@ export class SandboxManager {
     //  this will assign a new runner to the sandbox and restore the sandbox from the latest backup
     if (sandbox.runnerId) {
       const runner = await this.runnerService.findOne(sandbox.runnerId)
-      const originalRunnerId = sandbox.runnerId  // Store original value
+      const originalRunnerId = sandbox.runnerId // Store original value
 
       // if the runner is unschedulable and sandbox has a valid backup, move sandbox to prevRunnerId
       if (runner.unschedulable && sandbox.backupState === BackupState.COMPLETED) {
-          sandbox.prevRunnerId = originalRunnerId
-          sandbox.runnerId = null
+        sandbox.prevRunnerId = originalRunnerId
+        sandbox.runnerId = null
 
-          const sandboxToUpdate = await this.sandboxRepository.findOneByOrFail({
-            id: sandbox.id,
-          })
-          sandboxToUpdate.prevRunnerId = originalRunnerId
-          sandboxToUpdate.runnerId = null
-          await this.sandboxRepository.save(sandboxToUpdate)
+        const sandboxToUpdate = await this.sandboxRepository.findOneByOrFail({
+          id: sandbox.id,
+        })
+        sandboxToUpdate.prevRunnerId = originalRunnerId
+        sandboxToUpdate.runnerId = null
+        await this.sandboxRepository.save(sandboxToUpdate)
       }
 
       // If the sandbox is on a runner and its backupState is COMPLETED
