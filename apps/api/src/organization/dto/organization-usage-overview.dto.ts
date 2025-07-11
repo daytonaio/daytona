@@ -5,8 +5,8 @@
 
 import { ApiProperty, ApiSchema } from '@nestjs/swagger'
 
-@ApiSchema({ name: 'UsageOverview' })
-export class OverviewDto {
+@ApiSchema({ name: 'OrganizationUsageOverview' })
+export class OrganizationUsageOverviewDto {
   @ApiProperty()
   totalCpuQuota: number
   @ApiProperty()

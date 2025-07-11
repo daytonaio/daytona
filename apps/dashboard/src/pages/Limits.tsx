@@ -12,7 +12,7 @@ import { TierTable } from '@/components/TierTable'
 import { OrganizationWallet } from '@/billing-api/types/OrganizationWallet'
 import { useAuth } from 'react-oidc-context'
 import { AlertTriangle } from 'lucide-react'
-import { UsageOverview } from '@daytonaio/api-client'
+import { OrganizationUsageOverview } from '@daytonaio/api-client'
 import { handleApiError } from '@/lib/error-handling'
 import QuotaLine from '@/components/QuotaLine'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -26,7 +26,7 @@ const Limits: React.FC = () => {
   const { selectedOrganization } = useSelectedOrganization()
   const [organizationTier, setOrganizationTier] = useState<OrganizationTier | null>(null)
   const [wallet, setWallet] = useState<OrganizationWallet | null>(null)
-  const [usageOverview, setUsage] = useState<UsageOverview | null>(null)
+  const [usageOverview, setUsage] = useState<OrganizationUsageOverview | null>(null)
 
   const fetchOrganizationTier = useCallback(async () => {
     if (!import.meta.env.VITE_BILLING_API_URL) {

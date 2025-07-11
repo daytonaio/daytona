@@ -27,13 +27,13 @@ from daytona_api_client.models.organization import Organization
 from daytona_api_client.models.organization_invitation import OrganizationInvitation
 from daytona_api_client.models.organization_role import OrganizationRole
 from daytona_api_client.models.organization_suspension import OrganizationSuspension
+from daytona_api_client.models.organization_usage_overview import OrganizationUsageOverview
 from daytona_api_client.models.organization_user import OrganizationUser
 from daytona_api_client.models.update_assigned_organization_roles import UpdateAssignedOrganizationRoles
 from daytona_api_client.models.update_organization_invitation import UpdateOrganizationInvitation
 from daytona_api_client.models.update_organization_member_role import UpdateOrganizationMemberRole
 from daytona_api_client.models.update_organization_quota import UpdateOrganizationQuota
 from daytona_api_client.models.update_organization_role import UpdateOrganizationRole
-from daytona_api_client.models.usage_overview import UsageOverview
 
 from daytona_api_client.api_client import ApiClient, RequestSerialized
 from daytona_api_client.api_response import ApiResponse
@@ -2975,7 +2975,7 @@ class OrganizationsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> UsageOverview:
+    ) -> OrganizationUsageOverview:
         """Get organization current usage overview
 
 
@@ -3012,7 +3012,7 @@ class OrganizationsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "UsageOverview",
+            '200': "OrganizationUsageOverview",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -3041,7 +3041,7 @@ class OrganizationsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[UsageOverview]:
+    ) -> ApiResponse[OrganizationUsageOverview]:
         """Get organization current usage overview
 
 
@@ -3078,7 +3078,7 @@ class OrganizationsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "UsageOverview",
+            '200': "OrganizationUsageOverview",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -3144,7 +3144,7 @@ class OrganizationsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "UsageOverview",
+            '200': "OrganizationUsageOverview",
         }
         response_data = self.api_client.call_api(
             *_param,

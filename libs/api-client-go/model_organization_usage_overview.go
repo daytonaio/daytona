@@ -17,11 +17,11 @@ import (
 	"fmt"
 )
 
-// checks if the UsageOverview type satisfies the MappedNullable interface at compile time
-var _ MappedNullable = &UsageOverview{}
+// checks if the OrganizationUsageOverview type satisfies the MappedNullable interface at compile time
+var _ MappedNullable = &OrganizationUsageOverview{}
 
-// UsageOverview struct for UsageOverview
-type UsageOverview struct {
+// OrganizationUsageOverview struct for OrganizationUsageOverview
+type OrganizationUsageOverview struct {
 	TotalCpuQuota      float32 `json:"totalCpuQuota"`
 	TotalGpuQuota      float32 `json:"totalGpuQuota"`
 	TotalMemoryQuota   float32 `json:"totalMemoryQuota"`
@@ -31,14 +31,14 @@ type UsageOverview struct {
 	CurrentDiskUsage   float32 `json:"currentDiskUsage"`
 }
 
-type _UsageOverview UsageOverview
+type _OrganizationUsageOverview OrganizationUsageOverview
 
-// NewUsageOverview instantiates a new UsageOverview object
+// NewOrganizationUsageOverview instantiates a new OrganizationUsageOverview object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewUsageOverview(totalCpuQuota float32, totalGpuQuota float32, totalMemoryQuota float32, totalDiskQuota float32, currentCpuUsage float32, currentMemoryUsage float32, currentDiskUsage float32) *UsageOverview {
-	this := UsageOverview{}
+func NewOrganizationUsageOverview(totalCpuQuota float32, totalGpuQuota float32, totalMemoryQuota float32, totalDiskQuota float32, currentCpuUsage float32, currentMemoryUsage float32, currentDiskUsage float32) *OrganizationUsageOverview {
+	this := OrganizationUsageOverview{}
 	this.TotalCpuQuota = totalCpuQuota
 	this.TotalGpuQuota = totalGpuQuota
 	this.TotalMemoryQuota = totalMemoryQuota
@@ -49,16 +49,16 @@ func NewUsageOverview(totalCpuQuota float32, totalGpuQuota float32, totalMemoryQ
 	return &this
 }
 
-// NewUsageOverviewWithDefaults instantiates a new UsageOverview object
+// NewOrganizationUsageOverviewWithDefaults instantiates a new OrganizationUsageOverview object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewUsageOverviewWithDefaults() *UsageOverview {
-	this := UsageOverview{}
+func NewOrganizationUsageOverviewWithDefaults() *OrganizationUsageOverview {
+	this := OrganizationUsageOverview{}
 	return &this
 }
 
 // GetTotalCpuQuota returns the TotalCpuQuota field value
-func (o *UsageOverview) GetTotalCpuQuota() float32 {
+func (o *OrganizationUsageOverview) GetTotalCpuQuota() float32 {
 	if o == nil {
 		var ret float32
 		return ret
@@ -69,7 +69,7 @@ func (o *UsageOverview) GetTotalCpuQuota() float32 {
 
 // GetTotalCpuQuotaOk returns a tuple with the TotalCpuQuota field value
 // and a boolean to check if the value has been set.
-func (o *UsageOverview) GetTotalCpuQuotaOk() (*float32, bool) {
+func (o *OrganizationUsageOverview) GetTotalCpuQuotaOk() (*float32, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -77,12 +77,12 @@ func (o *UsageOverview) GetTotalCpuQuotaOk() (*float32, bool) {
 }
 
 // SetTotalCpuQuota sets field value
-func (o *UsageOverview) SetTotalCpuQuota(v float32) {
+func (o *OrganizationUsageOverview) SetTotalCpuQuota(v float32) {
 	o.TotalCpuQuota = v
 }
 
 // GetTotalGpuQuota returns the TotalGpuQuota field value
-func (o *UsageOverview) GetTotalGpuQuota() float32 {
+func (o *OrganizationUsageOverview) GetTotalGpuQuota() float32 {
 	if o == nil {
 		var ret float32
 		return ret
@@ -93,7 +93,7 @@ func (o *UsageOverview) GetTotalGpuQuota() float32 {
 
 // GetTotalGpuQuotaOk returns a tuple with the TotalGpuQuota field value
 // and a boolean to check if the value has been set.
-func (o *UsageOverview) GetTotalGpuQuotaOk() (*float32, bool) {
+func (o *OrganizationUsageOverview) GetTotalGpuQuotaOk() (*float32, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -101,12 +101,12 @@ func (o *UsageOverview) GetTotalGpuQuotaOk() (*float32, bool) {
 }
 
 // SetTotalGpuQuota sets field value
-func (o *UsageOverview) SetTotalGpuQuota(v float32) {
+func (o *OrganizationUsageOverview) SetTotalGpuQuota(v float32) {
 	o.TotalGpuQuota = v
 }
 
 // GetTotalMemoryQuota returns the TotalMemoryQuota field value
-func (o *UsageOverview) GetTotalMemoryQuota() float32 {
+func (o *OrganizationUsageOverview) GetTotalMemoryQuota() float32 {
 	if o == nil {
 		var ret float32
 		return ret
@@ -117,7 +117,7 @@ func (o *UsageOverview) GetTotalMemoryQuota() float32 {
 
 // GetTotalMemoryQuotaOk returns a tuple with the TotalMemoryQuota field value
 // and a boolean to check if the value has been set.
-func (o *UsageOverview) GetTotalMemoryQuotaOk() (*float32, bool) {
+func (o *OrganizationUsageOverview) GetTotalMemoryQuotaOk() (*float32, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -125,12 +125,12 @@ func (o *UsageOverview) GetTotalMemoryQuotaOk() (*float32, bool) {
 }
 
 // SetTotalMemoryQuota sets field value
-func (o *UsageOverview) SetTotalMemoryQuota(v float32) {
+func (o *OrganizationUsageOverview) SetTotalMemoryQuota(v float32) {
 	o.TotalMemoryQuota = v
 }
 
 // GetTotalDiskQuota returns the TotalDiskQuota field value
-func (o *UsageOverview) GetTotalDiskQuota() float32 {
+func (o *OrganizationUsageOverview) GetTotalDiskQuota() float32 {
 	if o == nil {
 		var ret float32
 		return ret
@@ -141,7 +141,7 @@ func (o *UsageOverview) GetTotalDiskQuota() float32 {
 
 // GetTotalDiskQuotaOk returns a tuple with the TotalDiskQuota field value
 // and a boolean to check if the value has been set.
-func (o *UsageOverview) GetTotalDiskQuotaOk() (*float32, bool) {
+func (o *OrganizationUsageOverview) GetTotalDiskQuotaOk() (*float32, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -149,12 +149,12 @@ func (o *UsageOverview) GetTotalDiskQuotaOk() (*float32, bool) {
 }
 
 // SetTotalDiskQuota sets field value
-func (o *UsageOverview) SetTotalDiskQuota(v float32) {
+func (o *OrganizationUsageOverview) SetTotalDiskQuota(v float32) {
 	o.TotalDiskQuota = v
 }
 
 // GetCurrentCpuUsage returns the CurrentCpuUsage field value
-func (o *UsageOverview) GetCurrentCpuUsage() float32 {
+func (o *OrganizationUsageOverview) GetCurrentCpuUsage() float32 {
 	if o == nil {
 		var ret float32
 		return ret
@@ -165,7 +165,7 @@ func (o *UsageOverview) GetCurrentCpuUsage() float32 {
 
 // GetCurrentCpuUsageOk returns a tuple with the CurrentCpuUsage field value
 // and a boolean to check if the value has been set.
-func (o *UsageOverview) GetCurrentCpuUsageOk() (*float32, bool) {
+func (o *OrganizationUsageOverview) GetCurrentCpuUsageOk() (*float32, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -173,12 +173,12 @@ func (o *UsageOverview) GetCurrentCpuUsageOk() (*float32, bool) {
 }
 
 // SetCurrentCpuUsage sets field value
-func (o *UsageOverview) SetCurrentCpuUsage(v float32) {
+func (o *OrganizationUsageOverview) SetCurrentCpuUsage(v float32) {
 	o.CurrentCpuUsage = v
 }
 
 // GetCurrentMemoryUsage returns the CurrentMemoryUsage field value
-func (o *UsageOverview) GetCurrentMemoryUsage() float32 {
+func (o *OrganizationUsageOverview) GetCurrentMemoryUsage() float32 {
 	if o == nil {
 		var ret float32
 		return ret
@@ -189,7 +189,7 @@ func (o *UsageOverview) GetCurrentMemoryUsage() float32 {
 
 // GetCurrentMemoryUsageOk returns a tuple with the CurrentMemoryUsage field value
 // and a boolean to check if the value has been set.
-func (o *UsageOverview) GetCurrentMemoryUsageOk() (*float32, bool) {
+func (o *OrganizationUsageOverview) GetCurrentMemoryUsageOk() (*float32, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -197,12 +197,12 @@ func (o *UsageOverview) GetCurrentMemoryUsageOk() (*float32, bool) {
 }
 
 // SetCurrentMemoryUsage sets field value
-func (o *UsageOverview) SetCurrentMemoryUsage(v float32) {
+func (o *OrganizationUsageOverview) SetCurrentMemoryUsage(v float32) {
 	o.CurrentMemoryUsage = v
 }
 
 // GetCurrentDiskUsage returns the CurrentDiskUsage field value
-func (o *UsageOverview) GetCurrentDiskUsage() float32 {
+func (o *OrganizationUsageOverview) GetCurrentDiskUsage() float32 {
 	if o == nil {
 		var ret float32
 		return ret
@@ -213,7 +213,7 @@ func (o *UsageOverview) GetCurrentDiskUsage() float32 {
 
 // GetCurrentDiskUsageOk returns a tuple with the CurrentDiskUsage field value
 // and a boolean to check if the value has been set.
-func (o *UsageOverview) GetCurrentDiskUsageOk() (*float32, bool) {
+func (o *OrganizationUsageOverview) GetCurrentDiskUsageOk() (*float32, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -221,11 +221,11 @@ func (o *UsageOverview) GetCurrentDiskUsageOk() (*float32, bool) {
 }
 
 // SetCurrentDiskUsage sets field value
-func (o *UsageOverview) SetCurrentDiskUsage(v float32) {
+func (o *OrganizationUsageOverview) SetCurrentDiskUsage(v float32) {
 	o.CurrentDiskUsage = v
 }
 
-func (o UsageOverview) MarshalJSON() ([]byte, error) {
+func (o OrganizationUsageOverview) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
@@ -233,7 +233,7 @@ func (o UsageOverview) MarshalJSON() ([]byte, error) {
 	return json.Marshal(toSerialize)
 }
 
-func (o UsageOverview) ToMap() (map[string]interface{}, error) {
+func (o OrganizationUsageOverview) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["totalCpuQuota"] = o.TotalCpuQuota
 	toSerialize["totalGpuQuota"] = o.TotalGpuQuota
@@ -245,7 +245,7 @@ func (o UsageOverview) ToMap() (map[string]interface{}, error) {
 	return toSerialize, nil
 }
 
-func (o *UsageOverview) UnmarshalJSON(data []byte) (err error) {
+func (o *OrganizationUsageOverview) UnmarshalJSON(data []byte) (err error) {
 	// This validates that all required properties are included in the JSON object
 	// by unmarshalling the object into a generic map with string keys and checking
 	// that every required field exists as a key in the generic map.
@@ -273,53 +273,53 @@ func (o *UsageOverview) UnmarshalJSON(data []byte) (err error) {
 		}
 	}
 
-	varUsageOverview := _UsageOverview{}
+	varOrganizationUsageOverview := _OrganizationUsageOverview{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
 	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varUsageOverview)
+	err = decoder.Decode(&varOrganizationUsageOverview)
 
 	if err != nil {
 		return err
 	}
 
-	*o = UsageOverview(varUsageOverview)
+	*o = OrganizationUsageOverview(varOrganizationUsageOverview)
 
 	return err
 }
 
-type NullableUsageOverview struct {
-	value *UsageOverview
+type NullableOrganizationUsageOverview struct {
+	value *OrganizationUsageOverview
 	isSet bool
 }
 
-func (v NullableUsageOverview) Get() *UsageOverview {
+func (v NullableOrganizationUsageOverview) Get() *OrganizationUsageOverview {
 	return v.value
 }
 
-func (v *NullableUsageOverview) Set(val *UsageOverview) {
+func (v *NullableOrganizationUsageOverview) Set(val *OrganizationUsageOverview) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullableUsageOverview) IsSet() bool {
+func (v NullableOrganizationUsageOverview) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullableUsageOverview) Unset() {
+func (v *NullableOrganizationUsageOverview) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullableUsageOverview(val *UsageOverview) *NullableUsageOverview {
-	return &NullableUsageOverview{value: val, isSet: true}
+func NewNullableOrganizationUsageOverview(val *OrganizationUsageOverview) *NullableOrganizationUsageOverview {
+	return &NullableOrganizationUsageOverview{value: val, isSet: true}
 }
 
-func (v NullableUsageOverview) MarshalJSON() ([]byte, error) {
+func (v NullableOrganizationUsageOverview) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullableUsageOverview) UnmarshalJSON(src []byte) error {
+func (v *NullableOrganizationUsageOverview) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
