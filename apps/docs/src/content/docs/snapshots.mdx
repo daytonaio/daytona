@@ -124,24 +124,24 @@ daytona = Daytona()
 # Create a Snapshot with custom resources
 
 daytona.snapshot.create(
-CreateSnapshotParams(
-name="my-snapshot",
-image=Image.debian_slim("3.12"),
-resources=Resources(
-cpu=2,
-memory=4,
-disk=8,
-),
-),
-on_logs=print,
+    CreateSnapshotParams(
+        name="my-snapshot",
+        image=Image.debian_slim("3.12"),
+        resources=Resources(
+          cpu=2,
+          memory=4,
+          disk=8,
+        ),
+    ),
+    on_logs=print,
 )
 
 # Create a Sandbox with custom Snapshot
 
 sandbox = daytona.create(
-CreateSandboxFromSnapshotParams(
-snapshot="my-snapshot",
-)
+    CreateSandboxFromSnapshotParams(
+        snapshot="my-snapshot",
+    )
 )
 
 ```

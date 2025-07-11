@@ -98,14 +98,14 @@ daytona = Daytona()
 # Create a Sandbox with custom resources
 
 resources = Resources(
-cpu=2, # 2 CPU cores
-memory=4, # 4GB RAM
-disk=8, # 8GB disk space
+    cpu=2,  # 2 CPU cores
+    memory=4,  # 4GB RAM
+    disk=8,  # 8GB disk space
 )
 
 params = CreateSandboxFromImageParams(
-image=Image.debian_slim("3.12"),
-resources=resources
+    image=Image.debian_slim("3.12"),
+    resources=resources
 )
 
 sandbox = daytona.create(params)
@@ -241,12 +241,18 @@ Starting an archived Sandbox takes more time than starting a stopped Sandbox, de
 A Sandbox must be stopped before it can be archived, and can be started again in the same way as a stopped Sandbox.
 
 <Tabs>
-  <TabItem label="Python" icon="seti:python">
-    ```python # Archive Sandbox sandbox.archive() ```
-  </TabItem>
-  <TabItem label="TypeScript" icon="seti:typescript">
-    ```typescript // Archive Sandbox await sandbox.archive(); ```
-  </TabItem>
+<TabItem label="Python" icon="seti:python">
+```python
+# Archive Sandbox
+sandbox.archive()
+```
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+```typescript
+// Archive Sandbox
+await sandbox.archive();
+```
+</TabItem>
 </Tabs>
 
 ## Delete Sandbox

@@ -23,10 +23,10 @@ Daytona SDK provides an option to list files and directories in a Sandbox using 
 files = sandbox.fs.list_files("workspace")
 
 for file in files:
-print(f"Name: {file.name}")
-print(f"Is directory: {file.is_dir}")
-print(f"Size: {file.size}")
-print(f"Modified: {file.mod_time}")
+    print(f"Name: {file.name}")
+    print(f"Is directory: {file.is_dir}")
+    print(f"Size: {file.size}")
+    print(f"Modified: {file.mod_time}")
 
 ```
 </TabItem>
@@ -104,22 +104,22 @@ The following example shows how to efficiently upload multiple files with a sing
 files_to_upload = []
 
 with open("file1.txt", "rb") as f1:
-files_to_upload.append(FileUpload(
-source=f1.read(),
-destination="data/file1.txt",
-))
+    files_to_upload.append(FileUpload(
+        source=f1.read(),
+        destination="data/file1.txt",
+    ))
 
 with open("file2.txt", "rb") as f2:
-files_to_upload.append(FileUpload(
-source=f2.read(),
-destination="data/file2.txt",
-))
+    files_to_upload.append(FileUpload(
+        source=f2.read(),
+        destination="data/file2.txt",
+    ))
 
 with open("settings.json", "rb") as f3:
-files_to_upload.append(FileUpload(
-source=f3.read(),
-destination="config/settings.json",
-))
+    files_to_upload.append(FileUpload(
+        source=f3.read(),
+        destination="config/settings.json",
+    ))
 
 sandbox.fs.upload_files(files_to_upload)
 
@@ -160,7 +160,7 @@ The following commands downloads the file `file1.txt` from the Sandbox user's ro
 content = sandbox.fs.download_file("file1.txt")
 
 with open("local_file.txt", "wb") as f:
-f.write(content)
+    f.write(content)
 
 print(content.decode('utf-8'))
 
@@ -254,9 +254,9 @@ for match in results:
 # Replace text in files
 
 sandbox.fs.replace_in_files(
-files=["workspace/file1.txt", "workspace/file2.txt"],
-pattern="old_text",
-new_value="new_text"
+    files=["workspace/file1.txt", "workspace/file2.txt"],
+    pattern="old_text",
+    new_value="new_text"
 )
 
 ```

@@ -2,7 +2,7 @@
 title: Process and Code Execution
 ---
 
-import { TabItem, Tabs } from '@astrojs/starlight/components'
+import { Tabs, TabItem } from '@astrojs/starlight/components';
 
 The Daytona SDK provides powerful process and code execution capabilities through the `process` module in Sandboxes. This guide covers all available process operations and best practices.
 
@@ -47,7 +47,7 @@ response = await sandbox.process.codeRun(
     console.log(\`Hello, \${process.argv[2]}!\`);
     console.log(\`FOO: \${process.env.FOO}\`);
     `,
-    {
+    { 
       argv: ["Daytona"],
       env: { FOO: "BAR" }
     }
@@ -89,8 +89,8 @@ print(response.result)
 # Passing environment variables
 
 response = sandbox.process.exec("echo $CUSTOM_SECRET", env={
-"CUSTOM_SECRET": "DAYTONA"
-}
+        "CUSTOM_SECRET": "DAYTONA"
+    }
 )
 print(response.result)
 
@@ -140,7 +140,7 @@ for command in session.commands:
 
 sessions = sandbox.process.list_sessions()
 for session in sessions:
-print(f"PID: {session.id}, Commands: {session.commands}")
+    print(f"PID: {session.id}, Commands: {session.commands}")
 
 ```
 </TabItem>

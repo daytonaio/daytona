@@ -28,9 +28,9 @@ Daytona SDK provides an option to configure settings using the `DaytonaConfig` c
 from daytona import DaytonaConfig
 
 config = DaytonaConfig(
-api_key="your-api-key",
-api_url="your-api-url",
-target="us"
+    api_key="your-api-key",
+    api_url="your-api-url",
+    target="us"
 )
 
 ```
@@ -40,11 +40,12 @@ target="us"
 import { DaytonaConfig } from '@daytonaio/sdk';
 
 const config: DaytonaConfig = {
-    apiKey: "your-api-key",
-    apiUrl: "your-api-url",
-    target: "us"
+    apiKey: "your-api-key",          
+    apiUrl: "your-api-url",     
+    target: "us"                  
 };
 ```
+
 </TabItem>
 </Tabs>
 
@@ -84,16 +85,18 @@ DAYTONA_TARGET=us
 Set environment variables in your shell:
 
 <Tabs>
-  <TabItem label="Bash/Zsh" icon="seti:shell">
-    ```bash export DAYTONA_API_KEY=your-api-key export
-    DAYTONA_API_URL=https://your-api-url ```
-  </TabItem>
-  <TabItem label="Windows PowerShell" icon="seti:powershell">
-    ```bash 
-    $env:DAYTONA_API_KEY="your-api-key"
-    $env:DAYTONA_API_URL="https://your-api-url"
-    ```
-  </TabItem>
+<TabItem label="Bash/Zsh" icon="seti:shell">
+```bash
+export DAYTONA_API_KEY=your-api-key
+export DAYTONA_API_URL=https://your-api-url
+```
+</TabItem>
+<TabItem label="Windows PowerShell" icon="seti:powershell">
+```bash
+$env:DAYTONA_API_KEY="your-api-key"
+$env:DAYTONA_API_URL="https://your-api-url"
+```
+</TabItem>
 </Tabs>
 
 ## Configuration Precedence
