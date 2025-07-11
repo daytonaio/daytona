@@ -66,6 +66,7 @@ const sandbox = await daytona.create({
   envVars: { NODE_ENV: 'development' },
   autoStopInterval: 60, // Auto-stop after 1 hour of inactivity,
   autoArchiveInterval: 60, // Auto-archive after a Sandbox has been stopped for 1 hour
+  autoDeleteInterval: 120, // Auto-delete after a Sandbox has been stopped for 2 hours
 })
 ```
 

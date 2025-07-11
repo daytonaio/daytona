@@ -1533,6 +1533,47 @@ paths:
       summary: Set sandbox auto-archive interval
       tags:
         - sandbox
+  /sandbox/{sandboxId}/autodelete/{interval}:
+    post:
+      operationId: setAutoDeleteInterval
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - description: ID of the sandbox
+          explode: false
+          in: path
+          name: sandboxId
+          required: true
+          schema:
+            type: string
+          style: simple
+        - description: "Auto-delete interval in minutes (negative value means disabled,\
+            \ 0 means delete immediately upon stopping)"
+          explode: false
+          in: path
+          name: interval
+          required: true
+          schema:
+            type: number
+          style: simple
+      responses:
+        '200':
+          description: Auto-delete interval has been set
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Set sandbox auto-delete interval
+      tags:
+        - sandbox
   /sandbox/{sandboxId}/archive:
     post:
       operationId: archiveSandbox
@@ -6712,6 +6753,7 @@ components:
         autoStopInterval: 30
         organizationId: organization123
         createdAt: 2024-10-01T12:00:00Z
+        autoDeleteInterval: 30
         public: false
         errorReason: The sandbox is not running
         runnerDomain: runner.example.com
@@ -6830,6 +6872,11 @@ components:
           description: Auto-archive interval in minutes
           example: 10080
           type: number
+        autoDeleteInterval:
+          description: "Auto-delete interval in minutes (negative value means disabled,\
+            \ 0 means delete immediately upon stopping)"
+          example: 30
+          type: number
         runnerDomain:
           description: The domain name of the runner
           example: runner.example.com
@@ -6917,6 +6964,7 @@ components:
           daytona.io/public: 'true'
         target: eu
         disk: 3
+        autoDeleteInterval: 30
         public: false
         user: daytona
         class: small
@@ -6989,6 +7037,11 @@ components:
           description: Auto-archive interval in minutes (0 means the maximum interval
             will be used)
           example: 10080
+          type: integer
+        autoDeleteInterval:
+          description: "Auto-delete interval in minutes (negative value means disabled,\
+            \ 0 means delete immediately upon stopping)"
+          example: 30
           type: integer
         volumes:
           description: Array of volumes to attach to the sandbox
@@ -8761,6 +8814,7 @@ components:
         autoStopInterval: 30
         organizationId: organization123
         createdAt: 2024-10-01T12:00:00Z
+        autoDeleteInterval: 30
         snapshotState: None
         public: false
         errorReason: The sandbox is not running
@@ -8883,6 +8937,11 @@ components:
         autoArchiveInterval:
           description: Auto-archive interval in minutes
           example: 10080
+          type: number
+        autoDeleteInterval:
+          description: "Auto-delete interval in minutes (negative value means disabled,\
+            \ 0 means delete immediately upon stopping)"
+          example: 30
           type: number
         runnerDomain:
           description: The domain name of the runner

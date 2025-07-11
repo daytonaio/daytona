@@ -298,9 +298,9 @@ All sandboxes have been deleted
 
 :::
 
-## Auto-stop and Auto-archive
+## Automated Lifecycle Management
 
-Daytona Sandboxes can be automatically stopped and archived based on user-defined intervals.
+Daytona Sandboxes can be automatically stopped, archived, and deleted based on user-defined intervals.
 
 ### Auto-stop Interval
 
@@ -365,7 +365,54 @@ const sandbox = await daytona.create({
 </TabItem>
 </Tabs>
 
-### Run Indefinitely
+### Auto-delete Interval
+
+The auto-delete interval parameter sets the amount of time after which a continuously stopped Sandbox will be automatically deleted. By default, Sandboxes will never be automatically deleted.
+
+The parameter can either be set to:
+
+- a time interval in minutes
+- `-1`, which disables the auto-delete functionality
+- `0`, which means the Sandbox will be deleted immediately after stopping
+
+If the parameter is not set, the Sandbox will not be deleted automatically.
+
+<Tabs>
+<TabItem label="Python" icon="seti:python">
+```python
+sandbox = daytona.create(CreateSandboxFromSnapshotParams(
+    snapshot="my-snapshot-name",
+    auto_delete_interval=60,  # Auto-delete after a Sandbox has been stopped for 1 hour
+))
+
+# Delete the Sandbox immediately after it has been stopped
+
+sandbox.set_auto_delete_interval(0)
+
+# Disable auto-deletion
+
+sandbox.set_auto_delete_interval(-1)
+
+```
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+```typescript
+const sandbox = await daytona.create({
+    snapshot: "my-snapshot-name",
+    autoDeleteInterval: 60, // Auto-delete after a Sandbox has been stopped for 1 hour
+});
+
+// Delete the Sandbox immediately after it has been stopped
+await sandbox.setAutoDeleteInterval(0)
+
+// Disable auto-deletion
+await sandbox.setAutoDeleteInterval(-1)
+```
+
+</TabItem>
+</Tabs>
+
+## Run Indefinitely
 
 By default, Sandboxes auto-stop after 15 minutes of inactivity. To keep a Sandbox running without interruption, set the auto-stop interval to `0` when creating a new Sandbox:
 
