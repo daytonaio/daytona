@@ -12,8 +12,8 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
+	"bytes"
 	"fmt"
 )
 
@@ -22,11 +22,11 @@ var _ MappedNullable = &GitCloneRequest{}
 
 // GitCloneRequest struct for GitCloneRequest
 type GitCloneRequest struct {
-	Url      string  `json:"url"`
-	Path     string  `json:"path"`
+	Url string `json:"url"`
+	Path string `json:"path"`
 	Username *string `json:"username,omitempty"`
 	Password *string `json:"password,omitempty"`
-	Branch   *string `json:"branch,omitempty"`
+	Branch *string `json:"branch,omitempty"`
 	CommitId *string `json:"commit_id,omitempty"`
 }
 
@@ -228,7 +228,7 @@ func (o *GitCloneRequest) SetCommitId(v string) {
 }
 
 func (o GitCloneRequest) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
+	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -268,10 +268,10 @@ func (o *GitCloneRequest) UnmarshalJSON(data []byte) (err error) {
 	err = json.Unmarshal(data, &allProperties)
 
 	if err != nil {
-		return err
+		return err;
 	}
 
-	for _, requiredProperty := range requiredProperties {
+	for _, requiredProperty := range(requiredProperties) {
 		if _, exists := allProperties[requiredProperty]; !exists {
 			return fmt.Errorf("no value given for required property %v", requiredProperty)
 		}
@@ -327,3 +327,5 @@ func (v *NullableGitCloneRequest) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

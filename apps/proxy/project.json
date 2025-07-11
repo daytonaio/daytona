@@ -37,6 +37,11 @@
     },
     "lint": {
       "executor": "@nx-go/nx-go:lint"
+    },
+    "docker": {
+      "options": {
+        "target": "proxy"
+      }
     }
   }
 }

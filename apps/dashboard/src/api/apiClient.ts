@@ -14,6 +14,7 @@ import {
   VolumesApi,
   SandboxApi,
   ToolboxApi,
+  DaytonaConfiguration,
 } from '@daytonaio/api-client'
 import axios, { AxiosError } from 'axios'
 import { DaytonaError } from './errors'
@@ -30,7 +31,7 @@ export class ApiClient {
   private _volumeApi: VolumesApi
   private _toolboxApi: ToolboxApi
 
-  constructor(accessToken: string) {
+  constructor(config: DaytonaConfiguration, accessToken: string) {
     this.config = new Configuration({
       basePath: import.meta.env.VITE_API_URL,
       accessToken: accessToken,
@@ -61,7 +62,7 @@ export class ApiClient {
     this._apiKeyApi = new ApiKeysApi(this.config, undefined, axiosInstance)
     this._dockerRegistryApi = new DockerRegistryApi(this.config, undefined, axiosInstance)
     this._organizationsApi = new OrganizationsApi(this.config, undefined, axiosInstance)
-    this._billingApi = new BillingApiClient(import.meta.env.VITE_BILLING_API_URL || window.location.origin, accessToken)
+    this._billingApi = new BillingApiClient(config.billingApiUrl || window.location.origin, accessToken)
     this._volumeApi = new VolumesApi(this.config, undefined, axiosInstance)
     this._toolboxApi = new ToolboxApi(this.config, undefined, axiosInstance)
   }

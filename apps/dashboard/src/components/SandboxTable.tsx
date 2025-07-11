@@ -59,6 +59,7 @@ interface DataTableProps {
   data: Sandbox[]
   loadingSandboxes: Record<string, boolean>
   loading: boolean
+  proxyTemplateUrl: string
   handleStart: (id: string) => void
   handleStop: (id: string) => void
   handleDelete: (id: string) => void
@@ -71,6 +72,7 @@ export function SandboxTable({
   data,
   loadingSandboxes,
   loading,
+  proxyTemplateUrl,
   handleStart,
   handleStop,
   handleDelete,
@@ -122,6 +124,7 @@ export function SandboxTable({
     loadingSandboxes,
     writePermitted,
     deletePermitted,
+    proxyTemplateUrl,
   })
   const table = useReactTable({
     data,
@@ -351,6 +354,7 @@ const getColumns = ({
   loadingSandboxes,
   writePermitted,
   deletePermitted,
+  proxyTemplateUrl,
 }: {
   handleStart: (id: string) => void
   handleStop: (id: string) => void
@@ -360,6 +364,7 @@ const getColumns = ({
   loadingSandboxes: Record<string, boolean>
   writePermitted: boolean
   deletePermitted: boolean
+  proxyTemplateUrl: string
 }): ColumnDef<Sandbox>[] => {
   const columns: ColumnDef<Sandbox>[] = [
     {
@@ -615,18 +620,10 @@ const getColumns = ({
       cell: ({ row }) => {
         if (row.original.state !== SandboxState.STARTED) return ''
 
-        let terminalUrl: string | null = null
-
-        if (!row.original.daemonVersion) {
-          terminalUrl = `https://22222-${row.original.id}.${row.original.runnerDomain}`
-        } else {
-          terminalUrl =
-            import.meta.env.VITE_PROXY_TEMPLATE_URL?.replace('{{PORT}}', '22222').replace(
-              '{{sandboxId}}',
-              row.original.id,
-            ) || null
+        const terminalUrl = proxyTemplateUrl.replace('{{PORT}}', '22222').replace('{{sandboxId}}', row.original.id)
+        if (!terminalUrl) {
+          return null
         }
-
         return (
           <div className="flex items-center gap-2">
             {terminalUrl && (

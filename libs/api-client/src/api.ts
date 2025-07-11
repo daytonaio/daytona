@@ -1,5 +1,5 @@
 /* tslint:disable */
-
+ 
 /**
  * Daytona
  * Daytona AI platform API Docs
@@ -13,6 +13,7 @@
  */
 
 export * from './api/api-keys-api'
+export * from './api/config-api'
 export * from './api/docker-registry-api'
 export * from './api/object-storage-api'
 export * from './api/organizations-api'
