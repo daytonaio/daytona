@@ -16,13 +16,13 @@ import (
 
 type FileInfoArgs struct {
 	Id       *string `json:"id,omitempty"`
-	FilePath *string `json:"file_path,omitempty"`
+	FilePath *string `json:"filePath,omitempty"`
 }
 
 func GetFileInfoTool() mcp.Tool {
 	return mcp.NewTool("get_file_info",
 		mcp.WithDescription("Get information about a file in the Daytona sandbox."),
-		mcp.WithString("file_path", mcp.Required(), mcp.Description("Path to the file to get information about.")),
+		mcp.WithString("filePath", mcp.Required(), mcp.Description("Path to the file to get information about.")),
 		mcp.WithString("id", mcp.Required(), mcp.Description("ID of the sandbox to get the file information from.")),
 	)
 }
@@ -38,7 +38,7 @@ func FileInfo(ctx context.Context, request mcp.CallToolRequest, args FileInfoArg
 	}
 
 	if args.FilePath == nil || *args.FilePath == "" {
-		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("file_path parameter is required")
+		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("filePath parameter is required")
 	}
 
 	// Get file info

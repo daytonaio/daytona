@@ -19,7 +19,7 @@ type GitCloneArgs struct {
 	Url      *string `json:"url,omitempty"`
 	Path     *string `json:"path,omitempty"`
 	Branch   *string `json:"branch,omitempty"`
-	CommitId *string `json:"commit_id,omitempty"`
+	CommitId *string `json:"commitId,omitempty"`
 	Username *string `json:"username,omitempty"`
 	Password *string `json:"password,omitempty"`
 }
@@ -30,7 +30,7 @@ func GetGitCloneTool() mcp.Tool {
 		mcp.WithString("url", mcp.Required(), mcp.Description("URL of the Git repository to clone.")),
 		mcp.WithString("path", mcp.Description("Directory to clone the repository into (defaults to current directory).")),
 		mcp.WithString("branch", mcp.Description("Branch to clone.")),
-		mcp.WithString("commit_id", mcp.Description("Commit ID to clone.")),
+		mcp.WithString("commitId", mcp.Description("Commit ID to clone.")),
 		mcp.WithString("username", mcp.Description("Username to clone the repository with.")),
 		mcp.WithString("password", mcp.Description("Password to clone the repository with.")),
 		mcp.WithString("id", mcp.Required(), mcp.Description("ID of the sandbox to clone the repository in.")),

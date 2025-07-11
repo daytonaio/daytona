@@ -15,14 +15,14 @@ import (
 
 type CreateFolderArgs struct {
 	Id         *string `json:"id,omitempty"`
-	FolderPath *string `json:"folder_path,omitempty"`
+	FolderPath *string `json:"folderPath,omitempty"`
 	Mode       *string `json:"mode,omitempty"`
 }
 
 func GetCreateFolderTool() mcp.Tool {
 	return mcp.NewTool("create_folder",
 		mcp.WithDescription("Create a new folder in the Daytona sandbox."),
-		mcp.WithString("folder_path", mcp.Required(), mcp.Description("Path to the folder to create.")),
+		mcp.WithString("folderPath", mcp.Required(), mcp.Description("Path to the folder to create.")),
 		mcp.WithString("mode", mcp.Description("Mode of the folder to create (defaults to 0755).")),
 		mcp.WithString("id", mcp.Required(), mcp.Description("ID of the sandbox to create the folder in.")),
 	)
@@ -39,7 +39,7 @@ func CreateFolder(ctx context.Context, request mcp.CallToolRequest, args CreateF
 	}
 
 	if args.FolderPath == nil || *args.FolderPath == "" {
-		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("folder_path parameter is required")
+		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("folderPath parameter is required")
 	}
 
 	mode := "0755" // default mode

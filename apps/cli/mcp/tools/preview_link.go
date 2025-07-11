@@ -19,7 +19,7 @@ import (
 type PreviewLinkArgs struct {
 	Id          *string `json:"id,omitempty"`
 	Port        *int32  `json:"port,omitempty"`
-	CheckServer *bool   `json:"check_server,omitempty"`
+	CheckServer *bool   `json:"checkServer,omitempty"`
 	Description *string `json:"description,omitempty"`
 }
 
@@ -28,7 +28,7 @@ func GetPreviewLinkTool() mcp.Tool {
 		mcp.WithDescription("Generate accessible preview URLs for web applications running in the Daytona sandbox. Creates a secure tunnel to expose local ports externally without configuration. Validates if a server is actually running on the specified port and provides diagnostic information for troubleshooting. Supports custom descriptions and metadata for better organization of multiple services."),
 		mcp.WithNumber("port", mcp.Required(), mcp.Description("Port to expose.")),
 		mcp.WithString("description", mcp.Required(), mcp.Description("Description of the service.")),
-		mcp.WithBoolean("check_server", mcp.Required(), mcp.Description("Check if a server is running on the specified port.")),
+		mcp.WithBoolean("checkServer", mcp.Required(), mcp.Description("Check if a server is running on the specified port.")),
 		mcp.WithString("id", mcp.Required(), mcp.Description("ID of the sandbox to generate the preview link for.")),
 	)
 }
