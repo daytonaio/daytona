@@ -79,8 +79,6 @@ export class AppService implements OnApplicationBootstrap {
       return
     }
 
-    registryUrl = registryUrl.replace(/^(https?:\/\/)/, '')
-
     this.logger.log('Initializing default transient registry...')
 
     await this.dockerRegistryService.create({
@@ -111,8 +109,6 @@ export class AppService implements OnApplicationBootstrap {
       this.logger.warn('Registry configuration not found, skipping internal registry setup')
       return
     }
-
-    registryUrl = registryUrl.replace(/^(https?:\/\/)/, '')
 
     this.logger.log('Initializing default internal registry...')
 
