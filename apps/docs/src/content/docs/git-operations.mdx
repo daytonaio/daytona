@@ -28,18 +28,18 @@ sandbox.git.clone(
 # Clone with authentication
 
 sandbox.git.clone(
-url="<https://github.com/user/repo.git>",
-path="workspace/repo",
-username="git",
-password="personal_access_token"
+    url="<https://github.com/user/repo.git>",
+    path="workspace/repo",
+    username="git",
+    password="personal_access_token"
 )
 
 # Clone specific branch
 
 sandbox.git.clone(
-url="<https://github.com/user/repo.git>",
-path="workspace/repo",
-branch="develop"
+    url="<https://github.com/user/repo.git>",
+    path="workspace/repo",
+    branch="develop"
 )
 
 ```
@@ -92,7 +92,7 @@ for file in status.file_status:
 
 response = sandbox.git.branches("workspace/repo")
 for branch in response.branches:
-print(f"Branch: {branch}")
+    print(f"Branch: {branch}")
 
 ```
 </TabItem>
@@ -180,9 +180,9 @@ sandbox.git.commit("workspace/repo", "feat: add new feature")
 
 commits = sandbox.git.log("workspace/repo")
 for commit in commits:
-print(f"Commit: {commit.hash}")
-print(f"Author: {commit.author}")
-print(f"Message: {commit.message}")
+    print(f"Commit: {commit.hash}")
+    print(f"Author: {commit.author}")
+    print(f"Message: {commit.message}")
 
 ```
 </TabItem>
@@ -231,7 +231,7 @@ sandbox.git.pull("workspace/repo")
 
 remotes = sandbox.git.list_remotes("workspace/repo")
 for remote in remotes:
-print(f"Remote: {remote.name} URL: {remote.url}")
+    print(f"Remote: {remote.name} URL: {remote.url}")
 
 ```
 </TabItem>
