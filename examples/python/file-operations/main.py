@@ -16,11 +16,11 @@ def main():
     print(f"Created sandbox with ID: {sandbox.id}")
 
     # List files in the sandbox
-    files = sandbox.fs.list_files("~")
+    files = sandbox.fs.list_files(".")
     print("Initial files:", files)
 
     # Create a new directory in the sandbox
-    new_dir = "~/project-files"
+    new_dir = "project-files"
     sandbox.fs.create_folder(new_dir, "755")
 
     # Create a local file for demonstration

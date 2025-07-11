@@ -24,7 +24,18 @@ func (s *SessionController) CreateSession(c *gin.Context) {
 
 	cmd := exec.CommandContext(ctx, common.GetShell())
 	cmd.Env = os.Environ()
-	cmd.Dir = s.projectDir
+
+	// for backward compatibility (only sdk clients before 0.23.X), we use the home directory as the default directory
+	sdkVersion := c.Request.Header.Get("X-Daytona-SDK-Version")
+	if isBefore0_23(sdkVersion) && sdkVersion != "0.0.0-dev" && strings.Contains(c.Request.Header.Get("X-Daytona-Source"), "sdk") {
+		homeDir, err := os.UserHomeDir()
+		if err != nil {
+			c.AbortWithError(http.StatusInternalServerError, err)
+			cancel()
+			return
+		}
+		cmd.Dir = homeDir
+	}
 
 	var request CreateSessionRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
@@ -200,4 +211,23 @@ func (s *SessionController) getSessionCommand(sessionId, cmdId string) (*Command
 	command.ExitCode = &exitCodeInt
 
 	return command, nil
+}
+
+func isBefore0_23(version string) bool {
+	parts := strings.Split(version, ".")
+	if len(parts) < 2 {
+		return true
+	}
+
+	major, err := strconv.Atoi(parts[0])
+	if err != nil {
+		return true
+	}
+
+	minor, err := strconv.Atoi(parts[1])
+	if err != nil {
+		return true
+	}
+
+	return major <= 0 && minor < 23
 }

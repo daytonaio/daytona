@@ -495,7 +495,7 @@ await sandbox.fs.uploadFiles(files)
 
 ### Downloading Files
 
-The following commands downloads the file `file1.txt` from the Sandbox user's root directory and prints out the content:
+The following commands downloads the file `file1.txt` from the Sandbox working directory and prints out the content:
 
 ```python
 
@@ -999,7 +999,8 @@ The Daytona SDK provides built-in Git support through the `git` module in Sandbo
 
 Daytona SDK provides an option to clone, check status, and manage Git repositories in Sandboxes. You can interact with Git repositories using the `git` module.
 
-Similarly to file operations the starting cloning dir is the current Sandbox user's root - e.g. `workspace/repo` implies `/home/[username]/workspace/repo`, but you are free to provide an absolute workdir path as well (by starting the path with `/`).
+Similarly to file operations the starting cloning dir is the current Sandbox working directory. Uses the WORKDIR specified in
+the Dockerfile if present, or falling back to the user's home directory if not - e.g. `workspace/repo` implies `/my-workdir/workspace/repo`, but you are free to provide an absolute workdir path as well (by starting the path with `/`).
 
 ### Cloning Repositories
 
@@ -1327,7 +1328,8 @@ The Daytona SDK provides Language Server Protocol (LSP) support through Sandbox 
 
 ## Creating LSP Servers
 
-Daytona SDK provides an option to create LSP servers using Python and TypeScript. The `path_to_project` starting point defaults to the current Sandbox user's root - e.g. `workspace/project` implies `/home/[username]/workspace/project`, but by starting with `/`, you may define an absolute path as well.
+Daytona SDK provides an option to create LSP servers using Python and TypeScript. The `path_to_project` starting point defaults to the current Sandbox working directory. Uses the WORKDIR specified in
+the Dockerfile if present, or falling back to the user's home directory if not - e.g. `workspace/project` implies `/my-workdir/workspace/project`, but by starting with `/`, you may define an absolute path as well.
 
 ```python
 from daytona import Daytona, LspLanguageId
@@ -1344,7 +1346,7 @@ language_id=LspLanguageId.PYTHON,
 path_to_project="workspace/project"
 )
 
-```
+
 ```typescript
 import { Daytona, LspLanguageId } from '@daytonaio/sdk'
 
@@ -2043,7 +2045,8 @@ console.log(response.result);
 
 ## Process Execution
 
-Daytona SDK provides an option to execute shell commands and manage background processes in Sandboxes. The workdir for executing defaults to the current Sandbox user's root - e.g. `workspace/repo` implies `/home/[username]/workspace/repo`, but you can override it with an absolute path (by starting the path with `/`).
+Daytona SDK provides an option to execute shell commands and manage background processes in Sandboxes. The workdir for executing defaults to the current Sandbox working directory. Uses the WORKDIR specified in
+the Dockerfile if present, or falling back to the user's home directory if not - e.g. `workspace/repo` implies `/my-workdir/workspace/repo`, but you can override it with an absolute path (by starting the path with `/`).
 
 ### Running Commands
 
@@ -2079,7 +2082,7 @@ const response2 = await sandbox.process.executeCommand("sleep 3", "workspace/src
 console.log(response2.result);
 
 // Passing environment variables
-const response3 = await sandbox.process.executeCommand("echo $CUSTOM_SECRET", "~", {
+const response3 = await sandbox.process.executeCommand("echo $CUSTOM_SECRET", ".", {
         "CUSTOM_SECRET": "DAYTONA"
     }
 );
@@ -2124,7 +2127,7 @@ for (const session of sessions) {
     console.log(`PID: ${session.id}, Commands: ${session.commands}`);
 }
 
-```
+
 
 
 ## Best Practices

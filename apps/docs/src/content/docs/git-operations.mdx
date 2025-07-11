@@ -10,7 +10,8 @@ The Daytona SDK provides built-in Git support through the `git` module in Sandbo
 
 Daytona SDK provides an option to clone, check status, and manage Git repositories in Sandboxes. You can interact with Git repositories using the `git` module.
 
-Similarly to file operations the starting cloning dir is the current Sandbox user's root - e.g. `workspace/repo` implies `/home/[username]/workspace/repo`, but you are free to provide an absolute workdir path as well (by starting the path with `/`).
+Similarly to file operations the starting cloning dir is the current Sandbox working directory. Uses the WORKDIR specified in
+the Dockerfile if present, or falling back to the user's home directory if not - e.g. `workspace/repo` implies `/my-workdir/workspace/repo`, but you are free to provide an absolute workdir path as well (by starting the path with `/`).
 
 ### Cloning Repositories
 
