@@ -650,9 +650,14 @@ export class SandboxService {
     } else {
       sandbox.desiredState = SandboxDesiredState.STOPPED
     }
+
     await this.sandboxRepository.save(sandbox)
 
-    this.eventEmitter.emit(SandboxEvents.STOPPED, new SandboxStoppedEvent(sandbox))
+    if (sandbox.autoDeleteInterval === 0) {
+      this.eventEmitter.emit(SandboxEvents.DESTROYED, new SandboxDestroyedEvent(sandbox))
+    } else {
+      this.eventEmitter.emit(SandboxEvents.STOPPED, new SandboxStoppedEvent(sandbox))
+    }
   }
 
   async updatePublicStatus(sandboxId: string, isPublic: boolean): Promise<void> {
