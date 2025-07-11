@@ -1418,10 +1418,10 @@ completions = lsp_server.completions(
 print(f"Completions: {completions}")
 ```
 ```typescript
-const completions = await lspServer.getCompletions({
-    path: "workspace/project/main.ts",
-    position: { line: 10, character: 15 }
-})
+const completions = await lspServer.completions(
+    "workspace/project/main.ts",
+    { line: 10, character: 15 }
+)
 console.log('Completions:', completions)
 ```
 
