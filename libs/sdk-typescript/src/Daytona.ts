@@ -125,6 +125,7 @@ export interface Resources {
  * @property {boolean} [public] - Is the Sandbox port preview public
  * @property {number} [autoStopInterval] - Auto-stop interval in minutes (0 means disabled). Default is 15 minutes.
  * @property {number} [autoArchiveInterval] - Auto-archive interval in minutes (0 means the maximum interval will be used). Default is 7 days.
+ * @property {VolumeMount[]} [volumes] - Optional array of volumes to mount to the Sandbox
  */
 export type CreateSandboxBaseParams = {
   user?: string

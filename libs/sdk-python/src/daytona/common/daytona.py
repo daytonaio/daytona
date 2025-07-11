@@ -105,6 +105,7 @@ class CreateSandboxBaseParams(BaseModel):
         auto_archive_interval (Optional[int]): Interval in minutes after which a continuously stopped Sandbox will
             automatically archive. Default is 7 days.
             0 means the maximum interval will be used.
+        volumes (Optional[List[VolumeMount]]): List of volumes mounts to attach to the Sandbox.
     """
 
     language: Optional[CodeLanguage] = None
