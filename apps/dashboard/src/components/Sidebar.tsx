@@ -25,7 +25,6 @@ import {
   TriangleAlert,
   Users,
 } from 'lucide-react'
-
 import {
   Sidebar as SidebarComponent,
   SidebarContent,
@@ -54,21 +53,17 @@ import { addHours, formatRelative } from 'date-fns'
 import { RoutePath } from '@/enums/RoutePath'
 import { DAYTONA_DOCS_URL, DAYTONA_SLACK_URL } from '@/constants/ExternalLinks'
 import { Logo, LogoText } from '@/assets/Logo'
-
 interface SidebarProps {
   isBannerVisible: boolean
 }
-
 export function Sidebar({ isBannerVisible }: SidebarProps) {
   const { theme, setTheme } = useTheme()
   const { user, signoutRedirect } = useAuth()
   const navigate = useNavigate()
   const { pathname } = useLocation()
-
   const { selectedOrganization, authenticatedUserOrganizationMember, authenticatedUserHasPermission } =
     useSelectedOrganization()
   const { count: organizationInvitationsCount } = useUserOrganizationInvitations()
-
   const sidebarItems = useMemo(() => {
     const arr = [
       {
@@ -88,7 +83,6 @@ export function Sidebar({ isBannerVisible }: SidebarProps) {
         path: RoutePath.REGISTRIES,
       },
     ]
-
     if (authenticatedUserHasPermission(OrganizationRolePermissionsEnum.READ_VOLUMES)) {
       arr.push({
         icon: <HardDrive size={16} strokeWidth={1.5} />,
@@ -96,7 +90,6 @@ export function Sidebar({ isBannerVisible }: SidebarProps) {
         path: RoutePath.VOLUMES,
       })
     }
-
     if (authenticatedUserOrganizationMember?.role === OrganizationUserRoleEnum.OWNER) {
       arr.push({
         icon: <LockKeyhole size={16} strokeWidth={1.5} />,
@@ -104,7 +97,6 @@ export function Sidebar({ isBannerVisible }: SidebarProps) {
         path: RoutePath.LIMITS,
       })
     }
-
     if (
       import.meta.env.VITE_BILLING_API_URL &&
       authenticatedUserOrganizationMember?.role === OrganizationUserRoleEnum.OWNER
@@ -115,14 +107,12 @@ export function Sidebar({ isBannerVisible }: SidebarProps) {
         path: RoutePath.BILLING,
       })
     }
-
     if (!selectedOrganization?.personal) {
       arr.push({
         icon: <Users size={16} strokeWidth={1.5} />,
         label: 'Members',
         path: RoutePath.MEMBERS,
       })
-
       // TODO: uncomment when we allow creating custom roles
       // if (authenticatedUserOrganizationMember?.role === OrganizationUserRoleEnum.OWNER) {
       //   arr.push({ icon: <UserCog className="w-5 h-5" />, label: 'Roles', path: RoutePath.ROLES })
@@ -135,11 +125,9 @@ export function Sidebar({ isBannerVisible }: SidebarProps) {
     })
     return arr
   }, [authenticatedUserOrganizationMember?.role, selectedOrganization?.personal, authenticatedUserHasPermission])
-
   const handleSignOut = () => {
     signoutRedirect()
   }
-
   return (
     <SidebarComponent isBannerVisible={isBannerVisible} collapsible="icon">
       <SidebarContent>
@@ -149,12 +137,9 @@ export function Sidebar({ isBannerVisible }: SidebarProps) {
               <Logo />
               <LogoText />
             </div>
-
             <SidebarTrigger className="p-2 [&_svg]:size-5" />
           </div>
-
           <OrganizationPicker />
-
           <SidebarGroupContent>
             <SidebarMenu>
               {sidebarItems.map((item) => (
@@ -231,6 +216,16 @@ export function Sidebar({ isBannerVisible }: SidebarProps) {
               </TooltipProvider>
             </SidebarMenuItem>
           )}
+          <SidebarMenuItem key="theme-toggle">
+            <SidebarMenuButton
+              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+              className="h-8 py-0"
+              title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+            >
+              {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+              <span>{theme === 'dark' ? 'Light mode' : 'Dark mode'}</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
           <SidebarMenuItem key="slack">
             <SidebarMenuButton asChild>
               <a href={DAYTONA_SLACK_URL} className=" h-8 py-0" target="_blank" rel="noopener noreferrer">
@@ -267,7 +262,7 @@ export function Sidebar({ isBannerVisible }: SidebarProps) {
                   <ChevronsUpDown className="w-4 h-4 opacity-50 flex-shrink-0" />
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
-              <DropdownMenuContent side="top" align="start" className="w-[--radix-popper-anchor-width]">
+              <DropdownMenuContent side="top" align="start" className="w-[--radix-popper-anchor-width] min-w-[12rem]">
                 {import.meta.env.VITE_LINKED_ACCOUNTS_ENABLED === 'true' && (
                   <DropdownMenuItem asChild>
                     <Button
@@ -303,16 +298,6 @@ export function Sidebar({ isBannerVisible }: SidebarProps) {
                   >
                     <ListChecks className="w-4 h-4" />
                     Onboarding
-                  </Button>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Button
-                    variant="ghost"
-                    className="w-full cursor-pointer justify-start"
-                    onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-                  >
-                    {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-                    {theme === 'dark' ? 'Light mode' : 'Dark mode'}
                   </Button>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
