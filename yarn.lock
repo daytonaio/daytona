@@ -14840,7 +14840,6 @@ __metadata:
     eslint-plugin-react: "npm:7.35.0"
     eslint-plugin-react-hooks: "npm:5.0.0"
     expand-tilde: "npm:^2.0.2"
-    express: "npm:^5.1.0"
     express-openid-connect: "npm:^2.18.0"
     express-session: "npm:^1.18.1"
     fast-glob: "npm:^3.3.0"
@@ -16922,7 +16921,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"express@npm:5.1.0, express@npm:^5.1.0":
+"express@npm:5.1.0":
   version: 5.1.0
   resolution: "express@npm:5.1.0"
   dependencies:
