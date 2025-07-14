@@ -30,6 +30,7 @@ type CreateSandboxArgs struct {
 	Disk                *int32                     `json:"disk,omitempty"`
 	AutoStopInterval    *int32                     `json:"autoStopInterval,omitempty"`
 	AutoArchiveInterval *int32                     `json:"autoArchiveInterval,omitempty"`
+	AutoDeleteInterval  *int32                     `json:"autoDeleteInterval,omitempty"`
 	Volumes             *[]apiclient.SandboxVolume `json:"volumes,omitempty"`
 	BuildInfo           *apiclient.CreateBuildInfo `json:"buildInfo,omitempty"`
 }
@@ -138,6 +139,10 @@ func createSandboxRequest(args CreateSandboxArgs) (*apiclient.CreateSandbox, err
 
 	if args.AutoArchiveInterval != nil {
 		createSandbox.SetAutoArchiveInterval(*args.AutoArchiveInterval)
+	}
+
+	if args.AutoDeleteInterval != nil {
+		createSandbox.SetAutoDeleteInterval(*args.AutoDeleteInterval)
 	}
 
 	if args.User != nil && *args.User != "" {
