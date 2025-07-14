@@ -70,10 +70,10 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
                     Start
                   </Button>
                 )}
-                {(sandbox.state === SandboxState.STOPPED || sandbox.state === SandboxState.ARCHIVED) && (
+                {/* {(sandbox.state === SandboxState.STOPPED || sandbox.state === SandboxState.ARCHIVED) && (
                   <Button
                     variant="outline"
-                    onClick={() => handleStart(sandbox.id)}
+                    onClick={() => handleFork(sandbox.id)}
                     disabled={loadingSandboxes[sandbox.id]}
                   >
                     <GitFork className="w-4 h-4" />
@@ -83,13 +83,13 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
                 {(sandbox.state === SandboxState.STOPPED || sandbox.state === SandboxState.ARCHIVED) && (
                   <Button
                     variant="outline"
-                    onClick={() => handleStart(sandbox.id)}
+                    onClick={() => handleSnapshot(sandbox.id)}
                     disabled={loadingSandboxes[sandbox.id]}
                   >
                     <Camera className="w-4 h-4" />
                     Snapshot
                   </Button>
-                )}
+                )} */}
                 {sandbox.state === SandboxState.STOPPED && (
                   <Button
                     variant="outline"
