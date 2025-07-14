@@ -7,7 +7,6 @@ import { Module, NestModule, MiddlewareConsumer, RequestMethod } from '@nestjs/c
 import { VersionHeaderMiddleware } from './common/middleware/version-header.middleware'
 import { AppService } from './app.service'
 import { UserModule } from './user/user.module'
-import { TeamModule } from './team/team.module'
 import { TypeOrmModule } from '@nestjs/typeorm'
 import { SandboxModule } from './sandbox/sandbox.module'
 import { AuthModule } from './auth/auth.module'
@@ -85,7 +84,6 @@ import { MaintenanceMiddleware } from './common/middleware/maintenance.middlewar
     ApiKeyModule,
     AuthModule,
     UserModule,
-    TeamModule,
     SandboxModule,
     DockerRegistryModule,
     ScheduleModule.forRoot(),
