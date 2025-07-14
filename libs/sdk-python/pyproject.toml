@@ -18,8 +18,7 @@ dependencies = [
     "httpx>=0.28.0,<0.29.0",
     "aiofiles>=24.1.0,<24.2.0",
     "toml>=0.10.0,<0.11.0",
-    "aioboto3>=13.0.0,<15.0.0",
-    "boto3>=1.0.0,<2.0.0",
+    "obstore>=0.7.0,<0.8.0",
 ]
 classifiers = [
     "Development Status :: 3 - Alpha",
@@ -34,3 +33,4 @@ license = {text = "Apache-2.0"}
 
 [tool.deptry]
 exclude = ["src/daytona/_utils/chart_data_extractor_wrapper.py", "scripts/sync_generator.py"]
+extend_exclude = [".venv", "dist", "build", ".pytest_cache", "__pycache__"]
