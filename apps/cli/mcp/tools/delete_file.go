@@ -16,13 +16,13 @@ import (
 
 type DeleteFileArgs struct {
 	Id       *string `json:"id,omitempty"`
-	FilePath *string `json:"file_path,omitempty"`
+	FilePath *string `json:"filePath,omitempty"`
 }
 
 func GetDeleteFileTool() mcp.Tool {
 	return mcp.NewTool("delete_file",
 		mcp.WithDescription("Delete a file or directory in the Daytona sandbox."),
-		mcp.WithString("file_path", mcp.Required(), mcp.Description("Path to the file or directory to delete.")),
+		mcp.WithString("filePath", mcp.Required(), mcp.Description("Path to the file or directory to delete.")),
 		mcp.WithString("id", mcp.Required(), mcp.Description("ID of the sandbox to delete the file in.")),
 	)
 }
@@ -38,7 +38,7 @@ func DeleteFile(ctx context.Context, request mcp.CallToolRequest, args DeleteFil
 	}
 
 	if args.FilePath == nil || *args.FilePath == "" {
-		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("file_path parameter is required")
+		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("filePath parameter is required")
 	}
 
 	// Execute delete command
