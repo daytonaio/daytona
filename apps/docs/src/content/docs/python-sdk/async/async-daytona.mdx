@@ -473,6 +473,7 @@ Base parameters for creating a new Sandbox.
 - `auto_delete_interval` _Optional[int]_ - Interval in minutes after which a continuously stopped Sandbox will
   automatically be deleted. By default, auto-delete is disabled.
   Negative value means disabled, 0 means delete immediately upon stopping.
+- `volumes` _Optional[List[VolumeMount]]_ - List of volumes mounts to attach to the Sandbox.
 
 ## CreateSandboxFromImageParams
 
