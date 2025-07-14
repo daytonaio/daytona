@@ -33,7 +33,7 @@ export function SandboxState({ state, errorReason }: SandboxStateProps) {
     return (
       <TooltipProvider delayDuration={100}>
         <Tooltip>
-          <TooltipTrigger>{errorContent}</TooltipTrigger>
+          <TooltipTrigger asChild>{errorContent}</TooltipTrigger>
           <TooltipContent>
             <p className="max-w-[300px]">{errorReason}</p>
           </TooltipContent>
