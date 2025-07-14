@@ -23,10 +23,8 @@ import {
   SquareUserRound,
   Sun,
   TriangleAlert,
-  //UserCog,
   Users,
 } from 'lucide-react'
-
 import {
   Sidebar as SidebarComponent,
   SidebarContent,
@@ -36,14 +34,13 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarTrigger,
 } from '@/components/ui/sidebar'
-import daytonaLogoBlack from '../assets/daytona-full-black.png'
-import daytonaLogoWhite from '../assets/daytona-full-white.png'
 import { useTheme } from '@/contexts/ThemeContext'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu'
 import { useAuth } from 'react-oidc-context'
 import { Button } from './ui/button'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { useMemo } from 'react'
 import { OrganizationPicker } from '@/components/Organizations/OrganizationPicker'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
@@ -55,82 +52,99 @@ import { TooltipProvider, TooltipTrigger } from './ui/tooltip'
 import { addHours, formatRelative } from 'date-fns'
 import { RoutePath } from '@/enums/RoutePath'
 import { DAYTONA_DOCS_URL, DAYTONA_SLACK_URL } from '@/constants/ExternalLinks'
-
+import { Logo, LogoText } from '@/assets/Logo'
 interface SidebarProps {
   isBannerVisible: boolean
 }
-
 export function Sidebar({ isBannerVisible }: SidebarProps) {
   const { theme, setTheme } = useTheme()
   const { user, signoutRedirect } = useAuth()
   const navigate = useNavigate()
-
+  const { pathname } = useLocation()
   const { selectedOrganization, authenticatedUserOrganizationMember, authenticatedUserHasPermission } =
     useSelectedOrganization()
   const { count: organizationInvitationsCount } = useUserOrganizationInvitations()
-
   const sidebarItems = useMemo(() => {
     const arr = [
-      { icon: <Container className="w-5 h-5" />, label: 'Sandboxes', path: RoutePath.SANDBOXES },
-      { icon: <KeyRound className="w-5 h-5" />, label: 'Keys', path: RoutePath.KEYS },
       {
-        icon: <Box className="w-5 h-5" />,
+        icon: <Container size={16} strokeWidth={1.5} />,
+        label: 'Sandboxes',
+        path: RoutePath.SANDBOXES,
+      },
+      { icon: <KeyRound size={16} strokeWidth={1.5} />, label: 'Keys', path: RoutePath.KEYS },
+      {
+        icon: <Box size={16} strokeWidth={1.5} />,
         label: 'Snapshots',
         path: RoutePath.SNAPSHOTS,
       },
-      { icon: <PackageOpen className="w-5 h-5" />, label: 'Registries', path: RoutePath.REGISTRIES },
+      {
+        icon: <PackageOpen size={16} strokeWidth={1.5} />,
+        label: 'Registries',
+        path: RoutePath.REGISTRIES,
+      },
     ]
-
     if (authenticatedUserHasPermission(OrganizationRolePermissionsEnum.READ_VOLUMES)) {
-      arr.push({ icon: <HardDrive className="w-5 h-5" />, label: 'Volumes', path: RoutePath.VOLUMES })
+      arr.push({
+        icon: <HardDrive size={16} strokeWidth={1.5} />,
+        label: 'Volumes',
+        path: RoutePath.VOLUMES,
+      })
     }
-
     if (authenticatedUserOrganizationMember?.role === OrganizationUserRoleEnum.OWNER) {
-      arr.push({ icon: <LockKeyhole className="w-5 h-5" />, label: 'Limits', path: RoutePath.LIMITS })
+      arr.push({
+        icon: <LockKeyhole size={16} strokeWidth={1.5} />,
+        label: 'Limits',
+        path: RoutePath.LIMITS,
+      })
     }
-
     if (
       import.meta.env.VITE_BILLING_API_URL &&
       authenticatedUserOrganizationMember?.role === OrganizationUserRoleEnum.OWNER
     ) {
-      arr.push({ icon: <CreditCard className="w-5 h-5" />, label: 'Billing', path: RoutePath.BILLING })
+      arr.push({
+        icon: <CreditCard size={16} strokeWidth={1.5} />,
+        label: 'Billing',
+        path: RoutePath.BILLING,
+      })
     }
-
     if (!selectedOrganization?.personal) {
-      arr.push({ icon: <Users className="w-5 h-5" />, label: 'Members', path: RoutePath.MEMBERS })
-
+      arr.push({
+        icon: <Users size={16} strokeWidth={1.5} />,
+        label: 'Members',
+        path: RoutePath.MEMBERS,
+      })
       // TODO: uncomment when we allow creating custom roles
       // if (authenticatedUserOrganizationMember?.role === OrganizationUserRoleEnum.OWNER) {
       //   arr.push({ icon: <UserCog className="w-5 h-5" />, label: 'Roles', path: RoutePath.ROLES })
       // }
     }
-    arr.push({ icon: <Settings className="w-5 h-5" />, label: 'Settings', path: RoutePath.SETTINGS })
+    arr.push({
+      icon: <Settings size={16} strokeWidth={1.5} />,
+      label: 'Settings',
+      path: RoutePath.SETTINGS,
+    })
     return arr
   }, [authenticatedUserOrganizationMember?.role, selectedOrganization?.personal, authenticatedUserHasPermission])
-
   const handleSignOut = () => {
     signoutRedirect()
   }
-
   return (
-    <SidebarComponent isBannerVisible={isBannerVisible}>
+    <SidebarComponent isBannerVisible={isBannerVisible} collapsible="icon">
       <SidebarContent>
         <SidebarGroup>
-          <div className="p-2 mb-2">
-            <img
-              src={theme === 'dark' ? daytonaLogoWhite : daytonaLogoBlack}
-              alt="Daytona Logo"
-              className="h-8 w-auto"
-            />
+          <div className="flex justify-between items-center gap-2 px-2 mb-2 h-12">
+            <div className="flex items-center gap-2 group-data-[state=collapsed]:hidden text-primary">
+              <Logo />
+              <LogoText />
+            </div>
+            <SidebarTrigger className="p-2 [&_svg]:size-5" />
           </div>
-
           <OrganizationPicker />
-
           <SidebarGroupContent>
             <SidebarMenu>
               {sidebarItems.map((item) => (
                 <SidebarMenuItem key={item.label}>
-                  <SidebarMenuButton asChild>
+                  <SidebarMenuButton asChild isActive={pathname.startsWith(item.path)}>
                     <button onClick={() => navigate(item.path)} className="text-sm">
                       {item.icon}
                       <span>{item.label}</span>
@@ -205,25 +219,25 @@ export function Sidebar({ isBannerVisible }: SidebarProps) {
           <SidebarMenuItem key="theme-toggle">
             <SidebarMenuButton
               onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-              className="text-xs h-8 py-0"
+              className="h-8 py-0"
               title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
             >
-              {theme === 'dark' ? <Sun className="!w-4 !h-4" /> : <Moon className="!w-4 !h-4" />}
+              {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
               <span>{theme === 'dark' ? 'Light mode' : 'Dark mode'}</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem key="slack">
             <SidebarMenuButton asChild>
-              <a href={DAYTONA_SLACK_URL} className="text-xs h-8 py-0" target="_blank" rel="noopener noreferrer">
-                <Slack className="!w-4 !h-4 fill-foreground" />
+              <a href={DAYTONA_SLACK_URL} className=" h-8 py-0" target="_blank" rel="noopener noreferrer">
+                <Slack size={16} strokeWidth={1.5} />
                 <span>Slack</span>
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem key="docs">
             <SidebarMenuButton asChild>
-              <a href={DAYTONA_DOCS_URL} className="text-xs h-8 py-0" target="_blank" rel="noopener noreferrer">
-                <BookOpen className="!w-4 !h-4" />
+              <a href={DAYTONA_DOCS_URL} className=" h-8 py-0" target="_blank" rel="noopener noreferrer">
+                <BookOpen size={16} strokeWidth={1.5} />
                 <span>Docs</span>
               </a>
             </SidebarMenuButton>
@@ -231,24 +245,24 @@ export function Sidebar({ isBannerVisible }: SidebarProps) {
           <SidebarMenuItem>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <SidebarMenuButton className="h-14 pl-1 flex items-center">
+                <SidebarMenuButton className="h-12 flex flex-shrink-0 items-center outline outline-1 outline-border outline-offset-0 bg-muted font-medium mt-2">
                   {user?.profile.picture ? (
                     <img
                       src={user.profile.picture}
                       alt={user.profile.name || 'Profile picture'}
-                      className="h-8 w-8 rounded-sm flex-shrink-0"
+                      className="h-4 w-4 rounded-sm flex-shrink-0"
                     />
                   ) : (
-                    <SquareUserRound className="!w-8 !h-8 flex-shrink-0" />
+                    <SquareUserRound className="!w-4 !h-4  flex-shrink-0" />
                   )}
                   <div className="flex-1 min-w-0">
                     <span className="truncate block">{user?.profile.name || ''}</span>
-                    <span className="truncate block text-muted-foreground">{user?.profile.email || ''}</span>
+                    <span className="truncate block text-muted-foreground text-xs">{user?.profile.email || ''}</span>
                   </div>
                   <ChevronsUpDown className="w-4 h-4 opacity-50 flex-shrink-0" />
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
-              <DropdownMenuContent side="top" className="w-[--radix-popper-anchor-width]">
+              <DropdownMenuContent side="top" align="start" className="w-[--radix-popper-anchor-width] min-w-[12rem]">
                 {import.meta.env.VITE_LINKED_ACCOUNTS_ENABLED === 'true' && (
                   <DropdownMenuItem asChild>
                     <Button

@@ -186,9 +186,9 @@ const OrganizationMembers: React.FC = () => {
   }, [authenticatedUserOrganizationMember])
 
   return (
-    <div className="p-6">
-      <div className="mb-6 flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Members</h1>
+    <div className="px-6 py-2">
+      <div className="mb-2 h-12 flex items-center justify-between">
+        <h1 className="text-2xl font-medium">Members</h1>
         {authenticatedUserIsOwner && (
           <CreateOrganizationInvitationDialog
             availableRoles={roles}
@@ -212,8 +212,8 @@ const OrganizationMembers: React.FC = () => {
 
       {authenticatedUserIsOwner && (
         <>
-          <div className="mb-6 flex justify-between items-center mt-12">
-            <h1 className="text-2xl font-bold">Invitations</h1>
+          <div className="mb-2 mt-12 h-12 flex items-center justify-between">
+            <h1 className="text-2xl font-medium">Invitations</h1>
           </div>
 
           <OrganizationInvitationTable
