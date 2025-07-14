@@ -169,13 +169,8 @@ exec_session_id = "python-app-session"
 sandbox.process.create_session(exec_session_id)
 
 sandbox.process.execute_session_command(exec_session_id, SessionExecuteRequest(
-<<<<<<< HEAD
-command="python app.py",
-var_async=True
-=======
     command="python /app.py",
     var_async=True
->>>>>>> 63bf6ad8 (fix(docs): revert formatting changes inside example code)
 ))
 
 # Get the preview link for the Flask app
