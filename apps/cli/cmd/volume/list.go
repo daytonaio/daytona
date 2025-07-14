@@ -8,6 +8,7 @@ import (
 
 	"github.com/daytonaio/daytona/cli/apiclient"
 	"github.com/daytonaio/daytona/cli/cmd/common"
+	"github.com/daytonaio/daytona/cli/config"
 	"github.com/daytonaio/daytona/cli/views/volume"
 	"github.com/spf13/cobra"
 )
@@ -36,12 +37,17 @@ var ListCmd = &cobra.Command{
 			return nil
 		}
 
-		activeOrganizationName, err := common.GetActiveOrganizationName(apiClient, ctx)
-		if err != nil {
-			return err
+		var activeOrganizationName *string
+
+		if !config.IsApiKeyAuth() {
+			name, err := common.GetActiveOrganizationName(apiClient, ctx)
+			if err != nil {
+				return err
+			}
+			activeOrganizationName = &name
 		}
 
-		volume.ListVolumes(volumes, &activeOrganizationName)
+		volume.ListVolumes(volumes, activeOrganizationName)
 		return nil
 	},
 }
