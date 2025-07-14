@@ -370,7 +370,7 @@ const Snapshots: React.FC = () => {
   }
 
   return (
-    <div className="p-6">
+    <div className="px-6 py-2">
       <Dialog
         open={showCreateDialog}
         onOpenChange={(isOpen) => {
@@ -386,13 +386,13 @@ const Snapshots: React.FC = () => {
           setDisk(undefined)
         }}
       >
-        <div className="mb-6 flex justify-between items-center">
-          <h1 className="text-2xl font-bold">Snapshots</h1>
+        <div className="mb-2 h-12 flex items-center justify-between">
+          <h1 className="text-2xl font-medium">Snapshots</h1>
           {writePermitted && (
             <DialogTrigger asChild>
               <Button
                 variant="default"
-                size="icon"
+                size="sm"
                 disabled={loadingTable}
                 className="w-auto px-4"
                 title="Create Snapshot"
