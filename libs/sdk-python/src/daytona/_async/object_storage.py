@@ -7,9 +7,9 @@ import os
 import tarfile
 import threading
 
-import aioboto3
 import aiofiles
 import aiofiles.os
+from obstore.store import S3Store
 
 from .._utils.docs_ignore import docs_ignore
 
@@ -22,69 +22,45 @@ class AsyncObjectStorage:
         aws_access_key_id (str): The access key ID for the object storage service.
         aws_secret_access_key (str): The secret access key for the object storage service.
         aws_session_token (str): The session token for the object storage service. Used for temporary credentials.
-        bucket_name (str): The name of the bucket to use.
+        bucket_name (str): The name of the bucket to use. Defaults to "daytona-volume-builds".
     """
 
     def __init__(
         self,
-        endpoint_url,
-        aws_access_key_id,
-        aws_secret_access_key,
-        aws_session_token,
-        bucket_name="daytona-volume-builds",
+        endpoint_url: str,
+        aws_access_key_id: str,
+        aws_secret_access_key: str,
+        aws_session_token: str,
+        bucket_name: str = "daytona-volume-builds",
     ):
         self.bucket_name = bucket_name
-        self.endpoint_url = endpoint_url
-        self.s3_client = aioboto3.Session().client(
-            service_name="s3",
-            endpoint_url=self.endpoint_url,
-            aws_access_key_id=aws_access_key_id,
-            aws_secret_access_key=aws_secret_access_key,
-            aws_session_token=aws_session_token,
+        self.store = S3Store(
+            bucket=bucket_name,
+            endpoint=endpoint_url,
+            access_key_id=aws_access_key_id,
+            secret_access_key=aws_secret_access_key,
+            token=aws_session_token,
         )
-        # unasync: delete start
-        self._client_ctx = None
 
-    async def __aenter__(self):
-        try:
-            self._client_ctx = self.s3_client
-            # pylint: disable=unnecessary-dunder-call
-            self.s3_client = await self._client_ctx.__aenter__()
-            return self
-        except Exception as e:
-            raise Exception(f"Error opening S3 client: {e}") from e
-
-    async def __aexit__(self, exc_type, exc, tb):
-        try:
-            if self._client_ctx:
-                await self._client_ctx.__aexit__(exc_type, exc, tb)
-            self.s3_client = None
-            self._client_ctx = None
-        except Exception as e:
-            raise Exception(f"Error closing S3 client: {e}") from e
-
-    # unasync: delete end
-
-    async def upload(self, path, organization_id, archive_base_path=None) -> str:
+    async def upload(self, path: str, organization_id: str, archive_base_path: str | None = None) -> str:
         """Uploads a file to the object storage service.
 
         Args:
             path (str): The path to the file to upload.
             organization_id (str): The organization ID to use.
             archive_base_path (str): The base path to use for the archive.
+
+        Returns:
+            str: The hash of the uploaded file.
         """
         if not await aiofiles.os.path.exists(path):
             raise FileNotFoundError(f"Path does not exist: {path}")
 
-        # Compute hash for the path
         path_hash = await self._compute_hash_for_path_md5(path, archive_base_path)
-
-        # Define the S3 prefix
-        prefix = f"{organization_id}/{path_hash}/"
-        s3_key = f"{prefix}context.tar"
+        s3_key = f"{organization_id}/{path_hash}/context.tar"
 
         # Check if it already exists in S3
-        if await self._folder_exists_in_s3(prefix):
+        if await self._file_exists_in_s3(s3_key):
             return path_hash
 
         # Upload to S3
@@ -94,7 +70,7 @@ class AsyncObjectStorage:
 
     @staticmethod
     @docs_ignore
-    def compute_archive_base_path(path_str) -> str:
+    def compute_archive_base_path(path_str: str) -> str:
         """Compute the base path for an archive. Returns normalized path without the root
         (drive letter or leading slash).
 
@@ -110,7 +86,7 @@ class AsyncObjectStorage:
         # Remove leading separators (both / and \)
         return path_without_drive.lstrip("/").lstrip("\\")
 
-    async def _compute_hash_for_path_md5(self, path_str, archive_base_path=None):
+    async def _compute_hash_for_path_md5(self, path_str: str, archive_base_path: str | None = None) -> str:
         """Computes the MD5 hash for a given path.
 
         Args:
@@ -150,19 +126,23 @@ class AsyncObjectStorage:
 
         return md5_hasher.hexdigest()
 
-    async def _folder_exists_in_s3(self, prefix):
-        """Checks if a folder exists in S3.
+    async def _file_exists_in_s3(self, file_path: str) -> bool:
+        """
+        Checks whether a specific object exists at the given path.
 
         Args:
-            prefix (str): The prefix to check.
+            file_path (str): Full object path, e.g. "org/abcd123/context.tar".
 
         Returns:
-            bool: True if the folder exists, False otherwise.
+            bool: True if the object exists, False otherwise.
         """
-        resp = await self.s3_client.list_objects_v2(Bucket=self.bucket_name, Prefix=prefix)
-        return "Contents" in resp
+        try:
+            await self.store.head_async(file_path)
+        except FileNotFoundError:
+            return False
+        return True
 
-    async def _upload_as_tar(self, s3_key, source_path, archive_base_path=None):
+    async def _upload_as_tar(self, s3_key: str, source_path: str, archive_base_path: str | None = None) -> None:
         """Uploads a file to the object storage service as a tar.
 
         Args:
@@ -187,9 +167,18 @@ class AsyncObjectStorage:
         thread = threading.Thread(target=tar_worker, daemon=True)
         thread.start()
 
-        await self.s3_client.upload_fileobj(Fileobj=read_file, Bucket=self.bucket_name, Key=s3_key)
+        async def reader_iter():
+            loop = asyncio.get_running_loop()
+            try:
+                while True:
+                    chunk = await loop.run_in_executor(None, read_file.read, 1024 * 64)
+                    if not chunk:
+                        break
+                    yield chunk
+            finally:
+                read_file.close()
 
-        read_file.close()
+        await self.store.put_async(s3_key, reader_iter())
         await asyncio.to_thread(thread.join)
 
     # unasync: delete start

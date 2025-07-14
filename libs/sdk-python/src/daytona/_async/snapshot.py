@@ -201,18 +201,18 @@ class AsyncSnapshotService:
 
         push_access_creds = await object_storage_api.get_push_access()
 
-        async with AsyncObjectStorage(
+        object_storage = AsyncObjectStorage(
             push_access_creds.storage_url,
             push_access_creds.access_key,
             push_access_creds.secret,
             push_access_creds.session_token,
             push_access_creds.bucket,
-        ) as object_storage:
-            context_hashes = []
-            for context in image._context_list:  # pylint: disable=protected-access
-                context_hash = await object_storage.upload(
-                    context.source_path, push_access_creds.organization_id, context.archive_path
-                )
-                context_hashes.append(context_hash)
+        )
+        context_hashes = []
+        for context in image._context_list:  # pylint: disable=protected-access
+            context_hash = await object_storage.upload(
+                context.source_path, push_access_creds.organization_id, context.archive_path
+            )
+            context_hashes.append(context_hash)
 
         return context_hashes
