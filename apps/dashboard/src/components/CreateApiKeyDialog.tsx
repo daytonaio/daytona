@@ -134,7 +134,7 @@ export const CreateApiKeyDialog: React.FC<CreateApiKeyDialogProps> = ({ availabl
       }}
     >
       <DialogTrigger asChild>
-        <Button variant="default" size="icon" className="w-auto px-4" title="Create Key">
+        <Button variant="default" size="sm" className="w-auto px-4" title="Create Key">
           <Plus className="w-4 h-4" />
           Create Key
         </Button>

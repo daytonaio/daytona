@@ -63,7 +63,9 @@ const Sandboxes: React.FC = () => {
     }
     setLoadingSnapshots(true)
     try {
-      const response = await snapshotApi.getAllSnapshots(selectedOrganization.id)
+      // TODO: Implement snapshot search by input
+      // e.g. "Search to load more results"
+      const response = await snapshotApi.getAllSnapshots(selectedOrganization.id, 100)
       setSnapshots(response.data.items ?? [])
     } catch (error) {
       console.error('Failed to fetch snapshots', error)

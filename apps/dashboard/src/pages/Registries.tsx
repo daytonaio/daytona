@@ -263,7 +263,7 @@ const Registries: React.FC = () => {
             <DialogTrigger asChild disabled={loading}>
               <Button
                 variant="default"
-                size="icon"
+                size="sm"
                 disabled={loading}
                 className="w-auto px-4"
                 title="Add Registry"

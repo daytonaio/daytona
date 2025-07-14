@@ -392,7 +392,7 @@ const Snapshots: React.FC = () => {
             <DialogTrigger asChild>
               <Button
                 variant="default"
-                size="icon"
+                size="sm"
                 disabled={loadingTable}
                 className="w-auto px-4"
                 title="Create Snapshot"
