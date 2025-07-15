@@ -318,14 +318,14 @@ console.log(`Token: ${previewLink.token}`);
 #### getUserRootDir()
 
 ```ts
-getUserRootDir(): Promise<undefined | string>
+getUserRootDir(): Promise<string>
 ```
 
 Gets the root directory path for the logged in user inside the Sandbox.
 
 **Returns**:
 
-- `Promise<undefined | string>` - The absolute path to the Sandbox root directory for the logged in user
+- `Promise<string>` - The absolute path to the Sandbox root directory for the logged in user
 
 **Example:**
 
