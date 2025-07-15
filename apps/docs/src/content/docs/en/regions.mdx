@@ -11,6 +11,8 @@ Daytona is currently available in the following regions:
 
 You can select the region during the Daytona [configuration](/docs/en/configuration) step.
 
+<Tabs>
+<TabItem label="Python" icon="seti:python">
 ```python
 from daytona import Daytona, DaytonaConfig
 
@@ -20,7 +22,8 @@ config = DaytonaConfig(
 
 daytona = Daytona(config)
 ```
-
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
 ```typescript
 import { Daytona } from '@daytonaio/sdk';
 
@@ -28,3 +31,5 @@ const daytona: Daytona = new Daytona({
     target: "eu"
 });
 ```
+</TabItem>
+</Tabs>
