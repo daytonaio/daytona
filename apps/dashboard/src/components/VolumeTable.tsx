@@ -162,43 +162,39 @@ export function VolumeTable({ data, loading, processingVolumeAction, onDelete, o
         </Table>
       </div>
       <div className="flex items-center justify-between space-x-2 py-4">
-        <div className="flex items-center space-x-2">
-          {table.getRowModel().rows.some((row) => row.getIsSelected()) && (
-            <div className="flex items-center space-x-2">
-              <Popover open={bulkDeleteConfirmationOpen} onOpenChange={setBulkDeleteConfirmationOpen}>
-                <PopoverTrigger>
-                  <Button variant="destructive" size="sm" className="h-8">
-                    Bulk Delete
+        {table.getRowModel().rows.some((row) => row.getIsSelected()) && (
+          <Popover open={bulkDeleteConfirmationOpen} onOpenChange={setBulkDeleteConfirmationOpen}>
+            <PopoverTrigger>
+              <Button variant="destructive" size="sm" className="h-8">
+                Bulk Delete
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent side="top">
+              <div className="flex flex-col gap-4">
+                <p>Are you sure you want to delete these Volumes?</p>
+                <div className="flex items-center space-x-2">
+                  <Button
+                    variant="destructive"
+                    onClick={() => {
+                      onBulkDelete(
+                        table
+                          .getRowModel()
+                          .rows.filter((row) => row.getIsSelected())
+                          .map((row) => row.original),
+                      )
+                      setBulkDeleteConfirmationOpen(false)
+                    }}
+                  >
+                    Delete
                   </Button>
-                </PopoverTrigger>
-                <PopoverContent side="top">
-                  <div className="flex flex-col gap-4">
-                    <p>Are you sure you want to delete these Volumes?</p>
-                    <div className="flex items-center space-x-2">
-                      <Button
-                        variant="destructive"
-                        onClick={() => {
-                          onBulkDelete(
-                            table
-                              .getRowModel()
-                              .rows.filter((row) => row.getIsSelected())
-                              .map((row) => row.original),
-                          )
-                          setBulkDeleteConfirmationOpen(false)
-                        }}
-                      >
-                        Delete
-                      </Button>
-                      <Button variant="outline" onClick={() => setBulkDeleteConfirmationOpen(false)}>
-                        Cancel
-                      </Button>
-                    </div>
-                  </div>
-                </PopoverContent>
-              </Popover>
-            </div>
-          )}
-        </div>
+                  <Button variant="outline" onClick={() => setBulkDeleteConfirmationOpen(false)}>
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
+        )}
         <Pagination table={table} selectionEnabled entityName="Volumes" />
       </div>
     </div>
