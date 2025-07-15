@@ -126,6 +126,7 @@ export interface Resources {
  * @property {number} [autoStopInterval] - Auto-stop interval in minutes (0 means disabled). Default is 15 minutes.
  * @property {number} [autoArchiveInterval] - Auto-archive interval in minutes (0 means the maximum interval will be used). Default is 7 days.
  * @property {number} [autoDeleteInterval] - Auto-delete interval in minutes (negative value means disabled, 0 means delete immediately upon stopping). By default, auto-delete is disabled.
+ * @property {VolumeMount[]} [volumes] - Optional array of volumes to mount to the Sandbox
  */
 export type CreateSandboxBaseParams = {
   user?: string
