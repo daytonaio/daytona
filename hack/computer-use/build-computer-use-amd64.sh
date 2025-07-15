@@ -17,7 +17,7 @@ echo "Building computer-use for amd64 architecture using Docker..."
 # Ensure dist directory exists
 mkdir -p dist/libs
 
-# Build using docker image builder (removed --no-cache for better performance)
+# Build using docker image builder
 echo "Building Docker image..."
 docker build --platform linux/amd64 -t computer-use-amd64:build -f hack/computer-use/Dockerfile .
 
