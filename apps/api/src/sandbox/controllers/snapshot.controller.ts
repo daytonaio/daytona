@@ -113,6 +113,27 @@ export class SnapshotController {
     return SnapshotDto.fromSnapshot(snapshot)
   }
 
+  @Get('can-cleanup-image')
+  @ApiOperation({
+    summary: 'Check if an image can be cleaned up',
+    operationId: 'canCleanupImage',
+  })
+  @ApiQuery({
+    name: 'imageName',
+    required: true,
+    type: String,
+    description: 'Image name with tag to check',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Boolean indicating if image can be cleaned up',
+    type: Boolean,
+  })
+  @RequiredSystemRole(SystemRole.ADMIN)
+  async canCleanupImage(@Query('imageName') imageName: string): Promise<boolean> {
+    return this.snapshotService.canCleanupImage(imageName)
+  }
+
   @Get(':id')
   @ApiOperation({
     summary: 'Get snapshot by ID or name',
