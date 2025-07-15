@@ -96,13 +96,14 @@ DAYTONA_TARGET=us
 - `DAYTONA_API_URL`: URL of your Daytona API.
 - `DAYTONA_TARGET`: Daytona Target to create the Sandboxes on.
 
+## Default Values
 
+If no configuration is provided, Daytona SDK will use its built-in defaults:
 
 ## Configuration Precedence
 
 The SDK uses the following precedence order for configuration (highest to lowest):
-
-1. Explicitly passed configuration in code.
-2. Environment variables.
-3. Configuration file.
-4. Default values.
+| Option    | Default Value                   |
+|-----------|---------------------------------|
+| API URL   | https://app.daytona.io/api      |
+| Target    | us                              |
