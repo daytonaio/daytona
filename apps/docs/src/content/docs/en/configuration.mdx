@@ -62,6 +62,22 @@ Daytona SDK supports environment variables for configuration. The SDK automatica
 ### Setting Environment Variables
 
 Daytona SDK can read configuration from environment variables. You can set these environment variables using the following methods:
+<Tabs>
+  <TabItem label="Bash/Zsh" icon="seti:shell">
+    ```bash
+    export DAYTONA_API_KEY=your-api-key
+    export DAYTONA_API_URL=https://your-api-url
+    export DAYTONA_TARGET=us
+    ```
+  </TabItem>
+  <TabItem label="Windows PowerShell" icon="seti:powershell">
+    ```bash 
+    $env:DAYTONA_API_KEY="your-api-key"
+    $env:DAYTONA_API_URL="https://your-api-url"
+    $env:DAYTONA_TARGET="us"
+    ```
+  </TabItem>
+</Tabs>
 
 - [Using a **`.env`** file](#using-a-env-file)
 - [Using Shell Environment](#using-shell-environment)
@@ -80,24 +96,7 @@ DAYTONA_TARGET=us
 - `DAYTONA_API_URL`: URL of your Daytona API.
 - `DAYTONA_TARGET`: Daytona Target to create the Sandboxes on.
 
-#### Using Shell Environment
 
-Set environment variables in your shell:
-
-<Tabs>
-<TabItem label="Bash/Zsh" icon="seti:shell">
-```bash
-export DAYTONA_API_KEY=your-api-key
-export DAYTONA_API_URL=https://your-api-url
-```
-</TabItem>
-<TabItem label="Windows PowerShell" icon="seti:powershell">
-```bash
-$env:DAYTONA_API_KEY="your-api-key"
-$env:DAYTONA_API_URL="https://your-api-url"
-```
-</TabItem>
-</Tabs>
 
 ## Configuration Precedence
 
