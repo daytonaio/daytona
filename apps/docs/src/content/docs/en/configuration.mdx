@@ -6,6 +6,15 @@ import { TabItem, Tabs } from '@astrojs/starlight/components'
 
 ## Configuration Options
 
+Daytona SDK supports multiple ways to configure your environment, in order of precedence:
+
+1. [**Configuration in code**](#configuration-in-code)
+2. [**Environment variables**](#environment-variables)
+3. [**.env file**](#env-file)
+4. [**Default values**](#default-values)
+
+## Configuration in Code
+
 Daytona SDK provides an option to configure settings using the `DaytonaConfig` class in Python and TypeScript. The `DaytonaConfig` class accepts the following parameters:
 
 - `api_key`: Your Daytona [API Key](/docs/api-keys)
@@ -49,9 +58,8 @@ Daytona SDK supports environment variables for configuration. The SDK automatica
 | **`DAYTONA_API_URL`** | URL of your Daytona API.                   | Yes      |
 | **`DAYTONA_TARGET`**  | Daytona Target to create the Sandboxes on. | Yes      |
 
-### Setting Environment Variables
+Set environment variables in your shell:
 
-Daytona SDK can read configuration from environment variables. You can set these environment variables using the following methods:
 <Tabs>
   <TabItem label="Bash/Zsh" icon="seti:shell">
     ```bash
@@ -69,10 +77,9 @@ Daytona SDK can read configuration from environment variables. You can set these
   </TabItem>
 </Tabs>
 
-- [Using a **`.env`** file](#using-a-env-file)
-- [Using Shell Environment](#using-shell-environment)
+You can also set these environment variables in a `.env` file.
 
-#### Using a **`.env`** File
+## .env File
 
 Create a `.env` file in your project root directory:
 
@@ -87,9 +94,6 @@ DAYTONA_TARGET=us
 
 If no configuration is provided, Daytona SDK will use its built-in defaults:
 
-## Configuration Precedence
-
-The SDK uses the following precedence order for configuration (highest to lowest):
 | Option    | Default Value                   |
 |-----------|---------------------------------|
 | API URL   | https://app.daytona.io/api      |
