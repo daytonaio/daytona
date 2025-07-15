@@ -153,6 +153,7 @@ export class DockerProvider implements OnModuleInit {
       // Remove Volumes configuration since we're using direct binding
       Env: ['DAYTONA_SANDBOX_ID=init-image', 'DAYTONA_SANDBOX_USER=root', `DAYTONA_SANDBOX_SNAPSHOT=${imageName}`],
       Entrypoint: entrypoint,
+      platform: 'linux/amd64', // Force AMD64 architecture
       HostConfig: {
         Binds: [
           //  `${dirPath}:${osHome}/project`,  // Direct path binding
