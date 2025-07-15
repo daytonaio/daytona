@@ -71,3 +71,24 @@ export function capitalize(value: string) {
 export function getMaskedApiKey(key: string) {
   return `${key.substring(0, 3)}********************${key.slice(-3)}`
 }
+
+export function formatDuration(minutes: number): string {
+  minutes = Math.abs(minutes)
+
+  if (minutes < 60) {
+    return `${Math.floor(minutes)}m`
+  }
+
+  const hours = minutes / 60
+  if (hours < 24) {
+    return `${Math.floor(hours)}h`
+  }
+
+  const days = hours / 24
+  if (days < 365) {
+    return `${Math.floor(days)}d`
+  }
+
+  const years = days / 365
+  return `${Math.floor(years)}y`
+}
