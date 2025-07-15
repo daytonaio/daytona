@@ -108,6 +108,7 @@ class CreateSandboxBaseParams(BaseModel):
         auto_delete_interval (Optional[int]): Interval in minutes after which a continuously stopped Sandbox will
             automatically be deleted. By default, auto-delete is disabled.
             Negative value means disabled, 0 means delete immediately upon stopping.
+        volumes (Optional[List[VolumeMount]]): List of volumes mounts to attach to the Sandbox.
     """
 
     language: Optional[CodeLanguage] = None
