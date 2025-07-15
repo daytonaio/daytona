@@ -28,18 +28,18 @@ sandbox.git.clone(
 # Clone with authentication
 
 sandbox.git.clone(
-url="<https://github.com/user/repo.git>",
-path="workspace/repo",
-username="git",
-password="personal_access_token"
+    url="https://github.com/user/repo.git",
+    path="workspace/repo",
+    username="git",
+    password="personal_access_token"
 )
 
 # Clone specific branch
 
 sandbox.git.clone(
-url="<https://github.com/user/repo.git>",
-path="workspace/repo",
-branch="develop"
+    url="https://github.com/user/repo.git",
+    path="workspace/repo",
+    branch="develop"
 )
 
 ```
@@ -92,7 +92,7 @@ for file in status.file_status:
 
 response = sandbox.git.branches("workspace/repo")
 for branch in response.branches:
-print(f"Branch: {branch}")
+    print(f"Branch: {branch}")
 
 ```
 </TabItem>
@@ -103,7 +103,7 @@ const status = await sandbox.git.status("workspace/repo");
 console.log(`Current branch: ${status.currentBranch}`);
 console.log(`Commits ahead: ${status.ahead}`);
 console.log(`Commits behind: ${status.behind}`);
-status['FileStatus[]'].forEach(file => {
+status.fileStatus.forEach(file => {
     console.log(`File: ${file.name}`);
 });
 
@@ -133,7 +133,7 @@ sandbox.git.create_branch("workspace/repo", "feature/new-feature")
 
 # Switch branch
 
-sandbox.git.checkout("workspace/repo", "feature/new-feature")
+sandbox.git.checkout_branch("workspace/repo", "feature/new-feature")
 
 # Delete branch
 
@@ -147,7 +147,7 @@ sandbox.git.delete_branch("workspace/repo", "feature/old-feature")
 await sandbox.git.createBranch("workspace/repo", "feature/new-feature");
 
 // Switch branch
-await sandbox.git.checkout("workspace/repo", "feature/new-feature");
+await sandbox.git.checkoutBranch("workspace/repo", "feature/new-feature");
 
 // Delete branch
 await sandbox.git.deleteBranch("workspace/repo", "feature/old-feature");
@@ -174,15 +174,7 @@ sandbox.git.add("workspace/repo", ["."])
 
 # Commit changes
 
-sandbox.git.commit("workspace/repo", "feat: add new feature")
-
-# Get commit history
-
-commits = sandbox.git.log("workspace/repo")
-for commit in commits:
-print(f"Commit: {commit.hash}")
-print(f"Author: {commit.author}")
-print(f"Message: {commit.message}")
+sandbox.git.commit("workspace/repo", "feat: add new feature", "John Doe", "john@example.com")
 
 ```
 </TabItem>
@@ -195,15 +187,7 @@ await sandbox.git.add("workspace/repo", ["file1.txt", "file2.txt"]);
 await sandbox.git.add("workspace/repo", ["."]);
 
 // Commit changes
-await sandbox.git.commit("workspace/repo", "feat: add new feature");
-
-// Get commit history
-const commits = await sandbox.git.log("workspace/repo");
-commits.forEach(commit => {
-    console.log(`Commit: ${commit.hash}`);
-    console.log(`Author: ${commit.author}`);
-    console.log(`Message: ${commit.message}`);
-});
+await sandbox.git.commit("workspace/repo", "feat: add new feature", "John Doe", "john@example.com");
 ```
 
 </TabItem>
@@ -227,12 +211,6 @@ sandbox.git.push("workspace/repo")
 
 sandbox.git.pull("workspace/repo")
 
-# List remotes
-
-remotes = sandbox.git.list_remotes("workspace/repo")
-for remote in remotes:
-print(f"Remote: {remote.name} URL: {remote.url}")
-
 ```
 </TabItem>
 <TabItem label="TypeScript" icon="seti:typescript">
@@ -240,14 +218,8 @@ print(f"Remote: {remote.name} URL: {remote.url}")
 // Push changes
 await sandbox.git.push("workspace/repo");
 
-// Push to specific remote and branch
-await sandbox.git.push("workspace/repo", "origin", "feature/new-feature");
-
 // Pull changes
 await sandbox.git.pull("workspace/repo");
-
-// Pull from specific remote and branch
-await sandbox.git.pull("workspace/repo", "origin", "main");
 ```
 
 </TabItem>

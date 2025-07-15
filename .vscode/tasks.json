@@ -4,7 +4,7 @@
     {
       "label": "debug-build-runner",
       "type": "shell",
-      "command": "yarn nx build runner",
+      "command": "yarn nx build runner --output-style=stream",
       "group": {
         "kind": "build",
         "isDefault": true

@@ -14,16 +14,16 @@ The volume data is stored on the S3 compatible object store. Multiple volumes ca
 In order to mount a volume to a Sandbox, one must be created.
 
 <Tabs>
-  <TabItem label="Python" icon="seti:python">
-    ```bash
-    volume = daytona.volume.get("my-volume", create=True)
-    ```
-  </TabItem>
-  <TabItem label="TypeScript" icon="seti:typescript">
-    ```bash
-    const volume = await daytona.volume.get('my-volume', true)
-    ```
-  </TabItem>
+<TabItem label="Python" icon="seti:python">
+```bash
+volume = daytona.volume.get("my-volume", create=True)
+```
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+```bash
+const volume = await daytona.volume.get('my-volume', true)
+```
+</TabItem>
 </Tabs>
 
 ## Mounting Volumes to Sandboxes
@@ -47,8 +47,8 @@ volume = daytona.volume.get("my-volume", create=True)
 mount_dir_1 = "/home/daytona/volume"
 
 params = CreateSandboxFromSnapshotParams(
-language="python",
-volumes=[VolumeMount(volumeId=volume.id, mountPath=mount_dir_1)],
+    language="python",
+    volumes=[VolumeMount(volumeId=volume.id, mountPath=mount_dir_1)],
 )
 sandbox = daytona.create(params)
 
@@ -97,18 +97,18 @@ main()
 When a volume is no longer needed, it can be removed.
 
 <Tabs>
-  <TabItem label="Python" icon="seti:python">
-    ```python
-    volume = daytona.volume.get("my-volume", create=True)
-    daytona.volume.delete(volume)
-    ```
-  </TabItem>
-  <TabItem label="TypeScript" icon="seti:typescript">
-    ```typescript
-    const volume = await daytona.volume.get('my-volume', true)
-    await daytona.volume.delete(volume)
-    ```
-  </TabItem>
+<TabItem label="Python" icon="seti:python">
+```python
+volume = daytona.volume.get("my-volume", create=True)
+daytona.volume.delete(volume)
+```
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+```typescript
+const volume = await daytona.volume.get('my-volume', true)
+await daytona.volume.delete(volume)
+```
+</TabItem>
 </Tabs>
 
 ## Working with Volumes
