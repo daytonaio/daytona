@@ -22,7 +22,7 @@ import { SandboxState } from '../../sandbox/enums/sandbox-state.enum'
 import { EventEmitter2 } from '@nestjs/event-emitter'
 import { OrganizationEvents } from '../constants/organization-events.constant'
 import { CreateOrganizationQuotaDto } from '../dto/create-organization-quota.dto'
-import { DEFAULT_ORGANIZATION_QUOTA } from '../../common/constants/default-organization-quota'
+import { DEFAULT_ORGANIZATION_QUOTA } from '../../common/constants/organization-defaults'
 import { ConfigService } from '@nestjs/config'
 import { UserEmailVerifiedEvent } from '../../user/events/user-email-verified.event'
 import { Volume } from '../../sandbox/entities/volume.entity'
@@ -35,6 +35,7 @@ import { SandboxDesiredState } from '../../sandbox/enums/sandbox-desired-state.e
 import { SnapshotRunner } from '../../sandbox/entities/snapshot-runner.entity'
 import { OrganizationSuspendedSnapshotRunnerRemovedEvent } from '../events/organization-suspended-snapshot-runner-removed'
 import { SystemRole } from '../../user/enums/system-role.enum'
+import { SnapshotState } from '../../sandbox/enums/snapshot-state.enum'
 
 @Injectable()
 export class OrganizationService implements OnModuleInit {
@@ -58,7 +59,7 @@ export class OrganizationService implements OnModuleInit {
   ) {}
 
   async onModuleInit(): Promise<void> {
-    await this.stopSuspendedOrganizationSandboxes()
+    await this.deactivateSuspendedOrganizationResources()
   }
 
   async create(
@@ -302,7 +303,7 @@ export class OrganizationService implements OnModuleInit {
   }
 
   @Cron(CronExpression.EVERY_10_MINUTES, { name: 'stop-suspended-organization-sandboxes' })
-  async stopSuspendedOrganizationSandboxes(): Promise<void> {
+  async deactivateSuspendedOrganizationResources(): Promise<void> {
     //  lock the sync to only run one instance at a time
     const lockKey = 'stop-suspended-organization-sandboxes'
     if (!(await this.redisLockProvider.lock(lockKey, 60))) {
@@ -339,6 +340,16 @@ export class OrganizationService implements OnModuleInit {
       ),
     )
 
+    // Set all snapshots to deactivated
+    await this.snapshotRepository.update(
+      {
+        organizationId: In(suspendedOrganizationIds),
+        general: Not(true),
+        state: Not(SnapshotState.ERROR),
+      },
+      { state: SnapshotState.INACTIVE },
+    )
+
     await this.redis.del(lockKey)
   }
 
@@ -365,7 +376,7 @@ export class OrganizationService implements OnModuleInit {
 
     const snapshotRunners = await this.snapshotRunnerRepository
       .createQueryBuilder('snapshotRunner')
-      .innerJoin('snapshot', 'snapshot', 'snapshot.internalName = snapshotRunner.snapshotRef')
+      .innerJoin('snapshot', 'snapshot', 'snapshot.ref = snapshotRunner.snapshotRef')
       .where('snapshot.general = false')
       .andWhere('snapshot.organizationId IN (:...suspendedOrgIds)', { suspendedOrgIds: suspendedOrganizationIds })
       .orderBy('snapshotRunner.createdAt', 'ASC')

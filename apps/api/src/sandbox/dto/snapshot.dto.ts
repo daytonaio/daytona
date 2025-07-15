@@ -7,6 +7,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import { SnapshotState } from '../enums/snapshot-state.enum'
 import { Snapshot } from '../entities/snapshot.entity'
 import { BuildInfoDto } from './build-info.dto'
+import { SnapshotTargetPropagationDto } from './snapshot-target-propagation.dto'
 
 export class SnapshotDto {
   @ApiProperty()
@@ -69,6 +70,12 @@ export class SnapshotDto {
   })
   buildInfo?: BuildInfoDto
 
+  @ApiProperty({
+    description: 'Target propagations for the snapshot',
+    type: [SnapshotTargetPropagationDto],
+  })
+  targetPropagations: SnapshotTargetPropagationDto[]
+
   static fromSnapshot(snapshot: Snapshot): SnapshotDto {
     return {
       id: snapshot.id,
@@ -96,6 +103,17 @@ export class SnapshotDto {
             updatedAt: snapshot.buildInfo.updatedAt,
           }
         : undefined,
+      targetPropagations: snapshot.targetPropagations?.map((propagation) => {
+        return {
+          id: propagation.id,
+          target: propagation.target,
+          desiredConcurrentSandboxes: propagation.desiredConcurrentSandboxes,
+          userOverride: propagation.userOverride,
+          snapshotId: propagation.snapshotId,
+          createdAt: propagation.createdAt,
+          updatedAt: propagation.updatedAt,
+        }
+      }),
     }
   }
 }

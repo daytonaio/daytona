@@ -23,6 +23,7 @@ from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictFloat, Stri
 from typing import Any, ClassVar, Dict, List, Optional, Union
 from daytona_api_client.models.build_info import BuildInfo
 from daytona_api_client.models.snapshot_state import SnapshotState
+from daytona_api_client.models.snapshot_target_propagation_dto import SnapshotTargetPropagationDto
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -48,8 +49,9 @@ class SnapshotDto(BaseModel):
     updated_at: datetime = Field(alias="updatedAt")
     last_used_at: Optional[datetime] = Field(alias="lastUsedAt")
     build_info: Optional[BuildInfo] = Field(default=None, description="Build information for the snapshot", alias="buildInfo")
+    target_propagations: List[SnapshotTargetPropagationDto] = Field(description="Target propagations for the snapshot", alias="targetPropagations")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["id", "organizationId", "general", "name", "imageName", "enabled", "state", "size", "entrypoint", "cpu", "gpu", "mem", "disk", "errorReason", "createdAt", "updatedAt", "lastUsedAt", "buildInfo"]
+    __properties: ClassVar[List[str]] = ["id", "organizationId", "general", "name", "imageName", "enabled", "state", "size", "entrypoint", "cpu", "gpu", "mem", "disk", "errorReason", "createdAt", "updatedAt", "lastUsedAt", "buildInfo", "targetPropagations"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -95,6 +97,13 @@ class SnapshotDto(BaseModel):
         # override the default output from pydantic by calling `to_dict()` of build_info
         if self.build_info:
             _dict['buildInfo'] = self.build_info.to_dict()
+        # override the default output from pydantic by calling `to_dict()` of each item in target_propagations (list)
+        _items = []
+        if self.target_propagations:
+            for _item_target_propagations in self.target_propagations:
+                if _item_target_propagations:
+                    _items.append(_item_target_propagations.to_dict())
+            _dict['targetPropagations'] = _items
         # puts key-value pairs in additional_properties in the top level
         if self.additional_properties is not None:
             for _key, _value in self.additional_properties.items():
@@ -149,7 +158,8 @@ class SnapshotDto(BaseModel):
             "createdAt": obj.get("createdAt"),
             "updatedAt": obj.get("updatedAt"),
             "lastUsedAt": obj.get("lastUsedAt"),
-            "buildInfo": BuildInfo.from_dict(obj["buildInfo"]) if obj.get("buildInfo") is not None else None
+            "buildInfo": BuildInfo.from_dict(obj["buildInfo"]) if obj.get("buildInfo") is not None else None,
+            "targetPropagations": [SnapshotTargetPropagationDto.from_dict(_item) for _item in obj["targetPropagations"]] if obj.get("targetPropagations") is not None else None
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

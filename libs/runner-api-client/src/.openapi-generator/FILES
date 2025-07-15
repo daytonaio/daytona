@@ -23,3 +23,4 @@ models/registry-dto.ts
 models/resize-sandbox-dto.ts
 models/sandbox-info-response.ts
 models/snapshot-exists-response.ts
+models/snapshot-info-response.ts

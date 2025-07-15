@@ -5,7 +5,7 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { useApi } from '@/hooks/useApi'
-import { Plus } from 'lucide-react'
+import { Plus, X } from 'lucide-react'
 import {
   SnapshotDto,
   SnapshotState,
@@ -31,6 +31,7 @@ import { useNotificationSocket } from '@/hooks/useNotificationSocket'
 import { Label } from '@/components/ui/label'
 import { handleApiError } from '@/lib/error-handling'
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
+import { Slider } from '@/components/ui/slider'
 
 const IMAGE_NAME_REGEX = /^[a-zA-Z0-9.\-:]+(\/[a-zA-Z0-9.\-:]+)*$/
 
@@ -56,6 +57,15 @@ const Snapshots: React.FC = () => {
   const [cpu, setCpu] = useState<number | undefined>(undefined)
   const [memory, setMemory] = useState<number | undefined>(undefined)
   const [disk, setDisk] = useState<number | undefined>(undefined)
+  const [targetPropagations, setTargetPropagations] = useState<Array<{ target: string; userOverride: number }>>([])
+  const [newTarget, setNewTarget] = useState('')
+  const [snapshotToEditTargets, setSnapshotToEditTargets] = useState<SnapshotDto | null>(null)
+  const [showTargetsDialog, setShowTargetsDialog] = useState(false)
+  const [editingTargetPropagations, setEditingTargetPropagations] = useState<
+    Array<{ target: string; userOverride: number }>
+  >([])
+  const [editingNewTarget, setEditingNewTarget] = useState('')
+  const [loadingTargetUpdate, setLoadingTargetUpdate] = useState(false)
 
   const { selectedOrganization, authenticatedUserHasPermission } = useSelectedOrganization()
 
@@ -238,8 +248,12 @@ const Snapshots: React.FC = () => {
       )
       setShowCreateDialog(false)
       setNewSnapshotName('')
-      setNewImageName('') // Add this line to clear the image name
+      setNewImageName('')
       setNewEntrypoint('')
+      setCpu(undefined)
+      setMemory(undefined)
+      setDisk(undefined)
+      setTargetPropagations([])
       toast.success(`Creating snapshot ${newSnapshotName}`)
 
       if (paginationParams.pageIndex !== 0) {
@@ -253,6 +267,26 @@ const Snapshots: React.FC = () => {
     } finally {
       setLoadingCreate(false)
     }
+  }
+
+  const addTargetPropagation = () => {
+    if (!newTarget.trim()) return
+
+    if (targetPropagations.some((tp) => tp.target === newTarget.trim())) {
+      toast.warning('Target already added')
+      return
+    }
+
+    setTargetPropagations([...targetPropagations, { target: newTarget.trim(), userOverride: 1 }])
+    setNewTarget('')
+  }
+
+  const removeTargetPropagation = (target: string) => {
+    setTargetPropagations(targetPropagations.filter((tp) => tp.target !== target))
+  }
+
+  const updateTargetConcurrency = (target: string, value: number) => {
+    setTargetPropagations(targetPropagations.map((tp) => (tp.target === target ? { ...tp, userOverride: value } : tp)))
   }
 
   const handleDelete = async (snapshot: SnapshotDto) => {
@@ -369,6 +403,83 @@ const Snapshots: React.FC = () => {
     }
   }
 
+  const handleEditTargets = (snapshot: SnapshotDto) => {
+    setSnapshotToEditTargets(snapshot)
+    setEditingTargetPropagations(snapshot.targetPropagations || [])
+    setShowTargetsDialog(true)
+  }
+
+  const addEditingTargetPropagation = () => {
+    if (!editingNewTarget.trim()) return
+
+    if (editingTargetPropagations.some((tp) => tp.target === editingNewTarget.trim())) {
+      toast.warning('Target already added')
+      return
+    }
+
+    setEditingTargetPropagations([...editingTargetPropagations, { target: editingNewTarget.trim(), userOverride: 1 }])
+    setEditingNewTarget('')
+  }
+
+  const removeEditingTargetPropagation = (target: string) => {
+    setEditingTargetPropagations(editingTargetPropagations.filter((tp) => tp.target !== target))
+  }
+
+  const updateEditingTargetConcurrency = (target: string, value: number) => {
+    setEditingTargetPropagations(
+      editingTargetPropagations.map((tp) => (tp.target === target ? { ...tp, userOverride: value } : tp)),
+    )
+  }
+
+  const handleUpdateTargets = async () => {
+    if (!snapshotToEditTargets) return
+
+    setLoadingTargetUpdate(true)
+    try {
+      await snapshotApi.setSnapshotTargetPropagations(
+        snapshotToEditTargets.id,
+        {
+          targetPropagations: editingTargetPropagations,
+        },
+        selectedOrganization?.id,
+      )
+      setShowTargetsDialog(false)
+      toast.success(`Updated targets for snapshot ${snapshotToEditTargets.name}`)
+
+      // Update the snapshot in the local state
+      setSnapshotsData((prev) => {
+        const updatedItems = prev.items.map((i) => {
+          if (i.id === snapshotToEditTargets.id) {
+            // Create a new snapshot object with the updated targetPropagations
+            return {
+              ...i,
+              targetPropagations: editingTargetPropagations.map((tp) => ({
+                ...tp,
+                id: i.targetPropagations?.find((existing) => existing.target === tp.target)?.id || '',
+                desiredConcurrentSandboxes:
+                  i.targetPropagations?.find((existing) => existing.target === tp.target)?.desiredConcurrentSandboxes ||
+                  0,
+                snapshotId: i.id,
+                createdAt: new Date(),
+                updatedAt: new Date(),
+              })),
+            }
+          }
+          return i
+        })
+
+        return {
+          ...prev,
+          items: updatedItems,
+        }
+      })
+    } catch (error) {
+      handleApiError(error, 'Failed to update snapshot targets')
+    } finally {
+      setLoadingTargetUpdate(false)
+    }
+  }
+
   return (
     <div className="px-6 py-2">
       <Dialog
@@ -384,6 +495,7 @@ const Snapshots: React.FC = () => {
           setCpu(undefined)
           setMemory(undefined)
           setDisk(undefined)
+          setTargetPropagations([])
         }}
       >
         <div className="mb-2 h-12 flex items-center justify-between">
@@ -542,6 +654,7 @@ const Snapshots: React.FC = () => {
           onBulkDelete={handleBulkDelete}
           onToggleEnabled={handleToggleEnabled}
           onActivate={handleActivate}
+          onEditTargets={handleEditTargets}
           pageCount={snapshotsData.totalPages}
           onPaginationChange={handlePaginationChange}
           pagination={{
@@ -581,6 +694,107 @@ const Snapshots: React.FC = () => {
               >
                 {loadingSnapshots[snapshotToDelete.id] ? 'Deleting...' : 'Delete'}
               </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {snapshotToEditTargets && (
+        <Dialog
+          open={showTargetsDialog}
+          onOpenChange={(isOpen) => {
+            setShowTargetsDialog(isOpen)
+            if (!isOpen) {
+              setSnapshotToEditTargets(null)
+            }
+          }}
+        >
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Edit Targets for Snapshot - {snapshotToEditTargets.name} </DialogTitle>
+              <DialogDescription>Update the distribution per target settings for the snapshot.</DialogDescription>
+            </DialogHeader>
+            <form
+              id="edit-targets-form"
+              className="space-y-6 overflow-y-auto px-1 pb-1"
+              onSubmit={async (e) => {
+                e.preventDefault()
+                await handleUpdateTargets()
+              }}
+            >
+              <div className="space-y-4">
+                <h3 className="text-sm font-medium">Distribution per Target</h3>
+                <p className="text-sm text-muted-foreground mt-1 pl-1">
+                  Specify targets and the desired number of concurrent sandboxes for each target.
+                </p>
+                <div className="flex items-center gap-2">
+                  <Input
+                    value={editingNewTarget}
+                    onChange={(e) => setEditingNewTarget(e.target.value)}
+                    placeholder="Target environment (e.g., eu, us, asia)"
+                    className="flex-grow"
+                  />
+                  <Button
+                    type="button"
+                    onClick={addEditingTargetPropagation}
+                    disabled={!editingNewTarget.trim()}
+                    variant="outline"
+                  >
+                    Add
+                  </Button>
+                </div>
+
+                {editingTargetPropagations.length > 0 && (
+                  <div className="space-y-3 mt-2">
+                    {editingTargetPropagations.map((tp) => (
+                      <div key={tp.target} className="border rounded-md p-3 space-y-2">
+                        <div className="flex justify-between items-center">
+                          <span className="font-medium">{tp.target}</span>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeEditingTargetPropagation(tp.target)}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                        <div className="grid grid-cols-[auto_1fr] gap-4 items-center">
+                          <span className="text-sm text-muted-foreground whitespace-nowrap">
+                            Desired Concurrent Sandboxes:
+                          </span>
+                          <div className="flex flex-col">
+                            <span className="text-right font-medium">{tp.userOverride}</span>
+                            <Slider
+                              value={[tp.userOverride]}
+                              min={0}
+                              max={100}
+                              step={1}
+                              onValueChange={(value) => updateEditingTargetConcurrency(tp.target, value[0])}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </form>
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button type="button" variant="secondary">
+                  Cancel
+                </Button>
+              </DialogClose>
+              {loadingTargetUpdate ? (
+                <Button type="button" variant="default" disabled>
+                  Updating...
+                </Button>
+              ) : (
+                <Button type="submit" form="edit-targets-form" variant="default">
+                  Update
+                </Button>
+              )}
             </DialogFooter>
           </DialogContent>
         </Dialog>

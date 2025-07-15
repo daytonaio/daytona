@@ -23,7 +23,6 @@ import { Snapshot } from './entities/snapshot.entity'
 import { SnapshotController } from './controllers/snapshot.controller'
 import { SnapshotService } from './services/snapshot.service'
 import { SnapshotManager } from './managers/snapshot.manager'
-import { DockerProvider } from './docker/docker-provider'
 import { SnapshotRunner } from './entities/snapshot-runner.entity'
 import { DockerRegistry } from '../docker-registry/entities/docker-registry.entity'
 import { SandboxSubscriber } from './subscribers/sandbox.subscriber'
@@ -42,6 +41,7 @@ import { BackupManager } from './managers/backup.manager'
 import { VolumeSubscriber } from './subscribers/volume.subscriber'
 import { WorkspaceController } from './controllers/workspace.deprecated.controller'
 import { SnapshotRunnerService } from './services/snapshot-runner.service'
+import { SnapshotTargetPropagation } from './entities/snapshot-target-propagation.entity'
 
 @Module({
   imports: [
@@ -49,7 +49,17 @@ import { SnapshotRunnerService } from './services/snapshot-runner.service'
     AuthModule,
     DockerRegistryModule,
     OrganizationModule,
-    TypeOrmModule.forFeature([Sandbox, Runner, Snapshot, BuildInfo, SnapshotRunner, DockerRegistry, WarmPool, Volume]),
+    TypeOrmModule.forFeature([
+      Sandbox,
+      Runner,
+      Snapshot,
+      BuildInfo,
+      SnapshotRunner,
+      DockerRegistry,
+      WarmPool,
+      Volume,
+      SnapshotTargetPropagation,
+    ]),
   ],
   controllers: [
     SandboxController,
@@ -70,7 +80,6 @@ import { SnapshotRunnerService } from './services/snapshot-runner.service'
     ToolboxService,
     SnapshotService,
     SnapshotManager,
-    DockerProvider,
     SandboxSubscriber,
     RedisLockProvider,
     SnapshotSubscriber,

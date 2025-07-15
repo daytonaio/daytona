@@ -25,8 +25,14 @@ import { OrganizationService } from '../../organization/services/organization.se
 import { SnapshotRunner } from '../entities/snapshot-runner.entity'
 import { Sandbox } from '../entities/sandbox.entity'
 import { SandboxState } from '../enums/sandbox-state.enum'
+import { SnapshotTargetPropagation } from '../entities/snapshot-target-propagation.entity'
+import { SetSnapshotTargetPropagationsDto } from '../dto/update-snapshot.dto'
 
 const IMAGE_NAME_REGEX = /^[a-zA-Z0-9.\-:]+(\/[a-zA-Z0-9.\-:]+)*$/
+const BASE_PROPAGATION_PERCENTAGE = 0.6
+const MINIMUM_PROPAGATION_COUNT = 10
+const DEFAULT_TARGETS = ['us', 'eu']
+
 @Injectable()
 export class SnapshotService {
   constructor(
@@ -36,6 +42,8 @@ export class SnapshotService {
     private readonly snapshotRepository: Repository<Snapshot>,
     @InjectRepository(BuildInfo)
     private readonly buildInfoRepository: Repository<BuildInfo>,
+    @InjectRepository(SnapshotTargetPropagation)
+    private readonly snapshotTargetPropagationRepository: Repository<SnapshotTargetPropagation>,
     @InjectRepository(SnapshotRunner)
     private readonly snapshotRunnerRepository: Repository<SnapshotRunner>,
     private readonly organizationService: OrganizationService,
@@ -96,14 +104,42 @@ export class SnapshotService {
       createSnapshotDto.disk,
     )
 
+    if (createSnapshotDto.targetPropagations) {
+      for (const targetPropagation of createSnapshotDto.targetPropagations) {
+        if (targetPropagation.userOverride < 0) {
+          throw new BadRequestException('User minimum cannot be negative')
+        }
+      }
+    }
+
     try {
-      const snapshot = this.snapshotRepository.create({
-        organizationId: organization.id,
-        ...createSnapshotDto,
-        mem: createSnapshotDto.memory, // Map memory to mem
-        state: createSnapshotDto.buildInfo ? SnapshotState.BUILD_PENDING : SnapshotState.PENDING,
-        general,
-      })
+      const snapshot = new Snapshot()
+      snapshot.organizationId = organization.id
+      snapshot.cpu = createSnapshotDto.cpu
+      snapshot.gpu = createSnapshotDto.gpu
+      snapshot.mem = createSnapshotDto.memory
+      snapshot.disk = createSnapshotDto.disk
+      snapshot.general = general
+      snapshot.name = createSnapshotDto.name
+      snapshot.imageName = createSnapshotDto.imageName
+      snapshot.entrypoint = createSnapshotDto.entrypoint
+      snapshot.state = SnapshotState.PENDING
+
+      let targetPropagations: SnapshotTargetPropagation[] = []
+
+      if (createSnapshotDto.targetPropagations) {
+        for (const targetPropagation of createSnapshotDto.targetPropagations) {
+          const propagation = new SnapshotTargetPropagation()
+          propagation.target = targetPropagation.target
+          propagation.desiredConcurrentSandboxes = this.getDefaultDesiredConcurrentSandboxes(organization, snapshot)
+          propagation.userOverride = targetPropagation.userOverride
+          propagation.snapshot = snapshot
+          targetPropagations.push(propagation)
+        }
+      } else {
+        targetPropagations = this.getDefaultTargetPropagations(organization, snapshot)
+      }
+      snapshot.targetPropagations = targetPropagations
 
       if (createSnapshotDto.buildInfo) {
         const buildSnapshotRef = generateBuildSnapshotRef(
@@ -299,7 +335,7 @@ export class SnapshotService {
     const snapshot = await this.snapshotRepository.findOne({
       where: {
         state: Not(In([SnapshotState.ERROR, SnapshotState.BUILD_FAILED])),
-        internalName: imageName,
+        ref: imageName,
       },
     })
 
@@ -326,5 +362,94 @@ export class SnapshotService {
     }
 
     return true
+  }
+
+  async setSnapshotTargetPropagations(
+    snapshotId: string,
+    setSnapshotTargetPropagationsDto: SetSnapshotTargetPropagationsDto,
+    organization: Organization,
+  ): Promise<Snapshot> {
+    const snapshot = await this.snapshotRepository.findOne({
+      where: { id: snapshotId },
+    })
+
+    if (!snapshot) {
+      throw new NotFoundException(`Snapshot ${snapshotId} not found`)
+    }
+
+    await this.organizationService.assertOrganizationIsNotSuspended(organization)
+
+    for (const targetPropagation of setSnapshotTargetPropagationsDto.targetPropagations) {
+      if (targetPropagation.userOverride < 0) {
+        throw new BadRequestException('Concurrent sandbox minimum must be non-negative')
+      }
+    }
+
+    const existingTargetPropagations = await this.snapshotTargetPropagationRepository.find({
+      where: { snapshotId },
+    })
+
+    // Create a map of existing propagations by target for easy lookup
+    const existingPropagationsMap = new Map(existingTargetPropagations.map((prop) => [prop.target, prop]))
+
+    for (const newProp of setSnapshotTargetPropagationsDto.targetPropagations) {
+      const existing = existingPropagationsMap.get(newProp.target)
+
+      if (existing) {
+        // Update existing propagation
+        existing.userOverride = newProp.userOverride
+        await this.snapshotTargetPropagationRepository.save(existing)
+        // Remove from map to track which ones need to be deleted
+        existingPropagationsMap.delete(newProp.target)
+      } else {
+        // Create new propagation
+        const newPropagation = this.snapshotTargetPropagationRepository.create({
+          snapshotId,
+          target: newProp.target,
+          userOverride: newProp.userOverride,
+          desiredConcurrentSandboxes: this.getDefaultDesiredConcurrentSandboxes(organization, snapshot),
+        })
+        await this.snapshotTargetPropagationRepository.save(newPropagation)
+      }
+    }
+
+    // Delete propagations that weren't in the update DTO
+    if (existingPropagationsMap.size > 0) {
+      await this.snapshotTargetPropagationRepository.remove(Array.from(existingPropagationsMap.values()))
+    }
+
+    // Refresh snapshot with updated propagations
+    return await this.snapshotRepository.findOne({
+      where: { id: snapshotId },
+      relations: ['targetPropagations'],
+    })
+  }
+
+  private getDefaultTargetPropagations(organization: Organization, snapshot: Snapshot): SnapshotTargetPropagation[] {
+    const targetPropagations: SnapshotTargetPropagation[] = []
+    for (const target of DEFAULT_TARGETS) {
+      const propagation = new SnapshotTargetPropagation()
+      propagation.target = target
+      propagation.desiredConcurrentSandboxes = this.getDefaultDesiredConcurrentSandboxes(organization, snapshot)
+      propagation.userOverride = 0
+      propagation.snapshot = snapshot
+      targetPropagations.push(propagation)
+    }
+    return targetPropagations
+  }
+
+  private getDefaultDesiredConcurrentSandboxes(organization: Organization, snapshot: Snapshot): number {
+    const calculatedValue = this.getMaxDesiredConcurrentSandboxes(organization, snapshot) * BASE_PROPAGATION_PERCENTAGE
+    return Math.max(MINIMUM_PROPAGATION_COUNT, Math.floor(calculatedValue))
+  }
+
+  private getMaxDesiredConcurrentSandboxes(organization: Organization, snapshot: Snapshot): number {
+    const cpuDivision = organization.totalCpuQuota / snapshot.cpu
+    const memoryDivision = organization.totalMemoryQuota / snapshot.mem
+    const diskDivision = organization.totalDiskQuota / snapshot.disk
+
+    const minDivision = Math.min(cpuDivision, memoryDivision, diskDivision)
+
+    return Math.floor(minDivision)
   }
 }

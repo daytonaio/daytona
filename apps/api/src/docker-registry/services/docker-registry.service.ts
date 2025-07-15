@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common'
+import { ForbiddenException, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { In, IsNull, Repository } from 'typeorm'
 import { DockerRegistry } from '../entities/docker-registry.entity'
@@ -16,10 +16,13 @@ import {
   IDockerRegistryProvider,
 } from './../../docker-registry/providers/docker-registry.provider.interface'
 import { RegistryType } from './../../docker-registry/enums/registry-type.enum'
+import axios from 'axios'
 
 @Injectable()
 @ApiOAuth2(['openid', 'profile', 'email'])
 export class DockerRegistryService {
+  private readonly logger = new Logger(DockerRegistryService.name)
+
   constructor(
     @InjectRepository(DockerRegistry)
     private readonly dockerRegistryRepository: Repository<DockerRegistry>,
@@ -250,5 +253,235 @@ export class DockerRegistryService {
     }
 
     return registry.url.startsWith('http') ? registry.url : `https://${registry.url}`
+  }
+
+  /**
+   * Checks if an image exists in the specified registry without pulling it
+   */
+  async checkImageExistsInRegistry(imageName: string, registry: DockerRegistry): Promise<boolean> {
+    try {
+      // extract tag
+      const lastColonIndex = imageName.lastIndexOf(':')
+      const fullPath = imageName.substring(0, lastColonIndex)
+      const tag = imageName.substring(lastColonIndex + 1)
+
+      const registryUrl = this.getRegistryUrl(registry)
+
+      // Remove registry prefix if present in the image name
+      let projectAndRepo = fullPath
+      if (fullPath.startsWith(registryUrl)) {
+        projectAndRepo = fullPath.substring(registryUrl.length + 1) // +1 for the slash
+      }
+
+      // For Harbor format like: harbor.host/bbox-stage/backup-sandbox-75148d5a
+      const parts = projectAndRepo.split('/')
+
+      const apiUrl = `${registryUrl}/v2/${parts[1]}/${parts[2]}/manifests/${tag}`
+      const encodedCredentials = Buffer.from(`${registry.username}:${registry.password}`).toString('base64')
+
+      const response = await axios({
+        method: 'get',
+        url: apiUrl,
+        headers: {
+          Authorization: `Basic ${encodedCredentials}`,
+        },
+        validateStatus: (status) => status < 500,
+        timeout: 30000,
+      })
+
+      if (response.status === 200) {
+        this.logger.debug(`Image ${imageName} exists in registry`)
+        return true
+      }
+
+      this.logger.debug(`Image ${imageName} does not exist in registry (status: ${response.status})`)
+      return false
+    } catch (error) {
+      this.logger.error(`Error checking if image ${imageName} exists in registry: ${error.message}`)
+      return false
+    }
+  }
+
+  private async deleteRepositoryWithPrefix(
+    repository: string,
+    prefix: string,
+    registry: DockerRegistry,
+  ): Promise<void> {
+    const registryUrl = this.getRegistryUrl(registry)
+    const encodedCredentials = Buffer.from(`${registry.username}:${registry.password}`).toString('base64')
+    const repoPath = `${registry.project}/${prefix}${repository}`
+
+    try {
+      // Step 1: List all tags in the repository
+      const tagsUrl = `${registryUrl}/v2/${repoPath}/tags/list`
+
+      const tagsResponse = await axios({
+        method: 'get',
+        url: tagsUrl,
+        headers: {
+          Authorization: `Basic ${encodedCredentials}`,
+        },
+        validateStatus: (status) => status < 500,
+        timeout: 30000,
+      })
+
+      if (tagsResponse.status === 404) {
+        return
+      }
+
+      if (tagsResponse.status >= 300) {
+        this.logger.error(`Error listing tags in repository ${repoPath}: ${tagsResponse.statusText}`)
+        throw new Error(`Failed to list tags in repository ${repoPath}: ${tagsResponse.statusText}`)
+      }
+
+      const tags = tagsResponse.data.tags || []
+
+      if (tags.length === 0) {
+        this.logger.debug(`Repository ${repoPath} has no tags to delete`)
+        return
+      }
+
+      // Step 2: Delete each tag
+      for (const tag of tags) {
+        try {
+          // Get the digest for this tag
+          const manifestUrl = `${registryUrl}/v2/${repoPath}/manifests/${tag}`
+
+          const manifestResponse = await axios({
+            method: 'head',
+            url: manifestUrl,
+            headers: {
+              Authorization: `Basic ${encodedCredentials}`,
+              Accept: 'application/vnd.docker.distribution.manifest.v2+json',
+            },
+            validateStatus: (status) => status < 500,
+            timeout: 30000,
+          })
+
+          if (manifestResponse.status >= 300) {
+            this.logger.warn(`Couldn't get manifest for tag ${tag}: ${manifestResponse.statusText}`)
+            continue
+          }
+
+          const digest = manifestResponse.headers['docker-content-digest']
+          if (!digest) {
+            this.logger.warn(`Docker content digest not found for tag ${tag}`)
+            continue
+          }
+
+          // Delete the manifest
+          const deleteUrl = `${registryUrl}/v2/${repoPath}/manifests/${digest}`
+
+          const deleteResponse = await axios({
+            method: 'delete',
+            url: deleteUrl,
+            headers: {
+              Authorization: `Basic ${encodedCredentials}`,
+            },
+            validateStatus: (status) => status < 500,
+            timeout: 30000,
+          })
+
+          if (deleteResponse.status < 300) {
+            this.logger.debug(`Deleted tag ${tag} from repository ${repoPath}`)
+          } else {
+            this.logger.warn(`Failed to delete tag ${tag}: ${deleteResponse.statusText}`)
+          }
+        } catch (error) {
+          this.logger.warn(`Exception when deleting tag ${tag}: ${error.message}`)
+          // Continue with other tags
+        }
+      }
+
+      this.logger.debug(`Repository ${repoPath} cleanup completed`)
+    } catch (error) {
+      this.logger.error(`Exception when deleting repository ${repoPath}: ${error.message}`)
+      throw error
+    }
+  }
+
+  async deleteSandboxRepository(repository: string, registry: DockerRegistry): Promise<void> {
+    try {
+      // Delete both backup and snapshot repositories - necessary due to renaming
+      await this.deleteRepositoryWithPrefix(repository, 'backup-', registry)
+      await this.deleteRepositoryWithPrefix(repository, 'snapshot-', registry)
+    } catch (error) {
+      this.logger.error(`Failed to delete repositories for ${repository}: ${error.message}`)
+      throw error
+    }
+  }
+
+  async deleteBackupImageFromRegistry(imageName: string, registry: DockerRegistry): Promise<void> {
+    // Extract tag
+    const lastColonIndex = imageName.lastIndexOf(':')
+    const fullPath = imageName.substring(0, lastColonIndex)
+    const tag = imageName.substring(lastColonIndex + 1)
+
+    const registryUrl = this.getRegistryUrl(registry)
+
+    // Remove registry prefix if present in the image name
+    let projectAndRepo = fullPath
+    if (fullPath.startsWith(registryUrl)) {
+      projectAndRepo = fullPath.substring(registryUrl.length + 1) // +1 for the slash
+    }
+
+    // For Harbor format like: harbor.host/bbox-stage/backup-sandbox-75148d5a
+    const parts = projectAndRepo.split('/')
+
+    // Construct repository path (everything after the registry host)
+    const repoPath = parts.slice(1).join('/')
+
+    // First, get the digest for the tag using the manifests endpoint
+    const manifestUrl = `${registryUrl}/v2/${repoPath}/manifests/${tag}`
+    const encodedCredentials = Buffer.from(`${registry.username}:${registry.password}`).toString('base64')
+
+    try {
+      // Get the digest from the headers
+      const manifestResponse = await axios({
+        method: 'head', // Using HEAD request to only fetch headers
+        url: manifestUrl,
+        headers: {
+          Authorization: `Basic ${encodedCredentials}`,
+          Accept: 'application/vnd.docker.distribution.manifest.v2+json',
+        },
+        validateStatus: (status) => status < 500,
+        timeout: 30000,
+      })
+
+      if (manifestResponse.status >= 300) {
+        this.logger.error(`Error getting manifest for image ${imageName}: ${manifestResponse.statusText}`)
+        throw new Error(`Failed to get manifest for image ${imageName}: ${manifestResponse.statusText}`)
+      }
+
+      // Extract the digest from headers
+      const digest = manifestResponse.headers['docker-content-digest']
+      if (!digest) {
+        throw new Error(`Docker content digest not found for image ${imageName}`)
+      }
+
+      // Now delete the image using the digest
+      const deleteUrl = `${registryUrl}/v2/${repoPath}/manifests/${digest}`
+
+      const deleteResponse = await axios({
+        method: 'delete',
+        url: deleteUrl,
+        headers: {
+          Authorization: `Basic ${encodedCredentials}`,
+        },
+        validateStatus: (status) => status < 500,
+        timeout: 30000,
+      })
+
+      if (deleteResponse.status < 300) {
+        this.logger.debug(`Image ${imageName} removed from the registry`)
+        return
+      }
+
+      this.logger.error(`Error removing image ${imageName} from registry: ${deleteResponse.statusText}`)
+      throw new Error(`Failed to remove image ${imageName} from registry: ${deleteResponse.statusText}`)
+    } catch (error) {
+      this.logger.error(`Exception when deleting image ${imageName}: ${error.message}`)
+      throw error
+    }
   }
 }

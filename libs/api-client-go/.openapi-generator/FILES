@@ -113,8 +113,11 @@ model_session.go
 model_session_execute_request.go
 model_session_execute_response.go
 model_set_snapshot_general_status_dto.go
+model_set_snapshot_target_propagation_dto.go
+model_set_snapshot_target_propagations_dto.go
 model_snapshot_dto.go
 model_snapshot_state.go
+model_snapshot_target_propagation_dto.go
 model_storage_access_dto.go
 model_toggle_state.go
 model_update_assigned_organization_roles.go

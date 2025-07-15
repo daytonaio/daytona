@@ -42,6 +42,8 @@ type SnapshotDto struct {
 	LastUsedAt     NullableTime    `json:"lastUsedAt"`
 	// Build information for the snapshot
 	BuildInfo *BuildInfo `json:"buildInfo,omitempty"`
+	// Target propagations for the snapshot
+	TargetPropagations []SnapshotTargetPropagationDto `json:"targetPropagations"`
 }
 
 type _SnapshotDto SnapshotDto
@@ -50,7 +52,7 @@ type _SnapshotDto SnapshotDto
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewSnapshotDto(id string, general bool, name string, enabled bool, state SnapshotState, size NullableFloat32, entrypoint []string, cpu float32, gpu float32, mem float32, disk float32, errorReason NullableString, createdAt time.Time, updatedAt time.Time, lastUsedAt NullableTime) *SnapshotDto {
+func NewSnapshotDto(id string, general bool, name string, enabled bool, state SnapshotState, size NullableFloat32, entrypoint []string, cpu float32, gpu float32, mem float32, disk float32, errorReason NullableString, createdAt time.Time, updatedAt time.Time, lastUsedAt NullableTime, targetPropagations []SnapshotTargetPropagationDto) *SnapshotDto {
 	this := SnapshotDto{}
 	this.Id = id
 	this.General = general
@@ -67,6 +69,7 @@ func NewSnapshotDto(id string, general bool, name string, enabled bool, state Sn
 	this.CreatedAt = createdAt
 	this.UpdatedAt = updatedAt
 	this.LastUsedAt = lastUsedAt
+	this.TargetPropagations = targetPropagations
 	return &this
 }
 
@@ -542,6 +545,30 @@ func (o *SnapshotDto) SetBuildInfo(v BuildInfo) {
 	o.BuildInfo = &v
 }
 
+// GetTargetPropagations returns the TargetPropagations field value
+func (o *SnapshotDto) GetTargetPropagations() []SnapshotTargetPropagationDto {
+	if o == nil {
+		var ret []SnapshotTargetPropagationDto
+		return ret
+	}
+
+	return o.TargetPropagations
+}
+
+// GetTargetPropagationsOk returns a tuple with the TargetPropagations field value
+// and a boolean to check if the value has been set.
+func (o *SnapshotDto) GetTargetPropagationsOk() ([]SnapshotTargetPropagationDto, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.TargetPropagations, true
+}
+
+// SetTargetPropagations sets field value
+func (o *SnapshotDto) SetTargetPropagations(v []SnapshotTargetPropagationDto) {
+	o.TargetPropagations = v
+}
+
 func (o SnapshotDto) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -578,6 +605,7 @@ func (o SnapshotDto) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.BuildInfo) {
 		toSerialize["buildInfo"] = o.BuildInfo
 	}
+	toSerialize["targetPropagations"] = o.TargetPropagations
 	return toSerialize, nil
 }
 
@@ -601,6 +629,7 @@ func (o *SnapshotDto) UnmarshalJSON(data []byte) (err error) {
 		"createdAt",
 		"updatedAt",
 		"lastUsedAt",
+		"targetPropagations",
 	}
 
 	allProperties := make(map[string]interface{})

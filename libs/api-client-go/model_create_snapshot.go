@@ -40,6 +40,8 @@ type CreateSnapshot struct {
 	Disk *int32 `json:"disk,omitempty"`
 	// Build information for the snapshot
 	BuildInfo *CreateBuildInfo `json:"buildInfo,omitempty"`
+	// Target propagations for the snapshot
+	TargetPropagations []SetSnapshotTargetPropagationDto `json:"targetPropagations,omitempty"`
 }
 
 type _CreateSnapshot CreateSnapshot
@@ -342,6 +344,38 @@ func (o *CreateSnapshot) SetBuildInfo(v CreateBuildInfo) {
 	o.BuildInfo = &v
 }
 
+// GetTargetPropagations returns the TargetPropagations field value if set, zero value otherwise.
+func (o *CreateSnapshot) GetTargetPropagations() []SetSnapshotTargetPropagationDto {
+	if o == nil || IsNil(o.TargetPropagations) {
+		var ret []SetSnapshotTargetPropagationDto
+		return ret
+	}
+	return o.TargetPropagations
+}
+
+// GetTargetPropagationsOk returns a tuple with the TargetPropagations field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *CreateSnapshot) GetTargetPropagationsOk() ([]SetSnapshotTargetPropagationDto, bool) {
+	if o == nil || IsNil(o.TargetPropagations) {
+		return nil, false
+	}
+	return o.TargetPropagations, true
+}
+
+// HasTargetPropagations returns a boolean if a field has been set.
+func (o *CreateSnapshot) HasTargetPropagations() bool {
+	if o != nil && !IsNil(o.TargetPropagations) {
+		return true
+	}
+
+	return false
+}
+
+// SetTargetPropagations gets a reference to the given []SetSnapshotTargetPropagationDto and assigns it to the TargetPropagations field.
+func (o *CreateSnapshot) SetTargetPropagations(v []SetSnapshotTargetPropagationDto) {
+	o.TargetPropagations = v
+}
+
 func (o CreateSnapshot) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -376,6 +410,9 @@ func (o CreateSnapshot) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.BuildInfo) {
 		toSerialize["buildInfo"] = o.BuildInfo
+	}
+	if !IsNil(o.TargetPropagations) {
+		toSerialize["targetPropagations"] = o.TargetPropagations
 	}
 	return toSerialize, nil
 }
