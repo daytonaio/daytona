@@ -225,6 +225,16 @@ export class SnapshotService {
   }
 
   /**
+   * Activates a snapshot.
+   *
+   * @param {Snapshot} snapshot - Snapshot to activate
+   * @returns {Promise<Snapshot>} The activated Snapshot instance
+   */
+  async activate(snapshot: Snapshot): Promise<Snapshot> {
+    return (await this.snapshotsApi.activateSnapshot(snapshot.id)).data as Snapshot
+  }
+
+  /**
    * Processes the image contexts by uploading them to object storage
    *
    * @private
