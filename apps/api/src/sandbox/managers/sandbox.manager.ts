@@ -898,8 +898,11 @@ export class SandboxManager {
       const runner = await this.runnerService.findOne(sandbox.runnerId)
       const originalRunnerId = sandbox.runnerId // Store original value
 
-      // if the runner is unschedulable and sandbox has a valid backup, move sandbox to prevRunnerId
-      if (runner.unschedulable && sandbox.backupState === BackupState.COMPLETED) {
+      // if the runner is unschedulable/not ready and sandbox has a valid backup, move sandbox to a new runner
+      if (
+        (runner.unschedulable || runner.state != RunnerState.READY) &&
+        sandbox.backupState === BackupState.COMPLETED
+      ) {
         sandbox.prevRunnerId = originalRunnerId
         sandbox.runnerId = null
 
