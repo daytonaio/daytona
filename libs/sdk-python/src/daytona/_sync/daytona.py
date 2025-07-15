@@ -231,7 +231,8 @@ class Daytona:
                 snapshot="my-snapshot-id",
                 env_vars={"DEBUG": "true"},
                 auto_stop_interval=0,
-                auto_archive_interval=60
+                auto_archive_interval=60,
+                auto_delete_interval=120
             )
             sandbox = daytona.create(params, timeout=40)
             ```
@@ -282,6 +283,7 @@ class Daytona:
                 resources=Resources(cpu=2, memory=4),
                 auto_stop_interval=0,
                 auto_archive_interval=60,
+                auto_delete_interval=120
             )
             sandbox = daytona.create(
                 params,
@@ -341,6 +343,7 @@ class Daytona:
             target=str(target) if target else None,
             auto_stop_interval=params.auto_stop_interval,
             auto_archive_interval=params.auto_archive_interval,
+            auto_delete_interval=params.auto_delete_interval,
             volumes=params.volumes,
         )
 

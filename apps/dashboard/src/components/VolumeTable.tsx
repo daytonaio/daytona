@@ -102,7 +102,7 @@ export function VolumeTable({ data, loading, processingVolumeAction, onDelete, o
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
                   return (
-                    <TableHead key={header.id}>
+                    <TableHead className="px-2" key={header.id}>
                       {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
                     </TableHead>
                   )
@@ -125,7 +125,9 @@ export function VolumeTable({ data, loading, processingVolumeAction, onDelete, o
                   className={`${processingVolumeAction[row.original.id] || row.original.state === VolumeState.PENDING_DELETE || row.original.state === VolumeState.DELETING ? 'opacity-50 pointer-events-none' : ''}`}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+                    <TableCell className="px-2" key={cell.id}>
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </TableCell>
                   ))}
                 </TableRow>
               ))
@@ -306,7 +308,7 @@ const getColumns = ({
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger>
-                  <div className={`flex items-center gap-2 px-2 ${color}`}>
+                  <div className={`flex items-center gap-2 ${color}`}>
                     {getStateIcon(state)}
                     {getStateLabel(state)}
                   </div>
@@ -320,7 +322,7 @@ const getColumns = ({
         }
 
         return (
-          <div className={`flex items-center gap-2 px-2 w-40 ${color}`}>
+          <div className={`flex items-center gap-2 w-40 ${color}`}>
             {getStateIcon(state)}
             <span>{getStateLabel(state)}</span>
           </div>

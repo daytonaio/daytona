@@ -15,15 +15,15 @@ import (
 
 type MoveFileArgs struct {
 	Id         *string `json:"id,omitempty"`
-	SourcePath *string `json:"source_path,omitempty"`
-	DestPath   *string `json:"dest_path,omitempty"`
+	SourcePath *string `json:"sourcePath,omitempty"`
+	DestPath   *string `json:"destPath,omitempty"`
 }
 
 func GetMoveFileTool() mcp.Tool {
 	return mcp.NewTool("move_file",
 		mcp.WithDescription("Move or rename a file in the Daytona sandbox."),
-		mcp.WithString("source_path", mcp.Required(), mcp.Description("Source path of the file to move.")),
-		mcp.WithString("dest_path", mcp.Required(), mcp.Description("Destination path where to move the file.")),
+		mcp.WithString("sourcePath", mcp.Required(), mcp.Description("Source path of the file to move.")),
+		mcp.WithString("destPath", mcp.Required(), mcp.Description("Destination path where to move the file.")),
 		mcp.WithString("id", mcp.Required(), mcp.Description("ID of the sandbox to move the file in.")),
 	)
 }
@@ -40,11 +40,11 @@ func MoveFile(ctx context.Context, request mcp.CallToolRequest, args MoveFileArg
 
 	// Get source and destination paths from request arguments
 	if args.SourcePath == nil || *args.SourcePath == "" {
-		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("source_path parameter is required")
+		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("sourcePath parameter is required")
 	}
 
 	if args.DestPath == nil || *args.DestPath == "" {
-		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("dest_path parameter is required")
+		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("destPath parameter is required")
 	}
 
 	_, err = apiClient.ToolboxAPI.MoveFile(ctx, *args.Id).Source(*args.SourcePath).Destination(*args.DestPath).Execute()

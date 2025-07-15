@@ -237,7 +237,7 @@ const Registries: React.FC = () => {
   )
 
   return (
-    <div className="p-6">
+    <div className="px-6 py-2">
       <Dialog
         open={showCreateOrEditDialog}
         onOpenChange={(isOpen) => {
@@ -257,13 +257,13 @@ const Registries: React.FC = () => {
           })
         }}
       >
-        <div className="mb-6 flex justify-between items-center">
-          <h1 className="text-2xl font-bold">Container Registries</h1>
+        <div className="mb-2 h-12 flex items-center justify-between">
+          <h1 className="text-2xl font-medium">Container Registries</h1>
           {writePermitted && (
             <DialogTrigger asChild disabled={loading}>
               <Button
                 variant="default"
-                size="icon"
+                size="sm"
                 disabled={loading}
                 className="w-auto px-4"
                 title="Add Registry"

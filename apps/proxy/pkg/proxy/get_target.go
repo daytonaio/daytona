@@ -18,54 +18,49 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func (p *Proxy) GetProxyTarget(ctx *gin.Context) (*url.URL, string, map[string]string, error) {
+func (p *Proxy) GetProxyTarget(ctx *gin.Context) (*url.URL, map[string]string, error) {
 	// Extract port and sandbox ID from the host header
 	// Expected format: 1234-some-id-uuid.proxy.domain
 	targetPort, sandboxID, err := p.parseHost(ctx.Request.Host)
 	if err != nil {
 		ctx.Error(common_errors.NewBadRequestError(err))
-		return nil, "", nil, err
+		return nil, nil, err
 	}
 
 	if targetPort == "" {
 		ctx.Error(common_errors.NewBadRequestError(errors.New("target port is required")))
-		return nil, "", nil, errors.New("target port is required")
+		return nil, nil, errors.New("target port is required")
 	}
 
 	if sandboxID == "" {
 		ctx.Error(common_errors.NewBadRequestError(errors.New("sandbox ID is required")))
-		return nil, "", nil, errors.New("sandbox ID is required")
+		return nil, nil, errors.New("sandbox ID is required")
 	}
 
 	isPublic, err := p.getSandboxPublic(ctx, sandboxID)
 	if err != nil {
 		ctx.Error(common_errors.NewBadRequestError(fmt.Errorf("failed to get sandbox public status: %w", err)))
-		return nil, "", nil, fmt.Errorf("failed to get sandbox public status: %w", err)
+		return nil, nil, fmt.Errorf("failed to get sandbox public status: %w", err)
 	}
 
-	if !*isPublic || targetPort == "22222" || targetPort == "6080" {
+	if !*isPublic || targetPort == "22222" {
 		err, didRedirect := p.Authenticate(ctx, sandboxID)
 		if err != nil {
 			if !didRedirect {
 				ctx.Error(common_errors.NewUnauthorizedError(err))
 			}
-			return nil, "", nil, err
+			return nil, nil, err
 		}
 	}
 
 	runnerInfo, err := p.getRunnerInfo(ctx, sandboxID)
 	if err != nil {
 		ctx.Error(common_errors.NewBadRequestError(fmt.Errorf("failed to get runner info: %w", err)))
-		return nil, "", nil, fmt.Errorf("failed to get runner info: %w", err)
+		return nil, nil, fmt.Errorf("failed to get runner info: %w", err)
 	}
 
 	// Build the target URL
 	targetURL := fmt.Sprintf("%s/sandboxes/%s/toolbox/proxy/%s", runnerInfo.ApiUrl, sandboxID, targetPort)
-	target, err := url.Parse(targetURL)
-	if err != nil {
-		ctx.Error(common_errors.NewBadRequestError(fmt.Errorf("failed to parse target URL: %w", err)))
-		return nil, "", nil, fmt.Errorf("failed to parse target URL: %w", err)
-	}
 
 	// Get the wildcard path and normalize it
 	path := ctx.Param("path")
@@ -78,13 +73,15 @@ func (p *Proxy) GetProxyTarget(ctx *gin.Context) (*url.URL, string, map[string]s
 	}
 
 	// Create the complete target URL with path
-	fullTargetURL := fmt.Sprintf("%s%s", targetURL, path)
-	if ctx.Request.URL.RawQuery != "" {
-		fullTargetURL = fmt.Sprintf("%s?%s", fullTargetURL, ctx.Request.URL.RawQuery)
+	target, err := url.Parse(fmt.Sprintf("%s%s", targetURL, path))
+	if err != nil {
+		ctx.Error(common_errors.NewBadRequestError(fmt.Errorf("failed to parse target URL: %w", err)))
+		return nil, nil, fmt.Errorf("failed to parse target URL: %w", err)
 	}
 
-	return target, fullTargetURL, map[string]string{
+	return target, map[string]string{
 		"X-Daytona-Authorization": fmt.Sprintf("Bearer %s", runnerInfo.ApiKey),
+		"X-Forwarded-Host":        ctx.Request.Host,
 	}, nil
 }
 

@@ -24,8 +24,8 @@ type ExecuteCommandArgs struct {
 type CommandResult struct {
 	Stdout    string `json:"stdout"`
 	Stderr    string `json:"stderr"`
-	ExitCode  int    `json:"exit_code"`
-	ErrorType string `json:"error_type,omitempty"`
+	ExitCode  int    `json:"exitCode"`
+	ErrorType string `json:"errorType,omitempty"`
 }
 
 func GetExecuteCommandTool() mcp.Tool {

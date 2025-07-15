@@ -76,6 +76,8 @@ POST_REPLACEMENTS = [
     (re.compile(r"\bawait\s+"), ""),
     # Strip Sync prefix
     (re.compile(r"\bSync([A-Z]\w*)\b"), r"\1"),
+    # Remove _async suffix from method calls
+    (re.compile(r"(\w+)_async\("), r"\1("),
     # httpx client fix
     (re.compile(r"httpx\.SyncClient\b"), "httpx.Client"),
     (re.compile(r"\.aiter_bytes\b"), ".iter_bytes"),
@@ -356,6 +358,39 @@ def apply_replacements(text: str, replacements: list) -> str:
                 tmp = pat.sub(repl, tmp)
             processed.append(tmp)
     return "".join(processed)
+
+
+def convert_async_executor_patterns(text: str) -> str:
+    """
+    Convert async executor patterns to sync equivalents:
+    - Remove 'loop = asyncio.get_running_loop()' lines
+    - Convert 'loop.run_in_executor(None, func, args)' to 'func(args)'
+    """
+    lines = text.splitlines(keepends=True)
+    result_lines = []
+
+    for line in lines:
+        # Skip lines that assign asyncio.get_running_loop()
+        if re.search(r"^\s*loop\s*=\s*asyncio\.get_running_loop\(\)", line):
+            continue
+
+        # Convert loop.run_in_executor patterns
+        # Pattern: loop.run_in_executor(None, reader.read, 1024 * 64)
+        # Result: reader.read(1024 * 64)
+        if "loop.run_in_executor(None," in line:
+            # Extract the function and arguments
+            pattern = r"loop\.run_in_executor\(None,\s*([^,]+),\s*(.+?)\)"
+            match = re.search(pattern, line)
+            if match:
+                func = match.group(1).strip()
+                args = match.group(2).strip()
+                # Replace the entire match with func(args)
+                replacement = f"{func}({args})"
+                line = re.sub(pattern, replacement, line)
+
+        result_lines.append(line)
+
+    return "".join(result_lines)
 
 
 def replace_all_to_thread_calls(text: str) -> str:
@@ -1110,6 +1145,9 @@ def post_process(path: Path):
 
     # 3) Translate any "await asyncio.to_thread(...)" calls into direct calls
     text = replace_all_to_thread_calls(text)
+
+    # 3.5) Convert async executor patterns to sync equivalents
+    text = convert_async_executor_patterns(text)
 
     # 4) Convert "await process_streaming_response(...)" calls into "asyncio.run(...)"
     text = replace_await_process_streaming(text)

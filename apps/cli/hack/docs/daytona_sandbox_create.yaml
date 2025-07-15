@@ -6,6 +6,10 @@ options:
     default_value: '10080'
     usage: |
       Auto-archive interval in minutes (0 means the maximum interval will be used)
+  - name: auto-delete
+    default_value: '-1'
+    usage: |
+      Auto-delete interval in minutes (negative value means disabled, 0 means delete immediately upon stopping)
   - name: auto-stop
     default_value: '0'
     usage: Auto-stop interval in minutes (0 means disabled)

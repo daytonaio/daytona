@@ -34,9 +34,8 @@ macOS Installation: \`\`\`brew install bash-completion\`\`\`
 }
 
 async function fetchRawDocs(ref) {
-  // TODO: switch back to GitHub API once the CLI is OSS
-  const url = 'https://download.daytona.io/docs/cli/cli-ref.txt'
-  // 'https://api.github.com/repos/daytonaio/daytona/contents/hack/docs'
+  const url =
+    'https://api.github.com/repos/daytonaio/daytona/contents/apps/cli/hack/docs'
   const request = await fetch(`${url}?ref=${ref}`)
   const response = await request.json()
 

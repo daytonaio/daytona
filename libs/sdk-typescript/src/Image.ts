@@ -7,9 +7,8 @@ import * as fs from 'fs'
 import * as fg from 'fast-glob'
 import * as _path from 'path'
 import { quote, parse as parseShellQuote } from 'shell-quote'
-import untildify from 'untildify'
+import expandTilde from 'expand-tilde'
 import { DaytonaError } from './errors/DaytonaError'
-import { ObjectStorage } from './ObjectStorage'
 import { parse as parseToml } from '@iarna/toml'
 
 const SUPPORTED_PYTHON_SERIES = ['3.9', '3.10', '3.11', '3.12', '3.13'] as const
@@ -115,7 +114,7 @@ export class Image {
    * image.pipInstallFromRequirements('requirements.txt', { findLinks: ['https://pypi.org/simple'] })
    */
   pipInstallFromRequirements(requirementsTxt: string, options?: PipInstallOptions): Image {
-    const expandedPath = untildify(requirementsTxt)
+    const expandedPath = expandTilde(requirementsTxt)
     if (!fs.existsSync(expandedPath)) {
       throw new Error(`Requirements file ${requirementsTxt} does not exist`)
     }
@@ -141,7 +140,7 @@ export class Image {
    * image.pipInstallFromPyproject('pyproject.toml', { optionalDependencies: ['dev'] })
    */
   pipInstallFromPyproject(pyprojectToml: string, options?: PyprojectOptions): Image {
-    const tomlData = parseToml(fs.readFileSync(untildify(pyprojectToml), 'utf-8')) as any
+    const tomlData = parseToml(fs.readFileSync(expandTilde(pyprojectToml), 'utf-8')) as any
     const dependencies: string[] = []
 
     if (!tomlData || !tomlData.project || !Array.isArray(tomlData.project.dependencies)) {
@@ -184,7 +183,7 @@ export class Image {
       remotePath = remotePath + _path.basename(localPath)
     }
 
-    const expandedPath = untildify(localPath)
+    const expandedPath = expandTilde(localPath)
     this._contextList.push({ sourcePath: expandedPath, archivePath: expandedPath })
     this._dockerfile += `COPY ${expandedPath} ${remotePath}\n`
 
@@ -204,7 +203,7 @@ export class Image {
    *  .addLocalDir('src', '/home/daytona/src')
    */
   addLocalDir(localPath: string, remotePath: string): Image {
-    const expandedPath = untildify(localPath)
+    const expandedPath = expandTilde(localPath)
 
     this._contextList.push({ sourcePath: expandedPath, archivePath: expandedPath })
     this._dockerfile += `COPY ${expandedPath} ${remotePath}\n`
@@ -339,7 +338,7 @@ export class Image {
    */
   dockerfileCommands(dockerfileCommands: string[], contextDir?: string): Image {
     if (contextDir) {
-      const expandedPath = untildify(contextDir)
+      const expandedPath = expandTilde(contextDir)
       if (!fs.existsSync(expandedPath) || !fs.statSync(expandedPath).isDirectory()) {
         throw new Error(`Context directory ${contextDir} does not exist`)
       }
@@ -373,7 +372,7 @@ export class Image {
    * const image = Image.fromDockerfile('Dockerfile')
    */
   static fromDockerfile(path: string): Image {
-    const expandedPath = _path.resolve(untildify(path))
+    const expandedPath = _path.resolve(expandTilde(path))
     if (!fs.existsSync(expandedPath)) {
       throw new Error(`Dockerfile ${path} does not exist`)
     }

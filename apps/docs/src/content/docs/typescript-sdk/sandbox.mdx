@@ -17,6 +17,13 @@ Represents a Daytona Sandbox.
     ```ts
     SandboxDto.autoArchiveInterval
     ```
+- `autoDeleteInterval?` _number_ - Auto-delete interval in minutes
+    
+    ##### Implementation of
+    
+    ```ts
+    SandboxDto.autoDeleteInterval
+    ```
 - `autoStopInterval?` _number_ - Auto-stop interval in minutes
     
     ##### Implementation of
@@ -383,6 +390,40 @@ The Sandbox will automatically archive after being continuously stopped for the 
 await sandbox.setAutoArchiveInterval(60);
 // Or use the maximum interval
 await sandbox.setAutoArchiveInterval(0);
+```
+
+***
+
+#### setAutoDeleteInterval()
+
+```ts
+setAutoDeleteInterval(interval: number): Promise<void>
+```
+
+Set the auto-delete interval for the Sandbox.
+
+The Sandbox will automatically delete after being continuously stopped for the specified interval.
+
+**Parameters**:
+
+- `interval` _number_ - Number of minutes after which a continuously stopped Sandbox will be auto-deleted.
+    Set to negative value to disable auto-delete. Set to 0 to delete immediately upon stopping.
+    By default, auto-delete is disabled.
+
+
+**Returns**:
+
+- `Promise<void>`
+
+**Example:**
+
+```ts
+// Auto-delete after 1 hour
+await sandbox.setAutoDeleteInterval(60);
+// Or delete immediately upon stopping
+await sandbox.setAutoDeleteInterval(0);
+// Or disable auto-delete
+await sandbox.setAutoDeleteInterval(-1);
 ```
 
 ***
