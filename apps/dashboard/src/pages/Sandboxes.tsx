@@ -36,6 +36,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import SandboxDetailsSheet from '@/components/SandboxDetailsSheet'
+import { formatDuration } from '@/lib/utils'
 
 const Sandboxes: React.FC = () => {
   const { sandboxApi, apiKeyApi, toolboxApi, snapshotApi } = useApi()
@@ -216,7 +217,14 @@ const Sandboxes: React.FC = () => {
 
     try {
       await sandboxApi.stopSandbox(id, selectedOrganization?.id)
-      toast.success(`Stopping sandbox with ID: ${id}`)
+      toast.success(
+        `Stopping sandbox with ID: ${id}`,
+        sandboxToStop?.autoDeleteInterval !== undefined && sandboxToStop.autoDeleteInterval >= 0
+          ? {
+              description: `This sandbox will be deleted automatically ${sandboxToStop.autoDeleteInterval === 0 ? 'upon stopping' : `in ${formatDuration(sandboxToStop.autoDeleteInterval)} unless it is started again`}.`,
+            }
+          : undefined,
+      )
     } catch (error) {
       handleApiError(error, 'Failed to stop sandbox')
       setSandboxes((prev) => prev.map((s) => (s.id === id ? { ...s, state: previousState } : s)))
