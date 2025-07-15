@@ -53,33 +53,15 @@ const lspServer = await sandbox.createLspServer(
 ## Supported Languages
 
 Daytona SDK provides an option to create LSP servers for various languages through the `LspLanguageId` enum in Python and TypeScript.
+### Supported Languages
 
-<Tabs>
-<TabItem label="Python" icon="seti:python">
-```python
-from daytona import LspLanguageId
+The supported languages for creating LSP servers with the Daytona SDK are defined by the `LspLanguageId` enum:
 
-# Available language IDs
+| Enum Value                   | Description                         |
+|------------------------------|-------------------------------------|
+| `LspLanguageId.PYTHON`       | Python language server.             |
+| `LspLanguageId.TYPESCRIPT`   | TypeScript/JavaScript language server. |
 
-LspLanguageId.PYTHON
-LspLanguageId.TYPESCRIPT
-
-```
-</TabItem>
-<TabItem label="TypeScript" icon="seti:typescript">
-```typescript
-import { LspLanguageId } from '@daytonaio/sdk'
-
-// Available language IDs
-LspLanguageId.PYTHON      
-LspLanguageId.TYPESCRIPT    
-```
-
-</TabItem>
-</Tabs>
-
-- `LspLanguageId.PYTHON`: Python language server.
-- `LspLanguageId.TYPESCRIPT`: TypeScript/JavaScript language server.
 
 ## LSP Features
 
