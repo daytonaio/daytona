@@ -64,11 +64,11 @@ dynamic_image = (
 # Create a new Sandbox with the dynamic image and stream the build logs
 
 sandbox = daytona.create(
-CreateSandboxFromImageParams(
-image=dynamic_image,
-),
-timeout=0,
-on_snapshot_create_logs=print,
+    CreateSandboxFromImageParams(
+        image=dynamic_image,
+    ),
+    timeout=0,
+    on_snapshot_create_logs=print,
 )
 
 ```
@@ -121,46 +121,46 @@ snapshot_name = f"python-example:{int(time.time())}"
 # Create a local file with some data to add to the image
 
 with open("file_example.txt", "w") as f:
-f.write("Hello, World!")
+    f.write("Hello, World!")
 
 # Create a Python image with common data science packages
 
 image = (
-Image.debian_slim("3.12")
-.pip_install(["numpy", "pandas", "matplotlib", "scipy", "scikit-learn", "jupyter"])
-.run_commands(
-"apt-get update && apt-get install -y git",
-"groupadd -r daytona && useradd -r -g daytona -m daytona",
-"mkdir -p /home/daytona/workspace",
-)
-.dockerfile_commands(["USER daytona"])
-.workdir("/home/daytona/workspace")
-.env({"MY_ENV_VAR": "My Environment Variable"})
-.add_local_file("file_example.txt", "/home/daytona/workspace/file_example.txt")
+    Image.debian_slim("3.12")
+    .pip_install(["numpy", "pandas", "matplotlib", "scipy", "scikit-learn", "jupyter"])
+    .run_commands(
+        "apt-get update && apt-get install -y git",
+        "groupadd -r daytona && useradd -r -g daytona -m daytona",
+        "mkdir -p /home/daytona/workspace",
+    )
+    .dockerfile_commands(["USER daytona"])
+    .workdir("/home/daytona/workspace")
+    .env({"MY_ENV_VAR": "My Environment Variable"})
+    .add_local_file("file_example.txt", "/home/daytona/workspace/file_example.txt")
 )
 
 # Create the Snapshot and stream the build logs
 
 print(f"=== Creating Snapshot: {snapshot_name} ===")
 daytona.snapshot.create(
-CreateSnapshotParams(
-name=snapshot_name,
-image=image,
-resources=Resources(
-cpu=1,
-memory=1,
-disk=3,
-),
-),
-on_logs=print,
+    CreateSnapshotParams(
+        name=snapshot_name,
+        image=image,
+        resources=Resources(
+            cpu=1,
+            memory=1,
+            disk=3,
+        ),
+    ),
+    on_logs=print,
 )
 
 # Create a new Sandbox using the pre-built Snapshot
 
 sandbox = daytona.create(
-CreateSandboxFromSnapshotParams(
-snapshot=snapshot_name
-)
+    CreateSandboxFromSnapshotParams(
+        snapshot=snapshot_name
+    )
 )
 
 ```
@@ -218,17 +218,16 @@ const sandbox = await daytona.create({
 If you have an existing Dockerfile that you want to use as the base for your image, you can import it in the following way:
 
 <Tabs>
-  <TabItem label="Python" icon="seti:python">
-    ```python image =
-    Image.from_dockerfile("app/Dockerfile").pip_install(["numpy"])
-    ```
-  </TabItem>
-  <TabItem label="TypeScript" icon="seti:typescript">
-    ```typescript
-    const image =
-    Image.fromDockerfile("app/Dockerfile").pipInstall(['numpy'])
-    ```
-  </TabItem>
+<TabItem label="Python" icon="seti:python">
+```python
+image = Image.from_dockerfile("app/Dockerfile").pip_install(["numpy"])
+```
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+```typescript
+const image = Image.fromDockerfile("app/Dockerfile").pipInstall(['numpy'])
+```
+</TabItem>
 </Tabs>
 
 ## Best Practices
