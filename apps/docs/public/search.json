@@ -112,6 +112,142 @@
     "objectID": 14
   },
   {
+    "title": "Analyze Data with AI",
+    "description": "You can use Daytona Sandbox to run AI-generated code to analyze data.",
+    "tag": "Documentation",
+    "url": "/docs/data-analysis-with-ai",
+    "slug": "/data-analysis-with-ai",
+    "objectID": 16
+  },
+  {
+    "title": "Build an AI Data Analyst with Daytona",
+    "description": "This example shows how to build an AI-powered data analyst that automatically generates insights and visualizations from CSV data using Daytona's secure sandbox environment.",
+    "tag": "Documentation",
+    "url": "/docs/data-analysis-with-ai#build-an-ai-data-analyst-with-daytona",
+    "slug": "/data-analysis-with-ai#build-an-ai-data-analyst-with-daytona",
+    "objectID": 17
+  },
+  {
+    "title": "1. Project Setup",
+    "description": "",
+    "tag": "Documentation",
+    "url": "/docs/data-analysis-with-ai#1-project-setup",
+    "slug": "/data-analysis-with-ai#1-project-setup",
+    "objectID": 18
+  },
+  {
+    "title": "1.1 Install Dependencies",
+    "description": "Install the Daytona SDK and Anthropic SDK to your project:",
+    "tag": "Documentation",
+    "url": "/docs/data-analysis-with-ai#11-install-dependencies",
+    "slug": "/data-analysis-with-ai#11-install-dependencies",
+    "objectID": 19
+  },
+  {
+    "title": "1.2 Configure Environment",
+    "description": "Get your API keys and configure your environment:",
+    "tag": "Documentation",
+    "url": "/docs/data-analysis-with-ai#12-configure-environment",
+    "slug": "/data-analysis-with-ai#12-configure-environment",
+    "objectID": 20
+  },
+  {
+    "title": "2. Dataset Preparation",
+    "description": "",
+    "tag": "Documentation",
+    "url": "/docs/data-analysis-with-ai#2-dataset-preparation",
+    "slug": "/data-analysis-with-ai#2-dataset-preparation",
+    "objectID": 21
+  },
+  {
+    "title": "2.1 Download Dataset",
+    "description": "We'll be using a publicly available dataset of about 10,000 movies.",
+    "tag": "Documentation",
+    "url": "/docs/data-analysis-with-ai#21-download-dataset",
+    "slug": "/data-analysis-with-ai#21-download-dataset",
+    "objectID": 22
+  },
+  {
+    "title": "2.2 Initialize Sandbox",
+    "description": "Now create a Daytona sandbox and upload your dataset:",
+    "tag": "Documentation",
+    "url": "/docs/data-analysis-with-ai#22-initialize-sandbox",
+    "slug": "/data-analysis-with-ai#22-initialize-sandbox",
+    "objectID": 23
+  },
+  {
+    "title": "Create sandbox",
+    "description": "",
+    "tag": "Documentation",
+    "url": "/docs/data-analysis-with-ai#create-sandbox",
+    "slug": "/data-analysis-with-ai#create-sandbox",
+    "objectID": 24
+  },
+  {
+    "title": "Upload the dataset to the sandbox",
+    "description": "",
+    "tag": "Documentation",
+    "url": "/docs/data-analysis-with-ai#upload-the-dataset-to-the-sandbox",
+    "slug": "/data-analysis-with-ai#upload-the-dataset-to-the-sandbox",
+    "objectID": 25
+  },
+  {
+    "title": "3. Building the AI Data Analyst",
+    "description": "Now we'll create the core functionality that connects Claude with Daytona to analyze data and generate visualizations.",
+    "tag": "Documentation",
+    "url": "/docs/data-analysis-with-ai#3-building-the-ai-data-analyst",
+    "slug": "/data-analysis-with-ai#3-building-the-ai-data-analyst",
+    "objectID": 26
+  },
+  {
+    "title": "3.1 Code Execution Handler",
+    "description": "First, let's create a function to handle code execution and chart extraction:",
+    "tag": "Documentation",
+    "url": "/docs/data-analysis-with-ai#31-code-execution-handler",
+    "slug": "/data-analysis-with-ai#31-code-execution-handler",
+    "objectID": 27
+  },
+  {
+    "title": "3.2 Creating the Analysis Prompt",
+    "description": "Next, we'll create the prompt that tells Claude about our dataset and what analysis we want.",
+    "tag": "Documentation",
+    "url": "/docs/data-analysis-with-ai#32-creating-the-analysis-prompt",
+    "slug": "/data-analysis-with-ai#32-creating-the-analysis-prompt",
+    "objectID": 28
+  },
+  {
+    "title": "3.3 Tool Calling Setup",
+    "description": "Now we'll connect Claude to our Daytona sandbox using tool calling.",
+    "tag": "Documentation",
+    "url": "/docs/data-analysis-with-ai#33-tool-calling-setup",
+    "slug": "/data-analysis-with-ai#33-tool-calling-setup",
+    "objectID": 29
+  },
+  {
+    "title": "3.4 Response Processing",
+    "description": "Finally, we'll parse Claude's response and execute any generated code in our Daytona sandbox:",
+    "tag": "Documentation",
+    "url": "/docs/data-analysis-with-ai#34-response-processing",
+    "slug": "/data-analysis-with-ai#34-response-processing",
+    "objectID": 30
+  },
+  {
+    "title": "4. Running Your Analysis",
+    "description": "Now you can run the complete code to see the results.",
+    "tag": "Documentation",
+    "url": "/docs/data-analysis-with-ai#4-running-your-analysis",
+    "slug": "/data-analysis-with-ai#4-running-your-analysis",
+    "objectID": 31
+  },
+  {
+    "title": "5. Complete Implementation",
+    "description": "Here are the complete, ready-to-run examples:",
+    "tag": "Documentation",
+    "url": "/docs/data-analysis-with-ai#5-complete-implementation",
+    "slug": "/data-analysis-with-ai#5-complete-implementation",
+    "objectID": 32
+  },
+  {
     "title": "Declarative Builder",
     "description": "Daytona's declarative builder provides a powerful, code-first approach to defining dependencies for Sandboxes.",
     "tag": "Documentation",
