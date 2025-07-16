@@ -16,6 +16,7 @@ import { ATTR_DEPLOYMENT_ENVIRONMENT_NAME } from '@opentelemetry/semantic-conven
 import { IORedisInstrumentation } from '@opentelemetry/instrumentation-ioredis'
 import { PgInstrumentation } from '@opentelemetry/instrumentation-pg'
 import { diag, DiagLogger, DiagLogLevel } from '@opentelemetry/api'
+import { CompressionAlgorithm } from '@opentelemetry/otlp-exporter-base'
 
 // Custom OpenTelemetry logger that uses NestJS Logger
 class NestJSDiagLogger extends Logger implements DiagLogger {
@@ -46,6 +47,8 @@ if (process.env.OTEL_ENABLED === 'true') {
             Authorization: `Basic ${Buffer.from(`${process.env.OTEL_AUTH_USERNAME}:${process.env.OTEL_AUTH_PASSWORD}`).toString('base64')}`,
           }
         : undefined,
+    keepAlive: true,
+    compression: CompressionAlgorithm.GZIP,
   })
 
   const sdk = new NodeSDK({
@@ -61,7 +64,14 @@ if (process.env.OTEL_ENABLED === 'true') {
       new IORedisInstrumentation({ requireParentSpan: true }),
       new PgInstrumentation({ requireParentSpan: true }),
     ],
-    spanProcessors: [new BatchSpanProcessor(traceExporter)],
+    spanProcessors: [
+      new BatchSpanProcessor(traceExporter, {
+        maxQueueSize: 10000,
+        maxExportBatchSize: 2048,
+        scheduledDelayMillis: 2000,
+        exportTimeoutMillis: 30000,
+      }),
+    ],
   })
 
   try {
