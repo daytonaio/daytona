@@ -311,6 +311,15 @@ export const sidebarConfig: NavigationGroup[] = [
           icon: 'server.svg',
         },
       },
+      {
+        type: 'link',
+        href: '/docs/data-analysis-with-ai',
+        label: 'Data Analysis with AI',
+        disablePagination: true,
+        attrs: {
+          icon: 'chart.svg',
+        },
+      },
     ],
   },
   {
