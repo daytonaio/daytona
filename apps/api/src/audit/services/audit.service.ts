@@ -40,6 +40,10 @@ export class AuditService {
     auditLog.source = createDto.source
     auditLog.metadata = createDto.metadata
 
+    if (this.configService.get('audit.consoleLogEnabled')) {
+      this.logger.log(`Creating audit log: ${JSON.stringify(auditLog)}`)
+    }
+
     return await this.auditLogRepository.save(auditLog)
   }
 
@@ -50,6 +54,11 @@ export class AuditService {
     }
 
     Object.assign(auditLog, updateDto)
+
+    if (this.configService.get('audit.consoleLogEnabled')) {
+      this.logger.log(`Updating audit log: ${JSON.stringify(auditLog)}`)
+    }
+
     return await this.auditLogRepository.save(auditLog)
   }
 
