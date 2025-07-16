@@ -6,6 +6,7 @@
 import { Logger, LogLevel } from '@nestjs/common'
 import { NodeSDK } from '@opentelemetry/sdk-node'
 import { HttpInstrumentation } from '@opentelemetry/instrumentation-http'
+import { ExpressInstrumentation } from '@opentelemetry/instrumentation-express'
 import { NestInstrumentation } from '@opentelemetry/instrumentation-nestjs-core'
 import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-base'
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http'
@@ -54,7 +55,8 @@ if (process.env.OTEL_ENABLED === 'true') {
     }),
     traceExporter,
     instrumentations: [
-      new HttpInstrumentation({ requireParentforOutgoingSpans: true, requireParentforIncomingSpans: true }),
+      new HttpInstrumentation({ requireParentforOutgoingSpans: true }),
+      new ExpressInstrumentation(),
       new NestInstrumentation(),
       new IORedisInstrumentation({ requireParentSpan: true }),
       new PgInstrumentation({ requireParentSpan: true }),
