@@ -207,6 +207,10 @@ daytona snapshot push custom-alpine:3.21 --name alpine-minimal
 
 :::tip
 Use the flags `--cpu`, `--memory` and `--disk` to specify the resources you want the underlying Sandboxes to have - for example `daytona snapshot push custom-alpine:3.21 --name alpine-minimal --cpu 2 --memory 4 --disk 8` will create Alpine Sandboxes with 2 vCPU, 4GiB of memory and 8GiB of disk space.
+
+Daytona expects the local image to be built for AMD64 architecture. Therefore, the `--platform=linux/amd64` flag is required when building the Docker image if your machine is running on a different architecture.
+
+For more information, see the [CLI documentation](/docs/tools/cli#daytona-snapshot-push).
 :::
 
 If you haven't built the desired image yet, and have a Dockerfile ready, you can use the Declarative Builder in our SDK - read more about it [here](/docs/getting-started#declarative-builder).
