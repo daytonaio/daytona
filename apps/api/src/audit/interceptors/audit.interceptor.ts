@@ -162,17 +162,6 @@ export class AuditInterceptor implements NestInterceptor {
     targetId: string | null,
     statusCode: number,
   ): Promise<void> {
-    if (this.configService.get('audit.consoleLogEnabled')) {
-      this.logger.log(
-        JSON.stringify({
-          ...auditLog,
-          organizationId,
-          targetId,
-          statusCode,
-        }),
-      )
-    }
-
     try {
       await this.auditService.updateLog(auditLog.id, {
         organizationId,
@@ -185,16 +174,6 @@ export class AuditInterceptor implements NestInterceptor {
   }
 
   private async recordHandlerError(auditLog: AuditLog, errorMessage: string, statusCode: number): Promise<void> {
-    if (this.configService.get('audit.consoleLogEnabled')) {
-      this.logger.log(
-        JSON.stringify({
-          ...auditLog,
-          errorMessage,
-          statusCode,
-        }),
-      )
-    }
-
     try {
       await this.auditService.updateLog(auditLog.id, {
         errorMessage,
