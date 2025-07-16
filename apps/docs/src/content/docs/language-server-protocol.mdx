@@ -8,7 +8,8 @@ The Daytona SDK provides Language Server Protocol (LSP) support through Sandbox 
 
 ## Creating LSP Servers
 
-Daytona SDK provides an option to create LSP servers using Python and TypeScript. The `path_to_project` starting point defaults to the current Sandbox user's root - e.g. `workspace/project` implies `/home/[username]/workspace/project`, but by starting with `/`, you may define an absolute path as well.
+Daytona SDK provides an option to create LSP servers using Python and TypeScript. The `path_to_project` starting point defaults to the current Sandbox working directory. Uses the WORKDIR specified in
+the Dockerfile if present, or falling back to the user's home directory if not - e.g. `workspace/project` implies `/my-workdir/workspace/project`, but by starting with `/`, you may define an absolute path as well.
 
 <Tabs>
 <TabItem label="Python" icon="seti:python">

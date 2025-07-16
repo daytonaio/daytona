@@ -19,7 +19,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func (d *DockerClient) Start(ctx context.Context, containerId string) error {
+func (d *DockerClient) Start(ctx context.Context, containerId string, workdir string) error {
 	defer timer.Timer()()
 	d.cache.SetSandboxState(ctx, containerId, enums.SandboxStateStarting)
 
@@ -66,7 +66,7 @@ func (d *DockerClient) Start(ctx context.Context, containerId string) error {
 
 	processesCtx := context.Background()
 	go func() {
-		if err := d.startDaytonaDaemon(processesCtx, containerId); err != nil {
+		if err := d.startDaytonaDaemon(processesCtx, containerId, workdir); err != nil {
 			log.Errorf("Failed to start Daytona daemon: %s\n", err.Error())
 		}
 	}()

@@ -712,20 +712,12 @@
     "objectID": 89
   },
   {
-    "title": "Get commit history",
-    "description": "",
-    "tag": "Documentation",
-    "url": "/docs/git-operations#get-commit-history",
-    "slug": "/git-operations#get-commit-history",
-    "objectID": 90
-  },
-  {
     "title": "Remote Operations",
     "description": "Daytona SDK provides an option to work with remote repositories in Git.",
     "tag": "Documentation",
     "url": "/docs/git-operations#remote-operations",
     "slug": "/git-operations#remote-operations",
-    "objectID": 91
+    "objectID": 90
   },
   {
     "title": "Working with Remotes",
@@ -733,7 +725,7 @@
     "tag": "Documentation",
     "url": "/docs/git-operations#working-with-remotes",
     "slug": "/git-operations#working-with-remotes",
-    "objectID": 92
+    "objectID": 91
   },
   {
     "title": "Push changes",
@@ -741,7 +733,7 @@
     "tag": "Documentation",
     "url": "/docs/git-operations#push-changes",
     "slug": "/git-operations#push-changes",
-    "objectID": 93
+    "objectID": 92
   },
   {
     "title": "Pull changes",
@@ -749,15 +741,7 @@
     "tag": "Documentation",
     "url": "/docs/git-operations#pull-changes",
     "slug": "/git-operations#pull-changes",
-    "objectID": 94
-  },
-  {
-    "title": "List remotes",
-    "description": "",
-    "tag": "Documentation",
-    "url": "/docs/git-operations#list-remotes",
-    "slug": "/git-operations#list-remotes",
-    "objectID": 95
+    "objectID": 93
   },
   {
     "title": "Language Server Protocol",
@@ -765,7 +749,7 @@
     "tag": "Documentation",
     "url": "/docs/language-server-protocol",
     "slug": "/language-server-protocol",
-    "objectID": 96
+    "objectID": 94
   },
   {
     "title": "Creating LSP Servers",
@@ -773,7 +757,7 @@
     "tag": "Documentation",
     "url": "/docs/language-server-protocol#creating-lsp-servers",
     "slug": "/language-server-protocol#creating-lsp-servers",
-    "objectID": 97
+    "objectID": 95
   },
   {
     "title": "Create Sandbox",
@@ -781,7 +765,7 @@
     "tag": "Documentation",
     "url": "/docs/language-server-protocol#create-sandbox",
     "slug": "/language-server-protocol#create-sandbox",
-    "objectID": 98
+    "objectID": 96
   },
   {
     "title": "Create LSP server for Python",
@@ -789,7 +773,7 @@
     "tag": "Documentation",
     "url": "/docs/language-server-protocol#create-lsp-server-for-python",
     "slug": "/language-server-protocol#create-lsp-server-for-python",
-    "objectID": 99
+    "objectID": 97
   },
   {
     "title": "Supported Languages",
@@ -797,7 +781,7 @@
     "tag": "Documentation",
     "url": "/docs/language-server-protocol#supported-languages",
     "slug": "/language-server-protocol#supported-languages",
-    "objectID": 100
+    "objectID": 98
   },
   {
     "title": "Available language IDs",
@@ -805,7 +789,7 @@
     "tag": "Documentation",
     "url": "/docs/language-server-protocol#available-language-ids",
     "slug": "/language-server-protocol#available-language-ids",
-    "objectID": 101
+    "objectID": 99
   },
   {
     "title": "LSP Features",
@@ -813,7 +797,7 @@
     "tag": "Documentation",
     "url": "/docs/language-server-protocol#lsp-features",
     "slug": "/language-server-protocol#lsp-features",
-    "objectID": 102
+    "objectID": 100
   },
   {
     "title": "Code Completion",
@@ -821,7 +805,7 @@
     "tag": "Documentation",
     "url": "/docs/language-server-protocol#code-completion",
     "slug": "/language-server-protocol#code-completion",
-    "objectID": 103
+    "objectID": 101
   },
   {
     "title": "Limits",
@@ -829,7 +813,7 @@
     "tag": "Documentation",
     "url": "/docs/limits",
     "slug": "/limits",
-    "objectID": 104
+    "objectID": 102
   },
   {
     "title": "Manage usage dynamically",
@@ -837,7 +821,7 @@
     "tag": "Documentation",
     "url": "/docs/limits#manage-usage-dynamically",
     "slug": "/limits#manage-usage-dynamically",
-    "objectID": 105
+    "objectID": 103
   },
   {
     "title": "Tiers & Limit Increases",
@@ -845,7 +829,7 @@
     "tag": "Documentation",
     "url": "/docs/limits#tiers--limit-increases",
     "slug": "/limits#tiers--limit-increases",
-    "objectID": 106
+    "objectID": 104
   },
   {
     "title": "Need More?",
@@ -853,7 +837,7 @@
     "tag": "Documentation",
     "url": "/docs/limits#need-more",
     "slug": "/limits#need-more",
-    "objectID": 107
+    "objectID": 105
   },
   {
     "title": "Linked Accounts",
@@ -861,7 +845,7 @@
     "tag": "Documentation",
     "url": "/docs/linked-accounts",
     "slug": "/linked-accounts",
-    "objectID": 108
+    "objectID": 106
   },
   {
     "title": "Unlock higher usage limits",
@@ -869,7 +853,7 @@
     "tag": "Documentation",
     "url": "/docs/linked-accounts#unlock-higher-usage-limits",
     "slug": "/linked-accounts#unlock-higher-usage-limits",
-    "objectID": 109
+    "objectID": 107
   },
   {
     "title": "How to link an account",
@@ -877,7 +861,7 @@
     "tag": "Documentation",
     "url": "/docs/linked-accounts#how-to-link-an-account",
     "slug": "/linked-accounts#how-to-link-an-account",
-    "objectID": 110
+    "objectID": 108
   },
   {
     "title": "How to unlink an account",
@@ -885,7 +869,7 @@
     "tag": "Documentation",
     "url": "/docs/linked-accounts#how-to-unlink-an-account",
     "slug": "/linked-accounts#how-to-unlink-an-account",
-    "objectID": 111
+    "objectID": 109
   },
   {
     "title": "Need More?",
@@ -893,7 +877,7 @@
     "tag": "Documentation",
     "url": "/docs/linked-accounts#need-more",
     "slug": "/linked-accounts#need-more",
-    "objectID": 112
+    "objectID": 110
   },
   {
     "title": "Log Streaming",
@@ -901,7 +885,7 @@
     "tag": "Documentation",
     "url": "/docs/log-streaming",
     "slug": "/log-streaming",
-    "objectID": 113
+    "objectID": 111
   },
   {
     "title": "Asynchronous",
@@ -909,7 +893,7 @@
     "tag": "Documentation",
     "url": "/docs/log-streaming#asynchronous",
     "slug": "/log-streaming#asynchronous",
-    "objectID": 114
+    "objectID": 112
   },
   {
     "title": "Synchronous",
@@ -917,7 +901,7 @@
     "tag": "Documentation",
     "url": "/docs/log-streaming#synchronous",
     "slug": "/log-streaming#synchronous",
-    "objectID": 115
+    "objectID": 113
   },
   {
     "title": "Daytona MCP Server",
@@ -925,7 +909,7 @@
     "tag": "Documentation",
     "url": "/docs/mcp",
     "slug": "/mcp",
-    "objectID": 116
+    "objectID": 114
   },
   {
     "title": "Prerequisites",
@@ -933,7 +917,7 @@
     "tag": "Documentation",
     "url": "/docs/mcp#prerequisites",
     "slug": "/mcp#prerequisites",
-    "objectID": 117
+    "objectID": 115
   },
   {
     "title": "Installation and Setup",
@@ -941,7 +925,7 @@
     "tag": "Documentation",
     "url": "/docs/mcp#installation-and-setup",
     "slug": "/mcp#installation-and-setup",
-    "objectID": 118
+    "objectID": 116
   },
   {
     "title": "1. Install Daytona CLI",
@@ -949,7 +933,7 @@
     "tag": "Documentation",
     "url": "/docs/mcp#1-install-daytona-cli",
     "slug": "/mcp#1-install-daytona-cli",
-    "objectID": 119
+    "objectID": 117
   },
   {
     "title": "2. Authenticate with Daytona",
@@ -957,7 +941,7 @@
     "tag": "Documentation",
     "url": "/docs/mcp#2-authenticate-with-daytona",
     "slug": "/mcp#2-authenticate-with-daytona",
-    "objectID": 120
+    "objectID": 118
   },
   {
     "title": "3. Initialize MCP Server",
@@ -965,7 +949,7 @@
     "tag": "Documentation",
     "url": "/docs/mcp#3-initialize-mcp-server",
     "slug": "/mcp#3-initialize-mcp-server",
-    "objectID": 121
+    "objectID": 119
   },
   {
     "title": "4. Open Your AI Agent",
@@ -973,7 +957,7 @@
     "tag": "Documentation",
     "url": "/docs/mcp#4-open-your-ai-agent",
     "slug": "/mcp#4-open-your-ai-agent",
-    "objectID": 122
+    "objectID": 120
   },
   {
     "title": "Integration with Other AI Agents",
@@ -981,7 +965,7 @@
     "tag": "Documentation",
     "url": "/docs/mcp#integration-with-other-ai-agents",
     "slug": "/mcp#integration-with-other-ai-agents",
-    "objectID": 123
+    "objectID": 121
   },
   {
     "title": "Available Tools",
@@ -989,7 +973,7 @@
     "tag": "Documentation",
     "url": "/docs/mcp#available-tools",
     "slug": "/mcp#available-tools",
-    "objectID": 124
+    "objectID": 122
   },
   {
     "title": "Sandbox Management",
@@ -997,7 +981,7 @@
     "tag": "Documentation",
     "url": "/docs/mcp#sandbox-management",
     "slug": "/mcp#sandbox-management",
-    "objectID": 125
+    "objectID": 123
   },
   {
     "title": "File Operations",
@@ -1005,7 +989,7 @@
     "tag": "Documentation",
     "url": "/docs/mcp#file-operations",
     "slug": "/mcp#file-operations",
-    "objectID": 126
+    "objectID": 124
   },
   {
     "title": "Preview",
@@ -1013,7 +997,7 @@
     "tag": "Documentation",
     "url": "/docs/mcp#preview",
     "slug": "/mcp#preview",
-    "objectID": 127
+    "objectID": 125
   },
   {
     "title": "Git Operations",
@@ -1021,7 +1005,7 @@
     "tag": "Documentation",
     "url": "/docs/mcp#git-operations",
     "slug": "/mcp#git-operations",
-    "objectID": 128
+    "objectID": 126
   },
   {
     "title": "Command Execution",
@@ -1029,7 +1013,7 @@
     "tag": "Documentation",
     "url": "/docs/mcp#command-execution",
     "slug": "/mcp#command-execution",
-    "objectID": 129
+    "objectID": 127
   },
   {
     "title": "Troubleshooting",
@@ -1037,7 +1021,7 @@
     "tag": "Documentation",
     "url": "/docs/mcp#troubleshooting",
     "slug": "/mcp#troubleshooting",
-    "objectID": 130
+    "objectID": 128
   },
   {
     "title": "Support",
@@ -1045,7 +1029,7 @@
     "tag": "Documentation",
     "url": "/docs/mcp#support",
     "slug": "/mcp#support",
-    "objectID": 131
+    "objectID": 129
   },
   {
     "title": "Organizations",
@@ -1053,7 +1037,7 @@
     "tag": "Documentation",
     "url": "/docs/organizations",
     "slug": "/organizations",
-    "objectID": 132
+    "objectID": 130
   },
   {
     "title": "Organization Roles",
@@ -1061,7 +1045,7 @@
     "tag": "Documentation",
     "url": "/docs/organizations#organization-roles",
     "slug": "/organizations#organization-roles",
-    "objectID": 133
+    "objectID": 131
   },
   {
     "title": "Administrative Actions",
@@ -1069,7 +1053,7 @@
     "tag": "Documentation",
     "url": "/docs/organizations#administrative-actions",
     "slug": "/organizations#administrative-actions",
-    "objectID": 134
+    "objectID": 132
   },
   {
     "title": "Inviting New Users",
@@ -1077,7 +1061,7 @@
     "tag": "Documentation",
     "url": "/docs/organizations#inviting-new-users",
     "slug": "/organizations#inviting-new-users",
-    "objectID": 135
+    "objectID": 133
   },
   {
     "title": "Available Assignments",
@@ -1085,7 +1069,7 @@
     "tag": "Documentation",
     "url": "/docs/organizations#available-assignments",
     "slug": "/organizations#available-assignments",
-    "objectID": 136
+    "objectID": 134
   },
   {
     "title": "Managing Invitations",
@@ -1093,7 +1077,7 @@
     "tag": "Documentation",
     "url": "/docs/organizations#managing-invitations",
     "slug": "/organizations#managing-invitations",
-    "objectID": 137
+    "objectID": 135
   },
   {
     "title": "Settings",
@@ -1101,7 +1085,7 @@
     "tag": "Documentation",
     "url": "/docs/organizations#settings",
     "slug": "/organizations#settings",
-    "objectID": 138
+    "objectID": 136
   },
   {
     "title": "Preview & Authentication",
@@ -1109,7 +1093,7 @@
     "tag": "Documentation",
     "url": "/docs/preview-and-authentication",
     "slug": "/preview-and-authentication",
-    "objectID": 139
+    "objectID": 137
   },
   {
     "title": "Process and Code Execution",
@@ -1117,7 +1101,7 @@
     "tag": "Documentation",
     "url": "/docs/process-code-execution",
     "slug": "/process-code-execution",
-    "objectID": 140
+    "objectID": 138
   },
   {
     "title": "Code Execution",
@@ -1125,7 +1109,7 @@
     "tag": "Documentation",
     "url": "/docs/process-code-execution#code-execution",
     "slug": "/process-code-execution#code-execution",
-    "objectID": 141
+    "objectID": 139
   },
   {
     "title": "Running Code",
@@ -1133,7 +1117,7 @@
     "tag": "Documentation",
     "url": "/docs/process-code-execution#running-code",
     "slug": "/process-code-execution#running-code",
-    "objectID": 142
+    "objectID": 140
   },
   {
     "title": "Run Python code",
@@ -1141,7 +1125,7 @@
     "tag": "Documentation",
     "url": "/docs/process-code-execution#run-python-code",
     "slug": "/process-code-execution#run-python-code",
-    "objectID": 143
+    "objectID": 141
   },
   {
     "title": "Process Execution",
@@ -1149,7 +1133,7 @@
     "tag": "Documentation",
     "url": "/docs/process-code-execution#process-execution",
     "slug": "/process-code-execution#process-execution",
-    "objectID": 144
+    "objectID": 142
   },
   {
     "title": "Running Commands",
@@ -1157,7 +1141,7 @@
     "tag": "Documentation",
     "url": "/docs/process-code-execution#running-commands",
     "slug": "/process-code-execution#running-commands",
-    "objectID": 145
+    "objectID": 143
   },
   {
     "title": "Execute any shell command",
@@ -1165,7 +1149,7 @@
     "tag": "Documentation",
     "url": "/docs/process-code-execution#execute-any-shell-command",
     "slug": "/process-code-execution#execute-any-shell-command",
-    "objectID": 146
+    "objectID": 144
   },
   {
     "title": "Setting a working directory and a timeout",
@@ -1173,7 +1157,7 @@
     "tag": "Documentation",
     "url": "/docs/process-code-execution#setting-a-working-directory-and-a-timeout",
     "slug": "/process-code-execution#setting-a-working-directory-and-a-timeout",
-    "objectID": 147
+    "objectID": 145
   },
   {
     "title": "Passing environment variables",
@@ -1181,7 +1165,7 @@
     "tag": "Documentation",
     "url": "/docs/process-code-execution#passing-environment-variables",
     "slug": "/process-code-execution#passing-environment-variables",
-    "objectID": 148
+    "objectID": 146
   },
   {
     "title": "Sessions (Background Processes)",
@@ -1189,7 +1173,7 @@
     "tag": "Documentation",
     "url": "/docs/process-code-execution#sessions-background-processes",
     "slug": "/process-code-execution#sessions-background-processes",
-    "objectID": 149
+    "objectID": 147
   },
   {
     "title": "Managing Long-Running Processes",
@@ -1197,7 +1181,7 @@
     "tag": "Documentation",
     "url": "/docs/process-code-execution#managing-long-running-processes",
     "slug": "/process-code-execution#managing-long-running-processes",
-    "objectID": 150
+    "objectID": 148
   },
   {
     "title": "Check session's executed commands",
@@ -1205,7 +1189,7 @@
     "tag": "Documentation",
     "url": "/docs/process-code-execution#check-sessions-executed-commands",
     "slug": "/process-code-execution#check-sessions-executed-commands",
-    "objectID": 151
+    "objectID": 149
   },
   {
     "title": "List all running sessions",
@@ -1213,7 +1197,7 @@
     "tag": "Documentation",
     "url": "/docs/process-code-execution#list-all-running-sessions",
     "slug": "/process-code-execution#list-all-running-sessions",
-    "objectID": 152
+    "objectID": 150
   },
   {
     "title": "Best Practices",
@@ -1221,7 +1205,7 @@
     "tag": "Documentation",
     "url": "/docs/process-code-execution#best-practices",
     "slug": "/process-code-execution#best-practices",
-    "objectID": 153
+    "objectID": 151
   },
   {
     "title": "Common Issues",
@@ -1229,7 +1213,7 @@
     "tag": "Documentation",
     "url": "/docs/process-code-execution#common-issues",
     "slug": "/process-code-execution#common-issues",
-    "objectID": 154
+    "objectID": 152
   },
   {
     "title": "Process Execution Failed",
@@ -1237,7 +1221,7 @@
     "tag": "Documentation",
     "url": "/docs/process-code-execution#process-execution-failed",
     "slug": "/process-code-execution#process-execution-failed",
-    "objectID": 155
+    "objectID": 153
   },
   {
     "title": "Process Timeout",
@@ -1245,7 +1229,7 @@
     "tag": "Documentation",
     "url": "/docs/process-code-execution#process-timeout",
     "slug": "/process-code-execution#process-timeout",
-    "objectID": 156
+    "objectID": 154
   },
   {
     "title": "Resource Limits",
@@ -1253,7 +1237,7 @@
     "tag": "Documentation",
     "url": "/docs/process-code-execution#resource-limits",
     "slug": "/process-code-execution#resource-limits",
-    "objectID": 157
+    "objectID": 155
   },
   {
     "title": "Region Selection",
@@ -1261,7 +1245,7 @@
     "tag": "Documentation",
     "url": "/docs/regions",
     "slug": "/regions",
-    "objectID": 158
+    "objectID": 156
   },
   {
     "title": "Sandbox Management",
@@ -1269,7 +1253,7 @@
     "tag": "Documentation",
     "url": "/docs/sandbox-management",
     "slug": "/sandbox-management",
-    "objectID": 159
+    "objectID": 157
   },
   {
     "title": "Sandbox Lifecycle",
@@ -1277,7 +1261,7 @@
     "tag": "Documentation",
     "url": "/docs/sandbox-management#sandbox-lifecycle",
     "slug": "/sandbox-management#sandbox-lifecycle",
-    "objectID": 160
+    "objectID": 158
   },
   {
     "title": "Creating Sandboxes",
@@ -1285,7 +1269,7 @@
     "tag": "Documentation",
     "url": "/docs/sandbox-management#creating-sandboxes",
     "slug": "/sandbox-management#creating-sandboxes",
-    "objectID": 161
+    "objectID": 159
   },
   {
     "title": "Basic Sandbox Creation",
@@ -1293,7 +1277,7 @@
     "tag": "Documentation",
     "url": "/docs/sandbox-management#basic-sandbox-creation",
     "slug": "/sandbox-management#basic-sandbox-creation",
-    "objectID": 162
+    "objectID": 160
   },
   {
     "title": "Create a basic Sandbox",
@@ -1301,7 +1285,7 @@
     "tag": "Documentation",
     "url": "/docs/sandbox-management#create-a-basic-sandbox",
     "slug": "/sandbox-management#create-a-basic-sandbox",
-    "objectID": 163
+    "objectID": 161
   },
   {
     "title": "Create a Sandbox with specific language",
@@ -1309,7 +1293,7 @@
     "tag": "Documentation",
     "url": "/docs/sandbox-management#create-a-sandbox-with-specific-language",
     "slug": "/sandbox-management#create-a-sandbox-with-specific-language",
-    "objectID": 164
+    "objectID": 162
   },
   {
     "title": "Create a Sandbox with custom labels",
@@ -1317,7 +1301,7 @@
     "tag": "Documentation",
     "url": "/docs/sandbox-management#create-a-sandbox-with-custom-labels",
     "slug": "/sandbox-management#create-a-sandbox-with-custom-labels",
-    "objectID": 165
+    "objectID": 163
   },
   {
     "title": "Sandbox Resources",
@@ -1325,7 +1309,7 @@
     "tag": "Documentation",
     "url": "/docs/sandbox-management#sandbox-resources",
     "slug": "/sandbox-management#sandbox-resources",
-    "objectID": 166
+    "objectID": 164
   },
   {
     "title": "Create a Sandbox with custom resources",
@@ -1333,7 +1317,7 @@
     "tag": "Documentation",
     "url": "/docs/sandbox-management#create-a-sandbox-with-custom-resources",
     "slug": "/sandbox-management#create-a-sandbox-with-custom-resources",
-    "objectID": 167
+    "objectID": 165
   },
   {
     "title": "Sandbox Information",
@@ -1341,7 +1325,7 @@
     "tag": "Documentation",
     "url": "/docs/sandbox-management#sandbox-information",
     "slug": "/sandbox-management#sandbox-information",
-    "objectID": 168
+    "objectID": 166
   },
   {
     "title": "Get Sandbox ID",
@@ -1349,7 +1333,7 @@
     "tag": "Documentation",
     "url": "/docs/sandbox-management#get-sandbox-id",
     "slug": "/sandbox-management#get-sandbox-id",
-    "objectID": 169
+    "objectID": 167
   },
   {
     "title": "Get the root directory of the Sandbox user",
@@ -1357,7 +1341,7 @@
     "tag": "Documentation",
     "url": "/docs/sandbox-management#get-the-root-directory-of-the-sandbox-user",
     "slug": "/sandbox-management#get-the-root-directory-of-the-sandbox-user",
-    "objectID": 170
+    "objectID": 168
   },
   {
     "title": "Get the Sandbox id, auto-stop interval and state",
@@ -1365,7 +1349,7 @@
     "tag": "Documentation",
     "url": "/docs/sandbox-management#get-the-sandbox-id-auto-stop-interval-and-state",
     "slug": "/sandbox-management#get-the-sandbox-id-auto-stop-interval-and-state",
-    "objectID": 171
+    "objectID": 169
   },
   {
     "title": "Stop and Start Sandbox",
@@ -1373,7 +1357,7 @@
     "tag": "Documentation",
     "url": "/docs/sandbox-management#stop-and-start-sandbox",
     "slug": "/sandbox-management#stop-and-start-sandbox",
-    "objectID": 172
+    "objectID": 170
   },
   {
     "title": "Stop Sandbox",
@@ -1381,7 +1365,7 @@
     "tag": "Documentation",
     "url": "/docs/sandbox-management#stop-sandbox",
     "slug": "/sandbox-management#stop-sandbox",
-    "objectID": 173
+    "objectID": 171
   },
   {
     "title": "The sandbox ID can later be used to find the sandbox and start it",
@@ -1389,7 +1373,7 @@
     "tag": "Documentation",
     "url": "/docs/sandbox-management#the-sandbox-id-can-later-be-used-to-find-the-sandbox-and-start-it",
     "slug": "/sandbox-management#the-sandbox-id-can-later-be-used-to-find-the-sandbox-and-start-it",
-    "objectID": 174
+    "objectID": 172
   },
   {
     "title": "Start Sandbox",
@@ -1397,7 +1381,7 @@
     "tag": "Documentation",
     "url": "/docs/sandbox-management#start-sandbox",
     "slug": "/sandbox-management#start-sandbox",
-    "objectID": 175
+    "objectID": 173
   },
   {
     "title": "Archive Sandbox",
@@ -1405,7 +1389,15 @@
     "tag": "Documentation",
     "url": "/docs/sandbox-management#archive-sandbox",
     "slug": "/sandbox-management#archive-sandbox",
-    "objectID": 176
+    "objectID": 174
+  },
+  {
+    "title": "Archive Sandbox",
+    "description": "",
+    "tag": "Documentation",
+    "url": "/docs/sandbox-management#archive-sandbox",
+    "slug": "/sandbox-management#archive-sandbox",
+    "objectID": 175
   },
   {
     "title": "Delete Sandbox",
@@ -1413,7 +1405,7 @@
     "tag": "Documentation",
     "url": "/docs/sandbox-management#delete-sandbox",
     "slug": "/sandbox-management#delete-sandbox",
-    "objectID": 177
+    "objectID": 176
   },
   {
     "title": "Delete Sandbox",
@@ -1421,7 +1413,7 @@
     "tag": "Documentation",
     "url": "/docs/sandbox-management#delete-sandbox",
     "slug": "/sandbox-management#delete-sandbox",
-    "objectID": 178
+    "objectID": 177
   },
   {
     "title": "Automated Lifecycle Management",
@@ -1429,7 +1421,7 @@
     "tag": "Documentation",
     "url": "/docs/sandbox-management#automated-lifecycle-management",
     "slug": "/sandbox-management#automated-lifecycle-management",
-    "objectID": 179
+    "objectID": 178
   },
   {
     "title": "Auto-stop Interval",
@@ -1437,7 +1429,7 @@
     "tag": "Documentation",
     "url": "/docs/sandbox-management#auto-stop-interval",
     "slug": "/sandbox-management#auto-stop-interval",
-    "objectID": 180
+    "objectID": 179
   },
   {
     "title": "Auto-archive Interval",
@@ -1445,7 +1437,7 @@
     "tag": "Documentation",
     "url": "/docs/sandbox-management#auto-archive-interval",
     "slug": "/sandbox-management#auto-archive-interval",
-    "objectID": 181
+    "objectID": 180
   },
   {
     "title": "Auto-delete Interval",
@@ -1453,7 +1445,7 @@
     "tag": "Documentation",
     "url": "/docs/sandbox-management#auto-delete-interval",
     "slug": "/sandbox-management#auto-delete-interval",
-    "objectID": 182
+    "objectID": 181
   },
   {
     "title": "Delete the Sandbox immediately after it has been stopped",
@@ -1461,7 +1453,7 @@
     "tag": "Documentation",
     "url": "/docs/sandbox-management#delete-the-sandbox-immediately-after-it-has-been-stopped",
     "slug": "/sandbox-management#delete-the-sandbox-immediately-after-it-has-been-stopped",
-    "objectID": 183
+    "objectID": 182
   },
   {
     "title": "Disable auto-deletion",
@@ -1469,7 +1461,7 @@
     "tag": "Documentation",
     "url": "/docs/sandbox-management#disable-auto-deletion",
     "slug": "/sandbox-management#disable-auto-deletion",
-    "objectID": 184
+    "objectID": 183
   },
   {
     "title": "Run Indefinitely",
@@ -1477,7 +1469,7 @@
     "tag": "Documentation",
     "url": "/docs/sandbox-management#run-indefinitely",
     "slug": "/sandbox-management#run-indefinitely",
-    "objectID": 185
+    "objectID": 184
   },
   {
     "title": "Snapshots",
@@ -1485,7 +1477,7 @@
     "tag": "Documentation",
     "url": "/docs/snapshots",
     "slug": "/snapshots",
-    "objectID": 186
+    "objectID": 185
   },
   {
     "title": "Creating Snapshots",
@@ -1493,7 +1485,7 @@
     "tag": "Documentation",
     "url": "/docs/snapshots#creating-snapshots",
     "slug": "/snapshots#creating-snapshots",
-    "objectID": 187
+    "objectID": 186
   },
   {
     "title": "Snapshot Resources",
@@ -1501,7 +1493,7 @@
     "tag": "Documentation",
     "url": "/docs/snapshots#snapshot-resources",
     "slug": "/snapshots#snapshot-resources",
-    "objectID": 188
+    "objectID": 187
   },
   {
     "title": "Create a Snapshot with custom resources",
@@ -1509,7 +1501,7 @@
     "tag": "Documentation",
     "url": "/docs/snapshots#create-a-snapshot-with-custom-resources",
     "slug": "/snapshots#create-a-snapshot-with-custom-resources",
-    "objectID": 189
+    "objectID": 188
   },
   {
     "title": "Create a Sandbox with custom Snapshot",
@@ -1517,7 +1509,7 @@
     "tag": "Documentation",
     "url": "/docs/snapshots#create-a-sandbox-with-custom-snapshot",
     "slug": "/snapshots#create-a-sandbox-with-custom-snapshot",
-    "objectID": 190
+    "objectID": 189
   },
   {
     "title": "Images from Private Registries",
@@ -1525,7 +1517,7 @@
     "tag": "Documentation",
     "url": "/docs/snapshots#images-from-private-registries",
     "slug": "/snapshots#images-from-private-registries",
-    "objectID": 191
+    "objectID": 190
   },
   {
     "title": "Using a Local Image",
@@ -1533,7 +1525,7 @@
     "tag": "Documentation",
     "url": "/docs/snapshots#using-a-local-image",
     "slug": "/snapshots#using-a-local-image",
-    "objectID": 192
+    "objectID": 191
   },
   {
     "title": "Deleting Snapshots",
@@ -1541,7 +1533,7 @@
     "tag": "Documentation",
     "url": "/docs/snapshots#deleting-snapshots",
     "slug": "/snapshots#deleting-snapshots",
-    "objectID": 193
+    "objectID": 192
   },
   {
     "title": "Default Snapshot",
@@ -1549,7 +1541,7 @@
     "tag": "Documentation",
     "url": "/docs/snapshots#default-snapshot",
     "slug": "/snapshots#default-snapshot",
-    "objectID": 194
+    "objectID": 193
   },
   {
     "title": "CLI",
@@ -1557,7 +1549,7 @@
     "tag": "Documentation",
     "url": "/docs/tools/cli",
     "slug": "/tools/cli",
-    "objectID": 195
+    "objectID": 194
   },
   {
     "title": "daytona",
@@ -1565,7 +1557,7 @@
     "tag": "Documentation",
     "url": "/docs/tools/cli#daytona",
     "slug": "/tools/cli#daytona",
-    "objectID": 196
+    "objectID": 195
   },
   {
     "title": "daytona autocomplete",
@@ -1573,7 +1565,7 @@
     "tag": "Documentation",
     "url": "/docs/tools/cli#daytona-autocomplete",
     "slug": "/tools/cli#daytona-autocomplete",
-    "objectID": 197
+    "objectID": 196
   },
   {
     "title": "daytona docs",
@@ -1581,7 +1573,7 @@
     "tag": "Documentation",
     "url": "/docs/tools/cli#daytona-docs",
     "slug": "/tools/cli#daytona-docs",
-    "objectID": 198
+    "objectID": 197
   },
   {
     "title": "daytona login",
@@ -1589,7 +1581,7 @@
     "tag": "Documentation",
     "url": "/docs/tools/cli#daytona-login",
     "slug": "/tools/cli#daytona-login",
-    "objectID": 199
+    "objectID": 198
   },
   {
     "title": "daytona logout",
@@ -1597,7 +1589,7 @@
     "tag": "Documentation",
     "url": "/docs/tools/cli#daytona-logout",
     "slug": "/tools/cli#daytona-logout",
-    "objectID": 200
+    "objectID": 199
   },
   {
     "title": "daytona mcp",
@@ -1605,7 +1597,7 @@
     "tag": "Documentation",
     "url": "/docs/tools/cli#daytona-mcp",
     "slug": "/tools/cli#daytona-mcp",
-    "objectID": 201
+    "objectID": 200
   },
   {
     "title": "daytona mcp config",
@@ -1613,7 +1605,7 @@
     "tag": "Documentation",
     "url": "/docs/tools/cli#daytona-mcp-config",
     "slug": "/tools/cli#daytona-mcp-config",
-    "objectID": 202
+    "objectID": 201
   },
   {
     "title": "daytona mcp init",
@@ -1621,7 +1613,7 @@
     "tag": "Documentation",
     "url": "/docs/tools/cli#daytona-mcp-init",
     "slug": "/tools/cli#daytona-mcp-init",
-    "objectID": 203
+    "objectID": 202
   },
   {
     "title": "daytona mcp start",
@@ -1629,7 +1621,7 @@
     "tag": "Documentation",
     "url": "/docs/tools/cli#daytona-mcp-start",
     "slug": "/tools/cli#daytona-mcp-start",
-    "objectID": 204
+    "objectID": 203
   },
   {
     "title": "daytona organization",
@@ -1637,7 +1629,7 @@
     "tag": "Documentation",
     "url": "/docs/tools/cli#daytona-organization",
     "slug": "/tools/cli#daytona-organization",
-    "objectID": 205
+    "objectID": 204
   },
   {
     "title": "daytona organization create",
@@ -1645,7 +1637,7 @@
     "tag": "Documentation",
     "url": "/docs/tools/cli#daytona-organization-create",
     "slug": "/tools/cli#daytona-organization-create",
-    "objectID": 206
+    "objectID": 205
   },
   {
     "title": "daytona organization delete",
@@ -1653,7 +1645,7 @@
     "tag": "Documentation",
     "url": "/docs/tools/cli#daytona-organization-delete",
     "slug": "/tools/cli#daytona-organization-delete",
-    "objectID": 207
+    "objectID": 206
   },
   {
     "title": "daytona organization list",
@@ -1661,7 +1653,7 @@
     "tag": "Documentation",
     "url": "/docs/tools/cli#daytona-organization-list",
     "slug": "/tools/cli#daytona-organization-list",
-    "objectID": 208
+    "objectID": 207
   },
   {
     "title": "daytona organization use",
@@ -1669,7 +1661,7 @@
     "tag": "Documentation",
     "url": "/docs/tools/cli#daytona-organization-use",
     "slug": "/tools/cli#daytona-organization-use",
-    "objectID": 209
+    "objectID": 208
   },
   {
     "title": "daytona sandbox",
@@ -1677,7 +1669,7 @@
     "tag": "Documentation",
     "url": "/docs/tools/cli#daytona-sandbox",
     "slug": "/tools/cli#daytona-sandbox",
-    "objectID": 210
+    "objectID": 209
   },
   {
     "title": "daytona sandbox create",
@@ -1685,7 +1677,7 @@
     "tag": "Documentation",
     "url": "/docs/tools/cli#daytona-sandbox-create",
     "slug": "/tools/cli#daytona-sandbox-create",
-    "objectID": 211
+    "objectID": 210
   },
   {
     "title": "daytona sandbox delete",
@@ -1693,7 +1685,7 @@
     "tag": "Documentation",
     "url": "/docs/tools/cli#daytona-sandbox-delete",
     "slug": "/tools/cli#daytona-sandbox-delete",
-    "objectID": 212
+    "objectID": 211
   },
   {
     "title": "daytona sandbox info",
@@ -1701,7 +1693,7 @@
     "tag": "Documentation",
     "url": "/docs/tools/cli#daytona-sandbox-info",
     "slug": "/tools/cli#daytona-sandbox-info",
-    "objectID": 213
+    "objectID": 212
   },
   {
     "title": "daytona sandbox list",
@@ -1709,7 +1701,7 @@
     "tag": "Documentation",
     "url": "/docs/tools/cli#daytona-sandbox-list",
     "slug": "/tools/cli#daytona-sandbox-list",
-    "objectID": 214
+    "objectID": 213
   },
   {
     "title": "daytona sandbox start",
@@ -1717,7 +1709,7 @@
     "tag": "Documentation",
     "url": "/docs/tools/cli#daytona-sandbox-start",
     "slug": "/tools/cli#daytona-sandbox-start",
-    "objectID": 215
+    "objectID": 214
   },
   {
     "title": "daytona sandbox stop",
@@ -1725,7 +1717,7 @@
     "tag": "Documentation",
     "url": "/docs/tools/cli#daytona-sandbox-stop",
     "slug": "/tools/cli#daytona-sandbox-stop",
-    "objectID": 216
+    "objectID": 215
   },
   {
     "title": "daytona snapshot",
@@ -1733,7 +1725,7 @@
     "tag": "Documentation",
     "url": "/docs/tools/cli#daytona-snapshot",
     "slug": "/tools/cli#daytona-snapshot",
-    "objectID": 217
+    "objectID": 216
   },
   {
     "title": "daytona snapshot create",
@@ -1741,7 +1733,7 @@
     "tag": "Documentation",
     "url": "/docs/tools/cli#daytona-snapshot-create",
     "slug": "/tools/cli#daytona-snapshot-create",
-    "objectID": 218
+    "objectID": 217
   },
   {
     "title": "daytona snapshot delete",
@@ -1749,7 +1741,7 @@
     "tag": "Documentation",
     "url": "/docs/tools/cli#daytona-snapshot-delete",
     "slug": "/tools/cli#daytona-snapshot-delete",
-    "objectID": 219
+    "objectID": 218
   },
   {
     "title": "daytona snapshot list",
@@ -1757,7 +1749,7 @@
     "tag": "Documentation",
     "url": "/docs/tools/cli#daytona-snapshot-list",
     "slug": "/tools/cli#daytona-snapshot-list",
-    "objectID": 220
+    "objectID": 219
   },
   {
     "title": "daytona snapshot push",
@@ -1765,7 +1757,7 @@
     "tag": "Documentation",
     "url": "/docs/tools/cli#daytona-snapshot-push",
     "slug": "/tools/cli#daytona-snapshot-push",
-    "objectID": 221
+    "objectID": 220
   },
   {
     "title": "daytona version",
@@ -1773,7 +1765,7 @@
     "tag": "Documentation",
     "url": "/docs/tools/cli#daytona-version",
     "slug": "/tools/cli#daytona-version",
-    "objectID": 222
+    "objectID": 221
   },
   {
     "title": "daytona volume",
@@ -1781,7 +1773,7 @@
     "tag": "Documentation",
     "url": "/docs/tools/cli#daytona-volume",
     "slug": "/tools/cli#daytona-volume",
-    "objectID": 223
+    "objectID": 222
   },
   {
     "title": "daytona volume create",
@@ -1789,7 +1781,7 @@
     "tag": "Documentation",
     "url": "/docs/tools/cli#daytona-volume-create",
     "slug": "/tools/cli#daytona-volume-create",
-    "objectID": 224
+    "objectID": 223
   },
   {
     "title": "daytona volume delete",
@@ -1797,7 +1789,7 @@
     "tag": "Documentation",
     "url": "/docs/tools/cli#daytona-volume-delete",
     "slug": "/tools/cli#daytona-volume-delete",
-    "objectID": 225
+    "objectID": 224
   },
   {
     "title": "daytona volume get",
@@ -1805,7 +1797,7 @@
     "tag": "Documentation",
     "url": "/docs/tools/cli#daytona-volume-get",
     "slug": "/tools/cli#daytona-volume-get",
-    "objectID": 226
+    "objectID": 225
   },
   {
     "title": "daytona volume list",
@@ -1813,7 +1805,7 @@
     "tag": "Documentation",
     "url": "/docs/tools/cli#daytona-volume-list",
     "slug": "/tools/cli#daytona-volume-list",
-    "objectID": 227
+    "objectID": 226
   },
   {
     "title": "Volumes",
@@ -1821,7 +1813,7 @@
     "tag": "Documentation",
     "url": "/docs/volumes",
     "slug": "/volumes",
-    "objectID": 228
+    "objectID": 227
   },
   {
     "title": "Creating Volumes",
@@ -1829,7 +1821,7 @@
     "tag": "Documentation",
     "url": "/docs/volumes#creating-volumes",
     "slug": "/volumes#creating-volumes",
-    "objectID": 229
+    "objectID": 228
   },
   {
     "title": "Mounting Volumes to Sandboxes",
@@ -1837,7 +1829,7 @@
     "tag": "Documentation",
     "url": "/docs/volumes#mounting-volumes-to-sandboxes",
     "slug": "/volumes#mounting-volumes-to-sandboxes",
-    "objectID": 230
+    "objectID": 229
   },
   {
     "title": "Create a new volume or get an existing one",
@@ -1845,7 +1837,7 @@
     "tag": "Documentation",
     "url": "/docs/volumes#create-a-new-volume-or-get-an-existing-one",
     "slug": "/volumes#create-a-new-volume-or-get-an-existing-one",
-    "objectID": 231
+    "objectID": 230
   },
   {
     "title": "Mount the volume to the sandbox",
@@ -1853,7 +1845,7 @@
     "tag": "Documentation",
     "url": "/docs/volumes#mount-the-volume-to-the-sandbox",
     "slug": "/volumes#mount-the-volume-to-the-sandbox",
-    "objectID": 232
+    "objectID": 231
   },
   {
     "title": "When you're done with the sandbox, you can remove it",
@@ -1861,7 +1853,7 @@
     "tag": "Documentation",
     "url": "/docs/volumes#when-youre-done-with-the-sandbox-you-can-remove-it",
     "slug": "/volumes#when-youre-done-with-the-sandbox-you-can-remove-it",
-    "objectID": 233
+    "objectID": 232
   },
   {
     "title": "The volume will persist even after the sandbox is removed",
@@ -1869,7 +1861,7 @@
     "tag": "Documentation",
     "url": "/docs/volumes#the-volume-will-persist-even-after-the-sandbox-is-removed",
     "slug": "/volumes#the-volume-will-persist-even-after-the-sandbox-is-removed",
-    "objectID": 234
+    "objectID": 233
   },
   {
     "title": "Deleting Volumes",
@@ -1877,7 +1869,7 @@
     "tag": "Documentation",
     "url": "/docs/volumes#deleting-volumes",
     "slug": "/volumes#deleting-volumes",
-    "objectID": 235
+    "objectID": 234
   },
   {
     "title": "Working with Volumes",
@@ -1885,7 +1877,7 @@
     "tag": "Documentation",
     "url": "/docs/volumes#working-with-volumes",
     "slug": "/volumes#working-with-volumes",
-    "objectID": 236
+    "objectID": 235
   },
   {
     "title": "Limitations",
@@ -1893,7 +1885,7 @@
     "tag": "Documentation",
     "url": "/docs/volumes#limitations",
     "slug": "/volumes#limitations",
-    "objectID": 237
+    "objectID": 236
   },
   {
     "title": "Web Terminal",
@@ -1901,6 +1893,6 @@
     "tag": "Documentation",
     "url": "/docs/web-terminal",
     "slug": "/web-terminal",
-    "objectID": 238
+    "objectID": 237
   }
 ]
