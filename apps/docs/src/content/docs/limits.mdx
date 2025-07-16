@@ -4,41 +4,41 @@ title: Limits
 
 Daytona enforces resource limits to ensure fair usage and stability across all organizations. Your organization has access to a compute pool consisting of:
 
-- **vCPU** — total CPU cores available
-- **Memory** — total RAM available
-- **Disk** — total disk space across sandboxes
+- **vCPU** — Total CPU cores available
+- **Memory** — Total RAM available
+- **Storage** — Total disk space available
 
 These resources are pooled and shared across all running Sandboxes.  
-The number of Sandboxes you can run at once depends on how much CPU, RAM, and disk each one uses. You can see how to configure and estimate resource usage in the [Sandbox Management docs](https://www.daytona.io/docs/sandbox-management/).
-
-:::tip
-
-### Manage usage dynamically
-
-Only **Running** Sandboxes count against your vCPU, memory, and disk limits.  
-Use **Stop**, **Archive**, or **Delete** to manage resources:
-
-- **Stopped** Sandboxes free up CPU and memory but still consume disk.
-- **Archived** Sandboxes free up all compute and move data to cold storage (no quota impact).
-- **Deleted** Sandboxes are permanently removed and free up all resources, including disk.
-
-:::
-
-Check your current usage and limits in the [Dashboard](https://app.daytona.io/dashboard/limits).
+The number of Sandboxes you can run at once depends on how much CPU, RAM, and storage each one uses.   You can see how to configure and estimate resource usage in the [Sandbox Management docs](https://www.daytona.io/docs/sandbox-management/).
 
 ## Tiers & Limit Increases
 
 Organizations are automatically placed into a Tier based on verification status.  
 You can unlock higher limits by completing the following steps:
 
-| Tier   | Compute Pool (vCPU / RAM / Disk) | Access Requirements                                                                                                     |
-| ------ | -------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| Tier 1 | 10 / 10GiB / 30GiB               | Email verified                                                                                                          |
-| Tier 2 | 100 / 200GiB / 300GiB            | Credit card linked, [GitHub connected](https://www.daytona.io/docs/linked-accounts#how-to-link-an-account), $10 top-up. |
-| Tier 3 | Everything bigger 🚀             | Coming soon.                                                                                                            |
-| Custom | Custom limits                    | Contact [support@daytona.io](mailto:support@daytona.io)                                                                 |
+| Tier     | Resources (vCPU / RAM / Storage) | Access Requirements                |
+|----------|----------------------------------|------------------------------------|
+| Tier 1   | 10 / 10GiB / 30GiB               | Email verified                     |
+| Tier 2   | 100 / 200GiB / 300GiB            | Credit card linked, $10 top-up, [GitHub connected](https://www.daytona.io/docs/linked-accounts#how-to-link-an-account). |
+| Tier 3   | Even more resources              | Coming soon. |
+| Custom   | Custom limits                    | Contact [support@daytona.io](mailto:support@daytona.io) |
 
 You’ll be automatically upgraded once you meet the criteria.
+
+:::tip
+
+### Manage usage dynamically
+
+This is how different sandbox states affect your available resources:
+
+- **Running:** Uses Compute, Memory, and Storage.
+- **Stopped:** Frees up Compute and Memory, but uses Storage.
+- **Archived:** Frees up all resources by moving data to cold storage.
+- **Deleted:** Permanently removed, all resources freed.
+
+:::
+
+Check your current usage and limits in the [Dashboard](https://app.daytona.io/dashboard/limits).
 
 ## Need More?
 
