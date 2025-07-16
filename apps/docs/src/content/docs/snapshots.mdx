@@ -102,7 +102,7 @@ main()
 
 ### Snapshot Resources
 
-Snapshots contain the resource requirements for Daytona Sandboxes. By default, Daytona Sandboxes come with **1 vCPU**, **1GB RAM**, and **3GiB disk**.
+Snapshots contain the resource requirements for Daytona Sandboxes. By default, Daytona Sandboxes come with **1 vCPU**, **1GB RAM**, and **3GiB disk**.  
 
 Need more power? Use the `Resources` class to define exactly what you need: CPU, memory, and disk space are all customizable.
 
@@ -199,18 +199,18 @@ The next step is the same; simply set the `CreateSandboxFromSnapshotParams` fiel
 
 In order to avoid having to manually set up a private container registry and push your image there, the [Daytona CLI](/docs/getting-started#setting-up-the-daytona-cli) allows you to create a Snapshot from your local image or from a local Dockerfile and use it in your Sandboxes.
 
-After running `docker images` and ensuring the image and tag you want to use is available use the `daytona snapshot push` command to create a Snapshot and push it to Daytona, e.g.:
+After running `docker images` and ensuring the image and tag you want to use is available use the `daytona snapshot push <your_local_docker_image>` command to create a Snapshot and push it to Daytona, e.g.:
 
 ```bash
-daytona snapshot push custom-alpine:3.21 -n my-snapshot-name
+daytona snapshot push custom-alpine:3.21 --name alpine-minimal
 ```
 
-For more information, see the [CLI documentation](/docs/tools/cli#daytona-snapshot-push).
-
 :::tip
+Use the flags `--cpu`, `--memory` and `--disk` to specify the resources you want the underlying Sandboxes to have - for example `daytona snapshot push custom-alpine:3.21 --name alpine-minimal --cpu 2 --memory 4 --disk 8` will create Alpine Sandboxes with 2 vCPU, 4GiB of memory and 8GiB of disk space.
 
 Daytona expects the local image to be built for AMD64 architecture. Therefore, the `--platform=linux/amd64` flag is required when building the Docker image if your machine is running on a different architecture.
 
+For more information, see the [CLI documentation](/docs/tools/cli#daytona-snapshot-push).
 :::
 
 If you haven't built the desired image yet, and have a Dockerfile ready, you can use the Declarative Builder in our SDK - read more about it [here](/docs/getting-started#declarative-builder).
@@ -218,7 +218,7 @@ If you haven't built the desired image yet, and have a Dockerfile ready, you can
 Alternatively, to do it through the CLI, use the `--dockerfile` flag under `create` to pass the path to the Dockerfile you want to use and Daytona will build the Snapshot for you:
 
 ```bash
-daytona snapshot create trying-daytona:0.0.1 --dockerfile ./Dockerfile --context ./requirements.txt
+daytona snapshot create data-analysis01 --dockerfile ./Dockerfile --context ./requirements.txt
 ```
 
 ```text

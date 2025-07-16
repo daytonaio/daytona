@@ -1,32 +1,32 @@
 # Daytona Documentation v0.0.0-dev
-# Generated on: 2025-07-13
+# Generated on: 2025-07-16
 
 
 title: API Keys
 
-import { TabItem, Tabs } from '@astrojs/starlight/components'
-
 Daytona API keys are used to authenticate requests to the [Daytona API](/docs/tools/api).
 
-The [Configuration](/docs/configuration) page covers how to set up your environment variables, including the `DAYTONA_API_KEY` environment variable.
+The [Configuration](/docs/configuration) page explains how to set the `DAYTONA_API_KEY` environment variable.
 
-To list existing API Keys go to the Keys subpage in the Dashboard. Clicking on `Create Key` will show a modal for creating and copying a new key to your clipboard.
-
-## Expiration
-
-When creating a new API Key you can optionally set an expiration date for the key. If no expiration date is set, the key will never expire.
+To manage your API keys, go to the [Keys](https://app.daytona.io/dashboard/keys) section in the Dashboard. Click `Create Key` to generate a new key and copy it to your clipboard.
 
 ## Permissions
 
 When adding a new API Key you will be prompted to select a set of permissions for the key:
 
-| Permission       | Description                                        |
-| ---------------- | -------------------------------------------------- |
-| **`Sandboxes`**  | Grants the ability to create and manage Sandboxes  |
-| **`Snapshots`**  | Grants the ability to create and manage Snapshots  |
+| Permission | Description |
+|------------|-------------|
+| **`Sandboxes`** | Grants the ability to create and manage Sandboxes |
+| **`Images`** | Grants the ability to create and manage Images |
 | **`Registries`** | Grants the ability to create and manage Registries |
+| **`Volumes`** | Grants the ability to create and manage Volumes |
 
-Each of these permissions have scopes for creating and updating resources (e.g. `write:sandboxes`) and delete resources (e.g. `delete:sandboxes`) that can be separately granted.
+Each permission includes fine-grained scopes:  
+
+- `write:*` for creating and updating  
+- `delete:*` for deleting resources  
+
+Example: `write:sandboxes`, `delete:sandboxes`
 
 title: Billing
 
@@ -38,19 +38,18 @@ The Wallet section shows the balance of the Organization's wallet and the amount
 
 ## Automatic Top-Up
 
-The Automatic Top-Up section allows organizations to set automatic top-up rules for their wallets.
+Organizations can set automatic top-up rules for their wallets.
 
-The Threshold parameter sets the amount of credits that will trigger a top-up.
+- **Threshold** — When the wallet balance drops to this amount, a top-up is triggered.  
+- **Target** — The wallet balance is topped up to this amount.
 
-The Target parameter sets the amount of credits that will be available in the wallet after the top-up.
-
-Setting Threshold and Target to 0 will disable the automatic top-up.
+Set both **Threshold** and **Target** to `0` to disable automatic top-up.
 
 ## Cost Breakdown
 
-The Cost Breakdown chart shows breakdown of costs per resource.
+The **Cost Breakdown** chart displays cost usage by resource.
 
-Users can view consumption for CPU, RAM and Disk and toggle between area and bar charts.
+You can view usage for CPU, RAM, and Storage, and toggle between area and bar charts.
 
 title: Configuration
 
@@ -755,13 +754,8 @@ exec_session_id = "python-app-session"
 sandbox.process.create_session(exec_session_id)
 
 sandbox.process.execute_session_command(exec_session_id, SessionExecuteRequest(
-<<<<<<< HEAD
-command="python app.py",
-var_async=True
-=======
     command="python /app.py",
     var_async=True
->>>>>>> 63bf6ad8 (fix(docs): revert formatting changes inside example code)
 ))
 
 # Get the preview link for the Flask app
@@ -1401,41 +1395,41 @@ title: Limits
 
 Daytona enforces resource limits to ensure fair usage and stability across all organizations. Your organization has access to a compute pool consisting of:
 
-- **vCPU** — total CPU cores available
-- **Memory** — total RAM available
-- **Disk** — total disk space across sandboxes
+- **vCPU** — Total CPU cores available
+- **Memory** — Total RAM available
+- **Storage** — Total disk space available
 
 These resources are pooled and shared across all running Sandboxes.  
-The number of Sandboxes you can run at once depends on how much CPU, RAM, and disk each one uses. You can see how to configure and estimate resource usage in the [Sandbox Management docs](https://www.daytona.io/docs/sandbox-management/).
-
-:::tip
-
-### Manage usage dynamically
-
-Only **Running** Sandboxes count against your vCPU, memory, and disk limits.  
-Use **Stop**, **Archive**, or **Delete** to manage resources:
-
-- **Stopped** Sandboxes free up CPU and memory but still consume disk.
-- **Archived** Sandboxes free up all compute and move data to cold storage (no quota impact).
-- **Deleted** Sandboxes are permanently removed and free up all resources, including disk.
-
-:::
-
-Check your current usage and limits in the [Dashboard](https://app.daytona.io/dashboard/limits).
+The number of Sandboxes you can run at once depends on how much CPU, RAM, and storage each one uses.   You can see how to configure and estimate resource usage in the [Sandbox Management docs](https://www.daytona.io/docs/sandbox-management/).
 
 ## Tiers & Limit Increases
 
 Organizations are automatically placed into a Tier based on verification status.  
 You can unlock higher limits by completing the following steps:
 
-| Tier   | Compute Pool (vCPU / RAM / Disk) | Access Requirements                                                                                                     |
-| ------ | -------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| Tier 1 | 10 / 10GiB / 30GiB               | Email verified                                                                                                          |
-| Tier 2 | 100 / 200GiB / 300GiB            | Credit card linked, [GitHub connected](https://www.daytona.io/docs/linked-accounts#how-to-link-an-account), $10 top-up. |
-| Tier 3 | Everything bigger 🚀             | Coming soon.                                                                                                            |
-| Custom | Custom limits                    | Contact [support@daytona.io](mailto:support@daytona.io)                                                                 |
+| Tier     | Resources (vCPU / RAM / Storage) | Access Requirements                |
+|----------|----------------------------------|------------------------------------|
+| Tier 1   | 10 / 10GiB / 30GiB               | Email verified                     |
+| Tier 2   | 100 / 200GiB / 300GiB            | $10 top-up, GitHub connected. |
+| Tier 3   | Even more resources              | Coming soon. |
+| Custom   | Custom limits                    | Contact [support@daytona.io](mailto:support@daytona.io) |
 
 You’ll be automatically upgraded once you meet the criteria.
+
+:::tip
+
+### Manage usage dynamically
+
+This is how different sandbox states affect your available resources:
+
+- **Running:** Uses Compute, Memory, and Storage.
+- **Stopped:** Frees up Compute and Memory, but uses Storage.
+- **Archived:** Frees up all resources by moving data to cold storage.
+- **Deleted:** Permanently removed, all resources freed.
+
+:::
+
+Check your current usage and limits in the [Dashboard](https://app.daytona.io/dashboard/limits).
 
 ## Need More?
 
@@ -1876,16 +1870,25 @@ For additional assistance:
 
 title: Organizations
 
-import { TabItem, Tabs } from '@astrojs/starlight/components'
+import { Tabs, TabItem } from '@astrojs/starlight/components';
 
-Organizations in Daytona are a way to group resources and easily collaborate with other users.
-Users in an Organization, depending on their permissions, view and manage the same set of key
-resources such as Sandboxes, Snapshots and Registries, as well as consume the same quotas for these resources.
+Organizations in Daytona are used to group resources and enable collaboration. Users can work individually in their Personal Organization or together in a Team Organization.
 
-After signing up to Daytona, users are assigned a Personal Organization. This default Organization
-cannot take new members and cannot be deleted. It has separate billing and will most commonly be used
-as a testing playground or by solo developers. Switching between organizations is done by selecting
-an option from the dropdown menu on the top of the sidebar.
+### Personal vs Team Organizations
+
+Every Daytona user starts with a **Personal Organization**, ideal for solo use and experimentation. **Team Organizations** are created manually and designed for company-wide collaboration with shared access and controls.
+
+| Feature | Personal Organization | Team Organization |
+|--------|------------------------|--------------------|
+| **Creation** | Automatic on signup | Manually by a user |
+| **Members** | Single user only | Multiple users (invite-based) |
+| **Access Control** | No roles or permissions | Roles with granular resource-based Assignments |
+| **Billing** | Tied to individual user | Shared across team members |
+| **Use Case** | Personal testing, small projects | Company/team development and production |
+| **Quota Scope** | Per user | Shared across all members |
+| **Deletable** | ❌ No | ✅ Yes (by Owner) |
+
+Users can switch between their Personal and Team Organizations using the dropdown in the sidebar. Each Organization has its own sandboxes, API keys, and resource quotas.
 
 ## Organization Roles
 
@@ -1914,14 +1917,14 @@ If you select the `Member` role, you can also define their **Assignments**.
 
 The list of available **Assignments** includes:
 
-| Assignment              | Description                                                         |
-| ----------------------- | ------------------------------------------------------------------- |
-| **`Viewer (required)`** | Grants read access to all resources in the organization             |
-| **`Developer`**         | Grants the ability to create sandboxes and keys in the organization |
-| **`Sandboxes Admin`**   | Grants admin access to sandboxes in the organization                |
-| **`Snapshots Admin`**   | Grants admin access to snapshots in the organization                |
-| **`Registries Admin`**  | Grants admin access to registries in the organization               |
-| **`Super Admin`**       | Grants full access to all resources in the organization             |
+| Assignment | Description |
+|------------|-------------|
+| **`Viewer (required)`** | Grants read access to all resources in the organization |
+| **`Developer`** | Grants the ability to create sandboxes and keys in the organization |
+| **`Sandboxes Admin`** | Grants admin access to sandboxes in the organization |
+| **`Images Admin`** | Grants admin access to images in the organization |
+| **`Registries Admin`** | Grants admin access to registries in the organization |
+| **`Super Admin`** | Grants full access to all resources in the organization |
 
 ## Managing Invitations
 
@@ -1936,17 +1939,21 @@ The Settings subpage in the Dashboard allows you to view the Organization ID and
 
 title: Preview & Authentication
 
-import { TabItem, Tabs } from '@astrojs/starlight/components'
+import { Tabs, TabItem } from '@astrojs/starlight/components';
 
 Processes listening for HTTP traffic in port range `3000-9999` can be previewed using preview links.
 
-A preview link's schema consists of the port, Sandbox ID and Runner combination, e.g.:
-`https://3000-sandbox-123456.h7890.daytona.work`
+A preview link's schema consists of the port and Sandbox ID combination, e.g.:
+`https://3000-sandbox-123456.proxy.daytona.work`
 
 If the Sandbox has its `public` property set to `true`, these links will be publicly accessible, otherwise the preview link will be available only to the Sandbox Organization users.
 
-For programmatic access (for example, `curl`), use the authorization token to access the preview URL, e.g.:
-`curl -H "x-daytona-preview-token: vg5c0ylmcimr8b_v1ne0u6mdnvit6gc0" https://3000-sandbox-123456.h7890.daytona.work`
+For programmatic access (for example, `curl`), use the authorization token to access the preview URL:
+
+```bash
+curl -H "x-daytona-preview-token: vg5c0ylmcimr8b_v1ne0u6mdnvit6gc0" \
+https://3000-sandbox-123456.proxy.daytona.work
+```
 
 To fetch the preview link and the authorization token for a specific port, you can simply use the SDK method:
 
@@ -1961,7 +1968,7 @@ print(f"Preview link token: {preview_info.token}")
 
 ```typescript
 
-const previewInfo = await sandbox.getPreviewLink(3000);
+const previewInfo = await sandbox.getPreviewUrl(3000);
 
 console.log(`Preview link url: ${previewInfo.url}`);
 console.log(`Preview link token: ${previewInfo.token}`);
@@ -2692,7 +2699,7 @@ main()
 
 ### Snapshot Resources
 
-Snapshots contain the resource requirements for Daytona Sandboxes. By default, Daytona Sandboxes come with **1 vCPU**, **1GB RAM**, and **3GiB disk**.
+Snapshots contain the resource requirements for Daytona Sandboxes. By default, Daytona Sandboxes come with **1 vCPU**, **1GB RAM**, and **3GiB disk**.  
 
 Need more power? Use the `Resources` class to define exactly what you need: CPU, memory, and disk space are all customizable.
 
@@ -2783,18 +2790,14 @@ The next step is the same; simply set the `CreateSandboxFromSnapshotParams` fiel
 
 In order to avoid having to manually set up a private container registry and push your image there, the [Daytona CLI](/docs/getting-started#setting-up-the-daytona-cli) allows you to create a Snapshot from your local image or from a local Dockerfile and use it in your Sandboxes.
 
-After running `docker images` and ensuring the image and tag you want to use is available use the `daytona snapshot push` command to create a Snapshot and push it to Daytona, e.g.:
+After running `docker images` and ensuring the image and tag you want to use is available use the `daytona snapshot push <your_local_docker_image>` command to create a Snapshot and push it to Daytona, e.g.:
 
 ```bash
-daytona snapshot push custom-alpine:3.21 -n my-snapshot-name
+daytona snapshot push custom-alpine:3.21 --name alpine-minimal
 ```
 
-For more information, see the [CLI documentation](/docs/tools/cli#daytona-snapshot-push).
-
 :::tip
-
-Daytona expects the local image to be built for AMD64 architecture. Therefore, the `--platform=linux/amd64` flag is required when building the Docker image if your machine is running on a different architecture.
-
+Use the flags `--cpu`, `--memory` and `--disk` to specify the resources you want the underlying Sandboxes to have - for example `daytona snapshot push custom-alpine:3.21 --name alpine-minimal --cpu 2 --memory 4 --disk 8` will create Alpine Sandboxes with 2 vCPU, 4GiB of memory and 8GiB of disk space.
 :::
 
 If you haven't built the desired image yet, and have a Dockerfile ready, you can use the Declarative Builder in our SDK - read more about it [here](/docs/getting-started#declarative-builder).
@@ -2802,7 +2805,7 @@ If you haven't built the desired image yet, and have a Dockerfile ready, you can
 Alternatively, to do it through the CLI, use the `--dockerfile` flag under `create` to pass the path to the Dockerfile you want to use and Daytona will build the Snapshot for you:
 
 ```bash
-daytona snapshot create trying-daytona:0.0.1 --dockerfile ./Dockerfile --context ./requirements.txt
+daytona snapshot create data-analysis01 --dockerfile ./Dockerfile --context ./requirements.txt
 ```
 
 ```text
@@ -3343,15 +3346,16 @@ daytona volume list [flags]
 
 title: Volumes
 
-import { TabItem, Tabs } from '@astrojs/starlight/components'
+import { Tabs, TabItem } from '@astrojs/starlight/components';
 
-Volumes are FUSE-based mounts on the Sandbox file system that enable file sharing between Sandboxes and instant access to existing files already present on the mounted volume.
-Using Volumes the Sandboxes can instantly read from large files eliminating the need to upload them first to the Sandbox file system.
-The volume data is stored on the S3 compatible object store. Multiple volumes can be mounted to a single Sandbox and each volume can be mounted on multiple Sandboxes simultaneously.
+Volumes are FUSE-based mounts that provide shared file access across Sandboxes. They allow Sandboxes to read from large files instantly - no need to upload files manually to each Sandbox. Volume data is stored on an S3-compatible object store.
+
+- Multiple volumes can be mounted to a single Sandbox  
+- A single volume can be mounted to multiple Sandboxes
 
 ## Creating Volumes
 
-In order to mount a volume to a Sandbox, one must be created.
+Before mounting a volume to a Sandbox, it must be created.
 
 ```bash
 volume = daytona.volume.get("my-volume", create=True)
@@ -3360,7 +3364,7 @@ volume = daytona.volume.get("my-volume", create=True)
 const volume = await daytona.volume.get('my-volume', true)
 ```
 
-## Mounting Volumes to Sandboxes
+## Mounting Volumes
 
 Once a volume is created, it can be mounted to a Sandbox by specifying it in the `CreateSandboxFromSnapshotParams` object:
 
@@ -3386,7 +3390,7 @@ sandbox = daytona.create(params)
 
 # When you're done with the sandbox, you can remove it
 
-# The volume will persist even after the sandbox is removed
+# The volume persists after the sandbox is removed
 
 sandbox.delete()
 
@@ -3409,10 +3413,10 @@ async function main() {
     language: 'typescript',
     volumes: [{ volumeId: volume.id, mountPath: mountDir1 }],
   })
-
+  
   // When you're done with the sandbox, you can remove it
   // The volume will persist even after the sandbox is removed
-  await daytona.delete(sandbox1)
+  await sandbox1.delete()
 }
 
 main()

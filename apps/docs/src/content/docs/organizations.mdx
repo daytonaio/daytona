@@ -2,16 +2,25 @@
 title: Organizations
 ---
 
-import { TabItem, Tabs } from '@astrojs/starlight/components'
+import { Tabs, TabItem } from '@astrojs/starlight/components';
 
-Organizations in Daytona are a way to group resources and easily collaborate with other users.
-Users in an Organization, depending on their permissions, view and manage the same set of key
-resources such as Sandboxes, Snapshots and Registries, as well as consume the same quotas for these resources.
+Organizations in Daytona are used to group resources and enable collaboration. Users can work individually in their Personal Organization or together in a Collaborative Organization.
 
-After signing up to Daytona, users are assigned a Personal Organization. This default Organization
-cannot take new members and cannot be deleted. It has separate billing and will most commonly be used
-as a testing playground or by solo developers. Switching between organizations is done by selecting
-an option from the dropdown menu on the top of the sidebar.
+### Personal vs Collaborative Organizations
+
+Every Daytona user starts with a **Personal Organization**, ideal for solo use and experimentation. **Collaborative Organizations** are created manually and designed for company-wide collaboration with shared access and controls.
+
+| Feature | Personal Organization | Collaborative Organization |
+|--------|------------------------|--------------------|
+| **Creation** | Automatic on signup | Manually by a user |
+| **Members** | Single user only | Multiple users (invite-based) |
+| **Access Control** | No roles or permissions | Roles with granular resource-based Assignments |
+| **Billing** | Tied to individual user | Shared across team members |
+| **Use Case** | Personal testing, small projects | Company/team development and production |
+| **Quota Scope** | Per user | Shared across all members |
+| **Deletable** | ❌ No | ✅ Yes (by Owner) |
+
+Users can switch between their Personal and Collaborative Organizations using the dropdown in the sidebar. Each Organization has its own sandboxes, API keys, and resource quotas.
 
 ## Organization Roles
 
@@ -40,14 +49,14 @@ If you select the `Member` role, you can also define their **Assignments**.
 
 The list of available **Assignments** includes:
 
-| Assignment              | Description                                                         |
-| ----------------------- | ------------------------------------------------------------------- |
-| **`Viewer (required)`** | Grants read access to all resources in the organization             |
-| **`Developer`**         | Grants the ability to create sandboxes and keys in the organization |
-| **`Sandboxes Admin`**   | Grants admin access to sandboxes in the organization                |
-| **`Snapshots Admin`**   | Grants admin access to snapshots in the organization                |
-| **`Registries Admin`**  | Grants admin access to registries in the organization               |
-| **`Super Admin`**       | Grants full access to all resources in the organization             |
+| Assignment | Description |
+|------------|-------------|
+| **`Viewer (required)`** | Grants read access to all resources in the organization |
+| **`Developer`** | Grants the ability to create sandboxes and keys in the organization |
+| **`Sandboxes Admin`** | Grants admin access to sandboxes in the organization |
+| **`Snapshots Admin`** | Grants admin access to snapshots in the organization |
+| **`Registries Admin`** | Grants admin access to registries in the organization |
+| **`Super Admin`** | Grants full access to all resources in the organization |
 
 ## Managing Invitations
 

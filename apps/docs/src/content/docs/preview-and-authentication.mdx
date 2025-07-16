@@ -2,17 +2,21 @@
 title: Preview & Authentication
 ---
 
-import { TabItem, Tabs } from '@astrojs/starlight/components'
+import { Tabs, TabItem } from '@astrojs/starlight/components';
 
 Processes listening for HTTP traffic in port range `3000-9999` can be previewed using preview links.
 
-A preview link's schema consists of the port, Sandbox ID and Runner combination, e.g.:
-`https://3000-sandbox-123456.h7890.daytona.work`
+A preview link's schema consists of the port and Sandbox ID combination, e.g.:
+`https://3000-sandbox-123456.proxy.daytona.work`
 
 If the Sandbox has its `public` property set to `true`, these links will be publicly accessible, otherwise the preview link will be available only to the Sandbox Organization users.
 
-For programmatic access (for example, `curl`), use the authorization token to access the preview URL, e.g.:
-`curl -H "x-daytona-preview-token: vg5c0ylmcimr8b_v1ne0u6mdnvit6gc0" https://3000-sandbox-123456.h7890.daytona.work`
+For programmatic access (for example, `curl`), use the authorization token to access the preview URL:
+
+```bash
+curl -H "x-daytona-preview-token: vg5c0ylmcimr8b_v1ne0u6mdnvit6gc0" \
+https://3000-sandbox-123456.proxy.daytona.work
+```
 
 To fetch the preview link and the authorization token for a specific port, you can simply use the SDK method:
 
@@ -31,7 +35,7 @@ print(f"Preview link token: {preview_info.token}")
 <TabItem label="TypeScript" icon="seti:typescript">
 ```typescript
 
-const previewInfo = await sandbox.getPreviewLink(3000);
+const previewInfo = await sandbox.getPreviewUrl(3000);
 
 console.log(`Preview link url: ${previewInfo.url}`);
 console.log(`Preview link token: ${previewInfo.token}`);
