@@ -161,7 +161,7 @@
   },
   {
     "title": "2.1 Download Dataset",
-    "description": "We'll be using a publicly available dataset of about 10,000 movies.",
+    "description": "We'll be using a publicly available dataset of vehicle valuation.",
     "tag": "Documentation",
     "url": "/docs/data-analysis-with-ai#21-download-dataset",
     "slug": "/data-analysis-with-ai#21-download-dataset",
