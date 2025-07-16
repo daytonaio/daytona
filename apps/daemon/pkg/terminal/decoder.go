@@ -30,8 +30,16 @@ func (d *UTF8Decoder) Write(data []byte) string {
 		r, size := utf8.DecodeRune(data[i:])
 		if r == utf8.RuneError {
 			if size == 1 {
-				// Likely an incomplete rune, break and buffer remaining
-				break
+				// Could be incomplete rune at the end
+				remaining := len(data) - i
+				if remaining < utf8.UTFMax {
+					// Buffer the remaining bytes for next call
+					break
+				}
+				// Otherwise, it's an invalid byte, emit replacement and advance by 1
+				output.WriteRune(r)
+				i++
+				continue
 			}
 		}
 		output.WriteRune(r)
