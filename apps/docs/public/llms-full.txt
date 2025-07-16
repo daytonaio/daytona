@@ -17,7 +17,7 @@ When adding a new API Key you will be prompted to select a set of permissions fo
 | Permission | Description |
 |------------|-------------|
 | **`Sandboxes`** | Grants the ability to create and manage Sandboxes |
-| **`Images`** | Grants the ability to create and manage Images |
+| **`Snapshots`** | Grants the ability to create and manage Snapshots |
 | **`Registries`** | Grants the ability to create and manage Registries |
 | **`Volumes`** | Grants the ability to create and manage Volumes |
 
@@ -1915,7 +1915,7 @@ You can unlock higher limits by completing the following steps:
 | Tier     | Resources (vCPU / RAM / Storage) | Access Requirements                |
 |----------|----------------------------------|------------------------------------|
 | Tier 1   | 10 / 10GiB / 30GiB               | Email verified                     |
-| Tier 2   | 100 / 200GiB / 300GiB            | $10 top-up, GitHub connected. |
+| Tier 2   | 100 / 200GiB / 300GiB            | Credit card linked, $10 top-up, [GitHub connected](https://www.daytona.io/docs/linked-accounts#how-to-link-an-account). |
 | Tier 3   | Even more resources              | Coming soon. |
 | Custom   | Custom limits                    | Contact [support@daytona.io](mailto:support@daytona.io) |
 
@@ -2377,13 +2377,13 @@ title: Organizations
 
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 
-Organizations in Daytona are used to group resources and enable collaboration. Users can work individually in their Personal Organization or together in a Team Organization.
+Organizations in Daytona are used to group resources and enable collaboration. Users can work individually in their Personal Organization or together in a Collaborative Organization.
 
-### Personal vs Team Organizations
+### Personal vs Collaborative Organizations
 
-Every Daytona user starts with a **Personal Organization**, ideal for solo use and experimentation. **Team Organizations** are created manually and designed for company-wide collaboration with shared access and controls.
+Every Daytona user starts with a **Personal Organization**, ideal for solo use and experimentation. **Collaborative Organizations** are created manually and designed for company-wide collaboration with shared access and controls.
 
-| Feature | Personal Organization | Team Organization |
+| Feature | Personal Organization | Collaborative Organization |
 |--------|------------------------|--------------------|
 | **Creation** | Automatic on signup | Manually by a user |
 | **Members** | Single user only | Multiple users (invite-based) |
@@ -2393,7 +2393,7 @@ Every Daytona user starts with a **Personal Organization**, ideal for solo use a
 | **Quota Scope** | Per user | Shared across all members |
 | **Deletable** | ❌ No | ✅ Yes (by Owner) |
 
-Users can switch between their Personal and Team Organizations using the dropdown in the sidebar. Each Organization has its own sandboxes, API keys, and resource quotas.
+Users can switch between their Personal and Collaborative Organizations using the dropdown in the sidebar. Each Organization has its own sandboxes, API keys, and resource quotas.
 
 ## Organization Roles
 
@@ -2427,7 +2427,7 @@ The list of available **Assignments** includes:
 | **`Viewer (required)`** | Grants read access to all resources in the organization |
 | **`Developer`** | Grants the ability to create sandboxes and keys in the organization |
 | **`Sandboxes Admin`** | Grants admin access to sandboxes in the organization |
-| **`Images Admin`** | Grants admin access to images in the organization |
+| **`Snapshots Admin`** | Grants admin access to snapshots in the organization |
 | **`Registries Admin`** | Grants admin access to registries in the organization |
 | **`Super Admin`** | Grants full access to all resources in the organization |
 
@@ -3303,6 +3303,10 @@ daytona snapshot push custom-alpine:3.21 --name alpine-minimal
 
 :::tip
 Use the flags `--cpu`, `--memory` and `--disk` to specify the resources you want the underlying Sandboxes to have - for example `daytona snapshot push custom-alpine:3.21 --name alpine-minimal --cpu 2 --memory 4 --disk 8` will create Alpine Sandboxes with 2 vCPU, 4GiB of memory and 8GiB of disk space.
+
+Daytona expects the local image to be built for AMD64 architecture. Therefore, the `--platform=linux/amd64` flag is required when building the Docker image if your machine is running on a different architecture.
+
+For more information, see the [CLI documentation](/docs/tools/cli#daytona-snapshot-push).
 :::
 
 If you haven't built the desired image yet, and have a Dockerfile ready, you can use the Declarative Builder in our SDK - read more about it [here](/docs/getting-started#declarative-builder).

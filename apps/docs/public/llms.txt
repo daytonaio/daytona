@@ -98,7 +98,7 @@
 - [Troubleshooting](https://daytona.io/docs/mcp#troubleshooting)
 - [Support](https://daytona.io/docs/mcp#support)
 - [Organizations](https://daytona.io/docs/organizations)
-- [Personal vs Team Organizations](https://daytona.io/docs/organizations#personal-vs-team-organizations)
+- [Personal vs Collaborative Organizations](https://daytona.io/docs/organizations#personal-vs-collaborative-organizations)
 - [Organization Roles](https://daytona.io/docs/organizations#organization-roles)
 - [Administrative Actions](https://daytona.io/docs/organizations#administrative-actions)
 - [Inviting New Users](https://daytona.io/docs/organizations#inviting-new-users)
