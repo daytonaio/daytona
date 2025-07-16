@@ -53,16 +53,15 @@ async def main():
             )
         )
 
-        print("Continuing execution while logs are streaming...")
+        # Continue execution while logs are streaming
         await asyncio.sleep(1)
         print("Other operations completed!")
-
-        print("At the end wait for any asynchronous task to complete and clean up resources...")
+        
+        # Wait for any asynchronous task to complete
         await logs_task
     except Exception as e:
         print(f"Error: {e}")
     finally:
-        print("Cleaning up sandbox...")
         sandbox.delete()
 
 if __name__ == "__main__":
@@ -91,16 +90,15 @@ if __name__ == "__main__":
         console.log('Log chunk:', chunk)
       })
 
-      console.log('Continuing execution while logs are streaming...')
+      // Continue execution while logs are streaming
       sleep(1)
       console.log('Other operations completed!')
 
-      console.log('At the end wait for any asynchronous task to complete and clean up resources...')
+      // Wait for any asynchronous task to complete
       await logTask
     } catch (error) {
       console.error('Error:', error)
     } finally {
-      console.log('Cleaning up sandbox...')
       await sandbox.delete()
     }
   }
@@ -144,9 +142,9 @@ you can process log stream synchronously. For example, you can write logs to a f
 
           with open(log_file_path, "w") as log_file:
               def handle_chunk(chunk: str):
-                  #  remove null bytes
+                  # Remove null bytes
                   clean_chunk = chunk.replace("\x00", "")
-                  #  write to file
+                  # Write to file
                   log_file.write(clean_chunk)
                   log_file.flush()
 
@@ -156,7 +154,6 @@ you can process log stream synchronously. For example, you can write logs to a f
       except Exception as e:
           print(f"Error: {e}")
       finally:
-          print("Cleaning up sandbox...")
           sandbox.delete()
 
   if __name__ == "__main__":
@@ -197,7 +194,6 @@ you can process log stream synchronously. For example, you can write logs to a f
     } catch (error) {
       console.error('Error:', error)
     } finally {
-      console.log('Cleaning up sandbox...')
       await sandbox.delete()
     }
   }
