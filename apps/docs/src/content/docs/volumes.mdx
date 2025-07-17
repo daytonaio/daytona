@@ -52,13 +52,6 @@ params = CreateSandboxFromSnapshotParams(
     volumes=[VolumeMount(volumeId=volume.id, mountPath=mount_dir_1)],
 )
 sandbox = daytona.create(params)
-
-# When you're done with the sandbox, you can remove it
-
-# The volume persists after the sandbox is removed
-
-sandbox.delete()
-
 ```
 
 </TabItem>
@@ -67,30 +60,51 @@ sandbox.delete()
 import { Daytona } from '@daytonaio/sdk'
 import path from 'path'
 
-async function main() {
-  const daytona = new Daytona()
+const daytona = new Daytona()
 
-  //  Create a new volume or get an existing one
-  const volume = await daytona.volume.get('my-volume', true)
+//  Create a new volume or get an existing one
+const volume = await daytona.volume.get('my-volume', true)
 
-  // Mount the volume to the sandbox
-  const mountDir1 = '/home/daytona/volume'
+// Mount the volume to the sandbox
+const mountDir1 = '/home/daytona/volume'
 
-  const sandbox1 = await daytona.create({
-    language: 'typescript',
-    volumes: [{ volumeId: volume.id, mountPath: mountDir1 }],
-  })
-  
-  // When you're done with the sandbox, you can remove it
-  // The volume will persist even after the sandbox is removed
-  await sandbox1.delete()
-}
-
-main()
-
+const sandbox1 = await daytona.create({
+  language: 'typescript',
+  volumes: [{ volumeId: volume.id, mountPath: mountDir1 }],
+})
 ```
 
 </TabItem>
+</Tabs>
+
+## Working with Volumes
+
+Once mounted, you can read from and write to the volume just like any other directory in the Sandbox file system. Files written to the volume persist beyond the lifecycle of any individual Sandbox.
+
+<Tabs>
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    # Write to a file in the mounted volume
+    with open("/home/daytona/volume/example.txt", "w") as f:
+        f.write("Hello from Daytona volume!")
+
+    # When you're done with the sandbox, you can remove it
+    # The volume will persist even after the sandbox is removed
+    sandbox.delete()
+    ```
+  </TabItem>
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    import fs from 'fs/promises'
+
+    // Write to a file in the mounted volume
+    await fs.writeFile('/home/daytona/volume/example.txt', 'Hello from Daytona volume!')
+
+    // When you're done with the sandbox, you can remove it
+    // The volume will persist even after the sandbox is removed
+    await daytona.delete(sandbox1)
+    ```
+  </TabItem>
 </Tabs>
 
 ## Deleting Volumes
@@ -111,10 +125,6 @@ await daytona.volume.delete(volume)
 ```
 </TabItem>
 </Tabs>
-
-## Working with Volumes
-
-Once mounted, you can read from and write to the volume just like any other directory in the Sandbox file system. Files written to the volume persist beyond the lifecycle of any individual Sandbox.
 
 ## Limitations
 
