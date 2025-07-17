@@ -197,10 +197,31 @@ func (c *ComputerUse) initializeProcesses(homeDir string) {
 	}
 
 	// Process 4: novnc (Web-based VNC client)
+	// Determine the best available NoVNC command with fallback options
+	var novncCommand string
+	var novncArgs []string
+
+	// Priority 1: Try launch.sh (modern NoVNC with enhanced features)
+	if _, err := os.Stat("/usr/share/novnc/utils/launch.sh"); err == nil {
+		novncCommand = "/usr/share/novnc/utils/launch.sh"
+		novncArgs = []string{"--vnc", "localhost:" + vncPort, "--listen", noVncPort}
+		log.Infof("Using NoVNC launch.sh (recommended)")
+	} else if _, err := os.Stat("/usr/share/novnc/utils/novnc_proxy"); err == nil {
+		// Priority 2: Try novnc_proxy (legacy NoVNC script)
+		novncCommand = "/usr/share/novnc/utils/novnc_proxy"
+		novncArgs = []string{"--vnc", "localhost:" + vncPort, "--listen", noVncPort}
+		log.Infof("Using NoVNC novnc_proxy (legacy)")
+	} else {
+		// Priority 3: Fallback to direct websockify (always available)
+		novncCommand = "websockify"
+		novncArgs = []string{"--web=/usr/share/novnc/", noVncPort, "localhost:" + vncPort}
+		log.Infof("Using direct websockify (fallback)")
+	}
+
 	c.processes["novnc"] = &Process{
 		Name:        "novnc",
-		Command:     "websockify",
-		Args:        []string{"--web=/usr/share/novnc/", noVncPort, "localhost:" + vncPort},
+		Command:     novncCommand,
+		Args:        novncArgs,
 		User:        user,
 		Priority:    400,
 		AutoRestart: true,
