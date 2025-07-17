@@ -126,6 +126,11 @@ func (c *ComputerUse) initializeProcesses(homeDir string) {
 		vncPort = "5901"
 	}
 
+	noVncPort := os.Getenv("NO_VNC_PORT")
+	if noVncPort == "" {
+		noVncPort = "6901"
+	}
+
 	display := os.Getenv("DISPLAY")
 	if display == "" {
 		display = ":0"
@@ -194,8 +199,8 @@ func (c *ComputerUse) initializeProcesses(homeDir string) {
 	// Process 4: novnc (Web-based VNC client)
 	c.processes["novnc"] = &Process{
 		Name:        "novnc",
-		Command:     "/usr/share/novnc/utils/novnc_proxy",
-		Args:        []string{"--vnc", "localhost:" + vncPort},
+		Command:     "/usr/share/novnc/utils/launch.sh",
+		Args:        []string{"--vnc", "localhost:" + vncPort, "--listen", noVncPort},
 		User:        user,
 		Priority:    400,
 		AutoRestart: true,
