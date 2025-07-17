@@ -233,8 +233,8 @@ export class Daytona {
       !config ||
       (!(this.apiKey && apiUrl && this.target) && !(this.jwtToken && this.organizationId && apiUrl && this.target))
     ) {
-      dotenv.config()
-      dotenv.config({ path: '.env.local', override: true })
+      dotenv.config({ quiet: true })
+      dotenv.config({ path: '.env.local', override: true, quiet: true })
       this.apiKey = this.apiKey || (this.jwtToken ? undefined : process?.env['DAYTONA_API_KEY'])
       this.jwtToken = this.jwtToken || process?.env['DAYTONA_JWT_TOKEN']
       this.organizationId = this.organizationId || process?.env['DAYTONA_ORGANIZATION_ID']
