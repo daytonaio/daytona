@@ -1,0 +1,395 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "maple",
+  "name": "Daytona",
+  "colors": {
+    "primary": "#2ECC71",
+    "light": "#2ECC71",
+    "dark": "#2ECC71"
+  },
+  "contextual": {
+    "options": [
+      "copy",
+      "view",
+      "chatgpt",
+      "claude"
+    ]
+  },
+  "fonts":{
+    "heading": {
+      "family": ""
+    },
+    "body": {
+      "family": ""
+    }
+  },
+  "favicon": "/favicon.png",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "icon": "house",
+        "groups": [
+          {
+            "group": " ",
+            "pages": [
+              "docs",
+              "docs/tools/api",
+              "docs/tools/cli"
+            ]
+          },
+          {
+            "group": "Introduction",
+            "pages": [
+              "docs/getting-started",
+              "docs/configuration",
+              "docs/sandbox-management",
+              "docs/snapshots",
+              "docs/declarative-builder",
+              "docs/volumes"
+            ]
+          },
+          {
+            "group": "Account management",
+            "pages": [
+              "docs/api-keys",
+              "docs/organizations",
+              "docs/limits",
+              "docs/billing",
+              "docs/linked-accounts"
+            ]
+          },
+          {
+            "group": "Agent Toolbox",
+            "pages": [
+              "docs/file-system-operations",
+              "docs/git-operations",
+              "docs/language-server-protocol",
+              "docs/process-code-execution",
+              "docs/log-streaming"
+            ]
+          },
+          {
+            "group": "Other",
+            "pages": [
+              "docs/web-terminal",
+              "docs/preview-and-authentication",
+              "docs/regions",
+              "docs/mcp"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "TS SDK Reference",
+        "icon": "cube",
+        "groups": [
+          {
+            "group": "TS SDK Reference",
+            "pages": [
+              "docs/typescript-sdk",
+              "docs/typescript-sdk/daytona",
+              "docs/typescript-sdk/sandbox",
+              "docs/typescript-sdk/charts",
+              "docs/typescript-sdk/errors",
+              "docs/typescript-sdk/execute-response",
+              "docs/typescript-sdk/file-system",
+              "docs/typescript-sdk/git",
+              "docs/typescript-sdk/image",
+              "docs/typescript-sdk/lsp-server",
+              "docs/typescript-sdk/object-storage",
+              "docs/typescript-sdk/process",
+              "docs/typescript-sdk/snapshot",
+              "docs/typescript-sdk/volume"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Python SDK Reference",
+        "icon": "cube",
+        "groups": [
+          {
+            "group": "Python SDK Reference",
+            "pages": [
+              "docs/python-sdk"
+            ]
+          },
+          {
+            "group": "Common",
+            "pages": [
+              "docs/python-sdk/common/charts",
+              "docs/python-sdk/common/errors",
+              "docs/python-sdk/common/image"
+            ]
+          },
+          {
+            "group": "Sync Python",
+            "pages": [
+              "docs/python-sdk/sync/daytona",
+              "docs/python-sdk/sync/sandbox",
+              "docs/python-sdk/sync/file-system",
+              "docs/python-sdk/sync/git",
+              "docs/python-sdk/sync/lsp-server",
+              "docs/python-sdk/sync/object-storage",
+              "docs/python-sdk/sync/process",
+              "docs/python-sdk/sync/volume"
+            ]
+          },
+          {
+            "group": "Async Python",
+            "pages": [
+              "docs/python-sdk/async/async-daytona",
+              "docs/python-sdk/async/async-sandbox",
+              "docs/python-sdk/async/async-file-system",
+              "docs/python-sdk/async/async-git",
+              "docs/python-sdk/async/async-lsp-server",
+              "docs/python-sdk/async/async-object-storage",
+              "docs/python-sdk/async/async-volume"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "icon": "server",
+        "groups": [
+          {
+            "group": "api-keys",
+            "pages": [
+              "api-reference/api-keys/list-api-keys",
+              "api-reference/api-keys/create-api-key",
+              "api-reference/api-keys/get-current-api-keys-details",
+              "api-reference/api-keys/get-api-key",
+              "api-reference/api-keys/delete-api-key"
+            ]
+          },
+          {
+            "group": "organizations",
+            "pages": [
+              "api-reference/organizations/list-organization-invitations-for-authenticated-user",
+              "api-reference/organizations/get-count-of-organization-invitations-for-authenticated-user",
+              "api-reference/organizations/accept-organization-invitation",
+              "api-reference/organizations/decline-organization-invitation",
+              "api-reference/organizations/list-organizations",
+              "api-reference/organizations/create-organization",
+              "api-reference/organizations/get-organization-by-id",
+              "api-reference/organizations/delete-organization",
+              "api-reference/organizations/get-organization-current-usage-overview",
+              "api-reference/organizations/update-organization-quota",
+              "api-reference/organizations/leave-organization",
+              "api-reference/organizations/suspend-organization",
+              "api-reference/organizations/unsuspend-organization",
+              "api-reference/organizations/list-organization-roles",
+              "api-reference/organizations/create-organization-role",
+              "api-reference/organizations/update-organization-role",
+              "api-reference/organizations/delete-organization-role",
+              "api-reference/organizations/list-organization-members",
+              "api-reference/organizations/update-role-for-organization-member",
+              "api-reference/organizations/update-assigned-roles-to-organization-member",
+              "api-reference/organizations/delete-organization-member",
+              "api-reference/organizations/list-pending-organization-invitations",
+              "api-reference/organizations/create-organization-invitation",
+              "api-reference/organizations/update-organization-invitation",
+              "api-reference/organizations/cancel-organization-invitation"
+            ]
+          },
+          {
+            "group": "users",
+            "pages": [
+              "api-reference/users/get-authenticated-user",
+              "api-reference/users/list-all-users",
+              "api-reference/users/create-user",
+              "api-reference/users/regenerate-user-key-pair",
+              "api-reference/users/get-available-account-providers",
+              "api-reference/users/link-account",
+              "api-reference/users/unlink-account",
+              "api-reference/users/get-user-by-id"
+            ]
+          },
+          {
+            "group": "sandbox",
+            "pages": [
+              "api-reference/sandbox/list-all-sandboxes",
+              "api-reference/sandbox/create-a-new-sandbox",
+              "api-reference/sandbox/get-sandbox-details",
+              "api-reference/sandbox/delete-sandbox",
+              "api-reference/sandbox/start-sandbox",
+              "api-reference/sandbox/stop-sandbox",
+              "api-reference/sandbox/replace-sandbox-labels",
+              "api-reference/sandbox/create-sandbox-backup",
+              "api-reference/sandbox/update-public-status",
+              "api-reference/sandbox/set-sandbox-auto-stop-interval",
+              "api-reference/sandbox/set-sandbox-auto-archive-interval",
+              "api-reference/sandbox/archive-sandbox",
+              "api-reference/sandbox/get-preview-url-for-a-sandbox-port",
+              "api-reference/sandbox/get-build-logs"
+            ]
+          },
+          {
+            "group": "runners",
+            "pages": [
+              "api-reference/runners/list-all-runners",
+              "api-reference/runners/create-runner",
+              "api-reference/runners/update-runner-scheduling-status",
+              "api-reference/runners/get-runner-by-sandbox-id",
+              "api-reference/runners/get-runners-by-snapshot-internal-name"
+            ]
+          },
+          {
+            "group": "toolbox",
+            "pages": [
+              "api-reference/toolbox/get-sandbox-project-dir",
+              "api-reference/toolbox/list-files",
+              "api-reference/toolbox/delete-file",
+              "api-reference/toolbox/download-file",
+              "api-reference/toolbox/search-for-textpattern-in-files",
+              "api-reference/toolbox/create-folder",
+              "api-reference/toolbox/get-file-info",
+              "api-reference/toolbox/move-file",
+              "api-reference/toolbox/set-file-permissions",
+              "api-reference/toolbox/replace-in-files",
+              "api-reference/toolbox/search-files",
+              "api-reference/toolbox/upload-file",
+              "api-reference/toolbox/upload-multiple-files",
+              "api-reference/toolbox/add-files",
+              "api-reference/toolbox/get-branch-list",
+              "api-reference/toolbox/create-branch",
+              "api-reference/toolbox/delete-branch",
+              "api-reference/toolbox/clone-repository",
+              "api-reference/toolbox/commit-changes",
+              "api-reference/toolbox/get-commit-history",
+              "api-reference/toolbox/pull-changes",
+              "api-reference/toolbox/push-changes",
+              "api-reference/toolbox/checkout-branch",
+              "api-reference/toolbox/get-git-status",
+              "api-reference/toolbox/execute-command",
+              "api-reference/toolbox/list-sessions",
+              "api-reference/toolbox/create-session",
+              "api-reference/toolbox/get-session",
+              "api-reference/toolbox/delete-session",
+              "api-reference/toolbox/execute-command-in-session",
+              "api-reference/toolbox/get-session-command",
+              "api-reference/toolbox/get-command-logs",
+              "api-reference/toolbox/get-lsp-completions",
+              "api-reference/toolbox/call-lsp-didclose",
+              "api-reference/toolbox/call-lsp-didopen",
+              "api-reference/toolbox/call-lsp-documentsymbols",
+              "api-reference/toolbox/start-lsp-server",
+              "api-reference/toolbox/stop-lsp-server",
+              "api-reference/toolbox/call-lsp-workspacesymbols"
+            ]
+          },
+          {
+            "group": "snapshots",
+            "pages": [
+              "api-reference/snapshots/list-all-snapshots",
+              "api-reference/snapshots/create-a-new-snapshot",
+              "api-reference/snapshots/get-snapshot-by-id-or-name",
+              "api-reference/snapshots/delete-snapshot",
+              "api-reference/snapshots/toggle-snapshot-state",
+              "api-reference/snapshots/set-snapshot-general-status",
+              "api-reference/snapshots/get-snapshot-build-logs",
+              "api-reference/snapshots/activate-a-snapshot"
+            ]
+          },
+          {
+            "group": "workspace",
+            "pages": [
+              "api-reference/workspace/[deprecated]-list-all-workspaces",
+              "api-reference/workspace/[deprecated]-create-a-new-workspace",
+              "api-reference/workspace/[deprecated]-get-workspace-details",
+              "api-reference/workspace/[deprecated]-delete-workspace",
+              "api-reference/workspace/[deprecated]-start-workspace",
+              "api-reference/workspace/[deprecated]-stop-workspace",
+              "api-reference/workspace/[deprecated]-replace-workspace-labels",
+              "api-reference/workspace/[deprecated]-create-workspace-backup",
+              "api-reference/workspace/[deprecated]-update-public-status",
+              "api-reference/workspace/[deprecated]-set-workspace-auto-stop-interval",
+              "api-reference/workspace/[deprecated]-set-workspace-auto-archive-interval",
+              "api-reference/workspace/[deprecated]-archive-workspace",
+              "api-reference/workspace/[deprecated]-get-preview-url-for-a-workspace-port",
+              "api-reference/workspace/[deprecated]-get-build-logs"
+            ]
+          },
+          {
+            "group": "preview",
+            "pages": [
+              "api-reference/preview/check-if-sandbox-is-public",
+              "api-reference/preview/check-if-sandbox-auth-token-is-valid",
+              "api-reference/preview/check-if-user-has-access-to-the-sandbox"
+            ]
+          },
+          {
+            "group": "volumes",
+            "pages": [
+              "api-reference/volumes/list-all-volumes",
+              "api-reference/volumes/create-a-new-volume",
+              "api-reference/volumes/get-volume-details",
+              "api-reference/volumes/delete-volume",
+              "api-reference/volumes/get-volume-details-by-name"
+            ]
+          },
+          {
+            "group": "docker-registry",
+            "pages": [
+              "api-reference/docker-registry/list-registries",
+              "api-reference/docker-registry/create-registry",
+              "api-reference/docker-registry/get-temporary-registry-access-for-pushing-snapshots",
+              "api-reference/docker-registry/get-registry",
+              "api-reference/docker-registry/delete-registry",
+              "api-reference/docker-registry/update-registry",
+              "api-reference/docker-registry/set-default-registry"
+            ]
+          },
+          {
+            "group": "object-storage",
+            "pages": [
+              "api-reference/object-storage/get-temporary-storage-access-for-pushing-objects"
+            ]
+          }
+        ]
+      }
+    ],
+    "global": {
+      "anchors": [
+        {
+          "anchor": "Community",
+          "href": "https://www.daytona.io/dotfiles/updates/stay-updated-with-the-daytona-community-slack",
+          "icon": "slack"
+        },
+        {
+          "anchor": "Blog",
+          "href": "https://www.daytona.io/dotfiles",
+          "icon": "newspaper"
+        }
+      ]
+    }
+  },
+  "logo": {
+    "light": "/logo/light.svg",
+    "dark": "/logo/dark.svg"
+  },
+  "navbar": {
+    "links": [
+      {
+        "label": "Sign in",
+        "href": "https://app.daytona.io/"
+      }
+    ],
+    "primary": {
+      "type": "button",
+      "label": "Get a Demo",
+      "href": "https://www.daytona.io/contact"
+    }
+  },
+  "footer": {
+    "socials": {
+      "github": "https://github.com/daytonaio/daytona",
+      "slack": "https://go.daytona.io/slack",
+      "x": "https://twitter.com/daytonaio",
+      "youtube": "https://youtube.com/@daytonaio",
+      "linkedin": "https://www.linkedin.com/company/daytonaio/"
+    }
+  }
+}

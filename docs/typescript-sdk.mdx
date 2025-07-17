@@ -1,0 +1,64 @@
+---
+title: "TypeScript SDK Reference"
+sidebarTitle: "TS SDK Reference"
+icon: cube
+---
+
+The Daytona TypeScript SDK provides a powerful interface for programmatically interacting with Daytona Sandboxes.
+
+## Installation
+
+Install the Daytona TypeScript SDK using npm:
+
+```sh
+npm install @daytonaio/sdk
+```
+
+Or using yarn:
+
+```sh
+yarn add @daytonaio/sdk
+```
+
+## Getting Started
+
+Here’s a simple example to help you get started with the Daytona TypeScript SDK:
+
+```ts
+import { Daytona } from '@daytonaio/sdk';
+
+async function main() {
+  // Initialize the SDK (uses environment variables by default)
+  const daytona = new Daytona();
+
+  // Create a new sandbox
+  const sandbox = await daytona.create({
+    language: 'typescript',
+    envVars: { NODE_ENV: 'development' }
+  });
+
+  // Execute a command
+  const response = await sandbox.process.executeCommand('echo "Hello, World!"');
+  console.log(response.result);
+}
+
+main().catch(console.error);
+```
+
+## Configuration
+
+The SDK can be configured using environment variables or by passing options to the constructor:
+
+```ts
+import { Daytona } from '@daytonaio/sdk';
+
+// Using environment variables (DAYTONA_API_KEY, DAYTONA_API_URL, DAYTONA_TARGET)
+const daytona = new Daytona();
+
+// Using explicit configuration
+const daytona = new Daytona({
+  apiKey: 'your-api-key',
+  apiUrl: 'https://app.daytona.io/api',
+  target: 'us'
+});
+```

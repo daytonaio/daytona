@@ -1,0 +1,193 @@
+---
+title: "Daytona Documentation"
+sidebarTitle: "Documentation"
+icon: "house"
+---
+
+The Daytona SDK provides official Python and TypeScript interfaces for interacting with Daytona, enabling you to programmatically manage development environments and execute code.
+
+### Quick Start
+
+Run your first line of code in a Daytona Sandbox. Use our [LLMs context files](/docs/getting-started#additional-examples) for faster development with AI assistants.
+
+#### 1. Get Your API Key
+
+* Go to the Daytona [Dashboard](https://app.daytona.io/dashboard).
+* Create a new [API key](https://app.daytona.io/dashboard/keys). Make sure to save it securely, as it won’t be shown again.
+
+#### 2. Install the SDK
+
+<CodeGroup>
+
+```sh Python
+pip install daytona
+```
+
+```sh TypeScript
+npm install @daytonaio/sdk
+```
+  
+</CodeGroup>
+
+#### 3. Write Your Code
+
+<Tabs>
+  <Tab title="Python">
+    Create a file named: `main.py`
+
+    ```python Python
+    from daytona import Daytona, DaytonaConfig
+
+    # Define the configuration
+
+    config = DaytonaConfig(api_key="your-api-key")
+
+    # Initialize the Daytona client
+
+    daytona = Daytona(config)
+
+    # Create the Sandbox instance
+
+    sandbox = daytona.create()
+
+    # Run the code securely inside the Sandbox
+
+    response = sandbox.process.code_run('print("Hello World from code!")')
+    if response.exit_code != 0:
+      print(f"Error: {response.exit_code} {response.result}")
+    else:
+        print(response.result)
+
+    # Clean up
+
+    sandbox.delete()
+    ```
+  </Tab>
+  <Tab title="TypeScript">
+    Create a file named: `index.mts`
+
+    ```ts
+    import { Daytona } from '@daytonaio/sdk';
+
+    // Initialize the Daytona client
+    const daytona = new Daytona({ apiKey: 'your-api-key' });
+
+    // Create the Sandbox instance
+    const sandbox = await daytona.create({
+      language: 'typescript',
+    });
+
+    // Run the code securely inside the Sandbox
+    const response = await sandbox.process.codeRun('console.log("Hello World from code!")')
+    console.log(response.result);
+
+    // Clean up
+    await sandbox.delete()
+    ```
+  </Tab>
+</Tabs>
+
+<Note>
+  Replace `your-api-key` with the value from your Daytona dashboard.
+</Note>
+
+#### 4. Run It
+
+<CodeGroup>
+
+```sh Python
+python main.py
+```
+
+```sh TypeScript
+npx tsx index.mts
+```
+  
+</CodeGroup>
+
+#### ✅ What You Just Did
+
+* Installed the Daytona SDK.
+* Created a secure sandbox environment.
+* Executed code remotely inside that sandbox.
+* Retrieved and displayed the output locally.
+
+You’re now ready to use Daytona for secure, isolated code execution.
+
+## Introduction
+
+<CardGroup>
+  <Card title="Getting Started" href="/docs/getting-started">
+    Learn about Daytona SDK and how it can help you manage your development environments.
+  </Card>
+  <Card title="Configuration" href="/docs/configuration">
+    Get started with Daytona SDK and learn how to use and configure your development environments.
+  </Card>
+  <Card title="Sandboxes" href="/docs/sandbox-management">
+    Learn how to create, manage, and remove Sandboxes using the Daytona SDK.
+  </Card>
+  <Card title="Snapshots" href="/docs/snapshots">
+    Learn how to create, manage and remove Snapshots using the Daytona SDK.
+  </Card>
+  <Card title="Declarative Builder" href="/docs/declarative-builder">
+    Learn how to dynamically build Snapshots from Docker/OCI compatible images using the Daytona SDK.
+  </Card>
+  <Card title="Volumes" href="/docs/volumes">
+    Learn how to manage volumes in your Daytona Sandboxes.
+  </Card>
+</CardGroup>
+
+## Account management
+
+<CardGroup>
+  <Card title="API Keys" href="/docs/api-keys">
+    Daytona API Key management and scopes.
+  </Card>
+  <Card title="Organizations" href="/docs/organizations">
+    Learn how to create, manage, and remove Organizations using the Daytona SDK.
+  </Card>
+  <Card title="Limits" href="/docs/limits">
+    Limits and tiers assigned to Organizations.
+  </Card>
+  <Card title="Billing" href="/docs/billing">
+    Billing management for Organizations.
+  </Card>
+  <Card title="Linked Accounts" href="/docs/linked-accounts">
+    Linked Accounts for Users.
+  </Card>
+</CardGroup>
+
+## Agent Toolbox
+
+<CardGroup>
+  <Card title="File System" href="/docs/file-system-operations">
+    Learn how to manage files and directories in your Sandboxes using the Daytona SDK.
+  </Card>
+  <Card title="Git Operations" href="/docs/git-operations">
+    Learn how to manage Git repositories in your Sandboxes using the Daytona SDK.
+  </Card>
+  <Card title="Language Server Protocol" href="/docs/language-server-protocol">
+    Learn how to use Language Server Protocol (LSP) support in your Sandboxes using the Daytona SDK.
+  </Card>
+  <Card title="Process & Code Execution" href="/docs/process-code-execution">
+    Learn about running commands and code in isolated environments using the Daytona SDK.
+  </Card>
+  <Card title="Log Streaming" href="/docs/log-streaming">
+    Learn how to stream logs from your Sandboxes using the Daytona SDK.
+  </Card>
+</CardGroup>
+
+## Other
+
+<CardGroup>
+  <Card title="Web Terminal" href="/docs/web-terminal">
+    Web Terminal access to Daytona Sandboxes.
+  </Card>
+  <Card title="Preview & Authentication" href="/docs/preview-and-authentication">
+    Preview URLs and authentication tokens.
+  </Card>
+  <Card title="Regions" href="/docs/regions">
+    Setting the region to spin up Daytona Sandboxes in.
+  </Card>
+  <Card title="MCP Server" href="/docs/mcp" />
+</CardGroup>

@@ -1,0 +1,80 @@
+---
+title: "ObjectStorage"
+---
+
+ObjectStorage class for interacting with object storage services.
+
+### Param
+
+The configuration for the object storage service.
+
+### Constructors
+
+#### new ObjectStorage()
+
+```ts
+new ObjectStorage(config: ObjectStorageConfig): ObjectStorage
+```
+
+**Parameters**:
+
+* `config` *ObjectStorageConfig*
+
+**Returns**:
+
+* `ObjectStorage`
+
+### Methods
+
+#### computeArchiveBasePath()
+
+```ts
+static computeArchiveBasePath(pathStr: string): string
+```
+
+Compute the base path for an archive. Returns normalized path without the root (drive letter or leading slash).
+
+**Parameters**:
+
+* `pathStr` *string* - The path to compute the base path for.
+
+**Returns**:
+
+* `string` - The base path for the archive.
+
+***
+
+#### upload()
+
+```ts
+upload(
+   path: string,
+   organizationId: string,
+archiveBasePath?: string): Promise<string>
+```
+
+Upload a file or directory to object storage.
+
+**Parameters**:
+
+* `path` *string* - The path to the file or directory to upload.
+* `organizationId` *string* - The organization ID to use for the upload.
+* `archiveBasePath?` *string* - The base path to use for the archive.
+
+**Returns**:
+
+* `Promise<string>` - The hash of the uploaded file or directory.
+
+***
+
+## ObjectStorageConfig
+
+Configuration for the ObjectStorage class.
+
+**Properties**:
+
+* `accessKeyId` *string* - The access key ID for the object storage service.
+* `bucketName?` *string* - The name of the bucket to use.
+* `endpointUrl` *string* - The endpoint URL for the object storage service.
+* `secretAccessKey` *string* - The secret access key for the object storage service.
+* `sessionToken?` *string* - The session token for the object storage service. Used for temporary credentials.

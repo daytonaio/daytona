@@ -1,0 +1,261 @@
+---
+title: "Charts"
+---
+
+## ChartType
+
+Chart types
+
+**Enum Members**:
+
+* `BAR` (“bar”)
+* `LINE` (“line”)
+* `PIE` (“pie”)
+* `SCATTER` (“scatter”)
+* `UNKNOWN` (“unknown”)
+
+## parseChart()
+
+```ts
+function parseChart(data: any): Chart
+```
+
+**Parameters**:
+
+* `data` *any*
+
+**Returns**:
+
+* `Chart`
+
+***
+
+## BarChart
+
+```ts
+type BarChart = Chart2D & {
+  elements: BarData[];
+  type: BAR;
+};
+```
+
+Represents a bar chart with metadata.
+
+**Type declaration**:
+
+* `elements` *BarData\[]* - The bars of the chart
+* `type` *BAR* - The type of chart
+
+## BarData
+
+```ts
+type BarData = {
+  group: string;
+  label: string;
+  value: string;
+};
+```
+
+Represents a bar in a bar chart.
+
+**Type declaration**:
+
+* `group` *string* - The group of the bar
+* `label` *string* - The label of the bar
+* `value` *string* - The value of the bar
+
+## BoxAndWhiskerChart
+
+```ts
+type BoxAndWhiskerChart = Chart2D & {
+  elements: BoxAndWhiskerData[];
+  type: BOX_AND_WHISKER;
+};
+```
+
+Represents a box and whisker chart with metadata.
+
+**Type declaration**:
+
+* `elements` *BoxAndWhiskerData\[]* - The box and whiskers of the chart
+* `type` *BOX\_AND\_WHISKER* - The type of chart
+
+## BoxAndWhiskerData
+
+```typescript
+type BoxAndWhiskerData = {
+  first_quartile: number;
+  label: string;
+  max: number;
+  median: number;
+  min: number;
+  outliers: number[];
+};
+```
+
+Represents a box and whisker in a box and whisker chart.
+
+**Type declaration**:
+
+* `first\_quartile` *number* - The first quartile of the box and whisker
+* `label` *string* - The label of the box and whisker
+* `max` *number* - The third quartile of the box and whisker
+* `median` *number* - The median of the box and whisker
+* `min` *number* - The minimum value of the box and whisker
+* `outliers` *number\[]*
+
+## Chart
+
+```ts
+type Chart = {
+  elements: any[];
+  png: string;
+  title: string;
+  type: ChartType;
+};
+```
+
+Represents a chart with metadata from matplotlib.
+
+**Type declaration**:
+
+* `elements` *any\[]* - The elements of the chart
+* `png?` *string* - The PNG representation of the chart encoded in base64
+* `title` *string* - The title of the chart
+* `type` *ChartType* - The type of chart
+
+## Chart2D
+
+```ts
+type Chart2D = Chart & {
+  x_label: string;
+  y_label: string;
+};
+```
+
+Represents a 2D chart with metadata.
+
+**Type declaration**:
+
+* `x\_label?` *string* - The label of the x-axis
+* `y\_label?` *string* - The label of the y-axis
+
+## CompositeChart
+
+```ts
+type CompositeChart = Chart & {
+  elements: Chart[];
+  type: COMPOSITE_CHART;
+};
+```
+
+Represents a composite chart with metadata.
+
+**Type declaration**:
+
+* `elements` *Chart\[]* - The charts of the composite chart
+* `type` *COMPOSITE\_CHART* - The type of chart
+
+## LineChart
+
+```ts
+type LineChart = PointChart & {
+  type: LINE;
+};
+```
+
+Represents a line chart with metadata.
+
+**Type declaration**:
+
+* `type` *LINE* - The type of chart
+
+## PieChart
+
+```ts
+type PieChart = Chart & {
+  elements: PieData[];
+  type: PIE;
+};
+```
+
+Represents a pie chart with metadata.
+
+**Type declaration**:
+
+* `elements` *PieData\[]* - The pie slices of the chart
+* `type` *PIE* - The type of chart
+
+## PieData
+
+```typescript
+type PieData = {
+  angle: number;
+  label: string;
+  radius: number;
+};
+```
+
+Represents a pie slice in a pie chart.
+
+**Type declaration**:
+
+* `angle` *number* - The angle of the pie slice
+* `label` *string* - The label of the pie slice
+* `radius` *number* - The radius of the pie slice
+
+## PointChart
+
+```typescript
+type PointChart = Chart2D & {
+  elements: PointData[];
+  x_scale: string;
+  x_tick_labels: string[];
+  x_ticks: (number | string)[];
+  y_scale: string;
+  y_tick_labels: string[];
+  y_ticks: (number | string)[];
+};
+```
+
+Represents a point chart with metadata.
+
+**Type declaration**:
+
+* `elements` *PointData\[]* - The points of the chart
+* `x\_scale` *string* - The scale of the x-axis
+* `x\_tick\_labels` *string\[]* - The labels of the x-axis
+* `x\_ticks` *(number | string)\[]* - The ticks of the x-axis
+* `y\_scale` *string* - The scale of the y-axis
+* `y\_tick\_labels` *string\[]* - The labels of the y-axis
+* `y\_ticks` *(number | string)\[]* - The ticks of the y-axis
+
+## PointData
+
+```typescript
+type PointData = {
+  label: string;
+  points: [number | string, number | string][];
+};
+```
+
+Represents a point in a 2D chart.
+
+**Type declaration**:
+
+* `label` *string* - The label of the point
+* `points` *\[number | string, number | string]\[]* - The points of the chart
+
+## ScatterChart
+
+```ts
+type ScatterChart = PointChart & {
+  type: SCATTER;
+};
+```
+
+Represents a scatter chart with metadata.
+
+**Type declaration**:
+
+* `type` *SCATTER* - The type of chart

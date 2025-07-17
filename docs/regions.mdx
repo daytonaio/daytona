@@ -1,0 +1,30 @@
+---
+title: "Region Selection"
+sidebarTitle: "Regions"
+icon: globe
+---
+
+Daytona is currently available in the following regions:
+
+* United States (US)
+* Europe (EU)
+
+You can select the region during the Daytona [configuration](/docs/configuration) step.
+
+```py
+from daytona import Daytona, DaytonaConfig
+
+config = DaytonaConfig(
+    target="us"
+)
+
+daytona = Daytona(config)
+```
+
+```ts
+import { Daytona } from '@daytonaio/sdk';
+
+const daytona: Daytona = new Daytona({
+    target: "eu"
+});
+```
