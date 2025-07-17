@@ -9,6 +9,7 @@ import {
   ConflictException,
   ForbiddenException,
   BadRequestException,
+  Logger,
 } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository, Not, In, IsNull, Raw, Like, JsonContains } from 'typeorm'
@@ -25,10 +26,14 @@ import { OrganizationService } from '../../organization/services/organization.se
 import { SnapshotRunner } from '../entities/snapshot-runner.entity'
 import { Sandbox } from '../entities/sandbox.entity'
 import { SandboxState } from '../enums/sandbox-state.enum'
+import { OrganizationEvents } from '../../organization/constants/organization-events.constant'
+import { OrganizationSuspendedSnapshotDeactivatedEvent } from '../../organization/events/organization-suspended-snapshot-deactivated.event'
 
 const IMAGE_NAME_REGEX = /^[a-zA-Z0-9.\-:]+(\/[a-zA-Z0-9.\-:]+)*$/
 @Injectable()
 export class SnapshotService {
+  private readonly logger = new Logger(SnapshotService.name)
+
   constructor(
     @InjectRepository(Sandbox)
     private readonly sandboxRepository: Repository<Sandbox>,
@@ -295,6 +300,25 @@ export class SnapshotService {
     return await this.snapshotRepository.save(snapshot)
   }
 
+  async deactivateSnapshot(snapshotId: string): Promise<Snapshot> {
+    const snapshot = await this.snapshotRepository.findOne({
+      where: { id: snapshotId },
+    })
+
+    if (!snapshot) {
+      throw new NotFoundException(`Snapshot ${snapshotId} not found`)
+    }
+
+    if (snapshot.state === SnapshotState.INACTIVE) {
+      throw new BadRequestException(`Snapshot ${snapshotId} is already inactive`)
+    }
+
+    // TODO: do we need extra check here for valid current state?
+
+    snapshot.state = SnapshotState.INACTIVE
+    return await this.snapshotRepository.save(snapshot)
+  }
+
   async canCleanupImage(imageName: string): Promise<boolean> {
     const snapshot = await this.snapshotRepository.findOne({
       where: {
@@ -326,5 +350,16 @@ export class SnapshotService {
     }
 
     return true
+  }
+
+  @OnEvent(OrganizationEvents.SUSPENDED_SNAPSHOT_DEACTIVATED)
+  async handleSuspendedSnapshotDeactivated(event: OrganizationSuspendedSnapshotDeactivatedEvent) {
+    await this.deactivateSnapshot(event.snapshotId).catch((error) => {
+      //  log the error for now, but don't throw it as it will be retried
+      this.logger.error(
+        `Error deactivating snapshot from suspended organization. SnapshotId: ${event.snapshotId}: `,
+        error,
+      )
+    })
   }
 }

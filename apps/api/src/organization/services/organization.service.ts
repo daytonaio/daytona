@@ -35,6 +35,8 @@ import { SandboxDesiredState } from '../../sandbox/enums/sandbox-desired-state.e
 import { SnapshotRunner } from '../../sandbox/entities/snapshot-runner.entity'
 import { OrganizationSuspendedSnapshotRunnerRemovedEvent } from '../events/organization-suspended-snapshot-runner-removed'
 import { SystemRole } from '../../user/enums/system-role.enum'
+import { SnapshotState } from '../../sandbox/enums/snapshot-state.enum'
+import { OrganizationSuspendedSnapshotDeactivatedEvent } from '../events/organization-suspended-snapshot-deactivated.event'
 
 @Injectable()
 export class OrganizationService implements OnModuleInit {
@@ -336,6 +338,47 @@ export class OrganizationService implements OnModuleInit {
       this.eventEmitter.emitAsync(
         OrganizationEvents.SUSPENDED_SANDBOX_STOPPED,
         new OrganizationSuspendedSandboxStoppedEvent(sandbox.id),
+      ),
+    )
+
+    await this.redis.del(lockKey)
+  }
+
+  @Cron(CronExpression.EVERY_10_MINUTES, { name: 'deactivate-suspended-organization-snapshots' })
+  async deactivateSuspendedOrganizationSnapshots(): Promise<void> {
+    //  lock the sync to only run one instance at a time
+    const lockKey = 'deactivate-suspended-organization-snapshots'
+    if (!(await this.redisLockProvider.lock(lockKey, 60))) {
+      return
+    }
+
+    const suspendedOrganizations = await this.findSuspended(
+      // Find organization suspended more than 24 hours ago
+      new Date(Date.now() - 1 * 1000 * 60 * 60 * 24),
+      //  and less than 7 days ago
+      new Date(Date.now() - 7 * 1000 * 60 * 60 * 24),
+    )
+
+    const suspendedOrganizationIds = suspendedOrganizations.map((organization) => organization.id)
+
+    // Skip if no suspended organizations found to avoid empty IN clause
+    if (suspendedOrganizationIds.length === 0) {
+      await this.redis.del(lockKey)
+      return
+    }
+
+    const snapshots = await this.snapshotRepository.find({
+      where: {
+        organizationId: In(suspendedOrganizationIds),
+        general: Not(true),
+        state: Not(In([SnapshotState.ERROR, SnapshotState.BUILD_FAILED, SnapshotState.INACTIVE])),
+      },
+    })
+
+    snapshots.map((snapshot) =>
+      this.eventEmitter.emitAsync(
+        OrganizationEvents.SUSPENDED_SNAPSHOT_DEACTIVATED,
+        new OrganizationSuspendedSnapshotDeactivatedEvent(snapshot.id),
       ),
     )
 
