@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Injectable, Logger } from '@nestjs/common'
+import { Injectable, Logger, NotFoundException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Cron, CronExpression } from '@nestjs/schedule'
 import { In, MoreThanOrEqual, Not, Raw, Repository } from 'typeorm'
@@ -36,6 +36,7 @@ import { SandboxCreatedEvent } from '../events/sandbox-create.event'
 import { OtelSpan } from '../../common/decorators/otel.decorator'
 import { SnapshotRunner } from '../entities/snapshot-runner.entity'
 import { Runner } from '../entities/runner.entity'
+import { Snapshot } from '../entities/snapshot.entity'
 
 const SYNC_INSTANCE_STATE_LOCK_KEY = 'sync-instance-state-'
 const SYNC_AGAIN = 'sync-again'
@@ -1007,19 +1008,59 @@ export class SandboxManager {
         return SYNC_AGAIN
       }
 
-      //  exclude the runner that the last runner sandbox was on
-      const availableRunners = (
-        await this.runnerService.findAvailableRunners({
+      //  make sure we pick a runner that has the base snapshot
+      let baseSnapshot: Snapshot | null = null
+      try {
+        baseSnapshot = await this.snapshotService.getSnapshotByName(sandbox.snapshot, sandbox.organizationId)
+      } catch (e) {
+        if (e instanceof NotFoundException) {
+          //  if the base snapshot is not found, we'll use any available runner later
+        } else {
+          //  for all other errors, throw them
+          throw e
+        }
+      }
+
+      const snapshotRef = baseSnapshot ? baseSnapshot.internalName : null
+
+      let availableRunners = []
+      const runnersWithBaseSnapshot = await this.runnerService.findAvailableRunners({
+        region: sandbox.region,
+        sandboxClass: sandbox.class,
+        snapshotRef,
+      })
+      if (runnersWithBaseSnapshot.length > 0) {
+        availableRunners = runnersWithBaseSnapshot
+      } else {
+        //  if no runner has the base snapshot, get all available runners
+        availableRunners = await this.runnerService.findAvailableRunners({
           region: sandbox.region,
           sandboxClass: sandbox.class,
         })
-      ).filter((runner) => runner.id != sandbox.prevRunnerId)
+      }
+
+      //  check if we have any available runners after filtering
+      if (availableRunners.length === 0) {
+        await this.updateSandboxState(
+          sandbox.id,
+          SandboxState.ERROR,
+          undefined,
+          'No available runners found for sandbox restoration',
+        )
+        return DONT_SYNC_AGAIN
+      }
 
       //  get random runner from available runners
       const randomRunnerIndex = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1) + min)
       const runnerId = availableRunners[randomRunnerIndex(0, availableRunners.length - 1)].id
 
       const runner = await this.runnerService.findOne(runnerId)
+
+      //  verify the runner is still available and ready
+      if (!runner || runner.state !== RunnerState.READY || runner.unschedulable || runner.used >= runner.capacity) {
+        this.logger.warn(`Selected runner ${runnerId} is no longer available, retrying sandbox assignment`)
+        return SYNC_AGAIN
+      }
 
       const runnerSandboxApi = this.runnerApiFactory.createSandboxApi(runner)
 
