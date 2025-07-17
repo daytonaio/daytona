@@ -4,7 +4,7 @@ title: Configuration
 
 import { TabItem, Tabs } from '@astrojs/starlight/components'
 
-## Configuration Options
+## Configuration Methods
 
 Daytona SDK supports multiple ways to configure your environment, in order of precedence:
 
@@ -54,7 +54,7 @@ Daytona SDK supports environment variables for configuration. The SDK automatica
 
 | Variable              | Description                                | Optional |
 | --------------------- | ------------------------------------------ | -------- |
-| **`DAYTONA_API_KEY`** | Your Daytona API key.                      |          |
+| **`DAYTONA_API_KEY`** | Your Daytona API key.                      | No       |
 | **`DAYTONA_API_URL`** | URL of your Daytona API.                   | Yes      |
 | **`DAYTONA_TARGET`**  | Daytona Target to create the Sandboxes on. | Yes      |
 
@@ -89,6 +89,7 @@ DAYTONA_API_URL=https://your-api-url
 DAYTONA_TARGET=us
 ```
 
+The SDK will automatically read these values when initializing.
 
 ## Default Values
 
