@@ -128,7 +128,7 @@ func (c *ComputerUse) initializeProcesses(homeDir string) {
 
 	noVncPort := os.Getenv("NO_VNC_PORT")
 	if noVncPort == "" {
-		noVncPort = "6901"
+		noVncPort = "6080"
 	}
 
 	display := os.Getenv("DISPLAY")
