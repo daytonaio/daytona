@@ -73,6 +73,8 @@ const sandbox = await daytona.create({ labels: { SOME_LABEL: 'my-label' } });
 </TabItem>
 </Tabs>
 
+See: [create (Python SDK)](/docs/python-sdk/sync/daytona#daytonacreate), [create (TypeScript SDK)](/docs/typescript-sdk/daytona#create)
+
 When Sandboxes are not actively used, it is recommended that they be stopped. This can be done manually [using the stop command](/docs/sandbox-management#stop-and-start-sandbox) or automatically by [setting the auto-stop interval](/docs/sandbox-management#auto-stop-and-auto-archive).
 
 :::note
@@ -229,6 +231,8 @@ await sandbox.start();
 </TabItem>
 </Tabs>
 
+See: [stop (Python SDK)](/docs/python-sdk/sync/sandbox#sandboxstop), [start (Python SDK)](/docs/python-sdk/sync/sandbox#sandboxstart), [find_one (Python SDK)](/docs/python-sdk/sync/daytona#daytonafind_one), [stop (TypeScript SDK)](/docs/typescript-sdk/sandbox#stop), [start (TypeScript SDK)](/docs/typescript-sdk/sandbox#start), [findOne (TypeScript SDK)](/docs/typescript-sdk/daytona#findone)
+
 The stopped state should be used when the Sandbox is expected to be started again soon. Otherwise, it is recommended to stop and then archive the Sandbox to eliminate disk usage costs.
 
 ## Archive Sandbox
@@ -255,6 +259,8 @@ await sandbox.archive();
 </TabItem>
 </Tabs>
 
+See: [archive (Python SDK)](/docs/python-sdk/sync/sandbox#sandboxarchive), [archive (TypeScript SDK)](/docs/typescript-sdk/sandbox#archive)
+
 ## Delete Sandbox
 
 The Daytona SDK provides methods to delete Sandboxes using Python and TypeScript.
@@ -274,6 +280,8 @@ await sandbox.delete();
 
 </TabItem>
 </Tabs>
+
+See: [delete (Python SDK)](/docs/python-sdk/sync/sandbox#sandboxdelete), [delete (TypeScript SDK)](/docs/typescript-sdk/sandbox#delete)
 
 :::tip
 Check out the [Daytona CLI](/docs/getting-started#setting-up-the-daytona-cli) if you prefer managing Sandboxes through the terminal:
