@@ -51,6 +51,7 @@ interface GetColumnsProps {
   loadingSandboxes: Record<string, boolean>
   writePermitted: boolean
   deletePermitted: boolean
+  proxyTemplateUrl: string
 }
 
 export function getColumns({
@@ -62,6 +63,7 @@ export function getColumns({
   loadingSandboxes,
   writePermitted,
   deletePermitted,
+  proxyTemplateUrl,
 }: GetColumnsProps): ColumnDef<Sandbox>[] {
   const columns: ColumnDef<Sandbox>[] = [
     {
@@ -253,6 +255,7 @@ export function getColumns({
             sandbox={row.original}
             writePermitted={writePermitted}
             deletePermitted={deletePermitted}
+            proxyTemplateUrl={proxyTemplateUrl}
             isLoading={loadingSandboxes[row.original.id]}
             onStart={handleStart}
             onStop={handleStop}

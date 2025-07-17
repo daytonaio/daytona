@@ -129,7 +129,7 @@ jobs:
           python3 -m pip install poetry==2.1.3
           sudo apt-get update && sudo apt-get install -y gcc libx11-dev libxtst-dev
           yarn
-          yarn build
+          yarn build --nxBail=true
 
   license-check:
     runs-on: ubuntu-latest

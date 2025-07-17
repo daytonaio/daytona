@@ -20,14 +20,12 @@ const buildTerminalUrl = (() => {
   let cachedUrl: string | null = null
   let cachedSandboxId: string | null = null
 
-  return (sandboxId: string, runnerDomain?: string, daemonVersion?: string) => {
+  return (sandboxId: string, proxyTemplateUrl: string, runnerDomain?: string, daemonVersion?: string) => {
     if (!runnerDomain) return null
 
     if (daemonVersion) {
       if (!cachedUrl || cachedSandboxId !== sandboxId) {
-        cachedUrl =
-          import.meta.env.VITE_PROXY_TEMPLATE_URL?.replace('{{PORT}}', '22222').replace('{{sandboxId}}', sandboxId) ||
-          null
+        cachedUrl = proxyTemplateUrl.replace('{{PORT}}', '22222').replace('{{sandboxId}}', sandboxId) || null
         cachedSandboxId = sandboxId
       }
       return cachedUrl
@@ -42,13 +40,14 @@ export function SandboxTableActions({
   writePermitted,
   deletePermitted,
   isLoading,
+  proxyTemplateUrl,
   onStart,
   onStop,
   onDelete,
   onArchive,
   onVnc,
 }: SandboxTableActionsProps) {
-  const terminalUrl = buildTerminalUrl(sandbox.id, sandbox.runnerDomain, sandbox.daemonVersion)
+  const terminalUrl = buildTerminalUrl(sandbox.id, proxyTemplateUrl, sandbox.runnerDomain, sandbox.daemonVersion)
   const isTerminalEnabled = terminalUrl && sandbox.state === SandboxState.STARTED
 
   const menuItems = useMemo(() => {

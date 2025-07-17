@@ -16,21 +16,22 @@ import (
 )
 
 type Config struct {
-	ApiToken           string `envconfig:"API_TOKEN" validate:"required"`
-	ApiPort            int    `envconfig:"API_PORT"`
-	TLSCertFile        string `envconfig:"TLS_CERT_FILE"`
-	TLSKeyFile         string `envconfig:"TLS_KEY_FILE"`
-	EnableTLS          bool   `envconfig:"ENABLE_TLS"`
-	CacheRetentionDays int    `envconfig:"CACHE_RETENTION_DAYS"`
-	Environment        string `envconfig:"ENVIRONMENT"`
-	ContainerRuntime   string `envconfig:"CONTAINER_RUNTIME"`
-	ContainerNetwork   string `envconfig:"CONTAINER_NETWORK"`
-	LogFilePath        string `envconfig:"LOG_FILE_PATH"`
-	AWSRegion          string `envconfig:"AWS_REGION"`
-	AWSEndpointUrl     string `envconfig:"AWS_ENDPOINT_URL"`
-	AWSAccessKeyId     string `envconfig:"AWS_ACCESS_KEY_ID"`
-	AWSSecretAccessKey string `envconfig:"AWS_SECRET_ACCESS_KEY"`
-	AWSDefaultBucket   string `envconfig:"AWS_DEFAULT_BUCKET"`
+	ApiToken               string `envconfig:"API_TOKEN" validate:"required"`
+	ApiPort                int    `envconfig:"API_PORT"`
+	TLSCertFile            string `envconfig:"TLS_CERT_FILE"`
+	TLSKeyFile             string `envconfig:"TLS_KEY_FILE"`
+	EnableTLS              bool   `envconfig:"ENABLE_TLS"`
+	CacheRetentionDays     int    `envconfig:"CACHE_RETENTION_DAYS"`
+	Environment            string `envconfig:"ENVIRONMENT"`
+	ContainerRuntime       string `envconfig:"CONTAINER_RUNTIME"`
+	ContainerNetwork       string `envconfig:"CONTAINER_NETWORK"`
+	LogFilePath            string `envconfig:"LOG_FILE_PATH"`
+	AWSRegion              string `envconfig:"AWS_REGION"`
+	AWSEndpointUrl         string `envconfig:"AWS_ENDPOINT_URL"`
+	AWSAccessKeyId         string `envconfig:"AWS_ACCESS_KEY_ID"`
+	AWSSecretAccessKey     string `envconfig:"AWS_SECRET_ACCESS_KEY"`
+	AWSDefaultBucket       string `envconfig:"AWS_DEFAULT_BUCKET"`
+	ResourceLimitsDisabled bool   `envconfig:"RESOURCE_LIMITS_DISABLED"`
 }
 
 var DEFAULT_API_PORT int = 8080

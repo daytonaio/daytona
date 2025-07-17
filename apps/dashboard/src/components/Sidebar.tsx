@@ -55,8 +55,11 @@ import { DAYTONA_DOCS_URL, DAYTONA_SLACK_URL } from '@/constants/ExternalLinks'
 import { Logo, LogoText } from '@/assets/Logo'
 interface SidebarProps {
   isBannerVisible: boolean
+  billingEnabled: boolean
+  linkedAccountsEnabled: boolean
 }
-export function Sidebar({ isBannerVisible }: SidebarProps) {
+
+export function Sidebar({ isBannerVisible, billingEnabled, linkedAccountsEnabled }: SidebarProps) {
   const { theme, setTheme } = useTheme()
   const { user, signoutRedirect } = useAuth()
   const navigate = useNavigate()
@@ -97,15 +100,9 @@ export function Sidebar({ isBannerVisible }: SidebarProps) {
         path: RoutePath.LIMITS,
       })
     }
-    if (
-      import.meta.env.VITE_BILLING_API_URL &&
-      authenticatedUserOrganizationMember?.role === OrganizationUserRoleEnum.OWNER
-    ) {
-      arr.push({
-        icon: <CreditCard size={16} strokeWidth={1.5} />,
-        label: 'Billing',
-        path: RoutePath.BILLING,
-      })
+
+    if (billingEnabled && authenticatedUserOrganizationMember?.role === OrganizationUserRoleEnum.OWNER) {
+      arr.push({ icon: <CreditCard size={16} strokeWidth={1.5} />, label: 'Billing', path: RoutePath.BILLING })
     }
     if (!selectedOrganization?.personal) {
       arr.push({
@@ -124,7 +121,13 @@ export function Sidebar({ isBannerVisible }: SidebarProps) {
       path: RoutePath.SETTINGS,
     })
     return arr
-  }, [authenticatedUserOrganizationMember?.role, selectedOrganization?.personal, authenticatedUserHasPermission])
+  }, [
+    authenticatedUserOrganizationMember?.role,
+    selectedOrganization?.personal,
+    authenticatedUserHasPermission,
+    billingEnabled,
+  ])
+
   const handleSignOut = () => {
     signoutRedirect()
   }
@@ -263,7 +266,7 @@ export function Sidebar({ isBannerVisible }: SidebarProps) {
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
               <DropdownMenuContent side="top" align="start" className="w-[--radix-popper-anchor-width] min-w-[12rem]">
-                {import.meta.env.VITE_LINKED_ACCOUNTS_ENABLED === 'true' && (
+                {linkedAccountsEnabled && (
                   <DropdownMenuItem asChild>
                     <Button
                       variant="ghost"

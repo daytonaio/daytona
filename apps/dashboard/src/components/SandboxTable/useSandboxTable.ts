@@ -25,6 +25,7 @@ interface UseSandboxTableProps {
   loadingSandboxes: Record<string, boolean>
   writePermitted: boolean
   deletePermitted: boolean
+  proxyTemplateUrl: string
   handleStart: (id: string) => void
   handleStop: (id: string) => void
   handleDelete: (id: string) => void
@@ -37,6 +38,7 @@ export function useSandboxTable({
   loadingSandboxes,
   writePermitted,
   deletePermitted,
+  proxyTemplateUrl,
   handleStart,
   handleStop,
   handleDelete,
@@ -72,6 +74,7 @@ export function useSandboxTable({
         loadingSandboxes,
         writePermitted,
         deletePermitted,
+        proxyTemplateUrl,
       }),
     [
       handleStart,

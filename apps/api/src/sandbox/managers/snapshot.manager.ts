@@ -6,7 +6,7 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Cron, CronExpression } from '@nestjs/schedule'
-import { In, IsNull, LessThan, Not, Or, Repository } from 'typeorm'
+import { In, IsNull, LessThan, Not, Or, Raw, Repository } from 'typeorm'
 import { DockerRegistryService } from '../../docker-registry/services/docker-registry.service'
 import { Snapshot } from '../entities/snapshot.entity'
 import { SnapshotState } from '../enums/snapshot-state.enum'
@@ -702,9 +702,19 @@ export class SnapshotManager {
 
       if (!snapshot.buildInfo) {
         // Snapshots that have gone through the build process are already in the internal registry
-        await this.pushSnapshotToInternalRegistry(snapshot.id)
+        snapshot.internalName = await this.pushSnapshotToInternalRegistry(snapshot.id)
       }
-      await this.propagateSnapshotToRunners(snapshot.internalName)
+      const runner = await this.runnerRepository.findOne({
+        where: {
+          state: RunnerState.READY,
+          unschedulable: false,
+          used: Raw((alias) => `${alias} < capacity`),
+        },
+      })
+      // Propagate snapshot to one runner so it can be used immediately
+      if (runner) {
+        await this.propagateSnapshotToRunner(snapshot.internalName, runner)
+      }
       await this.updateSnapshotState(snapshot.id, SnapshotState.ACTIVE)
 
       // Best effort removal of old snapshot from transient registry
@@ -783,7 +793,7 @@ export class SnapshotManager {
     }
   }
 
-  async pushSnapshotToInternalRegistry(snapshotId: string) {
+  async pushSnapshotToInternalRegistry(snapshotId: string): Promise<string> {
     const snapshot = await this.snapshotRepository.findOneOrFail({
       where: {
         id: snapshotId,
@@ -807,6 +817,8 @@ export class SnapshotManager {
 
     // Push the newly tagged snapshot
     await this.dockerProvider.pushImage(internalSnapshotName, registry)
+
+    return internalSnapshotName
   }
 
   async retrySnapshotRunnerPull(snapshotRunner: SnapshotRunner) {

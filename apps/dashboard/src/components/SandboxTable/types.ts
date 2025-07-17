@@ -13,6 +13,7 @@ export interface SandboxTableProps {
   loading: boolean
   snapshots: SnapshotDto[]
   loadingSnapshots: boolean
+  proxyTemplateUrl: string
   handleStart: (id: string) => void
   handleStop: (id: string) => void
   handleDelete: (id: string) => void
@@ -27,6 +28,7 @@ export interface SandboxTableActionsProps {
   writePermitted: boolean
   deletePermitted: boolean
   isLoading: boolean
+  proxyTemplateUrl: string
   onStart: (id: string) => void
   onStop: (id: string) => void
   onDelete: (id: string) => void
