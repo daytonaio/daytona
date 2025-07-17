@@ -199,8 +199,8 @@ func (c *ComputerUse) initializeProcesses(homeDir string) {
 	// Process 4: novnc (Web-based VNC client)
 	c.processes["novnc"] = &Process{
 		Name:        "novnc",
-		Command:     "/usr/share/novnc/utils/launch.sh",
-		Args:        []string{"--vnc", "localhost:" + vncPort, "--listen", noVncPort},
+		Command:     "websockify",
+		Args:        []string{"--web=/usr/share/novnc/", noVncPort, "localhost:" + vncPort},
 		User:        user,
 		Priority:    400,
 		AutoRestart: true,
