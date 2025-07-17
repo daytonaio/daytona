@@ -11,17 +11,14 @@ To manage your API keys, go to the [Keys](https://app.daytona.io/dashboard/keys)
 ## Permissions
 
 When adding a new API Key you will be prompted to select a set of permissions for the key:
-
-| Permission | Description |
-|------------|-------------|
-| **`Sandboxes`** | Grants the ability to create and manage Sandboxes |
-| **`Snapshots`** | Grants the ability to create and manage Snapshots |
-| **`Registries`** | Grants the ability to create and manage Registries |
-| **`Volumes`** | Grants the ability to create and manage Volumes |
-
-Each permission includes fine-grained scopes:
-
-- `write:*` for creating and updating
-- `delete:*` for deleting resources
-
-Example: `write:sandboxes`, `delete:sandboxes`
+| Resource    | Scope                | Description                          |
+|-------------|----------------------|--------------------------------------|
+| Sandboxes   | `write:sandboxes`    | Create/modify sandboxes           |
+|             | `delete:sandboxes`   | Delete sandboxes                     |
+| Snapshots   | `write:snapshots`    | Create/modify snapshots           |
+|             | `delete:snapshots`   | Delete snapshots                     |
+| Registries  | `write:registries`   | Create/modify registries          |
+|             | `delete:registries`  | Delete registries                    |
+| Volumes     | `read:volumes`       | View volumes                         |
+|             | `write:volumes`      | Create/modify volumes             |
+|             | `delete:volumes`     | Delete volumes                       |
