@@ -75,6 +75,16 @@ export class RunnerService {
     return this.runnerRepository.findOneBy({ id })
   }
 
+  async findByIds(runnerIds: string[]): Promise<Runner[]> {
+    if (runnerIds.length === 0) {
+      return []
+    }
+
+    return this.runnerRepository.find({
+      where: { id: In(runnerIds) },
+    })
+  }
+
   async findBySandboxId(sandboxId: string): Promise<Runner | null> {
     const sandbox = await this.sandboxRepository.findOneBy({ id: sandboxId, state: Not(SandboxState.DESTROYED) })
     if (!sandbox) {

@@ -117,12 +117,15 @@ export class SandboxController {
   ): Promise<SandboxDto[]> {
     const labels = labelsQuery ? JSON.parse(labelsQuery) : {}
     const sandboxes = await this.sandboxService.findAll(authContext.organizationId, labels, includeErroredDeleted)
-    const dtos = sandboxes.map(async (sandbox) => {
-      const runner = await this.runnerService.findOne(sandbox.runnerId)
-      const dto = SandboxDto.fromSandbox(sandbox, runner.domain)
-      return dto
+
+    const runnerIds = new Set(sandboxes.map((s) => s.runnerId))
+    const runners = await this.runnerService.findByIds(Array.from(runnerIds))
+    const runnerMap = new Map(runners.map((runner) => [runner.id, runner]))
+
+    return sandboxes.map((sandbox) => {
+      const runner = runnerMap.get(sandbox.runnerId)
+      return SandboxDto.fromSandbox(sandbox, runner?.domain)
     })
-    return await Promise.all(dtos)
   }
 
   @Post()
