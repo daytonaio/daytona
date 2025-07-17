@@ -4526,6 +4526,42 @@ paths:
       summary: Create a new snapshot
       tags:
         - snapshots
+  /snapshots/can-cleanup-image:
+    get:
+      operationId: canCleanupImage
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - description: Image name with tag to check
+          explode: true
+          in: query
+          name: imageName
+          required: true
+          schema:
+            type: string
+          style: form
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: boolean
+          description: Boolean indicating if image can be cleaned up
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Check if an image can be cleaned up
+      tags:
+        - snapshots
   /snapshots/{id}:
     delete:
       operationId: removeSnapshot

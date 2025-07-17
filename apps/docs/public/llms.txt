@@ -1,5 +1,5 @@
 # Daytona Documentation v0.0.0-dev
-# Generated on: 2025-07-13
+# Generated on: 2025-07-16
 
 # Daytona
 
@@ -8,7 +8,6 @@
 ## Docs
 
 - [API Keys](https://daytona.io/docs/api-keys)
-- [Expiration](https://daytona.io/docs/api-keys#expiration)
 - [Permissions](https://daytona.io/docs/api-keys#permissions)
 - [Billing](https://daytona.io/docs/billing)
 - [Wallet](https://daytona.io/docs/billing#wallet)
@@ -20,6 +19,13 @@
 - [Environment Variables](https://daytona.io/docs/configuration#environment-variables)
 - [Setting Environment Variables](https://daytona.io/docs/configuration#setting-environment-variables)
 - [Configuration Precedence](https://daytona.io/docs/configuration#configuration-precedence)
+- [Analyze Data with AI](https://daytona.io/docs/data-analysis-with-ai)
+- [Build an AI Data Analyst with Daytona](https://daytona.io/docs/data-analysis-with-ai#build-an-ai-data-analyst-with-daytona)
+- [1. Project Setup](https://daytona.io/docs/data-analysis-with-ai#1-project-setup)
+- [2. Dataset Preparation](https://daytona.io/docs/data-analysis-with-ai#2-dataset-preparation)
+- [3. Building the AI Data Analyst](https://daytona.io/docs/data-analysis-with-ai#3-building-the-ai-data-analyst)
+- [4. Running Your Analysis](https://daytona.io/docs/data-analysis-with-ai#4-running-your-analysis)
+- [5. Complete Implementation](https://daytona.io/docs/data-analysis-with-ai#5-complete-implementation)
 - [Declarative Builder](https://daytona.io/docs/declarative-builder)
 - [Overview](https://daytona.io/docs/declarative-builder#overview)
 - [Base Image Selection](https://daytona.io/docs/declarative-builder#base-image-selection)
@@ -65,8 +71,8 @@
 - [LSP Features](https://daytona.io/docs/language-server-protocol#lsp-features)
 - [Code Completion](https://daytona.io/docs/language-server-protocol#code-completion)
 - [Limits](https://daytona.io/docs/limits)
-- [Manage usage dynamically](https://daytona.io/docs/limits#manage-usage-dynamically)
 - [Tiers & Limit Increases](https://daytona.io/docs/limits#tiers--limit-increases)
+- [Manage usage dynamically](https://daytona.io/docs/limits#manage-usage-dynamically)
 - [Need More?](https://daytona.io/docs/limits#need-more)
 - [Linked Accounts](https://daytona.io/docs/linked-accounts)
 - [How to link an account](https://daytona.io/docs/linked-accounts#how-to-link-an-account)
@@ -92,6 +98,7 @@
 - [Troubleshooting](https://daytona.io/docs/mcp#troubleshooting)
 - [Support](https://daytona.io/docs/mcp#support)
 - [Organizations](https://daytona.io/docs/organizations)
+- [Personal vs Collaborative Organizations](https://daytona.io/docs/organizations#personal-vs-collaborative-organizations)
 - [Organization Roles](https://daytona.io/docs/organizations#organization-roles)
 - [Administrative Actions](https://daytona.io/docs/organizations#administrative-actions)
 - [Inviting New Users](https://daytona.io/docs/organizations#inviting-new-users)
@@ -168,7 +175,7 @@
 - [daytona volume list](https://daytona.io/docs/tools/cli#daytona-volume-list)
 - [Volumes](https://daytona.io/docs/volumes)
 - [Creating Volumes](https://daytona.io/docs/volumes#creating-volumes)
-- [Mounting Volumes to Sandboxes](https://daytona.io/docs/volumes#mounting-volumes-to-sandboxes)
+- [Mounting Volumes](https://daytona.io/docs/volumes#mounting-volumes)
 - [Deleting Volumes](https://daytona.io/docs/volumes#deleting-volumes)
 - [Working with Volumes](https://daytona.io/docs/volumes#working-with-volumes)
 - [Limitations](https://daytona.io/docs/volumes#limitations)

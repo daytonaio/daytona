@@ -239,44 +239,36 @@ export function SnapshotTable({
           </TableBody>
         </Table>
       </div>
-      <div className="flex items-center justify-between gap-2 mt-4">
-        <div className="flex items-center gap-4">
-          {deletePermitted && selectedRows.length > 0 && (
-            <Popover open={bulkDeleteConfirmationOpen} onOpenChange={setBulkDeleteConfirmationOpen}>
-              <PopoverTrigger>
-                <Button variant="destructive" size="sm">
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Bulk Delete
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent side="top">
-                <div className="flex flex-col gap-4">
-                  <p>Are you sure you want to delete these Snapshots?</p>
-                  <div className="flex items-center space-x-2">
-                    <Button
-                      variant="destructive"
-                      onClick={() => {
-                        handleBulkDelete()
-                        setBulkDeleteConfirmationOpen(false)
-                      }}
-                    >
-                      Delete
-                    </Button>
-                    <Button variant="outline" onClick={() => setBulkDeleteConfirmationOpen(false)}>
-                      Cancel
-                    </Button>
-                  </div>
+      <div className="flex items-center justify-between space-x-2 py-4">
+        {deletePermitted && selectedRows.length > 0 && (
+          <Popover open={bulkDeleteConfirmationOpen} onOpenChange={setBulkDeleteConfirmationOpen}>
+            <PopoverTrigger>
+              <Button variant="destructive" size="sm" className="h-8">
+                Bulk Delete
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent side="top">
+              <div className="flex flex-col gap-4">
+                <p>Are you sure you want to delete these Snapshots?</p>
+                <div className="flex items-center space-x-2">
+                  <Button
+                    variant="destructive"
+                    onClick={() => {
+                      handleBulkDelete()
+                      setBulkDeleteConfirmationOpen(false)
+                    }}
+                  >
+                    Delete
+                  </Button>
+                  <Button variant="outline" onClick={() => setBulkDeleteConfirmationOpen(false)}>
+                    Cancel
+                  </Button>
                 </div>
-              </PopoverContent>
-            </Popover>
-          )}
-          {deletePermitted && (
-            <span className="text-sm text-muted-foreground whitespace-nowrap">
-              {selectedRows.length} of {data.length} row(s) selected
-            </span>
-          )}
-        </div>
-        <Pagination table={table} className="mt-4" entityName="Snapshots" />
+              </div>
+            </PopoverContent>
+          </Popover>
+        )}
+        {deletePermitted && <Pagination table={table} selectionEnabled entityName="Snapshots" />}
       </div>
     </div>
   )

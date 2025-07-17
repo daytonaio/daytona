@@ -198,6 +198,15 @@ class SnapshotService:
 
         return created_snapshot if isinstance(created_snapshot, Snapshot) else Snapshot.from_dto(created_snapshot)
 
+    def activate(self, snapshot: Snapshot) -> Snapshot:
+        """Activate a snapshot.
+        Args:
+            snapshot (Snapshot): The Snapshot instance.
+        Returns:
+            Snapshot: The activated Snapshot instance.
+        """
+        return Snapshot.from_dto(self.__snapshots_api.activate_snapshot(snapshot.id))
+
     @staticmethod
     def process_image_context(object_storage_api: ObjectStorageApi, image: Image) -> List[str]:
         """Processes the image context by uploading it to object storage.
