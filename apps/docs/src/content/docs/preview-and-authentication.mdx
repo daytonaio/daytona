@@ -9,15 +9,6 @@ Processes listening for HTTP traffic in port range `3000-9999` can be previewed 
 A preview link's schema consists of the port and Sandbox ID combination, e.g.:
 `https://3000-sandbox-123456.proxy.daytona.work`
 
-If the Sandbox has its `public` property set to `true`, these links will be publicly accessible, otherwise the preview link will be available only to the Sandbox Organization users.
-
-For programmatic access (for example, `curl`), use the authorization token to access the preview URL:
-
-```bash
-curl -H "x-daytona-preview-token: vg5c0ylmcimr8b_v1ne0u6mdnvit6gc0" \
-https://3000-sandbox-123456.proxy.daytona.work
-```
-
 To fetch the preview link and the authorization token for a specific port, you can simply use the SDK method:
 
 <Tabs>
@@ -44,3 +35,13 @@ console.log(`Preview link token: ${previewInfo.token}`);
 
 </TabItem>
 </Tabs>
+## Authentication
+
+If the Sandbox has its `public` property set to `true`, these links will be publicly accessible, otherwise the preview link will be available only to the Sandbox Organization users.
+
+For programmatic access, use the authorization token to access the preview URL:
+
+```bash
+curl -H "x-daytona-preview-token: vg5c0ylmcimr8b_v1ne0u6mdnvit6gc0" \
+https://3000-sandbox-123456.proxy.daytona.work
+```
