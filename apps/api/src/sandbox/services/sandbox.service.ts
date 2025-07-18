@@ -44,6 +44,8 @@ import { TypedConfigService } from '../../config/typed-config.service'
 import { WarmPool } from '../entities/warm-pool.entity'
 import { SandboxDto } from '../dto/sandbox.dto'
 import { isValidUuid } from '../../common/utils/uuid'
+import { InjectRedis } from '@nestjs-modules/ioredis'
+import Redis from 'ioredis'
 
 const DEFAULT_CPU = 1
 const DEFAULT_MEMORY = 1
@@ -68,6 +70,7 @@ export class SandboxService {
     private readonly warmPoolService: SandboxWarmPoolService,
     private readonly eventEmitter: EventEmitter2,
     private readonly organizationService: OrganizationService,
+    @InjectRedis() private readonly redis: Redis,
   ) {}
 
   private async validateOrganizationQuotas(
@@ -77,6 +80,7 @@ export class SandboxService {
     disk: number,
     excludeSandboxId?: string,
   ): Promise<void> {
+    // validate per-sandbox quotas
     if (cpu > organization.maxCpuPerSandbox) {
       throw new ForbiddenException(
         `CPU request ${cpu} exceeds maximum allowed per sandbox (${organization.maxCpuPerSandbox})`,
@@ -93,27 +97,44 @@ export class SandboxService {
       )
     }
 
-    const sandboxUsageOverview = await this.organizationService.getSandboxUsageOverview(
+    // validate usage quotas
+    // use optimistic quota guards to protect against race conditions to prevent quota abuse (not 100% correct when close to quota limits)
+    const usageOverview = await this.organizationService.getSandboxUsageOverview(
       organization.id,
       organization,
       excludeSandboxId,
     )
 
-    if (sandboxUsageOverview.currentDiskUsage + disk > organization.totalDiskQuota) {
+    const concurrentCpuKey = `sandbox-concurrent-cpu-${organization.id}`
+    let concurrentCpu = parseInt(await this.redis.get(concurrentCpuKey)) || 0
+    concurrentCpu += cpu
+    await this.redis.setex(concurrentCpuKey, 1, concurrentCpu)
+
+    if (usageOverview.currentCpuUsage + concurrentCpu > usageOverview.totalCpuQuota) {
       throw new ForbiddenException(
-        `Total disk quota exceeded (${sandboxUsageOverview.currentDiskUsage + disk}GB > ${organization.totalDiskQuota}GB)`,
+        `Total CPU quota exceeded (${usageOverview.currentCpuUsage + cpu} > ${usageOverview.totalCpuQuota})`,
       )
     }
 
-    if (sandboxUsageOverview.currentCpuUsage + cpu > organization.totalCpuQuota) {
+    const concurrentMemoryKey = `sandbox-concurrent-memory-${organization.id}`
+    let concurrentMemory = parseInt(await this.redis.get(concurrentMemoryKey)) || 0
+    concurrentMemory += memory
+    await this.redis.setex(concurrentMemoryKey, 1, concurrentMemory)
+
+    if (usageOverview.currentMemoryUsage + concurrentMemory > usageOverview.totalMemoryQuota) {
       throw new ForbiddenException(
-        `Total CPU quota exceeded (${sandboxUsageOverview.currentCpuUsage + cpu} > ${organization.totalCpuQuota})`,
+        `Total memory quota exceeded (${usageOverview.currentMemoryUsage + memory}GB > ${usageOverview.totalMemoryQuota}GB)`,
       )
     }
 
-    if (sandboxUsageOverview.currentMemoryUsage + memory > organization.totalMemoryQuota) {
+    const concurrentDiskKey = `sandbox-concurrent-disk-${organization.id}`
+    let concurrentDisk = parseInt(await this.redis.get(concurrentDiskKey)) || 0
+    concurrentDisk += disk
+    await this.redis.setex(concurrentDiskKey, 1, concurrentDisk)
+
+    if (usageOverview.currentDiskUsage + concurrentDisk > usageOverview.totalDiskQuota) {
       throw new ForbiddenException(
-        `Total memory quota exceeded (${sandboxUsageOverview.currentMemoryUsage + memory}GB > ${organization.totalMemoryQuota}GB)`,
+        `Total disk quota exceeded (${usageOverview.currentDiskUsage + concurrentDisk}GB > ${usageOverview.totalDiskQuota}GB)`,
       )
     }
   }

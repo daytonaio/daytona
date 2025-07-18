@@ -232,6 +232,7 @@ export class SnapshotService {
     memory?: number,
     disk?: number,
   ): Promise<void> {
+    // validate per-sandbox quotas
     if (cpu && cpu > organization.maxCpuPerSandbox) {
       throw new ForbiddenException(
         `CPU request ${cpu} exceeds maximum allowed per sandbox (${organization.maxCpuPerSandbox})`,
@@ -248,11 +249,10 @@ export class SnapshotService {
       )
     }
 
+    // validate usage quotas
+    // use optimistic quota guards to protect against race conditions to prevent quota abuse (not 100% correct when close to quota limits)
     const usageOverview = await this.organizationService.getSnapshotUsageOverview(organization.id, organization)
 
-    //  optimistic quota guard
-    //  protect against race condition to prevent quota abuse
-    //  not 100% correct when close to quota limit
     const concurrentCountKey = `snapshot-concurrent-${organization.id}`
     let concurrentCount = parseInt(await this.redis.get(concurrentCountKey)) || 0
     concurrentCount++
