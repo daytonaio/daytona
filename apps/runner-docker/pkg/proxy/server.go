@@ -75,7 +75,8 @@ func New(config ProxyServerConfig) *ProxyServer {
 	}
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("/sandbox/{id}/toolbox/{path...}", withBearerAuth(s.proxyRequest, os.Getenv("TOKEN")))
+
+	mux.HandleFunc("/sandboxes/{id}/toolbox/{path...}", withBearerAuth(s.proxyRequest, os.Getenv("TOKEN")))
 
 	s.mux = mux
 

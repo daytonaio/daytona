@@ -18,6 +18,9 @@ import {
   EnumsBackupState,
   DefaultApi,
   CreateSandboxDTO,
+  BuildSnapshotRequestDTO,
+  CreateBackupDTO,
+  PullSnapshotRequestDTO,
 } from '@daytonaio/runner-api-client'
 import { Sandbox } from '../entities/sandbox.entity'
 import { BuildInfo } from '../entities/build-info.entity'
@@ -130,21 +133,26 @@ export class RunnerAdapterLegacy implements RunnerAdapter {
   }
 
   async buildSnapshot(buildInfo: BuildInfo, organizationId?: string, registry?: DockerRegistry): Promise<void> {
-    await this.snapshotApiClient.buildSnapshot({
+    const request: BuildSnapshotRequestDTO = {
       snapshot: buildInfo.snapshotRef,
-      registry: {
+      dockerfile: buildInfo.dockerfileContent,
+      organizationId: organizationId,
+      context: buildInfo.contextHashes,
+    }
+
+    if (registry) {
+      request.registry = {
         project: registry.name,
         url: registry.url,
         username: registry.username,
         password: registry.password,
-      },
-      dockerfile: buildInfo.dockerfileContent,
-      organizationId: organizationId,
-      context: buildInfo.contextHashes,
-    })
+      }
+    }
+
+    await this.snapshotApiClient.buildSnapshot(request)
   }
 
-  async create(sandbox: Sandbox, registry: DockerRegistry, entrypoint?: string[]): Promise<void> {
+  async create(sandbox: Sandbox, registry?: DockerRegistry, entrypoint?: string[]): Promise<void> {
     const request: CreateSandboxDTO = {
       id: sandbox.id,
       snapshot: sandbox.snapshot,
@@ -160,6 +168,7 @@ export class RunnerAdapterLegacy implements RunnerAdapter {
 
     if (registry) {
       request.registry = {
+        project: registry.name,
         url: registry.url,
         username: registry.username,
         password: registry.password,
@@ -169,15 +178,22 @@ export class RunnerAdapterLegacy implements RunnerAdapter {
     await this.sandboxApiClient.create(request)
   }
 
-  async createBackup(sandbox: Sandbox, backupSnapshotName: string, registry: DockerRegistry): Promise<void> {
-    await this.sandboxApiClient.createBackup(sandbox.id, {
-      registry: {
+  async createBackup(sandbox: Sandbox, backupSnapshotName: string, registry?: DockerRegistry): Promise<void> {
+    const request: CreateBackupDTO = {
+      snapshot: backupSnapshotName,
+      registry: undefined,
+    }
+
+    if (registry) {
+      request.registry = {
+        project: registry.name,
         url: registry.url,
         username: registry.username,
         password: registry.password,
-      },
-      snapshot: backupSnapshotName,
-    })
+      }
+    }
+
+    await this.sandboxApiClient.createBackup(sandbox.id, request)
   }
 
   async info(sandboxId: string): Promise<RunnerSandboxInfo> {
@@ -218,14 +234,20 @@ export class RunnerAdapterLegacy implements RunnerAdapter {
     return response.data.exists
   }
 
-  async pullSnapshot(snapshotName: string, registry: DockerRegistry): Promise<void> {
-    await this.snapshotApiClient.pullSnapshot({
+  async pullSnapshot(snapshotName: string, registry?: DockerRegistry): Promise<void> {
+    const request: PullSnapshotRequestDTO = {
       snapshot: snapshotName,
-      registry: {
+    }
+
+    if (registry) {
+      request.registry = {
+        project: registry.name,
         url: registry.url,
         username: registry.username,
         password: registry.password,
-      },
-    })
+      }
+    }
+
+    await this.snapshotApiClient.pullSnapshot(request)
   }
 }

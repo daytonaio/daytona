@@ -23,6 +23,9 @@ import {
   HEALTH_SERVICE_NAME,
   HealthStatus,
   CreateSandboxRequest,
+  CreateBackupRequest,
+  PullSnapshotRequest,
+  BuildSnapshotRequest,
 } from '@daytonaio/runner-grpc-client'
 import { ClientGrpc, ClientProxyFactory, Transport } from '@nestjs/microservices'
 import { ChannelCredentials, credentials, Metadata } from '@grpc/grpc-js'
@@ -130,23 +133,24 @@ export class RunnerAdapterV1 implements RunnerAdapter {
   }
 
   async buildSnapshot(buildInfo: BuildInfo, organizationId?: string, registry?: DockerRegistry): Promise<void> {
-    await firstValueFrom(
-      this.snapshotServiceClient.buildSnapshot(
-        {
-          snapshot: buildInfo.snapshotRef,
-          registry: {
-            project: registry.name,
-            url: registry.url,
-            username: registry.username,
-            password: registry.password,
-          },
-          dockerfile: buildInfo.dockerfileContent,
-          organizationId: organizationId,
-          context: buildInfo.contextHashes,
-        },
-        this.getMetadata(),
-      ),
-    )
+    const request: BuildSnapshotRequest = {
+      snapshot: buildInfo.snapshotRef,
+      registry: undefined,
+      dockerfile: buildInfo.dockerfileContent,
+      organizationId: organizationId,
+      context: buildInfo.contextHashes,
+    }
+
+    if (registry) {
+      request.registry = {
+        project: registry.name,
+        url: registry.url,
+        username: registry.username,
+        password: registry.password,
+      }
+    }
+
+    await firstValueFrom(this.snapshotServiceClient.buildSnapshot(request, this.getMetadata()))
   }
 
   async create(sandbox: Sandbox, registry: DockerRegistry, entrypoint?: string[]): Promise<void> {
@@ -175,22 +179,23 @@ export class RunnerAdapterV1 implements RunnerAdapter {
     await firstValueFrom(this.sandboxServiceClient.createSandbox(request, this.getMetadata()))
   }
 
-  async createBackup(sandbox: Sandbox, backupSnapshotName: string, registry: DockerRegistry): Promise<void> {
-    await firstValueFrom(
-      this.sandboxServiceClient.createBackup(
-        {
-          sandboxId: sandbox.id,
-          registry: {
-            project: registry.name,
-            url: registry.url,
-            username: registry.username,
-            password: registry.password,
-          },
-          snapshot: backupSnapshotName,
-        },
-        this.getMetadata(),
-      ),
-    )
+  async createBackup(sandbox: Sandbox, backupSnapshotName: string, registry?: DockerRegistry): Promise<void> {
+    const request: CreateBackupRequest = {
+      sandboxId: sandbox.id,
+      snapshot: backupSnapshotName,
+      registry: undefined,
+    }
+
+    if (registry) {
+      request.registry = {
+        project: registry.name,
+        url: registry.url,
+        username: registry.username,
+        password: registry.password,
+      }
+    }
+
+    await firstValueFrom(this.sandboxServiceClient.createBackup(request, this.getMetadata()))
   }
 
   async info(sandboxId: string): Promise<RunnerSandboxInfo> {
@@ -274,7 +279,7 @@ export class RunnerAdapterV1 implements RunnerAdapter {
         this.getMetadata(),
       ),
     )
-    return 'TODO'
+    return logs.content
   }
 
   async snapshotExists(snapshotName: string): Promise<boolean> {
@@ -290,20 +295,21 @@ export class RunnerAdapterV1 implements RunnerAdapter {
     return snapshot.exists
   }
 
-  async pullSnapshot(snapshotName: string, registry: DockerRegistry): Promise<void> {
-    await firstValueFrom(
-      this.snapshotServiceClient.pullSnapshot(
-        {
-          snapshot: snapshotName,
-          registry: {
-            project: registry.name,
-            url: registry.url,
-            username: registry.username,
-            password: registry.password,
-          },
-        },
-        this.getMetadata(),
-      ),
-    )
+  async pullSnapshot(snapshotName: string, registry?: DockerRegistry): Promise<void> {
+    const request: PullSnapshotRequest = {
+      snapshot: snapshotName,
+      registry: undefined,
+    }
+
+    if (registry) {
+      request.registry = {
+        project: registry.name,
+        url: registry.url,
+        username: registry.username,
+        password: registry.password,
+      }
+    }
+
+    await firstValueFrom(this.snapshotServiceClient.pullSnapshot(request, this.getMetadata()))
   }
 }

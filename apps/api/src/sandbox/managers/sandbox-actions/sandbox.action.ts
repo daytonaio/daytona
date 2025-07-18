@@ -60,7 +60,8 @@ export abstract class SandboxAction {
   }
 
   protected async getSandboxDaemonVersion(sandbox: Sandbox): Promise<string> {
-    const response = await this.toolboxService.forwardRequestToRunner(sandbox.id, 'GET', '/version')
-    return response.version
+    // const response = await this.toolboxService.forwardRequestToRunner(sandbox.id, 'GET', '/version')
+    // return response.version
+    return '0.0.0-dev'
   }
 }

@@ -63,6 +63,11 @@ func (s *SandboxService) StartSandbox(ctx context.Context, req *pb.StartSandboxR
 		}
 	}()
 
+	err = s.waitForDaemonRunning(ctx, containerIP, 10*time.Second)
+	if err != nil {
+		return nil, err
+	}
+
 	s.cache.SetSandboxState(ctx, req.GetSandboxId(), pb.SandboxState_SANDBOX_STATE_STARTED)
 
 	return &pb.StartSandboxResponse{

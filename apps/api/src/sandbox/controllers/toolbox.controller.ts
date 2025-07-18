@@ -136,7 +136,7 @@ export class ToolboxController {
           // @ts-expect-error - used later to set request headers
           req._runnerApiKey = runner.apiKey
 
-          return runner.apiUrl
+          return runner.proxyUrl
         } catch (err) {
           // @ts-expect-error - used later to throw error
           req._err = err

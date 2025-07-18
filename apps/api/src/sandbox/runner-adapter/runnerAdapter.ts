@@ -25,8 +25,8 @@ export interface RunnerAdapter {
   healthCheck(): Promise<void>
 
   info(sandboxId: string): Promise<RunnerSandboxInfo>
-  create(sandbox: Sandbox, registry: DockerRegistry, entrypoint?: string[]): Promise<void>
-  createBackup(sandbox: Sandbox, backupSnapshotName: string, registry: DockerRegistry): Promise<void>
+  create(sandbox: Sandbox, registry?: DockerRegistry, entrypoint?: string[]): Promise<void>
+  createBackup(sandbox: Sandbox, backupSnapshotName: string, registry?: DockerRegistry): Promise<void>
   start(sandboxId: string): Promise<void>
   stop(sandboxId: string): Promise<void>
   destroy(sandboxId: string): Promise<void>
@@ -34,7 +34,7 @@ export interface RunnerAdapter {
 
   removeSnapshot(snapshotName: string, force: boolean): Promise<void>
   buildSnapshot(buildInfo: BuildInfo, organizationId?: string, registry?: DockerRegistry): Promise<void>
-  pullSnapshot(snapshotName: string, registry: DockerRegistry): Promise<void>
+  pullSnapshot(snapshotName: string, registry?: DockerRegistry): Promise<void>
   snapshotExists(snapshotName: string): Promise<boolean>
   getSnapshotLogs(snapshotRef: string, follow: boolean): Promise<string>
 }

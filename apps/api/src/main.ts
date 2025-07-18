@@ -100,8 +100,8 @@ async function bootstrap() {
 
   // Auto create runners only in local development environment
   if (!configService.get('production')) {
-    const localGrpcRunnerDomain = 'localtest.me'
-    const localHttpRunnerDomain = 'localhost.me'
+    const localGrpcRunnerDomain = 'localtest.me:3004'
+    const localHttpRunnerDomain = 'localhost.me:3005'
 
     const runnerService = app.get(RunnerService)
     const runners = await runnerService.findAll()
