@@ -334,10 +334,10 @@ export class OrganizationService implements OnModuleInit {
     await this.redisLockProvider.unlock(lockKey)
   }
 
-  @Cron(CronExpression.EVERY_MINUTE, { name: 'remove-suspended-organization-snapshot-runners' })
-  async removeSuspendedOrganizationSnapshotRunners(): Promise<void> {
+  @Cron(CronExpression.EVERY_MINUTE, { name: 'deactivate-suspended-organization-snapshots' })
+  async deactivateSuspendedOrganizationSnapshots(): Promise<void> {
     //  lock the sync to only run one instance at a time
-    const lockKey = 'remove-suspended-organization-snapshot-runners'
+    const lockKey = 'deactivate-suspended-organization-snapshots'
     if (!(await this.redisLockProvider.lock(lockKey, 60))) {
       return
     }
@@ -353,7 +353,8 @@ export class OrganizationService implements OnModuleInit {
           .createQueryBuilder('snapshot')
           .select('1')
           .where('snapshot.organizationId = organization.id')
-          .andWhere(`snapshot.state = '${SnapshotState.ACTIVE}'`),
+          .andWhere(`snapshot.state = '${SnapshotState.ACTIVE}'`)
+          .andWhere(`snapshot.general = false`),
       )
       .take(100)
       .getRawMany()
@@ -371,6 +372,7 @@ export class OrganizationService implements OnModuleInit {
       .select('id')
       .where('snapshot.organizationId IN (:...suspendedOrgIds)', { suspendedOrgIds: suspendedOrganizationIds })
       .andWhere(`snapshot.state = '${SnapshotState.ACTIVE}'`)
+      .andWhere(`snapshot.general = false`)
       .take(100)
       .getRawMany()
 
