@@ -51,7 +51,7 @@ export class AuditController {
   })
   @RequiredSystemRole(SystemRole.ADMIN)
   async getAllLogs(@Query('page') page = 1, @Query('limit') limit = 10): Promise<PaginatedAuditLogsDto> {
-    const result = await this.auditService.getAllLogs(page, limit)
+    const result = await this.auditService.getLogs(page, limit)
     return {
       items: result.items.map(AuditLogDto.fromAuditLog),
       total: result.total,
@@ -93,7 +93,7 @@ export class AuditController {
     @Query('page') page = 1,
     @Query('limit') limit = 10,
   ): Promise<PaginatedAuditLogsDto> {
-    const result = await this.auditService.getLogsByOrganization(organizationId, page, limit)
+    const result = await this.auditService.getLogs(page, limit, organizationId)
     return {
       items: result.items.map(AuditLogDto.fromAuditLog),
       total: result.total,
