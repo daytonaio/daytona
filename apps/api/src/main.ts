@@ -18,7 +18,7 @@ import { HttpsOptions } from '@nestjs/common/interfaces/external/https-options.i
 import { TypedConfigService } from './config/typed-config.service'
 import { DataSource, MigrationExecutor } from 'typeorm'
 import { RunnerService } from './sandbox/services/runner.service'
-import { RunnerRegion } from './sandbox/enums/runner-region.enum'
+
 import { SandboxClass } from './sandbox/enums/sandbox-class.enum'
 import { getOpenApiConfig } from './openapi.config'
 import { SchedulerRegistry } from '@nestjs/schedule'
@@ -112,7 +112,7 @@ async function bootstrap() {
         gpu: 0,
         gpuType: 'none',
         capacity: 100,
-        region: RunnerRegion.US,
+        region: 'us',
         class: SandboxClass.SMALL,
         domain: 'localtest.me:3003',
       })
