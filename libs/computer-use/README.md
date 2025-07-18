@@ -32,7 +32,7 @@ To use the ComputerUse package, your Dockerfile must include the following VNC-r
 ENV DEBIAN_FRONTEND=noninteractive
 ENV DISPLAY=:1
 ENV VNC_PORT=5901
-ENV NO_VNC_PORT=6901
+ENV NO_VNC_PORT=6080
 ENV VNC_RESOLUTION=1280x720
 
 # Install VNC and desktop environment packages
@@ -121,7 +121,7 @@ The following environment variables should be set in your Dockerfile:
 ENV DEBIAN_FRONTEND=noninteractive
 ENV DISPLAY=:1
 ENV VNC_PORT=5901
-ENV NO_VNC_PORT=6901
+ENV NO_VNC_PORT=6080
 ENV VNC_RESOLUTION=1280x720
 ```
 
@@ -143,7 +143,7 @@ USER daytona
 
 - `VNC_RESOLUTION`: Set the VNC resolution (default: "1920x1080")
 - `VNC_PORT`: VNC server port (default: 5901)
-- `NO_VNC_PORT`: NoVNC web port (default: 6901)
+- `NO_VNC_PORT`: NoVNC web port (default: 6080)
 - `DISPLAY`: X display (default: ":1")
 - `VNC_USER`: User to run VNC processes (default: "daytona")
 
@@ -163,7 +163,7 @@ The processes are configured with the following settings based on environment va
 - `DISPLAY`: `:1`
 - `VNC_RESOLUTION`: `1920x1080`
 - `VNC_PORT`: `5901`
-- `NO_VNC_PORT`: `6901`
+- `NO_VNC_PORT`: `6080`
 - `VNC_USER`: `daytona`
 
 ### Log Files
