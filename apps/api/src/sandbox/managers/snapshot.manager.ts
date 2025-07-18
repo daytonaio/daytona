@@ -702,7 +702,8 @@ export class SnapshotManager {
 
       if (!snapshot.buildInfo) {
         // Snapshots that have gone through the build process are already in the internal registry
-        await this.pushSnapshotToInternalRegistry(snapshot.id)
+        const internalSnapshotName = await this.pushSnapshotToInternalRegistry(snapshot.id)
+        snapshot.internalName = internalSnapshotName
       }
       await this.propagateSnapshotToRunners(snapshot.internalName)
       await this.updateSnapshotState(snapshot.id, SnapshotState.ACTIVE)
@@ -783,7 +784,7 @@ export class SnapshotManager {
     }
   }
 
-  async pushSnapshotToInternalRegistry(snapshotId: string) {
+  async pushSnapshotToInternalRegistry(snapshotId: string): Promise<string> {
     const snapshot = await this.snapshotRepository.findOneOrFail({
       where: {
         id: snapshotId,
@@ -797,7 +798,7 @@ export class SnapshotManager {
 
     //  get tag from snapshot name
     const tag = snapshot.imageName.split(':')[1]
-    const internalSnapshotName = `${registry.url}/${registry.project}/${snapshot.id}:${tag}`
+    const internalSnapshotName = `${registry.url.replace(/^(https?:\/\/)/, '')}/${registry.project}/${snapshot.id}:${tag}`
 
     snapshot.internalName = internalSnapshotName
     await this.snapshotRepository.save(snapshot)
@@ -807,6 +808,8 @@ export class SnapshotManager {
 
     // Push the newly tagged snapshot
     await this.dockerProvider.pushImage(internalSnapshotName, registry)
+
+    return internalSnapshotName
   }
 
   async retrySnapshotRunnerPull(snapshotRunner: SnapshotRunner) {
