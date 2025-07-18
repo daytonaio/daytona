@@ -15,6 +15,9 @@ import { OrganizationActionGuard } from '../guards/organization-action.guard'
 import { OrganizationUserService } from '../services/organization-user.service'
 import { AuthContext } from '../../common/decorators/auth-context.decorator'
 import { AuthContext as IAuthContext } from '../../common/interfaces/auth-context.interface'
+import { Audit, TypedRequest } from '../../audit/decorators/audit.decorator'
+import { AuditAction } from '../../audit/enums/audit-action.enum'
+import { AuditTarget } from '../../audit/enums/audit-target.enum'
 
 @ApiTags('organizations')
 @Controller('organizations/:organizationId/users')
@@ -64,6 +67,16 @@ export class OrganizationUserController {
     type: 'string',
   })
   @RequiredOrganizationMemberRole(OrganizationMemberRole.OWNER)
+  @Audit({
+    action: AuditAction.UPDATE_ROLE,
+    targetType: AuditTarget.ORGANIZATION_USER,
+    targetIdFromRequest: (req) => req.params.userId,
+    requestMetadata: {
+      body: (req: TypedRequest<UpdateOrganizationMemberRoleDto>) => ({
+        role: req.body?.role,
+      }),
+    },
+  })
   async updateRole(
     @AuthContext() authContext: IAuthContext,
     @Param('organizationId') organizationId: string,
@@ -98,6 +111,16 @@ export class OrganizationUserController {
     type: 'string',
   })
   @RequiredOrganizationMemberRole(OrganizationMemberRole.OWNER)
+  @Audit({
+    action: AuditAction.UPDATE_ASSIGNED_ROLES,
+    targetType: AuditTarget.ORGANIZATION_USER,
+    targetIdFromRequest: (req) => req.params.userId,
+    requestMetadata: {
+      body: (req: TypedRequest<UpdateAssignedOrganizationRolesDto>) => ({
+        roleIds: req.body?.roleIds,
+      }),
+    },
+  })
   async updateAssignedRoles(
     @Param('organizationId') organizationId: string,
     @Param('userId') userId: string,
@@ -126,6 +149,11 @@ export class OrganizationUserController {
     type: 'string',
   })
   @RequiredOrganizationMemberRole(OrganizationMemberRole.OWNER)
+  @Audit({
+    action: AuditAction.DELETE,
+    targetType: AuditTarget.ORGANIZATION_USER,
+    targetIdFromRequest: (req) => req.params.userId,
+  })
   async delete(@Param('organizationId') organizationId: string, @Param('userId') userId: string): Promise<void> {
     return this.organizationUserService.delete(organizationId, userId)
   }

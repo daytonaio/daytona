@@ -42,8 +42,8 @@ class OrganizationRole(BaseModel):
     def permissions_validate_enum(cls, value):
         """Validates the enum"""
         for i in value:
-            if i not in set(['write:registries', 'delete:registries', 'write:snapshots', 'delete:snapshots', 'write:sandboxes', 'delete:sandboxes', 'read:volumes', 'write:volumes', 'delete:volumes']):
-                raise ValueError("each list item must be one of ('write:registries', 'delete:registries', 'write:snapshots', 'delete:snapshots', 'write:sandboxes', 'delete:sandboxes', 'read:volumes', 'write:volumes', 'delete:volumes')")
+            if i not in set(['write:registries', 'delete:registries', 'write:snapshots', 'delete:snapshots', 'write:sandboxes', 'delete:sandboxes', 'read:volumes', 'write:volumes', 'delete:volumes', 'read:audit_logs']):
+                raise ValueError("each list item must be one of ('write:registries', 'delete:registries', 'write:snapshots', 'delete:snapshots', 'write:sandboxes', 'delete:sandboxes', 'read:volumes', 'write:volumes', 'delete:volumes', 'read:audit_logs')")
         return value
 
     model_config = ConfigDict(
