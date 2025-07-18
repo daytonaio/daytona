@@ -82,6 +82,7 @@ const configuration = {
       : undefined,
     consoleLogEnabled: process.env.AUDIT_CONSOLE_LOG_ENABLED === 'true',
   },
+  cronTimeZone: process.env.CRON_TIMEZONE,
 }
 
 export { configuration }
