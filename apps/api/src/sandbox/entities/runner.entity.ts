@@ -63,6 +63,7 @@ export class Runner {
 
   @Column({
     nullable: true,
+    type: 'timestamp with time zone',
   })
   lastChecked: Date
 
@@ -71,9 +72,13 @@ export class Runner {
   })
   unschedulable: boolean
 
-  @CreateDateColumn()
+  @CreateDateColumn({
+    type: 'timestamp with time zone',
+  })
   createdAt: Date
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({
+    type: 'timestamp with time zone',
+  })
   updatedAt: Date
 }
