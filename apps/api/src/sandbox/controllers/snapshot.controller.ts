@@ -355,4 +355,24 @@ export class SnapshotController {
     const snapshot = await this.snapshotService.activateSnapshot(snapshotId)
     return SnapshotDto.fromSnapshot(snapshot)
   }
+
+  @Post(':id/deactivate')
+  @HttpCode(204)
+  @ApiOperation({
+    summary: 'Deactivate a snapshot',
+    operationId: 'deactivateSnapshot',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Snapshot ID',
+  })
+  @ApiResponse({
+    status: 204,
+    description: 'The snapshot has been successfully deactivated.',
+  })
+  @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SNAPSHOTS])
+  @UseGuards(SnapshotAccessGuard)
+  async deactivateSnapshot(@Param('id') snapshotId: string) {
+    await this.snapshotService.deactivateSnapshot(snapshotId)
+  }
 }

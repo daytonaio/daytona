@@ -4796,6 +4796,38 @@ paths:
       summary: Activate a snapshot
       tags:
         - snapshots
+  /snapshots/{id}/deactivate:
+    post:
+      operationId: deactivateSnapshot
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - description: Snapshot ID
+          explode: false
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '204':
+          description: The snapshot has been successfully deactivated.
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Deactivate a snapshot
+      tags:
+        - snapshots
   /workspace:
     get:
       deprecated: true
@@ -6998,7 +7030,7 @@ components:
         autoStopInterval: 30
         labels:
           daytona.io/public: 'true'
-        target: us-west
+        target: us
         disk: 3
         autoDeleteInterval: 30
         public: false
@@ -7043,7 +7075,7 @@ components:
           type: string
         target:
           description: The target (region) where the sandbox will be created
-          example: us-west
+          example: us
           type: string
         cpu:
           description: CPU cores allocated to the sandbox
@@ -7132,7 +7164,7 @@ components:
         apiKey: apiKey
         domain: domain
         cpu: 0.8008281904610115
-        region: us-west
+        region: us
         gpu: 5.962133916683182
         class: small
         gpuType: gpuType
@@ -7164,7 +7196,7 @@ components:
         capacity:
           type: number
         region:
-          example: us-west
+          example: us
           type: string
       required:
         - apiKey
@@ -7209,7 +7241,7 @@ components:
         domain: runner1.example.com
         id: runner123
         state: initializing
-        region: us-west
+        region: us
         unschedulable: false
         class: small
         lastChecked: 2024-10-01T12:00:00Z
@@ -7266,7 +7298,7 @@ components:
           type: number
         region:
           description: The region of the runner
-          example: us-west
+          example: us
           type: string
         state:
           allOf:
