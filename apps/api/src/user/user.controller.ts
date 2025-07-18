@@ -112,7 +112,7 @@ export class UserController {
   })
   @RequiredSystemRole(SystemRole.ADMIN)
   @Audit({
-    action: AuditAction.USER_REGENERATE_KEY_PAIR,
+    action: AuditAction.REGENERATE_KEY_PAIR,
     targetType: AuditTarget.USER,
     targetIdFromRequest: (req) => req.params.id,
   })
@@ -174,7 +174,7 @@ export class UserController {
     description: 'Account linked successfully',
   })
   @Audit({
-    action: AuditAction.USER_LINK_ACCOUNT,
+    action: AuditAction.LINK_ACCOUNT,
     requestMetadata: {
       body: (req: TypedRequest<CreateLinkedAccountDto>) => ({
         provider: req.body?.provider,
@@ -234,7 +234,7 @@ export class UserController {
     description: 'Account unlinked successfully',
   })
   @Audit({
-    action: AuditAction.USER_UNLINK_ACCOUNT,
+    action: AuditAction.UNLINK_ACCOUNT,
     requestMetadata: {
       params: (req) => ({
         provider: req.params.provider,

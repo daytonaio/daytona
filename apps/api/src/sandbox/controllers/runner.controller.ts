@@ -72,7 +72,7 @@ export class RunnerController {
     operationId: 'updateRunnerScheduling',
   })
   @Audit({
-    action: AuditAction.RUNNER_UPDATE_SCHEDULING,
+    action: AuditAction.UPDATE_SCHEDULING,
     targetType: AuditTarget.RUNNER,
     targetIdFromRequest: (req) => req.params.id,
     requestMetadata: {

@@ -206,7 +206,7 @@ export class SnapshotController {
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SNAPSHOTS])
   @UseGuards(SnapshotAccessGuard)
   @Audit({
-    action: AuditAction.SNAPSHOT_TOGGLE_STATE,
+    action: AuditAction.TOGGLE_STATE,
     targetType: AuditTarget.SNAPSHOT,
     targetIdFromRequest: (req) => req.params.id,
     requestMetadata: {
@@ -296,7 +296,7 @@ export class SnapshotController {
   })
   @RequiredSystemRole(SystemRole.ADMIN)
   @Audit({
-    action: AuditAction.SNAPSHOT_SET_GENERAL_STATUS,
+    action: AuditAction.SET_GENERAL_STATUS,
     targetType: AuditTarget.SNAPSHOT,
     targetIdFromRequest: (req) => req.params.id,
     requestMetadata: {

@@ -200,7 +200,7 @@ export class DockerRegistryController {
   @RequiredSystemRole(SystemRole.ADMIN)
   @UseGuards(DockerRegistryAccessGuard)
   @Audit({
-    action: AuditAction.DOCKER_REGISTRY_SET_DEFAULT,
+    action: AuditAction.SET_DEFAULT,
     targetType: AuditTarget.DOCKER_REGISTRY,
     targetIdFromRequest: (req) => req.params.id,
   })
