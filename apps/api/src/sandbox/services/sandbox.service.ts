@@ -439,11 +439,14 @@ export class SandboxService {
 
     let runner: Runner
 
+    const excludedRunnerIds = await this.runnerService.getRunnersWithHighStartedSandboxesRatio()
+
     try {
       runner = await this.runnerService.getRandomAvailableRunner({
         region: sandbox.region,
         sandboxClass: sandbox.class,
         snapshotRef: sandbox.buildInfo.snapshotRef,
+        excludedRunnerIds,
       })
       sandbox.runnerId = runner.id
     } catch (error) {
