@@ -153,6 +153,9 @@ export class AuditService implements OnModuleInit {
           where: {
             createdAt: LessThan(cutoffDate),
           },
+          order: {
+            createdAt: 'ASC',
+          },
           take: batchSize,
         })
 
