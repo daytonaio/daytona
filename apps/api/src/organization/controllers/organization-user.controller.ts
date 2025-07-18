@@ -68,7 +68,7 @@ export class OrganizationUserController {
   })
   @RequiredOrganizationMemberRole(OrganizationMemberRole.OWNER)
   @Audit({
-    action: AuditAction.ORGANIZATION_USER_UPDATE_ROLE,
+    action: AuditAction.UPDATE_ROLE,
     targetType: AuditTarget.ORGANIZATION_USER,
     targetIdFromRequest: (req) => req.params.userId,
     requestMetadata: {
@@ -112,7 +112,7 @@ export class OrganizationUserController {
   })
   @RequiredOrganizationMemberRole(OrganizationMemberRole.OWNER)
   @Audit({
-    action: AuditAction.ORGANIZATION_USER_UPDATE_ASSIGNED_ROLES,
+    action: AuditAction.UPDATE_ASSIGNED_ROLES,
     targetType: AuditTarget.ORGANIZATION_USER,
     targetIdFromRequest: (req) => req.params.userId,
     requestMetadata: {

@@ -101,7 +101,7 @@ export class OrganizationController {
   })
   @UseGuards(AuthGuard('jwt'))
   @Audit({
-    action: AuditAction.ORGANIZATION_INVITATION_ACCEPT,
+    action: AuditAction.ACCEPT,
     targetType: AuditTarget.ORGANIZATION_INVITATION,
     targetIdFromRequest: (req) => req.params.invitationId,
   })
@@ -137,7 +137,7 @@ export class OrganizationController {
   })
   @UseGuards(AuthGuard('jwt'))
   @Audit({
-    action: AuditAction.ORGANIZATION_INVITATION_DECLINE,
+    action: AuditAction.DECLINE,
     targetType: AuditTarget.ORGANIZATION_INVITATION,
     targetIdFromRequest: (req) => req.params.invitationId,
   })
@@ -295,7 +295,7 @@ export class OrganizationController {
   @RequiredSystemRole(SystemRole.ADMIN)
   @UseGuards(CombinedAuthGuard, SystemActionGuard)
   @Audit({
-    action: AuditAction.ORGANIZATION_UPDATE_QUOTA,
+    action: AuditAction.UPDATE_QUOTA,
     targetType: AuditTarget.ORGANIZATION,
     targetIdFromRequest: (req) => req.params.organizationId,
     requestMetadata: {
@@ -336,7 +336,7 @@ export class OrganizationController {
   })
   @UseGuards(AuthGuard('jwt'), OrganizationActionGuard)
   @Audit({
-    action: AuditAction.USER_LEAVE_ORGANIZATION,
+    action: AuditAction.LEAVE_ORGANIZATION,
   })
   async leave(
     @AuthContext() authContext: IAuthContext,
@@ -366,7 +366,7 @@ export class OrganizationController {
   @RequiredSystemRole(SystemRole.ADMIN)
   @UseGuards(CombinedAuthGuard, SystemActionGuard)
   @Audit({
-    action: AuditAction.ORGANIZATION_SUSPEND,
+    action: AuditAction.SUSPEND,
     targetType: AuditTarget.ORGANIZATION,
     targetIdFromRequest: (req) => req.params.organizationId,
     requestMetadata: {
@@ -404,7 +404,7 @@ export class OrganizationController {
   @RequiredSystemRole(SystemRole.ADMIN)
   @UseGuards(CombinedAuthGuard, SystemActionGuard)
   @Audit({
-    action: AuditAction.ORGANIZATION_UNSUSPEND,
+    action: AuditAction.UNSUSPEND,
     targetType: AuditTarget.ORGANIZATION,
     targetIdFromRequest: (req) => req.params.organizationId,
   })

@@ -285,7 +285,7 @@ export class SandboxController {
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
   @UseGuards(SandboxAccessGuard)
   @Audit({
-    action: AuditAction.SANDBOX_START,
+    action: AuditAction.START,
     targetType: AuditTarget.SANDBOX,
     targetIdFromRequest: (req) => req.params.sandboxId,
   })
@@ -327,7 +327,7 @@ export class SandboxController {
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
   @UseGuards(SandboxAccessGuard)
   @Audit({
-    action: AuditAction.SANDBOX_STOP,
+    action: AuditAction.STOP,
     targetType: AuditTarget.SANDBOX,
     targetIdFromRequest: (req) => req.params.sandboxId,
   })
@@ -354,7 +354,7 @@ export class SandboxController {
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
   @UseGuards(SandboxAccessGuard)
   @Audit({
-    action: AuditAction.SANDBOX_REPLACE_LABELS,
+    action: AuditAction.REPLACE_LABELS,
     targetType: AuditTarget.SANDBOX,
     targetIdFromRequest: (req) => req.params.sandboxId,
     requestMetadata: {
@@ -389,7 +389,7 @@ export class SandboxController {
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
   @UseGuards(SandboxAccessGuard)
   @Audit({
-    action: AuditAction.SANDBOX_CREATE_BACKUP,
+    action: AuditAction.CREATE_BACKUP,
     targetType: AuditTarget.SANDBOX,
     targetIdFromRequest: (req) => req.params.sandboxId,
   })
@@ -415,7 +415,7 @@ export class SandboxController {
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
   @UseGuards(SandboxAccessGuard)
   @Audit({
-    action: AuditAction.SANDBOX_UPDATE_PUBLIC_STATUS,
+    action: AuditAction.UPDATE_PUBLIC_STATUS,
     targetType: AuditTarget.SANDBOX,
     targetIdFromRequest: (req) => req.params.sandboxId,
     requestMetadata: {
@@ -450,7 +450,7 @@ export class SandboxController {
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
   @UseGuards(SandboxAccessGuard)
   @Audit({
-    action: AuditAction.SANDBOX_SET_AUTO_STOP_INTERVAL,
+    action: AuditAction.SET_AUTO_STOP_INTERVAL,
     targetType: AuditTarget.SANDBOX,
     targetIdFromRequest: (req) => req.params.sandboxId,
     requestMetadata: {
@@ -485,7 +485,7 @@ export class SandboxController {
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
   @UseGuards(SandboxAccessGuard)
   @Audit({
-    action: AuditAction.SANDBOX_SET_AUTO_ARCHIVE_INTERVAL,
+    action: AuditAction.SET_AUTO_ARCHIVE_INTERVAL,
     targetType: AuditTarget.SANDBOX,
     targetIdFromRequest: (req) => req.params.sandboxId,
     requestMetadata: {
@@ -524,7 +524,7 @@ export class SandboxController {
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
   @UseGuards(SandboxAccessGuard)
   @Audit({
-    action: AuditAction.SANDBOX_SET_AUTO_DELETE_INTERVAL,
+    action: AuditAction.SET_AUTO_DELETE_INTERVAL,
     targetType: AuditTarget.SANDBOX,
     targetIdFromRequest: (req) => req.params.sandboxId,
     requestMetadata: {
@@ -554,7 +554,7 @@ export class SandboxController {
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
   @UseGuards(SandboxAccessGuard)
   @Audit({
-    action: AuditAction.SANDBOX_ARCHIVE,
+    action: AuditAction.ARCHIVE,
     targetType: AuditTarget.SANDBOX,
     targetIdFromRequest: (req) => req.params.sandboxId,
   })
@@ -584,7 +584,7 @@ export class SandboxController {
   })
   @UseGuards(SandboxAccessGuard)
   @Audit({
-    action: AuditAction.SANDBOX_GET_PORT_PREVIEW_URL,
+    action: AuditAction.GET_PORT_PREVIEW_URL,
     targetType: AuditTarget.SANDBOX,
     targetIdFromRequest: (req) => req.params.sandboxId,
     requestMetadata: {

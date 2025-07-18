@@ -4,55 +4,38 @@
  */
 
 export enum AuditAction {
-  // generic
   CREATE = 'create',
   READ = 'read',
   UPDATE = 'update',
   DELETE = 'delete',
   LOGIN = 'login',
+  SET_DEFAULT = 'set_default',
+  UPDATE_ROLE = 'update_role',
+  UPDATE_ASSIGNED_ROLES = 'update_assigned_roles',
+  UPDATE_QUOTA = 'update_quota',
+  SUSPEND = 'suspend',
+  UNSUSPEND = 'unsuspend',
+  ACCEPT = 'accept',
+  DECLINE = 'decline',
+  LINK_ACCOUNT = 'link_account',
+  UNLINK_ACCOUNT = 'unlink_account',
+  LEAVE_ORGANIZATION = 'leave_organization',
+  REGENERATE_KEY_PAIR = 'regenerate_key_pair',
+  UPDATE_SCHEDULING = 'update_scheduling',
+  START = 'start',
+  STOP = 'stop',
+  REPLACE_LABELS = 'replace_labels',
+  CREATE_BACKUP = 'create_backup',
+  UPDATE_PUBLIC_STATUS = 'update_public_status',
+  SET_AUTO_STOP_INTERVAL = 'set_auto_stop_interval',
+  SET_AUTO_ARCHIVE_INTERVAL = 'set_auto_archive_interval',
+  SET_AUTO_DELETE_INTERVAL = 'set_auto_delete_interval',
+  ARCHIVE = 'archive',
+  GET_PORT_PREVIEW_URL = 'get_port_preview_url',
+  TOGGLE_STATE = 'toggle_state',
+  SET_GENERAL_STATUS = 'set_general_status',
 
-  // docker registry
-  DOCKER_REGISTRY_SET_DEFAULT = 'docker_registry_set_default',
-
-  // organization user
-  ORGANIZATION_USER_UPDATE_ROLE = 'organization_user_update_role',
-  ORGANIZATION_USER_UPDATE_ASSIGNED_ROLES = 'organization_user_update_assigned_roles',
-
-  // organization
-  ORGANIZATION_UPDATE_QUOTA = 'organization_update_quota',
-  ORGANIZATION_SUSPEND = 'organization_suspend',
-  ORGANIZATION_UNSUSPEND = 'organization_unsuspend',
-
-  // organization invitation
-  ORGANIZATION_INVITATION_ACCEPT = 'organization_invitation_accept',
-  ORGANIZATION_INVITATION_DECLINE = 'organization_invitation_decline',
-
-  // user
-  USER_LINK_ACCOUNT = 'user_link_account',
-  USER_UNLINK_ACCOUNT = 'user_unlink_account',
-  USER_LEAVE_ORGANIZATION = 'user_leave_organization',
-  USER_REGENERATE_KEY_PAIR = 'user_regenerate_key_pair',
-
-  // runner
-  RUNNER_UPDATE_SCHEDULING = 'runner_update_scheduling',
-
-  // sandbox
-  SANDBOX_START = 'sandbox_start',
-  SANDBOX_STOP = 'sandbox_stop',
-  SANDBOX_REPLACE_LABELS = 'sandbox_replace_labels',
-  SANDBOX_CREATE_BACKUP = 'sandbox_create_backup',
-  SANDBOX_UPDATE_PUBLIC_STATUS = 'sandbox_update_public_status',
-  SANDBOX_SET_AUTO_STOP_INTERVAL = 'sandbox_set_auto_stop_interval',
-  SANDBOX_SET_AUTO_ARCHIVE_INTERVAL = 'sandbox_set_auto_archive_interval',
-  SANDBOX_SET_AUTO_DELETE_INTERVAL = 'sandbox_set_auto_delete_interval',
-  SANDBOX_ARCHIVE = 'sandbox_archive',
-  SANDBOX_GET_PORT_PREVIEW_URL = 'sandbox_get_port_preview_url',
-
-  // snapshot
-  SNAPSHOT_TOGGLE_STATE = 'snapshot_toggle_state',
-  SNAPSHOT_SET_GENERAL_STATUS = 'snapshot_set_general_status',
-
-  // toolbox (must be prefixed with 'toolbox_')
+  // toolbox actions (must be prefixed with 'toolbox_')
   TOOLBOX_DELETE_FILE = 'toolbox_delete_file',
   TOOLBOX_DOWNLOAD_FILE = 'toolbox_download_file',
   TOOLBOX_CREATE_FOLDER = 'toolbox_create_folder',
