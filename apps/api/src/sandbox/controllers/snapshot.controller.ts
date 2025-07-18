@@ -397,6 +397,11 @@ export class SnapshotController {
   })
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SNAPSHOTS])
   @UseGuards(SnapshotAccessGuard)
+  @Audit({
+    action: AuditAction.ACTIVATE,
+    targetType: AuditTarget.SNAPSHOT,
+    targetIdFromRequest: (req) => req.params.id,
+  })
   async activateSnapshot(@Param('id') snapshotId: string): Promise<SnapshotDto> {
     const snapshot = await this.snapshotService.activateSnapshot(snapshotId)
     return SnapshotDto.fromSnapshot(snapshot)
