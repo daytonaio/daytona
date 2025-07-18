@@ -6,7 +6,7 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Cron, CronExpression } from '@nestjs/schedule'
-import { LessThan, Repository } from 'typeorm'
+import { FindManyOptions, LessThan, Repository } from 'typeorm'
 import { CreateAuditLogInternalDto } from '../dto/create-audit-log-internal.dto'
 import { UpdateAuditLogInternalDto } from '../dto/update-audit-log-internal.dto'
 import { AuditLog } from '../entities/audit-log.entity'
@@ -76,38 +76,23 @@ export class AuditService {
     return await this.auditLogRepository.save(auditLog)
   }
 
-  async getAllLogs(page = 1, limit = 10): Promise<PaginatedList<AuditLog>> {
+  async getLogs(page = 1, limit = 10, organizationId?: string): Promise<PaginatedList<AuditLog>> {
     const pageNum = Number(page)
     const limitNum = Number(limit)
 
-    const [items, total] = await this.auditLogRepository.findAndCount({
+    const options: FindManyOptions<AuditLog> = {
       order: {
         createdAt: 'DESC',
       },
       skip: (pageNum - 1) * limitNum,
       take: limitNum,
-    })
-
-    return {
-      items,
-      total,
-      page: pageNum,
-      totalPages: Math.ceil(total / limitNum),
     }
-  }
 
-  async getLogsByOrganization(organizationId: string, page = 1, limit = 10): Promise<PaginatedList<AuditLog>> {
-    const pageNum = Number(page)
-    const limitNum = Number(limit)
+    if (organizationId) {
+      options.where = [{ organizationId }, { targetId: organizationId }]
+    }
 
-    const [items, total] = await this.auditLogRepository.findAndCount({
-      where: [{ organizationId }, { targetId: organizationId }],
-      order: {
-        createdAt: 'DESC',
-      },
-      skip: (pageNum - 1) * limitNum,
-      take: limitNum,
-    })
+    const [items, total] = await this.auditLogRepository.findAndCount(options)
 
     return {
       items,
