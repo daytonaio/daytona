@@ -83,7 +83,7 @@ export interface CreateRunner {
    * @type {string}
    * @memberof CreateRunner
    */
-  region: CreateRunnerRegionEnum
+  region: string
 }
 
 export const CreateRunnerClassEnum = {
@@ -93,10 +93,3 @@ export const CreateRunnerClassEnum = {
 } as const
 
 export type CreateRunnerClassEnum = (typeof CreateRunnerClassEnum)[keyof typeof CreateRunnerClassEnum]
-export const CreateRunnerRegionEnum = {
-  EU: 'eu',
-  US: 'us',
-  ASIA: 'asia',
-} as const
-
-export type CreateRunnerRegionEnum = (typeof CreateRunnerRegionEnum)[keyof typeof CreateRunnerRegionEnum]

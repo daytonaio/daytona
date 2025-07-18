@@ -48,13 +48,6 @@ class CreateRunner(BaseModel):
             raise ValueError("must be one of enum values ('small', 'medium', 'large')")
         return value
 
-    @field_validator('region')
-    def region_validate_enum(cls, value):
-        """Validates the enum"""
-        if value not in set(['eu', 'us', 'asia']):
-            raise ValueError("must be one of enum values ('eu', 'us', 'asia')")
-        return value
-
     model_config = ConfigDict(
         populate_by_name=True,
         validate_assignment=True,

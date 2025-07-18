@@ -10,7 +10,6 @@ import { Sandbox } from '../entities/sandbox.entity'
 import { CreateSandboxDto } from '../dto/create-sandbox.dto'
 import { SandboxState } from '../enums/sandbox-state.enum'
 import { SandboxClass } from '../enums/sandbox-class.enum'
-import { RunnerRegion } from '../enums/runner-region.enum'
 import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
 import { RunnerService } from './runner.service'
 import { SandboxError } from '../../exceptions/sandbox-error.exception'
@@ -673,16 +672,12 @@ export class SandboxService {
     await this.sandboxRepository.save(sandbox)
   }
 
-  private getValidatedOrDefaultRegion(region: RunnerRegion): RunnerRegion {
-    if (!region) {
-      return RunnerRegion.US
+  private getValidatedOrDefaultRegion(region?: string): string {
+    if (!region || region.trim().length === 0) {
+      return 'us'
     }
 
-    if (Object.values(RunnerRegion).includes(region)) {
-      return region
-    } else {
-      throw new BadRequestError('Invalid region')
-    }
+    return region.trim()
   }
 
   private getValidatedOrDefaultClass(sandboxClass: SandboxClass): SandboxClass {

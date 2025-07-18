@@ -20,7 +20,6 @@ import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictFloat, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional, Union
-from daytona_api_client.models.runner_region import RunnerRegion
 from daytona_api_client.models.runner_state import RunnerState
 from daytona_api_client.models.sandbox_class import SandboxClass
 from typing import Optional, Set
@@ -42,7 +41,7 @@ class Runner(BaseModel):
     var_class: SandboxClass = Field(description="The class of the runner", alias="class")
     used: Union[StrictFloat, StrictInt] = Field(description="The current usage of the runner")
     capacity: Union[StrictFloat, StrictInt] = Field(description="The capacity of the runner")
-    region: RunnerRegion = Field(description="The region of the runner")
+    region: StrictStr = Field(description="The region of the runner")
     state: RunnerState = Field(description="The state of the runner")
     last_checked: Optional[StrictStr] = Field(default=None, description="The last time the runner was checked", alias="lastChecked")
     unschedulable: StrictBool = Field(description="Whether the runner is unschedulable")

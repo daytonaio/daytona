@@ -99,7 +99,6 @@ daytona_api_client/models/registry_push_access_dto.py
 daytona_api_client/models/replace_request.py
 daytona_api_client/models/replace_result.py
 daytona_api_client/models/runner.py
-daytona_api_client/models/runner_region.py
 daytona_api_client/models/runner_snapshot_dto.py
 daytona_api_client/models/runner_state.py
 daytona_api_client/models/sandbox.py

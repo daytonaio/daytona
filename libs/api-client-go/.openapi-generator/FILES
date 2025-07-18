@@ -97,7 +97,6 @@ model_registry_push_access_dto.go
 model_replace_request.go
 model_replace_result.go
 model_runner.go
-model_runner_region.go
 model_runner_snapshot_dto.go
 model_runner_state.go
 model_sandbox.go

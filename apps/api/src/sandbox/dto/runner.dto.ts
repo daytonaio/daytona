@@ -6,7 +6,6 @@
 import { ApiProperty, ApiPropertyOptional, ApiSchema } from '@nestjs/swagger'
 import { IsEnum, IsOptional } from 'class-validator'
 import { Runner } from '../entities/runner.entity'
-import { RunnerRegion } from '../enums/runner-region.enum'
 import { SandboxClass } from '../enums/sandbox-class.enum'
 import { RunnerState } from '../enums/runner-state.enum'
 
@@ -88,12 +87,9 @@ export class RunnerDto {
 
   @ApiProperty({
     description: 'The region of the runner',
-    enum: RunnerRegion,
-    enumName: 'RunnerRegion',
-    example: RunnerRegion.EU,
+    example: 'us',
   })
-  @IsEnum(RunnerRegion)
-  region: RunnerRegion
+  region: string
 
   @ApiProperty({
     description: 'The state of the runner',
