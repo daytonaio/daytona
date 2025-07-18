@@ -32,13 +32,17 @@ export class BuildInfo {
   @OneToMany(() => Sandbox, (sandbox) => sandbox.buildInfo)
   sandboxes: Sandbox[]
 
-  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  @Column({ type: 'timestamp with time zone', default: () => 'CURRENT_TIMESTAMP' })
   lastUsedAt: Date
 
-  @CreateDateColumn()
+  @CreateDateColumn({
+    type: 'timestamp with time zone',
+  })
   createdAt: Date
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({
+    type: 'timestamp with time zone',
+  })
   updatedAt: Date
 
   @BeforeInsert()

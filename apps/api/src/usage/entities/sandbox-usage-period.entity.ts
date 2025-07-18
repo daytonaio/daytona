@@ -17,10 +17,10 @@ export class SandboxUsagePeriod {
   // Redundant property to optimize billing queries
   organizationId: string
 
-  @Column({ type: 'timestamp' })
+  @Column({ type: 'timestamp with time zone' })
   startAt: Date
 
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ type: 'timestamp with time zone', nullable: true })
   endAt: Date | null
 
   @Column({ type: 'float' })
