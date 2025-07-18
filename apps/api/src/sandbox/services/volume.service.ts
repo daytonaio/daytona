@@ -16,6 +16,8 @@ import { OnEvent } from '@nestjs/event-emitter'
 import { SandboxEvents } from '../constants/sandbox-events.constants'
 import { SandboxCreatedEvent } from '../events/sandbox-create.event'
 import { OrganizationService } from '../../organization/services/organization.service'
+import { InjectRedis } from '@nestjs-modules/ioredis'
+import Redis from 'ioredis'
 
 @Injectable()
 export class VolumeService {
@@ -25,13 +27,22 @@ export class VolumeService {
     @InjectRepository(Volume)
     private readonly volumeRepository: Repository<Volume>,
     private readonly organizationService: OrganizationService,
+    @InjectRedis() private readonly redis: Redis,
   ) {}
 
   private async validateOrganizationQuotas(organization: Organization): Promise<void> {
-    const volumeUsageOverview = await this.organizationService.getVolumeUsageOverview(organization.id, organization)
+    const usageOverview = await this.organizationService.getVolumeUsageOverview(organization.id, organization)
 
-    if (volumeUsageOverview.currentVolumeUsage + 1 > organization.volumeQuota) {
-      throw new ForbiddenException('Reached the maximum number of volumes in the organization')
+    //  optimistic quota guard
+    //  protect against race condition to prevent quota abuse
+    //  not 100% correct when close to quota limit
+    const concurrentCountKey = `volume-concurrent-${organization.id}`
+    let concurrentCount = parseInt(await this.redis.get(concurrentCountKey)) || 0
+    concurrentCount++
+    await this.redis.setex(concurrentCountKey, 1, concurrentCount)
+
+    if (usageOverview.currentVolumeUsage + concurrentCount > usageOverview.totalVolumeQuota) {
+      throw new ForbiddenException(`Volume quota exceeded. Maximum allowed: ${usageOverview.totalVolumeQuota}`)
     }
   }
 
@@ -132,16 +143,6 @@ export class VolumeService {
     }
 
     return volume
-  }
-
-  // TODO: delete after optimistic quota refactor
-  async countActive(organizationId: string): Promise<number> {
-    return this.volumeRepository.count({
-      where: {
-        organizationId,
-        state: Not(In([VolumeState.DELETED, VolumeState.ERROR])),
-      },
-    })
   }
 
   @OnEvent(SandboxEvents.CREATED)

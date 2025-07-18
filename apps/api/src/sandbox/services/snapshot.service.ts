@@ -22,7 +22,8 @@ import { SandboxEvents } from '../constants/sandbox-events.constants'
 import { SandboxCreatedEvent } from '../events/sandbox-create.event'
 import { Organization } from '../../organization/entities/organization.entity'
 import { OrganizationService } from '../../organization/services/organization.service'
-import { SnapshotRunner } from '../entities/snapshot-runner.entity'
+import { InjectRedis } from '@nestjs-modules/ioredis'
+import Redis from 'ioredis'
 
 const IMAGE_NAME_REGEX = /^[a-zA-Z0-9.\-:]+(\/[a-zA-Z0-9.\-:]+)*$/
 @Injectable()
@@ -32,9 +33,8 @@ export class SnapshotService {
     private readonly snapshotRepository: Repository<Snapshot>,
     @InjectRepository(BuildInfo)
     private readonly buildInfoRepository: Repository<BuildInfo>,
-    @InjectRepository(SnapshotRunner)
-    private readonly snapshotRunnerRepository: Repository<SnapshotRunner>,
     private readonly organizationService: OrganizationService,
+    @InjectRedis() private readonly redis: Redis,
   ) {}
 
   private validateImageName(name: string): string | null {
@@ -248,10 +248,18 @@ export class SnapshotService {
       )
     }
 
-    const snapshotUsageOverview = await this.organizationService.getSnapshotUsageOverview(organization.id, organization)
+    const usageOverview = await this.organizationService.getSnapshotUsageOverview(organization.id, organization)
 
-    if (snapshotUsageOverview.currentSnapshotUsage + 1 > organization.snapshotQuota) {
-      throw new ForbiddenException('Reached the maximum number of snapshots in the organization')
+    //  optimistic quota guard
+    //  protect against race condition to prevent quota abuse
+    //  not 100% correct when close to quota limit
+    const concurrentCountKey = `snapshot-concurrent-${organization.id}`
+    let concurrentCount = parseInt(await this.redis.get(concurrentCountKey)) || 0
+    concurrentCount++
+    await this.redis.setex(concurrentCountKey, 1, concurrentCount)
+
+    if (usageOverview.currentSnapshotUsage + concurrentCount > usageOverview.totalSnapshotQuota) {
+      throw new ForbiddenException(`Snapshot quota exceeded. Maximum allowed: ${usageOverview.totalSnapshotQuota}`)
     }
   }
 
@@ -266,7 +274,7 @@ export class SnapshotService {
     await this.snapshotRepository.save(snapshot)
   }
 
-  async activateSnapshot(snapshotId: string): Promise<Snapshot> {
+  async activateSnapshot(snapshotId: string, organization: Organization): Promise<Snapshot> {
     const snapshot = await this.snapshotRepository.findOne({
       where: { id: snapshotId },
     })
@@ -282,6 +290,10 @@ export class SnapshotService {
     if (snapshot.state !== SnapshotState.INACTIVE) {
       throw new BadRequestException(`Snapshot ${snapshotId} cannot be activated - it is in ${snapshot.state} state`)
     }
+
+    this.organizationService.assertOrganizationIsNotSuspended(organization)
+
+    await this.validateOrganizationQuotas(organization, snapshot.cpu, snapshot.mem, snapshot.disk)
 
     snapshot.state = SnapshotState.ACTIVE
     snapshot.lastUsedAt = new Date()
