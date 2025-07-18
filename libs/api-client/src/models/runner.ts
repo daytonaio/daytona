@@ -14,9 +14,6 @@
 
 // May contain unused imports in some cases
 // @ts-ignore
-import type { RunnerRegion } from './runner-region'
-// May contain unused imports in some cases
-// @ts-ignore
 import type { RunnerState } from './runner-state'
 // May contain unused imports in some cases
 // @ts-ignore
@@ -102,10 +99,10 @@ export interface Runner {
   capacity: number
   /**
    * The region of the runner
-   * @type {RunnerRegion}
+   * @type {string}
    * @memberof Runner
    */
-  region: RunnerRegion
+  region: string
   /**
    * The state of the runner
    * @type {RunnerState}

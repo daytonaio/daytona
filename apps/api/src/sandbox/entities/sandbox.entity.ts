@@ -18,7 +18,6 @@ import { SandboxState } from '../enums/sandbox-state.enum'
 import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
 import { SandboxClass } from '../enums/sandbox-class.enum'
 import { BackupState } from '../enums/backup-state.enum'
-import { RunnerRegion } from '../enums/runner-region.enum'
 import { nanoid } from 'nanoid'
 import { SandboxVolume } from '../dto/sandbox.dto'
 import { BuildInfo } from './build-info.entity'
@@ -35,11 +34,9 @@ export class Sandbox {
   organizationId: string
 
   @Column({
-    type: 'enum',
-    enum: RunnerRegion,
-    default: RunnerRegion.EU,
+    default: 'us',
   })
-  region: RunnerRegion
+  region: string
 
   @Column({
     type: 'uuid',

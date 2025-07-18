@@ -47,7 +47,7 @@ type Runner struct {
 	// The capacity of the runner
 	Capacity float32 `json:"capacity"`
 	// The region of the runner
-	Region RunnerRegion `json:"region"`
+	Region string `json:"region"`
 	// The state of the runner
 	State RunnerState `json:"state"`
 	// The last time the runner was checked
@@ -66,7 +66,7 @@ type _Runner Runner
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewRunner(id string, domain string, apiUrl string, apiKey string, cpu float32, memory float32, disk float32, gpu float32, gpuType string, class SandboxClass, used float32, capacity float32, region RunnerRegion, state RunnerState, unschedulable bool, createdAt string, updatedAt string) *Runner {
+func NewRunner(id string, domain string, apiUrl string, apiKey string, cpu float32, memory float32, disk float32, gpu float32, gpuType string, class SandboxClass, used float32, capacity float32, region string, state RunnerState, unschedulable bool, createdAt string, updatedAt string) *Runner {
 	this := Runner{}
 	this.Id = id
 	this.Domain = domain
@@ -385,9 +385,9 @@ func (o *Runner) SetCapacity(v float32) {
 }
 
 // GetRegion returns the Region field value
-func (o *Runner) GetRegion() RunnerRegion {
+func (o *Runner) GetRegion() string {
 	if o == nil {
-		var ret RunnerRegion
+		var ret string
 		return ret
 	}
 
@@ -396,7 +396,7 @@ func (o *Runner) GetRegion() RunnerRegion {
 
 // GetRegionOk returns a tuple with the Region field value
 // and a boolean to check if the value has been set.
-func (o *Runner) GetRegionOk() (*RunnerRegion, bool) {
+func (o *Runner) GetRegionOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -404,7 +404,7 @@ func (o *Runner) GetRegionOk() (*RunnerRegion, bool) {
 }
 
 // SetRegion sets field value
-func (o *Runner) SetRegion(v RunnerRegion) {
+func (o *Runner) SetRegion(v string) {
 	o.Region = v
 }
 
