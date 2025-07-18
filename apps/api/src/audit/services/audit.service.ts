@@ -3,9 +3,10 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Injectable, Logger, NotFoundException } from '@nestjs/common'
+import { Injectable, Logger, NotFoundException, OnModuleInit } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { Cron, CronExpression } from '@nestjs/schedule'
+import { CronExpression, SchedulerRegistry } from '@nestjs/schedule'
+import { CronJob } from 'cron'
 import { FindManyOptions, LessThan, Repository } from 'typeorm'
 import { CreateAuditLogInternalDto } from '../dto/create-audit-log-internal.dto'
 import { UpdateAuditLogInternalDto } from '../dto/update-audit-log-internal.dto'
@@ -15,7 +16,7 @@ import { TypedConfigService } from '../../config/typed-config.service'
 import { RedisLockProvider } from '../../sandbox/common/redis-lock.provider'
 
 @Injectable()
-export class AuditService {
+export class AuditService implements OnModuleInit {
   private readonly logger = new Logger(AuditService.name)
 
   constructor(
@@ -23,7 +24,23 @@ export class AuditService {
     private readonly auditLogRepository: Repository<AuditLog>,
     private readonly configService: TypedConfigService,
     private readonly redisLockProvider: RedisLockProvider,
+    private readonly schedulerRegistry: SchedulerRegistry,
   ) {}
+
+  onModuleInit() {
+    this.schedulerRegistry.addCronJob(
+      'cleanup-old-audit-logs',
+      new CronJob(
+        CronExpression.EVERY_DAY_AT_2AM,
+        () => {
+          this.cleanupOldAuditLogs()
+        },
+        null,
+        true,
+        this.configService.get('cronTimeZone'),
+      ),
+    )
+  }
 
   async createLog(createDto: CreateAuditLogInternalDto): Promise<AuditLog> {
     const auditLog = new AuditLog()
@@ -102,7 +119,6 @@ export class AuditService {
     }
   }
 
-  @Cron(CronExpression.EVERY_DAY_AT_2AM)
   async cleanupOldAuditLogs(): Promise<void> {
     const lockKey = 'cleanup-old-audit-logs'
     if (!(await this.redisLockProvider.lock(lockKey, 600))) {
