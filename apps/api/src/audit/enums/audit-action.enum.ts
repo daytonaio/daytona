@@ -34,6 +34,7 @@ export enum AuditAction {
   GET_PORT_PREVIEW_URL = 'get_port_preview_url',
   TOGGLE_STATE = 'toggle_state',
   SET_GENERAL_STATUS = 'set_general_status',
+  ACTIVATE = 'activate',
 
   // toolbox actions (must be prefixed with 'toolbox_')
   TOOLBOX_DELETE_FILE = 'toolbox_delete_file',
