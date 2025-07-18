@@ -53,7 +53,21 @@ export class AuditService {
       throw new NotFoundException(`Audit log with ID ${id} not found`)
     }
 
-    Object.assign(auditLog, updateDto)
+    if (updateDto.statusCode) {
+      auditLog.statusCode = updateDto.statusCode
+    }
+
+    if (updateDto.errorMessage) {
+      auditLog.errorMessage = updateDto.errorMessage
+    }
+
+    if (updateDto.targetId) {
+      auditLog.targetId = updateDto.targetId
+    }
+
+    if (updateDto.organizationId) {
+      auditLog.organizationId = updateDto.organizationId
+    }
 
     if (this.configService.get('audit.consoleLogEnabled')) {
       this.logger.log(`Updating audit log: ${JSON.stringify(auditLog)}`)
