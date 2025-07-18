@@ -2,10 +2,15 @@
 import SidebarSublist from './SidebarSublist.astro'
 import { SideNavLinks } from './menu/SideNavLinks'
 import { getSidebar } from '../utils/navigation'
-import { sidebarConfig } from '../content/config'
+import { getSidebarConfig } from '../content/config'
 ---
 
-<SidebarSublist sublist={getSidebar(sidebarConfig, Astro.url.pathname)} />
+<SidebarSublist
+  sublist={getSidebar(
+    getSidebarConfig(Astro.props.lang, Astro.props.labels),
+    Astro.url.pathname
+  )}
+/>
 <div class="mobile-nav-btn nav__items_side_menu">
-  <SideNavLinks client:load />
+  <SideNavLinks client:load locale={Astro.props.lang} />
 </div>

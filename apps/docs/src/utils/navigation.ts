@@ -14,6 +14,9 @@ export interface NavigationLink extends NavigationItem {
   type: 'link'
   href: string
   label: string
+  translations?: {
+    [key: string]: string
+  }
   description?: string
   disablePagination?: boolean
   attrs?: {
@@ -37,6 +40,9 @@ export interface NavigationGroup extends NavigationItem {
   // The referenced page should be a `MainNavigationLink`. It is ignored for `NavigationCategory.MAIN` groups.
   homePageHref?: string
   autopopulateFromDir?: string
+  translations?: {
+    [key: string]: string
+  }
   entries?: (NavigationLink | MainNavigationLink)[]
 }
 

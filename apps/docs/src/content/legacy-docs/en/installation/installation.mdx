@@ -1,0 +1,115 @@
+---
+title: Installation
+description: Learn how to install Daytona on Linux, macOS, and Windows.
+sidebar:
+  label: Installation
+---
+
+import Aside from '@components/Aside.astro'
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+import Homebrew from './method/homebrew.mdx'
+import Nix from './method/nix.mdx'
+import ScriptPowerShell from './method/script-powershell.mdx'
+import ScriptUnix from './method/script-unix.mdx'
+import Uninstall from './method/uninstall.mdx'
+import UninstallWindows from './method/uninstall-windows.mdx'
+
+Install Daytona on Linux, macOS, and Windows systems.
+Each operating system supports both `x86_64` and `ARM64` architectures.
+
+Daytona leverages [Docker](https://docs.docker.com/engine/install/) to create and manage isolated development environments.
+
+## Installation
+
+<br />
+
+<Tabs>
+<TabItem label="Linux" icon="linux">
+
+Install Daytona on Linux using the following installation script:
+
+```shell
+(curl -sf -L https://download.daytona.io/daytona/install.sh | sudo bash) && daytona server -y && daytona
+```
+
+:::note
+You can install Daytona by manually downloading the binary and placing it in your `PATH`.
+
+```shell
+# x86-64
+curl -sf -L https://download.daytona.io/daytona/v0.53/daytona-linux-amd64 -o daytona
+# ARM64
+curl -sf -L https://download.daytona.io/daytona/v0.53/daytona-linux-arm64 -o daytona
+```
+
+:::
+
+</TabItem>
+<TabItem label="MacOS" icon="apple">
+
+Install Daytona on macOS using the following installation script:
+
+```shell
+(curl -sf -L https://download.daytona.io/daytona/install.sh | sudo bash) && daytona server -y && daytona
+```
+
+:::note
+You can install Daytona by manually downloading the binary and placing it in your `PATH`.
+
+```shell
+# x86-64/Intel-based
+curl -sf -L https://download.daytona.io/daytona/v0.53/daytona-darwin-amd64 -o daytona
+# ARM64/Apple Silicon
+curl -sf -L https://download.daytona.io/daytona/v0.53/daytona-darwin-arm64 -o daytona
+```
+
+:::
+
+</TabItem>
+<TabItem label="Windows" icon="seti:windows">
+Install Daytona on Windows using the following PowerShell script:
+
+```powershell
+$architecture = if ($env:PROCESSOR_ARCHITECTURE -eq "AMD64") { "amd64" } else { "arm64" }
+md -Force "$Env:APPDATA\bin\daytona"; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]'Tls,Tls11,Tls12';
+Invoke-WebRequest -URI "https://download.daytona.io/daytona/v0.53/daytona-windows-$architecture.exe" -OutFile "$Env:APPDATA\bin\daytona\daytona.exe";
+$env:Path += ";" + $Env:APPDATA + "\bin\daytona"; [Environment]::SetEnvironmentVariable("Path", $env:Path, [System.EnvironmentVariableTarget]::User);
+daytona serve;
+```
+
+:::note
+You can install Daytona by manually downloading the binary and placing it in your `PATH`.
+
+```sh
+# x86-64
+curl -sf -L https://download.daytona.io/daytona/v0.53/daytona-windows-amd64.exe -o daytona
+# AArch64
+curl -sf -L https://download.daytona.io/daytona/v0.53/daytona-windows-arm64.exe -o daytona
+```
+
+:::
+
+<br />
+
+:::tip
+If you are using Windows Subsystem for Linux (WSL), you can follow the [instructions](https://github.com/daytonaio/daytona/issues/282) on how to run Daytona when using an IDE reliant on the SSH client.
+:::
+</TabItem>
+<TabItem label="Homebrew" icon="homebrew">
+<Homebrew />
+</TabItem>
+<TabItem label="Nix" icon="nix">
+<Nix />
+</TabItem>
+</Tabs>
+
+## Uninstallation
+
+<Tabs>
+<TabItem label="Unix" icon="linux">
+<Uninstall />
+</TabItem>
+<TabItem label="Windows" icon="seti:windows">
+<UninstallWindows />
+</TabItem>
+</Tabs>

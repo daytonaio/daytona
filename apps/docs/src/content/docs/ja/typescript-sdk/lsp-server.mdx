@@ -1,0 +1,297 @@
+---
+title: "LspServer"
+hideTitleOnPage: true
+---
+
+
+## LspServer
+
+コード補完、シンボル検索などのIDE風機能を提供するコードインテリジェンス用のLanguage Server Protocol機能を提供します。
+
+### Constructors
+
+#### new LspServer()
+
+```ts
+new LspServer(
+   languageId: LspLanguageId, 
+   pathToProject: string, 
+   toolboxApi: ToolboxApi, 
+   sandboxId: string): LspServer
+```
+
+**Parameters**:
+
+- `languageId` _LspLanguageId_
+- `pathToProject` _string_
+- `toolboxApi` _ToolboxApi_
+- `sandboxId` _string_
+
+
+**Returns**:
+
+- `LspServer`
+
+### Methods
+
+#### completions()
+
+```ts
+completions(path: string, position: Position): Promise<CompletionList>
+```
+
+ファイル内の位置での補完候補を取得します。
+
+**Parameters**:
+
+- `path` _string_ - ファイルへのパス。相対パスはLSPサーバーコンストラクタで設定されたプロジェクトパスを基準に解決されます。
+- `position` _Position_ - 補完が要求されたファイル内の位置
+
+
+**Returns**:
+
+- `Promise<CompletionList>` - 補完候補のリスト。リストには以下が含まれます：
+    - isIncomplete: より多くのアイテムが利用可能かどうか
+    - items: 補完アイテムのリスト、それぞれに以下が含まれます：
+    - label: 挿入するテキスト
+    - kind: 補完の種類
+    - detail: アイテムに関する追加詳細
+    - documentation: アイテムのドキュメント
+    - sortText: リスト内でアイテムをソートするために使用されるテキスト
+    - filterText: アイテムをフィルタリングするために使用されるテキスト
+    - insertText: 実際に挿入するテキスト（labelと異なる場合）
+
+**Example:**
+
+```ts
+// 特定の位置での補完を取得
+const completions = await lsp.completions('workspace/project/src/index.ts', {
+  line: 10,
+  character: 15
+});
+completions.items.forEach(item => {
+  console.log(`${item.label} (${item.kind}): ${item.detail}`);
+});
+```
+
+***
+
+#### didClose()
+
+```ts
+didClose(path: string): Promise<void>
+```
+
+ファイルが閉じられたことをlanguage serverに通知します。エディタでファイルが閉じられた際に呼び出され、language serverがそのファイルに関連するリソースをクリーンアップできるようにします。
+
+**Parameters**:
+
+- `path` _string_ - 閉じられたファイルへのパス。相対パスはLSPサーバーコンストラクタで設定されたプロジェクトパスを基準に解決されます。
+
+
+**Returns**:
+
+- `Promise<void>`
+
+**Example:**
+
+```ts
+// ファイルの編集が完了した時
+await lsp.didClose('workspace/project/src/index.ts');
+```
+
+***
+
+#### didOpen()
+
+```ts
+didOpen(path: string): Promise<void>
+```
+
+ファイルが開かれたことをlanguage serverに通知し、そのファイルに対する診断や補完などの言語機能を有効にします。サーバーはファイルの内容の追跡を開始し、言語機能を提供します。
+
+**Parameters**:
+
+- `path` _string_ - 開かれたファイルへのパス。相対パスはユーザーのルートディレクトリを基準に解決されます。
+
+
+**Returns**:
+
+- `Promise<void>`
+
+**Example:**
+
+```ts
+// 編集用にファイルを開く時
+await lsp.didOpen('workspace/project/src/index.ts');
+// これでこのファイルに対して補完、シンボルなどを取得できます
+```
+
+***
+
+#### documentSymbols()
+
+```ts
+documentSymbols(path: string): Promise<LspSymbol[]>
+```
+
+ドキュメントからシンボル情報（関数、クラス、変数など）を取得します。
+
+**Parameters**:
+
+- `path` _string_ - シンボルを取得するファイルへのパス。相対パスはLSPサーバーコンストラクタで設定されたプロジェクトパスを基準に解決されます。
+
+
+**Returns**:
+
+- `Promise<LspSymbol[]>` - ドキュメント内のシンボルのリスト。各シンボルには以下が含まれます：
+    - name: シンボルの名前
+    - kind: シンボルの種類（関数、クラス、変数など）
+    - location: ファイル内のシンボルの位置
+
+**Example:**
+
+```ts
+// ファイル内のすべてのシンボルを取得
+const symbols = await lsp.documentSymbols('workspace/project/src/index.ts');
+symbols.forEach(symbol => {
+  console.log(`${symbol.kind} ${symbol.name}: ${symbol.location}`);
+});
+```
+
+***
+
+#### sandboxSymbols()
+
+```ts
+sandboxSymbols(query: string): Promise<LspSymbol[]>
+```
+
+Sandbox全体でクエリ文字列に一致するシンボルを検索します。
+
+**パラメータ**:
+
+- `query` _string_ - シンボル名と照合する検索クエリ
+
+
+**戻り値**:
+
+- `Promise<LspSymbol[]>` - すべてのファイルから一致するシンボルのリスト。各シンボルには以下が含まれます：
+    - name: シンボルの名前
+    - kind: シンボルの種類（関数、クラス、変数など）
+    - location: ファイル内のシンボルの位置
+
+**例:**
+
+```ts
+// "User"を含むすべてのシンボルを検索
+const symbols = await lsp.sandboxSymbols('User');
+symbols.forEach(symbol => {
+  console.log(`${symbol.name} (${symbol.kind}) in ${symbol.location}`);
+});
+```
+
+***
+
+#### start()
+
+```ts
+start(): Promise<void>
+```
+
+言語サーバーを開始します。他のLSP機能を使用する前に呼び出す必要があります。
+指定された言語とプロジェクトの言語サーバーを初期化します。
+
+**戻り値**:
+
+- `Promise<void>`
+
+**例:**
+
+```ts
+const lsp = await sandbox.createLspServer('typescript', 'workspace/project');
+await lsp.start();  // サーバーを初期化
+// LSP操作の準備完了
+```
+
+***
+
+#### stop()
+
+```ts
+stop(): Promise<void>
+```
+
+言語サーバーを停止します。LSPサーバーが不要になったときにシステムリソースを
+解放するために呼び出す必要があります。
+
+**戻り値**:
+
+- `Promise<void>`
+
+**例:**
+
+```ts
+// LSP機能の使用が終了したとき
+await lsp.stop();  // リソースをクリーンアップ
+```
+
+***
+
+#### ~~workspaceSymbols()~~
+
+```ts
+workspaceSymbols(query: string): Promise<LspSymbol[]>
+```
+
+Sandbox全体でクエリ文字列に一致するシンボルを検索します。
+
+**パラメータ**:
+
+- `query` _string_ - シンボル名と照合する検索クエリ
+
+
+**戻り値**:
+
+- `Promise<LspSymbol[]>` - すべてのファイルから一致するシンボルのリスト。各シンボルには以下が含まれます：
+    - name: シンボルの名前
+    - kind: シンボルの種類（関数、クラス、変数など）
+    - location: ファイル内のシンボルの位置
+
+##### 非推奨
+
+代わりに`sandboxSymbols`を使用してください。このメソッドは将来のバージョンで削除される予定です。
+
+***
+
+
+## LspLanguageId
+
+サポートされている言語サーバーのタイプ。
+
+**列挙型メンバー**:
+
+- `JAVASCRIPT` ("javascript")
+- `PYTHON` ("python")
+- `TYPESCRIPT` ("typescript")
+
+## Position
+
+テキストドキュメント内のゼロベースの位置を表し、
+行番号と文字オフセットで指定されます。
+
+**プロパティ**:
+
+- `character` _number_ - 行内のゼロベース文字オフセット
+- `line` _number_ - ドキュメント内のゼロベース行番号
+
+
+
+**例:**
+
+```ts
+const position: Position = {
+  line: 10,     // 11行目 (ゼロベース)
+  character: 15  // 行内の16文字目 (ゼロベース)
+};
+```

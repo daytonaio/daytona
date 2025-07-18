@@ -1,0 +1,48 @@
+---
+title: Windowsでのアンインストール
+---
+import Aside from "@components/Aside.astro";
+export const partial = true;
+
+<br />
+
+:::caution
+この手順は破壊的で元に戻すことができません。
+続行する前に、Workspaceデータと関連する設定のバックアップがあることを確認してください。
+:::
+
+<br />
+
+ローカルのDaytonaデータを削除するには、以下のコマンドを実行してください：
+
+```shell
+rmdir /s /q "%LOCALAPPDATA%\daytona"
+```
+
+Daytonaバイナリを削除するには、以下のコマンドを実行してください：
+
+```shell
+where daytona > nul && del /f /q "$(where daytona)"
+```
+
+DaytonaのSSH設定ファイルを削除するには、以下のコマンドを実行してください：
+
+```shell
+del /f /q "%USERPROFILE%\.ssh\daytona_config"
+```
+
+`%USERPROFILE%\.ssh\config`ファイルを編集して、`Include daytona_config entry`を削除してください。テキストエディタ（例：メモ帳）でファイルを開いて手動で行うことができます：
+
+```shell
+notepad "%USERPROFILE%\.ssh\config"
+```
+
+Daytonaレジストリコンテナを削除するには、以下のコマンドを実行してください：
+
+```shell
+docker rm /daytona-registry
+```
+
+Daytona用のオートコンプリートスクリプトを生成している場合は、シェル設定ファイル（例：`%USERPROFILE%\.bashrc`、`%USERPROFILE%\.zshrc`）から手動で削除する必要があります。
+
+システムからDaytonaのすべての痕跡が削除されていることを確認するために、`C:\Program Files\`、`C:\Program Files (x86)\`、および`C:\Users\%USERNAME%\AppData\Local\Temp\`ディレクトリ内の関連ファイルやディレクトリをチェックして削除してください。

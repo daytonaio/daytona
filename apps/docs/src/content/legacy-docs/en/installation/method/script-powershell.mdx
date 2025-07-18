@@ -1,0 +1,29 @@
+---
+title: PowerShell Installation
+---
+
+import Aside from '@components/Aside.astro'
+
+export const partial = true
+
+1. Run the following command in PowerShell:
+
+```powershell
+$architecture = if ($env:PROCESSOR_ARCHITECTURE -eq "AMD64") { "amd64" } else { "arm64" }
+md -Force "$Env:APPDATA\bin\daytona"; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]'Tls,Tls11,Tls12';
+Invoke-WebRequest -URI "https://download.daytona.io/daytona/v0.53/daytona-windows-$architecture.exe" -OutFile "$Env:APPDATA\bin\daytona\daytona.exe";
+$env:Path += ";" + $Env:APPDATA + "\bin\daytona"; [Environment]::SetEnvironmentVariable("Path", $env:Path, [System.EnvironmentVariableTarget]::User);
+daytona serve;
+```
+
+<Aside type="note">
+You can install Daytona by manually downloading the binary and placing it in your `PATH`.
+
+```powershell
+# x86-64
+curl -sf -L https://download.daytona.io/daytona/v0.53/daytona-windows-amd64.exe -o daytona
+# AArch64
+curl -sf -L https://download.daytona.io/daytona/v0.53/daytona-windows-arm64.exe -o daytona
+```
+
+</Aside>

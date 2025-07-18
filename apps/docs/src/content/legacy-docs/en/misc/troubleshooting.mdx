@@ -1,0 +1,72 @@
+---
+title: Troubleshooting
+description: Troubleshooting Daytona
+sidebar:
+  label: Troubleshooting
+---
+
+You can use the following troubleshooting tips to resolve common issues with Daytona.
+
+## Connectivity Issues
+
+### VPNs and Firewalls
+
+If your VPN is configured to handle all IP traffic or if your Firewall is configured to block certain IP addresses, they may prevent Daytona from successfully connecting to the reverse proxy service.
+The issue can be manifested in different ways, including:
+
+- Unable to start the Daytona Server due to the `control not running` error.
+- Unable to successfully create Workspaces due to the `Failed to connect to server: Get "http://server/health": lookup server...` error.
+- Unable to enter a Workspace using `daytona code` or `daytona ssh` due to the timeout when establishing a Tailscale connection.
+
+To work around this issue, you may need to add the following IP address exceptions to your VPN or Firewall:
+
+- `35.198.165.62` - Europe-based reverse proxy
+- `34.133.75.4` - US-based reverse proxy
+
+## WSL2 with Visual Studio Code
+
+### Description
+
+Running Daytona on WSL2 does not work seamlessly with the Visual Studio Code IDE. This issue arises because Visual Studio Code relies on the native Windows SSH client, whereas Daytona modifies the Linux SSH configuration file to set up workspace-specific SSH connection configurations.
+
+Daytona uses a ProxyCommand that invokes `daytona ssh-proxy` as defined in the SSH configuration. This configuration assumes that the Daytona binary is located within the Linux filesystem, which creates a conflict with Visual Studio Code's reliance on the Windows environment.
+
+This issue is not specific to Daytona but rather stems from a limitation in the Visual Studio Code remote development plugin. The plugin does not currently support passing a custom "remote SSH path" flag when invoking the `code` CLI. Without this feature, Daytona's reliance on Linux-specific configurations conflicts with Visual Studio Code's dependency on Windows-native tools.
+
+### Solution
+
+While awaiting official support for a "remote SSH path" flag in the Visual Studio Code plugin, the following workaround can address the issue. This solution involves creating a script and modifying configurations to align the Windows and Linux SSH clients for seamless operation.
+
+1. Create a **`wsl_ssh.bat`** script with the following content:
+
+```bash
+C:\Windows\system32\wsl.exe ssh %*
+```
+
+2. Save the **`wsl_ssh.bat`** script in the following directory:
+
+```text
+C:\Users\<USERNAME>\AppData\Roaming\bin\wsl_ssh.bat
+```
+
+3. Update the Visual Studio Code **`settings.json`** file to use the **`wsl_ssh.bat`** script as the SSH path:
+
+```sh
+"remote.SSH.path": "C:\\Users\\<USERNAME>\\AppData\\Roaming\\bin\\wsl_ssh.bat"
+```
+
+:::tip
+The `settings.json` file is located in the following directory:
+
+`C:\Users\<USERNAME>\AppData\Roaming\Code\User\settings.json`
+:::
+
+<br />
+
+4. Create a symlink to synchronize the native SSH configuration with the WSL2 SSH configuration:
+
+```sh
+ln -s /mnt/c/Users/<USERNAME>/.ssh/config config
+```
+
+This ensures the SSH configuration is consistent between environments.

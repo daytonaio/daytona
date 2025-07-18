@@ -1,0 +1,116 @@
+---
+title: Container Registries
+description: Configure container registries for your Workspace in Daytona
+---
+
+import Label from '@components/Label.astro'
+
+<Label>
+  Distribution: **Open Source**
+</Label>
+
+Container registries store credentials used to pull container images from specified registry servers. Adding container registry credentials is useful for users who want to create Workspaces from private images and those hosted on private registries.
+
+Container registries are managed through environment variables, enabling you to securely store and manage credentials. Daytona provides options to set, list, and delete container registries for your Workspaces.
+
+Daytona provides options to set global environment variables that apply to all Workspaces or set environment variables for a specific Workspace. To set environment variables for a specific Workspace, use the `--env` flag when creating a new Workspace, or configure the environment variables in the Workspace's template. For server-wide environment variables that apply to all new Workspaces, use the `daytona env` command.
+
+## Set a Container Registry
+
+Daytona provides an option to set a container registry through environment variables for your Workspace.
+
+1. Run the following command to set a container registry environment variable:
+
+```shell
+daytona env set
+```
+
+2. Set the server environment variable key for the container registry:
+
+```text
+Set server environment variable
+Key
+>
+```
+
+:::tip
+Add the following environment variables to configure your container registry:
+
+- **`<*>_CONTAINER_REGISTRY_SERVER`**
+
+  The URL of the container registry.
+
+- **`<*>_CONTAINER_REGISTRY_USERNAME`**
+
+  The username to authenticate with the container registry.
+
+- **`<*>_CONTAINER_REGISTRY_PASSWORD`**
+
+  The password to authenticate with the container registry.
+
+:::
+
+<br />
+
+3. Set the server environment variable value for the container registry:
+
+```text
+Value
+>
+```
+
+4. Select whether to add another environment variable:
+
+```text
+Add another environment variable?
+
+[Yes]     [No]
+```
+
+Upon selecting, Daytona will set the container registry environment variables for your Workspace.
+
+```text
+Server environment variables have been set successfully
+```
+
+## List Container Registries
+
+Daytona provides an option to list the container registries configured for your Workspaces.
+
+1. Run the following command to list the container registries:
+
+```shell
+daytona env list
+```
+
+Upon running this command, Daytona will display a list of your configured container registries' environment variables.
+
+```text
+Key                         Value
+────────────────────────────────────  
+MyEnvVariable               ********
+```
+
+## Delete a Container Registry
+
+Daytona provides an option to delete a container registry from your Workspace.
+
+1. Run the following command to delete a container registry:
+
+```shell
+daytona env delete
+```
+
+Upon running this command, you will be prompted to select the container registry you want to delete.
+
+```text
+Select Server Environment Variables To Delete
+1 item
+===
+MyEnvVariable
+********
+```
+
+```text
+Server environment variables have been successfully removed
+```
