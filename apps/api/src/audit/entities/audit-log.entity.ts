@@ -52,6 +52,8 @@ export class AuditLog {
   @Column({ type: 'jsonb', nullable: true })
   metadata?: AuditLogMetadata
 
-  @CreateDateColumn()
+  @CreateDateColumn({
+    type: 'timestamp with time zone',
+  })
   createdAt: Date
 }
