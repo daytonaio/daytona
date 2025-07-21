@@ -300,6 +300,30 @@ const Snapshots: React.FC = () => {
     }
   }
 
+  const handleDeactivate = async (snapshot: SnapshotDto) => {
+    setLoadingSnapshots((prev) => ({ ...prev, [snapshot.id]: true }))
+
+    // Optimistically update the snapshot state
+    setSnapshotsData((prev) => ({
+      ...prev,
+      items: prev.items.map((i) => (i.id === snapshot.id ? { ...i, state: SnapshotState.INACTIVE } : i)),
+    }))
+
+    try {
+      await snapshotApi.deactivateSnapshot(snapshot.id, selectedOrganization?.id)
+      toast.success(`Deactivating snapshot ${snapshot.name}`)
+    } catch (error) {
+      handleApiError(error, 'Failed to deactivate snapshot')
+      // Revert the optimistic update
+      setSnapshotsData((prev) => ({
+        ...prev,
+        items: prev.items.map((i) => (i.id === snapshot.id ? { ...i, state: snapshot.state } : i)),
+      }))
+    } finally {
+      setLoadingSnapshots((prev) => ({ ...prev, [snapshot.id]: false }))
+    }
+  }
+
   const writePermitted = useMemo(
     () => authenticatedUserHasPermission(OrganizationRolePermissionsEnum.WRITE_SNAPSHOTS),
     [authenticatedUserHasPermission],
@@ -512,6 +536,7 @@ const Snapshots: React.FC = () => {
           }}
           onBulkDelete={handleBulkDelete}
           onActivate={handleActivate}
+          onDeactivate={handleDeactivate}
           pageCount={snapshotsData.totalPages}
           onPaginationChange={handlePaginationChange}
           pagination={{

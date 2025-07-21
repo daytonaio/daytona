@@ -338,13 +338,16 @@ export class SnapshotService {
     snapshot.state = SnapshotState.INACTIVE
     await this.snapshotRepository.save(snapshot)
 
-    // Set associated SnapshotRunner records to REMOVING state
-    const result = await this.snapshotRunnerRepository.update(
-      { snapshotRef: snapshot.internalName },
-      { state: SnapshotRunnerState.REMOVING },
-    )
-
-    this.logger.debug(`Deactivated snapshot ${snapshot.id} and marked ${result.affected} SnapshotRunners for removal`)
+    try {
+      // Set associated SnapshotRunner records to REMOVING state
+      const result = await this.snapshotRunnerRepository.update(
+        { snapshotRef: snapshot.internalName },
+        { state: SnapshotRunnerState.REMOVING },
+      )
+      this.logger.debug(`Deactivated snapshot ${snapshot.id} and marked ${result.affected} SnapshotRunners for removal`)
+    } catch (error) {
+      this.logger.error(`Deactivated snapshot ${snapshot.id}, but failed to mark snapshot runners for removal`, error)
+    }
   }
 
   @OnEvent(OrganizationEvents.SUSPENDED_SNAPSHOT_DEACTIVATED)

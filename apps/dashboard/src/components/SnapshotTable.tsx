@@ -15,7 +15,7 @@ import {
 import { TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from './ui/table'
 import { Button } from './ui/button'
 import { useMemo, useState } from 'react'
-import { AlertTriangle, CheckCircle, MoreHorizontal, Timer, Trash2, Pause, Box } from 'lucide-react'
+import { AlertTriangle, CheckCircle, MoreHorizontal, Timer, Pause, Box } from 'lucide-react'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -40,6 +40,7 @@ interface DataTableProps {
   onDelete: (snapshot: SnapshotDto) => void
   onBulkDelete?: (snapshots: SnapshotDto[]) => void
   onActivate?: (snapshot: SnapshotDto) => void
+  onDeactivate?: (snapshot: SnapshotDto) => void
   pagination: {
     pageIndex: number
     pageSize: number
@@ -54,6 +55,7 @@ export function SnapshotTable({
   loadingSnapshots,
   onDelete,
   onActivate,
+  onDeactivate,
   pagination,
   pageCount,
   onBulkDelete,
@@ -78,11 +80,12 @@ export function SnapshotTable({
       getColumns({
         onDelete,
         onActivate,
+        onDeactivate,
         loadingSnapshots,
         writePermitted,
         deletePermitted,
       }),
-    [onDelete, onActivate, loadingSnapshots, writePermitted, deletePermitted],
+    [onDelete, onActivate, onDeactivate, loadingSnapshots, writePermitted, deletePermitted],
   )
 
   const columnsWithSelection = useMemo(() => {
@@ -274,12 +277,14 @@ export function SnapshotTable({
 const getColumns = ({
   onDelete,
   onActivate,
+  onDeactivate,
   loadingSnapshots,
   writePermitted,
   deletePermitted,
 }: {
   onDelete: (snapshot: SnapshotDto) => void
   onActivate?: (snapshot: SnapshotDto) => void
+  onDeactivate?: (snapshot: SnapshotDto) => void
   loadingSnapshots: Record<string, boolean>
   writePermitted: boolean
   deletePermitted: boolean
@@ -385,9 +390,10 @@ const getColumns = ({
         }
 
         const showActivate = writePermitted && onActivate && row.original.state === SnapshotState.INACTIVE
+        const showDeactivate = writePermitted && onDeactivate && row.original.state === SnapshotState.ACTIVE
         const showDelete = deletePermitted
 
-        const showSeparator = showActivate && showDelete
+        const showSeparator = (showActivate || showDeactivate) && showDelete
 
         return (
           <DropdownMenu>
@@ -405,6 +411,15 @@ const getColumns = ({
                   disabled={loadingSnapshots[row.original.id]}
                 >
                   Activate
+                </DropdownMenuItem>
+              )}
+              {showDeactivate && (
+                <DropdownMenuItem
+                  onClick={() => onDeactivate(row.original)}
+                  className="cursor-pointer"
+                  disabled={loadingSnapshots[row.original.id]}
+                >
+                  Deactivate
                 </DropdownMenuItem>
               )}
               {showSeparator && <DropdownMenuSeparator />}
