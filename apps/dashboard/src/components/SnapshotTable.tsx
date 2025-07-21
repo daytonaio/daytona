@@ -39,7 +39,6 @@ interface DataTableProps {
   loadingSnapshots: Record<string, boolean>
   onDelete: (snapshot: SnapshotDto) => void
   onBulkDelete?: (snapshots: SnapshotDto[]) => void
-  onToggleEnabled: (snapshot: SnapshotDto, enabled: boolean) => void
   onActivate?: (snapshot: SnapshotDto) => void
   pagination: {
     pageIndex: number
@@ -54,7 +53,6 @@ export function SnapshotTable({
   loading,
   loadingSnapshots,
   onDelete,
-  onToggleEnabled,
   onActivate,
   pagination,
   pageCount,
@@ -79,13 +77,12 @@ export function SnapshotTable({
     () =>
       getColumns({
         onDelete,
-        onToggleEnabled,
         onActivate,
         loadingSnapshots,
         writePermitted,
         deletePermitted,
       }),
-    [onDelete, onToggleEnabled, onActivate, loadingSnapshots, writePermitted, deletePermitted],
+    [onDelete, onActivate, loadingSnapshots, writePermitted, deletePermitted],
   )
 
   const columnsWithSelection = useMemo(() => {
@@ -276,14 +273,12 @@ export function SnapshotTable({
 
 const getColumns = ({
   onDelete,
-  onToggleEnabled,
   onActivate,
   loadingSnapshots,
   writePermitted,
   deletePermitted,
 }: {
   onDelete: (snapshot: SnapshotDto) => void
-  onToggleEnabled: (snapshot: SnapshotDto, enabled: boolean) => void
   onActivate?: (snapshot: SnapshotDto) => void
   loadingSnapshots: Record<string, boolean>
   writePermitted: boolean
@@ -389,6 +384,11 @@ const getColumns = ({
           return null
         }
 
+        const showActivate = writePermitted && onActivate && row.original.state === SnapshotState.INACTIVE
+        const showDelete = deletePermitted
+
+        const showSeparator = showActivate && showDelete
+
         return (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -398,7 +398,7 @@ const getColumns = ({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              {writePermitted && onActivate && row.original.state === SnapshotState.INACTIVE && (
+              {showActivate && (
                 <DropdownMenuItem
                   onClick={() => onActivate(row.original)}
                   className="cursor-pointer"
@@ -407,26 +407,15 @@ const getColumns = ({
                   Activate
                 </DropdownMenuItem>
               )}
-              {writePermitted && (
+              {showSeparator && <DropdownMenuSeparator />}
+              {showDelete && (
                 <DropdownMenuItem
-                  onClick={() => onToggleEnabled(row.original, !row.original.enabled)}
-                  className="cursor-pointer"
+                  onClick={() => onDelete(row.original)}
+                  className="cursor-pointer text-red-600 dark:text-red-400"
                   disabled={loadingSnapshots[row.original.id]}
                 >
-                  {row.original.enabled ? 'Disable' : 'Enable'}
+                  Delete
                 </DropdownMenuItem>
-              )}
-              {deletePermitted && (
-                <>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    onClick={() => onDelete(row.original)}
-                    className="cursor-pointer text-red-600 dark:text-red-400"
-                    disabled={loadingSnapshots[row.original.id]}
-                  >
-                    Delete
-                  </DropdownMenuItem>
-                </>
               )}
             </DropdownMenuContent>
           </DropdownMenu>

@@ -146,19 +146,6 @@ export class SnapshotService {
     }
   }
 
-  async toggleSnapshotState(snapshotId: string, enabled: boolean) {
-    const snapshot = await this.snapshotRepository.findOne({
-      where: { id: snapshotId },
-    })
-
-    if (!snapshot) {
-      throw new NotFoundException(`Snapshot ${snapshotId} not found`)
-    }
-
-    snapshot.enabled = enabled
-    return await this.snapshotRepository.save(snapshot)
-  }
-
   async removeSnapshot(snapshotId: string) {
     const snapshot = await this.snapshotRepository.findOne({
       where: { id: snapshotId },

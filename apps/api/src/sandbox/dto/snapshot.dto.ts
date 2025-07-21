@@ -24,9 +24,6 @@ export class SnapshotDto {
   @ApiPropertyOptional()
   imageName?: string
 
-  @ApiProperty()
-  enabled: boolean
-
   @ApiProperty({
     enum: SnapshotState,
     enumName: 'SnapshotState',
@@ -76,7 +73,6 @@ export class SnapshotDto {
       general: snapshot.general,
       name: snapshot.name,
       imageName: snapshot.imageName,
-      enabled: snapshot.enabled,
       state: snapshot.state,
       size: snapshot.size,
       entrypoint: snapshot.entrypoint,
