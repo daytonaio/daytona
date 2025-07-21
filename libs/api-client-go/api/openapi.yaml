@@ -7238,20 +7238,24 @@ components:
     CreateRunner:
       example:
         diskGiB: 1.4658129805029452
-        apiUrl: apiUrl
         apiKey: apiKey
+        proxyUrl: proxyUrl
+        cpu: 0.8008281904610115
+        gpu: 5.962133916683182
+        version: version
+        capacity: 5.637376656633329
+        apiUrl: apiUrl
         memoryGiB: 6.027456183070403
         domain: domain
-        cpu: 0.8008281904610115
         region: us
-        gpu: 5.962133916683182
         class: small
         gpuType: gpuType
-        capacity: 5.637376656633329
       properties:
         domain:
           type: string
         apiUrl:
+          type: string
+        proxyUrl:
           type: string
         apiKey:
           type: string
@@ -7277,6 +7281,8 @@ components:
         region:
           example: us
           type: string
+        version:
+          type: string
       required:
         - apiKey
         - apiUrl
@@ -7288,7 +7294,9 @@ components:
         - gpu
         - gpuType
         - memoryGiB
+        - proxyUrl
         - region
+        - version
       type: object
     SandboxClass:
       description: The class of the runner
@@ -7327,9 +7335,11 @@ components:
         gpuType: gpuType
         currentAllocatedCpu: 4000
         updatedAt: 2023-10-01T12:00:00Z
+        proxyUrl: https://proxy.runner1.example.com
         cpu: 8
         gpu: 1
         currentSnapshotCount: 12
+        version: '0'
         disk: 100
         domain: runner1.example.com
         region: us
@@ -7346,6 +7356,10 @@ components:
         apiUrl:
           description: The API URL of the runner
           example: https://api.runner1.example.com
+          type: string
+        proxyUrl:
+          description: The proxy URL of the runner
+          example: https://proxy.runner1.example.com
           type: string
         apiKey:
           description: The API key for the runner
@@ -7440,6 +7454,10 @@ components:
           description: The last update timestamp of the runner
           example: 2023-10-01T12:00:00Z
           type: string
+        version:
+          description: The version of the runner
+          example: '0'
+          type: string
       required:
         - apiKey
         - apiUrl
@@ -7453,11 +7471,13 @@ components:
         - gpuType
         - id
         - memory
+        - proxyUrl
         - region
         - state
         - unschedulable
         - updatedAt
         - used
+        - version
       type: object
     RunnerSnapshotDto:
       example:

@@ -85,7 +85,6 @@ func (a *ApiServer) Start() error {
 
 	public := a.router.Group("/")
 	public.GET("", controllers.HealthCheck)
-	public.GET("/metrics", gin.WrapH(promhttp.Handler()))
 
 	if config.GetEnvironment() == "development" {
 		public.GET("/api/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
@@ -93,6 +92,16 @@ func (a *ApiServer) Start() error {
 
 	protected := a.router.Group("/")
 	protected.Use(middlewares.AuthMiddleware())
+
+	metricsController := public.Group("/metrics")
+	{
+		metricsController.GET("", gin.WrapH(promhttp.Handler()))
+	}
+
+	infoController := protected.Group("/info")
+	{
+		infoController.GET("", controllers.RunnerInfo)
+	}
 
 	sandboxController := protected.Group("/sandboxes")
 	{

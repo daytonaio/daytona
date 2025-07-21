@@ -88,6 +88,7 @@
     "astro-expressive-code": "^0.41.2",
     "axios": "^1.6.1",
     "axios-debug-log": "^1.0.0",
+    "axios-retry": "^4.5.0",
     "cache-manager": "^6.4.1",
     "cache-manager-memcached-store": "^6.0.1",
     "cacheable-lookup": "^7.0.0",

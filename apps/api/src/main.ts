@@ -107,6 +107,7 @@ async function bootstrap() {
     if (!runners.find((runner) => runner.domain === 'localtest.me:3003')) {
       await runnerService.create({
         apiUrl: 'http://localhost:3003',
+        proxyUrl: 'http://localhost:3003',
         apiKey: 'secret_api_token',
         cpu: 4,
         memoryGiB: 8,
@@ -117,6 +118,7 @@ async function bootstrap() {
         region: 'us',
         class: SandboxClass.SMALL,
         domain: 'localtest.me:3003',
+        version: '0',
       })
     }
   }
