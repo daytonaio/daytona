@@ -127,6 +127,12 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
           case '/api/snapshots':
             this.captureCreateSnapshot(props, request.body, response)
             break
+          case '/api/snapshots/:snapshotId/activate':
+            this.captureActivateSnapshot(props, request.params.snapshotId)
+            break
+          case '/api/snapshots/:snapshotId/deactivate':
+            this.captureDeactivateSnapshot(props, request.params.snapshotId)
+            break
           case '/api/docker-registry':
             this.captureCreateDockerRegistry(props, response)
             break
@@ -444,6 +450,18 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
       snapshot_disk: request.disk,
       snapshot_is_build: request.buildInfo ? true : false,
       snapshot_build_info_context_hashes_length: request.buildInfo?.contextHashes?.length,
+    })
+  }
+
+  private captureActivateSnapshot(props: CommonCaptureProps, snapshotId: string) {
+    this.capture('api_snapshot_activated', props, 'api_snapshot_activation_failed', {
+      snapshot_id: snapshotId,
+    })
+  }
+
+  private captureDeactivateSnapshot(props: CommonCaptureProps, snapshotId: string) {
+    this.capture('api_snapshot_deactivated', props, 'api_snapshot_deactivation_failed', {
+      snapshot_id: snapshotId,
     })
   }
 
