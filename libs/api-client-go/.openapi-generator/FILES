@@ -119,7 +119,6 @@ model_set_snapshot_general_status_dto.go
 model_snapshot_dto.go
 model_snapshot_state.go
 model_storage_access_dto.go
-model_toggle_state.go
 model_update_assigned_organization_roles.go
 model_update_docker_registry.go
 model_update_organization_invitation.go

@@ -88,6 +88,7 @@ export const CreateAuditLogActionEnum = {
   TOGGLE_STATE: 'toggle_state',
   SET_GENERAL_STATUS: 'set_general_status',
   ACTIVATE: 'activate',
+  DEACTIVATE: 'deactivate',
   TOOLBOX_DELETE_FILE: 'toolbox_delete_file',
   TOOLBOX_DOWNLOAD_FILE: 'toolbox_download_file',
   TOOLBOX_CREATE_FOLDER: 'toolbox_create_folder',

@@ -146,7 +146,6 @@ from daytona_api_client.models.set_snapshot_general_status_dto import SetSnapsho
 from daytona_api_client.models.snapshot_dto import SnapshotDto
 from daytona_api_client.models.snapshot_state import SnapshotState
 from daytona_api_client.models.storage_access_dto import StorageAccessDto
-from daytona_api_client.models.toggle_state import ToggleState
 from daytona_api_client.models.update_assigned_organization_roles import UpdateAssignedOrganizationRoles
 from daytona_api_client.models.update_docker_registry import UpdateDockerRegistry
 from daytona_api_client.models.update_organization_invitation import UpdateOrganizationInvitation
