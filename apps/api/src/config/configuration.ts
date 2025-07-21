@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { RunnerRegion } from '../sandbox/enums/runner-region.enum'
 import { SandboxClass } from '../sandbox/enums/sandbox-class.enum'
 
 const configuration = {
@@ -100,7 +99,7 @@ const configuration = {
     gpu: parseInt(process.env.DEFAULT_RUNNER_GPU || '0', 10),
     gpuType: process.env.DEFAULT_RUNNER_GPU_TYPE,
     capacity: parseInt(process.env.DEFAULT_RUNNER_CAPACITY || '100', 10),
-    region: process.env.DEFAULT_RUNNER_REGION ? (process.env.DEFAULT_RUNNER_REGION as RunnerRegion) : undefined,
+    region: process.env.DEFAULT_RUNNER_REGION,
     class: process.env.DEFAULT_RUNNER_CLASS ? (process.env.DEFAULT_RUNNER_CLASS as SandboxClass) : undefined,
   },
 }
