@@ -27,7 +27,6 @@ const SNAPSHOTS_FETCH_LIMIT = 200
  * @property {boolean} general - Whether the Snapshot is general.
  * @property {string} name - Name of the Snapshot.
  * @property {string} imageName - Name of the Image of the Snapshot.
- * @property {boolean} enabled - Whether the Snapshot is enabled.
  * @property {SnapshotState} state - Current state of the Snapshot.
  * @property {number} size - Size of the Snapshot.
  * @property {string[]} entrypoint - Entrypoint of the Snapshot.

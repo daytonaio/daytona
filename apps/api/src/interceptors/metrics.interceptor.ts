@@ -20,7 +20,6 @@ import { CreateSandboxDto } from '../sandbox/dto/create-sandbox.dto'
 import { Request } from 'express'
 import { CreateSnapshotDto } from '../sandbox/dto/create-snapshot.dto'
 import { SnapshotDto } from '../sandbox/dto/snapshot.dto'
-import { ToggleStateDto } from '../sandbox/dto/toggle-state.dto'
 import { CreateOrganizationDto } from '../organization/dto/create-organization.dto'
 import { UpdateOrganizationQuotaDto } from '../organization/dto/update-organization-quota.dto'
 import { OrganizationDto } from '../organization/dto/organization.dto'
@@ -253,9 +252,6 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
         break
       case 'PATCH':
         switch (request.route.path) {
-          case '/api/snapshots/:snapshotId/toggle':
-            this.captureToggleSnapshotState(props, request.params.snapshotId, request.body)
-            break
           case '/api/organizations/:organizationId/quota':
             this.captureUpdateOrganizationQuota(props, request.params.organizationId, request.body)
             break
@@ -454,13 +450,6 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
   private captureDeleteSnapshot(props: CommonCaptureProps, snapshotId: string) {
     this.capture('api_snapshot_deleted', props, 'api_snapshot_deletion_failed', {
       snapshot_id: snapshotId,
-    })
-  }
-
-  private captureToggleSnapshotState(props: CommonCaptureProps, snapshotId: string, request: ToggleStateDto) {
-    this.capture('api_snapshot_state_toggled', props, 'api_snapshot_state_toggle_failed', {
-      snapshot_id: snapshotId,
-      snapshot_enabled: request.enabled,
     })
   }
 
