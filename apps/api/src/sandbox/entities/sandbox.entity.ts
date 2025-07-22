@@ -100,7 +100,7 @@ export class Sandbox {
   @Column({ nullable: true })
   backupSnapshot: string
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'timestamp with time zone' })
   lastBackupAt: Date
 
   @Column({
@@ -137,13 +137,17 @@ export class Sandbox {
   })
   volumes: SandboxVolume[]
 
-  @CreateDateColumn()
+  @CreateDateColumn({
+    type: 'timestamp with time zone',
+  })
   createdAt: Date
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({
+    type: 'timestamp with time zone',
+  })
   updatedAt: Date
 
-  @Column({ nullable: true, type: 'timestamp' })
+  @Column({ nullable: true, type: 'timestamp with time zone' })
   lastActivityAt?: Date
 
   //  this is the interval in minutes after which the sandbox will be stopped if lastActivityAt is not updated

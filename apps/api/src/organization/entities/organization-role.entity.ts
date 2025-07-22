@@ -45,9 +45,13 @@ export class OrganizationRole {
   @ManyToMany(() => OrganizationInvitation, (invitation) => invitation.assignedRoles)
   invitations: OrganizationInvitation[]
 
-  @CreateDateColumn()
+  @CreateDateColumn({
+    type: 'timestamp with time zone',
+  })
   createdAt: Date
 
-  @CreateDateColumn()
+  @CreateDateColumn({
+    type: 'timestamp with time zone',
+  })
   updatedAt: Date
 }

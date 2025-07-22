@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm'
+import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm'
 import { OrganizationUser } from './organization-user.entity'
 import { OrganizationRole } from './organization-role.entity'
 import { OrganizationInvitation } from './organization-invitation.entity'
@@ -117,7 +117,7 @@ export class Organization {
 
   @Column({
     nullable: true,
-    type: 'timestamp',
+    type: 'timestamp with time zone',
   })
   suspendedAt?: Date
 
@@ -128,13 +128,17 @@ export class Organization {
 
   @Column({
     nullable: true,
-    type: 'timestamp',
+    type: 'timestamp with time zone',
   })
   suspendedUntil?: Date
 
-  @CreateDateColumn()
+  @CreateDateColumn({
+    type: 'timestamp with time zone',
+  })
   createdAt: Date
 
-  @CreateDateColumn()
+  @UpdateDateColumn({
+    type: 'timestamp with time zone',
+  })
   updatedAt: Date
 }

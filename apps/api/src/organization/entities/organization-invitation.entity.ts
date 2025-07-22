@@ -58,7 +58,9 @@ export class OrganizationInvitation {
   })
   assignedRoles: OrganizationRole[]
 
-  @Column()
+  @Column({
+    type: 'timestamp with time zone',
+  })
   expiresAt: Date
 
   @Column({
@@ -72,9 +74,13 @@ export class OrganizationInvitation {
   @JoinColumn({ name: 'organizationId' })
   organization: Organization
 
-  @CreateDateColumn()
+  @CreateDateColumn({
+    type: 'timestamp with time zone',
+  })
   createdAt: Date
 
-  @CreateDateColumn()
+  @CreateDateColumn({
+    type: 'timestamp with time zone',
+  })
   updatedAt: Date
 }
