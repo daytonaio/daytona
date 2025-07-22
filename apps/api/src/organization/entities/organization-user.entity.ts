@@ -43,9 +43,13 @@ export class OrganizationUser {
   })
   assignedRoles: OrganizationRole[]
 
-  @CreateDateColumn()
+  @CreateDateColumn({
+    type: 'timestamp with time zone',
+  })
   createdAt: Date
 
-  @CreateDateColumn()
+  @CreateDateColumn({
+    type: 'timestamp with time zone',
+  })
   updatedAt: Date
 }
