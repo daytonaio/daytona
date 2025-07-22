@@ -30,6 +30,7 @@ interface UseSandboxTableProps {
   handleDelete: (id: string) => void
   handleArchive: (id: string) => void
   handleVnc: (id: string) => void
+  getWebTerminalUrl: (id: string) => Promise<string | null>
 }
 
 export function useSandboxTable({
@@ -42,6 +43,7 @@ export function useSandboxTable({
   handleDelete,
   handleArchive,
   handleVnc,
+  getWebTerminalUrl,
 }: UseSandboxTableProps) {
   const [sorting, setSorting] = useState<SortingState>([
     {
@@ -69,6 +71,7 @@ export function useSandboxTable({
         handleDelete,
         handleArchive,
         handleVnc,
+        getWebTerminalUrl,
         loadingSandboxes,
         writePermitted,
         deletePermitted,
@@ -79,6 +82,7 @@ export function useSandboxTable({
       handleDelete,
       handleArchive,
       handleVnc,
+      getWebTerminalUrl,
       loadingSandboxes,
       writePermitted,
       deletePermitted,

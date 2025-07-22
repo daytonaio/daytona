@@ -24,4 +24,7 @@ export enum OrganizationResourcePermission {
   READ_VOLUMES = 'read:volumes',
   WRITE_VOLUMES = 'write:volumes',
   DELETE_VOLUMES = 'delete:volumes',
+
+  // audit
+  READ_AUDIT_LOGS = 'read:audit_logs',
 }

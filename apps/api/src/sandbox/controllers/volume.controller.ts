@@ -40,6 +40,9 @@ import { VolumeDto } from '../dto/volume.dto'
 import { InjectRedis } from '@nestjs-modules/ioredis'
 import Redis from 'ioredis'
 import { ForbiddenException } from '@nestjs/common'
+import { Audit, TypedRequest } from '../../audit/decorators/audit.decorator'
+import { AuditAction } from '../../audit/enums/audit-action.enum'
+import { AuditTarget } from '../../audit/enums/audit-target.enum'
 
 @ApiTags('volumes')
 @Controller('volumes')
@@ -93,6 +96,16 @@ export class VolumeController {
     type: VolumeDto,
   })
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_VOLUMES])
+  @Audit({
+    action: AuditAction.CREATE,
+    targetType: AuditTarget.VOLUME,
+    targetIdFromResult: (result: VolumeDto) => result?.id,
+    requestMetadata: {
+      body: (req: TypedRequest<CreateVolumeDto>) => ({
+        name: req.body?.name,
+      }),
+    },
+  })
   async createVolume(
     @AuthContext() authContext: OrganizationAuthContext,
     @Body() createVolumeDto: CreateVolumeDto,
@@ -153,6 +166,11 @@ export class VolumeController {
     description: 'Volume has been marked for deletion',
   })
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.DELETE_VOLUMES])
+  @Audit({
+    action: AuditAction.DELETE,
+    targetType: AuditTarget.VOLUME,
+    targetIdFromRequest: (req) => req.params.volumeId,
+  })
   async deleteVolume(@Param('volumeId') volumeId: string): Promise<void> {
     return this.volumeService.delete(volumeId)
   }

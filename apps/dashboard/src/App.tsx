@@ -43,6 +43,7 @@ import LinkedAccounts from '@/pages/LinkedAccounts'
 import { Button } from './components/ui/button'
 import Volumes from './pages/Volumes'
 import NotFound from './pages/NotFound'
+import AuditLogs from './pages/AuditLogs'
 
 // Simple redirection components for external URLs
 const DocsRedirect = () => {
@@ -193,6 +194,16 @@ function App() {
             }
           /> */
           }
+          <Route
+            path={getRouteSubPath(RoutePath.AUDIT_LOGS)}
+            element={
+              <RequiredPermissionsOrganizationPageWrapper
+                requiredPermissions={[OrganizationRolePermissionsEnum.READ_AUDIT_LOGS]}
+              >
+                <AuditLogs />
+              </RequiredPermissionsOrganizationPageWrapper>
+            }
+          />
           <Route path={getRouteSubPath(RoutePath.SETTINGS)} element={<OrganizationSettings />} />
           {import.meta.env.VITE_LINKED_ACCOUNTS_ENABLED === 'true' && (
             <Route path={getRouteSubPath(RoutePath.LINKED_ACCOUNTS)} element={<LinkedAccounts />} />

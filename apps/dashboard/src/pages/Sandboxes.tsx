@@ -347,20 +347,26 @@ const Sandboxes: React.FC = () => {
     }
   }
 
-  const getVncUrl = (sandboxId: string) => {
-    const sandbox = sandboxes.find((s) => s.id === sandboxId)
-    if (!sandbox) {
+  const getPortPreviewUrl = useCallback(
+    async (sandboxId: string, port: number): Promise<string> => {
+      setLoadingSandboxes((prev) => ({ ...prev, [sandboxId]: true }))
+      try {
+        return (await sandboxApi.getPortPreviewUrl(sandboxId, port, selectedOrganization?.id)).data.url
+      } finally {
+        setLoadingSandboxes((prev) => ({ ...prev, [sandboxId]: false }))
+      }
+    },
+    [sandboxApi, selectedOrganization],
+  )
+
+  const getVncUrl = async (sandboxId: string): Promise<string | null> => {
+    try {
+      const portPreviewUrl = await getPortPreviewUrl(sandboxId, 6080)
+      return portPreviewUrl + '/vnc.html'
+    } catch (error) {
+      handleApiError(error, 'Failed to construct VNC URL')
       return null
     }
-
-    if (!sandbox.daemonVersion) {
-      return `https://6080-${sandbox.id}.${sandbox.runnerDomain}/vnc.html`
-    }
-
-    return (
-      import.meta.env.VITE_PROXY_TEMPLATE_URL?.replace('{{PORT}}', '6080').replace('{{sandboxId}}', sandbox.id) +
-      '/vnc.html'
-    )
   }
 
   const handleVnc = async (id: string) => {
@@ -376,12 +382,10 @@ const Sandboxes: React.FC = () => {
 
       // Check if computer use is active (all processes running)
       if (status === 'active') {
-        const vncUrl = getVncUrl(id)
+        const vncUrl = await getVncUrl(id)
         if (vncUrl) {
           window.open(vncUrl, '_blank')
           toast.success('Opening VNC desktop...')
-        } else {
-          toast.error('Failed to construct VNC URL')
         }
       } else {
         // Computer use is not active, try to start it
@@ -397,7 +401,7 @@ const Sandboxes: React.FC = () => {
             const newStatus = newStatusResponse.data.status
 
             if (newStatus === 'active') {
-              const vncUrl = getVncUrl(id)
+              const vncUrl = await getVncUrl(id)
 
               if (vncUrl) {
                 window.open(vncUrl, '_blank')
@@ -448,6 +452,18 @@ const Sandboxes: React.FC = () => {
       setLoadingSandboxes((prev) => ({ ...prev, [id]: false }))
     }
   }
+
+  const getWebTerminalUrl = useCallback(
+    async (sandboxId: string): Promise<string | null> => {
+      try {
+        return await getPortPreviewUrl(sandboxId, 22222)
+      } catch (error) {
+        handleApiError(error, 'Failed to construct web terminal URL')
+        return null
+      }
+    },
+    [getPortPreviewUrl],
+  )
 
   // Redirect user to the onboarding page if they haven't created an api key yet
   // Perform only once per user
@@ -510,6 +526,7 @@ const Sandboxes: React.FC = () => {
         handleBulkDelete={handleBulkDelete}
         handleArchive={handleArchive}
         handleVnc={handleVnc}
+        getWebTerminalUrl={getWebTerminalUrl}
         data={sandboxes}
         loading={loadingTable}
         snapshots={snapshots}
@@ -564,6 +581,7 @@ const Sandboxes: React.FC = () => {
           setShowSandboxDetails(false)
         }}
         handleArchive={handleArchive}
+        getWebTerminalUrl={getWebTerminalUrl}
         writePermitted={authenticatedUserOrganizationMember?.role === OrganizationUserRoleEnum.OWNER}
         deletePermitted={authenticatedUserOrganizationMember?.role === OrganizationUserRoleEnum.OWNER}
       />
