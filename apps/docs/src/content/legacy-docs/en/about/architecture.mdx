@@ -1,0 +1,139 @@
+---
+title: Architecture
+description: Learn about the architecture of Daytona and its components.
+---
+
+import Label from '@components/Label.astro'
+import Image from '@components/Image.astro';
+// import DocumentList from "@components/DocumentList.astro";
+// import DocumentListItem from "@components/DocumentListItem.astro";
+import ArchitectureDiagramLight from '@assets/index/images/architecture-diagram-light.png';
+import ArchitectureDiagramDark from '@assets/index/images/architecture-diagram-dark.png';
+
+<Label>
+  Distribution: **Open Source**, **Cloud**, **Self-Managed**
+</Label>
+
+Daytona architecture diagram represents the Daytona platform, featuring components and services available in its [Open Source](#open-source) and [Enterprise](#enterprise) distributions. Daytona Open Source is designed to provide core functionality for development, while Daytona Enterprise builds on this foundation with enhanced features tailored for larger organizations, including authentication, authorization, dashboard, observability capabilities, and resource management.
+
+<br />
+
+<Image
+  iconLight={ArchitectureDiagramLight}
+  iconDark={ArchitectureDiagramDark}
+  height="100%"
+  width="100%"
+  imageAlt="Daytona Architecture Diagram"
+/>
+
+## Open Source
+
+Daytona Open Source includes the [Daytona API](/docs/en/tools/api), which serves as the central interface for programmatically interacting with Daytona. The Open Source version provides a comprehensive set of features and tools to manage development environments, including [Interfaces](#interfaces), [Git Providers](#git-providers), [Container Registries](#container-registries), [Providers](#providers), and [Targets](#targets).
+
+### Interfaces
+
+Daytona Open Source offers a variety of [Interfaces](/docs/en/usage/ide) to interact with the platform and manage development environments. Interfaces provide different ways to interact with Daytona, enabling developers to choose the most suitable method based on their preferences and workflows.
+
+These include the [Command Line Interface (CLI)](/docs/en/tools/cli) for direct control, [IDEs](/docs/en/usage/ide) such as [Visual Studio Code (VSCode)](/docs/en/usage/ide#vs-code), [Visual Studio Code (VSCode) Browser](/docs/en/usage/ide#vs-code-browser), [Visual Studio Code Insiders](/docs/en/usage/ide#vs-code-insiders), [Visual Studio Codium](/docs/en/usage/ide#vscodium), [Jupyter](/docs/en/usage/ide#jupyter), [Zed](/docs/en/usage/ide#zed), [Cursor](/docs/en/usage/ide#cursor), [Headless](/docs/en/usage/ide#headless), [Windsurf](/docs/en/usage/ide#windsurf), JetBrains IDEs for integrated development, and [Terminal SSH](/docs/en/usage/ide#terminal-ssh).
+
+Additionally, [Daytona SDK](/docs/en/sdk) is provided to enable developers to create custom integrations and extend platform functionality.
+
+<DocumentList>
+<DocumentListItem
+    title="Daytona SDK"
+    subtitle="Learn how to use the Daytona SDK to create custom integrations and extend platform functionality."
+    href="/docs/sdk"
+    expanded
+  />
+</DocumentList>
+
+### Git Providers
+
+Daytona Open Source integrates Git Providers to manage version control operations and interact with Git repositories. Git Providers enable efficient source code management and synchronization with Workspaces.
+
+Supported Git Providers include [GitHub](/docs/en/configuration/git-providers#github), [GitLab](/docs/en/configuration/git-providers#gitlab), [Bitbucket](/docs/en/configuration/git-providers#bitbucket), [GitHub Enterprise Server](/docs/en/configuration/git-providers#github-enterprise-server), [GitLab Self-Managed](/docs/en/configuration/git-providers#gitlab-self-managed), [Bitbucket Server](/docs/en/configuration/git-providers#bitbucket-server), [Codeberg](/docs/en/configuration/git-providers#codeberg), [Gitea](/docs/en/configuration/git-providers#gitea), [Gitness](/docs/en/configuration/git-providers#gitness), [Azure DevOps](/docs/en/configuration/git-providers#azure-devops), [AWS CodeCommit](/docs/en/configuration/git-providers#aws-codecommit), [Gogs](/docs/en/configuration/git-providers#gogs), and [Gitee](/docs/en/configuration/git-providers#gitee).
+
+The Git Providers integration facilitates collaborative development workflows and streamlines the connection between repositories and development environments.
+
+<DocumentList>
+<DocumentListItem
+    title="Add a Git Provider"
+    subtitle="Learn how to add a Git Provider to Daytona and start managing your repositories effectively."
+    href="/docs/configuration/git-providers#add-a-git-provider"
+    expanded
+  />
+</DocumentList>
+
+### Container Registries
+
+[Container registries](/docs/en/configuration/container-registries) store credentials used to pull container images from specified registry servers. Adding container registry credentials is useful for users who want to create Workspaces from private images and those hosted on private registries.
+
+<DocumentList>
+<DocumentListItem
+    title="Set a Container Registry"
+    subtitle="Learn how to set a container registry through environment variables for your Workspace."
+    href="/docs/configuration/container-registries"
+    expanded
+  />
+</DocumentList>
+
+### Providers
+
+Daytona Open Source uses [Providers](/docs/en/configuration/providers) to enable integration with various technologies to create and manage development environments. Providers abstract complexities of underlying technologies and serve as the foundational engines that Daytona leverages to deploy and run your environments.
+
+Supported Providers include [Docker](/docs/en/configuration/providers#docker), [DigitalOcean](/docs/en/configuration/providers#digitalocean), [AWS](/docs/en/configuration/providers#aws), [Azure](/docs/en/configuration/providers#azure), [GCP](/docs/en/configuration/providers#gcp), [Hetzner](/docs/en/configuration/providers#hetzner), and [Fly](/docs/en/configuration/providers#fly).
+
+<DocumentList>
+<DocumentListItem
+    title="Install a Provider"
+    subtitle="Learn how to install a Provider and interface with the Daytona Server."
+    href="/docs/configuration/providers"
+    expanded
+  />
+</DocumentList>
+
+### Targets
+
+[Targets](/docs/en/usage/targets) represent isolated processing units where Workspaces are executed. They can operate on various infrastructures, including cloud-based and on-premises environments. Targets provide the necessary compute resources and meet security requirements within the defined infrastructure.
+
+<DocumentList>
+<DocumentListItem
+    title="Manage a Target"
+    subtitle="Learn how to manage a Target to define where development environments are executed."
+    href="/docs/usage/targets"
+    expanded
+  />
+</DocumentList>
+
+## Enterprise
+
+The Enterprise edition of Daytona extends the capabilities of the Open Source version with additional features and services tailored for enterprise-grade development environments. These enhancements include advanced security, authentication, and authorization mechanisms, as well as observability and resource management tools to optimize workspace performance and utilization.
+
+### Dashboard
+
+The Enterprise version introduces a Dashboard, which provides a centralized interface for managing and monitoring the platform, improving visibility and control over development environments.
+
+### Authentication
+
+Authentication features support Single Sign-On (SSO) and standards such as Security Assertion Markup Language (SAML) and
+System for Cross-domain Identity Management (SCIM), ensuring secure access to the platform. This enables seamless integration with enterprise identity systems and simplifies user management.
+
+### Authorization
+
+Authorization capabilities allow for granular control of access and permissions across users, teams, organizations, and projects. This ensures secure collaboration and adherence to organizational policies by providing role-based access management.
+
+### Observability
+
+Observability tools offer enhanced monitoring, logging, and tracing capabilities for Workspaces and development activities. This ensures that teams can track system performance, debug issues effectively, and maintain operational insights into their environments.
+
+### Resource Management
+
+Resource Management is expanded with enterprise features, enhancing workspace classes and quota management to meet large-scale, organization-wide requirements.
+
+### Identity Providers
+
+The Enterprise version integrates with Identity Providers (IDP) to enhance authentication and identity management. Supported IDPs include EntraID, Cognito, Okta, OpenID, Google, and others. These integrations ensure that enterprises can use their existing identity systems to manage user authentication, enabling secure and compliant access to the platform.
+
+### Security
+
+Daytona Enterprise enhances security by integrating with advanced security tools and services. These include JFrog, Snyk, Sonatype, and more, ensuring that vulnerabilities in dependencies and containerized environments are identified and mitigated. These security integrations provide automated scanning, reporting, and remediation, reinforcing the integrity of development workflows and applications.

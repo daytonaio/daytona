@@ -1,0 +1,112 @@
+---
+title: API Keys
+description: Learn how to create and manage Daytona API keys.
+---
+
+import Label from '@components/Label.astro'
+
+<Label>
+  Distribution: **Open Source**
+</Label>
+
+Daytona API keys are used to authenticate requests to the [Daytona API](/docs/en/tools/api). Daytona provides an option to generate an API key for managing your API requests, list all generated API keys, and revoke an API key.
+
+## Generate an API Key
+
+Daytona provides an option to generate API keys.
+
+1. Run the following command to generate an API key:
+
+```bash
+daytona api-key generate
+```
+
+Upon running this command, Daytona will prompt you to enter a name for the API key.
+
+```text
+Name
+>
+```
+
+Upon successful generation of the API key, Daytona will display the following confirmation message:
+
+```text
+You have successfully generated a new API Key and Server URL, which you can find below:
+
+DAYTONA_API_KEY=your-api-key
+DAYTONA_SERVER_URL=your-server-url
+```
+
+Daytona provides an option to connect to the Daytona Server instantly from a client machine by running the following command:
+
+```bash
+daytona profile add -a <your-server-url> -k <your-api-key>
+```
+
+## List API Keys
+
+Daytona provides an option to list all generated API keys.
+
+1. Run the following command to list all generated API keys:
+
+```bash
+daytona api-key list
+```
+
+Upon running this command, Daytona will display the list of all generated API keys.
+
+```text
+Name                                Type
+──────────────────────────────────────────
+default                             client
+```
+
+:::tip
+Daytona provides an option to view the existing Daytona Server API URL.
+
+<br />
+
+```bash
+daytona server config
+```
+
+```text
+API URL:  https://<server-id>.try-eu.daytona.app
+```
+
+:::
+
+## Revoke an API Key
+
+Daytona provides an option to revoke API keys.
+
+1. Run the following command to revoke an API key:
+
+```bash
+daytona api-key revoke
+```
+
+Upon running this command, Daytona will prompt you to enter the name of the API key that you want to revoke.
+
+```text
+Select an API key to revoke
+1 item
+===
+MyAPIKey
+client
+```
+
+3. Press **`Enter`** on the selected API key to revoke it.
+
+4. Confirm the revocation by selecting **`Yes`** or **`No`**.
+
+```text
+Revoke API Key 'test'?
+Are you sure you want to revoke 'test'?
+
+[Yes]     [No]
+```
+
+```text
+API key revoked
+```

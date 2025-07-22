@@ -1,0 +1,285 @@
+---
+title: "LspServer"
+hideTitleOnPage: true
+---
+
+## LspServer
+
+```python
+class LspServer()
+```
+
+コードインテリジェンス機能のためのLanguage Server Protocol機能を提供し、コード補完、シンボル検索などのIDE風の機能を提供します。
+
+#### LspServer.\_\_init\_\_
+
+```python
+def __init__(language_id: LspLanguageId, path_to_project: str,
+             toolbox_api: ToolboxApi, sandbox_id: str)
+```
+
+新しいLSPサーバーインスタンスを初期化します。
+
+**引数**:
+
+- `language_id` _LspLanguageId_ - 言語サーバーのタイプ（例：LspLanguageId.TYPESCRIPT）。
+- `path_to_project` _str_ - プロジェクトルートディレクトリへの絶対パス。
+- `toolbox_api` _ToolboxApi_ - Sandbox操作用のAPIクライアント。
+- `instance` _SandboxInstance_ - このサーバーが属するSandboxインスタンス。
+
+#### LspServer.start
+
+```python
+@intercept_errors(message_prefix="Failed to start LSP server: ")
+def start() -> None
+```
+
+言語サーバーを開始します。
+
+このメソッドは、他のLSP機能を使用する前に呼び出す必要があります。
+指定された言語とプロジェクトに対して言語サーバーを初期化します。
+
+**例**:
+
+```python
+lsp = sandbox.create_lsp_server("typescript", "workspace/project")
+lsp.start()  # サーバーを初期化
+# LSP操作の準備完了
+```
+
+#### LspServer.stop
+
+```python
+@intercept_errors(message_prefix="Failed to stop LSP server: ")
+def stop() -> None
+```
+
+言語サーバーを停止します。
+
+このメソッドは、LSPサーバーが不要になったときにシステムリソースを
+解放するために呼び出す必要があります。
+
+**例**:
+
+```python
+# LSP機能の使用が終了したとき
+lsp.stop()  # リソースをクリーンアップ
+```
+
+#### LspServer.did\_open
+
+```python
+@intercept_errors(message_prefix="Failed to open file: ")
+def did_open(path: str) -> None
+```
+
+ファイルが開かれたことを言語サーバーに通知します。
+
+このメソッドは、エディターでファイルが開かれたときに呼び出して、
+そのファイルに対する診断や補完などの言語機能を有効にする必要があります。サーバーは
+ファイルの内容の追跡を開始し、言語機能を提供します。
+
+**引数**:
+
+- `path` _str_ - 開かれたファイルへのパス。相対パスはLSPサーバーコンストラクタで設定された
+  プロジェクトパスに基づいて解決されます。
+  
+
+**例**:
+
+```python
+# 編集用にファイルを開くとき
+lsp.did_open("workspace/project/src/index.ts")
+# このファイルに対して補完、シンボルなどを取得可能
+```
+
+#### LspServer.did\_close
+
+```python
+@intercept_errors(message_prefix="Failed to close file: ")
+def did_close(path: str) -> None
+```
+
+ファイルが閉じられたことを言語サーバーに通知します。
+
+このメソッドは、エディターでファイルが閉じられたときに呼び出して、
+言語サーバーがそのファイルに関連するリソースをクリーンアップできるようにする必要があります。
+
+**引数**:
+
+- `path` _str_ - 閉じられたファイルへのパス。相対パスはLSPサーバーコンストラクタで設定された
+  プロジェクトパスに基づいて解決されます。
+  
+
+**例**:
+
+```python
+# ファイルの編集が終了したとき
+lsp.did_close("workspace/project/src/index.ts")
+```
+
+#### LspServer.document\_symbols
+
+```python
+@intercept_errors(message_prefix="Failed to get symbols from document: ")
+def document_symbols(path: str) -> List[LspSymbol]
+```
+
+ドキュメントからシンボル情報（関数、クラス、変数など）を取得します。
+
+**引数**:
+
+- `path` _str_ - シンボルを取得するファイルへのパス。相対パスはLSPサーバーコンストラクタで設定された
+  プロジェクトパスに基づいて解決されます。
+  
+
+**戻り値**:
+
+- `List[LspSymbol]` - ドキュメント内のシンボルのリスト。各シンボルには以下が含まれます：
+  - name: シンボルの名前
+  - kind: シンボルの種類（関数、クラス、変数など）
+  - location: ファイル内のシンボルの位置
+  
+
+**例**:
+
+```python
+# ファイル内のすべてのシンボルを取得
+symbols = lsp.document_symbols("workspace/project/src/index.ts")
+for symbol in symbols:
+    print(f"{symbol.kind} {symbol.name}: {symbol.location}")
+```
+
+#### LspServer.workspace\_symbols
+
+```python
+@deprecated(
+    reason=
+    "Method is deprecated. Use `sandbox_symbols` instead. This method will be removed in a future version."
+)
+def workspace_symbols(query: str) -> List[LspSymbol]
+```
+
+Sandbox内のすべてのファイルでクエリ文字列に一致するシンボルを
+検索します。
+
+**引数**:
+
+- `query` _str_ - シンボル名と照合する検索クエリ。
+  
+
+**戻り値**:
+
+- `List[LspSymbol]` - すべてのファイルから一致するシンボルのリスト。
+
+#### LspServer.sandbox\_symbols
+
+```python
+@intercept_errors(message_prefix="Failed to get symbols from sandbox: ")
+def sandbox_symbols(query: str) -> List[LspSymbol]
+```
+
+Sandbox内のすべてのファイルでクエリ文字列に一致するシンボルを検索します。
+
+**引数**:
+
+- `query` _str_ - シンボル名と照合する検索クエリ。
+  
+
+**戻り値**:
+
+- `List[LspSymbol]` - すべてのファイルから一致するシンボルのリスト。各シンボルには以下が含まれます：
+  - name: シンボルの名前
+  - kind: シンボルの種類（関数、クラス、変数など）
+  - location: ファイル内のシンボルの位置
+  
+
+**例**:
+
+```python
+# "User"を含むすべてのシンボルを検索
+symbols = lsp.sandbox_symbols("User")
+for symbol in symbols:
+    print(f"{symbol.name} in {symbol.location}")
+```
+
+#### LspServer.completions
+
+```python
+@intercept_errors(message_prefix="Failed to get completions: ")
+def completions(path: str, position: Position) -> CompletionList
+```
+
+ファイル内の位置で補完候補を取得します。
+
+**引数**:
+
+- `path` _str_ - ファイルへのパス。相対パスはLSPサーバーコンストラクタで設定されたプロジェクトパスに基づいて解決されます。
+- `position` _Position_ - 補完を取得するカーソル位置。
+  
+
+**戻り値**:
+
+- `CompletionList` - 補完候補のリスト。リストには以下が含まれます：
+  - isIncomplete: より多くのアイテムが利用可能かどうか
+  - items: 補完アイテムのリスト。各アイテムには以下が含まれます：
+  - label: 挿入するテキスト
+  - kind: 補完の種類
+  - detail: アイテムに関する追加の詳細
+  - documentation: アイテムのドキュメント
+  - sortText: リスト内でアイテムをソートするために使用されるテキスト
+  - filterText: アイテムをフィルタリングするために使用されるテキスト
+  - insertText: 実際に挿入するテキスト（labelと異なる場合）
+  
+
+**例**:
+
+```python
+# 特定の位置で補完を取得
+pos = Position(line=10, character=15)
+completions = lsp.completions("workspace/project/src/index.ts", pos)
+for item in completions.items:
+    print(f"{item.label} ({item.kind}): {item.detail}")
+```
+
+
+## LspLanguageId
+
+```python
+class LspLanguageId(Enum)
+```
+
+Language Server Protocol (LSP) の言語ID。
+
+**Enum Members**:
+    - `PYTHON` ("python")
+    - `TYPESCRIPT` ("typescript")
+    - `JAVASCRIPT` ("javascript")
+
+## Position
+
+```python
+class Position()
+```
+
+テキストドキュメント内のゼロベースの位置を表し、
+行番号と文字オフセットで指定されます。
+
+**属性**:
+
+- `line` _int_ - ドキュメント内のゼロベース行番号。
+- `character` _int_ - 行内のゼロベース文字オフセット。
+
+#### Position.\_\_init\_\_
+
+```python
+def __init__(line: int, character: int)
+```
+
+新しいPositionインスタンスを初期化します。
+
+**引数**:
+
+- `line` _int_ - ドキュメント内のゼロベース行番号。
+- `character` _int_ - 行内のゼロベース文字オフセット。
+

@@ -1,0 +1,109 @@
+---
+title: Sandbox Management
+---
+
+import Label from '@components/Label.astro'
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+<Label>
+  Distribution: **Open Source**
+</Label>
+
+Sandboxes are isolated development environments managed by Daytona. This guide covers how to create, manage, and remove Sandboxes using the SDK.
+
+## Creating Sandboxes
+
+Daytona SDK provides an option to create Sandboxes with default or custom configurations. You can specify the language, image, resources, environment variables, and volumes for the Sandbox.
+
+### Basic Sandbox Creation
+
+Daytona SDK provides methods to create Sandboxes with default configurations, specific languages, or custom IDs using Python and TypeScript.
+
+<Tabs>
+<TabItem label="Python" icon="seti:python">
+```python
+from daytona_sdk import Daytona
+
+daytona = Daytona()
+
+# Create a basic Sandbox
+
+workspace = daytona.create()
+
+# Create a Sandbox with specific language
+
+params = CreateWorkspaceParams(language="python")
+workspace = daytona.create(params)
+
+# Create a Sandbox with custom ID
+
+params = CreateWorkspaceParams(id="my-workspace")
+workspace = daytona.create(params)
+
+```
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+```typescript
+import { Daytona } from '@daytonaio/sdk';
+
+const daytona = new Daytona();
+
+// Create a basic workspace
+const workspace = await daytona.create();
+
+// Create a workspace with specific language
+const workspace = await daytona.create({ language: 'typescript' });
+
+// Create a workspace with custom ID
+const workspace = await daytona.create({ id: 'my-workspace' });
+```
+
+</TabItem>
+</Tabs>
+
+## Sandbox Information
+
+Daytona SDK provides methods to get information about a Sandbox, such as ID, root directory, and status using Python and TypeScript.
+
+<Tabs>
+<TabItem label="Python" icon="seti:python">
+```python
+# Get Sandbox ID
+workspace_id = workspace.id
+
+# Get Sandbox root directory
+
+root_dir = workspace.get_workspace_root_dir()
+
+```
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+```typescript
+// Get workspace ID
+const workspaceId = workspace.id;
+
+// Get workspace root directory
+const rootDir = await workspace.getWorkspaceRootDir();
+```
+
+</TabItem>
+</Tabs>
+
+## Remove Sandbox
+
+Daytona SDK provides methods to perform operations on Sandboxes, such as removing Sandboxes using Python and TypeScript.
+
+<Tabs>
+<TabItem label="Python" icon="seti:python">
+```python
+# Remove Sandbox
+daytona.remove(workspace)
+```
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+```typescript
+// Remove workspace
+await daytona.remove(workspace);
+```
+</TabItem>
+</Tabs>

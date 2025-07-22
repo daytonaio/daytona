@@ -1,0 +1,105 @@
+---
+title: Docker Extension
+description: Learn how to use the Daytona Docker extension to create, open, list, and delete Workspaces.
+---
+
+import Label from '@components/Label.astro'
+
+<Label>
+  Distribution: **Open Source**, **Self-Managed**
+</Label>
+
+Daytona provides a Docker Extension for using an embedded version of the Daytona client and server tools directly within Docker Desktop.
+
+The Docker Extension provides options to create, open, list, and delete [Workspaces](/docs/en/usage/workspaces).
+
+View the Daytona Docker Extension in the [Docker Desktop Extensions Marketplace](https://open.docker.com/extensions/marketplace?extensionId=daytonaio/docker-extension&tag=0.44.0) or [GitHub repository](https://open.docker.com/extensions/marketplace?extensionId=daytonaio/docker-extension&tag=0.44.0).
+
+## Prerequisites
+
+- [Docker Desktop](https://www.docker.com/products/docker-desktop) installed on your machine.
+
+## Installation
+
+{/* Install the Daytona Docker Extension from the [Docker Desktop Extensions Marketplace](https://open.docker.com/extensions/marketplace?extensionId=daytonaio/docker-extension&tag=0.44.0).
+
+### Manual */}
+
+1. Run the following command to install the Daytona Docker Extension
+
+```sh
+docker extension install daytonaio/docker-extension
+```
+
+:::note
+Allow non-marketplace extensions in the Docker desktop settings to install the Daytona Docker extension.
+:::
+
+Wait while Daytona Docker Extension sets up your Workspace. It handles all the initialization and configuration of your environment.
+
+## Create a Workspace
+
+Create a new Workspace using the Daytona Docker Extension within the Docker Desktop.
+
+1. Click **`Create Workspace`** to start creating a new Workspace.
+2. Select the Workspace resource. You can choose from the following options:
+
+- Browse your Git repositories.
+- Select a predefined sample.
+- Find with URL.
+
+3. Select the **`IDE`** from the dropdown list.
+4. Select the **`Target`** from the dropdown list.
+5. Click **`Next`** to proceed.
+
+```text
+Opening the project <project> from workspace <workspace> in <IDE>
+
+Setting up IDE customizations...
+Waiting for code server to install...
+Installing extensions...
+Setting up IDE settings...
+...
+```
+
+Daytona Docker Extension will create a new Workspace with the selected settings. You can now [open the Workspace](#open-an-existing-workspace) and start working on your project.
+
+## Open an Existing Workspace
+
+Daytona Docker Extension provides an option to open an existing Workspace in your IDE. This enables you to quickly access and work on your projects in your preferred development environment. With Daytona Docker Extension, you can effortlessly switch between different Workspaces and maintain an efficient workflow.
+
+1. Click the IDE button of the Workspace you want to open.
+
+    This will automatically launch your Workspace in the selected IDE.
+
+## Manage a Workspace
+
+Daytona Docker Extension provides an option to access and manage your Workspace, providing a detailed overview of the Workspace configuration.
+
+Once a Workspace is created, you will be presented with the following options and information:
+
+- **Name**
+
+    The name of the Workspace, and the GitHub repository it is associated with.
+
+- **Status**
+
+    The current status of the Workspace, such as `Running` or `Stopped`.
+
+- **Target**
+
+    The target environment for the Workspace.
+
+- **IDE**
+
+    The IDE used to open the Workspace.
+
+- [**Delete**](#delete-a-workspace)
+
+    Click the bin icon to delete the Workspace from the Daytona Docker Extension.
+
+## Delete a Workspace
+
+Daytona Docker Extension provides an option to delete one or more Workspaces, helping you manage your development environments by removing those that are no longer needed.
+
+1. Click the bin icon to delete your Workspace.

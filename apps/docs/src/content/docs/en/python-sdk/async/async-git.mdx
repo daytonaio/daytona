@@ -1,0 +1,382 @@
+---
+title: "AsyncGit"
+hideTitleOnPage: true
+---
+
+## AsyncGit
+
+```python
+class AsyncGit()
+```
+
+Provides Git operations within a Sandbox.
+
+**Example**:
+
+```python
+# Clone a repository
+await sandbox.git.clone(
+    url="https://github.com/user/repo.git",
+    path="workspace/repo"
+)
+
+# Check repository status
+status = await sandbox.git.status("workspace/repo")
+print(f"Modified files: {status.modified}")
+
+# Stage and commit changes
+await sandbox.git.add("workspace/repo", ["file.txt"])
+await sandbox.git.commit(
+    path="workspace/repo",
+    message="Update file",
+    author="John Doe",
+    email="john@example.com"
+)
+```
+
+#### AsyncGit.\_\_init\_\_
+
+```python
+def __init__(sandbox_id: str, toolbox_api: ToolboxApi,
+             get_root_dir: Callable[[], Awaitable[str]])
+```
+
+Initializes a new Git handler instance.
+
+**Arguments**:
+
+- `sandbox_id` _str_ - The Sandbox ID.
+- `toolbox_api` _ToolboxApi_ - API client for Sandbox operations.
+- `get_root_dir` _Callable[[], str]_ - A function to get the default root directory of the Sandbox.
+
+#### AsyncGit.add
+
+```python
+@intercept_errors(message_prefix="Failed to add files: ")
+async def add(path: str, files: List[str]) -> None
+```
+
+Stages the specified files for the next commit, similar to
+running 'git add' on the command line.
+
+**Arguments**:
+
+- `path` _str_ - Path to the Git repository root. Relative paths are resolved based on the user's
+  root directory.
+- `files` _List[str]_ - List of file paths or directories to stage, relative to the repository root.
+  
+
+**Example**:
+
+```python
+# Stage a single file
+await sandbox.git.add("workspace/repo", ["file.txt"])
+
+# Stage multiple files
+await sandbox.git.add("workspace/repo", [
+    "src/main.py",
+    "tests/test_main.py",
+    "README.md"
+])
+```
+
+#### AsyncGit.branches
+
+```python
+@intercept_errors(message_prefix="Failed to list branches: ")
+async def branches(path: str) -> ListBranchResponse
+```
+
+Lists branches in the repository.
+
+**Arguments**:
+
+- `path` _str_ - Path to the Git repository root. Relative paths are resolved based on the user's
+  root directory.
+  
+
+**Returns**:
+
+- `ListBranchResponse` - List of branches in the repository.
+  
+
+**Example**:
+
+```python
+response = await sandbox.git.branches("workspace/repo")
+print(f"Branches: {response.branches}")
+```
+
+#### AsyncGit.clone
+
+```python
+@intercept_errors(message_prefix="Failed to clone repository: ")
+async def clone(url: str,
+                path: str,
+                branch: Optional[str] = None,
+                commit_id: Optional[str] = None,
+                username: Optional[str] = None,
+                password: Optional[str] = None) -> None
+```
+
+Clones a Git repository into the specified path. It supports
+cloning specific branches or commits, and can authenticate with the remote
+repository if credentials are provided.
+
+**Arguments**:
+
+- `url` _str_ - Repository URL to clone from.
+- `path` _str_ - Path where the repository should be cloned. Relative paths are resolved based on the user's
+  root directory.
+- `branch` _Optional[str]_ - Specific branch to clone. If not specified,
+  clones the default branch.
+- `commit_id` _Optional[str]_ - Specific commit to clone. If specified,
+  the repository will be left in a detached HEAD state at this commit.
+- `username` _Optional[str]_ - Git username for authentication.
+- `password` _Optional[str]_ - Git password or token for authentication.
+  
+
+**Example**:
+
+```python
+# Clone the default branch
+await sandbox.git.clone(
+    url="https://github.com/user/repo.git",
+    path="workspace/repo"
+)
+
+# Clone a specific branch with authentication
+await sandbox.git.clone(
+    url="https://github.com/user/private-repo.git",
+    path="workspace/private",
+    branch="develop",
+    username="user",
+    password="token"
+)
+
+# Clone a specific commit
+await sandbox.git.clone(
+    url="https://github.com/user/repo.git",
+    path="workspace/repo-old",
+    commit_id="abc123"
+)
+```
+
+#### AsyncGit.commit
+
+```python
+@intercept_errors(message_prefix="Failed to commit changes: ")
+async def commit(path: str, message: str, author: str,
+                 email: str) -> GitCommitResponse
+```
+
+Creates a new commit with the staged changes. Make sure to stage
+changes using the add() method before committing.
+
+**Arguments**:
+
+- `path` _str_ - Path to the Git repository root. Relative paths are resolved based on the user's
+  root directory.
+- `message` _str_ - Commit message describing the changes.
+- `author` _str_ - Name of the commit author.
+- `email` _str_ - Email address of the commit author.
+  
+
+**Example**:
+
+```python
+# Stage and commit changes
+await sandbox.git.add("workspace/repo", ["README.md"])
+await sandbox.git.commit(
+    path="workspace/repo",
+    message="Update documentation",
+    author="John Doe",
+    email="john@example.com"
+)
+```
+
+#### AsyncGit.push
+
+```python
+@intercept_errors(message_prefix="Failed to push changes: ")
+async def push(path: str,
+               username: Optional[str] = None,
+               password: Optional[str] = None) -> None
+```
+
+Pushes all local commits on the current branch to the remote
+repository. If the remote repository requires authentication, provide
+username and password/token.
+
+**Arguments**:
+
+- `path` _str_ - Path to the Git repository root. Relative paths are resolved based on the user's
+  root directory.
+- `username` _Optional[str]_ - Git username for authentication.
+- `password` _Optional[str]_ - Git password or token for authentication.
+  
+
+**Example**:
+
+```python
+# Push without authentication (for public repos or SSH)
+await sandbox.git.push("workspace/repo")
+
+# Push with authentication
+await sandbox.git.push(
+    path="workspace/repo",
+    username="user",
+    password="github_token"
+)
+```
+
+#### AsyncGit.pull
+
+```python
+@intercept_errors(message_prefix="Failed to pull changes: ")
+async def pull(path: str,
+               username: Optional[str] = None,
+               password: Optional[str] = None) -> None
+```
+
+Pulls changes from the remote repository. If the remote repository requires authentication,
+provide username and password/token.
+
+**Arguments**:
+
+- `path` _str_ - Path to the Git repository root. Relative paths are resolved based on the user's
+  root directory.
+- `username` _Optional[str]_ - Git username for authentication.
+- `password` _Optional[str]_ - Git password or token for authentication.
+  
+
+**Example**:
+
+```python
+# Pull without authentication
+await sandbox.git.pull("workspace/repo")
+
+# Pull with authentication
+await sandbox.git.pull(
+    path="workspace/repo",
+    username="user",
+    password="github_token"
+)
+```
+
+#### AsyncGit.status
+
+```python
+@intercept_errors(message_prefix="Failed to get status: ")
+async def status(path: str) -> GitStatus
+```
+
+Gets the current Git repository status.
+
+**Arguments**:
+
+- `path` _str_ - Path to the Git repository root. Relative paths are resolved based on the user's
+  root directory.
+  
+
+**Returns**:
+
+- `GitStatus` - Repository status information including:
+  - current_branch: Current branch name
+  - file_status: List of file statuses
+  - ahead: Number of local commits not pushed to remote
+  - behind: Number of remote commits not pulled locally
+  - branch_published: Whether the branch has been published to the remote repository
+  
+
+**Example**:
+
+```python
+status = await sandbox.git.status("workspace/repo")
+print(f"On branch: {status.current_branch}")
+print(f"Commits ahead: {status.ahead}")
+print(f"Commits behind: {status.behind}")
+```
+
+#### AsyncGit.checkout\_branch
+
+```python
+@intercept_errors(message_prefix="Failed to checkout branch: ")
+async def checkout_branch(path: str, branch: str) -> None
+```
+
+Checkout branch in the repository.
+
+**Arguments**:
+
+- `path` _str_ - Path to the Git repository root. Relative paths are resolved based on the user's
+  root directory.
+- `branch` _str_ - Name of the branch to checkout
+  
+
+**Example**:
+
+```python
+# Checkout a branch
+await sandbox.git.checkout_branch("workspace/repo", "feature-branch")
+```
+
+#### AsyncGit.create\_branch
+
+```python
+@intercept_errors(message_prefix="Failed to create branch: ")
+async def create_branch(path: str, name: str) -> None
+```
+
+Create branch in the repository.
+
+**Arguments**:
+
+- `path` _str_ - Path to the Git repository root. Relative paths are resolved based on the user's
+  root directory.
+- `name` _str_ - Name of the new branch to create
+  
+
+**Example**:
+
+```python
+# Create a new branch
+await sandbox.git.create_branch("workspace/repo", "new-feature")
+```
+
+#### AsyncGit.delete\_branch
+
+```python
+@intercept_errors(message_prefix="Failed to delete branch: ")
+async def delete_branch(path: str, name: str) -> None
+```
+
+Delete branch in the repository.
+
+**Arguments**:
+
+- `path` _str_ - Path to the Git repository root. Relative paths are resolved based on the user's
+  root directory.
+- `name` _str_ - Name of the branch to delete
+  
+
+**Example**:
+
+```python
+# Delete a branch
+await sandbox.git.delete_branch("workspace/repo", "old-feature")
+```
+
+
+## GitCommitResponse
+
+```python
+class GitCommitResponse()
+```
+
+Response from the git commit.
+
+**Attributes**:
+
+- `sha` _str_ - The SHA of the commit
+

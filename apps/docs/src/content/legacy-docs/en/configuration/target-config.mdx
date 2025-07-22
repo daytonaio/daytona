@@ -1,0 +1,747 @@
+---
+title: Target Configurations
+description: Learn how to configure Target Configurations in Daytona.
+---
+
+import Label from '@components/Label.astro'
+
+<Label>
+  Distribution: **Open Source**
+</Label>
+
+A Target Configuration refers to the specific destination or environment where your development setup, facilitated by various [Providers](/docs/en/configuration/providers), is deployed and managed. Providers define the method and technology used to create your environments, while Targets Configurations specify the precise location or platform where these environments will reside.
+
+A Target Configuration can be a local machine, a remote server, or a cloud instance, and it can vary based on the chosen Provider. Target Configurations offer the flexibility to deploy and manage environments across different platforms and accounts, all within the unified interface provided by Daytona.
+
+Once you add your Target Configuration, it becomes available for selection whenever you create a new development environment in Daytona. You can create multiple Target Configurations, list existing ones, or delete those you no longer need.
+
+## Create a Target Configuration
+
+Daytona provides an option to create a Target Configuration to use when managing Workspaces.
+
+1. Run the following command to create a Target Configuration:
+
+```shell
+daytona target-config create
+```
+
+2. Select the appropriate Provider for the environment you want to deploy to.
+
+```text
+Choose a provider
+7 items
+===
+Docker
+v0.0.0
+DigitalOcean
+v0.0.0
+AWS
+v0.0.0
+Azure
+v.0.0.0
+GCP
+v0.0.0
+Hetzner
+v0.0.0
+Fly
+v0.0.0
+```
+
+3. Enter a name for your Target Configuration.
+
+```text
+Target Config Name
+>
+```
+
+4. Enter the appropriate configuration options when prompted. The configuration options vary based on the selected Provider. The following example shows adding a [remote Docker Target Configuration](#docker-remote).
+
+```text
+Remote Hostname
+>
+
+Remote Password
+>
+
+Remote Port
+>
+
+Remote User
+Note: non-root user required
+>
+
+Sock Path
+> /var/run/docker.sock
+
+Workspace Data Dir       
+The directory on the remote host where the workspace data will be stored
+> /tmp/daytona-data
+
+Remote Private Key Path
+daytona_config
+known_hosts
+Custom path
+None
+```
+
+5. Click **`Enter`** to confirm adding the Target Configuration.
+
+```text
+Target Config <target_config> created successfully
+```
+
+## List Target Configurations
+
+Daytona provides an option to keep track of your Target Configurations by listing all previously created Target Configurations with their details.
+
+1. Run the following command to list currently set Target Configurations:
+
+```shell
+daytona target-config list
+```
+
+Upon running this command, Daytona will display a list of your Target Configurations with their details. You will be able to see the Target Configuration name, the Provider it is connected to, and its configured Runner.
+
+```text
+Target            Provider                Runner
+────────────────────────────────────────────────
+local             docker-provider         local
+```
+
+## Delete a Target Configuration
+
+Daytona provides an option to delete Target Configurations, helping you manage and remove those that are no longer needed. Once a Target Configuration is deleted, you will not be able to manage or deploy Workspaces on that Target Configuration.
+
+1. Run the following command to delete a Target Configuration:
+
+```shell
+daytona target-config delete
+```
+
+Upon running this command, Daytona will display a list of your Target Configurations with their details. You will be able to see the Configuration name, the unique identifier of the Workspace, and the repository it is connected to.
+
+2. Press **`Enter`** on the selected Configuration to delete it.
+
+```text
+Choose a Target Config To Delete
+1 item
+===
+MyTarget          
+docker-provider
+```
+
+3. Click **`Yes`** to confirm deleting the Target Configuration.
+
+```text
+Delete all workspaces within MyTarget?
+You might not be able to easily remove these workspaces later.
+
+[Yes]     [No]
+```
+
+```text
+Target Config MyTarget removed successfully
+```
+
+## Docker (Local)
+
+Daytona provides an option to create a local Docker Target Configuration to use for deploying and managing Workspaces. The local Docker Target Configuration enables you to deploy Workspaces on your local machine using Docker.
+
+:::note
+Before creating a local Docker Target Configuration, ensure that [Docker](https://docs.docker.com/engine/install/) is installed and running on your local machine.
+:::
+
+<br />
+
+1. Run the following command to create a Target Configuration:
+
+```shell
+daytona target-config create
+```
+
+2. Select **`Docker`** to use the local Docker Provider.
+
+```text
+Choose a provider
+1 item
+===
+Docker
+v0.0.0
+```
+
+3. Enter a name for your Target Configuration.
+
+:::note
+The Target Configuration needs to be named `local` to be recognized as the local Docker Target Configuration.
+:::
+
+<br />
+
+```text
+Target Config Name
+>
+```
+
+4. Enter the appropriate configuration options when prompted.
+
+```text
+Sock Path
+> /var/run/docker.sock
+```
+
+5. Click **`Enter`** to confirm setting the Target Configuration.
+
+```text
+Target config <target_config_name> created successfully
+```
+
+## Docker (Remote)
+
+Daytona provides an option to create a remote Docker Target Configuration to use for deploying and managing Workspaces. The remote Docker Target Configuration enables you to deploy Workspaces on a remote machine using Docker.
+
+:::note
+Before creating a remote Docker Target Configuration, ensure that [Docker](https://docs.docker.com/engine/install/) is installed and running on the remote server.
+:::
+
+<br />
+
+1. Run the following command to create a Target Configuration:
+
+```shell
+daytona target-config add
+```
+
+2. Select **`Docker`** to use the Docker Provider.
+
+```text
+Choose a Provider
+1 item
+===
+Docker
+v0.0.0
+```
+
+3. Enter a name for your Target Configuration.
+
+```text
+Target Config Name
+>
+```
+
+4. Enter the appropriate configuration options when prompted.
+
+```text
+Remote Hostname
+>
+
+Remote Password
+>
+
+Remote Port
+>
+
+Remote User
+Note: non-root user required
+>
+
+Sock Path
+> /var/run/docker.sock
+
+Target Data Dir
+The directory on the remote host where the target data will be stored
+> /tmp/daytona-data
+
+Remote Private Key Path
+Showing files in: /home/user/.ssh
+You can select a file, choose None or enter a Custom path
+> config
+> config.save
+> id_rsa
+> id_rsa.pub
+> id_rsa_gitlab
+> id_rsa_gitlab.pub
+> known_hosts
+> known_hosts.old
+> Custom path
+> None
+```
+
+5. Click **`Enter`** to confirm setting the Target Configuration.
+
+```text
+Target Config <target_config> created successfully
+```
+
+## DigitalOcean
+
+Daytona provides an option to create a DigitalOcean Target Configuration to use for deploying and managing Workspaces. The DigitalOcean Target Configuration enables you to deploy Workspaces a remote machine using DigitalOcean.
+
+1. Run the following command to create a Target Configuration:
+
+```shell
+daytona target-config create
+```
+
+2. Select **`DigitalOcean`** to use the DigitalOcean Provider.
+
+```text
+Choose a provider
+1 item
+===
+DigitalOcean
+v0.0.0
+```
+
+:::note
+If you have not previously installed a [Runner](/docs/en/usage/runners), Daytona will prompt you select a Runner to manage the Provider. Upon selecting, Daytona will install the Runner on the target system and connect it to the Daytona Server.
+:::
+
+<br />
+
+3. Enter a name for your Target Configuration.
+
+```text
+Target Config Name
+>
+```
+
+5. Enter the appropriate configuration options when prompted.
+
+```text
+Auth Token
+If empty, token will be fetched from the DIGITALOCEAN_ACCESS_TOKEN environment variable.
+>
+
+Disk Size
+>
+
+Image
+> 
+
+Region
+>
+
+Size
+>
+```
+
+5. Click **`Enter`** to confirm setting the Target Configuration.
+
+```text
+Target Config <target_config> created successfully
+```
+
+## AWS
+
+Daytona provides an option to create an AWS Target Configuration to use for deploying and managing Workspaces.
+
+1. Run the following command to create a Target Configuration:
+
+```shell
+daytona target-config create
+```
+
+2. Select **`AWS`** to use the AWS Provider.
+
+```text
+Choose a provider
+1 item
+===
+AWS
+v0.0.0
+```
+
+:::note
+If you have not previously installed a [Runner](/docs/en/usage/runners), Daytona will prompt you select a Runner to manage the Provider. Upon selecting, Daytona will install the Runner on the target system and connect it to the Daytona Server.
+:::
+
+<br />
+
+3. Enter a name for your Target Configuration.
+
+```text
+Target Config Name
+>
+```
+
+4. Enter the appropriate configuration options when prompted.
+
+```text
+Access Key Id
+Find this in the AWS Console under "My Security Credentials"
+https://aws.amazon.com/premiumsupport/knowledge-center/manage-access-keys/
+Leave blank if you've set the AWS_ACCESS_KEY_ID environment variable, or enter
+your Id here.
+>
+
+Device Name
+The device name for the volume. This is typically the root device name for specified AMI.
+List of device names:
+https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/device_naming.html
+> /dev/sda1
+
+Image Id
+The ID of the Amazon Machine Image (AMI) to launch an instance. Default is ami-04a81a99f5ec58529.
+How to find AMI that meets your needs:
+https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/finding-an-ami.html
+> ami-04a81a99f5ec58529
+
+Instance Type
+The type of instance to launch. Default is t2.micro.
+List of available instance types:
+https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instance-types.html#AvailableInstanceTypes
+> t2.micro
+
+Region
+The geographic area where AWS resourced are hosted. List of available regions:
+https://docs.aws.amazon.com/general/latest/gr/rande.html
+Leave blank if you've set the AWS_DEFAULT_REGION environment variable, or enter your region here.
+> us-east-1
+
+Secret Access Key
+Find this in the AWS Console under "My Security Credentials"
+https://aws.amazon.com/premiumsupport/knowledge-center/manage-access-keys/
+Leave blank if you've set the AWS_SECRET_ACCESS_KEY environment variable, or enter your key here.
+>
+
+Volume Size
+The size of the instance volume, in GB. Default is 20 GB.It is recommended that the disk size should be more than 20 GB.
+List of volume size limits:
+https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/volume_limits.html
+> 20
+
+Volume Type
+The type of volume. Default is gp3.
+List of available volume types: 
+https://docs.aws.amazon.com/ebs/latest/userguide/ebs-volume-types.html
+>
+```
+
+5. Click **`Enter`** to confirm creating the Target Configuration.
+
+```text
+Target Config <target_config> created successfully
+```
+
+## Azure
+
+Daytona provides an option to set an Azure Target Configuration to use for deploying and managing Workspaces.
+
+1. Run the following command to set a Target Configuration:
+
+```shell
+daytona target-config set
+```
+
+2. Select **`Azure`** to use the Azure Provider.
+
+```text
+Choose a provider
+1 item
+===
+Azure
+v0.0.0
+```
+
+:::note
+If you have not previously installed a [Runner](/docs/en/usage/runners), Daytona will prompt you select a Runner to manage the Provider. Upon selecting, Daytona will install the Runner on the target system and connect it to the Daytona Server.
+:::
+
+<br />
+
+3. Enter a name for your Target Configuration.
+
+```text
+Target Config Name
+>
+```
+
+4. Enter the appropriate configuration options when prompted.
+
+```text
+Client ID
+Leave blank if you've set the AZURE_CLIENT_ID environment variable, or enter your Client Id here.
+To find the this, look for "appId" in the output after generating client credentials.
+https://learn.microsoft.com/en-us/cli/azure/azure-cli-sp-tutorial-1?tabs=bash
+>
+
+Client Secret
+Leave blank if you've set the AZURE_CLIENT_SECRET environment variable, or enter your Client     
+Secret here.
+To find the this, look for "password" in the output after generating client credentials
+https://learn.microsoft.com/en-us/cli/azure/azure-cli-sp-tutorial-1?tabs=bash
+>
+
+Disk Size
+The size of the instance volume, in GB. Default is 30 GB. It is recommended that the disk size should be more than 30 GB.
+>
+
+Disk Type
+The type of the azure managed disk. Default is StandardSSD_LRS. List of available disk types:                                                                    
+https://docs.microsoft.com/azure/virtual-machines/linux/disks-typesList of available disk types per location can be retrieved using the command:
+az vm list-skus --location <your-region> --output table
+>
+
+Image URN
+The identifier of the Azure virtual machine image to launch an instance. Default is Canonical:ubuntu-24_04-lts:server:latest.
+List of available images:
+https://learn.microsoft.com/en-us/azure/virtual-machines/linux/cli-ps-findimage
+>
+
+Region
+The geographic area where Azure resources are hosted. Default is centralus.
+List of available regions can be retrieved using the command:
+"az account list-locations -o table"
+>
+
+Resource Group
+If not set, Daytona will create a "daytona" resource group. How to create resource group:
+https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/manage-resource-groups-portal
+>
+
+Subscription ID
+Leave blank if you've set the AZURE_SUBSCRIPTION_ID environment variable, or enter your Subscription Id here.
+How to find subscription id:                                                                     
+https://learn.microsoft.com/en-us/azure/azure-portal/get-subscription-tenant-id#find-your-azure-subscription
+>
+
+Tenant ID
+Leave blank if you've set the AZURE_TENANT_ID environment variable, or enter your Tenant Id here.
+To find the this, look for "tenant" in the output after generating client credentials.           
+https://learn.microsoft.com/en-us/cli/azure/azure-cli-sp-tutorial-1?tabs=bash
+>
+
+VM Size
+Leave blank if you've set the AZURE_TENANT_ID environment variable, or enter your Tenant Id here.
+To find the this, look for "tenant" in the output after generating client credentials.           
+https://learn.microsoft.com/en-us/cli/azure/azure-cli-sp-tutorial-1?tabs=bash
+>
+```
+
+5. Click **`Enter`** to confirm setting the Target Configuration.
+
+```text
+Target Config <target_config> created successfully
+```
+
+## GCP
+
+Daytona provides an option to create a Google Cloud Platform (GCP) Target Configuration to use for deploying and managing Workspaces.
+
+1. Run the following command to set a Target Configuration:
+
+```shell
+daytona target-config create
+```
+
+2. Select **`GCP`** to use the GCP Provider.
+
+```text
+Choose a provider
+1 item
+===
+GCP
+v0.0.0
+```
+
+:::note
+If you have not previously installed a [Runner](/docs/en/usage/runners), Daytona will prompt you select a Runner to manage the Provider. Upon selecting, Daytona will install the Runner on the target system and connect it to the Daytona Server.
+:::
+
+<br />
+
+3. Enter a name for your Target Configuration.
+
+```text
+Target Config Name
+>
+```
+
+4. Enter the appropriate configuration options when prompted.
+
+```text
+Disk Size
+The size of the instance volume, in GB. Default is 20 GB.
+>
+
+Disk Type
+The GCP disk type to use for the VM. Default is pd-standard.
+https://cloud.google.com/compute/docs/disks
+List of available disk types can be retrieved using the command:
+gcloud compute disk-types list
+>
+
+Machine Type
+The GCP machine type to use for the VM. Default is List n1-standard-1.
+https://cloud.google.com/compute/docs/general-purpose-machines
+List of available machine types can be retrieved using the command:
+gcloud compute machine-types list
+>
+
+Project ID
+The GCP project ID where the resources will be created.
+Leave blank if you've set the GCP_PROJECT_ID.
+How to locate the project ID:
+https://support.google.com/googleapi/answer/7014113?hl=en
+>
+
+VM Image
+The GCP image to use for the VM.
+Default is projects/ubuntu-os-cloud/global/images/family/ubuntu-2204-lts
+https://cloud.google.com/compute/docs/images
+List of available images can be retrieved using the command:
+gcloud compute images list
+>
+
+Zone
+The GCP zone where the resources will be created. Default is us-central1-a.
+https://cloud.google.com/compute/docs/regions-zones
+List of available zones can be retrieved using the command:
+gcloud compute zones list
+>
+
+Credential File
+Full path to the GCP service account JSON key file.
+Leave blank if you've set the GCP_CREDENTIAL_FILE environment variable.
+Ensure that the file is secure and accessible only to authorized users.
+>
+```
+
+5. Click **`Enter`** to confirm setting the Target Configuration.
+
+```text
+Target Config <target_config> created successfully
+```
+
+## Hetzner
+
+Daytona provides an option to create a Hetzner Target Configuration to use for deploying and managing Workspaces.
+
+1. Run the following command to set a Target Configuration:
+
+```shell
+daytona target-config create
+```
+
+2. Select **`Hetzner`** to use the Hetzner Provider.
+
+```text
+Choose a provider
+1 item
+===
+Hetzner
+v0.0.0
+```
+
+:::note
+If you have not previously installed a [Runner](/docs/en/usage/runners), Daytona will prompt you select a Runner to manage the Provider. Upon selecting, Daytona will install the Runner on the target system and connect it to the Daytona Server.
+:::
+
+<br />
+
+3. Enter a name for your Target Configuration.
+
+```text
+Name
+>
+```
+
+4. Enter the appropriate configuration options when prompted.
+
+```text
+API Token
+If empty, token will be fetched from the HETZNER_API_TOKEN environment        
+variable.
+>
+
+Disk Image
+The Hetzner image to use for the VM. Default is ubuntu-24.04.
+https://docs.hetzner.com/robot/dedicated-server/operating-systems/standard-   
+images
+>
+
+Disk Size
+The size of the instance volume, in GB. Default is 20 GB.
+>
+
+Location
+The locations where the resources will be created. Default is fsn1.
+https://docs.hetzner.com/cloud/general/locations
+>
+
+Location
+Server Type
+The Hetzner server type to use for the VM. Default is List cpx11.
+https://docs.hetzner.com/cloud/servers/overview
+>
+```
+
+5. Click **`Enter`** to confirm setting the Target Configuration.
+
+```text
+Target Config <target_config> created successfully
+```
+
+## Fly
+
+Daytona provides an option to create a Fly Target Configuration to use for deploying and managing Workspaces.
+
+1. Run the following command to set a Target Configuration:
+
+```shell
+daytona target-config create
+```
+
+2. Select **`Fly`** to use the Fly Provider.
+
+```text
+Choose a provider
+1 item
+===
+Fly
+v0.0.0
+```
+
+:::note
+If you have not previously installed a [Runner](/docs/en/usage/runners), Daytona will prompt you select a Runner to manage the Provider. Upon selecting, Daytona will install the Runner on the target system and connect it to the Daytona Server.
+:::
+
+<br />
+
+3. Enter a name for your Target Configuration.
+
+```text
+Target Config Name
+>
+```
+
+4. Enter the appropriate configuration options when prompted.
+
+```text
+Auth Token
+If empty, token will be fetched from the FLY_ACCESS_TOKEN environment variable. 
+>
+
+Disk Size
+The size of the disk in GB.
+> 
+
+Org Slug
+The organization name to create the fly machine in.
+>
+
+Region
+The region where the fly machine resides. If not specified, near region will be used.
+>
+
+Size
+The size of the fly machine. Default is shared-cpu-4x. 
+List of available sizes https://fly.io/docs/about/pricing/#started-fly-machines
+>
+```
+
+5. Click **`Enter`** to confirm setting the Target Configuration.
+
+```text
+Target Config <target_config> created successfully
+```

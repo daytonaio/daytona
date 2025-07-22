@@ -1,0 +1,226 @@
+---
+title: Git操作
+---
+
+import { TabItem, Tabs } from '@astrojs/starlight/components'
+
+Daytona SDKは、Sandbox内の`git`モジュールを通じて組み込みのGitサポートを提供します。このガイドでは、利用可能なすべてのGit操作とベストプラクティスについて説明します。
+
+## 基本操作
+
+Daytona SDKは、Sandbox内でGitリポジトリのクローン、ステータス確認、管理を行うオプションを提供します。`git`モジュールを使用してGitリポジトリと対話できます。
+
+ファイル操作と同様に、開始クローンディレクトリは現在のSandboxユーザーのルートです - 例：`workspace/repo`は`/home/[username]/workspace/repo`を意味しますが、絶対workdirパスを提供することも可能です（パスを`/`で開始することで）。
+
+### リポジトリのクローン
+
+Daytona SDKは、PythonとTypeScriptを使用してGitリポジトリをSandboxにクローンするオプションを提供します。パブリックまたはプライベートリポジトリ、特定のブランチをクローンし、個人アクセストークンを使用して認証できます。
+
+<Tabs>
+<TabItem label="Python" icon="seti:python">
+```python
+# 基本的なクローン
+sandbox.git.clone(
+    url="https://github.com/user/repo.git",
+    path="workspace/repo"
+)
+
+# 認証付きクローン
+
+sandbox.git.clone(
+    url="https://github.com/user/repo.git",
+    path="workspace/repo",
+    username="git",
+    password="personal_access_token"
+)
+
+# 特定のブランチをクローン
+
+sandbox.git.clone(
+    url="https://github.com/user/repo.git",
+    path="workspace/repo",
+    branch="develop"
+)
+
+```
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+```typescript
+// 基本的なクローン
+await sandbox.git.clone(
+    "https://github.com/user/repo.git",
+    "workspace/repo"
+);
+
+// 認証付きクローン
+await sandbox.git.clone(
+    "https://github.com/user/repo.git",
+    "workspace/repo",
+    undefined,
+    undefined,
+    "git",
+    "personal_access_token"
+);
+
+// 特定のブランチをクローン
+await sandbox.git.clone(
+    "https://github.com/user/repo.git",
+    "workspace/repo",
+    "develop"
+);
+```
+
+</TabItem>
+</Tabs>
+
+### リポジトリステータス
+
+Daytona SDKは、Sandbox内のGitリポジトリのステータスを確認するオプションを提供します。PythonとTypeScriptを使用して、現在のブランチ、変更されたファイル、メインブランチより先行・後行しているコミット数を取得できます。
+
+<Tabs>
+<TabItem label="Python" icon="seti:python">
+```python
+# リポジトリステータスを取得
+status = sandbox.git.status("workspace/repo")
+print(f"Current branch: {status.current_branch}")
+print(f"Commits ahead: {status.ahead}")
+print(f"Commits behind: {status.behind}")
+for file in status.file_status:
+    print(f"File: {file.name}")
+
+# ブランチ一覧
+
+response = sandbox.git.branches("workspace/repo")
+for branch in response.branches:
+    print(f"Branch: {branch}")
+
+```
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+```typescript
+// リポジトリステータスを取得
+const status = await sandbox.git.status("workspace/repo");
+console.log(`Current branch: ${status.currentBranch}`);
+console.log(`Commits ahead: ${status.ahead}`);
+console.log(`Commits behind: ${status.behind}`);
+status.fileStatus.forEach(file => {
+    console.log(`File: ${file.name}`);
+});
+
+// ブランチ一覧
+const response = await sandbox.git.branches("workspace/repo");
+response.branches.forEach(branch => {
+    console.log(`Branch: ${branch}`);
+});
+```
+
+</TabItem>
+</Tabs>
+
+## ブランチ操作
+
+Daytona SDKは、Gitリポジトリでブランチを管理するオプションを提供します。ブランチの作成、切り替え、削除が可能です。
+
+### ブランチの管理
+
+Daytona SDKは、PythonとTypeScriptを使用してGitリポジトリでブランチを作成、切り替え、削除するオプションを提供します。
+
+<Tabs>
+<TabItem label="Python" icon="seti:python">
+```python
+# 新しいブランチを作成
+sandbox.git.create_branch("workspace/repo", "feature/new-feature")
+
+# ブランチを切り替え
+
+sandbox.git.checkout_branch("workspace/repo", "feature/new-feature")
+
+# ブランチを削除
+
+sandbox.git.delete_branch("workspace/repo", "feature/old-feature")
+
+```
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+```typescript
+// 新しいブランチを作成
+await sandbox.git.createBranch("workspace/repo", "feature/new-feature");
+
+// ブランチを切り替え
+await sandbox.git.checkoutBranch("workspace/repo", "feature/new-feature");
+
+// ブランチを削除
+await sandbox.git.deleteBranch("workspace/repo", "feature/old-feature");
+```
+
+</TabItem>
+</Tabs>
+
+## ステージングとコミット
+
+Daytona SDKは、Gitリポジトリの変更をステージングおよびコミットするオプションを提供します。PythonとTypeScriptを使用して、特定のファイル、すべての変更をステージングし、メッセージ付きでコミットできます。
+
+### 変更の操作
+
+<Tabs>
+<TabItem label="Python" icon="seti:python">
+```python
+# 特定のファイルをステージング
+sandbox.git.add("workspace/repo", ["file1.txt", "file2.txt"])
+
+# すべての変更をステージング
+
+sandbox.git.add("workspace/repo", ["."])
+
+# 変更をコミット
+
+sandbox.git.commit("workspace/repo", "feat: add new feature", "John Doe", "john@example.com")
+
+```
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+```typescript
+// 特定のファイルをステージング
+await sandbox.git.add("workspace/repo", ["file1.txt", "file2.txt"]);
+
+// すべての変更をステージング
+await sandbox.git.add("workspace/repo", ["."]);
+
+// 変更をコミット
+await sandbox.git.commit("workspace/repo", "feat: add new feature", "John Doe", "john@example.com");
+```
+
+</TabItem>
+</Tabs>
+
+## リモート操作
+
+Daytona SDKは、Gitでリモートリポジトリとやりとりするオプションを提供します。変更をプッシュしたり、変更をプルしたり、リモートを一覧表示したりできます。
+
+### リモートとの作業
+
+Daytona SDKは、PythonとTypeScriptを使用してGitリポジトリでプッシュ、プル、リモートの一覧表示を行うオプションを提供します。
+
+<Tabs>
+<TabItem label="Python" icon="seti:python">
+```python
+# 変更をプッシュ
+sandbox.git.push("workspace/repo")
+
+# 変更をプル
+
+sandbox.git.pull("workspace/repo")
+
+```
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+```typescript
+// 変更をプッシュ
+await sandbox.git.push("workspace/repo");
+
+// 変更をプル
+await sandbox.git.pull("workspace/repo");
+```
+
+</TabItem>
+</Tabs>

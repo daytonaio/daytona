@@ -1,0 +1,202 @@
+---
+title: Agent Toolbox
+description: Learn how to interact with the Workspace programmatically using the Workspace Toolbox API.
+---
+
+The Agent Toolbox enables you to interact with the [Workspace](/docs/en/usage/workspaces) programmatically by providing a [Workspace Toolbox API](/docs/en/tools/api#get-workspaceworkspaceidprojectidtoolboxfiles) to perform various operations within the Workspace environment.
+
+The Workspace Toolbox API provides file system, Git, and process operations, allowing you to manage files, execute Git commands, and run processes within the Workspace.
+
+## File System Operations
+
+Daytona provides an option to interact with the Workspace file system programmatically using the Workspace Toolbox API. The API provides the following file system operations:
+
+### List Files
+
+Daytona provides an option to list files in the Workspace using the `GET` HTTP method on the `/workspace/{workspaceId}/{projectId}/toolbox/files` endpoint.
+
+The API returns a list of files and directories present in the Workspace.
+
+### Delete Files
+
+Daytona provides an option to delete files in the Workspace using the `DELETE` HTTP method on the `/workspace/{workspaceId}/{projectId}/toolbox/files` endpoint.
+
+The API deletes the specified file or directory from the Workspace.
+
+### Create Folder
+
+Daytona provides an option to create a new folder in the Workspace using the `POST` HTTP method on the `/workspace/{workspaceId}/{projectId}/toolbox/createfolder` endpoint.
+
+The API creates a new folder with the specified name in the Workspace.
+
+### Download Files
+
+Daytona provides an option to download files from the Workspace using the `GET` HTTP method on the `/workspace/{workspaceId}/{projectId}/toolbox/download` endpoint.
+
+The API downloads the specified file from the Workspace.
+
+### Find Files
+
+Daytona provides an option to find files in the Workspace using the `GET` HTTP method on the `/workspace/{workspaceId}/{projectId}/toolbox/find` endpoint.
+
+The API searches for files with the specified name in the Workspace.
+
+### Files Information
+
+Daytona provides an option to get information about files in the Workspace using the `GET` HTTP method on the `/workspace/{workspaceId}/{projectId}/toolbox/info` endpoint.
+
+The API returns information about the specified file in the Workspace.
+
+### Move Files
+
+Daytona provides an option to move files in the Workspace using the `POST` HTTP method on the `/workspace/{workspaceId}/{projectId}/toolbox/move` endpoint.
+
+The API moves the specified file to the specified destination in the Workspace.
+
+### File Permissions
+
+Daytona provides an option to set file permissions in the Workspace using the `POST` HTTP method on the `/workspace/{workspaceId}/{projectId}/toolbox/permissions` endpoint.
+
+The API sets the specified permissions for the specified file in the Workspace.
+
+### Replace Files
+
+Daytona provides an option to replace files in the Workspace using the `POST` HTTP method on the `/workspace/{workspaceId}/{projectId}/toolbox/replace` endpoint.
+
+The API replaces the specified file with the specified content in the Workspace.
+
+### Search Files
+
+Daytona provides an option to search for files in the Workspace using the `GET` HTTP method on the `/workspace/{workspaceId}/{projectId}/toolbox/search` endpoint.
+
+The API searches for files with the specified content in the Workspace.
+
+### Upload Files
+
+Daytona provides an option to upload files to the Workspace using the `POST` HTTP method on the `/workspace/{workspaceId}/{projectId}/toolbox/upload` endpoint.
+
+The API uploads the specified file to the Workspace.
+
+## Git Operations
+
+Daytona provides an option to interact with the Workspace Git repository programmatically using the Workspace Toolbox API. The API provides the following Git operations:
+
+### Add Files
+
+Daytona provides an option to add files to the Workspace Git repository using the `POST` HTTP method on the `/workspace/{workspaceId}/{projectId}/toolbox/git/add` endpoint.
+
+The API adds the specified files to the Git repository.
+
+### List Branches
+
+Daytona provides an option to list branches in the Workspace Git repository using the `GET` HTTP method on the `/workspace/{workspaceId}/{projectId}/toolbox/git/branches` endpoint.
+
+The API returns a list of branches present in the Git repository.
+
+### Create Branch
+
+Daytona provides an option to create a new branch in the Workspace Git repository using the `POST` HTTP method on the `/workspace/{workspaceId}/{projectId}/toolbox/git/createbranch` endpoint.
+
+The API creates a new branch with the specified name in the Git repository.
+
+### Clone Repository
+
+Daytona provides an option to clone a Git repository into the Workspace using the `POST` HTTP method on the `/workspace/{workspaceId}/{projectId}/toolbox/git/clone` endpoint.
+
+The API clones the specified Git repository into the Workspace.
+
+### Commit Changes
+
+Daytona provides an option to commit changes to the Workspace Git repository using the `POST` HTTP method on the `/workspace/{workspaceId}/{projectId}/toolbox/git/commit` endpoint.
+
+The API commits the changes to the Git repository with the specified message.
+
+### Commit History
+
+Daytona provides an option to get the commit history of the Workspace Git repository using the `GET` HTTP method on the `/workspace/{workspaceId}/{projectId}/toolbox/git/history` endpoint.
+
+The API returns the commit history of the Git repository.
+
+### Pull Changes
+
+Daytona provides an option to pull changes from the remote Git repository into the Workspace using the `POST` HTTP method on the `/workspace/{workspaceId}/{projectId}/toolbox/git/pull` endpoint.
+
+The API pulls the changes from the remote repository into the Workspace.
+
+### Push Changes
+
+Daytona provides an option to push changes from the Workspace Git repository to the remote repository using the `POST` HTTP method on the `/workspace/{workspaceId}/{projectId}/toolbox/git/push` endpoint.
+
+The API pushes the changes from the Workspace to the remote repository.
+
+### Git Status
+
+Daytona provides an option to get the status of the Workspace Git repository using the `GET` HTTP method on the `/workspace/{workspaceId}/{projectId}/toolbox/git/status` endpoint.
+
+The API returns the status of the Git repository.
+
+## Language Server Protocol (LSP)
+
+Daytona provides an option to interact with the Language Server Protocol (LSP) programmatically using the Workspace Toolbox API. The API provides the following LSP operations:
+
+### LSP Completions
+
+Daytona provides an option to get completions for the specified text using the `POST` HTTP method on the `/workspace/{workspaceId}/{projectId}/toolbox/lsp/completions` endpoint.
+
+The API returns completions for the specified text.
+
+### LSP DidClose
+
+Daytona provides an option to notify the Language Server that a file has been closed using the `POST` HTTP method on the `/workspace/{workspaceId}/{projectId}/toolbox/lsp/didclose` endpoint.
+
+The API notifies the Language Server that the specified file has been closed.
+
+### LSP DidOpen
+
+Dayjsona provides an option to notify the Language Server that a file has been opened using the `POST` HTTP method on the `/workspace/{workspaceId}/{projectId}/toolbox/lsp/didopen` endpoint.
+
+The API notifies the Language Server that the specified file has been opened.
+
+### LSP Document Symbols
+
+Daytona provides an option to get document symbols for the specified text using the `GET` HTTP method on the `/workspace/{workspaceId}/{projectId}/toolbox/lsp/documentsymbols` endpoint.
+
+The API returns document symbols for the specified text.
+
+### Start LSP Server
+
+Daytona provides an option to start the Language Server using the `POST` HTTP method on the `/workspace/{workspaceId}/{projectId}/toolbox/lsp/start` endpoint.
+
+The API starts the Language Server in the Workspace.
+
+### Stop LSP Server
+
+Daytona provides an option to stop the Language Server using the `POST` HTTP method on the `/workspace/{workspaceId}/{projectId}/toolbox/lsp/stop` endpoint.
+
+The API stops the Language Server in the Workspace.
+
+### Workspace Symbols
+
+Daytona provides an option to get Workspace symbols for the specified text using the `GET` HTTP method on the `/workspace/{workspaceId}/{projectId}/toolbox/lsp/workspacesymbols` endpoint.
+
+The API returns Workspace symbols for the specified text.
+
+## Process Operations
+
+Daytona provides an option to interact with the Workspace processes programmatically using the Workspace Toolbox API. The API provides the following process operations:
+
+### Execute Command
+
+Daytona provides an option to execute a command in the Workspace using the `POST` HTTP method on the `/workspace/{workspaceId}/{projectId}/toolbox/execute` endpoint.
+
+The API executes the specified command in the Workspace.
+
+## Project Directory
+
+Daytona provides an option to interact with the Project directory programmatically using the Workspace Toolbox API. The API provides the following Project directory operations:
+
+### Get Project Directory
+
+Daytona provides an option to get the Project directory path using the `GET` HTTP method on the `/workspace/{workspaceId}/{projectId}/toolbox/projectdir` endpoint.
+
+The API returns the path of the Project directory in the Workspace.

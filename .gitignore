@@ -71,3 +71,4 @@ examples/**/*.png
 **/poetry.lock
 !/poetry.lock
 .astro
+.vscode/settings.json

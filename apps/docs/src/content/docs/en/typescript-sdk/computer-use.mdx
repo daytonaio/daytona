@@ -1,0 +1,809 @@
+---
+title: "ComputerUse"
+hideTitleOnPage: true
+---
+
+
+## ComputerUse
+
+Computer Use functionality for interacting with the desktop environment.
+
+**Properties**:
+
+- `display` _Display_ - Display operations interface
+- `keyboard` _Keyboard_ - Keyboard operations interface
+- `mouse` _Mouse_ - Mouse operations interface
+- `screenshot` _Screenshot_ - Screenshot operations interface
+    
+
+
+
+
+Provides access to mouse, keyboard, screenshot, and display operations
+for automating desktop interactions within a sandbox.
+
+### Constructors
+
+#### new ComputerUse()
+
+```ts
+new ComputerUse(sandboxId: string, toolboxApi: ToolboxApi): ComputerUse
+```
+
+**Parameters**:
+
+- `sandboxId` _string_
+- `toolboxApi` _ToolboxApi_
+
+
+**Returns**:
+
+- `ComputerUse`
+
+### Methods
+
+#### getProcessErrors()
+
+```ts
+getProcessErrors(processName: string): Promise<ProcessErrorsResponse>
+```
+
+Gets error logs for a specific VNC process
+
+**Parameters**:
+
+- `processName` _string_ - Name of the process to get error logs for
+
+
+**Returns**:
+
+- `Promise<ProcessErrorsResponse>` - Process error logs
+
+**Example:**
+
+```typescript
+const errorsResp = await sandbox.computerUse.getProcessErrors('x11vnc');
+console.log('X11VNC errors:', errorsResp.errors);
+```
+
+***
+
+#### getProcessLogs()
+
+```ts
+getProcessLogs(processName: string): Promise<ProcessLogsResponse>
+```
+
+Gets logs for a specific VNC process
+
+**Parameters**:
+
+- `processName` _string_ - Name of the process to get logs for
+
+
+**Returns**:
+
+- `Promise<ProcessLogsResponse>` - Process logs
+
+**Example:**
+
+```typescript
+const logsResp = await sandbox.computerUse.getProcessLogs('novnc');
+console.log('NoVNC logs:', logsResp.logs);
+```
+
+***
+
+#### getProcessStatus()
+
+```ts
+getProcessStatus(processName: string): Promise<ProcessStatusResponse>
+```
+
+Gets the status of a specific VNC process
+
+**Parameters**:
+
+- `processName` _string_ - Name of the process to check
+
+
+**Returns**:
+
+- `Promise<ProcessStatusResponse>` - Status information about the specific process
+
+**Example:**
+
+```typescript
+const xvfbStatus = await sandbox.computerUse.getProcessStatus('xvfb');
+const noVncStatus = await sandbox.computerUse.getProcessStatus('novnc');
+```
+
+***
+
+#### getStatus()
+
+```ts
+getStatus(): Promise<ComputerUseStatusResponse>
+```
+
+Gets the status of all computer use processes
+
+**Returns**:
+
+- `Promise<ComputerUseStatusResponse>` - Status information about all VNC desktop processes
+
+**Example:**
+
+```typescript
+const status = await sandbox.computerUse.getStatus();
+console.log('Computer use status:', status.status);
+```
+
+***
+
+#### restartProcess()
+
+```ts
+restartProcess(processName: string): Promise<ProcessRestartResponse>
+```
+
+Restarts a specific VNC process
+
+**Parameters**:
+
+- `processName` _string_ - Name of the process to restart
+
+
+**Returns**:
+
+- `Promise<ProcessRestartResponse>` - Process restart response
+
+**Example:**
+
+```typescript
+const result = await sandbox.computerUse.restartProcess('xfce4');
+console.log('XFCE4 process restarted:', result.message);
+```
+
+***
+
+#### start()
+
+```ts
+start(): Promise<ComputerUseStartResponse>
+```
+
+Starts all computer use processes (Xvfb, xfce4, x11vnc, novnc)
+
+**Returns**:
+
+- `Promise<ComputerUseStartResponse>` - Computer use start response
+
+**Example:**
+
+```typescript
+const result = await sandbox.computerUse.start();
+console.log('Computer use processes started:', result.message);
+```
+
+***
+
+#### stop()
+
+```ts
+stop(): Promise<ComputerUseStopResponse>
+```
+
+Stops all computer use processes
+
+**Returns**:
+
+- `Promise<ComputerUseStopResponse>` - Computer use stop response
+
+**Example:**
+
+```typescript
+const result = await sandbox.computerUse.stop();
+console.log('Computer use processes stopped:', result.message);
+```
+## Display
+
+Display operations for computer use functionality
+
+### Constructors
+
+#### new Display()
+
+```ts
+new Display(sandboxId: string, toolboxApi: ToolboxApi): Display
+```
+
+**Parameters**:
+
+- `sandboxId` _string_
+- `toolboxApi` _ToolboxApi_
+
+
+**Returns**:
+
+- `Display`
+
+### Methods
+
+#### getInfo()
+
+```ts
+getInfo(): Promise<DisplayInfoResponse>
+```
+
+Gets information about the displays
+
+**Returns**:
+
+- `Promise<DisplayInfoResponse>` - Display information including primary display and all available displays
+
+**Example:**
+
+```typescript
+const info = await sandbox.computerUse.display.getInfo();
+console.log(`Primary display: ${info.primary_display.width}x${info.primary_display.height}`);
+console.log(`Total displays: ${info.total_displays}`);
+info.displays.forEach((display, index) => {
+  console.log(`Display ${index}: ${display.width}x${display.height} at ${display.x},${display.y}`);
+});
+```
+
+***
+
+#### getWindows()
+
+```ts
+getWindows(): Promise<WindowsResponse>
+```
+
+Gets the list of open windows
+
+**Returns**:
+
+- `Promise<WindowsResponse>` - List of open windows with their IDs and titles
+
+**Example:**
+
+```typescript
+const windows = await sandbox.computerUse.display.getWindows();
+console.log(`Found ${windows.count} open windows:`);
+windows.windows.forEach(window => {
+  console.log(`- ${window.title} (ID: ${window.id})`);
+});
+```
+
+***
+
+
+## Keyboard
+
+Keyboard operations for computer use functionality
+
+### Constructors
+
+#### new Keyboard()
+
+```ts
+new Keyboard(sandboxId: string, toolboxApi: ToolboxApi): Keyboard
+```
+
+**Parameters**:
+
+- `sandboxId` _string_
+- `toolboxApi` _ToolboxApi_
+
+
+**Returns**:
+
+- `Keyboard`
+
+### Methods
+
+#### hotkey()
+
+```ts
+hotkey(keys: string): Promise<void>
+```
+
+Presses a hotkey combination
+
+**Parameters**:
+
+- `keys` _string_ - The hotkey combination (e.g., 'ctrl+c', 'alt+tab', 'cmd+shift+t')
+
+
+**Returns**:
+
+- `Promise<void>`
+
+**Throws**:
+
+If the hotkey operation fails
+
+**Example:**
+
+```typescript
+// Copy
+try {
+  await sandbox.computerUse.keyboard.hotkey('ctrl+c');
+  console.log('Operation success');
+} catch (e) {
+  console.log('Operation failed:', e);
+}
+
+// Paste
+try {
+  await sandbox.computerUse.keyboard.hotkey('ctrl+v');
+  console.log('Operation success');
+} catch (e) {
+  console.log('Operation failed:', e);
+}
+
+// Alt+Tab
+try {
+  await sandbox.computerUse.keyboard.hotkey('alt+tab');
+  console.log('Operation success');
+} catch (e) {
+  console.log('Operation failed:', e);
+}
+```
+
+***
+
+#### press()
+
+```ts
+press(key: string, modifiers?: string[]): Promise<void>
+```
+
+Presses a key with optional modifiers
+
+**Parameters**:
+
+- `key` _string_ - The key to press (e.g., 'Enter', 'Escape', 'Tab', 'a', 'A')
+- `modifiers?` _string\[\] = \[\]_ - Modifier keys ('ctrl', 'alt', 'meta', 'shift')
+
+
+**Returns**:
+
+- `Promise<void>`
+
+**Throws**:
+
+If the press operation fails
+
+**Example:**
+
+```typescript
+// Press Enter
+try {
+  await sandbox.computerUse.keyboard.press('Return');
+  console.log('Operation success');
+} catch (e) {
+  console.log('Operation failed:', e);
+}
+
+// Press Ctrl+C
+try {
+  await sandbox.computerUse.keyboard.press('c', ['ctrl']);
+  console.log('Operation success');
+} catch (e) {
+  console.log('Operation failed:', e);
+}
+
+// Press Ctrl+Shift+T
+try {
+  await sandbox.computerUse.keyboard.press('t', ['ctrl', 'shift']);
+  console.log('Operation success');
+} catch (e) {
+  console.log('Operation failed:', e);
+}
+```
+
+***
+
+#### type()
+
+```ts
+type(text: string, delay?: number): Promise<void>
+```
+
+Types the specified text
+
+**Parameters**:
+
+- `text` _string_ - The text to type
+- `delay?` _number_ - Delay between characters in milliseconds
+
+
+**Returns**:
+
+- `Promise<void>`
+
+**Throws**:
+
+If the type operation fails
+
+**Example:**
+
+```typescript
+try {
+  await sandbox.computerUse.keyboard.type('Hello, World!');
+  console.log('Operation success');
+} catch (e) {
+  console.log('Operation failed:', e);
+}
+
+// With delay between characters
+try {
+  await sandbox.computerUse.keyboard.type('Slow typing', 100);
+  console.log('Operation success');
+} catch (e) {
+  console.log('Operation failed:', e);
+}
+```
+
+***
+
+
+## Mouse
+
+Mouse operations for computer use functionality
+
+### Constructors
+
+#### new Mouse()
+
+```ts
+new Mouse(sandboxId: string, toolboxApi: ToolboxApi): Mouse
+```
+
+**Parameters**:
+
+- `sandboxId` _string_
+- `toolboxApi` _ToolboxApi_
+
+
+**Returns**:
+
+- `Mouse`
+
+### Methods
+
+#### click()
+
+```ts
+click(
+   x: number, 
+   y: number, 
+   button?: string, 
+double?: boolean): Promise<MouseClickResponse>
+```
+
+Clicks the mouse at the specified coordinates
+
+**Parameters**:
+
+- `x` _number_ - The x coordinate to click at
+- `y` _number_ - The y coordinate to click at
+- `button?` _string = 'left'_ - The mouse button to click ('left', 'right', 'middle')
+- `double?` _boolean = false_ - Whether to perform a double-click
+
+
+**Returns**:
+
+- `Promise<MouseClickResponse>` - Click operation result
+
+**Example:**
+
+```typescript
+// Single left click
+const result = await sandbox.computerUse.mouse.click(100, 200);
+
+// Double click
+const doubleClick = await sandbox.computerUse.mouse.click(100, 200, 'left', true);
+
+// Right click
+const rightClick = await sandbox.computerUse.mouse.click(100, 200, 'right');
+```
+
+***
+
+#### drag()
+
+```ts
+drag(
+   startX: number, 
+   startY: number, 
+   endX: number, 
+   endY: number, 
+button?: string): Promise<MouseDragResponse>
+```
+
+Drags the mouse from start coordinates to end coordinates
+
+**Parameters**:
+
+- `startX` _number_ - The starting x coordinate
+- `startY` _number_ - The starting y coordinate
+- `endX` _number_ - The ending x coordinate
+- `endY` _number_ - The ending y coordinate
+- `button?` _string = 'left'_ - The mouse button to use for dragging
+
+
+**Returns**:
+
+- `Promise<MouseDragResponse>` - Drag operation result
+
+**Example:**
+
+```typescript
+const result = await sandbox.computerUse.mouse.drag(50, 50, 150, 150);
+console.log(`Dragged from ${result.from.x},${result.from.y} to ${result.to.x},${result.to.y}`);
+```
+
+***
+
+#### getPosition()
+
+```ts
+getPosition(): Promise<MousePosition>
+```
+
+Gets the current mouse cursor position
+
+**Returns**:
+
+- `Promise<MousePosition>` - Current mouse position with x and y coordinates
+
+**Example:**
+
+```typescript
+const position = await sandbox.computerUse.mouse.getPosition();
+console.log(`Mouse is at: ${position.x}, ${position.y}`);
+```
+
+***
+
+#### move()
+
+```ts
+move(x: number, y: number): Promise<MouseMoveResponse>
+```
+
+Moves the mouse cursor to the specified coordinates
+
+**Parameters**:
+
+- `x` _number_ - The x coordinate to move to
+- `y` _number_ - The y coordinate to move to
+
+
+**Returns**:
+
+- `Promise<MouseMoveResponse>` - Move operation result
+
+**Example:**
+
+```typescript
+const result = await sandbox.computerUse.mouse.move(100, 200);
+console.log(`Mouse moved to: ${result.x}, ${result.y}`);
+```
+
+***
+
+#### scroll()
+
+```ts
+scroll(
+   x: number, 
+   y: number, 
+   direction: "up" | "down", 
+amount?: number): Promise<boolean>
+```
+
+Scrolls the mouse wheel at the specified coordinates
+
+**Parameters**:
+
+- `x` _number_ - The x coordinate to scroll at
+- `y` _number_ - The y coordinate to scroll at
+- `direction` _The direction to scroll_ - `"up"` | `"down"`
+- `amount?` _number = 1_ - The amount to scroll
+
+
+**Returns**:
+
+- `Promise<boolean>` - Whether the scroll operation was successful
+
+**Example:**
+
+```typescript
+// Scroll up
+const scrollUp = await sandbox.computerUse.mouse.scroll(100, 200, 'up', 3);
+
+// Scroll down
+const scrollDown = await sandbox.computerUse.mouse.scroll(100, 200, 'down', 5);
+```
+
+***
+
+
+## Screenshot
+
+Screenshot operations for computer use functionality
+
+### Constructors
+
+#### new Screenshot()
+
+```ts
+new Screenshot(sandboxId: string, toolboxApi: ToolboxApi): Screenshot
+```
+
+**Parameters**:
+
+- `sandboxId` _string_
+- `toolboxApi` _ToolboxApi_
+
+
+**Returns**:
+
+- `Screenshot`
+
+### Methods
+
+#### takeCompressed()
+
+```ts
+takeCompressed(options?: ScreenshotOptions): Promise<CompressedScreenshotResponse>
+```
+
+Takes a compressed screenshot of the entire screen
+
+**Parameters**:
+
+- `options?` _ScreenshotOptions = {}_ - Compression and display options
+
+
+**Returns**:
+
+- `Promise<CompressedScreenshotResponse>` - Compressed screenshot data
+
+**Example:**
+
+```typescript
+// Default compression
+const screenshot = await sandbox.computerUse.screenshot.takeCompressed();
+
+// High quality JPEG
+const jpeg = await sandbox.computerUse.screenshot.takeCompressed({
+  format: 'jpeg',
+  quality: 95,
+  showCursor: true
+});
+
+// Scaled down PNG
+const scaled = await sandbox.computerUse.screenshot.takeCompressed({
+  format: 'png',
+  scale: 0.5
+});
+```
+
+***
+
+#### takeCompressedRegion()
+
+```ts
+takeCompressedRegion(region: ScreenshotRegion, options?: ScreenshotOptions): Promise<CompressedScreenshotResponse>
+```
+
+Takes a compressed screenshot of a specific region
+
+**Parameters**:
+
+- `region` _ScreenshotRegion_ - The region to capture
+- `options?` _ScreenshotOptions = {}_ - Compression and display options
+
+
+**Returns**:
+
+- `Promise<CompressedScreenshotResponse>` - Compressed screenshot data
+
+**Example:**
+
+```typescript
+const region = { x: 0, y: 0, width: 800, height: 600 };
+const screenshot = await sandbox.computerUse.screenshot.takeCompressedRegion(region, {
+  format: 'webp',
+  quality: 80,
+  showCursor: true
+});
+console.log(`Compressed size: ${screenshot.size_bytes} bytes`);
+```
+
+***
+
+#### takeFullScreen()
+
+```ts
+takeFullScreen(showCursor?: boolean): Promise<ScreenshotResponse>
+```
+
+Takes a screenshot of the entire screen
+
+**Parameters**:
+
+- `showCursor?` _boolean = false_ - Whether to show the cursor in the screenshot
+
+
+**Returns**:
+
+- `Promise<ScreenshotResponse>` - Screenshot data with base64 encoded image
+
+**Example:**
+
+```typescript
+const screenshot = await sandbox.computerUse.screenshot.takeFullScreen();
+console.log(`Screenshot size: ${screenshot.width}x${screenshot.height}`);
+
+// With cursor visible
+const withCursor = await sandbox.computerUse.screenshot.takeFullScreen(true);
+```
+
+***
+
+#### takeRegion()
+
+```ts
+takeRegion(region: ScreenshotRegion, showCursor?: boolean): Promise<RegionScreenshotResponse>
+```
+
+Takes a screenshot of a specific region
+
+**Parameters**:
+
+- `region` _ScreenshotRegion_ - The region to capture
+- `showCursor?` _boolean = false_ - Whether to show the cursor in the screenshot
+
+
+**Returns**:
+
+- `Promise<RegionScreenshotResponse>` - Screenshot data with base64 encoded image
+
+**Example:**
+
+```typescript
+const region = { x: 100, y: 100, width: 300, height: 200 };
+const screenshot = await sandbox.computerUse.screenshot.takeRegion(region);
+console.log(`Captured region: ${screenshot.region.width}x${screenshot.region.height}`);
+```
+
+***
+
+
+## ScreenshotOptions
+
+Interface for screenshot compression options
+
+**Properties**:
+
+- `format?` _string_
+- `quality?` _number_
+- `scale?` _number_
+- `showCursor?` _boolean_
+## ScreenshotRegion
+
+Interface for region coordinates used in screenshot operations
+
+**Properties**:
+
+- `height` _number_
+- `width` _number_
+- `x` _number_
+- `y` _number_

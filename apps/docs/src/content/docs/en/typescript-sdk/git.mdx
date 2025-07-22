@@ -1,0 +1,403 @@
+---
+title: "Git"
+hideTitleOnPage: true
+---
+
+
+## Git
+
+Provides Git operations within a Sandbox.
+
+### Constructors
+
+#### new Git()
+
+```ts
+new Git(
+   sandboxId: string, 
+   toolboxApi: ToolboxApi, 
+   getRootDir: () => Promise<string>): Git
+```
+
+**Parameters**:
+
+- `sandboxId` _string_
+- `toolboxApi` _ToolboxApi_
+- `getRootDir` _\(\) =\> Promise\<string\>_
+
+
+**Returns**:
+
+- `Git`
+
+### Methods
+
+#### add()
+
+```ts
+add(path: string, files: string[]): Promise<void>
+```
+
+Stages the specified files for the next commit, similar to
+running 'git add' on the command line.
+
+**Parameters**:
+
+- `path` _string_ - Path to the Git repository root. Relative paths are resolved based on the user's
+    root directory.
+- `files` _string\[\]_ - List of file paths or directories to stage, relative to the repository root
+
+
+**Returns**:
+
+- `Promise<void>`
+
+**Examples:**
+
+```ts
+// Stage a single file
+await git.add('workspace/repo', ['file.txt']);
+```
+
+```ts
+// Stage whole repository
+await git.add('workspace/repo', ['.']);
+```
+
+***
+
+#### branches()
+
+```ts
+branches(path: string): Promise<ListBranchResponse>
+```
+
+List branches in the repository.
+
+**Parameters**:
+
+- `path` _string_ - Path to the Git repository root. Relative paths are resolved based on the user's
+    root directory.
+
+
+**Returns**:
+
+- `Promise<ListBranchResponse>` - List of branches in the repository
+
+**Example:**
+
+```ts
+const response = await git.branches('workspace/repo');
+console.log(`Branches: ${response.branches}`);
+```
+
+***
+
+#### checkoutBranch()
+
+```ts
+checkoutBranch(path: string, branch: string): Promise<void>
+```
+
+Checkout branche in the repository.
+
+**Parameters**:
+
+- `path` _string_ - Path to the Git repository root. Relative paths are resolved based on the user's
+    root directory.
+- `branch` _string_ - Name of the branch to checkout
+
+
+**Returns**:
+
+- `Promise<void>`
+
+**Example:**
+
+```ts
+await git.checkoutBranch('workspace/repo', 'new-feature');
+```
+
+***
+
+#### clone()
+
+```ts
+clone(
+   url: string, 
+   path: string, 
+   branch?: string, 
+   commitId?: string, 
+   username?: string, 
+password?: string): Promise<void>
+```
+
+Clones a Git repository into the specified path. It supports
+cloning specific branches or commits, and can authenticate with the remote
+repository if credentials are provided.
+
+**Parameters**:
+
+- `url` _string_ - Repository URL to clone from
+- `path` _string_ - Path where the repository should be cloned. Relative paths are resolved based on the user's
+    root directory.
+- `branch?` _string_ - Specific branch to clone. If not specified, clones the default branch
+- `commitId?` _string_ - Specific commit to clone. If specified, the repository will be left in a detached HEAD state at this commit
+- `username?` _string_ - Git username for authentication
+- `password?` _string_ - Git password or token for authentication
+
+
+**Returns**:
+
+- `Promise<void>`
+
+**Examples:**
+
+```ts
+// Clone the default branch
+await git.clone(
+  'https://github.com/user/repo.git',
+  'workspace/repo'
+);
+```
+
+```ts
+// Clone a specific branch with authentication
+await git.clone(
+  'https://github.com/user/private-repo.git',
+  'workspace/private',
+  branch='develop',
+  username='user',
+  password='token'
+);
+```
+
+```ts
+// Clone a specific commit
+await git.clone(
+  'https://github.com/user/repo.git',
+  'workspace/repo-old',
+  commitId='abc123'
+);
+```
+
+***
+
+#### commit()
+
+```ts
+commit(
+   path: string, 
+   message: string, 
+   author: string, 
+email: string): Promise<GitCommitResponse>
+```
+
+Commits staged changes.
+
+**Parameters**:
+
+- `path` _string_ - Path to the Git repository root. Relative paths are resolved based on the user's
+    root directory.
+- `message` _string_ - Commit message describing the changes
+- `author` _string_ - Name of the commit author
+- `email` _string_ - Email address of the commit author
+
+
+**Returns**:
+
+- `Promise<GitCommitResponse>`
+
+**Example:**
+
+```ts
+// Stage and commit changes
+await git.add('workspace/repo', ['README.md']);
+await git.commit(
+  'workspace/repo',
+  'Update documentation',
+  'John Doe',
+  'john@example.com'
+);
+```
+
+***
+
+#### createBranch()
+
+```ts
+createBranch(path: string, name: string): Promise<void>
+```
+
+Create branche in the repository.
+
+**Parameters**:
+
+- `path` _string_ - Path to the Git repository root. Relative paths are resolved based on the user's
+    root directory.
+- `name` _string_ - Name of the new branch to create
+
+
+**Returns**:
+
+- `Promise<void>`
+
+**Example:**
+
+```ts
+await git.createBranch('workspace/repo', 'new-feature');
+```
+
+***
+
+#### deleteBranch()
+
+```ts
+deleteBranch(path: string, name: string): Promise<void>
+```
+
+Delete branche in the repository.
+
+**Parameters**:
+
+- `path` _string_ - Path to the Git repository root. Relative paths are resolved based on the user's
+    root directory.
+- `name` _string_ - Name of the branch to delete
+
+
+**Returns**:
+
+- `Promise<void>`
+
+**Example:**
+
+```ts
+await git.deleteBranch('workspace/repo', 'new-feature');
+```
+
+***
+
+#### pull()
+
+```ts
+pull(
+   path: string, 
+   username?: string, 
+password?: string): Promise<void>
+```
+
+Pulls changes from the remote repository.
+
+**Parameters**:
+
+- `path` _string_ - Path to the Git repository root. Relative paths are resolved based on the user's
+    root directory.
+- `username?` _string_ - Git username for authentication
+- `password?` _string_ - Git password or token for authentication
+
+
+**Returns**:
+
+- `Promise<void>`
+
+**Examples:**
+
+```ts
+// Pull from a public repository
+await git.pull('workspace/repo');
+```
+
+```ts
+// Pull from a private repository
+await git.pull(
+  'workspace/repo',
+  'user',
+  'token'
+);
+```
+
+***
+
+#### push()
+
+```ts
+push(
+   path: string, 
+   username?: string, 
+password?: string): Promise<void>
+```
+
+Push local changes to the remote repository.
+
+**Parameters**:
+
+- `path` _string_ - Path to the Git repository root. Relative paths are resolved based on the user's
+    root directory.
+- `username?` _string_ - Git username for authentication
+- `password?` _string_ - Git password or token for authentication
+
+
+**Returns**:
+
+- `Promise<void>`
+
+**Examples:**
+
+```ts
+// Push to a public repository
+await git.push('workspace/repo');
+```
+
+```ts
+// Push to a private repository
+await git.push(
+  'workspace/repo',
+  'user',
+  'token'
+);
+```
+
+***
+
+#### status()
+
+```ts
+status(path: string): Promise<GitStatus>
+```
+
+Gets the current status of the Git repository.
+
+**Parameters**:
+
+- `path` _string_ - Path to the Git repository root. Relative paths are resolved based on the user's
+    root directory.
+
+
+**Returns**:
+
+- `Promise<GitStatus>` - Current repository status including:
+    - currentBranch: Name of the current branch
+    - ahead: Number of commits ahead of the remote branch
+    - behind: Number of commits behind the remote branch
+    - branchPublished: Whether the branch has been published to the remote repository
+    - fileStatus: List of file statuses
+
+**Example:**
+
+```ts
+const status = await sandbox.git.status('workspace/repo');
+console.log(`Current branch: ${status.currentBranch}`);
+console.log(`Commits ahead: ${status.ahead}`);
+console.log(`Commits behind: ${status.behind}`);
+```
+
+***
+
+
+## GitCommitResponse
+
+Response from the git commit.
+
+**Properties**:
+
+- `sha` _string_ - The SHA of the commit

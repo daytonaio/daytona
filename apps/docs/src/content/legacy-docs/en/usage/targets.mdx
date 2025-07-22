@@ -1,0 +1,261 @@
+---
+title: Targets
+description: Learn how to manage Target configuration across Workspaces.
+sidebar:
+  label: Targets
+---
+
+import Label from '@components/Label.astro'
+
+<Label>
+  Distribution: **Open Source**
+</Label>
+
+A Target is an isolated processing unit where Workspaces are executed. It can operate on various infrastructures, including cloud-based and on-premises environments. Targets provide the necessary compute resources and meet security requirements within the defined infrastructure.
+
+## Create a Target
+
+Daytona provides an option to create a Target. Creating a Target requires creating a Target Configuration and specifying the Provider to use.
+
+1. Run the following command to create a Target:
+
+```shell
+daytona target create
+```
+
+2. Select the [Target Configuration](/docs/en/configuration/target-config) to use for the Target.
+
+3. Select the [Provider](/docs/en/configuration/providers) for the environment you want to deploy to.
+
+4. Enter a name for your Target.
+
+```text
+Target Name
+>
+```
+
+5. Enter the appropriate configuration options when prompted. The configuration options vary based on the selected Provider. The following example shows adding a [local Docker Target Configuration](/docs/en/configuration/target-config#docker-local).
+
+```text
+Sock Path
+> /var/run/docker.sock
+```
+
+6. Enter a name for your Target.
+
+```text
+Target Name
+>
+```
+
+```text
+✓ Request submitted
+Creating target <target_name>
+```
+
+## Start a Target
+
+Daytona provides an option to start a Target.
+
+1. Run the following command to start a Target:
+
+```shell
+daytona target start
+```
+
+2. Select the Target you want to start.
+
+```text
+Select Targets to Start
+===
+local (default)
+<target_id>
+Docker (local)
+```
+
+## Stop a Target
+
+Daytona provides an option to stop a Target.
+
+1. Run the following command to stop a Target:
+
+```shell
+daytona target stop
+```
+
+2. Select the Target you want to stop.
+
+```text
+Select Targets to Stop
+===
+local (default)
+<target_id>
+Docker (local)
+```
+
+## List Targets
+
+Daytona provides an option to list all Targets.
+
+1. Run the following command to list all Targets:
+
+```shell
+daytona target list
+```
+
+Upon running the command, Daytona will display a list of all Targets along with their configurations.
+
+```text
+Target          Config Name     # Workspaces    Default     Status
+local (Docker)  local           0               Yes         /
+AWS             aws             0               No          Started
+```
+
+## Restart a Target
+
+Daytona provides an option to restart a Target.
+
+1. Run the following command to restart a Target:
+
+```shell
+daytona target restart
+```
+
+## Delete a Target
+
+Daytona provides an option to remove a Target.
+
+1. Run the following command to remove a Target:
+
+```shell
+daytona target delete
+```
+
+2. Select the Target you want to delete.
+
+```text
+Select Targets to Delete
+===
+local (default)
+<target_id>
+Docker (local)
+```
+
+## Targets Information
+
+Daytona provides an option to view detailed information about a Target.
+
+1. Run the following command to view detailed information about a Target:
+
+```shell
+daytona target info
+```
+
+2. Select the Target you want to view information about.
+
+```text
+Select Target to View
+===
+local (default)
+<target_id>
+Docker (local)
+```
+
+Upon running the command, Daytona will display detailed information about the selected Target.
+
+```text
+Name:             local
+ID:               <target_id>
+Provider:         Docker
+Runner:           local
+Default:          Yes
+State:            Running
+# Workspaces:     1
+```
+
+2. Select the Target you want to restart.
+
+```text
+Select Targets to Restart
+===
+local (default)
+<target_id>
+Docker (local)
+```
+
+Upon running the command, Daytona will restart the selected Target.
+
+## Set Default Target
+
+Daytona provides an option to set a Target as the default Target.
+
+1. Run the following command to set a Target as the default Target:
+
+```shell
+daytona target set-default
+```
+
+2. Select the Target you want to set as the default Target.
+
+```text
+Select a Target To Set As Default
+===
+local (default)
+<target_id>
+Docker (local)
+```
+
+Upon running the command, Daytona will set the selected Target as the default Target.
+
+```text
+Target 'local' set as default
+```
+
+## SSH into a Target
+
+Daytona provides an option to SSH into a Target.
+
+1. Run the following command to SSH into a Target:
+
+```shell
+daytona target ssh
+```
+
+2. Select the Target you want to SSH into.
+
+```text
+Select a Target To SSH Into
+===
+local (default)
+<target_id>
+Docker (local)
+```
+
+Upon running the command, Daytona will SSH into the selected Target.
+
+## Target Logs
+
+Daytona provides an option to view logs for a Target.
+
+1. Run the following command to view logs for a Target:
+
+```shell
+daytona target logs
+```
+
+2. Select the Target you want to view logs for.
+
+```text
+Select a Target To View Logs
+===
+local (default)
+<target_id>
+Docker (local)
+```
+
+Upon running the command, Daytona will display logs for the selected Target.
+
+```text
+local | Creating target local (<target_id>)
+local | ✓ Target creation complete
+```

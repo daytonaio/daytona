@@ -9,6 +9,8 @@ const __dirname = dirname(__filename)
 
 const DOCS_PATH = path.join(__dirname, '../src/content/docs')
 const SUBFOLDERS = [
+  'en',
+  'ja',
   'about',
   'configuration',
   'installation',
@@ -48,7 +50,7 @@ function extractRealSentence(text) {
     .split(/\n\n+/)
     .map(s => s.trim())
     .filter(s => s.length > 0)
-  for (let sentence of sentences) {
+  for (const sentence of sentences) {
     if (isSentence(sentence)) {
       const hyperlinkMatch = sentence.match(/^\[([^\]]+)\]\(([^\)]+)\)/)
       if (hyperlinkMatch) {

@@ -1,0 +1,24 @@
+---
+title: Nix Installation
+---
+import Aside from '@components/Aside.astro'
+export const partial = true;
+
+Daytona is available on nixpkgs unstable as [**`daytona-bin`**](https://search.nixos.org/packages?channel=unstable&show=daytona-bin).
+
+<br />
+
+### Ephemeral Usage
+
+Use **`nix-shell`** to try Daytona before permanently installing it on your system:
+
+```shell
+nix-shell -p daytona-bin
+```
+
+### Install Globally
+
+To permanently install Daytona on your system, you can add it to the relevant configuration.
+
+- On NixOS systems, add **`daytona-bin`** as a system package in **`/etc/nixos/configuration.nix`**.
+- On other Linux systems, use [home-manager](https://github.com/nix-community/home-manager) and add **`daytona-bin`** as a local package.

@@ -1,0 +1,183 @@
+---
+title: Builders
+description: プロジェクトのベースとしてDev Containersとカスタムイメージを使用する方法を詳述したリファレンス。
+sidebar:
+  label: Builders
+---
+
+import Label from '@components/Label.astro'
+
+<Label>
+  Distribution: **Open Source**
+</Label>
+
+import Aside from '@components/Aside.astro'
+import Keyboard from '@components/Keyboard.astro'
+
+Buildersは、あなたの[Project](/docs/ja/usage/projects)に必要なツールと設定を含むコンテナイメージを作成する責任があります。
+Daytonaは、結果として生成されるProject環境の作成方法を制御し、Projectイメージをビルドするための好みの方法を選択できるようにします。
+
+[Workspaceの作成](/docs/ja/usage/workspaces#create-a-workspace)時に、以下のBuildersから選択できます：
+
+- [**Automatic**](#automatic)
+
+   Daytonaが最も適切なBuilderを自動検出した後、Projectイメージをビルドします。
+
+- [**Dev Container**](#dev-container)
+
+   Daytonaがプロジェクト内にあるDev Container設定に従ってProjectイメージをビルドします。
+
+- [**Custom Image**](#custom-image)
+
+   Daytonaが指定したイメージを使用してProjectイメージをビルドします。
+
+- [**None**](#none)
+
+   Daytonaがデフォルトのベースイメージを使用してProjectを作成します。
+
+## 自動
+
+Daytonaは、あなたのプロジェクトに最も適切なBuilderを自動検出できます。Daytonaは以下のロジックを使用してどのBuilderを使用するかを決定します：
+
+1. リポジトリルートからの相対パスで、**`.devcontainer.json`** または **`.devcontainer/devcontainer.json`** にDev Container設定が存在するかチェックします。
+2. 存在する場合は、[Dev Container](#dev-container) Builderを使用します。存在しない場合は、[None](#none) Builderを使用します。
+
+自動Builderを使用するには、[ワークスペース作成](/docs/ja/usage/workspaces#create-a-workspace)時に`--builder`フラグの値を`auto`に設定します。このフラグは単一のプロジェクトでワークスペースを作成する場合にのみ適用されます。
+
+```shell
+daytona create <REPO_URL> --builder=auto
+```
+
+## Dev Container
+
+Development Containers（Dev Containers）は、あなたの[Projects](/docs/ja/usage/projects)に対して一貫性があり、完全に機能する開発環境を提供します。Dev Containerは、Projectsをビルドして実行するために必要なすべてのツール、ランタイム、および環境設定を定義します。
+
+Dev Container仕様は、異なるプラットフォームやCI/CDシステム間で複製可能な開発環境を定義するように設計されています。この仕様は、プロジェクトリポジトリ内の`devcontainer.json`ファイル内で定義されます。
+
+`devcontainer.json`ファイルは、開発環境を定義するコンポーネントで構成されるJSONファイルです。このファイルには、開発コンテナを設定するために必要なメタデータと設定を含むプロパティを持つオブジェクトが含まれています。詳細については、[dev container specification](https://containers.dev/implementors/json_reference/)をご覧ください。
+
+あなたのProjectの`devcontainer.json`ファイルを生成するには、[devcontainer.ai](https://devcontainer.ai/)を使用してください。
+
+`devcontainer.json`ファイルの例：
+
+```sh
+{
+    "name": "Example Python & PostgreSQL Dev Container",
+    "build": {
+        "dockerfile": "Dockerfile",
+        "args": {
+            "VARIANT": "3.8",
+            "INSTALL_NODE": "false"
+        }
+    },
+    "settings": {
+        "terminal.integrated.shell.linux": "/bin/bash"
+    },
+    "extensions": [
+        "ms-python.python",
+        "ms-azuretools.vscode-docker"
+    ],
+    "postCreateCommand": "pip install -r requirements.txt",
+    "remoteUser": "vscode"
+}
+```
+
+- `name`: 開発コンテナの名前。
+- `build`: 開発コンテナのビルド設定。
+- `settings`: 開発コンテナの設定。
+- `extensions`: 開発コンテナにインストールする拡張機能。
+- `postCreateCommand`: 開発コンテナ作成後に実行するコマンド。
+- `remoteUser`: イメージビルドプロセス中にコマンドを実行するユーザー。
+
+DaytonaはDev Container標準を使用してProjectイメージをビルドするオプションを提供します。Dev Container Builderを使用する際に利用可能な以下のオプションを使用してください：
+
+- **Devcontainer file path**
+
+   Dev Container設定が配置されているパス（リポジトリルートからの相対パス）。
+   デフォルト値は`.devcontainer/devcontainer.json`です。
+
+Dev Container Builderを使用するには、[Workspace creation](/docs/ja/usage/workspaces#create-a-workspace)中に`--devcontainer-path`フラグをリポジトリ内のDev Container設定パスに設定してください。このフラグは、単一のProjectでWorkspaceを作成する場合にのみ適用されます。
+
+```shell showLineNumbers
+daytona create <REPO_URL> --devcontainer-path=.devcontainer/devcontainer.json
+```
+
+:::note
+Dev Container標準の詳細については、[containers.dev](https://containers.dev/)の公式ドキュメントを参照してください。
+:::
+
+## カスタムイメージ
+
+カスタムベースコンテナを指定してProjectイメージをビルドできます。
+このBuilderを使用する際は、以下のオプションが利用可能です：
+
+- **カスタムコンテナイメージ**
+
+   Projectのベースコンテナイメージの名前。
+
+- **コンテナユーザー**
+
+   イメージビルドプロセス中にコマンドを実行するユーザー。
+
+- **環境変数**
+
+   `KEY=VALUE`形式の環境変数のリスト。
+
+Custom Image Builderを使用するには、[Workspaceの作成](/docs/ja/usage/workspaces#create-a-workspace)時に`--custom-image`と`--custom-image-user`の両方のフラグを設定します。これらのフラグは、単一のProjectでWorkspaceを作成する場合にのみ適用されます。
+
+```shell
+daytona create <REPO_URL> --custom-image=daytona-workspace:latest --custom-image-user=daytona
+```
+
+## None
+
+Daytonaはデフォルトのベースイメージを使用してプロジェクトをビルドできます。
+
+`daytona server configure`を使用して別途設定されていない限り、デフォルトのベースイメージは`daytonaio/workspace-project`に設定されています。
+
+## カスタムビルドレジストリ
+
+Daytona Builderによってビルドされたイメージに対してカスタムビルドレジストリを設定できます。
+イメージがビルドされた後、設定されたコンテナレジストリにアップロードされ、同じプロジェクトの将来のワークスペース作成を高速化します。
+
+**前提条件**
+
+- イメージのプッシュ/プル権限を持つ、アクセス可能なコンテナレジストリのアカウント。
+
+1. 以下のコマンドを実行してカスタムビルドレジストリを設定します：
+
+```shell
+daytona container-registry set
+```
+
+2. 必要なオプションを設定します：
+
+- **Server URL**
+
+   カスタムコンテナレジストリへの完全なURL。
+
+- **Username**
+
+   Daytonaがコンテナレジストリにログインする際に使用するユーザー名。
+
+- **Password**
+
+   コンテナレジストリアカウントのパスワード。
+
+3. <Keyboard shortcuts="Enter" />を押してカスタムビルドレジストリを設定します。
+4. 以下のコマンドを実行してサーバーを設定します：
+
+```shell
+daytona server configure
+```
+
+5. "Builder Registry"セクションがハイライトされるまで<Keyboard shortcuts="Enter" />を押します。
+
+```text
+Builder Registry
+To add options, add a container registry with 'daytona cr set'
+> Local registry managed by Daytona
+```
+
+6. <Keyboard shortcuts="↑" /> / <Keyboard shortcuts="↓" />矢印キーを使用して、以前に設定したカスタムレジストリを選択します。
+7. 設定を保存するためにコマンドが終了するまで<Keyboard shortcuts="Enter" />を押します。
