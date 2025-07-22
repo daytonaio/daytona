@@ -48,6 +48,7 @@ interface GetColumnsProps {
   handleDelete: (id: string) => void
   handleArchive: (id: string) => void
   handleVnc: (id: string) => void
+  getWebTerminalUrl: (id: string) => Promise<string | null>
   loadingSandboxes: Record<string, boolean>
   writePermitted: boolean
   deletePermitted: boolean
@@ -59,10 +60,18 @@ export function getColumns({
   handleDelete,
   handleArchive,
   handleVnc,
+  getWebTerminalUrl,
   loadingSandboxes,
   writePermitted,
   deletePermitted,
 }: GetColumnsProps): ColumnDef<Sandbox>[] {
+  const handleOpenWebTerminal = async (sandboxId: string) => {
+    const url = await getWebTerminalUrl(sandboxId)
+    if (url) {
+      window.open(url, '_blank')
+    }
+  }
+
   const columns: ColumnDef<Sandbox>[] = [
     {
       id: 'select',
@@ -259,6 +268,7 @@ export function getColumns({
             onDelete={handleDelete}
             onArchive={handleArchive}
             onVnc={handleVnc}
+            onOpenWebTerminal={handleOpenWebTerminal}
           />
         </div>
       ),

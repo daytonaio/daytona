@@ -29,6 +29,7 @@ import { SandboxState } from '../enums/sandbox-state.enum'
 import { OrganizationEvents } from '../../organization/constants/organization-events.constant'
 import { OrganizationSuspendedSnapshotDeactivatedEvent } from '../../organization/events/organization-suspended-snapshot-deactivated.event'
 import { SnapshotRunnerState } from '../enums/snapshot-runner-state.enum'
+import { PaginatedList } from '../../common/interfaces/paginated-list.interface'
 
 const IMAGE_NAME_REGEX = /^[a-zA-Z0-9_.\-:]+(\/[a-zA-Z0-9_.\-:]+)*$/
 @Injectable()
@@ -173,7 +174,7 @@ export class SnapshotService {
     await this.snapshotRepository.save(snapshot)
   }
 
-  async getAllSnapshots(organizationId: string, page = 1, limit = 10) {
+  async getAllSnapshots(organizationId: string, page = 1, limit = 10): Promise<PaginatedList<Snapshot>> {
     const pageNum = Number(page)
     const limitNum = Number(limit)
 

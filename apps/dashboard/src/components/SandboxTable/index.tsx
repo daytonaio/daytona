@@ -45,6 +45,7 @@ export function SandboxTable({
   handleBulkDelete,
   handleArchive,
   handleVnc,
+  getWebTerminalUrl,
   onRowClick,
 }: SandboxTableProps) {
   const navigate = useNavigate()
@@ -63,6 +64,7 @@ export function SandboxTable({
     handleDelete,
     handleArchive,
     handleVnc,
+    getWebTerminalUrl,
   })
 
   const [bulkDeleteDialogOpen, setBulkDeleteDialogOpen] = useState(false)
