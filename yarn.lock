@@ -14838,7 +14838,7 @@ __metadata:
     express-openid-connect: "npm:^2.18.0"
     express-session: "npm:^1.18.1"
     fast-glob: "npm:^3.3.0"
-    form-data: "npm:^4.0.0"
+    form-data: "npm:^4.0.4"
     husky: "npm:^9.1.7"
     ioredis: "npm:^5.5.0"
     is-ci: "npm:^4.1.0"
@@ -17544,6 +17544,19 @@ __metadata:
     hasown: "npm:^2.0.2"
     mime-types: "npm:^2.1.12"
   checksum: 10c0/f0cf45873d600110b5fadf5804478377694f73a1ed97aaa370a74c90cebd7fe6e845a081171668a5476477d0d55a73a4e03d6682968fa8661eac2a81d651fcdb
+  languageName: node
+  linkType: hard
+
+"form-data@npm:^4.0.4":
+  version: 4.0.4
+  resolution: "form-data@npm:4.0.4"
+  dependencies:
+    asynckit: "npm:^0.4.0"
+    combined-stream: "npm:^1.0.8"
+    es-set-tostringtag: "npm:^2.1.0"
+    hasown: "npm:^2.0.2"
+    mime-types: "npm:^2.1.12"
+  checksum: 10c0/373525a9a034b9d57073e55eab79e501a714ffac02e7a9b01be1c820780652b16e4101819785e1e18f8d98f0aee866cc654d660a435c378e16a72f2e7cac9695
   languageName: node
   linkType: hard
 
