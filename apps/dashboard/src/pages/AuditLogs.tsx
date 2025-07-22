@@ -92,6 +92,10 @@ const AuditLogs: React.FC = () => {
       }))
     }
 
+    if (!notificationSocket) {
+      return
+    }
+
     if (realTimeUpdatesEnabled) {
       notificationSocket.on('audit-log.created', handleAuditLogCreatedEvent)
       notificationSocket.on('audit-log.updated', handleAuditLogUpdatedEvent)
