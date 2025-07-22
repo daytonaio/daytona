@@ -14,7 +14,6 @@ import {
   SandboxVolume,
 } from '@daytonaio/api-client'
 import axios, { AxiosError } from 'axios'
-import * as dotenv from 'dotenv'
 import { SandboxPythonCodeToolbox } from './code-toolbox/SandboxPythonCodeToolbox'
 import { SandboxTsCodeToolbox } from './code-toolbox/SandboxTsCodeToolbox'
 import { DaytonaError, DaytonaNotFoundError } from './errors/DaytonaError'
@@ -24,6 +23,7 @@ import { SnapshotService } from './Snapshot'
 import { VolumeService } from './Volume'
 import * as packageJson from '../package.json'
 import { processStreamingResponse } from './utils/Stream'
+import { getEnvVar, RUNTIME, Runtime } from './utils/Runtime'
 
 /**
  * Represents a volume mount for a Sandbox.
@@ -201,6 +201,7 @@ export type SandboxFilter = {
  * @class
  */
 export class Daytona {
+  private readonly clientConfig: Configuration
   private readonly sandboxApi: SandboxApi
   private readonly toolboxApi: ToolboxApi
   private readonly objectStorageApi: ObjectStorageApi
@@ -229,26 +230,30 @@ export class Daytona {
     }
 
     if (
-      !config ||
-      (!(this.apiKey && apiUrl && this.target) && !(this.jwtToken && this.organizationId && apiUrl && this.target))
+      (!config ||
+        (!(this.apiKey && apiUrl && this.target) &&
+          !(this.jwtToken && this.organizationId && apiUrl && this.target))) &&
+      RUNTIME !== Runtime.BROWSER
     ) {
-      dotenv.config({ quiet: true })
-      dotenv.config({ path: '.env.local', override: true, quiet: true })
-      this.apiKey = this.apiKey || (this.jwtToken ? undefined : process?.env['DAYTONA_API_KEY'])
-      this.jwtToken = this.jwtToken || process?.env['DAYTONA_JWT_TOKEN']
-      this.organizationId = this.organizationId || process?.env['DAYTONA_ORGANIZATION_ID']
-      apiUrl =
-        apiUrl || process?.env['DAYTONA_API_URL'] || process?.env['DAYTONA_SERVER_URL'] || 'https://app.daytona.io/api'
-      this.target = this.target || process?.env['DAYTONA_TARGET']
+      if (RUNTIME === Runtime.NODE) {
+        const dotenv = require('dotenv')
+        dotenv.config({ quiet: true })
+        dotenv.config({ path: '.env.local', override: true, quiet: true })
+      }
+      this.apiKey = this.apiKey || (this.jwtToken ? undefined : getEnvVar('DAYTONA_API_KEY'))
+      this.jwtToken = this.jwtToken || getEnvVar('DAYTONA_JWT_TOKEN')
+      this.organizationId = this.organizationId || getEnvVar('DAYTONA_ORGANIZATION_ID')
+      apiUrl = apiUrl || getEnvVar('DAYTONA_API_URL') || getEnvVar('DAYTONA_SERVER_URL')
+      this.target = this.target || getEnvVar('DAYTONA_TARGET')
 
-      if (process?.env['DAYTONA_SERVER_URL'] && !process?.env['DAYTONA_API_URL']) {
+      if (getEnvVar('DAYTONA_SERVER_URL') && !getEnvVar('DAYTONA_API_URL')) {
         console.warn(
           '[Deprecation Warning] Environment variable `DAYTONA_SERVER_URL` is deprecated and will be removed in future versions. Use `DAYTONA_API_URL` instead.',
         )
       }
     }
 
-    this.apiUrl = apiUrl
+    this.apiUrl = apiUrl || 'https://app.daytona.io/api'
 
     const orgHeader: Record<string, string> = {}
     if (!this.apiKey) {
@@ -305,7 +310,12 @@ export class Daytona {
     this.toolboxApi = new ToolboxApi(configuration, '', axiosInstance)
     this.objectStorageApi = new ObjectStorageApi(configuration, '', axiosInstance)
     this.volume = new VolumeService(new VolumesApi(configuration, '', axiosInstance))
-    this.snapshot = new SnapshotService(new SnapshotsApi(configuration, '', axiosInstance), this.objectStorageApi)
+    this.snapshot = new SnapshotService(
+      configuration,
+      new SnapshotsApi(configuration, '', axiosInstance),
+      this.objectStorageApi,
+    )
+    this.clientConfig = configuration
   }
 
   /**
@@ -480,8 +490,10 @@ export class Daytona {
           sandboxInstance = (await this.sandboxApi.getSandbox(sandboxInstance.id)).data
         }
 
+        const url = `${this.clientConfig.basePath}/sandbox/${sandboxInstance.id}/build-logs?follow=true`
+
         await processStreamingResponse(
-          () => this.sandboxApi.getBuildLogs(sandboxInstance.id, undefined, true, { responseType: 'stream' }),
+          () => fetch(url, { method: 'GET', headers: this.clientConfig.baseOptions.headers }),
           (chunk) => options.onSnapshotCreateLogs?.(chunk.trimEnd()),
           async () => {
             sandboxInstance = (await this.sandboxApi.getSandbox(sandboxInstance.id)).data
@@ -490,7 +502,7 @@ export class Daytona {
         )
       }
 
-      const sandbox = new Sandbox(sandboxInstance, this.sandboxApi, this.toolboxApi, codeToolbox)
+      const sandbox = new Sandbox(sandboxInstance, this.clientConfig, this.sandboxApi, this.toolboxApi, codeToolbox)
 
       if (sandbox.state !== 'started') {
         const timeElapsed = Date.now() - startTime
@@ -523,7 +535,7 @@ export class Daytona {
     const language = sandboxInstance.labels && sandboxInstance.labels['code-toolbox-language']
     const codeToolbox = this.getCodeToolbox(language as CodeLanguage)
 
-    return new Sandbox(sandboxInstance, this.sandboxApi, this.toolboxApi, codeToolbox)
+    return new Sandbox(sandboxInstance, this.clientConfig, this.sandboxApi, this.toolboxApi, codeToolbox)
   }
 
   /**
@@ -570,7 +582,7 @@ export class Daytona {
     return response.data.map((sandbox) => {
       const language = sandbox.labels?.['code-toolbox-language'] as CodeLanguage
 
-      return new Sandbox(sandbox, this.sandboxApi, this.toolboxApi, this.getCodeToolbox(language))
+      return new Sandbox(sandbox, this.clientConfig, this.sandboxApi, this.toolboxApi, this.getCodeToolbox(language))
     })
   }
 

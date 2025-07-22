@@ -4,86 +4,65 @@
  */
 
 /**
- * Process a streaming response from a URL. Stream will terminate if the server-side stream
- * ends or if the shouldTerminate function returns True.
+ * Process a streaming response from fetch(), where getStream() returns a Fetch Response.
  *
- * @param getStream - A function that returns a promise of an AxiosResponse with .data being the stream
- * @param onChunk - A function to process each chunk of the response
- * @param shouldTerminate - A function to check if the response should be terminated
- * @param chunkTimeout - The timeout for each chunk
- * @param requireConsecutiveTermination - Whether to require two consecutive termination signals
- * to terminate the stream.
+ * @param getStream – zero-arg function that does `await fetch(...)` and returns the Response
+ * @param onChunk – called with each decoded UTF-8 chunk
+ * @param shouldTerminate – pollable; if true for two consecutive timeouts (or once if requireConsecutiveTermination=false), the loop breaks
+ * @param chunkTimeout – milliseconds to wait for a new chunk before calling shouldTerminate()
+ * @param requireConsecutiveTermination – whether you need two time-outs in a row to break
  */
 export async function processStreamingResponse(
-  getStream: () => Promise<any>, // can return AxiosResponse with .data being the stream
+  getStream: () => Promise<Response>,
   onChunk: (chunk: string) => void,
   shouldTerminate: () => Promise<boolean>,
   chunkTimeout = 2000,
   requireConsecutiveTermination = true,
 ): Promise<void> {
-  const response = await getStream()
-  const stream = response.data
-
-  let nextChunkPromise: Promise<Buffer | null> | null = null
+  const res = await getStream()
+  if (!res.body) throw new Error('No streaming support')
+  const reader = res.body.getReader()
+  const decoder = new TextDecoder()
+  const TIMEOUT = Symbol()
   let exitCheckStreak = 0
-  let terminated = false
 
-  const readNext = (): Promise<Buffer | null> => {
-    return new Promise((resolve) => {
-      const onData = (data: Buffer) => {
-        cleanup()
-        resolve(data)
-      }
-      const cleanup = () => {
-        stream.off('data', onData)
-      }
-      stream.once('data', onData)
-    })
-  }
+  // Only one pending read promise at a time:
+  let readPromise: Promise<Uint8Array | null> | null = null
 
-  const terminationPromise = new Promise<void>((resolve, reject) => {
-    stream.on('end', () => {
-      terminated = true
-      resolve()
-    })
-    stream.on('close', () => {
-      terminated = true
-      resolve()
-    })
-    stream.on('error', (err: Error) => {
-      terminated = true
-      reject(err)
-    })
-  })
-
-  const processLoop = async () => {
-    while (!terminated) {
-      if (!nextChunkPromise) {
-        nextChunkPromise = readNext()
+  try {
+    while (true) {
+      // Start a read if none in flight
+      if (!readPromise) {
+        readPromise = reader.read().then((r) => (r.done ? null : (r.value ?? new Uint8Array(0))))
       }
 
-      const timeoutPromise = new Promise<null>((resolve) => setTimeout(() => resolve(null), chunkTimeout))
-      const result = await Promise.race([nextChunkPromise, timeoutPromise])
+      // Race that single read against your timeout
+      const timeoutPromise = new Promise<typeof TIMEOUT>((r) => setTimeout(() => r(TIMEOUT), chunkTimeout))
+      const result = await Promise.race([readPromise, timeoutPromise])
 
-      if (result instanceof Buffer) {
-        onChunk(result.toString('utf8'))
-        nextChunkPromise = null
-        exitCheckStreak = 0
-      } else {
-        const shouldEnd = await shouldTerminate()
-        if (shouldEnd) {
-          exitCheckStreak += 1
-          if (!requireConsecutiveTermination || exitCheckStreak > 1) {
-            break
-          }
+      if (result === TIMEOUT) {
+        // no data yet, but the readPromise is still pending
+        const stop = await shouldTerminate()
+        if (stop) {
+          exitCheckStreak++
+          if (!requireConsecutiveTermination || exitCheckStreak > 1) break
         } else {
           exitCheckStreak = 0
         }
+        // loop again—but do NOT overwrite readPromise!
+      } else {
+        // readPromise has resolved
+        readPromise = null
+        if (result === null) {
+          // stream closed
+          break
+        }
+        // valid chunk
+        onChunk(decoder.decode(result))
+        exitCheckStreak = 0
       }
     }
-    stream.destroy()
-    stream.removeAllListeners()
+  } finally {
+    await reader.cancel()
   }
-
-  await Promise.race([processLoop(), terminationPromise])
 }

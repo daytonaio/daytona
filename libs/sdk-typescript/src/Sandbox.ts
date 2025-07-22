@@ -12,6 +12,7 @@ import {
   SandboxVolume,
   BuildInfo,
   SandboxBackupStateEnum,
+  Configuration,
 } from '@daytonaio/api-client'
 import { FileSystem } from './FileSystem'
 import { Git } from './Git'
@@ -107,6 +108,7 @@ export class Sandbox implements SandboxDto {
    */
   constructor(
     sandboxDto: SandboxDto,
+    private readonly clientConfig: Configuration,
     private readonly sandboxApi: SandboxApi,
     private readonly toolboxApi: ToolboxApi,
     private readonly codeToolbox: SandboxCodeToolbox,
@@ -115,7 +117,13 @@ export class Sandbox implements SandboxDto {
     this.rootDir = ''
     this.fs = new FileSystem(this.id, this.toolboxApi, async () => await this.getRootDir())
     this.git = new Git(this.id, this.toolboxApi, async () => await this.getRootDir())
-    this.process = new Process(this.id, this.codeToolbox, this.toolboxApi, async () => await this.getRootDir())
+    this.process = new Process(
+      this.id,
+      this.clientConfig,
+      this.codeToolbox,
+      this.toolboxApi,
+      async () => await this.getRootDir(),
+    )
     this.computerUse = new ComputerUse(this.id, this.toolboxApi)
   }
 

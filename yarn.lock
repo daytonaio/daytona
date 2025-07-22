@@ -14885,6 +14885,7 @@ __metadata:
     passport: "npm:^0.7.0"
     passport-http-bearer: "npm:^1.0.1"
     passport-jwt: "npm:^4.0.1"
+    pathe: "npm:^2.0.3"
     pg: "npm:^8.13.3"
     postcss: "npm:8.4.38"
     posthog-js: "npm:^1.217.6"
@@ -14913,8 +14914,6 @@ __metadata:
     sonner: "npm:^1.7.4"
     sqlite3: "npm:^5.1.7"
     starlight-openapi: "npm:^0.19.1"
-    stylus: "github:stylus/stylus#0.64.0"
-    stylus-loader: "npm:^7.1.0"
     suspend-react: "npm:^0.1.3"
     tailwind: "npm:^4.0.0"
     tailwind-merge: "npm:^3.0.1"
@@ -24677,7 +24676,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pathe@npm:^2.0.1":
+"pathe@npm:^2.0.1, pathe@npm:^2.0.3":
   version: 2.0.3
   resolution: "pathe@npm:2.0.3"
   checksum: 10c0/c118dc5a8b5c4166011b2b70608762e260085180bb9e33e80a50dcdb1e78c010b1624f4280c492c92b05fc276715a4c357d1f9edc570f8f1b3d90b6839ebaca1
@@ -29308,9 +29307,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"stylus@github:stylus/stylus#0.64.0":
+"stylus@npm:^0.64.0":
   version: 0.64.0
-  resolution: "stylus@https://github.com/stylus/stylus.git#commit=1086c6c1fbd7a7fd0ce9ad94f6cf4a62fc79a6e9"
+  resolution: "stylus@npm:0.64.0"
   dependencies:
     "@adobe/css-tools": "npm:~4.3.3"
     debug: "npm:^4.3.2"
@@ -29319,7 +29318,7 @@ __metadata:
     source-map: "npm:^0.7.3"
   bin:
     stylus: bin/stylus
-  checksum: 10c0/47a1ba772d7438112ddb1e985a1050c39d461e5035bc9728fa244c2fb3149d7c81c29be15ac156f43ace8b8dad9390c2764349238d5b3c91abb56cb9f076edb1
+  checksum: 10c0/8081ec48a6e85945202f72c3dae495c1086b1acedfb0b969fc7d9bac25be6de21efe073da5d287a5cdd2592b23b4b6e2af6eb0d8db42c3d39edb89715343d8aa
   languageName: node
   linkType: hard
 
