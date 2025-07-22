@@ -123,15 +123,15 @@ function App() {
           element={
             <Suspense fallback={<LoadingFallback />}>
               <ApiProvider>
-                <NotificationSocketProvider>
-                  <OrganizationsProvider>
-                    <SelectedOrganizationProvider>
-                      <UserOrganizationInvitationsProvider>
+                <OrganizationsProvider>
+                  <SelectedOrganizationProvider>
+                    <UserOrganizationInvitationsProvider>
+                      <NotificationSocketProvider>
                         <Dashboard />
-                      </UserOrganizationInvitationsProvider>
-                    </SelectedOrganizationProvider>
-                  </OrganizationsProvider>
-                </NotificationSocketProvider>
+                      </NotificationSocketProvider>
+                    </UserOrganizationInvitationsProvider>
+                  </SelectedOrganizationProvider>
+                </OrganizationsProvider>
               </ApiProvider>
             </Suspense>
           }

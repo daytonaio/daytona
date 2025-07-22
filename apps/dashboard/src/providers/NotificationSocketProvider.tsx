@@ -4,9 +4,10 @@
  */
 
 import { useAuth } from 'react-oidc-context'
-import { ReactNode, useEffect, useRef } from 'react'
-import { io } from 'socket.io-client'
+import { ReactNode, useEffect, useState } from 'react'
+import { io, Socket } from 'socket.io-client'
 import { NotificationSocketContext } from '@/contexts/NotificationSocketContext'
+import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 
 type Props = {
   children: ReactNode
@@ -14,28 +15,34 @@ type Props = {
 
 export function NotificationSocketProvider(props: Props) {
   const { user } = useAuth()
-  const notificationSocketRef = useRef(
-    io(window.location.origin, {
+  const { selectedOrganization } = useSelectedOrganization()
+  const [notificationSocket, setNotificationSocket] = useState<Socket | null>(null)
+
+  useEffect(() => {
+    const socket = io(window.location.origin, {
       path: '/api/socket.io/',
       autoConnect: false,
       transports: ['websocket', 'webtransport'],
-    }),
-  )
+      query: {
+        organizationId: selectedOrganization?.id,
+      },
+    })
 
-  useEffect(() => {
-    const socket = notificationSocketRef.current
+    setNotificationSocket(socket)
+
     if (user) {
       const token = user.access_token
       socket.auth = { token }
       socket.connect()
     }
+
     return () => {
       socket.disconnect()
     }
-  }, [user])
+  }, [user, selectedOrganization?.id])
 
   return (
-    <NotificationSocketContext.Provider value={{ notificationSocket: notificationSocketRef.current }}>
+    <NotificationSocketContext.Provider value={{ notificationSocket }}>
       {props.children}
     </NotificationSocketContext.Provider>
   )
