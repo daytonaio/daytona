@@ -156,6 +156,10 @@ const Snapshots: React.FC = () => {
       })
     }
 
+    if (!notificationSocket) {
+      return
+    }
+
     notificationSocket.on('snapshot.created', handleSnapshotCreatedEvent)
     notificationSocket.on('snapshot.state.updated', handleSnapshotStateUpdatedEvent)
     notificationSocket.on('snapshot.enabled.toggled', handleSnapshotEnabledToggledEvent)

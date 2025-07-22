@@ -151,6 +151,10 @@ const Sandboxes: React.FC = () => {
       }
     }
 
+    if (!notificationSocket) {
+      return
+    }
+
     notificationSocket.on('sandbox.created', handleSandboxCreatedEvent)
     notificationSocket.on('sandbox.state.updated', handleSandboxStateUpdatedEvent)
     notificationSocket.on('sandbox.desired-state.updated', handleSandboxDesiredStateUpdatedEvent)
