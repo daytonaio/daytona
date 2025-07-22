@@ -61,13 +61,6 @@ export class SnapshotManager {
 
     const skip = (await this.redis.get('sync-runner-snapshots-skip')) || 0
 
-    const totalRunners = await this.runnerRepository.count({
-      where: {
-        state: RunnerState.READY,
-        unschedulable: false,
-      },
-    })
-
     const snapshots = await this.snapshotRepository
       .createQueryBuilder('snapshot')
       .innerJoin('organization', 'org', 'org.id = snapshot.organizationId')
@@ -84,17 +77,6 @@ export class SnapshotManager {
     }
 
     await this.redis.set('sync-runner-snapshots-skip', Number(skip) + snapshots.length)
-
-    const snapshotRunners = await this.snapshotRunnerRepository.count({
-      where: {
-        snapshotRef: In(snapshots.map((snapshot) => snapshot.internalName)),
-        state: SnapshotRunnerState.READY,
-      },
-    })
-
-    if (snapshotRunners === totalRunners) {
-      return
-    }
 
     await Promise.all(
       snapshots.map((snapshot) => {
