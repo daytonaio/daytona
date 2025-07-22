@@ -30,7 +30,7 @@ import { OrganizationEvents } from '../../organization/constants/organization-ev
 import { OrganizationSuspendedSnapshotDeactivatedEvent } from '../../organization/events/organization-suspended-snapshot-deactivated.event'
 import { SnapshotRunnerState } from '../enums/snapshot-runner-state.enum'
 
-const IMAGE_NAME_REGEX = /^[a-zA-Z0-9.\-:]+(\/[a-zA-Z0-9.\-:]+)*$/
+const IMAGE_NAME_REGEX = /^[a-zA-Z0-9_.\-:]+(\/[a-zA-Z0-9_.\-:]+)*$/
 @Injectable()
 export class SnapshotService {
   private readonly logger = new Logger(SnapshotService.name)
