@@ -41,6 +41,14 @@ class Runner(BaseModel):
     var_class: SandboxClass = Field(description="The class of the runner", alias="class")
     used: Union[StrictFloat, StrictInt] = Field(description="The current usage of the runner")
     capacity: Union[StrictFloat, StrictInt] = Field(description="The capacity of the runner")
+    current_cpu_usage_percentage: Union[StrictFloat, StrictInt] = Field(description="Current CPU usage percentage", alias="currentCpuUsagePercentage")
+    current_memory_usage_percentage: Union[StrictFloat, StrictInt] = Field(description="Current RAM usage percentage", alias="currentMemoryUsagePercentage")
+    current_disk_usage_percentage: Union[StrictFloat, StrictInt] = Field(description="Current disk usage percentage", alias="currentDiskUsagePercentage")
+    current_allocated_cpu: Union[StrictFloat, StrictInt] = Field(description="Current allocated CPU", alias="currentAllocatedCpu")
+    current_allocated_memory: Union[StrictFloat, StrictInt] = Field(description="Current allocated memory", alias="currentAllocatedMemory")
+    current_allocated_disk: Union[StrictFloat, StrictInt] = Field(description="Current allocated disk", alias="currentAllocatedDisk")
+    current_snapshot_count: Union[StrictFloat, StrictInt] = Field(description="Current snapshot count", alias="currentSnapshotCount")
+    availability_score: Union[StrictFloat, StrictInt] = Field(description="Runner availability score", alias="availabilityScore")
     region: StrictStr = Field(description="The region of the runner")
     state: RunnerState = Field(description="The state of the runner")
     last_checked: Optional[StrictStr] = Field(default=None, description="The last time the runner was checked", alias="lastChecked")
@@ -48,7 +56,7 @@ class Runner(BaseModel):
     created_at: StrictStr = Field(description="The creation timestamp of the runner", alias="createdAt")
     updated_at: StrictStr = Field(description="The last update timestamp of the runner", alias="updatedAt")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["id", "domain", "apiUrl", "apiKey", "cpu", "memory", "disk", "gpu", "gpuType", "class", "used", "capacity", "region", "state", "lastChecked", "unschedulable", "createdAt", "updatedAt"]
+    __properties: ClassVar[List[str]] = ["id", "domain", "apiUrl", "apiKey", "cpu", "memory", "disk", "gpu", "gpuType", "class", "used", "capacity", "currentCpuUsagePercentage", "currentMemoryUsagePercentage", "currentDiskUsagePercentage", "currentAllocatedCpu", "currentAllocatedMemory", "currentAllocatedDisk", "currentSnapshotCount", "availabilityScore", "region", "state", "lastChecked", "unschedulable", "createdAt", "updatedAt"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -120,6 +128,14 @@ class Runner(BaseModel):
             "class": obj.get("class"),
             "used": obj.get("used"),
             "capacity": obj.get("capacity"),
+            "currentCpuUsagePercentage": obj.get("currentCpuUsagePercentage"),
+            "currentMemoryUsagePercentage": obj.get("currentMemoryUsagePercentage"),
+            "currentDiskUsagePercentage": obj.get("currentDiskUsagePercentage"),
+            "currentAllocatedCpu": obj.get("currentAllocatedCpu"),
+            "currentAllocatedMemory": obj.get("currentAllocatedMemory"),
+            "currentAllocatedDisk": obj.get("currentAllocatedDisk"),
+            "currentSnapshotCount": obj.get("currentSnapshotCount"),
+            "availabilityScore": obj.get("availabilityScore"),
             "region": obj.get("region"),
             "state": obj.get("state"),
             "lastChecked": obj.get("lastChecked"),

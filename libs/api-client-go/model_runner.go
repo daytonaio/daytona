@@ -46,6 +46,22 @@ type Runner struct {
 	Used float32 `json:"used"`
 	// The capacity of the runner
 	Capacity float32 `json:"capacity"`
+	// Current CPU usage percentage
+	CurrentCpuUsagePercentage float32 `json:"currentCpuUsagePercentage"`
+	// Current RAM usage percentage
+	CurrentMemoryUsagePercentage float32 `json:"currentMemoryUsagePercentage"`
+	// Current disk usage percentage
+	CurrentDiskUsagePercentage float32 `json:"currentDiskUsagePercentage"`
+	// Current allocated CPU
+	CurrentAllocatedCpu float32 `json:"currentAllocatedCpu"`
+	// Current allocated memory
+	CurrentAllocatedMemory float32 `json:"currentAllocatedMemory"`
+	// Current allocated disk
+	CurrentAllocatedDisk float32 `json:"currentAllocatedDisk"`
+	// Current snapshot count
+	CurrentSnapshotCount float32 `json:"currentSnapshotCount"`
+	// Runner availability score
+	AvailabilityScore float32 `json:"availabilityScore"`
 	// The region of the runner
 	Region string `json:"region"`
 	// The state of the runner
@@ -66,7 +82,7 @@ type _Runner Runner
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewRunner(id string, domain string, apiUrl string, apiKey string, cpu float32, memory float32, disk float32, gpu float32, gpuType string, class SandboxClass, used float32, capacity float32, region string, state RunnerState, unschedulable bool, createdAt string, updatedAt string) *Runner {
+func NewRunner(id string, domain string, apiUrl string, apiKey string, cpu float32, memory float32, disk float32, gpu float32, gpuType string, class SandboxClass, used float32, capacity float32, currentCpuUsagePercentage float32, currentMemoryUsagePercentage float32, currentDiskUsagePercentage float32, currentAllocatedCpu float32, currentAllocatedMemory float32, currentAllocatedDisk float32, currentSnapshotCount float32, availabilityScore float32, region string, state RunnerState, unschedulable bool, createdAt string, updatedAt string) *Runner {
 	this := Runner{}
 	this.Id = id
 	this.Domain = domain
@@ -80,6 +96,14 @@ func NewRunner(id string, domain string, apiUrl string, apiKey string, cpu float
 	this.Class = class
 	this.Used = used
 	this.Capacity = capacity
+	this.CurrentCpuUsagePercentage = currentCpuUsagePercentage
+	this.CurrentMemoryUsagePercentage = currentMemoryUsagePercentage
+	this.CurrentDiskUsagePercentage = currentDiskUsagePercentage
+	this.CurrentAllocatedCpu = currentAllocatedCpu
+	this.CurrentAllocatedMemory = currentAllocatedMemory
+	this.CurrentAllocatedDisk = currentAllocatedDisk
+	this.CurrentSnapshotCount = currentSnapshotCount
+	this.AvailabilityScore = availabilityScore
 	this.Region = region
 	this.State = state
 	this.Unschedulable = unschedulable
@@ -384,6 +408,198 @@ func (o *Runner) SetCapacity(v float32) {
 	o.Capacity = v
 }
 
+// GetCurrentCpuUsagePercentage returns the CurrentCpuUsagePercentage field value
+func (o *Runner) GetCurrentCpuUsagePercentage() float32 {
+	if o == nil {
+		var ret float32
+		return ret
+	}
+
+	return o.CurrentCpuUsagePercentage
+}
+
+// GetCurrentCpuUsagePercentageOk returns a tuple with the CurrentCpuUsagePercentage field value
+// and a boolean to check if the value has been set.
+func (o *Runner) GetCurrentCpuUsagePercentageOk() (*float32, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.CurrentCpuUsagePercentage, true
+}
+
+// SetCurrentCpuUsagePercentage sets field value
+func (o *Runner) SetCurrentCpuUsagePercentage(v float32) {
+	o.CurrentCpuUsagePercentage = v
+}
+
+// GetCurrentMemoryUsagePercentage returns the CurrentMemoryUsagePercentage field value
+func (o *Runner) GetCurrentMemoryUsagePercentage() float32 {
+	if o == nil {
+		var ret float32
+		return ret
+	}
+
+	return o.CurrentMemoryUsagePercentage
+}
+
+// GetCurrentMemoryUsagePercentageOk returns a tuple with the CurrentMemoryUsagePercentage field value
+// and a boolean to check if the value has been set.
+func (o *Runner) GetCurrentMemoryUsagePercentageOk() (*float32, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.CurrentMemoryUsagePercentage, true
+}
+
+// SetCurrentMemoryUsagePercentage sets field value
+func (o *Runner) SetCurrentMemoryUsagePercentage(v float32) {
+	o.CurrentMemoryUsagePercentage = v
+}
+
+// GetCurrentDiskUsagePercentage returns the CurrentDiskUsagePercentage field value
+func (o *Runner) GetCurrentDiskUsagePercentage() float32 {
+	if o == nil {
+		var ret float32
+		return ret
+	}
+
+	return o.CurrentDiskUsagePercentage
+}
+
+// GetCurrentDiskUsagePercentageOk returns a tuple with the CurrentDiskUsagePercentage field value
+// and a boolean to check if the value has been set.
+func (o *Runner) GetCurrentDiskUsagePercentageOk() (*float32, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.CurrentDiskUsagePercentage, true
+}
+
+// SetCurrentDiskUsagePercentage sets field value
+func (o *Runner) SetCurrentDiskUsagePercentage(v float32) {
+	o.CurrentDiskUsagePercentage = v
+}
+
+// GetCurrentAllocatedCpu returns the CurrentAllocatedCpu field value
+func (o *Runner) GetCurrentAllocatedCpu() float32 {
+	if o == nil {
+		var ret float32
+		return ret
+	}
+
+	return o.CurrentAllocatedCpu
+}
+
+// GetCurrentAllocatedCpuOk returns a tuple with the CurrentAllocatedCpu field value
+// and a boolean to check if the value has been set.
+func (o *Runner) GetCurrentAllocatedCpuOk() (*float32, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.CurrentAllocatedCpu, true
+}
+
+// SetCurrentAllocatedCpu sets field value
+func (o *Runner) SetCurrentAllocatedCpu(v float32) {
+	o.CurrentAllocatedCpu = v
+}
+
+// GetCurrentAllocatedMemory returns the CurrentAllocatedMemory field value
+func (o *Runner) GetCurrentAllocatedMemory() float32 {
+	if o == nil {
+		var ret float32
+		return ret
+	}
+
+	return o.CurrentAllocatedMemory
+}
+
+// GetCurrentAllocatedMemoryOk returns a tuple with the CurrentAllocatedMemory field value
+// and a boolean to check if the value has been set.
+func (o *Runner) GetCurrentAllocatedMemoryOk() (*float32, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.CurrentAllocatedMemory, true
+}
+
+// SetCurrentAllocatedMemory sets field value
+func (o *Runner) SetCurrentAllocatedMemory(v float32) {
+	o.CurrentAllocatedMemory = v
+}
+
+// GetCurrentAllocatedDisk returns the CurrentAllocatedDisk field value
+func (o *Runner) GetCurrentAllocatedDisk() float32 {
+	if o == nil {
+		var ret float32
+		return ret
+	}
+
+	return o.CurrentAllocatedDisk
+}
+
+// GetCurrentAllocatedDiskOk returns a tuple with the CurrentAllocatedDisk field value
+// and a boolean to check if the value has been set.
+func (o *Runner) GetCurrentAllocatedDiskOk() (*float32, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.CurrentAllocatedDisk, true
+}
+
+// SetCurrentAllocatedDisk sets field value
+func (o *Runner) SetCurrentAllocatedDisk(v float32) {
+	o.CurrentAllocatedDisk = v
+}
+
+// GetCurrentSnapshotCount returns the CurrentSnapshotCount field value
+func (o *Runner) GetCurrentSnapshotCount() float32 {
+	if o == nil {
+		var ret float32
+		return ret
+	}
+
+	return o.CurrentSnapshotCount
+}
+
+// GetCurrentSnapshotCountOk returns a tuple with the CurrentSnapshotCount field value
+// and a boolean to check if the value has been set.
+func (o *Runner) GetCurrentSnapshotCountOk() (*float32, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.CurrentSnapshotCount, true
+}
+
+// SetCurrentSnapshotCount sets field value
+func (o *Runner) SetCurrentSnapshotCount(v float32) {
+	o.CurrentSnapshotCount = v
+}
+
+// GetAvailabilityScore returns the AvailabilityScore field value
+func (o *Runner) GetAvailabilityScore() float32 {
+	if o == nil {
+		var ret float32
+		return ret
+	}
+
+	return o.AvailabilityScore
+}
+
+// GetAvailabilityScoreOk returns a tuple with the AvailabilityScore field value
+// and a boolean to check if the value has been set.
+func (o *Runner) GetAvailabilityScoreOk() (*float32, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.AvailabilityScore, true
+}
+
+// SetAvailabilityScore sets field value
+func (o *Runner) SetAvailabilityScore(v float32) {
+	o.AvailabilityScore = v
+}
+
 // GetRegion returns the Region field value
 func (o *Runner) GetRegion() string {
 	if o == nil {
@@ -558,6 +774,14 @@ func (o Runner) ToMap() (map[string]interface{}, error) {
 	toSerialize["class"] = o.Class
 	toSerialize["used"] = o.Used
 	toSerialize["capacity"] = o.Capacity
+	toSerialize["currentCpuUsagePercentage"] = o.CurrentCpuUsagePercentage
+	toSerialize["currentMemoryUsagePercentage"] = o.CurrentMemoryUsagePercentage
+	toSerialize["currentDiskUsagePercentage"] = o.CurrentDiskUsagePercentage
+	toSerialize["currentAllocatedCpu"] = o.CurrentAllocatedCpu
+	toSerialize["currentAllocatedMemory"] = o.CurrentAllocatedMemory
+	toSerialize["currentAllocatedDisk"] = o.CurrentAllocatedDisk
+	toSerialize["currentSnapshotCount"] = o.CurrentSnapshotCount
+	toSerialize["availabilityScore"] = o.AvailabilityScore
 	toSerialize["region"] = o.Region
 	toSerialize["state"] = o.State
 	if !IsNil(o.LastChecked) {
@@ -586,6 +810,14 @@ func (o *Runner) UnmarshalJSON(data []byte) (err error) {
 		"class",
 		"used",
 		"capacity",
+		"currentCpuUsagePercentage",
+		"currentMemoryUsagePercentage",
+		"currentDiskUsagePercentage",
+		"currentAllocatedCpu",
+		"currentAllocatedMemory",
+		"currentAllocatedDisk",
+		"currentSnapshotCount",
+		"availabilityScore",
 		"region",
 		"state",
 		"unschedulable",

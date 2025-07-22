@@ -98,6 +98,54 @@ export interface Runner {
    */
   capacity: number
   /**
+   * Current CPU usage percentage
+   * @type {number}
+   * @memberof Runner
+   */
+  currentCpuUsagePercentage: number
+  /**
+   * Current RAM usage percentage
+   * @type {number}
+   * @memberof Runner
+   */
+  currentMemoryUsagePercentage: number
+  /**
+   * Current disk usage percentage
+   * @type {number}
+   * @memberof Runner
+   */
+  currentDiskUsagePercentage: number
+  /**
+   * Current allocated CPU
+   * @type {number}
+   * @memberof Runner
+   */
+  currentAllocatedCpu: number
+  /**
+   * Current allocated memory
+   * @type {number}
+   * @memberof Runner
+   */
+  currentAllocatedMemory: number
+  /**
+   * Current allocated disk
+   * @type {number}
+   * @memberof Runner
+   */
+  currentAllocatedDisk: number
+  /**
+   * Current snapshot count
+   * @type {number}
+   * @memberof Runner
+   */
+  currentSnapshotCount: number
+  /**
+   * Runner availability score
+   * @type {number}
+   * @memberof Runner
+   */
+  availabilityScore: number
+  /**
    * The region of the runner
    * @type {string}
    * @memberof Runner

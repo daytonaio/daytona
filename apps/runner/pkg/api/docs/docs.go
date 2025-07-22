@@ -17,7 +17,7 @@ const docTemplate = `{
     "paths": {
         "/": {
             "get": {
-                "description": "Health check",
+                "description": "Health check with system metrics",
                 "produces": [
                     "application/json"
                 ],
@@ -27,10 +27,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/HealthCheckResponseDTO"
                         }
                     }
                 }
@@ -1154,6 +1151,46 @@ const docTemplate = `{
                 "timestamp": {
                     "type": "string",
                     "example": "2023-01-01T12:00:00Z"
+                }
+            }
+        },
+        "HealthCheckResponseDTO": {
+            "type": "object",
+            "properties": {
+                "metrics": {
+                    "$ref": "#/definitions/HealthMetrics"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "version": {
+                    "type": "string"
+                }
+            }
+        },
+        "HealthMetrics": {
+            "type": "object",
+            "properties": {
+                "currentAllocatedCpu": {
+                    "type": "integer"
+                },
+                "currentAllocatedDisk": {
+                    "type": "integer"
+                },
+                "currentAllocatedMemory": {
+                    "type": "integer"
+                },
+                "currentCpuUsagePercentage": {
+                    "type": "number"
+                },
+                "currentDiskUsagePercentage": {
+                    "type": "number"
+                },
+                "currentMemoryUsagePercentage": {
+                    "type": "number"
+                },
+                "currentSnapshotCount": {
+                    "type": "integer"
                 }
             }
         },

@@ -51,6 +51,49 @@ export class Runner {
   @Column()
   capacity: number
 
+  @Column({
+    type: 'float',
+    default: 0,
+  })
+  currentCpuUsagePercentage: number
+
+  @Column({
+    type: 'float',
+    default: 0,
+  })
+  currentMemoryUsagePercentage: number
+
+  @Column({
+    type: 'float',
+    default: 0,
+  })
+  currentDiskUsagePercentage: number
+
+  @Column({
+    default: 0,
+  })
+  currentAllocatedCpu: number
+
+  @Column({
+    default: 0,
+  })
+  currentAllocatedMemory: number
+
+  @Column({
+    default: 0,
+  })
+  currentAllocatedDisk: number
+
+  @Column({
+    default: 0,
+  })
+  currentSnapshotCount: number
+
+  @Column({
+    default: 0,
+  })
+  availabilityScore: number
+
   @Column()
   region: string
 

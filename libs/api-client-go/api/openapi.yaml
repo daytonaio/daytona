@@ -7109,7 +7109,7 @@ components:
         autoStopInterval: 30
         labels:
           daytona.io/public: 'true'
-        target: us-west
+        target: us
         disk: 3
         autoDeleteInterval: 30
         public: false
@@ -7154,7 +7154,7 @@ components:
           type: string
         target:
           description: The target (region) where the sandbox will be created
-          example: us-west
+          example: us
           type: string
         cpu:
           description: CPU cores allocated to the sandbox
@@ -7243,7 +7243,7 @@ components:
         apiKey: apiKey
         domain: domain
         cpu: 0.8008281904610115
-        region: us-west
+        region: us
         gpu: 5.962133916683182
         class: small
         gpuType: gpuType
@@ -7275,7 +7275,7 @@ components:
         capacity:
           type: number
         region:
-          example: us-west
+          example: us
           type: string
       required:
         - apiKey
@@ -7310,22 +7310,30 @@ components:
       example:
         memory: 16
         apiKey: api-key-123
-        cpu: 8
+        currentMemoryUsagePercentage: 68.2
+        availabilityScore: 85
         used: 2
-        gpu: 1
         capacity: 10
+        currentDiskUsagePercentage: 33.8
+        currentAllocatedDisk: 50000
+        currentCpuUsagePercentage: 45.6
         createdAt: 2023-10-01T12:00:00Z
-        disk: 100
+        currentAllocatedMemory: 8000
         apiUrl: https://api.runner1.example.com
-        domain: runner1.example.com
         id: runner123
         state: initializing
-        region: us-west
         unschedulable: false
         class: small
-        lastChecked: 2024-10-01T12:00:00Z
         gpuType: gpuType
+        currentAllocatedCpu: 4000
         updatedAt: 2023-10-01T12:00:00Z
+        cpu: 8
+        gpu: 1
+        currentSnapshotCount: 12
+        disk: 100
+        domain: runner1.example.com
+        region: us
+        lastChecked: 2024-10-01T12:00:00Z
       properties:
         id:
           description: The ID of the runner
@@ -7375,9 +7383,41 @@ components:
           description: The capacity of the runner
           example: 10
           type: number
+        currentCpuUsagePercentage:
+          description: Current CPU usage percentage
+          example: 45.6
+          type: number
+        currentMemoryUsagePercentage:
+          description: Current RAM usage percentage
+          example: 68.2
+          type: number
+        currentDiskUsagePercentage:
+          description: Current disk usage percentage
+          example: 33.8
+          type: number
+        currentAllocatedCpu:
+          description: Current allocated CPU
+          example: 4000
+          type: number
+        currentAllocatedMemory:
+          description: Current allocated memory
+          example: 8000
+          type: number
+        currentAllocatedDisk:
+          description: Current allocated disk
+          example: 50000
+          type: number
+        currentSnapshotCount:
+          description: Current snapshot count
+          example: 12
+          type: number
+        availabilityScore:
+          description: Runner availability score
+          example: 85
+          type: number
         region:
           description: The region of the runner
-          example: us-west
+          example: us
           type: string
         state:
           allOf:
@@ -7403,10 +7443,18 @@ components:
       required:
         - apiKey
         - apiUrl
+        - availabilityScore
         - capacity
         - class
         - cpu
         - createdAt
+        - currentAllocatedCpu
+        - currentAllocatedDisk
+        - currentAllocatedMemory
+        - currentCpuUsagePercentage
+        - currentDiskUsagePercentage
+        - currentMemoryUsagePercentage
+        - currentSnapshotCount
         - disk
         - domain
         - gpu

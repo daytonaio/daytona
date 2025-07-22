@@ -86,6 +86,54 @@ export class RunnerDto {
   capacity: number
 
   @ApiProperty({
+    description: 'Current CPU usage percentage',
+    example: 45.6,
+  })
+  currentCpuUsagePercentage: number
+
+  @ApiProperty({
+    description: 'Current RAM usage percentage',
+    example: 68.2,
+  })
+  currentMemoryUsagePercentage: number
+
+  @ApiProperty({
+    description: 'Current disk usage percentage',
+    example: 33.8,
+  })
+  currentDiskUsagePercentage: number
+
+  @ApiProperty({
+    description: 'Current allocated CPU',
+    example: 4000,
+  })
+  currentAllocatedCpu: number
+
+  @ApiProperty({
+    description: 'Current allocated memory',
+    example: 8000,
+  })
+  currentAllocatedMemory: number
+
+  @ApiProperty({
+    description: 'Current allocated disk',
+    example: 50000,
+  })
+  currentAllocatedDisk: number
+
+  @ApiProperty({
+    description: 'Current snapshot count',
+    example: 12,
+  })
+  currentSnapshotCount: number
+
+  @ApiProperty({
+    description: 'Runner availability score',
+    example: 85,
+  })
+  availabilityScore: number
+
+  @ApiProperty({
     description: 'The region of the runner',
     example: 'us',
   })
@@ -140,6 +188,14 @@ export class RunnerDto {
       class: runner.class,
       used: runner.used,
       capacity: runner.capacity,
+      currentCpuUsagePercentage: runner.currentCpuUsagePercentage,
+      currentMemoryUsagePercentage: runner.currentMemoryUsagePercentage,
+      currentDiskUsagePercentage: runner.currentDiskUsagePercentage,
+      currentAllocatedCpu: runner.currentAllocatedCpu,
+      currentAllocatedMemory: runner.currentAllocatedMemory,
+      currentAllocatedDisk: runner.currentAllocatedDisk,
+      currentSnapshotCount: runner.currentSnapshotCount,
+      availabilityScore: runner.availabilityScore,
       region: runner.region,
       state: runner.state,
       lastChecked: runner.lastChecked?.toISOString(),
