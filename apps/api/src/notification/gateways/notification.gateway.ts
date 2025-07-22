@@ -53,15 +53,19 @@ export class NotificationGateway implements OnGatewayInit, OnModuleInit {
       if (!token) {
         return next(new UnauthorizedException())
       }
+
       try {
         const payload = await this.jwtStrategy.verifyToken(token)
+
         // Join the user room for user scoped notifications
         await socket.join(payload.sub)
 
         // Join the organization room for organization scoped notifications
-        const organizations = await this.organizationService.findByUser(payload.sub)
-        const organizationIds = organizations.map((organization) => organization.id)
-        await socket.join(organizationIds)
+        const organizationId = socket.handshake.query.organizationId as string | undefined
+        if (organizationId) {
+          await socket.join(organizationId)
+        }
+
         next()
       } catch (error) {
         next(new UnauthorizedException())
