@@ -27,11 +27,11 @@ export class CreateRunnerDto {
 
   @IsNumber()
   @ApiProperty()
-  memory: number
+  memoryGiB: number
 
   @IsNumber()
   @ApiProperty()
-  disk: number
+  diskGiB: number
 
   @IsNumber()
   @ApiProperty()

@@ -8,8 +8,8 @@ type HealthMetrics struct {
 	CurrentMemoryUsagePercentage float64 `json:"currentMemoryUsagePercentage"`
 	CurrentDiskUsagePercentage   float64 `json:"currentDiskUsagePercentage"`
 	CurrentAllocatedCpu          int64   `json:"currentAllocatedCpu"`
-	CurrentAllocatedMemory       int64   `json:"currentAllocatedMemory"`
-	CurrentAllocatedDisk         int64   `json:"currentAllocatedDisk"`
+	CurrentAllocatedMemoryGiB    int64   `json:"currentAllocatedMemoryGiB"`
+	CurrentAllocatedDiskGiB      int64   `json:"currentAllocatedDiskGiB"`
 	CurrentSnapshotCount         int     `json:"currentSnapshotCount"`
 } //	@name	HealthMetrics
 

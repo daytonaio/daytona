@@ -29,13 +29,13 @@ export interface HealthMetrics {
    * @type {number}
    * @memberof HealthMetrics
    */
-  currentAllocatedDisk?: number
+  currentAllocatedDiskGiB?: number
   /**
    *
    * @type {number}
    * @memberof HealthMetrics
    */
-  currentAllocatedMemory?: number
+  currentAllocatedMemoryGiB?: number
   /**
    *
    * @type {number}

@@ -1174,10 +1174,10 @@ const docTemplate = `{
                 "currentAllocatedCpu": {
                     "type": "integer"
                 },
-                "currentAllocatedDisk": {
+                "currentAllocatedDiskGiB": {
                     "type": "integer"
                 },
-                "currentAllocatedMemory": {
+                "currentAllocatedMemoryGiB": {
                     "type": "integer"
                 },
                 "currentCpuUsagePercentage": {

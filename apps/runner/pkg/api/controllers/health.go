@@ -34,8 +34,8 @@ func HealthCheck(ctx *gin.Context) {
 		CurrentMemoryUsagePercentage: ramUsage,
 		CurrentDiskUsagePercentage:   diskUsage,
 		CurrentAllocatedCpu:          allocatedCpu,
-		CurrentAllocatedMemory:       allocatedMemory,
-		CurrentAllocatedDisk:         allocatedDisk,
+		CurrentAllocatedMemoryGiB:    allocatedMemory,
+		CurrentAllocatedDiskGiB:      allocatedDisk,
 		CurrentSnapshotCount:         snapshotCount,
 	}
 

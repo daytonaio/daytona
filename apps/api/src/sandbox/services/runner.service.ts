@@ -54,8 +54,8 @@ export class RunnerService {
     runner.apiUrl = createRunnerDto.apiUrl
     runner.apiKey = createRunnerDto.apiKey
     runner.cpu = createRunnerDto.cpu
-    runner.memoryGiB = createRunnerDto.memory
-    runner.diskGiB = createRunnerDto.disk
+    runner.memoryGiB = createRunnerDto.memoryGiB
+    runner.diskGiB = createRunnerDto.diskGiB
     runner.gpu = createRunnerDto.gpu
     runner.gpuType = createRunnerDto.gpuType
     runner.used = 0
@@ -232,8 +232,8 @@ export class RunnerService {
       updateData.currentMemoryUsagePercentage = metrics.currentMemoryUsagePercentage || 0
       updateData.currentDiskUsagePercentage = metrics.currentDiskUsagePercentage || 0
       updateData.currentAllocatedCpu = metrics.currentAllocatedCpu || 0
-      updateData.currentAllocatedMemory = metrics.currentAllocatedMemory || 0
-      updateData.currentAllocatedDisk = metrics.currentAllocatedDisk || 0
+      updateData.currentAllocatedMemoryGiB = metrics.currentAllocatedMemoryGiB || 0
+      updateData.currentAllocatedDiskGiB = metrics.currentAllocatedDiskGiB || 0
       updateData.currentSnapshotCount = metrics.currentSnapshotCount || 0
 
       updateData.availabilityScore = this.calculateAvailabilityScore({
@@ -241,8 +241,8 @@ export class RunnerService {
         memoryUsage: updateData.currentMemoryUsagePercentage,
         diskUsage: updateData.currentDiskUsagePercentage,
         allocatedCpu: updateData.currentAllocatedCpu,
-        allocatedMemory: updateData.currentAllocatedMemory,
-        allocatedDisk: updateData.currentAllocatedDisk,
+        allocatedMemory: updateData.currentAllocatedMemoryGiB,
+        allocatedDisk: updateData.currentAllocatedDiskGiB,
         capacity: runner.capacity,
         runnerCpu: runner.cpu,
         runnerMemory: runner.memoryGiB,
