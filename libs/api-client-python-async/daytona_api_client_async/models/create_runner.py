@@ -31,15 +31,15 @@ class CreateRunner(BaseModel):
     api_url: StrictStr = Field(alias="apiUrl")
     api_key: StrictStr = Field(alias="apiKey")
     cpu: Union[StrictFloat, StrictInt]
-    memory: Union[StrictFloat, StrictInt]
-    disk: Union[StrictFloat, StrictInt]
+    memory_gi_b: Union[StrictFloat, StrictInt] = Field(alias="memoryGiB")
+    disk_gi_b: Union[StrictFloat, StrictInt] = Field(alias="diskGiB")
     gpu: Union[StrictFloat, StrictInt]
     gpu_type: StrictStr = Field(alias="gpuType")
     var_class: StrictStr = Field(alias="class")
     capacity: Union[StrictFloat, StrictInt]
     region: StrictStr
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["domain", "apiUrl", "apiKey", "cpu", "memory", "disk", "gpu", "gpuType", "class", "capacity", "region"]
+    __properties: ClassVar[List[str]] = ["domain", "apiUrl", "apiKey", "cpu", "memoryGiB", "diskGiB", "gpu", "gpuType", "class", "capacity", "region"]
 
     @field_validator('var_class')
     def var_class_validate_enum(cls, value):
@@ -110,8 +110,8 @@ class CreateRunner(BaseModel):
             "apiUrl": obj.get("apiUrl"),
             "apiKey": obj.get("apiKey"),
             "cpu": obj.get("cpu"),
-            "memory": obj.get("memory"),
-            "disk": obj.get("disk"),
+            "memoryGiB": obj.get("memoryGiB"),
+            "diskGiB": obj.get("diskGiB"),
             "gpu": obj.get("gpu"),
             "gpuType": obj.get("gpuType"),
             "class": obj.get("class"),

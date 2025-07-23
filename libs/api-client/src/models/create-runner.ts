@@ -47,13 +47,13 @@ export interface CreateRunner {
    * @type {number}
    * @memberof CreateRunner
    */
-  memory: number
+  memoryGiB: number
   /**
    *
    * @type {number}
    * @memberof CreateRunner
    */
-  disk: number
+  diskGiB: number
   /**
    *
    * @type {number}
