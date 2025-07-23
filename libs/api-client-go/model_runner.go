@@ -32,9 +32,9 @@ type Runner struct {
 	ApiKey string `json:"apiKey"`
 	// The CPU capacity of the runner
 	Cpu float32 `json:"cpu"`
-	// The memory capacity of the runner in GB
+	// The memory capacity of the runner in GiB
 	Memory float32 `json:"memory"`
-	// The disk capacity of the runner in GB
+	// The disk capacity of the runner in GiB
 	Disk float32 `json:"disk"`
 	// The GPU capacity of the runner
 	Gpu float32 `json:"gpu"`
@@ -46,6 +46,22 @@ type Runner struct {
 	Used float32 `json:"used"`
 	// The capacity of the runner
 	Capacity float32 `json:"capacity"`
+	// Current CPU usage percentage
+	CurrentCpuUsagePercentage *float32 `json:"currentCpuUsagePercentage,omitempty"`
+	// Current RAM usage percentage
+	CurrentMemoryUsagePercentage *float32 `json:"currentMemoryUsagePercentage,omitempty"`
+	// Current disk usage percentage
+	CurrentDiskUsagePercentage *float32 `json:"currentDiskUsagePercentage,omitempty"`
+	// Current allocated CPU
+	CurrentAllocatedCpu *float32 `json:"currentAllocatedCpu,omitempty"`
+	// Current allocated memory in GiB
+	CurrentAllocatedMemoryGiB *float32 `json:"currentAllocatedMemoryGiB,omitempty"`
+	// Current allocated disk in GiB
+	CurrentAllocatedDiskGiB *float32 `json:"currentAllocatedDiskGiB,omitempty"`
+	// Current snapshot count
+	CurrentSnapshotCount *float32 `json:"currentSnapshotCount,omitempty"`
+	// Runner availability score
+	AvailabilityScore *float32 `json:"availabilityScore,omitempty"`
 	// The region of the runner
 	Region string `json:"region"`
 	// The state of the runner
@@ -384,6 +400,262 @@ func (o *Runner) SetCapacity(v float32) {
 	o.Capacity = v
 }
 
+// GetCurrentCpuUsagePercentage returns the CurrentCpuUsagePercentage field value if set, zero value otherwise.
+func (o *Runner) GetCurrentCpuUsagePercentage() float32 {
+	if o == nil || IsNil(o.CurrentCpuUsagePercentage) {
+		var ret float32
+		return ret
+	}
+	return *o.CurrentCpuUsagePercentage
+}
+
+// GetCurrentCpuUsagePercentageOk returns a tuple with the CurrentCpuUsagePercentage field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Runner) GetCurrentCpuUsagePercentageOk() (*float32, bool) {
+	if o == nil || IsNil(o.CurrentCpuUsagePercentage) {
+		return nil, false
+	}
+	return o.CurrentCpuUsagePercentage, true
+}
+
+// HasCurrentCpuUsagePercentage returns a boolean if a field has been set.
+func (o *Runner) HasCurrentCpuUsagePercentage() bool {
+	if o != nil && !IsNil(o.CurrentCpuUsagePercentage) {
+		return true
+	}
+
+	return false
+}
+
+// SetCurrentCpuUsagePercentage gets a reference to the given float32 and assigns it to the CurrentCpuUsagePercentage field.
+func (o *Runner) SetCurrentCpuUsagePercentage(v float32) {
+	o.CurrentCpuUsagePercentage = &v
+}
+
+// GetCurrentMemoryUsagePercentage returns the CurrentMemoryUsagePercentage field value if set, zero value otherwise.
+func (o *Runner) GetCurrentMemoryUsagePercentage() float32 {
+	if o == nil || IsNil(o.CurrentMemoryUsagePercentage) {
+		var ret float32
+		return ret
+	}
+	return *o.CurrentMemoryUsagePercentage
+}
+
+// GetCurrentMemoryUsagePercentageOk returns a tuple with the CurrentMemoryUsagePercentage field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Runner) GetCurrentMemoryUsagePercentageOk() (*float32, bool) {
+	if o == nil || IsNil(o.CurrentMemoryUsagePercentage) {
+		return nil, false
+	}
+	return o.CurrentMemoryUsagePercentage, true
+}
+
+// HasCurrentMemoryUsagePercentage returns a boolean if a field has been set.
+func (o *Runner) HasCurrentMemoryUsagePercentage() bool {
+	if o != nil && !IsNil(o.CurrentMemoryUsagePercentage) {
+		return true
+	}
+
+	return false
+}
+
+// SetCurrentMemoryUsagePercentage gets a reference to the given float32 and assigns it to the CurrentMemoryUsagePercentage field.
+func (o *Runner) SetCurrentMemoryUsagePercentage(v float32) {
+	o.CurrentMemoryUsagePercentage = &v
+}
+
+// GetCurrentDiskUsagePercentage returns the CurrentDiskUsagePercentage field value if set, zero value otherwise.
+func (o *Runner) GetCurrentDiskUsagePercentage() float32 {
+	if o == nil || IsNil(o.CurrentDiskUsagePercentage) {
+		var ret float32
+		return ret
+	}
+	return *o.CurrentDiskUsagePercentage
+}
+
+// GetCurrentDiskUsagePercentageOk returns a tuple with the CurrentDiskUsagePercentage field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Runner) GetCurrentDiskUsagePercentageOk() (*float32, bool) {
+	if o == nil || IsNil(o.CurrentDiskUsagePercentage) {
+		return nil, false
+	}
+	return o.CurrentDiskUsagePercentage, true
+}
+
+// HasCurrentDiskUsagePercentage returns a boolean if a field has been set.
+func (o *Runner) HasCurrentDiskUsagePercentage() bool {
+	if o != nil && !IsNil(o.CurrentDiskUsagePercentage) {
+		return true
+	}
+
+	return false
+}
+
+// SetCurrentDiskUsagePercentage gets a reference to the given float32 and assigns it to the CurrentDiskUsagePercentage field.
+func (o *Runner) SetCurrentDiskUsagePercentage(v float32) {
+	o.CurrentDiskUsagePercentage = &v
+}
+
+// GetCurrentAllocatedCpu returns the CurrentAllocatedCpu field value if set, zero value otherwise.
+func (o *Runner) GetCurrentAllocatedCpu() float32 {
+	if o == nil || IsNil(o.CurrentAllocatedCpu) {
+		var ret float32
+		return ret
+	}
+	return *o.CurrentAllocatedCpu
+}
+
+// GetCurrentAllocatedCpuOk returns a tuple with the CurrentAllocatedCpu field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Runner) GetCurrentAllocatedCpuOk() (*float32, bool) {
+	if o == nil || IsNil(o.CurrentAllocatedCpu) {
+		return nil, false
+	}
+	return o.CurrentAllocatedCpu, true
+}
+
+// HasCurrentAllocatedCpu returns a boolean if a field has been set.
+func (o *Runner) HasCurrentAllocatedCpu() bool {
+	if o != nil && !IsNil(o.CurrentAllocatedCpu) {
+		return true
+	}
+
+	return false
+}
+
+// SetCurrentAllocatedCpu gets a reference to the given float32 and assigns it to the CurrentAllocatedCpu field.
+func (o *Runner) SetCurrentAllocatedCpu(v float32) {
+	o.CurrentAllocatedCpu = &v
+}
+
+// GetCurrentAllocatedMemoryGiB returns the CurrentAllocatedMemoryGiB field value if set, zero value otherwise.
+func (o *Runner) GetCurrentAllocatedMemoryGiB() float32 {
+	if o == nil || IsNil(o.CurrentAllocatedMemoryGiB) {
+		var ret float32
+		return ret
+	}
+	return *o.CurrentAllocatedMemoryGiB
+}
+
+// GetCurrentAllocatedMemoryGiBOk returns a tuple with the CurrentAllocatedMemoryGiB field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Runner) GetCurrentAllocatedMemoryGiBOk() (*float32, bool) {
+	if o == nil || IsNil(o.CurrentAllocatedMemoryGiB) {
+		return nil, false
+	}
+	return o.CurrentAllocatedMemoryGiB, true
+}
+
+// HasCurrentAllocatedMemoryGiB returns a boolean if a field has been set.
+func (o *Runner) HasCurrentAllocatedMemoryGiB() bool {
+	if o != nil && !IsNil(o.CurrentAllocatedMemoryGiB) {
+		return true
+	}
+
+	return false
+}
+
+// SetCurrentAllocatedMemoryGiB gets a reference to the given float32 and assigns it to the CurrentAllocatedMemoryGiB field.
+func (o *Runner) SetCurrentAllocatedMemoryGiB(v float32) {
+	o.CurrentAllocatedMemoryGiB = &v
+}
+
+// GetCurrentAllocatedDiskGiB returns the CurrentAllocatedDiskGiB field value if set, zero value otherwise.
+func (o *Runner) GetCurrentAllocatedDiskGiB() float32 {
+	if o == nil || IsNil(o.CurrentAllocatedDiskGiB) {
+		var ret float32
+		return ret
+	}
+	return *o.CurrentAllocatedDiskGiB
+}
+
+// GetCurrentAllocatedDiskGiBOk returns a tuple with the CurrentAllocatedDiskGiB field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Runner) GetCurrentAllocatedDiskGiBOk() (*float32, bool) {
+	if o == nil || IsNil(o.CurrentAllocatedDiskGiB) {
+		return nil, false
+	}
+	return o.CurrentAllocatedDiskGiB, true
+}
+
+// HasCurrentAllocatedDiskGiB returns a boolean if a field has been set.
+func (o *Runner) HasCurrentAllocatedDiskGiB() bool {
+	if o != nil && !IsNil(o.CurrentAllocatedDiskGiB) {
+		return true
+	}
+
+	return false
+}
+
+// SetCurrentAllocatedDiskGiB gets a reference to the given float32 and assigns it to the CurrentAllocatedDiskGiB field.
+func (o *Runner) SetCurrentAllocatedDiskGiB(v float32) {
+	o.CurrentAllocatedDiskGiB = &v
+}
+
+// GetCurrentSnapshotCount returns the CurrentSnapshotCount field value if set, zero value otherwise.
+func (o *Runner) GetCurrentSnapshotCount() float32 {
+	if o == nil || IsNil(o.CurrentSnapshotCount) {
+		var ret float32
+		return ret
+	}
+	return *o.CurrentSnapshotCount
+}
+
+// GetCurrentSnapshotCountOk returns a tuple with the CurrentSnapshotCount field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Runner) GetCurrentSnapshotCountOk() (*float32, bool) {
+	if o == nil || IsNil(o.CurrentSnapshotCount) {
+		return nil, false
+	}
+	return o.CurrentSnapshotCount, true
+}
+
+// HasCurrentSnapshotCount returns a boolean if a field has been set.
+func (o *Runner) HasCurrentSnapshotCount() bool {
+	if o != nil && !IsNil(o.CurrentSnapshotCount) {
+		return true
+	}
+
+	return false
+}
+
+// SetCurrentSnapshotCount gets a reference to the given float32 and assigns it to the CurrentSnapshotCount field.
+func (o *Runner) SetCurrentSnapshotCount(v float32) {
+	o.CurrentSnapshotCount = &v
+}
+
+// GetAvailabilityScore returns the AvailabilityScore field value if set, zero value otherwise.
+func (o *Runner) GetAvailabilityScore() float32 {
+	if o == nil || IsNil(o.AvailabilityScore) {
+		var ret float32
+		return ret
+	}
+	return *o.AvailabilityScore
+}
+
+// GetAvailabilityScoreOk returns a tuple with the AvailabilityScore field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Runner) GetAvailabilityScoreOk() (*float32, bool) {
+	if o == nil || IsNil(o.AvailabilityScore) {
+		return nil, false
+	}
+	return o.AvailabilityScore, true
+}
+
+// HasAvailabilityScore returns a boolean if a field has been set.
+func (o *Runner) HasAvailabilityScore() bool {
+	if o != nil && !IsNil(o.AvailabilityScore) {
+		return true
+	}
+
+	return false
+}
+
+// SetAvailabilityScore gets a reference to the given float32 and assigns it to the AvailabilityScore field.
+func (o *Runner) SetAvailabilityScore(v float32) {
+	o.AvailabilityScore = &v
+}
+
 // GetRegion returns the Region field value
 func (o *Runner) GetRegion() string {
 	if o == nil {
@@ -558,6 +830,30 @@ func (o Runner) ToMap() (map[string]interface{}, error) {
 	toSerialize["class"] = o.Class
 	toSerialize["used"] = o.Used
 	toSerialize["capacity"] = o.Capacity
+	if !IsNil(o.CurrentCpuUsagePercentage) {
+		toSerialize["currentCpuUsagePercentage"] = o.CurrentCpuUsagePercentage
+	}
+	if !IsNil(o.CurrentMemoryUsagePercentage) {
+		toSerialize["currentMemoryUsagePercentage"] = o.CurrentMemoryUsagePercentage
+	}
+	if !IsNil(o.CurrentDiskUsagePercentage) {
+		toSerialize["currentDiskUsagePercentage"] = o.CurrentDiskUsagePercentage
+	}
+	if !IsNil(o.CurrentAllocatedCpu) {
+		toSerialize["currentAllocatedCpu"] = o.CurrentAllocatedCpu
+	}
+	if !IsNil(o.CurrentAllocatedMemoryGiB) {
+		toSerialize["currentAllocatedMemoryGiB"] = o.CurrentAllocatedMemoryGiB
+	}
+	if !IsNil(o.CurrentAllocatedDiskGiB) {
+		toSerialize["currentAllocatedDiskGiB"] = o.CurrentAllocatedDiskGiB
+	}
+	if !IsNil(o.CurrentSnapshotCount) {
+		toSerialize["currentSnapshotCount"] = o.CurrentSnapshotCount
+	}
+	if !IsNil(o.AvailabilityScore) {
+		toSerialize["availabilityScore"] = o.AvailabilityScore
+	}
 	toSerialize["region"] = o.Region
 	toSerialize["state"] = o.State
 	if !IsNil(o.LastChecked) {

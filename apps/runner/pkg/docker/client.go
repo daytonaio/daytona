@@ -38,6 +38,10 @@ func NewDockerClient(config DockerClientConfig) *DockerClient {
 	}
 }
 
+func (d *DockerClient) ApiClient() client.APIClient {
+	return d.apiClient
+}
+
 type DockerClient struct {
 	apiClient             client.APIClient
 	cache                 cache.IRunnerCache

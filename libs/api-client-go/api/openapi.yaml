@@ -7109,7 +7109,7 @@ components:
         autoStopInterval: 30
         labels:
           daytona.io/public: 'true'
-        target: us-west
+        target: us
         disk: 3
         autoDeleteInterval: 30
         public: false
@@ -7154,7 +7154,7 @@ components:
           type: string
         target:
           description: The target (region) where the sandbox will be created
-          example: us-west
+          example: us
           type: string
         cpu:
           description: CPU cores allocated to the sandbox
@@ -7237,13 +7237,13 @@ components:
       type: object
     CreateRunner:
       example:
-        disk: 1.4658129805029452
-        memory: 6.027456183070403
+        diskGiB: 1.4658129805029452
         apiUrl: apiUrl
         apiKey: apiKey
+        memoryGiB: 6.027456183070403
         domain: domain
         cpu: 0.8008281904610115
-        region: us-west
+        region: us
         gpu: 5.962133916683182
         class: small
         gpuType: gpuType
@@ -7257,9 +7257,9 @@ components:
           type: string
         cpu:
           type: number
-        memory:
+        memoryGiB:
           type: number
-        disk:
+        diskGiB:
           type: number
         gpu:
           type: number
@@ -7275,7 +7275,7 @@ components:
         capacity:
           type: number
         region:
-          example: us-west
+          example: us
           type: string
       required:
         - apiKey
@@ -7283,11 +7283,11 @@ components:
         - capacity
         - class
         - cpu
-        - disk
+        - diskGiB
         - domain
         - gpu
         - gpuType
-        - memory
+        - memoryGiB
         - region
       type: object
     SandboxClass:
@@ -7310,22 +7310,30 @@ components:
       example:
         memory: 16
         apiKey: api-key-123
-        cpu: 8
+        currentMemoryUsagePercentage: 68.2
+        availabilityScore: 85
         used: 2
-        gpu: 1
         capacity: 10
+        currentDiskUsagePercentage: 33.8
+        currentCpuUsagePercentage: 45.6
         createdAt: 2023-10-01T12:00:00Z
-        disk: 100
         apiUrl: https://api.runner1.example.com
-        domain: runner1.example.com
         id: runner123
         state: initializing
-        region: us-west
         unschedulable: false
         class: small
-        lastChecked: 2024-10-01T12:00:00Z
+        currentAllocatedDiskGiB: 50000
+        currentAllocatedMemoryGiB: 8000
         gpuType: gpuType
+        currentAllocatedCpu: 4000
         updatedAt: 2023-10-01T12:00:00Z
+        cpu: 8
+        gpu: 1
+        currentSnapshotCount: 12
+        disk: 100
+        domain: runner1.example.com
+        region: us
+        lastChecked: 2024-10-01T12:00:00Z
       properties:
         id:
           description: The ID of the runner
@@ -7348,11 +7356,11 @@ components:
           example: 8
           type: number
         memory:
-          description: The memory capacity of the runner in GB
+          description: The memory capacity of the runner in GiB
           example: 16
           type: number
         disk:
-          description: The disk capacity of the runner in GB
+          description: The disk capacity of the runner in GiB
           example: 100
           type: number
         gpu:
@@ -7375,9 +7383,41 @@ components:
           description: The capacity of the runner
           example: 10
           type: number
+        currentCpuUsagePercentage:
+          description: Current CPU usage percentage
+          example: 45.6
+          type: number
+        currentMemoryUsagePercentage:
+          description: Current RAM usage percentage
+          example: 68.2
+          type: number
+        currentDiskUsagePercentage:
+          description: Current disk usage percentage
+          example: 33.8
+          type: number
+        currentAllocatedCpu:
+          description: Current allocated CPU
+          example: 4000
+          type: number
+        currentAllocatedMemoryGiB:
+          description: Current allocated memory in GiB
+          example: 8000
+          type: number
+        currentAllocatedDiskGiB:
+          description: Current allocated disk in GiB
+          example: 50000
+          type: number
+        currentSnapshotCount:
+          description: Current snapshot count
+          example: 12
+          type: number
+        availabilityScore:
+          description: Runner availability score
+          example: 85
+          type: number
         region:
           description: The region of the runner
-          example: us-west
+          example: us
           type: string
         state:
           allOf:
@@ -9663,30 +9703,32 @@ components:
             - update
             - delete
             - login
-            - docker_registry_set_default
-            - organization_user_update_role
-            - organization_user_update_assigned_roles
-            - organization_update_quota
-            - organization_suspend
-            - organization_unsuspend
-            - organization_invitation_accept
-            - organization_invitation_decline
-            - user_link_account
-            - user_unlink_account
-            - user_leave_organization
-            - user_regenerate_key_pair
-            - runner_update_scheduling
-            - sandbox_start
-            - sandbox_stop
-            - sandbox_replace_labels
-            - sandbox_create_backup
-            - sandbox_update_public_status
-            - sandbox_set_auto_stop_interval
-            - sandbox_set_auto_archive_interval
-            - sandbox_archive
-            - sandbox_get_port_preview_url
-            - snapshot_toggle_state
-            - snapshot_set_general_status
+            - set_default
+            - update_role
+            - update_assigned_roles
+            - update_quota
+            - suspend
+            - unsuspend
+            - accept
+            - decline
+            - link_account
+            - unlink_account
+            - leave_organization
+            - regenerate_key_pair
+            - update_scheduling
+            - start
+            - stop
+            - replace_labels
+            - create_backup
+            - update_public_status
+            - set_auto_stop_interval
+            - set_auto_archive_interval
+            - set_auto_delete_interval
+            - archive
+            - get_port_preview_url
+            - toggle_state
+            - set_general_status
+            - activate
             - toolbox_delete_file
             - toolbox_download_file
             - toolbox_create_folder
@@ -9707,6 +9749,9 @@ components:
             - toolbox_create_session
             - toolbox_session_execute_command
             - toolbox_delete_session
+            - toolbox_computer_use_start
+            - toolbox_computer_use_stop
+            - toolbox_computer_use_restart_process
           type: string
         targetType:
           enum:

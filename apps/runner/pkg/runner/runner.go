@@ -15,12 +15,14 @@ type RunnerInstanceConfig struct {
 	Cache          cache.IRunnerCache
 	Docker         *docker.DockerClient
 	SandboxService *services.SandboxService
+	MetricsService *services.MetricsService
 }
 
 type Runner struct {
 	Cache          cache.IRunnerCache
 	Docker         *docker.DockerClient
 	SandboxService *services.SandboxService
+	MetricsService *services.MetricsService
 }
 
 var runner *Runner
@@ -39,6 +41,7 @@ func GetInstance(config *RunnerInstanceConfig) *Runner {
 			Cache:          config.Cache,
 			Docker:         config.Docker,
 			SandboxService: config.SandboxService,
+			MetricsService: config.MetricsService,
 		}
 	}
 
