@@ -109,7 +109,7 @@ async function bootstrap() {
         apiUrl: 'http://localhost:3003',
         apiKey: 'secret_api_token',
         cpu: 4,
-        memoryGiB: 8192,
+        memoryGiB: 8,
         diskGiB: 50,
         gpu: 0,
         gpuType: 'none',
