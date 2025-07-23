@@ -1,0 +1,25 @@
+# config.yaml
+issuer: http://localhost:5556/dex
+storage:
+  type: memory
+web:
+  http: 0.0.0.0:5556
+  allowedOrigins: ['*']
+  allowedHeaders: ['x-requested-with']
+staticClients:
+  - id: daytona
+    redirectURIs:
+      - 'http://localhost:3000'
+      - 'http://localhost:3000/api/oauth2-redirect.html'
+      - 'http://localhost:3009/callback'
+      - 'http://proxy.localhost:4000/callback'
+    name: 'Daytona'
+    public: true
+enablePasswordDB: true
+staticPasswords:
+  - email: 'dev@daytona.io'
+    # password generated with:
+    # echo password | htpasswd -BinC 10 admin | cut -d: -f2
+    hash: '$2a$10$2b2cU8CPhOTaGrs1HRQuAueS7JTT5ZHsHSzYiFPm1leZck7Mc8T4W'
+    username: 'admin'
+    userID: '1234'

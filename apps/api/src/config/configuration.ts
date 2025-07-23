@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
+import { SandboxClass } from '../sandbox/enums/sandbox-class.enum'
+
 const configuration = {
   production: process.env.NODE_ENV === 'production',
   environment: process.env.ENVIRONMENT,
@@ -23,6 +25,7 @@ const configuration = {
   posthog: {
     apiKey: process.env.POSTHOG_API_KEY,
     host: process.env.POSTHOG_HOST,
+    environment: process.env.POSTHOG_ENVIRONMENT,
   },
   oidc: {
     clientId: process.env.OIDC_CLIENT_ID || process.env.OID_CLIENT_ID,
@@ -74,6 +77,7 @@ const configuration = {
     domain: process.env.PROXY_DOMAIN,
     protocol: process.env.PROXY_PROTOCOL,
     apiKey: process.env.PROXY_API_KEY,
+    templateUrl: process.env.PROXY_TEMPLATE_URL,
   },
   audit: {
     toolboxRequestsEnabled: process.env.AUDIT_TOOLBOX_REQUESTS_ENABLED === 'true',
@@ -83,6 +87,21 @@ const configuration = {
     consoleLogEnabled: process.env.AUDIT_CONSOLE_LOG_ENABLED === 'true',
   },
   cronTimeZone: process.env.CRON_TIMEZONE,
+  pylonAppId: process.env.PYLON_APP_ID,
+  billingApiUrl: process.env.BILLING_API_URL,
+  defaultRunner: {
+    domain: process.env.DEFAULT_RUNNER_DOMAIN,
+    apiKey: process.env.DEFAULT_RUNNER_API_KEY,
+    apiUrl: process.env.DEFAULT_RUNNER_API_URL,
+    cpu: parseInt(process.env.DEFAULT_RUNNER_CPU || '4', 10),
+    memory: parseInt(process.env.DEFAULT_RUNNER_MEMORY || '8', 10),
+    disk: parseInt(process.env.DEFAULT_RUNNER_DISK || '50', 10),
+    gpu: parseInt(process.env.DEFAULT_RUNNER_GPU || '0', 10),
+    gpuType: process.env.DEFAULT_RUNNER_GPU_TYPE,
+    capacity: parseInt(process.env.DEFAULT_RUNNER_CAPACITY || '100', 10),
+    region: process.env.DEFAULT_RUNNER_REGION,
+    class: process.env.DEFAULT_RUNNER_CLASS ? (process.env.DEFAULT_RUNNER_CLASS as SandboxClass) : undefined,
+  },
 }
 
 export { configuration }

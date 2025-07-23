@@ -5,29 +5,29 @@
 
 import { FC, ReactNode } from 'react'
 import { PostHogProvider } from 'posthog-js/react'
-
-const posthogKey = import.meta.env.VITE_POSTHOG_KEY
-const posthogHost = import.meta.env.VITE_POSTHOG_HOST
+import { useConfig } from '@/hooks/useConfig'
 
 interface PostHogProviderWrapperProps {
   children: ReactNode
 }
 
 export const PostHogProviderWrapper: FC<PostHogProviderWrapperProps> = ({ children }) => {
-  if (!import.meta.env.PROD) {
+  const config = useConfig()
+
+  if (!import.meta.env.PROD || !config.posthog) {
     return children
   }
 
-  if (!posthogKey || !posthogHost) {
+  if (!config.posthog?.apiKey || !config.posthog?.host) {
     console.error('Invalid PostHog configuration')
     return children
   }
 
   return (
     <PostHogProvider
-      apiKey={posthogKey}
+      apiKey={config.posthog.apiKey}
       options={{
-        api_host: posthogHost,
+        api_host: config.posthog.host,
         person_profiles: 'always',
         autocapture: false, // ignore default frontend events
         capture_pageview: false, // initial pageview (handled in App.tsx)

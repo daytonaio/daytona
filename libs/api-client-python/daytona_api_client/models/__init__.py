@@ -16,6 +16,7 @@
 
 # import models into model package
 from daytona_api_client.models.account_provider import AccountProvider
+from daytona_api_client.models.announcement import Announcement
 from daytona_api_client.models.api_key_list import ApiKeyList
 from daytona_api_client.models.api_key_response import ApiKeyResponse
 from daytona_api_client.models.audit_log import AuditLog
@@ -44,6 +45,7 @@ from daytona_api_client.models.create_snapshot import CreateSnapshot
 from daytona_api_client.models.create_user import CreateUser
 from daytona_api_client.models.create_volume import CreateVolume
 from daytona_api_client.models.create_workspace import CreateWorkspace
+from daytona_api_client.models.daytona_configuration import DaytonaConfiguration
 from daytona_api_client.models.display_info_response import DisplayInfoResponse
 from daytona_api_client.models.docker_registry import DockerRegistry
 from daytona_api_client.models.execute_request import ExecuteRequest
@@ -79,6 +81,7 @@ from daytona_api_client.models.mouse_move_response import MouseMoveResponse
 from daytona_api_client.models.mouse_position import MousePosition
 from daytona_api_client.models.mouse_scroll_request import MouseScrollRequest
 from daytona_api_client.models.mouse_scroll_response import MouseScrollResponse
+from daytona_api_client.models.oidc_config import OidcConfig
 from daytona_api_client.models.organization import Organization
 from daytona_api_client.models.organization_invitation import OrganizationInvitation
 from daytona_api_client.models.organization_role import OrganizationRole
@@ -88,6 +91,7 @@ from daytona_api_client.models.paginated_audit_logs import PaginatedAuditLogs
 from daytona_api_client.models.paginated_snapshots_dto import PaginatedSnapshotsDto
 from daytona_api_client.models.port_preview_url import PortPreviewUrl
 from daytona_api_client.models.position import Position
+from daytona_api_client.models.posthog_config import PosthogConfig
 from daytona_api_client.models.process_errors_response import ProcessErrorsResponse
 from daytona_api_client.models.process_logs_response import ProcessLogsResponse
 from daytona_api_client.models.process_restart_response import ProcessRestartResponse

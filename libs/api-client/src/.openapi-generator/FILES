@@ -3,6 +3,7 @@
 api.ts
 api/api-keys-api.ts
 api/audit-api.ts
+api/config-api.ts
 api/docker-registry-api.ts
 api/object-storage-api.ts
 api/organizations-api.ts
@@ -20,6 +21,7 @@ configuration.ts
 git_push.sh
 index.ts
 models/account-provider.ts
+models/announcement.ts
 models/api-key-list.ts
 models/api-key-response.ts
 models/audit-log.ts
@@ -48,6 +50,7 @@ models/create-snapshot.ts
 models/create-user.ts
 models/create-volume.ts
 models/create-workspace.ts
+models/daytona-configuration.ts
 models/display-info-response.ts
 models/docker-registry.ts
 models/execute-request.ts
@@ -84,6 +87,7 @@ models/mouse-move-response.ts
 models/mouse-position.ts
 models/mouse-scroll-request.ts
 models/mouse-scroll-response.ts
+models/oidc-config.ts
 models/organization-invitation.ts
 models/organization-role.ts
 models/organization-suspension.ts
@@ -93,6 +97,7 @@ models/paginated-audit-logs.ts
 models/paginated-snapshots-dto.ts
 models/port-preview-url.ts
 models/position.ts
+models/posthog-config.ts
 models/process-errors-response.ts
 models/process-logs-response.ts
 models/process-restart-response.ts
