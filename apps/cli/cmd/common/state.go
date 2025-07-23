@@ -12,24 +12,20 @@ import (
 	apiclient_cli "github.com/daytonaio/daytona/cli/apiclient"
 )
 
-func AwaitSnapshotState(ctx context.Context, apiClient *apiclient.APIClient, targetImage string, state apiclient.SnapshotState) error {
+func AwaitSnapshotState(ctx context.Context, apiClient *apiclient.APIClient, name string, state apiclient.SnapshotState) error {
 	for {
-		snapshots, res, err := apiClient.SnapshotsAPI.GetAllSnapshots(ctx).Execute()
+		snapshot, res, err := apiClient.SnapshotsAPI.GetSnapshot(ctx, name).Execute()
 		if err != nil {
 			return apiclient_cli.HandleErrorResponse(res, err)
 		}
 
-		for _, snapshot := range snapshots.Items {
-			if snapshot.Name == targetImage {
-				if snapshot.State == state {
-					return nil
-				} else if snapshot.State == apiclient.SNAPSHOTSTATE_ERROR || snapshot.State == apiclient.SNAPSHOTSTATE_BUILD_FAILED {
-					if !snapshot.ErrorReason.IsSet() {
-						return fmt.Errorf("snapshot processing failed")
-					}
-					return fmt.Errorf("snapshot processing failed: %s", *snapshot.ErrorReason.Get())
-				}
+		if snapshot.State == state {
+			return nil
+		} else if snapshot.State == apiclient.SNAPSHOTSTATE_ERROR || snapshot.State == apiclient.SNAPSHOTSTATE_BUILD_FAILED {
+			if !snapshot.ErrorReason.IsSet() {
+				return fmt.Errorf("snapshot processing failed")
 			}
+			return fmt.Errorf("snapshot processing failed: %s", *snapshot.ErrorReason.Get())
 		}
 
 		time.Sleep(time.Second)
