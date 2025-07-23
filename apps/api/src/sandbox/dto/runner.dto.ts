@@ -85,49 +85,49 @@ export class RunnerDto {
   })
   capacity: number
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Current CPU usage percentage',
     example: 45.6,
   })
   currentCpuUsagePercentage: number
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Current RAM usage percentage',
     example: 68.2,
   })
   currentMemoryUsagePercentage: number
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Current disk usage percentage',
     example: 33.8,
   })
   currentDiskUsagePercentage: number
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Current allocated CPU',
     example: 4000,
   })
   currentAllocatedCpu: number
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Current allocated memory in GiB',
     example: 8000,
   })
   currentAllocatedMemoryGiB: number
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Current allocated disk in GiB',
     example: 50000,
   })
   currentAllocatedDiskGiB: number
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Current snapshot count',
     example: 12,
   })
   currentSnapshotCount: number
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Runner availability score',
     example: 85,
   })

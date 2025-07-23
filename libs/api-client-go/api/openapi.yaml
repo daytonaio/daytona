@@ -7443,18 +7443,10 @@ components:
       required:
         - apiKey
         - apiUrl
-        - availabilityScore
         - capacity
         - class
         - cpu
         - createdAt
-        - currentAllocatedCpu
-        - currentAllocatedDiskGiB
-        - currentAllocatedMemoryGiB
-        - currentCpuUsagePercentage
-        - currentDiskUsagePercentage
-        - currentMemoryUsagePercentage
-        - currentSnapshotCount
         - disk
         - domain
         - gpu
