@@ -147,7 +147,7 @@ var PushCmd = &cobra.Command{
 			return err
 		}
 
-		views_common.RenderInfoMessage(fmt.Sprintf("%s  Use '%s' to create a new sandbox using this snapshot", views_common.Checkmark, targetImage))
+		views_common.RenderInfoMessage(fmt.Sprintf("%s  Use '%s' to create a new sandbox using this snapshot", views_common.Checkmark, nameFlag))
 		return nil
 	},
 }
