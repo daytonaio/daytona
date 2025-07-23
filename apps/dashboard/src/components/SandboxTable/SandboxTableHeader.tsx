@@ -45,7 +45,13 @@ const RESOURCE_FILTERS = [
   { type: 'disk' as const, label: 'Disk', icon: HardDrive },
 ]
 
-export function SandboxTableHeader({ table, labelOptions, snapshots, loadingSnapshots }: SandboxTableHeaderProps) {
+export function SandboxTableHeader({
+  table,
+  labelOptions,
+  regionOptions,
+  snapshots,
+  loadingSnapshots,
+}: SandboxTableHeaderProps) {
   const [open, setOpen] = React.useState(false)
   const currentSort = table.getState().sorting[0]?.id || ''
 
@@ -177,6 +183,7 @@ export function SandboxTableHeader({ table, labelOptions, snapshots, loadingSnap
                   <RegionFilter
                     value={(table.getColumn('region')?.getFilterValue() as string[]) || []}
                     onFilterChange={(value) => table.getColumn('region')?.setFilterValue(value)}
+                    options={regionOptions}
                   />
                 </DropdownMenuSubContent>
               </DropdownMenuPortal>
@@ -252,6 +259,7 @@ export function SandboxTableHeader({ table, labelOptions, snapshots, loadingSnap
           <RegionFilterIndicator
             value={(table.getColumn('region')?.getFilterValue() as string[]) || []}
             onFilterChange={(value) => table.getColumn('region')?.setFilterValue(value)}
+            options={regionOptions}
           />
         )}
 
