@@ -60,13 +60,13 @@ export interface Runner {
    * @type {number}
    * @memberof Runner
    */
-  memoryGiB: number
+  memory: number
   /**
    * The disk capacity of the runner in GiB
    * @type {number}
    * @memberof Runner
    */
-  diskGiB: number
+  disk: number
   /**
    * The GPU capacity of the runner
    * @type {number}

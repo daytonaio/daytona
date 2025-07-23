@@ -34,8 +34,8 @@ class Runner(BaseModel):
     api_url: StrictStr = Field(description="The API URL of the runner", alias="apiUrl")
     api_key: StrictStr = Field(description="The API key for the runner", alias="apiKey")
     cpu: Union[StrictFloat, StrictInt] = Field(description="The CPU capacity of the runner")
-    memory_gi_b: Union[StrictFloat, StrictInt] = Field(description="The memory capacity of the runner in GiB", alias="memoryGiB")
-    disk_gi_b: Union[StrictFloat, StrictInt] = Field(description="The disk capacity of the runner in GiB", alias="diskGiB")
+    memory: Union[StrictFloat, StrictInt] = Field(description="The memory capacity of the runner in GiB")
+    disk: Union[StrictFloat, StrictInt] = Field(description="The disk capacity of the runner in GiB")
     gpu: Union[StrictFloat, StrictInt] = Field(description="The GPU capacity of the runner")
     gpu_type: StrictStr = Field(description="The type of GPU", alias="gpuType")
     var_class: SandboxClass = Field(description="The class of the runner", alias="class")
@@ -56,7 +56,7 @@ class Runner(BaseModel):
     created_at: StrictStr = Field(description="The creation timestamp of the runner", alias="createdAt")
     updated_at: StrictStr = Field(description="The last update timestamp of the runner", alias="updatedAt")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["id", "domain", "apiUrl", "apiKey", "cpu", "memoryGiB", "diskGiB", "gpu", "gpuType", "class", "used", "capacity", "currentCpuUsagePercentage", "currentMemoryUsagePercentage", "currentDiskUsagePercentage", "currentAllocatedCpu", "currentAllocatedMemoryGiB", "currentAllocatedDiskGiB", "currentSnapshotCount", "availabilityScore", "region", "state", "lastChecked", "unschedulable", "createdAt", "updatedAt"]
+    __properties: ClassVar[List[str]] = ["id", "domain", "apiUrl", "apiKey", "cpu", "memory", "disk", "gpu", "gpuType", "class", "used", "capacity", "currentCpuUsagePercentage", "currentMemoryUsagePercentage", "currentDiskUsagePercentage", "currentAllocatedCpu", "currentAllocatedMemoryGiB", "currentAllocatedDiskGiB", "currentSnapshotCount", "availabilityScore", "region", "state", "lastChecked", "unschedulable", "createdAt", "updatedAt"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -121,8 +121,8 @@ class Runner(BaseModel):
             "apiUrl": obj.get("apiUrl"),
             "apiKey": obj.get("apiKey"),
             "cpu": obj.get("cpu"),
-            "memoryGiB": obj.get("memoryGiB"),
-            "diskGiB": obj.get("diskGiB"),
+            "memory": obj.get("memory"),
+            "disk": obj.get("disk"),
             "gpu": obj.get("gpu"),
             "gpuType": obj.get("gpuType"),
             "class": obj.get("class"),

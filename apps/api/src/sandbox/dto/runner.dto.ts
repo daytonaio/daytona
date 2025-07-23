@@ -45,13 +45,13 @@ export class RunnerDto {
     description: 'The memory capacity of the runner in GiB',
     example: 16,
   })
-  memoryGiB: number
+  memory: number
 
   @ApiProperty({
     description: 'The disk capacity of the runner in GiB',
     example: 100,
   })
-  diskGiB: number
+  disk: number
 
   @ApiProperty({
     description: 'The GPU capacity of the runner',
@@ -181,8 +181,8 @@ export class RunnerDto {
       apiUrl: runner.apiUrl,
       apiKey: runner.apiKey,
       cpu: runner.cpu,
-      memoryGiB: runner.memoryGiB,
-      diskGiB: runner.diskGiB,
+      memory: runner.memoryGiB,
+      disk: runner.diskGiB,
       gpu: runner.gpu,
       gpuType: runner.gpuType,
       class: runner.class,

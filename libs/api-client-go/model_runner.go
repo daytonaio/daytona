@@ -33,9 +33,9 @@ type Runner struct {
 	// The CPU capacity of the runner
 	Cpu float32 `json:"cpu"`
 	// The memory capacity of the runner in GiB
-	MemoryGiB float32 `json:"memoryGiB"`
+	Memory float32 `json:"memory"`
 	// The disk capacity of the runner in GiB
-	DiskGiB float32 `json:"diskGiB"`
+	Disk float32 `json:"disk"`
 	// The GPU capacity of the runner
 	Gpu float32 `json:"gpu"`
 	// The type of GPU
@@ -82,15 +82,15 @@ type _Runner Runner
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewRunner(id string, domain string, apiUrl string, apiKey string, cpu float32, memoryGiB float32, diskGiB float32, gpu float32, gpuType string, class SandboxClass, used float32, capacity float32, currentCpuUsagePercentage float32, currentMemoryUsagePercentage float32, currentDiskUsagePercentage float32, currentAllocatedCpu float32, currentAllocatedMemoryGiB float32, currentAllocatedDiskGiB float32, currentSnapshotCount float32, availabilityScore float32, region string, state RunnerState, unschedulable bool, createdAt string, updatedAt string) *Runner {
+func NewRunner(id string, domain string, apiUrl string, apiKey string, cpu float32, memory float32, disk float32, gpu float32, gpuType string, class SandboxClass, used float32, capacity float32, currentCpuUsagePercentage float32, currentMemoryUsagePercentage float32, currentDiskUsagePercentage float32, currentAllocatedCpu float32, currentAllocatedMemoryGiB float32, currentAllocatedDiskGiB float32, currentSnapshotCount float32, availabilityScore float32, region string, state RunnerState, unschedulable bool, createdAt string, updatedAt string) *Runner {
 	this := Runner{}
 	this.Id = id
 	this.Domain = domain
 	this.ApiUrl = apiUrl
 	this.ApiKey = apiKey
 	this.Cpu = cpu
-	this.MemoryGiB = memoryGiB
-	this.DiskGiB = diskGiB
+	this.Memory = memory
+	this.Disk = disk
 	this.Gpu = gpu
 	this.GpuType = gpuType
 	this.Class = class
@@ -240,52 +240,52 @@ func (o *Runner) SetCpu(v float32) {
 	o.Cpu = v
 }
 
-// GetMemoryGiB returns the MemoryGiB field value
-func (o *Runner) GetMemoryGiB() float32 {
+// GetMemory returns the Memory field value
+func (o *Runner) GetMemory() float32 {
 	if o == nil {
 		var ret float32
 		return ret
 	}
 
-	return o.MemoryGiB
+	return o.Memory
 }
 
-// GetMemoryGiBOk returns a tuple with the MemoryGiB field value
+// GetMemoryOk returns a tuple with the Memory field value
 // and a boolean to check if the value has been set.
-func (o *Runner) GetMemoryGiBOk() (*float32, bool) {
+func (o *Runner) GetMemoryOk() (*float32, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return &o.MemoryGiB, true
+	return &o.Memory, true
 }
 
-// SetMemoryGiB sets field value
-func (o *Runner) SetMemoryGiB(v float32) {
-	o.MemoryGiB = v
+// SetMemory sets field value
+func (o *Runner) SetMemory(v float32) {
+	o.Memory = v
 }
 
-// GetDiskGiB returns the DiskGiB field value
-func (o *Runner) GetDiskGiB() float32 {
+// GetDisk returns the Disk field value
+func (o *Runner) GetDisk() float32 {
 	if o == nil {
 		var ret float32
 		return ret
 	}
 
-	return o.DiskGiB
+	return o.Disk
 }
 
-// GetDiskGiBOk returns a tuple with the DiskGiB field value
+// GetDiskOk returns a tuple with the Disk field value
 // and a boolean to check if the value has been set.
-func (o *Runner) GetDiskGiBOk() (*float32, bool) {
+func (o *Runner) GetDiskOk() (*float32, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return &o.DiskGiB, true
+	return &o.Disk, true
 }
 
-// SetDiskGiB sets field value
-func (o *Runner) SetDiskGiB(v float32) {
-	o.DiskGiB = v
+// SetDisk sets field value
+func (o *Runner) SetDisk(v float32) {
+	o.Disk = v
 }
 
 // GetGpu returns the Gpu field value
@@ -767,8 +767,8 @@ func (o Runner) ToMap() (map[string]interface{}, error) {
 	toSerialize["apiUrl"] = o.ApiUrl
 	toSerialize["apiKey"] = o.ApiKey
 	toSerialize["cpu"] = o.Cpu
-	toSerialize["memoryGiB"] = o.MemoryGiB
-	toSerialize["diskGiB"] = o.DiskGiB
+	toSerialize["memory"] = o.Memory
+	toSerialize["disk"] = o.Disk
 	toSerialize["gpu"] = o.Gpu
 	toSerialize["gpuType"] = o.GpuType
 	toSerialize["class"] = o.Class
@@ -803,8 +803,8 @@ func (o *Runner) UnmarshalJSON(data []byte) (err error) {
 		"apiUrl",
 		"apiKey",
 		"cpu",
-		"memoryGiB",
-		"diskGiB",
+		"memory",
+		"disk",
 		"gpu",
 		"gpuType",
 		"class",

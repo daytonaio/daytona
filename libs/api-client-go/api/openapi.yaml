@@ -7308,6 +7308,7 @@ components:
       type: string
     Runner:
       example:
+        memory: 16
         apiKey: api-key-123
         currentMemoryUsagePercentage: 68.2
         availabilityScore: 85
@@ -7326,11 +7327,10 @@ components:
         gpuType: gpuType
         currentAllocatedCpu: 4000
         updatedAt: 2023-10-01T12:00:00Z
-        diskGiB: 100
         cpu: 8
         gpu: 1
         currentSnapshotCount: 12
-        memoryGiB: 16
+        disk: 100
         domain: runner1.example.com
         region: us
         lastChecked: 2024-10-01T12:00:00Z
@@ -7355,11 +7355,11 @@ components:
           description: The CPU capacity of the runner
           example: 8
           type: number
-        memoryGiB:
+        memory:
           description: The memory capacity of the runner in GiB
           example: 16
           type: number
-        diskGiB:
+        disk:
           description: The disk capacity of the runner in GiB
           example: 100
           type: number
@@ -7455,12 +7455,12 @@ components:
         - currentDiskUsagePercentage
         - currentMemoryUsagePercentage
         - currentSnapshotCount
-        - diskGiB
+        - disk
         - domain
         - gpu
         - gpuType
         - id
-        - memoryGiB
+        - memory
         - region
         - state
         - unschedulable
