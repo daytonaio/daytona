@@ -42,16 +42,16 @@ export class RunnerDto {
   cpu: number
 
   @ApiProperty({
-    description: 'The memory capacity of the runner in GB',
+    description: 'The memory capacity of the runner in GiB',
     example: 16,
   })
-  memory: number
+  memoryGiB: number
 
   @ApiProperty({
-    description: 'The disk capacity of the runner in GB',
+    description: 'The disk capacity of the runner in GiB',
     example: 100,
   })
-  disk: number
+  diskGiB: number
 
   @ApiProperty({
     description: 'The GPU capacity of the runner',
@@ -110,16 +110,16 @@ export class RunnerDto {
   currentAllocatedCpu: number
 
   @ApiProperty({
-    description: 'Current allocated memory',
+    description: 'Current allocated memory in GiB',
     example: 8000,
   })
-  currentAllocatedMemory: number
+  currentAllocatedMemoryGiB: number
 
   @ApiProperty({
-    description: 'Current allocated disk',
+    description: 'Current allocated disk in GiB',
     example: 50000,
   })
-  currentAllocatedDisk: number
+  currentAllocatedDiskGiB: number
 
   @ApiProperty({
     description: 'Current snapshot count',
@@ -181,8 +181,8 @@ export class RunnerDto {
       apiUrl: runner.apiUrl,
       apiKey: runner.apiKey,
       cpu: runner.cpu,
-      memory: runner.memoryGiB,
-      disk: runner.diskGiB,
+      memoryGiB: runner.memoryGiB,
+      diskGiB: runner.diskGiB,
       gpu: runner.gpu,
       gpuType: runner.gpuType,
       class: runner.class,
@@ -192,8 +192,8 @@ export class RunnerDto {
       currentMemoryUsagePercentage: runner.currentMemoryUsagePercentage,
       currentDiskUsagePercentage: runner.currentDiskUsagePercentage,
       currentAllocatedCpu: runner.currentAllocatedCpu,
-      currentAllocatedMemory: runner.currentAllocatedMemoryGiB,
-      currentAllocatedDisk: runner.currentAllocatedDiskGiB,
+      currentAllocatedMemoryGiB: runner.currentAllocatedMemoryGiB,
+      currentAllocatedDiskGiB: runner.currentAllocatedDiskGiB,
       currentSnapshotCount: runner.currentSnapshotCount,
       availabilityScore: runner.availabilityScore,
       region: runner.region,

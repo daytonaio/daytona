@@ -56,17 +56,17 @@ export interface Runner {
    */
   cpu: number
   /**
-   * The memory capacity of the runner in GB
+   * The memory capacity of the runner in GiB
    * @type {number}
    * @memberof Runner
    */
-  memory: number
+  memoryGiB: number
   /**
-   * The disk capacity of the runner in GB
+   * The disk capacity of the runner in GiB
    * @type {number}
    * @memberof Runner
    */
-  disk: number
+  diskGiB: number
   /**
    * The GPU capacity of the runner
    * @type {number}
@@ -122,17 +122,17 @@ export interface Runner {
    */
   currentAllocatedCpu: number
   /**
-   * Current allocated memory
+   * Current allocated memory in GiB
    * @type {number}
    * @memberof Runner
    */
-  currentAllocatedMemory: number
+  currentAllocatedMemoryGiB: number
   /**
-   * Current allocated disk
+   * Current allocated disk in GiB
    * @type {number}
    * @memberof Runner
    */
-  currentAllocatedDisk: number
+  currentAllocatedDiskGiB: number
   /**
    * Current snapshot count
    * @type {number}

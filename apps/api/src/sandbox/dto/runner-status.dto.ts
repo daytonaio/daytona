@@ -35,13 +35,13 @@ export class RunnerStatusDto {
     description: 'Current allocated memory',
     example: 8000,
   })
-  currentAllocatedMemory: number
+  currentAllocatedMemoryGiB: number
 
   @ApiProperty({
     description: 'Current allocated disk',
     example: 50000,
   })
-  currentAllocatedDisk: number
+  currentAllocatedDiskGiB: number
 
   @ApiProperty({
     description: 'Current snapshot count',

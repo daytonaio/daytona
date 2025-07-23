@@ -32,10 +32,10 @@ type Runner struct {
 	ApiKey string `json:"apiKey"`
 	// The CPU capacity of the runner
 	Cpu float32 `json:"cpu"`
-	// The memory capacity of the runner in GB
-	Memory float32 `json:"memory"`
-	// The disk capacity of the runner in GB
-	Disk float32 `json:"disk"`
+	// The memory capacity of the runner in GiB
+	MemoryGiB float32 `json:"memoryGiB"`
+	// The disk capacity of the runner in GiB
+	DiskGiB float32 `json:"diskGiB"`
 	// The GPU capacity of the runner
 	Gpu float32 `json:"gpu"`
 	// The type of GPU
@@ -54,10 +54,10 @@ type Runner struct {
 	CurrentDiskUsagePercentage float32 `json:"currentDiskUsagePercentage"`
 	// Current allocated CPU
 	CurrentAllocatedCpu float32 `json:"currentAllocatedCpu"`
-	// Current allocated memory
-	CurrentAllocatedMemory float32 `json:"currentAllocatedMemory"`
-	// Current allocated disk
-	CurrentAllocatedDisk float32 `json:"currentAllocatedDisk"`
+	// Current allocated memory in GiB
+	CurrentAllocatedMemoryGiB float32 `json:"currentAllocatedMemoryGiB"`
+	// Current allocated disk in GiB
+	CurrentAllocatedDiskGiB float32 `json:"currentAllocatedDiskGiB"`
 	// Current snapshot count
 	CurrentSnapshotCount float32 `json:"currentSnapshotCount"`
 	// Runner availability score
@@ -82,15 +82,15 @@ type _Runner Runner
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewRunner(id string, domain string, apiUrl string, apiKey string, cpu float32, memory float32, disk float32, gpu float32, gpuType string, class SandboxClass, used float32, capacity float32, currentCpuUsagePercentage float32, currentMemoryUsagePercentage float32, currentDiskUsagePercentage float32, currentAllocatedCpu float32, currentAllocatedMemory float32, currentAllocatedDisk float32, currentSnapshotCount float32, availabilityScore float32, region string, state RunnerState, unschedulable bool, createdAt string, updatedAt string) *Runner {
+func NewRunner(id string, domain string, apiUrl string, apiKey string, cpu float32, memoryGiB float32, diskGiB float32, gpu float32, gpuType string, class SandboxClass, used float32, capacity float32, currentCpuUsagePercentage float32, currentMemoryUsagePercentage float32, currentDiskUsagePercentage float32, currentAllocatedCpu float32, currentAllocatedMemoryGiB float32, currentAllocatedDiskGiB float32, currentSnapshotCount float32, availabilityScore float32, region string, state RunnerState, unschedulable bool, createdAt string, updatedAt string) *Runner {
 	this := Runner{}
 	this.Id = id
 	this.Domain = domain
 	this.ApiUrl = apiUrl
 	this.ApiKey = apiKey
 	this.Cpu = cpu
-	this.Memory = memory
-	this.Disk = disk
+	this.MemoryGiB = memoryGiB
+	this.DiskGiB = diskGiB
 	this.Gpu = gpu
 	this.GpuType = gpuType
 	this.Class = class
@@ -100,8 +100,8 @@ func NewRunner(id string, domain string, apiUrl string, apiKey string, cpu float
 	this.CurrentMemoryUsagePercentage = currentMemoryUsagePercentage
 	this.CurrentDiskUsagePercentage = currentDiskUsagePercentage
 	this.CurrentAllocatedCpu = currentAllocatedCpu
-	this.CurrentAllocatedMemory = currentAllocatedMemory
-	this.CurrentAllocatedDisk = currentAllocatedDisk
+	this.CurrentAllocatedMemoryGiB = currentAllocatedMemoryGiB
+	this.CurrentAllocatedDiskGiB = currentAllocatedDiskGiB
 	this.CurrentSnapshotCount = currentSnapshotCount
 	this.AvailabilityScore = availabilityScore
 	this.Region = region
@@ -240,52 +240,52 @@ func (o *Runner) SetCpu(v float32) {
 	o.Cpu = v
 }
 
-// GetMemory returns the Memory field value
-func (o *Runner) GetMemory() float32 {
+// GetMemoryGiB returns the MemoryGiB field value
+func (o *Runner) GetMemoryGiB() float32 {
 	if o == nil {
 		var ret float32
 		return ret
 	}
 
-	return o.Memory
+	return o.MemoryGiB
 }
 
-// GetMemoryOk returns a tuple with the Memory field value
+// GetMemoryGiBOk returns a tuple with the MemoryGiB field value
 // and a boolean to check if the value has been set.
-func (o *Runner) GetMemoryOk() (*float32, bool) {
+func (o *Runner) GetMemoryGiBOk() (*float32, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return &o.Memory, true
+	return &o.MemoryGiB, true
 }
 
-// SetMemory sets field value
-func (o *Runner) SetMemory(v float32) {
-	o.Memory = v
+// SetMemoryGiB sets field value
+func (o *Runner) SetMemoryGiB(v float32) {
+	o.MemoryGiB = v
 }
 
-// GetDisk returns the Disk field value
-func (o *Runner) GetDisk() float32 {
+// GetDiskGiB returns the DiskGiB field value
+func (o *Runner) GetDiskGiB() float32 {
 	if o == nil {
 		var ret float32
 		return ret
 	}
 
-	return o.Disk
+	return o.DiskGiB
 }
 
-// GetDiskOk returns a tuple with the Disk field value
+// GetDiskGiBOk returns a tuple with the DiskGiB field value
 // and a boolean to check if the value has been set.
-func (o *Runner) GetDiskOk() (*float32, bool) {
+func (o *Runner) GetDiskGiBOk() (*float32, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return &o.Disk, true
+	return &o.DiskGiB, true
 }
 
-// SetDisk sets field value
-func (o *Runner) SetDisk(v float32) {
-	o.Disk = v
+// SetDiskGiB sets field value
+func (o *Runner) SetDiskGiB(v float32) {
+	o.DiskGiB = v
 }
 
 // GetGpu returns the Gpu field value
@@ -504,52 +504,52 @@ func (o *Runner) SetCurrentAllocatedCpu(v float32) {
 	o.CurrentAllocatedCpu = v
 }
 
-// GetCurrentAllocatedMemory returns the CurrentAllocatedMemory field value
-func (o *Runner) GetCurrentAllocatedMemory() float32 {
+// GetCurrentAllocatedMemoryGiB returns the CurrentAllocatedMemoryGiB field value
+func (o *Runner) GetCurrentAllocatedMemoryGiB() float32 {
 	if o == nil {
 		var ret float32
 		return ret
 	}
 
-	return o.CurrentAllocatedMemory
+	return o.CurrentAllocatedMemoryGiB
 }
 
-// GetCurrentAllocatedMemoryOk returns a tuple with the CurrentAllocatedMemory field value
+// GetCurrentAllocatedMemoryGiBOk returns a tuple with the CurrentAllocatedMemoryGiB field value
 // and a boolean to check if the value has been set.
-func (o *Runner) GetCurrentAllocatedMemoryOk() (*float32, bool) {
+func (o *Runner) GetCurrentAllocatedMemoryGiBOk() (*float32, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return &o.CurrentAllocatedMemory, true
+	return &o.CurrentAllocatedMemoryGiB, true
 }
 
-// SetCurrentAllocatedMemory sets field value
-func (o *Runner) SetCurrentAllocatedMemory(v float32) {
-	o.CurrentAllocatedMemory = v
+// SetCurrentAllocatedMemoryGiB sets field value
+func (o *Runner) SetCurrentAllocatedMemoryGiB(v float32) {
+	o.CurrentAllocatedMemoryGiB = v
 }
 
-// GetCurrentAllocatedDisk returns the CurrentAllocatedDisk field value
-func (o *Runner) GetCurrentAllocatedDisk() float32 {
+// GetCurrentAllocatedDiskGiB returns the CurrentAllocatedDiskGiB field value
+func (o *Runner) GetCurrentAllocatedDiskGiB() float32 {
 	if o == nil {
 		var ret float32
 		return ret
 	}
 
-	return o.CurrentAllocatedDisk
+	return o.CurrentAllocatedDiskGiB
 }
 
-// GetCurrentAllocatedDiskOk returns a tuple with the CurrentAllocatedDisk field value
+// GetCurrentAllocatedDiskGiBOk returns a tuple with the CurrentAllocatedDiskGiB field value
 // and a boolean to check if the value has been set.
-func (o *Runner) GetCurrentAllocatedDiskOk() (*float32, bool) {
+func (o *Runner) GetCurrentAllocatedDiskGiBOk() (*float32, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return &o.CurrentAllocatedDisk, true
+	return &o.CurrentAllocatedDiskGiB, true
 }
 
-// SetCurrentAllocatedDisk sets field value
-func (o *Runner) SetCurrentAllocatedDisk(v float32) {
-	o.CurrentAllocatedDisk = v
+// SetCurrentAllocatedDiskGiB sets field value
+func (o *Runner) SetCurrentAllocatedDiskGiB(v float32) {
+	o.CurrentAllocatedDiskGiB = v
 }
 
 // GetCurrentSnapshotCount returns the CurrentSnapshotCount field value
@@ -767,8 +767,8 @@ func (o Runner) ToMap() (map[string]interface{}, error) {
 	toSerialize["apiUrl"] = o.ApiUrl
 	toSerialize["apiKey"] = o.ApiKey
 	toSerialize["cpu"] = o.Cpu
-	toSerialize["memory"] = o.Memory
-	toSerialize["disk"] = o.Disk
+	toSerialize["memoryGiB"] = o.MemoryGiB
+	toSerialize["diskGiB"] = o.DiskGiB
 	toSerialize["gpu"] = o.Gpu
 	toSerialize["gpuType"] = o.GpuType
 	toSerialize["class"] = o.Class
@@ -778,8 +778,8 @@ func (o Runner) ToMap() (map[string]interface{}, error) {
 	toSerialize["currentMemoryUsagePercentage"] = o.CurrentMemoryUsagePercentage
 	toSerialize["currentDiskUsagePercentage"] = o.CurrentDiskUsagePercentage
 	toSerialize["currentAllocatedCpu"] = o.CurrentAllocatedCpu
-	toSerialize["currentAllocatedMemory"] = o.CurrentAllocatedMemory
-	toSerialize["currentAllocatedDisk"] = o.CurrentAllocatedDisk
+	toSerialize["currentAllocatedMemoryGiB"] = o.CurrentAllocatedMemoryGiB
+	toSerialize["currentAllocatedDiskGiB"] = o.CurrentAllocatedDiskGiB
 	toSerialize["currentSnapshotCount"] = o.CurrentSnapshotCount
 	toSerialize["availabilityScore"] = o.AvailabilityScore
 	toSerialize["region"] = o.Region
@@ -803,8 +803,8 @@ func (o *Runner) UnmarshalJSON(data []byte) (err error) {
 		"apiUrl",
 		"apiKey",
 		"cpu",
-		"memory",
-		"disk",
+		"memoryGiB",
+		"diskGiB",
 		"gpu",
 		"gpuType",
 		"class",
@@ -814,8 +814,8 @@ func (o *Runner) UnmarshalJSON(data []byte) (err error) {
 		"currentMemoryUsagePercentage",
 		"currentDiskUsagePercentage",
 		"currentAllocatedCpu",
-		"currentAllocatedMemory",
-		"currentAllocatedDisk",
+		"currentAllocatedMemoryGiB",
+		"currentAllocatedDiskGiB",
 		"currentSnapshotCount",
 		"availabilityScore",
 		"region",

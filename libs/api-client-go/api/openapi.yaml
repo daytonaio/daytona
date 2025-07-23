@@ -7308,29 +7308,29 @@ components:
       type: string
     Runner:
       example:
-        memory: 16
         apiKey: api-key-123
         currentMemoryUsagePercentage: 68.2
         availabilityScore: 85
         used: 2
         capacity: 10
         currentDiskUsagePercentage: 33.8
-        currentAllocatedDisk: 50000
         currentCpuUsagePercentage: 45.6
         createdAt: 2023-10-01T12:00:00Z
-        currentAllocatedMemory: 8000
         apiUrl: https://api.runner1.example.com
         id: runner123
         state: initializing
         unschedulable: false
         class: small
+        currentAllocatedDiskGiB: 50000
+        currentAllocatedMemoryGiB: 8000
         gpuType: gpuType
         currentAllocatedCpu: 4000
         updatedAt: 2023-10-01T12:00:00Z
+        diskGiB: 100
         cpu: 8
         gpu: 1
         currentSnapshotCount: 12
-        disk: 100
+        memoryGiB: 16
         domain: runner1.example.com
         region: us
         lastChecked: 2024-10-01T12:00:00Z
@@ -7355,12 +7355,12 @@ components:
           description: The CPU capacity of the runner
           example: 8
           type: number
-        memory:
-          description: The memory capacity of the runner in GB
+        memoryGiB:
+          description: The memory capacity of the runner in GiB
           example: 16
           type: number
-        disk:
-          description: The disk capacity of the runner in GB
+        diskGiB:
+          description: The disk capacity of the runner in GiB
           example: 100
           type: number
         gpu:
@@ -7399,12 +7399,12 @@ components:
           description: Current allocated CPU
           example: 4000
           type: number
-        currentAllocatedMemory:
-          description: Current allocated memory
+        currentAllocatedMemoryGiB:
+          description: Current allocated memory in GiB
           example: 8000
           type: number
-        currentAllocatedDisk:
-          description: Current allocated disk
+        currentAllocatedDiskGiB:
+          description: Current allocated disk in GiB
           example: 50000
           type: number
         currentSnapshotCount:
@@ -7449,18 +7449,18 @@ components:
         - cpu
         - createdAt
         - currentAllocatedCpu
-        - currentAllocatedDisk
-        - currentAllocatedMemory
+        - currentAllocatedDiskGiB
+        - currentAllocatedMemoryGiB
         - currentCpuUsagePercentage
         - currentDiskUsagePercentage
         - currentMemoryUsagePercentage
         - currentSnapshotCount
-        - disk
+        - diskGiB
         - domain
         - gpu
         - gpuType
         - id
-        - memory
+        - memoryGiB
         - region
         - state
         - unschedulable

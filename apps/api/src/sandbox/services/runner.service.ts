@@ -241,12 +241,12 @@ export class RunnerService {
         memoryUsage: updateData.currentMemoryUsagePercentage,
         diskUsage: updateData.currentDiskUsagePercentage,
         allocatedCpu: updateData.currentAllocatedCpu,
-        allocatedMemory: updateData.currentAllocatedMemoryGiB,
-        allocatedDisk: updateData.currentAllocatedDiskGiB,
+        allocatedMemoryGiB: updateData.currentAllocatedMemoryGiB,
+        allocatedDiskGiB: updateData.currentAllocatedDiskGiB,
         capacity: runner.capacity,
         runnerCpu: runner.cpu,
-        runnerMemory: runner.memoryGiB,
-        runnerDisk: runner.diskGiB,
+        runnerMemoryGiB: runner.memoryGiB,
+        runnerDiskGiB: runner.diskGiB,
       })
     } else {
       this.logger.warn(`Runner ${runnerId} didn't send health metrics`)
@@ -439,7 +439,7 @@ export class RunnerService {
     }
 
     // Allocated Memory Ratio Penalty (minimal impact, starts at 250% of runner memory capacity)
-    const allocatedMemoryRatio = (params.allocatedMemory / params.runnerMemory) * 100
+    const allocatedMemoryRatio = (params.allocatedMemoryGiB / params.runnerMemoryGiB) * 100
     if (allocatedMemoryRatio > 250) {
       const low = allocatedMemoryRatio > 250 ? ((Math.min(allocatedMemoryRatio, 300) - 250) / 50) * 0.5 : 0 // 250-300%: 0.5 points
       const medium = allocatedMemoryRatio > 300 ? ((Math.min(allocatedMemoryRatio, 350) - 300) / 50) * 1 : 0 // 300-350%: 1 more points
@@ -448,7 +448,7 @@ export class RunnerService {
     }
 
     // Allocated Disk Ratio Penalty (minimal impact, starts at 250% of runner disk capacity)
-    const allocatedDiskRatio = (params.allocatedDisk / params.runnerDisk) * 100
+    const allocatedDiskRatio = (params.allocatedDiskGiB / params.runnerDiskGiB) * 100
     if (allocatedDiskRatio > 250) {
       const low = allocatedDiskRatio > 250 ? ((Math.min(allocatedDiskRatio, 300) - 250) / 50) * 0.5 : 0 // 250-300%: 0.5 points
       const medium = allocatedDiskRatio > 300 ? ((Math.min(allocatedDiskRatio, 350) - 300) / 50) * 1 : 0 // 300-350%: 1 more points
@@ -472,10 +472,10 @@ interface AvailabilityScoreParams {
   memoryUsage: number
   diskUsage: number
   allocatedCpu: number
-  allocatedMemory: number
-  allocatedDisk: number
+  allocatedMemoryGiB: number
+  allocatedDiskGiB: number
   capacity: number
   runnerCpu: number
-  runnerMemory: number
-  runnerDisk: number
+  runnerMemoryGiB: number
+  runnerDiskGiB: number
 }
