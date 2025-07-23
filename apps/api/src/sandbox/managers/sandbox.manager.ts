@@ -388,6 +388,8 @@ export class SandboxManager {
   }
 
   private async handleUnassignedBuildSandbox(sandbox: Sandbox): Promise<SyncState> {
+    const highStartedRatioRunnerIds = await this.runnerService.getRunnersWithHighStartedSandboxesRatio()
+
     // Try to assign an available runner with the snapshot build
     let runnerId: string
     try {
@@ -395,6 +397,7 @@ export class SandboxManager {
         region: sandbox.region,
         sandboxClass: sandbox.class,
         snapshotRef: sandbox.buildInfo.snapshotRef,
+        excludedRunnerIds: highStartedRatioRunnerIds,
       })
       runnerId = runner.id
     } catch (error) {
@@ -411,6 +414,11 @@ export class SandboxManager {
 
     for (const snapshotRunner of snapshotRunners) {
       const runner = await this.runnerService.findOne(snapshotRunner.runnerId)
+
+      if (highStartedRatioRunnerIds.includes(runner.id)) {
+        continue
+      }
+
       if (runner.used < runner.capacity) {
         if (snapshotRunner.state === SnapshotRunnerState.BUILDING_SNAPSHOT) {
           await this.updateSandboxState(sandbox.id, SandboxState.BUILDING_SNAPSHOT, runner.id)

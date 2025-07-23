@@ -303,6 +303,21 @@ export class RunnerService {
     return runners.map((item) => item.runnerId)
   }
 
+  async getRunnersWithHighStartedSandboxesRatio(startedPercentage = 0.1, maxRunners = 10): Promise<string[]> {
+    const runners = await this.runnerRepository
+      .createQueryBuilder('runner')
+      .innerJoin('sandbox', 'sandbox', 'sandbox.runnerId = runner.id')
+      .select('runner.id')
+      .addSelect('CAST(COUNT(sandbox.id) AS FLOAT) / CAST(runner.capacity AS FLOAT)', 'ratio')
+      .where('sandbox.state = :state', { state: SandboxState.STARTED })
+      .groupBy('runner.id')
+      .having('COUNT(sandbox.id) > runner.capacity * :startedPercentage', { startedPercentage })
+      .orderBy('ratio', 'DESC')
+      .getRawMany()
+
+    return runners.map((item) => item.runnerId).slice(maxRunners)
+  }
+
   async getRunnersBySnapshotInternalName(internalName: string): Promise<RunnerSnapshotDto[]> {
     this.logger.debug(`Looking for snapshot with internalName: ${internalName}`)
 
