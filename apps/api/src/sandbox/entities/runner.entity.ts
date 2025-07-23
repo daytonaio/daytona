@@ -25,10 +25,10 @@ export class Runner {
   cpu: number
 
   @Column()
-  memory: number
+  memoryGiB: number
 
   @Column()
-  disk: number
+  diskGiB: number
 
   @Column()
   gpu: number
@@ -77,12 +77,12 @@ export class Runner {
   @Column({
     default: 0,
   })
-  currentAllocatedMemory: number
+  currentAllocatedMemoryGiB: number
 
   @Column({
     default: 0,
   })
-  currentAllocatedDisk: number
+  currentAllocatedDiskGiB: number
 
   @Column({
     default: 0,

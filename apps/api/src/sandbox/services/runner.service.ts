@@ -54,8 +54,8 @@ export class RunnerService {
     runner.apiUrl = createRunnerDto.apiUrl
     runner.apiKey = createRunnerDto.apiKey
     runner.cpu = createRunnerDto.cpu
-    runner.memory = createRunnerDto.memory
-    runner.disk = createRunnerDto.disk
+    runner.memoryGiB = createRunnerDto.memory
+    runner.diskGiB = createRunnerDto.disk
     runner.gpu = createRunnerDto.gpu
     runner.gpuType = createRunnerDto.gpuType
     runner.used = 0
@@ -245,8 +245,8 @@ export class RunnerService {
         allocatedDisk: updateData.currentAllocatedDisk,
         capacity: runner.capacity,
         runnerCpu: runner.cpu,
-        runnerMemory: runner.memory,
-        runnerDisk: runner.disk,
+        runnerMemory: runner.memoryGiB,
+        runnerDisk: runner.diskGiB,
       })
     } else {
       this.logger.warn(`Runner ${runnerId} didn't send health metrics`)
