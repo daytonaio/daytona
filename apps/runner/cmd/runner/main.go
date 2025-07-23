@@ -94,6 +94,7 @@ func main() {
 		Cache:          runnerCache,
 		Docker:         dockerClient,
 		SandboxService: sandboxService,
+		MetricsService: metricsService,
 	})
 
 	apiServerErrChan := make(chan error)

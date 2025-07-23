@@ -8,7 +8,6 @@ import (
 
 	"github.com/daytonaio/runner/pkg/api/dto"
 	"github.com/daytonaio/runner/pkg/runner"
-	"github.com/daytonaio/runner/pkg/services"
 	"github.com/gin-gonic/gin"
 )
 
@@ -23,10 +22,9 @@ import (
 //	@id				HealthCheck
 func HealthCheck(ctx *gin.Context) {
 	runnerInstance := runner.GetInstance(nil)
-	metricsService := services.NewMetricsService(runnerInstance.Docker, runnerInstance.Cache)
 
 	// Get cached system metrics
-	cpuUsage, ramUsage, diskUsage, allocatedCpu, allocatedMemory, allocatedDisk, snapshotCount := metricsService.GetCachedSystemMetrics(ctx.Request.Context())
+	cpuUsage, ramUsage, diskUsage, allocatedCpu, allocatedMemory, allocatedDisk, snapshotCount := runnerInstance.MetricsService.GetCachedSystemMetrics(ctx.Request.Context())
 
 	// Create metrics object
 	metrics := &dto.HealthMetrics{
