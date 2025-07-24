@@ -1664,6 +1664,14 @@
     "objectID": 208
   },
   {
+    "title": "Using a Private Docker Hub Image",
+    "description": "To use a private Docker Hub image, you'll need to [add a Container Registry](/docs/snapshots#images-from-private-registries) with your Docker Hub credentials",
+    "tag": "Documentation",
+    "url": "/docs/snapshots#using-a-private-docker-hub-image",
+    "slug": "/snapshots#using-a-private-docker-hub-image",
+    "objectID": 208
+  },
+  {
     "title": "Using a Local Image",
     "description": "In order to avoid having to manually set up a private container registry and push your image there, the [Daytona CLI](/docs/getting-started",
     "tag": "Documentation",
