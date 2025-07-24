@@ -38,9 +38,9 @@ import type { PaginatedSnapshotsDto } from '../models'
 // @ts-ignore
 import type { SetSnapshotGeneralStatusDto } from '../models'
 // @ts-ignore
-import type { SnapshotDto } from '../models'
+import type { SetSnapshotTargetPropagationsDto } from '../models'
 // @ts-ignore
-import type { ToggleState } from '../models'
+import type { SnapshotDto } from '../models'
 /**
  * SnapshotsApi - axios parameter creator
  * @export
@@ -441,24 +441,28 @@ export const SnapshotsApiAxiosParamCreator = function (configuration?: Configura
     },
     /**
      *
-     * @summary Toggle snapshot state
+     * @summary Set snapshot target propagations
      * @param {string} id Snapshot ID
-     * @param {ToggleState} toggleState
+     * @param {SetSnapshotTargetPropagationsDto} setSnapshotTargetPropagationsDto
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    toggleSnapshotState: async (
+    setSnapshotTargetPropagations: async (
       id: string,
-      toggleState: ToggleState,
+      setSnapshotTargetPropagationsDto: SetSnapshotTargetPropagationsDto,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'id' is not null or undefined
-      assertParamExists('toggleSnapshotState', 'id', id)
-      // verify required parameter 'toggleState' is not null or undefined
-      assertParamExists('toggleSnapshotState', 'toggleState', toggleState)
-      const localVarPath = `/snapshots/{id}/toggle`.replace(`{${'id'}}`, encodeURIComponent(String(id)))
+      assertParamExists('setSnapshotTargetPropagations', 'id', id)
+      // verify required parameter 'setSnapshotTargetPropagationsDto' is not null or undefined
+      assertParamExists(
+        'setSnapshotTargetPropagations',
+        'setSnapshotTargetPropagationsDto',
+        setSnapshotTargetPropagationsDto,
+      )
+      const localVarPath = `/snapshots/{id}/target-propagations`.replace(`{${'id'}}`, encodeURIComponent(String(id)))
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
       let baseOptions
@@ -484,7 +488,11 @@ export const SnapshotsApiAxiosParamCreator = function (configuration?: Configura
       setSearchParams(localVarUrlObj, localVarQueryParameter)
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
       localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
-      localVarRequestOptions.data = serializeDataIfNeeded(toggleState, localVarRequestOptions, configuration)
+      localVarRequestOptions.data = serializeDataIfNeeded(
+        setSnapshotTargetPropagationsDto,
+        localVarRequestOptions,
+        configuration,
+      )
 
       return {
         url: toPathString(localVarUrlObj),
@@ -732,28 +740,28 @@ export const SnapshotsApiFp = function (configuration?: Configuration) {
     },
     /**
      *
-     * @summary Toggle snapshot state
+     * @summary Set snapshot target propagations
      * @param {string} id Snapshot ID
-     * @param {ToggleState} toggleState
+     * @param {SetSnapshotTargetPropagationsDto} setSnapshotTargetPropagationsDto
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    async toggleSnapshotState(
+    async setSnapshotTargetPropagations(
       id: string,
-      toggleState: ToggleState,
+      setSnapshotTargetPropagationsDto: SetSnapshotTargetPropagationsDto,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<SnapshotDto>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.toggleSnapshotState(
+      const localVarAxiosArgs = await localVarAxiosParamCreator.setSnapshotTargetPropagations(
         id,
-        toggleState,
+        setSnapshotTargetPropagationsDto,
         xDaytonaOrganizationID,
         options,
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['SnapshotsApi.toggleSnapshotState']?.[localVarOperationServerIndex]?.url
+        operationServerMap['SnapshotsApi.setSnapshotTargetPropagations']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -908,21 +916,21 @@ export const SnapshotsApiFactory = function (configuration?: Configuration, base
     },
     /**
      *
-     * @summary Toggle snapshot state
+     * @summary Set snapshot target propagations
      * @param {string} id Snapshot ID
-     * @param {ToggleState} toggleState
+     * @param {SetSnapshotTargetPropagationsDto} setSnapshotTargetPropagationsDto
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    toggleSnapshotState(
+    setSnapshotTargetPropagations(
       id: string,
-      toggleState: ToggleState,
+      setSnapshotTargetPropagationsDto: SetSnapshotTargetPropagationsDto,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<SnapshotDto> {
       return localVarFp
-        .toggleSnapshotState(id, toggleState, xDaytonaOrganizationID, options)
+        .setSnapshotTargetPropagations(id, setSnapshotTargetPropagationsDto, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
   }
@@ -1079,22 +1087,22 @@ export class SnapshotsApi extends BaseAPI {
 
   /**
    *
-   * @summary Toggle snapshot state
+   * @summary Set snapshot target propagations
    * @param {string} id Snapshot ID
-   * @param {ToggleState} toggleState
+   * @param {SetSnapshotTargetPropagationsDto} setSnapshotTargetPropagationsDto
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof SnapshotsApi
    */
-  public toggleSnapshotState(
+  public setSnapshotTargetPropagations(
     id: string,
-    toggleState: ToggleState,
+    setSnapshotTargetPropagationsDto: SetSnapshotTargetPropagationsDto,
     xDaytonaOrganizationID?: string,
     options?: RawAxiosRequestConfig,
   ) {
     return SnapshotsApiFp(this.configuration)
-      .toggleSnapshotState(id, toggleState, xDaytonaOrganizationID, options)
+      .setSnapshotTargetPropagations(id, setSnapshotTargetPropagationsDto, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 }

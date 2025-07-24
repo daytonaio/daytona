@@ -4651,48 +4651,6 @@ paths:
       summary: Get snapshot by ID or name
       tags:
         - snapshots
-  /snapshots/{id}/toggle:
-    patch:
-      operationId: toggleSnapshotState
-      parameters:
-        - description: Use with JWT to specify the organization ID
-          explode: false
-          in: header
-          name: X-Daytona-Organization-ID
-          required: false
-          schema:
-            type: string
-          style: simple
-        - description: Snapshot ID
-          explode: false
-          in: path
-          name: id
-          required: true
-          schema:
-            type: string
-          style: simple
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ToggleState'
-        required: true
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SnapshotDto'
-          description: Snapshot state has been toggled
-      security:
-        - bearer: []
-        - oauth2:
-            - openid
-            - profile
-            - email
-      summary: Toggle snapshot state
-      tags:
-        - snapshots
   /snapshots/{id}/general:
     patch:
       operationId: setSnapshotGeneralStatus
@@ -4814,6 +4772,48 @@ paths:
             - profile
             - email
       summary: Activate a snapshot
+      tags:
+        - snapshots
+  /snapshots/{id}/target-propagations:
+    patch:
+      operationId: setSnapshotTargetPropagations
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - description: Snapshot ID
+          explode: false
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetSnapshotTargetPropagationsDto'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SnapshotDto'
+          description: Snapshot target propagations have been set
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Set snapshot target propagations
       tags:
         - snapshots
   /workspace:
@@ -6852,6 +6852,7 @@ components:
         - pending_build
         - building_snapshot
         - unknown
+        - pending_pull
         - pulling_snapshot
         - archiving
         - archived
@@ -8759,6 +8760,23 @@ components:
         - count
         - windows
       type: object
+    SetSnapshotTargetPropagationDto:
+      example:
+        userOverride: 0
+        target: local
+      properties:
+        target:
+          description: The target environment for the snapshot
+          example: local
+          type: string
+        userOverride:
+          description: User minimum value for the target
+          example: 0
+          type: number
+      required:
+        - target
+        - userOverride
+      type: object
     CreateSnapshot:
       example:
         general: true
@@ -8770,6 +8788,11 @@ components:
         name: ubuntu-4vcpu-8ram-100gb
         cpu: 1
         gpu: 0
+        targetPropagations:
+          - userOverride: 0
+            target: local
+          - userOverride: 0
+            target: local
       properties:
         name:
           description: The name of the snapshot
@@ -8808,30 +8831,70 @@ components:
           allOf:
             - $ref: '#/components/schemas/CreateBuildInfo'
           description: Build information for the snapshot
+        targetPropagations:
+          description: Target propagations for the snapshot
+          items:
+            $ref: '#/components/schemas/SetSnapshotTargetPropagationDto'
+          type: array
       required:
         - name
       type: object
     SnapshotState:
       enum:
-        - build_pending
-        - building
         - pending
         - pulling
         - pending_validation
         - validating
         - active
         - inactive
+        - building
+        - warming_up
         - error
         - build_failed
         - removing
       type: string
+    SnapshotTargetPropagationDto:
+      example:
+        createdAt: 2000-01-23T04:56:07.000+00:00
+        snapshotId: snapshotId
+        userOverride: 7.061401241503109
+        desiredConcurrentSandboxes: 2.3021358869347655
+        id: id
+        target: target
+        updatedAt: 2000-01-23T04:56:07.000+00:00
+      properties:
+        id:
+          type: string
+        target:
+          type: string
+        desiredConcurrentSandboxes:
+          type: number
+        userOverride:
+          type: number
+        snapshotId:
+          type: string
+        createdAt:
+          format: date-time
+          type: string
+        updatedAt:
+          format: date-time
+          type: string
+      required:
+        - createdAt
+        - desiredConcurrentSandboxes
+        - id
+        - snapshotId
+        - target
+        - updatedAt
+        - userOverride
+      type: object
     SnapshotDto:
       example:
+        maximumUserOverride: 9.301444243932576
         imageName: imageName
         buildInfo: ''
         cpu: 6.027456183070403
         gpu: 1.4658129805029452
-        enabled: true
         organizationId: organizationId
         general: true
         createdAt: 2000-01-23T04:56:07.000+00:00
@@ -8846,6 +8909,21 @@ components:
         name: name
         id: id
         state: ''
+        targetPropagations:
+          - createdAt: 2000-01-23T04:56:07.000+00:00
+            snapshotId: snapshotId
+            userOverride: 7.061401241503109
+            desiredConcurrentSandboxes: 2.3021358869347655
+            id: id
+            target: target
+            updatedAt: 2000-01-23T04:56:07.000+00:00
+          - createdAt: 2000-01-23T04:56:07.000+00:00
+            snapshotId: snapshotId
+            userOverride: 7.061401241503109
+            desiredConcurrentSandboxes: 2.3021358869347655
+            id: id
+            target: target
+            updatedAt: 2000-01-23T04:56:07.000+00:00
         updatedAt: 2000-01-23T04:56:07.000+00:00
       properties:
         id:
@@ -8858,8 +8936,6 @@ components:
           type: string
         imageName:
           type: string
-        enabled:
-          type: boolean
         state:
           allOf:
             - $ref: '#/components/schemas/SnapshotState'
@@ -8896,11 +8972,18 @@ components:
           allOf:
             - $ref: '#/components/schemas/BuildInfo'
           description: Build information for the snapshot
+        targetPropagations:
+          description: Target propagations for the snapshot
+          items:
+            $ref: '#/components/schemas/SnapshotTargetPropagationDto'
+          type: array
+        maximumUserOverride:
+          description: Maximum allowed user override value for target propagations
+          type: number
       required:
         - cpu
         - createdAt
         - disk
-        - enabled
         - entrypoint
         - errorReason
         - general
@@ -8913,28 +8996,17 @@ components:
         - state
         - updatedAt
       type: object
-    ToggleState:
-      example:
-        enabled: true
-      properties:
-        enabled:
-          description: Enable or disable the snapshot/tag
-          example: true
-          type: boolean
-      required:
-        - enabled
-      type: object
     PaginatedSnapshotsDto:
       example:
-        total: 2.3021358869347655
-        totalPages: 9.301444243932576
-        page: 7.061401241503109
+        total: 3.616076749251911
+        totalPages: 4.145608029883936
+        page: 2.027123023002322
         items:
-          - imageName: imageName
+          - maximumUserOverride: 9.301444243932576
+            imageName: imageName
             buildInfo: ''
             cpu: 6.027456183070403
             gpu: 1.4658129805029452
-            enabled: true
             organizationId: organizationId
             general: true
             createdAt: 2000-01-23T04:56:07.000+00:00
@@ -8949,12 +9021,27 @@ components:
             name: name
             id: id
             state: ''
+            targetPropagations:
+              - createdAt: 2000-01-23T04:56:07.000+00:00
+                snapshotId: snapshotId
+                userOverride: 7.061401241503109
+                desiredConcurrentSandboxes: 2.3021358869347655
+                id: id
+                target: target
+                updatedAt: 2000-01-23T04:56:07.000+00:00
+              - createdAt: 2000-01-23T04:56:07.000+00:00
+                snapshotId: snapshotId
+                userOverride: 7.061401241503109
+                desiredConcurrentSandboxes: 2.3021358869347655
+                id: id
+                target: target
+                updatedAt: 2000-01-23T04:56:07.000+00:00
             updatedAt: 2000-01-23T04:56:07.000+00:00
-          - imageName: imageName
+          - maximumUserOverride: 9.301444243932576
+            imageName: imageName
             buildInfo: ''
             cpu: 6.027456183070403
             gpu: 1.4658129805029452
-            enabled: true
             organizationId: organizationId
             general: true
             createdAt: 2000-01-23T04:56:07.000+00:00
@@ -8969,6 +9056,21 @@ components:
             name: name
             id: id
             state: ''
+            targetPropagations:
+              - createdAt: 2000-01-23T04:56:07.000+00:00
+                snapshotId: snapshotId
+                userOverride: 7.061401241503109
+                desiredConcurrentSandboxes: 2.3021358869347655
+                id: id
+                target: target
+                updatedAt: 2000-01-23T04:56:07.000+00:00
+              - createdAt: 2000-01-23T04:56:07.000+00:00
+                snapshotId: snapshotId
+                userOverride: 7.061401241503109
+                desiredConcurrentSandboxes: 2.3021358869347655
+                id: id
+                target: target
+                updatedAt: 2000-01-23T04:56:07.000+00:00
             updatedAt: 2000-01-23T04:56:07.000+00:00
       properties:
         items:
@@ -8997,6 +9099,22 @@ components:
           type: boolean
       required:
         - general
+      type: object
+    SetSnapshotTargetPropagationsDto:
+      example:
+        targetPropagations:
+          - userOverride: 0
+            target: local
+          - userOverride: 0
+            target: local
+      properties:
+        targetPropagations:
+          description: Target propagation settings
+          items:
+            $ref: '#/components/schemas/SetSnapshotTargetPropagationDto'
+          type: array
+      required:
+        - targetPropagations
       type: object
     SandboxInfo:
       properties:

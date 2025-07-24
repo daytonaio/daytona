@@ -197,10 +197,10 @@ export class SandboxService {
       throw new BadRequestError(`Snapshot ${sandbox.snapshot} not found while creating warm pool sandbox`)
     }
 
-    const runner = await this.runnerService.getRandomAvailableRunner({
+    const runner = await this.runnerService.getAvailableRunner({
       region: sandbox.region,
       sandboxClass: sandbox.class,
-      snapshotRef: snapshot.internalName,
+      snapshotRef: snapshot.ref,
     })
 
     sandbox.runnerId = runner.id
@@ -295,13 +295,23 @@ export class SandboxService {
       }
     }
 
-    const runner = await this.runnerService.getRandomAvailableRunner({
-      region,
-      sandboxClass,
-      snapshotRef: snapshot.internalName,
-    })
-
     const sandbox = new Sandbox()
+    let runnerDomain = ''
+
+    try {
+      const runner = await this.runnerService.getAvailableRunner({
+        region,
+        sandboxClass,
+        snapshotRef: snapshot.ref,
+      })
+      sandbox.runnerId = runner.id
+      runnerDomain = runner.domain
+    } catch (error) {
+      if (error instanceof BadRequestError == false || error.message !== 'No available runners') {
+        throw error
+      }
+      sandbox.state = SandboxState.PENDING_PULL
+    }
 
     sandbox.organizationId = organization.id
 
@@ -334,10 +344,8 @@ export class SandboxService {
       sandbox.autoDeleteInterval = createSandboxDto.autoDeleteInterval
     }
 
-    sandbox.runnerId = runner.id
-
     await this.sandboxRepository.insert(sandbox)
-    return SandboxDto.fromSandbox(sandbox, runner.domain)
+    return SandboxDto.fromSandbox(sandbox, runnerDomain)
   }
 
   private async assignWarmPoolSandbox(
@@ -442,14 +450,14 @@ export class SandboxService {
     let runner: Runner
 
     try {
-      runner = await this.runnerService.getRandomAvailableRunner({
+      runner = await this.runnerService.getAvailableRunner({
         region: sandbox.region,
         sandboxClass: sandbox.class,
         snapshotRef: sandbox.buildInfo.snapshotRef,
       })
       sandbox.runnerId = runner.id
     } catch (error) {
-      if (error instanceof BadRequestError == false || error.message !== 'No available runners' || !sandbox.buildInfo) {
+      if (error instanceof BadRequestError == false || error.message !== 'No available runners') {
         throw error
       }
       sandbox.state = SandboxState.PENDING_BUILD
@@ -712,12 +720,13 @@ export class SandboxService {
 
   @Cron(CronExpression.EVERY_10_MINUTES)
   async cleanupDestroyedSandboxs() {
-    const twentyFourHoursAgo = new Date()
-    twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24)
+    // Setting retention to five days to make more informed decisions for snapshot runner scaling
+    const fiveDaysAgo = new Date()
+    fiveDaysAgo.setDate(fiveDaysAgo.getDate() - 5)
 
     const destroyedSandboxs = await this.sandboxRepository.delete({
       state: SandboxState.DESTROYED,
-      updatedAt: LessThan(twentyFourHoursAgo),
+      updatedAt: LessThan(fiveDaysAgo),
     })
 
     if (destroyedSandboxs.affected > 0) {

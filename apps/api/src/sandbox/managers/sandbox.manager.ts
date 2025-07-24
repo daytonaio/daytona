@@ -24,7 +24,6 @@ import { SandboxStartedEvent } from '../events/sandbox-started.event'
 import { SandboxArchivedEvent } from '../events/sandbox-archived.event'
 import { SandboxDestroyedEvent } from '../events/sandbox-destroyed.event'
 import { SandboxCreatedEvent } from '../events/sandbox-create.event'
-
 import { OtelSpan } from '../../common/decorators/otel.decorator'
 
 import { SandboxStartAction } from './sandbox-actions/sandbox-start.action'
@@ -32,6 +31,8 @@ import { SandboxStopAction } from './sandbox-actions/sandbox-stop.action'
 import { SandboxDestroyAction } from './sandbox-actions/sandbox-destroy.action'
 import { SandboxArchiveAction } from './sandbox-actions/sandbox-archive.action'
 import { SYNC_AGAIN, DONT_SYNC_AGAIN } from './sandbox-actions/sandbox.action'
+import { Redis } from 'ioredis'
+import { InjectRedis } from '@nestjs-modules/ioredis'
 
 export const SYNC_INSTANCE_STATE_LOCK_KEY = 'sync-instance-state-'
 
@@ -48,6 +49,7 @@ export class SandboxManager {
     private readonly sandboxStopAction: SandboxStopAction,
     private readonly sandboxDestroyAction: SandboxDestroyAction,
     private readonly sandboxArchiveAction: SandboxArchiveAction,
+    @InjectRedis() private readonly redis: Redis,
   ) {}
 
   @Cron(CronExpression.EVERY_MINUTE, { name: 'auto-stop-check' })

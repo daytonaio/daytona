@@ -23,8 +23,8 @@ from typing_extensions import Annotated
 from daytona_api_client_async.models.create_snapshot import CreateSnapshot
 from daytona_api_client_async.models.paginated_snapshots_dto import PaginatedSnapshotsDto
 from daytona_api_client_async.models.set_snapshot_general_status_dto import SetSnapshotGeneralStatusDto
+from daytona_api_client_async.models.set_snapshot_target_propagations_dto import SetSnapshotTargetPropagationsDto
 from daytona_api_client_async.models.snapshot_dto import SnapshotDto
-from daytona_api_client_async.models.toggle_state import ToggleState
 
 from daytona_api_client_async.api_client import ApiClient, RequestSerialized
 from daytona_api_client_async.api_response import ApiResponse
@@ -2314,10 +2314,10 @@ class SnapshotsApi:
 
 
     @validate_call
-    async def toggle_snapshot_state(
+    async def set_snapshot_target_propagations(
         self,
         id: Annotated[StrictStr, Field(description="Snapshot ID")],
-        toggle_state: ToggleState,
+        set_snapshot_target_propagations_dto: SetSnapshotTargetPropagationsDto,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
@@ -2332,13 +2332,13 @@ class SnapshotsApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> SnapshotDto:
-        """Toggle snapshot state
+        """Set snapshot target propagations
 
 
         :param id: Snapshot ID (required)
         :type id: str
-        :param toggle_state: (required)
-        :type toggle_state: ToggleState
+        :param set_snapshot_target_propagations_dto: (required)
+        :type set_snapshot_target_propagations_dto: SetSnapshotTargetPropagationsDto
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -2363,9 +2363,9 @@ class SnapshotsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._toggle_snapshot_state_serialize(
+        _param = self._set_snapshot_target_propagations_serialize(
             id=id,
-            toggle_state=toggle_state,
+            set_snapshot_target_propagations_dto=set_snapshot_target_propagations_dto,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -2388,10 +2388,10 @@ class SnapshotsApi:
 
 
     @validate_call
-    async def toggle_snapshot_state_with_http_info(
+    async def set_snapshot_target_propagations_with_http_info(
         self,
         id: Annotated[StrictStr, Field(description="Snapshot ID")],
-        toggle_state: ToggleState,
+        set_snapshot_target_propagations_dto: SetSnapshotTargetPropagationsDto,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
@@ -2406,13 +2406,13 @@ class SnapshotsApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[SnapshotDto]:
-        """Toggle snapshot state
+        """Set snapshot target propagations
 
 
         :param id: Snapshot ID (required)
         :type id: str
-        :param toggle_state: (required)
-        :type toggle_state: ToggleState
+        :param set_snapshot_target_propagations_dto: (required)
+        :type set_snapshot_target_propagations_dto: SetSnapshotTargetPropagationsDto
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -2437,9 +2437,9 @@ class SnapshotsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._toggle_snapshot_state_serialize(
+        _param = self._set_snapshot_target_propagations_serialize(
             id=id,
-            toggle_state=toggle_state,
+            set_snapshot_target_propagations_dto=set_snapshot_target_propagations_dto,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -2462,10 +2462,10 @@ class SnapshotsApi:
 
 
     @validate_call
-    async def toggle_snapshot_state_without_preload_content(
+    async def set_snapshot_target_propagations_without_preload_content(
         self,
         id: Annotated[StrictStr, Field(description="Snapshot ID")],
-        toggle_state: ToggleState,
+        set_snapshot_target_propagations_dto: SetSnapshotTargetPropagationsDto,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
@@ -2480,13 +2480,13 @@ class SnapshotsApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Toggle snapshot state
+        """Set snapshot target propagations
 
 
         :param id: Snapshot ID (required)
         :type id: str
-        :param toggle_state: (required)
-        :type toggle_state: ToggleState
+        :param set_snapshot_target_propagations_dto: (required)
+        :type set_snapshot_target_propagations_dto: SetSnapshotTargetPropagationsDto
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -2511,9 +2511,9 @@ class SnapshotsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._toggle_snapshot_state_serialize(
+        _param = self._set_snapshot_target_propagations_serialize(
             id=id,
-            toggle_state=toggle_state,
+            set_snapshot_target_propagations_dto=set_snapshot_target_propagations_dto,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -2531,10 +2531,10 @@ class SnapshotsApi:
         return response_data.response
 
 
-    def _toggle_snapshot_state_serialize(
+    def _set_snapshot_target_propagations_serialize(
         self,
         id,
-        toggle_state,
+        set_snapshot_target_propagations_dto,
         x_daytona_organization_id,
         _request_auth,
         _content_type,
@@ -2565,8 +2565,8 @@ class SnapshotsApi:
             _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id
         # process the form parameters
         # process the body parameter
-        if toggle_state is not None:
-            _body_params = toggle_state
+        if set_snapshot_target_propagations_dto is not None:
+            _body_params = set_snapshot_target_propagations_dto
 
 
         # set the HTTP header `Accept`
@@ -2599,7 +2599,7 @@ class SnapshotsApi:
 
         return self.api_client.param_serialize(
             method='PATCH',
-            resource_path='/snapshots/{id}/toggle',
+            resource_path='/snapshots/{id}/target-propagations',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,

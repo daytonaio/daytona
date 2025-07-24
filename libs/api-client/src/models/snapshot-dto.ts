@@ -18,6 +18,9 @@ import type { BuildInfo } from './build-info'
 // May contain unused imports in some cases
 // @ts-ignore
 import type { SnapshotState } from './snapshot-state'
+// May contain unused imports in some cases
+// @ts-ignore
+import type { SnapshotTargetPropagationDto } from './snapshot-target-propagation-dto'
 
 /**
  *
@@ -55,12 +58,6 @@ export interface SnapshotDto {
    * @memberof SnapshotDto
    */
   imageName?: string
-  /**
-   *
-   * @type {boolean}
-   * @memberof SnapshotDto
-   */
-  enabled: boolean
   /**
    *
    * @type {SnapshotState}
@@ -133,4 +130,16 @@ export interface SnapshotDto {
    * @memberof SnapshotDto
    */
   buildInfo?: BuildInfo
+  /**
+   * Target propagations for the snapshot
+   * @type {Array<SnapshotTargetPropagationDto>}
+   * @memberof SnapshotDto
+   */
+  targetPropagations?: Array<SnapshotTargetPropagationDto>
+  /**
+   * Maximum allowed user override value for target propagations
+   * @type {number}
+   * @memberof SnapshotDto
+   */
+  maximumUserOverride?: number
 }

@@ -12,7 +12,7 @@ import {
   Logger,
 } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { Repository, Not, In, IsNull, Raw, Like, JsonContains } from 'typeorm'
+import { Repository, Not, In, Raw } from 'typeorm'
 import { Snapshot } from '../entities/snapshot.entity'
 import { SnapshotState } from '../enums/snapshot-state.enum'
 import { CreateSnapshotDto } from '../dto/create-snapshot.dto'
@@ -30,8 +30,16 @@ import { OrganizationEvents } from '../../organization/constants/organization-ev
 import { OrganizationSuspendedSnapshotDeactivatedEvent } from '../../organization/events/organization-suspended-snapshot-deactivated.event'
 import { SnapshotRunnerState } from '../enums/snapshot-runner-state.enum'
 import { PaginatedList } from '../../common/interfaces/paginated-list.interface'
+import { SetSnapshotTargetPropagationsDto } from '../dto/update-snapshot.dto'
+import { SnapshotTargetPropagation } from '../entities/snapshot-target-propagation.entity'
+import { DockerRegistryService } from '../../docker-registry/services/docker-registry.service'
 
 const IMAGE_NAME_REGEX = /^[a-zA-Z0-9_.\-:]+(\/[a-zA-Z0-9_.\-:]+)*$/
+
+const BASE_PROPAGATION_PERCENTAGE = 0.6
+const MINIMUM_PROPAGATION_COUNT = 10
+const DEFAULT_TARGETS = ['us', 'eu']
+
 @Injectable()
 export class SnapshotService {
   private readonly logger = new Logger(SnapshotService.name)
@@ -43,9 +51,12 @@ export class SnapshotService {
     private readonly snapshotRepository: Repository<Snapshot>,
     @InjectRepository(BuildInfo)
     private readonly buildInfoRepository: Repository<BuildInfo>,
+    @InjectRepository(SnapshotTargetPropagation)
+    private readonly snapshotTargetPropagationRepository: Repository<SnapshotTargetPropagation>,
     @InjectRepository(SnapshotRunner)
     private readonly snapshotRunnerRepository: Repository<SnapshotRunner>,
     private readonly organizationService: OrganizationService,
+    private readonly dockerRegistryService: DockerRegistryService,
   ) {}
 
   private validateImageName(name: string): string | null {
@@ -78,21 +89,50 @@ export class SnapshotService {
       throw new BadRequestException(nameValidationError)
     }
 
+    let entrypoint = createSnapshotDto.entrypoint
+    let ref: string
+
     if (createSnapshotDto.imageName) {
       const imageValidationError = this.validateImageName(createSnapshotDto.imageName)
       if (imageValidationError) {
         throw new BadRequestException(imageValidationError)
       }
+
+      try {
+        const imageDetails = await this.dockerRegistryService.getImageDetails(
+          createSnapshotDto.imageName,
+          organization.id,
+        )
+        if (!entrypoint || entrypoint.length === 0) {
+          if (imageDetails.entrypoint) {
+            entrypoint = imageDetails.entrypoint
+          } else if (imageDetails.cmd) {
+            entrypoint = imageDetails.cmd
+          } else {
+            entrypoint = ['sleep', 'infinity']
+          }
+        }
+        if (imageDetails.sizeGB > organization.maxSnapshotSize) {
+          throw new ForbiddenException(
+            `Image size ${imageDetails.sizeGB} exceeds the maximum allowed snapshot size (${organization.maxSnapshotSize})`,
+          )
+        }
+
+        const defaultInternalRegistry = await this.dockerRegistryService.getDefaultInternalRegistry()
+        const hash = imageDetails.digest.split(':')[1]
+        ref = `${defaultInternalRegistry.url}/${defaultInternalRegistry.project}/daytona-${hash}:daytona`
+      } catch (error) {
+        this.logger.error(`Error getting image details for ${createSnapshotDto.imageName}: ${error}`)
+      }
     }
 
     this.organizationService.assertOrganizationIsNotSuspended(organization)
 
-    // check if the organization has reached the snapshot quota
-    const snapshots = await this.snapshotRepository.find({
+    const snapshotCount = await this.snapshotRepository.count({
       where: { organizationId: organization.id },
     })
 
-    if (snapshots.length >= organization.snapshotQuota) {
+    if (snapshotCount >= organization.snapshotQuota) {
       throw new ForbiddenException('Reached the maximum number of snapshots in the organization')
     }
 
@@ -103,14 +143,27 @@ export class SnapshotService {
       createSnapshotDto.disk,
     )
 
+    if (createSnapshotDto.targetPropagations) {
+      for (const targetPropagation of createSnapshotDto.targetPropagations) {
+        if (targetPropagation.userOverride < 0) {
+          throw new BadRequestException('User minimum cannot be negative')
+        }
+      }
+    }
+
     try {
-      const snapshot = this.snapshotRepository.create({
-        organizationId: organization.id,
-        ...createSnapshotDto,
-        mem: createSnapshotDto.memory, // Map memory to mem
-        state: createSnapshotDto.buildInfo ? SnapshotState.BUILD_PENDING : SnapshotState.PENDING,
-        general,
-      })
+      const snapshot = new Snapshot()
+      snapshot.organizationId = organization.id
+      snapshot.cpu = createSnapshotDto.cpu
+      snapshot.gpu = createSnapshotDto.gpu
+      snapshot.mem = createSnapshotDto.memory
+      snapshot.disk = createSnapshotDto.disk
+      snapshot.general = general
+      snapshot.name = createSnapshotDto.name
+      snapshot.imageName = createSnapshotDto.imageName
+      snapshot.entrypoint = entrypoint
+      snapshot.state = SnapshotState.PENDING
+      snapshot.ref = ref
 
       if (createSnapshotDto.buildInfo) {
         const buildSnapshotRef = generateBuildSnapshotRef(
@@ -134,6 +187,34 @@ export class SnapshotService {
         }
       }
 
+      // Save the snapshot first to get its ID
+      const savedSnapshot = await this.snapshotRepository.save(snapshot)
+
+      const targetPropagations: SnapshotTargetPropagation[] = []
+
+      if (createSnapshotDto.targetPropagations) {
+        for (const targetPropagation of createSnapshotDto.targetPropagations) {
+          const propagation = this.snapshotTargetPropagationRepository.create({
+            snapshotId: savedSnapshot.id,
+            target: targetPropagation.target,
+            desiredConcurrentSandboxes: this.getDefaultDesiredConcurrentSandboxes(organization, savedSnapshot),
+            userOverride: targetPropagation.userOverride,
+          })
+          const savedPropagation = await this.snapshotTargetPropagationRepository.save(propagation)
+          targetPropagations.push(savedPropagation)
+        }
+      } else {
+        const defaultPropagations = this.getDefaultTargetPropagations(organization, savedSnapshot)
+        for (const propagation of defaultPropagations) {
+          propagation.snapshotId = savedSnapshot.id
+          const savedPropagation = await this.snapshotTargetPropagationRepository.save(propagation)
+          targetPropagations.push(savedPropagation)
+        }
+      }
+
+      // Update the snapshot with the saved propagations
+      savedSnapshot.targetPropagations = targetPropagations
+
       return await this.snapshotRepository.save(snapshot)
     } catch (error) {
       if (error.code === '23505') {
@@ -144,19 +225,6 @@ export class SnapshotService {
       }
       throw error
     }
-  }
-
-  async toggleSnapshotState(snapshotId: string, enabled: boolean) {
-    const snapshot = await this.snapshotRepository.findOne({
-      where: { id: snapshotId },
-    })
-
-    if (!snapshot) {
-      throw new NotFoundException(`Snapshot ${snapshotId} not found`)
-    }
-
-    snapshot.enabled = enabled
-    return await this.snapshotRepository.save(snapshot)
   }
 
   async removeSnapshot(snapshotId: string) {
@@ -306,7 +374,7 @@ export class SnapshotService {
     const snapshot = await this.snapshotRepository.findOne({
       where: {
         state: Not(In([SnapshotState.ERROR, SnapshotState.BUILD_FAILED])),
-        internalName: imageName,
+        ref: imageName,
       },
     })
 
@@ -353,7 +421,7 @@ export class SnapshotService {
 
     // Set associated SnapshotRunner records to REMOVING state
     const result = await this.snapshotRunnerRepository.update(
-      { snapshotRef: snapshot.internalName },
+      { snapshotRef: snapshot.ref },
       { state: SnapshotRunnerState.REMOVING },
     )
 
@@ -369,5 +437,94 @@ export class SnapshotService {
         error,
       )
     })
+  }
+
+  async setSnapshotTargetPropagations(
+    snapshotId: string,
+    setSnapshotTargetPropagationsDto: SetSnapshotTargetPropagationsDto,
+    organization: Organization,
+  ): Promise<Snapshot> {
+    const snapshot = await this.snapshotRepository.findOne({
+      where: { id: snapshotId },
+    })
+
+    if (!snapshot) {
+      throw new NotFoundException(`Snapshot ${snapshotId} not found`)
+    }
+
+    await this.organizationService.assertOrganizationIsNotSuspended(organization)
+
+    for (const targetPropagation of setSnapshotTargetPropagationsDto.targetPropagations) {
+      if (targetPropagation.userOverride < 0) {
+        throw new BadRequestException('Concurrent sandbox minimum must be non-negative')
+      }
+      // TODO: check if there is at least one runner with the given target
+    }
+
+    const existingTargetPropagations = await this.snapshotTargetPropagationRepository.find({
+      where: { snapshotId },
+    })
+
+    // Create a map of existing propagations by target for easy lookup
+    const existingPropagationsMap = new Map(existingTargetPropagations.map((prop) => [prop.target, prop]))
+
+    for (const newProp of setSnapshotTargetPropagationsDto.targetPropagations) {
+      const existing = existingPropagationsMap.get(newProp.target)
+
+      if (existing) {
+        // Update existing propagation
+        existing.userOverride = newProp.userOverride
+        await this.snapshotTargetPropagationRepository.save(existing)
+        // Remove from map to track which ones need to be deleted
+        existingPropagationsMap.delete(newProp.target)
+      } else {
+        // Create new propagation
+        const newPropagation = this.snapshotTargetPropagationRepository.create({
+          snapshotId,
+          target: newProp.target,
+          userOverride: newProp.userOverride,
+          desiredConcurrentSandboxes: this.getDefaultDesiredConcurrentSandboxes(organization, snapshot),
+        })
+        await this.snapshotTargetPropagationRepository.save(newPropagation)
+      }
+    }
+
+    // Delete propagations that weren't in the update DTO
+    if (existingPropagationsMap.size > 0) {
+      await this.snapshotTargetPropagationRepository.remove(Array.from(existingPropagationsMap.values()))
+    }
+
+    // Refresh snapshot with updated propagations
+    return await this.snapshotRepository.findOne({
+      where: { id: snapshotId },
+      relations: ['targetPropagations'],
+    })
+  }
+
+  private getDefaultTargetPropagations(organization: Organization, snapshot: Snapshot): SnapshotTargetPropagation[] {
+    const targetPropagations: SnapshotTargetPropagation[] = []
+    for (const target of DEFAULT_TARGETS) {
+      const propagation = new SnapshotTargetPropagation()
+      propagation.target = target
+      propagation.desiredConcurrentSandboxes = this.getDefaultDesiredConcurrentSandboxes(organization, snapshot)
+      propagation.snapshot = snapshot
+      targetPropagations.push(propagation)
+    }
+    return targetPropagations
+  }
+
+  private getDefaultDesiredConcurrentSandboxes(organization: Organization, snapshot: Snapshot): number {
+    const calculatedValue = this.getMaxDesiredConcurrentSandboxes(organization, snapshot) * BASE_PROPAGATION_PERCENTAGE
+    return Math.max(MINIMUM_PROPAGATION_COUNT, Math.floor(calculatedValue))
+  }
+
+  getMaxDesiredConcurrentSandboxes(organization: Organization, snapshot: Snapshot): number {
+    const cpuDivision = organization.totalCpuQuota / snapshot.cpu
+    const memoryDivision = organization.totalMemoryQuota / snapshot.mem
+    const diskDivision = organization.totalDiskQuota / snapshot.disk
+
+    const minDivision = Math.min(cpuDivision, memoryDivision, diskDivision)
+
+    return Math.floor(minDivision)
   }
 }

@@ -28,7 +28,6 @@ type SnapshotDto struct {
 	General        bool            `json:"general"`
 	Name           string          `json:"name"`
 	ImageName      *string         `json:"imageName,omitempty"`
-	Enabled        bool            `json:"enabled"`
 	State          SnapshotState   `json:"state"`
 	Size           NullableFloat32 `json:"size"`
 	Entrypoint     []string        `json:"entrypoint"`
@@ -42,6 +41,10 @@ type SnapshotDto struct {
 	LastUsedAt     NullableTime    `json:"lastUsedAt"`
 	// Build information for the snapshot
 	BuildInfo *BuildInfo `json:"buildInfo,omitempty"`
+	// Target propagations for the snapshot
+	TargetPropagations []SnapshotTargetPropagationDto `json:"targetPropagations,omitempty"`
+	// Maximum allowed user override value for target propagations
+	MaximumUserOverride *float32 `json:"maximumUserOverride,omitempty"`
 }
 
 type _SnapshotDto SnapshotDto
@@ -50,12 +53,11 @@ type _SnapshotDto SnapshotDto
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewSnapshotDto(id string, general bool, name string, enabled bool, state SnapshotState, size NullableFloat32, entrypoint []string, cpu float32, gpu float32, mem float32, disk float32, errorReason NullableString, createdAt time.Time, updatedAt time.Time, lastUsedAt NullableTime) *SnapshotDto {
+func NewSnapshotDto(id string, general bool, name string, state SnapshotState, size NullableFloat32, entrypoint []string, cpu float32, gpu float32, mem float32, disk float32, errorReason NullableString, createdAt time.Time, updatedAt time.Time, lastUsedAt NullableTime) *SnapshotDto {
 	this := SnapshotDto{}
 	this.Id = id
 	this.General = general
 	this.Name = name
-	this.Enabled = enabled
 	this.State = state
 	this.Size = size
 	this.Entrypoint = entrypoint
@@ -212,30 +214,6 @@ func (o *SnapshotDto) HasImageName() bool {
 // SetImageName gets a reference to the given string and assigns it to the ImageName field.
 func (o *SnapshotDto) SetImageName(v string) {
 	o.ImageName = &v
-}
-
-// GetEnabled returns the Enabled field value
-func (o *SnapshotDto) GetEnabled() bool {
-	if o == nil {
-		var ret bool
-		return ret
-	}
-
-	return o.Enabled
-}
-
-// GetEnabledOk returns a tuple with the Enabled field value
-// and a boolean to check if the value has been set.
-func (o *SnapshotDto) GetEnabledOk() (*bool, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.Enabled, true
-}
-
-// SetEnabled sets field value
-func (o *SnapshotDto) SetEnabled(v bool) {
-	o.Enabled = v
 }
 
 // GetState returns the State field value
@@ -542,6 +520,70 @@ func (o *SnapshotDto) SetBuildInfo(v BuildInfo) {
 	o.BuildInfo = &v
 }
 
+// GetTargetPropagations returns the TargetPropagations field value if set, zero value otherwise.
+func (o *SnapshotDto) GetTargetPropagations() []SnapshotTargetPropagationDto {
+	if o == nil || IsNil(o.TargetPropagations) {
+		var ret []SnapshotTargetPropagationDto
+		return ret
+	}
+	return o.TargetPropagations
+}
+
+// GetTargetPropagationsOk returns a tuple with the TargetPropagations field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *SnapshotDto) GetTargetPropagationsOk() ([]SnapshotTargetPropagationDto, bool) {
+	if o == nil || IsNil(o.TargetPropagations) {
+		return nil, false
+	}
+	return o.TargetPropagations, true
+}
+
+// HasTargetPropagations returns a boolean if a field has been set.
+func (o *SnapshotDto) HasTargetPropagations() bool {
+	if o != nil && !IsNil(o.TargetPropagations) {
+		return true
+	}
+
+	return false
+}
+
+// SetTargetPropagations gets a reference to the given []SnapshotTargetPropagationDto and assigns it to the TargetPropagations field.
+func (o *SnapshotDto) SetTargetPropagations(v []SnapshotTargetPropagationDto) {
+	o.TargetPropagations = v
+}
+
+// GetMaximumUserOverride returns the MaximumUserOverride field value if set, zero value otherwise.
+func (o *SnapshotDto) GetMaximumUserOverride() float32 {
+	if o == nil || IsNil(o.MaximumUserOverride) {
+		var ret float32
+		return ret
+	}
+	return *o.MaximumUserOverride
+}
+
+// GetMaximumUserOverrideOk returns a tuple with the MaximumUserOverride field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *SnapshotDto) GetMaximumUserOverrideOk() (*float32, bool) {
+	if o == nil || IsNil(o.MaximumUserOverride) {
+		return nil, false
+	}
+	return o.MaximumUserOverride, true
+}
+
+// HasMaximumUserOverride returns a boolean if a field has been set.
+func (o *SnapshotDto) HasMaximumUserOverride() bool {
+	if o != nil && !IsNil(o.MaximumUserOverride) {
+		return true
+	}
+
+	return false
+}
+
+// SetMaximumUserOverride gets a reference to the given float32 and assigns it to the MaximumUserOverride field.
+func (o *SnapshotDto) SetMaximumUserOverride(v float32) {
+	o.MaximumUserOverride = &v
+}
+
 func (o SnapshotDto) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -561,7 +603,6 @@ func (o SnapshotDto) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.ImageName) {
 		toSerialize["imageName"] = o.ImageName
 	}
-	toSerialize["enabled"] = o.Enabled
 	toSerialize["state"] = o.State
 	toSerialize["size"] = o.Size.Get()
 	if o.Entrypoint != nil {
@@ -578,6 +619,12 @@ func (o SnapshotDto) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.BuildInfo) {
 		toSerialize["buildInfo"] = o.BuildInfo
 	}
+	if !IsNil(o.TargetPropagations) {
+		toSerialize["targetPropagations"] = o.TargetPropagations
+	}
+	if !IsNil(o.MaximumUserOverride) {
+		toSerialize["maximumUserOverride"] = o.MaximumUserOverride
+	}
 	return toSerialize, nil
 }
 
@@ -589,7 +636,6 @@ func (o *SnapshotDto) UnmarshalJSON(data []byte) (err error) {
 		"id",
 		"general",
 		"name",
-		"enabled",
 		"state",
 		"size",
 		"entrypoint",

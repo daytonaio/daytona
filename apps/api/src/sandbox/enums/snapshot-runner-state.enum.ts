@@ -4,6 +4,7 @@
  */
 
 export enum SnapshotRunnerState {
+  PENDING = 'pending',
   PULLING_SNAPSHOT = 'pulling_snapshot',
   BUILDING_SNAPSHOT = 'building_snapshot',
   READY = 'ready',

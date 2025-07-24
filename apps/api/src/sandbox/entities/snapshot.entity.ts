@@ -17,6 +17,7 @@ import {
 import { SnapshotRunner } from './snapshot-runner.entity'
 import { SnapshotState } from '../enums/snapshot-state.enum'
 import { BuildInfo } from './build-info.entity'
+import { SnapshotTargetPropagation } from './snapshot-target-propagation.entity'
 
 @Entity()
 @Unique(['organizationId', 'name'])
@@ -41,10 +42,10 @@ export class Snapshot {
   imageName: string
 
   @Column({ nullable: true })
-  internalName?: string
+  ref?: string
 
-  @Column({ default: true })
-  enabled: boolean
+  @Column({ array: true, type: 'text', nullable: true })
+  parentRefChain?: string[]
 
   @Column({
     type: 'enum',
@@ -101,5 +102,8 @@ export class Snapshot {
   buildInfo?: BuildInfo
 
   @Column({ nullable: true })
-  buildRunnerId?: string
+  initialRunnerId?: string
+
+  @OneToMany(() => SnapshotTargetPropagation, (propagation) => propagation.snapshot)
+  targetPropagations: SnapshotTargetPropagation[]
 }

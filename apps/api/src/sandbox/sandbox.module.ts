@@ -22,7 +22,6 @@ import { Snapshot } from './entities/snapshot.entity'
 import { SnapshotController } from './controllers/snapshot.controller'
 import { SnapshotService } from './services/snapshot.service'
 import { SnapshotManager } from './managers/snapshot.manager'
-import { DockerProvider } from './docker/docker-provider'
 import { SnapshotRunner } from './entities/snapshot-runner.entity'
 import { DockerRegistry } from '../docker-registry/entities/docker-registry.entity'
 import { SandboxSubscriber } from './subscribers/sandbox.subscriber'
@@ -45,6 +44,7 @@ import { SandboxStartAction } from './managers/sandbox-actions/sandbox-start.act
 import { SandboxStopAction } from './managers/sandbox-actions/sandbox-stop.action'
 import { SandboxDestroyAction } from './managers/sandbox-actions/sandbox-destroy.action'
 import { SandboxArchiveAction } from './managers/sandbox-actions/sandbox-archive.action'
+import { SnapshotTargetPropagation } from './entities/snapshot-target-propagation.entity'
 
 @Module({
   imports: [
@@ -52,7 +52,17 @@ import { SandboxArchiveAction } from './managers/sandbox-actions/sandbox-archive
     AuthModule,
     DockerRegistryModule,
     OrganizationModule,
-    TypeOrmModule.forFeature([Sandbox, Runner, Snapshot, BuildInfo, SnapshotRunner, DockerRegistry, WarmPool, Volume]),
+    TypeOrmModule.forFeature([
+      Sandbox,
+      Runner,
+      Snapshot,
+      BuildInfo,
+      SnapshotRunner,
+      DockerRegistry,
+      WarmPool,
+      Volume,
+      SnapshotTargetPropagation,
+    ]),
   ],
   controllers: [
     SandboxController,
@@ -72,7 +82,6 @@ import { SandboxArchiveAction } from './managers/sandbox-actions/sandbox-archive
     ToolboxService,
     SnapshotService,
     SnapshotManager,
-    DockerProvider,
     SandboxSubscriber,
     RedisLockProvider,
     SnapshotSubscriber,

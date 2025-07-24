@@ -41,6 +41,7 @@ interface DataTableProps {
   onBulkDelete?: (snapshots: SnapshotDto[]) => void
   onToggleEnabled: (snapshot: SnapshotDto, enabled: boolean) => void
   onActivate?: (snapshot: SnapshotDto) => void
+  onEditTargets?: (snapshot: SnapshotDto) => void
   pagination: {
     pageIndex: number
     pageSize: number
@@ -56,6 +57,7 @@ export function SnapshotTable({
   onDelete,
   onToggleEnabled,
   onActivate,
+  onEditTargets,
   pagination,
   pageCount,
   onBulkDelete,
@@ -81,11 +83,12 @@ export function SnapshotTable({
         onDelete,
         onToggleEnabled,
         onActivate,
+        onEditTargets,
         loadingSnapshots,
         writePermitted,
         deletePermitted,
       }),
-    [onDelete, onToggleEnabled, onActivate, loadingSnapshots, writePermitted, deletePermitted],
+    [onDelete, onToggleEnabled, onActivate, onEditTargets, loadingSnapshots, writePermitted, deletePermitted],
   )
 
   const columnsWithSelection = useMemo(() => {
@@ -278,6 +281,7 @@ const getColumns = ({
   onDelete,
   onToggleEnabled,
   onActivate,
+  onEditTargets,
   loadingSnapshots,
   writePermitted,
   deletePermitted,
@@ -285,6 +289,7 @@ const getColumns = ({
   onDelete: (snapshot: SnapshotDto) => void
   onToggleEnabled: (snapshot: SnapshotDto, enabled: boolean) => void
   onActivate?: (snapshot: SnapshotDto) => void
+  onEditTargets?: (snapshot: SnapshotDto) => void
   loadingSnapshots: Record<string, boolean>
   writePermitted: boolean
   deletePermitted: boolean
@@ -414,6 +419,15 @@ const getColumns = ({
                   disabled={loadingSnapshots[row.original.id]}
                 >
                   {row.original.enabled ? 'Disable' : 'Enable'}
+                </DropdownMenuItem>
+              )}
+              {writePermitted && (
+                <DropdownMenuItem
+                  onClick={() => onEditTargets?.(row.original)}
+                  className="cursor-pointer"
+                  disabled={loadingSnapshots[row.original.id]}
+                >
+                  Targets
                 </DropdownMenuItem>
               )}
               {deletePermitted && (

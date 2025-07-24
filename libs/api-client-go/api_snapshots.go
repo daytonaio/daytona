@@ -122,17 +122,17 @@ type SnapshotsAPI interface {
 	SetSnapshotGeneralStatusExecute(r SnapshotsAPISetSnapshotGeneralStatusRequest) (*SnapshotDto, *http.Response, error)
 
 	/*
-		ToggleSnapshotState Toggle snapshot state
+		SetSnapshotTargetPropagations Set snapshot target propagations
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 		@param id Snapshot ID
-		@return SnapshotsAPIToggleSnapshotStateRequest
+		@return SnapshotsAPISetSnapshotTargetPropagationsRequest
 	*/
-	ToggleSnapshotState(ctx context.Context, id string) SnapshotsAPIToggleSnapshotStateRequest
+	SetSnapshotTargetPropagations(ctx context.Context, id string) SnapshotsAPISetSnapshotTargetPropagationsRequest
 
-	// ToggleSnapshotStateExecute executes the request
+	// SetSnapshotTargetPropagationsExecute executes the request
 	//  @return SnapshotDto
-	ToggleSnapshotStateExecute(r SnapshotsAPIToggleSnapshotStateRequest) (*SnapshotDto, *http.Response, error)
+	SetSnapshotTargetPropagationsExecute(r SnapshotsAPISetSnapshotTargetPropagationsRequest) (*SnapshotDto, *http.Response, error)
 }
 
 // SnapshotsAPIService SnapshotsAPI service
@@ -1061,38 +1061,38 @@ func (a *SnapshotsAPIService) SetSnapshotGeneralStatusExecute(r SnapshotsAPISetS
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
-type SnapshotsAPIToggleSnapshotStateRequest struct {
-	ctx                    context.Context
-	ApiService             SnapshotsAPI
-	id                     string
-	toggleState            *ToggleState
-	xDaytonaOrganizationID *string
+type SnapshotsAPISetSnapshotTargetPropagationsRequest struct {
+	ctx                              context.Context
+	ApiService                       SnapshotsAPI
+	id                               string
+	setSnapshotTargetPropagationsDto *SetSnapshotTargetPropagationsDto
+	xDaytonaOrganizationID           *string
 }
 
-func (r SnapshotsAPIToggleSnapshotStateRequest) ToggleState(toggleState ToggleState) SnapshotsAPIToggleSnapshotStateRequest {
-	r.toggleState = &toggleState
+func (r SnapshotsAPISetSnapshotTargetPropagationsRequest) SetSnapshotTargetPropagationsDto(setSnapshotTargetPropagationsDto SetSnapshotTargetPropagationsDto) SnapshotsAPISetSnapshotTargetPropagationsRequest {
+	r.setSnapshotTargetPropagationsDto = &setSnapshotTargetPropagationsDto
 	return r
 }
 
 // Use with JWT to specify the organization ID
-func (r SnapshotsAPIToggleSnapshotStateRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) SnapshotsAPIToggleSnapshotStateRequest {
+func (r SnapshotsAPISetSnapshotTargetPropagationsRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) SnapshotsAPISetSnapshotTargetPropagationsRequest {
 	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
 	return r
 }
 
-func (r SnapshotsAPIToggleSnapshotStateRequest) Execute() (*SnapshotDto, *http.Response, error) {
-	return r.ApiService.ToggleSnapshotStateExecute(r)
+func (r SnapshotsAPISetSnapshotTargetPropagationsRequest) Execute() (*SnapshotDto, *http.Response, error) {
+	return r.ApiService.SetSnapshotTargetPropagationsExecute(r)
 }
 
 /*
-ToggleSnapshotState Toggle snapshot state
+SetSnapshotTargetPropagations Set snapshot target propagations
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param id Snapshot ID
-	@return SnapshotsAPIToggleSnapshotStateRequest
+	@return SnapshotsAPISetSnapshotTargetPropagationsRequest
 */
-func (a *SnapshotsAPIService) ToggleSnapshotState(ctx context.Context, id string) SnapshotsAPIToggleSnapshotStateRequest {
-	return SnapshotsAPIToggleSnapshotStateRequest{
+func (a *SnapshotsAPIService) SetSnapshotTargetPropagations(ctx context.Context, id string) SnapshotsAPISetSnapshotTargetPropagationsRequest {
+	return SnapshotsAPISetSnapshotTargetPropagationsRequest{
 		ApiService: a,
 		ctx:        ctx,
 		id:         id,
@@ -1102,7 +1102,7 @@ func (a *SnapshotsAPIService) ToggleSnapshotState(ctx context.Context, id string
 // Execute executes the request
 //
 //	@return SnapshotDto
-func (a *SnapshotsAPIService) ToggleSnapshotStateExecute(r SnapshotsAPIToggleSnapshotStateRequest) (*SnapshotDto, *http.Response, error) {
+func (a *SnapshotsAPIService) SetSnapshotTargetPropagationsExecute(r SnapshotsAPISetSnapshotTargetPropagationsRequest) (*SnapshotDto, *http.Response, error) {
 	var (
 		localVarHTTPMethod  = http.MethodPatch
 		localVarPostBody    interface{}
@@ -1110,19 +1110,19 @@ func (a *SnapshotsAPIService) ToggleSnapshotStateExecute(r SnapshotsAPIToggleSna
 		localVarReturnValue *SnapshotDto
 	)
 
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SnapshotsAPIService.ToggleSnapshotState")
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SnapshotsAPIService.SetSnapshotTargetPropagations")
 	if err != nil {
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/snapshots/{id}/toggle"
+	localVarPath := localBasePath + "/snapshots/{id}/target-propagations"
 	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", url.PathEscape(parameterValueToString(r.id, "id")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
-	if r.toggleState == nil {
-		return localVarReturnValue, nil, reportError("toggleState is required and must be specified")
+	if r.setSnapshotTargetPropagationsDto == nil {
+		return localVarReturnValue, nil, reportError("setSnapshotTargetPropagationsDto is required and must be specified")
 	}
 
 	// to determine the Content-Type header
@@ -1146,7 +1146,7 @@ func (a *SnapshotsAPIService) ToggleSnapshotStateExecute(r SnapshotsAPIToggleSna
 		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Daytona-Organization-ID", r.xDaytonaOrganizationID, "simple", "")
 	}
 	// body params
-	localVarPostBody = r.toggleState
+	localVarPostBody = r.setSnapshotTargetPropagationsDto
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
 		return localVarReturnValue, nil, err
