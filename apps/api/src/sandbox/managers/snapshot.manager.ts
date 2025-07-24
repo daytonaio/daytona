@@ -943,56 +943,91 @@ export class SnapshotManager {
 
       const query = `
       WITH
-        STPS AS (
-          SELECT
-            CEIL(
-              COALESCE(
-                STP."userOverride",
-                STP."desiredConcurrentSandboxes"
-              ) / ${SB_PER_RUNNER}
-            ) AS DESIRED_RUNNER_COUNT,
-            S.REF AS SNAPSHOT_REF,
-            STP.TARGET
-          FROM
-            SNAPSHOT_TARGET_PROPAGATION STP
-            JOIN SNAPSHOT S ON STP."snapshotId" = S.ID
-          WHERE
-            S.STATE = 'active'
-          ORDER BY
-            S."lastUsedAt" DESC
-        )
-      SELECT
-        STPS.SNAPSHOT_REF,
-        STPS.DESIRED_RUNNER_COUNT,
-        CAST(COUNT(SR."runnerId") AS INTEGER) AS READY_RUNNER_COUNT
-      FROM
-        STPS
-        LEFT JOIN SNAPSHOT_RUNNER SR ON SR."snapshotRef" = STPS.SNAPSHOT_REF
-        AND SR.STATE = 'ready'
-        LEFT JOIN RUNNER R ON SR."runnerId" = R.ID::TEXT
-      GROUP BY
-        STPS.SNAPSHOT_REF,
-        STPS.DESIRED_RUNNER_COUNT;
+          STPS AS (
+            SELECT
+              CEIL(
+                COALESCE(
+                  STP."userOverride",
+                  STP."desiredConcurrentSandboxes"
+                ) / ${SB_PER_RUNNER}
+              ) AS DESIRED_RUNNER_COUNT,
+              S.REF AS SNAPSHOT_REF,
+              STP.TARGET
+            FROM
+              SNAPSHOT_TARGET_PROPAGATION STP
+              JOIN SNAPSHOT S ON STP."snapshotId" = S.ID
+            WHERE
+              S.STATE = 'active'
+            ORDER BY
+              S."lastUsedAt" DESC
+          )
+        SELECT
+          STPS.SNAPSHOT_REF,
+          STPS.DESIRED_RUNNER_COUNT,
+          STPS.TARGET,
+          CAST(COUNT(DISTINCT SR."runnerId") AS INTEGER) AS READY_RUNNER_COUNT,
+          ARRAY_AGG(SR."runnerId") FILTER (
+            WHERE
+              SR."runnerId" IS NOT NULL
+          ) AS RUNNER_IDS
+        FROM
+          STPS
+          JOIN SNAPSHOT_RUNNER SR ON SR."snapshotRef" = STPS.SNAPSHOT_REF
+          JOIN RUNNER R ON SR."runnerId" = R.ID::TEXT
+        WHERE
+          R.STATE = 'ready'
+          AND R.UNSCHEDULABLE = FALSE
+          AND SR.STATE = 'ready'
+        GROUP BY
+          STPS.SNAPSHOT_REF,
+          STPS.DESIRED_RUNNER_COUNT,
+          STPS.TARGET;
       `
 
-      // TODO: update the SnapshotTargetPropagationState to PROPAGATING if doing more, or READY if satisfied or scaling down
-
-      // Find overused snapshots and increase their desired propagation
-      const result = await this.snapshotRepository.query(query)
-
-      console.log('Enforce desired propagations:')
-      console.log(result)
-
-      // Iterate through the results and call different functions based on shouldPropagate
-      for (const item of result) {
-        if (item.shouldPropagate === true) {
-          // propagate to each runner
-          await this.propagateSnapshotToRunners(item.snapshot_id)
-        } else {
-          // For items where shouldPropagate is false and runnerId is not null
-          //     await this.pullSnapshotRunnerWithRetries(runner, snapshotRef, dockerRegistry)
-        }
+      interface SnapshotPropagationResult {
+        snapshot_ref: string
+        desired_runner_count: number
+        ready_runner_count: number
+        target: string
+        runner_ids: string[]
       }
+
+      const result: SnapshotPropagationResult[] = await this.snapshotRepository.query(query)
+
+      this.logger.debug('Enforce desired propagations:', result)
+
+      await Promise.allSettled(
+        result.map(async (r) => {
+          if (r.ready_runner_count < r.desired_runner_count) {
+            // Scale up: Need more runners for this snapshot
+            const runners = await this.runnerService.getAvailableRunners(
+              {
+                region: r.target,
+              },
+              r.desired_runner_count - r.ready_runner_count,
+            )
+
+            const runnerIds = runners.map((r) => r.id)
+
+            this.logger.debug(
+              `Scaling up snapshot ${r.snapshot_ref}: adding ${runnerIds.length} runners (${r.ready_runner_count}/${r.desired_runner_count})`,
+            )
+
+            await this.syncSnapshotDistribution(r.snapshot_ref, runnerIds, true)
+          } else if (r.ready_runner_count > 1.5 * r.desired_runner_count) {
+            // Scale down: Too many runners for this snapshot
+            const runnerIdsForRemoval = r.runner_ids
+              .slice(r.ready_runner_count - r.desired_runner_count)
+              .sort(() => Math.random() - 0.5)
+
+            this.logger.debug(
+              `Scaling down snapshot ${r.snapshot_ref}: removing ${runnerIdsForRemoval.length} runners (${r.ready_runner_count}/${r.desired_runner_count})`,
+            )
+
+            await this.syncSnapshotDistribution(r.snapshot_ref, runnerIdsForRemoval, false)
+          }
+        }),
+      )
     } catch (error) {
       this.logger.error(`Error syncing snapshot runners: ${fromAxiosError(error)}`)
     } finally {
