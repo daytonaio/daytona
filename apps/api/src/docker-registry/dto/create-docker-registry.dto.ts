@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { IsString, IsUrl, IsEnum, IsOptional } from 'class-validator'
+import { IsString, IsUrl, IsEnum, IsOptional, IsBoolean } from 'class-validator'
 import { ApiProperty, ApiPropertyOptional, ApiSchema } from '@nestjs/swagger'
 import { RegistryType } from './../../docker-registry/enums/registry-type.enum'
 
@@ -33,14 +33,13 @@ export class CreateDockerRegistryDto {
   @ApiProperty({
     description: 'Registry type',
     enum: RegistryType,
-    default: RegistryType.INTERNAL,
+    default: RegistryType.ORGANIZATION,
   })
   @IsEnum(RegistryType)
   registryType: RegistryType
 
-  @ApiProperty({
-    description: 'Set as default registry',
-    default: false,
-  })
+  @ApiPropertyOptional({ description: 'Set as default registry' })
+  @IsBoolean()
+  @IsOptional()
   isDefault?: boolean
 }
