@@ -276,21 +276,23 @@ export class SandboxService {
 
     await this.validateOrganizationQuotas(organization, cpu, mem, disk)
 
-    const warmPoolSandbox = await this.warmPoolService.fetchWarmPoolSandbox({
-      organizationId: organization.id,
-      snapshot: snapshotIdOrName,
-      target: createSandboxDto.target,
-      class: createSandboxDto.class,
-      cpu: cpu,
-      mem: mem,
-      disk: disk,
-      osUser: createSandboxDto.user,
-      env: createSandboxDto.env,
-      state: SandboxState.STARTED,
-    })
+    if (!createSandboxDto.volumes || createSandboxDto.volumes.length === 0) {
+      const warmPoolSandbox = await this.warmPoolService.fetchWarmPoolSandbox({
+        organizationId: organization.id,
+        snapshot: snapshotIdOrName,
+        target: createSandboxDto.target,
+        class: createSandboxDto.class,
+        cpu: cpu,
+        mem: mem,
+        disk: disk,
+        osUser: createSandboxDto.user,
+        env: createSandboxDto.env,
+        state: SandboxState.STARTED,
+      })
 
-    if (warmPoolSandbox) {
-      return await this.assignWarmPoolSandbox(warmPoolSandbox, createSandboxDto, organization.id)
+      if (warmPoolSandbox) {
+        return await this.assignWarmPoolSandbox(warmPoolSandbox, createSandboxDto, organization.id)
+      }
     }
 
     const runner = await this.runnerService.getRandomAvailableRunner({
