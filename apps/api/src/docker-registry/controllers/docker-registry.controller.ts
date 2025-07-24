@@ -3,7 +3,18 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, HttpCode } from '@nestjs/common'
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  HttpCode,
+  ForbiddenException,
+} from '@nestjs/common'
 import { ApiTags, ApiOperation, ApiResponse, ApiOAuth2, ApiHeader, ApiParam, ApiBearerAuth } from '@nestjs/swagger'
 import { CombinedAuthGuard } from '../../auth/combined-auth.guard'
 import { DockerRegistryService } from '../services/docker-registry.service'
@@ -26,6 +37,7 @@ import { SystemRole } from '../../user/enums/system-role.enum'
 import { Audit, MASKED_AUDIT_VALUE, TypedRequest } from '../../audit/decorators/audit.decorator'
 import { AuditAction } from '../../audit/enums/audit-action.enum'
 import { AuditTarget } from '../../audit/enums/audit-target.enum'
+import { RegistryType } from '../enums/registry-type.enum'
 
 @ApiTags('docker-registry')
 @Controller('docker-registry')
@@ -67,6 +79,16 @@ export class DockerRegistryController {
     @AuthContext() authContext: OrganizationAuthContext,
     @Body() createDockerRegistryDto: CreateDockerRegistryDto,
   ): Promise<DockerRegistryDto> {
+    if (createDockerRegistryDto.registryType !== RegistryType.ORGANIZATION && authContext.role !== SystemRole.ADMIN) {
+      throw new ForbiddenException(
+        `Insufficient permissions for creating ${createDockerRegistryDto.registryType} registries`,
+      )
+    }
+
+    if (createDockerRegistryDto.isDefault && authContext.role !== SystemRole.ADMIN) {
+      throw new ForbiddenException('Insufficient permissions for setting a default registry')
+    }
+
     const dockerRegistry = await this.dockerRegistryService.create(createDockerRegistryDto, authContext.organizationId)
     return DockerRegistryDto.fromDockerRegistry(dockerRegistry)
   }
