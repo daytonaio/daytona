@@ -8,7 +8,7 @@ export class Migration1753100751732 implements MigrationInterface {
       `CREATE TYPE "public"."snapshot_target_propagation_state_enum" AS ENUM('ready', 'propagating')`,
     )
     await queryRunner.query(`
-      CREATE TABLE "snapshot_target_propagation" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "target" character varying NOT NULL, "snapshotId" uuid NOT NULL, "desiredConcurrentSandboxes" integer NOT NULL, "userOverride" integer NOT NULL DEFAULT '0', "state" "public"."snapshot_target_propagation_state_enum" NOT NULL DEFAULT 'propagating', "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "snapshot_target_propagation_id_pk" PRIMARY KEY ("id"))`)
+      CREATE TABLE "snapshot_target_propagation" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "target" character varying NOT NULL, "snapshotId" uuid NOT NULL, "desiredConcurrentSandboxes" integer NOT NULL, "userOverride" integer DEFAULT NULL, "state" "public"."snapshot_target_propagation_state_enum" NOT NULL DEFAULT 'propagating', "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "snapshot_target_propagation_id_pk" PRIMARY KEY ("id"))`)
     await queryRunner.renameColumn('snapshot', 'internalName', 'ref')
     await queryRunner.renameColumn('snapshot', 'buildRunnerId', 'initialRunnerId')
     await queryRunner.query(`ALTER TABLE "snapshot" ADD "parentRefChain" text array`)

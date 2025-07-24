@@ -197,7 +197,7 @@ export class SandboxService {
       throw new BadRequestError(`Snapshot ${sandbox.snapshot} not found while creating warm pool sandbox`)
     }
 
-    const runner = await this.runnerService.getRandomAvailableRunner({
+    const runner = await this.runnerService.getAvailableRunner({
       region: sandbox.region,
       sandboxClass: sandbox.class,
       snapshotRef: snapshot.ref,
@@ -297,7 +297,7 @@ export class SandboxService {
     let runnerDomain = ''
 
     try {
-      const runner = await this.runnerService.getRandomAvailableRunner({
+      const runner = await this.runnerService.getAvailableRunner({
         region,
         sandboxClass,
         snapshotRef: snapshot.ref,
@@ -448,7 +448,7 @@ export class SandboxService {
     let runner: Runner
 
     try {
-      runner = await this.runnerService.getRandomAvailableRunner({
+      runner = await this.runnerService.getAvailableRunner({
         region: sandbox.region,
         sandboxClass: sandbox.class,
         snapshotRef: sandbox.buildInfo.snapshotRef,

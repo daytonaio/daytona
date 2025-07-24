@@ -401,7 +401,7 @@ export class SandboxManager {
 
     // Try to assign an available runner with the snapshot already available
     try {
-      const runner = await this.runnerService.getRandomAvailableRunner({
+      const runner = await this.runnerService.getAvailableRunner({
         region: sandbox.region,
         sandboxClass: sandbox.class,
         snapshotRef: snapshotRef,
@@ -443,7 +443,7 @@ export class SandboxManager {
     let runner: Runner
 
     try {
-      runner = await this.runnerService.getRandomAvailableRunner({
+      runner = await this.runnerService.getAvailableRunner({
         region: sandbox.region,
         sandboxClass: sandbox.class,
         excludedRunnerIds: excludedRunnerIds,
@@ -997,7 +997,7 @@ export class SandboxManager {
         if (runningSandboxsCount > usageThreshold) {
           //  TODO: usage should be based on compute usage
 
-          const availableRunners = await this.runnerService.findAvailableRunners({
+          const availableRunners = await this.runnerService.getAvailableRunners({
             region: sandbox.region,
             sandboxClass: sandbox.class,
           })
@@ -1093,7 +1093,7 @@ export class SandboxManager {
       const snapshotRef = baseSnapshot ? baseSnapshot.ref : null
 
       let availableRunners = []
-      const runnersWithBaseSnapshot = await this.runnerService.findAvailableRunners({
+      const runnersWithBaseSnapshot = await this.runnerService.getAvailableRunners({
         region: sandbox.region,
         sandboxClass: sandbox.class,
         snapshotRef,
@@ -1102,7 +1102,7 @@ export class SandboxManager {
         availableRunners = runnersWithBaseSnapshot
       } else {
         //  if no runner has the base snapshot, get all available runners
-        availableRunners = await this.runnerService.findAvailableRunners({
+        availableRunners = await this.runnerService.getAvailableRunners({
           region: sandbox.region,
           sandboxClass: sandbox.class,
         })

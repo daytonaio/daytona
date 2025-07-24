@@ -748,7 +748,7 @@ export class SnapshotManager {
       ? await this.runnerService.getRunnersWithMultipleSnapshotsBuilding()
       : await this.runnerService.getRunnersWithMultipleSnapshotsPulling()
 
-    const initialRunner = await this.runnerService.getRandomAvailableRunner({
+    const initialRunner = await this.runnerService.getAvailableRunner({
       region: DEFAULT_INITIAL_RUNNER_REGION,
       excludedRunnerIds: excludedRunnerIds,
     })
@@ -964,7 +964,7 @@ export class SnapshotManager {
       SELECT
         STPS.SNAPSHOT_REF,
         STPS.DESIRED_RUNNER_COUNT,
-        COUNT(SR."runnerId") AS READY_RUNNER_COUNT
+        CAST(COUNT(SR."runnerId") AS INTEGER) AS READY_RUNNER_COUNT
       FROM
         STPS
         LEFT JOIN SNAPSHOT_RUNNER SR ON SR."snapshotRef" = STPS.SNAPSHOT_REF

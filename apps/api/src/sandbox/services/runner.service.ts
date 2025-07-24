@@ -23,6 +23,8 @@ import { SnapshotRunnerState } from '../enums/snapshot-runner-state.enum'
 import { Snapshot } from '../entities/snapshot.entity'
 import { RunnerSnapshotDto } from '../dto/runner-snapshot.dto'
 
+const DEFAULT_RUNNER_SUBSET_SIZE = 10
+
 @Injectable()
 export class RunnerService {
   private readonly logger = new Logger(RunnerService.name)
@@ -96,11 +98,15 @@ export class RunnerService {
     return this.runnerRepository.findOneBy({ id: sandbox.runnerId })
   }
 
-  async findAvailableRunners(params: GetRunnerParams): Promise<Runner[]> {
+  async getAvailableRunner(params: GetRunnerParams): Promise<Runner> {
+    // Runners are sorted by availability score and shuffled, retrieve the first one
+    return await this.getAvailableRunners(params)[0]
+  }
+
+  async getAvailableRunners(params: GetRunnerParams, count?: number): Promise<Runner[]> {
     const runnerFilter: FindOptionsWhere<Runner> = {
       state: RunnerState.READY,
       unschedulable: Not(true),
-      used: Raw((alias) => `${alias} < capacity`),
     }
 
     if (params.snapshotRef !== undefined) {
@@ -134,11 +140,23 @@ export class RunnerService {
       runnerFilter.class = params.sandboxClass
     }
 
+    // Get 2x the number of runners to account for the random shuffle
+    const take = count && count > DEFAULT_RUNNER_SUBSET_SIZE / 2 ? count * 2 : DEFAULT_RUNNER_SUBSET_SIZE
+
     const runners = await this.runnerRepository.find({
       where: runnerFilter,
+      order: {
+        availabilityScore: 'DESC',
+      },
+      take: take,
     })
 
-    return runners.sort((a, b) => a.used / a.capacity - b.used / b.capacity).slice(0, 10)
+    if (runners.length == 0) {
+      throw new BadRequestError('No available runners')
+    }
+
+    // Shuffle the top DEFAULT_RUNNER_SUBSET_SIZE runners randomly
+    return runners.sort(() => Math.random() - 0.5).slice(0, count || DEFAULT_RUNNER_SUBSET_SIZE)
   }
 
   async remove(id: string): Promise<void> {
@@ -260,7 +278,7 @@ export class RunnerService {
     if (!runner) {
       throw new Error('Runner not found')
     }
-    //  recalculate runner usage
+
     const sandboxes = await this.sandboxRepository.find({
       where: {
         runnerId: runner.id,
@@ -284,21 +302,6 @@ export class RunnerService {
 
     runner.unschedulable = unschedulable
     return this.runnerRepository.save(runner)
-  }
-
-  async getRandomAvailableRunner(params: GetRunnerParams): Promise<Runner> {
-    const availableRunners = await this.findAvailableRunners(params)
-
-    //  TODO: implement a better algorithm to get a random available runner based on the runner's usage
-
-    if (availableRunners.length === 0) {
-      throw new BadRequestError('No available runners')
-    }
-
-    // Get random runner from available runners using inclusive bounds
-    const randomIntFromInterval = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1) + min)
-
-    return availableRunners[randomIntFromInterval(0, availableRunners.length - 1)]
   }
 
   async getSnapshotRunner(runnerId, snapshotRef: string): Promise<SnapshotRunner> {

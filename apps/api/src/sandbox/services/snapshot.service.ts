@@ -474,7 +474,6 @@ export class SnapshotService {
       const propagation = new SnapshotTargetPropagation()
       propagation.target = target
       propagation.desiredConcurrentSandboxes = this.getDefaultDesiredConcurrentSandboxes(organization, snapshot)
-      propagation.userOverride = 0
       propagation.snapshot = snapshot
       targetPropagations.push(propagation)
     }
