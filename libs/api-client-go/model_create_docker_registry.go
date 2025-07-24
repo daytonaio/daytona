@@ -31,11 +31,11 @@ type CreateDockerRegistry struct {
 	// Registry password
 	Password string `json:"password"`
 	// Registry project
-	Project string `json:"project"`
+	Project *string `json:"project,omitempty"`
 	// Registry type
 	RegistryType string `json:"registryType"`
 	// Set as default registry
-	IsDefault bool `json:"isDefault"`
+	IsDefault *bool `json:"isDefault,omitempty"`
 }
 
 type _CreateDockerRegistry CreateDockerRegistry
@@ -44,15 +44,13 @@ type _CreateDockerRegistry CreateDockerRegistry
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewCreateDockerRegistry(name string, url string, username string, password string, project string, registryType string, isDefault bool) *CreateDockerRegistry {
+func NewCreateDockerRegistry(name string, url string, username string, password string, registryType string) *CreateDockerRegistry {
 	this := CreateDockerRegistry{}
 	this.Name = name
 	this.Url = url
 	this.Username = username
 	this.Password = password
-	this.Project = project
 	this.RegistryType = registryType
-	this.IsDefault = isDefault
 	return &this
 }
 
@@ -61,10 +59,8 @@ func NewCreateDockerRegistry(name string, url string, username string, password 
 // but it doesn't guarantee that properties required by API are set
 func NewCreateDockerRegistryWithDefaults() *CreateDockerRegistry {
 	this := CreateDockerRegistry{}
-	var registryType string = "internal"
+	var registryType string = "organization"
 	this.RegistryType = registryType
-	var isDefault bool = false
-	this.IsDefault = isDefault
 	return &this
 }
 
@@ -164,28 +160,36 @@ func (o *CreateDockerRegistry) SetPassword(v string) {
 	o.Password = v
 }
 
-// GetProject returns the Project field value
+// GetProject returns the Project field value if set, zero value otherwise.
 func (o *CreateDockerRegistry) GetProject() string {
-	if o == nil {
+	if o == nil || IsNil(o.Project) {
 		var ret string
 		return ret
 	}
-
-	return o.Project
+	return *o.Project
 }
 
-// GetProjectOk returns a tuple with the Project field value
+// GetProjectOk returns a tuple with the Project field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 func (o *CreateDockerRegistry) GetProjectOk() (*string, bool) {
-	if o == nil {
+	if o == nil || IsNil(o.Project) {
 		return nil, false
 	}
-	return &o.Project, true
+	return o.Project, true
 }
 
-// SetProject sets field value
+// HasProject returns a boolean if a field has been set.
+func (o *CreateDockerRegistry) HasProject() bool {
+	if o != nil && !IsNil(o.Project) {
+		return true
+	}
+
+	return false
+}
+
+// SetProject gets a reference to the given string and assigns it to the Project field.
 func (o *CreateDockerRegistry) SetProject(v string) {
-	o.Project = v
+	o.Project = &v
 }
 
 // GetRegistryType returns the RegistryType field value
@@ -212,28 +216,36 @@ func (o *CreateDockerRegistry) SetRegistryType(v string) {
 	o.RegistryType = v
 }
 
-// GetIsDefault returns the IsDefault field value
+// GetIsDefault returns the IsDefault field value if set, zero value otherwise.
 func (o *CreateDockerRegistry) GetIsDefault() bool {
-	if o == nil {
+	if o == nil || IsNil(o.IsDefault) {
 		var ret bool
 		return ret
 	}
-
-	return o.IsDefault
+	return *o.IsDefault
 }
 
-// GetIsDefaultOk returns a tuple with the IsDefault field value
+// GetIsDefaultOk returns a tuple with the IsDefault field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 func (o *CreateDockerRegistry) GetIsDefaultOk() (*bool, bool) {
-	if o == nil {
+	if o == nil || IsNil(o.IsDefault) {
 		return nil, false
 	}
-	return &o.IsDefault, true
+	return o.IsDefault, true
 }
 
-// SetIsDefault sets field value
+// HasIsDefault returns a boolean if a field has been set.
+func (o *CreateDockerRegistry) HasIsDefault() bool {
+	if o != nil && !IsNil(o.IsDefault) {
+		return true
+	}
+
+	return false
+}
+
+// SetIsDefault gets a reference to the given bool and assigns it to the IsDefault field.
 func (o *CreateDockerRegistry) SetIsDefault(v bool) {
-	o.IsDefault = v
+	o.IsDefault = &v
 }
 
 func (o CreateDockerRegistry) MarshalJSON() ([]byte, error) {
@@ -250,9 +262,13 @@ func (o CreateDockerRegistry) ToMap() (map[string]interface{}, error) {
 	toSerialize["url"] = o.Url
 	toSerialize["username"] = o.Username
 	toSerialize["password"] = o.Password
-	toSerialize["project"] = o.Project
+	if !IsNil(o.Project) {
+		toSerialize["project"] = o.Project
+	}
 	toSerialize["registryType"] = o.RegistryType
-	toSerialize["isDefault"] = o.IsDefault
+	if !IsNil(o.IsDefault) {
+		toSerialize["isDefault"] = o.IsDefault
+	}
 	return toSerialize, nil
 }
 
@@ -265,9 +281,7 @@ func (o *CreateDockerRegistry) UnmarshalJSON(data []byte) (err error) {
 		"url",
 		"username",
 		"password",
-		"project",
 		"registryType",
-		"isDefault",
 	}
 
 	allProperties := make(map[string]interface{})
