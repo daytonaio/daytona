@@ -189,7 +189,7 @@ const Sandboxes: React.FC = () => {
         error instanceof OrganizationSuspendedError &&
           import.meta.env.VITE_BILLING_API_URL &&
           authenticatedUserOrganizationMember?.role === OrganizationUserRoleEnum.OWNER ? (
-          <Button variant="secondary" onClick={() => navigate(RoutePath.BILLING)}>
+          <Button variant="secondary" onClick={() => navigate(RoutePath.BILLING_WALLET)}>
             Go to billing
           </Button>
         ) : undefined,

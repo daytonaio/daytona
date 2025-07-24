@@ -31,7 +31,7 @@ import OrganizationSettings from '@/pages/OrganizationSettings'
 import UserOrganizationInvitations from '@/pages/UserOrganizationInvitations'
 import { OrganizationRolePermissionsEnum, OrganizationUserRoleEnum } from '@daytonaio/api-client'
 import Limits from './pages/Limits'
-import Billing from './pages/Billing'
+import Wallet from './pages/Wallet'
 import { NotificationSocketProvider } from '@/providers/NotificationSocketProvider'
 import { ApiProvider } from './providers/ApiProvider'
 import LandingPage from './pages/LandingPage'
@@ -39,11 +39,13 @@ import Logout from './pages/Logout'
 import { RoutePath, getRouteSubPath } from './enums/RoutePath'
 import { DAYTONA_DOCS_URL, DAYTONA_SLACK_URL } from './constants/ExternalLinks'
 import Onboarding from '@/pages/Onboarding'
-import LinkedAccounts from '@/pages/LinkedAccounts'
 import { Button } from './components/ui/button'
 import Volumes from './pages/Volumes'
 import NotFound from './pages/NotFound'
 import AuditLogs from './pages/AuditLogs'
+import Spending from './pages/Spending'
+import EmailVerify from './pages/EmailVerify'
+import AccountSettings from './pages/AccountSettings'
 
 // Simple redirection components for external URLs
 const DocsRedirect = () => {
@@ -164,14 +166,25 @@ function App() {
             }
           />
           {import.meta.env.VITE_BILLING_API_URL && (
-            <Route
-              path={getRouteSubPath(RoutePath.BILLING)}
-              element={
-                <OwnerAccessOrganizationPageWrapper>
-                  <Billing />
-                </OwnerAccessOrganizationPageWrapper>
-              }
-            />
+            <>
+              <Route
+                path={getRouteSubPath(RoutePath.BILLING_SPENDING)}
+                element={
+                  <OwnerAccessOrganizationPageWrapper>
+                    <Spending />
+                  </OwnerAccessOrganizationPageWrapper>
+                }
+              />
+              <Route
+                path={getRouteSubPath(RoutePath.BILLING_WALLET)}
+                element={
+                  <OwnerAccessOrganizationPageWrapper>
+                    <Wallet />
+                  </OwnerAccessOrganizationPageWrapper>
+                }
+              />
+              <Route path={getRouteSubPath(RoutePath.EMAIL_VERIFY)} element={<EmailVerify />} />
+            </>
           )}
           <Route
             path={getRouteSubPath(RoutePath.MEMBERS)}
@@ -205,9 +218,7 @@ function App() {
             }
           />
           <Route path={getRouteSubPath(RoutePath.SETTINGS)} element={<OrganizationSettings />} />
-          {import.meta.env.VITE_LINKED_ACCOUNTS_ENABLED === 'true' && (
-            <Route path={getRouteSubPath(RoutePath.LINKED_ACCOUNTS)} element={<LinkedAccounts />} />
-          )}
+          <Route path={getRouteSubPath(RoutePath.ACCOUNT_SETTINGS)} element={<AccountSettings />} />
           <Route path={getRouteSubPath(RoutePath.USER_INVITATIONS)} element={<UserOrganizationInvitations />} />
           <Route path={getRouteSubPath(RoutePath.ONBOARDING)} element={<Onboarding />} />
         </Route>
