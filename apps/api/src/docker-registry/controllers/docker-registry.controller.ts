@@ -146,8 +146,10 @@ export class DockerRegistryController {
     requestMetadata: {
       body: (req: TypedRequest<UpdateDockerRegistryDto>) => ({
         name: req.body?.name,
+        url: req.body?.url,
         username: req.body?.username,
         password: req.body?.password ? MASKED_AUDIT_VALUE : undefined,
+        project: req.body?.project,
       }),
     },
   })
