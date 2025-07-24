@@ -221,13 +221,7 @@ const Registries: React.FC = () => {
             type="submit"
             form="registry-form"
             variant="default"
-            disabled={
-              !formData.name ||
-              !formData.url ||
-              !formData.username ||
-              !formData.project ||
-              (!registryToEdit && !formData.password)
-            }
+            disabled={!formData.name || !formData.url || !formData.username || (!registryToEdit && !formData.password)}
           >
             {registryToEdit ? 'Edit' : 'Add'}
           </Button>

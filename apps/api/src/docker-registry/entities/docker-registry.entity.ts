@@ -26,7 +26,7 @@ export class DockerRegistry {
   @Column({ default: false })
   isDefault: boolean
 
-  @Column()
+  @Column({ default: '' })
   project: string
 
   @Column({ nullable: true, type: 'uuid' })
