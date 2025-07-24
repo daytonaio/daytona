@@ -100,13 +100,13 @@ export const CreateOrganizationDialog: React.FC<CreateOrganizationDialogProps> =
                   <>
                     To get started, add a payment method on the{' '}
                     <Link
-                      to={RoutePath.BILLING}
+                      to={RoutePath.BILLING_WALLET}
                       className="text-blue-500 hover:underline"
                       onClick={(e) => {
                         onOpenChange(false)
                       }}
                     >
-                      billing page
+                      wallet page
                     </Link>
                     .
                   </>
