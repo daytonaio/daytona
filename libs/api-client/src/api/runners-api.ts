@@ -126,16 +126,13 @@ export const RunnersApiAxiosParamCreator = function (configuration?: Configurati
     /**
      *
      * @summary Get runners by snapshot internal name
-     * @param {string} internalName Internal name of the snapshot
+     * @param {string} ref Internal name of the snapshot
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    getRunnersBySnapshotInternalName: async (
-      internalName: string,
-      options: RawAxiosRequestConfig = {},
-    ): Promise<RequestArgs> => {
-      // verify required parameter 'internalName' is not null or undefined
-      assertParamExists('getRunnersBySnapshotInternalName', 'internalName', internalName)
+    getRunnersBySnapshotRef: async (ref: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+      // verify required parameter 'ref' is not null or undefined
+      assertParamExists('getRunnersBySnapshotRef', 'ref', ref)
       const localVarPath = `/runners/by-snapshot`
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
@@ -154,8 +151,8 @@ export const RunnersApiAxiosParamCreator = function (configuration?: Configurati
 
       // authentication oauth2 required
 
-      if (internalName !== undefined) {
-        localVarQueryParameter['internalName'] = internalName
+      if (ref !== undefined) {
+        localVarQueryParameter['ref'] = ref
       }
 
       setSearchParams(localVarUrlObj, localVarQueryParameter)
@@ -297,18 +294,18 @@ export const RunnersApiFp = function (configuration?: Configuration) {
     /**
      *
      * @summary Get runners by snapshot internal name
-     * @param {string} internalName Internal name of the snapshot
+     * @param {string} ref Internal name of the snapshot
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    async getRunnersBySnapshotInternalName(
-      internalName: string,
+    async getRunnersBySnapshotRef(
+      ref: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<RunnerSnapshotDto>>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.getRunnersBySnapshotInternalName(internalName, options)
+      const localVarAxiosArgs = await localVarAxiosParamCreator.getRunnersBySnapshotRef(ref, options)
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['RunnersApi.getRunnersBySnapshotInternalName']?.[localVarOperationServerIndex]?.url
+        operationServerMap['RunnersApi.getRunnersBySnapshotRef']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -394,17 +391,12 @@ export const RunnersApiFactory = function (configuration?: Configuration, basePa
     /**
      *
      * @summary Get runners by snapshot internal name
-     * @param {string} internalName Internal name of the snapshot
+     * @param {string} ref Internal name of the snapshot
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    getRunnersBySnapshotInternalName(
-      internalName: string,
-      options?: RawAxiosRequestConfig,
-    ): AxiosPromise<Array<RunnerSnapshotDto>> {
-      return localVarFp
-        .getRunnersBySnapshotInternalName(internalName, options)
-        .then((request) => request(axios, basePath))
+    getRunnersBySnapshotRef(ref: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<RunnerSnapshotDto>> {
+      return localVarFp.getRunnersBySnapshotRef(ref, options).then((request) => request(axios, basePath))
     },
     /**
      *
@@ -466,14 +458,14 @@ export class RunnersApi extends BaseAPI {
   /**
    *
    * @summary Get runners by snapshot internal name
-   * @param {string} internalName Internal name of the snapshot
+   * @param {string} ref Internal name of the snapshot
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof RunnersApi
    */
-  public getRunnersBySnapshotInternalName(internalName: string, options?: RawAxiosRequestConfig) {
+  public getRunnersBySnapshotRef(ref: string, options?: RawAxiosRequestConfig) {
     return RunnersApiFp(this.configuration)
-      .getRunnersBySnapshotInternalName(internalName, options)
+      .getRunnersBySnapshotRef(ref, options)
       .then((request) => request(this.axios, this.basePath))
   }
 

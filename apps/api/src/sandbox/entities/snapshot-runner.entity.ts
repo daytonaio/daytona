@@ -3,10 +3,11 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm'
+import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn, Unique } from 'typeorm'
 import { SnapshotRunnerState } from '../enums/snapshot-runner-state.enum'
 
 @Entity()
+@Unique(['runnerId', 'snapshotRef'])
 export class SnapshotRunner {
   @PrimaryGeneratedColumn('uuid')
   id: string
@@ -14,17 +15,14 @@ export class SnapshotRunner {
   @Column({
     type: 'enum',
     enum: SnapshotRunnerState,
-    default: SnapshotRunnerState.PULLING_SNAPSHOT,
+    default: SnapshotRunnerState.PENDING,
   })
   state: SnapshotRunnerState
 
   @Column({ nullable: true })
   errorReason?: string
 
-  @Column({
-    //  todo: remove default
-    default: '',
-  })
+  @Column()
   snapshotRef: string
 
   @Column()

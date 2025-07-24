@@ -122,6 +122,19 @@ type SnapshotsAPI interface {
 	SetSnapshotGeneralStatusExecute(r SnapshotsAPISetSnapshotGeneralStatusRequest) (*SnapshotDto, *http.Response, error)
 
 	/*
+		SetSnapshotTargetPropagations Set snapshot target propagations
+
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param id Snapshot ID
+		@return SnapshotsAPISetSnapshotTargetPropagationsRequest
+	*/
+	SetSnapshotTargetPropagations(ctx context.Context, id string) SnapshotsAPISetSnapshotTargetPropagationsRequest
+
+	// SetSnapshotTargetPropagationsExecute executes the request
+	//  @return SnapshotDto
+	SetSnapshotTargetPropagationsExecute(r SnapshotsAPISetSnapshotTargetPropagationsRequest) (*SnapshotDto, *http.Response, error)
+
+	/*
 		ToggleSnapshotState Toggle snapshot state
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
@@ -1024,6 +1037,129 @@ func (a *SnapshotsAPIService) SetSnapshotGeneralStatusExecute(r SnapshotsAPISetS
 	}
 	// body params
 	localVarPostBody = r.setSnapshotGeneralStatusDto
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type SnapshotsAPISetSnapshotTargetPropagationsRequest struct {
+	ctx                              context.Context
+	ApiService                       SnapshotsAPI
+	id                               string
+	setSnapshotTargetPropagationsDto *SetSnapshotTargetPropagationsDto
+	xDaytonaOrganizationID           *string
+}
+
+func (r SnapshotsAPISetSnapshotTargetPropagationsRequest) SetSnapshotTargetPropagationsDto(setSnapshotTargetPropagationsDto SetSnapshotTargetPropagationsDto) SnapshotsAPISetSnapshotTargetPropagationsRequest {
+	r.setSnapshotTargetPropagationsDto = &setSnapshotTargetPropagationsDto
+	return r
+}
+
+// Use with JWT to specify the organization ID
+func (r SnapshotsAPISetSnapshotTargetPropagationsRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) SnapshotsAPISetSnapshotTargetPropagationsRequest {
+	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
+	return r
+}
+
+func (r SnapshotsAPISetSnapshotTargetPropagationsRequest) Execute() (*SnapshotDto, *http.Response, error) {
+	return r.ApiService.SetSnapshotTargetPropagationsExecute(r)
+}
+
+/*
+SetSnapshotTargetPropagations Set snapshot target propagations
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param id Snapshot ID
+	@return SnapshotsAPISetSnapshotTargetPropagationsRequest
+*/
+func (a *SnapshotsAPIService) SetSnapshotTargetPropagations(ctx context.Context, id string) SnapshotsAPISetSnapshotTargetPropagationsRequest {
+	return SnapshotsAPISetSnapshotTargetPropagationsRequest{
+		ApiService: a,
+		ctx:        ctx,
+		id:         id,
+	}
+}
+
+// Execute executes the request
+//
+//	@return SnapshotDto
+func (a *SnapshotsAPIService) SetSnapshotTargetPropagationsExecute(r SnapshotsAPISetSnapshotTargetPropagationsRequest) (*SnapshotDto, *http.Response, error) {
+	var (
+		localVarHTTPMethod  = http.MethodPatch
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *SnapshotDto
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SnapshotsAPIService.SetSnapshotTargetPropagations")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/snapshots/{id}/target-propagations"
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", url.PathEscape(parameterValueToString(r.id, "id")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.setSnapshotTargetPropagationsDto == nil {
+		return localVarReturnValue, nil, reportError("setSnapshotTargetPropagationsDto is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.xDaytonaOrganizationID != nil {
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Daytona-Organization-ID", r.xDaytonaOrganizationID, "simple", "")
+	}
+	// body params
+	localVarPostBody = r.setSnapshotTargetPropagationsDto
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
 		return localVarReturnValue, nil, err

@@ -52,7 +52,7 @@ import { CombinedAuthGuard } from '../../auth/combined-auth.guard'
 import { SystemActionGuard } from '../../auth/system-action.guard'
 import { RequiredSystemRole } from '../../common/decorators/required-role.decorator'
 import { SystemRole } from '../../user/enums/system-role.enum'
-import { SetSnapshotGeneralStatusDto } from '../dto/update-snapshot.dto'
+import { SetSnapshotGeneralStatusDto, SetSnapshotTargetPropagationsDto } from '../dto/update-snapshot.dto'
 import { LogProxy } from '../proxy/log-proxy'
 import { BadRequestError } from '../../exceptions/bad-request.exception'
 import { Snapshot } from '../entities/snapshot.entity'
@@ -186,38 +186,12 @@ export class SnapshotController {
       // If not found by ID, try by name
       snapshot = await this.snapshotService.getSnapshotByName(snapshotIdOrName, authContext.organizationId)
     }
-    return SnapshotDto.fromSnapshot(snapshot)
-  }
 
-  @Patch(':id/toggle')
-  @ApiOperation({
-    summary: 'Toggle snapshot state',
-    operationId: 'toggleSnapshotState',
-  })
-  @ApiParam({
-    name: 'id',
-    description: 'Snapshot ID',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Snapshot state has been toggled',
-    type: SnapshotDto,
-  })
-  @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SNAPSHOTS])
-  @UseGuards(SnapshotAccessGuard)
-  @Audit({
-    action: AuditAction.TOGGLE_STATE,
-    targetType: AuditTarget.SNAPSHOT,
-    targetIdFromRequest: (req) => req.params.id,
-    requestMetadata: {
-      body: (req: TypedRequest<ToggleStateDto>) => ({
-        enabled: req.body?.enabled,
-      }),
-    },
-  })
-  async toggleSnapshotState(@Param('id') snapshotId: string, @Body() toggleDto: ToggleStateDto): Promise<SnapshotDto> {
-    const snapshot = await this.snapshotService.toggleSnapshotState(snapshotId, toggleDto.enabled)
-    return SnapshotDto.fromSnapshot(snapshot)
+    const maximumUserOverride = this.snapshotService.getMaxDesiredConcurrentSandboxes(
+      authContext.organization,
+      snapshot,
+    )
+    return SnapshotDto.fromSnapshot(snapshot, maximumUserOverride)
   }
 
   @Delete(':id')
@@ -273,7 +247,13 @@ export class SnapshotController {
   ): Promise<PaginatedSnapshotsDto> {
     const result = await this.snapshotService.getAllSnapshots(authContext.organizationId, page, limit)
     return {
-      items: result.items.map(SnapshotDto.fromSnapshot),
+      items: result.items.map((snapshot) => {
+        const maximumUserOverride = this.snapshotService.getMaxDesiredConcurrentSandboxes(
+          authContext.organization,
+          snapshot,
+        )
+        return SnapshotDto.fromSnapshot(snapshot, maximumUserOverride)
+      }),
       total: result.total,
       page: result.page,
       totalPages: result.totalPages,
@@ -347,7 +327,7 @@ export class SnapshotController {
     const startTime = Date.now()
     const timeoutMs = 30 * 1000
 
-    while (!snapshot.buildRunnerId) {
+    while (!snapshot.initialRunnerId) {
       if (Date.now() - startTime > timeoutMs) {
         throw new NotFoundException(`Timeout waiting for build runner assignment for snapshot ${snapshotId}`)
       }
@@ -355,7 +335,7 @@ export class SnapshotController {
       snapshot = await this.snapshotService.getSnapshot(snapshotId)
     }
 
-    const runner = await this.runnerService.findOne(snapshot.buildRunnerId)
+    const runner = await this.runnerService.findOne(snapshot.initialRunnerId)
     if (!runner) {
       throw new NotFoundException(`Build runner for snapshot ${snapshotId} not found`)
     }
@@ -404,6 +384,35 @@ export class SnapshotController {
   })
   async activateSnapshot(@Param('id') snapshotId: string): Promise<SnapshotDto> {
     const snapshot = await this.snapshotService.activateSnapshot(snapshotId)
+    return SnapshotDto.fromSnapshot(snapshot)
+  }
+
+  @Patch(':id/target-propagations')
+  @ApiOperation({
+    summary: 'Set snapshot target propagations',
+    operationId: 'setSnapshotTargetPropagations',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Snapshot ID',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Snapshot target propagations have been set',
+    type: SnapshotDto,
+  })
+  @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SNAPSHOTS])
+  @UseGuards(SnapshotAccessGuard)
+  async setSnapshotTargetPropagations(
+    @AuthContext() authContext: OrganizationAuthContext,
+    @Param('id') snapshotId: string,
+    @Body() setTargetPropagationsDto: SetSnapshotTargetPropagationsDto,
+  ): Promise<SnapshotDto> {
+    const snapshot = await this.snapshotService.setSnapshotTargetPropagations(
+      snapshotId,
+      setTargetPropagationsDto,
+      authContext.organization,
+    )
     return SnapshotDto.fromSnapshot(snapshot)
   }
 }

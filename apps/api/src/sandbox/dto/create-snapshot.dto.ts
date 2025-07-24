@@ -6,6 +6,7 @@
 import { ApiProperty, ApiPropertyOptional, ApiSchema } from '@nestjs/swagger'
 import { IsArray, IsObject, IsBoolean, IsNumber, IsOptional, IsString } from 'class-validator'
 import { CreateBuildInfoDto } from './create-build-info.dto'
+import { SetSnapshotTargetPropagationDto } from './update-snapshot.dto'
 
 @ApiSchema({ name: 'CreateSnapshot' })
 export class CreateSnapshotDto {
@@ -85,4 +86,12 @@ export class CreateSnapshotDto {
   @IsOptional()
   @IsObject()
   buildInfo?: CreateBuildInfoDto
+
+  @ApiPropertyOptional({
+    description: 'Target propagations for the snapshot',
+    type: [SetSnapshotTargetPropagationDto],
+  })
+  @IsOptional()
+  @IsArray()
+  targetPropagations?: SetSnapshotTargetPropagationDto[]
 }

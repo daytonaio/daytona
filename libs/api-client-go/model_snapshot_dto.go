@@ -42,6 +42,10 @@ type SnapshotDto struct {
 	LastUsedAt     NullableTime    `json:"lastUsedAt"`
 	// Build information for the snapshot
 	BuildInfo *BuildInfo `json:"buildInfo,omitempty"`
+	// Target propagations for the snapshot
+	TargetPropagations []SnapshotTargetPropagationDto `json:"targetPropagations,omitempty"`
+	// Maximum allowed user override value for target propagations
+	MaximumUserOverride *float32 `json:"maximumUserOverride,omitempty"`
 }
 
 type _SnapshotDto SnapshotDto
@@ -542,6 +546,70 @@ func (o *SnapshotDto) SetBuildInfo(v BuildInfo) {
 	o.BuildInfo = &v
 }
 
+// GetTargetPropagations returns the TargetPropagations field value if set, zero value otherwise.
+func (o *SnapshotDto) GetTargetPropagations() []SnapshotTargetPropagationDto {
+	if o == nil || IsNil(o.TargetPropagations) {
+		var ret []SnapshotTargetPropagationDto
+		return ret
+	}
+	return o.TargetPropagations
+}
+
+// GetTargetPropagationsOk returns a tuple with the TargetPropagations field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *SnapshotDto) GetTargetPropagationsOk() ([]SnapshotTargetPropagationDto, bool) {
+	if o == nil || IsNil(o.TargetPropagations) {
+		return nil, false
+	}
+	return o.TargetPropagations, true
+}
+
+// HasTargetPropagations returns a boolean if a field has been set.
+func (o *SnapshotDto) HasTargetPropagations() bool {
+	if o != nil && !IsNil(o.TargetPropagations) {
+		return true
+	}
+
+	return false
+}
+
+// SetTargetPropagations gets a reference to the given []SnapshotTargetPropagationDto and assigns it to the TargetPropagations field.
+func (o *SnapshotDto) SetTargetPropagations(v []SnapshotTargetPropagationDto) {
+	o.TargetPropagations = v
+}
+
+// GetMaximumUserOverride returns the MaximumUserOverride field value if set, zero value otherwise.
+func (o *SnapshotDto) GetMaximumUserOverride() float32 {
+	if o == nil || IsNil(o.MaximumUserOverride) {
+		var ret float32
+		return ret
+	}
+	return *o.MaximumUserOverride
+}
+
+// GetMaximumUserOverrideOk returns a tuple with the MaximumUserOverride field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *SnapshotDto) GetMaximumUserOverrideOk() (*float32, bool) {
+	if o == nil || IsNil(o.MaximumUserOverride) {
+		return nil, false
+	}
+	return o.MaximumUserOverride, true
+}
+
+// HasMaximumUserOverride returns a boolean if a field has been set.
+func (o *SnapshotDto) HasMaximumUserOverride() bool {
+	if o != nil && !IsNil(o.MaximumUserOverride) {
+		return true
+	}
+
+	return false
+}
+
+// SetMaximumUserOverride gets a reference to the given float32 and assigns it to the MaximumUserOverride field.
+func (o *SnapshotDto) SetMaximumUserOverride(v float32) {
+	o.MaximumUserOverride = &v
+}
+
 func (o SnapshotDto) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -577,6 +645,12 @@ func (o SnapshotDto) ToMap() (map[string]interface{}, error) {
 	toSerialize["lastUsedAt"] = o.LastUsedAt.Get()
 	if !IsNil(o.BuildInfo) {
 		toSerialize["buildInfo"] = o.BuildInfo
+	}
+	if !IsNil(o.TargetPropagations) {
+		toSerialize["targetPropagations"] = o.TargetPropagations
+	}
+	if !IsNil(o.MaximumUserOverride) {
+		toSerialize["maximumUserOverride"] = o.MaximumUserOverride
 	}
 	return toSerialize, nil
 }

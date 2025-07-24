@@ -193,8 +193,17 @@ export class SandboxController {
         return sandbox
       }
 
-      await this.waitForSandboxStarted(sandbox.id, 30)
+      // If the runner hasn't been assigned, allow waiting for a longer time
+      await this.waitForSandboxStarted(sandbox.id, sandbox.runnerDomain ? 30 : 120)
       sandbox.state = SandboxState.STARTED
+    }
+
+    if (!sandbox.runnerDomain) {
+      const runner = await this.runnerService.findBySandboxId(sandbox.id)
+      if (!runner) {
+        throw new NotFoundException(`Runner for sandbox ${sandbox.id} not found`)
+      }
+      sandbox.runnerDomain = runner.domain
     }
 
     return sandbox

@@ -15,6 +15,9 @@
 // May contain unused imports in some cases
 // @ts-ignore
 import type { CreateBuildInfo } from './create-build-info'
+// May contain unused imports in some cases
+// @ts-ignore
+import type { SetSnapshotTargetPropagationDto } from './set-snapshot-target-propagation-dto'
 
 /**
  *
@@ -76,4 +79,10 @@ export interface CreateSnapshot {
    * @memberof CreateSnapshot
    */
   buildInfo?: CreateBuildInfo
+  /**
+   * Target propagations for the snapshot
+   * @type {Array<SetSnapshotTargetPropagationDto>}
+   * @memberof CreateSnapshot
+   */
+  targetPropagations?: Array<SetSnapshotTargetPropagationDto>
 }

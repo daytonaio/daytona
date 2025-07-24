@@ -322,21 +322,36 @@ export class RunnerService {
     })
   }
 
-  async createSnapshotRunner(
+  async createSnapshotRunnerEntry(
     runnerId: string,
     snapshotRef: string,
-    state: SnapshotRunnerState,
+    state?: SnapshotRunnerState,
     errorReason?: string,
   ): Promise<void> {
-    const snapshotRunner = new SnapshotRunner()
-    snapshotRunner.runnerId = runnerId
-    snapshotRunner.snapshotRef = snapshotRef
-    snapshotRunner.state = state
-    if (errorReason) {
-      snapshotRunner.errorReason = errorReason
+    try {
+      const snapshotRunner = new SnapshotRunner()
+      snapshotRunner.runnerId = runnerId
+      snapshotRunner.snapshotRef = snapshotRef
+      if (state) {
+        snapshotRunner.state = state
+      }
+      if (errorReason) {
+        snapshotRunner.errorReason = errorReason
+      }
+      await this.snapshotRunnerRepository.save(snapshotRunner)
+    } catch (error) {
+      if (error.code === '23505') {
+        // PostgreSQL unique violation error code - entry already exists, allow it
+        this.logger.debug(
+          `SnapshotRunner entry already exists for runnerId: ${runnerId}, snapshotRef: ${snapshotRef}. Continuing...`,
+        )
+        return
+      }
+      throw error // Re-throw any other errors
     }
-    await this.snapshotRunnerRepository.save(snapshotRunner)
   }
+
+  // TODO: combine getRunnersWithMultipleSnapshotsBuilding and getRunnersWithMultipleSnapshotsPulling?
 
   async getRunnersWithMultipleSnapshotsBuilding(maxSnapshotCount = 2): Promise<string[]> {
     const runners = await this.sandboxRepository
@@ -351,26 +366,38 @@ export class RunnerService {
     return runners.map((item) => item.runnerId)
   }
 
-  async getRunnersBySnapshotInternalName(internalName: string): Promise<RunnerSnapshotDto[]> {
-    this.logger.debug(`Looking for snapshot with internalName: ${internalName}`)
+  async getRunnersWithMultipleSnapshotsPulling(maxSnapshotCount = 2): Promise<string[]> {
+    const runners = await this.snapshotRunnerRepository
+      .createQueryBuilder('snapshot_runner')
+      .select('snapshot_runner.runnerId')
+      .where('snapshot_runner.state = :state', { state: SnapshotRunnerState.PULLING_SNAPSHOT })
+      .groupBy('snapshot_runner.runnerId')
+      .having('COUNT(*) > :maxSnapshotCount', { maxSnapshotCount })
+      .getRawMany()
 
-    // First find the snapshot by internalName
+    return runners.map((item) => item.runnerId)
+  }
+
+  async getRunnersBySnapshotRef(ref: string): Promise<RunnerSnapshotDto[]> {
+    this.logger.debug(`Looking for snapshot with ref: ${ref}`)
+
+    // First find the snapshot by ref
     const snapshot = await this.snapshotRepository.findOne({
-      where: { internalName },
+      where: { ref },
     })
 
     if (!snapshot) {
-      this.logger.debug(`No snapshot found with internalName: ${internalName}`)
+      this.logger.debug(`No snapshot found with ref: ${ref}`)
       return []
     }
 
     this.logger.debug(`Found snapshot with ID: ${snapshot.id}`)
 
     // Find all snapshot runners for this snapshot
-    // Note: snapshotRef contains the internalName, not the snapshot ID
+    // Note: snapshotRef contains the ref, not the snapshot ID
     const snapshotRunners = await this.snapshotRunnerRepository.find({
       where: {
-        snapshotRef: internalName,
+        snapshotRef: ref,
         state: Not(SnapshotRunnerState.ERROR),
       },
     })
