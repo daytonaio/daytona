@@ -75,7 +75,14 @@ const Registries: React.FC = () => {
     setActionInProgress(true)
     try {
       await dockerRegistryApi.createRegistry(
-        { ...formData, isDefault: false, registryType: DockerRegistryRegistryTypeEnum.ORGANIZATION },
+        {
+          name: formData.name.trim(),
+          url: formData.url.trim(),
+          username: formData.username.trim(),
+          password: formData.password.trim(),
+          project: formData.project.trim(),
+          registryType: DockerRegistryRegistryTypeEnum.ORGANIZATION,
+        },
         selectedOrganization?.id,
       )
       toast.success('Registry created successfully')
@@ -100,7 +107,17 @@ const Registries: React.FC = () => {
 
     setActionInProgress(true)
     try {
-      await dockerRegistryApi.updateRegistry(registryToEdit.id, formData, selectedOrganization?.id)
+      await dockerRegistryApi.updateRegistry(
+        registryToEdit.id,
+        {
+          name: formData.name.trim(),
+          url: formData.url.trim(),
+          username: formData.username.trim(),
+          password: formData.password.trim(),
+          project: formData.project.trim(),
+        },
+        selectedOrganization?.id,
+      )
       toast.success('Registry edited successfully')
       await fetchRegistries(false)
       setShowCreateOrEditDialog(false)
@@ -223,7 +240,12 @@ const Registries: React.FC = () => {
             type="submit"
             form="registry-form"
             variant="default"
-            disabled={!formData.name || !formData.url || !formData.username || (!registryToEdit && !formData.password)}
+            disabled={
+              !formData.name.trim() ||
+              !formData.url.trim() ||
+              !formData.username.trim() ||
+              (!registryToEdit && !formData.password.trim())
+            }
           >
             {registryToEdit ? 'Edit' : 'Add'}
           </Button>
