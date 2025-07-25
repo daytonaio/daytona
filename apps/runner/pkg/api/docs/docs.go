@@ -17,7 +17,7 @@ const docTemplate = `{
     "paths": {
         "/": {
             "get": {
-                "description": "Health check with system metrics",
+                "description": "Health check",
                 "produces": [
                     "application/json"
                 ],
@@ -27,7 +27,28 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/HealthCheckResponseDTO"
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/info": {
+            "get": {
+                "description": "Runner info with system metrics",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Runner info",
+                "operationId": "RunnerInfo",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/RunnerInfoResponseDTO"
                         }
                     }
                 }
@@ -1154,46 +1175,6 @@ const docTemplate = `{
                 }
             }
         },
-        "HealthCheckResponseDTO": {
-            "type": "object",
-            "properties": {
-                "metrics": {
-                    "$ref": "#/definitions/HealthMetrics"
-                },
-                "status": {
-                    "type": "string"
-                },
-                "version": {
-                    "type": "string"
-                }
-            }
-        },
-        "HealthMetrics": {
-            "type": "object",
-            "properties": {
-                "currentAllocatedCpu": {
-                    "type": "integer"
-                },
-                "currentAllocatedDiskGiB": {
-                    "type": "integer"
-                },
-                "currentAllocatedMemoryGiB": {
-                    "type": "integer"
-                },
-                "currentCpuUsagePercentage": {
-                    "type": "number"
-                },
-                "currentDiskUsagePercentage": {
-                    "type": "number"
-                },
-                "currentMemoryUsagePercentage": {
-                    "type": "number"
-                },
-                "currentSnapshotCount": {
-                    "type": "integer"
-                }
-            }
-        },
         "PullSnapshotRequestDTO": {
             "type": "object",
             "required": [
@@ -1244,6 +1225,40 @@ const docTemplate = `{
                 "memory": {
                     "type": "integer",
                     "minimum": 1
+                }
+            }
+        },
+        "RunnerInfoResponseDTO": {
+            "type": "object",
+            "properties": {
+                "metrics": {
+                    "$ref": "#/definitions/RunnerMetrics"
+                }
+            }
+        },
+        "RunnerMetrics": {
+            "type": "object",
+            "properties": {
+                "currentAllocatedCpu": {
+                    "type": "integer"
+                },
+                "currentAllocatedDiskGiB": {
+                    "type": "integer"
+                },
+                "currentAllocatedMemoryGiB": {
+                    "type": "integer"
+                },
+                "currentCpuUsagePercentage": {
+                    "type": "number"
+                },
+                "currentDiskUsagePercentage": {
+                    "type": "number"
+                },
+                "currentMemoryUsagePercentage": {
+                    "type": "number"
+                },
+                "currentSnapshotCount": {
+                    "type": "integer"
                 }
             }
         },

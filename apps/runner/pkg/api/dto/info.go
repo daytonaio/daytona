@@ -3,7 +3,7 @@
 
 package dto
 
-type HealthMetrics struct {
+type RunnerMetrics struct {
 	CurrentCpuUsagePercentage    float64 `json:"currentCpuUsagePercentage"`
 	CurrentMemoryUsagePercentage float64 `json:"currentMemoryUsagePercentage"`
 	CurrentDiskUsagePercentage   float64 `json:"currentDiskUsagePercentage"`
@@ -11,10 +11,8 @@ type HealthMetrics struct {
 	CurrentAllocatedMemoryGiB    int64   `json:"currentAllocatedMemoryGiB"`
 	CurrentAllocatedDiskGiB      int64   `json:"currentAllocatedDiskGiB"`
 	CurrentSnapshotCount         int     `json:"currentSnapshotCount"`
-} //	@name	HealthMetrics
+} //	@name	RunnerMetrics
 
-type HealthCheckResponseDTO struct {
-	Status  string         `json:"status"`
-	Version string         `json:"version"`
-	Metrics *HealthMetrics `json:"metrics,omitempty"`
-} //	@name	HealthCheckResponseDTO
+type RunnerInfoResponseDTO struct {
+	Metrics *RunnerMetrics `json:"metrics,omitempty"`
+} //	@name	RunnerInfoResponseDTO

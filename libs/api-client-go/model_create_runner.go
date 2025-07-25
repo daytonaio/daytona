@@ -24,6 +24,7 @@ var _ MappedNullable = &CreateRunner{}
 type CreateRunner struct {
 	Domain    string  `json:"domain"`
 	ApiUrl    string  `json:"apiUrl"`
+	ProxyUrl  string  `json:"proxyUrl"`
 	ApiKey    string  `json:"apiKey"`
 	Cpu       float32 `json:"cpu"`
 	MemoryGiB float32 `json:"memoryGiB"`
@@ -33,6 +34,7 @@ type CreateRunner struct {
 	Class     string  `json:"class"`
 	Capacity  float32 `json:"capacity"`
 	Region    string  `json:"region"`
+	Version   string  `json:"version"`
 }
 
 type _CreateRunner CreateRunner
@@ -41,10 +43,11 @@ type _CreateRunner CreateRunner
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewCreateRunner(domain string, apiUrl string, apiKey string, cpu float32, memoryGiB float32, diskGiB float32, gpu float32, gpuType string, class string, capacity float32, region string) *CreateRunner {
+func NewCreateRunner(domain string, apiUrl string, proxyUrl string, apiKey string, cpu float32, memoryGiB float32, diskGiB float32, gpu float32, gpuType string, class string, capacity float32, region string, version string) *CreateRunner {
 	this := CreateRunner{}
 	this.Domain = domain
 	this.ApiUrl = apiUrl
+	this.ProxyUrl = proxyUrl
 	this.ApiKey = apiKey
 	this.Cpu = cpu
 	this.MemoryGiB = memoryGiB
@@ -54,6 +57,7 @@ func NewCreateRunner(domain string, apiUrl string, apiKey string, cpu float32, m
 	this.Class = class
 	this.Capacity = capacity
 	this.Region = region
+	this.Version = version
 	return &this
 }
 
@@ -111,6 +115,30 @@ func (o *CreateRunner) GetApiUrlOk() (*string, bool) {
 // SetApiUrl sets field value
 func (o *CreateRunner) SetApiUrl(v string) {
 	o.ApiUrl = v
+}
+
+// GetProxyUrl returns the ProxyUrl field value
+func (o *CreateRunner) GetProxyUrl() string {
+	if o == nil {
+		var ret string
+		return ret
+	}
+
+	return o.ProxyUrl
+}
+
+// GetProxyUrlOk returns a tuple with the ProxyUrl field value
+// and a boolean to check if the value has been set.
+func (o *CreateRunner) GetProxyUrlOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.ProxyUrl, true
+}
+
+// SetProxyUrl sets field value
+func (o *CreateRunner) SetProxyUrl(v string) {
+	o.ProxyUrl = v
 }
 
 // GetApiKey returns the ApiKey field value
@@ -329,6 +357,30 @@ func (o *CreateRunner) SetRegion(v string) {
 	o.Region = v
 }
 
+// GetVersion returns the Version field value
+func (o *CreateRunner) GetVersion() string {
+	if o == nil {
+		var ret string
+		return ret
+	}
+
+	return o.Version
+}
+
+// GetVersionOk returns a tuple with the Version field value
+// and a boolean to check if the value has been set.
+func (o *CreateRunner) GetVersionOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.Version, true
+}
+
+// SetVersion sets field value
+func (o *CreateRunner) SetVersion(v string) {
+	o.Version = v
+}
+
 func (o CreateRunner) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -341,6 +393,7 @@ func (o CreateRunner) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["domain"] = o.Domain
 	toSerialize["apiUrl"] = o.ApiUrl
+	toSerialize["proxyUrl"] = o.ProxyUrl
 	toSerialize["apiKey"] = o.ApiKey
 	toSerialize["cpu"] = o.Cpu
 	toSerialize["memoryGiB"] = o.MemoryGiB
@@ -350,6 +403,7 @@ func (o CreateRunner) ToMap() (map[string]interface{}, error) {
 	toSerialize["class"] = o.Class
 	toSerialize["capacity"] = o.Capacity
 	toSerialize["region"] = o.Region
+	toSerialize["version"] = o.Version
 	return toSerialize, nil
 }
 
@@ -360,6 +414,7 @@ func (o *CreateRunner) UnmarshalJSON(data []byte) (err error) {
 	requiredProperties := []string{
 		"domain",
 		"apiUrl",
+		"proxyUrl",
 		"apiKey",
 		"cpu",
 		"memoryGiB",
@@ -369,6 +424,7 @@ func (o *CreateRunner) UnmarshalJSON(data []byte) (err error) {
 		"class",
 		"capacity",
 		"region",
+		"version",
 	}
 
 	allProperties := make(map[string]interface{})

@@ -10,7 +10,6 @@ import { FindOptionsWhere, In, Not, Raw, Repository } from 'typeorm'
 import { Runner } from '../entities/runner.entity'
 import { CreateRunnerDto } from '../dto/create-runner.dto'
 import { SandboxClass } from '../enums/sandbox-class.enum'
-import { RunnerApiFactory } from '../runner-api/runnerApi'
 import { RunnerState } from '../enums/runner-state.enum'
 import { BadRequestError } from '../../exceptions/bad-request.exception'
 import { SandboxEvents } from '../constants/sandbox-events.constants'
@@ -22,6 +21,7 @@ import { SnapshotRunner } from '../entities/snapshot-runner.entity'
 import { SnapshotRunnerState } from '../enums/snapshot-runner-state.enum'
 import { Snapshot } from '../entities/snapshot.entity'
 import { RunnerSnapshotDto } from '../dto/runner-snapshot.dto'
+import { RunnerAdapterFactory, RunnerInfo } from '../runner-adapter/runnerAdapter'
 
 @Injectable()
 export class RunnerService {
@@ -31,7 +31,7 @@ export class RunnerService {
   constructor(
     @InjectRepository(Runner)
     private readonly runnerRepository: Repository<Runner>,
-    private readonly runnerApiFactory: RunnerApiFactory,
+    private readonly runnerAdapterFactory: RunnerAdapterFactory,
     @InjectRepository(Sandbox)
     private readonly sandboxRepository: Repository<Sandbox>,
     @InjectRepository(SnapshotRunner)
@@ -52,6 +52,7 @@ export class RunnerService {
     const runner = new Runner()
     runner.domain = createRunnerDto.domain
     runner.apiUrl = createRunnerDto.apiUrl
+    runner.proxyUrl = createRunnerDto.proxyUrl
     runner.apiKey = createRunnerDto.apiKey
     runner.cpu = createRunnerDto.cpu
     runner.memoryGiB = createRunnerDto.memoryGiB
@@ -62,6 +63,7 @@ export class RunnerService {
     runner.capacity = createRunnerDto.capacity
     runner.region = createRunnerDto.region
     runner.class = createRunnerDto.class
+    runner.version = createRunnerDto.version
 
     return this.runnerRepository.save(runner)
   }
@@ -188,10 +190,17 @@ export class RunnerService {
       this.logger.debug(`Checking runner ${runner.id}`)
       try {
         // Get health check with status metrics
-        const runnerApi = this.runnerApiFactory.createRunnerApi(runner)
-        const healthResponse = await runnerApi.healthCheck()
+        const runnerAdapter = await this.runnerAdapterFactory.create(runner)
+        await runnerAdapter.healthCheck()
 
-        await this.updateRunnerStatus(runner.id, healthResponse.data)
+        let runnerInfo: RunnerInfo | undefined
+        try {
+          runnerInfo = await runnerAdapter.runnerInfo()
+        } catch (e) {
+          this.logger.warn(`Failed to get runner info for runner ${runner.id}: ${e.message}`)
+        }
+
+        await this.updateRunnerStatus(runner.id, runnerInfo)
 
         await this.recalculateRunnerUsage(runner.id)
       } catch (e) {
@@ -208,7 +217,7 @@ export class RunnerService {
     this.checkingRunners = false
   }
 
-  private async updateRunnerStatus(runnerId: string, status: any) {
+  private async updateRunnerStatus(runnerId: string, runnerInfo?: RunnerInfo) {
     const runner = await this.runnerRepository.findOne({ where: { id: runnerId } })
     if (!runner) {
       this.logger.error(`Runner ${runnerId} not found when trying to update status`)
@@ -225,7 +234,7 @@ export class RunnerService {
       lastChecked: new Date(),
     }
 
-    const metrics = status.metrics
+    const metrics = runnerInfo?.metrics
 
     if (metrics && typeof metrics.currentCpuUsagePercentage !== 'undefined') {
       updateData.currentCpuUsagePercentage = metrics.currentCpuUsagePercentage || 0

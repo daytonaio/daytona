@@ -32,6 +32,7 @@ class Runner(BaseModel):
     id: StrictStr = Field(description="The ID of the runner")
     domain: StrictStr = Field(description="The domain of the runner")
     api_url: StrictStr = Field(description="The API URL of the runner", alias="apiUrl")
+    proxy_url: StrictStr = Field(description="The proxy URL of the runner", alias="proxyUrl")
     api_key: StrictStr = Field(description="The API key for the runner", alias="apiKey")
     cpu: Union[StrictFloat, StrictInt] = Field(description="The CPU capacity of the runner")
     memory: Union[StrictFloat, StrictInt] = Field(description="The memory capacity of the runner in GiB")
@@ -55,8 +56,9 @@ class Runner(BaseModel):
     unschedulable: StrictBool = Field(description="Whether the runner is unschedulable")
     created_at: StrictStr = Field(description="The creation timestamp of the runner", alias="createdAt")
     updated_at: StrictStr = Field(description="The last update timestamp of the runner", alias="updatedAt")
+    version: StrictStr = Field(description="The version of the runner")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["id", "domain", "apiUrl", "apiKey", "cpu", "memory", "disk", "gpu", "gpuType", "class", "used", "capacity", "currentCpuUsagePercentage", "currentMemoryUsagePercentage", "currentDiskUsagePercentage", "currentAllocatedCpu", "currentAllocatedMemoryGiB", "currentAllocatedDiskGiB", "currentSnapshotCount", "availabilityScore", "region", "state", "lastChecked", "unschedulable", "createdAt", "updatedAt"]
+    __properties: ClassVar[List[str]] = ["id", "domain", "apiUrl", "proxyUrl", "apiKey", "cpu", "memory", "disk", "gpu", "gpuType", "class", "used", "capacity", "currentCpuUsagePercentage", "currentMemoryUsagePercentage", "currentDiskUsagePercentage", "currentAllocatedCpu", "currentAllocatedMemoryGiB", "currentAllocatedDiskGiB", "currentSnapshotCount", "availabilityScore", "region", "state", "lastChecked", "unschedulable", "createdAt", "updatedAt", "version"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -119,6 +121,7 @@ class Runner(BaseModel):
             "id": obj.get("id"),
             "domain": obj.get("domain"),
             "apiUrl": obj.get("apiUrl"),
+            "proxyUrl": obj.get("proxyUrl"),
             "apiKey": obj.get("apiKey"),
             "cpu": obj.get("cpu"),
             "memory": obj.get("memory"),
@@ -141,7 +144,8 @@ class Runner(BaseModel):
             "lastChecked": obj.get("lastChecked"),
             "unschedulable": obj.get("unschedulable"),
             "createdAt": obj.get("createdAt"),
-            "updatedAt": obj.get("updatedAt")
+            "updatedAt": obj.get("updatedAt"),
+            "version": obj.get("version")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

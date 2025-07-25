@@ -103,32 +103,6 @@ definitions:
       - statusCode
       - timestamp
     type: object
-  HealthCheckResponseDTO:
-    properties:
-      metrics:
-        $ref: '#/definitions/HealthMetrics'
-      status:
-        type: string
-      version:
-        type: string
-    type: object
-  HealthMetrics:
-    properties:
-      currentAllocatedCpu:
-        type: integer
-      currentAllocatedDiskGiB:
-        type: integer
-      currentAllocatedMemoryGiB:
-        type: integer
-      currentCpuUsagePercentage:
-        type: number
-      currentDiskUsagePercentage:
-        type: number
-      currentMemoryUsagePercentage:
-        type: number
-      currentSnapshotCount:
-        type: integer
-    type: object
   PullSnapshotRequestDTO:
     properties:
       registry:
@@ -163,6 +137,28 @@ definitions:
         type: integer
       memory:
         minimum: 1
+        type: integer
+    type: object
+  RunnerInfoResponseDTO:
+    properties:
+      metrics:
+        $ref: '#/definitions/RunnerMetrics'
+    type: object
+  RunnerMetrics:
+    properties:
+      currentAllocatedCpu:
+        type: integer
+      currentAllocatedDiskGiB:
+        type: integer
+      currentAllocatedMemoryGiB:
+        type: integer
+      currentCpuUsagePercentage:
+        type: number
+      currentDiskUsagePercentage:
+        type: number
+      currentMemoryUsagePercentage:
+        type: number
+      currentSnapshotCount:
         type: integer
     type: object
   SandboxInfoResponse:
@@ -235,7 +231,7 @@ info:
 paths:
   /:
     get:
-      description: Health check with system metrics
+      description: Health check
       operationId: HealthCheck
       produces:
         - application/json
@@ -243,8 +239,22 @@ paths:
         '200':
           description: OK
           schema:
-            $ref: '#/definitions/HealthCheckResponseDTO'
+            additionalProperties:
+              type: string
+            type: object
       summary: Health check
+  /info:
+    get:
+      description: Runner info with system metrics
+      operationId: RunnerInfo
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/RunnerInfoResponseDTO'
+      summary: Runner info
   /sandboxes:
     post:
       description: Create a sandbox
