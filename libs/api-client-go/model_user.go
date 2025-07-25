@@ -15,6 +15,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"time"
 )
 
 // checks if the User type satisfies the MappedNullable interface at compile time
@@ -30,6 +31,8 @@ type User struct {
 	Email string `json:"email"`
 	// User public keys
 	PublicKeys []UserPublicKey `json:"publicKeys"`
+	// Creation timestamp
+	CreatedAt time.Time `json:"createdAt"`
 }
 
 type _User User
@@ -38,12 +41,13 @@ type _User User
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewUser(id string, name string, email string, publicKeys []UserPublicKey) *User {
+func NewUser(id string, name string, email string, publicKeys []UserPublicKey, createdAt time.Time) *User {
 	this := User{}
 	this.Id = id
 	this.Name = name
 	this.Email = email
 	this.PublicKeys = publicKeys
+	this.CreatedAt = createdAt
 	return &this
 }
 
@@ -151,6 +155,30 @@ func (o *User) SetPublicKeys(v []UserPublicKey) {
 	o.PublicKeys = v
 }
 
+// GetCreatedAt returns the CreatedAt field value
+func (o *User) GetCreatedAt() time.Time {
+	if o == nil {
+		var ret time.Time
+		return ret
+	}
+
+	return o.CreatedAt
+}
+
+// GetCreatedAtOk returns a tuple with the CreatedAt field value
+// and a boolean to check if the value has been set.
+func (o *User) GetCreatedAtOk() (*time.Time, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.CreatedAt, true
+}
+
+// SetCreatedAt sets field value
+func (o *User) SetCreatedAt(v time.Time) {
+	o.CreatedAt = v
+}
+
 func (o User) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -165,6 +193,7 @@ func (o User) ToMap() (map[string]interface{}, error) {
 	toSerialize["name"] = o.Name
 	toSerialize["email"] = o.Email
 	toSerialize["publicKeys"] = o.PublicKeys
+	toSerialize["createdAt"] = o.CreatedAt
 	return toSerialize, nil
 }
 
@@ -177,6 +206,7 @@ func (o *User) UnmarshalJSON(data []byte) (err error) {
 		"name",
 		"email",
 		"publicKeys",
+		"createdAt",
 	}
 
 	allProperties := make(map[string]interface{})

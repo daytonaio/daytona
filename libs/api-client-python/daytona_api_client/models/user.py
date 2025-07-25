@@ -18,6 +18,7 @@ import pprint
 import re  # noqa: F401
 import json
 
+from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field, StrictStr
 from typing import Any, ClassVar, Dict, List
 from daytona_api_client.models.user_public_key import UserPublicKey
@@ -32,8 +33,9 @@ class User(BaseModel):
     name: StrictStr = Field(description="User name")
     email: StrictStr = Field(description="User email")
     public_keys: List[UserPublicKey] = Field(description="User public keys", alias="publicKeys")
+    created_at: datetime = Field(description="Creation timestamp", alias="createdAt")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["id", "name", "email", "publicKeys"]
+    __properties: ClassVar[List[str]] = ["id", "name", "email", "publicKeys", "createdAt"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -103,7 +105,8 @@ class User(BaseModel):
             "id": obj.get("id"),
             "name": obj.get("name"),
             "email": obj.get("email"),
-            "publicKeys": [UserPublicKey.from_dict(_item) for _item in obj["publicKeys"]] if obj.get("publicKeys") is not None else None
+            "publicKeys": [UserPublicKey.from_dict(_item) for _item in obj["publicKeys"]] if obj.get("publicKeys") is not None else None,
+            "createdAt": obj.get("createdAt")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():
