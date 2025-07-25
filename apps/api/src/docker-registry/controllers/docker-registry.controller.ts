@@ -3,7 +3,18 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, HttpCode } from '@nestjs/common'
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  HttpCode,
+  ForbiddenException,
+} from '@nestjs/common'
 import { ApiTags, ApiOperation, ApiResponse, ApiOAuth2, ApiHeader, ApiParam, ApiBearerAuth } from '@nestjs/swagger'
 import { CombinedAuthGuard } from '../../auth/combined-auth.guard'
 import { DockerRegistryService } from '../services/docker-registry.service'
@@ -26,6 +37,7 @@ import { SystemRole } from '../../user/enums/system-role.enum'
 import { Audit, MASKED_AUDIT_VALUE, TypedRequest } from '../../audit/decorators/audit.decorator'
 import { AuditAction } from '../../audit/enums/audit-action.enum'
 import { AuditTarget } from '../../audit/enums/audit-target.enum'
+import { RegistryType } from '../enums/registry-type.enum'
 
 @ApiTags('docker-registry')
 @Controller('docker-registry')
@@ -63,11 +75,22 @@ export class DockerRegistryController {
       }),
     },
   })
-  create(
+  async create(
     @AuthContext() authContext: OrganizationAuthContext,
     @Body() createDockerRegistryDto: CreateDockerRegistryDto,
   ): Promise<DockerRegistryDto> {
-    return this.dockerRegistryService.create(createDockerRegistryDto, authContext.organizationId)
+    if (createDockerRegistryDto.registryType !== RegistryType.ORGANIZATION && authContext.role !== SystemRole.ADMIN) {
+      throw new ForbiddenException(
+        `Insufficient permissions for creating ${createDockerRegistryDto.registryType} registries`,
+      )
+    }
+
+    if (createDockerRegistryDto.isDefault && authContext.role !== SystemRole.ADMIN) {
+      throw new ForbiddenException('Insufficient permissions for setting a default registry')
+    }
+
+    const dockerRegistry = await this.dockerRegistryService.create(createDockerRegistryDto, authContext.organizationId)
+    return DockerRegistryDto.fromDockerRegistry(dockerRegistry)
   }
 
   @Get()
@@ -80,8 +103,9 @@ export class DockerRegistryController {
     description: 'List of all docker registries',
     type: [DockerRegistryDto],
   })
-  findAll(@AuthContext() authContext: OrganizationAuthContext): Promise<DockerRegistryDto[]> {
-    return this.dockerRegistryService.findAll(authContext.organizationId)
+  async findAll(@AuthContext() authContext: OrganizationAuthContext): Promise<DockerRegistryDto[]> {
+    const dockerRegistries = await this.dockerRegistryService.findAll(authContext.organizationId)
+    return dockerRegistries.map(DockerRegistryDto.fromDockerRegistry)
   }
 
   @Get('registry-push-access')
@@ -117,7 +141,7 @@ export class DockerRegistryController {
   })
   @UseGuards(DockerRegistryAccessGuard)
   async findOne(@DockerRegistry() registry: DockerRegistryEntity): Promise<DockerRegistryDto> {
-    return registry
+    return DockerRegistryDto.fromDockerRegistry(registry)
   }
 
   @Patch(':id')
@@ -144,8 +168,10 @@ export class DockerRegistryController {
     requestMetadata: {
       body: (req: TypedRequest<UpdateDockerRegistryDto>) => ({
         name: req.body?.name,
+        url: req.body?.url,
         username: req.body?.username,
         password: req.body?.password ? MASKED_AUDIT_VALUE : undefined,
+        project: req.body?.project,
       }),
     },
   })
@@ -153,7 +179,8 @@ export class DockerRegistryController {
     @Param('id') registryId: string,
     @Body() updateDockerRegistryDto: UpdateDockerRegistryDto,
   ): Promise<DockerRegistryDto> {
-    return this.dockerRegistryService.update(registryId, updateDockerRegistryDto)
+    const dockerRegistry = await this.dockerRegistryService.update(registryId, updateDockerRegistryDto)
+    return DockerRegistryDto.fromDockerRegistry(dockerRegistry)
   }
 
   @Delete(':id')
@@ -205,6 +232,7 @@ export class DockerRegistryController {
     targetIdFromRequest: (req) => req.params.id,
   })
   async setDefault(@Param('id') registryId: string): Promise<DockerRegistryDto> {
-    return this.dockerRegistryService.setDefault(registryId)
+    const dockerRegistry = await this.dockerRegistryService.setDefault(registryId)
+    return DockerRegistryDto.fromDockerRegistry(dockerRegistry)
   }
 }

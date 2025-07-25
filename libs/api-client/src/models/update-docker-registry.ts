@@ -25,6 +25,12 @@ export interface UpdateDockerRegistry {
    */
   name: string
   /**
+   * Registry URL
+   * @type {string}
+   * @memberof UpdateDockerRegistry
+   */
+  url: string
+  /**
    * Registry username
    * @type {string}
    * @memberof UpdateDockerRegistry
@@ -36,4 +42,10 @@ export interface UpdateDockerRegistry {
    * @memberof UpdateDockerRegistry
    */
   password?: string
+  /**
+   * Registry project
+   * @type {string}
+   * @memberof UpdateDockerRegistry
+   */
+  project?: string
 }

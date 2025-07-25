@@ -19,7 +19,7 @@ import re  # noqa: F401
 import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictStr, field_validator
-from typing import Any, ClassVar, Dict, List
+from typing import Any, ClassVar, Dict, List, Optional
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -31,9 +31,9 @@ class CreateDockerRegistry(BaseModel):
     url: StrictStr = Field(description="Registry URL")
     username: StrictStr = Field(description="Registry username")
     password: StrictStr = Field(description="Registry password")
-    project: StrictStr = Field(description="Registry project")
+    project: Optional[StrictStr] = Field(default=None, description="Registry project")
     registry_type: StrictStr = Field(description="Registry type", alias="registryType")
-    is_default: StrictBool = Field(description="Set as default registry", alias="isDefault")
+    is_default: Optional[StrictBool] = Field(default=None, description="Set as default registry", alias="isDefault")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["name", "url", "username", "password", "project", "registryType", "isDefault"]
 
@@ -107,8 +107,8 @@ class CreateDockerRegistry(BaseModel):
             "username": obj.get("username"),
             "password": obj.get("password"),
             "project": obj.get("project"),
-            "registryType": obj.get("registryType") if obj.get("registryType") is not None else 'internal',
-            "isDefault": obj.get("isDefault") if obj.get("isDefault") is not None else False
+            "registryType": obj.get("registryType") if obj.get("registryType") is not None else 'organization',
+            "isDefault": obj.get("isDefault")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():
