@@ -57,12 +57,6 @@ export interface SnapshotDto {
   imageName?: string
   /**
    *
-   * @type {boolean}
-   * @memberof SnapshotDto
-   */
-  enabled: boolean
-  /**
-   *
    * @type {SnapshotState}
    * @memberof SnapshotDto
    */

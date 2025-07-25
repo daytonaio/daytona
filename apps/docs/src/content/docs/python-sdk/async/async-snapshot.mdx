@@ -1,5 +1,5 @@
 ---
-title: "AsyncSnapshot"
+title: 'AsyncSnapshot'
 hideTitleOnPage: true
 ---
 
@@ -18,7 +18,6 @@ Represents a Daytona Snapshot which is a pre-configured sandbox.
 - `general` _Optional[bool]_ - Whether the Snapshot is general.
 - `name` _StrictStr_ - Name of the Snapshot.
 - `image_name` _StrictStr_ - Name of the Image of the Snapshot.
-- `enabled` _StrictBool_ - Whether the Snapshot is enabled.
 - `state` _StrictStr_ - State of the Snapshot.
 - `size` _Optional[Union[StrictFloat, StrictInt]]_ - Size of the Snapshot.
 - `entrypoint` _Optional[List[str]]_ - Entrypoint of the Snapshot.
@@ -30,7 +29,6 @@ Represents a Daytona Snapshot which is a pre-configured sandbox.
 - `created_at` _StrictStr_ - Timestamp when the Snapshot was created.
 - `updated_at` _StrictStr_ - Timestamp when the Snapshot was last updated.
 - `last_used_at` _StrictStr_ - Timestamp when the Snapshot was last used.
-
 
 ## AsyncSnapshotService
 
@@ -52,7 +50,6 @@ List all Snapshots.
 **Returns**:
 
 - `List[Snapshot]` - List of all Snapshots.
-  
 
 **Example**:
 
@@ -75,7 +72,6 @@ Delete a Snapshot.
 **Arguments**:
 
 - `snapshot` _Snapshot_ - Snapshot to delete.
-  
 
 **Example**:
 
@@ -98,12 +94,10 @@ Get a Snapshot by name.
 **Arguments**:
 
 - `name` _str_ - Name of the Snapshot to get.
-  
 
 **Returns**:
 
 - `Snapshot` - The Snapshot object.
-  
 
 **Example**:
 
@@ -159,7 +153,7 @@ Activate a snapshot.
 
 - `Snapshot` - The activated Snapshot instance.
 
-#### AsyncSnapshotService.process\_image\_context
+#### AsyncSnapshotService.process_image_context
 
 ```python
 @staticmethod
@@ -193,4 +187,3 @@ Parameters for creating a new snapshot.
   it will be used to create a new image in Daytona.
 - `resources` _Optional[Resources]_ - Resources of the snapshot.
 - `entrypoint` _Optional[List[str]]_ - Entrypoint of the snapshot.
-

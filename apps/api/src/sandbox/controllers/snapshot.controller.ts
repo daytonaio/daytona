@@ -38,7 +38,6 @@ import {
   ApiBearerAuth,
 } from '@nestjs/swagger'
 import { CreateSnapshotDto } from '../dto/create-snapshot.dto'
-import { ToggleStateDto } from '../dto/toggle-state.dto'
 import { SnapshotDto } from '../dto/snapshot.dto'
 import { PaginatedSnapshotsDto } from '../dto/paginated-snapshots.dto'
 import { SnapshotAccessGuard } from '../guards/snapshot-access.guard'
@@ -186,37 +185,6 @@ export class SnapshotController {
       // If not found by ID, try by name
       snapshot = await this.snapshotService.getSnapshotByName(snapshotIdOrName, authContext.organizationId)
     }
-    return SnapshotDto.fromSnapshot(snapshot)
-  }
-
-  @Patch(':id/toggle')
-  @ApiOperation({
-    summary: 'Toggle snapshot state',
-    operationId: 'toggleSnapshotState',
-  })
-  @ApiParam({
-    name: 'id',
-    description: 'Snapshot ID',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Snapshot state has been toggled',
-    type: SnapshotDto,
-  })
-  @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SNAPSHOTS])
-  @UseGuards(SnapshotAccessGuard)
-  @Audit({
-    action: AuditAction.TOGGLE_STATE,
-    targetType: AuditTarget.SNAPSHOT,
-    targetIdFromRequest: (req) => req.params.id,
-    requestMetadata: {
-      body: (req: TypedRequest<ToggleStateDto>) => ({
-        enabled: req.body?.enabled,
-      }),
-    },
-  })
-  async toggleSnapshotState(@Param('id') snapshotId: string, @Body() toggleDto: ToggleStateDto): Promise<SnapshotDto> {
-    const snapshot = await this.snapshotService.toggleSnapshotState(snapshotId, toggleDto.enabled)
     return SnapshotDto.fromSnapshot(snapshot)
   }
 
@@ -405,5 +373,30 @@ export class SnapshotController {
   async activateSnapshot(@Param('id') snapshotId: string): Promise<SnapshotDto> {
     const snapshot = await this.snapshotService.activateSnapshot(snapshotId)
     return SnapshotDto.fromSnapshot(snapshot)
+  }
+
+  @Post(':id/deactivate')
+  @HttpCode(204)
+  @ApiOperation({
+    summary: 'Deactivate a snapshot',
+    operationId: 'deactivateSnapshot',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Snapshot ID',
+  })
+  @ApiResponse({
+    status: 204,
+    description: 'The snapshot has been successfully deactivated.',
+  })
+  @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SNAPSHOTS])
+  @UseGuards(SnapshotAccessGuard)
+  @Audit({
+    action: AuditAction.DEACTIVATE,
+    targetType: AuditTarget.SNAPSHOT,
+    targetIdFromRequest: (req) => req.params.id,
+  })
+  async deactivateSnapshot(@Param('id') snapshotId: string) {
+    await this.snapshotService.deactivateSnapshot(snapshotId)
   }
 }

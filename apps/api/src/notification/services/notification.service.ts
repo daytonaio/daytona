@@ -16,7 +16,6 @@ import { SnapshotEvents } from '../../sandbox/constants/snapshot-events'
 import { SnapshotDto } from '../../sandbox/dto/snapshot.dto'
 import { SnapshotStateUpdatedEvent } from '../../sandbox/events/snapshot-state-updated.event'
 import { SnapshotRemovedEvent } from '../../sandbox/events/snapshot-removed.event'
-import { SnapshotEnabledToggledEvent } from '../../sandbox/events/snapshot-enabled-toggled.event'
 import { VolumeEvents } from '../../sandbox/constants/volume-events'
 import { VolumeCreatedEvent } from '../../sandbox/events/volume-created.event'
 import { VolumeDto } from '../../sandbox/dto/volume.dto'
@@ -66,12 +65,6 @@ export class NotificationService {
   async handleSnapshotStateUpdated(event: SnapshotStateUpdatedEvent) {
     const dto = SnapshotDto.fromSnapshot(event.snapshot)
     this.notificationGateway.emitSnapshotStateUpdated(dto, event.oldState, event.newState)
-  }
-
-  @OnEvent(SnapshotEvents.ENABLED_TOGGLED)
-  async handleSnapshotEnabledToggled(event: SnapshotEnabledToggledEvent) {
-    const dto = SnapshotDto.fromSnapshot(event.snapshot)
-    this.notificationGateway.emitSnapshotEnabledToggled(dto)
   }
 
   @OnEvent(SnapshotEvents.REMOVED)
