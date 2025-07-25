@@ -13,20 +13,11 @@ export class Migration1753430929609 implements MigrationInterface {
 
     // For existing users, set createdAt to match their personal organization's createdAt
     await queryRunner.query(`
-        UPDATE "user" u
-        SET "createdAt" = (
-            SELECT o."createdAt"
-            FROM "organization" o
-            WHERE o."createdBy" = u.id
-            AND o.personal = true
-            LIMIT 1
-        )
-        WHERE EXISTS (
-            SELECT 1 
-            FROM "organization" o 
-            WHERE o."createdBy" = u.id 
-            AND o.personal = true
-        )
+        UPDATE "user" u 
+        SET "createdAt" = o."createdAt" 
+        FROM "organization" o 
+        WHERE o."createdBy" = u.id 
+          AND o.personal = true;
     `)
   }
 
