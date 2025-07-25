@@ -351,40 +351,17 @@ export class RunnerService {
     return runners.map((item) => item.runnerId)
   }
 
-  async getRunnersBySnapshotInternalName(internalName: string): Promise<RunnerSnapshotDto[]> {
-    this.logger.debug(`Looking for snapshot with internalName: ${internalName}`)
-
-    // First find the snapshot by internalName
-    const snapshot = await this.snapshotRepository.findOne({
-      where: { internalName },
-    })
-
-    if (!snapshot) {
-      this.logger.debug(`No snapshot found with internalName: ${internalName}`)
-      return []
-    }
-
-    this.logger.debug(`Found snapshot with ID: ${snapshot.id}`)
-
-    // Find all snapshot runners for this snapshot
-    // Note: snapshotRef contains the internalName, not the snapshot ID
+  async getRunnersBySnapshotRef(ref: string): Promise<RunnerSnapshotDto[]> {
     const snapshotRunners = await this.snapshotRunnerRepository.find({
       where: {
-        snapshotRef: internalName,
+        snapshotRef: ref,
         state: Not(SnapshotRunnerState.ERROR),
       },
+      select: ['runnerId', 'id'],
     })
 
-    this.logger.debug(`Found ${snapshotRunners.length} snapshot runners for snapshot ${snapshot.id}`)
-
-    if (snapshotRunners.length === 0) {
-      this.logger.debug(`No snapshot runners found for snapshot ${snapshot.id}`)
-      return []
-    }
-
-    // Get the runner IDs
-    const runnerIds = snapshotRunners.map((sr) => sr.runnerId)
-    this.logger.debug(`Runner IDs found: ${runnerIds.join(', ')}`)
+    // Extract distinct runnerIds from snapshot runners
+    const runnerIds = [...new Set(snapshotRunners.map((sr) => sr.runnerId))]
 
     // Find all runners with these IDs
     const runners = await this.runnerRepository.find({

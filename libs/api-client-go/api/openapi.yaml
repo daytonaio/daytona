@@ -1776,14 +1776,14 @@ paths:
       summary: Get runner by sandbox ID
       tags:
         - runners
-  /runners/by-snapshot:
+  /runners/by-snapshot-ref:
     get:
-      operationId: getRunnersBySnapshotInternalName
+      operationId: getRunnersBySnapshotRef
       parameters:
-        - description: Internal name of the snapshot
+        - description: Snapshot ref
           explode: true
           in: query
-          name: internalName
+          name: ref
           required: true
           schema:
             type: string
@@ -1803,7 +1803,7 @@ paths:
             - openid
             - profile
             - email
-      summary: Get runners by snapshot internal name
+      summary: Get runners by snapshot ref
       tags:
         - runners
   /toolbox/{sandboxId}/toolbox/project-dir:
