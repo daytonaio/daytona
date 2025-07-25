@@ -6691,6 +6691,7 @@ components:
       type: object
     User:
       example:
+        createdAt: 2000-01-23T04:56:07.000+00:00
         publicKeys:
           - name: name
             key: key
@@ -6714,7 +6715,12 @@ components:
           items:
             $ref: '#/components/schemas/UserPublicKey'
           type: array
+        createdAt:
+          description: Creation timestamp
+          format: date-time
+          type: string
       required:
+        - createdAt
         - email
         - id
         - name

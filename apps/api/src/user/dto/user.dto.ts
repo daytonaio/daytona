@@ -30,12 +30,18 @@ export class UserDto {
   })
   publicKeys: UserPublicKeyDto[]
 
+  @ApiProperty({
+    description: 'Creation timestamp',
+  })
+  createdAt: Date
+
   static fromUser(user: User): UserDto {
     const dto: UserDto = {
       id: user.id,
       name: user.name,
       email: user.email,
       publicKeys: user.publicKeys.map(UserPublicKeyDto.fromUserPublicKey),
+      createdAt: user.createdAt,
     }
 
     return dto
