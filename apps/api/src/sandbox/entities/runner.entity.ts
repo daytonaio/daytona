@@ -19,6 +19,9 @@ export class Runner {
   apiUrl: string
 
   @Column()
+  proxyUrl: string
+
+  @Column()
   apiKey: string
 
   @Column()
@@ -103,6 +106,11 @@ export class Runner {
     default: RunnerState.INITIALIZING,
   })
   state: RunnerState
+
+  @Column({
+    default: '0',
+  })
+  version: string
 
   @Column({
     nullable: true,

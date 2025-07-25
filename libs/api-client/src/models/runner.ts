@@ -44,6 +44,12 @@ export interface Runner {
    */
   apiUrl: string
   /**
+   * The proxy URL of the runner
+   * @type {string}
+   * @memberof Runner
+   */
+  proxyUrl: string
+  /**
    * The API key for the runner
    * @type {string}
    * @memberof Runner
@@ -181,4 +187,10 @@ export interface Runner {
    * @memberof Runner
    */
   updatedAt: string
+  /**
+   * The version of the runner
+   * @type {string}
+   * @memberof Runner
+   */
+  version: string
 }
