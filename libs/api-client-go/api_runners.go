@@ -47,16 +47,16 @@ type RunnersAPI interface {
 	GetRunnerBySandboxIdExecute(r RunnersAPIGetRunnerBySandboxIdRequest) (*Runner, *http.Response, error)
 
 	/*
-		GetRunnersBySnapshotInternalName Get runners by snapshot internal name
+		GetRunnersBySnapshotRef Get runners by snapshot ref
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@return RunnersAPIGetRunnersBySnapshotInternalNameRequest
+		@return RunnersAPIGetRunnersBySnapshotRefRequest
 	*/
-	GetRunnersBySnapshotInternalName(ctx context.Context) RunnersAPIGetRunnersBySnapshotInternalNameRequest
+	GetRunnersBySnapshotRef(ctx context.Context) RunnersAPIGetRunnersBySnapshotRefRequest
 
-	// GetRunnersBySnapshotInternalNameExecute executes the request
+	// GetRunnersBySnapshotRefExecute executes the request
 	//  @return []RunnerSnapshotDto
-	GetRunnersBySnapshotInternalNameExecute(r RunnersAPIGetRunnersBySnapshotInternalNameRequest) ([]RunnerSnapshotDto, *http.Response, error)
+	GetRunnersBySnapshotRefExecute(r RunnersAPIGetRunnersBySnapshotRefRequest) ([]RunnerSnapshotDto, *http.Response, error)
 
 	/*
 		ListRunners List all runners
@@ -284,30 +284,30 @@ func (a *RunnersAPIService) GetRunnerBySandboxIdExecute(r RunnersAPIGetRunnerByS
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
-type RunnersAPIGetRunnersBySnapshotInternalNameRequest struct {
-	ctx          context.Context
-	ApiService   RunnersAPI
-	internalName *string
+type RunnersAPIGetRunnersBySnapshotRefRequest struct {
+	ctx        context.Context
+	ApiService RunnersAPI
+	ref        *string
 }
 
-// Internal name of the snapshot
-func (r RunnersAPIGetRunnersBySnapshotInternalNameRequest) InternalName(internalName string) RunnersAPIGetRunnersBySnapshotInternalNameRequest {
-	r.internalName = &internalName
+// Snapshot ref
+func (r RunnersAPIGetRunnersBySnapshotRefRequest) Ref(ref string) RunnersAPIGetRunnersBySnapshotRefRequest {
+	r.ref = &ref
 	return r
 }
 
-func (r RunnersAPIGetRunnersBySnapshotInternalNameRequest) Execute() ([]RunnerSnapshotDto, *http.Response, error) {
-	return r.ApiService.GetRunnersBySnapshotInternalNameExecute(r)
+func (r RunnersAPIGetRunnersBySnapshotRefRequest) Execute() ([]RunnerSnapshotDto, *http.Response, error) {
+	return r.ApiService.GetRunnersBySnapshotRefExecute(r)
 }
 
 /*
-GetRunnersBySnapshotInternalName Get runners by snapshot internal name
+GetRunnersBySnapshotRef Get runners by snapshot ref
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return RunnersAPIGetRunnersBySnapshotInternalNameRequest
+	@return RunnersAPIGetRunnersBySnapshotRefRequest
 */
-func (a *RunnersAPIService) GetRunnersBySnapshotInternalName(ctx context.Context) RunnersAPIGetRunnersBySnapshotInternalNameRequest {
-	return RunnersAPIGetRunnersBySnapshotInternalNameRequest{
+func (a *RunnersAPIService) GetRunnersBySnapshotRef(ctx context.Context) RunnersAPIGetRunnersBySnapshotRefRequest {
+	return RunnersAPIGetRunnersBySnapshotRefRequest{
 		ApiService: a,
 		ctx:        ctx,
 	}
@@ -316,7 +316,7 @@ func (a *RunnersAPIService) GetRunnersBySnapshotInternalName(ctx context.Context
 // Execute executes the request
 //
 //	@return []RunnerSnapshotDto
-func (a *RunnersAPIService) GetRunnersBySnapshotInternalNameExecute(r RunnersAPIGetRunnersBySnapshotInternalNameRequest) ([]RunnerSnapshotDto, *http.Response, error) {
+func (a *RunnersAPIService) GetRunnersBySnapshotRefExecute(r RunnersAPIGetRunnersBySnapshotRefRequest) ([]RunnerSnapshotDto, *http.Response, error) {
 	var (
 		localVarHTTPMethod  = http.MethodGet
 		localVarPostBody    interface{}
@@ -324,21 +324,21 @@ func (a *RunnersAPIService) GetRunnersBySnapshotInternalNameExecute(r RunnersAPI
 		localVarReturnValue []RunnerSnapshotDto
 	)
 
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "RunnersAPIService.GetRunnersBySnapshotInternalName")
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "RunnersAPIService.GetRunnersBySnapshotRef")
 	if err != nil {
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/runners/by-snapshot"
+	localVarPath := localBasePath + "/runners/by-snapshot-ref"
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
-	if r.internalName == nil {
-		return localVarReturnValue, nil, reportError("internalName is required and must be specified")
+	if r.ref == nil {
+		return localVarReturnValue, nil, reportError("ref is required and must be specified")
 	}
 
-	parameterAddToHeaderOrQuery(localVarQueryParams, "internalName", r.internalName, "form", "")
+	parameterAddToHeaderOrQuery(localVarQueryParams, "ref", r.ref, "form", "")
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
