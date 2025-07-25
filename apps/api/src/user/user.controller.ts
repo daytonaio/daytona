@@ -269,6 +269,44 @@ export class UserController {
     }
   }
 
+  @Post('/mfa/sms/enroll')
+  @ApiOperation({
+    summary: 'Enroll in SMS MFA',
+    operationId: 'enrollInSmsMfa',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'SMS MFA enrollment URL',
+    type: String,
+  })
+  async enrollInSmsMfa(@AuthContext() authContext: IAuthContext): Promise<string> {
+    if (!this.configService.get('oidc.managementApi.enabled')) {
+      this.logger.warn('OIDC Management API is not enabled')
+      throw new NotFoundException()
+    }
+
+    const token = await this.getManagementApiToken()
+
+    try {
+      const response = await axios.post(
+        `${this.configService.getOrThrow('oidc.issuer')}/api/v2/guardian/enrollments/ticket`,
+        {
+          user_id: authContext.userId,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      )
+
+      return response.data.ticket_url
+    } catch (error) {
+      this.logger.error('Failed to enable SMS MFA', error?.message || String(error))
+      throw new UnauthorizedException()
+    }
+  }
+
   @Get('/:id')
   @ApiOperation({
     summary: 'Get user by ID',
