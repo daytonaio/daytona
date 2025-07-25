@@ -39,6 +39,7 @@ import { UserService } from '../../user/user.service'
 import { Audit, TypedRequest } from '../../audit/decorators/audit.decorator'
 import { AuditAction } from '../../audit/enums/audit-action.enum'
 import { AuditTarget } from '../../audit/enums/audit-target.enum'
+import { EmailUtils } from '../../common/utils/email.util'
 
 @ApiTags('organizations')
 @Controller('organizations')
@@ -111,7 +112,7 @@ export class OrganizationController {
   ): Promise<void> {
     try {
       const invitation = await this.organizationInvitationService.findOneOrFail(invitationId)
-      if (invitation.email !== authContext.email) {
+      if (!EmailUtils.areEqual(invitation.email, authContext.email)) {
         throw new ForbiddenException('User email does not match invitation email')
       }
     } catch (error) {
@@ -147,7 +148,7 @@ export class OrganizationController {
   ): Promise<void> {
     try {
       const invitation = await this.organizationInvitationService.findOneOrFail(invitationId)
-      if (invitation.email !== authContext.email) {
+      if (!EmailUtils.areEqual(invitation.email, authContext.email)) {
         throw new ForbiddenException('User email does not match invitation email')
       }
     } catch (error) {
