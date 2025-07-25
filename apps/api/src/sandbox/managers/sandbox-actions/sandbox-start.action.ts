@@ -61,13 +61,7 @@ export class SandboxStartAction extends SandboxAction {
       case SandboxState.STARTING: {
         return this.handleRunnerSandboxStartedStateCheck(sandbox)
       }
-      //  TODO: remove this case
       case SandboxState.ERROR: {
-        //  TODO: remove this asap
-        //  this was a temporary solution to recover from the false positive error state
-        if (sandbox.id.startsWith('err_')) {
-          return DONT_SYNC_AGAIN
-        }
         const runner = await this.runnerService.findOne(sandbox.runnerId)
         const runnerAdapter = await this.runnerAdapterFactory.create(runner)
 

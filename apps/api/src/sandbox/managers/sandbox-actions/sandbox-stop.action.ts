@@ -69,9 +69,6 @@ export class SandboxStopAction extends SandboxAction {
         return SYNC_AGAIN
       }
       case SandboxState.ERROR: {
-        if (sandbox.id.startsWith('err_')) {
-          return DONT_SYNC_AGAIN
-        }
         const sandboxInfo = await runnerAdapter.sandboxInfo(sandbox.id)
         if (sandboxInfo.state === SandboxState.STOPPED) {
           await this.updateSandboxState(sandbox.id, SandboxState.STOPPED)
