@@ -2,11 +2,13 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import asyncio
+import time
 from typing import Dict, Optional
 
 from daytona_api_client_async import PortPreviewUrl
 from daytona_api_client_async import Sandbox as SandboxDto
 from daytona_api_client_async import SandboxApi, ToolboxApi
+from daytona_api_client_async.exceptions import BadRequestException
 from pydantic import ConfigDict, PrivateAttr
 
 from .._utils.errors import intercept_errors
@@ -213,9 +215,18 @@ class AsyncSandbox(SandboxDto):
             print("Sandbox started successfully")
             ```
         """
-        sandbox = await self._sandbox_api.start_sandbox(self.id, _request_timeout=timeout or None)
-        self.__process_sandbox_dto(sandbox)
-        await self.wait_for_sandbox_start()
+        start_time = time.time()
+        try:
+            sandbox = await self._sandbox_api.start_sandbox(self.id, _request_timeout=timeout or None)
+            self.__process_sandbox_dto(sandbox)
+        except BadRequestException as e:
+            if "Sandbox failed to start: Timeout after" in str(e.body):
+                await self.refresh_data()
+            else:
+                raise e
+
+        time_elapsed = time.time() - start_time
+        await self.wait_for_sandbox_start(timeout=max(0.1, timeout - time_elapsed) if timeout else None)
 
     @intercept_errors(message_prefix="Failed to stop sandbox: ")
     @with_timeout(

@@ -11,6 +11,7 @@ from typing import Dict, Optional
 from daytona_api_client import PortPreviewUrl
 from daytona_api_client import Sandbox as SandboxDto
 from daytona_api_client import SandboxApi, ToolboxApi
+from daytona_api_client.exceptions import BadRequestException
 from pydantic import ConfigDict, PrivateAttr
 
 from .._utils.errors import intercept_errors
@@ -217,9 +218,18 @@ class Sandbox(SandboxDto):
             print("Sandbox started successfully")
             ```
         """
-        sandbox = self._sandbox_api.start_sandbox(self.id, _request_timeout=timeout or None)
-        self.__process_sandbox_dto(sandbox)
-        self.wait_for_sandbox_start()
+        start_time = time.time()
+        try:
+            sandbox = self._sandbox_api.start_sandbox(self.id, _request_timeout=timeout or None)
+            self.__process_sandbox_dto(sandbox)
+        except BadRequestException as e:
+            if "Sandbox failed to start: Timeout after" in str(e.body):
+                self.refresh_data()
+            else:
+                raise e
+
+        time_elapsed = time.time() - start_time
+        self.wait_for_sandbox_start(timeout=max(0.1, timeout - time_elapsed) if timeout else None)
 
     @intercept_errors(message_prefix="Failed to stop sandbox: ")
     @with_timeout(
