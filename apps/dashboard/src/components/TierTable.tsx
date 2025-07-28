@@ -64,6 +64,14 @@ export function TierTable({
       </TableHeader>
       <TableBody>
         {tiers.map((tier) => {
+          const topUpChecked =
+            !!organizationTier &&
+            organizationTier.largestSuccessfulPaymentCents >= tier.minTopUpAmountCents &&
+            (!tier.topUpIntervalDays ||
+              (!!organizationTier.largestSuccessfulPaymentDate &&
+                organizationTier.largestSuccessfulPaymentDate.getTime() >
+                  Date.now() - 1000 * 60 * 60 * 24 * tier.topUpIntervalDays))
+
           return (
             <TableRow key={tier.tier}>
               <TableCell>
@@ -84,23 +92,11 @@ export function TierTable({
                     businessEmailVerified={organizationTier?.hasVerifiedBusinessEmail ?? false}
                   />
                   {!!tier.minTopUpAmountCents && (
-                    <div
-                      className={cn(
-                        organizationTier && organizationTier.largestSuccessfulPaymentCents >= tier.minTopUpAmountCents
-                          ? 'text-green-500'
-                          : undefined,
-                      )}
-                    >
+                    <div className={cn(topUpChecked ? 'text-green-500' : undefined)}>
                       <TierRequirementItem
-                        checked={
-                          !!organizationTier &&
-                          organizationTier.largestSuccessfulPaymentCents >= tier.minTopUpAmountCents &&
-                          (!tier.topUpIntervalDays ||
-                            (!!organizationTier.largestSuccessfulPaymentDate &&
-                              organizationTier.largestSuccessfulPaymentDate.getTime() >
-                                Date.now() - 1000 * 60 * 60 * 24 * tier.topUpIntervalDays))
-                        }
+                        checked={topUpChecked}
                         label={`Top-Up ${getDollarAmount(tier.minTopUpAmountCents)}${tier.topUpIntervalDays ? ` (every ${tier.topUpIntervalDays} days)` : ''}`}
+                        link={RoutePath.BILLING_WALLET}
                       />
                       {!!tier.topUpIntervalDays && (
                         <div className="basis-full ml-6">
