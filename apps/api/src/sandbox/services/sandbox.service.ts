@@ -370,6 +370,25 @@ export class SandboxService {
       warmPoolSandbox.autoDeleteInterval = createSandboxDto.autoDeleteInterval
     }
 
+    if (createSandboxDto.networkAllowAll !== undefined) {
+      warmPoolSandbox.networkAllowAll = createSandboxDto.networkAllowAll
+    }
+    if (createSandboxDto.networkAllowList !== undefined) {
+      warmPoolSandbox.networkAllowList = createSandboxDto.networkAllowList
+    }
+
+    if (createSandboxDto.networkAllowAll !== undefined || createSandboxDto.networkAllowList !== undefined) {
+      const runner = await this.runnerService.findOne(warmPoolSandbox.runnerId)
+      if (runner) {
+        const runnerAdapter = await this.runnerAdapterFactory.create(runner)
+        await runnerAdapter.updateNetworkSettings(
+          warmPoolSandbox.id,
+          createSandboxDto.networkAllowAll,
+          createSandboxDto.networkAllowList,
+        )
+      }
+    }
+
     const runner = await this.runnerService.findOne(warmPoolSandbox.runnerId)
 
     const result = await this.sandboxRepository.save(warmPoolSandbox)
