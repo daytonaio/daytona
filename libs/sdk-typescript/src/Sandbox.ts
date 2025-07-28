@@ -210,7 +210,7 @@ export class Sandbox implements SandboxDto {
     }
 
     const timeElapsed = Date.now() - startTime
-    await this.waitUntilStarted(timeout ? Math.max(0.1, timeout - timeElapsed / 1000) : undefined)
+    await this.waitUntilStarted(timeout ? Math.max(0.1, timeout - timeElapsed / 1000) : timeout)
   }
 
   /**

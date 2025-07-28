@@ -226,7 +226,7 @@ class AsyncSandbox(SandboxDto):
                 raise e
 
         time_elapsed = time.time() - start_time
-        await self.wait_for_sandbox_start(timeout=max(0.1, timeout - time_elapsed) if timeout else None)
+        await self.wait_for_sandbox_start(timeout=max(0.1, timeout - time_elapsed) if timeout else timeout)
 
     @intercept_errors(message_prefix="Failed to stop sandbox: ")
     @with_timeout(
