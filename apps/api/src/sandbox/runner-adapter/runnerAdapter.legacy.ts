@@ -151,29 +151,33 @@ export class RunnerAdapterLegacy implements RunnerAdapter {
   }
 
   async createSandbox(sandbox: Sandbox, registry?: DockerRegistry, entrypoint?: string[]): Promise<void> {
-    const request: CreateSandboxDTO = {
+    const createSandboxDto: CreateSandboxDTO = {
       id: sandbox.id,
+      userId: sandbox.organizationId,
       snapshot: sandbox.snapshot,
       osUser: sandbox.osUser,
-      userId: sandbox.organizationId,
-      storageQuota: sandbox.disk,
-      memoryQuota: sandbox.mem,
       cpuQuota: sandbox.cpu,
+      gpuQuota: sandbox.gpu,
+      memoryQuota: sandbox.mem,
+      storageQuota: sandbox.disk,
       env: sandbox.env,
-      volumes: sandbox.volumes,
+      registry: registry
+        ? {
+            url: registry.url,
+            username: registry.username,
+            password: registry.password,
+          }
+        : undefined,
       entrypoint: entrypoint,
+      volumes: sandbox.volumes?.map((volume) => ({
+        volumeId: volume.volumeId,
+        mountPath: volume.mountPath,
+      })),
+      networkAllowAll: sandbox.networkAllowAll,
+      networkAllowList: sandbox.networkAllowList,
     }
 
-    if (registry) {
-      request.registry = {
-        project: registry.project,
-        url: registry.url,
-        username: registry.username,
-        password: registry.password,
-      }
-    }
-
-    await this.sandboxApiClient.create(request)
+    await this.sandboxApiClient.create(createSandboxDto)
   }
 
   async startSandbox(sandboxId: string): Promise<void> {

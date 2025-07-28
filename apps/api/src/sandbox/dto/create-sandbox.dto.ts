@@ -56,6 +56,22 @@ export class CreateSandboxDto {
   public?: boolean
 
   @ApiPropertyOptional({
+    description: 'Whether to allow all network access for the sandbox',
+    example: false,
+  })
+  @IsOptional()
+  @IsBoolean()
+  networkAllowAll?: boolean
+
+  @ApiPropertyOptional({
+    description: 'Comma-separated list of allowed network addresses for the sandbox',
+    example: '192.168.1.0/24,10.0.0.0/8',
+  })
+  @IsOptional()
+  @IsString()
+  networkAllowList?: string
+
+  @ApiPropertyOptional({
     description: 'The sandbox class type',
     enum: SandboxClass,
     example: Object.values(SandboxClass)[0],

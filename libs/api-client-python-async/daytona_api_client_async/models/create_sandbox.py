@@ -34,6 +34,8 @@ class CreateSandbox(BaseModel):
     env: Optional[Dict[str, StrictStr]] = Field(default=None, description="Environment variables for the sandbox")
     labels: Optional[Dict[str, StrictStr]] = Field(default=None, description="Labels for the sandbox")
     public: Optional[StrictBool] = Field(default=None, description="Whether the sandbox http preview is publicly accessible")
+    network_allow_all: Optional[StrictBool] = Field(default=None, description="Whether to allow all network access for the sandbox", alias="networkAllowAll")
+    network_allow_list: Optional[StrictStr] = Field(default=None, description="Comma-separated list of allowed network addresses for the sandbox", alias="networkAllowList")
     var_class: Optional[StrictStr] = Field(default=None, description="The sandbox class type", alias="class")
     target: Optional[StrictStr] = Field(default=None, description="The target (region) where the sandbox will be created")
     cpu: Optional[StrictInt] = Field(default=None, description="CPU cores allocated to the sandbox")
@@ -46,7 +48,7 @@ class CreateSandbox(BaseModel):
     volumes: Optional[List[SandboxVolume]] = Field(default=None, description="Array of volumes to attach to the sandbox")
     build_info: Optional[CreateBuildInfo] = Field(default=None, description="Build information for the sandbox", alias="buildInfo")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["snapshot", "user", "env", "labels", "public", "class", "target", "cpu", "gpu", "memory", "disk", "autoStopInterval", "autoArchiveInterval", "autoDeleteInterval", "volumes", "buildInfo"]
+    __properties: ClassVar[List[str]] = ["snapshot", "user", "env", "labels", "public", "networkAllowAll", "networkAllowList", "class", "target", "cpu", "gpu", "memory", "disk", "autoStopInterval", "autoArchiveInterval", "autoDeleteInterval", "volumes", "buildInfo"]
 
     @field_validator('var_class')
     def var_class_validate_enum(cls, value):
@@ -131,6 +133,8 @@ class CreateSandbox(BaseModel):
             "env": obj.get("env"),
             "labels": obj.get("labels"),
             "public": obj.get("public"),
+            "networkAllowAll": obj.get("networkAllowAll"),
+            "networkAllowList": obj.get("networkAllowList"),
             "class": obj.get("class"),
             "target": obj.get("target"),
             "cpu": obj.get("cpu"),

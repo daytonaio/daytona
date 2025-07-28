@@ -1113,6 +1113,12 @@ const docTemplate = `{
                     "type": "integer",
                     "minimum": 1
                 },
+                "networkAllowAll": {
+                    "type": "boolean"
+                },
+                "networkAllowList": {
+                    "type": "string"
+                },
                 "osUser": {
                     "type": "string"
                 },
