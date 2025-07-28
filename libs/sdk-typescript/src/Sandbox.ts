@@ -196,21 +196,12 @@ export class Sandbox implements SandboxDto {
     if (timeout < 0) {
       throw new DaytonaError('Timeout must be a non-negative number')
     }
+
     const startTime = Date.now()
-
-    try {
-      const response = await this.sandboxApi.startSandbox(this.id, undefined, { timeout: timeout * 1000 })
-      this.processSandboxDto(response.data)
-    } catch (error) {
-      if (error instanceof DaytonaError && error.message.includes('Sandbox failed to start: Timeout after')) {
-        await this.refreshData()
-      } else {
-        throw error
-      }
-    }
-
+    const response = await this.sandboxApi.startSandbox(this.id, undefined, { timeout: timeout * 1000 })
+    this.processSandboxDto(response.data)
     const timeElapsed = Date.now() - startTime
-    await this.waitUntilStarted(timeout ? Math.max(0.1, timeout - timeElapsed / 1000) : timeout)
+    await this.waitUntilStarted(timeout ? Math.max(0.001, timeout - timeElapsed / 1000) : timeout)
   }
 
   /**
@@ -235,7 +226,7 @@ export class Sandbox implements SandboxDto {
     await this.sandboxApi.stopSandbox(this.id, undefined, { timeout: timeout * 1000 })
     await this.refreshData()
     const timeElapsed = Date.now() - startTime
-    await this.waitUntilStopped(timeout ? timeout - timeElapsed / 1000 : 0)
+    await this.waitUntilStopped(timeout ? Math.max(0.001, timeout - timeElapsed / 1000) : timeout)
   }
 
   /**

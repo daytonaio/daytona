@@ -11,7 +11,6 @@ from typing import Dict, Optional
 from daytona_api_client import PortPreviewUrl
 from daytona_api_client import Sandbox as SandboxDto
 from daytona_api_client import SandboxApi, ToolboxApi
-from daytona_api_client.exceptions import BadRequestException
 from pydantic import ConfigDict, PrivateAttr
 
 from .._utils.errors import intercept_errors
@@ -219,17 +218,10 @@ class Sandbox(SandboxDto):
             ```
         """
         start_time = time.time()
-        try:
-            sandbox = self._sandbox_api.start_sandbox(self.id, _request_timeout=timeout or None)
-            self.__process_sandbox_dto(sandbox)
-        except BadRequestException as e:
-            if "Sandbox failed to start: Timeout after" in str(e.body):
-                self.refresh_data()
-            else:
-                raise e
-
+        sandbox = self._sandbox_api.start_sandbox(self.id, _request_timeout=timeout or None)
+        self.__process_sandbox_dto(sandbox)
         time_elapsed = time.time() - start_time
-        self.wait_for_sandbox_start(timeout=max(0.1, timeout - time_elapsed) if timeout else timeout)
+        self.wait_for_sandbox_start(timeout=max(0.001, timeout - time_elapsed) if timeout else timeout)
 
     @intercept_errors(message_prefix="Failed to stop sandbox: ")
     @with_timeout(
@@ -253,9 +245,11 @@ class Sandbox(SandboxDto):
             print("Sandbox stopped successfully")
             ```
         """
+        start_time = time.time()
         self._sandbox_api.stop_sandbox(self.id, _request_timeout=timeout or None)
         self.refresh_data()
-        self.wait_for_sandbox_stop()
+        time_elapsed = time.time() - start_time
+        self.wait_for_sandbox_stop(timeout=max(0.001, timeout - time_elapsed) if timeout else timeout)
 
     @intercept_errors(message_prefix="Failed to remove sandbox: ")
     def delete(self, timeout: Optional[float] = 60) -> None:
