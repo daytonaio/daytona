@@ -137,18 +137,16 @@ export function OrganizationEmailsTableHeader({ table, onAddEmail }: Organizatio
                 Add a new email address to your organization. A verification email will be sent to this address.
               </DialogDescription>
             </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="email" className="text-right">
-                  Email
-                </Label>
+            <div className="gap-4 py-4">
+              <div className="space-y-3">
+                <Label htmlFor="email">Email</Label>
                 <Input
                   id="email"
                   type="email"
                   placeholder="Enter email address"
                   value={newEmail}
                   onChange={(e) => handleEmailChange(e.target.value)}
-                  className={`col-span-3 ${!isValidEmail ? 'border-red-500' : ''}`}
+                  className={`${!isValidEmail ? 'border-red-500' : ''}`}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' && validateEmail(newEmail)) {
                       handleAddEmail()
@@ -157,7 +155,7 @@ export function OrganizationEmailsTableHeader({ table, onAddEmail }: Organizatio
                 />
               </div>
               {!isValidEmail && newEmail && (
-                <p className="text-sm text-red-500 col-span-4 text-center">Please enter a valid email address</p>
+                <p className="text-sm text-red-500 mt-2">Please enter a valid email address</p>
               )}
             </div>
             <DialogFooter>
