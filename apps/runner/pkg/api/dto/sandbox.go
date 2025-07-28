@@ -26,3 +26,8 @@ type ResizeSandboxDTO struct {
 	Gpu    int64 `json:"gpu" validate:"min=0"`
 	Memory int64 `json:"memory" validate:"min=1"`
 } //	@name	ResizeSandboxDTO
+
+type UpdateNetworkSettingsDTO struct {
+	NetworkAllowAll  bool   `json:"networkAllowAll,omitempty"`
+	NetworkAllowList string `json:"networkAllowList,omitempty"`
+} //	@name	UpdateNetworkSettingsDTO
