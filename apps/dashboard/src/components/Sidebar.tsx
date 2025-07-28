@@ -310,7 +310,7 @@ export function Sidebar({ isBannerVisible }: SidebarProps) {
                     className="w-full cursor-pointer justify-start"
                     onClick={() => navigate(RoutePath.ACCOUNT_SETTINGS)}
                   >
-                    <Link2 className="w-4 h-4" />
+                    <Settings className="w-4 h-4" />
                     Account Settings
                   </Button>
                 </DropdownMenuItem>
