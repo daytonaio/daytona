@@ -10,11 +10,11 @@ import { useAuth } from 'react-oidc-context'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { CodeLanguage, SAMPLES } from '@/playground-samples'
 
-// const files = import.meta.glob('../../../../node_modules/@daytonaio/sdk/dist/**/*.d.ts', {
-//   eager: true,
-//   query: '?raw',
-//   import: 'default',
-// })
+const files = import.meta.glob('../../../../dist/libs/sdk-typescript/**/*.d.ts', {
+  eager: true,
+  query: '?raw',
+  import: 'default',
+})
 
 const Playground: React.FC = () => {
   const [language, setLanguage] = useState<CodeLanguage>(CodeLanguage.TypeScript)
@@ -186,13 +186,13 @@ const Playground: React.FC = () => {
               <div className="h-[400px] rounded-md overflow-hidden">
                 <Editor
                   onMount={(editor, monaco) => {
-                    const mergedContext = ''
+                    let mergedContext = ''
 
-                    // Object.entries(files).forEach(async ([key, value]) => {
-                    //   // remove the import lines so all the definitions are in the same file
-                    //   const content = (value as string).replace(/^import .*;$/gm, '')
-                    //   mergedContext += content
-                    // })
+                    Object.entries(files).forEach(async ([key, value]) => {
+                      // remove the import lines so all the definitions are in the same file
+                      const content = (value as string).replace(/^import .*;$/gm, '')
+                      mergedContext += content
+                    })
 
                     monaco.languages.typescript.typescriptDefaults.addExtraLib(
                       `declare module '@daytonaio/sdk' {

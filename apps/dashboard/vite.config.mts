@@ -36,11 +36,11 @@ export default defineConfig((mode) => ({
     nxCopyAssetsPlugin(['*.md']),
     // enforce typechecking for build mode
     mode.command === 'build' &&
-      checker({
-        typescript: {
-          tsconfigPath: './tsconfig.app.json',
-        },
-      }),
+    checker({
+      typescript: {
+        tsconfigPath: './tsconfig.app.json',
+      },
+    }),
   ],
   resolve: {
     alias: [
@@ -62,10 +62,10 @@ export default defineConfig((mode) => ({
   //  plugins: [ nxViteTsPaths() ],
   // },
   define: {
-    'process.version': JSON.stringify('v22.11.0'),
-    'process.versions.node': JSON.stringify(process.versions.node),
-    'process.env': {},
-    'process.binding': () => ({}),
+    // 'process.version': JSON.stringify('v22.11.0'),
+    // 'process.versions.node': JSON.stringify(process.versions.node),
+    // 'process.env': {},
+    // 'process.binding': () => ({}),
   },
   build: {
     outDir: '../../dist/apps/dashboard',
