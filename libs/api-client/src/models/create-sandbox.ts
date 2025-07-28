@@ -62,7 +62,7 @@ export interface CreateSandbox {
    */
   networkAllowAll?: boolean
   /**
-   * Comma-separated list of allowed network addresses for the sandbox
+   * Comma-separated list of allowed network addresses for the sandbox (only /24 CIDR blocks allowed)
    * @type {string}
    * @memberof CreateSandbox
    */

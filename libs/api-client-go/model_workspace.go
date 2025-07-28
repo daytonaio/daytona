@@ -38,7 +38,7 @@ type Workspace struct {
 	Public bool `json:"public"`
 	// Whether to allow all network access for the sandbox
 	NetworkAllowAll bool `json:"networkAllowAll"`
-	// Comma-separated list of allowed network addresses for the sandbox
+	// Comma-separated list of allowed network addresses for the sandbox (only /24 CIDR blocks allowed)
 	NetworkAllowList *string `json:"networkAllowList,omitempty"`
 	// The target environment for the sandbox
 	Target string `json:"target"`

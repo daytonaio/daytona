@@ -82,8 +82,8 @@ export class SandboxDto {
   networkAllowAll: boolean
 
   @ApiPropertyOptional({
-    description: 'Comma-separated list of allowed network addresses for the sandbox',
-    example: '192.168.1.0/24,10.0.0.0/8',
+    description: 'Comma-separated list of allowed network addresses for the sandbox (only /24 CIDR blocks allowed)',
+    example: '192.168.1.0/24,10.0.0.0/24',
   })
   networkAllowList?: string
 
