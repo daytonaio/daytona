@@ -95,7 +95,7 @@ export function TierTable({
                     <div className={cn(topUpChecked ? 'text-green-500' : undefined)}>
                       <TierRequirementItem
                         checked={topUpChecked}
-                        label={`Top-Up ${getDollarAmount(tier.minTopUpAmountCents)}${tier.topUpIntervalDays ? ` (every ${tier.topUpIntervalDays} days)` : ''}`}
+                        label={`Top up ${getDollarAmount(tier.minTopUpAmountCents)}${tier.topUpIntervalDays ? ` (every ${tier.topUpIntervalDays} days)` : ''}`}
                         link={RoutePath.BILLING_WALLET}
                       />
                       {!!tier.topUpIntervalDays && (

@@ -308,7 +308,7 @@ const Wallet = () => {
                       <a href={billingPortalUrl ?? ''} target="_blank" rel="noopener noreferrer">
                         <Button variant="secondary" size="icon" className="w-full">
                           <ArrowUpRight className="w-20 h-20" />
-                          Top Up
+                          Top up
                         </Button>
                       </a>
                       <Button
@@ -333,7 +333,7 @@ const Wallet = () => {
                 label={
                   <CardTitle className="flex items-center gap-2">
                     <Info className="w-4 h-4" />
-                    Automatic Top Up
+                    Automatic Top up
                   </CardTitle>
                 }
                 side="bottom"
@@ -348,7 +348,7 @@ const Wallet = () => {
                       automatically topped up. The target must always be greater than the threshold by{' '}
                       <strong>at least $10</strong>.
                     </div>
-                    <div>Setting both values to 0 will disable automatic top ups.</div>
+                    <div>Setting both values to 0 will disable automatic top-ups.</div>
                   </div>
                 }
               />
