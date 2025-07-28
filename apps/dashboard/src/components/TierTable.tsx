@@ -329,7 +329,7 @@ function AdditionalTierRequirements({ tier, ...props }: AdditionalTierRequiremen
           label="Business email verified"
           link={RoutePath.BILLING_WALLET}
         />
-        <TierRequirementItem checked={props.phoneVerified} label="Phone verified" />
+        <TierRequirementItem checked={props.phoneVerified} label="Phone verified" link={RoutePath.ACCOUNT_SETTINGS} />
       </>
     )
   }
@@ -349,7 +349,7 @@ function TierRequirementItem({ checked, label, link }: TierRequirementItemProps)
     <>
       {getIcon(checked, label)}
       {label}
-      {!checked && <ExternalLinkIcon size={16} className="inline align-text-bottom ml-1" aria-label={label} />}
+      {!checked && link && <ExternalLinkIcon size={16} className="inline align-text-bottom ml-1" aria-label={label} />}
     </>
   )
 
