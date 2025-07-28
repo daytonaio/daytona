@@ -543,6 +543,45 @@ export class SandboxController {
     await this.sandboxService.setAutoDeleteInterval(sandboxId, interval)
   }
 
+  // TODO: Network settings endpoint will not be enabled for now
+  // @Post(':sandboxId/network-settings')
+  // @ApiOperation({
+  //   summary: 'Update sandbox network settings',
+  //   operationId: 'updateNetworkSettings',
+  // })
+  // @ApiParam({
+  //   name: 'sandboxId',
+  //   description: 'ID of the sandbox',
+  //   type: 'string',
+  // })
+  // @ApiResponse({
+  //   status: 200,
+  //   description: 'Network settings have been updated',
+  // })
+  // @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
+  // @UseGuards(SandboxAccessGuard)
+  // @Audit({
+  //   action: AuditAction.UPDATE_NETWORK_SETTINGS,
+  //   targetType: AuditTarget.SANDBOX,
+  //   targetIdFromRequest: (req) => req.params.sandboxId,
+  //   requestMetadata: {
+  //     body: (req: TypedRequest<{ networkAllowAll?: boolean; networkAllowList?: string }>) => ({
+  //       networkAllowAll: req.body?.networkAllowAll,
+  //       networkAllowList: req.body?.networkAllowList,
+  //     }),
+  //   },
+  // })
+  // async updateNetworkSettings(
+  //   @Param('sandboxId') sandboxId: string,
+  //   @Body() networkSettings: { networkAllowAll?: boolean; networkAllowList?: string },
+  // ): Promise<void> {
+  //   await this.sandboxService.updateNetworkSettings(
+  //     sandboxId,
+  //     networkSettings.networkAllowAll,
+  //     networkSettings.networkAllowList,
+  //   )
+  // }
+
   @Post(':sandboxId/archive')
   @HttpCode(200)
   @ApiOperation({

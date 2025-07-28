@@ -43,6 +43,7 @@ import { TypedConfigService } from '../../config/typed-config.service'
 import { WarmPool } from '../entities/warm-pool.entity'
 import { SandboxDto } from '../dto/sandbox.dto'
 import { isValidUuid } from '../../common/utils/uuid'
+import { RunnerAdapterFactory } from '../runner-adapter/runnerAdapter'
 
 const DEFAULT_CPU = 1
 const DEFAULT_MEMORY = 1
@@ -67,6 +68,7 @@ export class SandboxService {
     private readonly warmPoolService: SandboxWarmPoolService,
     private readonly eventEmitter: EventEmitter2,
     private readonly organizationService: OrganizationService,
+    private readonly runnerAdapterFactory: RunnerAdapterFactory,
   ) {}
 
   private async validateOrganizationQuotas(
@@ -772,6 +774,35 @@ export class SandboxService {
 
     sandbox.autoDeleteInterval = interval
     await this.sandboxRepository.save(sandbox)
+  }
+
+  async updateNetworkSettings(sandboxId: string, networkAllowAll?: boolean, networkAllowList?: string): Promise<void> {
+    const sandbox = await this.sandboxRepository.findOne({
+      where: { id: sandboxId },
+    })
+
+    if (!sandbox) {
+      throw new NotFoundException(`Sandbox with ID ${sandboxId} not found`)
+    }
+
+    if (networkAllowAll !== undefined) {
+      sandbox.networkAllowAll = networkAllowAll
+    }
+
+    if (networkAllowList !== undefined) {
+      sandbox.networkAllowList = networkAllowList
+    }
+
+    await this.sandboxRepository.save(sandbox)
+
+    // Update network settings on the runner
+    if (sandbox.runnerId) {
+      const runner = await this.runnerService.findOne(sandbox.runnerId)
+      if (runner) {
+        const runnerAdapter = await this.runnerAdapterFactory.create(runner)
+        await runnerAdapter.updateNetworkSettings(sandboxId, networkAllowAll, networkAllowList)
+      }
+    }
   }
 
   @OnEvent(WarmPoolEvents.TOPUP_REQUESTED)

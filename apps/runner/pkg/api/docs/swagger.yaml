@@ -178,6 +178,13 @@ definitions:
         example: true
         type: boolean
     type: object
+  UpdateNetworkSettingsDTO:
+    properties:
+      networkAllowAll:
+        type: boolean
+      networkAllowList:
+        type: string
+    type: object
   dto.VolumeDTO:
     properties:
       mountPath:
@@ -463,6 +470,91 @@ paths:
           schema:
             $ref: '#/definitions/ErrorResponse'
       summary: Destroy sandbox
+      tags:
+        - sandbox
+  /sandboxes/{sandboxId}/network-settings:
+    get:
+      description: Get sandbox network settings
+      operationId: GetNetworkSettings
+      parameters:
+        - description: Sandbox ID
+          in: path
+          name: sandboxId
+          required: true
+          type: string
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: Network settings
+          schema:
+            $ref: '#/definitions/UpdateNetworkSettingsDTO'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '409':
+          description: Conflict
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Get sandbox network settings
+      tags:
+        - sandbox
+    post:
+      description: Update sandbox network settings
+      operationId: UpdateNetworkSettings
+      parameters:
+        - description: Sandbox ID
+          in: path
+          name: sandboxId
+          required: true
+          type: string
+        - description: Update network settings
+          in: body
+          name: sandbox
+          required: true
+          schema:
+            $ref: '#/definitions/UpdateNetworkSettingsDTO'
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: Network settings updated
+          schema:
+            type: string
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '409':
+          description: Conflict
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Update sandbox network settings
       tags:
         - sandbox
   /sandboxes/{sandboxId}/resize:

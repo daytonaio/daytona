@@ -164,6 +164,79 @@ func Resize(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, "Sandbox resized")
 }
 
+// UpdateNetworkSettings godoc
+//
+//	@Tags			sandbox
+//	@Summary		Update sandbox network settings
+//	@Description	Update sandbox network settings
+//	@Produce		json
+//	@Param			sandboxId	path		string							true	"Sandbox ID"
+//	@Param			sandbox		body		dto.UpdateNetworkSettingsDTO	true	"Update network settings"
+//	@Success		200			{string}	string							"Network settings updated"
+//	@Failure		400			{object}	common.ErrorResponse
+//	@Failure		401			{object}	common.ErrorResponse
+//	@Failure		404			{object}	common.ErrorResponse
+//	@Failure		409			{object}	common.ErrorResponse
+//	@Failure		500			{object}	common.ErrorResponse
+//	@Router			/sandboxes/{sandboxId}/network-settings [post]
+//
+//	@id				UpdateNetworkSettings
+func UpdateNetworkSettings(ctx *gin.Context) {
+	var updateNetworkSettingsDto dto.UpdateNetworkSettingsDTO
+	err := ctx.ShouldBindJSON(&updateNetworkSettingsDto)
+	if err != nil {
+		ctx.Error(common.NewInvalidBodyRequestError(err))
+		return
+	}
+
+	// TODO: Implement UpdateNetworkSettings in Docker client
+	// sandboxId := ctx.Param("sandboxId")
+	// runner := runner.GetInstance(nil)
+	// err = runner.Docker.UpdateNetworkSettings(ctx.Request.Context(), sandboxId, updateNetworkSettingsDto)
+	// if err != nil {
+	// 	runner.Cache.SetSandboxState(ctx, sandboxId, enums.SandboxStateError)
+	// 	ctx.Error(err)
+	// 	return
+	// }
+
+	ctx.JSON(http.StatusOK, "Network settings updated")
+}
+
+// GetNetworkSettings godoc
+//
+//	@Tags			sandbox
+//	@Summary		Get sandbox network settings
+//	@Description	Get sandbox network settings
+//	@Produce		json
+//	@Param			sandboxId	path		string							true	"Sandbox ID"
+//	@Success		200			{object}	dto.UpdateNetworkSettingsDTO	"Network settings"
+//	@Failure		400			{object}	common.ErrorResponse
+//	@Failure		401			{object}	common.ErrorResponse
+//	@Failure		404			{object}	common.ErrorResponse
+//	@Failure		409			{object}	common.ErrorResponse
+//	@Failure		500			{object}	common.ErrorResponse
+//	@Router			/sandboxes/{sandboxId}/network-settings [get]
+//
+//	@id				GetNetworkSettings
+func GetNetworkSettings(ctx *gin.Context) {
+	// TODO: Implement GetNetworkSettings in Docker client
+	// sandboxId := ctx.Param("sandboxId")
+	// runner := runner.GetInstance(nil)
+	// networkSettings, err := runner.Docker.GetNetworkSettings(ctx.Request.Context(), sandboxId)
+	// if err != nil {
+	// 	ctx.Error(err)
+	// 	return
+	// }
+
+	// For now, return empty settings
+	networkSettings := dto.UpdateNetworkSettingsDTO{
+		NetworkAllowAll:  false,
+		NetworkAllowList: "",
+	}
+
+	ctx.JSON(http.StatusOK, networkSettings)
+}
+
 // Start 			godoc
 //
 //	@Tags			sandbox

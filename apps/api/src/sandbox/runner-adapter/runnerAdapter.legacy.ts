@@ -279,4 +279,13 @@ export class RunnerAdapterLegacy implements RunnerAdapter {
 
     return (getVersionResponse.data as any).version
   }
+
+  async updateNetworkSettings(sandboxId: string, networkAllowAll?: boolean, networkAllowList?: string): Promise<void> {
+    const updateNetworkSettingsDto = {
+      networkAllowAll: networkAllowAll,
+      networkAllowList: networkAllowList,
+    }
+
+    await this.sandboxApiClient.updateNetworkSettings(sandboxId, updateNetworkSettingsDto)
+  }
 }

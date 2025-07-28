@@ -331,6 +331,125 @@
         }
       }
     },
+    "/sandboxes/{sandboxId}/network-settings": {
+      "get": {
+        "description": "Get sandbox network settings",
+        "produces": ["application/json"],
+        "tags": ["sandbox"],
+        "summary": "Get sandbox network settings",
+        "operationId": "GetNetworkSettings",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Sandbox ID",
+            "name": "sandboxId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Network settings",
+            "schema": {
+              "$ref": "#/definitions/UpdateNetworkSettingsDTO"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      },
+      "post": {
+        "description": "Update sandbox network settings",
+        "produces": ["application/json"],
+        "tags": ["sandbox"],
+        "summary": "Update sandbox network settings",
+        "operationId": "UpdateNetworkSettings",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Sandbox ID",
+            "name": "sandboxId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "description": "Update network settings",
+            "name": "sandbox",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UpdateNetworkSettingsDTO"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Network settings updated",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      }
+    },
     "/sandboxes/{sandboxId}/resize": {
       "post": {
         "description": "Resize sandbox",
@@ -1197,6 +1316,17 @@
         "exists": {
           "type": "boolean",
           "example": true
+        }
+      }
+    },
+    "UpdateNetworkSettingsDTO": {
+      "type": "object",
+      "properties": {
+        "networkAllowAll": {
+          "type": "boolean"
+        },
+        "networkAllowList": {
+          "type": "string"
         }
       }
     },
