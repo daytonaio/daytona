@@ -25,6 +25,7 @@ import { OrganizationInvitationStatus } from '../enums/organization-invitation-s
 import { OrganizationInvitationAcceptedEvent } from '../events/organization-invitation-accepted.event'
 import { OrganizationInvitationCreatedEvent } from '../events/organization-invitation-created.event'
 import { UserService } from '../../user/user.service'
+import { EmailUtils } from '../../common/utils/email.util'
 
 @Injectable()
 export class OrganizationInvitationService {
@@ -53,34 +54,32 @@ export class OrganizationInvitationService {
       throw new ForbiddenException('Cannot invite users to personal organization')
     }
 
-    const existingUser = await this.userService.findOneByEmail(createOrganizationInvitationDto.email)
+    const normalizedEmail = EmailUtils.normalize(createOrganizationInvitationDto.email)
+
+    const existingUser = await this.userService.findOneByEmail(normalizedEmail, true)
     if (existingUser) {
       const organizationUser = await this.organizationUserService.findOne(organizationId, existingUser.id)
       if (organizationUser) {
-        throw new ConflictException(
-          `User with email ${createOrganizationInvitationDto.email} is already associated with this organization`,
-        )
+        throw new ConflictException(`User with email ${normalizedEmail} is already associated with this organization`)
       }
     }
 
     const existingInvitation = await this.organizationInvitationRepository.findOne({
       where: {
         organizationId,
-        email: createOrganizationInvitationDto.email,
+        email: normalizedEmail,
         status: OrganizationInvitationStatus.PENDING,
         expiresAt: MoreThan(new Date()),
       },
     })
     if (existingInvitation) {
-      throw new ConflictException(
-        `User with email "${createOrganizationInvitationDto.email}" already invited to this organization`,
-      )
+      throw new ConflictException(`User with email "${normalizedEmail}" already invited to this organization`)
     }
 
     let invitation = new OrganizationInvitation()
     invitation.organizationId = organizationId
     invitation.organization = organization
-    invitation.email = createOrganizationInvitationDto.email
+    invitation.email = normalizedEmail
     invitation.expiresAt = createOrganizationInvitationDto.expiresAt || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
     invitation.role = createOrganizationInvitationDto.role
     invitation.invitedBy = invitedBy
@@ -168,7 +167,7 @@ export class OrganizationInvitationService {
 
     return this.organizationInvitationRepository.find({
       where: {
-        email: user.email,
+        email: EmailUtils.normalize(user.email),
         status: OrganizationInvitationStatus.PENDING,
         expiresAt: MoreThan(new Date()),
       },
@@ -188,7 +187,7 @@ export class OrganizationInvitationService {
 
     return this.organizationInvitationRepository.count({
       where: {
-        email: user.email,
+        email: EmailUtils.normalize(user.email),
         status: OrganizationInvitationStatus.PENDING,
         expiresAt: MoreThan(new Date()),
       },
