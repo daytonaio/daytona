@@ -56,6 +56,18 @@ export interface CreateSandbox {
    */
   public?: boolean
   /**
+   * Whether to allow all network access for the sandbox
+   * @type {boolean}
+   * @memberof CreateSandbox
+   */
+  networkAllowAll?: boolean
+  /**
+   * Comma-separated list of allowed network addresses for the sandbox
+   * @type {string}
+   * @memberof CreateSandbox
+   */
+  networkAllowList?: string
+  /**
    * The sandbox class type
    * @type {string}
    * @memberof CreateSandbox

@@ -53,6 +53,10 @@ definitions:
       memoryQuota:
         minimum: 1
         type: integer
+      networkAllowAll:
+        type: boolean
+      networkAllowList:
+        type: string
       osUser:
         type: string
       registry:

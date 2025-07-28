@@ -77,6 +77,18 @@ export interface Workspace {
    */
   public: boolean
   /**
+   * Whether to allow all network access for the sandbox
+   * @type {boolean}
+   * @memberof Workspace
+   */
+  networkAllowAll: boolean
+  /**
+   * Comma-separated list of allowed network addresses for the sandbox
+   * @type {string}
+   * @memberof Workspace
+   */
+  networkAllowList?: string
+  /**
    * The target environment for the sandbox
    * @type {string}
    * @memberof Workspace

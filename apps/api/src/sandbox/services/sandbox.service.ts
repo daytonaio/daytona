@@ -322,6 +322,10 @@ export class SandboxService {
 
     sandbox.public = createSandboxDto.public || false
 
+    sandbox.networkAllowAll = createSandboxDto.networkAllowAll || false
+
+    sandbox.networkAllowList = createSandboxDto.networkAllowList
+
     if (createSandboxDto.autoStopInterval !== undefined) {
       sandbox.autoStopInterval = this.resolveAutoStopInterval(createSandboxDto.autoStopInterval)
     }
@@ -346,6 +350,8 @@ export class SandboxService {
     organizationId: string,
   ): Promise<SandboxDto> {
     warmPoolSandbox.public = createSandboxDto.public || false
+    warmPoolSandbox.networkAllowAll = createSandboxDto.networkAllowAll || false
+    warmPoolSandbox.networkAllowList = createSandboxDto.networkAllowList
     warmPoolSandbox.labels = createSandboxDto.labels || {}
     warmPoolSandbox.organizationId = organizationId
     warmPoolSandbox.createdAt = new Date()
@@ -405,6 +411,10 @@ export class SandboxService {
     sandbox.mem = mem
     sandbox.disk = disk
     sandbox.public = createSandboxDto.public || false
+
+    sandbox.networkAllowAll = createSandboxDto.networkAllowAll || false
+
+    sandbox.networkAllowList = createSandboxDto.networkAllowList
 
     if (createSandboxDto.autoStopInterval !== undefined) {
       sandbox.autoStopInterval = this.resolveAutoStopInterval(createSandboxDto.autoStopInterval)

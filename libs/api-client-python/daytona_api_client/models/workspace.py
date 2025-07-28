@@ -39,6 +39,8 @@ class Workspace(BaseModel):
     env: Dict[str, StrictStr] = Field(description="Environment variables for the sandbox")
     labels: Dict[str, StrictStr] = Field(description="Labels for the sandbox")
     public: StrictBool = Field(description="Whether the sandbox http preview is public")
+    network_allow_all: StrictBool = Field(description="Whether to allow all network access for the sandbox", alias="networkAllowAll")
+    network_allow_list: Optional[StrictStr] = Field(default=None, description="Comma-separated list of allowed network addresses for the sandbox", alias="networkAllowList")
     target: StrictStr = Field(description="The target environment for the sandbox")
     cpu: Union[StrictFloat, StrictInt] = Field(description="The CPU quota for the sandbox")
     gpu: Union[StrictFloat, StrictInt] = Field(description="The GPU quota for the sandbox")
@@ -65,7 +67,7 @@ class Workspace(BaseModel):
     snapshot_created_at: Optional[StrictStr] = Field(default=None, description="The creation timestamp of the last snapshot", alias="snapshotCreatedAt")
     info: Optional[SandboxInfo] = Field(default=None, description="Additional information about the sandbox")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["id", "organizationId", "snapshot", "user", "env", "labels", "public", "target", "cpu", "gpu", "memory", "disk", "state", "desiredState", "errorReason", "backupState", "backupCreatedAt", "autoStopInterval", "autoArchiveInterval", "autoDeleteInterval", "runnerDomain", "volumes", "buildInfo", "createdAt", "updatedAt", "class", "daemonVersion", "name", "image", "snapshotState", "snapshotCreatedAt", "info"]
+    __properties: ClassVar[List[str]] = ["id", "organizationId", "snapshot", "user", "env", "labels", "public", "networkAllowAll", "networkAllowList", "target", "cpu", "gpu", "memory", "disk", "state", "desiredState", "errorReason", "backupState", "backupCreatedAt", "autoStopInterval", "autoArchiveInterval", "autoDeleteInterval", "runnerDomain", "volumes", "buildInfo", "createdAt", "updatedAt", "class", "daemonVersion", "name", "image", "snapshotState", "snapshotCreatedAt", "info"]
 
     @field_validator('backup_state')
     def backup_state_validate_enum(cls, value):
@@ -175,6 +177,8 @@ class Workspace(BaseModel):
             "env": obj.get("env"),
             "labels": obj.get("labels"),
             "public": obj.get("public"),
+            "networkAllowAll": obj.get("networkAllowAll"),
+            "networkAllowList": obj.get("networkAllowList"),
             "target": obj.get("target"),
             "cpu": obj.get("cpu"),
             "gpu": obj.get("gpu"),

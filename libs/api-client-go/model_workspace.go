@@ -36,6 +36,10 @@ type Workspace struct {
 	Labels map[string]string `json:"labels"`
 	// Whether the sandbox http preview is public
 	Public bool `json:"public"`
+	// Whether to allow all network access for the sandbox
+	NetworkAllowAll bool `json:"networkAllowAll"`
+	// Comma-separated list of allowed network addresses for the sandbox
+	NetworkAllowList *string `json:"networkAllowList,omitempty"`
 	// The target environment for the sandbox
 	Target string `json:"target"`
 	// The CPU quota for the sandbox
@@ -95,7 +99,7 @@ type _Workspace Workspace
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewWorkspace(id string, organizationId string, user string, env map[string]string, labels map[string]string, public bool, target string, cpu float32, gpu float32, memory float32, disk float32, name string) *Workspace {
+func NewWorkspace(id string, organizationId string, user string, env map[string]string, labels map[string]string, public bool, networkAllowAll bool, target string, cpu float32, gpu float32, memory float32, disk float32, name string) *Workspace {
 	this := Workspace{}
 	this.Id = id
 	this.OrganizationId = organizationId
@@ -103,6 +107,7 @@ func NewWorkspace(id string, organizationId string, user string, env map[string]
 	this.Env = env
 	this.Labels = labels
 	this.Public = public
+	this.NetworkAllowAll = networkAllowAll
 	this.Target = target
 	this.Cpu = cpu
 	this.Gpu = gpu
@@ -296,6 +301,62 @@ func (o *Workspace) GetPublicOk() (*bool, bool) {
 // SetPublic sets field value
 func (o *Workspace) SetPublic(v bool) {
 	o.Public = v
+}
+
+// GetNetworkAllowAll returns the NetworkAllowAll field value
+func (o *Workspace) GetNetworkAllowAll() bool {
+	if o == nil {
+		var ret bool
+		return ret
+	}
+
+	return o.NetworkAllowAll
+}
+
+// GetNetworkAllowAllOk returns a tuple with the NetworkAllowAll field value
+// and a boolean to check if the value has been set.
+func (o *Workspace) GetNetworkAllowAllOk() (*bool, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.NetworkAllowAll, true
+}
+
+// SetNetworkAllowAll sets field value
+func (o *Workspace) SetNetworkAllowAll(v bool) {
+	o.NetworkAllowAll = v
+}
+
+// GetNetworkAllowList returns the NetworkAllowList field value if set, zero value otherwise.
+func (o *Workspace) GetNetworkAllowList() string {
+	if o == nil || IsNil(o.NetworkAllowList) {
+		var ret string
+		return ret
+	}
+	return *o.NetworkAllowList
+}
+
+// GetNetworkAllowListOk returns a tuple with the NetworkAllowList field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Workspace) GetNetworkAllowListOk() (*string, bool) {
+	if o == nil || IsNil(o.NetworkAllowList) {
+		return nil, false
+	}
+	return o.NetworkAllowList, true
+}
+
+// HasNetworkAllowList returns a boolean if a field has been set.
+func (o *Workspace) HasNetworkAllowList() bool {
+	if o != nil && !IsNil(o.NetworkAllowList) {
+		return true
+	}
+
+	return false
+}
+
+// SetNetworkAllowList gets a reference to the given string and assigns it to the NetworkAllowList field.
+func (o *Workspace) SetNetworkAllowList(v string) {
+	o.NetworkAllowList = &v
 }
 
 // GetTarget returns the Target field value
@@ -1072,6 +1133,10 @@ func (o Workspace) ToMap() (map[string]interface{}, error) {
 	toSerialize["env"] = o.Env
 	toSerialize["labels"] = o.Labels
 	toSerialize["public"] = o.Public
+	toSerialize["networkAllowAll"] = o.NetworkAllowAll
+	if !IsNil(o.NetworkAllowList) {
+		toSerialize["networkAllowList"] = o.NetworkAllowList
+	}
 	toSerialize["target"] = o.Target
 	toSerialize["cpu"] = o.Cpu
 	toSerialize["gpu"] = o.Gpu
@@ -1149,6 +1214,7 @@ func (o *Workspace) UnmarshalJSON(data []byte) (err error) {
 		"env",
 		"labels",
 		"public",
+		"networkAllowAll",
 		"target",
 		"cpu",
 		"gpu",

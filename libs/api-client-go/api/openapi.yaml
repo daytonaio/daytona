@@ -6994,6 +6994,7 @@ components:
         class: small
         updatedAt: 2024-10-01T12:00:00Z
         desiredState: destroyed
+        networkAllowList: '192.168.1.0/24,10.0.0.0/8'
         volumes:
           - mountPath: /data
             volumeId: volume123
@@ -7009,6 +7010,7 @@ components:
           daytona.io/public: 'true'
         target: local
         disk: 10
+        networkAllowAll: false
         backupState: None
         user: daytona
         autoArchiveInterval: 10080
@@ -7048,6 +7050,14 @@ components:
           description: Whether the sandbox http preview is public
           example: false
           type: boolean
+        networkAllowAll:
+          description: Whether to allow all network access for the sandbox
+          example: false
+          type: boolean
+        networkAllowList:
+          description: Comma-separated list of allowed network addresses for the sandbox
+          example: '192.168.1.0/24,10.0.0.0/8'
+          type: string
         target:
           description: The target environment for the sandbox
           example: local
@@ -7151,6 +7161,7 @@ components:
         - id
         - labels
         - memory
+        - networkAllowAll
         - organizationId
         - public
         - target
@@ -7182,6 +7193,7 @@ components:
       example:
         memory: 1
         buildInfo: ''
+        networkAllowList: '192.168.1.0/24,10.0.0.0/8'
         volumes:
           - mountPath: /data
             volumeId: volume123
@@ -7198,6 +7210,7 @@ components:
         disk: 3
         autoDeleteInterval: 30
         public: false
+        networkAllowAll: false
         user: daytona
         class: small
         autoArchiveInterval: 10080
@@ -7229,6 +7242,14 @@ components:
           description: Whether the sandbox http preview is publicly accessible
           example: false
           type: boolean
+        networkAllowAll:
+          description: Whether to allow all network access for the sandbox
+          example: false
+          type: boolean
+        networkAllowList:
+          description: Comma-separated list of allowed network addresses for the sandbox
+          example: '192.168.1.0/24,10.0.0.0/8'
+          type: string
         class:
           description: The sandbox class type
           enum:
@@ -9090,6 +9111,7 @@ components:
         info: ''
         desiredState: destroyed
         image: daytonaio/workspace:latest
+        networkAllowList: '192.168.1.0/24,10.0.0.0/8'
         volumes:
           - mountPath: /data
             volumeId: volume123
@@ -9107,6 +9129,7 @@ components:
         target: local
         disk: 10
         name: MyWorkspace
+        networkAllowAll: false
         backupState: None
         user: daytona
         autoArchiveInterval: 10080
@@ -9146,6 +9169,14 @@ components:
           description: Whether the sandbox http preview is public
           example: false
           type: boolean
+        networkAllowAll:
+          description: Whether to allow all network access for the sandbox
+          example: false
+          type: boolean
+        networkAllowList:
+          description: Comma-separated list of allowed network addresses for the sandbox
+          example: '192.168.1.0/24,10.0.0.0/8'
+          type: string
         target:
           description: The target environment for the sandbox
           example: local
@@ -9277,6 +9308,7 @@ components:
         - labels
         - memory
         - name
+        - networkAllowAll
         - organizationId
         - public
         - target
