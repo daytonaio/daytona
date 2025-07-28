@@ -6994,7 +6994,7 @@ components:
         class: small
         updatedAt: 2024-10-01T12:00:00Z
         desiredState: destroyed
-        networkAllowList: '192.168.1.0/24,10.0.0.0/8'
+        networkAllowList: '192.168.1.0/24,10.0.0.0/24'
         volumes:
           - mountPath: /data
             volumeId: volume123
@@ -7056,7 +7056,8 @@ components:
           type: boolean
         networkAllowList:
           description: Comma-separated list of allowed network addresses for the sandbox
-          example: '192.168.1.0/24,10.0.0.0/8'
+            (only /24 CIDR blocks allowed)
+          example: '192.168.1.0/24,10.0.0.0/24'
           type: string
         target:
           description: The target environment for the sandbox
@@ -7193,7 +7194,7 @@ components:
       example:
         memory: 1
         buildInfo: ''
-        networkAllowList: '192.168.1.0/24,10.0.0.0/8'
+        networkAllowList: '192.168.1.0/24,10.0.0.0/24'
         volumes:
           - mountPath: /data
             volumeId: volume123
@@ -7248,7 +7249,8 @@ components:
           type: boolean
         networkAllowList:
           description: Comma-separated list of allowed network addresses for the sandbox
-          example: '192.168.1.0/24,10.0.0.0/8'
+            (only /24 CIDR blocks allowed)
+          example: '192.168.1.0/24,10.0.0.0/24'
           type: string
         class:
           description: The sandbox class type
@@ -9111,7 +9113,7 @@ components:
         info: ''
         desiredState: destroyed
         image: daytonaio/workspace:latest
-        networkAllowList: '192.168.1.0/24,10.0.0.0/8'
+        networkAllowList: '192.168.1.0/24,10.0.0.0/24'
         volumes:
           - mountPath: /data
             volumeId: volume123
@@ -9175,7 +9177,8 @@ components:
           type: boolean
         networkAllowList:
           description: Comma-separated list of allowed network addresses for the sandbox
-          example: '192.168.1.0/24,10.0.0.0/8'
+            (only /24 CIDR blocks allowed)
+          example: '192.168.1.0/24,10.0.0.0/24'
           type: string
         target:
           description: The target environment for the sandbox

@@ -39,7 +39,7 @@ class Sandbox(BaseModel):
     labels: Dict[str, StrictStr] = Field(description="Labels for the sandbox")
     public: StrictBool = Field(description="Whether the sandbox http preview is public")
     network_allow_all: StrictBool = Field(description="Whether to allow all network access for the sandbox", alias="networkAllowAll")
-    network_allow_list: Optional[StrictStr] = Field(default=None, description="Comma-separated list of allowed network addresses for the sandbox", alias="networkAllowList")
+    network_allow_list: Optional[StrictStr] = Field(default=None, description="Comma-separated list of allowed network addresses for the sandbox (only /24 CIDR blocks allowed)", alias="networkAllowList")
     target: StrictStr = Field(description="The target environment for the sandbox")
     cpu: Union[StrictFloat, StrictInt] = Field(description="The CPU quota for the sandbox")
     gpu: Union[StrictFloat, StrictInt] = Field(description="The GPU quota for the sandbox")

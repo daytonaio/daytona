@@ -32,7 +32,7 @@ type CreateSandbox struct {
 	Public *bool `json:"public,omitempty"`
 	// Whether to allow all network access for the sandbox
 	NetworkAllowAll *bool `json:"networkAllowAll,omitempty"`
-	// Comma-separated list of allowed network addresses for the sandbox
+	// Comma-separated list of allowed network addresses for the sandbox (only /24 CIDR blocks allowed)
 	NetworkAllowList *string `json:"networkAllowList,omitempty"`
 	// The sandbox class type
 	Class *string `json:"class,omitempty"`

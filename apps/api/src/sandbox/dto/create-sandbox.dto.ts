@@ -3,11 +3,48 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { IsEnum, IsObject, IsOptional, IsString, IsNumber, IsBoolean } from 'class-validator'
+import { IsEnum, IsObject, IsOptional, IsString, IsNumber, IsBoolean, Validate } from 'class-validator'
 import { ApiPropertyOptional, ApiSchema } from '@nestjs/swagger'
 import { SandboxClass } from '../enums/sandbox-class.enum'
 import { SandboxVolume } from './sandbox.dto'
 import { CreateBuildInfoDto } from './create-build-info.dto'
+
+// Custom validator for /24 IP blocks
+export function IsValidNetworkAllowList(validationOptions?: any) {
+  return function (object: object, propertyName: string) {
+    const validate = (value: any) => {
+      if (!value) return true // Allow empty/null values
+
+      const networks = value.split(',').map((net: string) => net.trim())
+
+      for (const network of networks) {
+        if (!network) continue // Skip empty entries
+
+        // Check if it's a valid CIDR notation with /24
+        const cidrRegex = /^(\d{1,3}\.){3}\d{1,3}\/24$/
+        if (!cidrRegex.test(network)) {
+          return false
+        }
+
+        // Validate IP address ranges
+        const ipParts = network.split('/')[0].split('.')
+        for (const part of ipParts) {
+          const num = parseInt(part, 10)
+          if (num < 0 || num > 255) {
+            return false
+          }
+        }
+      }
+
+      return true
+    }
+
+    return {
+      validate,
+      defaultMessage: 'networkAllowList must contain valid /24 CIDR blocks (e.g., "192.168.1.0/24,10.0.0.0/24")',
+    }
+  }
+}
 
 @ApiSchema({ name: 'CreateSandbox' })
 export class CreateSandboxDto {
@@ -64,11 +101,12 @@ export class CreateSandboxDto {
   networkAllowAll?: boolean
 
   @ApiPropertyOptional({
-    description: 'Comma-separated list of allowed network addresses for the sandbox',
-    example: '192.168.1.0/24,10.0.0.0/8',
+    description: 'Comma-separated list of allowed network addresses for the sandbox (only /24 CIDR blocks allowed)',
+    example: '192.168.1.0/24,10.0.0.0/24',
   })
   @IsOptional()
   @IsString()
+  @Validate(IsValidNetworkAllowList)
   networkAllowList?: string
 
   @ApiPropertyOptional({
