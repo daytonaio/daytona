@@ -102,6 +102,7 @@ export function TierTable({
                         <div className="basis-full ml-6">
                           {organizationTier &&
                             organizationTier.largestSuccessfulPaymentDate &&
+                            organizationTier.largestSuccessfulPaymentCents >= tier.minTopUpAmountCents &&
                             ` (latest top-up: ${organizationTier.largestSuccessfulPaymentDate.toLocaleDateString(
                               'en-US',
                               {
