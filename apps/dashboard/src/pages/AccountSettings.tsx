@@ -13,7 +13,7 @@ import { Loader2 } from 'lucide-react'
 
 const AccountSettings: React.FC = () => {
   const { userApi } = useApi()
-  const { user } = useAuth()
+  const { user, signinSilent } = useAuth()
 
   const [enrollInSmsMfaLoading, setEnrollInSmsMfaLoading] = useState(false)
 
@@ -21,13 +21,23 @@ const AccountSettings: React.FC = () => {
     try {
       setEnrollInSmsMfaLoading(true)
       const response = await userApi.enrollInSmsMfa()
-      window.open(response.data, '_blank')
+      const popup = window.open(response.data, '_blank', 'width=500,height=700,scrollbars=yes,resizable=yes')
+      if (popup) {
+        const checkClosed = setInterval(() => {
+          if (popup.closed) {
+            clearInterval(checkClosed)
+            signinSilent().catch((error) => {
+              handleApiError(error, 'Failed to refresh user data. Please sign out and sign in again.')
+            })
+          }
+        }, 100)
+      }
     } catch (error) {
       handleApiError(error, 'Failed to enroll in SMS MFA')
     } finally {
       setEnrollInSmsMfaLoading(false)
     }
-  }, [userApi])
+  }, [userApi, signinSilent])
 
   return (
     <div className="p-6">
