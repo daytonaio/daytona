@@ -94,7 +94,11 @@ export function TierTable({
                       <TierRequirementItem
                         checked={
                           !!organizationTier &&
-                          organizationTier.largestSuccessfulPaymentCents >= tier.minTopUpAmountCents
+                          organizationTier.largestSuccessfulPaymentCents >= tier.minTopUpAmountCents &&
+                          (!tier.topUpIntervalDays ||
+                            (!!organizationTier.largestSuccessfulPaymentDate &&
+                              organizationTier.largestSuccessfulPaymentDate.getTime() >
+                                Date.now() - 1000 * 60 * 60 * 24 * tier.topUpIntervalDays))
                         }
                         label={`Top-Up ${getDollarAmount(tier.minTopUpAmountCents)}${tier.topUpIntervalDays ? ` (every ${tier.topUpIntervalDays} days)` : ''}`}
                       />
