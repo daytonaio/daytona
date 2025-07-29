@@ -20,7 +20,7 @@ func CloneRepository(c *gin.Context) {
 		return
 	}
 
-	branch := "main"
+	branch := ""
 	if req.Branch != nil {
 		branch = *req.Branch
 	}
