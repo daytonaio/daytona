@@ -44,6 +44,7 @@ import { WarmPool } from '../entities/warm-pool.entity'
 import { SandboxDto } from '../dto/sandbox.dto'
 import { isValidUuid } from '../../common/utils/uuid'
 import { RunnerAdapterFactory } from '../runner-adapter/runnerAdapter'
+import { validateNetworkAllowList } from '../utils/network-validation.util'
 
 const DEFAULT_CPU = 1
 const DEFAULT_MEMORY = 1
@@ -806,7 +807,10 @@ export class SandboxService {
 
     // Validate networkAllowList if provided
     if (networkAllowList !== undefined) {
-      this.validateNetworkAllowList(networkAllowList)
+      const validationError = validateNetworkAllowList(networkAllowList)
+      if (validationError) {
+        throw new BadRequestError(validationError)
+      }
     }
 
     if (networkAllowAll !== undefined) {
@@ -825,33 +829,6 @@ export class SandboxService {
       if (runner) {
         const runnerAdapter = await this.runnerAdapterFactory.create(runner)
         await runnerAdapter.updateNetworkSettings(sandboxId, networkAllowAll, networkAllowList)
-      }
-    }
-  }
-
-  private validateNetworkAllowList(networkAllowList: string): void {
-    if (!networkAllowList) return // Allow empty values
-
-    const networks = networkAllowList.split(',').map((net: string) => net.trim())
-
-    for (const network of networks) {
-      if (!network) continue // Skip empty entries
-
-      // Check if it's a valid CIDR notation with /24
-      const cidrRegex = /^(\d{1,3}\.){3}\d{1,3}\/24$/
-      if (!cidrRegex.test(network)) {
-        throw new BadRequestError(
-          `Invalid network format: ${network}. Only /24 CIDR blocks are allowed (e.g., "192.168.1.0/24")`,
-        )
-      }
-
-      // Validate IP address ranges
-      const ipParts = network.split('/')[0].split('.')
-      for (const part of ipParts) {
-        const num = parseInt(part, 10)
-        if (num < 0 || num > 255) {
-          throw new BadRequestError(`Invalid IP address in network: ${network}`)
-        }
       }
     }
   }

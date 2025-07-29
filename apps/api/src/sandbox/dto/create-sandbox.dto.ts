@@ -8,35 +8,14 @@ import { ApiPropertyOptional, ApiSchema } from '@nestjs/swagger'
 import { SandboxClass } from '../enums/sandbox-class.enum'
 import { SandboxVolume } from './sandbox.dto'
 import { CreateBuildInfoDto } from './create-build-info.dto'
+import { validateNetworkAllowList } from '../utils/network-validation.util'
 
 // Custom validator for /24 IP blocks
 export function IsValidNetworkAllowList(validationOptions?: any) {
   return function (object: object, propertyName: string) {
     const validate = (value: any) => {
       if (!value) return true // Allow empty/null values
-
-      const networks = value.split(',').map((net: string) => net.trim())
-
-      for (const network of networks) {
-        if (!network) continue // Skip empty entries
-
-        // Check if it's a valid CIDR notation with /24
-        const cidrRegex = /^(\d{1,3}\.){3}\d{1,3}\/24$/
-        if (!cidrRegex.test(network)) {
-          return false
-        }
-
-        // Validate IP address ranges
-        const ipParts = network.split('/')[0].split('.')
-        for (const part of ipParts) {
-          const num = parseInt(part, 10)
-          if (num < 0 || num > 255) {
-            return false
-          }
-        }
-      }
-
-      return true
+      return validateNetworkAllowList(value) === null
     }
 
     return {
