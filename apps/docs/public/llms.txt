@@ -1,5 +1,5 @@
 # Daytona Documentation v0.0.0-dev
-# Generated on: 2025-07-23
+# Generated on: 2025-07-25
 
 # Daytona
 
@@ -52,6 +52,7 @@
 - [Preview Your App](https://daytona.io/docs/getting-started#preview-your-app)
 - [Connect to an LLM](https://daytona.io/docs/getting-started#connect-to-an-llm)
 - [Additional Examples](https://daytona.io/docs/getting-started#additional-examples)
+- [Daytona in Vite Projects](https://daytona.io/docs/getting-started#daytona-in-vite-projects)
 - [Setting up the Daytona CLI](https://daytona.io/docs/getting-started#setting-up-the-daytona-cli)
 - [Git Operations](https://daytona.io/docs/git-operations)
 - [Basic Operations](https://daytona.io/docs/git-operations#basic-operations)

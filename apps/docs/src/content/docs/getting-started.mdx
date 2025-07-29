@@ -403,6 +403,27 @@ Speed up your development on Daytona using LLMs. Copy the /llms.txt files and in
 
 Learn more by checking out the Daytona SDK repository on [GitHub](https://github.com/daytonaio/daytona).
 
+## Daytona in Vite Projects
+
+When using Daytona SDK in a Vite-based project, you need to configure node polyfills to ensure compatibility. Add the following configuration to your `vite.config.ts` file in the plugins array:
+
+```typescript
+import { nodePolyfills } from 'vite-plugin-node-polyfills'
+
+export default defineConfig({
+  plugins: [
+    // ... other plugins
+    nodePolyfills({
+      globals: { global: true, process: true, Buffer: true },
+      overrides: {
+        path: 'path-browserify-win32',
+      },
+    }),
+  ],
+  // ... rest of your config
+})
+```
+
 ## Setting up the Daytona CLI
 
 If you want to use [images from your local device](/docs/snapshots#using-a-local-image) or simply prefer managing your Sandboxes using the command line interface, install the Daytona CLI by running:
