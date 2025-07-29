@@ -15,6 +15,10 @@ import { Organization } from '../../organization/entities/organization.entity'
 import { OnEvent } from '@nestjs/event-emitter'
 import { SandboxEvents } from '../constants/sandbox-events.constants'
 import { SandboxCreatedEvent } from '../events/sandbox-create.event'
+import { OrganizationService } from '../../organization/services/organization.service'
+import { InjectRedis } from '@nestjs-modules/ioredis'
+import Redis from 'ioredis'
+import { OrganizationUsageService } from '../../organization/services/organization-usage.service'
 
 @Injectable()
 export class VolumeService {
@@ -23,15 +27,29 @@ export class VolumeService {
   constructor(
     @InjectRepository(Volume)
     private readonly volumeRepository: Repository<Volume>,
+    private readonly organizationService: OrganizationService,
+    private readonly organizationUsageService: OrganizationUsageService,
+    @InjectRedis() private readonly redis: Redis,
   ) {}
 
-  async create(organization: Organization, createVolumeDto: CreateVolumeDto): Promise<Volume> {
-    // Validate quota
-    const activeVolumeCount = await this.countActive(organization.id)
+  private async validateOrganizationQuotas(organization: Organization): Promise<void> {
+    // validate usage quotas
+    // use optimistic quota guards to protect against race condition to prevent quota abuse (not 100% correct when close to quota limits)
+    const usageOverview = await this.organizationUsageService.getVolumeUsageOverview(organization.id)
 
-    if (activeVolumeCount >= organization.volumeQuota) {
-      throw new ForbiddenException(`Volume quota limit (${organization.volumeQuota}) reached`)
+    const concurrentCountKey = `org:${organization.id}:volume-concurrent`
+    const concurrentCount = await this.redis.incr(concurrentCountKey)
+    await this.redis.expire(concurrentCountKey, 1)
+
+    if (usageOverview.currentVolumeUsage + concurrentCount > organization.volumeQuota) {
+      throw new ForbiddenException(`Volume quota exceeded. Maximum allowed: ${organization.volumeQuota}`)
     }
+  }
+
+  async create(organization: Organization, createVolumeDto: CreateVolumeDto): Promise<Volume> {
+    this.organizationService.assertOrganizationIsNotSuspended(organization)
+
+    await this.validateOrganizationQuotas(organization)
 
     const volume = new Volume()
 
@@ -125,15 +143,6 @@ export class VolumeService {
     }
 
     return volume
-  }
-
-  async countActive(organizationId: string): Promise<number> {
-    return this.volumeRepository.count({
-      where: {
-        organizationId,
-        state: Not(In([VolumeState.DELETED, VolumeState.ERROR])),
-      },
-    })
   }
 
   @OnEvent(SandboxEvents.CREATED)
