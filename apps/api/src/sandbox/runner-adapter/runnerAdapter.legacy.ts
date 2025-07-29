@@ -166,7 +166,7 @@ export class RunnerAdapterLegacy implements RunnerAdapter {
 
     if (registry) {
       request.registry = {
-        project: registry.name,
+        project: registry.project,
         url: registry.url,
         username: registry.username,
         password: registry.password,
@@ -200,7 +200,7 @@ export class RunnerAdapterLegacy implements RunnerAdapter {
 
     if (registry) {
       request.registry = {
-        project: registry.name,
+        project: registry.project,
         url: registry.url,
         username: registry.username,
         password: registry.password,
@@ -226,7 +226,7 @@ export class RunnerAdapterLegacy implements RunnerAdapter {
 
     if (registry) {
       request.registry = {
-        project: registry.name,
+        project: registry.project,
         url: registry.url,
         username: registry.username,
         password: registry.password,
@@ -247,7 +247,7 @@ export class RunnerAdapterLegacy implements RunnerAdapter {
 
     if (registry) {
       request.registry = {
-        project: registry.name,
+        project: registry.project,
         url: registry.url,
         username: registry.username,
         password: registry.password,
