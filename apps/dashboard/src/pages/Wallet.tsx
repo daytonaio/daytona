@@ -11,8 +11,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
 import { ArrowUpRight, CreditCard, Info, Loader2 } from 'lucide-react'
-import { BillableMetricCode, OrganizationUsage } from '@/billing-api/types/OrganizationUsage'
-import { UsageChart, UsageChartData } from '@/components/UsageChart'
 import { Slider } from '@/components/ui/slider'
 import { toast } from 'sonner'
 import { Label } from '@/components/ui/label'
@@ -20,6 +18,9 @@ import { Input } from '@/components/ui/input'
 import { Tooltip } from '@/components/Tooltip'
 import { useApi } from '@/hooks/useApi'
 import { useAuth } from 'react-oidc-context'
+import { OrganizationEmail } from '@/billing-api'
+import { OrganizationEmailsTable } from '@/components/OrganizationEmails'
+import EmailVerify from './EmailVerify'
 
 const formatAmount = (amount: number) => {
   return Intl.NumberFormat('en-US', {
@@ -30,7 +31,7 @@ const formatAmount = (amount: number) => {
   }).format(amount / 100)
 }
 
-const Billing = () => {
+const Wallet = () => {
   const { selectedOrganization } = useSelectedOrganization()
   const { billingApi } = useApi()
   const { user } = useAuth()
@@ -44,6 +45,8 @@ const Billing = () => {
   const [couponCode, setCouponCode] = useState<string>('')
   const [redeemCouponError, setRedeemCouponError] = useState<string | null>(null)
   const [redeemCouponSuccess, setRedeemCouponSuccess] = useState<string | null>(null)
+  const [organizationEmails, setOrganizationEmails] = useState<OrganizationEmail[]>([])
+  const [organizationEmailsLoading, setOrganizationEmailsLoading] = useState(true)
 
   const fetchWallet = useCallback(async () => {
     if (!selectedOrganization) {
@@ -164,6 +167,81 @@ const Billing = () => {
     return true
   }, [automaticTopUpLoading, wallet, automaticTopUp])
 
+  const fetchOrganizationEmails = useCallback(async () => {
+    if (!selectedOrganization) {
+      return
+    }
+    setOrganizationEmailsLoading(true)
+    try {
+      const data = await billingApi.listOrganizationEmails(selectedOrganization.id)
+      setOrganizationEmails(data)
+    } catch (error) {
+      console.error('Failed to fetch organization emails:', error)
+    } finally {
+      setOrganizationEmailsLoading(false)
+    }
+  }, [billingApi, selectedOrganization])
+
+  const handleDeleteEmail = useCallback(
+    async (email: string) => {
+      if (!selectedOrganization) {
+        return
+      }
+      try {
+        await billingApi.deleteOrganizationEmail(selectedOrganization.id, email)
+        toast.success('Email deleted successfully')
+        fetchOrganizationEmails()
+      } catch (error) {
+        console.error('Failed to delete email:', error)
+        toast.error('Failed to delete email', {
+          description: String(error),
+        })
+      }
+    },
+    [billingApi, selectedOrganization, fetchOrganizationEmails],
+  )
+
+  const handleResendVerification = useCallback(
+    async (email: string) => {
+      if (!selectedOrganization) {
+        return
+      }
+      try {
+        await billingApi.resendOrganizationEmailVerification(selectedOrganization.id, email)
+        toast.success('Verification email sent successfully')
+      } catch (error) {
+        console.error('Failed to resend verification email:', error)
+        toast.error('Failed to resend verification email', {
+          description: String(error),
+        })
+      }
+    },
+    [billingApi, selectedOrganization],
+  )
+
+  const handleAddEmail = useCallback(
+    async (email: string) => {
+      if (!selectedOrganization) {
+        return
+      }
+      try {
+        await billingApi.addOrganizationEmail(selectedOrganization.id, email)
+        toast.success('Email added successfully. A verification email has been sent.')
+        fetchOrganizationEmails()
+      } catch (error) {
+        console.error('Failed to add email:', error)
+        toast.error('Failed to add email', {
+          description: String(error),
+        })
+      }
+    },
+    [billingApi, selectedOrganization, fetchOrganizationEmails],
+  )
+
+  useEffect(() => {
+    fetchOrganizationEmails()
+  }, [fetchOrganizationEmails])
+
   useEffect(() => {
     fetchWallet()
   }, [fetchWallet])
@@ -174,7 +252,7 @@ const Billing = () => {
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold">Billing</h1>
+      <h1 className="text-2xl font-bold">Wallet</h1>
       <div className="flex gap-4">
         <Card className="my-4 h-full">
           <CardHeader>
@@ -230,7 +308,7 @@ const Billing = () => {
                       <a href={billingPortalUrl ?? ''} target="_blank" rel="noopener noreferrer">
                         <Button variant="secondary" size="icon" className="w-full">
                           <ArrowUpRight className="w-20 h-20" />
-                          Top Up
+                          Top up
                         </Button>
                       </a>
                       <Button
@@ -255,7 +333,7 @@ const Billing = () => {
                 label={
                   <CardTitle className="flex items-center gap-2">
                     <Info className="w-4 h-4" />
-                    Automatic Top Up
+                    Automatic Top up
                   </CardTitle>
                 }
                 side="bottom"
@@ -270,7 +348,7 @@ const Billing = () => {
                       automatically topped up. The target must always be greater than the threshold by{' '}
                       <strong>at least $10</strong>.
                     </div>
-                    <div>Setting both values to 0 will disable automatic top ups.</div>
+                    <div>Setting both values to 0 will disable automatic top-ups.</div>
                   </div>
                 }
               />
@@ -403,98 +481,30 @@ const Billing = () => {
           </Card>
         )}
       </div>
-      <UsageContainer />
+
+      {/* Organization Emails Section */}
+      <div className="mt-8">
+        <Card>
+          <CardHeader>
+            <CardTitle>Billing Emails</CardTitle>
+            <CardDescription>
+              Manage billing emails for your organization which recieve important billing notifications such as invoices
+              and credit depletion notices.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <OrganizationEmailsTable
+              data={organizationEmails}
+              loading={organizationEmailsLoading}
+              handleDelete={handleDeleteEmail}
+              handleResendVerification={handleResendVerification}
+              handleAddEmail={handleAddEmail}
+            />
+          </CardContent>
+        </Card>
+      </div>
     </div>
   )
 }
 
-const UsageContainer = () => {
-  const { selectedOrganization } = useSelectedOrganization()
-  const { billingApi } = useApi()
-  const [currentOrganizationUsage, setCurrentOrganizationUsage] = useState<OrganizationUsage | null>(null)
-  const [currentOrganizationUsageLoading, setCurrentOrganizationUsageLoading] = useState(true)
-  const [pastOrganizationUsage, setPastOrganizationUsage] = useState<OrganizationUsage[]>([])
-  const [pastOrganizationUsageLoading, setPastOrganizationUsageLoading] = useState(true)
-
-  const fetchOrganizationUsage = useCallback(async () => {
-    if (!selectedOrganization) {
-      return
-    }
-    setCurrentOrganizationUsageLoading(true)
-    try {
-      const data = await billingApi.getOrganizationUsage(selectedOrganization.id)
-      setCurrentOrganizationUsage(data)
-    } catch (error) {
-      console.error('Failed to fetch organization usage data:', error)
-    } finally {
-      setCurrentOrganizationUsageLoading(false)
-    }
-  }, [billingApi, selectedOrganization])
-
-  const fetchPastOrganizationUsage = useCallback(async () => {
-    if (!selectedOrganization) {
-      return
-    }
-    setPastOrganizationUsageLoading(true)
-    try {
-      const data = await billingApi.getPastOrganizationUsage(selectedOrganization.id)
-      setPastOrganizationUsage(data.sort((a, b) => new Date(a.from).getTime() - new Date(b.from).getTime()))
-    } catch (error) {
-      console.error('Failed to fetch past organization usage data:', error)
-    } finally {
-      setPastOrganizationUsageLoading(false)
-    }
-  }, [billingApi, selectedOrganization])
-
-  useEffect(() => {
-    if (!selectedOrganization) {
-      return
-    }
-    fetchOrganizationUsage()
-    fetchPastOrganizationUsage()
-  }, [fetchOrganizationUsage, fetchPastOrganizationUsage, selectedOrganization])
-
-  return (
-    <UsageChart
-      title="Cost Breakdown"
-      usageData={[...pastOrganizationUsage, ...(currentOrganizationUsage ? [currentOrganizationUsage] : [])].map(
-        convertUsageToChartData,
-      )}
-      showTotal
-    />
-  )
-}
-
-function convertUsageToChartData(usage: OrganizationUsage): UsageChartData {
-  let ramGB = 0
-  let cpu = 0
-  let diskGB = 0
-  // let gpu = 0
-
-  for (const charge of usage.usageCharges) {
-    switch (charge.billableMetric) {
-      case BillableMetricCode.RAM_USAGE:
-        ramGB += Number(charge.amountCents) / 100
-        break
-      case BillableMetricCode.CPU_USAGE:
-        cpu += Number(charge.amountCents) / 100
-        break
-      case BillableMetricCode.DISK_USAGE:
-        diskGB += Number(charge.amountCents) / 100
-        break
-      // case BillableMetricCode.GPU_USAGE:
-      //   gpu += Number(charge.amountCents) / 100
-      //   break
-    }
-  }
-
-  return {
-    date: new Date(usage.from).toISOString(),
-    diskGB,
-    ramGB,
-    cpu,
-    // gpu,
-  }
-}
-
-export default Billing
+export default Wallet

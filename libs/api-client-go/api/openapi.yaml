@@ -1069,6 +1069,26 @@ paths:
       summary: Unlink account
       tags:
         - users
+  /users/mfa/sms/enroll:
+    post:
+      operationId: enrollInSmsMfa
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: string
+          description: SMS MFA enrollment URL
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Enroll in SMS MFA
+      tags:
+        - users
   /users/{id}:
     get:
       operationId: getUser

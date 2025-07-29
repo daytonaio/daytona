@@ -157,9 +157,9 @@ const LinkedAccounts: React.FC = () => {
   }
 
   return (
-    <div className="p-6">
+    <div>
       <div className="mb-6 flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Linked Accounts</h1>
+        <h1 className="text-xl font-medium">Linked Accounts</h1>
       </div>
 
       {loadingProviders ? (
