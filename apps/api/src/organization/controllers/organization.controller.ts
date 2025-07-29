@@ -40,6 +40,7 @@ import { Audit, TypedRequest } from '../../audit/decorators/audit.decorator'
 import { AuditAction } from '../../audit/enums/audit-action.enum'
 import { AuditTarget } from '../../audit/enums/audit-target.enum'
 import { EmailUtils } from '../../common/utils/email.util'
+import { OrganizationUsageService } from '../services/organization-usage.service'
 
 @ApiTags('organizations')
 @Controller('organizations')
@@ -52,6 +53,7 @@ export class OrganizationController {
     private readonly organizationService: OrganizationService,
     private readonly organizationUserService: OrganizationUserService,
     private readonly organizationInvitationService: OrganizationInvitationService,
+    private readonly organizationUsageService: OrganizationUsageService,
     private readonly userService: UserService,
   ) {}
 
@@ -275,7 +277,7 @@ export class OrganizationController {
   })
   @UseGuards(AuthGuard('jwt'), OrganizationActionGuard)
   async getUsageOverview(@Param('organizationId') organizationId: string): Promise<OrganizationUsageOverviewDto> {
-    return this.organizationService.getUsageOverview(organizationId)
+    return this.organizationUsageService.getUsageOverview(organizationId)
   }
 
   @Patch('/:organizationId/quota')
