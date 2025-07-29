@@ -9,8 +9,6 @@ export class Migration1753099115783 implements MigrationInterface {
   name = 'Migration1753099115783'
 
   public async up(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(`UPDATE "snapshot" SET "state" = 'inactive' WHERE "enabled" = false`)
-
     await queryRunner.query(`ALTER TABLE "snapshot" DROP COLUMN "enabled"`)
   }
 
