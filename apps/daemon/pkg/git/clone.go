@@ -36,7 +36,9 @@ func (s *Service) CloneRepository(repo *gitprovider.GitRepository, auth *http.Ba
 		capability.ThinPack,
 	}
 
-	cloneOptions.ReferenceName = plumbing.ReferenceName("refs/heads/" + repo.Branch)
+	if repo.Branch != "" {
+		cloneOptions.ReferenceName = plumbing.ReferenceName("refs/heads/" + repo.Branch)
+	}
 
 	_, err := git.PlainClone(s.ProjectDir, false, cloneOptions)
 	if err != nil {
@@ -66,7 +68,13 @@ func (s *Service) CloneRepository(repo *gitprovider.GitRepository, auth *http.Ba
 }
 
 func (s *Service) CloneRepositoryCmd(repo *gitprovider.GitRepository, auth *http.BasicAuth) []string {
-	cloneCmd := []string{"git", "clone", "--single-branch", "--branch", fmt.Sprintf("\"%s\"", repo.Branch)}
+	cloneCmd := []string{"git", "clone", "--single-branch"}
+
+	// Only add branch flag if a specific branch is provided
+	if repo.Branch != "" {
+		cloneCmd = append(cloneCmd, "--branch", fmt.Sprintf("\"%s\"", repo.Branch))
+	}
+
 	cloneUrl := repo.Url
 
 	// Default to https protocol if not specified
