@@ -105,7 +105,7 @@ func (p *Proxy) getRunnerInfo(ctx context.Context, sandboxId string) (*RunnerInf
 		ApiKey: runner.ApiKey,
 	}
 
-	err = p.runnerCache.Set(ctx, sandboxId, info, 1*time.Hour)
+	err = p.runnerCache.Set(ctx, sandboxId, info, 2*time.Minute)
 	if err != nil {
 		log.Errorf("Failed to set runner info in cache: %v", err)
 	}
@@ -129,7 +129,7 @@ func (p *Proxy) getSandboxPublic(ctx context.Context, sandboxId string) (*bool, 
 		isPublic = true
 	}
 
-	err = p.sandboxPublicCache.Set(ctx, sandboxId, isPublic, 2*time.Minute)
+	err = p.sandboxPublicCache.Set(ctx, sandboxId, isPublic, 1*time.Hour)
 	if err != nil {
 		log.Errorf("Failed to set sandbox public in cache: %v", err)
 	}
