@@ -54,6 +54,9 @@ class AsyncSandbox(SandboxDto):
         build_info (str): Build information for the Sandbox if it was created from dynamic build.
         created_at (str): When the Sandbox was created.
         updated_at (str): When the Sandbox was last updated.
+        network_allow_all (bool): Whether to allow all network access for the Sandbox.
+        network_allow_list (str): Comma-separated list of allowed network addresses for the Sandbox
+            (only /24 CIDR blocks allowed).
     """
 
     _fs: AsyncFileSystem = PrivateAttr()
@@ -470,3 +473,5 @@ class AsyncSandbox(SandboxDto):
         self.build_info = sandbox_dto.build_info
         self.created_at = sandbox_dto.created_at
         self.updated_at = sandbox_dto.updated_at
+        self.network_allow_all = sandbox_dto.network_allow_all
+        self.network_allow_list = sandbox_dto.network_allow_list

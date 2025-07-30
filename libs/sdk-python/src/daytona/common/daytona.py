@@ -109,6 +109,9 @@ class CreateSandboxBaseParams(BaseModel):
             automatically be deleted. By default, auto-delete is disabled.
             Negative value means disabled, 0 means delete immediately upon stopping.
         volumes (Optional[List[VolumeMount]]): List of volumes mounts to attach to the Sandbox.
+        network_allow_all (Optional[bool]): Whether to allow all network access for the Sandbox.
+        network_allow_list (Optional[str]): Comma-separated list of allowed network addresses for the Sandbox
+            (only /24 CIDR blocks allowed).
     """
 
     language: Optional[CodeLanguage] = None
@@ -120,6 +123,8 @@ class CreateSandboxBaseParams(BaseModel):
     auto_archive_interval: Optional[int] = None
     auto_delete_interval: Optional[int] = None
     volumes: Optional[List[VolumeMount]] = None
+    network_allow_all: Optional[bool] = None
+    network_allow_list: Optional[str] = None
 
 
 class CreateSandboxFromImageParams(CreateSandboxBaseParams):

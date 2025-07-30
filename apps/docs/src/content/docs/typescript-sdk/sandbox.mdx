@@ -118,6 +118,20 @@ Represents a Daytona Sandbox.
     ```ts
     SandboxDto.memory
     ```
+- `networkAllowAll` _boolean_ - Whether to allow all network access for the Sandbox
+    
+    ##### Implementation of
+    
+    ```ts
+    SandboxDto.networkAllowAll
+    ```
+- `networkAllowList?` _string_ - Comma-separated list of allowed network addresses for the Sandbox (only /24 CIDR blocks allowed)
+    
+    ##### Implementation of
+    
+    ```ts
+    SandboxDto.networkAllowList
+    ```
 - `organizationId` _string_ - Organization ID of the Sandbox
     
     ##### Implementation of
@@ -198,6 +212,7 @@ Represents a Daytona Sandbox.
 ```ts
 new Sandbox(
    sandboxDto: Sandbox, 
+   clientConfig: Configuration, 
    sandboxApi: SandboxApi, 
    toolboxApi: ToolboxApi, 
    codeToolbox: SandboxCodeToolbox): Sandbox
@@ -208,6 +223,7 @@ Creates a new Sandbox instance
 **Parameters**:
 
 - `sandboxDto` _Sandbox_ - The API Sandbox instance
+- `clientConfig` _Configuration_
 - `sandboxApi` _SandboxApi_ - API client for Sandbox operations
 - `toolboxApi` _ToolboxApi_ - API client for toolbox operations
 - `codeToolbox` _SandboxCodeToolbox_ - Language-specific toolbox implementation

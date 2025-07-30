@@ -424,6 +424,9 @@ Base parameters for creating a new Sandbox.
   automatically be deleted. By default, auto-delete is disabled.
   Negative value means disabled, 0 means delete immediately upon stopping.
 - `volumes` _Optional[List[VolumeMount]]_ - List of volumes mounts to attach to the Sandbox.
+- `network_allow_all` _Optional[bool]_ - Whether to allow all network access for the Sandbox.
+- `network_allow_list` _Optional[str]_ - Comma-separated list of allowed network addresses for the Sandbox
+  (only /24 CIDR blocks allowed).
 
 ## CreateSandboxFromImageParams
 
