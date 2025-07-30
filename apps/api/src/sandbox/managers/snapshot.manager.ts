@@ -10,9 +10,9 @@ import { In, IsNull, LessThan, Not, Or, Raw, Repository } from 'typeorm'
 import { DockerRegistryService } from '../../docker-registry/services/docker-registry.service'
 import { Snapshot } from '../entities/snapshot.entity'
 import { SnapshotState } from '../enums/snapshot-state.enum'
-import { DockerProvider } from '../docker/docker-provider'
 import { SnapshotRunner } from '../entities/snapshot-runner.entity'
 import { Runner } from '../entities/runner.entity'
+import { DockerRegistry } from '../../docker-registry/entities/docker-registry.entity'
 import { RunnerState } from '../enums/runner-state.enum'
 import { SnapshotRunnerState } from '../enums/snapshot-runner-state.enum'
 import { v4 as uuidv4 } from 'uuid'
@@ -20,13 +20,24 @@ import { RunnerNotReadyError } from '../errors/runner-not-ready.error'
 import { RegistryType } from '../../docker-registry/enums/registry-type.enum'
 import { RedisLockProvider } from '../common/redis-lock.provider'
 import { OrganizationService } from '../../organization/services/organization.service'
-import { DockerRegistry } from '../../docker-registry/entities/docker-registry.entity'
 import { BuildInfo } from '../entities/build-info.entity'
 import { fromAxiosError } from '../../common/utils/from-axios-error'
 import { InjectRedis } from '@nestjs-modules/ioredis'
 import { Redis } from 'ioredis'
 import { RunnerService } from '../services/runner.service'
-import { RunnerAdapterFactory } from '../runner-adapter/runnerAdapter'
+import { RunnerAdapterFactory, RunnerSnapshotInfo } from '../runner-adapter/runnerAdapter'
+import { OnEvent } from '@nestjs/event-emitter'
+import { SnapshotEvents } from '../constants/snapshot-events'
+import { SnapshotCreatedEvent } from '../events/snapshot-created.event'
+import { Sandbox } from '../entities/sandbox.entity'
+import { SandboxState } from '../enums/sandbox-state.enum'
+
+const DEFAULT_INITIAL_RUNNER_REGION = 'us'
+
+const SYNC_AGAIN = 'sync-again'
+const DONT_SYNC_AGAIN = 'dont-sync-again'
+type SyncState = typeof SYNC_AGAIN | typeof DONT_SYNC_AGAIN
+
 @Injectable()
 export class SnapshotManager {
   private readonly logger = new Logger(SnapshotManager.name)
@@ -46,7 +57,6 @@ export class SnapshotManager {
     private readonly buildInfoRepository: Repository<BuildInfo>,
     private readonly runnerService: RunnerService,
     private readonly dockerRegistryService: DockerRegistryService,
-    private readonly dockerProvider: DockerProvider,
     private readonly runnerAdapterFactory: RunnerAdapterFactory,
     private readonly redisLockProvider: RedisLockProvider,
     private readonly organizationService: OrganizationService,
@@ -80,7 +90,7 @@ export class SnapshotManager {
 
     await Promise.all(
       snapshots.map((snapshot) => {
-        this.propagateSnapshotToRunners(snapshot.internalName).catch((err) => {
+        this.propagateSnapshotToRunners(snapshot.ref).catch((err) => {
           this.logger.error(`Error propagating snapshot ${snapshot.id} to runners: ${err}`)
         })
       }),
@@ -161,18 +171,18 @@ export class SnapshotManager {
 
     switch (snapshotRunner.state) {
       case SnapshotRunnerState.PULLING_SNAPSHOT:
-        await this.handleSnapshotRunnerStatePullingSnapshot(snapshotRunner)
+        await this.handleSnapshotRunnerStatePullingSnapshot(snapshotRunner, runner)
         break
       case SnapshotRunnerState.BUILDING_SNAPSHOT:
-        await this.handleSnapshotRunnerStateBuildingSnapshot(snapshotRunner)
+        await this.handleSnapshotRunnerStateBuildingSnapshot(snapshotRunner, runner)
         break
       case SnapshotRunnerState.REMOVING:
-        await this.handleSnapshotRunnerStateRemoving(snapshotRunner)
+        await this.handleSnapshotRunnerStateRemoving(snapshotRunner, runner)
         break
     }
   }
 
-  async propagateSnapshotToRunners(internalSnapshotName: string) {
+  async propagateSnapshotToRunners(ref: string) {
     //  todo: remove try catch block and implement error handling
     try {
       const runners = await this.runnerRepository.find({
@@ -185,7 +195,7 @@ export class SnapshotManager {
       //  get all runners that have the snapshot in their base image
       const snapshotRunners = await this.snapshotRunnerRepository.find({
         where: {
-          snapshotRef: internalSnapshotName,
+          snapshotRef: ref,
           state: In([SnapshotRunnerState.READY, SnapshotRunnerState.PULLING_SNAPSHOT]),
         },
       })
@@ -203,31 +213,26 @@ export class SnapshotManager {
       //  limit the number of runners to propagate to
       const runnersToPropagateTo = unallocatedRunners.slice(0, propagateLimit)
 
+      let dockerRegistry = await this.dockerRegistryService.findOneBySnapshotImageName(ref)
+
+      // If no registry found by image name, use the default internal registry
+      if (!dockerRegistry) {
+        dockerRegistry = await this.dockerRegistryService.getDefaultInternalRegistry()
+        if (!dockerRegistry) {
+          throw new Error('No registry found for snapshot and no default internal registry configured')
+        }
+      }
+
       const results = await Promise.allSettled(
         runnersToPropagateTo.map(async (runner) => {
-          let snapshotRunner = await this.snapshotRunnerRepository.findOne({
-            where: {
-              snapshotRef: internalSnapshotName,
-              runnerId: runner.id,
-            },
-          })
+          const snapshotRunner = await this.runnerService.getSnapshotRunner(runner.id, ref)
 
           try {
-            if (snapshotRunner && !snapshotRunner.snapshotRef) {
-              //  this should never happen
-              this.logger.warn(`Internal snapshot name not found for snapshot runner ${snapshotRunner.id}`)
-              return
-            }
-
             if (!snapshotRunner) {
-              snapshotRunner = new SnapshotRunner()
-              snapshotRunner.snapshotRef = internalSnapshotName
-              snapshotRunner.runnerId = runner.id
-              snapshotRunner.state = SnapshotRunnerState.PULLING_SNAPSHOT
-              await this.snapshotRunnerRepository.save(snapshotRunner)
-              await this.propagateSnapshotToRunner(internalSnapshotName, runner)
+              await this.runnerService.createSnapshotRunnerEntry(runner.id, ref, SnapshotRunnerState.PULLING_SNAPSHOT)
+              await this.pullSnapshotRunnerWithRetries(runner, ref, dockerRegistry)
             } else if (snapshotRunner.state === SnapshotRunnerState.PULLING_SNAPSHOT) {
-              await this.handleSnapshotRunnerStatePullingSnapshot(snapshotRunner)
+              await this.handleSnapshotRunnerStatePullingSnapshot(snapshotRunner, runner)
             }
           } catch (err) {
             this.logger.error(`Error propagating snapshot to runner ${runner.id}: ${fromAxiosError(err)}`)
@@ -248,40 +253,32 @@ export class SnapshotManager {
     }
   }
 
-  async propagateSnapshotToRunner(internalSnapshotName: string, runner: Runner) {
-    let dockerRegistry = await this.dockerRegistryService.findOneBySnapshotImageName(internalSnapshotName)
-
-    // If no registry found by image name, use the default internal registry
-    if (!dockerRegistry) {
-      dockerRegistry = await this.dockerRegistryService.getDefaultInternalRegistry()
-      if (!dockerRegistry) {
-        throw new Error('No registry found for snapshot and no default internal registry configured')
-      }
-    }
-
+  async pullSnapshotRunnerWithRetries(
+    runner: Runner,
+    snapshotRef: string,
+    sourceRegistry?: DockerRegistry,
+    destinationRegistry?: DockerRegistry,
+  ) {
     const runnerAdapter = await this.runnerAdapterFactory.create(runner)
 
     let retries = 0
     while (retries < 10) {
       try {
-        await runnerAdapter.pullSnapshot(internalSnapshotName, dockerRegistry)
+        await runnerAdapter.pullSnapshot(snapshotRef, sourceRegistry, destinationRegistry)
+        return
       } catch (err) {
         if (err.code !== 'ECONNRESET') {
           throw err
         }
+        if (++retries >= 10) {
+          throw err
+        }
+        await new Promise((resolve) => setTimeout(resolve, retries * 1000))
       }
-      retries++
-      await new Promise((resolve) => setTimeout(resolve, retries * 1000))
     }
   }
 
-  async handleSnapshotRunnerStatePullingSnapshot(snapshotRunner: SnapshotRunner) {
-    const runner = await this.runnerRepository.findOneOrFail({
-      where: {
-        id: snapshotRunner.runnerId,
-      },
-    })
-
+  async handleSnapshotRunnerStatePullingSnapshot(snapshotRunner: SnapshotRunner, runner: Runner) {
     const runnerAdapter = await this.runnerAdapterFactory.create(runner)
     const exists = await runnerAdapter.snapshotExists(snapshotRunner.snapshotRef)
     if (exists) {
@@ -294,7 +291,7 @@ export class SnapshotManager {
     const timeoutMs = timeoutMinutes * 60 * 1000
     if (Date.now() - snapshotRunner.createdAt.getTime() > timeoutMs) {
       snapshotRunner.state = SnapshotRunnerState.ERROR
-      snapshotRunner.errorReason = 'Timeout while pulling snapshot'
+      snapshotRunner.errorReason = 'Timeout while pulling snapshot to runner'
       await this.snapshotRunnerRepository.save(snapshotRunner)
       return
     }
@@ -302,18 +299,13 @@ export class SnapshotManager {
     const retryTimeoutMinutes = 10
     const retryTimeoutMs = retryTimeoutMinutes * 60 * 1000
     if (Date.now() - snapshotRunner.createdAt.getTime() > retryTimeoutMs) {
-      await this.retrySnapshotRunnerPull(snapshotRunner)
+      const dockerRegistry = await this.dockerRegistryService.findOneBySnapshotImageName(snapshotRunner.snapshotRef)
+      await this.pullSnapshotRunnerWithRetries(runner, snapshotRunner.snapshotRef, dockerRegistry)
       return
     }
   }
 
-  async handleSnapshotRunnerStateBuildingSnapshot(snapshotRunner: SnapshotRunner) {
-    const runner = await this.runnerRepository.findOneOrFail({
-      where: {
-        id: snapshotRunner.runnerId,
-      },
-    })
-
+  async handleSnapshotRunnerStateBuildingSnapshot(snapshotRunner: SnapshotRunner, runner: Runner) {
     const runnerAdapter = await this.runnerAdapterFactory.create(runner)
     const exists = await runnerAdapter.snapshotExists(snapshotRunner.snapshotRef)
     if (exists) {
@@ -330,7 +322,6 @@ export class SnapshotManager {
       return
     }
 
-    //  get all snapshots
     const snapshots = await this.snapshotRepository.find({
       where: {
         state: SnapshotState.REMOVING,
@@ -341,7 +332,7 @@ export class SnapshotManager {
       snapshots.map(async (snapshot) => {
         await this.snapshotRunnerRepository.update(
           {
-            snapshotRef: snapshot.internalName,
+            snapshotRef: snapshot.ref,
           },
           {
             state: SnapshotRunnerState.REMOVING,
@@ -370,93 +361,65 @@ export class SnapshotManager {
 
     await Promise.all(
       snapshots.map(async (snapshot) => {
-        const lockKey = `check-snapshot-state-lock-${snapshot.id}`
-        if (!(await this.redisLockProvider.lock(lockKey, 720))) {
-          return
-        }
-
-        try {
-          switch (snapshot.state) {
-            case SnapshotState.BUILD_PENDING:
-              await this.handleSnapshotStateBuildPending(snapshot)
-              break
-            case SnapshotState.BUILDING:
-              await this.handleSnapshotStateBuilding(snapshot)
-              break
-            case SnapshotState.PENDING:
-              await this.handleSnapshotStatePending(snapshot)
-              break
-            case SnapshotState.PULLING:
-              await this.handleSnapshotStatePulling(snapshot)
-              break
-            case SnapshotState.PENDING_VALIDATION:
-              //  temp workaround to avoid race condition between api instances
-              {
-                let imageName = snapshot.imageName
-                if (snapshot.buildInfo) {
-                  imageName = snapshot.internalName
-                }
-                if (!(await this.dockerProvider.imageExists(imageName))) {
-                  await this.redisLockProvider.unlock(lockKey)
-                  return
-                }
-              }
-
-              await this.handleSnapshotStatePendingValidation(snapshot)
-              break
-            case SnapshotState.VALIDATING:
-              await this.handleSnapshotStateValidating(snapshot)
-              break
-            case SnapshotState.REMOVING:
-              await this.handleSnapshotStateRemoving(snapshot)
-              break
-          }
-        } catch (error) {
-          if (error.code === 'ECONNRESET') {
-            await this.redisLockProvider.unlock(lockKey)
-            this.checkSnapshotState()
-            return
-          }
-
-          const message = error.message || String(error)
-          await this.updateSnapshotState(snapshot.id, SnapshotState.ERROR, message)
-        }
-
-        await this.redisLockProvider.unlock(lockKey)
+        this.syncSnapshotState(snapshot.id)
       }),
     )
   }
 
-  @Cron(CronExpression.EVERY_30_MINUTES, {
-    name: 'cleanup-local-snapshots',
-  })
-  async cleanupLocalSnapshots() {
-    await this.dockerProvider.imagePrune()
-  }
-
-  async removeSnapshotFromRunner(runner: Runner, snapshotRunner: SnapshotRunner) {
-    if (snapshotRunner && !snapshotRunner.snapshotRef) {
-      //  this should never happen
-      this.logger.warn(`Internal snapshot name not found for snapshot runner ${snapshotRunner.id}`)
+  async syncSnapshotState(snapshotId: string): Promise<void> {
+    const lockKey = `check-snapshot-state-lock-${snapshotId}`
+    if (!(await this.redisLockProvider.lock(lockKey, 720))) {
       return
     }
 
-    const runnerAdapter = await this.runnerAdapterFactory.create(runner)
-    const exists = await runnerAdapter.snapshotExists(snapshotRunner.snapshotRef)
-    if (exists) {
-      await runnerAdapter.removeSnapshot(snapshotRunner.snapshotRef)
+    const snapshot = await this.snapshotRepository.findOne({
+      where: { id: snapshotId },
+    })
+
+    if (
+      !snapshot ||
+      [SnapshotState.ACTIVE, SnapshotState.ERROR, SnapshotState.BUILD_FAILED, SnapshotState.INACTIVE].includes(
+        snapshot.state,
+      )
+    ) {
+      await this.redisLockProvider.unlock(lockKey)
+      return
     }
 
-    snapshotRunner.state = SnapshotRunnerState.REMOVING
-    await this.snapshotRunnerRepository.save(snapshotRunner)
+    let syncState = DONT_SYNC_AGAIN
+
+    try {
+      switch (snapshot.state) {
+        case SnapshotState.PENDING:
+          syncState = await this.handleSnapshotStatePending(snapshot)
+          break
+        case SnapshotState.PULLING:
+        case SnapshotState.BUILDING:
+          syncState = await this.handleCheckInitialRunnerSnapshot(snapshot)
+          break
+        case SnapshotState.VALIDATING:
+          syncState = await this.handleSnapshotStateValidating(snapshot)
+          break
+        case SnapshotState.REMOVING:
+          syncState = await this.handleSnapshotStateRemoving(snapshot)
+          break
+      }
+    } catch (error) {
+      if (error.code === 'ECONNRESET') {
+        syncState = SYNC_AGAIN
+      } else {
+        const message = error.message || String(error)
+        await this.updateSnapshotState(snapshot.id, SnapshotState.ERROR, message)
+      }
+    }
+
+    await this.redisLockProvider.unlock(lockKey)
+    if (syncState === SYNC_AGAIN) {
+      this.syncSnapshotState(snapshotId)
+    }
   }
 
-  async handleSnapshotRunnerStateRemoving(snapshotRunner: SnapshotRunner) {
-    const runner = await this.runnerRepository.findOne({
-      where: {
-        id: snapshotRunner.runnerId,
-      },
-    })
+  async handleSnapshotRunnerStateRemoving(snapshotRunner: SnapshotRunner, runner: Runner) {
     if (!runner) {
       //  generally this should not happen
       //  in case the runner has been deleted from the database, delete the snapshot runner record
@@ -497,74 +460,188 @@ export class SnapshotManager {
     }
   }
 
-  async handleSnapshotStateRemoving(snapshot: Snapshot) {
+  async handleSnapshotStateValidating(snapshot: Snapshot): Promise<SyncState> {
+    const timeoutMinutes = 1
+    const timeoutMs = timeoutMinutes * 60 * 1000
+    if (Date.now() - snapshot.updatedAt.getTime() > timeoutMs) {
+      await this.updateSnapshotState(snapshot.id, SnapshotState.ERROR, 'Timeout while validating snapshot')
+      return DONT_SYNC_AGAIN
+    }
+
+    // TODO: add sleep?
+    return SYNC_AGAIN
+  }
+
+  async handleSnapshotStateRemoving(snapshot: Snapshot): Promise<SyncState> {
     const snapshotRunnerItems = await this.snapshotRunnerRepository.find({
       where: {
-        snapshotRef: snapshot.internalName,
+        snapshotRef: snapshot.ref,
       },
     })
 
     if (snapshotRunnerItems.length === 0) {
       await this.snapshotRepository.remove(snapshot)
     }
+
+    return DONT_SYNC_AGAIN
   }
 
-  async handleSnapshotStateBuildPending(snapshot: Snapshot) {
-    await this.updateSnapshotState(snapshot.id, SnapshotState.BUILDING)
-  }
-
-  async handleSnapshotStateBuilding(snapshot: Snapshot) {
-    // Check if build has timed out
+  async handleCheckInitialRunnerSnapshot(snapshot: Snapshot): Promise<SyncState> {
+    // Check for timeout - allow up to 30 minutes
     const timeoutMinutes = 30
     const timeoutMs = timeoutMinutes * 60 * 1000
     if (Date.now() - snapshot.createdAt.getTime() > timeoutMs) {
-      await this.updateSnapshotState(snapshot.id, SnapshotState.BUILD_FAILED, 'Timeout while building snapshot')
-      return
+      await this.updateSnapshotState(snapshot.id, SnapshotState.ERROR, 'Timeout processing snapshot on initial runner')
+      return DONT_SYNC_AGAIN
     }
 
-    // Get build info
-    if (!snapshot.buildInfo) {
-      await this.updateSnapshotState(snapshot.id, SnapshotState.BUILD_FAILED, 'Missing build information')
-      return
+    // Check if the snapshot ref is already set and it is already on the runner
+    const snapshotRunner = await this.snapshotRunnerRepository.findOne({
+      where: {
+        snapshotRef: snapshot.ref,
+        runnerId: snapshot.initialRunnerId,
+      },
+    })
+
+    if (snapshot.ref && snapshotRunner) {
+      if (snapshotRunner.state === SnapshotRunnerState.READY) {
+        await this.updateSnapshotState(snapshot.id, SnapshotState.ACTIVE)
+      } else if (snapshotRunner.state === SnapshotRunnerState.ERROR) {
+        await this.updateSnapshotState(snapshot.id, SnapshotState.ERROR, snapshotRunner.errorReason)
+      }
+      return DONT_SYNC_AGAIN
+    }
+
+    const runner = await this.runnerRepository.findOneOrFail({
+      where: {
+        id: snapshot.initialRunnerId,
+      },
+    })
+
+    const runnerAdapter = await this.runnerAdapterFactory.create(runner)
+
+    const initialImageRefOnRunner = snapshot.buildInfo ? snapshot.buildInfo.snapshotRef : snapshot.imageName
+
+    const snapshotInfoResponse = await runnerAdapter.getSnapshotInfo(initialImageRefOnRunner)
+
+    // Process snapshot info in case it had failed or it's a build snapshot
+    if (!snapshot.ref) {
+      await this.processSnapshotInfo(snapshot, snapshotInfoResponse)
     }
 
     try {
-      const excludedRunnerIds = await this.runnerService.getRunnersWithMultipleSnapshotsBuilding()
+      await runnerAdapter.removeSnapshot(snapshot.imageName)
+    } catch (error) {
+      this.logger.error(`Failed to remove snapshot ${snapshot.imageName}: ${fromAxiosError(error)}`)
+    }
 
-      // Find a runner to build the snapshot on
-      const runner = await this.runnerService.getRandomAvailableRunner({
-        excludedRunnerIds: excludedRunnerIds,
-      })
-
-      // TODO: get only runners where the base snapshot is available (extract from buildInfo)
-
-      if (!runner) {
-        // No ready runners available, retry later
-        return
-      }
-
-      // Assign the runner ID to the snapshot for tracking build progress
-      snapshot.buildRunnerId = runner.id
+    if (!snapshot.skipValidation) {
+      snapshot.state = SnapshotState.VALIDATING
       await this.snapshotRepository.save(snapshot)
 
+      await this.validateSandboxCreationOnRunner(snapshot, runner)
+    }
+
+    snapshot.state = SnapshotState.ACTIVE
+    await this.snapshotRepository.save(snapshot)
+
+    await this.runnerService.createSnapshotRunnerEntry(runner.id, snapshot.ref, SnapshotRunnerState.READY)
+
+    // Best effort removal of old snapshot from transient registry
+    const registry = await this.dockerRegistryService.findOneBySnapshotImageName(
+      snapshot.imageName,
+      snapshot.organizationId,
+    )
+    if (registry && registry.registryType === RegistryType.TRANSIENT) {
+      try {
+        await this.dockerRegistryService.removeImage(snapshot.imageName, registry.id)
+      } catch (error) {
+        if (error.statusCode === 404) {
+          //  image not found, just return
+          return DONT_SYNC_AGAIN
+        }
+        this.logger.error('Failed to remove transient image:', fromAxiosError(error))
+      }
+    }
+
+    return DONT_SYNC_AGAIN
+  }
+
+  async validateSandboxCreationOnRunner(snapshot: Snapshot, runner: Runner) {
+    const runnerAdapter = await this.runnerAdapterFactory.create(runner)
+
+    const sandbox = new Sandbox()
+    sandbox.id = uuidv4()
+    sandbox.snapshot = snapshot.ref
+    sandbox.osUser = 'root'
+    sandbox.disk = snapshot.disk
+    sandbox.mem = snapshot.mem
+    sandbox.cpu = snapshot.cpu
+    sandbox.organizationId = snapshot.organizationId
+    sandbox.runnerId = runner.id
+    sandbox.labels = {
+      DAYTONA_VALIDATING_SNAPSHOT_ID: snapshot.id,
+    }
+
+    const registry = await this.dockerRegistryService.getDefaultInternalRegistry()
+    await runnerAdapter.createSandbox(sandbox, registry, snapshot.entrypoint)
+
+    // Wait for 5 seconds to ensure the sandbox hasn't exited
+    await new Promise((resolve) => setTimeout(resolve, 5000))
+
+    const sandboxInfo = await runnerAdapter.sandboxInfo(sandbox.id)
+    if (sandboxInfo.state === SandboxState.STARTED) {
+      await this.updateSnapshotState(snapshot.id, SnapshotState.ACTIVE)
+    } else {
+      await this.updateSnapshotState(snapshot.id, SnapshotState.ERROR, 'Snapshot validation failed')
+    }
+
+    try {
+      await runnerAdapter.destroySandbox(sandbox.id)
+    } catch (error) {
+      this.logger.error(`Failed to destroy sandbox ${sandbox.id}: ${fromAxiosError(error)}`)
+    }
+  }
+
+  async processPullOnInitialRunner(snapshot: Snapshot, runner: Runner) {
+    const sourceRegistry = await this.dockerRegistryService.findOneBySnapshotImageName(
+      snapshot.imageName,
+      snapshot.organizationId,
+    )
+    const destinationRegistry = await this.dockerRegistryService.getDefaultInternalRegistry()
+
+    // Using image name for pull instead of the ref
+    try {
+      await this.pullSnapshotRunnerWithRetries(runner, snapshot.imageName, sourceRegistry, destinationRegistry)
+    } catch (err) {
+      if (err.code !== 'ECONNRESET') {
+        await this.updateSnapshotState(snapshot.id, SnapshotState.ERROR, err.message)
+        throw err
+      }
+      // TODO: check if retry
+      return
+    }
+  }
+
+  async processBuildOnRunner(snapshot: Snapshot, runner: Runner) {
+    // todo: split dockerfile by FROM's and pass all docker registry creds to the building process
+
+    try {
       const registry = await this.dockerRegistryService.getDefaultInternalRegistry()
 
       const runnerAdapter = await this.runnerAdapterFactory.create(runner)
 
       await runnerAdapter.buildSnapshot(snapshot.buildInfo, snapshot.organizationId, registry, true)
 
-      // save snapshotRunner
+      // // save snapshotRunner
 
-      const internalSnapshotName = `${registry.url}/${registry.project}/${snapshot.buildInfo.snapshotRef}`
+      // const snapshotRef = `${registry.url}/${registry.project}/${snapshot.buildInfo.snapshotRef}`
 
-      snapshot.internalName = internalSnapshotName
-      await this.snapshotRepository.save(snapshot)
+      // snapshot.ref = snapshotRef
+      // await this.snapshotRepository.save(snapshot)
 
-      // Wait for 30 seconds because of Harbor's delay at making newly created snapshots available
-      await new Promise((resolve) => setTimeout(resolve, 30000))
-
-      // Move to next state
-      await this.updateSnapshotState(snapshot.id, SnapshotState.PENDING)
+      // // Wait for 30 seconds because of Harbor's delay at making newly created snapshots available
+      // await new Promise((resolve) => setTimeout(resolve, 30000))
     } catch (err) {
       if (err.code === 'ECONNRESET') {
         // Connection reset, retry later
@@ -576,228 +653,34 @@ export class SnapshotManager {
     }
   }
 
-  async handleSnapshotStatePending(snapshot: Snapshot) {
-    let dockerRegistry: DockerRegistry
+  async handleSnapshotStatePending(snapshot: Snapshot): Promise<SyncState> {
+    // TODO: get only runners where the base snapshot is available (extract from buildInfo)
+    const excludedRunnerIds = snapshot.buildInfo
+      ? await this.runnerService.getRunnersWithMultipleSnapshotsBuilding()
+      : await this.runnerService.getRunnersWithMultipleSnapshotsPulling()
 
-    await this.updateSnapshotState(snapshot.id, SnapshotState.PULLING)
+    const initialRunner = await this.runnerService.getRandomAvailableRunner({
+      region: DEFAULT_INITIAL_RUNNER_REGION,
+      excludedRunnerIds: excludedRunnerIds,
+    })
 
-    let localImageName = snapshot.imageName
+    if (!initialRunner) {
+      // No runners available, retry later
+      return DONT_SYNC_AGAIN
+    }
+
+    snapshot.initialRunnerId = initialRunner.id
+    await this.snapshotRepository.save(snapshot)
 
     if (snapshot.buildInfo) {
-      //  get the default internal registry
-      dockerRegistry = await this.dockerRegistryService.getDefaultInternalRegistry()
-      localImageName = snapshot.internalName
+      await this.updateSnapshotState(snapshot.id, SnapshotState.BUILDING)
+      await this.processBuildOnRunner(snapshot, initialRunner)
     } else {
-      //  find docker registry based on snapshot name and organization id
-      dockerRegistry = await this.dockerRegistryService.findOneBySnapshotImageName(
-        snapshot.imageName,
-        snapshot.organizationId,
-      )
+      await this.updateSnapshotState(snapshot.id, SnapshotState.PULLING)
+      await this.processPullOnInitialRunner(snapshot, initialRunner)
     }
 
-    // Use the dockerRegistry for pulling the snapshot
-    await this.dockerProvider.pullImage(localImageName, dockerRegistry)
-  }
-
-  async handleSnapshotStatePulling(snapshot: Snapshot) {
-    const localImageName = snapshot.buildInfo ? snapshot.internalName : snapshot.imageName
-    // Check timeout first
-    const timeoutMinutes = 15
-    const timeoutMs = timeoutMinutes * 60 * 1000
-    if (Date.now() - snapshot.createdAt.getTime() > timeoutMs) {
-      await this.updateSnapshotState(snapshot.id, SnapshotState.ERROR, 'Timeout while pulling snapshot')
-      return
-    }
-
-    const exists = await this.dockerProvider.imageExists(localImageName)
-    if (!exists) {
-      //  retry until the snapshot exists (or eventually timeout)
-      return
-    }
-
-    //  sleep for 30 seconds
-    //  workaround for docker snapshot not being ready, but exists
-    await new Promise((resolve) => setTimeout(resolve, 30000))
-
-    //  get the organization
-    const organization = await this.organizationService.findOne(snapshot.organizationId)
-    if (!organization) {
-      throw new NotFoundException(`Organization with ID ${snapshot.organizationId} not found`)
-    }
-
-    // Check snapshot size
-    const snapshotInfo = await this.dockerProvider.getImageInfo(localImageName)
-    const MAX_SIZE_GB = organization.maxSnapshotSize
-
-    if (snapshotInfo.sizeGB > MAX_SIZE_GB) {
-      await this.updateSnapshotState(
-        snapshot.id,
-        SnapshotState.ERROR,
-        `Snapshot size (${snapshotInfo.sizeGB.toFixed(2)}GB) exceeds maximum allowed size of ${MAX_SIZE_GB}GB`,
-      )
-      return
-    }
-
-    snapshot.size = snapshotInfo.sizeGB
-    snapshot.state = SnapshotState.PENDING_VALIDATION
-
-    // Ensure entrypoint is set
-    if (!snapshot.entrypoint) {
-      if (snapshotInfo.entrypoint) {
-        if (Array.isArray(snapshotInfo.entrypoint)) {
-          snapshot.entrypoint = snapshotInfo.entrypoint
-        } else {
-          snapshot.entrypoint = [snapshotInfo.entrypoint]
-        }
-      } else {
-        snapshot.entrypoint = ['sleep', 'infinity']
-      }
-    }
-
-    await this.snapshotRepository.save(snapshot)
-  }
-
-  async handleSnapshotStatePendingValidation(snapshot: Snapshot) {
-    try {
-      await this.updateSnapshotState(snapshot.id, SnapshotState.VALIDATING)
-
-      await this.validateSnapshotRuntime(snapshot.id)
-
-      if (!snapshot.buildInfo) {
-        // Snapshots that have gone through the build process are already in the internal registry
-        const internalSnapshotName = await this.pushSnapshotToInternalRegistry(snapshot.id)
-        snapshot.internalName = internalSnapshotName
-      }
-      const runner = await this.runnerRepository.findOne({
-        where: {
-          state: RunnerState.READY,
-          unschedulable: Not(true),
-          used: Raw((alias) => `${alias} < capacity`),
-        },
-      })
-      // Propagate snapshot to one runner so it can be used immediately
-      if (runner) {
-        await this.propagateSnapshotToRunner(snapshot.internalName, runner)
-      }
-      await this.updateSnapshotState(snapshot.id, SnapshotState.ACTIVE)
-
-      // Best effort removal of old snapshot from transient registry
-      const registry = await this.dockerRegistryService.findOneBySnapshotImageName(
-        snapshot.imageName,
-        snapshot.organizationId,
-      )
-      if (registry && registry.registryType === RegistryType.TRANSIENT) {
-        try {
-          await this.dockerRegistryService.removeImage(snapshot.imageName, registry.id)
-        } catch (error) {
-          if (error.statusCode === 404) {
-            //  snapshot not found, just return
-            return
-          }
-          this.logger.error('Failed to remove old snapshot:', fromAxiosError(error))
-        }
-      }
-    } catch (error) {
-      // workaround when app runners don't use a single docker host instance
-      if (error.statusCode === 404 || error.message?.toLowerCase().includes('no such snapshot')) {
-        return
-      }
-      await this.updateSnapshotState(snapshot.id, SnapshotState.ERROR, error.message)
-    }
-  }
-
-  async handleSnapshotStateValidating(snapshot: Snapshot) {
-    //  check the timeout
-    const timeoutMinutes = 10
-    const timeoutMs = timeoutMinutes * 60 * 1000
-    if (Date.now() - snapshot.createdAt.getTime() > timeoutMs) {
-      await this.updateSnapshotState(snapshot.id, SnapshotState.ERROR, 'Timeout while validating snapshot')
-      return
-    }
-  }
-
-  async validateSnapshotRuntime(snapshotId: string): Promise<void> {
-    const snapshot = await this.snapshotRepository.findOneOrFail({
-      where: {
-        id: snapshotId,
-      },
-    })
-
-    let containerId: string | null = null
-
-    try {
-      const localImageName = snapshot.buildInfo ? snapshot.internalName : snapshot.imageName
-
-      // Create and start the container
-      containerId = await this.dockerProvider.create(localImageName, snapshot.entrypoint)
-
-      // Wait for 1 minute while checking container state
-      const startTime = Date.now()
-      const checkDuration = 60 * 1000 // 1 minute in milliseconds
-
-      while (Date.now() - startTime < checkDuration) {
-        const isRunning = await this.dockerProvider.isRunning(containerId)
-        if (!isRunning) {
-          throw new Error('Container exited')
-        }
-        await new Promise((resolve) => setTimeout(resolve, 2000))
-      }
-    } catch (error) {
-      this.logger.debug('Error validating snapshot runtime:', error)
-      throw error
-    } finally {
-      // Cleanup: Destroy the container
-      if (containerId) {
-        try {
-          await this.dockerProvider.remove(containerId)
-        } catch (cleanupError) {
-          this.logger.error('Error cleaning up container:', fromAxiosError(cleanupError))
-        }
-      }
-    }
-  }
-
-  async pushSnapshotToInternalRegistry(snapshotId: string): Promise<string> {
-    const snapshot = await this.snapshotRepository.findOneOrFail({
-      where: {
-        id: snapshotId,
-      },
-    })
-
-    const registry = await this.dockerRegistryService.getDefaultInternalRegistry()
-    if (!registry) {
-      throw new Error('No default internal registry configured')
-    }
-
-    //  get tag from snapshot name
-    const tag = snapshot.imageName.split(':')[1]
-    const internalSnapshotName = `${registry.url.replace(/^(https?:\/\/)/, '')}/${registry.project}/${snapshot.id}:${tag}`
-
-    snapshot.internalName = internalSnapshotName
-    await this.snapshotRepository.save(snapshot)
-
-    // Tag the snapshot with the internal registry name
-    await this.dockerProvider.tagImage(snapshot.imageName, internalSnapshotName)
-
-    // Push the newly tagged snapshot
-    await this.dockerProvider.pushImage(internalSnapshotName, registry)
-
-    return internalSnapshotName
-  }
-
-  async retrySnapshotRunnerPull(snapshotRunner: SnapshotRunner) {
-    const runner = await this.runnerRepository.findOneOrFail({
-      where: {
-        id: snapshotRunner.runnerId,
-      },
-    })
-
-    const runnerAdapter = await this.runnerAdapterFactory.create(runner)
-
-    const dockerRegistry = await this.dockerRegistryService.getDefaultInternalRegistry()
-    //  await this.redis.setex(lockKey, 360, this.instanceId)
-
-    await runnerAdapter.pullSnapshot(snapshotRunner.snapshotRef, dockerRegistry)
+    return SYNC_AGAIN
   }
 
   private async updateSnapshotState(snapshotId: string, state: SnapshotState, errorReason?: string) {
@@ -884,12 +767,12 @@ export class SnapshotManager {
       await this.snapshotRepository.update({ id: In(snapshotIds) }, { state: SnapshotState.INACTIVE })
 
       // Get internal names of deactivated snapshots
-      const internalNames = oldSnapshots.map((snapshot) => snapshot.internalName).filter((name) => name) // Filter out null/undefined values
+      const refs = oldSnapshots.map((snapshot) => snapshot.ref).filter((name) => name) // Filter out null/undefined values
 
-      if (internalNames.length > 0) {
+      if (refs.length > 0) {
         // Set associated SnapshotRunner records to REMOVING state
         const result = await this.snapshotRunnerRepository.update(
-          { snapshotRef: In(internalNames) },
+          { snapshotRef: In(refs) },
           { state: SnapshotRunnerState.REMOVING },
         )
 
@@ -946,5 +829,52 @@ export class SnapshotManager {
     } finally {
       await this.redisLockProvider.unlock(lockKey)
     }
+  }
+
+  private async processSnapshotInfo(snapshot: Snapshot, snapshotInfoResponse: RunnerSnapshotInfo) {
+    const defaultInternalRegistry = await this.dockerRegistryService.getDefaultInternalRegistry()
+    snapshot.ref = `${defaultInternalRegistry.url}/${defaultInternalRegistry.project}/daytona-${snapshotInfoResponse.hash}:daytona`
+
+    const organization = await this.organizationService.findOne(snapshot.organizationId)
+    if (!organization) {
+      throw new NotFoundException(`Organization with ID ${snapshot.organizationId} not found`)
+    }
+
+    const MAX_SIZE_GB = organization.maxSnapshotSize
+
+    if (snapshotInfoResponse.sizeGB > MAX_SIZE_GB) {
+      await this.updateSnapshotState(
+        snapshot.id,
+        SnapshotState.ERROR,
+        `Snapshot size (${snapshotInfoResponse.sizeGB.toFixed(2)}GB) exceeds maximum allowed size of ${MAX_SIZE_GB}GB`,
+      )
+      return DONT_SYNC_AGAIN
+    }
+
+    snapshot.size = snapshotInfoResponse.sizeGB
+
+    // Ensure entrypoint is set
+    if (!snapshot.entrypoint) {
+      if (snapshotInfoResponse.entrypoint) {
+        if (Array.isArray(snapshotInfoResponse.entrypoint)) {
+          snapshot.entrypoint = snapshotInfoResponse.entrypoint
+        } else {
+          snapshot.entrypoint = [snapshotInfoResponse.entrypoint]
+        }
+      } else if (snapshotInfoResponse.cmd) {
+        if (Array.isArray(snapshotInfoResponse.cmd)) {
+          snapshot.entrypoint = snapshotInfoResponse.cmd
+        } else {
+          snapshot.entrypoint = [snapshotInfoResponse.cmd]
+        }
+      } else {
+        snapshot.entrypoint = ['sleep', 'infinity']
+      }
+    }
+  }
+
+  @OnEvent(SnapshotEvents.CREATED)
+  private async handleSnapshotCreatedEvent(event: SnapshotCreatedEvent) {
+    this.syncSnapshotState(event.snapshot.id).catch(this.logger.error)
   }
 }

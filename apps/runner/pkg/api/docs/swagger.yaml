@@ -105,10 +105,12 @@ definitions:
     type: object
   PullSnapshotRequestDTO:
     properties:
-      registry:
+      destinationRegistry:
         $ref: '#/definitions/RegistryDTO'
       snapshot:
         type: string
+      sourceRegistry:
+        $ref: '#/definitions/RegistryDTO'
     required:
       - snapshot
     type: object
@@ -173,6 +175,34 @@ definitions:
       exists:
         example: true
         type: boolean
+    type: object
+  SnapshotInfoResponse:
+    properties:
+      cmd:
+        example:
+          - '["nginx"'
+          - '"-g"'
+          - '"daemon off;"]'
+        items:
+          type: string
+        type: array
+      entrypoint:
+        example:
+          - '["nginx"'
+          - '"-g"'
+          - '"daemon off;"]'
+        items:
+          type: string
+        type: array
+      hash:
+        example: a7be6198544f09a75b26e6376459b47c5b9972e7351d440e092c4faa9ea064ff
+        type: string
+      name:
+        example: nginx:latest
+        type: string
+      sizeGB:
+        example: 0.13
+        type: number
     type: object
   dto.VolumeDTO:
     properties:
@@ -787,12 +817,48 @@ paths:
       summary: Check if a snapshot exists
       tags:
         - snapshots
+  /snapshots/info:
+    get:
+      description: Get information about a specified snapshot including size and entrypoint
+      operationId: GetSnapshotInfo
+      parameters:
+        - description: Snapshot name and tag
+          in: query
+          name: snapshot
+          required: true
+          type: string
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/SnapshotInfoResponse'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Get snapshot information
+      tags:
+        - snapshots
   /snapshots/logs:
     get:
       description: Stream build logs
       operationId: GetBuildLogs
       parameters:
-        - description: Snapshot ID or snapshot ref without the tag
+        - description: Snapshot ref
           in: query
           name: snapshotRef
           required: true
@@ -827,7 +893,8 @@ paths:
         - snapshots
   /snapshots/pull:
     post:
-      description: Pull a snapshot from a registry
+      description: Pull a snapshot from a registry and optionally push to another
+        registry
       operationId: PullSnapshot
       parameters:
         - description: Pull snapshot

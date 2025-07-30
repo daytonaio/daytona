@@ -5,7 +5,7 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { useApi } from '@/hooks/useApi'
-import { Plus } from 'lucide-react'
+import { Plus, X } from 'lucide-react'
 import {
   SnapshotDto,
   SnapshotState,
@@ -29,6 +29,7 @@ import { toast } from 'sonner'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { useNotificationSocket } from '@/hooks/useNotificationSocket'
 import { Label } from '@/components/ui/label'
+import { Checkbox } from '@/components/ui/checkbox'
 import { handleApiError } from '@/lib/error-handling'
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 
@@ -56,6 +57,7 @@ const Snapshots: React.FC = () => {
   const [cpu, setCpu] = useState<number | undefined>(undefined)
   const [memory, setMemory] = useState<number | undefined>(undefined)
   const [disk, setDisk] = useState<number | undefined>(undefined)
+  const [skipValidation, setSkipValidation] = useState(false)
 
   const { selectedOrganization, authenticatedUserHasPermission } = useSelectedOrganization()
 
@@ -228,13 +230,15 @@ const Snapshots: React.FC = () => {
           cpu,
           memory,
           disk,
+          skipValidation,
         },
         selectedOrganization?.id,
       )
       setShowCreateDialog(false)
       setNewSnapshotName('')
-      setNewImageName('') // Add this line to clear the image name
+      setNewImageName('')
       setNewEntrypoint('')
+      setSkipValidation(false)
       toast.success(`Creating snapshot ${newSnapshotName}`)
 
       if (paginationParams.pageIndex !== 0) {
@@ -379,6 +383,7 @@ const Snapshots: React.FC = () => {
           setCpu(undefined)
           setMemory(undefined)
           setDisk(undefined)
+          setSkipValidation(false)
         }}
       >
         <div className="mb-2 h-12 flex items-center justify-between">
@@ -495,6 +500,16 @@ const Snapshots: React.FC = () => {
                 <p className="text-sm text-muted-foreground mt-1 pl-1">
                   If not specified, default values will be used (1 vCPU, 1 GiB memory, 3 GiB storage).
                 </p>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="skip-validation"
+                  checked={skipValidation}
+                  onCheckedChange={(checked) => setSkipValidation(!!checked)}
+                />
+                <Label htmlFor="skip-validation" className="text-sm">
+                  Skip validation
+                </Label>
               </div>
             </form>
             <DialogFooter>

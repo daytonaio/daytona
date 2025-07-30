@@ -31,6 +31,7 @@ export const STATE_ICONS: Record<SandboxState, React.ReactNode> = {
   [SandboxState.BUILD_FAILED]: <Square color="bg-destructive" />,
   [SandboxState.BUILDING_SNAPSHOT]: <Loader2 className="w-3 h-3 animate-spin" />,
   [SandboxState.PULLING_SNAPSHOT]: <Loader2 className="w-3 h-3 animate-spin" />,
+  [SandboxState.PENDING_PULL]: <Loader2 className="w-3 h-3 animate-spin" />,
   [SandboxState.PENDING_BUILD]: <Square color="bg-muted-foreground/20" />,
   [SandboxState.ARCHIVING]: <Loader2 className="w-3 h-3 animate-spin" />,
   [SandboxState.ARCHIVED]: <Square color="bg-muted-foreground/20" />,

@@ -27,7 +27,6 @@ class SnapshotState(str, Enum):
     """
     allowed enum values
     """
-    BUILD_PENDING = 'build_pending'
     BUILDING = 'building'
     PENDING = 'pending'
     PULLING = 'pulling'

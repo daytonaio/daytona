@@ -124,6 +124,7 @@ func (a *ApiServer) Start() error {
 		snapshotController.POST("/pull", controllers.PullSnapshot)
 		snapshotController.POST("/build", controllers.BuildSnapshot)
 		snapshotController.GET("/exists", controllers.SnapshotExists)
+		snapshotController.GET("/info", controllers.GetSnapshotInfo)
 		snapshotController.POST("/remove", controllers.RemoveSnapshot)
 		snapshotController.GET("/logs", controllers.GetBuildLogs)
 	}
