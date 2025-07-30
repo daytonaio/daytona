@@ -400,7 +400,7 @@ export class FileSystem {
     const FormDataClass =
       RUNTIME === Runtime.DENO
         ? FormData
-        : (await dynamicImport('form-data', 'Uploading files is not supported: ')).default
+        : ((await dynamicImport('form-data', 'Uploading files is not supported: ')) as any)
     const form = new FormDataClass()
     const rootDir = await this.getRootDir()
 
