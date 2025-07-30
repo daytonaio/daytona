@@ -140,6 +140,49 @@ main();
 All resource parameters are optional. If not specified, Daytona will use default values appropriate for the selected language and use case.
 :::
 
+### Network Settings
+
+Daytona Sandboxes provide configurable network access controls to enhance security and manage connectivity. By default, network access follows standard security policies, but you can customize network settings when creating a Sandbox.
+
+<Tabs>
+<TabItem label="Python" icon="seti:python">
+```python
+from daytona import Daytona, CreateSandboxFromSnapshotParams
+
+daytona = Daytona()
+
+# Explicitly allow list of network addresses
+
+params = CreateSandboxFromSnapshotParams(
+    network_allow_all=False,
+    network_allow_list="192.168.1.0/24,10.0.0.0/24"
+)
+sandbox = daytona.create(params)
+
+```
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+```typescript
+import { Daytona } from '@daytonaio/sdk';
+
+const daytona = new Daytona();
+
+// Explicitly allow list of network addresses
+const sandbox = await daytona.create({
+  networkAllowAll: false,
+  networkAllowList: '192.168.1.0/24,10.0.0.0/24'
+});
+```
+
+</TabItem>
+</Tabs>
+
+:::note
+Enabling `networkAllowAll` allows unrestricted network access, which may pose security risks. 
+It is recommended to whitelist specific network addresses using `networkAllowList` instead. 
+This setting accepts `/24` CIDR blocks in a comma-separated format.
+:::
+
 ## Sandbox Information
 
 The Daytona SDK provides methods to get information about a Sandbox, such as ID, root directory, and status using Python and TypeScript.
