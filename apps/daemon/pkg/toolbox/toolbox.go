@@ -109,6 +109,9 @@ func (s *Server) Start() error {
 		fsController.GET("/info", fs.GetFileInfo)
 		fsController.GET("/search", fs.SearchFiles)
 
+		// file watching (WebSocket)
+		fsController.GET("/watch", fs.WatchFiles)
+
 		// create/modify operations
 		fsController.POST("/folder", fs.CreateFolder)
 		fsController.POST("/move", fs.MoveFile)
