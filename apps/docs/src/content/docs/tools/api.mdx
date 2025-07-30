@@ -444,6 +444,14 @@ import Label from '@components/Label.astro'
 | **`204`** | Account unlinked successfully |
 
 
+## POST /users/mfa/sms/enroll
+
+### Responses
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | SMS MFA enrollment URL |
+
+
 ## GET /users/\{id\}
 
 ### Parameters
@@ -465,6 +473,7 @@ import Label from '@components/Label.astro'
 | **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
 | **`verbose`** | query | false | undefined | Include verbose output |
 | **`labels`** | query | false | undefined | JSON encoded labels to filter by |
+| **`includeErroredDeleted`** | query | false | undefined | Include errored and deleted sandboxes |
 
 ### Responses
 | Status Code | Description |
@@ -614,6 +623,21 @@ import Label from '@components/Label.astro'
 | **`200`** | Auto-archive interval has been set |
 
 
+## POST /sandbox/\{sandboxId\}/autodelete/\{interval\}
+
+### Parameters
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
+| **`sandboxId`** | path | true | undefined | ID of the sandbox |
+| **`interval`** | path | true | undefined | Auto-delete interval in minutes (negative value means disabled, 0 means delete immediately upon stopping) |
+
+### Responses
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | Auto-delete interval has been set |
+
+
 ## POST /sandbox/\{sandboxId\}/archive
 
 ### Parameters
@@ -699,12 +723,12 @@ import Label from '@components/Label.astro'
 | **`200`** | Runner found |
 
 
-## GET /runners/by-snapshot
+## GET /runners/by-snapshot-ref
 
 ### Parameters
 | Name | Location | Required | Type | Description |
 | :--- | :------- | :------- | :--- | :---------- |
-| **`internalName`** | query | true | undefined | Internal name of the snapshot |
+| **`ref`** | query | true | undefined | Snapshot ref |
 
 ### Responses
 | Status Code | Description |
@@ -1325,6 +1349,343 @@ The workspace symbol request is sent from the client to the server to list proje
 | **`200`** | OK |
 
 
+## POST /toolbox/\{sandboxId\}/toolbox/computeruse/start
+Start all VNC desktop processes (Xvfb, xfce4, x11vnc, novnc)
+
+### Parameters
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
+| **`sandboxId`** | path | true | undefined | undefined |
+
+### Responses
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | Computer use processes started successfully |
+
+
+## POST /toolbox/\{sandboxId\}/toolbox/computeruse/stop
+Stop all VNC desktop processes (Xvfb, xfce4, x11vnc, novnc)
+
+### Parameters
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
+| **`sandboxId`** | path | true | undefined | undefined |
+
+### Responses
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | Computer use processes stopped successfully |
+
+
+## GET /toolbox/\{sandboxId\}/toolbox/computeruse/status
+Get status of all VNC desktop processes
+
+### Parameters
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
+| **`sandboxId`** | path | true | undefined | undefined |
+
+### Responses
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | Computer use status retrieved successfully |
+
+
+## GET /toolbox/\{sandboxId\}/toolbox/computeruse/process/\{processName\}/status
+Get status of a specific VNC process
+
+### Parameters
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
+| **`processName`** | path | true | undefined | undefined |
+| **`sandboxId`** | path | true | undefined | undefined |
+
+### Responses
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | Process status retrieved successfully |
+
+
+## POST /toolbox/\{sandboxId\}/toolbox/computeruse/process/\{processName\}/restart
+Restart a specific VNC process
+
+### Parameters
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
+| **`processName`** | path | true | undefined | undefined |
+| **`sandboxId`** | path | true | undefined | undefined |
+
+### Responses
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | Process restarted successfully |
+
+
+## GET /toolbox/\{sandboxId\}/toolbox/computeruse/process/\{processName\}/logs
+Get logs for a specific VNC process
+
+### Parameters
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
+| **`processName`** | path | true | undefined | undefined |
+| **`sandboxId`** | path | true | undefined | undefined |
+
+### Responses
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | Process logs retrieved successfully |
+
+
+## GET /toolbox/\{sandboxId\}/toolbox/computeruse/process/\{processName\}/errors
+Get error logs for a specific VNC process
+
+### Parameters
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
+| **`processName`** | path | true | undefined | undefined |
+| **`sandboxId`** | path | true | undefined | undefined |
+
+### Responses
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | Process errors retrieved successfully |
+
+
+## GET /toolbox/\{sandboxId\}/toolbox/computeruse/mouse/position
+Get current mouse cursor position
+
+### Parameters
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
+| **`sandboxId`** | path | true | undefined | undefined |
+
+### Responses
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | Mouse position retrieved successfully |
+
+
+## POST /toolbox/\{sandboxId\}/toolbox/computeruse/mouse/move
+Move mouse cursor to specified coordinates
+
+### Parameters
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
+| **`sandboxId`** | path | true | undefined | undefined |
+
+### Responses
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | Mouse moved successfully |
+
+
+## POST /toolbox/\{sandboxId\}/toolbox/computeruse/mouse/click
+Click mouse at specified coordinates
+
+### Parameters
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
+| **`sandboxId`** | path | true | undefined | undefined |
+
+### Responses
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | Mouse clicked successfully |
+
+
+## POST /toolbox/\{sandboxId\}/toolbox/computeruse/mouse/drag
+Drag mouse from start to end coordinates
+
+### Parameters
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
+| **`sandboxId`** | path | true | undefined | undefined |
+
+### Responses
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | Mouse dragged successfully |
+
+
+## POST /toolbox/\{sandboxId\}/toolbox/computeruse/mouse/scroll
+Scroll mouse at specified coordinates
+
+### Parameters
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
+| **`sandboxId`** | path | true | undefined | undefined |
+
+### Responses
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | Mouse scrolled successfully |
+
+
+## POST /toolbox/\{sandboxId\}/toolbox/computeruse/keyboard/type
+Type text using keyboard
+
+### Parameters
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
+| **`sandboxId`** | path | true | undefined | undefined |
+
+### Responses
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | Text typed successfully |
+
+
+## POST /toolbox/\{sandboxId\}/toolbox/computeruse/keyboard/key
+Press a key with optional modifiers
+
+### Parameters
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
+| **`sandboxId`** | path | true | undefined | undefined |
+
+### Responses
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | Key pressed successfully |
+
+
+## POST /toolbox/\{sandboxId\}/toolbox/computeruse/keyboard/hotkey
+Press a hotkey combination
+
+### Parameters
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
+| **`sandboxId`** | path | true | undefined | undefined |
+
+### Responses
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | Hotkey pressed successfully |
+
+
+## GET /toolbox/\{sandboxId\}/toolbox/computeruse/screenshot
+Take a screenshot of the entire screen
+
+### Parameters
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
+| **`sandboxId`** | path | true | undefined | undefined |
+| **`show_cursor`** | query | false | undefined | undefined |
+
+### Responses
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | Screenshot taken successfully |
+
+
+## GET /toolbox/\{sandboxId\}/toolbox/computeruse/screenshot/region
+Take a screenshot of a specific region
+
+### Parameters
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
+| **`sandboxId`** | path | true | undefined | undefined |
+| **`show_cursor`** | query | false | undefined | undefined |
+| **`height`** | query | true | undefined | undefined |
+| **`width`** | query | true | undefined | undefined |
+| **`y`** | query | true | undefined | undefined |
+| **`x`** | query | true | undefined | undefined |
+
+### Responses
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | Region screenshot taken successfully |
+
+
+## GET /toolbox/\{sandboxId\}/toolbox/computeruse/screenshot/compressed
+Take a compressed screenshot with format, quality, and scale options
+
+### Parameters
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
+| **`sandboxId`** | path | true | undefined | undefined |
+| **`scale`** | query | false | undefined | undefined |
+| **`quality`** | query | false | undefined | undefined |
+| **`format`** | query | false | undefined | undefined |
+| **`show_cursor`** | query | false | undefined | undefined |
+
+### Responses
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | Compressed screenshot taken successfully |
+
+
+## GET /toolbox/\{sandboxId\}/toolbox/computeruse/screenshot/region/compressed
+Take a compressed screenshot of a specific region
+
+### Parameters
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
+| **`sandboxId`** | path | true | undefined | undefined |
+| **`scale`** | query | false | undefined | undefined |
+| **`quality`** | query | false | undefined | undefined |
+| **`format`** | query | false | undefined | undefined |
+| **`show_cursor`** | query | false | undefined | undefined |
+| **`height`** | query | true | undefined | undefined |
+| **`width`** | query | true | undefined | undefined |
+| **`y`** | query | true | undefined | undefined |
+| **`x`** | query | true | undefined | undefined |
+
+### Responses
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | Compressed region screenshot taken successfully |
+
+
+## GET /toolbox/\{sandboxId\}/toolbox/computeruse/display/info
+Get information about displays
+
+### Parameters
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
+| **`sandboxId`** | path | true | undefined | undefined |
+
+### Responses
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | Display info retrieved successfully |
+
+
+## GET /toolbox/\{sandboxId\}/toolbox/computeruse/display/windows
+Get list of open windows
+
+### Parameters
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
+| **`sandboxId`** | path | true | undefined | undefined |
+
+### Responses
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | Windows list retrieved successfully |
+
+
 ## POST /snapshots
 
 ### Parameters
@@ -1351,6 +1712,20 @@ The workspace symbol request is sent from the client to the server to list proje
 | Status Code | Description |
 | :-------- | :---------- |
 | **`200`** | List of all snapshots with pagination |
+
+
+## GET /snapshots/can-cleanup-image
+
+### Parameters
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
+| **`imageName`** | query | true | undefined | Image name with tag to check |
+
+### Responses
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | Boolean indicating if image can be cleaned up |
 
 
 ## GET /snapshots/\{id\}
@@ -1595,21 +1970,6 @@ The workspace symbol request is sent from the client to the server to list proje
 | Status Code | Description |
 | :-------- | :---------- |
 | **`200`** | Auto-archive interval has been set |
-
-
-## POST /sandbox/\{sandboxId\}/autodelete/\{interval\}
-
-### Parameters
-| Name | Location | Required | Type | Description |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
-| **`sandboxId`** | path | true | undefined | ID of the sandbox |
-| **`interval`** | path | true | undefined | Auto-delete interval in minutes (negative value means disabled, 0 means delete immediately upon stopping) |
-
-### Responses
-| Status Code | Description |
-| :-------- | :---------- |
-| **`200`** | Auto-delete interval has been set |
 
 
 ## POST /workspace/\{workspaceId\}/archive
@@ -1866,6 +2226,42 @@ The workspace symbol request is sent from the client to the server to list proje
 | Status Code | Description |
 | :-------- | :---------- |
 | **`200`** | Temporary storage access has been generated |
+
+
+## GET /audit
+
+### Parameters
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`limit`** | query | false | undefined | Number of items per page (default: 10) |
+| **`page`** | query | false | undefined | Page number (default: 1) |
+
+### Responses
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | Paginated list of all audit logs |
+
+## POST /audit
+
+### Responses
+| Status Code | Description |
+| :-------- | :---------- |
+| **`201`** | Audit log entry created successfully |
+
+
+## GET /audit/organizations/\{organizationId\}
+
+### Parameters
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`organizationId`** | path | true | undefined | Organization ID |
+| **`limit`** | query | false | undefined | Number of items per page (default: 10) |
+| **`page`** | query | false | undefined | Page number (default: 1) |
+
+### Responses
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | Paginated list of organization audit logs |
 
 
 
