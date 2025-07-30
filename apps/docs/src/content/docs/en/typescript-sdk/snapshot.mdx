@@ -28,6 +28,25 @@ new SnapshotService(snapshotsApi: SnapshotsApi, objectStorageApi: ObjectStorageA
 
 ### Methods
 
+#### activate()
+
+```ts
+activate(snapshot: Snapshot): Promise<Snapshot>
+```
+
+Activates a snapshot.
+
+**Parameters**:
+
+- `snapshot` _Snapshot_ - Snapshot to activate
+
+
+**Returns**:
+
+- `Promise<Snapshot>` - The activated Snapshot instance
+
+***
+
 #### create()
 
 ```ts

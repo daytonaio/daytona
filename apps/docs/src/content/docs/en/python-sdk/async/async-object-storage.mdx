@@ -17,12 +17,14 @@ AsyncObjectStorage class for interacting with object storage services.
 - `aws_access_key_id` _str_ - The access key ID for the object storage service.
 - `aws_secret_access_key` _str_ - The secret access key for the object storage service.
 - `aws_session_token` _str_ - The session token for the object storage service. Used for temporary credentials.
-- `bucket_name` _str_ - The name of the bucket to use.
+- `bucket_name` _str_ - The name of the bucket to use. Defaults to "daytona-volume-builds".
 
 #### AsyncObjectStorage.upload
 
 ```python
-async def upload(path, organization_id, archive_base_path=None) -> str
+async def upload(path: str,
+                 organization_id: str,
+                 archive_base_path: str | None = None) -> str
 ```
 
 Uploads a file to the object storage service.
@@ -32,5 +34,10 @@ Uploads a file to the object storage service.
 - `path` _str_ - The path to the file to upload.
 - `organization_id` _str_ - The organization ID to use.
 - `archive_base_path` _str_ - The base path to use for the archive.
+  
+
+**Returns**:
+
+- `str` - The hash of the uploaded file.
 
 

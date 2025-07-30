@@ -143,6 +143,22 @@ daytona.snapshot.create(
 )
 ```
 
+#### AsyncSnapshotService.activate
+
+```python
+async def activate(snapshot: Snapshot) -> Snapshot
+```
+
+snapshotをアクティベートします。
+
+**引数**:
+
+- `snapshot` _Snapshot_ - Snapshotインスタンス。
+
+**戻り値**:
+
+- `Snapshot` - アクティベートされたSnapshotインスタンス。
+
 #### AsyncSnapshotService.process\_image\_context
 
 ```python

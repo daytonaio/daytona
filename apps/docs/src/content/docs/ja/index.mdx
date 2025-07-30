@@ -36,14 +36,14 @@ Daytonaサンドボックスで最初のコード行を実行しましょう。A
 
 <Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
-```bash
-pip install daytona
-```
+  ```bash
+  pip install daytona
+  ```
   </TabItem>
   <TabItem label="TypeScript" icon="seti:typescript">
-```bash
-npm install @daytonaio/sdk
-```
+  ```bash
+  npm install @daytonaio/sdk
+  ```
   </TabItem>
 </Tabs>
 
@@ -51,8 +51,8 @@ npm install @daytonaio/sdk
 
 <Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
-  次の名前でファイルを作成します：`main.py`
-```python
+  `main.py`という名前のファイルを作成します：
+  ```python
   from daytona import Daytona, DaytonaConfig
 
 # 設定を定義
@@ -79,28 +79,28 @@ npm install @daytonaio/sdk
 
   sandbox.delete()
 
-```
+  ```
   </TabItem>
   <TabItem label="TypeScript" icon="seti:typescript">
-  次の名前でファイルを作成します：`index.mts`
-```typescript
-import { Daytona } from '@daytonaio/sdk';
+  `index.mts`という名前のファイルを作成します：
+  ```typescript
+  import { Daytona } from '@daytonaio/sdk';
 
-// Daytonaクライアントを初期化
-const daytona = new Daytona({ apiKey: 'your-api-key' });
+  // Daytonaクライアントを初期化
+  const daytona = new Daytona({ apiKey: 'your-api-key' });
 
-// サンドボックスインスタンスを作成
-const sandbox = await daytona.create({
-  language: 'typescript',
-});
+  // サンドボックスインスタンスを作成
+  const sandbox = await daytona.create({
+    language: 'typescript',
+  });
 
-// サンドボックス内でコードを安全に実行
-const response = await sandbox.process.codeRun('console.log("Hello World from code!")')
-console.log(response.result);
+  // サンドボックス内でコードを安全に実行
+  const response = await sandbox.process.codeRun('console.log("Hello World from code!")')
+  console.log(response.result);
 
-// クリーンアップ
-await sandbox.delete()
-```
+  // クリーンアップ
+  await sandbox.delete()
+  ```
 
   </TabItem>
 </Tabs>
@@ -113,14 +113,14 @@ await sandbox.delete()
 
 <Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
-```bash
-python main.py
-```
+  ```bash
+  python main.py
+  ```
   </TabItem>
   <TabItem label="TypeScript" icon="seti:typescript">
-```bash
-npx tsx index.mts
-```
+  ```bash
+  npx tsx index.mts
+  ```
   </TabItem>
 </Tabs>
 

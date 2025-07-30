@@ -208,20 +208,12 @@
     "objectID": 26
   },
   {
-    "title": "Check for charts in execution artifacts",
-    "description": "",
-    "tag": "Documentation",
-    "url": "/docs/en/data-analysis-with-ai#check-for-charts-in-execution-artifacts",
-    "slug": "/en/data-analysis-with-ai#check-for-charts-in-execution-artifacts",
-    "objectID": 27
-  },
-  {
     "title": "3.2 Creating the Analysis Prompt",
     "description": "Next, we'll create the prompt that tells Claude about our dataset and what analysis we want.",
     "tag": "Documentation",
     "url": "/docs/en/data-analysis-with-ai#32-creating-the-analysis-prompt",
     "slug": "/en/data-analysis-with-ai#32-creating-the-analysis-prompt",
-    "objectID": 28
+    "objectID": 27
   },
   {
     "title": "3.3 Tool Calling Setup",
@@ -229,7 +221,7 @@
     "tag": "Documentation",
     "url": "/docs/en/data-analysis-with-ai#33-tool-calling-setup",
     "slug": "/en/data-analysis-with-ai#33-tool-calling-setup",
-    "objectID": 29
+    "objectID": 28
   },
   {
     "title": "3.4 Response Processing",
@@ -237,7 +229,7 @@
     "tag": "Documentation",
     "url": "/docs/en/data-analysis-with-ai#34-response-processing",
     "slug": "/en/data-analysis-with-ai#34-response-processing",
-    "objectID": 30
+    "objectID": 29
   },
   {
     "title": "4. Running Your Analysis",
@@ -245,7 +237,7 @@
     "tag": "Documentation",
     "url": "/docs/en/data-analysis-with-ai#4-running-your-analysis",
     "slug": "/en/data-analysis-with-ai#4-running-your-analysis",
-    "objectID": 31
+    "objectID": 30
   },
   {
     "title": "5. Complete Implementation",
@@ -253,7 +245,7 @@
     "tag": "Documentation",
     "url": "/docs/en/data-analysis-with-ai#5-complete-implementation",
     "slug": "/en/data-analysis-with-ai#5-complete-implementation",
-    "objectID": 32
+    "objectID": 31
   },
   {
     "title": "Declarative Builder",
@@ -261,7 +253,7 @@
     "tag": "Documentation",
     "url": "/docs/en/declarative-builder",
     "slug": "/en/declarative-builder",
-    "objectID": 33
+    "objectID": 32
   },
   {
     "title": "Overview",
@@ -269,7 +261,7 @@
     "tag": "Documentation",
     "url": "/docs/en/declarative-builder#overview",
     "slug": "/en/declarative-builder#overview",
-    "objectID": 34
+    "objectID": 33
   },
   {
     "title": "Base Image Selection",
@@ -277,7 +269,7 @@
     "tag": "Documentation",
     "url": "/docs/en/declarative-builder#base-image-selection",
     "slug": "/en/declarative-builder#base-image-selection",
-    "objectID": 35
+    "objectID": 34
   },
   {
     "title": "Package Management",
@@ -285,7 +277,7 @@
     "tag": "Documentation",
     "url": "/docs/en/declarative-builder#package-management",
     "slug": "/en/declarative-builder#package-management",
-    "objectID": 36
+    "objectID": 35
   },
   {
     "title": "File System Operations",
@@ -293,7 +285,7 @@
     "tag": "Documentation",
     "url": "/docs/en/declarative-builder#file-system-operations",
     "slug": "/en/declarative-builder#file-system-operations",
-    "objectID": 37
+    "objectID": 36
   },
   {
     "title": "Environment Configuration",
@@ -301,7 +293,7 @@
     "tag": "Documentation",
     "url": "/docs/en/declarative-builder#environment-configuration",
     "slug": "/en/declarative-builder#environment-configuration",
-    "objectID": 38
+    "objectID": 37
   },
   {
     "title": "Dynamic Image Building",
@@ -309,7 +301,7 @@
     "tag": "Documentation",
     "url": "/docs/en/declarative-builder#dynamic-image-building",
     "slug": "/en/declarative-builder#dynamic-image-building",
-    "objectID": 39
+    "objectID": 38
   },
   {
     "title": "Define the dynamic image",
@@ -317,7 +309,7 @@
     "tag": "Documentation",
     "url": "/docs/en/declarative-builder#define-the-dynamic-image",
     "slug": "/en/declarative-builder#define-the-dynamic-image",
-    "objectID": 40
+    "objectID": 39
   },
   {
     "title": "Create a new Sandbox with the dynamic image and stream the build logs",
@@ -325,7 +317,7 @@
     "tag": "Documentation",
     "url": "/docs/en/declarative-builder#create-a-new-sandbox-with-the-dynamic-image-and-stream-the-build-logs",
     "slug": "/en/declarative-builder#create-a-new-sandbox-with-the-dynamic-image-and-stream-the-build-logs",
-    "objectID": 41
+    "objectID": 40
   },
   {
     "title": "Creating Pre-built Snapshots",
@@ -333,7 +325,7 @@
     "tag": "Documentation",
     "url": "/docs/en/declarative-builder#creating-pre-built-snapshots",
     "slug": "/en/declarative-builder#creating-pre-built-snapshots",
-    "objectID": 42
+    "objectID": 41
   },
   {
     "title": "Generate a unique name for the Snapshot",
@@ -341,7 +333,7 @@
     "tag": "Documentation",
     "url": "/docs/en/declarative-builder#generate-a-unique-name-for-the-snapshot",
     "slug": "/en/declarative-builder#generate-a-unique-name-for-the-snapshot",
-    "objectID": 43
+    "objectID": 42
   },
   {
     "title": "Create a local file with some data to add to the image",
@@ -349,7 +341,7 @@
     "tag": "Documentation",
     "url": "/docs/en/declarative-builder#create-a-local-file-with-some-data-to-add-to-the-image",
     "slug": "/en/declarative-builder#create-a-local-file-with-some-data-to-add-to-the-image",
-    "objectID": 44
+    "objectID": 43
   },
   {
     "title": "Create a Python image with common data science packages",
@@ -357,7 +349,7 @@
     "tag": "Documentation",
     "url": "/docs/en/declarative-builder#create-a-python-image-with-common-data-science-packages",
     "slug": "/en/declarative-builder#create-a-python-image-with-common-data-science-packages",
-    "objectID": 45
+    "objectID": 44
   },
   {
     "title": "Create the Snapshot and stream the build logs",
@@ -365,7 +357,7 @@
     "tag": "Documentation",
     "url": "/docs/en/declarative-builder#create-the-snapshot-and-stream-the-build-logs",
     "slug": "/en/declarative-builder#create-the-snapshot-and-stream-the-build-logs",
-    "objectID": 46
+    "objectID": 45
   },
   {
     "title": "Create a new Sandbox using the pre-built Snapshot",
@@ -373,7 +365,7 @@
     "tag": "Documentation",
     "url": "/docs/en/declarative-builder#create-a-new-sandbox-using-the-pre-built-snapshot",
     "slug": "/en/declarative-builder#create-a-new-sandbox-using-the-pre-built-snapshot",
-    "objectID": 47
+    "objectID": 46
   },
   {
     "title": "Using an Existing Dockerfile",
@@ -381,7 +373,7 @@
     "tag": "Documentation",
     "url": "/docs/en/declarative-builder#using-an-existing-dockerfile",
     "slug": "/en/declarative-builder#using-an-existing-dockerfile",
-    "objectID": 48
+    "objectID": 47
   },
   {
     "title": "Best Practices",
@@ -389,7 +381,7 @@
     "tag": "Documentation",
     "url": "/docs/en/declarative-builder#best-practices",
     "slug": "/en/declarative-builder#best-practices",
-    "objectID": 49
+    "objectID": 48
   },
   {
     "title": "File System Operations",
@@ -397,7 +389,7 @@
     "tag": "Documentation",
     "url": "/docs/en/file-system-operations",
     "slug": "/en/file-system-operations",
-    "objectID": 50
+    "objectID": 49
   },
   {
     "title": "Basic Operations",
@@ -405,7 +397,7 @@
     "tag": "Documentation",
     "url": "/docs/en/file-system-operations#basic-operations",
     "slug": "/en/file-system-operations#basic-operations",
-    "objectID": 51
+    "objectID": 50
   },
   {
     "title": "Listing Files and Directories",
@@ -413,7 +405,7 @@
     "tag": "Documentation",
     "url": "/docs/en/file-system-operations#listing-files-and-directories",
     "slug": "/en/file-system-operations#listing-files-and-directories",
-    "objectID": 52
+    "objectID": 51
   },
   {
     "title": "List files in a directory",
@@ -421,7 +413,7 @@
     "tag": "Documentation",
     "url": "/docs/en/file-system-operations#list-files-in-a-directory",
     "slug": "/en/file-system-operations#list-files-in-a-directory",
-    "objectID": 53
+    "objectID": 52
   },
   {
     "title": "Creating Directories",
@@ -429,7 +421,7 @@
     "tag": "Documentation",
     "url": "/docs/en/file-system-operations#creating-directories",
     "slug": "/en/file-system-operations#creating-directories",
-    "objectID": 54
+    "objectID": 53
   },
   {
     "title": "Create with specific permissions",
@@ -437,7 +429,7 @@
     "tag": "Documentation",
     "url": "/docs/en/file-system-operations#create-with-specific-permissions",
     "slug": "/en/file-system-operations#create-with-specific-permissions",
-    "objectID": 55
+    "objectID": 54
   },
   {
     "title": "Uploading Files",
@@ -445,7 +437,7 @@
     "tag": "Documentation",
     "url": "/docs/en/file-system-operations#uploading-files",
     "slug": "/en/file-system-operations#uploading-files",
-    "objectID": 56
+    "objectID": 55
   },
   {
     "title": "Uploading a Single File",
@@ -453,7 +445,7 @@
     "tag": "Documentation",
     "url": "/docs/en/file-system-operations#uploading-a-single-file",
     "slug": "/en/file-system-operations#uploading-a-single-file",
-    "objectID": 57
+    "objectID": 56
   },
   {
     "title": "Upload a single file",
@@ -461,7 +453,7 @@
     "tag": "Documentation",
     "url": "/docs/en/file-system-operations#upload-a-single-file",
     "slug": "/en/file-system-operations#upload-a-single-file",
-    "objectID": 58
+    "objectID": 57
   },
   {
     "title": "Uploading Multiple Files",
@@ -469,7 +461,7 @@
     "tag": "Documentation",
     "url": "/docs/en/file-system-operations#uploading-multiple-files",
     "slug": "/en/file-system-operations#uploading-multiple-files",
-    "objectID": 59
+    "objectID": 58
   },
   {
     "title": "Upload multiple files at once",
@@ -477,7 +469,7 @@
     "tag": "Documentation",
     "url": "/docs/en/file-system-operations#upload-multiple-files-at-once",
     "slug": "/en/file-system-operations#upload-multiple-files-at-once",
-    "objectID": 60
+    "objectID": 59
   },
   {
     "title": "Downloading Files",
@@ -485,7 +477,7 @@
     "tag": "Documentation",
     "url": "/docs/en/file-system-operations#downloading-files",
     "slug": "/en/file-system-operations#downloading-files",
-    "objectID": 61
+    "objectID": 60
   },
   {
     "title": "Deleting files",
@@ -493,7 +485,7 @@
     "tag": "Documentation",
     "url": "/docs/en/file-system-operations#deleting-files",
     "slug": "/en/file-system-operations#deleting-files",
-    "objectID": 62
+    "objectID": 61
   },
   {
     "title": "Advanced Operations",
@@ -501,7 +493,7 @@
     "tag": "Documentation",
     "url": "/docs/en/file-system-operations#advanced-operations",
     "slug": "/en/file-system-operations#advanced-operations",
-    "objectID": 63
+    "objectID": 62
   },
   {
     "title": "File Permissions",
@@ -509,7 +501,7 @@
     "tag": "Documentation",
     "url": "/docs/en/file-system-operations#file-permissions",
     "slug": "/en/file-system-operations#file-permissions",
-    "objectID": 64
+    "objectID": 63
   },
   {
     "title": "Set file permissions",
@@ -517,7 +509,7 @@
     "tag": "Documentation",
     "url": "/docs/en/file-system-operations#set-file-permissions",
     "slug": "/en/file-system-operations#set-file-permissions",
-    "objectID": 65
+    "objectID": 64
   },
   {
     "title": "Get file permissions",
@@ -525,7 +517,7 @@
     "tag": "Documentation",
     "url": "/docs/en/file-system-operations#get-file-permissions",
     "slug": "/en/file-system-operations#get-file-permissions",
-    "objectID": 66
+    "objectID": 65
   },
   {
     "title": "File Search and Replace",
@@ -533,7 +525,7 @@
     "tag": "Documentation",
     "url": "/docs/en/file-system-operations#file-search-and-replace",
     "slug": "/en/file-system-operations#file-search-and-replace",
-    "objectID": 67
+    "objectID": 66
   },
   {
     "title": "Search for text in files; if a folder is specified, the search is recursive",
@@ -541,7 +533,7 @@
     "tag": "Documentation",
     "url": "/docs/en/file-system-operations#search-for-text-in-files-if-a-folder-is-specified-the-search-is-recursive",
     "slug": "/en/file-system-operations#search-for-text-in-files-if-a-folder-is-specified-the-search-is-recursive",
-    "objectID": 68
+    "objectID": 67
   },
   {
     "title": "Replace text in files",
@@ -549,7 +541,7 @@
     "tag": "Documentation",
     "url": "/docs/en/file-system-operations#replace-text-in-files",
     "slug": "/en/file-system-operations#replace-text-in-files",
-    "objectID": 69
+    "objectID": 68
   },
   {
     "title": "Getting Started",
@@ -557,7 +549,7 @@
     "tag": "Documentation",
     "url": "/docs/en/getting-started",
     "slug": "/en/getting-started",
-    "objectID": 70
+    "objectID": 69
   },
   {
     "title": "Install the Daytona SDK",
@@ -565,7 +557,7 @@
     "tag": "Documentation",
     "url": "/docs/en/getting-started#install-the-daytona-sdk",
     "slug": "/en/getting-started#install-the-daytona-sdk",
-    "objectID": 71
+    "objectID": 70
   },
   {
     "title": "Using npm",
@@ -573,7 +565,7 @@
     "tag": "Documentation",
     "url": "/docs/en/getting-started#using-npm",
     "slug": "/en/getting-started#using-npm",
-    "objectID": 72
+    "objectID": 71
   },
   {
     "title": "Using yarn",
@@ -581,7 +573,7 @@
     "tag": "Documentation",
     "url": "/docs/en/getting-started#using-yarn",
     "slug": "/en/getting-started#using-yarn",
-    "objectID": 73
+    "objectID": 72
   },
   {
     "title": "Using pnpm",
@@ -589,7 +581,7 @@
     "tag": "Documentation",
     "url": "/docs/en/getting-started#using-pnpm",
     "slug": "/en/getting-started#using-pnpm",
-    "objectID": 74
+    "objectID": 73
   },
   {
     "title": "Run Code Inside a Sandbox",
@@ -597,7 +589,7 @@
     "tag": "Documentation",
     "url": "/docs/en/getting-started#run-code-inside-a-sandbox",
     "slug": "/en/getting-started#run-code-inside-a-sandbox",
-    "objectID": 75
+    "objectID": 74
   },
   {
     "title": "Initialize the Daytona client",
@@ -605,7 +597,7 @@
     "tag": "Documentation",
     "url": "/docs/en/getting-started#initialize-the-daytona-client",
     "slug": "/en/getting-started#initialize-the-daytona-client",
-    "objectID": 76
+    "objectID": 75
   },
   {
     "title": "Create the Sandbox instance",
@@ -613,7 +605,7 @@
     "tag": "Documentation",
     "url": "/docs/en/getting-started#create-the-sandbox-instance",
     "slug": "/en/getting-started#create-the-sandbox-instance",
-    "objectID": 77
+    "objectID": 76
   },
   {
     "title": "Run code securely inside the Sandbox",
@@ -621,7 +613,7 @@
     "tag": "Documentation",
     "url": "/docs/en/getting-started#run-code-securely-inside-the-sandbox",
     "slug": "/en/getting-started#run-code-securely-inside-the-sandbox",
-    "objectID": 78
+    "objectID": 77
   },
   {
     "title": "Clean up the Sandbox",
@@ -629,7 +621,7 @@
     "tag": "Documentation",
     "url": "/docs/en/getting-started#clean-up-the-sandbox",
     "slug": "/en/getting-started#clean-up-the-sandbox",
-    "objectID": 79
+    "objectID": 78
   },
   {
     "title": "Preview Your App",
@@ -637,7 +629,7 @@
     "tag": "Documentation",
     "url": "/docs/en/getting-started#preview-your-app",
     "slug": "/en/getting-started#preview-your-app",
-    "objectID": 80
+    "objectID": 79
   },
   {
     "title": "Save the Flask app to a file",
@@ -645,7 +637,7 @@
     "tag": "Documentation",
     "url": "/docs/en/getting-started#save-the-flask-app-to-a-file",
     "slug": "/en/getting-started#save-the-flask-app-to-a-file",
-    "objectID": 81
+    "objectID": 80
   },
   {
     "title": "Create a new session and execute a command",
@@ -653,7 +645,7 @@
     "tag": "Documentation",
     "url": "/docs/en/getting-started#create-a-new-session-and-execute-a-command",
     "slug": "/en/getting-started#create-a-new-session-and-execute-a-command",
-    "objectID": 82
+    "objectID": 81
   },
   {
     "title": "Get the preview link for the Flask app",
@@ -661,7 +653,7 @@
     "tag": "Documentation",
     "url": "/docs/en/getting-started#get-the-preview-link-for-the-flask-app",
     "slug": "/en/getting-started#get-the-preview-link-for-the-flask-app",
-    "objectID": 83
+    "objectID": 82
   },
   {
     "title": "Connect to an LLM",
@@ -669,7 +661,7 @@
     "tag": "Documentation",
     "url": "/docs/en/getting-started#connect-to-an-llm",
     "slug": "/en/getting-started#connect-to-an-llm",
-    "objectID": 84
+    "objectID": 83
   },
   {
     "title": "Run Python code inside the Sandbox and get the output",
@@ -677,7 +669,7 @@
     "tag": "Documentation",
     "url": "/docs/en/getting-started#run-python-code-inside-the-sandbox-and-get-the-output",
     "slug": "/en/getting-started#run-python-code-inside-the-sandbox-and-get-the-output",
-    "objectID": 85
+    "objectID": 84
   },
   {
     "title": "Additional Examples",
@@ -685,7 +677,7 @@
     "tag": "Documentation",
     "url": "/docs/en/getting-started#additional-examples",
     "slug": "/en/getting-started#additional-examples",
-    "objectID": 86
+    "objectID": 85
   },
   {
     "title": "Daytona in Vite Projects",
@@ -693,7 +685,7 @@
     "tag": "Documentation",
     "url": "/docs/en/getting-started#daytona-in-vite-projects",
     "slug": "/en/getting-started#daytona-in-vite-projects",
-    "objectID": 87
+    "objectID": 86
   },
   {
     "title": "Setting up the Daytona CLI",
@@ -701,7 +693,7 @@
     "tag": "Documentation",
     "url": "/docs/en/getting-started#setting-up-the-daytona-cli",
     "slug": "/en/getting-started#setting-up-the-daytona-cli",
-    "objectID": 88
+    "objectID": 87
   },
   {
     "title": "Git Operations",
@@ -709,7 +701,7 @@
     "tag": "Documentation",
     "url": "/docs/en/git-operations",
     "slug": "/en/git-operations",
-    "objectID": 89
+    "objectID": 88
   },
   {
     "title": "Basic Operations",
@@ -717,7 +709,7 @@
     "tag": "Documentation",
     "url": "/docs/en/git-operations#basic-operations",
     "slug": "/en/git-operations#basic-operations",
-    "objectID": 90
+    "objectID": 89
   },
   {
     "title": "Cloning Repositories",
@@ -725,7 +717,7 @@
     "tag": "Documentation",
     "url": "/docs/en/git-operations#cloning-repositories",
     "slug": "/en/git-operations#cloning-repositories",
-    "objectID": 91
+    "objectID": 90
   },
   {
     "title": "Basic clone",
@@ -733,7 +725,7 @@
     "tag": "Documentation",
     "url": "/docs/en/git-operations#basic-clone",
     "slug": "/en/git-operations#basic-clone",
-    "objectID": 92
+    "objectID": 91
   },
   {
     "title": "Clone with authentication",
@@ -741,7 +733,7 @@
     "tag": "Documentation",
     "url": "/docs/en/git-operations#clone-with-authentication",
     "slug": "/en/git-operations#clone-with-authentication",
-    "objectID": 93
+    "objectID": 92
   },
   {
     "title": "Clone specific branch",
@@ -749,7 +741,7 @@
     "tag": "Documentation",
     "url": "/docs/en/git-operations#clone-specific-branch",
     "slug": "/en/git-operations#clone-specific-branch",
-    "objectID": 94
+    "objectID": 93
   },
   {
     "title": "Repository Status",
@@ -757,7 +749,7 @@
     "tag": "Documentation",
     "url": "/docs/en/git-operations#repository-status",
     "slug": "/en/git-operations#repository-status",
-    "objectID": 95
+    "objectID": 94
   },
   {
     "title": "Get repository status",
@@ -765,7 +757,7 @@
     "tag": "Documentation",
     "url": "/docs/en/git-operations#get-repository-status",
     "slug": "/en/git-operations#get-repository-status",
-    "objectID": 96
+    "objectID": 95
   },
   {
     "title": "List branches",
@@ -773,7 +765,7 @@
     "tag": "Documentation",
     "url": "/docs/en/git-operations#list-branches",
     "slug": "/en/git-operations#list-branches",
-    "objectID": 97
+    "objectID": 96
   },
   {
     "title": "Branch Operations",
@@ -781,7 +773,7 @@
     "tag": "Documentation",
     "url": "/docs/en/git-operations#branch-operations",
     "slug": "/en/git-operations#branch-operations",
-    "objectID": 98
+    "objectID": 97
   },
   {
     "title": "Managing Branches",
@@ -789,7 +781,7 @@
     "tag": "Documentation",
     "url": "/docs/en/git-operations#managing-branches",
     "slug": "/en/git-operations#managing-branches",
-    "objectID": 99
+    "objectID": 98
   },
   {
     "title": "Create new branch",
@@ -797,7 +789,7 @@
     "tag": "Documentation",
     "url": "/docs/en/git-operations#create-new-branch",
     "slug": "/en/git-operations#create-new-branch",
-    "objectID": 100
+    "objectID": 99
   },
   {
     "title": "Switch branch",
@@ -805,7 +797,7 @@
     "tag": "Documentation",
     "url": "/docs/en/git-operations#switch-branch",
     "slug": "/en/git-operations#switch-branch",
-    "objectID": 101
+    "objectID": 100
   },
   {
     "title": "Delete branch",
@@ -813,7 +805,7 @@
     "tag": "Documentation",
     "url": "/docs/en/git-operations#delete-branch",
     "slug": "/en/git-operations#delete-branch",
-    "objectID": 102
+    "objectID": 101
   },
   {
     "title": "Staging and Committing",
@@ -821,7 +813,7 @@
     "tag": "Documentation",
     "url": "/docs/en/git-operations#staging-and-committing",
     "slug": "/en/git-operations#staging-and-committing",
-    "objectID": 103
+    "objectID": 102
   },
   {
     "title": "Working with Changes",
@@ -829,7 +821,7 @@
     "tag": "Documentation",
     "url": "/docs/en/git-operations#working-with-changes",
     "slug": "/en/git-operations#working-with-changes",
-    "objectID": 104
+    "objectID": 103
   },
   {
     "title": "Stage specific files",
@@ -837,7 +829,7 @@
     "tag": "Documentation",
     "url": "/docs/en/git-operations#stage-specific-files",
     "slug": "/en/git-operations#stage-specific-files",
-    "objectID": 105
+    "objectID": 104
   },
   {
     "title": "Stage all changes",
@@ -845,7 +837,7 @@
     "tag": "Documentation",
     "url": "/docs/en/git-operations#stage-all-changes",
     "slug": "/en/git-operations#stage-all-changes",
-    "objectID": 106
+    "objectID": 105
   },
   {
     "title": "Commit changes",
@@ -853,7 +845,7 @@
     "tag": "Documentation",
     "url": "/docs/en/git-operations#commit-changes",
     "slug": "/en/git-operations#commit-changes",
-    "objectID": 107
+    "objectID": 106
   },
   {
     "title": "Remote Operations",
@@ -861,7 +853,7 @@
     "tag": "Documentation",
     "url": "/docs/en/git-operations#remote-operations",
     "slug": "/en/git-operations#remote-operations",
-    "objectID": 108
+    "objectID": 107
   },
   {
     "title": "Working with Remotes",
@@ -869,7 +861,7 @@
     "tag": "Documentation",
     "url": "/docs/en/git-operations#working-with-remotes",
     "slug": "/en/git-operations#working-with-remotes",
-    "objectID": 109
+    "objectID": 108
   },
   {
     "title": "Push changes",
@@ -877,7 +869,7 @@
     "tag": "Documentation",
     "url": "/docs/en/git-operations#push-changes",
     "slug": "/en/git-operations#push-changes",
-    "objectID": 110
+    "objectID": 109
   },
   {
     "title": "Pull changes",
@@ -885,7 +877,7 @@
     "tag": "Documentation",
     "url": "/docs/en/git-operations#pull-changes",
     "slug": "/en/git-operations#pull-changes",
-    "objectID": 111
+    "objectID": 110
   },
   {
     "title": "Language Server Protocol",
@@ -893,7 +885,7 @@
     "tag": "Documentation",
     "url": "/docs/en/language-server-protocol",
     "slug": "/en/language-server-protocol",
-    "objectID": 112
+    "objectID": 111
   },
   {
     "title": "Creating LSP Servers",
@@ -901,7 +893,7 @@
     "tag": "Documentation",
     "url": "/docs/en/language-server-protocol#creating-lsp-servers",
     "slug": "/en/language-server-protocol#creating-lsp-servers",
-    "objectID": 113
+    "objectID": 112
   },
   {
     "title": "Create Sandbox",
@@ -909,7 +901,7 @@
     "tag": "Documentation",
     "url": "/docs/en/language-server-protocol#create-sandbox",
     "slug": "/en/language-server-protocol#create-sandbox",
-    "objectID": 114
+    "objectID": 113
   },
   {
     "title": "Create LSP server for Python",
@@ -917,7 +909,7 @@
     "tag": "Documentation",
     "url": "/docs/en/language-server-protocol#create-lsp-server-for-python",
     "slug": "/en/language-server-protocol#create-lsp-server-for-python",
-    "objectID": 115
+    "objectID": 114
   },
   {
     "title": "Supported Languages",
@@ -925,7 +917,7 @@
     "tag": "Documentation",
     "url": "/docs/en/language-server-protocol#supported-languages",
     "slug": "/en/language-server-protocol#supported-languages",
-    "objectID": 116
+    "objectID": 115
   },
   {
     "title": "Available language IDs",
@@ -933,7 +925,7 @@
     "tag": "Documentation",
     "url": "/docs/en/language-server-protocol#available-language-ids",
     "slug": "/en/language-server-protocol#available-language-ids",
-    "objectID": 117
+    "objectID": 116
   },
   {
     "title": "LSP Features",
@@ -941,7 +933,7 @@
     "tag": "Documentation",
     "url": "/docs/en/language-server-protocol#lsp-features",
     "slug": "/en/language-server-protocol#lsp-features",
-    "objectID": 118
+    "objectID": 117
   },
   {
     "title": "Code Completion",
@@ -949,7 +941,7 @@
     "tag": "Documentation",
     "url": "/docs/en/language-server-protocol#code-completion",
     "slug": "/en/language-server-protocol#code-completion",
-    "objectID": 119
+    "objectID": 118
   },
   {
     "title": "Limits",
@@ -957,7 +949,7 @@
     "tag": "Documentation",
     "url": "/docs/en/limits",
     "slug": "/en/limits",
-    "objectID": 120
+    "objectID": 119
   },
   {
     "title": "Tiers & Limit Increases",
@@ -965,7 +957,7 @@
     "tag": "Documentation",
     "url": "/docs/en/limits#tiers--limit-increases",
     "slug": "/en/limits#tiers--limit-increases",
-    "objectID": 121
+    "objectID": 120
   },
   {
     "title": "Manage usage dynamically",
@@ -973,7 +965,7 @@
     "tag": "Documentation",
     "url": "/docs/en/limits#manage-usage-dynamically",
     "slug": "/en/limits#manage-usage-dynamically",
-    "objectID": 122
+    "objectID": 121
   },
   {
     "title": "Need More?",
@@ -981,7 +973,7 @@
     "tag": "Documentation",
     "url": "/docs/en/limits#need-more",
     "slug": "/en/limits#need-more",
-    "objectID": 123
+    "objectID": 122
   },
   {
     "title": "Linked Accounts",
@@ -989,7 +981,7 @@
     "tag": "Documentation",
     "url": "/docs/en/linked-accounts",
     "slug": "/en/linked-accounts",
-    "objectID": 124
+    "objectID": 123
   },
   {
     "title": "Unlock higher usage limits",
@@ -997,7 +989,7 @@
     "tag": "Documentation",
     "url": "/docs/en/linked-accounts#unlock-higher-usage-limits",
     "slug": "/en/linked-accounts#unlock-higher-usage-limits",
-    "objectID": 125
+    "objectID": 124
   },
   {
     "title": "How to link an account",
@@ -1005,7 +997,7 @@
     "tag": "Documentation",
     "url": "/docs/en/linked-accounts#how-to-link-an-account",
     "slug": "/en/linked-accounts#how-to-link-an-account",
-    "objectID": 126
+    "objectID": 125
   },
   {
     "title": "How to unlink an account",
@@ -1013,7 +1005,7 @@
     "tag": "Documentation",
     "url": "/docs/en/linked-accounts#how-to-unlink-an-account",
     "slug": "/en/linked-accounts#how-to-unlink-an-account",
-    "objectID": 127
+    "objectID": 126
   },
   {
     "title": "Need More?",
@@ -1021,7 +1013,7 @@
     "tag": "Documentation",
     "url": "/docs/en/linked-accounts#need-more",
     "slug": "/en/linked-accounts#need-more",
-    "objectID": 128
+    "objectID": 127
   },
   {
     "title": "Log Streaming",
@@ -1029,7 +1021,7 @@
     "tag": "Documentation",
     "url": "/docs/en/log-streaming",
     "slug": "/en/log-streaming",
-    "objectID": 129
+    "objectID": 128
   },
   {
     "title": "Asynchronous",
@@ -1037,7 +1029,7 @@
     "tag": "Documentation",
     "url": "/docs/en/log-streaming#asynchronous",
     "slug": "/en/log-streaming#asynchronous",
-    "objectID": 130
+    "objectID": 129
   },
   {
     "title": "Synchronous",
@@ -1045,7 +1037,7 @@
     "tag": "Documentation",
     "url": "/docs/en/log-streaming#synchronous",
     "slug": "/en/log-streaming#synchronous",
-    "objectID": 131
+    "objectID": 130
   },
   {
     "title": "Daytona MCP Server",
@@ -1053,7 +1045,7 @@
     "tag": "Documentation",
     "url": "/docs/en/mcp",
     "slug": "/en/mcp",
-    "objectID": 132
+    "objectID": 131
   },
   {
     "title": "Prerequisites",
@@ -1061,7 +1053,7 @@
     "tag": "Documentation",
     "url": "/docs/en/mcp#prerequisites",
     "slug": "/en/mcp#prerequisites",
-    "objectID": 133
+    "objectID": 132
   },
   {
     "title": "Installation and Setup",
@@ -1069,7 +1061,7 @@
     "tag": "Documentation",
     "url": "/docs/en/mcp#installation-and-setup",
     "slug": "/en/mcp#installation-and-setup",
-    "objectID": 134
+    "objectID": 133
   },
   {
     "title": "1. Install Daytona CLI",
@@ -1077,7 +1069,7 @@
     "tag": "Documentation",
     "url": "/docs/en/mcp#1-install-daytona-cli",
     "slug": "/en/mcp#1-install-daytona-cli",
-    "objectID": 135
+    "objectID": 134
   },
   {
     "title": "2. Authenticate with Daytona",
@@ -1085,7 +1077,7 @@
     "tag": "Documentation",
     "url": "/docs/en/mcp#2-authenticate-with-daytona",
     "slug": "/en/mcp#2-authenticate-with-daytona",
-    "objectID": 136
+    "objectID": 135
   },
   {
     "title": "3. Initialize MCP Server",
@@ -1093,7 +1085,7 @@
     "tag": "Documentation",
     "url": "/docs/en/mcp#3-initialize-mcp-server",
     "slug": "/en/mcp#3-initialize-mcp-server",
-    "objectID": 137
+    "objectID": 136
   },
   {
     "title": "4. Open Your AI Agent",
@@ -1101,7 +1093,7 @@
     "tag": "Documentation",
     "url": "/docs/en/mcp#4-open-your-ai-agent",
     "slug": "/en/mcp#4-open-your-ai-agent",
-    "objectID": 138
+    "objectID": 137
   },
   {
     "title": "Integration with Other AI Agents",
@@ -1109,7 +1101,7 @@
     "tag": "Documentation",
     "url": "/docs/en/mcp#integration-with-other-ai-agents",
     "slug": "/en/mcp#integration-with-other-ai-agents",
-    "objectID": 139
+    "objectID": 138
   },
   {
     "title": "Available Tools",
@@ -1117,7 +1109,7 @@
     "tag": "Documentation",
     "url": "/docs/en/mcp#available-tools",
     "slug": "/en/mcp#available-tools",
-    "objectID": 140
+    "objectID": 139
   },
   {
     "title": "Sandbox Management",
@@ -1125,7 +1117,7 @@
     "tag": "Documentation",
     "url": "/docs/en/mcp#sandbox-management",
     "slug": "/en/mcp#sandbox-management",
-    "objectID": 141
+    "objectID": 140
   },
   {
     "title": "File Operations",
@@ -1133,7 +1125,7 @@
     "tag": "Documentation",
     "url": "/docs/en/mcp#file-operations",
     "slug": "/en/mcp#file-operations",
-    "objectID": 142
+    "objectID": 141
   },
   {
     "title": "Preview",
@@ -1141,7 +1133,7 @@
     "tag": "Documentation",
     "url": "/docs/en/mcp#preview",
     "slug": "/en/mcp#preview",
-    "objectID": 143
+    "objectID": 142
   },
   {
     "title": "Git Operations",
@@ -1149,7 +1141,7 @@
     "tag": "Documentation",
     "url": "/docs/en/mcp#git-operations",
     "slug": "/en/mcp#git-operations",
-    "objectID": 144
+    "objectID": 143
   },
   {
     "title": "Command Execution",
@@ -1157,7 +1149,7 @@
     "tag": "Documentation",
     "url": "/docs/en/mcp#command-execution",
     "slug": "/en/mcp#command-execution",
-    "objectID": 145
+    "objectID": 144
   },
   {
     "title": "Troubleshooting",
@@ -1165,7 +1157,7 @@
     "tag": "Documentation",
     "url": "/docs/en/mcp#troubleshooting",
     "slug": "/en/mcp#troubleshooting",
-    "objectID": 146
+    "objectID": 145
   },
   {
     "title": "Support",
@@ -1173,7 +1165,7 @@
     "tag": "Documentation",
     "url": "/docs/en/mcp#support",
     "slug": "/en/mcp#support",
-    "objectID": 147
+    "objectID": 146
   },
   {
     "title": "Organizations",
@@ -1181,7 +1173,7 @@
     "tag": "Documentation",
     "url": "/docs/en/organizations",
     "slug": "/en/organizations",
-    "objectID": 148
+    "objectID": 147
   },
   {
     "title": "Personal vs Collaborative Organizations",
@@ -1189,7 +1181,7 @@
     "tag": "Documentation",
     "url": "/docs/en/organizations#personal-vs-collaborative-organizations",
     "slug": "/en/organizations#personal-vs-collaborative-organizations",
-    "objectID": 149
+    "objectID": 148
   },
   {
     "title": "Organization Roles",
@@ -1197,7 +1189,7 @@
     "tag": "Documentation",
     "url": "/docs/en/organizations#organization-roles",
     "slug": "/en/organizations#organization-roles",
-    "objectID": 150
+    "objectID": 149
   },
   {
     "title": "Administrative Actions",
@@ -1205,7 +1197,7 @@
     "tag": "Documentation",
     "url": "/docs/en/organizations#administrative-actions",
     "slug": "/en/organizations#administrative-actions",
-    "objectID": 151
+    "objectID": 150
   },
   {
     "title": "Inviting New Users",
@@ -1213,7 +1205,7 @@
     "tag": "Documentation",
     "url": "/docs/en/organizations#inviting-new-users",
     "slug": "/en/organizations#inviting-new-users",
-    "objectID": 152
+    "objectID": 151
   },
   {
     "title": "Available Assignments",
@@ -1221,7 +1213,7 @@
     "tag": "Documentation",
     "url": "/docs/en/organizations#available-assignments",
     "slug": "/en/organizations#available-assignments",
-    "objectID": 153
+    "objectID": 152
   },
   {
     "title": "Managing Invitations",
@@ -1229,7 +1221,7 @@
     "tag": "Documentation",
     "url": "/docs/en/organizations#managing-invitations",
     "slug": "/en/organizations#managing-invitations",
-    "objectID": 154
+    "objectID": 153
   },
   {
     "title": "Settings",
@@ -1237,7 +1229,7 @@
     "tag": "Documentation",
     "url": "/docs/en/organizations#settings",
     "slug": "/en/organizations#settings",
-    "objectID": 155
+    "objectID": 154
   },
   {
     "title": "Preview & Authentication",
@@ -1245,7 +1237,7 @@
     "tag": "Documentation",
     "url": "/docs/en/preview-and-authentication",
     "slug": "/en/preview-and-authentication",
-    "objectID": 156
+    "objectID": 155
   },
   {
     "title": "Process and Code Execution",
@@ -1253,7 +1245,7 @@
     "tag": "Documentation",
     "url": "/docs/en/process-code-execution",
     "slug": "/en/process-code-execution",
-    "objectID": 157
+    "objectID": 156
   },
   {
     "title": "Code Execution",
@@ -1261,7 +1253,7 @@
     "tag": "Documentation",
     "url": "/docs/en/process-code-execution#code-execution",
     "slug": "/en/process-code-execution#code-execution",
-    "objectID": 158
+    "objectID": 157
   },
   {
     "title": "Running Code",
@@ -1269,7 +1261,7 @@
     "tag": "Documentation",
     "url": "/docs/en/process-code-execution#running-code",
     "slug": "/en/process-code-execution#running-code",
-    "objectID": 159
+    "objectID": 158
   },
   {
     "title": "Run Python code",
@@ -1277,7 +1269,7 @@
     "tag": "Documentation",
     "url": "/docs/en/process-code-execution#run-python-code",
     "slug": "/en/process-code-execution#run-python-code",
-    "objectID": 160
+    "objectID": 159
   },
   {
     "title": "Process Execution",
@@ -1285,7 +1277,7 @@
     "tag": "Documentation",
     "url": "/docs/en/process-code-execution#process-execution",
     "slug": "/en/process-code-execution#process-execution",
-    "objectID": 161
+    "objectID": 160
   },
   {
     "title": "Running Commands",
@@ -1293,7 +1285,7 @@
     "tag": "Documentation",
     "url": "/docs/en/process-code-execution#running-commands",
     "slug": "/en/process-code-execution#running-commands",
-    "objectID": 162
+    "objectID": 161
   },
   {
     "title": "Execute any shell command",
@@ -1301,7 +1293,7 @@
     "tag": "Documentation",
     "url": "/docs/en/process-code-execution#execute-any-shell-command",
     "slug": "/en/process-code-execution#execute-any-shell-command",
-    "objectID": 163
+    "objectID": 162
   },
   {
     "title": "Setting a working directory and a timeout",
@@ -1309,7 +1301,7 @@
     "tag": "Documentation",
     "url": "/docs/en/process-code-execution#setting-a-working-directory-and-a-timeout",
     "slug": "/en/process-code-execution#setting-a-working-directory-and-a-timeout",
-    "objectID": 164
+    "objectID": 163
   },
   {
     "title": "Passing environment variables",
@@ -1317,7 +1309,7 @@
     "tag": "Documentation",
     "url": "/docs/en/process-code-execution#passing-environment-variables",
     "slug": "/en/process-code-execution#passing-environment-variables",
-    "objectID": 165
+    "objectID": 164
   },
   {
     "title": "Sessions (Background Processes)",
@@ -1325,7 +1317,7 @@
     "tag": "Documentation",
     "url": "/docs/en/process-code-execution#sessions-background-processes",
     "slug": "/en/process-code-execution#sessions-background-processes",
-    "objectID": 166
+    "objectID": 165
   },
   {
     "title": "Managing Long-Running Processes",
@@ -1333,7 +1325,7 @@
     "tag": "Documentation",
     "url": "/docs/en/process-code-execution#managing-long-running-processes",
     "slug": "/en/process-code-execution#managing-long-running-processes",
-    "objectID": 167
+    "objectID": 166
   },
   {
     "title": "Check session's executed commands",
@@ -1341,7 +1333,7 @@
     "tag": "Documentation",
     "url": "/docs/en/process-code-execution#check-sessions-executed-commands",
     "slug": "/en/process-code-execution#check-sessions-executed-commands",
-    "objectID": 168
+    "objectID": 167
   },
   {
     "title": "List all running sessions",
@@ -1349,7 +1341,7 @@
     "tag": "Documentation",
     "url": "/docs/en/process-code-execution#list-all-running-sessions",
     "slug": "/en/process-code-execution#list-all-running-sessions",
-    "objectID": 169
+    "objectID": 168
   },
   {
     "title": "Best Practices",
@@ -1357,15 +1349,7 @@
     "tag": "Documentation",
     "url": "/docs/en/process-code-execution#best-practices",
     "slug": "/en/process-code-execution#best-practices",
-    "objectID": 170
-  },
-  {
-    "title": "Python - Clean up session",
-    "description": "",
-    "tag": "Documentation",
-    "url": "/docs/en/process-code-execution#python---clean-up-session",
-    "slug": "/en/process-code-execution#python---clean-up-session",
-    "objectID": 171
+    "objectID": 169
   },
   {
     "title": "Common Issues",
@@ -1373,7 +1357,7 @@
     "tag": "Documentation",
     "url": "/docs/en/process-code-execution#common-issues",
     "slug": "/en/process-code-execution#common-issues",
-    "objectID": 172
+    "objectID": 170
   },
   {
     "title": "Process Execution Failed",
@@ -1381,7 +1365,7 @@
     "tag": "Documentation",
     "url": "/docs/en/process-code-execution#process-execution-failed",
     "slug": "/en/process-code-execution#process-execution-failed",
-    "objectID": 173
+    "objectID": 171
   },
   {
     "title": "Process Timeout",
@@ -1389,7 +1373,7 @@
     "tag": "Documentation",
     "url": "/docs/en/process-code-execution#process-timeout",
     "slug": "/en/process-code-execution#process-timeout",
-    "objectID": 174
+    "objectID": 172
   },
   {
     "title": "Resource Limits",
@@ -1397,7 +1381,7 @@
     "tag": "Documentation",
     "url": "/docs/en/process-code-execution#resource-limits",
     "slug": "/en/process-code-execution#resource-limits",
-    "objectID": 175
+    "objectID": 173
   },
   {
     "title": "Region Selection",
@@ -1405,7 +1389,7 @@
     "tag": "Documentation",
     "url": "/docs/en/regions",
     "slug": "/en/regions",
-    "objectID": 176
+    "objectID": 174
   },
   {
     "title": "Sandbox Management",
@@ -1413,7 +1397,7 @@
     "tag": "Documentation",
     "url": "/docs/en/sandbox-management",
     "slug": "/en/sandbox-management",
-    "objectID": 177
+    "objectID": 175
   },
   {
     "title": "Sandbox Lifecycle",
@@ -1421,7 +1405,7 @@
     "tag": "Documentation",
     "url": "/docs/en/sandbox-management#sandbox-lifecycle",
     "slug": "/en/sandbox-management#sandbox-lifecycle",
-    "objectID": 178
+    "objectID": 176
   },
   {
     "title": "Creating Sandboxes",
@@ -1429,7 +1413,7 @@
     "tag": "Documentation",
     "url": "/docs/en/sandbox-management#creating-sandboxes",
     "slug": "/en/sandbox-management#creating-sandboxes",
-    "objectID": 179
+    "objectID": 177
   },
   {
     "title": "Basic Sandbox Creation",
@@ -1437,7 +1421,7 @@
     "tag": "Documentation",
     "url": "/docs/en/sandbox-management#basic-sandbox-creation",
     "slug": "/en/sandbox-management#basic-sandbox-creation",
-    "objectID": 180
+    "objectID": 178
   },
   {
     "title": "Create a basic Sandbox",
@@ -1445,7 +1429,7 @@
     "tag": "Documentation",
     "url": "/docs/en/sandbox-management#create-a-basic-sandbox",
     "slug": "/en/sandbox-management#create-a-basic-sandbox",
-    "objectID": 181
+    "objectID": 179
   },
   {
     "title": "Create a Sandbox with specific language",
@@ -1453,7 +1437,7 @@
     "tag": "Documentation",
     "url": "/docs/en/sandbox-management#create-a-sandbox-with-specific-language",
     "slug": "/en/sandbox-management#create-a-sandbox-with-specific-language",
-    "objectID": 182
+    "objectID": 180
   },
   {
     "title": "Create a Sandbox with custom labels",
@@ -1461,7 +1445,7 @@
     "tag": "Documentation",
     "url": "/docs/en/sandbox-management#create-a-sandbox-with-custom-labels",
     "slug": "/en/sandbox-management#create-a-sandbox-with-custom-labels",
-    "objectID": 183
+    "objectID": 181
   },
   {
     "title": "Sandbox Resources",
@@ -1469,7 +1453,7 @@
     "tag": "Documentation",
     "url": "/docs/en/sandbox-management#sandbox-resources",
     "slug": "/en/sandbox-management#sandbox-resources",
-    "objectID": 184
+    "objectID": 182
   },
   {
     "title": "Create a Sandbox with custom resources",
@@ -1477,7 +1461,7 @@
     "tag": "Documentation",
     "url": "/docs/en/sandbox-management#create-a-sandbox-with-custom-resources",
     "slug": "/en/sandbox-management#create-a-sandbox-with-custom-resources",
-    "objectID": 185
+    "objectID": 183
   },
   {
     "title": "Sandbox Information",
@@ -1485,7 +1469,7 @@
     "tag": "Documentation",
     "url": "/docs/en/sandbox-management#sandbox-information",
     "slug": "/en/sandbox-management#sandbox-information",
-    "objectID": 186
+    "objectID": 184
   },
   {
     "title": "Get Sandbox ID",
@@ -1493,7 +1477,7 @@
     "tag": "Documentation",
     "url": "/docs/en/sandbox-management#get-sandbox-id",
     "slug": "/en/sandbox-management#get-sandbox-id",
-    "objectID": 187
+    "objectID": 185
   },
   {
     "title": "Get the root directory of the Sandbox user",
@@ -1501,7 +1485,7 @@
     "tag": "Documentation",
     "url": "/docs/en/sandbox-management#get-the-root-directory-of-the-sandbox-user",
     "slug": "/en/sandbox-management#get-the-root-directory-of-the-sandbox-user",
-    "objectID": 188
+    "objectID": 186
   },
   {
     "title": "Get the Sandbox id, auto-stop interval and state",
@@ -1509,7 +1493,7 @@
     "tag": "Documentation",
     "url": "/docs/en/sandbox-management#get-the-sandbox-id-auto-stop-interval-and-state",
     "slug": "/en/sandbox-management#get-the-sandbox-id-auto-stop-interval-and-state",
-    "objectID": 189
+    "objectID": 187
   },
   {
     "title": "Stop and Start Sandbox",
@@ -1517,7 +1501,7 @@
     "tag": "Documentation",
     "url": "/docs/en/sandbox-management#stop-and-start-sandbox",
     "slug": "/en/sandbox-management#stop-and-start-sandbox",
-    "objectID": 190
+    "objectID": 188
   },
   {
     "title": "Stop Sandbox",
@@ -1525,7 +1509,7 @@
     "tag": "Documentation",
     "url": "/docs/en/sandbox-management#stop-sandbox",
     "slug": "/en/sandbox-management#stop-sandbox",
-    "objectID": 191
+    "objectID": 189
   },
   {
     "title": "The sandbox ID can later be used to find the sandbox and start it",
@@ -1533,7 +1517,7 @@
     "tag": "Documentation",
     "url": "/docs/en/sandbox-management#the-sandbox-id-can-later-be-used-to-find-the-sandbox-and-start-it",
     "slug": "/en/sandbox-management#the-sandbox-id-can-later-be-used-to-find-the-sandbox-and-start-it",
-    "objectID": 192
+    "objectID": 190
   },
   {
     "title": "Start Sandbox",
@@ -1541,7 +1525,7 @@
     "tag": "Documentation",
     "url": "/docs/en/sandbox-management#start-sandbox",
     "slug": "/en/sandbox-management#start-sandbox",
-    "objectID": 193
+    "objectID": 191
   },
   {
     "title": "Archive Sandbox",
@@ -1549,7 +1533,7 @@
     "tag": "Documentation",
     "url": "/docs/en/sandbox-management#archive-sandbox",
     "slug": "/en/sandbox-management#archive-sandbox",
-    "objectID": 194
+    "objectID": 192
   },
   {
     "title": "Archive Sandbox",
@@ -1557,7 +1541,7 @@
     "tag": "Documentation",
     "url": "/docs/en/sandbox-management#archive-sandbox",
     "slug": "/en/sandbox-management#archive-sandbox",
-    "objectID": 195
+    "objectID": 193
   },
   {
     "title": "Delete Sandbox",
@@ -1565,7 +1549,7 @@
     "tag": "Documentation",
     "url": "/docs/en/sandbox-management#delete-sandbox",
     "slug": "/en/sandbox-management#delete-sandbox",
-    "objectID": 196
+    "objectID": 194
   },
   {
     "title": "Delete Sandbox",
@@ -1573,7 +1557,7 @@
     "tag": "Documentation",
     "url": "/docs/en/sandbox-management#delete-sandbox",
     "slug": "/en/sandbox-management#delete-sandbox",
-    "objectID": 197
+    "objectID": 195
   },
   {
     "title": "Automated Lifecycle Management",
@@ -1581,7 +1565,7 @@
     "tag": "Documentation",
     "url": "/docs/en/sandbox-management#automated-lifecycle-management",
     "slug": "/en/sandbox-management#automated-lifecycle-management",
-    "objectID": 198
+    "objectID": 196
   },
   {
     "title": "Auto-stop Interval",
@@ -1589,7 +1573,7 @@
     "tag": "Documentation",
     "url": "/docs/en/sandbox-management#auto-stop-interval",
     "slug": "/en/sandbox-management#auto-stop-interval",
-    "objectID": 199
+    "objectID": 197
   },
   {
     "title": "Auto-archive Interval",
@@ -1597,7 +1581,7 @@
     "tag": "Documentation",
     "url": "/docs/en/sandbox-management#auto-archive-interval",
     "slug": "/en/sandbox-management#auto-archive-interval",
-    "objectID": 200
+    "objectID": 198
   },
   {
     "title": "Auto-delete Interval",
@@ -1605,7 +1589,7 @@
     "tag": "Documentation",
     "url": "/docs/en/sandbox-management#auto-delete-interval",
     "slug": "/en/sandbox-management#auto-delete-interval",
-    "objectID": 201
+    "objectID": 199
   },
   {
     "title": "Delete the Sandbox immediately after it has been stopped",
@@ -1613,7 +1597,7 @@
     "tag": "Documentation",
     "url": "/docs/en/sandbox-management#delete-the-sandbox-immediately-after-it-has-been-stopped",
     "slug": "/en/sandbox-management#delete-the-sandbox-immediately-after-it-has-been-stopped",
-    "objectID": 202
+    "objectID": 200
   },
   {
     "title": "Disable auto-deletion",
@@ -1621,7 +1605,7 @@
     "tag": "Documentation",
     "url": "/docs/en/sandbox-management#disable-auto-deletion",
     "slug": "/en/sandbox-management#disable-auto-deletion",
-    "objectID": 203
+    "objectID": 201
   },
   {
     "title": "Run Indefinitely",
@@ -1629,7 +1613,7 @@
     "tag": "Documentation",
     "url": "/docs/en/sandbox-management#run-indefinitely",
     "slug": "/en/sandbox-management#run-indefinitely",
-    "objectID": 204
+    "objectID": 202
   },
   {
     "title": "Snapshots",
@@ -1637,7 +1621,7 @@
     "tag": "Documentation",
     "url": "/docs/en/snapshots",
     "slug": "/en/snapshots",
-    "objectID": 205
+    "objectID": 203
   },
   {
     "title": "Creating Snapshots",
@@ -1645,7 +1629,7 @@
     "tag": "Documentation",
     "url": "/docs/en/snapshots#creating-snapshots",
     "slug": "/en/snapshots#creating-snapshots",
-    "objectID": 206
+    "objectID": 204
   },
   {
     "title": "Snapshot Resources",
@@ -1653,7 +1637,7 @@
     "tag": "Documentation",
     "url": "/docs/en/snapshots#snapshot-resources",
     "slug": "/en/snapshots#snapshot-resources",
-    "objectID": 207
+    "objectID": 205
   },
   {
     "title": "Create a Snapshot with custom resources",
@@ -1661,7 +1645,7 @@
     "tag": "Documentation",
     "url": "/docs/en/snapshots#create-a-snapshot-with-custom-resources",
     "slug": "/en/snapshots#create-a-snapshot-with-custom-resources",
-    "objectID": 208
+    "objectID": 206
   },
   {
     "title": "Create a Sandbox with custom Snapshot",
@@ -1669,7 +1653,7 @@
     "tag": "Documentation",
     "url": "/docs/en/snapshots#create-a-sandbox-with-custom-snapshot",
     "slug": "/en/snapshots#create-a-sandbox-with-custom-snapshot",
-    "objectID": 209
+    "objectID": 207
   },
   {
     "title": "Images from Private Registries",
@@ -1677,7 +1661,7 @@
     "tag": "Documentation",
     "url": "/docs/en/snapshots#images-from-private-registries",
     "slug": "/en/snapshots#images-from-private-registries",
-    "objectID": 210
+    "objectID": 208
   },
   {
     "title": "Using a Local Image",
@@ -1685,7 +1669,7 @@
     "tag": "Documentation",
     "url": "/docs/en/snapshots#using-a-local-image",
     "slug": "/en/snapshots#using-a-local-image",
-    "objectID": 211
+    "objectID": 209
   },
   {
     "title": "Deleting Snapshots",
@@ -1693,7 +1677,7 @@
     "tag": "Documentation",
     "url": "/docs/en/snapshots#deleting-snapshots",
     "slug": "/en/snapshots#deleting-snapshots",
-    "objectID": 212
+    "objectID": 210
   },
   {
     "title": "Default Snapshot",
@@ -1701,7 +1685,7 @@
     "tag": "Documentation",
     "url": "/docs/en/snapshots#default-snapshot",
     "slug": "/en/snapshots#default-snapshot",
-    "objectID": 213
+    "objectID": 211
   },
   {
     "title": "CLI",
@@ -1709,7 +1693,7 @@
     "tag": "Documentation",
     "url": "/docs/en/tools/cli",
     "slug": "/en/tools/cli",
-    "objectID": 214
+    "objectID": 212
   },
   {
     "title": "daytona",
@@ -1717,7 +1701,7 @@
     "tag": "Documentation",
     "url": "/docs/en/tools/cli#daytona",
     "slug": "/en/tools/cli#daytona",
-    "objectID": 215
+    "objectID": 213
   },
   {
     "title": "daytona autocomplete",
@@ -1725,7 +1709,7 @@
     "tag": "Documentation",
     "url": "/docs/en/tools/cli#daytona-autocomplete",
     "slug": "/en/tools/cli#daytona-autocomplete",
-    "objectID": 216
+    "objectID": 214
   },
   {
     "title": "daytona docs",
@@ -1733,7 +1717,7 @@
     "tag": "Documentation",
     "url": "/docs/en/tools/cli#daytona-docs",
     "slug": "/en/tools/cli#daytona-docs",
-    "objectID": 217
+    "objectID": 215
   },
   {
     "title": "daytona login",
@@ -1741,7 +1725,7 @@
     "tag": "Documentation",
     "url": "/docs/en/tools/cli#daytona-login",
     "slug": "/en/tools/cli#daytona-login",
-    "objectID": 218
+    "objectID": 216
   },
   {
     "title": "daytona logout",
@@ -1749,7 +1733,7 @@
     "tag": "Documentation",
     "url": "/docs/en/tools/cli#daytona-logout",
     "slug": "/en/tools/cli#daytona-logout",
-    "objectID": 219
+    "objectID": 217
   },
   {
     "title": "daytona mcp",
@@ -1757,7 +1741,7 @@
     "tag": "Documentation",
     "url": "/docs/en/tools/cli#daytona-mcp",
     "slug": "/en/tools/cli#daytona-mcp",
-    "objectID": 220
+    "objectID": 218
   },
   {
     "title": "daytona mcp config",
@@ -1765,7 +1749,7 @@
     "tag": "Documentation",
     "url": "/docs/en/tools/cli#daytona-mcp-config",
     "slug": "/en/tools/cli#daytona-mcp-config",
-    "objectID": 221
+    "objectID": 219
   },
   {
     "title": "daytona mcp init",
@@ -1773,7 +1757,7 @@
     "tag": "Documentation",
     "url": "/docs/en/tools/cli#daytona-mcp-init",
     "slug": "/en/tools/cli#daytona-mcp-init",
-    "objectID": 222
+    "objectID": 220
   },
   {
     "title": "daytona mcp start",
@@ -1781,7 +1765,7 @@
     "tag": "Documentation",
     "url": "/docs/en/tools/cli#daytona-mcp-start",
     "slug": "/en/tools/cli#daytona-mcp-start",
-    "objectID": 223
+    "objectID": 221
   },
   {
     "title": "daytona organization",
@@ -1789,7 +1773,7 @@
     "tag": "Documentation",
     "url": "/docs/en/tools/cli#daytona-organization",
     "slug": "/en/tools/cli#daytona-organization",
-    "objectID": 224
+    "objectID": 222
   },
   {
     "title": "daytona organization create",
@@ -1797,7 +1781,7 @@
     "tag": "Documentation",
     "url": "/docs/en/tools/cli#daytona-organization-create",
     "slug": "/en/tools/cli#daytona-organization-create",
-    "objectID": 225
+    "objectID": 223
   },
   {
     "title": "daytona organization delete",
@@ -1805,7 +1789,7 @@
     "tag": "Documentation",
     "url": "/docs/en/tools/cli#daytona-organization-delete",
     "slug": "/en/tools/cli#daytona-organization-delete",
-    "objectID": 226
+    "objectID": 224
   },
   {
     "title": "daytona organization list",
@@ -1813,7 +1797,7 @@
     "tag": "Documentation",
     "url": "/docs/en/tools/cli#daytona-organization-list",
     "slug": "/en/tools/cli#daytona-organization-list",
-    "objectID": 227
+    "objectID": 225
   },
   {
     "title": "daytona organization use",
@@ -1821,7 +1805,7 @@
     "tag": "Documentation",
     "url": "/docs/en/tools/cli#daytona-organization-use",
     "slug": "/en/tools/cli#daytona-organization-use",
-    "objectID": 228
+    "objectID": 226
   },
   {
     "title": "daytona sandbox",
@@ -1829,7 +1813,7 @@
     "tag": "Documentation",
     "url": "/docs/en/tools/cli#daytona-sandbox",
     "slug": "/en/tools/cli#daytona-sandbox",
-    "objectID": 229
+    "objectID": 227
   },
   {
     "title": "daytona sandbox create",
@@ -1837,7 +1821,7 @@
     "tag": "Documentation",
     "url": "/docs/en/tools/cli#daytona-sandbox-create",
     "slug": "/en/tools/cli#daytona-sandbox-create",
-    "objectID": 230
+    "objectID": 228
   },
   {
     "title": "daytona sandbox delete",
@@ -1845,7 +1829,7 @@
     "tag": "Documentation",
     "url": "/docs/en/tools/cli#daytona-sandbox-delete",
     "slug": "/en/tools/cli#daytona-sandbox-delete",
-    "objectID": 231
+    "objectID": 229
   },
   {
     "title": "daytona sandbox info",
@@ -1853,7 +1837,7 @@
     "tag": "Documentation",
     "url": "/docs/en/tools/cli#daytona-sandbox-info",
     "slug": "/en/tools/cli#daytona-sandbox-info",
-    "objectID": 232
+    "objectID": 230
   },
   {
     "title": "daytona sandbox list",
@@ -1861,7 +1845,7 @@
     "tag": "Documentation",
     "url": "/docs/en/tools/cli#daytona-sandbox-list",
     "slug": "/en/tools/cli#daytona-sandbox-list",
-    "objectID": 233
+    "objectID": 231
   },
   {
     "title": "daytona sandbox start",
@@ -1869,7 +1853,7 @@
     "tag": "Documentation",
     "url": "/docs/en/tools/cli#daytona-sandbox-start",
     "slug": "/en/tools/cli#daytona-sandbox-start",
-    "objectID": 234
+    "objectID": 232
   },
   {
     "title": "daytona sandbox stop",
@@ -1877,7 +1861,7 @@
     "tag": "Documentation",
     "url": "/docs/en/tools/cli#daytona-sandbox-stop",
     "slug": "/en/tools/cli#daytona-sandbox-stop",
-    "objectID": 235
+    "objectID": 233
   },
   {
     "title": "daytona snapshot",
@@ -1885,7 +1869,7 @@
     "tag": "Documentation",
     "url": "/docs/en/tools/cli#daytona-snapshot",
     "slug": "/en/tools/cli#daytona-snapshot",
-    "objectID": 236
+    "objectID": 234
   },
   {
     "title": "daytona snapshot create",
@@ -1893,7 +1877,7 @@
     "tag": "Documentation",
     "url": "/docs/en/tools/cli#daytona-snapshot-create",
     "slug": "/en/tools/cli#daytona-snapshot-create",
-    "objectID": 237
+    "objectID": 235
   },
   {
     "title": "daytona snapshot delete",
@@ -1901,7 +1885,7 @@
     "tag": "Documentation",
     "url": "/docs/en/tools/cli#daytona-snapshot-delete",
     "slug": "/en/tools/cli#daytona-snapshot-delete",
-    "objectID": 238
+    "objectID": 236
   },
   {
     "title": "daytona snapshot list",
@@ -1909,7 +1893,7 @@
     "tag": "Documentation",
     "url": "/docs/en/tools/cli#daytona-snapshot-list",
     "slug": "/en/tools/cli#daytona-snapshot-list",
-    "objectID": 239
+    "objectID": 237
   },
   {
     "title": "daytona snapshot push",
@@ -1917,7 +1901,7 @@
     "tag": "Documentation",
     "url": "/docs/en/tools/cli#daytona-snapshot-push",
     "slug": "/en/tools/cli#daytona-snapshot-push",
-    "objectID": 240
+    "objectID": 238
   },
   {
     "title": "daytona version",
@@ -1925,7 +1909,7 @@
     "tag": "Documentation",
     "url": "/docs/en/tools/cli#daytona-version",
     "slug": "/en/tools/cli#daytona-version",
-    "objectID": 241
+    "objectID": 239
   },
   {
     "title": "daytona volume",
@@ -1933,7 +1917,7 @@
     "tag": "Documentation",
     "url": "/docs/en/tools/cli#daytona-volume",
     "slug": "/en/tools/cli#daytona-volume",
-    "objectID": 242
+    "objectID": 240
   },
   {
     "title": "daytona volume create",
@@ -1941,7 +1925,7 @@
     "tag": "Documentation",
     "url": "/docs/en/tools/cli#daytona-volume-create",
     "slug": "/en/tools/cli#daytona-volume-create",
-    "objectID": 243
+    "objectID": 241
   },
   {
     "title": "daytona volume delete",
@@ -1949,7 +1933,7 @@
     "tag": "Documentation",
     "url": "/docs/en/tools/cli#daytona-volume-delete",
     "slug": "/en/tools/cli#daytona-volume-delete",
-    "objectID": 244
+    "objectID": 242
   },
   {
     "title": "daytona volume get",
@@ -1957,7 +1941,7 @@
     "tag": "Documentation",
     "url": "/docs/en/tools/cli#daytona-volume-get",
     "slug": "/en/tools/cli#daytona-volume-get",
-    "objectID": 245
+    "objectID": 243
   },
   {
     "title": "daytona volume list",
@@ -1965,7 +1949,7 @@
     "tag": "Documentation",
     "url": "/docs/en/tools/cli#daytona-volume-list",
     "slug": "/en/tools/cli#daytona-volume-list",
-    "objectID": 246
+    "objectID": 244
   },
   {
     "title": "Volumes",
@@ -1973,7 +1957,7 @@
     "tag": "Documentation",
     "url": "/docs/en/volumes",
     "slug": "/en/volumes",
-    "objectID": 247
+    "objectID": 245
   },
   {
     "title": "Creating Volumes",
@@ -1981,7 +1965,7 @@
     "tag": "Documentation",
     "url": "/docs/en/volumes#creating-volumes",
     "slug": "/en/volumes#creating-volumes",
-    "objectID": 248
+    "objectID": 246
   },
   {
     "title": "Mounting Volumes",
@@ -1989,7 +1973,7 @@
     "tag": "Documentation",
     "url": "/docs/en/volumes#mounting-volumes",
     "slug": "/en/volumes#mounting-volumes",
-    "objectID": 249
+    "objectID": 247
   },
   {
     "title": "Create a new volume or get an existing one",
@@ -1997,7 +1981,7 @@
     "tag": "Documentation",
     "url": "/docs/en/volumes#create-a-new-volume-or-get-an-existing-one",
     "slug": "/en/volumes#create-a-new-volume-or-get-an-existing-one",
-    "objectID": 250
+    "objectID": 248
   },
   {
     "title": "Mount the volume to the sandbox",
@@ -2005,7 +1989,7 @@
     "tag": "Documentation",
     "url": "/docs/en/volumes#mount-the-volume-to-the-sandbox",
     "slug": "/en/volumes#mount-the-volume-to-the-sandbox",
-    "objectID": 251
+    "objectID": 249
   },
   {
     "title": "When you're done with the sandbox, you can remove it",
@@ -2013,7 +1997,7 @@
     "tag": "Documentation",
     "url": "/docs/en/volumes#when-youre-done-with-the-sandbox-you-can-remove-it",
     "slug": "/en/volumes#when-youre-done-with-the-sandbox-you-can-remove-it",
-    "objectID": 252
+    "objectID": 250
   },
   {
     "title": "The volume persists after the sandbox is removed",
@@ -2021,7 +2005,7 @@
     "tag": "Documentation",
     "url": "/docs/en/volumes#the-volume-persists-after-the-sandbox-is-removed",
     "slug": "/en/volumes#the-volume-persists-after-the-sandbox-is-removed",
-    "objectID": 253
+    "objectID": 251
   },
   {
     "title": "Deleting Volumes",
@@ -2029,7 +2013,7 @@
     "tag": "Documentation",
     "url": "/docs/en/volumes#deleting-volumes",
     "slug": "/en/volumes#deleting-volumes",
-    "objectID": 254
+    "objectID": 252
   },
   {
     "title": "Working with Volumes",
@@ -2037,7 +2021,7 @@
     "tag": "Documentation",
     "url": "/docs/en/volumes#working-with-volumes",
     "slug": "/en/volumes#working-with-volumes",
-    "objectID": 255
+    "objectID": 253
   },
   {
     "title": "Limitations",
@@ -2045,7 +2029,7 @@
     "tag": "Documentation",
     "url": "/docs/en/volumes#limitations",
     "slug": "/en/volumes#limitations",
-    "objectID": 256
+    "objectID": 254
   },
   {
     "title": "Web Terminal",
@@ -2053,7 +2037,7 @@
     "tag": "Documentation",
     "url": "/docs/en/web-terminal",
     "slug": "/en/web-terminal",
-    "objectID": 257
+    "objectID": 255
   },
   {
     "title": "APIキー",
@@ -2061,7 +2045,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/api-keys",
     "slug": "/ja/api-keys",
-    "objectID": 258
+    "objectID": 256
   },
   {
     "title": "権限",
@@ -2069,7 +2053,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/api-keys#",
     "slug": "/ja/api-keys#",
-    "objectID": 259
+    "objectID": 257
   },
   {
     "title": "請求",
@@ -2077,7 +2061,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/billing",
     "slug": "/ja/billing",
-    "objectID": 260
+    "objectID": 258
   },
   {
     "title": "Wallet",
@@ -2085,7 +2069,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/billing#wallet",
     "slug": "/ja/billing#wallet",
-    "objectID": 261
+    "objectID": 259
   },
   {
     "title": "自動チャージ",
@@ -2093,7 +2077,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/billing#",
     "slug": "/ja/billing#",
-    "objectID": 262
+    "objectID": 260
   },
   {
     "title": "コスト内訳",
@@ -2101,7 +2085,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/billing#",
     "slug": "/ja/billing#",
-    "objectID": 263
+    "objectID": 261
   },
   {
     "title": "設定",
@@ -2109,7 +2093,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/configuration",
     "slug": "/ja/configuration",
-    "objectID": 264
+    "objectID": 262
   },
   {
     "title": "環境変数の設定",
@@ -2117,7 +2101,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/configuration#",
     "slug": "/ja/configuration#",
-    "objectID": 265
+    "objectID": 263
   },
   {
     "title": "設定オプション",
@@ -2125,7 +2109,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/configuration#",
     "slug": "/ja/configuration#",
-    "objectID": 266
+    "objectID": 264
   },
   {
     "title": "環境変数",
@@ -2133,7 +2117,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/configuration#",
     "slug": "/ja/configuration#",
-    "objectID": 267
+    "objectID": 265
   },
   {
     "title": "環境変数の設定",
@@ -2141,7 +2125,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/configuration#",
     "slug": "/ja/configuration#",
-    "objectID": 268
+    "objectID": 266
   },
   {
     "title": "**`.env`**ファイルを使用する",
@@ -2149,7 +2133,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/configuration#env",
     "slug": "/ja/configuration#env",
-    "objectID": 269
+    "objectID": 267
   },
   {
     "title": "シェル環境を使用する",
@@ -2157,7 +2141,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/configuration#",
     "slug": "/ja/configuration#",
-    "objectID": 270
+    "objectID": 268
   },
   {
     "title": "設定の優先順位",
@@ -2165,7 +2149,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/configuration#",
     "slug": "/ja/configuration#",
-    "objectID": 271
+    "objectID": 269
   },
   {
     "title": "AIでデータを分析する",
@@ -2173,7 +2157,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/data-analysis-with-ai",
     "slug": "/ja/data-analysis-with-ai",
-    "objectID": 272
+    "objectID": 270
   },
   {
     "title": "DaytonaでAIデータアナリストを構築する",
@@ -2181,7 +2165,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/data-analysis-with-ai#daytonaai",
     "slug": "/ja/data-analysis-with-ai#daytonaai",
-    "objectID": 273
+    "objectID": 271
   },
   {
     "title": "1. プロジェクトセットアップ",
@@ -2189,15 +2173,15 @@
     "tag": "Documentation",
     "url": "/docs/ja/data-analysis-with-ai#1-",
     "slug": "/ja/data-analysis-with-ai#1-",
-    "objectID": 274
+    "objectID": 272
   },
   {
     "title": "1.1 依存関係のインストール",
-    "description": "Daytona SDKとAnthropic SDKをプロジェクトにインストールします：",
+    "description": "",
     "tag": "Documentation",
     "url": "/docs/ja/data-analysis-with-ai#11-",
     "slug": "/ja/data-analysis-with-ai#11-",
-    "objectID": 275
+    "objectID": 273
   },
   {
     "title": "1.2 環境の設定",
@@ -2205,7 +2189,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/data-analysis-with-ai#12-",
     "slug": "/ja/data-analysis-with-ai#12-",
-    "objectID": 276
+    "objectID": 274
   },
   {
     "title": "2. データセットの準備",
@@ -2213,7 +2197,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/data-analysis-with-ai#2-",
     "slug": "/ja/data-analysis-with-ai#2-",
-    "objectID": 277
+    "objectID": 275
   },
   {
     "title": "2.1 データセットのダウンロード",
@@ -2221,7 +2205,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/data-analysis-with-ai#21-",
     "slug": "/ja/data-analysis-with-ai#21-",
-    "objectID": 278
+    "objectID": 276
   },
   {
     "title": "2.2 サンドボックスの初期化",
@@ -2229,7 +2213,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/data-analysis-with-ai#22-",
     "slug": "/ja/data-analysis-with-ai#22-",
-    "objectID": 279
+    "objectID": 277
   },
   {
     "title": "サンドボックスを作成",
@@ -2237,7 +2221,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/data-analysis-with-ai#",
     "slug": "/ja/data-analysis-with-ai#",
-    "objectID": 280
+    "objectID": 278
   },
   {
     "title": "データセットをサンドボックスにアップロード",
@@ -2245,15 +2229,15 @@
     "tag": "Documentation",
     "url": "/docs/ja/data-analysis-with-ai#",
     "slug": "/ja/data-analysis-with-ai#",
-    "objectID": 281
+    "objectID": 279
   },
   {
     "title": "3. AIデータアナリストの構築",
-    "description": "ClaudeとDaytonaを接続してデータを分析し、可視化を生成するコア機能を作成します。",
+    "description": "",
     "tag": "Documentation",
     "url": "/docs/ja/data-analysis-with-ai#3-ai",
     "slug": "/ja/data-analysis-with-ai#3-ai",
-    "objectID": 282
+    "objectID": 280
   },
   {
     "title": "3.1 コード実行ハンドラー",
@@ -2261,15 +2245,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/data-analysis-with-ai#31-",
     "slug": "/ja/data-analysis-with-ai#31-",
-    "objectID": 283
-  },
-  {
-    "title": "実行アーティファクトでチャートを確認",
-    "description": "",
-    "tag": "Documentation",
-    "url": "/docs/ja/data-analysis-with-ai#",
-    "slug": "/ja/data-analysis-with-ai#",
-    "objectID": 284
+    "objectID": 281
   },
   {
     "title": "3.2 分析プロンプトの作成",
@@ -2277,7 +2253,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/data-analysis-with-ai#32-",
     "slug": "/ja/data-analysis-with-ai#32-",
-    "objectID": 285
+    "objectID": 282
   },
   {
     "title": "3.3 ツール呼び出しの設定",
@@ -2285,15 +2261,15 @@
     "tag": "Documentation",
     "url": "/docs/ja/data-analysis-with-ai#33-",
     "slug": "/ja/data-analysis-with-ai#33-",
-    "objectID": 286
+    "objectID": 283
   },
   {
-    "title": "3.4 レスポンスの処理",
+    "title": "3.4 レスポンス処理",
     "description": "",
     "tag": "Documentation",
     "url": "/docs/ja/data-analysis-with-ai#34-",
     "slug": "/ja/data-analysis-with-ai#34-",
-    "objectID": 287
+    "objectID": 284
   },
   {
     "title": "4. 分析の実行",
@@ -2301,7 +2277,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/data-analysis-with-ai#4-",
     "slug": "/ja/data-analysis-with-ai#4-",
-    "objectID": 288
+    "objectID": 285
   },
   {
     "title": "5. 完全な実装",
@@ -2309,7 +2285,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/data-analysis-with-ai#5-",
     "slug": "/ja/data-analysis-with-ai#5-",
-    "objectID": 289
+    "objectID": 286
   },
   {
     "title": "宣言的ビルダー",
@@ -2317,7 +2293,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/declarative-builder",
     "slug": "/ja/declarative-builder",
-    "objectID": 290
+    "objectID": 287
   },
   {
     "title": "概要",
@@ -2325,7 +2301,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/declarative-builder#",
     "slug": "/ja/declarative-builder#",
-    "objectID": 291
+    "objectID": 288
   },
   {
     "title": "ベースイメージの選択",
@@ -2333,7 +2309,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/declarative-builder#",
     "slug": "/ja/declarative-builder#",
-    "objectID": 292
+    "objectID": 289
   },
   {
     "title": "パッケージ管理",
@@ -2341,7 +2317,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/declarative-builder#",
     "slug": "/ja/declarative-builder#",
-    "objectID": 293
+    "objectID": 290
   },
   {
     "title": "ファイルシステム操作",
@@ -2349,7 +2325,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/declarative-builder#",
     "slug": "/ja/declarative-builder#",
-    "objectID": 294
+    "objectID": 291
   },
   {
     "title": "環境設定",
@@ -2357,7 +2333,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/declarative-builder#",
     "slug": "/ja/declarative-builder#",
-    "objectID": 295
+    "objectID": 292
   },
   {
     "title": "動的イメージビルド",
@@ -2365,7 +2341,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/declarative-builder#",
     "slug": "/ja/declarative-builder#",
-    "objectID": 296
+    "objectID": 293
   },
   {
     "title": "動的イメージを定義",
@@ -2373,7 +2349,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/declarative-builder#",
     "slug": "/ja/declarative-builder#",
-    "objectID": 297
+    "objectID": 294
   },
   {
     "title": "動的イメージで新しいSandboxを作成し、ビルドログをストリーミング",
@@ -2381,7 +2357,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/declarative-builder#sandbox",
     "slug": "/ja/declarative-builder#sandbox",
-    "objectID": 298
+    "objectID": 295
   },
   {
     "title": "事前構築済みSnapshotの作成",
@@ -2389,7 +2365,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/declarative-builder#snapshot",
     "slug": "/ja/declarative-builder#snapshot",
-    "objectID": 299
+    "objectID": 296
   },
   {
     "title": "Snapshotの一意の名前を生成",
@@ -2397,7 +2373,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/declarative-builder#snapshot",
     "slug": "/ja/declarative-builder#snapshot",
-    "objectID": 300
+    "objectID": 297
   },
   {
     "title": "イメージに追加するデータを含むローカルファイルを作成",
@@ -2405,7 +2381,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/declarative-builder#",
     "slug": "/ja/declarative-builder#",
-    "objectID": 301
+    "objectID": 298
   },
   {
     "title": "一般的なデータサイエンスパッケージを含むPythonイメージを作成",
@@ -2413,7 +2389,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/declarative-builder#python",
     "slug": "/ja/declarative-builder#python",
-    "objectID": 302
+    "objectID": 299
   },
   {
     "title": "Snapshotを作成し、ビルドログをストリーミング",
@@ -2421,7 +2397,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/declarative-builder#snapshot",
     "slug": "/ja/declarative-builder#snapshot",
-    "objectID": 303
+    "objectID": 300
   },
   {
     "title": "事前構築済みSnapshotを使用して新しいSandboxを作成",
@@ -2429,7 +2405,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/declarative-builder#snapshotsandbox",
     "slug": "/ja/declarative-builder#snapshotsandbox",
-    "objectID": 304
+    "objectID": 301
   },
   {
     "title": "既存のDockerfileを使用する",
@@ -2437,7 +2413,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/declarative-builder#dockerfile",
     "slug": "/ja/declarative-builder#dockerfile",
-    "objectID": 305
+    "objectID": 302
   },
   {
     "title": "ベストプラクティス",
@@ -2445,7 +2421,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/declarative-builder#",
     "slug": "/ja/declarative-builder#",
-    "objectID": 306
+    "objectID": 303
   },
   {
     "title": "ファイルシステム操作",
@@ -2453,7 +2429,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/file-system-operations",
     "slug": "/ja/file-system-operations",
-    "objectID": 307
+    "objectID": 304
   },
   {
     "title": "基本操作",
@@ -2461,7 +2437,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/file-system-operations#",
     "slug": "/ja/file-system-operations#",
-    "objectID": 308
+    "objectID": 305
   },
   {
     "title": "ファイルとディレクトリの一覧表示",
@@ -2469,7 +2445,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/file-system-operations#",
     "slug": "/ja/file-system-operations#",
-    "objectID": 309
+    "objectID": 306
   },
   {
     "title": "ディレクトリ内のファイルを一覧表示",
@@ -2477,7 +2453,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/file-system-operations#",
     "slug": "/ja/file-system-operations#",
-    "objectID": 310
+    "objectID": 307
   },
   {
     "title": "ディレクトリの作成",
@@ -2485,7 +2461,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/file-system-operations#",
     "slug": "/ja/file-system-operations#",
-    "objectID": 311
+    "objectID": 308
   },
   {
     "title": "特定の権限で作成",
@@ -2493,7 +2469,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/file-system-operations#",
     "slug": "/ja/file-system-operations#",
-    "objectID": 312
+    "objectID": 309
   },
   {
     "title": "ファイルのアップロード",
@@ -2501,7 +2477,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/file-system-operations#",
     "slug": "/ja/file-system-operations#",
-    "objectID": 313
+    "objectID": 310
   },
   {
     "title": "単一ファイルのアップロード",
@@ -2509,7 +2485,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/file-system-operations#",
     "slug": "/ja/file-system-operations#",
-    "objectID": 314
+    "objectID": 311
   },
   {
     "title": "単一ファイルをアップロード",
@@ -2517,7 +2493,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/file-system-operations#",
     "slug": "/ja/file-system-operations#",
-    "objectID": 315
+    "objectID": 312
   },
   {
     "title": "複数ファイルのアップロード",
@@ -2525,7 +2501,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/file-system-operations#",
     "slug": "/ja/file-system-operations#",
-    "objectID": 316
+    "objectID": 313
   },
   {
     "title": "複数のファイルを一度にアップロード",
@@ -2533,7 +2509,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/file-system-operations#",
     "slug": "/ja/file-system-operations#",
-    "objectID": 317
+    "objectID": 314
   },
   {
     "title": "ファイルのダウンロード",
@@ -2541,7 +2517,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/file-system-operations#",
     "slug": "/ja/file-system-operations#",
-    "objectID": 318
+    "objectID": 315
   },
   {
     "title": "ファイルの削除",
@@ -2549,7 +2525,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/file-system-operations#",
     "slug": "/ja/file-system-operations#",
-    "objectID": 319
+    "objectID": 316
   },
   {
     "title": "高度な操作",
@@ -2557,7 +2533,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/file-system-operations#",
     "slug": "/ja/file-system-operations#",
-    "objectID": 320
+    "objectID": 317
   },
   {
     "title": "ファイル権限",
@@ -2565,7 +2541,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/file-system-operations#",
     "slug": "/ja/file-system-operations#",
-    "objectID": 321
+    "objectID": 318
   },
   {
     "title": "ファイル権限を設定",
@@ -2573,7 +2549,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/file-system-operations#",
     "slug": "/ja/file-system-operations#",
-    "objectID": 322
+    "objectID": 319
   },
   {
     "title": "ファイル権限を取得",
@@ -2581,7 +2557,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/file-system-operations#",
     "slug": "/ja/file-system-operations#",
-    "objectID": 323
+    "objectID": 320
   },
   {
     "title": "ファイルの検索と置換",
@@ -2589,7 +2565,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/file-system-operations#",
     "slug": "/ja/file-system-operations#",
-    "objectID": 324
+    "objectID": 321
   },
   {
     "title": "ファイル内のテキストを検索; フォルダが指定された場合、検索は再帰的に行われます",
@@ -2597,7 +2573,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/file-system-operations#-",
     "slug": "/ja/file-system-operations#-",
-    "objectID": 325
+    "objectID": 322
   },
   {
     "title": "ファイル内のテキストを置換",
@@ -2605,7 +2581,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/file-system-operations#",
     "slug": "/ja/file-system-operations#",
-    "objectID": 326
+    "objectID": 323
   },
   {
     "title": "はじめに",
@@ -2613,7 +2589,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/getting-started",
     "slug": "/ja/getting-started",
-    "objectID": 327
+    "objectID": 324
   },
   {
     "title": "Daytona SDKのインストール",
@@ -2621,7 +2597,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/getting-started#daytona-sdk",
     "slug": "/ja/getting-started#daytona-sdk",
-    "objectID": 328
+    "objectID": 325
   },
   {
     "title": "npmを使用",
@@ -2629,7 +2605,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/getting-started#npm",
     "slug": "/ja/getting-started#npm",
-    "objectID": 329
+    "objectID": 326
   },
   {
     "title": "yarnを使用",
@@ -2637,7 +2613,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/getting-started#yarn",
     "slug": "/ja/getting-started#yarn",
-    "objectID": 330
+    "objectID": 327
   },
   {
     "title": "pnpmを使用",
@@ -2645,15 +2621,15 @@
     "tag": "Documentation",
     "url": "/docs/ja/getting-started#pnpm",
     "slug": "/ja/getting-started#pnpm",
-    "objectID": 331
+    "objectID": 328
   },
   {
-    "title": "サンドボックス内でコードを実行する",
+    "title": "Sandbox内でコードを実行する",
     "description": "",
     "tag": "Documentation",
-    "url": "/docs/ja/getting-started#",
-    "slug": "/ja/getting-started#",
-    "objectID": 332
+    "url": "/docs/ja/getting-started#sandbox",
+    "slug": "/ja/getting-started#sandbox",
+    "objectID": 329
   },
   {
     "title": "Daytonaクライアントを初期化",
@@ -2661,31 +2637,31 @@
     "tag": "Documentation",
     "url": "/docs/ja/getting-started#daytona",
     "slug": "/ja/getting-started#daytona",
+    "objectID": 330
+  },
+  {
+    "title": "Sandboxインスタンスを作成",
+    "description": "",
+    "tag": "Documentation",
+    "url": "/docs/ja/getting-started#sandbox",
+    "slug": "/ja/getting-started#sandbox",
+    "objectID": 331
+  },
+  {
+    "title": "Sandbox内でコードを安全に実行",
+    "description": "",
+    "tag": "Documentation",
+    "url": "/docs/ja/getting-started#sandbox",
+    "slug": "/ja/getting-started#sandbox",
+    "objectID": 332
+  },
+  {
+    "title": "Sandboxをクリーンアップ",
+    "description": "",
+    "tag": "Documentation",
+    "url": "/docs/ja/getting-started#sandbox",
+    "slug": "/ja/getting-started#sandbox",
     "objectID": 333
-  },
-  {
-    "title": "サンドボックスインスタンスを作成",
-    "description": "",
-    "tag": "Documentation",
-    "url": "/docs/ja/getting-started#",
-    "slug": "/ja/getting-started#",
-    "objectID": 334
-  },
-  {
-    "title": "サンドボックス内でコードを安全に実行",
-    "description": "",
-    "tag": "Documentation",
-    "url": "/docs/ja/getting-started#",
-    "slug": "/ja/getting-started#",
-    "objectID": 335
-  },
-  {
-    "title": "サンドボックスをクリーンアップ",
-    "description": "",
-    "tag": "Documentation",
-    "url": "/docs/ja/getting-started#",
-    "slug": "/ja/getting-started#",
-    "objectID": 336
   },
   {
     "title": "アプリをプレビューする",
@@ -2693,7 +2669,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/getting-started#",
     "slug": "/ja/getting-started#",
-    "objectID": 337
+    "objectID": 334
   },
   {
     "title": "Flaskアプリをファイルに保存",
@@ -2701,7 +2677,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/getting-started#flask",
     "slug": "/ja/getting-started#flask",
-    "objectID": 338
+    "objectID": 335
   },
   {
     "title": "新しいセッションを作成してコマンドを実行",
@@ -2709,7 +2685,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/getting-started#",
     "slug": "/ja/getting-started#",
-    "objectID": 339
+    "objectID": 336
   },
   {
     "title": "Flaskアプリのプレビューリンクを取得",
@@ -2717,7 +2693,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/getting-started#flask",
     "slug": "/ja/getting-started#flask",
-    "objectID": 340
+    "objectID": 337
   },
   {
     "title": "LLMに接続する",
@@ -2725,7 +2701,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/getting-started#llm",
     "slug": "/ja/getting-started#llm",
-    "objectID": 341
+    "objectID": 338
   },
   {
     "title": "Sandbox内でPythonコードを実行し、出力を取得",
@@ -2733,7 +2709,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/getting-started#sandboxpython",
     "slug": "/ja/getting-started#sandboxpython",
-    "objectID": 342
+    "objectID": 339
   },
   {
     "title": "その他の例",
@@ -2741,7 +2717,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/getting-started#",
     "slug": "/ja/getting-started#",
-    "objectID": 343
+    "objectID": 340
   },
   {
     "title": "ViteプロジェクトでのDaytona",
@@ -2749,7 +2725,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/getting-started#vitedaytona",
     "slug": "/ja/getting-started#vitedaytona",
-    "objectID": 344
+    "objectID": 341
   },
   {
     "title": "Daytona CLIのセットアップ",
@@ -2757,7 +2733,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/getting-started#daytona-cli",
     "slug": "/ja/getting-started#daytona-cli",
-    "objectID": 345
+    "objectID": 342
   },
   {
     "title": "Git操作",
@@ -2765,7 +2741,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/git-operations",
     "slug": "/ja/git-operations",
-    "objectID": 346
+    "objectID": 343
   },
   {
     "title": "基本操作",
@@ -2773,7 +2749,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/git-operations#",
     "slug": "/ja/git-operations#",
-    "objectID": 347
+    "objectID": 344
   },
   {
     "title": "リポジトリのクローン",
@@ -2781,7 +2757,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/git-operations#",
     "slug": "/ja/git-operations#",
-    "objectID": 348
+    "objectID": 345
   },
   {
     "title": "基本的なクローン",
@@ -2789,7 +2765,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/git-operations#",
     "slug": "/ja/git-operations#",
-    "objectID": 349
+    "objectID": 346
   },
   {
     "title": "認証付きクローン",
@@ -2797,7 +2773,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/git-operations#",
     "slug": "/ja/git-operations#",
-    "objectID": 350
+    "objectID": 347
   },
   {
     "title": "特定のブランチをクローン",
@@ -2805,7 +2781,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/git-operations#",
     "slug": "/ja/git-operations#",
-    "objectID": 351
+    "objectID": 348
   },
   {
     "title": "リポジトリステータス",
@@ -2813,7 +2789,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/git-operations#",
     "slug": "/ja/git-operations#",
-    "objectID": 352
+    "objectID": 349
   },
   {
     "title": "リポジトリステータスを取得",
@@ -2821,7 +2797,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/git-operations#",
     "slug": "/ja/git-operations#",
-    "objectID": 353
+    "objectID": 350
   },
   {
     "title": "ブランチ一覧",
@@ -2829,7 +2805,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/git-operations#",
     "slug": "/ja/git-operations#",
-    "objectID": 354
+    "objectID": 351
   },
   {
     "title": "ブランチ操作",
@@ -2837,7 +2813,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/git-operations#",
     "slug": "/ja/git-operations#",
-    "objectID": 355
+    "objectID": 352
   },
   {
     "title": "ブランチの管理",
@@ -2845,7 +2821,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/git-operations#",
     "slug": "/ja/git-operations#",
-    "objectID": 356
+    "objectID": 353
   },
   {
     "title": "新しいブランチを作成",
@@ -2853,7 +2829,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/git-operations#",
     "slug": "/ja/git-operations#",
-    "objectID": 357
+    "objectID": 354
   },
   {
     "title": "ブランチを切り替え",
@@ -2861,7 +2837,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/git-operations#",
     "slug": "/ja/git-operations#",
-    "objectID": 358
+    "objectID": 355
   },
   {
     "title": "ブランチを削除",
@@ -2869,7 +2845,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/git-operations#",
     "slug": "/ja/git-operations#",
-    "objectID": 359
+    "objectID": 356
   },
   {
     "title": "ステージングとコミット",
@@ -2877,7 +2853,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/git-operations#",
     "slug": "/ja/git-operations#",
-    "objectID": 360
+    "objectID": 357
   },
   {
     "title": "変更の操作",
@@ -2885,7 +2861,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/git-operations#",
     "slug": "/ja/git-operations#",
-    "objectID": 361
+    "objectID": 358
   },
   {
     "title": "特定のファイルをステージング",
@@ -2893,7 +2869,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/git-operations#",
     "slug": "/ja/git-operations#",
-    "objectID": 362
+    "objectID": 359
   },
   {
     "title": "すべての変更をステージング",
@@ -2901,7 +2877,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/git-operations#",
     "slug": "/ja/git-operations#",
-    "objectID": 363
+    "objectID": 360
   },
   {
     "title": "変更をコミット",
@@ -2909,7 +2885,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/git-operations#",
     "slug": "/ja/git-operations#",
-    "objectID": 364
+    "objectID": 361
   },
   {
     "title": "リモート操作",
@@ -2917,7 +2893,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/git-operations#",
     "slug": "/ja/git-operations#",
-    "objectID": 365
+    "objectID": 362
   },
   {
     "title": "リモートとの作業",
@@ -2925,7 +2901,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/git-operations#",
     "slug": "/ja/git-operations#",
-    "objectID": 366
+    "objectID": 363
   },
   {
     "title": "変更をプッシュ",
@@ -2933,7 +2909,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/git-operations#",
     "slug": "/ja/git-operations#",
-    "objectID": 367
+    "objectID": 364
   },
   {
     "title": "変更をプル",
@@ -2941,7 +2917,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/git-operations#",
     "slug": "/ja/git-operations#",
-    "objectID": 368
+    "objectID": 365
   },
   {
     "title": "Language Server Protocol",
@@ -2949,7 +2925,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/language-server-protocol",
     "slug": "/ja/language-server-protocol",
-    "objectID": 369
+    "objectID": 366
   },
   {
     "title": "LSPサーバーの作成",
@@ -2957,7 +2933,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/language-server-protocol#lsp",
     "slug": "/ja/language-server-protocol#lsp",
-    "objectID": 370
+    "objectID": 367
   },
   {
     "title": "Sandboxを作成",
@@ -2965,7 +2941,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/language-server-protocol#sandbox",
     "slug": "/ja/language-server-protocol#sandbox",
-    "objectID": 371
+    "objectID": 368
   },
   {
     "title": "Python用のLSPサーバーを作成",
@@ -2973,7 +2949,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/language-server-protocol#pythonlsp",
     "slug": "/ja/language-server-protocol#pythonlsp",
-    "objectID": 372
+    "objectID": 369
   },
   {
     "title": "サポートされている言語",
@@ -2981,7 +2957,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/language-server-protocol#",
     "slug": "/ja/language-server-protocol#",
-    "objectID": 373
+    "objectID": 370
   },
   {
     "title": "利用可能な言語ID",
@@ -2989,7 +2965,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/language-server-protocol#id",
     "slug": "/ja/language-server-protocol#id",
-    "objectID": 374
+    "objectID": 371
   },
   {
     "title": "LSP機能",
@@ -2997,7 +2973,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/language-server-protocol#lsp",
     "slug": "/ja/language-server-protocol#lsp",
-    "objectID": 375
+    "objectID": 372
   },
   {
     "title": "コード補完",
@@ -3005,7 +2981,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/language-server-protocol#",
     "slug": "/ja/language-server-protocol#",
-    "objectID": 376
+    "objectID": 373
   },
   {
     "title": "制限",
@@ -3013,7 +2989,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/limits",
     "slug": "/ja/limits",
-    "objectID": 377
+    "objectID": 374
   },
   {
     "title": "ティアと制限の増加",
@@ -3021,7 +2997,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/limits#",
     "slug": "/ja/limits#",
-    "objectID": 378
+    "objectID": 375
   },
   {
     "title": "使用量を動的に管理",
@@ -3029,7 +3005,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/limits#",
     "slug": "/ja/limits#",
-    "objectID": 379
+    "objectID": 376
   },
   {
     "title": "さらに必要ですか？",
@@ -3037,7 +3013,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/limits#",
     "slug": "/ja/limits#",
-    "objectID": 380
+    "objectID": 377
   },
   {
     "title": "リンクされたアカウント",
@@ -3045,7 +3021,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/linked-accounts",
     "slug": "/ja/linked-accounts",
-    "objectID": 381
+    "objectID": 378
   },
   {
     "title": "より高い使用制限を解除",
@@ -3053,7 +3029,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/linked-accounts#",
     "slug": "/ja/linked-accounts#",
-    "objectID": 382
+    "objectID": 379
   },
   {
     "title": "アカウントをリンクする方法",
@@ -3061,7 +3037,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/linked-accounts#",
     "slug": "/ja/linked-accounts#",
-    "objectID": 383
+    "objectID": 380
   },
   {
     "title": "アカウントのリンクを解除する方法",
@@ -3069,7 +3045,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/linked-accounts#",
     "slug": "/ja/linked-accounts#",
-    "objectID": 384
+    "objectID": 381
   },
   {
     "title": "さらにサポートが必要ですか？",
@@ -3077,7 +3053,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/linked-accounts#",
     "slug": "/ja/linked-accounts#",
-    "objectID": 385
+    "objectID": 382
   },
   {
     "title": "ログストリーミング",
@@ -3085,7 +3061,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/log-streaming",
     "slug": "/ja/log-streaming",
-    "objectID": 386
+    "objectID": 383
   },
   {
     "title": "非同期",
@@ -3093,7 +3069,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/log-streaming#",
     "slug": "/ja/log-streaming#",
-    "objectID": 387
+    "objectID": 384
   },
   {
     "title": "同期処理",
@@ -3101,7 +3077,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/log-streaming#",
     "slug": "/ja/log-streaming#",
-    "objectID": 388
+    "objectID": 385
   },
   {
     "title": "Daytona MCP Server",
@@ -3109,7 +3085,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/mcp",
     "slug": "/ja/mcp",
-    "objectID": 389
+    "objectID": 386
   },
   {
     "title": "前提条件",
@@ -3117,7 +3093,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/mcp#",
     "slug": "/ja/mcp#",
-    "objectID": 390
+    "objectID": 387
   },
   {
     "title": "インストールとセットアップ",
@@ -3125,7 +3101,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/mcp#",
     "slug": "/ja/mcp#",
-    "objectID": 391
+    "objectID": 388
   },
   {
     "title": "1. Daytona CLIをインストール",
@@ -3133,7 +3109,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/mcp#1-daytona-cli",
     "slug": "/ja/mcp#1-daytona-cli",
-    "objectID": 392
+    "objectID": 389
   },
   {
     "title": "2. Daytonaで認証",
@@ -3141,7 +3117,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/mcp#2-daytona",
     "slug": "/ja/mcp#2-daytona",
-    "objectID": 393
+    "objectID": 390
   },
   {
     "title": "3. MCPサーバーを初期化",
@@ -3149,7 +3125,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/mcp#3-mcp",
     "slug": "/ja/mcp#3-mcp",
-    "objectID": 394
+    "objectID": 391
   },
   {
     "title": "4. AIエージェントを開く",
@@ -3157,7 +3133,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/mcp#4-ai",
     "slug": "/ja/mcp#4-ai",
-    "objectID": 395
+    "objectID": 392
   },
   {
     "title": "他のAIエージェントとの統合",
@@ -3165,7 +3141,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/mcp#ai",
     "slug": "/ja/mcp#ai",
-    "objectID": 396
+    "objectID": 393
   },
   {
     "title": "利用可能なツール",
@@ -3173,7 +3149,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/mcp#",
     "slug": "/ja/mcp#",
-    "objectID": 397
+    "objectID": 394
   },
   {
     "title": "サンドボックス管理",
@@ -3181,7 +3157,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/mcp#",
     "slug": "/ja/mcp#",
-    "objectID": 398
+    "objectID": 395
   },
   {
     "title": "ファイル操作",
@@ -3189,7 +3165,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/mcp#",
     "slug": "/ja/mcp#",
-    "objectID": 399
+    "objectID": 396
   },
   {
     "title": "プレビュー",
@@ -3197,7 +3173,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/mcp#",
     "slug": "/ja/mcp#",
-    "objectID": 400
+    "objectID": 397
   },
   {
     "title": "Git操作",
@@ -3205,7 +3181,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/mcp#git",
     "slug": "/ja/mcp#git",
-    "objectID": 401
+    "objectID": 398
   },
   {
     "title": "コマンド実行",
@@ -3213,7 +3189,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/mcp#",
     "slug": "/ja/mcp#",
-    "objectID": 402
+    "objectID": 399
   },
   {
     "title": "トラブルシューティング",
@@ -3221,7 +3197,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/mcp#",
     "slug": "/ja/mcp#",
-    "objectID": 403
+    "objectID": 400
   },
   {
     "title": "サポート",
@@ -3229,7 +3205,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/mcp#",
     "slug": "/ja/mcp#",
-    "objectID": 404
+    "objectID": 401
   },
   {
     "title": "Organizations",
@@ -3237,7 +3213,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/organizations",
     "slug": "/ja/organizations",
-    "objectID": 405
+    "objectID": 402
   },
   {
     "title": "Personal vs Collaborative Organizations",
@@ -3245,7 +3221,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/organizations#personal-vs-collaborative-organizations",
     "slug": "/ja/organizations#personal-vs-collaborative-organizations",
-    "objectID": 406
+    "objectID": 403
   },
   {
     "title": "組織の役割",
@@ -3253,7 +3229,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/organizations#",
     "slug": "/ja/organizations#",
-    "objectID": 407
+    "objectID": 404
   },
   {
     "title": "管理アクション",
@@ -3261,7 +3237,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/organizations#",
     "slug": "/ja/organizations#",
-    "objectID": 408
+    "objectID": 405
   },
   {
     "title": "新しいユーザーの招待",
@@ -3269,7 +3245,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/organizations#",
     "slug": "/ja/organizations#",
-    "objectID": 409
+    "objectID": 406
   },
   {
     "title": "利用可能な割り当て",
@@ -3277,7 +3253,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/organizations#",
     "slug": "/ja/organizations#",
-    "objectID": 410
+    "objectID": 407
   },
   {
     "title": "招待の管理",
@@ -3285,7 +3261,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/organizations#",
     "slug": "/ja/organizations#",
-    "objectID": 411
+    "objectID": 408
   },
   {
     "title": "設定",
@@ -3293,7 +3269,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/organizations#",
     "slug": "/ja/organizations#",
-    "objectID": 412
+    "objectID": 409
   },
   {
     "title": "プレビューと認証",
@@ -3301,7 +3277,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/preview-and-authentication",
     "slug": "/ja/preview-and-authentication",
-    "objectID": 413
+    "objectID": 410
   },
   {
     "title": "プロセスとコード実行",
@@ -3309,7 +3285,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/process-code-execution",
     "slug": "/ja/process-code-execution",
-    "objectID": 414
+    "objectID": 411
   },
   {
     "title": "コード実行",
@@ -3317,7 +3293,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/process-code-execution#",
     "slug": "/ja/process-code-execution#",
-    "objectID": 415
+    "objectID": 412
   },
   {
     "title": "コードの実行",
@@ -3325,7 +3301,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/process-code-execution#",
     "slug": "/ja/process-code-execution#",
-    "objectID": 416
+    "objectID": 413
   },
   {
     "title": "Pythonコードを実行",
@@ -3333,7 +3309,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/process-code-execution#python",
     "slug": "/ja/process-code-execution#python",
-    "objectID": 417
+    "objectID": 414
   },
   {
     "title": "プロセス実行",
@@ -3341,7 +3317,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/process-code-execution#",
     "slug": "/ja/process-code-execution#",
-    "objectID": 418
+    "objectID": 415
   },
   {
     "title": "コマンドの実行",
@@ -3349,7 +3325,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/process-code-execution#",
     "slug": "/ja/process-code-execution#",
-    "objectID": 419
+    "objectID": 416
   },
   {
     "title": "任意のシェルコマンドを実行",
@@ -3357,7 +3333,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/process-code-execution#",
     "slug": "/ja/process-code-execution#",
-    "objectID": 420
+    "objectID": 417
   },
   {
     "title": "作業ディレクトリとタイムアウトの設定",
@@ -3365,7 +3341,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/process-code-execution#",
     "slug": "/ja/process-code-execution#",
-    "objectID": 421
+    "objectID": 418
   },
   {
     "title": "環境変数の渡し方",
@@ -3373,7 +3349,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/process-code-execution#",
     "slug": "/ja/process-code-execution#",
-    "objectID": 422
+    "objectID": 419
   },
   {
     "title": "セッション（バックグラウンドプロセス）",
@@ -3381,7 +3357,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/process-code-execution#",
     "slug": "/ja/process-code-execution#",
-    "objectID": 423
+    "objectID": 420
   },
   {
     "title": "長時間実行プロセスの管理",
@@ -3389,7 +3365,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/process-code-execution#",
     "slug": "/ja/process-code-execution#",
-    "objectID": 424
+    "objectID": 421
   },
   {
     "title": "セッションの実行されたコマンドを確認",
@@ -3397,7 +3373,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/process-code-execution#",
     "slug": "/ja/process-code-execution#",
-    "objectID": 425
+    "objectID": 422
   },
   {
     "title": "実行中のすべてのセッションを一覧表示",
@@ -3405,7 +3381,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/process-code-execution#",
     "slug": "/ja/process-code-execution#",
-    "objectID": 426
+    "objectID": 423
   },
   {
     "title": "ベストプラクティス",
@@ -3413,15 +3389,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/process-code-execution#",
     "slug": "/ja/process-code-execution#",
-    "objectID": 427
-  },
-  {
-    "title": "Python - セッションのクリーンアップ",
-    "description": "",
-    "tag": "Documentation",
-    "url": "/docs/ja/process-code-execution#python---",
-    "slug": "/ja/process-code-execution#python---",
-    "objectID": 428
+    "objectID": 424
   },
   {
     "title": "よくある問題",
@@ -3429,7 +3397,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/process-code-execution#",
     "slug": "/ja/process-code-execution#",
-    "objectID": 429
+    "objectID": 425
   },
   {
     "title": "プロセス実行の失敗",
@@ -3437,7 +3405,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/process-code-execution#",
     "slug": "/ja/process-code-execution#",
-    "objectID": 430
+    "objectID": 426
   },
   {
     "title": "プロセスタイムアウト",
@@ -3445,7 +3413,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/process-code-execution#",
     "slug": "/ja/process-code-execution#",
-    "objectID": 431
+    "objectID": 427
   },
   {
     "title": "リソース制限",
@@ -3453,7 +3421,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/process-code-execution#",
     "slug": "/ja/process-code-execution#",
-    "objectID": 432
+    "objectID": 428
   },
   {
     "title": "リージョン選択",
@@ -3461,7 +3429,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/regions",
     "slug": "/ja/regions",
-    "objectID": 433
+    "objectID": 429
   },
   {
     "title": "Sandbox管理",
@@ -3469,7 +3437,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/sandbox-management",
     "slug": "/ja/sandbox-management",
-    "objectID": 434
+    "objectID": 430
   },
   {
     "title": "Sandboxのライフサイクル",
@@ -3477,7 +3445,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/sandbox-management#sandbox",
     "slug": "/ja/sandbox-management#sandbox",
-    "objectID": 435
+    "objectID": 431
   },
   {
     "title": "Sandboxの作成",
@@ -3485,7 +3453,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/sandbox-management#sandbox",
     "slug": "/ja/sandbox-management#sandbox",
-    "objectID": 436
+    "objectID": 432
   },
   {
     "title": "基本的なSandboxの作成",
@@ -3493,7 +3461,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/sandbox-management#sandbox",
     "slug": "/ja/sandbox-management#sandbox",
-    "objectID": 437
+    "objectID": 433
   },
   {
     "title": "基本的なSandboxを作成",
@@ -3501,7 +3469,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/sandbox-management#sandbox",
     "slug": "/ja/sandbox-management#sandbox",
-    "objectID": 438
+    "objectID": 434
   },
   {
     "title": "特定の言語でSandboxを作成",
@@ -3509,7 +3477,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/sandbox-management#sandbox",
     "slug": "/ja/sandbox-management#sandbox",
-    "objectID": 439
+    "objectID": 435
   },
   {
     "title": "カスタムラベルでSandboxを作成",
@@ -3517,7 +3485,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/sandbox-management#sandbox",
     "slug": "/ja/sandbox-management#sandbox",
-    "objectID": 440
+    "objectID": 436
   },
   {
     "title": "Sandboxリソース",
@@ -3525,7 +3493,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/sandbox-management#sandbox",
     "slug": "/ja/sandbox-management#sandbox",
-    "objectID": 441
+    "objectID": 437
   },
   {
     "title": "カスタムリソースでSandboxを作成",
@@ -3533,7 +3501,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/sandbox-management#sandbox",
     "slug": "/ja/sandbox-management#sandbox",
-    "objectID": 442
+    "objectID": 438
   },
   {
     "title": "Sandboxの情報",
@@ -3541,7 +3509,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/sandbox-management#sandbox",
     "slug": "/ja/sandbox-management#sandbox",
-    "objectID": 443
+    "objectID": 439
   },
   {
     "title": "Sandbox IDを取得",
@@ -3549,7 +3517,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/sandbox-management#sandbox-id",
     "slug": "/ja/sandbox-management#sandbox-id",
-    "objectID": 444
+    "objectID": 440
   },
   {
     "title": "Sandboxユーザーのルートディレクトリを取得",
@@ -3557,7 +3525,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/sandbox-management#sandbox",
     "slug": "/ja/sandbox-management#sandbox",
-    "objectID": 445
+    "objectID": 441
   },
   {
     "title": "Sandbox ID、自動停止間隔、状態を取得",
@@ -3565,7 +3533,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/sandbox-management#sandbox-id",
     "slug": "/ja/sandbox-management#sandbox-id",
-    "objectID": 446
+    "objectID": 442
   },
   {
     "title": "Sandboxの停止と開始",
@@ -3573,7 +3541,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/sandbox-management#sandbox",
     "slug": "/ja/sandbox-management#sandbox",
-    "objectID": 447
+    "objectID": 443
   },
   {
     "title": "Sandboxを停止",
@@ -3581,7 +3549,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/sandbox-management#sandbox",
     "slug": "/ja/sandbox-management#sandbox",
-    "objectID": 448
+    "objectID": 444
   },
   {
     "title": "sandbox IDは後でsandboxを見つけて開始するために使用できます",
@@ -3589,7 +3557,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/sandbox-management#sandbox-idsandbox",
     "slug": "/ja/sandbox-management#sandbox-idsandbox",
-    "objectID": 449
+    "objectID": 445
   },
   {
     "title": "Sandboxを開始",
@@ -3597,7 +3565,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/sandbox-management#sandbox",
     "slug": "/ja/sandbox-management#sandbox",
-    "objectID": 450
+    "objectID": 446
   },
   {
     "title": "Sandboxのアーカイブ",
@@ -3605,7 +3573,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/sandbox-management#sandbox",
     "slug": "/ja/sandbox-management#sandbox",
-    "objectID": 451
+    "objectID": 447
   },
   {
     "title": "Sandboxをアーカイブ",
@@ -3613,7 +3581,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/sandbox-management#sandbox",
     "slug": "/ja/sandbox-management#sandbox",
-    "objectID": 452
+    "objectID": 448
   },
   {
     "title": "Sandboxを削除する",
@@ -3621,7 +3589,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/sandbox-management#sandbox",
     "slug": "/ja/sandbox-management#sandbox",
-    "objectID": 453
+    "objectID": 449
   },
   {
     "title": "Sandboxを削除",
@@ -3629,7 +3597,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/sandbox-management#sandbox",
     "slug": "/ja/sandbox-management#sandbox",
-    "objectID": 454
+    "objectID": 450
   },
   {
     "title": "自動ライフサイクル管理",
@@ -3637,7 +3605,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/sandbox-management#",
     "slug": "/ja/sandbox-management#",
-    "objectID": 455
+    "objectID": 451
   },
   {
     "title": "自動停止間隔",
@@ -3645,7 +3613,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/sandbox-management#",
     "slug": "/ja/sandbox-management#",
-    "objectID": 456
+    "objectID": 452
   },
   {
     "title": "自動アーカイブ間隔",
@@ -3653,7 +3621,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/sandbox-management#",
     "slug": "/ja/sandbox-management#",
-    "objectID": 457
+    "objectID": 453
   },
   {
     "title": "自動削除間隔",
@@ -3661,7 +3629,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/sandbox-management#",
     "slug": "/ja/sandbox-management#",
-    "objectID": 458
+    "objectID": 454
   },
   {
     "title": "停止後すぐにSandboxを削除",
@@ -3669,7 +3637,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/sandbox-management#sandbox",
     "slug": "/ja/sandbox-management#sandbox",
-    "objectID": 459
+    "objectID": 455
   },
   {
     "title": "自動削除を無効にする",
@@ -3677,7 +3645,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/sandbox-management#",
     "slug": "/ja/sandbox-management#",
-    "objectID": 460
+    "objectID": 456
   },
   {
     "title": "無期限で実行",
@@ -3685,7 +3653,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/sandbox-management#",
     "slug": "/ja/sandbox-management#",
-    "objectID": 461
+    "objectID": 457
   },
   {
     "title": "スナップショット",
@@ -3693,7 +3661,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/snapshots",
     "slug": "/ja/snapshots",
-    "objectID": 462
+    "objectID": 458
   },
   {
     "title": "スナップショットの作成",
@@ -3701,7 +3669,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/snapshots#",
     "slug": "/ja/snapshots#",
-    "objectID": 463
+    "objectID": 459
   },
   {
     "title": "スナップショットリソース",
@@ -3709,7 +3677,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/snapshots#",
     "slug": "/ja/snapshots#",
-    "objectID": 464
+    "objectID": 460
   },
   {
     "title": "カスタムリソースでSnapshotを作成",
@@ -3717,7 +3685,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/snapshots#snapshot",
     "slug": "/ja/snapshots#snapshot",
-    "objectID": 465
+    "objectID": 461
   },
   {
     "title": "カスタムSnapshotでSandboxを作成",
@@ -3725,7 +3693,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/snapshots#snapshotsandbox",
     "slug": "/ja/snapshots#snapshotsandbox",
-    "objectID": 466
+    "objectID": 462
   },
   {
     "title": "プライベートレジストリからのイメージ",
@@ -3733,7 +3701,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/snapshots#",
     "slug": "/ja/snapshots#",
-    "objectID": 467
+    "objectID": 463
   },
   {
     "title": "ローカルイメージの使用",
@@ -3741,7 +3709,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/snapshots#",
     "slug": "/ja/snapshots#",
-    "objectID": 468
+    "objectID": 464
   },
   {
     "title": "スナップショットの削除",
@@ -3749,7 +3717,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/snapshots#",
     "slug": "/ja/snapshots#",
-    "objectID": 469
+    "objectID": 465
   },
   {
     "title": "デフォルトSnapshot",
@@ -3757,7 +3725,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/snapshots#snapshot",
     "slug": "/ja/snapshots#snapshot",
-    "objectID": 470
+    "objectID": 466
   },
   {
     "title": "CLI",
@@ -3765,7 +3733,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/tools/cli",
     "slug": "/ja/tools/cli",
-    "objectID": 471
+    "objectID": 467
   },
   {
     "title": "daytona",
@@ -3773,7 +3741,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/tools/cli#daytona",
     "slug": "/ja/tools/cli#daytona",
-    "objectID": 472
+    "objectID": 468
   },
   {
     "title": "daytona autocomplete",
@@ -3781,7 +3749,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/tools/cli#daytona-autocomplete",
     "slug": "/ja/tools/cli#daytona-autocomplete",
-    "objectID": 473
+    "objectID": 469
   },
   {
     "title": "daytona docs",
@@ -3789,7 +3757,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/tools/cli#daytona-docs",
     "slug": "/ja/tools/cli#daytona-docs",
-    "objectID": 474
+    "objectID": 470
   },
   {
     "title": "daytona login",
@@ -3797,7 +3765,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/tools/cli#daytona-login",
     "slug": "/ja/tools/cli#daytona-login",
-    "objectID": 475
+    "objectID": 471
   },
   {
     "title": "daytona logout",
@@ -3805,7 +3773,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/tools/cli#daytona-logout",
     "slug": "/ja/tools/cli#daytona-logout",
-    "objectID": 476
+    "objectID": 472
   },
   {
     "title": "daytona mcp",
@@ -3813,7 +3781,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/tools/cli#daytona-mcp",
     "slug": "/ja/tools/cli#daytona-mcp",
-    "objectID": 477
+    "objectID": 473
   },
   {
     "title": "daytona mcp config",
@@ -3821,7 +3789,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/tools/cli#daytona-mcp-config",
     "slug": "/ja/tools/cli#daytona-mcp-config",
-    "objectID": 478
+    "objectID": 474
   },
   {
     "title": "daytona mcp init",
@@ -3829,7 +3797,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/tools/cli#daytona-mcp-init",
     "slug": "/ja/tools/cli#daytona-mcp-init",
-    "objectID": 479
+    "objectID": 475
   },
   {
     "title": "daytona mcp start",
@@ -3837,7 +3805,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/tools/cli#daytona-mcp-start",
     "slug": "/ja/tools/cli#daytona-mcp-start",
-    "objectID": 480
+    "objectID": 476
   },
   {
     "title": "daytona organization",
@@ -3845,7 +3813,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/tools/cli#daytona-organization",
     "slug": "/ja/tools/cli#daytona-organization",
-    "objectID": 481
+    "objectID": 477
   },
   {
     "title": "daytona organization create",
@@ -3853,7 +3821,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/tools/cli#daytona-organization-create",
     "slug": "/ja/tools/cli#daytona-organization-create",
-    "objectID": 482
+    "objectID": 478
   },
   {
     "title": "daytona organization delete",
@@ -3861,7 +3829,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/tools/cli#daytona-organization-delete",
     "slug": "/ja/tools/cli#daytona-organization-delete",
-    "objectID": 483
+    "objectID": 479
   },
   {
     "title": "daytona organization list",
@@ -3869,7 +3837,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/tools/cli#daytona-organization-list",
     "slug": "/ja/tools/cli#daytona-organization-list",
-    "objectID": 484
+    "objectID": 480
   },
   {
     "title": "daytona organization use",
@@ -3877,7 +3845,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/tools/cli#daytona-organization-use",
     "slug": "/ja/tools/cli#daytona-organization-use",
-    "objectID": 485
+    "objectID": 481
   },
   {
     "title": "daytona sandbox",
@@ -3885,7 +3853,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/tools/cli#daytona-sandbox",
     "slug": "/ja/tools/cli#daytona-sandbox",
-    "objectID": 486
+    "objectID": 482
   },
   {
     "title": "daytona sandbox create",
@@ -3893,7 +3861,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/tools/cli#daytona-sandbox-create",
     "slug": "/ja/tools/cli#daytona-sandbox-create",
-    "objectID": 487
+    "objectID": 483
   },
   {
     "title": "daytona sandbox delete",
@@ -3901,7 +3869,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/tools/cli#daytona-sandbox-delete",
     "slug": "/ja/tools/cli#daytona-sandbox-delete",
-    "objectID": 488
+    "objectID": 484
   },
   {
     "title": "daytona sandbox info",
@@ -3909,7 +3877,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/tools/cli#daytona-sandbox-info",
     "slug": "/ja/tools/cli#daytona-sandbox-info",
-    "objectID": 489
+    "objectID": 485
   },
   {
     "title": "daytona sandbox list",
@@ -3917,7 +3885,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/tools/cli#daytona-sandbox-list",
     "slug": "/ja/tools/cli#daytona-sandbox-list",
-    "objectID": 490
+    "objectID": 486
   },
   {
     "title": "daytona sandbox start",
@@ -3925,7 +3893,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/tools/cli#daytona-sandbox-start",
     "slug": "/ja/tools/cli#daytona-sandbox-start",
-    "objectID": 491
+    "objectID": 487
   },
   {
     "title": "daytona sandbox stop",
@@ -3933,7 +3901,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/tools/cli#daytona-sandbox-stop",
     "slug": "/ja/tools/cli#daytona-sandbox-stop",
-    "objectID": 492
+    "objectID": 488
   },
   {
     "title": "daytona snapshot",
@@ -3941,7 +3909,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/tools/cli#daytona-snapshot",
     "slug": "/ja/tools/cli#daytona-snapshot",
-    "objectID": 493
+    "objectID": 489
   },
   {
     "title": "daytona snapshot create",
@@ -3949,7 +3917,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/tools/cli#daytona-snapshot-create",
     "slug": "/ja/tools/cli#daytona-snapshot-create",
-    "objectID": 494
+    "objectID": 490
   },
   {
     "title": "daytona snapshot delete",
@@ -3957,7 +3925,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/tools/cli#daytona-snapshot-delete",
     "slug": "/ja/tools/cli#daytona-snapshot-delete",
-    "objectID": 495
+    "objectID": 491
   },
   {
     "title": "daytona snapshot list",
@@ -3965,7 +3933,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/tools/cli#daytona-snapshot-list",
     "slug": "/ja/tools/cli#daytona-snapshot-list",
-    "objectID": 496
+    "objectID": 492
   },
   {
     "title": "daytona snapshot push",
@@ -3973,7 +3941,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/tools/cli#daytona-snapshot-push",
     "slug": "/ja/tools/cli#daytona-snapshot-push",
-    "objectID": 497
+    "objectID": 493
   },
   {
     "title": "daytona version",
@@ -3981,7 +3949,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/tools/cli#daytona-version",
     "slug": "/ja/tools/cli#daytona-version",
-    "objectID": 498
+    "objectID": 494
   },
   {
     "title": "daytona volume",
@@ -3989,7 +3957,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/tools/cli#daytona-volume",
     "slug": "/ja/tools/cli#daytona-volume",
-    "objectID": 499
+    "objectID": 495
   },
   {
     "title": "daytona volume create",
@@ -3997,7 +3965,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/tools/cli#daytona-volume-create",
     "slug": "/ja/tools/cli#daytona-volume-create",
-    "objectID": 500
+    "objectID": 496
   },
   {
     "title": "daytona volume delete",
@@ -4005,7 +3973,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/tools/cli#daytona-volume-delete",
     "slug": "/ja/tools/cli#daytona-volume-delete",
-    "objectID": 501
+    "objectID": 497
   },
   {
     "title": "daytona volume get",
@@ -4013,7 +3981,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/tools/cli#daytona-volume-get",
     "slug": "/ja/tools/cli#daytona-volume-get",
-    "objectID": 502
+    "objectID": 498
   },
   {
     "title": "daytona volume list",
@@ -4021,7 +3989,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/tools/cli#daytona-volume-list",
     "slug": "/ja/tools/cli#daytona-volume-list",
-    "objectID": 503
+    "objectID": 499
   },
   {
     "title": "ボリューム",
@@ -4029,7 +3997,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/volumes",
     "slug": "/ja/volumes",
-    "objectID": 504
+    "objectID": 500
   },
   {
     "title": "ボリュームの作成",
@@ -4037,7 +4005,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/volumes#",
     "slug": "/ja/volumes#",
-    "objectID": 505
+    "objectID": 501
   },
   {
     "title": "ボリュームのマウント",
@@ -4045,7 +4013,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/volumes#",
     "slug": "/ja/volumes#",
-    "objectID": 506
+    "objectID": 502
   },
   {
     "title": "新しいボリュームを作成するか、既存のものを取得する",
@@ -4053,7 +4021,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/volumes#",
     "slug": "/ja/volumes#",
-    "objectID": 507
+    "objectID": 503
   },
   {
     "title": "ボリュームをサンドボックスにマウントする",
@@ -4061,7 +4029,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/volumes#",
     "slug": "/ja/volumes#",
-    "objectID": 508
+    "objectID": 504
   },
   {
     "title": "サンドボックスでの作業が完了したら、削除できます",
@@ -4069,7 +4037,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/volumes#",
     "slug": "/ja/volumes#",
-    "objectID": 509
+    "objectID": 505
   },
   {
     "title": "ボリュームはサンドボックスが削除された後も持続します",
@@ -4077,7 +4045,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/volumes#",
     "slug": "/ja/volumes#",
-    "objectID": 510
+    "objectID": 506
   },
   {
     "title": "ボリュームの削除",
@@ -4085,7 +4053,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/volumes#",
     "slug": "/ja/volumes#",
-    "objectID": 511
+    "objectID": 507
   },
   {
     "title": "ボリュームの操作",
@@ -4093,7 +4061,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/volumes#",
     "slug": "/ja/volumes#",
-    "objectID": 512
+    "objectID": 508
   },
   {
     "title": "制限事項",
@@ -4101,7 +4069,7 @@
     "tag": "Documentation",
     "url": "/docs/ja/volumes#",
     "slug": "/ja/volumes#",
-    "objectID": 513
+    "objectID": 509
   },
   {
     "title": "Web Terminal",
@@ -4109,6 +4077,6 @@
     "tag": "Documentation",
     "url": "/docs/ja/web-terminal",
     "slug": "/ja/web-terminal",
-    "objectID": 514
+    "objectID": 510
   }
 ]

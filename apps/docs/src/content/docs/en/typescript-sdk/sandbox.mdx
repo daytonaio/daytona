@@ -14,174 +14,174 @@ Represents a Daytona Sandbox.
     
     ##### Implementation of
     
-```ts
-SandboxDto.autoArchiveInterval
-```
+    ```ts
+    SandboxDto.autoArchiveInterval
+    ```
 - `autoDeleteInterval?` _number_ - Auto-delete interval in minutes
     
     ##### Implementation of
     
-```ts
-SandboxDto.autoDeleteInterval
-```
+    ```ts
+    SandboxDto.autoDeleteInterval
+    ```
 - `autoStopInterval?` _number_ - Auto-stop interval in minutes
     
     ##### Implementation of
     
-```ts
-SandboxDto.autoStopInterval
-```
+    ```ts
+    SandboxDto.autoStopInterval
+    ```
 - `backupCreatedAt?` _string_ - When the backup was created
     
     ##### Implementation of
     
-```ts
-SandboxDto.backupCreatedAt
-```
+    ```ts
+    SandboxDto.backupCreatedAt
+    ```
 - `backupState?` _SandboxBackupStateEnum_ - Current state of Sandbox backup
     
     ##### Implementation of
     
-```ts
-SandboxDto.backupState
-```
+    ```ts
+    SandboxDto.backupState
+    ```
 - `buildInfo?` _BuildInfo_ - Build information for the Sandbox if it was created from dynamic build
     
     ##### Implementation of
     
-```ts
-SandboxDto.buildInfo
-```
+    ```ts
+    SandboxDto.buildInfo
+    ```
 - `computerUse` _ComputerUse_ - Computer use operations interface for desktop automation
 - `cpu` _number_ - Number of CPUs allocated to the Sandbox
     
     ##### Implementation of
     
-```ts
-SandboxDto.cpu
-```
+    ```ts
+    SandboxDto.cpu
+    ```
 - `createdAt?` _string_ - When the Sandbox was created
     
     ##### Implementation of
     
-```ts
-SandboxDto.createdAt
-```
+    ```ts
+    SandboxDto.createdAt
+    ```
 - `disk` _number_ - Amount of disk space allocated to the Sandbox in GiB
     
     ##### Implementation of
     
-```ts
-SandboxDto.disk
-```
+    ```ts
+    SandboxDto.disk
+    ```
 - `env` _Record\<string, string\>_ - Environment variables set in the Sandbox
     
     ##### Implementation of
     
-```ts
-SandboxDto.env
-```
+    ```ts
+    SandboxDto.env
+    ```
 - `errorReason?` _string_ - Error message if Sandbox is in error state
     
     ##### Implementation of
     
-```ts
-SandboxDto.errorReason
-```
+    ```ts
+    SandboxDto.errorReason
+    ```
 - `fs` _FileSystem_ - File system operations interface
 - `git` _Git_ - Git operations interface
 - `gpu` _number_ - Number of GPUs allocated to the Sandbox
     
     ##### Implementation of
     
-```ts
-SandboxDto.gpu
-```
+    ```ts
+    SandboxDto.gpu
+    ```
 - `id` _string_ - Unique identifier for the Sandbox
     
     ##### Implementation of
     
-```ts
-SandboxDto.id
-```
+    ```ts
+    SandboxDto.id
+    ```
 - `labels` _Record\<string, string\>_ - Custom labels attached to the Sandbox
     
     ##### Implementation of
     
-```ts
-SandboxDto.labels
-```
+    ```ts
+    SandboxDto.labels
+    ```
 - `memory` _number_ - Amount of memory allocated to the Sandbox in GiB
     
     ##### Implementation of
     
-```ts
-SandboxDto.memory
-```
+    ```ts
+    SandboxDto.memory
+    ```
 - `organizationId` _string_ - Organization ID of the Sandbox
     
     ##### Implementation of
     
-```ts
-SandboxDto.organizationId
-```
+    ```ts
+    SandboxDto.organizationId
+    ```
 - `process` _Process_ - Process execution interface
 - `public` _boolean_ - Whether the Sandbox is publicly accessible
     
     ##### Implementation of
     
-```ts
-SandboxDto.public
-```
+    ```ts
+    SandboxDto.public
+    ```
 - `runnerDomain?` _string_ - Domain name of the Sandbox runner
     
     ##### Implementation of
     
-```ts
-SandboxDto.runnerDomain
-```
+    ```ts
+    SandboxDto.runnerDomain
+    ```
 - `snapshot?` _string_ - Daytona snapshot used to create the Sandbox
     
     ##### Implementation of
     
-```ts
-SandboxDto.snapshot
-```
+    ```ts
+    SandboxDto.snapshot
+    ```
 - `state?` _SandboxState_ - Current state of the Sandbox (e.g., "started", "stopped")
     
     ##### Implementation of
     
-```ts
-SandboxDto.state
-```
+    ```ts
+    SandboxDto.state
+    ```
 - `target` _string_ - Target location of the runner where the Sandbox runs
     
     ##### Implementation of
     
-```ts
-SandboxDto.target
-```
+    ```ts
+    SandboxDto.target
+    ```
 - `updatedAt?` _string_ - When the Sandbox was last updated
     
     ##### Implementation of
     
-```ts
-SandboxDto.updatedAt
-```
+    ```ts
+    SandboxDto.updatedAt
+    ```
 - `user` _string_ - OS user running in the Sandbox
     
     ##### Implementation of
     
-```ts
-SandboxDto.user
-```
+    ```ts
+    SandboxDto.user
+    ```
 - `volumes?` _SandboxVolume\[\]_ - Volumes attached to the Sandbox
     
     ##### Implementation of
     
-```ts
-SandboxDto.volumes
-```
+    ```ts
+    SandboxDto.volumes
+    ```
     
 
 
@@ -318,14 +318,14 @@ console.log(`Token: ${previewLink.token}`);
 #### getUserRootDir()
 
 ```ts
-getUserRootDir(): Promise<undefined | string>
+getUserRootDir(): Promise<string>
 ```
 
 Gets the root directory path for the logged in user inside the Sandbox.
 
 **Returns**:
 
-- `Promise<undefined | string>` - The absolute path to the Sandbox root directory for the logged in user
+- `Promise<string>` - The absolute path to the Sandbox root directory for the logged in user
 
 **Example:**
 

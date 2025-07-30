@@ -4,16 +4,10 @@
   "src": ["apps/docs/src/components/**/*.{ts,tsx}"],
   "files": {
     "mdx": {
-      "include": [
-        "apps/docs/src/content/docs/[locale]/**/*.mdx",
-        "apps/docs/src/content/legacy-docs/[locale]/**/*.mdx"
-      ]
+      "include": ["apps/docs/src/content/docs/[locale]/**/*.mdx"]
     },
     "md": {
-      "include": [
-        "apps/docs/src/content/docs/[locale]/**/*.md",
-        "apps/docs/src/content/legacy-docs/[locale]/**/*.md"
-      ]
+      "include": ["apps/docs/src/content/docs/[locale]/**/*.md"]
     },
     "json": {
       "include": ["apps/docs/src/content/i18n/[locale].json"]
@@ -23,6 +17,5 @@
     }
   },
   "locales": ["en", "ja"],
-  "ssr": true,
-  "_versionId": "0077a5e99cd790092fdf53827bc76ada31ebe28b9b4d7182511ea6bea49fb123"
+  "ssr": true
 }

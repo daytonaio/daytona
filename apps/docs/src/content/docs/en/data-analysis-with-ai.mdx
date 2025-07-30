@@ -31,9 +31,10 @@ Install the Daytona SDK and Anthropic SDK to your project:
 
 <Tabs>
   <TabItem label="Python" icon="seti:python">
-  ```bash pip install daytona anthropic python-dotenv ```
+    ```bash pip install daytona anthropic python-dotenv ```
   </TabItem>
   <TabItem label="TypeScript" icon="seti:typescript">
+    ```bash npm install @daytonaio/sdk @anthropic-ai/sdk dotenv ```
   </TabItem>
 </Tabs>
 
@@ -83,7 +84,7 @@ sandbox = daytona.create()
 
 sandbox.fs.upload_file("dataset.csv", "/home/daytona/dataset.csv")
 
-```
+````
 </TabItem>
 <TabItem label="TypeScript" icon="seti:typescript">
 ```typescript
@@ -96,7 +97,7 @@ const sandbox = await daytona.create()
 
 // Upload the dataset to the sandbox
 await sandbox.fs.uploadFile('dataset.csv', '/home/daytona/dataset.csv')
-```
+````
 
 </TabItem>
 </Tabs>
@@ -115,28 +116,27 @@ First, let's create a function to handle code execution and chart extraction:
 import base64
 
 def run_ai_generated_code(sandbox, ai_generated_code):
-execution = sandbox.process.code_run(ai_generated_code)
-if execution.exit_code != 0:
-print('AI-generated code had an error.')
-print(execution.exit_code)
-print(execution.result)
-return
+  execution = sandbox.process.code_run(ai_generated_code)
+  if execution.exit_code != 0:
+    print('AI-generated code had an error.')
+    print(execution.exit_code)
+    print(execution.result)
+    return
 
-# Check for charts in execution artifacts
+  # Check for charts in execution artifacts
+  if not execution.artifacts or not execution.artifacts.charts:
+    print('No charts found in execution artifacts')
+    return
 
-if not execution.artifacts or not execution.artifacts.charts:
-print('No charts found in execution artifacts')
-return
+  result_idx = 0
+  for result in execution.artifacts.charts:
+    if result.png: # Save the png to a file (png is in base64 format)
+      with open(f'chart-{result_idx}.png', 'wb') as f:
+        f.write(base64.b64decode(result.png))
+        print(f'Chart saved to chart-{result_idx}.png')
+        result_idx += 1
 
-result_idx = 0
-for result in execution.artifacts.charts:
-if result.png: # Save the png to a file (png is in base64 format)
-with open(f'chart-{result_idx}.png', 'wb') as f:
-f.write(base64.b64decode(result.png))
-print(f'Chart saved to chart-{result_idx}.png')
-result_idx += 1
-
-```
+````
 </TabItem>
 <TabItem label="TypeScript" icon="seti:typescript">
 ```typescript
@@ -167,7 +167,7 @@ async function runAIGeneratedCode(sandbox, aiGeneratedCode: string) {
     }
   }
 }
-```
+````
 
 </TabItem>
 </Tabs>
@@ -189,7 +189,6 @@ prompt = f"""
 I have a CSV file with vehicle valuations saved in the sandbox at /home/daytona/dataset.csv.
 
 Relevant columns:
-
 - 'year': integer, the manufacturing year of the vehicle
 - 'price_in_euro': float, the listed price of the vehicle in Euros
 
@@ -202,7 +201,7 @@ Finish with a plt.show()"""
 anthropic = Anthropic()
 print('Waiting for the model response...')
 
-```
+````
 </TabItem>
 <TabItem label="TypeScript" icon="seti:typescript">
 ```typescript
@@ -215,15 +214,15 @@ Relevant columns:
 - 'year': integer, the manufacturing year of the vehicle
 - 'price_in_euro': float, the listed price of the vehicle in Euros
 
-Analyze how price varies by manufacturing year.
-Drop rows where 'year' or 'price_in_euro' is missing, non-numeric, or an outlier.
+Analyze how price varies by manufacturing year.  
+Drop rows where 'year' or 'price_in_euro' is missing, non-numeric, or an outlier.  
 Create a line chart showing average price per year.
 Write Python code that analyzes the dataset based on my request and produces right chart accordingly.
 Finish with a plt.show()`
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 console.log('Waiting for the model response...')
-```
+````
 
 </TabItem>
 </Tabs>
@@ -308,17 +307,17 @@ interface CodeRunToolInput {
 }
 
 for (const contentBlock of msg.content) {
-if (contentBlock.type === 'tool_use') {
-if (contentBlock.name === 'run_python_code') {
-const code = (contentBlock.input as CodeRunToolInput).code
-console.log('Will run following code in the Sandbox:\n', code)
-// Execute the code in the sandbox
-await runAIGeneratedCode(sandbox, code)
-}
-}
+  if (contentBlock.type === 'tool_use') {
+    if (contentBlock.name === 'run_python_code') {
+      const code = (contentBlock.input as CodeRunToolInput).code
+      console.log('Will run following code in the Sandbox:\n', code)
+      // Execute the code in the sandbox
+      await runAIGeneratedCode(sandbox, code)
+    }
+  }
 }
 
-```
+````
 </TabItem>
 </Tabs>
 
@@ -338,7 +337,7 @@ Now you can run the complete code to see the results.
 <TabItem label="Python" icon="seti:python">
 ```bash
 python data-analysis.py
-```
+````
 
 </TabItem>
 <TabItem label="TypeScript" icon="seti:typescript">
@@ -369,20 +368,20 @@ from dotenv import load_dotenv
 from daytona import Daytona, Sandbox
 from anthropic import Anthropic
 
-def main():
-load_dotenv() # Create sandbox
-daytona = Daytona()
-sandbox = daytona.create()
 
+def main():
+    load_dotenv()
+    # Create sandbox
+    daytona = Daytona()
+    sandbox = daytona.create()
+    
     # Upload the dataset to the sandbox
     sandbox.fs.upload_file("dataset.csv", "/home/daytona/dataset.csv")
-
+    
     prompt = f"""
-
 I have a CSV file with vehicle valuations saved in the sandbox at /home/daytona/dataset.csv.
 
 Relevant columns:
-
 - 'year': integer, the manufacturing year of the vehicle
 - 'price_in_euro': float, the listed price of the vehicle in Euros
 
@@ -424,14 +423,15 @@ Finish with a plt.show()"""
                 # Execute the code in the sandbox
                 run_ai_generated_code(sandbox, code)
 
-def run_ai_generated_code(sandbox: Sandbox, ai_generated_code: str):
-execution = sandbox.process.code_run(ai_generated_code)
-if execution.exit_code != 0:
-print('AI-generated code had an error.')
-print(execution.exit_code)
-print(execution.result)
-return
 
+def run_ai_generated_code(sandbox: Sandbox, ai_generated_code: str):
+    execution = sandbox.process.code_run(ai_generated_code)
+    if execution.exit_code != 0:
+        print('AI-generated code had an error.')
+        print(execution.exit_code)
+        print(execution.result)
+        return
+    
     # Iterate over all the results and specifically check for png files that will represent the chart.
     if not execution.artifacts or not execution.artifacts.charts:
         print('No charts found in execution artifacts')
@@ -448,10 +448,10 @@ return
             print(f'Chart saved to chart-{result_idx}.png')
             result_idx += 1
 
-if **name** == "**main**":
-main()
 
-```
+if __name__ == "__main__":
+    main()
+````
 </TabItem>
 <TabItem label="TypeScript" icon="seti:typescript">
 ```typescript
@@ -476,8 +476,8 @@ Relevant columns:
 - 'year': integer, the manufacturing year of the vehicle
 - 'price_in_euro': float, the listed price of the vehicle in Euros
 
-Analyze how price varies by manufacturing year.
-Drop rows where 'year' or 'price_in_euro' is missing, non-numeric, or an outlier.
+Analyze how price varies by manufacturing year.  
+Drop rows where 'year' or 'price_in_euro' is missing, non-numeric, or an outlier.  
 Create a line chart showing average price per year.
 Write Python code that analyzes the dataset based on my request and produces right chart accordingly.
 Finish with a plt.show()`
@@ -550,7 +550,6 @@ async function runAIGeneratedCode(sandbox: Sandbox, aiGeneratedCode: string) {
 }
 
 main().catch(console.error);
-```
-
+````
 </TabItem>
 </Tabs>

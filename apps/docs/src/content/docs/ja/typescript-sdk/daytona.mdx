@@ -337,12 +337,12 @@ await daytona.stop(sandbox);
 - `autoArchiveInterval?` _number_ - 自動アーカイブ間隔（分単位）（0は最大間隔が使用されることを意味します）。デフォルトは7日です。
 - `autoDeleteInterval?` _number_ - 自動削除間隔（分単位）（負の値は無効を意味し、0は停止時に即座に削除することを意味します）。デフォルトでは、自動削除は無効です。
 - `autoStopInterval?` _number_ - 自動停止間隔（分単位）（0は無効を意味します）。デフォルトは15分です。
-- `envVars?` _Record\<string, string\>_ - Sandboxで設定するオプションの環境変数
+- `envVars?` _Record\<string, string\>_ - Sandboxに設定するオプションの環境変数
 - `labels?` _Record\<string, string\>_ - Sandboxラベル
 - `language?` _string_ - 直接コード実行のためのプログラミング言語
 - `public?` _boolean_ - Sandboxポートプレビューが公開されているか
 - `user?` _string_ - Sandboxで使用するオプションのOSユーザー
-- `volumes?` _VolumeMount\[\]_
+- `volumes?` _VolumeMount\[\]_ - Sandboxにマウントするボリュームのオプション配列
 ## CreateSandboxFromImageParams
 
 新しいSandboxを作成するためのパラメータ。

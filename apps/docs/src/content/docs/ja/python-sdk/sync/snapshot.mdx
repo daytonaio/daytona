@@ -143,6 +143,22 @@ daytona.snapshot.create(
 )
 ```
 
+#### SnapshotService.activate
+
+```python
+def activate(snapshot: Snapshot) -> Snapshot
+```
+
+スナップショットをアクティベートします。
+
+**引数**:
+
+- `snapshot` _Snapshot_ - Snapshotインスタンス。
+
+**戻り値**:
+
+- `Snapshot` - アクティベートされたSnapshotインスタンス。
+
 #### SnapshotService.process\_image\_context
 
 ```python
@@ -151,7 +167,7 @@ def process_image_context(object_storage_api: ObjectStorageApi,
                           image: Image) -> List[str]
 ```
 
-オブジェクトストレージにアップロードすることで、イメージコンテキストを処理します。
+イメージコンテキストをオブジェクトストレージにアップロードして処理します。
 
 **引数**:
 

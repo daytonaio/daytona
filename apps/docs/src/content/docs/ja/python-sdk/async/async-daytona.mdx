@@ -459,7 +459,7 @@ class CreateSandboxBaseParams(BaseModel)
 
 - `language` _Optional[CodeLanguage]_ - Sandboxのプログラミング言語。デフォルトは"python"。
 - `os_user` _Optional[str]_ - SandboxのOSユーザー。
-- `env_vars` _Optional[Dict[str, str]]_ - Sandboxで設定する環境変数。
+- `env_vars` _Optional[Dict[str, str]]_ - Sandboxに設定する環境変数。
 - `labels` _Optional[Dict[str, str]]_ - Sandboxのカスタムラベル。
 - `public` _Optional[bool]_ - Sandboxを公開するかどうか。
 - `timeout` _Optional[float]_ - Sandboxが作成され開始されるまでのタイムアウト（秒）。
@@ -472,6 +472,7 @@ class CreateSandboxBaseParams(BaseModel)
 - `auto_delete_interval` _Optional[int]_ - 継続的に停止しているSandboxが
   自動的に削除される間隔（分）。デフォルトでは、自動削除は無効。
   負の値は無効を意味し、0は停止と同時に即座に削除することを意味する。
+- `volumes` _Optional[List[VolumeMount]]_ - Sandboxにアタッチするボリュームマウントのリスト。
 
 ## CreateSandboxFromImageParams
 
