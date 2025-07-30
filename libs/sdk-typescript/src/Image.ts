@@ -576,7 +576,7 @@ export class Image {
       }
 
       // Check if the line contains a COPY command
-      if (/^\s*COPY\s/.test(line)) {
+      if (/^\s*COPY\s+(?!.*--from=)/i.test(line)) {
         const fg = await dynamicImport('fast-glob', '"COPY" dockerfile command is not supported: ')
 
         const commandParts = this.parseCopyCommand(line)

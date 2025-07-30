@@ -235,7 +235,7 @@ export class Daytona {
           !(this.jwtToken && this.organizationId && apiUrl && this.target))) &&
       RUNTIME !== Runtime.BROWSER
     ) {
-      if (RUNTIME === Runtime.NODE) {
+      if (RUNTIME === Runtime.NODE && typeof require !== 'undefined') {
         const dotenv = require('dotenv')
         dotenv.config({ quiet: true })
         dotenv.config({ path: '.env.local', override: true, quiet: true })
