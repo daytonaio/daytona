@@ -16,6 +16,7 @@ import { InjectRedis } from '@nestjs-modules/ioredis'
 import Redis from 'ioredis'
 import { RunnerAdapterFactory } from '../../runner-adapter/runnerAdapter'
 import { ToolboxService } from '../../services/toolbox.service'
+import { MAX_ARCHIVING_CONCURRENT_SANDBOXES } from '../sandbox.manager'
 
 @Injectable()
 export class SandboxArchiveAction extends SandboxAction {
@@ -50,9 +51,9 @@ export class SandboxArchiveAction extends SandboxAction {
 
     //  if the sandbox is already in progress, continue
     if (!inProgressOnRunner.find((s) => s.id === sandbox.id)) {
-      //  max 3 sandboxes can be archived at the same time on the same runner
+      //  MAX_ARCHIVING_CONCURRENT_SANDBOXES sandboxes can be archived at the same time on the same runner
       //  this is to prevent the runner from being overloaded
-      if (inProgressOnRunner.length > 2) {
+      if (inProgressOnRunner.length >= MAX_ARCHIVING_CONCURRENT_SANDBOXES) {
         await this.redisLockProvider.unlock(lockKey)
         return DONT_SYNC_AGAIN
       }

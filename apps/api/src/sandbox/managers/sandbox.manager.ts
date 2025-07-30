@@ -35,6 +35,8 @@ import { SYNC_AGAIN, DONT_SYNC_AGAIN } from './sandbox-actions/sandbox.action'
 
 export const SYNC_INSTANCE_STATE_LOCK_KEY = 'sync-instance-state-'
 
+export const MAX_ARCHIVING_CONCURRENT_SANDBOXES = 6
+
 @Injectable()
 export class SandboxManager {
   private readonly logger = new Logger(SandboxManager.name)
@@ -277,7 +279,7 @@ export class SandboxManager {
       .select('"runnerId"')
       .where('"sandbox"."state" = :state', { state: SandboxState.ARCHIVING })
       .groupBy('"runnerId"')
-      .having('COUNT(*) >= 3')
+      .having('COUNT(*) >= :max', { max: MAX_ARCHIVING_CONCURRENT_SANDBOXES })
       .getRawMany()
 
     const sandboxes = await this.sandboxRepository
