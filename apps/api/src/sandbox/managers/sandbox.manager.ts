@@ -280,8 +280,9 @@ export class SandboxManager {
       .having('COUNT(*) >= 3')
       .getRawMany()
 
-    const sandboxes = await this.sandboxRepository.find({
-      where: [
+    const sandboxes = await this.sandboxRepository
+      .createQueryBuilder('sandbox')
+      .where([
         {
           state: SandboxState.ARCHIVING,
           desiredState: SandboxDesiredState.ARCHIVED,
@@ -293,12 +294,11 @@ export class SandboxManager {
           desiredState: SandboxDesiredState.ARCHIVED,
           runnerId: Not(In(runnersWith3InProgress.map((runner) => runner.runnerId))),
         },
-      ],
-      take: 100,
-      order: {
-        lastActivityAt: 'DESC',
-      },
-    })
+      ])
+      .orderBy('CASE WHEN "sandbox"."backupState" = \'Completed\' THEN 0 ELSE 1 END', 'ASC')
+      .addOrderBy('"sandbox"."lastActivityAt"', 'DESC')
+      .take(100)
+      .getMany()
 
     await Promise.all(
       sandboxes.map(async (sandbox) => {
