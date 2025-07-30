@@ -13,7 +13,7 @@ import Label from '@components/Label.astro'
 
 Prebuildsは、ワークスペースを事前にビルドすることで開発を加速するように設計されています。ワークスペースを開始すると、事前にビルドされた環境が使用され、ワークスペースがほぼ瞬時に開始されることが保証されます。
 
-Prebuildsは、接続されたGit Providerのリポジトリの変更を監視する[プロジェクト設定](/docs/ja/usage/projects#project-configuration)を設定することでこれを実現します。
+Prebuildsは、接続されたGit Providerのリポジトリの変更を監視する[プロジェクト設定](/docs/en/usage/projects#project-configuration)を設定することでこれを実現します。
 
 PrebuildsはGit ProviderからのWebhookイベントのリスナーを登録することで動作します。パブリックAPIエンドポイントが提供され、Git Providerはこれらのリクエストを送信するためにこれを使用します。
 
@@ -59,7 +59,7 @@ Maximum number of resulting builds stored at a time
 
 ## Prebildを使用する
 
-Prebildを追加すると、提供した[プロジェクト設定](/docs/ja/usage/projects#project-configuration)に基づいて即座にアクティブになります。Prebildは、定義されたコミット数に達したときなど、指定された条件が満たされるたびに自動的に実行されます。
+Prebildを追加すると、提供した[プロジェクト設定](/docs/en/usage/projects#project-configuration)に基づいて即座にアクティブになります。Prebildは、定義されたコミット数に達したときなど、指定された条件が満たされるたびに自動的に実行されます。
 
 例えば、コミット間隔を`5`に指定した場合、Prebildはリポジトリへの`5`コミットごとに実行されます。**Trigger files**フィールドには、変更があった際にコミット間隔を待つことなく即座にPrebildをトリガーしたいファイルを入力してください。**Retention**フィールドを使用して、Daytonaに記憶させたい成功したビルドの数を定義します（デフォルトは`3`）。
 

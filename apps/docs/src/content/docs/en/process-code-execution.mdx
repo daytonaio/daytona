@@ -176,29 +176,29 @@ Daytona SDK provides best practices for process and code execution in Sandboxes.
 
 <Tabs>
 <TabItem label="Python" icon="seti:python">
-   ```python
-   # Python - Clean up session
-   session_id = "long-running-cmd"
-   try:
-       sandbox.process.create_session(session_id)
-       session = sandbox.process.get_session(session_id)
-       # Do work...
-   finally:
-       sandbox.process.delete_session(session.session_id)
-   ```
+```python
+# Python - Clean up session
+session_id = "long-running-cmd"
+try:
+    sandbox.process.create_session(session_id)
+    session = sandbox.process.get_session(session_id)
+    # Do work...
+finally:
+    sandbox.process.delete_session(session.session_id)
+```
 </TabItem>
 <TabItem label="TypeScript" icon="seti:typescript">
-   ```typescript
-   // TypeScript - Clean up session
-   const sessionId = "long-running-cmd";
-   try {
-       await sandbox.process.createSession(sessionId);
-       const session = await sandbox.process.getSession(sessionId);
-       // Do work...
-   } finally {
-       await sandbox.process.deleteSession(session.sessionId);
-   }
-   ```
+```typescript
+// TypeScript - Clean up session
+const sessionId = "long-running-cmd";
+try {
+    await sandbox.process.createSession(sessionId);
+    const session = await sandbox.process.getSession(sessionId);
+    // Do work...
+} finally {
+    await sandbox.process.deleteSession(session.sessionId);
+}
+```
 </TabItem>
 </Tabs>
 

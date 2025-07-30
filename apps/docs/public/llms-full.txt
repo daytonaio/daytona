@@ -1,5 +1,5 @@
 # Daytona Documentation v0.0.0-dev
-# Generated on: 2025-07-25
+# Generated on: 2025-07-30
 
 
 title: API Keys
@@ -175,8 +175,7 @@ This example shows how to build an AI-powered data analyst that automatically ge
 
 Install the Daytona SDK and Anthropic SDK to your project:
 
-    ```bash pip install daytona anthropic python-dotenv ```
-    ```bash npm install @daytonaio/sdk @anthropic-ai/sdk dotenv ```
+  ```bash pip install daytona anthropic python-dotenv ```
 
 #### 1.2 Configure Environment
 
@@ -222,7 +221,7 @@ sandbox = daytona.create()
 
 sandbox.fs.upload_file("dataset.csv", "/home/daytona/dataset.csv")
 
-````
+```
 ```typescript
 import 'dotenv/config'
 import { Daytona } from '@daytonaio/sdk';
@@ -233,7 +232,7 @@ const sandbox = await daytona.create()
 
 // Upload the dataset to the sandbox
 await sandbox.fs.uploadFile('dataset.csv', '/home/daytona/dataset.csv')
-````
+```
 
 
 ### 3. Building the AI Data Analyst
@@ -269,7 +268,7 @@ f.write(base64.b64decode(result.png))
 print(f'Chart saved to chart-{result_idx}.png')
 result_idx += 1
 
-````
+```
 ```typescript
 import fs from 'fs'
 
@@ -298,7 +297,7 @@ async function runAIGeneratedCode(sandbox, aiGeneratedCode: string) {
     }
   }
 }
-````
+```
 
 
 #### 3.2 Creating the Analysis Prompt
@@ -329,7 +328,7 @@ Finish with a plt.show()"""
 anthropic = Anthropic()
 print('Waiting for the model response...')
 
-````
+```
 ```typescript
 import Anthropic from '@anthropic-ai/sdk'
 
@@ -348,7 +347,7 @@ Finish with a plt.show()`
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 console.log('Waiting for the model response...')
-````
+```
 
 
 #### 3.3 Tool Calling Setup
@@ -431,7 +430,7 @@ await runAIGeneratedCode(sandbox, code)
 }
 }
 
-````
+```
 
 That's it! The `run_ai_generated_code` function we created automatically handles saving charts. When Claude generates a visualization with `plt.show()`, Daytona captures it as a chart artifact and saves it as a PNG file.
 
@@ -447,7 +446,7 @@ Now you can run the complete code to see the results.
 
 ```bash
 python data-analysis.py
-````
+```
 
 ```bash
 npx tsx data-analysis.ts
@@ -554,7 +553,7 @@ return
 if **name** == "**main**":
 main()
 
-````
+```
 ```typescript
 import 'dotenv/config'
 import fs from 'fs'
@@ -651,7 +650,7 @@ async function runAIGeneratedCode(sandbox: Sandbox, aiGeneratedCode: string) {
 }
 
 main().catch(console.error);
-````
+```
 
 title: Declarative Builder
 
@@ -822,7 +821,11 @@ fs.writeFileSync(localFilePath, localFileContent)
 // Create a Python image with common data science packages
 const image = Image.debianSlim('3.12')
     .pipInstall(['numpy', 'pandas', 'matplotlib', 'scipy', 'scikit-learn'])
-    .runCommands('apt-get update && apt-get install -y git', 'mkdir -p /home/daytona/workspace')
+    .runCommands(
+      'apt-get update && apt-get install -y git',
+      'groupadd -r daytona && useradd -r -g daytona -m daytona',
+      'mkdir -p /home/daytona/workspace'
+    )
     .dockerfileCommands(['USER daytona'])
     .workdir('/home/daytona/workspace')
     .env({
@@ -1140,7 +1143,7 @@ yarn add @daytonaio/sdk
 
 pnpm add @daytonaio/sdk
 
-````
+```
 
 ## Run Code Inside a Sandbox
 
@@ -1164,7 +1167,7 @@ else:
 
 # Clean up the Sandbox
 sandbox.delete()
-````
+```
 
 ```typescript
 import { Daytona } from '@daytonaio/sdk'
@@ -1202,11 +1205,11 @@ await sandbox.delete();
 
 main().catch(console.error)
 
-````
+```
 
 ```bash
 python main.py
-````
+```
 
 ```bash
 npx tsx ./index.ts
@@ -1269,7 +1272,7 @@ var_async=True
 preview_info = sandbox.get_preview_link(3000)
 print(f"Flask app is available at: {preview_info.url}")
 
-````
+```
 
 ```typescript
 import { Daytona } from '@daytonaio/sdk';
@@ -1327,7 +1330,7 @@ if __name__ == '__main__':
 
 main().catch(error => console.error("Error:", error));
 
-````
+```
 
 
 Need to access this endpoint programmatically? Learn more about [Preview & Authentication](/docs/en/preview-and-authentication).
@@ -1386,7 +1389,7 @@ code = code.replace('\\', '\\\\')
 response = sandbox.process.code_run(code)
 print("The factorial of 25 is", response.result)
 
-````
+```
 
 Running the snippet:
 
@@ -1395,7 +1398,7 @@ ANTHROPIC_API_KEY="your-anthropic-api-key"
 DAYTONA_API_KEY="your-daytona-api-key"
 DAYTONA_TARGET=us
 python claude-example.py
-````
+```
 
 ```bash
 > The factorial of 25 is 15511210043330985984000000
@@ -1459,7 +1462,7 @@ console.log("The factorial of 25 is", response.result)
 
 main().catch(console.error)
 
-````
+```
 
 
 Running the snippet:
@@ -1469,7 +1472,7 @@ ANTHROPIC_API_KEY="your-anthropic-api-key"
 DAYTONA_API_KEY="your-daytona-api-key"
 DAYTONA_TARGET=us
 npx ts-node claude-example.ts
-````
+```
 
 ```bash
 > The factorial of 25 is 15511210043330985984000000
@@ -1743,17 +1746,17 @@ Run your first line of code in a Daytona Sandbox. Use our [LLMs context files](/
 
 #### 2. Install the SDK
 
-  ```bash
-  pip install daytona
-  ```
-  ```bash
-  npm install @daytonaio/sdk
-  ```
+```bash
+pip install daytona
+```
+```bash
+npm install @daytonaio/sdk
+```
 
 #### 3. Write Your Code
 
   Create a file named: `main.py`
-  ```python
+```python
   from daytona import Daytona, DaytonaConfig
 
 # Define the configuration
@@ -1780,26 +1783,26 @@ Run your first line of code in a Daytona Sandbox. Use our [LLMs context files](/
 
   sandbox.delete()
 
-  ```
+```
   Create a file named: `index.mts`
-  ```typescript
-  import { Daytona } from '@daytonaio/sdk';
+```typescript
+import { Daytona } from '@daytonaio/sdk';
 
-  // Initialize the Daytona client
-  const daytona = new Daytona({ apiKey: 'your-api-key' });
+// Initialize the Daytona client
+const daytona = new Daytona({ apiKey: 'your-api-key' });
 
-  // Create the Sandbox instance
-  const sandbox = await daytona.create({
-    language: 'typescript',
-  });
+// Create the Sandbox instance
+const sandbox = await daytona.create({
+  language: 'typescript',
+});
 
-  // Run the code securely inside the Sandbox
-  const response = await sandbox.process.codeRun('console.log("Hello World from code!")')
-  console.log(response.result);
+// Run the code securely inside the Sandbox
+const response = await sandbox.process.codeRun('console.log("Hello World from code!")')
+console.log(response.result);
 
-  // Clean up
-  await sandbox.delete()
-  ```
+// Clean up
+await sandbox.delete()
+```
 
 
 :::note
@@ -1808,12 +1811,12 @@ Replace `your-api-key` with the value from your Daytona dashboard.
 
 #### 4. Run It
 
-  ```bash
-  python main.py
-  ```
-  ```bash
-  npx tsx index.mts
-  ```
+```bash
+python main.py
+```
+```bash
+npx tsx index.mts
+```
 
 #### ✅ What You Just Did
 
@@ -1926,21 +1929,22 @@ Daytona enforces resource limits to ensure fair usage and stability across all o
 - **Storage** — Total disk space available
 
 These resources are pooled and shared across all running Sandboxes.  
-The number of Sandboxes you can run at once depends on how much CPU, RAM, and storage each one uses.   You can see how to configure and estimate resource usage in the [Sandbox Management docs](https://www.daytona.io/docs/sandbox-management/).
+The number of Sandboxes you can run at once depends on how much CPU, RAM, and storage each one uses. You can see how to configure and estimate resource usage in the [Sandbox Management docs](https://www.daytona.io/docs/sandbox-management/).
 
 ## Tiers & Limit Increases
 
 Organizations are automatically placed into a Tier based on verification status.  
 You can unlock higher limits by completing the following steps:
 
-| Tier     | Resources (vCPU / RAM / Storage) | Access Requirements                |
-|----------|----------------------------------|------------------------------------|
-| Tier 1   | 10 / 10GiB / 30GiB               | Email verified                     |
-| Tier 2   | 100 / 200GiB / 300GiB            | Credit card linked, $10 top-up, [GitHub connected](https://www.daytona.io/docs/linked-accounts#how-to-link-an-account). |
-| Tier 3   | Even more resources              | Coming soon. |
-| Custom   | Custom limits                    | Contact [support@daytona.io](mailto:support@daytona.io) |
+| Tier   | Resources (vCPU / RAM / Storage) | Access Requirements                                                                                                     |
+| ------ | -------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| Tier 1 | 10 / 10GiB / 30GiB               | Email verified                                                                                                          |
+| Tier 2 | 100 / 200GiB / 300GiB            | Credit card linked, $25 top-up, [GitHub connected](https://www.daytona.io/docs/linked-accounts#how-to-link-an-account). |
+| Tier 3 | 250 / 500GiB / 2000GiB           | Business email verified, Phone verified, $500 top-up.                                                                   |
+| Tier 4 | 500 / 1000GiB / 5000GiB          | $2000 top-up every 30 days.                                                                                             |
+| Custom | Custom limits                    | Contact [support@daytona.io](mailto:support@daytona.io)                                                                 |
 
-You’ll be automatically upgraded once you meet the criteria.
+Once you meet the criteria for a higher tier, make sure to Upgrade by clicking the "Upgrade" button in the [Dashboard](https://app.daytona.io/dashboard/limits).
 
 :::tip
 
@@ -2057,42 +2061,42 @@ if __name__ == "__main__":
     asyncio.run(main())
 
 ```
-  ```typescript
-  import { Daytona, Sandbox } from '@daytonaio/sdk'
+```typescript
+import { Daytona, Sandbox } from '@daytonaio/sdk'
 
-  async function main() {
-    const daytona = new Daytona()
-    const sandbox = await daytona.create()
+async function main() {
+  const daytona = new Daytona()
+  const sandbox = await daytona.create()
 
-    try {           
-      const sessionId = 'exec-session-async-logs'
-      await sandbox.process.createSession(sessionId)
+  try {           
+    const sessionId = 'exec-session-async-logs'
+    await sandbox.process.createSession(sessionId)
 
-      const command = await sandbox.process.executeSessionCommand(sessionId, {
-        command: 'for i in {1..10}; do echo "Processing step $i..."; sleep 1; done',
-        async: true,
-      })
+    const command = await sandbox.process.executeSessionCommand(sessionId, {
+      command: 'for i in {1..10}; do echo "Processing step $i..."; sleep 1; done',
+      async: true,
+    })
 
-      const logTask = sandbox.process.getSessionCommandLogs(sessionId, command.cmdId!, (chunk) => {
-        console.log('Log chunk:', chunk)
-      })
+    const logTask = sandbox.process.getSessionCommandLogs(sessionId, command.cmdId!, (chunk) => {
+      console.log('Log chunk:', chunk)
+    })
 
-      console.log('Continuing execution while logs are streaming...')
-      sleep(1)
-      console.log('Other operations completed!')
+    console.log('Continuing execution while logs are streaming...')
+    sleep(1)
+    console.log('Other operations completed!')
 
-      console.log('At the end wait for any asynchronous task to complete and clean up resources...')
-      await logTask
-    } catch (error) {
-      console.error('Error:', error)
-    } finally {
-      console.log('Cleaning up sandbox...')
-      await sandbox.delete()
-    }
+    console.log('At the end wait for any asynchronous task to complete and clean up resources...')
+    await logTask
+  } catch (error) {
+    console.error('Error:', error)
+  } finally {
+    console.log('Cleaning up sandbox...')
+    await sandbox.delete()
   }
+}
 
-  main()
-  ```
+main()
+```
 
 
 ## Synchronous
@@ -2100,90 +2104,90 @@ if __name__ == "__main__":
 If the command has a predictable duration, or if you don't need to run it in the background,
 you can process log stream synchronously. For example, you can write logs to a file or some other storage.
 
-  ```python
-  import asyncio
-  import os
-  from daytona import Daytona, SessionExecuteRequest
+```python
+import asyncio
+import os
+from daytona import Daytona, SessionExecuteRequest
 
-  async def main():
-      daytona = Daytona()
-      sandbox = daytona.create()
+async def main():
+    daytona = Daytona()
+    sandbox = daytona.create()
 
-      try:
-          session_id = "exec-session-1"
-          sandbox.process.create_session(session_id)
+    try:
+        session_id = "exec-session-1"
+        sandbox.process.create_session(session_id)
 
-          command = sandbox.process.execute_session_command(
-              session_id,
-              SessionExecuteRequest(
-                  command='counter=1; while (( counter <= 5 )); do echo "Count: $counter"; ((counter++)); sleep 2; done',
-                  var_async=True,
-              ),
-          )
+        command = sandbox.process.execute_session_command(
+            session_id,
+            SessionExecuteRequest(
+                command='counter=1; while (( counter <= 5 )); do echo "Count: $counter"; ((counter++)); sleep 2; done',
+                var_async=True,
+            ),
+        )
 
-          log_file_path = f"./logs/logs-session_{session_id}-command_{command.cmd_id}.log"
-          os.makedirs(os.path.dirname(log_file_path), exist_ok=True)
+        log_file_path = f"./logs/logs-session_{session_id}-command_{command.cmd_id}.log"
+        os.makedirs(os.path.dirname(log_file_path), exist_ok=True)
 
-          with open(log_file_path, "w") as log_file:
-              def handle_chunk(chunk: str):
-                  #  remove null bytes
-                  clean_chunk = chunk.replace("\x00", "")
-                  #  write to file
-                  log_file.write(clean_chunk)
-                  log_file.flush()
+        with open(log_file_path, "w") as log_file:
+            def handle_chunk(chunk: str):
+                #  remove null bytes
+                clean_chunk = chunk.replace("\x00", "")
+                #  write to file
+                log_file.write(clean_chunk)
+                log_file.flush()
 
-              await sandbox.process.get_session_command_logs_async(
-                  session_id, command.cmd_id, handle_chunk
-              )
-      except Exception as e:
-          print(f"Error: {e}")
-      finally:
-          print("Cleaning up sandbox...")
-          sandbox.delete()
+            await sandbox.process.get_session_command_logs_async(
+                session_id, command.cmd_id, handle_chunk
+            )
+    except Exception as e:
+        print(f"Error: {e}")
+    finally:
+        print("Cleaning up sandbox...")
+        sandbox.delete()
 
-  if __name__ == "__main__":
-      asyncio.run(main())
+if __name__ == "__main__":
+    asyncio.run(main())
 
-  ```
-  ```typescript
-  import { Daytona, Sandbox } from '@daytonaio/sdk'
+```
+```typescript
+import { Daytona, Sandbox } from '@daytonaio/sdk'
 
-  async function main() {
-    const daytona = new Daytona()
-    const sandbox = await daytona.create()
+async function main() {
+  const daytona = new Daytona()
+  const sandbox = await daytona.create()
 
-    try {           
-      const sessionId = 'exec-session-async-logs'
-      await sandbox.process.createSession(sessionId)
+  try {           
+    const sessionId = 'exec-session-async-logs'
+    await sandbox.process.createSession(sessionId)
 
-      const command = await sandbox.process.executeSessionCommand(sessionId, {
-        command: 'counter=1; while (( counter <= 5 )); do echo "Count: $counter"; ((counter++)); sleep 2; done',
-        async: true,
-      })
+    const command = await sandbox.process.executeSessionCommand(sessionId, {
+      command: 'counter=1; while (( counter <= 5 )); do echo "Count: $counter"; ((counter++)); sleep 2; done',
+      async: true,
+    })
 
-      const logFilePath = `./logs/logs-session-${sessionId}-command-${command.cmdId}.log`
-      const logsDir = path.dirname(logFilePath)
-      if (!fs.existsSync(logsDir)) {
-        fs.mkdirSync(logsDir, { recursive: true })
-      }
-
-      const stream = fs.createWriteStream(logFilePath)
-      await sandbox.process.getSessionCommandLogs(sessionId, command.cmdId!, (chunk) => {
-        const cleanChunk = chunk.replace(/\x00/g, '')
-        stream.write(cleanChunk)
-      })
-      stream.end()
-      await logTask
-    } catch (error) {
-      console.error('Error:', error)
-    } finally {
-      console.log('Cleaning up sandbox...')
-      await sandbox.delete()
+    const logFilePath = `./logs/logs-session-${sessionId}-command-${command.cmdId}.log`
+    const logsDir = path.dirname(logFilePath)
+    if (!fs.existsSync(logsDir)) {
+      fs.mkdirSync(logsDir, { recursive: true })
     }
-  }
 
-  main()
-  ```
+    const stream = fs.createWriteStream(logFilePath)
+    await sandbox.process.getSessionCommandLogs(sessionId, command.cmdId!, (chunk) => {
+      const cleanChunk = chunk.replace(/\x00/g, '')
+      stream.write(cleanChunk)
+    })
+    stream.end()
+    await logTask
+  } catch (error) {
+    console.error('Error:', error)
+  } finally {
+    console.log('Cleaning up sandbox...')
+    await sandbox.delete()
+  }
+}
+
+main()
+```
 
 title: Daytona MCP Server
 
@@ -2660,27 +2664,27 @@ Daytona SDK provides best practices for process and code execution in Sandboxes.
 - Clean up sessions after execution
 - Handle session exceptions properly
 
-   ```python
-   # Python - Clean up session
-   session_id = "long-running-cmd"
-   try:
-       sandbox.process.create_session(session_id)
-       session = sandbox.process.get_session(session_id)
-       # Do work...
-   finally:
-       sandbox.process.delete_session(session.session_id)
-   ```
-   ```typescript
-   // TypeScript - Clean up session
-   const sessionId = "long-running-cmd";
-   try {
-       await sandbox.process.createSession(sessionId);
-       const session = await sandbox.process.getSession(sessionId);
-       // Do work...
-   } finally {
-       await sandbox.process.deleteSession(session.sessionId);
-   }
-   ```
+```python
+# Python - Clean up session
+session_id = "long-running-cmd"
+try:
+    sandbox.process.create_session(session_id)
+    session = sandbox.process.get_session(session_id)
+    # Do work...
+finally:
+    sandbox.process.delete_session(session.session_id)
+```
+```typescript
+// TypeScript - Clean up session
+const sessionId = "long-running-cmd";
+try {
+    await sandbox.process.createSession(sessionId);
+    const session = await sandbox.process.getSession(sessionId);
+    // Do work...
+} finally {
+    await sandbox.process.deleteSession(session.sessionId);
+}
+```
 
 2. **Error Handling**
 
@@ -3006,13 +3010,13 @@ daytona sandbox list
 
 ```text
 
-    Sandbox               State           Region        Last Event
-    ────────────────────────────────────────────────────────────────────────────────────
-    ugliest_quokka        STARTED         us            1 hour ago
+Sandbox               State           Region        Last Event
+────────────────────────────────────────────────────────────────────────────────────
+ugliest_quokka        STARTED         us            1 hour ago
 
-    associated_yak        STARTED         us            14 hours ago
+associated_yak        STARTED         us            14 hours ago
 
-    developed_lemur       STARTED         us            17 hours ago
+developed_lemur       STARTED         us            17 hours ago
 
 ```
 
@@ -3191,7 +3195,7 @@ print(response.result)
 
 sandbox.delete()
 
-````
+```
 
 ```typescript
 import { Daytona } from '@daytonaio/sdk'
@@ -3223,7 +3227,7 @@ async function main() {
 }
 
 main()
-````
+```
 
 
 ### Snapshot Resources
@@ -3268,7 +3272,7 @@ snapshot="my-snapshot",
 )
 )
 
-````
+```
 ```typescript
 import { Daytona, Image } from "@daytonaio/sdk";
 
@@ -3296,7 +3300,7 @@ async function main() {
 }
 
 main();
-````
+```
 
 
 :::note

@@ -4748,6 +4748,24 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@jsep-plugin/assignment@npm:^1.3.0":
+  version: 1.3.0
+  resolution: "@jsep-plugin/assignment@npm:1.3.0"
+  peerDependencies:
+    jsep: ^0.4.0||^1.0.0
+  checksum: 10c0/d749554dc691798116eb068eebe2d9bcb0b0d89ef6c7cc7c2a9f37d03da15fdbf8053407e97008090cd1bd6f256ea6c26abbada7399cf79f0b6b502e164b084b
+  languageName: node
+  linkType: hard
+
+"@jsep-plugin/regex@npm:^1.0.4":
+  version: 1.0.4
+  resolution: "@jsep-plugin/regex@npm:1.0.4"
+  peerDependencies:
+    jsep: ^0.4.0||^1.0.0
+  checksum: 10c0/bec7eb7ea6ab453a2672edc808644c5be3dc06b2a9d77182e18cd595b37deba6dcdb3760849d8684afc5779a86b7d2604dd525cb612a548f9ed9f31a8032ec24
+  languageName: node
+  linkType: hard
+
 "@jsonjoy.com/base64@npm:^1.1.1":
   version: 1.1.2
   resolution: "@jsonjoy.com/base64@npm:1.1.2"
@@ -15329,7 +15347,7 @@ __metadata:
     fast-glob: "npm:^3.3.0"
     form-data: "npm:^4.0.4"
     gt-react: "npm:^10.0.1"
-    gtx-cli: "npm:^2.0.1"
+    gtx-cli: "npm:^2.0.20"
     husky: "npm:^9.1.7"
     ioredis: "npm:^5.5.0"
     is-ci: "npm:^4.1.0"
@@ -18087,6 +18105,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"foreach@npm:^2.0.4":
+  version: 2.0.6
+  resolution: "foreach@npm:2.0.6"
+  checksum: 10c0/dc79f83997ac986dadbc95b4035ce8b86699fb654eb85446b0ad779fe69d567fc9894075e460243ca8bc20adb8fd178ad203aef66dc3c620ac78b18a4cb7059c
+  languageName: node
+  linkType: hard
+
 "foreground-child@npm:^3.1.0":
   version: 3.3.1
   resolution: "foreground-child@npm:3.3.1"
@@ -18392,6 +18417,17 @@ __metadata:
     fast-json-stable-stringify: "npm:^2.1.0"
     intl-messageformat: "npm:^10.7.16"
   checksum: 10c0/8011932986d6ceeee96c46655ae526c46ecf697e1c87e365ec2c528a5bf751ede8daef7212b5cc7a4a2c38ed3cf35456b75cfe368de72a343b589c6af9540a22
+  languageName: node
+  linkType: hard
+
+"generaltranslation@npm:^7.1.4":
+  version: 7.1.4
+  resolution: "generaltranslation@npm:7.1.4"
+  dependencies:
+    crypto-js: "npm:^4.2.0"
+    fast-json-stable-stringify: "npm:^2.1.0"
+    intl-messageformat: "npm:^10.7.16"
+  checksum: 10c0/32840e94273986dc441abe213a5286f2d1b43d88b69c86af623c3fbf81fc60bee5021deeddb37c3b1c2e19e12617a9325db9b5cab36d619ba24a5fa8986301d9
   languageName: node
   linkType: hard
 
@@ -18771,9 +18807,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"gtx-cli@npm:^2.0.1":
-  version: 2.0.1
-  resolution: "gtx-cli@npm:2.0.1"
+"gtx-cli@npm:^2.0.20":
+  version: 2.0.20
+  resolution: "gtx-cli@npm:2.0.20"
   dependencies:
     "@babel/generator": "npm:^7.25.7"
     "@babel/parser": "npm:^7.25.7"
@@ -18786,14 +18822,19 @@ __metadata:
     esbuild: "npm:^0.25.4"
     fast-glob: "npm:^3.3.3"
     form-data: "npm:^4.0.2"
-    generaltranslation: "npm:^7.0.1"
+    generaltranslation: "npm:^7.1.4"
+    json-pointer: "npm:^0.6.2"
+    jsonpath-plus: "npm:^10.3.0"
+    jsonpointer: "npm:^5.0.1"
+    micromatch: "npm:^4.0.8"
     open: "npm:^10.1.1"
     ora: "npm:^8.2.0"
     resolve: "npm:^1.22.10"
     tsconfig-paths: "npm:^4.2.0"
+    yaml: "npm:^2.8.0"
   bin:
     gtx-cli: dist/main.js
-  checksum: 10c0/8f1504749f17ad04b5c00ccd3470064035820d9e609239b2df27ce3675a03c113f1844d664564286dcf0c8df472a97e60f5554b3f453487100f6c40244550af0
+  checksum: 10c0/b1d75eced94e28037dd99f29f33163bca2a636ff6fa47d2dee862e1909085e43223db2a4fa6cfe82c16714a9bbf08f9905aa4299280ad7e7d86b9df72df2130a
   languageName: node
   linkType: hard
 
@@ -21242,6 +21283,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"jsep@npm:^1.4.0":
+  version: 1.4.0
+  resolution: "jsep@npm:1.4.0"
+  checksum: 10c0/fe60adf47e050e22eadced42514a51a15a3cf0e2d147896584486acd8ee670fc16641101b9aeb81f4aaba382043d29744b7aac41171e8106515b14f27e0c7116
+  languageName: node
+  linkType: hard
+
 "jsesc@npm:^3.0.2":
   version: 3.1.0
   resolution: "jsesc@npm:3.1.0"
@@ -21280,6 +21328,15 @@ __metadata:
   version: 2.3.1
   resolution: "json-parse-even-better-errors@npm:2.3.1"
   checksum: 10c0/140932564c8f0b88455432e0f33c4cb4086b8868e37524e07e723f4eaedb9425bdc2bafd71bd1d9765bd15fd1e2d126972bc83990f55c467168c228c24d665f3
+  languageName: node
+  linkType: hard
+
+"json-pointer@npm:^0.6.2":
+  version: 0.6.2
+  resolution: "json-pointer@npm:0.6.2"
+  dependencies:
+    foreach: "npm:^2.0.4"
+  checksum: 10c0/47f6103032c0340b3392cb650e0ec817f785eccb553407da13fae85bc535483c9b359d7e756de4ed73130172c28d2b02f8beb53a700a98b12e72c7bf70e734b7
   languageName: node
   linkType: hard
 
@@ -21396,7 +21453,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jsonpointer@npm:^5.0.0":
+"jsonpath-plus@npm:^10.3.0":
+  version: 10.3.0
+  resolution: "jsonpath-plus@npm:10.3.0"
+  dependencies:
+    "@jsep-plugin/assignment": "npm:^1.3.0"
+    "@jsep-plugin/regex": "npm:^1.0.4"
+    jsep: "npm:^1.4.0"
+  bin:
+    jsonpath: bin/jsonpath-cli.js
+    jsonpath-plus: bin/jsonpath-cli.js
+  checksum: 10c0/f5ff53078ecab98e8afd1dcdb4488e528653fa5a03a32d671f52db1ae9c3236e6e072d75e1949a80929fd21b07603924a586f829b40ad35993fa0247fa4f7506
+  languageName: node
+  linkType: hard
+
+"jsonpointer@npm:^5.0.0, jsonpointer@npm:^5.0.1":
   version: 5.0.1
   resolution: "jsonpointer@npm:5.0.1"
   checksum: 10c0/89929e58b400fcb96928c0504fcf4fc3f919d81e9543ceb055df125538470ee25290bb4984251e172e6ef8fcc55761eb998c118da763a82051ad89d4cb073fe7

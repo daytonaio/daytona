@@ -11,17 +11,17 @@ import Label from '@components/Label.astro'
 
 Sandboxを起動する際、Daytonaは`python`、`node`、`pip`、および一般的なpipパッケージなどの便利なユーティリティがプリインストールされたシンプルなイメージをベースとしたスナップショットを使用します。詳細は[下記](#default-snapshot)をご覧ください。
 
-この動作をオーバーライドして、カスタムスナップショットを作成することが可能です。ダッシュボードにアクセスし、[Snapshots](https://app.daytona.io/dashboard/snapshots)をクリックして、`Create Snapshot`をクリックしてください。
+この動作をオーバーライドして、カスタムスナップショットを作成することも可能です。ダッシュボードにアクセスし、[Snapshots](https://app.daytona.io/dashboard/snapshots)をクリックして、`Create Snapshot`をクリックしてください。
 
 スナップショットイメージには、Docker Hubから公開アクセス可能な任意のイメージの名前とタグ（`alpine:3.21.3`や`debian:12.10`など）、または他の公開コンテナレジストリからのイメージ（例：`my-public-registry.com/custom-alpine:3.21`）を入力できます。
 
 エントリーポイントフィールドはオプションで、イメージに長時間実行されるエントリーポイントがない場合、Daytonaは自動的に`sleep infinity`を実行して、作成時にコンテナがすぐに終了しないようにします。
 
 :::note
-`latest`タグが付けられたイメージは頻繁に更新されるため、特定のタグ（例：`0.1.0`）のみがサポートされています。同様の考えが`lts`や`stable`などのタグにも適用され、イメージを定義する際はこれらの使用を避けることをお勧めします。
+`latest`タグが付けられたイメージは頻繁に更新されるため、特定のタグ（例：`0.1.0`）のみがサポートされています。`lts`や`stable`などのタグにも同じ考えが適用され、イメージを定義する際はこれらの使用を避けることをお勧めします。
 :::
 
-スナップショットがプル、検証され、`Active`状態になると、使用準備が完了します。カスタムスナップショットを使用するために`CreateSandboxFromSnapshotParams`オブジェクトを定義してください：
+スナップショットがプル、検証され、`Active`状態になると、使用準備が完了します。カスタムスナップショットを使用するには、`CreateSandboxFromSnapshotParams`オブジェクトを定義してください：
 
 <Tabs>
 <TabItem label="Python" icon="seti:python">
@@ -61,7 +61,7 @@ print(response.result)
 
 sandbox.delete()
 
-````
+```
 
 </TabItem>
 <TabItem label="TypeScript" icon="seti:typescript">
@@ -95,7 +95,7 @@ async function main() {
 }
 
 main()
-````
+```
 
 </TabItem>
 </Tabs>
@@ -144,7 +144,7 @@ snapshot="my-snapshot",
 )
 )
 
-````
+```
 </TabItem>
 <TabItem label="TypeScript" icon="seti:typescript">
 ```typescript
@@ -174,7 +174,7 @@ async function main() {
 }
 
 main();
-````
+```
 
 </TabItem>
 </Tabs>
@@ -189,7 +189,7 @@ main();
 
 1. ダッシュボードの[Registries](https://app.daytona.io/dashboard/registries)ページに移動します
 2. `Add Registry`ボタンをクリックします。
-3. Registryの名前とURL、ユーザー名、パスワード、プロジェクトを入力して送信します
+3. レジストリの名前とURL、ユーザー名、パスワード、プロジェクトを入力して送信します
 4. Container Registryが作成されたら、[Snapshots](https://app.daytona.io/dashboard/snapshots)ページに戻ります
 5. Snapshotを作成する際は、レジストリの場所とプロジェクト名を含む完全なプライベートイメージ名を入力してください - `my-private-registry.com/<my-project>/custom-alpine:3.21`
 
@@ -197,7 +197,7 @@ main();
 
 ### ローカルイメージの使用
 
-プライベートコンテナレジストリを手動で設定してイメージをプッシュする必要を避けるため、[Daytona CLI](/docs/ja/getting-started#setting-up-the-daytona-cli)では、ローカルイメージまたはローカルDockerfileからSnapshotを作成し、Sandboxで使用することができます。
+プライベートコンテナレジストリを手動で設定してイメージをプッシュする必要を避けるため、[Daytona CLI](/docs/en/getting-started#setting-up-the-daytona-cli)では、ローカルイメージまたはローカルDockerfileからSnapshotを作成し、Sandboxで使用することができます。
 
 `docker images`を実行して、使用したいイメージとタグが利用可能であることを確認した後、`daytona snapshot push <your_local_docker_image>`コマンドを使用してSnapshotを作成し、Daytonaにプッシュします。例：
 
@@ -206,16 +206,16 @@ daytona snapshot push custom-alpine:3.21 --name alpine-minimal
 ```
 
 :::tip
-`--cpu`、`--memory`、`--disk`フラグを使用して、基盤となるSandboxに必要なリソースを指定してください - 例えば`daytona snapshot push custom-alpine:3.21 --name alpine-minimal --cpu 2 --memory 4 --disk 8`は、2 vCPU、4GiBのメモリ、8GiBのディスク容量を持つAlpine Sandboxを作成します。
+`--cpu`、`--memory`、`--disk`フラグを使用して、基盤となるSandboxに持たせたいリソースを指定してください - 例えば`daytona snapshot push custom-alpine:3.21 --name alpine-minimal --cpu 2 --memory 4 --disk 8`は、2 vCPU、4GiBのメモリ、8GiBのディスク容量を持つAlpine Sandboxを作成します。
 
-Daytonaは、ローカルイメージがAMD64アーキテクチャ用にビルドされていることを期待します。そのため、マシンが異なるアーキテクチャで動作している場合、Dockerイメージをビルドする際に`--platform=linux/amd64`フラグが必要です。
+DaytonaはローカルイメージがAMD64アーキテクチャ用にビルドされていることを期待します。そのため、マシンが異なるアーキテクチャで動作している場合、Dockerイメージをビルドする際に`--platform=linux/amd64`フラグが必要です。
 
 詳細については、[CLIドキュメント](/docs/tools/cli#daytona-snapshot-push)を参照してください。
 :::
 
-まだ目的のイメージをビルドしておらず、Dockerfileが準備できている場合は、SDKのDeclarative Builderを使用できます - 詳細は[こちら](/docs/ja/getting-started#declarative-builder)をお読みください。
+まだ希望するイメージをビルドしておらず、Dockerfileが準備できている場合は、SDKのDeclarative Builderを使用できます - 詳細は[こちら](/docs/en/getting-started#declarative-builder)をお読みください。
 
-または、CLIを通じて行うには、`create`の下で`--dockerfile`フラグを使用して、使用したいDockerfileのパスを渡すと、DaytonaがSnapshotをビルドしてくれます：
+または、CLIを通じて行う場合は、`create`の下で`--dockerfile`フラグを使用して、使用したいDockerfileのパスを渡すと、DaytonaがSnapshotをビルドしてくれます：
 
 ```bash
 daytona snapshot create data-analysis01 --dockerfile ./Dockerfile --context ./requirements.txt

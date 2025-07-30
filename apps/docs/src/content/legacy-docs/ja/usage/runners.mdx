@@ -7,11 +7,11 @@ import { Tabs, TabItem } from '@astrojs/starlight/components';
 
 Runnerは、どこにでもデプロイできるスタンドアロンサービスです。ユーザーは、Runner登録時に生成される一連の指示とコマンドを実行することで、ターゲットシステムにRunnerをデプロイできます。
 
-デプロイされると、Runnerが起動し、[Daytona Server](/docs/ja/usage/server)に接続します。この時点で、そのステータスは`Running`としてマークされます。
+デプロイされると、Runnerが起動し、[Daytona Server](/docs/en/usage/server)に接続します。この時点で、そのステータスは`Running`としてマークされます。
 
 Runnerがすべてのリクエストを送信し、Serverは応答のみを行います。Runnerは、_Heartbeat_（ステータスを共有するため）や_Job Requests_（割り当てられたジョブをDaytona Serverに要求するため）などのリクエストを送信します。
 
-単一のRunnerは、デプロイ時または後でジョブを介して設定される複数の[Providers](/docs/ja/configuration/providers)を使用でき、さまざまな環境に対する柔軟性を可能にします。
+単一のRunnerは、デプロイ時または後でジョブを介して設定される複数の[Providers](/docs/en/configuration/providers)を使用でき、さまざまな環境に対する柔軟性を可能にします。
 
 ## Runnerの作成
 

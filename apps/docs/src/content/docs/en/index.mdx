@@ -36,14 +36,14 @@ Run your first line of code in a Daytona Sandbox. Use our [LLMs context files](/
 
 <Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
-  ```bash
-  pip install daytona
-  ```
+```bash
+pip install daytona
+```
   </TabItem>
   <TabItem label="TypeScript" icon="seti:typescript">
-  ```bash
-  npm install @daytonaio/sdk
-  ```
+```bash
+npm install @daytonaio/sdk
+```
   </TabItem>
 </Tabs>
 
@@ -52,7 +52,7 @@ Run your first line of code in a Daytona Sandbox. Use our [LLMs context files](/
 <Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
   Create a file named: `main.py`
-  ```python
+```python
   from daytona import Daytona, DaytonaConfig
 
 # Define the configuration
@@ -79,28 +79,28 @@ Run your first line of code in a Daytona Sandbox. Use our [LLMs context files](/
 
   sandbox.delete()
 
-  ```
+```
   </TabItem>
   <TabItem label="TypeScript" icon="seti:typescript">
   Create a file named: `index.mts`
-  ```typescript
-  import { Daytona } from '@daytonaio/sdk';
+```typescript
+import { Daytona } from '@daytonaio/sdk';
 
-  // Initialize the Daytona client
-  const daytona = new Daytona({ apiKey: 'your-api-key' });
+// Initialize the Daytona client
+const daytona = new Daytona({ apiKey: 'your-api-key' });
 
-  // Create the Sandbox instance
-  const sandbox = await daytona.create({
-    language: 'typescript',
-  });
+// Create the Sandbox instance
+const sandbox = await daytona.create({
+  language: 'typescript',
+});
 
-  // Run the code securely inside the Sandbox
-  const response = await sandbox.process.codeRun('console.log("Hello World from code!")')
-  console.log(response.result);
+// Run the code securely inside the Sandbox
+const response = await sandbox.process.codeRun('console.log("Hello World from code!")')
+console.log(response.result);
 
-  // Clean up
-  await sandbox.delete()
-  ```
+// Clean up
+await sandbox.delete()
+```
 
   </TabItem>
 </Tabs>
@@ -113,14 +113,14 @@ Replace `your-api-key` with the value from your Daytona dashboard.
 
 <Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
-  ```bash
-  python main.py
-  ```
+```bash
+python main.py
+```
   </TabItem>
   <TabItem label="TypeScript" icon="seti:typescript">
-  ```bash
-  npx tsx index.mts
-  ```
+```bash
+npx tsx index.mts
+```
   </TabItem>
 </Tabs>
 

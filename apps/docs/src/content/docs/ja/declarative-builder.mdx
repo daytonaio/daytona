@@ -13,7 +13,7 @@ Daytonaの宣言的ビルダーは、Sandboxの依存関係を定義するため
 1. **動的イメージ**: Sandboxを作成する際に、異なる依存関係を持つイメージを_オンデマンド_でビルド
 2. **事前ビルドスナップショット**: 複数のSandbox間で共有できる_すぐに使用可能な_スナップショットを作成・登録
 
-以下の機能を提供します。完全なAPIリファレンスとメソッドシグネチャについては、[Python](/docs/ja/python-sdk/common/image)および[TypeScript](/docs/ja/typescript-sdk/image) SDKリファレンスをご確認ください。
+以下の機能を提供します。完全なAPIリファレンスとメソッドシグネチャについては、[Python](/docs/en/python-sdk/common/image)および[TypeScript](/docs/en/typescript-sdk/image) SDKリファレンスをご確認ください。
 
 ### ベースイメージの選択
 
@@ -38,7 +38,7 @@ Daytonaの宣言的ビルダーは、Sandboxの依存関係を定義するため
 - イメージビルドプロセス中の**シェルコマンド実行**
 - エントリーポイントとデフォルトコマンドを含む**コンテナランタイム設定**
 
-詳細なメソッドシグネチャと使用例については、[Python](/docs/ja/python-sdk/common/image)および[TypeScript](/docs/ja/typescript-sdk/image) SDKリファレンスを参照してください。
+詳細なメソッドシグネチャと使用例については、[Python](/docs/en/python-sdk/common/image)および[TypeScript](/docs/en/typescript-sdk/image) SDKリファレンスを参照してください。
 
 ## 動的イメージビルド
 
@@ -179,7 +179,11 @@ fs.writeFileSync(localFilePath, localFileContent)
 // 一般的なデータサイエンスパッケージを含むPythonイメージを作成
 const image = Image.debianSlim('3.12')
     .pipInstall(['numpy', 'pandas', 'matplotlib', 'scipy', 'scikit-learn'])
-    .runCommands('apt-get update && apt-get install -y git', 'mkdir -p /home/daytona/workspace')
+    .runCommands(
+      'apt-get update && apt-get install -y git',
+      'groupadd -r daytona && useradd -r -g daytona -m daytona',
+      'mkdir -p /home/daytona/workspace'
+    )
     .dockerfileCommands(['USER daytona'])
     .workdir('/home/daytona/workspace')
     .env({

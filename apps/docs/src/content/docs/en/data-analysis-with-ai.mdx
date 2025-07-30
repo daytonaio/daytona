@@ -31,10 +31,9 @@ Install the Daytona SDK and Anthropic SDK to your project:
 
 <Tabs>
   <TabItem label="Python" icon="seti:python">
-    ```bash pip install daytona anthropic python-dotenv ```
+  ```bash pip install daytona anthropic python-dotenv ```
   </TabItem>
   <TabItem label="TypeScript" icon="seti:typescript">
-    ```bash npm install @daytonaio/sdk @anthropic-ai/sdk dotenv ```
   </TabItem>
 </Tabs>
 
@@ -84,7 +83,7 @@ sandbox = daytona.create()
 
 sandbox.fs.upload_file("dataset.csv", "/home/daytona/dataset.csv")
 
-````
+```
 </TabItem>
 <TabItem label="TypeScript" icon="seti:typescript">
 ```typescript
@@ -97,7 +96,7 @@ const sandbox = await daytona.create()
 
 // Upload the dataset to the sandbox
 await sandbox.fs.uploadFile('dataset.csv', '/home/daytona/dataset.csv')
-````
+```
 
 </TabItem>
 </Tabs>
@@ -137,7 +136,7 @@ f.write(base64.b64decode(result.png))
 print(f'Chart saved to chart-{result_idx}.png')
 result_idx += 1
 
-````
+```
 </TabItem>
 <TabItem label="TypeScript" icon="seti:typescript">
 ```typescript
@@ -168,7 +167,7 @@ async function runAIGeneratedCode(sandbox, aiGeneratedCode: string) {
     }
   }
 }
-````
+```
 
 </TabItem>
 </Tabs>
@@ -203,7 +202,7 @@ Finish with a plt.show()"""
 anthropic = Anthropic()
 print('Waiting for the model response...')
 
-````
+```
 </TabItem>
 <TabItem label="TypeScript" icon="seti:typescript">
 ```typescript
@@ -224,7 +223,7 @@ Finish with a plt.show()`
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 console.log('Waiting for the model response...')
-````
+```
 
 </TabItem>
 </Tabs>
@@ -319,7 +318,7 @@ await runAIGeneratedCode(sandbox, code)
 }
 }
 
-````
+```
 </TabItem>
 </Tabs>
 
@@ -339,7 +338,7 @@ Now you can run the complete code to see the results.
 <TabItem label="Python" icon="seti:python">
 ```bash
 python data-analysis.py
-````
+```
 
 </TabItem>
 <TabItem label="TypeScript" icon="seti:typescript">
@@ -452,7 +451,7 @@ return
 if **name** == "**main**":
 main()
 
-````
+```
 </TabItem>
 <TabItem label="TypeScript" icon="seti:typescript">
 ```typescript
@@ -551,7 +550,7 @@ async function runAIGeneratedCode(sandbox: Sandbox, aiGeneratedCode: string) {
 }
 
 main().catch(console.error);
-````
+```
 
 </TabItem>
 </Tabs>

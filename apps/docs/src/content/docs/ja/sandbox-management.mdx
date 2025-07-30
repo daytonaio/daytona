@@ -19,11 +19,11 @@ SandboxはDaytonaによって管理される分離された開発環境です。
 
 ## Sandboxの作成
 
-Daytona SDKは、デフォルトまたはカスタム設定でSandboxを作成するオプションを提供します。Sandboxの言語、[Snapshot](/docs/ja/snapshots)、リソース、環境変数、ボリュームを指定できます。
+Daytona SDKは、デフォルトまたはカスタム設定でSandboxを作成するオプションを提供します。Sandboxの言語、[Snapshot](/docs/en/snapshots)、リソース、環境変数、ボリュームを指定できます。
 実行中のSandboxはCPU、メモリ、ディスクストレージを使用します。すべてのリソースは使用時間に応じて秒単位で課金されます。
 
 :::tip
-自動停止間隔を延長したい場合は、Sandboxを作成する際に[自動停止間隔パラメータを設定](/docs/ja/sandbox-management#auto-stop-interval)できます。
+自動停止間隔を延長したい場合は、Sandboxを作成する際に[自動停止間隔パラメータを設定](/docs/en/sandbox-management#auto-stop-interval)できます。
 :::
 
 ### 基本的なSandboxの作成
@@ -73,7 +73,7 @@ const sandbox = await daytona.create({ labels: { SOME_LABEL: 'my-label' } });
 </TabItem>
 </Tabs>
 
-Sandboxが積極的に使用されていない場合は、停止することが推奨されます。これは[stopコマンドを使用](/docs/ja/sandbox-management#stop-and-start-sandbox)して手動で行うか、[自動停止間隔を設定](/docs/ja/sandbox-management#auto-stop-and-auto-archive)して自動的に行うことができます。
+Sandboxが積極的に使用されていない場合は、停止することが推奨されます。これは[stopコマンドを使用](/docs/en/sandbox-management#stop-and-start-sandbox)して手動で行うか、[自動停止間隔を設定](/docs/en/sandbox-management#auto-stop-and-auto-archive)して自動的に行うことができます。
 
 :::note
 DaytonaはデフォルトのSnapshotを使用してウォームSandboxのプールを保持しています。  
@@ -180,7 +180,7 @@ console.log(sandbox.state)
 </TabItem>
 </Tabs>
 
-特定のポートのプレビューURLを取得するには、[プレビューと認証](/docs/ja/preview-and-authentication)をご確認ください。
+特定のポートのプレビューURLを取得するには、[プレビューと認証](/docs/en/preview-and-authentication)をご確認ください。
 
 ## Sandboxの停止と開始
 
@@ -276,7 +276,7 @@ await sandbox.delete();
 </Tabs>
 
 :::tip
-ターミナルを通じてSandboxを管理することを好む場合は、[Daytona CLI](/docs/ja/getting-started#setting-up-the-daytona-cli)をチェックしてください：
+ターミナルを通じてSandboxを管理することを好む場合は、[Daytona CLI](/docs/en/getting-started#setting-up-the-daytona-cli)をチェックしてください：
 
 ```bash
 daytona sandbox list
@@ -284,13 +284,13 @@ daytona sandbox list
 
 ```text
 
-    Sandbox               State           Region        Last Event
-    ────────────────────────────────────────────────────────────────────────────────────
-    ugliest_quokka        STARTED         us            1 hour ago
+Sandbox               State           Region        Last Event
+────────────────────────────────────────────────────────────────────────────────────
+ugliest_quokka        STARTED         us            1 hour ago
 
-    associated_yak        STARTED         us            14 hours ago
+associated_yak        STARTED         us            14 hours ago
 
-    developed_lemur       STARTED         us            17 hours ago
+developed_lemur       STARTED         us            17 hours ago
 
 ```
 
