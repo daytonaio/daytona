@@ -11,7 +11,7 @@ options:
     usage: |
       Auto-delete interval in minutes (negative value means disabled, 0 means delete immediately upon stopping)
   - name: auto-stop
-    default_value: '0'
+    default_value: '15'
     usage: Auto-stop interval in minutes (0 means disabled)
   - name: class
     usage: Sandbox class type (small, medium, large)
@@ -43,6 +43,12 @@ options:
   - name: memory
     default_value: '0'
     usage: Memory allocated to the sandbox in MB
+  - name: network-allow-all
+    default_value: 'true'
+    usage: Whether to allow all network access for the sandbox
+  - name: network-allow-list
+    usage: |
+      Comma-separated list of allowed network addresses for the sandbox (only /24 CIDR blocks allowed)
   - name: public
     default_value: 'false'
     usage: Make sandbox publicly accessible

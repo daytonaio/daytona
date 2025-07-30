@@ -91,6 +91,11 @@ var CreateCmd = &cobra.Command{
 		}
 		createSandbox.SetAutoDeleteInterval(autoDeleteFlag)
 
+		createSandbox.SetNetworkAllowAll(networkAllowAllFlag)
+		if networkAllowListFlag != "" {
+			createSandbox.SetNetworkAllowList(networkAllowListFlag)
+		}
+
 		if dockerfileFlag != "" {
 			createBuildInfoDto, err := common.GetCreateBuildInfoDto(ctx, dockerfileFlag, contextFlag)
 			if err != nil {
@@ -189,23 +194,25 @@ var CreateCmd = &cobra.Command{
 }
 
 var (
-	snapshotFlag    string
-	userFlag        string
-	envFlag         []string
-	labelsFlag      []string
-	publicFlag      bool
-	classFlag       string
-	targetFlag      string
-	cpuFlag         int32
-	gpuFlag         int32
-	memoryFlag      int32
-	diskFlag        int32
-	autoStopFlag    int32
-	autoArchiveFlag int32
-	autoDeleteFlag  int32
-	volumesFlag     []string
-	dockerfileFlag  string
-	contextFlag     []string
+	snapshotFlag         string
+	userFlag             string
+	envFlag              []string
+	labelsFlag           []string
+	publicFlag           bool
+	classFlag            string
+	targetFlag           string
+	cpuFlag              int32
+	gpuFlag              int32
+	memoryFlag           int32
+	diskFlag             int32
+	autoStopFlag         int32
+	autoArchiveFlag      int32
+	autoDeleteFlag       int32
+	volumesFlag          []string
+	dockerfileFlag       string
+	contextFlag          []string
+	networkAllowAllFlag  bool
+	networkAllowListFlag string
 )
 
 func init() {
@@ -226,6 +233,8 @@ func init() {
 	CreateCmd.Flags().StringArrayVarP(&volumesFlag, "volume", "v", []string{}, "Volumes to mount (format: VOLUME_NAME:MOUNT_PATH)")
 	CreateCmd.Flags().StringVarP(&dockerfileFlag, "dockerfile", "f", "", "Path to Dockerfile for Sandbox snapshot")
 	CreateCmd.Flags().StringArrayVarP(&contextFlag, "context", "c", []string{}, "Files or directories to include in the build context (can be specified multiple times)")
+	CreateCmd.Flags().BoolVar(&networkAllowAllFlag, "network-allow-all", true, "Whether to allow all network access for the sandbox")
+	CreateCmd.Flags().StringVar(&networkAllowListFlag, "network-allow-list", "", "Comma-separated list of allowed network addresses for the sandbox (only /24 CIDR blocks allowed)")
 
 	CreateCmd.MarkFlagsMutuallyExclusive("snapshot", "dockerfile")
 	CreateCmd.MarkFlagsMutuallyExclusive("snapshot", "context")
