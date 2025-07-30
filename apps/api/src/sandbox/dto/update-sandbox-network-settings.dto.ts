@@ -1,0 +1,28 @@
+/*
+ * Copyright 2025 Daytona Platforms Inc.
+ * SPDX-License-Identifier: AGPL-3.0
+ */
+
+import { IsOptional, IsString, IsBoolean } from 'class-validator'
+import { ApiPropertyOptional, ApiSchema } from '@nestjs/swagger'
+import { IsValidNetworkAllowList } from '../decorators/is-valid-network-allow-list.decorator'
+
+@ApiSchema({ name: 'UpdateSandboxNetworkSettings' })
+export class UpdateSandboxNetworkSettingsDto {
+  @ApiPropertyOptional({
+    description: 'Whether to allow all network access for the sandbox',
+    example: false,
+  })
+  @IsOptional()
+  @IsBoolean()
+  networkAllowAll?: boolean
+
+  @ApiPropertyOptional({
+    description: 'Comma-separated list of allowed network addresses for the sandbox (only /24 CIDR blocks allowed)',
+    example: '192.168.1.0/24,10.0.0.0/24',
+  })
+  @IsOptional()
+  @IsString()
+  @IsValidNetworkAllowList()
+  networkAllowList?: string
+}

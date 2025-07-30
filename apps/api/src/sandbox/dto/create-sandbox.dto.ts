@@ -3,27 +3,12 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { IsEnum, IsObject, IsOptional, IsString, IsNumber, IsBoolean, Validate } from 'class-validator'
+import { IsEnum, IsObject, IsOptional, IsString, IsNumber, IsBoolean } from 'class-validator'
 import { ApiPropertyOptional, ApiSchema } from '@nestjs/swagger'
 import { SandboxClass } from '../enums/sandbox-class.enum'
 import { SandboxVolume } from './sandbox.dto'
 import { CreateBuildInfoDto } from './create-build-info.dto'
-import { validateNetworkAllowList } from '../utils/network-validation.util'
-
-// Custom validator for /24 IP blocks
-export function IsValidNetworkAllowList(validationOptions?: any) {
-  return function (object: object, propertyName: string) {
-    const validate = (value: any) => {
-      if (!value) return true // Allow empty/null values
-      return validateNetworkAllowList(value) === null
-    }
-
-    return {
-      validate,
-      defaultMessage: 'networkAllowList must contain valid /24 CIDR blocks (e.g., "192.168.1.0/24,10.0.0.0/24")',
-    }
-  }
-}
+import { IsValidNetworkAllowList } from '../decorators/is-valid-network-allow-list.decorator'
 
 @ApiSchema({ name: 'CreateSandbox' })
 export class CreateSandboxDto {
@@ -85,7 +70,7 @@ export class CreateSandboxDto {
   })
   @IsOptional()
   @IsString()
-  @Validate(IsValidNetworkAllowList)
+  @IsValidNetworkAllowList()
   networkAllowList?: string
 
   @ApiPropertyOptional({
