@@ -40,13 +40,7 @@ export interface RunnerAdapter {
   runnerInfo(): Promise<RunnerInfo>
 
   sandboxInfo(sandboxId: string): Promise<RunnerSandboxInfo>
-  createSandbox(
-    sandbox: Sandbox,
-    registry?: DockerRegistry,
-    entrypoint?: string[],
-    networkAllowAll?: boolean,
-    networkAllowList?: string,
-  ): Promise<void>
+  createSandbox(sandbox: Sandbox, registry?: DockerRegistry, entrypoint?: string[]): Promise<void>
   startSandbox(sandboxId: string): Promise<void>
   stopSandbox(sandboxId: string): Promise<void>
   destroySandbox(sandboxId: string): Promise<void>

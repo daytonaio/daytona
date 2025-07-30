@@ -194,7 +194,7 @@ export class SandboxStartAction extends SandboxAction {
       entrypoint = this.getEntrypointFromDockerfile(sandbox.buildInfo.dockerfileContent)
     }
 
-    await runnerAdapter.createSandbox(sandbox, registry, undefined, sandbox.networkAllowAll, sandbox.networkAllowList)
+    await runnerAdapter.createSandbox(sandbox, registry, entrypoint)
 
     await this.updateSandboxState(sandbox.id, SandboxState.CREATING)
     //  sync states again immediately for sandbox
@@ -374,7 +374,7 @@ export class SandboxStartAction extends SandboxAction {
       await this.updateSandboxState(sandbox.id, SandboxState.RESTORING, runnerId)
 
       sandbox.snapshot = validBackup
-      await runnerAdapter.createSandbox(sandbox, registry, undefined, sandbox.networkAllowAll, sandbox.networkAllowList)
+      await runnerAdapter.createSandbox(sandbox, registry)
     } else {
       // if sandbox has runner, start sandbox
       const runner = await this.runnerService.findOne(sandbox.runnerId)
