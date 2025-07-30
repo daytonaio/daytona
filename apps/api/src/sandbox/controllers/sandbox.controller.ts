@@ -65,6 +65,7 @@ import { SandboxStateUpdatedEvent } from '../events/sandbox-state-updated.event'
 import { Audit, MASKED_AUDIT_VALUE, TypedRequest } from '../../audit/decorators/audit.decorator'
 import { AuditAction } from '../../audit/enums/audit-action.enum'
 import { AuditTarget } from '../../audit/enums/audit-target.enum'
+// import { UpdateSandboxNetworkSettingsDto } from '../dto/update-sandbox-network-settings.dto'
 
 @ApiTags('sandbox')
 @Controller('sandbox')
@@ -565,7 +566,7 @@ export class SandboxController {
   //   targetType: AuditTarget.SANDBOX,
   //   targetIdFromRequest: (req) => req.params.sandboxId,
   //   requestMetadata: {
-  //     body: (req: TypedRequest<{ networkAllowAll?: boolean; networkAllowList?: string }>) => ({
+  //     body: (req: TypedRequest<UpdateSandboxNetworkSettingsDto>) => ({
   //       networkAllowAll: req.body?.networkAllowAll,
   //       networkAllowList: req.body?.networkAllowList,
   //     }),
@@ -573,7 +574,7 @@ export class SandboxController {
   // })
   // async updateNetworkSettings(
   //   @Param('sandboxId') sandboxId: string,
-  //   @Body() networkSettings: { networkAllowAll?: boolean; networkAllowList?: string },
+  //   @Body() networkSettings: UpdateSandboxNetworkSettingsDto,
   // ): Promise<void> {
   //   await this.sandboxService.updateNetworkSettings(
   //     sandboxId,
