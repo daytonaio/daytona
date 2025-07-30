@@ -3,7 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { FileInfo, Match, ReplaceRequest, ReplaceResult, SearchFilesResponse, ToolboxApi } from '@daytonaio/api-client'
+import {
+  Configuration,
+  FileInfo,
+  Match,
+  ReplaceRequest,
+  ReplaceResult,
+  SearchFilesResponse,
+  ToolboxApi,
+} from '@daytonaio/api-client'
 import { prefixRelativePath } from './utils/Path'
 import { dynamicImport } from './utils/Import'
 import { Buffer } from 'buffer'
@@ -55,6 +63,7 @@ export interface FileUpload {
 export class FileSystem {
   constructor(
     private readonly sandboxId: string,
+    private readonly clientConfig: Configuration,
     private readonly toolboxApi: ToolboxApi,
     private readonly getRootDir: () => Promise<string>,
   ) {}
@@ -398,7 +407,7 @@ export class FileSystem {
   public async uploadFiles(files: FileUpload[], timeout: number = 30 * 60): Promise<void> {
     // Use native FormData in Deno
     const FormDataClass =
-      RUNTIME === Runtime.DENO
+      RUNTIME === Runtime.DENO || RUNTIME === Runtime.SERVERLESS
         ? FormData
         : ((await dynamicImport('form-data', 'Uploading files is not supported: ')) as any)
     const form = new FormDataClass()
@@ -412,11 +421,21 @@ export class FileSystem {
       form.append(`files[${i}].file`, payload as any, dst)
     }
 
-    await this.toolboxApi.uploadFiles(this.sandboxId, undefined, {
-      data: form,
-      maxRedirects: 0,
-      timeout: timeout * 1000,
-    })
+    if (RUNTIME === Runtime.SERVERLESS) {
+      const url = `${this.clientConfig.basePath}/toolbox/${this.sandboxId}/toolbox/files/bulk-upload`
+      await fetch(url, {
+        method: 'POST',
+        headers: this.clientConfig.baseOptions.headers,
+        body: form,
+        signal: timeout ? AbortSignal.timeout(timeout * 1000) : undefined,
+      })
+    } else {
+      await this.toolboxApi.uploadFiles(this.sandboxId, undefined, {
+        data: form,
+        maxRedirects: 0,
+        timeout: timeout * 1000,
+      })
+    }
   }
 
   private async makeFilePayload(source: Uint8Array | string) {
@@ -427,7 +446,7 @@ export class FileSystem {
     }
 
     // 2) browser → Blob
-    if (RUNTIME === Runtime.BROWSER) {
+    if (RUNTIME === Runtime.BROWSER || RUNTIME === Runtime.SERVERLESS) {
       return new Blob([source], { type: 'application/octet-stream' })
     }
 
