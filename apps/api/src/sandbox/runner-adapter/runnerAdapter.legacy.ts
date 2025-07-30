@@ -22,6 +22,7 @@ import {
   CreateBackupDTO,
   PullSnapshotRequestDTO,
   ToolboxApi,
+  UpdateNetworkSettingsDTO,
 } from '@daytonaio/runner-api-client'
 import { Sandbox } from '../entities/sandbox.entity'
 import { BuildInfo } from '../entities/build-info.entity'
@@ -281,7 +282,7 @@ export class RunnerAdapterLegacy implements RunnerAdapter {
   }
 
   async updateNetworkSettings(sandboxId: string, networkAllowAll?: boolean, networkAllowList?: string): Promise<void> {
-    const updateNetworkSettingsDto = {
+    const updateNetworkSettingsDto: UpdateNetworkSettingsDTO = {
       networkAllowAll: networkAllowAll,
       networkAllowList: networkAllowList,
     }
