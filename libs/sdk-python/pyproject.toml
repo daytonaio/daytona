@@ -10,7 +10,7 @@ authors = [
 ]
 description = "Python SDK for Daytona"
 readme = "README.md"
-requires-python = ">=3.8,<4.0"
+requires-python = ">=3.9,<4.0"
 dependencies = [
     "environs>=10.0.0,<15.0.0",
     "pydantic>=2.4.2,<3.0.0",
@@ -24,9 +24,10 @@ classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
 ]
 keywords = ["daytona", "sdk"]
 license = {text = "Apache-2.0"}

@@ -115,7 +115,7 @@ export class Sandbox implements SandboxDto {
   ) {
     this.processSandboxDto(sandboxDto)
     this.rootDir = ''
-    this.fs = new FileSystem(this.id, this.toolboxApi, async () => await this.getRootDir())
+    this.fs = new FileSystem(this.id, this.clientConfig, this.toolboxApi, async () => await this.getRootDir())
     this.git = new Git(this.id, this.toolboxApi, async () => await this.getRootDir())
     this.process = new Process(
       this.id,
