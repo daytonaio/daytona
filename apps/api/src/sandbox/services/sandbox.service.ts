@@ -325,9 +325,13 @@ export class SandboxService {
 
     sandbox.public = createSandboxDto.public || false
 
-    sandbox.networkAllowAll = createSandboxDto.networkAllowAll || false
+    if (createSandboxDto.networkAllowAll !== undefined) {
+      sandbox.networkAllowAll = createSandboxDto.networkAllowAll
+    }
 
-    sandbox.networkAllowList = createSandboxDto.networkAllowList
+    if (createSandboxDto.networkAllowList !== undefined) {
+      sandbox.networkAllowList = this.resolveNetworkAllowList(createSandboxDto.networkAllowList)
+    }
 
     if (createSandboxDto.autoStopInterval !== undefined) {
       sandbox.autoStopInterval = this.resolveAutoStopInterval(createSandboxDto.autoStopInterval)
@@ -353,8 +357,6 @@ export class SandboxService {
     organizationId: string,
   ): Promise<SandboxDto> {
     warmPoolSandbox.public = createSandboxDto.public || false
-    warmPoolSandbox.networkAllowAll = createSandboxDto.networkAllowAll || false
-    warmPoolSandbox.networkAllowList = createSandboxDto.networkAllowList
     warmPoolSandbox.labels = createSandboxDto.labels || {}
     warmPoolSandbox.organizationId = organizationId
     warmPoolSandbox.createdAt = new Date()
@@ -375,22 +377,26 @@ export class SandboxService {
       warmPoolSandbox.networkAllowAll = createSandboxDto.networkAllowAll
     }
     if (createSandboxDto.networkAllowList !== undefined) {
-      warmPoolSandbox.networkAllowList = createSandboxDto.networkAllowList
+      warmPoolSandbox.networkAllowList = this.resolveNetworkAllowList(createSandboxDto.networkAllowList)
     }
 
-    if (createSandboxDto.networkAllowAll !== undefined || createSandboxDto.networkAllowList !== undefined) {
-      const runner = await this.runnerService.findOne(warmPoolSandbox.runnerId)
-      if (runner) {
-        const runnerAdapter = await this.runnerAdapterFactory.create(runner)
-        await runnerAdapter.updateNetworkSettings(
-          warmPoolSandbox.id,
-          createSandboxDto.networkAllowAll,
-          createSandboxDto.networkAllowList,
-        )
-      }
+    if (!warmPoolSandbox.runnerId) {
+      throw new SandboxError('Runner not found for warm pool sandbox')
     }
 
     const runner = await this.runnerService.findOne(warmPoolSandbox.runnerId)
+    if (!runner) {
+      throw new NotFoundException(`Runner with ID ${warmPoolSandbox.runnerId} not found`)
+    }
+
+    if (createSandboxDto.networkAllowAll !== undefined || createSandboxDto.networkAllowList !== undefined) {
+      const runnerAdapter = await this.runnerAdapterFactory.create(runner)
+      await runnerAdapter.updateNetworkSettings(
+        warmPoolSandbox.id,
+        createSandboxDto.networkAllowAll,
+        createSandboxDto.networkAllowList,
+      )
+    }
 
     const result = await this.sandboxRepository.save(warmPoolSandbox)
 
@@ -434,9 +440,13 @@ export class SandboxService {
     sandbox.disk = disk
     sandbox.public = createSandboxDto.public || false
 
-    sandbox.networkAllowAll = createSandboxDto.networkAllowAll || false
+    if (createSandboxDto.networkAllowAll !== undefined) {
+      sandbox.networkAllowAll = createSandboxDto.networkAllowAll
+    }
 
-    sandbox.networkAllowList = createSandboxDto.networkAllowList
+    if (createSandboxDto.networkAllowList !== undefined) {
+      sandbox.networkAllowList = this.resolveNetworkAllowList(createSandboxDto.networkAllowList)
+    }
 
     if (createSandboxDto.autoStopInterval !== undefined) {
       sandbox.autoStopInterval = this.resolveAutoStopInterval(createSandboxDto.autoStopInterval)
@@ -805,20 +815,12 @@ export class SandboxService {
       throw new NotFoundException(`Sandbox with ID ${sandboxId} not found`)
     }
 
-    // Validate networkAllowList if provided
-    if (networkAllowList !== undefined) {
-      const validationError = validateNetworkAllowList(networkAllowList)
-      if (validationError) {
-        throw new BadRequestError(validationError)
-      }
-    }
-
     if (networkAllowAll !== undefined) {
       sandbox.networkAllowAll = networkAllowAll
     }
 
     if (networkAllowList !== undefined) {
-      sandbox.networkAllowList = networkAllowList
+      sandbox.networkAllowList = this.resolveNetworkAllowList(networkAllowList)
     }
 
     await this.sandboxRepository.save(sandbox)
@@ -911,5 +913,14 @@ export class SandboxService {
     }
 
     return Math.min(autoArchiveInterval, maxAutoArchiveInterval)
+  }
+
+  private resolveNetworkAllowList(networkAllowList: string): string {
+    const validationError = validateNetworkAllowList(networkAllowList)
+    if (validationError) {
+      throw new BadRequestError(validationError)
+    }
+
+    return networkAllowList
   }
 }
