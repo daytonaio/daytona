@@ -567,9 +567,9 @@ class RunnersApi:
 
 
     @validate_call
-    def get_runners_by_snapshot_internal_name(
+    def get_runners_by_snapshot_ref(
         self,
-        internal_name: Annotated[StrictStr, Field(description="Internal name of the snapshot")],
+        ref: Annotated[StrictStr, Field(description="Snapshot ref")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -583,11 +583,11 @@ class RunnersApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> List[RunnerSnapshotDto]:
-        """Get runners by snapshot internal name
+        """Get runners by snapshot ref
 
 
-        :param internal_name: Internal name of the snapshot (required)
-        :type internal_name: str
+        :param ref: Snapshot ref (required)
+        :type ref: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -610,8 +610,8 @@ class RunnersApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._get_runners_by_snapshot_internal_name_serialize(
-            internal_name=internal_name,
+        _param = self._get_runners_by_snapshot_ref_serialize(
+            ref=ref,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -633,9 +633,9 @@ class RunnersApi:
 
 
     @validate_call
-    def get_runners_by_snapshot_internal_name_with_http_info(
+    def get_runners_by_snapshot_ref_with_http_info(
         self,
-        internal_name: Annotated[StrictStr, Field(description="Internal name of the snapshot")],
+        ref: Annotated[StrictStr, Field(description="Snapshot ref")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -649,11 +649,11 @@ class RunnersApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[List[RunnerSnapshotDto]]:
-        """Get runners by snapshot internal name
+        """Get runners by snapshot ref
 
 
-        :param internal_name: Internal name of the snapshot (required)
-        :type internal_name: str
+        :param ref: Snapshot ref (required)
+        :type ref: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -676,8 +676,8 @@ class RunnersApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._get_runners_by_snapshot_internal_name_serialize(
-            internal_name=internal_name,
+        _param = self._get_runners_by_snapshot_ref_serialize(
+            ref=ref,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -699,9 +699,9 @@ class RunnersApi:
 
 
     @validate_call
-    def get_runners_by_snapshot_internal_name_without_preload_content(
+    def get_runners_by_snapshot_ref_without_preload_content(
         self,
-        internal_name: Annotated[StrictStr, Field(description="Internal name of the snapshot")],
+        ref: Annotated[StrictStr, Field(description="Snapshot ref")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -715,11 +715,11 @@ class RunnersApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Get runners by snapshot internal name
+        """Get runners by snapshot ref
 
 
-        :param internal_name: Internal name of the snapshot (required)
-        :type internal_name: str
+        :param ref: Snapshot ref (required)
+        :type ref: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -742,8 +742,8 @@ class RunnersApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._get_runners_by_snapshot_internal_name_serialize(
-            internal_name=internal_name,
+        _param = self._get_runners_by_snapshot_ref_serialize(
+            ref=ref,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -760,9 +760,9 @@ class RunnersApi:
         return response_data.response
 
 
-    def _get_runners_by_snapshot_internal_name_serialize(
+    def _get_runners_by_snapshot_ref_serialize(
         self,
-        internal_name,
+        ref,
         _request_auth,
         _content_type,
         _headers,
@@ -785,9 +785,9 @@ class RunnersApi:
 
         # process the path parameters
         # process the query parameters
-        if internal_name is not None:
+        if ref is not None:
             
-            _query_params.append(('internalName', internal_name))
+            _query_params.append(('ref', ref))
             
         # process the header parameters
         # process the form parameters
@@ -811,7 +811,7 @@ class RunnersApi:
 
         return self.api_client.param_serialize(
             method='GET',
-            resource_path='/runners/by-snapshot',
+            resource_path='/runners/by-snapshot-ref',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,

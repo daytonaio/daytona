@@ -35,6 +35,12 @@ export interface CreateRunner {
    * @type {string}
    * @memberof CreateRunner
    */
+  proxyUrl: string
+  /**
+   *
+   * @type {string}
+   * @memberof CreateRunner
+   */
   apiKey: string
   /**
    *
@@ -47,13 +53,13 @@ export interface CreateRunner {
    * @type {number}
    * @memberof CreateRunner
    */
-  memory: number
+  memoryGiB: number
   /**
    *
    * @type {number}
    * @memberof CreateRunner
    */
-  disk: number
+  diskGiB: number
   /**
    *
    * @type {number}
@@ -83,7 +89,13 @@ export interface CreateRunner {
    * @type {string}
    * @memberof CreateRunner
    */
-  region: CreateRunnerRegionEnum
+  region: string
+  /**
+   *
+   * @type {string}
+   * @memberof CreateRunner
+   */
+  version: string
 }
 
 export const CreateRunnerClassEnum = {
@@ -93,10 +105,3 @@ export const CreateRunnerClassEnum = {
 } as const
 
 export type CreateRunnerClassEnum = (typeof CreateRunnerClassEnum)[keyof typeof CreateRunnerClassEnum]
-export const CreateRunnerRegionEnum = {
-  EU: 'eu',
-  US: 'us',
-  ASIA: 'asia',
-} as const
-
-export type CreateRunnerRegionEnum = (typeof CreateRunnerRegionEnum)[keyof typeof CreateRunnerRegionEnum]

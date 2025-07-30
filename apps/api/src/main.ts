@@ -18,11 +18,12 @@ import { HttpsOptions } from '@nestjs/common/interfaces/external/https-options.i
 import { TypedConfigService } from './config/typed-config.service'
 import { DataSource, MigrationExecutor } from 'typeorm'
 import { RunnerService } from './sandbox/services/runner.service'
-import { RunnerRegion } from './sandbox/enums/runner-region.enum'
+
 import { SandboxClass } from './sandbox/enums/sandbox-class.enum'
 import { getOpenApiConfig } from './openapi.config'
 import { SchedulerRegistry } from '@nestjs/schedule'
 import { EventEmitter2 } from '@nestjs/event-emitter'
+import { AuditInterceptor } from './audit/interceptors/audit.interceptor'
 
 // https options
 const httpsEnabled = process.env.CERT_PATH && process.env.CERT_KEY_PATH
@@ -32,7 +33,7 @@ const httpsOptions: HttpsOptions = {
 }
 
 // Default log level
-const logLevels: LogLevel[] = ['log', 'error']
+const logLevels: LogLevel[] = ['log', 'error', 'warn']
 if (process.env.LOG_LEVEL) {
   logLevels.push(process.env.LOG_LEVEL as LogLevel)
 }
@@ -56,6 +57,7 @@ async function bootstrap() {
   app.useGlobalFilters(new AllExceptionsFilter(httpAdapter))
   app.useGlobalFilters(new NotFoundExceptionFilter())
   app.useGlobalInterceptors(new MetricsInterceptor())
+  app.useGlobalInterceptors(app.get(AuditInterceptor))
   app.useGlobalPipes(new ValidationPipe())
 
   const eventEmitter = app.get(EventEmitter2)
@@ -105,16 +107,18 @@ async function bootstrap() {
     if (!runners.find((runner) => runner.domain === 'localtest.me:3003')) {
       await runnerService.create({
         apiUrl: 'http://localhost:3003',
+        proxyUrl: 'http://localhost:3003',
         apiKey: 'secret_api_token',
         cpu: 4,
-        memory: 8192,
-        disk: 50,
+        memoryGiB: 8,
+        diskGiB: 50,
         gpu: 0,
         gpuType: 'none',
         capacity: 100,
-        region: RunnerRegion.US,
+        region: 'us',
         class: SandboxClass.SMALL,
         domain: 'localtest.me:3003',
+        version: '0',
       })
     }
   }

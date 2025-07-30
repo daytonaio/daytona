@@ -70,7 +70,6 @@ import {
   KeyboardPressRequestDto,
   KeyboardHotkeyRequestDto,
   ScreenshotResponseDto,
-  RegionScreenshotRequestDto,
   RegionScreenshotResponseDto,
   CompressedScreenshotResponseDto,
   DisplayInfoResponseDto,
@@ -103,6 +102,9 @@ import { RequiredOrganizationResourcePermissions } from '../../organization/deco
 import { OrganizationResourcePermission } from '../../organization/enums/organization-resource-permission.enum'
 import followRedirects from 'follow-redirects'
 import { UploadFileDto } from '../dto/upload-file.dto'
+import { AuditAction } from '../../audit/enums/audit-action.enum'
+import { Audit, MASKED_AUDIT_VALUE, TypedRequest } from '../../audit/decorators/audit.decorator'
+import { AuditTarget } from '../../audit/enums/audit-target.enum'
 
 followRedirects.maxRedirects = 10
 followRedirects.maxBodyLength = 50 * 1024 * 1024
@@ -137,7 +139,7 @@ export class ToolboxController {
           // @ts-expect-error - used later to set request headers
           req._runnerApiKey = runner.apiKey
 
-          return runner.apiUrl
+          return runner.proxyUrl
         } catch (err) {
           // @ts-expect-error - used later to throw error
           req._err = err
@@ -255,6 +257,16 @@ export class ToolboxController {
   })
   @ApiQuery({ name: 'path', type: String, required: true })
   @ApiParam({ name: 'sandboxId', type: String, required: true })
+  @Audit({
+    action: AuditAction.TOOLBOX_DELETE_FILE,
+    targetType: AuditTarget.SANDBOX,
+    targetIdFromRequest: (req) => req.params.sandboxId,
+    requestMetadata: {
+      query: (req) => ({
+        path: req.query.path,
+      }),
+    },
+  })
   async deleteFile(
     @Request() req: RawBodyRequest<IncomingMessage>,
     @Res() res: ServerResponse<IncomingMessage>,
@@ -279,6 +291,16 @@ export class ToolboxController {
   })
   @ApiQuery({ name: 'path', type: String, required: true })
   @ApiParam({ name: 'sandboxId', type: String, required: true })
+  @Audit({
+    action: AuditAction.TOOLBOX_DOWNLOAD_FILE,
+    targetType: AuditTarget.SANDBOX,
+    targetIdFromRequest: (req) => req.params.sandboxId,
+    requestMetadata: {
+      query: (req) => ({
+        path: req.query.path,
+      }),
+    },
+  })
   async downloadFile(
     @Request() req: RawBodyRequest<IncomingMessage>,
     @Res() res: ServerResponse<IncomingMessage>,
@@ -324,6 +346,17 @@ export class ToolboxController {
   @ApiQuery({ name: 'mode', type: String, required: true })
   @ApiQuery({ name: 'path', type: String, required: true })
   @ApiParam({ name: 'sandboxId', type: String, required: true })
+  @Audit({
+    action: AuditAction.TOOLBOX_CREATE_FOLDER,
+    targetType: AuditTarget.SANDBOX,
+    targetIdFromRequest: (req) => req.params.sandboxId,
+    requestMetadata: {
+      query: (req) => ({
+        path: req.query.path,
+        mode: req.query.mode,
+      }),
+    },
+  })
   async createFolder(
     @Request() req: RawBodyRequest<IncomingMessage>,
     @Res() res: ServerResponse<IncomingMessage>,
@@ -368,6 +401,17 @@ export class ToolboxController {
   @ApiQuery({ name: 'destination', type: String, required: true })
   @ApiQuery({ name: 'source', type: String, required: true })
   @ApiParam({ name: 'sandboxId', type: String, required: true })
+  @Audit({
+    action: AuditAction.TOOLBOX_MOVE_FILE,
+    targetType: AuditTarget.SANDBOX,
+    targetIdFromRequest: (req) => req.params.sandboxId,
+    requestMetadata: {
+      query: (req) => ({
+        destination: req.query.destination,
+        source: req.query.source,
+      }),
+    },
+  })
   async moveFile(
     @Request() req: RawBodyRequest<IncomingMessage>,
     @Res() res: ServerResponse<IncomingMessage>,
@@ -393,6 +437,19 @@ export class ToolboxController {
   @ApiQuery({ name: 'owner', type: String, required: false })
   @ApiQuery({ name: 'path', type: String, required: true })
   @ApiParam({ name: 'sandboxId', type: String, required: true })
+  @Audit({
+    action: AuditAction.TOOLBOX_SET_FILE_PERMISSIONS,
+    targetType: AuditTarget.SANDBOX,
+    targetIdFromRequest: (req) => req.params.sandboxId,
+    requestMetadata: {
+      query: (req) => ({
+        mode: req.query.mode,
+        group: req.query.group,
+        owner: req.query.owner,
+        path: req.query.path,
+      }),
+    },
+  })
   async setFilePermissions(
     @Request() req: RawBodyRequest<IncomingMessage>,
     @Res() res: ServerResponse<IncomingMessage>,
@@ -418,6 +475,18 @@ export class ToolboxController {
     type: ReplaceRequestDto,
   })
   @ApiParam({ name: 'sandboxId', type: String, required: true })
+  @Audit({
+    action: AuditAction.TOOLBOX_REPLACE_IN_FILES,
+    targetType: AuditTarget.SANDBOX,
+    targetIdFromRequest: (req) => req.params.sandboxId,
+    requestMetadata: {
+      body: (req: TypedRequest<ReplaceRequestDto>) => ({
+        files: req.body?.files,
+        pattern: req.body?.pattern,
+        newValue: req.body?.newValue,
+      }),
+    },
+  })
   async replaceInFiles(
     @Request() req: RawBodyRequest<IncomingMessage>,
     @Res() res: ServerResponse<IncomingMessage>,
@@ -474,6 +543,16 @@ export class ToolboxController {
   })
   @ApiQuery({ name: 'path', type: String, required: true })
   @ApiParam({ name: 'sandboxId', type: String, required: true })
+  @Audit({
+    action: AuditAction.TOOLBOX_UPLOAD_FILE,
+    targetType: AuditTarget.SANDBOX,
+    targetIdFromRequest: (req) => req.params.sandboxId,
+    requestMetadata: {
+      query: (req) => ({
+        path: req.query.path,
+      }),
+    },
+  })
   async uploadFile(
     @Request() req: RawBodyRequest<IncomingMessage>,
     @Res() res: ServerResponse<IncomingMessage>,
@@ -496,6 +575,11 @@ export class ToolboxController {
   @ApiConsumes('multipart/form-data')
   @ApiBody({ type: [UploadFileDto] })
   @ApiParam({ name: 'sandboxId', type: String, required: true })
+  @Audit({
+    action: AuditAction.TOOLBOX_BULK_UPLOAD_FILES,
+    targetType: AuditTarget.SANDBOX,
+    targetIdFromRequest: (req) => req.params.sandboxId,
+  })
   async uploadFiles(
     @Request() req: RawBodyRequest<IncomingMessage>,
     @Res() res: ServerResponse<IncomingMessage>,
@@ -521,6 +605,17 @@ export class ToolboxController {
     type: GitAddRequestDto,
   })
   @ApiParam({ name: 'sandboxId', type: String, required: true })
+  @Audit({
+    action: AuditAction.TOOLBOX_GIT_ADD_FILES,
+    targetType: AuditTarget.SANDBOX,
+    targetIdFromRequest: (req) => req.params.sandboxId,
+    requestMetadata: {
+      body: (req: TypedRequest<GitAddRequestDto>) => ({
+        path: req.body?.path,
+        files: req.body?.files,
+      }),
+    },
+  })
   async gitAddFiles(
     @Request() req: RawBodyRequest<IncomingMessage>,
     @Res() res: ServerResponse<IncomingMessage>,
@@ -566,6 +661,17 @@ export class ToolboxController {
     type: GitBranchRequestDto,
   })
   @ApiParam({ name: 'sandboxId', type: String, required: true })
+  @Audit({
+    action: AuditAction.TOOLBOX_GIT_CREATE_BRANCH,
+    targetType: AuditTarget.SANDBOX,
+    targetIdFromRequest: (req) => req.params.sandboxId,
+    requestMetadata: {
+      body: (req: TypedRequest<GitBranchRequestDto>) => ({
+        path: req.body?.path,
+        name: req.body?.name,
+      }),
+    },
+  })
   async gitCreateBranch(
     @Request() req: RawBodyRequest<IncomingMessage>,
     @Res() res: ServerResponse<IncomingMessage>,
@@ -590,6 +696,17 @@ export class ToolboxController {
     type: GitDeleteBranchRequestDto,
   })
   @ApiParam({ name: 'sandboxId', type: String, required: true })
+  @Audit({
+    action: AuditAction.TOOLBOX_GIT_DELETE_BRANCH,
+    targetType: AuditTarget.SANDBOX,
+    targetIdFromRequest: (req) => req.params.sandboxId,
+    requestMetadata: {
+      body: (req: TypedRequest<GitDeleteBranchRequestDto>) => ({
+        path: req.body?.path,
+        name: req.body?.name,
+      }),
+    },
+  })
   async gitDeleteBranch(
     @Request() req: RawBodyRequest<IncomingMessage>,
     @Res() res: ServerResponse<IncomingMessage>,
@@ -614,6 +731,21 @@ export class ToolboxController {
     type: GitCloneRequestDto,
   })
   @ApiParam({ name: 'sandboxId', type: String, required: true })
+  @Audit({
+    action: AuditAction.TOOLBOX_GIT_CLONE_REPOSITORY,
+    targetType: AuditTarget.SANDBOX,
+    targetIdFromRequest: (req) => req.params.sandboxId,
+    requestMetadata: {
+      body: (req: TypedRequest<GitCloneRequestDto>) => ({
+        url: req.body?.url,
+        path: req.body?.path,
+        username: req.body?.username,
+        password: req.body?.password ? MASKED_AUDIT_VALUE : undefined,
+        branch: req.body?.branch,
+        commit_id: req.body?.commit_id,
+      }),
+    },
+  })
   async gitCloneRepository(
     @Request() req: RawBodyRequest<IncomingMessage>,
     @Res() res: ServerResponse<IncomingMessage>,
@@ -639,6 +771,19 @@ export class ToolboxController {
     type: GitCommitRequestDto,
   })
   @ApiParam({ name: 'sandboxId', type: String, required: true })
+  @Audit({
+    action: AuditAction.TOOLBOX_GIT_COMMIT_CHANGES,
+    targetType: AuditTarget.SANDBOX,
+    targetIdFromRequest: (req) => req.params.sandboxId,
+    requestMetadata: {
+      body: (req: TypedRequest<GitCommitRequestDto>) => ({
+        path: req.body?.path,
+        message: req.body?.message,
+        author: req.body?.author,
+        email: req.body?.email,
+      }),
+    },
+  })
   async gitCommitChanges(
     @Request() req: RawBodyRequest<IncomingMessage>,
     @Res() res: ServerResponse<IncomingMessage>,
@@ -684,6 +829,18 @@ export class ToolboxController {
     type: GitRepoRequestDto,
   })
   @ApiParam({ name: 'sandboxId', type: String, required: true })
+  @Audit({
+    action: AuditAction.TOOLBOX_GIT_PULL_CHANGES,
+    targetType: AuditTarget.SANDBOX,
+    targetIdFromRequest: (req) => req.params.sandboxId,
+    requestMetadata: {
+      body: (req: TypedRequest<GitRepoRequestDto>) => ({
+        path: req.body?.path,
+        username: req.body?.username,
+        password: req.body?.password ? MASKED_AUDIT_VALUE : undefined,
+      }),
+    },
+  })
   async gitPullChanges(
     @Request() req: RawBodyRequest<IncomingMessage>,
     @Res() res: ServerResponse<IncomingMessage>,
@@ -708,6 +865,18 @@ export class ToolboxController {
     type: GitRepoRequestDto,
   })
   @ApiParam({ name: 'sandboxId', type: String, required: true })
+  @Audit({
+    action: AuditAction.TOOLBOX_GIT_PUSH_CHANGES,
+    targetType: AuditTarget.SANDBOX,
+    targetIdFromRequest: (req) => req.params.sandboxId,
+    requestMetadata: {
+      body: (req: TypedRequest<GitRepoRequestDto>) => ({
+        path: req.body?.path,
+        username: req.body?.username,
+        password: req.body?.password ? MASKED_AUDIT_VALUE : undefined,
+      }),
+    },
+  })
   async gitPushChanges(
     @Request() req: RawBodyRequest<IncomingMessage>,
     @Res() res: ServerResponse<IncomingMessage>,
@@ -732,6 +901,17 @@ export class ToolboxController {
     type: GitCheckoutRequestDto,
   })
   @ApiParam({ name: 'sandboxId', type: String, required: true })
+  @Audit({
+    action: AuditAction.TOOLBOX_GIT_CHECKOUT_BRANCH,
+    targetType: AuditTarget.SANDBOX,
+    targetIdFromRequest: (req) => req.params.sandboxId,
+    requestMetadata: {
+      body: (req: TypedRequest<GitCheckoutRequestDto>) => ({
+        path: req.body?.path,
+        branch: req.body?.branch,
+      }),
+    },
+  })
   async gitCheckoutBranch(
     @Request() req: RawBodyRequest<IncomingMessage>,
     @Res() res: ServerResponse<IncomingMessage>,
@@ -773,6 +953,18 @@ export class ToolboxController {
     status: 200,
     description: 'Command executed successfully',
     type: ExecuteResponseDto,
+  })
+  @Audit({
+    action: AuditAction.TOOLBOX_EXECUTE_COMMAND,
+    targetType: AuditTarget.SANDBOX,
+    targetIdFromRequest: (req) => req.params.sandboxId,
+    requestMetadata: {
+      body: (req: TypedRequest<ExecuteRequestDto>) => ({
+        command: req.body?.command,
+        cwd: req.body?.cwd,
+        timeout: req.body?.timeout,
+      }),
+    },
   })
   async executeCommand(
     @Param('sandboxId') sandboxId: string,
@@ -849,6 +1041,16 @@ export class ToolboxController {
     type: CreateSessionRequestDto,
   })
   @ApiParam({ name: 'sandboxId', type: String, required: true })
+  @Audit({
+    action: AuditAction.TOOLBOX_CREATE_SESSION,
+    targetType: AuditTarget.SANDBOX,
+    targetIdFromRequest: (req) => req.params.sandboxId,
+    requestMetadata: {
+      body: (req: TypedRequest<CreateSessionRequestDto>) => ({
+        sessionId: req.body?.sessionId,
+      }),
+    },
+  })
   async createSession(
     @Request() req: RawBodyRequest<IncomingMessage>,
     @Res() res: ServerResponse<IncomingMessage>,
@@ -880,6 +1082,21 @@ export class ToolboxController {
   })
   @ApiParam({ name: 'sessionId', type: String, required: true })
   @ApiParam({ name: 'sandboxId', type: String, required: true })
+  @Audit({
+    action: AuditAction.TOOLBOX_SESSION_EXECUTE_COMMAND,
+    targetType: AuditTarget.SANDBOX,
+    targetIdFromRequest: (req) => req.params.sandboxId,
+    requestMetadata: {
+      params: (req) => ({
+        sessionId: req.params.sessionId,
+      }),
+      body: (req: TypedRequest<SessionExecuteRequestDto>) => ({
+        command: req.body?.command,
+        runAsync: req.body?.runAsync,
+        async: req.body?.async,
+      }),
+    },
+  })
   async executeSessionCommand(
     @Request() req: RawBodyRequest<IncomingMessage>,
     @Res() res: ServerResponse<IncomingMessage>,
@@ -900,6 +1117,16 @@ export class ToolboxController {
   })
   @ApiParam({ name: 'sessionId', type: String, required: true })
   @ApiParam({ name: 'sandboxId', type: String, required: true })
+  @Audit({
+    action: AuditAction.TOOLBOX_DELETE_SESSION,
+    targetType: AuditTarget.SANDBOX,
+    targetIdFromRequest: (req) => req.params.sandboxId,
+    requestMetadata: {
+      params: (req) => ({
+        sessionId: req.params.sessionId,
+      }),
+    },
+  })
   async deleteSession(
     @Request() req: RawBodyRequest<IncomingMessage>,
     @Res() res: ServerResponse<IncomingMessage>,
@@ -1148,6 +1375,11 @@ export class ToolboxController {
     type: ComputerUseStartResponseDto,
   })
   @ApiParam({ name: 'sandboxId', type: String, required: true })
+  @Audit({
+    action: AuditAction.TOOLBOX_COMPUTER_USE_START,
+    targetType: AuditTarget.SANDBOX,
+    targetIdFromRequest: (req) => req.params.sandboxId,
+  })
   async startComputerUse(
     @Request() req: RawBodyRequest<IncomingMessage>,
     @Res() res: ServerResponse<IncomingMessage>,
@@ -1170,6 +1402,11 @@ export class ToolboxController {
     type: ComputerUseStopResponseDto,
   })
   @ApiParam({ name: 'sandboxId', type: String, required: true })
+  @Audit({
+    action: AuditAction.TOOLBOX_COMPUTER_USE_STOP,
+    targetType: AuditTarget.SANDBOX,
+    targetIdFromRequest: (req) => req.params.sandboxId,
+  })
   async stopComputerUse(
     @Request() req: RawBodyRequest<IncomingMessage>,
     @Res() res: ServerResponse<IncomingMessage>,
@@ -1234,6 +1471,16 @@ export class ToolboxController {
   })
   @ApiParam({ name: 'sandboxId', type: String, required: true })
   @ApiParam({ name: 'processName', type: String, required: true })
+  @Audit({
+    action: AuditAction.TOOLBOX_COMPUTER_USE_RESTART_PROCESS,
+    targetType: AuditTarget.SANDBOX,
+    targetIdFromRequest: (req) => req.params.sandboxId,
+    requestMetadata: {
+      params: (req) => ({
+        processName: req.params.processName,
+      }),
+    },
+  })
   async restartProcess(
     @Request() req: RawBodyRequest<IncomingMessage>,
     @Res() res: ServerResponse<IncomingMessage>,

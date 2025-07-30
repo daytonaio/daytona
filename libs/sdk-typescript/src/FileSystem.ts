@@ -5,9 +5,9 @@
 
 import { FileInfo, Match, ReplaceRequest, ReplaceResult, SearchFilesResponse, ToolboxApi } from '@daytonaio/api-client'
 import { prefixRelativePath } from './utils/Path'
-import * as fs from 'fs'
-import { Readable } from 'stream'
-import FormData from 'form-data'
+import { dynamicImport } from './utils/Import'
+import { Buffer } from 'buffer'
+import { RUNTIME, Runtime } from './utils/Runtime'
 
 /**
  * Parameters for setting file permissions in the Sandbox.
@@ -148,6 +148,8 @@ export class FileSystem {
 
       return Buffer.from(await data.arrayBuffer())
     }
+
+    const fs = await dynamicImport('fs', 'Downloading file to local file is not supported: ')
 
     const response = await this.toolboxApi.downloadFile(this.sandboxId, remotePath, undefined, {
       responseType: 'stream',
@@ -394,21 +396,43 @@ export class FileSystem {
    * await fs.uploadFiles(files);
    */
   public async uploadFiles(files: FileUpload[], timeout: number = 30 * 60): Promise<void> {
-    const form = new FormData()
+    // Use native FormData in Deno
+    const FormDataClass =
+      RUNTIME === Runtime.DENO
+        ? FormData
+        : (await dynamicImport('form-data', 'Uploading files is not supported: ')).default
+    const form = new FormDataClass()
     const rootDir = await this.getRootDir()
 
-    files.forEach(({ source, destination }, i) => {
+    for (const [i, { source, destination }] of files.entries()) {
       const dst = prefixRelativePath(rootDir, destination)
       form.append(`files[${i}].path`, dst)
-      const stream = typeof source === 'string' ? fs.createReadStream(source) : Readable.from(source)
+      const payload = await this.makeFilePayload(source)
       // the third arg sets filename in Content-Disposition
-      form.append(`files[${i}].file`, stream as any, dst)
-    })
+      form.append(`files[${i}].file`, payload as any, dst)
+    }
 
     await this.toolboxApi.uploadFiles(this.sandboxId, undefined, {
       data: form,
       maxRedirects: 0,
       timeout: timeout * 1000,
     })
+  }
+
+  private async makeFilePayload(source: Uint8Array | string) {
+    // 1) file‐path
+    if (typeof source === 'string') {
+      const fs = await dynamicImport('fs', 'Uploading file from local file system is not supported: ')
+      return fs.createReadStream(source)
+    }
+
+    // 2) browser → Blob
+    if (RUNTIME === Runtime.BROWSER) {
+      return new Blob([source], { type: 'application/octet-stream' })
+    }
+
+    // 3) Node (or other server runtimes) → stream.Readable
+    const stream = await dynamicImport('stream', 'Uploading file is not supported: ')
+    return stream.Readable.from(source)
   }
 }

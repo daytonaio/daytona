@@ -18,7 +18,6 @@ import { SandboxState } from '../enums/sandbox-state.enum'
 import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
 import { SandboxClass } from '../enums/sandbox-class.enum'
 import { BackupState } from '../enums/backup-state.enum'
-import { RunnerRegion } from '../enums/runner-region.enum'
 import { nanoid } from 'nanoid'
 import { SandboxVolume } from '../dto/sandbox.dto'
 import { BuildInfo } from './build-info.entity'
@@ -35,11 +34,9 @@ export class Sandbox {
   organizationId: string
 
   @Column({
-    type: 'enum',
-    enum: RunnerRegion,
-    default: RunnerRegion.EU,
+    default: 'us',
   })
-  region: RunnerRegion
+  region: string
 
   @Column({
     type: 'uuid',
@@ -103,7 +100,7 @@ export class Sandbox {
   @Column({ nullable: true })
   backupSnapshot: string
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'timestamp with time zone' })
   lastBackupAt: Date
 
   @Column({
@@ -140,13 +137,17 @@ export class Sandbox {
   })
   volumes: SandboxVolume[]
 
-  @CreateDateColumn()
+  @CreateDateColumn({
+    type: 'timestamp with time zone',
+  })
   createdAt: Date
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({
+    type: 'timestamp with time zone',
+  })
   updatedAt: Date
 
-  @Column({ nullable: true, type: 'timestamp' })
+  @Column({ nullable: true, type: 'timestamp with time zone' })
   lastActivityAt?: Date
 
   //  this is the interval in minutes after which the sandbox will be stopped if lastActivityAt is not updated

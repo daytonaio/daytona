@@ -20,7 +20,6 @@ import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictFloat, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional, Union
-from daytona_api_client.models.runner_region import RunnerRegion
 from daytona_api_client.models.runner_state import RunnerState
 from daytona_api_client.models.sandbox_class import SandboxClass
 from typing import Optional, Set
@@ -33,23 +32,33 @@ class Runner(BaseModel):
     id: StrictStr = Field(description="The ID of the runner")
     domain: StrictStr = Field(description="The domain of the runner")
     api_url: StrictStr = Field(description="The API URL of the runner", alias="apiUrl")
+    proxy_url: StrictStr = Field(description="The proxy URL of the runner", alias="proxyUrl")
     api_key: StrictStr = Field(description="The API key for the runner", alias="apiKey")
     cpu: Union[StrictFloat, StrictInt] = Field(description="The CPU capacity of the runner")
-    memory: Union[StrictFloat, StrictInt] = Field(description="The memory capacity of the runner in GB")
-    disk: Union[StrictFloat, StrictInt] = Field(description="The disk capacity of the runner in GB")
+    memory: Union[StrictFloat, StrictInt] = Field(description="The memory capacity of the runner in GiB")
+    disk: Union[StrictFloat, StrictInt] = Field(description="The disk capacity of the runner in GiB")
     gpu: Union[StrictFloat, StrictInt] = Field(description="The GPU capacity of the runner")
     gpu_type: StrictStr = Field(description="The type of GPU", alias="gpuType")
     var_class: SandboxClass = Field(description="The class of the runner", alias="class")
     used: Union[StrictFloat, StrictInt] = Field(description="The current usage of the runner")
     capacity: Union[StrictFloat, StrictInt] = Field(description="The capacity of the runner")
-    region: RunnerRegion = Field(description="The region of the runner")
+    current_cpu_usage_percentage: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Current CPU usage percentage", alias="currentCpuUsagePercentage")
+    current_memory_usage_percentage: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Current RAM usage percentage", alias="currentMemoryUsagePercentage")
+    current_disk_usage_percentage: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Current disk usage percentage", alias="currentDiskUsagePercentage")
+    current_allocated_cpu: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Current allocated CPU", alias="currentAllocatedCpu")
+    current_allocated_memory_gi_b: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Current allocated memory in GiB", alias="currentAllocatedMemoryGiB")
+    current_allocated_disk_gi_b: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Current allocated disk in GiB", alias="currentAllocatedDiskGiB")
+    current_snapshot_count: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Current snapshot count", alias="currentSnapshotCount")
+    availability_score: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Runner availability score", alias="availabilityScore")
+    region: StrictStr = Field(description="The region of the runner")
     state: RunnerState = Field(description="The state of the runner")
     last_checked: Optional[StrictStr] = Field(default=None, description="The last time the runner was checked", alias="lastChecked")
     unschedulable: StrictBool = Field(description="Whether the runner is unschedulable")
     created_at: StrictStr = Field(description="The creation timestamp of the runner", alias="createdAt")
     updated_at: StrictStr = Field(description="The last update timestamp of the runner", alias="updatedAt")
+    version: StrictStr = Field(description="The version of the runner")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["id", "domain", "apiUrl", "apiKey", "cpu", "memory", "disk", "gpu", "gpuType", "class", "used", "capacity", "region", "state", "lastChecked", "unschedulable", "createdAt", "updatedAt"]
+    __properties: ClassVar[List[str]] = ["id", "domain", "apiUrl", "proxyUrl", "apiKey", "cpu", "memory", "disk", "gpu", "gpuType", "class", "used", "capacity", "currentCpuUsagePercentage", "currentMemoryUsagePercentage", "currentDiskUsagePercentage", "currentAllocatedCpu", "currentAllocatedMemoryGiB", "currentAllocatedDiskGiB", "currentSnapshotCount", "availabilityScore", "region", "state", "lastChecked", "unschedulable", "createdAt", "updatedAt", "version"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -112,6 +121,7 @@ class Runner(BaseModel):
             "id": obj.get("id"),
             "domain": obj.get("domain"),
             "apiUrl": obj.get("apiUrl"),
+            "proxyUrl": obj.get("proxyUrl"),
             "apiKey": obj.get("apiKey"),
             "cpu": obj.get("cpu"),
             "memory": obj.get("memory"),
@@ -121,12 +131,21 @@ class Runner(BaseModel):
             "class": obj.get("class"),
             "used": obj.get("used"),
             "capacity": obj.get("capacity"),
+            "currentCpuUsagePercentage": obj.get("currentCpuUsagePercentage"),
+            "currentMemoryUsagePercentage": obj.get("currentMemoryUsagePercentage"),
+            "currentDiskUsagePercentage": obj.get("currentDiskUsagePercentage"),
+            "currentAllocatedCpu": obj.get("currentAllocatedCpu"),
+            "currentAllocatedMemoryGiB": obj.get("currentAllocatedMemoryGiB"),
+            "currentAllocatedDiskGiB": obj.get("currentAllocatedDiskGiB"),
+            "currentSnapshotCount": obj.get("currentSnapshotCount"),
+            "availabilityScore": obj.get("availabilityScore"),
             "region": obj.get("region"),
             "state": obj.get("state"),
             "lastChecked": obj.get("lastChecked"),
             "unschedulable": obj.get("unschedulable"),
             "createdAt": obj.get("createdAt"),
-            "updatedAt": obj.get("updatedAt")
+            "updatedAt": obj.get("updatedAt"),
+            "version": obj.get("version")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

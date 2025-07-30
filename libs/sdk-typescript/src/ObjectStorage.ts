@@ -6,11 +6,9 @@
 import { ListObjectsV2Command, S3Client } from '@aws-sdk/client-s3'
 import { Upload } from '@aws-sdk/lib-storage'
 import * as crypto from 'crypto'
-import * as fs from 'fs'
-import * as path from 'path'
-import * as tar from 'tar'
-import { PassThrough } from 'stream'
+import * as pathe from 'pathe'
 import { DaytonaError } from './errors/DaytonaError'
+import { dynamicImport } from './utils/Import'
 
 /**
  * Configuration for the ObjectStorage class.
@@ -63,6 +61,8 @@ export class ObjectStorage {
    * @returns {Promise<string>} The hash of the uploaded file or directory.
    */
   async upload(path: string, organizationId: string, archiveBasePath: string): Promise<string> {
+    const fs = await dynamicImport('fs', '"upload" is not supported: ')
+
     if (!fs.existsSync(path)) {
       const errMsg = `Path does not exist: ${path}`
       throw new DaytonaError(errMsg)
@@ -94,8 +94,10 @@ export class ObjectStorage {
    * @returns {Promise<string>} The hash of the file or directory.
    */
   private async computeHashForPathMd5(pathStr: string, archiveBasePath: string): Promise<string> {
+    const fs = await dynamicImport('fs', '"computeHashForPathMd5" is not supported: ')
+
     const md5Hasher = crypto.createHash('md5')
-    const absPathStr = path.resolve(pathStr)
+    const absPathStr = pathe.resolve(pathStr)
 
     md5Hasher.update(archiveBasePath)
 
@@ -119,24 +121,25 @@ export class ObjectStorage {
    * @returns {Promise<void>} A promise that resolves when the directory has been hashed.
    */
   private async hashDirectory(dirPath: string, basePath: string, hasher: crypto.Hash): Promise<void> {
-    const entries = fs.readdirSync(dirPath, { withFileTypes: true })
+    const fs = await dynamicImport('fs', '"hashDirectory" is not supported: ')
 
+    const entries = fs.readdirSync(dirPath, { withFileTypes: true })
     const hasSubdirs = entries.some((e) => e.isDirectory())
     const hasFiles = entries.some((e) => e.isFile())
 
     if (!hasSubdirs && !hasFiles) {
       // Empty directory
-      const relDir = path.relative(basePath, dirPath)
+      const relDir = pathe.relative(basePath, dirPath)
       hasher.update(relDir)
     }
 
     for (const entry of entries) {
-      const fullPath = path.join(dirPath, entry.name)
+      const fullPath = pathe.join(dirPath, entry.name)
 
       if (entry.isDirectory()) {
         await this.hashDirectory(fullPath, basePath, hasher)
       } else if (entry.isFile()) {
-        const relPath = path.relative(basePath, fullPath)
+        const relPath = pathe.relative(basePath, fullPath)
         hasher.update(relPath)
 
         await this.hashFile(fullPath, hasher)
@@ -152,6 +155,8 @@ export class ObjectStorage {
    * @returns {Promise<void>} A promise that resolves when the file has been hashed.
    */
   private async hashFile(filePath: string, hasher: crypto.Hash): Promise<void> {
+    const fs = await dynamicImport('fs', '"hashFile" is not supported: ')
+
     await new Promise<void>((resolve, reject) => {
       const stream = fs.createReadStream(filePath, { highWaterMark: 8192 })
       stream.on('data', (chunk) => hasher.update(chunk))
@@ -186,10 +191,13 @@ export class ObjectStorage {
    * @param {string} archiveBasePath - The base path to use for the archive.
    */
   private async uploadAsTar(s3Key: string, sourcePath: string, archiveBasePath: string) {
-    sourcePath = path.resolve(sourcePath)
+    const importErrorPrefix = '"uploadAsTar" is not supported: '
+    const tar = await dynamicImport('tar', importErrorPrefix)
+    const stream = await dynamicImport('stream', importErrorPrefix)
 
-    const normalizedSourcePath = path.normalize(sourcePath)
-    const normalizedArchiveBasePath = path.normalize(archiveBasePath)
+    sourcePath = pathe.resolve(sourcePath)
+    const normalizedSourcePath = pathe.normalize(sourcePath)
+    const normalizedArchiveBasePath = pathe.normalize(archiveBasePath)
 
     let basePrefix: string
 
@@ -210,7 +218,7 @@ export class ObjectStorage {
       [normalizedArchiveBasePath],
     )
 
-    const pass = new PassThrough()
+    const pass = new stream.PassThrough()
     tarStream.pipe(pass)
 
     const uploader = new Upload({

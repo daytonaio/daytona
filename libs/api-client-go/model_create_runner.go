@@ -22,17 +22,19 @@ var _ MappedNullable = &CreateRunner{}
 
 // CreateRunner struct for CreateRunner
 type CreateRunner struct {
-	Domain   string  `json:"domain"`
-	ApiUrl   string  `json:"apiUrl"`
-	ApiKey   string  `json:"apiKey"`
-	Cpu      float32 `json:"cpu"`
-	Memory   float32 `json:"memory"`
-	Disk     float32 `json:"disk"`
-	Gpu      float32 `json:"gpu"`
-	GpuType  string  `json:"gpuType"`
-	Class    string  `json:"class"`
-	Capacity float32 `json:"capacity"`
-	Region   string  `json:"region"`
+	Domain    string  `json:"domain"`
+	ApiUrl    string  `json:"apiUrl"`
+	ProxyUrl  string  `json:"proxyUrl"`
+	ApiKey    string  `json:"apiKey"`
+	Cpu       float32 `json:"cpu"`
+	MemoryGiB float32 `json:"memoryGiB"`
+	DiskGiB   float32 `json:"diskGiB"`
+	Gpu       float32 `json:"gpu"`
+	GpuType   string  `json:"gpuType"`
+	Class     string  `json:"class"`
+	Capacity  float32 `json:"capacity"`
+	Region    string  `json:"region"`
+	Version   string  `json:"version"`
 }
 
 type _CreateRunner CreateRunner
@@ -41,19 +43,21 @@ type _CreateRunner CreateRunner
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewCreateRunner(domain string, apiUrl string, apiKey string, cpu float32, memory float32, disk float32, gpu float32, gpuType string, class string, capacity float32, region string) *CreateRunner {
+func NewCreateRunner(domain string, apiUrl string, proxyUrl string, apiKey string, cpu float32, memoryGiB float32, diskGiB float32, gpu float32, gpuType string, class string, capacity float32, region string, version string) *CreateRunner {
 	this := CreateRunner{}
 	this.Domain = domain
 	this.ApiUrl = apiUrl
+	this.ProxyUrl = proxyUrl
 	this.ApiKey = apiKey
 	this.Cpu = cpu
-	this.Memory = memory
-	this.Disk = disk
+	this.MemoryGiB = memoryGiB
+	this.DiskGiB = diskGiB
 	this.Gpu = gpu
 	this.GpuType = gpuType
 	this.Class = class
 	this.Capacity = capacity
 	this.Region = region
+	this.Version = version
 	return &this
 }
 
@@ -113,6 +117,30 @@ func (o *CreateRunner) SetApiUrl(v string) {
 	o.ApiUrl = v
 }
 
+// GetProxyUrl returns the ProxyUrl field value
+func (o *CreateRunner) GetProxyUrl() string {
+	if o == nil {
+		var ret string
+		return ret
+	}
+
+	return o.ProxyUrl
+}
+
+// GetProxyUrlOk returns a tuple with the ProxyUrl field value
+// and a boolean to check if the value has been set.
+func (o *CreateRunner) GetProxyUrlOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.ProxyUrl, true
+}
+
+// SetProxyUrl sets field value
+func (o *CreateRunner) SetProxyUrl(v string) {
+	o.ProxyUrl = v
+}
+
 // GetApiKey returns the ApiKey field value
 func (o *CreateRunner) GetApiKey() string {
 	if o == nil {
@@ -161,52 +189,52 @@ func (o *CreateRunner) SetCpu(v float32) {
 	o.Cpu = v
 }
 
-// GetMemory returns the Memory field value
-func (o *CreateRunner) GetMemory() float32 {
+// GetMemoryGiB returns the MemoryGiB field value
+func (o *CreateRunner) GetMemoryGiB() float32 {
 	if o == nil {
 		var ret float32
 		return ret
 	}
 
-	return o.Memory
+	return o.MemoryGiB
 }
 
-// GetMemoryOk returns a tuple with the Memory field value
+// GetMemoryGiBOk returns a tuple with the MemoryGiB field value
 // and a boolean to check if the value has been set.
-func (o *CreateRunner) GetMemoryOk() (*float32, bool) {
+func (o *CreateRunner) GetMemoryGiBOk() (*float32, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return &o.Memory, true
+	return &o.MemoryGiB, true
 }
 
-// SetMemory sets field value
-func (o *CreateRunner) SetMemory(v float32) {
-	o.Memory = v
+// SetMemoryGiB sets field value
+func (o *CreateRunner) SetMemoryGiB(v float32) {
+	o.MemoryGiB = v
 }
 
-// GetDisk returns the Disk field value
-func (o *CreateRunner) GetDisk() float32 {
+// GetDiskGiB returns the DiskGiB field value
+func (o *CreateRunner) GetDiskGiB() float32 {
 	if o == nil {
 		var ret float32
 		return ret
 	}
 
-	return o.Disk
+	return o.DiskGiB
 }
 
-// GetDiskOk returns a tuple with the Disk field value
+// GetDiskGiBOk returns a tuple with the DiskGiB field value
 // and a boolean to check if the value has been set.
-func (o *CreateRunner) GetDiskOk() (*float32, bool) {
+func (o *CreateRunner) GetDiskGiBOk() (*float32, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return &o.Disk, true
+	return &o.DiskGiB, true
 }
 
-// SetDisk sets field value
-func (o *CreateRunner) SetDisk(v float32) {
-	o.Disk = v
+// SetDiskGiB sets field value
+func (o *CreateRunner) SetDiskGiB(v float32) {
+	o.DiskGiB = v
 }
 
 // GetGpu returns the Gpu field value
@@ -329,6 +357,30 @@ func (o *CreateRunner) SetRegion(v string) {
 	o.Region = v
 }
 
+// GetVersion returns the Version field value
+func (o *CreateRunner) GetVersion() string {
+	if o == nil {
+		var ret string
+		return ret
+	}
+
+	return o.Version
+}
+
+// GetVersionOk returns a tuple with the Version field value
+// and a boolean to check if the value has been set.
+func (o *CreateRunner) GetVersionOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.Version, true
+}
+
+// SetVersion sets field value
+func (o *CreateRunner) SetVersion(v string) {
+	o.Version = v
+}
+
 func (o CreateRunner) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -341,15 +393,17 @@ func (o CreateRunner) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["domain"] = o.Domain
 	toSerialize["apiUrl"] = o.ApiUrl
+	toSerialize["proxyUrl"] = o.ProxyUrl
 	toSerialize["apiKey"] = o.ApiKey
 	toSerialize["cpu"] = o.Cpu
-	toSerialize["memory"] = o.Memory
-	toSerialize["disk"] = o.Disk
+	toSerialize["memoryGiB"] = o.MemoryGiB
+	toSerialize["diskGiB"] = o.DiskGiB
 	toSerialize["gpu"] = o.Gpu
 	toSerialize["gpuType"] = o.GpuType
 	toSerialize["class"] = o.Class
 	toSerialize["capacity"] = o.Capacity
 	toSerialize["region"] = o.Region
+	toSerialize["version"] = o.Version
 	return toSerialize, nil
 }
 
@@ -360,15 +414,17 @@ func (o *CreateRunner) UnmarshalJSON(data []byte) (err error) {
 	requiredProperties := []string{
 		"domain",
 		"apiUrl",
+		"proxyUrl",
 		"apiKey",
 		"cpu",
-		"memory",
-		"disk",
+		"memoryGiB",
+		"diskGiB",
 		"gpu",
 		"gpuType",
 		"class",
 		"capacity",
 		"region",
+		"version",
 	}
 
 	allProperties := make(map[string]interface{})

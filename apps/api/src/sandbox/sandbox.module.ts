@@ -13,7 +13,6 @@ import { UserModule } from '../user/user.module'
 import { RunnerService } from './services/runner.service'
 import { Runner } from './entities/runner.entity'
 import { RunnerController } from './controllers/runner.controller'
-import { RunnerApiFactory } from './runner-api/runnerApi'
 import { AuthModule } from '../auth/auth.module'
 import { ToolboxService } from './services/toolbox.service'
 import { DockerRegistryModule } from '../docker-registry/docker-registry.module'
@@ -41,7 +40,11 @@ import { BuildInfo } from './entities/build-info.entity'
 import { BackupManager } from './managers/backup.manager'
 import { VolumeSubscriber } from './subscribers/volume.subscriber'
 import { WorkspaceController } from './controllers/workspace.deprecated.controller'
-import { SnapshotRunnerService } from './services/snapshot-runner.service'
+import { RunnerAdapterFactory } from './runner-adapter/runnerAdapter'
+import { SandboxStartAction } from './managers/sandbox-actions/sandbox-start.action'
+import { SandboxStopAction } from './managers/sandbox-actions/sandbox-stop.action'
+import { SandboxDestroyAction } from './managers/sandbox-actions/sandbox-destroy.action'
+import { SandboxArchiveAction } from './managers/sandbox-actions/sandbox-archive.action'
 
 @Module({
   imports: [
@@ -66,7 +69,6 @@ import { SnapshotRunnerService } from './services/snapshot-runner.service'
     BackupManager,
     SandboxWarmPoolService,
     RunnerService,
-    RunnerApiFactory,
     ToolboxService,
     SnapshotService,
     SnapshotManager,
@@ -77,17 +79,13 @@ import { SnapshotRunnerService } from './services/snapshot-runner.service'
     VolumeService,
     VolumeManager,
     VolumeSubscriber,
-    SnapshotRunnerService,
+    RunnerAdapterFactory,
+    SandboxStartAction,
+    SandboxStopAction,
+    SandboxDestroyAction,
+    SandboxArchiveAction,
   ],
-  exports: [
-    SandboxService,
-    RunnerService,
-    RedisLockProvider,
-    SnapshotService,
-    VolumeService,
-    VolumeManager,
-    SnapshotRunnerService,
-  ],
+  exports: [SandboxService, RunnerService, RedisLockProvider, SnapshotService, VolumeService, VolumeManager],
 })
 export class SandboxModule {
   configure(consumer: MiddlewareConsumer) {

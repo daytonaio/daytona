@@ -69,7 +69,7 @@ export class AppService implements OnApplicationBootstrap {
       return
     }
 
-    let registryUrl = this.configService.getOrThrow('transientRegistry.url')
+    const registryUrl = this.configService.getOrThrow('transientRegistry.url')
     const registryAdmin = this.configService.getOrThrow('transientRegistry.admin')
     const registryPassword = this.configService.getOrThrow('transientRegistry.password')
     const registryProjectId = this.configService.getOrThrow('transientRegistry.projectId')
@@ -78,8 +78,6 @@ export class AppService implements OnApplicationBootstrap {
       this.logger.warn('Registry configuration not found, skipping transient registry setup')
       return
     }
-
-    registryUrl = registryUrl.replace(/^(https?:\/\/)/, '')
 
     this.logger.log('Initializing default transient registry...')
 
@@ -102,7 +100,7 @@ export class AppService implements OnApplicationBootstrap {
       return
     }
 
-    let registryUrl = this.configService.getOrThrow('internalRegistry.url')
+    const registryUrl = this.configService.getOrThrow('internalRegistry.url')
     const registryAdmin = this.configService.getOrThrow('internalRegistry.admin')
     const registryPassword = this.configService.getOrThrow('internalRegistry.password')
     const registryProjectId = this.configService.getOrThrow('internalRegistry.projectId')
@@ -111,8 +109,6 @@ export class AppService implements OnApplicationBootstrap {
       this.logger.warn('Registry configuration not found, skipping internal registry setup')
       return
     }
-
-    registryUrl = registryUrl.replace(/^(https?:\/\/)/, '')
 
     this.logger.log('Initializing default internal registry...')
 

@@ -34,6 +34,9 @@ import { AccountProviderDto } from './dto/account-provider.dto'
 import { ACCOUNT_PROVIDER_DISPLAY_NAME } from './constants/acount-provider-display-name.constant'
 import { AccountProvider } from './enums/account-provider.enum'
 import { CreateLinkedAccountDto } from './dto/create-linked-account.dto'
+import { Audit, TypedRequest } from '../audit/decorators/audit.decorator'
+import { AuditAction } from '../audit/enums/audit-action.enum'
+import { AuditTarget } from '../audit/enums/audit-target.enum'
 
 @ApiTags('users')
 @Controller('users')
@@ -73,6 +76,21 @@ export class UserController {
     operationId: 'createUser',
   })
   @RequiredSystemRole(SystemRole.ADMIN)
+  @Audit({
+    action: AuditAction.CREATE,
+    targetType: AuditTarget.USER,
+    targetIdFromResult: (result: User) => result?.id,
+    requestMetadata: {
+      body: (req: TypedRequest<CreateUserDto>) => ({
+        id: req.body?.id,
+        name: req.body?.name,
+        email: req.body?.email,
+        personalOrganizationQuota: req.body?.personalOrganizationQuota,
+        role: req.body?.role,
+        emailVerified: req.body?.emailVerified,
+      }),
+    },
+  })
   async create(@Body() createUserDto: CreateUserDto): Promise<User> {
     return this.userService.create(createUserDto)
   }
@@ -93,6 +111,11 @@ export class UserController {
     operationId: 'regenerateKeyPair',
   })
   @RequiredSystemRole(SystemRole.ADMIN)
+  @Audit({
+    action: AuditAction.REGENERATE_KEY_PAIR,
+    targetType: AuditTarget.USER,
+    targetIdFromRequest: (req) => req.params.id,
+  })
   async regenerateKeyPair(@Param('id') id: string): Promise<User> {
     return this.userService.regenerateKeyPair(id)
   }
@@ -150,6 +173,15 @@ export class UserController {
     status: 204,
     description: 'Account linked successfully',
   })
+  @Audit({
+    action: AuditAction.LINK_ACCOUNT,
+    requestMetadata: {
+      body: (req: TypedRequest<CreateLinkedAccountDto>) => ({
+        provider: req.body?.provider,
+        userId: req.body?.userId,
+      }),
+    },
+  })
   async linkAccount(
     @AuthContext() authContext: IAuthContext,
     @Body() createLinkedAccountDto: CreateLinkedAccountDto,
@@ -201,6 +233,15 @@ export class UserController {
     status: 204,
     description: 'Account unlinked successfully',
   })
+  @Audit({
+    action: AuditAction.UNLINK_ACCOUNT,
+    requestMetadata: {
+      params: (req) => ({
+        provider: req.params.provider,
+        providerUserId: req.params.providerUserId,
+      }),
+    },
+  })
   async unlinkAccount(
     @AuthContext() authContext: IAuthContext,
     @Param('provider') provider: string,
@@ -224,6 +265,44 @@ export class UserController {
       )
     } catch (error) {
       this.logger.error('Failed to unlink account', error?.message || String(error))
+      throw new UnauthorizedException()
+    }
+  }
+
+  @Post('/mfa/sms/enroll')
+  @ApiOperation({
+    summary: 'Enroll in SMS MFA',
+    operationId: 'enrollInSmsMfa',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'SMS MFA enrollment URL',
+    type: String,
+  })
+  async enrollInSmsMfa(@AuthContext() authContext: IAuthContext): Promise<string> {
+    if (!this.configService.get('oidc.managementApi.enabled')) {
+      this.logger.warn('OIDC Management API is not enabled')
+      throw new NotFoundException()
+    }
+
+    const token = await this.getManagementApiToken()
+
+    try {
+      const response = await axios.post(
+        `${this.configService.getOrThrow('oidc.issuer')}/api/v2/guardian/enrollments/ticket`,
+        {
+          user_id: authContext.userId,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      )
+
+      return response.data.ticket_url
+    } catch (error) {
+      this.logger.error('Failed to enable SMS MFA', error?.message || String(error))
       throw new UnauthorizedException()
     }
   }

@@ -816,7 +816,7 @@ export class ProcessLogsResponseDto {
 
   @ApiProperty({
     description: 'The log output from the specified VNC process',
-    example: '2024-01-15 10:30:45 [INFO] NoVNC server started on port 6901',
+    example: '2024-01-15 10:30:45 [INFO] NoVNC server started on port 6080',
   })
   logs: string
 }

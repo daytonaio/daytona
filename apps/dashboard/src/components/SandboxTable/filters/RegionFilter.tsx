@@ -4,24 +4,21 @@
  */
 
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover'
-import { Command, CommandList, CommandGroup, CommandItem, CommandInput } from '@/components/ui/command'
+import { Command, CommandList, CommandGroup, CommandItem, CommandInput, CommandEmpty } from '@/components/ui/command'
 import { cn } from '@/lib/utils'
 import { Check } from 'lucide-react'
 import { X } from 'lucide-react'
+import { FacetedFilterOption } from '../types'
 
 interface RegionFilterProps {
   value: string[]
   onFilterChange: (value: string[] | undefined) => void
+  options?: FacetedFilterOption[]
 }
 
-const REGIONS = [
-  { value: 'us', label: 'us' },
-  { value: 'eu', label: 'eu' },
-]
-
-export function RegionFilterIndicator({ value, onFilterChange }: RegionFilterProps) {
+export function RegionFilterIndicator({ value, onFilterChange, options }: RegionFilterProps) {
   const selectedRegionLabels = value
-    .map((v) => REGIONS.find((r) => r.value === v)?.label)
+    .map((v) => options?.find((r) => r.value === v)?.label)
     .filter(Boolean)
     .join(', ')
 
@@ -36,7 +33,7 @@ export function RegionFilterIndicator({ value, onFilterChange }: RegionFilterPro
         </PopoverTrigger>
 
         <PopoverContent className="p-0 w-72" align="start">
-          <RegionFilter value={value} onFilterChange={onFilterChange} />
+          <RegionFilter value={value} onFilterChange={onFilterChange} options={options} />
         </PopoverContent>
       </Popover>
 
@@ -47,7 +44,7 @@ export function RegionFilterIndicator({ value, onFilterChange }: RegionFilterPro
   )
 }
 
-export function RegionFilter({ value, onFilterChange }: RegionFilterProps) {
+export function RegionFilter({ value, onFilterChange, options }: RegionFilterProps) {
   return (
     <Command>
       <div className="flex items-center gap-2 justify-between p-2">
@@ -60,8 +57,9 @@ export function RegionFilter({ value, onFilterChange }: RegionFilterProps) {
         </button>
       </div>
       <CommandList>
+        <CommandEmpty>No regions found.</CommandEmpty>
         <CommandGroup>
-          {REGIONS.map((region) => (
+          {options?.map((region) => (
             <CommandItem
               key={region.value}
               onSelect={() => {

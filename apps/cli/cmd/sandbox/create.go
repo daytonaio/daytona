@@ -178,9 +178,12 @@ var CreateCmd = &cobra.Command{
 			return fmt.Errorf("failed to get runner domain")
 		}
 
-		sandboxUrl := fmt.Sprintf("https://%d-%s.%s", SANDBOX_TERMINAL_PORT, sandbox.Id, *runnerDomain)
+		previewUrl, res, err := apiClient.SandboxAPI.GetPortPreviewUrl(ctx, sandbox.Id, SANDBOX_TERMINAL_PORT).Execute()
+		if err != nil {
+			return apiclient_cli.HandleErrorResponse(res, err)
+		}
 
-		views_common.RenderInfoMessageBold(fmt.Sprintf("Sandbox is accessible at %s", views_common.LinkStyle.Render(sandboxUrl)))
+		views_common.RenderInfoMessageBold(fmt.Sprintf("Sandbox is accessible at %s", views_common.LinkStyle.Render(previewUrl.Url)))
 		return nil
 	},
 }

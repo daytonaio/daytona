@@ -61,6 +61,9 @@ import { LogProxy } from '../proxy/log-proxy'
 import { CreateWorkspaceDto } from '../dto/create-workspace.deprecated.dto'
 import { TypedConfigService } from '../../config/typed-config.service'
 import { BadRequestError } from '../../exceptions/bad-request.exception'
+import { Audit, MASKED_AUDIT_VALUE, TypedRequest } from '../../audit/decorators/audit.decorator'
+import { AuditAction } from '../../audit/enums/audit-action.enum'
+import { AuditTarget } from '../../audit/enums/audit-target.enum'
 
 @ApiTags('workspace')
 @Controller('workspace')
@@ -132,6 +135,32 @@ export class WorkspaceController {
   })
   @Throttle({ default: { limit: 100 } })
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
+  @Audit({
+    action: AuditAction.CREATE,
+    targetType: AuditTarget.SANDBOX,
+    targetIdFromResult: (result: WorkspaceDto) => result?.id,
+    requestMetadata: {
+      body: (req: TypedRequest<CreateWorkspaceDto>) => ({
+        image: req.body?.image,
+        user: req.body?.user,
+        env: req.body?.env
+          ? Object.fromEntries(Object.keys(req.body?.env).map((key) => [key, MASKED_AUDIT_VALUE]))
+          : undefined,
+        labels: req.body?.labels,
+        public: req.body?.public,
+        class: req.body?.class,
+        target: req.body?.target,
+        cpu: req.body?.cpu,
+        gpu: req.body?.gpu,
+        memory: req.body?.memory,
+        disk: req.body?.disk,
+        autoStopInterval: req.body?.autoStopInterval,
+        autoArchiveInterval: req.body?.autoArchiveInterval,
+        volumes: req.body?.volumes,
+        buildInfo: req.body?.buildInfo,
+      }),
+    },
+  })
   async createWorkspace(
     @AuthContext() authContext: OrganizationAuthContext,
     @Body() createWorkspaceDto: CreateWorkspaceDto,
@@ -218,6 +247,11 @@ export class WorkspaceController {
   @Throttle({ default: { limit: 100 } })
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.DELETE_SANDBOXES])
   @UseGuards(WorkspaceAccessGuard)
+  @Audit({
+    action: AuditAction.DELETE,
+    targetType: AuditTarget.SANDBOX,
+    targetIdFromRequest: (req) => req.params.workspaceId,
+  })
   async removeWorkspace(
     @Param('workspaceId') workspaceId: string,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -245,6 +279,11 @@ export class WorkspaceController {
   @Throttle({ default: { limit: 100 } })
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
   @UseGuards(WorkspaceAccessGuard)
+  @Audit({
+    action: AuditAction.START,
+    targetType: AuditTarget.SANDBOX,
+    targetIdFromRequest: (req) => req.params.workspaceId,
+  })
   async startWorkspace(
     @AuthContext() authContext: OrganizationAuthContext,
     @Param('workspaceId') workspaceId: string,
@@ -271,6 +310,11 @@ export class WorkspaceController {
   @Throttle({ default: { limit: 100 } })
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
   @UseGuards(WorkspaceAccessGuard)
+  @Audit({
+    action: AuditAction.STOP,
+    targetType: AuditTarget.SANDBOX,
+    targetIdFromRequest: (req) => req.params.workspaceId,
+  })
   async stopWorkspace(@Param('workspaceId') workspaceId: string): Promise<void> {
     return this.workspaceService.stop(workspaceId)
   }
@@ -294,6 +338,16 @@ export class WorkspaceController {
   })
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
   @UseGuards(WorkspaceAccessGuard)
+  @Audit({
+    action: AuditAction.REPLACE_LABELS,
+    targetType: AuditTarget.SANDBOX,
+    targetIdFromRequest: (req) => req.params.workspaceId,
+    requestMetadata: {
+      body: (req: TypedRequest<WorkspaceLabelsDto>) => ({
+        labels: req.body?.labels,
+      }),
+    },
+  })
   async replaceLabels(
     @Param('workspaceId') workspaceId: string,
     @Body() labelsDto: WorkspaceLabelsDto,
@@ -320,6 +374,11 @@ export class WorkspaceController {
   })
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
   @UseGuards(WorkspaceAccessGuard)
+  @Audit({
+    action: AuditAction.CREATE_BACKUP,
+    targetType: AuditTarget.SANDBOX,
+    targetIdFromRequest: (req) => req.params.workspaceId,
+  })
   async createBackup(@Param('workspaceId') workspaceId: string): Promise<void> {
     await this.workspaceService.createBackup(workspaceId)
   }
@@ -342,6 +401,16 @@ export class WorkspaceController {
   })
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
   @UseGuards(WorkspaceAccessGuard)
+  @Audit({
+    action: AuditAction.UPDATE_PUBLIC_STATUS,
+    targetType: AuditTarget.SANDBOX,
+    targetIdFromRequest: (req) => req.params.workspaceId,
+    requestMetadata: {
+      params: (req) => ({
+        isPublic: req.params.isPublic,
+      }),
+    },
+  })
   async updatePublicStatus(
     @Param('workspaceId') workspaceId: string,
     @Param('isPublic') isPublic: boolean,
@@ -371,6 +440,16 @@ export class WorkspaceController {
   })
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
   @UseGuards(WorkspaceAccessGuard)
+  @Audit({
+    action: AuditAction.SET_AUTO_STOP_INTERVAL,
+    targetType: AuditTarget.SANDBOX,
+    targetIdFromRequest: (req) => req.params.workspaceId,
+    requestMetadata: {
+      params: (req) => ({
+        interval: req.params.interval,
+      }),
+    },
+  })
   async setAutostopInterval(
     @Param('workspaceId') workspaceId: string,
     @Param('interval') interval: number,
@@ -400,6 +479,16 @@ export class WorkspaceController {
   })
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
   @UseGuards(WorkspaceAccessGuard)
+  @Audit({
+    action: AuditAction.SET_AUTO_ARCHIVE_INTERVAL,
+    targetType: AuditTarget.SANDBOX,
+    targetIdFromRequest: (req) => req.params.workspaceId,
+    requestMetadata: {
+      params: (req) => ({
+        interval: req.params.interval,
+      }),
+    },
+  })
   async setAutoArchiveInterval(
     @Param('workspaceId') workspaceId: string,
     @Param('interval') interval: number,
@@ -421,6 +510,11 @@ export class WorkspaceController {
   @Throttle({ default: { limit: 100 } })
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
   @UseGuards(WorkspaceAccessGuard)
+  @Audit({
+    action: AuditAction.ARCHIVE,
+    targetType: AuditTarget.SANDBOX,
+    targetIdFromRequest: (req) => req.params.workspaceId,
+  })
   async archiveWorkspace(@Param('workspaceId') workspaceId: string): Promise<void> {
     return this.workspaceService.archive(workspaceId)
   }

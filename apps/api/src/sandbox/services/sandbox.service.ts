@@ -10,7 +10,6 @@ import { Sandbox } from '../entities/sandbox.entity'
 import { CreateSandboxDto } from '../dto/create-sandbox.dto'
 import { SandboxState } from '../enums/sandbox-state.enum'
 import { SandboxClass } from '../enums/sandbox-class.enum'
-import { RunnerRegion } from '../enums/runner-region.enum'
 import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
 import { RunnerService } from './runner.service'
 import { SandboxError } from '../../exceptions/sandbox-error.exception'
@@ -277,21 +276,23 @@ export class SandboxService {
 
     await this.validateOrganizationQuotas(organization, cpu, mem, disk)
 
-    const warmPoolSandbox = await this.warmPoolService.fetchWarmPoolSandbox({
-      organizationId: organization.id,
-      snapshot: snapshotIdOrName,
-      target: createSandboxDto.target,
-      class: createSandboxDto.class,
-      cpu: cpu,
-      mem: mem,
-      disk: disk,
-      osUser: createSandboxDto.user,
-      env: createSandboxDto.env,
-      state: SandboxState.STARTED,
-    })
+    if (!createSandboxDto.volumes || createSandboxDto.volumes.length === 0) {
+      const warmPoolSandbox = await this.warmPoolService.fetchWarmPoolSandbox({
+        organizationId: organization.id,
+        snapshot: snapshotIdOrName,
+        target: createSandboxDto.target,
+        class: createSandboxDto.class,
+        cpu: cpu,
+        mem: mem,
+        disk: disk,
+        osUser: createSandboxDto.user,
+        env: createSandboxDto.env,
+        state: SandboxState.STARTED,
+      })
 
-    if (warmPoolSandbox) {
-      return await this.assignWarmPoolSandbox(warmPoolSandbox, createSandboxDto, organization.id)
+      if (warmPoolSandbox) {
+        return await this.assignWarmPoolSandbox(warmPoolSandbox, createSandboxDto, organization.id)
+      }
     }
 
     const runner = await this.runnerService.getRandomAvailableRunner({
@@ -673,16 +674,12 @@ export class SandboxService {
     await this.sandboxRepository.save(sandbox)
   }
 
-  private getValidatedOrDefaultRegion(region: RunnerRegion): RunnerRegion {
-    if (!region) {
-      return RunnerRegion.US
+  private getValidatedOrDefaultRegion(region?: string): string {
+    if (!region || region.trim().length === 0) {
+      return 'us'
     }
 
-    if (Object.values(RunnerRegion).includes(region)) {
-      return region
-    } else {
-      throw new BadRequestError('Invalid region')
-    }
+    return region.trim()
   }
 
   private getValidatedOrDefaultClass(sandboxClass: SandboxClass): SandboxClass {

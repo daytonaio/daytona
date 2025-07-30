@@ -87,10 +87,14 @@ func main() {
 
 	sandboxService := services.NewSandboxService(runnerCache, dockerClient)
 
+	metricsService := services.NewMetricsService(dockerClient, runnerCache)
+	metricsService.StartMetricsCollection(ctx)
+
 	_ = runner.GetInstance(&runner.RunnerInstanceConfig{
 		Cache:          runnerCache,
 		Docker:         dockerClient,
 		SandboxService: sandboxService,
+		MetricsService: metricsService,
 	})
 
 	apiServerErrChan := make(chan error)

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Sandbox, SandboxState } from '@daytonaio/api-client'
 import { SandboxState as SandboxStateComponent } from './SandboxTable/SandboxState'
 import { Button } from '@/components/ui/button'
@@ -21,6 +21,7 @@ interface SandboxDetailsSheetProps {
   handleStop: (id: string) => void
   handleDelete: (id: string) => void
   handleArchive: (id: string) => void
+  getWebTerminalUrl: (id: string) => Promise<string | null>
   writePermitted: boolean
   deletePermitted: boolean
 }
@@ -34,9 +35,27 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
   handleStop,
   handleDelete,
   handleArchive,
+  getWebTerminalUrl,
   writePermitted,
   deletePermitted,
 }) => {
+  const [terminalUrl, setTerminalUrl] = useState<string | null>(null)
+
+  // TODO: uncomment when we enable the terminal tab
+  // useEffect(() => {
+  //   const getTerminalUrl = async () => {
+  //     if (!sandbox?.id) {
+  //       setTerminalUrl(null)
+  //       return
+  //     }
+
+  //     const url = await getWebTerminalUrl(sandbox.id)
+  //     setTerminalUrl(url)
+  //   }
+
+  //   getTerminalUrl()
+  // }, [sandbox?.id, getWebTerminalUrl])
+
   if (!sandbox) return null
 
   const getLastEvent = (sandbox: Sandbox): { date: Date; relativeTimeString: string } => {
@@ -189,18 +208,7 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
           </TabsContent>
 
           <TabsContent value="terminal" className="p-4">
-            <iframe
-              title="Terminal"
-              src={
-                !sandbox.daemonVersion
-                  ? `https://22222-${sandbox.id}.${sandbox.runnerDomain}`
-                  : import.meta.env.VITE_PROXY_TEMPLATE_URL?.replace('{{PORT}}', '22222').replace(
-                      '{{sandboxId}}',
-                      sandbox.id,
-                    )
-              }
-              className="w-full h-full"
-            ></iframe>
+            <iframe title="Terminal" src={terminalUrl || undefined} className="w-full h-full"></iframe>
           </TabsContent>
         </Tabs>
       </SheetContent>

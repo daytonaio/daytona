@@ -14,6 +14,9 @@ import { SystemRole } from '../../user/enums/system-role.enum'
 import { ProxyGuard } from '../../auth/proxy.guard'
 import { RunnerDto } from '../dto/runner.dto'
 import { RunnerSnapshotDto } from '../dto/runner-snapshot.dto'
+import { Audit, MASKED_AUDIT_VALUE, TypedRequest } from '../../audit/decorators/audit.decorator'
+import { AuditAction } from '../../audit/enums/audit-action.enum'
+import { AuditTarget } from '../../audit/enums/audit-target.enum'
 
 import { CombinedAuthGuard } from '../../auth/combined-auth.guard'
 @ApiTags('runners')
@@ -29,6 +32,26 @@ export class RunnerController {
   @ApiOperation({
     summary: 'Create runner',
     operationId: 'createRunner',
+  })
+  @Audit({
+    action: AuditAction.CREATE,
+    targetType: AuditTarget.RUNNER,
+    targetIdFromResult: (result: Runner) => result?.id,
+    requestMetadata: {
+      body: (req: TypedRequest<CreateRunnerDto>) => ({
+        domain: req.body?.domain,
+        apiUrl: req.body?.apiUrl,
+        apiKey: MASKED_AUDIT_VALUE,
+        cpu: req.body?.cpu,
+        memoryGiB: req.body?.memoryGiB,
+        diskGiB: req.body?.diskGiB,
+        gpu: req.body?.gpu,
+        gpuType: req.body?.gpuType,
+        class: req.body?.class,
+        capacity: req.body?.capacity,
+        region: req.body?.region,
+      }),
+    },
   })
   async create(@Body() createRunnerDto: CreateRunnerDto): Promise<Runner> {
     return this.runnerService.create(createRunnerDto)
@@ -47,6 +70,16 @@ export class RunnerController {
   @ApiOperation({
     summary: 'Update runner scheduling status',
     operationId: 'updateRunnerScheduling',
+  })
+  @Audit({
+    action: AuditAction.UPDATE_SCHEDULING,
+    targetType: AuditTarget.RUNNER,
+    targetIdFromRequest: (req) => req.params.id,
+    requestMetadata: {
+      body: (req: TypedRequest<{ unschedulable: boolean }>) => ({
+        unschedulable: req.body?.unschedulable,
+      }),
+    },
   })
   async updateSchedulingStatus(
     @Param('id') id: string,
@@ -70,14 +103,14 @@ export class RunnerController {
     return RunnerDto.fromRunner(runner)
   }
 
-  @Get('/by-snapshot')
+  @Get('/by-snapshot-ref')
   @ApiOperation({
-    summary: 'Get runners by snapshot internal name',
-    operationId: 'getRunnersBySnapshotInternalName',
+    summary: 'Get runners by snapshot ref',
+    operationId: 'getRunnersBySnapshotRef',
   })
   @ApiQuery({
-    name: 'internalName',
-    description: 'Internal name of the snapshot',
+    name: 'ref',
+    description: 'Snapshot ref',
     type: String,
     required: true,
   })
@@ -86,7 +119,7 @@ export class RunnerController {
     description: 'Runners found for the snapshot',
     type: [RunnerSnapshotDto],
   })
-  async getRunnersBySnapshotInternalName(@Query('internalName') internalName: string): Promise<RunnerSnapshotDto[]> {
-    return this.runnerService.getRunnersBySnapshotInternalName(internalName)
+  async getRunnersBySnapshotRef(@Query('ref') ref: string): Promise<RunnerSnapshotDto[]> {
+    return this.runnerService.getRunnersBySnapshotRef(ref)
   }
 }

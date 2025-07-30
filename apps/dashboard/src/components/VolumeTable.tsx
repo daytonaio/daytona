@@ -143,7 +143,7 @@ export function VolumeTable({ data, loading, processingVolumeAction, onDelete, o
                       datasets, caching dependencies, or passing files across sandboxes.
                     </p>
                     <p>
-                      Create one via the SDK or CLI.{' '}
+                      Create one via the SDK or CLI. <br />
                       <a
                         href="https://www.daytona.io/docs/volumes"
                         target="_blank"

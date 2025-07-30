@@ -221,14 +221,14 @@ export function SnapshotTable({
                       them to define language runtimes, dependencies, and tools for your sandboxes.
                     </p>
                     <p>
-                      Create one from the Dashboard, CLI, or SDK to get started. Read the{' '}
+                      Create one from the Dashboard, CLI, or SDK to get started. <br />
                       <a
                         href="https://www.daytona.io/docs/snapshots"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-primary hover:underline font-medium"
                       >
-                        Snapshots guide
+                        Read the Snapshots guide
                       </a>{' '}
                       to learn more.
                     </p>

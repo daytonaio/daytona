@@ -10,8 +10,6 @@ import { FindOptionsWhere, In, Not, Raw, Repository } from 'typeorm'
 import { Runner } from '../entities/runner.entity'
 import { CreateRunnerDto } from '../dto/create-runner.dto'
 import { SandboxClass } from '../enums/sandbox-class.enum'
-import { RunnerRegion } from '../enums/runner-region.enum'
-import { RunnerApiFactory } from '../runner-api/runnerApi'
 import { RunnerState } from '../enums/runner-state.enum'
 import { BadRequestError } from '../../exceptions/bad-request.exception'
 import { SandboxEvents } from '../constants/sandbox-events.constants'
@@ -23,6 +21,7 @@ import { SnapshotRunner } from '../entities/snapshot-runner.entity'
 import { SnapshotRunnerState } from '../enums/snapshot-runner-state.enum'
 import { Snapshot } from '../entities/snapshot.entity'
 import { RunnerSnapshotDto } from '../dto/runner-snapshot.dto'
+import { RunnerAdapterFactory, RunnerInfo } from '../runner-adapter/runnerAdapter'
 
 @Injectable()
 export class RunnerService {
@@ -32,7 +31,7 @@ export class RunnerService {
   constructor(
     @InjectRepository(Runner)
     private readonly runnerRepository: Repository<Runner>,
-    private readonly runnerApiFactory: RunnerApiFactory,
+    private readonly runnerAdapterFactory: RunnerAdapterFactory,
     @InjectRepository(Sandbox)
     private readonly sandboxRepository: Repository<Sandbox>,
     @InjectRepository(SnapshotRunner)
@@ -43,7 +42,7 @@ export class RunnerService {
 
   async create(createRunnerDto: CreateRunnerDto): Promise<Runner> {
     // Validate region and class
-    if (!this.isValidRegion(createRunnerDto.region)) {
+    if (createRunnerDto.region.trim().length === 0) {
       throw new Error('Invalid region')
     }
     if (!this.isValidClass(createRunnerDto.class)) {
@@ -53,16 +52,18 @@ export class RunnerService {
     const runner = new Runner()
     runner.domain = createRunnerDto.domain
     runner.apiUrl = createRunnerDto.apiUrl
+    runner.proxyUrl = createRunnerDto.proxyUrl
     runner.apiKey = createRunnerDto.apiKey
     runner.cpu = createRunnerDto.cpu
-    runner.memory = createRunnerDto.memory
-    runner.disk = createRunnerDto.disk
+    runner.memoryGiB = createRunnerDto.memoryGiB
+    runner.diskGiB = createRunnerDto.diskGiB
     runner.gpu = createRunnerDto.gpu
     runner.gpuType = createRunnerDto.gpuType
     runner.used = 0
     runner.capacity = createRunnerDto.capacity
     runner.region = createRunnerDto.region
     runner.class = createRunnerDto.class
+    runner.version = createRunnerDto.version
 
     return this.runnerRepository.save(runner)
   }
@@ -188,10 +189,18 @@ export class RunnerService {
     for (const runner of runners) {
       this.logger.debug(`Checking runner ${runner.id}`)
       try {
-        // Do something with the runner
-        const runnerApi = this.runnerApiFactory.createRunnerApi(runner)
-        await runnerApi.healthCheck()
-        await this.updateRunnerState(runner.id, RunnerState.READY)
+        // Get health check with status metrics
+        const runnerAdapter = await this.runnerAdapterFactory.create(runner)
+        await runnerAdapter.healthCheck()
+
+        let runnerInfo: RunnerInfo | undefined
+        try {
+          runnerInfo = await runnerAdapter.runnerInfo()
+        } catch (e) {
+          this.logger.warn(`Failed to get runner info for runner ${runner.id}: ${e.message}`)
+        }
+
+        await this.updateRunnerStatus(runner.id, runnerInfo)
 
         await this.recalculateRunnerUsage(runner.id)
       } catch (e) {
@@ -206,6 +215,53 @@ export class RunnerService {
       }
     }
     this.checkingRunners = false
+  }
+
+  private async updateRunnerStatus(runnerId: string, runnerInfo?: RunnerInfo) {
+    const runner = await this.runnerRepository.findOne({ where: { id: runnerId } })
+    if (!runner) {
+      this.logger.error(`Runner ${runnerId} not found when trying to update status`)
+      return
+    }
+
+    if (runner.state === RunnerState.DECOMMISSIONED) {
+      this.logger.debug(`Runner ${runnerId} is decommissioned, not updating status`)
+      return
+    }
+
+    const updateData: any = {
+      state: RunnerState.READY,
+      lastChecked: new Date(),
+    }
+
+    const metrics = runnerInfo?.metrics
+
+    if (metrics && typeof metrics.currentCpuUsagePercentage !== 'undefined') {
+      updateData.currentCpuUsagePercentage = metrics.currentCpuUsagePercentage || 0
+      updateData.currentMemoryUsagePercentage = metrics.currentMemoryUsagePercentage || 0
+      updateData.currentDiskUsagePercentage = metrics.currentDiskUsagePercentage || 0
+      updateData.currentAllocatedCpu = metrics.currentAllocatedCpu || 0
+      updateData.currentAllocatedMemoryGiB = metrics.currentAllocatedMemoryGiB || 0
+      updateData.currentAllocatedDiskGiB = metrics.currentAllocatedDiskGiB || 0
+      updateData.currentSnapshotCount = metrics.currentSnapshotCount || 0
+
+      updateData.availabilityScore = this.calculateAvailabilityScore({
+        cpuUsage: updateData.currentCpuUsagePercentage,
+        memoryUsage: updateData.currentMemoryUsagePercentage,
+        diskUsage: updateData.currentDiskUsagePercentage,
+        allocatedCpu: updateData.currentAllocatedCpu,
+        allocatedMemoryGiB: updateData.currentAllocatedMemoryGiB,
+        allocatedDiskGiB: updateData.currentAllocatedDiskGiB,
+        capacity: runner.capacity,
+        runnerCpu: runner.cpu,
+        runnerMemoryGiB: runner.memoryGiB,
+        runnerDiskGiB: runner.diskGiB,
+      })
+    } else {
+      this.logger.warn(`Runner ${runnerId} didn't send health metrics`)
+    }
+
+    await this.runnerRepository.update(runnerId, updateData)
   }
 
   async recalculateRunnerUsage(runnerId: string) {
@@ -223,10 +279,6 @@ export class RunnerService {
     runner.used = sandboxes.length
 
     await this.runnerRepository.save(runner)
-  }
-
-  private isValidRegion(region: RunnerRegion): boolean {
-    return Object.values(RunnerRegion).includes(region)
   }
 
   private isValidClass(sandboxClass: SandboxClass): boolean {
@@ -308,40 +360,17 @@ export class RunnerService {
     return runners.map((item) => item.runnerId)
   }
 
-  async getRunnersBySnapshotInternalName(internalName: string): Promise<RunnerSnapshotDto[]> {
-    this.logger.debug(`Looking for snapshot with internalName: ${internalName}`)
-
-    // First find the snapshot by internalName
-    const snapshot = await this.snapshotRepository.findOne({
-      where: { internalName },
-    })
-
-    if (!snapshot) {
-      this.logger.debug(`No snapshot found with internalName: ${internalName}`)
-      return []
-    }
-
-    this.logger.debug(`Found snapshot with ID: ${snapshot.id}`)
-
-    // Find all snapshot runners for this snapshot
-    // Note: snapshotRef contains the internalName, not the snapshot ID
+  async getRunnersBySnapshotRef(ref: string): Promise<RunnerSnapshotDto[]> {
     const snapshotRunners = await this.snapshotRunnerRepository.find({
       where: {
-        snapshotRef: internalName,
+        snapshotRef: ref,
         state: Not(SnapshotRunnerState.ERROR),
       },
+      select: ['runnerId', 'id'],
     })
 
-    this.logger.debug(`Found ${snapshotRunners.length} snapshot runners for snapshot ${snapshot.id}`)
-
-    if (snapshotRunners.length === 0) {
-      this.logger.debug(`No snapshot runners found for snapshot ${snapshot.id}`)
-      return []
-    }
-
-    // Get the runner IDs
-    const runnerIds = snapshotRunners.map((sr) => sr.runnerId)
-    this.logger.debug(`Runner IDs found: ${runnerIds.join(', ')}`)
+    // Extract distinct runnerIds from snapshot runners
+    const runnerIds = [...new Set(snapshotRunners.map((sr) => sr.runnerId))]
 
     // Find all runners with these IDs
     const runners = await this.runnerRepository.find({
@@ -357,11 +386,82 @@ export class RunnerService {
       return new RunnerSnapshotDto(snapshotRunner.id, runner.id, runner.domain)
     })
   }
+
+  private calculateAvailabilityScore(params: AvailabilityScoreParams): number {
+    let penalty = 0
+
+    // CPU Penalty (reduced impact, starts at 40%)
+    if (params.cpuUsage > 0) {
+      const low = (Math.min(params.cpuUsage, 40) / 40) * 1 // 0-40%: gradual 0-1 points
+      const medium = params.cpuUsage > 40 ? ((Math.min(params.cpuUsage, 85) - 40) / 45) * 18 : 0 // 40-85%: 18 more points
+      const high = params.cpuUsage > 85 ? ((Math.min(params.cpuUsage, 95) - 85) / 10) * 12 : 0 // 85-95%: 12 more points
+      const critical = params.cpuUsage > 95 ? (params.cpuUsage - 95) * 3 : 0 // 95%+: 3 points per % over 95%
+      penalty += low + medium + high + critical
+    }
+
+    // RAM Penalty (starts at 40%, high impact, critical at 85%)
+    if (params.memoryUsage > 0) {
+      const low = (Math.min(params.memoryUsage, 40) / 40) * 3 // 0-40%: gradual 0-3 points
+      const medium = params.memoryUsage > 40 ? ((Math.min(params.memoryUsage, 85) - 40) / 45) * 35 : 0 // 40-85%: 35 more points
+      const critical = params.memoryUsage > 85 ? (params.memoryUsage - 85) * 6 : 0 // 85%+: 6 points per % over 85%
+      penalty += low + medium + critical
+    }
+
+    // Disk Penalty (high impact, critical at 85%)
+    if (params.diskUsage > 0) {
+      const low = (Math.min(params.diskUsage, 60) / 60) * 3 // 0-60%: gradual 0-3 points
+      const medium = params.diskUsage > 60 ? ((Math.min(params.diskUsage, 85) - 60) / 25) * 25 : 0 // 60-85%: 25 more points
+      const critical = params.diskUsage > 85 ? (params.diskUsage - 85) * 7 : 0 // 85%+: 7 points per % over 85%
+      penalty += low + medium + critical
+    }
+
+    // Allocated CPU Ratio Penalty (minimal impact, starts at 250% of runner CPU capacity)
+    const allocatedCpuRatio = (params.allocatedCpu / params.runnerCpu) * 100
+    if (allocatedCpuRatio > 250) {
+      const low = allocatedCpuRatio > 250 ? ((Math.min(allocatedCpuRatio, 300) - 250) / 50) * 0.5 : 0 // 250-300%: 0.5 points
+      const medium = allocatedCpuRatio > 300 ? ((Math.min(allocatedCpuRatio, 350) - 300) / 50) * 1 : 0 // 300-350%: 1 more points
+      const critical = allocatedCpuRatio > 350 ? (allocatedCpuRatio - 350) * 0.025 : 0 // 350%+: 0.025 points per % over 350%
+      penalty += low + medium + critical
+    }
+
+    // Allocated Memory Ratio Penalty (minimal impact, starts at 250% of runner memory capacity)
+    const allocatedMemoryRatio = (params.allocatedMemoryGiB / params.runnerMemoryGiB) * 100
+    if (allocatedMemoryRatio > 250) {
+      const low = allocatedMemoryRatio > 250 ? ((Math.min(allocatedMemoryRatio, 300) - 250) / 50) * 0.5 : 0 // 250-300%: 0.5 points
+      const medium = allocatedMemoryRatio > 300 ? ((Math.min(allocatedMemoryRatio, 350) - 300) / 50) * 1 : 0 // 300-350%: 1 more points
+      const critical = allocatedMemoryRatio > 350 ? (allocatedMemoryRatio - 350) * 0.025 : 0 // 350%+: 0.025 points per % over 350%
+      penalty += low + medium + critical
+    }
+
+    // Allocated Disk Ratio Penalty (minimal impact, starts at 250% of runner disk capacity)
+    const allocatedDiskRatio = (params.allocatedDiskGiB / params.runnerDiskGiB) * 100
+    if (allocatedDiskRatio > 250) {
+      const low = allocatedDiskRatio > 250 ? ((Math.min(allocatedDiskRatio, 300) - 250) / 50) * 0.5 : 0 // 250-300%: 0.5 points
+      const medium = allocatedDiskRatio > 300 ? ((Math.min(allocatedDiskRatio, 350) - 300) / 50) * 1 : 0 // 300-350%: 1 more points
+      const critical = allocatedDiskRatio > 350 ? (allocatedDiskRatio - 350) * 0.025 : 0 // 350%+: 0.025 points per % over 350%
+      penalty += low + medium + critical
+    }
+
+    return Math.max(0, Math.round(100 - penalty))
+  }
 }
 
 export class GetRunnerParams {
-  region?: RunnerRegion
+  region?: string
   sandboxClass?: SandboxClass
   snapshotRef?: string
   excludedRunnerIds?: string[]
+}
+
+interface AvailabilityScoreParams {
+  cpuUsage: number
+  memoryUsage: number
+  diskUsage: number
+  allocatedCpu: number
+  allocatedMemoryGiB: number
+  allocatedDiskGiB: number
+  capacity: number
+  runnerCpu: number
+  runnerMemoryGiB: number
+  runnerDiskGiB: number
 }

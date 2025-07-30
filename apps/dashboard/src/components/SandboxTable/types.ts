@@ -19,6 +19,7 @@ export interface SandboxTableProps {
   handleBulkDelete: (ids: string[]) => void
   handleArchive: (id: string) => void
   handleVnc: (id: string) => void
+  getWebTerminalUrl: (id: string) => Promise<string | null>
   onRowClick?: (sandbox: Sandbox) => void
 }
 
@@ -32,11 +33,13 @@ export interface SandboxTableActionsProps {
   onDelete: (id: string) => void
   onArchive: (id: string) => void
   onVnc: (id: string) => void
+  onOpenWebTerminal: (id: string) => void
 }
 
 export interface SandboxTableHeaderProps {
   table: Table<Sandbox>
   labelOptions: FacetedFilterOption[]
+  regionOptions: FacetedFilterOption[]
   snapshots: SnapshotDto[]
   loadingSnapshots: boolean
 }

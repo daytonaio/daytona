@@ -1069,6 +1069,26 @@ paths:
       summary: Unlink account
       tags:
         - users
+  /users/mfa/sms/enroll:
+    post:
+      operationId: enrollInSmsMfa
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: string
+          description: SMS MFA enrollment URL
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Enroll in SMS MFA
+      tags:
+        - users
   /users/{id}:
     get:
       operationId: getUser
@@ -1776,14 +1796,14 @@ paths:
       summary: Get runner by sandbox ID
       tags:
         - runners
-  /runners/by-snapshot:
+  /runners/by-snapshot-ref:
     get:
-      operationId: getRunnersBySnapshotInternalName
+      operationId: getRunnersBySnapshotRef
       parameters:
-        - description: Internal name of the snapshot
+        - description: Snapshot ref
           explode: true
           in: query
-          name: internalName
+          name: ref
           required: true
           schema:
             type: string
@@ -1803,7 +1823,7 @@ paths:
             - openid
             - profile
             - email
-      summary: Get runners by snapshot internal name
+      summary: Get runners by snapshot ref
       tags:
         - runners
   /toolbox/{sandboxId}/toolbox/project-dir:
@@ -5861,6 +5881,111 @@ paths:
       summary: Get temporary storage access for pushing objects
       tags:
         - object-storage
+  /audit:
+    get:
+      operationId: getAllAuditLogs
+      parameters:
+        - description: 'Number of items per page (default: 10)'
+          explode: true
+          in: query
+          name: limit
+          required: false
+          schema:
+            type: number
+          style: form
+        - description: 'Page number (default: 1)'
+          explode: true
+          in: query
+          name: page
+          required: false
+          schema:
+            type: number
+          style: form
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAuditLogs'
+          description: Paginated list of all audit logs
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Get all audit logs
+      tags:
+        - audit
+    post:
+      operationId: createAuditLog
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAuditLog'
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuditLog'
+          description: Audit log entry created successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Create audit log entry
+      tags:
+        - audit
+  /audit/organizations/{organizationId}:
+    get:
+      operationId: getOrganizationAuditLogs
+      parameters:
+        - description: Organization ID
+          explode: false
+          in: path
+          name: organizationId
+          required: true
+          schema:
+            type: string
+          style: simple
+        - description: 'Number of items per page (default: 10)'
+          explode: true
+          in: query
+          name: limit
+          required: false
+          schema:
+            type: number
+          style: form
+        - description: 'Page number (default: 1)'
+          explode: true
+          in: query
+          name: page
+          required: false
+          schema:
+            type: number
+          style: form
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAuditLogs'
+          description: Paginated list of organization audit logs
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Get audit logs for organization
+      tags:
+        - audit
 components:
   schemas:
     CreateApiKey:
@@ -5889,6 +6014,7 @@ components:
               - read:volumes
               - write:volumes
               - delete:volumes
+              - read:audit_logs
             type: string
           type: array
         expiresAt:
@@ -5938,6 +6064,7 @@ components:
               - read:volumes
               - write:volumes
               - delete:volumes
+              - read:audit_logs
             type: string
           type: array
         expiresAt:
@@ -5991,6 +6118,7 @@ components:
               - read:volumes
               - write:volumes
               - delete:volumes
+              - read:audit_logs
             type: string
           type: array
         lastUsedAt:
@@ -6047,6 +6175,7 @@ components:
               - read:volumes
               - write:volumes
               - delete:volumes
+              - read:audit_logs
             type: string
           type: array
         isGlobal:
@@ -6358,6 +6487,7 @@ components:
               - read:volumes
               - write:volumes
               - delete:volumes
+              - read:audit_logs
             type: string
           type: array
       required:
@@ -6394,6 +6524,7 @@ components:
               - read:volumes
               - write:volumes
               - delete:volumes
+              - read:audit_logs
             type: string
           type: array
       required:
@@ -6998,7 +7129,7 @@ components:
         autoStopInterval: 30
         labels:
           daytona.io/public: 'true'
-        target: eu
+        target: us
         disk: 3
         autoDeleteInterval: 30
         public: false
@@ -7043,11 +7174,7 @@ components:
           type: string
         target:
           description: The target (region) where the sandbox will be created
-          enum:
-            - eu
-            - us
-            - asia
-          example: eu
+          example: us
           type: string
         cpu:
           description: CPU cores allocated to the sandbox
@@ -7130,29 +7257,33 @@ components:
       type: object
     CreateRunner:
       example:
-        disk: 1.4658129805029452
-        memory: 6.027456183070403
-        apiUrl: apiUrl
+        diskGiB: 1.4658129805029452
         apiKey: apiKey
-        domain: domain
+        proxyUrl: proxyUrl
         cpu: 0.8008281904610115
-        region: eu
         gpu: 5.962133916683182
+        version: version
+        capacity: 5.637376656633329
+        apiUrl: apiUrl
+        memoryGiB: 6.027456183070403
+        domain: domain
+        region: us
         class: small
         gpuType: gpuType
-        capacity: 5.637376656633329
       properties:
         domain:
           type: string
         apiUrl:
           type: string
+        proxyUrl:
+          type: string
         apiKey:
           type: string
         cpu:
           type: number
-        memory:
+        memoryGiB:
           type: number
-        disk:
+        diskGiB:
           type: number
         gpu:
           type: number
@@ -7168,11 +7299,9 @@ components:
         capacity:
           type: number
         region:
-          enum:
-            - eu
-            - us
-            - asia
-          example: eu
+          example: us
+          type: string
+        version:
           type: string
       required:
         - apiKey
@@ -7180,12 +7309,14 @@ components:
         - capacity
         - class
         - cpu
-        - disk
+        - diskGiB
         - domain
         - gpu
         - gpuType
-        - memory
+        - memoryGiB
+        - proxyUrl
         - region
+        - version
       type: object
     SandboxClass:
       description: The class of the runner
@@ -7193,13 +7324,6 @@ components:
         - small
         - medium
         - large
-      type: string
-    RunnerRegion:
-      description: The region of the runner
-      enum:
-        - eu
-        - us
-        - asia
       type: string
     RunnerState:
       description: The state of the runner
@@ -7214,22 +7338,32 @@ components:
       example:
         memory: 16
         apiKey: api-key-123
-        cpu: 8
+        currentMemoryUsagePercentage: 68.2
+        availabilityScore: 85
         used: 2
-        gpu: 1
         capacity: 10
+        currentDiskUsagePercentage: 33.8
+        currentCpuUsagePercentage: 45.6
         createdAt: 2023-10-01T12:00:00Z
-        disk: 100
         apiUrl: https://api.runner1.example.com
-        domain: runner1.example.com
         id: runner123
         state: initializing
-        region: eu
         unschedulable: false
         class: small
-        lastChecked: 2024-10-01T12:00:00Z
+        currentAllocatedDiskGiB: 50000
+        currentAllocatedMemoryGiB: 8000
         gpuType: gpuType
+        currentAllocatedCpu: 4000
         updatedAt: 2023-10-01T12:00:00Z
+        proxyUrl: https://proxy.runner1.example.com
+        cpu: 8
+        gpu: 1
+        currentSnapshotCount: 12
+        version: '0'
+        disk: 100
+        domain: runner1.example.com
+        region: us
+        lastChecked: 2024-10-01T12:00:00Z
       properties:
         id:
           description: The ID of the runner
@@ -7243,6 +7377,10 @@ components:
           description: The API URL of the runner
           example: https://api.runner1.example.com
           type: string
+        proxyUrl:
+          description: The proxy URL of the runner
+          example: https://proxy.runner1.example.com
+          type: string
         apiKey:
           description: The API key for the runner
           example: api-key-123
@@ -7252,11 +7390,11 @@ components:
           example: 8
           type: number
         memory:
-          description: The memory capacity of the runner in GB
+          description: The memory capacity of the runner in GiB
           example: 16
           type: number
         disk:
-          description: The disk capacity of the runner in GB
+          description: The disk capacity of the runner in GiB
           example: 100
           type: number
         gpu:
@@ -7279,11 +7417,42 @@ components:
           description: The capacity of the runner
           example: 10
           type: number
+        currentCpuUsagePercentage:
+          description: Current CPU usage percentage
+          example: 45.6
+          type: number
+        currentMemoryUsagePercentage:
+          description: Current RAM usage percentage
+          example: 68.2
+          type: number
+        currentDiskUsagePercentage:
+          description: Current disk usage percentage
+          example: 33.8
+          type: number
+        currentAllocatedCpu:
+          description: Current allocated CPU
+          example: 4000
+          type: number
+        currentAllocatedMemoryGiB:
+          description: Current allocated memory in GiB
+          example: 8000
+          type: number
+        currentAllocatedDiskGiB:
+          description: Current allocated disk in GiB
+          example: 50000
+          type: number
+        currentSnapshotCount:
+          description: Current snapshot count
+          example: 12
+          type: number
+        availabilityScore:
+          description: Runner availability score
+          example: 85
+          type: number
         region:
-          allOf:
-            - $ref: '#/components/schemas/RunnerRegion'
           description: The region of the runner
-          example: eu
+          example: us
+          type: string
         state:
           allOf:
             - $ref: '#/components/schemas/RunnerState'
@@ -7305,6 +7474,10 @@ components:
           description: The last update timestamp of the runner
           example: 2023-10-01T12:00:00Z
           type: string
+        version:
+          description: The version of the runner
+          example: '0'
+          type: string
       required:
         - apiKey
         - apiUrl
@@ -7318,11 +7491,13 @@ components:
         - gpuType
         - id
         - memory
+        - proxyUrl
         - region
         - state
         - unschedulable
         - updatedAt
         - used
+        - version
       type: object
     RunnerSnapshotDto:
       example:
@@ -8190,7 +8365,7 @@ components:
     ProcessLogsResponse:
       example:
         processName: novnc
-        logs: '2024-01-15 10:30:45 [INFO] NoVNC server started on port 6901'
+        logs: '2024-01-15 10:30:45 [INFO] NoVNC server started on port 6080'
       properties:
         processName:
           description: The name of the VNC process whose logs were retrieved
@@ -8198,7 +8373,7 @@ components:
           type: string
         logs:
           description: The log output from the specified VNC process
-          example: '2024-01-15 10:30:45 [INFO] NoVNC server started on port 6901'
+          example: '2024-01-15 10:30:45 [INFO] NoVNC server started on port 6080'
           type: string
       required:
         - logs
@@ -9437,6 +9612,207 @@ components:
         - secret
         - sessionToken
         - storageUrl
+      type: object
+    AuditLog:
+      example:
+        metadata:
+          key: ''
+        targetId: targetId
+        errorMessage: errorMessage
+        ipAddress: ipAddress
+        actorEmail: actorEmail
+        targetType: targetType
+        userAgent: userAgent
+        source: source
+        organizationId: organizationId
+        createdAt: 2000-01-23T04:56:07.000+00:00
+        actorId: actorId
+        action: action
+        id: id
+        statusCode: 0.8008281904610115
+      properties:
+        id:
+          type: string
+        actorId:
+          type: string
+        actorEmail:
+          type: string
+        organizationId:
+          type: string
+        action:
+          type: string
+        targetType:
+          type: string
+        targetId:
+          type: string
+        statusCode:
+          type: number
+        errorMessage:
+          type: string
+        ipAddress:
+          type: string
+        userAgent:
+          type: string
+        source:
+          type: string
+        metadata:
+          additionalProperties: true
+          type: object
+        createdAt:
+          format: date-time
+          type: string
+      required:
+        - action
+        - actorEmail
+        - actorId
+        - createdAt
+        - id
+      type: object
+    PaginatedAuditLogs:
+      example:
+        total: 6.027456183070403
+        totalPages: 5.962133916683182
+        page: 1.4658129805029452
+        items:
+          - metadata:
+              key: ''
+            targetId: targetId
+            errorMessage: errorMessage
+            ipAddress: ipAddress
+            actorEmail: actorEmail
+            targetType: targetType
+            userAgent: userAgent
+            source: source
+            organizationId: organizationId
+            createdAt: 2000-01-23T04:56:07.000+00:00
+            actorId: actorId
+            action: action
+            id: id
+            statusCode: 0.8008281904610115
+          - metadata:
+              key: ''
+            targetId: targetId
+            errorMessage: errorMessage
+            ipAddress: ipAddress
+            actorEmail: actorEmail
+            targetType: targetType
+            userAgent: userAgent
+            source: source
+            organizationId: organizationId
+            createdAt: 2000-01-23T04:56:07.000+00:00
+            actorId: actorId
+            action: action
+            id: id
+            statusCode: 0.8008281904610115
+      properties:
+        items:
+          items:
+            $ref: '#/components/schemas/AuditLog'
+          type: array
+        total:
+          type: number
+        page:
+          type: number
+        totalPages:
+          type: number
+      required:
+        - items
+        - page
+        - total
+        - totalPages
+      type: object
+    CreateAuditLog:
+      example:
+        organizationId: organizationId
+        actorId: actorId
+        targetId: targetId
+        actorEmail: actorEmail
+        action: create
+        targetType: api_key
+      properties:
+        actorId:
+          type: string
+        actorEmail:
+          type: string
+        organizationId:
+          type: string
+        action:
+          enum:
+            - create
+            - read
+            - update
+            - delete
+            - login
+            - set_default
+            - update_role
+            - update_assigned_roles
+            - update_quota
+            - suspend
+            - unsuspend
+            - accept
+            - decline
+            - link_account
+            - unlink_account
+            - leave_organization
+            - regenerate_key_pair
+            - update_scheduling
+            - start
+            - stop
+            - replace_labels
+            - create_backup
+            - update_public_status
+            - set_auto_stop_interval
+            - set_auto_archive_interval
+            - set_auto_delete_interval
+            - archive
+            - get_port_preview_url
+            - toggle_state
+            - set_general_status
+            - activate
+            - toolbox_delete_file
+            - toolbox_download_file
+            - toolbox_create_folder
+            - toolbox_move_file
+            - toolbox_set_file_permissions
+            - toolbox_replace_in_files
+            - toolbox_upload_file
+            - toolbox_bulk_upload_files
+            - toolbox_git_add_files
+            - toolbox_git_create_branch
+            - toolbox_git_delete_branch
+            - toolbox_git_clone_repository
+            - toolbox_git_commit_changes
+            - toolbox_git_pull_changes
+            - toolbox_git_push_changes
+            - toolbox_git_checkout_branch
+            - toolbox_execute_command
+            - toolbox_create_session
+            - toolbox_session_execute_command
+            - toolbox_delete_session
+            - toolbox_computer_use_start
+            - toolbox_computer_use_stop
+            - toolbox_computer_use_restart_process
+          type: string
+        targetType:
+          enum:
+            - api_key
+            - organization
+            - organization_invitation
+            - organization_role
+            - organization_user
+            - docker_registry
+            - runner
+            - sandbox
+            - snapshot
+            - user
+            - volume
+          type: string
+        targetId:
+          type: string
+      required:
+        - action
+        - actorEmail
+        - actorId
       type: object
     uploadFile_request:
       properties:

@@ -3,11 +3,19 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Command, Session, SessionExecuteRequest, SessionExecuteResponse, ToolboxApi } from '@daytonaio/api-client'
+import {
+  Command,
+  Configuration,
+  Session,
+  SessionExecuteRequest,
+  SessionExecuteResponse,
+  ToolboxApi,
+} from '@daytonaio/api-client'
 import { SandboxCodeToolbox } from './Sandbox'
 import { ExecuteResponse } from './types/ExecuteResponse'
 import { ArtifactParser } from './utils/ArtifactParser'
 import { processStreamingResponse } from './utils/Stream'
+import { Buffer } from 'buffer'
 
 /**
  * Parameters for code execution.
@@ -31,6 +39,7 @@ export class CodeRunParams {
 export class Process {
   constructor(
     private readonly sandboxId: string,
+    private readonly clientConfig: Configuration,
     private readonly codeToolbox: SandboxCodeToolbox,
     private readonly toolboxApi: ToolboxApi,
     private readonly getRootDir: () => Promise<string>,
@@ -311,11 +320,10 @@ export class Process {
       return response.data
     }
 
+    const url = `${this.clientConfig.basePath}/toolbox/${this.sandboxId}/toolbox/process/session/${sessionId}/command/${commandId}/logs?follow=true`
+
     await processStreamingResponse(
-      () =>
-        this.toolboxApi.getSessionCommandLogs(this.sandboxId, sessionId, commandId, undefined, true, {
-          responseType: 'stream',
-        }),
+      () => fetch(url, { method: 'GET', headers: this.clientConfig.baseOptions.headers }),
       onLogs,
       () =>
         this.getSessionCommand(sessionId, commandId).then((res) => res.exitCode !== null && res.exitCode !== undefined),

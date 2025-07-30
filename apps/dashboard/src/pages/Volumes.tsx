@@ -96,6 +96,10 @@ const Volumes: React.FC = () => {
       }
     }
 
+    if (!notificationSocket) {
+      return
+    }
+
     notificationSocket.on('volume.created', handleVolumeCreatedEvent)
     notificationSocket.on('volume.state.updated', handleVolumeStateUpdatedEvent)
     notificationSocket.on('volume.lastUsedAt.updated', handleVolumeLastUsedAtUpdatedEvent)

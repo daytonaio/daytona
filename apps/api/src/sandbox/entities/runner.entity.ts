@@ -4,7 +4,6 @@
  */
 
 import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm'
-import { RunnerRegion } from '../enums/runner-region.enum'
 import { SandboxClass } from '../enums/sandbox-class.enum'
 import { RunnerState } from '../enums/runner-state.enum'
 
@@ -20,16 +19,19 @@ export class Runner {
   apiUrl: string
 
   @Column()
+  proxyUrl: string
+
+  @Column()
   apiKey: string
 
   @Column()
   cpu: number
 
   @Column()
-  memory: number
+  memoryGiB: number
 
   @Column()
-  disk: number
+  diskGiB: number
 
   @Column()
   gpu: number
@@ -53,10 +55,50 @@ export class Runner {
   capacity: number
 
   @Column({
-    type: 'enum',
-    enum: RunnerRegion,
+    type: 'float',
+    default: 0,
   })
-  region: RunnerRegion
+  currentCpuUsagePercentage: number
+
+  @Column({
+    type: 'float',
+    default: 0,
+  })
+  currentMemoryUsagePercentage: number
+
+  @Column({
+    type: 'float',
+    default: 0,
+  })
+  currentDiskUsagePercentage: number
+
+  @Column({
+    default: 0,
+  })
+  currentAllocatedCpu: number
+
+  @Column({
+    default: 0,
+  })
+  currentAllocatedMemoryGiB: number
+
+  @Column({
+    default: 0,
+  })
+  currentAllocatedDiskGiB: number
+
+  @Column({
+    default: 0,
+  })
+  currentSnapshotCount: number
+
+  @Column({
+    default: 0,
+  })
+  availabilityScore: number
+
+  @Column()
+  region: string
 
   @Column({
     type: 'enum',
@@ -66,7 +108,13 @@ export class Runner {
   state: RunnerState
 
   @Column({
+    default: '0',
+  })
+  version: string
+
+  @Column({
     nullable: true,
+    type: 'timestamp with time zone',
   })
   lastChecked: Date
 
@@ -75,9 +123,13 @@ export class Runner {
   })
   unschedulable: boolean
 
-  @CreateDateColumn()
+  @CreateDateColumn({
+    type: 'timestamp with time zone',
+  })
   createdAt: Date
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({
+    type: 'timestamp with time zone',
+  })
   updatedAt: Date
 }

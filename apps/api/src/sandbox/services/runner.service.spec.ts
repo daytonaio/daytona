@@ -11,16 +11,15 @@ import { Repository } from 'typeorm'
 import { UserService } from '../../user/user.service'
 import { User } from '../../user/user.entity'
 import { SandboxClass } from '../enums/sandbox-class.enum'
-import { RunnerRegion } from '../enums/runner-region.enum'
 
 const runnerArray: Runner[] = [
   {
     id: '1',
     class: SandboxClass.SMALL,
-    region: RunnerRegion.US,
+    region: 'us',
     cpu: 1,
-    disk: 1,
-    memory: 1,
+    diskGiB: 1,
+    memoryGiB: 1,
     gpu: 1,
     gpuType: 'test',
     key: 'test',
@@ -30,10 +29,10 @@ const runnerArray: Runner[] = [
   {
     id: '2',
     class: SandboxClass.SMALL,
-    region: RunnerRegion.US,
+    region: 'us',
     cpu: 1,
-    disk: 1,
-    memory: 1,
+    diskGiB: 1,
+    memoryGiB: 1,
     gpu: 1,
     gpuType: 'test',
     key: 'test',
@@ -45,10 +44,10 @@ const runnerArray: Runner[] = [
 const oneRunner: Runner = {
   id: '1',
   class: SandboxClass.SMALL,
-  region: RunnerRegion.US,
+  region: 'us',
   cpu: 1,
-  disk: 1,
-  memory: 1,
+  diskGiB: 1,
+  memoryGiB: 1,
   gpu: 1,
   gpuType: 'test',
   key: 'test',
@@ -96,10 +95,10 @@ describe('RunnerService', () => {
       const oneRunner: Runner = {
         id: '1',
         class: SandboxClass.SMALL,
-        region: RunnerRegion.US,
+        region: 'us',
         cpu: 1,
-        disk: 1,
-        memory: 1,
+        diskGiB: 1,
+        memoryGiB: 1,
         gpu: 1,
         gpuType: 'test',
         key: 'test',
@@ -110,10 +109,10 @@ describe('RunnerService', () => {
       expect(
         service.create({
           class: SandboxClass.SMALL,
-          region: RunnerRegion.US,
+          region: 'us',
           cpu: 1,
-          disk: 1,
-          memory: 1,
+          diskGiB: 1,
+          memoryGiB: 1,
           gpu: 1,
           gpuType: 'test',
           key: 'test',

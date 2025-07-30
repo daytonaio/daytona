@@ -6,6 +6,7 @@
 import {
   BookOpen,
   Box,
+  ChartColumn,
   ChevronsUpDown,
   Container,
   CreditCard,
@@ -22,6 +23,7 @@ import {
   Slack,
   SquareUserRound,
   Sun,
+  TextSearch,
   TriangleAlert,
   Users,
 } from 'lucide-react'
@@ -31,6 +33,7 @@ import {
   SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
+  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
@@ -97,16 +100,6 @@ export function Sidebar({ isBannerVisible }: SidebarProps) {
         path: RoutePath.LIMITS,
       })
     }
-    if (
-      import.meta.env.VITE_BILLING_API_URL &&
-      authenticatedUserOrganizationMember?.role === OrganizationUserRoleEnum.OWNER
-    ) {
-      arr.push({
-        icon: <CreditCard size={16} strokeWidth={1.5} />,
-        label: 'Billing',
-        path: RoutePath.BILLING,
-      })
-    }
     if (!selectedOrganization?.personal) {
       arr.push({
         icon: <Users size={16} strokeWidth={1.5} />,
@@ -118,6 +111,13 @@ export function Sidebar({ isBannerVisible }: SidebarProps) {
       //   arr.push({ icon: <UserCog className="w-5 h-5" />, label: 'Roles', path: RoutePath.ROLES })
       // }
     }
+    if (authenticatedUserHasPermission(OrganizationRolePermissionsEnum.READ_AUDIT_LOGS)) {
+      arr.push({
+        icon: <TextSearch size={16} strokeWidth={1.5} />,
+        label: 'Audit Logs',
+        path: RoutePath.AUDIT_LOGS,
+      })
+    }
     arr.push({
       icon: <Settings size={16} strokeWidth={1.5} />,
       label: 'Settings',
@@ -125,9 +125,33 @@ export function Sidebar({ isBannerVisible }: SidebarProps) {
     })
     return arr
   }, [authenticatedUserOrganizationMember?.role, selectedOrganization?.personal, authenticatedUserHasPermission])
+
+  const billingItems = useMemo(() => {
+    if (
+      !import.meta.env.VITE_BILLING_API_URL ||
+      authenticatedUserOrganizationMember?.role !== OrganizationUserRoleEnum.OWNER
+    ) {
+      return []
+    }
+
+    return [
+      {
+        icon: <ChartColumn size={16} strokeWidth={1.5} />,
+        label: 'Spending',
+        path: RoutePath.BILLING_SPENDING,
+      },
+      {
+        icon: <CreditCard size={16} strokeWidth={1.5} />,
+        label: 'Wallet',
+        path: RoutePath.BILLING_WALLET,
+      },
+    ]
+  }, [authenticatedUserOrganizationMember?.role])
+
   const handleSignOut = () => {
     signoutRedirect()
   }
+
   return (
     <SidebarComponent isBannerVisible={isBannerVisible} collapsible="icon">
       <SidebarContent>
@@ -143,6 +167,23 @@ export function Sidebar({ isBannerVisible }: SidebarProps) {
           <SidebarGroupContent>
             <SidebarMenu>
               {sidebarItems.map((item) => (
+                <SidebarMenuItem key={item.label}>
+                  <SidebarMenuButton asChild isActive={pathname.startsWith(item.path)}>
+                    <button onClick={() => navigate(item.path)} className="text-sm">
+                      {item.icon}
+                      <span>{item.label}</span>
+                    </button>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+        <SidebarGroup>
+          <SidebarGroupLabel>Billing</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {billingItems.map((item) => (
                 <SidebarMenuItem key={item.label}>
                   <SidebarMenuButton asChild isActive={pathname.startsWith(item.path)}>
                     <button onClick={() => navigate(item.path)} className="text-sm">
@@ -263,18 +304,16 @@ export function Sidebar({ isBannerVisible }: SidebarProps) {
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
               <DropdownMenuContent side="top" align="start" className="w-[--radix-popper-anchor-width] min-w-[12rem]">
-                {import.meta.env.VITE_LINKED_ACCOUNTS_ENABLED === 'true' && (
-                  <DropdownMenuItem asChild>
-                    <Button
-                      variant="ghost"
-                      className="w-full cursor-pointer justify-start"
-                      onClick={() => navigate(RoutePath.LINKED_ACCOUNTS)}
-                    >
-                      <Link2 className="w-4 h-4" />
-                      Linked Accounts
-                    </Button>
-                  </DropdownMenuItem>
-                )}
+                <DropdownMenuItem asChild>
+                  <Button
+                    variant="ghost"
+                    className="w-full cursor-pointer justify-start"
+                    onClick={() => navigate(RoutePath.ACCOUNT_SETTINGS)}
+                  >
+                    <Settings className="w-4 h-4" />
+                    Account Settings
+                  </Button>
+                </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <Button
                     variant="ghost"

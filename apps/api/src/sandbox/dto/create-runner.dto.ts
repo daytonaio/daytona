@@ -5,7 +5,6 @@
 
 import { IsEnum, IsNumber, IsString } from 'class-validator'
 import { SandboxClass } from '../enums/sandbox-class.enum'
-import { RunnerRegion } from '../enums/runner-region.enum'
 import { ApiProperty, ApiSchema } from '@nestjs/swagger'
 
 @ApiSchema({ name: 'CreateRunner' })
@@ -20,6 +19,10 @@ export class CreateRunnerDto {
 
   @IsString()
   @ApiProperty()
+  proxyUrl: string
+
+  @IsString()
+  @ApiProperty()
   apiKey: string
 
   @IsNumber()
@@ -28,11 +31,11 @@ export class CreateRunnerDto {
 
   @IsNumber()
   @ApiProperty()
-  memory: number
+  memoryGiB: number
 
   @IsNumber()
   @ApiProperty()
-  disk: number
+  diskGiB: number
 
   @IsNumber()
   @ApiProperty()
@@ -53,10 +56,13 @@ export class CreateRunnerDto {
   @ApiProperty()
   capacity: number
 
-  @IsEnum(RunnerRegion)
+  @IsString()
   @ApiProperty({
-    enum: RunnerRegion,
-    example: Object.values(RunnerRegion)[0],
+    example: 'us',
   })
-  region: RunnerRegion
+  region: string
+
+  @IsString()
+  @ApiProperty()
+  version: string
 }

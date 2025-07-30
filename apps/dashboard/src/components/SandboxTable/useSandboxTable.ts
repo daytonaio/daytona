@@ -30,6 +30,7 @@ interface UseSandboxTableProps {
   handleDelete: (id: string) => void
   handleArchive: (id: string) => void
   handleVnc: (id: string) => void
+  getWebTerminalUrl: (id: string) => Promise<string | null>
 }
 
 export function useSandboxTable({
@@ -42,6 +43,7 @@ export function useSandboxTable({
   handleDelete,
   handleArchive,
   handleVnc,
+  getWebTerminalUrl,
 }: UseSandboxTableProps) {
   const [sorting, setSorting] = useState<SortingState>([
     {
@@ -61,6 +63,16 @@ export function useSandboxTable({
     return Array.from(labels).map((label) => ({ label, value: label }))
   }, [data])
 
+  const regionOptions: FacetedFilterOption[] = useMemo(() => {
+    const regions = new Set<string>()
+    data.forEach((sandbox) => {
+      if (sandbox.target) {
+        regions.add(sandbox.target)
+      }
+    })
+    return Array.from(regions).map((region) => ({ label: region, value: region }))
+  }, [data])
+
   const columns = useMemo(
     () =>
       getColumns({
@@ -69,6 +81,7 @@ export function useSandboxTable({
         handleDelete,
         handleArchive,
         handleVnc,
+        getWebTerminalUrl,
         loadingSandboxes,
         writePermitted,
         deletePermitted,
@@ -79,6 +92,7 @@ export function useSandboxTable({
       handleDelete,
       handleArchive,
       handleVnc,
+      getWebTerminalUrl,
       loadingSandboxes,
       writePermitted,
       deletePermitted,
@@ -115,6 +129,7 @@ export function useSandboxTable({
   return {
     table,
     labelOptions,
+    regionOptions,
     sorting,
     columnFilters,
   }

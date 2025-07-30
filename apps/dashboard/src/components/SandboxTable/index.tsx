@@ -45,6 +45,7 @@ export function SandboxTable({
   handleBulkDelete,
   handleArchive,
   handleVnc,
+  getWebTerminalUrl,
   onRowClick,
 }: SandboxTableProps) {
   const navigate = useNavigate()
@@ -53,7 +54,7 @@ export function SandboxTable({
   const deletePermitted = authenticatedUserHasPermission(OrganizationRolePermissionsEnum.DELETE_SANDBOXES)
   const { state: sidebarState } = useSidebar()
 
-  const { table, labelOptions } = useSandboxTable({
+  const { table, labelOptions, regionOptions } = useSandboxTable({
     data,
     loadingSandboxes,
     writePermitted,
@@ -63,6 +64,7 @@ export function SandboxTable({
     handleDelete,
     handleArchive,
     handleVnc,
+    getWebTerminalUrl,
   })
 
   const [bulkDeleteDialogOpen, setBulkDeleteDialogOpen] = useState(false)
@@ -87,6 +89,7 @@ export function SandboxTable({
       <SandboxTableHeader
         table={table}
         labelOptions={labelOptions}
+        regionOptions={regionOptions}
         snapshots={snapshots}
         loadingSnapshots={loadingSnapshots}
       />

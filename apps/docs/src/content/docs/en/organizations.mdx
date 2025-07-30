@@ -2,7 +2,7 @@
 title: Organizations
 ---
 
-import { Tabs, TabItem } from '@astrojs/starlight/components';
+import { TabItem, Tabs } from '@astrojs/starlight/components'
 
 Organizations in Daytona are used to group resources and enable collaboration. Users can work individually in their Personal Organization or together in a Collaborative Organization.
 
@@ -10,15 +10,15 @@ Organizations in Daytona are used to group resources and enable collaboration. U
 
 Every Daytona user starts with a **Personal Organization**, ideal for solo use and experimentation. **Collaborative Organizations** are created manually and designed for company-wide collaboration with shared access and controls.
 
-| Feature | Personal Organization | Collaborative Organization |
-|--------|------------------------|--------------------|
-| **Creation** | Automatic on signup | Manually by a user |
-| **Members** | Single user only | Multiple users (invite-based) |
-| **Access Control** | No roles or permissions | Roles with granular resource-based Assignments |
-| **Billing** | Tied to individual user | Shared across team members |
-| **Use Case** | Personal testing, small projects | Company/team development and production |
-| **Quota Scope** | Per user | Shared across all members |
-| **Deletable** | ❌ No | ✅ Yes (by Owner) |
+| Feature            | Personal Organization            | Collaborative Organization                     |
+| ------------------ | -------------------------------- | ---------------------------------------------- |
+| **Creation**       | Automatic on signup              | Manually by a user                             |
+| **Members**        | Single user only                 | Multiple users (invite-based)                  |
+| **Access Control** | No roles or permissions          | Roles with granular resource-based Assignments |
+| **Billing**        | Tied to individual user          | Shared across team members                     |
+| **Use Case**       | Personal testing, small projects | Company/team development and production        |
+| **Quota Scope**    | Per user                         | Shared across all members                      |
+| **Deletable**      | ❌ No                            | ✅ Yes (by Owner)                              |
 
 Users can switch between their Personal and Collaborative Organizations using the dropdown in the sidebar. Each Organization has its own sandboxes, API keys, and resource quotas.
 
@@ -37,6 +37,7 @@ Organization `Owners` can perform administrative actions such as:
 - Change Role of a user in the Organization
 - Update Assignments for an Organization Member
 - Remove user from the Organization
+- Inspect audit logs
 - Delete Organization
 
 ## Inviting New Users
@@ -49,14 +50,16 @@ If you select the `Member` role, you can also define their **Assignments**.
 
 The list of available **Assignments** includes:
 
-| Assignment | Description |
-|------------|-------------|
-| **`Viewer (required)`** | Grants read access to all resources in the organization |
-| **`Developer`** | Grants the ability to create sandboxes and keys in the organization |
-| **`Sandboxes Admin`** | Grants admin access to sandboxes in the organization |
-| **`Snapshots Admin`** | Grants admin access to snapshots in the organization |
-| **`Registries Admin`** | Grants admin access to registries in the organization |
-| **`Super Admin`** | Grants full access to all resources in the organization |
+| Assignment              | Description                                                         |
+| ----------------------- | ------------------------------------------------------------------- |
+| **`Viewer (required)`** | Grants read access to all resources in the organization             |
+| **`Developer`**         | Grants the ability to create sandboxes and keys in the organization |
+| **`Sandboxes Admin`**   | Grants admin access to sandboxes in the organization                |
+| **`Snapshots Admin`**   | Grants admin access to snapshots in the organization                |
+| **`Registries Admin`**  | Grants admin access to registries in the organization               |
+| **`Volumes Admin`**     | Grants admin access to volumes in the organization                  |
+| **`Super Admin`**       | Grants full access to all resources in the organization             |
+| **`Auditor`**           | Grants access to audit logs in the organization                     |
 
 ## Managing Invitations
 

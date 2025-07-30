@@ -5,6 +5,7 @@
 
 import { SandboxCodeToolbox } from '../Sandbox'
 import { CodeRunParams } from '../Process'
+import { Buffer } from 'buffer'
 
 export class SandboxTsCodeToolbox implements SandboxCodeToolbox {
   public getRunCommand(code: string, params?: CodeRunParams): string {

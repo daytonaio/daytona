@@ -65,6 +65,7 @@ Follow the following steps to ensure your contribution goes smoothly.
 1. Ensure that you sign off on all your commits to comply with the DCO v1.1. We have more details in [Prepare your changes](/PREPARING_YOUR_CHANGES.md).
 1. Ensure to generate new docs after making command related changes, by running `./hack/generate-cli-docs.sh` in the daytona root directory.
 1. Ensure to generate a new API client after making changes related to the API spec, by running `./hack/swagger.sh` in the daytona root directory.
+1. Ensure that you are using `yarn` as the package manager for any Node.js dependencies.
 1. Ensure that you have no lint errors. We use `golangci-lint` as our linter which you can install by following instructions found [here](https://golangci-lint.run/welcome/install/#local-installation) (or simply open Daytona in a Dev Container). You can check for linting errors by running `golangci-lint run` in the root of the project.
 1. Create a pull request on GitHub. If you're new to GitHub, read about [pull requests](https://help.github.com/articles/about-pull-requests/). You are welcome to submit your pull request for commentary or review before it is complete by creating a [draft pull request](https://help.github.com/en/articles/about-pull-requests#draft-pull-requests). Please include specific questions or items you'd like feedback on.
 1. A member of the Daytona team will review your PR within three business days (excluding any holidays) and either merge, comment, and/or assign someone for review.

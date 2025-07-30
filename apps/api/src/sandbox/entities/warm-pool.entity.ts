@@ -4,7 +4,6 @@
  */
 
 import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm'
-import { RunnerRegion } from '../enums/runner-region.enum'
 import { SandboxClass } from '../enums/sandbox-class.enum'
 
 @Entity()
@@ -19,11 +18,9 @@ export class WarmPool {
   snapshot: string
 
   @Column({
-    type: 'enum',
-    enum: RunnerRegion,
-    default: RunnerRegion.EU,
+    default: 'us',
   })
-  target: RunnerRegion
+  target: string
 
   @Column()
   cpu: number
@@ -59,9 +56,13 @@ export class WarmPool {
   })
   env: { [key: string]: string }
 
-  @CreateDateColumn()
+  @CreateDateColumn({
+    type: 'timestamp with time zone',
+  })
   createdAt: Date
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({
+    type: 'timestamp with time zone',
+  })
   updatedAt: Date
 }

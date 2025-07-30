@@ -31,6 +31,8 @@ import {
 } from '../common'
 // @ts-ignore
 import { BASE_PATH, COLLECTION_FORMATS, type RequestArgs, BaseAPI, RequiredError, operationServerMap } from '../base'
+// @ts-ignore
+import type { RunnerInfoResponseDTO } from '../models'
 /**
  * DefaultApi - axios parameter creator
  * @export
@@ -45,6 +47,37 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
      */
     healthCheck: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
       const localVarPath = `/`
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      // authentication Bearer required
+      await setApiKeyToObject(localVarHeaderParameter, 'Authorization', configuration)
+
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     * Runner info with system metrics
+     * @summary Runner info
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    runnerInfo: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+      const localVarPath = `/info`
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
       let baseOptions
@@ -99,6 +132,27 @@ export const DefaultApiFp = function (configuration?: Configuration) {
           configuration,
         )(axios, localVarOperationServerBasePath || basePath)
     },
+    /**
+     * Runner info with system metrics
+     * @summary Runner info
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async runnerInfo(
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<RunnerInfoResponseDTO>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.runnerInfo(options)
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['DefaultApi.runnerInfo']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
   }
 }
 
@@ -117,6 +171,15 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
      */
     healthCheck(options?: RawAxiosRequestConfig): AxiosPromise<{ [key: string]: string }> {
       return localVarFp.healthCheck(options).then((request) => request(axios, basePath))
+    },
+    /**
+     * Runner info with system metrics
+     * @summary Runner info
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    runnerInfo(options?: RawAxiosRequestConfig): AxiosPromise<RunnerInfoResponseDTO> {
+      return localVarFp.runnerInfo(options).then((request) => request(axios, basePath))
     },
   }
 }
@@ -138,6 +201,19 @@ export class DefaultApi extends BaseAPI {
   public healthCheck(options?: RawAxiosRequestConfig) {
     return DefaultApiFp(this.configuration)
       .healthCheck(options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   * Runner info with system metrics
+   * @summary Runner info
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof DefaultApi
+   */
+  public runnerInfo(options?: RawAxiosRequestConfig) {
+    return DefaultApiFp(this.configuration)
+      .runnerInfo(options)
       .then((request) => request(this.axios, this.basePath))
   }
 }

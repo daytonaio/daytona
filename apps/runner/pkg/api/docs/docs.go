@@ -36,6 +36,24 @@ const docTemplate = `{
                 }
             }
         },
+        "/info": {
+            "get": {
+                "description": "Runner info with system metrics",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Runner info",
+                "operationId": "RunnerInfo",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/RunnerInfoResponseDTO"
+                        }
+                    }
+                }
+            }
+        },
         "/sandboxes": {
             "post": {
                 "description": "Create a sandbox",
@@ -1207,6 +1225,40 @@ const docTemplate = `{
                 "memory": {
                     "type": "integer",
                     "minimum": 1
+                }
+            }
+        },
+        "RunnerInfoResponseDTO": {
+            "type": "object",
+            "properties": {
+                "metrics": {
+                    "$ref": "#/definitions/RunnerMetrics"
+                }
+            }
+        },
+        "RunnerMetrics": {
+            "type": "object",
+            "properties": {
+                "currentAllocatedCpu": {
+                    "type": "integer"
+                },
+                "currentAllocatedDiskGiB": {
+                    "type": "integer"
+                },
+                "currentAllocatedMemoryGiB": {
+                    "type": "integer"
+                },
+                "currentCpuUsagePercentage": {
+                    "type": "number"
+                },
+                "currentDiskUsagePercentage": {
+                    "type": "number"
+                },
+                "currentMemoryUsagePercentage": {
+                    "type": "number"
+                },
+                "currentSnapshotCount": {
+                    "type": "integer"
                 }
             }
         },

@@ -6,7 +6,6 @@
 import { IsEnum, IsObject, IsOptional, IsString, IsNumber, IsBoolean } from 'class-validator'
 import { ApiPropertyOptional, ApiSchema } from '@nestjs/swagger'
 import { SandboxClass } from '../enums/sandbox-class.enum'
-import { RunnerRegion } from '../enums/runner-region.enum'
 import { SandboxVolume } from './sandbox.dto'
 import { CreateBuildInfoDto } from './create-build-info.dto'
 
@@ -67,12 +66,11 @@ export class CreateSandboxDto {
 
   @ApiPropertyOptional({
     description: 'The target (region) where the sandbox will be created',
-    enum: RunnerRegion,
-    example: Object.values(RunnerRegion)[0],
+    example: 'us',
   })
   @IsOptional()
-  @IsEnum(RunnerRegion)
-  target?: RunnerRegion
+  @IsString()
+  target?: string
 
   @ApiPropertyOptional({
     description: 'CPU cores allocated to the sandbox',
