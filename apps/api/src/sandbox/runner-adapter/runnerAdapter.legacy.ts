@@ -164,6 +164,7 @@ export class RunnerAdapterLegacy implements RunnerAdapter {
       env: sandbox.env,
       registry: registry
         ? {
+            project: registry.project,
             url: registry.url,
             username: registry.username,
             password: registry.password,
