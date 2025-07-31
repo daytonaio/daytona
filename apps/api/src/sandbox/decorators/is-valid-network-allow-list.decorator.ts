@@ -40,7 +40,7 @@ export function IsValidNetworkAllowList(validationOptions?: ValidationOptions) {
             return 'networkAllowList must be a string'
           }
 
-          return 'networkAllowList must contain valid /24 CIDR blocks (e.g., "192.168.1.0/24,10.0.0.0/24")'
+          return 'networkAllowList must contain valid CIDR network addresses (e.g., "192.168.1.0/16,10.0.0.0/24")'
         },
       },
     })

@@ -45,7 +45,7 @@ options:
     usage: Memory allocated to the sandbox in MB
   - name: network-allow-list
     usage: |
-      Comma-separated list of allowed network addresses for the sandbox (only /24 CIDR blocks allowed)
+      Comma-separated list of allowed CIDR network addresses for the sandbox
   - name: network-block-all
     default_value: 'false'
     usage: Whether to block all network access for the sandbox

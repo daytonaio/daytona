@@ -58,8 +58,7 @@ class Sandbox(SandboxDto):
         created_at (str): When the Sandbox was created.
         updated_at (str): When the Sandbox was last updated.
         network_block_all (bool): Whether to block all network access for the Sandbox.
-        network_allow_list (str): Comma-separated list of allowed network addresses for the Sandbox
-            (only /24 CIDR blocks allowed).
+        network_allow_list (str): Comma-separated list of allowed CIDR network addresses for the Sandbox.
     """
 
     _fs: FileSystem = PrivateAttr()

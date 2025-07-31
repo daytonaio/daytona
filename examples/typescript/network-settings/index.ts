@@ -17,7 +17,7 @@ async function main() {
 
   // Explicitly allow list of network addresses
   const sandbox3 = await daytona.create({
-    networkAllowList: '192.168.1.0/24,10.0.0.0/24',
+    networkAllowList: '192.168.1.0/16,10.0.0.0/24',
   })
   console.log('networkBlockAll:', sandbox3.networkBlockAll)
   console.log('networkAllowList:', sandbox3.networkAllowList)

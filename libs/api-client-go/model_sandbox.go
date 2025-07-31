@@ -38,7 +38,7 @@ type Sandbox struct {
 	Public bool `json:"public"`
 	// Whether to block all network access for the sandbox
 	NetworkBlockAll bool `json:"networkBlockAll"`
-	// Comma-separated list of allowed network addresses for the sandbox (only /24 CIDR blocks allowed)
+	// Comma-separated list of allowed CIDR network addresses for the sandbox
 	NetworkAllowList *string `json:"networkAllowList,omitempty"`
 	// The target environment for the sandbox
 	Target string `json:"target"`

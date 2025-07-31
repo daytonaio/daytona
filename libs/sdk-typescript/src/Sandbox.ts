@@ -63,7 +63,7 @@ export interface SandboxCodeToolbox {
  * @property {string} [createdAt] - When the Sandbox was created
  * @property {string} [updatedAt] - When the Sandbox was last updated
  * @property {boolean} networkBlockAll - Whether to block all network access for the Sandbox
- * @property {string} [networkAllowList] - Comma-separated list of allowed network addresses for the Sandbox (only /24 CIDR blocks allowed)
+ * @property {string} [networkAllowList] - Comma-separated list of allowed CIDR network addresses for the Sandbox
  *
  * @class
  */
