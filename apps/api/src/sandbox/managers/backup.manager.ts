@@ -68,8 +68,7 @@ export class BackupManager {
           order: {
             lastBackupAt: 'ASC',
           },
-          //  todo: increase this number when backup is stable
-          take: 10,
+          take: 100,
         })
 
         await Promise.all(
