@@ -75,7 +75,14 @@ const Registries: React.FC = () => {
     setActionInProgress(true)
     try {
       await dockerRegistryApi.createRegistry(
-        { ...formData, isDefault: false, registryType: DockerRegistryRegistryTypeEnum.ORGANIZATION },
+        {
+          name: formData.name.trim(),
+          url: formData.url.trim(),
+          username: formData.username.trim(),
+          password: formData.password.trim(),
+          project: formData.project.trim(),
+          registryType: DockerRegistryRegistryTypeEnum.ORGANIZATION,
+        },
         selectedOrganization?.id,
       )
       toast.success('Registry created successfully')
@@ -100,7 +107,17 @@ const Registries: React.FC = () => {
 
     setActionInProgress(true)
     try {
-      await dockerRegistryApi.updateRegistry(registryToEdit.id, formData, selectedOrganization?.id)
+      await dockerRegistryApi.updateRegistry(
+        registryToEdit.id,
+        {
+          name: formData.name.trim(),
+          url: formData.url.trim(),
+          username: formData.username.trim(),
+          password: formData.password.trim(),
+          project: formData.project.trim(),
+        },
+        selectedOrganization?.id,
+      )
       toast.success('Registry edited successfully')
       await fetchRegistries(false)
       setShowCreateOrEditDialog(false)
@@ -165,6 +182,7 @@ const Registries: React.FC = () => {
             value={formData.name}
             onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
             placeholder="My Registry"
+            required
           />
         </div>
         <div className="space-y-3">
@@ -174,6 +192,7 @@ const Registries: React.FC = () => {
             value={formData.url}
             onChange={(e) => setFormData((prev) => ({ ...prev, url: e.target.value }))}
             placeholder="https://registry.example.com"
+            required
           />
         </div>
         <div className="space-y-3">
@@ -182,6 +201,7 @@ const Registries: React.FC = () => {
             id="username"
             value={formData.username}
             onChange={(e) => setFormData((prev) => ({ ...prev, username: e.target.value }))}
+            required
           />
         </div>
         <div className="space-y-3">
@@ -191,10 +211,9 @@ const Registries: React.FC = () => {
             type="password"
             value={formData.password}
             onChange={(e) => setFormData((prev) => ({ ...prev, password: e.target.value }))}
+            required={!registryToEdit}
           />
-          {registryToEdit && (
-            <p className="text-sm text-gray-500">Leave blank to use the same password as the registry.</p>
-          )}
+          {registryToEdit && <p className="text-sm text-gray-500">Leave empty to keep the current password.</p>}
         </div>
         <div className="space-y-3">
           <Label htmlFor="project">Project</Label>
@@ -222,11 +241,10 @@ const Registries: React.FC = () => {
             form="registry-form"
             variant="default"
             disabled={
-              !formData.name ||
-              !formData.url ||
-              !formData.username ||
-              !formData.project ||
-              (!registryToEdit && !formData.password)
+              !formData.name.trim() ||
+              !formData.url.trim() ||
+              !formData.username.trim() ||
+              (!registryToEdit && !formData.password.trim())
             }
           >
             {registryToEdit ? 'Edit' : 'Add'}

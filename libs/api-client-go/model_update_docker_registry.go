@@ -24,10 +24,14 @@ var _ MappedNullable = &UpdateDockerRegistry{}
 type UpdateDockerRegistry struct {
 	// Registry name
 	Name string `json:"name"`
+	// Registry URL
+	Url string `json:"url"`
 	// Registry username
 	Username string `json:"username"`
 	// Registry password
 	Password *string `json:"password,omitempty"`
+	// Registry project
+	Project *string `json:"project,omitempty"`
 }
 
 type _UpdateDockerRegistry UpdateDockerRegistry
@@ -36,9 +40,10 @@ type _UpdateDockerRegistry UpdateDockerRegistry
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewUpdateDockerRegistry(name string, username string) *UpdateDockerRegistry {
+func NewUpdateDockerRegistry(name string, url string, username string) *UpdateDockerRegistry {
 	this := UpdateDockerRegistry{}
 	this.Name = name
+	this.Url = url
 	this.Username = username
 	return &this
 }
@@ -73,6 +78,30 @@ func (o *UpdateDockerRegistry) GetNameOk() (*string, bool) {
 // SetName sets field value
 func (o *UpdateDockerRegistry) SetName(v string) {
 	o.Name = v
+}
+
+// GetUrl returns the Url field value
+func (o *UpdateDockerRegistry) GetUrl() string {
+	if o == nil {
+		var ret string
+		return ret
+	}
+
+	return o.Url
+}
+
+// GetUrlOk returns a tuple with the Url field value
+// and a boolean to check if the value has been set.
+func (o *UpdateDockerRegistry) GetUrlOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.Url, true
+}
+
+// SetUrl sets field value
+func (o *UpdateDockerRegistry) SetUrl(v string) {
+	o.Url = v
 }
 
 // GetUsername returns the Username field value
@@ -131,6 +160,38 @@ func (o *UpdateDockerRegistry) SetPassword(v string) {
 	o.Password = &v
 }
 
+// GetProject returns the Project field value if set, zero value otherwise.
+func (o *UpdateDockerRegistry) GetProject() string {
+	if o == nil || IsNil(o.Project) {
+		var ret string
+		return ret
+	}
+	return *o.Project
+}
+
+// GetProjectOk returns a tuple with the Project field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *UpdateDockerRegistry) GetProjectOk() (*string, bool) {
+	if o == nil || IsNil(o.Project) {
+		return nil, false
+	}
+	return o.Project, true
+}
+
+// HasProject returns a boolean if a field has been set.
+func (o *UpdateDockerRegistry) HasProject() bool {
+	if o != nil && !IsNil(o.Project) {
+		return true
+	}
+
+	return false
+}
+
+// SetProject gets a reference to the given string and assigns it to the Project field.
+func (o *UpdateDockerRegistry) SetProject(v string) {
+	o.Project = &v
+}
+
 func (o UpdateDockerRegistry) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -142,9 +203,13 @@ func (o UpdateDockerRegistry) MarshalJSON() ([]byte, error) {
 func (o UpdateDockerRegistry) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["name"] = o.Name
+	toSerialize["url"] = o.Url
 	toSerialize["username"] = o.Username
 	if !IsNil(o.Password) {
 		toSerialize["password"] = o.Password
+	}
+	if !IsNil(o.Project) {
+		toSerialize["project"] = o.Project
 	}
 	return toSerialize, nil
 }
@@ -155,6 +220,7 @@ func (o *UpdateDockerRegistry) UnmarshalJSON(data []byte) (err error) {
 	// that every required field exists as a key in the generic map.
 	requiredProperties := []string{
 		"name",
+		"url",
 		"username",
 	}
 

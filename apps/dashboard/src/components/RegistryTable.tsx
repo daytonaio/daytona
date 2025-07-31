@@ -142,8 +142,11 @@ const getColumns = ({
       header: 'URL',
     },
     {
-      accessorKey: 'project',
+      id: 'project',
       header: 'Project',
+      cell: ({ row }) => {
+        return row.original.project || '-'
+      },
     },
     {
       accessorKey: 'username',

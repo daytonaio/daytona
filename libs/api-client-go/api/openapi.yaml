@@ -9413,9 +9413,9 @@ components:
       type: object
     CreateDockerRegistry:
       example:
-        registryType: internal
+        registryType: organization
         password: password
-        isDefault: false
+        isDefault: true
         name: name
         project: project
         url: url
@@ -9437,7 +9437,7 @@ components:
           description: Registry project
           type: string
         registryType:
-          default: internal
+          default: organization
           description: Registry type
           enum:
             - internal
@@ -9446,14 +9446,11 @@ components:
             - transient
           type: string
         isDefault:
-          default: false
           description: Set as default registry
           type: boolean
       required:
-        - isDefault
         - name
         - password
-        - project
         - registryType
         - url
         - username
@@ -9563,10 +9560,15 @@ components:
       example:
         password: password
         name: name
+        project: project
+        url: url
         username: username
       properties:
         name:
           description: Registry name
+          type: string
+        url:
+          description: Registry URL
           type: string
         username:
           description: Registry username
@@ -9574,8 +9576,12 @@ components:
         password:
           description: Registry password
           type: string
+        project:
+          description: Registry project
+          type: string
       required:
         - name
+        - url
         - username
       type: object
     StorageAccessDto:
