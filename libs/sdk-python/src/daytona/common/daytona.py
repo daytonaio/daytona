@@ -110,8 +110,7 @@ class CreateSandboxBaseParams(BaseModel):
             Negative value means disabled, 0 means delete immediately upon stopping.
         volumes (Optional[List[VolumeMount]]): List of volumes mounts to attach to the Sandbox.
         network_block_all (Optional[bool]): Whether to block all network access for the Sandbox.
-        network_allow_list (Optional[str]): Comma-separated list of allowed network addresses for the Sandbox
-            (only /24 CIDR blocks allowed).
+        network_allow_list (Optional[str]): Comma-separated list of allowed CIDR network addresses for the Sandbox.
     """
 
     language: Optional[CodeLanguage] = None

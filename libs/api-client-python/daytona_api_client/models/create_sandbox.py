@@ -35,7 +35,7 @@ class CreateSandbox(BaseModel):
     labels: Optional[Dict[str, StrictStr]] = Field(default=None, description="Labels for the sandbox")
     public: Optional[StrictBool] = Field(default=None, description="Whether the sandbox http preview is publicly accessible")
     network_block_all: Optional[StrictBool] = Field(default=None, description="Whether to block all network access for the sandbox", alias="networkBlockAll")
-    network_allow_list: Optional[StrictStr] = Field(default=None, description="Comma-separated list of allowed network addresses for the sandbox (only /24 CIDR blocks allowed)", alias="networkAllowList")
+    network_allow_list: Optional[StrictStr] = Field(default=None, description="Comma-separated list of allowed CIDR network addresses for the sandbox", alias="networkAllowList")
     var_class: Optional[StrictStr] = Field(default=None, description="The sandbox class type", alias="class")
     target: Optional[StrictStr] = Field(default=None, description="The target (region) where the sandbox will be created")
     cpu: Optional[StrictInt] = Field(default=None, description="CPU cores allocated to the sandbox")

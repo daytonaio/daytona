@@ -164,7 +164,7 @@ sandbox = daytona.create(params)
 # Explicitly allow list of network addresses
 
 params = CreateSandboxFromSnapshotParams(
-    network_allow_list="192.168.1.0/24,10.0.0.0/24"
+    network_allow_list="192.168.1.0/16,10.0.0.0/24"
 )
 sandbox = daytona.create(params)
 
@@ -183,7 +183,7 @@ const sandbox = await daytona.create({
 
 // Explicitly allow list of network addresses
 const sandbox = await daytona.create({
-  networkAllowList: '192.168.1.0/24,10.0.0.0/24'
+  networkAllowList: '192.168.1.0/16,10.0.0.0/24'
 });
 ```
 
@@ -192,7 +192,7 @@ const sandbox = await daytona.create({
 
 :::caution
 Enabling unrestricted network access may pose security risks when executing untrusted code.
-It is recommended to whitelist specific network addresses using `networkAllowList` or block all network access using `networkBlockAll` instead. 
+It is recommended to whitelist specific network addresses using `networkAllowList` or block all network access using `networkBlockAll` instead.
 :::
 
 ## Sandbox Information
