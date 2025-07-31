@@ -63,10 +63,16 @@ const { hasSidebar, labels } = Astro.props
     background-color: var(--bg-color);
     overflow-y: auto;
     overscroll-behavior: contain;
-    -ms-overflow-style: none;
-    scrollbar-width: none;
+    -ms-overflow-style: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-extra) var(--bg-color);
     &::-webkit-scrollbar {
-      display: none;
+      width: 8px;
+      background: var(--bg-color);
+    }
+    &::-webkit-scrollbar-thumb {
+      background: var(--border-extra);
+      border-radius: 4px;
     }
     @media (max-width: 1024px) {
       display: none;
@@ -79,6 +85,10 @@ const { hasSidebar, labels } = Astro.props
       border-left: 1px solid var(--border-extra);
       padding-left: 20px;
       padding-right: 20px;
+      scrollbar-width: none;
+      &::-webkit-scrollbar {
+        display: none;
+      }
     }
   }
 
