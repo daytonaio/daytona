@@ -28,10 +28,12 @@ class UpdateDockerRegistry(BaseModel):
     UpdateDockerRegistry
     """ # noqa: E501
     name: StrictStr = Field(description="Registry name")
+    url: StrictStr = Field(description="Registry URL")
     username: StrictStr = Field(description="Registry username")
     password: Optional[StrictStr] = Field(default=None, description="Registry password")
+    project: Optional[StrictStr] = Field(default=None, description="Registry project")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["name", "username", "password"]
+    __properties: ClassVar[List[str]] = ["name", "url", "username", "password", "project"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -92,8 +94,10 @@ class UpdateDockerRegistry(BaseModel):
 
         _obj = cls.model_validate({
             "name": obj.get("name"),
+            "url": obj.get("url"),
             "username": obj.get("username"),
-            "password": obj.get("password")
+            "password": obj.get("password"),
+            "project": obj.get("project")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

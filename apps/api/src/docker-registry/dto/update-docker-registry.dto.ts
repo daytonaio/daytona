@@ -3,30 +3,30 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { IsString, IsOptional } from 'class-validator'
-import { ApiProperty, ApiSchema } from '@nestjs/swagger'
+import { IsString, IsOptional, IsUrl } from 'class-validator'
+import { ApiProperty, ApiPropertyOptional, ApiSchema } from '@nestjs/swagger'
 
 @ApiSchema({ name: 'UpdateDockerRegistry' })
 export class UpdateDockerRegistryDto {
-  @ApiProperty({
-    description: 'Registry name',
-    required: true,
-  })
+  @ApiProperty({ description: 'Registry name' })
   @IsString()
   name: string
 
-  @ApiProperty({
-    description: 'Registry username',
-    required: true,
-  })
+  @ApiProperty({ description: 'Registry URL' })
+  @IsUrl()
+  url: string
+
+  @ApiProperty({ description: 'Registry username' })
   @IsString()
   username: string
 
-  @ApiProperty({
-    description: 'Registry password',
-    required: false,
-  })
+  @ApiPropertyOptional({ description: 'Registry password' })
   @IsString()
   @IsOptional()
   password?: string
+
+  @ApiPropertyOptional({ description: 'Registry project' })
+  @IsString()
+  @IsOptional()
+  project?: string
 }

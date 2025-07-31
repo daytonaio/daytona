@@ -47,7 +47,7 @@ export interface CreateDockerRegistry {
    * @type {string}
    * @memberof CreateDockerRegistry
    */
-  project: string
+  project?: string
   /**
    * Registry type
    * @type {string}
@@ -59,7 +59,7 @@ export interface CreateDockerRegistry {
    * @type {boolean}
    * @memberof CreateDockerRegistry
    */
-  isDefault: boolean
+  isDefault?: boolean
 }
 
 export const CreateDockerRegistryRegistryTypeEnum = {

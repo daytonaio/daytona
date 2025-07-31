@@ -5,6 +5,7 @@
 
 import { ApiProperty, ApiSchema } from '@nestjs/swagger'
 import { RegistryType } from './../../docker-registry/enums/registry-type.enum'
+import { DockerRegistry } from '../entities/docker-registry.entity'
 
 @ApiSchema({ name: 'DockerRegistry' })
 export class DockerRegistryDto {
@@ -56,4 +57,19 @@ export class DockerRegistryDto {
     example: '2024-01-31T12:00:00Z',
   })
   updatedAt: Date
+
+  static fromDockerRegistry(dockerRegistry: DockerRegistry): DockerRegistryDto {
+    const dto: DockerRegistryDto = {
+      id: dockerRegistry.id,
+      name: dockerRegistry.name,
+      url: dockerRegistry.url,
+      username: dockerRegistry.username,
+      project: dockerRegistry.project,
+      registryType: dockerRegistry.registryType,
+      createdAt: dockerRegistry.createdAt,
+      updatedAt: dockerRegistry.updatedAt,
+    }
+
+    return dto
+  }
 }

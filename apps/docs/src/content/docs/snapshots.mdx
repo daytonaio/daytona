@@ -189,11 +189,20 @@ To create a Snapshot from an image that is not publicly available, you need to s
 
 1. Go to the [Registries](https://app.daytona.io/dashboard/registries) page in the Dashboard
 2. Click the `Add Registry` button.
-3. Input the Registry's name and URL, username, password, project, and submit
+3. Fill out the form with an appropriate custom name, URL, username, password, and project (if applicable)
 4. Once the Container Registry is created, you may go back to the [Snapshots](https://app.daytona.io/dashboard/snapshots) page
-5. When creating the Snapshot, make sure to input the entire private image name, including the registry location and project name - `my-private-registry.com/<my-project>/custom-alpine:3.21`
+5. When creating the Snapshot, make sure to input the entire private image name, including the registry URL and project name (if applicable) - `my-private-registry.com/<my-project>/custom-alpine:3.21`
 
 The next step is the same; simply set the `CreateSandboxFromSnapshotParams` field to use the custom Snapshot and no more authentication is needed.
+
+#### Using a Private Docker Hub Image
+
+To use a private Docker Hub image, you'll need to [add a Container Registry](/docs/snapshots#images-from-private-registries) with your Docker Hub credentials:
+
+- **Registry URL**: Set this to `docker.io`
+- **Username**: Enter your Docker Hub username (the account with access to the private image)
+- **Password**: Use a [Docker Hub Personal Access Token](https://docs.docker.com/docker-hub/access-tokens/) (not your account password)
+- **Create the Snapshot**: Once the registry is added, you can create a Snapshot using the full image path as the image name: `docker.io/<username>/<image>:<tag>`
 
 ### Using a Local Image
 
@@ -206,8 +215,12 @@ daytona snapshot push custom-alpine:3.21 --name alpine-minimal
 ```
 
 :::tip
-Use the flags `--cpu`, `--memory` and `--disk` to specify the resources you want the underlying Sandboxes to have - for example `daytona snapshot push custom-alpine:3.21 --name alpine-minimal --cpu 2 --memory 4 --disk 8` will create Alpine Sandboxes with 2 vCPU, 4GiB of memory and 8GiB of disk space.
+Use the flags `--cpu`, `--memory` and `--disk` to specify the resources you want the underlying Sandboxes to have
 
+For example `daytona snapshot push custom-alpine:3.21 --name alpine-minimal --cpu 2 --memory 4 --disk 8` will create Alpine Sandboxes with 2 vCPU, 4GiB of memory and 8GiB of disk space.
+:::
+
+:::note
 Daytona expects the local image to be built for AMD64 architecture. Therefore, the `--platform=linux/amd64` flag is required when building the Docker image if your machine is running on a different architecture.
 
 For more information, see the [CLI documentation](/docs/tools/cli#daytona-snapshot-push).

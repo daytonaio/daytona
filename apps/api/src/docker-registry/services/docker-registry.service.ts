@@ -76,10 +76,12 @@ export class DockerRegistryService {
     }
 
     registry.name = updateDto.name
+    registry.url = updateDto.url
     registry.username = updateDto.username
     if (updateDto.password) {
       registry.password = updateDto.password
     }
+    registry.project = updateDto.project
 
     return this.dockerRegistryRepository.save(registry)
   }
