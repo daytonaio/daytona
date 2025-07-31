@@ -506,7 +506,9 @@ export class Daytona {
 
       if (sandbox.state !== 'started') {
         const timeElapsed = Date.now() - startTime
-        await sandbox.waitUntilStarted(options.timeout ? options.timeout - timeElapsed / 1000 : 0)
+        await sandbox.waitUntilStarted(
+          options.timeout ? Math.max(0.001, options.timeout - timeElapsed / 1000) : options.timeout,
+        )
       }
 
       return sandbox
