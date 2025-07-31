@@ -17,8 +17,8 @@ type CreateSandboxDTO struct {
 	Registry         *RegistryDTO      `json:"registry,omitempty"`
 	Entrypoint       []string          `json:"entrypoint,omitempty"`
 	Volumes          []VolumeDTO       `json:"volumes,omitempty"`
-	NetworkAllowAll  bool              `json:"networkAllowAll" validate:"required"`
-	NetworkAllowList string            `json:"networkAllowList,omitempty"`
+	NetworkBlockAll  *bool             `json:"networkBlockAll,omitempty"`
+	NetworkAllowList *string           `json:"networkAllowList,omitempty"`
 } //	@name	CreateSandboxDTO
 
 type ResizeSandboxDTO struct {
@@ -28,6 +28,6 @@ type ResizeSandboxDTO struct {
 } //	@name	ResizeSandboxDTO
 
 type UpdateNetworkSettingsDTO struct {
-	NetworkAllowAll  bool   `json:"networkAllowAll,omitempty"`
-	NetworkAllowList string `json:"networkAllowList,omitempty"`
+	NetworkBlockAll  *bool   `json:"networkBlockAll,omitempty"`
+	NetworkAllowList *string `json:"networkAllowList,omitempty"`
 } //	@name	UpdateNetworkSettingsDTO

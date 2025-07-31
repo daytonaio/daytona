@@ -36,8 +36,8 @@ type Sandbox struct {
 	Labels map[string]string `json:"labels"`
 	// Whether the sandbox http preview is public
 	Public bool `json:"public"`
-	// Whether to allow all network access for the sandbox
-	NetworkAllowAll bool `json:"networkAllowAll"`
+	// Whether to block all network access for the sandbox
+	NetworkBlockAll bool `json:"networkBlockAll"`
 	// Comma-separated list of allowed network addresses for the sandbox (only /24 CIDR blocks allowed)
 	NetworkAllowList *string `json:"networkAllowList,omitempty"`
 	// The target environment for the sandbox
@@ -89,7 +89,7 @@ type _Sandbox Sandbox
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewSandbox(id string, organizationId string, user string, env map[string]string, labels map[string]string, public bool, networkAllowAll bool, target string, cpu float32, gpu float32, memory float32, disk float32) *Sandbox {
+func NewSandbox(id string, organizationId string, user string, env map[string]string, labels map[string]string, public bool, networkBlockAll bool, target string, cpu float32, gpu float32, memory float32, disk float32) *Sandbox {
 	this := Sandbox{}
 	this.Id = id
 	this.OrganizationId = organizationId
@@ -97,7 +97,7 @@ func NewSandbox(id string, organizationId string, user string, env map[string]st
 	this.Env = env
 	this.Labels = labels
 	this.Public = public
-	this.NetworkAllowAll = networkAllowAll
+	this.NetworkBlockAll = networkBlockAll
 	this.Target = target
 	this.Cpu = cpu
 	this.Gpu = gpu
@@ -290,28 +290,28 @@ func (o *Sandbox) SetPublic(v bool) {
 	o.Public = v
 }
 
-// GetNetworkAllowAll returns the NetworkAllowAll field value
-func (o *Sandbox) GetNetworkAllowAll() bool {
+// GetNetworkBlockAll returns the NetworkBlockAll field value
+func (o *Sandbox) GetNetworkBlockAll() bool {
 	if o == nil {
 		var ret bool
 		return ret
 	}
 
-	return o.NetworkAllowAll
+	return o.NetworkBlockAll
 }
 
-// GetNetworkAllowAllOk returns a tuple with the NetworkAllowAll field value
+// GetNetworkBlockAllOk returns a tuple with the NetworkBlockAll field value
 // and a boolean to check if the value has been set.
-func (o *Sandbox) GetNetworkAllowAllOk() (*bool, bool) {
+func (o *Sandbox) GetNetworkBlockAllOk() (*bool, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return &o.NetworkAllowAll, true
+	return &o.NetworkBlockAll, true
 }
 
-// SetNetworkAllowAll sets field value
-func (o *Sandbox) SetNetworkAllowAll(v bool) {
-	o.NetworkAllowAll = v
+// SetNetworkBlockAll sets field value
+func (o *Sandbox) SetNetworkBlockAll(v bool) {
+	o.NetworkBlockAll = v
 }
 
 // GetNetworkAllowList returns the NetworkAllowList field value if set, zero value otherwise.
@@ -968,7 +968,7 @@ func (o Sandbox) ToMap() (map[string]interface{}, error) {
 	toSerialize["env"] = o.Env
 	toSerialize["labels"] = o.Labels
 	toSerialize["public"] = o.Public
-	toSerialize["networkAllowAll"] = o.NetworkAllowAll
+	toSerialize["networkBlockAll"] = o.NetworkBlockAll
 	if !IsNil(o.NetworkAllowList) {
 		toSerialize["networkAllowList"] = o.NetworkAllowList
 	}
@@ -1036,7 +1036,7 @@ func (o *Sandbox) UnmarshalJSON(data []byte) (err error) {
 		"env",
 		"labels",
 		"public",
-		"networkAllowAll",
+		"networkBlockAll",
 		"target",
 		"cpu",
 		"gpu",

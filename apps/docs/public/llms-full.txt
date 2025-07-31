@@ -3004,17 +3004,26 @@ All resource parameters are optional. If not specified, Daytona will use default
 
 ### Network Settings
 
-Daytona Sandboxes provide configurable network access controls to enhance security and manage connectivity. By default, network access follows standard security policies, but you can customize network settings when creating a Sandbox.
+Daytona Sandboxes provide configurable network access controls to enhance security and manage connectivity. By default, network access follows standard security policies, but you can customize network settings when creating a Sandbox:
+
+- To block all network access, set `networkBlockAll` to `True`
+- To restrict network access to specific addresses, set `networkAllowList` to a comma-separated list of CIDR blocks
 
 ```python
 from daytona import Daytona, CreateSandboxFromSnapshotParams
 
 daytona = Daytona()
 
+# Block all network access
+
+params = CreateSandboxFromSnapshotParams(
+    network_block_all=True
+)
+sandbox = daytona.create(params)
+
 # Explicitly allow list of network addresses
 
 params = CreateSandboxFromSnapshotParams(
-    network_allow_all=False,
     network_allow_list="192.168.1.0/24,10.0.0.0/24"
 )
 sandbox = daytona.create(params)
@@ -3025,18 +3034,21 @@ import { Daytona } from '@daytonaio/sdk';
 
 const daytona = new Daytona();
 
+// Block all network access
+const sandbox = await daytona.create({
+  networkBlockAll: true
+});
+
 // Explicitly allow list of network addresses
 const sandbox = await daytona.create({
-  networkAllowAll: false,
   networkAllowList: '192.168.1.0/24,10.0.0.0/24'
 });
 ```
 
 
-:::note
-Enabling `networkAllowAll` allows unrestricted network access, which may pose security risks. 
-It is recommended to whitelist specific network addresses using `networkAllowList` instead. 
-This setting accepts `/24` CIDR blocks in a comma-separated format.
+:::caution
+Enabling unrestricted network access may pose security risks when executing untrusted code.
+It is recommended to whitelist specific network addresses using `networkAllowList` or block all network access using `networkBlockAll` instead. 
 :::
 
 ## Sandbox Information
@@ -3565,483 +3577,482 @@ description: A reference of supported operations using the Daytona CLI.
 sidebar:
   label: Daytona CLI Reference
 
-
 The `daytona` command-line tool provides access to Daytona's core features including managing Snapshots and the lifecycle of Daytona Sandboxes. View the installation instructions by clicking [here](/docs/getting-started#setting-up-the-daytona-cli).
 
 This reference lists all commands supported by the `daytona` command-line tool complete with a description of their behaviour, and any supported flags.
 You can access this documentation on a per-command basis by appending the `--help`/`-h` flag when invoking `daytona`.
 
 ## daytona
-
 Daytona CLI
 
 ```shell
 daytona [flags]
 ```
 
-**Flags**
+__Flags__
 | Long | Short | Description |
 | :--- | :---- | :---------- |
-| `--help` | | help for daytona |
+| `--help` |  | help for daytona |
 | `--version` | `-v` | Display the version of Daytona |
 
-## daytona autocomplete
 
+## daytona autocomplete
 Adds a completion script for your shell environment
 
 ```shell
 daytona autocomplete [bash|zsh|fish|powershell] [flags]
 ```
 
-**Flags**
+__Flags__
 | Long | Short | Description |
 | :--- | :---- | :---------- |
-| `--help` | | help for daytona |
+| `--help` |  | help for daytona |
 
 <Aside type="note">
-  If using bash shell environment, make sure you have bash-completion installed
-  in order to get full autocompletion functionality. Linux Installation: ```sudo
-  apt-get install bash-completion``` macOS Installation: ```brew install
-  bash-completion```
+If using bash shell environment, make sure you have bash-completion installed in order to get full autocompletion functionality.
+Linux Installation: ```sudo apt-get install bash-completion```
+macOS Installation: ```brew install bash-completion```
 </Aside>
 
 ## daytona docs
-
 Opens the Daytona documentation in your default browser.
 
 ```shell
 daytona docs [flags]
 ```
 
-**Flags**
+__Flags__
 | Long | Short | Description |
 | :--- | :---- | :---------- |
-| `--help` | | help for daytona |
+| `--help` |  | help for daytona |
+
 
 ## daytona login
-
 Log in to Daytona
 
 ```shell
 daytona login [flags]
 ```
 
-**Flags**
+__Flags__
 | Long | Short | Description |
 | :--- | :---- | :---------- |
-| `--api-key` | | API key to use for authentication |
-| `--help` | | help for daytona |
+| `--api-key` |  | API key to use for authentication |
+| `--help` |  | help for daytona |
+
 
 ## daytona logout
-
 Logout from Daytona
 
 ```shell
 daytona logout [flags]
 ```
 
-**Flags**
+__Flags__
 | Long | Short | Description |
 | :--- | :---- | :---------- |
-| `--help` | | help for daytona |
+| `--help` |  | help for daytona |
+
 
 ## daytona mcp
-
 Manage Daytona MCP Server
 
 ```shell
 daytona mcp [flags]
 ```
 
-**Flags**
+__Flags__
 | Long | Short | Description |
 | :--- | :---- | :---------- |
-| `--help` | | help for daytona |
+| `--help` |  | help for daytona |
+
 
 ## daytona mcp config
-
 Outputs JSON configuration for Daytona MCP Server
 
 ```shell
 daytona mcp config [AGENT_NAME] [flags]
 ```
 
-**Flags**
+__Flags__
 | Long | Short | Description |
 | :--- | :---- | :---------- |
-| `--help` | | help for daytona |
+| `--help` |  | help for daytona |
+
 
 ## daytona mcp init
-
 Initialize Daytona MCP Server with an agent (currently supported: claude, windsurf, cursor)
+
 
 ```shell
 daytona mcp init [AGENT_NAME] [flags]
 ```
 
-**Flags**
+__Flags__
 | Long | Short | Description |
 | :--- | :---- | :---------- |
-| `--help` | | help for daytona |
+| `--help` |  | help for daytona |
+
 
 ## daytona mcp start
-
 Start Daytona MCP Server
 
 ```shell
 daytona mcp start [flags]
 ```
 
-**Flags**
+__Flags__
 | Long | Short | Description |
 | :--- | :---- | :---------- |
-| `--help` | | help for daytona |
+| `--help` |  | help for daytona |
+
 
 ## daytona organization
-
 Manage Daytona organizations
 
 ```shell
 daytona organization [flags]
 ```
 
-**Flags**
+__Flags__
 | Long | Short | Description |
 | :--- | :---- | :---------- |
-| `--help` | | help for daytona |
+| `--help` |  | help for daytona |
+
 
 ## daytona organization create
-
 Create a new organization and set it as active
 
 ```shell
 daytona organization create [ORGANIZATION_NAME] [flags]
 ```
 
-**Flags**
+__Flags__
 | Long | Short | Description |
 | :--- | :---- | :---------- |
-| `--help` | | help for daytona |
+| `--help` |  | help for daytona |
+
 
 ## daytona organization delete
-
 Delete an organization
 
 ```shell
 daytona organization delete [ORGANIZATION] [flags]
 ```
 
-**Flags**
+__Flags__
 | Long | Short | Description |
 | :--- | :---- | :---------- |
-| `--help` | | help for daytona |
+| `--help` |  | help for daytona |
+
 
 ## daytona organization list
-
 List all organizations
 
 ```shell
 daytona organization list [flags]
 ```
 
-**Flags**
+__Flags__
 | Long | Short | Description |
 | :--- | :---- | :---------- |
 | `--format` | `-f` | Output format. Must be one of (yaml, json) |
-| `--help` | | help for daytona |
+| `--help` |  | help for daytona |
+
 
 ## daytona organization use
-
 Set active organization
 
 ```shell
 daytona organization use [ORGANIZATION] [flags]
 ```
 
-**Flags**
+__Flags__
 | Long | Short | Description |
 | :--- | :---- | :---------- |
-| `--help` | | help for daytona |
+| `--help` |  | help for daytona |
+
 
 ## daytona sandbox
-
 Manage Daytona sandboxes
 
 ```shell
 daytona sandbox [flags]
 ```
 
-**Flags**
+__Flags__
 | Long | Short | Description |
 | :--- | :---- | :---------- |
-| `--help` | | help for daytona |
+| `--help` |  | help for daytona |
+
 
 ## daytona sandbox create
-
 Create a new sandbox
 
 ```shell
 daytona sandbox create [flags]
 ```
 
-**Flags**
+__Flags__
 | Long | Short | Description |
 | :--- | :---- | :---------- |
-| `--auto-archive` | | Auto-archive interval in minutes (0 means the maximum interval will be used) |
-| `--auto-delete` | | Auto-delete interval in minutes (negative value means disabled, 0 means delete immediately upon stopping) |
-| `--auto-stop` | | Auto-stop interval in minutes (0 means disabled) |
-| `--class` | | Sandbox class type (small, medium, large) |
+| `--auto-archive` |  | Auto-archive interval in minutes (0 means the maximum interval will be used) |
+| `--auto-delete` |  | Auto-delete interval in minutes (negative value means disabled, 0 means delete immediately upon stopping) |
+| `--auto-stop` |  | Auto-stop interval in minutes (0 means disabled) |
+| `--class` |  | Sandbox class type (small, medium, large) |
 | `--context` | `-c` | Files or directories to include in the build context (can be specified multiple times) |
-| `--cpu` | | CPU cores allocated to the sandbox |
-| `--disk` | | Disk space allocated to the sandbox in GB |
+| `--cpu` |  | CPU cores allocated to the sandbox |
+| `--disk` |  | Disk space allocated to the sandbox in GB |
 | `--dockerfile` | `-f` | Path to Dockerfile for Sandbox snapshot |
 | `--env` | `-e` | Environment variables (format: KEY=VALUE) |
-| `--gpu` | | GPU units allocated to the sandbox |
+| `--gpu` |  | GPU units allocated to the sandbox |
 | `--label` | `-l` | Labels (format: KEY=VALUE) |
-| `--memory` | | Memory allocated to the sandbox in MB |
-| `--public` | | Make sandbox publicly accessible |
-| `--snapshot` | | Snapshot to use for the sandbox |
-| `--target` | | Target region (eu, us) |
-| `--user` | | User associated with the sandbox |
+| `--memory` |  | Memory allocated to the sandbox in MB |
+| `--network-allow-all` |  | Whether to allow all network access for the sandbox |
+| `--network-allow-list` |  | Comma-separated list of allowed network addresses for the sandbox (only /24 CIDR blocks allowed) |
+| `--public` |  | Make sandbox publicly accessible |
+| `--snapshot` |  | Snapshot to use for the sandbox |
+| `--target` |  | Target region (eu, us) |
+| `--user` |  | User associated with the sandbox |
 | `--volume` | `-v` | Volumes to mount (format: VOLUME_NAME:MOUNT_PATH) |
-| `--help` | | help for daytona |
+| `--help` |  | help for daytona |
+
 
 ## daytona sandbox delete
-
 Delete a sandbox
 
 ```shell
 daytona sandbox delete [SANDBOX_ID] [flags]
 ```
 
-**Flags**
+__Flags__
 | Long | Short | Description |
 | :--- | :---- | :---------- |
 | `--all` | `-a` | Delete all sandboxes |
 | `--force` | `-f` | Force delete |
-| `--help` | | help for daytona |
+| `--help` |  | help for daytona |
+
 
 ## daytona sandbox info
-
 Get sandbox info
 
 ```shell
 daytona sandbox info [SANDBOX_ID] [flags]
 ```
 
-**Flags**
+__Flags__
 | Long | Short | Description |
 | :--- | :---- | :---------- |
 | `--format` | `-f` | Output format. Must be one of (yaml, json) |
 | `--verbose` | `-v` | Include verbose output |
-| `--help` | | help for daytona |
+| `--help` |  | help for daytona |
+
 
 ## daytona sandbox list
-
 List sandboxes
 
 ```shell
 daytona sandbox list [flags]
 ```
 
-**Flags**
+__Flags__
 | Long | Short | Description |
 | :--- | :---- | :---------- |
 | `--format` | `-f` | Output format. Must be one of (yaml, json) |
 | `--limit` | `-l` | Maximum number of items per page |
 | `--page` | `-p` | Page number for pagination (starting from 1) |
 | `--verbose` | `-v` | Include verbose output |
-| `--help` | | help for daytona |
+| `--help` |  | help for daytona |
+
 
 ## daytona sandbox start
-
 Start a sandbox
 
 ```shell
 daytona sandbox start [SANDBOX_ID] [flags]
 ```
 
-**Flags**
+__Flags__
 | Long | Short | Description |
 | :--- | :---- | :---------- |
 | `--all` | `-a` | Start all sandboxes |
-| `--help` | | help for daytona |
+| `--help` |  | help for daytona |
+
 
 ## daytona sandbox stop
-
 Stop a sandbox
 
 ```shell
 daytona sandbox stop [SANDBOX_ID] [flags]
 ```
 
-**Flags**
+__Flags__
 | Long | Short | Description |
 | :--- | :---- | :---------- |
 | `--all` | `-a` | Stop all sandboxes |
-| `--help` | | help for daytona |
+| `--help` |  | help for daytona |
+
 
 ## daytona snapshot
-
 Manage Daytona snapshots
 
 ```shell
 daytona snapshot [flags]
 ```
 
-**Flags**
+__Flags__
 | Long | Short | Description |
 | :--- | :---- | :---------- |
-| `--help` | | help for daytona |
+| `--help` |  | help for daytona |
+
 
 ## daytona snapshot create
-
 Create a snapshot
 
 ```shell
 daytona snapshot create [SNAPSHOT] [flags]
 ```
 
-**Flags**
+__Flags__
 | Long | Short | Description |
 | :--- | :---- | :---------- |
 | `--context` | `-c` | Files or directories to include in the build context (can be specified multiple times) |
-| `--cpu` | | CPU cores that will be allocated to the underlying sandboxes (default: 1) |
-| `--disk` | | Disk space that will be allocated to the underlying sandboxes in GB (default: 3) |
+| `--cpu` |  | CPU cores that will be allocated to the underlying sandboxes (default: 1) |
+| `--disk` |  | Disk space that will be allocated to the underlying sandboxes in GB (default: 3) |
 | `--dockerfile` | `-f` | Path to Dockerfile to build |
 | `--entrypoint` | `-e` | The entrypoint command for the snapshot |
 | `--image` | `-i` | The image name for the snapshot |
-| `--memory` | | Memory that will be allocated to the underlying sandboxes in GB (default: 1) |
-| `--help` | | help for daytona |
+| `--memory` |  | Memory that will be allocated to the underlying sandboxes in GB (default: 1) |
+| `--help` |  | help for daytona |
+
 
 ## daytona snapshot delete
-
 Delete a snapshot
 
 ```shell
 daytona snapshot delete [SNAPSHOT_ID] [flags]
 ```
 
-**Flags**
+__Flags__
 | Long | Short | Description |
 | :--- | :---- | :---------- |
 | `--all` | `-a` | Delete all snapshots |
-| `--help` | | help for daytona |
+| `--help` |  | help for daytona |
+
 
 ## daytona snapshot list
-
 List all snapshots
 
 ```shell
 daytona snapshot list [flags]
 ```
 
-**Flags**
+__Flags__
 | Long | Short | Description |
 | :--- | :---- | :---------- |
 | `--format` | `-f` | Output format. Must be one of (yaml, json) |
 | `--limit` | `-l` | Maximum number of items per page |
 | `--page` | `-p` | Page number for pagination (starting from 1) |
-| `--help` | | help for daytona |
+| `--help` |  | help for daytona |
+
 
 ## daytona snapshot push
-
 Push local snapshot
 
 ```shell
 daytona snapshot push [SNAPSHOT] [flags]
 ```
 
-**Flags**
+__Flags__
 | Long | Short | Description |
 | :--- | :---- | :---------- |
-| `--cpu` | | CPU cores that will be allocated to the underlying sandboxes (default: 1) |
-| `--disk` | | Disk space that will be allocated to the underlying sandboxes in GB (default: 3) |
+| `--cpu` |  | CPU cores that will be allocated to the underlying sandboxes (default: 1) |
+| `--disk` |  | Disk space that will be allocated to the underlying sandboxes in GB (default: 3) |
 | `--entrypoint` | `-e` | The entrypoint command for the image |
-| `--memory` | | Memory that will be allocated to the underlying sandboxes in GB (default: 1) |
+| `--memory` |  | Memory that will be allocated to the underlying sandboxes in GB (default: 1) |
 | `--name` | `-n` | Specify the Snapshot name |
-| `--help` | | help for daytona |
+| `--help` |  | help for daytona |
+
 
 ## daytona version
-
 Print the version number
 
 ```shell
 daytona version [flags]
 ```
 
-**Flags**
+__Flags__
 | Long | Short | Description |
 | :--- | :---- | :---------- |
-| `--help` | | help for daytona |
+| `--help` |  | help for daytona |
+
 
 ## daytona volume
-
 Manage Daytona volumes
 
 ```shell
 daytona volume [flags]
 ```
 
-**Flags**
+__Flags__
 | Long | Short | Description |
 | :--- | :---- | :---------- |
-| `--help` | | help for daytona |
+| `--help` |  | help for daytona |
+
 
 ## daytona volume create
-
 Create a volume
 
 ```shell
 daytona volume create [NAME] [flags]
 ```
 
-**Flags**
+__Flags__
 | Long | Short | Description |
 | :--- | :---- | :---------- |
 | `--size` | `-s` | Size of the volume in GB |
-| `--help` | | help for daytona |
+| `--help` |  | help for daytona |
+
 
 ## daytona volume delete
-
 Delete a volume
 
 ```shell
 daytona volume delete [VOLUME_ID] [flags]
 ```
 
-**Flags**
+__Flags__
 | Long | Short | Description |
 | :--- | :---- | :---------- |
-| `--help` | | help for daytona |
+| `--help` |  | help for daytona |
+
 
 ## daytona volume get
-
 Get volume details
 
 ```shell
 daytona volume get [VOLUME_ID] [flags]
 ```
 
-**Flags**
+__Flags__
 | Long | Short | Description |
 | :--- | :---- | :---------- |
 | `--format` | `-f` | Output format. Must be one of (yaml, json) |
-| `--help` | | help for daytona |
+| `--help` |  | help for daytona |
+
 
 ## daytona volume list
-
 List all volumes
 
 ```shell
 daytona volume list [flags]
 ```
 
-**Flags**
+__Flags__
 | Long | Short | Description |
 | :--- | :---- | :---------- |
 | `--format` | `-f` | Output format. Must be one of (yaml, json) |
-| `--help` | | help for daytona |
+| `--help` |  | help for daytona |
 
 title: Volumes
 

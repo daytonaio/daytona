@@ -91,8 +91,8 @@ export class Sandbox {
   @Column({ default: false })
   public: boolean
 
-  @Column({ default: true })
-  networkAllowAll: boolean
+  @Column({ default: false })
+  networkBlockAll: boolean
 
   @Column({ nullable: true })
   networkAllowList?: string

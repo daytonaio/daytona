@@ -43,12 +43,12 @@ options:
   - name: memory
     default_value: '0'
     usage: Memory allocated to the sandbox in MB
-  - name: network-allow-all
-    default_value: 'true'
-    usage: Whether to allow all network access for the sandbox
   - name: network-allow-list
     usage: |
       Comma-separated list of allowed network addresses for the sandbox (only /24 CIDR blocks allowed)
+  - name: network-block-all
+    default_value: 'false'
+    usage: Whether to block all network access for the sandbox
   - name: public
     default_value: 'false'
     usage: Make sandbox publicly accessible

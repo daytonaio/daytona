@@ -20,14 +20,14 @@
 export interface UpdateNetworkSettingsDTO {
   /**
    *
-   * @type {boolean}
-   * @memberof UpdateNetworkSettingsDTO
-   */
-  networkAllowAll?: boolean
-  /**
-   *
    * @type {string}
    * @memberof UpdateNetworkSettingsDTO
    */
   networkAllowList?: string
+  /**
+   *
+   * @type {boolean}
+   * @memberof UpdateNetworkSettingsDTO
+   */
+  networkBlockAll?: boolean
 }

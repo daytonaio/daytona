@@ -21,8 +21,8 @@ daytona sandbox create [flags]
       --gpu int32                   GPU units allocated to the sandbox
   -l, --label stringArray           Labels (format: KEY=VALUE)
       --memory int32                Memory allocated to the sandbox in MB
-      --network-allow-all           Whether to allow all network access for the sandbox (default true)
       --network-allow-list string   Comma-separated list of allowed network addresses for the sandbox (only /24 CIDR blocks allowed)
+      --network-block-all           Whether to block all network access for the sandbox
       --public                      Make sandbox publicly accessible
       --snapshot string             Snapshot to use for the sandbox
       --target string               Target region (eu, us)

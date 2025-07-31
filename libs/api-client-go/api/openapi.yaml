@@ -6985,6 +6985,7 @@ components:
         autoStopInterval: 30
         organizationId: organization123
         createdAt: 2024-10-01T12:00:00Z
+        networkBlockAll: false
         autoDeleteInterval: 30
         public: false
         errorReason: The sandbox is not running
@@ -7010,7 +7011,6 @@ components:
           daytona.io/public: 'true'
         target: local
         disk: 10
-        networkAllowAll: false
         backupState: None
         user: daytona
         autoArchiveInterval: 10080
@@ -7050,8 +7050,8 @@ components:
           description: Whether the sandbox http preview is public
           example: false
           type: boolean
-        networkAllowAll:
-          description: Whether to allow all network access for the sandbox
+        networkBlockAll:
+          description: Whether to block all network access for the sandbox
           example: false
           type: boolean
         networkAllowList:
@@ -7162,7 +7162,7 @@ components:
         - id
         - labels
         - memory
-        - networkAllowAll
+        - networkBlockAll
         - organizationId
         - public
         - target
@@ -7208,10 +7208,10 @@ components:
         labels:
           daytona.io/public: 'true'
         target: us
+        networkBlockAll: false
         disk: 3
         autoDeleteInterval: 30
         public: false
-        networkAllowAll: false
         user: daytona
         class: small
         autoArchiveInterval: 10080
@@ -7243,8 +7243,8 @@ components:
           description: Whether the sandbox http preview is publicly accessible
           example: false
           type: boolean
-        networkAllowAll:
-          description: Whether to allow all network access for the sandbox
+        networkBlockAll:
+          description: Whether to block all network access for the sandbox
           example: false
           type: boolean
         networkAllowList:
@@ -9101,6 +9101,7 @@ components:
         autoStopInterval: 30
         organizationId: organization123
         createdAt: 2024-10-01T12:00:00Z
+        networkBlockAll: false
         autoDeleteInterval: 30
         snapshotState: None
         public: false
@@ -9131,7 +9132,6 @@ components:
         target: local
         disk: 10
         name: MyWorkspace
-        networkAllowAll: false
         backupState: None
         user: daytona
         autoArchiveInterval: 10080
@@ -9171,8 +9171,8 @@ components:
           description: Whether the sandbox http preview is public
           example: false
           type: boolean
-        networkAllowAll:
-          description: Whether to allow all network access for the sandbox
+        networkBlockAll:
+          description: Whether to block all network access for the sandbox
           example: false
           type: boolean
         networkAllowList:
@@ -9311,7 +9311,7 @@ components:
         - labels
         - memory
         - name
-        - networkAllowAll
+        - networkBlockAll
         - organizationId
         - public
         - target
@@ -9863,6 +9863,7 @@ components:
             - set_general_status
             - activate
             - deactivate
+            - update_network_settings
             - toolbox_delete_file
             - toolbox_download_file
             - toolbox_create_folder

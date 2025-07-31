@@ -142,7 +142,10 @@ All resource parameters are optional. If not specified, Daytona will use default
 
 ### Network Settings
 
-Daytona Sandboxes provide configurable network access controls to enhance security and manage connectivity. By default, network access follows standard security policies, but you can customize network settings when creating a Sandbox.
+Daytona Sandboxes provide configurable network access controls to enhance security and manage connectivity. By default, network access follows standard security policies, but you can customize network settings when creating a Sandbox:
+
+- To block all network access, set `networkBlockAll` to `True`
+- To restrict network access to specific addresses, set `networkAllowList` to a comma-separated list of CIDR blocks
 
 <Tabs>
 <TabItem label="Python" icon="seti:python">
@@ -151,10 +154,16 @@ from daytona import Daytona, CreateSandboxFromSnapshotParams
 
 daytona = Daytona()
 
+# Block all network access
+
+params = CreateSandboxFromSnapshotParams(
+    network_block_all=True
+)
+sandbox = daytona.create(params)
+
 # Explicitly allow list of network addresses
 
 params = CreateSandboxFromSnapshotParams(
-    network_allow_all=False,
     network_allow_list="192.168.1.0/24,10.0.0.0/24"
 )
 sandbox = daytona.create(params)
@@ -167,9 +176,13 @@ import { Daytona } from '@daytonaio/sdk';
 
 const daytona = new Daytona();
 
+// Block all network access
+const sandbox = await daytona.create({
+  networkBlockAll: true
+});
+
 // Explicitly allow list of network addresses
 const sandbox = await daytona.create({
-  networkAllowAll: false,
   networkAllowList: '192.168.1.0/24,10.0.0.0/24'
 });
 ```
@@ -177,10 +190,9 @@ const sandbox = await daytona.create({
 </TabItem>
 </Tabs>
 
-:::note
-Enabling `networkAllowAll` allows unrestricted network access, which may pose security risks. 
-It is recommended to whitelist specific network addresses using `networkAllowList` instead. 
-This setting accepts `/24` CIDR blocks in a comma-separated format.
+:::caution
+Enabling unrestricted network access may pose security risks when executing untrusted code.
+It is recommended to whitelist specific network addresses using `networkAllowList` or block all network access using `networkBlockAll` instead. 
 :::
 
 ## Sandbox Information
