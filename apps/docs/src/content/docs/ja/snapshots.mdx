@@ -185,19 +185,28 @@ main();
 
 ### プライベートレジストリからのイメージ
 
-公開されていないイメージからSnapshotを作成するには、まずイメージのプライベートContainer Registryを追加する必要があります：
+公開されていないイメージからSnapshotを作成するには、まずそのイメージのプライベートContainer Registryを追加する必要があります：
 
 1. ダッシュボードの[Registries](https://app.daytona.io/dashboard/registries)ページに移動します
 2. `Add Registry`ボタンをクリックします。
-3. Registryの名前とURL、ユーザー名、パスワード、プロジェクトを入力して送信します
-4. Container Registryが作成されたら、[Snapshots](https://app.daytona.io/dashboard/snapshots)ページに戻ります
-5. Snapshotを作成する際は、レジストリの場所とプロジェクト名を含む完全なプライベートイメージ名を入力してください - `my-private-registry.com/<my-project>/custom-alpine:3.21`
+3. 適切なカスタム名、URL、ユーザー名、パスワード、プロジェクト（該当する場合）でフォームを入力します
+4. Container Registryが作成されたら、[Snapshots](https://app.daytona.io/dashboard/snapshots)ページに戻ることができます
+5. Snapshotを作成する際は、レジストリURLとプロジェクト名（該当する場合）を含む完全なプライベートイメージ名を入力してください - `my-private-registry.com/<my-project>/custom-alpine:3.21`
 
 次のステップは同じです。単純に`CreateSandboxFromSnapshotParams`フィールドをカスタムSnapshotを使用するように設定すれば、それ以上の認証は必要ありません。
 
+#### プライベートDocker Hubイメージの使用
+
+プライベートDocker Hubイメージを使用するには、Docker Hubの認証情報で[Container Registryを追加](/docs/snapshots#images-from-private-registries)する必要があります：
+
+- **Registry URL**: これを`docker.io`に設定します
+- **Username**: Docker Hubのユーザー名（プライベートイメージにアクセスできるアカウント）を入力します
+- **Password**: [Docker Hub Personal Access Token](https://docs.docker.com/docker-hub/access-tokens/)を使用します（アカウントパスワードではありません）
+- **Snapshotの作成**: レジストリが追加されたら、完全なイメージパスをイメージ名として使用してSnapshotを作成できます：`docker.io/<username>/<image>:<tag>`
+
 ### ローカルイメージの使用
 
-プライベートコンテナレジストリを手動で設定してイメージをプッシュする手間を避けるために、[Daytona CLI](/docs/en/getting-started#setting-up-the-daytona-cli)では、ローカルイメージまたはローカルのDockerfileからSnapshotを作成し、Sandboxで使用することができます。
+プライベートコンテナレジストリを手動で設定してイメージをプッシュする必要を避けるため、[Daytona CLI](/docs/en/getting-started#setting-up-the-daytona-cli)では、ローカルイメージまたはローカルDockerfileからSnapshotを作成し、Sandboxで使用することができます。
 
 `docker images`を実行して、使用したいイメージとタグが利用可能であることを確認した後、`daytona snapshot push <your_local_docker_image>`コマンドを使用してSnapshotを作成し、Daytonaにプッシュします。例：
 
@@ -206,14 +215,18 @@ daytona snapshot push custom-alpine:3.21 --name alpine-minimal
 ```
 
 :::tip
-`--cpu`、`--memory`、`--disk`フラグを使用して、基盤となるSandboxに持たせたいリソースを指定してください - 例えば`daytona snapshot push custom-alpine:3.21 --name alpine-minimal --cpu 2 --memory 4 --disk 8`は、2 vCPU、4GiBのメモリ、8GiBのディスク容量を持つAlpine Sandboxを作成します。
+基盤となるSandboxに必要なリソースを指定するには、`--cpu`、`--memory`、`--disk`フラグを使用してください
 
-DaytonaはローカルイメージがAMD64アーキテクチャ用にビルドされていることを期待します。そのため、マシンが異なるアーキテクチャで動作している場合、Dockerイメージをビルドする際に`--platform=linux/amd64`フラグが必要です。
+例えば、`daytona snapshot push custom-alpine:3.21 --name alpine-minimal --cpu 2 --memory 4 --disk 8`は、2 vCPU、4GiBのメモリ、8GiBのディスク容量を持つAlpine Sandboxを作成します。
+:::
+
+:::note
+DaytonaはローカルイメージがAMD64アーキテクチャ用にビルドされていることを期待します。そのため、お使いのマシンが異なるアーキテクチャで動作している場合、Dockerイメージをビルドする際に`--platform=linux/amd64`フラグが必要です。
 
 詳細については、[CLIドキュメント](/docs/en/tools/cli#daytona-snapshot-push)を参照してください。
 :::
 
-まだ希望するイメージをビルドしておらず、Dockerfileが準備できている場合は、SDKのDeclarative Builderを使用できます - 詳細は[こちら](/docs/en/getting-started#declarative-builder)をお読みください。
+まだ目的のイメージをビルドしておらず、Dockerfileが準備できている場合は、SDKのDeclarative Builderを使用できます - 詳細は[こちら](/docs/en/getting-started#declarative-builder)をお読みください。
 
 または、CLIを通じて行う場合は、`create`の下で`--dockerfile`フラグを使用して、使用したいDockerfileのパスを渡すと、DaytonaがSnapshotをビルドしてくれます：
 
