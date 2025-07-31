@@ -1016,7 +1016,7 @@ name = "daytona"
 version = "0.0.0-dev"
 description = "Python SDK for Daytona"
 optional = false
-python-versions = ">=3.8,<4.0"
+python-versions = ">=3.9,<4.0"
 groups = ["main"]
 files = []
 develop = true

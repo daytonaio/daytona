@@ -47,5 +47,5 @@ export async function dynamicImport<K extends keyof ModuleMap>(
     )
   }
 
-  return mod
+  return mod?.default ?? mod
 }

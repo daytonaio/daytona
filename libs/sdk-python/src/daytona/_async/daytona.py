@@ -3,6 +3,7 @@
 
 import asyncio
 import json
+import time
 import warnings
 from importlib.metadata import version
 from typing import Callable, Dict, List, Optional, Union, overload
@@ -362,6 +363,8 @@ class AsyncDaytona:
         if timeout < 0:
             raise DaytonaError("Timeout must be a non-negative number")
 
+        start_time = time.time()
+
         if params.auto_stop_interval is not None and params.auto_stop_interval < 0:
             raise DaytonaError("auto_stop_interval must be a non-negative integer")
 
@@ -452,7 +455,8 @@ class AsyncDaytona:
         if sandbox.state != SandboxState.STARTED:
             # Wait for sandbox to start
             try:
-                await sandbox.wait_for_sandbox_start()
+                time_elapsed = time.time() - start_time
+                await sandbox.wait_for_sandbox_start(timeout=max(0.001, timeout - time_elapsed) if timeout else timeout)
             finally:
                 # If not Daytona SaaS, we don't need to handle pulling image state
                 pass

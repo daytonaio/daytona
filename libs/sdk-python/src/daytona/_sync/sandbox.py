@@ -217,9 +217,11 @@ class Sandbox(SandboxDto):
             print("Sandbox started successfully")
             ```
         """
+        start_time = time.time()
         sandbox = self._sandbox_api.start_sandbox(self.id, _request_timeout=timeout or None)
         self.__process_sandbox_dto(sandbox)
-        self.wait_for_sandbox_start()
+        time_elapsed = time.time() - start_time
+        self.wait_for_sandbox_start(timeout=max(0.001, timeout - time_elapsed) if timeout else timeout)
 
     @intercept_errors(message_prefix="Failed to stop sandbox: ")
     @with_timeout(
@@ -243,9 +245,11 @@ class Sandbox(SandboxDto):
             print("Sandbox stopped successfully")
             ```
         """
+        start_time = time.time()
         self._sandbox_api.stop_sandbox(self.id, _request_timeout=timeout or None)
         self.refresh_data()
-        self.wait_for_sandbox_stop()
+        time_elapsed = time.time() - start_time
+        self.wait_for_sandbox_stop(timeout=max(0.001, timeout - time_elapsed) if timeout else timeout)
 
     @intercept_errors(message_prefix="Failed to remove sandbox: ")
     def delete(self, timeout: Optional[float] = 60) -> None:

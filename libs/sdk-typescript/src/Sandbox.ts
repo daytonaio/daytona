@@ -115,7 +115,7 @@ export class Sandbox implements SandboxDto {
   ) {
     this.processSandboxDto(sandboxDto)
     this.rootDir = ''
-    this.fs = new FileSystem(this.id, this.toolboxApi, async () => await this.getRootDir())
+    this.fs = new FileSystem(this.id, this.clientConfig, this.toolboxApi, async () => await this.getRootDir())
     this.git = new Git(this.id, this.toolboxApi, async () => await this.getRootDir())
     this.process = new Process(
       this.id,
@@ -204,11 +204,12 @@ export class Sandbox implements SandboxDto {
     if (timeout < 0) {
       throw new DaytonaError('Timeout must be a non-negative number')
     }
+
     const startTime = Date.now()
     const response = await this.sandboxApi.startSandbox(this.id, undefined, { timeout: timeout * 1000 })
     this.processSandboxDto(response.data)
     const timeElapsed = Date.now() - startTime
-    await this.waitUntilStarted(timeout ? timeout - timeElapsed / 1000 : 0)
+    await this.waitUntilStarted(timeout ? Math.max(0.001, timeout - timeElapsed / 1000) : timeout)
   }
 
   /**
@@ -233,7 +234,7 @@ export class Sandbox implements SandboxDto {
     await this.sandboxApi.stopSandbox(this.id, undefined, { timeout: timeout * 1000 })
     await this.refreshData()
     const timeElapsed = Date.now() - startTime
-    await this.waitUntilStopped(timeout ? timeout - timeElapsed / 1000 : 0)
+    await this.waitUntilStopped(timeout ? Math.max(0.001, timeout - timeElapsed / 1000) : timeout)
   }
 
   /**

@@ -893,4 +893,48 @@ export class SnapshotManager {
       await this.redisLockProvider.unlock(lockKey)
     }
   }
+
+  @Cron(CronExpression.EVERY_10_MINUTES)
+  async cleanupInactiveSnapshotsFromRunners() {
+    const lockKey = 'cleanup-inactive-snapshots-from-runners-lock'
+    if (!(await this.redisLockProvider.lock(lockKey, 300))) {
+      return
+    }
+
+    try {
+      // Only fetch inactive snapshots that have associated snapshot runner entries
+      const queryResult = await this.snapshotRepository
+        .createQueryBuilder('snapshot')
+        .select('snapshot."internalName"')
+        .where('snapshot.state = :snapshotState', { snapshotState: SnapshotState.INACTIVE })
+        .andWhere('snapshot."internalName" IS NOT NULL')
+        .andWhereExists(
+          this.snapshotRunnerRepository
+            .createQueryBuilder('snapshot_runner')
+            .select('1')
+            .where('snapshot_runner."snapshotRef" = snapshot."internalName"')
+            .andWhere('snapshot_runner.state != :snapshotRunnerState', {
+              snapshotRunnerState: SnapshotRunnerState.REMOVING,
+            }),
+        )
+        .take(100)
+        .getRawMany()
+
+      const inactiveSnapshotInternalNames = queryResult.map((result) => result.internalName)
+
+      if (inactiveSnapshotInternalNames.length > 0) {
+        // Set associated SnapshotRunner records to REMOVING state
+        const result = await this.snapshotRunnerRepository.update(
+          { snapshotRef: In(inactiveSnapshotInternalNames) },
+          { state: SnapshotRunnerState.REMOVING },
+        )
+
+        this.logger.debug(`Marked ${result.affected} SnapshotRunners for removal`)
+      }
+    } catch (error) {
+      this.logger.error(`Failed to cleanup inactive snapshots from runners: ${fromAxiosError(error)}`)
+    } finally {
+      await this.redisLockProvider.unlock(lockKey)
+    }
+  }
 }

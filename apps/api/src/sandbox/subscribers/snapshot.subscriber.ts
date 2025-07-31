@@ -10,7 +10,6 @@ import { SnapshotEvents } from '../constants/snapshot-events'
 import { Snapshot } from '../entities/snapshot.entity'
 import { SnapshotCreatedEvent } from '../events/snapshot-created.event'
 import { SnapshotStateUpdatedEvent } from '../events/snapshot-state-updated.event'
-import { SnapshotEnabledToggledEvent } from '../events/snapshot-enabled-toggled.event'
 import { SnapshotRemovedEvent } from '../events/snapshot-removed.event'
 
 @EventSubscriber()
@@ -35,12 +34,6 @@ export class SnapshotSubscriber implements EntitySubscriberInterface<Snapshot> {
 
     updatedColumns.forEach((column) => {
       switch (column) {
-        case 'enabled':
-          this.eventEmitter.emit(
-            SnapshotEvents.ENABLED_TOGGLED,
-            new SnapshotEnabledToggledEvent(event.entity as Snapshot),
-          )
-          break
         case 'state':
           this.eventEmitter.emit(
             SnapshotEvents.STATE_UPDATED,

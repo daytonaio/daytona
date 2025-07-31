@@ -32,9 +32,9 @@ export enum AuditAction {
   SET_AUTO_DELETE_INTERVAL = 'set_auto_delete_interval',
   ARCHIVE = 'archive',
   GET_PORT_PREVIEW_URL = 'get_port_preview_url',
-  TOGGLE_STATE = 'toggle_state',
   SET_GENERAL_STATUS = 'set_general_status',
   ACTIVATE = 'activate',
+  DEACTIVATE = 'deactivate',
 
   // toolbox actions (must be prefixed with 'toolbox_')
   TOOLBOX_DELETE_FILE = 'toolbox_delete_file',

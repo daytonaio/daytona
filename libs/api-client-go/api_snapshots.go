@@ -60,6 +60,18 @@ type SnapshotsAPI interface {
 	CreateSnapshotExecute(r SnapshotsAPICreateSnapshotRequest) (*SnapshotDto, *http.Response, error)
 
 	/*
+		DeactivateSnapshot Deactivate a snapshot
+
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param id Snapshot ID
+		@return SnapshotsAPIDeactivateSnapshotRequest
+	*/
+	DeactivateSnapshot(ctx context.Context, id string) SnapshotsAPIDeactivateSnapshotRequest
+
+	// DeactivateSnapshotExecute executes the request
+	DeactivateSnapshotExecute(r SnapshotsAPIDeactivateSnapshotRequest) (*http.Response, error)
+
+	/*
 		GetAllSnapshots List all snapshots
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
@@ -120,19 +132,6 @@ type SnapshotsAPI interface {
 	// SetSnapshotGeneralStatusExecute executes the request
 	//  @return SnapshotDto
 	SetSnapshotGeneralStatusExecute(r SnapshotsAPISetSnapshotGeneralStatusRequest) (*SnapshotDto, *http.Response, error)
-
-	/*
-		ToggleSnapshotState Toggle snapshot state
-
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param id Snapshot ID
-		@return SnapshotsAPIToggleSnapshotStateRequest
-	*/
-	ToggleSnapshotState(ctx context.Context, id string) SnapshotsAPIToggleSnapshotStateRequest
-
-	// ToggleSnapshotStateExecute executes the request
-	//  @return SnapshotDto
-	ToggleSnapshotStateExecute(r SnapshotsAPIToggleSnapshotStateRequest) (*SnapshotDto, *http.Response, error)
 }
 
 // SnapshotsAPIService SnapshotsAPI service
@@ -486,6 +485,106 @@ func (a *SnapshotsAPIService) CreateSnapshotExecute(r SnapshotsAPICreateSnapshot
 	}
 
 	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type SnapshotsAPIDeactivateSnapshotRequest struct {
+	ctx                    context.Context
+	ApiService             SnapshotsAPI
+	id                     string
+	xDaytonaOrganizationID *string
+}
+
+// Use with JWT to specify the organization ID
+func (r SnapshotsAPIDeactivateSnapshotRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) SnapshotsAPIDeactivateSnapshotRequest {
+	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
+	return r
+}
+
+func (r SnapshotsAPIDeactivateSnapshotRequest) Execute() (*http.Response, error) {
+	return r.ApiService.DeactivateSnapshotExecute(r)
+}
+
+/*
+DeactivateSnapshot Deactivate a snapshot
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param id Snapshot ID
+	@return SnapshotsAPIDeactivateSnapshotRequest
+*/
+func (a *SnapshotsAPIService) DeactivateSnapshot(ctx context.Context, id string) SnapshotsAPIDeactivateSnapshotRequest {
+	return SnapshotsAPIDeactivateSnapshotRequest{
+		ApiService: a,
+		ctx:        ctx,
+		id:         id,
+	}
+}
+
+// Execute executes the request
+func (a *SnapshotsAPIService) DeactivateSnapshotExecute(r SnapshotsAPIDeactivateSnapshotRequest) (*http.Response, error) {
+	var (
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SnapshotsAPIService.DeactivateSnapshot")
+	if err != nil {
+		return nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/snapshots/{id}/deactivate"
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", url.PathEscape(parameterValueToString(r.id, "id")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.xDaytonaOrganizationID != nil {
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Daytona-Organization-ID", r.xDaytonaOrganizationID, "simple", "")
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarHTTPResponse, newErr
+	}
+
+	return localVarHTTPResponse, nil
 }
 
 type SnapshotsAPIGetAllSnapshotsRequest struct {
@@ -1024,129 +1123,6 @@ func (a *SnapshotsAPIService) SetSnapshotGeneralStatusExecute(r SnapshotsAPISetS
 	}
 	// body params
 	localVarPostBody = r.setSnapshotGeneralStatusDto
-	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
-	if err != nil {
-		return localVarReturnValue, nil, err
-	}
-
-	localVarHTTPResponse, err := a.client.callAPI(req)
-	if err != nil || localVarHTTPResponse == nil {
-		return localVarReturnValue, localVarHTTPResponse, err
-	}
-
-	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
-	localVarHTTPResponse.Body.Close()
-	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
-	if err != nil {
-		return localVarReturnValue, localVarHTTPResponse, err
-	}
-
-	if localVarHTTPResponse.StatusCode >= 300 {
-		newErr := &GenericOpenAPIError{
-			body:  localVarBody,
-			error: localVarHTTPResponse.Status,
-		}
-		return localVarReturnValue, localVarHTTPResponse, newErr
-	}
-
-	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-	if err != nil {
-		newErr := &GenericOpenAPIError{
-			body:  localVarBody,
-			error: err.Error(),
-		}
-		return localVarReturnValue, localVarHTTPResponse, newErr
-	}
-
-	return localVarReturnValue, localVarHTTPResponse, nil
-}
-
-type SnapshotsAPIToggleSnapshotStateRequest struct {
-	ctx                    context.Context
-	ApiService             SnapshotsAPI
-	id                     string
-	toggleState            *ToggleState
-	xDaytonaOrganizationID *string
-}
-
-func (r SnapshotsAPIToggleSnapshotStateRequest) ToggleState(toggleState ToggleState) SnapshotsAPIToggleSnapshotStateRequest {
-	r.toggleState = &toggleState
-	return r
-}
-
-// Use with JWT to specify the organization ID
-func (r SnapshotsAPIToggleSnapshotStateRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) SnapshotsAPIToggleSnapshotStateRequest {
-	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
-	return r
-}
-
-func (r SnapshotsAPIToggleSnapshotStateRequest) Execute() (*SnapshotDto, *http.Response, error) {
-	return r.ApiService.ToggleSnapshotStateExecute(r)
-}
-
-/*
-ToggleSnapshotState Toggle snapshot state
-
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param id Snapshot ID
-	@return SnapshotsAPIToggleSnapshotStateRequest
-*/
-func (a *SnapshotsAPIService) ToggleSnapshotState(ctx context.Context, id string) SnapshotsAPIToggleSnapshotStateRequest {
-	return SnapshotsAPIToggleSnapshotStateRequest{
-		ApiService: a,
-		ctx:        ctx,
-		id:         id,
-	}
-}
-
-// Execute executes the request
-//
-//	@return SnapshotDto
-func (a *SnapshotsAPIService) ToggleSnapshotStateExecute(r SnapshotsAPIToggleSnapshotStateRequest) (*SnapshotDto, *http.Response, error) {
-	var (
-		localVarHTTPMethod  = http.MethodPatch
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *SnapshotDto
-	)
-
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SnapshotsAPIService.ToggleSnapshotState")
-	if err != nil {
-		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
-	}
-
-	localVarPath := localBasePath + "/snapshots/{id}/toggle"
-	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", url.PathEscape(parameterValueToString(r.id, "id")), -1)
-
-	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := url.Values{}
-	localVarFormParams := url.Values{}
-	if r.toggleState == nil {
-		return localVarReturnValue, nil, reportError("toggleState is required and must be specified")
-	}
-
-	// to determine the Content-Type header
-	localVarHTTPContentTypes := []string{"application/json"}
-
-	// set Content-Type header
-	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
-	if localVarHTTPContentType != "" {
-		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
-	}
-
-	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{"application/json"}
-
-	// set Accept header
-	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
-	if localVarHTTPHeaderAccept != "" {
-		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
-	}
-	if r.xDaytonaOrganizationID != nil {
-		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Daytona-Organization-ID", r.xDaytonaOrganizationID, "simple", "")
-	}
-	// body params
-	localVarPostBody = r.toggleState
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
 		return localVarReturnValue, nil, err

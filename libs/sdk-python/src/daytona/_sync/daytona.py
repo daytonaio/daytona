@@ -326,6 +326,8 @@ class Daytona:
         if timeout < 0:
             raise DaytonaError("Timeout must be a non-negative number")
 
+        start_time = time.time()
+
         if params.auto_stop_interval is not None and params.auto_stop_interval < 0:
             raise DaytonaError("auto_stop_interval must be a non-negative integer")
 
@@ -416,7 +418,8 @@ class Daytona:
         if sandbox.state != SandboxState.STARTED:
             # Wait for sandbox to start
             try:
-                sandbox.wait_for_sandbox_start()
+                time_elapsed = time.time() - start_time
+                sandbox.wait_for_sandbox_start(timeout=max(0.001, timeout - time_elapsed) if timeout else timeout)
             finally:
                 # If not Daytona SaaS, we don't need to handle pulling image state
                 pass

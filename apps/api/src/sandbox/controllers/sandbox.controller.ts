@@ -278,7 +278,7 @@ export class SandboxController {
   })
   @ApiResponse({
     status: 200,
-    description: 'Sandbox has been started',
+    description: 'Sandbox has been started or is being restored from archived state',
     type: SandboxDto,
   })
   @Throttle({ default: { limit: 100 } })
@@ -294,8 +294,11 @@ export class SandboxController {
     @Param('sandboxId') sandboxId: string,
   ): Promise<SandboxDto> {
     await this.sandboxService.start(sandboxId, authContext.organization)
+    let sandbox = SandboxDto.fromSandbox(await this.sandboxService.findOne(sandboxId), '')
 
-    const sandbox = await this.waitForSandboxStarted(sandboxId, 30)
+    if (![SandboxState.ARCHIVED, SandboxState.RESTORING, SandboxState.STARTED].includes(sandbox.state)) {
+      sandbox = await this.waitForSandboxStarted(sandboxId, 30)
+    }
 
     if (!sandbox.runnerDomain) {
       const runner = await this.runnerService.findBySandboxId(sandboxId)
