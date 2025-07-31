@@ -82,6 +82,23 @@ const { hasSidebar, labels } = Astro.props
     }
   }
 
+  .sidebar-pane::after {
+    content: '';
+    display: block;
+    position: sticky;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 32px;
+    pointer-events: none;
+    background: linear-gradient(
+      to bottom,
+      rgba(255, 255, 255, 0) 0%,
+      var(--bg-color, #fff) 100%
+    );
+    z-index: 10;
+  }
+
   :global([aria-expanded='true']) ~ .sidebar-pane {
     --sl-sidebar-visibility: visible;
     display: block;
