@@ -135,13 +135,6 @@ const Snapshots: React.FC = () => {
       }))
     }
 
-    const handleSnapshotEnabledToggledEvent = (snapshot: SnapshotDto) => {
-      setSnapshotsData((prev) => ({
-        ...prev,
-        items: prev.items.map((i) => (i.id === snapshot.id ? snapshot : i)),
-      }))
-    }
-
     const handleSnapshotRemovedEvent = (snapshotId: string) => {
       setSnapshotsData((prev) => {
         const newTotal = Math.max(0, prev.total - 1)
@@ -162,13 +155,11 @@ const Snapshots: React.FC = () => {
 
     notificationSocket.on('snapshot.created', handleSnapshotCreatedEvent)
     notificationSocket.on('snapshot.state.updated', handleSnapshotStateUpdatedEvent)
-    notificationSocket.on('snapshot.enabled.toggled', handleSnapshotEnabledToggledEvent)
     notificationSocket.on('snapshot.removed', handleSnapshotRemovedEvent)
 
     return () => {
       notificationSocket.off('snapshot.created', handleSnapshotCreatedEvent)
       notificationSocket.off('snapshot.state.updated', handleSnapshotStateUpdatedEvent)
-      notificationSocket.off('snapshot.enabled.toggled', handleSnapshotEnabledToggledEvent)
       notificationSocket.off('snapshot.removed', handleSnapshotRemovedEvent)
     }
   }, [notificationSocket, paginationParams.pageIndex, paginationParams.pageSize])
@@ -285,30 +276,6 @@ const Snapshots: React.FC = () => {
     }
   }
 
-  const handleToggleEnabled = async (snapshot: SnapshotDto, enabled: boolean) => {
-    setLoadingSnapshots((prev) => ({ ...prev, [snapshot.id]: true }))
-
-    // Optimistically update the snapshot enabled flag
-    setSnapshotsData((prev) => ({
-      ...prev,
-      items: prev.items.map((i) => (i.id === snapshot.id ? { ...i, enabled } : i)),
-    }))
-
-    try {
-      await snapshotApi.toggleSnapshotState(snapshot.id, { enabled }, selectedOrganization?.id)
-      toast.success(`${enabled ? 'Enabling' : 'Disabling'} snapshot ${snapshot.name}`)
-    } catch (error) {
-      handleApiError(error, enabled ? 'Failed to enable snapshot' : 'Failed to disable snapshot')
-      // Revert the optimistic update
-      setSnapshotsData((prev) => ({
-        ...prev,
-        items: prev.items.map((i) => (i.id === snapshot.id ? { ...i, enabled: snapshot.enabled } : i)),
-      }))
-    } finally {
-      setLoadingSnapshots((prev) => ({ ...prev, [snapshot.id]: false }))
-    }
-  }
-
   const handleActivate = async (snapshot: SnapshotDto) => {
     setLoadingSnapshots((prev) => ({ ...prev, [snapshot.id]: true }))
 
@@ -323,6 +290,30 @@ const Snapshots: React.FC = () => {
       toast.success(`Activating snapshot ${snapshot.name}`)
     } catch (error) {
       handleApiError(error, 'Failed to activate snapshot')
+      // Revert the optimistic update
+      setSnapshotsData((prev) => ({
+        ...prev,
+        items: prev.items.map((i) => (i.id === snapshot.id ? { ...i, state: snapshot.state } : i)),
+      }))
+    } finally {
+      setLoadingSnapshots((prev) => ({ ...prev, [snapshot.id]: false }))
+    }
+  }
+
+  const handleDeactivate = async (snapshot: SnapshotDto) => {
+    setLoadingSnapshots((prev) => ({ ...prev, [snapshot.id]: true }))
+
+    // Optimistically update the snapshot state
+    setSnapshotsData((prev) => ({
+      ...prev,
+      items: prev.items.map((i) => (i.id === snapshot.id ? { ...i, state: SnapshotState.INACTIVE } : i)),
+    }))
+
+    try {
+      await snapshotApi.deactivateSnapshot(snapshot.id, selectedOrganization?.id)
+      toast.success(`Deactivating snapshot ${snapshot.name}`)
+    } catch (error) {
+      handleApiError(error, 'Failed to deactivate snapshot')
       // Revert the optimistic update
       setSnapshotsData((prev) => ({
         ...prev,
@@ -544,8 +535,8 @@ const Snapshots: React.FC = () => {
             setShowDeleteDialog(true)
           }}
           onBulkDelete={handleBulkDelete}
-          onToggleEnabled={handleToggleEnabled}
           onActivate={handleActivate}
+          onDeactivate={handleDeactivate}
           pageCount={snapshotsData.totalPages}
           onPaginationChange={handlePaginationChange}
           pagination={{

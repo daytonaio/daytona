@@ -15,7 +15,7 @@ import {
 import { TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from './ui/table'
 import { Button } from './ui/button'
 import { useMemo, useState } from 'react'
-import { AlertTriangle, CheckCircle, MoreHorizontal, Timer, Trash2, Pause, Box } from 'lucide-react'
+import { AlertTriangle, CheckCircle, MoreHorizontal, Timer, Pause, Box } from 'lucide-react'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -39,8 +39,8 @@ interface DataTableProps {
   loadingSnapshots: Record<string, boolean>
   onDelete: (snapshot: SnapshotDto) => void
   onBulkDelete?: (snapshots: SnapshotDto[]) => void
-  onToggleEnabled: (snapshot: SnapshotDto, enabled: boolean) => void
   onActivate?: (snapshot: SnapshotDto) => void
+  onDeactivate?: (snapshot: SnapshotDto) => void
   pagination: {
     pageIndex: number
     pageSize: number
@@ -54,8 +54,8 @@ export function SnapshotTable({
   loading,
   loadingSnapshots,
   onDelete,
-  onToggleEnabled,
   onActivate,
+  onDeactivate,
   pagination,
   pageCount,
   onBulkDelete,
@@ -79,13 +79,13 @@ export function SnapshotTable({
     () =>
       getColumns({
         onDelete,
-        onToggleEnabled,
         onActivate,
+        onDeactivate,
         loadingSnapshots,
         writePermitted,
         deletePermitted,
       }),
-    [onDelete, onToggleEnabled, onActivate, loadingSnapshots, writePermitted, deletePermitted],
+    [onDelete, onActivate, onDeactivate, loadingSnapshots, writePermitted, deletePermitted],
   )
 
   const columnsWithSelection = useMemo(() => {
@@ -276,15 +276,15 @@ export function SnapshotTable({
 
 const getColumns = ({
   onDelete,
-  onToggleEnabled,
   onActivate,
+  onDeactivate,
   loadingSnapshots,
   writePermitted,
   deletePermitted,
 }: {
   onDelete: (snapshot: SnapshotDto) => void
-  onToggleEnabled: (snapshot: SnapshotDto, enabled: boolean) => void
   onActivate?: (snapshot: SnapshotDto) => void
+  onDeactivate?: (snapshot: SnapshotDto) => void
   loadingSnapshots: Record<string, boolean>
   writePermitted: boolean
   deletePermitted: boolean
@@ -389,6 +389,12 @@ const getColumns = ({
           return null
         }
 
+        const showActivate = writePermitted && onActivate && row.original.state === SnapshotState.INACTIVE
+        const showDeactivate = writePermitted && onDeactivate && row.original.state === SnapshotState.ACTIVE
+        const showDelete = deletePermitted
+
+        const showSeparator = (showActivate || showDeactivate) && showDelete
+
         return (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -398,7 +404,7 @@ const getColumns = ({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              {writePermitted && onActivate && row.original.state === SnapshotState.INACTIVE && (
+              {showActivate && (
                 <DropdownMenuItem
                   onClick={() => onActivate(row.original)}
                   className="cursor-pointer"
@@ -407,26 +413,24 @@ const getColumns = ({
                   Activate
                 </DropdownMenuItem>
               )}
-              {writePermitted && (
+              {showDeactivate && (
                 <DropdownMenuItem
-                  onClick={() => onToggleEnabled(row.original, !row.original.enabled)}
+                  onClick={() => onDeactivate(row.original)}
                   className="cursor-pointer"
                   disabled={loadingSnapshots[row.original.id]}
                 >
-                  {row.original.enabled ? 'Disable' : 'Enable'}
+                  Deactivate
                 </DropdownMenuItem>
               )}
-              {deletePermitted && (
-                <>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    onClick={() => onDelete(row.original)}
-                    className="cursor-pointer text-red-600 dark:text-red-400"
-                    disabled={loadingSnapshots[row.original.id]}
-                  >
-                    Delete
-                  </DropdownMenuItem>
-                </>
+              {showSeparator && <DropdownMenuSeparator />}
+              {showDelete && (
+                <DropdownMenuItem
+                  onClick={() => onDelete(row.original)}
+                  className="cursor-pointer text-red-600 dark:text-red-400"
+                  disabled={loadingSnapshots[row.original.id]}
+                >
+                  Delete
+                </DropdownMenuItem>
               )}
             </DropdownMenuContent>
           </DropdownMenu>

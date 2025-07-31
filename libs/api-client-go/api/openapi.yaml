@@ -4651,48 +4651,6 @@ paths:
       summary: Get snapshot by ID or name
       tags:
         - snapshots
-  /snapshots/{id}/toggle:
-    patch:
-      operationId: toggleSnapshotState
-      parameters:
-        - description: Use with JWT to specify the organization ID
-          explode: false
-          in: header
-          name: X-Daytona-Organization-ID
-          required: false
-          schema:
-            type: string
-          style: simple
-        - description: Snapshot ID
-          explode: false
-          in: path
-          name: id
-          required: true
-          schema:
-            type: string
-          style: simple
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ToggleState'
-        required: true
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SnapshotDto'
-          description: Snapshot state has been toggled
-      security:
-        - bearer: []
-        - oauth2:
-            - openid
-            - profile
-            - email
-      summary: Toggle snapshot state
-      tags:
-        - snapshots
   /snapshots/{id}/general:
     patch:
       operationId: setSnapshotGeneralStatus
@@ -4814,6 +4772,38 @@ paths:
             - profile
             - email
       summary: Activate a snapshot
+      tags:
+        - snapshots
+  /snapshots/{id}/deactivate:
+    post:
+      operationId: deactivateSnapshot
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - description: Snapshot ID
+          explode: false
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '204':
+          description: The snapshot has been successfully deactivated.
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Deactivate a snapshot
       tags:
         - snapshots
   /workspace:
@@ -8837,7 +8827,6 @@ components:
         buildInfo: ''
         cpu: 6.027456183070403
         gpu: 1.4658129805029452
-        enabled: true
         organizationId: organizationId
         general: true
         createdAt: 2000-01-23T04:56:07.000+00:00
@@ -8864,8 +8853,6 @@ components:
           type: string
         imageName:
           type: string
-        enabled:
-          type: boolean
         state:
           allOf:
             - $ref: '#/components/schemas/SnapshotState'
@@ -8906,7 +8893,6 @@ components:
         - cpu
         - createdAt
         - disk
-        - enabled
         - entrypoint
         - errorReason
         - general
@@ -8919,17 +8905,6 @@ components:
         - state
         - updatedAt
       type: object
-    ToggleState:
-      example:
-        enabled: true
-      properties:
-        enabled:
-          description: Enable or disable the snapshot/tag
-          example: true
-          type: boolean
-      required:
-        - enabled
-      type: object
     PaginatedSnapshotsDto:
       example:
         total: 2.3021358869347655
@@ -8940,7 +8915,6 @@ components:
             buildInfo: ''
             cpu: 6.027456183070403
             gpu: 1.4658129805029452
-            enabled: true
             organizationId: organizationId
             general: true
             createdAt: 2000-01-23T04:56:07.000+00:00
@@ -8960,7 +8934,6 @@ components:
             buildInfo: ''
             cpu: 6.027456183070403
             gpu: 1.4658129805029452
-            enabled: true
             organizationId: organizationId
             general: true
             createdAt: 2000-01-23T04:56:07.000+00:00
@@ -9778,9 +9751,9 @@ components:
             - set_auto_delete_interval
             - archive
             - get_port_preview_url
-            - toggle_state
             - set_general_status
             - activate
+            - deactivate
             - toolbox_delete_file
             - toolbox_download_file
             - toolbox_create_folder

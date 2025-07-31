@@ -103,10 +103,6 @@ export class NotificationGateway implements OnGatewayInit, OnModuleInit {
       .emit(SnapshotEvents.STATE_UPDATED, { snapshot: snapshot, oldState, newState })
   }
 
-  emitSnapshotEnabledToggled(snapshot: SnapshotDto) {
-    this.server.to(snapshot.organizationId).emit(SnapshotEvents.ENABLED_TOGGLED, snapshot)
-  }
-
   emitSnapshotRemoved(snapshot: SnapshotDto) {
     this.server.to(snapshot.organizationId).emit(SnapshotEvents.REMOVED, snapshot.id)
   }

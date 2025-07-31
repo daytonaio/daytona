@@ -15,7 +15,6 @@ import (
 type RowData struct {
 	Name    string
 	State   string
-	Enabled string
 	Size    string
 	Created string
 }
@@ -28,7 +27,7 @@ func ListSnapshots(snapshotList []apiclient.SnapshotDto, activeOrganizationName 
 
 	SortSnapshots(&snapshotList)
 
-	headers := []string{"Snapshot", "State", "Enabled", "Size", "Created"}
+	headers := []string{"Snapshot", "State", "Size", "Created"}
 
 	data := [][]string{}
 
@@ -61,15 +60,9 @@ func SortSnapshots(snapshotList *[]apiclient.SnapshotDto) {
 }
 
 func getTableRowData(snapshot apiclient.SnapshotDto) *RowData {
-	rowData := RowData{"", "", "", "", ""}
+	rowData := RowData{"", "", "", ""}
 	rowData.Name = snapshot.Name + util.AdditionalPropertyPadding
 	rowData.State = getStateLabel(snapshot.State)
-
-	if snapshot.Enabled {
-		rowData.Enabled = "Yes"
-	} else {
-		rowData.Enabled = "No"
-	}
 
 	if snapshot.Size.IsSet() && snapshot.Size.Get() != nil {
 		rowData.Size = fmt.Sprintf("%.2f GB", *snapshot.Size.Get())
@@ -95,7 +88,6 @@ func getRowFromRowData(rowData RowData) []string {
 	row := []string{
 		common.NameStyle.Render(rowData.Name),
 		rowData.State,
-		common.DefaultRowDataStyle.Render(rowData.Enabled),
 		common.DefaultRowDataStyle.Render(rowData.Size),
 		common.DefaultRowDataStyle.Render(rowData.Created),
 	}
