@@ -35,7 +35,6 @@ class SnapshotDto(BaseModel):
     general: StrictBool
     name: StrictStr
     image_name: Optional[StrictStr] = Field(default=None, alias="imageName")
-    enabled: StrictBool
     state: SnapshotState
     size: Optional[Union[StrictFloat, StrictInt]]
     entrypoint: Optional[List[StrictStr]]
@@ -49,7 +48,7 @@ class SnapshotDto(BaseModel):
     last_used_at: Optional[datetime] = Field(alias="lastUsedAt")
     build_info: Optional[BuildInfo] = Field(default=None, description="Build information for the snapshot", alias="buildInfo")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["id", "organizationId", "general", "name", "imageName", "enabled", "state", "size", "entrypoint", "cpu", "gpu", "mem", "disk", "errorReason", "createdAt", "updatedAt", "lastUsedAt", "buildInfo"]
+    __properties: ClassVar[List[str]] = ["id", "organizationId", "general", "name", "imageName", "state", "size", "entrypoint", "cpu", "gpu", "mem", "disk", "errorReason", "createdAt", "updatedAt", "lastUsedAt", "buildInfo"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -137,7 +136,6 @@ class SnapshotDto(BaseModel):
             "general": obj.get("general"),
             "name": obj.get("name"),
             "imageName": obj.get("imageName"),
-            "enabled": obj.get("enabled"),
             "state": obj.get("state"),
             "size": obj.get("size"),
             "entrypoint": obj.get("entrypoint"),

@@ -43,9 +43,6 @@ export class Snapshot {
   @Column({ nullable: true })
   internalName?: string
 
-  @Column({ default: true })
-  enabled: boolean
-
   @Column({
     type: 'enum',
     enum: SnapshotState,

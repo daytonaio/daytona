@@ -20,7 +20,6 @@ class Snapshot(SnapshotDto):
         general (Optional[bool]): Whether the Snapshot is general.
         name (StrictStr): Name of the Snapshot.
         image_name (StrictStr): Name of the Image of the Snapshot.
-        enabled (StrictBool): Whether the Snapshot is enabled.
         state (StrictStr): State of the Snapshot.
         size (Optional[Union[StrictFloat, StrictInt]]): Size of the Snapshot.
         entrypoint (Optional[List[str]]): Entrypoint of the Snapshot.

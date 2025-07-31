@@ -28,7 +28,6 @@ type SnapshotDto struct {
 	General        bool            `json:"general"`
 	Name           string          `json:"name"`
 	ImageName      *string         `json:"imageName,omitempty"`
-	Enabled        bool            `json:"enabled"`
 	State          SnapshotState   `json:"state"`
 	Size           NullableFloat32 `json:"size"`
 	Entrypoint     []string        `json:"entrypoint"`
@@ -50,12 +49,11 @@ type _SnapshotDto SnapshotDto
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewSnapshotDto(id string, general bool, name string, enabled bool, state SnapshotState, size NullableFloat32, entrypoint []string, cpu float32, gpu float32, mem float32, disk float32, errorReason NullableString, createdAt time.Time, updatedAt time.Time, lastUsedAt NullableTime) *SnapshotDto {
+func NewSnapshotDto(id string, general bool, name string, state SnapshotState, size NullableFloat32, entrypoint []string, cpu float32, gpu float32, mem float32, disk float32, errorReason NullableString, createdAt time.Time, updatedAt time.Time, lastUsedAt NullableTime) *SnapshotDto {
 	this := SnapshotDto{}
 	this.Id = id
 	this.General = general
 	this.Name = name
-	this.Enabled = enabled
 	this.State = state
 	this.Size = size
 	this.Entrypoint = entrypoint
@@ -212,30 +210,6 @@ func (o *SnapshotDto) HasImageName() bool {
 // SetImageName gets a reference to the given string and assigns it to the ImageName field.
 func (o *SnapshotDto) SetImageName(v string) {
 	o.ImageName = &v
-}
-
-// GetEnabled returns the Enabled field value
-func (o *SnapshotDto) GetEnabled() bool {
-	if o == nil {
-		var ret bool
-		return ret
-	}
-
-	return o.Enabled
-}
-
-// GetEnabledOk returns a tuple with the Enabled field value
-// and a boolean to check if the value has been set.
-func (o *SnapshotDto) GetEnabledOk() (*bool, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.Enabled, true
-}
-
-// SetEnabled sets field value
-func (o *SnapshotDto) SetEnabled(v bool) {
-	o.Enabled = v
 }
 
 // GetState returns the State field value
@@ -561,7 +535,6 @@ func (o SnapshotDto) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.ImageName) {
 		toSerialize["imageName"] = o.ImageName
 	}
-	toSerialize["enabled"] = o.Enabled
 	toSerialize["state"] = o.State
 	toSerialize["size"] = o.Size.Get()
 	if o.Entrypoint != nil {
@@ -589,7 +562,6 @@ func (o *SnapshotDto) UnmarshalJSON(data []byte) (err error) {
 		"id",
 		"general",
 		"name",
-		"enabled",
 		"state",
 		"size",
 		"entrypoint",
