@@ -1,5 +1,5 @@
 # Daytona Documentation v0.0.0-dev
-# Generated on: 2025-07-25
+# Generated on: 2025-07-31
 
 # Daytona
 
@@ -9,6 +9,15 @@
 
 - [API Keys](https://daytona.io/docs/api-keys)
 - [Permissions](https://daytona.io/docs/api-keys#permissions)
+- [Audit Logs](https://daytona.io/docs/audit-logs)
+- [Prerequisites](https://daytona.io/docs/audit-logs#prerequisites)
+- [Real-Time Updates](https://daytona.io/docs/audit-logs#real-time-updates)
+- [Log Structure](https://daytona.io/docs/audit-logs#log-structure)
+- [Example](https://daytona.io/docs/audit-logs#example)
+- [Use Cases](https://daytona.io/docs/audit-logs#use-cases)
+- [Actions](https://daytona.io/docs/audit-logs#actions)
+- [Targets](https://daytona.io/docs/audit-logs#targets)
+- [Outcomes](https://daytona.io/docs/audit-logs#outcomes)
 - [Billing](https://daytona.io/docs/billing)
 - [Wallet](https://daytona.io/docs/billing#wallet)
 - [Automatic Top-Up](https://daytona.io/docs/billing#automatic-top-up)
