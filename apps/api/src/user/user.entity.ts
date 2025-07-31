@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Column, Entity, PrimaryColumn } from 'typeorm'
+import { Column, CreateDateColumn, Entity, PrimaryColumn } from 'typeorm'
 import { SystemRole } from './enums/system-role.enum'
 
 export interface UserSSHKeyPair {
@@ -49,4 +49,9 @@ export class User {
     default: SystemRole.USER,
   })
   role: SystemRole
+
+  @CreateDateColumn({
+    type: 'timestamp with time zone',
+  })
+  createdAt: Date
 }

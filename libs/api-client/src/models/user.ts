@@ -46,4 +46,10 @@ export interface User {
    * @memberof User
    */
   publicKeys: Array<UserPublicKey>
+  /**
+   * Creation timestamp
+   * @type {Date}
+   * @memberof User
+   */
+  createdAt: Date
 }
