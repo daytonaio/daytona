@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import asyncio
+import time
 from typing import Dict, Optional
 
 from daytona_api_client_async import PortPreviewUrl
@@ -213,9 +214,11 @@ class AsyncSandbox(SandboxDto):
             print("Sandbox started successfully")
             ```
         """
+        start_time = time.time()
         sandbox = await self._sandbox_api.start_sandbox(self.id, _request_timeout=timeout or None)
         self.__process_sandbox_dto(sandbox)
-        await self.wait_for_sandbox_start()
+        time_elapsed = time.time() - start_time
+        await self.wait_for_sandbox_start(timeout=max(0.001, timeout - time_elapsed) if timeout else timeout)
 
     @intercept_errors(message_prefix="Failed to stop sandbox: ")
     @with_timeout(
@@ -239,9 +242,11 @@ class AsyncSandbox(SandboxDto):
             print("Sandbox stopped successfully")
             ```
         """
+        start_time = time.time()
         await self._sandbox_api.stop_sandbox(self.id, _request_timeout=timeout or None)
         await self.refresh_data()
-        await self.wait_for_sandbox_stop()
+        time_elapsed = time.time() - start_time
+        await self.wait_for_sandbox_stop(timeout=max(0.001, timeout - time_elapsed) if timeout else timeout)
 
     @intercept_errors(message_prefix="Failed to remove sandbox: ")
     async def delete(self, timeout: Optional[float] = 60) -> None:
