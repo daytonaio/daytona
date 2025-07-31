@@ -295,6 +295,16 @@ export const sidebarConfig: NavigationGroup[] = [
       },
       {
         type: 'link',
+        href: '/docs/audit-logs',
+        label: 'Audit Logs',
+        description:
+          'Monitor and track activities across your Daytona organization.',
+        attrs: {
+          icon: 'log.svg',
+        },
+      },
+      {
+        type: 'link',
         href: '/docs/regions',
         label: 'Regions',
         description: 'Setting the region to spin up Daytona Sandboxes in.',

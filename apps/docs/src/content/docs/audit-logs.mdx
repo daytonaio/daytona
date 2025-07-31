@@ -1,0 +1,113 @@
+---
+title: Audit Logs
+description: View and monitor all user actions across your Daytona organization.
+---
+
+Daytona Audit Logs provide a detailed record of user and system activity across your organization. Use this feature to track sandbox lifecycle events, user access, system changes, and more.
+
+You can access Audit Logs from the [Dashboard](https://app.daytona.io/dashboard/audit-logs).
+
+## Prerequisites
+
+Audit logs are available to:
+- **Admins** - Full access to all audit logs
+- **Members** - Access only if they have audit log permissions
+
+Contact your organization admin if you cannot access audit logs.
+
+## Real-Time Updates
+
+Enable the **Real-Time Updates** toggle in the top-right corner of the Audit Logs page to automatically refresh logs as new events occur.
+
+## Log Structure
+
+Each log entry includes the following columns:
+
+| Field     | Description                            |
+|---------- |----------------------------------------|
+| **Time**  | Timestamp of when the action occurred (UTC)  |
+| **User**  | Email of the user who performed action  |
+| **Action**| Operation executed                      |
+| **Target**| Resource type affected                  |
+| **Outcome**| Result status code and message         |
+
+### Example
+
+```text
+Time:       5h ago (7/31/2025, 8:15:27 AM)
+User:       janedoe@acme.com
+Action:     create
+Target:     sandbox (ID: 10f249ad-...)
+Outcome:    Success (200)
+```
+
+## Use Cases
+
+- **Security audits**: Monitor for unauthorized access or sandbox misuse
+- **Debugging**: Understand sandbox lifecycle issues (e.g. failed starts)
+- **Compliance Export**: Export logs for internal or external audits (Coming soon)
+
+## Actions
+
+Below is the complete list of actions logged by Daytona:
+
+```text
+create, read, update, delete, login,
+set_default, update_role, update_assigned_roles, update_quota,
+suspend, unsuspend, accept, decline,
+link_account, unlink_account, leave_organization,
+regenerate_key_pair, update_scheduling,
+start, stop, replace_labels, create_backup,
+update_public_status, set_auto_stop_interval,
+set_auto_archive_interval, set_auto_delete_interval, archive,
+get_port_preview_url, toggle_state, set_general_status, activate,
+update_network_settings,
+toolbox_delete_file, toolbox_download_file, toolbox_create_folder,
+toolbox_move_file, toolbox_set_file_permissions, toolbox_replace_in_files,
+toolbox_upload_file, toolbox_bulk_upload_files,
+toolbox_git_add_files, toolbox_git_create_branch, toolbox_git_delete_branch,
+toolbox_git_clone_repository, toolbox_git_commit_changes,
+toolbox_git_pull_changes, toolbox_git_push_changes,
+toolbox_git_checkout_branch, toolbox_execute_command,
+toolbox_create_session, toolbox_session_execute_command,
+toolbox_delete_session, toolbox_computer_use_start,
+toolbox_computer_use_stop, toolbox_computer_use_restart_process
+```
+
+## Targets
+
+Each action targets a specific resource type. Possible targets include:
+
+```text
+api_key, organization, organization_invitation,
+organization_role, organization_user, docker_registry,
+runner, sandbox, snapshot, user, volume
+```
+
+## Outcomes
+
+The outcome field indicates the result of the action. Statuses follow standard HTTP semantics:
+
+| Outcome | Description |
+|---------|-------------|
+| **Info** | Informational (1xx codes) |
+| **Success** | Action succeeded (2xx codes) |
+| **Redirect** | Redirects (3xx codes) |
+| **Error** | Client/server error (4xx/5xx) |
+
+Example errors may include:
+
+- `400` – Sandbox is not started
+- `403` – Unauthorized
+- `500` – Internal error
+
+{/* ## Filtering & Pagination
+
+You can filter and search logs by:
+
+- Action type
+- Target resource
+- Outcome status
+- User email
+
+Use the page size selector to change how many results are shown per page. */} 
