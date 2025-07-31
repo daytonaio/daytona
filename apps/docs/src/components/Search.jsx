@@ -1,4 +1,5 @@
 import { liteClient as algoliasearch } from 'algoliasearch/lite'
+import { GTProvider, useGT } from 'gt-react'
 import { useEffect, useRef, useState } from 'react'
 import {
   Configure,
@@ -10,7 +11,9 @@ import {
   SearchBox,
   connectStats,
 } from 'react-instantsearch-dom'
+import loadTranslations from 'src/i18n/loadTranslations'
 
+import gtConfig from '../../gt.config.json'
 import '../styles/components/search.scss'
 
 const ALGOLIA_APP_ID = import.meta.env.PUBLIC_ALGOLIA_APP_ID || null
@@ -21,13 +24,14 @@ const searchClient =
     ? algoliasearch(ALGOLIA_APP_ID, ALGOLIA_API_KEY)
     : null
 
-function Search() {
+function SearchContent() {
   const [isSearchVisible, setIsSearchVisible] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [debounceQuery, setDebounceQuery] = useState('')
   const [displayHits, setDisplayHits] = useState(false)
   const debounceTimeoutRef = useRef(null)
   const searchWrapperRef = useRef(null)
+  const t = useGT()
 
   useEffect(() => {
     const toggleSearch = () => {
@@ -119,7 +123,11 @@ function Search() {
         <InstantSearch indexName="docs" searchClient={searchClient}>
           <div className="search-bar-container">
             <SearchBox
-              translations={{ placeholder: 'Search daytona.io' }}
+              translations={{
+                placeholder: t('Search daytona.io', {
+                  $context: 'As in a search bar on a website',
+                }),
+              }}
               autoFocus
               onChange={event => setSearchQuery(event.currentTarget.value)}
               value={searchQuery}
@@ -324,5 +332,19 @@ const CustomStats = ({ nbHits, indexName, setDisplayHits }) => {
 }
 
 const Stats = connectStats(CustomStats)
+
+const Search = ({ locale }) => {
+  return (
+    <GTProvider
+      config={gtConfig}
+      loadTranslations={loadTranslations}
+      locale={locale}
+      projectId={import.meta.env.PUBLIC_VITE_GT_PROJECT_ID}
+      devApiKey={import.meta.env.PUBLIC_VITE_GT_API_KEY}
+    >
+      <SearchContent />
+    </GTProvider>
+  )
+}
 
 export default Search

@@ -1,4 +1,5 @@
 import * as _fs from 'fs'
+import { extname } from 'path'
 import { parseArgs } from 'util'
 import * as yaml from 'yaml'
 
@@ -16,7 +17,7 @@ sidebar:
 import Aside from "@components/Aside.astro";
 import Label from "@components/Label.astro";
 
-The \`daytona\` command-line tool provides access to Daytona's core features including managing Snapshots and the lifecycle of Daytona Sandboxes. View the installation instructions by clicking [here](/docs/getting-started#setting-up-the-daytona-cli).
+The \`daytona\` command-line tool provides access to Daytona's core features including managing Snapshots and the lifecycle of Daytona Sandboxes. View the installation instructions by clicking [here](/docs/en/getting-started#setting-up-the-daytona-cli).
 
 This reference lists all commands supported by the \`daytona\` command-line tool complete with a description of their behaviour, and any supported flags.
 You can access this documentation on a per-command basis by appending the \`--help\`/\`-h\` flag when invoking \`daytona\`.
@@ -90,14 +91,14 @@ function yamlToMarkdown(files) {
 
     if (rawDoc.options) {
       for (const flag of rawDoc.options) {
-        let row = flagToRow(flag)
+        const row = flagToRow(flag)
         output += row
       }
     }
 
     if (rawDoc.inherited_options) {
       for (const flag of rawDoc.inherited_options) {
-        let row = flagToRow(flag)
+        const row = flagToRow(flag)
         output += row
       }
     }
@@ -117,8 +118,8 @@ async function process(args) {
   console.log(`grabbing docs for ${ref}...`)
 
   // grab the files from GitHub
-  let files = await fetchRawDocs(ref)
-  let transformed = yamlToMarkdown(files)
+  const files = await fetchRawDocs(ref)
+  const transformed = yamlToMarkdown(files)
 
   const singleMarkdown = transformed.join('\n')
   console.log(`writing to '${output}'...`)
@@ -134,7 +135,7 @@ const commandOpts = {
   output: {
     type: 'string',
     short: 'o',
-    default: `${__dirname}/../src/content/docs/tools/cli.mdx`,
+    default: `${__dirname}/../src/content/docs/en/tools/cli.mdx`,
   },
 }
 

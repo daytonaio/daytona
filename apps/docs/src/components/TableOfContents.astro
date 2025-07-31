@@ -12,7 +12,7 @@ const { toc } = Astro.props
     >
       <nav aria-labelledby="starlight__on-this-page">
         <h2 id="starlight__on-this-page" class="table-of-contents-title">
-          # Contents
+          # {Astro.props.labels['tableOfContents.title']}
         </h2>
         <TableOfContentsList toc={toc.items} />
       </nav>

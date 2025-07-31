@@ -1,0 +1,289 @@
+---
+title: "チャート"
+hideTitleOnPage: true
+---
+
+
+## ChartType
+
+チャートタイプ
+
+**列挙型メンバー**:
+
+- `BAR` ("bar")
+- `LINE` ("line")
+- `PIE` ("pie")
+- `SCATTER` ("scatter")
+- `UNKNOWN` ("unknown")
+
+## parseChart()
+
+```ts
+function parseChart(data: any): Chart
+```
+
+**パラメータ**:
+
+- `data` _any_
+
+
+**戻り値**:
+
+- `Chart`
+
+***
+
+
+## BarChart
+
+```ts
+type BarChart = Chart2D & {
+  elements: BarData[];
+  type: BAR;
+};
+```
+
+メタデータを持つ棒グラフを表します。
+
+**型宣言**:
+
+- `elements` _BarData\[\]_ - チャートの棒
+- `type` _BAR_ - チャートの種類
+    
+
+
+## BarData
+
+```ts
+type BarData = {
+  group: string;
+  label: string;
+  value: string;
+};
+```
+
+棒グラフの棒を表します。
+
+**型宣言**:
+
+- `group` _string_ - 棒のグループ
+- `label` _string_ - 棒のラベル
+- `value` _string_ - 棒の値
+    
+
+
+## BoxAndWhiskerChart
+
+```ts
+type BoxAndWhiskerChart = Chart2D & {
+  elements: BoxAndWhiskerData[];
+  type: BOX_AND_WHISKER;
+};
+```
+
+メタデータを持つボックスアンドウィスカーチャートを表します。
+
+**型宣言**:
+
+- `elements` _BoxAndWhiskerData\[\]_ - チャートのボックスとウィスカー
+- `type` _BOX\_AND\_WHISKER_ - チャートの種類
+    
+
+
+## BoxAndWhiskerData
+
+```ts
+type BoxAndWhiskerData = {
+  first_quartile: number;
+  label: string;
+  max: number;
+  median: number;
+  min: number;
+  outliers: number[];
+};
+```
+
+ボックスアンドウィスカーチャートにおけるボックスアンドウィスカーを表します。
+
+**型宣言**:
+
+- `first\_quartile` _number_ - ボックスアンドウィスカーの第1四分位数
+- `label` _string_ - ボックスアンドウィスカーのラベル
+- `max` _number_ - ボックスアンドウィスカーの第3四分位数
+- `median` _number_ - ボックスアンドウィスカーの中央値
+- `min` _number_ - ボックスアンドウィスカーの最小値
+- `outliers` _number\[\]_
+
+
+## Chart
+
+```ts
+type Chart = {
+  elements: any[];
+  png: string;
+  title: string;
+  type: ChartType;
+};
+```
+
+matplotlibからのメタデータを持つチャートを表します。
+
+**型宣言**:
+
+- `elements` _any\[\]_ - チャートの要素
+- `png?` _string_ - base64でエンコードされたチャートのPNG表現
+- `title` _string_ - チャートのタイトル
+- `type` _ChartType_ - チャートの種類
+    
+
+
+## Chart2D
+
+```ts
+type Chart2D = Chart & {
+  x_label: string;
+  y_label: string;
+};
+```
+
+メタデータを持つ2Dチャートを表します。
+
+**型宣言**:
+
+- `x\_label?` _string_ - x軸のラベル
+- `y\_label?` _string_ - y軸のラベル
+    
+
+
+## CompositeChart
+
+```ts
+type CompositeChart = Chart & {
+  elements: Chart[];
+  type: COMPOSITE_CHART;
+};
+```
+
+メタデータを持つ複合チャートを表します。
+
+**型宣言**:
+
+- `elements` _Chart\[\]_ - 複合チャートのチャート
+- `type` _COMPOSITE\_CHART_ - チャートの種類
+    
+
+
+## LineChart
+
+```ts
+type LineChart = PointChart & {
+  type: LINE;
+};
+```
+
+メタデータを持つ線グラフを表します。
+
+**型宣言**:
+
+- `type` _LINE_ - チャートの種類
+    
+
+
+## PieChart
+
+```ts
+type PieChart = Chart & {
+  elements: PieData[];
+  type: PIE;
+};
+```
+
+メタデータを持つ円グラフを表します。
+
+**型宣言**:
+
+- `elements` _PieData\[\]_ - チャートの円グラフスライス
+- `type` _PIE_ - チャートの種類
+    
+
+
+## PieData
+
+```ts
+type PieData = {
+  angle: number;
+  label: string;
+  radius: number;
+};
+```
+
+円グラフの円スライスを表します。
+
+**型宣言**:
+
+- `angle` _number_ - 円スライスの角度
+- `label` _string_ - 円スライスのラベル
+- `radius` _number_ - 円スライスの半径
+    
+
+
+## PointChart
+
+```ts
+type PointChart = Chart2D & {
+  elements: PointData[];
+  x_scale: string;
+  x_tick_labels: string[];
+  x_ticks: (number | string)[];
+  y_scale: string;
+  y_tick_labels: string[];
+  y_ticks: (number | string)[];
+};
+```
+
+メタデータを持つポイントチャートを表します。
+
+**型宣言**:
+
+- `elements` _PointData\[\]_ - チャートのポイント
+- `x\_scale` _string_ - x軸のスケール
+- `x\_tick\_labels` _string\[\]_ - x軸のラベル
+- `x\_ticks` _\(number \| string\)\[\]_ - x軸の目盛り
+- `y\_scale` _string_ - y軸のスケール
+- `y\_tick\_labels` _string\[\]_ - y軸のラベル
+- `y\_ticks` _\(number \| string\)\[\]_ - y軸の目盛り
+    
+
+
+## PointData
+
+```ts
+type PointData = {
+  label: string;
+  points: [number | string, number | string][];
+};
+```
+
+2Dチャートのポイントを表します。
+
+**型宣言**:
+
+- `label` _string_ - ポイントのラベル
+- `points` _\[number \| string, number \| string\]\[\]_ - チャートのポイント
+    
+
+
+## ScatterChart
+
+```ts
+type ScatterChart = PointChart & {
+  type: SCATTER;
+};
+```
+
+メタデータを持つ散布図を表します。
+
+**型宣言**:
+
+- `type` _SCATTER_ - チャートの種類
+

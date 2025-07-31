@@ -1,0 +1,164 @@
+---
+title: "ボリューム"
+hideTitleOnPage: true
+---
+
+
+## VolumeService
+
+Daytona Volumeを管理するためのサービス。
+
+このサービスは、Volumeの一覧表示、取得、作成、削除のメソッドを提供します。
+
+### Constructors
+
+#### new VolumeService()
+
+```ts
+new VolumeService(volumesApi: VolumesApi): VolumeService
+```
+
+**Parameters**:
+
+- `volumesApi` _VolumesApi_
+
+
+**Returns**:
+
+- `VolumeService`
+
+### Methods
+
+#### create()
+
+```ts
+create(name: string): Promise<Volume>
+```
+
+指定された名前で新しいVolumeを作成します。
+
+**Parameters**:
+
+- `name` _string_ - 新しいVolumeの名前
+
+
+**Returns**:
+
+- `Promise<Volume>` - 新しく作成されたVolume
+
+**Throws**:
+
+Volumeが作成できない場合
+
+**Example:**
+
+```ts
+const daytona = new Daytona();
+const volume = await daytona.volume.create("my-data-volume");
+console.log(`Created volume ${volume.name} with ID ${volume.id}`);
+```
+
+***
+
+#### delete()
+
+```ts
+delete(volume: Volume): Promise<void>
+```
+
+Volumeを削除します。
+
+**Parameters**:
+
+- `volume` _Volume_ - 削除するVolume
+
+
+**Returns**:
+
+- `Promise<void>`
+
+**Throws**:
+
+Volumeが存在しないか削除できない場合
+
+**Example:**
+
+```ts
+const daytona = new Daytona();
+const volume = await daytona.volume.get("volume-name");
+await daytona.volume.delete(volume);
+console.log("Volume deleted successfully");
+```
+
+***
+
+#### get()
+
+```ts
+get(name: string, create: boolean): Promise<Volume>
+```
+
+名前でVolumeを取得します。
+
+**Parameters**:
+
+- `name` _string_ - 取得するVolumeの名前
+- `create` _boolean = false_ - Volumeが存在しない場合に作成するかどうか
+
+
+**Returns**:
+
+- `Promise<Volume>` - 要求されたVolume
+
+**Throws**:
+
+Volumeが存在しないかアクセスできない場合
+
+**Example:**
+
+```ts
+const daytona = new Daytona();
+const volume = await daytona.volume.get("volume-name", true);
+console.log(`Volume ${volume.name} is in state ${volume.state}`);
+```
+
+***
+
+#### list()
+
+```ts
+list(): Promise<Volume[]>
+```
+
+利用可能なすべてのVolumeを一覧表示します。
+
+**Returns**:
+
+- `Promise<Volume[]>` - ユーザーがアクセス可能なすべてのVolumeのリスト
+
+**Example:**
+
+```ts
+const daytona = new Daytona();
+const volumes = await daytona.volume.list();
+console.log(`Found ${volumes.length} volumes`);
+volumes.forEach(vol => console.log(`${vol.name} (${vol.id})`));
+```
+
+***
+
+
+## Volume
+
+```ts
+type Volume = VolumeDto & {
+  __brand: "Volume";
+};
+```
+
+SandboxesのためのShared Storage VolumeであるDaytona Volumeを表します。
+
+**型宣言**:
+
+- `\_\_brand` _"Volume"_
+

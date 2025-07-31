@@ -7,7 +7,7 @@ import { fileURLToPath } from 'url'
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
 
-const DOCS_PATH = path.join(__dirname, '../src/content/docs')
+const DOCS_PATH = path.join(__dirname, '../src/content/docs/en')
 const SUBFOLDERS = [
   'about',
   'configuration',
@@ -48,7 +48,7 @@ function extractRealSentence(text) {
     .split(/\n\n+/)
     .map(s => s.trim())
     .filter(s => s.length > 0)
-  for (let sentence of sentences) {
+  for (const sentence of sentences) {
     if (isSentence(sentence)) {
       const hyperlinkMatch = sentence.match(/^\[([^\]]+)\]\(([^\)]+)\)/)
       if (hyperlinkMatch) {
