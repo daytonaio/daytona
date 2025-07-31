@@ -70,7 +70,7 @@ const SideNavLinksContent = () => {
           {stars === undefined
             ? ''
             : stars === null
-              ? t('Star', { context: 'As in a star on GitHub' })
+              ? t('Star', { $context: 'As in a star on GitHub' })
               : GITHUB_STARS_FORMATTER.format(stars)}
         </a>
       </div>

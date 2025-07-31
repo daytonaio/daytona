@@ -3906,12 +3906,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@generaltranslation/supported-locales@npm:^2.0.12":
-  version: 2.0.12
-  resolution: "@generaltranslation/supported-locales@npm:2.0.12"
+"@generaltranslation/supported-locales@npm:^2.0.13":
+  version: 2.0.13
+  resolution: "@generaltranslation/supported-locales@npm:2.0.13"
   dependencies:
     generaltranslation: "npm:^7.0.1"
-  checksum: 10c0/8b5170820217a3f5c235b6280680de56dba9861ebcf23ca158aa7626b5d73e3954f493fff9b336efe093c6395b9f66f642f30d54a84b9f35fb4b17bc5cbcba17
+  checksum: 10c0/ff15ea6d3eb31db1f5146b6305042a8750001f2755122ced72dbc670bac018e6dd74b82d0b86efcc39a57098c6fccade6635495f9d224ef34f52af9c06a72464
   languageName: node
   linkType: hard
 
@@ -15346,7 +15346,7 @@ __metadata:
     express-session: "npm:^1.18.1"
     fast-glob: "npm:^3.3.0"
     form-data: "npm:^4.0.4"
-    gt-react: "npm:^10.0.1"
+    gt-react: "npm:^10.0.8"
     gtx-cli: "npm:^2.0.20"
     husky: "npm:^9.1.7"
     ioredis: "npm:^5.5.0"
@@ -18420,7 +18420,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"generaltranslation@npm:^7.1.4":
+"generaltranslation@npm:^7.1.1, generaltranslation@npm:^7.1.4":
   version: 7.1.4
   resolution: "generaltranslation@npm:7.1.4"
   dependencies:
@@ -18794,16 +18794,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"gt-react@npm:^10.0.1":
-  version: 10.0.1
-  resolution: "gt-react@npm:10.0.1"
+"gt-react@npm:^10.0.8":
+  version: 10.0.8
+  resolution: "gt-react@npm:10.0.8"
   dependencies:
-    "@generaltranslation/supported-locales": "npm:^2.0.12"
-    generaltranslation: "npm:^7.0.1"
+    "@generaltranslation/supported-locales": "npm:^2.0.13"
+    generaltranslation: "npm:^7.1.1"
   peerDependencies:
     react: ">=16.8.0"
     react-dom: ">=16.8.0"
-  checksum: 10c0/52e57caa4157cd4a22af0524ec39725082acf0bde45118d68629d472d07581106c967f2c46c6482496dd5b4124fd0a8406f009956e5f7890b0e5e7004bac7dff
+  checksum: 10c0/eb7ac841238d3b2c9b4e6ccd6abb474512dbf107f2c23dce185719cf35c072517fdac6bb866ea7c7ea8a989d8b2d173e391379ff91fe757ac2ad6a9ba2c80b85
   languageName: node
   linkType: hard
 

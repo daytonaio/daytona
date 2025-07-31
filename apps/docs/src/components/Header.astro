@@ -7,10 +7,13 @@ import searchIcon from '@assets/icons/search.svg?raw'
 import Version from '@components/Version.astro'
 import Search from '@components/Search'
 import '../styles/components/search.scss'
+import gtconfig from '../../gt.config.json'
 
+// Disable search for translations (for now)
 const algoliaEnabled =
   import.meta.env.PUBLIC_ALGOLIA_APP_ID &&
-  import.meta.env.PUBLIC_ALGOLIA_API_KEY
+  import.meta.env.PUBLIC_ALGOLIA_API_KEY &&
+  Astro.props.lang === gtconfig.defaultLocale
 ---
 
 <header class="navbar">
@@ -66,4 +69,7 @@ const algoliaEnabled =
   </nav>
 </header>
 
-{algoliaEnabled && <Search client:load />}
+{
+  // Skip search for translations (for now)
+  algoliaEnabled && <Search client:load locale={Astro.props.lang} />
+}

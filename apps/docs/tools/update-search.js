@@ -7,10 +7,8 @@ import { fileURLToPath } from 'url'
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
 
-const DOCS_PATH = path.join(__dirname, '../src/content/docs')
+const DOCS_PATH = path.join(__dirname, '../src/content/docs/en')
 const SUBFOLDERS = [
-  'en',
-  'ja',
   'about',
   'configuration',
   'installation',
