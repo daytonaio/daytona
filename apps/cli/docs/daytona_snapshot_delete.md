@@ -20,4 +20,4 @@ daytona snapshot delete [SNAPSHOT_ID] [flags]
 
 ### SEE ALSO
 
-* [daytona snapshot](daytona_snapshot.md)  - Manage Daytona snapshots
+- [daytona snapshot](daytona_snapshot.md) - Manage Daytona snapshots

@@ -38,4 +38,4 @@ daytona sandbox create [flags]
 
 ### SEE ALSO
 
-* [daytona sandbox](daytona_sandbox.md)  - Manage Daytona sandboxes
+- [daytona sandbox](daytona_sandbox.md) - Manage Daytona sandboxes

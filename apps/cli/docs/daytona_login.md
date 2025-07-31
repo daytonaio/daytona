@@ -20,4 +20,4 @@ daytona login [flags]
 
 ### SEE ALSO
 
-* [daytona](daytona.md)  - Daytona CLI
+- [daytona](daytona.md) - Daytona CLI

@@ -17,7 +17,7 @@ type CreateSandboxDTO struct {
 	Registry         *RegistryDTO      `json:"registry,omitempty"`
 	Entrypoint       []string          `json:"entrypoint,omitempty"`
 	Volumes          []VolumeDTO       `json:"volumes,omitempty"`
-	NetworkAllowAll  bool              `json:"networkAllowAll,omitempty"`
+	NetworkAllowAll  bool              `json:"networkAllowAll" validate:"required"`
 	NetworkAllowList string            `json:"networkAllowList,omitempty"`
 } //	@name	CreateSandboxDTO
 

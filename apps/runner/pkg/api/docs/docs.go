@@ -1205,6 +1205,7 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "id",
+                "networkAllowAll",
                 "osUser",
                 "snapshot",
                 "userId"
