@@ -170,6 +170,8 @@ export class SandboxController {
         autoDeleteInterval: req.body?.autoDeleteInterval,
         volumes: req.body?.volumes,
         buildInfo: req.body?.buildInfo,
+        networkAllowAll: req.body?.networkAllowAll,
+        networkAllowList: req.body?.networkAllowList,
       }),
     },
   })
