@@ -74,6 +74,7 @@ definitions:
         type: array
     required:
       - id
+      - networkAllowAll
       - osUser
       - snapshot
       - userId

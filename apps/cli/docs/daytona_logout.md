@@ -14,4 +14,4 @@ daytona logout [flags]
 
 ### SEE ALSO
 
-* [daytona](daytona.md)  - Daytona CLI
+- [daytona](daytona.md) - Daytona CLI

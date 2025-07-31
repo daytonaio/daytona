@@ -1125,7 +1125,7 @@
     },
     "CreateSandboxDTO": {
       "type": "object",
-      "required": ["id", "osUser", "snapshot", "userId"],
+      "required": ["id", "networkAllowAll", "osUser", "snapshot", "userId"],
       "properties": {
         "cpuQuota": {
           "type": "integer",

@@ -72,7 +72,7 @@ export interface CreateSandboxDTO {
    * @type {boolean}
    * @memberof CreateSandboxDTO
    */
-  networkAllowAll?: boolean
+  networkAllowAll: boolean
   /**
    *
    * @type {string}

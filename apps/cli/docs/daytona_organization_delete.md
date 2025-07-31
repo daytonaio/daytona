@@ -14,4 +14,4 @@ daytona organization delete [ORGANIZATION] [flags]
 
 ### SEE ALSO
 
-* [daytona organization](daytona_organization.md)  - Manage Daytona organizations
+- [daytona organization](daytona_organization.md) - Manage Daytona organizations

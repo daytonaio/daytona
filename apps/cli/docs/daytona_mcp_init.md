@@ -14,4 +14,4 @@ daytona mcp init [AGENT_NAME] [flags]
 
 ### SEE ALSO
 
-* [daytona mcp](daytona_mcp.md)  - Manage Daytona MCP Server
+- [daytona mcp](daytona_mcp.md) - Manage Daytona MCP Server

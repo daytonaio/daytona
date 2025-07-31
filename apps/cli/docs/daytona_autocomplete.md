@@ -14,4 +14,4 @@ daytona autocomplete [bash|zsh|fish|powershell] [flags]
 
 ### SEE ALSO
 
-* [daytona](daytona.md)  - Daytona CLI
+- [daytona](daytona.md) - Daytona CLI
