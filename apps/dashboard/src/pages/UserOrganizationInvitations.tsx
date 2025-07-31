@@ -8,7 +8,6 @@ import { useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
 import { useApi } from '@/hooks/useApi'
 import { OrganizationInvitation } from '@daytonaio/api-client'
-import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { UserOrganizationInvitationTable } from '@/components/UserOrganizationInvitations/UserOrganizationInvitationTable'
 import { useOrganizations } from '@/hooks/useOrganizations'
 import { useUserOrganizationInvitations } from '@/hooks/useUserOrganizationInvitations'
@@ -19,7 +18,6 @@ const UserOrganizationInvitations: React.FC = () => {
   const { organizationsApi } = useApi()
 
   const { refreshOrganizations } = useOrganizations()
-  const { onSelectOrganization } = useSelectedOrganization()
   const { setCount } = useUserOrganizationInvitations()
 
   const [invitations, setInvitations] = useState<OrganizationInvitation[]>([])
@@ -75,8 +73,7 @@ const UserOrganizationInvitations: React.FC = () => {
     try {
       await organizationsApi.acceptOrganizationInvitation(invitation.id)
       toast.success('Invitation accepted successfully')
-      await refreshOrganizations()
-      await onSelectOrganization(invitation.organizationId)
+      await refreshOrganizations(invitation.organizationId)
       await fetchInvitations(false)
       return true
     } catch (error) {

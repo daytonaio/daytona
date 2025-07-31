@@ -41,7 +41,8 @@ export const CreateOrganizationDialog: React.FC<CreateOrganizationDialogProps> =
     setLoading(true)
     const org = await onCreateOrganization(name)
     if (org) {
-      setCreatedOrg(org)
+      // TODO: Return when we fix the selected org states
+      // setCreatedOrg(org)
       setName('')
     }
     setLoading(false)

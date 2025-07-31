@@ -46,6 +46,7 @@ import AuditLogs from './pages/AuditLogs'
 import Spending from './pages/Spending'
 import EmailVerify from './pages/EmailVerify'
 import AccountSettings from './pages/AccountSettings'
+import { BillingProvider } from './providers/BillingProvider'
 
 // Simple redirection components for external URLs
 const DocsRedirect = () => {
@@ -128,11 +129,13 @@ function App() {
               <ApiProvider>
                 <OrganizationsProvider>
                   <SelectedOrganizationProvider>
-                    <UserOrganizationInvitationsProvider>
-                      <NotificationSocketProvider>
-                        <Dashboard />
-                      </NotificationSocketProvider>
-                    </UserOrganizationInvitationsProvider>
+                    <BillingProvider>
+                      <UserOrganizationInvitationsProvider>
+                        <NotificationSocketProvider>
+                          <Dashboard />
+                        </NotificationSocketProvider>
+                      </UserOrganizationInvitationsProvider>
+                    </BillingProvider>
                   </SelectedOrganizationProvider>
                 </OrganizationsProvider>
               </ApiProvider>
