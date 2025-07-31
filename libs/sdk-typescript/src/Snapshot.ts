@@ -55,6 +55,7 @@ export type CreateSnapshotParams = {
   image: string | Image
   resources?: Resources
   entrypoint?: string[]
+  skipValidation?: boolean
 }
 
 /**
@@ -163,6 +164,10 @@ export class SnapshotService {
       createSnapshotReq.disk = params.resources.disk
     }
 
+    if (params.skipValidation !== undefined) {
+      createSnapshotReq.skipValidation = params.skipValidation
+    }
+
     let createdSnapshot = (
       await this.snapshotsApi.createSnapshot(createSnapshotReq, undefined, {
         timeout: (options.timeout || 0) * 1000,
@@ -197,7 +202,7 @@ export class SnapshotService {
     if (options.onLogs) {
       options.onLogs(`Creating snapshot ${createdSnapshot.name} (${createdSnapshot.state})`)
 
-      if (createdSnapshot.state !== SnapshotState.BUILD_PENDING) {
+      if (createdSnapshot.state !== SnapshotState.PENDING) {
         await startLogStreaming(options.onLogs)
       }
     }
@@ -205,7 +210,7 @@ export class SnapshotService {
     let previousState = createdSnapshot.state
     while (!terminalStates.includes(createdSnapshot.state)) {
       if (options.onLogs && previousState !== createdSnapshot.state) {
-        if (createdSnapshot.state !== SnapshotState.BUILD_PENDING && !streamPromise) {
+        if (createdSnapshot.state !== SnapshotState.PENDING && !streamPromise) {
           await startLogStreaming(options.onLogs)
         }
         options.onLogs(`Creating snapshot ${createdSnapshot.name} (${createdSnapshot.state})`)

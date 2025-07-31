@@ -850,6 +850,60 @@ const docTemplate = `{
                 }
             }
         },
+        "/snapshots/info": {
+            "get": {
+                "description": "Get information about a specified snapshot including size and entrypoint",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "snapshots"
+                ],
+                "summary": "Get snapshot information",
+                "operationId": "GetSnapshotInfo",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Snapshot name and tag",
+                        "name": "snapshot",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/SnapshotInfoResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/snapshots/logs": {
             "get": {
                 "description": "Stream build logs",
@@ -861,7 +915,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Snapshot ID or snapshot ref without the tag",
+                        "description": "Snapshot ref",
                         "name": "snapshotRef",
                         "in": "query",
                         "required": true
@@ -909,7 +963,7 @@ const docTemplate = `{
         },
         "/snapshots/pull": {
             "post": {
-                "description": "Pull a snapshot from a registry",
+                "description": "Pull a snapshot from a registry and optionally push to another registry",
                 "tags": [
                     "snapshots"
                 ],
@@ -1181,11 +1235,14 @@ const docTemplate = `{
                 "snapshot"
             ],
             "properties": {
-                "registry": {
+                "destinationRegistry": {
                     "$ref": "#/definitions/RegistryDTO"
                 },
                 "snapshot": {
                     "type": "string"
+                },
+                "sourceRegistry": {
+                    "$ref": "#/definitions/RegistryDTO"
                 }
             }
         },
@@ -1279,6 +1336,45 @@ const docTemplate = `{
                 "exists": {
                     "type": "boolean",
                     "example": true
+                }
+            }
+        },
+        "SnapshotInfoResponse": {
+            "type": "object",
+            "properties": {
+                "cmd": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "[\"nginx\"",
+                        "\"-g\"",
+                        "\"daemon off;\"]"
+                    ]
+                },
+                "entrypoint": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "[\"nginx\"",
+                        "\"-g\"",
+                        "\"daemon off;\"]"
+                    ]
+                },
+                "hash": {
+                    "type": "string",
+                    "example": "a7be6198544f09a75b26e6376459b47c5b9972e7351d440e092c4faa9ea064ff"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "nginx:latest"
+                },
+                "sizeGB": {
+                    "type": "number",
+                    "example": 0.13
                 }
             }
         },

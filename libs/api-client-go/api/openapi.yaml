@@ -6848,6 +6848,7 @@ components:
         - pending_build
         - building_snapshot
         - unknown
+        - pending_pull
         - pulling_snapshot
         - archiving
         - archived
@@ -8758,6 +8759,7 @@ components:
     CreateSnapshot:
       example:
         general: true
+        skipValidation: false
         disk: 3
         imageName: ubuntu:22.04
         memory: 1
@@ -8804,12 +8806,15 @@ components:
           allOf:
             - $ref: '#/components/schemas/CreateBuildInfo'
           description: Build information for the snapshot
+        skipValidation:
+          description: Whether to skip validation for the snapshot
+          example: false
+          type: boolean
       required:
         - name
       type: object
     SnapshotState:
       enum:
-        - build_pending
         - building
         - pending
         - pulling
