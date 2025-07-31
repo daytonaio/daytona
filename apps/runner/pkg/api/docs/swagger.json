@@ -1125,7 +1125,7 @@
     },
     "CreateSandboxDTO": {
       "type": "object",
-      "required": ["id", "networkAllowAll", "osUser", "snapshot", "userId"],
+      "required": ["id", "osUser", "snapshot", "userId"],
       "properties": {
         "cpuQuota": {
           "type": "integer",
@@ -1157,11 +1157,11 @@
           "type": "integer",
           "minimum": 1
         },
-        "networkAllowAll": {
-          "type": "boolean"
-        },
         "networkAllowList": {
           "type": "string"
+        },
+        "networkBlockAll": {
+          "type": "boolean"
         },
         "osUser": {
           "type": "string"
@@ -1322,11 +1322,11 @@
     "UpdateNetworkSettingsDTO": {
       "type": "object",
       "properties": {
-        "networkAllowAll": {
-          "type": "boolean"
-        },
         "networkAllowList": {
           "type": "string"
+        },
+        "networkBlockAll": {
+          "type": "boolean"
         }
       }
     },

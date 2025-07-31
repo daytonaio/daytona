@@ -1205,7 +1205,6 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "id",
-                "networkAllowAll",
                 "osUser",
                 "snapshot",
                 "userId"
@@ -1241,11 +1240,11 @@ const docTemplate = `{
                     "type": "integer",
                     "minimum": 1
                 },
-                "networkAllowAll": {
-                    "type": "boolean"
-                },
                 "networkAllowList": {
                     "type": "string"
+                },
+                "networkBlockAll": {
+                    "type": "boolean"
                 },
                 "osUser": {
                     "type": "string"
@@ -1419,11 +1418,11 @@ const docTemplate = `{
         "UpdateNetworkSettingsDTO": {
             "type": "object",
             "properties": {
-                "networkAllowAll": {
-                    "type": "boolean"
-                },
                 "networkAllowList": {
                     "type": "string"
+                },
+                "networkBlockAll": {
+                    "type": "boolean"
                 }
             }
         },

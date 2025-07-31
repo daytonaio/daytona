@@ -53,10 +53,10 @@ definitions:
       memoryQuota:
         minimum: 1
         type: integer
-      networkAllowAll:
-        type: boolean
       networkAllowList:
         type: string
+      networkBlockAll:
+        type: boolean
       osUser:
         type: string
       registry:
@@ -74,7 +74,6 @@ definitions:
         type: array
     required:
       - id
-      - networkAllowAll
       - osUser
       - snapshot
       - userId
@@ -181,10 +180,10 @@ definitions:
     type: object
   UpdateNetworkSettingsDTO:
     properties:
-      networkAllowAll:
-        type: boolean
       networkAllowList:
         type: string
+      networkBlockAll:
+        type: boolean
     type: object
   dto.VolumeDTO:
     properties:

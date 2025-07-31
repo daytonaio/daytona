@@ -69,16 +69,16 @@ export interface CreateSandboxDTO {
   memoryQuota?: number
   /**
    *
-   * @type {boolean}
-   * @memberof CreateSandboxDTO
-   */
-  networkAllowAll: boolean
-  /**
-   *
    * @type {string}
    * @memberof CreateSandboxDTO
    */
   networkAllowList?: string
+  /**
+   *
+   * @type {boolean}
+   * @memberof CreateSandboxDTO
+   */
+  networkBlockAll?: boolean
   /**
    *
    * @type {string}

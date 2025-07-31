@@ -533,7 +533,7 @@ import Label from '@components/Label.astro'
 ### Responses
 | Status Code | Description |
 | :-------- | :---------- |
-| **`200`** | Sandbox has been started |
+| **`200`** | Sandbox has been started or is being restored from archived state |
 
 
 ## POST /sandbox/\{sandboxId\}/stop
@@ -1756,20 +1756,6 @@ Get list of open windows
 | **`200`** | Snapshot has been deleted |
 
 
-## PATCH /snapshots/\{id\}/toggle
-
-### Parameters
-| Name | Location | Required | Type | Description |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
-| **`id`** | path | true | undefined | Snapshot ID |
-
-### Responses
-| Status Code | Description |
-| :-------- | :---------- |
-| **`200`** | Snapshot state has been toggled |
-
-
 ## PATCH /snapshots/\{id\}/general
 
 ### Parameters
@@ -1813,6 +1799,20 @@ Get list of open windows
 | **`200`** | The snapshot has been successfully activated. |
 | **`400`** | Bad request - Snapshot is already active, not in inactive state, or has associated snapshot runners |
 | **`404`** | Snapshot not found |
+
+
+## POST /snapshots/\{id\}/deactivate
+
+### Parameters
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
+| **`id`** | path | true | undefined | Snapshot ID |
+
+### Responses
+| Status Code | Description |
+| :-------- | :---------- |
+| **`204`** | The snapshot has been successfully deactivated. |
 
 
 ## GET /workspace

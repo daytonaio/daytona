@@ -325,8 +325,8 @@ export class SandboxService {
 
     sandbox.public = createSandboxDto.public || false
 
-    if (createSandboxDto.networkAllowAll !== undefined) {
-      sandbox.networkAllowAll = createSandboxDto.networkAllowAll
+    if (createSandboxDto.networkBlockAll !== undefined) {
+      sandbox.networkBlockAll = createSandboxDto.networkBlockAll
     }
 
     if (createSandboxDto.networkAllowList !== undefined) {
@@ -373,8 +373,8 @@ export class SandboxService {
       warmPoolSandbox.autoDeleteInterval = createSandboxDto.autoDeleteInterval
     }
 
-    if (createSandboxDto.networkAllowAll !== undefined) {
-      warmPoolSandbox.networkAllowAll = createSandboxDto.networkAllowAll
+    if (createSandboxDto.networkBlockAll !== undefined) {
+      warmPoolSandbox.networkBlockAll = createSandboxDto.networkBlockAll
     }
     if (createSandboxDto.networkAllowList !== undefined) {
       warmPoolSandbox.networkAllowList = this.resolveNetworkAllowList(createSandboxDto.networkAllowList)
@@ -389,11 +389,11 @@ export class SandboxService {
       throw new NotFoundException(`Runner with ID ${warmPoolSandbox.runnerId} not found`)
     }
 
-    if (createSandboxDto.networkAllowAll !== undefined || createSandboxDto.networkAllowList !== undefined) {
+    if (createSandboxDto.networkBlockAll !== undefined || createSandboxDto.networkAllowList !== undefined) {
       const runnerAdapter = await this.runnerAdapterFactory.create(runner)
       await runnerAdapter.updateNetworkSettings(
         warmPoolSandbox.id,
-        createSandboxDto.networkAllowAll,
+        createSandboxDto.networkBlockAll,
         createSandboxDto.networkAllowList,
       )
     }
@@ -440,8 +440,8 @@ export class SandboxService {
     sandbox.disk = disk
     sandbox.public = createSandboxDto.public || false
 
-    if (createSandboxDto.networkAllowAll !== undefined) {
-      sandbox.networkAllowAll = createSandboxDto.networkAllowAll
+    if (createSandboxDto.networkBlockAll !== undefined) {
+      sandbox.networkBlockAll = createSandboxDto.networkBlockAll
     }
 
     if (createSandboxDto.networkAllowList !== undefined) {
@@ -806,7 +806,7 @@ export class SandboxService {
     await this.sandboxRepository.save(sandbox)
   }
 
-  async updateNetworkSettings(sandboxId: string, networkAllowAll?: boolean, networkAllowList?: string): Promise<void> {
+  async updateNetworkSettings(sandboxId: string, networkBlockAll?: boolean, networkAllowList?: string): Promise<void> {
     const sandbox = await this.sandboxRepository.findOne({
       where: { id: sandboxId },
     })
@@ -815,8 +815,8 @@ export class SandboxService {
       throw new NotFoundException(`Sandbox with ID ${sandboxId} not found`)
     }
 
-    if (networkAllowAll !== undefined) {
-      sandbox.networkAllowAll = networkAllowAll
+    if (networkBlockAll !== undefined) {
+      sandbox.networkBlockAll = networkBlockAll
     }
 
     if (networkAllowList !== undefined) {
@@ -830,7 +830,7 @@ export class SandboxService {
       const runner = await this.runnerService.findOne(sandbox.runnerId)
       if (runner) {
         const runnerAdapter = await this.runnerAdapterFactory.create(runner)
-        await runnerAdapter.updateNetworkSettings(sandboxId, networkAllowAll, networkAllowList)
+        await runnerAdapter.updateNetworkSettings(sandboxId, networkBlockAll, networkAllowList)
       }
     }
   }

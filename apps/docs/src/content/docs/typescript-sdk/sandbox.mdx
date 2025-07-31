@@ -118,19 +118,19 @@ Represents a Daytona Sandbox.
     ```ts
     SandboxDto.memory
     ```
-- `networkAllowAll` _boolean_ - Whether to allow all network access for the Sandbox
-    
-    ##### Implementation of
-    
-    ```ts
-    SandboxDto.networkAllowAll
-    ```
 - `networkAllowList?` _string_ - Comma-separated list of allowed network addresses for the Sandbox (only /24 CIDR blocks allowed)
     
     ##### Implementation of
     
     ```ts
     SandboxDto.networkAllowList
+    ```
+- `networkBlockAll` _boolean_ - Whether to block all network access for the Sandbox
+    
+    ##### Implementation of
+    
+    ```ts
+    SandboxDto.networkBlockAll
     ```
 - `organizationId` _string_ - Organization ID of the Sandbox
     

@@ -38,7 +38,7 @@ class Sandbox(BaseModel):
     env: Dict[str, StrictStr] = Field(description="Environment variables for the sandbox")
     labels: Dict[str, StrictStr] = Field(description="Labels for the sandbox")
     public: StrictBool = Field(description="Whether the sandbox http preview is public")
-    network_allow_all: StrictBool = Field(description="Whether to allow all network access for the sandbox", alias="networkAllowAll")
+    network_block_all: StrictBool = Field(description="Whether to block all network access for the sandbox", alias="networkBlockAll")
     network_allow_list: Optional[StrictStr] = Field(default=None, description="Comma-separated list of allowed network addresses for the sandbox (only /24 CIDR blocks allowed)", alias="networkAllowList")
     target: StrictStr = Field(description="The target environment for the sandbox")
     cpu: Union[StrictFloat, StrictInt] = Field(description="The CPU quota for the sandbox")
@@ -61,7 +61,7 @@ class Sandbox(BaseModel):
     var_class: Optional[StrictStr] = Field(default=None, description="The class of the sandbox", alias="class")
     daemon_version: Optional[StrictStr] = Field(default=None, description="The version of the daemon running in the sandbox", alias="daemonVersion")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["id", "organizationId", "snapshot", "user", "env", "labels", "public", "networkAllowAll", "networkAllowList", "target", "cpu", "gpu", "memory", "disk", "state", "desiredState", "errorReason", "backupState", "backupCreatedAt", "autoStopInterval", "autoArchiveInterval", "autoDeleteInterval", "runnerDomain", "volumes", "buildInfo", "createdAt", "updatedAt", "class", "daemonVersion"]
+    __properties: ClassVar[List[str]] = ["id", "organizationId", "snapshot", "user", "env", "labels", "public", "networkBlockAll", "networkAllowList", "target", "cpu", "gpu", "memory", "disk", "state", "desiredState", "errorReason", "backupState", "backupCreatedAt", "autoStopInterval", "autoArchiveInterval", "autoDeleteInterval", "runnerDomain", "volumes", "buildInfo", "createdAt", "updatedAt", "class", "daemonVersion"]
 
     @field_validator('backup_state')
     def backup_state_validate_enum(cls, value):
@@ -158,7 +158,7 @@ class Sandbox(BaseModel):
             "env": obj.get("env"),
             "labels": obj.get("labels"),
             "public": obj.get("public"),
-            "networkAllowAll": obj.get("networkAllowAll"),
+            "networkBlockAll": obj.get("networkBlockAll"),
             "networkAllowList": obj.get("networkAllowList"),
             "target": obj.get("target"),
             "cpu": obj.get("cpu"),

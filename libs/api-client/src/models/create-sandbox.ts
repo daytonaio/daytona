@@ -56,11 +56,11 @@ export interface CreateSandbox {
    */
   public?: boolean
   /**
-   * Whether to allow all network access for the sandbox
+   * Whether to block all network access for the sandbox
    * @type {boolean}
    * @memberof CreateSandbox
    */
-  networkAllowAll?: boolean
+  networkBlockAll?: boolean
   /**
    * Comma-separated list of allowed network addresses for the sandbox (only /24 CIDR blocks allowed)
    * @type {string}

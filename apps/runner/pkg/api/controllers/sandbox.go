@@ -230,8 +230,8 @@ func GetNetworkSettings(ctx *gin.Context) {
 
 	// For now, return empty settings
 	networkSettings := dto.UpdateNetworkSettingsDTO{
-		NetworkAllowAll:  false,
-		NetworkAllowList: "",
+		NetworkBlockAll:  nil,
+		NetworkAllowList: nil,
 	}
 
 	ctx.JSON(http.StatusOK, networkSettings)

@@ -5,22 +5,21 @@ async function main() {
 
   // Default settings
   const sandbox1 = await daytona.create()
-  console.log('networkAllowAll:', sandbox1.networkAllowAll)
+  console.log('networkBlockAll:', sandbox1.networkBlockAll)
   console.log('networkAllowList:', sandbox1.networkAllowList)
 
-  // Explicitly allow all network access
+  // Block all network access
   const sandbox2 = await daytona.create({
-    networkAllowAll: true,
+    networkBlockAll: true,
   })
-  console.log('networkAllowAll:', sandbox2.networkAllowAll)
+  console.log('networkBlockAll:', sandbox2.networkBlockAll)
   console.log('networkAllowList:', sandbox2.networkAllowList)
 
   // Explicitly allow list of network addresses
   const sandbox3 = await daytona.create({
-    networkAllowAll: false,
     networkAllowList: '192.168.1.0/24,10.0.0.0/24',
   })
-  console.log('networkAllowAll:', sandbox3.networkAllowAll)
+  console.log('networkBlockAll:', sandbox3.networkBlockAll)
   console.log('networkAllowList:', sandbox3.networkAllowList)
 
   await sandbox1.delete()

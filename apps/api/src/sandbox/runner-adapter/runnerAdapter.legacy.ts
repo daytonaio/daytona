@@ -175,7 +175,7 @@ export class RunnerAdapterLegacy implements RunnerAdapter {
         volumeId: volume.volumeId,
         mountPath: volume.mountPath,
       })),
-      networkAllowAll: sandbox.networkAllowAll,
+      networkBlockAll: sandbox.networkBlockAll,
       networkAllowList: sandbox.networkAllowList,
     }
 
@@ -282,9 +282,9 @@ export class RunnerAdapterLegacy implements RunnerAdapter {
     return (getVersionResponse.data as any).version
   }
 
-  async updateNetworkSettings(sandboxId: string, networkAllowAll?: boolean, networkAllowList?: string): Promise<void> {
+  async updateNetworkSettings(sandboxId: string, networkBlockAll?: boolean, networkAllowList?: string): Promise<void> {
     const updateNetworkSettingsDto: UpdateNetworkSettingsDTO = {
-      networkAllowAll: networkAllowAll,
+      networkBlockAll: networkBlockAll,
       networkAllowList: networkAllowList,
     }
 

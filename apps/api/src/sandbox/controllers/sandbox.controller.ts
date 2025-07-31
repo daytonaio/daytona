@@ -170,7 +170,7 @@ export class SandboxController {
         autoDeleteInterval: req.body?.autoDeleteInterval,
         volumes: req.body?.volumes,
         buildInfo: req.body?.buildInfo,
-        networkAllowAll: req.body?.networkAllowAll,
+        networkBlockAll: req.body?.networkBlockAll,
         networkAllowList: req.body?.networkAllowList,
       }),
     },
@@ -569,7 +569,7 @@ export class SandboxController {
   //   targetIdFromRequest: (req) => req.params.sandboxId,
   //   requestMetadata: {
   //     body: (req: TypedRequest<UpdateSandboxNetworkSettingsDto>) => ({
-  //       networkAllowAll: req.body?.networkAllowAll,
+  //       networkBlockAll: req.body?.networkBlockAll,
   //       networkAllowList: req.body?.networkAllowList,
   //     }),
   //   },
@@ -580,7 +580,7 @@ export class SandboxController {
   // ): Promise<void> {
   //   await this.sandboxService.updateNetworkSettings(
   //     sandboxId,
-  //     networkSettings.networkAllowAll,
+  //     networkSettings.networkBlockAll,
   //     networkSettings.networkAllowList,
   //   )
   // }

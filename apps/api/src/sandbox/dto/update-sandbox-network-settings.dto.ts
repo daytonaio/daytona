@@ -10,12 +10,12 @@ import { IsValidNetworkAllowList } from '../decorators/is-valid-network-allow-li
 @ApiSchema({ name: 'UpdateSandboxNetworkSettings' })
 export class UpdateSandboxNetworkSettingsDto {
   @ApiPropertyOptional({
-    description: 'Whether to allow all network access for the sandbox',
+    description: 'Whether to block all network access for the sandbox',
     example: false,
   })
   @IsOptional()
   @IsBoolean()
-  networkAllowAll?: boolean
+  networkBlockAll?: boolean
 
   @ApiPropertyOptional({
     description: 'Comma-separated list of allowed network addresses for the sandbox (only /24 CIDR blocks allowed)',

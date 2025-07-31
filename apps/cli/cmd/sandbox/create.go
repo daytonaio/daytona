@@ -91,7 +91,7 @@ var CreateCmd = &cobra.Command{
 		}
 		createSandbox.SetAutoDeleteInterval(autoDeleteFlag)
 
-		createSandbox.SetNetworkAllowAll(networkAllowAllFlag)
+		createSandbox.SetNetworkBlockAll(networkBlockAllFlag)
 		if networkAllowListFlag != "" {
 			createSandbox.SetNetworkAllowList(networkAllowListFlag)
 		}
@@ -211,7 +211,7 @@ var (
 	volumesFlag          []string
 	dockerfileFlag       string
 	contextFlag          []string
-	networkAllowAllFlag  bool
+	networkBlockAllFlag  bool
 	networkAllowListFlag string
 )
 
@@ -233,7 +233,7 @@ func init() {
 	CreateCmd.Flags().StringArrayVarP(&volumesFlag, "volume", "v", []string{}, "Volumes to mount (format: VOLUME_NAME:MOUNT_PATH)")
 	CreateCmd.Flags().StringVarP(&dockerfileFlag, "dockerfile", "f", "", "Path to Dockerfile for Sandbox snapshot")
 	CreateCmd.Flags().StringArrayVarP(&contextFlag, "context", "c", []string{}, "Files or directories to include in the build context (can be specified multiple times)")
-	CreateCmd.Flags().BoolVar(&networkAllowAllFlag, "network-allow-all", true, "Whether to allow all network access for the sandbox")
+	CreateCmd.Flags().BoolVar(&networkBlockAllFlag, "network-block-all", false, "Whether to block all network access for the sandbox")
 	CreateCmd.Flags().StringVar(&networkAllowListFlag, "network-allow-list", "", "Comma-separated list of allowed network addresses for the sandbox (only /24 CIDR blocks allowed)")
 
 	CreateCmd.MarkFlagsMutuallyExclusive("snapshot", "dockerfile")
