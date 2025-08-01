@@ -247,7 +247,10 @@ export function Sidebar({ isBannerVisible }: SidebarProps) {
                         <br />
                         Started sandboxes will be stopped{' '}
                         {formatRelative(
-                          addHours(new Date(selectedOrganization.suspendedAt), 24),
+                          addHours(
+                            new Date(selectedOrganization.suspendedAt),
+                            selectedOrganization.suspensionCleanupGracePeriodHours,
+                          ),
                           new Date(selectedOrganization.suspendedAt),
                         )}
                       </p>

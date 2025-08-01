@@ -496,6 +496,34 @@ paths:
       summary: Unsuspend organization
       tags:
         - organizations
+  /organizations/by-sandbox-id/{sandboxId}:
+    get:
+      operationId: getOrganizationBySandboxId
+      parameters:
+        - description: Sandbox ID
+          explode: false
+          in: path
+          name: sandboxId
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Organization'
+          description: Organization
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Get organization by sandbox ID
+      tags:
+        - organizations
   /organizations/{organizationId}/roles:
     get:
       operationId: listOrganizationRoles
@@ -1312,7 +1340,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Sandbox'
-          description: Sandbox has been started
+          description: Sandbox has been started or is being restored from archived
+            state
       security:
         - bearer: []
         - oauth2:
@@ -6292,15 +6321,22 @@ components:
       type: object
     Organization:
       example:
-        createdAt: 2000-01-23T04:56:07.000+00:00
-        suspendedUntil: 2000-01-23T04:56:07.000+00:00
-        createdBy: createdBy
+        totalCpuQuota: 6.027456183070403
         suspensionReason: suspensionReason
         suspendedAt: 2000-01-23T04:56:07.000+00:00
-        name: name
         personal: true
-        id: id
+        suspensionCleanupGracePeriodHours: 0.8008281904610115
         suspended: true
+        createdAt: 2000-01-23T04:56:07.000+00:00
+        maxCpuPerSandbox: 5.637376656633329
+        suspendedUntil: 2000-01-23T04:56:07.000+00:00
+        maxDiskPerSandbox: 7.061401241503109
+        createdBy: createdBy
+        name: name
+        maxMemoryPerSandbox: 2.3021358869347655
+        id: id
+        totalMemoryQuota: 1.4658129805029452
+        totalDiskQuota: 5.962133916683182
         updatedAt: 2000-01-23T04:56:07.000+00:00
       properties:
         id:
@@ -6337,16 +6373,44 @@ components:
           description: Suspended until
           format: date-time
           type: string
+        suspensionCleanupGracePeriodHours:
+          description: Suspension cleanup grace period hours
+          type: number
+        totalCpuQuota:
+          description: Total CPU quota
+          type: number
+        totalMemoryQuota:
+          description: Total memory quota
+          type: number
+        totalDiskQuota:
+          description: Total disk quota
+          type: number
+        maxCpuPerSandbox:
+          description: Max CPU per sandbox
+          type: number
+        maxMemoryPerSandbox:
+          description: Max memory per sandbox
+          type: number
+        maxDiskPerSandbox:
+          description: Max disk per sandbox
+          type: number
       required:
         - createdAt
         - createdBy
         - id
+        - maxCpuPerSandbox
+        - maxDiskPerSandbox
+        - maxMemoryPerSandbox
         - name
         - personal
         - suspended
         - suspendedAt
         - suspendedUntil
+        - suspensionCleanupGracePeriodHours
         - suspensionReason
+        - totalCpuQuota
+        - totalDiskQuota
+        - totalMemoryQuota
         - updatedAt
       type: object
     UsageOverview:
@@ -6436,6 +6500,7 @@ components:
       example:
         reason: reason
         until: 2000-01-23T04:56:07.000+00:00
+        suspensionCleanupGracePeriodHours: 0.8008281904610115
       properties:
         reason:
           description: Suspension reason
@@ -6444,8 +6509,12 @@ components:
           description: Suspension until
           format: date-time
           type: string
+        suspensionCleanupGracePeriodHours:
+          description: Suspension cleanup grace period hours
+          type: number
       required:
         - reason
+        - suspensionCleanupGracePeriodHours
         - until
       type: object
     CreateOrganizationRole:

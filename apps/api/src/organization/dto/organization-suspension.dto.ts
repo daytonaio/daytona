@@ -18,4 +18,10 @@ export class OrganizationSuspensionDto {
   })
   @IsOptional()
   until?: Date
+
+  @ApiProperty({
+    description: 'Suspension cleanup grace period hours',
+  })
+  @IsOptional()
+  suspensionCleanupGracePeriodHours?: number
 }

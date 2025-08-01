@@ -19,8 +19,8 @@ import re  # noqa: F401
 import json
 
 from datetime import datetime
-from pydantic import BaseModel, ConfigDict, Field, StrictStr
-from typing import Any, ClassVar, Dict, List
+from pydantic import BaseModel, ConfigDict, Field, StrictFloat, StrictInt, StrictStr
+from typing import Any, ClassVar, Dict, List, Union
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -30,8 +30,9 @@ class OrganizationSuspension(BaseModel):
     """ # noqa: E501
     reason: StrictStr = Field(description="Suspension reason")
     until: datetime = Field(description="Suspension until")
+    suspension_cleanup_grace_period_hours: Union[StrictFloat, StrictInt] = Field(description="Suspension cleanup grace period hours", alias="suspensionCleanupGracePeriodHours")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["reason", "until"]
+    __properties: ClassVar[List[str]] = ["reason", "until", "suspensionCleanupGracePeriodHours"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -92,7 +93,8 @@ class OrganizationSuspension(BaseModel):
 
         _obj = cls.model_validate({
             "reason": obj.get("reason"),
-            "until": obj.get("until")
+            "until": obj.get("until"),
+            "suspensionCleanupGracePeriodHours": obj.get("suspensionCleanupGracePeriodHours")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

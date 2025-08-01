@@ -27,6 +27,8 @@ type OrganizationSuspension struct {
 	Reason string `json:"reason"`
 	// Suspension until
 	Until time.Time `json:"until"`
+	// Suspension cleanup grace period hours
+	SuspensionCleanupGracePeriodHours float32 `json:"suspensionCleanupGracePeriodHours"`
 }
 
 type _OrganizationSuspension OrganizationSuspension
@@ -35,10 +37,11 @@ type _OrganizationSuspension OrganizationSuspension
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewOrganizationSuspension(reason string, until time.Time) *OrganizationSuspension {
+func NewOrganizationSuspension(reason string, until time.Time, suspensionCleanupGracePeriodHours float32) *OrganizationSuspension {
 	this := OrganizationSuspension{}
 	this.Reason = reason
 	this.Until = until
+	this.SuspensionCleanupGracePeriodHours = suspensionCleanupGracePeriodHours
 	return &this
 }
 
@@ -98,6 +101,30 @@ func (o *OrganizationSuspension) SetUntil(v time.Time) {
 	o.Until = v
 }
 
+// GetSuspensionCleanupGracePeriodHours returns the SuspensionCleanupGracePeriodHours field value
+func (o *OrganizationSuspension) GetSuspensionCleanupGracePeriodHours() float32 {
+	if o == nil {
+		var ret float32
+		return ret
+	}
+
+	return o.SuspensionCleanupGracePeriodHours
+}
+
+// GetSuspensionCleanupGracePeriodHoursOk returns a tuple with the SuspensionCleanupGracePeriodHours field value
+// and a boolean to check if the value has been set.
+func (o *OrganizationSuspension) GetSuspensionCleanupGracePeriodHoursOk() (*float32, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.SuspensionCleanupGracePeriodHours, true
+}
+
+// SetSuspensionCleanupGracePeriodHours sets field value
+func (o *OrganizationSuspension) SetSuspensionCleanupGracePeriodHours(v float32) {
+	o.SuspensionCleanupGracePeriodHours = v
+}
+
 func (o OrganizationSuspension) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -110,6 +137,7 @@ func (o OrganizationSuspension) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["reason"] = o.Reason
 	toSerialize["until"] = o.Until
+	toSerialize["suspensionCleanupGracePeriodHours"] = o.SuspensionCleanupGracePeriodHours
 	return toSerialize, nil
 }
 
@@ -120,6 +148,7 @@ func (o *OrganizationSuspension) UnmarshalJSON(data []byte) (err error) {
 	requiredProperties := []string{
 		"reason",
 		"until",
+		"suspensionCleanupGracePeriodHours",
 	}
 
 	allProperties := make(map[string]interface{})

@@ -58,6 +58,41 @@ export class OrganizationDto {
   })
   suspendedUntil?: Date
 
+  @ApiProperty({
+    description: 'Suspension cleanup grace period hours',
+  })
+  suspensionCleanupGracePeriodHours?: number
+
+  @ApiProperty({
+    description: 'Total CPU quota',
+  })
+  totalCpuQuota: number
+
+  @ApiProperty({
+    description: 'Total memory quota',
+  })
+  totalMemoryQuota: number
+
+  @ApiProperty({
+    description: 'Total disk quota',
+  })
+  totalDiskQuota: number
+
+  @ApiProperty({
+    description: 'Max CPU per sandbox',
+  })
+  maxCpuPerSandbox: number
+
+  @ApiProperty({
+    description: 'Max memory per sandbox',
+  })
+  maxMemoryPerSandbox: number
+
+  @ApiProperty({
+    description: 'Max disk per sandbox',
+  })
+  maxDiskPerSandbox: number
+
   static fromOrganization(organization: Organization): OrganizationDto {
     const dto: OrganizationDto = {
       id: organization.id,
@@ -70,6 +105,13 @@ export class OrganizationDto {
       suspensionReason: organization.suspensionReason,
       suspendedAt: organization.suspendedAt,
       suspendedUntil: organization.suspendedUntil,
+      suspensionCleanupGracePeriodHours: organization.suspensionCleanupGracePeriodHours,
+      totalCpuQuota: organization.totalCpuQuota,
+      totalMemoryQuota: organization.totalMemoryQuota,
+      totalDiskQuota: organization.totalDiskQuota,
+      maxCpuPerSandbox: organization.maxCpuPerSandbox,
+      maxMemoryPerSandbox: organization.maxMemoryPerSandbox,
+      maxDiskPerSandbox: organization.maxDiskPerSandbox,
     }
 
     return dto
