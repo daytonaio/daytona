@@ -59,8 +59,7 @@ export const OrganizationPicker: React.FC = () => {
         })
       ).data
       toast.success('Organization created successfully')
-      await refreshOrganizations()
-      await onSelectOrganization(organization.id)
+      await refreshOrganizations(organization.id)
       return organization
     } catch (error) {
       handleApiError(error, 'Failed to create organization')

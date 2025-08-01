@@ -14,10 +14,15 @@ import { VerifyEmailDialog } from '@/components/VerifyEmailDialog'
 import { AnnouncementBanner } from '@/components/AnnouncementBanner'
 import { LocalStorageKey } from '@/enums/LocalStorageKey'
 import { cn } from '@/lib/utils'
+import { useBilling } from '@/hooks/useBilling'
+import { RoutePath } from '@/enums/RoutePath'
+import { useNavigate } from 'react-router-dom'
 
 const Dashboard: React.FC = () => {
   const { selectedOrganization } = useSelectedOrganization()
   const [showVerifyEmailDialog, setShowVerifyEmailDialog] = useState(false)
+  const { wallet } = useBilling()
+  const navigate = useNavigate()
 
   useEffect(() => {
     if (
@@ -27,6 +32,16 @@ const Dashboard: React.FC = () => {
       setShowVerifyEmailDialog(true)
     }
   }, [selectedOrganization])
+
+  useEffect(() => {
+    if (!import.meta.env.VITE_BILLING_API_URL) {
+      return
+    }
+
+    if (!wallet || wallet?.ongoingBalanceCents <= 0) {
+      navigate(RoutePath.BILLING_WALLET)
+    }
+  }, [wallet])
 
   const bannerText = import.meta.env.VITE_ANNOUNCEMENT_BANNER_TEXT
   const bannerLearnMoreUrl = import.meta.env.VITE_ANNOUNCEMENT_BANNER_LEARN_MORE_URL

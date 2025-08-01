@@ -95,7 +95,7 @@ export function TierTable({
                     <div className={cn(topUpChecked ? 'text-green-500' : undefined)}>
                       <TierRequirementItem
                         checked={topUpChecked}
-                        label={`Top up ${getDollarAmount(tier.minTopUpAmountCents)}${tier.topUpIntervalDays ? ` (every ${tier.topUpIntervalDays} days)` : ''}`}
+                        label={`Top up ${getDollarAmount(tier.minTopUpAmountCents)}${tier.topUpIntervalDays ? ` (every ${tier.topUpIntervalDays} days)` : ' (one time)'}`}
                         link={RoutePath.BILLING_WALLET}
                       />
                       {!!tier.topUpIntervalDays && (
@@ -143,11 +143,21 @@ export function TierTable({
           <TableCell>Custom</TableCell>
           <TableCell>
             <div className="grid gap-0 gap-y-4 py-2">
+              <div className={cn(organizationTier?.tier && organizationTier.tier >= 3 ? 'text-green-500' : undefined)}>
+                {getIcon(!!organizationTier?.tier && organizationTier.tier >= 3, 'At least Tier 3')}At least Tier 3
+              </div>
               <div>
                 <PhoneCall size={18} className="inline align-text-bottom mr-2" aria-label="Contact sales" />
                 Contact sales at sales@daytona.io
               </div>
             </div>
+          </TableCell>
+          <TableCell className="text-center">
+            <Button variant="outline">
+              <a href="mailto:sales@daytona.io?subject=Custom%20Tier%20Inquiry&body=Hi%20Daytona%20Team%2C%0A%0AI%27m%20interested%20in%20a%20custom%20plan%20and%20would%20like%20to%20learn%20more%20about%20your%20options.%0A%0AHere%27s%20some%20context%3A%0A%0A-%20Your%20use%20case%3A%20%0A-%20Current%20technology%3A%20%0A-%20Requirements%3A%20%0A-%20Typical%20sandbox%20size%3A%20%0A-%20Peak%20concurrent%20sandboxes%3A%20%0A%0AThanks.">
+                Contact Sales
+              </a>
+            </Button>
           </TableCell>
         </TableRow>
       </TableBody>

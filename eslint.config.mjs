@@ -1,4 +1,6 @@
 import nx from '@nx/eslint-plugin'
+import react from 'eslint-plugin-react'
+import reactHooks from 'eslint-plugin-react-hooks'
 
 /** @type {import('eslint').Linter.Config[]} */
 export default [
@@ -10,6 +12,10 @@ export default [
   },
   {
     files: ['**/*.ts', '**/*.tsx', '**/*.js', '**/*.jsx'],
+    plugins: {
+      react,
+      'react-hooks': reactHooks,
+    },
     rules: {
       '@nx/enforce-module-boundaries': [
         'error',

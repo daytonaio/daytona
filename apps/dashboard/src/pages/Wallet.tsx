@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { AutomaticTopUp, OrganizationWallet } from '@/billing-api/types/OrganizationWallet'
+import { AutomaticTopUp } from '@/billing-api/types/OrganizationWallet'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { useEffect, useMemo, useState } from 'react'
 import { useCallback } from 'react'
@@ -20,7 +20,7 @@ import { useApi } from '@/hooks/useApi'
 import { useAuth } from 'react-oidc-context'
 import { OrganizationEmail } from '@/billing-api'
 import { OrganizationEmailsTable } from '@/components/OrganizationEmails'
-import EmailVerify from './EmailVerify'
+import { useBilling } from '@/hooks/useBilling'
 
 const formatAmount = (amount: number) => {
   return Intl.NumberFormat('en-US', {
@@ -35,10 +35,7 @@ const Wallet = () => {
   const { selectedOrganization } = useSelectedOrganization()
   const { billingApi } = useApi()
   const { user } = useAuth()
-  const [wallet, setWallet] = useState<OrganizationWallet | null>(null)
-  const [walletLoading, setWalletLoading] = useState(true)
-  const [billingPortalUrl, setBillingPortalUrl] = useState<string | null>(null)
-  const [billingPortalUrlLoading, setBillingPortalUrlLoading] = useState(true)
+  const { wallet, walletLoading, billingPortalUrl, billingPortalUrlLoading, refreshWallet } = useBilling()
   const [automaticTopUp, setAutomaticTopUp] = useState<AutomaticTopUp | undefined>(undefined)
   const [automaticTopUpLoading, setAutomaticTopUpLoading] = useState(false)
   const [redeemCouponLoading, setRedeemCouponLoading] = useState(false)
@@ -47,37 +44,6 @@ const Wallet = () => {
   const [redeemCouponSuccess, setRedeemCouponSuccess] = useState<string | null>(null)
   const [organizationEmails, setOrganizationEmails] = useState<OrganizationEmail[]>([])
   const [organizationEmailsLoading, setOrganizationEmailsLoading] = useState(true)
-
-  const fetchWallet = useCallback(async () => {
-    if (!selectedOrganization) {
-      return
-    }
-    setWalletLoading(true)
-    try {
-      const data = await billingApi.getOrganizationWallet(selectedOrganization.id)
-      setWallet(data)
-      setAutomaticTopUp(data.automaticTopUp)
-    } catch (error) {
-      console.error('Failed to fetch wallet data:', error)
-    } finally {
-      setWalletLoading(false)
-    }
-  }, [billingApi, selectedOrganization])
-
-  const fetchBillingPortalUrl = useCallback(async () => {
-    if (!selectedOrganization) {
-      return
-    }
-    setBillingPortalUrlLoading(true)
-    try {
-      const data = await billingApi.getOrganizationBillingPortalUrl(selectedOrganization.id)
-      setBillingPortalUrl(data)
-    } catch (error) {
-      console.error('Failed to fetch billing portal url:', error)
-    } finally {
-      setBillingPortalUrlLoading(false)
-    }
-  }, [billingApi, selectedOrganization])
 
   const handleUpdatePaymentMethod = useCallback(async () => {
     if (!selectedOrganization) {
@@ -100,7 +66,7 @@ const Wallet = () => {
     try {
       await billingApi.setAutomaticTopUp(selectedOrganization.id, automaticTopUp)
       toast.success('Automatic top up set successfully')
-      fetchWallet()
+      refreshWallet()
     } catch (error) {
       console.error('Failed to set automatic top up:', error)
       toast.error('Failed to set automatic top up', {
@@ -109,7 +75,7 @@ const Wallet = () => {
     } finally {
       setAutomaticTopUpLoading(false)
     }
-  }, [billingApi, selectedOrganization, automaticTopUp, fetchWallet])
+  }, [billingApi, selectedOrganization, automaticTopUp, refreshWallet])
 
   const handleRedeemCoupon = useCallback(async () => {
     if (!selectedOrganization || !couponCode) {
@@ -130,14 +96,14 @@ const Wallet = () => {
         setRedeemCouponSuccess(null)
       }, 3000)
       setCouponCode('')
-      fetchWallet()
+      refreshWallet()
     } catch (error) {
       console.error('Failed to redeem coupon:', error)
       setRedeemCouponError(String(error))
     } finally {
       setRedeemCouponLoading(false)
     }
-  }, [billingApi, selectedOrganization, couponCode, fetchWallet, redeemCouponLoading])
+  }, [billingApi, selectedOrganization, couponCode, refreshWallet, redeemCouponLoading])
 
   const saveAutomaticTopUpDisabled = useMemo(() => {
     if (automaticTopUpLoading) {
@@ -241,14 +207,6 @@ const Wallet = () => {
   useEffect(() => {
     fetchOrganizationEmails()
   }, [fetchOrganizationEmails])
-
-  useEffect(() => {
-    fetchWallet()
-  }, [fetchWallet])
-
-  useEffect(() => {
-    fetchBillingPortalUrl()
-  }, [fetchBillingPortalUrl])
 
   return (
     <div className="p-6">
