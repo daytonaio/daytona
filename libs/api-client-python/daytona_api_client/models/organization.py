@@ -19,8 +19,8 @@ import re  # noqa: F401
 import json
 
 from datetime import datetime
-from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictStr
-from typing import Any, ClassVar, Dict, List
+from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictFloat, StrictInt, StrictStr
+from typing import Any, ClassVar, Dict, List, Union
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -38,8 +38,15 @@ class Organization(BaseModel):
     suspended_at: datetime = Field(description="Suspended at", alias="suspendedAt")
     suspension_reason: StrictStr = Field(description="Suspended reason", alias="suspensionReason")
     suspended_until: datetime = Field(description="Suspended until", alias="suspendedUntil")
+    suspension_cleanup_grace_period_hours: Union[StrictFloat, StrictInt] = Field(description="Suspension cleanup grace period hours", alias="suspensionCleanupGracePeriodHours")
+    total_cpu_quota: Union[StrictFloat, StrictInt] = Field(description="Total CPU quota", alias="totalCpuQuota")
+    total_memory_quota: Union[StrictFloat, StrictInt] = Field(description="Total memory quota", alias="totalMemoryQuota")
+    total_disk_quota: Union[StrictFloat, StrictInt] = Field(description="Total disk quota", alias="totalDiskQuota")
+    max_cpu_per_sandbox: Union[StrictFloat, StrictInt] = Field(description="Max CPU per sandbox", alias="maxCpuPerSandbox")
+    max_memory_per_sandbox: Union[StrictFloat, StrictInt] = Field(description="Max memory per sandbox", alias="maxMemoryPerSandbox")
+    max_disk_per_sandbox: Union[StrictFloat, StrictInt] = Field(description="Max disk per sandbox", alias="maxDiskPerSandbox")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["id", "name", "createdBy", "personal", "createdAt", "updatedAt", "suspended", "suspendedAt", "suspensionReason", "suspendedUntil"]
+    __properties: ClassVar[List[str]] = ["id", "name", "createdBy", "personal", "createdAt", "updatedAt", "suspended", "suspendedAt", "suspensionReason", "suspendedUntil", "suspensionCleanupGracePeriodHours", "totalCpuQuota", "totalMemoryQuota", "totalDiskQuota", "maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -108,7 +115,14 @@ class Organization(BaseModel):
             "suspended": obj.get("suspended"),
             "suspendedAt": obj.get("suspendedAt"),
             "suspensionReason": obj.get("suspensionReason"),
-            "suspendedUntil": obj.get("suspendedUntil")
+            "suspendedUntil": obj.get("suspendedUntil"),
+            "suspensionCleanupGracePeriodHours": obj.get("suspensionCleanupGracePeriodHours"),
+            "totalCpuQuota": obj.get("totalCpuQuota"),
+            "totalMemoryQuota": obj.get("totalMemoryQuota"),
+            "totalDiskQuota": obj.get("totalDiskQuota"),
+            "maxCpuPerSandbox": obj.get("maxCpuPerSandbox"),
+            "maxMemoryPerSandbox": obj.get("maxMemoryPerSandbox"),
+            "maxDiskPerSandbox": obj.get("maxDiskPerSandbox")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

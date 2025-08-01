@@ -412,4 +412,30 @@ export class OrganizationController {
   async unsuspend(@Param('organizationId') organizationId: string): Promise<void> {
     return this.organizationService.unsuspend(organizationId)
   }
+
+  @Get('/by-sandbox-id/:sandboxId')
+  @ApiOperation({
+    summary: 'Get organization by sandbox ID',
+    operationId: 'getOrganizationBySandboxId',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Organization',
+    type: OrganizationDto,
+  })
+  @ApiParam({
+    name: 'sandboxId',
+    description: 'Sandbox ID',
+    type: 'string',
+  })
+  @RequiredSystemRole(SystemRole.ADMIN)
+  @UseGuards(CombinedAuthGuard, SystemActionGuard)
+  async getBySandboxId(@Param('sandboxId') sandboxId: string): Promise<OrganizationDto> {
+    const organization = await this.organizationService.findBySandboxId(sandboxId)
+    if (!organization) {
+      throw new NotFoundException(`Organization with sandbox ID ${sandboxId} not found`)
+    }
+
+    return OrganizationDto.fromOrganization(organization)
+  }
 }

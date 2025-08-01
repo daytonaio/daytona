@@ -78,4 +78,46 @@ export interface Organization {
    * @memberof Organization
    */
   suspendedUntil: Date
+  /**
+   * Suspension cleanup grace period hours
+   * @type {number}
+   * @memberof Organization
+   */
+  suspensionCleanupGracePeriodHours: number
+  /**
+   * Total CPU quota
+   * @type {number}
+   * @memberof Organization
+   */
+  totalCpuQuota: number
+  /**
+   * Total memory quota
+   * @type {number}
+   * @memberof Organization
+   */
+  totalMemoryQuota: number
+  /**
+   * Total disk quota
+   * @type {number}
+   * @memberof Organization
+   */
+  totalDiskQuota: number
+  /**
+   * Max CPU per sandbox
+   * @type {number}
+   * @memberof Organization
+   */
+  maxCpuPerSandbox: number
+  /**
+   * Max memory per sandbox
+   * @type {number}
+   * @memberof Organization
+   */
+  maxMemoryPerSandbox: number
+  /**
+   * Max disk per sandbox
+   * @type {number}
+   * @memberof Organization
+   */
+  maxDiskPerSandbox: number
 }

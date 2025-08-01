@@ -30,4 +30,10 @@ export interface OrganizationSuspension {
    * @memberof OrganizationSuspension
    */
   until: Date
+  /**
+   * Suspension cleanup grace period hours
+   * @type {number}
+   * @memberof OrganizationSuspension
+   */
+  suspensionCleanupGracePeriodHours: number
 }
