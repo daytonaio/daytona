@@ -133,9 +133,9 @@ export class AuditService implements OnModuleInit {
         return
       }
 
-      if (retentionDays < 90) {
+      if (retentionDays < 365) {
         this.logger.warn(
-          `Audit log retention period (${retentionDays} days) is less than minimum 90 days, skipping cleanup`,
+          `Audit log retention period (${retentionDays} days) is less than minimum 365 days, skipping cleanup`,
         )
         return
       }
