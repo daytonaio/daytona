@@ -3,6 +3,7 @@ daytona_api_client/__init__.py
 daytona_api_client/api/__init__.py
 daytona_api_client/api/api_keys_api.py
 daytona_api_client/api/audit_api.py
+daytona_api_client/api/config_api.py
 daytona_api_client/api/docker_registry_api.py
 daytona_api_client/api/object_storage_api.py
 daytona_api_client/api/organizations_api.py
@@ -20,6 +21,7 @@ daytona_api_client/configuration.py
 daytona_api_client/exceptions.py
 daytona_api_client/models/__init__.py
 daytona_api_client/models/account_provider.py
+daytona_api_client/models/announcement.py
 daytona_api_client/models/api_key_list.py
 daytona_api_client/models/api_key_response.py
 daytona_api_client/models/audit_log.py
@@ -48,6 +50,7 @@ daytona_api_client/models/create_snapshot.py
 daytona_api_client/models/create_user.py
 daytona_api_client/models/create_volume.py
 daytona_api_client/models/create_workspace.py
+daytona_api_client/models/daytona_configuration.py
 daytona_api_client/models/display_info_response.py
 daytona_api_client/models/docker_registry.py
 daytona_api_client/models/execute_request.py
@@ -83,6 +86,7 @@ daytona_api_client/models/mouse_move_response.py
 daytona_api_client/models/mouse_position.py
 daytona_api_client/models/mouse_scroll_request.py
 daytona_api_client/models/mouse_scroll_response.py
+daytona_api_client/models/oidc_config.py
 daytona_api_client/models/organization.py
 daytona_api_client/models/organization_invitation.py
 daytona_api_client/models/organization_role.py
@@ -92,6 +96,7 @@ daytona_api_client/models/paginated_audit_logs.py
 daytona_api_client/models/paginated_snapshots_dto.py
 daytona_api_client/models/port_preview_url.py
 daytona_api_client/models/position.py
+daytona_api_client/models/posthog_config.py
 daytona_api_client/models/process_errors_response.py
 daytona_api_client/models/process_logs_response.py
 daytona_api_client/models/process_restart_response.py

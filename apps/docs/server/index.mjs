@@ -9,11 +9,9 @@ app.use((req, res, next) => {
   res.setHeader('X-Frame-Options', 'SAMEORIGIN')
   next()
 })
-app.use('/', express.static('dist/client/'))
-app.use((req, res, next) => {
-  ssrHandler(req, res, next)
-})
-app.get('*', (req, res) => {
+app.use('/docs', express.static('dist/client/'))
+app.use(ssrHandler)
+app.use((req, res) => {
   res.sendFile('404.html', { root: 'dist/client/' })
 })
 

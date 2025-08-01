@@ -34,6 +34,7 @@ import { CreateVolumeDto } from '../sandbox/dto/create-volume.dto'
 import { VolumeDto } from '../sandbox/dto/volume.dto'
 import { CreateWorkspaceDto } from '../sandbox/dto/create-workspace.deprecated.dto'
 import { WorkspaceDto } from '../sandbox/dto/workspace.deprecated.dto'
+import { TypedConfigService } from '../config/typed-config.service'
 
 type RequestWithUser = Request & { user?: { userId: string; organizationId: string } }
 type CommonCaptureProps = {
@@ -46,6 +47,7 @@ type CommonCaptureProps = {
   source: string
   isDeprecated?: boolean
   sdkVersion?: string
+  environment?: string
 }
 
 @Injectable()
@@ -53,21 +55,21 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
   private readonly posthog?: PostHog
   private readonly logger = new Logger(MetricsInterceptor.name)
 
-  constructor() {
-    if (!process.env.POSTHOG_API_KEY) {
+  constructor(private readonly configService: TypedConfigService) {
+    if (!this.configService.get('posthog.apiKey')) {
       this.logger.warn('POSTHOG_API_KEY is not set, metrics will not be recorded')
       return
     }
 
-    if (!process.env.POSTHOG_HOST) {
+    if (!this.configService.get('posthog.host')) {
       this.logger.warn('POSTHOG_HOST is not set, metrics will not be recorded')
       return
     }
 
     // Initialize PostHog client
     // Make sure to set POSTHOG_API_KEY in your environment variables
-    this.posthog = new PostHog(process.env.POSTHOG_API_KEY, {
-      host: process.env.POSTHOG_HOST,
+    this.posthog = new PostHog(this.configService.getOrThrow('posthog.apiKey'), {
+      host: this.configService.getOrThrow('posthog.host'),
     })
   }
 
@@ -116,6 +118,7 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
       source: Array.isArray(source) ? source[0] : source,
       isDeprecated: request.route.path.includes('/workspace') || request.route.path.includes('/images'),
       sdkVersion,
+      environment: this.configService.get('posthog.environment'),
     }
 
     switch (request.method) {
@@ -841,6 +844,7 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
       source: props.source,
       is_deprecated: props.isDeprecated,
       sdk_version: props.sdkVersion,
+      environment: props.environment,
     }
   }
 

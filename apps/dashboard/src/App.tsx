@@ -46,6 +46,7 @@ import AuditLogs from './pages/AuditLogs'
 import Spending from './pages/Spending'
 import EmailVerify from './pages/EmailVerify'
 import AccountSettings from './pages/AccountSettings'
+import { useConfig } from './hooks/useConfig'
 
 // Simple redirection components for external URLs
 const DocsRedirect = () => {
@@ -65,6 +66,7 @@ const SlackRedirect = () => {
 }
 
 function App() {
+  const config = useConfig()
   const location = useLocation()
   const posthog = usePostHog()
   const { error: authError, isAuthenticated, user, signoutRedirect } = useAuth()
@@ -76,10 +78,10 @@ function App() {
         name: user.profile.name,
       })
     }
-    if (import.meta.env.PROD && import.meta.env.VITE_PYLON_APP_ID && isAuthenticated && user) {
+    if (import.meta.env.PROD && config.pylonAppId && isAuthenticated && user) {
       window.pylon = {
         chat_settings: {
-          app_id: import.meta.env.VITE_PYLON_APP_ID,
+          app_id: config.pylonAppId,
           email: user.profile.email || '',
           name: user.profile.name || '',
           avatar_url: user.profile.picture,
@@ -87,7 +89,7 @@ function App() {
         },
       }
     }
-  }, [isAuthenticated, user, posthog])
+  }, [isAuthenticated, user, posthog, config.pylonAppId])
 
   // Hack for tracking PostHog pageviews in SPAs
   useEffect(() => {
@@ -165,7 +167,7 @@ function App() {
               </OwnerAccessOrganizationPageWrapper>
             }
           />
-          {import.meta.env.VITE_BILLING_API_URL && (
+          {config.billingApiUrl && (
             <>
               <Route
                 path={getRouteSubPath(RoutePath.BILLING_SPENDING)}
@@ -218,7 +220,10 @@ function App() {
             }
           />
           <Route path={getRouteSubPath(RoutePath.SETTINGS)} element={<OrganizationSettings />} />
-          <Route path={getRouteSubPath(RoutePath.ACCOUNT_SETTINGS)} element={<AccountSettings />} />
+          <Route
+            path={getRouteSubPath(RoutePath.ACCOUNT_SETTINGS)}
+            element={<AccountSettings linkedAccountsEnabled={config.linkedAccountsEnabled} />}
+          />
           <Route path={getRouteSubPath(RoutePath.USER_INVITATIONS)} element={<UserOrganizationInvitations />} />
           <Route path={getRouteSubPath(RoutePath.ONBOARDING)} element={<Onboarding />} />
         </Route>

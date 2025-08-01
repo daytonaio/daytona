@@ -23,12 +23,14 @@ import { RoutePath } from '@/enums/RoutePath'
 
 interface CreateOrganizationDialogProps {
   open: boolean
+  billingApiUrl?: string
   onOpenChange: (open: boolean) => void
   onCreateOrganization: (name: string) => Promise<Organization | null>
 }
 
 export const CreateOrganizationDialog: React.FC<CreateOrganizationDialogProps> = ({
   open,
+  billingApiUrl,
   onOpenChange,
   onCreateOrganization,
 }) => {
@@ -96,7 +98,7 @@ export const CreateOrganizationDialog: React.FC<CreateOrganizationDialogProps> =
             <div className="p-3 rounded-md bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
               <p className="font-medium">Your organization is created.</p>
               <p className="text-sm mt-1">
-                {import.meta.env.VITE_BILLING_API_URL ? (
+                {billingApiUrl ? (
                   <>
                     To get started, add a payment method on the{' '}
                     <Link

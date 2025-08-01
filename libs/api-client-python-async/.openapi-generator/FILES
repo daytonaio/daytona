@@ -3,6 +3,7 @@ daytona_api_client_async/__init__.py
 daytona_api_client_async/api/__init__.py
 daytona_api_client_async/api/api_keys_api.py
 daytona_api_client_async/api/audit_api.py
+daytona_api_client_async/api/config_api.py
 daytona_api_client_async/api/docker_registry_api.py
 daytona_api_client_async/api/object_storage_api.py
 daytona_api_client_async/api/organizations_api.py
@@ -20,6 +21,7 @@ daytona_api_client_async/configuration.py
 daytona_api_client_async/exceptions.py
 daytona_api_client_async/models/__init__.py
 daytona_api_client_async/models/account_provider.py
+daytona_api_client_async/models/announcement.py
 daytona_api_client_async/models/api_key_list.py
 daytona_api_client_async/models/api_key_response.py
 daytona_api_client_async/models/audit_log.py
@@ -48,6 +50,7 @@ daytona_api_client_async/models/create_snapshot.py
 daytona_api_client_async/models/create_user.py
 daytona_api_client_async/models/create_volume.py
 daytona_api_client_async/models/create_workspace.py
+daytona_api_client_async/models/daytona_configuration.py
 daytona_api_client_async/models/display_info_response.py
 daytona_api_client_async/models/docker_registry.py
 daytona_api_client_async/models/execute_request.py
@@ -83,6 +86,7 @@ daytona_api_client_async/models/mouse_move_response.py
 daytona_api_client_async/models/mouse_position.py
 daytona_api_client_async/models/mouse_scroll_request.py
 daytona_api_client_async/models/mouse_scroll_response.py
+daytona_api_client_async/models/oidc_config.py
 daytona_api_client_async/models/organization.py
 daytona_api_client_async/models/organization_invitation.py
 daytona_api_client_async/models/organization_role.py
@@ -92,6 +96,7 @@ daytona_api_client_async/models/paginated_audit_logs.py
 daytona_api_client_async/models/paginated_snapshots_dto.py
 daytona_api_client_async/models/port_preview_url.py
 daytona_api_client_async/models/position.py
+daytona_api_client_async/models/posthog_config.py
 daytona_api_client_async/models/process_errors_response.py
 daytona_api_client_async/models/process_logs_response.py
 daytona_api_client_async/models/process_restart_response.py

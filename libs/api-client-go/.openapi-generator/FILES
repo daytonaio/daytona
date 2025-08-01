@@ -2,6 +2,7 @@
 api/openapi.yaml
 api_api_keys.go
 api_audit.go
+api_config.go
 api_docker_registry.go
 api_object_storage.go
 api_organizations.go
@@ -18,6 +19,7 @@ configuration.go
 go.mod
 go.sum
 model_account_provider.go
+model_announcement.go
 model_api_key_list.go
 model_api_key_response.go
 model_audit_log.go
@@ -46,6 +48,7 @@ model_create_snapshot.go
 model_create_user.go
 model_create_volume.go
 model_create_workspace.go
+model_daytona_configuration.go
 model_display_info_response.go
 model_docker_registry.go
 model_execute_request.go
@@ -81,6 +84,7 @@ model_mouse_move_response.go
 model_mouse_position.go
 model_mouse_scroll_request.go
 model_mouse_scroll_response.go
+model_oidc_config.go
 model_organization.go
 model_organization_invitation.go
 model_organization_role.go
@@ -90,6 +94,7 @@ model_paginated_audit_logs.go
 model_paginated_snapshots_dto.go
 model_port_preview_url.go
 model_position.go
+model_posthog_config.go
 model_process_errors_response.go
 model_process_logs_response.go
 model_process_restart_response.go

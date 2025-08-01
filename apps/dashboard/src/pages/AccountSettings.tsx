@@ -11,7 +11,7 @@ import { handleApiError } from '@/lib/error-handling'
 import { Button } from '@/components/ui/button'
 import { Loader2 } from 'lucide-react'
 
-const AccountSettings: React.FC = () => {
+const AccountSettings: React.FC<{ linkedAccountsEnabled: boolean }> = ({ linkedAccountsEnabled }) => {
   const { userApi } = useApi()
   const { user, signinSilent } = useAuth()
 
@@ -45,7 +45,7 @@ const AccountSettings: React.FC = () => {
         <h1 className="text-2xl font-medium">Account Settings</h1>
       </div>
 
-      {import.meta.env.VITE_LINKED_ACCOUNTS_ENABLED === 'true' && <LinkedAccounts />}
+      {linkedAccountsEnabled && <LinkedAccounts />}
 
       <div className="mt-8">
         <div className="mb-6 flex justify-between items-center">

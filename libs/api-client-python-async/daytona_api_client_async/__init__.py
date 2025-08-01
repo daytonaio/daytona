@@ -20,6 +20,7 @@ __version__ = "0.0.0-dev"
 # import apis into sdk package
 from daytona_api_client_async.api.api_keys_api import ApiKeysApi
 from daytona_api_client_async.api.audit_api import AuditApi
+from daytona_api_client_async.api.config_api import ConfigApi
 from daytona_api_client_async.api.docker_registry_api import DockerRegistryApi
 from daytona_api_client_async.api.object_storage_api import ObjectStorageApi
 from daytona_api_client_async.api.organizations_api import OrganizationsApi
@@ -45,6 +46,7 @@ from daytona_api_client_async.exceptions import ApiException
 
 # import models into sdk package
 from daytona_api_client_async.models.account_provider import AccountProvider
+from daytona_api_client_async.models.announcement import Announcement
 from daytona_api_client_async.models.api_key_list import ApiKeyList
 from daytona_api_client_async.models.api_key_response import ApiKeyResponse
 from daytona_api_client_async.models.audit_log import AuditLog
@@ -73,6 +75,7 @@ from daytona_api_client_async.models.create_snapshot import CreateSnapshot
 from daytona_api_client_async.models.create_user import CreateUser
 from daytona_api_client_async.models.create_volume import CreateVolume
 from daytona_api_client_async.models.create_workspace import CreateWorkspace
+from daytona_api_client_async.models.daytona_configuration import DaytonaConfiguration
 from daytona_api_client_async.models.display_info_response import DisplayInfoResponse
 from daytona_api_client_async.models.docker_registry import DockerRegistry
 from daytona_api_client_async.models.execute_request import ExecuteRequest
@@ -108,6 +111,7 @@ from daytona_api_client_async.models.mouse_move_response import MouseMoveRespons
 from daytona_api_client_async.models.mouse_position import MousePosition
 from daytona_api_client_async.models.mouse_scroll_request import MouseScrollRequest
 from daytona_api_client_async.models.mouse_scroll_response import MouseScrollResponse
+from daytona_api_client_async.models.oidc_config import OidcConfig
 from daytona_api_client_async.models.organization import Organization
 from daytona_api_client_async.models.organization_invitation import OrganizationInvitation
 from daytona_api_client_async.models.organization_role import OrganizationRole
@@ -117,6 +121,7 @@ from daytona_api_client_async.models.paginated_audit_logs import PaginatedAuditL
 from daytona_api_client_async.models.paginated_snapshots_dto import PaginatedSnapshotsDto
 from daytona_api_client_async.models.port_preview_url import PortPreviewUrl
 from daytona_api_client_async.models.position import Position
+from daytona_api_client_async.models.posthog_config import PosthogConfig
 from daytona_api_client_async.models.process_errors_response import ProcessErrorsResponse
 from daytona_api_client_async.models.process_logs_response import ProcessLogsResponse
 from daytona_api_client_async.models.process_restart_response import ProcessRestartResponse

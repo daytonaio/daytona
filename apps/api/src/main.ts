@@ -9,7 +9,7 @@ import { NestFactory } from '@nestjs/core'
 import { NestExpressApplication } from '@nestjs/platform-express'
 import { AppModule } from './app.module'
 import { SwaggerModule } from '@nestjs/swagger'
-import { ConsoleLogger, Logger, LogLevel, ValidationPipe } from '@nestjs/common'
+import { ConsoleLogger, INestApplication, Logger, LogLevel, ValidationPipe } from '@nestjs/common'
 import { HttpAdapterHost } from '@nestjs/core'
 import { AllExceptionsFilter } from './filters/all-exceptions.filter'
 import { NotFoundExceptionFilter } from './common/middleware/frontend.middleware'
@@ -18,12 +18,13 @@ import { HttpsOptions } from '@nestjs/common/interfaces/external/https-options.i
 import { TypedConfigService } from './config/typed-config.service'
 import { DataSource, MigrationExecutor } from 'typeorm'
 import { RunnerService } from './sandbox/services/runner.service'
-
-import { SandboxClass } from './sandbox/enums/sandbox-class.enum'
 import { getOpenApiConfig } from './openapi.config'
 import { SchedulerRegistry } from '@nestjs/schedule'
 import { EventEmitter2 } from '@nestjs/event-emitter'
 import { AuditInterceptor } from './audit/interceptors/audit.interceptor'
+import { ApiKeyService } from './api-key/api-key.service'
+import { DAYTONA_ADMIN_USER_ID } from './app.service'
+import { OrganizationService } from './organization/services/organization.service'
 
 // https options
 const httpsEnabled = process.env.CERT_PATH && process.env.CERT_KEY_PATH
@@ -56,7 +57,7 @@ async function bootstrap() {
   const httpAdapter = app.get(HttpAdapterHost)
   app.useGlobalFilters(new AllExceptionsFilter(httpAdapter))
   app.useGlobalFilters(new NotFoundExceptionFilter())
-  app.useGlobalInterceptors(new MetricsInterceptor())
+  app.useGlobalInterceptors(new MetricsInterceptor(configService))
   app.useGlobalInterceptors(app.get(AuditInterceptor))
   app.useGlobalPipes(new ValidationPipe())
 
@@ -64,22 +65,34 @@ async function bootstrap() {
   eventEmitter.setMaxListeners(100)
 
   // Runtime flags for migrations for run and revert migrations
-  if (process.argv.length > 2 && process.argv[2].startsWith('--migration-')) {
-    const dataSource = app.get(DataSource)
-    dataSource.setOptions({ logging: true })
-    const migrationExecutor = new MigrationExecutor(dataSource)
+  if (process.argv.length > 2) {
+    if (process.argv[2].startsWith('--migration-')) {
+      const dataSource = app.get(DataSource)
+      dataSource.setOptions({ logging: true })
+      const migrationExecutor = new MigrationExecutor(dataSource)
 
-    switch (process.argv[2]) {
-      case '--migration-run':
-        await migrationExecutor.executePendingMigrations()
-        break
-      case '--migration-revert':
-        await migrationExecutor.undoLastMigration()
-        break
-      default:
-        Logger.error('Invalid migration flag')
+      switch (process.argv[2]) {
+        case '--migration-run':
+          await migrationExecutor.executePendingMigrations()
+          break
+        case '--migration-revert':
+          await migrationExecutor.undoLastMigration()
+          break
+        default:
+          Logger.error('Invalid migration flag')
+          process.exit(1)
+      }
+    } else if (process.argv[2] === '--create-admin-api-key') {
+      if (process.argv.length < 4) {
+        Logger.error('Invalid flag. API key name is required.')
         process.exit(1)
+      }
+      await createAdminApiKey(app, process.argv[3])
+    } else {
+      Logger.error('Invalid flag')
+      process.exit(1)
     }
+
     process.exit(0)
   }
 
@@ -101,24 +114,25 @@ async function bootstrap() {
   })
 
   // Auto create runners only in local development environment
-  if (!configService.get('production')) {
+  if (configService.get('defaultRunner.domain')) {
     const runnerService = app.get(RunnerService)
     const runners = await runnerService.findAll()
-    if (!runners.find((runner) => runner.domain === 'localtest.me:3003')) {
+    if (!runners.find((runner) => runner.domain === configService.getOrThrow('defaultRunner.domain'))) {
+      Logger.log(`Creating default runner: ${configService.getOrThrow('defaultRunner.domain')}`)
       await runnerService.create({
-        apiUrl: 'http://localhost:3003',
-        proxyUrl: 'http://localhost:3003',
-        apiKey: 'secret_api_token',
-        cpu: 4,
-        memoryGiB: 8,
-        diskGiB: 50,
-        gpu: 0,
-        gpuType: 'none',
-        capacity: 100,
-        region: 'us',
-        class: SandboxClass.SMALL,
-        domain: 'localtest.me:3003',
-        version: '0',
+        apiUrl: configService.getOrThrow('defaultRunner.apiUrl'),
+        proxyUrl: configService.getOrThrow('defaultRunner.proxyUrl'),
+        apiKey: configService.getOrThrow('defaultRunner.apiKey'),
+        cpu: configService.getOrThrow('defaultRunner.cpu'),
+        memoryGiB: configService.getOrThrow('defaultRunner.memory'),
+        diskGiB: configService.getOrThrow('defaultRunner.disk'),
+        gpu: configService.getOrThrow('defaultRunner.gpu'),
+        gpuType: configService.getOrThrow('defaultRunner.gpuType'),
+        capacity: configService.getOrThrow('defaultRunner.capacity'),
+        region: configService.getOrThrow('defaultRunner.region'),
+        class: configService.getOrThrow('defaultRunner.class'),
+        domain: configService.getOrThrow('defaultRunner.domain'),
+        version: configService.get('defaultRunner.version') || '0'
       })
     }
   }
@@ -136,6 +150,22 @@ async function bootstrap() {
   const port = configService.get('port')
   await app.listen(port, host)
   Logger.log(`🚀 Daytona API is running on: http://${host}:${port}/${globalPrefix}`)
+}
+
+async function createAdminApiKey(app: INestApplication, apiKeyName: string) {
+  const apiKeyService = app.get(ApiKeyService)
+  const organizationService = app.get(OrganizationService)
+
+  const personalOrg = await organizationService.findPersonal(DAYTONA_ADMIN_USER_ID)
+  const { value } = await apiKeyService.createApiKey(personalOrg.id, DAYTONA_ADMIN_USER_ID, apiKeyName, [])
+  Logger.log(
+    `
+=========================================
+=========================================
+Admin API key created: ${value}
+=========================================
+=========================================`,
+  )
 }
 
 bootstrap()

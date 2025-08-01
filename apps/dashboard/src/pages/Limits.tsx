@@ -20,6 +20,7 @@ import { OrganizationTier, Tier } from '@/billing-api'
 import { UserProfileIdentity } from './LinkedAccounts'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { toast } from 'sonner'
+import { useConfig } from '@/hooks/useConfig'
 
 const Limits: React.FC = () => {
   const { user } = useAuth()
@@ -30,9 +31,10 @@ const Limits: React.FC = () => {
   const [wallet, setWallet] = useState<OrganizationWallet | null>(null)
   const [usageOverview, setUsage] = useState<UsageOverview | null>(null)
   const [tierLoading, setTierLoading] = useState(false)
+  const config = useConfig()
 
   const fetchOrganizationTier = useCallback(async () => {
-    if (!import.meta.env.VITE_BILLING_API_URL) {
+    if (!config.billingApiUrl) {
       return
     }
     if (!selectedOrganization) {
@@ -47,7 +49,7 @@ const Limits: React.FC = () => {
     } finally {
       setTierLoading(false)
     }
-  }, [billingApi, selectedOrganization])
+  }, [billingApi, selectedOrganization, config.billingApiUrl])
 
   const fetchTiers = useCallback(async () => {
     const data = await billingApi.listTiers()
@@ -55,7 +57,7 @@ const Limits: React.FC = () => {
   }, [billingApi])
 
   const fetchOrganizationWallet = useCallback(async () => {
-    if (!import.meta.env.VITE_BILLING_API_URL) {
+    if (!config.billingApiUrl) {
       return
     }
     if (!selectedOrganization) {
@@ -67,7 +69,7 @@ const Limits: React.FC = () => {
     } catch (error) {
       handleApiError(error, 'Failed to fetch organization wallet')
     }
-  }, [billingApi, selectedOrganization])
+  }, [billingApi, selectedOrganization, config.billingApiUrl])
 
   const fetchUsage = useCallback(async () => {
     if (!selectedOrganization) {
@@ -118,7 +120,7 @@ const Limits: React.FC = () => {
   )
 
   useEffect(() => {
-    if (import.meta.env.VITE_BILLING_API_URL) {
+    if (config.billingApiUrl) {
       // Fetch usage after tier because limits might have changed
       fetchOrganizationTier().finally(() => fetchUsage())
       fetchTiers()
@@ -127,7 +129,7 @@ const Limits: React.FC = () => {
     }
     const interval = setInterval(fetchUsage, 10000)
     return () => clearInterval(interval)
-  }, [fetchOrganizationTier, fetchUsage, fetchTiers])
+  }, [fetchOrganizationTier, fetchUsage, fetchTiers, config.billingApiUrl])
 
   useEffect(() => {
     fetchOrganizationWallet()
@@ -231,7 +233,7 @@ const Limits: React.FC = () => {
         </CardContent>
       </Card>
 
-      {import.meta.env.VITE_BILLING_API_URL && (
+      {config.billingApiUrl && (
         <Card className="my-4">
           <CardHeader>
             <CardTitle className="flex items-center mb-2">Increasing your limits</CardTitle>

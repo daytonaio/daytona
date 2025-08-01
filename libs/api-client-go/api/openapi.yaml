@@ -10,6 +10,20 @@ info:
 servers:
   - url: http://localhost:3000
 paths:
+  /config:
+    get:
+      operationId: ConfigController_getConfig
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DaytonaConfiguration'
+          description: Daytona configuration
+      summary: Get config
+      tags:
+        - config
   /api-keys:
     get:
       operationId: listApiKeys
@@ -5978,6 +5992,134 @@ paths:
         - audit
 components:
   schemas:
+    Announcement:
+      properties:
+        text:
+          description: The announcement text
+          example: New feature available!
+          type: string
+        learnMoreUrl:
+          description: URL to learn more about the announcement
+          example: https://example.com/learn-more
+          type: string
+      required:
+        - text
+      type: object
+    PosthogConfig:
+      properties:
+        apiKey:
+          description: PostHog API key
+          example: phc_abc123
+          type: string
+        host:
+          description: PostHog host URL
+          example: https://app.posthog.com
+          type: string
+      required:
+        - apiKey
+        - host
+      type: object
+    OidcConfig:
+      properties:
+        issuer:
+          description: OIDC issuer
+          example: https://auth.example.com
+          type: string
+        clientId:
+          description: OIDC client ID
+          example: daytona-client
+          type: string
+        audience:
+          description: OIDC audience
+          example: daytona-api
+          type: string
+      required:
+        - audience
+        - clientId
+        - issuer
+      type: object
+    DaytonaConfiguration:
+      example:
+        pylonAppId: pylon-app-123
+        proxyTemplateUrl: 'https://{{PORT}}-{{sandboxId}}.proxy.example.com'
+        dashboardUrl: https://dashboard.example.com
+        maintananceMode: false
+        environment: production
+        defaultSnapshot: ubuntu:22.04
+        billingApiUrl: https://billing.example.com
+        linkedAccountsEnabled: true
+        oidc: ''
+        announcements:
+          feature-update:
+            text: New feature available!
+            learnMoreUrl: https://example.com
+        posthog: ''
+        maxAutoArchiveInterval: 43200
+      properties:
+        posthog:
+          allOf:
+            - $ref: '#/components/schemas/PosthogConfig'
+          description: PostHog configuration
+        oidc:
+          allOf:
+            - $ref: '#/components/schemas/OidcConfig'
+          description: OIDC configuration
+        linkedAccountsEnabled:
+          description: Whether linked accounts are enabled
+          example: true
+          type: boolean
+        announcements:
+          additionalProperties:
+            $ref: '#/components/schemas/Announcement'
+          description: System announcements
+          example:
+            feature-update:
+              text: New feature available!
+              learnMoreUrl: https://example.com
+          type: object
+        pylonAppId:
+          description: Pylon application ID
+          example: pylon-app-123
+          type: string
+        proxyTemplateUrl:
+          description: Proxy template URL
+          example: 'https://{{PORT}}-{{sandboxId}}.proxy.example.com'
+          type: string
+        defaultSnapshot:
+          description: Default snapshot for sandboxes
+          example: ubuntu:22.04
+          type: string
+        dashboardUrl:
+          description: Dashboard URL
+          example: https://dashboard.example.com
+          type: string
+        maxAutoArchiveInterval:
+          description: Maximum auto-archive interval in minutes
+          example: 43200
+          type: number
+        maintananceMode:
+          description: Whether maintenance mode is enabled
+          example: false
+          type: boolean
+        environment:
+          description: Current environment
+          example: production
+          type: string
+        billingApiUrl:
+          description: Billing API URL
+          example: https://billing.example.com
+          type: string
+      required:
+        - announcements
+        - dashboardUrl
+        - defaultSnapshot
+        - environment
+        - linkedAccountsEnabled
+        - maintananceMode
+        - maxAutoArchiveInterval
+        - oidc
+        - proxyTemplateUrl
+      type: object
     CreateApiKey:
       example:
         permissions:
