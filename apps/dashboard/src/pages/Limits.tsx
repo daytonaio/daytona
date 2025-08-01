@@ -239,6 +239,8 @@ const Limits: React.FC = () => {
               <CardDescription>
                 Your organization is currently in <b>Tier {organizationTier.tier}</b>. Your limits will automatically be
                 increased once you move to the next tier based on the criteria outlined below.
+                <br />
+                Note: For the top up requirements, make sure to top up in a single transaction.
               </CardDescription>
             )}
           </CardHeader>

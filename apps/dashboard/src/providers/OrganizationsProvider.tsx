@@ -9,6 +9,7 @@ import { useApi } from '@/hooks/useApi'
 import { OrganizationsContext, IOrganizationsContext } from '@/contexts/OrganizationsContext'
 import { Organization } from '@daytonaio/api-client'
 import { handleApiError } from '@/lib/error-handling'
+import { LocalStorageKey } from '@/enums/LocalStorageKey'
 
 type Props = {
   children: ReactNode
@@ -30,11 +31,22 @@ export function OrganizationsProvider(props: Props) {
     suspend(getOrganizations, [organizationsApi, 'organizations']),
   )
 
-  const refreshOrganizations = useCallback(async () => {
-    const orgs = await getOrganizations()
-    setOrganizations(orgs)
-    return orgs
-  }, [getOrganizations])
+  const refreshOrganizations = useCallback(
+    async (selectedOrganizationId?: string) => {
+      const orgs = await getOrganizations()
+      setOrganizations(orgs)
+      if (selectedOrganizationId) {
+        localStorage.setItem(LocalStorageKey.SelectedOrganizationId, selectedOrganizationId)
+      }
+      // TODO: come back to this asap
+      // After creating a new org, the selected org was updated unnecessarily so we reload the page just in case
+      setTimeout(() => {
+        window.location.reload()
+      }, 500)
+      return orgs
+    },
+    [getOrganizations],
+  )
 
   const contextValue: IOrganizationsContext = useMemo(() => {
     return {
