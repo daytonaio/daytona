@@ -43,7 +43,9 @@ export const CreateOrganizationDialog: React.FC<CreateOrganizationDialogProps> =
     if (org) {
       // TODO: Return when we fix the selected org states
       // setCreatedOrg(org)
-      setName('')
+      // setName('')
+    } else {
+      setLoading(false)
     }
     setLoading(false)
   }
