@@ -23,6 +23,7 @@ import { TableEmptyState } from '../TableEmptyState'
 import { SandboxTableProps } from './types'
 import { useSandboxTable } from './useSandboxTable'
 import { SandboxTableHeader } from './SandboxTableHeader'
+import { BulkActionsDropdown } from './BulkActionsDropdown'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { OrganizationRolePermissionsEnum } from '@daytonaio/api-client'
 import { cn } from '@/lib/utils'
@@ -43,6 +44,9 @@ export function SandboxTable({
   handleStop,
   handleDelete,
   handleBulkDelete,
+  handleBulkStart,
+  handleBulkStop,
+  handleBulkArchive,
   handleArchive,
   handleVnc,
   getWebTerminalUrl,
@@ -210,33 +214,47 @@ export function SandboxTable({
               <div className="text-sm text-muted-foreground">
                 {selectedCount} {selectedCount === 1 ? 'sandbox' : 'sandboxes'} selected
               </div>
-              <AlertDialog open={bulkDeleteDialogOpen} onOpenChange={setBulkDeleteDialogOpen}>
-                <AlertDialogTrigger asChild>
-                  <Button variant="ghost" size="sm" className="h-8">
-                    <Trash2 className="w-4 h-4" />
-                    Delete {selectedCount > 1 ? 'All' : ''}
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Delete Sandboxes</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      Are you sure you want to delete{' '}
-                      {selectedCount === 1 ? 'this sandbox' : `these ${selectedCount} sandboxes`}? This action cannot be
-                      undone.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction
-                      onClick={handleBulkDeleteConfirm}
-                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                    >
-                      Delete
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
+              <div className="flex items-center gap-2">
+                <BulkActionsDropdown
+                  selectedSandboxes={table
+                    .getRowModel()
+                    .rows.filter((row) => row.getIsSelected())
+                    .map((row) => row.original)}
+                  selectedCount={selectedCount}
+                  onBulkStart={handleBulkStart}
+                  onBulkStop={handleBulkStop}
+                  onBulkArchive={handleBulkArchive}
+                  onBulkDelete={handleBulkDelete}
+                  onClearSelection={() => table.toggleAllRowsSelected(false)}
+                />
+                <AlertDialog open={bulkDeleteDialogOpen} onOpenChange={setBulkDeleteDialogOpen}>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="ghost" size="sm" className="h-8 text-destructive hover:text-destructive">
+                      <Trash2 className="w-4 h-4" />
+                      Delete {selectedCount > 1 ? 'All' : ''}
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Delete Sandboxes</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Are you sure you want to delete{' '}
+                        {selectedCount === 1 ? 'this sandbox' : `these ${selectedCount} sandboxes`}? This action cannot
+                        be undone.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={handleBulkDeleteConfirm}
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      >
+                        Delete
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
             </div>
           </motion.div>
         )}

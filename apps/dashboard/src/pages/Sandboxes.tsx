@@ -321,6 +321,160 @@ const Sandboxes: React.FC = () => {
     }
   }
 
+  const handleBulkStart = async (ids: string[]) => {
+    setLoadingSandboxes((prev) => ({ ...prev, ...ids.reduce((acc, id) => ({ ...acc, [id]: true }), {}) }))
+    setTransitioningSandboxes((prev) => ({ ...prev, ...ids.reduce((acc, id) => ({ ...acc, [id]: true }), {}) }))
+
+    const selectedSandboxInBulk = selectedSandbox && ids.includes(selectedSandbox.id)
+
+    for (const id of ids) {
+      const sandboxToStart = sandboxes.find((s) => s.id === id)
+      const previousState = sandboxToStart?.state
+
+      setSandboxes((prev) => prev.map((s) => (s.id === id ? { ...s, state: SandboxState.STARTING } : s)))
+
+      if (selectedSandbox?.id === id) {
+        setSelectedSandbox((prev) => (prev ? { ...prev, state: SandboxState.STARTING } : null))
+      }
+
+      try {
+        await sandboxApi.startSandbox(id, selectedOrganization?.id)
+        toast.success(`Starting sandbox with ID: ${id}`)
+      } catch (error) {
+        handleApiError(
+          error,
+          'Failed to start sandbox',
+          error instanceof OrganizationSuspendedError &&
+            import.meta.env.VITE_BILLING_API_URL &&
+            authenticatedUserOrganizationMember?.role === OrganizationUserRoleEnum.OWNER ? (
+            <Button variant="secondary" onClick={() => navigate(RoutePath.BILLING_WALLET)}>
+              Go to billing
+            </Button>
+          ) : undefined,
+        )
+        setSandboxes((prev) => prev.map((s) => (s.id === id ? { ...s, state: previousState } : s)))
+        if (selectedSandbox?.id === id && previousState) {
+          setSelectedSandbox((prev) => (prev ? { ...prev, state: previousState } : null))
+        }
+
+        const shouldContinue = window.confirm(
+          `Failed to start sandbox with ID: ${id}. Do you want to continue with the remaining sandboxes?`,
+        )
+
+        if (!shouldContinue) {
+          break
+        }
+      } finally {
+        setLoadingSandboxes((prev) => ({ ...prev, [id]: false }))
+        setTimeout(() => {
+          setTransitioningSandboxes((prev) => ({ ...prev, [id]: false }))
+        }, 2000)
+      }
+    }
+
+    if (selectedSandboxInBulk) {
+      setShowSandboxDetails(false)
+      setSelectedSandbox(null)
+    }
+  }
+
+  const handleBulkStop = async (ids: string[]) => {
+    setLoadingSandboxes((prev) => ({ ...prev, ...ids.reduce((acc, id) => ({ ...acc, [id]: true }), {}) }))
+    setTransitioningSandboxes((prev) => ({ ...prev, ...ids.reduce((acc, id) => ({ ...acc, [id]: true }), {}) }))
+
+    const selectedSandboxInBulk = selectedSandbox && ids.includes(selectedSandbox.id)
+
+    for (const id of ids) {
+      const sandboxToStop = sandboxes.find((s) => s.id === id)
+      const previousState = sandboxToStop?.state
+
+      setSandboxes((prev) => prev.map((s) => (s.id === id ? { ...s, state: SandboxState.STOPPING } : s)))
+
+      if (selectedSandbox?.id === id) {
+        setSelectedSandbox((prev) => (prev ? { ...prev, state: SandboxState.STOPPING } : null))
+      }
+
+      try {
+        await sandboxApi.stopSandbox(id, selectedOrganization?.id)
+        toast.success(
+          `Stopping sandbox with ID: ${id}`,
+          sandboxToStop?.autoDeleteInterval !== undefined && sandboxToStop.autoDeleteInterval >= 0
+            ? {
+                description: `This sandbox will be deleted automatically ${sandboxToStop.autoDeleteInterval === 0 ? 'upon stopping' : `in ${formatDuration(sandboxToStop.autoDeleteInterval)} unless it is started again`}.`,
+              }
+            : undefined,
+        )
+      } catch (error) {
+        handleApiError(error, 'Failed to stop sandbox')
+        setSandboxes((prev) => prev.map((s) => (s.id === id ? { ...s, state: previousState } : s)))
+        if (selectedSandbox?.id === id && previousState) {
+          setSelectedSandbox((prev) => (prev ? { ...prev, state: previousState } : null))
+        }
+
+        const shouldContinue = window.confirm(
+          `Failed to stop sandbox with ID: ${id}. Do you want to continue with the remaining sandboxes?`,
+        )
+
+        if (!shouldContinue) {
+          break
+        }
+      } finally {
+        setLoadingSandboxes((prev) => ({ ...prev, [id]: false }))
+        setTimeout(() => {
+          setTransitioningSandboxes((prev) => ({ ...prev, [id]: false }))
+        }, 2000)
+      }
+    }
+
+    if (selectedSandboxInBulk) {
+      setShowSandboxDetails(false)
+      setSelectedSandbox(null)
+    }
+  }
+
+  const handleBulkArchive = async (ids: string[]) => {
+    setLoadingSandboxes((prev) => ({ ...prev, ...ids.reduce((acc, id) => ({ ...acc, [id]: true }), {}) }))
+
+    const selectedSandboxInBulk = selectedSandbox && ids.includes(selectedSandbox.id)
+
+    for (const id of ids) {
+      const sandboxToArchive = sandboxes.find((s) => s.id === id)
+      const previousState = sandboxToArchive?.state
+
+      setSandboxes((prev) => prev.map((s) => (s.id === id ? { ...s, state: SandboxState.ARCHIVING } : s)))
+
+      if (selectedSandbox?.id === id) {
+        setSelectedSandbox((prev) => (prev ? { ...prev, state: SandboxState.ARCHIVING } : null))
+      }
+
+      try {
+        await sandboxApi.archiveSandbox(id, selectedOrganization?.id)
+        toast.success(`Archiving sandbox with ID: ${id}`)
+      } catch (error) {
+        handleApiError(error, 'Failed to archive sandbox')
+        setSandboxes((prev) => prev.map((s) => (s.id === id ? { ...s, state: previousState } : s)))
+        if (selectedSandbox?.id === id && previousState) {
+          setSelectedSandbox((prev) => (prev ? { ...prev, state: previousState } : null))
+        }
+
+        const shouldContinue = window.confirm(
+          `Failed to archive sandbox with ID: ${id}. Do you want to continue with the remaining sandboxes?`,
+        )
+
+        if (!shouldContinue) {
+          break
+        }
+      } finally {
+        setLoadingSandboxes((prev) => ({ ...prev, [id]: false }))
+      }
+    }
+
+    if (selectedSandboxInBulk) {
+      setShowSandboxDetails(false)
+      setSelectedSandbox(null)
+    }
+  }
+
   const handleArchive = async (id: string) => {
     setLoadingSandboxes((prev) => ({ ...prev, [id]: true }))
 
@@ -524,6 +678,9 @@ const Sandboxes: React.FC = () => {
           setShowDeleteDialog(true)
         }}
         handleBulkDelete={handleBulkDelete}
+        handleBulkStart={handleBulkStart}
+        handleBulkStop={handleBulkStop}
+        handleBulkArchive={handleBulkArchive}
         handleArchive={handleArchive}
         handleVnc={handleVnc}
         getWebTerminalUrl={getWebTerminalUrl}
