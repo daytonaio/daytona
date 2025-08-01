@@ -781,6 +781,7 @@ export class ToolboxController {
         message: req.body?.message,
         author: req.body?.author,
         email: req.body?.email,
+        allow_empty: req.body?.allow_empty,
       }),
     },
   })

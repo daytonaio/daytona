@@ -177,7 +177,9 @@ class AsyncGit:
         )
 
     @intercept_errors(message_prefix="Failed to commit changes: ")
-    async def commit(self, path: str, message: str, author: str, email: str) -> GitCommitResponse:
+    async def commit(
+        self, path: str, message: str, author: str, email: str, allow_empty: bool = False
+    ) -> GitCommitResponse:
         """Creates a new commit with the staged changes. Make sure to stage
         changes using the add() method before committing.
 
@@ -187,6 +189,7 @@ class AsyncGit:
             message (str): Commit message describing the changes.
             author (str): Name of the commit author.
             email (str): Email address of the commit author.
+            allow_empty (bool, optional): Allow creating an empty commit when no changes are staged. Defaults to False.
 
         Example:
             ```python
@@ -198,6 +201,15 @@ class AsyncGit:
                 author="John Doe",
                 email="john@example.com"
             )
+
+            # Create an empty commit
+            await sandbox.git.commit(
+                path="workspace/repo",
+                message="Empty commit for testing",
+                author="John Doe",
+                email="john@example.com",
+                allow_empty=True
+            )
             ```
         """
         response = await self._toolbox_api.git_commit_changes(
@@ -207,6 +219,7 @@ class AsyncGit:
                 message=message,
                 author=author,
                 email=email,
+                allow_empty=allow_empty,
             ),
         )
         return GitCommitResponse(sha=response.hash)

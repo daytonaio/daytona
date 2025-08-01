@@ -18,8 +18,8 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, StrictStr
-from typing import Any, ClassVar, Dict, List
+from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictStr
+from typing import Any, ClassVar, Dict, List, Optional
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -31,8 +31,9 @@ class GitCommitRequest(BaseModel):
     message: StrictStr
     author: StrictStr
     email: StrictStr
+    allow_empty: Optional[StrictBool] = Field(default=False, description="Allow creating an empty commit when no changes are staged")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["path", "message", "author", "email"]
+    __properties: ClassVar[List[str]] = ["path", "message", "author", "email", "allow_empty"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -95,7 +96,8 @@ class GitCommitRequest(BaseModel):
             "path": obj.get("path"),
             "message": obj.get("message"),
             "author": obj.get("author"),
-            "email": obj.get("email")
+            "email": obj.get("email"),
+            "allow_empty": obj.get("allow_empty") if obj.get("allow_empty") is not None else False
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

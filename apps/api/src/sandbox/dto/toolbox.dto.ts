@@ -139,6 +139,12 @@ export class GitCommitRequestDto {
 
   @ApiProperty()
   email: string
+
+  @ApiPropertyOptional({
+    description: 'Allow creating an empty commit when no changes are staged',
+    default: false,
+  })
+  allow_empty?: boolean
 }
 
 @ApiSchema({ name: 'GitCommitResponse' })

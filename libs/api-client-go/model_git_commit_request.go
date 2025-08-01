@@ -26,6 +26,8 @@ type GitCommitRequest struct {
 	Message string `json:"message"`
 	Author  string `json:"author"`
 	Email   string `json:"email"`
+	// Allow creating an empty commit when no changes are staged
+	AllowEmpty *bool `json:"allow_empty,omitempty"`
 }
 
 type _GitCommitRequest GitCommitRequest
@@ -40,6 +42,8 @@ func NewGitCommitRequest(path string, message string, author string, email strin
 	this.Message = message
 	this.Author = author
 	this.Email = email
+	var allowEmpty bool = false
+	this.AllowEmpty = &allowEmpty
 	return &this
 }
 
@@ -48,6 +52,8 @@ func NewGitCommitRequest(path string, message string, author string, email strin
 // but it doesn't guarantee that properties required by API are set
 func NewGitCommitRequestWithDefaults() *GitCommitRequest {
 	this := GitCommitRequest{}
+	var allowEmpty bool = false
+	this.AllowEmpty = &allowEmpty
 	return &this
 }
 
@@ -147,6 +153,38 @@ func (o *GitCommitRequest) SetEmail(v string) {
 	o.Email = v
 }
 
+// GetAllowEmpty returns the AllowEmpty field value if set, zero value otherwise.
+func (o *GitCommitRequest) GetAllowEmpty() bool {
+	if o == nil || IsNil(o.AllowEmpty) {
+		var ret bool
+		return ret
+	}
+	return *o.AllowEmpty
+}
+
+// GetAllowEmptyOk returns a tuple with the AllowEmpty field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *GitCommitRequest) GetAllowEmptyOk() (*bool, bool) {
+	if o == nil || IsNil(o.AllowEmpty) {
+		return nil, false
+	}
+	return o.AllowEmpty, true
+}
+
+// HasAllowEmpty returns a boolean if a field has been set.
+func (o *GitCommitRequest) HasAllowEmpty() bool {
+	if o != nil && !IsNil(o.AllowEmpty) {
+		return true
+	}
+
+	return false
+}
+
+// SetAllowEmpty gets a reference to the given bool and assigns it to the AllowEmpty field.
+func (o *GitCommitRequest) SetAllowEmpty(v bool) {
+	o.AllowEmpty = &v
+}
+
 func (o GitCommitRequest) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -161,6 +199,9 @@ func (o GitCommitRequest) ToMap() (map[string]interface{}, error) {
 	toSerialize["message"] = o.Message
 	toSerialize["author"] = o.Author
 	toSerialize["email"] = o.Email
+	if !IsNil(o.AllowEmpty) {
+		toSerialize["allow_empty"] = o.AllowEmpty
+	}
 	return toSerialize, nil
 }
 

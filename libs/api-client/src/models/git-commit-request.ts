@@ -42,4 +42,10 @@ export interface GitCommitRequest {
    * @memberof GitCommitRequest
    */
   email: string
+  /**
+   * Allow creating an empty commit when no changes are staged
+   * @type {boolean}
+   * @memberof GitCommitRequest
+   */
+  allow_empty?: boolean
 }
