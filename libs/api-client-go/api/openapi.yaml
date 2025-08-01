@@ -1312,7 +1312,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Sandbox'
-          description: Sandbox has been started
+          description: Sandbox has been started or is being restored from archived
+            state
       security:
         - bearer: []
         - oauth2:
@@ -7725,6 +7726,7 @@ components:
         author: author
         message: message
         email: email
+        allow_empty: false
       properties:
         path:
           type: string
@@ -7734,6 +7736,10 @@ components:
           type: string
         email:
           type: string
+        allow_empty:
+          default: false
+          description: Allow creating an empty commit when no changes are staged
+          type: boolean
       required:
         - author
         - email
