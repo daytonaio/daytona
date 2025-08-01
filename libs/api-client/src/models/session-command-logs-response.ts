@@ -15,19 +15,19 @@
 /**
  *
  * @export
- * @interface GitBranchRequest
+ * @interface SessionCommandLogsResponse
  */
-export interface GitBranchRequest {
+export interface SessionCommandLogsResponse {
   /**
-   *
+   * The stdout of the command
    * @type {string}
-   * @memberof GitBranchRequest
+   * @memberof SessionCommandLogsResponse
    */
-  path: string
+  stdout: string
   /**
-   *
+   * The stderr of the command
    * @type {string}
-   * @memberof GitBranchRequest
+   * @memberof SessionCommandLogsResponse
    */
-  name: string
+  stderr: string
 }

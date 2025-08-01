@@ -81,6 +81,7 @@ import {
   ProcessRestartResponseDto,
   ProcessLogsResponseDto,
   ProcessErrorsResponseDto,
+  SessionCommandLogsResponseDto,
 } from '../dto/toolbox.dto'
 import { ToolboxService } from '../services/toolbox.service'
 import { ContentTypeInterceptor } from '../../common/interceptors/content-type.interceptors'
@@ -1166,6 +1167,11 @@ export class ToolboxController {
   // When follow is true, the response is an octet stream
   @ApiResponse({
     status: 200,
+    description: 'Command logs',
+    type: SessionCommandLogsResponseDto,
+  })
+  @ApiResponse({
+    status: 200,
     description: 'Command log stream',
     content: {
       'text/plain': {
@@ -1175,7 +1181,7 @@ export class ToolboxController {
       },
     },
   })
-  @ApiQuery({ name: 'follow', type: Boolean, required: false })
+  @ApiQuery({ name: 'follow', type: Boolean, required: false, description: 'Whether to stream the logs' })
   @ApiParam({ name: 'commandId', type: String, required: true })
   @ApiParam({ name: 'sessionId', type: String, required: true })
   @ApiParam({ name: 'sandboxId', type: String, required: true })

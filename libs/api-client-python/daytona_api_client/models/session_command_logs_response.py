@@ -18,21 +18,19 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, Field, StrictFloat, StrictInt, StrictStr
-from typing import Any, ClassVar, Dict, List, Optional, Union
+from pydantic import BaseModel, ConfigDict, Field, StrictStr
+from typing import Any, ClassVar, Dict, List
 from typing import Optional, Set
 from typing_extensions import Self
 
-class SessionExecuteResponse(BaseModel):
+class SessionCommandLogsResponse(BaseModel):
     """
-    SessionExecuteResponse
+    SessionCommandLogsResponse
     """ # noqa: E501
-    cmd_id: Optional[StrictStr] = Field(default=None, description="The ID of the executed command", alias="cmdId")
-    stdout: Optional[StrictStr] = Field(default=None, description="The stdout of the executed command")
-    stderr: Optional[StrictStr] = Field(default=None, description="The stderr of the executed command")
-    exit_code: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="The exit code of the executed command", alias="exitCode")
+    stdout: StrictStr = Field(description="The stdout of the command")
+    stderr: StrictStr = Field(description="The stderr of the command")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["cmdId", "stdout", "stderr", "exitCode"]
+    __properties: ClassVar[List[str]] = ["stdout", "stderr"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -52,7 +50,7 @@ class SessionExecuteResponse(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of SessionExecuteResponse from a JSON string"""
+        """Create an instance of SessionCommandLogsResponse from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -84,7 +82,7 @@ class SessionExecuteResponse(BaseModel):
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of SessionExecuteResponse from a dict"""
+        """Create an instance of SessionCommandLogsResponse from a dict"""
         if obj is None:
             return None
 
@@ -92,10 +90,8 @@ class SessionExecuteResponse(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "cmdId": obj.get("cmdId"),
             "stdout": obj.get("stdout"),
-            "stderr": obj.get("stderr"),
-            "exitCode": obj.get("exitCode")
+            "stderr": obj.get("stderr")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

@@ -17,6 +17,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+const (
+	COMMAND_EXIT_MARKER = "DTN_CMD_EXITED"
+)
+
 var sessions = map[string]*session{}
 
 func (s *SessionController) CreateSession(c *gin.Context) {
@@ -183,7 +187,7 @@ func (s *SessionController) getSessionCommand(sessionId, cmdId string) (*Command
 		return command, nil
 	}
 
-	_, exitCodeFilePath := command.LogFilePath(session.Dir(s.configDir))
+	_, _, exitCodeFilePath := command.LogFilePath(session.Dir(s.configDir))
 	exitCode, err := os.ReadFile(exitCodeFilePath)
 	if err != nil {
 		if os.IsNotExist(err) {

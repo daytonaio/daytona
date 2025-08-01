@@ -61,40 +61,27 @@ async function sessionExecLogsAsync(sandbox: Sandbox) {
   await sandbox.process.createSession(sessionId)
 
   const command = await sandbox.process.executeSessionCommand(sessionId, {
-    command: 'counter=1; while (( counter <= 3 )); do echo "Count: $counter"; ((counter++)); sleep 2; done',
+    command: 'counter=1; while (( counter <= 3 )); do echo "Count: $counter"; ((counter++)); sleep 2; done; non-existent-command',
     runAsync: true,
   })
 
-  await sandbox.process.getSessionCommandLogs(sessionId, command.cmdId!, (chunk) => {
-    console.log('Log chunk:', chunk)
-  })
+  await sandbox.process.getSessionCommandLogs(
+    sessionId,
+    command.cmdId!,
+    (stdout) => console.log('[STDOUT]:', stdout),
+    (stderr) => console.log('[STDERR]:', stderr),
+  )
 }
 
 async function main() {
   const daytona = new Daytona()
 
   //  first, create a sandbox
-  const sandbox = await daytona.create(
-    {
-      image: Image.base('ubuntu:22.04').runCommands(
-        'apt-get update && apt-get install -y --no-install-recommends nodejs npm coreutils',
-        'curl -fsSL https://deb.nodesource.com/setup_20.x | bash -',
-        'apt-get install -y nodejs',
-        'npm install -g ts-node typescript',
-      ),
-      language: 'typescript',
-      autoStopInterval: 60,
-      autoArchiveInterval: 60,
-      autoDeleteInterval: 120,
-    },
-    {
-      onSnapshotCreateLogs: console.log,
-    },
-  )
+  const sandbox = await daytona.create()
 
   try {
-    await basicExec(sandbox)
-    await sessionExec(sandbox)
+    // await basicExec(sandbox)
+    // await sessionExec(sandbox)
     await sessionExecLogsAsync(sandbox)
   } catch (error) {
     console.error('Error executing commands:', error)

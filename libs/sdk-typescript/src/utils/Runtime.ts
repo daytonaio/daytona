@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { dynamicImport } from "./Import"
+
 declare global {
   /**
    * In Deno this global exists and has a `version.deno` string;

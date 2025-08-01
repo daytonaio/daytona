@@ -40,7 +40,8 @@ async def main():
 
         print("Now getting logs for the second command")
         logs = await sandbox.process.get_session_command_logs(exec_session_id, exec_command2.cmd_id)
-        print(logs)
+        print(f"Command stdout: {logs.stdout}")
+        print(f"Command stderr: {logs.stderr}")
 
         # You can also list all active sessions
         sessions = await sandbox.process.list_sessions()
