@@ -24,7 +24,7 @@ export const BillingProvider: React.FC<BillingProviderProps> = ({ children }) =>
 
   const getWallet = useCallback(
     async (selectedOrganizationId?: string) => {
-      if (!selectedOrganizationId) {
+      if (!import.meta.env.VITE_BILLING_API_URL || !selectedOrganizationId) {
         return null
       }
       try {
@@ -39,7 +39,7 @@ export const BillingProvider: React.FC<BillingProviderProps> = ({ children }) =>
 
   const getOrganizationTier = useCallback(
     async (selectedOrganizationId?: string) => {
-      if (!selectedOrganizationId) {
+      if (!import.meta.env.VITE_BILLING_API_URL || !selectedOrganizationId) {
         return null
       }
       return await billingApi.getOrganizationTier(selectedOrganizationId)
@@ -48,6 +48,9 @@ export const BillingProvider: React.FC<BillingProviderProps> = ({ children }) =>
   )
 
   const getTiers = useCallback(async () => {
+    if (!import.meta.env.VITE_BILLING_API_URL) {
+      return []
+    }
     try {
       return await billingApi.listTiers()
     } catch (error) {
@@ -58,7 +61,7 @@ export const BillingProvider: React.FC<BillingProviderProps> = ({ children }) =>
 
   const getOrganizationEmails = useCallback(
     async (selectedOrganizationId?: string) => {
-      if (!selectedOrganizationId) {
+      if (!import.meta.env.VITE_BILLING_API_URL || !selectedOrganizationId) {
         return []
       }
       return await billingApi.listOrganizationEmails(selectedOrganizationId)
@@ -68,7 +71,7 @@ export const BillingProvider: React.FC<BillingProviderProps> = ({ children }) =>
 
   const getBillingPortalUrl = useCallback(
     async (selectedOrganizationId?: string) => {
-      if (!selectedOrganizationId) {
+      if (!import.meta.env.VITE_BILLING_API_URL || !selectedOrganizationId) {
         return null
       }
       return await billingApi.getOrganizationBillingPortalUrl(selectedOrganizationId)
