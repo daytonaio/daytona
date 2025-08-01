@@ -32,6 +32,8 @@ import { SandboxStopAction } from './sandbox-actions/sandbox-stop.action'
 import { SandboxDestroyAction } from './sandbox-actions/sandbox-destroy.action'
 import { SandboxArchiveAction } from './sandbox-actions/sandbox-archive.action'
 import { SYNC_AGAIN, DONT_SYNC_AGAIN } from './sandbox-actions/sandbox.action'
+import { EventEmitter2 } from '@nestjs/event-emitter'
+import { TypedConfigService } from '../../config/typed-config.service'
 
 export const SYNC_INSTANCE_STATE_LOCK_KEY = 'sync-instance-state-'
 
@@ -48,6 +50,8 @@ export class SandboxManager {
     private readonly sandboxStopAction: SandboxStopAction,
     private readonly sandboxDestroyAction: SandboxDestroyAction,
     private readonly sandboxArchiveAction: SandboxArchiveAction,
+    private readonly eventEmitter: EventEmitter2,
+    private readonly configService: TypedConfigService,
   ) {}
 
   @Cron(CronExpression.EVERY_MINUTE, { name: 'auto-stop-check' })
@@ -144,9 +148,7 @@ export class SandboxManager {
             order: {
               lastBackupAt: 'ASC',
             },
-            //  max 3 sandboxes can be archived at the same time on the same runner
-            //  this is to prevent the runner from being overloaded
-            take: 3,
+            take: this.configService.getOrThrow('maxConcurrentArchivesPerRunner'),
           })
 
           await Promise.all(
@@ -160,8 +162,12 @@ export class SandboxManager {
               try {
                 sandbox.pending = true
                 sandbox.desiredState = SandboxDesiredState.ARCHIVED
+                // Set the last activity to now to mark the start of the archive process
+                // Otherwise, sandboxes that have been left long in the queue might time out immediately
+                sandbox.lastActivityAt = new Date()
                 await this.sandboxRepository.save(sandbox)
-                this.syncInstanceState(sandbox.id)
+                // Triggering the event will start a backup and sync the state
+                this.eventEmitter.emit(SandboxEvents.ARCHIVED, new SandboxArchivedEvent(sandbox))
               } catch (error) {
                 this.logger.error(`Error processing auto-archive state for sandbox ${sandbox.id}:`, error)
               } finally {
@@ -277,7 +283,7 @@ export class SandboxManager {
       .select('"runnerId"')
       .where('"sandbox"."state" = :state', { state: SandboxState.ARCHIVING })
       .groupBy('"runnerId"')
-      .having('COUNT(*) >= 3')
+      .having('COUNT(*) >= :max', { max: this.configService.getOrThrow('maxConcurrentArchivesPerRunner') })
       .getRawMany()
 
     const sandboxes = await this.sandboxRepository
@@ -295,7 +301,10 @@ export class SandboxManager {
           runnerId: Not(In(runnersWith3InProgress.map((runner) => runner.runnerId))),
         },
       ])
-      .orderBy('CASE WHEN "sandbox"."backupState" = \'Completed\' THEN 0 ELSE 1 END', 'ASC')
+      .orderBy(
+        'CASE WHEN "sandbox"."state" = \'archiving\' THEN 0 WHEN "sandbox"."backupState" = \'Completed\' THEN 1 ELSE 2 END',
+        'ASC',
+      )
       .addOrderBy('"sandbox"."lastActivityAt"', 'DESC')
       .take(100)
       .getMany()
