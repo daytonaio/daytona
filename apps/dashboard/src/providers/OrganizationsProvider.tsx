@@ -40,7 +40,9 @@ export function OrganizationsProvider(props: Props) {
       }
       // TODO: come back to this asap
       // After creating a new org, the selected org was updated unnecessarily so we reload the page just in case
-      window.location.reload()
+      setTimeout(() => {
+        window.location.reload()
+      }, 500)
       return orgs
     },
     [getOrganizations],
