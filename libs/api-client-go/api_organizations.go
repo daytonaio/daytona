@@ -353,6 +353,18 @@ type OrganizationsAPI interface {
 	// UpdateRoleForOrganizationMemberExecute executes the request
 	//  @return OrganizationUser
 	UpdateRoleForOrganizationMemberExecute(r OrganizationsAPIUpdateRoleForOrganizationMemberRequest) (*OrganizationUser, *http.Response, error)
+
+	/*
+		UpdateSandboxDefaultNetworkBlockAll Update sandbox default network block all
+
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param organizationId Organization ID
+		@return OrganizationsAPIUpdateSandboxDefaultNetworkBlockAllRequest
+	*/
+	UpdateSandboxDefaultNetworkBlockAll(ctx context.Context, organizationId string) OrganizationsAPIUpdateSandboxDefaultNetworkBlockAllRequest
+
+	// UpdateSandboxDefaultNetworkBlockAllExecute executes the request
+	UpdateSandboxDefaultNetworkBlockAllExecute(r OrganizationsAPIUpdateSandboxDefaultNetworkBlockAllRequest) (*http.Response, error)
 }
 
 // OrganizationsAPIService OrganizationsAPI service
@@ -3008,4 +3020,105 @@ func (a *OrganizationsAPIService) UpdateRoleForOrganizationMemberExecute(r Organ
 	}
 
 	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type OrganizationsAPIUpdateSandboxDefaultNetworkBlockAllRequest struct {
+	ctx                                       context.Context
+	ApiService                                OrganizationsAPI
+	organizationId                            string
+	organizationSandboxDefaultNetworkBlockAll *OrganizationSandboxDefaultNetworkBlockAll
+}
+
+func (r OrganizationsAPIUpdateSandboxDefaultNetworkBlockAllRequest) OrganizationSandboxDefaultNetworkBlockAll(organizationSandboxDefaultNetworkBlockAll OrganizationSandboxDefaultNetworkBlockAll) OrganizationsAPIUpdateSandboxDefaultNetworkBlockAllRequest {
+	r.organizationSandboxDefaultNetworkBlockAll = &organizationSandboxDefaultNetworkBlockAll
+	return r
+}
+
+func (r OrganizationsAPIUpdateSandboxDefaultNetworkBlockAllRequest) Execute() (*http.Response, error) {
+	return r.ApiService.UpdateSandboxDefaultNetworkBlockAllExecute(r)
+}
+
+/*
+UpdateSandboxDefaultNetworkBlockAll Update sandbox default network block all
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param organizationId Organization ID
+	@return OrganizationsAPIUpdateSandboxDefaultNetworkBlockAllRequest
+*/
+func (a *OrganizationsAPIService) UpdateSandboxDefaultNetworkBlockAll(ctx context.Context, organizationId string) OrganizationsAPIUpdateSandboxDefaultNetworkBlockAllRequest {
+	return OrganizationsAPIUpdateSandboxDefaultNetworkBlockAllRequest{
+		ApiService:     a,
+		ctx:            ctx,
+		organizationId: organizationId,
+	}
+}
+
+// Execute executes the request
+func (a *OrganizationsAPIService) UpdateSandboxDefaultNetworkBlockAllExecute(r OrganizationsAPIUpdateSandboxDefaultNetworkBlockAllRequest) (*http.Response, error) {
+	var (
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "OrganizationsAPIService.UpdateSandboxDefaultNetworkBlockAll")
+	if err != nil {
+		return nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/organizations/{organizationId}/sandbox-default-network-block-all"
+	localVarPath = strings.Replace(localVarPath, "{"+"organizationId"+"}", url.PathEscape(parameterValueToString(r.organizationId, "organizationId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.organizationSandboxDefaultNetworkBlockAll == nil {
+		return nil, reportError("organizationSandboxDefaultNetworkBlockAll is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.organizationSandboxDefaultNetworkBlockAll
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarHTTPResponse, newErr
+	}
+
+	return localVarHTTPResponse, nil
 }

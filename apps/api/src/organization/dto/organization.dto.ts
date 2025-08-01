@@ -93,6 +93,11 @@ export class OrganizationDto {
   })
   maxDiskPerSandbox: number
 
+  @ApiProperty({
+    description: 'Sandbox default network block all',
+  })
+  sandboxDefaultNetworkBlockAll: boolean
+
   static fromOrganization(organization: Organization): OrganizationDto {
     const dto: OrganizationDto = {
       id: organization.id,
@@ -112,6 +117,7 @@ export class OrganizationDto {
       maxCpuPerSandbox: organization.maxCpuPerSandbox,
       maxMemoryPerSandbox: organization.maxMemoryPerSandbox,
       maxDiskPerSandbox: organization.maxDiskPerSandbox,
+      sandboxDefaultNetworkBlockAll: organization.sandboxDefaultNetworkBlockAll,
     }
 
     return dto

@@ -36,6 +36,7 @@ export enum AuditAction {
   ACTIVATE = 'activate',
   DEACTIVATE = 'deactivate',
   UPDATE_NETWORK_SETTINGS = 'update_network_settings',
+  UPDATE_SANDBOX_DEFAULT_NETWORK_BLOCK_ALL = 'update_sandbox_default_network_block_all',
 
   // toolbox actions (must be prefixed with 'toolbox_')
   TOOLBOX_DELETE_FILE = 'toolbox_delete_file',

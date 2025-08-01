@@ -86,6 +86,7 @@ daytona_api_client/models/mouse_scroll_response.py
 daytona_api_client/models/organization.py
 daytona_api_client/models/organization_invitation.py
 daytona_api_client/models/organization_role.py
+daytona_api_client/models/organization_sandbox_default_network_block_all.py
 daytona_api_client/models/organization_suspension.py
 daytona_api_client/models/organization_user.py
 daytona_api_client/models/paginated_audit_logs.py

@@ -204,6 +204,19 @@ export class OrganizationService implements OnModuleInit {
     await this.organizationRepository.save(organization)
   }
 
+  async updateSandboxDefaultNetworkBlockAll(
+    organizationId: string,
+    sandboxDefaultNetworkBlockAll: boolean,
+  ): Promise<void> {
+    const organization = await this.organizationRepository.findOne({ where: { id: organizationId } })
+    if (!organization) {
+      throw new NotFoundException(`Organization with ID ${organizationId} not found`)
+    }
+    organization.sandboxDefaultNetworkBlockAll = sandboxDefaultNetworkBlockAll
+
+    await this.organizationRepository.save(organization)
+  }
+
   private async createWithEntityManager(
     entityManager: EntityManager,
     createOrganizationDto: CreateOrganizationDto,
@@ -254,6 +267,10 @@ export class OrganizationService implements OnModuleInit {
       organization.suspendedAt = new Date()
       organization.suspensionReason = 'Payment method required'
     }
+
+    organization.sandboxDefaultNetworkBlockAll = this.configService.get<boolean>(
+      'ORGANIZATION_SANDBOX_DEFAULT_NETWORK_BLOCK_ALL',
+    )
 
     const owner = new OrganizationUser()
     owner.userId = createdBy

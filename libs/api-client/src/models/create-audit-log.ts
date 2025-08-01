@@ -89,6 +89,7 @@ export const CreateAuditLogActionEnum = {
   ACTIVATE: 'activate',
   DEACTIVATE: 'deactivate',
   UPDATE_NETWORK_SETTINGS: 'update_network_settings',
+  UPDATE_SANDBOX_DEFAULT_NETWORK_BLOCK_ALL: 'update_sandbox_default_network_block_all',
   TOOLBOX_DELETE_FILE: 'toolbox_delete_file',
   TOOLBOX_DOWNLOAD_FILE: 'toolbox_download_file',
   TOOLBOX_CREATE_FOLDER: 'toolbox_create_folder',

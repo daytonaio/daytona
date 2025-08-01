@@ -84,6 +84,7 @@ model_mouse_scroll_response.go
 model_organization.go
 model_organization_invitation.go
 model_organization_role.go
+model_organization_sandbox_default_network_block_all.go
 model_organization_suspension.go
 model_organization_user.go
 model_paginated_audit_logs.go

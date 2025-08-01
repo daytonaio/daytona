@@ -138,6 +138,11 @@ export class Organization {
   })
   suspendedUntil?: Date
 
+  @Column({
+    default: false,
+  })
+  sandboxDefaultNetworkBlockAll: boolean
+
   @CreateDateColumn({
     type: 'timestamp with time zone',
   })

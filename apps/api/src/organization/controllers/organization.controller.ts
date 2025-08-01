@@ -40,6 +40,7 @@ import { Audit, TypedRequest } from '../../audit/decorators/audit.decorator'
 import { AuditAction } from '../../audit/enums/audit-action.enum'
 import { AuditTarget } from '../../audit/enums/audit-target.enum'
 import { EmailUtils } from '../../common/utils/email.util'
+import { OrganizationSandboxDefaultNetworkBlockAllDto } from '../dto/organization-sandbox-default-network-block-all.dto'
 
 @ApiTags('organizations')
 @Controller('organizations')
@@ -437,5 +438,41 @@ export class OrganizationController {
     }
 
     return OrganizationDto.fromOrganization(organization)
+  }
+
+  @Post('/:organizationId/sandbox-default-network-block-all')
+  @ApiOperation({
+    summary: 'Update sandbox default network block all',
+    operationId: 'updateSandboxDefaultNetworkBlockAll',
+  })
+  @ApiResponse({
+    status: 204,
+    description: 'Sandbox default network block all updated successfully',
+  })
+  @ApiParam({
+    name: 'organizationId',
+    description: 'Organization ID',
+    type: 'string',
+  })
+  @RequiredSystemRole(SystemRole.ADMIN)
+  @UseGuards(CombinedAuthGuard, SystemActionGuard)
+  @Audit({
+    action: AuditAction.UPDATE_SANDBOX_DEFAULT_NETWORK_BLOCK_ALL,
+    targetType: AuditTarget.ORGANIZATION,
+    targetIdFromRequest: (req) => req.params.organizationId,
+    requestMetadata: {
+      body: (req: TypedRequest<OrganizationSandboxDefaultNetworkBlockAllDto>) => ({
+        sandboxDefaultNetworkBlockAll: req.body?.sandboxDefaultNetworkBlockAll,
+      }),
+    },
+  })
+  async updateSandboxDefaultNetworkBlockAll(
+    @Param('organizationId') organizationId: string,
+    @Body() body: OrganizationSandboxDefaultNetworkBlockAllDto,
+  ): Promise<void> {
+    return this.organizationService.updateSandboxDefaultNetworkBlockAll(
+      organizationId,
+      body.sandboxDefaultNetworkBlockAll,
+    )
   }
 }

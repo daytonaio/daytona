@@ -524,6 +524,36 @@ paths:
       summary: Get organization by sandbox ID
       tags:
         - organizations
+  /organizations/{organizationId}/sandbox-default-network-block-all:
+    post:
+      operationId: updateSandboxDefaultNetworkBlockAll
+      parameters:
+        - description: Organization ID
+          explode: false
+          in: path
+          name: organizationId
+          required: true
+          schema:
+            type: string
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrganizationSandboxDefaultNetworkBlockAll'
+        required: true
+      responses:
+        '204':
+          description: Sandbox default network block all updated successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Update sandbox default network block all
+      tags:
+        - organizations
   /organizations/{organizationId}/roles:
     get:
       operationId: listOrganizationRoles
@@ -6337,6 +6367,7 @@ components:
         id: id
         totalMemoryQuota: 1.4658129805029452
         totalDiskQuota: 5.962133916683182
+        sandboxDefaultNetworkBlockAll: true
         updatedAt: 2000-01-23T04:56:07.000+00:00
       properties:
         id:
@@ -6394,6 +6425,9 @@ components:
         maxDiskPerSandbox:
           description: Max disk per sandbox
           type: number
+        sandboxDefaultNetworkBlockAll:
+          description: Sandbox default network block all
+          type: boolean
       required:
         - createdAt
         - createdBy
@@ -6403,6 +6437,7 @@ components:
         - maxMemoryPerSandbox
         - name
         - personal
+        - sandboxDefaultNetworkBlockAll
         - suspended
         - suspendedAt
         - suspendedUntil
@@ -6516,6 +6551,16 @@ components:
         - reason
         - suspensionCleanupGracePeriodHours
         - until
+      type: object
+    OrganizationSandboxDefaultNetworkBlockAll:
+      example:
+        sandboxDefaultNetworkBlockAll: true
+      properties:
+        sandboxDefaultNetworkBlockAll:
+          description: Sandbox default network block all
+          type: boolean
+      required:
+        - sandboxDefaultNetworkBlockAll
       type: object
     CreateOrganizationRole:
       example:
@@ -7055,7 +7100,8 @@ components:
           example: false
           type: boolean
         networkAllowList:
-          description: Comma-separated list of allowed CIDR network addresses for the sandbox
+          description: Comma-separated list of allowed CIDR network addresses for
+            the sandbox
           example: '192.168.1.0/16,10.0.0.0/24'
           type: string
         target:
@@ -7247,7 +7293,8 @@ components:
           example: false
           type: boolean
         networkAllowList:
-          description: Comma-separated list of allowed CIDR network addresses for the sandbox
+          description: Comma-separated list of allowed CIDR network addresses for
+            the sandbox
           example: '192.168.1.0/16,10.0.0.0/24'
           type: string
         class:
@@ -9174,7 +9221,8 @@ components:
           example: false
           type: boolean
         networkAllowList:
-          description: Comma-separated list of allowed CIDR network addresses for the sandbox
+          description: Comma-separated list of allowed CIDR network addresses for
+            the sandbox
           example: '192.168.1.0/16,10.0.0.0/24'
           type: string
         target:
@@ -9861,6 +9909,7 @@ components:
             - activate
             - deactivate
             - update_network_settings
+            - update_sandbox_default_network_block_all
             - toolbox_delete_file
             - toolbox_download_file
             - toolbox_create_folder

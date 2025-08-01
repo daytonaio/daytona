@@ -120,4 +120,10 @@ export interface Organization {
    * @memberof Organization
    */
   maxDiskPerSandbox: number
+  /**
+   * Sandbox default network block all
+   * @type {boolean}
+   * @memberof Organization
+   */
+  sandboxDefaultNetworkBlockAll: boolean
 }
