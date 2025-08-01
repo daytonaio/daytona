@@ -87,6 +87,18 @@ export class OrganizationService implements OnModuleInit {
     })
   }
 
+  async findBySandboxId(sandboxId: string): Promise<Organization | null> {
+    const sandbox = await this.sandboxRepository.findOne({
+      where: { id: sandboxId },
+    })
+
+    if (!sandbox) {
+      return null
+    }
+
+    return this.organizationRepository.findOne({ where: { id: sandbox.organizationId } })
+  }
+
   async findPersonal(userId: string): Promise<Organization> {
     return this.findPersonalWithEntityManager(this.organizationRepository.manager, userId)
   }
@@ -156,7 +168,12 @@ export class OrganizationService implements OnModuleInit {
     return this.organizationRepository.save(organization)
   }
 
-  async suspend(organizationId: string, suspensionReason?: string, suspendedUntil?: Date): Promise<void> {
+  async suspend(
+    organizationId: string,
+    suspensionReason?: string,
+    suspendedUntil?: Date,
+    suspensionCleanupGracePeriodHours?: number,
+  ): Promise<void> {
     const organization = await this.organizationRepository.findOne({ where: { id: organizationId } })
     if (!organization) {
       throw new NotFoundException(`Organization with ID ${organizationId} not found`)
@@ -166,6 +183,10 @@ export class OrganizationService implements OnModuleInit {
     organization.suspensionReason = suspensionReason || null
     organization.suspendedUntil = suspendedUntil || null
     organization.suspendedAt = new Date()
+    if (suspensionCleanupGracePeriodHours) {
+      organization.suspensionCleanupGracePeriodHours = suspensionCleanupGracePeriodHours
+    }
+
     await this.organizationRepository.save(organization)
   }
 
@@ -295,7 +316,7 @@ export class OrganizationService implements OnModuleInit {
       .createQueryBuilder('organization')
       .select('id')
       .where('suspended = true')
-      .andWhere(`"suspendedAt" < NOW() - INTERVAL '1 day'`)
+      .andWhere(`"suspendedAt" < NOW() - INTERVAL '1 hour' * "suspensionCleanupGracePeriodHours"`)
       .andWhere(`"suspendedAt" > NOW() - INTERVAL '7 day'`)
       .andWhereExists(
         this.sandboxRepository
@@ -346,7 +367,7 @@ export class OrganizationService implements OnModuleInit {
       .createQueryBuilder('organization')
       .select('id')
       .where('suspended = true')
-      .andWhere(`"suspendedAt" < NOW() - INTERVAL '1 day'`)
+      .andWhere(`"suspendedAt" < NOW() - INTERVAL '1 hour' * "suspensionCleanupGracePeriodHours"`)
       .andWhere(`"suspendedAt" > NOW() - INTERVAL '7 day'`)
       .andWhereExists(
         this.snapshotRepository

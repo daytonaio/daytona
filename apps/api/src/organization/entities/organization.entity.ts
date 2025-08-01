@@ -127,6 +127,12 @@ export class Organization {
   suspensionReason?: string
 
   @Column({
+    type: 'int',
+    default: 24,
+  })
+  suspensionCleanupGracePeriodHours: number
+
+  @Column({
     nullable: true,
     type: 'timestamp with time zone',
   })
