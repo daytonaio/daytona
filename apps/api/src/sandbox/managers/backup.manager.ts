@@ -321,7 +321,7 @@ export class BackupManager {
         backupState: In([BackupState.NONE]),
       },
       //  todo: increase this number when auto-stop is stable
-      take: 10,
+      take: 100,
     })
 
     await Promise.all(

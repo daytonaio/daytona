@@ -16,6 +16,7 @@ import { InjectRedis } from '@nestjs-modules/ioredis'
 import Redis from 'ioredis'
 import { RunnerAdapterFactory } from '../../runner-adapter/runnerAdapter'
 import { ToolboxService } from '../../services/toolbox.service'
+import { TypedConfigService } from '../../../config/typed-config.service'
 
 @Injectable()
 export class SandboxArchiveAction extends SandboxAction {
@@ -27,6 +28,7 @@ export class SandboxArchiveAction extends SandboxAction {
     private readonly redisLockProvider: RedisLockProvider,
     @InjectRedis() private readonly redis: Redis,
     protected toolboxService: ToolboxService,
+    private readonly configService: TypedConfigService,
   ) {
     super(runnerService, runnerAdapterFactory, sandboxRepository, toolboxService)
   }
@@ -37,29 +39,27 @@ export class SandboxArchiveAction extends SandboxAction {
       return DONT_SYNC_AGAIN
     }
 
-    const inProgressOnRunner = await this.sandboxRepository.find({
-      where: {
-        runnerId: sandbox.runnerId,
-        state: In([SandboxState.ARCHIVING]),
-      },
-      order: {
-        lastActivityAt: 'DESC',
-      },
-      take: 100,
-    })
-
-    //  if the sandbox is already in progress, continue
-    if (!inProgressOnRunner.find((s) => s.id === sandbox.id)) {
-      //  max 3 sandboxes can be archived at the same time on the same runner
-      //  this is to prevent the runner from being overloaded
-      if (inProgressOnRunner.length > 2) {
-        await this.redisLockProvider.unlock(lockKey)
-        return DONT_SYNC_AGAIN
-      }
-    }
-
     switch (sandbox.state) {
       case SandboxState.STOPPED: {
+        const inProgressOnRunner = await this.sandboxRepository.find({
+          where: {
+            runnerId: sandbox.runnerId,
+            state: In([SandboxState.ARCHIVING]),
+          },
+          order: {
+            lastActivityAt: 'DESC',
+          },
+          take: 100,
+        })
+
+        //  if the sandbox is already in progress, continue
+        if (!inProgressOnRunner.find((s) => s.id === sandbox.id)) {
+          if (inProgressOnRunner.length >= this.configService.getOrThrow('maxConcurrentArchivesPerRunner')) {
+            await this.redisLockProvider.unlock(lockKey)
+            return DONT_SYNC_AGAIN
+          }
+        }
+
         await this.updateSandboxState(sandbox.id, SandboxState.ARCHIVING)
         //  fallthrough to archiving state
       }

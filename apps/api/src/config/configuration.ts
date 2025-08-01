@@ -83,6 +83,7 @@ const configuration = {
     consoleLogEnabled: process.env.AUDIT_CONSOLE_LOG_ENABLED === 'true',
   },
   cronTimeZone: process.env.CRON_TIMEZONE,
+  maxConcurrentArchivesPerRunner: parseInt(process.env.MAX_CONCURRENT_ARCHIVES_PER_RUNNER || '6', 10),
 }
 
 export { configuration }
