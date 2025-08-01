@@ -44,6 +44,8 @@ import type { OrganizationInvitation } from '../models'
 // @ts-ignore
 import type { OrganizationRole } from '../models'
 // @ts-ignore
+import type { OrganizationSandboxDefaultLimitedNetworkEgress } from '../models'
+// @ts-ignore
 import type { OrganizationSuspension } from '../models'
 // @ts-ignore
 import type { OrganizationUsageOverview } from '../models'
@@ -1191,6 +1193,64 @@ export const OrganizationsApiAxiosParamCreator = function (configuration?: Confi
         options: localVarRequestOptions,
       }
     },
+    /**
+     *
+     * @summary Update sandbox default limited network egress
+     * @param {string} organizationId Organization ID
+     * @param {OrganizationSandboxDefaultLimitedNetworkEgress} organizationSandboxDefaultLimitedNetworkEgress
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    updateSandboxDefaultLimitedNetworkEgress: async (
+      organizationId: string,
+      organizationSandboxDefaultLimitedNetworkEgress: OrganizationSandboxDefaultLimitedNetworkEgress,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'organizationId' is not null or undefined
+      assertParamExists('updateSandboxDefaultLimitedNetworkEgress', 'organizationId', organizationId)
+      // verify required parameter 'organizationSandboxDefaultLimitedNetworkEgress' is not null or undefined
+      assertParamExists(
+        'updateSandboxDefaultLimitedNetworkEgress',
+        'organizationSandboxDefaultLimitedNetworkEgress',
+        organizationSandboxDefaultLimitedNetworkEgress,
+      )
+      const localVarPath = `/organizations/{organizationId}/sandbox-default-limited-network-egress`.replace(
+        `{${'organizationId'}}`,
+        encodeURIComponent(String(organizationId)),
+      )
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      // authentication bearer required
+      // http bearer authentication required
+      await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+      // authentication oauth2 required
+
+      localVarHeaderParameter['Content-Type'] = 'application/json'
+
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+      localVarRequestOptions.data = serializeDataIfNeeded(
+        organizationSandboxDefaultLimitedNetworkEgress,
+        localVarRequestOptions,
+        configuration,
+      )
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
   }
 }
 
@@ -1840,6 +1900,36 @@ export const OrganizationsApiFp = function (configuration?: Configuration) {
           configuration,
         )(axios, localVarOperationServerBasePath || basePath)
     },
+    /**
+     *
+     * @summary Update sandbox default limited network egress
+     * @param {string} organizationId Organization ID
+     * @param {OrganizationSandboxDefaultLimitedNetworkEgress} organizationSandboxDefaultLimitedNetworkEgress
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async updateSandboxDefaultLimitedNetworkEgress(
+      organizationId: string,
+      organizationSandboxDefaultLimitedNetworkEgress: OrganizationSandboxDefaultLimitedNetworkEgress,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.updateSandboxDefaultLimitedNetworkEgress(
+        organizationId,
+        organizationSandboxDefaultLimitedNetworkEgress,
+        options,
+      )
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['OrganizationsApi.updateSandboxDefaultLimitedNetworkEgress']?.[localVarOperationServerIndex]
+          ?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
   }
 }
 
@@ -2198,6 +2288,27 @@ export const OrganizationsApiFactory = function (
     ): AxiosPromise<OrganizationRole> {
       return localVarFp
         .updateOrganizationRole(organizationId, roleId, updateOrganizationRole, options)
+        .then((request) => request(axios, basePath))
+    },
+    /**
+     *
+     * @summary Update sandbox default limited network egress
+     * @param {string} organizationId Organization ID
+     * @param {OrganizationSandboxDefaultLimitedNetworkEgress} organizationSandboxDefaultLimitedNetworkEgress
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    updateSandboxDefaultLimitedNetworkEgress(
+      organizationId: string,
+      organizationSandboxDefaultLimitedNetworkEgress: OrganizationSandboxDefaultLimitedNetworkEgress,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<void> {
+      return localVarFp
+        .updateSandboxDefaultLimitedNetworkEgress(
+          organizationId,
+          organizationSandboxDefaultLimitedNetworkEgress,
+          options,
+        )
         .then((request) => request(axios, basePath))
     },
   }
@@ -2598,6 +2709,25 @@ export class OrganizationsApi extends BaseAPI {
   ) {
     return OrganizationsApiFp(this.configuration)
       .updateOrganizationRole(organizationId, roleId, updateOrganizationRole, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   *
+   * @summary Update sandbox default limited network egress
+   * @param {string} organizationId Organization ID
+   * @param {OrganizationSandboxDefaultLimitedNetworkEgress} organizationSandboxDefaultLimitedNetworkEgress
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof OrganizationsApi
+   */
+  public updateSandboxDefaultLimitedNetworkEgress(
+    organizationId: string,
+    organizationSandboxDefaultLimitedNetworkEgress: OrganizationSandboxDefaultLimitedNetworkEgress,
+    options?: RawAxiosRequestConfig,
+  ) {
+    return OrganizationsApiFp(this.configuration)
+      .updateSandboxDefaultLimitedNetworkEgress(organizationId, organizationSandboxDefaultLimitedNetworkEgress, options)
       .then((request) => request(this.axios, this.basePath))
   }
 }

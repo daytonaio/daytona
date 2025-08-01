@@ -91,6 +91,7 @@ daytona_api_client_async/models/mouse_scroll_response.py
 daytona_api_client_async/models/organization.py
 daytona_api_client_async/models/organization_invitation.py
 daytona_api_client_async/models/organization_role.py
+daytona_api_client_async/models/organization_sandbox_default_limited_network_egress.py
 daytona_api_client_async/models/organization_suspension.py
 daytona_api_client_async/models/organization_usage_overview.py
 daytona_api_client_async/models/organization_user.py

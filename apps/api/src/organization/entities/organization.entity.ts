@@ -138,6 +138,11 @@ export class Organization {
   })
   suspendedUntil?: Date
 
+  @Column({
+    default: false,
+  })
+  sandboxLimitedNetworkEgress: boolean
+
   @CreateDateColumn({
     type: 'timestamp with time zone',
   })

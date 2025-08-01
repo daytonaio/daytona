@@ -41,6 +41,7 @@ import { AuditAction } from '../../audit/enums/audit-action.enum'
 import { AuditTarget } from '../../audit/enums/audit-target.enum'
 import { EmailUtils } from '../../common/utils/email.util'
 import { OrganizationUsageService } from '../services/organization-usage.service'
+import { OrganizationSandboxDefaultLimitedNetworkEgressDto } from '../dto/organization-sandbox-default-limited-network-egress.dto'
 
 @ApiTags('organizations')
 @Controller('organizations')
@@ -439,5 +440,41 @@ export class OrganizationController {
     }
 
     return OrganizationDto.fromOrganization(organization)
+  }
+
+  @Post('/:organizationId/sandbox-default-limited-network-egress')
+  @ApiOperation({
+    summary: 'Update sandbox default limited network egress',
+    operationId: 'updateSandboxDefaultLimitedNetworkEgress',
+  })
+  @ApiResponse({
+    status: 204,
+    description: 'Sandbox default limited network egress updated successfully',
+  })
+  @ApiParam({
+    name: 'organizationId',
+    description: 'Organization ID',
+    type: 'string',
+  })
+  @RequiredSystemRole(SystemRole.ADMIN)
+  @UseGuards(CombinedAuthGuard, SystemActionGuard)
+  @Audit({
+    action: AuditAction.UPDATE_SANDBOX_DEFAULT_LIMITED_NETWORK_EGRESS,
+    targetType: AuditTarget.ORGANIZATION,
+    targetIdFromRequest: (req) => req.params.organizationId,
+    requestMetadata: {
+      body: (req: TypedRequest<OrganizationSandboxDefaultLimitedNetworkEgressDto>) => ({
+        sandboxDefaultLimitedNetworkEgress: req.body?.sandboxDefaultLimitedNetworkEgress,
+      }),
+    },
+  })
+  async updateSandboxDefaultLimitedNetworkEgress(
+    @Param('organizationId') organizationId: string,
+    @Body() body: OrganizationSandboxDefaultLimitedNetworkEgressDto,
+  ): Promise<void> {
+    return this.organizationService.updateSandboxDefaultLimitedNetworkEgress(
+      organizationId,
+      body.sandboxDefaultLimitedNetworkEgress,
+    )
   }
 }
