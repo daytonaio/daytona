@@ -66,8 +66,9 @@ func getProxyTarget(ctx *gin.Context) (*url.URL, map[string]string, error) {
 	}
 
 	if containerIP == "" {
-		ctx.Error(common.NewBadRequestError(errors.New("container has no IP address, it might not be running")))
-		return nil, nil, errors.New("container has no IP address, it might not be running")
+		message := "no IP address found. Is the Sandbox started?"
+		ctx.Error(common.NewBadRequestError(errors.New(message)))
+		return nil, nil, errors.New(message)
 	}
 
 	// Build the target URL
