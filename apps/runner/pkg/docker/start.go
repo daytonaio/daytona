@@ -140,5 +140,5 @@ func getContainerIP(container *types.ContainerJSON) (string, error) {
 	for _, network := range container.NetworkSettings.Networks {
 		return network.IPAddress, nil
 	}
-	return "", fmt.Errorf("container has no IP address, it might not be running")
+	return "", fmt.Errorf("no IP address found. Is the Sandbox started?")
 }
