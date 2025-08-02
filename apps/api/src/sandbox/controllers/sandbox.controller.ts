@@ -300,7 +300,7 @@ export class SandboxController {
       sandbox = await this.waitForSandboxStarted(sandboxId, 30)
     }
 
-    if (!sandbox.runnerDomain) {
+    if (!sandbox.runnerDomain && sandbox.state != SandboxState.ARCHIVED) {
       const runner = await this.runnerService.findBySandboxId(sandboxId)
       if (!runner) {
         throw new NotFoundException(`Runner for sandbox ${sandboxId} not found`)
