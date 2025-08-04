@@ -4,20 +4,16 @@
 package fs
 
 import (
-	"bufio"
 	"context"
 	"fmt"
 	"os"
-	"os/exec"
 	"path/filepath"
-	"strconv"
-	"strings"
 	"time"
 
+	"github.com/fsnotify/fsnotify"
 	log "github.com/sirupsen/logrus"
 )
 
-// NewFileWatcher creates a new file watcher for the specified path
 func NewFileWatcher(path string, recursive bool) *FileWatcher {
 	ctx, cancel := context.WithCancel(context.Background())
 
@@ -41,178 +37,160 @@ func (w *FileWatcher) Start() error {
 		return fmt.Errorf("file watcher is already running")
 	}
 
-	// Check if path exists
 	if _, err := os.Stat(w.path); os.IsNotExist(err) {
 		return fmt.Errorf("path does not exist: %s", w.path)
 	}
 
-	// Build inotifywait command
-	args := []string{
-		"-m",                              // Monitor continuously
-		"-e", "create,delete,modify,move", // Events to watch
-		"--format", "%w%f|%e|%T", // Output format: path|event|timestamp
-		"--timefmt", "%s", // Timestamp format (Unix timestamp)
-	}
-
-	if w.recursive {
-		args = append(args, "-r") // Recursive
-	}
-
-	args = append(args, w.path) // Path to watch
-
-	// Create command with context for cancellation
-	w.cmd = exec.CommandContext(w.ctx, "inotifywait", args...)
-
-	stdout, err := w.cmd.StdoutPipe()
+	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
-		return fmt.Errorf("failed to create stdout pipe: %w", err)
+		return fmt.Errorf("failed to create watcher: %w", err)
 	}
 
-	stderr, err := w.cmd.StderrPipe()
-	if err != nil {
-		return fmt.Errorf("failed to create stderr pipe: %w", err)
-	}
-
-	// Start the command
-	if err := w.cmd.Start(); err != nil {
-		return fmt.Errorf("failed to start inotifywait: %w", err)
-	}
-
+	w.watcher = watcher
 	w.running = true
 
-	// Handle stderr (errors and initial setup messages)
-	go func() {
-		scanner := bufio.NewScanner(stderr)
-		for scanner.Scan() {
-			line := scanner.Text()
-			// inotifywait writes setup messages to stderr, only log actual errors
-			if strings.Contains(line, "No space left on device") ||
-				strings.Contains(line, "permission denied") ||
-				strings.Contains(line, "failed") {
-				log.Errorf("inotifywait error: %s", line)
-				w.errors <- fmt.Errorf("inotifywait error: %s", line)
-			}
-		}
-	}()
+	if err := w.addPath(w.path); err != nil {
+		w.watcher.Close()
+		w.running = false
+		return fmt.Errorf("failed to add path to watcher: %w", err)
+	}
 
-	// Process stdout (actual events)
-	go func() {
-		defer func() {
-			w.mu.Lock()
-			w.running = false
-			w.mu.Unlock()
-			close(w.events)
-			close(w.errors)
-		}()
-
-		scanner := bufio.NewScanner(stdout)
-		for scanner.Scan() {
-			line := scanner.Text()
-			if event, err := w.parseInotifyOutput(line); err == nil {
-				select {
-				case w.events <- event:
-				case <-w.ctx.Done():
-					return
-				}
-			} else {
-				log.Errorf("Failed to parse inotify output: %s - %v", line, err)
-			}
-		}
-
-		if err := scanner.Err(); err != nil {
-			w.errors <- fmt.Errorf("error reading inotifywait output: %w", err)
-		}
-	}()
-
-	// Wait for command to finish in a separate goroutine
-	go func() {
-		err := w.cmd.Wait()
-		if err != nil && w.ctx.Err() == nil {
-			// Only report error if not cancelled
-			w.errors <- fmt.Errorf("inotifywait process exited: %w", err)
-		}
-	}()
+	go w.processEvents()
 
 	return nil
 }
 
-// Stop stops the file watcher
-func (w *FileWatcher) Stop() {
-	w.mu.Lock()
-	defer w.mu.Unlock()
-
-	if !w.running {
-		return
+// addPath adds a path to the watcher, recursively if needed
+func (w *FileWatcher) addPath(path string) error {
+	err := w.watcher.Add(path)
+	if err != nil {
+		return err
 	}
 
-	// Cancel context to stop goroutines
-	w.cancel()
+	if w.recursive {
+		return filepath.Walk(path, func(walkPath string, info os.FileInfo, err error) error {
+			if err != nil {
+				return err
+			}
+			if info.IsDir() && walkPath != path {
+				if err := w.watcher.Add(walkPath); err != nil {
+					log.Warnf("Failed to watch directory %s: %v", walkPath, err)
+				}
+			}
+			return nil
+		})
+	}
 
-	// Kill the inotifywait process if it's still running
-	if w.cmd != nil && w.cmd.Process != nil {
-		w.cmd.Process.Kill()
+	return nil
+}
+
+// processEvents processes fsnotify events and converts them to our format
+func (w *FileWatcher) processEvents() {
+	defer func() {
+		w.mu.Lock()
+		w.running = false
+		w.mu.Unlock()
+		close(w.events)
+		close(w.errors)
+		if w.watcher != nil {
+			w.watcher.Close()
+		}
+	}()
+
+	for {
+		select {
+		case <-w.ctx.Done():
+			return
+
+		case event, ok := <-w.watcher.Events:
+			if !ok {
+				return
+			}
+			w.handleFsnotifyEvent(event)
+
+		case err, ok := <-w.watcher.Errors:
+			if !ok {
+				return
+			}
+			w.errors <- err
+		}
 	}
 }
 
-// Events returns the channel for receiving file system events
+// handleFsnotifyEvent converts fsnotify events to our event format
+func (w *FileWatcher) handleFsnotifyEvent(event fsnotify.Event) {
+	isDir := false
+	if stat, err := os.Stat(event.Name); err == nil {
+		isDir = stat.IsDir()
+	}
+
+	var eventType FilesystemEventType
+
+	// Handle events in logical priority: Remove > Create > Rename > Write > Chmod
+	// Rationale: Final state matters most (deleted > created > moved > modified > permissions)
+	if event.Has(fsnotify.Remove) {
+		eventType = FilesystemEventDelete
+	} else if event.Has(fsnotify.Create) {
+		eventType = FilesystemEventCreate
+		if w.recursive && isDir {
+			if err := w.watcher.Add(event.Name); err != nil {
+				log.Warnf("Failed to watch new directory %s: %v", event.Name, err)
+				// Don't send the event if we can't watch the directory
+				return
+			}
+		}
+	} else if event.Has(fsnotify.Rename) {
+		eventType = FilesystemEventRename
+	} else if event.Has(fsnotify.Write) {
+		eventType = FilesystemEventWrite
+	} else if event.Has(fsnotify.Chmod) {
+		eventType = FilesystemEventChmod
+	} else {
+		return
+	}
+
+	filesystemEvent := FilesystemEvent{
+		Type:      eventType,
+		Name:      event.Name,
+		IsDir:     isDir,
+		Timestamp: time.Now().Unix(),
+	}
+
+	// Check context first to avoid race condition
+	select {
+	case <-w.ctx.Done():
+		return
+	default:
+		// Try to send event, but don't block
+		select {
+		case w.events <- filesystemEvent:
+		case <-w.ctx.Done():
+			return
+		default:
+			// Channel is full, drop event to avoid blocking
+			log.Warnf("Event channel full, dropping event for %s", event.Name)
+		}
+	}
+}
+
+// Stop stops the file watcher
+func (w *FileWatcher) Stop() {
+	w.cancel()
+}
+
+// Events returns the events channel
 func (w *FileWatcher) Events() <-chan FilesystemEvent {
 	return w.events
 }
 
-// Errors returns the channel for receiving errors
+// Errors returns the errors channel
 func (w *FileWatcher) Errors() <-chan error {
 	return w.errors
 }
 
-// parseInotifyOutput parses a line of inotifywait output into a FilesystemEvent
-// Format: "/path/to/file|CREATE,ISDIR|1640995200"
-func (w *FileWatcher) parseInotifyOutput(line string) (FilesystemEvent, error) {
-	parts := strings.Split(line, "|")
-	if len(parts) != 3 {
-		return FilesystemEvent{}, fmt.Errorf("invalid inotify output format: %s", line)
-	}
-
-	filePath := parts[0]
-	eventTypes := parts[1]
-	timestampStr := parts[2]
-
-	// Parse timestamp
-	timestamp, err := strconv.ParseInt(timestampStr, 10, 64)
-	if err != nil {
-		timestamp = time.Now().Unix()
-	}
-
-	// Determine if it's a directory
-	isDir := strings.Contains(eventTypes, "ISDIR")
-
-	// Convert inotify events to our event types
-	var eventType FilesystemEventType
-	switch {
-	case strings.Contains(eventTypes, "CREATE"):
-		eventType = FilesystemEventCreate
-	case strings.Contains(eventTypes, "DELETE"):
-		eventType = FilesystemEventDelete
-	case strings.Contains(eventTypes, "MODIFY"):
-		eventType = FilesystemEventWrite
-	case strings.Contains(eventTypes, "MOVE"):
-		eventType = FilesystemEventRename
-	default:
-		// Default to WRITE for any other modification
-		eventType = FilesystemEventWrite
-	}
-
-	// Convert absolute path to relative path if possible
-	relPath := filePath
-	if absPath, err := filepath.Abs(w.path); err == nil {
-		if rel, err := filepath.Rel(absPath, filePath); err == nil && !strings.HasPrefix(rel, "..") {
-			relPath = filepath.Join(w.path, rel)
-		}
-	}
-
-	return FilesystemEvent{
-		Type:      eventType,
-		Name:      relPath,
-		IsDir:     isDir,
-		Timestamp: timestamp,
-	}, nil
+// IsRunning returns whether the watcher is currently running
+func (w *FileWatcher) IsRunning() bool {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	return w.running
 }
