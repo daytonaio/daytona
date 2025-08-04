@@ -37,6 +37,10 @@ export type {
   ScatterChart,
 } from './types/Charts'
 
+// File watcher types
+export { FilesystemEventType } from './types/FileWatcher'
+export type { FilesystemEvent, WatchOptions, WatchHandle, FileWatchCallback } from './types/FileWatcher'
+
 export { SandboxState } from '@daytonaio/api-client'
 export type {
   FileInfo,

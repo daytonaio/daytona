@@ -11,7 +11,10 @@ import {
   ReplaceResult,
   SearchFilesResponse,
   ToolboxApi,
+  PortPreviewUrl,
 } from '@daytonaio/api-client'
+import { prefixRelativePath } from './utils/Path'
+import { FilesystemEvent, WatchOptions, WatchHandle, FileWatchCallback } from './types/FileWatcher'
 import FormData from 'form-data'
 import { dynamicImport } from './utils/Import'
 import { RUNTIME, Runtime } from './utils/Runtime'
@@ -63,6 +66,7 @@ export class FileSystem {
     private readonly sandboxId: string,
     private readonly clientConfig: Configuration,
     private readonly toolboxApi: ToolboxApi,
+    private readonly getPreviewLink: (port: number) => Promise<PortPreviewUrl>,
   ) {}
 
   /**
@@ -415,5 +419,92 @@ export class FileSystem {
     // 3) Node (or other server runtimes) → stream.Readable
     const stream = await dynamicImport('stream', 'Uploading file is not supported: ')
     return stream.Readable.from(source)
+  }
+
+  /**
+   * Watch a directory for file system changes.
+   *
+   * @param {string} path - Directory path to watch. Relative paths are resolved based on the user's root directory.
+   * @param {FileWatchCallback} callback - Function called for each file system event
+   * @param {WatchOptions} [options] - Watch configuration options
+   * @returns {Promise<WatchHandle>} Promise that resolves to a WatchHandle for cleanup
+   *
+   * @example
+   * // Watch a directory for all changes
+   * const handle = await fileSystem.watchDir('/workspace/src', (event) => {
+   *   console.log(`${event.type}: ${event.name}`)
+   * })
+   *
+   * // Watch recursively
+   * const handle = await fileSystem.watchDir('/workspace', (event) => {
+   *   if (event.type === FilesystemEventType.WRITE && event.name.endsWith('.ts')) {
+   *     console.log('TypeScript file changed:', event.name)
+   *   }
+   * }, { recursive: true })
+   *
+   * // Stop watching
+   * await handle.close()
+   *
+   * @note The file watcher connects to the Daytona proxy service using the sandbox's preview link,
+   * which automatically handles authentication and routing to the correct runner.
+   */
+  public async watchDir(path: string, callback: FileWatchCallback, options: WatchOptions = {}): Promise<WatchHandle> {
+    const absolutePath = prefixRelativePath(await this.getRootDir(), path)
+
+    // Get the proxy URL using the same pattern as Process class
+    const previewLink = await this.getPreviewLink(2280)
+    const proxyUrl = previewLink.url
+    const proxyUrlObj = new URL(proxyUrl)
+    const protocol = proxyUrlObj.protocol === 'https:' ? 'wss:' : 'ws:'
+
+    // Construct WebSocket URL for file watching with authentication token
+    // The preview link already contains the correct host format
+    const wsUrl = `${protocol}//${proxyUrlObj.host}/files/watch?path=${encodeURIComponent(absolutePath)}&recursive=${options.recursive || false}&DAYTONA_SANDBOX_AUTH_KEY=${previewLink.token}`
+
+    return new Promise((resolve, reject) => {
+      const ws = new WebSocket(wsUrl)
+      let isConnected = false
+
+      const cleanup = () => {
+        if (ws.readyState === WebSocket.OPEN) {
+          ws.close()
+        }
+      }
+
+      ws.onopen = () => {
+        isConnected = true
+        resolve({
+          close: async () => {
+            cleanup()
+          },
+        })
+      }
+
+      ws.onmessage = async (event) => {
+        try {
+          const fsEvent: FilesystemEvent = JSON.parse(event.data)
+          await callback(fsEvent)
+        } catch (error) {
+          // Only log parsing errors in development
+          if (process.env.NODE_ENV === 'development') {
+            console.warn('Failed to parse filesystem event:', error)
+          }
+        }
+      }
+
+      ws.onerror = (error) => {
+        // Only log connection errors during initial connection
+        if (!isConnected) {
+          console.warn('File watcher connection failed:', error)
+          reject(new Error('Failed to establish file watcher connection'))
+        }
+      }
+
+      ws.onclose = (event) => {
+        if (!isConnected) {
+          reject(new Error(`WebSocket connection closed: ${event.reason || 'Unknown reason'}`))
+        }
+      }
+    })
   }
 }
