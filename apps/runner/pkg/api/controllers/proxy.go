@@ -40,6 +40,12 @@ func ProxyRequest(ctx *gin.Context) {
 		}
 	}
 
+	// Handle file watching WebSocket requests
+	if regexp.MustCompile(`^/files/watch$`).MatchString(ctx.Param("path")) {
+		ProxyFileWatchStream(ctx)
+		return
+	}
+
 	proxy.NewProxyRequestHandler(getProxyTarget)(ctx)
 }
 
