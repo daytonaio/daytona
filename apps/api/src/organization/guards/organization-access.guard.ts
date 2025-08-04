@@ -36,7 +36,15 @@ export class OrganizationAccessGuard implements CanActivate {
       return false
     }
 
-    if (organizationIdParam && authContext.apiKey && authContext.apiKey.organizationId !== organizationIdParam) {
+    if (
+      organizationIdParam &&
+      authContext.apiKey &&
+      authContext.apiKey.organizationId !== organizationIdParam &&
+      authContext.role !== SystemRole.ADMIN
+    ) {
+      this.logger.warn(
+        `Organization ID mismatch in the request context. Expected: ${organizationIdParam}, Actual: ${authContext.apiKey.organizationId}`,
+      )
       this.logger.warn('Organization ID mismatch in the request context.')
       return false
     }
