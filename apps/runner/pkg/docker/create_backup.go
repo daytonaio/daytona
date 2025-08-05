@@ -31,7 +31,7 @@ func (d *DockerClient) CreateBackup(ctx context.Context, containerId string, bac
 
 	d.cache.SetBackupState(ctx, containerId, enums.BackupStateCompleted)
 
-	log.Infof("Backp (%s) for container %s created successfully", backupDto.Snapshot, containerId)
+	log.Infof("Backup (%s) for container %s created successfully", backupDto.Snapshot, containerId)
 
 	err = d.RemoveImage(ctx, backupDto.Snapshot, true)
 	if err != nil {

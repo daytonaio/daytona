@@ -6,8 +6,11 @@ package docker
 import (
 	"context"
 	"fmt"
+	"io"
+	"strings"
 
 	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/api/types/image"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -27,6 +30,19 @@ func (d *DockerClient) commitContainer(ctx context.Context, containerId, imageNa
 			return nil
 		}
 
+		// Check if the error is related to "failed to get digest" and try export/import fallback
+		if strings.Contains(err.Error(), "Error response from daemon: failed to get digest") {
+			log.Warnf("Commit failed with digest error, attempting export/import fallback for container %s", containerId)
+
+			err = d.exportImportContainer(ctx, containerId, imageName)
+			if err == nil {
+				log.Infof("Container %s successfully backed up using export/import method", containerId)
+				return nil
+			}
+
+			log.Errorf("Export/import fallback also failed for container %s: %v", containerId, err)
+		}
+
 		if attempt < maxRetries {
 			log.Warnf("Failed to commit container %s (attempt %d/%d): %v", containerId, attempt, maxRetries, err)
 			continue
@@ -35,5 +51,37 @@ func (d *DockerClient) commitContainer(ctx context.Context, containerId, imageNa
 		return fmt.Errorf("failed to commit container after %d attempts: %w", maxRetries, err)
 	}
 
+	return nil
+}
+
+func (d *DockerClient) exportImportContainer(ctx context.Context, containerId, imageName string) error {
+	log.Infof("Exporting container %s and importing as image %s...", containerId, imageName)
+
+	// Export the container
+	exportReader, err := d.apiClient.ContainerExport(ctx, containerId)
+	if err != nil {
+		return fmt.Errorf("failed to export container %s: %w", containerId, err)
+	}
+	defer exportReader.Close()
+
+	// Import the exported container as a new image
+	importOptions := image.ImportOptions{}
+
+	importResponse, err := d.apiClient.ImageImport(ctx, image.ImportSource{
+		Source:     exportReader,
+		SourceName: "-",
+	}, imageName, importOptions)
+	if err != nil {
+		return fmt.Errorf("failed to import container %s as image %s: %w", containerId, imageName, err)
+	}
+	defer importResponse.Close()
+
+	// Read the import response to completion
+	_, err = io.ReadAll(importResponse)
+	if err != nil {
+		return fmt.Errorf("failed to read import response for container %s: %w", containerId, err)
+	}
+
+	log.Infof("Container %s successfully exported and imported as image %s", containerId, imageName)
 	return nil
 }
