@@ -39,6 +39,13 @@ export class SandboxStartAction extends SandboxAction {
   }
 
   async run(sandbox: Sandbox): Promise<SyncState> {
+    if (sandbox.runnerId !== null) {
+      const runner = await this.runnerService.findOne(sandbox.runnerId)
+      if (runner.state !== RunnerState.READY) {
+        return DONT_SYNC_AGAIN
+      }
+    }
+
     switch (sandbox.state) {
       case SandboxState.PENDING_BUILD: {
         return this.handleUnassignedBuildSandbox(sandbox)
