@@ -83,8 +83,16 @@ var PushCmd = &cobra.Command{
 			return fmt.Errorf("failed to marshal auth config: %w", err)
 		}
 
-		// Tag image
-		targetImage := fmt.Sprintf("%s/%s/%s", tokenResponse.RegistryUrl, tokenResponse.Project, sourceImage)
+		// Extract image name without tag and create timestamp-based tag
+		imageName := sourceImage
+		if colonIndex := strings.LastIndex(sourceImage, ":"); colonIndex != -1 {
+			imageName = sourceImage[:colonIndex]
+		}
+
+		// Generate timestamp-based tag to avoid inconsistencies
+		// 20060102150405 is the format of the timestamp (year, month, day, hour, minute, second)
+		timestamp := time.Now().Format("20060102150405")
+		targetImage := fmt.Sprintf("%s/%s/%s:%s", tokenResponse.RegistryUrl, tokenResponse.Project, imageName, timestamp)
 		err = dockerClient.ImageTag(ctx, sourceImage, targetImage)
 		if err != nil {
 			return fmt.Errorf("failed to tag image: %w", err)
