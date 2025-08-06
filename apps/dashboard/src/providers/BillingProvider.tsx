@@ -13,6 +13,7 @@ import { OrganizationEmail } from '@/billing-api'
 import { BillingContext, IBillingContext } from '@/contexts/BillingContext'
 import { handleApiError } from '@/lib/error-handling'
 import { suspend } from 'suspend-react'
+import { OrganizationUserRoleEnum } from '@daytonaio/api-client'
 
 interface BillingProviderProps {
   children: ReactNode
@@ -20,11 +21,16 @@ interface BillingProviderProps {
 
 export const BillingProvider: React.FC<BillingProviderProps> = ({ children }) => {
   const { billingApi } = useApi()
-  const { selectedOrganization } = useSelectedOrganization()
+  const { selectedOrganization, authenticatedUserOrganizationMember } = useSelectedOrganization()
+
+  // Helper function to check if user has owner role
+  const isOwner = useCallback(() => {
+    return authenticatedUserOrganizationMember?.role === OrganizationUserRoleEnum.OWNER
+  }, [authenticatedUserOrganizationMember])
 
   const getWallet = useCallback(
     async (selectedOrganizationId?: string) => {
-      if (!import.meta.env.VITE_BILLING_API_URL || !selectedOrganizationId) {
+      if (!import.meta.env.VITE_BILLING_API_URL || !selectedOrganizationId || !isOwner()) {
         return null
       }
       try {
@@ -34,17 +40,17 @@ export const BillingProvider: React.FC<BillingProviderProps> = ({ children }) =>
         throw error
       }
     },
-    [billingApi],
+    [billingApi, isOwner],
   )
 
   const getOrganizationTier = useCallback(
     async (selectedOrganizationId?: string) => {
-      if (!import.meta.env.VITE_BILLING_API_URL || !selectedOrganizationId) {
+      if (!import.meta.env.VITE_BILLING_API_URL || !selectedOrganizationId || !isOwner()) {
         return null
       }
       return await billingApi.getOrganizationTier(selectedOrganizationId)
     },
-    [billingApi],
+    [billingApi, isOwner],
   )
 
   const getTiers = useCallback(async () => {
@@ -61,22 +67,22 @@ export const BillingProvider: React.FC<BillingProviderProps> = ({ children }) =>
 
   const getOrganizationEmails = useCallback(
     async (selectedOrganizationId?: string) => {
-      if (!import.meta.env.VITE_BILLING_API_URL || !selectedOrganizationId) {
+      if (!import.meta.env.VITE_BILLING_API_URL || !selectedOrganizationId || !isOwner()) {
         return []
       }
       return await billingApi.listOrganizationEmails(selectedOrganizationId)
     },
-    [billingApi],
+    [billingApi, isOwner],
   )
 
   const getBillingPortalUrl = useCallback(
     async (selectedOrganizationId?: string) => {
-      if (!import.meta.env.VITE_BILLING_API_URL || !selectedOrganizationId) {
+      if (!import.meta.env.VITE_BILLING_API_URL || !selectedOrganizationId || !isOwner()) {
         return null
       }
       return await billingApi.getOrganizationBillingPortalUrl(selectedOrganizationId)
     },
-    [billingApi],
+    [billingApi, isOwner],
   )
 
   // Wallet state
@@ -190,7 +196,7 @@ export const BillingProvider: React.FC<BillingProviderProps> = ({ children }) =>
       return
     }
 
-    if (selectedOrganization) {
+    if (selectedOrganization && isOwner()) {
       refreshWallet()
       refreshTier()
       refreshTiers()
@@ -206,6 +212,7 @@ export const BillingProvider: React.FC<BillingProviderProps> = ({ children }) =>
     }
   }, [
     selectedOrganization,
+    isOwner,
     refreshWallet,
     refreshTier,
     refreshTiers,

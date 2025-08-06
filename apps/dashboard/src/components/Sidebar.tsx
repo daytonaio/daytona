@@ -12,7 +12,6 @@ import {
   CreditCard,
   HardDrive,
   KeyRound,
-  Link2,
   ListChecks,
   LockKeyhole,
   LogOut,
@@ -180,7 +179,7 @@ export function Sidebar({ isBannerVisible }: SidebarProps) {
           </SidebarGroupContent>
         </SidebarGroup>
         <SidebarGroup>
-          <SidebarGroupLabel>Billing</SidebarGroupLabel>
+          {billingItems.length > 0 && <SidebarGroupLabel>Billing</SidebarGroupLabel>}
           <SidebarGroupContent>
             <SidebarMenu>
               {billingItems.map((item) => (
