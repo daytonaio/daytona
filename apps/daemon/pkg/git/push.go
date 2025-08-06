@@ -26,7 +26,7 @@ func (s *Service) Push(auth *http.BasicAuth) error {
 	options := &git.PushOptions{
 		Auth: auth,
 		RefSpecs: []config.RefSpec{
-			config.RefSpec(fmt.Sprintf("+%s:%s", ref.Name(), ref.Name())),
+			config.RefSpec(fmt.Sprintf("%s:%s", ref.Name(), ref.Name())),
 		},
 	}
 
