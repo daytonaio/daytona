@@ -47,6 +47,7 @@ import Spending from './pages/Spending'
 import EmailVerify from './pages/EmailVerify'
 import AccountSettings from './pages/AccountSettings'
 import { BillingProvider } from './providers/BillingProvider'
+import Playground from './pages/Playground'
 
 // Simple redirection components for external URLs
 const DocsRedirect = () => {
@@ -146,6 +147,7 @@ function App() {
             index
             element={<Navigate to={`${getRouteSubPath(RoutePath.SANDBOXES)}${location.search}`} replace />}
           />
+          <Route path={getRouteSubPath(RoutePath.PLAYGROUND)} element={<Playground />} />
           <Route path={getRouteSubPath(RoutePath.KEYS)} element={<Keys />} />
           <Route path={getRouteSubPath(RoutePath.SANDBOXES)} element={<Sandboxes />} />
           <Route path={getRouteSubPath(RoutePath.SNAPSHOTS)} element={<Snapshots />} />

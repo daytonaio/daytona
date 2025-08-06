@@ -5,6 +5,7 @@ import checker from 'vite-plugin-checker'
 import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin'
 import { nxCopyAssetsPlugin } from '@nx/vite/plugins/nx-copy-assets.plugin'
 import path from 'path'
+import { nodePolyfills } from 'vite-plugin-node-polyfills'
 
 export default defineConfig((mode) => ({
   root: __dirname,
@@ -23,25 +24,38 @@ export default defineConfig((mode) => ({
   },
   plugins: [
     react(),
+    // Required for @daytonaio/sdk
+    nodePolyfills({
+      globals: { global: true, process: true, Buffer: true },
+      overrides: {
+        path: 'path-browserify-win32',
+      },
+    }),
     nxViteTsPaths(),
     nxCopyAssetsPlugin(['*.md']),
     // enforce typechecking for build mode
     mode.command === 'build' &&
-      checker({
-        typescript: {
-          tsconfigPath: './tsconfig.app.json',
-        },
-      }),
+    checker({
+      typescript: {
+        tsconfigPath: './tsconfig.app.json',
+      },
+    }),
   ],
   resolve: {
-    alias: {
-      '@': path.resolve(__dirname, './src'), // Make sure this points to dashboard's src
-    },
+    alias: [
+      // Resolve @daytonaio/sdk to the built distribution
+      {
+        find: '@daytonaio/sdk',
+        replacement: path.resolve(__dirname, '../../libs/sdk-typescript/src'),
+      },
+      // Target @ but not @daytonaio,
+      {
+        // find: /^@(?!daytonaio)/,
+        find: '@',
+        replacement: path.resolve(__dirname, './src'), // Make sure this points to dashboard's src
+      },
+    ],
   },
-  // Uncomment this if you are using workers.
-  // worker: {
-  //  plugins: [ nxViteTsPaths() ],
-  // },
   build: {
     outDir: '../../dist/apps/dashboard',
     emptyOutDir: true,

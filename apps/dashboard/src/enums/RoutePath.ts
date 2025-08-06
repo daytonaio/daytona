@@ -17,6 +17,7 @@ export enum RoutePath {
 
   // Dashboard sub-routes
   KEYS = '/dashboard/keys',
+  PLAYGROUND = '/dashboard/playground',
   SANDBOXES = '/dashboard/sandboxes',
   SNAPSHOTS = '/dashboard/snapshots',
   REGISTRIES = '/dashboard/registries',
