@@ -37,7 +37,7 @@ func (s *Service) CloneRepository(repo *gitprovider.GitRepository, auth *http.Ba
 	}
 
 	if repo.Branch != "" {
-		cloneOptions.ReferenceName = plumbing.ReferenceName("refs/heads/" + repo.Branch)
+		cloneOptions.ReferenceName = plumbing.NewBranchReferenceName(repo.Branch)
 	}
 
 	_, err := git.PlainClone(s.ProjectDir, false, cloneOptions)
