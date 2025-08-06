@@ -79,19 +79,19 @@ func (d *DockerClient) exportImportContainer(ctx context.Context, containerId, i
 	var changes []string
 
 	// Preserve CMD if it exists
-	if containerInfo.Config.Cmd != nil && len(containerInfo.Config.Cmd) > 0 {
+	if len(containerInfo.Config.Cmd) > 0 {
 		cmdStr := buildDockerfileCmd(containerInfo.Config.Cmd)
 		changes = append(changes, fmt.Sprintf("CMD %s", cmdStr))
 	}
 
 	// Preserve ENTRYPOINT if it exists
-	if containerInfo.Config.Entrypoint != nil && len(containerInfo.Config.Entrypoint) > 0 {
+	if len(containerInfo.Config.Entrypoint) > 0 {
 		entrypointStr := buildDockerfileCmd(containerInfo.Config.Entrypoint)
 		changes = append(changes, fmt.Sprintf("ENTRYPOINT %s", entrypointStr))
 	}
 
 	// Preserve environment variables
-	if containerInfo.Config.Env != nil && len(containerInfo.Config.Env) > 0 {
+	if len(containerInfo.Config.Env) > 0 {
 		for _, env := range containerInfo.Config.Env {
 			changes = append(changes, fmt.Sprintf("ENV %s", env))
 		}
@@ -103,7 +103,7 @@ func (d *DockerClient) exportImportContainer(ctx context.Context, containerId, i
 	}
 
 	// Preserve exposed ports
-	if containerInfo.Config.ExposedPorts != nil && len(containerInfo.Config.ExposedPorts) > 0 {
+	if len(containerInfo.Config.ExposedPorts) > 0 {
 		for port := range containerInfo.Config.ExposedPorts {
 			changes = append(changes, fmt.Sprintf("EXPOSE %s", string(port)))
 		}
