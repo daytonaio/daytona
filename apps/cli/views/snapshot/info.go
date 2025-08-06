@@ -22,8 +22,8 @@ func RenderInfo(snapshot *apiclient.SnapshotDto, forceUnstyled bool) {
 	output += getInfoLine(nameLabel, snapshot.Name) + "\n"
 	output += getInfoLine("State", getStateLabel(snapshot.State)) + "\n"
 
-	if snapshot.Size.IsSet() {
-		output += getInfoLine("Size", fmt.Sprintf("%.2f GB", *snapshot.Size.Get())) + "\n"
+	if size := snapshot.Size.Get(); size != nil {
+		output += getInfoLine("Size", fmt.Sprintf("%.2f GB", *size)) + "\n"
 	} else {
 		output += getInfoLine("Size", "-") + "\n"
 	}
