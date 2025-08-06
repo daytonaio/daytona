@@ -201,7 +201,7 @@ export class BackupManager {
 
     // Generate backup snapshot name
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
-    const backupSnapshot = `${registry.url}/${registry.project}/backup-${sandbox.id}:${timestamp}`
+    const backupSnapshot = `${registry.url.replace('https://', '').replace('http://', '')}/${registry.project}/backup-${sandbox.id}:${timestamp}`
 
     //  if sandbox has a backup snapshot, add it to the existingBackupSnapshots array
     if (
