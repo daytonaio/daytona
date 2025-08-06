@@ -76,13 +76,12 @@ func (s *SessionController) DeleteSession(c *gin.Context) {
 	sessionId := c.Param("sessionId")
 
 	session, ok := sessions[sessionId]
-	if !ok || session.deleted {
+	if !ok {
 		c.AbortWithError(http.StatusNotFound, errors.New("session not found"))
 		return
 	}
 
 	session.cancel()
-	session.deleted = true
 
 	err := os.RemoveAll(session.Dir(s.configDir))
 	if err != nil {
@@ -90,17 +89,14 @@ func (s *SessionController) DeleteSession(c *gin.Context) {
 		return
 	}
 
+	delete(sessions, sessionId)
 	c.Status(http.StatusNoContent)
 }
 
 func (s *SessionController) ListSessions(c *gin.Context) {
 	sessionDTOs := []Session{}
 
-	for sessionId, session := range sessions {
-		if session.deleted {
-			continue
-		}
-
+	for sessionId := range sessions {
 		commands, err := s.getSessionCommands(sessionId)
 		if err != nil {
 			c.AbortWithError(http.StatusInternalServerError, err)
@@ -119,8 +115,8 @@ func (s *SessionController) ListSessions(c *gin.Context) {
 func (s *SessionController) GetSession(c *gin.Context) {
 	sessionId := c.Param("sessionId")
 
-	session, ok := sessions[sessionId]
-	if !ok || session.deleted {
+	_, ok := sessions[sessionId]
+	if !ok {
 		c.AbortWithError(http.StatusNotFound, errors.New("session not found"))
 		return
 	}
@@ -152,7 +148,7 @@ func (s *SessionController) GetSessionCommand(c *gin.Context) {
 
 func (s *SessionController) getSessionCommands(sessionId string) ([]*Command, error) {
 	session, ok := sessions[sessionId]
-	if !ok || session.deleted {
+	if !ok {
 		return nil, errors.New("session not found")
 	}
 
@@ -170,7 +166,7 @@ func (s *SessionController) getSessionCommands(sessionId string) ([]*Command, er
 
 func (s *SessionController) getSessionCommand(sessionId, cmdId string) (*Command, error) {
 	session, ok := sessions[sessionId]
-	if !ok || session.deleted {
+	if !ok {
 		return nil, errors.New("session not found")
 	}
 
