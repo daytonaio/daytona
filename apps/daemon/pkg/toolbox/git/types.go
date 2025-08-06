@@ -19,10 +19,11 @@ type GitCloneRequest struct {
 } // @name GitCloneRequest
 
 type GitCommitRequest struct {
-	Path    string `json:"path" validate:"required"`
-	Message string `json:"message" validate:"required"`
-	Author  string `json:"author" validate:"required"`
-	Email   string `json:"email" validate:"required"`
+	Path       string `json:"path" validate:"required"`
+	Message    string `json:"message" validate:"required"`
+	Author     string `json:"author" validate:"required"`
+	Email      string `json:"email" validate:"required"`
+	AllowEmpty bool   `json:"allow_empty,omitempty"`
 } // @name GitCommitRequest
 
 type GitCommitResponse struct {
