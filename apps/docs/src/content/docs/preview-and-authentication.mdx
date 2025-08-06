@@ -44,3 +44,13 @@ console.log(`Preview link token: ${previewInfo.token}`);
 
 </TabItem>
 </Tabs>
+
+## Keep Sandbox Started While Previewing
+
+To prevent the sandbox from being stopped due to inactivity, you can set the `X-Daytona-Update-Last-Activity` header to `true` when using the preview link URL.
+This will prevent Daytona from stopping sandboxes that have [auto-stop enabled](/docs/sandbox-management#auto-stop-interval).
+
+```bash
+curl -H "X-Daytona-Update-Last-Activity: true" \
+https://3000-sandbox-123456.proxy.daytona.work
+```

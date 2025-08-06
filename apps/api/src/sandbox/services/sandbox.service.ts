@@ -43,6 +43,7 @@ import { TypedConfigService } from '../../config/typed-config.service'
 import { WarmPool } from '../entities/warm-pool.entity'
 import { SandboxDto } from '../dto/sandbox.dto'
 import { isValidUuid } from '../../common/utils/uuid'
+import { nanoid } from 'nanoid'
 
 const DEFAULT_CPU = 1
 const DEFAULT_MEMORY = 1
@@ -616,6 +617,7 @@ export class SandboxService {
 
     sandbox.pending = true
     sandbox.desiredState = SandboxDesiredState.STARTED
+    sandbox.authToken = nanoid(32).toLocaleLowerCase()
     await this.sandboxRepository.save(sandbox)
 
     this.eventEmitter.emit(SandboxEvents.STARTED, new SandboxStartedEvent(sandbox))
@@ -671,6 +673,19 @@ export class SandboxService {
     }
 
     sandbox.public = isPublic
+    await this.sandboxRepository.save(sandbox)
+  }
+
+  async updateLastActivityAt(sandboxId: string, lastActivityAt: Date): Promise<void> {
+    const sandbox = await this.sandboxRepository.findOne({
+      where: { id: sandboxId },
+    })
+
+    if (!sandbox) {
+      throw new NotFoundException(`Sandbox with ID ${sandboxId} not found`)
+    }
+
+    sandbox.lastActivityAt = lastActivityAt
     await this.sandboxRepository.save(sandbox)
   }
 

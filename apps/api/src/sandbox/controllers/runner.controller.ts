@@ -17,8 +17,8 @@ import { RunnerSnapshotDto } from '../dto/runner-snapshot.dto'
 import { Audit, MASKED_AUDIT_VALUE, TypedRequest } from '../../audit/decorators/audit.decorator'
 import { AuditAction } from '../../audit/enums/audit-action.enum'
 import { AuditTarget } from '../../audit/enums/audit-target.enum'
-
 import { CombinedAuthGuard } from '../../auth/combined-auth.guard'
+
 @ApiTags('runners')
 @Controller('runners')
 @UseGuards(CombinedAuthGuard, SystemActionGuard, ProxyGuard)
