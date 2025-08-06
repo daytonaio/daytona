@@ -127,4 +127,10 @@ export interface SnapshotDto {
    * @memberof SnapshotDto
    */
   buildInfo?: BuildInfo
+  /**
+   *
+   * @type {boolean}
+   * @memberof SnapshotDto
+   */
+  skipValidation: boolean
 }
