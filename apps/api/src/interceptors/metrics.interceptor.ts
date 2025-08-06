@@ -17,7 +17,6 @@ import { PostHog } from 'posthog-node'
 import { SandboxDto } from '../sandbox/dto/sandbox.dto'
 import { DockerRegistryDto } from '../docker-registry/dto/docker-registry.dto'
 import { CreateSandboxDto } from '../sandbox/dto/create-sandbox.dto'
-import { Request } from 'express'
 import { CreateSnapshotDto } from '../sandbox/dto/create-snapshot.dto'
 import { SnapshotDto } from '../sandbox/dto/snapshot.dto'
 import { CreateOrganizationDto } from '../organization/dto/create-organization.dto'
@@ -34,8 +33,8 @@ import { CreateVolumeDto } from '../sandbox/dto/create-volume.dto'
 import { VolumeDto } from '../sandbox/dto/volume.dto'
 import { CreateWorkspaceDto } from '../sandbox/dto/create-workspace.deprecated.dto'
 import { WorkspaceDto } from '../sandbox/dto/workspace.deprecated.dto'
+import { RequestWithUser } from '../common/types/request.types'
 
-type RequestWithUser = Request & { user?: { userId: string; organizationId: string } }
 type CommonCaptureProps = {
   organizationId?: string
   distinctId: string
@@ -76,7 +75,7 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
       return next.handle()
     }
 
-    const request = context.switchToHttp().getRequest()
+    const request = context.switchToHttp().getRequest<RequestWithUser>()
     const startTime = Date.now()
 
     return next.handle().pipe(

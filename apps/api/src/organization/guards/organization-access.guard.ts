@@ -6,8 +6,9 @@
 import { CanActivate, ExecutionContext, Injectable, Logger } from '@nestjs/common'
 import { OrganizationService } from '../services/organization.service'
 import { OrganizationUserService } from '../services/organization-user.service'
-import { AuthContext, OrganizationAuthContext } from '../../common/interfaces/auth-context.interface'
 import { SystemRole } from '../../user/enums/system-role.enum'
+import { RequestWithAuthContext } from '../../common/types/request.types'
+import { OrganizationAuthContext } from '../../common/interfaces/auth-context.interface'
 
 @Injectable()
 export class OrganizationAccessGuard implements CanActivate {
@@ -19,9 +20,8 @@ export class OrganizationAccessGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request = context.switchToHttp().getRequest()
-    // TODO: initialize authContext safely
-    const authContext: AuthContext = request.user
+    const request = context.switchToHttp().getRequest<RequestWithAuthContext>()
+    const authContext = request.user
 
     if (!authContext) {
       this.logger.warn('User object is undefined. Authentication may not be set up correctly.')

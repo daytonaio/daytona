@@ -5,20 +5,19 @@
 
 import { Injectable, CanActivate, ExecutionContext, NotFoundException, ForbiddenException } from '@nestjs/common'
 import { SandboxService } from '../services/sandbox.service'
-import { OrganizationAuthContext } from '../../common/interfaces/auth-context.interface'
 import { SystemRole } from '../../user/enums/system-role.enum'
+import { RequestWithOrganizationContext } from '../../common/types/request.types'
 
 @Injectable()
 export class SandboxAccessGuard implements CanActivate {
   constructor(private readonly sandboxService: SandboxService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request = context.switchToHttp().getRequest()
+    const request = context.switchToHttp().getRequest<RequestWithOrganizationContext>()
     // TODO: remove deprecated request.params.workspaceId param once we remove the deprecated workspace controller
     const sandboxId: string = request.params.sandboxId || request.params.id || request.params.workspaceId
 
-    // TODO: initialize authContext safely
-    const authContext: OrganizationAuthContext = request.user
+    const authContext = request.user
 
     try {
       const sandbox = await this.sandboxService.findOne(sandboxId, true)
