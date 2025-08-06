@@ -8,6 +8,7 @@ import {
   Box,
   ChartColumn,
   ChevronsUpDown,
+  Code,
   Container,
   CreditCard,
   HardDrive,
@@ -188,6 +189,14 @@ export function Sidebar({ isBannerVisible }: SidebarProps) {
           <OrganizationPicker />
           <SidebarGroupContent>
             <SidebarMenu>
+              <SidebarMenuItem key="playground">
+                <SidebarMenuButton asChild size="lg">
+                  <button onClick={() => navigate(RoutePath.PLAYGROUND)} className="text-sm">
+                    <Code className="w-5 h-5" />
+                    <span>Playground</span>
+                  </button>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
               {sidebarItems.map((item) => (
                 <SidebarMenuItem key={item.label}>
                   <SidebarMenuButton asChild isActive={pathname.startsWith(item.path)}>
