@@ -181,7 +181,7 @@ class Git:
         )
 
     @intercept_errors(message_prefix="Failed to commit changes: ")
-    def commit(self, path: str, message: str, author: str, email: str) -> GitCommitResponse:
+    def commit(self, path: str, message: str, author: str, email: str, allow_empty: bool = False) -> GitCommitResponse:
         """Creates a new commit with the staged changes. Make sure to stage
         changes using the add() method before committing.
 
@@ -191,6 +191,7 @@ class Git:
             message (str): Commit message describing the changes.
             author (str): Name of the commit author.
             email (str): Email address of the commit author.
+            allow_empty (bool, optional): Allow creating an empty commit when no changes are staged. Defaults to False.
 
         Example:
             ```python
@@ -200,7 +201,8 @@ class Git:
                 path="workspace/repo",
                 message="Update documentation",
                 author="John Doe",
-                email="john@example.com"
+                email="john@example.com",
+                allow_empty=True
             )
             ```
         """
@@ -211,6 +213,7 @@ class Git:
                 message=message,
                 author=author,
                 email=email,
+                allow_empty=allow_empty,
             ),
         )
         return GitCommitResponse(sha=response.hash)

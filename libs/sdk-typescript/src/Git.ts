@@ -193,6 +193,7 @@ export class Git {
    * @param {string} message - Commit message describing the changes
    * @param {string} author - Name of the commit author
    * @param {string} email - Email address of the commit author
+   * @param {boolean} [allowEmpty] - Allow creating an empty commit when no changes are staged
    * @returns {Promise<void>}
    *
    * @example
@@ -202,15 +203,24 @@ export class Git {
    *   'workspace/repo',
    *   'Update documentation',
    *   'John Doe',
-   *   'john@example.com'
+   *   'john@example.com',
+   *   true
    * );
+   *
    */
-  public async commit(path: string, message: string, author: string, email: string): Promise<GitCommitResponse> {
+  public async commit(
+    path: string,
+    message: string,
+    author: string,
+    email: string,
+    allowEmpty?: boolean,
+  ): Promise<GitCommitResponse> {
     const response = await this.toolboxApi.gitCommitChanges(this.sandboxId, {
       path: prefixRelativePath(await this.getRootDir(), path),
       message,
       author,
       email,
+      allow_empty: allowEmpty,
     })
     return {
       sha: response.data.hash,

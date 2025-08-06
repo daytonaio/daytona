@@ -7794,6 +7794,7 @@ components:
         author: author
         message: message
         email: email
+        allow_empty: false
       properties:
         path:
           type: string
@@ -7803,6 +7804,10 @@ components:
           type: string
         email:
           type: string
+        allow_empty:
+          default: false
+          description: Allow creating an empty commit when no changes are staged
+          type: boolean
       required:
         - author
         - email

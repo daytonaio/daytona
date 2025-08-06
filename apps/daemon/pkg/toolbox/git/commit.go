@@ -31,6 +31,7 @@ func CommitChanges(c *gin.Context) {
 			Email: req.Email,
 			When:  time.Now(),
 		},
+		AllowEmptyCommits: req.AllowEmpty,
 	})
 
 	if err != nil {
