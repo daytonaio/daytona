@@ -122,6 +122,7 @@ models/sandbox.ts
 models/screenshot-response.ts
 models/search-files-response.ts
 models/send-webhook-dto.ts
+models/session-command-logs-response.ts
 models/session-execute-request.ts
 models/session-execute-response.ts
 models/session.ts

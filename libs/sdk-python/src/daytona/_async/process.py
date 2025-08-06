@@ -5,17 +5,20 @@ import base64
 import json
 from typing import Awaitable, Callable, Dict, List, Optional
 
+import websockets
 from daytona_api_client_async import (
     Command,
     CreateSessionRequest,
     ExecuteRequest,
+    PortPreviewUrl,
     Session,
+    SessionCommandLogsResponse,
     SessionExecuteResponse,
     ToolboxApi,
 )
 
 from .._utils.errors import intercept_errors
-from .._utils.stream import process_streaming_response
+from .._utils.stream import std_demux_stream
 from ..code_toolbox.sandbox_python_code_toolbox import SandboxPythonCodeToolbox
 from ..common.charts import parse_chart
 from ..common.process import CodeRunParams, ExecuteResponse, ExecutionArtifacts, SessionExecuteRequest
@@ -30,6 +33,7 @@ class AsyncProcess:
         code_toolbox: SandboxPythonCodeToolbox,
         toolbox_api: ToolboxApi,
         get_root_dir: Callable[[], Awaitable[str]],
+        get_preview_link: Callable[[int], Awaitable[PortPreviewUrl]],
     ):
         """Initialize a new Process instance.
 
@@ -43,6 +47,7 @@ class AsyncProcess:
         self._code_toolbox = code_toolbox
         self._toolbox_api = toolbox_api
         self._get_root_dir = get_root_dir
+        self._get_preview_link = get_preview_link
 
     @staticmethod
     def _parse_output(lines: List[str]) -> Optional[ExecutionArtifacts]:
@@ -335,7 +340,7 @@ class AsyncProcess:
         )
 
     @intercept_errors(message_prefix="Failed to get session command logs: ")
-    async def get_session_command_logs(self, session_id: str, command_id: str) -> str:
+    async def get_session_command_logs(self, session_id: str, command_id: str) -> SessionCommandLogsResponse:
         """Get the logs for a command executed in a session. Retrieves the complete output
         (stdout and stderr) from a command executed in a session.
 
@@ -344,7 +349,7 @@ class AsyncProcess:
             command_id (str): Unique identifier of the command.
 
         Returns:
-            str: Complete command output including both stdout and stderr.
+            SessionCommandLogsResponse: Command output including both stdout and stderr.
 
         Example:
             ```python
@@ -352,7 +357,8 @@ class AsyncProcess:
                 "my-session",
                 "cmd-123"
             )
-            print(f"Command output: {logs}")
+            print(f"Command stdout: {logs.stdout}")
+            print(f"Command stderr: {logs.stderr}")
             ```
         """
         return await self._toolbox_api.get_session_command_logs(
@@ -362,25 +368,27 @@ class AsyncProcess:
     # unasync: preserve start
     @intercept_errors(message_prefix="Failed to get session command logs: ")
     async def get_session_command_logs_async(
-        self, session_id: str, command_id: str, on_logs: Callable[[str], None]
+        self, session_id: str, command_id: str, on_stdout: Callable[[str], None], on_stderr: Callable[[str], None]
     ) -> None:
         """Asynchronously retrieves and processes the logs for a command executed in a session as they become available.
 
         Args:
             session_id (str): Unique identifier of the session.
             command_id (str): Unique identifier of the command.
-            on_logs (Callable[[str], None]): Callback function to handle log chunks as they arrive.
+            on_stdout (Callable[[str], None]): Callback function to handle stdout log chunks as they arrive.
+            on_stderr (Callable[[str], None]): Callback function to handle stderr log chunks as they arrive.
 
         Example:
             ```python
             await sandbox.process.get_session_command_logs_async(
                 "my-session",
                 "cmd-123",
-                lambda chunk: print(f"Log chunk: {chunk}")
+                lambda log: print(f"[STDOUT]: {log}"),
+                lambda log: print(f"[STDERR]: {log}"),
             )
             ```
         """
-        _, url, *_ = self._toolbox_api._get_session_command_logs_serialize(  # pylint: disable=protected-access
+        _, url, headers, *_ = self._toolbox_api._get_session_command_logs_serialize(  # pylint: disable=protected-access
             sandbox_id=self._sandbox_id,
             session_id=session_id,
             command_id=command_id,
@@ -391,19 +399,20 @@ class AsyncProcess:
             _headers=None,
             _host_index=None,
         )
-
         # unasync: preserve end
-        async def should_terminate():
-            return (await self.get_session_command(session_id, command_id)).exit_code is not None
+
+        preview_link = await self._get_preview_link(2280)
+        url = preview_link.url.replace("http", "ws", 1) + url[url.index("/process") :]
 
         # unasync: preserve start
-
-        await process_streaming_response(
-            url=url,
-            headers=self._toolbox_api.api_client.default_headers,
-            on_chunk=on_logs,
-            should_terminate=should_terminate,
-        )
+        async with websockets.connect(
+            url,
+            additional_headers={
+                **headers,
+                "X-Daytona-Preview-Token": preview_link.token,
+            },
+        ) as ws:
+            await std_demux_stream(ws, on_stdout, on_stderr)
 
     # unasync: preserve end
 

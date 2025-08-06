@@ -44,11 +44,12 @@ async function sessionExec(sandbox: Sandbox) {
   const response = await sandbox.process.executeSessionCommand('exec-session-1', {
     command: 'echo $FOO',
   })
-  console.log(`FOO=${response.output}`)
+  console.log(`FOO=${response.stdout}`)
 
   //  we can also get the logs for the command any time after it is executed
   const logs = await sandbox.process.getSessionCommandLogs('exec-session-1', response.cmdId!)
-  console.log('logs for command: ', logs)
+  console.log('[STDOUT]:', logs.stdout)
+  console.log('[STDERR]:', logs.stderr)
 
   //  we can also delete the session
   await sandbox.process.deleteSession('exec-session-1')
@@ -61,13 +62,17 @@ async function sessionExecLogsAsync(sandbox: Sandbox) {
   await sandbox.process.createSession(sessionId)
 
   const command = await sandbox.process.executeSessionCommand(sessionId, {
-    command: 'counter=1; while (( counter <= 3 )); do echo "Count: $counter"; ((counter++)); sleep 2; done',
+    command:
+      'counter=1; while (( counter <= 3 )); do echo "Count: $counter"; ((counter++)); sleep 2; done; non-existent-command',
     runAsync: true,
   })
 
-  await sandbox.process.getSessionCommandLogs(sessionId, command.cmdId!, (chunk) => {
-    console.log('Log chunk:', chunk)
-  })
+  await sandbox.process.getSessionCommandLogs(
+    sessionId,
+    command.cmdId!,
+    (stdout) => console.log('[STDOUT]:', stdout),
+    (stderr) => console.log('[STDERR]:', stderr),
+  )
 }
 
 async function main() {

@@ -6,6 +6,13 @@ import inspect
 from typing import Callable
 
 import httpx
+import websockets
+from websockets.asyncio.client import Connection
+
+from .errors import DaytonaError
+
+STDOUT_PREFIX = 0x01
+STDERR_PREFIX = 0x02
 
 
 async def process_streaming_response(
@@ -96,3 +103,39 @@ async def process_streaming_response(
                     except httpx.RemoteProtocolError as e:
                         if "peer closed connection without sending complete message body" not in str(e):
                             raise e
+
+
+async def std_demux_stream(
+    connection: Connection, on_stdout: Callable[[bytes], None], on_stderr: Callable[[bytes], None]
+) -> None:
+    """
+    Demultiplexes a WebSocket stream into separate stdout and stderr streams.
+
+    Args:
+        connection: The WebSocket connection to demultiplex.
+        on_stdout: Callback function for stdout messages.
+        on_stderr: Callback function for stderr messages.
+    """
+    while True:
+        try:
+            chunk = await connection.recv()
+        except websockets.exceptions.ConnectionClosedOK:
+            # Clean termination
+            break
+        except websockets.exceptions.ConnectionClosedError as e:
+            raise DaytonaError(f"WebSocket error: {e}") from e
+
+        if isinstance(chunk, str):
+            chunk = chunk.encode("utf-8", "ignore")
+
+        if not chunk:
+            continue
+
+        prefix, data = chunk[0], chunk[1:].decode("utf-8", "ignore")
+
+        if prefix == STDOUT_PREFIX:
+            on_stdout(data)
+        elif prefix == STDERR_PREFIX:
+            on_stderr(data)
+        else:
+            raise DaytonaError(f"Unknown data prefix: '{prefix}' for data: '{data}'")
