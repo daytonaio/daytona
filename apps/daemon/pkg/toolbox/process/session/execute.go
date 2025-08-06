@@ -48,10 +48,7 @@ func (s *SessionController) SessionExecuteCommand(c *gin.Context) {
 		return
 	}
 
-	var cmdId *string
-	var logFile *os.File
-
-	cmdId = util.Pointer(uuid.NewString())
+	cmdId := util.Pointer(uuid.NewString())
 
 	command := &Command{
 		Id:      *cmdId,
@@ -59,22 +56,44 @@ func (s *SessionController) SessionExecuteCommand(c *gin.Context) {
 	}
 	session.commands[*cmdId] = command
 
-	logFilePath, exitCodeFilePath := command.LogFilePath(session.Dir(s.configDir))
+	stdoutFilePath, stderrFilePath, exitCodeFilePath := command.LogFilePath(session.Dir(s.configDir))
 
-	if err := os.MkdirAll(filepath.Dir(logFilePath), 0755); err != nil {
+	if err := os.MkdirAll(filepath.Dir(stdoutFilePath), 0755); err != nil {
 		c.AbortWithError(http.StatusBadRequest, fmt.Errorf("failed to create log directory: %w", err))
 		return
 	}
 
-	logFile, err := os.Create(logFilePath)
+	stdoutFile, err := os.Create(stdoutFilePath)
 	if err != nil {
-		c.AbortWithError(http.StatusBadRequest, fmt.Errorf("failed to create log file: %w", err))
+		c.AbortWithError(http.StatusBadRequest, fmt.Errorf("failed to create stdout log file: %w", err))
 		return
 	}
 
-	defer logFile.Close()
+	defer stdoutFile.Close()
 
-	cmdToExec := fmt.Sprintf("{ %s; } > %s 2>&1 ; echo \"$?\" > %s\n", request.Command, logFile.Name(), exitCodeFilePath)
+	stderrFile, err := os.Create(stderrFilePath)
+	if err != nil {
+		c.AbortWithError(http.StatusBadRequest, fmt.Errorf("failed to create stderr log file: %w", err))
+		return
+	}
+
+	defer stderrFile.Close()
+
+	cmdToExec := fmt.Sprintf(
+		`{ 
+			 %s; 
+			 exit_code=$?; 
+			 echo %s >&1; 
+			 echo %s >&2; 
+			 echo "$exit_code" > %s; 
+		 } > %s 2> %s`+"\n",
+		request.Command,
+		COMMAND_EXIT_MARKER, // goes into stdout log
+		COMMAND_EXIT_MARKER, // goes into stderr log
+		exitCodeFilePath,
+		stdoutFilePath,
+		stderrFilePath,
+	)
 
 	_, err = session.stdinWriter.Write([]byte(cmdToExec))
 	if err != nil {
@@ -115,17 +134,25 @@ func (s *SessionController) SessionExecuteCommand(c *gin.Context) {
 
 			sessions[sessionId].commands[*cmdId].ExitCode = &exitCodeInt
 
-			logBytes, err := os.ReadFile(logFilePath)
+			stdoutBytes, err := os.ReadFile(stdoutFilePath)
 			if err != nil {
 				c.AbortWithError(http.StatusBadRequest, fmt.Errorf("failed to read log file: %w", err))
 				return
 			}
+			stdoutContent := strings.TrimSuffix(strings.TrimRight(string(stdoutBytes), " \n\r\t"), COMMAND_EXIT_MARKER)
 
-			logContent := string(logBytes)
+			stderrBytes, err := os.ReadFile(stderrFilePath)
+			if err != nil {
+				c.AbortWithError(http.StatusBadRequest, fmt.Errorf("failed to read stderr log file: %w", err))
+				return
+			}
+			stderrContent := strings.TrimSuffix(strings.TrimRight(string(stderrBytes), " \n\r\t"), COMMAND_EXIT_MARKER)
 
 			c.JSON(http.StatusOK, SessionExecuteResponse{
 				CommandId: cmdId,
-				Output:    &logContent,
+				Output:    util.Pointer(stdoutContent + "\n" + stderrContent),
+				Stdout:    &stdoutContent,
+				Stderr:    &stderrContent,
 				ExitCode:  &exitCodeInt,
 			})
 			return

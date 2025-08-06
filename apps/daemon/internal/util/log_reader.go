@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-func ReadLog(ctx context.Context, logReader io.Reader, follow bool, c chan []byte, errChan chan error) {
+func ReadCommandLog(ctx context.Context, logReader io.Reader, follow bool, c chan []byte, errChan chan error) {
 	reader := bufio.NewReader(logReader)
 
 	for {

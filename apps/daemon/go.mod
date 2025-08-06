@@ -9,6 +9,7 @@ replace github.com/docker/go-connections => github.com/docker/go-connections v0.
 replace github.com/samber/lo => github.com/samber/lo v1.39.0
 
 require (
+	github.com/Masterminds/semver/v3 v3.4.0
 	github.com/cakturk/go-netstat v0.0.0-20200220111822-e5b49efee7a5
 	github.com/creack/pty v1.1.23
 	github.com/gin-gonic/gin v1.10.1

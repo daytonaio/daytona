@@ -15,7 +15,8 @@ Handles process and code execution within a Sandbox.
 
 ```python
 def __init__(sandbox_id: str, code_toolbox: SandboxPythonCodeToolbox,
-             toolbox_api: ToolboxApi, get_root_dir: Callable[[], str])
+             toolbox_api: ToolboxApi, get_root_dir: Callable[[], str],
+             get_preview_link: Callable[[int], PortPreviewUrl])
 ```
 
 Initialize a new Process instance.
@@ -291,7 +292,8 @@ print(result.output)  # Prints: Hello
 
 ```python
 @intercept_errors(message_prefix="Failed to get session command logs: ")
-def get_session_command_logs(session_id: str, command_id: str) -> str
+def get_session_command_logs(session_id: str,
+                             command_id: str) -> SessionCommandLogsResponse
 ```
 
 Get the logs for a command executed in a session. Retrieves the complete output
@@ -305,7 +307,7 @@ Get the logs for a command executed in a session. Retrieves the complete output
 
 **Returns**:
 
-- `str` - Complete command output including both stdout and stderr.
+- `SessionCommandLogsResponse` - Command output including both stdout and stderr.
   
 
 **Example**:
@@ -315,7 +317,8 @@ logs = sandbox.process.get_session_command_logs(
     "my-session",
     "cmd-123"
 )
-print(f"Command output: {logs}")
+print(f"Command stdout: {logs.stdout}")
+print(f"Command stderr: {logs.stderr}")
 ```
 
 #### Process.get\_session\_command\_logs\_async
@@ -323,8 +326,8 @@ print(f"Command output: {logs}")
 ```python
 @intercept_errors(message_prefix="Failed to get session command logs: ")
 async def get_session_command_logs_async(
-        session_id: str, command_id: str, on_logs: Callable[[str],
-                                                            None]) -> None
+        session_id: str, command_id: str, on_stdout: Callable[[str], None],
+        on_stderr: Callable[[str], None]) -> None
 ```
 
 Asynchronously retrieves and processes the logs for a command executed in a session as they become available.
@@ -333,7 +336,8 @@ Asynchronously retrieves and processes the logs for a command executed in a sess
 
 - `session_id` _str_ - Unique identifier of the session.
 - `command_id` _str_ - Unique identifier of the command.
-- `on_logs` _Callable[[str], None]_ - Callback function to handle log chunks as they arrive.
+- `on_stdout` _Callable[[str], None]_ - Callback function to handle stdout log chunks as they arrive.
+- `on_stderr` _Callable[[str], None]_ - Callback function to handle stderr log chunks as they arrive.
   
 
 **Example**:
@@ -342,7 +346,8 @@ Asynchronously retrieves and processes the logs for a command executed in a sess
 await sandbox.process.get_session_command_logs_async(
     "my-session",
     "cmd-123",
-    lambda chunk: print(f"Log chunk: {chunk}")
+    lambda log: print(f"[STDOUT]: {log}"),
+    lambda log: print(f"[STDERR]: {log}"),
 )
 ```
 

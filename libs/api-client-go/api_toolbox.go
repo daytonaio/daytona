@@ -339,8 +339,8 @@ type ToolboxAPI interface {
 	GetSessionCommandLogs(ctx context.Context, sandboxId string, sessionId string, commandId string) ToolboxAPIGetSessionCommandLogsRequest
 
 	// GetSessionCommandLogsExecute executes the request
-	//  @return string
-	GetSessionCommandLogsExecute(r ToolboxAPIGetSessionCommandLogsRequest) (string, *http.Response, error)
+	//  @return SessionCommandLogsResponse
+	GetSessionCommandLogsExecute(r ToolboxAPIGetSessionCommandLogsRequest) (*SessionCommandLogsResponse, *http.Response, error)
 
 	/*
 		GetWindows Get windows
@@ -3318,12 +3318,13 @@ func (r ToolboxAPIGetSessionCommandLogsRequest) XDaytonaOrganizationID(xDaytonaO
 	return r
 }
 
+// Whether to stream the logs
 func (r ToolboxAPIGetSessionCommandLogsRequest) Follow(follow bool) ToolboxAPIGetSessionCommandLogsRequest {
 	r.follow = &follow
 	return r
 }
 
-func (r ToolboxAPIGetSessionCommandLogsRequest) Execute() (string, *http.Response, error) {
+func (r ToolboxAPIGetSessionCommandLogsRequest) Execute() (*SessionCommandLogsResponse, *http.Response, error) {
 	return r.ApiService.GetSessionCommandLogsExecute(r)
 }
 
@@ -3350,13 +3351,13 @@ func (a *ToolboxAPIService) GetSessionCommandLogs(ctx context.Context, sandboxId
 
 // Execute executes the request
 //
-//	@return string
-func (a *ToolboxAPIService) GetSessionCommandLogsExecute(r ToolboxAPIGetSessionCommandLogsRequest) (string, *http.Response, error) {
+//	@return SessionCommandLogsResponse
+func (a *ToolboxAPIService) GetSessionCommandLogsExecute(r ToolboxAPIGetSessionCommandLogsRequest) (*SessionCommandLogsResponse, *http.Response, error) {
 	var (
 		localVarHTTPMethod  = http.MethodGet
 		localVarPostBody    interface{}
 		formFiles           []formFile
-		localVarReturnValue string
+		localVarReturnValue *SessionCommandLogsResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.GetSessionCommandLogs")
@@ -3386,7 +3387,7 @@ func (a *ToolboxAPIService) GetSessionCommandLogsExecute(r ToolboxAPIGetSessionC
 	}
 
 	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{"text/plain"}
+	localVarHTTPHeaderAccepts := []string{"application/json"}
 
 	// set Accept header
 	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)

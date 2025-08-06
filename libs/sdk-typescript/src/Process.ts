@@ -7,15 +7,19 @@ import {
   Command,
   Configuration,
   Session,
+  SessionCommandLogsResponse,
   SessionExecuteRequest,
   SessionExecuteResponse,
+  PortPreviewUrl,
   ToolboxApi,
 } from '@daytonaio/api-client'
 import { SandboxCodeToolbox } from './Sandbox'
 import { ExecuteResponse } from './types/ExecuteResponse'
 import { ArtifactParser } from './utils/ArtifactParser'
-import { processStreamingResponse } from './utils/Stream'
+import { stdDemuxStream } from './utils/Stream'
 import { Buffer } from 'buffer'
+import WebSocket from 'isomorphic-ws'
+import { RUNTIME, Runtime } from './utils/Runtime'
 
 /**
  * Parameters for code execution.
@@ -43,6 +47,7 @@ export class Process {
     private readonly codeToolbox: SandboxCodeToolbox,
     private readonly toolboxApi: ToolboxApi,
     private readonly getRootDir: () => Promise<string>,
+    private readonly getPreviewLink: (port: number) => Promise<PortPreviewUrl>,
   ) {}
 
   /**
@@ -285,13 +290,14 @@ export class Process {
    *
    * @param {string} sessionId - Unique identifier of the session
    * @param {string} commandId - Unique identifier of the command
-   * @returns {Promise<string>} Command logs
+   * @returns {Promise<SessionCommandLogsResponse>} Command logs containing: stdout and stderr
    *
    * @example
    * const logs = await process.getSessionCommandLogs('my-session', 'cmd-123');
-   * console.log('Command output:', logs);
+   * console.log('[STDOUT]:', logs.stdout);
+   * console.log('[STDERR]:', logs.stderr);
    */
-  public async getSessionCommandLogs(sessionId: string, commandId: string): Promise<string>
+  public async getSessionCommandLogs(sessionId: string, commandId: string): Promise<SessionCommandLogsResponse>
   /**
    * Asynchronously retrieve and process the logs for a command executed in a session as they become available.
    *
@@ -302,32 +308,47 @@ export class Process {
    *
    * @example
    * const logs = await process.getSessionCommandLogs('my-session', 'cmd-123', (chunk) => {
-   *   console.log('Log chunk:', chunk);
+   *   console.log('[STDOUT]:', chunk);
+   * }, (chunk) => {
+   *   console.log('[STDERR]:', chunk);
    * });
    */
   public async getSessionCommandLogs(
     sessionId: string,
     commandId: string,
-    onLogs: (chunk: string) => void,
+    onStdout: (chunk: string) => void,
+    onStderr: (chunk: string) => void,
   ): Promise<void>
   public async getSessionCommandLogs(
     sessionId: string,
     commandId: string,
-    onLogs?: (chunk: string) => void,
-  ): Promise<string | void> {
-    if (!onLogs) {
+    onStdout?: (chunk: string) => void,
+    onStderr?: (chunk: string) => void,
+  ): Promise<SessionCommandLogsResponse | void> {
+    if (!onStdout && !onStderr) {
       const response = await this.toolboxApi.getSessionCommandLogs(this.sandboxId, sessionId, commandId)
       return response.data
     }
 
-    const url = `${this.clientConfig.basePath}/toolbox/${this.sandboxId}/toolbox/process/session/${sessionId}/command/${commandId}/logs?follow=true`
+    const previewLink = await this.getPreviewLink(2280)
+    const url = `${previewLink.url.replace('http', 'ws')}/process/session/${sessionId}/command/${commandId}/logs?follow=true`
 
-    await processStreamingResponse(
-      () => fetch(url, { method: 'GET', headers: this.clientConfig.baseOptions.headers }),
-      onLogs,
-      () =>
-        this.getSessionCommand(sessionId, commandId).then((res) => res.exitCode !== null && res.exitCode !== undefined),
-    )
+    let ws: WebSocket
+    if (RUNTIME === Runtime.BROWSER) {
+      ws = new WebSocket(
+        url + '&DAYTONA_SANDBOX_AUTH_KEY=' + previewLink.token,
+        `X-Daytona-SDK-Version~${this.clientConfig.baseOptions.headers['X-Daytona-SDK-Version']}`,
+      )
+    } else {
+      ws = new WebSocket(url, {
+        headers: {
+          ...this.clientConfig.baseOptions.headers,
+          'X-Daytona-Preview-Token': previewLink.token,
+        },
+      })
+    }
+
+    await stdDemuxStream(ws, onStdout, onStderr)
   }
 
   /**
