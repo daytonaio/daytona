@@ -23,6 +23,10 @@ export class OrganizationAccessGuard implements CanActivate {
     // TODO: initialize authContext safely
     const authContext: AuthContext = request.user
 
+    if (authContext.role === 'proxy') {
+      return true
+    }
+
     if (!authContext) {
       this.logger.warn('User object is undefined. Authentication may not be set up correctly.')
       return false

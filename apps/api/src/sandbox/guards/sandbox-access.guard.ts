@@ -22,7 +22,11 @@ export class SandboxAccessGuard implements CanActivate {
 
     try {
       const sandbox = await this.sandboxService.findOne(sandboxId, true)
-      if (authContext.role !== SystemRole.ADMIN && sandbox.organizationId !== authContext.organizationId) {
+      if (
+        authContext.role !== SystemRole.ADMIN &&
+        authContext.role !== 'proxy' &&
+        sandbox.organizationId !== authContext.organizationId
+      ) {
         throw new ForbiddenException('Request organization ID does not match resource organization ID')
       }
       request.sandbox = sandbox
