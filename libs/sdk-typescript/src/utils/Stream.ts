@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import WebSocket from 'isomorphic-ws'
+import { DaytonaError } from '../errors/DaytonaError'
 
 export const STDOUT_PREFIX = 1
 export const STDERR_PREFIX = 2
@@ -100,13 +101,15 @@ export function stdDemuxStream(
         let bytes: Uint8Array
         if (typeof data === 'string') {
           // If a text message is received (e.g., older ws or if server sent text), first char is the prefix byte
-          const prefixCode = data.charCodeAt(0)
+          const prefix = data.charCodeAt(0)
           const contentText = data.substring(1)
           // Deliver to appropriate stream based on prefix
-          if (prefixCode === STDOUT_PREFIX) {
+          if (prefix === STDOUT_PREFIX) {
             onStdout(contentText)
-          } else if (prefixCode === STDERR_PREFIX) {
+          } else if (prefix === STDERR_PREFIX) {
             onStderr(contentText)
+          } else {
+            throw new DaytonaError(`Unknown data prefix: '${prefix}'`)
           }
           return // done handling this message
         } else if (data instanceof ArrayBuffer) {
@@ -150,17 +153,16 @@ export function stdDemuxStream(
     // Process a Uint8Array message: demux by prefix and decode the content
     const processBytes = (bytes: Uint8Array) => {
       if (bytes.length < 1) return
-      const channel = bytes[0] // prefix byte: 1 = STDOUT, 2 = STDERR
+      const prefix = bytes[0]
       const contentBytes = bytes.subarray(1)
       // Decode remaining bytes to UTF-8 string (TextDecoder handles multi-byte chars properly)
       const text = textDecoder.decode(contentBytes)
-      if (channel === 1) {
+      if (prefix === STDOUT_PREFIX) {
         onStdout(text)
-      } else if (channel === 2) {
+      } else if (prefix === STDERR_PREFIX) {
         onStderr(text)
       } else {
-        // If other channels exist (e.g., 0 for stdin echo, 3 for server error messages), ignore or handle as needed.
-        // Here we ignore unexpected channels, but you could add handling for channel 3 (error messages) if required.
+        throw new DaytonaError(`Unknown data prefix: '${prefix}'`)
       }
     }
 
