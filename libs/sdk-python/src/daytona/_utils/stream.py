@@ -138,4 +138,4 @@ async def std_demux_stream(
         elif prefix == STDERR_PREFIX:
             on_stderr(data)
         else:
-            raise DaytonaError(f"Unknown data prefix: '{prefix}' for data: '{data}'")
+            raise DaytonaError(f"Unknown data prefix: '{prefix}'")
