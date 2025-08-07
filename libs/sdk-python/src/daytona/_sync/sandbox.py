@@ -92,7 +92,7 @@ class Sandbox(SandboxDto):
 
         self._fs = FileSystem(self.id, toolbox_api, self.__get_root_dir)
         self._git = Git(self.id, toolbox_api, self.__get_root_dir)
-        self._process = Process(self.id, code_toolbox, toolbox_api, self.__get_root_dir)
+        self._process = Process(self.id, code_toolbox, toolbox_api, self.__get_root_dir, self.get_preview_link)
         self._computer_use = ComputerUse(self.id, toolbox_api)
 
     @property

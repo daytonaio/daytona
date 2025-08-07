@@ -166,8 +166,11 @@ await sandbox.git.clone(
 
 ```python
 @intercept_errors(message_prefix="Failed to commit changes: ")
-async def commit(path: str, message: str, author: str,
-                 email: str) -> GitCommitResponse
+async def commit(path: str,
+                 message: str,
+                 author: str,
+                 email: str,
+                 allow_empty: bool = False) -> GitCommitResponse
 ```
 
 Creates a new commit with the staged changes. Make sure to stage
@@ -180,6 +183,7 @@ changes using the add() method before committing.
 - `message` _str_ - Commit message describing the changes.
 - `author` _str_ - Name of the commit author.
 - `email` _str_ - Email address of the commit author.
+- `allow_empty` _bool, optional_ - Allow creating an empty commit when no changes are staged. Defaults to False.
   
 
 **Example**:
@@ -191,7 +195,8 @@ await sandbox.git.commit(
     path="workspace/repo",
     message="Update documentation",
     author="John Doe",
-    email="john@example.com"
+    email="john@example.com",
+    allow_empty=True
 )
 ```
 

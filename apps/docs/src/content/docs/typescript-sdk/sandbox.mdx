@@ -198,6 +198,7 @@ Represents a Daytona Sandbox.
 ```ts
 new Sandbox(
    sandboxDto: Sandbox, 
+   clientConfig: Configuration, 
    sandboxApi: SandboxApi, 
    toolboxApi: ToolboxApi, 
    codeToolbox: SandboxCodeToolbox): Sandbox
@@ -208,6 +209,7 @@ Creates a new Sandbox instance
 **Parameters**:
 
 - `sandboxDto` _Sandbox_ - The API Sandbox instance
+- `clientConfig` _Configuration_
 - `sandboxApi` _SandboxApi_ - API client for Sandbox operations
 - `toolboxApi` _ToolboxApi_ - API client for toolbox operations
 - `codeToolbox` _SandboxCodeToolbox_ - Language-specific toolbox implementation

@@ -328,12 +328,20 @@ export class SessionExecuteResponseDto {
   cmdId?: string
 
   @ApiPropertyOptional({
-    description: 'The output of the executed command',
+    description: 'The stdout of the executed command',
     example: 'total 20\ndrwxr-xr-x  4 user group  128 Mar 15 10:30 .',
   })
   @IsString()
   @IsOptional()
-  output?: string
+  stdout?: string
+
+  @ApiPropertyOptional({
+    description: 'The stderr of the executed command',
+    example: "ls: cannot access 'non-existent-file': No such file or directory",
+  })
+  @IsString()
+  @IsOptional()
+  stderr?: string
 
   @ApiPropertyOptional({
     description: 'The exit code of the executed command',
@@ -384,6 +392,23 @@ export class SessionDto {
   @IsArray()
   @IsOptional()
   commands?: CommandDto[] | null
+}
+
+@ApiSchema({ name: 'SessionCommandLogsResponse' })
+export class SessionCommandLogsResponseDto {
+  @ApiProperty({
+    description: 'The stdout of the command',
+    example: 'total 20\ndrwxr-xr-x  4 user group  128 Mar 15 10:30 .',
+  })
+  @IsString()
+  stdout: string
+
+  @ApiProperty({
+    description: 'The stderr of the command',
+    example: "ls: cannot access 'non-existent-file': No such file or directory",
+  })
+  @IsString()
+  stderr: string
 }
 
 // Computer Use DTOs

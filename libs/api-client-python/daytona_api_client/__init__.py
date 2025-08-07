@@ -140,6 +140,7 @@ from daytona_api_client.models.sandbox_volume import SandboxVolume
 from daytona_api_client.models.screenshot_response import ScreenshotResponse
 from daytona_api_client.models.search_files_response import SearchFilesResponse
 from daytona_api_client.models.session import Session
+from daytona_api_client.models.session_command_logs_response import SessionCommandLogsResponse
 from daytona_api_client.models.session_execute_request import SessionExecuteRequest
 from daytona_api_client.models.session_execute_response import SessionExecuteResponse
 from daytona_api_client.models.set_snapshot_general_status_dto import SetSnapshotGeneralStatusDto

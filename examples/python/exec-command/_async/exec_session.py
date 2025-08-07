@@ -19,7 +19,7 @@ async def main():
             exec_session_id, SessionExecuteRequest(command="export FOO=BAR")
         )
         if exec_command1.exit_code != 0:
-            print(f"Error: {exec_command1.exit_code} {exec_command1.output}")
+            print(f"Error: {exec_command1.exit_code} {exec_command1.stderr}")
 
         # Get the session details again to see the command has been executed
         session = await sandbox.process.get_session(exec_session_id)
@@ -34,13 +34,14 @@ async def main():
             exec_session_id, SessionExecuteRequest(command="echo $FOO")
         )
         if exec_command2.exit_code != 0:
-            print(f"Error: {exec_command2.exit_code} {exec_command2.output}")
+            print(f"Error: {exec_command2.exit_code} {exec_command2.stderr}")
         else:
-            print(exec_command2.output)
+            print(exec_command2.stdout)
 
         print("Now getting logs for the second command")
         logs = await sandbox.process.get_session_command_logs(exec_session_id, exec_command2.cmd_id)
-        print(logs)
+        print(f"[STDOUT]: {logs.stdout}")
+        print(f"[STDERR]: {logs.stderr}")
 
         # You can also list all active sessions
         sessions = await sandbox.process.list_sessions()

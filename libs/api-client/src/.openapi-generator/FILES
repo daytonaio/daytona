@@ -115,6 +115,7 @@ models/sandbox-volume.ts
 models/sandbox.ts
 models/screenshot-response.ts
 models/search-files-response.ts
+models/session-command-logs-response.ts
 models/session-execute-request.ts
 models/session-execute-response.ts
 models/session.ts
