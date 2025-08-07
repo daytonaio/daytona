@@ -72,6 +72,14 @@ export class RunnerService {
     return this.runnerRepository.find()
   }
 
+  async findAllReady(): Promise<Runner[]> {
+    return this.runnerRepository.find({
+      where: {
+        state: RunnerState.READY,
+      },
+    })
+  }
+
   async findOne(id: string): Promise<Runner | null> {
     return this.runnerRepository.findOneBy({ id })
   }
