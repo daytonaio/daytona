@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"os/exec"
 	"strings"
 
 	"github.com/docker/docker/api/types/container"
@@ -27,6 +28,35 @@ func (d *DockerClient) commitContainer(ctx context.Context, containerId, imageNa
 		})
 		if err == nil {
 			log.Infof("Container %s committed successfully with image ID: %s", containerId, commitResp.ID)
+
+			// Check if the committed image contains socket files
+			hasSockets, err := d.checkImageForSockets(ctx, imageName)
+			if err != nil {
+				log.Warnf("Failed to check image for sockets: %v", err)
+				// Continue with the commit even if socket check fails
+				return nil
+			}
+
+			if hasSockets {
+				log.Warnf("Image %s contains socket files, using export/import method", imageName)
+
+				// Remove the problematic image
+				_, err := d.apiClient.ImageRemove(ctx, imageName, image.RemoveOptions{})
+				if err != nil {
+					log.Warnf("Failed to remove image with sockets: %v", err)
+				}
+
+				// Use export/import method to create a clean image
+				err = d.exportImportContainer(ctx, containerId, imageName)
+				if err == nil {
+					log.Infof("Container %s successfully backed up using export/import method after socket cleanup", containerId)
+					return nil
+				}
+
+				log.Errorf("Export/import fallback failed for container %s: %v", containerId, err)
+				return fmt.Errorf("failed to create image without sockets: %w", err)
+			}
+
 			return nil
 		}
 
@@ -52,6 +82,89 @@ func (d *DockerClient) commitContainer(ctx context.Context, containerId, imageNa
 	}
 
 	return nil
+}
+
+// checkImageForSockets checks if an image contains socket files by inspecting its GraphDriver data
+func (d *DockerClient) checkImageForSockets(ctx context.Context, imageName string) (bool, error) {
+	log.Infof("Checking image %s for socket files...", imageName)
+
+	// Inspect the image to get GraphDriver data
+	imageInspect, _, err := d.apiClient.ImageInspectWithRaw(ctx, imageName)
+	if err != nil {
+		return false, fmt.Errorf("failed to inspect image %s: %w", imageName, err)
+	}
+
+	// Check if GraphDriver data exists
+	if imageInspect.GraphDriver.Data == nil {
+		log.Infof("No GraphDriver data found for image %s", imageName)
+		return false, nil
+	}
+
+	// Get LowerDir and UpperDir from GraphDriver data
+	lowerDir, ok := imageInspect.GraphDriver.Data["LowerDir"]
+	if !ok {
+		log.Infof("No LowerDir found for image %s", imageName)
+	}
+	upperDir, ok := imageInspect.GraphDriver.Data["UpperDir"]
+	if !ok {
+		log.Infof("No UpperDir found for image %s", imageName)
+	}
+
+	var dirsToCheck []string
+
+	// Add LowerDir directories if it exists (split by colons)
+	if lowerDir != "" {
+		lowerDirs := strings.Split(lowerDir, ":")
+		dirsToCheck = append(dirsToCheck, lowerDirs...)
+	}
+
+	// Add UpperDir if it exists
+	if upperDir != "" {
+		dirsToCheck = append(dirsToCheck, upperDir)
+	}
+
+	// Check each directory for socket files
+	for _, dir := range dirsToCheck {
+		hasSockets, err := d.checkDirectoryForSockets(dir)
+		if err != nil {
+			log.Warnf("Failed to check directory %s for sockets: %v", dir, err)
+			continue
+		}
+
+		if hasSockets {
+			log.Infof("Found socket files in directory: %s", dir)
+			return true, nil
+		}
+	}
+
+	log.Infof("No socket files found in image %s", imageName)
+	return false, nil
+}
+
+// checkDirectoryForSockets uses the find command to search for socket files in a directory
+func (d *DockerClient) checkDirectoryForSockets(dirPath string) (bool, error) {
+	// Use find command to search for socket files
+	cmd := exec.Command("find", dirPath, "-type", "s")
+	output, err := cmd.Output()
+
+	if err != nil {
+		// If find command fails, it might be because no socket files were found
+		// Check the exit code to determine if it's an error or just no results
+		if exitErr, ok := err.(*exec.ExitError); ok && exitErr.ExitCode() == 1 {
+			// Exit code 1 means no files found, which is not an error
+			return false, nil
+		}
+		return false, fmt.Errorf("find command failed: %w", err)
+	}
+
+	// If output is not empty, socket files were found
+	socketFiles := strings.TrimSpace(string(output))
+	if socketFiles != "" {
+		log.Infof("Found socket files in %s: %s", dirPath, socketFiles)
+		return true, nil
+	}
+
+	return false, nil
 }
 
 func (d *DockerClient) exportImportContainer(ctx context.Context, containerId, imageName string) error {
