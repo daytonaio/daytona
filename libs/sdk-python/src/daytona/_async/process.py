@@ -3,6 +3,7 @@
 
 import base64
 import json
+import re
 from typing import Awaitable, Callable, Dict, List, Optional
 
 import websockets
@@ -402,7 +403,7 @@ class AsyncProcess:
         # unasync: preserve end
 
         preview_link = await self._get_preview_link(2280)
-        url = preview_link.url.replace("http", "ws", 1) + url[url.index("/process") :]
+        url = re.sub(r"^http", "ws", preview_link.url) + url[url.index("/process") :]
 
         # unasync: preserve start
         async with websockets.connect(

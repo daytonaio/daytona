@@ -331,7 +331,7 @@ export class Process {
     }
 
     const previewLink = await this.getPreviewLink(2280)
-    const url = `${previewLink.url.replace('http', 'ws')}/process/session/${sessionId}/command/${commandId}/logs?follow=true`
+    const url = `${previewLink.url.replace(/^http/, 'ws')}/process/session/${sessionId}/command/${commandId}/logs?follow=true`
 
     let ws: WebSocket
     if (RUNTIME === Runtime.BROWSER) {

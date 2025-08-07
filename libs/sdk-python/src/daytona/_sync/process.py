@@ -7,6 +7,7 @@
 
 import base64
 import json
+import re
 from typing import Callable, Dict, List, Optional
 
 import websockets
@@ -402,7 +403,7 @@ class Process:
         )
 
         preview_link = self._get_preview_link(2280)
-        url = preview_link.url.replace("http", "ws", 1) + url[url.index("/process") :]
+        url = re.sub(r"^http", "ws", preview_link.url) + url[url.index("/process") :]
 
         async with websockets.connect(
             url,
