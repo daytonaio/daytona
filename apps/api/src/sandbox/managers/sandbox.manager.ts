@@ -130,12 +130,25 @@ export class SandboxManager {
 
     try {
       // Get all ready runners
-      const allRunners = await this.runnerService.findAll()
-      const readyRunners = allRunners.filter((runner) => runner.state === RunnerState.READY)
+      const readyRunners = await this.runnerService.findAllReady()
 
       // Process all runners in parallel
       await Promise.all(
         readyRunners.map(async (runner) => {
+          // If runner already has maxConcurrentArchives, skip
+          const archiveCount = await this.sandboxRepository.count({
+            where: {
+              runnerId: runner.id,
+              organizationId: Not(SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION),
+              desiredState: SandboxDesiredState.ARCHIVED,
+              state: Not(In([SandboxState.ARCHIVED, SandboxState.ERROR])),
+            },
+          })
+
+          if (archiveCount >= this.configService.getOrThrow('maxConcurrentArchivesPerRunner')) {
+            return
+          }
+
           const sandboxes = await this.sandboxRepository.find({
             where: {
               runnerId: runner.id,
@@ -148,7 +161,7 @@ export class SandboxManager {
             order: {
               lastBackupAt: 'ASC',
             },
-            take: this.configService.getOrThrow('maxConcurrentArchivesPerRunner'),
+            take: this.configService.getOrThrow('maxConcurrentArchivesPerRunner') - archiveCount,
           })
 
           await Promise.all(
