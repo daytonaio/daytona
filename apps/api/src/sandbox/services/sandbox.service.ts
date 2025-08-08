@@ -588,6 +588,13 @@ export class SandboxService {
       throw new NotFoundException(`Sandbox with ID ${sandboxId} not found`)
     }
 
+    if (sandbox.state === SandboxState.ARCHIVING) {
+      sandbox.pending = false
+      sandbox.state = SandboxState.STOPPED
+      sandbox.desiredState = SandboxDesiredState.STOPPED
+      await this.sandboxRepository.save(sandbox)
+    }
+
     if (String(sandbox.state) !== String(sandbox.desiredState)) {
       throw new SandboxError('State change in progress')
     }

@@ -84,6 +84,7 @@ const configuration = {
   },
   cronTimeZone: process.env.CRON_TIMEZONE,
   maxConcurrentArchivesPerRunner: parseInt(process.env.MAX_CONCURRENT_ARCHIVES_PER_RUNNER || '6', 10),
+  maxConcurrentBackupsPerRunner: parseInt(process.env.MAX_CONCURRENT_BACKUPS_PER_RUNNER || '15', 10),
 }
 
 export { configuration }

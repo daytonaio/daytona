@@ -27,6 +27,7 @@ import { SandboxDestroyedEvent } from '../events/sandbox-destroyed.event'
 import { SandboxBackupCreatedEvent } from '../events/sandbox-backup-created.event'
 import { SandboxArchivedEvent } from '../events/sandbox-archived.event'
 import { RunnerAdapterFactory } from '../runner-adapter/runnerAdapter'
+import { TypedConfigService } from '../../config/typed-config.service'
 
 @Injectable()
 export class BackupManager {
@@ -41,6 +42,7 @@ export class BackupManager {
     @InjectRedis() private readonly redis: Redis,
     private readonly dockerProvider: DockerProvider,
     private readonly redisLockProvider: RedisLockProvider,
+    private readonly configService: TypedConfigService,
   ) {}
 
   //  on init
@@ -290,6 +292,17 @@ export class BackupManager {
       //  check if backup is already in progress on the runner
       const runnerSandbox = await runnerAdapter.sandboxInfo(sandbox.id)
       if (runnerSandbox.backupState?.toUpperCase() === 'IN_PROGRESS') {
+        return
+      }
+
+      const inProgressOnRunner = await this.sandboxRepository.find({
+        where: {
+          runnerId: sandbox.runnerId,
+          backupState: In([BackupState.IN_PROGRESS]),
+        },
+        take: 100,
+      })
+      if (inProgressOnRunner.length >= this.configService.getOrThrow('maxConcurrentBackupsPerRunner')) {
         return
       }
 

@@ -94,6 +94,17 @@ export class SandboxArchiveAction extends SandboxAction {
           return DONT_SYNC_AGAIN
         }
 
+        if (
+          (sandbox.backupState === BackupState.COMPLETED || sandbox.backupState === BackupState.NONE) &&
+          (!sandbox.lastBackupAt || sandbox.lastBackupAt < new Date(Date.now() - 1 * 60 * 60 * 1000))
+        ) {
+          //  if the backup is older than 1 hour, we need to retry the backup
+          await this.sandboxRepository.update(sandbox.id, {
+            backupState: BackupState.PENDING,
+          })
+          return DONT_SYNC_AGAIN
+        }
+
         if (sandbox.backupState !== BackupState.COMPLETED) {
           return DONT_SYNC_AGAIN
         }
