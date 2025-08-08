@@ -64,7 +64,7 @@ export class BackupManager {
           where: {
             runnerId: runner.id,
             organizationId: Not(SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION),
-            state: In([SandboxState.STARTED, SandboxState.ARCHIVING]),
+            state: In([SandboxState.STARTED, SandboxState.ARCHIVING, SandboxState.PENDING_ARCHIVE]),
             backupState: In([BackupState.NONE, BackupState.COMPLETED]),
           },
           order: {
@@ -114,7 +114,7 @@ export class BackupManager {
 
     const sandboxes = await this.sandboxRepository.find({
       where: {
-        state: In([SandboxState.STARTED, SandboxState.STOPPED, SandboxState.ARCHIVING]),
+        state: In([SandboxState.STARTED, SandboxState.STOPPED, SandboxState.ARCHIVING, SandboxState.PENDING_ARCHIVE]),
         backupState: In([BackupState.PENDING, BackupState.IN_PROGRESS]),
       },
     })
@@ -185,6 +185,7 @@ export class BackupManager {
       !(
         sandbox.state === SandboxState.STARTED ||
         sandbox.state === SandboxState.ARCHIVING ||
+        sandbox.state === SandboxState.PENDING_ARCHIVE ||
         (sandbox.state === SandboxState.STOPPED && sandbox.runnerId)
       )
     ) {
@@ -330,7 +331,7 @@ export class BackupManager {
 
     const sandboxes = await this.sandboxRepository.find({
       where: {
-        state: In([SandboxState.STOPPED, SandboxState.ARCHIVING]),
+        state: In([SandboxState.STOPPED, SandboxState.ARCHIVING, SandboxState.PENDING_ARCHIVE]),
         backupState: In([BackupState.NONE]),
       },
       //  todo: increase this number when auto-stop is stable

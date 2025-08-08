@@ -6918,6 +6918,7 @@ components:
         - building_snapshot
         - unknown
         - pulling_snapshot
+        - pending_archive
         - archiving
         - archived
       type: string

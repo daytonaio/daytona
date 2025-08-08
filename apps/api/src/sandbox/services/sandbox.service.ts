@@ -97,7 +97,12 @@ export class SandboxService {
 
     const ignoredStates = [SandboxState.DESTROYED, SandboxState.ARCHIVED, SandboxState.ERROR, SandboxState.BUILD_FAILED]
 
-    const inactiveStates = [...ignoredStates, SandboxState.STOPPED, SandboxState.ARCHIVING]
+    const inactiveStates = [
+      ...ignoredStates,
+      SandboxState.STOPPED,
+      SandboxState.ARCHIVING,
+      SandboxState.PENDING_ARCHIVE,
+    ]
 
     const resourceMetrics: {
       used_disk: number
@@ -588,7 +593,7 @@ export class SandboxService {
       throw new NotFoundException(`Sandbox with ID ${sandboxId} not found`)
     }
 
-    if (sandbox.state === SandboxState.ARCHIVING) {
+    if (sandbox.state === SandboxState.PENDING_ARCHIVE) {
       sandbox.pending = false
       sandbox.state = SandboxState.STOPPED
       sandbox.desiredState = SandboxDesiredState.STOPPED

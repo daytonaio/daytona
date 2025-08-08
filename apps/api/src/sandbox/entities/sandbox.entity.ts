@@ -211,7 +211,7 @@ export class Sandbox {
             SandboxState.PULLING_SNAPSHOT,
             SandboxState.ERROR,
             SandboxState.BUILD_FAILED,
-            SandboxState.ARCHIVING,
+            SandboxState.PENDING_ARCHIVE,
           ].includes(this.state)
         ) {
           break
@@ -238,6 +238,7 @@ export class Sandbox {
             SandboxState.STOPPED,
             SandboxState.ERROR,
             SandboxState.BUILD_FAILED,
+            SandboxState.PENDING_ARCHIVE,
           ].includes(this.state)
         ) {
           break

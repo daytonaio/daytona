@@ -40,7 +40,7 @@ export class SandboxArchiveAction extends SandboxAction {
     }
 
     switch (sandbox.state) {
-      case SandboxState.STOPPED: {
+      case SandboxState.STOPPED || SandboxState.PENDING_ARCHIVE: {
         const inProgressOnRunner = await this.sandboxRepository.find({
           where: {
             runnerId: sandbox.runnerId,
@@ -55,6 +55,9 @@ export class SandboxArchiveAction extends SandboxAction {
         //  if the sandbox is already in progress, continue
         if (!inProgressOnRunner.find((s) => s.id === sandbox.id)) {
           if (inProgressOnRunner.length >= this.configService.getOrThrow('maxConcurrentArchivesPerRunner')) {
+            if (sandbox.state !== SandboxState.PENDING_ARCHIVE) {
+              await this.updateSandboxState(sandbox.id, SandboxState.PENDING_ARCHIVE)
+            }
             await this.redisLockProvider.unlock(lockKey)
             return DONT_SYNC_AGAIN
           }

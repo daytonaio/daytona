@@ -41,6 +41,7 @@ class SandboxState(str, Enum):
     BUILDING_SNAPSHOT = 'building_snapshot'
     UNKNOWN = 'unknown'
     PULLING_SNAPSHOT = 'pulling_snapshot'
+    PENDING_ARCHIVE = 'pending_archive'
     ARCHIVING = 'archiving'
     ARCHIVED = 'archived'
 

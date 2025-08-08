@@ -302,7 +302,7 @@ export class SandboxManager {
         },
       ])
       .orderBy(
-        'CASE WHEN "sandbox"."state" = \'archiving\' THEN 0 WHEN "sandbox"."backupState" = \'Completed\' THEN 1 ELSE 2 END',
+        'CASE WHEN "sandbox"."state" = \'archiving\' THEN 0 WHEN "sandbox"."state" = \'pending_archive\' THEN 1 WHEN "sandbox"."backupState" = \'Completed\' THEN 2 ELSE 3 END',
         'ASC',
       )
       .addOrderBy('"sandbox"."lastActivityAt"', 'DESC')

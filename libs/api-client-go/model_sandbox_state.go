@@ -35,6 +35,7 @@ const (
 	SANDBOXSTATE_BUILDING_SNAPSHOT SandboxState = "building_snapshot"
 	SANDBOXSTATE_UNKNOWN           SandboxState = "unknown"
 	SANDBOXSTATE_PULLING_SNAPSHOT  SandboxState = "pulling_snapshot"
+	SANDBOXSTATE_PENDING_ARCHIVE   SandboxState = "pending_archive"
 	SANDBOXSTATE_ARCHIVING         SandboxState = "archiving"
 	SANDBOXSTATE_ARCHIVED          SandboxState = "archived"
 )
@@ -55,6 +56,7 @@ var AllowedSandboxStateEnumValues = []SandboxState{
 	"building_snapshot",
 	"unknown",
 	"pulling_snapshot",
+	"pending_archive",
 	"archiving",
 	"archived",
 }
