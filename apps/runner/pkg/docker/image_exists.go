@@ -7,8 +7,8 @@ import (
 	"context"
 	"strings"
 
+	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/api/types/image"
-
 	log "github.com/sirupsen/logrus"
 )
 
@@ -19,7 +19,9 @@ func (d *DockerClient) ImageExists(ctx context.Context, imageName string, includ
 		return false, nil
 	}
 
-	images, err := d.apiClient.ImageList(ctx, image.ListOptions{})
+	images, err := d.apiClient.ImageList(ctx, image.ListOptions{
+		Filters: filters.NewArgs(filters.Arg("reference", imageName)),
+	})
 	if err != nil {
 		return false, err
 	}

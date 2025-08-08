@@ -18,7 +18,6 @@ import (
 	"github.com/daytonaio/runner/pkg/docker"
 	"github.com/daytonaio/runner/pkg/models"
 	"github.com/docker/docker/api/types/container"
-	"github.com/docker/docker/api/types/image"
 )
 
 type MetricsService struct {
@@ -64,6 +63,8 @@ func (m *MetricsService) GetSystemMetrics(ctx context.Context) (float64, float64
 }
 
 func (m *MetricsService) GetAllocatedResources(ctx context.Context) (int64, int64, int64, error) {
+	return -1, -1, -1, nil
+
 	containers, err := m.docker.ApiClient().ContainerList(ctx, container.ListOptions{All: true})
 	if err != nil {
 		return -1, -1, -1, err
@@ -95,12 +96,13 @@ func (m *MetricsService) GetAllocatedResources(ctx context.Context) (int64, int6
 }
 
 func (m *MetricsService) GetSnapshotCount(ctx context.Context) (int, error) {
-	images, err := m.docker.ApiClient().ImageList(ctx, image.ListOptions{})
-	if err != nil {
-		return -1, nil // Return -1 on error
-	}
+	return -1, nil
+	// images, err := m.docker.ApiClient().ImageList(ctx, image.ListOptions{})
+	// if err != nil {
+	// 	return -1, nil // Return -1 on error
+	// }
 
-	return len(images), nil
+	// return len(images), nil
 }
 
 func (m *MetricsService) getCPUUsage() (float64, error) {

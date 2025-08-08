@@ -40,14 +40,55 @@ func (d *DockerClient) commitContainer(ctx context.Context, containerId, imageNa
 			if hasSockets {
 				log.Warnf("Image %s contains socket files, using export/import method", imageName)
 
+				containerInspect, err := d.apiClient.ContainerInspect(ctx, containerId)
+				if err != nil {
+					log.Warnf("Failed to inspect container %s: %v", containerId, err)
+					return fmt.Errorf("failed to inspect container %s: %w", containerId, err)
+				}
+
+				containerConfig := containerInspect.Config
+				containerConfig.Image = imageName
+
+				// Start the container from that image
+				c, err := d.apiClient.ContainerCreate(ctx, containerConfig, containerInspect.HostConfig, nil, nil, fmt.Sprintf("socket-fix-%s", containerId))
+				if err != nil {
+					log.Warnf("Failed to start container from image %s: %v", imageName, err)
+					return fmt.Errorf("failed to start container from image %s: %w", imageName, err)
+				}
+				defer d.apiClient.ContainerRemove(ctx, c.ID, container.RemoveOptions{
+					RemoveVolumes: true,
+					RemoveLinks:   false,
+					Force:         true,
+				})
+				if err != nil {
+					log.Warnf("Failed to remove container %s: %v", c.ID, err)
+					return fmt.Errorf("failed to remove container %s: %w", c.ID, err)
+				}
+
+				// Start the container
+				if err := d.apiClient.ContainerStart(ctx, c.ID, container.StartOptions{}); err != nil {
+					log.Warnf("Failed to start container %s: %v", c.ID, err)
+					return fmt.Errorf("failed to start container %s: %w", c.ID, err)
+				}
+
+				// Remove all sock files from the container
+				if _, err := d.execSync(ctx, c.ID, container.ExecOptions{
+					Cmd: []string{"find", "/", "-type", "s", "-delete"},
+				}, container.ExecStartOptions{}); err != nil {
+					log.Warnf("Failed to remove sock files from container %s: %v", c.ID, err)
+					return fmt.Errorf("failed to remove sock files from container %s: %w", c.ID, err)
+				}
+
 				// Remove the problematic image
-				_, err := d.apiClient.ImageRemove(ctx, imageName, image.RemoveOptions{})
+				_, err = d.apiClient.ImageRemove(ctx, imageName, image.RemoveOptions{
+					Force: true,
+				})
 				if err != nil {
 					log.Warnf("Failed to remove image with sockets: %v", err)
 				}
 
 				// Use export/import method to create a clean image
-				err = d.exportImportContainer(ctx, containerId, imageName)
+				err = d.exportImportContainer(ctx, c.ID, imageName)
 				if err == nil {
 					log.Infof("Container %s successfully backed up using export/import method after socket cleanup", containerId)
 					return nil
