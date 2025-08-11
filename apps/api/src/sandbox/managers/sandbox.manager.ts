@@ -256,9 +256,9 @@ export class SandboxManager {
         .where('sandbox.state NOT IN (:...excludedStates)', {
           excludedStates: [SandboxState.DESTROYED, SandboxState.ERROR, SandboxState.BUILD_FAILED],
         })
-        .andWhere('sandbox.desiredState::text != sandbox.state::text')
-        .andWhere('sandbox.desiredState::text != :archived', { archived: 'archived' })
-        .orderBy('sandbox.lastActivityAt', 'ASC')
+        .andWhere('sandbox."desiredState"::text != sandbox.state::text')
+        .andWhere('sandbox."desiredState"::text != :archived', { archived: 'archived' })
+        .orderBy('sandbox."lastActivityAt"', 'ASC')
 
       const stream = await queryBuilder.stream()
       let processedCount = 0
