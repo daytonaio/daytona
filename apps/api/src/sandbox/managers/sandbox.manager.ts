@@ -257,7 +257,7 @@ export class SandboxManager {
           excludedStates: [SandboxState.DESTROYED, SandboxState.ERROR, SandboxState.BUILD_FAILED],
         })
         .andWhere('sandbox."desiredState"::text != sandbox.state::text')
-        .andWhere('sandbox."desiredState"::text != :archived', { archived: 'archived' })
+        .andWhere('sandbox."desiredState"::text != :archived', { archived: SandboxDesiredState.ARCHIVED })
         .orderBy('sandbox."lastActivityAt"', 'ASC')
 
       const stream = await queryBuilder.stream()
@@ -265,39 +265,43 @@ export class SandboxManager {
       const maxProcessPerRun = 200
       const pendingProcesses: Promise<void>[] = []
 
-      await new Promise<void>((resolve, reject) => {
-        stream.on('data', (row: any) => {
-          if (processedCount >= maxProcessPerRun) {
-            stream.destroy()
-            return
-          }
+      try {
+        await new Promise<void>((resolve, reject) => {
+          stream.on('data', (row: any) => {
+            if (processedCount >= maxProcessPerRun) {
+              resolve()
+              return
+            }
 
-          // Process sandbox asynchronously but track the promise
-          const processPromise = this.syncInstanceState(row.sandbox_id)
-          pendingProcesses.push(processPromise)
-          processedCount++
+            // Process sandbox asynchronously but track the promise
+            const processPromise = this.syncInstanceState(row.sandbox_id)
+            pendingProcesses.push(processPromise)
+            processedCount++
 
-          // Limit concurrent processing to avoid overwhelming the system
-          if (pendingProcesses.length >= 10) {
-            stream.pause()
-            Promise.all(pendingProcesses.splice(0, pendingProcesses.length))
-              .then(() => stream.resume())
+            // Limit concurrent processing to avoid overwhelming the system
+            if (pendingProcesses.length >= 10) {
+              stream.pause()
+              Promise.all(pendingProcesses.splice(0, pendingProcesses.length))
+                .then(() => stream.resume())
+                .catch(reject)
+            }
+          })
+
+          stream.on('end', () => {
+            Promise.all(pendingProcesses)
+              .then(() => {
+                resolve()
+              })
               .catch(reject)
-          }
-        })
+          })
 
-        stream.on('end', async () => {
-          try {
-            // Wait for any remaining processes to complete
-            await Promise.all(pendingProcesses)
-            resolve()
-          } catch (error) {
-            reject(error)
-          }
+          stream.on('error', reject)
         })
-
-        stream.on('error', reject)
-      })
+      } finally {
+        if (!stream.destroyed) {
+          stream.destroy()
+        }
+      }
     } finally {
       await this.redisLockProvider.unlock(globalLockKey)
     }
