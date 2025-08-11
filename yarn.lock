@@ -14541,6 +14541,7 @@ __metadata:
     passport-jwt: "npm:^4.0.1"
     pathe: "npm:^2.0.3"
     pg: "npm:^8.13.3"
+    pg-query-stream: "npm:^4.10.3"
     postcss: "npm:8.4.38"
     posthog-js: "npm:^1.217.6"
     posthog-node: "npm:^4.10.1"
@@ -24383,6 +24384,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"pg-cursor@npm:^2.15.3":
+  version: 2.15.3
+  resolution: "pg-cursor@npm:2.15.3"
+  peerDependencies:
+    pg: ^8
+  checksum: 10c0/60ea02689af0b6bd89946a7abb123260506e6fe9be1ea3c547e7d6fbbde5a6c8ca066f4114d6bd6699a87c47c93c9c5d7bfa6ff39bb62290221f5a3c0e1516b2
+  languageName: node
+  linkType: hard
+
 "pg-int8@npm:1.0.1":
   version: 1.0.1
   resolution: "pg-int8@npm:1.0.1"
@@ -24403,6 +24413,17 @@ __metadata:
   version: 1.10.3
   resolution: "pg-protocol@npm:1.10.3"
   checksum: 10c0/f7ef54708c93ee6d271e37678296fc5097e4337fca91a88a3d99359b78633dbdbf6e983f0adb34b7cdd261b7ec7266deb20c3233bf3dfdb498b3e1098e8750b9
+  languageName: node
+  linkType: hard
+
+"pg-query-stream@npm:^4.10.3":
+  version: 4.10.3
+  resolution: "pg-query-stream@npm:4.10.3"
+  dependencies:
+    pg-cursor: "npm:^2.15.3"
+  peerDependencies:
+    pg: ^8
+  checksum: 10c0/b39231104ed9c511036ac0abb402cc9a3d145503c93a69cbc7cef7ebfed1b323a9b8b98a7685620675da68fd48d5404e20e95a2804edd32fad09df18b5192c69
   languageName: node
   linkType: hard
 

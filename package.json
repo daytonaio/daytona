@@ -120,6 +120,7 @@
     "passport-jwt": "^4.0.1",
     "pathe": "^2.0.3",
     "pg": "^8.13.3",
+    "pg-query-stream": "^4.10.3",
     "posthog-js": "^1.217.6",
     "posthog-node": "^4.10.1",
     "prism-react-renderer": "^2.4.1",
