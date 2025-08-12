@@ -27,6 +27,7 @@ import { SandboxDestroyedEvent } from '../events/sandbox-destroyed.event'
 import { SandboxBackupCreatedEvent } from '../events/sandbox-backup-created.event'
 import { SandboxArchivedEvent } from '../events/sandbox-archived.event'
 import { RunnerAdapterFactory } from '../runner-adapter/runnerAdapter'
+import { TypedConfigService } from '../../config/typed-config.service'
 
 @Injectable()
 export class BackupManager {
@@ -41,6 +42,7 @@ export class BackupManager {
     @InjectRedis() private readonly redis: Redis,
     private readonly dockerProvider: DockerProvider,
     private readonly redisLockProvider: RedisLockProvider,
+    private readonly configService: TypedConfigService,
   ) {}
 
   //  on init
@@ -62,7 +64,7 @@ export class BackupManager {
           where: {
             runnerId: runner.id,
             organizationId: Not(SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION),
-            state: In([SandboxState.STARTED, SandboxState.ARCHIVING]),
+            state: In([SandboxState.STARTED, SandboxState.ARCHIVING, SandboxState.PENDING_ARCHIVE]),
             backupState: In([BackupState.NONE, BackupState.COMPLETED]),
           },
           order: {
@@ -112,7 +114,7 @@ export class BackupManager {
 
     const sandboxes = await this.sandboxRepository.find({
       where: {
-        state: In([SandboxState.STARTED, SandboxState.STOPPED, SandboxState.ARCHIVING]),
+        state: In([SandboxState.STARTED, SandboxState.STOPPED, SandboxState.ARCHIVING, SandboxState.PENDING_ARCHIVE]),
         backupState: In([BackupState.PENDING, BackupState.IN_PROGRESS]),
       },
     })
@@ -183,6 +185,7 @@ export class BackupManager {
       !(
         sandbox.state === SandboxState.STARTED ||
         sandbox.state === SandboxState.ARCHIVING ||
+        sandbox.state === SandboxState.PENDING_ARCHIVE ||
         (sandbox.state === SandboxState.STOPPED && sandbox.runnerId)
       )
     ) {
@@ -293,6 +296,17 @@ export class BackupManager {
         return
       }
 
+      const inProgressOnRunner = await this.sandboxRepository.find({
+        where: {
+          runnerId: sandbox.runnerId,
+          backupState: In([BackupState.IN_PROGRESS]),
+        },
+        take: 100,
+      })
+      if (inProgressOnRunner.length >= this.configService.getOrThrow('maxConcurrentBackupsPerRunner')) {
+        return
+      }
+
       // Initiate backup on runner
       await runnerAdapter.createBackup(sandbox, sandbox.backupSnapshot, registry)
 
@@ -317,7 +331,7 @@ export class BackupManager {
 
     const sandboxes = await this.sandboxRepository.find({
       where: {
-        state: In([SandboxState.STOPPED, SandboxState.ARCHIVING]),
+        state: In([SandboxState.STOPPED, SandboxState.ARCHIVING, SandboxState.PENDING_ARCHIVE]),
         backupState: In([BackupState.NONE]),
       },
       //  todo: increase this number when auto-stop is stable

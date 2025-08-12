@@ -40,7 +40,7 @@ export class SandboxArchiveAction extends SandboxAction {
     }
 
     switch (sandbox.state) {
-      case SandboxState.STOPPED: {
+      case SandboxState.STOPPED || SandboxState.PENDING_ARCHIVE: {
         const inProgressOnRunner = await this.sandboxRepository.find({
           where: {
             runnerId: sandbox.runnerId,
@@ -55,6 +55,9 @@ export class SandboxArchiveAction extends SandboxAction {
         //  if the sandbox is already in progress, continue
         if (!inProgressOnRunner.find((s) => s.id === sandbox.id)) {
           if (inProgressOnRunner.length >= this.configService.getOrThrow('maxConcurrentArchivesPerRunner')) {
+            if (sandbox.state !== SandboxState.PENDING_ARCHIVE) {
+              await this.updateSandboxState(sandbox.id, SandboxState.PENDING_ARCHIVE)
+            }
             await this.redisLockProvider.unlock(lockKey)
             return DONT_SYNC_AGAIN
           }
@@ -91,6 +94,17 @@ export class SandboxArchiveAction extends SandboxAction {
         const timeout = new Date(Date.now() - 120 * 60 * 1000)
         if (sandbox.lastActivityAt < timeout) {
           await this.updateSandboxState(sandbox.id, SandboxState.ERROR, undefined, 'Archiving operation timed out')
+          return DONT_SYNC_AGAIN
+        }
+
+        if (
+          (sandbox.backupState === BackupState.COMPLETED || sandbox.backupState === BackupState.NONE) &&
+          (!sandbox.lastBackupAt || sandbox.lastBackupAt < new Date(Date.now() - 1 * 60 * 60 * 1000))
+        ) {
+          //  if the backup is older than 1 hour, we need to retry the backup
+          await this.sandboxRepository.update(sandbox.id, {
+            backupState: BackupState.PENDING,
+          })
           return DONT_SYNC_AGAIN
         }
 
