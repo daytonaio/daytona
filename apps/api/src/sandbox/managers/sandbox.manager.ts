@@ -257,31 +257,67 @@ export class SandboxManager {
   @Cron(CronExpression.EVERY_10_SECONDS, { name: 'sync-states' })
   @OtelSpan()
   async syncStates(): Promise<void> {
-    const lockKey = 'sync-states'
-    if (!(await this.redisLockProvider.lock(lockKey, 30))) {
+    const globalLockKey = 'sync-states'
+    if (!(await this.redisLockProvider.lock(globalLockKey, 30))) {
       return
     }
 
-    const sandboxes = await this.sandboxRepository.find({
-      where: {
-        state: Not(In([SandboxState.DESTROYED, SandboxState.ERROR, SandboxState.BUILD_FAILED])),
-        desiredState: Raw(
-          () =>
-            `"Sandbox"."desiredState"::text != "Sandbox"."state"::text AND "Sandbox"."desiredState"::text != 'archived'`,
-        ),
-      },
-      take: 100,
-      order: {
-        lastActivityAt: 'DESC',
-      },
-    })
+    try {
+      const queryBuilder = this.sandboxRepository
+        .createQueryBuilder('sandbox')
+        .select(['sandbox.id'])
+        .where('sandbox.state NOT IN (:...excludedStates)', {
+          excludedStates: [SandboxState.DESTROYED, SandboxState.ERROR, SandboxState.BUILD_FAILED],
+        })
+        .andWhere('sandbox."desiredState"::text != sandbox.state::text')
+        .andWhere('sandbox."desiredState"::text != :archived', { archived: SandboxDesiredState.ARCHIVED })
+        .orderBy('sandbox."lastActivityAt"', 'ASC')
 
-    await Promise.all(
-      sandboxes.map(async (sandbox) => {
-        this.syncInstanceState(sandbox.id)
-      }),
-    )
-    await this.redisLockProvider.unlock(lockKey)
+      const stream = await queryBuilder.stream()
+      let processedCount = 0
+      const maxProcessPerRun = 200
+      const pendingProcesses: Promise<void>[] = []
+
+      try {
+        await new Promise<void>((resolve, reject) => {
+          stream.on('data', (row: any) => {
+            if (processedCount >= maxProcessPerRun) {
+              resolve()
+              return
+            }
+
+            // Process sandbox asynchronously but track the promise
+            const processPromise = this.syncInstanceState(row.sandbox_id)
+            pendingProcesses.push(processPromise)
+            processedCount++
+
+            // Limit concurrent processing to avoid overwhelming the system
+            if (pendingProcesses.length >= 100) {
+              stream.pause()
+              Promise.all(pendingProcesses.splice(0, pendingProcesses.length))
+                .then(() => stream.resume())
+                .catch(reject)
+            }
+          })
+
+          stream.on('end', () => {
+            Promise.all(pendingProcesses)
+              .then(() => {
+                resolve()
+              })
+              .catch(reject)
+          })
+
+          stream.on('error', reject)
+        })
+      } finally {
+        if (!stream.destroyed) {
+          stream.destroy()
+        }
+      }
+    } finally {
+      await this.redisLockProvider.unlock(globalLockKey)
+    }
   }
 
   @Cron(CronExpression.EVERY_10_SECONDS, { name: 'sync-archived-desired-states' })
