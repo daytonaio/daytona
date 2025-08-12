@@ -94,7 +94,7 @@ func Destroy(ctx *gin.Context) {
 //	@Produce		json
 //	@Param			sandboxId	path		string				true	"Sandbox ID"
 //	@Param			sandbox		body		dto.CreateBackupDTO	true	"Create backup"
-//	@Success		201			{string}	string				"Backup created"
+//	@Success		201			{string}	string				"Backup started"
 //	@Failure		400			{object}	common.ErrorResponse
 //	@Failure		401			{object}	common.ErrorResponse
 //	@Failure		404			{object}	common.ErrorResponse
@@ -115,14 +115,14 @@ func CreateBackup(ctx *gin.Context) {
 
 	runner := runner.GetInstance(nil)
 
-	err = runner.Docker.CreateBackup(ctx.Request.Context(), sandboxId, createBackupDTO)
+	err = runner.Docker.StartBackupCreate(ctx.Request.Context(), sandboxId, createBackupDTO)
 	if err != nil {
 		runner.Cache.SetBackupState(ctx, sandboxId, enums.BackupStateFailed)
 		ctx.Error(err)
 		return
 	}
 
-	ctx.JSON(http.StatusCreated, "Backup created")
+	ctx.JSON(http.StatusCreated, "Backup started")
 }
 
 // Resize 			godoc

@@ -265,7 +265,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "201": {
-                        "description": "Backup created",
+                        "description": "Backup started",
                         "schema": {
                             "type": "string"
                         }

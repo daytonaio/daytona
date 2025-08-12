@@ -6,7 +6,7 @@
 import { Injectable, Logger } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Cron, CronExpression } from '@nestjs/schedule'
-import { In, Not, Repository } from 'typeorm'
+import { In, IsNull, LessThan, Not, Or, Repository } from 'typeorm'
 import { Sandbox } from '../entities/sandbox.entity'
 import { SandboxState } from '../enums/sandbox-state.enum'
 import { RunnerService } from '../services/runner.service'
@@ -27,6 +27,7 @@ import { SandboxDestroyedEvent } from '../events/sandbox-destroyed.event'
 import { SandboxBackupCreatedEvent } from '../events/sandbox-backup-created.event'
 import { SandboxArchivedEvent } from '../events/sandbox-archived.event'
 import { RunnerAdapterFactory } from '../runner-adapter/runnerAdapter'
+import { TypedConfigService } from '../../config/typed-config.service'
 
 @Injectable()
 export class BackupManager {
@@ -41,6 +42,7 @@ export class BackupManager {
     @InjectRedis() private readonly redis: Redis,
     private readonly dockerProvider: DockerProvider,
     private readonly redisLockProvider: RedisLockProvider,
+    private readonly configService: TypedConfigService,
   ) {}
 
   //  on init
@@ -51,33 +53,36 @@ export class BackupManager {
   //  todo: make frequency configurable or more efficient
   @Cron(CronExpression.EVERY_5_MINUTES, { name: 'ad-hoc-backup-check' })
   async adHocBackupCheck(): Promise<void> {
+    const lockKey = 'ad-hoc-backup-check'
+    const hasLock = await this.redisLockProvider.lock(lockKey, 5 * 60)
+    if (!hasLock) {
+      return
+    }
+
     // Get all ready runners
-    const allRunners = await this.runnerService.findAll()
-    const readyRunners = allRunners.filter((runner) => runner.state === RunnerState.READY)
+    const readyRunners = await this.runnerService.findAllReady()
 
-    // Process all runners in parallel
-    await Promise.all(
-      readyRunners.map(async (runner) => {
-        const sandboxes = await this.sandboxRepository.find({
-          where: {
-            runnerId: runner.id,
-            organizationId: Not(SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION),
-            state: In([SandboxState.STARTED, SandboxState.ARCHIVING]),
-            backupState: In([BackupState.NONE, BackupState.COMPLETED]),
-          },
-          order: {
-            lastBackupAt: 'ASC',
-          },
-          //  todo: increase this number when backup is stable
-          take: 10,
-        })
+    try {
+      // Process all runners in parallel
+      await Promise.all(
+        readyRunners.map(async (runner) => {
+          const sandboxes = await this.sandboxRepository.find({
+            where: {
+              runnerId: runner.id,
+              organizationId: Not(SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION),
+              state: SandboxState.STARTED,
+              backupState: In([BackupState.NONE, BackupState.COMPLETED]),
+              lastBackupAt: Or(IsNull(), LessThan(new Date(Date.now() - 1 * 60 * 60 * 1000))),
+            },
+            order: {
+              lastBackupAt: 'ASC',
+            },
+            //  todo: increase this number when backup is stable
+            take: 10,
+          })
 
-        await Promise.all(
-          sandboxes
-            .filter(
-              (sandbox) => !sandbox.lastBackupAt || sandbox.lastBackupAt < new Date(Date.now() - 1 * 60 * 60 * 1000),
-            )
-            .map(async (sandbox) => {
+          await Promise.all(
+            sandboxes.map(async (sandbox) => {
               const lockKey = `sandbox-backup-${sandbox.id}`
               const hasLock = await this.redisLockProvider.lock(lockKey, 60)
               if (!hasLock) {
@@ -86,7 +91,7 @@ export class BackupManager {
 
               try {
                 //  todo: remove the catch handler asap
-                await this.startBackupCreate(sandbox.id).catch((error) => {
+                await this.setBackupPending(sandbox.id).catch((error) => {
                   if (error instanceof BadRequestError && error.message === 'A backup is already in progress') {
                     return
                   }
@@ -94,17 +99,24 @@ export class BackupManager {
                 })
               } catch (error) {
                 this.logger.error(`Error processing stop state for sandbox ${sandbox.id}:`, fromAxiosError(error))
+              } finally {
+                await this.redisLockProvider.unlock(lockKey)
               }
             }),
-        )
-      }),
-    )
+          )
+        }),
+      )
+    } catch (error) {
+      this.logger.error(`Error processing backups: `, error)
+    } finally {
+      await this.redisLockProvider.unlock(lockKey)
+    }
   }
 
-  @Cron(CronExpression.EVERY_10_SECONDS, { name: 'sync-backup-states' }) // Run every 10 seconds
-  async syncBackupStates(): Promise<void> {
+  @Cron(CronExpression.EVERY_10_SECONDS, { name: 'check-backup-states' }) // Run every 10 seconds
+  async checkBackupStates(): Promise<void> {
     //  lock the sync to only run one instance at a time
-    const lockKey = 'sync-backup-states'
+    const lockKey = 'check-backup-states'
     const hasLock = await this.redisLockProvider.lock(lockKey, 10)
     if (!hasLock) {
       return
@@ -112,60 +124,123 @@ export class BackupManager {
 
     const sandboxes = await this.sandboxRepository.find({
       where: {
-        state: In([SandboxState.STARTED, SandboxState.STOPPED, SandboxState.ARCHIVING]),
+        state: In([SandboxState.PENDING_ARCHIVE, SandboxState.STARTED, SandboxState.STOPPED]),
         backupState: In([BackupState.PENDING, BackupState.IN_PROGRESS]),
       },
+      order: {
+        lastBackupAt: 'ASC',
+      },
+      take: 100,
     })
 
-    await Promise.all(
-      sandboxes.map(async (s) => {
-        const lockKey = `sandbox-backup-${s.id}`
-        const hasLock = await this.redisLockProvider.lock(lockKey, 60)
-        if (!hasLock) {
-          return
-        }
-
-        const runner = await this.runnerService.findOne(s.runnerId)
-        if (runner.state !== RunnerState.READY) {
-          return
-        }
-
-        //  get the latest sandbox state
-        const sandbox = await this.sandboxRepository.findOneByOrFail({
-          id: s.id,
-        })
-
-        try {
-          switch (sandbox.backupState) {
-            case BackupState.PENDING: {
-              await this.handlePendingBackup(sandbox)
-              break
-            }
-            case BackupState.IN_PROGRESS: {
-              await this.checkBackupProgress(sandbox)
-              break
-            }
+    try {
+      await Promise.all(
+        sandboxes.map(async (s) => {
+          const lockKey = `sandbox-backup-${s.id}`
+          const hasLock = await this.redisLockProvider.lock(lockKey, 60)
+          if (!hasLock) {
+            return
           }
-        } catch (error) {
-          //  if error, retry 10 times
-          const errorRetryKey = `${lockKey}-error-retry`
-          const errorRetryCount = await this.redis.get(errorRetryKey)
-          if (!errorRetryCount) {
-            await this.redis.setex(errorRetryKey, 300, '1')
-          } else if (parseInt(errorRetryCount) > 10) {
-            this.logger.error(`Error processing backup for sandbox ${sandbox.id}:`, fromAxiosError(error))
-            await this.updateWorkspacBackupState(sandbox.id, BackupState.ERROR)
-          } else {
-            await this.redis.setex(errorRetryKey, 300, errorRetryCount + 1)
+
+          try {
+            const runner = await this.runnerService.findOne(s.runnerId)
+            if (runner.state !== RunnerState.READY) {
+              return
+            }
+
+            //  get the latest sandbox state
+            const sandbox = await this.sandboxRepository.findOneByOrFail({
+              id: s.id,
+            })
+
+            try {
+              switch (sandbox.backupState) {
+                case BackupState.PENDING: {
+                  await this.handlePendingBackup(sandbox)
+                  break
+                }
+                case BackupState.IN_PROGRESS: {
+                  await this.checkBackupProgress(sandbox)
+                  break
+                }
+              }
+            } catch (error) {
+              //  if error, retry 10 times
+              const errorRetryKey = `${lockKey}-error-retry`
+              const errorRetryCount = await this.redis.get(errorRetryKey)
+              if (!errorRetryCount) {
+                await this.redis.setex(errorRetryKey, 300, '1')
+              } else if (parseInt(errorRetryCount) > 10) {
+                this.logger.error(`Error processing backup for sandbox ${sandbox.id}:`, fromAxiosError(error))
+                await this.updateSandboxBackupState(sandbox.id, BackupState.ERROR)
+              } else {
+                await this.redis.setex(errorRetryKey, 300, errorRetryCount + 1)
+              }
+            }
+          } catch (error) {
+            this.logger.error(`Error processing backup for sandbox ${s.id}:`, error)
+          } finally {
+            await this.redisLockProvider.unlock(lockKey)
           }
-        }
-      }),
-    ).catch((ex) => {
-      this.logger.error(ex)
-    })
+        }),
+      )
+    } catch (error) {
+      this.logger.error(`Error processing backups: `, error)
+    } finally {
+      await this.redisLockProvider.unlock(lockKey)
+    }
   }
 
-  async startBackupCreate(sandboxId: string): Promise<void> {
+  @Cron(CronExpression.EVERY_30_SECONDS, { name: 'sync-stop-state-create-backups' }) // Run every 30 seconds
+  async syncStopStateCreateBackups(): Promise<void> {
+    const lockKey = 'sync-stop-state-create-backups'
+    const hasLock = await this.redisLockProvider.lock(lockKey, 30)
+    if (!hasLock) {
+      return
+    }
+
+    try {
+      const sandboxes = await this.sandboxRepository.find({
+        where: {
+          state: In([SandboxState.STOPPED, SandboxState.PENDING_ARCHIVE]),
+          backupState: In([BackupState.NONE]),
+        },
+        //  todo: increase this number when auto-stop is stable
+        take: 100,
+      })
+
+      await Promise.all(
+        sandboxes
+          .filter((sandbox) => sandbox.runnerId !== null)
+          .map(async (sandbox) => {
+            const lockKey = `sandbox-backup-${sandbox.id}`
+            const hasLock = await this.redisLockProvider.lock(lockKey, 30)
+            if (!hasLock) {
+              return
+            }
+
+            try {
+              const runner = await this.runnerService.findOne(sandbox.runnerId)
+              if (runner.state !== RunnerState.READY) {
+                return
+              }
+
+              await this.setBackupPending(sandbox.id)
+            } catch (error) {
+              this.logger.error(`Error processing backup for sandbox ${sandbox.id}:`, error)
+            } finally {
+              await this.redisLockProvider.unlock(lockKey)
+            }
+          }),
+      )
+    } catch (error) {
+      this.logger.error(`Error processing backups: `, error)
+    } finally {
+      await this.redisLockProvider.unlock(lockKey)
+    }
+  }
+
+  async setBackupPending(sandboxId: string): Promise<void> {
     const sandbox = await this.sandboxRepository.findOneByOrFail({
       id: sandboxId,
     })
@@ -182,7 +257,7 @@ export class BackupManager {
     if (
       !(
         sandbox.state === SandboxState.STARTED ||
-        sandbox.state === SandboxState.ARCHIVING ||
+        sandbox.state === SandboxState.PENDING_ARCHIVE ||
         (sandbox.state === SandboxState.STOPPED && sandbox.runnerId)
       )
     ) {
@@ -203,30 +278,10 @@ export class BackupManager {
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
     const backupSnapshot = `${registry.url.replace('https://', '').replace('http://', '')}/${registry.project}/backup-${sandbox.id}:${timestamp}`
 
-    //  if sandbox has a backup snapshot, add it to the existingBackupSnapshots array
-    if (
-      sandbox.lastBackupAt &&
-      sandbox.backupSnapshot &&
-      [BackupState.NONE, BackupState.COMPLETED].includes(sandbox.backupState)
-    ) {
-      sandbox.existingBackupSnapshots.push({
-        snapshotName: sandbox.backupSnapshot,
-        createdAt: sandbox.lastBackupAt,
-      })
-    }
-    const existingBackupSnapshots = sandbox.existingBackupSnapshots
-    existingBackupSnapshots.push({
-      snapshotName: backupSnapshot,
-      createdAt: new Date(),
-    })
-
     const sandboxToUpdate = await this.sandboxRepository.findOneByOrFail({
       id: sandbox.id,
     })
-    sandboxToUpdate.existingBackupSnapshots = existingBackupSnapshots
-    sandboxToUpdate.backupState = BackupState.PENDING
-    sandboxToUpdate.backupRegistryId = registry.id
-    sandboxToUpdate.backupSnapshot = backupSnapshot
+    sandboxToUpdate.setBackupState(BackupState.PENDING, backupSnapshot, registry.id)
     await this.sandboxRepository.save(sandboxToUpdate)
   }
 
@@ -240,26 +295,29 @@ export class BackupManager {
 
       switch (sandboxInfo.backupState?.toUpperCase()) {
         case 'COMPLETED': {
-          sandbox.backupState = BackupState.COMPLETED
-          sandbox.lastBackupAt = new Date()
+          sandbox.setBackupState(BackupState.COMPLETED)
           const sandboxToUpdate = await this.sandboxRepository.findOneByOrFail({
             id: sandbox.id,
           })
-          sandboxToUpdate.backupState = BackupState.COMPLETED
-          sandboxToUpdate.lastBackupAt = new Date()
+          sandboxToUpdate.setBackupState(BackupState.COMPLETED)
           await this.sandboxRepository.save(sandboxToUpdate)
           break
         }
         case 'FAILED':
         case 'ERROR': {
-          await this.updateWorkspacBackupState(sandbox.id, BackupState.ERROR)
+          await this.updateSandboxBackupState(sandbox.id, BackupState.ERROR)
           break
         }
-
+        // If backup state is none, retry the backup process by setting the backup state to pending
+        // This can happen if the runner is restarted or the operation is cancelled
+        case 'NONE': {
+          await this.updateSandboxBackupState(sandbox.id, BackupState.PENDING)
+          break
+        }
         // If still in progress or any other state, do nothing and wait for next sync
       }
     } catch (error) {
-      await this.updateWorkspacBackupState(sandbox.id, BackupState.ERROR)
+      await this.updateSandboxBackupState(sandbox.id, BackupState.ERROR)
       throw error
     }
   }
@@ -278,7 +336,20 @@ export class BackupManager {
   }
 
   private async handlePendingBackup(sandbox: Sandbox): Promise<void> {
+    const lockKey = `runner-${sandbox.runnerId}-backup-lock`
     try {
+      await this.redisLockProvider.waitForLock(lockKey, 10)
+
+      const backupsInProgress = await this.sandboxRepository.count({
+        where: {
+          runnerId: sandbox.runnerId,
+          backupState: BackupState.IN_PROGRESS,
+        },
+      })
+      if (backupsInProgress >= this.configService.getOrThrow('maxConcurrentBackupsPerRunner')) {
+        return
+      }
+
       const registry = await this.dockerRegistryService.findOne(sandbox.backupRegistryId)
       if (!registry) {
         throw new Error('Registry not found')
@@ -290,83 +361,37 @@ export class BackupManager {
       //  check if backup is already in progress on the runner
       const runnerSandbox = await runnerAdapter.sandboxInfo(sandbox.id)
       if (runnerSandbox.backupState?.toUpperCase() === 'IN_PROGRESS') {
+        await this.updateSandboxBackupState(sandbox.id, BackupState.IN_PROGRESS)
         return
       }
 
       // Initiate backup on runner
       await runnerAdapter.createBackup(sandbox, sandbox.backupSnapshot, registry)
 
-      await this.updateWorkspacBackupState(sandbox.id, BackupState.IN_PROGRESS)
+      await this.updateSandboxBackupState(sandbox.id, BackupState.IN_PROGRESS)
     } catch (error) {
       if (error.response?.status === 400 && error.response?.data?.message.includes('A backup is already in progress')) {
-        await this.updateWorkspacBackupState(sandbox.id, BackupState.IN_PROGRESS)
+        await this.updateSandboxBackupState(sandbox.id, BackupState.IN_PROGRESS)
         return
       }
-      await this.updateWorkspacBackupState(sandbox.id, BackupState.ERROR)
+      await this.updateSandboxBackupState(sandbox.id, BackupState.ERROR)
       throw error
+    } finally {
+      await this.redisLockProvider.unlock(lockKey)
     }
   }
 
-  @Cron(CronExpression.EVERY_30_SECONDS, { name: 'sync-stop-state-create-backups' }) // Run every 30 seconds
-  async syncStopStateCreateBackups(): Promise<void> {
-    const lockKey = 'sync-stop-state-create-backups'
-    const hasLock = await this.redisLockProvider.lock(lockKey, 30)
-    if (!hasLock) {
-      return
-    }
-
-    const sandboxes = await this.sandboxRepository.find({
-      where: {
-        state: In([SandboxState.STOPPED, SandboxState.ARCHIVING]),
-        backupState: In([BackupState.NONE]),
-      },
-      //  todo: increase this number when auto-stop is stable
-      take: 100,
-    })
-
-    await Promise.all(
-      sandboxes
-        .filter((sandbox) => sandbox.runnerId !== null)
-        .map(async (sandbox) => {
-          const lockKey = `sandbox-backup-${sandbox.id}`
-          const hasLock = await this.redisLockProvider.lock(lockKey, 30)
-          if (!hasLock) {
-            return
-          }
-
-          const runner = await this.runnerService.findOne(sandbox.runnerId)
-          if (runner.state !== RunnerState.READY) {
-            return
-          }
-
-          //  TODO: this should be revisited
-          //  an error should be handled better and not just logged
-          try {
-            //  todo: remove the catch handler asap
-            await this.startBackupCreate(sandbox.id).catch((error) => {
-              if (error instanceof BadRequestError && error.message === 'A backup is already in progress') {
-                return
-              }
-              this.logger.error(`Failed to create backup for sandbox ${sandbox.id}:`, fromAxiosError(error))
-            })
-          } catch (error) {
-            this.logger.error(`Failed to create backup for sandbox ${sandbox.id}:`, fromAxiosError(error))
-          }
-        }),
-    )
-  }
-
-  private async updateWorkspacBackupState(sandboxId: string, backupState: BackupState): Promise<void> {
+  private async updateSandboxBackupState(sandboxId: string, backupState: BackupState): Promise<void> {
     const sandboxToUpdate = await this.sandboxRepository.findOneByOrFail({
       id: sandboxId,
     })
-    sandboxToUpdate.backupState = backupState
+    sandboxToUpdate.setBackupState(backupState)
     await this.sandboxRepository.save(sandboxToUpdate)
   }
 
   @OnEvent(SandboxEvents.ARCHIVED)
   private async handleSandboxArchivedEvent(event: SandboxArchivedEvent) {
-    this.startBackupCreate(event.sandbox.id)
+    this.setBackupPending(event.sandbox.id)
   }
 
   @OnEvent(SandboxEvents.DESTROYED)

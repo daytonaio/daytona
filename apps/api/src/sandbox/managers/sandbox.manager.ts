@@ -129,65 +129,37 @@ export class SandboxManager {
     }
 
     try {
-      // Get all ready runners
-      const readyRunners = await this.runnerService.findAllReady()
+      const sandboxes = await this.sandboxRepository.find({
+        where: {
+          organizationId: Not(SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION),
+          state: SandboxState.STOPPED,
+          desiredState: SandboxDesiredState.STOPPED,
+          pending: Not(true),
+          lastActivityAt: Raw((alias) => `${alias} < NOW() - INTERVAL '1 minute' * "autoArchiveInterval"`),
+        },
+        order: {
+          lastBackupAt: 'ASC',
+        },
+        take: 100,
+      })
 
-      // Process all runners in parallel
       await Promise.all(
-        readyRunners.map(async (runner) => {
-          // If runner already has maxConcurrentArchives, skip
-          const archiveCount = await this.sandboxRepository.count({
-            where: {
-              runnerId: runner.id,
-              organizationId: Not(SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION),
-              desiredState: SandboxDesiredState.ARCHIVED,
-              state: Not(In([SandboxState.ARCHIVED, SandboxState.ERROR])),
-            },
-          })
-
-          if (archiveCount >= this.configService.getOrThrow('maxConcurrentArchivesPerRunner')) {
+        sandboxes.map(async (sandbox) => {
+          const lockKey = SYNC_INSTANCE_STATE_LOCK_KEY + sandbox.id
+          const acquired = await this.redisLockProvider.lock(lockKey, 30)
+          if (!acquired) {
             return
           }
 
-          const sandboxes = await this.sandboxRepository.find({
-            where: {
-              runnerId: runner.id,
-              organizationId: Not(SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION),
-              state: SandboxState.STOPPED,
-              desiredState: SandboxDesiredState.STOPPED,
-              pending: Not(true),
-              lastActivityAt: Raw((alias) => `${alias} < NOW() - INTERVAL '1 minute' * "autoArchiveInterval"`),
-            },
-            order: {
-              lastBackupAt: 'ASC',
-            },
-            take: this.configService.getOrThrow('maxConcurrentArchivesPerRunner') - archiveCount,
-          })
-
-          await Promise.all(
-            sandboxes.map(async (sandbox) => {
-              const lockKey = SYNC_INSTANCE_STATE_LOCK_KEY + sandbox.id
-              const acquired = await this.redisLockProvider.lock(lockKey, 30)
-              if (!acquired) {
-                return
-              }
-
-              try {
-                sandbox.pending = true
-                sandbox.desiredState = SandboxDesiredState.ARCHIVED
-                // Set the last activity to now to mark the start of the archive process
-                // Otherwise, sandboxes that have been left long in the queue might time out immediately
-                sandbox.lastActivityAt = new Date()
-                await this.sandboxRepository.save(sandbox)
-                // Triggering the event will start a backup and sync the state
-                this.eventEmitter.emit(SandboxEvents.ARCHIVED, new SandboxArchivedEvent(sandbox))
-              } catch (error) {
-                this.logger.error(`Error processing auto-archive state for sandbox ${sandbox.id}:`, error)
-              } finally {
-                await this.redisLockProvider.unlock(lockKey)
-              }
-            }),
-          )
+          try {
+            sandbox.desiredState = SandboxDesiredState.ARCHIVED
+            await this.sandboxRepository.save(sandbox)
+            this.syncInstanceState(sandbox.id)
+          } catch (error) {
+            this.logger.error(`Error processing auto-archive state for sandbox ${sandbox.id}:`, error)
+          } finally {
+            await this.redisLockProvider.unlock(lockKey)
+          }
         }),
       )
     } finally {
@@ -291,36 +263,16 @@ export class SandboxManager {
       return
     }
 
-    const runnersWith3InProgress = await this.sandboxRepository
-      .createQueryBuilder('sandbox')
-      .select('"runnerId"')
-      .where('"sandbox"."state" = :state', { state: SandboxState.ARCHIVING })
-      .groupBy('"runnerId"')
-      .having('COUNT(*) >= :max', { max: this.configService.getOrThrow('maxConcurrentArchivesPerRunner') })
-      .getRawMany()
-
-    const sandboxes = await this.sandboxRepository
-      .createQueryBuilder('sandbox')
-      .where([
-        {
-          state: SandboxState.ARCHIVING,
-          desiredState: SandboxDesiredState.ARCHIVED,
-        },
-        {
-          state: Not(
-            In([SandboxState.ARCHIVED, SandboxState.DESTROYED, SandboxState.ERROR, SandboxState.BUILD_FAILED]),
-          ),
-          desiredState: SandboxDesiredState.ARCHIVED,
-          runnerId: Not(In(runnersWith3InProgress.map((runner) => runner.runnerId))),
-        },
-      ])
-      .orderBy(
-        'CASE WHEN "sandbox"."state" = \'archiving\' THEN 0 WHEN "sandbox"."backupState" = \'Completed\' THEN 1 ELSE 2 END',
-        'ASC',
-      )
-      .addOrderBy('"sandbox"."lastActivityAt"', 'DESC')
-      .take(100)
-      .getMany()
+    const sandboxes = await this.sandboxRepository.find({
+      where: {
+        state: In([SandboxState.PENDING_ARCHIVE, SandboxState.STOPPED]),
+        desiredState: SandboxDesiredState.ARCHIVED,
+      },
+      take: 100,
+      order: {
+        lastActivityAt: 'ASC',
+      },
+    })
 
     await Promise.all(
       sandboxes.map(async (sandbox) => {

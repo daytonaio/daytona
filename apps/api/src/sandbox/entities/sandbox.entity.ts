@@ -95,13 +95,13 @@ export class Sandbox {
   labels: { [key: string]: string }
 
   @Column({ nullable: true })
-  backupRegistryId: string
+  backupRegistryId: string | null
 
   @Column({ nullable: true })
-  backupSnapshot: string
+  backupSnapshot: string | null
 
   @Column({ nullable: true, type: 'timestamp with time zone' })
-  lastBackupAt: Date
+  lastBackupAt: Date | null
 
   @Column({
     type: 'enum',
@@ -181,6 +181,33 @@ export class Sandbox {
   @Column({ nullable: true })
   daemonVersion?: string
 
+  public setBackupState(state: BackupState, backupSnapshot?: string | null, backupRegistryId?: string | null) {
+    this.backupState = state
+    switch (state) {
+      case BackupState.NONE:
+        this.backupSnapshot = null
+        break
+      case BackupState.COMPLETED: {
+        const now = new Date()
+        this.lastBackupAt = now
+        this.existingBackupSnapshots = [
+          ...this.existingBackupSnapshots,
+          {
+            snapshotName: this.backupSnapshot,
+            createdAt: now,
+          },
+        ]
+        break
+      }
+    }
+    if (backupSnapshot !== undefined) {
+      this.backupSnapshot = backupSnapshot
+    }
+    if (backupRegistryId !== undefined) {
+      this.backupRegistryId = backupRegistryId
+    }
+  }
+
   @BeforeUpdate()
   updateAccessToken() {
     if (this.state === SandboxState.STARTED) {
@@ -209,6 +236,7 @@ export class Sandbox {
             SandboxState.PENDING_BUILD,
             SandboxState.BUILDING_SNAPSHOT,
             SandboxState.PULLING_SNAPSHOT,
+            SandboxState.PENDING_ARCHIVE,
             SandboxState.ERROR,
             SandboxState.BUILD_FAILED,
           ].includes(this.state)
@@ -233,7 +261,7 @@ export class Sandbox {
         if (
           [
             SandboxState.ARCHIVED,
-            SandboxState.ARCHIVING,
+            SandboxState.PENDING_ARCHIVE,
             SandboxState.STOPPED,
             SandboxState.ERROR,
             SandboxState.BUILD_FAILED,
@@ -252,6 +280,7 @@ export class Sandbox {
             SandboxState.ARCHIVED,
             SandboxState.ERROR,
             SandboxState.BUILD_FAILED,
+            SandboxState.PENDING_ARCHIVE,
           ].includes(this.state)
         ) {
           break

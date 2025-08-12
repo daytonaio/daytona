@@ -327,10 +327,10 @@ const Sandboxes: React.FC = () => {
     const sandboxToArchive = sandboxes.find((s) => s.id === id)
     const previousState = sandboxToArchive?.state
 
-    setSandboxes((prev) => prev.map((s) => (s.id === id ? { ...s, state: SandboxState.ARCHIVING } : s)))
+    setSandboxes((prev) => prev.map((s) => (s.id === id ? { ...s, state: SandboxState.PENDING_ARCHIVE } : s)))
 
     if (selectedSandbox?.id === id) {
-      setSelectedSandbox((prev) => (prev ? { ...prev, state: SandboxState.ARCHIVING } : null))
+      setSelectedSandbox((prev) => (prev ? { ...prev, state: SandboxState.PENDING_ARCHIVE } : null))
     }
 
     try {

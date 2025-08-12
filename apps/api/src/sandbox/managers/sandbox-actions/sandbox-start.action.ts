@@ -71,7 +71,7 @@ export class SandboxStartAction extends SandboxAction {
             id: sandbox.id,
           })
           sandboxToUpdate.state = SandboxState.STARTED
-          sandboxToUpdate.backupState = BackupState.NONE
+          sandboxToUpdate.setBackupState(BackupState.NONE)
 
           try {
             const daemonVersion = await runnerAdapter.getSandboxDaemonVersion(sandbox.id)
@@ -279,13 +279,20 @@ export class SandboxStartAction extends SandboxAction {
         return DONT_SYNC_AGAIN
       }
 
+      if (!sandbox.backupRegistryId) {
+        throw new Error('No registry found for backup')
+      }
+
       const registry = await this.dockerRegistryService.findOne(sandbox.backupRegistryId)
       if (!registry) {
         throw new Error('No registry found for backup')
       }
 
-      const existingBackups = sandbox.existingBackupSnapshots.map((existingSnapshot) => existingSnapshot.snapshotName)
-      let validBackup
+      const existingBackups = sandbox.existingBackupSnapshots
+        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+        .map((existingSnapshot) => existingSnapshot.snapshotName)
+
+      let validBackup: string | null = null
       let exists = false
 
       while (existingBackups.length > 0) {
@@ -430,13 +437,13 @@ export class SandboxStartAction extends SandboxAction {
 
         //  if previous backup state is error or completed, set backup state to none
         if ([BackupState.ERROR, BackupState.COMPLETED].includes(sandbox.backupState)) {
-          sandbox.backupState = BackupState.NONE
+          sandbox.setBackupState(BackupState.NONE)
 
           const sandboxToUpdate = await this.sandboxRepository.findOneByOrFail({
             id: sandbox.id,
           })
           sandboxToUpdate.state = SandboxState.STARTED
-          sandboxToUpdate.backupState = BackupState.NONE
+          sandboxToUpdate.setBackupState(BackupState.NONE)
           if (daemonVersion) {
             sandboxToUpdate.daemonVersion = daemonVersion
           }
