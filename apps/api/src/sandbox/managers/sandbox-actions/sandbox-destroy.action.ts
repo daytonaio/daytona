@@ -51,7 +51,7 @@ export class SandboxDestroyAction extends SandboxAction {
           }
         } catch (e) {
           //  if the sandbox is not found on runner, it is already destroyed
-          if (!e.response || e.response.status !== 404) {
+          if (e.response?.status !== 404) {
             throw e
           }
         }
@@ -70,7 +70,7 @@ export class SandboxDestroyAction extends SandboxAction {
           await runnerAdapter.destroySandbox(sandbox.id)
         } catch (e) {
           //  if the sandbox is not found on runner, it is already destroyed
-          if (e.response.status !== 404) {
+          if (e.response?.status !== 404) {
             throw e
           }
         }
