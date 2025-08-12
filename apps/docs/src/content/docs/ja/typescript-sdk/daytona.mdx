@@ -1,0 +1,455 @@
+---
+title: "Daytona"
+hideTitleOnPage: true
+---
+
+
+## Daytona
+
+Daytona APIとやり取りするためのメインクラス。
+Daytona Sandboxの作成、管理、操作のためのメソッドを提供します。
+明示的な設定または環境変数を使用して初期化できます。
+
+**プロパティ**:
+
+- `snapshot` _SnapshotService_ - Daytona Snapshotを管理するためのサービス
+- `volume` _VolumeService_ - Daytona Volumeを管理するためのサービス
+    
+
+
+
+
+**例:**
+
+```ts
+// 環境変数を使用
+// DAYTONA_API_KEY、DAYTONA_API_URL、DAYTONA_TARGETを使用
+const daytona = new Daytona();
+const sandbox = await daytona.create();
+```
+
+```ts
+// 明示的な設定を使用
+const config: DaytonaConfig = {
+    apiKey: "your-api-key",
+    apiUrl: "https://your-api.com",
+    target: "us"
+};
+const daytona = new Daytona(config);
+
+@class
+```
+
+### コンストラクタ
+
+#### new Daytona()
+
+```ts
+new Daytona(config?: DaytonaConfig): Daytona
+```
+
+新しいDaytonaクライアントインスタンスを作成します。
+
+**パラメータ**:
+
+- `config?` _DaytonaConfig_ - 設定オプション
+
+
+**戻り値**:
+
+- `Daytona`
+
+**例外**:
+
+- `DaytonaError` - APIキーが不足している場合
+
+### メソッド
+
+#### create()
+
+##### 呼び出しシグネチャ
+
+```ts
+create(params?: CreateSandboxFromSnapshotParams, options?: {
+  timeout: number;
+}): Promise<Sandbox>
+```
+
+指定されたまたはデフォルトのスナップショットからSandboxを作成します。言語、イメージ、環境変数、ボリュームなど、さまざまなパラメータを指定できます。
+
+**パラメータ**:
+
+- `params?` _CreateSandboxFromSnapshotParams_ - スナップショットからのSandbox作成のパラメータ
+- `options?` _作成操作のオプション_
+- `timeout?` _number_ - タイムアウト（秒）（0は無制限、デフォルトは60）
+
+**戻り値**:
+
+- `Promise<Sandbox>` - 作成されたSandboxインスタンス
+
+**例:**
+
+```ts
+const sandbox = await daytona.create();
+```
+
+```ts
+// カスタムサンドボックスを作成
+const params: CreateSandboxFromSnapshotParams = {
+    language: 'typescript',
+    snapshot: 'my-snapshot-id',
+    envVars: {
+        NODE_ENV: 'development',
+        DEBUG: 'true'
+    },
+    autoStopInterval: 60,
+    autoArchiveInterval: 60,
+    autoDeleteInterval: 120
+};
+const sandbox = await daytona.create(params, { timeout: 100 });
+```
+
+##### 呼び出しシグネチャ
+
+```ts
+create(params?: CreateSandboxFromImageParams, options?: {
+  onSnapshotCreateLogs: (chunk: string) => void;
+  timeout: number;
+}): Promise<Sandbox>
+```
+
+レジストリで利用可能な指定されたイメージまたは宣言的なDaytona Imageからサンドボックスを作成します。リソース、言語、イメージ、環境変数、ボリュームなど、さまざまなパラメータを指定できます。Daytonaは提供されたイメージからスナップショットを作成し、それを使用してSandboxを作成します。
+
+**パラメータ**:
+
+- `params?` _CreateSandboxFromImageParams_ - イメージからのSandbox作成のパラメータ
+- `options?` _作成操作のオプション_
+- `onSnapshotCreateLogs?` _\(chunk: string\) =\> void_ - スナップショット作成ログを処理するコールバック関数。
+- `timeout?` _number_ - タイムアウト（秒）（0は無制限、デフォルトは60）
+
+**戻り値**:
+
+- `Promise<Sandbox>` - 作成されたSandboxインスタンス
+
+**例:**
+
+```ts
+const sandbox = await daytona.create({ image: 'debian:12.9' }, { timeout: 90, onSnapshotCreateLogs: console.log });
+```
+
+```ts
+// カスタムサンドボックスを作成
+const image = Image.base('alpine:3.18').pipInstall('numpy');
+const params: CreateSandboxFromImageParams = {
+    language: 'typescript',
+    image,
+    envVars: {
+        NODE_ENV: 'development',
+        DEBUG: 'true'
+    },
+    resources: {
+        cpu: 2,
+        memory: 4 // 4GB RAM
+    },
+    autoStopInterval: 60,
+    autoArchiveInterval: 60,
+    autoDeleteInterval: 120
+};
+const sandbox = await daytona.create(params, { timeout: 100, onSnapshotCreateLogs: console.log });
+```
+
+***
+
+#### delete()
+
+```ts
+delete(sandbox: Sandbox, timeout: number): Promise<void>
+```
+
+Sandboxを削除します。
+
+**パラメータ**:
+
+- `sandbox` _Sandbox_ - 削除するSandbox
+- `timeout` _number = 60_ - タイムアウト（秒）（0は無制限、デフォルトは60）
+
+
+**戻り値**:
+
+- `Promise<void>`
+
+**例:**
+
+```ts
+const sandbox = await daytona.get('my-sandbox-id');
+await daytona.delete(sandbox);
+```
+
+***
+
+#### findOne()
+
+```ts
+findOne(filter: SandboxFilter): Promise<Sandbox>
+```
+
+IDまたはラベルでSandboxを検索します。
+
+**パラメータ**:
+
+- `filter` _SandboxFilter_ - Sandboxのフィルタ
+
+
+**戻り値**:
+
+- `Promise<Sandbox>` - IDまたはラベルに一致する最初のSandbox。
+
+**例:**
+
+```ts
+const sandbox = await daytona.findOne({ labels: { 'my-label': 'my-value' } });
+console.log(`Sandbox ID: ${sandbox.id}, State: ${sandbox.state}`);
+```
+
+***
+
+#### get()
+
+```ts
+get(sandboxId: string): Promise<Sandbox>
+```
+
+IDでSandboxを取得します。
+
+**パラメータ**:
+
+- `sandboxId` _string_ - 取得するSandboxのID
+
+
+**戻り値**:
+
+- `Promise<Sandbox>` - Sandbox
+
+**例:**
+
+```ts
+const sandbox = await daytona.get('my-sandbox-id');
+console.log(`Sandbox state: ${sandbox.state}`);
+```
+
+***
+
+#### list()
+
+```ts
+list(labels?: Record<string, string>): Promise<Sandbox[]>
+```
+
+ラベルでフィルタリングされたすべてのSandboxを一覧表示します。
+
+**パラメータ**:
+
+- `labels?` _Record\<string, string\>_ - Sandboxをフィルタリングするラベル
+
+
+**戻り値**:
+
+- `Promise<Sandbox[]>` - ラベルに一致するSandboxの配列。
+
+**例:**
+
+```ts
+const sandboxes = await daytona.list({ 'my-label': 'my-value' });
+for (const sandbox of sandboxes) {
+    console.log(`${sandbox.id}: ${sandbox.state}`);
+}
+```
+
+***
+
+#### start()
+
+```ts
+start(sandbox: Sandbox, timeout?: number): Promise<void>
+```
+
+Sandboxを開始し、準備完了まで待機します。
+
+**パラメータ**:
+
+- `sandbox` _Sandbox_ - 開始するSandbox
+- `timeout?` _number_ - オプションのタイムアウト（秒単位、0は無制限を意味します）
+
+
+**戻り値**:
+
+- `Promise<void>`
+
+**例:**
+
+```ts
+const sandbox = await daytona.get('my-sandbox-id');
+// sandboxの開始を最大60秒間待機
+await daytona.start(sandbox, 60);
+```
+
+***
+
+#### stop()
+
+```ts
+stop(sandbox: Sandbox): Promise<void>
+```
+
+Sandboxを停止します。
+
+**パラメータ**:
+
+- `sandbox` _Sandbox_ - 停止するSandbox
+
+
+**戻り値**:
+
+- `Promise<void>`
+
+**例:**
+
+```ts
+const sandbox = await daytona.get('my-sandbox-id');
+await daytona.stop(sandbox);
+```
+## CodeLanguage
+
+コード実行でサポートされているプログラミング言語
+
+**列挙型メンバー**:
+
+- `JAVASCRIPT` ("javascript")
+- `PYTHON` ("python")
+- `TYPESCRIPT` ("typescript")
+
+## CreateSandboxBaseParams
+
+新しいSandboxを作成するためのベースパラメータ。
+
+**プロパティ**:
+
+- `autoArchiveInterval?` _number_ - 自動アーカイブ間隔（分単位）（0は最大間隔が使用されることを意味します）。デフォルトは7日です。
+- `autoDeleteInterval?` _number_ - 自動削除間隔（分単位）（負の値は無効を意味し、0は停止時に即座に削除することを意味します）。デフォルトでは、自動削除は無効です。
+- `autoStopInterval?` _number_ - 自動停止間隔（分単位）（0は無効を意味します）。デフォルトは15分です。
+- `envVars?` _Record\<string, string\>_ - Sandboxに設定するオプションの環境変数
+- `labels?` _Record\<string, string\>_ - Sandboxラベル
+- `language?` _string_ - 直接コード実行のためのプログラミング言語
+- `public?` _boolean_ - Sandboxポートプレビューが公開されているか
+- `user?` _string_ - Sandboxで使用するオプションのOSユーザー
+- `volumes?` _VolumeMount\[\]_ - Sandboxにマウントするボリュームのオプション配列
+## CreateSandboxFromImageParams
+
+新しいSandboxを作成するためのパラメータ。
+
+**プロパティ**:
+
+- `autoArchiveInterval?` _number_
+- `autoDeleteInterval?` _number_
+- `autoStopInterval?` _number_
+- `envVars?` _Record\<string, string\>_
+- `image` _string \| Image_ - Sandboxに使用するカスタムDockerイメージ。Imageオブジェクトが提供された場合、
+    イメージは動的にビルドされます。
+- `labels?` _Record\<string, string\>_
+- `language?` _string_
+- `public?` _boolean_
+- `resources?` _Resources_ - Sandboxのリソース割り当て。提供されない場合、sandboxは
+    デフォルトのリソースを持ちます。
+- `user?` _string_
+- `volumes?` _VolumeMount\[\]_
+## CreateSandboxFromSnapshotParams
+
+スナップショットから新しいSandboxを作成するためのパラメータ。
+
+**プロパティ**:
+
+- `autoArchiveInterval?` _number_
+- `autoDeleteInterval?` _number_
+- `autoStopInterval?` _number_
+- `envVars?` _Record\<string, string\>_
+- `labels?` _Record\<string, string\>_
+- `language?` _string_
+- `public?` _boolean_
+- `snapshot?` _string_ - Sandboxに使用するスナップショットの名前。
+- `user?` _string_
+- `volumes?` _VolumeMount\[\]_
+## DaytonaConfig
+
+Daytonaクライアントを初期化するための設定オプション。
+
+**プロパティ**:
+
+- `apiKey?` _string_ - Daytona APIでの認証用APIキー
+- `apiUrl?` _string_ - Daytona APIのURL。ここで設定されておらず、環境変数DAYTONA_API_URLでも設定されていない場合、デフォルトで'https://app.daytona.io/api'になります。
+- `jwtToken?` _string_ - Daytona APIでの認証用JWTトークン。設定されていない場合は、環境変数`DAYTONA_JWT_TOKEN`で提供するか、代わりにAPIキーを提供する必要があります。
+- `organizationId?` _string_ - JWTベース認証で使用される組織ID。JWTトークンが提供される場合は必須で、ここまたは環境変数`DAYTONA_ORGANIZATION_ID`で設定する必要があります。
+- ~~`serverUrl?`~~ _string_ - **_非推奨_** - 代わりに`apiUrl`を使用してください。このプロパティは将来のバージョンで削除されます。
+- `target?` _string_ - Sandboxのターゲット場所
+    
+
+
+
+
+**例:**
+
+```ts
+const config: DaytonaConfig = {
+    apiKey: "your-api-key",
+    apiUrl: "https://your-api.com",
+    target: "us"
+};
+const daytona = new Daytona(config);
+```
+## Resources
+
+Sandboxのリソース割り当て。
+
+**プロパティ**:
+
+- `cpu?` _number_ - Sandboxのコア単位でのCPU割り当て
+- `disk?` _number_ - SandboxのGiB単位でのディスク容量割り当て
+- `gpu?` _number_ - Sandboxのユニット単位でのGPU割り当て
+- `memory?` _number_ - SandboxのGiB単位でのメモリ割り当て
+    
+
+
+
+
+**例:**
+
+```ts
+const resources: SandboxResources = {
+    cpu: 2,
+    memory: 4,  // 4GiB RAM
+    disk: 20    // 20GiB disk
+};
+```
+## SandboxFilter
+
+Sandboxのフィルター。
+
+**プロパティ**:
+
+- `id?` _string_ - 取得するSandboxのID
+- `labels?` _Record\<string, string\>_ - Sandboxをフィルタリングするためのラベル
+## VolumeMount
+
+Sandboxのボリュームマウントを表します。
+
+**プロパティ**:
+
+- `mountPath` _string_ - Volumeをマウントするsandbox上のパス
+    
+- `volumeId` _string_ - マウントするVolumeのID
+    
+
+
+
+**継承元:**
+
+- `SandboxVolume`

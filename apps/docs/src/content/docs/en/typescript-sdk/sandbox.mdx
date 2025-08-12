@@ -1,0 +1,638 @@
+---
+title: "Sandbox"
+hideTitleOnPage: true
+---
+
+
+## Sandbox
+
+Represents a Daytona Sandbox.
+
+**Properties**:
+
+- `autoArchiveInterval?` _number_ - Auto-archive interval in minutes
+    
+    ##### Implementation of
+    
+    ```ts
+    SandboxDto.autoArchiveInterval
+    ```
+- `autoDeleteInterval?` _number_ - Auto-delete interval in minutes
+    
+    ##### Implementation of
+    
+    ```ts
+    SandboxDto.autoDeleteInterval
+    ```
+- `autoStopInterval?` _number_ - Auto-stop interval in minutes
+    
+    ##### Implementation of
+    
+    ```ts
+    SandboxDto.autoStopInterval
+    ```
+- `backupCreatedAt?` _string_ - When the backup was created
+    
+    ##### Implementation of
+    
+    ```ts
+    SandboxDto.backupCreatedAt
+    ```
+- `backupState?` _SandboxBackupStateEnum_ - Current state of Sandbox backup
+    
+    ##### Implementation of
+    
+    ```ts
+    SandboxDto.backupState
+    ```
+- `buildInfo?` _BuildInfo_ - Build information for the Sandbox if it was created from dynamic build
+    
+    ##### Implementation of
+    
+    ```ts
+    SandboxDto.buildInfo
+    ```
+- `computerUse` _ComputerUse_ - Computer use operations interface for desktop automation
+- `cpu` _number_ - Number of CPUs allocated to the Sandbox
+    
+    ##### Implementation of
+    
+    ```ts
+    SandboxDto.cpu
+    ```
+- `createdAt?` _string_ - When the Sandbox was created
+    
+    ##### Implementation of
+    
+    ```ts
+    SandboxDto.createdAt
+    ```
+- `disk` _number_ - Amount of disk space allocated to the Sandbox in GiB
+    
+    ##### Implementation of
+    
+    ```ts
+    SandboxDto.disk
+    ```
+- `env` _Record\<string, string\>_ - Environment variables set in the Sandbox
+    
+    ##### Implementation of
+    
+    ```ts
+    SandboxDto.env
+    ```
+- `errorReason?` _string_ - Error message if Sandbox is in error state
+    
+    ##### Implementation of
+    
+    ```ts
+    SandboxDto.errorReason
+    ```
+- `fs` _FileSystem_ - File system operations interface
+- `git` _Git_ - Git operations interface
+- `gpu` _number_ - Number of GPUs allocated to the Sandbox
+    
+    ##### Implementation of
+    
+    ```ts
+    SandboxDto.gpu
+    ```
+- `id` _string_ - Unique identifier for the Sandbox
+    
+    ##### Implementation of
+    
+    ```ts
+    SandboxDto.id
+    ```
+- `labels` _Record\<string, string\>_ - Custom labels attached to the Sandbox
+    
+    ##### Implementation of
+    
+    ```ts
+    SandboxDto.labels
+    ```
+- `memory` _number_ - Amount of memory allocated to the Sandbox in GiB
+    
+    ##### Implementation of
+    
+    ```ts
+    SandboxDto.memory
+    ```
+- `organizationId` _string_ - Organization ID of the Sandbox
+    
+    ##### Implementation of
+    
+    ```ts
+    SandboxDto.organizationId
+    ```
+- `process` _Process_ - Process execution interface
+- `public` _boolean_ - Whether the Sandbox is publicly accessible
+    
+    ##### Implementation of
+    
+    ```ts
+    SandboxDto.public
+    ```
+- `runnerDomain?` _string_ - Domain name of the Sandbox runner
+    
+    ##### Implementation of
+    
+    ```ts
+    SandboxDto.runnerDomain
+    ```
+- `snapshot?` _string_ - Daytona snapshot used to create the Sandbox
+    
+    ##### Implementation of
+    
+    ```ts
+    SandboxDto.snapshot
+    ```
+- `state?` _SandboxState_ - Current state of the Sandbox (e.g., "started", "stopped")
+    
+    ##### Implementation of
+    
+    ```ts
+    SandboxDto.state
+    ```
+- `target` _string_ - Target location of the runner where the Sandbox runs
+    
+    ##### Implementation of
+    
+    ```ts
+    SandboxDto.target
+    ```
+- `updatedAt?` _string_ - When the Sandbox was last updated
+    
+    ##### Implementation of
+    
+    ```ts
+    SandboxDto.updatedAt
+    ```
+- `user` _string_ - OS user running in the Sandbox
+    
+    ##### Implementation of
+    
+    ```ts
+    SandboxDto.user
+    ```
+- `volumes?` _SandboxVolume\[\]_ - Volumes attached to the Sandbox
+    
+    ##### Implementation of
+    
+    ```ts
+    SandboxDto.volumes
+    ```
+    
+
+
+
+
+### Implements
+
+- `Sandbox`
+
+### Constructors
+
+#### new Sandbox()
+
+```ts
+new Sandbox(
+   sandboxDto: Sandbox, 
+   sandboxApi: SandboxApi, 
+   toolboxApi: ToolboxApi, 
+   codeToolbox: SandboxCodeToolbox): Sandbox
+```
+
+Creates a new Sandbox instance
+
+**Parameters**:
+
+- `sandboxDto` _Sandbox_ - The API Sandbox instance
+- `sandboxApi` _SandboxApi_ - API client for Sandbox operations
+- `toolboxApi` _ToolboxApi_ - API client for toolbox operations
+- `codeToolbox` _SandboxCodeToolbox_ - Language-specific toolbox implementation
+
+
+**Returns**:
+
+- `Sandbox`
+
+### Methods
+
+#### archive()
+
+```ts
+archive(): Promise<void>
+```
+
+Archives the sandbox, making it inactive and preserving its state. When sandboxes are archived, the entire filesystem
+state is moved to cost-effective object storage, making it possible to keep sandboxes available for an extended period.
+The tradeoff between archived and stopped states is that starting an archived sandbox takes more time, depending on its size.
+Sandbox must be stopped before archiving.
+
+**Returns**:
+
+- `Promise<void>`
+
+***
+
+#### createLspServer()
+
+```ts
+createLspServer(languageId: string, pathToProject: string): Promise<LspServer>
+```
+
+Creates a new Language Server Protocol (LSP) server instance.
+
+The LSP server provides language-specific features like code completion,
+diagnostics, and more.
+
+**Parameters**:
+
+- `languageId` _string_ - The language server type (e.g., "typescript")
+- `pathToProject` _string_ - Path to the project root directory. Relative paths are resolved based on the user's
+    root directory.
+
+
+**Returns**:
+
+- `Promise<LspServer>` - A new LSP server instance configured for the specified language
+
+**Example:**
+
+```ts
+const lsp = await sandbox.createLspServer('typescript', 'workspace/project');
+```
+
+***
+
+#### delete()
+
+```ts
+delete(timeout: number): Promise<void>
+```
+
+Deletes the Sandbox.
+
+**Parameters**:
+
+- `timeout` _number = 60_
+
+
+**Returns**:
+
+- `Promise<void>`
+
+***
+
+#### getPreviewLink()
+
+```ts
+getPreviewLink(port: number): Promise<PortPreviewUrl>
+```
+
+Retrieves the preview link for the sandbox at the specified port. If the port is closed,
+it will be opened automatically. For private sandboxes, a token is included to grant access
+to the URL.
+
+**Parameters**:
+
+- `port` _number_ - The port to open the preview link on.
+
+
+**Returns**:
+
+- `Promise<PortPreviewUrl>` - The response object for the preview link, which includes the `url`
+    and the `token` (to access private sandboxes).
+
+**Example:**
+
+```ts
+const previewLink = await sandbox.getPreviewLink(3000);
+console.log(`Preview URL: ${previewLink.url}`);
+console.log(`Token: ${previewLink.token}`);
+```
+
+***
+
+#### getUserRootDir()
+
+```ts
+getUserRootDir(): Promise<string>
+```
+
+Gets the root directory path for the logged in user inside the Sandbox.
+
+**Returns**:
+
+- `Promise<string>` - The absolute path to the Sandbox root directory for the logged in user
+
+**Example:**
+
+```ts
+const rootDir = await sandbox.getUserRootDir();
+console.log(`Sandbox root: ${rootDir}`);
+```
+
+***
+
+#### refreshData()
+
+```ts
+refreshData(): Promise<void>
+```
+
+Refreshes the Sandbox data from the API.
+
+**Returns**:
+
+- `Promise<void>`
+
+**Example:**
+
+```ts
+await sandbox.refreshData();
+console.log(`Sandbox ${sandbox.id}:`);
+console.log(`State: ${sandbox.state}`);
+console.log(`Resources: ${sandbox.cpu} CPU, ${sandbox.memory} GiB RAM`);
+```
+
+***
+
+#### setAutoArchiveInterval()
+
+```ts
+setAutoArchiveInterval(interval: number): Promise<void>
+```
+
+Set the auto-archive interval for the Sandbox.
+
+The Sandbox will automatically archive after being continuously stopped for the specified interval.
+
+**Parameters**:
+
+- `interval` _number_ - Number of minutes after which a continuously stopped Sandbox will be auto-archived.
+    Set to 0 for the maximum interval. Default is 7 days.
+
+
+**Returns**:
+
+- `Promise<void>`
+
+**Throws**:
+
+- `DaytonaError` - If interval is not a non-negative integer
+
+**Example:**
+
+```ts
+// Auto-archive after 1 hour
+await sandbox.setAutoArchiveInterval(60);
+// Or use the maximum interval
+await sandbox.setAutoArchiveInterval(0);
+```
+
+***
+
+#### setAutoDeleteInterval()
+
+```ts
+setAutoDeleteInterval(interval: number): Promise<void>
+```
+
+Set the auto-delete interval for the Sandbox.
+
+The Sandbox will automatically delete after being continuously stopped for the specified interval.
+
+**Parameters**:
+
+- `interval` _number_ - Number of minutes after which a continuously stopped Sandbox will be auto-deleted.
+    Set to negative value to disable auto-delete. Set to 0 to delete immediately upon stopping.
+    By default, auto-delete is disabled.
+
+
+**Returns**:
+
+- `Promise<void>`
+
+**Example:**
+
+```ts
+// Auto-delete after 1 hour
+await sandbox.setAutoDeleteInterval(60);
+// Or delete immediately upon stopping
+await sandbox.setAutoDeleteInterval(0);
+// Or disable auto-delete
+await sandbox.setAutoDeleteInterval(-1);
+```
+
+***
+
+#### setAutostopInterval()
+
+```ts
+setAutostopInterval(interval: number): Promise<void>
+```
+
+Set the auto-stop interval for the Sandbox.
+
+The Sandbox will automatically stop after being idle (no new events) for the specified interval.
+Events include any state changes or interactions with the Sandbox through the sdk.
+Interactions using Sandbox Previews are not included.
+
+**Parameters**:
+
+- `interval` _number_ - Number of minutes of inactivity before auto-stopping.
+    Set to 0 to disable auto-stop. Default is 15 minutes.
+
+
+**Returns**:
+
+- `Promise<void>`
+
+**Throws**:
+
+- `DaytonaError` - If interval is not a non-negative integer
+
+**Example:**
+
+```ts
+// Auto-stop after 1 hour
+await sandbox.setAutostopInterval(60);
+// Or disable auto-stop
+await sandbox.setAutostopInterval(0);
+```
+
+***
+
+#### setLabels()
+
+```ts
+setLabels(labels: Record<string, string>): Promise<Record<string, string>>
+```
+
+Sets labels for the Sandbox.
+
+Labels are key-value pairs that can be used to organize and identify Sandboxes.
+
+**Parameters**:
+
+- `labels` _Record\<string, string\>_ - Dictionary of key-value pairs representing Sandbox labels
+
+
+**Returns**:
+
+- `Promise<Record<string, string>>`
+
+**Example:**
+
+```ts
+// Set sandbox labels
+await sandbox.setLabels({
+  project: 'my-project',
+  environment: 'development',
+  team: 'backend'
+});
+```
+
+***
+
+#### start()
+
+```ts
+start(timeout?: number): Promise<void>
+```
+
+Start the Sandbox.
+
+This method starts the Sandbox and waits for it to be ready.
+
+**Parameters**:
+
+- `timeout?` _number = 60_ - Maximum time to wait in seconds. 0 means no timeout.
+    Defaults to 60-second timeout.
+
+
+**Returns**:
+
+- `Promise<void>`
+
+**Throws**:
+
+- `DaytonaError` - If Sandbox fails to start or times out
+
+**Example:**
+
+```ts
+const sandbox = await daytona.getCurrentSandbox('my-sandbox');
+await sandbox.start(40);  // Wait up to 40 seconds
+console.log('Sandbox started successfully');
+```
+
+***
+
+#### stop()
+
+```ts
+stop(timeout?: number): Promise<void>
+```
+
+Stops the Sandbox.
+
+This method stops the Sandbox and waits for it to be fully stopped.
+
+**Parameters**:
+
+- `timeout?` _number = 60_ - Maximum time to wait in seconds. 0 means no timeout.
+    Defaults to 60-second timeout.
+
+
+**Returns**:
+
+- `Promise<void>`
+
+**Example:**
+
+```ts
+const sandbox = await daytona.getCurrentSandbox('my-sandbox');
+await sandbox.stop();
+console.log('Sandbox stopped successfully');
+```
+
+***
+
+#### waitUntilStarted()
+
+```ts
+waitUntilStarted(timeout?: number): Promise<void>
+```
+
+Waits for the Sandbox to reach the 'started' state.
+
+This method polls the Sandbox status until it reaches the 'started' state
+or encounters an error.
+
+**Parameters**:
+
+- `timeout?` _number = 60_ - Maximum time to wait in seconds. 0 means no timeout.
+    Defaults to 60 seconds.
+
+
+**Returns**:
+
+- `Promise<void>`
+
+**Throws**:
+
+- `DaytonaError` - If the sandbox ends up in an error state or fails to start within the timeout period.
+
+***
+
+#### waitUntilStopped()
+
+```ts
+waitUntilStopped(timeout?: number): Promise<void>
+```
+
+Wait for Sandbox to reach 'stopped' state.
+
+This method polls the Sandbox status until it reaches the 'stopped' state
+or encounters an error.
+
+**Parameters**:
+
+- `timeout?` _number = 60_ - Maximum time to wait in seconds. 0 means no timeout.
+    Defaults to 60 seconds.
+
+
+**Returns**:
+
+- `Promise<void>`
+
+**Throws**:
+
+- `DaytonaError` - If the sandbox fails to stop within the timeout period.
+## SandboxCodeToolbox
+
+Interface defining methods that a code toolbox must implement
+
+### Methods
+
+#### getRunCommand()
+
+```ts
+getRunCommand(code: string, params?: CodeRunParams): string
+```
+
+Generates a command to run the provided code
+
+**Parameters**:
+
+- `code` _string_
+- `params?` _CodeRunParams_
+
+
+**Returns**:
+
+- `string`
+

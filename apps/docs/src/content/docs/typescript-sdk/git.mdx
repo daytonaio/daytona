@@ -190,7 +190,8 @@ commit(
    path: string, 
    message: string, 
    author: string, 
-email: string): Promise<GitCommitResponse>
+   email: string, 
+allowEmpty?: boolean): Promise<GitCommitResponse>
 ```
 
 Commits staged changes.
@@ -202,6 +203,7 @@ Commits staged changes.
 - `message` _string_ - Commit message describing the changes
 - `author` _string_ - Name of the commit author
 - `email` _string_ - Email address of the commit author
+- `allowEmpty?` _boolean_ - Allow creating an empty commit when no changes are staged
 
 
 **Returns**:
@@ -217,7 +219,8 @@ await git.commit(
   'workspace/repo',
   'Update documentation',
   'John Doe',
-  'john@example.com'
+  'john@example.com',
+  true
 );
 ```
 

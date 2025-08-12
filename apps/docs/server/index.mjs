@@ -9,7 +9,7 @@ app.use((req, res, next) => {
   res.setHeader('X-Frame-Options', 'SAMEORIGIN')
   next()
 })
-app.use('/', express.static('dist/client/'))
+app.use('/docs', express.static('dist/client/'))
 app.use((req, res, next) => {
   ssrHandler(req, res, next)
 })

@@ -1,0 +1,395 @@
+---
+title: "Git"
+hideTitleOnPage: true
+---
+
+
+## Git
+
+Sandbox内でGit操作を提供します。
+
+### コンストラクタ
+
+#### new Git()
+
+```ts
+new Git(
+   sandboxId: string, 
+   toolboxApi: ToolboxApi, 
+   getRootDir: () => Promise<string>): Git
+```
+
+**パラメータ**:
+
+- `sandboxId` _string_
+- `toolboxApi` _ToolboxApi_
+- `getRootDir` _\(\) =\> Promise\<string\>_
+
+
+**戻り値**:
+
+- `Git`
+
+### メソッド
+
+#### add()
+
+```ts
+add(path: string, files: string[]): Promise<void>
+```
+
+次のコミットのために指定されたファイルをステージングします。コマンドラインで'git add'を実行するのと同様です。
+
+**パラメータ**:
+
+- `path` _string_ - Gitリポジトリルートへのパス。相対パスはユーザーのルートディレクトリを基準に解決されます。
+- `files` _string\[\]_ - ステージングするファイルパスまたはディレクトリのリスト。リポジトリルートからの相対パス
+
+
+**戻り値**:
+
+- `Promise<void>`
+
+**例:**
+
+```ts
+// 単一ファイルをステージング
+await git.add('workspace/repo', ['file.txt']);
+```
+
+```ts
+// リポジトリ全体をステージング
+await git.add('workspace/repo', ['.']);
+```
+
+***
+
+#### branches()
+
+```ts
+branches(path: string): Promise<ListBranchResponse>
+```
+
+リポジトリ内のブランチを一覧表示します。
+
+**パラメータ**:
+
+- `path` _string_ - Gitリポジトリルートへのパス。相対パスはユーザーのルートディレクトリを基準に解決されます。
+
+
+**戻り値**:
+
+- `Promise<ListBranchResponse>` - リポジトリ内のブランチのリスト
+
+**例:**
+
+```ts
+const response = await git.branches('workspace/repo');
+console.log(`ブランチ: ${response.branches}`);
+```
+
+***
+
+#### checkoutBranch()
+
+```ts
+checkoutBranch(path: string, branch: string): Promise<void>
+```
+
+リポジトリ内のブランチをチェックアウトします。
+
+**パラメータ**:
+
+- `path` _string_ - Gitリポジトリルートへのパス。相対パスはユーザーのルートディレクトリを基準に解決されます。
+- `branch` _string_ - チェックアウトするブランチの名前
+
+
+**戻り値**:
+
+- `Promise<void>`
+
+**例:**
+
+```ts
+await git.checkoutBranch('workspace/repo', 'new-feature');
+```
+
+***
+
+#### clone()
+
+```ts
+clone(
+   url: string, 
+   path: string, 
+   branch?: string, 
+   commitId?: string, 
+   username?: string, 
+password?: string): Promise<void>
+```
+
+指定されたパスにGitリポジトリをクローンします。特定のブランチやコミットのクローンをサポートし、認証情報が提供されている場合はリモートリポジトリで認証できます。
+
+**パラメータ**:
+
+- `url` _string_ - クローン元のリポジトリURL
+- `path` _string_ - リポジトリをクローンするパス。相対パスはユーザーのルートディレクトリを基準に解決されます。
+- `branch?` _string_ - クローンする特定のブランチ。指定されていない場合は、デフォルトブランチをクローンします
+- `commitId?` _string_ - クローンする特定のコミット。指定された場合、リポジトリはこのコミットでdetached HEADの状態になります
+- `username?` _string_ - 認証用のGitユーザー名
+- `password?` _string_ - 認証用のGitパスワードまたはトークン
+
+
+**戻り値**:
+
+- `Promise<void>`
+
+**例:**
+
+```ts
+// デフォルトブランチをクローン
+await git.clone(
+  'https://github.com/user/repo.git',
+  'workspace/repo'
+);
+```
+
+```ts
+// 認証付きで特定のブランチをクローン
+await git.clone(
+  'https://github.com/user/private-repo.git',
+  'workspace/private',
+  branch='develop',
+  username='user',
+  password='token'
+);
+```
+
+```ts
+// 特定のコミットをクローン
+await git.clone(
+  'https://github.com/user/repo.git',
+  'workspace/repo-old',
+  commitId='abc123'
+);
+```
+
+***
+
+#### commit()
+
+```ts
+commit(
+   path: string, 
+   message: string, 
+   author: string, 
+email: string): Promise<GitCommitResponse>
+```
+
+ステージングされた変更をコミットします。
+
+**パラメータ**:
+
+- `path` _string_ - Gitリポジトリルートへのパス。相対パスはユーザーのルートディレクトリを基準に解決されます。
+- `message` _string_ - 変更を説明するコミットメッセージ
+- `author` _string_ - コミット作成者の名前
+- `email` _string_ - コミット作成者のメールアドレス
+
+
+**戻り値**:
+
+- `Promise<GitCommitResponse>`
+
+**例:**
+
+```ts
+// 変更をステージングしてコミット
+await git.add('workspace/repo', ['README.md']);
+await git.commit(
+  'workspace/repo',
+  'ドキュメントを更新',
+  'John Doe',
+  'john@example.com'
+);
+```
+
+***
+
+#### createBranch()
+
+```ts
+createBranch(path: string, name: string): Promise<void>
+```
+
+リポジトリにブランチを作成します。
+
+**パラメータ**:
+
+- `path` _string_ - Gitリポジトリルートへのパス。相対パスはユーザーの
+    ルートディレクトリを基準に解決されます。
+- `name` _string_ - 作成する新しいブランチの名前
+
+
+**戻り値**:
+
+- `Promise<void>`
+
+**例:**
+
+```ts
+await git.createBranch('workspace/repo', 'new-feature');
+```
+
+***
+
+#### deleteBranch()
+
+```ts
+deleteBranch(path: string, name: string): Promise<void>
+```
+
+リポジトリのブランチを削除します。
+
+**パラメータ**:
+
+- `path` _string_ - Gitリポジトリルートへのパス。相対パスはユーザーの
+    ルートディレクトリを基準に解決されます。
+- `name` _string_ - 削除するブランチの名前
+
+
+**戻り値**:
+
+- `Promise<void>`
+
+**例:**
+
+```ts
+await git.deleteBranch('workspace/repo', 'new-feature');
+```
+
+***
+
+#### pull()
+
+```ts
+pull(
+   path: string, 
+   username?: string, 
+password?: string): Promise<void>
+```
+
+リモートリポジトリから変更をプルします。
+
+**パラメータ**:
+
+- `path` _string_ - Gitリポジトリルートへのパス。相対パスはユーザーの
+    ルートディレクトリを基準に解決されます。
+- `username?` _string_ - 認証用のGitユーザー名
+- `password?` _string_ - 認証用のGitパスワードまたはトークン
+
+
+**戻り値**:
+
+- `Promise<void>`
+
+**例:**
+
+```ts
+// パブリックリポジトリからプル
+await git.pull('workspace/repo');
+```
+
+```ts
+// プライベートリポジトリからプル
+await git.pull(
+  'workspace/repo',
+  'user',
+  'token'
+);
+```
+
+***
+
+#### push()
+
+```ts
+push(
+   path: string, 
+   username?: string, 
+password?: string): Promise<void>
+```
+
+ローカルの変更をリモートリポジトリにプッシュします。
+
+**パラメータ**:
+
+- `path` _string_ - Gitリポジトリルートへのパス。相対パスはユーザーの
+    ルートディレクトリを基準に解決されます。
+- `username?` _string_ - 認証用のGitユーザー名
+- `password?` _string_ - 認証用のGitパスワードまたはトークン
+
+
+**戻り値**:
+
+- `Promise<void>`
+
+**例:**
+
+```ts
+// パブリックリポジトリにプッシュ
+await git.push('workspace/repo');
+```
+
+```ts
+// プライベートリポジトリにプッシュ
+await git.push(
+  'workspace/repo',
+  'user',
+  'token'
+);
+```
+
+***
+
+#### status()
+
+```ts
+status(path: string): Promise<GitStatus>
+```
+
+Gitリポジトリの現在のステータスを取得します。
+
+**パラメータ**:
+
+- `path` _string_ - Gitリポジトリルートへのパス。相対パスはユーザーの
+    ルートディレクトリを基準に解決されます。
+
+
+**戻り値**:
+
+- `Promise<GitStatus>` - 以下を含む現在のリポジトリステータス:
+    - currentBranch: 現在のブランチ名
+    - ahead: リモートブランチより先行しているコミット数
+    - behind: リモートブランチより遅れているコミット数
+    - branchPublished: ブランチがリモートリポジトリに公開されているかどうか
+    - fileStatus: ファイルステータスのリスト
+
+**例:**
+
+```ts
+const status = await sandbox.git.status('workspace/repo');
+console.log(`現在のブランチ: ${status.currentBranch}`);
+console.log(`先行コミット数: ${status.ahead}`);
+console.log(`遅れコミット数: ${status.behind}`);
+```
+
+***
+
+
+## GitCommitResponse
+
+gitコミットからのレスポンス。
+
+**プロパティ**:
+
+- `sha` _string_ - コミットのSHA

@@ -1,12 +1,12 @@
 # Daytona Documentation v0.0.0-dev
-# Generated on: 2025-07-31
+# Generated on: 2025-08-12
 
 
 title: API Keys
 
-Daytona API keys are used to authenticate requests to the [Daytona API](/docs/tools/api).
+Daytona API keys are used to authenticate requests to the [Daytona API](/docs/en/tools/api).
 
-The [Configuration](/docs/configuration) page explains how to set the `DAYTONA_API_KEY` environment variable.
+The [Configuration](/docs/en/configuration) page explains how to set the `DAYTONA_API_KEY` environment variable.
 
 To manage your API keys, go to the [Keys](https://app.daytona.io/dashboard/keys) section in the Dashboard. Click `Create Key` to generate a new key and copy it to your clipboard.
 
@@ -27,118 +27,6 @@ Each permission includes fine-grained scopes:
 - `delete:*` for deleting resources  
 
 Example: `write:sandboxes`, `delete:sandboxes`
-
-title: Audit Logs
-description: View and monitor all user actions across your Daytona organization.
-
-Daytona Audit Logs provide a detailed record of user and system activity across your organization. Use this feature to track sandbox lifecycle events, user access, system changes, and more.
-
-You can access Audit Logs from the [Dashboard](https://app.daytona.io/dashboard/audit-logs).
-
-## Prerequisites
-
-Audit logs are available to:
-- **Admins** - Full access to all audit logs
-- **Members** - Access only if they have audit log permissions
-
-Contact your organization admin if you cannot access audit logs.
-
-## Real-Time Updates
-
-Enable the **Real-Time Updates** toggle in the top-right corner of the Audit Logs page to automatically refresh logs as new events occur.
-
-## Log Structure
-
-Each log entry includes the following columns:
-
-| Field     | Description                            |
-|---------- |----------------------------------------|
-| **Time**  | Timestamp of when the action occurred (UTC)  |
-| **User**  | Email of the user who performed action  |
-| **Action**| Operation executed                      |
-| **Target**| Resource type affected                  |
-| **Outcome**| Result status code and message         |
-
-### Example
-
-```text
-Time:       5h ago (7/31/2025, 8:15:27 AM)
-User:       janedoe@acme.com
-Action:     create
-Target:     sandbox (ID: 10f249ad-...)
-Outcome:    Success (200)
-```
-
-## Use Cases
-
-- **Security audits**: Monitor for unauthorized access or sandbox misuse
-- **Debugging**: Understand sandbox lifecycle issues (e.g. failed starts)
-- **Compliance Export**: Export logs for internal or external audits (Coming soon)
-
-## Actions
-
-Below is the complete list of actions logged by Daytona:
-
-```text
-create, read, update, delete, login,
-set_default, update_role, update_assigned_roles, update_quota,
-suspend, unsuspend, accept, decline,
-link_account, unlink_account, leave_organization,
-regenerate_key_pair, update_scheduling,
-start, stop, replace_labels, create_backup,
-update_public_status, set_auto_stop_interval,
-set_auto_archive_interval, set_auto_delete_interval, archive,
-get_port_preview_url, toggle_state, set_general_status, activate,
-update_network_settings,
-toolbox_delete_file, toolbox_download_file, toolbox_create_folder,
-toolbox_move_file, toolbox_set_file_permissions, toolbox_replace_in_files,
-toolbox_upload_file, toolbox_bulk_upload_files,
-toolbox_git_add_files, toolbox_git_create_branch, toolbox_git_delete_branch,
-toolbox_git_clone_repository, toolbox_git_commit_changes,
-toolbox_git_pull_changes, toolbox_git_push_changes,
-toolbox_git_checkout_branch, toolbox_execute_command,
-toolbox_create_session, toolbox_session_execute_command,
-toolbox_delete_session, toolbox_computer_use_start,
-toolbox_computer_use_stop, toolbox_computer_use_restart_process
-```
-
-## Targets
-
-Each action targets a specific resource type. Possible targets include:
-
-```text
-api_key, organization, organization_invitation,
-organization_role, organization_user, docker_registry,
-runner, sandbox, snapshot, user, volume
-```
-
-## Outcomes
-
-The outcome field indicates the result of the action. Statuses follow standard HTTP semantics:
-
-| Outcome | Description |
-|---------|-------------|
-| **Info** | Informational (1xx codes) |
-| **Success** | Action succeeded (2xx codes) |
-| **Redirect** | Redirects (3xx codes) |
-| **Error** | Client/server error (4xx/5xx) |
-
-Example errors may include:
-
-- `400` – Sandbox is not started
-- `403` – Unauthorized
-- `500` – Internal error
-
-{/* ## Filtering & Pagination
-
-You can filter and search logs by:
-
-- Action type
-- Target resource
-- Outcome status
-- User email
-
-Use the page size selector to change how many results are shown per page. */}
 
 title: Billing
 
@@ -265,7 +153,7 @@ description: Use Daytona to run AI-generated code for data analysis and visualiz
 import { TabItem, Tabs } from '@astrojs/starlight/components'
 import { Image } from 'astro:assets'
 
-import chartImage from '../../assets/docs/images/chart-0.png'
+import chartImage from '../../../assets/docs/images/chart-0.png'
 
 You can use Daytona Sandbox to run AI-generated code to analyze data. Here's how the AI data analysis workflow typically looks:
 
@@ -777,7 +665,7 @@ The declarative builder system supports two primary workflows:
 1. **Dynamic Images**: Build images with varying dependencies _on demand_ when creating Sandboxes
 2. **Pre-built Snapshots**: Create and register _ready-to-use_ Snapshots that can be shared across multiple Sandboxes
 
-It provides the following capabilities. For a complete API reference and method signatures, check the [Python](/docs/python-sdk/common/image) and [TypeScript](/docs/typescript-sdk/image) SDK references.
+It provides the following capabilities. For a complete API reference and method signatures, check the [Python](/docs/en/python-sdk/common/image) and [TypeScript](/docs/en/typescript-sdk/image) SDK references.
 
 ### Base Image Selection
 
@@ -802,7 +690,7 @@ It provides the following capabilities. For a complete API reference and method 
 - **Shell command execution** during the image build process
 - **Container runtime settings** including an entrypoint and default commands
 
-For detailed method signatures and usage examples, refer to the [Python](/docs/python-sdk/common/image) and [TypeScript](/docs/typescript-sdk/image) SDK references.
+For detailed method signatures and usage examples, refer to the [Python](/docs/en/python-sdk/common/image) and [TypeScript](/docs/en/typescript-sdk/image) SDK references.
 
 ## Dynamic Image Building
 
@@ -1230,11 +1118,11 @@ title: Getting Started
 
 import { TabItem, Tabs } from '@astrojs/starlight/components'
 
-The Daytona SDK provides official [Python](/docs/python-sdk) and [TypeScript](/docs/typescript-sdk) interfaces for interacting with Daytona, enabling you to programmatically manage development environments and execute code. [Python SDK](/docs/python-sdk) supports both sync and async programming models where async classes are prefixed with `Async`.
+The Daytona SDK provides official [Python](/docs/en/python-sdk) and [TypeScript](/docs/en/typescript-sdk) interfaces for interacting with Daytona, enabling you to programmatically manage development environments and execute code. [Python SDK](/docs/en/python-sdk) supports both sync and async programming models where async classes are prefixed with `Async`.
 
 Follow the step by step guide to create and run your first Daytona Sandbox for an AI Agent.
 
-For steps on additional configuration, including setting environmnent variables as well as accessing experimental features on our staging deployment, visit [Configuration](/docs/configuration).
+For steps on additional configuration, including setting environmnent variables as well as accessing experimental features on our staging deployment, visit [Configuration](/docs/en/configuration).
 
 ## Install the Daytona SDK
 
@@ -1445,10 +1333,10 @@ main().catch(error => console.error("Error:", error));
 ```
 
 
-Need to access this endpoint programmatically? Learn more about [Preview & Authentication](/docs/preview-and-authentication).
+Need to access this endpoint programmatically? Learn more about [Preview & Authentication](/docs/en/preview-and-authentication).
 
 :::tip
-You can access the Sandbox [Web Terminal](/docs/web-terminal) by printing out the preview URL for port `22222` or by simply going to Dashboard -> Sandboxes and clicking on the Terminal input sign.
+You can access the Sandbox [Web Terminal](/docs/en/web-terminal) by printing out the preview URL for port `22222` or by simply going to Dashboard -> Sandboxes and clicking on the Terminal input sign.
 :::
 
 ## Connect to an LLM
@@ -1621,7 +1509,7 @@ import { nodePolyfills } from 'vite-plugin-node-polyfills'
 
 ## Setting up the Daytona CLI
 
-If you want to use [images from your local device](/docs/snapshots#using-a-local-image) or simply prefer managing your Sandboxes using the command line interface, install the Daytona CLI by running:
+If you want to use [images from your local device](/docs/en/snapshots#using-a-local-image) or simply prefer managing your Sandboxes using the command line interface, install the Daytona CLI by running:
 
 ```bash
 brew install daytonaio/cli/daytona
@@ -1848,7 +1736,7 @@ enabling you to programmatically manage development environments and execute cod
 
 ### Quick Start
 
-Run your first line of code in a Daytona Sandbox. Use our [LLMs context files](/docs/getting-started#additional-examples) for faster development with AI assistants.
+Run your first line of code in a Daytona Sandbox. Use our [LLMs context files](/docs/en/getting-started#additional-examples) for faster development with AI assistants.
 
 #### 1. Get Your API Key
 
@@ -2855,7 +2743,7 @@ Daytona is currently available in the following regions:
 - United States (US)
 - Europe (EU)
 
-You can select the region during the Daytona [configuration](/docs/configuration) step.
+You can select the region during the Daytona [configuration](/docs/en/configuration) step.
 
 ```python
 from daytona import Daytona, DaytonaConfig
@@ -2893,11 +2781,11 @@ By default, sandboxes auto-stop after `15 minutes` of inactivity and auto-archiv
 
 ## Creating Sandboxes
 
-The Daytona SDK provides an option to create Sandboxes with default or custom configurations. You can specify the language, [Snapshot](/docs/snapshots), resources, environment variables, and volumes for the Sandbox.
+The Daytona SDK provides an option to create Sandboxes with default or custom configurations. You can specify the language, [Snapshot](/docs/en/snapshots), resources, environment variables, and volumes for the Sandbox.
 Running Sandboxes utilize CPU, memory, and disk storage. Every resource is charged per second of usage.
 
 :::tip
-If you want to prolong the auto-stop interval, you can [set the auto-stop interval parameter](/docs/sandbox-management#auto-stop-interval) when creating a Sandbox.
+If you want to prolong the auto-stop interval, you can [set the auto-stop interval parameter](/docs/en/sandbox-management#auto-stop-interval) when creating a Sandbox.
 :::
 
 ### Basic Sandbox Creation
@@ -2941,7 +2829,7 @@ const sandbox = await daytona.create({ labels: { SOME_LABEL: 'my-label' } });
 ```
 
 
-When Sandboxes are not actively used, it is recommended that they be stopped. This can be done manually [using the stop command](/docs/sandbox-management#stop-and-start-sandbox) or automatically by [setting the auto-stop interval](/docs/sandbox-management#auto-stop-and-auto-archive).
+When Sandboxes are not actively used, it is recommended that they be stopped. This can be done manually [using the stop command](/docs/en/sandbox-management#stop-and-start-sandbox) or automatically by [setting the auto-stop interval](/docs/en/sandbox-management#auto-stop-and-auto-archive).
 
 :::note
 Daytona keeps a pool of warm Sandboxes using default Snapshots.  
@@ -3036,7 +2924,7 @@ console.log(sandbox.state)
 ```
 
 
-To get the preview URL for a specific port, check out [Preview & Authentication](/docs/preview-and-authentication).
+To get the preview URL for a specific port, check out [Preview & Authentication](/docs/en/preview-and-authentication).
 
 ## Stop and Start Sandbox
 
@@ -3114,7 +3002,7 @@ await sandbox.delete();
 
 
 :::tip
-Check out the [Daytona CLI](/docs/getting-started#setting-up-the-daytona-cli) if you prefer managing Sandboxes through the terminal:
+Check out the [Daytona CLI](/docs/en/getting-started#setting-up-the-daytona-cli) if you prefer managing Sandboxes through the terminal:
 
 ```bash
 daytona sandbox list
@@ -3442,7 +3330,7 @@ To use a private Docker Hub image, you'll need to [add a Container Registry](/do
 
 ### Using a Local Image
 
-In order to avoid having to manually set up a private container registry and push your image there, the [Daytona CLI](/docs/getting-started#setting-up-the-daytona-cli) allows you to create a Snapshot from your local image or from a local Dockerfile and use it in your Sandboxes.
+In order to avoid having to manually set up a private container registry and push your image there, the [Daytona CLI](/docs/en/getting-started#setting-up-the-daytona-cli) allows you to create a Snapshot from your local image or from a local Dockerfile and use it in your Sandboxes.
 
 After running `docker images` and ensuring the image and tag you want to use is available use the `daytona snapshot push <your_local_docker_image>` command to create a Snapshot and push it to Daytona, e.g.:
 
@@ -3459,10 +3347,10 @@ For example `daytona snapshot push custom-alpine:3.21 --name alpine-minimal --cp
 :::note
 Daytona expects the local image to be built for AMD64 architecture. Therefore, the `--platform=linux/amd64` flag is required when building the Docker image if your machine is running on a different architecture.
 
-For more information, see the [CLI documentation](/docs/tools/cli#daytona-snapshot-push).
+For more information, see the [CLI documentation](/docs/en/tools/cli#daytona-snapshot-push).
 :::
 
-If you haven't built the desired image yet, and have a Dockerfile ready, you can use the Declarative Builder in our SDK - read more about it [here](/docs/getting-started#declarative-builder).
+If you haven't built the desired image yet, and have a Dockerfile ready, you can use the Declarative Builder in our SDK - read more about it [here](/docs/en/getting-started#declarative-builder).
 
 Alternatively, to do it through the CLI, use the `--dockerfile` flag under `create` to pass the path to the Dockerfile you want to use and Daytona will build the Snapshot for you:
 
@@ -3529,7 +3417,7 @@ sidebar:
   label: Daytona CLI Reference
 
 
-The `daytona` command-line tool provides access to Daytona's core features including managing Snapshots and the lifecycle of Daytona Sandboxes. View the installation instructions by clicking [here](/docs/getting-started#setting-up-the-daytona-cli).
+The `daytona` command-line tool provides access to Daytona's core features including managing Snapshots and the lifecycle of Daytona Sandboxes. View the installation instructions by clicking [here](/docs/en/getting-started#setting-up-the-daytona-cli).
 
 This reference lists all commands supported by the `daytona` command-line tool complete with a description of their behaviour, and any supported flags.
 You can access this documentation on a per-command basis by appending the `--help`/`-h` flag when invoking `daytona`.

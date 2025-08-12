@@ -95,7 +95,7 @@ const image = Image.debianSlim('3.12')
 #### fromDockerfile()
 
 ```ts
-static fromDockerfile(path: string): Image
+static fromDockerfile(path: string): Promise<Image>
 ```
 
 Creates an Image from an existing Dockerfile.
@@ -107,7 +107,7 @@ Creates an Image from an existing Dockerfile.
 
 **Returns**:
 
-- `Image` - The Image instance.
+- `Promise<Image>` - The Image instance.
 
 **Example:**
 
@@ -120,7 +120,7 @@ const image = Image.fromDockerfile('Dockerfile')
 #### addLocalDir()
 
 ```ts
-addLocalDir(localPath: string, remotePath: string): Image
+addLocalDir(localPath: string, remotePath: string): Promise<Image>
 ```
 
 Adds a local directory to the image.
@@ -133,7 +133,7 @@ Adds a local directory to the image.
 
 **Returns**:
 
-- `Image` - The Image instance.
+- `Promise<Image>` - The Image instance.
 
 **Example:**
 
@@ -148,7 +148,7 @@ const image = Image
 #### addLocalFile()
 
 ```ts
-addLocalFile(localPath: string, remotePath: string): Image
+addLocalFile(localPath: string, remotePath: string): Promise<Image>
 ```
 
 Adds a local file to the image.
@@ -161,7 +161,7 @@ Adds a local file to the image.
 
 **Returns**:
 
-- `Image` - The Image instance.
+- `Promise<Image>` - The Image instance.
 
 **Example:**
 
@@ -203,7 +203,7 @@ const image = Image
 #### dockerfileCommands()
 
 ```ts
-dockerfileCommands(dockerfileCommands: string[], contextDir?: string): Image
+dockerfileCommands(dockerfileCommands: string[], contextDir?: string): Promise<Image>
 ```
 
 Extends an image with arbitrary Dockerfile-like commands.
@@ -216,7 +216,7 @@ Extends an image with arbitrary Dockerfile-like commands.
 
 **Returns**:
 
-- `Image` - The Image instance.
+- `Promise<Image>` - The Image instance.
 
 **Example:**
 
@@ -311,7 +311,7 @@ const image = Image.debianSlim('3.12').pipInstall('numpy', { findLinks: ['https:
 #### pipInstallFromPyproject()
 
 ```ts
-pipInstallFromPyproject(pyprojectToml: string, options?: PyprojectOptions): Image
+pipInstallFromPyproject(pyprojectToml: string, options?: PyprojectOptions): Promise<Image>
 ```
 
 Installs dependencies from a pyproject.toml file.
@@ -324,7 +324,7 @@ Installs dependencies from a pyproject.toml file.
 
 **Returns**:
 
-- `Image` - The Image instance.
+- `Promise<Image>` - The Image instance.
 
 **Example:**
 
@@ -338,7 +338,7 @@ image.pipInstallFromPyproject('pyproject.toml', { optionalDependencies: ['dev'] 
 #### pipInstallFromRequirements()
 
 ```ts
-pipInstallFromRequirements(requirementsTxt: string, options?: PipInstallOptions): Image
+pipInstallFromRequirements(requirementsTxt: string, options?: PipInstallOptions): Promise<Image>
 ```
 
 Installs dependencies from a requirements.txt file.
@@ -351,7 +351,7 @@ Installs dependencies from a requirements.txt file.
 
 **Returns**:
 
-- `Image` - The Image instance.
+- `Promise<Image>` - The Image instance.
 
 **Example:**
 

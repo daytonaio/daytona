@@ -6,6 +6,9 @@ import { defineConfig } from 'astro/config'
 import fs from 'node:fs'
 import { loadEnv } from 'vite'
 
+import config from './gt.config.json'
+import { generateI18nConfig } from './src/i18n/generateI18nConfig'
+
 const { PUBLIC_WEB_URL } = loadEnv(import.meta.env.MODE, process.cwd(), '')
 
 const jsonDarkString = fs.readFileSync(
@@ -60,8 +63,14 @@ export default defineConfig({
         minSyntaxHighlightingColorContrast: 3.0,
         themes: [myThemeDark, myThemeLight],
       },
+      ...generateI18nConfig(config),
     }),
   ],
+  i18n: {
+    locales: config.locales,
+    defaultLocale: config.defaultLocale,
+  },
+  experimental: { contentLayer: true },
   output: 'hybrid',
   adapter: node({
     mode: 'middleware',

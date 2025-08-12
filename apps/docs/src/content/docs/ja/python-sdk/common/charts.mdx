@@ -1,0 +1,205 @@
+---
+title: "チャート"
+hideTitleOnPage: true
+---
+
+## Chart
+
+```python
+class Chart()
+```
+
+matplotlibからのメタデータを持つチャートを表します。
+
+**属性**:
+
+- `type` _ChartType_ - チャートのタイプ
+- `title` _str_ - チャートのタイトル
+- `elements` _List[Any]_ - チャートの要素
+- `png` _Optional[str]_ - base64でエンコードされたチャートのPNG表現
+
+
+## ChartType
+
+```python
+class ChartType(str, Enum)
+```
+
+チャートタイプ
+
+**Enum Members**:
+    - `LINE` ("line")
+    - `SCATTER` ("scatter")
+    - `BAR` ("bar")
+    - `PIE` ("pie")
+    - `BOX_AND_WHISKER` ("box_and_whisker")
+    - `COMPOSITE_CHART` ("composite_chart")
+    - `UNKNOWN` ("unknown")
+
+## Chart2D
+
+```python
+class Chart2D(Chart)
+```
+
+メタデータを持つ2Dチャートを表します。
+
+**属性**:
+
+- `x_label` _Optional[str]_ - x軸のラベル
+- `y_label` _Optional[str]_ - y軸のラベル
+
+## PointData
+
+```python
+class PointData()
+```
+
+2Dチャートの点を表します。
+
+**属性**:
+
+- `label` _str_ - 点のラベル
+- `points` _List[Tuple[Union[str, float], Union[str, float]]]_ - チャートの点
+
+## PointChart
+
+```python
+class PointChart(Chart2D)
+```
+
+メタデータを持つポイントチャートを表します。
+
+**属性**:
+
+- `x_ticks` _List[Union[str, float]]_ - x軸の目盛り
+- `x_tick_labels` _List[str]_ - x軸のラベル
+- `x_scale` _str_ - x軸のスケール
+- `y_ticks` _List[Union[str, float]]_ - y軸の目盛り
+- `y_tick_labels` _List[str]_ - y軸のラベル
+- `y_scale` _str_ - y軸のスケール
+- `elements` _List[PointData]_ - チャートのポイント
+
+## LineChart
+
+```python
+class LineChart(PointChart)
+```
+
+メタデータを持つ折れ線グラフを表します。
+
+**属性**:
+
+- `type` _ChartType_ - チャートの種類
+
+## ScatterChart
+
+```python
+class ScatterChart(PointChart)
+```
+
+メタデータを持つ散布図を表します。
+
+**属性**:
+
+- `type` _ChartType_ - チャートの種類
+
+## BarData
+
+```python
+class BarData()
+```
+
+棒グラフの棒を表します。
+
+**属性**:
+
+- `label` _str_ - 棒のラベル
+- `group` _str_ - 棒のグループ
+- `value` _str_ - 棒の値
+
+## BarChart
+
+```python
+class BarChart(Chart2D)
+```
+
+メタデータを持つ棒グラフを表します。
+
+**属性**:
+
+- `type` _ChartType_ - チャートの種類
+- `elements` _List[BarData]_ - チャートの棒
+
+## PieData
+
+```python
+class PieData()
+```
+
+円グラフの円スライスを表します。
+
+**属性**:
+
+- `label` _str_ - 円スライスのラベル
+- `angle` _float_ - 円スライスの角度
+- `radius` _float_ - 円スライスの半径
+- `autopct` _float_ - 円スライスのautopct値
+
+## PieChart
+
+```python
+class PieChart(Chart)
+```
+
+メタデータを持つ円グラフを表します。
+
+**属性**:
+
+- `type` _ChartType_ - チャートの種類
+- `elements` _List[PieData]_ - チャートの円グラフスライス
+
+## BoxAndWhiskerData
+
+```python
+class BoxAndWhiskerData()
+```
+
+ボックスプロット（箱ひげ図）チャートにおけるボックスとひげを表します。
+
+**属性**:
+
+- `label` _str_ - ボックスとひげのラベル
+- `min` _float_ - ボックスとひげの最小値
+- `first_quartile` _float_ - ボックスとひげの第1四分位数
+- `median` _float_ - ボックスとひげの中央値
+- `third_quartile` _float_ - ボックスとひげの第3四分位数
+- `max` _float_ - ボックスとひげの最大値
+- `outliers` _List[float]_ - ボックスとひげの外れ値
+
+## BoxAndWhiskerChart
+
+```python
+class BoxAndWhiskerChart(Chart2D)
+```
+
+メタデータを持つボックスアンドウィスカーチャートを表します。
+
+**属性**:
+
+- `type` _ChartType_ - チャートのタイプ
+- `elements` _List[BoxAndWhiskerData]_ - チャートのボックスとウィスカー
+
+## CompositeChart
+
+```python
+class CompositeChart(Chart)
+```
+
+メタデータを持つ複合チャートを表します。複合チャートは複数のチャート（サブプロット）を含むチャートです。
+
+**属性**:
+
+- `type` _ChartType_ - チャートのタイプ
+- `elements` _List[Chart]_ - 複合チャートのチャート（サブプロット）
+

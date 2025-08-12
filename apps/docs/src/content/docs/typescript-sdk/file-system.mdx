@@ -15,6 +15,7 @@ Provides file system operations within a Sandbox.
 ```ts
 new FileSystem(
    sandboxId: string, 
+   clientConfig: Configuration, 
    toolboxApi: ToolboxApi, 
    getRootDir: () => Promise<string>): FileSystem
 ```
@@ -22,6 +23,7 @@ new FileSystem(
 **Parameters**:
 
 - `sandboxId` _string_
+- `clientConfig` _Configuration_
 - `toolboxApi` _ToolboxApi_
 - `getRootDir` _\(\) =\> Promise\<string\>_
 

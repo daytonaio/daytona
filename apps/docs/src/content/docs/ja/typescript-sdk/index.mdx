@@ -1,0 +1,64 @@
+---
+title: TypeScript SDK リファレンス
+description: TypeScript SDKを使用してDaytona Sandboxesと連携する
+next: /docs/typescript-sdk/daytona
+---
+
+Daytona TypeScript SDKは、Daytona Sandboxesとプログラム的に連携するための強力なインターフェースを提供します。
+
+## インストール
+
+npmを使用してDaytona TypeScript SDKをインストールします：
+
+```bash
+npm install @daytonaio/sdk
+```
+
+またはyarnを使用：
+
+```bash
+yarn add @daytonaio/sdk
+```
+
+## はじめに
+
+Daytona TypeScript SDKを使い始めるのに役立つ簡単な例をご紹介します：
+
+```typescript
+import { Daytona } from '@daytonaio/sdk'
+
+async function main() {
+  // SDKを初期化（デフォルトで環境変数を使用）
+  const daytona = new Daytona()
+
+  // 新しいサンドボックスを作成
+  const sandbox = await daytona.create({
+    language: 'typescript',
+    envVars: { NODE_ENV: 'development' },
+  })
+
+  // コマンドを実行
+  const response = await sandbox.process.executeCommand('echo "Hello, World!"')
+  console.log(response.result)
+}
+
+main().catch(console.error)
+```
+
+## 設定
+
+SDKは環境変数を使用するか、コンストラクタにオプションを渡すことで設定できます：
+
+```typescript
+import { Daytona } from '@daytonaio/sdk';
+
+// 環境変数を使用（DAYTONA_API_KEY、DAYTONA_API_URL、DAYTONA_TARGET）
+const daytona = new Daytona();
+
+// 明示的な設定を使用
+const daytona = new Daytona({
+  apiKey: 'your-api-key',
+  apiUrl: 'https://app.daytona.io/api',
+  target: 'us'
+});
+```
