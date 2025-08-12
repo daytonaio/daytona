@@ -23,7 +23,7 @@ func (s *SessionController) GetSessionCommandLogs(c *gin.Context) {
 	cmdId := c.Param("commandId")
 
 	session, ok := sessions[sessionId]
-	if !ok || session.deleted {
+	if !ok {
 		c.AbortWithError(http.StatusNotFound, errors.New("session not found"))
 		return
 	}
