@@ -279,7 +279,7 @@ export class SandboxManager {
             processedCount++
 
             // Limit concurrent processing to avoid overwhelming the system
-            if (pendingProcesses.length >= 10) {
+            if (pendingProcesses.length >= 100) {
               stream.pause()
               Promise.all(pendingProcesses.splice(0, pendingProcesses.length))
                 .then(() => stream.resume())
