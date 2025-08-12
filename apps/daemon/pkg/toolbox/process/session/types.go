@@ -38,7 +38,6 @@ type session struct {
 	commands    map[string]*Command
 	ctx         context.Context
 	cancel      context.CancelFunc
-	deleted     bool
 }
 
 func (s *session) Dir(configDir string) string {
