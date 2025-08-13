@@ -219,7 +219,6 @@ export function addWebhookDocumentation(document: OpenAPIObject): OpenAPIObjectW
                         state: {
                           type: 'string',
                           enum: [
-                            'build_pending',
                             'building',
                             'pending',
                             'pulling',
@@ -275,7 +274,6 @@ export function addWebhookDocumentation(document: OpenAPIObject): OpenAPIObjectW
                             state: {
                               type: 'string',
                               enum: [
-                                'build_pending',
                                 'building',
                                 'pending',
                                 'pulling',
@@ -293,7 +291,6 @@ export function addWebhookDocumentation(document: OpenAPIObject): OpenAPIObjectW
                         oldState: {
                           type: 'string',
                           enum: [
-                            'build_pending',
                             'building',
                             'pending',
                             'pulling',
@@ -309,7 +306,6 @@ export function addWebhookDocumentation(document: OpenAPIObject): OpenAPIObjectW
                         newState: {
                           type: 'string',
                           enum: [
-                            'build_pending',
                             'building',
                             'pending',
                             'pulling',

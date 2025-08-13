@@ -144,6 +144,9 @@ class AsyncSnapshotService:
             create_snapshot_req.memory = params.resources.memory
             create_snapshot_req.disk = params.resources.disk
 
+        if params.skip_validation is not None:
+            create_snapshot_req.skip_validation = params.skip_validation
+
         created_snapshot = await self.__snapshots_api.create_snapshot(create_snapshot_req)
 
         terminal_states = [SnapshotState.ACTIVE, SnapshotState.ERROR, SnapshotState.BUILD_FAILED]
@@ -174,13 +177,13 @@ class AsyncSnapshotService:
         log_task = None
         if on_logs:
             on_logs(f"Creating snapshot {created_snapshot.name} ({created_snapshot.state})")
-            if created_snapshot.state != SnapshotState.BUILD_PENDING:
+            if created_snapshot.state != SnapshotState.PENDING:
                 log_task = asyncio.create_task(start_log_streaming())
 
         previous_state = created_snapshot.state
         while created_snapshot.state not in terminal_states:
             if on_logs and previous_state != created_snapshot.state:
-                if created_snapshot.state != SnapshotState.BUILD_PENDING and not log_task:
+                if created_snapshot.state != SnapshotState.PENDING and not log_task:
                     log_task = asyncio.create_task(start_log_streaming())
                 on_logs(f"Creating snapshot {created_snapshot.name} ({created_snapshot.state})")
                 previous_state = created_snapshot.state

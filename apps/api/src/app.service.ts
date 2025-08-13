@@ -46,6 +46,7 @@ export class AppService implements OnApplicationBootstrap, OnApplicationShutdown
     await this.initializeTransientRegistry()
     await this.initializeBackupRegistry()
     await this.initializeInternalRegistry()
+    await this.initializeBackupRegistry()
     await this.initializeDefaultSnapshot()
   }
 
@@ -204,7 +205,7 @@ Admin user created with API key: ${value}
 
     const defaultSnapshot = this.configService.getOrThrow('defaultSnapshot')
 
-    await this.snapshotService.createSnapshot(
+    await this.snapshotService.createFromPull(
       adminPersonalOrg,
       {
         name: defaultSnapshot,
