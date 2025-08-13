@@ -325,6 +325,15 @@ const getColumns = ({
       },
     },
     {
+      accessorKey: 'entrypoint',
+      header: 'Entrypoint',
+      cell: ({ row }) => {
+        const snapshot = row.original
+        const entrypoint = Array.isArray(snapshot.entrypoint) ? snapshot.entrypoint.join(' ') : ''
+        return entrypoint
+      },
+    },
+    {
       id: 'resources',
       header: 'Resources',
       cell: ({ row }) => {
