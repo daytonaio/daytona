@@ -163,7 +163,6 @@ export class SandboxService {
     if (sandbox.pending) {
       throw new SandboxError('Sandbox state change in progress')
     }
-    sandbox.pending = true
     sandbox.state = SandboxState.PENDING_ARCHIVE
     sandbox.desiredState = SandboxDesiredState.ARCHIVED
     await this.sandboxRepository.save(sandbox)
