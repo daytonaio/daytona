@@ -125,8 +125,10 @@ from daytona_api_client_async.models.update_organization_quota import UpdateOrga
 from daytona_api_client_async.models.update_organization_role import UpdateOrganizationRole
 from daytona_api_client_async.models.usage_overview import UsageOverview
 from daytona_api_client_async.models.user import User
+from daytona_api_client_async.models.user_home_dir_response import UserHomeDirResponse
 from daytona_api_client_async.models.user_public_key import UserPublicKey
 from daytona_api_client_async.models.volume_dto import VolumeDto
 from daytona_api_client_async.models.volume_state import VolumeState
 from daytona_api_client_async.models.windows_response import WindowsResponse
+from daytona_api_client_async.models.work_dir_response import WorkDirResponse
 from daytona_api_client_async.models.workspace import Workspace
