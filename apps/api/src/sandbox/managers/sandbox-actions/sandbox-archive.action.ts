@@ -17,6 +17,7 @@ import Redis from 'ioredis'
 import { RunnerAdapterFactory } from '../../runner-adapter/runnerAdapter'
 import { ToolboxService } from '../../services/toolbox.service'
 import { TypedConfigService } from '../../../config/typed-config.service'
+import { RunnerState } from '../../enums/runner-state.enum'
 
 @Injectable()
 export class SandboxArchiveAction extends SandboxAction {
@@ -34,6 +35,13 @@ export class SandboxArchiveAction extends SandboxAction {
   }
 
   async run(sandbox: Sandbox): Promise<SyncState> {
+    if (sandbox.runnerId !== null) {
+      const runner = await this.runnerService.findOne(sandbox.runnerId)
+      if (runner.state !== RunnerState.READY) {
+        return DONT_SYNC_AGAIN
+      }
+    }
+
     const lockKey = 'archive-lock-' + sandbox.runnerId
     if (!(await this.redisLockProvider.lock(lockKey, 10))) {
       return DONT_SYNC_AGAIN
