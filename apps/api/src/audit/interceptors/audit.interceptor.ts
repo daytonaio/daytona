@@ -15,19 +15,15 @@ import {
   HttpStatus,
 } from '@nestjs/common'
 import { Reflector } from '@nestjs/core'
-import { Request, Response } from 'express'
+import { Response } from 'express'
 import { Observable, Subscriber, firstValueFrom } from 'rxjs'
 import { AUDIT_CONTEXT_KEY, AuditContext } from '../decorators/audit.decorator'
 import { AuditLog, AuditLogMetadata } from '../entities/audit-log.entity'
 import { AuditAction } from '../enums/audit-action.enum'
 import { AuditService } from '../services/audit.service'
-import { AuthContext } from '../../common/interfaces/auth-context.interface'
 import { CustomHeaders } from '../../common/constants/header.constants'
 import { TypedConfigService } from '../../config/typed-config.service'
-
-type RequestWithUser = Request & {
-  user?: AuthContext
-}
+import { RequestWithUser } from '../../common/types/request.types'
 
 @Injectable()
 export class AuditInterceptor implements NestInterceptor {
