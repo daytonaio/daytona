@@ -43,6 +43,7 @@ import { TypedConfigService } from '../../config/typed-config.service'
 import { WarmPool } from '../entities/warm-pool.entity'
 import { SandboxDto } from '../dto/sandbox.dto'
 import { isValidUuid } from '../../common/utils/uuid'
+import { VolumeService } from './volume.service'
 
 const DEFAULT_CPU = 1
 const DEFAULT_MEMORY = 1
@@ -63,6 +64,7 @@ export class SandboxService {
     @InjectRepository(BuildInfo)
     private readonly buildInfoRepository: Repository<BuildInfo>,
     private readonly runnerService: RunnerService,
+    private readonly volumeService: VolumeService,
     private readonly configService: TypedConfigService,
     private readonly warmPoolService: SandboxWarmPoolService,
     private readonly eventEmitter: EventEmitter2,
@@ -293,6 +295,9 @@ export class SandboxService {
       if (warmPoolSandbox) {
         return await this.assignWarmPoolSandbox(warmPoolSandbox, createSandboxDto, organization.id)
       }
+    } else {
+      const volumeIdOrNames = createSandboxDto.volumes.map((v) => v.volumeId)
+      await this.volumeService.validateVolumes(organization.id, volumeIdOrNames)
     }
 
     const runner = await this.runnerService.getRandomAvailableRunner({
@@ -385,16 +390,17 @@ export class SandboxService {
 
     await this.validateOrganizationQuotas(organization, cpu, mem, disk)
 
-    const sandbox = new Sandbox()
+    if (createSandboxDto.volumes && createSandboxDto.volumes.length > 0) {
+      const volumeIdOrNames = createSandboxDto.volumes.map((v) => v.volumeId)
+      await this.volumeService.validateVolumes(organization.id, volumeIdOrNames)
+    }
 
-    // sandbox = from
+    const sandbox = new Sandbox()
 
     sandbox.organizationId = organization.id
 
-    //  TODO: make configurable
     sandbox.region = region
     sandbox.class = sandboxClass
-    //  TODO: default user should be configurable
     sandbox.osUser = createSandboxDto.user || 'daytona'
     sandbox.env = createSandboxDto.env || {}
     sandbox.labels = createSandboxDto.labels || {}
