@@ -43,7 +43,6 @@ import { RunnerService } from '../services/runner.service'
 import { SandboxState as WorkspaceState } from '../enums/sandbox-state.enum'
 import { Sandbox as WorkspaceEntity } from '../entities/sandbox.entity'
 import { ContentTypeInterceptor } from '../../common/interceptors/content-type.interceptors'
-import { Throttle } from '@nestjs/throttler'
 import { Runner } from '../entities/runner.entity'
 import { InjectRedis } from '@nestjs-modules/ioredis'
 import { Sandbox as Workspace } from '../decorators/sandbox.decorator'
@@ -133,7 +132,6 @@ export class WorkspaceController {
     description: 'The workspace has been successfully created.',
     type: WorkspaceDto,
   })
-  @Throttle({ default: { limit: 100 } })
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
   @Audit({
     action: AuditAction.CREATE,
@@ -244,7 +242,6 @@ export class WorkspaceController {
     status: 200,
     description: 'Workspace has been deleted',
   })
-  @Throttle({ default: { limit: 100 } })
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.DELETE_SANDBOXES])
   @UseGuards(WorkspaceAccessGuard)
   @Audit({
@@ -276,7 +273,6 @@ export class WorkspaceController {
     status: 200,
     description: 'Workspace has been started',
   })
-  @Throttle({ default: { limit: 100 } })
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
   @UseGuards(WorkspaceAccessGuard)
   @Audit({
@@ -307,7 +303,6 @@ export class WorkspaceController {
     status: 200,
     description: 'Workspace has been stopped',
   })
-  @Throttle({ default: { limit: 100 } })
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
   @UseGuards(WorkspaceAccessGuard)
   @Audit({
@@ -507,7 +502,6 @@ export class WorkspaceController {
     status: 200,
     description: 'Workspace has been archived',
   })
-  @Throttle({ default: { limit: 100 } })
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
   @UseGuards(WorkspaceAccessGuard)
   @Audit({
