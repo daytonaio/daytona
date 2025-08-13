@@ -25,4 +25,6 @@ models/runner-info-response-dto.ts
 models/runner-metrics.ts
 models/sandbox-info-response.ts
 models/snapshot-exists-response.ts
+models/snapshot-info-response.ts
+models/tag-image-request-dto.ts
 models/update-network-settings-dto.ts

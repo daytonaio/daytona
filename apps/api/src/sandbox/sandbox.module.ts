@@ -21,7 +21,6 @@ import { Snapshot } from './entities/snapshot.entity'
 import { SnapshotController } from './controllers/snapshot.controller'
 import { SnapshotService } from './services/snapshot.service'
 import { SnapshotManager } from './managers/snapshot.manager'
-import { DockerProvider } from './docker/docker-provider'
 import { SnapshotRunner } from './entities/snapshot-runner.entity'
 import { DockerRegistry } from '../docker-registry/entities/docker-registry.entity'
 import { SandboxSubscriber } from './subscribers/sandbox.subscriber'
@@ -82,7 +81,6 @@ import { SandboxRepository } from './repositories/sandbox.repository'
     ToolboxService,
     SnapshotService,
     SnapshotManager,
-    DockerProvider,
     SandboxSubscriber,
     RedisLockProvider,
     SnapshotSubscriber,

@@ -117,17 +117,17 @@ daytona = Daytona()
 
 # Create a Snapshot with custom resources
 daytona.snapshot.create(
-    CreateSnapshotParams(
-        name="my-snapshot",
-        image=Image.debian_slim("3.12"),
-        # All resource parameters are optional:
-        resources=Resources(
-          cpu=2,
-          memory=4,
-          disk=8,
-        ),
+  CreateSnapshotParams(
+    name="my-snapshot",
+    image=Image.debian_slim("3.12"),
+    # All resource parameters are optional:
+    resources=Resources(
+      cpu=2,
+      memory=4,
+      disk=8,
     ),
-    on_logs=print,
+  ),
+  on_logs=print,
 )
 ```
 </TabItem>
@@ -155,7 +155,6 @@ await daytona.snapshot.create(
 
 </TabItem>
 </Tabs>
-
 
 Check your available resources and limits in the [dashboard](https://app.daytona.io/dashboard/limits).
 
@@ -238,6 +237,7 @@ Docker-in-Docker Sandboxes require additional resources due to the Docker daemon
 ## Default Snapshot
 
 When a Sandbox is created with no Snapshot specified, Daytona uses a default Snapshot that includes `python`, `node`, their language servers, and several common pip packages:
+
 - `anthropic` (v0.49.0)
 - `beautifulsoup4` (v4.13.3)
 - `daytona_sdk` (v0.11.1)

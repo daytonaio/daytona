@@ -1,4 +1,4 @@
-FROM docker:28.2.2-dind-alpine3.22 AS daytona
+FROM node:22-alpine AS daytona
 
 # Install nodejs
 RUN apk --update add --no-cache nodejs=22.16.0-r2 npm bash curl
@@ -15,8 +15,6 @@ RUN yarn
 
 RUN yarn nx build api --configuration=production --nxBail=true && \
   VITE_BASE_API_URL=%DAYTONA_BASE_API_URL% yarn nx build dashboard --configuration=production --nxBail=true
-
-RUN mkdir -p /etc/docker && echo '{"insecure-registries": ["registry:6000"]}' > /etc/docker/daemon.json
 
 ENV NODE_ENV=production
 
@@ -122,4 +120,4 @@ ENV RUN_MIGRATIONS=true
 
 HEALTHCHECK CMD [ "curl", "-f", "http://localhost:3000/api/config" ]
 
-ENTRYPOINT ["sh", "-c", "dockerd-entrypoint.sh & node dist/apps/api/main.js"]
+ENTRYPOINT ["node", "dist/apps/api/main.js"]
