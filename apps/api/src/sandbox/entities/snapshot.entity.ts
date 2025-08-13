@@ -41,7 +41,7 @@ export class Snapshot {
   imageName: string
 
   @Column({ nullable: true })
-  internalName?: string
+  ref?: string
 
   @Column({
     type: 'enum',
@@ -71,11 +71,17 @@ export class Snapshot {
   @Column({ default: false })
   hideFromUsers: boolean
 
+  @Column({ default: false })
+  skipValidation: boolean
+
   @OneToMany(() => SnapshotRunner, (runner) => runner.snapshotRef)
   runners: SnapshotRunner[]
 
   @Column({ array: true, type: 'text', nullable: true })
   entrypoint?: string[]
+
+  @Column({ array: true, type: 'text', nullable: true })
+  cmd?: string[]
 
   @CreateDateColumn({
     type: 'timestamp with time zone',
@@ -98,5 +104,5 @@ export class Snapshot {
   buildInfo?: BuildInfo
 
   @Column({ nullable: true })
-  buildRunnerId?: string
+  initialRunnerId?: string
 }
