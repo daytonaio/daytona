@@ -41,7 +41,6 @@ import { RunnerService } from '../services/runner.service'
 import { SandboxState } from '../enums/sandbox-state.enum'
 import { Sandbox as SandboxEntity } from '../entities/sandbox.entity'
 import { ContentTypeInterceptor } from '../../common/interceptors/content-type.interceptors'
-import { Throttle } from '@nestjs/throttler'
 import { Runner } from '../entities/runner.entity'
 import { Sandbox } from '../decorators/sandbox.decorator'
 import { SandboxAccessGuard } from '../guards/sandbox-access.guard'
@@ -141,7 +140,6 @@ export class SandboxController {
     description: 'The sandbox has been successfully created.',
     type: SandboxDto,
   })
-  @Throttle({ default: { limit: 100 } })
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
   @Audit({
     action: AuditAction.CREATE,
@@ -249,7 +247,6 @@ export class SandboxController {
     status: 200,
     description: 'Sandbox has been deleted',
   })
-  @Throttle({ default: { limit: 100 } })
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.DELETE_SANDBOXES])
   @UseGuards(SandboxAccessGuard)
   @Audit({
@@ -281,7 +278,6 @@ export class SandboxController {
     description: 'Sandbox has been started or is being restored from archived state',
     type: SandboxDto,
   })
-  @Throttle({ default: { limit: 100 } })
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
   @UseGuards(SandboxAccessGuard)
   @Audit({
@@ -326,7 +322,6 @@ export class SandboxController {
     status: 200,
     description: 'Sandbox has been stopped',
   })
-  @Throttle({ default: { limit: 100 } })
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
   @UseGuards(SandboxAccessGuard)
   @Audit({
@@ -592,7 +587,6 @@ export class SandboxController {
     status: 200,
     description: 'Sandbox has been archived',
   })
-  @Throttle({ default: { limit: 100 } })
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
   @UseGuards(SandboxAccessGuard)
   @Audit({
