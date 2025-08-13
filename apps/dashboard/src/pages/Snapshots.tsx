@@ -24,10 +24,11 @@ import { toast } from 'sonner'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { useNotificationSocket } from '@/hooks/useNotificationSocket'
 import { Label } from '@/components/ui/label'
+import { Checkbox } from '@/components/ui/checkbox'
 import { handleApiError } from '@/lib/error-handling'
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 
-const IMAGE_NAME_REGEX = /^[a-zA-Z0-9_.\-:]+(\/[a-zA-Z0-9_.\-:]+)*$/
+const IMAGE_NAME_REGEX = /^[a-zA-Z0-9_.\-:]+(\/[a-zA-Z0-9_.\-:]+)*(@sha256:[a-f0-9]{64})?$/
 
 const Snapshots: React.FC = () => {
   const { notificationSocket } = useNotificationSocket()
@@ -51,6 +52,7 @@ const Snapshots: React.FC = () => {
   const [cpu, setCpu] = useState<number | undefined>(undefined)
   const [memory, setMemory] = useState<number | undefined>(undefined)
   const [disk, setDisk] = useState<number | undefined>(undefined)
+  const [skipValidation, setSkipValidation] = useState(false)
 
   const { selectedOrganization, authenticatedUserHasPermission } = useSelectedOrganization()
 
@@ -100,10 +102,24 @@ const Snapshots: React.FC = () => {
           if (prev.items.some((i) => i.id === snapshot.id)) {
             return prev
           }
+          // Determine where the "unused" snapshots start
+          const firstUnusedIndex = prev.items.findIndex((i) => !i.lastUsedAt)
+          if (firstUnusedIndex === -1) {
+            // No unused snapshots yet; append to the end
+            const newSnapshots = [...prev.items, snapshot]
+            const newTotal = prev.total + 1
+            return {
+              ...prev,
+              items: newSnapshots.slice(0, paginationParams.pageSize),
+              total: newTotal,
+              totalPages: Math.ceil(newTotal / paginationParams.pageSize),
+            }
+          }
 
-          // Find the insertion point - used snapshots should remain at the top
-          const insertIndex =
-            prev.items.findIndex((i) => !i.lastUsedAt && i.createdAt <= snapshot.createdAt) || prev.items.length
+          // Insert within the unused section keeping newest-first (by createdAt)
+          const unusedSection = prev.items.slice(firstUnusedIndex)
+          const relativeIndex = unusedSection.findIndex((i) => i.createdAt <= snapshot.createdAt)
+          const insertIndex = firstUnusedIndex + (relativeIndex === -1 ? unusedSection.length : relativeIndex)
 
           const newSnapshots = [...prev.items]
           newSnapshots.splice(insertIndex, 0, snapshot)
@@ -185,8 +201,21 @@ const Snapshots: React.FC = () => {
       return 'Spaces are not allowed in image names'
     }
 
-    if (!name.includes(':') || name.endsWith(':') || /:\s*$/.test(name)) {
-      return 'Image name must include a tag (e.g., ubuntu:22.04)'
+    // Check for digest format (@sha256:hash)
+    if (name.includes('@sha256:')) {
+      const [imageName, digest] = name.split('@sha256:')
+      if (!imageName || !digest || !/^[a-f0-9]{64}$/.test(digest)) {
+        return 'Invalid digest format. Must be image@sha256:64_hex_characters'
+      }
+      if (imageName.includes(':')) {
+        return 'Image name cannot contain both a tag and a digest'
+      }
+      return null
+    }
+
+    // Handle tag format (only check if no digest is present)
+    if (!name.includes('@') && (!name.includes(':') || name.endsWith(':') || /:\s*$/.test(name))) {
+      return 'Image name must include a tag (e.g., ubuntu:22.04) or digest (@sha256:...)'
     }
 
     if (name.endsWith(':latest')) {
@@ -223,13 +252,15 @@ const Snapshots: React.FC = () => {
           cpu,
           memory,
           disk,
+          skipValidation,
         },
         selectedOrganization?.id,
       )
       setShowCreateDialog(false)
       setNewSnapshotName('')
-      setNewImageName('') // Add this line to clear the image name
+      setNewImageName('')
       setNewEntrypoint('')
+      setSkipValidation(false)
       toast.success(`Creating snapshot ${newSnapshotName}`)
 
       if (paginationParams.pageIndex !== 0) {
@@ -374,6 +405,7 @@ const Snapshots: React.FC = () => {
           setCpu(undefined)
           setMemory(undefined)
           setDisk(undefined)
+          setSkipValidation(false)
         }}
       >
         <div className="mb-2 h-12 flex items-center justify-between">
@@ -428,7 +460,7 @@ const Snapshots: React.FC = () => {
                   placeholder="ubuntu:22.04"
                 />
                 <p className="text-sm text-muted-foreground mt-1 pl-1">
-                  Must include a tag (e.g., ubuntu:22.04). The tag "latest" is not allowed.
+                  Must include either a tag (e.g., ubuntu:22.04) or a digest. The tag "latest" is not allowed.
                 </p>
               </div>
               <div className="space-y-3">
@@ -490,6 +522,16 @@ const Snapshots: React.FC = () => {
                 <p className="text-sm text-muted-foreground mt-1 pl-1">
                   If not specified, default values will be used (1 vCPU, 1 GiB memory, 3 GiB storage).
                 </p>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="skip-validation"
+                  checked={skipValidation}
+                  onCheckedChange={(checked) => setSkipValidation(!!checked)}
+                />
+                <Label htmlFor="skip-validation" className="text-sm">
+                  Skip validation
+                </Label>
               </div>
             </form>
             <DialogFooter>
