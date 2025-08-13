@@ -76,4 +76,10 @@ export interface CreateSnapshot {
    * @memberof CreateSnapshot
    */
   buildInfo?: CreateBuildInfo
+  /**
+   * Whether to skip validation for the snapshot
+   * @type {boolean}
+   * @memberof CreateSnapshot
+   */
+  skipValidation?: boolean
 }
