@@ -50,6 +50,7 @@ export class SandboxStartAction extends SandboxAction {
         return this.handleRunnerSandboxUnknownStateOnDesiredStateStart(sandbox)
       }
       case SandboxState.ARCHIVED:
+      case SandboxState.PENDING_ARCHIVE:
       case SandboxState.STOPPED: {
         return this.handleRunnerSandboxStoppedOrArchivedStateOnDesiredStateStart(sandbox)
       }
