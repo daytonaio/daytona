@@ -19,6 +19,14 @@ export interface RunnerSandboxInfo {
   backupErrorReason?: string
 }
 
+export interface RunnerSnapshotInfo {
+  name: string
+  sizeGB: number
+  entrypoint: string[]
+  cmd: string[]
+  hash: string
+}
+
 export interface RunnerMetrics {
   currentAllocatedCpu?: number
   currentAllocatedDiskGiB?: number
@@ -60,8 +68,13 @@ export interface RunnerAdapter {
     registry?: DockerRegistry,
     pushToInternalRegistry?: boolean,
   ): Promise<void>
-  pullSnapshot(snapshotName: string, registry?: DockerRegistry): Promise<void>
+  pullSnapshot(
+    snapshotName: string,
+    sourceRegistry?: DockerRegistry,
+    destinationRegistry?: DockerRegistry,
+  ): Promise<void>
   snapshotExists(snapshotName: string): Promise<boolean>
+  getSnapshotInfo(snapshotName: string): Promise<RunnerSnapshotInfo>
   getSnapshotLogs(snapshotRef: string, follow: boolean): Promise<string>
 
   getSandboxDaemonVersion(sandboxId: string): Promise<string>
