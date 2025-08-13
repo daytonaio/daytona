@@ -21,7 +21,6 @@ type SnapshotState string
 
 // List of SnapshotState
 const (
-	SNAPSHOTSTATE_BUILD_PENDING      SnapshotState = "build_pending"
 	SNAPSHOTSTATE_BUILDING           SnapshotState = "building"
 	SNAPSHOTSTATE_PENDING            SnapshotState = "pending"
 	SNAPSHOTSTATE_PULLING            SnapshotState = "pulling"
@@ -36,7 +35,6 @@ const (
 
 // All allowed values of SnapshotState enum
 var AllowedSnapshotStateEnumValues = []SnapshotState{
-	"build_pending",
 	"building",
 	"pending",
 	"pulling",

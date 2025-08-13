@@ -4,7 +4,6 @@
  */
 
 export enum SnapshotState {
-  BUILD_PENDING = 'build_pending',
   BUILDING = 'building',
   PENDING = 'pending',
   PULLING = 'pulling',
