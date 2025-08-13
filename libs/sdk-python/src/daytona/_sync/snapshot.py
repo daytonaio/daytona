@@ -150,6 +150,9 @@ class SnapshotService:
             create_snapshot_req.memory = params.resources.memory
             create_snapshot_req.disk = params.resources.disk
 
+        if params.skip_validation is not None:
+            create_snapshot_req.skip_validation = params.skip_validation
+
         created_snapshot = self.__snapshots_api.create_snapshot(create_snapshot_req)
 
         terminal_states = [SnapshotState.ACTIVE, SnapshotState.ERROR, SnapshotState.BUILD_FAILED]

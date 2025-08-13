@@ -342,6 +342,38 @@ func (o *CreateSnapshot) SetBuildInfo(v CreateBuildInfo) {
 	o.BuildInfo = &v
 }
 
+// GetSkipValidation returns the SkipValidation field value if set, zero value otherwise.
+func (o *CreateSnapshot) GetSkipValidation() bool {
+	if o == nil || IsNil(o.SkipValidation) {
+		var ret bool
+		return ret
+	}
+	return *o.SkipValidation
+}
+
+// GetSkipValidationOk returns a tuple with the SkipValidation field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *CreateSnapshot) GetSkipValidationOk() (*bool, bool) {
+	if o == nil || IsNil(o.SkipValidation) {
+		return nil, false
+	}
+	return o.SkipValidation, true
+}
+
+// HasSkipValidation returns a boolean if a field has been set.
+func (o *CreateSnapshot) HasSkipValidation() bool {
+	if o != nil && !IsNil(o.SkipValidation) {
+		return true
+	}
+
+	return false
+}
+
+// SetSkipValidation gets a reference to the given bool and assigns it to the SkipValidation field.
+func (o *CreateSnapshot) SetSkipValidation(v bool) {
+	o.SkipValidation = &v
+}
+
 func (o CreateSnapshot) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
