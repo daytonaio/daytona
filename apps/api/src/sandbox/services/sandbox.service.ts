@@ -572,6 +572,7 @@ export class SandboxService {
     }
     sandbox.pending = true
     sandbox.desiredState = SandboxDesiredState.DESTROYED
+    sandbox.backupState = BackupState.NONE
     await this.sandboxRepository.save(sandbox)
 
     this.eventEmitter.emit(SandboxEvents.DESTROYED, new SandboxDestroyedEvent(sandbox))
