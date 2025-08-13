@@ -214,7 +214,7 @@ export class SandboxService {
     const runner = await this.runnerService.getRandomAvailableRunner({
       region: sandbox.region,
       sandboxClass: sandbox.class,
-      snapshotRef: snapshot.internalName,
+      snapshotRef: snapshot.ref,
     })
 
     sandbox.runnerId = runner.id
@@ -314,7 +314,7 @@ export class SandboxService {
     const runner = await this.runnerService.getRandomAvailableRunner({
       region,
       sandboxClass,
-      snapshotRef: snapshot.internalName,
+      snapshotRef: snapshot.ref,
     })
 
     const sandbox = new Sandbox()

@@ -22,6 +22,7 @@ const STATE_PRIORITY_ORDER_ARRAY = [
   SandboxState.DESTROYING,
   SandboxState.DESTROYED,
   SandboxState.PULLING_SNAPSHOT,
+  SandboxState.PENDING_PULL,
   SandboxState.UNKNOWN,
 ] as const
 
@@ -40,6 +41,7 @@ const STATE_COLOR_MAPPING = {
   [SandboxState.DESTROYING]: 'text-gray-800 dark:text-gray-200',
   [SandboxState.DESTROYED]: 'text-gray-800 dark:text-gray-200',
   [SandboxState.PULLING_SNAPSHOT]: 'text-gray-800 dark:text-gray-200',
+  [SandboxState.PENDING_PULL]: 'text-gray-800 dark:text-gray-200',
   [SandboxState.UNKNOWN]: 'text-gray-800 dark:text-gray-200',
   [SandboxState.ARCHIVING]: 'text-gray-800 dark:text-gray-200',
 } as const
@@ -59,6 +61,7 @@ const STATE_LABEL_MAPPING: Record<SandboxState, string> = {
   [SandboxState.DESTROYING]: 'Deleting',
   [SandboxState.DESTROYED]: 'Destroyed',
   [SandboxState.PULLING_SNAPSHOT]: 'Pulling Snapshot',
+  [SandboxState.PENDING_PULL]: 'Pending Pull',
   [SandboxState.UNKNOWN]: 'Unknown',
   [SandboxState.ARCHIVING]: 'Archiving',
 }

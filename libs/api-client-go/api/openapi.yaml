@@ -7305,6 +7305,7 @@ components:
         - pending_build
         - building_snapshot
         - unknown
+        - pending_pull
         - pulling_snapshot
         - archived
         - archiving
@@ -9315,6 +9316,7 @@ components:
     CreateSnapshot:
       example:
         general: true
+        skipValidation: false
         disk: 3
         imageName: ubuntu:22.04
         memory: 1
@@ -9361,12 +9363,15 @@ components:
           allOf:
             - $ref: '#/components/schemas/CreateBuildInfo'
           description: Build information for the snapshot
+        skipValidation:
+          description: Whether to skip validation for the snapshot
+          example: false
+          type: boolean
       required:
         - name
       type: object
     SnapshotState:
       enum:
-        - build_pending
         - building
         - pending
         - pulling
@@ -9387,6 +9392,7 @@ components:
         organizationId: organizationId
         general: true
         createdAt: 2000-01-23T04:56:07.000+00:00
+        skipValidation: true
         disk: 5.637376656633329
         size: 0.8008281904610115
         mem: 5.962133916683182
@@ -9446,6 +9452,8 @@ components:
           allOf:
             - $ref: '#/components/schemas/BuildInfo'
           description: Build information for the snapshot
+        skipValidation:
+          type: boolean
       required:
         - cpu
         - createdAt
@@ -9459,6 +9467,7 @@ components:
         - mem
         - name
         - size
+        - skipValidation
         - state
         - updatedAt
       type: object
@@ -9475,6 +9484,7 @@ components:
             organizationId: organizationId
             general: true
             createdAt: 2000-01-23T04:56:07.000+00:00
+            skipValidation: true
             disk: 5.637376656633329
             size: 0.8008281904610115
             mem: 5.962133916683182
@@ -9494,6 +9504,7 @@ components:
             organizationId: organizationId
             general: true
             createdAt: 2000-01-23T04:56:07.000+00:00
+            skipValidation: true
             disk: 5.637376656633329
             size: 0.8008281904610115
             mem: 5.962133916683182
