@@ -917,10 +917,7 @@ export class SandboxService {
   }
 
   private resolveNetworkAllowList(networkAllowList: string): string {
-    const validationError = validateNetworkAllowList(networkAllowList)
-    if (validationError) {
-      throw new BadRequestError(validationError)
-    }
+    validateNetworkAllowList(networkAllowList)
 
     return networkAllowList
   }

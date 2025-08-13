@@ -39,7 +39,7 @@ func (d *DockerClient) Destroy(ctx context.Context, containerId string) error {
 
 	d.cache.SetSandboxState(ctx, containerId, enums.SandboxStateDestroying)
 
-	_, err := d.ContainerInspect(ctx, containerId)
+	ct, err := d.ContainerInspect(ctx, containerId)
 	if err != nil {
 		if errdefs.IsNotFound(err) {
 			d.cache.SetSandboxState(ctx, containerId, enums.SandboxStateDestroyed)
@@ -56,6 +56,14 @@ func (d *DockerClient) Destroy(ctx context.Context, containerId string) error {
 		}
 		return err
 	}
+
+	go func() {
+		containerShortId := ct.ID[:12]
+		err = d.netRulesManager.DeleteNetworkRules(containerShortId)
+		if err != nil {
+			log.Errorf("Failed to delete sandbox network settings: %v", err)
+		}
+	}()
 
 	d.cache.SetSandboxState(ctx, containerId, enums.SandboxStateDestroyed)
 

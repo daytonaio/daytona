@@ -4,6 +4,7 @@
 package controllers
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/daytonaio/runner/pkg/api/dto"
@@ -189,15 +190,35 @@ func UpdateNetworkSettings(ctx *gin.Context) {
 		return
 	}
 
-	// TODO: Implement UpdateNetworkSettings in Docker client
-	// sandboxId := ctx.Param("sandboxId")
-	// runner := runner.GetInstance(nil)
-	// err = runner.Docker.UpdateNetworkSettings(ctx.Request.Context(), sandboxId, updateNetworkSettingsDto)
-	// if err != nil {
-	// 	runner.Cache.SetSandboxState(ctx, sandboxId, enums.SandboxStateError)
-	// 	ctx.Error(err)
-	// 	return
-	// }
+	sandboxId := ctx.Param("sandboxId")
+	runner := runner.GetInstance(nil)
+
+	info, err := runner.Docker.ContainerInspect(ctx.Request.Context(), sandboxId)
+	if err != nil {
+		ctx.Error(common.NewInvalidBodyRequestError(err))
+		return
+	}
+	containerShortId := info.ID[:12]
+
+	// Return error if container does not have an IP address
+	if info.NetworkSettings.IPAddress == "" {
+		ctx.Error(common.NewInvalidBodyRequestError(errors.New("sandbox does not have an IP address")))
+		return
+	}
+
+	if updateNetworkSettingsDto.NetworkBlockAll != nil && *updateNetworkSettingsDto.NetworkBlockAll {
+		err = runner.NetRulesManager.SetNetWorkRules(containerShortId, info.NetworkSettings.IPAddress, "")
+		if err != nil {
+			ctx.Error(common.NewInvalidBodyRequestError(err))
+			return
+		}
+	} else if updateNetworkSettingsDto.NetworkAllowList != nil {
+		err = runner.NetRulesManager.SetNetWorkRules(containerShortId, info.NetworkSettings.IPAddress, *updateNetworkSettingsDto.NetworkAllowList)
+		if err != nil {
+			ctx.Error(common.NewInvalidBodyRequestError(err))
+			return
+		}
+	}
 
 	ctx.JSON(http.StatusOK, "Network settings updated")
 }

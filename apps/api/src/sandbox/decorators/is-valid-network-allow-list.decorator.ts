@@ -3,8 +3,27 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { registerDecorator, ValidationOptions, ValidationArguments } from 'class-validator'
+import { registerDecorator, ValidationOptions, ValidatorConstraintInterface } from 'class-validator'
 import { validateNetworkAllowList } from '../utils/network-validation.util'
+
+class IsValidNetworkAllowListConstraint implements ValidatorConstraintInterface {
+  private errorMessage =
+    'networkAllowList must contain valid CIDR network addresses (e.g., "192.168.1.0/16,10.0.0.0/24")'
+
+  validate(value: any): boolean {
+    try {
+      validateNetworkAllowList(value)
+      return true
+    } catch (err: any) {
+      this.errorMessage = err.message
+      return false
+    }
+  }
+
+  defaultMessage(): string {
+    return this.errorMessage
+  }
+}
 
 /**
  * Custom class-validator decorator that validates network allow list using the validateNetworkAllowList utility
@@ -17,32 +36,7 @@ export function IsValidNetworkAllowList(validationOptions?: ValidationOptions) {
       target: object.constructor,
       propertyName: propertyName,
       options: validationOptions,
-      validator: {
-        validate(value: any, args: ValidationArguments) {
-          // Allow empty/null/undefined values
-          if (!value) {
-            return true
-          }
-
-          // Ensure value is a string
-          if (typeof value !== 'string') {
-            return false
-          }
-
-          // Use the existing validation utility
-          const validationResult = validateNetworkAllowList(value)
-          return validationResult === null
-        },
-        defaultMessage(args: ValidationArguments) {
-          const value = args.value
-
-          if (typeof value !== 'string') {
-            return 'networkAllowList must be a string'
-          }
-
-          return 'networkAllowList must contain valid CIDR network addresses (e.g., "192.168.1.0/16,10.0.0.0/24")'
-        },
-      },
+      validator: IsValidNetworkAllowListConstraint,
     })
   }
 }
