@@ -9,6 +9,7 @@ export class Migration1755003696741 implements MigrationInterface {
   name = 'Migration1755003696741'
 
   public async up(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(`ALTER TABLE "sandbox" ADD "backupErrorReason" text`)
     await queryRunner.query(`ALTER TYPE "public"."sandbox_state_enum" RENAME TO "sandbox_state_enum_old"`)
     await queryRunner.query(
       `CREATE TYPE "public"."sandbox_state_enum" AS ENUM('creating', 'restoring', 'destroyed', 'destroying', 'started', 'stopped', 'starting', 'stopping', 'error', 'build_failed', 'pending_build', 'building_snapshot', 'unknown', 'pulling_snapshot', 'archived', 'pending_archive')`,
@@ -32,5 +33,6 @@ export class Migration1755003696741 implements MigrationInterface {
     await queryRunner.query(`ALTER TABLE "sandbox" ALTER COLUMN "state" SET DEFAULT 'unknown'`)
     await queryRunner.query(`DROP TYPE "public"."sandbox_state_enum"`)
     await queryRunner.query(`ALTER TYPE "public"."sandbox_state_enum_old" RENAME TO "sandbox_state_enum"`)
+    await queryRunner.query(`ALTER TABLE "sandbox" DROP COLUMN "backupErrorReason"`)
   }
 }

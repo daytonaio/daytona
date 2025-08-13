@@ -1265,6 +1265,9 @@ const docTemplate = `{
         "SandboxInfoResponse": {
             "type": "object",
             "properties": {
+                "backupError": {
+                    "type": "string"
+                },
                 "backupState": {
                     "$ref": "#/definitions/enums.BackupState"
                 },

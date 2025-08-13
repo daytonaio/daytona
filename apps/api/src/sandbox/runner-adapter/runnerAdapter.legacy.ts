@@ -147,6 +147,7 @@ export class RunnerAdapterLegacy implements RunnerAdapter {
     return {
       state: this.convertSandboxState(sandboxInfo.data.state),
       backupState: this.convertBackupState(sandboxInfo.data.backupState),
+      backupErrorReason: sandboxInfo.data.backupError,
     }
   }
 

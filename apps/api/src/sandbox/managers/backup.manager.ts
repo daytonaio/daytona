@@ -172,7 +172,7 @@ export class BackupManager {
                 await this.redis.setex(errorRetryKey, 300, '1')
               } else if (parseInt(errorRetryCount) > 10) {
                 this.logger.error(`Error processing backup for sandbox ${sandbox.id}:`, fromAxiosError(error))
-                await this.updateSandboxBackupState(sandbox.id, BackupState.ERROR)
+                await this.updateSandboxBackupState(sandbox.id, BackupState.ERROR, fromAxiosError(error).message)
               } else {
                 await this.redis.setex(errorRetryKey, 300, errorRetryCount + 1)
               }
@@ -305,7 +305,7 @@ export class BackupManager {
         }
         case 'FAILED':
         case 'ERROR': {
-          await this.updateSandboxBackupState(sandbox.id, BackupState.ERROR)
+          await this.updateSandboxBackupState(sandbox.id, BackupState.ERROR, sandboxInfo.backupErrorReason)
           break
         }
         // If backup state is none, retry the backup process by setting the backup state to pending
@@ -317,7 +317,7 @@ export class BackupManager {
         // If still in progress or any other state, do nothing and wait for next sync
       }
     } catch (error) {
-      await this.updateSandboxBackupState(sandbox.id, BackupState.ERROR)
+      await this.updateSandboxBackupState(sandbox.id, BackupState.ERROR, fromAxiosError(error).message)
       throw error
     }
   }
@@ -374,18 +374,22 @@ export class BackupManager {
         await this.updateSandboxBackupState(sandbox.id, BackupState.IN_PROGRESS)
         return
       }
-      await this.updateSandboxBackupState(sandbox.id, BackupState.ERROR)
+      await this.updateSandboxBackupState(sandbox.id, BackupState.ERROR, fromAxiosError(error).message)
       throw error
     } finally {
       await this.redisLockProvider.unlock(lockKey)
     }
   }
 
-  private async updateSandboxBackupState(sandboxId: string, backupState: BackupState): Promise<void> {
+  private async updateSandboxBackupState(
+    sandboxId: string,
+    backupState: BackupState,
+    backupErrorReason?: string | null,
+  ): Promise<void> {
     const sandboxToUpdate = await this.sandboxRepository.findOneByOrFail({
       id: sandboxId,
     })
-    sandboxToUpdate.setBackupState(backupState)
+    sandboxToUpdate.setBackupState(backupState, undefined, undefined, backupErrorReason)
     await this.sandboxRepository.save(sandboxToUpdate)
   }
 

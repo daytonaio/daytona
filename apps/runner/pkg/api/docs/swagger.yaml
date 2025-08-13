@@ -163,6 +163,8 @@ definitions:
     type: object
   SandboxInfoResponse:
     properties:
+      backupError:
+        type: string
       backupState:
         $ref: '#/definitions/enums.BackupState'
       state:

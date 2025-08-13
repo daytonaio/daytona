@@ -111,6 +111,12 @@ export class Sandbox {
   backupState: BackupState
 
   @Column({
+    type: 'text',
+    nullable: true,
+  })
+  backupErrorReason: string | null
+
+  @Column({
     type: 'jsonb',
     default: [],
   })
@@ -181,7 +187,12 @@ export class Sandbox {
   @Column({ nullable: true })
   daemonVersion?: string
 
-  public setBackupState(state: BackupState, backupSnapshot?: string | null, backupRegistryId?: string | null) {
+  public setBackupState(
+    state: BackupState,
+    backupSnapshot?: string | null,
+    backupRegistryId?: string | null,
+    backupErrorReason?: string | null,
+  ) {
     this.backupState = state
     switch (state) {
       case BackupState.NONE:
@@ -197,6 +208,7 @@ export class Sandbox {
             createdAt: now,
           },
         ]
+        this.backupErrorReason = null
         break
       }
     }
@@ -205,6 +217,9 @@ export class Sandbox {
     }
     if (backupRegistryId !== undefined) {
       this.backupRegistryId = backupRegistryId
+    }
+    if (backupErrorReason !== undefined) {
+      this.backupErrorReason = backupErrorReason
     }
   }
 

@@ -117,7 +117,7 @@ func CreateBackup(ctx *gin.Context) {
 
 	err = runner.Docker.StartBackupCreate(ctx.Request.Context(), sandboxId, createBackupDTO)
 	if err != nil {
-		runner.Cache.SetBackupState(ctx, sandboxId, enums.BackupStateFailed)
+		runner.Cache.SetBackupState(ctx, sandboxId, enums.BackupStateFailed, err)
 		ctx.Error(err)
 		return
 	}
@@ -252,12 +252,14 @@ func Info(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, SandboxInfoResponse{
 		State:       info.SandboxState,
 		BackupState: info.BackupState,
+		BackupError: info.BackupErrorReason,
 	})
 }
 
 type SandboxInfoResponse struct {
 	State       enums.SandboxState `json:"state"`
 	BackupState enums.BackupState  `json:"backupState"`
+	BackupError *string            `json:"backupError,omitempty"`
 } //	@name	SandboxInfoResponse
 
 // RemoveDestroyed godoc
