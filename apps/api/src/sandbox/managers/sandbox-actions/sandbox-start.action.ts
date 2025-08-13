@@ -324,25 +324,29 @@ export class SandboxStartAction extends SandboxAction {
 
       //  make sure we pick a runner that has the base snapshot
       let baseSnapshot: Snapshot | null = null
-      try {
-        baseSnapshot = await this.snapshotService.getSnapshotByName(sandbox.snapshot, sandbox.organizationId)
-      } catch (e) {
-        if (e instanceof NotFoundException) {
-          //  if the base snapshot is not found, we'll use any available runner later
-        } else {
-          //  for all other errors, throw them
-          throw e
+      if (sandbox.snapshot) {
+        try {
+          baseSnapshot = await this.snapshotService.getSnapshotByName(sandbox.snapshot, sandbox.organizationId)
+        } catch (e) {
+          if (e instanceof NotFoundException) {
+            //  if the base snapshot is not found, we'll use any available runner later
+          } else {
+            //  for all other errors, throw them
+            throw e
+          }
         }
       }
 
       const snapshotRef = baseSnapshot ? baseSnapshot.internalName : null
 
       let availableRunners = []
-      const runnersWithBaseSnapshot = await this.runnerService.findAvailableRunners({
-        region: sandbox.region,
-        sandboxClass: sandbox.class,
-        snapshotRef,
-      })
+      const runnersWithBaseSnapshot = snapshotRef
+        ? await this.runnerService.findAvailableRunners({
+            region: sandbox.region,
+            sandboxClass: sandbox.class,
+            snapshotRef,
+          })
+        : []
       if (runnersWithBaseSnapshot.length > 0) {
         availableRunners = runnersWithBaseSnapshot
       } else {
@@ -355,12 +359,7 @@ export class SandboxStartAction extends SandboxAction {
 
       //  check if we have any available runners after filtering
       if (availableRunners.length === 0) {
-        await this.updateSandboxState(
-          sandbox.id,
-          SandboxState.ERROR,
-          undefined,
-          'No available runners found for sandbox restoration',
-        )
+        // Sync state again later. Runners are unavailable
         return DONT_SYNC_AGAIN
       }
 
