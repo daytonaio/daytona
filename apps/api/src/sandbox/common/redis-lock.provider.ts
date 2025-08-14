@@ -23,10 +23,10 @@ export class RedisLockProvider {
   }
 
   async waitForLock(key: string, ttl: number): Promise<void> {
-    while (await this.redis.get(key)) {
+    while (true) {
+      const acquired = await this.lock(key, ttl)
+      if (acquired) break
       await new Promise((resolve) => setTimeout(resolve, 50))
     }
-
-    await this.redis.setex(key, ttl, '1')
   }
 }

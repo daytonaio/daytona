@@ -23,6 +23,7 @@ import (
 	"github.com/daytonaio/runner/pkg/runner"
 	"github.com/daytonaio/runner/pkg/services"
 	"github.com/docker/docker/client"
+	"github.com/joho/godotenv"
 
 	"github.com/rs/zerolog"
 	zlog "github.com/rs/zerolog/log"
@@ -118,6 +119,13 @@ func main() {
 }
 
 func init() {
+	// Load .env file
+	err := godotenv.Load()
+	if err != nil {
+		log.Println("Warning: Error loading .env file:", err)
+		// Continue anyway, as environment variables might be set directly
+	}
+
 	logLevel := log.WarnLevel
 
 	logLevelEnv, logLevelSet := os.LookupEnv("LOG_LEVEL")

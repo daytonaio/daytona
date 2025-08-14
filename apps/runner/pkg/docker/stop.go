@@ -15,6 +15,12 @@ import (
 func (d *DockerClient) Stop(ctx context.Context, containerId string) error {
 	d.cache.SetSandboxState(ctx, containerId, enums.SandboxStateStopping)
 
+	// Cancel a backup if it's already in progress
+	backup_context, ok := backup_context_map.Get(containerId)
+	if ok {
+		backup_context.cancel()
+	}
+
 	err := d.apiClient.ContainerStop(ctx, containerId, container.StopOptions{
 		Signal: "SIGKILL",
 	})

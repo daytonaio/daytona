@@ -339,12 +339,23 @@ export class SnapshotService {
     await this.snapshotRepository.save(snapshot)
 
     try {
-      // Set associated SnapshotRunner records to REMOVING state
-      const result = await this.snapshotRunnerRepository.update(
-        { snapshotRef: snapshot.internalName },
-        { state: SnapshotRunnerState.REMOVING },
-      )
-      this.logger.debug(`Deactivated snapshot ${snapshot.id} and marked ${result.affected} SnapshotRunners for removal`)
+      const countActiveSnapshots = await this.snapshotRepository.count({
+        where: {
+          state: SnapshotState.ACTIVE,
+          internalName: snapshot.internalName,
+        },
+      })
+
+      if (countActiveSnapshots === 0) {
+        // Set associated SnapshotRunner records to REMOVING state
+        const result = await this.snapshotRunnerRepository.update(
+          { snapshotRef: snapshot.internalName },
+          { state: SnapshotRunnerState.REMOVING },
+        )
+        this.logger.debug(
+          `Deactivated snapshot ${snapshot.id} and marked ${result.affected} SnapshotRunners for removal`,
+        )
+      }
     } catch (error) {
       this.logger.error(`Deactivated snapshot ${snapshot.id}, but failed to mark snapshot runners for removal`, error)
     }

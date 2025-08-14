@@ -27,6 +27,12 @@ import type { EnumsSandboxState } from './enums-sandbox-state'
 export interface SandboxInfoResponse {
   /**
    *
+   * @type {string}
+   * @memberof SandboxInfoResponse
+   */
+  backupError?: string
+  /**
+   *
    * @type {EnumsBackupState}
    * @memberof SandboxInfoResponse
    */

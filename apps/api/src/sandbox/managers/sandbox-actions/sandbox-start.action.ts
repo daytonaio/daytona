@@ -50,6 +50,7 @@ export class SandboxStartAction extends SandboxAction {
         return this.handleRunnerSandboxUnknownStateOnDesiredStateStart(sandbox)
       }
       case SandboxState.ARCHIVED:
+      case SandboxState.PENDING_ARCHIVE:
       case SandboxState.STOPPED: {
         return this.handleRunnerSandboxStoppedOrArchivedStateOnDesiredStateStart(sandbox)
       }
@@ -71,7 +72,7 @@ export class SandboxStartAction extends SandboxAction {
             id: sandbox.id,
           })
           sandboxToUpdate.state = SandboxState.STARTED
-          sandboxToUpdate.backupState = BackupState.NONE
+          sandboxToUpdate.setBackupState(BackupState.NONE)
 
           try {
             const daemonVersion = await runnerAdapter.getSandboxDaemonVersion(sandbox.id)
@@ -279,13 +280,20 @@ export class SandboxStartAction extends SandboxAction {
         return DONT_SYNC_AGAIN
       }
 
+      if (!sandbox.backupRegistryId) {
+        throw new Error('No registry found for backup')
+      }
+
       const registry = await this.dockerRegistryService.findOne(sandbox.backupRegistryId)
       if (!registry) {
         throw new Error('No registry found for backup')
       }
 
-      const existingBackups = sandbox.existingBackupSnapshots.map((existingSnapshot) => existingSnapshot.snapshotName)
-      let validBackup
+      const existingBackups = sandbox.existingBackupSnapshots
+        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+        .map((existingSnapshot) => existingSnapshot.snapshotName)
+
+      let validBackup: string | null = null
       let exists = false
 
       while (existingBackups.length > 0) {
@@ -317,25 +325,29 @@ export class SandboxStartAction extends SandboxAction {
 
       //  make sure we pick a runner that has the base snapshot
       let baseSnapshot: Snapshot | null = null
-      try {
-        baseSnapshot = await this.snapshotService.getSnapshotByName(sandbox.snapshot, sandbox.organizationId)
-      } catch (e) {
-        if (e instanceof NotFoundException) {
-          //  if the base snapshot is not found, we'll use any available runner later
-        } else {
-          //  for all other errors, throw them
-          throw e
+      if (sandbox.snapshot) {
+        try {
+          baseSnapshot = await this.snapshotService.getSnapshotByName(sandbox.snapshot, sandbox.organizationId)
+        } catch (e) {
+          if (e instanceof NotFoundException) {
+            //  if the base snapshot is not found, we'll use any available runner later
+          } else {
+            //  for all other errors, throw them
+            throw e
+          }
         }
       }
 
       const snapshotRef = baseSnapshot ? baseSnapshot.internalName : null
 
       let availableRunners = []
-      const runnersWithBaseSnapshot = await this.runnerService.findAvailableRunners({
-        region: sandbox.region,
-        sandboxClass: sandbox.class,
-        snapshotRef,
-      })
+      const runnersWithBaseSnapshot = snapshotRef
+        ? await this.runnerService.findAvailableRunners({
+            region: sandbox.region,
+            sandboxClass: sandbox.class,
+            snapshotRef,
+          })
+        : []
       if (runnersWithBaseSnapshot.length > 0) {
         availableRunners = runnersWithBaseSnapshot
       } else {
@@ -348,12 +360,7 @@ export class SandboxStartAction extends SandboxAction {
 
       //  check if we have any available runners after filtering
       if (availableRunners.length === 0) {
-        await this.updateSandboxState(
-          sandbox.id,
-          SandboxState.ERROR,
-          undefined,
-          'No available runners found for sandbox restoration',
-        )
+        // Sync state again later. Runners are unavailable
         return DONT_SYNC_AGAIN
       }
 
@@ -430,13 +437,13 @@ export class SandboxStartAction extends SandboxAction {
 
         //  if previous backup state is error or completed, set backup state to none
         if ([BackupState.ERROR, BackupState.COMPLETED].includes(sandbox.backupState)) {
-          sandbox.backupState = BackupState.NONE
+          sandbox.setBackupState(BackupState.NONE)
 
           const sandboxToUpdate = await this.sandboxRepository.findOneByOrFail({
             id: sandbox.id,
           })
           sandboxToUpdate.state = SandboxState.STARTED
-          sandboxToUpdate.backupState = BackupState.NONE
+          sandboxToUpdate.setBackupState(BackupState.NONE)
           if (daemonVersion) {
             sandboxToUpdate.daemonVersion = daemonVersion
           }

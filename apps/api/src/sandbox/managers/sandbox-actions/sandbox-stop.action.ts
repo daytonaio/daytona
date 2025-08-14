@@ -52,7 +52,7 @@ export class SandboxStopAction extends SandboxAction {
               id: sandbox.id,
             })
             sandboxToUpdate.state = SandboxState.STOPPED
-            sandboxToUpdate.backupState = BackupState.NONE
+            sandboxToUpdate.setBackupState(BackupState.NONE)
             await this.sandboxRepository.save(sandboxToUpdate)
             return SYNC_AGAIN
           }

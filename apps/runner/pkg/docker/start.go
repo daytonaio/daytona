@@ -23,6 +23,12 @@ func (d *DockerClient) Start(ctx context.Context, containerId string) error {
 	defer timer.Timer()()
 	d.cache.SetSandboxState(ctx, containerId, enums.SandboxStateStarting)
 
+	// Cancel a backup if it's already in progress
+	backup_context, ok := backup_context_map.Get(containerId)
+	if ok {
+		backup_context.cancel()
+	}
+
 	c, err := d.ContainerInspect(ctx, containerId)
 	if err != nil {
 		return err

@@ -163,6 +163,8 @@ definitions:
     type: object
   SandboxInfoResponse:
     properties:
+      backupError:
+        type: string
       backupState:
         $ref: '#/definitions/enums.BackupState'
       state:
@@ -395,7 +397,7 @@ paths:
         - application/json
       responses:
         '201':
-          description: Backup created
+          description: Backup started
           schema:
             type: string
         '400':

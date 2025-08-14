@@ -150,6 +150,10 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
           case '/api/workspace/:workspaceId/stop':
             this.captureStopSandbox(props, request.params.sandboxId)
             break
+          case '/api/sandbox/:sandboxId/archive':
+          case '/api/workspace/:workspaceId/archive':
+            this.captureArchiveSandbox(props, request.params.sandboxId)
+            break
           case '/api/sandbox/:sandboxId/backup':
             this.captureCreateBackup(props, request.params.sandboxId)
             break
@@ -571,6 +575,12 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
 
   private captureStopSandbox(props: CommonCaptureProps, sandboxId: string) {
     this.capture('api_sandbox_stopped', props, 'api_sandbox_stop_failed', {
+      sandbox_id: sandboxId,
+    })
+  }
+
+  private captureArchiveSandbox(props: CommonCaptureProps, sandboxId: string) {
+    this.capture('api_sandbox_archived', props, 'api_sandbox_archive_failed', {
       sandbox_id: sandboxId,
     })
   }

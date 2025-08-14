@@ -14,7 +14,7 @@ import (
 
 type IRunnerCache interface {
 	SetSandboxState(ctx context.Context, sandboxId string, state enums.SandboxState)
-	SetBackupState(ctx context.Context, sandboxId string, state enums.BackupState)
+	SetBackupState(ctx context.Context, sandboxId string, state enums.BackupState, err error)
 	SetSystemMetrics(ctx context.Context, metrics models.SystemMetrics)
 	GetSystemMetrics(ctx context.Context) *models.SystemMetrics
 
@@ -72,17 +72,22 @@ func (c *InMemoryRunnerCache) SetSandboxState(ctx context.Context, sandboxId str
 	c.cache[sandboxId] = data
 }
 
-func (c *InMemoryRunnerCache) SetBackupState(ctx context.Context, sandboxId string, state enums.BackupState) {
+func (c *InMemoryRunnerCache) SetBackupState(ctx context.Context, sandboxId string, state enums.BackupState, err error) {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
 
 	data, ok := c.cache[sandboxId]
 	if !ok {
+		backupErrorReason := ""
+		if err != nil {
+			backupErrorReason = err.Error()
+		}
 		data = &models.CacheData{
-			SandboxState:    enums.SandboxStateUnknown,
-			BackupState:     state,
-			DestructionTime: nil,
-			SystemMetrics:   nil,
+			SandboxState:      enums.SandboxStateUnknown,
+			BackupState:       state,
+			BackupErrorReason: &backupErrorReason,
+			DestructionTime:   nil,
+			SystemMetrics:     nil,
 		}
 	} else {
 		data.BackupState = state

@@ -16,6 +16,7 @@ import { BackupState } from '../enums/backup-state.enum'
 export interface RunnerSandboxInfo {
   state: SandboxState
   backupState?: BackupState
+  backupErrorReason?: string
 }
 
 export interface RunnerMetrics {
