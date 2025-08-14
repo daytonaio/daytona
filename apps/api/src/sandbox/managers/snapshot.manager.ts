@@ -346,18 +346,17 @@ export class SnapshotManager {
           },
         })
 
-        if (countActiveSnapshots > 0) {
-          return
+        // Only remove snapshot runners if no other snapshots depend on them
+        if (countActiveSnapshots === 0) {
+          await this.snapshotRunnerRepository.update(
+            {
+              snapshotRef: snapshot.internalName,
+            },
+            {
+              state: SnapshotRunnerState.REMOVING,
+            },
+          )
         }
-
-        await this.snapshotRunnerRepository.update(
-          {
-            snapshotRef: snapshot.internalName,
-          },
-          {
-            state: SnapshotRunnerState.REMOVING,
-          },
-        )
 
         await this.snapshotRepository.remove(snapshot)
       }),
