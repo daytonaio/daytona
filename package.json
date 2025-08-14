@@ -86,7 +86,7 @@
     "algoliasearch": "^5.30.0",
     "astro": "4.16.18",
     "astro-expressive-code": "^0.41.2",
-    "axios": "^1.6.1",
+    "axios": "^1.11.0",
     "axios-debug-log": "^1.0.0",
     "axios-retry": "^4.5.0",
     "cache-manager": "^6.4.1",
