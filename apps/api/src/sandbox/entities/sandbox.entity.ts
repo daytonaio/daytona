@@ -251,7 +251,7 @@ export class Sandbox {
             SandboxState.PENDING_BUILD,
             SandboxState.BUILDING_SNAPSHOT,
             SandboxState.PULLING_SNAPSHOT,
-            SandboxState.PENDING_ARCHIVE,
+            SandboxState.ARCHIVING,
             SandboxState.ERROR,
             SandboxState.BUILD_FAILED,
           ].includes(this.state)
@@ -276,7 +276,7 @@ export class Sandbox {
         if (
           [
             SandboxState.ARCHIVED,
-            SandboxState.PENDING_ARCHIVE,
+            SandboxState.ARCHIVING,
             SandboxState.STOPPED,
             SandboxState.ERROR,
             SandboxState.BUILD_FAILED,
@@ -295,7 +295,7 @@ export class Sandbox {
             SandboxState.ARCHIVED,
             SandboxState.ERROR,
             SandboxState.BUILD_FAILED,
-            SandboxState.PENDING_ARCHIVE,
+            SandboxState.ARCHIVING,
           ].includes(this.state)
         ) {
           break

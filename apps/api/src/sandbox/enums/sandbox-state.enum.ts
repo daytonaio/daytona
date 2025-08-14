@@ -19,5 +19,5 @@ export enum SandboxState {
   UNKNOWN = 'unknown',
   PULLING_SNAPSHOT = 'pulling_snapshot',
   ARCHIVED = 'archived',
-  PENDING_ARCHIVE = 'pending_archive',
+  ARCHIVING = 'archiving',
 }

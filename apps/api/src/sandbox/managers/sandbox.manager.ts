@@ -301,7 +301,7 @@ export class SandboxManager {
 
     const sandboxes = await this.sandboxRepository.find({
       where: {
-        state: In([SandboxState.PENDING_ARCHIVE, SandboxState.STOPPED]),
+        state: In([SandboxState.ARCHIVING, SandboxState.STOPPED]),
         desiredState: SandboxDesiredState.ARCHIVED,
       },
       take: 100,
