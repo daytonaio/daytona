@@ -165,7 +165,7 @@ class AsyncDaytona:
         # Get SDK version dynamically
         try:
             sdk_version = None
-            for pkg_name in ["daytona_sdk", "daytona"]:
+            for pkg_name in ["daytona", "daytona_sdk"]:
                 try:
                     sdk_version = version(pkg_name)
                     break
