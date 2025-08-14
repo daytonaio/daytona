@@ -83,7 +83,6 @@ export const getSidebarConfig = (
           attrs: {
             icon: 'server.svg',
           },
-          relatedGroupCategory: NavigationCategory.GENERAL,
         },
         {
           type: 'link',
