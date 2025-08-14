@@ -31,7 +31,7 @@ export class OrganizationResourceActionGuard extends OrganizationAccessGuard {
     // TODO: initialize authContext safely
     const authContext: OrganizationAuthContext = request.user
 
-    if (authContext.role === SystemRole.ADMIN) {
+    if (authContext.role === SystemRole.ADMIN || authContext.role === 'proxy') {
       return true
     }
 

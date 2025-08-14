@@ -32,6 +32,7 @@ type RunnerInfo struct {
 const DAYTONA_SANDBOX_AUTH_KEY_HEADER = "X-Daytona-Preview-Token"
 const DAYTONA_SANDBOX_AUTH_KEY_QUERY_PARAM = "DAYTONA_SANDBOX_AUTH_KEY"
 const DAYTONA_SANDBOX_AUTH_COOKIE_NAME = "daytona-sandbox-auth-"
+const DAYTONA_SANDBOX_UPDATE_LAST_ACTIVITY_HEADER = "X-Daytona-Update-Last-Activity"
 
 type Proxy struct {
 	config       *config.Config
