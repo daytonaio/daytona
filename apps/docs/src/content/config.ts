@@ -344,11 +344,6 @@ export const getSidebarConfig = (
       entries: [
         {
           type: 'link',
-          href: '/docs/typescript-sdk',
-          label: labels['sidebarconfig.home'],
-        },
-        {
-          type: 'link',
           href: localizePath('/docs/typescript-sdk/daytona', locale),
           label: labels['sidebarconfig.daytona'],
         },
@@ -356,19 +351,6 @@ export const getSidebarConfig = (
           type: 'link',
           href: localizePath('/docs/typescript-sdk/sandbox', locale),
           label: labels['sidebarconfig.sandbox'],
-        },
-      ],
-    },
-    {
-      type: 'group',
-      label: labels['sidebarconfig.pythonSdkReference'],
-      homePageHref: localizePath('/docs/python-sdk', locale),
-      category: NavigationCategory.PYTHON_SDK,
-      entries: [
-        {
-          type: 'link',
-          href: localizePath('/docs/python-sdk', locale),
-          label: labels['sidebarconfig.home'],
         },
       ],
     },
