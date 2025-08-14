@@ -24,7 +24,8 @@ const getVersionHeader = () => {
   ].join('\n')
 }
 
-const DOCS_PATH = path.join(__dirname, '../src/content/docs')
+// Only include English docs
+const DOCS_PATH = path.join(__dirname, '../src/content/docs/en')
 const SUBFOLDERS = new Set([
   'about',
   'configuration',
@@ -63,7 +64,7 @@ const extractSubHeadings = (content, slug) => {
       .toLowerCase()
       .replace(/\s+/g, '-')
       .replace(/[^a-z0-9-]/g, '')}`
-    headings.push({ title: match[2].trim(), url: `/docs${headingSlug}` })
+    headings.push({ title: match[2].trim(), url: `/docs/en${headingSlug}` })
   }
 
   return headings
@@ -79,7 +80,7 @@ const parseMarkdownFile = filePath => {
     .replace(/\.mdx?$/, '')
 
   return [
-    { title, url: `/docs${slug}` },
+    { title, url: `/docs/en${slug}` },
     ...extractSubHeadings(cleanContent, slug),
   ]
 }

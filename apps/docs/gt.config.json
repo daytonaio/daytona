@@ -1,0 +1,27 @@
+{
+  "framework": "react",
+  "defaultLocale": "en",
+  "src": ["apps/docs/src/components/**/*.{ts,tsx,jsx,js}"],
+  "files": {
+    "mdx": {
+      "include": ["apps/docs/src/content/docs/[locale]/**/*.mdx"]
+    },
+    "md": {
+      "include": ["apps/docs/src/content/docs/[locale]/**/*.md"]
+    },
+    "json": {
+      "include": ["apps/docs/src/content/i18n/[locale].json"]
+    },
+    "gt": {
+      "output": "apps/docs/src/data/i18n/[locale].json"
+    }
+  },
+  "locales": ["en", "ja"],
+  "baseUrl": "https://api.gtx.dev",
+  "ssr": true,
+  "options": {
+    "experimentalFlattenJsonFiles": true,
+    "experimentalLocalizeStaticUrls": true,
+    "docsUrlPattern": "/docs/[locale]/"
+  }
+}

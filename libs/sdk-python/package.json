@@ -1,7 +1,7 @@
 {
   "version": "0.0.0-dev",
   "config": {
-    "docsDir": "../../apps/docs/src/content/docs/python-sdk"
+    "docsDir": "../../apps/docs/src/content/docs/en/python-sdk"
   },
   "scripts": {
     "build": "python -m build",

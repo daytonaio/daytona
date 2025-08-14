@@ -1,0 +1,23 @@
+name: GT Translate
+on:
+  push:
+    branches: [main]
+
+jobs:
+  translate:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.head_commit.author.name != 'github-actions[bot]' && !contains(github.event.head_commit.message, 'gt-translate/') }}
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: generaltranslation/translate@v0
+        with:
+          gt_api_key: ${{ secrets.GT_API_KEY }}
+          gt_project_id: ${{ secrets.GT_PROJECT_ID }}
+          config: 'apps/docs/gt.config.json'
+          inline: true
+          timeout: 3600
+          pr_branch: 'gt-translate/${{ github.ref_name }}'

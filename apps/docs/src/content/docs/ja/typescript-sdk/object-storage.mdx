@@ -1,0 +1,69 @@
+---
+title: "ObjectStorage"
+hideTitleOnPage: true
+---
+
+
+## ObjectStorage
+
+オブジェクトストレージサービスと連携するためのObjectStorageクラス。
+
+### Param
+
+オブジェクトストレージサービスの設定。
+
+### Constructors
+
+#### new ObjectStorage()
+
+```ts
+new ObjectStorage(config: ObjectStorageConfig): ObjectStorage
+```
+
+**Parameters**:
+
+- `config` _ObjectStorageConfig_
+
+
+**Returns**:
+
+- `ObjectStorage`
+
+### Methods
+
+#### upload()
+
+```ts
+upload(
+   path: string, 
+   organizationId: string, 
+archiveBasePath: string): Promise<string>
+```
+
+ファイルまたはディレクトリをオブジェクトストレージにアップロードします。
+
+**Parameters**:
+
+- `path` _string_ - アップロードするファイルまたはディレクトリのパス。
+- `organizationId` _string_ - アップロードに使用する組織ID。
+- `archiveBasePath` _string_ - アーカイブに使用するベースパス。
+
+
+**Returns**:
+
+- `Promise<string>` - アップロードされたファイルまたはディレクトリのハッシュ。
+
+***
+
+
+## ObjectStorageConfig
+
+ObjectStorageクラスの設定。
+
+**プロパティ**:
+
+- `accessKeyId` _string_ - オブジェクトストレージサービスのアクセスキーID。
+- `bucketName?` _string_ - 使用するバケットの名前。
+- `endpointUrl` _string_ - オブジェクトストレージサービスのエンドポイントURL。
+- `secretAccessKey` _string_ - オブジェクトストレージサービスのシークレットアクセスキー。
+- `sessionToken?` _string_ - オブジェクトストレージサービスのセッショントークン。一時的な認証情報に使用されます。

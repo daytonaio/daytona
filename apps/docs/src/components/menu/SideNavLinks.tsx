@@ -1,13 +1,18 @@
+import { GTProvider, T, useGT } from 'gt-react'
 import { useEffect, useState } from 'react'
+import loadTranslations from 'src/i18n/loadTranslations'
+
+import gtConfig from '../../../gt.config.json'
+import LocaleSelector from './LocaleSelector'
 
 const GITHUB_STARS_FORMATTER = new Intl.NumberFormat('en-US', {
   notation: 'compact',
   maximumFractionDigits: 1,
 })
 
-export const SideNavLinks = () => {
+const SideNavLinksContent = () => {
   const [stars, setStars] = useState<number | null | undefined>(undefined)
-
+  const t = useGT()
   useEffect(() => {
     const storedStars = sessionStorage.getItem('stargazers')
     if (!storedStars || isNaN(Number(storedStars))) {
@@ -28,16 +33,20 @@ export const SideNavLinks = () => {
 
   return (
     <>
-      <div className="nav-item call">
-        <a
-          href="https://www.daytona.io/contact"
-          target="_blank"
-          className="nav__link"
-          rel="noreferrer"
-        >
-          Get a Demo
-        </a>
-      </div>
+      <T>
+        <div className="nav-item call">
+          <a
+            href="https://www.daytona.io/contact"
+            target="_blank"
+            className="nav__link"
+            rel="noreferrer"
+          >
+            Get a Demo
+          </a>
+        </div>
+      </T>
+      <LocaleSelector className="nav-item" />
+
       <div className="nav-item github">
         <a
           href="https://github.com/daytonaio"
@@ -61,10 +70,24 @@ export const SideNavLinks = () => {
           {stars === undefined
             ? ''
             : stars === null
-              ? 'Star'
+              ? t('Star', { $context: 'As in a star on GitHub' })
               : GITHUB_STARS_FORMATTER.format(stars)}
         </a>
       </div>
     </>
+  )
+}
+
+export const SideNavLinks = ({ locale }: { locale: string }) => {
+  return (
+    <GTProvider
+      config={gtConfig}
+      loadTranslations={loadTranslations}
+      locale={locale}
+      projectId={import.meta.env.PUBLIC_VITE_GT_PROJECT_ID}
+      devApiKey={import.meta.env.PUBLIC_VITE_GT_API_KEY}
+    >
+      <SideNavLinksContent />
+    </GTProvider>
   )
 }

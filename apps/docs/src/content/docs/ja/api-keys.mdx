@@ -1,0 +1,27 @@
+---
+title: APIキー
+---
+
+Daytona APIキーは、[Daytona API](/docs/ja/tools/api)へのリクエストを認証するために使用されます。
+
+[設定](/docs/ja/configuration)ページでは、`DAYTONA_API_KEY`環境変数の設定方法について説明しています。
+
+APIキーを管理するには、ダッシュボードの[Keys](https://app.daytona.io/dashboard/keys)セクションにアクセスしてください。`Create Key`をクリックして新しいキーを生成し、クリップボードにコピーします。
+
+## 権限
+
+新しいAPI Keyを追加する際、そのキーに対する権限セットの選択を求められます：
+
+| 権限 | 説明 |
+|------------|-------------|
+| **`Sandboxes`** | Sandboxesの作成と管理を行う権限を付与します |
+| **`Snapshots`** | Snapshotsの作成と管理を行う権限を付与します |
+| **`Registries`** | Registriesの作成と管理を行う権限を付与します |
+| **`Volumes`** | Volumesの作成と管理を行う権限を付与します |
+
+各権限には細かいスコープが含まれています：
+
+- `write:*` 作成と更新用  
+- `delete:*` リソース削除用  
+
+例：`write:sandboxes`、`delete:sandboxes`
