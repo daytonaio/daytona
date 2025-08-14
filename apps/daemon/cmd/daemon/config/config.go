@@ -14,7 +14,6 @@ import (
 )
 
 type Config struct {
-	ProjectDir  string
 	LogFilePath *string `envconfig:"DAYTONA_DAEMON_LOG_FILE_PATH"`
 }
 
