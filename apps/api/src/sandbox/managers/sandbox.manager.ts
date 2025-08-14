@@ -247,7 +247,7 @@ export class SandboxManager {
 
       const stream = await queryBuilder.stream()
       let processedCount = 0
-      const maxProcessPerRun = 200
+      const maxProcessPerRun = 100
       const pendingProcesses: Promise<void>[] = []
 
       try {
@@ -264,7 +264,7 @@ export class SandboxManager {
             processedCount++
 
             // Limit concurrent processing to avoid overwhelming the system
-            if (pendingProcesses.length >= 100) {
+            if (pendingProcesses.length >= 10) {
               stream.pause()
               Promise.all(pendingProcesses.splice(0, pendingProcesses.length))
                 .then(() => stream.resume())
