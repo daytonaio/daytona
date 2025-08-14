@@ -13,11 +13,15 @@ Service for managing Daytona Snapshots. Can be used to list, get, create and del
 #### new SnapshotService()
 
 ```ts
-new SnapshotService(snapshotsApi: SnapshotsApi, objectStorageApi: ObjectStorageApi): SnapshotService
+new SnapshotService(
+   clientConfig: Configuration, 
+   snapshotsApi: SnapshotsApi, 
+   objectStorageApi: ObjectStorageApi): SnapshotService
 ```
 
 **Parameters**:
 
+- `clientConfig` _Configuration_
 - `snapshotsApi` _SnapshotsApi_
 - `objectStorageApi` _ObjectStorageApi_
 

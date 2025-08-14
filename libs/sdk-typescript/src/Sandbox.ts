@@ -123,6 +123,7 @@ export class Sandbox implements SandboxDto {
       this.codeToolbox,
       this.toolboxApi,
       async () => await this.getRootDir(),
+      async (port) => await this.getPreviewLink(port),
     )
     this.computerUse = new ComputerUse(this.id, this.toolboxApi)
   }

@@ -3217,7 +3217,8 @@ paths:
           schema:
             type: string
           style: simple
-        - explode: true
+        - description: Whether to stream the logs
+          explode: true
           in: query
           name: follow
           required: false
@@ -3227,10 +3228,10 @@ paths:
       responses:
         '200':
           content:
-            text/plain:
+            application/json:
               schema:
-                type: string
-          description: Command log stream
+                $ref: '#/components/schemas/SessionCommandLogsResponse'
+          description: Command logs
       security:
         - bearer: []
         - oauth2:
@@ -8046,26 +8047,52 @@ components:
       type: object
     SessionExecuteResponse:
       example:
-        output: |-
+        cmdId: cmd-123
+        stdout: |-
           total 20
           drwxr-xr-x  4 user group  128 Mar 15 10:30 .
-        cmdId: cmd-123
         exitCode: 0
+        stderr: "ls: cannot access 'non-existent-file': No such file or directory"
       properties:
         cmdId:
           description: The ID of the executed command
           example: cmd-123
           type: string
-        output:
-          description: The output of the executed command
+        stdout:
+          description: The stdout of the executed command
           example: |-
             total 20
             drwxr-xr-x  4 user group  128 Mar 15 10:30 .
+          type: string
+        stderr:
+          description: The stderr of the executed command
+          example: "ls: cannot access 'non-existent-file': No such file or directory"
           type: string
         exitCode:
           description: The exit code of the executed command
           example: 0
           type: number
+      type: object
+    SessionCommandLogsResponse:
+      example:
+        stdout: |-
+          total 20
+          drwxr-xr-x  4 user group  128 Mar 15 10:30 .
+        stderr: "ls: cannot access 'non-existent-file': No such file or directory"
+      properties:
+        stdout:
+          description: The stdout of the command
+          example: |-
+            total 20
+            drwxr-xr-x  4 user group  128 Mar 15 10:30 .
+          type: string
+        stderr:
+          description: The stderr of the command
+          example: "ls: cannot access 'non-existent-file': No such file or directory"
+          type: string
+      required:
+        - stderr
+        - stdout
       type: object
     Position:
       example:

@@ -109,6 +109,7 @@
     "fast-glob": "^3.3.0",
     "form-data": "^4.0.4",
     "ioredis": "^5.5.0",
+    "isomorphic-ws": "^5.0.0",
     "jose": "~5.10.0",
     "jwks-rsa": "^3.1.0",
     "lucide-react": "^0.487.0",

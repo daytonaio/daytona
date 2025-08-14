@@ -132,6 +132,8 @@ import type { SearchFilesResponse } from '../models'
 // @ts-ignore
 import type { Session } from '../models'
 // @ts-ignore
+import type { SessionCommandLogsResponse } from '../models'
+// @ts-ignore
 import type { SessionExecuteRequest } from '../models'
 // @ts-ignore
 import type { SessionExecuteResponse } from '../models'
@@ -1227,7 +1229,7 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
      * @param {string} sessionId
      * @param {string} commandId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {boolean} [follow]
+     * @param {boolean} [follow] Whether to stream the logs
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
@@ -4226,7 +4228,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
      * @param {string} sessionId
      * @param {string} commandId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {boolean} [follow]
+     * @param {boolean} [follow] Whether to stream the logs
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
@@ -4237,7 +4239,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
       xDaytonaOrganizationID?: string,
       follow?: boolean,
       options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<string>> {
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<SessionCommandLogsResponse>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.getSessionCommandLogs(
         sandboxId,
         sessionId,
@@ -5948,7 +5950,7 @@ export const ToolboxApiFactory = function (configuration?: Configuration, basePa
      * @param {string} sessionId
      * @param {string} commandId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {boolean} [follow]
+     * @param {boolean} [follow] Whether to stream the logs
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
@@ -5959,7 +5961,7 @@ export const ToolboxApiFactory = function (configuration?: Configuration, basePa
       xDaytonaOrganizationID?: string,
       follow?: boolean,
       options?: RawAxiosRequestConfig,
-    ): AxiosPromise<string> {
+    ): AxiosPromise<SessionCommandLogsResponse> {
       return localVarFp
         .getSessionCommandLogs(sandboxId, sessionId, commandId, xDaytonaOrganizationID, follow, options)
         .then((request) => request(axios, basePath))
@@ -7172,7 +7174,7 @@ export class ToolboxApi extends BaseAPI {
    * @param {string} sessionId
    * @param {string} commandId
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-   * @param {boolean} [follow]
+   * @param {boolean} [follow] Whether to stream the logs
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof ToolboxApi

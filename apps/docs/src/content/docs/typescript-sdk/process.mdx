@@ -39,17 +39,21 @@ Handles process and code execution within a Sandbox.
 ```ts
 new Process(
    sandboxId: string, 
+   clientConfig: Configuration, 
    codeToolbox: SandboxCodeToolbox, 
    toolboxApi: ToolboxApi, 
-   getRootDir: () => Promise<string>): Process
+   getRootDir: () => Promise<string>, 
+   getPreviewLink: (port: number) => Promise<PortPreviewUrl>): Process
 ```
 
 **Parameters**:
 
 - `sandboxId` _string_
+- `clientConfig` _Configuration_
 - `codeToolbox` _SandboxCodeToolbox_
 - `toolboxApi` _ToolboxApi_
 - `getRootDir` _\(\) =\> Promise\<string\>_
+- `getPreviewLink` _\(port: number\) =\> Promise\<PortPreviewUrl\>_
 
 
 **Returns**:
@@ -358,7 +362,7 @@ if (cmd.exitCode === 0) {
 ##### Call Signature
 
 ```ts
-getSessionCommandLogs(sessionId: string, commandId: string): Promise<string>
+getSessionCommandLogs(sessionId: string, commandId: string): Promise<SessionCommandLogsResponse>
 ```
 
 Get the logs for a command executed in a session.
@@ -370,13 +374,14 @@ Get the logs for a command executed in a session.
 
 **Returns**:
 
-- `Promise<string>` - Command logs
+- `Promise<SessionCommandLogsResponse>` - Command logs containing: stdout and stderr
 
 **Example:**
 
 ```ts
 const logs = await process.getSessionCommandLogs('my-session', 'cmd-123');
-console.log('Command output:', logs);
+console.log('[STDOUT]:', logs.stdout);
+console.log('[STDERR]:', logs.stderr);
 ```
 
 ##### Call Signature
@@ -385,7 +390,8 @@ console.log('Command output:', logs);
 getSessionCommandLogs(
    sessionId: string, 
    commandId: string, 
-onLogs: (chunk: string) => void): Promise<void>
+   onStdout: (chunk: string) => void, 
+onStderr: (chunk: string) => void): Promise<void>
 ```
 
 Asynchronously retrieve and process the logs for a command executed in a session as they become available.
@@ -394,7 +400,8 @@ Asynchronously retrieve and process the logs for a command executed in a session
 
 - `sessionId` _string_ - Unique identifier of the session
 - `commandId` _string_ - Unique identifier of the command
-- `onLogs` _\(chunk: string\) =\> void_ - Callback function to handle each log chunk
+- `onStdout` _\(chunk: string\) =\> void_
+- `onStderr` _\(chunk: string\) =\> void_
 
 **Returns**:
 
@@ -404,7 +411,9 @@ Asynchronously retrieve and process the logs for a command executed in a session
 
 ```ts
 const logs = await process.getSessionCommandLogs('my-session', 'cmd-123', (chunk) => {
-  console.log('Log chunk:', chunk);
+  console.log('[STDOUT]:', chunk);
+}, (chunk) => {
+  console.log('[STDERR]:', chunk);
 });
 ```
 

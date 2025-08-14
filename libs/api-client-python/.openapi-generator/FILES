@@ -115,6 +115,7 @@ daytona_api_client/models/sandbox_volume.py
 daytona_api_client/models/screenshot_response.py
 daytona_api_client/models/search_files_response.py
 daytona_api_client/models/session.py
+daytona_api_client/models/session_command_logs_response.py
 daytona_api_client/models/session_execute_request.py
 daytona_api_client/models/session_execute_response.py
 daytona_api_client/models/set_snapshot_general_status_dto.py

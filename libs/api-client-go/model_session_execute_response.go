@@ -22,8 +22,10 @@ var _ MappedNullable = &SessionExecuteResponse{}
 type SessionExecuteResponse struct {
 	// The ID of the executed command
 	CmdId *string `json:"cmdId,omitempty"`
-	// The output of the executed command
-	Output *string `json:"output,omitempty"`
+	// The stdout of the executed command
+	Stdout *string `json:"stdout,omitempty"`
+	// The stderr of the executed command
+	Stderr *string `json:"stderr,omitempty"`
 	// The exit code of the executed command
 	ExitCode *float32 `json:"exitCode,omitempty"`
 }
@@ -77,36 +79,68 @@ func (o *SessionExecuteResponse) SetCmdId(v string) {
 	o.CmdId = &v
 }
 
-// GetOutput returns the Output field value if set, zero value otherwise.
-func (o *SessionExecuteResponse) GetOutput() string {
-	if o == nil || IsNil(o.Output) {
+// GetStdout returns the Stdout field value if set, zero value otherwise.
+func (o *SessionExecuteResponse) GetStdout() string {
+	if o == nil || IsNil(o.Stdout) {
 		var ret string
 		return ret
 	}
-	return *o.Output
+	return *o.Stdout
 }
 
-// GetOutputOk returns a tuple with the Output field value if set, nil otherwise
+// GetStdoutOk returns a tuple with the Stdout field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *SessionExecuteResponse) GetOutputOk() (*string, bool) {
-	if o == nil || IsNil(o.Output) {
+func (o *SessionExecuteResponse) GetStdoutOk() (*string, bool) {
+	if o == nil || IsNil(o.Stdout) {
 		return nil, false
 	}
-	return o.Output, true
+	return o.Stdout, true
 }
 
-// HasOutput returns a boolean if a field has been set.
-func (o *SessionExecuteResponse) HasOutput() bool {
-	if o != nil && !IsNil(o.Output) {
+// HasStdout returns a boolean if a field has been set.
+func (o *SessionExecuteResponse) HasStdout() bool {
+	if o != nil && !IsNil(o.Stdout) {
 		return true
 	}
 
 	return false
 }
 
-// SetOutput gets a reference to the given string and assigns it to the Output field.
-func (o *SessionExecuteResponse) SetOutput(v string) {
-	o.Output = &v
+// SetStdout gets a reference to the given string and assigns it to the Stdout field.
+func (o *SessionExecuteResponse) SetStdout(v string) {
+	o.Stdout = &v
+}
+
+// GetStderr returns the Stderr field value if set, zero value otherwise.
+func (o *SessionExecuteResponse) GetStderr() string {
+	if o == nil || IsNil(o.Stderr) {
+		var ret string
+		return ret
+	}
+	return *o.Stderr
+}
+
+// GetStderrOk returns a tuple with the Stderr field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *SessionExecuteResponse) GetStderrOk() (*string, bool) {
+	if o == nil || IsNil(o.Stderr) {
+		return nil, false
+	}
+	return o.Stderr, true
+}
+
+// HasStderr returns a boolean if a field has been set.
+func (o *SessionExecuteResponse) HasStderr() bool {
+	if o != nil && !IsNil(o.Stderr) {
+		return true
+	}
+
+	return false
+}
+
+// SetStderr gets a reference to the given string and assigns it to the Stderr field.
+func (o *SessionExecuteResponse) SetStderr(v string) {
+	o.Stderr = &v
 }
 
 // GetExitCode returns the ExitCode field value if set, zero value otherwise.
@@ -154,8 +188,11 @@ func (o SessionExecuteResponse) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.CmdId) {
 		toSerialize["cmdId"] = o.CmdId
 	}
-	if !IsNil(o.Output) {
-		toSerialize["output"] = o.Output
+	if !IsNil(o.Stdout) {
+		toSerialize["stdout"] = o.Stdout
+	}
+	if !IsNil(o.Stderr) {
+		toSerialize["stderr"] = o.Stderr
 	}
 	if !IsNil(o.ExitCode) {
 		toSerialize["exitCode"] = o.ExitCode
