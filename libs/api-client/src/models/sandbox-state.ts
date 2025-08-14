@@ -34,7 +34,7 @@ export const SandboxState = {
   UNKNOWN: 'unknown',
   PULLING_SNAPSHOT: 'pulling_snapshot',
   ARCHIVED: 'archived',
-  PENDING_ARCHIVE: 'pending_archive',
+  ARCHIVING: 'archiving',
 } as const
 
 export type SandboxState = (typeof SandboxState)[keyof typeof SandboxState]

@@ -40,11 +40,8 @@ export class SandboxArchiveAction extends SandboxAction {
     }
 
     switch (sandbox.state) {
-      case SandboxState.STOPPED: {
-        await this.updateSandboxState(sandbox.id, SandboxState.PENDING_ARCHIVE)
-        //  fallthrough to archiving state
-      }
-      case SandboxState.PENDING_ARCHIVE: {
+      case SandboxState.STOPPED:
+      case SandboxState.ARCHIVING: {
         await this.redisLockProvider.unlock(lockKey)
 
         //  if the backup state is error, we need to retry the backup

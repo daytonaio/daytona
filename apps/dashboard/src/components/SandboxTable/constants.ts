@@ -41,7 +41,7 @@ const STATE_COLOR_MAPPING = {
   [SandboxState.DESTROYED]: 'text-gray-800 dark:text-gray-200',
   [SandboxState.PULLING_SNAPSHOT]: 'text-gray-800 dark:text-gray-200',
   [SandboxState.UNKNOWN]: 'text-gray-800 dark:text-gray-200',
-  [SandboxState.PENDING_ARCHIVE]: 'text-gray-800 dark:text-gray-200',
+  [SandboxState.ARCHIVING]: 'text-gray-800 dark:text-gray-200',
 } as const
 
 const STATE_LABEL_MAPPING: Record<SandboxState, string> = {
@@ -60,7 +60,7 @@ const STATE_LABEL_MAPPING: Record<SandboxState, string> = {
   [SandboxState.DESTROYED]: 'Destroyed',
   [SandboxState.PULLING_SNAPSHOT]: 'Pulling Snapshot',
   [SandboxState.UNKNOWN]: 'Unknown',
-  [SandboxState.PENDING_ARCHIVE]: 'Pending Archive',
+  [SandboxState.ARCHIVING]: 'Archiving',
 }
 
 export const STATE_PRIORITY_ORDER: Record<SandboxState, number> = Object.fromEntries(
@@ -82,7 +82,7 @@ export const STATUSES: FacetedFilterOption[] = [
   { label: getStateLabel(SandboxState.STOPPING), value: SandboxState.STOPPING, icon: Timer },
   { label: getStateLabel(SandboxState.DESTROYING), value: SandboxState.DESTROYING, icon: Timer },
   { label: getStateLabel(SandboxState.ARCHIVED), value: SandboxState.ARCHIVED, icon: Archive },
-  { label: getStateLabel(SandboxState.PENDING_ARCHIVE), value: SandboxState.PENDING_ARCHIVE, icon: Timer },
+  { label: getStateLabel(SandboxState.ARCHIVING), value: SandboxState.ARCHIVING, icon: Timer },
 ]
 
 export function getStateLabel(state?: SandboxState): string {
