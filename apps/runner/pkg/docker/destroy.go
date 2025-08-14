@@ -25,6 +25,12 @@ func (d *DockerClient) Destroy(ctx context.Context, containerId string) error {
 		}
 	}()
 
+	// Cancel a backup if it's already in progress
+	backup_context, ok := backup_context_map.Get(containerId)
+	if ok {
+		backup_context.cancel()
+	}
+
 	// Ignore err because we want to destroy the container even if it exited
 	state, _ := d.DeduceSandboxState(ctx, containerId)
 	if state == enums.SandboxStateDestroyed || state == enums.SandboxStateDestroying {

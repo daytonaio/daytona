@@ -41,8 +41,8 @@ class SandboxState(str, Enum):
     BUILDING_SNAPSHOT = 'building_snapshot'
     UNKNOWN = 'unknown'
     PULLING_SNAPSHOT = 'pulling_snapshot'
-    ARCHIVING = 'archiving'
     ARCHIVED = 'archived'
+    PENDING_ARCHIVE = 'pending_archive'
 
     @classmethod
     def from_json(cls, json_str: str) -> Self:

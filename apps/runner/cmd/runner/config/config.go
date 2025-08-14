@@ -5,13 +5,11 @@ package config
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
 	"strings"
 
 	"github.com/go-playground/validator/v10"
-	"github.com/joho/godotenv"
 	"github.com/kelseyhightower/envconfig"
 )
 
@@ -44,14 +42,7 @@ func GetConfig() (*Config, error) {
 
 	config = &Config{}
 
-	// Load .env file
-	err := godotenv.Load()
-	if err != nil {
-		log.Println("Warning: Error loading .env file:", err)
-		// Continue anyway, as environment variables might be set directly
-	}
-
-	err = envconfig.Process("", config)
+	err := envconfig.Process("", config)
 	if err != nil {
 		return nil, err
 	}

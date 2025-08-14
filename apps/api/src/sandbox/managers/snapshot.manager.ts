@@ -339,6 +339,17 @@ export class SnapshotManager {
 
     await Promise.all(
       snapshots.map(async (snapshot) => {
+        const countActiveSnapshots = await this.snapshotRepository.count({
+          where: {
+            state: SnapshotState.ACTIVE,
+            internalName: snapshot.internalName,
+          },
+        })
+
+        if (countActiveSnapshots > 0) {
+          return
+        }
+
         await this.snapshotRunnerRepository.update(
           {
             snapshotRef: snapshot.internalName,
@@ -862,18 +873,30 @@ export class SnapshotManager {
     try {
       const twoWeeksAgo = new Date(Date.now() - 14 * 1000 * 60 * 60 * 24)
 
-      // Find all active snapshots that haven't been used in over 14 days or have null lastUsedAt
-      const oldSnapshots = await this.snapshotRepository.find({
-        where: [
-          {
-            general: false,
-            state: SnapshotState.ACTIVE,
-            lastUsedAt: Or(IsNull(), LessThan(twoWeeksAgo)),
-            createdAt: LessThan(twoWeeksAgo),
+      const oldSnapshots = await this.snapshotRepository
+        .createQueryBuilder('snapshot')
+        .where('snapshot.general = false')
+        .andWhere('snapshot.state = :snapshotState', { snapshotState: SnapshotState.ACTIVE })
+        .andWhere('(snapshot."lastUsedAt" IS NULL OR snapshot."lastUsedAt" < :twoWeeksAgo)', { twoWeeksAgo })
+        .andWhere('snapshot."createdAt" < :twoWeeksAgo', { twoWeeksAgo })
+        .andWhere(
+          () => {
+            const query = this.snapshotRepository
+              .createQueryBuilder('s')
+              .select('1')
+              .where('s."internalName" = snapshot."internalName"')
+              .andWhere('s.state = :activeState')
+              .andWhere('(s."lastUsedAt" >= :twoWeeksAgo OR s."createdAt" >= :twoWeeksAgo)')
+
+            return `NOT EXISTS (${query.getQuery()})`
           },
-        ],
-        take: 100,
-      })
+          {
+            activeState: SnapshotState.ACTIVE,
+            twoWeeksAgo,
+          },
+        )
+        .take(100)
+        .getMany()
 
       if (oldSnapshots.length === 0) {
         return
@@ -926,6 +949,19 @@ export class SnapshotManager {
             .andWhere('snapshot_runner.state != :snapshotRunnerState', {
               snapshotRunnerState: SnapshotRunnerState.REMOVING,
             }),
+        )
+        .andWhere(
+          () => {
+            const query = this.snapshotRepository
+              .createQueryBuilder('s')
+              .select('1')
+              .where('s."internalName" = snapshot."internalName"')
+              .andWhere('s.state = :snapshotState')
+            return `NOT EXISTS (${query.getQuery()})`
+          },
+          {
+            snapshotState: SnapshotState.ACTIVE,
+          },
         )
         .take(100)
         .getRawMany()

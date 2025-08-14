@@ -293,9 +293,6 @@ export class SandboxDto {
         if (sandbox.desiredState === SandboxDesiredState.DESTROYED) {
           return SandboxState.DESTROYING
         }
-        if (sandbox.desiredState === SandboxDesiredState.ARCHIVED) {
-          return SandboxState.ARCHIVING
-        }
         break
       case SandboxState.UNKNOWN:
         if (sandbox.desiredState === SandboxDesiredState.STARTED) {

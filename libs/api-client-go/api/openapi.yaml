@@ -6918,8 +6918,8 @@ components:
         - building_snapshot
         - unknown
         - pulling_snapshot
-        - archiving
         - archived
+        - pending_archive
       type: string
     SandboxDesiredState:
       description: The desired state of the sandbox

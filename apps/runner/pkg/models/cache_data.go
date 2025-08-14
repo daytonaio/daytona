@@ -21,8 +21,9 @@ type SystemMetrics struct {
 }
 
 type CacheData struct {
-	SandboxState    enums.SandboxState
-	BackupState     enums.BackupState
-	DestructionTime *time.Time
-	SystemMetrics   *SystemMetrics
+	SandboxState      enums.SandboxState
+	BackupState       enums.BackupState
+	BackupErrorReason *string
+	DestructionTime   *time.Time
+	SystemMetrics     *SystemMetrics
 }

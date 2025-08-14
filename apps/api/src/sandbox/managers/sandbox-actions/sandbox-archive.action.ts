@@ -8,7 +8,7 @@ import { Sandbox } from '../../entities/sandbox.entity'
 import { SandboxState } from '../../enums/sandbox-state.enum'
 import { DONT_SYNC_AGAIN, SandboxAction, SyncState, SYNC_AGAIN } from './sandbox.action'
 import { BackupState } from '../../enums/backup-state.enum'
-import { In, Repository } from 'typeorm'
+import { Repository } from 'typeorm'
 import { RedisLockProvider } from '../../common/redis-lock.provider'
 import { RunnerService } from '../../services/runner.service'
 import { InjectRepository } from '@nestjs/typeorm'
@@ -41,29 +41,10 @@ export class SandboxArchiveAction extends SandboxAction {
 
     switch (sandbox.state) {
       case SandboxState.STOPPED: {
-        const inProgressOnRunner = await this.sandboxRepository.find({
-          where: {
-            runnerId: sandbox.runnerId,
-            state: In([SandboxState.ARCHIVING]),
-          },
-          order: {
-            lastActivityAt: 'DESC',
-          },
-          take: 100,
-        })
-
-        //  if the sandbox is already in progress, continue
-        if (!inProgressOnRunner.find((s) => s.id === sandbox.id)) {
-          if (inProgressOnRunner.length >= this.configService.getOrThrow('maxConcurrentArchivesPerRunner')) {
-            await this.redisLockProvider.unlock(lockKey)
-            return DONT_SYNC_AGAIN
-          }
-        }
-
-        await this.updateSandboxState(sandbox.id, SandboxState.ARCHIVING)
+        await this.updateSandboxState(sandbox.id, SandboxState.PENDING_ARCHIVE)
         //  fallthrough to archiving state
       }
-      case SandboxState.ARCHIVING: {
+      case SandboxState.PENDING_ARCHIVE: {
         await this.redisLockProvider.unlock(lockKey)
 
         //  if the backup state is error, we need to retry the backup
@@ -73,7 +54,12 @@ export class SandboxArchiveAction extends SandboxAction {
           const archiveErrorRetryCount = archiveErrorRetryCountRaw ? parseInt(archiveErrorRetryCountRaw) : 0
           //  if the archive error retry count is greater than 3, we need to mark the sandbox as error
           if (archiveErrorRetryCount > 3) {
-            await this.updateSandboxState(sandbox.id, SandboxState.ERROR, undefined, 'Failed to archive sandbox')
+            await this.updateSandboxState(
+              sandbox.id,
+              SandboxState.ERROR,
+              undefined,
+              'Failed to archive sandbox after 3 retries',
+            )
             await this.redis.del(archiveErrorRetryKey)
             return DONT_SYNC_AGAIN
           }
@@ -84,13 +70,6 @@ export class SandboxArchiveAction extends SandboxAction {
             backupState: BackupState.PENDING,
           })
 
-          return DONT_SYNC_AGAIN
-        }
-
-        // Check for timeout - if more than 120 minutes since last activity
-        const timeout = new Date(Date.now() - 120 * 60 * 1000)
-        if (sandbox.lastActivityAt < timeout) {
-          await this.updateSandboxState(sandbox.id, SandboxState.ERROR, undefined, 'Archiving operation timed out')
           return DONT_SYNC_AGAIN
         }
 
