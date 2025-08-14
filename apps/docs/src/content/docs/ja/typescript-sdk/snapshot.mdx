@@ -6,18 +6,22 @@ hideTitleOnPage: true
 
 ## SnapshotService
 
-Daytonaスナップショットを管理するためのサービス。スナップショットの一覧表示、取得、作成、削除に使用できます。
+Daytona Snapshot を管理するサービス。Snapshot の一覧、取得、作成、削除に利用できます。
 
 ### Constructors
 
 #### new SnapshotService()
 
 ```ts
-new SnapshotService(snapshotsApi: SnapshotsApi, objectStorageApi: ObjectStorageApi): SnapshotService
+new SnapshotService(
+   clientConfig: Configuration, 
+   snapshotsApi: SnapshotsApi, 
+   objectStorageApi: ObjectStorageApi): SnapshotService
 ```
 
 **Parameters**:
 
+- `clientConfig` _Configuration_
 - `snapshotsApi` _SnapshotsApi_
 - `objectStorageApi` _ObjectStorageApi_
 
@@ -34,16 +38,16 @@ new SnapshotService(snapshotsApi: SnapshotsApi, objectStorageApi: ObjectStorageA
 activate(snapshot: Snapshot): Promise<Snapshot>
 ```
 
-スナップショットをアクティベートします。
+スナップショットをアクティブ化します。
 
 **Parameters**:
 
-- `snapshot` _Snapshot_ - アクティベートするスナップショット
+- `snapshot` _Snapshot_ - アクティブ化する Snapshot
 
 
 **Returns**:
 
-- `Promise<Snapshot>` - アクティベートされたSnapshotインスタンス
+- `Promise<Snapshot>` - アクティブ化された Snapshot インスタンス
 
 ***
 
@@ -56,14 +60,14 @@ create(params: CreateSnapshotParams, options: {
 }): Promise<Snapshot>
 ```
 
-指定されたImage定義から新しいスナップショットを作成し、登録します。
+指定された Image 定義から新しいスナップショットを作成して登録します。
 
 **Parameters**:
 
-- `params` _CreateSnapshotParams_ - スナップショット作成のパラメータ。
-- `options` _作成操作のオプション。_
-- `onLogs?` _\(chunk: string\) =\> void_ - このコールバック関数はスナップショット作成ログを処理します。
-- `timeout?` _number_ - デフォルトはタイムアウトなし。秒単位のタイムアウト（0はタイムアウトなしを意味します）。
+- `params` _CreateSnapshotParams_ - スナップショット作成用のパラメータ。
+- `options` _Options for the create operation._
+- `onLogs?` _\(chunk: string\) =\> void_ - スナップショット作成時のログを処理するコールバック関数。
+- `timeout?` _number_ - 既定ではタイムアウトなし。秒数（0 はタイムアウトなし）。
 
 
 **Returns**:
@@ -85,11 +89,11 @@ await daytona.snapshot.create({ name: 'my-snapshot', image: image }, { onLogs: c
 delete(snapshot: Snapshot): Promise<void>
 ```
 
-スナップショットを削除します。
+Snapshot を削除します。
 
 **Parameters**:
 
-- `snapshot` _Snapshot_ - 削除するスナップショット
+- `snapshot` _Snapshot_ - 削除する Snapshot
 
 
 **Returns**:
@@ -98,7 +102,7 @@ delete(snapshot: Snapshot): Promise<void>
 
 **Throws**:
 
-スナップショットが存在しないか削除できない場合
+Snapshot が存在しない、または削除できない場合
 
 **Example:**
 
@@ -106,7 +110,7 @@ delete(snapshot: Snapshot): Promise<void>
 const daytona = new Daytona();
 const snapshot = await daytona.snapshot.get("snapshot-name");
 await daytona.snapshot.delete(snapshot);
-console.log("スナップショットが正常に削除されました");
+console.log("Snapshot deleted successfully");
 ```
 
 ***
@@ -117,27 +121,27 @@ console.log("スナップショットが正常に削除されました");
 get(name: string): Promise<Snapshot>
 ```
 
-名前でスナップショットを取得します。
+名前を指定して Snapshot を取得します。
 
 **Parameters**:
 
-- `name` _string_ - 取得するスナップショットの名前
+- `name` _string_ - 取得する Snapshot の名前
 
 
 **Returns**:
 
-- `Promise<Snapshot>` - 要求されたスナップショット
+- `Promise<Snapshot>` - 取得された Snapshot
 
 **Throws**:
 
-スナップショットが存在しないかアクセスできない場合
+Snapshot が存在しない、またはアクセスできない場合
 
 **Example:**
 
 ```ts
 const daytona = new Daytona();
 const snapshot = await daytona.snapshot.get("snapshot-name");
-console.log(`スナップショット ${snapshot.name} の状態は ${snapshot.state} です`);
+console.log(`Snapshot ${snapshot.name} is in state ${snapshot.state}`);
 ```
 
 ***
@@ -148,18 +152,18 @@ console.log(`スナップショット ${snapshot.name} の状態は ${snapshot.s
 list(): Promise<Snapshot[]>
 ```
 
-すべてのスナップショットを一覧表示します。
+すべての Snapshot を一覧表示します。
 
 **Returns**:
 
-- `Promise<Snapshot[]>` - ユーザーがアクセス可能なすべてのスナップショットのリスト
+- `Promise<Snapshot[]>` - ユーザーがアクセス可能なすべての Snapshot の一覧
 
 **Example:**
 
 ```ts
 const daytona = new Daytona();
 const snapshots = await daytona.snapshot.list();
-console.log(`${snapshots.length} 個のスナップショットが見つかりました`);
+console.log(`Found ${snapshots.length} snapshots`);
 snapshots.forEach(snapshot => console.log(`${snapshot.name} (${snapshot.imageName})`));
 ```
 

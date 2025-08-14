@@ -28,35 +28,37 @@ new CodeRunParams(): CodeRunParams
 **戻り値**:
 
 - `CodeRunParams`
-## Process
+## プロセス
 
-Sandbox内でプロセスとコード実行を処理します。
+Sandbox 内でのプロセス管理とコード実行を行います。
 
-### Constructors
+### コンストラクタ
 
 #### new Process()
 
 ```ts
 new Process(
    sandboxId: string, 
+   clientConfig: Configuration, 
    codeToolbox: SandboxCodeToolbox, 
    toolboxApi: ToolboxApi, 
    getRootDir: () => Promise<string>): Process
 ```
 
-**Parameters**:
+**パラメータ**:
 
 - `sandboxId` _string_
+- `clientConfig` _Configuration_
 - `codeToolbox` _SandboxCodeToolbox_
 - `toolboxApi` _ToolboxApi_
 - `getRootDir` _\(\) =\> Promise\<string\>_
 
 
-**Returns**:
+**戻り値**:
 
 - `Process`
 
-### Methods
+### メソッド
 
 #### codeRun()
 
@@ -67,36 +69,36 @@ codeRun(
 timeout?: number): Promise<ExecuteResponse>
 ```
 
-適切な言語ランタイムを使用してSandbox内でコードを実行します。
+適切な言語ランタイムを用いて、Sandbox 内でコードを実行します。
 
-**Parameters**:
+**パラメータ**:
 
 - `code` _string_ - 実行するコード
-- `params?` _CodeRunParams_ - コード実行のパラメータ
-- `timeout?` _number_ - 実行完了を待機する最大時間（秒）
+- `params?` _CodeRunParams_ - 実行パラメータ
+- `timeout?` _number_ - 実行完了を待つ最大時間（秒）
 
 
-**Returns**:
+**戻り値**:
 
-- `Promise<ExecuteResponse>` - 以下を含むコード実行結果:
+- `Promise<ExecuteResponse>` - 次を含むコード実行結果:
     - exitCode: 実行の終了ステータス
-    - result: コードからの標準出力
-    - artifacts: `stdout`（resultと同じ）と`charts`（matplotlibチャートメタデータ）を含むExecutionArtifactsオブジェクト
+    - result: コードの標準出力
+    - artifacts: `stdout`（result と同一）および `charts`（matplotlib のチャートメタデータ）を含む ExecutionArtifacts オブジェクト
 
-**Examples:**
+**例:**
 
 ```ts
-// TypeScriptコードを実行
+// Run TypeScript code
 const response = await process.codeRun(`
   const x = 10;
   const y = 20;
   console.log(\`Sum: \${x + y}\`);
 `);
-console.log(response.artifacts.stdout);  // 出力: Sum: 30
+console.log(response.artifacts.stdout);  // Prints: Sum: 30
 ```
 
 ```ts
-// matplotlibを使用してPythonコードを実行
+// Run Python code with matplotlib
 const response = await process.codeRun(`
 import matplotlib.pyplot as plt
 import numpy as np
@@ -142,27 +144,27 @@ if (response.artifacts?.charts) {
 createSession(sessionId: string): Promise<void>
 ```
 
-Sandbox内に新しい長時間実行バックグラウンドセッションを作成します。
+Sandbox に新しい常駐型のバックグラウンドセッションを作成します。
 
-セッションは、コマンド間で状態を維持するバックグラウンドプロセスであり、複数の関連コマンドや永続的な環境設定が必要なシナリオに最適です。長時間実行コマンドを実行し、プロセスステータスを監視できます。
+セッションはコマンド間で状態を保持するバックグラウンドプロセスで、関連する複数コマンドの実行や永続的な環境準備が必要なケースに最適です。長時間実行のコマンドを走らせ、プロセス状態を監視できます。
 
-**Parameters**:
+**パラメータ**:
 
-- `sessionId` _string_ - 新しいセッションの一意識別子
+- `sessionId` _string_ - 新規セッションの一意の識別子
 
 
-**Returns**:
+**戻り値**:
 
 - `Promise<void>`
 
-**Example:**
+**例:**
 
 ```ts
-// 新しいセッションを作成
+// Create a new session
 const sessionId = 'my-session';
 await process.createSession(sessionId);
 const session = await process.getSession(sessionId);
-// 作業を実行...
+// Do work...
 await process.deleteSession(sessionId);
 ```
 
@@ -174,21 +176,21 @@ await process.deleteSession(sessionId);
 deleteSession(sessionId: string): Promise<void>
 ```
 
-Sandboxからセッションを削除します。
+Sandbox からセッションを削除します。
 
-**Parameters**:
+**パラメータ**:
 
-- `sessionId` _string_ - 削除するセッションの一意識別子
+- `sessionId` _string_ - 削除するセッションの一意の識別子
 
 
-**Returns**:
+**戻り値**:
 
 - `Promise<void>`
 
-**Example:**
+**例:**
 
 ```ts
-// 完了したセッションをクリーンアップ
+// Clean up a completed session
 await process.deleteSession('my-session');
 ```
 
