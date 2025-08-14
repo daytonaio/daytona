@@ -339,6 +339,17 @@ export class SnapshotManager {
 
     await Promise.all(
       snapshots.map(async (snapshot) => {
+        const countActiveSnapshots = await this.snapshotRepository.count({
+          where: {
+            state: SnapshotState.ACTIVE,
+            internalName: snapshot.internalName,
+          },
+        })
+
+        if (countActiveSnapshots > 0) {
+          return
+        }
+
         await this.snapshotRunnerRepository.update(
           {
             snapshotRef: snapshot.internalName,
