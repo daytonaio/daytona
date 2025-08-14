@@ -26,10 +26,9 @@ const releaseLink = `https://github.com/daytonaio/daytona/releases/tag/v${releas
       >
     </p>
     <p>
-      <Fragment
-        set:html={textArrowIcon}
-      />Astro.props.labels['footer.latestUpdates'] - <a
-        href="https://github.com/daytonaio/daytona/commits/main/"
+      <Fragment set:html={textArrowIcon} />{
+        Astro.props.labels['footer.latestUpdates']
+      } - <a href="https://github.com/daytonaio/daytona/commits/main/"
         >{Astro.props.labels['footer.viewChangelog']}</a
       >
     </p>
