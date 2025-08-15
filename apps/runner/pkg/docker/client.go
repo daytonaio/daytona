@@ -8,6 +8,7 @@ import (
 	"sync"
 
 	"github.com/daytonaio/runner/pkg/cache"
+	"github.com/daytonaio/runner/pkg/netrules"
 	"github.com/docker/docker/client"
 )
 
@@ -21,6 +22,7 @@ type DockerClientConfig struct {
 	AWSSecretAccessKey    string
 	DaemonPath            string
 	ComputerUsePluginPath string
+	NetRulesManager       *netrules.NetRulesManager
 }
 
 func NewDockerClient(config DockerClientConfig) *DockerClient {
@@ -35,6 +37,7 @@ func NewDockerClient(config DockerClientConfig) *DockerClient {
 		volumeMutexes:         make(map[string]*sync.Mutex),
 		daemonPath:            config.DaemonPath,
 		computerUsePluginPath: config.ComputerUsePluginPath,
+		netRulesManager:       config.NetRulesManager,
 	}
 }
 
@@ -54,4 +57,5 @@ type DockerClient struct {
 	volumeMutexesMutex    sync.Mutex
 	daemonPath            string
 	computerUsePluginPath string
+	netRulesManager       *netrules.NetRulesManager
 }

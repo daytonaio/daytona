@@ -72,6 +72,18 @@ export interface CreateSandboxDTO {
    * @type {string}
    * @memberof CreateSandboxDTO
    */
+  networkAllowList?: string
+  /**
+   *
+   * @type {boolean}
+   * @memberof CreateSandboxDTO
+   */
+  networkBlockAll?: boolean
+  /**
+   *
+   * @type {string}
+   * @memberof CreateSandboxDTO
+   */
   osUser: string
   /**
    *

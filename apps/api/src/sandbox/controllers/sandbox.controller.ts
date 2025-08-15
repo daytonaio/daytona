@@ -65,6 +65,7 @@ import { SandboxStateUpdatedEvent } from '../events/sandbox-state-updated.event'
 import { Audit, MASKED_AUDIT_VALUE, TypedRequest } from '../../audit/decorators/audit.decorator'
 import { AuditAction } from '../../audit/enums/audit-action.enum'
 import { AuditTarget } from '../../audit/enums/audit-target.enum'
+// import { UpdateSandboxNetworkSettingsDto } from '../dto/update-sandbox-network-settings.dto'
 
 @ApiTags('sandbox')
 @Controller('sandbox')
@@ -169,6 +170,8 @@ export class SandboxController {
         autoDeleteInterval: req.body?.autoDeleteInterval,
         volumes: req.body?.volumes,
         buildInfo: req.body?.buildInfo,
+        networkBlockAll: req.body?.networkBlockAll,
+        networkAllowList: req.body?.networkAllowList,
       }),
     },
   })
@@ -542,6 +545,45 @@ export class SandboxController {
   ): Promise<void> {
     await this.sandboxService.setAutoDeleteInterval(sandboxId, interval)
   }
+
+  // TODO: Network settings endpoint will not be enabled for now
+  // @Post(':sandboxId/network-settings')
+  // @ApiOperation({
+  //   summary: 'Update sandbox network settings',
+  //   operationId: 'updateNetworkSettings',
+  // })
+  // @ApiParam({
+  //   name: 'sandboxId',
+  //   description: 'ID of the sandbox',
+  //   type: 'string',
+  // })
+  // @ApiResponse({
+  //   status: 200,
+  //   description: 'Network settings have been updated',
+  // })
+  // @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
+  // @UseGuards(SandboxAccessGuard)
+  // @Audit({
+  //   action: AuditAction.UPDATE_NETWORK_SETTINGS,
+  //   targetType: AuditTarget.SANDBOX,
+  //   targetIdFromRequest: (req) => req.params.sandboxId,
+  //   requestMetadata: {
+  //     body: (req: TypedRequest<UpdateSandboxNetworkSettingsDto>) => ({
+  //       networkBlockAll: req.body?.networkBlockAll,
+  //       networkAllowList: req.body?.networkAllowList,
+  //     }),
+  //   },
+  // })
+  // async updateNetworkSettings(
+  //   @Param('sandboxId') sandboxId: string,
+  //   @Body() networkSettings: UpdateSandboxNetworkSettingsDto,
+  // ): Promise<void> {
+  //   await this.sandboxService.updateNetworkSettings(
+  //     sandboxId,
+  //     networkSettings.networkBlockAll,
+  //     networkSettings.networkAllowList,
+  //   )
+  // }
 
   @Post(':sandboxId/archive')
   @HttpCode(200)

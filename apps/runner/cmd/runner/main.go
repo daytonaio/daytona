@@ -20,6 +20,7 @@ import (
 	"github.com/daytonaio/runner/pkg/daemon"
 	"github.com/daytonaio/runner/pkg/docker"
 	"github.com/daytonaio/runner/pkg/models"
+	"github.com/daytonaio/runner/pkg/netrules"
 	"github.com/daytonaio/runner/pkg/runner"
 	"github.com/daytonaio/runner/pkg/services"
 	"github.com/docker/docker/client"
@@ -50,6 +51,24 @@ func main() {
 		log.Error(err)
 		return
 	}
+
+	// Initialize net rules manager
+	persistent := cfg.Environment == "production"
+	netRulesManager, err := netrules.NewNetRulesManager(persistent)
+	if err != nil {
+		log.Error(err)
+		return
+	}
+
+	// Start Docker events monitor
+	monitor := docker.NewDockerMonitor(cli, netRulesManager)
+	go func() {
+		err = monitor.Start()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}()
+	defer monitor.Stop()
 
 	runnerCache := cache.NewInMemoryRunnerCache(cache.InMemoryRunnerCacheConfig{
 		Cache:         make(map[string]*models.CacheData),
@@ -84,6 +103,7 @@ func main() {
 		AWSSecretAccessKey:    cfg.AWSSecretAccessKey,
 		DaemonPath:            daemonPath,
 		ComputerUsePluginPath: pluginPath,
+		NetRulesManager:       netRulesManager,
 	})
 
 	sandboxService := services.NewSandboxService(runnerCache, dockerClient)
@@ -92,10 +112,11 @@ func main() {
 	metricsService.StartMetricsCollection(ctx)
 
 	_ = runner.GetInstance(&runner.RunnerInstanceConfig{
-		Cache:          runnerCache,
-		Docker:         dockerClient,
-		SandboxService: sandboxService,
-		MetricsService: metricsService,
+		Cache:           runnerCache,
+		Docker:          dockerClient,
+		SandboxService:  sandboxService,
+		MetricsService:  metricsService,
+		NetRulesManager: netRulesManager,
 	})
 
 	apiServerErrChan := make(chan error)

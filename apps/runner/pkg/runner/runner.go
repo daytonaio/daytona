@@ -8,21 +8,24 @@ import (
 
 	"github.com/daytonaio/runner/pkg/cache"
 	"github.com/daytonaio/runner/pkg/docker"
+	"github.com/daytonaio/runner/pkg/netrules"
 	"github.com/daytonaio/runner/pkg/services"
 )
 
 type RunnerInstanceConfig struct {
-	Cache          cache.IRunnerCache
-	Docker         *docker.DockerClient
-	SandboxService *services.SandboxService
-	MetricsService *services.MetricsService
+	Cache           cache.IRunnerCache
+	Docker          *docker.DockerClient
+	SandboxService  *services.SandboxService
+	MetricsService  *services.MetricsService
+	NetRulesManager *netrules.NetRulesManager
 }
 
 type Runner struct {
-	Cache          cache.IRunnerCache
-	Docker         *docker.DockerClient
-	SandboxService *services.SandboxService
-	MetricsService *services.MetricsService
+	Cache           cache.IRunnerCache
+	Docker          *docker.DockerClient
+	SandboxService  *services.SandboxService
+	MetricsService  *services.MetricsService
+	NetRulesManager *netrules.NetRulesManager
 }
 
 var runner *Runner
@@ -38,10 +41,11 @@ func GetInstance(config *RunnerInstanceConfig) *Runner {
 		}
 
 		runner = &Runner{
-			Cache:          config.Cache,
-			Docker:         config.Docker,
-			SandboxService: config.SandboxService,
-			MetricsService: config.MetricsService,
+			Cache:           config.Cache,
+			Docker:          config.Docker,
+			SandboxService:  config.SandboxService,
+			MetricsService:  config.MetricsService,
+			NetRulesManager: config.NetRulesManager,
 		}
 	}
 

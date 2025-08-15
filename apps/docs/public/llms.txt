@@ -1,5 +1,5 @@
 # Daytona Documentation v0.0.0-dev
-# Generated on: 2025-07-31
+# Generated on: 2025-08-07
 
 # Daytona
 
@@ -134,6 +134,7 @@
 - [Creating Sandboxes](https://daytona.io/docs/sandbox-management#creating-sandboxes)
 - [Basic Sandbox Creation](https://daytona.io/docs/sandbox-management#basic-sandbox-creation)
 - [Sandbox Resources](https://daytona.io/docs/sandbox-management#sandbox-resources)
+- [Network Settings](https://daytona.io/docs/sandbox-management#network-settings)
 - [Sandbox Information](https://daytona.io/docs/sandbox-management#sandbox-information)
 - [Stop and Start Sandbox](https://daytona.io/docs/sandbox-management#stop-and-start-sandbox)
 - [Archive Sandbox](https://daytona.io/docs/sandbox-management#archive-sandbox)

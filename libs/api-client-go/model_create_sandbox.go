@@ -30,6 +30,10 @@ type CreateSandbox struct {
 	Labels *map[string]string `json:"labels,omitempty"`
 	// Whether the sandbox http preview is publicly accessible
 	Public *bool `json:"public,omitempty"`
+	// Whether to block all network access for the sandbox
+	NetworkBlockAll *bool `json:"networkBlockAll,omitempty"`
+	// Comma-separated list of allowed CIDR network addresses for the sandbox
+	NetworkAllowList *string `json:"networkAllowList,omitempty"`
 	// The sandbox class type
 	Class *string `json:"class,omitempty"`
 	// The target (region) where the sandbox will be created
@@ -229,6 +233,70 @@ func (o *CreateSandbox) HasPublic() bool {
 // SetPublic gets a reference to the given bool and assigns it to the Public field.
 func (o *CreateSandbox) SetPublic(v bool) {
 	o.Public = &v
+}
+
+// GetNetworkBlockAll returns the NetworkBlockAll field value if set, zero value otherwise.
+func (o *CreateSandbox) GetNetworkBlockAll() bool {
+	if o == nil || IsNil(o.NetworkBlockAll) {
+		var ret bool
+		return ret
+	}
+	return *o.NetworkBlockAll
+}
+
+// GetNetworkBlockAllOk returns a tuple with the NetworkBlockAll field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *CreateSandbox) GetNetworkBlockAllOk() (*bool, bool) {
+	if o == nil || IsNil(o.NetworkBlockAll) {
+		return nil, false
+	}
+	return o.NetworkBlockAll, true
+}
+
+// HasNetworkBlockAll returns a boolean if a field has been set.
+func (o *CreateSandbox) HasNetworkBlockAll() bool {
+	if o != nil && !IsNil(o.NetworkBlockAll) {
+		return true
+	}
+
+	return false
+}
+
+// SetNetworkBlockAll gets a reference to the given bool and assigns it to the NetworkBlockAll field.
+func (o *CreateSandbox) SetNetworkBlockAll(v bool) {
+	o.NetworkBlockAll = &v
+}
+
+// GetNetworkAllowList returns the NetworkAllowList field value if set, zero value otherwise.
+func (o *CreateSandbox) GetNetworkAllowList() string {
+	if o == nil || IsNil(o.NetworkAllowList) {
+		var ret string
+		return ret
+	}
+	return *o.NetworkAllowList
+}
+
+// GetNetworkAllowListOk returns a tuple with the NetworkAllowList field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *CreateSandbox) GetNetworkAllowListOk() (*string, bool) {
+	if o == nil || IsNil(o.NetworkAllowList) {
+		return nil, false
+	}
+	return o.NetworkAllowList, true
+}
+
+// HasNetworkAllowList returns a boolean if a field has been set.
+func (o *CreateSandbox) HasNetworkAllowList() bool {
+	if o != nil && !IsNil(o.NetworkAllowList) {
+		return true
+	}
+
+	return false
+}
+
+// SetNetworkAllowList gets a reference to the given string and assigns it to the NetworkAllowList field.
+func (o *CreateSandbox) SetNetworkAllowList(v string) {
+	o.NetworkAllowList = &v
 }
 
 // GetClass returns the Class field value if set, zero value otherwise.
@@ -607,6 +675,12 @@ func (o CreateSandbox) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.Public) {
 		toSerialize["public"] = o.Public
+	}
+	if !IsNil(o.NetworkBlockAll) {
+		toSerialize["networkBlockAll"] = o.NetworkBlockAll
+	}
+	if !IsNil(o.NetworkAllowList) {
+		toSerialize["networkAllowList"] = o.NetworkAllowList
 	}
 	if !IsNil(o.Class) {
 		toSerialize["class"] = o.Class
