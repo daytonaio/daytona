@@ -31,4 +31,8 @@ export function validateNetworkAllowList(networkAllowList: string): void {
       throw new Error(`Invalid CIDR prefix length: ${network}. Prefix must be between 0 and 32`)
     }
   }
+
+  if (networks.length > 5) {
+    throw new Error(`Network allow list cannot contain more than 5 networks`)
+  }
 }
