@@ -50,18 +50,18 @@ from daytona import Daytona, CreateSandboxFromSnapshotParams
 daytona = Daytona()
 
 sandbox = daytona.create(CreateSandboxFromSnapshotParams(
-    snapshot="my-snapshot-name",
+snapshot="my-snapshot-name",
 ))
 
 response = sandbox.process.code_run('print("Sum of 3 and 4 is " + str(3 + 4))')
 if response.exit_code != 0:
-    print(f"Error running code: {response.exit_code} {response.result}")
+print(f"Error running code: {response.exit_code} {response.result}")
 else:
-    print(response.result)
+print(response.result)
 
 sandbox.delete()
 
-```
+````
 
 </TabItem>
 <TabItem label="TypeScript" icon="seti:typescript">
@@ -95,14 +95,14 @@ async function main() {
 }
 
 main()
-```
+````
 
 </TabItem>
 </Tabs>
 
 ### Snapshot Resources
 
-Snapshots contain the resource requirements for Daytona Sandboxes. By default, Daytona Sandboxes come with **1 vCPU**, **1GB RAM**, and **3GiB disk**.  
+Snapshots contain the resource requirements for Daytona Sandboxes. By default, Daytona Sandboxes come with **1 vCPU**, **1GB RAM**, and **3GiB disk**.
 
 Need more power? Use the `Resources` class to define exactly what you need: CPU, memory, and disk space are all customizable.
 
@@ -124,27 +124,27 @@ daytona = Daytona()
 # Create a Snapshot with custom resources
 
 daytona.snapshot.create(
-    CreateSnapshotParams(
-        name="my-snapshot",
-        image=Image.debian_slim("3.12"),
-        resources=Resources(
-          cpu=2,
-          memory=4,
-          disk=8,
-        ),
-    ),
-    on_logs=print,
+CreateSnapshotParams(
+name="my-snapshot",
+image=Image.debian_slim("3.12"),
+resources=Resources(
+cpu=2,
+memory=4,
+disk=8,
+),
+),
+on_logs=print,
 )
 
 # Create a Sandbox with custom Snapshot
 
 sandbox = daytona.create(
-    CreateSandboxFromSnapshotParams(
-        snapshot="my-snapshot",
-    )
+CreateSandboxFromSnapshotParams(
+snapshot="my-snapshot",
+)
 )
 
-```
+````
 </TabItem>
 <TabItem label="TypeScript" icon="seti:typescript">
 ```typescript
@@ -174,7 +174,7 @@ async function main() {
 }
 
 main();
-```
+````
 
 </TabItem>
 </Tabs>
