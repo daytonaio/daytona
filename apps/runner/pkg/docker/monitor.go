@@ -139,14 +139,23 @@ func (dm *DockerMonitor) handleContainerEvent(event events.Message) {
 			return
 		}
 		shortContainerID := containerID[:12]
-		dm.netRulesManager.AssignNetworkRules(shortContainerID, ct.NetworkSettings.IPAddress)
+		err = dm.netRulesManager.AssignNetworkRules(shortContainerID, ct.NetworkSettings.IPAddress)
+		if err != nil {
+			log.Errorf("Error assigning network rules: %v", err)
+		}
 	case "stop":
 	case "kill":
 		shortContainerID := containerID[:12]
-		dm.netRulesManager.UnassignNetworkRules(shortContainerID)
+		err := dm.netRulesManager.UnassignNetworkRules(shortContainerID)
+		if err != nil {
+			log.Errorf("Error unassigning network rules: %v", err)
+		}
 	case "destroy":
 		shortContainerID := containerID[:12]
-		dm.netRulesManager.DeleteNetworkRules(shortContainerID)
+		err := dm.netRulesManager.DeleteNetworkRules(shortContainerID)
+		if err != nil {
+			log.Errorf("Error deleting network rules: %v", err)
+		}
 	}
 }
 
