@@ -21,7 +21,7 @@ import { RequiredOrganizationMemberRole } from '../decorators/required-organizat
 import { CreateOrganizationDto } from '../dto/create-organization.dto'
 import { OrganizationDto } from '../dto/organization.dto'
 import { OrganizationInvitationDto } from '../dto/organization-invitation.dto'
-import { OverviewDto } from '../dto/overview.dto'
+import { OrganizationUsageOverviewDto } from '../dto/organization-usage-overview.dto'
 import { UpdateOrganizationQuotaDto } from '../dto/update-organization-quota.dto'
 import { OrganizationMemberRole } from '../enums/organization-member-role.enum'
 import { OrganizationActionGuard } from '../guards/organization-action.guard'
@@ -40,6 +40,7 @@ import { Audit, TypedRequest } from '../../audit/decorators/audit.decorator'
 import { AuditAction } from '../../audit/enums/audit-action.enum'
 import { AuditTarget } from '../../audit/enums/audit-target.enum'
 import { EmailUtils } from '../../common/utils/email.util'
+import { OrganizationUsageService } from '../services/organization-usage.service'
 
 @ApiTags('organizations')
 @Controller('organizations')
@@ -52,6 +53,7 @@ export class OrganizationController {
     private readonly organizationService: OrganizationService,
     private readonly organizationUserService: OrganizationUserService,
     private readonly organizationInvitationService: OrganizationInvitationService,
+    private readonly organizationUsageService: OrganizationUsageService,
     private readonly userService: UserService,
   ) {}
 
@@ -266,7 +268,7 @@ export class OrganizationController {
   @ApiResponse({
     status: 200,
     description: 'Current usage overview',
-    type: OverviewDto,
+    type: OrganizationUsageOverviewDto,
   })
   @ApiParam({
     name: 'organizationId',
@@ -274,8 +276,8 @@ export class OrganizationController {
     type: 'string',
   })
   @UseGuards(AuthGuard('jwt'), OrganizationActionGuard)
-  async getUsageOverview(@Param('organizationId') organizationId: string): Promise<OverviewDto> {
-    return this.organizationService.getUsageOverview(organizationId)
+  async getUsageOverview(@Param('organizationId') organizationId: string): Promise<OrganizationUsageOverviewDto> {
+    return this.organizationUsageService.getUsageOverview(organizationId)
   }
 
   @Patch('/:organizationId/quota')

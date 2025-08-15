@@ -373,7 +373,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UsageOverview'
+                $ref: '#/components/schemas/OrganizationUsageOverview'
           description: Current usage overview
       security:
         - bearer: []
@@ -6413,19 +6413,20 @@ components:
         - totalMemoryQuota
         - updatedAt
       type: object
-    UsageOverview:
+    OrganizationUsageOverview:
       example:
         totalCpuQuota: 0.8008281904610115
-        currentDiskUsage: 7.061401241503109
-        currentMemoryUsage: 2.3021358869347655
-        currentCpuUsage: 5.637376656633329
-        totalGpuQuota: 6.027456183070403
-        totalMemoryQuota: 1.4658129805029452
-        totalDiskQuota: 5.962133916683182
+        totalSnapshotQuota: 7.061401241503109
+        currentDiskUsage: 2.3021358869347655
+        currentVolumeUsage: 2.027123023002322
+        currentMemoryUsage: 5.637376656633329
+        currentCpuUsage: 5.962133916683182
+        totalVolumeQuota: 3.616076749251911
+        currentSnapshotUsage: 9.301444243932576
+        totalMemoryQuota: 6.027456183070403
+        totalDiskQuota: 1.4658129805029452
       properties:
         totalCpuQuota:
-          type: number
-        totalGpuQuota:
           type: number
         totalMemoryQuota:
           type: number
@@ -6437,14 +6438,25 @@ components:
           type: number
         currentDiskUsage:
           type: number
+        totalSnapshotQuota:
+          type: number
+        currentSnapshotUsage:
+          type: number
+        totalVolumeQuota:
+          type: number
+        currentVolumeUsage:
+          type: number
       required:
         - currentCpuUsage
         - currentDiskUsage
         - currentMemoryUsage
+        - currentSnapshotUsage
+        - currentVolumeUsage
         - totalCpuQuota
         - totalDiskQuota
-        - totalGpuQuota
         - totalMemoryQuota
+        - totalSnapshotQuota
+        - totalVolumeQuota
       type: object
     UpdateOrganizationQuota:
       example:

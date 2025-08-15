@@ -5,12 +5,11 @@
 
 import { ApiProperty, ApiSchema } from '@nestjs/swagger'
 
-@ApiSchema({ name: 'UsageOverview' })
-export class OverviewDto {
+@ApiSchema({ name: 'OrganizationUsageOverview' })
+export class OrganizationUsageOverviewDto {
+  // Sandbox usage
   @ApiProperty()
   totalCpuQuota: number
-  @ApiProperty()
-  totalGpuQuota: number
   @ApiProperty()
   totalMemoryQuota: number
   @ApiProperty()
@@ -22,4 +21,16 @@ export class OverviewDto {
   currentMemoryUsage: number
   @ApiProperty()
   currentDiskUsage: number
+
+  // Snapshot usage
+  @ApiProperty()
+  totalSnapshotQuota: number
+  @ApiProperty()
+  currentSnapshotUsage: number
+
+  // Volume usage
+  @ApiProperty()
+  totalVolumeQuota: number
+  @ApiProperty()
+  currentVolumeUsage: number
 }
