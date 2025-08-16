@@ -146,6 +146,7 @@
     "sonner": "^1.7.4",
     "starlight-openapi": "^0.19.1",
     "suspend-react": "^0.1.3",
+    "svix": "^1.73.0",
     "tailwind": "^4.0.0",
     "tailwind-merge": "^3.0.1",
     "tailwindcss-animate": "^1.0.7",
