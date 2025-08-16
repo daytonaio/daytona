@@ -25,6 +25,7 @@ import { EmailModule } from './email/email.module'
 import { TypedConfigService } from './config/typed-config.service'
 import { TypedConfigModule } from './config/typed-config.module'
 import { NotificationModule } from './notification/notification.module'
+import { WebhookModule } from './webhook/webhook.module'
 import { ObjectStorageModule } from './object-storage/object-storage.module'
 import { CustomNamingStrategy } from './common/utils/naming-strategy.util'
 import { MaintenanceMiddleware } from './common/middleware/maintenance.middleware'
@@ -106,6 +107,7 @@ import { AuditModule } from './audit/audit.module'
       },
     }),
     NotificationModule,
+    WebhookModule,
     ObjectStorageModule,
     AuditModule,
   ],
