@@ -191,4 +191,21 @@ export class WebhookService implements OnModuleInit {
   isEnabled(): boolean {
     return this.svix !== null
   }
+
+  /**
+   * Get Svix Consumer App Portal access URL for an organization
+   */
+  async getAppPortalAccessUrl(organizationId: string): Promise<string> {
+    if (!this.svix) {
+      throw new Error('Svix not configured')
+    }
+    try {
+      const dashboard = await this.svix.authentication.appPortalAccess(organizationId, {})
+      this.logger.debug(`Generated app portal access URL for organization ${organizationId}`)
+      return dashboard.url
+    } catch (error) {
+      this.logger.error(`Failed to generate app portal access URL for organization ${organizationId}:`, error)
+      throw error
+    }
+  }
 }
