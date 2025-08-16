@@ -37,6 +37,40 @@ export class WebhookController {
     private readonly organizationService: OrganizationService,
   ) {}
 
+  @Post('organizations/:organizationId/app-portal-access')
+  @ApiOperation({ summary: 'Get Svix Consumer App Portal access URL for an organization' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'App Portal access URL generated successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        url: { type: 'string', description: 'App Portal access URL' },
+      },
+    },
+  })
+  @ApiResponse({
+    status: HttpStatus.FORBIDDEN,
+    description: 'User does not have access to this organization',
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'Organization not found',
+  })
+  async getAppPortalAccess(@Param('organizationId') organizationId: string): Promise<{ url: string }> {
+    // Check if user has access to this organization
+    const organization = await this.organizationService.findOne(organizationId)
+    if (!organization) {
+      throw new NotFoundException('Organization not found')
+    }
+
+    // TODO: Add proper authorization check here
+    // For now, we'll assume the user has access if they can see the organization
+
+    const url = await this.webhookService.getAppPortalAccessUrl(organizationId)
+    return { url }
+  }
+
   // @Post('organizations/:organizationId/endpoints')
   // @ApiOperation({ summary: 'Create a new webhook endpoint for an organization' })
   // @ApiResponse({
@@ -57,12 +91,6 @@ export class WebhookController {
   //   @Body() createWebhookEndpointDto: CreateWebhookEndpointDto,
   // ): Promise<WebhookEndpointDto> {
   //   // Check if user has access to this organization
-  //   const organization = await this.organizationService.findOne(organizationId)
-  //   if (!organization) {
-  //     throw new NotFoundException('Organization not found')
-  //   }
-
-  //   // TODO: Add proper authorization check here
   //   // For now, we'll assume the user has access if they can see the organization
 
   //   const endpoint = await this.webhookService.createEndpoint(
