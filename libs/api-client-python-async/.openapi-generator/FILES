@@ -123,6 +123,8 @@ daytona_api_client_async/models/session_execute_response.py
 daytona_api_client_async/models/set_snapshot_general_status_dto.py
 daytona_api_client_async/models/snapshot_dto.py
 daytona_api_client_async/models/snapshot_state.py
+daytona_api_client_async/models/ssh_access_dto.py
+daytona_api_client_async/models/ssh_access_validation_dto.py
 daytona_api_client_async/models/storage_access_dto.py
 daytona_api_client_async/models/update_assigned_organization_roles.py
 daytona_api_client_async/models/update_docker_registry.py

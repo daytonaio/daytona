@@ -64,6 +64,7 @@ func (c *InMemoryRunnerCache) SetSandboxState(ctx context.Context, sandboxId str
 		}
 	} else {
 		data.SandboxState = state
+		// SSH passwords are now stored in files, no need to preserve
 	}
 
 	c.cache[sandboxId] = data
@@ -87,6 +88,11 @@ func (c *InMemoryRunnerCache) SetBackupState(ctx context.Context, sandboxId stri
 		}
 	} else {
 		data.BackupState = state
+		if err != nil {
+			errorReason := err.Error()
+			data.BackupErrorReason = &errorReason
+		}
+		// SSH passwords are now stored in files, no need to preserve
 	}
 
 	c.cache[sandboxId] = data
@@ -124,6 +130,7 @@ func (c *InMemoryRunnerCache) Remove(ctx context.Context, sandboxId string) {
 	defer c.mutex.Unlock()
 
 	destructionTime := time.Now().Add(time.Duration(c.retentionDays) * 24 * time.Hour)
+
 	c.cache[sandboxId] = &models.CacheData{
 		SandboxState:    enums.SandboxStateDestroyed,
 		BackupState:     enums.BackupStateNone,

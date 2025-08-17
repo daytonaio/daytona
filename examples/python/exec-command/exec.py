@@ -7,6 +7,7 @@ def main():
     params = CreateSandboxFromImageParams(
         image="python:3.9.23-slim",
         language="python",
+        auto_stop_interval=60,
         resources=Resources(
             cpu=1,
             memory=1,
@@ -29,7 +30,7 @@ def main():
     else:
         print(response.result)
 
-    daytona.delete(sandbox)
+    # daytona.delete(sandbox)
 
 
 if __name__ == "__main__":

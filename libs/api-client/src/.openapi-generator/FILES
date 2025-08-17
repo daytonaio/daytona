@@ -124,6 +124,8 @@ models/session.ts
 models/set-snapshot-general-status-dto.ts
 models/snapshot-dto.ts
 models/snapshot-state.ts
+models/ssh-access-dto.ts
+models/ssh-access-validation-dto.ts
 models/storage-access-dto.ts
 models/update-assigned-organization-roles.ts
 models/update-docker-registry.ts

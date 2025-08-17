@@ -18,6 +18,14 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// min returns the smaller of two integers
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+
 type Server struct {
 	ProjectDir        string
 	DefaultProjectDir string
@@ -29,6 +37,27 @@ func (s *Server) Start() error {
 
 	sshServer := ssh.Server{
 		Addr: fmt.Sprintf(":%d", config.SSH_PORT),
+		PublicKeyHandler: func(ctx ssh.Context, key ssh.PublicKey) bool {
+			// Reject all public key authentication attempts
+			log.Debugf("Public key authentication rejected for user: %s", ctx.User())
+			return false
+		},
+		PasswordHandler: func(ctx ssh.Context, password string) bool {
+			log.Debugf("Password authentication attempt for user: %s", ctx.User())
+			if len(password) > 0 {
+				log.Debugf("Received password length: %d, starts with: %s", len(password), password[:min(len(password), 3)])
+			} else {
+				log.Debugf("Received empty password")
+			}
+			// Allow authentication with no password
+			authenticated := len(password) == 0
+			if authenticated {
+				log.Debugf("No-password authentication succeeded for user: %s", ctx.User())
+			} else {
+				log.Debugf("Password authentication failed for user: %s (password provided)", ctx.User())
+			}
+			return authenticated
+		},
 		Handler: func(session ssh.Session) {
 			switch ss := session.Subsystem(); ss {
 			case "":

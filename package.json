@@ -243,24 +243,24 @@
   },
   "lint-staged": {
     "*.{ts,tsx,astro}": [
-      "eslint --cache --fix",
-      "prettier --write"
+      "yarn eslint --cache --fix",
+      "yarn prettier --write"
     ],
     "*.go": [
       "gofmt -w"
     ],
     "*.{mdx,md}": [
-      "markdownlint-cli2 --fix"
+      "yarn markdownlint-cli2 --fix"
     ],
     "!(libs/api-client-python/**/*|libs/api-client-python-async/**/*)*.py": [
-      "isort",
-      "black --config pyproject.toml",
-      "pylint -sn"
+      ".venv/bin/isort",
+      ".venv/bin/black --config pyproject.toml",
+      ".venv/bin/pylint -sn"
     ],
     "*.ipynb": [
-      "nbqa isort",
-      "black --config pyproject.toml",
-      "nbqa pylint -sn"
+      ".venv/bin/nbqa isort",
+      ".venv/bin/black --config pyproject.toml",
+      ".venv/bin/nbqa pylint -sn"
     ]
   }
 }

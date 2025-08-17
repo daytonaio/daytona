@@ -39,6 +39,10 @@ import type { PortPreviewUrl } from '../models'
 import type { Sandbox } from '../models'
 // @ts-ignore
 import type { SandboxLabels } from '../models'
+// @ts-ignore
+import type { SshAccessDto } from '../models'
+// @ts-ignore
+import type { SshAccessValidationDto } from '../models'
 /**
  * SandboxApi - axios parameter creator
  * @export
@@ -183,6 +187,60 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
       localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
       localVarRequestOptions.data = serializeDataIfNeeded(createSandbox, localVarRequestOptions, configuration)
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     *
+     * @summary Create SSH access for sandbox
+     * @param {string} sandboxId ID of the sandbox
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {number} [expiresInMinutes] Expiration time in minutes (default: 60)
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    createSshAccess: async (
+      sandboxId: string,
+      xDaytonaOrganizationID?: string,
+      expiresInMinutes?: number,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'sandboxId' is not null or undefined
+      assertParamExists('createSshAccess', 'sandboxId', sandboxId)
+      const localVarPath = `/sandbox/{sandboxId}/ssh-access`.replace(
+        `{${'sandboxId'}}`,
+        encodeURIComponent(String(sandboxId)),
+      )
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      // authentication bearer required
+      // http bearer authentication required
+      await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+      // authentication oauth2 required
+
+      if (expiresInMinutes !== undefined) {
+        localVarQueryParameter['expiresInMinutes'] = expiresInMinutes
+      }
+
+      if (xDaytonaOrganizationID != null) {
+        localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
+      }
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
 
       return {
         url: toPathString(localVarUrlObj),
@@ -514,6 +572,60 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
     },
     /**
      *
+     * @summary Revoke SSH access for sandbox
+     * @param {string} sandboxId ID of the sandbox
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {string} [token] SSH access token to revoke. If not provided, all SSH access for the sandbox will be revoked.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    revokeSshAccess: async (
+      sandboxId: string,
+      xDaytonaOrganizationID?: string,
+      token?: string,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'sandboxId' is not null or undefined
+      assertParamExists('revokeSshAccess', 'sandboxId', sandboxId)
+      const localVarPath = `/sandbox/{sandboxId}/ssh-access`.replace(
+        `{${'sandboxId'}}`,
+        encodeURIComponent(String(sandboxId)),
+      )
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      // authentication bearer required
+      // http bearer authentication required
+      await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+      // authentication oauth2 required
+
+      if (token !== undefined) {
+        localVarQueryParameter['token'] = token
+      }
+
+      if (xDaytonaOrganizationID != null) {
+        localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
+      }
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     *
      * @summary Set sandbox auto-archive interval
      * @param {string} sandboxId ID of the sandbox
      * @param {number} interval Auto-archive interval in minutes (0 means the maximum interval will be used)
@@ -812,6 +924,55 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
         options: localVarRequestOptions,
       }
     },
+    /**
+     *
+     * @summary Validate SSH access for sandbox
+     * @param {string} token SSH access token to validate
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    validateSshAccess: async (
+      token: string,
+      xDaytonaOrganizationID?: string,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'token' is not null or undefined
+      assertParamExists('validateSshAccess', 'token', token)
+      const localVarPath = `/sandbox/ssh-access/validate`
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      // authentication bearer required
+      // http bearer authentication required
+      await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+      // authentication oauth2 required
+
+      if (token !== undefined) {
+        localVarQueryParameter['token'] = token
+      }
+
+      if (xDaytonaOrganizationID != null) {
+        localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
+      }
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
   }
 }
 
@@ -897,6 +1058,38 @@ export const SandboxApiFp = function (configuration?: Configuration) {
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
         operationServerMap['SandboxApi.createSandbox']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
+    /**
+     *
+     * @summary Create SSH access for sandbox
+     * @param {string} sandboxId ID of the sandbox
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {number} [expiresInMinutes] Expiration time in minutes (default: 60)
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async createSshAccess(
+      sandboxId: string,
+      xDaytonaOrganizationID?: string,
+      expiresInMinutes?: number,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<SshAccessDto>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.createSshAccess(
+        sandboxId,
+        xDaytonaOrganizationID,
+        expiresInMinutes,
+        options,
+      )
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['SandboxApi.createSshAccess']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -1102,6 +1295,38 @@ export const SandboxApiFp = function (configuration?: Configuration) {
     },
     /**
      *
+     * @summary Revoke SSH access for sandbox
+     * @param {string} sandboxId ID of the sandbox
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {string} [token] SSH access token to revoke. If not provided, all SSH access for the sandbox will be revoked.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async revokeSshAccess(
+      sandboxId: string,
+      xDaytonaOrganizationID?: string,
+      token?: string,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.revokeSshAccess(
+        sandboxId,
+        xDaytonaOrganizationID,
+        token,
+        options,
+      )
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['SandboxApi.revokeSshAccess']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
+    /**
+     *
      * @summary Set sandbox auto-archive interval
      * @param {string} sandboxId ID of the sandbox
      * @param {number} interval Auto-archive interval in minutes (0 means the maximum interval will be used)
@@ -1278,6 +1503,35 @@ export const SandboxApiFp = function (configuration?: Configuration) {
           configuration,
         )(axios, localVarOperationServerBasePath || basePath)
     },
+    /**
+     *
+     * @summary Validate SSH access for sandbox
+     * @param {string} token SSH access token to validate
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async validateSshAccess(
+      token: string,
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<SshAccessValidationDto>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.validateSshAccess(
+        token,
+        xDaytonaOrganizationID,
+        options,
+      )
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['SandboxApi.validateSshAccess']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
   }
 }
 
@@ -1337,6 +1591,25 @@ export const SandboxApiFactory = function (configuration?: Configuration, basePa
     ): AxiosPromise<Sandbox> {
       return localVarFp
         .createSandbox(createSandbox, xDaytonaOrganizationID, options)
+        .then((request) => request(axios, basePath))
+    },
+    /**
+     *
+     * @summary Create SSH access for sandbox
+     * @param {string} sandboxId ID of the sandbox
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {number} [expiresInMinutes] Expiration time in minutes (default: 60)
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    createSshAccess(
+      sandboxId: string,
+      xDaytonaOrganizationID?: string,
+      expiresInMinutes?: number,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<SshAccessDto> {
+      return localVarFp
+        .createSshAccess(sandboxId, xDaytonaOrganizationID, expiresInMinutes, options)
         .then((request) => request(axios, basePath))
     },
     /**
@@ -1457,6 +1730,25 @@ export const SandboxApiFactory = function (configuration?: Configuration, basePa
     },
     /**
      *
+     * @summary Revoke SSH access for sandbox
+     * @param {string} sandboxId ID of the sandbox
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {string} [token] SSH access token to revoke. If not provided, all SSH access for the sandbox will be revoked.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    revokeSshAccess(
+      sandboxId: string,
+      xDaytonaOrganizationID?: string,
+      token?: string,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<void> {
+      return localVarFp
+        .revokeSshAccess(sandboxId, xDaytonaOrganizationID, token, options)
+        .then((request) => request(axios, basePath))
+    },
+    /**
+     *
      * @summary Set sandbox auto-archive interval
      * @param {string} sandboxId ID of the sandbox
      * @param {number} interval Auto-archive interval in minutes (0 means the maximum interval will be used)
@@ -1565,6 +1857,23 @@ export const SandboxApiFactory = function (configuration?: Configuration, basePa
         .updatePublicStatus(sandboxId, isPublic, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
+    /**
+     *
+     * @summary Validate SSH access for sandbox
+     * @param {string} token SSH access token to validate
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    validateSshAccess(
+      token: string,
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<SshAccessValidationDto> {
+      return localVarFp
+        .validateSshAccess(token, xDaytonaOrganizationID, options)
+        .then((request) => request(axios, basePath))
+    },
   }
 }
 
@@ -1617,6 +1926,27 @@ export class SandboxApi extends BaseAPI {
   public createSandbox(createSandbox: CreateSandbox, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
     return SandboxApiFp(this.configuration)
       .createSandbox(createSandbox, xDaytonaOrganizationID, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   *
+   * @summary Create SSH access for sandbox
+   * @param {string} sandboxId ID of the sandbox
+   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+   * @param {number} [expiresInMinutes] Expiration time in minutes (default: 60)
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof SandboxApi
+   */
+  public createSshAccess(
+    sandboxId: string,
+    xDaytonaOrganizationID?: string,
+    expiresInMinutes?: number,
+    options?: RawAxiosRequestConfig,
+  ) {
+    return SandboxApiFp(this.configuration)
+      .createSshAccess(sandboxId, xDaytonaOrganizationID, expiresInMinutes, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
@@ -1750,6 +2080,27 @@ export class SandboxApi extends BaseAPI {
 
   /**
    *
+   * @summary Revoke SSH access for sandbox
+   * @param {string} sandboxId ID of the sandbox
+   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+   * @param {string} [token] SSH access token to revoke. If not provided, all SSH access for the sandbox will be revoked.
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof SandboxApi
+   */
+  public revokeSshAccess(
+    sandboxId: string,
+    xDaytonaOrganizationID?: string,
+    token?: string,
+    options?: RawAxiosRequestConfig,
+  ) {
+    return SandboxApiFp(this.configuration)
+      .revokeSshAccess(sandboxId, xDaytonaOrganizationID, token, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   *
    * @summary Set sandbox auto-archive interval
    * @param {string} sandboxId ID of the sandbox
    * @param {number} interval Auto-archive interval in minutes (0 means the maximum interval will be used)
@@ -1859,6 +2210,21 @@ export class SandboxApi extends BaseAPI {
   ) {
     return SandboxApiFp(this.configuration)
       .updatePublicStatus(sandboxId, isPublic, xDaytonaOrganizationID, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   *
+   * @summary Validate SSH access for sandbox
+   * @param {string} token SSH access token to validate
+   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof SandboxApi
+   */
+  public validateSshAccess(token: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
+    return SandboxApiFp(this.configuration)
+      .validateSshAccess(token, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 }

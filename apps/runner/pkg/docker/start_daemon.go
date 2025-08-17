@@ -5,6 +5,7 @@ package docker
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/daytonaio/common-go/pkg/timer"
 	"github.com/docker/docker/api/types/container"
@@ -16,7 +17,7 @@ func (d *DockerClient) startDaytonaDaemon(ctx context.Context, containerId strin
 	defer timer.Timer()()
 
 	execOptions := container.ExecOptions{
-		Cmd:          []string{"sh", "-c", "/usr/local/bin/daytona"},
+		Cmd:          []string{"sh", "-c", fmt.Sprintf("/usr/local/bin/daytona")},
 		AttachStdout: true,
 		AttachStderr: true,
 		Tty:          true,

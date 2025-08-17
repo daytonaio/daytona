@@ -14,4 +14,5 @@ type CacheData struct {
 	BackupState       enums.BackupState
 	BackupErrorReason *string
 	DestructionTime   *time.Time
+	SystemMetrics     *SystemMetrics
 }

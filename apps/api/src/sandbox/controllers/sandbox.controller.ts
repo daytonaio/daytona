@@ -63,6 +63,8 @@ import { Audit, MASKED_AUDIT_VALUE, TypedRequest } from '../../audit/decorators/
 import { AuditAction } from '../../audit/enums/audit-action.enum'
 import { AuditTarget } from '../../audit/enums/audit-target.enum'
 // import { UpdateSandboxNetworkSettingsDto } from '../dto/update-sandbox-network-settings.dto'
+import { SshAccessDto, SshAccessValidationDto } from '../dto/ssh-access.dto'
+import { Throttle } from '@nestjs/throttler'
 
 @ApiTags('sandbox')
 @Controller('sandbox')
@@ -716,6 +718,113 @@ export class SandboxController {
       next,
     )
     return logProxy.create()
+  }
+
+  @Post(':sandboxId/ssh-access')
+  @HttpCode(200)
+  @ApiOperation({
+    summary: 'Create SSH access for sandbox',
+    operationId: 'createSshAccess',
+  })
+  @ApiParam({
+    name: 'sandboxId',
+    description: 'ID of the sandbox',
+    type: 'string',
+  })
+  @ApiQuery({
+    name: 'expiresInMinutes',
+    required: false,
+    type: Number,
+    description: 'Expiration time in minutes (default: 60)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'SSH access has been created',
+    type: SshAccessDto,
+  })
+  @Throttle({ default: { limit: 100 } })
+  @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
+  @UseGuards(SandboxAccessGuard)
+  @Audit({
+    action: AuditAction.CREATE,
+    targetType: AuditTarget.SANDBOX,
+    targetIdFromRequest: (req) => req.params.sandboxId,
+    requestMetadata: {
+      query: (req) => ({
+        expiresInMinutes: req.query.expiresInMinutes,
+      }),
+    },
+  })
+  async createSshAccess(
+    @Param('sandboxId') sandboxId: string,
+    @Query('expiresInMinutes') expiresInMinutes?: number,
+  ): Promise<SshAccessDto> {
+    const sshAccess = await this.sandboxService.createSshAccess(sandboxId, expiresInMinutes)
+    return SshAccessDto.fromSshAccess(sshAccess)
+  }
+
+  @Delete(':sandboxId/ssh-access')
+  @HttpCode(200)
+  @ApiOperation({
+    summary: 'Revoke SSH access for sandbox',
+    operationId: 'revokeSshAccess',
+  })
+  @ApiParam({
+    name: 'sandboxId',
+    description: 'ID of the sandbox',
+    type: 'string',
+  })
+  @ApiQuery({
+    name: 'token',
+    required: false,
+    type: String,
+    description: 'SSH access token to revoke. If not provided, all SSH access for the sandbox will be revoked.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'SSH access has been revoked',
+  })
+  @Throttle({ default: { limit: 100 } })
+  @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
+  @UseGuards(SandboxAccessGuard)
+  @Audit({
+    action: AuditAction.DELETE,
+    targetType: AuditTarget.SANDBOX,
+    targetIdFromRequest: (req) => req.params.sandboxId,
+    requestMetadata: {
+      query: (req) => ({
+        token: req.query.token,
+      }),
+    },
+  })
+  async revokeSshAccess(@Param('sandboxId') sandboxId: string, @Query('token') token?: string): Promise<void> {
+    return this.sandboxService.revokeSshAccess(sandboxId, token)
+  }
+
+  @Get('ssh-access/validate')
+  @ApiOperation({
+    summary: 'Validate SSH access for sandbox',
+    operationId: 'validateSshAccess',
+  })
+  @ApiQuery({
+    name: 'token',
+    required: true,
+    type: String,
+    description: 'SSH access token to validate',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'SSH access validation result',
+    type: SshAccessValidationDto,
+  })
+  async validateSshAccess(@Query('token') token: string): Promise<SshAccessValidationDto> {
+    const result = await this.sandboxService.validateSshAccess(token)
+    return SshAccessValidationDto.fromValidationResult(
+      result.valid,
+      result.sandboxId,
+      result.runnerId,
+      result.runnerDomain,
+    )
   }
 
   private async waitForSandboxStarted(sandboxId: string, timeoutSeconds: number): Promise<SandboxDto> {
