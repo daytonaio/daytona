@@ -148,25 +148,14 @@ export class ApiKeyService {
   }
 
   async updateLastUsedAt(organizationId: string, userId: string, name: string, lastUsedAt: Date): Promise<void> {
-    const cooldownKey = `cooldown-${organizationId}-${userId}-${name}`
+    const cooldownKey = `api-key-last-used-update-${organizationId}-${userId}-${name}`
+
+    const aquired = await this.redisLockProvider.lock(cooldownKey, 10)
 
     // redis for cooldown period - 10 seconds
     // prevents database flooding when multiple requests are made at the same time
-    const lastUpdateTime = await this.redisLockProvider.get(cooldownKey)
-    if (lastUpdateTime) {
-      const timestamp = parseInt(lastUpdateTime)
-
-      if (isNaN(timestamp) || timestamp <= 0 || timestamp > Date.now()) {
-        this.logger.warn(`Invalid timestamp in Redis for API key ${name}: ${lastUpdateTime}, proceeding with update`)
-      } else {
-        const timeSinceLastUpdate = Date.now() - timestamp
-        const tenSecondsInMs = 10 * 1000
-
-        if (timeSinceLastUpdate < tenSecondsInMs) {
-          this.logger.debug(`Skipping update for API key ${name} - last update was ${timeSinceLastUpdate}ms ago`)
-          return
-        }
-      }
+    if (!aquired) {
+      return
     }
 
     await this.apiKeyRepository.update(
@@ -177,9 +166,6 @@ export class ApiKeyService {
       },
       { lastUsedAt },
     )
-
-    // Set the cooldown key in Redis with current timestamp
-    await this.redisLockProvider.set(cooldownKey, Date.now().toString(), 60) // 60 second TTL
   }
 
   private getEffectivePermissions(
