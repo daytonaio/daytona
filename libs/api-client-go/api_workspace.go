@@ -132,7 +132,7 @@ type WorkspaceAPI interface {
 	GetWorkspaceDeprecatedExecute(r WorkspaceAPIGetWorkspaceDeprecatedRequest) (*Workspace, *http.Response, error)
 
 	/*
-		ListWorkspacesDeprecated [DEPRECATED] List all workspaces
+		ListWorkspacesDeprecated [DEPRECATED] List all workspaces with pagination
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 		@return WorkspaceAPIListWorkspacesDeprecatedRequest
@@ -142,9 +142,9 @@ type WorkspaceAPI interface {
 	ListWorkspacesDeprecated(ctx context.Context) WorkspaceAPIListWorkspacesDeprecatedRequest
 
 	// ListWorkspacesDeprecatedExecute executes the request
-	//  @return []Workspace
+	//  @return PaginatedWorkspaces
 	// Deprecated
-	ListWorkspacesDeprecatedExecute(r WorkspaceAPIListWorkspacesDeprecatedRequest) ([]Workspace, *http.Response, error)
+	ListWorkspacesDeprecatedExecute(r WorkspaceAPIListWorkspacesDeprecatedRequest) (*PaginatedWorkspaces, *http.Response, error)
 
 	/*
 		ReplaceLabelsWorkspaceDeprecated [DEPRECATED] Replace workspace labels
@@ -1064,6 +1064,8 @@ type WorkspaceAPIListWorkspacesDeprecatedRequest struct {
 	xDaytonaOrganizationID *string
 	verbose                *bool
 	labels                 *string
+	limit                  *float32
+	page                   *float32
 }
 
 // Use with JWT to specify the organization ID
@@ -1084,12 +1086,24 @@ func (r WorkspaceAPIListWorkspacesDeprecatedRequest) Labels(labels string) Works
 	return r
 }
 
-func (r WorkspaceAPIListWorkspacesDeprecatedRequest) Execute() ([]Workspace, *http.Response, error) {
+// Number of items per page
+func (r WorkspaceAPIListWorkspacesDeprecatedRequest) Limit(limit float32) WorkspaceAPIListWorkspacesDeprecatedRequest {
+	r.limit = &limit
+	return r
+}
+
+// Page number
+func (r WorkspaceAPIListWorkspacesDeprecatedRequest) Page(page float32) WorkspaceAPIListWorkspacesDeprecatedRequest {
+	r.page = &page
+	return r
+}
+
+func (r WorkspaceAPIListWorkspacesDeprecatedRequest) Execute() (*PaginatedWorkspaces, *http.Response, error) {
 	return r.ApiService.ListWorkspacesDeprecatedExecute(r)
 }
 
 /*
-ListWorkspacesDeprecated [DEPRECATED] List all workspaces
+ListWorkspacesDeprecated [DEPRECATED] List all workspaces with pagination
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@return WorkspaceAPIListWorkspacesDeprecatedRequest
@@ -1105,15 +1119,15 @@ func (a *WorkspaceAPIService) ListWorkspacesDeprecated(ctx context.Context) Work
 
 // Execute executes the request
 //
-//	@return []Workspace
+//	@return PaginatedWorkspaces
 //
 // Deprecated
-func (a *WorkspaceAPIService) ListWorkspacesDeprecatedExecute(r WorkspaceAPIListWorkspacesDeprecatedRequest) ([]Workspace, *http.Response, error) {
+func (a *WorkspaceAPIService) ListWorkspacesDeprecatedExecute(r WorkspaceAPIListWorkspacesDeprecatedRequest) (*PaginatedWorkspaces, *http.Response, error) {
 	var (
 		localVarHTTPMethod  = http.MethodGet
 		localVarPostBody    interface{}
 		formFiles           []formFile
-		localVarReturnValue []Workspace
+		localVarReturnValue *PaginatedWorkspaces
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WorkspaceAPIService.ListWorkspacesDeprecated")
@@ -1132,6 +1146,12 @@ func (a *WorkspaceAPIService) ListWorkspacesDeprecatedExecute(r WorkspaceAPIList
 	}
 	if r.labels != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "labels", r.labels, "form", "")
+	}
+	if r.limit != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "limit", r.limit, "form", "")
+	}
+	if r.page != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "page", r.page, "form", "")
 	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}

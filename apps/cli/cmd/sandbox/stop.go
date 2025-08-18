@@ -33,7 +33,7 @@ var StopCmd = &cobra.Command{
 			if allFlag {
 				var stoppedCount int
 
-				for _, s := range sandboxList {
+				for _, s := range sandboxList.Items {
 					res, err := apiClient.SandboxAPI.StopSandbox(ctx, s.Id).Execute()
 					if err != nil {
 						fmt.Printf("Failed to stop sandbox %s: %s\n", s.Id, apiclient.HandleErrorResponse(res, err))
@@ -49,16 +49,8 @@ var StopCmd = &cobra.Command{
 		}
 
 		stopArg := args[0]
-		var sandboxCount int
 
-		for _, s := range sandboxList {
-			if s.Id == args[0] {
-				stopArg = s.Id
-				sandboxCount++
-			}
-		}
-
-		switch sandboxCount {
+		switch sandboxList.Total {
 		case 0:
 			return fmt.Errorf("sandbox %s not found", args[0])
 		case 1:

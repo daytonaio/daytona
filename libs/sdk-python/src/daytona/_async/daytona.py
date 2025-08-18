@@ -39,6 +39,8 @@ from .sandbox import AsyncSandbox
 from .snapshot import AsyncSnapshotService
 from .volume import AsyncVolumeService
 
+SANDBOXES_FETCH_LIMIT = 200
+
 
 class AsyncDaytona:
     """Main class for interacting with the Daytona API.
@@ -591,7 +593,9 @@ class AsyncDaytona:
                 print(f"{sandbox.id}: {sandbox.status}")
             ```
         """
-        sandboxes = await self._sandbox_api.list_sandboxes(labels=json.dumps(labels))
+        response = await self._sandbox_api.list_sandboxes(labels=json.dumps(labels), limit=SANDBOXES_FETCH_LIMIT)
+        if response.total > SANDBOXES_FETCH_LIMIT:
+            response = await self._sandbox_api.list_sandboxes(labels=json.dumps(labels), limit=response.total)
 
         return [
             AsyncSandbox(
@@ -600,7 +604,7 @@ class AsyncDaytona:
                 self._toolbox_api,
                 self._get_code_toolbox(self._validate_language_label(sandbox.labels.get("code-toolbox-language"))),
             )
-            for sandbox in sandboxes
+            for sandbox in response.items
         ]
 
     def _validate_language_label(self, language: Optional[str]) -> CodeLanguage:

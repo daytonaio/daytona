@@ -35,7 +35,7 @@ var DeleteCmd = &cobra.Command{
 			if allFlag {
 				var deletedCount int
 
-				for _, s := range sandboxList {
+				for _, s := range sandboxList.Items {
 					res, err := apiClient.SandboxAPI.DeleteSandbox(ctx, s.Id).Force(forceFlag).Execute()
 					if err != nil {
 						fmt.Printf("Failed to delete sandbox %s: %s\n", s.Id, apiclient.HandleErrorResponse(res, err))
@@ -52,16 +52,7 @@ var DeleteCmd = &cobra.Command{
 
 		deletionArg := args[0]
 
-		var sandboxCount int
-
-		for _, s := range sandboxList {
-			if s.Id == args[0] {
-				deletionArg = s.Id
-				sandboxCount++
-			}
-		}
-
-		switch sandboxCount {
+		switch sandboxList.Total {
 		case 0:
 			return fmt.Errorf("sandbox %s not found", args[0])
 		case 1:

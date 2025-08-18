@@ -49,6 +49,9 @@ export function SandboxTable({
   handleCreateSshAccess,
   handleRevokeSshAccess,
   onRowClick,
+  pagination,
+  pageCount,
+  onPaginationChange,
 }: SandboxTableProps) {
   const navigate = useNavigate()
   const { authenticatedUserHasPermission } = useSelectedOrganization()
@@ -69,6 +72,9 @@ export function SandboxTable({
     getWebTerminalUrl,
     handleCreateSshAccess,
     handleRevokeSshAccess,
+    pagination,
+    pageCount,
+    onPaginationChange,
   })
 
   const [bulkDeleteDialogOpen, setBulkDeleteDialogOpen] = useState(false)
