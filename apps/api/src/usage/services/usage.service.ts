@@ -15,7 +15,7 @@ import { Cron, CronExpression } from '@nestjs/schedule'
 import { RedisLockProvider } from '../../sandbox/common/redis-lock.provider'
 import { SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION } from '../../sandbox/constants/sandbox.constants'
 import { Sandbox } from '../../sandbox/entities/sandbox.entity'
-
+import { SandboxUsagePeriodArchive } from '../entities/sandbox-usage-period-archive.entity'
 @Injectable()
 export class UsageService {
   private readonly logger = new Logger(UsageService.name)
@@ -150,6 +150,40 @@ export class UsageService {
     }
 
     await this.redisLockProvider.unlock('close-and-reopen-usage-periods')
+  }
+
+  @Cron(CronExpression.EVERY_MINUTE, { name: 'archive-usage-periods' })
+  async archiveUsagePeriods() {
+    const lockKey = 'archive-usage-periods'
+    if (!(await this.redisLockProvider.lock(lockKey, 60))) {
+      return
+    }
+
+    await this.sandboxUsagePeriodRepository.manager.transaction(async (transactionalEntityManager) => {
+      const usagePeriods = await transactionalEntityManager.find(SandboxUsagePeriod, {
+        where: {
+          endAt: Not(IsNull()),
+        },
+        order: {
+          startAt: 'ASC',
+        },
+        take: 1000,
+      })
+
+      if (usagePeriods.length === 0) {
+        return
+      }
+
+      this.logger.debug(`Found ${usagePeriods.length} usage periods to archive`)
+
+      await transactionalEntityManager.delete(
+        SandboxUsagePeriod,
+        usagePeriods.map((usagePeriod) => usagePeriod.id),
+      )
+      await transactionalEntityManager.save(usagePeriods.map(SandboxUsagePeriodArchive.fromUsagePeriod))
+    })
+
+    await this.redisLockProvider.unlock(lockKey)
   }
 
   private async waitForLock(sandboxId: string) {
