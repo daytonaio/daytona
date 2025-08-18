@@ -510,7 +510,18 @@ export class SandboxStartAction extends SandboxAction {
         }
         break
       }
+      case SandboxState.STARTING:
+      case SandboxState.RESTORING:
+      case SandboxState.CREATING: {
+        break
+      }
       case SandboxState.ERROR: {
+        await this.updateSandboxState(sandbox.id, SandboxState.ERROR)
+        break
+      }
+      // also any other state that is not STARTED
+      default: {
+        console.error(`Sandbox ${sandbox.id} is in unexpected state ${sandboxInfo.state}`)
         await this.updateSandboxState(sandbox.id, SandboxState.ERROR)
         break
       }
