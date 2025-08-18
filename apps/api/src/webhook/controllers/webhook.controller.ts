@@ -3,33 +3,24 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import {
-  Controller,
-  Post,
-  Get,
-  //  Delete,
-  Body,
-  Param,
-  UseGuards,
-  HttpStatus,
-  //  HttpCode,
-  NotFoundException,
-} from '@nestjs/common'
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger'
+import { Controller, Post, Get, Body, Param, UseGuards, HttpStatus } from '@nestjs/common'
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiHeader } from '@nestjs/swagger'
 import { WebhookService } from '../services/webhook.service'
 import { SendWebhookDto } from '../dto/send-webhook.dto'
 import { CombinedAuthGuard } from '../../auth/combined-auth.guard'
-import { OrganizationService } from '../../organization/services/organization.service'
+import { CustomHeaders } from '../../common/constants/header.constants'
+import { SystemActionGuard } from '../../auth/system-action.guard'
+import { OrganizationAccessGuard } from '../../organization/guards/organization-access.guard'
+import { RequiredSystemRole } from '../../common/decorators/required-role.decorator'
+import { SystemRole } from '../../user/enums/system-role.enum'
 
 @ApiTags('webhooks')
 @Controller('webhooks')
-@UseGuards(CombinedAuthGuard)
+@ApiHeader(CustomHeaders.ORGANIZATION_ID)
+@UseGuards(CombinedAuthGuard, SystemActionGuard, OrganizationAccessGuard)
 @ApiBearerAuth()
 export class WebhookController {
-  constructor(
-    private readonly webhookService: WebhookService,
-    private readonly organizationService: OrganizationService,
-  ) {}
+  constructor(private readonly webhookService: WebhookService) {}
 
   @Post('organizations/:organizationId/app-portal-access')
   @ApiOperation({ summary: 'Get Svix Consumer App Portal access URL for an organization' })
@@ -43,24 +34,7 @@ export class WebhookController {
       },
     },
   })
-  @ApiResponse({
-    status: HttpStatus.FORBIDDEN,
-    description: 'User does not have access to this organization',
-  })
-  @ApiResponse({
-    status: HttpStatus.NOT_FOUND,
-    description: 'Organization not found',
-  })
   async getAppPortalAccess(@Param('organizationId') organizationId: string): Promise<{ url: string }> {
-    // Check if user has access to this organization
-    const organization = await this.organizationService.findOne(organizationId)
-    if (!organization) {
-      throw new NotFoundException('Organization not found')
-    }
-
-    // TODO: Add proper authorization check here
-    // For now, we'll assume the user has access if they can see the organization
-
     const url = await this.webhookService.getAppPortalAccessUrl(organizationId)
     return { url }
   }
@@ -71,27 +45,11 @@ export class WebhookController {
     status: HttpStatus.OK,
     description: 'Webhook message sent successfully',
   })
-  @ApiResponse({
-    status: HttpStatus.FORBIDDEN,
-    description: 'User does not have access to this organization',
-  })
-  @ApiResponse({
-    status: HttpStatus.NOT_FOUND,
-    description: 'Organization not found',
-  })
+  @RequiredSystemRole(SystemRole.ADMIN)
   async sendWebhook(
     @Param('organizationId') organizationId: string,
     @Body() sendWebhookDto: SendWebhookDto,
   ): Promise<void> {
-    // Check if user has access to this organization
-    const organization = await this.organizationService.findOne(organizationId)
-    if (!organization) {
-      throw new NotFoundException('Organization not found')
-    }
-
-    // TODO: Add proper authorization check here
-    // For now, we'll assume the user has access if they can see the organization
-
     await this.webhookService.sendWebhook(
       organizationId,
       sendWebhookDto.eventType,
@@ -107,27 +65,11 @@ export class WebhookController {
     description: 'List of delivery attempts',
     type: [Object],
   })
-  @ApiResponse({
-    status: HttpStatus.FORBIDDEN,
-    description: 'User does not have access to this organization',
-  })
-  @ApiResponse({
-    status: HttpStatus.NOT_FOUND,
-    description: 'Organization not found',
-  })
+  @RequiredSystemRole(SystemRole.ADMIN)
   async getMessageAttempts(
     @Param('organizationId') organizationId: string,
     @Param('messageId') messageId: string,
   ): Promise<any[]> {
-    // Check if user has access to this organization
-    const organization = await this.organizationService.findOne(organizationId)
-    if (!organization) {
-      throw new NotFoundException('Organization not found')
-    }
-
-    // TODO: Add proper authorization check here
-    // For now, we'll assume the user has access if they can see the organization
-
     return this.webhookService.getMessageAttempts(organizationId, messageId)
   }
 
@@ -143,6 +85,7 @@ export class WebhookController {
       },
     },
   })
+  @RequiredSystemRole(SystemRole.ADMIN)
   async getStatus(): Promise<{ enabled: boolean }> {
     return {
       enabled: this.webhookService.isEnabled(),
