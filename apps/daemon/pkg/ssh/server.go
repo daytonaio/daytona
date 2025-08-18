@@ -19,8 +19,8 @@ import (
 )
 
 type Server struct {
-	ProjectDir        string
-	DefaultProjectDir string
+	WorkDir        string
+	DefaultWorkDir string
 }
 
 func (s *Server) Start() error {
@@ -78,10 +78,10 @@ func (s *Server) Start() error {
 }
 
 func (s *Server) handlePty(session ssh.Session, ptyReq ssh.Pty, winCh <-chan ssh.Window) {
-	dir := s.ProjectDir
+	dir := s.WorkDir
 
-	if _, err := os.Stat(s.ProjectDir); os.IsNotExist(err) {
-		dir = s.DefaultProjectDir
+	if _, err := os.Stat(s.WorkDir); os.IsNotExist(err) {
+		dir = s.DefaultWorkDir
 	}
 
 	env := []string{}
@@ -146,9 +146,9 @@ func (s *Server) handleNonPty(session ssh.Session) {
 		cmd.Env = append(cmd.Env, fmt.Sprintf("%s=%s", "SSH_AUTH_SOCK", l.Addr().String()))
 	}
 
-	cmd.Dir = s.ProjectDir
-	if _, err := os.Stat(s.ProjectDir); os.IsNotExist(err) {
-		cmd.Dir = s.DefaultProjectDir
+	cmd.Dir = s.WorkDir
+	if _, err := os.Stat(s.WorkDir); os.IsNotExist(err) {
+		cmd.Dir = s.DefaultWorkDir
 	}
 
 	cmd.Stdout = session
