@@ -12,6 +12,7 @@ import { OrganizationUser } from '../organization/entities/organization-user.ent
 import { OrganizationMemberRole } from '../organization/enums/organization-member-role.enum'
 import { OrganizationResourcePermission } from '../organization/enums/organization-resource-permission.enum'
 import { OrganizationUserService } from '../organization/services/organization-user.service'
+import { RedisLockProvider } from '../sandbox/common/redis-lock.provider'
 
 @Injectable()
 export class ApiKeyService {
@@ -21,6 +22,7 @@ export class ApiKeyService {
     @InjectRepository(ApiKey)
     private apiKeyRepository: Repository<ApiKey>,
     private organizationUserService: OrganizationUserService,
+    private readonly redisLockProvider: RedisLockProvider,
   ) {}
 
   private generateApiKeyValue(): string {
@@ -146,6 +148,16 @@ export class ApiKeyService {
   }
 
   async updateLastUsedAt(organizationId: string, userId: string, name: string, lastUsedAt: Date): Promise<void> {
+    const cooldownKey = `api-key-last-used-update-${organizationId}-${userId}-${name}`
+
+    const aquired = await this.redisLockProvider.lock(cooldownKey, 10)
+
+    // redis for cooldown period - 10 seconds
+    // prevents database flooding when multiple requests are made at the same time
+    if (!aquired) {
+      return
+    }
+
     await this.apiKeyRepository.update(
       {
         organizationId,
