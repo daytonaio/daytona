@@ -29,4 +29,12 @@ export class RedisLockProvider {
       await new Promise((resolve) => setTimeout(resolve, 50))
     }
   }
+
+  async get(key: string): Promise<string | null> {
+    return await this.redis.get(key)
+  }
+
+  async set(key: string, value: string, ttl: number): Promise<void> {
+    await this.redis.set(key, value, 'EX', ttl)
+  }
 }

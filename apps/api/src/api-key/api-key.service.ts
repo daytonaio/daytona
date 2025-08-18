@@ -12,6 +12,7 @@ import { OrganizationUser } from '../organization/entities/organization-user.ent
 import { OrganizationMemberRole } from '../organization/enums/organization-member-role.enum'
 import { OrganizationResourcePermission } from '../organization/enums/organization-resource-permission.enum'
 import { OrganizationUserService } from '../organization/services/organization-user.service'
+import { RedisLockProvider } from '../sandbox/common/redis-lock.provider'
 
 @Injectable()
 export class ApiKeyService {
@@ -21,6 +22,7 @@ export class ApiKeyService {
     @InjectRepository(ApiKey)
     private apiKeyRepository: Repository<ApiKey>,
     private organizationUserService: OrganizationUserService,
+    private readonly redisLockProvider: RedisLockProvider,
   ) {}
 
   private generateApiKeyValue(): string {
@@ -146,6 +148,27 @@ export class ApiKeyService {
   }
 
   async updateLastUsedAt(organizationId: string, userId: string, name: string, lastUsedAt: Date): Promise<void> {
+    const cooldownKey = `cooldown-${organizationId}-${userId}-${name}`
+
+    // redis for cooldown period - 10 seconds
+    // prevents database flooding when multiple requests are made at the same time
+    const lastUpdateTime = await this.redisLockProvider.get(cooldownKey)
+    if (lastUpdateTime) {
+      const timestamp = parseInt(lastUpdateTime)
+
+      if (isNaN(timestamp) || timestamp <= 0 || timestamp > Date.now()) {
+        this.logger.warn(`Invalid timestamp in Redis for API key ${name}: ${lastUpdateTime}, proceeding with update`)
+      } else {
+        const timeSinceLastUpdate = Date.now() - timestamp
+        const tenSecondsInMs = 10 * 1000
+
+        if (timeSinceLastUpdate < tenSecondsInMs) {
+          this.logger.debug(`Skipping update for API key ${name} - last update was ${timeSinceLastUpdate}ms ago`)
+          return
+        }
+      }
+    }
+
     await this.apiKeyRepository.update(
       {
         organizationId,
@@ -154,6 +177,9 @@ export class ApiKeyService {
       },
       { lastUsedAt },
     )
+
+    // Set the cooldown key in Redis with current timestamp
+    await this.redisLockProvider.set(cooldownKey, Date.now().toString(), 60) // 60 second TTL
   }
 
   private getEffectivePermissions(
