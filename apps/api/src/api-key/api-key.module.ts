@@ -9,11 +9,12 @@ import { ApiKeyService } from './api-key.service'
 import { ApiKey } from './api-key.entity'
 import { TypeOrmModule } from '@nestjs/typeorm'
 import { OrganizationModule } from '../organization/organization.module'
+import { RedisLockProvider } from '../sandbox/common/redis-lock.provider'
 
 @Module({
   imports: [OrganizationModule, TypeOrmModule.forFeature([ApiKey])],
   controllers: [ApiKeyController],
-  providers: [ApiKeyService],
+  providers: [ApiKeyService, RedisLockProvider],
   exports: [ApiKeyService],
 })
 export class ApiKeyModule {}
