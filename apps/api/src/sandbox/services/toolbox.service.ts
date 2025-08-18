@@ -10,6 +10,7 @@ import { Sandbox } from '../entities/sandbox.entity'
 import { Runner } from '../entities/runner.entity'
 import axios from 'axios'
 import { SandboxState } from '../enums/sandbox-state.enum'
+import { RedisLockProvider } from '../common/redis-lock.provider'
 
 @Injectable()
 export class ToolboxService {
@@ -20,6 +21,7 @@ export class ToolboxService {
     private readonly sandboxRepository: Repository<Sandbox>,
     @InjectRepository(Runner)
     private readonly runnerRepository: Repository<Runner>,
+    private readonly redisLockProvider: RedisLockProvider,
   ) {}
 
   async forwardRequestToRunner(sandboxId: string, method: string, path: string, data?: any): Promise<any> {
@@ -100,9 +102,16 @@ export class ToolboxService {
 
       return runner
     } finally {
-      await this.sandboxRepository.update(sandboxId, {
-        lastActivityAt: new Date(),
-      })
+      const lockKey = `sandbox-last-activity-${sandboxId}`
+      const acquired = await this.redisLockProvider.lock(lockKey, 10)
+
+      // redis for cooldown period - 10 seconds
+      // prevents database flooding when multiple requests are made at the same time
+      if (acquired) {
+        await this.sandboxRepository.update(sandboxId, {
+          lastActivityAt: new Date(),
+        })
+      }
     }
   }
 }
