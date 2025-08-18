@@ -9,9 +9,10 @@ import { SandboxUsagePeriod } from './entities/sandbox-usage-period.entity'
 import { UsageService } from './services/usage.service'
 import { RedisLockProvider } from '../sandbox/common/redis-lock.provider'
 import { Sandbox } from '../sandbox/entities/sandbox.entity'
+import { SandboxUsagePeriodArchive } from './entities/sandbox-usage-period-archive.entity'
 
 @Module({
-  imports: [TypeOrmModule.forFeature([SandboxUsagePeriod, Sandbox])],
+  imports: [TypeOrmModule.forFeature([SandboxUsagePeriod, Sandbox, SandboxUsagePeriodArchive])],
   providers: [UsageService, RedisLockProvider],
   exports: [UsageService],
 })
