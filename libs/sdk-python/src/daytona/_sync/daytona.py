@@ -43,6 +43,8 @@ from .sandbox import Sandbox
 from .snapshot import SnapshotService
 from .volume import VolumeService
 
+SANDBOXES_FETCH_LIMIT = 200
+
 
 class Daytona:
     """Main class for interacting with the Daytona API.
@@ -552,7 +554,9 @@ class Daytona:
                 print(f"{sandbox.id}: {sandbox.status}")
             ```
         """
-        sandboxes = self._sandbox_api.list_sandboxes(labels=json.dumps(labels))
+        response = self._sandbox_api.list_sandboxes(labels=json.dumps(labels), limit=SANDBOXES_FETCH_LIMIT)
+        if response.total > SANDBOXES_FETCH_LIMIT:
+            response = self._sandbox_api.list_sandboxes(labels=json.dumps(labels), limit=response.total)
 
         return [
             Sandbox(
@@ -561,7 +565,7 @@ class Daytona:
                 self._toolbox_api,
                 self._get_code_toolbox(self._validate_language_label(sandbox.labels.get("code-toolbox-language"))),
             )
-            for sandbox in sandboxes
+            for sandbox in response.items
         ]
 
     def _validate_language_label(self, language: Optional[str]) -> CodeLanguage:

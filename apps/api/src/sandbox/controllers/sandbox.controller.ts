@@ -38,6 +38,7 @@ import {
   ApiBearerAuth,
 } from '@nestjs/swagger'
 import { SandboxDto, SandboxLabelsDto } from '../dto/sandbox.dto'
+import { PaginatedSandboxesDto } from '../dto/paginated-sandboxes.dto'
 import { RunnerService } from '../services/runner.service'
 import { SandboxState } from '../enums/sandbox-state.enum'
 import { Sandbox as SandboxEntity } from '../entities/sandbox.entity'
@@ -90,8 +91,20 @@ export class SandboxController {
   })
   @ApiResponse({
     status: 200,
-    description: 'List of all sandboxes',
-    type: [SandboxDto],
+    description: 'List of all sandboxes with pagination',
+    type: PaginatedSandboxesDto,
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Page number',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Number of items per page',
   })
   @ApiQuery({
     name: 'verbose',
@@ -114,21 +127,34 @@ export class SandboxController {
   })
   async listSandboxes(
     @AuthContext() authContext: OrganizationAuthContext,
+    @Query('page') page = 1,
+    @Query('limit') limit = 10,
     @Query('verbose') verbose?: boolean,
     @Query('labels') labelsQuery?: string,
     @Query('includeErroredDeleted') includeErroredDeleted?: boolean,
-  ): Promise<SandboxDto[]> {
+  ): Promise<PaginatedSandboxesDto> {
     const labels = labelsQuery ? JSON.parse(labelsQuery) : {}
-    const sandboxes = await this.sandboxService.findAll(authContext.organizationId, labels, includeErroredDeleted)
+    const result = await this.sandboxService.findAll(
+      authContext.organizationId,
+      labels,
+      includeErroredDeleted,
+      page,
+      limit,
+    )
 
-    const runnerIds = new Set(sandboxes.map((s) => s.runnerId))
+    const runnerIds = new Set(result.items.map((s) => s.runnerId))
     const runners = await this.runnerService.findByIds(Array.from(runnerIds))
     const runnerMap = new Map(runners.map((runner) => [runner.id, runner]))
 
-    return sandboxes.map((sandbox) => {
-      const runner = runnerMap.get(sandbox.runnerId)
-      return SandboxDto.fromSandbox(sandbox, runner?.domain)
-    })
+    return {
+      items: result.items.map((sandbox) => {
+        const runner = runnerMap.get(sandbox.runnerId)
+        return SandboxDto.fromSandbox(sandbox, runner?.domain)
+      }),
+      total: result.total,
+      page: result.page,
+      totalPages: result.totalPages,
+    }
   }
 
   @Post()

@@ -21,6 +21,12 @@ export interface SandboxTableProps {
   handleVnc: (id: string) => void
   getWebTerminalUrl: (id: string) => Promise<string | null>
   onRowClick?: (sandbox: Sandbox) => void
+  pagination: {
+    pageIndex: number
+    pageSize: number
+  }
+  pageCount: number
+  onPaginationChange: (pagination: { pageIndex: number; pageSize: number }) => void
 }
 
 export interface SandboxTableActionsProps {

@@ -12,6 +12,7 @@ import {
   SandboxDesiredState,
   SandboxState,
   SnapshotDto,
+  PaginatedSandboxes,
 } from '@daytonaio/api-client'
 import { SandboxTable } from '@/components/SandboxTable'
 import { Button, buttonVariants } from '@/components/ui/button'
@@ -25,6 +26,7 @@ import { useAuth } from 'react-oidc-context'
 import { LocalStorageKey } from '@/enums/LocalStorageKey'
 import { getLocalStorageItem, setLocalStorageItem } from '@/lib/local-storage'
 import { DAYTONA_DOCS_URL } from '@/constants/ExternalLinks'
+import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -43,7 +45,12 @@ const Sandboxes: React.FC = () => {
   const { user } = useAuth()
   const { notificationSocket } = useNotificationSocket()
 
-  const [sandboxes, setSandboxes] = useState<Sandbox[]>([])
+  const [sandboxesData, setSandboxesData] = useState<PaginatedSandboxes>({
+    items: [],
+    total: 0,
+    page: 1,
+    totalPages: 0,
+  })
   const [snapshots, setSnapshots] = useState<SnapshotDto[]>([])
   const [loadingSandboxes, setLoadingSandboxes] = useState<Record<string, boolean>>({})
   const [transitioningSandboxes, setTransitioningSandboxes] = useState<Record<string, boolean>>({})
@@ -53,6 +60,11 @@ const Sandboxes: React.FC = () => {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [selectedSandbox, setSelectedSandbox] = useState<Sandbox | null>(null)
   const [showSandboxDetails, setShowSandboxDetails] = useState(false)
+
+  const [paginationParams, setPaginationParams] = useState({
+    pageIndex: 0,
+    pageSize: DEFAULT_PAGE_SIZE,
+  })
 
   const navigate = useNavigate()
 
@@ -75,6 +87,7 @@ const Sandboxes: React.FC = () => {
     }
   }, [selectedOrganization, snapshotApi])
 
+  // TODO: search/filters/sort params?
   const fetchSandboxes = useCallback(
     async (showTableLoadingState = true) => {
       if (!selectedOrganization) {
@@ -84,16 +97,29 @@ const Sandboxes: React.FC = () => {
         setLoadingTable(true)
       }
       try {
-        const sandboxes = (await sandboxApi.listSandboxes(selectedOrganization.id)).data
-        setSandboxes(sandboxes)
+        const response = (
+          await sandboxApi.listSandboxes(
+            selectedOrganization.id,
+            undefined, // verbose
+            undefined, // labels
+            undefined, // includeErroredDeleted
+            paginationParams.pageSize,
+            paginationParams.pageIndex + 1,
+          )
+        ).data
+        setSandboxesData(response)
       } catch (error) {
         handleApiError(error, 'Failed to fetch sandboxes')
       } finally {
         setLoadingTable(false)
       }
     },
-    [sandboxApi, selectedOrganization],
+    [sandboxApi, selectedOrganization, paginationParams.pageIndex, paginationParams.pageSize],
   )
+
+  const handlePaginationChange = useCallback(({ pageIndex, pageSize }: { pageIndex: number; pageSize: number }) => {
+    setPaginationParams({ pageIndex, pageSize })
+  }, [])
 
   useEffect(() => {
     fetchSandboxes()
@@ -102,24 +128,37 @@ const Sandboxes: React.FC = () => {
 
   useEffect(() => {
     if (selectedSandbox) {
-      const updatedSandbox = sandboxes.find((s) => s.id === selectedSandbox.id)
+      const updatedSandbox = sandboxesData.items.find((s) => s.id === selectedSandbox.id)
       if (updatedSandbox && updatedSandbox !== selectedSandbox) {
         setSelectedSandbox(updatedSandbox)
       }
     }
-  }, [sandboxes, selectedSandbox])
+  }, [sandboxesData.items, selectedSandbox])
 
   useEffect(() => {
-    if (selectedSandbox && !sandboxes.some((s) => s.id === selectedSandbox.id)) {
+    if (selectedSandbox && !sandboxesData.items.some((s) => s.id === selectedSandbox.id)) {
       setSelectedSandbox(null)
       setShowSandboxDetails(false)
     }
-  }, [sandboxes, selectedSandbox])
+  }, [sandboxesData.items, selectedSandbox])
 
   useEffect(() => {
     const handleSandboxCreatedEvent = (sandbox: Sandbox) => {
-      if (!sandboxes.some((s) => s.id === sandbox.id)) {
-        setSandboxes((prev) => [sandbox, ...prev])
+      if (paginationParams.pageIndex === 0) {
+        setSandboxesData((prev) => {
+          if (prev.items.some((s) => s.id === sandbox.id)) {
+            return prev
+          }
+
+          const newSandboxes = [sandbox, ...prev.items]
+          const newTotal = prev.total + 1
+          return {
+            ...prev,
+            items: newSandboxes.slice(0, paginationParams.pageSize),
+            total: newTotal,
+            totalPages: Math.ceil(newTotal / paginationParams.pageSize),
+          }
+        })
       }
     }
 
@@ -129,11 +168,26 @@ const Sandboxes: React.FC = () => {
       newState: SandboxState
     }) => {
       if (data.newState === SandboxState.DESTROYED) {
-        setSandboxes((prev) => prev.filter((s) => s.id !== data.sandbox.id))
-      } else if (!sandboxes.some((s) => s.id === data.sandbox.id)) {
-        setSandboxes((prev) => [data.sandbox, ...prev])
+        setSandboxesData((prev) => {
+          const newTotal = Math.max(0, prev.total - 1)
+          const newItems = prev.items.filter((s) => s.id !== data.sandbox.id)
+
+          return {
+            ...prev,
+            items: newItems,
+            total: newTotal,
+            totalPages: Math.ceil(newTotal / paginationParams.pageSize),
+          }
+        })
       } else {
-        setSandboxes((prev) => prev.map((s) => (s.id === data.sandbox.id ? data.sandbox : s)))
+        setSandboxesData((prev) => ({
+          ...prev,
+          items: prev.items.some((s) => s.id === data.sandbox.id)
+            ? prev.items.map((s) => (s.id === data.sandbox.id ? data.sandbox : s))
+            : paginationParams.pageIndex === 0
+              ? [data.sandbox, ...prev.items.slice(0, paginationParams.pageSize - 1)]
+              : prev.items,
+        }))
       }
     }
 
@@ -147,7 +201,17 @@ const Sandboxes: React.FC = () => {
         data.sandbox.state &&
         ([SandboxState.ERROR, SandboxState.BUILD_FAILED] as SandboxState[]).includes(data.sandbox.state)
       ) {
-        setSandboxes((prev) => prev.filter((s) => s.id !== data.sandbox.id))
+        setSandboxesData((prev) => {
+          const newTotal = Math.max(0, prev.total - 1)
+          const newItems = prev.items.filter((s) => s.id !== data.sandbox.id)
+
+          return {
+            ...prev,
+            items: newItems,
+            total: newTotal,
+            totalPages: Math.ceil(newTotal / paginationParams.pageSize),
+          }
+        })
       }
     }
 
@@ -164,16 +228,28 @@ const Sandboxes: React.FC = () => {
       notificationSocket.off('sandbox.state.updated', handleSandboxStateUpdatedEvent)
       notificationSocket.off('sandbox.desired-state.updated', handleSandboxDesiredStateUpdatedEvent)
     }
-  }, [notificationSocket, sandboxes])
+  }, [notificationSocket, paginationParams.pageIndex, paginationParams.pageSize])
+
+  useEffect(() => {
+    if (sandboxesData.items.length === 0 && paginationParams.pageIndex > 0) {
+      setPaginationParams((prev) => ({
+        ...prev,
+        pageIndex: prev.pageIndex - 1,
+      }))
+    }
+  }, [sandboxesData.items.length, paginationParams.pageIndex])
 
   const handleStart = async (id: string) => {
     setLoadingSandboxes((prev) => ({ ...prev, [id]: true }))
     setTransitioningSandboxes((prev) => ({ ...prev, [id]: true }))
 
-    const sandboxToStart = sandboxes.find((s) => s.id === id)
+    const sandboxToStart = sandboxesData.items.find((s) => s.id === id)
     const previousState = sandboxToStart?.state
 
-    setSandboxes((prev) => prev.map((s) => (s.id === id ? { ...s, state: SandboxState.STARTING } : s)))
+    setSandboxesData((prev) => ({
+      ...prev,
+      items: prev.items.map((s) => (s.id === id ? { ...s, state: SandboxState.STARTING } : s)),
+    }))
 
     if (selectedSandbox?.id === id) {
       setSelectedSandbox((prev) => (prev ? { ...prev, state: SandboxState.STARTING } : null))
@@ -194,7 +270,10 @@ const Sandboxes: React.FC = () => {
           </Button>
         ) : undefined,
       )
-      setSandboxes((prev) => prev.map((s) => (s.id === id ? { ...s, state: previousState } : s)))
+      setSandboxesData((prev) => ({
+        ...prev,
+        items: prev.items.map((s) => (s.id === id ? { ...s, state: previousState } : s)),
+      }))
       if (selectedSandbox?.id === id && previousState) {
         setSelectedSandbox((prev) => (prev ? { ...prev, state: previousState } : null))
       }
@@ -210,10 +289,13 @@ const Sandboxes: React.FC = () => {
     setLoadingSandboxes((prev) => ({ ...prev, [id]: true }))
     setTransitioningSandboxes((prev) => ({ ...prev, [id]: true }))
 
-    const sandboxToStop = sandboxes.find((s) => s.id === id)
+    const sandboxToStop = sandboxesData.items.find((s) => s.id === id)
     const previousState = sandboxToStop?.state
 
-    setSandboxes((prev) => prev.map((s) => (s.id === id ? { ...s, state: SandboxState.STOPPING } : s)))
+    setSandboxesData((prev) => ({
+      ...prev,
+      items: prev.items.map((s) => (s.id === id ? { ...s, state: SandboxState.STOPPING } : s)),
+    }))
 
     if (selectedSandbox?.id === id) {
       setSelectedSandbox((prev) => (prev ? { ...prev, state: SandboxState.STOPPING } : null))
@@ -231,7 +313,10 @@ const Sandboxes: React.FC = () => {
       )
     } catch (error) {
       handleApiError(error, 'Failed to stop sandbox')
-      setSandboxes((prev) => prev.map((s) => (s.id === id ? { ...s, state: previousState } : s)))
+      setSandboxesData((prev) => ({
+        ...prev,
+        items: prev.items.map((s) => (s.id === id ? { ...s, state: previousState } : s)),
+      }))
       if (selectedSandbox?.id === id && previousState) {
         setSelectedSandbox((prev) => (prev ? { ...prev, state: previousState } : null))
       }
@@ -246,10 +331,13 @@ const Sandboxes: React.FC = () => {
   const handleDelete = async (id: string) => {
     setLoadingSandboxes((prev) => ({ ...prev, [id]: true }))
 
-    const sandboxToDelete = sandboxes.find((s) => s.id === id)
+    const sandboxToDelete = sandboxesData.items.find((s) => s.id === id)
     const previousState = sandboxToDelete?.state
 
-    setSandboxes((prev) => prev.map((s) => (s.id === id ? { ...s, state: SandboxState.DESTROYING } : s)))
+    setSandboxesData((prev) => ({
+      ...prev,
+      items: prev.items.map((s) => (s.id === id ? { ...s, state: SandboxState.DESTROYING } : s)),
+    }))
 
     if (selectedSandbox?.id === id) {
       setSelectedSandbox((prev) => (prev ? { ...prev, state: SandboxState.DESTROYING } : null))
@@ -268,7 +356,10 @@ const Sandboxes: React.FC = () => {
       toast.success(`Deleting sandbox with ID:  ${id}`)
     } catch (error) {
       handleApiError(error, 'Failed to delete sandbox')
-      setSandboxes((prev) => prev.map((s) => (s.id === id ? { ...s, state: previousState } : s)))
+      setSandboxesData((prev) => ({
+        ...prev,
+        items: prev.items.map((s) => (s.id === id ? { ...s, state: previousState } : s)),
+      }))
       if (selectedSandbox?.id === id && previousState) {
         setSelectedSandbox((prev) => (prev ? { ...prev, state: previousState } : null))
       }
@@ -283,10 +374,13 @@ const Sandboxes: React.FC = () => {
     const selectedSandboxInBulk = selectedSandbox && ids.includes(selectedSandbox.id)
 
     for (const id of ids) {
-      const sandboxToDelete = sandboxes.find((s) => s.id === id)
+      const sandboxToDelete = sandboxesData.items.find((s) => s.id === id)
       const previousState = sandboxToDelete?.state
 
-      setSandboxes((prev) => prev.map((s) => (s.id === id ? { ...s, state: SandboxState.DESTROYING } : s)))
+      setSandboxesData((prev) => ({
+        ...prev,
+        items: prev.items.map((s) => (s.id === id ? { ...s, state: SandboxState.DESTROYING } : s)),
+      }))
 
       if (selectedSandbox?.id === id) {
         setSelectedSandbox((prev) => (prev ? { ...prev, state: SandboxState.DESTROYING } : null))
@@ -298,7 +392,10 @@ const Sandboxes: React.FC = () => {
       } catch (error) {
         handleApiError(error, 'Failed to delete sandbox')
 
-        setSandboxes((prev) => prev.map((s) => (s.id === id ? { ...s, state: previousState } : s)))
+        setSandboxesData((prev) => ({
+          ...prev,
+          items: prev.items.map((s) => (s.id === id ? { ...s, state: previousState } : s)),
+        }))
         if (selectedSandbox?.id === id && previousState) {
           setSelectedSandbox((prev) => (prev ? { ...prev, state: previousState } : null))
         }
@@ -324,10 +421,13 @@ const Sandboxes: React.FC = () => {
   const handleArchive = async (id: string) => {
     setLoadingSandboxes((prev) => ({ ...prev, [id]: true }))
 
-    const sandboxToArchive = sandboxes.find((s) => s.id === id)
+    const sandboxToArchive = sandboxesData.items.find((s) => s.id === id)
     const previousState = sandboxToArchive?.state
 
-    setSandboxes((prev) => prev.map((s) => (s.id === id ? { ...s, state: SandboxState.ARCHIVING } : s)))
+    setSandboxesData((prev) => ({
+      ...prev,
+      items: prev.items.map((s) => (s.id === id ? { ...s, state: SandboxState.ARCHIVING } : s)),
+    }))
 
     if (selectedSandbox?.id === id) {
       setSelectedSandbox((prev) => (prev ? { ...prev, state: SandboxState.ARCHIVING } : null))
@@ -338,7 +438,10 @@ const Sandboxes: React.FC = () => {
       toast.success(`Archiving sandbox with ID: ${id}`)
     } catch (error) {
       handleApiError(error, 'Failed to archive sandbox')
-      setSandboxes((prev) => prev.map((s) => (s.id === id ? { ...s, state: previousState } : s)))
+      setSandboxesData((prev) => ({
+        ...prev,
+        items: prev.items.map((s) => (s.id === id ? { ...s, state: previousState } : s)),
+      }))
       if (selectedSandbox?.id === id && previousState) {
         setSelectedSandbox((prev) => (prev ? { ...prev, state: previousState } : null))
       }
@@ -500,7 +603,7 @@ const Sandboxes: React.FC = () => {
     <div className="flex flex-col min-h-dvh px-10 py-3">
       <div className="mb-2 h-12 flex items-center justify-between">
         <h1 className="text-2xl font-medium">Sandboxes</h1>
-        {!loadingTable && sandboxes.length === 0 && (
+        {!loadingTable && sandboxesData.items.length === 0 && (
           <div className="flex items-center gap-2">
             <Button variant="link" className="text-primary" onClick={() => navigate(RoutePath.ONBOARDING)}>
               Onboarding guide
@@ -527,13 +630,19 @@ const Sandboxes: React.FC = () => {
         handleArchive={handleArchive}
         handleVnc={handleVnc}
         getWebTerminalUrl={getWebTerminalUrl}
-        data={sandboxes}
+        data={sandboxesData.items}
         loading={loadingTable}
         snapshots={snapshots}
         loadingSnapshots={loadingSnapshots}
         onRowClick={(sandbox: Sandbox) => {
           setSelectedSandbox(sandbox)
           setShowSandboxDetails(true)
+        }}
+        pageCount={sandboxesData.totalPages}
+        onPaginationChange={handlePaginationChange}
+        pagination={{
+          pageIndex: paginationParams.pageIndex,
+          pageSize: paginationParams.pageSize,
         }}
       />
 

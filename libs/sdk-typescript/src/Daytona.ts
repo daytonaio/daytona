@@ -25,6 +25,8 @@ import * as packageJson from '../package.json'
 import { processStreamingResponse } from './utils/Stream'
 import { getEnvVar, RUNTIME, Runtime } from './utils/Runtime'
 
+const SANDBOXES_FETCH_LIMIT = 200
+
 /**
  * Represents a volume mount for a Sandbox.
  *
@@ -576,12 +578,23 @@ export class Daytona {
    * }
    */
   public async list(labels?: Record<string, string>): Promise<Sandbox[]> {
-    const response = await this.sandboxApi.listSandboxes(
+    let response = await this.sandboxApi.listSandboxes(
       undefined,
       undefined,
       labels ? JSON.stringify(labels) : undefined,
+      undefined,
+      SANDBOXES_FETCH_LIMIT,
     )
-    return response.data.map((sandbox) => {
+    if (response.data.total > SANDBOXES_FETCH_LIMIT) {
+      response = await this.sandboxApi.listSandboxes(
+        undefined,
+        undefined,
+        labels ? JSON.stringify(labels) : undefined,
+        undefined,
+        response.data.total,
+      )
+    }
+    return response.data.items.map((sandbox) => {
       const language = sandbox.labels?.['code-toolbox-language'] as CodeLanguage
 
       return new Sandbox(sandbox, this.clientConfig, this.sandboxApi, this.toolboxApi, this.getCodeToolbox(language))

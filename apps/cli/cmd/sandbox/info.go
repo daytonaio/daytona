@@ -32,16 +32,8 @@ var InfoCmd = &cobra.Command{
 		}
 
 		infoArg := args[0]
-		var sandboxCount int
 
-		for _, s := range sandboxList {
-			if s.Id == args[0] {
-				infoArg = s.Id
-				sandboxCount++
-			}
-		}
-
-		switch sandboxCount {
+		switch sandboxList.Total {
 		case 0:
 			return fmt.Errorf("sandbox %s not found", args[0])
 		case 1:

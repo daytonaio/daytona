@@ -5,7 +5,7 @@
 
 import { ForbiddenException, Injectable, Logger, NotFoundException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { Not, Repository, LessThan, In, JsonContains, FindOptionsWhere, Or } from 'typeorm'
+import { Not, Repository, LessThan, In, JsonContains, FindOptionsWhere } from 'typeorm'
 import { Sandbox } from '../entities/sandbox.entity'
 import { CreateSandboxDto } from '../dto/create-sandbox.dto'
 import { SandboxState } from '../enums/sandbox-state.enum'
@@ -43,6 +43,7 @@ import { TypedConfigService } from '../../config/typed-config.service'
 import { WarmPool } from '../entities/warm-pool.entity'
 import { SandboxDto } from '../dto/sandbox.dto'
 import { isValidUuid } from '../../common/utils/uuid'
+import { PaginatedList } from '../../common/interfaces/paginated-list.interface'
 
 const DEFAULT_CPU = 1
 const DEFAULT_MEMORY = 1
@@ -485,7 +486,12 @@ export class SandboxService {
     organizationId: string,
     labels?: { [key: string]: string },
     includeErroredDestroyed?: boolean,
-  ): Promise<Sandbox[]> {
+    page = 1,
+    limit = 10,
+  ): Promise<PaginatedList<Sandbox>> {
+    const pageNum = Number(page)
+    const limitNum = Number(limit)
+
     const baseFindOptions: FindOptionsWhere<Sandbox> = {
       organizationId,
       ...(labels ? { labels: JsonContains(labels) } : {}),
@@ -503,7 +509,21 @@ export class SandboxService {
       },
     ]
 
-    return this.sandboxRepository.find({ where })
+    const [items, total] = await this.sandboxRepository.findAndCount({
+      where,
+      order: {
+        createdAt: 'DESC',
+      },
+      skip: (pageNum - 1) * limitNum,
+      take: limitNum,
+    })
+
+    return {
+      items,
+      total,
+      page: pageNum,
+      totalPages: Math.ceil(total / limitNum),
+    }
   }
 
   async findOne(sandboxId: string, returnDestroyed?: boolean): Promise<Sandbox> {

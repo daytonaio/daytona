@@ -47,6 +47,9 @@ export function SandboxTable({
   handleVnc,
   getWebTerminalUrl,
   onRowClick,
+  pagination,
+  pageCount,
+  onPaginationChange,
 }: SandboxTableProps) {
   const navigate = useNavigate()
   const { authenticatedUserHasPermission } = useSelectedOrganization()
@@ -65,6 +68,9 @@ export function SandboxTable({
     handleArchive,
     handleVnc,
     getWebTerminalUrl,
+    pagination,
+    pageCount,
+    onPaginationChange,
   })
 
   const [bulkDeleteDialogOpen, setBulkDeleteDialogOpen] = useState(false)

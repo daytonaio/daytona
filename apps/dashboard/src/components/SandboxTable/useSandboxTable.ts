@@ -16,7 +16,6 @@ import {
   getSortedRowModel,
 } from '@tanstack/react-table'
 import { useState, useMemo } from 'react'
-import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 import { FacetedFilterOption } from './types'
 import { getColumns } from './columns'
 
@@ -31,6 +30,12 @@ interface UseSandboxTableProps {
   handleArchive: (id: string) => void
   handleVnc: (id: string) => void
   getWebTerminalUrl: (id: string) => Promise<string | null>
+  pagination: {
+    pageIndex: number
+    pageSize: number
+  }
+  pageCount: number
+  onPaginationChange: (pagination: { pageIndex: number; pageSize: number }) => void
 }
 
 export function useSandboxTable({
@@ -44,10 +49,13 @@ export function useSandboxTable({
   handleArchive,
   handleVnc,
   getWebTerminalUrl,
+  pagination,
+  pageCount,
+  onPaginationChange,
 }: UseSandboxTableProps) {
   const [sorting, setSorting] = useState<SortingState>([
     {
-      id: 'lastEvent',
+      id: 'createdAt',
       desc: true,
     },
   ])
@@ -110,20 +118,25 @@ export function useSandboxTable({
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
     getFilteredRowModel: getFilteredRowModel(),
+    manualPagination: true,
+    pageCount: pageCount,
+    onPaginationChange: (updater) => {
+      const newPagination = typeof updater === 'function' ? updater(table.getState().pagination) : updater
+      onPaginationChange(newPagination)
+    },
     state: {
       sorting,
       columnFilters,
+      pagination: {
+        pageIndex: pagination.pageIndex,
+        pageSize: pagination.pageSize,
+      },
     },
     defaultColumn: {
       size: 100,
     },
-    enableRowSelection: true,
+    enableRowSelection: deletePermitted,
     getRowId: (row) => row.id,
-    initialState: {
-      pagination: {
-        pageSize: DEFAULT_PAGE_SIZE,
-      },
-    },
   })
 
   return {

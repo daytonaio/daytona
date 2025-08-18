@@ -119,8 +119,8 @@ type SandboxAPI interface {
 	ListSandboxes(ctx context.Context) SandboxAPIListSandboxesRequest
 
 	// ListSandboxesExecute executes the request
-	//  @return []Sandbox
-	ListSandboxesExecute(r SandboxAPIListSandboxesRequest) ([]Sandbox, *http.Response, error)
+	//  @return PaginatedSandboxes
+	ListSandboxesExecute(r SandboxAPIListSandboxesRequest) (*PaginatedSandboxes, *http.Response, error)
 
 	/*
 		ReplaceLabels Replace sandbox labels
@@ -1012,6 +1012,8 @@ type SandboxAPIListSandboxesRequest struct {
 	verbose                *bool
 	labels                 *string
 	includeErroredDeleted  *bool
+	limit                  *float32
+	page                   *float32
 }
 
 // Use with JWT to specify the organization ID
@@ -1038,7 +1040,19 @@ func (r SandboxAPIListSandboxesRequest) IncludeErroredDeleted(includeErroredDele
 	return r
 }
 
-func (r SandboxAPIListSandboxesRequest) Execute() ([]Sandbox, *http.Response, error) {
+// Number of items per page
+func (r SandboxAPIListSandboxesRequest) Limit(limit float32) SandboxAPIListSandboxesRequest {
+	r.limit = &limit
+	return r
+}
+
+// Page number
+func (r SandboxAPIListSandboxesRequest) Page(page float32) SandboxAPIListSandboxesRequest {
+	r.page = &page
+	return r
+}
+
+func (r SandboxAPIListSandboxesRequest) Execute() (*PaginatedSandboxes, *http.Response, error) {
 	return r.ApiService.ListSandboxesExecute(r)
 }
 
@@ -1057,13 +1071,13 @@ func (a *SandboxAPIService) ListSandboxes(ctx context.Context) SandboxAPIListSan
 
 // Execute executes the request
 //
-//	@return []Sandbox
-func (a *SandboxAPIService) ListSandboxesExecute(r SandboxAPIListSandboxesRequest) ([]Sandbox, *http.Response, error) {
+//	@return PaginatedSandboxes
+func (a *SandboxAPIService) ListSandboxesExecute(r SandboxAPIListSandboxesRequest) (*PaginatedSandboxes, *http.Response, error) {
 	var (
 		localVarHTTPMethod  = http.MethodGet
 		localVarPostBody    interface{}
 		formFiles           []formFile
-		localVarReturnValue []Sandbox
+		localVarReturnValue *PaginatedSandboxes
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SandboxAPIService.ListSandboxes")
@@ -1085,6 +1099,12 @@ func (a *SandboxAPIService) ListSandboxesExecute(r SandboxAPIListSandboxesReques
 	}
 	if r.includeErroredDeleted != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "includeErroredDeleted", r.includeErroredDeleted, "form", "")
+	}
+	if r.limit != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "limit", r.limit, "form", "")
+	}
+	if r.page != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "page", r.page, "form", "")
 	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}

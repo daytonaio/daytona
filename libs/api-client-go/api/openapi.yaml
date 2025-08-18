@@ -1181,15 +1181,29 @@ paths:
           schema:
             type: boolean
           style: form
+        - description: Number of items per page
+          explode: true
+          in: query
+          name: limit
+          required: false
+          schema:
+            type: number
+          style: form
+        - description: Page number
+          explode: true
+          in: query
+          name: page
+          required: false
+          schema:
+            type: number
+          style: form
       responses:
         '200':
           content:
             application/json:
               schema:
-                items:
-                  $ref: '#/components/schemas/Sandbox'
-                type: array
-          description: List of all sandboxes
+                $ref: '#/components/schemas/PaginatedSandboxes'
+          description: List of all sandboxes with pagination
       security:
         - bearer: []
         - oauth2:
@@ -4865,22 +4879,36 @@ paths:
             example: '{"label1": "value1", "label2": "value2"}'
             type: string
           style: form
+        - description: Number of items per page
+          explode: true
+          in: query
+          name: limit
+          required: false
+          schema:
+            type: number
+          style: form
+        - description: Page number
+          explode: true
+          in: query
+          name: page
+          required: false
+          schema:
+            type: number
+          style: form
       responses:
         '200':
           content:
             application/json:
               schema:
-                items:
-                  $ref: '#/components/schemas/Workspace'
-                type: array
-          description: List of all workspacees
+                $ref: '#/components/schemas/PaginatedWorkspaces'
+          description: List of all workspaces with pagination
       security:
         - bearer: []
         - oauth2:
             - openid
             - profile
             - email
-      summary: '[DEPRECATED] List all workspaces'
+      summary: '[DEPRECATED] List all workspaces with pagination'
       tags:
         - workspace
     post:
@@ -7156,6 +7184,95 @@ components:
         - target
         - user
       type: object
+    PaginatedSandboxes:
+      example:
+        total: 0.8008281904610115
+        totalPages: 1.4658129805029452
+        page: 6.027456183070403
+        items:
+          - memory: 4
+            buildInfo: ''
+            autoStopInterval: 30
+            organizationId: organization123
+            createdAt: 2024-10-01T12:00:00Z
+            autoDeleteInterval: 30
+            public: false
+            errorReason: The sandbox is not running
+            runnerDomain: runner.example.com
+            id: sandbox123
+            state: creating
+            class: small
+            updatedAt: 2024-10-01T12:00:00Z
+            desiredState: destroyed
+            volumes:
+              - mountPath: /data
+                volumeId: volume123
+              - mountPath: /data
+                volumeId: volume123
+            cpu: 2
+            env:
+              NODE_ENV: production
+            gpu: 0
+            daemonVersion: 1.0.0
+            backupCreatedAt: 2024-10-01T12:00:00Z
+            labels:
+              daytona.io/public: 'true'
+            target: local
+            disk: 10
+            backupState: None
+            user: daytona
+            autoArchiveInterval: 10080
+            snapshot: daytonaio/sandbox:latest
+          - memory: 4
+            buildInfo: ''
+            autoStopInterval: 30
+            organizationId: organization123
+            createdAt: 2024-10-01T12:00:00Z
+            autoDeleteInterval: 30
+            public: false
+            errorReason: The sandbox is not running
+            runnerDomain: runner.example.com
+            id: sandbox123
+            state: creating
+            class: small
+            updatedAt: 2024-10-01T12:00:00Z
+            desiredState: destroyed
+            volumes:
+              - mountPath: /data
+                volumeId: volume123
+              - mountPath: /data
+                volumeId: volume123
+            cpu: 2
+            env:
+              NODE_ENV: production
+            gpu: 0
+            daemonVersion: 1.0.0
+            backupCreatedAt: 2024-10-01T12:00:00Z
+            labels:
+              daytona.io/public: 'true'
+            target: local
+            disk: 10
+            backupState: None
+            user: daytona
+            autoArchiveInterval: 10080
+            snapshot: daytonaio/sandbox:latest
+      properties:
+        items:
+          items:
+            $ref: '#/components/schemas/Sandbox'
+          type: array
+        total:
+          type: number
+        page:
+          type: number
+        totalPages:
+          type: number
+      required:
+        - items
+        - page
+        - total
+        - totalPages
+      type: object
     CreateBuildInfo:
       properties:
         dockerfileContent:
@@ -9281,6 +9398,105 @@ components:
         - public
         - target
         - user
+      type: object
+    PaginatedWorkspaces:
+      example:
+        total: 0.8008281904610115
+        totalPages: 1.4658129805029452
+        page: 6.027456183070403
+        items:
+          - memory: 4
+            buildInfo: ''
+            autoStopInterval: 30
+            organizationId: organization123
+            createdAt: 2024-10-01T12:00:00Z
+            autoDeleteInterval: 30
+            snapshotState: None
+            public: false
+            errorReason: The sandbox is not running
+            runnerDomain: runner.example.com
+            id: sandbox123
+            state: creating
+            class: small
+            updatedAt: 2024-10-01T12:00:00Z
+            info: ''
+            desiredState: destroyed
+            image: daytonaio/workspace:latest
+            volumes:
+              - mountPath: /data
+                volumeId: volume123
+              - mountPath: /data
+                volumeId: volume123
+            cpu: 2
+            env:
+              NODE_ENV: production
+            snapshotCreatedAt: 2024-10-01T12:00:00Z
+            gpu: 0
+            daemonVersion: 1.0.0
+            backupCreatedAt: 2024-10-01T12:00:00Z
+            labels:
+              daytona.io/public: 'true'
+            target: local
+            disk: 10
+            name: MyWorkspace
+            backupState: None
+            user: daytona
+            autoArchiveInterval: 10080
+            snapshot: daytonaio/sandbox:latest
+          - memory: 4
+            buildInfo: ''
+            autoStopInterval: 30
+            organizationId: organization123
+            createdAt: 2024-10-01T12:00:00Z
+            autoDeleteInterval: 30
+            snapshotState: None
+            public: false
+            errorReason: The sandbox is not running
+            runnerDomain: runner.example.com
+            id: sandbox123
+            state: creating
+            class: small
+            updatedAt: 2024-10-01T12:00:00Z
+            info: ''
+            desiredState: destroyed
+            image: daytonaio/workspace:latest
+            volumes:
+              - mountPath: /data
+                volumeId: volume123
+              - mountPath: /data
+                volumeId: volume123
+            cpu: 2
+            env:
+              NODE_ENV: production
+            snapshotCreatedAt: 2024-10-01T12:00:00Z
+            gpu: 0
+            daemonVersion: 1.0.0
+            backupCreatedAt: 2024-10-01T12:00:00Z
+            labels:
+              daytona.io/public: 'true'
+            target: local
+            disk: 10
+            name: MyWorkspace
+            backupState: None
+            user: daytona
+            autoArchiveInterval: 10080
+            snapshot: daytonaio/sandbox:latest
+      properties:
+        items:
+          items:
+            $ref: '#/components/schemas/Workspace'
+          type: array
+        total:
+          type: number
+        page:
+          type: number
+        totalPages:
+          type: number
+      required:
+        - items
+        - page
+        - total
+        - totalPages
       type: object
     CreateWorkspace:
       example:

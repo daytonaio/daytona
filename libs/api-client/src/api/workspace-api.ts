@@ -34,6 +34,8 @@ import { BASE_PATH, COLLECTION_FORMATS, type RequestArgs, BaseAPI, RequiredError
 // @ts-ignore
 import type { CreateWorkspace } from '../models'
 // @ts-ignore
+import type { PaginatedWorkspaces } from '../models'
+// @ts-ignore
 import type { PortPreviewUrl } from '../models'
 // @ts-ignore
 import type { SandboxLabels } from '../models'
@@ -413,10 +415,12 @@ export const WorkspaceApiAxiosParamCreator = function (configuration?: Configura
     },
     /**
      *
-     * @summary [DEPRECATED] List all workspaces
+     * @summary [DEPRECATED] List all workspaces with pagination
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {boolean} [verbose] Include verbose output
      * @param {string} [labels] JSON encoded labels to filter by
+     * @param {number} [limit] Number of items per page
+     * @param {number} [page] Page number
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
@@ -425,6 +429,8 @@ export const WorkspaceApiAxiosParamCreator = function (configuration?: Configura
       xDaytonaOrganizationID?: string,
       verbose?: boolean,
       labels?: string,
+      limit?: number,
+      page?: number,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       const localVarPath = `/workspace`
@@ -451,6 +457,14 @@ export const WorkspaceApiAxiosParamCreator = function (configuration?: Configura
 
       if (labels !== undefined) {
         localVarQueryParameter['labels'] = labels
+      }
+
+      if (limit !== undefined) {
+        localVarQueryParameter['limit'] = limit
+      }
+
+      if (page !== undefined) {
+        localVarQueryParameter['page'] = page
       }
 
       if (xDaytonaOrganizationID != null) {
@@ -1009,10 +1023,12 @@ export const WorkspaceApiFp = function (configuration?: Configuration) {
     },
     /**
      *
-     * @summary [DEPRECATED] List all workspaces
+     * @summary [DEPRECATED] List all workspaces with pagination
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {boolean} [verbose] Include verbose output
      * @param {string} [labels] JSON encoded labels to filter by
+     * @param {number} [limit] Number of items per page
+     * @param {number} [page] Page number
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
@@ -1021,12 +1037,16 @@ export const WorkspaceApiFp = function (configuration?: Configuration) {
       xDaytonaOrganizationID?: string,
       verbose?: boolean,
       labels?: string,
+      limit?: number,
+      page?: number,
       options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Workspace>>> {
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PaginatedWorkspaces>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.listWorkspacesDeprecated(
         xDaytonaOrganizationID,
         verbose,
         labels,
+        limit,
+        page,
         options,
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
@@ -1379,10 +1399,12 @@ export const WorkspaceApiFactory = function (configuration?: Configuration, base
     },
     /**
      *
-     * @summary [DEPRECATED] List all workspaces
+     * @summary [DEPRECATED] List all workspaces with pagination
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {boolean} [verbose] Include verbose output
      * @param {string} [labels] JSON encoded labels to filter by
+     * @param {number} [limit] Number of items per page
+     * @param {number} [page] Page number
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
@@ -1391,10 +1413,12 @@ export const WorkspaceApiFactory = function (configuration?: Configuration, base
       xDaytonaOrganizationID?: string,
       verbose?: boolean,
       labels?: string,
+      limit?: number,
+      page?: number,
       options?: RawAxiosRequestConfig,
-    ): AxiosPromise<Array<Workspace>> {
+    ): AxiosPromise<PaginatedWorkspaces> {
       return localVarFp
-        .listWorkspacesDeprecated(xDaytonaOrganizationID, verbose, labels, options)
+        .listWorkspacesDeprecated(xDaytonaOrganizationID, verbose, labels, limit, page, options)
         .then((request) => request(axios, basePath))
     },
     /**
@@ -1673,10 +1697,12 @@ export class WorkspaceApi extends BaseAPI {
 
   /**
    *
-   * @summary [DEPRECATED] List all workspaces
+   * @summary [DEPRECATED] List all workspaces with pagination
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {boolean} [verbose] Include verbose output
    * @param {string} [labels] JSON encoded labels to filter by
+   * @param {number} [limit] Number of items per page
+   * @param {number} [page] Page number
    * @param {*} [options] Override http request option.
    * @deprecated
    * @throws {RequiredError}
@@ -1686,10 +1712,12 @@ export class WorkspaceApi extends BaseAPI {
     xDaytonaOrganizationID?: string,
     verbose?: boolean,
     labels?: string,
+    limit?: number,
+    page?: number,
     options?: RawAxiosRequestConfig,
   ) {
     return WorkspaceApiFp(this.configuration)
-      .listWorkspacesDeprecated(xDaytonaOrganizationID, verbose, labels, options)
+      .listWorkspacesDeprecated(xDaytonaOrganizationID, verbose, labels, limit, page, options)
       .then((request) => request(this.axios, this.basePath))
   }
 

@@ -89,7 +89,9 @@ daytona_api_client_async/models/organization_role.py
 daytona_api_client_async/models/organization_suspension.py
 daytona_api_client_async/models/organization_user.py
 daytona_api_client_async/models/paginated_audit_logs.py
+daytona_api_client_async/models/paginated_sandboxes.py
 daytona_api_client_async/models/paginated_snapshots_dto.py
+daytona_api_client_async/models/paginated_workspaces.py
 daytona_api_client_async/models/port_preview_url.py
 daytona_api_client_async/models/position.py
 daytona_api_client_async/models/process_errors_response.py

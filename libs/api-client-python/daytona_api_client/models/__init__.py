@@ -85,7 +85,9 @@ from daytona_api_client.models.organization_role import OrganizationRole
 from daytona_api_client.models.organization_suspension import OrganizationSuspension
 from daytona_api_client.models.organization_user import OrganizationUser
 from daytona_api_client.models.paginated_audit_logs import PaginatedAuditLogs
+from daytona_api_client.models.paginated_sandboxes import PaginatedSandboxes
 from daytona_api_client.models.paginated_snapshots_dto import PaginatedSnapshotsDto
+from daytona_api_client.models.paginated_workspaces import PaginatedWorkspaces
 from daytona_api_client.models.port_preview_url import PortPreviewUrl
 from daytona_api_client.models.position import Position
 from daytona_api_client.models.process_errors_response import ProcessErrorsResponse

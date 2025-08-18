@@ -18,9 +18,10 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 from typing_extensions import Annotated
 
 from pydantic import Field, StrictBool, StrictFloat, StrictInt, StrictStr
-from typing import List, Optional, Union
+from typing import Optional, Union
 from typing_extensions import Annotated
 from daytona_api_client_async.models.create_sandbox import CreateSandbox
+from daytona_api_client_async.models.paginated_sandboxes import PaginatedSandboxes
 from daytona_api_client_async.models.port_preview_url import PortPreviewUrl
 from daytona_api_client_async.models.sandbox import Sandbox
 from daytona_api_client_async.models.sandbox_labels import SandboxLabels
@@ -2026,6 +2027,8 @@ class SandboxApi:
         verbose: Annotated[Optional[StrictBool], Field(description="Include verbose output")] = None,
         labels: Annotated[Optional[StrictStr], Field(description="JSON encoded labels to filter by")] = None,
         include_errored_deleted: Annotated[Optional[StrictBool], Field(description="Include errored and deleted sandboxes")] = None,
+        limit: Annotated[Optional[Union[StrictFloat, StrictInt]], Field(description="Number of items per page")] = None,
+        page: Annotated[Optional[Union[StrictFloat, StrictInt]], Field(description="Page number")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2038,7 +2041,7 @@ class SandboxApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> List[Sandbox]:
+    ) -> PaginatedSandboxes:
         """List all sandboxes
 
 
@@ -2050,6 +2053,10 @@ class SandboxApi:
         :type labels: str
         :param include_errored_deleted: Include errored and deleted sandboxes
         :type include_errored_deleted: bool
+        :param limit: Number of items per page
+        :type limit: float
+        :param page: Page number
+        :type page: float
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -2077,6 +2084,8 @@ class SandboxApi:
             verbose=verbose,
             labels=labels,
             include_errored_deleted=include_errored_deleted,
+            limit=limit,
+            page=page,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -2084,7 +2093,7 @@ class SandboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "List[Sandbox]",
+            '200': "PaginatedSandboxes",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2104,6 +2113,8 @@ class SandboxApi:
         verbose: Annotated[Optional[StrictBool], Field(description="Include verbose output")] = None,
         labels: Annotated[Optional[StrictStr], Field(description="JSON encoded labels to filter by")] = None,
         include_errored_deleted: Annotated[Optional[StrictBool], Field(description="Include errored and deleted sandboxes")] = None,
+        limit: Annotated[Optional[Union[StrictFloat, StrictInt]], Field(description="Number of items per page")] = None,
+        page: Annotated[Optional[Union[StrictFloat, StrictInt]], Field(description="Page number")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2116,7 +2127,7 @@ class SandboxApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[List[Sandbox]]:
+    ) -> ApiResponse[PaginatedSandboxes]:
         """List all sandboxes
 
 
@@ -2128,6 +2139,10 @@ class SandboxApi:
         :type labels: str
         :param include_errored_deleted: Include errored and deleted sandboxes
         :type include_errored_deleted: bool
+        :param limit: Number of items per page
+        :type limit: float
+        :param page: Page number
+        :type page: float
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -2155,6 +2170,8 @@ class SandboxApi:
             verbose=verbose,
             labels=labels,
             include_errored_deleted=include_errored_deleted,
+            limit=limit,
+            page=page,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -2162,7 +2179,7 @@ class SandboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "List[Sandbox]",
+            '200': "PaginatedSandboxes",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2182,6 +2199,8 @@ class SandboxApi:
         verbose: Annotated[Optional[StrictBool], Field(description="Include verbose output")] = None,
         labels: Annotated[Optional[StrictStr], Field(description="JSON encoded labels to filter by")] = None,
         include_errored_deleted: Annotated[Optional[StrictBool], Field(description="Include errored and deleted sandboxes")] = None,
+        limit: Annotated[Optional[Union[StrictFloat, StrictInt]], Field(description="Number of items per page")] = None,
+        page: Annotated[Optional[Union[StrictFloat, StrictInt]], Field(description="Page number")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2206,6 +2225,10 @@ class SandboxApi:
         :type labels: str
         :param include_errored_deleted: Include errored and deleted sandboxes
         :type include_errored_deleted: bool
+        :param limit: Number of items per page
+        :type limit: float
+        :param page: Page number
+        :type page: float
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -2233,6 +2256,8 @@ class SandboxApi:
             verbose=verbose,
             labels=labels,
             include_errored_deleted=include_errored_deleted,
+            limit=limit,
+            page=page,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -2240,7 +2265,7 @@ class SandboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "List[Sandbox]",
+            '200': "PaginatedSandboxes",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2255,6 +2280,8 @@ class SandboxApi:
         verbose,
         labels,
         include_errored_deleted,
+        limit,
+        page,
         _request_auth,
         _content_type,
         _headers,
@@ -2288,6 +2315,14 @@ class SandboxApi:
         if include_errored_deleted is not None:
             
             _query_params.append(('includeErroredDeleted', include_errored_deleted))
+            
+        if limit is not None:
+            
+            _query_params.append(('limit', limit))
+            
+        if page is not None:
+            
+            _query_params.append(('page', page))
             
         # process the header parameters
         if x_daytona_organization_id is not None:
