@@ -13,6 +13,9 @@ import { SystemActionGuard } from '../../auth/system-action.guard'
 import { OrganizationAccessGuard } from '../../organization/guards/organization-access.guard'
 import { RequiredSystemRole } from '../../common/decorators/required-role.decorator'
 import { SystemRole } from '../../user/enums/system-role.enum'
+import { Audit, TypedRequest } from '../../audit/decorators/audit.decorator'
+import { AuditAction } from '../../audit/enums/audit-action.enum'
+import { AuditTarget } from '../../audit/enums/audit-target.enum'
 
 @ApiTags('webhooks')
 @Controller('webhooks')
@@ -34,6 +37,11 @@ export class WebhookController {
       },
     },
   })
+  @Audit({
+    action: AuditAction.GET_WEBHOOK_APP_PORTAL_ACCESS,
+    targetType: AuditTarget.ORGANIZATION,
+    targetIdFromRequest: (req) => req.params.organizationId,
+  })
   async getAppPortalAccess(@Param('organizationId') organizationId: string): Promise<{ url: string }> {
     const url = await this.webhookService.getAppPortalAccessUrl(organizationId)
     return { url }
@@ -46,6 +54,18 @@ export class WebhookController {
     description: 'Webhook message sent successfully',
   })
   @RequiredSystemRole(SystemRole.ADMIN)
+  @Audit({
+    action: AuditAction.SEND_WEBHOOK_MESSAGE,
+    targetType: AuditTarget.ORGANIZATION,
+    targetIdFromRequest: (req) => req.params.organizationId,
+    requestMetadata: {
+      body: (req: TypedRequest<SendWebhookDto>) => ({
+        eventType: req.body?.eventType,
+        payload: req.body?.payload,
+        eventId: req.body?.eventId,
+      }),
+    },
+  })
   async sendWebhook(
     @Param('organizationId') organizationId: string,
     @Body() sendWebhookDto: SendWebhookDto,
