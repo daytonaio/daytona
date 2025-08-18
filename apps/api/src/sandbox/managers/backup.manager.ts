@@ -293,8 +293,8 @@ export class BackupManager {
       // Get sandbox info from runner
       const sandboxInfo = await runnerAdapter.sandboxInfo(sandbox.id)
 
-      switch (sandboxInfo.backupState?.toUpperCase()) {
-        case 'COMPLETED': {
+      switch (sandboxInfo.backupState) {
+        case BackupState.COMPLETED: {
           sandbox.setBackupState(BackupState.COMPLETED)
           const sandboxToUpdate = await this.sandboxRepository.findOneByOrFail({
             id: sandbox.id,
@@ -303,14 +303,13 @@ export class BackupManager {
           await this.sandboxRepository.save(sandboxToUpdate)
           break
         }
-        case 'FAILED':
-        case 'ERROR': {
+        case BackupState.ERROR: {
           await this.updateSandboxBackupState(sandbox.id, BackupState.ERROR, sandboxInfo.backupErrorReason)
           break
         }
         // If backup state is none, retry the backup process by setting the backup state to pending
         // This can happen if the runner is restarted or the operation is cancelled
-        case 'NONE': {
+        case BackupState.NONE: {
           await this.updateSandboxBackupState(sandbox.id, BackupState.PENDING)
           break
         }
