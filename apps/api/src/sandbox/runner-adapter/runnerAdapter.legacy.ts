@@ -74,6 +74,8 @@ export class RunnerAdapterLegacy implements RunnerAdapter {
         return BackupState.IN_PROGRESS
       case EnumsBackupState.BackupStateCompleted:
         return BackupState.COMPLETED
+      case EnumsBackupState.BackupStateFailed:
+        return BackupState.ERROR
       default:
         return BackupState.NONE
     }
