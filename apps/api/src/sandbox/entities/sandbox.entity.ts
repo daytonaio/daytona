@@ -209,6 +209,11 @@ export class Sandbox {
           },
         ]
         this.backupErrorReason = null
+        if (this.desiredState === SandboxDesiredState.ARCHIVED) {
+          if (this.state === SandboxState.ARCHIVING || this.state === SandboxState.STOPPED) {
+            this.state = SandboxState.ARCHIVED
+          }
+        }
         break
       }
     }
