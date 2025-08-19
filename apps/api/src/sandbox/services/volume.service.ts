@@ -127,6 +127,35 @@ export class VolumeService {
     return volume
   }
 
+  async validateVolumes(organizationId: string, volumeIdOrNames: string[]): Promise<void> {
+    if (!volumeIdOrNames.length) {
+      return
+    }
+
+    const volumes = await this.volumeRepository.find({
+      where: [
+        { id: In(volumeIdOrNames), organizationId, state: Not(VolumeState.DELETED) },
+        { name: In(volumeIdOrNames), organizationId, state: Not(VolumeState.DELETED) },
+      ],
+    })
+
+    // Check if all requested volumes were found and are in a READY state
+    const foundIds = new Set(volumes.map((v) => v.id))
+    const foundNames = new Set(volumes.map((v) => v.name))
+
+    for (const idOrName of volumeIdOrNames) {
+      if (!foundIds.has(idOrName) && !foundNames.has(idOrName)) {
+        throw new NotFoundException(`Volume '${idOrName}' not found`)
+      }
+    }
+
+    for (const volume of volumes) {
+      if (volume.state !== VolumeState.READY) {
+        throw new BadRequestError(`Volume '${volume.name}' is not in a ready state. Current state: ${volume.state}`)
+      }
+    }
+  }
+
   async countActive(organizationId: string): Promise<number> {
     return this.volumeRepository.count({
       where: {
