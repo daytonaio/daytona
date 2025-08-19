@@ -105,9 +105,18 @@ import { UploadFileDto } from '../dto/upload-file.dto'
 import { AuditAction } from '../../audit/enums/audit-action.enum'
 import { Audit, MASKED_AUDIT_VALUE, TypedRequest } from '../../audit/decorators/audit.decorator'
 import { AuditTarget } from '../../audit/enums/audit-target.enum'
+import { InjectRedis } from '@nestjs-modules/ioredis'
+import { Redis } from 'ioredis'
 
 followRedirects.maxRedirects = 10
 followRedirects.maxBodyLength = 50 * 1024 * 1024
+
+type RunnerInfo = {
+  apiKey: string
+  apiUrl: string
+}
+const RUNNER_INFO_CACHE_PREFIX = 'proxy:sandbox-runner-info:'
+const RUNNER_INFO_CACHE_TTL = 2 * 60 // 2 minutes
 
 @ApiTags('toolbox')
 @Controller('toolbox')
@@ -129,17 +138,21 @@ export class ToolboxController {
     NextFunction
   >
 
-  constructor(private readonly toolboxService: ToolboxService) {
+  constructor(
+    private readonly toolboxService: ToolboxService,
+    @InjectRedis() private readonly redis: Redis,
+  ) {
     const commonProxyOptions: Options = {
       router: async (req: RawBodyRequest<IncomingMessage>) => {
         // eslint-disable-next-line no-useless-escape
         const sandboxId = req.url.match(/^\/api\/toolbox\/([^\/]+)\/toolbox/)?.[1]
         try {
-          const runner = await this.toolboxService.getRunner(sandboxId)
-          // @ts-expect-error - used later to set request headers
-          req._runnerApiKey = runner.apiKey
+          const runnerInfo = await this.getRunnerInfo(sandboxId)
 
-          return runner.proxyUrl
+          // @ts-expect-error - used later to set request headers
+          req._runnerApiKey = runnerInfo.apiKey
+
+          return runnerInfo.apiUrl
         } catch (err) {
           // @ts-expect-error - used later to throw error
           req._err = err
@@ -204,6 +217,32 @@ export class ToolboxController {
       ...commonProxyOptions,
       followRedirects: false,
     })
+  }
+
+  private async getRunnerInfo(sandboxId: string): Promise<RunnerInfo> {
+    let runnerInfo: RunnerInfo | null = null
+    try {
+      const cached: { value: RunnerInfo } = JSON.parse(await this.redis.get(`${RUNNER_INFO_CACHE_PREFIX}${sandboxId}`))
+      runnerInfo = cached.value
+    } catch {
+      // Ignore error and fetch from db
+    }
+
+    if (!runnerInfo) {
+      const runner = await this.toolboxService.getRunner(sandboxId)
+      runnerInfo = {
+        apiKey: runner.apiKey,
+        apiUrl: runner.proxyUrl,
+      }
+      await this.redis.set(
+        `${RUNNER_INFO_CACHE_PREFIX}${sandboxId}`,
+        JSON.stringify({ value: runnerInfo }),
+        'EX',
+        RUNNER_INFO_CACHE_TTL,
+      )
+    }
+
+    return runnerInfo
   }
 
   @Get(':sandboxId/toolbox/project-dir')
