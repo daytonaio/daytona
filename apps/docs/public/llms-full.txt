@@ -1619,6 +1619,37 @@ import { nodePolyfills } from 'vite-plugin-node-polyfills'
 })
 ```
 
+## Daytona in Next.js Projects
+
+When using Daytona SDK in a Next.js project, you need to configure node polyfills to ensure compatibility with Webpack and Turbopack bundlers (depending on what you're using). Add the following configuration to your `next.config.ts` file:
+
+```typescript
+import type { NextConfig } from 'next'
+import NodePolyfillPlugin from 'node-polyfill-webpack-plugin'
+import { env, nodeless } from 'unenv'
+
+const { alias: turbopackAlias } = env(nodeless, {})
+
+const nextConfig: NextConfig = {
+  // Turbopack
+  experimental: {
+    turbo: {
+      resolveAlias: {
+        ...turbopackAlias,
+      },
+    },
+  },
+  // Webpack
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      config.plugins.push(new NodePolyfillPlugin())
+    }
+    return config
+  },
+}
+
+```
+
 ## Setting up the Daytona CLI
 
 If you want to use [images from your local device](/docs/en/snapshots#using-a-local-image) or simply prefer managing your Sandboxes using the command line interface, install the Daytona CLI by running:
