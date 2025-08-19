@@ -72,7 +72,7 @@ export class SandboxService {
     private readonly organizationService: OrganizationService,
     private readonly runnerAdapterFactory: RunnerAdapterFactory,
     private readonly organizationUsageService: OrganizationUsageService,
-  ) { }
+  ) {}
 
   private async validateOrganizationQuotas(
     organization: Organization,
