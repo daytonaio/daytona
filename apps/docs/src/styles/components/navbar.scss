@@ -264,6 +264,114 @@
     }
   }
 
+  .locale-selector-wrapper {
+    position: relative;
+    display: inline-block;
+    padding: 1px 0;
+  }
+
+  .locale-selector {
+    border-radius: 3px;
+    transition: 0.6s;
+    background: var(--secondary-btn-color);
+    border: 1px solid var(--secondary-btn-color);
+    color: var(--white);
+    font-family: 'Berkeley Mono', monospace;
+    font-size: 0.875rem;
+    font-weight: 400;
+    line-height: 2.14;
+    height: auto;
+    padding: 0 17px;
+    text-transform: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+
+    @include for-pc-screen-sizes {
+      min-width: 80px;
+    }
+
+    @include for-laptop-screen-sizes {
+      min-width: 80px;
+    }
+
+    @include for-tablet-screen-sizes {
+      width: 100%;
+      justify-content: center;
+    }
+
+    @include for-mobile-screen-sizes {
+      width: 100%;
+      justify-content: center;
+    }
+
+    @include for-hover-state {
+      &:hover {
+        background: var(--secondary-hover-color);
+        border-color: var(--secondary-hover-color);
+      }
+    }
+  }
+
+  .locale-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--block-bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: 3px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    margin-top: 2px;
+
+    @include for-mobile-screen-sizes {
+      top: auto;
+      bottom: 100%;
+      margin-top: 0;
+      margin-bottom: 2px;
+    }
+  }
+
+  .locale-option {
+    display: block;
+    width: 100%;
+    padding: 8px 12px;
+    background: var(--block-bg-color);
+    color: var(--secondary-text-color);
+    border: none;
+    font-family: 'Berkeley Mono', monospace;
+    font-size: 0.875rem;
+    font-weight: 400;
+    text-align: left;
+    cursor: pointer;
+    transition: 0.2s;
+
+    &:first-child {
+      border-top-left-radius: 3px;
+      border-top-right-radius: 3px;
+    }
+
+    &:last-child {
+      border-bottom-left-radius: 3px;
+      border-bottom-right-radius: 3px;
+    }
+
+    &.active {
+      background: var(--secondary-btn-color);
+      color: var(--white);
+    }
+
+    @include for-hover-state {
+      &:hover {
+        background: var(--cta-surface-neutral-primary);
+        color: var(--primary-text-color);
+      }
+    }
+  }
+
   .call {
     background: #007fff33;
     padding: 1px 0;

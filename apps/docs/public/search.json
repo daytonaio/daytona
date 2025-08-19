@@ -761,7 +761,7 @@
   },
   {
     "title": "Setting up the Daytona CLI",
-    "description": "If you want to use [images from your local device](/docs/snapshots",
+    "description": "If you want to use [images from your local device](/docs/en/snapshots",
     "tag": "Documentation",
     "url": "/docs/getting-started#setting-up-the-daytona-cli",
     "slug": "/getting-started#setting-up-the-daytona-cli",
@@ -1745,7 +1745,7 @@
   },
   {
     "title": "Using a Local Image",
-    "description": "In order to avoid having to manually set up a private container registry and push your image there, the [Daytona CLI](/docs/getting-started",
+    "description": "In order to avoid having to manually set up a private container registry and push your image there, the [Daytona CLI](/docs/en/getting-started",
     "tag": "Documentation",
     "url": "/docs/snapshots#using-a-local-image",
     "slug": "/snapshots#using-a-local-image",

@@ -1,0 +1,503 @@
+---
+title: "AsyncDaytona"
+hideTitleOnPage: true
+---
+
+## AsyncDaytona
+
+```python
+class AsyncDaytona()
+```
+
+Daytona APIと対話するためのメインクラス。
+
+このクラスは、Daytona Sandboxを作成、管理、操作するための非同期メソッドを提供します。
+明示的な設定または環境変数を使用して初期化できます。
+
+**属性**:
+
+- `volume` _AsyncVolumeService_ - ボリュームを管理するためのサービス。
+- `snapshot` _AsyncSnapshotService_ - スナップショットを管理するためのサービス。
+  
+
+**例**:
+
+  環境変数を使用する場合:
+```python
+async with AsyncDaytona() as daytona:  # DAYTONA_API_KEY、DAYTONA_API_URLを使用
+    sandbox = await daytona.create()
+```
+  
+  明示的な設定を使用する場合:
+```python
+config = DaytonaConfig(
+    api_key="your-api-key",
+    api_url="https://your-api.com",
+    target="us"
+)
+try:
+    daytona = AsyncDaytona(config)
+    sandbox = await daytona.create()
+finally:
+    await daytona.close()
+```
+
+#### AsyncDaytona.\_\_init\_\_
+
+```python
+def __init__(config: Optional[DaytonaConfig] = None)
+```
+
+オプションの設定でDaytonaインスタンスを初期化します。
+
+設定が提供されない場合、環境変数から読み取ります:
+- `DAYTONA_API_KEY`: 認証に必要なAPIキー
+- `DAYTONA_API_URL`: 必要なAPI URL
+- `DAYTONA_TARGET`: オプションのターゲット環境（デフォルトは'us'）
+
+**引数**:
+
+- `config` _Optional[DaytonaConfig]_ - api_key、api_url、targetを含むオブジェクト。
+  
+
+**例外**:
+
+- `DaytonaError` - APIキーが設定または環境変数のいずれからも提供されない場合
+  
+
+**例**:
+
+```python
+from daytona import Daytona, DaytonaConfig
+# 環境変数を使用
+daytona1 = AsyncDaytona()
+await daytona1.close()
+# 明示的な設定を使用
+config = DaytonaConfig(
+    api_key="your-api-key",
+    api_url="https://your-api.com",
+    target="us"
+)
+daytona2 = AsyncDaytona(config)
+await daytona2.close()
+```
+
+#### AsyncDaytona.\_\_aenter\_\_
+
+```python
+async def __aenter__()
+```
+
+非同期コンテキストマネージャーのエントリー。
+
+#### AsyncDaytona.\_\_aexit\_\_
+
+```python
+async def __aexit__(exc_type, exc_value, traceback)
+```
+
+非同期コンテキストマネージャーの終了 - 適切なクリーンアップを保証します。
+
+#### AsyncDaytona.close
+
+```python
+async def close()
+```
+
+HTTPセッションを閉じ、リソースをクリーンアップします。
+
+AsyncDaytonaインスタンスの使用が完了したときに、基盤となるHTTPセッションを適切に閉じ、
+リソースリークを回避するためにこのメソッドを呼び出す必要があります。
+
+**例**:
+
+```python
+daytona = AsyncDaytona()
+try:
+    sandbox = await daytona.create()
+    # ... sandboxを使用 ...
+finally:
+    await daytona.close()
+```
+  
+  または、非同期コンテキストマネージャーとして使用する方が良いでしょう:
+```python
+async with AsyncDaytona() as daytona:
+    sandbox = await daytona.create()
+    # ... sandboxを使用 ...
+# 自動的に閉じられます
+```
+
+#### AsyncDaytona.create
+
+```python
+@overload
+async def create(params: Optional[CreateSandboxFromSnapshotParams] = None,
+                 *,
+                 timeout: Optional[float] = 60) -> AsyncSandbox
+```
+
+指定されたまたはデフォルトのスナップショットからSandboxを作成します。言語、イメージ、
+環境変数、ボリュームなど、さまざまなパラメータを指定できます。
+
+**引数**:
+
+- `params` _Optional[CreateSandboxFromSnapshotParams]_ - Sandbox作成のパラメータ。提供されない場合、
+  デフォルトのDaytonaスナップショットとPython言語にデフォルト設定されます。
+- `timeout` _Optional[float]_ - サンドボックス作成のタイムアウト（秒）。0は無制限を意味します。
+  デフォルトは60秒です。
+  
+
+**戻り値**:
+
+- `Sandbox` - 作成されたSandboxインスタンス。
+  
+
+**例外**:
+
+- `DaytonaError` - timeout、auto_stop_interval、またはauto_archive_intervalが負の場合;
+  サンドボックスの開始に失敗またはタイムアウトした場合
+  
+
+**例**:
+
+  デフォルトのPython Sandboxを作成:
+```python
+sandbox = await daytona.create()
+```
+  
+  カスタムSandboxを作成:
+```python
+params = CreateSandboxFromSnapshotParams(
+    language="python",
+    snapshot="my-snapshot-id",
+    env_vars={"DEBUG": "true"},
+    auto_stop_interval=0,
+    auto_archive_interval=60,
+    auto_delete_interval=120
+)
+sandbox = await daytona.create(params, timeout=40)
+```
+
+#### AsyncDaytona.create
+
+```python
+@overload
+async def create(
+        params: Optional[CreateSandboxFromImageParams] = None,
+        *,
+        timeout: Optional[float] = 60,
+        on_snapshot_create_logs: Callable[[str], None] = None) -> AsyncSandbox
+```
+
+指定されたレジストリで利用可能なイメージまたは宣言的なDaytona Imageからサンドボックスを作成します。
+リソース、言語、イメージ、環境変数、ボリュームなど、さまざまなパラメータを指定できます。Daytonaは提供されたイメージからスナップショットを作成し、それを使用してサンドボックスを作成します。
+
+**引数**:
+
+- `params` _Optional[CreateSandboxFromImageParams]_ - イメージからのサンドボックス作成のパラメータ。
+- `timeout` _Optional[float]_ - サンドボックス作成のタイムアウト（秒）。0は無制限を意味します。
+  デフォルトは60秒です。
+- `on_snapshot_create_logs` _Callable[[str], None]_ - このコールバック関数はスナップショット作成ログを処理します。
+  
+
+**戻り値**:
+
+- `Sandbox` - 作成されたサンドボックスインスタンス。
+  
+
+**例外**:
+
+- `DaytonaError` - timeout、auto_stop_interval、またはauto_archive_intervalが負の値の場合；
+  サンドボックスの開始に失敗またはタイムアウトした場合
+  
+
+**例**:
+
+  イメージからデフォルトのPythonサンドボックスを作成：
+```python
+sandbox = await daytona.create(CreateSandboxFromImageParams(image="debian:12.9"))
+```
+  
+  宣言的イメージ定義からカスタムサンドボックスを作成：
+```python
+declarative_image = (
+    Image.base("alpine:3.18")
+    .pipInstall(["numpy", "pandas"])
+    .env({"MY_ENV_VAR": "My Environment Variable"})
+)
+params = CreateSandboxFromImageParams(
+    language="python",
+    image=declarative_image,
+    env_vars={"DEBUG": "true"},
+    resources=Resources(cpu=2, memory=4),
+    auto_stop_interval=0,
+    auto_archive_interval=60,
+    auto_delete_interval=120
+)
+sandbox = await daytona.create(
+    params,
+    timeout=40,
+    on_snapshot_create_logs=lambda chunk: print(chunk, end=""),
+)
+```
+
+#### AsyncDaytona.delete
+
+```python
+async def delete(sandbox: AsyncSandbox, timeout: Optional[float] = 60) -> None
+```
+
+サンドボックスを削除します。
+
+**引数**:
+
+- `sandbox` _Sandbox_ - 削除するサンドボックスインスタンス。
+- `timeout` _Optional[float]_ - サンドボックス削除のタイムアウト（秒）。0は無制限を意味します。
+  デフォルトは60秒です。
+  
+
+**例外**:
+
+- `DaytonaError` - サンドボックスの削除に失敗またはタイムアウトした場合
+  
+
+**例**:
+
+```python
+sandbox = await daytona.create()
+# ... サンドボックスを使用 ...
+await daytona.delete(sandbox)  # 完了時にクリーンアップ
+```
+
+#### AsyncDaytona.get
+
+```python
+@intercept_errors(message_prefix="Failed to get sandbox: ")
+async def get(sandbox_id: str) -> AsyncSandbox
+```
+
+IDによってサンドボックスを取得します。
+
+**引数**:
+
+- `sandbox_id` _str_ - 取得するサンドボックスのID。
+  
+
+**戻り値**:
+
+- `Sandbox` - サンドボックスインスタンス。
+  
+
+**例外**:
+
+- `DaytonaError` - sandbox_idが提供されていない場合。
+  
+
+**例**:
+
+```python
+sandbox = await daytona.get("my-sandbox-id")
+print(sandbox.status)
+```
+
+#### AsyncDaytona.find\_one
+
+```python
+@intercept_errors(message_prefix="Failed to find sandbox: ")
+async def find_one(sandbox_id: Optional[str] = None,
+                   labels: Optional[Dict[str, str]] = None) -> AsyncSandbox
+```
+
+IDまたはラベルによってサンドボックスを検索します。
+
+**引数**:
+
+- `sandbox_id` _Optional[str]_ - 取得するサンドボックスのID。
+- `labels` _Optional[Dict[str, str]]_ - サンドボックスをフィルタリングするラベル。
+  
+
+**戻り値**:
+
+- `Sandbox` - IDまたはラベルに一致する最初のサンドボックス。
+  
+
+**例外**:
+
+- `DaytonaError` - サンドボックスが見つからない場合。
+  
+
+**例**:
+
+```python
+sandbox = await daytona.find_one(labels={"my-label": "my-value"})
+print(f"Sandbox ID: {sandbox.id} State: {sandbox.state}")
+```
+
+#### AsyncDaytona.list
+
+```python
+@intercept_errors(message_prefix="Failed to list sandboxes: ")
+async def list(labels: Optional[Dict[str, str]] = None) -> List[AsyncSandbox]
+```
+
+ラベルでフィルタリングされたサンドボックスをリストします。
+
+**引数**:
+
+- `labels` _Optional[Dict[str, str]]_ - サンドボックスをフィルタリングするラベル。
+  
+
+**戻り値**:
+
+- `List[Sandbox]` - ラベルに一致するサンドボックスインスタンスのリスト。
+  
+
+**例**:
+
+```python
+sandboxes = await daytona.list(labels={"my-label": "my-value"})
+for sandbox in sandboxes:
+    print(f"{sandbox.id}: {sandbox.status}")
+```
+
+#### AsyncDaytona.start
+
+```python
+async def start(sandbox: AsyncSandbox, timeout: Optional[float] = 60) -> None
+```
+
+Sandboxを開始し、準備が完了するまで待機します。
+
+**引数**:
+
+- `sandbox` _Sandbox_ - 開始するSandbox。
+- `timeout` _Optional[float]_ - Sandboxの開始を待機するオプションのタイムアウト（秒）。
+  0はタイムアウトなしを意味します。デフォルトは60秒です。
+  
+
+**例外**:
+
+- `DaytonaError` - タイムアウトが負の値の場合；Sandboxの開始に失敗またはタイムアウトした場合
+
+#### AsyncDaytona.stop
+
+```python
+async def stop(sandbox: AsyncSandbox, timeout: Optional[float] = 60) -> None
+```
+
+Sandboxを停止し、停止が完了するまで待機します。
+
+**引数**:
+
+- `sandbox` _Sandbox_ - 停止するsandbox
+- `timeout` _Optional[float]_ - sandboxの停止に対するオプションのタイムアウト（秒）。
+  0はタイムアウトなしを意味します。デフォルトは60秒です。
+  
+
+**例外**:
+
+- `DaytonaError` - タイムアウトが負の値の場合；Sandboxの停止に失敗またはタイムアウトした場合
+
+
+## CodeLanguage
+
+```python
+@dataclass
+class CodeLanguage(Enum)
+```
+
+Daytonaでサポートされているプログラミング言語
+
+**Enum Members**:
+    - `PYTHON` ("python")
+    - `TYPESCRIPT` ("typescript")
+    - `JAVASCRIPT` ("javascript")
+
+## DaytonaConfig
+
+```python
+class DaytonaConfig(BaseModel)
+```
+
+Daytonaクライアントを初期化するための設定オプション。
+
+**属性**:
+
+- `api_key` _Optional[str]_ - Daytona APIでの認証用APIキー。設定されていない場合は、
+  環境変数`DAYTONA_API_KEY`で提供するか、代わりにJWTトークンを提供する必要があります。
+- `jwt_token` _Optional[str]_ - Daytona APIでの認証用JWTトークン。設定されていない場合は、
+  環境変数`DAYTONA_JWT_TOKEN`で提供するか、代わりにAPIキーを提供する必要があります。
+- `organization_id` _Optional[str]_ - JWTベース認証で使用される組織ID。JWTトークンが
+  提供される場合は必須で、ここまたは環境変数`DAYTONA_ORGANIZATION_ID`で設定する必要があります。
+- `api_url` _Optional[str]_ - Daytona APIのURL。ここまたは環境変数`DAYTONA_API_URL`で設定されていない場合、
+  デフォルトで`'https://app.daytona.io/api'`になります。
+- `server_url` _Optional[str]_ - 非推奨。代わりに`api_url`を使用してください。このプロパティは
+  将来のバージョンで削除される予定です。
+- `target` _Optional[str]_ - Sandboxのターゲットランナー場所。ここまたは環境変数`DAYTONA_TARGET`で設定されていない場合、
+  デフォルトで`'us'`になります。
+  
+
+**例**:
+
+```python
+config = DaytonaConfig(api_key="your-api-key")
+```
+```python
+config = DaytonaConfig(jwt_token="your-jwt-token", organization_id="your-organization-id")
+```
+
+## CreateSandboxBaseParams
+
+```python
+class CreateSandboxBaseParams(BaseModel)
+```
+
+新しいSandboxを作成するためのベースパラメータ。
+
+**属性**:
+
+- `language` _Optional[CodeLanguage]_ - Sandboxのプログラミング言語。デフォルトは"python"。
+- `os_user` _Optional[str]_ - SandboxのOSユーザー。
+- `env_vars` _Optional[Dict[str, str]]_ - Sandboxに設定する環境変数。
+- `labels` _Optional[Dict[str, str]]_ - Sandboxのカスタムラベル。
+- `public` _Optional[bool]_ - Sandboxを公開するかどうか。
+- `timeout` _Optional[float]_ - Sandboxが作成され開始されるまでのタイムアウト（秒）。
+- `auto_stop_interval` _Optional[int]_ - この時間内にSandboxイベントが発生しなかった場合に
+  Sandboxが自動的に停止する間隔（分）。デフォルトは15分。
+  0は自動停止なしを意味する。
+- `auto_archive_interval` _Optional[int]_ - 継続的に停止しているSandboxが
+  自動的にアーカイブされる間隔（分）。デフォルトは7日。
+  0は最大間隔が使用されることを意味する。
+- `auto_delete_interval` _Optional[int]_ - 継続的に停止しているSandboxが
+  自動的に削除される間隔（分）。デフォルトでは、自動削除は無効。
+  負の値は無効を意味し、0は停止と同時に即座に削除することを意味する。
+- `volumes` _Optional[List[VolumeMount]]_ - Sandboxにアタッチするボリュームマウントのリスト。
+
+## CreateSandboxFromImageParams
+
+```python
+class CreateSandboxFromImageParams(CreateSandboxBaseParams)
+```
+
+イメージから新しいSandboxを作成するためのパラメータ。
+
+**属性**:
+
+- `image` _Union[str, Image]_ - Sandboxに使用するカスタムDockerイメージ。Imageオブジェクトが提供された場合、
+  イメージは動的にビルドされます。
+- `resources` _Optional[Resources]_ - Sandboxのリソース設定。提供されない場合、sandboxは
+  デフォルトのリソースを持ちます。
+
+## CreateSandboxFromSnapshotParams
+
+```python
+class CreateSandboxFromSnapshotParams(CreateSandboxBaseParams)
+```
+
+スナップショットから新しいSandboxを作成するためのパラメータ。
+
+**属性**:
+
+- `snapshot` _Optional[str]_ - Sandboxに使用するスナップショットの名前。
+

@@ -1,0 +1,216 @@
+---
+title: Daytona MCP Server
+---
+
+import { TabItem, Tabs } from '@astrojs/starlight/components'
+
+Daytona Model Context Protocol (MCP) Serverは、AIエージェントがDaytonaの機能とプログラム的に連携できるようにします。このガイドでは、様々なAIエージェントでMCPサーバーをセットアップして使用する方法について説明します。
+
+## 前提条件
+
+開始する前に、以下を確認してください：
+
+- Daytonaアカウント
+- Daytona CLIがインストールされていること
+- 互換性のあるAIエージェント（Claude Desktop App、Claude Code、Cursor、またはWindsurf）
+
+## インストールとセットアップ
+
+### 1. Daytona CLIをインストール
+
+<Tabs>
+<TabItem label="Mac/Linux">
+```bash
+brew install daytonaio/cli/daytona
+```
+
+</TabItem>
+<TabItem label="Windows">
+```bash
+powershell -Command "irm https://get.daytona.io/windows | iex"
+```
+</TabItem>
+</Tabs>
+
+### 2. Daytonaで認証
+
+```bash
+daytona login
+```
+
+### 3. MCPサーバーを初期化
+
+お好みのAIエージェントでDaytona MCPサーバーを初期化します：
+
+```bash
+daytona mcp init [claude/cursor/windsurf]
+```
+
+### 4. AIエージェントを開く
+
+初期化後、AIエージェントアプリケーションを開いてDaytonaの機能を使い始めます。
+
+## 他のAIエージェントとの統合
+
+Daytona MCPを他のAIエージェントと統合するには、以下の手順に従ってください：
+
+1. MCP設定を生成します：
+
+```bash
+daytona mcp config
+```
+
+このコマンドは、エージェントの設定にコピーできるJSON設定を出力します：
+
+```json
+{
+  "mcpServers": {
+    "daytona-mcp": {
+      "command": "daytona",
+      "args": ["mcp", "start"],
+      "env": {
+        "HOME": "${HOME}",
+        "PATH": "${HOME}:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/homebrew/bin"
+      },
+      "logFile": "${HOME}/Library/Logs/daytona/daytona-mcp-server.log"
+    }
+  }
+}
+```
+
+:::note
+Windowsユーザーの場合は、`env`フィールドに以下を追加してください：
+
+```json
+"APPDATA": "${APPDATA}"
+```
+
+:::
+
+2. AIエージェントを開くか再起動して設定を適用します。
+
+## 利用可能なツール
+
+### サンドボックス管理
+
+- **サンドボックス作成**
+
+  - 新しいDaytonaサンドボックスを作成します
+  - パラメータ:
+    - `target` (デフォルト: "us"): ターゲット地域
+    - `snapshot`: サンドボックス用のスナップショット（オプション）
+    - `auto_stop_interval` (デフォルト: "15"): 自動停止間隔（分単位、0で無効化）
+    - `auto_archive_interval` (デフォルト: "10080"): 自動アーカイブ間隔（分単位、0の場合は最大間隔が使用されます）
+
+- **サンドボックス削除**
+  - 既存のDaytonaサンドボックスを削除します
+
+### ファイル操作
+
+- **ファイルダウンロード**
+
+  - Daytonaサンドボックスからファイルをダウンロードします
+  - テキストまたはbase64エンコードされた画像としてコンテンツを返します
+  - パラメータ:
+    - `file_path`: ファイルへのパス
+
+- **ファイルアップロード**
+
+  - Daytonaサンドボックスにファイルをアップロードします
+  - テキストまたはbase64エンコードされたバイナリコンテンツをサポートします
+  - 必要な親ディレクトリを自動的に作成します
+  - ファイルは適切な権限でセッション中に保持されます
+  - 上書き制御をサポートし、元のファイル形式を維持します
+  - パラメータ:
+    - `file_path`: アップロードするファイルのパス
+    - `content`: アップロードするファイルのコンテンツ
+    - `encoding`: アップロードするファイルのエンコーディング
+    - `overwrite`: ファイルが既に存在する場合に上書きする
+
+- **フォルダ作成**
+
+  - サンドボックス内に新しいディレクトリを作成します
+  - パラメータ:
+    - `folder_path`: 作成するパス
+    - `mode`: ディレクトリの権限（デフォルト: 0755）
+
+- **ファイル情報取得**
+
+  - ファイルに関する情報を取得します
+  - パラメータ:
+    - `file_path`: ファイルへのパス
+
+- **ファイル一覧**
+
+  - ディレクトリの内容を一覧表示します
+  - パラメータ:
+    - `path`: ディレクトリパス（デフォルトは現在のディレクトリ）
+
+- **ファイル移動**
+
+  - ファイルを移動または名前変更します
+  - パラメータ:
+    - `source_path`: 移動元の場所
+    - `dest_path`: 移動先の場所
+
+- **ファイル削除**
+  - ファイルまたはディレクトリを削除します
+  - パラメータ:
+    - `file_path`: 削除するパス
+
+### プレビュー
+
+- **プレビューリンク**
+  - Webアプリケーション用のアクセス可能なプレビューURLを生成します
+  - ローカルポートを外部に公開するためのセキュアなトンネルを作成します
+  - 指定されたポートでサーバーステータスを検証します
+  - トラブルシューティング用の診断情報を提供します
+  - サービス整理のためのカスタム説明とメタデータをサポートします
+  - パラメータ:
+    - `port`: 公開するポート
+    - `description`: サービスの説明
+    - `check_server`: ポートでサーバーが実行されているかチェックする
+
+### Git操作
+
+- **Git Clone**
+  - Gitリポジトリをクローンします
+  - パラメータ:
+    - `url`: リポジトリURL
+    - `path`: ターゲットディレクトリ（デフォルトは現在）
+    - `branch`: クローンするブランチ
+    - `commit_id`: クローンする特定のコミット
+    - `username`: Gitユーザー名
+    - `password`: Gitパスワード
+
+### コマンド実行
+
+- **コマンド実行**
+  - Daytona環境でシェルコマンドを実行します
+  - stdout、stderr、終了コードを返します
+  - コマンドはサンドボックスユーザー権限で実行されます
+  - パラメータ:
+    - `command`: 実行するコマンド
+
+## トラブルシューティング
+
+よくある問題と解決策：
+
+- **認証の問題**
+
+  - `daytona login`を実行して認証情報を更新してください
+
+- **接続エラー**
+
+  - MCPサーバーの設定を確認してください
+  - サーバーのステータスを確認してください
+
+- **サンドボックスエラー**
+  - `daytona sandbox list`を使用してサンドボックスのステータスを確認してください
+
+## サポート
+
+追加のサポートについては：
+
+- [daytona.io](https://daytona.io)をご覧ください
+- support@daytona.ioまでお問い合わせください

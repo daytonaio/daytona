@@ -14,7 +14,6 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-
 # environment variables
 .env
 .env.production
@@ -22,14 +21,11 @@ pnpm-debug.log*
 # macOS-specific files
 .DS_Store
 
-
-
 # Idea/Jetbrains
 .idea/
 
-
 # git config
-.gitconfig 
+.gitconfig
 
 # vscode settings
 .vscode

@@ -1,0 +1,32 @@
+---
+title: "ExecuteResponse"
+hideTitleOnPage: true
+---
+
+
+## ExecuteResponse
+
+コマンド実行からのレスポンス。
+
+**プロパティ**:
+
+- `artifacts?` _ExecutionArtifacts_ - コマンド実行からのアーティファクト
+- `exitCode` _number_ - コマンド実行からの終了コード
+    
+- `result` _string_ - コマンド実行からの出力
+    
+
+
+
+
+**継承:**
+
+- `ExecuteResponse`
+## ExecutionArtifacts
+
+コマンド実行からのアーティファクト。
+
+**プロパティ**:
+
+- `charts?` _Chart\[\]_ - matplotlibからのチャートメタデータのリスト
+- `stdout` _string_ - コマンドからの標準出力、`ExecuteResponse`の`result`と同じ

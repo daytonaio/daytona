@@ -1,0 +1,122 @@
+---
+title: ボリューム
+---
+
+import Label from '@components/Label.astro'
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+ボリュームは、Sandbox間で共有ファイルアクセスを提供するFUSEベースのマウントです。Sandboxが大きなファイルから瞬時に読み取ることを可能にし、各Sandboxに手動でファイルをアップロードする必要がありません。ボリュームデータはS3互換のオブジェクトストアに保存されます。
+
+- 複数のボリュームを単一のSandboxにマウントできます
+- 単一のボリュームを複数のSandboxにマウントできます
+
+## ボリュームの作成
+
+Sandboxにボリュームをマウントする前に、ボリュームを作成する必要があります。
+
+<Tabs>
+<TabItem label="Python" icon="seti:python">
+```bash
+volume = daytona.volume.get("my-volume", create=True)
+```
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+```bash
+const volume = await daytona.volume.get('my-volume', true)
+```
+</TabItem>
+</Tabs>
+
+## ボリュームのマウント
+
+ボリュームが作成されると、`CreateSandboxFromSnapshotParams`オブジェクトで指定することによってSandboxにマウントできます：
+
+<Tabs>
+<TabItem label="Python" icon="seti:python">
+```python
+import os
+from daytona import CreateSandboxFromSnapshotParams, Daytona, VolumeMount
+
+daytona = Daytona()
+
+# 新しいボリュームを作成するか、既存のものを取得する
+
+volume = daytona.volume.get("my-volume", create=True)
+
+# ボリュームをサンドボックスにマウントする
+
+mount_dir_1 = "/home/daytona/volume"
+
+params = CreateSandboxFromSnapshotParams(
+    language="python",
+    volumes=[VolumeMount(volumeId=volume.id, mountPath=mount_dir_1)],
+)
+sandbox = daytona.create(params)
+
+# サンドボックスでの作業が完了したら、削除できます
+
+# ボリュームはサンドボックスが削除された後も持続します
+
+sandbox.delete()
+
+```
+
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+```typescript
+import { Daytona } from '@daytonaio/sdk'
+import path from 'path'
+
+async function main() {
+  const daytona = new Daytona()
+
+  // 新しいボリュームを作成するか、既存のものを取得する
+  const volume = await daytona.volume.get('my-volume', true)
+
+  // ボリュームをサンドボックスにマウントする
+  const mountDir1 = '/home/daytona/volume'
+
+  const sandbox1 = await daytona.create({
+    language: 'typescript',
+    volumes: [{ volumeId: volume.id, mountPath: mountDir1 }],
+  })
+  
+  // サンドボックスでの作業が完了したら、削除できます
+  // ボリュームはサンドボックスが削除された後も持続します
+  await sandbox1.delete()
+}
+
+main()
+
+```
+
+</TabItem>
+</Tabs>
+
+## ボリュームの削除
+
+ボリュームが不要になった場合、削除することができます。
+
+<Tabs>
+<TabItem label="Python" icon="seti:python">
+```python
+volume = daytona.volume.get("my-volume", create=True)
+daytona.volume.delete(volume)
+```
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+```typescript
+const volume = await daytona.volume.get('my-volume', true)
+await daytona.volume.delete(volume)
+```
+</TabItem>
+</Tabs>
+
+## ボリュームの操作
+
+マウントされると、Sandboxファイルシステム内の他のディレクトリと同様に、ボリュームから読み取りや書き込みを行うことができます。ボリュームに書き込まれたファイルは、個々のSandboxのライフサイクルを超えて永続化されます。
+
+## 制限事項
+
+ボリュームはFUSEベースのマウントであるため、ブロックストレージアクセスを必要とするアプリケーション（データベーステーブルなど）には使用できません。
+ボリュームは一般的に、ローカルSandboxファイルシステムと比較して、読み取りと書き込みの両方の操作が遅くなります。
