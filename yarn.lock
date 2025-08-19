@@ -262,6 +262,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@astrojs/internal-helpers@npm:0.7.1":
+  version: 0.7.1
+  resolution: "@astrojs/internal-helpers@npm:0.7.1"
+  checksum: 10c0/f14fa470d16b04d968f3d63826b158ed981befdb899d296f62e1d3d2b5d3ab164bfa60ceea97c072beb39ff5c7df5e054234d1a3af9a0f42df10780d50655f95
+  languageName: node
+  linkType: hard
+
 "@astrojs/markdown-remark@npm:5.0.0":
   version: 5.0.0
   resolution: "@astrojs/markdown-remark@npm:5.0.0"
@@ -390,15 +397,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@astrojs/node@npm:8.2.5":
-  version: 8.2.5
-  resolution: "@astrojs/node@npm:8.2.5"
+"@astrojs/node@npm:9.4.1":
+  version: 9.4.1
+  resolution: "@astrojs/node@npm:9.4.1"
   dependencies:
-    send: "npm:^0.18.0"
+    "@astrojs/internal-helpers": "npm:0.7.1"
+    send: "npm:^1.2.0"
     server-destroy: "npm:^1.0.1"
   peerDependencies:
-    astro: ^4.2.0
-  checksum: 10c0/8b85ba225fd90b2adaf5c0cbcb6ccc03854c3d0343d1aef4e927fcc836eafd3e2c90d8458377488baee16ed26cfd6acb79f5d5a8640a3596a35978886613e471
+    astro: ^5.3.0
+  checksum: 10c0/f4f1bff5b2c097f29728f5b0c622aed4dbd0fc7b7d2d4db9b004ecb623f2bd83e345ec7814f6fe162a9da74dba2063f27bd5b5ae06735a7e3154b13f5d540099
   languageName: node
   linkType: hard
 
@@ -15222,7 +15230,7 @@ __metadata:
   resolution: "daytona@workspace:."
   dependencies:
     "@astrojs/mdx": "npm:2.2.4"
-    "@astrojs/node": "npm:8.2.5"
+    "@astrojs/node": "npm:9.4.1"
     "@astrojs/react": "npm:^3.1.1"
     "@astrojs/starlight": "npm:^0.22.0"
     "@astrojs/starlight-tailwind": "npm:^2.0.1"
@@ -28528,27 +28536,6 @@ __metadata:
     range-parser: "npm:~1.2.1"
     statuses: "npm:2.0.1"
   checksum: 10c0/ea3f8a67a8f0be3d6bf9080f0baed6d2c51d11d4f7b4470de96a5029c598a7011c497511ccc28968b70ef05508675cebff27da9151dd2ceadd60be4e6cf845e3
-  languageName: node
-  linkType: hard
-
-"send@npm:^0.18.0":
-  version: 0.18.0
-  resolution: "send@npm:0.18.0"
-  dependencies:
-    debug: "npm:2.6.9"
-    depd: "npm:2.0.0"
-    destroy: "npm:1.2.0"
-    encodeurl: "npm:~1.0.2"
-    escape-html: "npm:~1.0.3"
-    etag: "npm:~1.8.1"
-    fresh: "npm:0.5.2"
-    http-errors: "npm:2.0.0"
-    mime: "npm:1.6.0"
-    ms: "npm:2.1.3"
-    on-finished: "npm:2.4.1"
-    range-parser: "npm:~1.2.1"
-    statuses: "npm:2.0.1"
-  checksum: 10c0/0eb134d6a51fc13bbcb976a1f4214ea1e33f242fae046efc311e80aff66c7a43603e26a79d9d06670283a13000e51be6e0a2cb80ff0942eaf9f1cd30b7ae736a
   languageName: node
   linkType: hard
 
