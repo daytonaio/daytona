@@ -87,6 +87,29 @@ func (d *DockerClient) Create(ctx context.Context, sandboxDto dto.CreateSandboxD
 		return "", err
 	}
 
+	containerShortId := c.ID[:12]
+	info, err := d.apiClient.ContainerInspect(context.Background(), sandboxDto.Id)
+	if err != nil {
+		log.Errorf("Failed to inspect container: %v", err)
+	}
+	ip := info.NetworkSettings.IPAddress
+
+	if sandboxDto.NetworkBlockAll != nil && *sandboxDto.NetworkBlockAll {
+		go func() {
+			err = d.netRulesManager.SetNetWorkRules(containerShortId, ip, "")
+			if err != nil {
+				log.Errorf("Failed to update sandbox network settings: %v", err)
+			}
+		}()
+	} else if sandboxDto.NetworkAllowList != nil && *sandboxDto.NetworkAllowList != "" {
+		go func() {
+			err = d.netRulesManager.SetNetWorkRules(containerShortId, ip, *sandboxDto.NetworkAllowList)
+			if err != nil {
+				log.Errorf("Failed to update sandbox network settings: %v", err)
+			}
+		}()
+	}
+
 	return c.ID, nil
 }
 

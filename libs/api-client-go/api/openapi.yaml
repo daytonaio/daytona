@@ -6985,6 +6985,7 @@ components:
         autoStopInterval: 30
         organizationId: organization123
         createdAt: 2024-10-01T12:00:00Z
+        networkBlockAll: false
         autoDeleteInterval: 30
         public: false
         errorReason: The sandbox is not running
@@ -6994,6 +6995,7 @@ components:
         class: small
         updatedAt: 2024-10-01T12:00:00Z
         desiredState: destroyed
+        networkAllowList: '192.168.1.0/16,10.0.0.0/24'
         volumes:
           - mountPath: /data
             volumeId: volume123
@@ -7048,6 +7050,14 @@ components:
           description: Whether the sandbox http preview is public
           example: false
           type: boolean
+        networkBlockAll:
+          description: Whether to block all network access for the sandbox
+          example: false
+          type: boolean
+        networkAllowList:
+          description: Comma-separated list of allowed CIDR network addresses for the sandbox
+          example: '192.168.1.0/16,10.0.0.0/24'
+          type: string
         target:
           description: The target environment for the sandbox
           example: local
@@ -7151,6 +7161,7 @@ components:
         - id
         - labels
         - memory
+        - networkBlockAll
         - organizationId
         - public
         - target
@@ -7182,6 +7193,7 @@ components:
       example:
         memory: 1
         buildInfo: ''
+        networkAllowList: '192.168.1.0/16,10.0.0.0/24'
         volumes:
           - mountPath: /data
             volumeId: volume123
@@ -7195,6 +7207,7 @@ components:
         labels:
           daytona.io/public: 'true'
         target: us
+        networkBlockAll: false
         disk: 3
         autoDeleteInterval: 30
         public: false
@@ -7229,6 +7242,14 @@ components:
           description: Whether the sandbox http preview is publicly accessible
           example: false
           type: boolean
+        networkBlockAll:
+          description: Whether to block all network access for the sandbox
+          example: false
+          type: boolean
+        networkAllowList:
+          description: Comma-separated list of allowed CIDR network addresses for the sandbox
+          example: '192.168.1.0/16,10.0.0.0/24'
+          type: string
         class:
           description: The sandbox class type
           enum:
@@ -9078,6 +9099,7 @@ components:
         autoStopInterval: 30
         organizationId: organization123
         createdAt: 2024-10-01T12:00:00Z
+        networkBlockAll: false
         autoDeleteInterval: 30
         snapshotState: None
         public: false
@@ -9090,6 +9112,7 @@ components:
         info: ''
         desiredState: destroyed
         image: daytonaio/workspace:latest
+        networkAllowList: '192.168.1.0/16,10.0.0.0/24'
         volumes:
           - mountPath: /data
             volumeId: volume123
@@ -9146,6 +9169,14 @@ components:
           description: Whether the sandbox http preview is public
           example: false
           type: boolean
+        networkBlockAll:
+          description: Whether to block all network access for the sandbox
+          example: false
+          type: boolean
+        networkAllowList:
+          description: Comma-separated list of allowed CIDR network addresses for the sandbox
+          example: '192.168.1.0/16,10.0.0.0/24'
+          type: string
         target:
           description: The target environment for the sandbox
           example: local
@@ -9277,6 +9308,7 @@ components:
         - labels
         - memory
         - name
+        - networkBlockAll
         - organizationId
         - public
         - target
@@ -9828,6 +9860,7 @@ components:
             - set_general_status
             - activate
             - deactivate
+            - update_network_settings
             - toolbox_delete_file
             - toolbox_download_file
             - toolbox_create_folder

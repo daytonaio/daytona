@@ -507,6 +507,10 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
       sandbox_env_vars_length_request: envVarsLength,
       sandbox_volumes_length_request: request.volumes?.length,
       sandbox_daemon_version: response.daemonVersion,
+      sandbox_network_block_all_request: request.networkBlockAll,
+      sandbox_network_block_all: response.networkBlockAll,
+      sandbox_network_allow_list_set_request: !!request.networkAllowList,
+      sandbox_network_allow_list_set: !!response.networkAllowList,
     }
 
     if (request.buildInfo) {

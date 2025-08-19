@@ -33,6 +33,8 @@ type CreateSandboxArgs struct {
 	AutoDeleteInterval  *int32                     `json:"autoDeleteInterval,omitempty"`
 	Volumes             *[]apiclient.SandboxVolume `json:"volumes,omitempty"`
 	BuildInfo           *apiclient.CreateBuildInfo `json:"buildInfo,omitempty"`
+	NetworkBlockAll     *bool                      `json:"networkBlockAll,omitempty"`
+	NetworkAllowList    *string                    `json:"networkAllowList,omitempty"`
 }
 
 func GetCreateSandboxTool() mcp.Tool {
@@ -54,6 +56,8 @@ func GetCreateSandboxTool() mcp.Tool {
 		mcp.WithNumber("autoDeleteInterval", mcp.DefaultNumber(-1), mcp.Description("Auto-delete interval in minutes (negative value means disabled, 0 means delete immediately upon stopping) for the sandbox.")),
 		mcp.WithArray("volumes", mcp.Description("Volumes to attach to the sandbox."), mcp.Items(map[string]any{"type": "object", "properties": map[string]any{"volumeId": map[string]any{"type": "string"}, "mountPath": map[string]any{"type": "string"}}})),
 		mcp.WithObject("buildInfo", mcp.Description("Build information for the sandbox."), mcp.Properties(map[string]any{"dockerfileContent": map[string]any{"type": "string"}, "contextHashes": map[string]any{"type": "array", "items": map[string]any{"type": "string"}}})),
+		mcp.WithBoolean("networkBlockAll", mcp.Description("Whether to block all network access to the sandbox.")),
+		mcp.WithString("networkAllowList", mcp.Description("Comma-separated list of domains to allow network access to the sandbox.")),
 	)
 }
 
@@ -179,6 +183,14 @@ func createSandboxRequest(args CreateSandboxArgs) (*apiclient.CreateSandbox, err
 
 	if args.BuildInfo != nil {
 		createSandbox.SetBuildInfo(*args.BuildInfo)
+	}
+
+	if args.NetworkBlockAll != nil {
+		createSandbox.SetNetworkBlockAll(*args.NetworkBlockAll)
+	}
+
+	if args.NetworkAllowList != nil {
+		createSandbox.SetNetworkAllowList(*args.NetworkAllowList)
 	}
 
 	return createSandbox, nil

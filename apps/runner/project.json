@@ -54,7 +54,7 @@
     "serve": {
       "executor": "@nx-go/nx-go:serve",
       "options": {
-        "cmd": "gow",
+        "cmd": "sudo -E PATH=/usr/local/go/bin:$PATH $(which gow)",
         "cwd": ".",
         "main": "{projectRoot}/cmd/runner/main.go"
       },
@@ -66,6 +66,7 @@
           "target": "build",
           "projects": "daemon"
         },
+        "build",
         "copy-daemon-bin",
         "copy-computeruse-plugin"
       ]

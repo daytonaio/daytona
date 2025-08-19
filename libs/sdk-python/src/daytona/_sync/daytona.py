@@ -347,6 +347,8 @@ class Daytona:
             auto_archive_interval=params.auto_archive_interval,
             auto_delete_interval=params.auto_delete_interval,
             volumes=params.volumes,
+            network_block_all=params.network_block_all,
+            network_allow_list=params.network_allow_list,
         )
 
         if getattr(params, "snapshot", None):
