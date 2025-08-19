@@ -91,6 +91,12 @@ export class Sandbox {
   @Column({ default: false })
   public: boolean
 
+  @Column({ default: false })
+  networkBlockAll: boolean
+
+  @Column({ nullable: true })
+  networkAllowList?: string
+
   @Column('jsonb', { nullable: true })
   labels: { [key: string]: string }
 

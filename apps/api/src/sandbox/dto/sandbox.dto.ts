@@ -76,6 +76,18 @@ export class SandboxDto {
   public: boolean
 
   @ApiProperty({
+    description: 'Whether to block all network access for the sandbox',
+    example: false,
+  })
+  networkBlockAll: boolean
+
+  @ApiPropertyOptional({
+    description: 'Comma-separated list of allowed CIDR network addresses for the sandbox',
+    example: '192.168.1.0/16,10.0.0.0/24',
+  })
+  networkAllowList?: string
+
+  @ApiProperty({
     description: 'The target environment for the sandbox',
     example: 'local',
   })
@@ -250,6 +262,8 @@ export class SandboxDto {
       memory: sandbox.mem,
       disk: sandbox.disk,
       public: sandbox.public,
+      networkBlockAll: sandbox.networkBlockAll,
+      networkAllowList: sandbox.networkAllowList,
       labels: sandbox.labels,
       volumes: sandbox.volumes,
       state: this.getSandboxState(sandbox),

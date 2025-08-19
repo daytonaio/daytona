@@ -74,6 +74,18 @@ export interface Sandbox {
    */
   public: boolean
   /**
+   * Whether to block all network access for the sandbox
+   * @type {boolean}
+   * @memberof Sandbox
+   */
+  networkBlockAll: boolean
+  /**
+   * Comma-separated list of allowed CIDR network addresses for the sandbox
+   * @type {string}
+   * @memberof Sandbox
+   */
+  networkAllowList?: string
+  /**
    * The target environment for the sandbox
    * @type {string}
    * @memberof Sandbox

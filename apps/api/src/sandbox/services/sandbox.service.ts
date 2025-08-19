@@ -43,6 +43,8 @@ import { TypedConfigService } from '../../config/typed-config.service'
 import { WarmPool } from '../entities/warm-pool.entity'
 import { SandboxDto } from '../dto/sandbox.dto'
 import { isValidUuid } from '../../common/utils/uuid'
+import { RunnerAdapterFactory } from '../runner-adapter/runnerAdapter'
+import { validateNetworkAllowList } from '../utils/network-validation.util'
 
 const DEFAULT_CPU = 1
 const DEFAULT_MEMORY = 1
@@ -67,6 +69,7 @@ export class SandboxService {
     private readonly warmPoolService: SandboxWarmPoolService,
     private readonly eventEmitter: EventEmitter2,
     private readonly organizationService: OrganizationService,
+    private readonly runnerAdapterFactory: RunnerAdapterFactory,
   ) {}
 
   private async validateOrganizationQuotas(
@@ -322,6 +325,14 @@ export class SandboxService {
 
     sandbox.public = createSandboxDto.public || false
 
+    if (createSandboxDto.networkBlockAll !== undefined) {
+      sandbox.networkBlockAll = createSandboxDto.networkBlockAll
+    }
+
+    if (createSandboxDto.networkAllowList !== undefined) {
+      sandbox.networkAllowList = this.resolveNetworkAllowList(createSandboxDto.networkAllowList)
+    }
+
     if (createSandboxDto.autoStopInterval !== undefined) {
       sandbox.autoStopInterval = this.resolveAutoStopInterval(createSandboxDto.autoStopInterval)
     }
@@ -362,7 +373,30 @@ export class SandboxService {
       warmPoolSandbox.autoDeleteInterval = createSandboxDto.autoDeleteInterval
     }
 
+    if (createSandboxDto.networkBlockAll !== undefined) {
+      warmPoolSandbox.networkBlockAll = createSandboxDto.networkBlockAll
+    }
+    if (createSandboxDto.networkAllowList !== undefined) {
+      warmPoolSandbox.networkAllowList = this.resolveNetworkAllowList(createSandboxDto.networkAllowList)
+    }
+
+    if (!warmPoolSandbox.runnerId) {
+      throw new SandboxError('Runner not found for warm pool sandbox')
+    }
+
     const runner = await this.runnerService.findOne(warmPoolSandbox.runnerId)
+    if (!runner) {
+      throw new NotFoundException(`Runner with ID ${warmPoolSandbox.runnerId} not found`)
+    }
+
+    if (createSandboxDto.networkBlockAll !== undefined || createSandboxDto.networkAllowList !== undefined) {
+      const runnerAdapter = await this.runnerAdapterFactory.create(runner)
+      await runnerAdapter.updateNetworkSettings(
+        warmPoolSandbox.id,
+        createSandboxDto.networkBlockAll,
+        createSandboxDto.networkAllowList,
+      )
+    }
 
     const result = await this.sandboxRepository.save(warmPoolSandbox)
 
@@ -405,6 +439,14 @@ export class SandboxService {
     sandbox.mem = mem
     sandbox.disk = disk
     sandbox.public = createSandboxDto.public || false
+
+    if (createSandboxDto.networkBlockAll !== undefined) {
+      sandbox.networkBlockAll = createSandboxDto.networkBlockAll
+    }
+
+    if (createSandboxDto.networkAllowList !== undefined) {
+      sandbox.networkAllowList = this.resolveNetworkAllowList(createSandboxDto.networkAllowList)
+    }
 
     if (createSandboxDto.autoStopInterval !== undefined) {
       sandbox.autoStopInterval = this.resolveAutoStopInterval(createSandboxDto.autoStopInterval)
@@ -765,6 +807,35 @@ export class SandboxService {
     await this.sandboxRepository.save(sandbox)
   }
 
+  async updateNetworkSettings(sandboxId: string, networkBlockAll?: boolean, networkAllowList?: string): Promise<void> {
+    const sandbox = await this.sandboxRepository.findOne({
+      where: { id: sandboxId },
+    })
+
+    if (!sandbox) {
+      throw new NotFoundException(`Sandbox with ID ${sandboxId} not found`)
+    }
+
+    if (networkBlockAll !== undefined) {
+      sandbox.networkBlockAll = networkBlockAll
+    }
+
+    if (networkAllowList !== undefined) {
+      sandbox.networkAllowList = this.resolveNetworkAllowList(networkAllowList)
+    }
+
+    await this.sandboxRepository.save(sandbox)
+
+    // Update network settings on the runner
+    if (sandbox.runnerId) {
+      const runner = await this.runnerService.findOne(sandbox.runnerId)
+      if (runner) {
+        const runnerAdapter = await this.runnerAdapterFactory.create(runner)
+        await runnerAdapter.updateNetworkSettings(sandboxId, networkBlockAll, networkAllowList)
+      }
+    }
+  }
+
   @OnEvent(WarmPoolEvents.TOPUP_REQUESTED)
   private async createWarmPoolSandbox(event: WarmPoolTopUpRequested) {
     await this.createForWarmPool(event.warmPool)
@@ -843,5 +914,11 @@ export class SandboxService {
     }
 
     return Math.min(autoArchiveInterval, maxAutoArchiveInterval)
+  }
+
+  private resolveNetworkAllowList(networkAllowList: string): string {
+    validateNetworkAllowList(networkAllowList)
+
+    return networkAllowList
   }
 }

@@ -3,6 +3,7 @@ module github.com/daytonaio/runner
 go 1.23.2
 
 require (
+	github.com/coreos/go-iptables v0.8.0
 	github.com/docker/docker v27.5.1+incompatible
 	github.com/gin-gonic/gin v1.10.1
 	github.com/go-playground/validator/v10 v10.26.0
