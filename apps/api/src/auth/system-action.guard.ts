@@ -7,7 +7,8 @@ import { Injectable, ExecutionContext, Logger, CanActivate } from '@nestjs/commo
 import { Reflector } from '@nestjs/core'
 import { RequiredSystemRole, RequiredApiRole } from '../common/decorators/required-role.decorator'
 import { SystemRole } from '../user/enums/system-role.enum'
-import { ApiRole, AuthContext } from '../common/interfaces/auth-context.interface'
+import { ApiRole } from '../common/interfaces/auth-context.interface'
+import { RequestWithAuthContext } from '../common/types/request.types'
 
 @Injectable()
 export class SystemActionGuard implements CanActivate {
@@ -16,9 +17,8 @@ export class SystemActionGuard implements CanActivate {
   constructor(private readonly reflector: Reflector) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request = context.switchToHttp().getRequest()
-    // TODO: initialize authContext safely
-    const authContext: AuthContext = request.user
+    const request = context.switchToHttp().getRequest<RequestWithAuthContext>()
+    const authContext = request.user
 
     let requiredRole: SystemRole | SystemRole[] | ApiRole | ApiRole[] =
       this.reflector.get(RequiredSystemRole, context.getHandler()) ||

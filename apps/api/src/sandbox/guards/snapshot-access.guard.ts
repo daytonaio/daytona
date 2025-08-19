@@ -5,20 +5,19 @@
 
 import { Injectable, CanActivate, ExecutionContext, ForbiddenException } from '@nestjs/common'
 import { SnapshotService } from '../services/snapshot.service'
-import { OrganizationAuthContext } from '../../common/interfaces/auth-context.interface'
 import { SystemRole } from '../../user/enums/system-role.enum'
 import { Snapshot } from '../entities/snapshot.entity'
+import { RequestWithOrganizationContext } from '../../common/types/request.types'
 
 @Injectable()
 export class SnapshotAccessGuard implements CanActivate {
   constructor(private readonly snapshotService: SnapshotService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request = context.switchToHttp().getRequest()
+    const request = context.switchToHttp().getRequest<RequestWithOrganizationContext>()
     const snapshotId: string = request.params.snapshotId || request.params.id
 
-    // TODO: initialize authContext safely
-    const authContext: OrganizationAuthContext = request.user
+    const authContext = request.user
 
     let snapshot: Snapshot
 
