@@ -65,11 +65,12 @@ import { SandboxStateUpdatedEvent } from '../events/sandbox-state-updated.event'
 import { Audit, MASKED_AUDIT_VALUE, TypedRequest } from '../../audit/decorators/audit.decorator'
 import { AuditAction } from '../../audit/enums/audit-action.enum'
 import { AuditTarget } from '../../audit/enums/audit-target.enum'
+import { ProxyGuard } from '../../auth/proxy.guard'
 
 @ApiTags('sandbox')
 @Controller('sandbox')
 @ApiHeader(CustomHeaders.ORGANIZATION_ID)
-@UseGuards(CombinedAuthGuard, OrganizationResourceActionGuard)
+@UseGuards(CombinedAuthGuard, OrganizationResourceActionGuard, ProxyGuard)
 @ApiOAuth2(['openid', 'profile', 'email'])
 @ApiBearerAuth()
 export class SandboxController {
@@ -429,6 +430,25 @@ export class SandboxController {
   })
   async updatePublicStatus(@Param('sandboxId') sandboxId: string, @Param('isPublic') isPublic: boolean): Promise<void> {
     await this.sandboxService.updatePublicStatus(sandboxId, isPublic)
+  }
+
+  @Post(':sandboxId/last-activity')
+  @ApiOperation({
+    summary: 'Update sandbox last activity',
+    operationId: 'updateLastActivity',
+  })
+  @ApiParam({
+    name: 'sandboxId',
+    description: 'ID of the sandbox',
+    type: 'string',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Last activity has been updated',
+  })
+  @UseGuards(SandboxAccessGuard)
+  async updateLastActivity(@Param('sandboxId') sandboxId: string): Promise<void> {
+    await this.sandboxService.updateLastActivityAt(sandboxId, new Date())
   }
 
   @Post(':sandboxId/autostop/:interval')

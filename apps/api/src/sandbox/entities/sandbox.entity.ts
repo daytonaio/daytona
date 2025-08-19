@@ -18,7 +18,6 @@ import { SandboxState } from '../enums/sandbox-state.enum'
 import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
 import { SandboxClass } from '../enums/sandbox-class.enum'
 import { BackupState } from '../enums/backup-state.enum'
-import { nanoid } from 'nanoid'
 import { SandboxVolume } from '../dto/sandbox.dto'
 import { BuildInfo } from './build-info.entity'
 
@@ -220,13 +219,6 @@ export class Sandbox {
     }
     if (backupErrorReason !== undefined) {
       this.backupErrorReason = backupErrorReason
-    }
-  }
-
-  @BeforeUpdate()
-  updateAccessToken() {
-    if (this.state === SandboxState.STARTED) {
-      this.authToken = nanoid(32).toLocaleLowerCase()
     }
   }
 

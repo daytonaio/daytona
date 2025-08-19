@@ -59,6 +59,13 @@ func (p *Proxy) GetProxyTarget(ctx *gin.Context) (*url.URL, map[string]string, e
 		return nil, nil, fmt.Errorf("failed to get runner info: %w", err)
 	}
 
+	// Update last activity if the header is set
+	// This is used to prevent the sandbox from being stopped due to inactivity
+	if ctx.Request.Header.Get(DAYTONA_SANDBOX_UPDATE_LAST_ACTIVITY_HEADER) == "true" {
+		p.updateLastActivity(ctx, sandboxID)
+		ctx.Request.Header.Del(DAYTONA_SANDBOX_UPDATE_LAST_ACTIVITY_HEADER)
+	}
+
 	// Build the target URL
 	targetURL := fmt.Sprintf("%s/sandboxes/%s/toolbox/proxy/%s", runnerInfo.ApiUrl, sandboxID, targetPort)
 
@@ -159,6 +166,18 @@ func (p *Proxy) getSandboxAuthKeyValid(ctx context.Context, sandboxId string, au
 	}
 
 	return &isValid, nil
+}
+
+func (p *Proxy) updateLastActivity(ctx context.Context, sandboxId string) {
+	resp, err := p.apiclient.SandboxAPI.UpdateLastActivity(ctx, sandboxId).Execute()
+	if err != nil {
+		log.Errorf("failed to update last activity for sandbox %s: %v", sandboxId, err)
+		return
+	}
+
+	if resp.StatusCode != http.StatusCreated {
+		log.Errorf("failed to update last activity for sandbox %s: %s", sandboxId, resp.Status)
+	}
 }
 
 func (p *Proxy) parseHost(host string) (targetPort string, sandboxID string, err error) {
