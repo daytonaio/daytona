@@ -318,7 +318,14 @@ export class SandboxManager {
     await this.redisLockProvider.unlock(lockKey)
   }
 
-  async syncInstanceState(sandboxId: string): Promise<void> {
+  async syncInstanceState(sandboxId: string, startedAt = new Date()): Promise<void> {
+    // If syncing for longer than 10 seconds, return
+    // The sandbox will be continued in the next cron run
+    // This prevents endless loops of syncing the same sandbox
+    if (new Date().getTime() - startedAt.getTime() > 10000) {
+      return
+    }
+
     //  prevent syncState cron from running multiple instances of the same sandbox
     const lockKey = SYNC_INSTANCE_STATE_LOCK_KEY + sandboxId
     const acquired = await this.redisLockProvider.lock(lockKey, 360)
@@ -373,7 +380,7 @@ export class SandboxManager {
 
     await this.redisLockProvider.unlock(lockKey)
     if (syncState === SYNC_AGAIN) {
-      this.syncInstanceState(sandboxId)
+      this.syncInstanceState(sandboxId, startedAt)
     }
   }
 
