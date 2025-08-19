@@ -1,0 +1,195 @@
+---
+title: "スナップショット"
+hideTitleOnPage: true
+---
+
+## Snapshot
+
+```python
+class Snapshot(SnapshotDto)
+```
+
+事前設定されたサンドボックスであるDaytona Snapshotを表します。
+
+**属性**:
+
+- `id` _StrictStr_ - Snapshotの一意識別子。
+- `organization_id` _Optional[StrictStr]_ - SnapshotのOrganization ID。
+- `general` _Optional[bool]_ - Snapshotが一般的かどうか。
+- `name` _StrictStr_ - Snapshotの名前。
+- `image_name` _StrictStr_ - SnapshotのImageの名前。
+- `state` _StrictStr_ - Snapshotの状態。
+- `size` _Optional[Union[StrictFloat, StrictInt]]_ - Snapshotのサイズ。
+- `entrypoint` _Optional[List[str]]_ - Snapshotのエントリーポイント。
+- `cpu` _Union[StrictFloat, StrictInt]_ - SnapshotのCPU。
+- `gpu` _Union[StrictFloat, StrictInt]_ - SnapshotのGPU。
+- `mem` _Union[StrictFloat, StrictInt]_ - Snapshotのメモリ（GiB単位）。
+- `disk` _Union[StrictFloat, StrictInt]_ - Snapshotのディスク（GiB単位）。
+- `error_reason` _Optional[StrictStr]_ - Snapshotのエラー理由。
+- `created_at` _StrictStr_ - Snapshotが作成されたタイムスタンプ。
+- `updated_at` _StrictStr_ - Snapshotが最後に更新されたタイムスタンプ。
+- `last_used_at` _StrictStr_ - Snapshotが最後に使用されたタイムスタンプ。
+
+
+## SnapshotService
+
+```python
+class SnapshotService()
+```
+
+Daytona Snapshotを管理するためのサービス。Snapshotの一覧表示、取得、作成、削除に使用できます。
+
+#### SnapshotService.list
+
+```python
+@intercept_errors(message_prefix="Failed to list snapshots: ")
+def list() -> List[Snapshot]
+```
+
+すべてのSnapshotを一覧表示します。
+
+**戻り値**:
+
+- `List[Snapshot]` - すべてのSnapshotのリスト。
+  
+
+**例**:
+
+```python
+daytona = Daytona()
+snapshots = daytona.snapshot.list()
+for snapshot in snapshots:
+    print(f"{snapshot.name} ({snapshot.image_name})")
+```
+
+#### SnapshotService.delete
+
+```python
+@intercept_errors(message_prefix="Failed to delete snapshot: ")
+def delete(snapshot: Snapshot) -> None
+```
+
+Snapshotを削除します。
+
+**引数**:
+
+- `snapshot` _Snapshot_ - 削除するSnapshot。
+  
+
+**例**:
+
+```python
+daytona = Daytona()
+snapshot = daytona.snapshot.get("test-snapshot")
+daytona.snapshot.delete(snapshot)
+print("Snapshot deleted")
+```
+
+#### SnapshotService.get
+
+```python
+@intercept_errors(message_prefix="Failed to get snapshot: ")
+def get(name: str) -> Snapshot
+```
+
+名前でSnapshotを取得します。
+
+**引数**:
+
+- `name` _str_ - 取得するSnapshotの名前。
+  
+
+**戻り値**:
+
+- `Snapshot` - Snapshotオブジェクト。
+  
+
+**例**:
+
+```python
+daytona = Daytona()
+snapshot = daytona.snapshot.get("test-snapshot-name")
+print(f"{snapshot.name} ({snapshot.image_name})")
+```
+
+#### SnapshotService.create
+
+```python
+@intercept_errors(message_prefix="Failed to create snapshot: ")
+@with_timeout(error_message=lambda self, timeout: (
+    f"Failed to create snapshot within {timeout} seconds timeout period."))
+def create(params: CreateSnapshotParams,
+           *,
+           on_logs: Callable[[str], None] = None,
+           timeout: Optional[float] = 0) -> Snapshot
+```
+
+指定されたImage定義から新しいスナップショットを作成し、登録します。
+
+**引数**:
+
+- `params` _CreateSnapshotParams_ - スナップショット作成のパラメータ。
+- `on_logs` _Callable[[str], None]_ - このコールバック関数はスナップショット作成ログを処理します。
+- `timeout` _Optional[float]_ - デフォルトはタイムアウトなし。タイムアウト時間（秒）（0はタイムアウトなしを意味します）。
+
+**例**:
+
+```python
+image = Image.debianSlim('3.12').pipInstall('numpy')
+daytona.snapshot.create(
+    CreateSnapshotParams(name='my-snapshot', image=image),
+    on_logs=lambda chunk: print(chunk, end=""),
+)
+```
+
+#### SnapshotService.activate
+
+```python
+def activate(snapshot: Snapshot) -> Snapshot
+```
+
+スナップショットをアクティベートします。
+
+**引数**:
+
+- `snapshot` _Snapshot_ - Snapshotインスタンス。
+
+**戻り値**:
+
+- `Snapshot` - アクティベートされたSnapshotインスタンス。
+
+#### SnapshotService.process\_image\_context
+
+```python
+@staticmethod
+def process_image_context(object_storage_api: ObjectStorageApi,
+                          image: Image) -> List[str]
+```
+
+イメージコンテキストをオブジェクトストレージにアップロードして処理します。
+
+**引数**:
+
+- `image` _Image_ - Imageインスタンス。
+
+**戻り値**:
+
+- `List[str]` - オブジェクトストレージに保存されたコンテキストハッシュのリスト。
+
+## CreateSnapshotParams
+
+```python
+class CreateSnapshotParams(BaseModel)
+```
+
+新しいスナップショットを作成するためのパラメータ。
+
+**属性**:
+
+- `name` _Optional[str]_ - スナップショットの名前。
+- `image` _Union[str, Image]_ - スナップショットのイメージ。文字列が提供された場合、
+  何らかのレジストリで利用可能である必要があります。Imageインスタンスが提供された場合、
+  Daytonaで新しいイメージを作成するために使用されます。
+- `resources` _Optional[Resources]_ - スナップショットのリソース。
+- `entrypoint` _Optional[List[str]]_ - スナップショットのエントリーポイント。
+

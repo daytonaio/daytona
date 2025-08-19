@@ -109,7 +109,7 @@ const commandOpts = {
   output: {
     type: 'string',
     short: 'o',
-    default: `${__dirname}/../src/content/docs/tools/api.mdx`,
+    default: `${__dirname}/../src/content/docs/en/tools/api.mdx`,
   },
 }
 

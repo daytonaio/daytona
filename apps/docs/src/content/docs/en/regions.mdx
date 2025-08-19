@@ -1,0 +1,30 @@
+---
+title: Region Selection
+---
+
+import { TabItem, Tabs } from '@astrojs/starlight/components'
+
+Daytona is currently available in the following regions:
+
+- United States (US)
+- Europe (EU)
+
+You can select the region during the Daytona [configuration](/docs/en/configuration) step.
+
+```python
+from daytona import Daytona, DaytonaConfig
+
+config = DaytonaConfig(
+    target="us"
+)
+
+daytona = Daytona(config)
+```
+
+```typescript
+import { Daytona } from '@daytonaio/sdk';
+
+const daytona: Daytona = new Daytona({
+    target: "eu"
+});
+```

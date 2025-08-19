@@ -1,0 +1,129 @@
+---
+title: "AsyncVolume"
+hideTitleOnPage: true
+---
+
+## Volume
+
+```python
+class Volume(VolumeDto)
+```
+
+SandboxesのためのShared Storageボリュームである、Daytona Volumeを表します。
+
+**属性**:
+
+- `id` _StrictStr_ - Volumeの一意識別子。
+- `name` _StrictStr_ - Volumeの名前。
+- `organization_id` _StrictStr_ - VolumeのOrganization ID。
+- `state` _StrictStr_ - Volumeの状態。
+- `created_at` _StrictStr_ - Volumeが作成された日時。
+- `updated_at` _StrictStr_ - Volumeが最後に更新された日時。
+- `last_used_at` _StrictStr_ - Volumeが最後に使用された日時。
+
+
+## AsyncVolumeService
+
+```python
+class AsyncVolumeService()
+```
+
+Daytona Volumeを管理するためのサービス。Volumeの一覧表示、取得、作成、削除に使用できます。
+
+#### AsyncVolumeService.list
+
+```python
+async def list() -> List[Volume]
+```
+
+すべてのVolumeを一覧表示します。
+
+**戻り値**:
+
+- `List[Volume]` - すべてのVolumeのリスト。
+  
+
+**例**:
+
+```python
+async with AsyncDaytona() as daytona:
+    volumes = await daytona.volume.list()
+    for volume in volumes:
+        print(f"{volume.name} ({volume.id})")
+```
+
+#### AsyncVolumeService.get
+
+```python
+async def get(name: str, create: bool = False) -> Volume
+```
+
+名前でVolumeを取得します。
+
+**引数**:
+
+- `name` _str_ - 取得するVolumeの名前。
+- `create` _bool_ - Trueの場合、存在しない場合は新しいVolumeを作成します。
+  
+
+**戻り値**:
+
+- `Volume` - Volumeオブジェクト。
+  
+
+**例**:
+
+```python
+async with AsyncDaytona() as daytona:
+    volume = await daytona.volume.get("test-volume-name", create=True)
+    print(f"{volume.name} ({volume.id})")
+```
+
+#### AsyncVolumeService.create
+
+```python
+async def create(name: str) -> Volume
+```
+
+新しいVolumeを作成します。
+
+**引数**:
+
+- `name` _str_ - 作成するVolumeの名前。
+  
+
+**戻り値**:
+
+- `Volume` - Volumeオブジェクト。
+  
+
+**例**:
+
+```python
+async with AsyncDaytona() as daytona:
+    volume = await daytona.volume.create("test-volume")
+    print(f"{volume.name} ({volume.id}); state: {volume.state}")
+```
+
+#### AsyncVolumeService.delete
+
+```python
+async def delete(volume: Volume) -> None
+```
+
+Volumeを削除します。
+
+**引数**:
+
+- `volume` _Volume_ - 削除するVolume。
+  
+
+**例**:
+
+```python
+async with AsyncDaytona() as daytona:
+    volume = await daytona.volume.get("test-volume")
+    await daytona.volume.delete(volume)
+    print("Volume deleted")
+```
+

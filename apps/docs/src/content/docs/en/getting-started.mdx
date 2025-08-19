@@ -1,0 +1,443 @@
+---
+title: Getting Started
+---
+
+import { TabItem, Tabs } from '@astrojs/starlight/components'
+
+The Daytona SDK provides official [Python](/docs/en/python-sdk) and [TypeScript](/docs/en/typescript-sdk) interfaces for interacting with Daytona, enabling you to programmatically manage development environments and execute code. [Python SDK](/docs/en/python-sdk) supports both sync and async programming models where async classes are prefixed with `Async`.
+
+Follow the step by step guide to create and run your first Daytona Sandbox for an AI Agent.
+
+For steps on additional configuration, including setting environmnent variables as well as accessing experimental features on our staging deployment, visit [Configuration](/docs/en/configuration).
+
+## Install the Daytona SDK
+
+Daytona provides official Python and TypeScript SDKs for interacting with the Daytona platform. Install the SDK using your preferred method:
+
+<Tabs>
+<TabItem label="Python" icon="seti:python">
+```bash
+pip install daytona
+```
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+```bash
+# Using npm
+npm install @daytonaio/sdk
+
+# Using yarn
+
+yarn add @daytonaio/sdk
+
+# Using pnpm
+
+pnpm add @daytonaio/sdk
+
+```
+</TabItem>
+</Tabs>
+
+## Run Code Inside a Sandbox
+
+Run the following code to create a Daytona Sandbox and execute commands:
+
+<Tabs>
+<TabItem label="Python" icon="seti:python">
+```python
+from daytona import Daytona, DaytonaConfig
+
+# Initialize the Daytona client
+daytona = Daytona(DaytonaConfig(api_key="YOUR_API_KEY"))
+
+# Create the Sandbox instance
+sandbox = daytona.create()
+
+# Run code securely inside the Sandbox
+response = sandbox.process.code_run('print("Sum of 3 and 4 is " + str(3 + 4))')
+if response.exit_code != 0:
+    print(f"Error running code: {response.exit_code} {response.result}")
+else:
+    print(response.result)
+
+# Clean up the Sandbox
+sandbox.delete()
+```
+
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+```typescript
+import { Daytona } from '@daytonaio/sdk'
+
+async function main() {
+  // Initialize the Daytona client
+  const daytona = new Daytona({
+    apiKey: 'YOUR_API_KEY',
+  })
+
+  let sandbox;
+  try {
+    // Create the Sandbox instance
+    sandbox = await daytona.create({
+      language: "python",
+    });
+    // Run code securely inside the Sandbox
+    const response = await sandbox.process.codeRun(
+      'print("Sum of 3 and 4 is " + str(3 + 4))'
+    );
+    if (response.exitCode !== 0) {
+      console.error("Error running code:", response.exitCode, response.result);
+    } else {
+      console.log(response.result);
+    }
+  } catch (error) {
+    console.error("Sandbox flow error:", error);
+  } finally {
+    // Clean up the Sandbox
+    if (sandbox) {
+      await sandbox.delete();
+    }
+  }
+}
+
+main().catch(console.error)
+
+```
+</TabItem>
+</Tabs>
+
+<Tabs>
+<TabItem label="Python" icon="seti:python">
+```bash
+python main.py
+```
+
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+```bash
+npx tsx ./index.ts
+```
+</TabItem>
+</Tabs>
+
+## Preview Your App
+
+The following snippet uploads a file containing a simple Flask app to a Daytona Sandbox. The web server runs on port `3000` and is accessible through the provided preview URL:
+
+<Tabs>
+<TabItem label="Python" icon="seti:python">
+```python
+from daytona import Daytona, DaytonaConfig, SessionExecuteRequest
+
+daytona = Daytona(DaytonaConfig(api_key="YOUR_API_KEY"))
+
+sandbox = daytona.create()
+
+app_code = b'''
+from flask import Flask
+
+app = Flask(__name__)
+
+@app.route('/')
+def hello():
+    return """
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Hello World</title>
+        <link rel="icon" href="https://www.daytona.io/favicon.ico">
+    </head>
+    <body style="display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-color: #0a0a0a; font-family: Arial, sans-serif;">
+        <div style="text-align: center; padding: 2rem; border-radius: 10px; background-color: white; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+            <img src="https://raw.githubusercontent.com/daytonaio/daytona/main/assets/images/Daytona-logotype-black.png" alt="Daytona Logo" style="width: 180px; margin: 10px 0px;">
+            <p>This web app is running in a Daytona sandbox!</p>
+        </div>
+    </body>
+    </html>
+    """
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=3000)
+'''
+
+# Save the Flask app to a file
+
+sandbox.fs.upload_file(app_code, "app.py")
+
+# Create a new session and execute a command
+
+exec_session_id = "python-app-session"
+sandbox.process.create_session(exec_session_id)
+
+sandbox.process.execute_session_command(exec_session_id, SessionExecuteRequest(
+    command="python /app.py",
+    var_async=True
+))
+
+# Get the preview link for the Flask app
+
+preview_info = sandbox.get_preview_link(3000)
+print(f"Flask app is available at: {preview_info.url}")
+
+```
+
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+```typescript
+import { Daytona } from '@daytonaio/sdk';
+
+const daytona = new Daytona(({
+  apiKey: "YOUR_API_KEY"
+}));
+
+async function main() {
+  const sandbox = await daytona.create();
+
+  const appCode = Buffer.from(`
+from flask import Flask
+
+app = Flask(__name__)
+
+@app.route('/')
+def hello():
+    return """
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Hello World</title>
+        <link rel="icon" href="https://www.daytona.io/favicon.ico">
+    </head>
+    <body style="display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-color: #0a0a0a; font-family: Arial, sans-serif;">
+        <div style="text-align: center; padding: 2rem; border-radius: 10px; background-color: white; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+            <img src="https://raw.githubusercontent.com/daytonaio/daytona/main/assets/images/Daytona-logotype-black.png" alt="Daytona Logo" style="width: 180px; margin: 10px 0px;">
+            <p>This web app is running in a Daytona sandbox!</p>
+        </div>
+    </body>
+    </html>
+    """
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=3000)
+  `);
+
+  // Save the Flask app to a file
+  await sandbox.fs.uploadFile(appCode, "app.py");
+
+  // Create a new session and execute a command
+  const execSessionId = "python-app-session";
+  await sandbox.process.createSession(execSessionId);
+
+  await sandbox.process.executeSessionCommand(execSessionId, ({
+    command: `python app.py`,
+    async: true,
+  }));
+
+  // Get the preview link for the Flask app
+  const previewInfo = await sandbox.getPreviewLink(3000);
+  console.log(`Flask app is available at: ${previewInfo.url}`);
+}
+
+main().catch(error => console.error("Error:", error));
+
+```
+
+</TabItem>
+</Tabs>
+
+Need to access this endpoint programmatically? Learn more about [Preview & Authentication](/docs/en/preview-and-authentication).
+
+:::tip
+You can access the Sandbox [Web Terminal](/docs/en/web-terminal) by printing out the preview URL for port `22222` or by simply going to Dashboard -> Sandboxes and clicking on the Terminal input sign.
+:::
+
+## Connect to an LLM
+
+The following snippet connects to an LLM using the Anthropic API and asks Claude to generate code for getting the factorial of 25 and then executes it inside of a Daytona Sandbox:
+
+<Tabs>
+<TabItem label="Python" icon="seti:python">
+```python
+import os
+import re
+import requests
+from daytona import Daytona, DaytonaConfig
+from dotenv import load_dotenv
+
+load_dotenv()
+
+daytona = Daytona(DaytonaConfig())
+
+sandbox = daytona.create()
+
+def get_claude_response(api_key, prompt):
+    url = "https://api.anthropic.com/v1/messages"
+    headers = {
+        "x-api-key": api_key,
+        "anthropic-version": "2023-06-01",
+        "Content-Type": "application/json"
+    }
+    data = {
+        "model": "claude-3-7-sonnet-latest",
+        "max_tokens": 256,
+        "messages": [{"role": "user", "content": prompt}]
+    }
+    response = requests.post(url, json=data, headers=headers)
+    if response.status_code == 200:
+        content = response.json().get("content", [])
+        return "".join([item["text"] for item in content if item["type"] == "text"])
+    else:
+        return f"Error {response.status_code}: {response.text}"
+
+prompt = "Python code that returns the factorial of 25. Output only the code. No explanation. No intro. No comments. Just raw code in a single code block."
+
+result = get_claude_response(os.environ["ANTHROPIC_API_KEY"], prompt)
+
+code_match = re.search(r"```python\n(.*?)```", result, re.DOTALL)
+
+code = code_match.group(1) if code_match else result
+code = code.replace('\\', '\\\\')
+
+# Run Python code inside the Sandbox and get the output
+
+response = sandbox.process.code_run(code)
+print("The factorial of 25 is", response.result)
+
+```
+
+Running the snippet:
+
+```bash
+ANTHROPIC_API_KEY="your-anthropic-api-key"
+DAYTONA_API_KEY="your-daytona-api-key"
+DAYTONA_TARGET=us
+python claude-example.py
+```
+
+```bash
+> The factorial of 25 is 15511210043330985984000000
+```
+
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+```typescript
+import { Daytona } from '@daytonaio/sdk'
+import * as dotenv from 'dotenv'
+import axios from 'axios'
+
+dotenv.config()
+
+const daytona = new Daytona()
+
+async function getClaudeResponse(apiKey: string, prompt: string): Promise<string> {
+  const url = "https://api.anthropic.com/v1/messages"
+  const headers = {
+    "x-api-key": apiKey,
+    "anthropic-version": "2023-06-01",
+    "Content-Type": "application/json"
+  }
+  const data = {
+    "model": "claude-3-7-sonnet-latest",
+    "max_tokens": 256,
+    "messages": [{"role": "user", "content": prompt}]
+  }
+
+  try {
+    const response = await axios.post(url, data, { headers })
+    if (response.status === 200) {
+      const content = response.data.content || []
+      return content
+        .filter((item: any) => item.type === "text")
+        .map((item: any) => item.text)
+        .join("")
+    } else {
+      return `Error ${response.status}: ${response.statusText}`
+    }
+  } catch (error: any) {
+    return `Error: ${error.message}`
+  }
+}
+
+async function main() {
+  const sandbox = await daytona.create()
+
+  const prompt = "Python code that returns the factorial of 25. Output only the code. No explanation. No intro. No comments. Just raw code in a single code block."
+  
+  const result = await getClaudeResponse(process.env.ANTHROPIC_API_KEY || "", prompt)
+  
+  // Extract code from the response using regex
+  const codeMatch = result.match(/```python\n(.*?)```/s)
+  
+  let code = codeMatch ? codeMatch[1] : result
+  code = code.replace(/\\/g, '\\\\')
+  
+  // Run the extracted code in the sandbox
+  const response = await sandbox.process.codeRun(code)
+  console.log("The factorial of 25 is", response.result)
+}
+
+main().catch(console.error)
+
+```
+
+
+Running the snippet:
+
+```bash
+ANTHROPIC_API_KEY="your-anthropic-api-key"
+DAYTONA_API_KEY="your-daytona-api-key"
+DAYTONA_TARGET=us
+npx ts-node claude-example.ts
+```
+
+```bash
+> The factorial of 25 is 15511210043330985984000000
+```
+
+</TabItem>
+</Tabs>
+
+## Additional Examples
+
+Use the Daytona SDK [Python examples](https://github.com/daytonaio/daytona/tree/main/examples/python) or [TypeScript/JavaScript examples](https://github.com/daytonaio/daytona/tree/main/examples/typescript) to create a Sandbox and run your code.
+
+Speed up your development on Daytona using LLMs. Copy the /llms.txt files and include them into your projects or chat context: [llms-full.txt](https://www.daytona.io/docs/llms-full.txt) or [llms.txt](https://www.daytona.io/docs/llms.txt)
+
+Learn more by checking out the Daytona SDK repository on [GitHub](https://github.com/daytonaio/daytona).
+
+## Daytona in Vite Projects
+
+When using Daytona SDK in a Vite-based project, you need to configure node polyfills to ensure compatibility. Add the following configuration to your `vite.config.ts` file in the plugins array:
+
+```typescript
+import { nodePolyfills } from 'vite-plugin-node-polyfills'
+
+export default defineConfig({
+  plugins: [
+    // ... other plugins
+    nodePolyfills({
+      globals: { global: true, process: true, Buffer: true },
+      overrides: {
+        path: 'path-browserify-win32',
+      },
+    }),
+  ],
+  // ... rest of your config
+})
+```
+
+## Setting up the Daytona CLI
+
+If you want to use [images from your local device](/docs/en/snapshots#using-a-local-image) or simply prefer managing your Sandboxes using the command line interface, install the Daytona CLI by running:
+
+<Tabs>
+<TabItem label="Mac/Linux">
+```bash
+brew install daytonaio/cli/daytona
+```
+
+</TabItem>
+<TabItem label="Windows">
+```bash
+powershell -Command "irm https://get.daytona.io/windows | iex"
+```
+</TabItem>
+</Tabs>
