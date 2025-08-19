@@ -212,6 +212,7 @@ export class Sandbox {
         if (this.desiredState === SandboxDesiredState.ARCHIVED) {
           if (this.state === SandboxState.ARCHIVING || this.state === SandboxState.STOPPED) {
             this.state = SandboxState.ARCHIVED
+            this.runnerId = null
           }
         }
         break
