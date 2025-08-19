@@ -8,10 +8,15 @@ import { OrganizationService } from '../services/organization.service'
 import { OrganizationUserService } from '../services/organization-user.service'
 import { AuthContext, OrganizationAuthContext } from '../../common/interfaces/auth-context.interface'
 import { SystemRole } from '../../user/enums/system-role.enum'
+import { InjectRedis } from '@nestjs-modules/ioredis'
+import Redis from 'ioredis'
+import { Organization } from '../entities/organization.entity'
+import { OrganizationUser } from '../entities/organization-user.entity'
 
 @Injectable()
 export class OrganizationAccessGuard implements CanActivate {
   protected readonly logger = new Logger(OrganizationAccessGuard.name)
+  @InjectRedis() private readonly redis: Redis
 
   constructor(
     private readonly organizationService: OrganizationService,
@@ -51,7 +56,8 @@ export class OrganizationAccessGuard implements CanActivate {
 
     const organizationId = organizationIdParam || authContext.organizationId
 
-    const organization = await this.organizationService.findOne(organizationId)
+    const organization = await this.getCachedOrganization(organizationId)
+
     if (!organization) {
       this.logger.warn(`Organization not found. Organization ID: ${organizationId}`)
       return false
@@ -68,7 +74,8 @@ export class OrganizationAccessGuard implements CanActivate {
       return true
     }
 
-    const organizationUser = await this.organizationUserService.findOne(organizationId, authContext.userId)
+    const organizationUser = await this.getCachedOrganizationUser(organizationId, authContext.userId)
+
     if (!organizationUser) {
       this.logger.warn(
         `Organization user not found. User ID: ${authContext.userId}, Organization ID: ${organizationId}`,
@@ -80,5 +87,46 @@ export class OrganizationAccessGuard implements CanActivate {
     request.user = organizationAuthContext
 
     return true
+  }
+
+  private async getCachedOrganization(organizationId: string): Promise<Organization | null> {
+    try {
+      const cachedOrganization = await this.redis.get(`organization:${organizationId}`)
+      if (cachedOrganization) {
+        return JSON.parse(cachedOrganization)
+      }
+      const organization = await this.organizationService.findOne(organizationId)
+      if (organization) {
+        await this.redis.set(`organization:${organizationId}`, JSON.stringify(organization), 'EX', 10)
+        return organization
+      }
+      return null
+    } catch (error) {
+      this.logger.error('Error getting cached organization:', error)
+      return null
+    }
+  }
+
+  private async getCachedOrganizationUser(organizationId: string, userId: string): Promise<OrganizationUser | null> {
+    try {
+      const cachedOrganizationUser = await this.redis.get(`organization-user:${organizationId}:${userId}`)
+      if (cachedOrganizationUser) {
+        return JSON.parse(cachedOrganizationUser)
+      }
+      const organizationUser = await this.organizationUserService.findOne(organizationId, userId)
+      if (organizationUser) {
+        await this.redis.set(
+          `organization-user:${organizationId}:${userId}`,
+          JSON.stringify(organizationUser),
+          'EX',
+          10,
+        )
+        return organizationUser
+      }
+      return null
+    } catch (ex) {
+      this.logger.error('Error getting cached organization user:', ex)
+      return null
+    }
   }
 }
