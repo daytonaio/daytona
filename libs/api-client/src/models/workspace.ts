@@ -77,6 +77,18 @@ export interface Workspace {
    */
   public: boolean
   /**
+   * Whether to block all network access for the sandbox
+   * @type {boolean}
+   * @memberof Workspace
+   */
+  networkBlockAll: boolean
+  /**
+   * Comma-separated list of allowed CIDR network addresses for the sandbox
+   * @type {string}
+   * @memberof Workspace
+   */
+  networkAllowList?: string
+  /**
    * The target environment for the sandbox
    * @type {string}
    * @memberof Workspace

@@ -22,6 +22,7 @@ import {
   CreateBackupDTO,
   PullSnapshotRequestDTO,
   ToolboxApi,
+  UpdateNetworkSettingsDTO,
 } from '@daytonaio/runner-api-client'
 import { Sandbox } from '../entities/sandbox.entity'
 import { BuildInfo } from '../entities/build-info.entity'
@@ -154,29 +155,34 @@ export class RunnerAdapterLegacy implements RunnerAdapter {
   }
 
   async createSandbox(sandbox: Sandbox, registry?: DockerRegistry, entrypoint?: string[]): Promise<void> {
-    const request: CreateSandboxDTO = {
+    const createSandboxDto: CreateSandboxDTO = {
       id: sandbox.id,
+      userId: sandbox.organizationId,
       snapshot: sandbox.snapshot,
       osUser: sandbox.osUser,
-      userId: sandbox.organizationId,
-      storageQuota: sandbox.disk,
-      memoryQuota: sandbox.mem,
       cpuQuota: sandbox.cpu,
+      gpuQuota: sandbox.gpu,
+      memoryQuota: sandbox.mem,
+      storageQuota: sandbox.disk,
       env: sandbox.env,
-      volumes: sandbox.volumes,
+      registry: registry
+        ? {
+            project: registry.project,
+            url: registry.url,
+            username: registry.username,
+            password: registry.password,
+          }
+        : undefined,
       entrypoint: entrypoint,
+      volumes: sandbox.volumes?.map((volume) => ({
+        volumeId: volume.volumeId,
+        mountPath: volume.mountPath,
+      })),
+      networkBlockAll: sandbox.networkBlockAll,
+      networkAllowList: sandbox.networkAllowList,
     }
 
-    if (registry) {
-      request.registry = {
-        project: registry.project,
-        url: registry.url,
-        username: registry.username,
-        password: registry.password,
-      }
-    }
-
-    await this.sandboxApiClient.create(request)
+    await this.sandboxApiClient.create(createSandboxDto)
   }
 
   async startSandbox(sandboxId: string): Promise<void> {
@@ -277,5 +283,14 @@ export class RunnerAdapterLegacy implements RunnerAdapter {
     }
 
     return (getVersionResponse.data as any).version
+  }
+
+  async updateNetworkSettings(sandboxId: string, networkBlockAll?: boolean, networkAllowList?: string): Promise<void> {
+    const updateNetworkSettingsDto: UpdateNetworkSettingsDTO = {
+      networkBlockAll: networkBlockAll,
+      networkAllowList: networkAllowList,
+    }
+
+    await this.sandboxApiClient.updateNetworkSettings(sandboxId, updateNetworkSettingsDto)
   }
 }

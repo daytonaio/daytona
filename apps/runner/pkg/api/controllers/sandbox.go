@@ -4,6 +4,7 @@
 package controllers
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/daytonaio/runner/pkg/api/dto"
@@ -162,6 +163,99 @@ func Resize(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, "Sandbox resized")
+}
+
+// UpdateNetworkSettings godoc
+//
+//	@Tags			sandbox
+//	@Summary		Update sandbox network settings
+//	@Description	Update sandbox network settings
+//	@Produce		json
+//	@Param			sandboxId	path		string							true	"Sandbox ID"
+//	@Param			sandbox		body		dto.UpdateNetworkSettingsDTO	true	"Update network settings"
+//	@Success		200			{string}	string							"Network settings updated"
+//	@Failure		400			{object}	common.ErrorResponse
+//	@Failure		401			{object}	common.ErrorResponse
+//	@Failure		404			{object}	common.ErrorResponse
+//	@Failure		409			{object}	common.ErrorResponse
+//	@Failure		500			{object}	common.ErrorResponse
+//	@Router			/sandboxes/{sandboxId}/network-settings [post]
+//
+//	@id				UpdateNetworkSettings
+func UpdateNetworkSettings(ctx *gin.Context) {
+	var updateNetworkSettingsDto dto.UpdateNetworkSettingsDTO
+	err := ctx.ShouldBindJSON(&updateNetworkSettingsDto)
+	if err != nil {
+		ctx.Error(common.NewInvalidBodyRequestError(err))
+		return
+	}
+
+	sandboxId := ctx.Param("sandboxId")
+	runner := runner.GetInstance(nil)
+
+	info, err := runner.Docker.ContainerInspect(ctx.Request.Context(), sandboxId)
+	if err != nil {
+		ctx.Error(common.NewInvalidBodyRequestError(err))
+		return
+	}
+	containerShortId := info.ID[:12]
+
+	// Return error if container does not have an IP address
+	if info.NetworkSettings.IPAddress == "" {
+		ctx.Error(common.NewInvalidBodyRequestError(errors.New("sandbox does not have an IP address")))
+		return
+	}
+
+	if updateNetworkSettingsDto.NetworkBlockAll != nil && *updateNetworkSettingsDto.NetworkBlockAll {
+		err = runner.NetRulesManager.SetNetWorkRules(containerShortId, info.NetworkSettings.IPAddress, "")
+		if err != nil {
+			ctx.Error(common.NewInvalidBodyRequestError(err))
+			return
+		}
+	} else if updateNetworkSettingsDto.NetworkAllowList != nil {
+		err = runner.NetRulesManager.SetNetWorkRules(containerShortId, info.NetworkSettings.IPAddress, *updateNetworkSettingsDto.NetworkAllowList)
+		if err != nil {
+			ctx.Error(common.NewInvalidBodyRequestError(err))
+			return
+		}
+	}
+
+	ctx.JSON(http.StatusOK, "Network settings updated")
+}
+
+// GetNetworkSettings godoc
+//
+//	@Tags			sandbox
+//	@Summary		Get sandbox network settings
+//	@Description	Get sandbox network settings
+//	@Produce		json
+//	@Param			sandboxId	path		string							true	"Sandbox ID"
+//	@Success		200			{object}	dto.UpdateNetworkSettingsDTO	"Network settings"
+//	@Failure		400			{object}	common.ErrorResponse
+//	@Failure		401			{object}	common.ErrorResponse
+//	@Failure		404			{object}	common.ErrorResponse
+//	@Failure		409			{object}	common.ErrorResponse
+//	@Failure		500			{object}	common.ErrorResponse
+//	@Router			/sandboxes/{sandboxId}/network-settings [get]
+//
+//	@id				GetNetworkSettings
+func GetNetworkSettings(ctx *gin.Context) {
+	// TODO: Implement GetNetworkSettings in Docker client
+	// sandboxId := ctx.Param("sandboxId")
+	// runner := runner.GetInstance(nil)
+	// networkSettings, err := runner.Docker.GetNetworkSettings(ctx.Request.Context(), sandboxId)
+	// if err != nil {
+	// 	ctx.Error(err)
+	// 	return
+	// }
+
+	// For now, return empty settings
+	networkSettings := dto.UpdateNetworkSettingsDTO{
+		NetworkBlockAll:  nil,
+		NetworkAllowList: nil,
+	}
+
+	ctx.JSON(http.StatusOK, networkSettings)
 }
 
 // Start 			godoc

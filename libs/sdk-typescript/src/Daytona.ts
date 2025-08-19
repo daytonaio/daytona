@@ -126,6 +126,8 @@ export interface Resources {
  * @property {number} [autoArchiveInterval] - Auto-archive interval in minutes (0 means the maximum interval will be used). Default is 7 days.
  * @property {number} [autoDeleteInterval] - Auto-delete interval in minutes (negative value means disabled, 0 means delete immediately upon stopping). By default, auto-delete is disabled.
  * @property {VolumeMount[]} [volumes] - Optional array of volumes to mount to the Sandbox
+ * @property {boolean} [networkBlockAll] - Whether to block all network access for the Sandbox
+ * @property {string} [networkAllowList] - Comma-separated list of allowed CIDR network addresses for the Sandbox
  */
 export type CreateSandboxBaseParams = {
   user?: string
@@ -137,6 +139,8 @@ export type CreateSandboxBaseParams = {
   autoArchiveInterval?: number
   autoDeleteInterval?: number
   volumes?: VolumeMount[]
+  networkBlockAll?: boolean
+  networkAllowList?: string
 }
 
 /**
@@ -468,6 +472,8 @@ export class Daytona {
           autoArchiveInterval: params.autoArchiveInterval,
           autoDeleteInterval: params.autoDeleteInterval,
           volumes: params.volumes,
+          networkBlockAll: params.networkBlockAll,
+          networkAllowList: params.networkAllowList,
         },
         undefined,
         {
