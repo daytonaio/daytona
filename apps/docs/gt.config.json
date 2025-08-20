@@ -17,7 +17,6 @@
     }
   },
   "locales": ["en", "ja"],
-  "baseUrl": "https://api.gtx.dev",
   "ssr": true,
   "options": {
     "experimentalFlattenJsonFiles": true,
