@@ -3,20 +3,20 @@ title: "チャート"
 hideTitleOnPage: true
 ---
 
-## Chart
+## チャート
 
 ```python
 class Chart()
 ```
 
-matplotlibからのメタデータを持つチャートを表します。
+matplotlib のメタデータを含むチャートを表します。
 
 **属性**:
 
 - `type` _ChartType_ - チャートのタイプ
 - `title` _str_ - チャートのタイトル
 - `elements` _List[Any]_ - チャートの要素
-- `png` _Optional[str]_ - base64でエンコードされたチャートのPNG表現
+- `png` _Optional[str]_ - base64 でエンコードされたチャートの PNG 表現
 
 
 ## ChartType
@@ -27,7 +27,7 @@ class ChartType(str, Enum)
 
 チャートタイプ
 
-**Enum Members**:
+**列挙メンバー**:
     - `LINE` ("line")
     - `SCATTER` ("scatter")
     - `BAR` ("bar")
@@ -42,7 +42,7 @@ class ChartType(str, Enum)
 class Chart2D(Chart)
 ```
 
-メタデータを持つ2Dチャートを表します。
+メタデータを含む2次元チャートを表します。
 
 **属性**:
 
@@ -55,12 +55,12 @@ class Chart2D(Chart)
 class PointData()
 ```
 
-2Dチャートの点を表します。
+2Dチャート上の点を表します。
 
 **属性**:
 
 - `label` _str_ - 点のラベル
-- `points` _List[Tuple[Union[str, float], Union[str, float]]]_ - チャートの点
+- `points` _List[Tuple[Union[str, float], Union[str, float]]]_ - チャート上の点の配列
 
 ## PointChart
 
@@ -68,17 +68,17 @@ class PointData()
 class PointChart(Chart2D)
 ```
 
-メタデータを持つポイントチャートを表します。
+メタデータ付きの散布図（ポイントチャート）を表します。
 
 **属性**:
 
-- `x_ticks` _List[Union[str, float]]_ - x軸の目盛り
-- `x_tick_labels` _List[str]_ - x軸のラベル
+- `x_ticks` _List[Union[str, float]]_ - x軸の目盛
+- `x_tick_labels` _List[str]_ - x軸の目盛ラベル
 - `x_scale` _str_ - x軸のスケール
-- `y_ticks` _List[Union[str, float]]_ - y軸の目盛り
-- `y_tick_labels` _List[str]_ - y軸のラベル
+- `y_ticks` _List[Union[str, float]]_ - y軸の目盛
+- `y_tick_labels` _List[str]_ - y軸の目盛ラベル
 - `y_scale` _str_ - y軸のスケール
-- `elements` _List[PointData]_ - チャートのポイント
+- `elements` _List[PointData]_ - 図の点要素
 
 ## LineChart
 
@@ -86,7 +86,7 @@ class PointChart(Chart2D)
 class LineChart(PointChart)
 ```
 
-メタデータを持つ折れ線グラフを表します。
+メタデータ付きの折れ線グラフを表します。
 
 **属性**:
 
@@ -98,11 +98,11 @@ class LineChart(PointChart)
 class ScatterChart(PointChart)
 ```
 
-メタデータを持つ散布図を表します。
+メタデータを含む散布図を表します。
 
 **属性**:
 
-- `type` _ChartType_ - チャートの種類
+- `type` _ChartType_ - チャートのタイプ
 
 ## BarData
 
@@ -110,7 +110,7 @@ class ScatterChart(PointChart)
 class BarData()
 ```
 
-棒グラフの棒を表します。
+棒グラフの1本の棒を表します。
 
 **属性**:
 
@@ -124,12 +124,12 @@ class BarData()
 class BarChart(Chart2D)
 ```
 
-メタデータを持つ棒グラフを表します。
+メタデータ付きの棒グラフを表します。
 
 **属性**:
 
-- `type` _ChartType_ - チャートの種類
-- `elements` _List[BarData]_ - チャートの棒
+- `type` _ChartType_ - グラフのタイプ
+- `elements` _List[BarData]_ - 棒（バー）のリスト
 
 ## PieData
 
@@ -137,14 +137,14 @@ class BarChart(Chart2D)
 class PieData()
 ```
 
-円グラフの円スライスを表します。
+円グラフのスライス（扇形）を表します。
 
 **属性**:
 
-- `label` _str_ - 円スライスのラベル
-- `angle` _float_ - 円スライスの角度
-- `radius` _float_ - 円スライスの半径
-- `autopct` _float_ - 円スライスのautopct値
+- `label` _str_ - スライスのラベル
+- `angle` _float_ - スライスの角度
+- `radius` _float_ - スライスの半径
+- `autopct` _float_ - スライスのautopct値
 
 ## PieChart
 
@@ -156,8 +156,8 @@ class PieChart(Chart)
 
 **属性**:
 
-- `type` _ChartType_ - チャートの種類
-- `elements` _List[PieData]_ - チャートの円グラフスライス
+- `type` _ChartType_ - グラフの種類
+- `elements` _List[PieData]_ - 円グラフのスライス
 
 ## BoxAndWhiskerData
 
@@ -165,17 +165,17 @@ class PieChart(Chart)
 class BoxAndWhiskerData()
 ```
 
-ボックスプロット（箱ひげ図）チャートにおけるボックスとひげを表します。
+箱ひげ図における箱ひげを表します。
 
 **属性**:
 
-- `label` _str_ - ボックスとひげのラベル
-- `min` _float_ - ボックスとひげの最小値
-- `first_quartile` _float_ - ボックスとひげの第1四分位数
-- `median` _float_ - ボックスとひげの中央値
-- `third_quartile` _float_ - ボックスとひげの第3四分位数
-- `max` _float_ - ボックスとひげの最大値
-- `outliers` _List[float]_ - ボックスとひげの外れ値
+- `label` _str_ - 箱ひげのラベル
+- `min` _float_ - 箱ひげの最小値
+- `first_quartile` _float_ - 箱ひげの第1四分位数
+- `median` _float_ - 箱ひげの中央値
+- `third_quartile` _float_ - 箱ひげの第3四分位数
+- `max` _float_ - 箱ひげの最大値
+- `outliers` _List[float]_ - 箱ひげの外れ値
 
 ## BoxAndWhiskerChart
 
@@ -183,12 +183,12 @@ class BoxAndWhiskerData()
 class BoxAndWhiskerChart(Chart2D)
 ```
 
-メタデータを持つボックスアンドウィスカーチャートを表します。
+メタデータ付きの箱ひげ図を表します。
 
 **属性**:
 
 - `type` _ChartType_ - チャートのタイプ
-- `elements` _List[BoxAndWhiskerData]_ - チャートのボックスとウィスカー
+- `elements` _List[BoxAndWhiskerData]_ - チャートの箱ひげ要素
 
 ## CompositeChart
 
@@ -196,10 +196,10 @@ class BoxAndWhiskerChart(Chart2D)
 class CompositeChart(Chart)
 ```
 
-メタデータを持つ複合チャートを表します。複合チャートは複数のチャート（サブプロット）を含むチャートです。
+メタデータを持つ複合チャートを表します。複合チャートは、複数のチャート（サブプロット）で構成されるチャートです。
 
 **属性**:
 
 - `type` _ChartType_ - チャートのタイプ
-- `elements` _List[Chart]_ - 複合チャートのチャート（サブプロット）
+- `elements` _List[Chart]_ - 複合チャートを構成するチャート（サブプロット）
 

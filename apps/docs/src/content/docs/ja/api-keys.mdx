@@ -1,27 +1,27 @@
 ---
-title: APIキー
+title: API Keys
 ---
 
-Daytona APIキーは、[Daytona API](/docs/ja/tools/api)へのリクエストを認証するために使用されます。
+DaytonaのAPIキーは、[Daytona API](/docs/ja/tools/api)へのリクエストを認証するために使用します。
 
-[設定](/docs/ja/configuration)ページでは、`DAYTONA_API_KEY`環境変数の設定方法について説明しています。
+[Configuration](/docs/ja/configuration)ページでは、`DAYTONA_API_KEY` 環境変数の設定方法を説明しています。
 
-APIキーを管理するには、ダッシュボードの[Keys](https://app.daytona.io/dashboard/keys)セクションにアクセスしてください。`Create Key`をクリックして新しいキーを生成し、クリップボードにコピーします。
+APIキーを管理するには、Dashboardの[Keys](https://app.daytona.io/dashboard/keys)セクションに移動します。`Create Key` をクリックして新しいキーを作成し、クリップボードにコピーします。
 
 ## 権限
 
-新しいAPI Keyを追加する際、そのキーに対する権限セットの選択を求められます：
+新しい APIキー を追加する際、キーに付与する権限セットを選択するよう求められます:
 
-| 権限 | 説明 |
+| Permission | Description |
 |------------|-------------|
-| **`Sandboxes`** | Sandboxesの作成と管理を行う権限を付与します |
-| **`Snapshots`** | Snapshotsの作成と管理を行う権限を付与します |
-| **`Registries`** | Registriesの作成と管理を行う権限を付与します |
-| **`Volumes`** | Volumesの作成と管理を行う権限を付与します |
+| **`Sandboxes`** | サンドボックス（Daytonaが管理する隔離された一時的な実行環境）を作成・管理する権限を付与 |
+| **`Snapshots`** | スナップショット（サンドボックス作成に使う事前設定済みの再利用可能なイメージ／テンプレート）を作成・管理する権限を付与 |
+| **`Registries`** | レジストリを作成・管理する権限を付与 |
+| **`Volumes`** | ボリューム（S3互換オブジェクトストレージをバックエンドとするFUSE共有ストレージマウント）を作成・管理する権限を付与 |
 
-各権限には細かいスコープが含まれています：
+各権限には、より細かなスコープが含まれます:
 
-- `write:*` 作成と更新用  
-- `delete:*` リソース削除用  
+- `write:*` は作成および更新
+- `delete:*` はリソースの削除
 
-例：`write:sandboxes`、`delete:sandboxes`
+例: `write:sandboxes`, `delete:sandboxes`

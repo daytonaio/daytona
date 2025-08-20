@@ -4,18 +4,18 @@ title: Language Server Protocol
 
 import { TabItem, Tabs } from '@astrojs/starlight/components'
 
-Daytona SDKは、Sandboxインスタンスを通じてLanguage Server Protocol（LSP）サポートを提供します。これにより、コード補完、診断などの高度な言語機能が有効になります。
+Daytona（デイトナ）SDKは、サンドボックスインスタンス経由でLSP（Language Server Protocol）をサポートします。これにより、コード補完や診断などの高度な言語機能を利用できます。
 
 ## LSPサーバーの作成
 
-Daytona SDKは、PythonとTypeScriptを使用してLSPサーバーを作成するオプションを提供します。`path_to_project`の開始点は、デフォルトで現在のSandboxユーザーのルートになります - 例：`workspace/project`は`/home/[username]/workspace/project`を意味しますが、`/`で始めることで絶対パスを定義することもできます。
+Daytona（デイトナ）SDKは、PythonおよびTypeScriptでLSPサーバーを作成する機能を提供します。`path_to_project` の基準パスはデフォルトで現在のサンドボックスユーザーのホーム直下です。たとえば `workspace/project` は `/home/[username]/workspace/project` を指します。先頭を `/` にすることで絶対パスも指定できます。
 
 <Tabs>
 <TabItem label="Python" icon="seti:python">
 ```python
 from daytona import Daytona, LspLanguageId
 
-# Sandboxを作成
+# サンドボックスを作成
 
 daytona = Daytona()
 sandbox = daytona.create()
@@ -33,7 +33,7 @@ lsp_server = sandbox.create_lsp_server(
 ```typescript
 import { Daytona, LspLanguageId } from '@daytonaio/sdk'
 
-// sandboxを作成
+// サンドボックスを作成
 const daytona = new Daytona()
 const sandbox = await daytona.create({
     language: 'typescript'
@@ -49,16 +49,16 @@ const lspServer = await sandbox.createLspServer(
 </TabItem>
 </Tabs>
 
-## サポートされている言語
+## サポート対象の言語
 
-Daytona SDKは、PythonとTypeScriptの`LspLanguageId`列挙型を通じて、さまざまな言語のLSPサーバーを作成するオプションを提供します。
+Daytona SDK では、Python および TypeScript の `LspLanguageId` 列挙体を使用して、各種言語向けの LSP サーバーを作成できます。
 
 <Tabs>
 <TabItem label="Python" icon="seti:python">
 ```python
 from daytona import LspLanguageId
 
-# 利用可能な言語ID
+# 利用可能な言語 ID
 
 LspLanguageId.PYTHON
 LspLanguageId.TYPESCRIPT
@@ -69,7 +69,7 @@ LspLanguageId.TYPESCRIPT
 ```typescript
 import { LspLanguageId } from '@daytonaio/sdk'
 
-// 利用可能な言語ID
+// 利用可能な言語 ID
 LspLanguageId.PYTHON      
 LspLanguageId.TYPESCRIPT    
 ```
@@ -77,16 +77,16 @@ LspLanguageId.TYPESCRIPT
 </TabItem>
 </Tabs>
 
-- `LspLanguageId.PYTHON`: Python言語サーバー。
-- `LspLanguageId.TYPESCRIPT`: TypeScript/JavaScript言語サーバー。
+- `LspLanguageId.PYTHON`: Python 向け言語サーバー。
+- `LspLanguageId.TYPESCRIPT`: TypeScript/JavaScript 向け言語サーバー。
 
-## LSP機能
+## LSP 機能
 
-Daytona SDKは、コード解析と編集のための様々なLSP機能を提供します。
+Daytona SDK は、コード解析や編集のための各種 LSP 機能を提供します。
 
 ### コード補完
 
-Daytona SDKは、PythonとTypeScriptを使用してファイル内の特定の位置でコード補完を取得するオプションを提供します。
+Daytona SDK では、Python と TypeScript を用いて、ファイル内の特定位置のコード補完候補を取得できます。
 
 <Tabs>
 <TabItem label="Python" icon="seti:python">
