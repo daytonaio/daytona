@@ -6,11 +6,11 @@ hideTitleOnPage: true
 
 ## ObjectStorage
 
-オブジェクトストレージサービスと連携するためのObjectStorageクラス。
+オブジェクトストレージサービスとやり取りするための ObjectStorage クラス。
 
 ### Param
 
-オブジェクトストレージサービスの設定。
+オブジェクトストレージサービスの構成。
 
 ### Constructors
 
@@ -44,26 +44,25 @@ archiveBasePath: string): Promise<string>
 
 **Parameters**:
 
-- `path` _string_ - アップロードするファイルまたはディレクトリのパス。
+- `path` _string_ - アップロード対象のファイルまたはディレクトリのパス。
 - `organizationId` _string_ - アップロードに使用する組織ID。
-- `archiveBasePath` _string_ - アーカイブに使用するベースパス。
+- `archiveBasePath` _string_ - アーカイブで使用するベースパス。
 
 
 **Returns**:
 
-- `Promise<string>` - アップロードされたファイルまたはディレクトリのハッシュ。
-
+- `Promise<string>` - アップロードされたファイルまたはディレクトリのハッシュ値。
 ***
 
 
 ## ObjectStorageConfig
 
-ObjectStorageクラスの設定。
+ObjectStorage クラスの設定。
 
 **プロパティ**:
 
-- `accessKeyId` _string_ - オブジェクトストレージサービスのアクセスキーID。
-- `bucketName?` _string_ - 使用するバケットの名前。
-- `endpointUrl` _string_ - オブジェクトストレージサービスのエンドポイントURL。
+- `accessKeyId` _string_ - オブジェクトストレージサービスのアクセスキー ID。
+- `bucketName?` _string_ - 使用するバケット名。
+- `endpointUrl` _string_ - オブジェクトストレージサービスのエンドポイント URL。
 - `secretAccessKey` _string_ - オブジェクトストレージサービスのシークレットアクセスキー。
-- `sessionToken?` _string_ - オブジェクトストレージサービスのセッショントークン。一時的な認証情報に使用されます。
+- `sessionToken?` _string_ - オブジェクトストレージサービスのセッショントークン（一時的な認証情報で使用）。

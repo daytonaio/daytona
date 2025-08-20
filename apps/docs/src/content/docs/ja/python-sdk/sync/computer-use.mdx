@@ -1,5 +1,5 @@
 ---
-title: "ComputerUse"
+title: "コンピューター使用"
 hideTitleOnPage: true
 ---
 
@@ -9,9 +9,9 @@ hideTitleOnPage: true
 class ComputerUse()
 ```
 
-デスクトップ環境と対話するためのComputer Use機能。
+デスクトップ環境と対話するためのコンピューター使用機能。
 
-サンドボックス内でデスクトップ操作を自動化するためのマウス、キーボード、スクリーンショット、ディスプレイ操作へのアクセスを提供します。
+サンドボックス内でのデスクトップ操作を自動化するために、マウス、キーボード、スクリーンショット、ディスプレイの操作にアクセスできます。
 
 **属性**:
 
@@ -27,11 +27,11 @@ class ComputerUse()
 def start() -> ComputerUseStartResponse
 ```
 
-すべてのcomputer useプロセス（Xvfb、xfce4、x11vnc、novnc）を開始します。
+すべてのコンピューター使用プロセス（Xvfb、xfce4、x11vnc、novnc）を起動します。
 
 **戻り値**:
 
-- `ComputerUseStartResponse` - Computer use開始レスポンス。
+- `ComputerUseStartResponse` - コンピューター使用の起動レスポンス。
   
 
 **例**:
@@ -48,11 +48,11 @@ print("Computer use processes started:", result.message)
 def stop() -> ComputerUseStopResponse
 ```
 
-すべてのcomputer useプロセスを停止します。
+すべてのコンピューター使用プロセスを停止します。
 
 **戻り値**:
 
-- `ComputerUseStopResponse` - Computer use停止レスポンス。
+- `ComputerUseStopResponse` - コンピューター使用の停止レスポンス。
   
 
 **例**:
@@ -62,14 +62,14 @@ result = sandbox.computer_use.stop()
 print("Computer use processes stopped:", result.message)
 ```
 
-#### ComputerUse.get\_status
+#### ComputerUse.get_status
 
 ```python
 @intercept_errors(message_prefix="Failed to get computer use status: ")
 def get_status() -> ComputerUseStatusResponse
 ```
 
-すべてのcomputer useプロセスのステータスを取得します。
+すべてのコンピューター使用プロセスのステータスを取得します。
 
 **戻り値**:
 
@@ -83,7 +83,7 @@ response = sandbox.computer_use.get_status()
 print("Computer use status:", response.status)
 ```
 
-#### ComputerUse.get\_process\_status
+#### ComputerUse.get_process_status
 
 ```python
 @intercept_errors(message_prefix="Failed to get process status: ")
@@ -94,12 +94,12 @@ def get_process_status(process_name: str) -> ProcessStatusResponse
 
 **引数**:
 
-- `process_name` _str_ - チェックするプロセスの名前。
+- `process_name` _str_ - 確認するプロセス名。
   
 
 **戻り値**:
 
-- `ProcessStatusResponse` - 特定のプロセスに関するステータス情報。
+- `ProcessStatusResponse` - 指定したプロセスに関するステータス情報。
   
 
 **例**:
@@ -109,7 +109,7 @@ xvfb_status = sandbox.computer_use.get_process_status("xvfb")
 no_vnc_status = sandbox.computer_use.get_process_status("novnc")
 ```
 
-#### ComputerUse.restart\_process
+#### ComputerUse.restart_process
 
 ```python
 @intercept_errors(message_prefix="Failed to restart process: ")
@@ -120,7 +120,7 @@ def restart_process(process_name: str) -> ProcessRestartResponse
 
 **引数**:
 
-- `process_name` _str_ - 再起動するプロセスの名前。
+- `process_name` _str_ - 再起動するプロセス名。
   
 
 **戻り値**:
@@ -135,7 +135,7 @@ result = sandbox.computer_use.restart_process("xfce4")
 print("XFCE4 process restarted:", result.message)
 ```
 
-#### ComputerUse.get\_process\_logs
+#### ComputerUse.get_process_logs
 
 ```python
 @intercept_errors(message_prefix="Failed to get process logs: ")
@@ -146,12 +146,12 @@ def get_process_logs(process_name: str) -> ProcessLogsResponse
 
 **引数**:
 
-- `process_name` _str_ - ログを取得するプロセスの名前。
+- `process_name` _str_ - ログを取得するプロセス名。
   
 
 **戻り値**:
 
-- `ProcessLogsResponse` - プロセスログ。
+- `ProcessLogsResponse` - プロセスのログ。
   
 
 **例**:
@@ -161,7 +161,7 @@ logs = sandbox.computer_use.get_process_logs("novnc")
 print("NoVNC logs:", logs)
 ```
 
-#### ComputerUse.get\_process\_errors
+#### ComputerUse.get_process_errors
 
 ```python
 @intercept_errors(message_prefix="Failed to get process errors: ")
@@ -172,12 +172,12 @@ def get_process_errors(process_name: str) -> ProcessErrorsResponse
 
 **引数**:
 
-- `process_name` _str_ - エラーログを取得するプロセスの名前。
+- `process_name` _str_ - エラーログを取得するプロセス名。
   
 
 **戻り値**:
 
-- `ProcessErrorsResponse` - プロセスエラーログ。
+- `ProcessErrorsResponse` - プロセスのエラーログ。
   
 
 **例**:
@@ -188,13 +188,13 @@ print("X11VNC errors:", errors)
 ```
 
 
-## Mouse
+## マウス
 
 ```python
 class Mouse()
 ```
 
-コンピューター使用機能のためのマウス操作。
+コンピューター使用機能のマウス操作。
 
 #### Mouse.get\_position
 
@@ -205,12 +205,12 @@ def get_position() -> MousePosition
 
 現在のマウスカーソル位置を取得します。
 
-**Returns**:
+**戻り値**:
 
-- `MousePosition` - xとy座標を持つ現在のマウス位置。
+- `MousePosition` - 現在のマウス位置（x および y 座標）。
   
 
-**Example**:
+**例**:
 
 ```python
 position = sandbox.computer_use.mouse.get_position()
@@ -224,20 +224,20 @@ print(f"Mouse is at: {position.x}, {position.y}")
 def move(x: int, y: int) -> MouseMoveResponse
 ```
 
-マウスカーソルを指定された座標に移動します。
+マウスカーソルを指定した座標に移動します。
 
-**Arguments**:
+**引数**:
 
-- `x` _int_ - 移動先のx座標。
-- `y` _int_ - 移動先のy座標。
+- `x` _int_ - 移動先の x 座標。
+- `y` _int_ - 移動先の y 座標。
   
 
-**Returns**:
+**戻り値**:
 
 - `MouseMoveResponse` - 移動操作の結果。
   
 
-**Example**:
+**例**:
 
 ```python
 result = sandbox.computer_use.mouse.move(100, 200)
@@ -254,31 +254,31 @@ def click(x: int,
           double: bool = False) -> MouseClickResponse
 ```
 
-指定された座標でマウスをクリックします。
+指定した座標でクリックします。
 
-**Arguments**:
+**引数**:
 
-- `x` _int_ - クリックするx座標。
-- `y` _int_ - クリックするy座標。
-- `button` _str_ - クリックするマウスボタン（'left'、'right'、'middle'）。
-- `double` _bool_ - ダブルクリックを実行するかどうか。
+- `x` _int_ - クリックする x 座標。
+- `y` _int_ - クリックする y 座標。
+- `button` _str_ - クリックするボタン（'left'、'right'、'middle'）。
+- `double` _bool_ - ダブルクリックを行うかどうか。
   
 
-**Returns**:
+**戻り値**:
 
 - `MouseClickResponse` - クリック操作の結果。
   
 
-**Example**:
+**例**:
 
 ```python
-# シングル左クリック
+# Single left click
 result = sandbox.computer_use.mouse.click(100, 200)
 
-# ダブルクリック
+# Double click
 double_click = sandbox.computer_use.mouse.click(100, 200, "left", True)
 
-# 右クリック
+# Right click
 right_click = sandbox.computer_use.mouse.click(100, 200, "right")
 ```
 
@@ -293,23 +293,23 @@ def drag(start_x: int,
          button: str = "left") -> MouseDragResponse
 ```
 
-開始座標から終了座標までマウスをドラッグします。
+開始座標から終了座標までドラッグします。
 
-**Arguments**:
+**引数**:
 
-- `start_x` _int_ - 開始x座標。
-- `start_y` _int_ - 開始y座標。
-- `end_x` _int_ - 終了x座標。
-- `end_y` _int_ - 終了y座標。
-- `button` _str_ - ドラッグに使用するマウスボタン。
+- `start_x` _int_ - 開始 x 座標。
+- `start_y` _int_ - 開始 y 座標。
+- `end_x` _int_ - 終了 x 座標。
+- `end_y` _int_ - 終了 y 座標。
+- `button` _str_ - ドラッグに使用するボタン。
   
 
-**Returns**:
+**戻り値**:
 
 - `MouseDragResponse` - ドラッグ操作の結果。
   
 
-**Example**:
+**例**:
 
 ```python
 result = sandbox.computer_use.mouse.drag(50, 50, 150, 150)
@@ -323,38 +323,38 @@ print(f"Dragged from {result.from_x},{result.from_y} to {result.to_x},{result.to
 def scroll(x: int, y: int, direction: str, amount: int = 1) -> bool
 ```
 
-指定された座標でマウスホイールをスクロールします。
+指定した座標でマウスホイールをスクロールします。
 
-**Arguments**:
+**引数**:
 
-- `x` _int_ - スクロールするx座標。
-- `y` _int_ - スクロールするy座標。
-- `direction` _str_ - スクロール方向（'up'または'down'）。
+- `x` _int_ - スクロールする x 座標。
+- `y` _int_ - スクロールする y 座標。
+- `direction` _str_ - スクロール方向（'up' または 'down'）。
 - `amount` _int_ - スクロール量。
   
 
-**Returns**:
+**戻り値**:
 
 - `bool` - スクロール操作が成功したかどうか。
   
 
-**Example**:
+**例**:
 
 ```python
-# 上にスクロール
+# Scroll up
 scroll_up = sandbox.computer_use.mouse.scroll(100, 200, "up", 3)
 
-# 下にスクロール
+# Scroll down
 scroll_down = sandbox.computer_use.mouse.scroll(100, 200, "down", 5)
 ```
 
-## Keyboard
+## キーボード
 
 ```python
 class Keyboard()
 ```
 
-コンピューター使用機能のためのキーボード操作。
+コンピューター使用機能向けのキーボード操作。
 
 #### Keyboard.type
 
@@ -363,20 +363,20 @@ class Keyboard()
 def type(text: str, delay: Optional[int] = None) -> None
 ```
 
-指定されたテキストを入力します。
+指定したテキストを入力します。
 
-**Arguments**:
+**引数**:
 
 - `text` _str_ - 入力するテキスト。
 - `delay` _int_ - 文字間の遅延（ミリ秒）。
   
 
-**Raises**:
+**送出**:
 
-- `DaytonaError` - 入力操作が失敗した場合。
+- `DaytonaError` - 入力処理に失敗した場合。
   
 
-**Example**:
+**例**:
 
 ```python
 try:
@@ -385,7 +385,7 @@ try:
 except Exception as e:
     print(f"Operation failed: {e}")
 
-# 文字間に遅延を設定
+# 文字間に遅延を設ける場合
 try:
     sandbox.computer_use.keyboard.type("Slow typing", 100)
     print(f"Operation success")
@@ -400,35 +400,35 @@ except Exception as e:
 def press(key: str, modifiers: Optional[List[str]] = None) -> None
 ```
 
-オプションの修飾キーと共にキーを押します。
+必要に応じてモディファイアを併用してキーを押します。
 
-**Arguments**:
+**引数**:
 
-- `key` _str_ - 押すキー（例：'Enter'、'Escape'、'Tab'、'a'、'A'）。
-- `modifiers` _List[str]_ - 修飾キー（'ctrl'、'alt'、'meta'、'shift'）。
+- `key` _str_ - 押すキー（例: 'Enter', 'Escape', 'Tab', 'a', 'A'）。
+- `modifiers` _List[str]_ - モディファイアキー（'ctrl', 'alt', 'meta', 'shift'）。
   
 
-**Raises**:
+**送出**:
 
-- `DaytonaError` - キー押下操作が失敗した場合。
+- `DaytonaError` - キー押下処理に失敗した場合。
   
 
-**Example**:
+**例**:
 
 ```python
-# Enterキーを押す
+# Enter を押す
 try:
     sandbox.computer_use.keyboard.press("Return")
     print(f"Operation success")
 except Exception as e:
     print(f"Operation failed: {e}")
 
-# Ctrl+Cを押す
+# Ctrl+C を押す
 try:
     sandbox.computer_use.keyboard.press("c", ["ctrl"])
     print(f"Operation success")
 
-# Ctrl+Shift+Tを押す
+# Ctrl+Shift+T を押す
 try:
     sandbox.computer_use.keyboard.press("t", ["ctrl", "shift"])
     print(f"Operation success")
@@ -445,17 +445,17 @@ def hotkey(keys: str) -> None
 
 ホットキーの組み合わせを押します。
 
-**Arguments**:
+**引数**:
 
-- `keys` _str_ - ホットキーの組み合わせ（例：'ctrl+c'、'alt+tab'、'cmd+shift+t'）。
+- `keys` _str_ - ホットキーの組み合わせ（例: 'ctrl+c', 'alt+tab', 'cmd+shift+t'）。
   
 
-**Raises**:
+**送出**:
 
-- `DaytonaError` - ホットキー操作が失敗した場合。
+- `DaytonaError` - ホットキー処理に失敗した場合。
   
 
-**Example**:
+**例**:
 
 ```python
 # コピー
@@ -480,13 +480,13 @@ except Exception as e:
     print(f"Operation failed: {e}")
 ```
 
-## Screenshot
+## スクリーンショット
 
 ```python
 class Screenshot()
 ```
 
-コンピューター使用機能のためのスクリーンショット操作。
+コンピューター使用機能のスクリーンショット操作。
 
 #### Screenshot.take\_full\_screen
 
@@ -504,7 +504,7 @@ def take_full_screen(show_cursor: bool = False) -> ScreenshotResponse
 
 **戻り値**:
 
-- `ScreenshotResponse` - base64エンコードされた画像を含むスクリーンショットデータ。
+- `ScreenshotResponse` - 画像をbase64エンコードしたスクリーンショットデータ。
   
 
 **例**:
@@ -513,7 +513,7 @@ def take_full_screen(show_cursor: bool = False) -> ScreenshotResponse
 screenshot = sandbox.computer_use.screenshot.take_full_screen()
 print(f"Screenshot size: {screenshot.width}x{screenshot.height}")
 
-# カーソルを表示する場合
+# カーソルを表示
 with_cursor = sandbox.computer_use.screenshot.take_full_screen(True)
 ```
 
@@ -525,17 +525,17 @@ def take_region(region: ScreenshotRegion,
                 show_cursor: bool = False) -> RegionScreenshotResponse
 ```
 
-特定の領域のスクリーンショットを撮影します。
+指定した領域のスクリーンショットを撮影します。
 
 **引数**:
 
-- `region` _ScreenshotRegion_ - キャプチャする領域。
+- `region` _ScreenshotRegion_ - 取得する領域。
 - `show_cursor` _bool_ - スクリーンショットにカーソルを表示するかどうか。
   
 
 **戻り値**:
 
-- `RegionScreenshotResponse` - base64エンコードされた画像を含むスクリーンショットデータ。
+- `RegionScreenshotResponse` - 画像をbase64エンコードしたスクリーンショットデータ。
   
 
 **例**:
@@ -555,11 +555,11 @@ def take_compressed(
 ) -> CompressedScreenshotResponse
 ```
 
-画面全体の圧縮されたスクリーンショットを撮影します。
+画面全体の圧縮スクリーンショットを撮影します。
 
 **引数**:
 
-- `options` _ScreenshotOptions_ - 圧縮と表示のオプション。
+- `options` _ScreenshotOptions_ - 圧縮および表示のオプション。
   
 
 **戻り値**:
@@ -570,7 +570,7 @@ def take_compressed(
 **例**:
 
 ```python
-# デフォルト圧縮
+# 既定の圧縮
 screenshot = sandbox.computer_use.screenshot.take_compressed()
 
 # 高品質JPEG
@@ -578,7 +578,7 @@ jpeg = sandbox.computer_use.screenshot.take_compressed(
     ScreenshotOptions(format="jpeg", quality=95, show_cursor=True)
 )
 
-# 縮小されたPNG
+# 縮小PNG
 scaled = sandbox.computer_use.screenshot.take_compressed(
     ScreenshotOptions(format="png", scale=0.5)
 )
@@ -595,12 +595,12 @@ def take_compressed_region(
 ) -> CompressedScreenshotResponse
 ```
 
-特定の領域の圧縮されたスクリーンショットを撮影します。
+指定した領域の圧縮スクリーンショットを撮影します。
 
 **引数**:
 
-- `region` _ScreenshotRegion_ - キャプチャする領域。
-- `options` _ScreenshotOptions_ - 圧縮と表示のオプション。
+- `region` _ScreenshotRegion_ - 取得する領域。
+- `options` _ScreenshotOptions_ - 圧縮および表示のオプション。
   
 
 **戻り値**:
@@ -619,26 +619,26 @@ screenshot = sandbox.computer_use.screenshot.take_compressed_region(
 print(f"Compressed size: {screenshot.size_bytes} bytes")
 ```
 
-## Display
+## ディスプレイ
 
 ```python
 class Display()
 ```
 
-コンピューター使用機能のディスプレイ操作。
+コンピューター使用機能のディスプレイ操作を提供します。
 
-#### Display.get\_info
+#### Display.get_info
 
 ```python
 @intercept_errors(message_prefix="Failed to get display info: ")
 def get_info() -> DisplayInfoResponse
 ```
 
-ディスプレイに関する情報を取得します。
+ディスプレイ情報を取得します。
 
 **戻り値**:
 
-- `DisplayInfoResponse` - プライマリディスプレイと利用可能なすべてのディスプレイを含むディスプレイ情報。
+- `DisplayInfoResponse` - プライマリーディスプレイおよび利用可能なすべてのディスプレイを含む情報。
   
 
 **例**:
@@ -651,18 +651,18 @@ for i, display in enumerate(info.displays):
     print(f"Display {i}: {display.width}x{display.height} at {display.x},{display.y}")
 ```
 
-#### Display.get\_windows
+#### Display.get_windows
 
 ```python
 @intercept_errors(message_prefix="Failed to get windows: ")
 def get_windows() -> WindowsResponse
 ```
 
-開いているウィンドウのリストを取得します。
+開いているウィンドウの一覧を取得します。
 
 **戻り値**:
 
-- `WindowsResponse` - IDとタイトルを含む開いているウィンドウのリスト。
+- `WindowsResponse` - ID とタイトルを含む開いているウィンドウの一覧。
   
 
 **例**:
@@ -680,7 +680,7 @@ for window in windows.windows:
 class ScreenshotRegion()
 ```
 
-スクリーンショット操作のための領域座標。
+スクリーンショット操作用の領域座標。
 
 **属性**:
 
@@ -695,12 +695,12 @@ class ScreenshotRegion()
 class ScreenshotOptions()
 ```
 
-スクリーンショットの圧縮と表示のオプション。
+スクリーンショットの圧縮および表示に関するオプション。
 
 **属性**:
 
 - `show_cursor` _bool_ - スクリーンショットにカーソルを表示するかどうか。
 - `fmt` _str_ - 画像形式（例：'png'、'jpeg'、'webp'）。
-- `quality` _int_ - 圧縮品質（0-100）。
+- `quality` _int_ - 圧縮品質（0〜100）。
 - `scale` _float_ - スクリーンショットのスケール係数。
 

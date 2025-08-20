@@ -6,7 +6,7 @@ hideTitleOnPage: true
 
 ## CodeRunParams
 
-コード実行のパラメータ。
+コード実行用のパラメータ。
 
 **プロパティ**:
 
@@ -17,7 +17,7 @@ hideTitleOnPage: true
 
 
 
-### Constructors
+### コンストラクタ
 
 #### new CodeRunParams()
 
@@ -30,7 +30,7 @@ new CodeRunParams(): CodeRunParams
 - `CodeRunParams`
 ## プロセス
 
-Sandbox 内でのプロセス管理とコード実行を行います。
+サンドボックス内でのプロセスおよびコード実行を扱います。
 
 ### コンストラクタ
 
@@ -69,36 +69,36 @@ codeRun(
 timeout?: number): Promise<ExecuteResponse>
 ```
 
-適切な言語ランタイムを用いて、Sandbox 内でコードを実行します。
+適切な言語ランタイムを用いてサンドボックス内でコードを実行します。
 
 **パラメータ**:
 
 - `code` _string_ - 実行するコード
-- `params?` _CodeRunParams_ - 実行パラメータ
-- `timeout?` _number_ - 実行完了を待つ最大時間（秒）
+- `params?` _CodeRunParams_ - コード実行用のパラメータ
+- `timeout?` _number_ - 実行完了を待機する最大時間（秒）
 
 
 **戻り値**:
 
-- `Promise<ExecuteResponse>` - 次を含むコード実行結果:
+- `Promise<ExecuteResponse>` - 以下を含むコード実行結果:
     - exitCode: 実行の終了ステータス
     - result: コードの標準出力
-    - artifacts: `stdout`（result と同一）および `charts`（matplotlib のチャートメタデータ）を含む ExecutionArtifacts オブジェクト
+    - artifacts: `stdout`（result と同じ）および `charts`（matplotlib のチャートメタデータ）を含む ExecutionArtifacts オブジェクト
 
 **例:**
 
 ```ts
-// Run TypeScript code
+// TypeScript コードを実行
 const response = await process.codeRun(`
   const x = 10;
   const y = 20;
   console.log(\`Sum: \${x + y}\`);
 `);
-console.log(response.artifacts.stdout);  // Prints: Sum: 30
+console.log(response.artifacts.stdout);  // 出力: Sum: 30
 ```
 
 ```ts
-// Run Python code with matplotlib
+// matplotlib を用いた Python コードを実行
 const response = await process.codeRun(`
 import matplotlib.pyplot as plt
 import numpy as np
@@ -144,13 +144,13 @@ if (response.artifacts?.charts) {
 createSession(sessionId: string): Promise<void>
 ```
 
-Sandbox に新しい常駐型のバックグラウンドセッションを作成します。
+サンドボックス内に新しい長時間実行のバックグラウンドセッションを作成します。
 
-セッションはコマンド間で状態を保持するバックグラウンドプロセスで、関連する複数コマンドの実行や永続的な環境準備が必要なケースに最適です。長時間実行のコマンドを走らせ、プロセス状態を監視できます。
+セッションはコマンド間で状態を保持するバックグラウンドプロセスであり、関連する複数のコマンドや永続的な環境設定が必要なシナリオに最適です。長時間実行のコマンドを実行し、プロセスの状態を監視できます。
 
 **パラメータ**:
 
-- `sessionId` _string_ - 新規セッションの一意の識別子
+- `sessionId` _string_ - 新しいセッションの一意の識別子
 
 
 **戻り値**:
@@ -160,11 +160,11 @@ Sandbox に新しい常駐型のバックグラウンドセッションを作成
 **例:**
 
 ```ts
-// Create a new session
+// 新しいセッションを作成
 const sessionId = 'my-session';
 await process.createSession(sessionId);
 const session = await process.getSession(sessionId);
-// Do work...
+// 作業を実行...
 await process.deleteSession(sessionId);
 ```
 
@@ -176,7 +176,7 @@ await process.deleteSession(sessionId);
 deleteSession(sessionId: string): Promise<void>
 ```
 
-Sandbox からセッションを削除します。
+サンドボックスからセッションを削除します。
 
 **パラメータ**:
 
@@ -190,7 +190,7 @@ Sandbox からセッションを削除します。
 **例:**
 
 ```ts
-// Clean up a completed session
+// 完了したセッションをクリーンアップ
 await process.deleteSession('my-session');
 ```
 
@@ -206,39 +206,39 @@ executeCommand(
 timeout?: number): Promise<ExecuteResponse>
 ```
 
-Sandboxでシェルコマンドを実行します。
+サンドボックスでシェルコマンドを実行します。
 
-**パラメータ**:
+**Parameters**:
 
 - `command` _string_ - 実行するシェルコマンド
-- `cwd?` _string_ - コマンド実行の作業ディレクトリ。指定されない場合は、Sandboxのルートディレクトリを使用します。
-    デフォルトはユーザーのルートディレクトリです。
+- `cwd?` _string_ - コマンド実行時の作業ディレクトリ。未指定の場合はサンドボックスのルートディレクトリを使用します。
+    既定値はユーザーのルートディレクトリです。
 - `env?` _Record\<string, string\>_ - コマンドに設定する環境変数
-- `timeout?` _number_ - コマンドの完了を待つ最大時間（秒）。0は無期限に待機することを意味します。
+- `timeout?` _number_ - コマンドの完了を待機する最大時間（秒）。0 は無期限に待機します。
 
 
-**戻り値**:
+**Returns**:
 
-- `Promise<ExecuteResponse>` - 以下を含むコマンド実行結果:
+- `Promise<ExecuteResponse>` - コマンド実行結果。以下を含む:
     - exitCode: コマンドの終了ステータス
-    - result: コマンドからの標準出力
-    - artifacts: `stdout`（resultと同じ）と`charts`（matplotlibチャートのメタデータ）を含むExecutionArtifactsオブジェクト
+    - result: コマンドの標準出力
+    - artifacts: ExecutionArtifacts オブジェクト（`stdout`（result と同じ）と `charts`（matplotlib のチャートメタデータ）を含む）
 
-**例:**
+**Examples:**
 
 ```ts
-// シンプルなコマンド
+// Simple command
 const response = await process.executeCommand('echo "Hello"');
-console.log(response.artifacts.stdout);  // 出力: Hello
+console.log(response.artifacts.stdout);  // Prints: Hello
 ```
 
 ```ts
-// 作業ディレクトリを指定したコマンド
+// Command with working directory
 const result = await process.executeCommand('ls', 'workspace/src');
 ```
 
 ```ts
-// タイムアウトを指定したコマンド
+// Command with timeout
 const result = await process.executeCommand('sleep 10', undefined, 5);
 ```
 
@@ -255,38 +255,38 @@ timeout?: number): Promise<SessionExecuteResponse>
 
 既存のセッションでコマンドを実行します。
 
-**パラメータ**:
+**Parameters**:
 
-- `sessionId` _string_ - 使用するセッションの一意識別子
-- `req` _SessionExecuteRequest_ - 以下を含むコマンド実行リクエスト:
+- `sessionId` _string_ - 使用するセッションの一意の識別子
+- `req` _SessionExecuteRequest_ - コマンド実行リクエスト。以下を含む:
     - command: 実行するコマンド
     - runAsync: 非同期で実行するかどうか
 - `timeout?` _number_ - タイムアウト（秒）
 
 
-**戻り値**:
+**Returns**:
 
-- `Promise<SessionExecuteResponse>` - 以下を含むコマンド実行結果:
-    - cmdId: 実行されたコマンドの一意識別子
+- `Promise<SessionExecuteResponse>` - コマンド実行結果。以下を含む:
+    - cmdId: 実行されたコマンドの一意の識別子
     - output: コマンド出力（同期実行の場合）
     - exitCode: コマンドの終了ステータス（同期実行の場合）
 
-**例:**
+**Example:**
 
 ```ts
-// 状態を維持しながらコマンドを順次実行
+// Execute commands in sequence, maintaining state
 const sessionId = 'my-session';
 
-// ディレクトリを変更
+// Change directory
 await process.executeSessionCommand(sessionId, {
   command: 'cd /home/daytona'
 });
 
-// 新しいディレクトリでコマンドを実行
+// Run command in new directory
 const result = await process.executeSessionCommand(sessionId, {
   command: 'pwd'
 });
-console.log(result.output);  // 出力: /home/daytona
+console.log(result.output);  // Prints: /home/daytona
 ```
 
 ***
@@ -297,25 +297,25 @@ console.log(result.output);  // 出力: /home/daytona
 getSession(sessionId: string): Promise<Session>
 ```
 
-Sandbox内のセッションを取得します。
+サンドボックス内のセッションを取得します。
 
-**パラメータ**:
+**Parameters**:
 
-- `sessionId` _string_ - 取得するセッションの一意識別子
+- `sessionId` _string_ - 取得するセッションの一意の識別子
 
 
-**戻り値**:
+**Returns**:
 
-- `Promise<Session>` - 以下を含むセッション情報:
-    - sessionId: セッションの一意識別子
-    - commands: セッションで実行されたコマンドのリスト
+- `Promise<Session>` - セッション情報。以下を含む:
+    - sessionId: セッションの一意の識別子
+    - commands: セッション内で実行されたコマンドの一覧
 
-**例:**
+**Example:**
 
 ```ts
 const session = await process.getSession('my-session');
 session.commands.forEach(cmd => {
-  console.log(`コマンド: ${cmd.command}`);
+  console.log(`Command: ${cmd.command}`);
 });
 ```
 
@@ -329,25 +329,25 @@ getSessionCommand(sessionId: string, commandId: string): Promise<Command>
 
 セッションで実行された特定のコマンドに関する情報を取得します。
 
-**パラメータ**:
+**Parameters**:
 
-- `sessionId` _string_ - セッションの一意識別子
-- `commandId` _string_ - コマンドの一意識別子
+- `sessionId` _string_ - セッションの一意の識別子
+- `commandId` _string_ - コマンドの一意の識別子
 
 
-**戻り値**:
+**Returns**:
 
-- `Promise<Command>` - 以下を含むコマンド情報:
-    - id: コマンドの一意識別子
+- `Promise<Command>` - コマンド情報。以下を含む:
+    - id: コマンドの一意の識別子
     - command: 実行されたコマンド文字列
     - exitCode: コマンドの終了ステータス（完了している場合）
 
-**例:**
+**Example:**
 
 ```ts
 const cmd = await process.getSessionCommand('my-session', 'cmd-123');
 if (cmd.exitCode === 0) {
-  console.log(`コマンド ${cmd.command} が正常に完了しました`);
+  console.log(`Command ${cmd.command} completed successfully`);
 }
 ```
 
@@ -363,20 +363,20 @@ getSessionCommandLogs(sessionId: string, commandId: string): Promise<string>
 
 セッションで実行されたコマンドのログを取得します。
 
-**パラメータ**:
+**Parameters**:
 
-- `sessionId` _string_ - セッションの一意識別子
-- `commandId` _string_ - コマンドの一意識別子
+- `sessionId` _string_ - セッションの一意の識別子
+- `commandId` _string_ - コマンドの一意の識別子
 
-**戻り値**:
+**Returns**:
 
-- `Promise<string>` - コマンドログ
+- `Promise<string>` - コマンドのログ
 
-**例:**
+**Example:**
 
 ```ts
 const logs = await process.getSessionCommandLogs('my-session', 'cmd-123');
-console.log('コマンド出力:', logs);
+console.log('Command output:', logs);
 ```
 
 ##### Call Signature
@@ -388,12 +388,12 @@ getSessionCommandLogs(
 onLogs: (chunk: string) => void): Promise<void>
 ```
 
-セッションで実行されたコマンドのログを、利用可能になり次第非同期で取得・処理します。
+セッションで実行されたコマンドのログを、利用可能になり次第、非同期で取得・処理します。
 
-**パラメータ**:
+**パラメーター**:
 
-- `sessionId` _string_ - セッションの一意識別子
-- `commandId` _string_ - コマンドの一意識別子
+- `sessionId` _string_ - セッションの一意の識別子
+- `commandId` _string_ - コマンドの一意の識別子
 - `onLogs` _\(chunk: string\) =\> void_ - 各ログチャンクを処理するコールバック関数
 
 **戻り値**:
@@ -416,7 +416,7 @@ const logs = await process.getSessionCommandLogs('my-session', 'cmd-123', (chunk
 listSessions(): Promise<Session[]>
 ```
 
-Sandbox内のすべてのアクティブなセッションを一覧表示します。
+サンドボックス内のすべてのアクティブなセッションを一覧表示します。
 
 **戻り値**:
 
