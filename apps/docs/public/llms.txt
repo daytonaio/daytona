@@ -62,6 +62,7 @@
 - [Connect to an LLM](https://daytona.io/docs/en/getting-started#connect-to-an-llm)
 - [Additional Examples](https://daytona.io/docs/en/getting-started#additional-examples)
 - [Daytona in Vite Projects](https://daytona.io/docs/en/getting-started#daytona-in-vite-projects)
+- [Daytona in Next.js Projects](https://daytona.io/docs/en/getting-started#daytona-in-nextjs-projects)
 - [Setting up the Daytona CLI](https://daytona.io/docs/en/getting-started#setting-up-the-daytona-cli)
 - [Git Operations](https://daytona.io/docs/en/git-operations)
 - [Basic Operations](https://daytona.io/docs/en/git-operations#basic-operations)
