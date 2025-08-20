@@ -55,6 +55,7 @@ async function bootstrap() {
 
   const configService = app.get(TypedConfigService)
   const httpAdapter = app.get(HttpAdapterHost)
+  app.set('trust proxy', true)
   app.useGlobalFilters(new AllExceptionsFilter(httpAdapter))
   app.useGlobalFilters(new NotFoundExceptionFilter())
   app.useGlobalInterceptors(new MetricsInterceptor(configService))
