@@ -4,9 +4,9 @@ title: Web Terminal
 
 import { TabItem, Tabs } from '@astrojs/starlight/components'
 
-DaytonaはSandboxとやり取りするためのWeb Terminalを提供しており、ファイルの表示、コマンドの実行、デバッグを便利に行うことができます。
+Daytonaはサンドボックス（Daytonaが管理する隔離された一時的な計算環境）と対話するためのWeb Terminalを提供しており、ファイルの表示、コマンドの実行、デバッグを手軽に行えます。
 
-実行中のSandboxのAccessの下にある[Sandboxリスト](https://app.daytona.io/dashboard/sandboxes)でTerminalアイコン`>_`をクリックすることで開くことができます。デフォルトで利用可能で、ポート`22222`でアクセスできます。
+[Sandbox list](https://app.daytona.io/dashboard/sandboxes) の Access 列にある、実行中の任意のサンドボックスの Terminal アイコン `>_` をクリックすると開けます。標準で有効になっており、ポート `22222` でアクセスできます。
 
 ```text
 
@@ -17,5 +17,5 @@ sandbox-963e3f71      STARTED       us         12 minutes ago      >_
 ```
 
 :::note
-Terminalアクセスは非常にセンシティブな手順であるため、`CreateSandboxFromSnapshotParams`または`CreateSandboxFromImageParams`で`public`パラメータを`True`に設定した場合でも、組織内のユーザーのみがアクセスできます。
+Terminal へのアクセスは非常に機密性の高い操作であるため、`CreateSandboxFromSnapshotParams` や `CreateSandboxFromImageParams` で `public` パラメータを `True` に設定した場合でも、あなたの組織（Daytona内のリソースとユーザーのグループ）のユーザーにのみ許可されます。
 :::

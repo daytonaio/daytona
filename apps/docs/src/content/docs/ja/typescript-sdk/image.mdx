@@ -1,13 +1,13 @@
 ---
-title: "画像"
+title: "イメージ"
 hideTitleOnPage: true
 ---
 
 
 ## Image
 
-Daytona サンドボックス用のイメージ定義を表します。
-このクラスを直接インスタンス化しないでください。代わりに `Image.base()`、`Image.debianSlim()`、`Image.fromDockerfile()` などの静的ファクトリーメソッドを使用してください。
+Daytona のサンドボックス用イメージ定義を表します。
+このクラスを直接インスタンス化しないでください。代わりに `Image.base()`、`Image.debianSlim()`、`Image.fromDockerfile()` などの静的ファクトリメソッドを使用してください。
 
 ### Accessors
 
@@ -76,7 +76,7 @@ static debianSlim(pythonVersion?: "3.9" | "3.10" | "3.11" | "3.12" | "3.13"): Im
 
 **Parameters**:
 
-- `pythonVersion?` _使用する Python バージョン。_ - `"3.9"` | `"3.10"` | `"3.11"` | `"3.12"` | `"3.13"`
+- `pythonVersion?` _使用する Python のバージョン。_ - `"3.9"` | `"3.10"` | `"3.11"` | `"3.12"` | `"3.13"`
 
 
 **Returns**:
@@ -94,19 +94,19 @@ const image = Image.debianSlim('3.12')
 #### fromDockerfile()
 
 ```ts
-static fromDockerfile(path: string): Promise<Image>
+static fromDockerfile(path: string): Image
 ```
 
 既存の Dockerfile から Image を作成します。
 
 **Parameters**:
 
-- `path` _string_ - Dockerfile のパス。
+- `path` _string_ - Dockerfile へのパス。
 
 
 **Returns**:
 
-- `Promise<Image>` - Image インスタンス。
+- `Image` - Image インスタンス。
 
 **Example:**
 
@@ -119,7 +119,7 @@ const image = Image.fromDockerfile('Dockerfile')
 #### addLocalDir()
 
 ```ts
-addLocalDir(localPath: string, remotePath: string): Promise<Image>
+addLocalDir(localPath: string, remotePath: string): Image
 ```
 
 ローカルディレクトリをイメージに追加します。
@@ -132,7 +132,7 @@ addLocalDir(localPath: string, remotePath: string): Promise<Image>
 
 **Returns**:
 
-- `Promise<Image>` - Image インスタンス。
+- `Image` - Image インスタンス。
 
 **Example:**
 
@@ -147,7 +147,7 @@ const image = Image
 #### addLocalFile()
 
 ```ts
-addLocalFile(localPath: string, remotePath: string): Promise<Image>
+addLocalFile(localPath: string, remotePath: string): Image
 ```
 
 ローカルファイルをイメージに追加します。
@@ -160,7 +160,7 @@ addLocalFile(localPath: string, remotePath: string): Promise<Image>
 
 **Returns**:
 
-- `Promise<Image>` - Image インスタンス。
+- `Image` - Image インスタンス。
 
 **Example:**
 
@@ -202,10 +202,10 @@ const image = Image
 #### dockerfileCommands()
 
 ```ts
-dockerfileCommands(dockerfileCommands: string[], contextDir?: string): Promise<Image>
+dockerfileCommands(dockerfileCommands: string[], contextDir?: string): Image
 ```
 
-任意の Dockerfile 風コマンドでイメージを拡張します。
+任意の Dockerfile 形式のコマンドでイメージを拡張します。
 
 **Parameters**:
 
@@ -215,7 +215,7 @@ dockerfileCommands(dockerfileCommands: string[], contextDir?: string): Promise<I
 
 **Returns**:
 
-- `Promise<Image>` - Image インスタンス。
+- `Image` - Image インスタンス。
 
 **Example:**
 
@@ -233,11 +233,11 @@ const image = Image
 entrypoint(entrypointCommands: string[]): Image
 ```
 
-イメージのエントリポイントを設定します。
+イメージのエントリーポイントを設定します。
 
 **Parameters**:
 
-- `entrypointCommands` _string\[\]_ - エントリポイントとして設定するコマンド。
+- `entrypointCommands` _string\[\]_ - エントリーポイントとして設定するコマンド。
 
 
 **Returns**:
@@ -262,10 +262,9 @@ env(envVars: Record<string, string>): Image
 
 イメージ内の環境変数を設定します。
 
-**パラメータ**:
+**パラメーター**:
 
 - `envVars` _Record\<string, string\>_ - 設定する環境変数。
-
 
 **戻り値**:
 
@@ -287,13 +286,12 @@ const image = Image
 pipInstall(packages: string | string[], options?: PipInstallOptions): Image
 ```
 
-pip でパッケージをインストールするコマンドを追加します。
+pip を使用してパッケージをインストールするコマンドを追加します。
 
-**パラメータ**:
+**パラメーター**:
 
-- `packages` _インストールするパッケージ。_ - `string` | `string`[]
-- `options?` _PipInstallOptions_ - pip install コマンドのオプション。
-
+- `packages` _インストールするパッケージ_ - `string` | `string`[]
+- `options?` _PipInstallOptions_ - pip インストールコマンドのオプション。
 
 **戻り値**:
 
@@ -310,20 +308,19 @@ const image = Image.debianSlim('3.12').pipInstall('numpy', { findLinks: ['https:
 #### pipInstallFromPyproject()
 
 ```ts
-pipInstallFromPyproject(pyprojectToml: string, options?: PyprojectOptions): Promise<Image>
+pipInstallFromPyproject(pyprojectToml: string, options?: PyprojectOptions): Image
 ```
 
-pyproject.toml から依存関係をインストールします。
+pyproject.toml ファイルから依存関係をインストールします。
 
-**パラメータ**:
+**パラメーター**:
 
-- `pyprojectToml` _string_ - pyproject.toml へのパス。
-- `options?` _PyprojectOptions_ - pip install コマンドのオプション。
-
+- `pyprojectToml` _string_ - pyproject.toml ファイルのパス。
+- `options?` _PyprojectOptions_ - pip インストールコマンドのオプション。
 
 **戻り値**:
 
-- `Promise<Image>` - Image インスタンス。
+- `Image` - Image インスタンス。
 
 **例:**
 
@@ -337,20 +334,19 @@ image.pipInstallFromPyproject('pyproject.toml', { optionalDependencies: ['dev'] 
 #### pipInstallFromRequirements()
 
 ```ts
-pipInstallFromRequirements(requirementsTxt: string, options?: PipInstallOptions): Promise<Image>
+pipInstallFromRequirements(requirementsTxt: string, options?: PipInstallOptions): Image
 ```
 
-requirements.txt から依存関係をインストールします。
+requirements.txt ファイルから依存関係をインストールします。
 
-**パラメータ**:
+**パラメーター**:
 
-- `requirementsTxt` _string_ - requirements.txt へのパス。
-- `options?` _PipInstallOptions_ - pip install コマンドのオプション。
-
+- `requirementsTxt` _string_ - requirements.txt ファイルのパス。
+- `options?` _PipInstallOptions_ - pip インストールコマンドのオプション。
 
 **戻り値**:
 
-- `Promise<Image>` - Image インスタンス。
+- `Image` - Image インスタンス。
 
 **例:**
 
@@ -369,10 +365,9 @@ runCommands(...commands: (string | string[])[]): Image
 
 イメージ内でコマンドを実行します。
 
-**パラメータ**:
+**パラメーター**:
 
 - `commands` _...\(string \| string\[\]\)\[\]_ - 実行するコマンド。
-
 
 **戻り値**:
 
@@ -399,10 +394,9 @@ workdir(dirPath: string): Image
 
 イメージ内の作業ディレクトリを設定します。
 
-**パラメータ**:
+**パラメーター**:
 
-- `dirPath` _string_ - 作業ディレクトリへのパス。
-
+- `dirPath` _string_ - 作業ディレクトリのパス。
 
 **戻り値**:
 
@@ -419,53 +413,53 @@ const image = Image
 ***
 
 
-## Context
+## コンテキスト
 
-イメージに追加されるコンテキストファイルを表します。
+イメージに追加するコンテキストファイルを表します。
 
 **プロパティ**:
 
-- `archivePath` _string_ - オブジェクトストレージ内のアーカイブファイル内のパス。
+- `archivePath` _string_ - オブジェクトストレージ内のアーカイブの内部パス。
 - `sourcePath` _string_ - ソースファイルまたはディレクトリへのパス。
 ## PipInstallOptions
 
-pip installコマンドのオプション。
+pip install コマンド用のオプション。
 
 **プロパティ**:
 
-- `extraIndexUrls?` _string\[\]_ - pip installコマンドで使用する追加のインデックスURL。
-- `extraOptions?` _string_ - pip installコマンドで使用する追加のオプション。指定された文字列はpip installコマンドに直接渡されます。
-- `findLinks?` _string\[\]_ - pip installコマンドで使用するfind-links。
-- `indexUrl?` _string_ - pip installコマンドで使用するインデックスURL。
+- `extraIndexUrls?` _string\[\]_ - pip install コマンドで使用する追加のインデックス URL。
+- `extraOptions?` _string_ - pip install コマンドで使用する追加オプション。指定した文字列がそのまま pip install コマンドに渡されます。
+- `findLinks?` _string\[\]_ - pip install コマンドで使用する find-links。
+- `indexUrl?` _string_ - pip install コマンドで使用するインデックス URL。
 - `pre?` _boolean_ - プレリリース版をインストールするかどうか。
     
 
 
 
 
-### 継承元
+### により拡張
 
 - `PyprojectOptions`
 ## PyprojectOptions
 
-pyproject.toml ファイルで指定する pip install コマンド用オプション。
+pyproject.toml からの pip install コマンド用オプション。
 
 **プロパティ**:
 
-- `extraIndexUrls?` _string\[\]_ - pip install コマンドで使用する追加の index URL。
+- `extraIndexUrls?` _string\[\]_ - pip install コマンドで使用する追加のインデックス URL。
     - _継承元_: `PipInstallOptions.extraIndexUrls`
-- `extraOptions?` _string_ - pip install コマンドで使用する追加オプション。指定した文字列がそのまま pip install コマンドに渡されます。
+- `extraOptions?` _string_ - pip install コマンドに渡す追加オプション。指定した文字列がそのまま pip install コマンドに渡されます。
     - _継承元_: `PipInstallOptions.extraOptions`
 - `findLinks?` _string\[\]_ - pip install コマンドで使用する find-links。
     - _継承元_: `PipInstallOptions.findLinks`
-- `indexUrl?` _string_ - pip install コマンドで使用する index URL。
+- `indexUrl?` _string_ - pip install コマンドで使用するインデックス URL。
     - _継承元_: `PipInstallOptions.indexUrl`
-- `optionalDependencies?` _string\[\]_ - インストールする任意の依存関係。
+- `optionalDependencies?` _string\[\]_ - 任意でインストールする依存関係。
 - `pre?` _boolean_ - プレリリース版をインストールするかどうか。
     - _継承元_: `PipInstallOptions.pre`
 
 
 
-**拡張:**
+**継承:** 
 
 - `PipInstallOptions`

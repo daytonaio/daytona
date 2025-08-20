@@ -3,23 +3,23 @@ title: "AsyncVolume"
 hideTitleOnPage: true
 ---
 
-## Volume
+## ボリューム
 
 ```python
 class Volume(VolumeDto)
 ```
 
-SandboxesのためのShared Storageボリュームである、Daytona Volumeを表します。
+Daytonaのボリューム（S3互換オブジェクトストレージをバックエンドとするFUSEベースの共有ストレージマウント）を表します。サンドボックス間で共有可能なストレージです。
 
 **属性**:
 
-- `id` _StrictStr_ - Volumeの一意識別子。
-- `name` _StrictStr_ - Volumeの名前。
-- `organization_id` _StrictStr_ - VolumeのOrganization ID。
-- `state` _StrictStr_ - Volumeの状態。
-- `created_at` _StrictStr_ - Volumeが作成された日時。
-- `updated_at` _StrictStr_ - Volumeが最後に更新された日時。
-- `last_used_at` _StrictStr_ - Volumeが最後に使用された日時。
+- `id` _StrictStr_ - ボリュームの一意な識別子。
+- `name` _StrictStr_ - ボリューム名。
+- `organization_id` _StrictStr_ - ボリュームが属する組織ID。
+- `state` _StrictStr_ - ボリュームの状態。
+- `created_at` _StrictStr_ - ボリュームの作成日時。
+- `updated_at` _StrictStr_ - ボリュームの最終更新日時。
+- `last_used_at` _StrictStr_ - ボリュームの最終使用日時。
 
 
 ## AsyncVolumeService
@@ -28,7 +28,7 @@ SandboxesのためのShared Storageボリュームである、Daytona Volumeを�
 class AsyncVolumeService()
 ```
 
-Daytona Volumeを管理するためのサービス。Volumeの一覧表示、取得、作成、削除に使用できます。
+Daytonaのボリューム（ボリューム（S3互換オブジェクトストレージをバックエンドとするFUSEベースの共有ストレージマウント））を管理するサービスです。ボリュームの一覧、取得、作成、削除に使用できます。
 
 #### AsyncVolumeService.list
 
@@ -36,14 +36,14 @@ Daytona Volumeを管理するためのサービス。Volumeの一覧表示、取
 async def list() -> List[Volume]
 ```
 
-すべてのVolumeを一覧表示します。
+すべてのボリュームを一覧表示します。
 
-**戻り値**:
+**Returns**:
 
-- `List[Volume]` - すべてのVolumeのリスト。
+- `List[Volume]` - すべてのボリュームのリスト。
   
 
-**例**:
+**Example**:
 
 ```python
 async with AsyncDaytona() as daytona:
@@ -58,20 +58,20 @@ async with AsyncDaytona() as daytona:
 async def get(name: str, create: bool = False) -> Volume
 ```
 
-名前でVolumeを取得します。
+名前を指定してボリュームを取得します。
 
-**引数**:
+**Arguments**:
 
-- `name` _str_ - 取得するVolumeの名前。
-- `create` _bool_ - Trueの場合、存在しない場合は新しいVolumeを作成します。
+- `name` _str_ - 取得するボリューム名。
+- `create` _bool_ - True の場合、存在しなければ新規にボリュームを作成します。
   
 
-**戻り値**:
+**Returns**:
 
-- `Volume` - Volumeオブジェクト。
+- `Volume` - 取得したボリュームオブジェクト。
   
 
-**例**:
+**Example**:
 
 ```python
 async with AsyncDaytona() as daytona:
@@ -85,19 +85,19 @@ async with AsyncDaytona() as daytona:
 async def create(name: str) -> Volume
 ```
 
-新しいVolumeを作成します。
+新しいボリュームを作成します。
 
-**引数**:
+**Arguments**:
 
-- `name` _str_ - 作成するVolumeの名前。
+- `name` _str_ - 作成するボリューム名。
   
 
-**戻り値**:
+**Returns**:
 
-- `Volume` - Volumeオブジェクト。
+- `Volume` - 作成されたボリュームオブジェクト。
   
 
-**例**:
+**Example**:
 
 ```python
 async with AsyncDaytona() as daytona:
@@ -111,14 +111,14 @@ async with AsyncDaytona() as daytona:
 async def delete(volume: Volume) -> None
 ```
 
-Volumeを削除します。
+ボリュームを削除します。
 
-**引数**:
+**Arguments**:
 
-- `volume` _Volume_ - 削除するVolume。
+- `volume` _Volume_ - 削除するボリューム。
   
 
-**例**:
+**Example**:
 
 ```python
 async with AsyncDaytona() as daytona:

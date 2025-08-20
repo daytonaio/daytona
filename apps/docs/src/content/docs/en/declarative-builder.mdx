@@ -49,55 +49,55 @@ This eliminates the need to use your own compute for the build process and you c
 It doesn't require registering and validating a separate Snapshot for each version. Instead, it allows you to iterate on the dependency list quickly or to have slightly different versions for tens or hundreds of similar usecases/setups.
 
 <Tabs>
-<TabItem label="Python" icon="seti:python">
-```python
-# Define the dynamic image
-dynamic_image = (
-    Image.debian_slim("3.12")
-    .pip_install(["pytest", "pytest-cov", "mypy", "ruff", "black", "gunicorn"])
-    .run_commands("apt-get update && apt-get install -y git curl", "mkdir -p /home/daytona/project")
-    .workdir("/home/daytona/project")
-    .env({"ENV_VAR": "My Environment Variable"})
-    .add_local_file("file_example.txt", "/home/daytona/project/file_example.txt")
-)
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    # Define the dynamic image
+    dynamic_image = (
+        Image.debian_slim("3.12")
+        .pip_install(["pytest", "pytest-cov", "mypy", "ruff", "black", "gunicorn"])
+        .run_commands("apt-get update && apt-get install -y git curl", "mkdir -p /home/daytona/project")
+        .workdir("/home/daytona/project")
+        .env({"ENV_VAR": "My Environment Variable"})
+        .add_local_file("file_example.txt", "/home/daytona/project/file_example.txt")
+    )
 
-# Create a new Sandbox with the dynamic image and stream the build logs
+    # Create a new Sandbox with the dynamic image and stream the build logs
 
-sandbox = daytona.create(
-    CreateSandboxFromImageParams(
-        image=dynamic_image,
-    ),
-    timeout=0,
-    on_snapshot_create_logs=print,
-)
+    sandbox = daytona.create(
+        CreateSandboxFromImageParams(
+            image=dynamic_image,
+        ),
+        timeout=0,
+        on_snapshot_create_logs=print,
+    )
 
-```
-</TabItem>
-<TabItem label="TypeScript" icon="seti:typescript">
-```typescript
-// Define the dynamic image
-const dynamicImage = Image.debianSlim('3.13')
-    .pipInstall(['pytest', 'pytest-cov', 'black', 'isort', 'mypy', 'ruff'])
-    .runCommands('apt-get update && apt-get install -y git', 'mkdir -p /home/daytona/project')
-    .workdir('/home/daytona/project')
-    .env({
-      NODE_ENV: 'development',
-    })
-    .addLocalFile('file_example.txt', '/home/daytona/project/file_example.txt')
+    ```
+  </TabItem>
 
-// Create a new Sandbox with the dynamic image and stream the build logs
-const sandbox = await daytona.create(
-  {
-    image: dynamicImage,
-  },
-  {
-    timeout: 0,
-    onSnapshotCreateLogs: console.log,
-  }
-)
-```
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    // Define the dynamic image
+    const dynamicImage = Image.debianSlim('3.13')
+        .pipInstall(['pytest', 'pytest-cov', 'black', 'isort', 'mypy', 'ruff'])
+        .runCommands('apt-get update && apt-get install -y git', 'mkdir -p /home/daytona/project')
+        .workdir('/home/daytona/project')
+        .env({
+          NODE_ENV: 'development',
+        })
+        .addLocalFile('file_example.txt', '/home/daytona/project/file_example.txt')
 
-</TabItem>
+    // Create a new Sandbox with the dynamic image and stream the build logs
+    const sandbox = await daytona.create(
+      {
+        image: dynamicImage,
+      },
+      {
+        timeout: 0,
+        onSnapshotCreateLogs: console.log,
+      }
+    )
+    ```
+  </TabItem>
 </Tabs>
 
 :::tip
@@ -113,108 +113,108 @@ If you want to prepare a new Daytona Snapshot with specific dependencies and the
 This Snapshot will stay visible in the Daytona dashboard and be permanently cached, ensuring that rebuilding it is not needed.
 
 <Tabs>
-<TabItem label="Python" icon="seti:python">
-```python
-# Generate a unique name for the Snapshot
-snapshot_name = f"python-example:{int(time.time())}"
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    # Generate a unique name for the Snapshot
+    snapshot_name = f"python-example:{int(time.time())}"
 
-# Create a local file with some data to add to the image
+    # Create a local file with some data to add to the image
 
-with open("file_example.txt", "w") as f:
-    f.write("Hello, World!")
+    with open("file_example.txt", "w") as f:
+        f.write("Hello, World!")
 
-# Create a Python image with common data science packages
+    # Create a Python image with common data science packages
 
-image = (
-    Image.debian_slim("3.12")
-    .pip_install(["numpy", "pandas", "matplotlib", "scipy", "scikit-learn", "jupyter"])
-    .run_commands(
-        "apt-get update && apt-get install -y git",
-        "groupadd -r daytona && useradd -r -g daytona -m daytona",
-        "mkdir -p /home/daytona/workspace",
+    image = (
+        Image.debian_slim("3.12")
+        .pip_install(["numpy", "pandas", "matplotlib", "scipy", "scikit-learn", "jupyter"])
+        .run_commands(
+            "apt-get update && apt-get install -y git",
+            "groupadd -r daytona && useradd -r -g daytona -m daytona",
+            "mkdir -p /home/daytona/workspace",
+        )
+        .dockerfile_commands(["USER daytona"])
+        .workdir("/home/daytona/workspace")
+        .env({"MY_ENV_VAR": "My Environment Variable"})
+        .add_local_file("file_example.txt", "/home/daytona/workspace/file_example.txt")
     )
-    .dockerfile_commands(["USER daytona"])
-    .workdir("/home/daytona/workspace")
-    .env({"MY_ENV_VAR": "My Environment Variable"})
-    .add_local_file("file_example.txt", "/home/daytona/workspace/file_example.txt")
-)
 
-# Create the Snapshot and stream the build logs
+    # Create the Snapshot and stream the build logs
 
-print(f"=== Creating Snapshot: {snapshot_name} ===")
-daytona.snapshot.create(
-    CreateSnapshotParams(
-        name=snapshot_name,
-        image=image,
-        resources=Resources(
-            cpu=1,
-            memory=1,
-            disk=3,
+    print(f"=== Creating Snapshot: {snapshot_name} ===")
+    daytona.snapshot.create(
+        CreateSnapshotParams(
+            name=snapshot_name,
+            image=image,
+            resources=Resources(
+                cpu=1,
+                memory=1,
+                disk=3,
+            ),
         ),
-    ),
-    on_logs=print,
-)
-
-# Create a new Sandbox using the pre-built Snapshot
-
-sandbox = daytona.create(
-    CreateSandboxFromSnapshotParams(
-        snapshot=snapshot_name
+        on_logs=print,
     )
-)
 
-```
-</TabItem>
-<TabItem label="TypeScript" icon="seti:typescript">
-```typescript
-// Generate a unique name for the image
-const snapshotName = `node-example:${Date.now()}`
-console.log(`Creating Snapshot with name: ${snapshotName}`)
+    # Create a new Sandbox using the pre-built Snapshot
 
-// Create a local file with some data to add to the Snapshot
-const localFilePath = 'file_example.txt'
-const localFileContent = 'Hello, World!'
-fs.writeFileSync(localFilePath, localFileContent)
-
-// Create a Python image with common data science packages
-const image = Image.debianSlim('3.12')
-    .pipInstall(['numpy', 'pandas', 'matplotlib', 'scipy', 'scikit-learn'])
-    .runCommands(
-      'apt-get update && apt-get install -y git',
-      'groupadd -r daytona && useradd -r -g daytona -m daytona',
-      'mkdir -p /home/daytona/workspace'
+    sandbox = daytona.create(
+        CreateSandboxFromSnapshotParams(
+            snapshot=snapshot_name
+        )
     )
-    .dockerfileCommands(['USER daytona'])
-    .workdir('/home/daytona/workspace')
-    .env({
-        MY_ENV_VAR: 'My Environment Variable',
+
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    // Generate a unique name for the image
+    const snapshotName = `node-example:${Date.now()}`
+    console.log(`Creating Snapshot with name: ${snapshotName}`)
+
+    // Create a local file with some data to add to the Snapshot
+    const localFilePath = 'file_example.txt'
+    const localFileContent = 'Hello, World!'
+    fs.writeFileSync(localFilePath, localFileContent)
+
+    // Create a Python image with common data science packages
+    const image = Image.debianSlim('3.12')
+        .pipInstall(['numpy', 'pandas', 'matplotlib', 'scipy', 'scikit-learn'])
+        .runCommands(
+          'apt-get update && apt-get install -y git',
+          'groupadd -r daytona && useradd -r -g daytona -m daytona',
+          'mkdir -p /home/daytona/workspace'
+        )
+        .dockerfileCommands(['USER daytona'])
+        .workdir('/home/daytona/workspace')
+        .env({
+            MY_ENV_VAR: 'My Environment Variable',
+        })
+        .addLocalFile(localFilePath, '/home/daytona/workspace/file_example.txt')
+
+    // Create the Snapshot and stream the build logs
+    console.log(`=== Creating Snapshot: ${snapshotName} ===`)
+    await daytona.snapshot.create(
+        {
+          name: snapshotName,
+          image,
+          resources: {
+            cpu: 1,
+            memory: 1,
+            disk: 3,
+          },
+        },
+        {
+          onLogs: console.log,
+        },
+      )
+
+    // Create a new Sandbox using the pre-built Snapshot
+    const sandbox = await daytona.create({
+        snapshot: snapshotName,
     })
-    .addLocalFile(localFilePath, '/home/daytona/workspace/file_example.txt')
-
-// Create the Snapshot and stream the build logs
-console.log(`=== Creating Snapshot: ${snapshotName} ===`)
-await daytona.snapshot.create(
-    {
-      name: snapshotName,
-      image,
-      resources: {
-        cpu: 1,
-        memory: 1,
-        disk: 3,
-      },
-    },
-    {
-      onLogs: console.log,
-    },
-  )
-
-// Create a new Sandbox using the pre-built Snapshot
-const sandbox = await daytona.create({
-    snapshot: snapshotName,
-})
-```
-
-</TabItem>
+    ```
+  </TabItem>
 </Tabs>
 
 ## Using an Existing Dockerfile
@@ -222,16 +222,17 @@ const sandbox = await daytona.create({
 If you have an existing Dockerfile that you want to use as the base for your image, you can import it in the following way:
 
 <Tabs>
-<TabItem label="Python" icon="seti:python">
-```python
-image = Image.from_dockerfile("app/Dockerfile").pip_install(["numpy"])
-```
-</TabItem>
-<TabItem label="TypeScript" icon="seti:typescript">
-```typescript
-const image = Image.fromDockerfile("app/Dockerfile").pipInstall(['numpy'])
-```
-</TabItem>
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    image = Image.from_dockerfile("app/Dockerfile").pip_install(["numpy"])
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    const image = Image.fromDockerfile("app/Dockerfile").pipInstall(['numpy'])
+    ```
+  </TabItem>
 </Tabs>
 
 ## Best Practices

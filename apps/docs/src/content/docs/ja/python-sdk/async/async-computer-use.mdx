@@ -9,9 +9,9 @@ hideTitleOnPage: true
 class AsyncComputerUse()
 ```
 
-デスクトップ環境と対話するためのComputer Use機能。
+デスクトップ環境と対話するためのコンピューター操作（Computer Use）機能。
 
-サンドボックス内でデスクトップ操作を自動化するためのマウス、キーボード、スクリーンショット、ディスプレイ操作へのアクセスを提供します。
+サンドボックス（Daytonaが管理する隔離された一時的な実行環境）内でのデスクトップ操作自動化のために、マウス、キーボード、スクリーンショット、ディスプレイの各操作にアクセスできます。
 
 **属性**:
 
@@ -27,11 +27,11 @@ class AsyncComputerUse()
 async def start() -> ComputerUseStartResponse
 ```
 
-すべてのcomputer useプロセス（Xvfb、xfce4、x11vnc、novnc）を開始します。
+すべてのコンピューター操作プロセス（Xvfb、xfce4、x11vnc、novnc）を起動します。
 
 **戻り値**:
 
-- `ComputerUseStartResponse` - Computer use開始レスポンス。
+- `ComputerUseStartResponse` - コンピューター操作の起動レスポンス。
   
 
 **例**:
@@ -48,11 +48,11 @@ print("Computer use processes started:", result.message)
 async def stop() -> ComputerUseStopResponse
 ```
 
-すべてのcomputer useプロセスを停止します。
+すべてのコンピューター操作プロセスを停止します。
 
 **戻り値**:
 
-- `ComputerUseStopResponse` - Computer use停止レスポンス。
+- `ComputerUseStopResponse` - コンピューター操作の停止レスポンス。
   
 
 **例**:
@@ -69,7 +69,7 @@ print("Computer use processes stopped:", result.message)
 async def get_status() -> ComputerUseStatusResponse
 ```
 
-すべてのcomputer useプロセスのステータスを取得します。
+すべてのコンピューター操作プロセスのステータスを取得します。
 
 **戻り値**:
 
@@ -94,12 +94,12 @@ async def get_process_status(process_name: str) -> ProcessStatusResponse
 
 **引数**:
 
-- `process_name` _str_ - チェックするプロセスの名前。
+- `process_name` _str_ - 確認するプロセス名。
   
 
 **戻り値**:
 
-- `ProcessStatusResponse` - 特定のプロセスに関するステータス情報。
+- `ProcessStatusResponse` - 指定したプロセスに関するステータス情報。
   
 
 **例**:
@@ -120,12 +120,12 @@ async def restart_process(process_name: str) -> ProcessRestartResponse
 
 **引数**:
 
-- `process_name` _str_ - 再起動するプロセスの名前。
+- `process_name` _str_ - 再起動するプロセス名。
   
 
 **戻り値**:
 
-- `ProcessRestartResponse` - プロセス再起動レスポンス。
+- `ProcessRestartResponse` - プロセス再起動のレスポンス。
   
 
 **例**:
@@ -146,12 +146,12 @@ async def get_process_logs(process_name: str) -> ProcessLogsResponse
 
 **引数**:
 
-- `process_name` _str_ - ログを取得するプロセスの名前。
+- `process_name` _str_ - ログを取得するプロセス名。
   
 
 **戻り値**:
 
-- `ProcessLogsResponse` - プロセスログ。
+- `ProcessLogsResponse` - プロセスのログ。
   
 
 **例**:
@@ -172,12 +172,12 @@ async def get_process_errors(process_name: str) -> ProcessErrorsResponse
 
 **引数**:
 
-- `process_name` _str_ - エラーログを取得するプロセスの名前。
+- `process_name` _str_ - エラーログを取得するプロセス名。
   
 
 **戻り値**:
 
-- `ProcessErrorsResponse` - プロセスエラーログ。
+- `ProcessErrorsResponse` - プロセスのエラーログ。
   
 
 **例**:
@@ -194,7 +194,7 @@ print("X11VNC errors:", errors)
 class AsyncMouse()
 ```
 
-コンピューター使用機能のためのマウス操作。
+コンピューター操作機能のためのマウス操作。
 
 #### AsyncMouse.get\_position
 
@@ -205,12 +205,12 @@ async def get_position() -> MousePosition
 
 現在のマウスカーソル位置を取得します。
 
-**戻り値**:
+**Returns**:
 
-- `MousePosition` - xとy座標を持つ現在のマウス位置。
+- `MousePosition` - x座標とy座標を含む現在のマウス位置。
   
 
-**例**:
+**Example**:
 
 ```python
 position = await sandbox.computer_use.mouse.get_position()
@@ -224,20 +224,20 @@ print(f"Mouse is at: {position.x}, {position.y}")
 async def move(x: int, y: int) -> MouseMoveResponse
 ```
 
-マウスカーソルを指定された座標に移動します。
+マウスカーソルを指定した座標に移動します。
 
-**引数**:
+**Arguments**:
 
 - `x` _int_ - 移動先のx座標。
 - `y` _int_ - 移動先のy座標。
   
 
-**戻り値**:
+**Returns**:
 
 - `MouseMoveResponse` - 移動操作の結果。
   
 
-**例**:
+**Example**:
 
 ```python
 result = await sandbox.computer_use.mouse.move(100, 200)
@@ -254,31 +254,31 @@ async def click(x: int,
                 double: bool = False) -> MouseClickResponse
 ```
 
-指定された座標でマウスをクリックします。
+指定した座標でマウスをクリックします。
 
-**引数**:
+**Arguments**:
 
 - `x` _int_ - クリックするx座標。
 - `y` _int_ - クリックするy座標。
 - `button` _str_ - クリックするマウスボタン（'left'、'right'、'middle'）。
-- `double` _bool_ - ダブルクリックを実行するかどうか。
+- `double` _bool_ - ダブルクリックを行うかどうか。
   
 
-**戻り値**:
+**Returns**:
 
 - `MouseClickResponse` - クリック操作の結果。
   
 
-**例**:
+**Example**:
 
 ```python
-# シングル左クリック
+# Single left click
 result = await sandbox.computer_use.mouse.click(100, 200)
 
-# ダブルクリック
+# Double click
 double_click = await sandbox.computer_use.mouse.click(100, 200, "left", True)
 
-# 右クリック
+# Right click
 right_click = await sandbox.computer_use.mouse.click(100, 200, "right")
 ```
 
@@ -295,7 +295,7 @@ async def drag(start_x: int,
 
 開始座標から終了座標までマウスをドラッグします。
 
-**引数**:
+**Arguments**:
 
 - `start_x` _int_ - 開始x座標。
 - `start_y` _int_ - 開始y座標。
@@ -304,12 +304,12 @@ async def drag(start_x: int,
 - `button` _str_ - ドラッグに使用するマウスボタン。
   
 
-**戻り値**:
+**Returns**:
 
 - `MouseDragResponse` - ドラッグ操作の結果。
   
 
-**例**:
+**Example**:
 
 ```python
 result = await sandbox.computer_use.mouse.drag(50, 50, 150, 150)
@@ -323,28 +323,28 @@ print(f"Dragged from {result.from_x},{result.from_y} to {result.to_x},{result.to
 async def scroll(x: int, y: int, direction: str, amount: int = 1) -> bool
 ```
 
-指定された座標でマウスホイールをスクロールします。
+指定した座標でマウスホイールをスクロールします。
 
-**引数**:
+**Arguments**:
 
 - `x` _int_ - スクロールするx座標。
 - `y` _int_ - スクロールするy座標。
-- `direction` _str_ - スクロール方向（'up'または'down'）。
+- `direction` _str_ - スクロール方向（'up' または 'down'）。
 - `amount` _int_ - スクロール量。
   
 
-**戻り値**:
+**Returns**:
 
 - `bool` - スクロール操作が成功したかどうか。
   
 
-**例**:
+**Example**:
 
 ```python
-# 上にスクロール
+# Scroll up
 scroll_up = await sandbox.computer_use.mouse.scroll(100, 200, "up", 3)
 
-# 下にスクロール
+# Scroll down
 scroll_down = await sandbox.computer_use.mouse.scroll(100, 200, "down", 5)
 ```
 
@@ -354,7 +354,7 @@ scroll_down = await sandbox.computer_use.mouse.scroll(100, 200, "down", 5)
 class AsyncKeyboard()
 ```
 
-コンピューター使用機能のためのキーボード操作。
+コンピューター操作（Computer Use）機能におけるキーボード操作。
 
 #### AsyncKeyboard.type
 
@@ -363,34 +363,34 @@ class AsyncKeyboard()
 async def type(text: str, delay: Optional[int] = None) -> None
 ```
 
-指定されたテキストを入力します。
+指定したテキストを入力します。
 
-**引数**:
+**Arguments**:
 
 - `text` _str_ - 入力するテキスト。
-- `delay` _int_ - 文字間の遅延（ミリ秒）。
+- `delay` _int_ - 文字ごとの遅延（ミリ秒）。
   
 
-**例外**:
+**Raises**:
 
-- `DaytonaError` - 入力操作が失敗した場合。
+- `DaytonaError` - 入力処理に失敗した場合。
   
 
-**例**:
+**Example**:
 
 ```python
 try:
     await sandbox.computer_use.keyboard.type("Hello, World!")
-    print(f"操作成功")
+    print(f"Operation success")
 except Exception as e:
-    print(f"操作失敗: {e}")
+    print(f"Operation failed: {e}")
 
-# 文字間に遅延を設定
+# 文字ごとに遅延を入れる場合
 try:
     await sandbox.computer_use.keyboard.type("Slow typing", 100)
-    print(f"操作成功")
+    print(f"Operation success")
 except Exception as e:
-    print(f"操作失敗: {e}")
+    print(f"Operation failed: {e}")
 ```
 
 #### AsyncKeyboard.press
@@ -400,40 +400,40 @@ except Exception as e:
 async def press(key: str, modifiers: Optional[List[str]] = None) -> None
 ```
 
-オプションの修飾キーと共にキーを押します。
+必要に応じてモディファイアキーと組み合わせてキーを押します。
 
-**引数**:
+**Arguments**:
 
-- `key` _str_ - 押すキー（例：'Enter'、'Escape'、'Tab'、'a'、'A'）。
-- `modifiers` _List[str]_ - 修飾キー（'ctrl'、'alt'、'meta'、'shift'）。
+- `key` _str_ - 押下するキー（例: 'Enter', 'Escape', 'Tab', 'a', 'A'）。
+- `modifiers` _List[str]_ - モディファイアキー（'ctrl', 'alt', 'meta', 'shift'）。
   
 
-**例外**:
+**Raises**:
 
-- `DaytonaError` - キー押下操作が失敗した場合。
+- `DaytonaError` - キー押下処理に失敗した場合。
   
 
-**例**:
+**Example**:
 
 ```python
-# Enterキーを押す
+# Enter を押す
 try:
     await sandbox.computer_use.keyboard.press("Return")
-    print(f"操作成功")
+    print(f"Operation success")
 except Exception as e:
-    print(f"操作失敗: {e}")
+    print(f"Operation failed: {e}")
 
-# Ctrl+Cを押す
+# Ctrl+C を押す
 try:
     await sandbox.computer_use.keyboard.press("c", ["ctrl"])
-    print(f"操作成功")
+    print(f"Operation success")
 
-# Ctrl+Shift+Tを押す
+# Ctrl+Shift+T を押す
 try:
     await sandbox.computer_use.keyboard.press("t", ["ctrl", "shift"])
-    print(f"操作成功")
+    print(f"Operation success")
 except Exception as e:
-    print(f"操作失敗: {e}")
+    print(f"Operation failed: {e}")
 ```
 
 #### AsyncKeyboard.hotkey
@@ -445,39 +445,39 @@ async def hotkey(keys: str) -> None
 
 ホットキーの組み合わせを押します。
 
-**引数**:
+**Arguments**:
 
-- `keys` _str_ - ホットキーの組み合わせ（例：'ctrl+c'、'alt+tab'、'cmd+shift+t'）。
+- `keys` _str_ - ホットキーの組み合わせ（例: 'ctrl+c', 'alt+tab', 'cmd+shift+t'）。
   
 
-**例外**:
+**Raises**:
 
-- `DaytonaError` - ホットキー操作が失敗した場合。
+- `DaytonaError` - ホットキー処理に失敗した場合。
   
 
-**例**:
+**Example**:
 
 ```python
 # コピー
 try:
     await sandbox.computer_use.keyboard.hotkey("ctrl+c")
-    print(f"操作成功")
+    print(f"Operation success")
 except Exception as e:
-    print(f"操作失敗: {e}")
+    print(f"Operation failed: {e}")
 
 # ペースト
 try:
     await sandbox.computer_use.keyboard.hotkey("ctrl+v")
-    print(f"操作成功")
+    print(f"Operation success")
 except Exception as e:
-    print(f"操作失敗: {e}")
+    print(f"Operation failed: {e}")
 
 # Alt+Tab
 try:
     await sandbox.computer_use.keyboard.hotkey("alt+tab")
-    print(f"操作成功")
+    print(f"Operation success")
 except Exception as e:
-    print(f"操作失敗: {e}")
+    print(f"Operation failed: {e}")
 ```
 
 ## AsyncScreenshot
@@ -486,7 +486,7 @@ except Exception as e:
 class AsyncScreenshot()
 ```
 
-コンピューター使用機能のスクリーンショット操作。
+コンピューター操作（Computer Use）機能向けのスクリーンショット処理。
 
 #### AsyncScreenshot.take\_full\_screen
 
@@ -495,7 +495,7 @@ class AsyncScreenshot()
 async def take_full_screen(show_cursor: bool = False) -> ScreenshotResponse
 ```
 
-画面全体のスクリーンショットを撮影します。
+画面全体のスクリーンショットを取得します。
 
 **引数**:
 
@@ -504,7 +504,7 @@ async def take_full_screen(show_cursor: bool = False) -> ScreenshotResponse
 
 **戻り値**:
 
-- `ScreenshotResponse` - base64エンコードされた画像を含むスクリーンショットデータ。
+- `ScreenshotResponse` - 画像をbase64エンコードしたスクリーンショットデータ。
   
 
 **例**:
@@ -513,7 +513,7 @@ async def take_full_screen(show_cursor: bool = False) -> ScreenshotResponse
 screenshot = await sandbox.computer_use.screenshot.take_full_screen()
 print(f"Screenshot size: {screenshot.width}x{screenshot.height}")
 
-# カーソルを表示する場合
+# With cursor visible
 with_cursor = await sandbox.computer_use.screenshot.take_full_screen(True)
 ```
 
@@ -525,17 +525,17 @@ async def take_region(region: ScreenshotRegion,
                       show_cursor: bool = False) -> RegionScreenshotResponse
 ```
 
-特定の領域のスクリーンショットを撮影します。
+指定した領域のスクリーンショットを取得します。
 
 **引数**:
 
-- `region` _ScreenshotRegion_ - キャプチャする領域。
+- `region` _ScreenshotRegion_ - 取得対象の領域。
 - `show_cursor` _bool_ - スクリーンショットにカーソルを表示するかどうか。
   
 
 **戻り値**:
 
-- `RegionScreenshotResponse` - base64エンコードされた画像を含むスクリーンショットデータ。
+- `RegionScreenshotResponse` - 画像をbase64エンコードしたスクリーンショットデータ。
   
 
 **例**:
@@ -555,30 +555,30 @@ async def take_compressed(
 ) -> CompressedScreenshotResponse
 ```
 
-画面全体の圧縮されたスクリーンショットを撮影します。
+画面全体の圧縮スクリーンショットを取得します。
 
 **引数**:
 
-- `options` _ScreenshotOptions_ - 圧縮と表示のオプション。
+- `options` _ScreenshotOptions_ - 圧縮および表示のオプション。
   
 
 **戻り値**:
 
-- `CompressedScreenshotResponse` - 圧縮されたスクリーンショットデータ。
+- `CompressedScreenshotResponse` - 圧縮済みスクリーンショットデータ。
   
 
 **例**:
 
 ```python
-# デフォルト圧縮
+# Default compression
 screenshot = await sandbox.computer_use.screenshot.take_compressed()
 
-# 高品質JPEG
+# High quality JPEG
 jpeg = await sandbox.computer_use.screenshot.take_compressed(
     ScreenshotOptions(format="jpeg", quality=95, show_cursor=True)
 )
 
-# 縮小されたPNG
+# Scaled down PNG
 scaled = await sandbox.computer_use.screenshot.take_compressed(
     ScreenshotOptions(format="png", scale=0.5)
 )
@@ -595,17 +595,17 @@ async def take_compressed_region(
 ) -> CompressedScreenshotResponse
 ```
 
-特定の領域の圧縮されたスクリーンショットを撮影します。
+指定した領域の圧縮スクリーンショットを取得します。
 
 **引数**:
 
-- `region` _ScreenshotRegion_ - キャプチャする領域。
-- `options` _ScreenshotOptions_ - 圧縮と表示のオプション。
+- `region` _ScreenshotRegion_ - 取得対象の領域。
+- `options` _ScreenshotOptions_ - 圧縮および表示のオプション。
   
 
 **戻り値**:
 
-- `CompressedScreenshotResponse` - 圧縮されたスクリーンショットデータ。
+- `CompressedScreenshotResponse` - 圧縮済みスクリーンショットデータ。
   
 
 **例**:
@@ -625,7 +625,7 @@ print(f"Compressed size: {screenshot.size_bytes} bytes")
 class AsyncDisplay()
 ```
 
-コンピューター使用機能のディスプレイ操作。
+コンピューター操作機能向けのディスプレイ操作。
 
 #### AsyncDisplay.get\_info
 
@@ -634,14 +634,14 @@ class AsyncDisplay()
 async def get_info() -> DisplayInfoResponse
 ```
 
-ディスプレイに関する情報を取得します。
+ディスプレイ情報を取得します。
 
-**戻り値**:
+**Returns**:
 
-- `DisplayInfoResponse` - プライマリディスプレイと利用可能なすべてのディスプレイを含むディスプレイ情報。
+- `DisplayInfoResponse` - プライマリディスプレイおよび利用可能なすべてのディスプレイを含む情報。
   
 
-**例**:
+**Example**:
 
 ```python
 info = await sandbox.computer_use.display.get_info()
@@ -658,14 +658,14 @@ for i, display in enumerate(info.displays):
 async def get_windows() -> WindowsResponse
 ```
 
-開いているウィンドウのリストを取得します。
+開いているウィンドウの一覧を取得します。
 
-**戻り値**:
+**Returns**:
 
-- `WindowsResponse` - IDとタイトルを含む開いているウィンドウのリスト。
+- `WindowsResponse` - IDとタイトルを含む開いているウィンドウの一覧。
   
 
-**例**:
+**Example**:
 
 ```python
 windows = await sandbox.computer_use.display.get_windows()
@@ -695,12 +695,12 @@ class ScreenshotRegion()
 class ScreenshotOptions()
 ```
 
-スクリーンショットの圧縮と表示のオプション。
+スクリーンショットの圧縮や表示に関するオプション。
 
 **属性**:
 
 - `show_cursor` _bool_ - スクリーンショットにカーソルを表示するかどうか。
-- `fmt` _str_ - 画像形式（例：'png'、'jpeg'、'webp'）。
-- `quality` _int_ - 圧縮品質（0-100）。
-- `scale` _float_ - スクリーンショットのスケール係数。
+- `fmt` _str_ - 画像形式（例: 'png'、'jpeg'、'webp'）。
+- `quality` _int_ - 圧縮品質（0〜100）。
+- `scale` _float_ - スクリーンショットの拡大率。
 
