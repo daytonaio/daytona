@@ -1,12 +1,12 @@
 ---
-title: "ComputerUse"
+title: "Computer Use"
 hideTitleOnPage: true
 ---
 
 
 ## ComputerUse
 
-デスクトップ環境と対話するためのComputer Use機能。
+デスクトップ環境と対話するためのコンピュータ操作機能。
 
 **プロパティ**:
 
@@ -19,8 +19,7 @@ hideTitleOnPage: true
 
 
 
-サンドボックス内でデスクトップ操作を自動化するためのマウス、キーボード、スクリーンショット、
-およびディスプレイ操作へのアクセスを提供します。
+サンドボックス（Daytonaで管理される隔離された一時的な計算環境）内でのデスクトップ操作を自動化するために、マウス、キーボード、スクリーンショット、ディスプレイの各操作にアクセスできます。
 
 ### コンストラクタ
 
@@ -57,7 +56,7 @@ getProcessErrors(processName: string): Promise<ProcessErrorsResponse>
 
 **戻り値**:
 
-- `Promise<ProcessErrorsResponse>` - プロセスエラーログ
+- `Promise<ProcessErrorsResponse>` - プロセスのエラーログ
 
 **例:**
 
@@ -83,7 +82,7 @@ getProcessLogs(processName: string): Promise<ProcessLogsResponse>
 
 **戻り値**:
 
-- `Promise<ProcessLogsResponse>` - プロセスログ
+- `Promise<ProcessLogsResponse>` - プロセスのログ
 
 **例:**
 
@@ -104,7 +103,7 @@ getProcessStatus(processName: string): Promise<ProcessStatusResponse>
 
 **パラメータ**:
 
-- `processName` _string_ - チェックするプロセス名
+- `processName` _string_ - 確認するプロセス名
 
 
 **戻り値**:
@@ -126,7 +125,7 @@ const noVncStatus = await sandbox.computerUse.getProcessStatus('novnc');
 getStatus(): Promise<ComputerUseStatusResponse>
 ```
 
-すべてのcomputer useプロセスのステータスを取得します
+すべてのコンピュータ操作プロセスのステータスを取得します
 
 **戻り値**:
 
@@ -156,7 +155,7 @@ restartProcess(processName: string): Promise<ProcessRestartResponse>
 
 **戻り値**:
 
-- `Promise<ProcessRestartResponse>` - プロセス再起動レスポンス
+- `Promise<ProcessRestartResponse>` - プロセス再起動のレスポンス
 
 **例:**
 
@@ -173,11 +172,11 @@ console.log('XFCE4 process restarted:', result.message);
 start(): Promise<ComputerUseStartResponse>
 ```
 
-すべてのcomputer useプロセス（Xvfb、xfce4、x11vnc、novnc）を開始します
+すべてのコンピュータ操作プロセス（Xvfb、xfce4、x11vnc、novnc）を開始します
 
 **戻り値**:
 
-- `Promise<ComputerUseStartResponse>` - Computer use開始レスポンス
+- `Promise<ComputerUseStartResponse>` - コンピュータ操作の開始レスポンス
 
 **例:**
 
@@ -194,11 +193,11 @@ console.log('Computer use processes started:', result.message);
 stop(): Promise<ComputerUseStopResponse>
 ```
 
-すべてのcomputer useプロセスを停止します
+すべてのコンピュータ操作プロセスを停止します
 
 **戻り値**:
 
-- `Promise<ComputerUseStopResponse>` - Computer use停止レスポンス
+- `Promise<ComputerUseStopResponse>` - コンピュータ操作の停止レスポンス
 
 **例:**
 
@@ -208,7 +207,7 @@ console.log('Computer use processes stopped:', result.message);
 ```
 ## Display
 
-computer use機能のディスプレイ操作
+コンピュータ操作機能のためのディスプレイ操作
 
 ### コンストラクタ
 
@@ -240,16 +239,16 @@ getInfo(): Promise<DisplayInfoResponse>
 
 **戻り値**:
 
-- `Promise<DisplayInfoResponse>` - プライマリディスプレイと利用可能なすべてのディスプレイを含むディスプレイ情報
+- `Promise<DisplayInfoResponse>` - プライマリディスプレイおよび利用可能なすべてのディスプレイを含むディスプレイ情報
 
 **例:**
 
 ```typescript
 const info = await sandbox.computerUse.display.getInfo();
-console.log(`プライマリディスプレイ: ${info.primary_display.width}x${info.primary_display.height}`);
-console.log(`総ディスプレイ数: ${info.total_displays}`);
+console.log(`Primary display: ${info.primary_display.width}x${info.primary_display.height}`);
+console.log(`Total displays: ${info.total_displays}`);
 info.displays.forEach((display, index) => {
-  console.log(`ディスプレイ ${index}: ${display.width}x${display.height} at ${display.x},${display.y}`);
+  console.log(`Display ${index}: ${display.width}x${display.height} at ${display.x},${display.y}`);
 });
 ```
 
@@ -261,17 +260,17 @@ info.displays.forEach((display, index) => {
 getWindows(): Promise<WindowsResponse>
 ```
 
-開いているウィンドウのリストを取得します
+開いているウィンドウの一覧を取得します
 
 **戻り値**:
 
-- `Promise<WindowsResponse>` - IDとタイトルを含む開いているウィンドウのリスト
+- `Promise<WindowsResponse>` - IDとタイトルを含む開いているウィンドウの一覧
 
 **例:**
 
 ```typescript
 const windows = await sandbox.computerUse.display.getWindows();
-console.log(`${windows.count}個の開いているウィンドウが見つかりました:`);
+console.log(`Found ${windows.count} open windows:`);
 windows.windows.forEach(window => {
   console.log(`- ${window.title} (ID: ${window.id})`);
 });
@@ -280,11 +279,11 @@ windows.windows.forEach(window => {
 ***
 
 
-## Keyboard
+## キーボード
 
-コンピューター使用機能のキーボード操作
+コンピュータ操作機能のためのキーボード操作
 
-### Constructors
+### コンストラクター
 
 #### new Keyboard()
 
@@ -292,17 +291,17 @@ windows.windows.forEach(window => {
 new Keyboard(sandboxId: string, toolboxApi: ToolboxApi): Keyboard
 ```
 
-**Parameters**:
+**パラメータ**:
 
 - `sandboxId` _string_
 - `toolboxApi` _ToolboxApi_
 
 
-**Returns**:
+**戻り値**:
 
 - `Keyboard`
 
-### Methods
+### メソッド
 
 #### hotkey()
 
@@ -310,46 +309,46 @@ new Keyboard(sandboxId: string, toolboxApi: ToolboxApi): Keyboard
 hotkey(keys: string): Promise<void>
 ```
 
-ホットキーの組み合わせを押します
+ホットキーの組み合わせを送信します
 
-**Parameters**:
+**パラメータ**:
 
-- `keys` _string_ - ホットキーの組み合わせ（例：'ctrl+c'、'alt+tab'、'cmd+shift+t'）
+- `keys` _string_ - ホットキーの組み合わせ（例: 'ctrl+c', 'alt+tab', 'cmd+shift+t'）
 
 
-**Returns**:
+**戻り値**:
 
 - `Promise<void>`
 
-**Throws**:
+**スロー**:
 
-ホットキー操作が失敗した場合
+ホットキー操作に失敗した場合
 
-**Example:**
+**例:**
 
 ```typescript
-// コピー
+// Copy
 try {
   await sandbox.computerUse.keyboard.hotkey('ctrl+c');
-  console.log('操作成功');
+  console.log('Operation success');
 } catch (e) {
-  console.log('操作失敗:', e);
+  console.log('Operation failed:', e);
 }
 
-// ペースト
+// Paste
 try {
   await sandbox.computerUse.keyboard.hotkey('ctrl+v');
-  console.log('操作成功');
+  console.log('Operation success');
 } catch (e) {
-  console.log('操作失敗:', e);
+  console.log('Operation failed:', e);
 }
 
 // Alt+Tab
 try {
   await sandbox.computerUse.keyboard.hotkey('alt+tab');
-  console.log('操作成功');
+  console.log('Operation success');
 } catch (e) {
-  console.log('操作失敗:', e);
+  console.log('Operation failed:', e);
 }
 ```
 
@@ -361,47 +360,47 @@ try {
 press(key: string, modifiers?: string[]): Promise<void>
 ```
 
-オプションの修飾キーと共にキーを押します
+必要に応じて修飾キーと併せてキーを押下します
 
-**Parameters**:
+**パラメータ**:
 
-- `key` _string_ - 押すキー（例：'Enter'、'Escape'、'Tab'、'a'、'A'）
-- `modifiers?` _string\[\] = \[\]_ - 修飾キー（'ctrl'、'alt'、'meta'、'shift'）
+- `key` _string_ - 押下するキー（例: 'Enter', 'Escape', 'Tab', 'a', 'A')
+- `modifiers?` _string\[\] = \[\]_ - 修飾キー（'ctrl', 'alt', 'meta', 'shift'）
 
 
-**Returns**:
+**戻り値**:
 
 - `Promise<void>`
 
-**Throws**:
+**スロー**:
 
-押下操作が失敗した場合
+キー押下操作に失敗した場合
 
-**Example:**
+**例:**
 
 ```typescript
-// Enterを押す
+// Press Enter
 try {
   await sandbox.computerUse.keyboard.press('Return');
-  console.log('操作成功');
+  console.log('Operation success');
 } catch (e) {
-  console.log('操作失敗:', e);
+  console.log('Operation failed:', e);
 }
 
-// Ctrl+Cを押す
+// Press Ctrl+C
 try {
   await sandbox.computerUse.keyboard.press('c', ['ctrl']);
-  console.log('操作成功');
+  console.log('Operation success');
 } catch (e) {
-  console.log('操作失敗:', e);
+  console.log('Operation failed:', e);
 }
 
-// Ctrl+Shift+Tを押す
+// Press Ctrl+Shift+T
 try {
   await sandbox.computerUse.keyboard.press('t', ['ctrl', 'shift']);
-  console.log('操作成功');
+  console.log('Operation success');
 } catch (e) {
-  console.log('操作失敗:', e);
+  console.log('Operation failed:', e);
 }
 ```
 
@@ -413,38 +412,38 @@ try {
 type(text: string, delay?: number): Promise<void>
 ```
 
-指定されたテキストを入力します
+指定したテキストを入力します
 
-**Parameters**:
+**パラメータ**:
 
 - `text` _string_ - 入力するテキスト
 - `delay?` _number_ - 文字間の遅延（ミリ秒）
 
 
-**Returns**:
+**戻り値**:
 
 - `Promise<void>`
 
-**Throws**:
+**スロー**:
 
-入力操作が失敗した場合
+入力操作に失敗した場合
 
-**Example:**
+**例:**
 
 ```typescript
 try {
   await sandbox.computerUse.keyboard.type('Hello, World!');
-  console.log('操作成功');
+  console.log('Operation success');
 } catch (e) {
-  console.log('操作失敗:', e);
+  console.log('Operation failed:', e);
 }
 
-// 文字間に遅延を設定
+// With delay between characters
 try {
   await sandbox.computerUse.keyboard.type('Slow typing', 100);
-  console.log('操作成功');
+  console.log('Operation success');
 } catch (e) {
-  console.log('操作失敗:', e);
+  console.log('Operation failed:', e);
 }
 ```
 
@@ -453,7 +452,7 @@ try {
 
 ## Mouse
 
-コンピューター使用機能のマウス操作
+コンピュータ操作（Computer Use）機能におけるマウス操作
 
 ### Constructors
 
@@ -485,14 +484,14 @@ click(
 double?: boolean): Promise<MouseClickResponse>
 ```
 
-指定された座標でマウスをクリックします
+指定した座標でマウスクリックを実行します
 
 **Parameters**:
 
-- `x` _number_ - クリックするx座標
-- `y` _number_ - クリックするy座標
-- `button?` _string = 'left'_ - クリックするマウスボタン（'left'、'right'、'middle'）
-- `double?` _boolean = false_ - ダブルクリックを実行するかどうか
+- `x` _number_ - クリック先のx座標
+- `y` _number_ - クリック先のy座標
+- `button?` _string = 'left'_ - 使用するマウスボタン（'left'、'right'、'middle'）
+- `double?` _boolean = false_ - ダブルクリックを行うかどうか
 
 
 **Returns**:
@@ -502,13 +501,13 @@ double?: boolean): Promise<MouseClickResponse>
 **Example:**
 
 ```typescript
-// シングル左クリック
+// Single left click
 const result = await sandbox.computerUse.mouse.click(100, 200);
 
-// ダブルクリック
+// Double click
 const doubleClick = await sandbox.computerUse.mouse.click(100, 200, 'left', true);
 
-// 右クリック
+// Right click
 const rightClick = await sandbox.computerUse.mouse.click(100, 200, 'right');
 ```
 
@@ -525,7 +524,7 @@ drag(
 button?: string): Promise<MouseDragResponse>
 ```
 
-開始座標から終了座標までマウスをドラッグします
+開始座標から終了座標までドラッグします
 
 **Parameters**:
 
@@ -544,7 +543,7 @@ button?: string): Promise<MouseDragResponse>
 
 ```typescript
 const result = await sandbox.computerUse.mouse.drag(50, 50, 150, 150);
-console.log(`${result.from.x},${result.from.y}から${result.to.x},${result.to.y}にドラッグしました`);
+console.log(`Dragged from ${result.from.x},${result.from.y} to ${result.to.x},${result.to.y}`);
 ```
 
 ***
@@ -559,13 +558,13 @@ getPosition(): Promise<MousePosition>
 
 **Returns**:
 
-- `Promise<MousePosition>` - xとy座標を持つ現在のマウス位置
+- `Promise<MousePosition>` - x座標とy座標を含む現在のマウス位置
 
 **Example:**
 
 ```typescript
 const position = await sandbox.computerUse.mouse.getPosition();
-console.log(`マウスの位置: ${position.x}, ${position.y}`);
+console.log(`Mouse is at: ${position.x}, ${position.y}`);
 ```
 
 ***
@@ -576,7 +575,7 @@ console.log(`マウスの位置: ${position.x}, ${position.y}`);
 move(x: number, y: number): Promise<MouseMoveResponse>
 ```
 
-マウスカーソルを指定された座標に移動します
+指定した座標にマウスカーソルを移動します
 
 **Parameters**:
 
@@ -592,7 +591,7 @@ move(x: number, y: number): Promise<MouseMoveResponse>
 
 ```typescript
 const result = await sandbox.computerUse.mouse.move(100, 200);
-console.log(`マウスが移動しました: ${result.x}, ${result.y}`);
+console.log(`Mouse moved to: ${result.x}, ${result.y}`);
 ```
 
 ***
@@ -607,13 +606,13 @@ scroll(
 amount?: number): Promise<boolean>
 ```
 
-指定された座標でマウスホイールをスクロールします
+指定した座標でマウスホイールをスクロールします
 
 **Parameters**:
 
-- `x` _number_ - スクロールするx座標
-- `y` _number_ - スクロールするy座標
-- `direction` _スクロールする方向_ - `"up"` | `"down"`
+- `x` _number_ - スクロール先のx座標
+- `y` _number_ - スクロール先のy座標
+- `direction` _スクロール方向_ - `"up"` | `"down"`
 - `amount?` _number = 1_ - スクロール量
 
 
@@ -624,21 +623,21 @@ amount?: number): Promise<boolean>
 **Example:**
 
 ```typescript
-// 上にスクロール
+// Scroll up
 const scrollUp = await sandbox.computerUse.mouse.scroll(100, 200, 'up', 3);
 
-// 下にスクロール
+// Scroll down
 const scrollDown = await sandbox.computerUse.mouse.scroll(100, 200, 'down', 5);
 ```
 
 ***
 
 
-## Screenshot
+## スクリーンショット
 
-コンピューター使用機能のスクリーンショット操作
+コンピュータ操作機能におけるスクリーンショット操作
 
-### Constructors
+### コンストラクタ
 
 #### new Screenshot()
 
@@ -646,17 +645,17 @@ const scrollDown = await sandbox.computerUse.mouse.scroll(100, 200, 'down', 5);
 new Screenshot(sandboxId: string, toolboxApi: ToolboxApi): Screenshot
 ```
 
-**Parameters**:
+**パラメータ**:
 
 - `sandboxId` _string_
 - `toolboxApi` _ToolboxApi_
 
 
-**Returns**:
+**戻り値**:
 
 - `Screenshot`
 
-### Methods
+### メソッド
 
 #### takeCompressed()
 
@@ -664,31 +663,31 @@ new Screenshot(sandboxId: string, toolboxApi: ToolboxApi): Screenshot
 takeCompressed(options?: ScreenshotOptions): Promise<CompressedScreenshotResponse>
 ```
 
-画面全体の圧縮されたスクリーンショットを撮影します
+画面全体の圧縮スクリーンショットを取得します
 
-**Parameters**:
+**パラメータ**:
 
-- `options?` _ScreenshotOptions = {}_ - 圧縮と表示のオプション
+- `options?` _ScreenshotOptions = {}_ - 圧縮および表示のオプション
 
 
-**Returns**:
+**戻り値**:
 
-- `Promise<CompressedScreenshotResponse>` - 圧縮されたスクリーンショットデータ
+- `Promise<CompressedScreenshotResponse>` - 圧縮スクリーンショットのデータ
 
-**Example:**
+**例:**
 
 ```typescript
-// デフォルトの圧縮
+// 既定の圧縮
 const screenshot = await sandbox.computerUse.screenshot.takeCompressed();
 
-// 高品質JPEG
+// 高品質 JPEG
 const jpeg = await sandbox.computerUse.screenshot.takeCompressed({
   format: 'jpeg',
   quality: 95,
   showCursor: true
 });
 
-// 縮小されたPNG
+// 縮小した PNG
 const scaled = await sandbox.computerUse.screenshot.takeCompressed({
   format: 'png',
   scale: 0.5
@@ -703,19 +702,19 @@ const scaled = await sandbox.computerUse.screenshot.takeCompressed({
 takeCompressedRegion(region: ScreenshotRegion, options?: ScreenshotOptions): Promise<CompressedScreenshotResponse>
 ```
 
-特定の領域の圧縮されたスクリーンショットを撮影します
+特定の領域の圧縮スクリーンショットを取得します
 
-**Parameters**:
+**パラメータ**:
 
-- `region` _ScreenshotRegion_ - キャプチャする領域
-- `options?` _ScreenshotOptions = {}_ - 圧縮と表示のオプション
+- `region` _ScreenshotRegion_ - 取得対象の領域
+- `options?` _ScreenshotOptions = {}_ - 圧縮および表示のオプション
 
 
-**Returns**:
+**戻り値**:
 
-- `Promise<CompressedScreenshotResponse>` - 圧縮されたスクリーンショットデータ
+- `Promise<CompressedScreenshotResponse>` - 圧縮スクリーンショットのデータ
 
-**Example:**
+**例:**
 
 ```typescript
 const region = { x: 0, y: 0, width: 800, height: 600 };
@@ -724,7 +723,7 @@ const screenshot = await sandbox.computerUse.screenshot.takeCompressedRegion(reg
   quality: 80,
   showCursor: true
 });
-console.log(`圧縮サイズ: ${screenshot.size_bytes} バイト`);
+console.log(`Compressed size: ${screenshot.size_bytes} bytes`);
 ```
 
 ***
@@ -735,24 +734,24 @@ console.log(`圧縮サイズ: ${screenshot.size_bytes} バイト`);
 takeFullScreen(showCursor?: boolean): Promise<ScreenshotResponse>
 ```
 
-画面全体のスクリーンショットを撮影します
+画面全体のスクリーンショットを取得します
 
-**Parameters**:
+**パラメータ**:
 
 - `showCursor?` _boolean = false_ - スクリーンショットにカーソルを表示するかどうか
 
 
-**Returns**:
+**戻り値**:
 
-- `Promise<ScreenshotResponse>` - base64エンコードされた画像を含むスクリーンショットデータ
+- `Promise<ScreenshotResponse>` - 画像を base64 でエンコードしたスクリーンショットデータ
 
-**Example:**
+**例:**
 
 ```typescript
 const screenshot = await sandbox.computerUse.screenshot.takeFullScreen();
-console.log(`スクリーンショットサイズ: ${screenshot.width}x${screenshot.height}`);
+console.log(`Screenshot size: ${screenshot.width}x${screenshot.height}`);
 
-// カーソルを表示
+// カーソルを表示する場合
 const withCursor = await sandbox.computerUse.screenshot.takeFullScreen(true);
 ```
 
@@ -764,24 +763,24 @@ const withCursor = await sandbox.computerUse.screenshot.takeFullScreen(true);
 takeRegion(region: ScreenshotRegion, showCursor?: boolean): Promise<RegionScreenshotResponse>
 ```
 
-特定の領域のスクリーンショットを撮影します
+特定の領域のスクリーンショットを取得します
 
-**Parameters**:
+**パラメータ**:
 
-- `region` _ScreenshotRegion_ - キャプチャする領域
+- `region` _ScreenshotRegion_ - 取得対象の領域
 - `showCursor?` _boolean = false_ - スクリーンショットにカーソルを表示するかどうか
 
 
-**Returns**:
+**戻り値**:
 
-- `Promise<RegionScreenshotResponse>` - base64エンコードされた画像を含むスクリーンショットデータ
+- `Promise<RegionScreenshotResponse>` - 画像を base64 でエンコードしたスクリーンショットデータ
 
-**Example:**
+**例:**
 
 ```typescript
 const region = { x: 100, y: 100, width: 300, height: 200 };
 const screenshot = await sandbox.computerUse.screenshot.takeRegion(region);
-console.log(`キャプチャした領域: ${screenshot.region.width}x${screenshot.region.height}`);
+console.log(`Captured region: ${screenshot.region.width}x${screenshot.region.height}`);
 ```
 
 ***
@@ -789,7 +788,7 @@ console.log(`キャプチャした領域: ${screenshot.region.width}x${screensho
 
 ## ScreenshotOptions
 
-スクリーンショット圧縮オプションのインターフェース
+スクリーンショット圧縮オプション用のインターフェース
 
 **プロパティ**:
 

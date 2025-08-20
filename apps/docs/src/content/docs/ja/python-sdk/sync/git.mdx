@@ -9,7 +9,7 @@ hideTitleOnPage: true
 class Git()
 ```
 
-Sandbox 内で Git 操作を提供します。
+サンドボックス内での Git 操作を提供します。
 
 **例**:
 
@@ -34,7 +34,7 @@ sandbox.git.commit(
 )
 ```
 
-#### Git.\_\_init\_\_
+#### Git.__init__
 
 ```python
 def __init__(sandbox_id: str, toolbox_api: ToolboxApi,
@@ -45,9 +45,9 @@ def __init__(sandbox_id: str, toolbox_api: ToolboxApi,
 
 **引数**:
 
-- `sandbox_id` _str_ - Sandbox ID。
-- `toolbox_api` _ToolboxApi_ - Sandbox 操作用の API クライアント。
-- `get_root_dir` _Callable[[], str]_ - Sandbox のデフォルトルートディレクトリを取得する関数。
+- `sandbox_id` _str_ - サンドボックス ID。
+- `toolbox_api` _ToolboxApi_ - サンドボックス操作用の API クライアント。
+- `get_root_dir` _Callable[[], str]_ - サンドボックスのデフォルトのルートディレクトリを取得する関数。
 
 #### Git.add
 
@@ -56,14 +56,14 @@ def __init__(sandbox_id: str, toolbox_api: ToolboxApi,
 def add(path: str, files: List[str]) -> None
 ```
 
-次回のコミットに向けて指定したファイルをステージします。コマンドラインで
+指定したファイルを次回のコミットに向けてステージします。コマンドラインで
 `git add` を実行するのと同様です。
 
 **引数**:
 
 - `path` _str_ - Git リポジトリのルートへのパス。相対パスはユーザーの
   ルートディレクトリを基準に解決されます。
-- `files` _List[str]_ - リポジトリルートからの相対パスで指定する、ステージ対象のファイルまたはディレクトリの一覧。
+- `files` _List[str]_ - ステージするファイルまたはディレクトリのリスト。リポジトリルートからの相対パス。
   
 
 **例**:
@@ -130,8 +130,8 @@ def clone(url: str,
   ルートディレクトリを基準に解決されます。
 - `branch` _Optional[str]_ - クローンするブランチ。未指定の場合は
   デフォルトブランチをクローンします。
-- `commit_id` _Optional[str]_ - クローンするコミット。指定した場合、
-  リポジトリはこのコミットで分離ヘッド（detached HEAD）状態になります。
+- `commit_id` _Optional[str]_ - チェックアウトする特定のコミット。指定した場合、
+  リポジトリはこのコミットで detached HEAD 状態になります。
 - `username` _Optional[str]_ - 認証用の Git ユーザー名。
 - `password` _Optional[str]_ - 認証用の Git パスワードまたはトークン。
   
@@ -173,17 +173,17 @@ def commit(path: str,
            allow_empty: bool = False) -> GitCommitResponse
 ```
 
-ステージ済みの変更から新しいコミットを作成します。コミットする前に必ず add() メソッドで
+ステージ済みの変更で新しいコミットを作成します。コミットする前に必ず add() メソッドで
 変更をステージしてください。
 
 **引数**:
 
-- `path` _str_ - Git リポジトリのルートパス。相対パスはユーザーの
+- `path` _str_ - Git リポジトリのルートへのパス。相対パスはユーザーの
   ルートディレクトリを基準に解決されます。
-- `message` _str_ - 変更内容を記述するコミットメッセージ。
-- `author` _str_ - コミットの作成者名。
-- `email` _str_ - コミット作成者のメールアドレス。
-- `allow_empty` _bool, optional_ - 変更がステージされていない場合でも空コミットの作成を許可します。既定は False。
+- `message` _str_ - 変更内容を説明するコミットメッセージ。
+- `author` _str_ - コミット作者の名前。
+- `email` _str_ - コミット作者のメールアドレス。
+- `allow_empty` _bool, optional_ - 変更がステージされていない場合でも空のコミットを作成できるようにします。デフォルトは False。
   
 
 **例**:
@@ -210,12 +210,12 @@ def push(path: str,
 ```
 
 現在のブランチのすべてのローカルコミットをリモート
-リポジトリへプッシュします。リモートリポジトリが認証を要求する場合は、
-ユーザー名とパスワード／トークンを指定してください。
+リポジトリにプッシュします。リモートリポジトリが認証を要求する場合は、
+username と password/token を指定してください。
 
 **引数**:
 
-- `path` _str_ - Git リポジトリのルートパス。相対パスはユーザーの
+- `path` _str_ - Git リポジトリのルートへのパス。相対パスはユーザーの
   ルートディレクトリを基準に解決されます。
 - `username` _Optional[str]_ - 認証用の Git ユーザー名。
 - `password` _Optional[str]_ - 認証用の Git パスワードまたはトークン。
@@ -245,11 +245,11 @@ def pull(path: str,
 ```
 
 リモートリポジトリから変更をプルします。リモートリポジトリが認証を要求する場合は、
-ユーザー名とパスワード／トークンを指定してください。
+username と password/token を指定してください。
 
 **引数**:
 
-- `path` _str_ - Git リポジトリのルートパス。相対パスはユーザーの
+- `path` _str_ - Git リポジトリのルートへのパス。相対パスはユーザーの
   ルートディレクトリを基準に解決されます。
 - `username` _Optional[str]_ - 認証用の Git ユーザー名。
 - `password` _Optional[str]_ - 認証用の Git パスワードまたはトークン。
@@ -280,7 +280,7 @@ def status(path: str) -> GitStatus
 
 **引数**:
 
-- `path` _str_ - Git リポジトリのルートパス。相対パスはユーザーの
+- `path` _str_ - Git リポジトリのルートへのパス。相対パスはユーザーの
   ルートディレクトリを基準に解決されます。
   
 
@@ -288,9 +288,9 @@ def status(path: str) -> GitStatus
 
 - `GitStatus` - リポジトリのステータス情報（以下を含む）:
   - current_branch: 現在のブランチ名
-  - file_status: ファイルステータス一覧
-  - ahead: リモートへ未プッシュのローカルコミット数
-  - behind: ローカルへ未プルのリモートコミット数
+  - file_status: ファイルの状態のリスト
+  - ahead: リモートに未プッシュのローカルコミット数
+  - behind: ローカルに未プルのリモートコミット数
   - branch_published: ブランチがリモートリポジトリに公開済みかどうか
   
 
@@ -314,7 +314,7 @@ def checkout_branch(path: str, branch: str) -> None
 
 **引数**:
 
-- `path` _str_ - Git リポジトリのルートパス。相対パスはユーザーの
+- `path` _str_ - Git リポジトリのルートへのパス。相対パスはユーザーの
   ルートディレクトリを基準に解決されます。
 - `branch` _str_ - チェックアウトするブランチ名
   
@@ -337,7 +337,7 @@ def create_branch(path: str, name: str) -> None
 
 **引数**:
 
-- `path` _str_ - Git リポジトリのルートパス。相対パスはユーザーの
+- `path` _str_ - Git リポジトリのルートへのパス。相対パスはユーザーの
   ルートディレクトリを基準に解決されます。
 - `name` _str_ - 作成する新しいブランチ名
   
@@ -356,7 +356,7 @@ sandbox.git.create_branch("workspace/repo", "new-feature")
 def delete_branch(path: str, name: str) -> None
 ```
 
-リポジトリのブランチを削除します。
+リポジトリ内のブランチを削除します。
 
 **引数**:
 
@@ -379,9 +379,9 @@ sandbox.git.delete_branch("workspace/repo", "old-feature")
 class GitCommitResponse()
 ```
 
-gitコミットからのレスポンス。
+Git の commit に対するレスポンス。
 
 **属性**:
 
-- `sha` _str_ - コミットのSHA
+- `sha` _str_ - コミットの SHA
 

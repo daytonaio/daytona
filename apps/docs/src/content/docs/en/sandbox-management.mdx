@@ -31,52 +31,51 @@ If you want to prolong the auto-stop interval, you can [set the auto-stop interv
 The Daytona SDK provides methods to create Sandboxes with default configurations, specific languages, or custom labels using Python and TypeScript.
 
 <Tabs>
-<TabItem label="Python" icon="seti:python">
-```python
-from daytona import Daytona, CreateSandboxFromSnapshotParams
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    from daytona import Daytona, CreateSandboxFromSnapshotParams
 
-daytona = Daytona()
+    daytona = Daytona()
 
-# Create a basic Sandbox
+    # Create a basic Sandbox
 
-sandbox = daytona.create()
+    sandbox = daytona.create()
 
-# Create a Sandbox with specific language
+    # Create a Sandbox with specific language
 
-params = CreateSandboxFromSnapshotParams(language="python")
-sandbox = daytona.create(params)
+    params = CreateSandboxFromSnapshotParams(language="python")
+    sandbox = daytona.create(params)
 
-# Create a Sandbox with custom labels
+    # Create a Sandbox with custom labels
 
-params = CreateSandboxFromSnapshotParams(labels={"SOME_LABEL": "my-label"})
-sandbox = daytona.create(params)
+    params = CreateSandboxFromSnapshotParams(labels={"SOME_LABEL": "my-label"})
+    sandbox = daytona.create(params)
 
-```
-</TabItem>
+    ```
+  </TabItem>
 
-<TabItem label="TypeScript" icon="seti:typescript">
-```typescript
-import { Daytona } from '@daytonaio/sdk';
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    import { Daytona } from '@daytonaio/sdk';
 
-const daytona = new Daytona();
+    const daytona = new Daytona();
 
-// Create a basic Sandbox
-const sandbox = await daytona.create();
+    // Create a basic Sandbox
+    const sandbox = await daytona.create();
 
-// Create a Sandbox with specific language
-const sandbox = await daytona.create({ language: 'typescript' });
+    // Create a Sandbox with specific language
+    const sandbox = await daytona.create({ language: 'typescript' });
 
-// Create a Sandbox with custom labels
-const sandbox = await daytona.create({ labels: { SOME_LABEL: 'my-label' } });
-```
-
-</TabItem>
+    // Create a Sandbox with custom labels
+    const sandbox = await daytona.create({ labels: { SOME_LABEL: 'my-label' } });
+    ```
+  </TabItem>
 </Tabs>
 
 When Sandboxes are not actively used, it is recommended that they be stopped. This can be done manually [using the stop command](/docs/en/sandbox-management#stop-and-start-sandbox) or automatically by [setting the auto-stop interval](/docs/en/sandbox-management#auto-stop-and-auto-archive).
 
 :::note
-Daytona keeps a pool of warm Sandboxes using default Snapshots.  
+Daytona keeps a pool of warm Sandboxes using default Snapshots.\
 When available, your Sandbox will launch in milliseconds instead of cold-booting.
 :::
 
@@ -89,51 +88,51 @@ Need more power? Use the `Resources` class to define exactly what you need: CPU,
 Check your available resources and limits in the [dashboard](https://app.daytona.io/dashboard/limits).
 
 <Tabs>
-<TabItem label="Python" icon="seti:python">
-```python
-from daytona import Daytona, Resources, CreateSandboxFromImageParams, Image
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    from daytona import Daytona, Resources, CreateSandboxFromImageParams, Image
 
-daytona = Daytona()
+    daytona = Daytona()
 
-# Create a Sandbox with custom resources
+    # Create a Sandbox with custom resources
 
-resources = Resources(
-    cpu=2,  # 2 CPU cores
-    memory=4,  # 4GB RAM
-    disk=8,  # 8GB disk space
-)
+    resources = Resources(
+        cpu=2,  # 2 CPU cores
+        memory=4,  # 4GB RAM
+        disk=8,  # 8GB disk space
+    )
 
-params = CreateSandboxFromImageParams(
-    image=Image.debian_slim("3.12"),
-    resources=resources
-)
+    params = CreateSandboxFromImageParams(
+        image=Image.debian_slim("3.12"),
+        resources=resources
+    )
 
-sandbox = daytona.create(params)
+    sandbox = daytona.create(params)
 
-```
-</TabItem>
-<TabItem label="TypeScript" icon="seti:typescript">
-```typescript
-import { Daytona, Image } from "@daytonaio/sdk";
+    ```
+  </TabItem>
 
-async function main() {
-  const daytona = new Daytona();
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    import { Daytona, Image } from "@daytonaio/sdk";
 
-  // Create a Sandbox with custom resources
-  const sandbox = await daytona.create({
-    image: Image.debianSlim("3.13"),
-    resources: {
-      cpu: 2, // 2 CPU cores
-      memory: 4, // 4GB RAM
-      disk: 8, // 8GB disk space
-    },
-  });
-}
+    async function main() {
+      const daytona = new Daytona();
 
-main();
-```
+      // Create a Sandbox with custom resources
+      const sandbox = await daytona.create({
+        image: Image.debianSlim("3.13"),
+        resources: {
+          cpu: 2, // 2 CPU cores
+          memory: 4, // 4GB RAM
+          disk: 8, // 8GB disk space
+        },
+      });
+    }
 
-</TabItem>
+    main();
+    ```
+  </TabItem>
 </Tabs>
 
 :::note
@@ -148,46 +147,46 @@ Daytona Sandboxes provide configurable network access controls to enhance securi
 - To restrict network access to specific addresses, set `networkAllowList` to a comma-separated list of up to 5 CIDR blocks
 
 <Tabs>
-<TabItem label="Python" icon="seti:python">
-```python
-from daytona import Daytona, CreateSandboxFromSnapshotParams
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    from daytona import Daytona, CreateSandboxFromSnapshotParams
 
-daytona = Daytona()
+    daytona = Daytona()
 
-# Block all network access
+    # Block all network access
 
-params = CreateSandboxFromSnapshotParams(
-  network_block_all=True
-)
-sandbox = daytona.create(params)
+    params = CreateSandboxFromSnapshotParams(
+      network_block_all=True
+    )
+    sandbox = daytona.create(params)
 
-# Explicitly allow list of network addresses
+    # Explicitly allow list of network addresses
 
-params = CreateSandboxFromSnapshotParams(
-  network_allow_list="192.168.1.0/16,10.0.0.0/24"
-)
-sandbox = daytona.create(params)
+    params = CreateSandboxFromSnapshotParams(
+      network_allow_list="192.168.1.0/16,10.0.0.0/24"
+    )
+    sandbox = daytona.create(params)
 
-```
-</TabItem>
-<TabItem label="TypeScript" icon="seti:typescript">
-```typescript
-import { Daytona } from '@daytonaio/sdk';
+    ```
+  </TabItem>
 
-const daytona = new Daytona();
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    import { Daytona } from '@daytonaio/sdk';
 
-// Block all network access
-const sandbox = await daytona.create({
-  networkBlockAll: true
-});
+    const daytona = new Daytona();
 
-// Explicitly allow list of network addresses
-const sandbox = await daytona.create({
-  networkAllowList: '192.168.1.0/16,10.0.0.0/24'
-});
-```
+    // Block all network access
+    const sandbox = await daytona.create({
+      networkBlockAll: true
+    });
 
-</TabItem>
+    // Explicitly allow list of network addresses
+    const sandbox = await daytona.create({
+      networkAllowList: '192.168.1.0/16,10.0.0.0/24'
+    });
+    ```
+  </TabItem>
 </Tabs>
 
 :::caution
@@ -200,39 +199,38 @@ It is recommended to whitelist specific network addresses using `networkAllowLis
 The Daytona SDK provides methods to get information about a Sandbox, such as ID, root directory, and status using Python and TypeScript.
 
 <Tabs>
-<TabItem label="Python" icon="seti:python">
-```python
-# Get Sandbox ID
-sandbox_id = sandbox.id
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    # Get Sandbox ID
+    sandbox_id = sandbox.id
 
-# Get the root directory of the Sandbox user
+    # Get the root directory of the Sandbox user
 
-root_dir = sandbox.get_user_root_dir()
+    root_dir = sandbox.get_user_root_dir()
 
-# Get the Sandbox id, auto-stop interval and state
+    # Get the Sandbox id, auto-stop interval and state
 
-print(sandbox.id)
-print(sandbox.auto_stop_interval)
-print(sandbox.state)
+    print(sandbox.id)
+    print(sandbox.auto_stop_interval)
+    print(sandbox.state)
 
-```
+    ```
+  </TabItem>
 
-</TabItem>
-<TabItem label="TypeScript" icon="seti:typescript">
-```typescript
-// Get Sandbox ID
-const sandboxId = sandbox.id;
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    // Get Sandbox ID
+    const sandboxId = sandbox.id;
 
-// Get the root directory of the Sandbox user
-const rootDir = await sandbox.getUserRootDir();
+    // Get the root directory of the Sandbox user
+    const rootDir = await sandbox.getUserRootDir();
 
-// Get the Sandbox id, auto-stop interval and state
-console.log(sandbox.id)
-console.log(sandbox.autoStopInterval)
-console.log(sandbox.state)
-```
-
-</TabItem>
+    // Get the Sandbox id, auto-stop interval and state
+    console.log(sandbox.id)
+    console.log(sandbox.autoStopInterval)
+    console.log(sandbox.state)
+    ```
+  </TabItem>
 </Tabs>
 
 To get the preview URL for a specific port, check out [Preview & Authentication](/docs/en/preview-and-authentication).
@@ -244,44 +242,44 @@ The Daytona SDK provides methods to stop and start Sandboxes using Python and Ty
 Stopped Sandboxes maintain filesystem persistence while their memory state is cleared. They incur only disk usage costs and can be started again when needed.
 
 <Tabs>
-<TabItem label="Python" icon="seti:python">
-```python
-sandbox = daytona.create(CreateSandboxParams(language="python"))
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    sandbox = daytona.create(CreateSandboxParams(language="python"))
 
-# Stop Sandbox
+    # Stop Sandbox
 
-sandbox.stop()
+    sandbox.stop()
 
-print(sandbox.id) # 7cd11133-96c1-4cc8-9baa-c757b8f8c916
+    print(sandbox.id) # 7cd11133-96c1-4cc8-9baa-c757b8f8c916
 
-# The sandbox ID can later be used to find the sandbox and start it
+    # The sandbox ID can later be used to find the sandbox and start it
 
-sandbox = daytona.find_one("7cd11133-96c1-4cc8-9baa-c757b8f8c916")
+    sandbox = daytona.find_one("7cd11133-96c1-4cc8-9baa-c757b8f8c916")
 
-# Start Sandbox
+    # Start Sandbox
 
-sandbox.start()
+    sandbox.start()
 
-```
-</TabItem>
-<TabItem label="TypeScript" icon="seti:typescript">
-```typescript
-const sandbox = await daytona.create({ language: 'typescript' });
+    ```
+  </TabItem>
 
-// Stop Sandbox
-await sandbox.stop();
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    const sandbox = await daytona.create({ language: 'typescript' });
 
-console.log(sandbox.id) // 7cd11133-96c1-4cc8-9baa-c757b8f8c916
+    // Stop Sandbox
+    await sandbox.stop();
 
-// The sandbox ID can later be used to find the sandbox and start it
+    console.log(sandbox.id) // 7cd11133-96c1-4cc8-9baa-c757b8f8c916
 
-const sandbox = await daytona.findOne("7cd11133-96c1-4cc8-9baa-c757b8f8c916");
+    // The sandbox ID can later be used to find the sandbox and start it
 
-// Start Sandbox
-await sandbox.start();
-```
+    const sandbox = await daytona.findOne("7cd11133-96c1-4cc8-9baa-c757b8f8c916");
 
-</TabItem>
+    // Start Sandbox
+    await sandbox.start();
+    ```
+  </TabItem>
 </Tabs>
 
 The stopped state should be used when the Sandbox is expected to be started again soon. Otherwise, it is recommended to stop and then archive the Sandbox to eliminate disk usage costs.
@@ -296,18 +294,19 @@ Starting an archived Sandbox takes more time than starting a stopped Sandbox, de
 A Sandbox must be stopped before it can be archived, and can be started again in the same way as a stopped Sandbox.
 
 <Tabs>
-<TabItem label="Python" icon="seti:python">
-```python
-# Archive Sandbox
-sandbox.archive()
-```
-</TabItem>
-<TabItem label="TypeScript" icon="seti:typescript">
-```typescript
-// Archive Sandbox
-await sandbox.archive();
-```
-</TabItem>
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    # Archive Sandbox
+    sandbox.archive()
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    // Archive Sandbox
+    await sandbox.archive();
+    ```
+  </TabItem>
 </Tabs>
 
 ## Delete Sandbox
@@ -315,19 +314,19 @@ await sandbox.archive();
 The Daytona SDK provides methods to delete Sandboxes using Python and TypeScript.
 
 <Tabs>
-<TabItem label="Python" icon="seti:python">
-```python
-# Delete Sandbox
-sandbox.delete()
-```
-</TabItem>
-<TabItem label="TypeScript" icon="seti:typescript">
-```typescript
-// Delete Sandbox
-await sandbox.delete();
-```
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    # Delete Sandbox
+    sandbox.delete()
+    ```
+  </TabItem>
 
-</TabItem>
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    // Delete Sandbox
+    await sandbox.delete();
+    ```
+  </TabItem>
 </Tabs>
 
 :::tip
@@ -377,23 +376,23 @@ If the parameter is not set, the default interval of `15` minutes will be used.
 :::
 
 <Tabs>
-<TabItem label="Python" icon="seti:python">
-```python
-sandbox = daytona.create(CreateSandboxFromSnapshotParams(
-    snapshot="my-snapshot-name",
-    auto_stop_interval=0,  # Disables the auto-stop feature - default is 15 minutes
-))
-```
-</TabItem>
-<TabItem label="TypeScript" icon="seti:typescript">
-```typescript
-const sandbox = await daytona.create({
-    snapshot: "my-snapshot-name",
-    autoStopInterval: 0, // Disables the auto-stop feature - default is 15 minutes
-});
-```
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    sandbox = daytona.create(CreateSandboxFromSnapshotParams(
+        snapshot="my-snapshot-name",
+        auto_stop_interval=0,  # Disables the auto-stop feature - default is 15 minutes
+    ))
+    ```
+  </TabItem>
 
-</TabItem>
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    const sandbox = await daytona.create({
+        snapshot: "my-snapshot-name",
+        autoStopInterval: 0, // Disables the auto-stop feature - default is 15 minutes
+    });
+    ```
+  </TabItem>
 </Tabs>
 
 ### Auto-archive Interval
@@ -408,22 +407,23 @@ The parameter can either be set to:
 If the parameter is not set, the default interval of `7 days` days will be used.
 
 <Tabs>
-<TabItem label="Python" icon="seti:python">
-```python
-sandbox = daytona.create(CreateSandboxFromSnapshotParams(
-    snapshot="my-snapshot-name",
-    auto_archive_interval=60 # Auto-archive after a Sandbox has been stopped for 1 hour
-))
-```
-</TabItem>
-<TabItem label="TypeScript" icon="seti:typescript">
-```typescript
-const sandbox = await daytona.create({
-    snapshot: "my-snapshot-name",
-    autoArchiveInterval: 60 // Auto-archive after a Sandbox has been stopped for 1 hour
-});
-```
-</TabItem>
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    sandbox = daytona.create(CreateSandboxFromSnapshotParams(
+        snapshot="my-snapshot-name",
+        auto_archive_interval=60 # Auto-archive after a Sandbox has been stopped for 1 hour
+    ))
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    const sandbox = await daytona.create({
+        snapshot: "my-snapshot-name",
+        autoArchiveInterval: 60 // Auto-archive after a Sandbox has been stopped for 1 hour
+    });
+    ```
+  </TabItem>
 </Tabs>
 
 ### Auto-delete Interval
@@ -439,38 +439,38 @@ The parameter can either be set to:
 If the parameter is not set, the Sandbox will not be deleted automatically.
 
 <Tabs>
-<TabItem label="Python" icon="seti:python">
-```python
-sandbox = daytona.create(CreateSandboxFromSnapshotParams(
-    snapshot="my-snapshot-name",
-    auto_delete_interval=60,  # Auto-delete after a Sandbox has been stopped for 1 hour
-))
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    sandbox = daytona.create(CreateSandboxFromSnapshotParams(
+        snapshot="my-snapshot-name",
+        auto_delete_interval=60,  # Auto-delete after a Sandbox has been stopped for 1 hour
+    ))
 
-# Delete the Sandbox immediately after it has been stopped
+    # Delete the Sandbox immediately after it has been stopped
 
-sandbox.set_auto_delete_interval(0)
+    sandbox.set_auto_delete_interval(0)
 
-# Disable auto-deletion
+    # Disable auto-deletion
 
-sandbox.set_auto_delete_interval(-1)
+    sandbox.set_auto_delete_interval(-1)
 
-```
-</TabItem>
-<TabItem label="TypeScript" icon="seti:typescript">
-```typescript
-const sandbox = await daytona.create({
-    snapshot: "my-snapshot-name",
-    autoDeleteInterval: 60, // Auto-delete after a Sandbox has been stopped for 1 hour
-});
+    ```
+  </TabItem>
 
-// Delete the Sandbox immediately after it has been stopped
-await sandbox.setAutoDeleteInterval(0)
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    const sandbox = await daytona.create({
+        snapshot: "my-snapshot-name",
+        autoDeleteInterval: 60, // Auto-delete after a Sandbox has been stopped for 1 hour
+    });
 
-// Disable auto-deletion
-await sandbox.setAutoDeleteInterval(-1)
-```
+    // Delete the Sandbox immediately after it has been stopped
+    await sandbox.setAutoDeleteInterval(0)
 
-</TabItem>
+    // Disable auto-deletion
+    await sandbox.setAutoDeleteInterval(-1)
+    ```
+  </TabItem>
 </Tabs>
 
 ## Run Indefinitely
@@ -478,20 +478,21 @@ await sandbox.setAutoDeleteInterval(-1)
 By default, Sandboxes auto-stop after 15 minutes of inactivity. To keep a Sandbox running without interruption, set the auto-stop interval to `0` when creating a new Sandbox:
 
 <Tabs>
-<TabItem label="Python" icon="seti:python">
-```python
-sandbox = daytona.create(CreateSandboxFromSnapshotParams(
-    snapshot="my-snapshot-name",
-    auto_stop_interval=0,  # Disables the auto-stop feature - default is 15 minutes
-))
-```
-</TabItem>
-<TabItem label="TypeScript" icon="seti:typescript">
-```typescript
-const sandbox = await daytona.create({
-    snapshot: "my-snapshot-name",
-    autoStopInterval: 0, // Disables the auto-stop feature - default is 15 minutes
-});
-```
-</TabItem>
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    sandbox = daytona.create(CreateSandboxFromSnapshotParams(
+        snapshot="my-snapshot-name",
+        auto_stop_interval=0,  # Disables the auto-stop feature - default is 15 minutes
+    ))
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    const sandbox = await daytona.create({
+        snapshot: "my-snapshot-name",
+        autoStopInterval: 0, // Disables the auto-stop feature - default is 15 minutes
+    });
+    ```
+  </TabItem>
 </Tabs>
