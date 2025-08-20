@@ -85,7 +85,7 @@
     "@socket.io/redis-adapter": "^8.3.0",
     "@tanstack/react-table": "^8.21.2",
     "algoliasearch": "^5.30.0",
-    "astro": "4.16.18",
+    "astro": "4.16.19",
     "astro-expressive-code": "^0.41.2",
     "axios": "^1.11.0",
     "axios-debug-log": "^1.0.0",
