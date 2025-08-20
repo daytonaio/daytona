@@ -631,8 +631,14 @@ export class SandboxService {
       throw new NotFoundException(`Sandbox with ID ${sandboxId} not found`)
     }
 
-    if (String(sandbox.state) !== String(sandbox.desiredState) && sandbox.state !== SandboxState.ARCHIVING) {
-      throw new SandboxError('State change in progress')
+    if (String(sandbox.state) !== String(sandbox.desiredState)) {
+      // Allow start of stopped | archived and archiving | archived sandboxes
+      if (
+        sandbox.desiredState !== SandboxDesiredState.ARCHIVED ||
+        (sandbox.state !== SandboxState.STOPPED && sandbox.state !== SandboxState.ARCHIVING)
+      ) {
+        throw new SandboxError('State change in progress')
+      }
     }
 
     if (![SandboxState.STOPPED, SandboxState.ARCHIVED, SandboxState.ARCHIVING].includes(sandbox.state)) {
