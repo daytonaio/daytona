@@ -31,7 +31,7 @@ import { OrganizationInvitationService } from '../services/organization-invitati
 import { AuthContext } from '../../common/decorators/auth-context.decorator'
 import { AuthContext as IAuthContext } from '../../common/interfaces/auth-context.interface'
 import { SystemActionGuard } from '../../auth/system-action.guard'
-import { RequiredSystemRole } from '../../common/decorators/required-role.decorator'
+import { RequiredApiRole, RequiredSystemRole } from '../../common/decorators/required-role.decorator'
 import { SystemRole } from '../../user/enums/system-role.enum'
 import { OrganizationSuspensionDto } from '../dto/organization-suspension.dto'
 import { CombinedAuthGuard } from '../../auth/combined-auth.guard'
@@ -428,7 +428,7 @@ export class OrganizationController {
     description: 'Sandbox ID',
     type: 'string',
   })
-  @RequiredSystemRole(SystemRole.ADMIN)
+  @RequiredApiRole([SystemRole.ADMIN, 'proxy'])
   @UseGuards(CombinedAuthGuard, SystemActionGuard)
   async getBySandboxId(@Param('sandboxId') sandboxId: string): Promise<OrganizationDto> {
     const organization = await this.organizationService.findBySandboxId(sandboxId)

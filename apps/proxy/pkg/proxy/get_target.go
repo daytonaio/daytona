@@ -43,7 +43,7 @@ func (p *Proxy) GetProxyTarget(ctx *gin.Context) (*url.URL, map[string]string, e
 		return nil, nil, fmt.Errorf("failed to get sandbox public status: %w", err)
 	}
 
-	if !*isPublic || targetPort == "22222" {
+	if !*isPublic || targetPort == TERMINAL_PORT {
 		err, didRedirect := p.Authenticate(ctx, sandboxID)
 		if err != nil {
 			if !didRedirect {
