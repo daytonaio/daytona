@@ -1,4 +1,5 @@
 import { Daytona, Sandbox, Image, FilesystemEventType } from '@daytonaio/sdk'
+import { execSync } from 'child_process'
 
 // Set up environment variables before running this example:
 // export DAYTONA_API_KEY="your-api-key"
@@ -95,7 +96,7 @@ async function fileWatchingWithAsyncCallback(sandbox: Sandbox) {
     await new Promise((resolve) => setTimeout(resolve, 100))
 
     // Log event details
-    console.log(`  Timestamp: ${new Date(event.timestamp * 1000).toISOString()}`)
+    console.log(`  Timestamp: ${event.timestamp}`)
     console.log(`  Is Directory: ${event.isDir}`)
   })
 
@@ -114,24 +115,28 @@ async function fileWatchingWithAsyncCallback(sandbox: Sandbox) {
 async function main() {
   const daytona = new Daytona()
 
-  // Create a sandbox with Node.js for file operations
-  const sandbox = await daytona.create(
-    {
-      image: Image.base('ubuntu:22.04').runCommands(
-        'apt-get update && apt-get install -y --no-install-recommends nodejs npm coreutils',
-        'curl -fsSL https://deb.nodesource.com/setup_20.x | bash -',
-        'apt-get install -y nodejs',
-        'npm install -g ts-node typescript',
-      ),
-      language: 'typescript',
-      autoStopInterval: 180,
-      autoArchiveInterval: 60,
-      autoDeleteInterval: 120,
-    },
-    {
-      onSnapshotCreateLogs: console.log,
-    },
+  // Create an image with the workspace directory
+  const image = Image.base('ubuntu:22.04').runCommands(
+    'apt-get update && apt-get install -y --no-install-recommends nodejs npm coreutils',
+    'curl -fsSL https://deb.nodesource.com/setup_20.x | bash -',
+    'apt-get install -y nodejs',
+    'npm install -g ts-node typescript',
+    'mkdir -p /workspace', // Create the workspace directory
   )
+
+  // Create a new sandbox
+  const sandbox = await daytona.create({
+    image,
+    language: 'typescript',
+    resources: {
+      cpu: 1,
+      memory: 1,
+      disk: 3,
+    },
+  })
+
+  // Local Hack for DNS resolution
+  // execSync('hack/file-watching/dns_fix.sh', { stdio: 'inherit' })
 
   try {
     await basicFileWatching(sandbox)
@@ -143,6 +148,7 @@ async function main() {
   } finally {
     // Cleanup
     await daytona.delete(sandbox)
+    console.log('File watching demo completed. Sandbox cleaned up.')
   }
 }
 
