@@ -35,7 +35,7 @@ export default defineConfig({
         github: 'https://github.com/daytonaio',
       },
       editLink: {
-        baseUrl: 'https://github.com/daytonaio/docs/blob/main/',
+        baseUrl: 'https://github.com/daytonaio/daytona/blob/main/apps/docs/',
       },
       tableOfContents: { minHeadingLevel: 2, maxHeadingLevel: 4 },
       customCss: ['./src/fonts/font-face.css', './src/styles/style.scss'],
