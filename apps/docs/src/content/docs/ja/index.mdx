@@ -1,49 +1,48 @@
 ---
-title: Daytona ドキュメント
-description: Daytonaでサンドボックスの管理を始めましょう。
+title: Daytona Documentation
+description: Daytona でサンドボックスの管理を始めましょう。
 template: doc
 head:
   - tag: title
-    content: ドキュメント · Daytona
+    content: Documentation · Daytona
   - tag: meta
     attrs:
         property: og:title
-        content: ドキュメント · Daytona
+        content: Documentation · Daytona
   - tag: meta
     attrs:
         name: twitter:title
-        content: ドキュメント · Daytona
+        content: Documentation · Daytona
 tableOfContents: false
 ---
 
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 import ExploreMore from '@components/ExploreMore.astro';
 
-Daytona SDKは、Daytonaとやり取りするための公式のPythonおよびTypeScriptインターフェースを提供し、
-開発環境をプログラムで管理し、コードを実行することができます。
+Daytona SDK は、Daytona とやり取りするための公式の Python / TypeScript インターフェースを提供し、開発環境のプログラムによる管理やコードの実行を可能にします。
 
 ### クイックスタート
 
-Daytonaサンドボックスで最初のコード行を実行しましょう。AIアシスタントでの高速開発のために、[LLMsコンテキストファイル](/docs/ja/getting-started#additional-examples)をご利用ください。
+Daytona のサンドボックスで最初のコードを実行しましょう。AI アシスタントとの開発を加速するために、[LLM コンテキストファイル](/docs/ja/getting-started#additional-examples)を活用してください。
 
-#### 1. APIキーを取得する
+#### 1. API キーを取得
 
-- Daytona [ダッシュボード](https://app.daytona.io/dashboard)にアクセスします。
-- 新しい[APIキー](https://app.daytona.io/dashboard/keys)を作成します。再度表示されないため、
-  安全に保存してください。
+- Daytona の[ダッシュボード](https://app.daytona.io/dashboard)にアクセスします。
+- 新しい[API キー](https://app.daytona.io/dashboard/keys)を作成します。再表示されないため、安全な場所に保存してください。
 
-#### 2. SDKをインストールする
+#### 2. SDK をインストール
 
 <Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
-  ```bash
-  pip install daytona
-  ```
+    ```bash
+    pip install daytona
+    ```
   </TabItem>
+
   <TabItem label="TypeScript" icon="seti:typescript">
-  ```bash
-  npm install @daytonaio/sdk
-  ```
+    ```bash
+    npm install @daytonaio/sdk
+    ```
   </TabItem>
 </Tabs>
 
@@ -51,86 +50,89 @@ Daytonaサンドボックスで最初のコード行を実行しましょう。A
 
 <Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
-  `main.py`という名前のファイルを作成します：
-  ```python
-  from daytona import Daytona, DaytonaConfig
+    Create a file named: `main.py`
 
-# 設定を定義
+    ```python
+    from daytona import Daytona, DaytonaConfig
 
-  config = DaytonaConfig(api_key="your-api-key")
+    # Define the configuration
 
-# Daytonaクライアントを初期化
+    config = DaytonaConfig(api_key="your-api-key")
 
-  daytona = Daytona(config)
+    # Initialize the Daytona client
 
-# サンドボックスインスタンスを作成
+    daytona = Daytona(config)
 
-  sandbox = daytona.create()
+    # Create the Sandbox instance
 
-# サンドボックス内でコードを安全に実行
+    sandbox = daytona.create()
 
-  response = sandbox.process.code_run('print("Hello World from code!")')
-  if response.exit_code != 0:
-    print(f"Error: {response.exit_code} {response.result}")
-  else:
-      print(response.result)
-  
-# クリーンアップ
+    # Run the code securely inside the Sandbox
 
-  sandbox.delete()
+    response = sandbox.process.code_run('print("Hello World from code!")')
+    if response.exit_code != 0:
+      print(f"Error: {response.exit_code} {response.result}")
+    else:
+        print(response.result)
 
-  ```
+    # Clean up
+
+    sandbox.delete()
+
+    ```
   </TabItem>
+
   <TabItem label="TypeScript" icon="seti:typescript">
-  `index.mts`という名前のファイルを作成します：
-  ```typescript
-  import { Daytona } from '@daytonaio/sdk';
+    Create a file named: `index.mts`
 
-  // Daytonaクライアントを初期化
-  const daytona = new Daytona({ apiKey: 'your-api-key' });
+    ```typescript
+    import { Daytona } from '@daytonaio/sdk';
 
-  // サンドボックスインスタンスを作成
-  const sandbox = await daytona.create({
-    language: 'typescript',
-  });
+    // Initialize the Daytona client
+    const daytona = new Daytona({ apiKey: 'your-api-key' });
 
-  // サンドボックス内でコードを安全に実行
-  const response = await sandbox.process.codeRun('console.log("Hello World from code!")')
-  console.log(response.result);
+    // Create the Sandbox instance
+    const sandbox = await daytona.create({
+      language: 'typescript',
+    });
 
-  // クリーンアップ
-  await sandbox.delete()
-  ```
+    // Run the code securely inside the Sandbox
+    const response = await sandbox.process.codeRun('console.log("Hello World from code!")')
+    console.log(response.result);
 
+    // Clean up
+    await sandbox.delete()
+    ```
   </TabItem>
 </Tabs>
 
 :::note
-`your-api-key`をDaytonaダッシュボードからの値に置き換えてください。
+`your-api-key` は Daytona ダッシュボードで発行された値に置き換えてください。
 :::
 
 #### 4. 実行する
 
 <Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
-  ```bash
-  python main.py
-  ```
+    ```bash
+    python main.py
+    ```
   </TabItem>
+
   <TabItem label="TypeScript" icon="seti:typescript">
-  ```bash
-  npx tsx index.mts
-  ```
+    ```bash
+    npx tsx index.mts
+    ```
   </TabItem>
 </Tabs>
 
-#### ✅ 今行ったこと
+#### ✅ 実行した内容
 
-- Daytona SDKをインストールしました。
-- 安全なサンドボックス環境を作成しました。
-- そのサンドボックス内でコードをリモート実行しました。
-- 出力を取得してローカルに表示しました。
+- Daytona SDK をインストールしました。
+- セキュアなサンドボックス環境を作成しました。
+- サンドボックス内でリモート実行しました。
+- 出力をローカルで取得して表示しました。
 
-これで、安全で分離されたコード実行のためにDaytonaを使用する準備が整いました。
+これで、セキュアかつ分離されたコード実行に Daytona を利用する準備が整いました。
 
 <ExploreMore />
