@@ -4,12 +4,15 @@
 package docker
 
 import (
+	"fmt"
 	"io"
 	"sync"
+	"time"
 
 	"github.com/daytonaio/runner/pkg/cache"
 	"github.com/daytonaio/runner/pkg/netrules"
 	"github.com/docker/docker/client"
+	log "github.com/sirupsen/logrus"
 )
 
 type DockerClientConfig struct {
@@ -58,4 +61,32 @@ type DockerClient struct {
 	daemonPath            string
 	computerUsePluginPath string
 	netRulesManager       *netrules.NetRulesManager
+}
+
+// retryWithExponentialBackoff executes a function with exponential backoff retry logic
+func (d *DockerClient) retryWithExponentialBackoff(operationName, containerId string, maxRetries int, baseDelay, maxDelay time.Duration, operationFunc func() error) error {
+	for attempt := 1; attempt <= maxRetries; attempt++ {
+		log.Infof("%s container %s (attempt %d/%d)...", operationName, containerId, attempt, maxRetries)
+
+		err := operationFunc()
+		if err == nil {
+			return nil
+		}
+
+		if attempt < maxRetries {
+			// Calculate exponential backoff delay
+			delay := baseDelay * time.Duration(1<<(attempt-1))
+			if delay > maxDelay {
+				delay = maxDelay
+			}
+
+			log.Warnf("Failed to %s container %s (attempt %d/%d): %v. Retrying in %v...", operationName, containerId, attempt, maxRetries, err, delay)
+			time.Sleep(delay)
+			continue
+		}
+
+		return fmt.Errorf("failed to %s container after %d attempts: %w", operationName, maxRetries, err)
+	}
+
+	return nil
 }

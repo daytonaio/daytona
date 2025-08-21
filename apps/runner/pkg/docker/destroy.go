@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/daytonaio/runner/internal/constants"
 	"github.com/daytonaio/runner/pkg/common"
 	"github.com/daytonaio/runner/pkg/models/enums"
 	"github.com/docker/docker/api/types/container"
@@ -47,40 +48,26 @@ func (d *DockerClient) Destroy(ctx context.Context, containerId string) error {
 		return err
 	}
 
-	// Exponential backoff retry configuration
-	maxRetries := 5
-	baseDelay := 100 * time.Millisecond
-	maxDelay := 5 * time.Second
-
-	for attempt := 1; attempt <= maxRetries; attempt++ {
-		log.Infof("Removing container %s (attempt %d/%d)...", containerId, attempt, maxRetries)
-
-		err = d.apiClient.ContainerRemove(ctx, containerId, container.RemoveOptions{
-			Force: true,
-		})
-
-		if err == nil {
-			break
-		}
-
+	// Use exponential backoff helper for container removal
+	err = d.retryWithExponentialBackoff(
+		"remove",
+		containerId,
+		constants.DEFAULT_MAX_RETRIES,
+		constants.DEFAULT_BASE_DELAY,
+		constants.DEFAULT_MAX_DELAY,
+		func() error {
+			return d.apiClient.ContainerRemove(ctx, containerId, container.RemoveOptions{
+				Force: true,
+			})
+		},
+	)
+	if err != nil {
+		// Handle NotFound error case
 		if errdefs.IsNotFound(err) {
 			d.cache.SetSandboxState(ctx, containerId, enums.SandboxStateDestroyed)
 			return nil
 		}
-
-		if attempt < maxRetries {
-			// Calculate exponential backoff delay
-			delay := baseDelay * time.Duration(1<<(attempt-1))
-			if delay > maxDelay {
-				delay = maxDelay
-			}
-
-			log.Warnf("Failed to remove container %s (attempt %d/%d): %v. Retrying in %v...", containerId, attempt, maxRetries, err, delay)
-			time.Sleep(delay)
-			continue
-		}
-
-		return fmt.Errorf("failed to remove container after %d attempts: %w", maxRetries, err)
+		return err
 	}
 
 	go func() {
@@ -108,39 +95,25 @@ func (d *DockerClient) RemoveDestroyed(ctx context.Context, containerId string) 
 		return common.NewBadRequestError(fmt.Errorf("container %s is not in destroyed state", containerId))
 	}
 
-	// Exponential backoff retry configuration
-	maxRetries := 5
-	baseDelay := 100 * time.Millisecond
-	maxDelay := 5 * time.Second
-
-	for attempt := 1; attempt <= maxRetries; attempt++ {
-		log.Infof("Removing container %s (attempt %d/%d)...", containerId, attempt, maxRetries)
-
-		err = d.apiClient.ContainerRemove(ctx, containerId, container.RemoveOptions{
-			Force: true,
-		})
-
-		if err == nil {
-			break
-		}
-
+	// Use exponential backoff helper for container removal
+	err = d.retryWithExponentialBackoff(
+		"remove",
+		containerId,
+		constants.DEFAULT_MAX_RETRIES,
+		constants.DEFAULT_BASE_DELAY,
+		constants.DEFAULT_MAX_DELAY,
+		func() error {
+			return d.apiClient.ContainerRemove(ctx, containerId, container.RemoveOptions{
+				Force: true,
+			})
+		},
+	)
+	if err != nil {
+		// Handle NotFound error case
 		if errdefs.IsNotFound(err) {
 			return nil
 		}
-
-		if attempt < maxRetries {
-			// Calculate exponential backoff delay
-			delay := baseDelay * time.Duration(1<<(attempt-1))
-			if delay > maxDelay {
-				delay = maxDelay
-			}
-
-			log.Warnf("Failed to remove container %s (attempt %d/%d): %v. Retrying in %v...", containerId, attempt, maxRetries, err, delay)
-			time.Sleep(delay)
-			continue
-		}
-
-		return fmt.Errorf("failed to remove container after %d attempts: %w", maxRetries, err)
+		return err
 	}
 
 	log.Infof("Destroyed container %s removed successfully", containerId)

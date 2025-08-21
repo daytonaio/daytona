@@ -8,10 +8,9 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/daytonaio/runner/internal/constants"
 	"github.com/daytonaio/runner/pkg/models/enums"
 	"github.com/docker/docker/api/types/container"
-
-	log "github.com/sirupsen/logrus"
 )
 
 func (d *DockerClient) Stop(ctx context.Context, containerId string) error {
@@ -23,37 +22,24 @@ func (d *DockerClient) Stop(ctx context.Context, containerId string) error {
 		backup_context.cancel()
 	}
 
-	// Exponential backoff retry configuration
-	maxRetries := 5
-	baseDelay := 100 * time.Millisecond
-	maxDelay := 5 * time.Second
-
-	for attempt := 1; attempt <= maxRetries; attempt++ {
-		log.Infof("Stopping container %s (attempt %d/%d)...", containerId, attempt, maxRetries)
-
-		err := d.apiClient.ContainerStop(ctx, containerId, container.StopOptions{
-			Signal: "SIGKILL",
-		})
-		if err == nil {
-			break
-		}
-
-		if attempt < maxRetries {
-			// Calculate exponential backoff delay
-			delay := baseDelay * time.Duration(1<<(attempt-1))
-			if delay > maxDelay {
-				delay = maxDelay
-			}
-
-			log.Warnf("Failed to stop container %s (attempt %d/%d): %v. Retrying in %v...", containerId, attempt, maxRetries, err, delay)
-			time.Sleep(delay)
-			continue
-		}
-
-		return fmt.Errorf("failed to stop container after %d attempts: %w", maxRetries, err)
+	// Use exponential backoff helper for container stopping
+	err := d.retryWithExponentialBackoff(
+		"stop",
+		containerId,
+		constants.DEFAULT_MAX_RETRIES,
+		constants.DEFAULT_BASE_DELAY,
+		constants.DEFAULT_MAX_DELAY,
+		func() error {
+			return d.apiClient.ContainerStop(ctx, containerId, container.StopOptions{
+				Signal: "SIGKILL",
+			})
+		},
+	)
+	if err != nil {
+		return err
 	}
 
-	err := d.waitForContainerStopped(ctx, containerId, 10*time.Second)
+	err = d.waitForContainerStopped(ctx, containerId, 10*time.Second)
 	if err != nil {
 		return err
 	}
