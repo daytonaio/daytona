@@ -12,7 +12,7 @@ Daytona SDKはDaytonaと連携するための公式[Python](/docs/ja/python-sdk)
 
 ## Daytona SDK をインストールする
 
-Daytona は、Daytona プラットフォームと連携するための公式の Python SDK と TypeScript SDK（TS SDK／Python SDK）を提供しています。お好みの方法で SDK をインストールしてください:
+Daytona は、Daytona プラットフォームと連携するための公式 Python および TypeScript の SDK を提供しています。お好みの方法で SDK をインストールしてください。
 
 <Tabs>
   <TabItem label="Python" icon="seti:python">
@@ -37,23 +37,23 @@ Daytona は、Daytona プラットフォームと連携するための公式の 
 
 ## サンドボックス内でコードを実行する
 
-以下のコードでDaytona（サンドボックスを作成・管理するクラウド上の隔離開発環境プラットフォーム）のサンドボックス（Daytonaが管理する隔離された一時的な実行環境）を作成し、コマンドを実行します:
+次のコードを実行して、Daytona のサンドボックスを作成し、コマンドを実行します。
 
 <Tabs>
   <TabItem label="Python" icon="seti:python">
     ```python
     from daytona import Daytona, DaytonaConfig
 
-    # Daytonaクライアントを初期化
+    # Daytona クライアントを初期化
     daytona = Daytona(DaytonaConfig(api_key="YOUR_API_KEY"))
 
-    # サンドボックスを作成
+    # サンドボックスのインスタンスを作成
     sandbox = daytona.create()
 
     # サンドボックス内で安全にコードを実行
     response = sandbox.process.code_run('print("Sum of 3 and 4 is " + str(3 + 4))')
     if response.exit_code != 0:
-        print(f"コード実行エラー: {response.exit_code} {response.result}")
+        print(f"Error running code: {response.exit_code} {response.result}")
     else:
         print(response.result)
 
@@ -67,14 +67,14 @@ Daytona は、Daytona プラットフォームと連携するための公式の 
     import { Daytona } from '@daytonaio/sdk'
 
     async function main() {
-      // Daytonaクライアントを初期化
+      // Daytona クライアントを初期化
       const daytona = new Daytona({
         apiKey: 'YOUR_API_KEY',
       })
 
       let sandbox;
       try {
-        // サンドボックスを作成
+        // サンドボックスのインスタンスを作成
         sandbox = await daytona.create({
           language: "python",
         });
@@ -83,12 +83,12 @@ Daytona は、Daytona プラットフォームと連携するための公式の 
           'print("Sum of 3 and 4 is " + str(3 + 4))'
         );
         if (response.exitCode !== 0) {
-          console.error("コード実行エラー:", response.exitCode, response.result);
+          console.error("Error running code:", response.exitCode, response.result);
         } else {
           console.log(response.result);
         }
       } catch (error) {
-        console.error("サンドボックス処理フローでエラー:", error);
+        console.error("Sandbox flow error:", error);
       } finally {
         // サンドボックスをクリーンアップ
         if (sandbox) {
@@ -117,9 +117,9 @@ Daytona は、Daytona プラットフォームと連携するための公式の 
   </TabItem>
 </Tabs>
 
-## アプリをプレビューする
+## アプリをプレビュー
 
-次のスニペットは、シンプルな Flask アプリを含むファイルを Daytona のサンドボックス（Daytonaが管理する隔離された一時的な実行環境）にアップロードします。Web サーバーはポート `3000` で動作し、提供されたプレビュー URL からアクセスできます:
+次のスニペットは、シンプルな Flask アプリを含むファイルを Daytona のサンドボックスにアップロードします。Web サーバーはポート `3000` で起動し、提供されたプレビューURLからアクセスできます。
 
 <Tabs>
   <TabItem label="Python" icon="seti:python">
@@ -157,11 +157,11 @@ Daytona は、Daytona プラットフォームと連携するための公式の 
         app.run(host='0.0.0.0', port=3000)
     '''
 
-    # Flask アプリをファイルに保存
+    # Save the Flask app to a file
 
     sandbox.fs.upload_file(app_code, "app.py")
 
-    # 新しいセッションを作成してコマンドを実行
+    # Create a new session and execute a command
 
     exec_session_id = "python-app-session"
     sandbox.process.create_session(exec_session_id)
@@ -171,7 +171,7 @@ Daytona は、Daytona プラットフォームと連携するための公式の 
         var_async=True
     ))
 
-    # Flask アプリのプレビューリンクを取得
+    # Get the preview link for the Flask app
 
     preview_info = sandbox.get_preview_link(3000)
     print(f"Flask app is available at: {preview_info.url}")
@@ -217,10 +217,10 @@ Daytona は、Daytona プラットフォームと連携するための公式の 
         app.run(host='0.0.0.0', port=3000)
       `);
 
-      // Flask アプリをファイルに保存
+      // Save the Flask app to a file
       await sandbox.fs.uploadFile(appCode, "app.py");
 
-      // 新しいセッションを作成してコマンドを実行
+      // Create a new session and execute a command
       const execSessionId = "python-app-session";
       await sandbox.process.createSession(execSessionId);
 
@@ -229,7 +229,7 @@ Daytona は、Daytona プラットフォームと連携するための公式の 
         async: true,
       }));
 
-      // Flask アプリのプレビューリンクを取得
+      // Get the preview link for the Flask app
       const previewInfo = await sandbox.getPreviewLink(3000);
       console.log(`Flask app is available at: ${previewInfo.url}`);
     }
@@ -284,7 +284,7 @@ Daytona は、Daytona プラットフォームと連携するための公式の 
         else:
             return f"Error {response.status_code}: {response.text}"
 
-    prompt = "Python code that returns the factorial of 25. Output only the code. No explanation. No intro. No comments. Just raw code in a single code block."
+    prompt = "25 の階乗を返す Python コード。出力はコードのみ。説明なし。前置きなし。コメントなし。単一のコードブロックで生のコードのみ。"
 
     result = get_claude_response(os.environ["ANTHROPIC_API_KEY"], prompt)
 
@@ -293,14 +293,14 @@ Daytona は、Daytona プラットフォームと連携するための公式の 
     code = code_match.group(1) if code_match else result
     code = code.replace('\\', '\\\\')
 
-    # サンドボックス内でPythonコードを実行し、出力を取得
+    # サンドボックス内で Python コードを実行し、結果を取得
 
     response = sandbox.process.code_run(code)
     print("The factorial of 25 is", response.result)
 
     ````
 
-    スニペットの実行方法:
+    スニペットを実行する:
 
     ```bash
     ANTHROPIC_API_KEY="your-anthropic-api-key"
@@ -310,7 +310,7 @@ Daytona は、Daytona プラットフォームと連携するための公式の 
     ```
 
     ```bash
-    > The factorial of 25 is 15511210043330985984000000
+    > 25 の階乗は 15511210043330985984000000 です
     ```
   </TabItem>
 
@@ -356,11 +356,11 @@ Daytona は、Daytona プラットフォームと連携するための公式の 
     async function main() {
       const sandbox = await daytona.create()
 
-      const prompt = "Python code that returns the factorial of 25. Output only the code. No explanation. No intro. No comments. Just raw code in a single code block."
+      const prompt = "25 の階乗を返す Python コード。コードのみを出力。説明なし。前置きなし。コメントなし。単一のコードブロックに生のコードのみ。"
       
       const result = await getClaudeResponse(process.env.ANTHROPIC_API_KEY || "", prompt)
       
-      // 正規表現でレスポンスからコードを抽出
+      // レスポンスから正規表現でコードを抽出
       const codeMatch = result.match(/```python\n(.*?)```/s)
       
       let code = codeMatch ? codeMatch[1] : result
@@ -375,7 +375,7 @@ Daytona は、Daytona プラットフォームと連携するための公式の 
 
     ````
 
-    スニペットの実行方法:
+    スニペットを実行する:
 
     ```bash
     ANTHROPIC_API_KEY="your-anthropic-api-key"
@@ -385,7 +385,7 @@ Daytona は、Daytona プラットフォームと連携するための公式の 
     ```
 
     ```bash
-    > The factorial of 25 is 15511210043330985984000000
+    > 25の階乗は 15511210043330985984000000 です
     ```
   </TabItem>
 </Tabs>
@@ -453,7 +453,7 @@ export default nextConfig
 
 ## Daytona CLI のセットアップ
 
-[ローカルデバイスのイメージ](/docs/ja/snapshots#using-a-local-image)を使う場合や、コマンドラインでサンドボックス（Daytonaが管理する隔離された一時的な実行環境）を管理したい場合は、以下を実行して Daytona CLI（daytonaコマンドラインツール）をインストールしてください。
+[ローカルデバイス上のイメージ](/docs/ja/snapshots#using-a-local-image)を使用する場合、またはコマンドラインインターフェースでサンドボックスを管理したい場合は、次のコマンドで Daytona CLI をインストールしてください:
 
 <Tabs>
   <TabItem label="Mac/Linux">
@@ -464,7 +464,7 @@ export default nextConfig
 
   <TabItem label="Windows">
     ```bash
-    brew install daytonaio/cli/daytona
+    powershell -Command "irm https://get.daytona.io/windows | iex"
     ```
   </TabItem>
 </Tabs>

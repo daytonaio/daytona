@@ -42,11 +42,11 @@ Daytona（サンドボックスの作成・管理プラットフォーム）の�
 
 ## 動的イメージビルド
 
-サンドボックス（Daytonaが管理する隔離された一時的な実行環境）を作成する際に、その場でイメージを生成できます。既存のイメージに含まれていない特定の依存関係を持つ新しいサンドボックスを作成したい場合に有用です。
+サンドボックス作成時に、その場でイメージを生成できます。既存のどのイメージにも含まれていない特定の依存関係を持つ新しいサンドボックスを用意したい場合に有用です。
 
-完全に新しいイメージを定義することも、既存のイメージに特定の依存関係を追加することもできます（例：`pip`パッケージや`apt-get install`コマンド）。
-これによりビルド処理のために自前の計算リソースを使う必要がなくなり、代わりにDaytona（サンドボックスの作成・管理プラットフォーム）のインフラにオフロードできます。
-各バージョンごとに別個のスナップショット（サンドボックス作成に使う事前設定済みの再利用可能なイメージ／テンプレート）を登録・検証する必要はありません。代わりに、依存関係リストを素早く反復しやすくなり、数十から数百の類似ユースケース／セットアップに対してわずかに異なるバージョンを用意できます。
+新規のイメージを定義することも、既存のイメージに特定の依存関係を追加することも可能です（例: `pip` パッケージや `apt-get install` コマンド）。\
+これにより、ビルド処理のために自前のコンピュートリソースを使う必要がなくなり、Daytonaのインフラストラクチャにオフロードできます。\
+各バージョンごとに個別のスナップショットを登録・検証する必要もありません。依存関係リストを素早く反復しやすくなり、また、数十〜数百の類似ユースケース/セットアップ向けにわずかに異なるバージョンを用意することもできます。
 
 <Tabs>
   <TabItem label="Python" icon="seti:python">
@@ -101,28 +101,30 @@ Daytona（サンドボックスの作成・管理プラットフォーム）の�
 </Tabs>
 
 :::tip
-動的イメージからのサンドボックス作成を一度でも実行すると、そのイメージは以後24時間キャッシュされ、同じランナー（サンドボックスがスケジュールされ実行される基盤の計算ノード／ホスト）上での後続のサンドボックス作成はほぼ即時になります。
+動的イメージからのサンドボックス作成を一度実行すると、そのイメージは24時間キャッシュされ、同じランナー上での後続のサンドボックス作成はほぼ即時に完了します。
 
 つまり、毎回同じスクリプトを使えば、Daytonaがイメージのキャッシュを適切に処理します。
 :::
 
 ## 事前ビルド済みスナップショットの作成
 
-特定の依存関係を含む新しいDaytona（サンドボックスの作成・管理プラットフォーム）のスナップショット（サンドボックス作成に使う事前設定済みの再利用可能なイメージ／テンプレート）を用意し、必要なときに複数のサンドボックス（Daytonaが管理する隔離された一時的な実行環境）で即座に使いたい場合は、事前ビルド済みスナップショットを作成できます。
+特定の依存関係を含む新しいDaytonaのスナップショットを準備し、必要なときに複数のサンドボックスで即座に使いたい場合は、事前ビルド済みのスナップショットを作成できます。
 
-このスナップショットはDaytonaダッシュボードに表示され続け、恒久的にキャッシュされるため、再ビルドは不要です。
+このスナップショットはDaytonaダッシュボード上に表示され続け、永続的にキャッシュされるため、再ビルドは不要です。
 
 <Tabs>
   <TabItem label="Python" icon="seti:python">
     ```python
-    # スナップショット用の一意な名前を生成
+    # スナップショット用の一意の名前を生成
     snapshot_name = f"python-example:{int(time.time())}"
 
-    # イメージに追加するためのローカルファイルを作成
+    # イメージに追加するデータを含むローカルファイルを作成
+
     with open("file_example.txt", "w") as f:
         f.write("Hello, World!")
 
-    # 代表的なデータサイエンス用パッケージを含むPythonイメージを作成
+    # 一般的なデータサイエンスパッケージを含むPythonイメージを作成
+
     image = (
         Image.debian_slim("3.12")
         .pip_install(["numpy", "pandas", "matplotlib", "scipy", "scikit-learn", "jupyter"])
@@ -137,7 +139,8 @@ Daytona（サンドボックスの作成・管理プラットフォーム）の�
         .add_local_file("file_example.txt", "/home/daytona/workspace/file_example.txt")
     )
 
-    # スナップショットを作成し、ビルドログをストリーム出力
+    # スナップショットを作成し、ビルドログをストリーミング出力
+
     print(f"=== Creating Snapshot: {snapshot_name} ===")
     daytona.snapshot.create(
         CreateSnapshotParams(
@@ -152,7 +155,8 @@ Daytona（サンドボックスの作成・管理プラットフォーム）の�
         on_logs=print,
     )
 
-    # 事前ビルド済みスナップショットを使って新しいサンドボックスを作成
+    # 事前ビルド済みのスナップショットを使って新しいサンドボックスを作成
+
     sandbox = daytona.create(
         CreateSandboxFromSnapshotParams(
             snapshot=snapshot_name
@@ -164,16 +168,16 @@ Daytona（サンドボックスの作成・管理プラットフォーム）の�
 
   <TabItem label="TypeScript" icon="seti:typescript">
     ```typescript
-    // イメージ用の一意な名前を生成
+    // イメージ用の一意の名前を生成
     const snapshotName = `node-example:${Date.now()}`
     console.log(`Creating Snapshot with name: ${snapshotName}`)
 
-    // スナップショットに追加するためのローカルファイルを作成
+    // スナップショットに追加するデータを含むローカルファイルを作成
     const localFilePath = 'file_example.txt'
     const localFileContent = 'Hello, World!'
     fs.writeFileSync(localFilePath, localFileContent)
 
-    // 代表的なデータサイエンス用パッケージを含むPythonイメージを作成
+    // 一般的なデータサイエンスパッケージを含むPythonイメージを作成
     const image = Image.debianSlim('3.12')
         .pipInstall(['numpy', 'pandas', 'matplotlib', 'scipy', 'scikit-learn'])
         .runCommands(
@@ -188,7 +192,7 @@ Daytona（サンドボックスの作成・管理プラットフォーム）の�
         })
         .addLocalFile(localFilePath, '/home/daytona/workspace/file_example.txt')
 
-    // スナップショットを作成し、ビルドログをストリーム出力
+    # スナップショットを作成し、ビルドログをストリーミング出力
     console.log(`=== Creating Snapshot: ${snapshotName} ===`)
     await daytona.snapshot.create(
         {
@@ -205,7 +209,7 @@ Daytona（サンドボックスの作成・管理プラットフォーム）の�
         },
       )
 
-    // 事前ビルド済みスナップショットを使って新しいサンドボックスを作成
+    // 事前ビルド済みのスナップショットを使って新しいサンドボックスを作成
     const sandbox = await daytona.create({
         snapshot: snapshotName,
     })
@@ -213,9 +217,9 @@ Daytona（サンドボックスの作成・管理プラットフォーム）の�
   </TabItem>
 </Tabs>
 
-## 既存のDockerfileを利用する
+## 既存の Dockerfile を利用する
 
-イメージのベースとして既存のDockerfileを使いたい場合は、次のようにインポートできます。
+既存の Dockerfile をイメージのベースとして使いたい場合は、次のようにインポートできます。
 
 <Tabs>
   <TabItem label="Python" icon="seti:python">
