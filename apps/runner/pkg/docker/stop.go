@@ -10,6 +10,8 @@ import (
 
 	"github.com/daytonaio/runner/pkg/models/enums"
 	"github.com/docker/docker/api/types/container"
+
+	log "github.com/sirupsen/logrus"
 )
 
 func (d *DockerClient) Stop(ctx context.Context, containerId string) error {
@@ -21,14 +23,26 @@ func (d *DockerClient) Stop(ctx context.Context, containerId string) error {
 		backup_context.cancel()
 	}
 
-	err := d.apiClient.ContainerStop(ctx, containerId, container.StopOptions{
-		Signal: "SIGKILL",
-	})
-	if err != nil {
-		return err
+	maxRetries := 3
+	for attempt := 1; attempt <= maxRetries; attempt++ {
+		log.Infof("Stopping container %s (attempt %d/%d)...", containerId, attempt, maxRetries)
+
+		err := d.apiClient.ContainerStop(ctx, containerId, container.StopOptions{
+			Signal: "SIGKILL",
+		})
+		if err == nil {
+			break
+		}
+
+		if attempt < maxRetries {
+			log.Warnf("Failed to stop container %s (attempt %d/%d): %v", containerId, attempt, maxRetries, err)
+			continue
+		}
+
+		return fmt.Errorf("failed to stop container after %d attempts: %w", maxRetries, err)
 	}
 
-	err = d.waitForContainerStopped(ctx, containerId, 10*time.Second)
+	err := d.waitForContainerStopped(ctx, containerId, 10*time.Second)
 	if err != nil {
 		return err
 	}

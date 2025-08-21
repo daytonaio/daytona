@@ -47,14 +47,29 @@ func (d *DockerClient) Destroy(ctx context.Context, containerId string) error {
 		return err
 	}
 
-	err = d.apiClient.ContainerRemove(ctx, containerId, container.RemoveOptions{
-		Force: true,
-	})
-	if err != nil {
+	maxRetries := 3
+	for attempt := 1; attempt <= maxRetries; attempt++ {
+		log.Infof("Removing container %s (attempt %d/%d)...", containerId, attempt, maxRetries)
+
+		err = d.apiClient.ContainerRemove(ctx, containerId, container.RemoveOptions{
+			Force: true,
+		})
+
+		if err == nil {
+			break
+		}
+
 		if errdefs.IsNotFound(err) {
 			d.cache.SetSandboxState(ctx, containerId, enums.SandboxStateDestroyed)
+			return nil
 		}
-		return err
+
+		if attempt < maxRetries {
+			log.Warnf("Failed to remove container %s (attempt %d/%d): %v", containerId, attempt, maxRetries, err)
+			continue
+		}
+
+		return fmt.Errorf("failed to remove container after %d attempts: %w", maxRetries, err)
 	}
 
 	go func() {
@@ -82,15 +97,28 @@ func (d *DockerClient) RemoveDestroyed(ctx context.Context, containerId string) 
 		return common.NewBadRequestError(fmt.Errorf("container %s is not in destroyed state", containerId))
 	}
 
-	// Remove the container
-	err = d.apiClient.ContainerRemove(ctx, containerId, container.RemoveOptions{
-		Force: true,
-	})
-	if err != nil {
-		if errdefs.IsNotFound(err) {
-			return nil // Container already removed
+	maxRetries := 3
+	for attempt := 1; attempt <= maxRetries; attempt++ {
+		log.Infof("Removing container %s (attempt %d/%d)...", containerId, attempt, maxRetries)
+
+		err = d.apiClient.ContainerRemove(ctx, containerId, container.RemoveOptions{
+			Force: true,
+		})
+
+		if err == nil {
+			break
 		}
-		return err
+
+		if errdefs.IsNotFound(err) {
+			return nil
+		}
+
+		if attempt < maxRetries {
+			log.Warnf("Failed to remove container %s (attempt %d/%d): %v", containerId, attempt, maxRetries, err)
+			continue
+		}
+
+		return fmt.Errorf("failed to remove container after %d attempts: %w", maxRetries, err)
 	}
 
 	log.Infof("Destroyed container %s removed successfully", containerId)
