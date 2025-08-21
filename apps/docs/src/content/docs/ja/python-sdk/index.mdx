@@ -24,7 +24,7 @@ poetry add daytona
 
 ## はじめに
 
-Daytona の Python SDK を使い始めるためのシンプルな例を以下に示します。
+Daytona の Python SDK を使い始めるためのシンプルな例を示します。
 
 <Tabs>
   <TabItem label="Sync" icon="seti:python">
@@ -35,7 +35,7 @@ Daytona の Python SDK を使い始めるためのシンプルな例を以下に
         # SDK を初期化（既定で環境変数を使用）
         daytona = Daytona()
 
-        # 新しいサンドボックスを作成
+        # サンドボックスを新規作成
         sandbox = daytona.create()
 
         # コマンドを実行
@@ -55,7 +55,7 @@ Daytona の Python SDK を使い始めるためのシンプルな例を以下に
     async def main():
         # SDK を初期化（既定で環境変数を使用）
         async with AsyncDaytona() as daytona:
-            # 新しいサンドボックスを作成
+            # サンドボックスを新規作成
             sandbox = await daytona.create()
 
             # コマンドを実行
@@ -68,19 +68,19 @@ Daytona の Python SDK を使い始めるためのシンプルな例を以下に
   </TabItem>
 </Tabs>
 
-## 設定
+## 構成
 
-SDK は環境変数を使用するか、コンストラクターにオプションを渡すことで設定できます。
+SDK は環境変数を使うか、コンストラクタにオプションを渡して設定できます:
 
 <Tabs>
   <TabItem label="Sync" icon="seti:python">
     ```python
     from daytona import Daytona, DaytonaConfig
 
-    # 環境変数を利用 (DAYTONA_API_KEY, DAYTONA_API_URL, DAYTONA_TARGET)
+    # 環境変数を使用 (DAYTONA_API_KEY, DAYTONA_API_URL, DAYTONA_TARGET)
     daytona = Daytona()
 
-    # 明示的な設定を利用
+    # 明示的な設定を使用
     config = DaytonaConfig(
         api_key="your-api-key",
         api_url="https://app.daytona.io/api",
@@ -97,14 +97,14 @@ SDK は環境変数を使用するか、コンストラクターにオプショ�
 
     async def main():
         try:
-            # 環境変数を利用 (DAYTONA_API_KEY, DAYTONA_API_URL, DAYTONA_TARGET)
+            # 環境変数を使用 (DAYTONA_API_KEY, DAYTONA_API_URL, DAYTONA_TARGET)
             daytona = AsyncDaytona()
-            # 非同期処理をここに記述
+            # 非同期コードをここに記述
             pass
         finally:
             await daytona.close()
 
-        # 明示的な設定を利用
+        # 明示的な設定を使用
         config = DaytonaConfig(
             api_key="your-api-key",
             api_url="https://app.daytona.io/api",

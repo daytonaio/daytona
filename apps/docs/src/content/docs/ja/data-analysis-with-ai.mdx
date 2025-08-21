@@ -17,9 +17,9 @@ Daytona のサンドボックス（Daytonaが管理する隔離された一時�
 
 ## Daytona で AI データアナリストを構築する
 
-この例では、Daytona の安全なサンドボックス環境を用いて、CSV データから自動的にインサイトと可視化を生成する AI 搭載データアナリストの作り方を示します。
+この例では、Daytona の安全なサンドボックス環境を用いて、CSV データから自動的に洞察と可視化を生成する AI 搭載のデータアナリストを構築する方法を示します。
 
-**今回構築するもの:** 車両の評価データセットを分析し、製造年と価格の関係を特定し、プロフェッショナルな可視化を生成するシステムです。すべてを自然言語で Claude に指示して実行します。
+**作成するもの:** 車両評価データセットを分析し、製造年と価格の関係を特定し、プロフェッショナルな可視化を生成するシステムです。すべて自然言語プロンプトで Claude に指示して実行します。
 
 ### 1. プロジェクトのセットアップ
 
@@ -39,7 +39,7 @@ Daytona SDK と Anthropic SDK をプロジェクトにインストールしま�
 
 #### 1.2 環境設定
 
-API キーを取得して環境を設定します:
+APIキーを取得し、環境を設定します:
 
 1. **Daytona API key:** [Daytona Dashboard](https://app.daytona.io/dashboard/keys) から取得
 2. **Anthropic API key:** [Anthropic Console](https://console.anthropic.com/) から取得
@@ -103,11 +103,11 @@ Daytona のサンドボックスを作成し、データセットをアップロ
 
 ### 3. AI データアナリストの構築
 
-ここから、Claude と Daytona を連携させてデータを分析し、可視化を生成する中核機能を作成します。
+ここでは、Claude と Daytona を連携させてデータを分析し、可視化を生成する中核機能を作成します。
 
 #### 3.1 コード実行ハンドラー
 
-まず、コードの実行とチャート抽出を処理する関数を作成します:
+まず、コード実行とチャート抽出を処理する関数を作成します:
 
 <Tabs>
   <TabItem label="Python" icon="seti:python">
@@ -122,17 +122,17 @@ Daytona のサンドボックスを作成し、データセットをアップロ
         print(execution.result)
         return
 
-      # 実行成果物（実行成果物（チャート等の構造化された出力））内のチャートを確認
+      # Check for charts in execution artifacts
       if not execution.artifacts or not execution.artifacts.charts:
-        print('実行成果物にチャートが見つかりませんでした')
+        print('No charts found in execution artifacts')
         return
 
       result_idx = 0
       for result in execution.artifacts.charts:
-        if result.png: # png をファイルに保存（png は base64 形式）
+        if result.png: # Save the png to a file (png is in base64 format)
           with open(f'chart-{result_idx}.png', 'wb') as f:
             f.write(base64.b64decode(result.png))
-            print(f'チャートを chart-{result_idx}.png に保存しました')
+            print(f'Chart saved to chart-{result_idx}.png')
             result_idx += 1
 
     ```
@@ -151,18 +151,18 @@ Daytona のサンドボックスを作成し、データセットをアップロ
         return
       }
 
-      // 実行成果物（実行成果物（チャート等の構造化された出力））内のチャートを確認
+      // Check for charts in execution artifacts
       if (!execution.artifacts || !execution.artifacts.charts) {
-        console.log('実行成果物にチャートが見つかりませんでした')
+        console.log('No charts found in execution artifacts')
         return
       }
 
       let resultIdx = 0
       for (const result of execution.artifacts.charts) {
         if (result.png) {
-          // png をファイルに保存（png は base64 形式）
+          // Save the png to a file (png is in base64 format)
           fs.writeFileSync(`chart-${resultIdx}.png`, result.png, { encoding: 'base64' })
-          console.log(`チャートを chart-${resultIdx}.png に保存しました`)
+          console.log(`Chart saved to chart-${resultIdx}.png`)
           resultIdx++
         }
       }
@@ -171,13 +171,13 @@ Daytona のサンドボックスを作成し、データセットをアップロ
   </TabItem>
 </Tabs>
 
-#### 3.2 分析プロンプトの作成
+#### 3.2 分析用プロンプトの作成
 
-次に、データセットの内容と実施したい分析を Claude に伝えるプロンプトを作成します。このプロンプトには以下が含まれます:
+次に、データセットと求める分析内容をClaudeに伝えるプロンプトを作成します。このプロンプトには以下が含まれます。
 
-- データセットのスキーマとカラムの説明
-- 具体的な分析リクエスト（製造年ごとの価格推移）
-- コード生成のための指示
+- データセットのスキーマと列の説明
+- 具体的な分析リクエスト（製造年別の平均価格の推移）
+- コード生成に関する指示
 
 <Tabs>
   <TabItem label="Python" icon="seti:python">
@@ -198,7 +198,7 @@ Daytona のサンドボックスを作成し、データセットをアップロ
     Finish with a plt.show()"""
 
     anthropic = Anthropic()
-    print('モデルの応答を待機中...')
+    print('Waiting for the model response...')
 
     ```
   </TabItem>
@@ -221,14 +221,14 @@ Daytona のサンドボックスを作成し、データセットをアップロ
     Finish with a plt.show()`
 
     const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
-    console.log('モデルの応答を待機中...')
+    console.log('Waiting for the model response...')
     ```
   </TabItem>
 </Tabs>
 
 #### 3.3 ツール呼び出しのセットアップ
 
-ここでは、ツール呼び出しを使って Claude を Daytona のサンドボックス（サンドボックス（Daytonaが管理する隔離された一時的な実行環境））に接続します。これにより、Claude が生成した Python コードを自動的に実行できるようになります。
+ここでは、ツール呼び出しを使用してClaudeをDaytonaのサンドボックスに接続します。これにより、Claudeは生成したPythonコードを自動的に実行できます。
 
 <Tabs>
   <TabItem label="Python" icon="seti:python">
@@ -286,7 +286,7 @@ Daytona のサンドボックスを作成し、データセットをアップロ
 
 #### 3.4 レスポンス処理
 
-最後に、Claude のレスポンスを解析し、生成されたコードがあれば Daytona のサンドボックス（Daytonaが管理する隔離された一時的な実行環境）で実行します:
+最後に、Claude のレスポンスを解析し、生成されたコードを Daytona のサンドボックスで実行します:
 
 <Tabs>
   <TabItem label="Python" icon="seti:python">
@@ -322,18 +322,18 @@ Daytona のサンドボックスを作成し、データセットをアップロ
   </TabItem>
 </Tabs>
 
-以上です！作成した `run_ai_generated_code` 関数はチャートの保存を自動で処理します。Claude が `plt.show()` で可視化を生成すると、Daytona（サンドボックスを作成・管理するプラットフォーム）がそれをチャートの実行成果物として取得し、PNG ファイルとして保存します。
+以上です。作成した `run_ai_generated_code` 関数はチャートの保存を自動的に処理します。Claude が `plt.show()` で可視化を生成すると、Daytona がそれをチャートの成果物として取得し、PNG ファイルとして保存します。
 
-**このアプローチの主な利点:**
+主な利点:
 
-- **安全な実行:** コードは隔離された Daytona のサンドボックスで実行されます
-- **成果物の自動取得:** チャート、テーブル、出力が自動的に抽出されます
-- **エラーハンドリング:** 組み込みのエラー検出とログ記録
-- **言語非依存:** ここでは Python を使用しましたが、Daytona は複数言語をサポートしています
+- セキュアな実行: 分離された Daytona のサンドボックスでコードを実行
+- 成果物の自動取得: チャート、テーブル、出力を自動的に抽出
+- エラーハンドリング: 組み込みのエラー検出とロギング
+- 言語非依存: ここでは Python を使用しましたが、Daytona は複数言語をサポート
 
 ### 4. 分析の実行
 
-結果を確認するため、完全なコードを実行します。
+完全なコードを実行して結果を確認します。
 
 <Tabs>
   <TabItem label="Python" icon="seti:python">
@@ -349,13 +349,13 @@ Daytona のサンドボックスを作成し、データセットをアップロ
   </TabItem>
 </Tabs>
 
-プロジェクトディレクトリに、次のようなチャートが生成されているはずです:
+プロジェクトディレクトリ内に、次のようなチャートが出力されるはずです:
 
-<Image src={chartImage} alt="製造年別の車両評価のチャート" width={600} style="max-width: 100%; height: auto; margin: 1rem 0;" />
+<Image src={chartImage} alt="製造年別の車両評価額チャート" width={600} style="max-width: 100%; height: auto; margin: 1rem 0;" />
 
 ### 5. 完全な実装
 
-すぐに実行できる完全なサンプルを以下に示します:
+以下に、すぐに実行できるサンプル一式を示します:
 
 <Tabs>
   <TabItem label="Python" icon="seti:python">
@@ -368,25 +368,25 @@ Daytona のサンドボックスを作成し、データセットをアップロ
 
     def main():
         load_dotenv()
-        # サンドボックス（Daytonaが管理する隔離された一時的な実行環境）を作成
+        # サンドボックスを作成
         daytona = Daytona()
         sandbox = daytona.create()
         
-        # データセットをサンドボックスにアップロード
+        # データセットをサンドボックスへアップロード
         sandbox.fs.upload_file("dataset.csv", "/home/daytona/dataset.csv")
         
         prompt = f"""
-    /home/daytona/dataset.csv に、車両の評価額が記載されたCSVファイルがサンドボックスに保存されています。
+    /home/daytona/dataset.csv のサンドボックスに、車両の評価額が保存された CSV ファイルがあります。
 
     関連する列:
-    - 'year': 整数。車両の製造年
-    - 'price_in_euro': 浮動小数点数。ユーロ建ての掲載価格
+    - 'year': 整数型、車両の製造年
+    - 'price_in_euro': 浮動小数点型、車両のユーロ建て掲載価格
 
-    製造年ごとの価格の変動を分析してください。  
+    製造年ごとの価格変動を分析してください。  
     'year' または 'price_in_euro' が欠損、非数値、または外れ値の行は除外してください。  
     年ごとの平均価格を示す折れ線グラフを作成してください。
-    上記の要件に基づいてデータセットを分析し、適切なグラフを生成するPythonコードを書いてください。
-    最後は plt.show() で終了してください。"""
+    この要件に基づいてデータセットを分析し、適切なグラフを生成する Python コードを書いてください。
+    最後に plt.show() で終了してください"""
 
         anthropic = Anthropic()
         print('モデルの応答を待機中...')
@@ -397,13 +397,13 @@ Daytona のサンドボックスを作成し、データセットをアップロ
             tools=[
                 {
                     'name': 'run_python_code',
-                    'description': 'Pythonコードを実行する',
+                    'description': 'Python コードを実行',
                     'input_schema': {
                         'type': 'object',
                         'properties': {
                             'code': {
                                 'type': 'string',
-                                'description': '実行するPythonコード',
+                                'description': '実行する Python コード',
                             },
                         },
                         'required': ['code'],
@@ -416,7 +416,7 @@ Daytona のサンドボックスを作成し、データセットをアップロ
             if content_block.type == 'tool_use':
                 if content_block.name == 'run_python_code':
                     code = content_block.input['code']
-                    print('次のコードをサンドボックスで実行します:\n', code)
+                    print('サンドボックスで次のコードを実行します:\n', code)
                     # サンドボックス内でコードを実行
                     run_ai_generated_code(sandbox, code)
 
@@ -424,25 +424,25 @@ Daytona のサンドボックスを作成し、データセットをアップロ
     def run_ai_generated_code(sandbox: Sandbox, ai_generated_code: str):
         execution = sandbox.process.code_run(ai_generated_code)
         if execution.exit_code != 0:
-            print('AI生成コードでエラーが発生しました。')
+            print('AI 生成コードでエラーが発生しました。')
             print(execution.exit_code)
             print(execution.result)
             return
         
-        # 実行結果を走査し、グラフを表すpngファイルがあるか確認
+        # すべての結果を走査し、グラフを表す png ファイルがあるか確認
         if not execution.artifacts or not execution.artifacts.charts:
-            print('実行成果物にチャートが見つかりませんでした')
+            print('実行成果物にグラフが見つかりませんでした')
             print(execution.artifacts)
             return
 
         result_idx = 0
         for result in execution.artifacts.charts:
             if result.png:
-                # pngをファイルに保存
-                # pngはbase64形式
+                # png をファイルに保存
+                # png は base64 形式です。
                 with open(f'chart-{result_idx}.png', 'wb') as f:
                     f.write(base64.b64decode(result.png))
-                print(f'チャートを chart-{result_idx}.png に保存しました')
+                print(f'グラフを chart-{result_idx}.png に保存しました')
                 result_idx += 1
 
 
@@ -468,17 +468,17 @@ Daytona のサンドボックスを作成し、データセットをアップロ
       await sandbox.fs.uploadFile('dataset.csv', '/home/daytona/dataset.csv')
 
       const prompt = `
-    I have a CSV file with vehicle valuations saved in the sandbox at /home/daytona/dataset.csv.
+    サンドボックス内の /home/daytona/dataset.csv に車両評価のCSVファイルがあります。
 
-    Relevant columns:
-    - 'year': integer, the manufacturing year of the vehicle
-    - 'price_in_euro': float, the listed price of the vehicle in Euros
+    関連列:
+    - 'year': 整数、車両の製造年
+    - 'price_in_euro': 浮動小数点数、ユーロ建ての掲載価格
 
-    Analyze how price varies by manufacturing year.  
-    Drop rows where 'year' or 'price_in_euro' is missing, non-numeric, or an outlier.  
-    Create a line chart showing average price per year.
-    Write Python code that analyzes the dataset based on my request and produces right chart accordingly.
-    Finish with a plt.show()`
+    製造年ごとの価格の変動を分析してください。  
+    'year' または 'price_in_euro' が欠損、非数値、または外れ値の行は除外してください。  
+    年ごとの平均価格を示す折れ線グラフを作成してください。
+    リクエストに基づいてデータセットを分析し、適切なグラフを生成する Python コードを書いてください。
+    最後に plt.show() で終了してください`
 
       const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
       console.log('モデルの応答を待っています...')
@@ -489,13 +489,13 @@ Daytona のサンドボックスを作成し、データセットをアップロ
         tools: [
           {
             name: 'run_python_code',
-            description: 'Run Python code',
+            description: 'Python コードを実行',
             input_schema: {
               type: 'object',
               properties: {
                 code: {
                   type: 'string',
-                  description: 'The Python code to run',
+                  description: '実行する Python コード',
                 },
               },
               required: ['code'],
@@ -512,7 +512,7 @@ Daytona のサンドボックスを作成し、データセットをアップロ
         if (contentBlock.type === 'tool_use') {
           if (contentBlock.name === 'run_python_code') {
             const code = (contentBlock.input as CodeRunToolInput).code
-            console.log('以下のコードをサンドボックスで実行します:\n', code)
+            console.log('サンドボックスで次のコードを実行します:\n', code)
             // サンドボックスでコードを実行
             await runAIGeneratedCode(sandbox, code)
           }
@@ -528,9 +528,9 @@ Daytona のサンドボックスを作成し、データセットをアップロ
         console.log(execution.result)
         process.exit(1)
       }
-      // すべての結果を走査し、グラフを表す png ファイルがあるか確認する
+      // すべての結果を確認し、グラフを表す PNG ファイルがあるかを特に確認します。
       if (!execution.artifacts || !execution.artifacts.charts) {
-        console.log('実行成果物にグラフが見つかりません')
+        console.log('実行成果物にチャートが見つかりません')
         console.log(execution.artifacts)
         return
       }
@@ -538,10 +538,10 @@ Daytona のサンドボックスを作成し、データセットをアップロ
       let resultIdx = 0
       for (const result of execution.artifacts.charts) {
         if (result.png) {
-          // png をファイルに保存
-          // png は base64 形式
+          // PNG をファイルに保存
+          // PNG は base64 形式です。
           fs.writeFileSync(`chart-${resultIdx}.png`, result.png, { encoding: 'base64' })
-          console.log(`グラフを chart-${resultIdx}.png に保存しました`)
+          console.log(`チャートを chart-${resultIdx}.png に保存しました`)
           resultIdx++
         }
       }
