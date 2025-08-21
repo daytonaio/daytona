@@ -19,16 +19,16 @@ import Image from 'astro/components/Image.astro'
 
 ## サンドボックスの作成
 
-Daytona SDK では、デフォルトまたはカスタム構成でサンドボックスを作成できます。サンドボックスに対して、言語、[スナップショット](/docs/ja/snapshots)、リソース、環境変数、ボリュームを指定できます。
-稼働中のサンドボックスは CPU、メモリ、ディスクストレージを使用します。各リソースは使用した秒数に応じて課金されます。
+Daytona SDK は、デフォルトまたはカスタム構成でサンドボックスを作成する機能を提供します。サンドボックスに対して、言語、[スナップショット](/docs/ja/snapshots)、リソース、環境変数、ボリュームを指定できます。
+稼働中のサンドボックスは CPU、メモリ、ディスクストレージを消費します。各リソースは使用秒単位で課金されます。
 
 :::tip
 自動停止の間隔を延長したい場合は、サンドボックス作成時に[自動停止間隔パラメータを設定](/docs/ja/sandbox-management#auto-stop-interval)できます。
 :::
 
-### 基本的なサンドボックス作成
+### 基本的なサンドボックスの作成
 
-Daytona SDK には、Python と TypeScript を用いて、デフォルト構成、特定の言語、またはカスタムラベルでサンドボックスを作成するためのメソッドが用意されています。
+Daytona SDK には、Python と TypeScript により、デフォルト構成、特定の言語、またはカスタムラベルでサンドボックスを作成するメソッドが用意されています。
 
 <Tabs>
   <TabItem label="Python" icon="seti:python">
@@ -72,20 +72,20 @@ Daytona SDK には、Python と TypeScript を用いて、デフォルト構成�
   </TabItem>
 </Tabs>
 
-サンドボックスが積極的に使用されていない場合は、停止することを推奨します。これは、[stop コマンドを使用](/docs/ja/sandbox-management#stop-and-start-sandbox)して手動で行うか、[自動停止間隔を設定](/docs/ja/sandbox-management#auto-stop-and-auto-archive)して自動化できます。
+サンドボックスが積極的に使用されていない場合は、停止することを推奨します。これは、[stop コマンドの使用](/docs/ja/sandbox-management#stop-and-start-sandbox)による手動操作、または[自動停止間隔の設定](/docs/ja/sandbox-management#auto-stop-and-auto-archive)による自動化で行えます。
 
 :::note
 Daytona はデフォルトのスナップショットを用いたウォーム状態のサンドボックスプールを維持しています。\
-利用可能な場合、サンドボックスはコールドブートすることなくミリ秒で起動します。
+利用可能な場合はコールドブートせず、ミリ秒単位でサンドボックスが起動します。
 :::
 
 ### サンドボックスのリソース
 
-Daytona のサンドボックスは、デフォルトで **1 vCPU**、**1GB RAM**、**3GiB ディスク**が付与されています。
+Daytona のサンドボックスは、デフォルトで **1 vCPU**、**1GB RAM**、**3GiB ディスク**を備えています。
 
-より高い性能が必要ですか？`Resources` クラスを使用して、必要な CPU、メモリ、ディスク容量を詳細に指定できます。
+より高い性能が必要ですか？`Resources` クラスを使用して、必要な構成を正確に指定できます。CPU、メモリ、ディスク容量はすべてカスタマイズ可能です。
 
-[ダッシュボード](https://app.daytona.io/dashboard/limits)で、利用可能なリソースと制限を確認してください。
+[ダッシュボード](https://app.daytona.io/dashboard/limits)で利用可能なリソースと上限を確認してください。
 
 <Tabs>
   <TabItem label="Python" icon="seti:python">
@@ -136,15 +136,15 @@ Daytona のサンドボックスは、デフォルトで **1 vCPU**、**1GB RAM*
 </Tabs>
 
 :::note
-すべてのリソースパラメータは任意です。指定しない場合、Daytona は選択した言語とユースケースに適したデフォルト値を使用します。
+すべてのリソースパラメータは任意です。指定しない場合、Daytona は選択した言語やユースケースに適したデフォルト値を使用します。
 :::
 
 ### ネットワーク設定
 
-Daytona のサンドボックスは、セキュリティ強化と接続性の管理のために、設定可能なネットワークアクセス制御を提供します。デフォルトでは標準的なセキュリティポリシーに従いますが、サンドボックス作成時にネットワーク設定をカスタマイズできます。
+Daytona のサンドボックスは、セキュリティ強化と接続性管理のため、ネットワークアクセス制御を構成可能に提供します。デフォルトでは標準的なセキュリティポリシーに従いますが、サンドボックス作成時にネットワーク設定をカスタマイズできます。
 
 - すべてのネットワークアクセスをブロックするには、`networkBlockAll` を `True` に設定します
-- 特定のアドレスのみにネットワークアクセスを許可するには、最大 5 個の CIDR ブロックをカンマ区切りで `networkAllowList` に設定します
+- 特定のアドレスにアクセスを制限するには、`networkAllowList` に最大 5 つの CIDR ブロックをカンマ区切りで設定します
 
 <Tabs>
   <TabItem label="Python" icon="seti:python">
@@ -190,39 +190,40 @@ Daytona のサンドボックスは、セキュリティ強化と接続性の管
 </Tabs>
 
 :::caution
-無制限のネットワークアクセスを有効にすると、信頼できないコードの実行時にセキュリティリスクを招く可能性があります。
-代わりに `networkAllowList` で特定のネットワークアドレスのみを許可するか、`networkBlockAll` で全ネットワークアクセスをブロックすることを推奨します。
+信頼できないコードを実行する場合、無制限のネットワークアクセスを有効にするとセキュリティリスクが生じる可能性があります。
+代わりに、`networkAllowList` を使用して特定のネットワークアドレスを許可リストに追加するか、`networkBlockAll` を使用してすべてのネットワークアクセスをブロックすることを推奨します。
 :::
 
 ## サンドボックス情報
 
-Daytona（サンドボックスの作成・管理を行うプラットフォーム）のTS SDK／Python SDKは、PythonおよびTypeScriptから、ID・ルートディレクトリ・状態などサンドボックス（Daytonaが管理する隔離された一時的な実行環境）の情報を取得するメソッドを提供します。
+Daytona SDK は、Python と TypeScript で、ID、ルートディレクトリ、状態などサンドボックスに関する情報を取得するためのメソッドを提供します。
 
 <Tabs>
   <TabItem label="Python" icon="seti:python">
     ```python
-    # サンドボックスIDを取得
+    # サンドボックス ID を取得
     sandbox_id = sandbox.id
 
     # サンドボックスユーザーのルートディレクトリを取得
     root_dir = sandbox.get_user_root_dir()
 
-    # サンドボックスのID、自動停止間隔、状態を取得
+    # サンドボックスの ID・自動停止間隔・状態を取得
     print(sandbox.id)
     print(sandbox.auto_stop_interval)
     print(sandbox.state)
+
     ```
   </TabItem>
 
   <TabItem label="TypeScript" icon="seti:typescript">
     ```typescript
-    // サンドボックスIDを取得
+    // サンドボックス ID を取得
     const sandboxId = sandbox.id;
 
     // サンドボックスユーザーのルートディレクトリを取得
     const rootDir = await sandbox.getUserRootDir();
 
-    // サンドボックスのID、自動停止間隔、状態を取得
+    // サンドボックスの ID・自動停止間隔・状態を取得
     console.log(sandbox.id)
     console.log(sandbox.autoStopInterval)
     console.log(sandbox.state)
@@ -230,13 +231,13 @@ Daytona（サンドボックスの作成・管理を行うプラットフォー�
   </TabItem>
 </Tabs>
 
-特定のポートのプレビューURLを取得するには、[Preview & Authentication](/docs/ja/preview-and-authentication)を参照してください。
+特定のポートのプレビュー URL を取得するには、[プレビューと認証](/docs/ja/preview-and-authentication)を参照してください。
 
 ## サンドボックスの停止と起動
 
-Daytona（サンドボックスの作成・管理を行うプラットフォーム）のTS SDK／Python SDKは、PythonおよびTypeScriptからサンドボックス（Daytonaが管理する隔離された一時的な実行環境）を停止・起動するためのメソッドを提供します。
+Daytona SDK は、Python と TypeScript でサンドボックスを停止・起動するためのメソッドを提供します。
 
-停止したサンドボックスはファイルシステムの内容が保持されますが、メモリ状態はクリアされます。ディスク使用量のコストのみが発生し、必要に応じて再度起動できます。
+停止したサンドボックスは、メモリ状態がクリアされますが、ファイルシステムは保持されます。ディスク使用量のコストのみが発生し、必要に応じて再度起動できます。
 
 <Tabs>
   <TabItem label="Python" icon="seti:python">
@@ -279,14 +280,14 @@ Daytona（サンドボックスの作成・管理を行うプラットフォー�
   </TabItem>
 </Tabs>
 
-サンドボックスを近いうちに再度起動する見込みがある場合は、停止状態の活用を推奨します。そうでない場合は、停止後にアーカイブしてディスク使用量のコストを抑えることを推奨します。
+近く再起動する見込みがある場合は、停止状態を利用してください。そうでない場合は、ディスク使用量のコストをなくすため、停止後にサンドボックスをアーカイブすることを推奨します。
 
 ## サンドボックスのアーカイブ
 
-Daytona SDKは、PythonおよびTypeScriptからサンドボックス（Daytonaが管理する隔離された一時的な実行環境）をアーカイブするためのメソッドを提供します。
+Daytona SDK は、Python と TypeScript からサンドボックスをアーカイブするためのメソッドを提供します。
 
-サンドボックスをアーカイブすると、ファイルシステム全体の状態がコスト効率の高いオブジェクトストレージに移され、サンドボックスを長期間にわたり利用可能な状態で保持できます。
-アーカイブ済みのサンドボックスを起動するには、サイズにもよりますが、停止中のサンドボックスを起動する場合より時間がかかります。
+サンドボックスをアーカイブすると、ファイルシステム全体の状態がコスト効率の高いオブジェクトストレージに移され、サンドボックスを長期間利用可能な状態で保持できます。
+アーカイブされたサンドボックスの起動には、サイズに応じて、停止中のサンドボックスよりも時間がかかります。
 
 サンドボックスはアーカイブ前に停止している必要があり、停止中のサンドボックスと同様の手順で再度起動できます。
 
@@ -308,26 +309,26 @@ Daytona SDKは、PythonおよびTypeScriptからサンドボックス（Daytona�
 
 ## サンドボックスの削除
 
-Daytona（サンドボックスの作成・管理を行うプラットフォーム）SDKは、Python と TypeScript からサンドボックス（Daytonaが管理する隔離された一時的な実行環境）を削除するメソッドを提供します。
+Daytona SDK には、Python と TypeScript でサンドボックスを削除するためのメソッドが用意されています。
 
 <Tabs>
   <TabItem label="Python" icon="seti:python">
     ```python
-    # Delete Sandbox
+    # サンドボックスを削除
     sandbox.delete()
     ```
   </TabItem>
 
   <TabItem label="TypeScript" icon="seti:typescript">
     ```typescript
-    // Delete Sandbox
+    // サンドボックスを削除
     await sandbox.delete();
     ```
   </TabItem>
 </Tabs>
 
 :::tip
-ターミナルでサンドボックスを管理したい場合は、[Daytona CLI](/docs/ja/getting-started#setting-up-the-daytona-cli)をご利用ください:
+ターミナルからサンドボックスを管理したい場合は、[Daytona CLI](/docs/ja/getting-started#setting-up-the-daytona-cli)をご確認ください:
 
 ```bash
 daytona sandbox list
@@ -350,23 +351,23 @@ daytona sandbox start|stop|remove --all
 ```
 
 ```text
-All sandboxes have been deleted
+すべてのサンドボックスを削除しました
 ```
 
 :::
 
 ## 自動ライフサイクル管理
 
-Daytona サンドボックス（Daytonaが管理する隔離された一時的な実行環境）は、ユーザーが定義した間隔に基づいて自動的に停止、アーカイブ、削除できます。
+Daytona のサンドボックスは、ユーザーが指定した間隔に基づいて自動で停止、アーカイブ、削除できます。
 
-### 自動停止間隔
+### 自動停止の間隔
 
-自動停止間隔パラメータは、稼働中のサンドボックスが自動的に停止されるまでの時間を設定します。
+自動停止の間隔パラメータは、稼働中のサンドボックスを自動停止するまでの時間を設定します。
 
-このパラメータは次のいずれかで設定できます:
+パラメータは次のいずれかで設定できます:
 
 - 分単位の時間間隔
-- `0`（自動停止を無効化し、サンドボックスを無期限に実行可能にする）
+- `0`（自動停止を無効にし、サンドボックスを無期限に稼働させる）
 
 パラメータが未設定の場合、デフォルトの `15` 分が使用されます。
 
@@ -377,7 +378,7 @@ Daytona サンドボックス（Daytonaが管理する隔離された一時的�
     ```python
     sandbox = daytona.create(CreateSandboxFromSnapshotParams(
         snapshot="my-snapshot-name",
-        auto_stop_interval=0,  # 自動停止を無効化 - デフォルトは15分
+        auto_stop_interval=0,  # 自動停止を無効化 - デフォルトは 15 分
     ))
     ```
   </TabItem>
@@ -386,29 +387,29 @@ Daytona サンドボックス（Daytonaが管理する隔離された一時的�
     ```typescript
     const sandbox = await daytona.create({
         snapshot: "my-snapshot-name",
-        autoStopInterval: 0, // 自動停止を無効化 - デフォルトは15分
+        autoStopInterval: 0, // 自動停止を無効化 - デフォルトは 15 分
     });
     ```
   </TabItem>
 </Tabs>
 
-### 自動アーカイブ間隔
+### 自動アーカイブの間隔
 
-自動アーカイブ間隔パラメータは、停止状態が継続しているサンドボックスが自動的にアーカイブされるまでの時間を設定します。
+自動アーカイブの間隔パラメータは、停止状態が継続しているサンドボックスを自動アーカイブするまでの時間を設定します。
 
-このパラメータは次のいずれかで設定できます:
+パラメータは次のいずれかで設定できます:
 
 - 分単位の時間間隔
-- `0`（最大間隔である `30日` が使用される）
+- `0`（最大間隔の `30 days` が適用される）
 
-パラメータが未設定の場合、デフォルトの `7日` が使用されます。
+パラメータが未設定の場合、デフォルトの `7 days` が使用されます。
 
 <Tabs>
   <TabItem label="Python" icon="seti:python">
     ```python
     sandbox = daytona.create(CreateSandboxFromSnapshotParams(
         snapshot="my-snapshot-name",
-        auto_archive_interval=60 # 停止後1時間で自動アーカイブ
+        auto_archive_interval=60 # 停止後 1 時間で自動アーカイブ
     ))
     ```
   </TabItem>
@@ -417,38 +418,36 @@ Daytona サンドボックス（Daytonaが管理する隔離された一時的�
     ```typescript
     const sandbox = await daytona.create({
         snapshot: "my-snapshot-name",
-        autoArchiveInterval: 60 // 停止後1時間で自動アーカイブ
+        autoArchiveInterval: 60 // 停止後 1 時間で自動アーカイブ
     });
     ```
   </TabItem>
 </Tabs>
 
-### 自動削除間隔
+### 自動削除の間隔
 
-自動削除間隔パラメータは、停止状態が継続しているサンドボックスが自動的に削除されるまでの時間を設定します。デフォルトでは、サンドボックスが自動的に削除されることはありません。
+自動削除の間隔パラメータは、停止状態が継続しているサンドボックスを自動削除するまでの時間を設定します。デフォルトでは、サンドボックスは自動削除されません。
 
-このパラメータは次のいずれかで設定できます:
+パラメータは次のいずれかで設定できます:
 
 - 分単位の時間間隔
 - `-1`（自動削除を無効化）
 - `0`（停止直後に即時削除）
 
-パラメータが未設定の場合、サンドボックスは自動的には削除されません。
+パラメータが未設定の場合、サンドボックスは自動削除されません。
 
 <Tabs>
   <TabItem label="Python" icon="seti:python">
     ```python
     sandbox = daytona.create(CreateSandboxFromSnapshotParams(
         snapshot="my-snapshot-name",
-        auto_delete_interval=60,  # 停止後1時間で自動削除
+        auto_delete_interval=60,  # 停止後 1 時間で自動削除
     ))
 
-    # 停止直後に即時削除
-
+    # 停止直後に即時削除する
     sandbox.set_auto_delete_interval(0)
 
-    # 自動削除を無効化
-
+    # 自動削除を無効化する
     sandbox.set_auto_delete_interval(-1)
 
     ```
@@ -458,13 +457,13 @@ Daytona サンドボックス（Daytonaが管理する隔離された一時的�
     ```typescript
     const sandbox = await daytona.create({
         snapshot: "my-snapshot-name",
-        autoDeleteInterval: 60, // 停止後1時間で自動削除
+        autoDeleteInterval: 60, // 停止後 1 時間で自動削除
     });
 
-    // 停止直後に即時削除
+    // 停止直後に即時削除する
     await sandbox.setAutoDeleteInterval(0)
 
-    // 自動削除を無効化
+    // 自動削除を無効化する
     await sandbox.setAutoDeleteInterval(-1)
     ```
   </TabItem>
@@ -472,7 +471,7 @@ Daytona サンドボックス（Daytonaが管理する隔離された一時的�
 
 ## 無期限で実行
 
-デフォルトでは、サンドボックス（Daytonaが管理する隔離された一時的な実行環境）は、非アクティブ状態が15分続くと自動停止します。中断なくサンドボックスを稼働させるには、新しいサンドボックスの作成時に自動停止間隔を`0`に設定してください。
+デフォルトでは、サンドボックスは15分間操作がないと自動停止します。中断なくサンドボックスを稼働させ続けるには、新しいサンドボックスを作成する際に自動停止間隔を`0`に設定してください。
 
 <Tabs>
   <TabItem label="Python" icon="seti:python">

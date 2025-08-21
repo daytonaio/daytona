@@ -9,19 +9,19 @@ import Label from '@components/Label.astro'
 
 ## スナップショットの作成
 
-サンドボックスを起動する際、Daytona（隔離されたクラウドホスト開発環境＝Sandbox を作成・管理するプラットフォーム）は、`python`、`node`、`pip` に加え、一般的な pip パッケージがあらかじめインストールされたシンプルなイメージに基づくスナップショット（サンドボックス作成に使う再利用可能な事前設定イメージ／テンプレート）を使用します。詳細は[下記](#default-snapshot)を参照してください。
+サンドボックスを起動する際、Daytona は `python`、`node`、`pip` ならびに一般的な pip パッケージなどの有用なユーティリティがプリインストールされたシンプルなイメージに基づくスナップショットを使用します。詳細は[以下](#default-snapshot)を参照してください。
 
-この挙動は上書き可能で、Dashboard にアクセスし、[Snapshots](https://app.daytona.io/dashboard/snapshots) をクリックしてから `Create Snapshot` を選択すると、カスタムスナップショットを作成できます。
+この挙動は上書き可能です。ダッシュボードにアクセスし、[Snapshots](https://app.daytona.io/dashboard/snapshots) をクリックしてから `Create Snapshot` を選択すると、カスタムスナップショットを作成できます。
 
-スナップショット用イメージには、Docker Hub の `alpine:3.21.3` や `debian:12.10` のようなパブリックにアクセス可能な任意のイメージ名とタグ、または他のパブリックコンテナレジストリ（例: `my-public-registry.com/custom-alpine:3.21`）のものを指定できます。
+スナップショットのイメージには、Docker Hub の `alpine:3.21.3` や `debian:12.10` のような公開イメージの名前とタグ、または別の公開コンテナレジストリ（例: `my-public-registry.com/custom-alpine:3.21`）のイメージを指定できます。
 
-entrypoint フィールドは任意です。イメージに長時間稼働する entrypoint がない場合、Daytona は自動的に `sleep infinity` を実行し、作成直後にコンテナが即終了しないようにします。
+entrypoint フィールドは任意です。イメージに長時間稼働する entrypoint がない場合、Daytona は自動的に `sleep infinity` を実行して、作成直後にコンテナが即時終了しないようにします。
 
 :::note
-`latest` タグのイメージは頻繁に更新されるため、特定のタグ（例: `0.1.0`）のみがサポートされます。同様に、`lts` や `stable` といったタグにも同じ考え方が当てはまるため、イメージ定義時にはそれらの使用を避けることを推奨します。
+`latest` タグのイメージは頻繁に更新されるため、特定のタグ（例: `0.1.0`）のみがサポートされます。同様に、`lts` や `stable` といったタグも避けることを推奨します。
 :::
 
-スナップショットがプルされて検証され、`Active` 状態になれば使用可能です。使用するカスタムスナップショットを指定するには、`CreateSandboxFromSnapshotParams` オブジェクトを定義します:
+スナップショットがプルおよび検証され、`Active` 状態になれば使用可能です。使用するカスタムスナップショットを指定するために、`CreateSandboxFromSnapshotParams` オブジェクトを定義します:
 
 <Tabs>
   <TabItem label="Python" icon="seti:python">
@@ -102,11 +102,11 @@ entrypoint フィールドは任意です。イメージに長時間稼働する
 
 ### スナップショットのリソース
 
-スナップショットには Daytona サンドボックス（Daytona が管理する隔離された一時的な計算環境）のリソース要件が含まれます。デフォルトでは、Daytona サンドボックスは **1 vCPU**、**1GB RAM**、**3GiB disk** を備えています。
+スナップショットには Daytona サンドボックスのリソース要件が含まれます。デフォルトでは、Daytona サンドボックスは **1 vCPU**、**1GB RAM**、**3GiB ディスク**を備えています。
 
-より高い性能が必要ですか？`Resources` クラスを使用して、必要な CPU、メモリ、ディスク容量を正確に指定できます。
+より高いパフォーマンスが必要ですか？`Resources` クラスを使用して、必要な CPU、メモリ、ディスク容量を正確に指定できます。
 
-利用可能なリソースと上限は[ダッシュボード](https://app.daytona.io/dashboard/limits)で確認できます。
+利用可能なリソースと上限は[ダッシュボード](https://app.daytona.io/dashboard/limits)で確認してください。
 
 <Tabs>
   <TabItem label="Python" icon="seti:python">
@@ -121,7 +121,7 @@ entrypoint フィールドは任意です。イメージに長時間稼働する
 
     daytona = Daytona()
 
-    # カスタムリソースでスナップショットを作成
+    # カスタムリソースを指定してスナップショットを作成
 
     daytona.snapshot.create(
         CreateSnapshotParams(
@@ -154,7 +154,7 @@ entrypoint フィールドは任意です。イメージに長時間稼働する
     async function main() {
       const daytona = new Daytona();
 
-      // カスタムリソースでスナップショットを作成
+      // カスタムリソースを指定してスナップショットを作成
       await daytona.snapshot.create(
         {
           name: "my-snapshot",
@@ -180,35 +180,35 @@ entrypoint フィールドは任意です。イメージに長時間稼働する
 </Tabs>
 
 :::note
-すべてのリソースパラメータは省略可能です。指定しない場合、Daytona がデフォルト値を使用します。
+すべてのリソースパラメータは任意です。指定しない場合、Daytonaはデフォルト値を使用します。
 :::
 
 ### プライベートレジストリのイメージ
 
-公開されていないイメージからスナップショット（サンドボックス作成に使う再利用可能な事前設定イメージ／テンプレート）を作成するには、まずそのイメージのプライベート Container Registry を追加します。
+一般公開されていないイメージからスナップショットを作成するには、まずそのイメージのプライベートコンテナレジストリを追加します。
 
-1. ダッシュボードの [Registries](https://app.daytona.io/dashboard/registries) ページへ移動
-2. 「Add Registry」ボタンをクリック
-3. 適切なカスタム名、URL、ユーザー名、パスワード、（該当する場合は）プロジェクトを入力
-4. Container Registry を作成したら、[Snapshots](https://app.daytona.io/dashboard/snapshots) ページに戻る
-5. スナップショット作成時、レジストリの URL とプロジェクト名（該当する場合）を含む完全なプライベートイメージ名を指定します（例: `my-private-registry.com/<my-project>/custom-alpine:3.21`）
+1. ダッシュボードの[Registries](https://app.daytona.io/dashboard/registries)ページに移動
+2. `Add Registry`ボタンをクリック
+3. 適切なカスタム名、URL、ユーザー名、パスワード、プロジェクト（該当する場合）を入力
+4. コンテナレジストリを作成したら、[Snapshots](https://app.daytona.io/dashboard/snapshots)ページに戻る
+5. スナップショット作成時は、レジストリURLとプロジェクト名（該当する場合）を含むプライベートイメージ名全体を入力すること（例: `my-private-registry.com/<my-project>/custom-alpine:3.21`）
 
-次の手順は同じです。`CreateSandboxFromSnapshotParams` のフィールドにカスタムスナップショットを指定すれば、追加の認証は不要です。
+この先の手順は同じです。`CreateSandboxFromSnapshotParams`のフィールドにそのカスタムスナップショットを指定すれば、追加の認証は不要です。
 
-#### プライベート Docker Hub イメージの使用
+#### プライベートな Docker Hub イメージの使用
 
-プライベートな Docker Hub イメージを使うには、Docker Hub の認証情報で[Container Registry を追加](/docs/ja/snapshots#images-from-private-registries)します。
+プライベートな Docker Hub イメージを使用するには、Docker Hub の認証情報で[コンテナレジストリを追加](/docs/ja/snapshots#images-from-private-registries)します。
 
-- レジストリ URL: `docker.io`
-- ユーザー名: Docker Hub のユーザー名（該当イメージへアクセスできるアカウント）
-- パスワード: [Docker Hub Personal Access Token](https://docs.docker.com/docker-hub/access-tokens/) を使用（アカウントのパスワードではありません）
-- スナップショットの作成: レジストリ追加後、イメージ名としてフルパスを用いてスナップショットを作成します（例: `docker.io/<username>/<image>:<tag>`）
+- Registry URL: `docker.io` を指定
+- Username: Docker Hub のユーザー名（プライベートイメージにアクセスできるアカウント）
+- Password: [Docker Hub Personal Access Token](https://docs.docker.com/docker-hub/access-tokens/)を使用（アカウントのパスワードではない）
+- スナップショットの作成: レジストリを追加後、イメージ名としてフルイメージパスを指定してスナップショットを作成（例: `docker.io/<username>/<image>:<tag>`）
 
 ### ローカルイメージの使用
 
-プライベートコンテナレジストリを手動で用意してイメージをプッシュする手間を省くために、[Daytona CLI](/docs/ja/getting-started#setting-up-the-daytona-cli) を使ってローカルイメージまたはローカル Dockerfile からスナップショットを作成し、サンドボックスで利用できます。
+プライベートコンテナレジストリを手動で用意してイメージをプッシュする手間を避けるために、[Daytona CLI](/docs/ja/getting-started#setting-up-the-daytona-cli)を使ってローカルイメージやローカルの Dockerfile からスナップショットを作成し、サンドボックスで使用できます。
 
-`docker images` を実行して使用したいイメージとタグが存在することを確認したら、`daytona snapshot push <your_local_docker_image>` コマンドでスナップショットを作成し Daytona にプッシュします。例:
+`docker images` を実行して使用したいイメージとタグが存在することを確認したら、`daytona snapshot push <your_local_docker_image>` コマンドでスナップショットを作成して Daytona にプッシュします。例:
 
 ```bash
 daytona snapshot push custom-alpine:3.21 --name alpine-minimal

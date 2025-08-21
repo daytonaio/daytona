@@ -35,14 +35,15 @@ daytona autocomplete [bash|zsh|fish|powershell] [flags]
 ```
 
 **フラグ**
-| Long | Short | 説明 |
+| Long | Short | Description |
 | :--- | :---- | :---------- |
 | `--help` | | daytona のヘルプを表示 |
 
 <Aside type="note">
-  bash シェルを使用する場合、完全な自動補完機能を利用するには bash-completion がインストールされていることを確認してください。Linux でのインストール: `sudo
-    apt-get install bash-completion` macOS でのインストール: `brew install
-    bash-completion`
+  bash を使用している場合、完全な自動補完を利用するには bash-completion が
+  インストールされていることを確認してください。Linux のインストール: `sudo
+      apt-get install bash-completion` macOS のインストール: `brew install
+      bash-completion`
 </Aside>
 
 ## daytona docs
@@ -227,22 +228,22 @@ daytona sandbox create [flags]
 **フラグ**
 | Long | Short | 説明 |
 | :--- | :---- | :---------- |
-| `--auto-archive` | | 自動アーカイブの間隔（分）。0 は最大間隔を使用 |
-| `--auto-delete` | | 自動削除の間隔（分）。負の値で無効、0 は停止直後に削除 |
-| `--auto-stop` | | 自動停止の間隔（分）。0 は無効 |
-| `--class` | | サンドボックスのクラス（small, medium, large） |
-| `--context` | `-c` | ビルドコンテキストに含めるファイルまたはディレクトリ（複数指定可） |
+| `--auto-archive` | | 自動アーカイブの間隔（分）（0 は最大の間隔が使用されます） |
+| `--auto-delete` | | 自動削除の間隔（分）（負の値で無効、0 は停止後に即時削除） |
+| `--auto-stop` | | 自動停止の間隔（分）（0 は無効） |
+| `--class` | | サンドボックスのクラス種別（small、medium、large） |
+| `--context` | `-c` | ビルドコンテキストに含めるファイルまたはディレクトリ（複数回指定可） |
 | `--cpu` | | サンドボックスに割り当てる CPU コア数 |
 | `--disk` | | サンドボックスに割り当てるディスク容量（GB） |
 | `--dockerfile` | `-f` | サンドボックスのスナップショット用 Dockerfile のパス |
 | `--env` | `-e` | 環境変数（形式: KEY=VALUE） |
-| `--gpu` | | サンドボックスに割り当てる GPU ユニット数 |
+| `--gpu` | | サンドボックスに割り当てる GPU ユニット |
 | `--label` | `-l` | ラベル（形式: KEY=VALUE） |
 | `--memory` | | サンドボックスに割り当てるメモリ（MB） |
 | `--public` | | サンドボックスを公開アクセス可能にする |
-| `--snapshot` | | サンドボックスで使用するスナップショット |
+| `--snapshot` | | サンドボックスに使用するスナップショット |
 | `--target` | | ターゲット（リージョン）（eu, us） |
-| `--user` | | サンドボックスに紐づくユーザー |
+| `--user` | | サンドボックスに関連付けるユーザー |
 | `--volume` | `-v` | マウントするボリューム（形式: VOLUME\_NAME:MOUNT\_PATH） |
 | `--help` | | daytona のヘルプ |
 
