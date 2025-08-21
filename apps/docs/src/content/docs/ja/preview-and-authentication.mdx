@@ -4,21 +4,21 @@ title: プレビューと認証
 
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 
-ポート範囲`3000-9999`でHTTPトラフィックをリッスンしているプロセスは、プレビューリンクを使用してプレビューできます。
+ポート範囲 `3000-9999` でHTTPトラフィックを待ち受けるプロセスは、プレビューリンクで公開して確認できます。
 
-プレビューリンクのスキーマは、ポートとSandbox IDの組み合わせで構成されます。例：
+プレビューリンクの形式はポート番号とサンドボックス（Sandbox）IDの組み合わせです。例:
 `https://3000-sandbox-123456.proxy.daytona.work`
 
-Sandboxの`public`プロパティが`true`に設定されている場合、これらのリンクは公開アクセス可能になります。そうでなければ、プレビューリンクはSandbox Organizationのユーザーのみが利用できます。
+サンドボックスの `public` プロパティが `true` の場合、これらのリンクは一般公開されます。そうでない場合、プレビューリンクにアクセスできるのは当該サンドボックスの組織（Organization）ユーザーのみです。
 
-プログラムによるアクセス（例：`curl`）の場合は、認証トークンを使用してプレビューURLにアクセスします：
+プログラムからアクセスする場合（例: `curl`）、プレビュートークン（x-daytona-preview-token）をヘッダーに指定してプレビューURLへアクセスします:
 
 ```bash
 curl -H "x-daytona-preview-token: vg5c0ylmcimr8b_v1ne0u6mdnvit6gc0" \
 https://3000-sandbox-123456.proxy.daytona.work
 ```
 
-特定のポートのプレビューリンクと認証トークンを取得するには、SDKメソッドを使用するだけです：
+特定のポートに対応するプレビューリンクとトークンを取得するには、SDKのメソッドを使用します:
 
 <Tabs>
 <TabItem label="Python" icon="seti:python">

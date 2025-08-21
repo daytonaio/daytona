@@ -6,9 +6,9 @@ hideTitleOnPage: true
 
 ## VolumeService
 
-Daytona Volumeを管理するためのサービス。
+Daytonaのボリューム（S3互換オブジェクトストレージをバックエンドとするFUSEベースの共有ストレージマウント）を管理するサービス。
 
-このサービスは、Volumeの一覧表示、取得、作成、削除のメソッドを提供します。
+このサービスは、ボリュームの一覧取得、参照、作成、削除の各メソッドを提供します。
 
 ### Constructors
 
@@ -35,20 +35,20 @@ new VolumeService(volumesApi: VolumesApi): VolumeService
 create(name: string): Promise<Volume>
 ```
 
-指定された名前で新しいVolumeを作成します。
+指定した名前で新しいボリュームを作成します。
 
 **Parameters**:
 
-- `name` _string_ - 新しいVolumeの名前
+- `name` _string_ - 新規ボリュームの名前
 
 
 **Returns**:
 
-- `Promise<Volume>` - 新しく作成されたVolume
+- `Promise<Volume>` - 作成されたボリューム
 
 **Throws**:
 
-Volumeが作成できない場合
+ボリュームを作成できない場合
 
 **Example:**
 
@@ -66,11 +66,11 @@ console.log(`Created volume ${volume.name} with ID ${volume.id}`);
 delete(volume: Volume): Promise<void>
 ```
 
-Volumeを削除します。
+ボリュームを削除します。
 
 **Parameters**:
 
-- `volume` _Volume_ - 削除するVolume
+- `volume` _Volume_ - 削除するボリューム
 
 
 **Returns**:
@@ -79,7 +79,7 @@ Volumeを削除します。
 
 **Throws**:
 
-Volumeが存在しないか削除できない場合
+ボリュームが存在しない、または削除できない場合
 
 **Example:**
 
@@ -98,21 +98,21 @@ console.log("Volume deleted successfully");
 get(name: string, create: boolean): Promise<Volume>
 ```
 
-名前でVolumeを取得します。
+名前を指定してボリュームを取得します。
 
 **Parameters**:
 
-- `name` _string_ - 取得するVolumeの名前
-- `create` _boolean = false_ - Volumeが存在しない場合に作成するかどうか
+- `name` _string_ - 取得するボリューム名
+- `create` _boolean = false_ - 存在しない場合に作成するかどうか
 
 
 **Returns**:
 
-- `Promise<Volume>` - 要求されたVolume
+- `Promise<Volume>` - 取得されたボリューム
 
 **Throws**:
 
-Volumeが存在しないかアクセスできない場合
+ボリュームが存在しない、またはアクセスできない場合
 
 **Example:**
 
@@ -130,11 +130,11 @@ console.log(`Volume ${volume.name} is in state ${volume.state}`);
 list(): Promise<Volume[]>
 ```
 
-利用可能なすべてのVolumeを一覧表示します。
+利用可能なすべてのボリュームを一覧表示します。
 
 **Returns**:
 
-- `Promise<Volume[]>` - ユーザーがアクセス可能なすべてのVolumeのリスト
+- `Promise<Volume[]>` - ユーザーがアクセス可能なすべてのボリュームの一覧
 
 **Example:**
 
@@ -148,7 +148,7 @@ volumes.forEach(vol => console.log(`${vol.name} (${vol.id})`));
 ***
 
 
-## Volume
+## ボリューム（Volume）
 
 ```ts
 type Volume = VolumeDto & {
@@ -156,9 +156,9 @@ type Volume = VolumeDto & {
 };
 ```
 
-SandboxesのためのShared Storage VolumeであるDaytona Volumeを表します。
+Daytona（サンドボックスを作成・管理するプラットフォーム）のボリューム（S3互換オブジェクトストレージをバックエンドとするFUSEベースの共有ストレージマウント）を表します。サンドボックス（Daytonaが管理する隔離された一時的なコンピュート環境）間で共有されるストレージです。
 
-**型宣言**:
+**型定義**:
 
 - `\_\_brand` _"Volume"_
 

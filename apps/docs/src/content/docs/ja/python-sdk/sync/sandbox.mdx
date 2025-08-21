@@ -3,44 +3,46 @@ title: "サンドボックス"
 hideTitleOnPage: true
 ---
 
-## Sandbox
+## サンドボックス
 
 ```python
 class Sandbox(SandboxDto)
 ```
 
-Daytona Sandboxを表します。
+Daytona のサンドボックスを表します。
 
 **属性**:
 
 - `fs` _FileSystem_ - ファイルシステム操作インターフェース。
-- `git` _Git_ - Git操作インターフェース。
+- `git` _Git_ - Git 操作インターフェース。
 - `process` _Process_ - プロセス実行インターフェース。
-- `computer_use` _ComputerUse_ - デスクトップ自動化のためのコンピューター使用操作インターフェース。
-- `id` _str_ - Sandboxの一意識別子。
-- `organization_id` _str_ - SandboxのOrganization ID。
-- `snapshot` _str_ - Sandboxの作成に使用されたDaytonaスナップショット。
-- `user` _str_ - Sandbox内で実行されているOSユーザー。
-- `env` _Dict[str, str]_ - Sandbox内で設定された環境変数。
-- `labels` _Dict[str, str]_ - Sandboxに付加されたカスタムラベル。
-- `public` _bool_ - Sandboxが公開アクセス可能かどうか。
-- `target` _str_ - Sandboxが実行されるランナーのターゲット場所。
-- `cpu` _int_ - Sandboxに割り当てられたCPU数。
-- `gpu` _int_ - Sandboxに割り当てられたGPU数。
-- `memory` _int_ - SandboxにGiB単位で割り当てられたメモリ量。
-- `disk` _int_ - SandboxにGiB単位で割り当てられたディスク容量。
-- `state` _SandboxState_ - Sandboxの現在の状態（例：「started」、「stopped」）。
-- `error_reason` _str_ - Sandboxがエラー状態の場合のエラーメッセージ。
-- `backup_state` _SandboxBackupStateEnum_ - Sandboxバックアップの現在の状態。
+- `computer_use` _ComputerUse_ - デスクトップ自動化のためのコンピューター使用インターフェース。
+- `id` _str_ - サンドボックスの一意の識別子。
+- `organization_id` _str_ - サンドボックスの組織 ID。
+- `snapshot` _str_ - サンドボックスの作成に使用された Daytona のスナップショット。
+- `user` _str_ - サンドボックス内で稼働する OS ユーザー。
+- `env` _Dict[str, str]_ - サンドボックスで設定される環境変数。
+- `labels` _Dict[str, str]_ - サンドボックスに付与されたカスタムラベル。
+- `public` _bool_ - サンドボックスが公開アクセス可能かどうか。
+- `target` _str_ - サンドボックスが実行されるランナーのターゲット(リージョン)。
+- `cpu` _int_ - サンドボックスに割り当てられた CPU 数。
+- `gpu` _int_ - サンドボックスに割り当てられた GPU 数。
+- `memory` _int_ - サンドボックスに割り当てられたメモリ量（GiB）。
+- `disk` _int_ - サンドボックスに割り当てられたディスク容量（GiB）。
+- `state` _SandboxState_ - サンドボックスの現在の状態（例: "started"、"stopped"）。
+- `error_reason` _str_ - サンドボックスがエラー状態の場合のエラーメッセージ。
+- `backup_state` _SandboxBackupStateEnum_ - サンドボックスのバックアップの現在の状態。
 - `backup_created_at` _str_ - バックアップが作成された日時。
-- `auto_stop_interval` _int_ - 自動停止間隔（分単位）。
-- `auto_archive_interval` _int_ - 自動アーカイブ間隔（分単位）。
-- `auto_delete_interval` _int_ - 自動削除間隔（分単位）。
-- `runner_domain` _str_ - Sandboxランナーのドメイン名。
-- `volumes` _List[str]_ - Sandboxに接続されたボリューム。
-- `build_info` _str_ - 動的ビルドから作成された場合のSandboxのビルド情報。
-- `created_at` _str_ - Sandboxが作成された日時。
-- `updated_at` _str_ - Sandboxが最後に更新された日時。
+- `auto_stop_interval` _int_ - 自動停止の間隔（分）。
+- `auto_archive_interval` _int_ - 自動アーカイブの間隔（分）。
+- `auto_delete_interval` _int_ - 自動削除の間隔（分）。
+- `runner_domain` _str_ - サンドボックスのランナーのドメイン名。
+- `volumes` _List[str]_ - サンドボックスに接続されたボリューム。
+- `build_info` _str_ - 動的ビルドから作成された場合のサンドボックスのビルド情報。
+- `created_at` _str_ - サンドボックスが作成された日時。
+- `updated_at` _str_ - サンドボックスが最後に更新された日時。
+- `network_block_all` _bool_ - サンドボックスのすべてのネットワークアクセスをブロックするかどうか。
+- `network_allow_list` _str_ - サンドボックスで許可される CIDR ネットワークアドレスのカンマ区切りリスト。
 
 #### Sandbox.\_\_init\_\_
 
@@ -49,14 +51,14 @@ def __init__(sandbox_dto: SandboxDto, sandbox_api: SandboxApi,
              toolbox_api: ToolboxApi, code_toolbox: SandboxCodeToolbox)
 ```
 
-新しいSandboxインスタンスを初期化します。
+新しいサンドボックスインスタンスを初期化します。
 
 **引数**:
 
-- `id` _str_ - Sandboxの一意識別子。
-- `instance` _SandboxInstance_ - 基盤となるSandboxインスタンス。
-- `sandbox_api` _SandboxApi_ - Sandbox操作用のAPIクライアント。
-- `toolbox_api` _ToolboxApi_ - ツールボックス操作用のAPIクライアント。
+- `id` _str_ - サンドボックスの一意の識別子。
+- `instance` _SandboxInstance_ - 基盤となるサンドボックスインスタンス。
+- `sandbox_api` _SandboxApi_ - サンドボックス操作用の API クライアント。
+- `toolbox_api` _ToolboxApi_ - ツールボックス操作用の API クライアント。
 - `code_toolbox` _SandboxCodeToolbox_ - 言語固有のツールボックス実装。
 
 #### Sandbox.refresh\_data
@@ -65,7 +67,7 @@ def __init__(sandbox_dto: SandboxDto, sandbox_api: SandboxApi,
 def refresh_data() -> None
 ```
 
-APIからSandboxデータを更新します。
+API からサンドボックスのデータをリフレッシュします。
 
 **例**:
 
@@ -83,11 +85,11 @@ print(f"Resources: {sandbox.cpu} CPU, {sandbox.memory} GiB RAM")
 def get_user_root_dir() -> str
 ```
 
-Sandbox内のログインユーザーのルートディレクトリパスを取得します。
+サンドボックス内でログイン中のユーザーのルートディレクトリパスを取得します。
 
 **戻り値**:
 
-- `str` - ログインユーザーのSandboxルートディレクトリへの絶対パス。
+- `str` - ログイン中のユーザー用サンドボックスのルートディレクトリの絶対パス。
   
 
 **例**:
@@ -104,20 +106,20 @@ def create_lsp_server(language_id: LspLanguageId,
                       path_to_project: str) -> LspServer
 ```
 
-新しいLanguage Server Protocol（LSP）サーバーインスタンスを作成します。
+新しい Language Server Protocol (LSP) サーバーインスタンスを作成します。
 
-LSPサーバーは、コード補完、診断などの言語固有の機能を提供します。
+LSP サーバーは、コード補完、診断などの言語固有の機能を提供します。
 
 **引数**:
 
-- `language_id` _LspLanguageId_ - 言語サーバーのタイプ（例：LspLanguageId.PYTHON）。
-- `path_to_project` _str_ - プロジェクトルートディレクトリへのパス。相対パスはユーザーの
+- `language_id` _LspLanguageId_ - 言語サーバーの種類（例: LspLanguageId.PYTHON）。
+- `path_to_project` _str_ - プロジェクトのルートディレクトリへのパス。相対パスはユーザーの
   ルートディレクトリを基準に解決されます。
   
 
 **戻り値**:
 
-- `LspServer` - 指定された言語用に設定された新しいLSPサーバーインスタンス。
+- `LspServer` - 指定した言語向けに構成された新しい LSP サーバーインスタンス。
   
 
 **例**:
@@ -133,18 +135,18 @@ lsp = sandbox.create_lsp_server("python", "workspace/project")
 def set_labels(labels: Dict[str, str]) -> Dict[str, str]
 ```
 
-Sandboxのラベルを設定します。
+サンドボックスにラベルを設定します。
 
-ラベルは、Sandboxを整理し識別するために使用できるキーと値のペアです。
+ラベルはサンドボックスを整理・識別するために使用できるキーと値のペアです。
 
 **引数**:
 
-- `labels` _Dict[str, str]_ - Sandboxラベルを表すキーと値のペアの辞書。
+- `labels` _Dict[str, str]_ - サンドボックスのラベルを表すキーと値のペアのディクショナリ。
   
 
 **戻り値**:
 
-  Dict[str, str]: 更新されたSandboxラベルを含む辞書。
+  Dict[str, str]: 更新後のサンドボックスのラベルを含むディクショナリ。
   
 
 **例**:
@@ -168,23 +170,23 @@ print(f"Updated labels: {new_labels}")
 def start(timeout: Optional[float] = 60)
 ```
 
-Sandboxを開始し、準備が完了するまで待機します。
+サンドボックスを起動し、準備完了になるまで待機します。
 
 **引数**:
 
-- `timeout` _Optional[float]_ - 待機する最大時間（秒）。0はタイムアウトなしを意味します。デフォルトは60秒です。
+- `timeout` _Optional[float]_ - 待機する最大時間（秒）。0 はタイムアウトなしを意味します。デフォルトは 60 秒。
   
 
-**例外**:
+**送出**:
 
-- `DaytonaError` - タイムアウトが負の値の場合。Sandboxの開始に失敗またはタイムアウトした場合。
+- `DaytonaError` - タイムアウトが負の場合、またはサンドボックスの起動に失敗／タイムアウトした場合。
   
 
 **例**:
 
 ```python
 sandbox = daytona.get_current_sandbox("my-sandbox")
-sandbox.start(timeout=40)  # 最大40秒待機
+sandbox.start(timeout=40)  # 最大 40 秒待機
 print("Sandbox started successfully")
 ```
 
@@ -198,16 +200,16 @@ print("Sandbox started successfully")
 def stop(timeout: Optional[float] = 60)
 ```
 
-Sandboxを停止し、完全に停止するまで待機します。
+サンドボックスを停止し、完全に停止するまで待機します。
 
 **引数**:
 
-- `timeout` _Optional[float]_ - 待機する最大時間（秒）。0はタイムアウトなしを意味します。デフォルトは60秒です。
+- `timeout` _Optional[float]_ - 待機する最大時間（秒）。0 はタイムアウトなしを意味します。デフォルトは 60 秒。
   
 
-**例外**:
+**送出**:
 
-- `DaytonaError` - タイムアウトが負の値の場合；Sandboxの停止に失敗またはタイムアウトした場合
+- `DaytonaError` - タイムアウトが負の場合、またはサンドボックスの停止に失敗／タイムアウトした場合。
   
 
 **例**:
@@ -225,12 +227,12 @@ print("Sandbox stopped successfully")
 def delete(timeout: Optional[float] = 60) -> None
 ```
 
-Sandboxを削除します。
+サンドボックスを削除します。
 
 **引数**:
 
-- `timeout` _Optional[float]_ - Sandbox削除のタイムアウト（秒）。0はタイムアウトなしを意味します。
-  デフォルトは60秒です。
+- `timeout` _Optional[float]_ - サンドボックス削除のタイムアウト（秒）。0 はタイムアウトなしを意味します。
+  デフォルトは 60 秒。
 
 #### Sandbox.wait\_for\_sandbox\_start
 
@@ -243,17 +245,17 @@ Sandboxを削除します。
 def wait_for_sandbox_start(timeout: Optional[float] = 60) -> None
 ```
 
-Sandboxが'started'状態に達するまで待機します。Sandboxのステータスを
-'started'状態に達するか、エラーが発生するか、タイムアウトするまでポーリングします。
+サンドボックスが「started」状態になるまで待機します。サンドボックスのステータスをポーリングし、
+「started」状態に達するか、エラーが発生するか、タイムアウトするまで待機します。
 
 **引数**:
 
-- `timeout` _Optional[float]_ - 待機する最大時間（秒）。0はタイムアウトなしを意味します。デフォルトは60秒です。
+- `timeout` _Optional[float]_ - 待機する最大時間（秒）。0 はタイムアウトなしを意味します。デフォルトは 60 秒。
   
 
-**例外**:
+**送出**:
 
-- `DaytonaError` - タイムアウトが負の値の場合；Sandboxの開始に失敗またはタイムアウトした場合
+- `DaytonaError` - タイムアウトが負の場合、またはサンドボックスの起動に失敗／タイムアウトした場合。
 
 #### Sandbox.wait\_for\_sandbox\_stop
 
@@ -266,17 +268,17 @@ Sandboxが'started'状態に達するまで待機します。Sandboxのステー
 def wait_for_sandbox_stop(timeout: Optional[float] = 60) -> None
 ```
 
-Sandboxが'stopped'状態に達するまで待機します。Sandboxのステータスを
-'stopped'状態に達するか、エラーが発生するか、タイムアウトするまでポーリングします。Sandboxが停止するまで最大60秒間待機します。
+サンドボックスが「stopped」状態になるまで待機します。サンドボックスのステータスをポーリングし、
+「stopped」状態に達するか、エラーが発生するか、タイムアウトするまで待機します。サンドボックスが停止するまで最長 60 秒待機します。
 
 **引数**:
 
-- `timeout` _Optional[float]_ - 待機する最大時間（秒）。0はタイムアウトなしを意味します。デフォルトは60秒です。
+- `timeout` _Optional[float]_ - 待機する最大時間（秒）。0 はタイムアウトなしを意味します。デフォルトは 60 秒。
   
 
-**例外**:
+**送出**:
 
-- `DaytonaError` - タイムアウトが負の値の場合。Sandboxの停止に失敗またはタイムアウトした場合。
+- `DaytonaError` - タイムアウトが負の場合、またはサンドボックスの停止に失敗／タイムアウトした場合。
 
 #### Sandbox.set\_autostop\_interval
 
@@ -285,21 +287,21 @@ Sandboxが'stopped'状態に達するまで待機します。Sandboxのステー
 def set_autostop_interval(interval: int) -> None
 ```
 
-Sandboxの自動停止間隔を設定します。
+サンドボックスの自動停止間隔を設定します。
 
-Sandboxは指定された間隔でアイドル状態（新しいイベントなし）になった後、自動的に停止します。
-イベントには、SDKを通じたSandboxの状態変更や相互作用が含まれます。
-Sandbox Previewsを使用した相互作用は含まれません。
+サンドボックスは、指定した間隔のあいだアイドル状態（新しいイベントなし）が続くと自動的に停止します。
+イベントには、SDK を介したサンドボックスとの状態変更や操作が含まれます。
+サンドボックスのプレビュー経由の操作は含まれません。
 
 **引数**:
 
 - `interval` _int_ - 自動停止までの非アクティブ時間（分）。
-  自動停止を無効にするには0に設定します。デフォルトは15です。
+  0 に設定すると自動停止を無効化します。デフォルトは 15。
   
 
-**例外**:
+**送出**:
 
-- `DaytonaError` - intervalが負の値の場合
+- `DaytonaError` - interval が負の場合
   
 
 **例**:
@@ -307,7 +309,7 @@ Sandbox Previewsを使用した相互作用は含まれません。
 ```python
 # 1時間後に自動停止
 sandbox.set_autostop_interval(60)
-# または自動停止を無効にする
+# または自動停止を無効化
 sandbox.set_autostop_interval(0)
 ```
 
@@ -318,19 +320,19 @@ sandbox.set_autostop_interval(0)
 def set_auto_archive_interval(interval: int) -> None
 ```
 
-Sandboxの自動アーカイブ間隔を設定します。
+サンドボックスの自動アーカイブ間隔を設定します。
 
-Sandboxは指定された間隔で継続的に停止された後、自動的にアーカイブされます。
+サンドボックスは、指定した間隔のあいだ連続して停止状態が続くと自動的にアーカイブされます。
 
 **引数**:
 
-- `interval` _int_ - 継続的に停止されたSandboxが自動アーカイブされるまでの時間（分）。
-  最大間隔にするには0に設定します。デフォルトは7日です。
+- `interval` _int_ - 連続して停止してから自動アーカイブされるまでの分数。
+  0 に設定すると最大間隔になります。デフォルトは 7 日。
   
 
-**例外**:
+**送出**:
 
-- `DaytonaError` - intervalが負の値の場合
+- `DaytonaError` - interval が負の場合
   
 
 **例**:
@@ -349,15 +351,15 @@ sandbox.set_auto_archive_interval(0)
 def set_auto_delete_interval(interval: int) -> None
 ```
 
-Sandboxの自動削除間隔を設定します。
+サンドボックスの自動削除間隔を設定します。
 
-Sandboxは指定された間隔で継続的に停止された後、自動的に削除されます。
+サンドボックスは、指定した間隔のあいだ連続して停止状態が続くと自動的に削除されます。
 
 **引数**:
 
-- `interval` _int_ - 継続的に停止されたSandboxが自動削除されるまでの時間（分）。
-  自動削除を無効にするには負の値に設定します。停止時に即座に削除するには0に設定します。
-  デフォルトでは、自動削除は無効になっています。
+- `interval` _int_ - 連続して停止してから自動削除されるまでの分数。
+  負の値に設定すると自動削除を無効化します。0 に設定すると停止時に即時削除します。
+  既定では自動削除は無効です。
   
 
 **例**:
@@ -365,9 +367,9 @@ Sandboxは指定された間隔で継続的に停止された後、自動的に�
 ```python
 # 1時間後に自動削除
 sandbox.set_auto_delete_interval(60)
-# または停止時に即座に削除
+# または停止時に即時削除
 sandbox.set_auto_delete_interval(0)
-# または自動削除を無効にする
+# または自動削除を無効化
 sandbox.set_auto_delete_interval(-1)
 ```
 
@@ -378,18 +380,19 @@ sandbox.set_auto_delete_interval(-1)
 def get_preview_link(port: int) -> PortPreviewUrl
 ```
 
-指定されたポートでsandboxのプレビューリンクを取得します。ポートが閉じている場合は、
-自動的に開かれます。プライベートsandboxの場合、URLへのアクセスを許可するトークンが含まれます。
+指定したポートのサンドボックスのプレビューリンクを取得します。ポートが閉じている場合は
+自動的に開かれます。プライベートなサンドボックスでは、URL にアクセス権を与える
+トークンが含まれます。
 
 **引数**:
 
 - `port` _int_ - プレビューリンクを開くポート。
   
 
-**戻り値**:
+**返り値**:
 
-- `PortPreviewUrl` - プレビューリンクのレスポンスオブジェクト。`url`と
-  `token`（プライベートsandboxにアクセスするため）が含まれます。
+- `PortPreviewUrl` - プレビューリンクのレスポンスオブジェクト。`url`
+  と（プライベートなサンドボックスにアクセスするための）`token` を含みます。
   
 
 **例**:
@@ -407,28 +410,28 @@ print(f"Token: {preview_link.token}")
 def archive() -> None
 ```
 
-sandboxをアーカイブし、非アクティブにして状態を保持します。sandboxが
-アーカイブされると、ファイルシステム全体の状態がコスト効率の良いオブジェクトストレージに移動され、
-sandboxを長期間利用可能に保つことができます。アーカイブ状態と
-停止状態のトレードオフは、アーカイブされたsandboxの開始にはサイズに応じてより多くの時間がかかることです。
-Sandboxはアーカイブ前に停止されている必要があります。
+サンドボックスをアーカイブし、非アクティブ化して状態を保持します。サンドボックスが
+アーカイブされると、ファイルシステム全体の状態はコスト効率の高いオブジェクトストレージに移動され、
+長期間にわたりサンドボックスを利用可能な状態に保つことができます。アーカイブ状態と
+停止状態のトレードオフは、アーカイブされたサンドボックスの起動には、そのサイズに応じて
+より時間がかかる点です。アーカイブする前にサンドボックスは停止している必要があります。
 
 
-## Resources
+## リソース
 
 ```python
 @dataclass
 class Resources()
 ```
 
-Sandboxのリソース設定。
+サンドボックスのリソース設定。
 
 **属性**:
 
-- `cpu` _Optional[int]_ - 割り当てるCPUコア数。
-- `memory` _Optional[int]_ - 割り当てるメモリ量（GiB単位）。
-- `disk` _Optional[int]_ - 割り当てるディスク容量（GiB単位）。
-- `gpu` _Optional[int]_ - 割り当てるGPU数。
+- `cpu` _Optional[int]_ - 割り当てる CPU コア数。
+- `memory` _Optional[int]_ - 割り当てるメモリ容量（GiB）。
+- `disk` _Optional[int]_ - 割り当てるディスク容量（GiB）。
+- `gpu` _Optional[int]_ - 割り当てる GPU 数。
   
 
 **例**:
@@ -437,7 +440,7 @@ Sandboxのリソース設定。
 resources = Resources(
     cpu=2,
     memory=4,  # 4GiB RAM
-    disk=20,   # 20GiB ディスク
+    disk=20,   # 20GiB disk
     gpu=1
 )
 params = CreateSandboxFromImageParams(

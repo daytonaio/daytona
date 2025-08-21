@@ -2,26 +2,26 @@
 title: ログストリーミング
 ---
 
-サンドボックスで長時間実行されるプロセスを実行する際、そのログに**リアルタイム**でアクセスし、処理したいことがよくあります。
+サンドボックス（隔離された一時的な実行環境）で長時間動作するプロセスを扱う場合、**リアルタイム**でログにアクセスし処理したいことがよくあります。
 
-Daytona SDKは以下の両方をサポートしています：
+Daytona（サンドボックスを作成・管理するプラットフォーム）のSDKは次の両方をサポートします:
 
-- `ログスナップショットの取得` — 特定の時点までのすべてのログを取得します。
-- `ログストリーミング` — プロセスがまだ実行中の間、生成されるログをストリーミングします。
+- `Fetching log snapshot` — 指定時点までのすべてのログを取得します。
+- `Log streaming` — プロセスの実行中に生成されるログをストリーミングします。
 
-このガイドでは、非同期モードと同期モードの両方でログストリーミングを使用する方法について説明します。
-リアルタイムストリーミングは、**デバッグ**、**モニタリング**、または**可観測性ツール**との統合に特に有用です。
+このガイドでは、非同期モードと同期モードの両方でログストリーミングを使用する方法を説明します。
+リアルタイムストリーミングは、**デバッグ**、**モニタリング**、および**可観測性ツール**との統合に特に有用です。
 
 ## 非同期
 
-サンドボックス化されたプロセスがより大きなシステムの一部であり、長期間（または無期限に）実行されることが期待される場合、
-システムの残りの部分が実行を続けている間に、**バックグラウンドで**ログを非同期に処理することができます。
+サンドボックス（隔離された一時的な実行環境）内のプロセスが大規模なシステムの一部で、長時間（あるいは無期限に）稼働する場合でも、
+システムの他の処理を進めながら、ログを**バックグラウンド**で非同期に処理できます。
 
-これは以下の用途に最適です：
+この方法は次の用途に最適です:
 
 - 継続的な監視
-- 長時間実行されるジョブのデバッグ
-- ライブログ転送や可視化
+- 長時間実行ジョブのデバッグ
+- ライブログの転送や可視化
 
 import { TabItem, Tabs } from '@astrojs/starlight/components'
 
@@ -53,16 +53,16 @@ async def main():
             )
         )
 
-        print("ログがストリーミングされている間に実行を継続しています...")
+        print("Continuing execution while logs are streaming...")
         await asyncio.sleep(1)
-        print("その他の操作が完了しました！")
+        print("Other operations completed!")
 
-        print("最後に非同期タスクの完了を待ち、リソースをクリーンアップします...")
+        print("At the end wait for any asynchronous task to complete and clean up resources...")
         await logs_task
     except Exception as e:
-        print(f"エラー: {e}")
+        print(f"Error: {e}")
     finally:
-        print("サンドボックスをクリーンアップしています...")
+        print("Cleaning up sandbox...")
         sandbox.delete()
 
 if __name__ == "__main__":
@@ -88,19 +88,19 @@ if __name__ == "__main__":
       })
 
       const logTask = sandbox.process.getSessionCommandLogs(sessionId, command.cmdId!, (chunk) => {
-        console.log('ログチャンク:', chunk)
+        console.log('Log chunk:', chunk)
       })
 
-      console.log('ログがストリーミングされている間に実行を継続しています...')
+      console.log('Continuing execution while logs are streaming...')
       sleep(1)
-      console.log('その他の操作が完了しました！')
+      console.log('Other operations completed!')
 
-      console.log('最後に非同期タスクの完了を待ち、リソースをクリーンアップします...')
+      console.log('At the end wait for any asynchronous task to complete and clean up resources...')
       await logTask
     } catch (error) {
-      console.error('エラー:', error)
+      console.error('Error:', error)
     } finally {
-      console.log('サンドボックスをクリーンアップしています...')
+      console.log('Cleaning up sandbox...')
       await sandbox.delete()
     }
   }
@@ -111,9 +111,10 @@ if __name__ == "__main__":
   </TabItem>
 </Tabs>
 
-## 同期処理
+## 同期実行
 
-コマンドの実行時間が予測可能な場合、またはバックグラウンドで実行する必要がない場合は、ログストリームを同期的に処理できます。例えば、ログをファイルや他のストレージに書き込むことができます。
+コマンドの実行時間が予測できる場合、またはバックグラウンドで動かす必要がない場合は、
+ログストリームを同期的に処理できます。たとえば、ログをファイルやその他のストレージに書き出せます。
 
 <Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
@@ -143,9 +144,9 @@ if __name__ == "__main__":
 
           with open(log_file_path, "w") as log_file:
               def handle_chunk(chunk: str):
-                  # null バイトを削除
+                  #  nullバイトを削除
                   clean_chunk = chunk.replace("\x00", "")
-                  # ファイルに書き込み
+                  #  ファイルに書き込む
                   log_file.write(clean_chunk)
                   log_file.flush()
 
