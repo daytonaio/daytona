@@ -47,7 +47,11 @@ func (d *DockerClient) Destroy(ctx context.Context, containerId string) error {
 		return err
 	}
 
-	maxRetries := 3
+	// Exponential backoff retry configuration
+	maxRetries := 5
+	baseDelay := 100 * time.Millisecond
+	maxDelay := 5 * time.Second
+
 	for attempt := 1; attempt <= maxRetries; attempt++ {
 		log.Infof("Removing container %s (attempt %d/%d)...", containerId, attempt, maxRetries)
 
@@ -65,7 +69,14 @@ func (d *DockerClient) Destroy(ctx context.Context, containerId string) error {
 		}
 
 		if attempt < maxRetries {
-			log.Warnf("Failed to remove container %s (attempt %d/%d): %v", containerId, attempt, maxRetries, err)
+			// Calculate exponential backoff delay
+			delay := baseDelay * time.Duration(1<<(attempt-1))
+			if delay > maxDelay {
+				delay = maxDelay
+			}
+
+			log.Warnf("Failed to remove container %s (attempt %d/%d): %v. Retrying in %v...", containerId, attempt, maxRetries, err, delay)
+			time.Sleep(delay)
 			continue
 		}
 
@@ -97,7 +108,11 @@ func (d *DockerClient) RemoveDestroyed(ctx context.Context, containerId string) 
 		return common.NewBadRequestError(fmt.Errorf("container %s is not in destroyed state", containerId))
 	}
 
-	maxRetries := 3
+	// Exponential backoff retry configuration
+	maxRetries := 5
+	baseDelay := 100 * time.Millisecond
+	maxDelay := 5 * time.Second
+
 	for attempt := 1; attempt <= maxRetries; attempt++ {
 		log.Infof("Removing container %s (attempt %d/%d)...", containerId, attempt, maxRetries)
 
@@ -114,7 +129,14 @@ func (d *DockerClient) RemoveDestroyed(ctx context.Context, containerId string) 
 		}
 
 		if attempt < maxRetries {
-			log.Warnf("Failed to remove container %s (attempt %d/%d): %v", containerId, attempt, maxRetries, err)
+			// Calculate exponential backoff delay
+			delay := baseDelay * time.Duration(1<<(attempt-1))
+			if delay > maxDelay {
+				delay = maxDelay
+			}
+
+			log.Warnf("Failed to remove container %s (attempt %d/%d): %v. Retrying in %v...", containerId, attempt, maxRetries, err, delay)
+			time.Sleep(delay)
 			continue
 		}
 

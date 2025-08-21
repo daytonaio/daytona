@@ -23,7 +23,11 @@ func (d *DockerClient) Stop(ctx context.Context, containerId string) error {
 		backup_context.cancel()
 	}
 
-	maxRetries := 3
+	// Exponential backoff retry configuration
+	maxRetries := 5
+	baseDelay := 100 * time.Millisecond
+	maxDelay := 5 * time.Second
+
 	for attempt := 1; attempt <= maxRetries; attempt++ {
 		log.Infof("Stopping container %s (attempt %d/%d)...", containerId, attempt, maxRetries)
 
@@ -35,7 +39,14 @@ func (d *DockerClient) Stop(ctx context.Context, containerId string) error {
 		}
 
 		if attempt < maxRetries {
-			log.Warnf("Failed to stop container %s (attempt %d/%d): %v", containerId, attempt, maxRetries, err)
+			// Calculate exponential backoff delay
+			delay := baseDelay * time.Duration(1<<(attempt-1))
+			if delay > maxDelay {
+				delay = maxDelay
+			}
+
+			log.Warnf("Failed to stop container %s (attempt %d/%d): %v. Retrying in %v...", containerId, attempt, maxRetries, err, delay)
+			time.Sleep(delay)
 			continue
 		}
 
