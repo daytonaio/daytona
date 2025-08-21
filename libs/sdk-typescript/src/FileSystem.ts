@@ -485,7 +485,7 @@ export class FileSystem {
 
       ws.onmessage = async (event) => {
         try {
-          const fsEvent: FilesystemEvent = JSON.parse(event.data)
+          const fsEvent: FilesystemEvent = JSON.parse(event.data.toString())
           await callback(fsEvent)
         } catch (error) {
           // Only log parsing errors in development

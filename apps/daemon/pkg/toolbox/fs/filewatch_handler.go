@@ -46,18 +46,25 @@ func WatchFiles(c *gin.Context) {
 	watcher := NewFileWatcher(path, recursive)
 	if err := watcher.Start(); err != nil {
 		log.Errorf("Failed to start file watcher: %v", err)
-		ws.WriteMessage(websocket.CloseMessage,
+		if writeErr := ws.WriteMessage(websocket.CloseMessage,
 			websocket.FormatCloseMessage(websocket.CloseInternalServerErr,
-				"Failed to start file watcher"))
+				"Failed to start file watcher")); writeErr != nil {
+			log.Errorf("Failed to write close message: %v", writeErr)
+		}
 		return
 	}
 
 	defer watcher.Stop()
 
 	// Set up ping/pong to detect disconnected clients
-	ws.SetReadDeadline(time.Now().Add(60 * time.Second))
+	if err := ws.SetReadDeadline(time.Now().Add(60 * time.Second)); err != nil {
+		log.Errorf("Failed to set read deadline: %v", err)
+		return
+	}
 	ws.SetPongHandler(func(string) error {
-		ws.SetReadDeadline(time.Now().Add(60 * time.Second))
+		if err := ws.SetReadDeadline(time.Now().Add(60 * time.Second)); err != nil {
+			log.Errorf("Failed to set read deadline in pong handler: %v", err)
+		}
 		return nil
 	})
 
@@ -113,9 +120,11 @@ func WatchFiles(c *gin.Context) {
 			log.Errorf("File watcher error: %v", err)
 
 			// Send error as close message and terminate connection
-			ws.WriteMessage(websocket.CloseMessage,
+			if writeErr := ws.WriteMessage(websocket.CloseMessage,
 				websocket.FormatCloseMessage(websocket.CloseInternalServerErr,
-					err.Error()))
+					err.Error())); writeErr != nil {
+				log.Errorf("Failed to write close message: %v", writeErr)
+			}
 			return
 
 		case <-pingTicker.C:
