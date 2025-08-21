@@ -18,6 +18,9 @@ import { FilesystemEvent, WatchOptions, WatchHandle, FileWatchCallback } from '.
 import FormData from 'form-data'
 import { dynamicImport } from './utils/Import'
 import { RUNTIME, Runtime } from './utils/Runtime'
+import * as fs from 'fs'
+import { Readable } from 'stream'
+import WebSocket from 'ws'
 
 /**
  * Parameters for setting file permissions in the Sandbox.
