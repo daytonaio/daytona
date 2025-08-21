@@ -10,6 +10,7 @@ import (
 	"net"
 	"net/http"
 	"slices"
+	"strings"
 
 	apiclient "github.com/daytonaio/apiclient"
 	"github.com/daytonaio/proxy/cmd/proxy/config"
@@ -32,10 +33,12 @@ type RunnerInfo struct {
 const DAYTONA_SANDBOX_AUTH_KEY_HEADER = "X-Daytona-Preview-Token"
 const DAYTONA_SANDBOX_AUTH_KEY_QUERY_PARAM = "DAYTONA_SANDBOX_AUTH_KEY"
 const DAYTONA_SANDBOX_AUTH_COOKIE_NAME = "daytona-sandbox-auth-"
+const TERMINAL_PORT = "22222"
 
 type Proxy struct {
 	config       *config.Config
 	secureCookie *securecookie.SecureCookie
+	cookieDomain string
 
 	apiclient                *apiclient.APIClient
 	runnerCache              cache.ICache[RunnerInfo]
@@ -49,6 +52,10 @@ func StartProxy(config *config.Config) error {
 	}
 
 	proxy.secureCookie = securecookie.New([]byte(config.ProxyApiKey), nil)
+	cookieDomain := config.ProxyDomain
+	cookieDomain = strings.Split(cookieDomain, ":")[0]
+	cookieDomain = fmt.Sprintf(".%s", cookieDomain)
+	proxy.cookieDomain = cookieDomain
 
 	clientConfig := apiclient.NewConfiguration()
 	clientConfig.Servers = apiclient.ServerConfigurations{
@@ -88,6 +95,15 @@ func StartProxy(config *config.Config) error {
 	router := gin.New()
 	router.Use(gin.Recovery())
 
+	router.Use(common_errors.NewErrorMiddleware(func(ctx *gin.Context, err error) common_errors.ErrorResponse {
+		return common_errors.ErrorResponse{
+			StatusCode: http.StatusInternalServerError,
+			Message:    err.Error(),
+		}
+	}))
+
+	router.Use(proxy.browserWarningMiddleware())
+
 	router.Use(func(ctx *gin.Context) {
 		if ctx.Request.Header.Get("X-Daytona-Disable-CORS") == "true" {
 			ctx.Request.Header.Del("X-Daytona-Disable-CORS")
@@ -105,14 +121,12 @@ func StartProxy(config *config.Config) error {
 		cors.New(corsConfig)(ctx)
 	})
 
-	router.Use(common_errors.NewErrorMiddleware(func(ctx *gin.Context, err error) common_errors.ErrorResponse {
-		return common_errors.ErrorResponse{
-			StatusCode: http.StatusInternalServerError,
-			Message:    err.Error(),
-		}
-	}))
-
 	router.Any("/*path", func(ctx *gin.Context) {
+		if ctx.Request.Method == "POST" && ctx.Request.URL.Path == ACCEPT_PREVIEW_PAGE_WARNING_PATH {
+			handleAcceptProxyWarning(ctx, config.EnableTLS)
+			return
+		}
+
 		_, _, err := proxy.parseHost(ctx.Request.Host)
 		// if the host is not valid, we don't proxy the request
 		if err != nil {
