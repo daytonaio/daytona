@@ -15,16 +15,11 @@ import {
 } from '@daytonaio/api-client'
 import { prefixRelativePath } from './utils/Path'
 import { FilesystemEvent, WatchOptions, WatchHandle, FileWatchCallback } from './types/FileWatcher'
-<<<<<<< HEAD
 import { dynamicImport } from './utils/Import'
 import { Buffer } from 'buffer'
 import { RUNTIME, Runtime } from './utils/Runtime'
-=======
-import * as fs from 'fs'
-import { Readable } from 'stream'
 import FormData from 'form-data'
 import WebSocket from 'ws'
->>>>>>> 7fee5368 (feat: added python sdk support for file-watching, adjusted examples with dns resolution)
 
 /**
  * Parameters for setting file permissions in the Sandbox.
@@ -526,7 +521,7 @@ export class FileSystem {
 
       ws.onmessage = async (event) => {
         try {
-          const fsEvent: FilesystemEvent = JSON.parse(event.data)
+          const fsEvent: FilesystemEvent = JSON.parse(event.data.toString())
           await callback(fsEvent)
         } catch (error) {
           // Only log parsing errors in development
