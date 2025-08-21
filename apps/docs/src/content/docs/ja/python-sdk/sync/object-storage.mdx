@@ -1,5 +1,5 @@
 ---
-title: "ObjectStorage"
+title: "オブジェクトストレージ"
 hideTitleOnPage: true
 ---
 
@@ -9,15 +9,15 @@ hideTitleOnPage: true
 class ObjectStorage()
 ```
 
-オブジェクトストレージサービスとやり取りするためのObjectStorageクラス。
+オブジェクトストレージサービスと連携するための ObjectStorage クラス。
 
 **属性**:
 
 - `endpoint_url` _str_ - オブジェクトストレージサービスのエンドポイントURL。
 - `aws_access_key_id` _str_ - オブジェクトストレージサービスのアクセスキーID。
 - `aws_secret_access_key` _str_ - オブジェクトストレージサービスのシークレットアクセスキー。
-- `aws_session_token` _str_ - オブジェクトストレージサービスのセッショントークン。一時的な認証情報に使用されます。
-- `bucket_name` _str_ - 使用するバケットの名前。デフォルトは"daytona-volume-builds"です。
+- `aws_session_token` _str_ - オブジェクトストレージサービスのセッショントークン。短期認証情報に使用。
+- `bucket_name` _str_ - 使用するバケット名。既定値は "daytona-volume-builds"。
 
 #### ObjectStorage.upload
 
@@ -27,17 +27,17 @@ def upload(path: str,
            archive_base_path: str | None = None) -> str
 ```
 
-オブジェクトストレージサービスにファイルをアップロードします。
+ファイルをオブジェクトストレージサービスにアップロードします。
 
 **引数**:
 
 - `path` _str_ - アップロードするファイルのパス。
 - `organization_id` _str_ - 使用する組織ID。
-- `archive_base_path` _str_ - アーカイブに使用するベースパス。
+- `archive_base_path` _str_ - アーカイブのベースパス。
   
 
 **戻り値**:
 
-- `str` - アップロードされたファイルのハッシュ。
+- `str` - アップロードしたファイルのハッシュ。
 
 

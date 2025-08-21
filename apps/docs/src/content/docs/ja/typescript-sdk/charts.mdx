@@ -6,15 +6,15 @@ hideTitleOnPage: true
 
 ## ChartType
 
-チャートタイプ
+チャートの種類
 
-**列挙型メンバー**:
+**列挙メンバー**:
 
-- `BAR` ("bar")
-- `LINE` ("line")
-- `PIE` ("pie")
-- `SCATTER` ("scatter")
-- `UNKNOWN` ("unknown")
+- `BAR`（"bar"）
+- `LINE`（"line"）
+- `PIE`（"pie"）
+- `SCATTER`（"scatter"）
+- `UNKNOWN`（"unknown"）
 
 ## parseChart()
 
@@ -43,12 +43,12 @@ type BarChart = Chart2D & {
 };
 ```
 
-メタデータを持つ棒グラフを表します。
+メタデータを含む棒グラフを表します。
 
-**型宣言**:
+**型定義**:
 
-- `elements` _BarData\[\]_ - チャートの棒
-- `type` _BAR_ - チャートの種類
+- `elements` _BarData\[\]_ - 棒グラフの要素
+- `type` _BAR_ - グラフの種類
     
 
 
@@ -62,13 +62,13 @@ type BarData = {
 };
 ```
 
-棒グラフの棒を表します。
+棒グラフの1本のバーを表します。
 
-**型宣言**:
+**型定義**:
 
-- `group` _string_ - 棒のグループ
-- `label` _string_ - 棒のラベル
-- `value` _string_ - 棒の値
+- `group` _string_ - バーの属するグループ
+- `label` _string_ - バーのラベル
+- `value` _string_ - バーの値
     
 
 
@@ -81,12 +81,12 @@ type BoxAndWhiskerChart = Chart2D & {
 };
 ```
 
-メタデータを持つボックスアンドウィスカーチャートを表します。
+メタデータを含む箱ひげ図を表します。
 
-**型宣言**:
+**型定義**:
 
-- `elements` _BoxAndWhiskerData\[\]_ - チャートのボックスとウィスカー
-- `type` _BOX\_AND\_WHISKER_ - チャートの種類
+- `elements` _BoxAndWhiskerData\[\]_ - 図の箱ひげ要素
+- `type` _BOX\_AND\_WHISKER_ - 図の種類
     
 
 
@@ -103,19 +103,19 @@ type BoxAndWhiskerData = {
 };
 ```
 
-ボックスアンドウィスカーチャートにおけるボックスアンドウィスカーを表します。
+箱ひげ図の箱ひげを表します。
 
-**型宣言**:
+**型定義**:
 
-- `first\_quartile` _number_ - ボックスアンドウィスカーの第1四分位数
-- `label` _string_ - ボックスアンドウィスカーのラベル
-- `max` _number_ - ボックスアンドウィスカーの第3四分位数
-- `median` _number_ - ボックスアンドウィスカーの中央値
-- `min` _number_ - ボックスアンドウィスカーの最小値
-- `outliers` _number\[\]_
+- `first_quartile` _number_ - 箱ひげの第1四分位数
+- `label` _string_ - 箱ひげのラベル
+- `max` _number_ - 箱ひげの第3四分位数
+- `median` _number_ - 箱ひげの中央値
+- `min` _number_ - 箱ひげの最小値
+- `outliers` _number[]_
 
 
-## Chart
+## チャート
 
 ```ts
 type Chart = {
@@ -126,14 +126,14 @@ type Chart = {
 };
 ```
 
-matplotlibからのメタデータを持つチャートを表します。
+matplotlib のメタデータを含むチャートを表します。
 
-**型宣言**:
+**型定義**:
 
 - `elements` _any\[\]_ - チャートの要素
-- `png?` _string_ - base64でエンコードされたチャートのPNG表現
+- `png?` _string_ - base64 でエンコードされたチャートの PNG 表現
 - `title` _string_ - チャートのタイトル
-- `type` _ChartType_ - チャートの種類
+- `type` _ChartType_ - チャートのタイプ
     
 
 
@@ -146,7 +146,7 @@ type Chart2D = Chart & {
 };
 ```
 
-メタデータを持つ2Dチャートを表します。
+メタデータを持つ2次元チャートを表します。
 
 **型宣言**:
 
@@ -164,12 +164,12 @@ type CompositeChart = Chart & {
 };
 ```
 
-メタデータを持つ複合チャートを表します。
+メタデータを含む合成チャートを表します。
 
 **型宣言**:
 
-- `elements` _Chart\[\]_ - 複合チャートのチャート
-- `type` _COMPOSITE\_CHART_ - チャートの種類
+- `elements` _Chart\[\]_ - 合成チャートを構成するチャート群
+- `type` _COMPOSITE\_CHART_ - チャートのタイプ
     
 
 
@@ -181,11 +181,11 @@ type LineChart = PointChart & {
 };
 ```
 
-メタデータを持つ線グラフを表します。
+メタデータを含む折れ線グラフを表します。
 
-**型宣言**:
+**型定義**:
 
-- `type` _LINE_ - チャートの種類
+- `type` _LINE_ - チャートのタイプ
     
 
 
@@ -198,12 +198,12 @@ type PieChart = Chart & {
 };
 ```
 
-メタデータを持つ円グラフを表します。
+メタデータを含む円グラフを表します。
 
-**型宣言**:
+**型定義**:
 
-- `elements` _PieData\[\]_ - チャートの円グラフスライス
-- `type` _PIE_ - チャートの種類
+- `elements` _PieData\[\]_ - グラフの各扇形（スライス）
+- `type` _PIE_ - グラフのタイプ
     
 
 
@@ -217,13 +217,13 @@ type PieData = {
 };
 ```
 
-円グラフの円スライスを表します。
+円グラフのスライス（扇形）を表します。
 
-**型宣言**:
+**型定義**:
 
-- `angle` _number_ - 円スライスの角度
-- `label` _string_ - 円スライスのラベル
-- `radius` _number_ - 円スライスの半径
+- `angle` _number_ - スライスの角度
+- `label` _string_ - スライスのラベル
+- `radius` _number_ - スライスの半径
     
 
 
@@ -241,17 +241,17 @@ type PointChart = Chart2D & {
 };
 ```
 
-メタデータを持つポイントチャートを表します。
+メタデータを含む点グラフを表します。
 
-**型宣言**:
+**型定義**:
 
-- `elements` _PointData\[\]_ - チャートのポイント
+- `elements` _PointData\[\]_ - グラフの点
 - `x\_scale` _string_ - x軸のスケール
-- `x\_tick\_labels` _string\[\]_ - x軸のラベル
-- `x\_ticks` _\(number \| string\)\[\]_ - x軸の目盛り
+- `x\_tick\_labels` _string\[\]_ - x軸の目盛ラベル
+- `x\_ticks` _\(number \| string\)\[\]_ - x軸の目盛
 - `y\_scale` _string_ - y軸のスケール
-- `y\_tick\_labels` _string\[\]_ - y軸のラベル
-- `y\_ticks` _\(number \| string\)\[\]_ - y軸の目盛り
+- `y\_tick\_labels` _string\[\]_ - y軸の目盛ラベル
+- `y\_ticks` _\(number \| string\)\[\]_ - y軸の目盛
     
 
 
@@ -264,12 +264,12 @@ type PointData = {
 };
 ```
 
-2Dチャートのポイントを表します。
+2Dチャートのデータ点を表します。
 
 **型宣言**:
 
-- `label` _string_ - ポイントのラベル
-- `points` _\[number \| string, number \| string\]\[\]_ - チャートのポイント
+- `label` _string_ - 点のラベル
+- `points` _\[number \| string, number \| string\]\[\]_ - チャートの座標点一覧
     
 
 

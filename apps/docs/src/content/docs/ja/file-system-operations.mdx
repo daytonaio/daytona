@@ -4,22 +4,22 @@ title: ファイルシステム操作
 
 import { TabItem, Tabs } from '@astrojs/starlight/components'
 
-Daytona SDKは、Sandboxes内の`fs`モジュールを通じて包括的なファイルシステム操作を提供します。このガイドでは、利用可能なすべてのファイルシステム操作とベストプラクティスについて説明します。
+Daytona（サンドボックスという隔離されたクラウド開発環境を作成・管理するプラットフォーム）のSDKは、サンドボックス（Daytonaが管理する隔離された一時的な実行環境）内の`fs`モジュールを通じて、充実したファイルシステム操作機能を提供します。本ガイドでは、利用可能なすべてのファイルシステム操作とベストプラクティスについて説明します。
 
 ## 基本操作
 
-Daytona SDKは、Sandbox内のファイルシステムと対話するオプションを提供します。ファイルの一覧表示、ディレクトリの作成、ファイルの読み書きなど、さまざまな操作を実行できます。
+Daytona SDK は、サンドボックス（Daytonaが管理する隔離された一時的な実行環境）内のファイルシステムとやり取りする機能を提供します。ファイルの一覧表示、ディレクトリ作成、ファイルの読み書きなど、さまざまな操作を実行できます。
 
-簡単にするため、ファイル操作はデフォルトでSandboxユーザーのルートディレクトリで操作していることを前提としています。例えば、`workspace`は`/home/[username]/workspace`を意味しますが、先頭にスラッシュ`/`で始まる絶対workdirパスを提供することも可能です。
+簡潔さのため、ファイル操作はデフォルトでサンドボックスユーザーのホームディレクトリ直下で行われる前提です。例えば、`workspace` は `/home/[username]/workspace` を意味します。先頭にスラッシュ `/` を付けた絶対パスを作業ディレクトリとして指定することも可能です。
 
 ### ファイルとディレクトリの一覧表示
 
-Daytona SDKは、PythonとTypeScriptを使用してSandbox内のファイルとディレクトリを一覧表示するオプションを提供します。
+Daytona SDK は、Python と TypeScript を用いてサンドボックス内のファイルやディレクトリを一覧表示できます。
 
 <Tabs>
 <TabItem label="Python" icon="seti:python">
 ```python
-# ディレクトリ内のファイルを一覧表示
+# List files in a directory
 files = sandbox.fs.list_files("workspace")
 
 for file in files:
@@ -32,7 +32,7 @@ for file in files:
 </TabItem>
 <TabItem label="TypeScript" icon="seti:typescript">
 ```typescript
-// ディレクトリ内のファイルを一覧表示
+// List files in a directory
 const files = await sandbox.fs.listFiles("workspace")
 
 files.forEach(file => {
@@ -48,18 +48,18 @@ files.forEach(file => {
 
 ### ディレクトリの作成
 
-Daytona SDKは、PythonとTypeScriptを使用して特定の権限でディレクトリを作成するオプションを提供します。
+Daytona SDK は、Python と TypeScript で特定のパーミッションを指定してディレクトリを作成できます。
 
 <Tabs>
 <TabItem label="Python" icon="seti:python">
 ```python
-# 特定の権限で作成
+# Create with specific permissions
 sandbox.fs.create_folder("workspace/new-dir", "755")
 ```
 </TabItem>
 <TabItem label="TypeScript" icon="seti:typescript">
 ```typescript
-// 特定の権限で作成
+// Create with specific permissions
 await sandbox.fs.createFolder("workspace/new-dir", "755")
 ```
 
@@ -68,16 +68,16 @@ await sandbox.fs.createFolder("workspace/new-dir", "755")
 
 ### ファイルのアップロード
 
-Daytona SDKは、PythonとTypeScriptを使用してSandbox内のファイルの読み取り、書き込み、アップロード、ダウンロード、削除を行うオプションを提供します。
+Daytona SDK は、Python と TypeScript を用いて、サンドボックス内でのファイルの読み取り、書き込み、アップロード、ダウンロード、削除を行うための機能を提供します。
 
 #### 単一ファイルのアップロード
 
-単一ファイルをアップロードしたい場合は、以下のように実行できます：
+単一ファイルをアップロードする場合は、次のように実行します。
 
 <Tabs>
 <TabItem label="Python" icon="seti:python">
 ```python
-# 単一ファイルをアップロード
+# Upload a single file
 with open("local_file.txt", "rb") as f:
     content = f.read()
 sandbox.fs.upload_file(content, "remote_file.txt")
@@ -85,7 +85,7 @@ sandbox.fs.upload_file(content, "remote_file.txt")
 </TabItem>
 <TabItem label="TypeScript" icon="seti:typescript">
 ```typescript
-// 単一ファイルをアップロード
+// Upload a single file
 const fileContent = Buffer.from('Hello, World!')
 await sandbox.fs.uploadFile(fileContent, "data.txt")
 ```
@@ -95,12 +95,12 @@ await sandbox.fs.uploadFile(fileContent, "data.txt")
 
 #### 複数ファイルのアップロード
 
-以下の例は、単一のメソッド呼び出しで複数のファイルを効率的にアップロードする方法を示しています。
+以下は、1回のメソッド呼び出しで複数ファイルを効率的にアップロードする例です。
 
 <Tabs>
 <TabItem label="Python" icon="seti:python">
 ```python
-# 複数のファイルを一度にアップロード
+# Upload multiple files at once
 files_to_upload = []
 
 with open("file1.txt", "rb") as f1:
@@ -127,7 +127,7 @@ sandbox.fs.upload_files(files_to_upload)
 </TabItem>
 <TabItem label="TypeScript" icon="seti:typescript">
 ```typescript
-// 複数のファイルを一度にアップロード
+// Upload multiple files at once
 const files = [
     {
         source: Buffer.from('Content of file 1'),
@@ -151,7 +151,7 @@ await sandbox.fs.uploadFiles(files)
 
 ### ファイルのダウンロード
 
-以下のコマンドは、Sandboxユーザーのルートディレクトリから`file1.txt`ファイルをダウンロードし、内容を出力します：
+次のコマンドは、サンドボックスユーザーのホームディレクトリから `file1.txt` をダウンロードし、その内容を出力します。
 
 <Tabs>
 <TabItem label="Python" icon="seti:python">
@@ -180,7 +180,7 @@ console.log('File content:', downloadedFile.toString())
 
 ### ファイルの削除
 
-ファイルが不要になったら、`delete_file`関数を使用してファイルを削除するだけです。
+不要になったファイルは、`delete_file` 関数で削除できます。
 
 <Tabs>
 <TabItem label="Python" icon="seti:python">
@@ -201,19 +201,19 @@ await sandbox.fs.deleteFile("workspace/file.txt")
 
 ## 高度な操作
 
-Daytona SDKは、ファイル権限、検索と置換などの高度なファイルシステム操作を提供します。
+Daytona SDK は、ファイル権限の設定・取得、検索と置換などの高度なファイルシステム操作を提供します。
 
 ### ファイル権限
 
-Daytona SDKは、PythonとTypeScriptを使用してファイル権限の設定、ファイル権限の取得、ディレクトリ権限の再帰的設定を行うオプションを提供します。
+Daytona SDK では、Python と TypeScript から、ファイル権限の設定・取得や、ディレクトリ権限の再帰的な設定が行えます。
 
 <Tabs>
 <TabItem label="Python" icon="seti:python">
 ```python
-# ファイル権限を設定
+# Set file permissions
 sandbox.fs.set_file_permissions("workspace/file.txt", "644")
 
-# ファイル権限を取得
+# Get file permissions
 
 file_info = sandbox.fs.get_file_info("workspace/file.txt")
 print(f"Permissions: {file_info.permissions}")
@@ -222,10 +222,10 @@ print(f"Permissions: {file_info.permissions}")
 </TabItem>
 <TabItem label="TypeScript" icon="seti:typescript">
 ```typescript
-// ファイル権限を設定
+// Set file permissions
 await sandbox.fs.setFilePermissions("workspace/file.txt", { mode: "644" })
 
-// ファイル権限を取得
+// Get file permissions
 const fileInfo = await sandbox.fs.getFileDetails("workspace/file.txt")
 console.log(`Permissions: ${fileInfo.permissions}`)
 ```
@@ -235,12 +235,12 @@ console.log(`Permissions: ${fileInfo.permissions}`)
 
 ### ファイルの検索と置換
 
-Daytona SDKは、PythonとTypeScriptを使用してファイル内のテキストを検索し、ファイル内のテキストを置換するオプションを提供します。
+Daytona SDK では、Python と TypeScript から、ファイル内のテキストの検索および置換を行えます。
 
 <Tabs>
 <TabItem label="Python" icon="seti:python">
 ```python
-# ファイル内のテキストを検索; フォルダが指定された場合、検索は再帰的に行われます
+# Search for text in files; if a folder is specified, the search is recursive
 results = sandbox.fs.find_files(
     path="workspace/src",
     pattern="text-of-interest"
@@ -251,7 +251,7 @@ for match in results:
     print(f"Line content: {match.content}")
     print("\n")
 
-# ファイル内のテキストを置換
+# Replace text in files
 
 sandbox.fs.replace_in_files(
     files=["workspace/file1.txt", "workspace/file2.txt"],
@@ -263,7 +263,7 @@ sandbox.fs.replace_in_files(
 </TabItem>
 <TabItem label="TypeScript" icon="seti:typescript">
 ```typescript
-// ファイル内のテキストを検索; フォルダが指定された場合、検索は再帰的に行われます
+// Search for text in files; if a folder is specified, the search is recursive
 const results = await sandbox.fs.findFiles({
     path="workspace/src",
     pattern: "text-of-interest"
@@ -274,7 +274,7 @@ results.forEach(match => {
     console.log('Line content:', match.content)
 })
 
-// ファイル内のテキストを置換
+// Replace text in files
 await sandbox.fs.replaceInFiles(
     ["workspace/file1.txt", "workspace/file2.txt"],
     "old_text",

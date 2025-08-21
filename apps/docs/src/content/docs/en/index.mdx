@@ -36,14 +36,15 @@ Run your first line of code in a Daytona Sandbox. Use our [LLMs context files](/
 
 <Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
-  ```bash
-  pip install daytona
-  ```
+    ```bash
+    pip install daytona
+    ```
   </TabItem>
+
   <TabItem label="TypeScript" icon="seti:typescript">
-  ```bash
-  npm install @daytonaio/sdk
-  ```
+    ```bash
+    npm install @daytonaio/sdk
+    ```
   </TabItem>
 </Tabs>
 
@@ -51,57 +52,59 @@ Run your first line of code in a Daytona Sandbox. Use our [LLMs context files](/
 
 <Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
-  Create a file named: `main.py`
-  ```python
-  from daytona import Daytona, DaytonaConfig
+    Create a file named: `main.py`
 
-# Define the configuration
+    ```python
+    from daytona import Daytona, DaytonaConfig
 
-  config = DaytonaConfig(api_key="your-api-key")
+    # Define the configuration
 
-# Initialize the Daytona client
+    config = DaytonaConfig(api_key="your-api-key")
 
-  daytona = Daytona(config)
+    # Initialize the Daytona client
 
-# Create the Sandbox instance
+    daytona = Daytona(config)
 
-  sandbox = daytona.create()
+    # Create the Sandbox instance
 
-# Run the code securely inside the Sandbox
+    sandbox = daytona.create()
 
-  response = sandbox.process.code_run('print("Hello World from code!")')
-  if response.exit_code != 0:
-    print(f"Error: {response.exit_code} {response.result}")
-  else:
-      print(response.result)
-  
-# Clean up
+    # Run the code securely inside the Sandbox
 
-  sandbox.delete()
+    response = sandbox.process.code_run('print("Hello World from code!")')
+    if response.exit_code != 0:
+      print(f"Error: {response.exit_code} {response.result}")
+    else:
+        print(response.result)
 
-  ```
+    # Clean up
+
+    sandbox.delete()
+
+    ```
   </TabItem>
+
   <TabItem label="TypeScript" icon="seti:typescript">
-  Create a file named: `index.mts`
-  ```typescript
-  import { Daytona } from '@daytonaio/sdk';
+    Create a file named: `index.mts`
 
-  // Initialize the Daytona client
-  const daytona = new Daytona({ apiKey: 'your-api-key' });
+    ```typescript
+    import { Daytona } from '@daytonaio/sdk';
 
-  // Create the Sandbox instance
-  const sandbox = await daytona.create({
-    language: 'typescript',
-  });
+    // Initialize the Daytona client
+    const daytona = new Daytona({ apiKey: 'your-api-key' });
 
-  // Run the code securely inside the Sandbox
-  const response = await sandbox.process.codeRun('console.log("Hello World from code!")')
-  console.log(response.result);
+    // Create the Sandbox instance
+    const sandbox = await daytona.create({
+      language: 'typescript',
+    });
 
-  // Clean up
-  await sandbox.delete()
-  ```
+    // Run the code securely inside the Sandbox
+    const response = await sandbox.process.codeRun('console.log("Hello World from code!")')
+    console.log(response.result);
 
+    // Clean up
+    await sandbox.delete()
+    ```
   </TabItem>
 </Tabs>
 
@@ -113,14 +116,15 @@ Replace `your-api-key` with the value from your Daytona dashboard.
 
 <Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
-  ```bash
-  python main.py
-  ```
+    ```bash
+    python main.py
+    ```
   </TabItem>
+
   <TabItem label="TypeScript" icon="seti:typescript">
-  ```bash
-  npx tsx index.mts
-  ```
+    ```bash
+    npx tsx index.mts
+    ```
   </TabItem>
 </Tabs>
 
