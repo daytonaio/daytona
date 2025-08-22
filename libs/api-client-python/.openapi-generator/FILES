@@ -87,6 +87,7 @@ daytona_api_client/models/organization.py
 daytona_api_client/models/organization_invitation.py
 daytona_api_client/models/organization_role.py
 daytona_api_client/models/organization_suspension.py
+daytona_api_client/models/organization_usage_overview.py
 daytona_api_client/models/organization_user.py
 daytona_api_client/models/paginated_audit_logs.py
 daytona_api_client/models/paginated_snapshots_dto.py
@@ -127,7 +128,6 @@ daytona_api_client/models/update_organization_invitation.py
 daytona_api_client/models/update_organization_member_role.py
 daytona_api_client/models/update_organization_quota.py
 daytona_api_client/models/update_organization_role.py
-daytona_api_client/models/usage_overview.py
 daytona_api_client/models/user.py
 daytona_api_client/models/user_public_key.py
 daytona_api_client/models/volume_dto.py

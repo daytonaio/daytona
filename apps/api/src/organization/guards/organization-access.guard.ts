@@ -50,7 +50,6 @@ export class OrganizationAccessGuard implements CanActivate {
       this.logger.warn(
         `Organization ID mismatch in the request context. Expected: ${organizationIdParam}, Actual: ${authContext.apiKey.organizationId}`,
       )
-      this.logger.warn('Organization ID mismatch in the request context.')
       return false
     }
 

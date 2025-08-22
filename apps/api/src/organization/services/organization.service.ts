@@ -5,9 +5,8 @@
 
 import { ForbiddenException, Injectable, NotFoundException, Logger, OnModuleInit } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { EntityManager, In, IsNull, LessThan, MoreThan, Not, Or, Repository } from 'typeorm'
+import { EntityManager, In, Not, Repository } from 'typeorm'
 import { CreateOrganizationDto } from '../dto/create-organization.dto'
-import { OverviewDto } from '../dto/overview.dto'
 import { UpdateOrganizationQuotaDto } from '../dto/update-organization-quota.dto'
 import { Organization } from '../entities/organization.entity'
 import { OrganizationUser } from '../entities/organization-user.entity'
@@ -26,8 +25,6 @@ import { DEFAULT_ORGANIZATION_QUOTA } from '../../common/constants/default-organ
 import { ConfigService } from '@nestjs/config'
 import { UserEmailVerifiedEvent } from '../../user/events/user-email-verified.event'
 import { Cron, CronExpression } from '@nestjs/schedule'
-import { InjectRedis } from '@nestjs-modules/ioredis'
-import { Redis } from 'ioredis'
 import { RedisLockProvider } from '../../sandbox/common/redis-lock.provider'
 import { OrganizationSuspendedSandboxStoppedEvent } from '../events/organization-suspended-sandbox-stopped.event'
 import { SandboxDesiredState } from '../../sandbox/enums/sandbox-desired-state.enum'
@@ -40,7 +37,6 @@ export class OrganizationService implements OnModuleInit {
   private readonly logger = new Logger(OrganizationService.name)
 
   constructor(
-    @InjectRedis() private readonly redis: Redis,
     @InjectRepository(Organization)
     private readonly organizationRepository: Repository<Organization>,
     @InjectRepository(Sandbox)
@@ -111,39 +107,6 @@ export class OrganizationService implements OnModuleInit {
     }
 
     return this.removeWithEntityManager(this.organizationRepository.manager, organization)
-  }
-
-  async getUsageOverview(organizationId: string): Promise<OverviewDto> {
-    const organization = await this.organizationRepository.findOne({ where: { id: organizationId } })
-    if (!organization) {
-      throw new NotFoundException(`Organization with ID ${organizationId} not found`)
-    }
-
-    // Get all sandboxes for the organization, excluding destroyed and error ones
-    const sandboxes = await this.sandboxRepository.find({
-      where: {
-        organizationId,
-        state: Not(In([SandboxState.DESTROYED, SandboxState.ERROR, SandboxState.BUILD_FAILED, SandboxState.ARCHIVED])),
-      },
-    })
-
-    // Get running sandboxes
-    const runningSandboxes = sandboxes.filter((s) => s.state === SandboxState.STARTED)
-
-    // Calculate current usage
-    const currentCpuUsage = runningSandboxes.reduce((sum, s) => sum + s.cpu, 0)
-    const currentMemoryUsage = runningSandboxes.reduce((sum, s) => sum + s.mem, 0)
-    const currentDiskUsage = sandboxes.reduce((sum, s) => sum + s.disk, 0)
-
-    return {
-      totalCpuQuota: organization.totalCpuQuota,
-      totalGpuQuota: 0,
-      totalMemoryQuota: organization.totalMemoryQuota,
-      totalDiskQuota: organization.totalDiskQuota,
-      currentCpuUsage,
-      currentMemoryUsage,
-      currentDiskUsage,
-    }
   }
 
   async updateQuota(
