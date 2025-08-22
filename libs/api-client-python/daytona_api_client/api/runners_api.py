@@ -18,7 +18,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 from typing_extensions import Annotated
 
 from pydantic import Field, StrictStr
-from typing import List
+from typing import List, Optional
 from typing_extensions import Annotated
 from daytona_api_client.models.create_runner import CreateRunner
 from daytona_api_client.models.runner import Runner
@@ -830,6 +830,7 @@ class RunnersApi:
     @validate_call
     def list_runners(
         self,
+        region: Annotated[Optional[StrictStr], Field(description="Filter runners by region code")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -846,6 +847,8 @@ class RunnersApi:
         """List all runners
 
 
+        :param region: Filter runners by region code
+        :type region: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -869,6 +872,7 @@ class RunnersApi:
         """ # noqa: E501
 
         _param = self._list_runners_serialize(
+            region=region,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -892,6 +896,7 @@ class RunnersApi:
     @validate_call
     def list_runners_with_http_info(
         self,
+        region: Annotated[Optional[StrictStr], Field(description="Filter runners by region code")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -908,6 +913,8 @@ class RunnersApi:
         """List all runners
 
 
+        :param region: Filter runners by region code
+        :type region: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -931,6 +938,7 @@ class RunnersApi:
         """ # noqa: E501
 
         _param = self._list_runners_serialize(
+            region=region,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -954,6 +962,7 @@ class RunnersApi:
     @validate_call
     def list_runners_without_preload_content(
         self,
+        region: Annotated[Optional[StrictStr], Field(description="Filter runners by region code")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -970,6 +979,8 @@ class RunnersApi:
         """List all runners
 
 
+        :param region: Filter runners by region code
+        :type region: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -993,6 +1004,7 @@ class RunnersApi:
         """ # noqa: E501
 
         _param = self._list_runners_serialize(
+            region=region,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -1011,6 +1023,7 @@ class RunnersApi:
 
     def _list_runners_serialize(
         self,
+        region,
         _request_auth,
         _content_type,
         _headers,
@@ -1033,6 +1046,10 @@ class RunnersApi:
 
         # process the path parameters
         # process the query parameters
+        if region is not None:
+            
+            _query_params.append(('region', region))
+            
         # process the header parameters
         # process the form parameters
         # process the body parameter

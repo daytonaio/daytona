@@ -1,0 +1,33 @@
+/*
+ * Copyright 2025 Daytona Platforms Inc.
+ * SPDX-License-Identifier: AGPL-3.0
+ */
+
+import { Injectable, CanActivate, ExecutionContext, NotFoundException, ForbiddenException } from '@nestjs/common'
+import { RegionService } from '../services/region.service'
+import { OrganizationAuthContext } from '../../common/interfaces/auth-context.interface'
+import { SystemRole } from '../../user/enums/system-role.enum'
+
+@Injectable()
+export class RegionAccessGuard implements CanActivate {
+  constructor(private readonly regionService: RegionService) {}
+
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    const request = context.switchToHttp().getRequest()
+    const regionId: string = request.params.regionId || request.params.id
+
+    // TODO: initialize authContext safely
+    const authContext: OrganizationAuthContext = request.user
+
+    try {
+      const region = await this.regionService.findOne(regionId)
+      if (authContext.role !== SystemRole.ADMIN && region.organizationId !== authContext.organizationId) {
+        throw new ForbiddenException('Request organization ID does not match resource organization ID')
+      }
+      request.region = region
+      return true
+    } catch (error) {
+      throw new NotFoundException(`Region with ID ${regionId} not found`)
+    }
+  }
+}

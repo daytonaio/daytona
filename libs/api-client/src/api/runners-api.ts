@@ -167,10 +167,11 @@ export const RunnersApiAxiosParamCreator = function (configuration?: Configurati
     /**
      *
      * @summary List all runners
+     * @param {string} [region] Filter runners by region code
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    listRunners: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+    listRunners: async (region?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
       const localVarPath = `/runners`
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
@@ -188,6 +189,10 @@ export const RunnersApiAxiosParamCreator = function (configuration?: Configurati
       await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
       // authentication oauth2 required
+
+      if (region !== undefined) {
+        localVarQueryParameter['region'] = region
+      }
 
       setSearchParams(localVarUrlObj, localVarQueryParameter)
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
@@ -317,13 +322,15 @@ export const RunnersApiFp = function (configuration?: Configuration) {
     /**
      *
      * @summary List all runners
+     * @param {string} [region] Filter runners by region code
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async listRunners(
+      region?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.listRunners(options)
+      const localVarAxiosArgs = await localVarAxiosParamCreator.listRunners(region, options)
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
         operationServerMap['RunnersApi.listRunners']?.[localVarOperationServerIndex]?.url
@@ -401,11 +408,12 @@ export const RunnersApiFactory = function (configuration?: Configuration, basePa
     /**
      *
      * @summary List all runners
+     * @param {string} [region] Filter runners by region code
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    listRunners(options?: RawAxiosRequestConfig): AxiosPromise<void> {
-      return localVarFp.listRunners(options).then((request) => request(axios, basePath))
+    listRunners(region?: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+      return localVarFp.listRunners(region, options).then((request) => request(axios, basePath))
     },
     /**
      *
@@ -472,13 +480,14 @@ export class RunnersApi extends BaseAPI {
   /**
    *
    * @summary List all runners
+   * @param {string} [region] Filter runners by region code
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof RunnersApi
    */
-  public listRunners(options?: RawAxiosRequestConfig) {
+  public listRunners(region?: string, options?: RawAxiosRequestConfig) {
     return RunnersApiFp(this.configuration)
-      .listRunners(options)
+      .listRunners(region, options)
       .then((request) => request(this.axios, this.basePath))
   }
 

@@ -25,6 +25,7 @@ import {
   TextSearch,
   TriangleAlert,
   Users,
+  Server,
 } from 'lucide-react'
 import {
   Sidebar as SidebarComponent,
@@ -201,20 +202,45 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+        {billingItems.length > 0 && (
+          <SidebarGroup>
+            <SidebarGroupLabel>Billing</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {billingItems.map((item) => (
+                  <SidebarMenuItem key={item.label}>
+                    <SidebarMenuButton asChild isActive={pathname.startsWith(item.path)}>
+                      <button onClick={() => navigate(item.path)} className="text-sm">
+                        {item.icon}
+                        <span>{item.label}</span>
+                      </button>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
         <SidebarGroup>
-          {billingItems.length > 0 && <SidebarGroupLabel>Billing</SidebarGroupLabel>}
+          <SidebarGroupLabel>Infrastructure</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {billingItems.map((item) => (
-                <SidebarMenuItem key={item.label}>
-                  <SidebarMenuButton asChild isActive={pathname.startsWith(item.path)}>
-                    <button onClick={() => navigate(item.path)} className="text-sm">
-                      {item.icon}
-                      <span>{item.label}</span>
-                    </button>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild isActive={pathname.startsWith(RoutePath.REGIONS)}>
+                  <button onClick={() => navigate(RoutePath.REGIONS)} className="text-sm">
+                    <Container size={16} strokeWidth={1.5} />
+                    <span>Regions</span>
+                  </button>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild isActive={pathname.startsWith(RoutePath.RUNNERS)}>
+                  <button onClick={() => navigate(RoutePath.RUNNERS)} className="text-sm">
+                    <Server size={16} strokeWidth={1.5} />
+                    <span>Runners</span>
+                  </button>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

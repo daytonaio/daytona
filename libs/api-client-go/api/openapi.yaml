@@ -1985,7 +1985,15 @@ paths:
   /runners:
     get:
       operationId: listRunners
-      parameters: []
+      parameters:
+        - description: Filter runners by region code
+          explode: true
+          in: query
+          name: region
+          required: false
+          schema:
+            type: string
+          style: form
       responses:
         '200':
           description: ''
@@ -6005,6 +6013,102 @@ paths:
       summary: Get volume details by name
       tags:
         - volumes
+  /regions:
+    get:
+      operationId: listRegions
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/RegionDto'
+                type: array
+          description: List of all regions
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: List all regions
+      tags:
+        - regions
+    post:
+      operationId: createRegion
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateRegion'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegionDto'
+          description: The region has been successfully created.
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Create a new region
+      tags:
+        - regions
+  /regions/{code}:
+    delete:
+      operationId: deleteRegion
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - description: Region code
+          explode: false
+          in: path
+          name: code
+          required: true
+          schema:
+            example: abc12345
+            type: string
+          style: simple
+      responses:
+        '204':
+          description: The region has been successfully deleted.
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Delete a region
+      tags:
+        - regions
   /docker-registry:
     get:
       operationId: listRegistries
@@ -6755,6 +6859,12 @@ components:
               - read:volumes
               - write:volumes
               - delete:volumes
+              - read:regions
+              - write:regions
+              - delete:regions
+              - read:runners
+              - write:runners
+              - delete:runners
               - read:audit_logs
             type: string
           type: array
@@ -6805,6 +6915,12 @@ components:
               - read:volumes
               - write:volumes
               - delete:volumes
+              - read:regions
+              - write:regions
+              - delete:regions
+              - read:runners
+              - write:runners
+              - delete:runners
               - read:audit_logs
             type: string
           type: array
@@ -6860,6 +6976,12 @@ components:
               - read:volumes
               - write:volumes
               - delete:volumes
+              - read:regions
+              - write:regions
+              - delete:regions
+              - read:runners
+              - write:runners
+              - delete:runners
               - read:audit_logs
             type: string
           type: array
@@ -6922,6 +7044,12 @@ components:
               - read:volumes
               - write:volumes
               - delete:volumes
+              - read:regions
+              - write:regions
+              - delete:regions
+              - read:runners
+              - write:runners
+              - delete:runners
               - read:audit_logs
             type: string
           type: array
@@ -7301,6 +7429,12 @@ components:
               - read:volumes
               - write:volumes
               - delete:volumes
+              - read:regions
+              - write:regions
+              - delete:regions
+              - read:runners
+              - write:runners
+              - delete:runners
               - read:audit_logs
             type: string
           type: array
@@ -7338,6 +7472,12 @@ components:
               - read:volumes
               - write:volumes
               - delete:volumes
+              - read:regions
+              - write:regions
+              - delete:regions
+              - read:runners
+              - write:runners
+              - delete:runners
               - read:audit_logs
             type: string
           type: array
@@ -10374,6 +10514,65 @@ components:
       required:
         - name
       type: object
+    RegionDto:
+      example:
+        organizationId: 123e4567-e89b-12d3-a456-426614174000
+        createdAt: 2023-01-01T00:00:00.000Z
+        code: abc12345
+        name: us-east-1
+        dockerRegistryId: 123e4567-e89b-12d3-a456-426614174000
+        updatedAt: 2023-01-01T00:00:00.000Z
+      properties:
+        code:
+          description: Region code
+          example: abc12345
+          type: string
+        name:
+          description: Region name
+          example: us-east-1
+          type: string
+        organizationId:
+          description: Organization ID
+          example: 123e4567-e89b-12d3-a456-426614174000
+          type: string
+        dockerRegistryId:
+          description: Docker registry ID (optional)
+          example: 123e4567-e89b-12d3-a456-426614174000
+          nullable: true
+          type: string
+        createdAt:
+          description: Creation timestamp
+          example: 2023-01-01T00:00:00.000Z
+          type: string
+        updatedAt:
+          description: Last update timestamp
+          example: 2023-01-01T00:00:00.000Z
+          type: string
+      required:
+        - code
+        - createdAt
+        - dockerRegistryId
+        - name
+        - organizationId
+        - updatedAt
+      type: object
+    CreateRegion:
+      example:
+        name: us-east-1
+        dockerRegistryId: 123e4567-e89b-12d3-a456-426614174000
+      properties:
+        name:
+          description: Region name
+          example: us-east-1
+          type: string
+        dockerRegistryId:
+          description: Docker registry ID (optional)
+          example: 123e4567-e89b-12d3-a456-426614174000
+          nullable: true
+          type: string
+      required:
+        - name
+      type: object
     CreateDockerRegistry:
       example:
         registryType: organization
@@ -10865,6 +11064,7 @@ components:
             - snapshot
             - user
             - volume
+            - region
           type: string
         targetId:
           type: string

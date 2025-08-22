@@ -396,6 +396,13 @@ func (a *RunnersAPIService) GetRunnersBySnapshotRefExecute(r RunnersAPIGetRunner
 type RunnersAPIListRunnersRequest struct {
 	ctx        context.Context
 	ApiService RunnersAPI
+	region     *string
+}
+
+// Filter runners by region code
+func (r RunnersAPIListRunnersRequest) Region(region string) RunnersAPIListRunnersRequest {
+	r.region = &region
+	return r
 }
 
 func (r RunnersAPIListRunnersRequest) Execute() (*http.Response, error) {
@@ -434,6 +441,9 @@ func (a *RunnersAPIService) ListRunnersExecute(r RunnersAPIListRunnersRequest) (
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
 
+	if r.region != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "region", r.region, "form", "")
+	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
