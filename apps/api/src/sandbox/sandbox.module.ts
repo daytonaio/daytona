@@ -46,6 +46,9 @@ import { SandboxStopAction } from './managers/sandbox-actions/sandbox-stop.actio
 import { SandboxDestroyAction } from './managers/sandbox-actions/sandbox-destroy.action'
 import { SandboxArchiveAction } from './managers/sandbox-actions/sandbox-archive.action'
 import { SshAccess } from './entities/ssh-access.entity'
+import { RegionController } from './controllers/region.controller'
+import { RegionService } from './services/region.service'
+import { Region } from './entities/region.entity'
 
 @Module({
   imports: [
@@ -63,6 +66,7 @@ import { SshAccess } from './entities/ssh-access.entity'
       WarmPool,
       Volume,
       SshAccess,
+      Region,
     ]),
   ],
   controllers: [
@@ -73,6 +77,7 @@ import { SshAccess } from './entities/ssh-access.entity'
     WorkspaceController,
     PreviewController,
     VolumeController,
+    RegionController,
   ],
   providers: [
     SandboxService,
@@ -95,8 +100,17 @@ import { SshAccess } from './entities/ssh-access.entity'
     SandboxStopAction,
     SandboxDestroyAction,
     SandboxArchiveAction,
+    RegionService,
   ],
-  exports: [SandboxService, RunnerService, RedisLockProvider, SnapshotService, VolumeService, VolumeManager],
+  exports: [
+    SandboxService,
+    RunnerService,
+    RedisLockProvider,
+    SnapshotService,
+    VolumeService,
+    VolumeManager,
+    RegionService,
+  ],
 })
 export class SandboxModule {
   configure(consumer: MiddlewareConsumer) {
