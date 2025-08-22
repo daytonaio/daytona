@@ -17,6 +17,9 @@ export interface SandboxTableProps {
   handleStop: (id: string) => void
   handleDelete: (id: string) => void
   handleBulkDelete: (ids: string[]) => void
+  handleBulkStart: (ids: string[]) => void
+  handleBulkStop: (ids: string[]) => void
+  handleBulkArchive: (ids: string[]) => void
   handleArchive: (id: string) => void
   handleVnc: (id: string) => void
   getWebTerminalUrl: (id: string) => Promise<string | null>
