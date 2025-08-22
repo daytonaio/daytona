@@ -5,7 +5,7 @@
 
 import { ForbiddenException, Injectable, Logger, NotFoundException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { Not, Repository, LessThan, In, JsonContains, FindOptionsWhere, Or } from 'typeorm'
+import { Not, Repository, LessThan, In, JsonContains, FindOptionsWhere } from 'typeorm'
 import { Sandbox } from '../entities/sandbox.entity'
 import { CreateSandboxDto } from '../dto/create-sandbox.dto'
 import { SandboxState } from '../enums/sandbox-state.enum'
@@ -45,6 +45,7 @@ import { SandboxDto } from '../dto/sandbox.dto'
 import { isValidUuid } from '../../common/utils/uuid'
 import { RunnerAdapterFactory } from '../runner-adapter/runnerAdapter'
 import { validateNetworkAllowList } from '../utils/network-validation.util'
+import { OrganizationUsageService } from '../../organization/services/organization-usage.service'
 
 const DEFAULT_CPU = 1
 const DEFAULT_MEMORY = 1
@@ -70,6 +71,7 @@ export class SandboxService {
     private readonly eventEmitter: EventEmitter2,
     private readonly organizationService: OrganizationService,
     private readonly runnerAdapterFactory: RunnerAdapterFactory,
+    private readonly organizationUsageService: OrganizationUsageService,
   ) {}
 
   private async validateOrganizationQuotas(
@@ -79,9 +81,7 @@ export class SandboxService {
     disk: number,
     excludeSandboxId?: string,
   ): Promise<void> {
-    this.organizationService.assertOrganizationIsNotSuspended(organization)
-
-    // Check per-sandbox resource limits
+    // validate per-sandbox quotas
     if (cpu > organization.maxCpuPerSandbox) {
       throw new ForbiddenException(
         `CPU request ${cpu} exceeds maximum allowed per sandbox (${organization.maxCpuPerSandbox})`,
@@ -98,49 +98,50 @@ export class SandboxService {
       )
     }
 
-    const ignoredStates = [SandboxState.DESTROYED, SandboxState.ARCHIVED, SandboxState.ERROR, SandboxState.BUILD_FAILED]
+    // validate usage quotas
+    // start by incrementing the pending usage
+    const {
+      cpuIncremented: pendingCpuIncremented,
+      memoryIncremented: pendingMemoryIncremented,
+      diskIncremented: pendingDiskIncremented,
+    } = await this.organizationUsageService.incrementPendingSandboxUsage(
+      organization.id,
+      cpu,
+      memory,
+      disk,
+      excludeSandboxId,
+    )
 
-    const inactiveStates = [...ignoredStates, SandboxState.STOPPED, SandboxState.ARCHIVING]
+    // get the current usage overview
+    const usageOverview = await this.organizationUsageService.getSandboxUsageOverview(organization.id, excludeSandboxId)
 
-    const resourceMetrics: {
-      used_disk: number
-      used_cpu: number
-      used_mem: number
-    } = await this.sandboxRepository
-      .createQueryBuilder('sandbox')
-      .select([
-        'SUM(CASE WHEN sandbox.state NOT IN (:...ignoredStates) THEN sandbox.disk ELSE 0 END) as used_disk',
-        'SUM(CASE WHEN sandbox.state NOT IN (:...inactiveStates) THEN sandbox.cpu ELSE 0 END) as used_cpu',
-        'SUM(CASE WHEN sandbox.state NOT IN (:...inactiveStates) THEN sandbox.mem ELSE 0 END) as used_mem',
-      ])
-      .where('sandbox.organizationId = :organizationId', { organizationId: organization.id })
-      .andWhere(
-        excludeSandboxId ? 'sandbox.id != :excludeSandboxId' : '1=1',
-        excludeSandboxId ? { excludeSandboxId } : {},
-      )
-      .setParameter('ignoredStates', ignoredStates)
-      .setParameter('inactiveStates', inactiveStates)
-      .getRawOne()
+    try {
+      if (usageOverview.currentCpuUsage + usageOverview.pendingCpuUsage > organization.totalCpuQuota) {
+        throw new ForbiddenException(`Total CPU quota exceeded. Maximum allowed: ${organization.totalCpuQuota}`)
+      }
 
-    const usedDisk = Number(resourceMetrics.used_disk) || 0
-    const usedCpu = Number(resourceMetrics.used_cpu) || 0
-    const usedMem = Number(resourceMetrics.used_mem) || 0
+      if (usageOverview.currentMemoryUsage + usageOverview.pendingMemoryUsage > organization.totalMemoryQuota) {
+        throw new ForbiddenException(
+          `Total memory quota exceeded. Maximum allowed: ${organization.totalMemoryQuota}GiB`,
+        )
+      }
 
-    if (usedDisk + disk > organization.totalDiskQuota) {
-      throw new ForbiddenException(
-        `Total disk quota exceeded (${usedDisk + disk}GB > ${organization.totalDiskQuota}GB)`,
-      )
-    }
-
-    // Check total resource quotas
-    if (usedCpu + cpu > organization.totalCpuQuota) {
-      throw new ForbiddenException(`Total CPU quota exceeded (${usedCpu + cpu} > ${organization.totalCpuQuota})`)
-    }
-
-    if (usedMem + memory > organization.totalMemoryQuota) {
-      throw new ForbiddenException(
-        `Total memory quota exceeded (${usedMem + memory}GB > ${organization.totalMemoryQuota}GB)`,
-      )
+      if (usageOverview.currentDiskUsage + usageOverview.pendingDiskUsage > organization.totalDiskQuota) {
+        throw new ForbiddenException(`Total disk quota exceeded. Maximum allowed: ${organization.totalDiskQuota}GiB`)
+      }
+    } catch (error) {
+      // rollback the pending usage
+      try {
+        await this.organizationUsageService.decrementPendingSandboxUsage(
+          organization.id,
+          pendingCpuIncremented ? cpu : undefined,
+          pendingMemoryIncremented ? memory : undefined,
+          pendingDiskIncremented ? disk : undefined,
+        )
+      } catch (error) {
+        this.logger.error(`Error rolling back pending usage: ${error}`)
+      }
+      throw error
     }
   }
 
@@ -276,6 +277,8 @@ export class SandboxService {
         gpu = createSandboxDto.gpu
       }
     }
+
+    this.organizationService.assertOrganizationIsNotSuspended(organization)
 
     await this.validateOrganizationQuotas(organization, cpu, mem, disk)
 
@@ -416,6 +419,8 @@ export class SandboxService {
     const mem = createSandboxDto.memory || DEFAULT_MEMORY
     const disk = createSandboxDto.disk || DEFAULT_DISK
     const gpu = createSandboxDto.gpu || DEFAULT_GPU
+
+    this.organizationService.assertOrganizationIsNotSuspended(organization)
 
     await this.validateOrganizationQuotas(organization, cpu, mem, disk)
 
@@ -647,16 +652,14 @@ export class SandboxService {
 
     this.organizationService.assertOrganizationIsNotSuspended(organization)
 
+    await this.validateOrganizationQuotas(organization, sandbox.cpu, sandbox.mem, sandbox.disk, sandbox.id)
+
     if (sandbox.runnerId) {
       // Add runner readiness check
       const runner = await this.runnerService.findOne(sandbox.runnerId)
       if (runner.state !== RunnerState.READY) {
         throw new SandboxError('Runner is not ready')
       }
-    } else {
-      //  restore operation
-      //  like a new sandbox creation, we need to validate quotas
-      await this.validateOrganizationQuotas(organization, sandbox.cpu, sandbox.mem, sandbox.disk, sandbox.id)
     }
 
     if (sandbox.pending) {

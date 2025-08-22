@@ -23,6 +23,7 @@ import { Snapshot } from '../sandbox/entities/snapshot.entity'
 import { Volume } from '../sandbox/entities/volume.entity'
 import { RedisLockProvider } from '../sandbox/common/redis-lock.provider'
 import { SnapshotRunner } from '../sandbox/entities/snapshot-runner.entity'
+import { OrganizationUsageService } from './services/organization-usage.service'
 
 @Module({
   imports: [
@@ -49,8 +50,15 @@ import { SnapshotRunner } from '../sandbox/entities/snapshot-runner.entity'
     OrganizationRoleService,
     OrganizationUserService,
     OrganizationInvitationService,
+    OrganizationUsageService,
     RedisLockProvider,
   ],
-  exports: [OrganizationService, OrganizationRoleService, OrganizationUserService, OrganizationInvitationService],
+  exports: [
+    OrganizationService,
+    OrganizationRoleService,
+    OrganizationUserService,
+    OrganizationInvitationService,
+    OrganizationUsageService,
+  ],
 })
 export class OrganizationModule {}
