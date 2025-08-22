@@ -45,6 +45,9 @@ import { SandboxStartAction } from './managers/sandbox-actions/sandbox-start.act
 import { SandboxStopAction } from './managers/sandbox-actions/sandbox-stop.action'
 import { SandboxDestroyAction } from './managers/sandbox-actions/sandbox-destroy.action'
 import { SandboxArchiveAction } from './managers/sandbox-actions/sandbox-archive.action'
+import { RegionController } from './controllers/region.controller'
+import { RegionService } from './services/region.service'
+import { Region } from './entities/region.entity'
 
 @Module({
   imports: [
@@ -52,7 +55,17 @@ import { SandboxArchiveAction } from './managers/sandbox-actions/sandbox-archive
     AuthModule,
     DockerRegistryModule,
     OrganizationModule,
-    TypeOrmModule.forFeature([Sandbox, Runner, Snapshot, BuildInfo, SnapshotRunner, DockerRegistry, WarmPool, Volume]),
+    TypeOrmModule.forFeature([
+      Sandbox,
+      Runner,
+      Snapshot,
+      BuildInfo,
+      SnapshotRunner,
+      DockerRegistry,
+      WarmPool,
+      Volume,
+      Region,
+    ]),
   ],
   controllers: [
     SandboxController,
@@ -62,6 +75,7 @@ import { SandboxArchiveAction } from './managers/sandbox-actions/sandbox-archive
     WorkspaceController,
     PreviewController,
     VolumeController,
+    RegionController,
   ],
   providers: [
     SandboxService,
@@ -84,8 +98,17 @@ import { SandboxArchiveAction } from './managers/sandbox-actions/sandbox-archive
     SandboxStopAction,
     SandboxDestroyAction,
     SandboxArchiveAction,
+    RegionService,
   ],
-  exports: [SandboxService, RunnerService, RedisLockProvider, SnapshotService, VolumeService, VolumeManager],
+  exports: [
+    SandboxService,
+    RunnerService,
+    RedisLockProvider,
+    SnapshotService,
+    VolumeService,
+    VolumeManager,
+    RegionService,
+  ],
 })
 export class SandboxModule {
   configure(consumer: MiddlewareConsumer) {
