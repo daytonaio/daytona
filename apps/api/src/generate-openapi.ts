@@ -4,6 +4,7 @@ import { NestFactory } from '@nestjs/core'
 import { AppModule } from './app.module'
 import { SwaggerModule } from '@nestjs/swagger'
 import { getOpenApiConfig } from './openapi.config'
+import { addWebhookDocumentation } from './openapi-webhooks'
 
 async function generateOpenAPI() {
   const app = await NestFactory.create(AppModule, {
@@ -11,8 +12,12 @@ async function generateOpenAPI() {
   })
 
   const config = getOpenApiConfig('http://localhost:3000')
-  const document = SwaggerModule.createDocument(app, config)
-  fs.writeFileSync('./dist/apps/api/openapi.json', JSON.stringify(document, null, 2))
+  const document = {
+    ...SwaggerModule.createDocument(app, config),
+    openapi: '3.1.0',
+  }
+  const documentWithWebhooks = addWebhookDocumentation(document)
+  fs.writeFileSync('./dist/apps/api/openapi.json', JSON.stringify(documentWithWebhooks, null, 2))
 
   await app.close()
   console.log('OpenAPI specification generated successfully!')
