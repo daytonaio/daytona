@@ -13,7 +13,7 @@ if [ -z "$SANDBOXES" ]; then
 fi
 
 # Remove old Daytona entries
-sudo sed -i '/# DAYTONA_SANDBOXES_START/,/# DAYTONA_SANDBOXES_END/d' /etc/hosts
+sudo sed -i.tmp '/# DAYTONA_SANDBOXES_START/,/# DAYTONA_SANDBOXES_END/d' /etc/hosts && sudo mv /etc/hosts.tmp /etc/hosts
 
 # Add new entries
 echo "# DAYTONA_SANDBOXES_START" | sudo tee -a /etc/hosts

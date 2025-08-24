@@ -64,6 +64,8 @@
   "sidebarconfig.processCodeExecutionDescription": "Learn about running commands and code in isolated environments using the Daytona SDK.",
   "sidebarconfig.logStreaming": "Log Streaming",
   "sidebarconfig.logStreamingDescription": "Learn how to stream logs from your Sandboxes using the Daytona SDK.",
+  "sidebarconfig.fileWatching": "File Watching",
+  "sidebarconfig.fileWatchingDescription": "Learn how to use file-watching in your Sandboxes using the Daytona SDK.",
   "sidebarconfig.computerUse": "Computer Use",
   "sidebarconfig.computerUseLinux": "Linux",
   "sidebarconfig.computerUseLinuxDescription": "Computer use capabilities and automation for Linux environments.",

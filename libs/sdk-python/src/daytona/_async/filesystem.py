@@ -11,7 +11,7 @@ from typing import List, Union, overload
 import aiofiles
 import aiofiles.os
 import httpx
-import websockets
+import websocket
 from daytona_api_client_async import (
     FileInfo,
     Match,
@@ -590,13 +590,19 @@ class AsyncFileSystem:
             f"&DAYTONA_SANDBOX_AUTH_KEY={preview_link.token}"
         )
 
-        # Create WebSocket connection
-        websocket = await websockets.connect(ws_url)
+        try:
+            # Use websocket-client in a thread since it's synchronous
+            ws_connection = await asyncio.to_thread(
+                websocket.create_connection, ws_url, header=["X-Daytona-Preview-Token: " + preview_link.token]
+            )
+        except Exception as e:
+            raise Exception(f"Failed to establish WebSocket connection: {e}") from e
 
         # Create a task to handle the WebSocket connection
         async def handle_websocket():
             try:
-                async for message in websocket:
+                while True:
+                    message = await asyncio.to_thread(ws_connection.recv)
                     try:
                         data = json.loads(message)
                         event = FilesystemEvent(
@@ -614,10 +620,11 @@ class AsyncFileSystem:
                         # Only log parsing errors in development
                         if os.getenv("NODE_ENV") == "development":
                             print(f"Warning: Failed to parse filesystem event: {e}")
-            except websockets.exceptions.ConnectionClosed:
+            except Exception:
+                # Only log connection errors during initial connection
                 pass
             finally:
-                await websocket.close()
+                await asyncio.to_thread(ws_connection.close)
 
         # Start the WebSocket handler task
         task = asyncio.create_task(handle_websocket())
@@ -625,6 +632,6 @@ class AsyncFileSystem:
         # Return a handle that can close the connection
         def close_func():
             task.cancel()
-            asyncio.create_task(websocket.close())
+            asyncio.create_task(asyncio.to_thread(ws_connection.close))
 
         return WatchHandle(close_func)
