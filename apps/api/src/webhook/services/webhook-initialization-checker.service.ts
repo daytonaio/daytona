@@ -25,7 +25,7 @@ export class WebhookInitializationCheckerService {
       where: { organizationId },
     })
 
-    return initialization?.endpointsCreated === true && initialization?.svixApplicationCreated === true
+    return initialization?.svixApplicationCreated === true
   }
 
   /**

@@ -13,11 +13,6 @@ export class WebhookInitialization {
   @Column({
     default: false,
   })
-  endpointsCreated: boolean
-
-  @Column({
-    default: false,
-  })
   svixApplicationCreated: boolean
 
   @Column({

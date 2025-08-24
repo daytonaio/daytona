@@ -6,11 +6,8 @@
 import { Module } from '@nestjs/common'
 import { TypeOrmModule } from '@nestjs/typeorm'
 import { WebhookService } from './services/webhook.service'
-import { WebhookGateway } from './gateways/webhook.gateway'
 import { WebhookController } from './controllers/webhook.controller'
 import { WebhookEventHandlerService } from './services/webhook-event-handler.service'
-import { WebhookEndpointInitializerService } from './services/webhook-endpoint-initializer.service'
-import { WebhookInitializationManagerService } from './services/webhook-initialization-manager.service'
 import { WebhookInitializationCheckerService } from './services/webhook-initialization-checker.service'
 import { WebhookInitialization } from './entities/webhook-initialization.entity'
 import { OrganizationModule } from '../organization/organization.module'
@@ -20,14 +17,7 @@ import { AuthModule } from '../auth/auth.module'
 @Module({
   imports: [OrganizationModule, TypedConfigModule, TypeOrmModule.forFeature([WebhookInitialization]), AuthModule],
   controllers: [WebhookController],
-  providers: [
-    WebhookService,
-    WebhookGateway,
-    WebhookEventHandlerService,
-    WebhookEndpointInitializerService,
-    WebhookInitializationManagerService,
-    WebhookInitializationCheckerService,
-  ],
-  exports: [WebhookService, WebhookInitializationManagerService],
+  providers: [WebhookService, WebhookEventHandlerService, WebhookInitializationCheckerService],
+  exports: [WebhookService],
 })
 export class WebhookModule {}

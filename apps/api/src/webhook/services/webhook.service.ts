@@ -29,6 +29,7 @@ export class WebhookService implements OnModuleInit {
         this.svix = new Svix(svixAuthToken, { serverUrl })
       } else {
         this.svix = new Svix(svixAuthToken)
+        //this.svix.eventType.importOpenapi
       }
       this.logger.log('Svix webhook service initialized')
     } else {
@@ -107,63 +108,6 @@ export class WebhookService implements OnModuleInit {
       this.logger.debug(`Sent webhook ${eventType} to organization ${organizationId}`)
     } catch (error) {
       this.logger.error(`Failed to send webhook ${eventType} to organization ${organizationId}:`, error)
-      throw error
-    }
-  }
-
-  /**
-   * Create a webhook endpoint for an organization
-   */
-  async createEndpoint(organizationId: string, url: string, description?: string, eventTypes?: string[]): Promise<any> {
-    if (!this.svix) {
-      throw new Error('Svix not configured')
-    }
-
-    try {
-      const endpoint = await this.svix.endpoint.create(organizationId, {
-        url,
-        description: description || 'Webhook endpoint',
-        filterTypes: eventTypes || undefined,
-      })
-
-      this.logger.log(`Created webhook endpoint for organization ${organizationId}: ${endpoint.id}`)
-      return endpoint
-    } catch (error) {
-      this.logger.error(`Failed to create webhook endpoint for organization ${organizationId}:`, error)
-      throw error
-    }
-  }
-
-  /**
-   * List all webhook endpoints for an organization
-   */
-  async listEndpoints(organizationId: string): Promise<any[]> {
-    if (!this.svix) {
-      throw new Error('Svix not configured')
-    }
-
-    try {
-      const endpoints = await this.svix.endpoint.list(organizationId)
-      return endpoints.data
-    } catch (error) {
-      this.logger.error(`Failed to list webhook endpoints for organization ${organizationId}:`, error)
-      throw error
-    }
-  }
-
-  /**
-   * Delete a webhook endpoint
-   */
-  async deleteEndpoint(organizationId: string, endpointId: string): Promise<void> {
-    if (!this.svix) {
-      throw new Error('Svix not configured')
-    }
-
-    try {
-      await this.svix.endpoint.delete(organizationId, endpointId)
-      this.logger.log(`Deleted webhook endpoint ${endpointId} for organization ${organizationId}`)
-    } catch (error) {
-      this.logger.error(`Failed to delete webhook endpoint ${endpointId} for organization ${organizationId}:`, error)
       throw error
     }
   }
