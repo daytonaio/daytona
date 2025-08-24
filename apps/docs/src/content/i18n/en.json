@@ -64,6 +64,8 @@
   "sidebarconfig.processCodeExecutionDescription": "Learn about running commands and code in isolated environments using the Daytona SDK.",
   "sidebarconfig.logStreaming": "Log Streaming",
   "sidebarconfig.logStreamingDescription": "Learn how to stream logs from your Sandboxes using the Daytona SDK.",
+  "sidebarconfig.fileWatching": "File Watching",
+  "sidebarconfig.fileWatchingDescription": "Learn how to use file-watching in your Sandboxes using the Daytona SDK.",
   "sidebarconfig.other": "Other",
   "sidebarconfig.webTerminal": "Web Terminal",
   "sidebarconfig.webTerminalDescription": "Web Terminal access to Daytona Sandboxes.",

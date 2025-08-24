@@ -795,16 +795,31 @@ def replace_asyncio_create_task_with_threading(text: str) -> str:
         if not has_threading_import:
             # Insert after the last import but before other code
             insert_idx = 0
+            in_multiline_import = False
+            paren_count = 0
+
             for i, l in enumerate(final_lines):
+                line_stripped = l.strip()
+
+                # Check if we're in a multi-line import
+                if "(" in line_stripped and ("import" in line_stripped or "from" in line_stripped):
+                    paren_count += line_stripped.count("(") - line_stripped.count(")")
+                    in_multiline_import = paren_count > 0
+                elif in_multiline_import:
+                    paren_count += line_stripped.count("(") - line_stripped.count(")")
+                    in_multiline_import = paren_count > 0
+
+                # Only consider this a good insertion point if we're not in a multi-line import
                 if (
-                    l.strip().startswith("import")
-                    or l.strip().startswith("from")
-                    or l.strip().startswith("#")
-                    or not l.strip()
+                    (line_stripped.startswith("import") or line_stripped.startswith("from"))
+                    and not in_multiline_import
+                    or line_stripped.startswith("#")
+                    or not line_stripped
                 ):
                     insert_idx = i + 1
-                else:
+                elif not in_multiline_import and line_stripped and not line_stripped.startswith("#"):
                     break
+
             final_lines.insert(insert_idx, "import threading\n")
     return "".join(final_lines)
 

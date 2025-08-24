@@ -2,9 +2,11 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import asyncio
-import subprocess
 
-from daytona import AsyncDaytona, CreateSandboxFromImageParams, FilesystemEventType, Image, Resources, WatchOptions
+from daytona import AsyncDaytona, FilesystemEventType, WatchOptions
+
+# import os
+# import subprocess
 
 
 async def basic_file_watching(sandbox):
@@ -114,21 +116,9 @@ async def file_watching_with_async_callback(sandbox):
 async def main():
     """Main function demonstrating file watching capabilities."""
     async with AsyncDaytona() as daytona:
-        # Create an image with the workspace directory
-        image = Image.base("python:3.9.23-slim").run_commands("mkdir -p /workspace")
+        sandbox = await daytona.create()
 
-        params = CreateSandboxFromImageParams(
-            image=image,
-            language="python",
-            resources=Resources(
-                cpu=1,
-                memory=1,
-                disk=3,
-            ),
-        )
-        sandbox = await daytona.create(params, timeout=150, on_snapshot_create_logs=print)
-
-        # Local Hack for DNS resolution
+        # Local Hack for DNS resolution - run after sandbox creation
         # subprocess.run(["hack/file-watching/dns_fix.sh"], check=True)
 
         try:

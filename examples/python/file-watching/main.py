@@ -1,9 +1,10 @@
 # Copyright 2025 Daytona Platforms Inc.
 # SPDX-License-Identifier: Apache-2.0
 
+# import subprocess
 import time
-import subprocess
-from daytona import Daytona, CreateSandboxFromImageParams, FilesystemEventType, Resources, WatchOptions, Image
+
+from daytona import Daytona, FilesystemEventType, WatchOptions
 
 
 def basic_file_watching(sandbox):
@@ -113,21 +114,8 @@ def file_watching_with_sync_callback(sandbox):
 def main():
     """Main function demonstrating file watching capabilities."""
     daytona = Daytona()
+    sandbox = daytona.create()
 
-    # Create an image with the workspace directory
-    image = Image.base("python:3.9.23-slim").run_commands("mkdir -p /workspace")
-    
-    params = CreateSandboxFromImageParams(
-        image=image,
-        language="python",
-        resources=Resources(
-            cpu=1,
-            memory=1,
-            disk=3,
-        ),
-    )
-    sandbox = daytona.create(params, timeout=150, on_snapshot_create_logs=print)
-    
     # Local Hack for DNS resolution
     # subprocess.run(["hack/file-watching/dns_fix.sh"], check=True)
 
@@ -151,4 +139,4 @@ if __name__ == "__main__":
     # export DAYTONA_TARGET="your-target"
     # export DAYTONA_ORGANIZATION_ID="your-organization-id"
 
-    main() 
+    main()

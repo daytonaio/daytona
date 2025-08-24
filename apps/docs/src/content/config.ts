@@ -270,6 +270,15 @@ export const getSidebarConfig = (
             icon: 'log.svg',
           },
         },
+        {
+          type: 'link',
+          href: localizePath('/docs/file-watching', locale),
+          label: labels['sidebarconfig.fileWatching'],
+          description: labels['sidebarconfig.fileWatchingDescription'],
+          attrs: {
+            icon: 'watch.svg',
+          },
+        },
       ],
     },
     {

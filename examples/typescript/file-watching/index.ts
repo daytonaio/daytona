@@ -1,4 +1,4 @@
-import { Daytona, Sandbox, Image, FilesystemEventType } from '@daytonaio/sdk'
+import { Daytona, Sandbox, FilesystemEventType } from '@daytonaio/sdk'
 import { execSync } from 'child_process'
 
 // Set up environment variables before running this example:
@@ -22,8 +22,6 @@ async function basicFileWatching(sandbox: Sandbox) {
 
   // Wait a bit for events to be processed
   await new Promise((resolve) => setTimeout(resolve, 2000))
-
-  // Stop watching
   await handle.close()
   console.log('Basic file watching completed')
 }
@@ -55,8 +53,6 @@ async function recursiveFileWatching(sandbox: Sandbox) {
 
   // Wait for events to be processed
   await new Promise((resolve) => setTimeout(resolve, 2000))
-
-  // Stop watching
   await handle.close()
   console.log('Recursive file watching completed')
 }
@@ -76,7 +72,6 @@ async function fileWatchingWithErrorHandling(sandbox: Sandbox) {
 
     // Wait for events
     await new Promise((resolve) => setTimeout(resolve, 2000))
-
     await handle.close()
     console.log('File watching with error handling completed')
   } catch (error) {
@@ -107,33 +102,13 @@ async function fileWatchingWithAsyncCallback(sandbox: Sandbox) {
 
   // Wait for all events to be processed
   await new Promise((resolve) => setTimeout(resolve, 3000))
-
   await handle.close()
   console.log(`Async file watching completed. Processed ${eventCount} events.`)
 }
 
 async function main() {
   const daytona = new Daytona()
-
-  // Create an image with the workspace directory
-  const image = Image.base('ubuntu:22.04').runCommands(
-    'apt-get update && apt-get install -y --no-install-recommends nodejs npm coreutils',
-    'curl -fsSL https://deb.nodesource.com/setup_20.x | bash -',
-    'apt-get install -y nodejs',
-    'npm install -g ts-node typescript',
-    'mkdir -p /workspace', // Create the workspace directory
-  )
-
-  // Create a new sandbox
-  const sandbox = await daytona.create({
-    image,
-    language: 'typescript',
-    resources: {
-      cpu: 1,
-      memory: 1,
-      disk: 3,
-    },
-  })
+  const sandbox = await daytona.create()
 
   // Local Hack for DNS resolution
   // execSync('hack/file-watching/dns_fix.sh', { stdio: 'inherit' })
@@ -146,7 +121,6 @@ async function main() {
   } catch (error) {
     console.error('Error with file watching:', error)
   } finally {
-    // Cleanup
     await daytona.delete(sandbox)
     console.log('File watching demo completed. Sandbox cleaned up.')
   }
