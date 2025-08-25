@@ -1,0 +1,32 @@
+---
+title: "API Keys"
+icon: tag
+---
+
+Daytona API keys are used to authenticate requests to the [Daytona API](/tools/api).
+
+The [Configuration](/configuration) page covers how to set up your environment variables, including the `DAYTONA_API_KEY` environment variable.
+
+To manage your API keys, go to the [Keys](https://app.daytona.io/dashboard/keys) section in the Dashboard. Click `Create Key` to generate a new key and copy it to your clipboard.
+
+{/* ## Expiration
+
+When creating a new API Key you can optionally set an expiration date for the key. If no expiration date is set, the key will never expire. */}
+
+## Permissions
+
+When adding a new API Key you will be prompted to select a set of permissions for the key:
+
+| Permission       | Description                                        |
+| ---------------- | -------------------------------------------------- |
+| **`Sandboxes`**  | Grants the ability to create and manage Sandboxes  |
+| **`Snapshots`**  | Grants the ability to create and manage Snapshots  |
+| **`Registries`** | Grants the ability to create and manage Registries |
+| **`Volumes`**    | Grants the ability to create and manage Volumes    |
+
+Each permission includes fine-grained scopes:
+
+- `write:*` for creating and updating
+- `delete:*` for deleting resources
+
+Example: `write:sandboxes`, `delete:sandboxes`.

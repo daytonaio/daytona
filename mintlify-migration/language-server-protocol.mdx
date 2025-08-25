@@ -1,0 +1,101 @@
+---
+title: "Language Server Protocol"
+icon: wave-pulse
+---
+
+The Daytona SDK provides Language Server Protocol (LSP) support through Sandbox instances. This enables advanced language features like code completion, diagnostics, and more.
+
+## Creating LSP Servers
+
+Daytona SDK provides an option to create LSP servers using Python and TypeScript. The `path_to_project` starting point defaults to the current Sandbox user’s root - e.g. `workspace/project` implies `/home/[username]/workspace/project`, but by starting with `/`, you may define an absolute path as well.
+
+<CodeGroup>
+
+```python Python
+from daytona import Daytona, LspLanguageId
+
+# Create Sandbox
+
+daytona = Daytona()
+sandbox = daytona.create()
+
+# Create LSP server for Python
+
+lsp_server = sandbox.create_lsp_server(
+    language_id=LspLanguageId.PYTHON,
+    path_to_project="workspace/project"
+)
+```
+
+```ts TypeScript
+import { Daytona, LspLanguageId } from '@daytonaio/sdk'
+
+// Create sandbox
+const daytona = new Daytona()
+const sandbox = await daytona.create({
+    language: 'typescript'
+})
+
+// Create LSP server for TypeScript
+const lspServer = await sandbox.createLspServer(
+    LspLanguageId.TYPESCRIPT,
+    "workspace/project"
+)
+```
+    
+</CodeGroup>
+
+## Supported Languages
+
+Daytona SDK provides an option to create LSP servers for various languages through the `LspLanguageId` enum in Python and TypeScript.
+
+<CodeGroup>
+
+```python Python
+from daytona import LspLanguageId
+
+# Available language IDs
+
+LspLanguageId.PYTHON
+LspLanguageId.TYPESCRIPT
+```
+
+```ts TypeScript
+import { LspLanguageId } from '@daytonaio/sdk'
+
+// Available language IDs
+LspLanguageId.PYTHON
+LspLanguageId.TYPESCRIPT
+```
+    
+</CodeGroup>
+
+* `LspLanguageId.PYTHON`: Python language server.
+* `LspLanguageId.TYPESCRIPT`: TypeScript/JavaScript language server.
+
+## LSP Features
+
+Daytona SDK provides various LSP features for code analysis and editing.
+
+### Code Completion
+
+Daytona SDK provides an option to get code completions for a specific position in a file using Python and TypeScript.
+
+<CodeGroup>
+
+```python Python
+completions = lsp_server.completions(
+    path="workspace/project/main.py",
+    position={"line": 10, "character": 15}
+)
+print(f"Completions: {completions}")
+```
+
+```ts Typescript
+const completions = await lspServer.completions(
+    "workspace/project/main.ts",
+    { line: 10, character: 15 }
+)
+console.log('Completions:', completions)
+```
+</CodeGroup>

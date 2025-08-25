@@ -1,0 +1,26 @@
+---
+title: "ExecuteResponse"
+---
+
+Response from the command execution.
+
+**Properties**:
+
+* `artifacts?` *ExecutionArtifacts* - Artifacts from the command execution
+
+* `exitCode` *number* - The exit code from the command execution
+
+* `result` *string* - The output from the command execution
+
+**Extends:**
+
+* `ExecuteResponse`
+
+## ExecutionArtifacts
+
+Artifacts from the command execution.
+
+**Properties**:
+
+* `charts?` *Chart\[]* - List of chart metadata from matplotlib
+* `stdout` *string* - Standard output from the command, same as `result` in `ExecuteResponse`

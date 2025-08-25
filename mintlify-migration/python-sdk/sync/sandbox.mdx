@@ -1,0 +1,404 @@
+---
+title: "Sandbox"
+---
+
+```py
+class Sandbox(SandboxDto)
+```
+
+Represents a Daytona Sandbox.
+
+**Attributes**:
+
+* `fs` *FileSystem* - File system operations interface.
+* `git` *Git* - Git operations interface.
+* `process` *Process* - Process execution interface.
+* `computer_use` *ComputerUse* - Computer use operations interface for desktop automation.
+* `id` *str* - Unique identifier for the Sandbox.
+* `organization_id` *str* - Organization ID of the Sandbox.
+* `snapshot` *str* - Daytona snapshot used to create the Sandbox.
+* `user` *str* - OS user running in the Sandbox.
+* `env` *Dict\[str, str]* - Environment variables set in the Sandbox.
+* `labels` *Dict\[str, str]* - Custom labels attached to the Sandbox.
+* `public` *bool* - Whether the Sandbox is publicly accessible.
+* `target` *str* - Target location of the runner where the Sandbox runs.
+* `cpu` *int* - Number of CPUs allocated to the Sandbox.
+* `gpu` *int* - Number of GPUs allocated to the Sandbox.
+* `memory` *int* - Amount of memory allocated to the Sandbox in GiB.
+* `disk` *int* - Amount of disk space allocated to the Sandbox in GiB.
+* `state` *SandboxState* - Current state of the Sandbox (e.g., “started”, “stopped”).
+* `error_reason` *str* - Error message if Sandbox is in error state.
+* `backup_state` *SandboxBackupStateEnum* - Current state of Sandbox backup.
+* `backup_created_at` *str* - When the backup was created.
+* `auto_stop_interval` *int* - Auto-stop interval in minutes.
+* `auto_archive_interval` *int* - Auto-archive interval in minutes.
+* `auto_delete_interval` *int* - Auto-delete interval in minutes.
+* `runner_domain` *str* - Domain name of the Sandbox runner.
+* `volumes` *List\[str]* - Volumes attached to the Sandbox.
+* `build_info` *str* - Build information for the Sandbox if it was created from dynamic build.
+* `created_at` *str* - When the Sandbox was created.
+* `updated_at` *str* - When the Sandbox was last updated.
+
+#### Sandbox.\_\_init\_\_
+
+```py
+def __init__(sandbox_dto: SandboxDto, sandbox_api: SandboxApi,
+             toolbox_api: ToolboxApi, code_toolbox: SandboxCodeToolbox)
+```
+
+Initialize a new Sandbox instance.
+
+**Arguments**:
+
+* `id` *str* - Unique identifier for the Sandbox.
+* `instance` *SandboxInstance* - The underlying Sandbox instance.
+* `sandbox_api` *SandboxApi* - API client for Sandbox operations.
+* `toolbox_api` *ToolboxApi* - API client for toolbox operations.
+* `code_toolbox` *SandboxCodeToolbox* - Language-specific toolbox implementation.
+
+#### Sandbox.refresh\_data
+
+```python
+def refresh_data() -> None
+```
+
+Refreshes the Sandbox data from the API.
+
+**Example**:
+
+```python
+sandbox.refresh_data()
+print(f"Sandbox {sandbox.id}:")
+print(f"State: {sandbox.state}")
+print(f"Resources: {sandbox.cpu} CPU, {sandbox.memory} GiB RAM")
+```
+
+#### Sandbox.get\_user\_root\_dir
+
+```python
+@intercept_errors(message_prefix="Failed to get sandbox root directory: ")
+def get_user_root_dir() -> str
+```
+
+Gets the root directory path for the logged in user inside the Sandbox.
+
+**Returns**:
+
+* `str` - The absolute path to the Sandbox root directory for the logged in user.
+
+**Example**:
+
+```python
+root_dir = sandbox.get_user_root_dir()
+print(f"Sandbox root: {root_dir}")
+```
+
+#### Sandbox.create\_lsp\_server
+
+```python
+def create_lsp_server(language_id: LspLanguageId,
+                      path_to_project: str) -> LspServer
+```
+
+Creates a new Language Server Protocol (LSP) server instance.
+
+The LSP server provides language-specific features like code completion, diagnostics, and more.
+
+**Arguments**:
+
+* `language_id` *LspLanguageId* - The language server type (e.g., LspLanguageId.PYTHON).
+* `path_to_project` *str* - Path to the project root directory. Relative paths are resolved based on the user’s root directory.
+
+**Returns**:
+
+* `LspServer` - A new LSP server instance configured for the specified language.
+
+**Example**:
+
+```py
+lsp = sandbox.create_lsp_server("python", "workspace/project")
+```
+
+#### Sandbox.set\_labels
+
+```python
+@intercept_errors(message_prefix="Failed to set labels: ")
+def set_labels(labels: Dict[str, str]) -> Dict[str, str]
+```
+
+Sets labels for the Sandbox.
+
+Labels are key-value pairs that can be used to organize and identify Sandboxes.
+
+**Arguments**:
+
+* `labels` *Dict\[str, str]* - Dictionary of key-value pairs representing Sandbox labels.
+
+**Returns**:
+
+Dict\[str, str]: Dictionary containing the updated Sandbox labels.
+
+**Example**:
+
+```python
+new_labels = sandbox.set_labels({
+    "project": "my-project",
+    "environment": "development",
+    "team": "backend"
+})
+print(f"Updated labels: {new_labels}")
+```
+
+#### Sandbox.start
+
+```python
+@intercept_errors(message_prefix="Failed to start sandbox: ")
+@with_timeout(error_message=lambda self, timeout: (
+    f"Sandbox {self.id} failed to start within the {timeout} seconds timeout period"
+))
+def start(timeout: Optional[float] = 60)
+```
+
+Starts the Sandbox and waits for it to be ready.
+
+**Arguments**:
+
+* `timeout` *Optional\[float]* - Maximum time to wait in seconds. 0 means no timeout. Default is 60 seconds.
+
+**Raises**:
+
+* `DaytonaError` - If timeout is negative. If sandbox fails to start or times out.
+
+**Example**:
+
+```py
+sandbox = daytona.get_current_sandbox("my-sandbox")
+sandbox.start(timeout=40)  # Wait up to 40 seconds
+print("Sandbox started successfully")
+```
+
+#### Sandbox.stop
+
+```python
+@intercept_errors(message_prefix="Failed to stop sandbox: ")
+@with_timeout(error_message=lambda self, timeout: (
+    f"Sandbox {self.id} failed to stop within the {timeout} seconds timeout period"
+))
+def stop(timeout: Optional[float] = 60)
+```
+
+Stops the Sandbox and waits for it to be fully stopped.
+
+**Arguments**:
+
+* `timeout` *Optional\[float]* - Maximum time to wait in seconds. 0 means no timeout. Default is 60 seconds.
+
+**Raises**:
+
+* `DaytonaError` - If timeout is negative; If sandbox fails to stop or times out
+
+**Example**:
+
+```python
+sandbox = daytona.get_current_sandbox("my-sandbox")
+sandbox.stop()
+print("Sandbox stopped successfully")
+```
+
+#### Sandbox.delete
+
+```python
+def delete() -> None
+```
+
+Deletes the Sandbox.
+
+#### Sandbox.wait\_for\_sandbox\_start
+
+```python
+@intercept_errors(
+    message_prefix="Failure during waiting for sandbox to start: ")
+@with_timeout(error_message=lambda self, timeout: (
+    f"Sandbox {self.id} failed to become ready within the {timeout} seconds timeout period"
+))
+def wait_for_sandbox_start(timeout: Optional[float] = 60) -> None
+```
+
+Waits for the Sandbox to reach the ‘started’ state. Polls the Sandbox status until it reaches the ‘started’ state, encounters an error or times out.
+
+**Arguments**:
+
+* `timeout` *Optional\[float]* - Maximum time to wait in seconds. 0 means no timeout. Default is 60 seconds.
+
+**Raises**:
+
+* `DaytonaError` - If timeout is negative; If Sandbox fails to start or times out
+
+#### Sandbox.wait\_for\_sandbox\_stop
+
+```python
+@intercept_errors(
+    message_prefix="Failure during waiting for sandbox to stop: ")
+@with_timeout(error_message=lambda self, timeout: (
+    f"Sandbox {self.id} failed to become stopped within the {timeout} seconds timeout period"
+))
+def wait_for_sandbox_stop(timeout: Optional[float] = 60) -> None
+```
+
+Waits for the Sandbox to reach the ‘stopped’ state. Polls the Sandbox status until it reaches the ‘stopped’ state, encounters an error or times out. It will wait up to 60 seconds for the Sandbox to stop.
+
+**Arguments**:
+
+* `timeout` *Optional\[float]* - Maximum time to wait in seconds. 0 means no timeout. Default is 60 seconds.
+
+**Raises**:
+
+* `DaytonaError` - If timeout is negative. If Sandbox fails to stop or times out.
+
+#### Sandbox.set\_autostop\_interval
+
+```python
+@intercept_errors(message_prefix="Failed to set auto-stop interval: ")
+def set_autostop_interval(interval: int) -> None
+```
+
+Sets the auto-stop interval for the Sandbox.
+
+The Sandbox will automatically stop after being idle (no new events) for the specified interval. Events include any state changes or interactions with the Sandbox through the SDK. Interactions using Sandbox Previews are not included.
+
+**Arguments**:
+
+* `interval` *int* - Number of minutes of inactivity before auto-stopping. Set to 0 to disable auto-stop. Defaults to 15.
+
+**Raises**:
+
+* `DaytonaError` - If interval is negative
+
+**Example**:
+
+```python
+# Auto-stop after 1 hour
+sandbox.set_autostop_interval(60)
+# Or disable auto-stop
+sandbox.set_autostop_interval(0)
+```
+
+#### Sandbox.set\_auto\_archive\_interval
+
+```python
+@intercept_errors(message_prefix="Failed to set auto-archive interval: ")
+def set_auto_archive_interval(interval: int) -> None
+```
+
+Sets the auto-archive interval for the Sandbox.
+
+The Sandbox will automatically archive after being continuously stopped for the specified interval.
+
+**Arguments**:
+
+* `interval` *int* - Number of minutes after which a continuously stopped Sandbox will be auto-archived. Set to 0 for the maximum interval. Default is 7 days.
+
+**Raises**:
+
+* `DaytonaError` - If interval is negative
+
+**Example**:
+
+```python
+# Auto-archive after 1 hour
+sandbox.set_autoarchive_interval(60)
+# Or use the maximum interval
+sandbox.set_autoarchive_interval(0)
+```
+
+#### Sandbox.set_auto_delete_interval
+
+```python
+@intercept_errors(message_prefix="Failed to set auto-delete interval: ")
+def set_auto_delete_interval(interval: int) -> None
+```
+
+Sets the auto-delete interval for the Sandbox.
+
+The Sandbox will automatically delete after being continuously stopped for the specified interval.
+
+**Arguments**:
+
+- `interval` *int* - Number of minutes after which a continuously stopped Sandbox will be auto-deleted. Set to negative value to disable auto-delete. Set to 0 to delete immediately upon stopping. By default, auto-delete is disabled.
+
+**Example**:
+
+```python
+# Auto-delete after 1 hour
+sandbox.set_auto_delete_interval(60)
+# Or delete immediately upon stopping
+sandbox.set_auto_delete_interval(0)
+# Or disable auto-delete
+sandbox.set_auto_delete_interval(-1)
+```
+
+#### Sandbox.get\_preview\_link
+
+```python
+@intercept_errors(message_prefix="Failed to get preview link: ")
+def get_preview_link(port: int) -> PortPreviewUrl
+```
+
+Retrieves the preview link for the sandbox at the specified port. If the port is closed, it will be opened automatically. For private sandboxes, a token is included to grant access to the URL.
+
+**Arguments**:
+
+* `port` *int* - The port to open the preview link on.
+
+**Returns**:
+
+* `PortPreviewUrl` - The response object for the preview link, which includes the `url` and the `token` (to access private sandboxes).
+
+**Example**:
+
+```python
+preview_link = sandbox.get_preview_link(3000)
+print(f"Preview URL: {preview_link.url}")
+print(f"Token: {preview_link.token}")
+```
+
+#### Sandbox.archive
+
+```python
+@intercept_errors(message_prefix="Failed to archive sandbox: ")
+def archive() -> None
+```
+
+Archives the sandbox, making it inactive and preserving its state. When sandboxes are archived, the entire filesystem state is moved to cost-effective object storage, making it possible to keep sandboxes available for an extended period. The tradeoff between archived and stopped states is that starting an archived sandbox takes more time, depending on its size. Sandbox must be stopped before archiving.
+
+## Resources
+
+```py
+@dataclass
+class Resources()
+```
+
+Resources configuration for Sandbox.
+
+**Attributes**:
+
+* `cpu` *Optional\[int]* - Number of CPU cores to allocate.
+* `memory` *Optional\[int]* - Amount of memory in GiB to allocate.
+* `disk` *Optional\[int]* - Amount of disk space in GiB to allocate.
+* `gpu` *Optional\[int]* - Number of GPUs to allocate.
+
+**Example**:
+
+```py
+resources = Resources(
+    cpu=2,
+    memory=4,  # 4GiB RAM
+    disk=20,   # 20GiB disk
+    gpu=1
+)
+params = CreateSandboxFromImageParams(
+    image=Image.debian_slim("3.12").pip_install(["numpy", "pandas"]),
+    language="python",
+    resources=resources
+)
+```

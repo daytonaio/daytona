@@ -1,0 +1,210 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "maple",
+  "name": "Daytona",
+  "colors": {
+    "primary": "#2ECC71",
+    "light": "#2ECC71",
+    "dark": "#2ECC71"
+  },
+  "contextual": {
+    "options": [
+      "copy",
+      "view",
+      "chatgpt",
+      "claude"
+    ]
+  },
+  "fonts": {
+    "heading": {
+      "family": "Roboto Mono"
+    },
+    "body": {
+      "family": ""
+    }
+  },
+  "favicon": "/favicon.png",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "icon": "house",
+        "groups": [
+          {
+            "group": " ",
+            "pages": [
+              "docs",
+              "tools/api",
+              "tools/cli"
+            ]
+          },
+          {
+            "group": "Introduction",
+            "pages": [
+              "getting-started",
+              "configuration",
+              "sandbox-management",
+              "snapshots",
+              "declarative-builder",
+              "volumes"
+            ]
+          },
+          {
+            "group": "Account management",
+            "pages": [
+              "api-keys",
+              "organizations",
+              "limits",
+              "billing",
+              "linked-accounts"
+            ]
+          },
+          {
+            "group": "Agent Toolbox",
+            "pages": [
+              "file-system-operations",
+              "git-operations",
+              "language-server-protocol",
+              "process-code-execution",
+              "log-streaming"
+            ]
+          },
+          {
+            "group": "Other",
+            "pages": [
+              "web-terminal",
+              "preview-and-authentication",
+              "audit-logs",
+              "regions",
+              "mcp-server",
+              "data-analysis-with-ai"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "TS SDK Reference",
+        "icon": "cube",
+        "groups": [
+          {
+            "group": "TS SDK Reference",
+            "pages": [
+              "typescript-sdk",
+              "typescript-sdk/daytona",
+              "typescript-sdk/sandbox",
+              "typescript-sdk/charts",
+              "typescript-sdk/computer-use",
+              "typescript-sdk/errors",
+              "typescript-sdk/execute-response",
+              "typescript-sdk/file-system",
+              "typescript-sdk/git",
+              "typescript-sdk/image",
+              "typescript-sdk/lsp-server",
+              "typescript-sdk/object-storage",
+              "typescript-sdk/process",
+              "typescript-sdk/snapshot",
+              "typescript-sdk/volume"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Python SDK Reference",
+        "icon": "cube",
+        "groups": [
+          {
+            "group": "Python SDK Reference",
+            "pages": [
+              "python-sdk"
+            ]
+          },
+          {
+            "group": "Common",
+            "pages": [
+              "python-sdk/common/charts",
+              "python-sdk/common/errors",
+              "python-sdk/common/image"
+            ]
+          },
+          {
+            "group": "Sync Python",
+            "pages": [
+              "python-sdk/sync/daytona",
+              "python-sdk/sync/sandbox",
+              "python-sdk/sync/compute-use",
+              "python-sdk/sync/file-system",
+              "python-sdk/sync/git",
+              "python-sdk/sync/lsp-server",
+              "python-sdk/sync/object-storage",
+              "python-sdk/sync/process",
+              "python-sdk/sync/snapshot",
+              "python-sdk/sync/volume"
+            ]
+          },
+          {
+            "group": "Async Python",
+            "pages": [
+              "python-sdk/async/async-daytona",
+              "python-sdk/async/async-sandbox",
+              "python-sdk/async/async-compute-use",
+              "python-sdk/async/async-file-system",
+              "python-sdk/async/async-git",
+              "python-sdk/async/async-lsp-server",
+              "python-sdk/async/async-object-storage",
+              "python-sdk/async/async-snapshot",
+              "python-sdk/async/async-volume"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "icon": "server",
+        "openapi": {
+          "source": "openapi.json",
+          "directory": "api-reference"
+        }
+      }
+    ],
+    "global": {
+      "anchors": [
+        {
+          "anchor": "Community",
+          "href": "https://www.daytona.io/dotfiles/updates/stay-updated-with-the-daytona-community-slack",
+          "icon": "slack"
+        },
+        {
+          "anchor": "Blog",
+          "href": "https://www.daytona.io/dotfiles",
+          "icon": "newspaper"
+        }
+      ]
+    }
+  },
+  "logo": {
+    "light": "/logo/light.svg",
+    "dark": "/logo/dark.svg"
+  },
+  "navbar": {
+    "links": [
+      {
+        "label": "Sign in",
+        "href": "https://app.daytona.io/"
+      }
+    ],
+    "primary": {
+      "type": "button",
+      "label": "Get a Demo",
+      "href": "https://www.daytona.io/contact"
+    }
+  },
+  "footer": {
+    "socials": {
+      "github": "https://github.com/daytonaio/daytona",
+      "slack": "https://go.daytona.io/slack",
+      "x": "https://twitter.com/daytonaio",
+      "youtube": "https://youtube.com/@daytonaio",
+      "linkedin": "https://www.linkedin.com/company/daytonaio/"
+    }
+  }
+}

@@ -1,0 +1,4 @@
+[ZoneTransfer]
+ZoneId=3
+ReferrerUrl=https://cloudconvert.com/
+HostUrl=https://eu-central.storage.cloudconvert.com/tasks/e213786e-a97e-4faa-81f4-2cd4e925352c/sandbox-states.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=cloudconvert-production%2F20250815%2Ffra%2Fs3%2Faws4_request&X-Amz-Date=20250815T171253Z&X-Amz-Expires=86400&X-Amz-Signature=d29a7e6c3acb92b40bf7348445aa459e0d7a7bf446d0fc94e8895c22d98d49fb&X-Amz-SignedHeaders=host&response-content-disposition=attachment%3B%20filename%3D%22sandbox-states.png%22&response-content-type=image%2Fpng&x-id=GetObject

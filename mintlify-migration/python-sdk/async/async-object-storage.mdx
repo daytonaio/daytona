@@ -1,0 +1,31 @@
+---
+title: "AsyncObjectStorage"
+---
+
+```py
+class AsyncObjectStorage()
+```
+
+AsyncObjectStorage class for interacting with object storage services.
+
+**Attributes**:
+
+* `endpoint_url` *str* - The endpoint URL for the object storage service.
+* `aws_access_key_id` *str* - The access key ID for the object storage service.
+* `aws_secret_access_key` *str* - The secret access key for the object storage service.
+* `aws_session_token` *str* - The session token for the object storage service. Used for temporary credentials.
+* `bucket_name` *str* - The name of the bucket to use.
+
+#### AsyncObjectStorage.upload
+
+```python
+async def upload(path, organization_id, archive_base_path=None) -> str
+```
+
+Uploads a file to the object storage service.
+
+**Arguments**:
+
+* `path` *str* - The path to the file to upload.
+* `organization_id` *str* - The organization ID to use.
+* `archive_base_path` *str* - The base path to use for the archive.
