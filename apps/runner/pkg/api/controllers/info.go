@@ -24,21 +24,18 @@ func RunnerInfo(ctx *gin.Context) {
 	runnerInstance := runner.GetInstance(nil)
 
 	// Get cached system metrics
-	cpuUsage, ramUsage, diskUsage, allocatedCpu, allocatedMemory, allocatedDisk, snapshotCount := runnerInstance.MetricsService.GetCachedSystemMetrics(ctx.Request.Context())
-
-	// Create metrics object
-	metrics := &dto.RunnerMetrics{
-		CurrentCpuUsagePercentage:    cpuUsage,
-		CurrentMemoryUsagePercentage: ramUsage,
-		CurrentDiskUsagePercentage:   diskUsage,
-		CurrentAllocatedCpu:          allocatedCpu,
-		CurrentAllocatedMemoryGiB:    allocatedMemory,
-		CurrentAllocatedDiskGiB:      allocatedDisk,
-		CurrentSnapshotCount:         snapshotCount,
-	}
+	metrics := runnerInstance.MetricsService.GetSystemMetrics(ctx.Request.Context())
 
 	response := dto.RunnerInfoResponseDTO{
-		Metrics: metrics,
+		Metrics: &dto.RunnerMetrics{
+			CurrentCpuUsagePercentage:    metrics.CPUUsage,
+			CurrentMemoryUsagePercentage: metrics.RAMUsage,
+			CurrentDiskUsagePercentage:   metrics.DiskUsage,
+			CurrentAllocatedCpu:          metrics.AllocatedCPU,
+			CurrentAllocatedMemoryGiB:    metrics.AllocatedMemory,
+			CurrentAllocatedDiskGiB:      metrics.AllocatedDisk,
+			CurrentSnapshotCount:         metrics.SnapshotCount,
+		},
 	}
 
 	ctx.JSON(http.StatusOK, response)
