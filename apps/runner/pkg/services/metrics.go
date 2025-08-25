@@ -1,101 +1,431 @@
-// Copyright 2025 Daytona Platforms Inc.
-// SPDX-License-Identifier: AGPL-3.0
-
 package services
 
 import (
 	"bufio"
 	"context"
 	"fmt"
-	"os"
-	"os/exec"
+	"io"
+	"net/http"
 	"strconv"
 	"strings"
-	"syscall"
+	"sync"
 	"time"
 
 	"github.com/daytonaio/runner/pkg/cache"
 	"github.com/daytonaio/runner/pkg/docker"
 	"github.com/daytonaio/runner/pkg/models"
-	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/image"
 )
 
+const systemMetricsKey = "__system_metrics__"
+
+type MetricsServiceConfig struct {
+	Endpoint string
+	Cache    cache.ICache[models.SystemMetrics]
+	Docker   *docker.DockerClient
+	Interval time.Duration
+}
+
 type MetricsService struct {
-	docker *docker.DockerClient
-	cache  cache.IRunnerCache
+	endpoint   string
+	httpClient *http.Client
+	cache      cache.ICache[models.SystemMetrics]
+	docker     *docker.DockerClient
+	interval   time.Duration
+	cpuHistory *CPUMetricsHistory
 }
 
-type cpuStats struct {
-	user    uint64
-	nice    uint64
-	system  uint64
-	idle    uint64
-	iowait  uint64
-	irq     uint64
-	softirq uint64
-	steal   uint64
+// CPUMetricsHistory stores previous CPU metrics for delta calculation
+type CPUMetricsHistory struct {
+	mu          sync.RWMutex
+	prevMetrics map[string]float64
+	lastUpdate  time.Time
 }
 
-func NewMetricsService(docker *docker.DockerClient, cache cache.IRunnerCache) *MetricsService {
+// NewPrometheusParser creates a new parser instance
+func NewMetricsService(config MetricsServiceConfig) *MetricsService {
 	return &MetricsService{
-		docker: docker,
-		cache:  cache,
+		endpoint: config.Endpoint,
+		httpClient: &http.Client{
+			Timeout: 30 * time.Second,
+		},
+		cache:    config.Cache,
+		docker:   config.Docker,
+		interval: config.Interval,
+		cpuHistory: &CPUMetricsHistory{
+			prevMetrics: make(map[string]float64),
+		},
 	}
 }
 
-func (m *MetricsService) GetSystemMetrics(ctx context.Context) (float64, float64, float64, error) {
-	cpuUsage, err := m.getCPUUsage()
+// FetchMetrics fetches metrics from the Prometheus endpoint
+func (s *MetricsService) fetchMetrics() (string, error) {
+	resp, err := s.httpClient.Get(s.endpoint)
 	if err != nil {
-		cpuUsage = -1.0
+		return "", fmt.Errorf("failed to fetch metrics: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("unexpected status code: %d", resp.StatusCode)
 	}
 
-	ramUsage, err := m.getRAMUsage()
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		ramUsage = -1.0
+		return "", fmt.Errorf("failed to read response body: %w", err)
 	}
 
-	diskUsage, err := m.getDiskUsage()
-	if err != nil {
-		diskUsage = -1.0
-	}
-
-	return cpuUsage, ramUsage, diskUsage, nil
+	return string(body), nil
 }
 
-func (m *MetricsService) GetAllocatedResources(ctx context.Context) (int64, int64, int64, error) {
-	containers, err := m.docker.ApiClient().ContainerList(ctx, container.ListOptions{All: true})
-	if err != nil {
-		return -1, -1, -1, err
-	}
+// ParseMetrics parses the Prometheus metrics text format
+func (s *MetricsService) parseMetrics(metricsText string) (*models.SystemMetrics, error) {
+	metrics := &models.SystemMetrics{}
 
-	var totalAllocatedCpuMicroseconds int64 = 0 // CPU quota in microseconds per period
-	var totalAllocatedMemoryBytes int64 = 0     // Memory in bytes
-	var totalAllocatedDiskBytes int64 = 0       // Disk in bytes
+	// Store raw metric values
+	metricValues := make(map[string]float64)
+	metricLabels := make(map[string]map[string]string)
 
-	for _, containerItem := range containers {
-		cpu, memory, disk, err := m.getContainerAllocatedResources(ctx, containerItem.ID)
-		if err == nil {
-			// For CPU and memory: only count running containers
-			if containerItem.State == "running" {
-				totalAllocatedCpuMicroseconds += cpu
-				totalAllocatedMemoryBytes += memory
+	scanner := bufio.NewScanner(strings.NewReader(metricsText))
+	for scanner.Scan() {
+		line := strings.TrimSpace(scanner.Text())
+
+		// Skip comments and empty lines
+		if line == "" || strings.HasPrefix(line, "#") {
+			continue
+		}
+
+		// Parse metric line - find the last space-separated value as the metric value
+		lastSpaceIndex := strings.LastIndex(line, " ")
+		if lastSpaceIndex == -1 {
+			continue
+		}
+
+		metricLabel := strings.TrimSpace(line[:lastSpaceIndex])
+		metricValue := strings.TrimSpace(line[lastSpaceIndex+1:])
+
+		// Parse the value
+		value, err := strconv.ParseFloat(metricValue, 64)
+		if err != nil {
+			continue
+		}
+
+		// Parse labels if present
+		labels := make(map[string]string)
+		metricName := metricLabel
+
+		if strings.Contains(metricLabel, "{") {
+			labelStart := strings.Index(metricLabel, "{")
+			labelEnd := strings.LastIndex(metricLabel, "}")
+			if labelEnd > labelStart {
+				labelStr := metricLabel[labelStart+1 : labelEnd]
+				actualMetricName := metricLabel[:labelStart]
+
+				// Parse labels - handle comma separation more carefully
+				labelPairs := s.splitLabels(labelStr)
+				for _, pair := range labelPairs {
+					pair = strings.TrimSpace(pair)
+					equalIndex := strings.Index(pair, "=")
+					if equalIndex > 0 {
+						key := strings.TrimSpace(pair[:equalIndex])
+						value := strings.TrimSpace(pair[equalIndex+1:])
+						// Remove quotes if present
+						key = strings.Trim(key, `"`)
+						value = strings.Trim(value, `"`)
+						labels[key] = value
+					}
+				}
+				metricName = actualMetricName
 			}
-			// For disk: count all containers (running and stopped)
-			totalAllocatedDiskBytes += disk
+		}
+
+		// Store metric value and labels
+		fullKey := metricName
+		if len(labels) > 0 {
+			// Create a unique key with labels for complex metrics
+			labelParts := make([]string, 0, len(labels))
+			for k, v := range labels {
+				labelParts = append(labelParts, k+"="+v)
+			}
+			fullKey = metricName + "{" + strings.Join(labelParts, ",") + "}"
+		}
+
+		metricValues[fullKey] = value
+		metricLabels[fullKey] = labels
+	}
+
+	// Parse and calculate all metrics
+	if err := s.parseAllMetrics(metrics, metricValues, metricLabels); err != nil {
+		return nil, fmt.Errorf("failed to parse metrics: %w", err)
+	}
+
+	return metrics, nil
+}
+
+// splitLabels splits label string on commas, but respects quoted values
+func (s *MetricsService) splitLabels(labelStr string) []string {
+	var labels []string
+	var current strings.Builder
+	inQuotes := false
+
+	for _, r := range labelStr {
+		switch r {
+		case '"':
+			inQuotes = !inQuotes
+			current.WriteRune(r)
+		case ',':
+			if !inQuotes {
+				if current.Len() > 0 {
+					labels = append(labels, current.String())
+					current.Reset()
+				}
+			} else {
+				current.WriteRune(r)
+			}
+		default:
+			current.WriteRune(r)
 		}
 	}
 
-	// Convert to original API units
-	totalAllocatedCpuVCPUs := totalAllocatedCpuMicroseconds / 100000           // Convert back to vCPUs
-	totalAllocatedMemoryGB := totalAllocatedMemoryBytes / (1024 * 1024 * 1024) // Convert back to GB
-	totalAllocatedDiskGB := totalAllocatedDiskBytes / (1024 * 1024 * 1024)     // Convert back to GB
+	if current.Len() > 0 {
+		labels = append(labels, current.String())
+	}
 
-	return totalAllocatedCpuVCPUs, totalAllocatedMemoryGB, totalAllocatedDiskGB, nil
+	return labels
 }
 
-func (m *MetricsService) GetSnapshotCount(ctx context.Context) (int, error) {
-	images, err := m.docker.ApiClient().ImageList(ctx, image.ListOptions{})
+// parseAllMetrics parses all required metrics
+func (s *MetricsService) parseAllMetrics(metrics *models.SystemMetrics, metricValues map[string]float64, metricLabels map[string]map[string]string) error {
+	// Parse CPU metrics
+	s.parseCPUMetrics(metrics, metricValues, metricLabels)
+
+	// Parse Memory metrics
+	s.parseMemoryMetrics(metrics, metricValues)
+
+	// Parse Disk metrics
+	s.parseDiskMetrics(metrics, metricValues, metricLabels)
+
+	return nil
+}
+
+// parseCPUMetrics calculates CPU usage using delta approach (like Grafana irate)
+func (s *MetricsService) parseCPUMetrics(metrics *models.SystemMetrics, metricValues map[string]float64, metricLabels map[string]map[string]string) {
+	// Count CPU cores
+	cpuCores := make(map[string]bool)
+	currentCPUMetrics := make(map[string]float64)
+
+	for key, value := range metricValues {
+		if strings.HasPrefix(key, "node_cpu_seconds_total") {
+			labels := metricLabels[key]
+			cpu := labels["cpu"]
+			mode := labels["mode"]
+
+			if cpu != "" && mode != "" {
+				cpuCores[cpu] = true
+				// Store current metrics for delta calculation
+				cpuKey := cpu + "_" + mode
+				currentCPUMetrics[cpuKey] = value
+			}
+		}
+	}
+
+	// Set allocated CPU
+	metrics.AllocatedCPU = int64(len(cpuCores))
+
+	s.cpuHistory.mu.Lock()
+	defer s.cpuHistory.mu.Unlock()
+
+	now := time.Now()
+
+	// If we have previous data, calculate deltas
+	if len(s.cpuHistory.prevMetrics) > 0 && !s.cpuHistory.lastUpdate.IsZero() {
+		timeDelta := now.Sub(s.cpuHistory.lastUpdate).Seconds()
+
+		if timeDelta > 0 && timeDelta < 300 { // Only use if reasonable time interval (< 5 minutes)
+			var totalIdleDelta, totalAllDelta float64
+
+			for cpu := range cpuCores {
+				var cpuTotalDelta, cpuIdleDelta float64
+
+				// Calculate deltas for each CPU mode
+				for _, mode := range []string{"idle", "user", "system", "iowait", "irq", "softirq", "steal", "guest", "guest_nice"} {
+					cpuKey := cpu + "_" + mode
+
+					if currentVal, exists := currentCPUMetrics[cpuKey]; exists {
+						if prevVal, hasPrev := s.cpuHistory.prevMetrics[cpuKey]; hasPrev {
+							delta := currentVal - prevVal
+							if delta >= 0 { // Ensure positive delta
+								cpuTotalDelta += delta
+								if mode == "idle" {
+									cpuIdleDelta = delta
+								}
+							}
+						}
+					}
+				}
+
+				totalAllDelta += cpuTotalDelta
+				totalIdleDelta += cpuIdleDelta
+			}
+
+			// Calculate CPU usage: (1 - idle_rate) * 100
+			if totalAllDelta > 0 {
+				idlePercent := totalIdleDelta / totalAllDelta
+				metrics.CPUUsage = (1 - idlePercent) * 100
+
+				// Ensure reasonable bounds
+				if metrics.CPUUsage < 0 {
+					metrics.CPUUsage = 0
+				} else if metrics.CPUUsage > 100 {
+					metrics.CPUUsage = 100
+				}
+			}
+		}
+	}
+
+	// Fallback to load average if delta calculation didn't work
+	if metrics.CPUUsage == 0 {
+		if load1, exists := metricValues["node_load1"]; exists && metrics.AllocatedCPU > 0 {
+			loadPercent := (load1 / float64(metrics.AllocatedCPU)) * 100
+			if loadPercent > 100 {
+				loadPercent = 100
+			}
+			metrics.CPUUsage = loadPercent
+		}
+	}
+
+	// Store current metrics for next iteration
+	s.cpuHistory.prevMetrics = currentCPUMetrics
+	s.cpuHistory.lastUpdate = now
+}
+
+// parseMemoryMetrics calculates RAM usage and allocated memory using Grafana-style formula
+func (s *MetricsService) parseMemoryMetrics(metrics *models.SystemMetrics, metricValues map[string]float64) {
+	// Grafana formula: sum(node_memory_MemTotal_bytes)
+	totalMemory := metricValues["node_memory_MemTotal_bytes"]
+
+	// Grafana formula components for memory usage:
+	// 100 * (1 - ((node_memory_MemFree_bytes + node_memory_Cached_bytes + node_memory_Buffers_bytes) / node_memory_MemTotal_bytes))
+	memFree := metricValues["node_memory_MemFree_bytes"]
+	memCached := metricValues["node_memory_Cached_bytes"]
+	memBuffers := metricValues["node_memory_Buffers_bytes"]
+
+	if totalMemory > 0 {
+		// Convert bytes to gigabytes (1 GB = 1024^3 bytes)
+		metrics.AllocatedMemory = int64(totalMemory / (1024 * 1024 * 1024))
+
+		// Calculate memory usage using Grafana formula
+		availableMemory := memFree + memCached + memBuffers
+		metrics.RAMUsage = 100 * (1 - (availableMemory / totalMemory))
+
+		// Ensure percentage is within valid range
+		if metrics.RAMUsage < 0 {
+			metrics.RAMUsage = 0
+		} else if metrics.RAMUsage > 100 {
+			metrics.RAMUsage = 100
+		}
+	}
+}
+
+// parseDiskMetrics calculates disk usage and allocated disk space using Grafana-style formula
+func (s *MetricsService) parseDiskMetrics(metrics *models.SystemMetrics, metricValues map[string]float64, metricLabels map[string]map[string]string) {
+	// Grafana queries focus on specific filesystem types and mount points
+	// We'll look for xfs filesystems and common mount points like /var/lib/docker, /, etc.
+
+	var totalDiskSize, totalDiskFree float64
+	validDevices := 0
+
+	// Parse filesystem metrics - focusing on main filesystems
+	// Grafana query: node_filesystem_size_bytes{fstype=~"xfs",mountpoint=~"/var/lib/docker"}
+	// We'll be more flexible and include common mount points and filesystem types
+
+	for key, value := range metricValues {
+		labels := metricLabels[key]
+		device := labels["device"]
+		mountpoint := labels["mountpoint"]
+		fstype := labels["fstype"]
+
+		if strings.HasPrefix(key, "node_filesystem_size_bytes") && s.isValidDiskDevice(device, mountpoint, fstype) {
+			totalDiskSize += value
+			validDevices++
+		}
+
+		if strings.HasPrefix(key, "node_filesystem_free_bytes") && s.isValidDiskDevice(device, mountpoint, fstype) {
+			totalDiskFree += value
+		}
+	}
+
+	if totalDiskSize > 0 {
+		// Convert bytes to gigabytes (1 GB = 1024^3 bytes)
+		metrics.AllocatedDisk = int64(totalDiskSize / (1024 * 1024 * 1024))
+
+		// Calculate disk usage using Grafana formula:
+		// 100*(1-(node_filesystem_free_bytes / node_filesystem_size_bytes))
+		metrics.DiskUsage = 100 * (1 - (totalDiskFree / totalDiskSize))
+
+		// Ensure percentage is within valid range
+		if metrics.DiskUsage < 0 {
+			metrics.DiskUsage = 0
+		} else if metrics.DiskUsage > 100 {
+			metrics.DiskUsage = 100
+		}
+	}
+}
+
+// isValidDiskDevice determines if a device should be included in disk calculations
+// Based on Grafana query patterns: fstype=~"xfs", physical devices, important mount points
+func (s *MetricsService) isValidDiskDevice(device, mountpoint, fstype string) bool {
+	// Skip non-physical devices
+	if !strings.HasPrefix(device, "/dev/") {
+		return false
+	}
+
+	// Skip loop devices and snap mounts
+	if strings.Contains(device, "loop") || strings.Contains(mountpoint, "snap") {
+		return false
+	}
+
+	// Include common filesystem types (xfs, ext4, ext3, etc.)
+	validFSTypes := []string{"xfs", "ext4", "ext3", "ext2", "btrfs"}
+	validFS := false
+	for _, validType := range validFSTypes {
+		if fstype == validType {
+			validFS = true
+			break
+		}
+	}
+	if !validFS {
+		return false
+	}
+
+	// Include important mount points or root filesystem
+	importantMounts := []string{"/", "/var/lib/docker", "/home", "/opt", "/usr", "/var"}
+	for _, mount := range importantMounts {
+		if mountpoint == mount || strings.HasPrefix(mountpoint, mount+"/") {
+			return true
+		}
+	}
+
+	// Include if it's a root mount or major partition
+	if mountpoint == "/" || (mountpoint != "" && !strings.Contains(mountpoint, "boot")) {
+		return true
+	}
+
+	return false
+}
+
+// GetSystemMetrics fetches and parses system metrics
+func (s *MetricsService) GetSystemMetrics(ctx context.Context) (*models.SystemMetrics, error) {
+	metricsText, err := s.fetchMetrics()
+	if err != nil {
+		return nil, err
+	}
+
+	return s.parseMetrics(metricsText)
+}
+
+func (s *MetricsService) GetSnapshotCount(ctx context.Context) (int, error) {
+	images, err := s.docker.ApiClient().ImageList(ctx, image.ListOptions{})
 	if err != nil {
 		return -1, nil // Return -1 on error
 	}
@@ -103,350 +433,95 @@ func (m *MetricsService) GetSnapshotCount(ctx context.Context) (int, error) {
 	return len(images), nil
 }
 
-func (m *MetricsService) getCPUUsage() (float64, error) {
-	// Read initial CPU stats
-	stats1, err := m.readCPUStats()
-	if err != nil {
-		return -1.0, err
-	}
-
-	// Wait a short period
-	time.Sleep(100 * time.Millisecond)
-
-	// Read CPU stats again
-	stats2, err := m.readCPUStats()
-	if err != nil {
-		return -1.0, err
-	}
-
-	// Calculate the difference
-	total1 := stats1.user + stats1.nice + stats1.system + stats1.idle + stats1.iowait + stats1.irq + stats1.softirq + stats1.steal
-	total2 := stats2.user + stats2.nice + stats2.system + stats2.idle + stats2.iowait + stats2.irq + stats2.softirq + stats2.steal
-
-	idle1 := stats1.idle + stats1.iowait
-	idle2 := stats2.idle + stats2.iowait
-
-	totalDiff := float64(total2 - total1)
-	idleDiff := float64(idle2 - idle1)
-
-	if totalDiff == 0 {
-		return -1.0, fmt.Errorf("no CPU time difference detected")
-	}
-
-	cpuUsage := (1.0 - idleDiff/totalDiff) * 100.0
-
-	// Ensure valid percentage range
-	if cpuUsage < 0 || cpuUsage > 100 {
-		return -1.0, fmt.Errorf("invalid CPU usage calculated: %f", cpuUsage)
-	}
-
-	return cpuUsage, nil
-}
-
-func (m *MetricsService) readCPUStats() (*cpuStats, error) {
-	file, err := os.Open("/proc/stat")
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-
-	scanner := bufio.NewScanner(file)
-	if !scanner.Scan() {
-		return nil, fmt.Errorf("failed to read CPU line from /proc/stat")
-	}
-
-	line := scanner.Text()
-	fields := strings.Fields(line)
-	if len(fields) < 8 || fields[0] != "cpu" {
-		return nil, fmt.Errorf("invalid CPU line format")
-	}
-
-	stats := &cpuStats{}
-	stats.user, _ = strconv.ParseUint(fields[1], 10, 64)
-	stats.nice, _ = strconv.ParseUint(fields[2], 10, 64)
-	stats.system, _ = strconv.ParseUint(fields[3], 10, 64)
-	stats.idle, _ = strconv.ParseUint(fields[4], 10, 64)
-	stats.iowait, _ = strconv.ParseUint(fields[5], 10, 64)
-	stats.irq, _ = strconv.ParseUint(fields[6], 10, 64)
-	stats.softirq, _ = strconv.ParseUint(fields[7], 10, 64)
-	if len(fields) > 8 {
-		stats.steal, _ = strconv.ParseUint(fields[8], 10, 64)
-	}
-
-	return stats, nil
-}
-
-func (m *MetricsService) getRAMUsage() (float64, error) {
-	file, err := os.Open("/proc/meminfo")
-	if err != nil {
-		return -1.0, err
-	}
-	defer file.Close()
-
-	var memTotal, memAvailable uint64
-	scanner := bufio.NewScanner(file)
-
-	for scanner.Scan() {
-		line := scanner.Text()
-		fields := strings.Fields(line)
-		if len(fields) >= 2 {
-			switch fields[0] {
-			case "MemTotal:":
-				memTotal, _ = strconv.ParseUint(fields[1], 10, 64)
-			case "MemAvailable:":
-				memAvailable, _ = strconv.ParseUint(fields[1], 10, 64)
-			}
-		}
-	}
-
-	if memTotal == 0 {
-		return -1.0, fmt.Errorf("could not read memory total")
-	}
-
-	if memAvailable > memTotal {
-		return -1.0, fmt.Errorf("invalid memory values: available > total")
-	}
-
-	memUsed := memTotal - memAvailable
-	ramUsage := (float64(memUsed) / float64(memTotal)) * 100.0
-
-	// Ensure valid percentage range
-	if ramUsage < 0 || ramUsage > 100 {
-		return -1.0, fmt.Errorf("invalid RAM usage calculated: %f", ramUsage)
-	}
-
-	return ramUsage, nil
-}
-
-func (m *MetricsService) getDiskUsage() (float64, error) {
-	// Get disk usage for the root filesystem
-	var stat syscall.Statfs_t
-	err := syscall.Statfs("/", &stat)
-	if err != nil {
-		return m.getDiskUsageCommand()
-	}
-
-	// Available blocks * block size = available space
-	totalBytes := stat.Blocks * uint64(stat.Bsize)
-	availableBytes := stat.Bavail * uint64(stat.Bsize)
-
-	if totalBytes == 0 {
-		return -1.0, fmt.Errorf("total disk space is zero")
-	}
-
-	if availableBytes > totalBytes {
-		return -1.0, fmt.Errorf("invalid disk values: available > total")
-	}
-
-	usedBytes := totalBytes - availableBytes
-	diskUsage := (float64(usedBytes) / float64(totalBytes)) * 100.0
-
-	// Ensure valid percentage range
-	if diskUsage < 0 || diskUsage > 100 {
-		return -1.0, fmt.Errorf("invalid disk usage calculated: %f", diskUsage)
-	}
-
-	return diskUsage, nil
-}
-
-func (m *MetricsService) getDiskUsageCommand() (float64, error) {
-	// Fallback to df command if syscall fails
-	cmd := exec.Command("df", "/")
-	output, err := cmd.Output()
-	if err != nil {
-		return -1.0, err
-	}
-
-	lines := strings.Split(string(output), "\n")
-	if len(lines) < 2 {
-		return -1.0, fmt.Errorf("unexpected df output")
-	}
-
-	fields := strings.Fields(lines[1])
-	if len(fields) < 5 {
-		return -1.0, fmt.Errorf("unexpected df output format")
-	}
-
-	// fields[4] contains the usage percentage like "45%"
-	usageStr := strings.TrimSuffix(fields[4], "%")
-	usage, err := strconv.ParseFloat(usageStr, 64)
-	if err != nil {
-		return -1.0, err
-	}
-
-	// Ensure valid percentage range
-	if usage < 0 || usage > 100 {
-		return -1.0, fmt.Errorf("invalid disk usage from df: %f", usage)
-	}
-
-	return usage, nil
-}
-
-func (m *MetricsService) getContainerAllocatedResources(ctx context.Context, containerID string) (int64, int64, int64, error) {
-	// Inspect the container to get its resource configuration
-	containerJSON, err := m.docker.ApiClient().ContainerInspect(ctx, containerID)
-	if err != nil {
-		return 0, 0, 0, err
-	}
-
-	var allocatedCpu int64 = 0
-	var allocatedMemory int64 = 0
-	var allocatedDisk int64 = 0
-
-	if containerJSON.HostConfig != nil {
-		resources := containerJSON.HostConfig.Resources
-
-		// CPU allocation (convert from quota to total microseconds if quota is set)
-		if resources.CPUQuota > 0 {
-			allocatedCpu = resources.CPUQuota
-		}
-
-		// Memory allocation
-		if resources.Memory > 0 {
-			allocatedMemory = resources.Memory
-		}
-
-		// Disk allocation from StorageOpt (assuming xfs filesystem)
-		if containerJSON.HostConfig.StorageOpt != nil {
-			if sizeStr, exists := containerJSON.HostConfig.StorageOpt["size"]; exists {
-				// Parse size string like "10G" and convert to GB
-				if diskGB, err := m.parseStorageQuotaGB(sizeStr); err == nil {
-					allocatedDisk = diskGB
-				}
-			}
-		}
-	}
-
-	return allocatedCpu, allocatedMemory, allocatedDisk, nil
-}
-
-func (m *MetricsService) parseStorageQuotaGB(sizeStr string) (int64, error) {
-	// Handle size format like "10G" and return the GB value
-	if sizeStr == "" {
-		return 0, fmt.Errorf("empty size string")
-	}
-
-	// Remove any whitespace
-	sizeStr = strings.TrimSpace(sizeStr)
-
-	// Check if it ends with 'G' (assuming xfs format)
-	if strings.HasSuffix(sizeStr, "G") {
-		// Remove the 'G' and parse the number
-		numStr := strings.TrimSuffix(sizeStr, "G")
-		gb, err := strconv.ParseInt(numStr, 10, 64)
-		if err != nil {
-			return 0, err
-		}
-		return gb, nil
-	}
-
-	// If it doesn't end with 'G', return 0 (not xfs format)
-	return 0, fmt.Errorf("not in expected xfs format (e.g., '10G')")
-}
-
 // GetCachedSystemMetrics returns cached metrics if available, otherwise returns defaults
-func (m *MetricsService) GetCachedSystemMetrics(ctx context.Context) (float64, float64, float64, int64, int64, int64, int) {
-	metrics := m.cache.GetSystemMetrics(ctx)
-	if metrics == nil {
+func (s *MetricsService) GetCachedSystemMetrics(ctx context.Context) *models.SystemMetrics {
+	metrics, err := s.cache.Get(ctx, systemMetricsKey)
+	if err != nil || metrics == nil {
 		// Return default values if no metrics are cached
-		return -1.0, -1.0, -1.0, -1, -1, -1, -1
+		return &models.SystemMetrics{
+			CPUUsage:        -1.0,
+			RAMUsage:        -1.0,
+			DiskUsage:       -1.0,
+			AllocatedCPU:    -1,
+			AllocatedMemory: -1,
+			AllocatedDisk:   -1,
+			SnapshotCount:   -1,
+			LastUpdated:     time.Now(),
+		}
 	}
 
-	return metrics.CPUUsage, metrics.RAMUsage, metrics.DiskUsage,
-		metrics.AllocatedCPU, metrics.AllocatedMemory, metrics.AllocatedDisk,
-		metrics.SnapshotCount
+	return metrics
 }
 
 // CollectAndCacheMetrics collects all metrics and stores them in cache
-func (m *MetricsService) CollectAndCacheMetrics(ctx context.Context) error {
+func (s *MetricsService) CollectAndCacheMetrics(ctx context.Context) error {
+	finalMetrics := &models.SystemMetrics{
+		CPUUsage:        -1.0,
+		RAMUsage:        -1.0,
+		DiskUsage:       -1.0,
+		AllocatedCPU:    -1,
+		AllocatedMemory: -1,
+		AllocatedDisk:   -1,
+		SnapshotCount:   -1,
+		LastUpdated:     time.Now(),
+	}
+
 	// Get current cached metrics to preserve valid values
-	cachedMetrics := m.cache.GetSystemMetrics(ctx)
-
-	// Initialize with default values or preserve existing ones
-	var finalCpuUsage, finalRamUsage, finalDiskUsage float64 = -1.0, -1.0, -1.0
-	var finalAllocatedCpu, finalAllocatedMemory, finalAllocatedDisk int64 = -1, -1, -1
-	var finalSnapshotCount int = -1
-
-	// If we have cached metrics, use them as starting point
-	if cachedMetrics != nil {
-		finalCpuUsage = cachedMetrics.CPUUsage
-		finalRamUsage = cachedMetrics.RAMUsage
-		finalDiskUsage = cachedMetrics.DiskUsage
-		finalAllocatedCpu = cachedMetrics.AllocatedCPU
-		finalAllocatedMemory = cachedMetrics.AllocatedMemory
-		finalAllocatedDisk = cachedMetrics.AllocatedDisk
-		finalSnapshotCount = cachedMetrics.SnapshotCount
+	cachedMetrics, err := s.cache.Get(ctx, systemMetricsKey)
+	if err == nil && cachedMetrics != nil {
+		finalMetrics = cachedMetrics
 	}
 
 	// Collect system metrics
-	cpuUsage, ramUsage, diskUsage, err := m.GetSystemMetrics(ctx)
+	metrics, err := s.GetSystemMetrics(ctx)
 	if err == nil {
 		// Only update if values are valid (not 0 or -1)
-		if cpuUsage > 0 && cpuUsage != -1.0 {
-			finalCpuUsage = cpuUsage
+		if metrics.CPUUsage > 0 && metrics.CPUUsage != -1.0 {
+			finalMetrics.CPUUsage = metrics.CPUUsage
 		}
-		if ramUsage > 0 && ramUsage != -1.0 {
-			finalRamUsage = ramUsage
+		if metrics.RAMUsage > 0 && metrics.RAMUsage != -1.0 {
+			finalMetrics.RAMUsage = metrics.RAMUsage
 		}
-		if diskUsage > 0 && diskUsage != -1.0 {
-			finalDiskUsage = diskUsage
+		if metrics.DiskUsage > 0 && metrics.DiskUsage != -1.0 {
+			finalMetrics.DiskUsage = metrics.DiskUsage
 		}
-	}
-
-	// Get allocated resources
-	allocatedCpu, allocatedMemory, allocatedDisk, err := m.GetAllocatedResources(ctx)
-	if err == nil {
-		// Only update if values are valid (not 0 or -1)
-		// Note: 0 can be valid for allocated resources (no containers running)
-		// so we only check for -1
-		if allocatedCpu != -1 {
-			finalAllocatedCpu = allocatedCpu
+		if metrics.AllocatedCPU > 0 && metrics.AllocatedCPU != -1 {
+			finalMetrics.AllocatedCPU = metrics.AllocatedCPU
 		}
-		if allocatedMemory != -1 {
-			finalAllocatedMemory = allocatedMemory
+		if metrics.AllocatedMemory > 0 && metrics.AllocatedMemory != -1 {
+			finalMetrics.AllocatedMemory = metrics.AllocatedMemory
 		}
-		if allocatedDisk != -1 {
-			finalAllocatedDisk = allocatedDisk
+		if metrics.AllocatedDisk > 0 && metrics.AllocatedDisk != -1 {
+			finalMetrics.AllocatedDisk = metrics.AllocatedDisk
 		}
 	}
 
 	// Get snapshot count
-	snapshotCount, err := m.GetSnapshotCount(ctx)
-	if err == nil && snapshotCount != -1 {
-		// 0 is a valid snapshot count, so only check for -1
-		finalSnapshotCount = snapshotCount
+	snapshotCount, err := s.GetSnapshotCount(ctx)
+	if err == nil && snapshotCount > 0 && snapshotCount != -1 {
+		finalMetrics.SnapshotCount = snapshotCount
 	}
 
 	// Store in cache with final values
-	metrics := models.SystemMetrics{
-		CPUUsage:        finalCpuUsage,
-		RAMUsage:        finalRamUsage,
-		DiskUsage:       finalDiskUsage,
-		AllocatedCPU:    finalAllocatedCpu,
-		AllocatedMemory: finalAllocatedMemory,
-		AllocatedDisk:   finalAllocatedDisk,
-		SnapshotCount:   finalSnapshotCount,
-		LastUpdated:     time.Now(),
-	}
+	s.cache.Set(ctx, systemMetricsKey, *finalMetrics, 2*time.Hour)
 
-	m.cache.SetSystemMetrics(ctx, metrics)
 	return nil
 }
 
 // StartMetricsCollection starts a background goroutine that collects metrics every 20 seconds
-func (m *MetricsService) StartMetricsCollection(ctx context.Context) {
+func (s *MetricsService) StartMetricsCollection(ctx context.Context) {
 	go func() {
 		// Collect metrics immediately on startup
-		_ = m.CollectAndCacheMetrics(ctx)
+		_ = s.CollectAndCacheMetrics(ctx)
 
 		// Set up ticker for every 20 seconds
-		ticker := time.NewTicker(20 * time.Second)
+		ticker := time.NewTicker(s.interval)
 		defer ticker.Stop()
 
 		for {
 			select {
 			case <-ticker.C:
-				_ = m.CollectAndCacheMetrics(ctx)
+				_ = s.CollectAndCacheMetrics(ctx)
 			case <-ctx.Done():
 				return
 			}
