@@ -577,6 +577,14 @@ const docTemplate = `{
                         "name": "sandboxId",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "description": "Metadata",
+                        "name": "metadata",
+                        "in": "body",
+                        "schema": {
+                            "type": "object"
+                        }
                     }
                 ],
                 "responses": {
@@ -1240,6 +1248,12 @@ const docTemplate = `{
                     "type": "integer",
                     "minimum": 1
                 },
+                "metadata": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
                 "networkAllowList": {
                     "type": "string"
                 },
@@ -1425,6 +1439,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "networkBlockAll": {
+                    "type": "boolean"
+                },
+                "networkLimitEgress": {
                     "type": "boolean"
                 }
             }

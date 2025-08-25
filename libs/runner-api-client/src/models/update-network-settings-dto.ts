@@ -30,4 +30,10 @@ export interface UpdateNetworkSettingsDTO {
    * @memberof UpdateNetworkSettingsDTO
    */
   networkBlockAll?: boolean
+  /**
+   *
+   * @type {boolean}
+   * @memberof UpdateNetworkSettingsDTO
+   */
+  networkLimitEgress?: boolean
 }
