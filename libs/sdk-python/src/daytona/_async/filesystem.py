@@ -611,10 +611,12 @@ class AsyncFileSystem:
                             is_dir=data["isDir"],
                             timestamp=data["timestamp"],
                         )
+                        # unasync: delete start
                         # Handle both sync and async callbacks
                         if asyncio.iscoroutinefunction(callback):
                             await callback(event)
                         else:
+                            # unasync: delete end
                             callback(event)
                     except (json.JSONDecodeError, KeyError) as e:
                         # Only log parsing errors in development

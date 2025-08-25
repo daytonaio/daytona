@@ -307,18 +307,41 @@ def pre_filter(src: Path, dst: Path) -> dict:
     """
     Copy src to dst, removing delete-blocks and preserving verbatim sections.
     Returns a map of placeholder→block for all # unasync: preserve … blocks.
+    Also handles proper indentation when delete blocks are removed.
     """
     lines = src.read_text(encoding="utf-8").splitlines(keepends=True)
     out, block_map = [], {}
     buf, idx = [], 0
     in_preserve = in_delete = False
+    delete_block_indent = None
 
-    for line in lines:
+    for i, line in enumerate(lines):
         if MARKERS["delete_start"].match(line):
             in_delete = True
+            delete_block_indent = len(line) - len(line.lstrip())
             continue
         if MARKERS["delete_end"].match(line):
             in_delete = False
+            # Look ahead to see if the next line needs unindenting
+            if i + 1 < len(lines):
+                next_line = lines[i + 1]
+                if next_line.strip():  # Not an empty line
+                    next_indent = len(next_line) - len(next_line.lstrip())
+                    # If the next line is indented more than the delete block, unindent it
+                    if next_indent > delete_block_indent:
+                        unindent_amount = next_indent - delete_block_indent
+                        # Unindent subsequent lines until we hit a line with same or less indentation
+                        for j in range(i + 1, len(lines)):
+                            if lines[j].strip():  # Not empty
+                                line_indent = len(lines[j]) - len(lines[j].lstrip())
+                                if line_indent >= next_indent:
+                                    # Unindent this line
+                                    lines[j] = (
+                                        lines[j][unindent_amount:] if len(lines[j]) >= unindent_amount else lines[j]
+                                    )
+                                else:
+                                    break
+            delete_block_indent = None
             continue
         if in_delete:
             continue
@@ -761,14 +784,25 @@ def replace_asyncio_create_task_with_threading(text: str) -> str:
       <var> = threading.Thread(target=<some_method>)
       <var>.start()
     and replace any line that is just <var> with <var>.join()
+    Also handle nested patterns like:
+      asyncio.create_task(asyncio.to_thread(func)) -> func()
     Also, ensure 'import threading' is present if any such replacement is made.
     """
     import_vars = set()
     lines = text.splitlines(keepends=True)
     new_lines = []
     pattern = re.compile(r"^(\s*)(\w+)\s*=\s*asyncio\.create_task\(\s*([\w\.]+)\s*\(\s*\)\s*\)\s*$")
-    # Pass 1: Replace assignments and collect variable names
+
+    # Pass 1: Replace assignments and collect variable names, handle nested patterns
     for line in lines:
+        # Handle nested asyncio.create_task(asyncio.to_thread(...)) patterns
+        if "asyncio.create_task(asyncio.to_thread(" in line:
+            # Convert asyncio.create_task(asyncio.to_thread(func)) to just func()
+            nested_pattern = r"asyncio\.create_task\(asyncio\.to_thread\(([^)]+)\)\)"
+            line = re.sub(nested_pattern, r"\1()", line)
+            new_lines.append(line)
+            continue
+
         m = pattern.match(line)
         if m:
             indent, var, method = m.groups()
@@ -776,6 +810,7 @@ def replace_asyncio_create_task_with_threading(text: str) -> str:
             import_vars.add(var)
         else:
             new_lines.append(line)
+
     # Pass 2: Replace usages of the variable alone on a line with .join()
     final_lines = []
     for line in new_lines:
@@ -789,6 +824,7 @@ def replace_asyncio_create_task_with_threading(text: str) -> str:
                 break
         if not replaced:
             final_lines.append(line)
+
     # Pass 3: Ensure import threading is present if needed
     if import_vars:
         has_threading_import = any(re.match(r"^\s*import threading\s*$", l) for l in final_lines)
@@ -822,6 +858,90 @@ def replace_asyncio_create_task_with_threading(text: str) -> str:
 
             final_lines.insert(insert_idx, "import threading\n")
     return "".join(final_lines)
+
+
+def replace_thread_cancel_calls(text: str) -> str:
+    """
+    Replace task.cancel() calls for threading.Thread objects.
+    Since threading.Thread doesn't have a cancel method, we'll remove the call
+    and let the thread terminate naturally when the connection is closed.
+    """
+    lines = text.splitlines(keepends=True)
+    result_lines = []
+    thread_vars = set()
+
+    # First pass: identify threading.Thread variables
+    for line in lines:
+        if "threading.Thread(" in line:
+            match = re.search(r"(\w+)\s*=\s*threading\.Thread\(", line)
+            if match:
+                thread_vars.add(match.group(1))
+        result_lines.append(line)
+
+    # Second pass: remove .cancel() calls on thread variables
+    final_lines = []
+    for line in result_lines:
+        should_skip = False
+        for var in thread_vars:
+            # Remove task.cancel() calls for threading.Thread variables
+            if f"{var}.cancel()" in line:
+                should_skip = True
+                break
+        if not should_skip:
+            final_lines.append(line)
+
+    return "".join(final_lines)
+
+
+def replace_standalone_asyncio_create_task(text: str) -> str:
+    """
+    Replace standalone asyncio.create_task(...) calls that are not assignments.
+    For example: asyncio.create_task(ws_connection.close()) -> ws_connection.close()
+    """
+    lines = text.splitlines(keepends=True)
+    result_lines = []
+
+    for line in lines:
+        # Look for standalone asyncio.create_task calls (not assignments)
+        if "asyncio.create_task(" in line and "=" not in line:
+            # Handle the specific case: asyncio.create_task(ws_connection.close())
+            if "ws_connection.close()" in line:
+                line = line.replace("asyncio.create_task(ws_connection.close())", "ws_connection.close()")
+            else:
+                # Extract the function call inside asyncio.create_task(...)
+                # Handle both function calls with and without parentheses
+                pattern = r"asyncio\.create_task\(([^)]+)\)"
+                match = re.search(pattern, line)
+                if match:
+                    func_call = match.group(1)
+                    # If it doesn't end with (), add them (for bare function references)
+                    if not func_call.endswith(")"):
+                        func_call += "()"
+                    # Replace the entire asyncio.create_task(...) with just the function call
+                    line = re.sub(pattern, func_call, line)
+
+        result_lines.append(line)
+
+    return "".join(result_lines)
+
+
+def add_threading_daemon_for_websocket(text: str) -> str:
+    """
+    Add daemon=True to threading.Thread calls specifically for WebSocket handlers.
+    This is a specific case for the filesystem watch_dir method.
+    """
+    lines = text.splitlines(keepends=True)
+    result_lines = []
+
+    for line in lines:
+        # Look for threading.Thread(target=handle_websocket) pattern
+        if "threading.Thread(target=handle_websocket)" in line:
+            line = line.replace(
+                "threading.Thread(target=handle_websocket)", "threading.Thread(target=handle_websocket, daemon=True)"
+            )
+        result_lines.append(line)
+
+    return "".join(result_lines)
 
 
 def manage_asyncio_imports(text: str) -> str:
@@ -1136,15 +1256,20 @@ def post_process(path: Path):
     1) Call transform_docstrings()
     2) Apply POST_REPLACEMENTS (strip 'await', rename imports, etc.)
     3) Translate await asyncio.to_thread(...) calls
-    4) Convert await process_streaming_response(...) calls
-    5) Wrap any unwrapped process_streaming_response(...) calls
-    6) Convert await asyncio.sleep(...) calls to time.sleep(...)
-    7) Strip Awaitable[...] wrappers
-    8) Clean up typing imports
-    9) Remove any leftover daytona.close() lines
-    10) Collapse >2 blank lines into exactly 2
-    11) Manage asyncio and time imports (add if needed based on usage, remove if unused)
-    12) Inject auto‐gen banner if missing
+    4) Convert async executor patterns to sync equivalents
+    5) Convert await process_streaming_response(...) calls
+    6) Wrap any unwrapped process_streaming_response(...) calls
+    7) Convert await asyncio.sleep(...) calls to time.sleep(...)
+    8) Convert 'asyncio.create_task' to 'threading.Thread' and usages
+    9) Handle thread cancellation calls
+    10) Handle standalone asyncio.create_task calls
+    11) Add daemon=True to WebSocket threading.Thread calls
+    12) Strip Awaitable[...] wrappers
+    13) Clean up typing imports
+    14) Remove any leftover daytona.close() lines
+    15) Collapse >2 blank lines into exactly 2
+    16) Manage asyncio and time imports (add if needed based on usage, remove if unused)
+    17) Inject auto‐gen banner if missing
     """
     text = path.read_text(encoding="utf-8")
     original = text
@@ -1174,13 +1299,22 @@ def post_process(path: Path):
     # 6) Convert "await asyncio.sleep(...)" calls into "time.sleep(...)"
     text = replace_asyncio_sleep_calls(text)
 
-    # 6.5) Convert 'asyncio.create_task' to 'threading.Thread' and usages
+    # 7) Convert 'asyncio.create_task' to 'threading.Thread' and usages
     text = replace_asyncio_create_task_with_threading(text)
 
-    # 7) Strip type Awaitable[...] wrappers
+    # 8) Handle thread cancellation calls (task.cancel() on threading.Thread)
+    text = replace_thread_cancel_calls(text)
+
+    # 9) Handle standalone asyncio.create_task calls
+    text = replace_standalone_asyncio_create_task(text)
+
+    # 10) Add daemon=True to WebSocket threading.Thread calls
+    text = add_threading_daemon_for_websocket(text)
+
+    # 11) Strip type Awaitable[...] wrappers
     text = re.sub(r"Awaitable\[(.*?)\]", r"\1", text)
 
-    # 8) Clean up typing imports, dropping "Awaitable"
+    # 12) Clean up typing imports, dropping "Awaitable"
     def clean_imports(m):
         imps = [i.strip() for i in m.group(1).split(",") if i.strip() != "Awaitable"]
         return f"from typing import {', '.join(imps)}" if imps else ""
@@ -1192,16 +1326,16 @@ def post_process(path: Path):
         flags=re.MULTILINE,
     )
 
-    # 9) Remove any leftover "daytona.close()" lines
+    # 13) Remove any leftover "daytona.close()" lines
     text = re.sub(r"^\s*daytona\w*\.close\(\)\s*$", "", text, flags=re.MULTILINE)
 
-    # 10) Collapse more than two blank lines into exactly two
+    # 14) Collapse more than two blank lines into exactly two
     text = re.sub(r"\n\s*\n\s*\n", "\n\n", text)
 
-    # 11) Manage asyncio and time imports (add if needed based on usage, remove if unused)
+    # 15) Manage asyncio and time imports (add if needed based on usage, remove if unused)
     text = manage_asyncio_imports(text)
 
-    # 12) Inject auto‐gen banner if it's missing in the first few lines
+    # 16) Inject auto‐gen banner if it's missing in the first few lines
     lines = text.splitlines(keepends=True)
     if not any("auto-generated by the unasync conversion script" in l for l in lines[:10]):
         idx = find_license_end(lines)

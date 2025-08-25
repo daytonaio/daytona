@@ -613,7 +613,6 @@ class FileSystem:
                             is_dir=data["isDir"],
                             timestamp=data["timestamp"],
                         )
-                        # Call the sync callback
                         callback(event)
                     except (json.JSONDecodeError, KeyError) as e:
                         # Only log parsing errors in development
@@ -632,6 +631,5 @@ class FileSystem:
         # Return a handle that can close the connection
         def close_func():
             ws_connection.close()
-            # The thread will exit when the WebSocket connection closes
 
         return WatchHandle(close_func)
