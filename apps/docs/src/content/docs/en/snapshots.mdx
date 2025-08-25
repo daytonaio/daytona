@@ -197,7 +197,7 @@ The next step is the same; simply set the `CreateSandboxFromSnapshotParams` fiel
 
 #### Using a Private Docker Hub Image
 
-To use a private Docker Hub image, you'll need to [add a Container Registry](/docs/snapshots#images-from-private-registries) with your Docker Hub credentials:
+To use a private Docker Hub image, you'll need to [add a Container Registry](/docs/en/snapshots#images-from-private-registries) with your Docker Hub credentials:
 
 - **Registry URL**: Set this to `docker.io`
 - **Username**: Enter your Docker Hub username (the account with access to the private image)
@@ -206,7 +206,7 @@ To use a private Docker Hub image, you'll need to [add a Container Registry](/do
 
 ### Using a Local Image
 
-In order to avoid having to manually set up a private container registry and push your image there, the [Daytona CLI](/docs/getting-started#setting-up-the-daytona-cli) allows you to create a Snapshot from your local image or from a local Dockerfile and use it in your Sandboxes.
+In order to avoid having to manually set up a private container registry and push your image there, the [Daytona CLI](/docs/en/getting-started#setting-up-the-daytona-cli) allows you to create a Snapshot from your local image or from a local Dockerfile and use it in your Sandboxes.
 
 After running `docker images` and ensuring the image and tag you want to use is available use the `daytona snapshot push <your_local_docker_image>` command to create a Snapshot and push it to Daytona, e.g.:
 
@@ -223,10 +223,10 @@ For example `daytona snapshot push custom-alpine:3.21 --name alpine-minimal --cp
 :::note
 Daytona expects the local image to be built for AMD64 architecture. Therefore, the `--platform=linux/amd64` flag is required when building the Docker image if your machine is running on a different architecture.
 
-For more information, see the [CLI documentation](/docs/tools/cli#daytona-snapshot-push).
+For more information, see the [CLI documentation](/docs/en/tools/cli#daytona-snapshot-push).
 :::
 
-If you haven't built the desired image yet, and have a Dockerfile ready, you can use the Declarative Builder in our SDK - read more about it [here](/docs/getting-started#declarative-builder).
+If you haven't built the desired image yet, and have a Dockerfile ready, you can use the Declarative Builder in our SDK - read more about it [here](/docs/en/getting-started#declarative-builder).
 
 Alternatively, to do it through the CLI, use the `--dockerfile` flag under `create` to pass the path to the Dockerfile you want to use and Daytona will build the Snapshot for you:
 
