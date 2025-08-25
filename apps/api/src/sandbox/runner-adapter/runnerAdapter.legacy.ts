@@ -154,7 +154,12 @@ export class RunnerAdapterLegacy implements RunnerAdapter {
     }
   }
 
-  async createSandbox(sandbox: Sandbox, registry?: DockerRegistry, entrypoint?: string[]): Promise<void> {
+  async createSandbox(
+    sandbox: Sandbox,
+    registry?: DockerRegistry,
+    entrypoint?: string[],
+    metadata?: { [key: string]: string },
+  ): Promise<void> {
     const createSandboxDto: CreateSandboxDTO = {
       id: sandbox.id,
       userId: sandbox.organizationId,
@@ -180,13 +185,14 @@ export class RunnerAdapterLegacy implements RunnerAdapter {
       })),
       networkBlockAll: sandbox.networkBlockAll,
       networkAllowList: sandbox.networkAllowList,
+      metadata: metadata,
     }
 
     await this.sandboxApiClient.create(createSandboxDto)
   }
 
-  async startSandbox(sandboxId: string): Promise<void> {
-    await this.sandboxApiClient.start(sandboxId)
+  async startSandbox(sandboxId: string, metadata?: { [key: string]: string }): Promise<void> {
+    await this.sandboxApiClient.start(sandboxId, metadata)
   }
 
   async stopSandbox(sandboxId: string): Promise<void> {
@@ -285,10 +291,16 @@ export class RunnerAdapterLegacy implements RunnerAdapter {
     return (getVersionResponse.data as any).version
   }
 
-  async updateNetworkSettings(sandboxId: string, networkBlockAll?: boolean, networkAllowList?: string): Promise<void> {
+  async updateNetworkSettings(
+    sandboxId: string,
+    networkBlockAll?: boolean,
+    networkAllowList?: string,
+    networkLimitEgress?: boolean,
+  ): Promise<void> {
     const updateNetworkSettingsDto: UpdateNetworkSettingsDTO = {
       networkBlockAll: networkBlockAll,
       networkAllowList: networkAllowList,
+      networkLimitEgress: networkLimitEgress,
     }
 
     await this.sandboxApiClient.updateNetworkSettings(sandboxId, updateNetworkSettingsDto)
