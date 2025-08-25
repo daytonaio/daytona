@@ -11,11 +11,13 @@ Snapshots are pre-configured templates containing all dependencies, tools, envir
 
 When spinning up a Sandbox, Daytona uses a Snapshot based on a simple image with some useful utilities pre-installed, such as `python`, `node`, `pip` as well as some common pip packages. More information [below](#default-snapshot).
 
-It is possible to override this behavior and create custom Snapshots by visiting the Dashboard, clicking on [Snapshots](https://app.daytona.io/dashboard/snapshots) and on `Create Snapshot`.
+To create a Snapshot from a public image, follow these steps:
 
-For the Snapshot image, you may enter the name and tag of any publicly accessible image from Docker Hub such as `alpine:3.21.3` and `debian:12.10` or from another public container registry - e.g. `my-public-registry.com/custom-alpine:3.21`.
+1. Visit the Dashboard and click on [Snapshots](https://app.daytona.io/dashboard/snapshots)
+2. Click on **Create Snapshot**
+3. Enter the name and tag of any publicly accessible image from Docker Hub (e.g. `alpine:3.21.3`) or from another public container registry (e.g. `my-public-registry.com/custom-alpine:3.21`)
 
-The entrypoint field is optional and if the image hasn't got a long-running entrypoint, Daytona will ensure sure that the resulting container won't exit immediately upon creation by automatically running `sleep infinity`.
+Optionally, set the entrypoint field. If the image does not have a long-running entrypoint, Daytona will automatically run `sleep infinity` to prevent the container from exiting immediately.
 
 :::note
 Since images tagged `latest` get frequent updates, only specific tags (e.g. `0.1.0`) are supported. Same idea applies to tags such as `lts` or `stable` and we recommend avoiding those when defining an image.
@@ -25,13 +27,13 @@ Once the Snapshot is pulled, validated and has an `Active` state, it is ready to
 
 ### Images from Private Registries
 
-To create a Snapshot from an image that is not publicly available, you need to start by adding the image's private Container Registry:
+To create a Snapshot from an image that is available in a private container registry:
 
 1. Go to the [Registries](https://app.daytona.io/dashboard/registries) page in the Dashboard
-2. Click the `Add Registry` button.
+2. Click the **Add Registry** button.
 3. Fill out the form with an appropriate custom name, URL, username, password, and project (if applicable)
 4. Once the Container Registry is created, you may go back to the [Snapshots](https://app.daytona.io/dashboard/snapshots) page
-5. When creating the Snapshot, make sure to input the entire private image name, including the registry URL and project name (if applicable) - `my-private-registry.com/<my-project>/custom-alpine:3.21`
+5. When creating the Snapshot, make sure to input the entire private image name, including the registry location and project name (e.g. `my-private-registry.com/<my-project>/custom-alpine:3.21`)
 
 The next step is the same; simply set the `CreateSandboxFromSnapshotParams` field to use the custom Snapshot and no more authentication is needed.
 
@@ -48,7 +50,10 @@ To use a private Docker Hub image, you'll need to [add a Container Registry](/do
 
 In order to avoid having to manually set up a private container registry and push your image there, the [Daytona CLI](/docs/en/getting-started#setting-up-the-daytona-cli) allows you to create a Snapshot from your local image or from a local Dockerfile and use it in your Sandboxes.
 
-After running `docker images` and ensuring the image and tag you want to use is available use the `daytona snapshot push <your_local_docker_image>` command to create a Snapshot and push it to Daytona, e.g.:
+To create a Snapshot from a local image:
+
+1. Run `docker images` to ensure the image and tag you want to use is available
+2. Run `daytona snapshot push <your_local_docker_image>` to create a Snapshot and push it to Daytona, e.g.:
 
 ```bash
 daytona snapshot push custom-alpine:3.21 --name alpine-minimal
@@ -177,7 +182,11 @@ For examples of running code inside a sandbox, see the [Getting Started Guide](/
 
 ## Deleting Snapshots
 
-Deleting your custom Snapshots is a straightforward process. Simply go to the [Snapshots](https://app.daytona.io/dashboard/snapshots) page and click on the `Delete` button that shows up when clicking the three dots at the end of a row of the Snapshot you want deleted.
+To delete custom Snapshots:
+
+1. Go to the [Snapshots](https://app.daytona.io/dashboard/snapshots) page
+2. Click the three dots at the end of the row for the Snapshot you want to delete
+3. Click the `Delete` button that appears
 
 :::tip
 
