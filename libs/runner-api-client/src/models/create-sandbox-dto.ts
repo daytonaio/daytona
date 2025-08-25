@@ -69,6 +69,12 @@ export interface CreateSandboxDTO {
   memoryQuota?: number
   /**
    *
+   * @type {{ [key: string]: string; }}
+   * @memberof CreateSandboxDTO
+   */
+  metadata?: { [key: string]: string }
+  /**
+   *
    * @type {string}
    * @memberof CreateSandboxDTO
    */

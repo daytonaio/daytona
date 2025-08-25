@@ -207,13 +207,21 @@ func UpdateNetworkSettings(ctx *gin.Context) {
 	}
 
 	if updateNetworkSettingsDto.NetworkBlockAll != nil && *updateNetworkSettingsDto.NetworkBlockAll {
-		err = runner.NetRulesManager.SetNetWorkRules(containerShortId, info.NetworkSettings.IPAddress, "")
+		err = runner.NetRulesManager.SetNetworkRules(containerShortId, info.NetworkSettings.IPAddress, "")
 		if err != nil {
 			ctx.Error(common.NewInvalidBodyRequestError(err))
 			return
 		}
 	} else if updateNetworkSettingsDto.NetworkAllowList != nil {
-		err = runner.NetRulesManager.SetNetWorkRules(containerShortId, info.NetworkSettings.IPAddress, *updateNetworkSettingsDto.NetworkAllowList)
+		err = runner.NetRulesManager.SetNetworkRules(containerShortId, info.NetworkSettings.IPAddress, *updateNetworkSettingsDto.NetworkAllowList)
+		if err != nil {
+			ctx.Error(common.NewInvalidBodyRequestError(err))
+			return
+		}
+	}
+
+	if updateNetworkSettingsDto.NetworkLimitEgress != nil && *updateNetworkSettingsDto.NetworkLimitEgress {
+		err = runner.NetRulesManager.SetNetworkLimiter(containerShortId, info.NetworkSettings.IPAddress)
 		if err != nil {
 			ctx.Error(common.NewInvalidBodyRequestError(err))
 			return
@@ -265,6 +273,7 @@ func GetNetworkSettings(ctx *gin.Context) {
 //	@Description	Start sandbox
 //	@Produce		json
 //	@Param			sandboxId	path		string	true	"Sandbox ID"
+//	@Param			metadata	body		object	false	"Metadata"
 //	@Success		200			{string}	string	"Sandbox started"
 //	@Failure		400			{object}	common.ErrorResponse
 //	@Failure		401			{object}	common.ErrorResponse
@@ -279,7 +288,14 @@ func Start(ctx *gin.Context) {
 
 	runner := runner.GetInstance(nil)
 
-	err := runner.Docker.Start(ctx.Request.Context(), sandboxId)
+	var metadata map[string]string
+	err := ctx.ShouldBindJSON(&metadata)
+	if err != nil {
+		ctx.Error(common.NewInvalidBodyRequestError(err))
+		return
+	}
+
+	err = runner.Docker.Start(ctx.Request.Context(), sandboxId, metadata)
 	if err != nil {
 		runner.Cache.SetSandboxState(ctx, sandboxId, enums.SandboxStateError)
 		ctx.Error(err)
