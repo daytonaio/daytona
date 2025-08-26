@@ -24,6 +24,9 @@ import { getOpenApiConfig } from './openapi.config'
 import { SchedulerRegistry } from '@nestjs/schedule'
 import { EventEmitter2 } from '@nestjs/event-emitter'
 import { AuditInterceptor } from './audit/interceptors/audit.interceptor'
+import { OrganizationService } from './organization/services/organization.service'
+import { Organization } from './organization/entities/organization.entity'
+import { DEFAULT_ORGANIZATION_QUOTA } from './common/constants/default-organization-quota'
 
 // https options
 const httpsEnabled = process.env.CERT_PATH && process.env.CERT_KEY_PATH
@@ -103,23 +106,37 @@ async function bootstrap() {
   // Auto create runners only in local development environment
   if (!configService.get('production')) {
     const runnerService = app.get(RunnerService)
+    const organizationService = app.get(OrganizationService)
+
+    // Try to find an existing organization or create a simple one for local development
+    let mockOrganization: Organization
+    try {
+      mockOrganization = await organizationService.findPersonal('local-dev-user')
+    } catch {
+      // Create a simple organization for local development
+      mockOrganization = await organizationService.create({ name: 'Local Development' }, 'local-dev-user', true, false)
+    }
+
     const runners = await runnerService.findAll()
     if (!runners.find((runner) => runner.domain === 'localtest.me:3003')) {
-      await runnerService.create({
-        apiUrl: 'http://localhost:3003',
-        proxyUrl: 'http://localhost:3003',
-        apiKey: 'secret_api_token',
-        cpu: 4,
-        memoryGiB: 8,
-        diskGiB: 50,
-        gpu: 0,
-        gpuType: 'none',
-        capacity: 100,
-        region: 'us',
-        class: SandboxClass.SMALL,
-        domain: 'localtest.me:3003',
-        version: '0',
-      })
+      await runnerService.create(
+        {
+          apiUrl: 'http://localhost:3003',
+          proxyUrl: 'http://localhost:3003',
+          apiKey: 'secret_api_token',
+          cpu: 4,
+          memoryGiB: 8,
+          diskGiB: 50,
+          gpu: 0,
+          gpuType: 'none',
+          capacity: 100,
+          region: 'us',
+          class: SandboxClass.SMALL,
+          domain: 'localtest.me:3003',
+          version: '0',
+        },
+        mockOrganization,
+      )
     }
   }
 

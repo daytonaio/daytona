@@ -17,12 +17,16 @@ import { RunnerSnapshotDto } from '../dto/runner-snapshot.dto'
 import { Audit, MASKED_AUDIT_VALUE, TypedRequest } from '../../audit/decorators/audit.decorator'
 import { AuditAction } from '../../audit/enums/audit-action.enum'
 import { AuditTarget } from '../../audit/enums/audit-target.enum'
-
 import { CombinedAuthGuard } from '../../auth/combined-auth.guard'
+import { AuthContext } from '../../common/decorators/auth-context.decorator'
+import { OrganizationAuthContext } from '../../common/interfaces/auth-context.interface'
+import { OrganizationResourceActionGuard } from '../../organization/guards/organization-resource-action.guard'
+import { RequiredOrganizationResourcePermissions } from '../../organization/decorators/required-organization-resource-permissions.decorator'
+import { OrganizationResourcePermission } from '../../organization/enums/organization-resource-permission.enum'
+
 @ApiTags('runners')
 @Controller('runners')
-@UseGuards(CombinedAuthGuard, SystemActionGuard, ProxyGuard)
-@RequiredApiRole([SystemRole.ADMIN, 'proxy'])
+@UseGuards(CombinedAuthGuard, SystemActionGuard, ProxyGuard, OrganizationResourceActionGuard)
 @ApiOAuth2(['openid', 'profile', 'email'])
 @ApiBearerAuth()
 export class RunnerController {
@@ -53,8 +57,12 @@ export class RunnerController {
       }),
     },
   })
-  async create(@Body() createRunnerDto: CreateRunnerDto): Promise<Runner> {
-    return this.runnerService.create(createRunnerDto)
+  @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_RUNNERS])
+  async create(
+    @Body() createRunnerDto: CreateRunnerDto,
+    @AuthContext() authContext: OrganizationAuthContext,
+  ): Promise<Runner> {
+    return this.runnerService.create(createRunnerDto, authContext.organization)
   }
 
   @Get()
@@ -62,8 +70,23 @@ export class RunnerController {
     summary: 'List all runners',
     operationId: 'listRunners',
   })
-  async findAll(): Promise<Runner[]> {
-    return this.runnerService.findAll()
+  @ApiQuery({
+    name: 'region',
+    description: 'Filter runners by region code',
+    type: String,
+    required: false,
+  })
+  @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.READ_RUNNERS])
+  @RequiredApiRole([SystemRole.ADMIN, 'proxy'])
+  async findAll(
+    @Query('region') region: string,
+    @AuthContext() authContext: OrganizationAuthContext,
+  ): Promise<Runner[]> {
+    if (authContext.role === 'proxy') {
+      return this.runnerService.findAll(null, region)
+    }
+
+    return this.runnerService.findAll(authContext.organization, region)
   }
 
   @Patch(':id/scheduling')
@@ -81,6 +104,7 @@ export class RunnerController {
       }),
     },
   })
+  @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_RUNNERS])
   async updateSchedulingStatus(
     @Param('id') id: string,
     @Body('unschedulable') unschedulable: boolean,
@@ -98,6 +122,8 @@ export class RunnerController {
     description: 'Runner found',
     type: RunnerDto,
   })
+  @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.READ_RUNNERS])
+  @RequiredApiRole([SystemRole.ADMIN, 'proxy'])
   async getRunnerBySandboxId(@Param('sandboxId') sandboxId: string): Promise<RunnerDto> {
     const runner = await this.runnerService.findBySandboxId(sandboxId)
     return RunnerDto.fromRunner(runner)
@@ -119,6 +145,8 @@ export class RunnerController {
     description: 'Runners found for the snapshot',
     type: [RunnerSnapshotDto],
   })
+  @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.READ_RUNNERS])
+  @RequiredApiRole([SystemRole.ADMIN, 'proxy'])
   async getRunnersBySnapshotRef(@Query('ref') ref: string): Promise<RunnerSnapshotDto[]> {
     return this.runnerService.getRunnersBySnapshotRef(ref)
   }

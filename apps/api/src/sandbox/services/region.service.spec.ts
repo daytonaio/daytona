@@ -19,6 +19,7 @@ describe('RegionService', () => {
     code: 'abc12345',
     name: 'us-east-1',
     organizationId: 'org-123',
+    dockerRegistryId: null,
     createdAt: new Date(),
     updatedAt: new Date(),
   }
@@ -63,6 +64,22 @@ describe('RegionService', () => {
       const result = await service.create(mockOrganization, createRegionDto)
 
       expect(result).toEqual(mockRegion)
+      expect(mockRepository.save).toHaveBeenCalled()
+    })
+
+    it('should create a new region with docker registry ID', async () => {
+      const createRegionDto: CreateRegionDto = {
+        name: 'us-east-1',
+        dockerRegistryId: 'registry-123',
+      }
+
+      const regionWithRegistry = { ...mockRegion, dockerRegistryId: 'registry-123' }
+      mockRepository.findOne.mockResolvedValue(null)
+      mockRepository.save.mockResolvedValue(regionWithRegistry)
+
+      const result = await service.create(mockOrganization, createRegionDto)
+
+      expect(result).toEqual(regionWithRegistry)
       expect(mockRepository.save).toHaveBeenCalled()
     })
 

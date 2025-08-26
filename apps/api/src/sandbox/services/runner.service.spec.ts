@@ -11,6 +11,11 @@ import { Repository } from 'typeorm'
 import { UserService } from '../../user/user.service'
 import { User } from '../../user/user.entity'
 import { SandboxClass } from '../enums/sandbox-class.enum'
+import { Region } from '../entities/region.entity'
+import { Sandbox } from '../entities/sandbox.entity'
+import { SnapshotRunner } from '../entities/snapshot-runner.entity'
+import { Snapshot } from '../entities/snapshot.entity'
+import { RunnerAdapterFactory } from '../runner-adapter/runnerAdapter'
 
 const runnerArray: Runner[] = [
   {
@@ -22,9 +27,26 @@ const runnerArray: Runner[] = [
     memoryGiB: 1,
     gpu: 1,
     gpuType: 'test',
-    key: 'test',
     domain: 'test',
-    limit: 1,
+    apiUrl: 'http://test.com',
+    proxyUrl: 'http://proxy.test.com',
+    apiKey: 'test-key',
+    capacity: 1,
+    used: 0,
+    state: 'READY' as any,
+    version: '1.0',
+    unschedulable: false,
+    currentCpuUsagePercentage: 0,
+    currentMemoryUsagePercentage: 0,
+    currentDiskUsagePercentage: 0,
+    currentAllocatedCpu: 0,
+    currentAllocatedMemoryGiB: 0,
+    currentAllocatedDiskGiB: 0,
+    currentSnapshotCount: 0,
+    availabilityScore: 100,
+    lastChecked: new Date(),
+    createdAt: new Date(),
+    updatedAt: new Date(),
   },
   {
     id: '2',
@@ -35,9 +57,26 @@ const runnerArray: Runner[] = [
     memoryGiB: 1,
     gpu: 1,
     gpuType: 'test',
-    key: 'test',
     domain: 'test',
-    limit: 1,
+    apiUrl: 'http://test.com',
+    proxyUrl: 'http://proxy.test.com',
+    apiKey: 'test-key',
+    capacity: 1,
+    used: 0,
+    state: 'READY' as any,
+    version: '1.0',
+    unschedulable: false,
+    currentCpuUsagePercentage: 0,
+    currentMemoryUsagePercentage: 0,
+    currentDiskUsagePercentage: 0,
+    currentAllocatedCpu: 0,
+    currentAllocatedMemoryGiB: 0,
+    currentAllocatedDiskGiB: 0,
+    currentSnapshotCount: 0,
+    availabilityScore: 100,
+    lastChecked: new Date(),
+    createdAt: new Date(),
+    updatedAt: new Date(),
   },
 ]
 
@@ -50,9 +89,26 @@ const oneRunner: Runner = {
   memoryGiB: 1,
   gpu: 1,
   gpuType: 'test',
-  key: 'test',
   domain: 'test',
-  limit: 1,
+  apiUrl: 'http://test.com',
+  proxyUrl: 'http://proxy.test.com',
+  apiKey: 'test-key',
+  capacity: 1,
+  used: 0,
+  state: 'READY' as any,
+  version: '1.0',
+  unschedulable: false,
+  currentCpuUsagePercentage: 0,
+  currentMemoryUsagePercentage: 0,
+  currentDiskUsagePercentage: 0,
+  currentAllocatedCpu: 0,
+  currentAllocatedMemoryGiB: 0,
+  currentAllocatedDiskGiB: 0,
+  currentSnapshotCount: 0,
+  availabilityScore: 100,
+  lastChecked: new Date(),
+  createdAt: new Date(),
+  updatedAt: new Date(),
 }
 
 describe('RunnerService', () => {
@@ -74,9 +130,39 @@ describe('RunnerService', () => {
           },
         },
         {
+          provide: getRepositoryToken(Region),
+          useValue: {
+            findOne: jest.fn(),
+          },
+        },
+        {
+          provide: getRepositoryToken(Sandbox),
+          useValue: {
+            find: jest.fn(),
+          },
+        },
+        {
+          provide: getRepositoryToken(SnapshotRunner),
+          useValue: {
+            find: jest.fn(),
+          },
+        },
+        {
+          provide: getRepositoryToken(Snapshot),
+          useValue: {
+            find: jest.fn(),
+          },
+        },
+        {
           provide: UserService,
           useValue: {
             findOne: jest.fn().mockResolvedValue(new User()),
+          },
+        },
+        {
+          provide: RunnerAdapterFactory,
+          useValue: {
+            create: jest.fn(),
           },
         },
       ],
@@ -101,9 +187,26 @@ describe('RunnerService', () => {
         memoryGiB: 1,
         gpu: 1,
         gpuType: 'test',
-        key: 'test',
         domain: 'test',
-        limit: 1,
+        apiUrl: 'http://test.com',
+        proxyUrl: 'http://proxy.test.com',
+        apiKey: 'test-key',
+        capacity: 1,
+        used: 0,
+        state: 'READY' as any,
+        version: '1.0',
+        unschedulable: false,
+        currentCpuUsagePercentage: 0,
+        currentMemoryUsagePercentage: 0,
+        currentDiskUsagePercentage: 0,
+        currentAllocatedCpu: 0,
+        currentAllocatedMemoryGiB: 0,
+        currentAllocatedDiskGiB: 0,
+        currentSnapshotCount: 0,
+        availabilityScore: 100,
+        lastChecked: new Date(),
+        createdAt: new Date(),
+        updatedAt: new Date(),
       }
 
       expect(
@@ -115,11 +218,40 @@ describe('RunnerService', () => {
           memoryGiB: 1,
           gpu: 1,
           gpuType: 'test',
-          key: 'test',
           domain: 'test',
-          limit: 1,
+          apiUrl: 'http://test.com',
+          proxyUrl: 'http://proxy.test.com',
+          apiKey: 'test-key',
+          capacity: 1,
+          version: '1.0',
         }),
-      ).resolves.toEqual(oneRunner)
+      ).resolves.toMatchObject({
+        id: '1',
+        class: SandboxClass.SMALL,
+        region: 'us',
+        cpu: 1,
+        diskGiB: 1,
+        memoryGiB: 1,
+        gpu: 1,
+        gpuType: 'test',
+        domain: 'test',
+        apiUrl: 'http://test.com',
+        proxyUrl: 'http://proxy.test.com',
+        apiKey: 'test-key',
+        capacity: 1,
+        used: 0,
+        state: 'READY',
+        version: '1.0',
+        unschedulable: false,
+        currentCpuUsagePercentage: 0,
+        currentMemoryUsagePercentage: 0,
+        currentDiskUsagePercentage: 0,
+        currentAllocatedCpu: 0,
+        currentAllocatedMemoryGiB: 0,
+        currentAllocatedDiskGiB: 0,
+        currentSnapshotCount: 0,
+        availabilityScore: 100,
+      })
     })
   })
 

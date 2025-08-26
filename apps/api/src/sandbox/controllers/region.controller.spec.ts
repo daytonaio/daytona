@@ -16,6 +16,7 @@ describe('RegionController', () => {
     code: 'abc12345',
     name: 'us-east-1',
     organizationId: 'org-123',
+    dockerRegistryId: null,
     createdAt: new Date(),
     updatedAt: new Date(),
   }
@@ -23,6 +24,7 @@ describe('RegionController', () => {
   const mockRegionDto = {
     name: 'us-east-1',
     organizationId: 'org-123',
+    dockerRegistryId: null,
     createdAt: '2023-01-01T00:00:00.000Z',
     updatedAt: '2023-01-01T00:00:00.000Z',
   }
@@ -76,6 +78,25 @@ describe('RegionController', () => {
 
       expect(result.name).toBe(mockRegionDto.name)
       expect(result.organizationId).toBe(mockRegionDto.organizationId)
+      expect(result.createdAt).toBeDefined()
+      expect(result.updatedAt).toBeDefined()
+      expect(service.create).toHaveBeenCalledWith(mockOrganization, createRegionDto)
+    })
+
+    it('should create a new region with docker registry ID', async () => {
+      const createRegionDto: CreateRegionDto = {
+        name: 'us-east-1',
+        dockerRegistryId: 'registry-123',
+      }
+
+      const regionWithRegistry = { ...mockRegion, dockerRegistryId: 'registry-123' }
+      jest.spyOn(service, 'create').mockResolvedValue(regionWithRegistry)
+
+      const result = await controller.createRegion(mockAuthContext as any, createRegionDto)
+
+      expect(result.name).toBe(mockRegionDto.name)
+      expect(result.organizationId).toBe(mockRegionDto.organizationId)
+      expect(result.dockerRegistryId).toBe('registry-123')
       expect(result.createdAt).toBeDefined()
       expect(result.updatedAt).toBeDefined()
       expect(service.create).toHaveBeenCalledWith(mockOrganization, createRegionDto)

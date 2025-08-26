@@ -4,7 +4,7 @@
  */
 
 import { ApiProperty, ApiSchema } from '@nestjs/swagger'
-import { IsString, IsNotEmpty } from 'class-validator'
+import { IsString, IsNotEmpty, IsOptional } from 'class-validator'
 
 @ApiSchema({ name: 'CreateRegion' })
 export class CreateRegionDto {
@@ -15,4 +15,14 @@ export class CreateRegionDto {
   @IsString()
   @IsNotEmpty()
   name: string
+
+  @ApiProperty({
+    description: 'Docker registry ID (optional)',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+    required: false,
+    nullable: true,
+  })
+  @IsOptional()
+  @IsString()
+  dockerRegistryId?: string
 }
