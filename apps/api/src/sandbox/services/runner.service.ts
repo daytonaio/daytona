@@ -183,7 +183,7 @@ export class RunnerService {
     })
   }
 
-  @Cron('45 * * * * *')
+  @Cron('15 * * * * *')
   private async handleCheckRunners() {
     if (this.checkingRunners) {
       return

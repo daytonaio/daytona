@@ -113,7 +113,7 @@ func main() {
 	metricsService := services.NewMetricsService(services.MetricsServiceConfig{
 		Docker:   dockerClient,
 		Cache:    metricsCache,
-		Interval: 20 * time.Second,
+		Interval: 15 * time.Second,
 	})
 	metricsService.StartMetricsCollection(ctx)
 
