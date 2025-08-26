@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Controller, Post, Get, Body, Param, UseGuards, HttpStatus, NotFoundException } from '@nestjs/common'
+import { Controller, Post, Get, Body, Param, UseGuards, HttpStatus } from '@nestjs/common'
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiHeader } from '@nestjs/swagger'
 import { WebhookService } from '../services/webhook.service'
 import { SendWebhookDto } from '../dto/send-webhook.dto'
@@ -16,7 +16,6 @@ import { SystemRole } from '../../user/enums/system-role.enum'
 import { Audit, TypedRequest } from '../../audit/decorators/audit.decorator'
 import { AuditAction } from '../../audit/enums/audit-action.enum'
 import { AuditTarget } from '../../audit/enums/audit-target.enum'
-import { OrganizationService } from '../../organization/services/organization.service'
 import { WebhookInitializationCheckerService } from '../services/webhook-initialization-checker.service'
 
 @ApiTags('webhooks')
@@ -28,7 +27,6 @@ export class WebhookController {
   constructor(
     private readonly webhookService: WebhookService,
     private readonly webhookInitializationChecker: WebhookInitializationCheckerService,
-    private readonly organizationService: OrganizationService,
   ) {}
 
   @Post('organizations/:organizationId/app-portal-access')
@@ -136,20 +134,7 @@ export class WebhookController {
       },
     },
   })
-  @ApiResponse({
-    status: HttpStatus.NOT_FOUND,
-    description: 'Organization not found',
-  })
   async getInitializationStatus(@Param('organizationId') organizationId: string): Promise<any> {
-    // Check if user has access to this organization
-    const organization = await this.organizationService.findOne(organizationId)
-    if (!organization) {
-      throw new NotFoundException('Organization not found')
-    }
-
-    // TODO: Add proper authorization check here
-    // For now, we'll assume the user has access if they can see the organization
-
     return this.webhookInitializationChecker.getInitializationStatus(organizationId)
   }
 }
