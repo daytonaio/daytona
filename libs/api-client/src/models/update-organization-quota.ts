@@ -23,53 +23,53 @@ export interface UpdateOrganizationQuota {
    * @type {number}
    * @memberof UpdateOrganizationQuota
    */
-  totalCpuQuota: number | null
+  totalCpuQuota: number
   /**
    *
    * @type {number}
    * @memberof UpdateOrganizationQuota
    */
-  totalMemoryQuota: number | null
+  totalMemoryQuota: number
   /**
    *
    * @type {number}
    * @memberof UpdateOrganizationQuota
    */
-  totalDiskQuota: number | null
+  totalDiskQuota: number
   /**
    *
    * @type {number}
    * @memberof UpdateOrganizationQuota
    */
-  maxCpuPerSandbox: number | null
+  maxCpuPerSandbox: number
   /**
    *
    * @type {number}
    * @memberof UpdateOrganizationQuota
    */
-  maxMemoryPerSandbox: number | null
+  maxMemoryPerSandbox: number
   /**
    *
    * @type {number}
    * @memberof UpdateOrganizationQuota
    */
-  maxDiskPerSandbox: number | null
+  maxDiskPerSandbox: number
   /**
    *
    * @type {number}
    * @memberof UpdateOrganizationQuota
    */
-  snapshotQuota: number | null
+  snapshotQuota: number
   /**
    *
    * @type {number}
    * @memberof UpdateOrganizationQuota
    */
-  maxSnapshotSize: number | null
+  maxSnapshotSize: number
   /**
    *
    * @type {number}
    * @memberof UpdateOrganizationQuota
    */
-  volumeQuota: number | null
+  volumeQuota: number
 }

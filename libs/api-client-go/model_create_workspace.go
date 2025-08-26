@@ -25,9 +25,9 @@ type CreateWorkspace struct {
 	// The user associated with the project
 	User *string `json:"user,omitempty"`
 	// Environment variables for the workspace
-	Env *map[string]string `json:"env,omitempty"`
+	Env map[string]string `json:"env,omitempty"`
 	// Labels for the workspace
-	Labels *map[string]string `json:"labels,omitempty"`
+	Labels map[string]string `json:"labels,omitempty"`
 	// Whether the workspace http preview is publicly accessible
 	Public *bool `json:"public,omitempty"`
 	// The workspace class type
@@ -139,14 +139,14 @@ func (o *CreateWorkspace) GetEnv() map[string]string {
 		var ret map[string]string
 		return ret
 	}
-	return *o.Env
+	return o.Env
 }
 
 // GetEnvOk returns a tuple with the Env field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *CreateWorkspace) GetEnvOk() (*map[string]string, bool) {
+func (o *CreateWorkspace) GetEnvOk() (map[string]string, bool) {
 	if o == nil || IsNil(o.Env) {
-		return nil, false
+		return map[string]string{}, false
 	}
 	return o.Env, true
 }
@@ -162,7 +162,7 @@ func (o *CreateWorkspace) HasEnv() bool {
 
 // SetEnv gets a reference to the given map[string]string and assigns it to the Env field.
 func (o *CreateWorkspace) SetEnv(v map[string]string) {
-	o.Env = &v
+	o.Env = v
 }
 
 // GetLabels returns the Labels field value if set, zero value otherwise.
@@ -171,14 +171,14 @@ func (o *CreateWorkspace) GetLabels() map[string]string {
 		var ret map[string]string
 		return ret
 	}
-	return *o.Labels
+	return o.Labels
 }
 
 // GetLabelsOk returns a tuple with the Labels field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *CreateWorkspace) GetLabelsOk() (*map[string]string, bool) {
+func (o *CreateWorkspace) GetLabelsOk() (map[string]string, bool) {
 	if o == nil || IsNil(o.Labels) {
-		return nil, false
+		return map[string]string{}, false
 	}
 	return o.Labels, true
 }
@@ -194,7 +194,7 @@ func (o *CreateWorkspace) HasLabels() bool {
 
 // SetLabels gets a reference to the given map[string]string and assigns it to the Labels field.
 func (o *CreateWorkspace) SetLabels(v map[string]string) {
-	o.Labels = &v
+	o.Labels = v
 }
 
 // GetPublic returns the Public field value if set, zero value otherwise.

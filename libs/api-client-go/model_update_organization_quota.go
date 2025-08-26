@@ -22,15 +22,15 @@ var _ MappedNullable = &UpdateOrganizationQuota{}
 
 // UpdateOrganizationQuota struct for UpdateOrganizationQuota
 type UpdateOrganizationQuota struct {
-	TotalCpuQuota       NullableFloat32 `json:"totalCpuQuota"`
-	TotalMemoryQuota    NullableFloat32 `json:"totalMemoryQuota"`
-	TotalDiskQuota      NullableFloat32 `json:"totalDiskQuota"`
-	MaxCpuPerSandbox    NullableFloat32 `json:"maxCpuPerSandbox"`
-	MaxMemoryPerSandbox NullableFloat32 `json:"maxMemoryPerSandbox"`
-	MaxDiskPerSandbox   NullableFloat32 `json:"maxDiskPerSandbox"`
-	SnapshotQuota       NullableFloat32 `json:"snapshotQuota"`
-	MaxSnapshotSize     NullableFloat32 `json:"maxSnapshotSize"`
-	VolumeQuota         NullableFloat32 `json:"volumeQuota"`
+	TotalCpuQuota       float32 `json:"totalCpuQuota"`
+	TotalMemoryQuota    float32 `json:"totalMemoryQuota"`
+	TotalDiskQuota      float32 `json:"totalDiskQuota"`
+	MaxCpuPerSandbox    float32 `json:"maxCpuPerSandbox"`
+	MaxMemoryPerSandbox float32 `json:"maxMemoryPerSandbox"`
+	MaxDiskPerSandbox   float32 `json:"maxDiskPerSandbox"`
+	SnapshotQuota       float32 `json:"snapshotQuota"`
+	MaxSnapshotSize     float32 `json:"maxSnapshotSize"`
+	VolumeQuota         float32 `json:"volumeQuota"`
 }
 
 type _UpdateOrganizationQuota UpdateOrganizationQuota
@@ -39,7 +39,7 @@ type _UpdateOrganizationQuota UpdateOrganizationQuota
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewUpdateOrganizationQuota(totalCpuQuota NullableFloat32, totalMemoryQuota NullableFloat32, totalDiskQuota NullableFloat32, maxCpuPerSandbox NullableFloat32, maxMemoryPerSandbox NullableFloat32, maxDiskPerSandbox NullableFloat32, snapshotQuota NullableFloat32, maxSnapshotSize NullableFloat32, volumeQuota NullableFloat32) *UpdateOrganizationQuota {
+func NewUpdateOrganizationQuota(totalCpuQuota float32, totalMemoryQuota float32, totalDiskQuota float32, maxCpuPerSandbox float32, maxMemoryPerSandbox float32, maxDiskPerSandbox float32, snapshotQuota float32, maxSnapshotSize float32, volumeQuota float32) *UpdateOrganizationQuota {
 	this := UpdateOrganizationQuota{}
 	this.TotalCpuQuota = totalCpuQuota
 	this.TotalMemoryQuota = totalMemoryQuota
@@ -62,237 +62,219 @@ func NewUpdateOrganizationQuotaWithDefaults() *UpdateOrganizationQuota {
 }
 
 // GetTotalCpuQuota returns the TotalCpuQuota field value
-// If the value is explicit nil, the zero value for float32 will be returned
 func (o *UpdateOrganizationQuota) GetTotalCpuQuota() float32 {
-	if o == nil || o.TotalCpuQuota.Get() == nil {
+	if o == nil {
 		var ret float32
 		return ret
 	}
 
-	return *o.TotalCpuQuota.Get()
+	return o.TotalCpuQuota
 }
 
 // GetTotalCpuQuotaOk returns a tuple with the TotalCpuQuota field value
 // and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *UpdateOrganizationQuota) GetTotalCpuQuotaOk() (*float32, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return o.TotalCpuQuota.Get(), o.TotalCpuQuota.IsSet()
+	return &o.TotalCpuQuota, true
 }
 
 // SetTotalCpuQuota sets field value
 func (o *UpdateOrganizationQuota) SetTotalCpuQuota(v float32) {
-	o.TotalCpuQuota.Set(&v)
+	o.TotalCpuQuota = v
 }
 
 // GetTotalMemoryQuota returns the TotalMemoryQuota field value
-// If the value is explicit nil, the zero value for float32 will be returned
 func (o *UpdateOrganizationQuota) GetTotalMemoryQuota() float32 {
-	if o == nil || o.TotalMemoryQuota.Get() == nil {
+	if o == nil {
 		var ret float32
 		return ret
 	}
 
-	return *o.TotalMemoryQuota.Get()
+	return o.TotalMemoryQuota
 }
 
 // GetTotalMemoryQuotaOk returns a tuple with the TotalMemoryQuota field value
 // and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *UpdateOrganizationQuota) GetTotalMemoryQuotaOk() (*float32, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return o.TotalMemoryQuota.Get(), o.TotalMemoryQuota.IsSet()
+	return &o.TotalMemoryQuota, true
 }
 
 // SetTotalMemoryQuota sets field value
 func (o *UpdateOrganizationQuota) SetTotalMemoryQuota(v float32) {
-	o.TotalMemoryQuota.Set(&v)
+	o.TotalMemoryQuota = v
 }
 
 // GetTotalDiskQuota returns the TotalDiskQuota field value
-// If the value is explicit nil, the zero value for float32 will be returned
 func (o *UpdateOrganizationQuota) GetTotalDiskQuota() float32 {
-	if o == nil || o.TotalDiskQuota.Get() == nil {
+	if o == nil {
 		var ret float32
 		return ret
 	}
 
-	return *o.TotalDiskQuota.Get()
+	return o.TotalDiskQuota
 }
 
 // GetTotalDiskQuotaOk returns a tuple with the TotalDiskQuota field value
 // and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *UpdateOrganizationQuota) GetTotalDiskQuotaOk() (*float32, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return o.TotalDiskQuota.Get(), o.TotalDiskQuota.IsSet()
+	return &o.TotalDiskQuota, true
 }
 
 // SetTotalDiskQuota sets field value
 func (o *UpdateOrganizationQuota) SetTotalDiskQuota(v float32) {
-	o.TotalDiskQuota.Set(&v)
+	o.TotalDiskQuota = v
 }
 
 // GetMaxCpuPerSandbox returns the MaxCpuPerSandbox field value
-// If the value is explicit nil, the zero value for float32 will be returned
 func (o *UpdateOrganizationQuota) GetMaxCpuPerSandbox() float32 {
-	if o == nil || o.MaxCpuPerSandbox.Get() == nil {
+	if o == nil {
 		var ret float32
 		return ret
 	}
 
-	return *o.MaxCpuPerSandbox.Get()
+	return o.MaxCpuPerSandbox
 }
 
 // GetMaxCpuPerSandboxOk returns a tuple with the MaxCpuPerSandbox field value
 // and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *UpdateOrganizationQuota) GetMaxCpuPerSandboxOk() (*float32, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return o.MaxCpuPerSandbox.Get(), o.MaxCpuPerSandbox.IsSet()
+	return &o.MaxCpuPerSandbox, true
 }
 
 // SetMaxCpuPerSandbox sets field value
 func (o *UpdateOrganizationQuota) SetMaxCpuPerSandbox(v float32) {
-	o.MaxCpuPerSandbox.Set(&v)
+	o.MaxCpuPerSandbox = v
 }
 
 // GetMaxMemoryPerSandbox returns the MaxMemoryPerSandbox field value
-// If the value is explicit nil, the zero value for float32 will be returned
 func (o *UpdateOrganizationQuota) GetMaxMemoryPerSandbox() float32 {
-	if o == nil || o.MaxMemoryPerSandbox.Get() == nil {
+	if o == nil {
 		var ret float32
 		return ret
 	}
 
-	return *o.MaxMemoryPerSandbox.Get()
+	return o.MaxMemoryPerSandbox
 }
 
 // GetMaxMemoryPerSandboxOk returns a tuple with the MaxMemoryPerSandbox field value
 // and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *UpdateOrganizationQuota) GetMaxMemoryPerSandboxOk() (*float32, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return o.MaxMemoryPerSandbox.Get(), o.MaxMemoryPerSandbox.IsSet()
+	return &o.MaxMemoryPerSandbox, true
 }
 
 // SetMaxMemoryPerSandbox sets field value
 func (o *UpdateOrganizationQuota) SetMaxMemoryPerSandbox(v float32) {
-	o.MaxMemoryPerSandbox.Set(&v)
+	o.MaxMemoryPerSandbox = v
 }
 
 // GetMaxDiskPerSandbox returns the MaxDiskPerSandbox field value
-// If the value is explicit nil, the zero value for float32 will be returned
 func (o *UpdateOrganizationQuota) GetMaxDiskPerSandbox() float32 {
-	if o == nil || o.MaxDiskPerSandbox.Get() == nil {
+	if o == nil {
 		var ret float32
 		return ret
 	}
 
-	return *o.MaxDiskPerSandbox.Get()
+	return o.MaxDiskPerSandbox
 }
 
 // GetMaxDiskPerSandboxOk returns a tuple with the MaxDiskPerSandbox field value
 // and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *UpdateOrganizationQuota) GetMaxDiskPerSandboxOk() (*float32, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return o.MaxDiskPerSandbox.Get(), o.MaxDiskPerSandbox.IsSet()
+	return &o.MaxDiskPerSandbox, true
 }
 
 // SetMaxDiskPerSandbox sets field value
 func (o *UpdateOrganizationQuota) SetMaxDiskPerSandbox(v float32) {
-	o.MaxDiskPerSandbox.Set(&v)
+	o.MaxDiskPerSandbox = v
 }
 
 // GetSnapshotQuota returns the SnapshotQuota field value
-// If the value is explicit nil, the zero value for float32 will be returned
 func (o *UpdateOrganizationQuota) GetSnapshotQuota() float32 {
-	if o == nil || o.SnapshotQuota.Get() == nil {
+	if o == nil {
 		var ret float32
 		return ret
 	}
 
-	return *o.SnapshotQuota.Get()
+	return o.SnapshotQuota
 }
 
 // GetSnapshotQuotaOk returns a tuple with the SnapshotQuota field value
 // and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *UpdateOrganizationQuota) GetSnapshotQuotaOk() (*float32, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return o.SnapshotQuota.Get(), o.SnapshotQuota.IsSet()
+	return &o.SnapshotQuota, true
 }
 
 // SetSnapshotQuota sets field value
 func (o *UpdateOrganizationQuota) SetSnapshotQuota(v float32) {
-	o.SnapshotQuota.Set(&v)
+	o.SnapshotQuota = v
 }
 
 // GetMaxSnapshotSize returns the MaxSnapshotSize field value
-// If the value is explicit nil, the zero value for float32 will be returned
 func (o *UpdateOrganizationQuota) GetMaxSnapshotSize() float32 {
-	if o == nil || o.MaxSnapshotSize.Get() == nil {
+	if o == nil {
 		var ret float32
 		return ret
 	}
 
-	return *o.MaxSnapshotSize.Get()
+	return o.MaxSnapshotSize
 }
 
 // GetMaxSnapshotSizeOk returns a tuple with the MaxSnapshotSize field value
 // and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *UpdateOrganizationQuota) GetMaxSnapshotSizeOk() (*float32, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return o.MaxSnapshotSize.Get(), o.MaxSnapshotSize.IsSet()
+	return &o.MaxSnapshotSize, true
 }
 
 // SetMaxSnapshotSize sets field value
 func (o *UpdateOrganizationQuota) SetMaxSnapshotSize(v float32) {
-	o.MaxSnapshotSize.Set(&v)
+	o.MaxSnapshotSize = v
 }
 
 // GetVolumeQuota returns the VolumeQuota field value
-// If the value is explicit nil, the zero value for float32 will be returned
 func (o *UpdateOrganizationQuota) GetVolumeQuota() float32 {
-	if o == nil || o.VolumeQuota.Get() == nil {
+	if o == nil {
 		var ret float32
 		return ret
 	}
 
-	return *o.VolumeQuota.Get()
+	return o.VolumeQuota
 }
 
 // GetVolumeQuotaOk returns a tuple with the VolumeQuota field value
 // and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *UpdateOrganizationQuota) GetVolumeQuotaOk() (*float32, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return o.VolumeQuota.Get(), o.VolumeQuota.IsSet()
+	return &o.VolumeQuota, true
 }
 
 // SetVolumeQuota sets field value
 func (o *UpdateOrganizationQuota) SetVolumeQuota(v float32) {
-	o.VolumeQuota.Set(&v)
+	o.VolumeQuota = v
 }
 
 func (o UpdateOrganizationQuota) MarshalJSON() ([]byte, error) {
@@ -305,15 +287,15 @@ func (o UpdateOrganizationQuota) MarshalJSON() ([]byte, error) {
 
 func (o UpdateOrganizationQuota) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	toSerialize["totalCpuQuota"] = o.TotalCpuQuota.Get()
-	toSerialize["totalMemoryQuota"] = o.TotalMemoryQuota.Get()
-	toSerialize["totalDiskQuota"] = o.TotalDiskQuota.Get()
-	toSerialize["maxCpuPerSandbox"] = o.MaxCpuPerSandbox.Get()
-	toSerialize["maxMemoryPerSandbox"] = o.MaxMemoryPerSandbox.Get()
-	toSerialize["maxDiskPerSandbox"] = o.MaxDiskPerSandbox.Get()
-	toSerialize["snapshotQuota"] = o.SnapshotQuota.Get()
-	toSerialize["maxSnapshotSize"] = o.MaxSnapshotSize.Get()
-	toSerialize["volumeQuota"] = o.VolumeQuota.Get()
+	toSerialize["totalCpuQuota"] = o.TotalCpuQuota
+	toSerialize["totalMemoryQuota"] = o.TotalMemoryQuota
+	toSerialize["totalDiskQuota"] = o.TotalDiskQuota
+	toSerialize["maxCpuPerSandbox"] = o.MaxCpuPerSandbox
+	toSerialize["maxMemoryPerSandbox"] = o.MaxMemoryPerSandbox
+	toSerialize["maxDiskPerSandbox"] = o.MaxDiskPerSandbox
+	toSerialize["snapshotQuota"] = o.SnapshotQuota
+	toSerialize["maxSnapshotSize"] = o.MaxSnapshotSize
+	toSerialize["volumeQuota"] = o.VolumeQuota
 	return toSerialize, nil
 }
 

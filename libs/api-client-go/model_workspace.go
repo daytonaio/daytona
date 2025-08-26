@@ -243,11 +243,11 @@ func (o *Workspace) GetEnv() map[string]string {
 
 // GetEnvOk returns a tuple with the Env field value
 // and a boolean to check if the value has been set.
-func (o *Workspace) GetEnvOk() (*map[string]string, bool) {
+func (o *Workspace) GetEnvOk() (map[string]string, bool) {
 	if o == nil {
-		return nil, false
+		return map[string]string{}, false
 	}
-	return &o.Env, true
+	return o.Env, true
 }
 
 // SetEnv sets field value
@@ -267,11 +267,11 @@ func (o *Workspace) GetLabels() map[string]string {
 
 // GetLabelsOk returns a tuple with the Labels field value
 // and a boolean to check if the value has been set.
-func (o *Workspace) GetLabelsOk() (*map[string]string, bool) {
+func (o *Workspace) GetLabelsOk() (map[string]string, bool) {
 	if o == nil {
-		return nil, false
+		return map[string]string{}, false
 	}
-	return &o.Labels, true
+	return o.Labels, true
 }
 
 // SetLabels sets field value

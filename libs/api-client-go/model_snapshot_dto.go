@@ -23,22 +23,22 @@ var _ MappedNullable = &SnapshotDto{}
 
 // SnapshotDto struct for SnapshotDto
 type SnapshotDto struct {
-	Id             string          `json:"id"`
-	OrganizationId *string         `json:"organizationId,omitempty"`
-	General        bool            `json:"general"`
-	Name           string          `json:"name"`
-	ImageName      *string         `json:"imageName,omitempty"`
-	State          SnapshotState   `json:"state"`
-	Size           NullableFloat32 `json:"size"`
-	Entrypoint     []string        `json:"entrypoint"`
-	Cpu            float32         `json:"cpu"`
-	Gpu            float32         `json:"gpu"`
-	Mem            float32         `json:"mem"`
-	Disk           float32         `json:"disk"`
-	ErrorReason    NullableString  `json:"errorReason"`
-	CreatedAt      time.Time       `json:"createdAt"`
-	UpdatedAt      time.Time       `json:"updatedAt"`
-	LastUsedAt     NullableTime    `json:"lastUsedAt"`
+	Id             string        `json:"id"`
+	OrganizationId *string       `json:"organizationId,omitempty"`
+	General        bool          `json:"general"`
+	Name           string        `json:"name"`
+	ImageName      *string       `json:"imageName,omitempty"`
+	State          SnapshotState `json:"state"`
+	Size           float32       `json:"size"`
+	Entrypoint     []string      `json:"entrypoint"`
+	Cpu            float32       `json:"cpu"`
+	Gpu            float32       `json:"gpu"`
+	Mem            float32       `json:"mem"`
+	Disk           float32       `json:"disk"`
+	ErrorReason    string        `json:"errorReason"`
+	CreatedAt      time.Time     `json:"createdAt"`
+	UpdatedAt      time.Time     `json:"updatedAt"`
+	LastUsedAt     time.Time     `json:"lastUsedAt"`
 	// Build information for the snapshot
 	BuildInfo *BuildInfo `json:"buildInfo,omitempty"`
 }
@@ -49,7 +49,7 @@ type _SnapshotDto SnapshotDto
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewSnapshotDto(id string, general bool, name string, state SnapshotState, size NullableFloat32, entrypoint []string, cpu float32, gpu float32, mem float32, disk float32, errorReason NullableString, createdAt time.Time, updatedAt time.Time, lastUsedAt NullableTime) *SnapshotDto {
+func NewSnapshotDto(id string, general bool, name string, state SnapshotState, size float32, entrypoint []string, cpu float32, gpu float32, mem float32, disk float32, errorReason string, createdAt time.Time, updatedAt time.Time, lastUsedAt time.Time) *SnapshotDto {
 	this := SnapshotDto{}
 	this.Id = id
 	this.General = general
@@ -237,33 +237,30 @@ func (o *SnapshotDto) SetState(v SnapshotState) {
 }
 
 // GetSize returns the Size field value
-// If the value is explicit nil, the zero value for float32 will be returned
 func (o *SnapshotDto) GetSize() float32 {
-	if o == nil || o.Size.Get() == nil {
+	if o == nil {
 		var ret float32
 		return ret
 	}
 
-	return *o.Size.Get()
+	return o.Size
 }
 
 // GetSizeOk returns a tuple with the Size field value
 // and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *SnapshotDto) GetSizeOk() (*float32, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return o.Size.Get(), o.Size.IsSet()
+	return &o.Size, true
 }
 
 // SetSize sets field value
 func (o *SnapshotDto) SetSize(v float32) {
-	o.Size.Set(&v)
+	o.Size = v
 }
 
 // GetEntrypoint returns the Entrypoint field value
-// If the value is explicit nil, the zero value for []string will be returned
 func (o *SnapshotDto) GetEntrypoint() []string {
 	if o == nil {
 		var ret []string
@@ -275,9 +272,8 @@ func (o *SnapshotDto) GetEntrypoint() []string {
 
 // GetEntrypointOk returns a tuple with the Entrypoint field value
 // and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *SnapshotDto) GetEntrypointOk() ([]string, bool) {
-	if o == nil || IsNil(o.Entrypoint) {
+	if o == nil {
 		return nil, false
 	}
 	return o.Entrypoint, true
@@ -385,29 +381,27 @@ func (o *SnapshotDto) SetDisk(v float32) {
 }
 
 // GetErrorReason returns the ErrorReason field value
-// If the value is explicit nil, the zero value for string will be returned
 func (o *SnapshotDto) GetErrorReason() string {
-	if o == nil || o.ErrorReason.Get() == nil {
+	if o == nil {
 		var ret string
 		return ret
 	}
 
-	return *o.ErrorReason.Get()
+	return o.ErrorReason
 }
 
 // GetErrorReasonOk returns a tuple with the ErrorReason field value
 // and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *SnapshotDto) GetErrorReasonOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return o.ErrorReason.Get(), o.ErrorReason.IsSet()
+	return &o.ErrorReason, true
 }
 
 // SetErrorReason sets field value
 func (o *SnapshotDto) SetErrorReason(v string) {
-	o.ErrorReason.Set(&v)
+	o.ErrorReason = v
 }
 
 // GetCreatedAt returns the CreatedAt field value
@@ -459,29 +453,27 @@ func (o *SnapshotDto) SetUpdatedAt(v time.Time) {
 }
 
 // GetLastUsedAt returns the LastUsedAt field value
-// If the value is explicit nil, the zero value for time.Time will be returned
 func (o *SnapshotDto) GetLastUsedAt() time.Time {
-	if o == nil || o.LastUsedAt.Get() == nil {
+	if o == nil {
 		var ret time.Time
 		return ret
 	}
 
-	return *o.LastUsedAt.Get()
+	return o.LastUsedAt
 }
 
 // GetLastUsedAtOk returns a tuple with the LastUsedAt field value
 // and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *SnapshotDto) GetLastUsedAtOk() (*time.Time, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return o.LastUsedAt.Get(), o.LastUsedAt.IsSet()
+	return &o.LastUsedAt, true
 }
 
 // SetLastUsedAt sets field value
 func (o *SnapshotDto) SetLastUsedAt(v time.Time) {
-	o.LastUsedAt.Set(&v)
+	o.LastUsedAt = v
 }
 
 // GetBuildInfo returns the BuildInfo field value if set, zero value otherwise.
@@ -536,18 +528,16 @@ func (o SnapshotDto) ToMap() (map[string]interface{}, error) {
 		toSerialize["imageName"] = o.ImageName
 	}
 	toSerialize["state"] = o.State
-	toSerialize["size"] = o.Size.Get()
-	if o.Entrypoint != nil {
-		toSerialize["entrypoint"] = o.Entrypoint
-	}
+	toSerialize["size"] = o.Size
+	toSerialize["entrypoint"] = o.Entrypoint
 	toSerialize["cpu"] = o.Cpu
 	toSerialize["gpu"] = o.Gpu
 	toSerialize["mem"] = o.Mem
 	toSerialize["disk"] = o.Disk
-	toSerialize["errorReason"] = o.ErrorReason.Get()
+	toSerialize["errorReason"] = o.ErrorReason
 	toSerialize["createdAt"] = o.CreatedAt
 	toSerialize["updatedAt"] = o.UpdatedAt
-	toSerialize["lastUsedAt"] = o.LastUsedAt.Get()
+	toSerialize["lastUsedAt"] = o.LastUsedAt
 	if !IsNil(o.BuildInfo) {
 		toSerialize["buildInfo"] = o.BuildInfo
 	}

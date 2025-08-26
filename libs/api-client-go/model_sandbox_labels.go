@@ -58,11 +58,11 @@ func (o *SandboxLabels) GetLabels() map[string]string {
 
 // GetLabelsOk returns a tuple with the Labels field value
 // and a boolean to check if the value has been set.
-func (o *SandboxLabels) GetLabelsOk() (*map[string]string, bool) {
+func (o *SandboxLabels) GetLabelsOk() (map[string]string, bool) {
 	if o == nil {
-		return nil, false
+		return map[string]string{}, false
 	}
-	return &o.Labels, true
+	return o.Labels, true
 }
 
 // SetLabels sets field value

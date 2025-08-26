@@ -25,9 +25,9 @@ type CreateSandbox struct {
 	// The user associated with the project
 	User *string `json:"user,omitempty"`
 	// Environment variables for the sandbox
-	Env *map[string]string `json:"env,omitempty"`
+	Env map[string]string `json:"env,omitempty"`
 	// Labels for the sandbox
-	Labels *map[string]string `json:"labels,omitempty"`
+	Labels map[string]string `json:"labels,omitempty"`
 	// Whether the sandbox http preview is publicly accessible
 	Public *bool `json:"public,omitempty"`
 	// Whether to block all network access for the sandbox
@@ -145,14 +145,14 @@ func (o *CreateSandbox) GetEnv() map[string]string {
 		var ret map[string]string
 		return ret
 	}
-	return *o.Env
+	return o.Env
 }
 
 // GetEnvOk returns a tuple with the Env field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *CreateSandbox) GetEnvOk() (*map[string]string, bool) {
+func (o *CreateSandbox) GetEnvOk() (map[string]string, bool) {
 	if o == nil || IsNil(o.Env) {
-		return nil, false
+		return map[string]string{}, false
 	}
 	return o.Env, true
 }
@@ -168,7 +168,7 @@ func (o *CreateSandbox) HasEnv() bool {
 
 // SetEnv gets a reference to the given map[string]string and assigns it to the Env field.
 func (o *CreateSandbox) SetEnv(v map[string]string) {
-	o.Env = &v
+	o.Env = v
 }
 
 // GetLabels returns the Labels field value if set, zero value otherwise.
@@ -177,14 +177,14 @@ func (o *CreateSandbox) GetLabels() map[string]string {
 		var ret map[string]string
 		return ret
 	}
-	return *o.Labels
+	return o.Labels
 }
 
 // GetLabelsOk returns a tuple with the Labels field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *CreateSandbox) GetLabelsOk() (*map[string]string, bool) {
+func (o *CreateSandbox) GetLabelsOk() (map[string]string, bool) {
 	if o == nil || IsNil(o.Labels) {
-		return nil, false
+		return map[string]string{}, false
 	}
 	return o.Labels, true
 }
@@ -200,7 +200,7 @@ func (o *CreateSandbox) HasLabels() bool {
 
 // SetLabels gets a reference to the given map[string]string and assigns it to the Labels field.
 func (o *CreateSandbox) SetLabels(v map[string]string) {
-	o.Labels = &v
+	o.Labels = v
 }
 
 // GetPublic returns the Public field value if set, zero value otherwise.

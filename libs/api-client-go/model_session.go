@@ -74,7 +74,6 @@ func (o *Session) SetSessionId(v string) {
 }
 
 // GetCommands returns the Commands field value
-// If the value is explicit nil, the zero value for []Command will be returned
 func (o *Session) GetCommands() []Command {
 	if o == nil {
 		var ret []Command
@@ -86,9 +85,8 @@ func (o *Session) GetCommands() []Command {
 
 // GetCommandsOk returns a tuple with the Commands field value
 // and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *Session) GetCommandsOk() ([]Command, bool) {
-	if o == nil || IsNil(o.Commands) {
+	if o == nil {
 		return nil, false
 	}
 	return o.Commands, true
@@ -110,9 +108,7 @@ func (o Session) MarshalJSON() ([]byte, error) {
 func (o Session) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["sessionId"] = o.SessionId
-	if o.Commands != nil {
-		toSerialize["commands"] = o.Commands
-	}
+	toSerialize["commands"] = o.Commands
 	return toSerialize, nil
 }
 

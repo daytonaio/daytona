@@ -19,7 +19,7 @@ import re  # noqa: F401
 import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictStr
-from typing import Any, ClassVar, Dict, List, Optional
+from typing import Any, ClassVar, Dict, List
 from daytona_api_client_async.models.command import Command
 from typing import Optional, Set
 from typing_extensions import Self
@@ -29,7 +29,7 @@ class Session(BaseModel):
     Session
     """ # noqa: E501
     session_id: StrictStr = Field(description="The ID of the session", alias="sessionId")
-    commands: Optional[List[Command]] = Field(description="The list of commands executed in this session")
+    commands: List[Command] = Field(description="The list of commands executed in this session")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["sessionId", "commands"]
 
@@ -85,11 +85,6 @@ class Session(BaseModel):
         if self.additional_properties is not None:
             for _key, _value in self.additional_properties.items():
                 _dict[_key] = _value
-
-        # set to None if commands (nullable) is None
-        # and model_fields_set contains the field
-        if self.commands is None and "commands" in self.model_fields_set:
-            _dict['commands'] = None
 
         return _dict
 

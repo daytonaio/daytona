@@ -47,7 +47,7 @@ export interface ApiKeyResponse {
    * @type {Date}
    * @memberof ApiKeyResponse
    */
-  expiresAt: Date | null
+  expiresAt: Date
 }
 
 export const ApiKeyResponsePermissionsEnum = {
