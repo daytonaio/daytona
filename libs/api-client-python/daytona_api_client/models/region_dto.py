@@ -18,29 +18,23 @@ import pprint
 import re  # noqa: F401
 import json
 
-from datetime import datetime
-from pydantic import BaseModel, ConfigDict, Field, StrictStr, field_validator
+from pydantic import BaseModel, ConfigDict, Field, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
 from typing import Optional, Set
 from typing_extensions import Self
 
-class CreateApiKey(BaseModel):
+class RegionDto(BaseModel):
     """
-    CreateApiKey
+    RegionDto
     """ # noqa: E501
-    name: StrictStr = Field(description="The name of the API key")
-    permissions: List[StrictStr] = Field(description="The list of organization resource permissions assigned to the API key")
-    expires_at: Optional[datetime] = Field(default=None, description="When the API key expires", alias="expiresAt")
+    code: StrictStr = Field(description="Region code")
+    name: StrictStr = Field(description="Region name")
+    organization_id: StrictStr = Field(description="Organization ID", alias="organizationId")
+    docker_registry_id: Optional[StrictStr] = Field(description="Docker registry ID (optional)", alias="dockerRegistryId")
+    created_at: StrictStr = Field(description="Creation timestamp", alias="createdAt")
+    updated_at: StrictStr = Field(description="Last update timestamp", alias="updatedAt")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["name", "permissions", "expiresAt"]
-
-    @field_validator('permissions')
-    def permissions_validate_enum(cls, value):
-        """Validates the enum"""
-        for i in value:
-            if i not in set(['write:registries', 'delete:registries', 'write:snapshots', 'delete:snapshots', 'write:sandboxes', 'delete:sandboxes', 'read:volumes', 'write:volumes', 'delete:volumes', 'read:regions', 'write:regions', 'delete:regions', 'read:audit_logs']):
-                raise ValueError("each list item must be one of ('write:registries', 'delete:registries', 'write:snapshots', 'delete:snapshots', 'write:sandboxes', 'delete:sandboxes', 'read:volumes', 'write:volumes', 'delete:volumes', 'read:regions', 'write:regions', 'delete:regions', 'read:audit_logs')")
-        return value
+    __properties: ClassVar[List[str]] = ["code", "name", "organizationId", "dockerRegistryId", "createdAt", "updatedAt"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -60,7 +54,7 @@ class CreateApiKey(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of CreateApiKey from a JSON string"""
+        """Create an instance of RegionDto from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -88,16 +82,16 @@ class CreateApiKey(BaseModel):
             for _key, _value in self.additional_properties.items():
                 _dict[_key] = _value
 
-        # set to None if expires_at (nullable) is None
+        # set to None if docker_registry_id (nullable) is None
         # and model_fields_set contains the field
-        if self.expires_at is None and "expires_at" in self.model_fields_set:
-            _dict['expiresAt'] = None
+        if self.docker_registry_id is None and "docker_registry_id" in self.model_fields_set:
+            _dict['dockerRegistryId'] = None
 
         return _dict
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of CreateApiKey from a dict"""
+        """Create an instance of RegionDto from a dict"""
         if obj is None:
             return None
 
@@ -105,9 +99,12 @@ class CreateApiKey(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
+            "code": obj.get("code"),
             "name": obj.get("name"),
-            "permissions": obj.get("permissions"),
-            "expiresAt": obj.get("expiresAt")
+            "organizationId": obj.get("organizationId"),
+            "dockerRegistryId": obj.get("dockerRegistryId"),
+            "createdAt": obj.get("createdAt"),
+            "updatedAt": obj.get("updatedAt")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

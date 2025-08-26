@@ -6,6 +6,7 @@ api_docker_registry.go
 api_object_storage.go
 api_organizations.go
 api_preview.go
+api_regions.go
 api_runners.go
 api_sandbox.go
 api_snapshots.go
@@ -39,6 +40,7 @@ model_create_organization.go
 model_create_organization_invitation.go
 model_create_organization_quota.go
 model_create_organization_role.go
+model_create_region.go
 model_create_runner.go
 model_create_sandbox.go
 model_create_session_request.go
@@ -97,6 +99,7 @@ model_process_restart_response.go
 model_process_status_response.go
 model_project_dir_response.go
 model_range.go
+model_region_dto.go
 model_region_screenshot_response.go
 model_registry_push_access_dto.go
 model_replace_request.go

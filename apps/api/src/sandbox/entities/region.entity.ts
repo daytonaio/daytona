@@ -20,6 +20,12 @@ export class Region {
   })
   organizationId: string
 
+  @Column({
+    type: 'uuid',
+    nullable: true,
+  })
+  dockerRegistryId: string
+
   @CreateDateColumn({
     type: 'timestamp with time zone',
   })

@@ -36,6 +36,7 @@ export class RegionService {
     region.code = Region.generateCode()
     region.name = createRegionDto.name
     region.organizationId = organization.id
+    region.dockerRegistryId = createRegionDto.dockerRegistryId || null
 
     const savedRegion = await this.regionRepository.save(region)
     this.logger.debug(`Created region ${savedRegion.code} for organization ${organization.id}`)

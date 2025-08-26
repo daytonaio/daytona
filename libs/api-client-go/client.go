@@ -61,6 +61,8 @@ type APIClient struct {
 
 	PreviewAPI PreviewAPI
 
+	RegionsAPI RegionsAPI
+
 	RunnersAPI RunnersAPI
 
 	SandboxAPI SandboxAPI
@@ -98,6 +100,7 @@ func NewAPIClient(cfg *Configuration) *APIClient {
 	c.ObjectStorageAPI = (*ObjectStorageAPIService)(&c.common)
 	c.OrganizationsAPI = (*OrganizationsAPIService)(&c.common)
 	c.PreviewAPI = (*PreviewAPIService)(&c.common)
+	c.RegionsAPI = (*RegionsAPIService)(&c.common)
 	c.RunnersAPI = (*RunnersAPIService)(&c.common)
 	c.SandboxAPI = (*SandboxAPIService)(&c.common)
 	c.SnapshotsAPI = (*SnapshotsAPIService)(&c.common)
