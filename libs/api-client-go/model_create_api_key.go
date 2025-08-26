@@ -28,7 +28,7 @@ type CreateApiKey struct {
 	// The list of organization resource permissions assigned to the API key
 	Permissions []string `json:"permissions"`
 	// When the API key expires
-	ExpiresAt *time.Time `json:"expiresAt,omitempty"`
+	ExpiresAt NullableTime `json:"expiresAt,omitempty"`
 }
 
 type _CreateApiKey CreateApiKey
@@ -100,36 +100,47 @@ func (o *CreateApiKey) SetPermissions(v []string) {
 	o.Permissions = v
 }
 
-// GetExpiresAt returns the ExpiresAt field value if set, zero value otherwise.
+// GetExpiresAt returns the ExpiresAt field value if set, zero value otherwise (both if not set or set to explicit null).
 func (o *CreateApiKey) GetExpiresAt() time.Time {
-	if o == nil || IsNil(o.ExpiresAt) {
+	if o == nil || IsNil(o.ExpiresAt.Get()) {
 		var ret time.Time
 		return ret
 	}
-	return *o.ExpiresAt
+	return *o.ExpiresAt.Get()
 }
 
 // GetExpiresAtOk returns a tuple with the ExpiresAt field value if set, nil otherwise
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *CreateApiKey) GetExpiresAtOk() (*time.Time, bool) {
-	if o == nil || IsNil(o.ExpiresAt) {
+	if o == nil {
 		return nil, false
 	}
-	return o.ExpiresAt, true
+	return o.ExpiresAt.Get(), o.ExpiresAt.IsSet()
 }
 
 // HasExpiresAt returns a boolean if a field has been set.
 func (o *CreateApiKey) HasExpiresAt() bool {
-	if o != nil && !IsNil(o.ExpiresAt) {
+	if o != nil && o.ExpiresAt.IsSet() {
 		return true
 	}
 
 	return false
 }
 
-// SetExpiresAt gets a reference to the given time.Time and assigns it to the ExpiresAt field.
+// SetExpiresAt gets a reference to the given NullableTime and assigns it to the ExpiresAt field.
 func (o *CreateApiKey) SetExpiresAt(v time.Time) {
-	o.ExpiresAt = &v
+	o.ExpiresAt.Set(&v)
+}
+
+// SetExpiresAtNil sets the value for ExpiresAt to be an explicit nil
+func (o *CreateApiKey) SetExpiresAtNil() {
+	o.ExpiresAt.Set(nil)
+}
+
+// UnsetExpiresAt ensures that no value is present for ExpiresAt, not even an explicit nil
+func (o *CreateApiKey) UnsetExpiresAt() {
+	o.ExpiresAt.Unset()
 }
 
 func (o CreateApiKey) MarshalJSON() ([]byte, error) {
@@ -144,8 +155,8 @@ func (o CreateApiKey) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["name"] = o.Name
 	toSerialize["permissions"] = o.Permissions
-	if !IsNil(o.ExpiresAt) {
-		toSerialize["expiresAt"] = o.ExpiresAt
+	if o.ExpiresAt.IsSet() {
+		toSerialize["expiresAt"] = o.ExpiresAt.Get()
 	}
 	return toSerialize, nil
 }

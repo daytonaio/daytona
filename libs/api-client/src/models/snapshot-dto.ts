@@ -66,13 +66,13 @@ export interface SnapshotDto {
    * @type {number}
    * @memberof SnapshotDto
    */
-  size: number
+  size: number | null
   /**
    *
    * @type {Array<string>}
    * @memberof SnapshotDto
    */
-  entrypoint: Array<string>
+  entrypoint: Array<string> | null
   /**
    *
    * @type {number}
@@ -102,7 +102,7 @@ export interface SnapshotDto {
    * @type {string}
    * @memberof SnapshotDto
    */
-  errorReason: string
+  errorReason: string | null
   /**
    *
    * @type {Date}
@@ -120,7 +120,7 @@ export interface SnapshotDto {
    * @type {Date}
    * @memberof SnapshotDto
    */
-  lastUsedAt: Date
+  lastUsedAt: Date | null
   /**
    * Build information for the snapshot
    * @type {BuildInfo}

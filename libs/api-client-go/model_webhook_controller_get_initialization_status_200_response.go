@@ -20,13 +20,13 @@ var _ MappedNullable = &WebhookControllerGetInitializationStatus200Response{}
 
 // WebhookControllerGetInitializationStatus200Response struct for WebhookControllerGetInitializationStatus200Response
 type WebhookControllerGetInitializationStatus200Response struct {
-	OrganizationId         *string  `json:"organizationId,omitempty"`
-	EndpointsCreated       *bool    `json:"endpointsCreated,omitempty"`
-	SvixApplicationCreated *bool    `json:"svixApplicationCreated,omitempty"`
-	LastError              *string  `json:"lastError,omitempty"`
-	RetryCount             *float32 `json:"retryCount,omitempty"`
-	CreatedAt              *string  `json:"createdAt,omitempty"`
-	UpdatedAt              *string  `json:"updatedAt,omitempty"`
+	OrganizationId         *string        `json:"organizationId,omitempty"`
+	EndpointsCreated       *bool          `json:"endpointsCreated,omitempty"`
+	SvixApplicationCreated *bool          `json:"svixApplicationCreated,omitempty"`
+	LastError              NullableString `json:"lastError,omitempty"`
+	RetryCount             *float32       `json:"retryCount,omitempty"`
+	CreatedAt              *string        `json:"createdAt,omitempty"`
+	UpdatedAt              *string        `json:"updatedAt,omitempty"`
 }
 
 // NewWebhookControllerGetInitializationStatus200Response instantiates a new WebhookControllerGetInitializationStatus200Response object
@@ -142,36 +142,47 @@ func (o *WebhookControllerGetInitializationStatus200Response) SetSvixApplication
 	o.SvixApplicationCreated = &v
 }
 
-// GetLastError returns the LastError field value if set, zero value otherwise.
+// GetLastError returns the LastError field value if set, zero value otherwise (both if not set or set to explicit null).
 func (o *WebhookControllerGetInitializationStatus200Response) GetLastError() string {
-	if o == nil || IsNil(o.LastError) {
+	if o == nil || IsNil(o.LastError.Get()) {
 		var ret string
 		return ret
 	}
-	return *o.LastError
+	return *o.LastError.Get()
 }
 
 // GetLastErrorOk returns a tuple with the LastError field value if set, nil otherwise
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *WebhookControllerGetInitializationStatus200Response) GetLastErrorOk() (*string, bool) {
-	if o == nil || IsNil(o.LastError) {
+	if o == nil {
 		return nil, false
 	}
-	return o.LastError, true
+	return o.LastError.Get(), o.LastError.IsSet()
 }
 
 // HasLastError returns a boolean if a field has been set.
 func (o *WebhookControllerGetInitializationStatus200Response) HasLastError() bool {
-	if o != nil && !IsNil(o.LastError) {
+	if o != nil && o.LastError.IsSet() {
 		return true
 	}
 
 	return false
 }
 
-// SetLastError gets a reference to the given string and assigns it to the LastError field.
+// SetLastError gets a reference to the given NullableString and assigns it to the LastError field.
 func (o *WebhookControllerGetInitializationStatus200Response) SetLastError(v string) {
-	o.LastError = &v
+	o.LastError.Set(&v)
+}
+
+// SetLastErrorNil sets the value for LastError to be an explicit nil
+func (o *WebhookControllerGetInitializationStatus200Response) SetLastErrorNil() {
+	o.LastError.Set(nil)
+}
+
+// UnsetLastError ensures that no value is present for LastError, not even an explicit nil
+func (o *WebhookControllerGetInitializationStatus200Response) UnsetLastError() {
+	o.LastError.Unset()
 }
 
 // GetRetryCount returns the RetryCount field value if set, zero value otherwise.
@@ -289,8 +300,8 @@ func (o WebhookControllerGetInitializationStatus200Response) ToMap() (map[string
 	if !IsNil(o.SvixApplicationCreated) {
 		toSerialize["svixApplicationCreated"] = o.SvixApplicationCreated
 	}
-	if !IsNil(o.LastError) {
-		toSerialize["lastError"] = o.LastError
+	if o.LastError.IsSet() {
+		toSerialize["lastError"] = o.LastError.Get()
 	}
 	if !IsNil(o.RetryCount) {
 		toSerialize["retryCount"] = o.RetryCount

@@ -32,7 +32,7 @@ type ApiKeyResponse struct {
 	// The list of organization resource permissions assigned to the API key
 	Permissions []string `json:"permissions"`
 	// When the API key expires
-	ExpiresAt time.Time `json:"expiresAt"`
+	ExpiresAt NullableTime `json:"expiresAt"`
 }
 
 type _ApiKeyResponse ApiKeyResponse
@@ -41,7 +41,7 @@ type _ApiKeyResponse ApiKeyResponse
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewApiKeyResponse(name string, value string, createdAt time.Time, permissions []string, expiresAt time.Time) *ApiKeyResponse {
+func NewApiKeyResponse(name string, value string, createdAt time.Time, permissions []string, expiresAt NullableTime) *ApiKeyResponse {
 	this := ApiKeyResponse{}
 	this.Name = name
 	this.Value = value
@@ -156,27 +156,29 @@ func (o *ApiKeyResponse) SetPermissions(v []string) {
 }
 
 // GetExpiresAt returns the ExpiresAt field value
+// If the value is explicit nil, the zero value for time.Time will be returned
 func (o *ApiKeyResponse) GetExpiresAt() time.Time {
-	if o == nil {
+	if o == nil || o.ExpiresAt.Get() == nil {
 		var ret time.Time
 		return ret
 	}
 
-	return o.ExpiresAt
+	return *o.ExpiresAt.Get()
 }
 
 // GetExpiresAtOk returns a tuple with the ExpiresAt field value
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *ApiKeyResponse) GetExpiresAtOk() (*time.Time, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return &o.ExpiresAt, true
+	return o.ExpiresAt.Get(), o.ExpiresAt.IsSet()
 }
 
 // SetExpiresAt sets field value
 func (o *ApiKeyResponse) SetExpiresAt(v time.Time) {
-	o.ExpiresAt = v
+	o.ExpiresAt.Set(&v)
 }
 
 func (o ApiKeyResponse) MarshalJSON() ([]byte, error) {
@@ -193,7 +195,7 @@ func (o ApiKeyResponse) ToMap() (map[string]interface{}, error) {
 	toSerialize["value"] = o.Value
 	toSerialize["createdAt"] = o.CreatedAt
 	toSerialize["permissions"] = o.Permissions
-	toSerialize["expiresAt"] = o.ExpiresAt
+	toSerialize["expiresAt"] = o.ExpiresAt.Get()
 	return toSerialize, nil
 }
 

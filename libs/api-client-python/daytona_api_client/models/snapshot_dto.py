@@ -36,16 +36,16 @@ class SnapshotDto(BaseModel):
     name: StrictStr
     image_name: Optional[StrictStr] = Field(default=None, alias="imageName")
     state: SnapshotState
-    size: Union[StrictFloat, StrictInt]
-    entrypoint: List[StrictStr]
+    size: Optional[Union[StrictFloat, StrictInt]]
+    entrypoint: Optional[List[StrictStr]]
     cpu: Union[StrictFloat, StrictInt]
     gpu: Union[StrictFloat, StrictInt]
     mem: Union[StrictFloat, StrictInt]
     disk: Union[StrictFloat, StrictInt]
-    error_reason: StrictStr = Field(alias="errorReason")
+    error_reason: Optional[StrictStr] = Field(alias="errorReason")
     created_at: datetime = Field(alias="createdAt")
     updated_at: datetime = Field(alias="updatedAt")
-    last_used_at: datetime = Field(alias="lastUsedAt")
+    last_used_at: Optional[datetime] = Field(alias="lastUsedAt")
     build_info: Optional[BuildInfo] = Field(default=None, description="Build information for the snapshot", alias="buildInfo")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["id", "organizationId", "general", "name", "imageName", "state", "size", "entrypoint", "cpu", "gpu", "mem", "disk", "errorReason", "createdAt", "updatedAt", "lastUsedAt", "buildInfo"]
@@ -98,6 +98,26 @@ class SnapshotDto(BaseModel):
         if self.additional_properties is not None:
             for _key, _value in self.additional_properties.items():
                 _dict[_key] = _value
+
+        # set to None if size (nullable) is None
+        # and model_fields_set contains the field
+        if self.size is None and "size" in self.model_fields_set:
+            _dict['size'] = None
+
+        # set to None if entrypoint (nullable) is None
+        # and model_fields_set contains the field
+        if self.entrypoint is None and "entrypoint" in self.model_fields_set:
+            _dict['entrypoint'] = None
+
+        # set to None if error_reason (nullable) is None
+        # and model_fields_set contains the field
+        if self.error_reason is None and "error_reason" in self.model_fields_set:
+            _dict['errorReason'] = None
+
+        # set to None if last_used_at (nullable) is None
+        # and model_fields_set contains the field
+        if self.last_used_at is None and "last_used_at" in self.model_fields_set:
+            _dict['lastUsedAt'] = None
 
         return _dict
 

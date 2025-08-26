@@ -47,13 +47,13 @@ export interface ApiKeyList {
    * @type {Date}
    * @memberof ApiKeyList
    */
-  lastUsedAt: Date
+  lastUsedAt: Date | null
   /**
    * When the API key expires
    * @type {Date}
    * @memberof ApiKeyList
    */
-  expiresAt: Date
+  expiresAt: Date | null
 }
 
 export const ApiKeyListPermissionsEnum = {

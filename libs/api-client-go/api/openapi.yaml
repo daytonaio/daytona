@@ -1,4 +1,4 @@
-openapi: 3.1.0
+openapi: 3.0.0
 info:
   contact:
     email: support@daytona.com
@@ -6172,7 +6172,7 @@ components:
           - write:registries
           - write:registries
         name: My API Key
-        expiresAt: 2025-06-09T12:00:00.000Z
+        expiresAt: 2025-06-09T12:00:00Z
       properties:
         name:
           description: The name of the API key
@@ -6197,22 +6197,23 @@ components:
           type: array
         expiresAt:
           description: When the API key expires
-          example: 2025-06-09T12:00:00.000Z
+          example: 2025-06-09T12:00:00Z
           format: date-time
-          type: string
           nullable: true
+          type: string
       required:
         - name
         - permissions
+      type: object
     ApiKeyResponse:
       example:
-        createdAt: 2024-03-14T12:00:00.000Z
+        createdAt: 2024-03-14T12:00:00Z
         permissions:
           - write:registries
           - write:registries
         name: My API Key
         value: bb_sk_1234567890abcdef
-        expiresAt: 2025-06-09T12:00:00.000Z
+        expiresAt: 2025-06-09T12:00:00Z
       properties:
         name:
           description: The name of the API key
@@ -6224,7 +6225,7 @@ components:
           type: string
         createdAt:
           description: When the API key was created
-          example: 2024-03-14T12:00:00.000Z
+          example: 2024-03-14T12:00:00Z
           format: date-time
           type: string
         permissions:
@@ -6246,26 +6247,27 @@ components:
           type: array
         expiresAt:
           description: When the API key expires
-          example: 2025-06-09T12:00:00.000Z
+          example: 2025-06-09T12:00:00Z
           format: date-time
-          type: string
           nullable: true
+          type: string
       required:
         - createdAt
         - expiresAt
         - name
         - permissions
         - value
+      type: object
     ApiKeyList:
       example:
-        createdAt: 2024-03-14T12:00:00.000Z
-        lastUsedAt: 2024-03-14T12:00:00.000Z
+        createdAt: 2024-03-14T12:00:00Z
+        lastUsedAt: 2024-03-14T12:00:00Z
         permissions:
           - write:registries
           - write:registries
         name: My API Key
         value: bb_********************def
-        expiresAt: 2024-03-14T12:00:00.000Z
+        expiresAt: 2024-03-14T12:00:00Z
       properties:
         name:
           description: The name of the API key
@@ -6277,7 +6279,7 @@ components:
           type: string
         createdAt:
           description: When the API key was created
-          example: 2024-03-14T12:00:00.000Z
+          example: 2024-03-14T12:00:00Z
           format: date-time
           type: string
         permissions:
@@ -6299,16 +6301,16 @@ components:
           type: array
         lastUsedAt:
           description: When the API key was last used
-          example: 2024-03-14T12:00:00.000Z
+          example: 2024-03-14T12:00:00Z
           format: date-time
-          type: string
           nullable: true
+          type: string
         expiresAt:
           description: When the API key expires
-          example: 2024-03-14T12:00:00.000Z
+          example: 2024-03-14T12:00:00Z
           format: date-time
-          type: string
           nullable: true
+          type: string
       required:
         - createdAt
         - expiresAt
@@ -6316,6 +6318,7 @@ components:
         - name
         - permissions
         - value
+      type: object
     OrganizationRole:
       example:
         createdAt: 2000-01-23T04:56:07.000+00:00
@@ -6372,6 +6375,7 @@ components:
         - name
         - permissions
         - updatedAt
+      type: object
     OrganizationInvitation:
       example:
         organizationId: organizationId
@@ -6462,6 +6466,7 @@ components:
         - role
         - status
         - updatedAt
+      type: object
     CreateOrganization:
       example:
         name: My Organization
@@ -6472,6 +6477,7 @@ components:
           type: string
       required:
         - name
+      type: object
     Organization:
       example:
         totalCpuQuota: 6.027456183070403
@@ -6565,6 +6571,7 @@ components:
         - totalDiskQuota
         - totalMemoryQuota
         - updatedAt
+      type: object
     OrganizationUsageOverview:
       example:
         totalCpuQuota: 0.8008281904610115
@@ -6609,6 +6616,7 @@ components:
         - totalMemoryQuota
         - totalSnapshotQuota
         - totalVolumeQuota
+      type: object
     UpdateOrganizationQuota:
       example:
         snapshotQuota: 7.061401241503109
@@ -6622,32 +6630,32 @@ components:
         totalDiskQuota: 1.4658129805029452
       properties:
         totalCpuQuota:
-          type: number
           nullable: true
+          type: number
         totalMemoryQuota:
-          type: number
           nullable: true
+          type: number
         totalDiskQuota:
-          type: number
           nullable: true
+          type: number
         maxCpuPerSandbox:
-          type: number
           nullable: true
+          type: number
         maxMemoryPerSandbox:
-          type: number
           nullable: true
+          type: number
         maxDiskPerSandbox:
-          type: number
           nullable: true
+          type: number
         snapshotQuota:
-          type: number
           nullable: true
+          type: number
         maxSnapshotSize:
-          type: number
           nullable: true
+          type: number
         volumeQuota:
-          type: number
           nullable: true
+          type: number
       required:
         - maxCpuPerSandbox
         - maxDiskPerSandbox
@@ -6658,6 +6666,7 @@ components:
         - totalDiskQuota
         - totalMemoryQuota
         - volumeQuota
+      type: object
     OrganizationSuspension:
       example:
         reason: reason
@@ -6678,6 +6687,7 @@ components:
         - reason
         - suspensionCleanupGracePeriodHours
         - until
+      type: object
     CreateOrganizationRole:
       example:
         permissions:
@@ -6714,6 +6724,7 @@ components:
         - description
         - name
         - permissions
+      type: object
     UpdateOrganizationRole:
       example:
         permissions:
@@ -6750,6 +6761,7 @@ components:
         - description
         - name
         - permissions
+      type: object
     OrganizationUser:
       example:
         organizationId: organizationId
@@ -6819,6 +6831,7 @@ components:
         - role
         - updatedAt
         - userId
+      type: object
     UpdateOrganizationMemberRole:
       example:
         role: owner
@@ -6831,6 +6844,7 @@ components:
           type: string
       required:
         - role
+      type: object
     UpdateAssignedOrganizationRoles:
       example:
         roleIds:
@@ -6844,6 +6858,7 @@ components:
           type: array
       required:
         - roleIds
+      type: object
     CreateOrganizationInvitation:
       example:
         role: member
@@ -6880,6 +6895,7 @@ components:
         - assignedRoleIds
         - email
         - role
+      type: object
     UpdateOrganizationInvitation:
       example:
         role: owner
@@ -6907,6 +6923,7 @@ components:
       required:
         - assignedRoleIds
         - role
+      type: object
     UserPublicKey:
       example:
         name: name
@@ -6921,6 +6938,7 @@ components:
       required:
         - key
         - name
+      type: object
     User:
       example:
         createdAt: 2000-01-23T04:56:07.000+00:00
@@ -6957,6 +6975,7 @@ components:
         - id
         - name
         - publicKeys
+      type: object
     CreateOrganizationQuota:
       example:
         snapshotQuota: 7.061401241503109
@@ -6987,6 +7006,7 @@ components:
           type: number
         volumeQuota:
           type: number
+      type: object
     CreateUser:
       example:
         emailVerified: true
@@ -7023,6 +7043,7 @@ components:
       required:
         - id
         - name
+      type: object
     AccountProvider:
       example:
         displayName: displayName
@@ -7035,6 +7056,7 @@ components:
       required:
         - displayName
         - name
+      type: object
     CreateLinkedAccount:
       example:
         provider: provider
@@ -7049,6 +7071,7 @@ components:
       required:
         - provider
         - userId
+      type: object
     SandboxState:
       description: The state of the sandbox
       enum:
@@ -7094,6 +7117,7 @@ components:
       required:
         - mountPath
         - volumeId
+      type: object
     BuildInfo:
       properties:
         dockerfileContent:
@@ -7124,6 +7148,7 @@ components:
       required:
         - createdAt
         - updatedAt
+      type: object
     Sandbox:
       example:
         memory: 4
@@ -7184,12 +7209,14 @@ components:
           description: Environment variables for the sandbox
           example:
             NODE_ENV: production
+          type: object
         labels:
           additionalProperties:
             type: string
           description: Labels for the sandbox
           example:
             daytona.io/public: 'true'
+          type: object
         public:
           description: Whether the sandbox http preview is public
           example: false
@@ -7311,6 +7338,7 @@ components:
         - public
         - target
         - user
+      type: object
     CreateBuildInfo:
       properties:
         dockerfileContent:
@@ -7332,6 +7360,7 @@ components:
           type: array
       required:
         - dockerfileContent
+      type: object
     CreateSandbox:
       example:
         memory: 1
@@ -7373,12 +7402,14 @@ components:
           description: Environment variables for the sandbox
           example:
             NODE_ENV: production
+          type: object
         labels:
           additionalProperties:
             type: string
           description: Labels for the sandbox
           example:
             daytona.io/public: 'true'
+          type: object
         public:
           description: Whether the sandbox http preview is publicly accessible
           example: false
@@ -7443,6 +7474,7 @@ components:
           allOf:
             - $ref: '#/components/schemas/CreateBuildInfo'
           description: Build information for the sandbox
+      type: object
     SandboxLabels:
       example:
         labels:
@@ -7456,8 +7488,10 @@ components:
           example:
             environment: dev
             team: backend
+          type: object
       required:
         - labels
+      type: object
     PortPreviewUrl:
       example:
         url: https://123456-mysandbox.runner.com
@@ -7479,6 +7513,7 @@ components:
       required:
         - token
         - url
+      type: object
     CreateRunner:
       example:
         diskGiB: 1.4658129805029452
@@ -7541,6 +7576,7 @@ components:
         - proxyUrl
         - region
         - version
+      type: object
     SandboxClass:
       description: The class of the runner
       enum:
@@ -7721,6 +7757,7 @@ components:
         - updatedAt
         - used
         - version
+      type: object
     RunnerSnapshotDto:
       example:
         runnerDomain: runner.example.com
@@ -7743,12 +7780,14 @@ components:
         - runnerDomain
         - runnerId
         - runnerSnapshotId
+      type: object
     ProjectDirResponse:
       example:
         dir: dir
       properties:
         dir:
           type: string
+      type: object
     FileInfo:
       example:
         mode: mode
@@ -7785,6 +7824,7 @@ components:
         - owner
         - permissions
         - size
+      type: object
     Match:
       example:
         file: file
@@ -7801,6 +7841,7 @@ components:
         - content
         - file
         - line
+      type: object
     ReplaceRequest:
       example:
         newValue: newValue
@@ -7821,6 +7862,7 @@ components:
         - files
         - newValue
         - pattern
+      type: object
     ReplaceResult:
       example:
         file: file
@@ -7833,6 +7875,7 @@ components:
           type: boolean
         error:
           type: string
+      type: object
     SearchFilesResponse:
       example:
         files:
@@ -7845,6 +7888,7 @@ components:
           type: array
       required:
         - files
+      type: object
     UploadFile:
       properties:
         file:
@@ -7855,6 +7899,7 @@ components:
       required:
         - file
         - path
+      type: object
     GitAddRequest:
       example:
         path: path
@@ -7872,6 +7917,7 @@ components:
       required:
         - files
         - path
+      type: object
     ListBranchResponse:
       example:
         branches:
@@ -7884,6 +7930,7 @@ components:
           type: array
       required:
         - branches
+      type: object
     GitBranchRequest:
       example:
         path: path
@@ -7896,6 +7943,7 @@ components:
       required:
         - name
         - path
+      type: object
     GitDeleteBranchRequest:
       example:
         path: path
@@ -7908,6 +7956,7 @@ components:
       required:
         - name
         - path
+      type: object
     GitCloneRequest:
       example:
         path: path
@@ -7932,6 +7981,7 @@ components:
       required:
         - path
         - url
+      type: object
     GitCommitRequest:
       example:
         path: path
@@ -7957,6 +8007,7 @@ components:
         - email
         - message
         - path
+      type: object
     GitCommitResponse:
       example:
         hash: hash
@@ -7965,6 +8016,7 @@ components:
           type: string
       required:
         - hash
+      type: object
     GitCommitInfo:
       example:
         author: author
@@ -7989,6 +8041,7 @@ components:
         - hash
         - message
         - timestamp
+      type: object
     GitRepoRequest:
       example:
         path: path
@@ -8003,6 +8056,7 @@ components:
           type: string
       required:
         - path
+      type: object
     GitCheckoutRequest:
       example:
         path: path
@@ -8015,6 +8069,7 @@ components:
       required:
         - branch
         - path
+      type: object
     FileStatus:
       example:
         extra: extra
@@ -8035,6 +8090,7 @@ components:
         - name
         - staging
         - worktree
+      type: object
     GitStatus:
       example:
         behind: 6.027456183070403
@@ -8066,6 +8122,7 @@ components:
       required:
         - currentBranch
         - fileStatus
+      type: object
     ExecuteRequest:
       example:
         cwd: cwd
@@ -8082,6 +8139,7 @@ components:
           type: number
       required:
         - command
+      type: object
     ExecuteResponse:
       example:
         result: Command output here
@@ -8098,6 +8156,7 @@ components:
       required:
         - exitCode
         - result
+      type: object
     Command:
       example:
         exitCode: 0
@@ -8119,6 +8178,7 @@ components:
       required:
         - command
         - id
+      type: object
     Session:
       example:
         sessionId: session-123
@@ -8138,11 +8198,12 @@ components:
           description: The list of commands executed in this session
           items:
             $ref: '#/components/schemas/Command'
-          type: array
           nullable: true
+          type: array
       required:
         - commands
         - sessionId
+      type: object
     CreateSessionRequest:
       example:
         sessionId: session-123
@@ -8153,6 +8214,7 @@ components:
           type: string
       required:
         - sessionId
+      type: object
     SessionExecuteRequest:
       example:
         async: false
@@ -8175,6 +8237,7 @@ components:
           type: boolean
       required:
         - command
+      type: object
     SessionExecuteResponse:
       example:
         output: |-
@@ -8197,6 +8260,7 @@ components:
           description: The exit code of the executed command
           example: 0
           type: number
+      type: object
     Position:
       example:
         character: 6.027456183070403
@@ -8209,6 +8273,7 @@ components:
       required:
         - character
         - line
+      type: object
     CompletionContext:
       example:
         triggerCharacter: triggerCharacter
@@ -8220,6 +8285,7 @@ components:
           type: string
       required:
         - triggerKind
+      type: object
     LspCompletionParams:
       example:
         pathToProject: pathToProject
@@ -8250,6 +8316,7 @@ components:
         - pathToProject
         - position
         - uri
+      type: object
     CompletionItem:
       example:
         insertText: insertText
@@ -8276,6 +8343,7 @@ components:
           type: string
       required:
         - label
+      type: object
     CompletionList:
       example:
         items:
@@ -8304,6 +8372,7 @@ components:
       required:
         - isIncomplete
         - items
+      type: object
     LspDocumentRequest:
       example:
         pathToProject: pathToProject
@@ -8323,6 +8392,7 @@ components:
         - languageId
         - pathToProject
         - uri
+      type: object
     Range:
       example:
         start:
@@ -8339,6 +8409,7 @@ components:
       required:
         - end
         - start
+      type: object
     LspLocation:
       example:
         range:
@@ -8357,6 +8428,7 @@ components:
       required:
         - range
         - uri
+      type: object
     LspSymbol:
       example:
         kind: 0.8008281904610115
@@ -8381,6 +8453,7 @@ components:
         - kind
         - location
         - name
+      type: object
     LspServerRequest:
       example:
         pathToProject: pathToProject
@@ -8395,6 +8468,7 @@ components:
       required:
         - languageId
         - pathToProject
+      type: object
     ComputerUseStartResponse:
       example:
         message: Computer use processes started successfully
@@ -8451,6 +8525,7 @@ components:
       required:
         - message
         - status
+      type: object
     ComputerUseStopResponse:
       example:
         message: Computer use processes stopped successfully
@@ -8499,6 +8574,7 @@ components:
       required:
         - message
         - status
+      type: object
     ComputerUseStatusResponse:
       example:
         status: active
@@ -8515,6 +8591,7 @@ components:
           type: string
       required:
         - status
+      type: object
     ProcessStatusResponse:
       example:
         running: true
@@ -8531,6 +8608,7 @@ components:
       required:
         - processName
         - running
+      type: object
     ProcessRestartResponse:
       example:
         processName: xfce4
@@ -8547,6 +8625,7 @@ components:
       required:
         - message
         - processName
+      type: object
     ProcessLogsResponse:
       example:
         processName: novnc
@@ -8563,6 +8642,7 @@ components:
       required:
         - logs
         - processName
+      type: object
     ProcessErrorsResponse:
       example:
         processName: x11vnc
@@ -8579,6 +8659,7 @@ components:
       required:
         - errors
         - processName
+      type: object
     MousePosition:
       example:
         x: 100
@@ -8595,6 +8676,7 @@ components:
       required:
         - x
         - 'y'
+      type: object
     MouseMoveRequest:
       example:
         x: 150
@@ -8611,6 +8693,7 @@ components:
       required:
         - x
         - 'y'
+      type: object
     MouseMoveResponse:
       example:
         x: 150
@@ -8627,6 +8710,7 @@ components:
       required:
         - x
         - 'y'
+      type: object
     MouseClickRequest:
       example:
         button: left
@@ -8654,6 +8738,7 @@ components:
       required:
         - x
         - 'y'
+      type: object
     MouseClickResponse:
       example:
         x: 100
@@ -8670,6 +8755,7 @@ components:
       required:
         - x
         - 'y'
+      type: object
     MouseDragRequest:
       example:
         button: left
@@ -8704,6 +8790,7 @@ components:
         - endY
         - startX
         - startY
+      type: object
     MouseDragResponse:
       example:
         x: 300
@@ -8720,6 +8807,7 @@ components:
       required:
         - x
         - 'y'
+      type: object
     MouseScrollRequest:
       example:
         amount: 3
@@ -8747,6 +8835,7 @@ components:
         - direction
         - x
         - 'y'
+      type: object
     MouseScrollResponse:
       example:
         success: true
@@ -8757,6 +8846,7 @@ components:
           type: boolean
       required:
         - success
+      type: object
     KeyboardTypeRequest:
       example:
         delay: 100
@@ -8772,6 +8862,7 @@ components:
           type: number
       required:
         - text
+      type: object
     KeyboardPressRequest:
       example:
         modifiers:
@@ -8794,6 +8885,7 @@ components:
           type: array
       required:
         - key
+      type: object
     KeyboardHotkeyRequest:
       example:
         keys: ctrl+c
@@ -8805,6 +8897,7 @@ components:
           type: string
       required:
         - keys
+      type: object
     ScreenshotResponse:
       example:
         cursorPosition:
@@ -8829,6 +8922,7 @@ components:
           type: number
       required:
         - screenshot
+      type: object
     RegionScreenshotResponse:
       example:
         cursorPosition:
@@ -8854,6 +8948,7 @@ components:
           type: number
       required:
         - screenshot
+      type: object
     CompressedScreenshotResponse:
       example:
         cursorPosition:
@@ -8879,6 +8974,7 @@ components:
           type: number
       required:
         - screenshot
+      type: object
     DisplayInfoResponse:
       example:
         displays:
@@ -8903,6 +8999,7 @@ components:
           type: array
       required:
         - displays
+      type: object
     WindowsResponse:
       example:
         count: 5
@@ -8925,6 +9022,7 @@ components:
       required:
         - count
         - windows
+      type: object
     CreateSnapshot:
       example:
         general: true
@@ -8976,6 +9074,7 @@ components:
           description: Build information for the snapshot
       required:
         - name
+      type: object
     SnapshotState:
       enum:
         - build_pending
@@ -9026,13 +9125,13 @@ components:
           allOf:
             - $ref: '#/components/schemas/SnapshotState'
         size:
-          type: number
           nullable: true
+          type: number
         entrypoint:
           items:
             type: string
-          type: array
           nullable: true
+          type: array
         cpu:
           type: number
         gpu:
@@ -9042,8 +9141,8 @@ components:
         disk:
           type: number
         errorReason:
-          type: string
           nullable: true
+          type: string
         createdAt:
           format: date-time
           type: string
@@ -9052,8 +9151,8 @@ components:
           type: string
         lastUsedAt:
           format: date-time
-          type: string
           nullable: true
+          type: string
         buildInfo:
           allOf:
             - $ref: '#/components/schemas/BuildInfo'
@@ -9073,6 +9172,7 @@ components:
         - size
         - state
         - updatedAt
+      type: object
     PaginatedSnapshotsDto:
       example:
         total: 2.3021358869347655
@@ -9133,6 +9233,7 @@ components:
         - page
         - total
         - totalPages
+      type: object
     SetSnapshotGeneralStatusDto:
       example:
         general: true
@@ -9143,6 +9244,7 @@ components:
           type: boolean
       required:
         - general
+      type: object
     SandboxInfo:
       properties:
         created:
@@ -9162,6 +9264,7 @@ components:
       required:
         - created
         - name
+      type: object
     Workspace:
       example:
         memory: 4
@@ -9227,12 +9330,14 @@ components:
           description: Environment variables for the sandbox
           example:
             NODE_ENV: production
+          type: object
         labels:
           additionalProperties:
             type: string
           description: Labels for the sandbox
           example:
             daytona.io/public: 'true'
+          type: object
         public:
           description: Whether the sandbox http preview is public
           example: false
@@ -9382,6 +9487,7 @@ components:
         - public
         - target
         - user
+      type: object
     CreateWorkspace:
       example:
         image: daytonaio/workspace:latest
@@ -9420,12 +9526,14 @@ components:
           description: Environment variables for the workspace
           example:
             NODE_ENV: production
+          type: object
         labels:
           additionalProperties:
             type: string
           description: Labels for the workspace
           example:
             daytona.io/public: 'true'
+          type: object
         public:
           description: Whether the workspace http preview is publicly accessible
           example: false
@@ -9480,6 +9588,7 @@ components:
           allOf:
             - $ref: '#/components/schemas/CreateBuildInfo'
           description: Build information for the workspace
+      type: object
     VolumeState:
       description: Volume state
       enum:
@@ -9530,13 +9639,13 @@ components:
         lastUsedAt:
           description: Last used timestamp
           example: 2023-01-01T00:00:00.000Z
-          type: string
           nullable: true
+          type: string
         errorReason:
           description: The error reason of the volume
           example: Error processing volume
-          type: string
           nullable: true
+          type: string
       required:
         - createdAt
         - errorReason
@@ -9545,6 +9654,7 @@ components:
         - organizationId
         - state
         - updatedAt
+      type: object
     CreateVolume:
       example:
         name: name
@@ -9553,6 +9663,7 @@ components:
           type: string
       required:
         - name
+      type: object
     CreateDockerRegistry:
       example:
         registryType: organization
@@ -9596,6 +9707,7 @@ components:
         - registryType
         - url
         - username
+      type: object
     DockerRegistry:
       example:
         registryType: internal
@@ -9655,6 +9767,7 @@ components:
         - updatedAt
         - url
         - username
+      type: object
     RegistryPushAccessDto:
       example:
         registryUrl: registry.example.com
@@ -9695,6 +9808,7 @@ components:
         - registryUrl
         - secret
         - username
+      type: object
     UpdateDockerRegistry:
       example:
         password: password
@@ -9722,6 +9836,7 @@ components:
         - name
         - url
         - username
+      type: object
     SendWebhookDto:
       example:
         eventId: evt_1234567890abcdef
@@ -9747,6 +9862,7 @@ components:
       required:
         - eventType
         - payload
+      type: object
     StorageAccessDto:
       example:
         organizationId: 123e4567-e89b-12d3-a456-426614174000
@@ -9787,6 +9903,7 @@ components:
         - secret
         - sessionToken
         - storageUrl
+      type: object
     AuditLog:
       example:
         metadata:
@@ -9841,6 +9958,7 @@ components:
         - actorId
         - createdAt
         - id
+      type: object
     PaginatedAuditLogs:
       example:
         total: 6.027456183070403
@@ -9893,6 +10011,7 @@ components:
         - page
         - total
         - totalPages
+      type: object
     CreateAuditLog:
       example:
         organizationId: organizationId
@@ -9988,11 +10107,13 @@ components:
         - action
         - actorEmail
         - actorId
+      type: object
     uploadFile_request:
       properties:
         file:
           format: binary
           type: string
+      type: object
     WebhookController_getAppPortalAccess_200_response:
       example:
         url: url
@@ -10000,12 +10121,14 @@ components:
         url:
           description: App Portal access URL
           type: string
+      type: object
     WebhookController_getStatus_200_response:
       example:
         enabled: true
       properties:
         enabled:
           type: boolean
+      type: object
     WebhookController_getInitializationStatus_200_response:
       example:
         organizationId: organizationId
@@ -10023,359 +10146,15 @@ components:
         svixApplicationCreated:
           type: boolean
         lastError:
-          type: string
           nullable: true
+          type: string
         retryCount:
           type: number
         createdAt:
           type: string
         updatedAt:
           type: string
-    sandbox_created_post_request_data:
-      properties:
-        id:
-          example: sandbox123
-        organizationId:
-          example: organization123
-        target:
-          example: local
-        snapshot:
-          example: daytonaio/sandbox:latest
-        user:
-          example: daytona
-        env:
-          additionalProperties:
-            type: string
-        cpu:
-          example: 2
-        gpu:
-          example: 0
-        memory:
-          example: 4
-        disk:
-          example: 10
-        public:
-          example: false
-        labels:
-          additionalProperties: {}
-        state:
-          enum:
-            - creating
-            - restoring
-            - destroyed
-            - destroying
-            - started
-            - stopped
-            - starting
-            - stopping
-            - error
-            - build_failed
-            - pending_build
-            - building_snapshot
-            - unknown
-            - pulling_snapshot
-            - archived
-            - archiving
-        desiredState:
-          enum:
-            - destroyed
-            - started
-            - stopped
-            - resized
-            - archived
-        createdAt:
-          format: date-time
-          type: string
-        updatedAt:
-          format: date-time
-          type: string
-    sandbox_created_post_request:
-      properties:
-        event:
-          example: sandbox.created
-        timestamp:
-          format: date-time
-          type: string
-        data:
-          $ref: '#/components/schemas/sandbox_created_post_request_data'
-    sandbox_state_updated_post_request_data_sandbox:
-      properties:
-        id:
-          example: sandbox123
-        organizationId:
-          example: organization123
-        state:
-          enum:
-            - creating
-            - restoring
-            - destroyed
-            - destroying
-            - started
-            - stopped
-            - starting
-            - stopping
-            - error
-            - build_failed
-            - pending_build
-            - building_snapshot
-            - unknown
-            - pulling_snapshot
-            - archived
-            - archiving
-    sandbox_state_updated_post_request_data:
-      properties:
-        sandbox:
-          $ref: '#/components/schemas/sandbox_state_updated_post_request_data_sandbox'
-        oldState:
-          enum:
-            - creating
-            - restoring
-            - destroyed
-            - destroying
-            - started
-            - stopped
-            - starting
-            - stopping
-            - error
-            - build_failed
-            - pending_build
-            - building_snapshot
-            - unknown
-            - pulling_snapshot
-            - archived
-            - archiving
-        newState:
-          enum:
-            - creating
-            - restoring
-            - destroyed
-            - destroying
-            - started
-            - stopped
-            - starting
-            - stopping
-            - error
-            - build_failed
-            - pending_build
-            - building_snapshot
-            - unknown
-            - pulling_snapshot
-            - archived
-            - archiving
-    sandbox_state_updated_post_request:
-      properties:
-        event:
-          example: sandbox.state.updated
-        timestamp:
-          format: date-time
-          type: string
-        data:
-          $ref: '#/components/schemas/sandbox_state_updated_post_request_data'
-    snapshot_created_post_request_data:
-      properties:
-        id:
-          example: snapshot123
-        organizationId:
-          example: organization123
-        general:
-          example: false
-        name:
-          example: my-snapshot
-        imageName:
-          example: my-image:latest
-        state:
-          enum:
-            - build_pending
-            - building
-            - pending
-            - pulling
-            - pending_validation
-            - validating
-            - active
-            - inactive
-            - error
-            - build_failed
-            - removing
-          type: string
-        size:
-          example: 1024
-        cpu:
-          example: 2
-        gpu:
-          example: 0
-        mem:
-          example: 4
-        disk:
-          example: 10
-        createdAt:
-          format: date-time
-          type: string
-        updatedAt:
-          format: date-time
-          type: string
-    snapshot_created_post_request:
-      properties:
-        event:
-          example: snapshot.created
-        timestamp:
-          format: date-time
-          type: string
-        data:
-          $ref: '#/components/schemas/snapshot_created_post_request_data'
-    snapshot_state_updated_post_request_data_snapshot:
-      properties:
-        id:
-          example: snapshot123
-        organizationId:
-          example: organization123
-        state:
-          enum:
-            - build_pending
-            - building
-            - pending
-            - pulling
-            - pending_validation
-            - validating
-            - active
-            - inactive
-            - error
-            - build_failed
-            - removing
-          type: string
-    snapshot_state_updated_post_request_data:
-      properties:
-        snapshot:
-          $ref: '#/components/schemas/snapshot_state_updated_post_request_data_snapshot'
-        oldState:
-          enum:
-            - build_pending
-            - building
-            - pending
-            - pulling
-            - pending_validation
-            - validating
-            - active
-            - inactive
-            - error
-            - build_failed
-            - removing
-          type: string
-        newState:
-          enum:
-            - build_pending
-            - building
-            - pending
-            - pulling
-            - pending_validation
-            - validating
-            - active
-            - inactive
-            - error
-            - build_failed
-            - removing
-          type: string
-    snapshot_state_updated_post_request:
-      properties:
-        event:
-          example: snapshot.state.updated
-        timestamp:
-          format: date-time
-          type: string
-        data:
-          $ref: '#/components/schemas/snapshot_state_updated_post_request_data'
-    snapshot_removed_post_request:
-      properties:
-        event:
-          example: snapshot.removed
-        timestamp:
-          format: date-time
-          type: string
-        data:
-          description: The ID of the removed snapshot
-          example: snapshot123
-    volume_created_post_request_data:
-      properties:
-        id:
-          example: vol-12345678
-        name:
-          example: my-volume
-        organizationId:
-          example: 123e4567-e89b-12d3-a456-426614174000
-        state:
-          enum:
-            - creating
-            - ready
-            - pending_create
-            - pending_delete
-            - deleting
-            - deleted
-            - error
-        createdAt:
-          format: date-time
-          type: string
-        updatedAt:
-          format: date-time
-          type: string
-        lastUsedAt:
-          format: date-time
-          type: string
-        errorReason:
-          example: Error processing volume
-    volume_created_post_request:
-      properties:
-        event:
-          example: volume.created
-        timestamp:
-          format: date-time
-          type: string
-        data:
-          $ref: '#/components/schemas/volume_created_post_request_data'
-    volume_state_updated_post_request_data_volume:
-      properties:
-        id:
-          example: vol-12345678
-        organizationId:
-          example: 123e4567-e89b-12d3-a456-426614174000
-        state:
-          enum:
-            - creating
-            - ready
-            - pending_create
-            - pending_delete
-            - deleting
-            - deleted
-            - error
-    volume_state_updated_post_request_data:
-      properties:
-        volume:
-          $ref: '#/components/schemas/volume_state_updated_post_request_data_volume'
-        oldState:
-          enum:
-            - creating
-            - ready
-            - pending_create
-            - pending_delete
-            - deleting
-            - deleted
-            - error
-        newState:
-          enum:
-            - creating
-            - ready
-            - pending_create
-            - pending_delete
-            - deleting
-            - deleted
-            - error
-    volume_state_updated_post_request:
-      properties:
-        event:
-          example: volume.state.updated
-        timestamp:
-          format: date-time
-          type: string
-        data:
-          $ref: '#/components/schemas/volume_state_updated_post_request_data'
+      type: object
   securitySchemes:
     bearer:
       bearerFormat: JWT

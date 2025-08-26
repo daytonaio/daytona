@@ -35,7 +35,7 @@ export interface CreateApiKey {
    * @type {Date}
    * @memberof CreateApiKey
    */
-  expiresAt?: Date
+  expiresAt?: Date | null
 }
 
 export const CreateApiKeyPermissionsEnum = {

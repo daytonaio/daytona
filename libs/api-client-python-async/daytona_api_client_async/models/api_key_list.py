@@ -20,7 +20,7 @@ import json
 
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field, StrictStr, field_validator
-from typing import Any, ClassVar, Dict, List
+from typing import Any, ClassVar, Dict, List, Optional
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -32,8 +32,8 @@ class ApiKeyList(BaseModel):
     value: StrictStr = Field(description="The masked API key value")
     created_at: datetime = Field(description="When the API key was created", alias="createdAt")
     permissions: List[StrictStr] = Field(description="The list of organization resource permissions assigned to the API key")
-    last_used_at: datetime = Field(description="When the API key was last used", alias="lastUsedAt")
-    expires_at: datetime = Field(description="When the API key expires", alias="expiresAt")
+    last_used_at: Optional[datetime] = Field(description="When the API key was last used", alias="lastUsedAt")
+    expires_at: Optional[datetime] = Field(description="When the API key expires", alias="expiresAt")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["name", "value", "createdAt", "permissions", "lastUsedAt", "expiresAt"]
 
@@ -90,6 +90,16 @@ class ApiKeyList(BaseModel):
         if self.additional_properties is not None:
             for _key, _value in self.additional_properties.items():
                 _dict[_key] = _value
+
+        # set to None if last_used_at (nullable) is None
+        # and model_fields_set contains the field
+        if self.last_used_at is None and "last_used_at" in self.model_fields_set:
+            _dict['lastUsedAt'] = None
+
+        # set to None if expires_at (nullable) is None
+        # and model_fields_set contains the field
+        if self.expires_at is None and "expires_at" in self.model_fields_set:
+            _dict['expiresAt'] = None
 
         return _dict
 

@@ -83,6 +83,11 @@ class WebhookControllerGetInitializationStatus200Response(BaseModel):
             for _key, _value in self.additional_properties.items():
                 _dict[_key] = _value
 
+        # set to None if last_error (nullable) is None
+        # and model_fields_set contains the field
+        if self.last_error is None and "last_error" in self.model_fields_set:
+            _dict['lastError'] = None
+
         return _dict
 
     @classmethod

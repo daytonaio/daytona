@@ -41,7 +41,7 @@ export interface WebhookControllerGetInitializationStatus200Response {
    * @type {string}
    * @memberof WebhookControllerGetInitializationStatus200Response
    */
-  lastError?: string
+  lastError?: string | null
   /**
    *
    * @type {number}

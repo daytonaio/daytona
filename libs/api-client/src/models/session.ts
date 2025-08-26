@@ -33,5 +33,5 @@ export interface Session {
    * @type {Array<Command>}
    * @memberof Session
    */
-  commands: Array<Command>
+  commands: Array<Command> | null
 }

@@ -32,9 +32,9 @@ type ApiKeyList struct {
 	// The list of organization resource permissions assigned to the API key
 	Permissions []string `json:"permissions"`
 	// When the API key was last used
-	LastUsedAt time.Time `json:"lastUsedAt"`
+	LastUsedAt NullableTime `json:"lastUsedAt"`
 	// When the API key expires
-	ExpiresAt time.Time `json:"expiresAt"`
+	ExpiresAt NullableTime `json:"expiresAt"`
 }
 
 type _ApiKeyList ApiKeyList
@@ -43,7 +43,7 @@ type _ApiKeyList ApiKeyList
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewApiKeyList(name string, value string, createdAt time.Time, permissions []string, lastUsedAt time.Time, expiresAt time.Time) *ApiKeyList {
+func NewApiKeyList(name string, value string, createdAt time.Time, permissions []string, lastUsedAt NullableTime, expiresAt NullableTime) *ApiKeyList {
 	this := ApiKeyList{}
 	this.Name = name
 	this.Value = value
@@ -159,51 +159,55 @@ func (o *ApiKeyList) SetPermissions(v []string) {
 }
 
 // GetLastUsedAt returns the LastUsedAt field value
+// If the value is explicit nil, the zero value for time.Time will be returned
 func (o *ApiKeyList) GetLastUsedAt() time.Time {
-	if o == nil {
+	if o == nil || o.LastUsedAt.Get() == nil {
 		var ret time.Time
 		return ret
 	}
 
-	return o.LastUsedAt
+	return *o.LastUsedAt.Get()
 }
 
 // GetLastUsedAtOk returns a tuple with the LastUsedAt field value
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *ApiKeyList) GetLastUsedAtOk() (*time.Time, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return &o.LastUsedAt, true
+	return o.LastUsedAt.Get(), o.LastUsedAt.IsSet()
 }
 
 // SetLastUsedAt sets field value
 func (o *ApiKeyList) SetLastUsedAt(v time.Time) {
-	o.LastUsedAt = v
+	o.LastUsedAt.Set(&v)
 }
 
 // GetExpiresAt returns the ExpiresAt field value
+// If the value is explicit nil, the zero value for time.Time will be returned
 func (o *ApiKeyList) GetExpiresAt() time.Time {
-	if o == nil {
+	if o == nil || o.ExpiresAt.Get() == nil {
 		var ret time.Time
 		return ret
 	}
 
-	return o.ExpiresAt
+	return *o.ExpiresAt.Get()
 }
 
 // GetExpiresAtOk returns a tuple with the ExpiresAt field value
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *ApiKeyList) GetExpiresAtOk() (*time.Time, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return &o.ExpiresAt, true
+	return o.ExpiresAt.Get(), o.ExpiresAt.IsSet()
 }
 
 // SetExpiresAt sets field value
 func (o *ApiKeyList) SetExpiresAt(v time.Time) {
-	o.ExpiresAt = v
+	o.ExpiresAt.Set(&v)
 }
 
 func (o ApiKeyList) MarshalJSON() ([]byte, error) {
@@ -220,8 +224,8 @@ func (o ApiKeyList) ToMap() (map[string]interface{}, error) {
 	toSerialize["value"] = o.Value
 	toSerialize["createdAt"] = o.CreatedAt
 	toSerialize["permissions"] = o.Permissions
-	toSerialize["lastUsedAt"] = o.LastUsedAt
-	toSerialize["expiresAt"] = o.ExpiresAt
+	toSerialize["lastUsedAt"] = o.LastUsedAt.Get()
+	toSerialize["expiresAt"] = o.ExpiresAt.Get()
 	return toSerialize, nil
 }
 
