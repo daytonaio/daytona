@@ -72,6 +72,9 @@ export const OrganizationRolePermissionsEnum = {
   READ_VOLUMES: 'read:volumes',
   WRITE_VOLUMES: 'write:volumes',
   DELETE_VOLUMES: 'delete:volumes',
+  READ_REGIONS: 'read:regions',
+  WRITE_REGIONS: 'write:regions',
+  DELETE_REGIONS: 'delete:regions',
   READ_AUDIT_LOGS: 'read:audit_logs',
 } as const
 

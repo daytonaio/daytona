@@ -23,6 +23,9 @@ import { Snapshot } from '../entities/snapshot.entity'
 import { RunnerSnapshotDto } from '../dto/runner-snapshot.dto'
 import { RunnerAdapterFactory, RunnerInfo } from '../runner-adapter/runnerAdapter'
 import { RedisLockProvider } from '../common/redis-lock.provider'
+import { Region } from '../entities/region.entity'
+import { OrganizationAuthContext } from '../../common/interfaces/auth-context.interface'
+import { Organization } from '../../organization/entities/organization.entity'
 
 @Injectable()
 export class RunnerService {
@@ -39,15 +42,28 @@ export class RunnerService {
     @InjectRepository(Snapshot)
     private readonly snapshotRepository: Repository<Snapshot>,
     private readonly redisLockProvider: RedisLockProvider,
+    @InjectRepository(Region)
+    private readonly regionRepository: Repository<Region>,
   ) {}
 
-  async create(createRunnerDto: CreateRunnerDto): Promise<Runner> {
+  async create(createRunnerDto: CreateRunnerDto, organization: Organization): Promise<Runner> {
     // Validate region and class
     if (createRunnerDto.region.trim().length === 0) {
       throw new Error('Invalid region')
     }
     if (!this.isValidClass(createRunnerDto.class)) {
       throw new Error('Invalid class')
+    }
+
+    const region = await this.regionRepository.findOne({
+      where: {
+        code: createRunnerDto.region,
+        organizationId: organization.id,
+      },
+    })
+
+    if (!region) {
+      throw new Error('Invalid region')
     }
 
     const runner = new Runner()
@@ -69,8 +85,42 @@ export class RunnerService {
     return this.runnerRepository.save(runner)
   }
 
-  async findAll(): Promise<Runner[]> {
-    return this.runnerRepository.find()
+  async findAll(organization?: Organization, region?: string): Promise<Runner[]> {
+    const where: FindOptionsWhere<Runner> = {}
+
+    if (organization) {
+      const region_check = await this.regionRepository.findOne({
+        where: {
+          code: region,
+          organizationId: organization.id,
+        },
+      })
+
+      if (!region_check) {
+        throw new Error('Invalid region')
+      }
+    }
+
+    if (region) {
+      // Validate that the region exists and belongs to the organization
+      const regionEntity = await this.regionRepository.findOne({
+        where: {
+          code: region,
+          organizationId: organization?.id,
+        },
+      })
+
+      if (!regionEntity) {
+        throw new BadRequestError(`Region with code "${region}" not found or not owned by your organization`)
+      }
+
+      // Filter runners by the region string
+      where.region = region
+    }
+
+    return this.runnerRepository.find({
+      where,
+    })
   }
 
   async findAllReady(): Promise<Runner[]> {

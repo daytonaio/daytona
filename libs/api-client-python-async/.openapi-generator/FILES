@@ -8,6 +8,7 @@ daytona_api_client_async/api/health_api.py
 daytona_api_client_async/api/object_storage_api.py
 daytona_api_client_async/api/organizations_api.py
 daytona_api_client_async/api/preview_api.py
+daytona_api_client_async/api/regions_api.py
 daytona_api_client_async/api/runners_api.py
 daytona_api_client_async/api/sandbox_api.py
 daytona_api_client_async/api/snapshots_api.py
@@ -43,6 +44,7 @@ daytona_api_client_async/models/create_organization.py
 daytona_api_client_async/models/create_organization_invitation.py
 daytona_api_client_async/models/create_organization_quota.py
 daytona_api_client_async/models/create_organization_role.py
+daytona_api_client_async/models/create_region.py
 daytona_api_client_async/models/create_runner.py
 daytona_api_client_async/models/create_sandbox.py
 daytona_api_client_async/models/create_session_request.py
@@ -104,6 +106,7 @@ daytona_api_client_async/models/process_restart_response.py
 daytona_api_client_async/models/process_status_response.py
 daytona_api_client_async/models/project_dir_response.py
 daytona_api_client_async/models/range.py
+daytona_api_client_async/models/region_dto.py
 daytona_api_client_async/models/region_screenshot_response.py
 daytona_api_client_async/models/registry_push_access_dto.py
 daytona_api_client_async/models/replace_request.py
