@@ -191,8 +191,7 @@ export class SandboxController {
         return sandbox
       }
 
-      await this.waitForSandboxStarted(sandbox.id, 30)
-      sandbox.state = SandboxState.STARTED
+      await this.waitForSandboxStarted(sandbox, 30)
     }
 
     return sandbox
@@ -293,7 +292,7 @@ export class SandboxController {
     let sandbox = SandboxDto.fromSandbox(await this.sandboxService.findOne(sandboxId), '')
 
     if (![SandboxState.ARCHIVED, SandboxState.RESTORING, SandboxState.STARTED].includes(sandbox.state)) {
-      sandbox = await this.waitForSandboxStarted(sandboxId, 30)
+      sandbox = await this.waitForSandboxStarted(sandbox, 30)
     }
 
     if (!sandbox.runnerDomain && sandbox.state != SandboxState.ARCHIVED) {
@@ -718,12 +717,15 @@ export class SandboxController {
     return logProxy.create()
   }
 
-  private async waitForSandboxStarted(sandboxId: string, timeoutSeconds: number): Promise<SandboxDto> {
+  // wait up to `timeoutSeconds` for the sandbox to start; if it doesn’t, return current sandbox
+  private async waitForSandboxStarted(sandbox: SandboxDto, timeoutSeconds: number): Promise<SandboxDto> {
+    let latestSandbox: SandboxEntity
     const waitForStarted = new Promise<SandboxDto>((resolve, reject) => {
       // eslint-disable-next-line
       let timeout: NodeJS.Timeout
       const handleStateUpdated = (event: SandboxStateUpdatedEvent) => {
-        if (event.sandbox.id !== sandboxId) {
+        latestSandbox = event.sandbox
+        if (event.sandbox.id !== sandbox.id) {
           return
         }
         if (event.sandbox.state === SandboxState.STARTED) {
@@ -739,9 +741,14 @@ export class SandboxController {
       }
 
       this.eventEmitter.on(SandboxEvents.STATE_UPDATED, handleStateUpdated)
+
       timeout = setTimeout(() => {
         this.eventEmitter.off(SandboxEvents.STATE_UPDATED, handleStateUpdated)
-        reject(new BadRequestError(`Sandbox failed to start: Timeout after ${timeoutSeconds} seconds`))
+        if (latestSandbox) {
+          resolve(SandboxDto.fromSandbox(latestSandbox, ''))
+        } else {
+          resolve(sandbox)
+        }
       }, timeoutSeconds * 1000)
     })
 
