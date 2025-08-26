@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Controller, Post, Get, Body, Param, UseGuards, HttpStatus } from '@nestjs/common'
+import { Controller, Post, Get, Body, Param, UseGuards, HttpStatus, NotFoundException } from '@nestjs/common'
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiHeader } from '@nestjs/swagger'
 import { WebhookService } from '../services/webhook.service'
 import { SendWebhookDto } from '../dto/send-webhook.dto'
@@ -16,7 +16,7 @@ import { SystemRole } from '../../user/enums/system-role.enum'
 import { Audit, TypedRequest } from '../../audit/decorators/audit.decorator'
 import { AuditAction } from '../../audit/enums/audit-action.enum'
 import { AuditTarget } from '../../audit/enums/audit-target.enum'
-import { WebhookInitializationCheckerService } from '../services/webhook-initialization-checker.service'
+import { OrganizationService } from '../../organization/services/organization.service'
 
 @ApiTags('webhooks')
 @Controller('webhooks')
@@ -25,8 +25,8 @@ import { WebhookInitializationCheckerService } from '../services/webhook-initial
 @ApiBearerAuth()
 export class WebhookController {
   constructor(
+    private readonly organizationService: OrganizationService,
     private readonly webhookService: WebhookService,
-    private readonly webhookInitializationChecker: WebhookInitializationCheckerService,
   ) {}
 
   @Post('organizations/:organizationId/app-portal-access')
@@ -135,6 +135,30 @@ export class WebhookController {
     },
   })
   async getInitializationStatus(@Param('organizationId') organizationId: string): Promise<any> {
-    return this.webhookInitializationChecker.getInitializationStatus(organizationId)
+    return this.webhookService.getInitializationStatus(organizationId)
+  }
+
+  @Post('organizations/:organizationId/initialize')
+  @ApiOperation({ summary: 'Initialize webhooks for an organization' })
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    description: 'Webhooks initialized successfully',
+  })
+  @ApiResponse({
+    status: HttpStatus.FORBIDDEN,
+    description: 'User does not have access to this organization',
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'Organization not found',
+  })
+  @RequiredSystemRole(SystemRole.ADMIN)
+  async initializeWebhooks(@Param('organizationId') organizationId: string): Promise<void> {
+    const organization = await this.organizationService.findOne(organizationId)
+    if (!organization) {
+      throw new NotFoundException('Organization not found')
+    }
+
+    await this.webhookService.createSvixApplication(organization)
   }
 }

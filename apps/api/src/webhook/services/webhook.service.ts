@@ -9,7 +9,9 @@ import { TypedConfigService } from '../../config/typed-config.service'
 import { Svix } from 'svix'
 import { OrganizationEvents } from '../../organization/constants/organization-events.constant'
 import { Organization } from '../../organization/entities/organization.entity'
-import { WebhookInitializationCheckerService } from './webhook-initialization-checker.service'
+import { InjectRepository } from '@nestjs/typeorm'
+import { WebhookInitialization } from '../entities/webhook-initialization.entity'
+import { Repository } from 'typeorm'
 
 @Injectable()
 export class WebhookService implements OnModuleInit {
@@ -18,7 +20,8 @@ export class WebhookService implements OnModuleInit {
 
   constructor(
     private readonly configService: TypedConfigService,
-    private readonly webhookInitializationChecker: WebhookInitializationCheckerService,
+    @InjectRepository(WebhookInitialization)
+    private readonly webhookInitializationRepository: Repository<WebhookInitialization>,
   ) {}
 
   async onModuleInit() {
@@ -37,7 +40,17 @@ export class WebhookService implements OnModuleInit {
     }
   }
 
-  @OnEvent(OrganizationEvents.CREATED)
+  /**
+   * Get webhook initialization status for an organization
+   */
+  async getInitializationStatus(organizationId: string): Promise<WebhookInitialization | null> {
+    return this.webhookInitializationRepository.findOne({
+      where: { organizationId },
+    })
+  }
+
+  // TODO: Remove this once we decide to open webhooks to all organizations
+  // @OnEvent(OrganizationEvents.CREATED)
   async handleOrganizationCreated(organization: Organization) {
     if (!this.svix) {
       this.logger.debug('Svix not configured, skipping webhook creation')
@@ -67,9 +80,27 @@ export class WebhookService implements OnModuleInit {
         uid: organization.id,
       })
 
+      // Implement retry logic here
+      await this.webhookInitializationRepository.create({
+        organizationId: organization.id,
+        svixApplicationId: svixApp.id,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        retryCount: 0,
+        lastError: null,
+      })
+
       this.logger.log(`Created Svix application for organization ${organization.id}: ${svixApp.id}`)
       return svixApp
     } catch (error) {
+      await this.webhookInitializationRepository.create({
+        organizationId: organization.id,
+        svixApplicationId: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        retryCount: 0,
+        lastError: String(error),
+      })
       this.logger.error(`Failed to create Svix application for organization ${organization.id}:`, error)
       throw error
     }
@@ -86,7 +117,7 @@ export class WebhookService implements OnModuleInit {
 
     try {
       // Check if webhooks are initialized for this organization
-      const isInitialized = await this.webhookInitializationChecker.isWebhookInitialized(organizationId)
+      const isInitialized = await this.getInitializationStatus(organizationId)
 
       if (!isInitialized) {
         this.logger.log(`Webhooks not initialized for organization ${organizationId}, creating Svix application now...`)

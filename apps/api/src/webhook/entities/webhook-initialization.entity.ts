@@ -11,17 +11,6 @@ export class WebhookInitialization {
   organizationId: string
 
   @Column({
-    default: false,
-  })
-  svixApplicationCreated: boolean
-
-  @Column({
-    type: 'jsonb',
-    nullable: true,
-  })
-  endpointIds: string[]
-
-  @Column({
     nullable: true,
   })
   svixApplicationId?: string
