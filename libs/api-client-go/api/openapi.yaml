@@ -6027,8 +6027,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/WebhookController_getInitializationStatus_200_response'
           description: Webhook initialization status
-        '404':
-          description: Organization not found
       security:
         - bearer: []
       summary: Get webhook initialization status for an organization

@@ -374,7 +374,6 @@ class WebhooksApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "WebhookControllerGetInitializationStatus200Response",
-            '404': None,
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -445,7 +444,6 @@ class WebhooksApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "WebhookControllerGetInitializationStatus200Response",
-            '404': None,
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -516,7 +514,6 @@ class WebhooksApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "WebhookControllerGetInitializationStatus200Response",
-            '404': None,
         }
         response_data = self.api_client.call_api(
             *_param,
