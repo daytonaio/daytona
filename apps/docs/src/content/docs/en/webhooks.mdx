@@ -1,0 +1,109 @@
+---
+title: Webhooks
+description: Connect your applications to Daytona events in real-time with webhooks for automation, monitoring, and integrations.
+---
+
+import { TabItem, Tabs } from '@astrojs/starlight/components'
+
+Webhooks are HTTP callbacks that Daytona sends to your specified endpoints when specific events occur.
+Think of them as "reverse API calls" - instead of your application asking Daytona for updates, Daytona
+proactively notifies your application when something important happens.
+
+## Use Cases
+
+Webhooks enable powerful automation and integration scenarios:
+
+- **Real-time Notifications**: Get instant alerts when sandboxes are created, started, or stopped
+- **Automated Workflows**: Trigger deployment pipelines when snapshots are created
+- **Monitoring & Analytics**: Track usage patterns and resource utilization across your organization
+- **Integration**: Connect Daytona with your existing tools like Slack, Discord, or custom applications
+- **Audit & Compliance**: Maintain detailed logs of all important changes
+
+---
+
+## Getting Started
+
+### Accessing Webhooks
+
+If you don't see **Webhooks** in your dashboard sidebar, contact [support@daytona.io](mailto:support@daytona.io) to enable webhooks for your organization. Provide your organization ID (found in your organization settings) when requesting access.
+
+Once webhooks are enabled for your organization:
+
+1. Navigate to your [Daytona Dashboard](https://app.daytona.io/dashboard)
+2. Click **Webhooks** in the left sidebar
+3. You'll be able to access the webhook management interface
+
+:::note
+Webhooks are available to organization admins and members with appropriate permissions.
+:::
+
+---
+
+## Managing Webhook Endpoints
+
+### Creating Endpoints
+
+To start receiving webhook events:
+
+1. Go to the **Endpoints** tab in your webhook dashboard
+2. Click **Add Endpoint**
+3. Configure your endpoint:
+   - **Endpoint URL**: The HTTPS endpoint where you want to receive events
+   - **Description**: A helpful description for this endpoint
+   - **Subscribe to events**: Select which events you want to receive
+
+### Testing Endpoints
+
+Before going live, test your webhook endpoints:
+
+1. Select webhook from **Endpoints** list
+2. Go to the **Testing** tab
+3. Configure test event and send it
+4. Verify your endpoint receives the test payload correctly
+5. Check that your application handles the webhook format properly
+
+---
+
+## Available Events
+
+Daytona sends webhooks for lifecycle events across your infrastructure resources. You can subscribe to specific event types or receive all events and filter them in your application.
+
+##### Event Categories
+
+- Sandbox Lifecycle Events
+- Snapshot Lifecycle Events
+- Volume Lifecycle Events
+
+---
+
+## Webhook Payload Format
+
+All webhook events follow a consistent structure:
+
+```json
+{
+  "event": "event.type",
+  "timestamp": "2024-01-15T10:30:00Z",
+  "data": {
+    // Event-specific data
+  }
+}
+```
+
+**Common Fields:**
+
+- `event`: The type of event (e.g., "sandbox.created")
+- `timestamp`: ISO 8601 timestamp when the event occurred
+- `data`: Event-specific payload containing relevant information
+
+---
+
+## Monitoring and Activity
+
+### Activity
+
+The **Activity** tab provides a visual overview of your webhook activity, including delivery statistics, event volume trends, and performance metrics to help you monitor the health of your webhook integrations.
+
+### Event Logs
+
+The **Logs** tab shows detailed information about webhook deliveries, including event history, delivery status, and retry information for troubleshooting and monitoring purposes.

@@ -316,6 +316,15 @@ export const getSidebarConfig = (
         },
         {
           type: 'link',
+          href: localizePath('/docs/webhooks', locale),
+          label: labels['sidebarconfig.webhooks'],
+          description: labels['sidebarconfig.webhooksDescription'],
+          attrs: {
+            icon: 'webhook.svg',
+          },
+        },
+        {
+          type: 'link',
           href: '/docs/regions',
           label: labels['sidebarconfig.regions'],
           description: labels['sidebarconfig.regionsDescription'],
