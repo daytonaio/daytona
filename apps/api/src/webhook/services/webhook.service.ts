@@ -59,8 +59,8 @@ export class WebhookService implements OnModuleInit {
 
     try {
       // Create a new Svix application for this organization
-      const svixApp = await this.createSvixApplication(organization)
-      this.logger.log(`Created Svix application for organization ${organization.id}: ${svixApp.id}`)
+      const svixAppId = await this.createSvixApplication(organization)
+      this.logger.log(`Created Svix application for organization ${organization.id}: ${svixAppId}`)
     } catch (error) {
       this.logger.error(`Failed to create Svix application for organization ${organization.id}:`, error)
     }
@@ -69,38 +69,42 @@ export class WebhookService implements OnModuleInit {
   /**
    * Create a Svix application for an organization
    */
-  async createSvixApplication(organization: Organization): Promise<any> {
+  async createSvixApplication(organization: Organization): Promise<string> {
     if (!this.svix) {
       throw new Error('Svix not configured')
     }
 
+    let existingWebhookInitialization = await this.getInitializationStatus(organization.id)
+    if (existingWebhookInitialization && existingWebhookInitialization.svixApplicationId) {
+      this.logger.warn(
+        `Svix application already exists for organization ${organization.id}: ${existingWebhookInitialization.svixApplicationId}`,
+      )
+      return existingWebhookInitialization.svixApplicationId
+    } else {
+      existingWebhookInitialization = new WebhookInitialization()
+      existingWebhookInitialization.organizationId = organization.id
+      existingWebhookInitialization.svixApplicationId = null
+      existingWebhookInitialization.retryCount = -1
+      existingWebhookInitialization.lastError = null
+    }
+
     try {
-      const svixApp = await this.svix.application.create({
+      const svixApp = await this.svix.application.getOrCreate({
         name: organization.name,
         uid: organization.id,
       })
+      existingWebhookInitialization.svixApplicationId = svixApp.id
+      existingWebhookInitialization.retryCount = existingWebhookInitialization.retryCount + 1
+      existingWebhookInitialization.lastError = null
 
-      // Implement retry logic here
-      await this.webhookInitializationRepository.create({
-        organizationId: organization.id,
-        svixApplicationId: svixApp.id,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        retryCount: 0,
-        lastError: null,
-      })
+      await this.webhookInitializationRepository.save(existingWebhookInitialization)
 
       this.logger.log(`Created Svix application for organization ${organization.id}: ${svixApp.id}`)
-      return svixApp
+      return svixApp.id
     } catch (error) {
-      await this.webhookInitializationRepository.create({
-        organizationId: organization.id,
-        svixApplicationId: null,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        retryCount: 0,
-        lastError: String(error),
-      })
+      existingWebhookInitialization.retryCount = existingWebhookInitialization.retryCount + 1
+      existingWebhookInitialization.lastError = String(error)
+      await this.webhookInitializationRepository.save(existingWebhookInitialization)
       this.logger.error(`Failed to create Svix application for organization ${organization.id}:`, error)
       throw error
     }
