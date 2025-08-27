@@ -15,8 +15,6 @@ import (
 type IRunnerCache interface {
 	SetSandboxState(ctx context.Context, sandboxId string, state enums.SandboxState)
 	SetBackupState(ctx context.Context, sandboxId string, state enums.BackupState, err error)
-	SetSystemMetrics(ctx context.Context, metrics models.SystemMetrics)
-	GetSystemMetrics(ctx context.Context) *models.SystemMetrics
 
 	Set(ctx context.Context, sandboxId string, data models.CacheData)
 	Get(ctx context.Context, sandboxId string) *models.CacheData
@@ -63,7 +61,6 @@ func (c *InMemoryRunnerCache) SetSandboxState(ctx context.Context, sandboxId str
 			SandboxState:    state,
 			BackupState:     enums.BackupStateNone,
 			DestructionTime: nil,
-			SystemMetrics:   nil,
 		}
 	} else {
 		data.SandboxState = state
@@ -87,49 +84,12 @@ func (c *InMemoryRunnerCache) SetBackupState(ctx context.Context, sandboxId stri
 			BackupState:       state,
 			BackupErrorReason: &backupErrorReason,
 			DestructionTime:   nil,
-			SystemMetrics:     nil,
 		}
 	} else {
 		data.BackupState = state
 	}
 
 	c.cache[sandboxId] = data
-}
-
-func (c *InMemoryRunnerCache) SetSystemMetrics(ctx context.Context, metrics models.SystemMetrics) {
-	c.mutex.Lock()
-	defer c.mutex.Unlock()
-
-	// Store system metrics under a special key
-	const systemMetricsKey = "__system_metrics__"
-
-	data, ok := c.cache[systemMetricsKey]
-	if !ok {
-		data = &models.CacheData{
-			SandboxState:    enums.SandboxStateUnknown,
-			BackupState:     enums.BackupStateNone,
-			DestructionTime: nil,
-			SystemMetrics:   &metrics,
-		}
-	} else {
-		data.SystemMetrics = &metrics
-	}
-
-	c.cache[systemMetricsKey] = data
-}
-
-func (c *InMemoryRunnerCache) GetSystemMetrics(ctx context.Context) *models.SystemMetrics {
-	c.mutex.RLock()
-	defer c.mutex.RUnlock()
-
-	const systemMetricsKey = "__system_metrics__"
-
-	data, ok := c.cache[systemMetricsKey]
-	if !ok || data.SystemMetrics == nil {
-		return nil
-	}
-
-	return data.SystemMetrics
 }
 
 func (c *InMemoryRunnerCache) Set(ctx context.Context, sandboxId string, data models.CacheData) {
@@ -140,7 +100,6 @@ func (c *InMemoryRunnerCache) Set(ctx context.Context, sandboxId string, data mo
 		SandboxState:    data.SandboxState,
 		BackupState:     data.BackupState,
 		DestructionTime: data.DestructionTime,
-		SystemMetrics:   data.SystemMetrics,
 	}
 }
 
@@ -154,7 +113,6 @@ func (c *InMemoryRunnerCache) Get(ctx context.Context, sandboxId string) *models
 			SandboxState:    enums.SandboxStateUnknown,
 			BackupState:     enums.BackupStateNone,
 			DestructionTime: nil,
-			SystemMetrics:   nil,
 		}
 	}
 
@@ -170,7 +128,6 @@ func (c *InMemoryRunnerCache) Remove(ctx context.Context, sandboxId string) {
 		SandboxState:    enums.SandboxStateDestroyed,
 		BackupState:     enums.BackupStateNone,
 		DestructionTime: &destructionTime,
-		SystemMetrics:   nil,
 	}
 }
 
