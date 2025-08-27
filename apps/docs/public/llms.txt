@@ -1,5 +1,5 @@
 # Daytona Documentation v0.0.0-dev
-# Generated on: 2025-08-19
+# Generated on: 2025-08-27
 
 # Daytona
 
@@ -28,6 +28,10 @@
 - [Environment Variables](https://daytona.io/docs/en/configuration#environment-variables)
 - [Setting Environment Variables](https://daytona.io/docs/en/configuration#setting-environment-variables)
 - [Configuration Precedence](https://daytona.io/docs/en/configuration#configuration-precedence)
+- [Custom Preview Proxy](https://daytona.io/docs/en/custom-preview-proxy)
+- [How It Works](https://daytona.io/docs/en/custom-preview-proxy#how-it-works)
+- [Daytona Headers](https://daytona.io/docs/en/custom-preview-proxy#daytona-headers)
+- [Examples](https://daytona.io/docs/en/custom-preview-proxy#examples)
 - [Analyze Data with AI](https://daytona.io/docs/en/data-analysis-with-ai)
 - [Build an AI Data Analyst with Daytona](https://daytona.io/docs/en/data-analysis-with-ai#build-an-ai-data-analyst-with-daytona)
 - [1. Project Setup](https://daytona.io/docs/en/data-analysis-with-ai#1-project-setup)
@@ -151,6 +155,9 @@
 - [Images from Private Registries](https://daytona.io/docs/en/snapshots#images-from-private-registries)
 - [Using a Local Image](https://daytona.io/docs/en/snapshots#using-a-local-image)
 - [Deleting Snapshots](https://daytona.io/docs/en/snapshots#deleting-snapshots)
+- [Running Docker in a Sandbox](https://daytona.io/docs/en/snapshots#running-docker-in-a-sandbox)
+- [Creating a DinD Snapshot](https://daytona.io/docs/en/snapshots#creating-a-dind-snapshot)
+- [Use Cases](https://daytona.io/docs/en/snapshots#use-cases)
 - [Default Snapshot](https://daytona.io/docs/en/snapshots#default-snapshot)
 - [CLI](https://daytona.io/docs/en/tools/cli)
 - [daytona](https://daytona.io/docs/en/tools/cli#daytona)

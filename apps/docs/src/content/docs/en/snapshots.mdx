@@ -258,6 +258,45 @@ To temporarily disable a Snapshot, instead of deleting, you can click `Disable`.
 
 :::
 
+## Running Docker in a Sandbox
+
+Daytona Sandboxes can run Docker containers inside them (**Docker-in-Docker**), enabling you to build, test, and deploy containerized applications. This is particularly useful when your projects have dependencies on external services like databases, message queues, or other microservices.
+
+Agents can seamlessly interact with these services since they run within the same sandbox environment, providing better isolation and security compared to external service dependencies.
+
+### Creating a DinD Snapshot
+
+You can create a Snapshot with Docker support using pre-built Docker-in-Docker images as a base or by manually installing Docker in a custom image.
+
+#### Using Pre-built Images
+
+The following base images are widely used for creating Docker-in-Docker snapshots or can be used as a base for a custom Dockerfile:
+
+- `docker:28.3.3-dind` - Official Docker-in-Docker image (Alpine-based, lightweight)
+- `docker:28.3.3-dind-rootless` - Rootless Docker-in-Docker for enhanced security
+- `docker:28.3.2-dind-alpine3.22` - Docker-in-Docker image with Alpine 3.22
+
+#### Manual Docker Installation
+
+Alternatively, you can install Docker manually in a custom Dockerfile:
+
+```dockerfile
+FROM ubuntu:22.04
+# Install Docker using the official install script
+RUN curl -fsSL https://get.docker.com | VERSION=28.3.3 sh -
+```
+
+### Use Cases
+
+- Run databases (PostgreSQL, Redis, MySQL) and other services
+- Build and test containerized applications
+- Deploy microservices and their dependencies
+- Create isolated development environments with full container orchestration
+
+:::note
+Docker-in-Docker Sandboxes require additional resources due to the Docker daemon overhead. Consider allocating at least 2 vCPU and 4GiB of memory for optimal performance.
+:::
+
 ## Default Snapshot
 
 The default Snapshot used by Daytona is based on an image that contains `python`, `node` and their respective LSP's, as well as these pre-installed `pip` packages:
