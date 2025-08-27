@@ -73,6 +73,8 @@
   "sidebarconfig.customPreviewProxyDescription": "プレビュー用プロキシを独自のドメインとロジックでカスタマイズします。",
   "sidebarconfig.auditLogs": "監査ログ",
   "sidebarconfig.auditLogsDescription": "Daytona の組織（組織全体）でのアクティビティを監視・追跡します。",
+  "sidebarconfig.webhooks": "ウェブフック",
+  "sidebarconfig.webhooksDescription": "Daytona 組織でイベントが発生したときにリアルタイム通知を受け取ります。",
   "sidebarconfig.regions": "リージョン",
   "sidebarconfig.regionsDescription": "Daytonaのサンドボックス（サンドボックス（Daytonaが管理する隔離された一時的な実行環境））を起動するリージョン（ターゲット（リージョン））を設定します。",
   "sidebarconfig.mcpServer": "MCPサーバー",

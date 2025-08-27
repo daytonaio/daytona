@@ -1950,5 +1950,109 @@
     "url": "/docs/web-terminal",
     "slug": "/web-terminal",
     "objectID": 244
+  },
+  {
+    "title": "Webhooks",
+    "description": "Webhooks are HTTP callbacks that Daytona sends to your specified endpoints when specific events occur.",
+    "tag": "Documentation",
+    "url": "/docs/webhooks",
+    "slug": "/webhooks",
+    "objectID": 245
+  },
+  {
+    "title": "Use Cases",
+    "description": "Webhooks enable powerful automation and integration scenarios:",
+    "tag": "Documentation",
+    "url": "/docs/webhooks#use-cases",
+    "slug": "/webhooks#use-cases",
+    "objectID": 246
+  },
+  {
+    "title": "Getting Started",
+    "description": "",
+    "tag": "Documentation",
+    "url": "/docs/webhooks#getting-started",
+    "slug": "/webhooks#getting-started",
+    "objectID": 247
+  },
+  {
+    "title": "Accessing Webhooks",
+    "description": "If you don't see **Webhooks** in your dashboard sidebar, contact [support@daytona.",
+    "tag": "Documentation",
+    "url": "/docs/webhooks#accessing-webhooks",
+    "slug": "/webhooks#accessing-webhooks",
+    "objectID": 248
+  },
+  {
+    "title": "Managing Webhook Endpoints",
+    "description": "",
+    "tag": "Documentation",
+    "url": "/docs/webhooks#managing-webhook-endpoints",
+    "slug": "/webhooks#managing-webhook-endpoints",
+    "objectID": 249
+  },
+  {
+    "title": "Creating Endpoints",
+    "description": "To start receiving webhook events:",
+    "tag": "Documentation",
+    "url": "/docs/webhooks#creating-endpoints",
+    "slug": "/webhooks#creating-endpoints",
+    "objectID": 250
+  },
+  {
+    "title": "Testing Endpoints",
+    "description": "Before going live, test your webhook endpoints:",
+    "tag": "Documentation",
+    "url": "/docs/webhooks#testing-endpoints",
+    "slug": "/webhooks#testing-endpoints",
+    "objectID": 251
+  },
+  {
+    "title": "Available Events",
+    "description": "Daytona sends webhooks for lifecycle events across your infrastructure resources.",
+    "tag": "Documentation",
+    "url": "/docs/webhooks#available-events",
+    "slug": "/webhooks#available-events",
+    "objectID": 252
+  },
+  {
+    "title": "Event Categories",
+    "description": "",
+    "tag": "Documentation",
+    "url": "/docs/webhooks#event-categories",
+    "slug": "/webhooks#event-categories",
+    "objectID": 253
+  },
+  {
+    "title": "Webhook Payload Format",
+    "description": "All webhook events follow a consistent structure:",
+    "tag": "Documentation",
+    "url": "/docs/webhooks#webhook-payload-format",
+    "slug": "/webhooks#webhook-payload-format",
+    "objectID": 254
+  },
+  {
+    "title": "Monitoring and Activity",
+    "description": "",
+    "tag": "Documentation",
+    "url": "/docs/webhooks#monitoring-and-activity",
+    "slug": "/webhooks#monitoring-and-activity",
+    "objectID": 255
+  },
+  {
+    "title": "Activity",
+    "description": "The **Activity** tab provides a visual overview of your webhook activity, including delivery statistics, event volume trends, and performance metrics to help you monitor the health of your webhook integrations.",
+    "tag": "Documentation",
+    "url": "/docs/webhooks#activity",
+    "slug": "/webhooks#activity",
+    "objectID": 256
+  },
+  {
+    "title": "Event Logs",
+    "description": "The **Logs** tab shows detailed information about webhook deliveries, including event history, delivery status, and retry information for troubleshooting and monitoring purposes.",
+    "tag": "Documentation",
+    "url": "/docs/webhooks#event-logs",
+    "slug": "/webhooks#event-logs",
+    "objectID": 257
   }
 ]

@@ -73,6 +73,8 @@
   "sidebarconfig.customPreviewProxyDescription": "Customize the preview proxy with your own domain and logic.",
   "sidebarconfig.auditLogs": "Audit Logs",
   "sidebarconfig.auditLogsDescription": "Monitor and track activities across your Daytona organization.",
+  "sidebarconfig.webhooks": "Webhooks",
+  "sidebarconfig.webhooksDescription": "Receive real-time notifications when events occur in your Daytona organization.",
   "sidebarconfig.regions": "Regions",
   "sidebarconfig.regionsDescription": "Setting the region to spin up Daytona Sandboxes in.",
   "sidebarconfig.mcpServer": "MCP Server",

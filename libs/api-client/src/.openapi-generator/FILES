@@ -13,6 +13,7 @@ api/snapshots-api.ts
 api/toolbox-api.ts
 api/users-api.ts
 api/volumes-api.ts
+api/webhooks-api.ts
 api/workspace-api.ts
 base.ts
 common.ts
@@ -116,6 +117,7 @@ models/sandbox-volume.ts
 models/sandbox.ts
 models/screenshot-response.ts
 models/search-files-response.ts
+models/send-webhook-dto.ts
 models/session-execute-request.ts
 models/session-execute-response.ts
 models/session.ts
@@ -133,5 +135,8 @@ models/user-public-key.ts
 models/user.ts
 models/volume-dto.ts
 models/volume-state.ts
+models/webhook-app-portal-access.ts
+models/webhook-controller-get-status200-response.ts
+models/webhook-initialization-status.ts
 models/windows-response.ts
 models/workspace.ts

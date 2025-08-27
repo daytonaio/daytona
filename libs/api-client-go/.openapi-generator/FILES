@@ -12,6 +12,7 @@ api_snapshots.go
 api_toolbox.go
 api_users.go
 api_volumes.go
+api_webhooks.go
 api_workspace.go
 client.go
 configuration.go
@@ -113,6 +114,7 @@ model_sandbox_state.go
 model_sandbox_volume.go
 model_screenshot_response.go
 model_search_files_response.go
+model_send_webhook_dto.go
 model_session.go
 model_session_execute_request.go
 model_session_execute_response.go
@@ -130,6 +132,9 @@ model_user.go
 model_user_public_key.go
 model_volume_dto.go
 model_volume_state.go
+model_webhook_app_portal_access.go
+model_webhook_controller_get_status_200_response.go
+model_webhook_initialization_status.go
 model_windows_response.go
 model_workspace.go
 response.go

@@ -5873,6 +5873,198 @@ paths:
       summary: Set default registry
       tags:
         - docker-registry
+  /webhooks/organizations/{organizationId}/app-portal-access:
+    post:
+      operationId: WebhookController_getAppPortalAccess
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: organizationId
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebhookAppPortalAccess'
+          description: App Portal access generated successfully
+      security:
+        - bearer: []
+      summary: Get Svix Consumer App Portal access URL for an organization
+      tags:
+        - webhooks
+  /webhooks/organizations/{organizationId}/send:
+    post:
+      operationId: WebhookController_sendWebhook
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: organizationId
+          required: true
+          schema:
+            type: string
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SendWebhookDto'
+        required: true
+      responses:
+        '200':
+          description: Webhook message sent successfully
+      security:
+        - bearer: []
+      summary: Send a webhook message to an organization
+      tags:
+        - webhooks
+  /webhooks/organizations/{organizationId}/messages/{messageId}/attempts:
+    get:
+      operationId: WebhookController_getMessageAttempts
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: organizationId
+          required: true
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: messageId
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  type: object
+                type: array
+          description: List of delivery attempts
+      security:
+        - bearer: []
+      summary: Get delivery attempts for a webhook message
+      tags:
+        - webhooks
+  /webhooks/status:
+    get:
+      operationId: WebhookController_getStatus
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebhookController_getStatus_200_response'
+          description: Webhook service status
+      security:
+        - bearer: []
+      summary: Get webhook service status
+      tags:
+        - webhooks
+  /webhooks/organizations/{organizationId}/initialization-status:
+    get:
+      operationId: WebhookController_getInitializationStatus
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: organizationId
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebhookInitializationStatus'
+          description: Webhook initialization status
+        '404':
+          description: Webhook initialization status not found
+      security:
+        - bearer: []
+      summary: Get webhook initialization status for an organization
+      tags:
+        - webhooks
+  /webhooks/organizations/{organizationId}/initialize:
+    post:
+      operationId: WebhookController_initializeWebhooks
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: organizationId
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '201':
+          description: Webhooks initialized successfully
+        '403':
+          description: User does not have access to this organization
+        '404':
+          description: Organization not found
+      security:
+        - bearer: []
+      summary: Initialize webhooks for an organization
+      tags:
+        - webhooks
   /object-storage/push-access:
     get:
       operationId: getPushAccess
@@ -7067,7 +7259,8 @@ components:
           example: false
           type: boolean
         networkAllowList:
-          description: Comma-separated list of allowed CIDR network addresses for the sandbox
+          description: Comma-separated list of allowed CIDR network addresses for
+            the sandbox
           example: '192.168.1.0/16,10.0.0.0/24'
           type: string
         target:
@@ -7259,7 +7452,8 @@ components:
           example: false
           type: boolean
         networkAllowList:
-          description: Comma-separated list of allowed CIDR network addresses for the sandbox
+          description: Comma-separated list of allowed CIDR network addresses for
+            the sandbox
           example: '192.168.1.0/16,10.0.0.0/24'
           type: string
         class:
@@ -9186,7 +9380,8 @@ components:
           example: false
           type: boolean
         networkAllowList:
-          description: Comma-separated list of allowed CIDR network addresses for the sandbox
+          description: Comma-separated list of allowed CIDR network addresses for
+            the sandbox
           example: '192.168.1.0/16,10.0.0.0/24'
           type: string
         target:
@@ -9675,6 +9870,86 @@ components:
         - url
         - username
       type: object
+    WebhookAppPortalAccess:
+      example:
+        url: https://app.svix.com/app_1234567890
+      properties:
+        url:
+          description: The URL to the webhook app portal
+          example: https://app.svix.com/app_1234567890
+          type: string
+      required:
+        - url
+      type: object
+    SendWebhookDto:
+      example:
+        eventId: evt_1234567890abcdef
+        payload:
+          id: sandbox-123
+          name: My Sandbox
+        eventType: sandbox.created
+      properties:
+        eventType:
+          description: The type of event being sent
+          example: sandbox.created
+          type: string
+        payload:
+          description: The payload data to send
+          example:
+            id: sandbox-123
+            name: My Sandbox
+          type: object
+        eventId:
+          description: Optional event ID for idempotency
+          example: evt_1234567890abcdef
+          type: string
+      required:
+        - eventType
+        - payload
+      type: object
+    WebhookInitializationStatus:
+      example:
+        organizationId: 123e4567-e89b-12d3-a456-426614174000
+        createdAt: 2023-01-01T00:00:00.000Z
+        lastError: Failed to create Svix application
+        retryCount: 3
+        svixApplicationId: app_1234567890
+        updatedAt: 2023-01-01T00:00:00.000Z
+      properties:
+        organizationId:
+          description: Organization ID
+          example: 123e4567-e89b-12d3-a456-426614174000
+          type: string
+        svixApplicationId:
+          description: The ID of the Svix application
+          example: app_1234567890
+          nullable: true
+          type: string
+        lastError:
+          description: The error reason for the last initialization attempt
+          example: Failed to create Svix application
+          nullable: true
+          type: string
+        retryCount:
+          description: The number of times the initialization has been attempted
+          example: 3
+          type: number
+        createdAt:
+          description: When the webhook initialization was created
+          example: 2023-01-01T00:00:00.000Z
+          type: string
+        updatedAt:
+          description: When the webhook initialization was last updated
+          example: 2023-01-01T00:00:00.000Z
+          type: string
+      required:
+        - createdAt
+        - lastError
+        - organizationId
+        - retryCount
+        - svixApplicationId
+        - updatedAt
+      type: object
     StorageAccessDto:
       example:
         organizationId: 123e4567-e89b-12d3-a456-426614174000
@@ -9873,6 +10148,9 @@ components:
             - activate
             - deactivate
             - update_network_settings
+            - get_webhook_app_portal_access
+            - send_webhook_message
+            - initialize_webhooks
             - toolbox_delete_file
             - toolbox_download_file
             - toolbox_create_folder
@@ -9923,6 +10201,13 @@ components:
         file:
           format: binary
           type: string
+      type: object
+    WebhookController_getStatus_200_response:
+      example:
+        enabled: true
+      properties:
+        enabled:
+          type: boolean
       type: object
   securitySchemes:
     bearer:

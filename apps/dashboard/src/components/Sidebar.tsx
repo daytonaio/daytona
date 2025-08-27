@@ -55,6 +55,7 @@ import { addHours, formatRelative } from 'date-fns'
 import { RoutePath } from '@/enums/RoutePath'
 import { DAYTONA_DOCS_URL, DAYTONA_SLACK_URL } from '@/constants/ExternalLinks'
 import { Logo, LogoText } from '@/assets/Logo'
+import { useWebhooks } from '@/hooks/useWebhooks'
 interface SidebarProps {
   isBannerVisible: boolean
 }
@@ -66,8 +67,14 @@ export function Sidebar({ isBannerVisible }: SidebarProps) {
   const { selectedOrganization, authenticatedUserOrganizationMember, authenticatedUserHasPermission } =
     useSelectedOrganization()
   const { count: organizationInvitationsCount } = useUserOrganizationInvitations()
+  const { isInitialized: webhooksInitialized, openAppPortal } = useWebhooks()
   const sidebarItems = useMemo(() => {
-    const arr = [
+    const arr: Array<{
+      icon: React.ReactElement
+      label: string
+      path: RoutePath | string
+      onClick?: () => void
+    }> = [
       {
         icon: <Container size={16} strokeWidth={1.5} />,
         label: 'Sandboxes',
@@ -117,13 +124,29 @@ export function Sidebar({ isBannerVisible }: SidebarProps) {
         path: RoutePath.AUDIT_LOGS,
       })
     }
+
+    // Add Webhooks link if webhooks are initialized
+    if (webhooksInitialized) {
+      arr.push({
+        icon: <Mail size={16} strokeWidth={1.5} />,
+        label: 'Webhooks',
+        path: '#webhooks' as any, // This will be handled by onClick
+        onClick: () => openAppPortal(),
+      })
+    }
     arr.push({
       icon: <Settings size={16} strokeWidth={1.5} />,
       label: 'Settings',
       path: RoutePath.SETTINGS,
     })
     return arr
-  }, [authenticatedUserOrganizationMember?.role, selectedOrganization?.personal, authenticatedUserHasPermission])
+  }, [
+    authenticatedUserOrganizationMember?.role,
+    selectedOrganization?.personal,
+    authenticatedUserHasPermission,
+    webhooksInitialized,
+    openAppPortal,
+  ])
 
   const billingItems = useMemo(() => {
     if (
@@ -168,7 +191,7 @@ export function Sidebar({ isBannerVisible }: SidebarProps) {
               {sidebarItems.map((item) => (
                 <SidebarMenuItem key={item.label}>
                   <SidebarMenuButton asChild isActive={pathname.startsWith(item.path)}>
-                    <button onClick={() => navigate(item.path)} className="text-sm">
+                    <button onClick={() => (item.onClick ? item.onClick() : navigate(item.path))} className="text-sm">
                       {item.icon}
                       <span>{item.label}</span>
                     </button>
