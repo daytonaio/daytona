@@ -34,11 +34,11 @@ import { BASE_PATH, COLLECTION_FORMATS, type RequestArgs, BaseAPI, RequiredError
 // @ts-ignore
 import type { SendWebhookDto } from '../models'
 // @ts-ignore
-import type { WebhookControllerGetAppPortalAccess200Response } from '../models'
-// @ts-ignore
-import type { WebhookControllerGetInitializationStatus200Response } from '../models'
+import type { WebhookAppPortalAccess } from '../models'
 // @ts-ignore
 import type { WebhookControllerGetStatus200Response } from '../models'
+// @ts-ignore
+import type { WebhookInitializationStatus } from '../models'
 /**
  * WebhooksApi - axios parameter creator
  * @export
@@ -346,9 +346,7 @@ export const WebhooksApiFp = function (configuration?: Configuration) {
       organizationId: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
-    ): Promise<
-      (axios?: AxiosInstance, basePath?: string) => AxiosPromise<WebhookControllerGetAppPortalAccess200Response>
-    > {
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<WebhookAppPortalAccess>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.webhookControllerGetAppPortalAccess(
         organizationId,
         xDaytonaOrganizationID,
@@ -377,9 +375,7 @@ export const WebhooksApiFp = function (configuration?: Configuration) {
       organizationId: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
-    ): Promise<
-      (axios?: AxiosInstance, basePath?: string) => AxiosPromise<WebhookControllerGetInitializationStatus200Response>
-    > {
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<WebhookInitializationStatus>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.webhookControllerGetInitializationStatus(
         organizationId,
         xDaytonaOrganizationID,
@@ -537,7 +533,7 @@ export const WebhooksApiFactory = function (configuration?: Configuration, baseP
       organizationId: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
-    ): AxiosPromise<WebhookControllerGetAppPortalAccess200Response> {
+    ): AxiosPromise<WebhookAppPortalAccess> {
       return localVarFp
         .webhookControllerGetAppPortalAccess(organizationId, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
@@ -554,7 +550,7 @@ export const WebhooksApiFactory = function (configuration?: Configuration, baseP
       organizationId: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
-    ): AxiosPromise<WebhookControllerGetInitializationStatus200Response> {
+    ): AxiosPromise<WebhookInitializationStatus> {
       return localVarFp
         .webhookControllerGetInitializationStatus(organizationId, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))

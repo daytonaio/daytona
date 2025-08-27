@@ -135,8 +135,8 @@ models/user-public-key.ts
 models/user.ts
 models/volume-dto.ts
 models/volume-state.ts
-models/webhook-controller-get-app-portal-access200-response.ts
-models/webhook-controller-get-initialization-status200-response.ts
+models/webhook-app-portal-access.ts
 models/webhook-controller-get-status200-response.ts
+models/webhook-initialization-status.ts
 models/windows-response.ts
 models/workspace.ts

@@ -32,8 +32,8 @@ type WebhooksAPI interface {
 	WebhookControllerGetAppPortalAccess(ctx context.Context, organizationId string) WebhooksAPIWebhookControllerGetAppPortalAccessRequest
 
 	// WebhookControllerGetAppPortalAccessExecute executes the request
-	//  @return WebhookControllerGetAppPortalAccess200Response
-	WebhookControllerGetAppPortalAccessExecute(r WebhooksAPIWebhookControllerGetAppPortalAccessRequest) (*WebhookControllerGetAppPortalAccess200Response, *http.Response, error)
+	//  @return WebhookAppPortalAccess
+	WebhookControllerGetAppPortalAccessExecute(r WebhooksAPIWebhookControllerGetAppPortalAccessRequest) (*WebhookAppPortalAccess, *http.Response, error)
 
 	/*
 		WebhookControllerGetInitializationStatus Get webhook initialization status for an organization
@@ -45,8 +45,8 @@ type WebhooksAPI interface {
 	WebhookControllerGetInitializationStatus(ctx context.Context, organizationId string) WebhooksAPIWebhookControllerGetInitializationStatusRequest
 
 	// WebhookControllerGetInitializationStatusExecute executes the request
-	//  @return WebhookControllerGetInitializationStatus200Response
-	WebhookControllerGetInitializationStatusExecute(r WebhooksAPIWebhookControllerGetInitializationStatusRequest) (*WebhookControllerGetInitializationStatus200Response, *http.Response, error)
+	//  @return WebhookInitializationStatus
+	WebhookControllerGetInitializationStatusExecute(r WebhooksAPIWebhookControllerGetInitializationStatusRequest) (*WebhookInitializationStatus, *http.Response, error)
 
 	/*
 		WebhookControllerGetMessageAttempts Get delivery attempts for a webhook message
@@ -115,7 +115,7 @@ func (r WebhooksAPIWebhookControllerGetAppPortalAccessRequest) XDaytonaOrganizat
 	return r
 }
 
-func (r WebhooksAPIWebhookControllerGetAppPortalAccessRequest) Execute() (*WebhookControllerGetAppPortalAccess200Response, *http.Response, error) {
+func (r WebhooksAPIWebhookControllerGetAppPortalAccessRequest) Execute() (*WebhookAppPortalAccess, *http.Response, error) {
 	return r.ApiService.WebhookControllerGetAppPortalAccessExecute(r)
 }
 
@@ -136,13 +136,13 @@ func (a *WebhooksAPIService) WebhookControllerGetAppPortalAccess(ctx context.Con
 
 // Execute executes the request
 //
-//	@return WebhookControllerGetAppPortalAccess200Response
-func (a *WebhooksAPIService) WebhookControllerGetAppPortalAccessExecute(r WebhooksAPIWebhookControllerGetAppPortalAccessRequest) (*WebhookControllerGetAppPortalAccess200Response, *http.Response, error) {
+//	@return WebhookAppPortalAccess
+func (a *WebhooksAPIService) WebhookControllerGetAppPortalAccessExecute(r WebhooksAPIWebhookControllerGetAppPortalAccessRequest) (*WebhookAppPortalAccess, *http.Response, error) {
 	var (
 		localVarHTTPMethod  = http.MethodPost
 		localVarPostBody    interface{}
 		formFiles           []formFile
-		localVarReturnValue *WebhookControllerGetAppPortalAccess200Response
+		localVarReturnValue *WebhookAppPortalAccess
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WebhooksAPIService.WebhookControllerGetAppPortalAccess")
@@ -227,7 +227,7 @@ func (r WebhooksAPIWebhookControllerGetInitializationStatusRequest) XDaytonaOrga
 	return r
 }
 
-func (r WebhooksAPIWebhookControllerGetInitializationStatusRequest) Execute() (*WebhookControllerGetInitializationStatus200Response, *http.Response, error) {
+func (r WebhooksAPIWebhookControllerGetInitializationStatusRequest) Execute() (*WebhookInitializationStatus, *http.Response, error) {
 	return r.ApiService.WebhookControllerGetInitializationStatusExecute(r)
 }
 
@@ -248,13 +248,13 @@ func (a *WebhooksAPIService) WebhookControllerGetInitializationStatus(ctx contex
 
 // Execute executes the request
 //
-//	@return WebhookControllerGetInitializationStatus200Response
-func (a *WebhooksAPIService) WebhookControllerGetInitializationStatusExecute(r WebhooksAPIWebhookControllerGetInitializationStatusRequest) (*WebhookControllerGetInitializationStatus200Response, *http.Response, error) {
+//	@return WebhookInitializationStatus
+func (a *WebhooksAPIService) WebhookControllerGetInitializationStatusExecute(r WebhooksAPIWebhookControllerGetInitializationStatusRequest) (*WebhookInitializationStatus, *http.Response, error) {
 	var (
 		localVarHTTPMethod  = http.MethodGet
 		localVarPostBody    interface{}
 		formFiles           []formFile
-		localVarReturnValue *WebhookControllerGetInitializationStatus200Response
+		localVarReturnValue *WebhookInitializationStatus
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WebhooksAPIService.WebhookControllerGetInitializationStatus")

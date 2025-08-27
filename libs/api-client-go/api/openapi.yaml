@@ -5897,8 +5897,8 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/WebhookController_getAppPortalAccess_200_response'
-          description: App Portal access URL generated successfully
+                $ref: '#/components/schemas/WebhookAppPortalAccess'
+          description: App Portal access generated successfully
       security:
         - bearer: []
       summary: Get Svix Consumer App Portal access URL for an organization
@@ -6025,8 +6025,10 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/WebhookController_getInitializationStatus_200_response'
+                $ref: '#/components/schemas/WebhookInitializationStatus'
           description: Webhook initialization status
+        '404':
+          description: Webhook initialization status not found
       security:
         - bearer: []
       summary: Get webhook initialization status for an organization
@@ -9868,6 +9870,17 @@ components:
         - url
         - username
       type: object
+    WebhookAppPortalAccess:
+      example:
+        url: https://app.svix.com/app_1234567890
+      properties:
+        url:
+          description: The URL to the webhook app portal
+          example: https://app.svix.com/app_1234567890
+          type: string
+      required:
+        - url
+      type: object
     SendWebhookDto:
       example:
         eventId: evt_1234567890abcdef
@@ -9893,6 +9906,49 @@ components:
       required:
         - eventType
         - payload
+      type: object
+    WebhookInitializationStatus:
+      example:
+        organizationId: 123e4567-e89b-12d3-a456-426614174000
+        createdAt: 2023-01-01T00:00:00.000Z
+        lastError: Failed to create Svix application
+        retryCount: 3
+        svixApplicationId: app_1234567890
+        updatedAt: 2023-01-01T00:00:00.000Z
+      properties:
+        organizationId:
+          description: Organization ID
+          example: 123e4567-e89b-12d3-a456-426614174000
+          type: string
+        svixApplicationId:
+          description: The ID of the Svix application
+          example: app_1234567890
+          nullable: true
+          type: string
+        lastError:
+          description: The error reason for the last initialization attempt
+          example: Failed to create Svix application
+          nullable: true
+          type: string
+        retryCount:
+          description: The number of times the initialization has been attempted
+          example: 3
+          type: number
+        createdAt:
+          description: When the webhook initialization was created
+          example: 2023-01-01T00:00:00.000Z
+          type: string
+        updatedAt:
+          description: When the webhook initialization was last updated
+          example: 2023-01-01T00:00:00.000Z
+          type: string
+      required:
+        - createdAt
+        - lastError
+        - organizationId
+        - retryCount
+        - svixApplicationId
+        - updatedAt
       type: object
     StorageAccessDto:
       example:
@@ -10094,6 +10150,7 @@ components:
             - update_network_settings
             - get_webhook_app_portal_access
             - send_webhook_message
+            - initialize_webhooks
             - toolbox_delete_file
             - toolbox_download_file
             - toolbox_create_folder
@@ -10145,46 +10202,12 @@ components:
           format: binary
           type: string
       type: object
-    WebhookController_getAppPortalAccess_200_response:
-      example:
-        url: url
-      properties:
-        url:
-          description: App Portal access URL
-          type: string
-      type: object
     WebhookController_getStatus_200_response:
       example:
         enabled: true
       properties:
         enabled:
           type: boolean
-      type: object
-    WebhookController_getInitializationStatus_200_response:
-      example:
-        organizationId: organizationId
-        createdAt: createdAt
-        lastError: lastError
-        endpointsCreated: true
-        retryCount: 0.8008281904610115
-        svixApplicationCreated: true
-        updatedAt: updatedAt
-      properties:
-        organizationId:
-          type: string
-        endpointsCreated:
-          type: boolean
-        svixApplicationCreated:
-          type: boolean
-        lastError:
-          nullable: true
-          type: string
-        retryCount:
-          type: number
-        createdAt:
-          type: string
-        updatedAt:
-          type: string
       type: object
   securitySchemes:
     bearer:

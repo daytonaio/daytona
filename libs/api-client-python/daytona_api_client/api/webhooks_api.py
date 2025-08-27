@@ -21,9 +21,9 @@ from pydantic import Field, StrictStr
 from typing import Any, Dict, List, Optional
 from typing_extensions import Annotated
 from daytona_api_client.models.send_webhook_dto import SendWebhookDto
-from daytona_api_client.models.webhook_controller_get_app_portal_access200_response import WebhookControllerGetAppPortalAccess200Response
-from daytona_api_client.models.webhook_controller_get_initialization_status200_response import WebhookControllerGetInitializationStatus200Response
+from daytona_api_client.models.webhook_app_portal_access import WebhookAppPortalAccess
 from daytona_api_client.models.webhook_controller_get_status200_response import WebhookControllerGetStatus200Response
+from daytona_api_client.models.webhook_initialization_status import WebhookInitializationStatus
 
 from daytona_api_client.api_client import ApiClient, RequestSerialized
 from daytona_api_client.api_response import ApiResponse
@@ -60,7 +60,7 @@ class WebhooksApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> WebhookControllerGetAppPortalAccess200Response:
+    ) -> WebhookAppPortalAccess:
         """Get Svix Consumer App Portal access URL for an organization
 
 
@@ -100,7 +100,7 @@ class WebhooksApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "WebhookControllerGetAppPortalAccess200Response",
+            '200': "WebhookAppPortalAccess",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -130,7 +130,7 @@ class WebhooksApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[WebhookControllerGetAppPortalAccess200Response]:
+    ) -> ApiResponse[WebhookAppPortalAccess]:
         """Get Svix Consumer App Portal access URL for an organization
 
 
@@ -170,7 +170,7 @@ class WebhooksApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "WebhookControllerGetAppPortalAccess200Response",
+            '200': "WebhookAppPortalAccess",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -240,7 +240,7 @@ class WebhooksApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "WebhookControllerGetAppPortalAccess200Response",
+            '200': "WebhookAppPortalAccess",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -333,7 +333,7 @@ class WebhooksApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> WebhookControllerGetInitializationStatus200Response:
+    ) -> WebhookInitializationStatus:
         """Get webhook initialization status for an organization
 
 
@@ -373,7 +373,8 @@ class WebhooksApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "WebhookControllerGetInitializationStatus200Response",
+            '200': "WebhookInitializationStatus",
+            '404': None,
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -403,7 +404,7 @@ class WebhooksApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[WebhookControllerGetInitializationStatus200Response]:
+    ) -> ApiResponse[WebhookInitializationStatus]:
         """Get webhook initialization status for an organization
 
 
@@ -443,7 +444,8 @@ class WebhooksApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "WebhookControllerGetInitializationStatus200Response",
+            '200': "WebhookInitializationStatus",
+            '404': None,
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -513,7 +515,8 @@ class WebhooksApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "WebhookControllerGetInitializationStatus200Response",
+            '200': "WebhookInitializationStatus",
+            '404': None,
         }
         response_data = self.api_client.call_api(
             *_param,

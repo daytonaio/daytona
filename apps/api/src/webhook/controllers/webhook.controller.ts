@@ -17,6 +17,8 @@ import { Audit, TypedRequest } from '../../audit/decorators/audit.decorator'
 import { AuditAction } from '../../audit/enums/audit-action.enum'
 import { AuditTarget } from '../../audit/enums/audit-target.enum'
 import { OrganizationService } from '../../organization/services/organization.service'
+import { WebhookAppPortalAccessDto } from '../dto/webhook-app-portal-access.dto'
+import { WebhookInitializationStatusDto } from '../dto/webhook-initialization-status.dto'
 
 @ApiTags('webhooks')
 @Controller('webhooks')
@@ -33,20 +35,15 @@ export class WebhookController {
   @ApiOperation({ summary: 'Get Svix Consumer App Portal access URL for an organization' })
   @ApiResponse({
     status: HttpStatus.OK,
-    description: 'App Portal access URL generated successfully',
-    schema: {
-      type: 'object',
-      properties: {
-        url: { type: 'string', description: 'App Portal access URL' },
-      },
-    },
+    description: 'App Portal access generated successfully',
+    type: WebhookAppPortalAccessDto,
   })
   @Audit({
     action: AuditAction.GET_WEBHOOK_APP_PORTAL_ACCESS,
     targetType: AuditTarget.ORGANIZATION,
     targetIdFromRequest: (req) => req.params.organizationId,
   })
-  async getAppPortalAccess(@Param('organizationId') organizationId: string): Promise<{ url: string }> {
+  async getAppPortalAccess(@Param('organizationId') organizationId: string): Promise<WebhookAppPortalAccessDto> {
     const url = await this.webhookService.getAppPortalAccessUrl(organizationId)
     return { url }
   }
@@ -121,21 +118,20 @@ export class WebhookController {
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'Webhook initialization status',
-    schema: {
-      type: 'object',
-      properties: {
-        organizationId: { type: 'string' },
-        endpointsCreated: { type: 'boolean' },
-        svixApplicationCreated: { type: 'boolean' },
-        lastError: { type: 'string', nullable: true },
-        retryCount: { type: 'number' },
-        createdAt: { type: 'string' },
-        updatedAt: { type: 'string' },
-      },
-    },
+    type: WebhookInitializationStatusDto,
   })
-  async getInitializationStatus(@Param('organizationId') organizationId: string): Promise<any> {
-    return this.webhookService.getInitializationStatus(organizationId)
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'Webhook initialization status not found',
+  })
+  async getInitializationStatus(
+    @Param('organizationId') organizationId: string,
+  ): Promise<WebhookInitializationStatusDto> {
+    const status = await this.webhookService.getInitializationStatus(organizationId)
+    if (!status) {
+      throw new NotFoundException('Webhook initialization status not found')
+    }
+    return WebhookInitializationStatusDto.fromWebhookInitialization(status)
   }
 
   @Post('organizations/:organizationId/initialize')
@@ -153,6 +149,11 @@ export class WebhookController {
     description: 'Organization not found',
   })
   @RequiredSystemRole(SystemRole.ADMIN)
+  @Audit({
+    action: AuditAction.INITIALIZE_WEBHOOKS,
+    targetType: AuditTarget.ORGANIZATION,
+    targetIdFromRequest: (req) => req.params.organizationId,
+  })
   async initializeWebhooks(@Param('organizationId') organizationId: string): Promise<void> {
     const organization = await this.organizationService.findOne(organizationId)
     if (!organization) {

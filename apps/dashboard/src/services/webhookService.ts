@@ -5,22 +5,7 @@
 
 import { useAuth } from 'react-oidc-context'
 import { useCallback } from 'react'
-
-export interface WebhookInitializationStatus {
-  organizationId: string
-  endpointsCreated: boolean
-  svixApplicationCreated: boolean
-  endpointIds: string[]
-  svixApplicationId?: string
-  lastError?: string
-  retryCount: number
-  createdAt: string
-  updatedAt: string
-}
-
-export interface AppPortalAccessResponse {
-  url: string
-}
+import { WebhookInitializationStatus } from '@daytonaio/api-client'
 
 export function useWebhookService() {
   const { user } = useAuth()
@@ -39,7 +24,7 @@ export function useWebhookService() {
         })
 
         if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`)
+          return null
         }
 
         return await response.json()
@@ -64,7 +49,7 @@ export function useWebhookService() {
         })
 
         if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`)
+          return null
         }
 
         const data = await response.json()
@@ -80,7 +65,7 @@ export function useWebhookService() {
   const isWebhookInitialized = useCallback(
     async (organizationId: string): Promise<boolean> => {
       const status = await getInitializationStatus(organizationId)
-      return status?.endpointsCreated === true && status?.svixApplicationCreated === true
+      return status !== null && status.svixApplicationId !== null
     },
     [getInitializationStatus],
   )
