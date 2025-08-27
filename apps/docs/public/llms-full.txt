@@ -1,5 +1,5 @@
 # Daytona Documentation v0.0.0-dev
-# Generated on: 2025-08-19
+# Generated on: 2025-08-27
 
 
 title: API Keys
@@ -21,10 +21,10 @@ When adding a new API Key you will be prompted to select a set of permissions fo
 | **`Registries`** | Grants the ability to create and manage Registries |
 | **`Volumes`** | Grants the ability to create and manage Volumes |
 
-Each permission includes fine-grained scopes:  
+Each permission includes fine-grained scopes:
 
-- `write:*` for creating and updating  
-- `delete:*` for deleting resources  
+- `write:*` for creating and updating
+- `delete:*` for deleting resources
 
 Example: `write:sandboxes`, `delete:sandboxes`
 
@@ -259,6 +259,70 @@ The SDK uses the following precedence order for configuration (highest to lowest
 3. Configuration file.
 4. Default values.
 
+title: Custom Preview Proxy
+description: Customize the preview proxy with your own domain and logic.
+
+Daytona allows you to deploy your own custom preview proxy to handle preview URLs for sandboxes. This gives you complete control over the preview experience, including custom domains, authentication, error handling, and styling.
+
+**What you can do with a custom preview proxy:**
+
+- **Custom Domain:** Host your proxy under your own domain (e.g., `preview.yourcompany.com`)
+- **User Authentication:** Implement custom authentication logic for private previews
+- **Smart Sandbox Management:** Automatically start stopped sandboxes before forwarding users
+- **Custom Error Pages:** Style error pages to match your brand
+- **Preview Warning Control:** Disable Daytona's preview warning
+- **CORS Management:** Override Daytona's default CORS settings
+
+
+## How It Works
+
+When a user visits a preview URL, your custom proxy receives the request and can:
+
+1. **Authenticate the user** using custom logic
+2. **Check sandbox status** and start it if needed
+3. **Forward the request** to the actual sandbox
+4. **Handle responses** with custom styling and error pages
+5. **Send custom headers** to control Daytona's behavior
+
+
+## Daytona Headers
+
+Your proxy can send special headers to control Daytona's behavior:
+
+#### Disable Preview Warning
+
+To disable Daytona's preview warning page, send:
+
+```
+X-Daytona-Skip-Preview-Warning: true
+```
+
+#### Disable CORS
+
+To override Daytona's default CORS settings, send:
+
+```
+X-Daytona-Disable-CORS: true
+```
+
+#### Authentication
+
+For private preview links, users should send:
+
+```
+X-Daytona-Preview-Token: {sandboxToken}
+```
+
+The `sandboxToken` can be fetched through the [Daytona SDK or API](/docs/en/preview-and-authentication).
+
+
+## Examples
+
+You can find examples of custom preview proxies on our [Github](https://github.com/daytonaio/daytona-proxy-samples):
+
+- [Typescript Example](https://github.com/daytonaio/daytona-proxy-samples/tree/main/typescript)
+- [Golang Example](https://github.com/daytonaio/daytona-proxy-samples/tree/main/go)
+
 title: Analyze Data with AI
 description: Use Daytona to run AI-generated code for data analysis and visualization.
 
@@ -287,8 +351,9 @@ This example shows how to build an AI-powered data analyst that automatically ge
 
 Install the Daytona SDK and Anthropic SDK to your project:
 
-    ```bash pip install daytona anthropic python-dotenv ```
-    ```bash npm install @daytonaio/sdk @anthropic-ai/sdk dotenv ```
+    `bash pip install daytona anthropic python-dotenv `
+
+    `bash npm install @daytonaio/sdk @anthropic-ai/sdk dotenv `
 
 #### 1.2 Configure Environment
 
@@ -318,35 +383,35 @@ Download the file and save it as `dataset.csv` in your project directory.
 
 Now create a Daytona sandbox and upload your dataset:
 
-```python
-from dotenv import load_dotenv
-from daytona import Daytona
-import os
+    ```python
+    from dotenv import load_dotenv
+    from daytona import Daytona
+    import os
 
-load_dotenv()
+    load_dotenv()
 
-# Create sandbox
+    # Create sandbox
 
-daytona = Daytona()
-sandbox = daytona.create()
+    daytona = Daytona()
+    sandbox = daytona.create()
 
-# Upload the dataset to the sandbox
+    # Upload the dataset to the sandbox
 
-sandbox.fs.upload_file("dataset.csv", "/home/daytona/dataset.csv")
+    sandbox.fs.upload_file("dataset.csv", "/home/daytona/dataset.csv")
 
-````
-```typescript
-import 'dotenv/config'
-import { Daytona } from '@daytonaio/sdk';
+    ```
 
-// Create sandbox
-const daytona = new Daytona();
-const sandbox = await daytona.create()
+    ```typescript
+    import 'dotenv/config'
+    import { Daytona } from '@daytonaio/sdk';
 
-// Upload the dataset to the sandbox
-await sandbox.fs.uploadFile('dataset.csv', '/home/daytona/dataset.csv')
-````
+    // Create sandbox
+    const daytona = new Daytona();
+    const sandbox = await daytona.create()
 
+    // Upload the dataset to the sandbox
+    await sandbox.fs.uploadFile('dataset.csv', '/home/daytona/dataset.csv')
+    ```
 
 ### 3. Building the AI Data Analyst
 
@@ -356,61 +421,61 @@ Now we'll create the core functionality that connects Claude with Daytona to ana
 
 First, let's create a function to handle code execution and chart extraction:
 
-```python
-import base64
+    ```python
+    import base64
 
-def run_ai_generated_code(sandbox, ai_generated_code):
-  execution = sandbox.process.code_run(ai_generated_code)
-  if execution.exit_code != 0:
-    print('AI-generated code had an error.')
-    print(execution.exit_code)
-    print(execution.result)
-    return
+    def run_ai_generated_code(sandbox, ai_generated_code):
+      execution = sandbox.process.code_run(ai_generated_code)
+      if execution.exit_code != 0:
+        print('AI-generated code had an error.')
+        print(execution.exit_code)
+        print(execution.result)
+        return
 
-  # Check for charts in execution artifacts
-  if not execution.artifacts or not execution.artifacts.charts:
-    print('No charts found in execution artifacts')
-    return
+      # Check for charts in execution artifacts
+      if not execution.artifacts or not execution.artifacts.charts:
+        print('No charts found in execution artifacts')
+        return
 
-  result_idx = 0
-  for result in execution.artifacts.charts:
-    if result.png: # Save the png to a file (png is in base64 format)
-      with open(f'chart-{result_idx}.png', 'wb') as f:
-        f.write(base64.b64decode(result.png))
-        print(f'Chart saved to chart-{result_idx}.png')
-        result_idx += 1
+      result_idx = 0
+      for result in execution.artifacts.charts:
+        if result.png: # Save the png to a file (png is in base64 format)
+          with open(f'chart-{result_idx}.png', 'wb') as f:
+            f.write(base64.b64decode(result.png))
+            print(f'Chart saved to chart-{result_idx}.png')
+            result_idx += 1
 
-````
-```typescript
-import fs from 'fs'
+    ```
 
-async function runAIGeneratedCode(sandbox, aiGeneratedCode: string) {
-  const execution = await sandbox.process.codeRun(aiGeneratedCode)
-  if (execution.exitCode != 0) {
-    console.error('AI-generated code had an error.')
-    console.log(execution.exitCode)
-    console.log(execution.result)
-    return
-  }
+    ```typescript
+    import fs from 'fs'
 
-  // Check for charts in execution artifacts
-  if (!execution.artifacts || !execution.artifacts.charts) {
-    console.log('No charts found in execution artifacts')
-    return
-  }
+    async function runAIGeneratedCode(sandbox, aiGeneratedCode: string) {
+      const execution = await sandbox.process.codeRun(aiGeneratedCode)
+      if (execution.exitCode != 0) {
+        console.error('AI-generated code had an error.')
+        console.log(execution.exitCode)
+        console.log(execution.result)
+        return
+      }
 
-  let resultIdx = 0
-  for (const result of execution.artifacts.charts) {
-    if (result.png) {
-      // Save the png to a file (png is in base64 format)
-      fs.writeFileSync(`chart-${resultIdx}.png`, result.png, { encoding: 'base64' })
-      console.log(`Chart saved to chart-${resultIdx}.png`)
-      resultIdx++
+      // Check for charts in execution artifacts
+      if (!execution.artifacts || !execution.artifacts.charts) {
+        console.log('No charts found in execution artifacts')
+        return
+      }
+
+      let resultIdx = 0
+      for (const result of execution.artifacts.charts) {
+        if (result.png) {
+          // Save the png to a file (png is in base64 format)
+          fs.writeFileSync(`chart-${resultIdx}.png`, result.png, { encoding: 'base64' })
+          console.log(`Chart saved to chart-${resultIdx}.png`)
+          resultIdx++
+        }
+      }
     }
-  }
-}
-````
-
+    ```
 
 #### 3.2 Creating the Analysis Prompt
 
@@ -420,193 +485,52 @@ Next, we'll create the prompt that tells Claude about our dataset and what analy
 - The specific analysis request (vote average trends over time)
 - Instructions for code generation
 
-```python
-from anthropic import Anthropic
+    ```python
+    from anthropic import Anthropic
 
-prompt = f"""
-I have a CSV file with vehicle valuations saved in the sandbox at /home/daytona/dataset.csv.
+    prompt = f"""
+    I have a CSV file with vehicle valuations saved in the sandbox at /home/daytona/dataset.csv.
 
-Relevant columns:
-- 'year': integer, the manufacturing year of the vehicle
-- 'price_in_euro': float, the listed price of the vehicle in Euros
+    Relevant columns:
+    - 'year': integer, the manufacturing year of the vehicle
+    - 'price_in_euro': float, the listed price of the vehicle in Euros
 
-Analyze how price varies by manufacturing year.  
-Drop rows where 'year' or 'price_in_euro' is missing, non-numeric, or an outlier.  
-Create a line chart showing average price per year.
-Write Python code that analyzes the dataset based on my request and produces right chart accordingly.
-Finish with a plt.show()"""
+    Analyze how price varies by manufacturing year.  
+    Drop rows where 'year' or 'price_in_euro' is missing, non-numeric, or an outlier.  
+    Create a line chart showing average price per year.
+    Write Python code that analyzes the dataset based on my request and produces right chart accordingly.
+    Finish with a plt.show()"""
 
-anthropic = Anthropic()
-print('Waiting for the model response...')
+    anthropic = Anthropic()
+    print('Waiting for the model response...')
 
-````
-```typescript
-import Anthropic from '@anthropic-ai/sdk'
+    ```
 
-const prompt = `
-I have a CSV file with vehicle valuations saved in the sandbox at /home/daytona/dataset.csv.
+    ```typescript
+    import Anthropic from '@anthropic-ai/sdk'
 
-Relevant columns:
-- 'year': integer, the manufacturing year of the vehicle
-- 'price_in_euro': float, the listed price of the vehicle in Euros
+    const prompt = `
+    I have a CSV file with vehicle valuations saved in the sandbox at /home/daytona/dataset.csv.
 
-Analyze how price varies by manufacturing year.  
-Drop rows where 'year' or 'price_in_euro' is missing, non-numeric, or an outlier.  
-Create a line chart showing average price per year.
-Write Python code that analyzes the dataset based on my request and produces right chart accordingly.
-Finish with a plt.show()`
+    Relevant columns:
+    - 'year': integer, the manufacturing year of the vehicle
+    - 'price_in_euro': float, the listed price of the vehicle in Euros
 
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
-console.log('Waiting for the model response...')
-````
+    Analyze how price varies by manufacturing year.  
+    Drop rows where 'year' or 'price_in_euro' is missing, non-numeric, or an outlier.  
+    Create a line chart showing average price per year.
+    Write Python code that analyzes the dataset based on my request and produces right chart accordingly.
+    Finish with a plt.show()`
 
+    const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+    console.log('Waiting for the model response...')
+    ```
 
 #### 3.3 Tool Calling Setup
 
 Now we'll connect Claude to our Daytona sandbox using tool calling. This allows Claude to automatically execute the Python code it generates:
 
-```python
-msg = anthropic.messages.create(
-    model='claude-3-5-sonnet-20240620',
-    max_tokens=1024,
-    messages=[{'role': 'user', 'content': prompt}],
-    tools=[
-        {
-            'name': 'run_python_code',
-            'description': 'Run Python code',
-            'input_schema': {
-                'type': 'object',
-                'properties': {
-                    'code': {
-                        'type': 'string',
-                        'description': 'The Python code to run',
-                    },
-                },
-                'required': ['code'],
-            },
-        },
-    ],
-)
-```
-```typescript
-const msg = await anthropic.messages.create({
-  model: 'claude-3-5-sonnet-20240620',
-  max_tokens: 1024,
-  messages: [{ role: 'user', content: prompt }],
-  tools: [
-    {
-      name: 'run_python_code',
-      description: 'Run Python code',
-      input_schema: {
-        type: 'object',
-        properties: {
-          code: {
-            type: 'string',
-            description: 'The Python code to run',
-          },
-        },
-        required: ['code'],
-      },
-    },
-  ],
-})
-```
-
-#### 3.4 Response Processing
-
-Finally, we'll parse Claude's response and execute any generated code in our Daytona sandbox:
-
-```python
-for content_block in msg.content:
-    if content_block.type == 'tool_use':
-        if content_block.name == 'run_python_code':
-            code = content_block.input['code']
-            print('Will run following code in the Sandbox:\n', code)
-            # Execute the code in the sandbox
-            run_ai_generated_code(sandbox, code)
-```
-```typescript
-interface CodeRunToolInput {
-  code: string
-}
-
-for (const contentBlock of msg.content) {
-  if (contentBlock.type === 'tool_use') {
-    if (contentBlock.name === 'run_python_code') {
-      const code = (contentBlock.input as CodeRunToolInput).code
-      console.log('Will run following code in the Sandbox:\n', code)
-      // Execute the code in the sandbox
-      await runAIGeneratedCode(sandbox, code)
-    }
-  }
-}
-
-````
-
-That's it! The `run_ai_generated_code` function we created automatically handles saving charts. When Claude generates a visualization with `plt.show()`, Daytona captures it as a chart artifact and saves it as a PNG file.
-
-**Key advantages of this approach:**
-- **Secure execution:** Code runs in isolated Daytona sandboxes
-- **Automatic artifact capture:** Charts, tables, and outputs are automatically extracted
-- **Error handling:** Built-in error detection and logging
-- **Language agnostic:** While we used Python here, Daytona supports multiple languages
-
-### 4. Running Your Analysis
-
-Now you can run the complete code to see the results.
-
-```bash
-python data-analysis.py
-````
-
-```bash
-npx tsx data-analysis.ts
-```
-
-You should see the chart in your project directory that will look similar to this:
-
-<Image
-  src={chartImage}
-  alt="Vehicle valuation by manufacturing year chart"
-  width={600}
-  style="max-width: 100%; height: auto; margin: 1rem 0;"
-/>
-
-### 5. Complete Implementation
-
-Here are the complete, ready-to-run examples:
-
-```python
-import base64
-from dotenv import load_dotenv
-from daytona import Daytona, Sandbox
-from anthropic import Anthropic
-
-
-def main():
-    load_dotenv()
-    # Create sandbox
-    daytona = Daytona()
-    sandbox = daytona.create()
-    
-    # Upload the dataset to the sandbox
-    sandbox.fs.upload_file("dataset.csv", "/home/daytona/dataset.csv")
-    
-    prompt = f"""
-I have a CSV file with vehicle valuations saved in the sandbox at /home/daytona/dataset.csv.
-
-Relevant columns:
-- 'year': integer, the manufacturing year of the vehicle
-- 'price_in_euro': float, the listed price of the vehicle in Euros
-
-Analyze how price varies by manufacturing year.  
-Drop rows where 'year' or 'price_in_euro' is missing, non-numeric, or an outlier.  
-Create a line chart showing average price per year.
-Write Python code that analyzes the dataset based on my request and produces right chart accordingly.
-Finish with a plt.show()"""
-
-    anthropic = Anthropic()
-    print('Waiting for the model response...')
+    ```python
     msg = anthropic.messages.create(
         model='claude-3-5-sonnet-20240620',
         max_tokens=1024,
@@ -628,7 +552,37 @@ Finish with a plt.show()"""
             },
         ],
     )
+    ```
 
+    ```typescript
+    const msg = await anthropic.messages.create({
+      model: 'claude-3-5-sonnet-20240620',
+      max_tokens: 1024,
+      messages: [{ role: 'user', content: prompt }],
+      tools: [
+        {
+          name: 'run_python_code',
+          description: 'Run Python code',
+          input_schema: {
+            type: 'object',
+            properties: {
+              code: {
+                type: 'string',
+                description: 'The Python code to run',
+              },
+            },
+            required: ['code'],
+          },
+        },
+      ],
+    })
+    ```
+
+#### 3.4 Response Processing
+
+Finally, we'll parse Claude's response and execute any generated code in our Daytona sandbox:
+
+    ```python
     for content_block in msg.content:
         if content_block.type == 'tool_use':
             if content_block.name == 'run_python_code':
@@ -636,133 +590,243 @@ Finish with a plt.show()"""
                 print('Will run following code in the Sandbox:\n', code)
                 # Execute the code in the sandbox
                 run_ai_generated_code(sandbox, code)
+    ```
 
+    ```typescript
+    interface CodeRunToolInput {
+      code: string
+    }
 
-def run_ai_generated_code(sandbox: Sandbox, ai_generated_code: str):
-    execution = sandbox.process.code_run(ai_generated_code)
-    if execution.exit_code != 0:
-        print('AI-generated code had an error.')
-        print(execution.exit_code)
-        print(execution.result)
-        return
-    
-    # Iterate over all the results and specifically check for png files that will represent the chart.
-    if not execution.artifacts or not execution.artifacts.charts:
-        print('No charts found in execution artifacts')
-        print(execution.artifacts)
-        return
-
-    result_idx = 0
-    for result in execution.artifacts.charts:
-        if result.png:
-            # Save the png to a file
-            # The png is in base64 format.
-            with open(f'chart-{result_idx}.png', 'wb') as f:
-                f.write(base64.b64decode(result.png))
-            print(f'Chart saved to chart-{result_idx}.png')
-            result_idx += 1
-
-
-if __name__ == "__main__":
-    main()
-````
-```typescript
-import 'dotenv/config'
-import fs from 'fs'
-import Anthropic from '@anthropic-ai/sdk'
-import { Daytona, Sandbox } from '@daytonaio/sdk';
-
-
-async function main() {
-  // Create sandbox
-  const daytona = new Daytona();
-  const sandbox = await daytona.create()
-
-  // Upload the dataset to the sandbox
-  await sandbox.fs.uploadFile('dataset.csv', '/home/daytona/dataset.csv')
-
-  const prompt = `
-I have a CSV file with vehicle valuations saved in the sandbox at /home/daytona/dataset.csv.
-
-Relevant columns:
-- 'year': integer, the manufacturing year of the vehicle
-- 'price_in_euro': float, the listed price of the vehicle in Euros
-
-Analyze how price varies by manufacturing year.  
-Drop rows where 'year' or 'price_in_euro' is missing, non-numeric, or an outlier.  
-Create a line chart showing average price per year.
-Write Python code that analyzes the dataset based on my request and produces right chart accordingly.
-Finish with a plt.show()`
-
-  const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
-  console.log('Waiting for the model response...')
-  const msg = await anthropic.messages.create({
-    model: 'claude-3-5-sonnet-20240620',
-    max_tokens: 1024,
-    messages: [{ role: 'user', content: prompt }],
-    tools: [
-      {
-        name: 'run_python_code',
-        description: 'Run Python code',
-        input_schema: {
-          type: 'object',
-          properties: {
-            code: {
-              type: 'string',
-              description: 'The Python code to run',
-            },
-          },
-          required: ['code'],
-        },
-      },
-    ],
-  })
-
-  interface CodeRunToolInput {
-    code: string
-  }
-
-  for (const contentBlock of msg.content) {
-    if (contentBlock.type === 'tool_use') {
-      if (contentBlock.name === 'run_python_code') {
-        const code = (contentBlock.input as CodeRunToolInput).code
-        console.log('Will run following code in the Sandbox:\n', code)
-        // Execute the code in the sandbox
-        await runAIGeneratedCode(sandbox, code)
+    for (const contentBlock of msg.content) {
+      if (contentBlock.type === 'tool_use') {
+        if (contentBlock.name === 'run_python_code') {
+          const code = (contentBlock.input as CodeRunToolInput).code
+          console.log('Will run following code in the Sandbox:\n', code)
+          // Execute the code in the sandbox
+          await runAIGeneratedCode(sandbox, code)
+        }
       }
     }
-  }
-}
 
-async function runAIGeneratedCode(sandbox: Sandbox, aiGeneratedCode: string) {
-  const execution = await sandbox.process.codeRun(aiGeneratedCode)
-  if (execution.exitCode != 0) {
-    console.error('AI-generated code had an error.')
-    console.log(execution.exitCode)
-    console.log(execution.result)
-    process.exit(1)
-  }
-  // Iterate over all the results and specifically check for png files that will represent the chart.
-  if (!execution.artifacts || !execution.artifacts.charts) {
-    console.log('No charts found in execution artifacts')
-    console.log(execution.artifacts)
-    return
-  }
+    ```
 
-  let resultIdx = 0
-  for (const result of execution.artifacts.charts) {
-    if (result.png) {
-      // Save the png to a file
-      // The png is in base64 format.
-      fs.writeFileSync(`chart-${resultIdx}.png`, result.png, { encoding: 'base64' })
-      console.log(`Chart saved to chart-${resultIdx}.png`)
-      resultIdx++
+That's it! The `run_ai_generated_code` function we created automatically handles saving charts. When Claude generates a visualization with `plt.show()`, Daytona captures it as a chart artifact and saves it as a PNG file.
+
+**Key advantages of this approach:**
+
+- **Secure execution:** Code runs in isolated Daytona sandboxes
+- **Automatic artifact capture:** Charts, tables, and outputs are automatically extracted
+- **Error handling:** Built-in error detection and logging
+- **Language agnostic:** While we used Python here, Daytona supports multiple languages
+
+### 4. Running Your Analysis
+
+Now you can run the complete code to see the results.
+
+    ```bash
+    python data-analysis.py
+    ```
+
+    ```bash
+    npx tsx data-analysis.ts
+    ```
+
+You should see the chart in your project directory that will look similar to this:
+
+<Image src={chartImage} alt="Vehicle valuation by manufacturing year chart" width={600} style="max-width: 100%; height: auto; margin: 1rem 0;" />
+
+### 5. Complete Implementation
+
+Here are the complete, ready-to-run examples:
+
+    ```python
+    import base64
+    from dotenv import load_dotenv
+    from daytona import Daytona, Sandbox
+    from anthropic import Anthropic
+
+
+    def main():
+        load_dotenv()
+        # Create sandbox
+        daytona = Daytona()
+        sandbox = daytona.create()
+        
+        # Upload the dataset to the sandbox
+        sandbox.fs.upload_file("dataset.csv", "/home/daytona/dataset.csv")
+        
+        prompt = f"""
+    I have a CSV file with vehicle valuations saved in the sandbox at /home/daytona/dataset.csv.
+
+    Relevant columns:
+    - 'year': integer, the manufacturing year of the vehicle
+    - 'price_in_euro': float, the listed price of the vehicle in Euros
+
+    Analyze how price varies by manufacturing year.  
+    Drop rows where 'year' or 'price_in_euro' is missing, non-numeric, or an outlier.  
+    Create a line chart showing average price per year.
+    Write Python code that analyzes the dataset based on my request and produces right chart accordingly.
+    Finish with a plt.show()"""
+
+        anthropic = Anthropic()
+        print('Waiting for the model response...')
+        msg = anthropic.messages.create(
+            model='claude-3-5-sonnet-20240620',
+            max_tokens=1024,
+            messages=[{'role': 'user', 'content': prompt}],
+            tools=[
+                {
+                    'name': 'run_python_code',
+                    'description': 'Run Python code',
+                    'input_schema': {
+                        'type': 'object',
+                        'properties': {
+                            'code': {
+                                'type': 'string',
+                                'description': 'The Python code to run',
+                            },
+                        },
+                        'required': ['code'],
+                    },
+                },
+            ],
+        )
+
+        for content_block in msg.content:
+            if content_block.type == 'tool_use':
+                if content_block.name == 'run_python_code':
+                    code = content_block.input['code']
+                    print('Will run following code in the Sandbox:\n', code)
+                    # Execute the code in the sandbox
+                    run_ai_generated_code(sandbox, code)
+
+
+    def run_ai_generated_code(sandbox: Sandbox, ai_generated_code: str):
+        execution = sandbox.process.code_run(ai_generated_code)
+        if execution.exit_code != 0:
+            print('AI-generated code had an error.')
+            print(execution.exit_code)
+            print(execution.result)
+            return
+        
+        # Iterate over all the results and specifically check for png files that will represent the chart.
+        if not execution.artifacts or not execution.artifacts.charts:
+            print('No charts found in execution artifacts')
+            print(execution.artifacts)
+            return
+
+        result_idx = 0
+        for result in execution.artifacts.charts:
+            if result.png:
+                # Save the png to a file
+                # The png is in base64 format.
+                with open(f'chart-{result_idx}.png', 'wb') as f:
+                    f.write(base64.b64decode(result.png))
+                print(f'Chart saved to chart-{result_idx}.png')
+                result_idx += 1
+
+
+    if __name__ == "__main__":
+        main()
+    ```
+
+    ```typescript
+    import 'dotenv/config'
+    import fs from 'fs'
+    import Anthropic from '@anthropic-ai/sdk'
+    import { Daytona, Sandbox } from '@daytonaio/sdk';
+
+
+    async function main() {
+      // Create sandbox
+      const daytona = new Daytona();
+      const sandbox = await daytona.create()
+
+      // Upload the dataset to the sandbox
+      await sandbox.fs.uploadFile('dataset.csv', '/home/daytona/dataset.csv')
+
+      const prompt = `
+    I have a CSV file with vehicle valuations saved in the sandbox at /home/daytona/dataset.csv.
+
+    Relevant columns:
+    - 'year': integer, the manufacturing year of the vehicle
+    - 'price_in_euro': float, the listed price of the vehicle in Euros
+
+    Analyze how price varies by manufacturing year.  
+    Drop rows where 'year' or 'price_in_euro' is missing, non-numeric, or an outlier.  
+    Create a line chart showing average price per year.
+    Write Python code that analyzes the dataset based on my request and produces right chart accordingly.
+    Finish with a plt.show()`
+
+      const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+      console.log('Waiting for the model response...')
+      const msg = await anthropic.messages.create({
+        model: 'claude-3-5-sonnet-20240620',
+        max_tokens: 1024,
+        messages: [{ role: 'user', content: prompt }],
+        tools: [
+          {
+            name: 'run_python_code',
+            description: 'Run Python code',
+            input_schema: {
+              type: 'object',
+              properties: {
+                code: {
+                  type: 'string',
+                  description: 'The Python code to run',
+                },
+              },
+              required: ['code'],
+            },
+          },
+        ],
+      })
+
+      interface CodeRunToolInput {
+        code: string
+      }
+
+      for (const contentBlock of msg.content) {
+        if (contentBlock.type === 'tool_use') {
+          if (contentBlock.name === 'run_python_code') {
+            const code = (contentBlock.input as CodeRunToolInput).code
+            console.log('Will run following code in the Sandbox:\n', code)
+            // Execute the code in the sandbox
+            await runAIGeneratedCode(sandbox, code)
+          }
+        }
+      }
     }
-  }
-}
 
-main().catch(console.error);
-````
+    async function runAIGeneratedCode(sandbox: Sandbox, aiGeneratedCode: string) {
+      const execution = await sandbox.process.codeRun(aiGeneratedCode)
+      if (execution.exitCode != 0) {
+        console.error('AI-generated code had an error.')
+        console.log(execution.exitCode)
+        console.log(execution.result)
+        process.exit(1)
+      }
+      // Iterate over all the results and specifically check for png files that will represent the chart.
+      if (!execution.artifacts || !execution.artifacts.charts) {
+        console.log('No charts found in execution artifacts')
+        console.log(execution.artifacts)
+        return
+      }
+
+      let resultIdx = 0
+      for (const result of execution.artifacts.charts) {
+        if (result.png) {
+          // Save the png to a file
+          // The png is in base64 format.
+          fs.writeFileSync(`chart-${resultIdx}.png`, result.png, { encoding: 'base64' })
+          console.log(`Chart saved to chart-${resultIdx}.png`)
+          resultIdx++
+        }
+      }
+    }
+
+    main().catch(console.error);
+    ```
 
 title: Declarative Builder
 
@@ -812,51 +876,51 @@ You can either define an entirely new image or append some specific dependencies
 This eliminates the need to use your own compute for the build process and you can instead offload it to Daytona's infrastructure.
 It doesn't require registering and validating a separate Snapshot for each version. Instead, it allows you to iterate on the dependency list quickly or to have slightly different versions for tens or hundreds of similar usecases/setups.
 
-```python
-# Define the dynamic image
-dynamic_image = (
-    Image.debian_slim("3.12")
-    .pip_install(["pytest", "pytest-cov", "mypy", "ruff", "black", "gunicorn"])
-    .run_commands("apt-get update && apt-get install -y git curl", "mkdir -p /home/daytona/project")
-    .workdir("/home/daytona/project")
-    .env({"ENV_VAR": "My Environment Variable"})
-    .add_local_file("file_example.txt", "/home/daytona/project/file_example.txt")
-)
+    ```python
+    # Define the dynamic image
+    dynamic_image = (
+        Image.debian_slim("3.12")
+        .pip_install(["pytest", "pytest-cov", "mypy", "ruff", "black", "gunicorn"])
+        .run_commands("apt-get update && apt-get install -y git curl", "mkdir -p /home/daytona/project")
+        .workdir("/home/daytona/project")
+        .env({"ENV_VAR": "My Environment Variable"})
+        .add_local_file("file_example.txt", "/home/daytona/project/file_example.txt")
+    )
 
-# Create a new Sandbox with the dynamic image and stream the build logs
+    # Create a new Sandbox with the dynamic image and stream the build logs
 
-sandbox = daytona.create(
-    CreateSandboxFromImageParams(
-        image=dynamic_image,
-    ),
-    timeout=0,
-    on_snapshot_create_logs=print,
-)
+    sandbox = daytona.create(
+        CreateSandboxFromImageParams(
+            image=dynamic_image,
+        ),
+        timeout=0,
+        on_snapshot_create_logs=print,
+    )
 
-```
-```typescript
-// Define the dynamic image
-const dynamicImage = Image.debianSlim('3.13')
-    .pipInstall(['pytest', 'pytest-cov', 'black', 'isort', 'mypy', 'ruff'])
-    .runCommands('apt-get update && apt-get install -y git', 'mkdir -p /home/daytona/project')
-    .workdir('/home/daytona/project')
-    .env({
-      NODE_ENV: 'development',
-    })
-    .addLocalFile('file_example.txt', '/home/daytona/project/file_example.txt')
+    ```
 
-// Create a new Sandbox with the dynamic image and stream the build logs
-const sandbox = await daytona.create(
-  {
-    image: dynamicImage,
-  },
-  {
-    timeout: 0,
-    onSnapshotCreateLogs: console.log,
-  }
-)
-```
+    ```typescript
+    // Define the dynamic image
+    const dynamicImage = Image.debianSlim('3.13')
+        .pipInstall(['pytest', 'pytest-cov', 'black', 'isort', 'mypy', 'ruff'])
+        .runCommands('apt-get update && apt-get install -y git', 'mkdir -p /home/daytona/project')
+        .workdir('/home/daytona/project')
+        .env({
+          NODE_ENV: 'development',
+        })
+        .addLocalFile('file_example.txt', '/home/daytona/project/file_example.txt')
 
+    // Create a new Sandbox with the dynamic image and stream the build logs
+    const sandbox = await daytona.create(
+      {
+        image: dynamicImage,
+      },
+      {
+        timeout: 0,
+        onSnapshotCreateLogs: console.log,
+      }
+    )
+    ```
 
 :::tip
 Once you've run the Sandbox creation from a dynamic image a single time, the image will get cached for the next 24 hours and any subsequent Sandbox creation that lands on the same Runner will be almost instantaneous.
@@ -870,115 +934,116 @@ If you want to prepare a new Daytona Snapshot with specific dependencies and the
 
 This Snapshot will stay visible in the Daytona dashboard and be permanently cached, ensuring that rebuilding it is not needed.
 
-```python
-# Generate a unique name for the Snapshot
-snapshot_name = f"python-example:{int(time.time())}"
+    ```python
+    # Generate a unique name for the Snapshot
+    snapshot_name = f"python-example:{int(time.time())}"
 
-# Create a local file with some data to add to the image
+    # Create a local file with some data to add to the image
 
-with open("file_example.txt", "w") as f:
-    f.write("Hello, World!")
+    with open("file_example.txt", "w") as f:
+        f.write("Hello, World!")
 
-# Create a Python image with common data science packages
+    # Create a Python image with common data science packages
 
-image = (
-    Image.debian_slim("3.12")
-    .pip_install(["numpy", "pandas", "matplotlib", "scipy", "scikit-learn", "jupyter"])
-    .run_commands(
-        "apt-get update && apt-get install -y git",
-        "groupadd -r daytona && useradd -r -g daytona -m daytona",
-        "mkdir -p /home/daytona/workspace",
+    image = (
+        Image.debian_slim("3.12")
+        .pip_install(["numpy", "pandas", "matplotlib", "scipy", "scikit-learn", "jupyter"])
+        .run_commands(
+            "apt-get update && apt-get install -y git",
+            "groupadd -r daytona && useradd -r -g daytona -m daytona",
+            "mkdir -p /home/daytona/workspace",
+        )
+        .dockerfile_commands(["USER daytona"])
+        .workdir("/home/daytona/workspace")
+        .env({"MY_ENV_VAR": "My Environment Variable"})
+        .add_local_file("file_example.txt", "/home/daytona/workspace/file_example.txt")
     )
-    .dockerfile_commands(["USER daytona"])
-    .workdir("/home/daytona/workspace")
-    .env({"MY_ENV_VAR": "My Environment Variable"})
-    .add_local_file("file_example.txt", "/home/daytona/workspace/file_example.txt")
-)
 
-# Create the Snapshot and stream the build logs
+    # Create the Snapshot and stream the build logs
 
-print(f"=== Creating Snapshot: {snapshot_name} ===")
-daytona.snapshot.create(
-    CreateSnapshotParams(
-        name=snapshot_name,
-        image=image,
-        resources=Resources(
-            cpu=1,
-            memory=1,
-            disk=3,
+    print(f"=== Creating Snapshot: {snapshot_name} ===")
+    daytona.snapshot.create(
+        CreateSnapshotParams(
+            name=snapshot_name,
+            image=image,
+            resources=Resources(
+                cpu=1,
+                memory=1,
+                disk=3,
+            ),
         ),
-    ),
-    on_logs=print,
-)
-
-# Create a new Sandbox using the pre-built Snapshot
-
-sandbox = daytona.create(
-    CreateSandboxFromSnapshotParams(
-        snapshot=snapshot_name
+        on_logs=print,
     )
-)
 
-```
-```typescript
-// Generate a unique name for the image
-const snapshotName = `node-example:${Date.now()}`
-console.log(`Creating Snapshot with name: ${snapshotName}`)
+    # Create a new Sandbox using the pre-built Snapshot
 
-// Create a local file with some data to add to the Snapshot
-const localFilePath = 'file_example.txt'
-const localFileContent = 'Hello, World!'
-fs.writeFileSync(localFilePath, localFileContent)
-
-// Create a Python image with common data science packages
-const image = Image.debianSlim('3.12')
-    .pipInstall(['numpy', 'pandas', 'matplotlib', 'scipy', 'scikit-learn'])
-    .runCommands(
-      'apt-get update && apt-get install -y git',
-      'groupadd -r daytona && useradd -r -g daytona -m daytona',
-      'mkdir -p /home/daytona/workspace'
+    sandbox = daytona.create(
+        CreateSandboxFromSnapshotParams(
+            snapshot=snapshot_name
+        )
     )
-    .dockerfileCommands(['USER daytona'])
-    .workdir('/home/daytona/workspace')
-    .env({
-        MY_ENV_VAR: 'My Environment Variable',
+
+    ```
+
+    ```typescript
+    // Generate a unique name for the image
+    const snapshotName = `node-example:${Date.now()}`
+    console.log(`Creating Snapshot with name: ${snapshotName}`)
+
+    // Create a local file with some data to add to the Snapshot
+    const localFilePath = 'file_example.txt'
+    const localFileContent = 'Hello, World!'
+    fs.writeFileSync(localFilePath, localFileContent)
+
+    // Create a Python image with common data science packages
+    const image = Image.debianSlim('3.12')
+        .pipInstall(['numpy', 'pandas', 'matplotlib', 'scipy', 'scikit-learn'])
+        .runCommands(
+          'apt-get update && apt-get install -y git',
+          'groupadd -r daytona && useradd -r -g daytona -m daytona',
+          'mkdir -p /home/daytona/workspace'
+        )
+        .dockerfileCommands(['USER daytona'])
+        .workdir('/home/daytona/workspace')
+        .env({
+            MY_ENV_VAR: 'My Environment Variable',
+        })
+        .addLocalFile(localFilePath, '/home/daytona/workspace/file_example.txt')
+
+    // Create the Snapshot and stream the build logs
+    console.log(`=== Creating Snapshot: ${snapshotName} ===`)
+    await daytona.snapshot.create(
+        {
+          name: snapshotName,
+          image,
+          resources: {
+            cpu: 1,
+            memory: 1,
+            disk: 3,
+          },
+        },
+        {
+          onLogs: console.log,
+        },
+      )
+
+    // Create a new Sandbox using the pre-built Snapshot
+    const sandbox = await daytona.create({
+        snapshot: snapshotName,
     })
-    .addLocalFile(localFilePath, '/home/daytona/workspace/file_example.txt')
-
-// Create the Snapshot and stream the build logs
-console.log(`=== Creating Snapshot: ${snapshotName} ===`)
-await daytona.snapshot.create(
-    {
-      name: snapshotName,
-      image,
-      resources: {
-        cpu: 1,
-        memory: 1,
-        disk: 3,
-      },
-    },
-    {
-      onLogs: console.log,
-    },
-  )
-
-// Create a new Sandbox using the pre-built Snapshot
-const sandbox = await daytona.create({
-    snapshot: snapshotName,
-})
-```
-
+    ```
 
 ## Using an Existing Dockerfile
 
 If you have an existing Dockerfile that you want to use as the base for your image, you can import it in the following way:
 
-```python
-image = Image.from_dockerfile("app/Dockerfile").pip_install(["numpy"])
-```
-```typescript
-const image = Image.fromDockerfile("app/Dockerfile").pipInstall(['numpy'])
-```
+    ```python
+    image = Image.from_dockerfile("app/Dockerfile").pip_install(["numpy"])
+    ```
+
+    ```typescript
+    const image = Image.fromDockerfile("app/Dockerfile").pipInstall(['numpy'])
+    ```
 
 ## Best Practices
 
@@ -1240,210 +1305,210 @@ For steps on additional configuration, including setting environmnent variables 
 
 Daytona provides official Python and TypeScript SDKs for interacting with the Daytona platform. Install the SDK using your preferred method:
 
-```bash
-pip install daytona
-```
-```bash
-# Using npm
-npm install @daytonaio/sdk
+    ```bash
+    pip install daytona
+    ```
 
-# Using yarn
+    ```bash
+    # Using npm
+    npm install @daytonaio/sdk
 
-yarn add @daytonaio/sdk
+    # Using yarn
 
-# Using pnpm
+    yarn add @daytonaio/sdk
 
-pnpm add @daytonaio/sdk
+    # Using pnpm
 
-```
+    pnpm add @daytonaio/sdk
+
+    ```
 
 ## Run Code Inside a Sandbox
 
 Run the following code to create a Daytona Sandbox and execute commands:
 
-```python
-from daytona import Daytona, DaytonaConfig
+    ```python
+    from daytona import Daytona, DaytonaConfig
 
-# Initialize the Daytona client
-daytona = Daytona(DaytonaConfig(api_key="YOUR_API_KEY"))
+    # Initialize the Daytona client
+    daytona = Daytona(DaytonaConfig(api_key="YOUR_API_KEY"))
 
-# Create the Sandbox instance
-sandbox = daytona.create()
+    # Create the Sandbox instance
+    sandbox = daytona.create()
 
-# Run code securely inside the Sandbox
-response = sandbox.process.code_run('print("Sum of 3 and 4 is " + str(3 + 4))')
-if response.exit_code != 0:
-    print(f"Error running code: {response.exit_code} {response.result}")
-else:
-    print(response.result)
+    # Run code securely inside the Sandbox
+    response = sandbox.process.code_run('print("Sum of 3 and 4 is " + str(3 + 4))')
+    if response.exit_code != 0:
+        print(f"Error running code: {response.exit_code} {response.result}")
+    else:
+        print(response.result)
 
-# Clean up the Sandbox
-sandbox.delete()
-```
+    # Clean up the Sandbox
+    sandbox.delete()
+    ```
 
-```typescript
-import { Daytona } from '@daytonaio/sdk'
+    ```typescript
+    import { Daytona } from '@daytonaio/sdk'
 
-async function main() {
-  // Initialize the Daytona client
-  const daytona = new Daytona({
-    apiKey: 'YOUR_API_KEY',
-  })
+    async function main() {
+      // Initialize the Daytona client
+      const daytona = new Daytona({
+        apiKey: 'YOUR_API_KEY',
+      })
 
-  let sandbox;
-  try {
-    // Create the Sandbox instance
-    sandbox = await daytona.create({
-      language: "python",
-    });
-    // Run code securely inside the Sandbox
-    const response = await sandbox.process.codeRun(
-      'print("Sum of 3 and 4 is " + str(3 + 4))'
-    );
-    if (response.exitCode !== 0) {
-      console.error("Error running code:", response.exitCode, response.result);
-    } else {
-      console.log(response.result);
+      let sandbox;
+      try {
+        // Create the Sandbox instance
+        sandbox = await daytona.create({
+          language: "python",
+        });
+        // Run code securely inside the Sandbox
+        const response = await sandbox.process.codeRun(
+          'print("Sum of 3 and 4 is " + str(3 + 4))'
+        );
+        if (response.exitCode !== 0) {
+          console.error("Error running code:", response.exitCode, response.result);
+        } else {
+          console.log(response.result);
+        }
+      } catch (error) {
+        console.error("Sandbox flow error:", error);
+      } finally {
+        // Clean up the Sandbox
+        if (sandbox) {
+          await sandbox.delete();
+        }
+      }
     }
-  } catch (error) {
-    console.error("Sandbox flow error:", error);
-  } finally {
-    // Clean up the Sandbox
-    if (sandbox) {
-      await sandbox.delete();
-    }
-  }
-}
 
-main().catch(console.error)
+    main().catch(console.error)
 
-```
+    ```
 
-```bash
-python main.py
-```
+    ```bash
+    python main.py
+    ```
 
-```bash
-npx tsx ./index.ts
-```
+    ```bash
+    npx tsx ./index.ts
+    ```
 
 ## Preview Your App
 
 The following snippet uploads a file containing a simple Flask app to a Daytona Sandbox. The web server runs on port `3000` and is accessible through the provided preview URL:
 
-```python
-from daytona import Daytona, DaytonaConfig, SessionExecuteRequest
+    ```python
+    from daytona import Daytona, DaytonaConfig, SessionExecuteRequest
 
-daytona = Daytona(DaytonaConfig(api_key="YOUR_API_KEY"))
+    daytona = Daytona(DaytonaConfig(api_key="YOUR_API_KEY"))
 
-sandbox = daytona.create()
+    sandbox = daytona.create()
 
-app_code = b'''
-from flask import Flask
+    app_code = b'''
+    from flask import Flask
 
-app = Flask(__name__)
+    app = Flask(__name__)
 
-@app.route('/')
-def hello():
-    return """
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <title>Hello World</title>
-        <link rel="icon" href="https://www.daytona.io/favicon.ico">
-    </head>
-    <body style="display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-color: #0a0a0a; font-family: Arial, sans-serif;">
-        <div style="text-align: center; padding: 2rem; border-radius: 10px; background-color: white; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
-            <img src="https://raw.githubusercontent.com/daytonaio/daytona/main/assets/images/Daytona-logotype-black.png" alt="Daytona Logo" style="width: 180px; margin: 10px 0px;">
-            <p>This web app is running in a Daytona sandbox!</p>
-        </div>
-    </body>
-    </html>
-    """
+    @app.route('/')
+    def hello():
+        return """
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Hello World</title>
+            <link rel="icon" href="https://www.daytona.io/favicon.ico">
+        </head>
+        <body style="display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-color: #0a0a0a; font-family: Arial, sans-serif;">
+            <div style="text-align: center; padding: 2rem; border-radius: 10px; background-color: white; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                <img src="https://raw.githubusercontent.com/daytonaio/daytona/main/assets/images/Daytona-logotype-black.png" alt="Daytona Logo" style="width: 180px; margin: 10px 0px;">
+                <p>This web app is running in a Daytona sandbox!</p>
+            </div>
+        </body>
+        </html>
+        """
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=3000)
-'''
+    if __name__ == '__main__':
+        app.run(host='0.0.0.0', port=3000)
+    '''
 
-# Save the Flask app to a file
+    # Save the Flask app to a file
 
-sandbox.fs.upload_file(app_code, "app.py")
+    sandbox.fs.upload_file(app_code, "app.py")
 
-# Create a new session and execute a command
+    # Create a new session and execute a command
 
-exec_session_id = "python-app-session"
-sandbox.process.create_session(exec_session_id)
+    exec_session_id = "python-app-session"
+    sandbox.process.create_session(exec_session_id)
 
-sandbox.process.execute_session_command(exec_session_id, SessionExecuteRequest(
-    command="python /app.py",
-    var_async=True
-))
+    sandbox.process.execute_session_command(exec_session_id, SessionExecuteRequest(
+        command="python /app.py",
+        var_async=True
+    ))
 
-# Get the preview link for the Flask app
+    # Get the preview link for the Flask app
 
-preview_info = sandbox.get_preview_link(3000)
-print(f"Flask app is available at: {preview_info.url}")
+    preview_info = sandbox.get_preview_link(3000)
+    print(f"Flask app is available at: {preview_info.url}")
 
-```
+    ```
 
-```typescript
-import { Daytona } from '@daytonaio/sdk';
+    ```typescript
+    import { Daytona } from '@daytonaio/sdk';
 
-const daytona = new Daytona(({
-  apiKey: "YOUR_API_KEY"
-}));
+    const daytona = new Daytona(({
+      apiKey: "YOUR_API_KEY"
+    }));
 
-async function main() {
-  const sandbox = await daytona.create();
+    async function main() {
+      const sandbox = await daytona.create();
 
-  const appCode = Buffer.from(`
-from flask import Flask
+      const appCode = Buffer.from(`
+    from flask import Flask
 
-app = Flask(__name__)
+    app = Flask(__name__)
 
-@app.route('/')
-def hello():
-    return """
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <title>Hello World</title>
-        <link rel="icon" href="https://www.daytona.io/favicon.ico">
-    </head>
-    <body style="display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-color: #0a0a0a; font-family: Arial, sans-serif;">
-        <div style="text-align: center; padding: 2rem; border-radius: 10px; background-color: white; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
-            <img src="https://raw.githubusercontent.com/daytonaio/daytona/main/assets/images/Daytona-logotype-black.png" alt="Daytona Logo" style="width: 180px; margin: 10px 0px;">
-            <p>This web app is running in a Daytona sandbox!</p>
-        </div>
-    </body>
-    </html>
-    """
+    @app.route('/')
+    def hello():
+        return """
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Hello World</title>
+            <link rel="icon" href="https://www.daytona.io/favicon.ico">
+        </head>
+        <body style="display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-color: #0a0a0a; font-family: Arial, sans-serif;">
+            <div style="text-align: center; padding: 2rem; border-radius: 10px; background-color: white; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                <img src="https://raw.githubusercontent.com/daytonaio/daytona/main/assets/images/Daytona-logotype-black.png" alt="Daytona Logo" style="width: 180px; margin: 10px 0px;">
+                <p>This web app is running in a Daytona sandbox!</p>
+            </div>
+        </body>
+        </html>
+        """
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=3000)
-  `);
+    if __name__ == '__main__':
+        app.run(host='0.0.0.0', port=3000)
+      `);
 
-  // Save the Flask app to a file
-  await sandbox.fs.uploadFile(appCode, "app.py");
+      // Save the Flask app to a file
+      await sandbox.fs.uploadFile(appCode, "app.py");
 
-  // Create a new session and execute a command
-  const execSessionId = "python-app-session";
-  await sandbox.process.createSession(execSessionId);
+      // Create a new session and execute a command
+      const execSessionId = "python-app-session";
+      await sandbox.process.createSession(execSessionId);
 
-  await sandbox.process.executeSessionCommand(execSessionId, ({
-    command: `python app.py`,
-    async: true,
-  }));
+      await sandbox.process.executeSessionCommand(execSessionId, ({
+        command: `python app.py`,
+        async: true,
+      }));
 
-  // Get the preview link for the Flask app
-  const previewInfo = await sandbox.getPreviewLink(3000);
-  console.log(`Flask app is available at: ${previewInfo.url}`);
-}
+      // Get the preview link for the Flask app
+      const previewInfo = await sandbox.getPreviewLink(3000);
+      console.log(`Flask app is available at: ${previewInfo.url}`);
+    }
 
-main().catch(error => console.error("Error:", error));
+    main().catch(error => console.error("Error:", error));
 
-```
-
+    ```
 
 Need to access this endpoint programmatically? Learn more about [Preview & Authentication](/docs/en/preview-and-authentication).
 
@@ -1455,141 +1520,139 @@ You can access the Sandbox [Web Terminal](/docs/en/web-terminal) by printing out
 
 The following snippet connects to an LLM using the Anthropic API and asks Claude to generate code for getting the factorial of 25 and then executes it inside of a Daytona Sandbox:
 
-```python
-import os
-import re
-import requests
-from daytona import Daytona, DaytonaConfig
-from dotenv import load_dotenv
+    ````python
+    import os
+    import re
+    import requests
+    from daytona import Daytona, DaytonaConfig
+    from dotenv import load_dotenv
 
-load_dotenv()
+    load_dotenv()
 
-daytona = Daytona(DaytonaConfig())
+    daytona = Daytona(DaytonaConfig())
 
-sandbox = daytona.create()
+    sandbox = daytona.create()
 
-def get_claude_response(api_key, prompt):
-    url = "https://api.anthropic.com/v1/messages"
-    headers = {
-        "x-api-key": api_key,
+    def get_claude_response(api_key, prompt):
+        url = "https://api.anthropic.com/v1/messages"
+        headers = {
+            "x-api-key": api_key,
+            "anthropic-version": "2023-06-01",
+            "Content-Type": "application/json"
+        }
+        data = {
+            "model": "claude-3-7-sonnet-latest",
+            "max_tokens": 256,
+            "messages": [{"role": "user", "content": prompt}]
+        }
+        response = requests.post(url, json=data, headers=headers)
+        if response.status_code == 200:
+            content = response.json().get("content", [])
+            return "".join([item["text"] for item in content if item["type"] == "text"])
+        else:
+            return f"Error {response.status_code}: {response.text}"
+
+    prompt = "Python code that returns the factorial of 25. Output only the code. No explanation. No intro. No comments. Just raw code in a single code block."
+
+    result = get_claude_response(os.environ["ANTHROPIC_API_KEY"], prompt)
+
+    code_match = re.search(r"```python\n(.*?)```", result, re.DOTALL)
+
+    code = code_match.group(1) if code_match else result
+    code = code.replace('\\', '\\\\')
+
+    # Run Python code inside the Sandbox and get the output
+
+    response = sandbox.process.code_run(code)
+    print("The factorial of 25 is", response.result)
+
+    ````
+
+    Running the snippet:
+
+    ```bash
+    ANTHROPIC_API_KEY="your-anthropic-api-key"
+    DAYTONA_API_KEY="your-daytona-api-key"
+    DAYTONA_TARGET=us
+    python claude-example.py
+    ```
+
+    ```bash
+    > The factorial of 25 is 15511210043330985984000000
+    ```
+
+    ````typescript
+    import { Daytona } from '@daytonaio/sdk'
+    import * as dotenv from 'dotenv'
+    import axios from 'axios'
+
+    dotenv.config()
+
+    const daytona = new Daytona()
+
+    async function getClaudeResponse(apiKey: string, prompt: string): Promise<string> {
+      const url = "https://api.anthropic.com/v1/messages"
+      const headers = {
+        "x-api-key": apiKey,
         "anthropic-version": "2023-06-01",
         "Content-Type": "application/json"
-    }
-    data = {
+      }
+      const data = {
         "model": "claude-3-7-sonnet-latest",
         "max_tokens": 256,
         "messages": [{"role": "user", "content": prompt}]
+      }
+
+      try {
+        const response = await axios.post(url, data, { headers })
+        if (response.status === 200) {
+          const content = response.data.content || []
+          return content
+            .filter((item: any) => item.type === "text")
+            .map((item: any) => item.text)
+            .join("")
+        } else {
+          return `Error ${response.status}: ${response.statusText}`
+        }
+      } catch (error: any) {
+        return `Error: ${error.message}`
+      }
     }
-    response = requests.post(url, json=data, headers=headers)
-    if response.status_code == 200:
-        content = response.json().get("content", [])
-        return "".join([item["text"] for item in content if item["type"] == "text"])
-    else:
-        return f"Error {response.status_code}: {response.text}"
 
-prompt = "Python code that returns the factorial of 25. Output only the code. No explanation. No intro. No comments. Just raw code in a single code block."
+    async function main() {
+      const sandbox = await daytona.create()
 
-result = get_claude_response(os.environ["ANTHROPIC_API_KEY"], prompt)
-
-code_match = re.search(r"```python\n(.*?)```", result, re.DOTALL)
-
-code = code_match.group(1) if code_match else result
-code = code.replace('\\', '\\\\')
-
-# Run Python code inside the Sandbox and get the output
-
-response = sandbox.process.code_run(code)
-print("The factorial of 25 is", response.result)
-
-```
-
-Running the snippet:
-
-```bash
-ANTHROPIC_API_KEY="your-anthropic-api-key"
-DAYTONA_API_KEY="your-daytona-api-key"
-DAYTONA_TARGET=us
-python claude-example.py
-```
-
-```bash
-> The factorial of 25 is 15511210043330985984000000
-```
-
-```typescript
-import { Daytona } from '@daytonaio/sdk'
-import * as dotenv from 'dotenv'
-import axios from 'axios'
-
-dotenv.config()
-
-const daytona = new Daytona()
-
-async function getClaudeResponse(apiKey: string, prompt: string): Promise<string> {
-  const url = "https://api.anthropic.com/v1/messages"
-  const headers = {
-    "x-api-key": apiKey,
-    "anthropic-version": "2023-06-01",
-    "Content-Type": "application/json"
-  }
-  const data = {
-    "model": "claude-3-7-sonnet-latest",
-    "max_tokens": 256,
-    "messages": [{"role": "user", "content": prompt}]
-  }
-
-  try {
-    const response = await axios.post(url, data, { headers })
-    if (response.status === 200) {
-      const content = response.data.content || []
-      return content
-        .filter((item: any) => item.type === "text")
-        .map((item: any) => item.text)
-        .join("")
-    } else {
-      return `Error ${response.status}: ${response.statusText}`
+      const prompt = "Python code that returns the factorial of 25. Output only the code. No explanation. No intro. No comments. Just raw code in a single code block."
+      
+      const result = await getClaudeResponse(process.env.ANTHROPIC_API_KEY || "", prompt)
+      
+      // Extract code from the response using regex
+      const codeMatch = result.match(/```python\n(.*?)```/s)
+      
+      let code = codeMatch ? codeMatch[1] : result
+      code = code.replace(/\\/g, '\\\\')
+      
+      // Run the extracted code in the sandbox
+      const response = await sandbox.process.codeRun(code)
+      console.log("The factorial of 25 is", response.result)
     }
-  } catch (error: any) {
-    return `Error: ${error.message}`
-  }
-}
 
-async function main() {
-  const sandbox = await daytona.create()
+    main().catch(console.error)
 
-  const prompt = "Python code that returns the factorial of 25. Output only the code. No explanation. No intro. No comments. Just raw code in a single code block."
-  
-  const result = await getClaudeResponse(process.env.ANTHROPIC_API_KEY || "", prompt)
-  
-  // Extract code from the response using regex
-  const codeMatch = result.match(/```python\n(.*?)```/s)
-  
-  let code = codeMatch ? codeMatch[1] : result
-  code = code.replace(/\\/g, '\\\\')
-  
-  // Run the extracted code in the sandbox
-  const response = await sandbox.process.codeRun(code)
-  console.log("The factorial of 25 is", response.result)
-}
+    ````
 
-main().catch(console.error)
+    Running the snippet:
 
-```
+    ```bash
+    ANTHROPIC_API_KEY="your-anthropic-api-key"
+    DAYTONA_API_KEY="your-daytona-api-key"
+    DAYTONA_TARGET=us
+    npx ts-node claude-example.ts
+    ```
 
-
-Running the snippet:
-
-```bash
-ANTHROPIC_API_KEY="your-anthropic-api-key"
-DAYTONA_API_KEY="your-daytona-api-key"
-DAYTONA_TARGET=us
-npx ts-node claude-example.ts
-```
-
-```bash
-> The factorial of 25 is 15511210043330985984000000
-```
-
+    ```bash
+    > The factorial of 25 is 15511210043330985984000000
+    ```
 
 ## Additional Examples
 
@@ -1654,13 +1717,13 @@ const nextConfig: NextConfig = {
 
 If you want to use [images from your local device](/docs/en/snapshots#using-a-local-image) or simply prefer managing your Sandboxes using the command line interface, install the Daytona CLI by running:
 
-```bash
-brew install daytonaio/cli/daytona
-```
+    ```bash
+    brew install daytonaio/cli/daytona
+    ```
 
-```bash
-powershell -Command "irm https://get.daytona.io/windows | iex"
-```
+    ```bash
+    powershell -Command "irm https://get.daytona.io/windows | iex"
+    ```
 
 title: Git Operations
 
@@ -1889,64 +1952,67 @@ Run your first line of code in a Daytona Sandbox. Use our [LLMs context files](/
 
 #### 2. Install the SDK
 
-  ```bash
-  pip install daytona
-  ```
-  ```bash
-  npm install @daytonaio/sdk
-  ```
+    ```bash
+    pip install daytona
+    ```
+
+    ```bash
+    npm install @daytonaio/sdk
+    ```
 
 #### 3. Write Your Code
 
-  Create a file named: `main.py`
-  ```python
-  from daytona import Daytona, DaytonaConfig
+    Create a file named: `main.py`
 
-# Define the configuration
+    ```python
+    from daytona import Daytona, DaytonaConfig
 
-  config = DaytonaConfig(api_key="your-api-key")
+    # Define the configuration
 
-# Initialize the Daytona client
+    config = DaytonaConfig(api_key="your-api-key")
 
-  daytona = Daytona(config)
+    # Initialize the Daytona client
 
-# Create the Sandbox instance
+    daytona = Daytona(config)
 
-  sandbox = daytona.create()
+    # Create the Sandbox instance
 
-# Run the code securely inside the Sandbox
+    sandbox = daytona.create()
 
-  response = sandbox.process.code_run('print("Hello World from code!")')
-  if response.exit_code != 0:
-    print(f"Error: {response.exit_code} {response.result}")
-  else:
-      print(response.result)
-  
-# Clean up
+    # Run the code securely inside the Sandbox
 
-  sandbox.delete()
+    response = sandbox.process.code_run('print("Hello World from code!")')
+    if response.exit_code != 0:
+      print(f"Error: {response.exit_code} {response.result}")
+    else:
+        print(response.result)
 
-  ```
-  Create a file named: `index.mts`
-  ```typescript
-  import { Daytona } from '@daytonaio/sdk';
+    # Clean up
 
-  // Initialize the Daytona client
-  const daytona = new Daytona({ apiKey: 'your-api-key' });
+    sandbox.delete()
 
-  // Create the Sandbox instance
-  const sandbox = await daytona.create({
-    language: 'typescript',
-  });
+    ```
 
-  // Run the code securely inside the Sandbox
-  const response = await sandbox.process.codeRun('console.log("Hello World from code!")')
-  console.log(response.result);
+    Create a file named: `index.mts`
 
-  // Clean up
-  await sandbox.delete()
-  ```
+    ```typescript
+    import { Daytona } from '@daytonaio/sdk';
 
+    // Initialize the Daytona client
+    const daytona = new Daytona({ apiKey: 'your-api-key' });
+
+    // Create the Sandbox instance
+    const sandbox = await daytona.create({
+      language: 'typescript',
+    });
+
+    // Run the code securely inside the Sandbox
+    const response = await sandbox.process.codeRun('console.log("Hello World from code!")')
+    console.log(response.result);
+
+    // Clean up
+    await sandbox.delete()
+    ```
 
 :::note
 Replace `your-api-key` with the value from your Daytona dashboard.
@@ -1954,12 +2020,13 @@ Replace `your-api-key` with the value from your Daytona dashboard.
 
 #### 4. Run It
 
-  ```bash
-  python main.py
-  ```
-  ```bash
-  npx tsx index.mts
-  ```
+    ```bash
+    python main.py
+    ```
+
+    ```bash
+    npx tsx index.mts
+    ```
 
 #### ✅ What You Just Did
 
@@ -2071,12 +2138,12 @@ Daytona enforces resource limits to ensure fair usage and stability across all o
 - **Memory** — Total RAM available
 - **Storage** — Total disk space available
 
-These resources are pooled and shared across all running Sandboxes.  
+These resources are pooled and shared across all running Sandboxes.\
 The number of Sandboxes you can run at once depends on how much CPU, RAM, and storage each one uses. You can see how to configure and estimate resource usage in the [Sandbox Management docs](https://www.daytona.io/docs/sandbox-management/).
 
 ## Tiers & Limit Increases
 
-Organizations are automatically placed into a Tier based on verification status.  
+Organizations are automatically placed into a Tier based on verification status.\
 You can unlock higher limits by completing the following steps:
 
 | Tier   | Resources (vCPU / RAM / Storage) | Access Requirements                                                                                                     |
@@ -2935,47 +3002,46 @@ If you want to prolong the auto-stop interval, you can [set the auto-stop interv
 
 The Daytona SDK provides methods to create Sandboxes with default configurations, specific languages, or custom labels using Python and TypeScript.
 
-```python
-from daytona import Daytona, CreateSandboxFromSnapshotParams
+    ```python
+    from daytona import Daytona, CreateSandboxFromSnapshotParams
 
-daytona = Daytona()
+    daytona = Daytona()
 
-# Create a basic Sandbox
+    # Create a basic Sandbox
 
-sandbox = daytona.create()
+    sandbox = daytona.create()
 
-# Create a Sandbox with specific language
+    # Create a Sandbox with specific language
 
-params = CreateSandboxFromSnapshotParams(language="python")
-sandbox = daytona.create(params)
+    params = CreateSandboxFromSnapshotParams(language="python")
+    sandbox = daytona.create(params)
 
-# Create a Sandbox with custom labels
+    # Create a Sandbox with custom labels
 
-params = CreateSandboxFromSnapshotParams(labels={"SOME_LABEL": "my-label"})
-sandbox = daytona.create(params)
+    params = CreateSandboxFromSnapshotParams(labels={"SOME_LABEL": "my-label"})
+    sandbox = daytona.create(params)
 
-```
+    ```
 
-```typescript
-import { Daytona } from '@daytonaio/sdk';
+    ```typescript
+    import { Daytona } from '@daytonaio/sdk';
 
-const daytona = new Daytona();
+    const daytona = new Daytona();
 
-// Create a basic Sandbox
-const sandbox = await daytona.create();
+    // Create a basic Sandbox
+    const sandbox = await daytona.create();
 
-// Create a Sandbox with specific language
-const sandbox = await daytona.create({ language: 'typescript' });
+    // Create a Sandbox with specific language
+    const sandbox = await daytona.create({ language: 'typescript' });
 
-// Create a Sandbox with custom labels
-const sandbox = await daytona.create({ labels: { SOME_LABEL: 'my-label' } });
-```
-
+    // Create a Sandbox with custom labels
+    const sandbox = await daytona.create({ labels: { SOME_LABEL: 'my-label' } });
+    ```
 
 When Sandboxes are not actively used, it is recommended that they be stopped. This can be done manually [using the stop command](/docs/en/sandbox-management#stop-and-start-sandbox) or automatically by [setting the auto-stop interval](/docs/en/sandbox-management#auto-stop-and-auto-archive).
 
 :::note
-Daytona keeps a pool of warm Sandboxes using default Snapshots.  
+Daytona keeps a pool of warm Sandboxes using default Snapshots.\
 When available, your Sandbox will launch in milliseconds instead of cold-booting.
 :::
 
@@ -2987,47 +3053,47 @@ Need more power? Use the `Resources` class to define exactly what you need: CPU,
 
 Check your available resources and limits in the [dashboard](https://app.daytona.io/dashboard/limits).
 
-```python
-from daytona import Daytona, Resources, CreateSandboxFromImageParams, Image
+    ```python
+    from daytona import Daytona, Resources, CreateSandboxFromImageParams, Image
 
-daytona = Daytona()
+    daytona = Daytona()
 
-# Create a Sandbox with custom resources
+    # Create a Sandbox with custom resources
 
-resources = Resources(
-    cpu=2,  # 2 CPU cores
-    memory=4,  # 4GB RAM
-    disk=8,  # 8GB disk space
-)
+    resources = Resources(
+        cpu=2,  # 2 CPU cores
+        memory=4,  # 4GB RAM
+        disk=8,  # 8GB disk space
+    )
 
-params = CreateSandboxFromImageParams(
-    image=Image.debian_slim("3.12"),
-    resources=resources
-)
+    params = CreateSandboxFromImageParams(
+        image=Image.debian_slim("3.12"),
+        resources=resources
+    )
 
-sandbox = daytona.create(params)
+    sandbox = daytona.create(params)
 
-```
-```typescript
-import { Daytona, Image } from "@daytonaio/sdk";
+    ```
 
-async function main() {
-  const daytona = new Daytona();
+    ```typescript
+    import { Daytona, Image } from "@daytonaio/sdk";
 
-  // Create a Sandbox with custom resources
-  const sandbox = await daytona.create({
-    image: Image.debianSlim("3.13"),
-    resources: {
-      cpu: 2, // 2 CPU cores
-      memory: 4, // 4GB RAM
-      disk: 8, // 8GB disk space
-    },
-  });
-}
+    async function main() {
+      const daytona = new Daytona();
 
-main();
-```
+      // Create a Sandbox with custom resources
+      const sandbox = await daytona.create({
+        image: Image.debianSlim("3.13"),
+        resources: {
+          cpu: 2, // 2 CPU cores
+          memory: 4, // 4GB RAM
+          disk: 8, // 8GB disk space
+        },
+      });
+    }
 
+    main();
+    ```
 
 :::note
 All resource parameters are optional. If not specified, Daytona will use default values appropriate for the selected language and use case.
@@ -3040,42 +3106,42 @@ Daytona Sandboxes provide configurable network access controls to enhance securi
 - To block all network access, set `networkBlockAll` to `True`
 - To restrict network access to specific addresses, set `networkAllowList` to a comma-separated list of up to 5 CIDR blocks
 
-```python
-from daytona import Daytona, CreateSandboxFromSnapshotParams
+    ```python
+    from daytona import Daytona, CreateSandboxFromSnapshotParams
 
-daytona = Daytona()
+    daytona = Daytona()
 
-# Block all network access
+    # Block all network access
 
-params = CreateSandboxFromSnapshotParams(
-  network_block_all=True
-)
-sandbox = daytona.create(params)
+    params = CreateSandboxFromSnapshotParams(
+      network_block_all=True
+    )
+    sandbox = daytona.create(params)
 
-# Explicitly allow list of network addresses
+    # Explicitly allow list of network addresses
 
-params = CreateSandboxFromSnapshotParams(
-  network_allow_list="192.168.1.0/16,10.0.0.0/24"
-)
-sandbox = daytona.create(params)
+    params = CreateSandboxFromSnapshotParams(
+      network_allow_list="192.168.1.0/16,10.0.0.0/24"
+    )
+    sandbox = daytona.create(params)
 
-```
-```typescript
-import { Daytona } from '@daytonaio/sdk';
+    ```
 
-const daytona = new Daytona();
+    ```typescript
+    import { Daytona } from '@daytonaio/sdk';
 
-// Block all network access
-const sandbox = await daytona.create({
-  networkBlockAll: true
-});
+    const daytona = new Daytona();
 
-// Explicitly allow list of network addresses
-const sandbox = await daytona.create({
-  networkAllowList: '192.168.1.0/16,10.0.0.0/24'
-});
-```
+    // Block all network access
+    const sandbox = await daytona.create({
+      networkBlockAll: true
+    });
 
+    // Explicitly allow list of network addresses
+    const sandbox = await daytona.create({
+      networkAllowList: '192.168.1.0/16,10.0.0.0/24'
+    });
+    ```
 
 :::caution
 Enabling unrestricted network access may pose security risks when executing untrusted code.
@@ -3086,35 +3152,34 @@ It is recommended to whitelist specific network addresses using `networkAllowLis
 
 The Daytona SDK provides methods to get information about a Sandbox, such as ID, root directory, and status using Python and TypeScript.
 
-```python
-# Get Sandbox ID
-sandbox_id = sandbox.id
+    ```python
+    # Get Sandbox ID
+    sandbox_id = sandbox.id
 
-# Get the root directory of the Sandbox user
+    # Get the root directory of the Sandbox user
 
-root_dir = sandbox.get_user_root_dir()
+    root_dir = sandbox.get_user_root_dir()
 
-# Get the Sandbox id, auto-stop interval and state
+    # Get the Sandbox id, auto-stop interval and state
 
-print(sandbox.id)
-print(sandbox.auto_stop_interval)
-print(sandbox.state)
+    print(sandbox.id)
+    print(sandbox.auto_stop_interval)
+    print(sandbox.state)
 
-```
+    ```
 
-```typescript
-// Get Sandbox ID
-const sandboxId = sandbox.id;
+    ```typescript
+    // Get Sandbox ID
+    const sandboxId = sandbox.id;
 
-// Get the root directory of the Sandbox user
-const rootDir = await sandbox.getUserRootDir();
+    // Get the root directory of the Sandbox user
+    const rootDir = await sandbox.getUserRootDir();
 
-// Get the Sandbox id, auto-stop interval and state
-console.log(sandbox.id)
-console.log(sandbox.autoStopInterval)
-console.log(sandbox.state)
-```
-
+    // Get the Sandbox id, auto-stop interval and state
+    console.log(sandbox.id)
+    console.log(sandbox.autoStopInterval)
+    console.log(sandbox.state)
+    ```
 
 To get the preview URL for a specific port, check out [Preview & Authentication](/docs/en/preview-and-authentication).
 
@@ -3124,40 +3189,40 @@ The Daytona SDK provides methods to stop and start Sandboxes using Python and Ty
 
 Stopped Sandboxes maintain filesystem persistence while their memory state is cleared. They incur only disk usage costs and can be started again when needed.
 
-```python
-sandbox = daytona.create(CreateSandboxParams(language="python"))
+    ```python
+    sandbox = daytona.create(CreateSandboxParams(language="python"))
 
-# Stop Sandbox
+    # Stop Sandbox
 
-sandbox.stop()
+    sandbox.stop()
 
-print(sandbox.id) # 7cd11133-96c1-4cc8-9baa-c757b8f8c916
+    print(sandbox.id) # 7cd11133-96c1-4cc8-9baa-c757b8f8c916
 
-# The sandbox ID can later be used to find the sandbox and start it
+    # The sandbox ID can later be used to find the sandbox and start it
 
-sandbox = daytona.find_one("7cd11133-96c1-4cc8-9baa-c757b8f8c916")
+    sandbox = daytona.find_one("7cd11133-96c1-4cc8-9baa-c757b8f8c916")
 
-# Start Sandbox
+    # Start Sandbox
 
-sandbox.start()
+    sandbox.start()
 
-```
-```typescript
-const sandbox = await daytona.create({ language: 'typescript' });
+    ```
 
-// Stop Sandbox
-await sandbox.stop();
+    ```typescript
+    const sandbox = await daytona.create({ language: 'typescript' });
 
-console.log(sandbox.id) // 7cd11133-96c1-4cc8-9baa-c757b8f8c916
+    // Stop Sandbox
+    await sandbox.stop();
 
-// The sandbox ID can later be used to find the sandbox and start it
+    console.log(sandbox.id) // 7cd11133-96c1-4cc8-9baa-c757b8f8c916
 
-const sandbox = await daytona.findOne("7cd11133-96c1-4cc8-9baa-c757b8f8c916");
+    // The sandbox ID can later be used to find the sandbox and start it
 
-// Start Sandbox
-await sandbox.start();
-```
+    const sandbox = await daytona.findOne("7cd11133-96c1-4cc8-9baa-c757b8f8c916");
 
+    // Start Sandbox
+    await sandbox.start();
+    ```
 
 The stopped state should be used when the Sandbox is expected to be started again soon. Otherwise, it is recommended to stop and then archive the Sandbox to eliminate disk usage costs.
 
@@ -3170,28 +3235,29 @@ Starting an archived Sandbox takes more time than starting a stopped Sandbox, de
 
 A Sandbox must be stopped before it can be archived, and can be started again in the same way as a stopped Sandbox.
 
-```python
-# Archive Sandbox
-sandbox.archive()
-```
-```typescript
-// Archive Sandbox
-await sandbox.archive();
-```
+    ```python
+    # Archive Sandbox
+    sandbox.archive()
+    ```
+
+    ```typescript
+    // Archive Sandbox
+    await sandbox.archive();
+    ```
 
 ## Delete Sandbox
 
 The Daytona SDK provides methods to delete Sandboxes using Python and TypeScript.
 
-```python
-# Delete Sandbox
-sandbox.delete()
-```
-```typescript
-// Delete Sandbox
-await sandbox.delete();
-```
+    ```python
+    # Delete Sandbox
+    sandbox.delete()
+    ```
 
+    ```typescript
+    // Delete Sandbox
+    await sandbox.delete();
+    ```
 
 :::tip
 Check out the [Daytona CLI](/docs/en/getting-started#setting-up-the-daytona-cli) if you prefer managing Sandboxes through the terminal:
@@ -3239,19 +3305,19 @@ If the parameter is not set, the default interval of `15` minutes will be used.
 
 :::
 
-```python
-sandbox = daytona.create(CreateSandboxFromSnapshotParams(
-    snapshot="my-snapshot-name",
-    auto_stop_interval=0,  # Disables the auto-stop feature - default is 15 minutes
-))
-```
-```typescript
-const sandbox = await daytona.create({
-    snapshot: "my-snapshot-name",
-    autoStopInterval: 0, // Disables the auto-stop feature - default is 15 minutes
-});
-```
+    ```python
+    sandbox = daytona.create(CreateSandboxFromSnapshotParams(
+        snapshot="my-snapshot-name",
+        auto_stop_interval=0,  # Disables the auto-stop feature - default is 15 minutes
+    ))
+    ```
 
+    ```typescript
+    const sandbox = await daytona.create({
+        snapshot: "my-snapshot-name",
+        autoStopInterval: 0, // Disables the auto-stop feature - default is 15 minutes
+    });
+    ```
 
 ### Auto-archive Interval
 
@@ -3264,18 +3330,19 @@ The parameter can either be set to:
 
 If the parameter is not set, the default interval of `7 days` days will be used.
 
-```python
-sandbox = daytona.create(CreateSandboxFromSnapshotParams(
-    snapshot="my-snapshot-name",
-    auto_archive_interval=60 # Auto-archive after a Sandbox has been stopped for 1 hour
-))
-```
-```typescript
-const sandbox = await daytona.create({
-    snapshot: "my-snapshot-name",
-    autoArchiveInterval: 60 // Auto-archive after a Sandbox has been stopped for 1 hour
-});
-```
+    ```python
+    sandbox = daytona.create(CreateSandboxFromSnapshotParams(
+        snapshot="my-snapshot-name",
+        auto_archive_interval=60 # Auto-archive after a Sandbox has been stopped for 1 hour
+    ))
+    ```
+
+    ```typescript
+    const sandbox = await daytona.create({
+        snapshot: "my-snapshot-name",
+        autoArchiveInterval: 60 // Auto-archive after a Sandbox has been stopped for 1 hour
+    });
+    ```
 
 ### Auto-delete Interval
 
@@ -3289,51 +3356,52 @@ The parameter can either be set to:
 
 If the parameter is not set, the Sandbox will not be deleted automatically.
 
-```python
-sandbox = daytona.create(CreateSandboxFromSnapshotParams(
-    snapshot="my-snapshot-name",
-    auto_delete_interval=60,  # Auto-delete after a Sandbox has been stopped for 1 hour
-))
+    ```python
+    sandbox = daytona.create(CreateSandboxFromSnapshotParams(
+        snapshot="my-snapshot-name",
+        auto_delete_interval=60,  # Auto-delete after a Sandbox has been stopped for 1 hour
+    ))
 
-# Delete the Sandbox immediately after it has been stopped
+    # Delete the Sandbox immediately after it has been stopped
 
-sandbox.set_auto_delete_interval(0)
+    sandbox.set_auto_delete_interval(0)
 
-# Disable auto-deletion
+    # Disable auto-deletion
 
-sandbox.set_auto_delete_interval(-1)
+    sandbox.set_auto_delete_interval(-1)
 
-```
-```typescript
-const sandbox = await daytona.create({
-    snapshot: "my-snapshot-name",
-    autoDeleteInterval: 60, // Auto-delete after a Sandbox has been stopped for 1 hour
-});
+    ```
 
-// Delete the Sandbox immediately after it has been stopped
-await sandbox.setAutoDeleteInterval(0)
+    ```typescript
+    const sandbox = await daytona.create({
+        snapshot: "my-snapshot-name",
+        autoDeleteInterval: 60, // Auto-delete after a Sandbox has been stopped for 1 hour
+    });
 
-// Disable auto-deletion
-await sandbox.setAutoDeleteInterval(-1)
-```
+    // Delete the Sandbox immediately after it has been stopped
+    await sandbox.setAutoDeleteInterval(0)
 
+    // Disable auto-deletion
+    await sandbox.setAutoDeleteInterval(-1)
+    ```
 
 ## Run Indefinitely
 
 By default, Sandboxes auto-stop after 15 minutes of inactivity. To keep a Sandbox running without interruption, set the auto-stop interval to `0` when creating a new Sandbox:
 
-```python
-sandbox = daytona.create(CreateSandboxFromSnapshotParams(
-    snapshot="my-snapshot-name",
-    auto_stop_interval=0,  # Disables the auto-stop feature - default is 15 minutes
-))
-```
-```typescript
-const sandbox = await daytona.create({
-    snapshot: "my-snapshot-name",
-    autoStopInterval: 0, // Disables the auto-stop feature - default is 15 minutes
-});
-```
+    ```python
+    sandbox = daytona.create(CreateSandboxFromSnapshotParams(
+        snapshot="my-snapshot-name",
+        auto_stop_interval=0,  # Disables the auto-stop feature - default is 15 minutes
+    ))
+    ```
+
+    ```typescript
+    const sandbox = await daytona.create({
+        snapshot: "my-snapshot-name",
+        autoStopInterval: 0, // Disables the auto-stop feature - default is 15 minutes
+    });
+    ```
 
 title: Snapshots
 
@@ -3357,143 +3425,143 @@ Since images tagged `latest` get frequent updates, only specific tags (e.g. `0.1
 
 Once the Snapshot is pulled, validated and has an `Active` state, it is ready to be used. Define the `CreateSandboxFromSnapshotParams` object to specify the custom Snapshot to use:
 
-```python
-sandbox = daytona.create(CreateSandboxFromSnapshotParams(
-    snapshot="my-snapshot-name",
-))
-```
-```typescript
-const sandbox = await daytona.create({
-  snapshot: "my-snapshot-name",
-})
-```
+    ```python
+    sandbox = daytona.create(CreateSandboxFromSnapshotParams(
+        snapshot="my-snapshot-name",
+    ))
+    ```
 
-Full example:
-
-```python
-from daytona import Daytona, CreateSandboxFromSnapshotParams
-
-daytona = Daytona()
-
-sandbox = daytona.create(CreateSandboxFromSnapshotParams(
-    snapshot="my-snapshot-name",
-))
-
-response = sandbox.process.code_run('print("Sum of 3 and 4 is " + str(3 + 4))')
-if response.exit_code != 0:
-    print(f"Error running code: {response.exit_code} {response.result}")
-else:
-    print(response.result)
-
-sandbox.delete()
-
-```
-
-```typescript
-import { Daytona } from '@daytonaio/sdk'
-
-async function main() {
-  // Initialize the Daytona client
-  const daytona = new Daytona()
-
-  try {
-    // Create the Sandbox instance
+    ```typescript
     const sandbox = await daytona.create({
       snapshot: "my-snapshot-name",
     })
-    // Run the code securely inside the Sandbox
-    const response = await sandbox.process.codeRun(
-      'print("Sum of 3 and 4 is " + str(3 + 4))',
-    )
-    if (response.exitCode !== 0) {
-      console.error('Error running code:', response.exitCode, response.result)
-    } else {
-      console.log(response.result)
+    ```
+
+Full example:
+
+    ```python
+    from daytona import Daytona, CreateSandboxFromSnapshotParams
+
+    daytona = Daytona()
+
+    sandbox = daytona.create(CreateSandboxFromSnapshotParams(
+        snapshot="my-snapshot-name",
+    ))
+
+    response = sandbox.process.code_run('print("Sum of 3 and 4 is " + str(3 + 4))')
+    if response.exit_code != 0:
+        print(f"Error running code: {response.exit_code} {response.result}")
+    else:
+        print(response.result)
+
+    sandbox.delete()
+
+    ```
+
+    ```typescript
+    import { Daytona } from '@daytonaio/sdk'
+
+    async function main() {
+      // Initialize the Daytona client
+      const daytona = new Daytona()
+
+      try {
+        // Create the Sandbox instance
+        const sandbox = await daytona.create({
+          snapshot: "my-snapshot-name",
+        })
+        // Run the code securely inside the Sandbox
+        const response = await sandbox.process.codeRun(
+          'print("Sum of 3 and 4 is " + str(3 + 4))',
+        )
+        if (response.exitCode !== 0) {
+          console.error('Error running code:', response.exitCode, response.result)
+        } else {
+          console.log(response.result)
+        }
+      } catch (error) {
+        console.error('Sandbox flow error:', error)
+      } finally {
+        // Clean up the Sandbox
+        await sandbox.delete()
+      }
     }
-  } catch (error) {
-    console.error('Sandbox flow error:', error)
-  } finally {
-    // Clean up the Sandbox
-    await sandbox.delete()
-  }
-}
 
-main()
-```
-
+    main()
+    ```
 
 ### Snapshot Resources
 
-Snapshots contain the resource requirements for Daytona Sandboxes. By default, Daytona Sandboxes come with **1 vCPU**, **1GB RAM**, and **3GiB disk**.  
+Snapshots contain the resource requirements for Daytona Sandboxes. By default, Daytona Sandboxes come with **1 vCPU**, **1GB RAM**, and **3GiB disk**.
 
 Need more power? Use the `Resources` class to define exactly what you need: CPU, memory, and disk space are all customizable.
 
 Check your available resources and limits in the [dashboard](https://app.daytona.io/dashboard/limits).
 
-```python
-from daytona import (
-    Daytona,
-    CreateSnapshotParams,
-    Image,
-    Resources,
-    CreateSandboxFromSnapshotParams,
-)
-
-daytona = Daytona()
-
-# Create a Snapshot with custom resources
-
-daytona.snapshot.create(
-    CreateSnapshotParams(
-        name="my-snapshot",
-        image=Image.debian_slim("3.12"),
-        resources=Resources(
-          cpu=2,
-          memory=4,
-          disk=8,
-        ),
-    ),
-    on_logs=print,
-)
-
-# Create a Sandbox with custom Snapshot
-
-sandbox = daytona.create(
-    CreateSandboxFromSnapshotParams(
-        snapshot="my-snapshot",
+    ```python
+    from daytona import (
+        Daytona,
+        CreateSnapshotParams,
+        Image,
+        Resources,
+        CreateSandboxFromSnapshotParams,
     )
-)
 
-```
-```typescript
-import { Daytona, Image } from "@daytonaio/sdk";
+    daytona = Daytona()
 
-async function main() {
-  const daytona = new Daytona();
+    # Create a Snapshot with custom resources
 
-  // Create a Snapshot with custom resources
-  await daytona.snapshot.create(
-    {
-      name: "my-snapshot",
-      image: Image.debianSlim("3.13"),
-      resources: {
-        cpu: 2,
-        memory: 4,
-        disk: 8,
-      },
-    },
-    { onLogs: console.log }
-  );
+    daytona.snapshot.create(
+        CreateSnapshotParams(
+            name="my-snapshot",
+            image=Image.debian_slim("3.12"),
+            resources=Resources(
+              cpu=2,
+              memory=4,
+              disk=8,
+            ),
+        ),
+        on_logs=print,
+    )
 
-  // Create a Sandbox with custom Snapshot
-  const sandbox = await daytona.create({
-    snapshot: "my-snapshot",
-  });
-}
+    # Create a Sandbox with custom Snapshot
 
-main();
-```
+    sandbox = daytona.create(
+        CreateSandboxFromSnapshotParams(
+            snapshot="my-snapshot",
+        )
+    )
 
+    ```
+
+    ```typescript
+    import { Daytona, Image } from "@daytonaio/sdk";
+
+    async function main() {
+      const daytona = new Daytona();
+
+      // Create a Snapshot with custom resources
+      await daytona.snapshot.create(
+        {
+          name: "my-snapshot",
+          image: Image.debianSlim("3.13"),
+          resources: {
+            cpu: 2,
+            memory: 4,
+            disk: 8,
+          },
+        },
+        { onLogs: console.log }
+      );
+
+      // Create a Sandbox with custom Snapshot
+      const sandbox = await daytona.create({
+        snapshot: "my-snapshot",
+      });
+    }
+
+    main();
+    ```
 
 :::note
 All resource parameters are optional. If not specified, Daytona will use the default values.
@@ -3513,7 +3581,7 @@ The next step is the same; simply set the `CreateSandboxFromSnapshotParams` fiel
 
 #### Using a Private Docker Hub Image
 
-To use a private Docker Hub image, you'll need to [add a Container Registry](/docs/snapshots#images-from-private-registries) with your Docker Hub credentials:
+To use a private Docker Hub image, you'll need to [add a Container Registry](/docs/en/snapshots#images-from-private-registries) with your Docker Hub credentials:
 
 - **Registry URL**: Set this to `docker.io`
 - **Username**: Enter your Docker Hub username (the account with access to the private image)
@@ -3572,6 +3640,45 @@ Deleting your custom Snapshots is a straightforward process. Simply go to the [S
 
 To temporarily disable a Snapshot, instead of deleting, you can click `Disable`. This will prevent the Snapshot from being used in any new Sandboxes but will not delete it.
 
+:::
+
+## Running Docker in a Sandbox
+
+Daytona Sandboxes can run Docker containers inside them (**Docker-in-Docker**), enabling you to build, test, and deploy containerized applications. This is particularly useful when your projects have dependencies on external services like databases, message queues, or other microservices.
+
+Agents can seamlessly interact with these services since they run within the same sandbox environment, providing better isolation and security compared to external service dependencies.
+
+### Creating a DinD Snapshot
+
+You can create a Snapshot with Docker support using pre-built Docker-in-Docker images as a base or by manually installing Docker in a custom image.
+
+#### Using Pre-built Images
+
+The following base images are widely used for creating Docker-in-Docker snapshots or can be used as a base for a custom Dockerfile:
+
+- `docker:28.3.3-dind` - Official Docker-in-Docker image (Alpine-based, lightweight)
+- `docker:28.3.3-dind-rootless` - Rootless Docker-in-Docker for enhanced security
+- `docker:28.3.2-dind-alpine3.22` - Docker-in-Docker image with Alpine 3.22
+
+#### Manual Docker Installation
+
+Alternatively, you can install Docker manually in a custom Dockerfile:
+
+```dockerfile
+FROM ubuntu:22.04
+# Install Docker using the official install script
+RUN curl -fsSL https://get.docker.com | VERSION=28.3.3 sh -
+```
+
+### Use Cases
+
+- Run databases (PostgreSQL, Redis, MySQL) and other services
+- Build and test containerized applications
+- Deploy microservices and their dependencies
+- Create isolated development environments with full container orchestration
+
+:::note
+Docker-in-Docker Sandboxes require additional resources due to the Docker daemon overhead. Consider allocating at least 2 vCPU and 4GiB of memory for optimal performance.
 :::
 
 ## Default Snapshot
@@ -3643,9 +3750,9 @@ daytona autocomplete [bash|zsh|fish|powershell] [flags]
 
 <Aside type="note">
   If using bash shell environment, make sure you have bash-completion installed
-  in order to get full autocompletion functionality. Linux Installation: ```sudo
-  apt-get install bash-completion``` macOS Installation: ```brew install
-  bash-completion```
+  in order to get full autocompletion functionality. Linux Installation: `sudo
+        apt-get install bash-completion` macOS Installation: `brew install
+        bash-completion`
 </Aside>
 
 ## daytona docs
@@ -3846,7 +3953,7 @@ daytona sandbox create [flags]
 | `--snapshot` | | Snapshot to use for the sandbox |
 | `--target` | | Target region (eu, us) |
 | `--user` | | User associated with the sandbox |
-| `--volume` | `-v` | Volumes to mount (format: VOLUME_NAME:MOUNT_PATH) |
+| `--volume` | `-v` | Volumes to mount (format: VOLUME\_NAME:MOUNT\_PATH) |
 | `--help` | | help for daytona |
 
 ## daytona sandbox delete
