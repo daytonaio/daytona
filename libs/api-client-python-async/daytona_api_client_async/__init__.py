@@ -30,6 +30,7 @@ from daytona_api_client_async.api.snapshots_api import SnapshotsApi
 from daytona_api_client_async.api.toolbox_api import ToolboxApi
 from daytona_api_client_async.api.users_api import UsersApi
 from daytona_api_client_async.api.volumes_api import VolumesApi
+from daytona_api_client_async.api.webhooks_api import WebhooksApi
 from daytona_api_client_async.api.workspace_api import WorkspaceApi
 
 # import ApiClient
@@ -140,6 +141,7 @@ from daytona_api_client_async.models.sandbox_state import SandboxState
 from daytona_api_client_async.models.sandbox_volume import SandboxVolume
 from daytona_api_client_async.models.screenshot_response import ScreenshotResponse
 from daytona_api_client_async.models.search_files_response import SearchFilesResponse
+from daytona_api_client_async.models.send_webhook_dto import SendWebhookDto
 from daytona_api_client_async.models.session import Session
 from daytona_api_client_async.models.session_execute_request import SessionExecuteRequest
 from daytona_api_client_async.models.session_execute_response import SessionExecuteResponse
@@ -157,5 +159,8 @@ from daytona_api_client_async.models.user import User
 from daytona_api_client_async.models.user_public_key import UserPublicKey
 from daytona_api_client_async.models.volume_dto import VolumeDto
 from daytona_api_client_async.models.volume_state import VolumeState
+from daytona_api_client_async.models.webhook_app_portal_access import WebhookAppPortalAccess
+from daytona_api_client_async.models.webhook_controller_get_status200_response import WebhookControllerGetStatus200Response
+from daytona_api_client_async.models.webhook_initialization_status import WebhookInitializationStatus
 from daytona_api_client_async.models.windows_response import WindowsResponse
 from daytona_api_client_async.models.workspace import Workspace

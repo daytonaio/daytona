@@ -13,6 +13,7 @@ daytona_api_client_async/api/snapshots_api.py
 daytona_api_client_async/api/toolbox_api.py
 daytona_api_client_async/api/users_api.py
 daytona_api_client_async/api/volumes_api.py
+daytona_api_client_async/api/webhooks_api.py
 daytona_api_client_async/api/workspace_api.py
 daytona_api_client_async/api_client.py
 daytona_api_client_async/api_response.py
@@ -115,6 +116,7 @@ daytona_api_client_async/models/sandbox_state.py
 daytona_api_client_async/models/sandbox_volume.py
 daytona_api_client_async/models/screenshot_response.py
 daytona_api_client_async/models/search_files_response.py
+daytona_api_client_async/models/send_webhook_dto.py
 daytona_api_client_async/models/session.py
 daytona_api_client_async/models/session_execute_request.py
 daytona_api_client_async/models/session_execute_response.py
@@ -132,6 +134,9 @@ daytona_api_client_async/models/user.py
 daytona_api_client_async/models/user_public_key.py
 daytona_api_client_async/models/volume_dto.py
 daytona_api_client_async/models/volume_state.py
+daytona_api_client_async/models/webhook_app_portal_access.py
+daytona_api_client_async/models/webhook_controller_get_status200_response.py
+daytona_api_client_async/models/webhook_initialization_status.py
 daytona_api_client_async/models/windows_response.py
 daytona_api_client_async/models/workspace.py
 daytona_api_client_async/py.typed

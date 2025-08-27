@@ -111,6 +111,7 @@ from daytona_api_client.models.sandbox_state import SandboxState
 from daytona_api_client.models.sandbox_volume import SandboxVolume
 from daytona_api_client.models.screenshot_response import ScreenshotResponse
 from daytona_api_client.models.search_files_response import SearchFilesResponse
+from daytona_api_client.models.send_webhook_dto import SendWebhookDto
 from daytona_api_client.models.session import Session
 from daytona_api_client.models.session_execute_request import SessionExecuteRequest
 from daytona_api_client.models.session_execute_response import SessionExecuteResponse
@@ -128,5 +129,8 @@ from daytona_api_client.models.user import User
 from daytona_api_client.models.user_public_key import UserPublicKey
 from daytona_api_client.models.volume_dto import VolumeDto
 from daytona_api_client.models.volume_state import VolumeState
+from daytona_api_client.models.webhook_app_portal_access import WebhookAppPortalAccess
+from daytona_api_client.models.webhook_controller_get_status200_response import WebhookControllerGetStatus200Response
+from daytona_api_client.models.webhook_initialization_status import WebhookInitializationStatus
 from daytona_api_client.models.windows_response import WindowsResponse
 from daytona_api_client.models.workspace import Workspace

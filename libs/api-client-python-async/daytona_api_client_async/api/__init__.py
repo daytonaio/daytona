@@ -13,5 +13,6 @@ from daytona_api_client_async.api.snapshots_api import SnapshotsApi
 from daytona_api_client_async.api.toolbox_api import ToolboxApi
 from daytona_api_client_async.api.users_api import UsersApi
 from daytona_api_client_async.api.volumes_api import VolumesApi
+from daytona_api_client_async.api.webhooks_api import WebhooksApi
 from daytona_api_client_async.api.workspace_api import WorkspaceApi
 

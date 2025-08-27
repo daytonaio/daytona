@@ -112,4 +112,29 @@ export class ApiClient {
   public get auditApi() {
     return this._auditApi
   }
+
+  public async webhookRequest(method: string, url: string, data?: any) {
+    // Use the existing axios instance that's already configured with interceptors
+    const axiosInstance = axios.create({
+      baseURL: import.meta.env.VITE_API_URL,
+      headers: {
+        Authorization: `Bearer ${this.config.accessToken}`,
+      },
+    })
+
+    return axiosInstance.request({
+      method,
+      url,
+      data,
+    })
+  }
+
+  public get axiosInstance() {
+    return axios.create({
+      baseURL: import.meta.env.VITE_API_URL,
+      headers: {
+        Authorization: `Bearer ${this.config.accessToken}`,
+      },
+    })
+  }
 }

@@ -36,6 +36,9 @@ export enum AuditAction {
   ACTIVATE = 'activate',
   DEACTIVATE = 'deactivate',
   UPDATE_NETWORK_SETTINGS = 'update_network_settings',
+  GET_WEBHOOK_APP_PORTAL_ACCESS = 'get_webhook_app_portal_access',
+  SEND_WEBHOOK_MESSAGE = 'send_webhook_message',
+  INITIALIZE_WEBHOOKS = 'initialize_webhooks',
 
   // toolbox actions (must be prefixed with 'toolbox_')
   TOOLBOX_DELETE_FILE = 'toolbox_delete_file',
