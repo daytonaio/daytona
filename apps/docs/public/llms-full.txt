@@ -3764,8 +3764,6 @@ Connecting your local VSCode to a sandbox requires a few simple steps:
 2. Add a new SSH connection
 3. When prompted for the SSH connection URL, paste your SSH command from above.
 
-And that's it! VSCode will automatically install everything it needs to run inside the sandbox and you can use it just as you would locally.
-
 Find out more about the extension [here](https://code.visualstudio.com/docs/remote/ssh).
 
 ## Connecting with JetBrains IDEs
@@ -3776,8 +3774,6 @@ Connecting your local JetBrains IDEs to a sandbox requires a few simple steps:
 2. Add a new connection.
 3. When prompted for the SSH connection URL, paste your SSH command from above.
 4. Choose an IDE you want installed in your sandbox.
-
-And that's it! The JetBrains Gateway will automatically install everything it needs to run inside the sandbox and you can use it just as you would locally.
 
 ## Managing SSH Access
 
