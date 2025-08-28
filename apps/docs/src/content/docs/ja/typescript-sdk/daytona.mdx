@@ -3,8 +3,7 @@ title: "Daytona"
 hideTitleOnPage: true
 ---
 
-
-## Daytona
+## Daytona {#daytona}
 
 Daytona API と対話するためのメインクラス。
 Daytona サンドボックスの作成、管理、操作のためのメソッドを提供します。
@@ -14,10 +13,6 @@ Daytona サンドボックスの作成、管理、操作のためのメソッド
 
 - `snapshot` _SnapshotService_ - Daytona スナップショットを管理するサービス
 - `volume` _VolumeService_ - Daytona ボリュームを管理するサービス
-    
-
-
-
 
 **例:**
 
@@ -40,9 +35,9 @@ const daytona = new Daytona(config);
 @class
 ```
 
-### コンストラクター
+### コンストラクター {#constructors}
 
-#### new Daytona()
+#### new Daytona() {#new-daytona}
 
 ```ts
 new Daytona(config?: DaytonaConfig): Daytona
@@ -54,7 +49,6 @@ new Daytona(config?: DaytonaConfig): Daytona
 
 - `config?` _DaytonaConfig_ - 設定オプション
 
-
 **戻り値**:
 
 - `Daytona`
@@ -63,11 +57,11 @@ new Daytona(config?: DaytonaConfig): Daytona
 
 - `DaytonaError` - API キーが指定されていない場合
 
-### メソッド
+### メソッド {#methods}
 
-#### create()
+#### create() {#create}
 
-##### 呼び出しシグネチャ
+##### 呼び出しシグネチャ {#call-signature}
 
 ```ts
 create(params?: CreateSandboxFromSnapshotParams, options?: {
@@ -109,7 +103,7 @@ const params: CreateSandboxFromSnapshotParams = {
 const sandbox = await daytona.create(params, { timeout: 100 });
 ```
 
-##### 呼び出しシグネチャ
+##### 呼び出しシグネチャ {#call-signature}
 
 ```ts
 create(params?: CreateSandboxFromImageParams, options?: {
@@ -124,7 +118,7 @@ create(params?: CreateSandboxFromImageParams, options?: {
 
 - `params?` _CreateSandboxFromImageParams_ - イメージからサンドボックスを作成するためのパラメータ
 - `options?` _作成処理のオプション_
-- `onSnapshotCreateLogs?` _\(chunk: string\) =\> void_ - スナップショット作成ログを処理するコールバック関数
+- `onSnapshotCreateLogs?` _(chunk: string) => void_ - スナップショット作成ログを処理するコールバック関数
 - `timeout?` _number_ - タイムアウト（秒）（0 はタイムアウトなし、デフォルトは 60）
 
 **戻り値**:
@@ -158,9 +152,9 @@ const params: CreateSandboxFromImageParams = {
 const sandbox = await daytona.create(params, { timeout: 100, onSnapshotCreateLogs: console.log });
 ```
 
-***
+---
 
-#### delete()
+#### delete() {#delete}
 
 ```ts
 delete(sandbox: Sandbox, timeout: number): Promise<void>
@@ -173,7 +167,6 @@ delete(sandbox: Sandbox, timeout: number): Promise<void>
 - `sandbox` _Sandbox_ - 削除するサンドボックス
 - `timeout` _number = 60_ - タイムアウト（秒）（0 はタイムアウトなし、デフォルトは 60）
 
-
 **戻り値**:
 
 - `Promise<void>`
@@ -185,9 +178,9 @@ const sandbox = await daytona.get('my-sandbox-id');
 await daytona.delete(sandbox);
 ```
 
-***
+---
 
-#### findOne()
+#### findOne() {#findone}
 
 ```ts
 findOne(filter: SandboxFilter): Promise<Sandbox>
@@ -198,7 +191,6 @@ ID またはラベルでサンドボックスを検索します。
 **パラメータ**:
 
 - `filter` _SandboxFilter_ - サンドボックスのフィルター
-
 
 **戻り値**:
 
@@ -211,9 +203,9 @@ const sandbox = await daytona.findOne({ labels: { 'my-label': 'my-value' } });
 console.log(`Sandbox ID: ${sandbox.id}, State: ${sandbox.state}`);
 ```
 
-***
+---
 
-#### get()
+#### get() {#get}
 
 ```ts
 get(sandboxId: string): Promise<Sandbox>
@@ -224,7 +216,6 @@ ID でサンドボックスを取得します。
 **パラメータ**:
 
 - `sandboxId` _string_ - 取得するサンドボックスの ID
-
 
 **戻り値**:
 
@@ -237,9 +228,9 @@ const sandbox = await daytona.get('my-sandbox-id');
 console.log(`Sandbox state: ${sandbox.state}`);
 ```
 
-***
+---
 
-#### list()
+#### list() {#list}
 
 ```ts
 list(labels?: Record<string, string>): Promise<Sandbox[]>
@@ -249,8 +240,7 @@ list(labels?: Record<string, string>): Promise<Sandbox[]>
 
 **パラメータ**:
 
-- `labels?` _Record\<string, string\>_ - サンドボックスを絞り込むラベル
-
+- `labels?` _Record<string, string>_ - サンドボックスを絞り込むラベル
 
 **戻り値**:
 
@@ -265,9 +255,9 @@ for (const sandbox of sandboxes) {
 }
 ```
 
-***
+---
 
-#### start()
+#### start() {#start}
 
 ```ts
 start(sandbox: Sandbox, timeout?: number): Promise<void>
@@ -279,7 +269,6 @@ start(sandbox: Sandbox, timeout?: number): Promise<void>
 
 - `sandbox` _Sandbox_ - 起動するサンドボックス
 - `timeout?` _number_ - 任意のタイムアウト（秒）（0 はタイムアウトなし）
-
 
 **戻り値**:
 
@@ -293,9 +282,9 @@ const sandbox = await daytona.get('my-sandbox-id');
 await daytona.start(sandbox, 60);
 ```
 
-***
+---
 
-#### stop()
+#### stop() {#stop}
 
 ```ts
 stop(sandbox: Sandbox): Promise<void>
@@ -307,7 +296,6 @@ stop(sandbox: Sandbox): Promise<void>
 
 - `sandbox` _Sandbox_ - 停止するサンドボックス
 
-
 **戻り値**:
 
 - `Promise<void>`
@@ -318,7 +306,8 @@ stop(sandbox: Sandbox): Promise<void>
 const sandbox = await daytona.get('my-sandbox-id');
 await daytona.stop(sandbox);
 ```
-## CodeLanguage
+
+## CodeLanguage {#codelanguage}
 
 コード実行でサポートされているプログラミング言語
 
@@ -328,7 +317,7 @@ await daytona.stop(sandbox);
 - `PYTHON` ("python")
 - `TYPESCRIPT` ("typescript")
 
-## CreateSandboxBaseParams
+## CreateSandboxBaseParams {#createsandboxbaseparams}
 
 新しいサンドボックスを作成するための基本パラメータ。
 
@@ -337,15 +326,16 @@ await daytona.stop(sandbox);
 - `autoArchiveInterval?` _number_ - 自動アーカイブの間隔（分）。0 は最大間隔を使用することを意味します。デフォルトは 7 日。
 - `autoDeleteInterval?` _number_ - 自動削除の間隔（分）。負の値は無効、0 は停止時に即時削除を意味します。デフォルトでは自動削除は無効です。
 - `autoStopInterval?` _number_ - 自動停止の間隔（分）。0 は無効を意味します。デフォルトは 15 分。
-- `envVars?` _Record\<string, string\>_ - サンドボックスに設定する任意の環境変数
-- `labels?` _Record\<string, string\>_ - サンドボックスのラベル
+- `envVars?` _Record<string, string>_ - サンドボックスに設定する任意の環境変数
+- `labels?` _Record<string, string>_ - サンドボックスのラベル
 - `language?` _string_ - 直接コード実行用のプログラミング言語
 - `networkAllowList?` _string_ - サンドボックスで許可する CIDR ネットワークアドレスのカンマ区切りリスト
 - `networkBlockAll?` _boolean_ - サンドボックスのネットワークアクセスをすべてブロックするかどうか
 - `public?` _boolean_ - サンドボックスのポートプレビューを公開するかどうか
 - `user?` _string_ - サンドボックスで使用する任意の OS ユーザー
-- `volumes?` _VolumeMount\[\]_ - サンドボックスにマウントする任意のボリューム配列
-## CreateSandboxFromImageParams
+- `volumes?` _VolumeMount[]_ - サンドボックスにマウントする任意のボリューム配列
+
+## CreateSandboxFromImageParams {#createsandboxfromimageparams}
 
 新しいサンドボックスを作成するためのパラメータ。
 
@@ -354,19 +344,20 @@ await daytona.stop(sandbox);
 - `autoArchiveInterval?` _number_
 - `autoDeleteInterval?` _number_
 - `autoStopInterval?` _number_
-- `envVars?` _Record\<string, string\>_
-- `image` _string \| Image_ - サンドボックスに使用するカスタム Docker イメージ。Image オブジェクトが指定された場合は、
-    イメージが動的にビルドされます。
-- `labels?` _Record\<string, string\>_
+- `envVars?` _Record<string, string>_
+- `image` _string | Image_ - サンドボックスに使用するカスタム Docker イメージ。Image オブジェクトが指定された場合は、
+  イメージが動的にビルドされます。
+- `labels?` _Record<string, string>_
 - `language?` _string_
 - `networkAllowList?` _string_
 - `networkBlockAll?` _boolean_
 - `public?` _boolean_
 - `resources?` _Resources_ - サンドボックスのリソース割り当て。指定しない場合、サンドボックスは
-    既定のリソースを使用します。
+  既定のリソースを使用します。
 - `user?` _string_
-- `volumes?` _VolumeMount\[\]_
-## CreateSandboxFromSnapshotParams
+- `volumes?` _VolumeMount[]_
+
+## CreateSandboxFromSnapshotParams {#createsandboxfromsnapshotparams}
 
 スナップショットから新しいサンドボックスを作成するためのパラメータ。
 
@@ -375,16 +366,17 @@ await daytona.stop(sandbox);
 - `autoArchiveInterval?` _number_
 - `autoDeleteInterval?` _number_
 - `autoStopInterval?` _number_
-- `envVars?` _Record\<string, string\>_
-- `labels?` _Record\<string, string\>_
+- `envVars?` _Record<string, string>_
+- `labels?` _Record<string, string>_
 - `language?` _string_
 - `networkAllowList?` _string_
 - `networkBlockAll?` _boolean_
 - `public?` _boolean_
 - `snapshot?` _string_ - サンドボックスに使用するスナップショット名。
 - `user?` _string_
-- `volumes?` _VolumeMount\[\]_
-## DaytonaConfig
+- `volumes?` _VolumeMount[]_
+
+## DaytonaConfig {#daytonaconfig}
 
 Daytona クライアントを初期化するための設定オプション。
 
@@ -393,12 +385,10 @@ Daytona クライアントを初期化するための設定オプション。
 - `apiKey?` _string_ - Daytona API で認証するための API キー
 - `apiUrl?` _string_ - Daytona API の URL。ここで未設定で、かつ環境変数 DAYTONA_API_URL でも未設定の場合は、既定で 'https://app.daytona.io/api' が使用されます。
 - `jwtToken?` _string_ - Daytona API で認証するための JWT トークン。未設定の場合は、
-    環境変数 `DAYTONA_JWT_TOKEN` で指定するか、代わりに API キーを指定する必要があります。
+  環境変数 `DAYTONA_JWT_TOKEN` で指定するか、代わりに API キーを指定する必要があります。
 - `organizationId?` _string_ - JWT ベース認証で使用される組織 ID。JWT トークンが指定されている場合に必須で、ここで設定するか、環境変数 `DAYTONA_ORGANIZATION_ID` で設定する必要があります。
 - ~~`serverUrl?`~~ _string_ - **_非推奨_** - 代わりに `apiUrl` を使用してください。このプロパティは今後のバージョンで削除されます。
 - `target?` _string_ - サンドボックスのターゲット（ロケーション）
-    
-
 
 **例:**
 
@@ -410,7 +400,8 @@ const config: DaytonaConfig = {
 };
 const daytona = new Daytona(config);
 ```
-## Resources
+
+## Resources {#resources}
 
 サンドボックスのリソース割り当て。
 
@@ -420,8 +411,6 @@ const daytona = new Daytona(config);
 - `disk?` _number_ - サンドボックスのディスク割り当て（GiB）
 - `gpu?` _number_ - サンドボックスの GPU 割り当て（ユニット）
 - `memory?` _number_ - サンドボックスのメモリ割り当て（GiB）
-    
-
 
 **例:**
 
@@ -432,26 +421,25 @@ const resources: SandboxResources = {
     disk: 20    // 20GiB disk
 };
 ```
-## SandboxFilter
+
+## SandboxFilter {#sandboxfilter}
 
 サンドボックスのフィルター。
 
 **プロパティ**:
 
 - `id?` _string_ - 取得するサンドボックスの ID
-- `labels?` _Record\<string, string\>_ - サンドボックスを絞り込むためのラベル
-## VolumeMount
+- `labels?` _Record<string, string>_ - サンドボックスを絞り込むためのラベル
+
+## VolumeMount {#volumemount}
 
 サンドボックスのボリュームマウントを表します。
 
 **プロパティ**:
 
 - `mountPath` _string_ - サンドボックス上でボリュームをマウントするパス
-    
+
 - `volumeId` _string_ - マウントするボリュームのID
-    
-
-
 
 **継承:**
 
