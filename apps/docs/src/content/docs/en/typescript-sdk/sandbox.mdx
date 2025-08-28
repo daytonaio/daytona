@@ -282,6 +282,25 @@ const lsp = await sandbox.createLspServer('typescript', 'workspace/project');
 
 ***
 
+#### createSshAccess()
+
+```ts
+createSshAccess(expiresInMinutes?: number): Promise<SshAccessDto>
+```
+
+Creates an SSH access token for the sandbox.
+
+**Parameters**:
+
+- `expiresInMinutes?` _number_ - The number of minutes the SSH access token will be valid for.
+
+
+**Returns**:
+
+- `Promise<SshAccessDto>` - The SSH access token.
+
+***
+
 #### delete()
 
 ```ts
@@ -372,6 +391,25 @@ console.log(`Sandbox ${sandbox.id}:`);
 console.log(`State: ${sandbox.state}`);
 console.log(`Resources: ${sandbox.cpu} CPU, ${sandbox.memory} GiB RAM`);
 ```
+
+***
+
+#### revokeSshAccess()
+
+```ts
+revokeSshAccess(token: string): Promise<void>
+```
+
+Revokes an SSH access token for the sandbox.
+
+**Parameters**:
+
+- `token` _string_ - The token to revoke.
+
+
+**Returns**:
+
+- `Promise<void>`
 
 ***
 
@@ -574,6 +612,25 @@ const sandbox = await daytona.getCurrentSandbox('my-sandbox');
 await sandbox.stop();
 console.log('Sandbox stopped successfully');
 ```
+
+***
+
+#### validateSshAccess()
+
+```ts
+validateSshAccess(token: string): Promise<SshAccessValidationDto>
+```
+
+Validates an SSH access token for the sandbox.
+
+**Parameters**:
+
+- `token` _string_ - The token to validate.
+
+
+**Returns**:
+
+- `Promise<SshAccessValidationDto>` - The SSH access validation result.
 
 ***
 
