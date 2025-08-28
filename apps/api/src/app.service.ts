@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Injectable, Logger, OnApplicationBootstrap } from '@nestjs/common'
+import { Injectable, Logger, OnApplicationBootstrap, OnApplicationShutdown } from '@nestjs/common'
 import { DockerRegistryService } from './docker-registry/services/docker-registry.service'
 import { RegistryType } from './docker-registry/enums/registry-type.enum'
 import { OrganizationService } from './organization/services/organization.service'
@@ -13,11 +13,12 @@ import { EventEmitterReadinessWatcher } from '@nestjs/event-emitter'
 import { SnapshotService } from './sandbox/services/snapshot.service'
 import { SystemRole } from './user/enums/system-role.enum'
 import { TypedConfigService } from './config/typed-config.service'
+import { SchedulerRegistry } from '@nestjs/schedule'
 
 const DAYTONA_ADMIN_USER_ID = 'daytona-admin'
 
 @Injectable()
-export class AppService implements OnApplicationBootstrap {
+export class AppService implements OnApplicationBootstrap, OnApplicationShutdown {
   private readonly logger = new Logger(AppService.name)
 
   constructor(
@@ -28,13 +29,30 @@ export class AppService implements OnApplicationBootstrap {
     private readonly apiKeyService: ApiKeyService,
     private readonly eventEmitterReadinessWatcher: EventEmitterReadinessWatcher,
     private readonly snapshotService: SnapshotService,
+    private readonly schedulerRegistry: SchedulerRegistry,
   ) {}
 
+  async onApplicationShutdown(signal?: string) {
+    this.logger.log(`Received shutdown signal: ${signal}. Shutting down gracefully...`)
+    await this.stopAllCronJobs()
+  }
+
   async onApplicationBootstrap() {
+    if (this.configService.get('disableCronJobs') || this.configService.get('maintananceMode')) {
+      await this.stopAllCronJobs()
+    }
+
     await this.initializeAdminUser()
     await this.initializeTransientRegistry()
     await this.initializeInternalRegistry()
     await this.initializeDefaultSnapshot()
+  }
+
+  private async stopAllCronJobs(): Promise<void> {
+    for (const cronName of this.schedulerRegistry.getCronJobs().keys()) {
+      this.logger.debug(`Stopping cron job: ${cronName}`)
+      this.schedulerRegistry.deleteCronJob(cronName)
+    }
   }
 
   private async initializeAdminUser(): Promise<void> {
