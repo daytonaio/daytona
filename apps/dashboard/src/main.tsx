@@ -7,25 +7,24 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
 import { PostHogProviderWrapper } from './components/PostHogProviderWrapper'
-import { oidcConfig } from './auth/oidc-config'
-import { AuthProvider } from 'react-oidc-context'
 import App from './App'
 import './index.css'
 import { ErrorBoundary } from 'react-error-boundary'
 import { ErrorBoundaryFallback } from './components/ErrorBoundaryFallback'
+import { ConfigProvider } from './providers/ConfigProvider'
 
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement)
 
 root.render(
   <React.StrictMode>
     <ErrorBoundary FallbackComponent={ErrorBoundaryFallback}>
-      <PostHogProviderWrapper>
-        <AuthProvider {...oidcConfig}>
+      <ConfigProvider>
+        <PostHogProviderWrapper>
           <BrowserRouter>
             <App />
           </BrowserRouter>
-        </AuthProvider>
-      </PostHogProviderWrapper>
+        </PostHogProviderWrapper>
+      </ConfigProvider>
     </ErrorBoundary>
   </React.StrictMode>,
 )

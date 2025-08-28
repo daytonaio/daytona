@@ -14,13 +14,17 @@
       "configurations": {
         "production": {}
       },
-      "dependsOn": ["build-amd64"]
+      "dependsOn": ["build-amd64"],
+      "outputs": ["{workspaceRoot}/dist/libs/computer-use"],
+      "cache": true
     },
     "build-amd64": {
       "executor": "nx:run-commands",
       "options": {
         "command": "./hack/computer-use/build-computer-use-amd64.sh"
-      }
+      },
+      "outputs": ["{workspaceRoot}/dist/libs/computer-use-amd64"],
+      "cache": true
     },
     "format": {
       "executor": "nx:run-commands",

@@ -9,9 +9,11 @@ import { useAuth } from 'react-oidc-context'
 import LoadingFallback from '@/components/LoadingFallback'
 import { ApiClient } from '@/api/apiClient'
 import { useLocation } from 'react-router-dom'
+import { useConfig } from '@/hooks/useConfig'
 
 export const ApiProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, isAuthenticated, isLoading, signinRedirect } = useAuth()
+  const config = useConfig()
   const location = useLocation()
 
   const apiRef = useRef<ApiClient | null>(null)
@@ -21,7 +23,7 @@ export const ApiProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     if (user) {
       if (!apiRef.current) {
-        apiRef.current = new ApiClient(user.access_token)
+        apiRef.current = new ApiClient(config, user.access_token)
       } else {
         apiRef.current.setAccessToken(user.access_token)
       }
@@ -29,7 +31,7 @@ export const ApiProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     } else {
       setIsApiReady(false)
     }
-  }, [user])
+  }, [user, config])
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {

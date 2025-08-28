@@ -1,0 +1,4 @@
+insecure-entitlements = [ "network.host", "security.insecure" ]
+
+[registry."registry:5000"]
+  http = true
