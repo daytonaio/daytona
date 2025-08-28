@@ -184,59 +184,59 @@
     "objectID": 23
   },
   {
-    "title": "Custom Preview Proxy",
+    "title": "Custom Domain/Authentication",
     "description": "Daytona allows you to deploy your own custom preview proxy to handle preview URLs for sandboxes.",
     "tag": "Documentation",
-    "url": "/docs/custom-preview-proxy",
-    "slug": "/custom-preview-proxy",
+    "url": "/docs/custom-domain-authentication",
+    "slug": "/custom-domain-authentication",
     "objectID": 24
   },
   {
     "title": "How It Works",
     "description": "When a user visits a preview URL, your custom proxy receives the request and can:",
     "tag": "Documentation",
-    "url": "/docs/custom-preview-proxy#how-it-works",
-    "slug": "/custom-preview-proxy#how-it-works",
+    "url": "/docs/custom-domain-authentication#how-it-works",
+    "slug": "/custom-domain-authentication#how-it-works",
     "objectID": 25
   },
   {
     "title": "Daytona Headers",
     "description": "Your proxy can send special headers to control Daytona's behavior:",
     "tag": "Documentation",
-    "url": "/docs/custom-preview-proxy#daytona-headers",
-    "slug": "/custom-preview-proxy#daytona-headers",
+    "url": "/docs/custom-domain-authentication#daytona-headers",
+    "slug": "/custom-domain-authentication#daytona-headers",
     "objectID": 26
   },
   {
     "title": "Disable Preview Warning",
     "description": "To disable Daytona's preview warning page, send:",
     "tag": "Documentation",
-    "url": "/docs/custom-preview-proxy#disable-preview-warning",
-    "slug": "/custom-preview-proxy#disable-preview-warning",
+    "url": "/docs/custom-domain-authentication#disable-preview-warning",
+    "slug": "/custom-domain-authentication#disable-preview-warning",
     "objectID": 27
   },
   {
     "title": "Disable CORS",
     "description": "To override Daytona's default CORS settings, send:",
     "tag": "Documentation",
-    "url": "/docs/custom-preview-proxy#disable-cors",
-    "slug": "/custom-preview-proxy#disable-cors",
+    "url": "/docs/custom-domain-authentication#disable-cors",
+    "slug": "/custom-domain-authentication#disable-cors",
     "objectID": 28
   },
   {
     "title": "Authentication",
     "description": "For private preview links, users should send:",
     "tag": "Documentation",
-    "url": "/docs/custom-preview-proxy#authentication",
-    "slug": "/custom-preview-proxy#authentication",
+    "url": "/docs/custom-domain-authentication#authentication",
+    "slug": "/custom-domain-authentication#authentication",
     "objectID": 29
   },
   {
     "title": "Examples",
     "description": "You can find examples of custom preview proxies on our [Github](https://github.",
     "tag": "Documentation",
-    "url": "/docs/custom-preview-proxy#examples",
-    "slug": "/custom-preview-proxy#examples",
+    "url": "/docs/custom-domain-authentication#examples",
+    "slug": "/custom-domain-authentication#examples",
     "objectID": 30
   },
   {
@@ -1408,11 +1408,11 @@
     "objectID": 176
   },
   {
-    "title": "Network Settings",
-    "description": "Daytona Sandboxes provide configurable network access controls to enhance security and manage connectivity.",
+    "title": "Network Settings (Firewall)",
+    "description": "Daytona Sandboxes provide configurable network firewall controls to enhance security and manage connectivity.",
     "tag": "Documentation",
-    "url": "/docs/sandbox-management#network-settings",
-    "slug": "/sandbox-management#network-settings",
+    "url": "/docs/sandbox-management#network-settings-firewall",
+    "slug": "/sandbox-management#network-settings-firewall",
     "objectID": 177
   },
   {
