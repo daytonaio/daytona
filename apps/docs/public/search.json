@@ -1600,91 +1600,91 @@
     "objectID": 200
   },
   {
-    "title": "SSH Gateway",
-    "description": "You can connect to any of your sandboxes via SSH using token-based authentication through the SSH Gateway.",
+    "title": "SSH Access",
+    "description": "You can connect to any of your sandboxes via SSH using token-based authentication.",
     "tag": "Documentation",
-    "url": "/docs/ssh-gateway",
-    "slug": "/ssh-gateway",
+    "url": "/docs/ssh-access",
+    "slug": "/ssh-access",
     "objectID": 201
   },
   {
     "title": "Creating an SSH Access Token",
     "description": "To connect to a sandbox, you'll need to create an SSH access token first.",
     "tag": "Documentation",
-    "url": "/docs/ssh-gateway#creating-an-ssh-access-token",
-    "slug": "/ssh-gateway#creating-an-ssh-access-token",
+    "url": "/docs/ssh-access#creating-an-ssh-access-token",
+    "slug": "/ssh-access#creating-an-ssh-access-token",
     "objectID": 202
   },
   {
     "title": "Create SSH access token",
     "description": "",
     "tag": "Documentation",
-    "url": "/docs/ssh-gateway#create-ssh-access-token",
-    "slug": "/ssh-gateway#create-ssh-access-token",
+    "url": "/docs/ssh-access#create-ssh-access-token",
+    "slug": "/ssh-access#create-ssh-access-token",
     "objectID": 203
   },
   {
     "title": "Connection Command",
     "description": "Once you have your token, connect using:",
     "tag": "Documentation",
-    "url": "/docs/ssh-gateway#connection-command",
-    "slug": "/ssh-gateway#connection-command",
+    "url": "/docs/ssh-access#connection-command",
+    "slug": "/ssh-access#connection-command",
     "objectID": 204
   },
   {
     "title": "Connecting with VSCode",
     "description": "Connecting your local VSCode to a sandbox requires a few simple steps:",
     "tag": "Documentation",
-    "url": "/docs/ssh-gateway#connecting-with-vscode",
-    "slug": "/ssh-gateway#connecting-with-vscode",
+    "url": "/docs/ssh-access#connecting-with-vscode",
+    "slug": "/ssh-access#connecting-with-vscode",
     "objectID": 205
   },
   {
     "title": "Connecting with JetBrains IDEs",
     "description": "Connecting your local JetBrains IDEs to a sandbox requires a few simple steps:",
     "tag": "Documentation",
-    "url": "/docs/ssh-gateway#connecting-with-jetbrains-ides",
-    "slug": "/ssh-gateway#connecting-with-jetbrains-ides",
+    "url": "/docs/ssh-access#connecting-with-jetbrains-ides",
+    "slug": "/ssh-access#connecting-with-jetbrains-ides",
     "objectID": 206
   },
   {
     "title": "Managing SSH Access",
     "description": "",
     "tag": "Documentation",
-    "url": "/docs/ssh-gateway#managing-ssh-access",
-    "slug": "/ssh-gateway#managing-ssh-access",
+    "url": "/docs/ssh-access#managing-ssh-access",
+    "slug": "/ssh-access#managing-ssh-access",
     "objectID": 207
   },
   {
     "title": "Token Expiration",
     "description": "SSH access tokens expire automatically for security:",
     "tag": "Documentation",
-    "url": "/docs/ssh-gateway#token-expiration",
-    "slug": "/ssh-gateway#token-expiration",
+    "url": "/docs/ssh-access#token-expiration",
+    "slug": "/ssh-access#token-expiration",
     "objectID": 208
   },
   {
     "title": "Revoking Access",
     "description": "You can revoke SSH access tokens at any time:",
     "tag": "Documentation",
-    "url": "/docs/ssh-gateway#revoking-access",
-    "slug": "/ssh-gateway#revoking-access",
+    "url": "/docs/ssh-access#revoking-access",
+    "slug": "/ssh-access#revoking-access",
     "objectID": 209
   },
   {
     "title": "Revoke all SSH access for the sandbox",
     "description": "",
     "tag": "Documentation",
-    "url": "/docs/ssh-gateway#revoke-all-ssh-access-for-the-sandbox",
-    "slug": "/ssh-gateway#revoke-all-ssh-access-for-the-sandbox",
+    "url": "/docs/ssh-access#revoke-all-ssh-access-for-the-sandbox",
+    "slug": "/ssh-access#revoke-all-ssh-access-for-the-sandbox",
     "objectID": 210
   },
   {
     "title": "Revoke specific SSH access for the sandbox",
     "description": "",
     "tag": "Documentation",
-    "url": "/docs/ssh-gateway#revoke-specific-ssh-access-for-the-sandbox",
-    "slug": "/ssh-gateway#revoke-specific-ssh-access-for-the-sandbox",
+    "url": "/docs/ssh-access#revoke-specific-ssh-access-for-the-sandbox",
+    "slug": "/ssh-access#revoke-specific-ssh-access-for-the-sandbox",
     "objectID": 211
   },
   {
