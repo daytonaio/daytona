@@ -10,22 +10,25 @@ import (
 	"github.com/daytonaio/runner/pkg/docker"
 	"github.com/daytonaio/runner/pkg/netrules"
 	"github.com/daytonaio/runner/pkg/services"
+	"github.com/daytonaio/runner/pkg/sshgateway"
 )
 
 type RunnerInstanceConfig struct {
-	Cache           cache.IRunnerCache
-	Docker          *docker.DockerClient
-	SandboxService  *services.SandboxService
-	MetricsService  *services.MetricsService
-	NetRulesManager *netrules.NetRulesManager
+	Cache             cache.IRunnerCache
+	Docker            *docker.DockerClient
+	SandboxService    *services.SandboxService
+	MetricsService    *services.MetricsService
+	NetRulesManager   *netrules.NetRulesManager
+	SSHGatewayService *sshgateway.Service
 }
 
 type Runner struct {
-	Cache           cache.IRunnerCache
-	Docker          *docker.DockerClient
-	SandboxService  *services.SandboxService
-	MetricsService  *services.MetricsService
-	NetRulesManager *netrules.NetRulesManager
+	Cache             cache.IRunnerCache
+	Docker            *docker.DockerClient
+	SandboxService    *services.SandboxService
+	MetricsService    *services.MetricsService
+	NetRulesManager   *netrules.NetRulesManager
+	SSHGatewayService *sshgateway.Service
 }
 
 var runner *Runner
@@ -41,11 +44,12 @@ func GetInstance(config *RunnerInstanceConfig) *Runner {
 		}
 
 		runner = &Runner{
-			Cache:           config.Cache,
-			Docker:          config.Docker,
-			SandboxService:  config.SandboxService,
-			MetricsService:  config.MetricsService,
-			NetRulesManager: config.NetRulesManager,
+			Cache:             config.Cache,
+			Docker:            config.Docker,
+			SandboxService:    config.SandboxService,
+			MetricsService:    config.MetricsService,
+			NetRulesManager:   config.NetRulesManager,
+			SSHGatewayService: config.SSHGatewayService,
 		}
 	}
 

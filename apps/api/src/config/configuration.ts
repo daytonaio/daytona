@@ -89,6 +89,7 @@ const configuration = {
     authToken: process.env.SVIX_AUTH_TOKEN,
     serverUrl: process.env.SVIX_SERVER_URL,
   },
+  sshGatewayApiKey: process.env.SSH_GATEWAY_API_KEY,
 }
 
 export { configuration }

@@ -45,6 +45,7 @@ import { SandboxStartAction } from './managers/sandbox-actions/sandbox-start.act
 import { SandboxStopAction } from './managers/sandbox-actions/sandbox-stop.action'
 import { SandboxDestroyAction } from './managers/sandbox-actions/sandbox-destroy.action'
 import { SandboxArchiveAction } from './managers/sandbox-actions/sandbox-archive.action'
+import { SshAccess } from './entities/ssh-access.entity'
 
 @Module({
   imports: [
@@ -52,7 +53,17 @@ import { SandboxArchiveAction } from './managers/sandbox-actions/sandbox-archive
     AuthModule,
     DockerRegistryModule,
     OrganizationModule,
-    TypeOrmModule.forFeature([Sandbox, Runner, Snapshot, BuildInfo, SnapshotRunner, DockerRegistry, WarmPool, Volume]),
+    TypeOrmModule.forFeature([
+      Sandbox,
+      Runner,
+      Snapshot,
+      BuildInfo,
+      SnapshotRunner,
+      DockerRegistry,
+      WarmPool,
+      Volume,
+      SshAccess,
+    ]),
   ],
   controllers: [
     SandboxController,

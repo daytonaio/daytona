@@ -46,6 +46,9 @@ import { isValidUuid } from '../../common/utils/uuid'
 import { RunnerAdapterFactory } from '../runner-adapter/runnerAdapter'
 import { validateNetworkAllowList } from '../utils/network-validation.util'
 import { OrganizationUsageService } from '../../organization/services/organization-usage.service'
+import { SshAccess } from '../entities/ssh-access.entity'
+import { nanoid } from 'nanoid'
+import { SshAccessValidationDto } from '../dto/ssh-access.dto'
 
 const DEFAULT_CPU = 1
 const DEFAULT_MEMORY = 1
@@ -65,6 +68,8 @@ export class SandboxService {
     private readonly runnerRepository: Repository<Runner>,
     @InjectRepository(BuildInfo)
     private readonly buildInfoRepository: Repository<BuildInfo>,
+    @InjectRepository(SshAccess)
+    private readonly sshAccessRepository: Repository<SshAccess>,
     private readonly runnerService: RunnerService,
     private readonly configService: TypedConfigService,
     private readonly warmPoolService: SandboxWarmPoolService,
@@ -929,5 +934,67 @@ export class SandboxService {
     validateNetworkAllowList(networkAllowList)
 
     return networkAllowList
+  }
+
+  async createSshAccess(sandboxId: string, expiresInMinutes = 60): Promise<SshAccess> {
+    //  check if sandbox exists
+    await this.findOne(sandboxId)
+
+    // Revoke any existing SSH access for this sandbox
+    await this.revokeSshAccess(sandboxId)
+
+    const sshAccess = new SshAccess()
+    sshAccess.sandboxId = sandboxId
+    sshAccess.token = nanoid(32)
+    sshAccess.expiresAt = new Date(Date.now() + expiresInMinutes * 60 * 1000)
+
+    return await this.sshAccessRepository.save(sshAccess)
+  }
+
+  async revokeSshAccess(sandboxId: string, token?: string): Promise<void> {
+    if (token) {
+      // Revoke specific SSH access by token
+      await this.sshAccessRepository.delete({ sandboxId, token })
+    } else {
+      // Revoke all SSH access for the sandbox (backward compatibility)
+      await this.sshAccessRepository.delete({ sandboxId })
+    }
+  }
+
+  async validateSshAccess(token: string): Promise<SshAccessValidationDto> {
+    const sshAccess = await this.sshAccessRepository.findOne({
+      where: {
+        token,
+      },
+      relations: ['sandbox'],
+    })
+
+    if (!sshAccess) {
+      return { valid: false, sandboxId: null }
+    }
+
+    // Check if token is expired
+    const isExpired = sshAccess.expiresAt < new Date()
+    if (isExpired) {
+      return { valid: false, sandboxId: null }
+    }
+
+    // Get runner information if sandbox exists
+    if (sshAccess.sandbox && sshAccess.sandbox.runnerId) {
+      const runner = await this.runnerRepository.findOne({
+        where: { id: sshAccess.sandbox.runnerId },
+      })
+
+      if (runner) {
+        return {
+          valid: true,
+          sandboxId: sshAccess.sandbox.id,
+          runnerId: runner.id,
+          runnerDomain: runner.domain,
+        }
+      }
+    }
+
+    return { valid: true, sandboxId: sshAccess.sandbox.id }
   }
 }
