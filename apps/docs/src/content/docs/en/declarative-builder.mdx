@@ -178,19 +178,20 @@ This Snapshot will stay visible in the Daytona dashboard and be permanently cach
     fs.writeFileSync(localFilePath, localFileContent)
 
     // Create a Python image with common data science packages
-    const image = Image.debianSlim('3.12')
-        .pipInstall(['numpy', 'pandas', 'matplotlib', 'scipy', 'scikit-learn'])
-        .runCommands(
-          'apt-get update && apt-get install -y git',
-          'groupadd -r daytona && useradd -r -g daytona -m daytona',
-          'mkdir -p /home/daytona/workspace'
-        )
-        .dockerfileCommands(['USER daytona'])
-        .workdir('/home/daytona/workspace')
-        .env({
-            MY_ENV_VAR: 'My Environment Variable',
-        })
-        .addLocalFile(localFilePath, '/home/daytona/workspace/file_example.txt')
+    let image = Image.debianSlim('3.12')
+    .pipInstall(['numpy', 'pandas', 'matplotlib', 'scipy', 'scikit-learn'])
+    .runCommands(
+      'apt-get update && apt-get install -y git',
+      'groupadd -r daytona && useradd -r -g daytona -m daytona',
+      'mkdir -p /home/daytona/workspace'
+    )
+    image = await image.dockerfileCommands(['USER daytona'])
+    image = image
+      .workdir('/home/daytona/workspace')
+      .env({
+          MY_ENV_VAR: 'My Environment Variable',
+      })
+    image = await image.addLocalFile(localFilePath, '/home/daytona/workspace/file_example.txt')
 
     // Create the Snapshot and stream the build logs
     console.log(`=== Creating Snapshot: ${snapshotName} ===`)
