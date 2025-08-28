@@ -11,9 +11,16 @@ func (manager *NetRulesManager) AssignNetworkRules(name string, sourceIp string)
 	manager.mu.Lock()
 	defer manager.mu.Unlock()
 
-	if err := manager.ipt.InsertUnique("filter", "DOCKER-USER", 1, "-j", chainName, "-s", sourceIp, "-p", "all"); err != nil {
+	// check does the chain exist
+	exists, err := manager.ipt.ChainExists("filter", chainName)
+	if err != nil {
 		return err
 	}
 
-	return manager.saveIptablesRules()
+	// return if the chain does not exist
+	if !exists {
+		return nil
+	}
+
+	return manager.ipt.InsertUnique("filter", "DOCKER-USER", 1, "-j", chainName, "-s", sourceIp, "-p", "all")
 }

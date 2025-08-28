@@ -89,6 +89,8 @@ const configuration = {
     authToken: process.env.SVIX_AUTH_TOKEN,
     serverUrl: process.env.SVIX_SERVER_URL,
   },
+  organizationSandboxDefaultLimitedNetworkEgress:
+    process.env.ORGANIZATION_SANDBOX_DEFAULT_LIMITED_NETWORK_EGRESS === 'true',
 }
 
 export { configuration }

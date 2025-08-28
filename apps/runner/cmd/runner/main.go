@@ -53,9 +53,15 @@ func main() {
 	}
 
 	// Initialize net rules manager
-	persistent := cfg.Environment == "production"
+	persistent := cfg.Environment != "development"
 	netRulesManager, err := netrules.NewNetRulesManager(persistent)
 	if err != nil {
+		log.Error(err)
+		return
+	}
+
+	// Start net rules manager
+	if err = netRulesManager.Start(); err != nil {
 		log.Error(err)
 		return
 	}
@@ -69,6 +75,7 @@ func main() {
 		}
 	}()
 	defer monitor.Stop()
+	defer netRulesManager.Stop()
 
 	runnerCache := cache.NewInMemoryRunnerCache(cache.InMemoryRunnerCacheConfig{
 		Cache:         make(map[string]*models.CacheData),
