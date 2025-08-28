@@ -13,6 +13,8 @@ import {
   BuildInfo,
   SandboxBackupStateEnum,
   Configuration,
+  SshAccessDto,
+  SshAccessValidationDto,
 } from '@daytonaio/api-client'
 import { FileSystem } from './FileSystem'
 import { Git } from './Git'
@@ -447,6 +449,36 @@ export class Sandbox implements SandboxDto {
   public async archive(): Promise<void> {
     await this.sandboxApi.archiveSandbox(this.id)
     await this.refreshData()
+  }
+
+  /**
+   * Creates an SSH access token for the sandbox.
+   *
+   * @param {number} expiresInMinutes - The number of minutes the SSH access token will be valid for.
+   * @returns {Promise<SshAccessDto>} The SSH access token.
+   */
+  public async createSshAccess(expiresInMinutes?: number): Promise<SshAccessDto> {
+    return (await this.sandboxApi.createSshAccess(this.id, undefined, expiresInMinutes)).data
+  }
+
+  /**
+   * Revokes an SSH access token for the sandbox.
+   *
+   * @param {string} token - The token to revoke.
+   * @returns {Promise<void>}
+   */
+  public async revokeSshAccess(token: string): Promise<void> {
+    await this.sandboxApi.revokeSshAccess(this.id, undefined, token)
+  }
+
+  /**
+   * Validates an SSH access token for the sandbox.
+   *
+   * @param {string} token - The token to validate.
+   * @returns {Promise<SshAccessValidationDto>} The SSH access validation result.
+   */
+  public async validateSshAccess(token: string): Promise<SshAccessValidationDto> {
+    return (await this.sandboxApi.validateSshAccess(token)).data
   }
 
   private async getRootDir(): Promise<string> {

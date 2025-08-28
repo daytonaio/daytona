@@ -10,7 +10,7 @@ from typing import Dict, Optional
 
 from daytona_api_client import PortPreviewUrl
 from daytona_api_client import Sandbox as SandboxDto
-from daytona_api_client import SandboxApi, ToolboxApi
+from daytona_api_client import SandboxApi, SshAccessDto, SshAccessValidationDto, ToolboxApi
 from pydantic import ConfigDict, PrivateAttr
 
 from .._utils.errors import intercept_errors
@@ -444,6 +444,33 @@ class Sandbox(SandboxDto):
         """
         self._sandbox_api.archive_sandbox(self.id)
         self.refresh_data()
+
+    @intercept_errors(message_prefix="Failed to create SSH access: ")
+    def create_ssh_access(self, expires_in_minutes: Optional[int] = None) -> SshAccessDto:
+        """Creates an SSH access token for the sandbox.
+
+        Args:
+            expires_in_minutes (Optional[int]): The number of minutes the SSH access token will be valid for.
+        """
+        return (self._sandbox_api.create_ssh_access(self.id, expires_in_minutes=expires_in_minutes)).data
+
+    @intercept_errors(message_prefix="Failed to revoke SSH access: ")
+    def revoke_ssh_access(self, token: str) -> None:
+        """Revokes an SSH access token for the sandbox.
+
+        Args:
+            token (str): The token to revoke.
+        """
+        self._sandbox_api.revoke_ssh_access(self.id, token)
+
+    @intercept_errors(message_prefix="Failed to validate SSH access: ")
+    def validate_ssh_access(self, token: str) -> SshAccessValidationDto:
+        """Validates an SSH access token for the sandbox.
+
+        Args:
+            token (str): The token to validate.
+        """
+        return (self._sandbox_api.validate_ssh_access(token)).data
 
     def __get_root_dir(self) -> str:
         if not self._root_dir:

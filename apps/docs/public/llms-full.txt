@@ -1,5 +1,5 @@
 # Daytona Documentation v0.0.0-dev
-# Generated on: 2025-08-27
+# Generated on: 2025-08-28
 
 
 title: API Keys
@@ -3458,6 +3458,7 @@ Full example:
 
     ```
 
+
     ```typescript
     import { Daytona } from '@daytonaio/sdk'
 
@@ -3489,6 +3490,7 @@ Full example:
 
     main()
     ```
+
 
 ### Snapshot Resources
 
@@ -3534,6 +3536,7 @@ Check your available resources and limits in the [dashboard](https://app.daytona
 
     ```
 
+
     ```typescript
     import { Daytona, Image } from "@daytonaio/sdk";
 
@@ -3562,6 +3565,7 @@ Check your available resources and limits in the [dashboard](https://app.daytona
 
     main();
     ```
+
 
 :::note
 All resource parameters are optional. If not specified, Daytona will use the default values.
