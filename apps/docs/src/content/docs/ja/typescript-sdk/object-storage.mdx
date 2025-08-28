@@ -3,17 +3,18 @@ title: "ObjectStorage"
 hideTitleOnPage: true
 ---
 
-## ObjectStorage {#objectstorage}
+
+## ObjectStorage
 
 オブジェクトストレージサービスとやり取りするための ObjectStorage クラス。
 
-### Param {#param}
+### Param
 
 オブジェクトストレージサービスの構成。
 
-### Constructors {#constructors}
+### Constructors
 
-#### new ObjectStorage() {#new-objectstorage}
+#### new ObjectStorage()
 
 ```ts
 new ObjectStorage(config: ObjectStorageConfig): ObjectStorage
@@ -23,13 +24,14 @@ new ObjectStorage(config: ObjectStorageConfig): ObjectStorage
 
 - `config` _ObjectStorageConfig_
 
+
 **Returns**:
 
 - `ObjectStorage`
 
-### Methods {#methods}
+### Methods
 
-#### upload() {#upload}
+#### upload()
 
 ```ts
 upload(
@@ -46,13 +48,14 @@ archiveBasePath: string): Promise<string>
 - `organizationId` _string_ - アップロードに使用する組織ID。
 - `archiveBasePath` _string_ - アーカイブで使用するベースパス。
 
+
 **Returns**:
 
 - `Promise<string>` - アップロードされたファイルまたはディレクトリのハッシュ値。
+***
 
----
 
-## ObjectStorageConfig {#objectstorageconfig}
+## ObjectStorageConfig
 
 ObjectStorage クラスの設定。
 

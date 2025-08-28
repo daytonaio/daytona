@@ -3,7 +3,7 @@ title: "AsyncObjectStorage"
 hideTitleOnPage: true
 ---
 
-## AsyncObjectStorage {#asyncobjectstorage}
+## AsyncObjectStorage
 
 ```python
 class AsyncObjectStorage()
@@ -19,7 +19,7 @@ class AsyncObjectStorage()
 - `aws_session_token` _str_ - オブジェクトストレージサービスのセッショントークン。一時的な認証情報に使用。
 - `bucket_name` _str_ - 使用するバケット名。既定値は "daytona-volume-builds"。
 
-#### AsyncObjectStorage.upload {#asyncobjectstorageupload}
+#### AsyncObjectStorage.upload
 
 ```python
 async def upload(path: str,
@@ -34,7 +34,10 @@ async def upload(path: str,
 - `path` _str_ - アップロードするファイルのパス。
 - `organization_id` _str_ - 使用する組織ID。
 - `archive_base_path` _str_ - アーカイブに使用するベースパス。
+  
 
 **Returns**:
 
 - `str` - アップロードしたファイルのハッシュ値。
+
+
