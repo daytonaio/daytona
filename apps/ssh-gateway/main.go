@@ -43,6 +43,7 @@ func main() {
 	apiURL := getEnv("API_URL", "http://localhost:3000")
 	apiKey := getEnv("API_KEY", "")
 	sshPkPath := getEnv("SSH_PK_PATH", "")
+	sshHostKeyPath := getEnv("SSH_HOST_KEY_PATH", "")
 
 	if apiKey == "" {
 		log.Fatal("API_KEY environment variable is required")
@@ -52,9 +53,18 @@ func main() {
 		log.Fatal("SSH_PK_PATH environment variable is required")
 	}
 
+	if sshHostKeyPath == "" {
+		log.Fatal("SSH_HOST_KEY_PATH environment variable is required")
+	}
+
 	// Check if the private key file exists and is readable
 	if _, err := os.Stat(sshPkPath); os.IsNotExist(err) {
 		log.Fatalf("SSH private key file does not exist: %s", sshPkPath)
+	}
+
+	// Check if the host key file exists and is readable
+	if _, err := os.Stat(sshHostKeyPath); os.IsNotExist(err) {
+		log.Fatalf("SSH host key file does not exist: %s", sshHostKeyPath)
 	}
 
 	clientConfig := apiclient.NewConfiguration()
@@ -72,10 +82,10 @@ func main() {
 		Transport: http.DefaultTransport,
 	}
 
-	// Generate a temporary host key for the gateway
-	hostKey, err := generateHostKey()
+	// Load the host key from file
+	hostKey, err := loadHostKeyFromFile(sshHostKeyPath)
 	if err != nil {
-		log.Fatalf("Failed to generate host key: %v", err)
+		log.Fatalf("Failed to load host key: %v", err)
 	}
 
 	// Load the private key from file
@@ -95,6 +105,7 @@ func main() {
 		publicKey:  publicKey,
 	}
 
+	log.Printf("Host key loaded from %s", sshHostKeyPath)
 	log.Printf("Private key loaded from %s", sshPkPath)
 	log.Printf("Public key generated: %s", string(ssh.MarshalAuthorizedKey(publicKey)))
 
@@ -106,54 +117,8 @@ func main() {
 
 func (g *SSHGateway) Start() error {
 	serverConfig := &ssh.ServerConfig{
-		// Allow no client auth initially, we'll handle it in the PublicKeyCallback
-		NoClientAuth: false,
-		// Custom authentication that treats username as token
-		PublicKeyCallback: func(conn ssh.ConnMetadata, key ssh.PublicKey) (*ssh.Permissions, error) {
-			// Extract token from username
-			token := conn.User()
-			if token == "" {
-				return nil, fmt.Errorf("no token provided")
-			}
-
-			log.Printf("Validating token: %s", token)
-
-			// Validate the token using the API
-			validation, _, err := g.apiClient.SandboxAPI.ValidateSshAccess(context.Background()).Token(token).Execute()
-			if err != nil {
-				log.Printf("Failed to validate SSH access: %v", err)
-				return nil, fmt.Errorf("authentication failed")
-			}
-
-			if !validation.Valid {
-				log.Printf("Invalid token: %s", token)
-				return nil, fmt.Errorf("invalid or expired token")
-			}
-
-			if validation.RunnerId == nil {
-				log.Printf("No runner ID returned for token: %s", token)
-				return nil, fmt.Errorf("no runner available")
-			}
-
-			runnerDomain := ""
-			if validation.RunnerDomain != nil {
-				runnerDomain = *validation.RunnerDomain
-			}
-
-			log.Printf("Token validated, returning permissions for runner: %s", validation.RunnerId)
-
-			// Return permissions with runner information
-			// Note: We don't check sandbox state here - we'll do that in the connection handler
-			// to allow us to close the connection with a proper error message
-			return &ssh.Permissions{
-				Extensions: map[string]string{
-					"runner-id":     *validation.RunnerId,
-					"runner-domain": runnerDomain,
-					"token":         token,
-					"sandbox-id":    validation.SandboxId,
-				},
-			}, nil
-		},
+		// Allow no client auth initially, we'll handle it in the connection handler
+		NoClientAuth: true,
 		// Disable password authentication completely
 		PasswordCallback: func(conn ssh.ConnMetadata, password []byte) (*ssh.Permissions, error) {
 			return nil, fmt.Errorf("password authentication not allowed")
@@ -199,13 +164,44 @@ func (g *SSHGateway) handleConnection(conn net.Conn, serverConfig *ssh.ServerCon
 	}
 	defer serverConn.Close()
 
-	// Extract runner information from permissions
-	runnerID := serverConn.Permissions.Extensions["runner-id"]
-	runnerDomain := serverConn.Permissions.Extensions["runner-domain"]
-	token := serverConn.Permissions.Extensions["token"]
-	sandboxId := serverConn.Permissions.Extensions["sandbox-id"]
+	// Extract token from username and validate it
+	token := serverConn.User()
+	if token == "" {
+		log.Printf("No token provided in username")
+		conn.Close()
+		return
+	}
 
-	log.Printf("SSH connection established for runner: %s", runnerID)
+	log.Printf("Validating token: %s", token)
+
+	// Validate the token using the API
+	validation, _, err := g.apiClient.SandboxAPI.ValidateSshAccess(context.Background()).Token(token).Execute()
+	if err != nil {
+		log.Printf("Failed to validate SSH access: %v", err)
+		conn.Close()
+		return
+	}
+
+	if !validation.Valid {
+		log.Printf("Invalid token: %s", token)
+		conn.Close()
+		return
+	}
+
+	if validation.RunnerId == nil {
+		log.Printf("No runner ID returned for token: %s", token)
+		conn.Close()
+		return
+	}
+
+	runnerID := *validation.RunnerId
+	runnerDomain := ""
+	if validation.RunnerDomain != nil {
+		runnerDomain = *validation.RunnerDomain
+	}
+	sandboxId := validation.SandboxId
+
+	log.Printf("Token validated, SSH connection established for runner: %s", runnerID)
 
 	// Check if the sandbox is started before proceeding
 	if sandboxId != "" {
@@ -450,6 +446,20 @@ func loadPrivateKeyFromFile(filePath string) (ssh.Signer, error) {
 	signer, err := parsePrivateKey(string(bytes))
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse private key from file %s: %w", filePath, err)
+	}
+
+	return signer, nil
+}
+
+func loadHostKeyFromFile(filePath string) (ssh.Signer, error) {
+	bytes, err := os.ReadFile(filePath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read host key file %s: %w", filePath, err)
+	}
+
+	signer, err := ssh.ParsePrivateKey(bytes)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse host key from file %s: %w", filePath, err)
 	}
 
 	return signer, nil

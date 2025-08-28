@@ -124,6 +124,7 @@ func main() {
 		sshGatewayService = sshgateway.NewService(dockerClient)
 
 		go func() {
+			log.Info("Starting SSH Gateway")
 			if err := sshGatewayService.Start(ctx); err != nil {
 				log.Errorf("SSH Gateway error: %v", err)
 			}

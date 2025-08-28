@@ -4,13 +4,21 @@
 package sshgateway
 
 import (
+	"crypto/rand"
+	"crypto/rsa"
+	"crypto/x509"
+	"encoding/pem"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strconv"
+
+	"golang.org/x/crypto/ssh"
 )
 
 const (
-	SSH_GATEWAY_PORT = 2220
+	SSH_GATEWAY_PORT  = 2220
+	SSH_HOST_KEY_PATH = "/workspaces/daytona/hack/runner-ssh-host-key/id_rsa"
 )
 
 // IsSSHGatewayEnabled checks if the SSH gateway should be enabled
@@ -38,10 +46,60 @@ func GetSSHPublicKey() (string, error) {
 }
 
 // GetSSHHostKey returns the SSH host key from configuration
-func GetSSHHostKey() (string, error) {
-	hostKey := os.Getenv("SSH_HOST_KEY")
-	if hostKey == "" {
-		return "", fmt.Errorf("SSH_HOST_KEY environment variable not set")
+func GetSSHHostKey() (ssh.Signer, error) {
+	// Check if host key file exists
+	if _, err := os.Stat(SSH_HOST_KEY_PATH); os.IsNotExist(err) {
+		// Generate new host key if file doesn't exist
+		if err := generateAndSaveHostKey(); err != nil {
+			return nil, fmt.Errorf("failed to generate host key: %w", err)
+		}
 	}
-	return hostKey, nil
+
+	// Read the host key file
+	hostKeyBytes, err := os.ReadFile(SSH_HOST_KEY_PATH)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read host key file: %w", err)
+	}
+
+	// Parse the private key to get the public key
+	signer, err := ssh.ParsePrivateKey(hostKeyBytes)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse host key: %w", err)
+	}
+
+	return signer, nil
+}
+
+// generateAndSaveHostKey generates a new RSA host key and saves it to the file
+func generateAndSaveHostKey() error {
+	// Create directory if it doesn't exist
+	dir := filepath.Dir(SSH_HOST_KEY_PATH)
+	if err := os.MkdirAll(dir, 0700); err != nil {
+		return fmt.Errorf("failed to create directory: %w", err)
+	}
+
+	// Generate a new RSA key pair
+	privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
+	if err != nil {
+		return fmt.Errorf("failed to generate RSA key: %w", err)
+	}
+
+	// Encode private key to PEM format
+	privateKeyPEM := &pem.Block{
+		Type:  "RSA PRIVATE KEY",
+		Bytes: x509.MarshalPKCS1PrivateKey(privateKey),
+	}
+
+	// Save private key to file
+	privateKeyFile, err := os.OpenFile(SSH_HOST_KEY_PATH, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
+	if err != nil {
+		return fmt.Errorf("failed to create host key file: %w", err)
+	}
+	defer privateKeyFile.Close()
+
+	if err := pem.Encode(privateKeyFile, privateKeyPEM); err != nil {
+		return fmt.Errorf("failed to encode private key: %w", err)
+	}
+
+	return nil
 }

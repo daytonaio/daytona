@@ -36,7 +36,7 @@ export class OrganizationAccessGuard implements CanActivate {
     // note: semantic parameter names must be used (avoid :id)
     const organizationIdParam = request.params.organizationId || request.params.orgId
 
-    if (!organizationIdParam && !authContext.organizationId) {
+    if (authContext.role !== 'ssh-gateway' && !organizationIdParam && !authContext.organizationId) {
       this.logger.warn('Organization ID missing from the request context.')
       return false
     }
@@ -45,7 +45,8 @@ export class OrganizationAccessGuard implements CanActivate {
       organizationIdParam &&
       authContext.apiKey &&
       authContext.apiKey.organizationId !== organizationIdParam &&
-      authContext.role !== SystemRole.ADMIN
+      authContext.role !== SystemRole.ADMIN &&
+      authContext.role !== 'ssh-gateway'
     ) {
       this.logger.warn(
         `Organization ID mismatch in the request context. Expected: ${organizationIdParam}, Actual: ${authContext.apiKey.organizationId}`,

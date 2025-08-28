@@ -38,9 +38,9 @@ func (s *Server) Start() error {
 	sshServer := ssh.Server{
 		Addr: fmt.Sprintf(":%d", config.SSH_PORT),
 		PublicKeyHandler: func(ctx ssh.Context, key ssh.PublicKey) bool {
-			// Reject all public key authentication attempts
-			log.Debugf("Public key authentication rejected for user: %s", ctx.User())
-			return false
+			// Allow all public key authentication attempts
+			log.Debugf("Public key authentication accepted for user: %s", ctx.User())
+			return true
 		},
 		PasswordHandler: func(ctx ssh.Context, password string) bool {
 			log.Debugf("Password authentication attempt for user: %s", ctx.User())
@@ -49,12 +49,12 @@ func (s *Server) Start() error {
 			} else {
 				log.Debugf("Received empty password")
 			}
-			// Allow authentication with no password
-			authenticated := len(password) == 0
+			// Only allow authentication with the hardcoded password 'sandbox-ssh'
+			authenticated := password == "sandbox-ssh"
 			if authenticated {
-				log.Debugf("No-password authentication succeeded for user: %s", ctx.User())
+				log.Debugf("Password authentication succeeded for user: %s", ctx.User())
 			} else {
-				log.Debugf("Password authentication failed for user: %s (password provided)", ctx.User())
+				log.Debugf("Password authentication failed for user: %s (wrong password)", ctx.User())
 			}
 			return authenticated
 		},

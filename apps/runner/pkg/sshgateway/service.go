@@ -55,15 +55,9 @@ func (s *Service) Start(ctx context.Context) error {
 	}
 
 	// Get the host key from configuration
-	hostKeyString, err := GetSSHHostKey()
+	hostKey, err := GetSSHHostKey()
 	if err != nil {
 		return fmt.Errorf("failed to get SSH host key from config: %w", err)
-	}
-
-	// Parse the host key from config
-	hostKey, err := ssh.ParsePrivateKey([]byte(hostKeyString))
-	if err != nil {
-		return fmt.Errorf("failed to parse SSH host key from config: %w", err)
 	}
 
 	serverConfig := &ssh.ServerConfig{
@@ -93,6 +87,8 @@ func (s *Service) Start(ctx context.Context) error {
 		return fmt.Errorf("failed to listen on port %d: %w", s.port, err)
 	}
 	defer listener.Close()
+
+	log.Infof("SSH Gateway listening on port %d", s.port)
 
 	for {
 		select {
@@ -243,7 +239,7 @@ func (s *Service) connectToSandbox(sandboxId, channelType string, extraData []by
 	// Create SSH client config to connect to the sandbox
 	clientConfig := &ssh.ClientConfig{
 		User:            sandboxDetails.User,
-		Auth:            []ssh.AuthMethod{},
+		Auth:            []ssh.AuthMethod{ssh.Password("sandbox-ssh")}, // Use hardcoded password for sandbox auth
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 		Timeout:         30 * time.Second,
 	}
