@@ -3,7 +3,8 @@ title: "Computer Use"
 hideTitleOnPage: true
 ---
 
-## ComputerUse {#computeruse}
+
+## ComputerUse
 
 デスクトップ環境と対話するためのコンピュータ操作機能。
 
@@ -13,12 +14,16 @@ hideTitleOnPage: true
 - `keyboard` _Keyboard_ - キーボード操作インターフェース
 - `mouse` _Mouse_ - マウス操作インターフェース
 - `screenshot` _Screenshot_ - スクリーンショット操作インターフェース
+    
+
+
+
 
 サンドボックス（Daytonaで管理される隔離された一時的な計算環境）内でのデスクトップ操作を自動化するために、マウス、キーボード、スクリーンショット、ディスプレイの各操作にアクセスできます。
 
-### コンストラクタ {#constructors}
+### コンストラクタ
 
-#### new ComputerUse() {#new-computeruse}
+#### new ComputerUse()
 
 ```ts
 new ComputerUse(sandboxId: string, toolboxApi: ToolboxApi): ComputerUse
@@ -29,13 +34,14 @@ new ComputerUse(sandboxId: string, toolboxApi: ToolboxApi): ComputerUse
 - `sandboxId` _string_
 - `toolboxApi` _ToolboxApi_
 
+
 **戻り値**:
 
 - `ComputerUse`
 
-### メソッド {#methods}
+### メソッド
 
-#### getProcessErrors() {#getprocesserrors}
+#### getProcessErrors()
 
 ```ts
 getProcessErrors(processName: string): Promise<ProcessErrorsResponse>
@@ -46,6 +52,7 @@ getProcessErrors(processName: string): Promise<ProcessErrorsResponse>
 **パラメータ**:
 
 - `processName` _string_ - エラーログを取得するプロセス名
+
 
 **戻り値**:
 
@@ -58,9 +65,9 @@ const errorsResp = await sandbox.computerUse.getProcessErrors('x11vnc');
 console.log('X11VNC errors:', errorsResp.errors);
 ```
 
----
+***
 
-#### getProcessLogs() {#getprocesslogs}
+#### getProcessLogs()
 
 ```ts
 getProcessLogs(processName: string): Promise<ProcessLogsResponse>
@@ -71,6 +78,7 @@ getProcessLogs(processName: string): Promise<ProcessLogsResponse>
 **パラメータ**:
 
 - `processName` _string_ - ログを取得するプロセス名
+
 
 **戻り値**:
 
@@ -83,9 +91,9 @@ const logsResp = await sandbox.computerUse.getProcessLogs('novnc');
 console.log('NoVNC logs:', logsResp.logs);
 ```
 
----
+***
 
-#### getProcessStatus() {#getprocessstatus}
+#### getProcessStatus()
 
 ```ts
 getProcessStatus(processName: string): Promise<ProcessStatusResponse>
@@ -96,6 +104,7 @@ getProcessStatus(processName: string): Promise<ProcessStatusResponse>
 **パラメータ**:
 
 - `processName` _string_ - 確認するプロセス名
+
 
 **戻り値**:
 
@@ -108,9 +117,9 @@ const xvfbStatus = await sandbox.computerUse.getProcessStatus('xvfb');
 const noVncStatus = await sandbox.computerUse.getProcessStatus('novnc');
 ```
 
----
+***
 
-#### getStatus() {#getstatus}
+#### getStatus()
 
 ```ts
 getStatus(): Promise<ComputerUseStatusResponse>
@@ -129,9 +138,9 @@ const status = await sandbox.computerUse.getStatus();
 console.log('Computer use status:', status.status);
 ```
 
----
+***
 
-#### restartProcess() {#restartprocess}
+#### restartProcess()
 
 ```ts
 restartProcess(processName: string): Promise<ProcessRestartResponse>
@@ -142,6 +151,7 @@ restartProcess(processName: string): Promise<ProcessRestartResponse>
 **パラメータ**:
 
 - `processName` _string_ - 再起動するプロセス名
+
 
 **戻り値**:
 
@@ -154,9 +164,9 @@ const result = await sandbox.computerUse.restartProcess('xfce4');
 console.log('XFCE4 process restarted:', result.message);
 ```
 
----
+***
 
-#### start() {#start}
+#### start()
 
 ```ts
 start(): Promise<ComputerUseStartResponse>
@@ -175,9 +185,9 @@ const result = await sandbox.computerUse.start();
 console.log('Computer use processes started:', result.message);
 ```
 
----
+***
 
-#### stop() {#stop}
+#### stop()
 
 ```ts
 stop(): Promise<ComputerUseStopResponse>
@@ -195,14 +205,13 @@ stop(): Promise<ComputerUseStopResponse>
 const result = await sandbox.computerUse.stop();
 console.log('Computer use processes stopped:', result.message);
 ```
-
-## Display {#display}
+## Display
 
 コンピュータ操作機能のためのディスプレイ操作
 
-### コンストラクタ {#constructors}
+### コンストラクタ
 
-#### new Display() {#new-display}
+#### new Display()
 
 ```ts
 new Display(sandboxId: string, toolboxApi: ToolboxApi): Display
@@ -213,13 +222,14 @@ new Display(sandboxId: string, toolboxApi: ToolboxApi): Display
 - `sandboxId` _string_
 - `toolboxApi` _ToolboxApi_
 
+
 **戻り値**:
 
 - `Display`
 
-### メソッド {#methods}
+### メソッド
 
-#### getInfo() {#getinfo}
+#### getInfo()
 
 ```ts
 getInfo(): Promise<DisplayInfoResponse>
@@ -242,9 +252,9 @@ info.displays.forEach((display, index) => {
 });
 ```
 
----
+***
 
-#### getWindows() {#getwindows}
+#### getWindows()
 
 ```ts
 getWindows(): Promise<WindowsResponse>
@@ -266,15 +276,16 @@ windows.windows.forEach(window => {
 });
 ```
 
----
+***
 
-## キーボード {#keyboard}
+
+## キーボード
 
 コンピュータ操作機能のためのキーボード操作
 
-### コンストラクター {#constructors}
+### コンストラクター
 
-#### new Keyboard() {#new-keyboard}
+#### new Keyboard()
 
 ```ts
 new Keyboard(sandboxId: string, toolboxApi: ToolboxApi): Keyboard
@@ -285,13 +296,14 @@ new Keyboard(sandboxId: string, toolboxApi: ToolboxApi): Keyboard
 - `sandboxId` _string_
 - `toolboxApi` _ToolboxApi_
 
+
 **戻り値**:
 
 - `Keyboard`
 
-### メソッド {#methods}
+### メソッド
 
-#### hotkey() {#hotkey}
+#### hotkey()
 
 ```ts
 hotkey(keys: string): Promise<void>
@@ -302,6 +314,7 @@ hotkey(keys: string): Promise<void>
 **パラメータ**:
 
 - `keys` _string_ - ホットキーの組み合わせ（例: 'ctrl+c', 'alt+tab', 'cmd+shift+t'）
+
 
 **戻り値**:
 
@@ -339,9 +352,9 @@ try {
 }
 ```
 
----
+***
 
-#### press() {#press}
+#### press()
 
 ```ts
 press(key: string, modifiers?: string[]): Promise<void>
@@ -352,7 +365,8 @@ press(key: string, modifiers?: string[]): Promise<void>
 **パラメータ**:
 
 - `key` _string_ - 押下するキー（例: 'Enter', 'Escape', 'Tab', 'a', 'A')
-- `modifiers?` _string[] = []_ - 修飾キー（'ctrl', 'alt', 'meta', 'shift'）
+- `modifiers?` _string\[\] = \[\]_ - 修飾キー（'ctrl', 'alt', 'meta', 'shift'）
+
 
 **戻り値**:
 
@@ -390,9 +404,9 @@ try {
 }
 ```
 
----
+***
 
-#### type() {#type}
+#### type()
 
 ```ts
 type(text: string, delay?: number): Promise<void>
@@ -404,6 +418,7 @@ type(text: string, delay?: number): Promise<void>
 
 - `text` _string_ - 入力するテキスト
 - `delay?` _number_ - 文字間の遅延（ミリ秒）
+
 
 **戻り値**:
 
@@ -432,15 +447,16 @@ try {
 }
 ```
 
----
+***
 
-## Mouse {#mouse}
+
+## Mouse
 
 コンピュータ操作（Computer Use）機能におけるマウス操作
 
-### Constructors {#constructors}
+### Constructors
 
-#### new Mouse() {#new-mouse}
+#### new Mouse()
 
 ```ts
 new Mouse(sandboxId: string, toolboxApi: ToolboxApi): Mouse
@@ -451,13 +467,14 @@ new Mouse(sandboxId: string, toolboxApi: ToolboxApi): Mouse
 - `sandboxId` _string_
 - `toolboxApi` _ToolboxApi_
 
+
 **Returns**:
 
 - `Mouse`
 
-### Methods {#methods}
+### Methods
 
-#### click() {#click}
+#### click()
 
 ```ts
 click(
@@ -476,6 +493,7 @@ double?: boolean): Promise<MouseClickResponse>
 - `button?` _string = 'left'_ - 使用するマウスボタン（'left'、'right'、'middle'）
 - `double?` _boolean = false_ - ダブルクリックを行うかどうか
 
+
 **Returns**:
 
 - `Promise<MouseClickResponse>` - クリック操作の結果
@@ -493,9 +511,9 @@ const doubleClick = await sandbox.computerUse.mouse.click(100, 200, 'left', true
 const rightClick = await sandbox.computerUse.mouse.click(100, 200, 'right');
 ```
 
----
+***
 
-#### drag() {#drag}
+#### drag()
 
 ```ts
 drag(
@@ -516,6 +534,7 @@ button?: string): Promise<MouseDragResponse>
 - `endY` _number_ - 終了y座標
 - `button?` _string = 'left'_ - ドラッグに使用するマウスボタン
 
+
 **Returns**:
 
 - `Promise<MouseDragResponse>` - ドラッグ操作の結果
@@ -527,9 +546,9 @@ const result = await sandbox.computerUse.mouse.drag(50, 50, 150, 150);
 console.log(`Dragged from ${result.from.x},${result.from.y} to ${result.to.x},${result.to.y}`);
 ```
 
----
+***
 
-#### getPosition() {#getposition}
+#### getPosition()
 
 ```ts
 getPosition(): Promise<MousePosition>
@@ -548,9 +567,9 @@ const position = await sandbox.computerUse.mouse.getPosition();
 console.log(`Mouse is at: ${position.x}, ${position.y}`);
 ```
 
----
+***
 
-#### move() {#move}
+#### move()
 
 ```ts
 move(x: number, y: number): Promise<MouseMoveResponse>
@@ -563,6 +582,7 @@ move(x: number, y: number): Promise<MouseMoveResponse>
 - `x` _number_ - 移動先のx座標
 - `y` _number_ - 移動先のy座標
 
+
 **Returns**:
 
 - `Promise<MouseMoveResponse>` - 移動操作の結果
@@ -574,9 +594,9 @@ const result = await sandbox.computerUse.mouse.move(100, 200);
 console.log(`Mouse moved to: ${result.x}, ${result.y}`);
 ```
 
----
+***
 
-#### scroll() {#scroll}
+#### scroll()
 
 ```ts
 scroll(
@@ -595,6 +615,7 @@ amount?: number): Promise<boolean>
 - `direction` _スクロール方向_ - `"up"` | `"down"`
 - `amount?` _number = 1_ - スクロール量
 
+
 **Returns**:
 
 - `Promise<boolean>` - スクロール操作が成功したかどうか
@@ -609,15 +630,16 @@ const scrollUp = await sandbox.computerUse.mouse.scroll(100, 200, 'up', 3);
 const scrollDown = await sandbox.computerUse.mouse.scroll(100, 200, 'down', 5);
 ```
 
----
+***
 
-## スクリーンショット {#screenshot}
+
+## スクリーンショット
 
 コンピュータ操作機能におけるスクリーンショット操作
 
-### コンストラクタ {#constructors}
+### コンストラクタ
 
-#### new Screenshot() {#new-screenshot}
+#### new Screenshot()
 
 ```ts
 new Screenshot(sandboxId: string, toolboxApi: ToolboxApi): Screenshot
@@ -628,13 +650,14 @@ new Screenshot(sandboxId: string, toolboxApi: ToolboxApi): Screenshot
 - `sandboxId` _string_
 - `toolboxApi` _ToolboxApi_
 
+
 **戻り値**:
 
 - `Screenshot`
 
-### メソッド {#methods}
+### メソッド
 
-#### takeCompressed() {#takecompressed}
+#### takeCompressed()
 
 ```ts
 takeCompressed(options?: ScreenshotOptions): Promise<CompressedScreenshotResponse>
@@ -645,6 +668,7 @@ takeCompressed(options?: ScreenshotOptions): Promise<CompressedScreenshotRespons
 **パラメータ**:
 
 - `options?` _ScreenshotOptions = {}_ - 圧縮および表示のオプション
+
 
 **戻り値**:
 
@@ -670,9 +694,9 @@ const scaled = await sandbox.computerUse.screenshot.takeCompressed({
 });
 ```
 
----
+***
 
-#### takeCompressedRegion() {#takecompressedregion}
+#### takeCompressedRegion()
 
 ```ts
 takeCompressedRegion(region: ScreenshotRegion, options?: ScreenshotOptions): Promise<CompressedScreenshotResponse>
@@ -684,6 +708,7 @@ takeCompressedRegion(region: ScreenshotRegion, options?: ScreenshotOptions): Pro
 
 - `region` _ScreenshotRegion_ - 取得対象の領域
 - `options?` _ScreenshotOptions = {}_ - 圧縮および表示のオプション
+
 
 **戻り値**:
 
@@ -701,9 +726,9 @@ const screenshot = await sandbox.computerUse.screenshot.takeCompressedRegion(reg
 console.log(`Compressed size: ${screenshot.size_bytes} bytes`);
 ```
 
----
+***
 
-#### takeFullScreen() {#takefullscreen}
+#### takeFullScreen()
 
 ```ts
 takeFullScreen(showCursor?: boolean): Promise<ScreenshotResponse>
@@ -714,6 +739,7 @@ takeFullScreen(showCursor?: boolean): Promise<ScreenshotResponse>
 **パラメータ**:
 
 - `showCursor?` _boolean = false_ - スクリーンショットにカーソルを表示するかどうか
+
 
 **戻り値**:
 
@@ -729,9 +755,9 @@ console.log(`Screenshot size: ${screenshot.width}x${screenshot.height}`);
 const withCursor = await sandbox.computerUse.screenshot.takeFullScreen(true);
 ```
 
----
+***
 
-#### takeRegion() {#takeregion}
+#### takeRegion()
 
 ```ts
 takeRegion(region: ScreenshotRegion, showCursor?: boolean): Promise<RegionScreenshotResponse>
@@ -743,6 +769,7 @@ takeRegion(region: ScreenshotRegion, showCursor?: boolean): Promise<RegionScreen
 
 - `region` _ScreenshotRegion_ - 取得対象の領域
 - `showCursor?` _boolean = false_ - スクリーンショットにカーソルを表示するかどうか
+
 
 **戻り値**:
 
@@ -756,9 +783,10 @@ const screenshot = await sandbox.computerUse.screenshot.takeRegion(region);
 console.log(`Captured region: ${screenshot.region.width}x${screenshot.region.height}`);
 ```
 
----
+***
 
-## ScreenshotOptions {#screenshotoptions}
+
+## ScreenshotOptions
 
 スクリーンショット圧縮オプション用のインターフェース
 
@@ -768,8 +796,7 @@ console.log(`Captured region: ${screenshot.region.width}x${screenshot.region.hei
 - `quality?` _number_
 - `scale?` _number_
 - `showCursor?` _boolean_
-
-## ScreenshotRegion {#screenshotregion}
+## ScreenshotRegion
 
 スクリーンショット操作で使用される領域座標のインターフェース
 

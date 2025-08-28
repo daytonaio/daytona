@@ -3,7 +3,7 @@ title: "スナップショット"
 hideTitleOnPage: true
 ---
 
-## スナップショット {#snapshot}
+## スナップショット
 
 ```python
 class Snapshot(SnapshotDto)
@@ -30,7 +30,8 @@ class Snapshot(SnapshotDto)
 - `updated_at` _StrictStr_ - スナップショットの最終更新時刻。
 - `last_used_at` _StrictStr_ - スナップショットの最終使用時刻。
 
-## SnapshotService {#snapshotservice}
+
+## SnapshotService
 
 ```python
 class SnapshotService()
@@ -38,7 +39,7 @@ class SnapshotService()
 
 Daytonaのスナップショットを管理するサービス。スナップショットの一覧、取得、作成、削除に使用できます。
 
-#### SnapshotService.list {#snapshotservicelist}
+#### SnapshotService.list
 
 ```python
 @intercept_errors(message_prefix="Failed to list snapshots: ")
@@ -50,6 +51,7 @@ def list() -> List[Snapshot]
 **Returns**:
 
 - `List[Snapshot]` - すべてのスナップショットのリスト。
+  
 
 **Example**:
 
@@ -60,7 +62,7 @@ for snapshot in snapshots:
     print(f"{snapshot.name} ({snapshot.image_name})")
 ```
 
-#### SnapshotService.delete {#snapshotservicedelete}
+#### SnapshotService.delete
 
 ```python
 @intercept_errors(message_prefix="Failed to delete snapshot: ")
@@ -72,6 +74,7 @@ def delete(snapshot: Snapshot) -> None
 **Arguments**:
 
 - `snapshot` _Snapshot_ - 削除するスナップショット。
+  
 
 **Example**:
 
@@ -82,7 +85,7 @@ daytona.snapshot.delete(snapshot)
 print("Snapshot deleted")
 ```
 
-#### SnapshotService.get {#snapshotserviceget}
+#### SnapshotService.get
 
 ```python
 @intercept_errors(message_prefix="Failed to get snapshot: ")
@@ -94,10 +97,12 @@ def get(name: str) -> Snapshot
 **Arguments**:
 
 - `name` _str_ - 取得するスナップショットの名前。
+  
 
 **Returns**:
 
 - `Snapshot` - 取得したスナップショットオブジェクト。
+  
 
 **Example**:
 
@@ -107,7 +112,7 @@ snapshot = daytona.snapshot.get("test-snapshot-name")
 print(f"{snapshot.name} ({snapshot.image_name})")
 ```
 
-#### SnapshotService.create {#snapshotservicecreate}
+#### SnapshotService.create
 
 ```python
 @intercept_errors(message_prefix="Failed to create snapshot: ")
@@ -137,7 +142,7 @@ daytona.snapshot.create(
 )
 ```
 
-#### SnapshotService.activate {#snapshotserviceactivate}
+#### SnapshotService.activate
 
 ```python
 def activate(snapshot: Snapshot) -> Snapshot
@@ -153,7 +158,7 @@ def activate(snapshot: Snapshot) -> Snapshot
 
 - `Snapshot` - アクティブ化されたスナップショットインスタンス。
 
-#### SnapshotService.process_image_context {#snapshotserviceprocess_image_context}
+#### SnapshotService.process\_image\_context
 
 ```python
 @staticmethod
@@ -171,7 +176,7 @@ def process_image_context(object_storage_api: ObjectStorageApi,
 
 - `List[str]` - オブジェクトストレージに保存されたコンテキストハッシュのリスト。
 
-## CreateSnapshotParams {#createsnapshotparams}
+## CreateSnapshotParams
 
 ```python
 class CreateSnapshotParams(BaseModel)
@@ -187,3 +192,4 @@ class CreateSnapshotParams(BaseModel)
   Daytona で新しいイメージを作成するために使用されます。
 - `resources` _Optional[Resources]_ - スナップショットのリソース。
 - `entrypoint` _Optional[List[str]]_ - スナップショットのエントリポイント。
+

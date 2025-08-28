@@ -3,15 +3,16 @@ title: "ボリューム"
 hideTitleOnPage: true
 ---
 
-## VolumeService {#volumeservice}
+
+## VolumeService
 
 Daytonaのボリューム（S3互換オブジェクトストレージをバックエンドとするFUSEベースの共有ストレージマウント）を管理するサービス。
 
 このサービスは、ボリュームの一覧取得、参照、作成、削除の各メソッドを提供します。
 
-### Constructors {#constructors}
+### Constructors
 
-#### new VolumeService() {#new-volumeservice}
+#### new VolumeService()
 
 ```ts
 new VolumeService(volumesApi: VolumesApi): VolumeService
@@ -21,13 +22,14 @@ new VolumeService(volumesApi: VolumesApi): VolumeService
 
 - `volumesApi` _VolumesApi_
 
+
 **Returns**:
 
 - `VolumeService`
 
-### Methods {#methods}
+### Methods
 
-#### create() {#create}
+#### create()
 
 ```ts
 create(name: string): Promise<Volume>
@@ -38,6 +40,7 @@ create(name: string): Promise<Volume>
 **Parameters**:
 
 - `name` _string_ - 新規ボリュームの名前
+
 
 **Returns**:
 
@@ -55,9 +58,9 @@ const volume = await daytona.volume.create("my-data-volume");
 console.log(`Created volume ${volume.name} with ID ${volume.id}`);
 ```
 
----
+***
 
-#### delete() {#delete}
+#### delete()
 
 ```ts
 delete(volume: Volume): Promise<void>
@@ -68,6 +71,7 @@ delete(volume: Volume): Promise<void>
 **Parameters**:
 
 - `volume` _Volume_ - 削除するボリューム
+
 
 **Returns**:
 
@@ -86,9 +90,9 @@ await daytona.volume.delete(volume);
 console.log("Volume deleted successfully");
 ```
 
----
+***
 
-#### get() {#get}
+#### get()
 
 ```ts
 get(name: string, create: boolean): Promise<Volume>
@@ -100,6 +104,7 @@ get(name: string, create: boolean): Promise<Volume>
 
 - `name` _string_ - 取得するボリューム名
 - `create` _boolean = false_ - 存在しない場合に作成するかどうか
+
 
 **Returns**:
 
@@ -117,9 +122,9 @@ const volume = await daytona.volume.get("volume-name", true);
 console.log(`Volume ${volume.name} is in state ${volume.state}`);
 ```
 
----
+***
 
-#### list() {#list}
+#### list()
 
 ```ts
 list(): Promise<Volume[]>
@@ -140,9 +145,10 @@ console.log(`Found ${volumes.length} volumes`);
 volumes.forEach(vol => console.log(`${vol.name} (${vol.id})`));
 ```
 
----
+***
 
-## ボリューム（Volume） {#volume}
+
+## ボリューム（Volume）
 
 ```ts
 type Volume = VolumeDto & {
@@ -155,3 +161,4 @@ Daytona（サンドボックスを作成・管理するプラットフォーム�
 **型定義**:
 
 - `\_\_brand` _"Volume"_
+

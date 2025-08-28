@@ -16,7 +16,7 @@ Daytona では、サンドボックスのプレビューURLを処理するため
 
 ---
 
-## 仕組み {#how-it-works}
+## 仕組み
 
 ユーザーがプレビューURLにアクセスすると、カスタムプロキシがリクエストを受け取り、次のことが可能です:
 
@@ -28,11 +28,11 @@ Daytona では、サンドボックスのプレビューURLを処理するため
 
 ---
 
-## Daytona ヘッダー {#daytona-headers}
+## Daytona ヘッダー
 
 プロキシは、Daytona の動作を制御するための特殊なヘッダーを送信できます：
 
-#### プレビュー警告の無効化 {#disable-preview-warning}
+#### プレビュー警告の無効化
 
 Daytona のプレビュー警告ページを無効化するには、次を送信します：
 
@@ -40,7 +40,7 @@ Daytona のプレビュー警告ページを無効化するには、次を送信
 X-Daytona-Skip-Preview-Warning: true
 ```
 
-#### CORS の無効化 {#disable-cors}
+#### CORS の無効化
 
 Daytona の既定の CORS 設定を上書きするには、次を送信します：
 
@@ -48,7 +48,7 @@ Daytona の既定の CORS 設定を上書きするには、次を送信します
 X-Daytona-Disable-CORS: true
 ```
 
-#### 認証 {#authentication}
+#### 認証
 
 非公開のプレビューリンクでは、次を送信する必要があります：
 
@@ -60,7 +60,7 @@ X-Daytona-Preview-Token: {sandboxToken}
 
 ---
 
-## 例 {#examples}
+## 例
 
 カスタムプレビュー用プロキシのサンプルは [GitHub](https://github.com/daytonaio/daytona-proxy-samples) にあります。
 

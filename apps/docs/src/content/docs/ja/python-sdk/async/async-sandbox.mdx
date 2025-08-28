@@ -3,7 +3,7 @@ title: "AsyncSandbox"
 hideTitleOnPage: true
 ---
 
-## AsyncSandbox {#asyncsandbox}
+## AsyncSandbox
 
 ```python
 class AsyncSandbox(SandboxDto)
@@ -44,7 +44,7 @@ Daytona のサンドボックスを表します。
 - `network_block_all` _bool_ - サンドボックスの全ネットワークアクセスをブロックするかどうか。
 - `network_allow_list` _str_ - サンドボックスで許可される CIDR ネットワークアドレスのカンマ区切りリスト。
 
-#### AsyncSandbox.**init** {#asyncsandbox__init__}
+#### AsyncSandbox.__init__
 
 ```python
 def __init__(sandbox_dto: SandboxDto, sandbox_api: SandboxApi,
@@ -61,7 +61,7 @@ def __init__(sandbox_dto: SandboxDto, sandbox_api: SandboxApi,
 - `toolbox_api` _ToolboxApi_ - ツールボックス操作用の API クライアント。
 - `code_toolbox` _SandboxCodeToolbox_ - 言語別のツールボックス実装。
 
-#### AsyncSandbox.refresh_data {#asyncsandboxrefresh_data}
+#### AsyncSandbox.refresh_data
 
 ```python
 async def refresh_data() -> None
@@ -78,7 +78,7 @@ print(f"State: {sandbox.state}")
 print(f"Resources: {sandbox.cpu} CPU, {sandbox.memory} GiB RAM")
 ```
 
-#### AsyncSandbox.get_user_root_dir {#asyncsandboxget_user_root_dir}
+#### AsyncSandbox.get_user_root_dir
 
 ```python
 @intercept_errors(message_prefix="Failed to get sandbox root directory: ")
@@ -90,6 +90,7 @@ async def get_user_root_dir() -> str
 **戻り値**:
 
 - `str` - ログイン中のユーザー向けサンドボックスのルートディレクトリへの絶対パス。
+  
 
 **例**:
 
@@ -98,7 +99,7 @@ root_dir = await sandbox.get_user_root_dir()
 print(f"Sandbox root: {root_dir}")
 ```
 
-#### AsyncSandbox.create_lsp_server {#asyncsandboxcreate_lsp_server}
+#### AsyncSandbox.create_lsp_server
 
 ```python
 def create_lsp_server(language_id: LspLanguageId,
@@ -114,10 +115,12 @@ LSP サーバーは、コード補完や診断などの言語固有機能を提�
 - `language_id` _LspLanguageId_ - 言語サーバーの種類（例: LspLanguageId.PYTHON）。
 - `path_to_project` _str_ - プロジェクトのルートディレクトリへのパス。相対パスはユーザーの
   ルートディレクトリを基準に解決されます。
+  
 
 **戻り値**:
 
 - `LspServer` - 指定した言語向けに構成された新しい LSP サーバーインスタンス。
+  
 
 **例**:
 
@@ -125,7 +128,7 @@ LSP サーバーは、コード補完や診断などの言語固有機能を提�
 lsp = sandbox.create_lsp_server("python", "workspace/project")
 ```
 
-#### AsyncSandbox.set_labels {#asyncsandboxset_labels}
+#### AsyncSandbox.set\_labels
 
 ```python
 @intercept_errors(message_prefix="Failed to set labels: ")
@@ -139,10 +142,12 @@ async def set_labels(labels: Dict[str, str]) -> Dict[str, str]
 **引数**:
 
 - `labels` _Dict[str, str]_ - サンドボックスのラベルを表すキーと値のペアのディクショナリ。
+  
 
 **戻り値**:
 
-Dict[str, str]: 更新後のサンドボックスのラベルを含むディクショナリ。
+  Dict[str, str]: 更新後のサンドボックスのラベルを含むディクショナリ。
+  
 
 **例**:
 
@@ -155,7 +160,7 @@ new_labels = sandbox.set_labels({
 print(f"Updated labels: {new_labels}")
 ```
 
-#### AsyncSandbox.start {#asyncsandboxstart}
+#### AsyncSandbox.start
 
 ```python
 @intercept_errors(message_prefix="Failed to start sandbox: ")
@@ -170,10 +175,12 @@ async def start(timeout: Optional[float] = 60)
 **引数**:
 
 - `timeout` _Optional[float]_ - 最大待機時間（秒）。0 はタイムアウトなし。デフォルトは 60 秒。
+  
 
 **例外**:
 
 - `DaytonaError` - タイムアウトが負の場合。サンドボックスの起動に失敗した場合、またはタイムアウトした場合。
+  
 
 **例**:
 
@@ -183,7 +190,7 @@ sandbox.start(timeout=40)  # 最大 40 秒待機
 print("Sandbox started successfully")
 ```
 
-#### AsyncSandbox.stop {#asyncsandboxstop}
+#### AsyncSandbox.stop
 
 ```python
 @intercept_errors(message_prefix="Failed to stop sandbox: ")
@@ -198,10 +205,12 @@ async def stop(timeout: Optional[float] = 60)
 **引数**:
 
 - `timeout` _Optional[float]_ - 最大待機時間（秒）。0 はタイムアウトなし。デフォルトは 60 秒。
+  
 
 **例外**:
 
 - `DaytonaError` - タイムアウトが負の場合、またはサンドボックスの停止に失敗した場合／タイムアウトした場合。
+  
 
 **例**:
 
@@ -211,7 +220,7 @@ sandbox.stop()
 print("Sandbox stopped successfully")
 ```
 
-#### AsyncSandbox.delete {#asyncsandboxdelete}
+#### AsyncSandbox.delete
 
 ```python
 @intercept_errors(message_prefix="Failed to remove sandbox: ")
@@ -225,7 +234,7 @@ async def delete(timeout: Optional[float] = 60) -> None
 - `timeout` _Optional[float]_ - サンドボックス削除のタイムアウト（秒）。0 はタイムアウトなし。
   デフォルトは 60 秒。
 
-#### AsyncSandbox.wait_for_sandbox_start {#asyncsandboxwait_for_sandbox_start}
+#### AsyncSandbox.wait\_for\_sandbox\_start
 
 ```python
 @intercept_errors(
@@ -242,12 +251,13 @@ async def wait_for_sandbox_start(timeout: Optional[float] = 60) -> None
 **引数**:
 
 - `timeout` _Optional[float]_ - 最大待機時間（秒）。0 はタイムアウトなし。デフォルトは 60 秒。
+  
 
 **例外**:
 
 - `DaytonaError` - タイムアウトが負の場合、またはサンドボックスの起動に失敗／タイムアウトした場合。
 
-#### AsyncSandbox.wait_for_sandbox_stop {#asyncsandboxwait_for_sandbox_stop}
+#### AsyncSandbox.wait\_for\_sandbox\_stop
 
 ```python
 @intercept_errors(
@@ -265,12 +275,13 @@ async def wait_for_sandbox_stop(timeout: Optional[float] = 60) -> None
 **引数**:
 
 - `timeout` _Optional[float]_ - 待機する最大時間（秒）。0 はタイムアウトなし。デフォルトは 60 秒。
+  
 
 **送出**:
 
 - `DaytonaError` - タイムアウトが負の場合。サンドボックスの停止に失敗した場合、またはタイムアウトした場合。
 
-#### AsyncSandbox.set_autostop_interval {#asyncsandboxset_autostop_interval}
+#### AsyncSandbox.set\_autostop\_interval
 
 ```python
 @intercept_errors(message_prefix="Failed to set auto-stop interval: ")
@@ -287,10 +298,12 @@ async def set_autostop_interval(interval: int) -> None
 
 - `interval` _int_ - 自動停止までの非アクティブ時間（分）。
   0 に設定すると自動停止を無効化。デフォルトは 15。
+  
 
 **送出**:
 
 - `DaytonaError` - interval が負の場合
+  
 
 **例**:
 
@@ -301,7 +314,7 @@ sandbox.set_autostop_interval(60)
 sandbox.set_autostop_interval(0)
 ```
 
-#### AsyncSandbox.set_auto_archive_interval {#asyncsandboxset_auto_archive_interval}
+#### AsyncSandbox.set\_auto\_archive\_interval
 
 ```python
 @intercept_errors(message_prefix="Failed to set auto-archive interval: ")
@@ -316,10 +329,12 @@ async def set_auto_archive_interval(interval: int) -> None
 
 - `interval` _int_ - 連続停止中のサンドボックスが自動アーカイブされるまでの分数。
   0 に設定すると最大の間隔になります。デフォルトは 7 日。
+  
 
 **送出**:
 
 - `DaytonaError` - interval が負の場合
+  
 
 **例**:
 
@@ -330,7 +345,7 @@ sandbox.set_auto_archive_interval(60)
 sandbox.set_auto_archive_interval(0)
 ```
 
-#### AsyncSandbox.set_auto_delete_interval {#asyncsandboxset_auto_delete_interval}
+#### AsyncSandbox.set\_auto\_delete\_interval
 
 ```python
 @intercept_errors(message_prefix="Failed to set auto-delete interval: ")
@@ -346,6 +361,7 @@ async def set_auto_delete_interval(interval: int) -> None
 - `interval` _int_ - 連続停止中のサンドボックスが自動削除されるまでの分数。
   自動削除を無効化するには負の値を設定。停止時に即時削除するには 0 を設定。
   既定では自動削除は無効です。
+  
 
 **例**:
 
@@ -358,7 +374,7 @@ sandbox.set_auto_delete_interval(0)
 sandbox.set_auto_delete_interval(-1)
 ```
 
-#### AsyncSandbox.get_preview_link {#asyncsandboxget_preview_link}
+#### AsyncSandbox.get\_preview\_link
 
 ```python
 @intercept_errors(message_prefix="Failed to get preview link: ")
@@ -372,11 +388,13 @@ async def get_preview_link(port: int) -> PortPreviewUrl
 **引数**:
 
 - `port` _int_ - プレビューリンクを開くポート。
+  
 
 **戻り値**:
 
 - `PortPreviewUrl` - プレビューリンクのレスポンスオブジェクト。`url`
   と `token`（プライベートなサンドボックスへのアクセス用）を含みます。
+  
 
 **例**:
 
@@ -386,7 +404,7 @@ print(f"Preview URL: {preview_link.url}")
 print(f"Token: {preview_link.token}")
 ```
 
-#### AsyncSandbox.archive {#asyncsandboxarchive}
+#### AsyncSandbox.archive
 
 ```python
 @intercept_errors(message_prefix="Failed to archive sandbox: ")
@@ -399,7 +417,8 @@ async def archive() -> None
 トレードオフは、サンドボックスのサイズに応じて、アーカイブされたサンドボックスの起動により
 時間がかかる点です。アーカイブ前にサンドボックスは停止している必要があります。
 
-## リソース {#resources}
+
+## リソース
 
 ```python
 @dataclass
@@ -414,6 +433,7 @@ class Resources()
 - `memory` _Optional[int]_ - 割り当てるメモリ容量（GiB）。
 - `disk` _Optional[int]_ - 割り当てるディスク容量（GiB）。
 - `gpu` _Optional[int]_ - 割り当てるGPU数。
+  
 
 **例**:
 
@@ -430,3 +450,4 @@ params = CreateSandboxFromImageParams(
     resources=resources
 )
 ```
+

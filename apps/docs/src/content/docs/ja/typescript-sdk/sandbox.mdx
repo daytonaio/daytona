@@ -3,206 +3,211 @@ title: "サンドボックス"
 hideTitleOnPage: true
 ---
 
-## サンドボックス {#sandbox}
+
+## サンドボックス
 
 Daytona のサンドボックスを表します。
 
 **プロパティ**:
 
 - `autoArchiveInterval?` _number_ - 自動アーカイブの間隔（分）
-
-  ##### 実装 {#implementation-of}
-
-  ```ts
-  SandboxDto.autoArchiveInterval
-  ```
+    
+    ##### 実装
+    
+    ```ts
+    SandboxDto.autoArchiveInterval
+    ```
 - `autoDeleteInterval?` _number_ - 自動削除の間隔（分）
-
-  ##### 実装 {#implementation-of}
-
-  ```ts
-  SandboxDto.autoDeleteInterval
-  ```
+    
+    ##### 実装
+    
+    ```ts
+    SandboxDto.autoDeleteInterval
+    ```
 - `autoStopInterval?` _number_ - 自動停止の間隔（分）
-
-  ##### 実装 {#implementation-of}
-
-  ```ts
-  SandboxDto.autoStopInterval
-  ```
+    
+    ##### 実装
+    
+    ```ts
+    SandboxDto.autoStopInterval
+    ```
 - `backupCreatedAt?` _string_ - バックアップの作成時刻
-
-  ##### 実装 {#implementation-of}
-
-  ```ts
-  SandboxDto.backupCreatedAt
-  ```
+    
+    ##### 実装
+    
+    ```ts
+    SandboxDto.backupCreatedAt
+    ```
 - `backupState?` _SandboxBackupStateEnum_ - サンドボックスのバックアップの現在の状態
-
-  ##### 実装 {#implementation-of}
-
-  ```ts
-  SandboxDto.backupState
-  ```
+    
+    ##### 実装
+    
+    ```ts
+    SandboxDto.backupState
+    ```
 - `buildInfo?` _BuildInfo_ - 動的ビルドから作成された場合のサンドボックスのビルド情報
-
-  ##### 実装 {#implementation-of}
-
-  ```ts
-  SandboxDto.buildInfo
-  ```
+    
+    ##### 実装
+    
+    ```ts
+    SandboxDto.buildInfo
+    ```
 - `computerUse` _ComputerUse_ - デスクトップ自動化のためのコンピューター使用操作インターフェース
 - `cpu` _number_ - サンドボックスに割り当てられた CPU 数
-
-  ##### 実装 {#implementation-of}
-
-  ```ts
-  SandboxDto.cpu
-  ```
+    
+    ##### 実装
+    
+    ```ts
+    SandboxDto.cpu
+    ```
 - `createdAt?` _string_ - サンドボックスの作成時刻
-
-  ##### 実装 {#implementation-of}
-
-  ```ts
-  SandboxDto.createdAt
-  ```
+    
+    ##### 実装
+    
+    ```ts
+    SandboxDto.createdAt
+    ```
 - `disk` _number_ - サンドボックスに割り当てられたディスク容量（GiB）
-
-  ##### 実装 {#implementation-of}
-
-  ```ts
-  SandboxDto.disk
-  ```
-- `env` _Record<string, string>_ - サンドボックスで設定される環境変数
-
-  ##### 実装 {#implementation-of}
-
-  ```ts
-  SandboxDto.env
-  ```
+    
+    ##### 実装
+    
+    ```ts
+    SandboxDto.disk
+    ```
+- `env` _Record\<string, string\>_ - サンドボックスで設定される環境変数
+    
+    ##### 実装
+    
+    ```ts
+    SandboxDto.env
+    ```
 - `errorReason?` _string_ - サンドボックスがエラー状態の場合のエラーメッセージ
-
-  ##### 実装 {#implementation-of}
-
-  ```ts
-  SandboxDto.errorReason
-  ```
+    
+    ##### 実装
+    
+    ```ts
+    SandboxDto.errorReason
+    ```
 - `fs` _FileSystem_ - ファイルシステム操作インターフェース
 - `git` _Git_ - Git 操作インターフェース
 - `gpu` _number_ - サンドボックスに割り当てられた GPU 数
-
-  ##### 実装 {#implementation-of}
-
-  ```ts
-  SandboxDto.gpu
-  ```
+    
+    ##### 実装
+    
+    ```ts
+    SandboxDto.gpu
+    ```
 - `id` _string_ - サンドボックスの一意の識別子
-
-  ##### 実装 {#implementation-of}
-
-  ```ts
-  SandboxDto.id
-  ```
-- `labels` _Record<string, string>_ - サンドボックスに付与されたカスタムラベル
-
-  ##### 実装 {#implementation-of}
-
-  ```ts
-  SandboxDto.labels
-  ```
+    
+    ##### 実装
+    
+    ```ts
+    SandboxDto.id
+    ```
+- `labels` _Record\<string, string\>_ - サンドボックスに付与されたカスタムラベル
+    
+    ##### 実装
+    
+    ```ts
+    SandboxDto.labels
+    ```
 - `memory` _number_ - サンドボックスに割り当てられたメモリ容量（GiB）
-
-  ##### 実装 {#implementation-of}
-
-  ```ts
-  SandboxDto.memory
-  ```
+    
+    ##### 実装
+    
+    ```ts
+    SandboxDto.memory
+    ```
 - `networkAllowList?` _string_ - サンドボックスで許可される CIDR ネットワークアドレスのカンマ区切りリスト
-
-  ##### 実装 {#implementation-of}
-
-  ```ts
-  SandboxDto.networkAllowList
-  ```
+    
+    ##### 実装
+    
+    ```ts
+    SandboxDto.networkAllowList
+    ```
 - `networkBlockAll` _boolean_ - サンドボックスのネットワークアクセスをすべてブロックするかどうか
-
-  ##### 実装 {#implementation-of}
-
-  ```ts
-  SandboxDto.networkBlockAll
-  ```
+    
+    ##### 実装
+    
+    ```ts
+    SandboxDto.networkBlockAll
+    ```
 - `organizationId` _string_ - サンドボックスの組織 ID
-
-  ##### 実装 {#implementation-of}
-
-  ```ts
-  SandboxDto.organizationId
-  ```
+    
+    ##### 実装
+    
+    ```ts
+    SandboxDto.organizationId
+    ```
 - `process` _Process_ - プロセス実行インターフェース
 - `public` _boolean_ - サンドボックスが公開アクセス可能かどうか
-
-  ##### 実装 {#implementation-of}
-
-  ```ts
-  SandboxDto.public
-  ```
+    
+    ##### 実装
+    
+    ```ts
+    SandboxDto.public
+    ```
 - `runnerDomain?` _string_ - サンドボックスのランナーのドメイン名
-
-  ##### 実装 {#implementation-of}
-
-  ```ts
-  SandboxDto.runnerDomain
-  ```
+    
+    ##### 実装
+    
+    ```ts
+    SandboxDto.runnerDomain
+    ```
 - `snapshot?` _string_ - サンドボックスの作成に使用された Daytona のスナップショット
-
-  ##### 実装 {#implementation-of}
-
-  ```ts
-  SandboxDto.snapshot
-  ```
+    
+    ##### 実装
+    
+    ```ts
+    SandboxDto.snapshot
+    ```
 - `state?` _SandboxState_ - サンドボックスの現在の状態（例: "started", "stopped"）
-
-  ##### 実装 {#implementation-of}
-
-  ```ts
-  SandboxDto.state
-  ```
+    
+    ##### 実装
+    
+    ```ts
+    SandboxDto.state
+    ```
 - `target` _string_ - サンドボックスが実行されるランナーのターゲット（リージョン）
-
-  ##### 実装 {#implementation-of}
-
-  ```ts
-  SandboxDto.target
-  ```
+    
+    ##### 実装
+    
+    ```ts
+    SandboxDto.target
+    ```
 - `updatedAt?` _string_ - サンドボックスの最終更新時刻
-
-  ##### 実装 {#implementation-of}
-
-  ```ts
-  SandboxDto.updatedAt
-  ```
+    
+    ##### 実装
+    
+    ```ts
+    SandboxDto.updatedAt
+    ```
 - `user` _string_ - サンドボックスで実行中の OS ユーザー
+    
+    ##### 実装
+    
+    ```ts
+    SandboxDto.user
+    ```
+- `volumes?` _SandboxVolume\[\]_ - サンドボックスに接続されたボリューム
+    
+    ##### 実装
+    
+    ```ts
+    SandboxDto.volumes
+    ```
+    
 
-  ##### 実装 {#implementation-of}
 
-  ```ts
-  SandboxDto.user
-  ```
-- `volumes?` _SandboxVolume[]_ - サンドボックスに接続されたボリューム
 
-  ##### 実装 {#implementation-of}
 
-  ```ts
-  SandboxDto.volumes
-  ```
-
-### 実装 {#implements}
+### 実装
 
 - `Sandbox`
 
-### コンストラクター {#constructors}
+### コンストラクター
 
-#### new Sandbox() {#new-sandbox}
+#### new Sandbox()
 
 ```ts
 new Sandbox(
@@ -223,13 +228,14 @@ new Sandbox(
 - `toolboxApi` _ToolboxApi_ - ツールボックス操作用の API クライアント
 - `codeToolbox` _SandboxCodeToolbox_ - 言語別ツールボックス実装
 
+
 **戻り値**:
 
 - `Sandbox`
 
-### メソッド {#methods}
+### メソッド
 
-#### archive() {#archive}
+#### archive()
 
 ```ts
 archive(): Promise<void>
@@ -244,9 +250,9 @@ archive(): Promise<void>
 
 - `Promise<void>`
 
----
+***
 
-#### createLspServer() {#createlspserver}
+#### createLspServer()
 
 ```ts
 createLspServer(languageId: string, pathToProject: string): Promise<LspServer>
@@ -260,7 +266,8 @@ LSP サーバーはコード補完、診断などの言語機能を提供しま�
 
 - `languageId` _string_ - 言語サーバーの種類（例: "typescript"）
 - `pathToProject` _string_ - プロジェクトのルートディレクトリへのパス。相対パスはユーザーの
-  ルートディレクトリを基準に解決されます。
+    ルートディレクトリを基準に解決されます。
+
 
 **戻り値**:
 
@@ -272,9 +279,9 @@ LSP サーバーはコード補完、診断などの言語機能を提供しま�
 const lsp = await sandbox.createLspServer('typescript', 'workspace/project');
 ```
 
----
+***
 
-#### delete() {#delete}
+#### delete()
 
 ```ts
 delete(timeout: number): Promise<void>
@@ -286,13 +293,14 @@ delete(timeout: number): Promise<void>
 
 - `timeout` _number = 60_
 
+
 **戻り値**:
 
 - `Promise<void>`
 
----
+***
 
-#### getPreviewLink() {#getpreviewlink}
+#### getPreviewLink()
 
 ```ts
 getPreviewLink(port: number): Promise<PortPreviewUrl>
@@ -305,10 +313,11 @@ getPreviewLink(port: number): Promise<PortPreviewUrl>
 
 - `port` _number_ - プレビューリンクを開くポート
 
+
 **戻り値**:
 
 - `Promise<PortPreviewUrl>` - プレビューリンクのレスポンスオブジェクト。`url`
-  と `token`（プライベートサンドボックスにアクセスするため）を含みます。
+    と `token`（プライベートサンドボックスにアクセスするため）を含みます。
 
 **例:**
 
@@ -318,9 +327,9 @@ console.log(`Preview URL: ${previewLink.url}`);
 console.log(`Token: ${previewLink.token}`);
 ```
 
----
+***
 
-#### getUserRootDir() {#getuserrootdir}
+#### getUserRootDir()
 
 ```ts
 getUserRootDir(): Promise<string>
@@ -339,9 +348,9 @@ const rootDir = await sandbox.getUserRootDir();
 console.log(`Sandbox root: ${rootDir}`);
 ```
 
----
+***
 
-#### refreshData() {#refreshdata}
+#### refreshData()
 
 ```ts
 refreshData(): Promise<void>
@@ -362,9 +371,9 @@ console.log(`State: ${sandbox.state}`);
 console.log(`Resources: ${sandbox.cpu} CPU, ${sandbox.memory} GiB RAM`);
 ```
 
----
+***
 
-#### setAutoArchiveInterval() {#setautoarchiveinterval}
+#### setAutoArchiveInterval()
 
 ```ts
 setAutoArchiveInterval(interval: number): Promise<void>
@@ -377,7 +386,8 @@ setAutoArchiveInterval(interval: number): Promise<void>
 **パラメーター**:
 
 - `interval` _number_ - 連続停止から自動アーカイブまでの分数。
-  最大間隔にするには 0 を指定します。デフォルトは 7 日です。
+    最大間隔にするには 0 を指定します。デフォルトは 7 日です。
+
 
 **戻り値**:
 
@@ -396,9 +406,9 @@ await sandbox.setAutoArchiveInterval(60);
 await sandbox.setAutoArchiveInterval(0);
 ```
 
----
+***
 
-#### setAutoDeleteInterval() {#setautodeleteinterval}
+#### setAutoDeleteInterval()
 
 ```ts
 setAutoDeleteInterval(interval: number): Promise<void>
@@ -411,8 +421,9 @@ setAutoDeleteInterval(interval: number): Promise<void>
 **パラメータ**:
 
 - `interval` _number_ - 連続停止後に自動削除されるまでの分数。
-  自動削除を無効化するには負の値を設定します。停止と同時に即時削除するには 0 を設定します。
-  既定では自動削除は無効です。
+    自動削除を無効化するには負の値を設定します。停止と同時に即時削除するには 0 を設定します。
+    既定では自動削除は無効です。
+
 
 **戻り値**:
 
@@ -429,9 +440,9 @@ await sandbox.setAutoDeleteInterval(0);
 await sandbox.setAutoDeleteInterval(-1);
 ```
 
----
+***
 
-#### setAutostopInterval() {#setautostopinterval}
+#### setAutostopInterval()
 
 ```ts
 setAutostopInterval(interval: number): Promise<void>
@@ -446,7 +457,8 @@ Sandbox Previews を用いたインタラクションは含まれません。
 **パラメータ**:
 
 - `interval` _number_ - 自動停止までの非アクティブ時間（分）。
-  自動停止を無効化するには 0 を設定します。既定は 15 分です。
+    自動停止を無効化するには 0 を設定します。既定は 15 分です。
+
 
 **戻り値**:
 
@@ -465,9 +477,9 @@ await sandbox.setAutostopInterval(60);
 await sandbox.setAutostopInterval(0);
 ```
 
----
+***
 
-#### setLabels() {#setlabels}
+#### setLabels()
 
 ```ts
 setLabels(labels: Record<string, string>): Promise<Record<string, string>>
@@ -479,7 +491,8 @@ setLabels(labels: Record<string, string>): Promise<Record<string, string>>
 
 **パラメータ**:
 
-- `labels` _Record<string, string>_ - サンドボックスのラベルを表すキーと値のペアの辞書
+- `labels` _Record\<string, string\>_ - サンドボックスのラベルを表すキーと値のペアの辞書
+
 
 **戻り値**:
 
@@ -496,9 +509,9 @@ await sandbox.setLabels({
 });
 ```
 
----
+***
 
-#### start() {#start}
+#### start()
 
 ```ts
 start(timeout?: number): Promise<void>
@@ -511,7 +524,8 @@ start(timeout?: number): Promise<void>
 **パラメータ**:
 
 - `timeout?` _number = 60_ - 待機する最大時間（秒）。0 はタイムアウトなしを意味します。
-  既定は 60 秒のタイムアウトです。
+    既定は 60 秒のタイムアウトです。
+
 
 **戻り値**:
 
@@ -529,9 +543,9 @@ await sandbox.start(40);  // 最大 40 秒待機
 console.log('Sandbox started successfully');
 ```
 
----
+***
 
-#### stop() {#stop}
+#### stop()
 
 ```ts
 stop(timeout?: number): Promise<void>
@@ -544,7 +558,8 @@ stop(timeout?: number): Promise<void>
 **パラメータ**:
 
 - `timeout?` _number = 60_ - 待機する最大時間（秒）。0 はタイムアウトなしを意味します。
-  既定は 60 秒のタイムアウトです。
+    既定は 60 秒のタイムアウトです。
+
 
 **戻り値**:
 
@@ -558,9 +573,9 @@ await sandbox.stop();
 console.log('Sandbox stopped successfully');
 ```
 
----
+***
 
-#### waitUntilStarted() {#waituntilstarted}
+#### waitUntilStarted()
 
 ```ts
 waitUntilStarted(timeout?: number): Promise<void>
@@ -574,7 +589,8 @@ waitUntilStarted(timeout?: number): Promise<void>
 **パラメータ**:
 
 - `timeout?` _number = 60_ - 待機する最大時間（秒）。0 はタイムアウトなしを意味します。
-  既定は 60 秒です。
+    既定は 60 秒です。
+
 
 **戻り値**:
 
@@ -584,9 +600,9 @@ waitUntilStarted(timeout?: number): Promise<void>
 
 - `DaytonaError` - サンドボックスがエラー状態になった場合、またはタイムアウト内に起動できなかった場合
 
----
+***
 
-#### waitUntilStopped() {#waituntilstopped}
+#### waitUntilStopped()
 
 ```ts
 waitUntilStopped(timeout?: number): Promise<void>
@@ -600,7 +616,8 @@ waitUntilStopped(timeout?: number): Promise<void>
 **パラメータ**:
 
 - `timeout?` _number = 60_ - 待機する最大時間（秒）。0 はタイムアウトなしを意味します。
-  既定は 60 秒です。
+    既定は 60 秒です。
+
 
 **戻り値**:
 
@@ -609,14 +626,13 @@ waitUntilStopped(timeout?: number): Promise<void>
 **スロー**:
 
 - `DaytonaError` - サンドボックスがタイムアウト内に停止できなかった場合
-
-## SandboxCodeToolbox {#sandboxcodetoolbox}
+## SandboxCodeToolbox
 
 コードツールボックスが実装すべきメソッドを定義するインターフェース
 
-### Methods {#methods}
+### Methods
 
-#### getRunCommand() {#getruncommand}
+#### getRunCommand()
 
 ```ts
 getRunCommand(code: string, params?: CodeRunParams): string
@@ -629,6 +645,8 @@ getRunCommand(code: string, params?: CodeRunParams): string
 - `code` _string_
 - `params?` _CodeRunParams_
 
+
 **Returns**:
 
 - `string`
+
