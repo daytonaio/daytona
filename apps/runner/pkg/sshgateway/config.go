@@ -36,6 +36,7 @@ func GetSSHGatewayPort() int {
 }
 
 // GetSSHPublicKey returns the SSH public key from configuration
+// Get ssh public key of ssh gateway - external ssh gateway, not runner ssh gateway
 func GetSSHPublicKey() (string, error) {
 	publicKey := os.Getenv("SSH_PUBLIC_KEY")
 	if publicKey == "" {
@@ -49,7 +50,7 @@ func GetSSHHostKeyPath() string {
 	if path := os.Getenv("SSH_HOST_KEY_PATH"); path != "" {
 		return path
 	}
-	return "/root/.daytona/"
+	return "/root/.ssh/id_rsa"
 }
 
 // GetSSHHostKey returns the SSH host key from configuration
@@ -59,7 +60,7 @@ func GetSSHHostKey() (ssh.Signer, error) {
 	// Check if host key file exists
 	if _, err := os.Stat(hostKeyPath); os.IsNotExist(err) {
 		// Generate new host key if file doesn't exist
-		if err := generateAndSaveHostKey(); err != nil {
+		if err := generateAndSaveHostKey(hostKeyPath); err != nil {
 			return nil, fmt.Errorf("failed to generate host key: %w", err)
 		}
 	}
@@ -80,9 +81,7 @@ func GetSSHHostKey() (ssh.Signer, error) {
 }
 
 // generateAndSaveHostKey generates a new RSA host key and saves it to the file
-func generateAndSaveHostKey() error {
-	hostKeyPath := GetSSHHostKeyPath()
-
+func generateAndSaveHostKey(hostKeyPath string) error {
 	// Create directory if it doesn't exist
 	dir := filepath.Dir(hostKeyPath)
 	if err := os.MkdirAll(dir, 0700); err != nil {
