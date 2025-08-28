@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"io"
 	"net"
-	"sync"
 	"time"
 
 	"github.com/daytonaio/runner/pkg/docker"
@@ -20,7 +19,6 @@ import (
 
 type Service struct {
 	dockerClient *docker.DockerClient
-	mutex        sync.RWMutex
 	port         int
 }
 

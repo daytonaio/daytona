@@ -956,7 +956,7 @@ export class SandboxService {
       // Revoke specific SSH access by token
       await this.sshAccessRepository.delete({ sandboxId, token })
     } else {
-      // Revoke all SSH access for the sandbox (backward compatibility)
+      // Revoke all SSH access for the sandbox
       await this.sshAccessRepository.delete({ sandboxId })
     }
   }

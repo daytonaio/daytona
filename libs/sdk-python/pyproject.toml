@@ -3,7 +3,7 @@ requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [project]
-name = "daytona_sdk"
+name = "daytona"
 version = "0.0.0-dev"
 authors = [
     { name = "Daytona Platforms Inc.", email = "support@daytona.io"  },
