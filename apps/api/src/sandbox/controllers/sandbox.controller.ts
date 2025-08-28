@@ -79,7 +79,7 @@ export class SandboxController {
     private readonly sandboxService: SandboxService,
     private readonly configService: TypedConfigService,
     private readonly eventEmitter: EventEmitter2,
-  ) { }
+  ) {}
 
   @Get()
   @ApiOperation({
