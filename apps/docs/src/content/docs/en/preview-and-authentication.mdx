@@ -2,7 +2,7 @@
 title: Preview & Authentication
 ---
 
-import { Tabs, TabItem } from '@astrojs/starlight/components';
+import { Tabs, TabItem } from '@astrojs/starlight/components'
 
 Processes listening for HTTP traffic in port range `3000-9999` can be previewed using preview links.
 
@@ -44,3 +44,7 @@ console.log(`Preview link token: ${previewInfo.token}`);
 
 </TabItem>
 </Tabs>
+
+:::tip
+If you want to serve the previews under your own domain instead of using Daytona's URLs, check out the [Custom Domain/Authentication](/docs/en/custom-domain-authentication) section.
+:::

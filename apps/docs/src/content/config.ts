@@ -298,9 +298,10 @@ export const getSidebarConfig = (
         },
         {
           type: 'link',
-          href: localizePath('/docs/custom-preview-proxy', locale),
-          label: labels['sidebarconfig.customPreviewProxy'],
-          description: labels['sidebarconfig.customPreviewProxyDescription'],
+          href: localizePath('/docs/custom-domain-authentication', locale),
+          label: labels['sidebarconfig.customDomainAuthentication'],
+          description:
+            labels['sidebarconfig.customDomainAuthenticationDescription'],
           attrs: {
             icon: 'proxy-link.svg',
           },

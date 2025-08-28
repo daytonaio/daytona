@@ -1,5 +1,5 @@
 # Daytona Documentation v0.0.0-dev
-# Generated on: 2025-08-27
+# Generated on: 2025-08-28
 
 
 title: API Keys
@@ -259,7 +259,7 @@ The SDK uses the following precedence order for configuration (highest to lowest
 3. Configuration file.
 4. Default values.
 
-title: Custom Preview Proxy
+title: Custom Domain/Authentication
 description: Customize the preview proxy with your own domain and logic.
 
 Daytona allows you to deploy your own custom preview proxy to handle preview URLs for sandboxes. This gives you complete control over the preview experience, including custom domains, authentication, error handling, and styling.
@@ -2682,7 +2682,7 @@ The Settings subpage in the Dashboard allows you to view the Organization ID and
 
 title: Preview & Authentication
 
-import { Tabs, TabItem } from '@astrojs/starlight/components';
+import { Tabs, TabItem } from '@astrojs/starlight/components'
 
 Processes listening for HTTP traffic in port range `3000-9999` can be previewed using preview links.
 
@@ -2717,6 +2717,11 @@ console.log(`Preview link url: ${previewInfo.url}`);
 console.log(`Preview link token: ${previewInfo.token}`);
 
 ```
+
+
+:::tip
+If you want to serve the previews under your own domain instead of using Daytona's URLs, check out the [Custom Domain/Authentication](/docs/en/custom-domain-authentication) section.
+:::
 
 title: Process and Code Execution
 
@@ -3099,9 +3104,9 @@ Check your available resources and limits in the [dashboard](https://app.daytona
 All resource parameters are optional. If not specified, Daytona will use default values appropriate for the selected language and use case.
 :::
 
-### Network Settings
+### Network Settings (Firewall)
 
-Daytona Sandboxes provide configurable network access controls to enhance security and manage connectivity. By default, network access follows standard security policies, but you can customize network settings when creating a Sandbox:
+Daytona Sandboxes provide configurable network firewall controls to enhance security and manage connectivity. By default, network access follows standard security policies, but you can customize network settings when creating a Sandbox:
 
 - To block all network access, set `networkBlockAll` to `True`
 - To restrict network access to specific addresses, set `networkAllowList` to a comma-separated list of up to 5 CIDR blocks

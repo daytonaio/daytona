@@ -1,5 +1,5 @@
 # Daytona Documentation v0.0.0-dev
-# Generated on: 2025-08-27
+# Generated on: 2025-08-28
 
 # Daytona
 
@@ -28,10 +28,10 @@
 - [Environment Variables](https://daytona.io/docs/en/configuration#environment-variables)
 - [Setting Environment Variables](https://daytona.io/docs/en/configuration#setting-environment-variables)
 - [Configuration Precedence](https://daytona.io/docs/en/configuration#configuration-precedence)
-- [Custom Preview Proxy](https://daytona.io/docs/en/custom-preview-proxy)
-- [How It Works](https://daytona.io/docs/en/custom-preview-proxy#how-it-works)
-- [Daytona Headers](https://daytona.io/docs/en/custom-preview-proxy#daytona-headers)
-- [Examples](https://daytona.io/docs/en/custom-preview-proxy#examples)
+- [Custom Domain/Authentication](https://daytona.io/docs/en/custom-domain-authentication)
+- [How It Works](https://daytona.io/docs/en/custom-domain-authentication#how-it-works)
+- [Daytona Headers](https://daytona.io/docs/en/custom-domain-authentication#daytona-headers)
+- [Examples](https://daytona.io/docs/en/custom-domain-authentication#examples)
 - [Analyze Data with AI](https://daytona.io/docs/en/data-analysis-with-ai)
 - [Build an AI Data Analyst with Daytona](https://daytona.io/docs/en/data-analysis-with-ai#build-an-ai-data-analyst-with-daytona)
 - [1. Project Setup](https://daytona.io/docs/en/data-analysis-with-ai#1-project-setup)
@@ -139,7 +139,7 @@
 - [Creating Sandboxes](https://daytona.io/docs/en/sandbox-management#creating-sandboxes)
 - [Basic Sandbox Creation](https://daytona.io/docs/en/sandbox-management#basic-sandbox-creation)
 - [Sandbox Resources](https://daytona.io/docs/en/sandbox-management#sandbox-resources)
-- [Network Settings](https://daytona.io/docs/en/sandbox-management#network-settings)
+- [Network Settings (Firewall)](https://daytona.io/docs/en/sandbox-management#network-settings-firewall)
 - [Sandbox Information](https://daytona.io/docs/en/sandbox-management#sandbox-information)
 - [Stop and Start Sandbox](https://daytona.io/docs/en/sandbox-management#stop-and-start-sandbox)
 - [Archive Sandbox](https://daytona.io/docs/en/sandbox-management#archive-sandbox)
