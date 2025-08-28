@@ -1,0 +1,109 @@
+---
+title: SSH Gateway
+---
+
+import { TabItem, Tabs } from '@astrojs/starlight/components'
+
+You can connect to any of your sandboxes via SSH using token-based authentication through the SSH Gateway.
+
+## Creating an SSH Access Token
+
+To connect to a sandbox, you'll need to create an SSH access token first. This token provides secure, time-limited access to your sandbox.
+
+SSH access can be initialized from the dashboard by opening the sandbox’s options menu and selecting `Create SSH Access`.
+It can also be initialized programmatically using one of the SDKs listed below.
+
+<Tabs>
+<TabItem label="Python" icon="seti:python">
+
+```python
+from daytona import Daytona
+
+daytona = Daytona()
+sandbox = daytona.get("sandbox-abc123")
+
+# Create SSH access token
+ssh_access = sandbox.create_ssh_access(expires_in_minutes=60)
+print(f"SSH Token: {ssh_access.token}")
+```
+
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+
+```typescript
+import { Daytona } from '@daytonaio/sdk'
+
+const daytona = new Daytona()
+const sandbox = await daytona.get('sandbox-abc123')
+
+// Create SSH access token
+const sshAccess = await sandbox.createSshAccess(60)
+console.log(`SSH Token: ${sshAccess.token}`)
+```
+
+</TabItem>
+</Tabs>
+
+## Connection Command
+
+Once you have your token, connect using:
+
+```bash
+ssh <token>@ssh.app.daytona.io
+```
+
+## Connecting with VSCode
+
+Connecting your local VSCode to a sandbox requires a few simple steps:
+
+1. Make sure that the [Remote Explorer extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode.remote-explorer) is installed in your VSCode.
+2. Add a new SSH connection
+3. When prompted for the SSH connection URL, paste your SSH command from above.
+
+Find out more about the extension [here](https://code.visualstudio.com/docs/remote/ssh).
+
+## Connecting with JetBrains IDEs
+
+Connecting your local JetBrains IDEs to a sandbox requires a few simple steps:
+
+1. Download the [JetBrains Gateway](https://www.jetbrains.com/remote-development/gateway/) app to your local machine.
+2. Add a new connection.
+3. When prompted for the SSH connection URL, paste your SSH command from above.
+4. Choose an IDE you want installed in your sandbox.
+
+## Managing SSH Access
+
+### Token Expiration
+
+SSH access tokens expire automatically for security:
+
+- **Default**: 60 minutes
+
+### Revoking Access
+
+You can revoke SSH access tokens at any time:
+
+<Tabs>
+<TabItem label="Python" icon="seti:python">
+
+```python
+# Revoke all SSH access for the sandbox
+sandbox.revoke_ssh_access()
+
+# Revoke specific SSH access for the sandbox
+sandbox.revoke_ssh_access(token="specific-token")
+```
+
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+
+```typescript
+// Revoke all SSH access for the sandbox
+await sandbox.revokeSshAccess()
+
+// Revoke specific SSH access for the sandbox
+await sandbox.revokeSshAccess('specific-token')
+```
+
+</TabItem>
+</Tabs>

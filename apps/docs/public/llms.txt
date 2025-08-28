@@ -1,5 +1,5 @@
 # Daytona Documentation v0.0.0-dev
-# Generated on: 2025-08-27
+# Generated on: 2025-08-28
 
 # Daytona
 
@@ -159,6 +159,14 @@
 - [Creating a DinD Snapshot](https://daytona.io/docs/en/snapshots#creating-a-dind-snapshot)
 - [Use Cases](https://daytona.io/docs/en/snapshots#use-cases)
 - [Default Snapshot](https://daytona.io/docs/en/snapshots#default-snapshot)
+- [SSH Gateway](https://daytona.io/docs/en/ssh-gateway)
+- [Creating an SSH Access Token](https://daytona.io/docs/en/ssh-gateway#creating-an-ssh-access-token)
+- [Connection Command](https://daytona.io/docs/en/ssh-gateway#connection-command)
+- [Connecting with VSCode](https://daytona.io/docs/en/ssh-gateway#connecting-with-vscode)
+- [Connecting with JetBrains IDEs](https://daytona.io/docs/en/ssh-gateway#connecting-with-jetbrains-ides)
+- [Managing SSH Access](https://daytona.io/docs/en/ssh-gateway#managing-ssh-access)
+- [Token Expiration](https://daytona.io/docs/en/ssh-gateway#token-expiration)
+- [Revoking Access](https://daytona.io/docs/en/ssh-gateway#revoking-access)
 - [CLI](https://daytona.io/docs/en/tools/cli)
 - [daytona](https://daytona.io/docs/en/tools/cli#daytona)
 - [daytona autocomplete](https://daytona.io/docs/en/tools/cli#daytona-autocomplete)

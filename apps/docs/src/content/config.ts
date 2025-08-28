@@ -289,6 +289,15 @@ export const getSidebarConfig = (
         },
         {
           type: 'link',
+          href: localizePath('/docs/ssh-gateway', locale),
+          label: labels['sidebarconfig.sshGateway'],
+          description: labels['sidebarconfig.sshGatewayDescription'],
+          attrs: {
+            icon: 'terminal.svg',
+          },
+        },
+        {
+          type: 'link',
           href: localizePath('/docs/preview-and-authentication', locale),
           label: labels['sidebarconfig.previewAuthentication'],
           description: labels['sidebarconfig.previewAuthenticationDescription'],
