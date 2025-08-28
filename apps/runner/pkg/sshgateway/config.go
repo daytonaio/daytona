@@ -17,8 +17,7 @@ import (
 )
 
 const (
-	SSH_GATEWAY_PORT  = 2220
-	SSH_HOST_KEY_PATH = "/workspaces/daytona/hack/runner-ssh-host-key/id_rsa"
+	SSH_GATEWAY_PORT = 2220
 )
 
 // IsSSHGatewayEnabled checks if the SSH gateway should be enabled
@@ -45,10 +44,20 @@ func GetSSHPublicKey() (string, error) {
 	return publicKey, nil
 }
 
+// GetSSHHostKeyPath returns the SSH host key path from configuration
+func GetSSHHostKeyPath() string {
+	if path := os.Getenv("SSH_HOST_KEY_PATH"); path != "" {
+		return path
+	}
+	return "/root/.daytona/"
+}
+
 // GetSSHHostKey returns the SSH host key from configuration
 func GetSSHHostKey() (ssh.Signer, error) {
+	hostKeyPath := GetSSHHostKeyPath()
+
 	// Check if host key file exists
-	if _, err := os.Stat(SSH_HOST_KEY_PATH); os.IsNotExist(err) {
+	if _, err := os.Stat(hostKeyPath); os.IsNotExist(err) {
 		// Generate new host key if file doesn't exist
 		if err := generateAndSaveHostKey(); err != nil {
 			return nil, fmt.Errorf("failed to generate host key: %w", err)
@@ -56,7 +65,7 @@ func GetSSHHostKey() (ssh.Signer, error) {
 	}
 
 	// Read the host key file
-	hostKeyBytes, err := os.ReadFile(SSH_HOST_KEY_PATH)
+	hostKeyBytes, err := os.ReadFile(hostKeyPath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read host key file: %w", err)
 	}
@@ -72,8 +81,10 @@ func GetSSHHostKey() (ssh.Signer, error) {
 
 // generateAndSaveHostKey generates a new RSA host key and saves it to the file
 func generateAndSaveHostKey() error {
+	hostKeyPath := GetSSHHostKeyPath()
+
 	// Create directory if it doesn't exist
-	dir := filepath.Dir(SSH_HOST_KEY_PATH)
+	dir := filepath.Dir(hostKeyPath)
 	if err := os.MkdirAll(dir, 0700); err != nil {
 		return fmt.Errorf("failed to create directory: %w", err)
 	}
@@ -91,7 +102,7 @@ func generateAndSaveHostKey() error {
 	}
 
 	// Save private key to file
-	privateKeyFile, err := os.OpenFile(SSH_HOST_KEY_PATH, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
+	privateKeyFile, err := os.OpenFile(hostKeyPath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
 	if err != nil {
 		return fmt.Errorf("failed to create host key file: %w", err)
 	}
