@@ -7,8 +7,6 @@ package main
 
 import (
 	"context"
-	"crypto/rand"
-	"crypto/rsa"
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
@@ -42,29 +40,19 @@ func main() {
 	port := getEnvInt("SSH_GATEWAY_PORT", defaultPort)
 	apiURL := getEnv("API_URL", "http://localhost:3000")
 	apiKey := getEnv("API_KEY", "")
-	sshPkPath := getEnv("SSH_PK_PATH", "")
-	sshHostKeyPath := getEnv("SSH_HOST_KEY_PATH", "")
+	sshPk := getEnv("SSH_PRIVATE_KEY", "")
+	sshHostKey := getEnv("SSH_HOST_KEY", "")
 
 	if apiKey == "" {
 		log.Fatal("API_KEY environment variable is required")
 	}
 
-	if sshPkPath == "" {
-		log.Fatal("SSH_PK_PATH environment variable is required")
+	if sshPk == "" {
+		log.Fatal("SSH_PRIVATE_KEY environment variable is required")
 	}
 
-	if sshHostKeyPath == "" {
-		log.Fatal("SSH_HOST_KEY_PATH environment variable is required")
-	}
-
-	// Check if the private key file exists and is readable
-	if _, err := os.Stat(sshPkPath); os.IsNotExist(err) {
-		log.Fatalf("SSH private key file does not exist: %s", sshPkPath)
-	}
-
-	// Check if the host key file exists and is readable
-	if _, err := os.Stat(sshHostKeyPath); os.IsNotExist(err) {
-		log.Fatalf("SSH host key file does not exist: %s", sshHostKeyPath)
+	if sshHostKey == "" {
+		log.Fatal("SSH_HOST_KEY environment variable is required")
 	}
 
 	clientConfig := apiclient.NewConfiguration()
@@ -82,16 +70,16 @@ func main() {
 		Transport: http.DefaultTransport,
 	}
 
-	// Load the host key from file
-	hostKey, err := loadHostKeyFromFile(sshHostKeyPath)
+	// Load the host key from environment variable
+	hostKey, err := parsePrivateKey(sshHostKey)
 	if err != nil {
-		log.Fatalf("Failed to load host key: %v", err)
+		log.Fatalf("Failed to parse host key from SSH_HOST_KEY: %v", err)
 	}
 
-	// Load the private key from file
-	privateKey, err := loadPrivateKeyFromFile(sshPkPath)
+	// Load the private key from environment variable
+	privateKey, err := parsePrivateKey(sshPk)
 	if err != nil {
-		log.Fatalf("Failed to load private key from %s: %v", sshPkPath, err)
+		log.Fatalf("Failed to parse private key from SSH_PRIVATE_KEY: %v", err)
 	}
 
 	// Generate public key from private key
@@ -105,8 +93,8 @@ func main() {
 		publicKey:  publicKey,
 	}
 
-	log.Printf("Host key loaded from %s", sshHostKeyPath)
-	log.Printf("Private key loaded from %s", sshPkPath)
+	log.Printf("Host key loaded from SSH_HOST_KEY environment variable")
+	log.Printf("Private key loaded from SSH_PRIVATE_KEY environment variable")
 	log.Printf("Public key generated: %s", string(ssh.MarshalAuthorizedKey(publicKey)))
 
 	log.Printf("Starting SSH Gateway on port %d", port)
@@ -385,22 +373,6 @@ func (g *SSHGateway) sendErrorAndClose(conn net.Conn, errorMessage string) {
 	conn.Close()
 }
 
-func generateHostKey() (ssh.Signer, error) {
-	// Generate a new RSA key pair
-	privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
-	if err != nil {
-		return nil, fmt.Errorf("failed to generate RSA key: %w", err)
-	}
-
-	// Create SSH signer
-	signer, err := ssh.NewSignerFromKey(privateKey)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create SSH signer: %w", err)
-	}
-
-	return signer, nil
-}
-
 func parsePrivateKey(privateKeyPEM string) (ssh.Signer, error) {
 	// First try to parse as OpenSSH format (newer format)
 	signer, err := ssh.ParsePrivateKey([]byte(privateKeyPEM))
@@ -435,34 +407,6 @@ func (g *SSHGateway) GetPublicKeyString() string {
 // GetPublicKey returns the SSH public key
 func (g *SSHGateway) GetPublicKey() ssh.PublicKey {
 	return g.publicKey
-}
-
-func loadPrivateKeyFromFile(filePath string) (ssh.Signer, error) {
-	bytes, err := os.ReadFile(filePath)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read private key file %s: %w", filePath, err)
-	}
-
-	signer, err := parsePrivateKey(string(bytes))
-	if err != nil {
-		return nil, fmt.Errorf("failed to parse private key from file %s: %w", filePath, err)
-	}
-
-	return signer, nil
-}
-
-func loadHostKeyFromFile(filePath string) (ssh.Signer, error) {
-	bytes, err := os.ReadFile(filePath)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read host key file %s: %w", filePath, err)
-	}
-
-	signer, err := ssh.ParsePrivateKey(bytes)
-	if err != nil {
-		return nil, fmt.Errorf("failed to parse host key from file %s: %w", filePath, err)
-	}
-
-	return signer, nil
 }
 
 func getEnv(key, defaultValue string) string {
