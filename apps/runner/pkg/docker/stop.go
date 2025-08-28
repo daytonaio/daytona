@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/daytonaio/runner/internal/constants"
 	"github.com/daytonaio/runner/pkg/models/enums"
 	"github.com/docker/docker/api/types/container"
 )
@@ -21,9 +22,19 @@ func (d *DockerClient) Stop(ctx context.Context, containerId string) error {
 		backup_context.cancel()
 	}
 
-	err := d.apiClient.ContainerStop(ctx, containerId, container.StopOptions{
-		Signal: "SIGKILL",
-	})
+	// Use exponential backoff helper for container stopping
+	err := d.retryWithExponentialBackoff(
+		"stop",
+		containerId,
+		constants.DEFAULT_MAX_RETRIES,
+		constants.DEFAULT_BASE_DELAY,
+		constants.DEFAULT_MAX_DELAY,
+		func() error {
+			return d.apiClient.ContainerStop(ctx, containerId, container.StopOptions{
+				Signal: "SIGKILL",
+			})
+		},
+	)
 	if err != nil {
 		return err
 	}
