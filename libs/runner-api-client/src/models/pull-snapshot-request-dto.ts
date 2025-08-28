@@ -27,11 +27,17 @@ export interface PullSnapshotRequestDTO {
    * @type {RegistryDTO}
    * @memberof PullSnapshotRequestDTO
    */
-  registry?: RegistryDTO
+  destinationRegistry?: RegistryDTO
   /**
    *
    * @type {string}
    * @memberof PullSnapshotRequestDTO
    */
   snapshot: string
+  /**
+   *
+   * @type {RegistryDTO}
+   * @memberof PullSnapshotRequestDTO
+   */
+  sourceRegistry?: RegistryDTO
 }
