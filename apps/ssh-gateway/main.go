@@ -8,6 +8,7 @@ package main
 import (
 	"context"
 	"crypto/x509"
+	"encoding/base64"
 	"encoding/pem"
 	"fmt"
 	"io"
@@ -55,6 +56,18 @@ func main() {
 		log.Fatal("SSH_HOST_KEY environment variable is required")
 	}
 
+	// Decode base64 encoded private key
+	decodedPk, err := base64.StdEncoding.DecodeString(sshPk)
+	if err != nil {
+		log.Fatalf("Failed to base64 decode SSH_PRIVATE_KEY: %v", err)
+	}
+
+	// Decode base64 encoded host key
+	decodedHostKey, err := base64.StdEncoding.DecodeString(sshHostKey)
+	if err != nil {
+		log.Fatalf("Failed to base64 decode SSH_HOST_KEY: %v", err)
+	}
+
 	clientConfig := apiclient.NewConfiguration()
 	clientConfig.Servers = apiclient.ServerConfigurations{
 		{
@@ -71,13 +84,13 @@ func main() {
 	}
 
 	// Load the host key from environment variable
-	hostKey, err := parsePrivateKey(sshHostKey)
+	hostKey, err := parsePrivateKey(string(decodedHostKey))
 	if err != nil {
 		log.Fatalf("Failed to parse host key from SSH_HOST_KEY: %v", err)
 	}
 
 	// Load the private key from environment variable
-	privateKey, err := parsePrivateKey(sshPk)
+	privateKey, err := parsePrivateKey(string(decodedPk))
 	if err != nil {
 		log.Fatalf("Failed to parse private key from SSH_PRIVATE_KEY: %v", err)
 	}
@@ -93,8 +106,8 @@ func main() {
 		publicKey:  publicKey,
 	}
 
-	log.Printf("Host key loaded from SSH_HOST_KEY environment variable")
-	log.Printf("Private key loaded from SSH_PRIVATE_KEY environment variable")
+	log.Printf("Host key loaded from SSH_HOST_KEY environment variable (base64 decoded)")
+	log.Printf("Private key loaded from SSH_PRIVATE_KEY environment variable (base64 decoded)")
 	log.Printf("Public key generated: %s", string(ssh.MarshalAuthorizedKey(publicKey)))
 
 	log.Printf("Starting SSH Gateway on port %d", port)
