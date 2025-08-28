@@ -3,14 +3,13 @@ title: "Git"
 hideTitleOnPage: true
 ---
 
-
-## Git
+## Git {#git}
 
 サンドボックス内での Git 操作を提供します。
 
-### Constructors
+### Constructors {#constructors}
 
-#### new Git()
+#### new Git() {#new-git}
 
 ```ts
 new Git(
@@ -23,16 +22,15 @@ new Git(
 
 - `sandboxId` _string_
 - `toolboxApi` _ToolboxApi_
-- `getRootDir` _\(\) =\> Promise\<string\>_
-
+- `getRootDir` _() => Promise<string>_
 
 **Returns**:
 
 - `Git`
 
-### Methods
+### Methods {#methods}
 
-#### add()
+#### add() {#add}
 
 ```ts
 add(path: string, files: string[]): Promise<void>
@@ -44,9 +42,8 @@ add(path: string, files: string[]): Promise<void>
 **Parameters**:
 
 - `path` _string_ - Git リポジトリのルートへのパス。相対パスはユーザーの
-    ルートディレクトリを基準に解決されます。
-- `files` _string\[\]_ - リポジトリルートからの相対パスで指定する、ステージ対象のファイルまたはディレクトリの一覧
-
+  ルートディレクトリを基準に解決されます。
+- `files` _string[]_ - リポジトリルートからの相対パスで指定する、ステージ対象のファイルまたはディレクトリの一覧
 
 **Returns**:
 
@@ -64,9 +61,9 @@ await git.add('workspace/repo', ['file.txt']);
 await git.add('workspace/repo', ['.']);
 ```
 
-***
+---
 
-#### branches()
+#### branches() {#branches}
 
 ```ts
 branches(path: string): Promise<ListBranchResponse>
@@ -77,8 +74,7 @@ branches(path: string): Promise<ListBranchResponse>
 **Parameters**:
 
 - `path` _string_ - Git リポジトリのルートへのパス。相対パスはユーザーの
-    ルートディレクトリを基準に解決されます。
-
+  ルートディレクトリを基準に解決されます。
 
 **Returns**:
 
@@ -91,9 +87,9 @@ const response = await git.branches('workspace/repo');
 console.log(`Branches: ${response.branches}`);
 ```
 
-***
+---
 
-#### checkoutBranch()
+#### checkoutBranch() {#checkoutbranch}
 
 ```ts
 checkoutBranch(path: string, branch: string): Promise<void>
@@ -104,9 +100,8 @@ checkoutBranch(path: string, branch: string): Promise<void>
 **Parameters**:
 
 - `path` _string_ - Git リポジトリのルートへのパス。相対パスはユーザーの
-    ルートディレクトリを基準に解決されます。
+  ルートディレクトリを基準に解決されます。
 - `branch` _string_ - チェックアウトするブランチ名
-
 
 **Returns**:
 
@@ -118,9 +113,9 @@ checkoutBranch(path: string, branch: string): Promise<void>
 await git.checkoutBranch('workspace/repo', 'new-feature');
 ```
 
-***
+---
 
-#### clone()
+#### clone() {#clone}
 
 ```ts
 clone(
@@ -140,12 +135,11 @@ password?: string): Promise<void>
 
 - `url` _string_ - クローン元のリポジトリ URL
 - `path` _string_ - リポジトリをクローンするパス。相対パスはユーザーの
-    ルートディレクトリを基準に解決されます。
+  ルートディレクトリを基準に解決されます。
 - `branch?` _string_ - クローンするブランチ。未指定の場合はデフォルトブランチをクローン
 - `commitId?` _string_ - クローンするコミット。指定された場合、リポジトリはそのコミットの分離 HEAD 状態になります
 - `username?` _string_ - 認証に用いる Git ユーザー名
 - `password?` _string_ - 認証に用いる Git パスワードまたはトークン
-
 
 **Returns**:
 
@@ -181,9 +175,9 @@ await git.clone(
 );
 ```
 
-***
+---
 
-#### commit()
+#### commit() {#commit}
 
 ```ts
 commit(
@@ -199,12 +193,11 @@ allowEmpty?: boolean): Promise<GitCommitResponse>
 **Parameters**:
 
 - `path` _string_ - Git リポジトリのルートへのパス。相対パスはユーザーの
-    ルートディレクトリを基準に解決されます。
+  ルートディレクトリを基準に解決されます。
 - `message` _string_ - 変更内容を説明するコミットメッセージ
 - `author` _string_ - コミットの作成者名
 - `email` _string_ - コミット作成者のメールアドレス
 - `allowEmpty?` _boolean_ - 変更がステージされていない場合でも空のコミットの作成を許可
-
 
 **Returns**:
 
@@ -224,9 +217,9 @@ await git.commit(
 );
 ```
 
-***
+---
 
-#### createBranch()
+#### createBranch() {#createbranch}
 
 ```ts
 createBranch(path: string, name: string): Promise<void>
@@ -237,9 +230,8 @@ createBranch(path: string, name: string): Promise<void>
 **Parameters**:
 
 - `path` _string_ - Git リポジトリのルートへのパス。相対パスはユーザーの
-    ルートディレクトリを基準に解決されます。
+  ルートディレクトリを基準に解決されます。
 - `name` _string_ - 作成する新しいブランチ名
-
 
 **Returns**:
 
@@ -251,9 +243,9 @@ createBranch(path: string, name: string): Promise<void>
 await git.createBranch('workspace/repo', 'new-feature');
 ```
 
-***
+---
 
-#### deleteBranch()
+#### deleteBranch() {#deletebranch}
 
 ```ts
 deleteBranch(path: string, name: string): Promise<void>
@@ -264,9 +256,8 @@ deleteBranch(path: string, name: string): Promise<void>
 **Parameters**:
 
 - `path` _string_ - Git リポジトリのルートへのパス。相対パスはユーザーの
-    ルートディレクトリを基準に解決されます。
+  ルートディレクトリを基準に解決されます。
 - `name` _string_ - 削除するブランチ名
-
 
 **Returns**:
 
@@ -278,9 +269,9 @@ deleteBranch(path: string, name: string): Promise<void>
 await git.deleteBranch('workspace/repo', 'new-feature');
 ```
 
-***
+---
 
-#### pull()
+#### pull() {#pull}
 
 ```ts
 pull(
@@ -294,10 +285,9 @@ password?: string): Promise<void>
 **Parameters**:
 
 - `path` _string_ - Git リポジトリのルートへのパス。相対パスはユーザーの
-    ルートディレクトリを基準に解決されます。
+  ルートディレクトリを基準に解決されます。
 - `username?` _string_ - 認証用の Git ユーザー名
 - `password?` _string_ - 認証用の Git パスワードまたはトークン
-
 
 **Returns**:
 
@@ -319,9 +309,9 @@ await git.pull(
 );
 ```
 
-***
+---
 
-#### push()
+#### push() {#push}
 
 ```ts
 push(
@@ -335,10 +325,9 @@ password?: string): Promise<void>
 **Parameters**:
 
 - `path` _string_ - Git リポジトリのルートへのパス。相対パスはユーザーの
-    ルートディレクトリを基準に解決されます。
+  ルートディレクトリを基準に解決されます。
 - `username?` _string_ - 認証用の Git ユーザー名
 - `password?` _string_ - 認証用の Git パスワードまたはトークン
-
 
 **Returns**:
 
@@ -360,9 +349,9 @@ await git.push(
 );
 ```
 
-***
+---
 
-#### status()
+#### status() {#status}
 
 ```ts
 status(path: string): Promise<GitStatus>
@@ -373,17 +362,16 @@ Git リポジトリの現在のステータスを取得します。
 **Parameters**:
 
 - `path` _string_ - Git リポジトリのルートへのパス。相対パスはユーザーの
-    ルートディレクトリを基準に解決されます。
-
+  ルートディレクトリを基準に解決されます。
 
 **Returns**:
 
 - `Promise<GitStatus>` - 現在のリポジトリのステータス（以下を含む）:
-    - currentBranch: 現在のブランチ名
-    - ahead: リモートブランチより先行しているコミット数
-    - behind: リモートブランチより遅れているコミット数
-    - branchPublished: ブランチがリモートリポジトリに公開済みかどうか
-    - fileStatus: ファイルのステータス一覧
+  - currentBranch: 現在のブランチ名
+  - ahead: リモートブランチより先行しているコミット数
+  - behind: リモートブランチより遅れているコミット数
+  - branchPublished: ブランチがリモートリポジトリに公開済みかどうか
+  - fileStatus: ファイルのステータス一覧
 
 **Example:**
 
@@ -394,10 +382,9 @@ console.log(`Commits ahead: ${status.ahead}`);
 console.log(`Commits behind: ${status.behind}`);
 ```
 
-***
+---
 
-
-## GitCommitResponse
+## GitCommitResponse {#gitcommitresponse}
 
 git commit のレスポンス。
 
