@@ -6,160 +6,159 @@ import { Tabs, TabItem } from '@astrojs/starlight/components';
 
 DaytonaのTS SDK / Python SDKは、サンドボックス内の`process`モジュールを通じて強力なプロセスとコード実行機能を提供します。本ガイドでは、利用可能なプロセス操作のすべてとベストプラクティスを解説します。
 
-## プロセスとコード実行 {#code-execution}
+## プロセスとコード実行
 
 Daytona SDK は、Python と TypeScript でコードを実行できます。
 
-### コードの実行 {#running-code}
+### コードの実行
 
 Daytona SDK は、Python と TypeScript のコードスニペット実行に対応しています。入力、タイムアウト、環境変数を指定して実行できます。
 
 <Tabs>
-  <TabItem label="Python" icon="seti:python">
-    ```python
-    # Python コードを実行
-    response = sandbox.process.code_run('''
-    def greet(name):
-        return f"Hello, {name}!"
+<TabItem label="Python" icon="seti:python">
+```python
+# Python コードを実行
+response = sandbox.process.code_run('''
+def greet(name):
+    return f"Hello, {name}!"
 
-    print(greet("Daytona"))
-    ''')
+print(greet("Daytona"))
+''')
 
-    print(response.result)
+print(response.result)
 
-    ```
-  </TabItem>
+```
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+```typescript
+// TypeScript コードを実行
+let response = await sandbox.process.codeRun(`
+function greet(name: string): string {
+    return \`Hello, \${name}!\`;
+}
 
-  <TabItem label="TypeScript" icon="seti:typescript">
-    ```typescript
-    // TypeScript コードを実行
-    let response = await sandbox.process.codeRun(`
-    function greet(name: string): string {
-        return \`Hello, \${name}!\`;
+console.log(greet("Daytona"));
+`);
+console.log(response.result);
+
+// argv と環境変数を指定して実行
+response = await sandbox.process.codeRun(
+    `
+    console.log(\`Hello, \${process.argv[2]}!\`);
+    console.log(\`FOO: \${process.env.FOO}\`);
+    `,
+    { 
+      argv: ["Daytona"],
+      env: { FOO: "BAR" }
     }
+);
+console.log(response.result);
 
-    console.log(greet("Daytona"));
-    `);
-    console.log(response.result);
+// タイムアウトを指定して実行
+response = await sandbox.process.codeRun(
+    'setTimeout(() => console.log("Done"), 2000);',
+    undefined,
+    5000
+);
+console.log(response.result);
+```
 
-    // argv と環境変数を指定して実行
-    response = await sandbox.process.codeRun(
-        `
-        console.log(\`Hello, \${process.argv[2]}!\`);
-        console.log(\`FOO: \${process.env.FOO}\`);
-        `,
-        { 
-          argv: ["Daytona"],
-          env: { FOO: "BAR" }
-        }
-    );
-    console.log(response.result);
-
-    // タイムアウトを指定して実行
-    response = await sandbox.process.codeRun(
-        'setTimeout(() => console.log("Done"), 2000);',
-        undefined,
-        5000
-    );
-    console.log(response.result);
-    ```
-  </TabItem>
+</TabItem>
 </Tabs>
 
-## プロセスとコード実行 {#process-execution}
+## プロセスとコード実行
 
 Daytona SDK は、サンドボックス（Daytonaが管理する隔離された一時的な実行環境）内でシェルコマンドを実行し、バックグラウンドプロセスを管理できます。実行時の作業ディレクトリはデフォルトで現在のサンドボックスユーザーのホーム配下です。たとえば `workspace/repo` は `/home/[username]/workspace/repo` を指しますが、絶対パス（先頭を `/` にする）を指定して上書きできます。
 
-### コマンドの実行 {#running-commands}
+### コマンドの実行
 
 Daytona SDK は、Python と TypeScript からシェルコマンドを実行できます。標準入力、タイムアウト、環境変数を指定してコマンドを実行可能です。
 
 <Tabs>
-  <TabItem label="Python" icon="seti:python">
-    ```python
-    # 任意のシェルコマンドを実行
-    response = sandbox.process.exec("ls -la")
-    print(response.result)
+<TabItem label="Python" icon="seti:python">
+```python
+# 任意のシェルコマンドを実行
+response = sandbox.process.exec("ls -la")
+print(response.result)
 
-    # 作業ディレクトリとタイムアウトを設定
-    response = sandbox.process.exec("sleep 3", cwd="workspace/src", timeout=5)
-    print(response.result)
+# 作業ディレクトリとタイムアウトを設定
+response = sandbox.process.exec("sleep 3", cwd="workspace/src", timeout=5)
+print(response.result)
 
-    # 環境変数を渡す
-    response = sandbox.process.exec("echo $CUSTOM_SECRET", env={
-            "CUSTOM_SECRET": "DAYTONA"
-        }
-    )
-    print(response.result)
+# 環境変数を渡す
+response = sandbox.process.exec("echo $CUSTOM_SECRET", env={
+        "CUSTOM_SECRET": "DAYTONA"
+    }
+)
+print(response.result)
 
-    ```
-  </TabItem>
+```
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+```typescript
 
-  <TabItem label="TypeScript" icon="seti:typescript">
-    ```typescript
+// 任意のシェルコマンドを実行
+const response = await sandbox.process.executeCommand("ls -la");
+console.log(response.result);
 
-    // 任意のシェルコマンドを実行
-    const response = await sandbox.process.executeCommand("ls -la");
-    console.log(response.result);
+// 作業ディレクトリとタイムアウトを設定
+const response2 = await sandbox.process.executeCommand("sleep 3", "workspace/src", undefined, 5);
+console.log(response2.result);
 
-    // 作業ディレクトリとタイムアウトを設定
-    const response2 = await sandbox.process.executeCommand("sleep 3", "workspace/src", undefined, 5);
-    console.log(response2.result);
+// 環境変数を渡す
+const response3 = await sandbox.process.executeCommand("echo $CUSTOM_SECRET", "~", {
+        "CUSTOM_SECRET": "DAYTONA"
+    }
+);
+console.log(response3.result);
 
-    // 環境変数を渡す
-    const response3 = await sandbox.process.executeCommand("echo $CUSTOM_SECRET", "~", {
-            "CUSTOM_SECRET": "DAYTONA"
-        }
-    );
-    console.log(response3.result);
+```
 
-    ```
-  </TabItem>
+</TabItem>
 </Tabs>
 
-## セッション（バックグラウンドプロセス） {#sessions-background-processes}
+## セッション（バックグラウンドプロセス）
 
 Daytona SDK は、サンドボックス（Daytonaが管理する隔離された一時的な実行環境）内でバックグラウンドプロセスのセッションを開始・停止・管理する機能を提供します。長時間実行のコマンドを走らせ、プロセスの状態を監視し、稼働中のすべてのプロセスを一覧できます。
 
-### 長時間実行プロセスの管理 {#managing-long-running-processes}
+### 長時間実行プロセスの管理
 
 Daytona SDK は、バックグラウンドプロセスの開始および停止機能を提供します。長時間実行のコマンドを実行し、プロセスの状態を監視できます。
 
 <Tabs>
-  <TabItem label="Python" icon="seti:python">
-    ```python
-    # セッションで実行されたコマンドを確認
-    session = sandbox.process.get_session(session_id)
-    print(f"Session {session_id}:")
-    for command in session.commands:
-        print(f"Command: {command.command}, Exit Code: {command.exit_code}")
+<TabItem label="Python" icon="seti:python">
+```python
+# セッションで実行されたコマンドを確認
+session = sandbox.process.get_session(session_id)
+print(f"Session {session_id}:")
+for command in session.commands:
+    print(f"Command: {command.command}, Exit Code: {command.exit_code}")
 
-    # 実行中のすべてのセッションを一覧表示
-    sessions = sandbox.process.list_sessions()
-    for session in sessions:
-        print(f"PID: {session.id}, Commands: {session.commands}")
-    ```
-  </TabItem>
+# 実行中のすべてのセッションを一覧表示
+sessions = sandbox.process.list_sessions()
+for session in sessions:
+    print(f"PID: {session.id}, Commands: {session.commands}")
+```
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+```typescript
+// セッションで実行されたコマンドを確認
+const session = await sandbox.process.getSession(sessionId);
+console.log(`Session ${sessionId}:`);
+for (const command of session.commands) {
+    console.log(`Command: ${command.command}, Exit Code: ${command.exitCode}`);
+}
 
-  <TabItem label="TypeScript" icon="seti:typescript">
-    ```typescript
-    // セッションで実行されたコマンドを確認
-    const session = await sandbox.process.getSession(sessionId);
-    console.log(`Session ${sessionId}:`);
-    for (const command of session.commands) {
-        console.log(`Command: ${command.command}, Exit Code: ${command.exitCode}`);
-    }
-
-    // 実行中のすべてのセッションを一覧表示
-    const sessions = await sandbox.process.listSessions();
-    for (const session of sessions) {
-        console.log(`PID: ${session.id}, Commands: ${session.commands}`);
-    }
-    ```
-  </TabItem>
+// 実行中のすべてのセッションを一覧表示
+const sessions = await sandbox.process.listSessions();
+for (const session of sessions) {
+    console.log(`PID: ${session.id}, Commands: ${session.commands}`);
+}
+```
+</TabItem>
 </Tabs>
 
-## ベストプラクティス {#best-practices}
+## ベストプラクティス
 
 Daytona SDK は、サンドボックス（Daytonaが管理する隔離された一時的な実行環境）におけるプロセスとコード実行（サンドボックス内でのコマンド／コード実行モジュール）のベストプラクティスを提供します。
 
@@ -170,32 +169,31 @@ Daytona SDK は、サンドボックス（Daytonaが管理する隔離された�
 - セッションで発生する例外を適切に処理する
 
 <Tabs>
-  <TabItem label="Python" icon="seti:python">
-    ```python
-    # Python - セッションのクリーンアップ
-    session_id = "long-running-cmd"
-    try:
-        sandbox.process.create_session(session_id)
-        session = sandbox.process.get_session(session_id)
-        # 処理を実行...
-    finally:
-        sandbox.process.delete_session(session.session_id)
-    ```
-  </TabItem>
-
-  <TabItem label="TypeScript" icon="seti:typescript">
-    ```typescript
-    // TypeScript - セッションのクリーンアップ
-    const sessionId = "long-running-cmd";
-    try {
-        await sandbox.process.createSession(sessionId);
-        const session = await sandbox.process.getSession(sessionId);
-        // 処理を実行...
-    } finally {
-        await sandbox.process.deleteSession(session.sessionId);
-    }
-    ```
-  </TabItem>
+<TabItem label="Python" icon="seti:python">
+   ```python
+   # Python - セッションのクリーンアップ
+   session_id = "long-running-cmd"
+   try:
+       sandbox.process.create_session(session_id)
+       session = sandbox.process.get_session(session_id)
+       # 処理を実行...
+   finally:
+       sandbox.process.delete_session(session.session_id)
+   ```
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+   ```typescript
+   // TypeScript - セッションのクリーンアップ
+   const sessionId = "long-running-cmd";
+   try {
+       await sandbox.process.createSession(sessionId);
+       const session = await sandbox.process.getSession(sessionId);
+       // 処理を実行...
+   } finally {
+       await sandbox.process.deleteSession(session.sessionId);
+   }
+   ```
+</TabItem>
 </Tabs>
 
 2. **エラーハンドリング**
@@ -205,49 +203,48 @@ Daytona SDK は、サンドボックス（Daytonaが管理する隔離された�
 - エラーハンドリングには try-catch ブロックを使用する
 
 <Tabs>
-  <TabItem label="Python" icon="seti:python">
-    ```python
-    try:
-        response = sandbox.process.code_run("invalid python code")
-    except ProcessExecutionError as e:
-        print(f"Execution failed: {e}")
-        print(f"Exit code: {e.exit_code}")
-        print(f"Error output: {e.stderr}")
-    ```
-  </TabItem>
-
-  <TabItem label="TypeScript" icon="seti:typescript">
-    ```typescript
-    try {
-        const response = await sandbox.process.codeRun("invalid typescript code");
-    } catch (e) {
-        if (e instanceof ProcessExecutionError) {
-            console.error("Execution failed:", e);
-            console.error("Exit code:", e.exitCode);
-            console.error("Error output:", e.stderr);
-        }
+<TabItem label="Python" icon="seti:python">
+```python
+try:
+    response = sandbox.process.code_run("invalid python code")
+except ProcessExecutionError as e:
+    print(f"Execution failed: {e}")
+    print(f"Exit code: {e.exit_code}")
+    print(f"Error output: {e.stderr}")
+```
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+```typescript
+try {
+    const response = await sandbox.process.codeRun("invalid typescript code");
+} catch (e) {
+    if (e instanceof ProcessExecutionError) {
+        console.error("Execution failed:", e);
+        console.error("Exit code:", e.exitCode);
+        console.error("Error output:", e.stderr);
     }
-    ```
-  </TabItem>
+}
+```
+</TabItem>
 </Tabs>
 
-## よくある問題 {#common-issues}
+## よくある問題
 
 Daytona SDK は、プロセスとコードの実行（プロセスとコード実行）に関する一般的な問題のトラブルシューティング手段を提供します。
 
-### プロセス実行に失敗する {#process-execution-failed}
+### プロセス実行に失敗する
 
 - コマンドの構文を確認する
 - 必要な依存関係を満たしているか確認する
 - 必要な権限が付与されていることを確認する
 
-### プロセスがタイムアウトする {#process-timeout}
+### プロセスがタイムアウトする
 
 - タイムアウト設定を調整する
 - 長時間実行タスクを最適化する
 - バックグラウンド処理の利用を検討する
 
-### リソース制限 {#resource-limits}
+### リソース制限
 
 - プロセスのメモリ使用量を監視する
 - プロセスのクリーンアップを適切に行う
