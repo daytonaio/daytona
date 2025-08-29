@@ -162,7 +162,12 @@ export class RunnerService {
       return
     }
 
-    await this.recalculateRunnerUsage(event.sandbox.runnerId)
+    const runner = await this.runnerRepository.findOne({ where: { id: event.sandbox.runnerId } })
+    if (!runner) {
+      throw new Error('Runner not found')
+    }
+
+    await this.recalculateRunnerUsage(runner)
   }
 
   private async updateRunnerState(runnerId: string, newState: RunnerState): Promise<void> {
@@ -198,34 +203,37 @@ export class RunnerService {
           state: Not(RunnerState.DECOMMISSIONED),
         },
       })
-      for (const runner of runners) {
-        this.logger.debug(`Checking runner ${runner.id}`)
-        try {
-          // Get health check with status metrics
-          const runnerAdapter = await this.runnerAdapterFactory.create(runner)
-          await runnerAdapter.healthCheck()
 
-          let runnerInfo: RunnerInfo | undefined
+      await Promise.all(
+        runners.map(async (runner) => {
+          this.logger.debug(`Checking runner ${runner.id}`)
           try {
-            runnerInfo = await runnerAdapter.runnerInfo()
+            // Get health check with status metrics
+            const runnerAdapter = await this.runnerAdapterFactory.create(runner)
+            await runnerAdapter.healthCheck()
+
+            let runnerInfo: RunnerInfo | undefined
+            try {
+              runnerInfo = await runnerAdapter.runnerInfo()
+            } catch (e) {
+              this.logger.warn(`Failed to get runner info for runner ${runner.id}: ${e.message}`)
+            }
+
+            await this.updateRunnerStatus(runner.id, runnerInfo)
+
+            await this.recalculateRunnerUsage(runner)
           } catch (e) {
-            this.logger.warn(`Failed to get runner info for runner ${runner.id}: ${e.message}`)
+            if (e.code === 'ECONNREFUSED') {
+              this.logger.error(`Runner ${runner.id} not reachable`)
+            } else {
+              this.logger.error(`Error checking runner ${runner.id}: ${e.message}`)
+              this.logger.error(e)
+            }
+
+            await this.updateRunnerState(runner.id, RunnerState.UNRESPONSIVE)
           }
-
-          await this.updateRunnerStatus(runner.id, runnerInfo)
-
-          await this.recalculateRunnerUsage(runner.id)
-        } catch (e) {
-          if (e.code === 'ECONNREFUSED') {
-            this.logger.error('Runner not reachable')
-          } else {
-            this.logger.error(`Error checking runner ${runner.id}: ${e.message}`)
-            this.logger.error(e)
-          }
-
-          await this.updateRunnerState(runner.id, RunnerState.UNRESPONSIVE)
-        }
-      }
+        }),
+      )
     } finally {
       await this.redisLockProvider.unlock(lockKey)
     }
@@ -278,12 +286,7 @@ export class RunnerService {
     await this.runnerRepository.update(runnerId, updateData)
   }
 
-  async recalculateRunnerUsage(runnerId: string) {
-    const runner = await this.runnerRepository.findOne({ where: { id: runnerId } })
-    if (!runner) {
-      throw new Error('Runner not found')
-    }
-    //  recalculate runner usage
+  async recalculateRunnerUsage(runner: Runner) {
     const sandboxes = await this.sandboxRepository.find({
       where: {
         runnerId: runner.id,
