@@ -3,7 +3,7 @@ title: "プロセス"
 hideTitleOnPage: true
 ---
 
-## プロセス
+## プロセス {#process}
 
 ```python
 class Process()
@@ -11,7 +11,7 @@ class Process()
 
 サンドボックス内でのプロセスおよびコード実行を扱います。
 
-#### Process.\_\_init\_\_
+#### Process.__init__ {#process__init__}
 
 ```python
 def __init__(sandbox_id: str, code_toolbox: SandboxPythonCodeToolbox,
@@ -27,7 +27,7 @@ def __init__(sandbox_id: str, code_toolbox: SandboxPythonCodeToolbox,
 - `toolbox_api` _ToolboxApi_ - サンドボックス操作用の API クライアント。
 - `get_root_dir` _Callable[[], str]_ - サンドボックスの既定のルートディレクトリを取得する関数。
 
-#### Process.exec
+#### Process.exec {#processexec}
 
 ```python
 @intercept_errors(message_prefix="Failed to execute command: ")
@@ -45,7 +45,6 @@ def exec(command: str,
 - `cwd` _Optional[str]_ - コマンド実行時の作業ディレクトリ。指定しない場合はサンドボックスのルートディレクトリを使用します。既定はユーザーのルートディレクトリです。
 - `env` _Optional[Dict[str, str]]_ - コマンドに設定する環境変数。
 - `timeout` _Optional[int]_ - コマンドの完了を待機する最大時間（秒）。0 は無期限待機を意味します。
-  
 
 **戻り値**:
 
@@ -53,7 +52,6 @@ def exec(command: str,
   - exit_code: コマンドの終了ステータス
   - result: コマンドの標準出力
   - artifacts: `stdout`（result と同じ）および `charts`（matplotlib のチャートのメタデータ）を含む ExecutionArtifacts オブジェクト
-  
 
 **例**:
 
@@ -69,7 +67,7 @@ result = sandbox.process.exec("ls", cwd="workspace/src")
 result = sandbox.process.exec("sleep 10", timeout=5)
 ```
 
-#### Process.code\_run
+#### Process.code_run {#processcode_run}
 
 ```python
 def code_run(code: str,
@@ -84,7 +82,6 @@ def code_run(code: str,
 - `code` _str_ - 実行するコード。
 - `params` _Optional[CodeRunParams]_ - コード実行のパラメータ。
 - `timeout` _Optional[int]_ - コードの完了を待機する最大時間（秒）。0 は無期限待機を意味します。
-  
 
 **戻り値**:
 
@@ -92,7 +89,6 @@ def code_run(code: str,
   - exit_code: 実行の終了ステータス
   - result: コードの標準出力
   - artifacts: `stdout`（result と同じ）および `charts`（matplotlib のチャートのメタデータ）を含む ExecutionArtifacts オブジェクト
-  
 
 **例**:
 
@@ -105,8 +101,9 @@ response = sandbox.process.code_run('''
 ''')
 print(response.artifacts.stdout)  # 出力: Sum: 30
 ```
-  
-  Matplotlib のチャートは自動検出され、`ExecutionArtifacts` オブジェクトの `charts` フィールドで返されます。
+
+Matplotlib のチャートは自動検出され、`ExecutionArtifacts` オブジェクトの `charts` フィールドで返されます。
+
 ```python
 code = '''
 import matplotlib.pyplot as plt
@@ -144,7 +141,7 @@ if chart.type == ChartType.LINE and isinstance(chart, LineChart):
         print(f"Points: {element.points}")
 ```
 
-#### Process.create\_session
+#### Process.create_session {#processcreate_session}
 
 ```python
 @intercept_errors(message_prefix="Failed to create session: ")
@@ -158,7 +155,6 @@ def create_session(session_id: str) -> None
 **引数**:
 
 - `session_id` _str_ - 新規セッションの一意な識別子。
-  
 
 **例**:
 
@@ -171,7 +167,7 @@ session = sandbox.process.get_session(session_id)
 sandbox.process.delete_session(session_id)
 ```
 
-#### Process.get\_session
+#### Process.get_session {#processget_session}
 
 ```python
 @intercept_errors(message_prefix="Failed to get session: ")
@@ -183,14 +179,12 @@ def get_session(session_id: str) -> Session
 **引数**:
 
 - `session_id` _str_ - 取得するセッションの一意な識別子。
-  
 
 **戻り値**:
 
 - `Session` - 次の情報を含むセッション情報:
   - session_id: セッションの一意な識別子
   - commands: セッションで実行されたコマンドの一覧
-  
 
 **例**:
 
@@ -200,7 +194,7 @@ for cmd in session.commands:
     print(f"Command: {cmd.command}")
 ```
 
-#### Process.get\_session\_command
+#### Process.get_session_command {#processget_session_command}
 
 ```python
 @intercept_errors(message_prefix="Failed to get session command: ")
@@ -213,7 +207,6 @@ def get_session_command(session_id: str, command_id: str) -> Command
 
 - `session_id` _str_ - セッションの一意な識別子。
 - `command_id` _str_ - コマンドの一意な識別子。
-  
 
 **戻り値**:
 
@@ -221,7 +214,6 @@ def get_session_command(session_id: str, command_id: str) -> Command
   - id: コマンドの一意な識別子
   - command: 実行されたコマンド文字列
   - exit_code: 終了ステータス（完了している場合）
-  
 
 **例**:
 
@@ -231,7 +223,7 @@ if cmd.exit_code == 0:
     print(f"Command {cmd.command} completed successfully")
 ```
 
-#### Process.execute\_session\_command
+#### Process.execute_session_command {#processexecute_session_command}
 
 ```python
 @intercept_errors(message_prefix="Failed to execute session command: ")
@@ -249,7 +241,6 @@ def execute_session_command(
 - `req` _SessionExecuteRequest_ - 次を含むコマンド実行リクエスト:
   - command: 実行するコマンド
   - run_async: 非同期で実行するかどうか
-  
 
 **戻り値**:
 
@@ -257,7 +248,6 @@ def execute_session_command(
   - cmd_id: 実行されたコマンドの一意な識別子
   - output: コマンドの出力（同期実行の場合）
   - exit_code: 終了ステータス（同期実行の場合）
-  
 
 **例**:
 
@@ -279,7 +269,7 @@ result = sandbox.process.execute_session_command(session_id, req)
 print(result.output)  # Prints: Hello
 ```
 
-#### Process.get\_session\_command\_logs
+#### Process.get_session_command_logs {#processget_session_command_logs}
 
 ```python
 @intercept_errors(message_prefix="Failed to get session command logs: ")
@@ -292,12 +282,10 @@ def get_session_command_logs(session_id: str, command_id: str) -> str
 
 - `session_id` _str_ - セッションの一意な識別子。
 - `command_id` _str_ - コマンドの一意な識別子。
-  
 
 **戻り値**:
 
 - `str` - stdout と stderr の両方を含む完全なコマンド出力。
-  
 
 **例**:
 
@@ -309,7 +297,7 @@ logs = sandbox.process.get_session_command_logs(
 print(f"Command output: {logs}")
 ```
 
-#### Process.get\_session\_command\_logs\_async
+#### Process.get_session_command_logs_async {#processget_session_command_logs_async}
 
 ```python
 @intercept_errors(message_prefix="Failed to get session command logs: ")
@@ -325,7 +313,6 @@ async def get_session_command_logs_async(
 - `session_id` _str_ - セッションの一意の識別子。
 - `command_id` _str_ - コマンドの一意の識別子。
 - `on_logs` _Callable[[str], None]_ - 受信したログチャンクを処理するコールバック関数。
-  
 
 **例**:
 
@@ -337,7 +324,7 @@ await sandbox.process.get_session_command_logs_async(
 )
 ```
 
-#### Process.list\_sessions
+#### Process.list_sessions {#processlist_sessions}
 
 ```python
 @intercept_errors(message_prefix="Failed to list sessions: ")
@@ -349,7 +336,6 @@ def list_sessions() -> List[Session]
 **戻り値**:
 
 - `List[Session]` - サンドボックス内のすべてのセッションのリスト。
-  
 
 **例**:
 
@@ -360,7 +346,7 @@ for session in sessions:
     print(f"  Commands: {len(session.commands)}")
 ```
 
-#### Process.delete\_session
+#### Process.delete_session {#processdelete_session}
 
 ```python
 @intercept_errors(message_prefix="Failed to delete session: ")
@@ -372,7 +358,6 @@ def delete_session(session_id: str) -> None
 **引数**:
 
 - `session_id` _str_ - 削除するセッションの一意の識別子。
-  
 
 **例**:
 
@@ -385,8 +370,7 @@ sandbox.process.create_session("temp-session")
 sandbox.process.delete_session("temp-session")
 ```
 
-
-## CodeRunParams
+## CodeRunParams {#coderunparams}
 
 ```python
 @dataclass
@@ -400,7 +384,7 @@ class CodeRunParams()
 - `argv` _Optional[List[str]]_ - コマンドライン引数
 - `env` _Optional[Dict[str, str]]_ - 環境変数
 
-## SessionExecuteRequest
+## SessionExecuteRequest {#sessionexecuterequest}
 
 ```python
 class SessionExecuteRequest(ApiSessionExecuteRequest,
@@ -415,7 +399,7 @@ class SessionExecuteRequest(ApiSessionExecuteRequest,
 - `run_async` _Optional[bool]_ - コマンドを非同期で実行するかどうか。
 - `var_async` _Optional[bool]_ - 非推奨。代わりに `run_async` を使用してください。
 
-## 実行成果物
+## 実行成果物 {#executionartifacts}
 
 ```python
 class ExecutionArtifacts()
@@ -428,7 +412,7 @@ class ExecutionArtifacts()
 - `stdout` _str_ - コマンドの標準出力。`ExecuteResponse` の `result` と同一
 - `charts` _Optional[List[Chart]]_ - matplotlib のチャートメタデータのリスト
 
-## ExecuteResponse
+## ExecuteResponse {#executeresponse}
 
 ```python
 class ExecuteResponse(ClientExecuteResponse)
@@ -441,4 +425,3 @@ class ExecuteResponse(ClientExecuteResponse)
 - `exit_code` _int_ - コマンド実行の終了コード
 - `result` _str_ - コマンド実行の出力
 - `artifacts` _Optional[ExecutionArtifacts]_ - コマンド実行の実行成果物
-

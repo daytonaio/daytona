@@ -7,7 +7,7 @@ import Label from '@components/Label.astro'
 
 スナップショット（サンドボックス作成に使う再利用可能な事前設定イメージ／テンプレート）は、Daytona のサンドボックス（Daytona が管理する隔離された一時的な計算環境）に必要な依存関係、ツール、環境設定、リソース要件をすべて含む事前構成済みテンプレートです。Daytona は、標準的な [Docker](https://www.docker.com/) または [OCI](https://opencontainers.org/) 互換イメージからのスナップショット作成をサポートします。
 
-## スナップショットの作成
+## スナップショットの作成 {#creating-snapshots}
 
 サンドボックスを起動する際、Daytona は `python`、`node`、`pip` ならびに一般的な pip パッケージなどの有用なユーティリティがプリインストールされたシンプルなイメージに基づくスナップショットを使用します。詳細は[以下](#default-snapshot)を参照してください。
 
@@ -100,7 +100,7 @@ entrypoint フィールドは任意です。イメージに長時間稼働する
   </TabItem>
 </Tabs>
 
-### スナップショットのリソース
+### スナップショットのリソース {#snapshot-resources}
 
 スナップショットには Daytona サンドボックスのリソース要件が含まれます。デフォルトでは、Daytona サンドボックスは **1 vCPU**、**1GB RAM**、**3GiB ディスク**を備えています。
 
@@ -183,7 +183,7 @@ entrypoint フィールドは任意です。イメージに長時間稼働する
 すべてのリソースパラメータは任意です。指定しない場合、Daytonaはデフォルト値を使用します。
 :::
 
-### プライベートレジストリのイメージ
+### プライベートレジストリのイメージ {#images-from-private-registries}
 
 一般公開されていないイメージからスナップショットを作成するには、まずそのイメージのプライベートコンテナレジストリを追加します。
 
@@ -195,7 +195,7 @@ entrypoint フィールドは任意です。イメージに長時間稼働する
 
 この先の手順は同じです。`CreateSandboxFromSnapshotParams`のフィールドにそのカスタムスナップショットを指定すれば、追加の認証は不要です。
 
-#### プライベートな Docker Hub イメージの使用
+#### プライベートな Docker Hub イメージの使用 {#using-a-private-docker-hub-image}
 
 プライベートな Docker Hub イメージを使用するには、Docker Hub の認証情報で[コンテナレジストリを追加](/docs/ja/snapshots#images-from-private-registries)します。
 
@@ -204,7 +204,7 @@ entrypoint フィールドは任意です。イメージに長時間稼働する
 - Password: [Docker Hub Personal Access Token](https://docs.docker.com/docker-hub/access-tokens/)を使用（アカウントのパスワードではない）
 - スナップショットの作成: レジストリを追加後、イメージ名としてフルイメージパスを指定してスナップショットを作成（例: `docker.io/<username>/<image>:<tag>`）
 
-### ローカルイメージの使用
+### ローカルイメージの使用 {#using-a-local-image}
 
 プライベートコンテナレジストリを手動で用意してイメージをプッシュする手間を避けるために、[Daytona CLI](/docs/ja/getting-started#setting-up-the-daytona-cli)を使ってローカルイメージやローカルの Dockerfile からスナップショットを作成し、サンドボックスで使用できます。
 
@@ -248,7 +248,7 @@ Step 1/5 : FROM alpine:latest
 
 ```
 
-## スナップショットの削除
+## スナップショットの削除 {#deleting-snapshots}
 
 作成したカスタムスナップショットの削除は簡単です。[Snapshots](https://app.daytona.io/dashboard/snapshots) ページに移動し、削除したいスナップショットの行末にある三点アイコンをクリックして表示される `Delete` ボタンを選択してください。
 
@@ -258,17 +258,17 @@ Step 1/5 : FROM alpine:latest
 
 :::
 
-## サンドボックスでDockerを実行する
+## サンドボックスでDockerを実行する {#running-docker-in-a-sandbox}
 
 Daytonaのサンドボックスは内部でDockerコンテナを実行できます（Docker-in-Docker）。これにより、コンテナ化されたアプリケーションのビルド、テスト、デプロイが可能になります。特に、データベース、メッセージキュー、その他のマイクロサービスなど外部サービスに依存するプロジェクトで有用です。
 
 これらのサービスは同一のサンドボックス環境内で稼働するため、エージェントはシームレスに連携でき、外部サービス依存と比べて優れた分離性とセキュリティを提供します。
 
-### DinDスナップショットの作成
+### DinDスナップショットの作成 {#creating-a-dind-snapshot}
 
 事前構築されたDocker-in-Dockerイメージをベースにするか、カスタムイメージにDockerを手動でインストールすることで、Docker対応のスナップショットを作成できます。
 
-#### 事前構築イメージの利用
+#### 事前構築イメージの利用 {#using-pre-built-images}
 
 以下のベースイメージはDocker-in-Dockerスナップショットの作成に広く使われており、カスタムDockerfileのベースとしても利用できます:
 
@@ -276,7 +276,7 @@ Daytonaのサンドボックスは内部でDockerコンテナを実行できま�
 - `docker:28.3.3-dind-rootless` - セキュリティを強化したRootless Docker-in-Docker
 - `docker:28.3.2-dind-alpine3.22` - Alpine 3.22ベースのDocker-in-Dockerイメージ
 
-#### Dockerの手動インストール
+#### Dockerの手動インストール {#manual-docker-installation}
 
 あるいは、カスタムDockerfileでDockerを手動インストールできます:
 
@@ -286,7 +286,7 @@ FROM ubuntu:22.04
 RUN curl -fsSL https://get.docker.com | VERSION=28.3.3 sh -
 ```
 
-### ユースケース
+### ユースケース {#use-cases}
 
 - データベース（PostgreSQL、Redis、MySQL）やその他のサービスの実行
 - コンテナ化アプリケーションのビルドとテスト
@@ -297,7 +297,7 @@ RUN curl -fsSL https://get.docker.com | VERSION=28.3.3 sh -
 Docker-in-Dockerのサンドボックスは、Dockerデーモンのオーバーヘッドにより追加のリソースを必要とします。最適なパフォーマンスのために、少なくとも2 vCPUと4GiBのメモリを割り当てることを検討してください。
 :::
 
-## デフォルトのスナップショット
+## デフォルトのスナップショット {#default-snapshot}
 
 Daytona が使用するデフォルトのスナップショットは、`python` と `node`、それぞれの LSP に加えて、以下の `pip` 事前インストール済みパッケージを含むイメージをベースにしています:
 
