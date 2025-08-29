@@ -14,6 +14,7 @@ import { ProxyContext } from '../common/interfaces/proxy-context.interface'
 import { InjectRedis } from '@nestjs-modules/ioredis'
 import Redis from 'ioredis'
 import { SystemRole } from '../user/enums/system-role.enum'
+import { SshGatewayContext } from '../common/interfaces/ssh-gateway-context.interface'
 
 type UserCache = {
   userId: string
@@ -39,9 +40,16 @@ export class ApiKeyStrategy extends PassportStrategy(Strategy, 'api-key') implem
     this.logger.log('ApiKeyStrategy initialized')
   }
 
-  async validate(token: string): Promise<AuthContext | ProxyContext> {
+  async validate(token: string): Promise<AuthContext | ProxyContext | SshGatewayContext> {
     this.logger.debug('Validate method called')
     this.logger.debug(`Validating API key: ${token.substring(0, 8)}...`)
+
+    const sshGatewayApiKey = this.configService.getOrThrow('sshGatewayApiKey')
+    if (sshGatewayApiKey === token) {
+      return {
+        role: 'ssh-gateway',
+      }
+    }
 
     const proxyApiKey = this.configService.getOrThrow('proxy.apiKey')
     if (proxyApiKey === token) {

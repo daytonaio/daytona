@@ -52,6 +52,8 @@ interface GetColumnsProps {
   loadingSandboxes: Record<string, boolean>
   writePermitted: boolean
   deletePermitted: boolean
+  handleCreateSshAccess: (id: string) => void
+  handleRevokeSshAccess: (id: string) => void
 }
 
 export function getColumns({
@@ -64,6 +66,8 @@ export function getColumns({
   loadingSandboxes,
   writePermitted,
   deletePermitted,
+  handleCreateSshAccess,
+  handleRevokeSshAccess,
 }: GetColumnsProps): ColumnDef<Sandbox>[] {
   const handleOpenWebTerminal = async (sandboxId: string) => {
     const url = await getWebTerminalUrl(sandboxId)
@@ -269,6 +273,8 @@ export function getColumns({
             onArchive={handleArchive}
             onVnc={handleVnc}
             onOpenWebTerminal={handleOpenWebTerminal}
+            onCreateSshAccess={handleCreateSshAccess}
+            onRevokeSshAccess={handleRevokeSshAccess}
           />
         </div>
       ),

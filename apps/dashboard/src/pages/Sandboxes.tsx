@@ -37,6 +37,8 @@ import {
 } from '@/components/ui/alert-dialog'
 import SandboxDetailsSheet from '@/components/SandboxDetailsSheet'
 import { formatDuration } from '@/lib/utils'
+import { Label } from '@/components/ui/label'
+import { Check, Copy } from 'lucide-react'
 
 const Sandboxes: React.FC = () => {
   const { sandboxApi, apiKeyApi, toolboxApi, snapshotApi } = useApi()
@@ -53,6 +55,13 @@ const Sandboxes: React.FC = () => {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [selectedSandbox, setSelectedSandbox] = useState<Sandbox | null>(null)
   const [showSandboxDetails, setShowSandboxDetails] = useState(false)
+  const [showCreateSshDialog, setShowCreateSshDialog] = useState(false)
+  const [showRevokeSshDialog, setShowRevokeSshDialog] = useState(false)
+  const [sshToken, setSshToken] = useState<string>('')
+  const [sshExpiryMinutes, setSshExpiryMinutes] = useState<number>(60)
+  const [revokeSshToken, setRevokeSshToken] = useState<string>('')
+  const [sshSandboxId, setSshSandboxId] = useState<string>('')
+  const [copied, setCopied] = useState<string | null>(null)
 
   const navigate = useNavigate()
 
@@ -465,6 +474,61 @@ const Sandboxes: React.FC = () => {
     [getPortPreviewUrl],
   )
 
+  const handleCreateSshAccess = async (id: string) => {
+    setLoadingSandboxes((prev) => ({ ...prev, [id]: true }))
+    try {
+      const response = await sandboxApi.createSshAccess(id, selectedOrganization?.id, sshExpiryMinutes)
+      setSshToken(response.data.token)
+      setSshSandboxId(id)
+      setShowCreateSshDialog(true)
+      toast.success('SSH access created successfully')
+    } catch (error) {
+      handleApiError(error, 'Failed to create SSH access')
+    } finally {
+      setLoadingSandboxes((prev) => ({ ...prev, [id]: false }))
+    }
+  }
+
+  const openCreateSshDialog = (id: string) => {
+    setSshSandboxId(id)
+    setShowCreateSshDialog(true)
+  }
+
+  const handleRevokeSshAccess = async (id: string) => {
+    if (!revokeSshToken.trim()) {
+      toast.error('Please enter a token to revoke')
+      return
+    }
+
+    setLoadingSandboxes((prev) => ({ ...prev, [id]: true }))
+    try {
+      await sandboxApi.revokeSshAccess(id, selectedOrganization?.id, revokeSshToken)
+      setRevokeSshToken('')
+      setSshSandboxId('')
+      setShowRevokeSshDialog(false)
+      toast.success('SSH access revoked successfully')
+    } catch (error) {
+      handleApiError(error, 'Failed to revoke SSH access')
+    } finally {
+      setLoadingSandboxes((prev) => ({ ...prev, [id]: false }))
+    }
+  }
+
+  const openRevokeSshDialog = (id: string) => {
+    setSshSandboxId(id)
+    setShowRevokeSshDialog(true)
+  }
+
+  const copyToClipboard = async (text: string, label: string) => {
+    try {
+      await navigator.clipboard.writeText(text)
+      setCopied(label)
+      setTimeout(() => setCopied(null), 2000)
+    } catch (err) {
+      console.error('Failed to copy text:', err)
+    }
+  }
+
   // Redirect user to the onboarding page if they haven't created an api key yet
   // Perform only once per user
   useEffect(() => {
@@ -527,6 +591,8 @@ const Sandboxes: React.FC = () => {
         handleArchive={handleArchive}
         handleVnc={handleVnc}
         getWebTerminalUrl={getWebTerminalUrl}
+        handleCreateSshAccess={openCreateSshDialog}
+        handleRevokeSshAccess={openRevokeSshDialog}
         data={sandboxes}
         loading={loadingTable}
         snapshots={snapshots}
@@ -567,6 +633,126 @@ const Sandboxes: React.FC = () => {
           </AlertDialogContent>
         </AlertDialog>
       )}
+
+      {/* Create SSH Access Dialog */}
+      <AlertDialog
+        open={showCreateSshDialog}
+        onOpenChange={(isOpen) => {
+          setShowCreateSshDialog(isOpen)
+          if (!isOpen) {
+            setSshToken('')
+            setSshExpiryMinutes(60)
+            setSshSandboxId('')
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Create SSH Access</AlertDialogTitle>
+            <AlertDialogDescription>
+              {sshToken
+                ? 'SSH access has been created successfully. Use the token below to connect:'
+                : 'Set the expiration time for SSH access:'}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="space-y-4">
+            {!sshToken ? (
+              <div className="space-y-3">
+                <Label className="text-sm font-medium">Expiry (minutes):</Label>
+                <input
+                  type="number"
+                  min="1"
+                  max="1440"
+                  value={sshExpiryMinutes}
+                  onChange={(e) => setSshExpiryMinutes(Number(e.target.value))}
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                />
+              </div>
+            ) : (
+              <div className="p-3 flex justify-between items-center rounded-md bg-green-100 text-green-600 dark:bg-green-900/50 dark:text-green-400">
+                <span className="overflow-x-auto pr-2 cursor-text select-all">
+                  {import.meta.env.VITE_SSH_GATEWAY_COMMAND?.replace('{{TOKEN}}', sshToken) ||
+                    `ssh -p 22222 user@host -o ProxyCommand="echo ${sshToken}"`}
+                </span>
+                {(copied === 'SSH Command' && <Check className="w-4 h-4" />) || (
+                  <Copy
+                    className="w-4 h-4 cursor-pointer"
+                    onClick={() =>
+                      copyToClipboard(
+                        import.meta.env.VITE_SSH_GATEWAY_COMMAND?.replace('{{TOKEN}}', sshToken) ||
+                          `ssh -p 22222 user@host -o ProxyCommand="echo ${sshToken}"`,
+                        'SSH Command',
+                      )
+                    }
+                  />
+                )}
+              </div>
+            )}
+          </div>
+          <AlertDialogFooter>
+            {!sshToken ? (
+              <>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={() => handleCreateSshAccess(sshSandboxId)}
+                  disabled={!sshSandboxId}
+                  className="bg-secondary text-secondary-foreground hover:bg-secondary/80"
+                >
+                  Create
+                </AlertDialogAction>
+              </>
+            ) : (
+              <AlertDialogAction
+                onClick={() => setShowCreateSshDialog(false)}
+                className="bg-secondary text-secondary-foreground hover:bg-secondary/80"
+              >
+                Close
+              </AlertDialogAction>
+            )}
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Revoke SSH Access Dialog */}
+      <AlertDialog
+        open={showRevokeSshDialog}
+        onOpenChange={(isOpen) => {
+          setShowRevokeSshDialog(isOpen)
+          if (!isOpen) {
+            setRevokeSshToken('')
+            setSshSandboxId('')
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Revoke SSH Access</AlertDialogTitle>
+            <AlertDialogDescription>Enter the SSH access token you want to revoke:</AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-3">
+              <label className="text-sm font-medium">SSH Token:</label>
+              <input
+                type="text"
+                value={revokeSshToken}
+                onChange={(e) => setRevokeSshToken(e.target.value)}
+                placeholder="Enter SSH token to revoke"
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              />
+            </div>
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => handleRevokeSshAccess(sshSandboxId)}
+              disabled={!revokeSshToken.trim() || !sshSandboxId}
+              className="bg-secondary text-secondary-foreground hover:bg-secondary/80"
+            >
+              Revoke Access
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <SandboxDetailsSheet
         sandbox={selectedSandbox}

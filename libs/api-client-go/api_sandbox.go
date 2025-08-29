@@ -60,6 +60,19 @@ type SandboxAPI interface {
 	CreateSandboxExecute(r SandboxAPICreateSandboxRequest) (*Sandbox, *http.Response, error)
 
 	/*
+		CreateSshAccess Create SSH access for sandbox
+
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId ID of the sandbox
+		@return SandboxAPICreateSshAccessRequest
+	*/
+	CreateSshAccess(ctx context.Context, sandboxId string) SandboxAPICreateSshAccessRequest
+
+	// CreateSshAccessExecute executes the request
+	//  @return SshAccessDto
+	CreateSshAccessExecute(r SandboxAPICreateSshAccessRequest) (*SshAccessDto, *http.Response, error)
+
+	/*
 		DeleteSandbox Delete sandbox
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
@@ -134,6 +147,18 @@ type SandboxAPI interface {
 	// ReplaceLabelsExecute executes the request
 	//  @return SandboxLabels
 	ReplaceLabelsExecute(r SandboxAPIReplaceLabelsRequest) (*SandboxLabels, *http.Response, error)
+
+	/*
+		RevokeSshAccess Revoke SSH access for sandbox
+
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId ID of the sandbox
+		@return SandboxAPIRevokeSshAccessRequest
+	*/
+	RevokeSshAccess(ctx context.Context, sandboxId string) SandboxAPIRevokeSshAccessRequest
+
+	// RevokeSshAccessExecute executes the request
+	RevokeSshAccessExecute(r SandboxAPIRevokeSshAccessRequest) (*http.Response, error)
 
 	/*
 		SetAutoArchiveInterval Set sandbox auto-archive interval
@@ -211,6 +236,18 @@ type SandboxAPI interface {
 
 	// UpdatePublicStatusExecute executes the request
 	UpdatePublicStatusExecute(r SandboxAPIUpdatePublicStatusRequest) (*http.Response, error)
+
+	/*
+		ValidateSshAccess Validate SSH access for sandbox
+
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return SandboxAPIValidateSshAccessRequest
+	*/
+	ValidateSshAccess(ctx context.Context) SandboxAPIValidateSshAccessRequest
+
+	// ValidateSshAccessExecute executes the request
+	//  @return SshAccessValidationDto
+	ValidateSshAccessExecute(r SandboxAPIValidateSshAccessRequest) (*SshAccessValidationDto, *http.Response, error)
 }
 
 // SandboxAPIService SandboxAPI service
@@ -510,6 +547,128 @@ func (a *SandboxAPIService) CreateSandboxExecute(r SandboxAPICreateSandboxReques
 	}
 	// body params
 	localVarPostBody = r.createSandbox
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type SandboxAPICreateSshAccessRequest struct {
+	ctx                    context.Context
+	ApiService             SandboxAPI
+	sandboxId              string
+	xDaytonaOrganizationID *string
+	expiresInMinutes       *float32
+}
+
+// Use with JWT to specify the organization ID
+func (r SandboxAPICreateSshAccessRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) SandboxAPICreateSshAccessRequest {
+	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
+	return r
+}
+
+// Expiration time in minutes (default: 60)
+func (r SandboxAPICreateSshAccessRequest) ExpiresInMinutes(expiresInMinutes float32) SandboxAPICreateSshAccessRequest {
+	r.expiresInMinutes = &expiresInMinutes
+	return r
+}
+
+func (r SandboxAPICreateSshAccessRequest) Execute() (*SshAccessDto, *http.Response, error) {
+	return r.ApiService.CreateSshAccessExecute(r)
+}
+
+/*
+CreateSshAccess Create SSH access for sandbox
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId ID of the sandbox
+	@return SandboxAPICreateSshAccessRequest
+*/
+func (a *SandboxAPIService) CreateSshAccess(ctx context.Context, sandboxId string) SandboxAPICreateSshAccessRequest {
+	return SandboxAPICreateSshAccessRequest{
+		ApiService: a,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
+	}
+}
+
+// Execute executes the request
+//
+//	@return SshAccessDto
+func (a *SandboxAPIService) CreateSshAccessExecute(r SandboxAPICreateSshAccessRequest) (*SshAccessDto, *http.Response, error) {
+	var (
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *SshAccessDto
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SandboxAPIService.CreateSshAccess")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/sandbox/{sandboxId}/ssh-access"
+	localVarPath = strings.Replace(localVarPath, "{"+"sandboxId"+"}", url.PathEscape(parameterValueToString(r.sandboxId, "sandboxId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	if r.expiresInMinutes != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "expiresInMinutes", r.expiresInMinutes, "form", "")
+	}
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.xDaytonaOrganizationID != nil {
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Daytona-Organization-ID", r.xDaytonaOrganizationID, "simple", "")
+	}
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
 		return localVarReturnValue, nil, err
@@ -1266,6 +1425,116 @@ func (a *SandboxAPIService) ReplaceLabelsExecute(r SandboxAPIReplaceLabelsReques
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
+type SandboxAPIRevokeSshAccessRequest struct {
+	ctx                    context.Context
+	ApiService             SandboxAPI
+	sandboxId              string
+	xDaytonaOrganizationID *string
+	token                  *string
+}
+
+// Use with JWT to specify the organization ID
+func (r SandboxAPIRevokeSshAccessRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) SandboxAPIRevokeSshAccessRequest {
+	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
+	return r
+}
+
+// SSH access token to revoke. If not provided, all SSH access for the sandbox will be revoked.
+func (r SandboxAPIRevokeSshAccessRequest) Token(token string) SandboxAPIRevokeSshAccessRequest {
+	r.token = &token
+	return r
+}
+
+func (r SandboxAPIRevokeSshAccessRequest) Execute() (*http.Response, error) {
+	return r.ApiService.RevokeSshAccessExecute(r)
+}
+
+/*
+RevokeSshAccess Revoke SSH access for sandbox
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId ID of the sandbox
+	@return SandboxAPIRevokeSshAccessRequest
+*/
+func (a *SandboxAPIService) RevokeSshAccess(ctx context.Context, sandboxId string) SandboxAPIRevokeSshAccessRequest {
+	return SandboxAPIRevokeSshAccessRequest{
+		ApiService: a,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
+	}
+}
+
+// Execute executes the request
+func (a *SandboxAPIService) RevokeSshAccessExecute(r SandboxAPIRevokeSshAccessRequest) (*http.Response, error) {
+	var (
+		localVarHTTPMethod = http.MethodDelete
+		localVarPostBody   interface{}
+		formFiles          []formFile
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SandboxAPIService.RevokeSshAccess")
+	if err != nil {
+		return nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/sandbox/{sandboxId}/ssh-access"
+	localVarPath = strings.Replace(localVarPath, "{"+"sandboxId"+"}", url.PathEscape(parameterValueToString(r.sandboxId, "sandboxId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	if r.token != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "token", r.token, "form", "")
+	}
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.xDaytonaOrganizationID != nil {
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Daytona-Organization-ID", r.xDaytonaOrganizationID, "simple", "")
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarHTTPResponse, newErr
+	}
+
+	return localVarHTTPResponse, nil
+}
+
 type SandboxAPISetAutoArchiveIntervalRequest struct {
 	ctx                    context.Context
 	ApiService             SandboxAPI
@@ -1892,4 +2161,123 @@ func (a *SandboxAPIService) UpdatePublicStatusExecute(r SandboxAPIUpdatePublicSt
 	}
 
 	return localVarHTTPResponse, nil
+}
+
+type SandboxAPIValidateSshAccessRequest struct {
+	ctx                    context.Context
+	ApiService             SandboxAPI
+	token                  *string
+	xDaytonaOrganizationID *string
+}
+
+// SSH access token to validate
+func (r SandboxAPIValidateSshAccessRequest) Token(token string) SandboxAPIValidateSshAccessRequest {
+	r.token = &token
+	return r
+}
+
+// Use with JWT to specify the organization ID
+func (r SandboxAPIValidateSshAccessRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) SandboxAPIValidateSshAccessRequest {
+	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
+	return r
+}
+
+func (r SandboxAPIValidateSshAccessRequest) Execute() (*SshAccessValidationDto, *http.Response, error) {
+	return r.ApiService.ValidateSshAccessExecute(r)
+}
+
+/*
+ValidateSshAccess Validate SSH access for sandbox
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return SandboxAPIValidateSshAccessRequest
+*/
+func (a *SandboxAPIService) ValidateSshAccess(ctx context.Context) SandboxAPIValidateSshAccessRequest {
+	return SandboxAPIValidateSshAccessRequest{
+		ApiService: a,
+		ctx:        ctx,
+	}
+}
+
+// Execute executes the request
+//
+//	@return SshAccessValidationDto
+func (a *SandboxAPIService) ValidateSshAccessExecute(r SandboxAPIValidateSshAccessRequest) (*SshAccessValidationDto, *http.Response, error) {
+	var (
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *SshAccessValidationDto
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SandboxAPIService.ValidateSshAccess")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/sandbox/ssh-access/validate"
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.token == nil {
+		return localVarReturnValue, nil, reportError("token is required and must be specified")
+	}
+
+	parameterAddToHeaderOrQuery(localVarQueryParams, "token", r.token, "form", "")
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.xDaytonaOrganizationID != nil {
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Daytona-Organization-ID", r.xDaytonaOrganizationID, "simple", "")
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
 }
