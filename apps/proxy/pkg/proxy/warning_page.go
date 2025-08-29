@@ -57,6 +57,12 @@ func (p *Proxy) browserWarningMiddleware() gin.HandlerFunc {
 			return
 		}
 
+		// Skip warning if websocket
+		if ctx.Request.Header.Get("Upgrade") == "websocket" {
+			ctx.Next()
+			return
+		}
+
 		// Skip warning if user has already accepted
 		if hasAcceptedWarning(ctx) {
 			ctx.Next()
