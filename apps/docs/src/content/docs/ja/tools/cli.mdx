@@ -12,7 +12,7 @@ import Label from '@components/Label.astro'
 
 本リファレンスでは、`daytona` コマンドラインツールでサポートされているすべてのコマンドを、その動作の説明および対応フラグとともに一覧しています。`daytona` 実行時に `--help` または `-h` フラグを付けることで、各コマンドごとのドキュメントを参照できます。
 
-## daytona
+## daytona {#daytona}
 
 Daytona CLI
 
@@ -26,7 +26,7 @@ daytona [flags]
 | `--help` | | daytona のヘルプを表示します |
 | `--version` | `-v` | Daytona のバージョンを表示します |
 
-## daytona autocomplete
+## daytona autocomplete {#daytona-autocomplete}
 
 シェル環境に補完スクリプトを追加します
 
@@ -41,11 +41,11 @@ daytona autocomplete [bash|zsh|fish|powershell] [flags]
 
 <Aside type="note">
   bash シェルを使用している場合、オートコンプリート機能をフルに利用するには bash-completion がインストールされていることを確認してください。Linux のインストール: `sudo
-          apt-get install bash-completion` macOS のインストール: `brew install
-          bash-completion`
+            apt-get install bash-completion` macOS のインストール: `brew install
+            bash-completion`
 </Aside>
 
-## daytona docs
+## daytona docs {#daytona-docs}
 
 既定のブラウザでDaytona（デイトナ）のドキュメントを開きます。
 
@@ -58,7 +58,7 @@ daytona docs [flags]
 | :--- | :---- | :---------- |
 | `--help` | | daytona のヘルプを表示 |
 
-## daytona login
+## daytona login {#daytona-login}
 
 Daytona（デイトナ）にログイン
 
@@ -72,7 +72,7 @@ daytona login [flags]
 | `--api-key` | | 認証に使用するAPIキー |
 | `--help` | | daytonaのヘルプ |
 
-## daytona logout
+## daytona logout {#daytona-logout}
 
 Daytona（デイトナ）からログアウトします
 
@@ -85,7 +85,7 @@ daytona logout [flags]
 | :--- | :---- | :---------- |
 | `--help` | | daytona のヘルプを表示 |
 
-## daytona mcp
+## daytona mcp {#daytona-mcp}
 
 Daytona MCPサーバー（Model Context Protocol）を管理する
 
@@ -98,7 +98,7 @@ daytona mcp [flags]
 | :--- | :---- | :---------- |
 | `--help` | | daytona のヘルプを表示 |
 
-## daytona mcp config
+## daytona mcp config {#daytona-mcp-config}
 
 Daytona MCPサーバー用のJSON設定を出力します
 
@@ -111,7 +111,7 @@ daytona mcp config [AGENT_NAME] [flags]
 | :--- | :---- | :---------- |
 | `--help` | | daytona のヘルプを表示 |
 
-## daytona mcp init
+## daytona mcp init {#daytona-mcp-init}
 
 エージェントを指定して Daytona MCPサーバー を初期化します（現在サポート: claude、windsurf、cursor）
 
@@ -124,7 +124,7 @@ daytona mcp init [AGENT_NAME] [flags]
 | :--- | :---- | :---------- |
 | `--help` | | daytona のヘルプを表示 |
 
-## daytona mcp start
+## daytona mcp start {#daytona-mcp-start}
 
 Daytona MCPサーバーを起動します
 
@@ -137,7 +137,7 @@ daytona mcp start [flags]
 | :--- | :---- | :---------- |
 | `--help` | | daytona のヘルプを表示 |
 
-## daytona organization
+## daytona organization {#daytona-organization}
 
 Daytona（デイトナ）の組織を管理する
 
@@ -150,7 +150,7 @@ daytona organization [flags]
 | :--- | :---- | :---------- |
 | `--help` | | daytona のヘルプを表示 |
 
-## daytona organization create
+## daytona organization create {#daytona-organization-create}
 
 新しい組織を作成し、アクティブとして設定します
 
@@ -163,7 +163,7 @@ daytona organization create [ORGANIZATION_NAME] [flags]
 | :--- | :---- | :---------- |
 | `--help` | | daytona のヘルプを表示 |
 
-## daytona organization delete
+## daytona organization delete {#daytona-organization-delete}
 
 組織を削除する
 
@@ -176,7 +176,7 @@ daytona organization delete [ORGANIZATION] [flags]
 | :--- | :---- | :---------- |
 | `--help` | | daytona のヘルプを表示 |
 
-## daytona organization list
+## daytona organization list {#daytona-organization-list}
 
 すべての組織を一覧表示します
 
@@ -190,7 +190,7 @@ daytona organization list [flags]
 | `--format` | `-f` | 出力形式。yaml または json のいずれか |
 | `--help` | | daytona のヘルプを表示 |
 
-## daytona organization use
+## daytona organization use {#daytona-organization-use}
 
 アクティブな組織を設定する
 
@@ -203,7 +203,7 @@ daytona organization use [ORGANIZATION] [flags]
 | :--- | :---- | :---------- |
 | `--help` | | daytona のヘルプを表示 |
 
-## daytona sandbox
+## daytona sandbox {#daytona-sandbox}
 
 Daytona（デイトナ）のサンドボックスを管理します
 
@@ -216,7 +216,7 @@ daytona sandbox [flags]
 | :--- | :---- | :---------- |
 | `--help` | | daytona のヘルプを表示 |
 
-## daytona sandbox create
+## daytona sandbox create {#daytona-sandbox-create}
 
 新しいサンドボックスを作成
 
@@ -243,10 +243,10 @@ daytona sandbox create [flags]
 | `--snapshot` | | サンドボックスに使用するスナップショット |
 | `--target` | | ターゲット（リージョン）（eu, us） |
 | `--user` | | サンドボックスに関連付けるユーザー |
-| `--volume` | `-v` | マウントするボリューム（形式: VOLUME\_NAME:MOUNT\_PATH） |
+| `--volume` | `-v` | マウントするボリューム（形式: VOLUME_NAME:MOUNT_PATH） |
 | `--help` | | daytona のヘルプ |
 
-## daytona sandbox delete
+## daytona sandbox delete {#daytona-sandbox-delete}
 
 サンドボックスを削除
 
@@ -261,7 +261,7 @@ daytona sandbox delete [SANDBOX_ID] [flags]
 | `--force` | `-f` | 強制的に削除 |
 | `--help` | | daytona のヘルプを表示 |
 
-## daytona sandbox info
+## daytona sandbox info {#daytona-sandbox-info}
 
 サンドボックス情報を取得する
 
@@ -276,7 +276,7 @@ daytona sandbox info [SANDBOX_ID] [flags]
 | `--verbose` | `-v` | 詳細な出力を含める |
 | `--help` | | daytona のヘルプを表示 |
 
-## daytona sandbox list
+## daytona sandbox list {#daytona-sandbox-list}
 
 サンドボックスを一覧表示します
 
@@ -293,7 +293,7 @@ daytona sandbox list [flags]
 | `--verbose` | `-v` | 冗長な出力を含める |
 | `--help` | | daytona のヘルプを表示 |
 
-## daytona sandbox start
+## daytona sandbox start {#daytona-sandbox-start}
 
 サンドボックスを起動する
 
@@ -307,7 +307,7 @@ daytona sandbox start [SANDBOX_ID] [flags]
 | `--all` | `-a` | すべてのサンドボックスを起動する |
 | `--help` | | daytona のヘルプ |
 
-## daytona sandbox stop
+## daytona sandbox stop {#daytona-sandbox-stop}
 
 サンドボックスを停止する
 
@@ -321,7 +321,7 @@ daytona sandbox stop [SANDBOX_ID] [flags]
 | `--all` | `-a` | すべてのサンドボックスを停止 |
 | `--help` | | daytona のヘルプを表示 |
 
-## daytona snapshot
+## daytona snapshot {#daytona-snapshot}
 
 Daytona（デイトナ）のスナップショットを管理する
 
@@ -334,7 +334,7 @@ daytona snapshot [flags]
 | :--- | :---- | :---------- |
 | `--help` | | daytona のヘルプを表示 |
 
-## daytona snapshot create
+## daytona snapshot create {#daytona-snapshot-create}
 
 スナップショットを作成
 
@@ -354,7 +354,7 @@ daytona snapshot create [SNAPSHOT] [flags]
 | `--memory` | | サンドボックスに割り当てるメモリ容量（GB）（既定: 1） |
 | `--help` | | daytona のヘルプ |
 
-## daytona snapshot delete
+## daytona snapshot delete {#daytona-snapshot-delete}
 
 スナップショットを削除します
 
@@ -368,7 +368,7 @@ daytona snapshot delete [SNAPSHOT_ID] [flags]
 | `--all` | `-a` | すべてのスナップショットを削除します |
 | `--help` | | daytona のヘルプを表示 |
 
-## daytona snapshot list
+## daytona snapshot list {#daytona-snapshot-list}
 
 すべてのスナップショットを一覧表示します
 
@@ -384,7 +384,7 @@ daytona snapshot list [flags]
 | `--page` | `-p` | ページネーション用のページ番号（1から） |
 | `--help` | | daytona のヘルプ |
 
-## daytona snapshot push
+## daytona snapshot push {#daytona-snapshot-push}
 
 ローカルのスナップショットをプッシュします
 
@@ -402,7 +402,7 @@ daytona snapshot push [SNAPSHOT] [flags]
 | `--name` | `-n` | スナップショット名を指定 |
 | `--help` | | daytonaのヘルプ |
 
-## daytona version
+## daytona version {#daytona-version}
 
 バージョン番号を表示します
 
@@ -415,7 +415,7 @@ daytona version [flags]
 | :--- | :---- | :---------- |
 | `--help` | | daytona のヘルプを表示 |
 
-## daytona volume
+## daytona volume {#daytona-volume}
 
 Daytona（デイトナ）のボリュームを管理します
 
@@ -428,7 +428,7 @@ daytona volume [flags]
 | :--- | :---- | :---------- |
 | `--help` | | daytona のヘルプを表示 |
 
-## daytona volume create
+## daytona volume create {#daytona-volume-create}
 
 ボリュームを作成します
 
@@ -442,7 +442,7 @@ daytona volume create [NAME] [flags]
 | `--size` | `-s` | ボリュームのサイズ（GB） |
 | `--help` | | daytona のヘルプを表示 |
 
-## daytona volume delete
+## daytona volume delete {#daytona-volume-delete}
 
 ボリュームを削除します
 
@@ -455,7 +455,7 @@ daytona volume delete [VOLUME_ID] [flags]
 | :--- | :---- | :---------- |
 | `--help` | | daytona のヘルプを表示 |
 
-## daytona volume get
+## daytona volume get {#daytona-volume-get}
 
 ボリュームの詳細を取得する
 
@@ -469,7 +469,7 @@ daytona volume get [VOLUME_ID] [flags]
 | `--format` | `-f` | 出力形式。yaml または json のいずれか |
 | `--help` | | daytona のヘルプを表示 |
 
-## daytona volume list
+## daytona volume list {#daytona-volume-list}
 
 すべてのボリュームを一覧表示します
 
