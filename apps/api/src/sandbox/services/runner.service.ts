@@ -164,7 +164,7 @@ export class RunnerService {
 
     const runner = await this.runnerRepository.findOne({ where: { id: event.sandbox.runnerId } })
     if (!runner) {
-      throw new Error('Runner not found')
+      throw new Error('Runner not found, cannot recalculate usage')
     }
 
     await this.recalculateRunnerUsage(runner)
@@ -212,16 +212,14 @@ export class RunnerService {
             (async () => {
               this.logger.debug(`Checking runner ${runner.id}`)
               try {
-                // Get health check with status metrics
                 const runnerAdapter = await this.runnerAdapterFactory.create(runner)
 
-                // Note: The current runner adapter doesn't support abort signals
-                // but the timeout will still prevent the Promise from hanging
-                await runnerAdapter.healthCheck()
+                // Get health check with status metrics
+                await runnerAdapter.healthCheck(abortController.signal)
 
                 let runnerInfo: RunnerInfo | undefined
                 try {
-                  runnerInfo = await runnerAdapter.runnerInfo()
+                  runnerInfo = await runnerAdapter.runnerInfo(abortController.signal)
                 } catch (e) {
                   this.logger.warn(`Failed to get runner info for runner ${runner.id}: ${e.message}`)
                 }
