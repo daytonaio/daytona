@@ -206,12 +206,17 @@ export class RunnerService {
 
       await Promise.all(
         runners.map(async (runner) => {
+          const abortController = new AbortController()
+
           return Promise.race([
             (async () => {
               this.logger.debug(`Checking runner ${runner.id}`)
               try {
                 // Get health check with status metrics
                 const runnerAdapter = await this.runnerAdapterFactory.create(runner)
+
+                // Note: The current runner adapter doesn't support abort signals
+                // but the timeout will still prevent the Promise from hanging
                 await runnerAdapter.healthCheck()
 
                 let runnerInfo: RunnerInfo | undefined
@@ -226,6 +231,8 @@ export class RunnerService {
               } catch (e) {
                 if (e.code === 'ECONNREFUSED') {
                   this.logger.error(`Runner ${runner.id} not reachable`)
+                } else if (e.name === 'AbortError') {
+                  this.logger.error(`Runner ${runner.id} health check was aborted due to timeout`)
                 } else {
                   this.logger.error(`Error checking runner ${runner.id}: ${e.message}`)
                   this.logger.error(e)
@@ -235,9 +242,12 @@ export class RunnerService {
               }
             })(),
             new Promise<void>((_, reject) => {
-              setTimeout(() => reject(new Error('Health check timeout')), 30000)
+              setTimeout(() => {
+                abortController.abort()
+                reject(new Error('Health check timeout'))
+              }, 10000)
             }).catch(async () => {
-              this.logger.error(`Runner ${runner.id} health check timed out after 30 seconds`)
+              this.logger.error(`Runner ${runner.id} health check timed out after 10 seconds`)
               await this.updateRunnerState(runner.id, RunnerState.UNRESPONSIVE)
             }),
           ])
