@@ -37,6 +37,8 @@ import {
 } from '@/components/ui/alert-dialog'
 import SandboxDetailsSheet from '@/components/SandboxDetailsSheet'
 import { formatDuration } from '@/lib/utils'
+import { Label } from '@/components/ui/label'
+import { Check, Copy } from 'lucide-react'
 
 const Sandboxes: React.FC = () => {
   const { sandboxApi, apiKeyApi, toolboxApi, snapshotApi } = useApi()
@@ -59,6 +61,7 @@ const Sandboxes: React.FC = () => {
   const [sshExpiryMinutes, setSshExpiryMinutes] = useState<number>(60)
   const [revokeSshToken, setRevokeSshToken] = useState<string>('')
   const [sshSandboxId, setSshSandboxId] = useState<string>('')
+  const [copied, setCopied] = useState<string | null>(null)
 
   const navigate = useNavigate()
 
@@ -516,6 +519,16 @@ const Sandboxes: React.FC = () => {
     setShowRevokeSshDialog(true)
   }
 
+  const copyToClipboard = async (text: string, label: string) => {
+    try {
+      await navigator.clipboard.writeText(text)
+      setCopied(label)
+      setTimeout(() => setCopied(null), 2000)
+    } catch (err) {
+      console.error('Failed to copy text:', err)
+    }
+  }
+
   // Redirect user to the onboarding page if they haven't created an api key yet
   // Perform only once per user
   useEffect(() => {
@@ -645,7 +658,7 @@ const Sandboxes: React.FC = () => {
           <div className="space-y-4">
             {!sshToken ? (
               <div className="space-y-3">
-                <label className="text-sm font-medium">Expiry (minutes):</label>
+                <Label className="text-sm font-medium">Expiry (minutes):</Label>
                 <input
                   type="number"
                   min="1"
@@ -656,21 +669,24 @@ const Sandboxes: React.FC = () => {
                 />
               </div>
             ) : (
-              <>
-                <div className="space-y-3">
-                  <label className="text-sm font-medium">Expiry (minutes):</label>
-                  <div className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background">
-                    {sshExpiryMinutes}
-                  </div>
-                </div>
-                <div className="space-y-3">
-                  <label className="text-sm font-medium">SSH Command:</label>
-                  <div className="flex min-h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background font-mono break-all">
-                    {import.meta.env.VITE_SSH_GATEWAY_COMMAND?.replace('{{TOKEN}}', sshToken) ||
-                      `ssh -p 22222 user@host -o ProxyCommand="echo ${sshToken}"`}
-                  </div>
-                </div>
-              </>
+              <div className="p-3 flex justify-between items-center rounded-md bg-green-100 text-green-600 dark:bg-green-900/50 dark:text-green-400">
+                <span className="overflow-x-auto pr-2 cursor-text select-all">
+                  {import.meta.env.VITE_SSH_GATEWAY_COMMAND?.replace('{{TOKEN}}', sshToken) ||
+                    `ssh -p 22222 user@host -o ProxyCommand="echo ${sshToken}"`}
+                </span>
+                {(copied === 'SSH Command' && <Check className="w-4 h-4" />) || (
+                  <Copy
+                    className="w-4 h-4 cursor-pointer"
+                    onClick={() =>
+                      copyToClipboard(
+                        import.meta.env.VITE_SSH_GATEWAY_COMMAND?.replace('{{TOKEN}}', sshToken) ||
+                          `ssh -p 22222 user@host -o ProxyCommand="echo ${sshToken}"`,
+                        'SSH Command',
+                      )
+                    }
+                  />
+                )}
+              </div>
             )}
           </div>
           <AlertDialogFooter>
