@@ -113,7 +113,7 @@ export class BackupManager {
     }
   }
 
-  @Cron(CronExpression.EVERY_10_SECONDS, { name: 'check-backup-states' }) // Run every 10 seconds
+  @Cron(CronExpression.EVERY_10_SECONDS, { name: 'check-backup-states' })
   async checkBackupStates(): Promise<void> {
     //  lock the sync to only run one instance at a time
     const lockKey = 'check-backup-states'
@@ -122,19 +122,22 @@ export class BackupManager {
       return
     }
 
-    const sandboxes = await this.sandboxRepository.find({
-      where: {
-        state: In([SandboxState.ARCHIVING, SandboxState.STARTED, SandboxState.STOPPED]),
-        backupState: In([BackupState.PENDING, BackupState.IN_PROGRESS]),
-      },
-      order: {
-        lastBackupAt: 'ASC',
-      },
-      take: 100,
-    })
-
     try {
-      await Promise.all(
+      const sandboxes = await this.sandboxRepository
+        .createQueryBuilder('sandbox')
+        .innerJoin('runner', 'r', 'r.id = sandbox.runnerId')
+        .where('sandbox.state IN (:...states)', {
+          states: [SandboxState.ARCHIVING, SandboxState.STARTED, SandboxState.STOPPED],
+        })
+        .andWhere('sandbox.backupState IN (:...backupStates)', {
+          backupStates: [BackupState.PENDING, BackupState.IN_PROGRESS],
+        })
+        .andWhere('r.state = :ready', { ready: RunnerState.READY })
+        .orderBy('sandbox.lastBackupAt', 'ASC')
+        .take(100)
+        .getMany()
+
+      await Promise.allSettled(
         sandboxes.map(async (s) => {
           const lockKey = `sandbox-backup-${s.id}`
           const hasLock = await this.redisLockProvider.lock(lockKey, 60)
@@ -143,11 +146,6 @@ export class BackupManager {
           }
 
           try {
-            const runner = await this.runnerService.findOne(s.runnerId)
-            if (runner.state !== RunnerState.READY) {
-              return
-            }
-
             //  get the latest sandbox state
             const sandbox = await this.sandboxRepository.findOneByOrFail({
               id: s.id,
@@ -191,25 +189,25 @@ export class BackupManager {
     }
   }
 
-  @Cron(CronExpression.EVERY_30_SECONDS, { name: 'sync-stop-state-create-backups' }) // Run every 30 seconds
+  @Cron(CronExpression.EVERY_10_SECONDS, { name: 'sync-stop-state-create-backups' })
   async syncStopStateCreateBackups(): Promise<void> {
     const lockKey = 'sync-stop-state-create-backups'
-    const hasLock = await this.redisLockProvider.lock(lockKey, 30)
+    const hasLock = await this.redisLockProvider.lock(lockKey, 10)
     if (!hasLock) {
       return
     }
 
     try {
-      const sandboxes = await this.sandboxRepository.find({
-        where: {
-          state: In([SandboxState.STOPPED, SandboxState.ARCHIVING]),
-          backupState: In([BackupState.NONE]),
-        },
-        //  todo: increase this number when auto-stop is stable
-        take: 100,
-      })
+      const sandboxes = await this.sandboxRepository
+        .createQueryBuilder('sandbox')
+        .innerJoin('runner', 'r', 'r.id = sandbox.runnerId')
+        .where('sandbox.state IN (:...states)', { states: [SandboxState.ARCHIVING, SandboxState.STOPPED] })
+        .andWhere('sandbox.backupState = :none', { none: BackupState.NONE })
+        .andWhere('r.state = :ready', { ready: RunnerState.READY })
+        .take(100)
+        .getMany()
 
-      await Promise.all(
+      await Promise.allSettled(
         sandboxes
           .filter((sandbox) => sandbox.runnerId !== null)
           .map(async (sandbox) => {
@@ -220,11 +218,6 @@ export class BackupManager {
             }
 
             try {
-              const runner = await this.runnerService.findOne(sandbox.runnerId)
-              if (runner.state !== RunnerState.READY) {
-                return
-              }
-
               await this.setBackupPending(sandbox.id)
             } catch (error) {
               this.logger.error(`Error processing backup for sandbox ${sandbox.id}:`, error)
