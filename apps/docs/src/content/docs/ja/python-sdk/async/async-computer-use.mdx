@@ -3,7 +3,7 @@ title: "AsyncComputerUse"
 hideTitleOnPage: true
 ---
 
-## AsyncComputerUse
+## AsyncComputerUse {#asynccomputeruse}
 
 ```python
 class AsyncComputerUse()
@@ -20,7 +20,7 @@ class AsyncComputerUse()
 - `screenshot` _AsyncScreenshot_ - スクリーンショット操作インターフェース。
 - `display` _AsyncDisplay_ - ディスプレイ操作インターフェース。
 
-#### AsyncComputerUse.start
+#### AsyncComputerUse.start {#asynccomputerusestart}
 
 ```python
 @intercept_errors(message_prefix="Failed to start computer use: ")
@@ -32,7 +32,6 @@ async def start() -> ComputerUseStartResponse
 **戻り値**:
 
 - `ComputerUseStartResponse` - コンピューター操作の起動レスポンス。
-  
 
 **例**:
 
@@ -41,7 +40,7 @@ result = await sandbox.computer_use.start()
 print("Computer use processes started:", result.message)
 ```
 
-#### AsyncComputerUse.stop
+#### AsyncComputerUse.stop {#asynccomputerusestop}
 
 ```python
 @intercept_errors(message_prefix="Failed to stop computer use: ")
@@ -53,7 +52,6 @@ async def stop() -> ComputerUseStopResponse
 **戻り値**:
 
 - `ComputerUseStopResponse` - コンピューター操作の停止レスポンス。
-  
 
 **例**:
 
@@ -62,7 +60,7 @@ result = await sandbox.computer_use.stop()
 print("Computer use processes stopped:", result.message)
 ```
 
-#### AsyncComputerUse.get\_status
+#### AsyncComputerUse.get_status {#asynccomputeruseget_status}
 
 ```python
 @intercept_errors(message_prefix="Failed to get computer use status: ")
@@ -74,7 +72,6 @@ async def get_status() -> ComputerUseStatusResponse
 **戻り値**:
 
 - `ComputerUseStatusResponse` - すべてのVNCデスクトッププロセスに関するステータス情報。
-  
 
 **例**:
 
@@ -83,7 +80,7 @@ response = await sandbox.computer_use.get_status()
 print("Computer use status:", response.status)
 ```
 
-#### AsyncComputerUse.get\_process\_status
+#### AsyncComputerUse.get_process_status {#asynccomputeruseget_process_status}
 
 ```python
 @intercept_errors(message_prefix="Failed to get process status: ")
@@ -95,12 +92,10 @@ async def get_process_status(process_name: str) -> ProcessStatusResponse
 **引数**:
 
 - `process_name` _str_ - 確認するプロセス名。
-  
 
 **戻り値**:
 
 - `ProcessStatusResponse` - 指定したプロセスに関するステータス情報。
-  
 
 **例**:
 
@@ -109,7 +104,7 @@ xvfb_status = await sandbox.computer_use.get_process_status("xvfb")
 no_vnc_status = await sandbox.computer_use.get_process_status("novnc")
 ```
 
-#### AsyncComputerUse.restart\_process
+#### AsyncComputerUse.restart_process {#asynccomputeruserestart_process}
 
 ```python
 @intercept_errors(message_prefix="Failed to restart process: ")
@@ -121,12 +116,10 @@ async def restart_process(process_name: str) -> ProcessRestartResponse
 **引数**:
 
 - `process_name` _str_ - 再起動するプロセス名。
-  
 
 **戻り値**:
 
 - `ProcessRestartResponse` - プロセス再起動のレスポンス。
-  
 
 **例**:
 
@@ -135,7 +128,7 @@ result = await sandbox.computer_use.restart_process("xfce4")
 print("XFCE4 process restarted:", result.message)
 ```
 
-#### AsyncComputerUse.get\_process\_logs
+#### AsyncComputerUse.get_process_logs {#asynccomputeruseget_process_logs}
 
 ```python
 @intercept_errors(message_prefix="Failed to get process logs: ")
@@ -147,12 +140,10 @@ async def get_process_logs(process_name: str) -> ProcessLogsResponse
 **引数**:
 
 - `process_name` _str_ - ログを取得するプロセス名。
-  
 
 **戻り値**:
 
 - `ProcessLogsResponse` - プロセスのログ。
-  
 
 **例**:
 
@@ -161,7 +152,7 @@ logs = await sandbox.computer_use.get_process_logs("novnc")
 print("NoVNC logs:", logs)
 ```
 
-#### AsyncComputerUse.get\_process\_errors
+#### AsyncComputerUse.get_process_errors {#asynccomputeruseget_process_errors}
 
 ```python
 @intercept_errors(message_prefix="Failed to get process errors: ")
@@ -173,12 +164,10 @@ async def get_process_errors(process_name: str) -> ProcessErrorsResponse
 **引数**:
 
 - `process_name` _str_ - エラーログを取得するプロセス名。
-  
 
 **戻り値**:
 
 - `ProcessErrorsResponse` - プロセスのエラーログ。
-  
 
 **例**:
 
@@ -187,8 +176,7 @@ errors = await sandbox.computer_use.get_process_errors("x11vnc")
 print("X11VNC errors:", errors)
 ```
 
-
-## AsyncMouse
+## AsyncMouse {#asyncmouse}
 
 ```python
 class AsyncMouse()
@@ -196,7 +184,7 @@ class AsyncMouse()
 
 コンピューター操作機能のためのマウス操作。
 
-#### AsyncMouse.get\_position
+#### AsyncMouse.get_position {#asyncmouseget_position}
 
 ```python
 @intercept_errors(message_prefix="Failed to get mouse position: ")
@@ -208,7 +196,6 @@ async def get_position() -> MousePosition
 **Returns**:
 
 - `MousePosition` - x座標とy座標を含む現在のマウス位置。
-  
 
 **Example**:
 
@@ -217,7 +204,7 @@ position = await sandbox.computer_use.mouse.get_position()
 print(f"Mouse is at: {position.x}, {position.y}")
 ```
 
-#### AsyncMouse.move
+#### AsyncMouse.move {#asyncmousemove}
 
 ```python
 @intercept_errors(message_prefix="Failed to move mouse: ")
@@ -230,12 +217,10 @@ async def move(x: int, y: int) -> MouseMoveResponse
 
 - `x` _int_ - 移動先のx座標。
 - `y` _int_ - 移動先のy座標。
-  
 
 **Returns**:
 
 - `MouseMoveResponse` - 移動操作の結果。
-  
 
 **Example**:
 
@@ -244,7 +229,7 @@ result = await sandbox.computer_use.mouse.move(100, 200)
 print(f"Mouse moved to: {result.x}, {result.y}")
 ```
 
-#### AsyncMouse.click
+#### AsyncMouse.click {#asyncmouseclick}
 
 ```python
 @intercept_errors(message_prefix="Failed to click mouse: ")
@@ -262,12 +247,10 @@ async def click(x: int,
 - `y` _int_ - クリックするy座標。
 - `button` _str_ - クリックするマウスボタン（'left'、'right'、'middle'）。
 - `double` _bool_ - ダブルクリックを行うかどうか。
-  
 
 **Returns**:
 
 - `MouseClickResponse` - クリック操作の結果。
-  
 
 **Example**:
 
@@ -282,7 +265,7 @@ double_click = await sandbox.computer_use.mouse.click(100, 200, "left", True)
 right_click = await sandbox.computer_use.mouse.click(100, 200, "right")
 ```
 
-#### AsyncMouse.drag
+#### AsyncMouse.drag {#asyncmousedrag}
 
 ```python
 @intercept_errors(message_prefix="Failed to drag mouse: ")
@@ -302,12 +285,10 @@ async def drag(start_x: int,
 - `end_x` _int_ - 終了x座標。
 - `end_y` _int_ - 終了y座標。
 - `button` _str_ - ドラッグに使用するマウスボタン。
-  
 
 **Returns**:
 
 - `MouseDragResponse` - ドラッグ操作の結果。
-  
 
 **Example**:
 
@@ -316,7 +297,7 @@ result = await sandbox.computer_use.mouse.drag(50, 50, 150, 150)
 print(f"Dragged from {result.from_x},{result.from_y} to {result.to_x},{result.to_y}")
 ```
 
-#### AsyncMouse.scroll
+#### AsyncMouse.scroll {#asyncmousescroll}
 
 ```python
 @intercept_errors(message_prefix="Failed to scroll mouse: ")
@@ -331,12 +312,10 @@ async def scroll(x: int, y: int, direction: str, amount: int = 1) -> bool
 - `y` _int_ - スクロールするy座標。
 - `direction` _str_ - スクロール方向（'up' または 'down'）。
 - `amount` _int_ - スクロール量。
-  
 
 **Returns**:
 
 - `bool` - スクロール操作が成功したかどうか。
-  
 
 **Example**:
 
@@ -348,7 +327,7 @@ scroll_up = await sandbox.computer_use.mouse.scroll(100, 200, "up", 3)
 scroll_down = await sandbox.computer_use.mouse.scroll(100, 200, "down", 5)
 ```
 
-## AsyncKeyboard
+## AsyncKeyboard {#asynckeyboard}
 
 ```python
 class AsyncKeyboard()
@@ -356,7 +335,7 @@ class AsyncKeyboard()
 
 コンピューター操作（Computer Use）機能におけるキーボード操作。
 
-#### AsyncKeyboard.type
+#### AsyncKeyboard.type {#asynckeyboardtype}
 
 ```python
 @intercept_errors(message_prefix="Failed to type text: ")
@@ -369,12 +348,10 @@ async def type(text: str, delay: Optional[int] = None) -> None
 
 - `text` _str_ - 入力するテキスト。
 - `delay` _int_ - 文字ごとの遅延（ミリ秒）。
-  
 
 **Raises**:
 
 - `DaytonaError` - 入力処理に失敗した場合。
-  
 
 **Example**:
 
@@ -393,7 +370,7 @@ except Exception as e:
     print(f"Operation failed: {e}")
 ```
 
-#### AsyncKeyboard.press
+#### AsyncKeyboard.press {#asynckeyboardpress}
 
 ```python
 @intercept_errors(message_prefix="Failed to press key: ")
@@ -406,12 +383,10 @@ async def press(key: str, modifiers: Optional[List[str]] = None) -> None
 
 - `key` _str_ - 押下するキー（例: 'Enter', 'Escape', 'Tab', 'a', 'A'）。
 - `modifiers` _List[str]_ - モディファイアキー（'ctrl', 'alt', 'meta', 'shift'）。
-  
 
 **Raises**:
 
 - `DaytonaError` - キー押下処理に失敗した場合。
-  
 
 **Example**:
 
@@ -436,7 +411,7 @@ except Exception as e:
     print(f"Operation failed: {e}")
 ```
 
-#### AsyncKeyboard.hotkey
+#### AsyncKeyboard.hotkey {#asynckeyboardhotkey}
 
 ```python
 @intercept_errors(message_prefix="Failed to press hotkey: ")
@@ -448,12 +423,10 @@ async def hotkey(keys: str) -> None
 **Arguments**:
 
 - `keys` _str_ - ホットキーの組み合わせ（例: 'ctrl+c', 'alt+tab', 'cmd+shift+t'）。
-  
 
 **Raises**:
 
 - `DaytonaError` - ホットキー処理に失敗した場合。
-  
 
 **Example**:
 
@@ -480,7 +453,7 @@ except Exception as e:
     print(f"Operation failed: {e}")
 ```
 
-## AsyncScreenshot
+## AsyncScreenshot {#asyncscreenshot}
 
 ```python
 class AsyncScreenshot()
@@ -488,7 +461,7 @@ class AsyncScreenshot()
 
 コンピューター操作（Computer Use）機能向けのスクリーンショット処理。
 
-#### AsyncScreenshot.take\_full\_screen
+#### AsyncScreenshot.take_full_screen {#asyncscreenshottake_full_screen}
 
 ```python
 @intercept_errors(message_prefix="Failed to take screenshot: ")
@@ -500,12 +473,10 @@ async def take_full_screen(show_cursor: bool = False) -> ScreenshotResponse
 **引数**:
 
 - `show_cursor` _bool_ - スクリーンショットにカーソルを表示するかどうか。
-  
 
 **戻り値**:
 
 - `ScreenshotResponse` - 画像をbase64エンコードしたスクリーンショットデータ。
-  
 
 **例**:
 
@@ -517,7 +488,7 @@ print(f"Screenshot size: {screenshot.width}x{screenshot.height}")
 with_cursor = await sandbox.computer_use.screenshot.take_full_screen(True)
 ```
 
-#### AsyncScreenshot.take\_region
+#### AsyncScreenshot.take_region {#asyncscreenshottake_region}
 
 ```python
 @intercept_errors(message_prefix="Failed to take region screenshot: ")
@@ -531,12 +502,10 @@ async def take_region(region: ScreenshotRegion,
 
 - `region` _ScreenshotRegion_ - 取得対象の領域。
 - `show_cursor` _bool_ - スクリーンショットにカーソルを表示するかどうか。
-  
 
 **戻り値**:
 
 - `RegionScreenshotResponse` - 画像をbase64エンコードしたスクリーンショットデータ。
-  
 
 **例**:
 
@@ -546,7 +515,7 @@ screenshot = await sandbox.computer_use.screenshot.take_region(region)
 print(f"Captured region: {screenshot.region.width}x{screenshot.region.height}")
 ```
 
-#### AsyncScreenshot.take\_compressed
+#### AsyncScreenshot.take_compressed {#asyncscreenshottake_compressed}
 
 ```python
 @intercept_errors(message_prefix="Failed to take compressed screenshot: ")
@@ -560,12 +529,10 @@ async def take_compressed(
 **引数**:
 
 - `options` _ScreenshotOptions_ - 圧縮および表示のオプション。
-  
 
 **戻り値**:
 
 - `CompressedScreenshotResponse` - 圧縮済みスクリーンショットデータ。
-  
 
 **例**:
 
@@ -584,7 +551,7 @@ scaled = await sandbox.computer_use.screenshot.take_compressed(
 )
 ```
 
-#### AsyncScreenshot.take\_compressed\_region
+#### AsyncScreenshot.take_compressed_region {#asyncscreenshottake_compressed_region}
 
 ```python
 @intercept_errors(
@@ -601,12 +568,10 @@ async def take_compressed_region(
 
 - `region` _ScreenshotRegion_ - 取得対象の領域。
 - `options` _ScreenshotOptions_ - 圧縮および表示のオプション。
-  
 
 **戻り値**:
 
 - `CompressedScreenshotResponse` - 圧縮済みスクリーンショットデータ。
-  
 
 **例**:
 
@@ -619,7 +584,7 @@ screenshot = await sandbox.computer_use.screenshot.take_compressed_region(
 print(f"Compressed size: {screenshot.size_bytes} bytes")
 ```
 
-## AsyncDisplay
+## AsyncDisplay {#asyncdisplay}
 
 ```python
 class AsyncDisplay()
@@ -627,7 +592,7 @@ class AsyncDisplay()
 
 コンピューター操作機能向けのディスプレイ操作。
 
-#### AsyncDisplay.get\_info
+#### AsyncDisplay.get_info {#asyncdisplayget_info}
 
 ```python
 @intercept_errors(message_prefix="Failed to get display info: ")
@@ -639,7 +604,6 @@ async def get_info() -> DisplayInfoResponse
 **Returns**:
 
 - `DisplayInfoResponse` - プライマリディスプレイおよび利用可能なすべてのディスプレイを含む情報。
-  
 
 **Example**:
 
@@ -651,7 +615,7 @@ for i, display in enumerate(info.displays):
     print(f"Display {i}: {display.width}x{display.height} at {display.x},{display.y}")
 ```
 
-#### AsyncDisplay.get\_windows
+#### AsyncDisplay.get_windows {#asyncdisplayget_windows}
 
 ```python
 @intercept_errors(message_prefix="Failed to get windows: ")
@@ -663,7 +627,6 @@ async def get_windows() -> WindowsResponse
 **Returns**:
 
 - `WindowsResponse` - IDとタイトルを含む開いているウィンドウの一覧。
-  
 
 **Example**:
 
@@ -674,7 +637,7 @@ for window in windows.windows:
     print(f"- {window.title} (ID: {window.id})")
 ```
 
-## ScreenshotRegion
+## ScreenshotRegion {#screenshotregion}
 
 ```python
 class ScreenshotRegion()
@@ -689,7 +652,7 @@ class ScreenshotRegion()
 - `width` _int_ - 領域の幅。
 - `height` _int_ - 領域の高さ。
 
-## ScreenshotOptions
+## ScreenshotOptions {#screenshotoptions}
 
 ```python
 class ScreenshotOptions()
@@ -703,4 +666,3 @@ class ScreenshotOptions()
 - `fmt` _str_ - 画像形式（例: 'png'、'jpeg'、'webp'）。
 - `quality` _int_ - 圧縮品質（0〜100）。
 - `scale` _float_ - スクリーンショットの拡大率。
-
