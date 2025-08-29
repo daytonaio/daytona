@@ -3,7 +3,14 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { ForbiddenException, Injectable, NotFoundException, Logger, OnModuleInit } from '@nestjs/common'
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+  Logger,
+  OnModuleInit,
+  OnApplicationShutdown,
+} from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { EntityManager, In, Not, Repository } from 'typeorm'
 import { CreateOrganizationDto } from '../dto/create-organization.dto'
@@ -31,9 +38,13 @@ import { SandboxDesiredState } from '../../sandbox/enums/sandbox-desired-state.e
 import { SystemRole } from '../../user/enums/system-role.enum'
 import { SnapshotState } from '../../sandbox/enums/snapshot-state.enum'
 import { OrganizationSuspendedSnapshotDeactivatedEvent } from '../events/organization-suspended-snapshot-deactivated.event'
+import { TrackJobExecution } from '../../common/decorators/track-job-execution.decorator'
+import { TrackableJobExecutions } from '../../common/interfaces/trackable-job-executions'
+import { setTimeout } from 'timers/promises'
 
 @Injectable()
-export class OrganizationService implements OnModuleInit {
+export class OrganizationService implements OnModuleInit, TrackableJobExecutions, OnApplicationShutdown {
+  activeJobs = new Set<string>()
   private readonly logger = new Logger(OrganizationService.name)
 
   constructor(
@@ -47,6 +58,14 @@ export class OrganizationService implements OnModuleInit {
     private readonly configService: ConfigService,
     private readonly redisLockProvider: RedisLockProvider,
   ) {}
+
+  async onApplicationShutdown() {
+    //  wait for all active jobs to finish
+    while (this.activeJobs.size > 0) {
+      this.logger.log(`Waiting for ${this.activeJobs.size} active jobs to finish`)
+      await setTimeout(1000)
+    }
+  }
 
   async onModuleInit(): Promise<void> {
     await this.stopSuspendedOrganizationSandboxes()
@@ -268,6 +287,7 @@ export class OrganizationService implements OnModuleInit {
   }
 
   @Cron(CronExpression.EVERY_MINUTE, { name: 'stop-suspended-organization-sandboxes' })
+  @TrackJobExecution()
   async stopSuspendedOrganizationSandboxes(): Promise<void> {
     //  lock the sync to only run one instance at a time
     const lockKey = 'stop-suspended-organization-sandboxes'
@@ -319,6 +339,7 @@ export class OrganizationService implements OnModuleInit {
   }
 
   @Cron(CronExpression.EVERY_MINUTE, { name: 'deactivate-suspended-organization-snapshots' })
+  @TrackJobExecution()
   async deactivateSuspendedOrganizationSnapshots(): Promise<void> {
     //  lock the sync to only run one instance at a time
     const lockKey = 'deactivate-suspended-organization-snapshots'
@@ -375,6 +396,7 @@ export class OrganizationService implements OnModuleInit {
   @OnAsyncEvent({
     event: UserEvents.CREATED,
   })
+  @TrackJobExecution()
   async handleUserCreatedEvent(payload: UserCreatedEvent): Promise<Organization> {
     return this.createWithEntityManager(
       payload.entityManager,
@@ -391,6 +413,7 @@ export class OrganizationService implements OnModuleInit {
   @OnAsyncEvent({
     event: UserEvents.EMAIL_VERIFIED,
   })
+  @TrackJobExecution()
   async handleUserEmailVerifiedEvent(payload: UserEmailVerifiedEvent): Promise<void> {
     await this.unsuspendPersonalWithEntityManager(payload.entityManager, payload.userId)
   }
@@ -398,6 +421,7 @@ export class OrganizationService implements OnModuleInit {
   @OnAsyncEvent({
     event: UserEvents.DELETED,
   })
+  @TrackJobExecution()
   async handleUserDeletedEvent(payload: UserDeletedEvent): Promise<void> {
     const organization = await this.findPersonalWithEntityManager(payload.entityManager, payload.userId)
 

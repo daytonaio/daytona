@@ -30,6 +30,7 @@ import { ObjectStorageModule } from './object-storage/object-storage.module'
 import { CustomNamingStrategy } from './common/utils/naming-strategy.util'
 import { MaintenanceMiddleware } from './common/middleware/maintenance.middleware'
 import { AuditModule } from './audit/audit.module'
+import { HealthModule } from './health/health.module'
 
 @Module({
   imports: [
@@ -110,6 +111,7 @@ import { AuditModule } from './audit/audit.module'
     WebhookModule,
     ObjectStorageModule,
     AuditModule,
+    HealthModule,
   ],
   controllers: [],
   providers: [AppService],

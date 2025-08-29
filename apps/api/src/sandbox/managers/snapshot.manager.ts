@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Injectable, Logger, NotFoundException } from '@nestjs/common'
+import { Injectable, Logger, NotFoundException, OnApplicationShutdown } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Cron, CronExpression } from '@nestjs/schedule'
 import { In, IsNull, LessThan, Not, Or, Raw, Repository } from 'typeorm'
@@ -27,8 +27,15 @@ import { InjectRedis } from '@nestjs-modules/ioredis'
 import { Redis } from 'ioredis'
 import { RunnerService } from '../services/runner.service'
 import { RunnerAdapterFactory } from '../runner-adapter/runnerAdapter'
+
+import { TrackableJobExecutions } from '../../common/interfaces/trackable-job-executions'
+import { TrackJobExecution } from '../../common/decorators/track-job-execution.decorator'
+import { setTimeout as sleep } from 'timers/promises'
+
 @Injectable()
-export class SnapshotManager {
+export class SnapshotManager implements TrackableJobExecutions, OnApplicationShutdown {
+  activeJobs = new Set<string>()
+
   private readonly logger = new Logger(SnapshotManager.name)
   //  generate a unique instance id used to ensure only one instance of the worker is handing the
   //  snapshot activation
@@ -52,7 +59,16 @@ export class SnapshotManager {
     private readonly organizationService: OrganizationService,
   ) {}
 
+  async onApplicationShutdown() {
+    //  wait for all active jobs to finish
+    while (this.activeJobs.size > 0) {
+      this.logger.log(`Waiting for ${this.activeJobs.size} active jobs to finish`)
+      await sleep(1000)
+    }
+  }
+
   @Cron(CronExpression.EVERY_5_SECONDS)
+  @TrackJobExecution()
   async syncRunnerSnapshots() {
     const lockKey = 'sync-runner-snapshots-lock'
     if (!(await this.redisLockProvider.lock(lockKey, 30))) {
@@ -90,6 +106,7 @@ export class SnapshotManager {
   }
 
   @Cron(CronExpression.EVERY_10_SECONDS)
+  @TrackJobExecution()
   async syncRunnerSnapshotStates() {
     //  this approach is not ideal, as if the number of runners is large, this will take a long time
     //  also, if some snapshots stuck in a "pulling" state, they will infest the queue
@@ -324,6 +341,7 @@ export class SnapshotManager {
   }
 
   @Cron(CronExpression.EVERY_10_SECONDS)
+  @TrackJobExecution()
   async checkSnapshotCleanup() {
     const lockKey = 'check-snapshot-cleanup-lock'
     if (!(await this.redisLockProvider.lock(lockKey, 30))) {
@@ -366,6 +384,7 @@ export class SnapshotManager {
   }
 
   @Cron(CronExpression.EVERY_10_SECONDS)
+  @TrackJobExecution()
   async checkSnapshotState() {
     //  the first time the snapshot is created it needs to be validated and pushed to the internal registry
     //  before propagating to the runners
@@ -440,6 +459,7 @@ export class SnapshotManager {
   @Cron(CronExpression.EVERY_30_MINUTES, {
     name: 'cleanup-local-snapshots',
   })
+  @TrackJobExecution()
   async cleanupLocalSnapshots() {
     await this.dockerProvider.imagePrune()
   }
@@ -824,6 +844,7 @@ export class SnapshotManager {
   }
 
   @Cron(CronExpression.EVERY_HOUR)
+  @TrackJobExecution()
   async cleanupOldBuildInfoSnapshotRunners() {
     const lockKey = 'cleanup-old-buildinfo-snapshots-lock'
     if (!(await this.redisLockProvider.lock(lockKey, 300))) {
@@ -863,6 +884,7 @@ export class SnapshotManager {
   }
 
   @Cron(CronExpression.EVERY_10_MINUTES)
+  @TrackJobExecution()
   async deactivateOldSnapshots() {
     const lockKey = 'deactivate-old-snapshots-lock'
     if (!(await this.redisLockProvider.lock(lockKey, 300))) {
@@ -927,6 +949,7 @@ export class SnapshotManager {
   }
 
   @Cron(CronExpression.EVERY_10_MINUTES)
+  @TrackJobExecution()
   async cleanupInactiveSnapshotsFromRunners() {
     const lockKey = 'cleanup-inactive-snapshots-from-runners-lock'
     if (!(await this.redisLockProvider.lock(lockKey, 300))) {
