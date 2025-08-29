@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Injectable, Logger } from '@nestjs/common'
+import { Injectable, Logger, OnApplicationShutdown } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { IsNull, LessThan, Not, Repository } from 'typeorm'
 import { SandboxUsagePeriod } from '../entities/sandbox-usage-period.entity'
@@ -16,8 +16,13 @@ import { RedisLockProvider } from '../../sandbox/common/redis-lock.provider'
 import { SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION } from '../../sandbox/constants/sandbox.constants'
 import { Sandbox } from '../../sandbox/entities/sandbox.entity'
 import { SandboxUsagePeriodArchive } from '../entities/sandbox-usage-period-archive.entity'
+import { TrackableJobExecutions } from '../../common/interfaces/trackable-job-executions'
+import { TrackJobExecution } from '../../common/decorators/track-job-execution.decorator'
+import { setTimeout as sleep } from 'timers/promises'
+
 @Injectable()
-export class UsageService {
+export class UsageService implements TrackableJobExecutions, OnApplicationShutdown {
+  activeJobs = new Set<string>()
   private readonly logger = new Logger(UsageService.name)
 
   constructor(
@@ -28,7 +33,16 @@ export class UsageService {
     private readonly sandboxRepository: Repository<Sandbox>,
   ) {}
 
+  async onApplicationShutdown() {
+    //  wait for all active jobs to finish
+    while (this.activeJobs.size > 0) {
+      this.logger.log(`Waiting for ${this.activeJobs.size} active jobs to finish`)
+      await sleep(1000)
+    }
+  }
+
   @OnEvent(SandboxEvents.STATE_UPDATED)
+  @TrackJobExecution()
   async handleSandboxStateUpdate(event: SandboxStateUpdatedEvent) {
     await this.waitForLock(event.sandbox.id)
 
@@ -97,6 +111,7 @@ export class UsageService {
   }
 
   @Cron(CronExpression.EVERY_MINUTE, { name: 'close-and-reopen-usage-periods' })
+  @TrackJobExecution()
   async closeAndReopenUsagePeriods() {
     if (!(await this.redisLockProvider.lock('close-and-reopen-usage-periods', 60))) {
       return
@@ -153,6 +168,7 @@ export class UsageService {
   }
 
   @Cron(CronExpression.EVERY_MINUTE, { name: 'archive-usage-periods' })
+  @TrackJobExecution()
   async archiveUsagePeriods() {
     const lockKey = 'archive-usage-periods'
     if (!(await this.redisLockProvider.lock(lockKey, 60))) {
