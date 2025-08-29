@@ -5,7 +5,7 @@
 
 import { Injectable, Logger, NotFoundException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { Cron } from '@nestjs/schedule'
+import { Cron, CronExpression } from '@nestjs/schedule'
 import { FindOptionsWhere, In, Not, Raw, Repository } from 'typeorm'
 import { Runner } from '../entities/runner.entity'
 import { CreateRunnerDto } from '../dto/create-runner.dto'
@@ -189,7 +189,7 @@ export class RunnerService {
     })
   }
 
-  @Cron('15 * * * * *')
+  @Cron(CronExpression.EVERY_10_SECONDS, { name: 'check-runners' })
   private async handleCheckRunners() {
     const lockKey = 'check-runners'
     const hasLock = await this.redisLockProvider.lock(lockKey, 60)
@@ -208,23 +208,32 @@ export class RunnerService {
         runners.map(async (runner) => {
           this.logger.debug(`Checking runner ${runner.id}`)
           try {
-            // Get health check with status metrics
+            // Get health check with status metrics with 30-second timeout
             const runnerAdapter = await this.runnerAdapterFactory.create(runner)
-            await runnerAdapter.healthCheck()
 
-            let runnerInfo: RunnerInfo | undefined
-            try {
-              runnerInfo = await runnerAdapter.runnerInfo()
-            } catch (e) {
-              this.logger.warn(`Failed to get runner info for runner ${runner.id}: ${e.message}`)
-            }
+            await Promise.race([
+              (async () => {
+                await runnerAdapter.healthCheck()
 
-            await this.updateRunnerStatus(runner.id, runnerInfo)
+                let runnerInfo: RunnerInfo | undefined
+                try {
+                  runnerInfo = await runnerAdapter.runnerInfo()
+                } catch (e) {
+                  this.logger.warn(`Failed to get runner info for runner ${runner.id}: ${e.message}`)
+                }
 
-            await this.recalculateRunnerUsage(runner)
+                await this.updateRunnerStatus(runner.id, runnerInfo)
+                await this.recalculateRunnerUsage(runner)
+              })(),
+              new Promise((_, reject) => {
+                setTimeout(() => reject(new Error('Health check timeout')), 30000)
+              }),
+            ])
           } catch (e) {
             if (e.code === 'ECONNREFUSED') {
               this.logger.error(`Runner ${runner.id} not reachable`)
+            } else if (e.message === 'Health check timeout') {
+              this.logger.error(`Runner ${runner.id} health check timed out after 30 seconds`)
             } else {
               this.logger.error(`Error checking runner ${runner.id}: ${e.message}`)
               this.logger.error(e)
