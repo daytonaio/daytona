@@ -10,7 +10,7 @@ Daytona SDKはDaytonaと連携するための公式[Python](/docs/ja/python-sdk)
 
 環境変数の設定やステージング環境での実験的機能へのアクセスなど、追加の設定手順については[Configuration](/docs/ja/configuration)を参照してください。
 
-## Daytona SDK をインストールする
+## Daytona SDK をインストールする {#install-the-daytona-sdk}
 
 Daytona は、Daytona プラットフォームと連携するための公式 Python および TypeScript の SDK を提供しています。お好みの方法で SDK をインストールしてください。
 
@@ -35,7 +35,7 @@ Daytona は、Daytona プラットフォームと連携するための公式 Pyt
   </TabItem>
 </Tabs>
 
-## サンドボックス内でコードを実行する
+## サンドボックス内でコードを実行する {#run-code-inside-a-sandbox}
 
 次のコードを実行して、Daytona のサンドボックスを作成し、コマンドを実行します。
 
@@ -117,7 +117,7 @@ Daytona は、Daytona プラットフォームと連携するための公式 Pyt
   </TabItem>
 </Tabs>
 
-## アプリをプレビュー
+## アプリをプレビュー {#preview-your-app}
 
 次のスニペットは、シンプルな Flask アプリを含むファイルを Daytona のサンドボックスにアップロードします。Web サーバーはポート `3000` で起動し、提供されたプレビューURLからアクセスできます。
 
@@ -246,7 +246,7 @@ Daytona は、Daytona プラットフォームと連携するための公式 Pyt
 ポート `22222` のプレビューURLを表示するか、Dashboard -> Sandboxes に移動して Terminal のアイコンをクリックすると、サンドボックスの[Web Terminal](/docs/ja/web-terminal)にアクセスできます。
 :::
 
-## LLM に接続する
+## LLM に接続する {#connect-to-an-llm}
 
 次のスニペットは、Anthropic API を用いて LLM に接続し、Claude に 25 の階乗を求めるコードの生成を依頼し、そのコードを Daytona のサンドボックス（Daytonaが管理する隔離された一時的な実行環境）内で実行します。
 
@@ -390,7 +390,7 @@ Daytona は、Daytona プラットフォームと連携するための公式 Pyt
   </TabItem>
 </Tabs>
 
-## 追加の例
+## 追加の例 {#additional-examples}
 
 Daytona SDK の [Python の例](https://github.com/daytonaio/daytona/tree/main/examples/python) または [TypeScript/JavaScript の例](https://github.com/daytonaio/daytona/tree/main/examples/typescript) を使ってサンドボックス（Daytonaが管理する隔離された一時的な実行環境）を作成し、コードを実行しましょう。
 
@@ -398,7 +398,7 @@ LLM を活用して Daytona 上での開発を加速できます。/llms.txt フ
 
 [GitHub](https://github.com/daytonaio/daytona) 上の Daytona SDK リポジトリを参照して、さらに詳しく学びましょう。
 
-## ViteプロジェクトでのDaytona
+## ViteプロジェクトでのDaytona {#daytona-in-vite-projects}
 
 ViteベースのプロジェクトでDaytona SDKを使用する場合、互換性を確保するためにNodeのポリフィルを設定する必要があります。`vite.config.ts` のplugins配列に以下の設定を追加してください：
 
@@ -419,7 +419,7 @@ export default defineConfig({
 })
 ```
 
-## Next.js プロジェクトにおける Daytona
+## Next.js プロジェクトにおける Daytona {#daytona-in-nextjs-projects}
 
 Next.js プロジェクトで Daytona SDK を使用する場合、利用中のバンドラーに応じて Webpack や Turbopack との互換性を保つため、Node のポリフィルを設定する必要があります。次の設定を `next.config.ts` に追加してください:
 
@@ -451,7 +451,7 @@ const nextConfig: NextConfig = {
 export default nextConfig
 ```
 
-## Daytona CLI のセットアップ
+## Daytona CLI のセットアップ {#setting-up-the-daytona-cli}
 
 [ローカルデバイス上のイメージ](/docs/ja/snapshots#using-a-local-image)を使用する場合、またはコマンドラインインターフェースでサンドボックスを管理したい場合は、次のコマンドで Daytona CLI をインストールしてください:
 
