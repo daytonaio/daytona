@@ -7,6 +7,7 @@ import (
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
+	"encoding/base64"
 	"encoding/pem"
 	"fmt"
 	"os"
@@ -37,12 +38,19 @@ func GetSSHGatewayPort() int {
 
 // GetSSHPublicKey returns the SSH public key from configuration
 // Get ssh public key of ssh gateway - external ssh gateway, not runner ssh gateway
+// Should be base64 encoded
 func GetSSHPublicKey() (string, error) {
 	publicKey := os.Getenv("SSH_PUBLIC_KEY")
 	if publicKey == "" {
 		return "", fmt.Errorf("SSH_PUBLIC_KEY environment variable not set")
 	}
-	return publicKey, nil
+
+	decodedKey, err := base64.StdEncoding.DecodeString(publicKey)
+	if err != nil {
+		return "", fmt.Errorf("failed to base64 decode SSH_PUBLIC_KEY: %w", err)
+	}
+
+	return string(decodedKey), nil
 }
 
 // GetSSHHostKeyPath returns the SSH host key path from configuration
