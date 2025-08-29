@@ -36,9 +36,9 @@ export interface RunnerInfo {
 export interface RunnerAdapter {
   init(runner: Runner): Promise<void>
 
-  healthCheck(): Promise<void>
+  healthCheck(signal?: AbortSignal): Promise<void>
 
-  runnerInfo(): Promise<RunnerInfo>
+  runnerInfo(signal?: AbortSignal): Promise<RunnerInfo>
 
   sandboxInfo(sandboxId: string): Promise<RunnerSandboxInfo>
   createSandbox(sandbox: Sandbox, registry?: DockerRegistry, entrypoint?: string[]): Promise<void>
