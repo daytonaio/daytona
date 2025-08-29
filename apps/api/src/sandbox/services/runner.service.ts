@@ -189,7 +189,7 @@ export class RunnerService {
     })
   }
 
-  @Cron(CronExpression.EVERY_10_SECONDS, { name: 'check-runners' })
+  @Cron(CronExpression.EVERY_10_SECONDS, { name: 'check-runners', waitForCompletion: true })
   private async handleCheckRunners() {
     const lockKey = 'check-runners'
     const hasLock = await this.redisLockProvider.lock(lockKey, 60)
@@ -206,13 +206,12 @@ export class RunnerService {
 
       await Promise.all(
         runners.map(async (runner) => {
-          this.logger.debug(`Checking runner ${runner.id}`)
-          try {
-            // Get health check with status metrics with 30-second timeout
-            const runnerAdapter = await this.runnerAdapterFactory.create(runner)
-
-            await Promise.race([
-              (async () => {
+          return Promise.race([
+            (async () => {
+              this.logger.debug(`Checking runner ${runner.id}`)
+              try {
+                // Get health check with status metrics
+                const runnerAdapter = await this.runnerAdapterFactory.create(runner)
                 await runnerAdapter.healthCheck()
 
                 let runnerInfo: RunnerInfo | undefined
@@ -224,23 +223,24 @@ export class RunnerService {
 
                 await this.updateRunnerStatus(runner.id, runnerInfo)
                 await this.recalculateRunnerUsage(runner)
-              })(),
-              new Promise((_, reject) => {
-                setTimeout(() => reject(new Error('Health check timeout')), 30000)
-              }),
-            ])
-          } catch (e) {
-            if (e.code === 'ECONNREFUSED') {
-              this.logger.error(`Runner ${runner.id} not reachable`)
-            } else if (e.message === 'Health check timeout') {
-              this.logger.error(`Runner ${runner.id} health check timed out after 30 seconds`)
-            } else {
-              this.logger.error(`Error checking runner ${runner.id}: ${e.message}`)
-              this.logger.error(e)
-            }
+              } catch (e) {
+                if (e.code === 'ECONNREFUSED') {
+                  this.logger.error(`Runner ${runner.id} not reachable`)
+                } else {
+                  this.logger.error(`Error checking runner ${runner.id}: ${e.message}`)
+                  this.logger.error(e)
+                }
 
-            await this.updateRunnerState(runner.id, RunnerState.UNRESPONSIVE)
-          }
+                await this.updateRunnerState(runner.id, RunnerState.UNRESPONSIVE)
+              }
+            })(),
+            new Promise<void>((_, reject) => {
+              setTimeout(() => reject(new Error('Health check timeout')), 30000)
+            }).catch(async () => {
+              this.logger.error(`Runner ${runner.id} health check timed out after 30 seconds`)
+              await this.updateRunnerState(runner.id, RunnerState.UNRESPONSIVE)
+            }),
+          ])
         }),
       )
     } finally {
