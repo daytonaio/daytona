@@ -2,45 +2,48 @@
 title: プレビューと認証
 ---
 
-import { Tabs, TabItem } from '@astrojs/starlight/components';
+import { Tabs, TabItem } from '@astrojs/starlight/components'
 
-ポート範囲 `3000-9999` でHTTPトラフィックを待ち受けるプロセスは、プレビューリンクで公開して確認できます。
+ポート範囲 `3000-9999` で HTTP トラフィックを受け付けるプロセスは、プレビューリンクで公開できます。
 
-プレビューリンクの形式はポート番号とサンドボックス（Sandbox）IDの組み合わせです。例:
+プレビューリンクの形式は、ポートとサンドボックスIDの組み合わせです。例:
 `https://3000-sandbox-123456.proxy.daytona.work`
 
-サンドボックスの `public` プロパティが `true` の場合、これらのリンクは一般公開されます。そうでない場合、プレビューリンクにアクセスできるのは当該サンドボックスの組織（Organization）ユーザーのみです。
+サンドボックスの `public` プロパティが `true` の場合、これらのリンクは公開アクセス可能です。そうでない場合、プレビューリンクはそのサンドボックスの組織のユーザーのみがアクセスできます。
 
-プログラムからアクセスする場合（例: `curl`）、プレビュートークン（x-daytona-preview-token）をヘッダーに指定してプレビューURLへアクセスします:
+プログラムからのアクセス（例: `curl`）では、認可トークンを使用してプレビューURLにアクセスしてください:
 
 ```bash
 curl -H "x-daytona-preview-token: vg5c0ylmcimr8b_v1ne0u6mdnvit6gc0" \
 https://3000-sandbox-123456.proxy.daytona.work
 ```
 
-特定のポートに対応するプレビューリンクとトークンを取得するには、SDKのメソッドを使用します:
+特定のポートのプレビューリンクと認可トークンを取得するには、SDK のメソッドを使用します:
 
 <Tabs>
-<TabItem label="Python" icon="seti:python">
-```python
+  <TabItem label="Python" icon="seti:python">
+    ```python
 
-preview_info = sandbox.get_preview_link(3000)
+    preview_info = sandbox.get_preview_link(3000)
 
-print(f"Preview link url: {preview_info.url}")
-print(f"Preview link token: {preview_info.token}")
+    print(f"Preview link url: {preview_info.url}")
+    print(f"Preview link token: {preview_info.token}")
 
-```
+    ```
+  </TabItem>
 
-</TabItem>
-<TabItem label="TypeScript" icon="seti:typescript">
-```typescript
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
 
-const previewInfo = await sandbox.getPreviewUrl(3000);
+    const previewInfo = await sandbox.getPreviewUrl(3000);
 
-console.log(`Preview link url: ${previewInfo.url}`);
-console.log(`Preview link token: ${previewInfo.token}`);
+    console.log(`Preview link url: ${previewInfo.url}`);
+    console.log(`Preview link token: ${previewInfo.token}`);
 
-```
-
-</TabItem>
+    ```
+  </TabItem>
 </Tabs>
+
+:::tip
+Daytona の URL ではなく独自ドメインでプレビューを提供したい場合は、[カスタムドメイン/認証](/docs/ja/custom-domain-authentication) を参照してください。
+:::
