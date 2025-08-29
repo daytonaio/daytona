@@ -22,11 +22,11 @@ import { SnapshotRunnerState } from '../enums/snapshot-runner-state.enum'
 import { Snapshot } from '../entities/snapshot.entity'
 import { RunnerSnapshotDto } from '../dto/runner-snapshot.dto'
 import { RunnerAdapterFactory, RunnerInfo } from '../runner-adapter/runnerAdapter'
+import { RedisLockProvider } from '../common/redis-lock.provider'
 
 @Injectable()
 export class RunnerService {
   private readonly logger = new Logger(RunnerService.name)
-  private checkingRunners = false
 
   constructor(
     @InjectRepository(Runner)
@@ -38,6 +38,7 @@ export class RunnerService {
     private readonly snapshotRunnerRepository: Repository<SnapshotRunner>,
     @InjectRepository(Snapshot)
     private readonly snapshotRepository: Repository<Snapshot>,
+    private readonly redisLockProvider: RedisLockProvider,
   ) {}
 
   async create(createRunnerDto: CreateRunnerDto): Promise<Runner> {
@@ -185,44 +186,49 @@ export class RunnerService {
 
   @Cron('15 * * * * *')
   private async handleCheckRunners() {
-    if (this.checkingRunners) {
+    const lockKey = 'check-runners'
+    const hasLock = await this.redisLockProvider.lock(lockKey, 60)
+    if (!hasLock) {
       return
     }
-    this.checkingRunners = true
-    const runners = await this.runnerRepository.find({
-      where: {
-        state: Not(RunnerState.DECOMMISSIONED),
-      },
-    })
-    for (const runner of runners) {
-      this.logger.debug(`Checking runner ${runner.id}`)
-      try {
-        // Get health check with status metrics
-        const runnerAdapter = await this.runnerAdapterFactory.create(runner)
-        await runnerAdapter.healthCheck()
 
-        let runnerInfo: RunnerInfo | undefined
+    try {
+      const runners = await this.runnerRepository.find({
+        where: {
+          state: Not(RunnerState.DECOMMISSIONED),
+        },
+      })
+      for (const runner of runners) {
+        this.logger.debug(`Checking runner ${runner.id}`)
         try {
-          runnerInfo = await runnerAdapter.runnerInfo()
+          // Get health check with status metrics
+          const runnerAdapter = await this.runnerAdapterFactory.create(runner)
+          await runnerAdapter.healthCheck()
+
+          let runnerInfo: RunnerInfo | undefined
+          try {
+            runnerInfo = await runnerAdapter.runnerInfo()
+          } catch (e) {
+            this.logger.warn(`Failed to get runner info for runner ${runner.id}: ${e.message}`)
+          }
+
+          await this.updateRunnerStatus(runner.id, runnerInfo)
+
+          await this.recalculateRunnerUsage(runner.id)
         } catch (e) {
-          this.logger.warn(`Failed to get runner info for runner ${runner.id}: ${e.message}`)
+          if (e.code === 'ECONNREFUSED') {
+            this.logger.error('Runner not reachable')
+          } else {
+            this.logger.error(`Error checking runner ${runner.id}: ${e.message}`)
+            this.logger.error(e)
+          }
+
+          await this.updateRunnerState(runner.id, RunnerState.UNRESPONSIVE)
         }
-
-        await this.updateRunnerStatus(runner.id, runnerInfo)
-
-        await this.recalculateRunnerUsage(runner.id)
-      } catch (e) {
-        if (e.code === 'ECONNREFUSED') {
-          this.logger.error('Runner not reachable')
-        } else {
-          this.logger.error(`Error checking runner ${runner.id}: ${e.message}`)
-          this.logger.error(e)
-        }
-
-        await this.updateRunnerState(runner.id, RunnerState.UNRESPONSIVE)
       }
+    } finally {
+      await this.redisLockProvider.unlock(lockKey)
     }
-    this.checkingRunners = false
   }
 
   private async updateRunnerStatus(runnerId: string, runnerInfo?: RunnerInfo) {
