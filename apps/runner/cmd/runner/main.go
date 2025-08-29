@@ -23,6 +23,7 @@ import (
 	"github.com/daytonaio/runner/pkg/netrules"
 	"github.com/daytonaio/runner/pkg/runner"
 	"github.com/daytonaio/runner/pkg/services"
+	"github.com/daytonaio/runner/pkg/sshgateway"
 	"github.com/docker/docker/client"
 	"github.com/joho/godotenv"
 
@@ -35,7 +36,7 @@ import (
 func main() {
 	cfg, err := config.GetConfig()
 	if err != nil {
-		log.Error(err)
+		log.Errorf("Failed to get config: %v", err)
 		return
 	}
 
@@ -48,7 +49,7 @@ func main() {
 
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
-		log.Error(err)
+		log.Errorf("Error creating Docker client: %v", err)
 		return
 	}
 
@@ -83,13 +84,13 @@ func main() {
 
 	daemonPath, err := daemon.WriteStaticBinary("daemon-amd64")
 	if err != nil {
-		log.Error(err)
+		log.Errorf("Error writing daemon binary: %v", err)
 		return
 	}
 
 	pluginPath, err := daemon.WriteStaticBinary("daytona-computer-use")
 	if err != nil {
-		log.Error(err)
+		log.Errorf("Error writing plugin binary: %v", err)
 		return
 	}
 
@@ -117,19 +118,35 @@ func main() {
 	})
 	metricsService.StartMetricsCollection(ctx)
 
+	// Initialize SSH Gateway if enabled
+	var sshGatewayService *sshgateway.Service
+	if sshgateway.IsSSHGatewayEnabled() {
+		sshGatewayService = sshgateway.NewService(dockerClient)
+
+		go func() {
+			log.Info("Starting SSH Gateway")
+			if err := sshGatewayService.Start(ctx); err != nil {
+				log.Errorf("SSH Gateway error: %v", err)
+			}
+		}()
+	} else {
+		log.Info("Gateway disabled - set SSH_GATEWAY_ENABLE=true to enable")
+	}
+
 	_ = runner.GetInstance(&runner.RunnerInstanceConfig{
-		Cache:           runnerCache,
-		Docker:          dockerClient,
-		SandboxService:  sandboxService,
-		MetricsService:  metricsService,
-		NetRulesManager: netRulesManager,
+		Cache:             runnerCache,
+		Docker:            dockerClient,
+		SandboxService:    sandboxService,
+		MetricsService:    metricsService,
+		NetRulesManager:   netRulesManager,
+		SSHGatewayService: sshGatewayService,
 	})
 
 	apiServerErrChan := make(chan error)
 
 	go func() {
-		log.Infof("Starting Daytona Runner on port %d", cfg.ApiPort)
-		apiServerErrChan <- apiServer.Start()
+		err := apiServer.Start()
+		apiServerErrChan <- err
 	}()
 
 	interruptChannel := make(chan os.Signal, 1)
@@ -137,10 +154,9 @@ func main() {
 
 	select {
 	case err := <-apiServerErrChan:
-		log.Error(err)
+		log.Errorf("API server error: %v", err)
 		return
 	case <-interruptChannel:
-		log.Info("Shutting down Daytona Runner")
 		apiServer.Stop()
 	}
 }
@@ -149,7 +165,7 @@ func init() {
 	// Load .env file
 	err := godotenv.Load()
 	if err != nil {
-		log.Println("Warning: Error loading .env file:", err)
+		log.Printf("Error loading .env file: %v", err)
 		// Continue anyway, as environment variables might be set directly
 	}
 
@@ -161,25 +177,26 @@ func init() {
 		var err error
 		logLevel, err = log.ParseLevel(logLevelEnv)
 		if err != nil {
+			log.Warnf("Failed to parse log level '%s', using WarnLevel: %v", logLevelEnv, err)
 			logLevel = log.WarnLevel
 		}
 	}
 
 	log.SetLevel(logLevel)
-
 	log.SetOutput(os.Stdout)
 
 	logFilePath, logFilePathSet := os.LookupEnv("LOG_FILE_PATH")
 	if logFilePathSet {
 		logDir := filepath.Dir(logFilePath)
+
 		if err := os.MkdirAll(logDir, 0755); err != nil {
-			log.Error("Failed to create log directory:", err)
+			log.Errorf("Failed to create log directory: %v", err)
 			os.Exit(1)
 		}
 
 		file, err := os.OpenFile(logFilePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 		if err != nil {
-			log.Error(err)
+			log.Errorf("Failed to open log file: %v", err)
 			os.Exit(1)
 		}
 
@@ -188,11 +205,13 @@ func init() {
 
 	zerologLevel, err := zerolog.ParseLevel(logLevel.String())
 	if err != nil {
+		log.Warnf("Failed to parse zerolog level, using ErrorLevel: %v", err)
 		zerologLevel = zerolog.ErrorLevel
 	}
 
 	zerolog.SetGlobalLevel(zerologLevel)
 	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
+
 	zlog.Logger = zlog.Output(zerolog.ConsoleWriter{
 		Out:        &util.DebugLogWriter{},
 		TimeFormat: time.RFC3339,

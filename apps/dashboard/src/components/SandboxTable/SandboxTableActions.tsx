@@ -27,6 +27,8 @@ export function SandboxTableActions({
   onArchive,
   onVnc,
   onOpenWebTerminal,
+  onCreateSshAccess,
+  onRevokeSshAccess,
 }: SandboxTableActionsProps) {
   const menuItems = useMemo(() => {
     const items = []
@@ -62,6 +64,20 @@ export function SandboxTableActions({
           disabled: isLoading,
         })
       }
+
+      // Add SSH access options
+      items.push({
+        key: 'create-ssh',
+        label: 'Create SSH Access',
+        onClick: () => onCreateSshAccess(sandbox.id),
+        disabled: isLoading,
+      })
+      items.push({
+        key: 'revoke-ssh',
+        label: 'Revoke SSH Access',
+        onClick: () => onRevokeSshAccess(sandbox.id),
+        disabled: isLoading,
+      })
     }
 
     if (deletePermitted) {
@@ -90,6 +106,8 @@ export function SandboxTableActions({
     onDelete,
     onArchive,
     onVnc,
+    onCreateSshAccess,
+    onRevokeSshAccess,
   ])
 
   if (!writePermitted && !deletePermitted) {

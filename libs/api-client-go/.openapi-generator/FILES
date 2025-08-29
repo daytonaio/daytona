@@ -121,6 +121,8 @@ model_session_execute_response.go
 model_set_snapshot_general_status_dto.go
 model_snapshot_dto.go
 model_snapshot_state.go
+model_ssh_access_dto.go
+model_ssh_access_validation_dto.go
 model_storage_access_dto.go
 model_update_assigned_organization_roles.go
 model_update_docker_registry.go
