@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Injectable, Logger } from '@nestjs/common'
+import { Injectable, Logger, OnApplicationShutdown } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Cron, CronExpression } from '@nestjs/schedule'
 import { In, IsNull, LessThan, Not, Or, Repository } from 'typeorm'
@@ -29,8 +29,14 @@ import { SandboxArchivedEvent } from '../events/sandbox-archived.event'
 import { RunnerAdapterFactory } from '../runner-adapter/runnerAdapter'
 import { TypedConfigService } from '../../config/typed-config.service'
 
+import { TrackJobExecution } from '../../common/decorators/track-job-execution.decorator'
+import { TrackableJobExecutions } from '../../common/interfaces/trackable-job-executions'
+import { setTimeout } from 'timers/promises'
+
 @Injectable()
-export class BackupManager {
+export class BackupManager implements TrackableJobExecutions, OnApplicationShutdown {
+  activeJobs = new Set<string>()
+
   private readonly logger = new Logger(BackupManager.name)
 
   constructor(
@@ -50,8 +56,17 @@ export class BackupManager {
     await this.adHocBackupCheck()
   }
 
+  async onApplicationShutdown() {
+    //  wait for all active jobs to finish
+    while (this.activeJobs.size > 0) {
+      this.logger.log(`Waiting for ${this.activeJobs.size} active jobs to finish`)
+      await setTimeout(1000)
+    }
+  }
+
   //  todo: make frequency configurable or more efficient
   @Cron(CronExpression.EVERY_5_MINUTES, { name: 'ad-hoc-backup-check' })
+  @TrackJobExecution()
   async adHocBackupCheck(): Promise<void> {
     const lockKey = 'ad-hoc-backup-check'
     const hasLock = await this.redisLockProvider.lock(lockKey, 5 * 60)
@@ -114,6 +129,7 @@ export class BackupManager {
   }
 
   @Cron(CronExpression.EVERY_10_SECONDS, { name: 'check-backup-states' })
+  @TrackJobExecution()
   async checkBackupStates(): Promise<void> {
     //  lock the sync to only run one instance at a time
     const lockKey = 'check-backup-states'
@@ -190,6 +206,7 @@ export class BackupManager {
   }
 
   @Cron(CronExpression.EVERY_10_SECONDS, { name: 'sync-stop-state-create-backups' })
+  @TrackJobExecution()
   async syncStopStateCreateBackups(): Promise<void> {
     const lockKey = 'sync-stop-state-create-backups'
     const hasLock = await this.redisLockProvider.lock(lockKey, 10)
@@ -386,16 +403,19 @@ export class BackupManager {
   }
 
   @OnEvent(SandboxEvents.ARCHIVED)
+  @TrackJobExecution()
   private async handleSandboxArchivedEvent(event: SandboxArchivedEvent) {
     this.setBackupPending(event.sandbox.id)
   }
 
   @OnEvent(SandboxEvents.DESTROYED)
+  @TrackJobExecution()
   private async handleSandboxDestroyedEvent(event: SandboxDestroyedEvent) {
     this.deleteSandboxBackupRepositoryFromRegistry(event.sandbox)
   }
 
   @OnEvent(SandboxEvents.BACKUP_CREATED)
+  @TrackJobExecution()
   private async handleSandboxBackupCreatedEvent(event: SandboxBackupCreatedEvent) {
     this.handlePendingBackup(event.sandbox)
   }

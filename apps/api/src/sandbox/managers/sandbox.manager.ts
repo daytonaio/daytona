@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Injectable, Logger } from '@nestjs/common'
+import { Injectable, Logger, OnApplicationShutdown } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Cron, CronExpression } from '@nestjs/schedule'
 import { In, MoreThanOrEqual, Not, Raw, Repository } from 'typeorm'
@@ -35,10 +35,16 @@ import { SYNC_AGAIN, DONT_SYNC_AGAIN } from './sandbox-actions/sandbox.action'
 import { EventEmitter2 } from '@nestjs/event-emitter'
 import { TypedConfigService } from '../../config/typed-config.service'
 
+import { TrackJobExecution } from '../../common/decorators/track-job-execution.decorator'
+import { TrackableJobExecutions } from '../../common/interfaces/trackable-job-executions'
+import { setTimeout } from 'timers/promises'
+
 export const SYNC_INSTANCE_STATE_LOCK_KEY = 'sync-instance-state-'
 
 @Injectable()
-export class SandboxManager {
+export class SandboxManager implements TrackableJobExecutions, OnApplicationShutdown {
+  activeJobs = new Set<string>()
+
   private readonly logger = new Logger(SandboxManager.name)
 
   constructor(
@@ -54,7 +60,16 @@ export class SandboxManager {
     private readonly configService: TypedConfigService,
   ) {}
 
+  async onApplicationShutdown() {
+    //  wait for all active jobs to finish
+    while (this.activeJobs.size > 0) {
+      this.logger.log(`Waiting for ${this.activeJobs.size} active jobs to finish`)
+      await setTimeout(1000)
+    }
+  }
+
   @Cron(CronExpression.EVERY_MINUTE, { name: 'auto-stop-check' })
+  @TrackJobExecution()
   @OtelSpan()
   async autostopCheck(): Promise<void> {
     const lockKey = 'auto-stop-check-worker-selected'
@@ -121,6 +136,7 @@ export class SandboxManager {
   }
 
   @Cron(CronExpression.EVERY_MINUTE, { name: 'auto-archive-check' })
+  @TrackJobExecution()
   async autoArchiveCheck(): Promise<void> {
     const lockKey = 'auto-archive-check-worker-selected'
     //  lock the sync to only run one instance at a time
@@ -168,6 +184,7 @@ export class SandboxManager {
   }
 
   @Cron(CronExpression.EVERY_MINUTE, { name: 'auto-delete-check' })
+  @TrackJobExecution()
   async autoDeleteCheck(): Promise<void> {
     const lockKey = 'auto-delete-check-worker-selected'
     //  lock the sync to only run one instance at a time
@@ -227,6 +244,7 @@ export class SandboxManager {
   }
 
   @Cron(CronExpression.EVERY_10_SECONDS, { name: 'sync-states' })
+  @TrackJobExecution()
   @OtelSpan()
   async syncStates(): Promise<void> {
     const globalLockKey = 'sync-states'
@@ -293,6 +311,7 @@ export class SandboxManager {
   }
 
   @Cron(CronExpression.EVERY_10_SECONDS, { name: 'sync-archived-desired-states' })
+  @TrackJobExecution()
   async syncArchivedDesiredStates(): Promise<void> {
     const lockKey = 'sync-archived-desired-states'
     if (!(await this.redisLockProvider.lock(lockKey, 30))) {
@@ -385,26 +404,31 @@ export class SandboxManager {
   }
 
   @OnEvent(SandboxEvents.ARCHIVED)
+  @TrackJobExecution()
   private async handleSandboxArchivedEvent(event: SandboxArchivedEvent) {
     this.syncInstanceState(event.sandbox.id).catch(this.logger.error)
   }
 
   @OnEvent(SandboxEvents.DESTROYED)
+  @TrackJobExecution()
   private async handleSandboxDestroyedEvent(event: SandboxDestroyedEvent) {
     this.syncInstanceState(event.sandbox.id).catch(this.logger.error)
   }
 
   @OnEvent(SandboxEvents.STARTED)
+  @TrackJobExecution()
   private async handleSandboxStartedEvent(event: SandboxStartedEvent) {
     this.syncInstanceState(event.sandbox.id).catch(this.logger.error)
   }
 
   @OnEvent(SandboxEvents.STOPPED)
+  @TrackJobExecution()
   private async handleSandboxStoppedEvent(event: SandboxStoppedEvent) {
     this.syncInstanceState(event.sandbox.id).catch(this.logger.error)
   }
 
   @OnEvent(SandboxEvents.CREATED)
+  @TrackJobExecution()
   private async handleSandboxCreatedEvent(event: SandboxCreatedEvent) {
     this.syncInstanceState(event.sandbox.id).catch(this.logger.error)
   }

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common'
+import { Injectable, Logger, OnApplicationShutdown, OnModuleInit } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository, In } from 'typeorm'
 import { Volume } from '../entities/volume.entity'
@@ -16,10 +16,16 @@ import { RedisLockProvider } from '../common/redis-lock.provider'
 import { TypedConfigService } from '../../config/typed-config.service'
 import { deleteS3Bucket } from '../../common/utils/delete-s3-bucket'
 
+import { TrackableJobExecutions } from '../../common/interfaces/trackable-job-executions'
+import { TrackJobExecution } from '../../common/decorators/track-job-execution.decorator'
+import { setTimeout } from 'timers/promises'
+
 const VOLUME_STATE_LOCK_KEY = 'volume-state-'
 
 @Injectable()
-export class VolumeManager implements OnModuleInit {
+export class VolumeManager implements OnModuleInit, TrackableJobExecutions, OnApplicationShutdown {
+  activeJobs = new Set<string>()
+
   private readonly logger = new Logger(VolumeManager.name)
   private processingVolumes: Set<string> = new Set()
   private skipTestConnection: boolean
@@ -58,6 +64,14 @@ export class VolumeManager implements OnModuleInit {
     await this.testConnection()
   }
 
+  async onApplicationShutdown() {
+    //  wait for all active jobs to finish
+    while (this.activeJobs.size > 0) {
+      this.logger.log(`Waiting for ${this.activeJobs.size} active jobs to finish`)
+      await setTimeout(1000)
+    }
+  }
+
   private async testConnection() {
     try {
       // Try a simple operation to test the connection
@@ -71,6 +85,7 @@ export class VolumeManager implements OnModuleInit {
   }
 
   @Cron(CronExpression.EVERY_5_SECONDS)
+  @TrackJobExecution()
   async processPendingVolumes() {
     try {
       // Lock the entire process

@@ -56,6 +56,7 @@
     "@nestjs/schedule": "^5.0.1",
     "@nestjs/serve-static": "^5.0.2",
     "@nestjs/swagger": "^11.0.3",
+    "@nestjs/terminus": "^11.0.0",
     "@nestjs/throttler": "^6.4.0",
     "@nestjs/typeorm": "^11.0.0",
     "@nestjs/websockets": "^11.0.13",

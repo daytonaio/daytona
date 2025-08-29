@@ -123,19 +123,17 @@ async function bootstrap() {
     }
   }
 
-  // Stop all cron jobs if disable cron jobs is enabled or maintenance mode is enabled
-  if (configService.get('disableCronJobs') || configService.get('maintananceMode')) {
-    await app.init()
-    const schedulerRegistry = app.get(SchedulerRegistry)
-    for (const cronName of schedulerRegistry.getCronJobs().keys()) {
-      schedulerRegistry.deleteCronJob(cronName)
-    }
-  }
+  // Starts listening for shutdown hooks
+  app.enableShutdownHooks()
 
   const host = '0.0.0.0'
   const port = configService.get('port')
   await app.listen(port, host)
   Logger.log(`🚀 Daytona API is running on: http://${host}:${port}/${globalPrefix}`)
+
+  if (process.send) {
+    process.send('ready')
+  }
 }
 
 bootstrap()
