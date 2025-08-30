@@ -89,7 +89,7 @@ class AsyncSandbox(SandboxDto):
         self._code_toolbox = code_toolbox
         self._root_dir = ""
 
-        self._fs = AsyncFileSystem(self.id, toolbox_api, self.__get_root_dir)
+        self._fs = AsyncFileSystem(self.id, toolbox_api, self.__get_root_dir, self.get_preview_link)
         self._git = AsyncGit(self.id, toolbox_api, self.__get_root_dir)
         self._process = AsyncProcess(self.id, code_toolbox, toolbox_api, self.__get_root_dir)
         self._computer_use = AsyncComputerUse(self.id, toolbox_api)

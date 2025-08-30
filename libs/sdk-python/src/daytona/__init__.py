@@ -34,6 +34,14 @@ from .common.daytona import (
     DaytonaConfig,
 )
 from .common.errors import DaytonaError
+from .common.file_watcher import (
+    FilesystemEvent,
+    FilesystemEventType,
+    FileWatchCallback,
+    SyncWatchHandle,
+    WatchHandle,
+    WatchOptions,
+)
 from .common.filesystem import FileUpload
 from .common.image import Image
 from .common.lsp_server import LspLanguageId
@@ -78,4 +86,10 @@ __all__ = [
     "CreateSandboxFromImageParams",
     "CreateSandboxFromSnapshotParams",
     "CreateSnapshotParams",
+    "FilesystemEvent",
+    "FilesystemEventType",
+    "FileWatchCallback",
+    "WatchHandle",
+    "SyncWatchHandle",
+    "WatchOptions",
 ]

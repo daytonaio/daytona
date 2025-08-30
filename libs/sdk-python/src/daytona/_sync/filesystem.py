@@ -6,15 +6,27 @@
 # Edit the async source and re-run this script.
 
 import io
+import json
 import os
+import threading
 from contextlib import ExitStack
 from typing import Callable, List, Union, overload
 
 import httpx
-from daytona_api_client import FileInfo, Match, ReplaceRequest, ReplaceResult, SearchFilesResponse, ToolboxApi
+import websocket
+from daytona_api_client import (
+    FileInfo,
+    Match,
+    PortPreviewUrl,
+    ReplaceRequest,
+    ReplaceResult,
+    SearchFilesResponse,
+    ToolboxApi,
+)
 
 from .._utils.errors import intercept_errors
 from .._utils.path import prefix_relative_path
+from ..common.file_watcher import FilesystemEvent, FilesystemEventType, FileWatchCallback, WatchHandle, WatchOptions
 from ..common.filesystem import FileUpload
 
 
@@ -30,6 +42,7 @@ class FileSystem:
         sandbox_id: str,
         toolbox_api: ToolboxApi,
         get_root_dir: Callable[[], str],
+        get_preview_link: Callable[[int], "PortPreviewUrl"],
     ):
         """Initializes a new FileSystem instance.
 
@@ -41,6 +54,7 @@ class FileSystem:
         self._sandbox_id = sandbox_id
         self._toolbox_api = toolbox_api
         self._get_root_dir = get_root_dir
+        self._get_preview_link = get_preview_link
 
     @intercept_errors(message_prefix="Failed to create folder: ")
     def create_folder(self, path: str, mode: str) -> None:
@@ -525,3 +539,100 @@ class FileSystem:
                     url, data=data_fields, files=file_fields, headers=headers  # any non-file form fields
                 )
                 response.raise_for_status()
+
+    @intercept_errors(message_prefix="Failed to watch directory: ")
+    def watch_dir(
+        self,
+        path: str,
+        callback: FileWatchCallback,
+        options: WatchOptions = None,
+    ) -> WatchHandle:
+        """Watch a directory for file system changes.
+
+        Args:
+            path: Directory path to watch. Relative paths are resolved based on the user's root directory.
+            callback: Function called for each file system event
+            options: Watch configuration options
+
+        Returns:
+            WatchHandle: Handle for cleanup
+
+        Example:
+            ```python
+            # Watch a directory for all changes
+            handle = sandbox.fs.watch_dir("/workspace/src", lambda event: print(f"{event.type}: {event.name}"))
+
+            # Watch recursively
+            handle = sandbox.fs.watch_dir("/workspace", lambda event: print(f"{event.type}: {event.name}"),
+                                              WatchOptions(recursive=True))
+
+            # Stop watching
+            handle.close()
+            ```
+        """
+        if options is None:
+            options = WatchOptions()
+
+        absolute_path = prefix_relative_path(self._get_root_dir(), path)
+
+        # Get the proxy URL using the same pattern as Process class
+        preview_link = self._get_preview_link(2280)
+        proxy_url = preview_link.url
+        proxy_url_obj = httpx.URL(proxy_url)
+        protocol = "wss" if proxy_url_obj.scheme == "https" else "ws"
+
+        # Construct WebSocket URL for file watching with authentication token
+        # Use the full authority from the proxy URL
+        authority = (
+            proxy_url_obj.netloc.decode("utf-8")
+            if isinstance(proxy_url_obj.netloc, bytes)
+            else str(proxy_url_obj.netloc)
+        )
+        ws_url = (
+            f"{protocol}://{authority}/files/watch"
+            f"?path={absolute_path}"
+            f"&recursive={options.recursive}"
+            f"&DAYTONA_SANDBOX_AUTH_KEY={preview_link.token}"
+        )
+
+        try:
+            # Use websocket-client in a thread since it's synchronous
+            ws_connection = websocket.create_connection(
+                ws_url, header=["X-Daytona-Preview-Token: " + preview_link.token]
+            )
+        except Exception as e:
+            raise Exception(f"Failed to establish WebSocket connection: {e}") from e
+
+        # Create a task to handle the WebSocket connection
+        def handle_websocket():
+            try:
+                while True:
+                    message = ws_connection.recv()
+                    try:
+                        data = json.loads(message)
+                        event = FilesystemEvent(
+                            event_type=FilesystemEventType(data["type"]),
+                            name=data["name"],
+                            is_dir=data["isDir"],
+                            timestamp=data["timestamp"],
+                        )
+                        callback(event)
+                    except (json.JSONDecodeError, KeyError) as e:
+                        # Only log parsing errors in development
+                        if os.getenv("NODE_ENV") == "development":
+                            print(f"Warning: Failed to parse filesystem event: {e}")
+            except Exception:
+                # Only log connection errors during initial connection
+                pass
+            finally:
+                ws_connection.close()
+
+        # Start the WebSocket handler task
+        task = threading.Thread(target=handle_websocket, daemon=True)
+        task.start()
+
+        # Return a handle that can close the connection
+        def close_func():
+            ws_connection.close()
+
+        return WatchHandle(close_func)
