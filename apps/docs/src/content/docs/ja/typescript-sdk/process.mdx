@@ -3,23 +3,18 @@ title: "プロセス"
 hideTitleOnPage: true
 ---
 
-
-## CodeRunParams
+## CodeRunParams {#coderunparams}
 
 コード実行用のパラメータ。
 
 **プロパティ**:
 
-- `argv?` _string\[\]_ - コマンドライン引数
-- `env?` _Record\<string, string\>_ - 環境変数
-    
+- `argv?` _string[]_ - コマンドライン引数
+- `env?` _Record<string, string>_ - 環境変数
 
+### コンストラクタ {#constructors}
 
-
-
-### コンストラクタ
-
-#### new CodeRunParams()
+#### new CodeRunParams() {#new-coderunparams}
 
 ```ts
 new CodeRunParams(): CodeRunParams
@@ -28,13 +23,14 @@ new CodeRunParams(): CodeRunParams
 **戻り値**:
 
 - `CodeRunParams`
-## プロセス
+
+## プロセス {#process}
 
 サンドボックス内でのプロセスおよびコード実行を扱います。
 
-### コンストラクタ
+### コンストラクタ {#constructors}
 
-#### new Process()
+#### new Process() {#new-process}
 
 ```ts
 new Process(
@@ -51,16 +47,15 @@ new Process(
 - `clientConfig` _Configuration_
 - `codeToolbox` _SandboxCodeToolbox_
 - `toolboxApi` _ToolboxApi_
-- `getRootDir` _\(\) =\> Promise\<string\>_
-
+- `getRootDir` _() => Promise<string>_
 
 **戻り値**:
 
 - `Process`
 
-### メソッド
+### メソッド {#methods}
 
-#### codeRun()
+#### codeRun() {#coderun}
 
 ```ts
 codeRun(
@@ -77,13 +72,12 @@ timeout?: number): Promise<ExecuteResponse>
 - `params?` _CodeRunParams_ - コード実行用のパラメータ
 - `timeout?` _number_ - 実行完了を待機する最大時間（秒）
 
-
 **戻り値**:
 
 - `Promise<ExecuteResponse>` - 以下を含むコード実行結果:
-    - exitCode: 実行の終了ステータス
-    - result: コードの標準出力
-    - artifacts: `stdout`（result と同じ）および `charts`（matplotlib のチャートメタデータ）を含む ExecutionArtifacts オブジェクト
+  - exitCode: 実行の終了ステータス
+  - result: コードの標準出力
+  - artifacts: `stdout`（result と同じ）および `charts`（matplotlib のチャートメタデータ）を含む ExecutionArtifacts オブジェクト
 
 **例:**
 
@@ -136,9 +130,9 @@ if (response.artifacts?.charts) {
 }
 ```
 
-***
+---
 
-#### createSession()
+#### createSession() {#createsession}
 
 ```ts
 createSession(sessionId: string): Promise<void>
@@ -151,7 +145,6 @@ createSession(sessionId: string): Promise<void>
 **パラメータ**:
 
 - `sessionId` _string_ - 新しいセッションの一意の識別子
-
 
 **戻り値**:
 
@@ -168,9 +161,9 @@ const session = await process.getSession(sessionId);
 await process.deleteSession(sessionId);
 ```
 
-***
+---
 
-#### deleteSession()
+#### deleteSession() {#deletesession}
 
 ```ts
 deleteSession(sessionId: string): Promise<void>
@@ -181,7 +174,6 @@ deleteSession(sessionId: string): Promise<void>
 **パラメータ**:
 
 - `sessionId` _string_ - 削除するセッションの一意の識別子
-
 
 **戻り値**:
 
@@ -194,9 +186,9 @@ deleteSession(sessionId: string): Promise<void>
 await process.deleteSession('my-session');
 ```
 
-***
+---
 
-#### executeCommand()
+#### executeCommand() {#executecommand}
 
 ```ts
 executeCommand(
@@ -212,17 +204,16 @@ timeout?: number): Promise<ExecuteResponse>
 
 - `command` _string_ - 実行するシェルコマンド
 - `cwd?` _string_ - コマンド実行時の作業ディレクトリ。未指定の場合はサンドボックスのルートディレクトリを使用します。
-    既定値はユーザーのルートディレクトリです。
-- `env?` _Record\<string, string\>_ - コマンドに設定する環境変数
+  既定値はユーザーのルートディレクトリです。
+- `env?` _Record<string, string>_ - コマンドに設定する環境変数
 - `timeout?` _number_ - コマンドの完了を待機する最大時間（秒）。0 は無期限に待機します。
-
 
 **Returns**:
 
 - `Promise<ExecuteResponse>` - コマンド実行結果。以下を含む:
-    - exitCode: コマンドの終了ステータス
-    - result: コマンドの標準出力
-    - artifacts: ExecutionArtifacts オブジェクト（`stdout`（result と同じ）と `charts`（matplotlib のチャートメタデータ）を含む）
+  - exitCode: コマンドの終了ステータス
+  - result: コマンドの標準出力
+  - artifacts: ExecutionArtifacts オブジェクト（`stdout`（result と同じ）と `charts`（matplotlib のチャートメタデータ）を含む）
 
 **Examples:**
 
@@ -242,9 +233,9 @@ const result = await process.executeCommand('ls', 'workspace/src');
 const result = await process.executeCommand('sleep 10', undefined, 5);
 ```
 
-***
+---
 
-#### executeSessionCommand()
+#### executeSessionCommand() {#executesessioncommand}
 
 ```ts
 executeSessionCommand(
@@ -259,17 +250,16 @@ timeout?: number): Promise<SessionExecuteResponse>
 
 - `sessionId` _string_ - 使用するセッションの一意の識別子
 - `req` _SessionExecuteRequest_ - コマンド実行リクエスト。以下を含む:
-    - command: 実行するコマンド
-    - runAsync: 非同期で実行するかどうか
+  - command: 実行するコマンド
+  - runAsync: 非同期で実行するかどうか
 - `timeout?` _number_ - タイムアウト（秒）
-
 
 **Returns**:
 
 - `Promise<SessionExecuteResponse>` - コマンド実行結果。以下を含む:
-    - cmdId: 実行されたコマンドの一意の識別子
-    - output: コマンド出力（同期実行の場合）
-    - exitCode: コマンドの終了ステータス（同期実行の場合）
+  - cmdId: 実行されたコマンドの一意の識別子
+  - output: コマンド出力（同期実行の場合）
+  - exitCode: コマンドの終了ステータス（同期実行の場合）
 
 **Example:**
 
@@ -289,9 +279,9 @@ const result = await process.executeSessionCommand(sessionId, {
 console.log(result.output);  // Prints: /home/daytona
 ```
 
-***
+---
 
-#### getSession()
+#### getSession() {#getsession}
 
 ```ts
 getSession(sessionId: string): Promise<Session>
@@ -303,12 +293,11 @@ getSession(sessionId: string): Promise<Session>
 
 - `sessionId` _string_ - 取得するセッションの一意の識別子
 
-
 **Returns**:
 
 - `Promise<Session>` - セッション情報。以下を含む:
-    - sessionId: セッションの一意の識別子
-    - commands: セッション内で実行されたコマンドの一覧
+  - sessionId: セッションの一意の識別子
+  - commands: セッション内で実行されたコマンドの一覧
 
 **Example:**
 
@@ -319,9 +308,9 @@ session.commands.forEach(cmd => {
 });
 ```
 
-***
+---
 
-#### getSessionCommand()
+#### getSessionCommand() {#getsessioncommand}
 
 ```ts
 getSessionCommand(sessionId: string, commandId: string): Promise<Command>
@@ -334,13 +323,12 @@ getSessionCommand(sessionId: string, commandId: string): Promise<Command>
 - `sessionId` _string_ - セッションの一意の識別子
 - `commandId` _string_ - コマンドの一意の識別子
 
-
 **Returns**:
 
 - `Promise<Command>` - コマンド情報。以下を含む:
-    - id: コマンドの一意の識別子
-    - command: 実行されたコマンド文字列
-    - exitCode: コマンドの終了ステータス（完了している場合）
+  - id: コマンドの一意の識別子
+  - command: 実行されたコマンド文字列
+  - exitCode: コマンドの終了ステータス（完了している場合）
 
 **Example:**
 
@@ -351,11 +339,11 @@ if (cmd.exitCode === 0) {
 }
 ```
 
-***
+---
 
-#### getSessionCommandLogs()
+#### getSessionCommandLogs() {#getsessioncommandlogs}
 
-##### Call Signature
+##### Call Signature {#call-signature}
 
 ```ts
 getSessionCommandLogs(sessionId: string, commandId: string): Promise<string>
@@ -379,7 +367,7 @@ const logs = await process.getSessionCommandLogs('my-session', 'cmd-123');
 console.log('Command output:', logs);
 ```
 
-##### Call Signature
+##### Call Signature {#call-signature}
 
 ```ts
 getSessionCommandLogs(
@@ -394,7 +382,7 @@ onLogs: (chunk: string) => void): Promise<void>
 
 - `sessionId` _string_ - セッションの一意の識別子
 - `commandId` _string_ - コマンドの一意の識別子
-- `onLogs` _\(chunk: string\) =\> void_ - 各ログチャンクを処理するコールバック関数
+- `onLogs` _(chunk: string) => void_ - 各ログチャンクを処理するコールバック関数
 
 **戻り値**:
 
@@ -408,9 +396,9 @@ const logs = await process.getSessionCommandLogs('my-session', 'cmd-123', (chunk
 });
 ```
 
-***
+---
 
-#### listSessions()
+#### listSessions() {#listsessions}
 
 ```ts
 listSessions(): Promise<Session[]>
