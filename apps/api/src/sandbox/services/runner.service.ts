@@ -202,9 +202,13 @@ export class RunnerService {
         where: {
           state: Not(RunnerState.DECOMMISSIONED),
         },
+        order: {
+          lastChecked: 'ASC',
+        },
+        take: 100,
       })
 
-      await Promise.all(
+      await Promise.allSettled(
         runners.map(async (runner) => {
           const abortController = new AbortController()
 
