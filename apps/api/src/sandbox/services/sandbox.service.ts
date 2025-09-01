@@ -767,7 +767,7 @@ export class SandboxService {
     return sandbox.labels
   }
 
-  @Cron(CronExpression.EVERY_10_MINUTES)
+  @Cron(CronExpression.EVERY_10_MINUTES, { name: 'cleanup-destroyed-sandboxes' })
   async cleanupDestroyedSandboxs() {
     const twentyFourHoursAgo = new Date()
     twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24)
@@ -855,7 +855,7 @@ export class SandboxService {
     await this.createForWarmPool(event.warmPool)
   }
 
-  @Cron(CronExpression.EVERY_MINUTE)
+  @Cron(CronExpression.EVERY_MINUTE, { name: 'handle-unschedulable-runners' })
   private async handleUnschedulableRunners() {
     const runners = await this.runnerRepository.find({ where: { unschedulable: true } })
 

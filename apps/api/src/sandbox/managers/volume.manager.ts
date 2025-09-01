@@ -84,7 +84,7 @@ export class VolumeManager implements OnModuleInit, TrackableJobExecutions, OnAp
     }
   }
 
-  @Cron(CronExpression.EVERY_5_SECONDS)
+  @Cron(CronExpression.EVERY_5_SECONDS, { name: 'process-pending-volumes' })
   @TrackJobExecution()
   async processPendingVolumes() {
     try {

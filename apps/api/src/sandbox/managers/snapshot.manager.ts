@@ -67,7 +67,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     }
   }
 
-  @Cron(CronExpression.EVERY_5_SECONDS)
+  @Cron(CronExpression.EVERY_5_SECONDS, { name: 'sync-runner-snapshots' })
   @TrackJobExecution()
   async syncRunnerSnapshots() {
     const lockKey = 'sync-runner-snapshots-lock'
@@ -105,7 +105,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     await this.redisLockProvider.unlock(lockKey)
   }
 
-  @Cron(CronExpression.EVERY_10_SECONDS)
+  @Cron(CronExpression.EVERY_10_SECONDS, { name: 'sync-runner-snapshot-states' })
   @TrackJobExecution()
   async syncRunnerSnapshotStates() {
     //  this approach is not ideal, as if the number of runners is large, this will take a long time
@@ -340,7 +340,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     }
   }
 
-  @Cron(CronExpression.EVERY_10_SECONDS)
+  @Cron(CronExpression.EVERY_10_SECONDS, { name: 'check-snapshot-cleanup' })
   @TrackJobExecution()
   async checkSnapshotCleanup() {
     const lockKey = 'check-snapshot-cleanup-lock'
@@ -383,7 +383,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     await this.redisLockProvider.unlock(lockKey)
   }
 
-  @Cron(CronExpression.EVERY_10_SECONDS)
+  @Cron(CronExpression.EVERY_10_SECONDS, { name: 'check-snapshot-state' })
   @TrackJobExecution()
   async checkSnapshotState() {
     //  the first time the snapshot is created it needs to be validated and pushed to the internal registry
@@ -456,9 +456,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     )
   }
 
-  @Cron(CronExpression.EVERY_30_MINUTES, {
-    name: 'cleanup-local-snapshots',
-  })
+  @Cron(CronExpression.EVERY_30_MINUTES, { name: 'cleanup-local-snapshots' })
   @TrackJobExecution()
   async cleanupLocalSnapshots() {
     await this.dockerProvider.imagePrune()
@@ -843,7 +841,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     await this.snapshotRepository.save(snapshot)
   }
 
-  @Cron(CronExpression.EVERY_HOUR)
+  @Cron(CronExpression.EVERY_HOUR, { name: 'cleanup-old-build-info-snapshot-runners' })
   @TrackJobExecution()
   async cleanupOldBuildInfoSnapshotRunners() {
     const lockKey = 'cleanup-old-buildinfo-snapshots-lock'
@@ -883,7 +881,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     }
   }
 
-  @Cron(CronExpression.EVERY_10_MINUTES)
+  @Cron(CronExpression.EVERY_10_MINUTES, { name: 'deactivate-old-snapshots' })
   @TrackJobExecution()
   async deactivateOldSnapshots() {
     const lockKey = 'deactivate-old-snapshots-lock'
@@ -948,7 +946,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     }
   }
 
-  @Cron(CronExpression.EVERY_10_MINUTES)
+  @Cron(CronExpression.EVERY_10_MINUTES, { name: 'cleanup-inactive-snapshots-from-runners' })
   @TrackJobExecution()
   async cleanupInactiveSnapshotsFromRunners() {
     const lockKey = 'cleanup-inactive-snapshots-from-runners-lock'

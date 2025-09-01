@@ -34,7 +34,7 @@ export class AppService implements OnApplicationBootstrap, OnApplicationShutdown
 
   async onApplicationShutdown(signal?: string) {
     this.logger.log(`Received shutdown signal: ${signal}. Shutting down gracefully...`)
-    await this.stopAllCronJobs()
+    await this.stopAllCronJobs(30)
   }
 
   async onApplicationBootstrap() {
@@ -48,10 +48,33 @@ export class AppService implements OnApplicationBootstrap, OnApplicationShutdown
     await this.initializeDefaultSnapshot()
   }
 
-  private async stopAllCronJobs(): Promise<void> {
-    for (const cronName of this.schedulerRegistry.getCronJobs().keys()) {
-      this.logger.debug(`Stopping cron job: ${cronName}`)
-      this.schedulerRegistry.deleteCronJob(cronName)
+  private async stopAllCronJobs(timeoutSeconds = 30): Promise<void> {
+    const cronJobs = this.schedulerRegistry.getCronJobs()
+    this.logger.log(`Found ${cronJobs.size} cron jobs to stop`)
+
+    const stopJobsPromise = async () => {
+      for (const [cronName, cronJob] of cronJobs.entries()) {
+        this.logger.debug(`Stopping cron job: ${cronName}`)
+        try {
+          cronJob.stop()
+          this.schedulerRegistry.deleteCronJob(cronName)
+        } catch (error) {
+          this.logger.error(`Failed to stop cron job ${cronName}: ${error.message}`)
+        }
+      }
+      this.logger.log('All cron jobs stopped successfully')
+    }
+
+    try {
+      await Promise.race([
+        stopJobsPromise(),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Cron job shutdown timeout exceeded')), timeoutSeconds * 1000),
+        ),
+      ])
+    } catch (error) {
+      this.logger.error(`Cron job shutdown error or timeout: ${error.message}`)
+      this.logger.warn('Forcing cron job shutdown due to timeout')
     }
   }
 
