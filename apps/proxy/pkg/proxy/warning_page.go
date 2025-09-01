@@ -57,8 +57,8 @@ func (p *Proxy) browserWarningMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		// Skip warning if websocket
-		if ctx.Request.Header.Get("Upgrade") == "websocket" {
+		// Skip warning for WebSocket requests
+		if isWebSocketRequest(ctx.Request) {
 			ctx.Next()
 			return
 		}
@@ -302,4 +302,12 @@ func isBrowser(userAgent string) bool {
 func hasAcceptedWarning(c *gin.Context) bool {
 	cookie, err := c.Cookie(PREVIEW_PAGE_ACCEPT_COOKIE_NAME)
 	return err == nil && cookie == "true"
+}
+
+// isWebSocketRequest checks if the request is a WebSocket upgrade request
+func isWebSocketRequest(req *http.Request) bool {
+	connection := strings.ToLower(req.Header.Get("Connection"))
+	upgrade := strings.ToLower(req.Header.Get("Upgrade"))
+
+	return upgrade == "websocket" && connection == "upgrade"
 }
