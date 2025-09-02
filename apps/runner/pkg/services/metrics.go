@@ -54,7 +54,7 @@ func (s *MetricsService) GetCPUMetrics(ctx context.Context, metrics *models.Syst
 func (s *MetricsService) GetMemoryMetrics(ctx context.Context, metrics *models.SystemMetrics) {
 	memory, err := mem.VirtualMemory()
 	if err == nil {
-		metrics.RAMUsage = memory.UsedPercent
+		metrics.RAMUsage = (float64(memory.Total-memory.Available) / float64(memory.Total)) * 100
 		metrics.AllocatedMemory = int64(memory.Total / (1024 * 1024 * 1024))
 	}
 }
