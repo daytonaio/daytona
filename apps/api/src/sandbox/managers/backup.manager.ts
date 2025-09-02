@@ -6,7 +6,7 @@
 import { Injectable, Logger, OnApplicationShutdown } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Cron, CronExpression } from '@nestjs/schedule'
-import { In, IsNull, LessThan, Not, Or, Repository } from 'typeorm'
+import { In, IsNull, LessThan, MoreThan, Not, Or, Repository } from 'typeorm'
 import { Sandbox } from '../entities/sandbox.entity'
 import { SandboxState } from '../enums/sandbox-state.enum'
 import { RunnerService } from '../services/runner.service'
@@ -88,6 +88,7 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
               state: SandboxState.STARTED,
               backupState: In([BackupState.NONE, BackupState.COMPLETED]),
               lastBackupAt: Or(IsNull(), LessThan(new Date(Date.now() - 1 * 60 * 60 * 1000))),
+              autoDeleteInterval: MoreThan(0),
             },
             order: {
               lastBackupAt: 'ASC',
