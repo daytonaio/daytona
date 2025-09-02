@@ -46,6 +46,8 @@ type DaytonaConfiguration struct {
 	Environment string `json:"environment"`
 	// Billing API URL
 	BillingApiUrl *string `json:"billingApiUrl,omitempty"`
+	// SSH Gateway command
+	SshGatewayCommand *string `json:"sshGatewayCommand,omitempty"`
 }
 
 type _DaytonaConfiguration DaytonaConfiguration
@@ -388,6 +390,38 @@ func (o *DaytonaConfiguration) SetBillingApiUrl(v string) {
 	o.BillingApiUrl = &v
 }
 
+// GetSshGatewayCommand returns the SshGatewayCommand field value if set, zero value otherwise.
+func (o *DaytonaConfiguration) GetSshGatewayCommand() string {
+	if o == nil || IsNil(o.SshGatewayCommand) {
+		var ret string
+		return ret
+	}
+	return *o.SshGatewayCommand
+}
+
+// GetSshGatewayCommandOk returns a tuple with the SshGatewayCommand field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *DaytonaConfiguration) GetSshGatewayCommandOk() (*string, bool) {
+	if o == nil || IsNil(o.SshGatewayCommand) {
+		return nil, false
+	}
+	return o.SshGatewayCommand, true
+}
+
+// HasSshGatewayCommand returns a boolean if a field has been set.
+func (o *DaytonaConfiguration) HasSshGatewayCommand() bool {
+	if o != nil && !IsNil(o.SshGatewayCommand) {
+		return true
+	}
+
+	return false
+}
+
+// SetSshGatewayCommand gets a reference to the given string and assigns it to the SshGatewayCommand field.
+func (o *DaytonaConfiguration) SetSshGatewayCommand(v string) {
+	o.SshGatewayCommand = &v
+}
+
 func (o DaytonaConfiguration) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -415,6 +449,9 @@ func (o DaytonaConfiguration) ToMap() (map[string]interface{}, error) {
 	toSerialize["environment"] = o.Environment
 	if !IsNil(o.BillingApiUrl) {
 		toSerialize["billingApiUrl"] = o.BillingApiUrl
+	}
+	if !IsNil(o.SshGatewayCommand) {
+		toSerialize["sshGatewayCommand"] = o.SshGatewayCommand
 	}
 	return toSerialize, nil
 }

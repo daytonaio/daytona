@@ -100,4 +100,10 @@ export interface DaytonaConfiguration {
    * @memberof DaytonaConfiguration
    */
   billingApiUrl?: string
+  /**
+   * SSH Gateway command
+   * @type {string}
+   * @memberof DaytonaConfiguration
+   */
+  sshGatewayCommand?: string
 }

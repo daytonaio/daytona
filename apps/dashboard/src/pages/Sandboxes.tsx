@@ -673,7 +673,7 @@ const Sandboxes: React.FC = () => {
             ) : (
               <div className="p-3 flex justify-between items-center rounded-md bg-green-100 text-green-600 dark:bg-green-900/50 dark:text-green-400">
                 <span className="overflow-x-auto pr-2 cursor-text select-all">
-                  {import.meta.env.VITE_SSH_GATEWAY_COMMAND?.replace('{{TOKEN}}', sshToken) ||
+                  {config.sshGatewayCommand?.replace('{{TOKEN}}', sshToken) ||
                     `ssh -p 22222 user@host -o ProxyCommand="echo ${sshToken}"`}
                 </span>
                 {(copied === 'SSH Command' && <Check className="w-4 h-4" />) || (
@@ -681,7 +681,7 @@ const Sandboxes: React.FC = () => {
                     className="w-4 h-4 cursor-pointer"
                     onClick={() =>
                       copyToClipboard(
-                        import.meta.env.VITE_SSH_GATEWAY_COMMAND?.replace('{{TOKEN}}', sshToken) ||
+                        config.sshGatewayCommand?.replace('{{TOKEN}}', sshToken) ||
                           `ssh -p 22222 user@host -o ProxyCommand="echo ${sshToken}"`,
                         'SSH Command',
                       )

@@ -94,6 +94,7 @@ const configuration = {
     serverUrl: process.env.SVIX_SERVER_URL,
   },
   sshGatewayApiKey: process.env.SSH_GATEWAY_API_KEY,
+  sshGatewayCommand: process.env.SSH_GATEWAY_COMMAND,
   pylonAppId: process.env.PYLON_APP_ID,
   billingApiUrl: process.env.BILLING_API_URL,
   defaultRunner: {

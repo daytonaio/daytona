@@ -154,6 +154,14 @@ export class ConfigurationDto {
   @IsOptional()
   billingApiUrl?: string
 
+  @ApiPropertyOptional({
+    description: 'SSH Gateway command',
+    example: 'ssh -p 2222 {{TOKEN}}@localhost',
+  })
+  @IsOptional()
+  @IsString()
+  sshGatewayCommand?: string
+
   constructor(configService: TypedConfigService) {
     this.oidc = {
       issuer: configService.getOrThrow('oidc.issuer'),
@@ -167,6 +175,8 @@ export class ConfigurationDto {
     this.maxAutoArchiveInterval = configService.getOrThrow('maxAutoArchiveInterval')
     this.maintananceMode = configService.getOrThrow('maintananceMode')
     this.environment = configService.getOrThrow('environment')
+
+    this.sshGatewayCommand = configService.get('sshGatewayCommand')
 
     if (configService.get('billingApiUrl')) {
       this.billingApiUrl = configService.get('billingApiUrl')
