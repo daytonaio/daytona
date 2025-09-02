@@ -4,6 +4,7 @@ daytona_api_client/api/__init__.py
 daytona_api_client/api/api_keys_api.py
 daytona_api_client/api/audit_api.py
 daytona_api_client/api/docker_registry_api.py
+daytona_api_client/api/health_api.py
 daytona_api_client/api/object_storage_api.py
 daytona_api_client/api/organizations_api.py
 daytona_api_client/api/preview_api.py
@@ -65,6 +66,9 @@ daytona_api_client/models/git_commit_response.py
 daytona_api_client/models/git_delete_branch_request.py
 daytona_api_client/models/git_repo_request.py
 daytona_api_client/models/git_status.py
+daytona_api_client/models/health_controller_check200_response.py
+daytona_api_client/models/health_controller_check200_response_info_value.py
+daytona_api_client/models/health_controller_check503_response.py
 daytona_api_client/models/keyboard_hotkey_request.py
 daytona_api_client/models/keyboard_press_request.py
 daytona_api_client/models/keyboard_type_request.py

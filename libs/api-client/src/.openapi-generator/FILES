@@ -4,6 +4,7 @@ api.ts
 api/api-keys-api.ts
 api/audit-api.ts
 api/docker-registry-api.ts
+api/health-api.ts
 api/object-storage-api.ts
 api/organizations-api.ts
 api/preview-api.ts
@@ -65,6 +66,9 @@ models/git-commit-response.ts
 models/git-delete-branch-request.ts
 models/git-repo-request.ts
 models/git-status.ts
+models/health-controller-check200-response-info-value.ts
+models/health-controller-check200-response.ts
+models/health-controller-check503-response.ts
 models/index.ts
 models/keyboard-hotkey-request.ts
 models/keyboard-press-request.ts

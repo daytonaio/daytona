@@ -3,6 +3,7 @@ api/openapi.yaml
 api_api_keys.go
 api_audit.go
 api_docker_registry.go
+api_health.go
 api_object_storage.go
 api_organizations.go
 api_preview.go
@@ -63,6 +64,9 @@ model_git_commit_response.go
 model_git_delete_branch_request.go
 model_git_repo_request.go
 model_git_status.go
+model_health_controller_check_200_response.go
+model_health_controller_check_200_response_info_value.go
+model_health_controller_check_503_response.go
 model_keyboard_hotkey_request.go
 model_keyboard_press_request.go
 model_keyboard_type_request.go
