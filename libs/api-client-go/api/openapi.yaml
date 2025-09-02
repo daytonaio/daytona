@@ -6317,6 +6317,25 @@ paths:
       summary: Get audit logs for organization
       tags:
         - audit
+  /health:
+    get:
+      operationId: HealthController_check
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthController_check_200_response'
+          description: The Health Check is successful
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthController_check_503_response'
+          description: The Health Check is not successful
+      tags:
+        - Health
 components:
   schemas:
     CreateApiKey:
@@ -10399,6 +10418,98 @@ components:
       properties:
         enabled:
           type: boolean
+      type: object
+    HealthController_check_200_response_info_value:
+      additionalProperties: true
+      properties:
+        status:
+          type: string
+      required:
+        - status
+      type: object
+    HealthController_check_200_response:
+      example:
+        details:
+          database:
+            status: up
+        error: {}
+        status: ok
+        info:
+          database:
+            status: up
+      properties:
+        status:
+          example: ok
+          type: string
+        info:
+          additionalProperties:
+            $ref: '#/components/schemas/HealthController_check_200_response_info_value'
+          example:
+            database:
+              status: up
+          nullable: true
+          type: object
+        error:
+          additionalProperties:
+            $ref: '#/components/schemas/HealthController_check_200_response_info_value'
+          example: {}
+          nullable: true
+          type: object
+        details:
+          additionalProperties:
+            $ref: '#/components/schemas/HealthController_check_200_response_info_value'
+          example:
+            database:
+              status: up
+          type: object
+      type: object
+    HealthController_check_503_response:
+      example:
+        details:
+          database:
+            status: up
+          redis:
+            status: down
+            message: Could not connect
+        error:
+          redis:
+            status: down
+            message: Could not connect
+        status: error
+        info:
+          database:
+            status: up
+      properties:
+        status:
+          example: error
+          type: string
+        info:
+          additionalProperties:
+            $ref: '#/components/schemas/HealthController_check_200_response_info_value'
+          example:
+            database:
+              status: up
+          nullable: true
+          type: object
+        error:
+          additionalProperties:
+            $ref: '#/components/schemas/HealthController_check_200_response_info_value'
+          example:
+            redis:
+              status: down
+              message: Could not connect
+          nullable: true
+          type: object
+        details:
+          additionalProperties:
+            $ref: '#/components/schemas/HealthController_check_200_response_info_value'
+          example:
+            database:
+              status: up
+            redis:
+              status: down
+              message: Could not connect
+          type: object
       type: object
   securitySchemes:
     bearer:

@@ -18,6 +18,7 @@
 __version__ = "0.0.0-dev"
 
 # import apis into sdk package
+from daytona_api_client.api.health_api import HealthApi
 from daytona_api_client.api.api_keys_api import ApiKeysApi
 from daytona_api_client.api.audit_api import AuditApi
 from daytona_api_client.api.docker_registry_api import DockerRegistryApi
@@ -90,6 +91,9 @@ from daytona_api_client.models.git_commit_response import GitCommitResponse
 from daytona_api_client.models.git_delete_branch_request import GitDeleteBranchRequest
 from daytona_api_client.models.git_repo_request import GitRepoRequest
 from daytona_api_client.models.git_status import GitStatus
+from daytona_api_client.models.health_controller_check200_response import HealthControllerCheck200Response
+from daytona_api_client.models.health_controller_check200_response_info_value import HealthControllerCheck200ResponseInfoValue
+from daytona_api_client.models.health_controller_check503_response import HealthControllerCheck503Response
 from daytona_api_client.models.keyboard_hotkey_request import KeyboardHotkeyRequest
 from daytona_api_client.models.keyboard_press_request import KeyboardPressRequest
 from daytona_api_client.models.keyboard_type_request import KeyboardTypeRequest
