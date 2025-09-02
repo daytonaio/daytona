@@ -32,13 +32,13 @@ const Playground: React.FC = () => {
   const handleReload = () => {
     switch (language) {
       case CodeLanguage.TypeScript:
-        handleSampleChange('Default', language)
+        handleSampleChange(selectedSample, language)
         break
       case CodeLanguage.Python:
-        handleSampleChange('Default', language)
+        handleSampleChange(selectedSample, language)
         break
       case CodeLanguage.Bash:
-        handleSampleChange('Default', language)
+        handleSampleChange(selectedSample, language)
         break
     }
   }
@@ -111,6 +111,7 @@ const Playground: React.FC = () => {
           'daytona-playground-language': language,
           'daytona-playground-sample': selectedSample,
         },
+        autoDeleteInterval: 0,
       })
 
       if (language === CodeLanguage.Bash) {
@@ -180,12 +181,12 @@ const Playground: React.FC = () => {
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="space-y-2">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 h-full">
+        <div className="space-y-2 h-full">
           <h2 className="text-xl font-semibold">Editor</h2>
           <Card>
             <CardContent className="p-0">
-              <div className="h-[400px] rounded-md overflow-hidden">
+              <div className="h-[500px] rounded-md overflow-hidden">
                 <Editor
                   onMount={(editor, monaco) => {
                     let mergedContext = ''
@@ -207,8 +208,11 @@ const Playground: React.FC = () => {
                       target: monaco.languages.typescript.ScriptTarget.ESNext,
                       module: monaco.languages.typescript.ModuleKind.ESNext,
                     })
+
+                    editor.layout()
                   }}
-                  height="400px"
+                  height="500px"
+                  // height="10px"
                   language={language}
                   value={editorValue}
                   onChange={handleCodeChange}
@@ -216,6 +220,7 @@ const Playground: React.FC = () => {
                   options={{
                     minimap: { enabled: false },
                     fontSize: 14,
+                    automaticLayout: true,
                   }}
                 />
               </div>
@@ -227,16 +232,16 @@ const Playground: React.FC = () => {
           <h2 className="text-xl font-semibold">Output</h2>
           <Card>
             <CardContent className="p-0">
-              <div className="h-[400px] bg-black text-white font-mono p-4 overflow-auto rounded-md">
+              <div className="h-[500px] bg-black text-white font-mono p-4 overflow-auto rounded-md">
                 <pre className="m-0">{output}</pre>
               </div>
             </CardContent>
           </Card>
         </div>
-      </div>
 
-      <div className="text-sm text-muted-foreground">
-        <p>Note: Running code will create a new sandbox and delete it after the code has finished executing.</p>
+        <div className="text-sm text-muted-foreground col-span-2">
+          <p>Note: Running code will create a new sandbox and delete it after the code has finished executing.</p>
+        </div>
       </div>
     </div>
   )
