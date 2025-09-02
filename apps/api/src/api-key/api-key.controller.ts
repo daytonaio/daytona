@@ -21,6 +21,7 @@ import { SystemRole } from '../user/enums/system-role.enum'
 import { Audit, TypedRequest } from '../audit/decorators/audit.decorator'
 import { AuditAction } from '../audit/enums/audit-action.enum'
 import { AuditTarget } from '../audit/enums/audit-target.enum'
+import { ApiKey } from './api-key.entity'
 
 @ApiTags('api-keys')
 @Controller('api-keys')
@@ -82,7 +83,14 @@ export class ApiKeyController {
   })
   @ApiResponse({ status: 500, description: 'Error fetching API keys.' })
   async getApiKeys(@AuthContext() authContext: OrganizationAuthContext): Promise<ApiKeyListDto[]> {
-    const apiKeys = await this.apiKeyService.getApiKeys(authContext.organizationId, authContext.userId)
+    let apiKeys: ApiKey[] = []
+
+    if (authContext.role === SystemRole.ADMIN || authContext.organizationUser?.role === OrganizationMemberRole.OWNER) {
+      apiKeys = await this.apiKeyService.getApiKeys(authContext.organizationId)
+    } else {
+      apiKeys = await this.apiKeyService.getApiKeys(authContext.organizationId, authContext.userId)
+    }
+
     return apiKeys.map((apiKey) => ApiKeyListDto.fromApiKey(apiKey))
   }
 
@@ -136,6 +144,39 @@ export class ApiKeyController {
   })
   async deleteApiKey(@AuthContext() authContext: OrganizationAuthContext, @Param('name') name: string) {
     await this.apiKeyService.deleteApiKey(authContext.organizationId, authContext.userId, name)
+  }
+
+  @Delete(':userId/:name')
+  @ApiOperation({
+    summary: 'Delete API key for user',
+    operationId: 'deleteApiKeyForUser',
+  })
+  @ApiResponse({ status: 204, description: 'API key deleted successfully.' })
+  @HttpCode(204)
+  @Audit({
+    action: AuditAction.DELETE,
+    targetType: AuditTarget.API_KEY,
+    targetIdFromRequest: (req) => req.params.name,
+    requestMetadata: {
+      params: (req) => ({
+        userId: req.params.userId,
+      }),
+    },
+  })
+  async deleteApiKeyForUser(
+    @AuthContext() authContext: OrganizationAuthContext,
+    @Param('userId') userId: string,
+    @Param('name') name: string,
+  ) {
+    if (
+      userId !== authContext.userId &&
+      authContext.role !== SystemRole.ADMIN &&
+      authContext.organizationUser?.role !== OrganizationMemberRole.OWNER
+    ) {
+      throw new ForbiddenException('Incorrect user ID provided')
+    }
+
+    await this.apiKeyService.deleteApiKey(authContext.organizationId, userId, name)
   }
 
   private validateRequestedApiKeyPermissions(

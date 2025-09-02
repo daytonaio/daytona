@@ -70,7 +70,7 @@ export class ApiKeyService {
     return { apiKey, value }
   }
 
-  async getApiKeys(organizationId: string, userId: string): Promise<ApiKey[]> {
+  async getApiKeys(organizationId: string, userId?: string): Promise<ApiKey[]> {
     const apiKeys = await this.apiKeyRepository.find({
       where: { organizationId, userId },
       order: {
@@ -82,17 +82,50 @@ export class ApiKeyService {
       },
     })
 
-    const organizationUser = await this.organizationUserService.findOne(organizationId, userId)
-    if (!organizationUser) {
-      throw new NotFoundException('Organization user (API key owner) not found')
+    if (apiKeys.length === 0) {
+      return []
     }
 
-    return apiKeys.map((apiKey) => {
-      return {
-        ...apiKey,
-        permissions: this.getEffectivePermissions(apiKey, organizationUser),
+    if (userId) {
+      // We need to fetch who created the API keys to calculate their effective permissions (e.g. a permission was unassigned from user after they already created an API key with that permission)
+      const organizationUser = await this.organizationUserService.findOne(organizationId, userId)
+      if (!organizationUser) {
+        throw new NotFoundException('Organization user (API key owner) not found')
       }
-    })
+
+      return apiKeys.map((apiKey) => {
+        return {
+          ...apiKey,
+          permissions: this.getEffectivePermissions(apiKey, organizationUser),
+        }
+      })
+    }
+
+    // We are fetching all API keys for the organization, use a map to avoid repeated database calls for the same user
+    const organizationUserCache = new Map<string, OrganizationUser | null>()
+
+    return await Promise.all(
+      apiKeys.map(async (apiKey) => {
+        let organizationUser = organizationUserCache.get(apiKey.userId)
+
+        if (organizationUser === undefined) {
+          // User not in cache, fetch from database
+          organizationUser = await this.organizationUserService.findOne(apiKey.organizationId, apiKey.userId)
+          organizationUserCache.set(apiKey.userId, organizationUser)
+        }
+
+        if (!organizationUser) {
+          // If organization user is not found, return the API key with original permissions
+          // This could happen if the user was removed from the organization but API key remains
+          return apiKey
+        }
+
+        return {
+          ...apiKey,
+          permissions: this.getEffectivePermissions(apiKey, organizationUser),
+        }
+      }),
+    )
   }
 
   async getApiKeyByName(organizationId: string, userId: string, name: string): Promise<ApiKey> {

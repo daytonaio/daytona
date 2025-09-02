@@ -48,6 +48,12 @@ export class ApiKeyListDto {
   })
   expiresAt?: Date
 
+  @ApiProperty({
+    description: 'The user ID of the user who created the API key',
+    example: '123',
+  })
+  userId: string
+
   constructor(partial: Partial<ApiKeyListDto>) {
     Object.assign(this, partial)
   }
@@ -62,6 +68,7 @@ export class ApiKeyListDto {
       permissions: apiKey.permissions,
       lastUsedAt: apiKey.lastUsedAt,
       expiresAt: apiKey.expiresAt,
+      userId: apiKey.userId,
     })
   }
 }

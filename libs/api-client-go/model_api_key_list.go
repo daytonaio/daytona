@@ -35,6 +35,8 @@ type ApiKeyList struct {
 	LastUsedAt NullableTime `json:"lastUsedAt"`
 	// When the API key expires
 	ExpiresAt NullableTime `json:"expiresAt"`
+	// The user ID of the user who created the API key
+	UserId string `json:"userId"`
 }
 
 type _ApiKeyList ApiKeyList
@@ -43,7 +45,7 @@ type _ApiKeyList ApiKeyList
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewApiKeyList(name string, value string, createdAt time.Time, permissions []string, lastUsedAt NullableTime, expiresAt NullableTime) *ApiKeyList {
+func NewApiKeyList(name string, value string, createdAt time.Time, permissions []string, lastUsedAt NullableTime, expiresAt NullableTime, userId string) *ApiKeyList {
 	this := ApiKeyList{}
 	this.Name = name
 	this.Value = value
@@ -51,6 +53,7 @@ func NewApiKeyList(name string, value string, createdAt time.Time, permissions [
 	this.Permissions = permissions
 	this.LastUsedAt = lastUsedAt
 	this.ExpiresAt = expiresAt
+	this.UserId = userId
 	return &this
 }
 
@@ -210,6 +213,30 @@ func (o *ApiKeyList) SetExpiresAt(v time.Time) {
 	o.ExpiresAt.Set(&v)
 }
 
+// GetUserId returns the UserId field value
+func (o *ApiKeyList) GetUserId() string {
+	if o == nil {
+		var ret string
+		return ret
+	}
+
+	return o.UserId
+}
+
+// GetUserIdOk returns a tuple with the UserId field value
+// and a boolean to check if the value has been set.
+func (o *ApiKeyList) GetUserIdOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.UserId, true
+}
+
+// SetUserId sets field value
+func (o *ApiKeyList) SetUserId(v string) {
+	o.UserId = v
+}
+
 func (o ApiKeyList) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -226,6 +253,7 @@ func (o ApiKeyList) ToMap() (map[string]interface{}, error) {
 	toSerialize["permissions"] = o.Permissions
 	toSerialize["lastUsedAt"] = o.LastUsedAt.Get()
 	toSerialize["expiresAt"] = o.ExpiresAt.Get()
+	toSerialize["userId"] = o.UserId
 	return toSerialize, nil
 }
 
@@ -240,6 +268,7 @@ func (o *ApiKeyList) UnmarshalJSON(data []byte) (err error) {
 		"permissions",
 		"lastUsedAt",
 		"expiresAt",
+		"userId",
 	}
 
 	allProperties := make(map[string]interface{})
