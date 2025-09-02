@@ -159,7 +159,8 @@ To create an ephemeral Sandbox, set `ephemeral` to `True` when creating a Sandbo
     # Create an ephemeral Sandbox
 
     params = CreateSandboxFromSnapshotParams(
-      ephemeral=True
+      ephemeral=True,
+      auto_stop_interval=5 # the ephemeral sandbox will be deleted after 5 minutes of inactivity
     )
     sandbox = daytona.create(params)
     ```
@@ -174,7 +175,8 @@ To create an ephemeral Sandbox, set `ephemeral` to `True` when creating a Sandbo
 
     // Create an ephemeral Sandbox
     const sandbox = await daytona.create({
-      ephemeral: true
+      ephemeral: true,
+      autoStopInterval: 5 // the ephemeral sandbox will be deleted after 5 minutes of inactivity
     });
     ```
 
