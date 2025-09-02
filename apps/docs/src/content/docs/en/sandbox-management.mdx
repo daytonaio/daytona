@@ -52,6 +52,7 @@ The Daytona SDK provides methods to create Sandboxes with default configurations
     sandbox = daytona.create(params)
 
     ```
+
   </TabItem>
 
   <TabItem label="TypeScript" icon="seti:typescript">
@@ -69,6 +70,7 @@ The Daytona SDK provides methods to create Sandboxes with default configurations
     // Create a Sandbox with custom labels
     const sandbox = await daytona.create({ labels: { SOME_LABEL: 'my-label' } });
     ```
+
   </TabItem>
 </Tabs>
 
@@ -110,6 +112,7 @@ Check your available resources and limits in the [dashboard](https://app.daytona
     sandbox = daytona.create(params)
 
     ```
+
   </TabItem>
 
   <TabItem label="TypeScript" icon="seti:typescript">
@@ -132,11 +135,54 @@ Check your available resources and limits in the [dashboard](https://app.daytona
 
     main();
     ```
+
   </TabItem>
 </Tabs>
 
 :::note
 All resource parameters are optional. If not specified, Daytona will use default values appropriate for the selected language and use case.
+:::
+
+### Ephemeral Sandboxes
+
+Ephemeral Sandboxes are Sandboxes that are automatically deleted after a period of inactivity. They are useful for short-lived tasks or for testing purposes.
+
+To create an ephemeral Sandbox, set `ephemeral` to `True` when creating a Sandbox:
+
+<Tabs>
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    from daytona import Daytona, CreateSandboxFromSnapshotParams
+
+    daytona = Daytona()
+
+    # Create an ephemeral Sandbox
+
+    params = CreateSandboxFromSnapshotParams(
+      ephemeral=True
+    )
+    sandbox = daytona.create(params)
+    ```
+
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    import { Daytona } from '@daytonaio/sdk';
+
+    const daytona = new Daytona();
+
+    // Create an ephemeral Sandbox
+    const sandbox = await daytona.create({
+      ephemeral: true
+    });
+    ```
+
+  </TabItem>
+</Tabs>
+
+:::note
+Setting ["autoDeleteInterval: 0"](#auto-delete-interval) has the same effect as setting "ephemeral" to `true`.
 :::
 
 ### Network Settings (Firewall)
@@ -168,6 +214,7 @@ Daytona Sandboxes provide configurable network firewall controls to enhance secu
     sandbox = daytona.create(params)
 
     ```
+
   </TabItem>
 
   <TabItem label="TypeScript" icon="seti:typescript">
@@ -186,6 +233,7 @@ Daytona Sandboxes provide configurable network firewall controls to enhance secu
       networkAllowList: '192.168.1.0/16,10.0.0.0/24'
     });
     ```
+
   </TabItem>
 </Tabs>
 
@@ -215,6 +263,7 @@ The Daytona SDK provides methods to get information about a Sandbox, such as ID,
     print(sandbox.state)
 
     ```
+
   </TabItem>
 
   <TabItem label="TypeScript" icon="seti:typescript">
@@ -230,6 +279,7 @@ The Daytona SDK provides methods to get information about a Sandbox, such as ID,
     console.log(sandbox.autoStopInterval)
     console.log(sandbox.state)
     ```
+
   </TabItem>
 </Tabs>
 
@@ -261,6 +311,7 @@ Stopped Sandboxes maintain filesystem persistence while their memory state is cl
     sandbox.start()
 
     ```
+
   </TabItem>
 
   <TabItem label="TypeScript" icon="seti:typescript">
@@ -279,6 +330,7 @@ Stopped Sandboxes maintain filesystem persistence while their memory state is cl
     // Start Sandbox
     await sandbox.start();
     ```
+
   </TabItem>
 </Tabs>
 
@@ -455,6 +507,7 @@ If the parameter is not set, the Sandbox will not be deleted automatically.
     sandbox.set_auto_delete_interval(-1)
 
     ```
+
   </TabItem>
 
   <TabItem label="TypeScript" icon="seti:typescript">
@@ -470,6 +523,7 @@ If the parameter is not set, the Sandbox will not be deleted automatically.
     // Disable auto-deletion
     await sandbox.setAutoDeleteInterval(-1)
     ```
+
   </TabItem>
 </Tabs>
 

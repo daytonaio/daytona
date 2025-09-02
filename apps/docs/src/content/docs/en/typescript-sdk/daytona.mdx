@@ -341,6 +341,7 @@ Base parameters for creating a new Sandbox.
 - `autoDeleteInterval?` _number_ - Auto-delete interval in minutes (negative value means disabled, 0 means delete immediately upon stopping). By default, auto-delete is disabled.
 - `autoStopInterval?` _number_ - Auto-stop interval in minutes (0 means disabled). Default is 15 minutes.
 - `envVars?` _Record\<string, string\>_ - Optional environment variables to set in the Sandbox
+- `ephemeral?` _boolean_ - Whether the Sandbox should be ephemeral. If true, autoDeleteInterval will be set to 0.
 - `labels?` _Record\<string, string\>_ - Sandbox labels
 - `language?` _string_ - Programming language for direct code execution
 - `networkAllowList?` _string_ - Comma-separated list of allowed CIDR network addresses for the Sandbox
@@ -358,6 +359,7 @@ Parameters for creating a new Sandbox.
 - `autoDeleteInterval?` _number_
 - `autoStopInterval?` _number_
 - `envVars?` _Record\<string, string\>_
+- `ephemeral?` _boolean_
 - `image` _string \| Image_ - Custom Docker image to use for the Sandbox. If an Image object is provided,
     the image will be dynamically built.
 - `labels?` _Record\<string, string\>_
@@ -379,6 +381,7 @@ Parameters for creating a new Sandbox from a snapshot.
 - `autoDeleteInterval?` _number_
 - `autoStopInterval?` _number_
 - `envVars?` _Record\<string, string\>_
+- `ephemeral?` _boolean_
 - `labels?` _Record\<string, string\>_
 - `language?` _string_
 - `networkAllowList?` _string_
