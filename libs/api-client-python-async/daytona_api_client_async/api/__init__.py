@@ -1,6 +1,7 @@
 # flake8: noqa
 
 # import apis into api package
+from daytona_api_client_async.api.health_api import HealthApi
 from daytona_api_client_async.api.api_keys_api import ApiKeysApi
 from daytona_api_client_async.api.audit_api import AuditApi
 from daytona_api_client_async.api.docker_registry_api import DockerRegistryApi
