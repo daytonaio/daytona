@@ -522,6 +522,10 @@ export class SandboxService {
       throw new NotFoundException(`Sandbox with ID ${sandboxId} not found`)
     }
 
+    if (sandbox.autoDeleteInterval === 0) {
+      throw new SandboxError('Ephemeral sandboxes cannot be backed up')
+    }
+
     if (![BackupState.COMPLETED, BackupState.NONE].includes(sandbox.backupState)) {
       throw new SandboxError('Sandbox backup is already in progress')
     }
