@@ -3,7 +3,7 @@ title: "オブジェクトストレージ"
 hideTitleOnPage: true
 ---
 
-## ObjectStorage
+## ObjectStorage {#objectstorage}
 
 ```python
 class ObjectStorage()
@@ -19,7 +19,7 @@ class ObjectStorage()
 - `aws_session_token` _str_ - オブジェクトストレージサービスのセッショントークン。短期認証情報に使用。
 - `bucket_name` _str_ - 使用するバケット名。既定値は "daytona-volume-builds"。
 
-#### ObjectStorage.upload
+#### ObjectStorage.upload {#objectstorageupload}
 
 ```python
 def upload(path: str,
@@ -34,10 +34,7 @@ def upload(path: str,
 - `path` _str_ - アップロードするファイルのパス。
 - `organization_id` _str_ - 使用する組織ID。
 - `archive_base_path` _str_ - アーカイブのベースパス。
-  
 
 **戻り値**:
 
 - `str` - アップロードしたファイルのハッシュ。
-
-
