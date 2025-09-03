@@ -310,6 +310,7 @@ class Sandbox(SandboxDto):
         """Waits for the Sandbox to reach the 'stopped' state. Polls the Sandbox status until it
         reaches the 'stopped' state, encounters an error or times out. It will wait up to 60 seconds
         for the Sandbox to stop.
+        Treats destroyed as stopped to cover ephemeral sandboxes that are automatically deleted after stopping.
 
         Args:
             timeout (Optional[float]): Maximum time to wait in seconds. 0 means no timeout. Default is 60 seconds.
@@ -317,7 +318,7 @@ class Sandbox(SandboxDto):
         Raises:
             DaytonaError: If timeout is negative. If Sandbox fails to stop or times out.
         """
-        while self.state != "stopped":
+        while self.state not in ["stopped", "destroyed"]:
             try:
                 self.refresh_data()
 

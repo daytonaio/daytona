@@ -111,6 +111,8 @@ class CreateSandboxBaseParams(BaseModel):
         volumes (Optional[List[VolumeMount]]): List of volumes mounts to attach to the Sandbox.
         network_block_all (Optional[bool]): Whether to block all network access for the Sandbox.
         network_allow_list (Optional[str]): Comma-separated list of allowed CIDR network addresses for the Sandbox.
+        ephemeral (Optional[bool]): Whether the Sandbox should be ephemeral.
+            If True, auto_delete_interval will be set to 0.
     """
 
     language: Optional[CodeLanguage] = None
@@ -124,6 +126,21 @@ class CreateSandboxBaseParams(BaseModel):
     volumes: Optional[List[VolumeMount]] = None
     network_block_all: Optional[bool] = None
     network_allow_list: Optional[str] = None
+    ephemeral: Optional[bool] = None
+
+    @model_validator(mode="before")
+    @classmethod
+    def __handle_ephemeral_auto_delete_conflict(cls, values):  # pylint: disable=unused-private-member
+        if "ephemeral" in values and values.get("ephemeral"):
+            if "auto_delete_interval" in values and values.get("auto_delete_interval"):
+                warnings.warn(
+                    """'ephemeral' and 'auto_delete_interval' cannot be used together.
+                        If ephemeral is True, auto_delete_interval will be ignored and set to 0.""",
+                    UserWarning,
+                    stacklevel=3,
+                )
+            values["auto_delete_interval"] = 0
+        return values
 
 
 class CreateSandboxFromImageParams(CreateSandboxBaseParams):

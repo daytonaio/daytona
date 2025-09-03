@@ -272,6 +272,7 @@ def wait_for_sandbox_stop(timeout: Optional[float] = 60) -> None
 Waits for the Sandbox to reach the 'stopped' state. Polls the Sandbox status until it
 reaches the 'stopped' state, encounters an error or times out. It will wait up to 60 seconds
 for the Sandbox to stop.
+Treats destroyed as stopped to cover ephemeral sandboxes that are automatically deleted after stopping.
 
 **Arguments**:
 
