@@ -668,6 +668,8 @@ export class SandboxService {
 
     await this.validateOrganizationQuotas(organization, sandbox.cpu, sandbox.mem, sandbox.disk, sandbox.id)
 
+    await this.validateOrganizationQuotas(organization, sandbox.cpu, sandbox.mem, sandbox.disk, sandbox.id)
+
     if (sandbox.runnerId) {
       // Add runner readiness check
       const runner = await this.runnerService.findOne(sandbox.runnerId)
