@@ -311,11 +311,12 @@ export class Sandbox implements SandboxDto {
     const checkInterval = 100 // Wait 100 ms between checks
     const startTime = Date.now()
 
-    while (this.state !== 'stopped') {
+    // Treat destroyed as stopped to cover ephemeral sandboxes that are automatically deleted after stopping
+    while (this.state !== 'stopped' && this.state !== 'destroyed') {
       await this.refreshData()
 
       // @ts-expect-error this.refreshData() can modify this.state so this check is fine
-      if (this.state === 'stopped') {
+      if (this.state === 'stopped' || this.state === 'destroyed') {
         return
       }
 

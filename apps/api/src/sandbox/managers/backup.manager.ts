@@ -88,6 +88,7 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
               state: SandboxState.STARTED,
               backupState: In([BackupState.NONE, BackupState.COMPLETED]),
               lastBackupAt: Or(IsNull(), LessThan(new Date(Date.now() - 1 * 60 * 60 * 1000))),
+              autoDeleteInterval: Not(0),
             },
             order: {
               lastBackupAt: 'ASC',

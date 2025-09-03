@@ -128,6 +128,7 @@ export interface Resources {
  * @property {VolumeMount[]} [volumes] - Optional array of volumes to mount to the Sandbox
  * @property {boolean} [networkBlockAll] - Whether to block all network access for the Sandbox
  * @property {string} [networkAllowList] - Comma-separated list of allowed CIDR network addresses for the Sandbox
+ * @property {boolean} [ephemeral] - Whether the Sandbox should be ephemeral. If true, autoDeleteInterval will be set to 0.
  */
 export type CreateSandboxBaseParams = {
   user?: string
@@ -141,6 +142,7 @@ export type CreateSandboxBaseParams = {
   volumes?: VolumeMount[]
   networkBlockAll?: boolean
   networkAllowList?: string
+  ephemeral?: boolean
 }
 
 /**
@@ -417,6 +419,15 @@ export class Daytona {
       (!Number.isInteger(params.autoStopInterval) || params.autoStopInterval < 0)
     ) {
       throw new DaytonaError('autoStopInterval must be a non-negative integer')
+    }
+
+    if (params.ephemeral) {
+      if (params.autoDeleteInterval !== undefined && params.autoDeleteInterval !== 0) {
+        console.warn(
+          "'ephemeral' and 'autoDeleteInterval' cannot be used together. If ephemeral is true, autoDeleteInterval will be ignored and set to 0.",
+        )
+      }
+      params.autoDeleteInterval = 0
     }
 
     if (

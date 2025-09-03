@@ -172,6 +172,11 @@ export class SandboxService {
     if (sandbox.pending) {
       throw new SandboxError('Sandbox state change in progress')
     }
+
+    if (sandbox.autoDeleteInterval === 0) {
+      throw new SandboxError('Ephemeral sandboxes cannot be archived')
+    }
+
     sandbox.state = SandboxState.ARCHIVING
     sandbox.desiredState = SandboxDesiredState.ARCHIVED
     await this.sandboxRepository.save(sandbox)
@@ -520,6 +525,10 @@ export class SandboxService {
 
     if (!sandbox) {
       throw new NotFoundException(`Sandbox with ID ${sandboxId} not found`)
+    }
+
+    if (sandbox.autoDeleteInterval === 0) {
+      throw new SandboxError('Ephemeral sandboxes cannot be backed up')
     }
 
     if (![BackupState.COMPLETED, BackupState.NONE].includes(sandbox.backupState)) {
