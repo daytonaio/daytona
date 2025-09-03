@@ -4,7 +4,7 @@
  */
 
 import React, { useEffect, useState } from 'react'
-import { Outlet } from 'react-router-dom'
+import { Outlet, useLocation } from 'react-router-dom'
 
 import { Sidebar } from '@/components/Sidebar'
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
@@ -23,6 +23,7 @@ const Dashboard: React.FC = () => {
   const [showVerifyEmailDialog, setShowVerifyEmailDialog] = useState(false)
   const { wallet } = useBilling()
   const navigate = useNavigate()
+  const location = useLocation()
 
   useEffect(() => {
     if (
@@ -38,10 +39,13 @@ const Dashboard: React.FC = () => {
       return
     }
 
-    if (!wallet || wallet?.ongoingBalanceCents <= 0) {
+    const excludedRoutes = [RoutePath.BILLING_WALLET, RoutePath.USER_INVITATIONS]
+    const shouldSkipRedirect = excludedRoutes.some((route) => location.pathname.startsWith(route))
+
+    if ((!wallet || wallet?.ongoingBalanceCents <= 0) && !shouldSkipRedirect) {
       navigate(RoutePath.BILLING_WALLET)
     }
-  }, [wallet])
+  }, [wallet]) // Only depend on wallet to avoid infinite loops from navigation
 
   const bannerText = import.meta.env.VITE_ANNOUNCEMENT_BANNER_TEXT
   const bannerLearnMoreUrl = import.meta.env.VITE_ANNOUNCEMENT_BANNER_LEARN_MORE_URL
