@@ -263,7 +263,8 @@ func serveWarningPage(c *gin.Context, https bool) {
           • This website is served through <a href="https://daytona.io" target="_blank">daytona.io</a><br />
           • Content and functionality may change without notice<br />
           • You should only visit this website if you trust whoever sent the link to<br />
-          • Be careful about disclosing personal or financial information like passwords, phone numbers, or credit cards
+          • Be careful about disclosing personal or financial information like passwords, phone numbers, or credit cards<br />
+          • To get rid of this warning for your organization, visit our docs: <a href="https://daytona.io/docs/en/preview-and-authentication" target="_blank">https://daytona.io/docs/en/preview-and-authentication</a>
         </div>
 
         <form action="%s" method="POST" style="margin: 0">
