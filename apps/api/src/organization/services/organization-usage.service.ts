@@ -44,6 +44,7 @@ import { SnapshotCreatedEvent } from '../../sandbox/events/snapshot-created.even
 import { SnapshotStateUpdatedEvent } from '../../sandbox/events/snapshot-state-updated.event'
 import { VolumeCreatedEvent } from '../../sandbox/events/volume-created.event'
 import { VolumeStateUpdatedEvent } from '../../sandbox/events/volume-state-updated.event'
+import { SandboxState } from '../../sandbox/enums/sandbox-state.enum'
 
 @Injectable()
 export class OrganizationUsageService {
@@ -1101,6 +1102,24 @@ export class OrganizationUsageService {
   async handleSandboxStateUpdated(event: SandboxStateUpdatedEvent) {
     const lockKey = `sandbox:${event.sandbox.id}:quota-usage-update`
     await this.redisLockProvider.waitForLock(lockKey, 60)
+
+    // Special case for warm pool sandboxes (otherwise the quota usage deltas would be 0 due to the "unchanged" state)
+    if (event.oldState === event.newState && event.newState === SandboxState.STARTED) {
+      try {
+        await this.updateCurrentQuotaUsage(event.sandbox.organizationId, 'cpu', event.sandbox.cpu)
+        await this.updateCurrentQuotaUsage(event.sandbox.organizationId, 'memory', event.sandbox.mem)
+        await this.updateCurrentQuotaUsage(event.sandbox.organizationId, 'disk', event.sandbox.disk)
+        return
+      } catch (error) {
+        this.logger.warn(
+          `Error updating cached sandbox quota usage for organization ${event.sandbox.organizationId}`,
+          error,
+        )
+        return
+      } finally {
+        await this.redisLockProvider.unlock(lockKey)
+      }
+    }
 
     try {
       const cpuDelta = this.calculateQuotaUsageDelta(
