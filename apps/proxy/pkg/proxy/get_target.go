@@ -138,13 +138,14 @@ func (p *Proxy) getSandboxPublic(ctx context.Context, sandboxId string) (*bool, 
 }
 
 func (p *Proxy) getSandboxAuthKeyValid(ctx context.Context, sandboxId string, authKey string) (*bool, error) {
-	has, err := p.sandboxAuthKeyValidCache.Has(ctx, authKey)
+	cacheKey := fmt.Sprintf("%s:%s", sandboxId, authKey)
+	has, err := p.sandboxAuthKeyValidCache.Has(ctx, cacheKey)
 	if err != nil {
 		return nil, err
 	}
 
 	if has {
-		return p.sandboxAuthKeyValidCache.Get(ctx, authKey)
+		return p.sandboxAuthKeyValidCache.Get(ctx, cacheKey)
 	}
 
 	isValid := false
@@ -153,7 +154,7 @@ func (p *Proxy) getSandboxAuthKeyValid(ctx context.Context, sandboxId string, au
 		isValid = true
 	}
 
-	err = p.sandboxAuthKeyValidCache.Set(ctx, authKey, isValid, 2*time.Minute)
+	err = p.sandboxAuthKeyValidCache.Set(ctx, cacheKey, isValid, 2*time.Minute)
 	if err != nil {
 		log.Errorf("Failed to set sandbox auth key valid in cache: %v", err)
 	}
