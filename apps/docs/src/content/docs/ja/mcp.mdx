@@ -6,7 +6,7 @@ import { TabItem, Tabs } from '@astrojs/starlight/components'
 
 Daytona Model Context Protocol (MCP) サーバーは、AIエージェントがDaytonaの機能にプログラムからアクセスし、操作できるようにします。本ガイドでは、各種AIエージェントでMCPサーバーをセットアップして利用する方法を解説します。
 
-## 前提条件
+## 前提条件 {#prerequisites}
 
 開始する前に、以下を用意してください:
 
@@ -14,31 +14,31 @@ Daytona Model Context Protocol (MCP) サーバーは、AIエージェントがDa
 - Daytona CLI がインストールされていること
 - 互換性のある AI エージェント（Claude Desktop App、Claude Code、Cursor、または Windsurf）
 
-## インストールとセットアップ
+## インストールとセットアップ {#installation-and-setup}
 
-### 1. Daytona CLI のインストール
+### 1. Daytona CLI のインストール {#1-install-daytona-cli}
 
 <Tabs>
-<TabItem label="Mac/Linux">
-```bash
-brew install daytonaio/cli/daytona
-```
+  <TabItem label="Mac/Linux">
+    ```bash
+    brew install daytonaio/cli/daytona
+    ```
+  </TabItem>
 
-</TabItem>
-<TabItem label="Windows">
-```bash
-powershell -Command "irm https://get.daytona.io/windows | iex"
-```
-</TabItem>
+  <TabItem label="Windows">
+    ```bash
+    powershell -Command "irm https://get.daytona.io/windows | iex"
+    ```
+  </TabItem>
 </Tabs>
 
-### 2. Daytona に認証する
+### 2. Daytona に認証する {#2-authenticate-with-daytona}
 
 ```bash
 daytona login
 ```
 
-### 3. MCPサーバーを初期化
+### 3. MCPサーバーを初期化 {#3-initialize-mcp-server}
 
 使用するAIエージェントで Daytona の MCPサーバーを初期化します:
 
@@ -46,11 +46,11 @@ daytona login
 daytona mcp init [claude/cursor/windsurf]
 ```
 
-### 4. AIエージェントを起動
+### 4. AIエージェントを起動 {#4-open-your-ai-agent}
 
 初期化後、AIエージェントのアプリケーションを起動して、Daytona の機能の利用を開始します。
 
-## 他のAIエージェントとの統合
+## 他のAIエージェントとの統合 {#integration-with-other-ai-agents}
 
 Daytona MCP を他のAIエージェントと統合するには、次の手順に従ってください。
 
@@ -89,9 +89,9 @@ Windows ユーザーは、`env` フィールドに次を追加してください
 
 2. 設定を反映するため、AI エージェントを開き直すか再起動します。
 
-## 利用可能なツール
+## 利用可能なツール {#available-tools}
 
-### サンドボックス管理
+### サンドボックス管理 {#sandbox-management}
 
 - **サンドボックスの作成**
 
@@ -105,7 +105,7 @@ Windows ユーザーは、`env` フィールドに次を追加してください
 - **サンドボックスの破棄**
   - 既存の Daytona サンドボックスを削除します
 
-### ファイル操作
+### ファイル操作 {#file-operations}
 
 - **ファイルのダウンロード**
 
@@ -158,7 +158,7 @@ Windows ユーザーは、`env` フィールドに次を追加してください
   - パラメータ:
     - `file_path`: 削除対象のパス
 
-### プレビュー
+### プレビュー {#preview}
 
 - **プレビューリンク**
   - Web アプリケーション向けにアクセス可能なプレビュー URL を生成します
@@ -171,7 +171,7 @@ Windows ユーザーは、`env` フィールドに次を追加してください
     - `description`: サービスの説明
     - `check_server`: ポートでサーバーが稼働中かを確認
 
-### Git 操作
+### Git 操作 {#git-operations}
 
 - **Git Clone**
   - Git リポジトリをクローンします
@@ -183,7 +183,7 @@ Windows ユーザーは、`env` フィールドに次を追加してください
     - `username`: Git ユーザー名
     - `password`: Git パスワード
 
-### コマンド実行
+### コマンド実行 {#command-execution}
 
 - **コマンドの実行**
   - Daytona 環境でシェルコマンドを実行します
@@ -192,7 +192,7 @@ Windows ユーザーは、`env` フィールドに次を追加してください
   - パラメータ:
     - `command`: 実行するコマンド
 
-## トラブルシューティング
+## トラブルシューティング {#troubleshooting}
 
 一般的な問題と解決策:
 
@@ -208,7 +208,7 @@ Windows ユーザーは、`env` フィールドに次を追加してください
 - **サンドボックスのエラー**
   - `daytona sandbox list` を使用してサンドボックスのステータスを確認する
 
-## サポート
+## サポート {#support}
 
 サポートが必要な場合は、次をご利用ください:
 
