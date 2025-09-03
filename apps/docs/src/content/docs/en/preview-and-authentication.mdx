@@ -7,7 +7,14 @@ import { Tabs, TabItem } from '@astrojs/starlight/components'
 Processes listening for HTTP traffic in port range `3000-9999` can be previewed using preview links.
 
 A preview link's schema consists of the port and Sandbox ID combination, e.g.:
-`https://3000-sandbox-123456.proxy.daytona.work`
+`https://3000-sandbox-123456.proxy.daytona.works`
+
+:::tip
+When opening the preview link in a browser, a warning page will be shown for the first time.
+This warning serves as a security measure to inform users about the potential risks of visiting the preview URL.
+
+To avoid this warning, you can upgrade to [Tier 3](/docs/en/limits) or deploy your own [custom preview proxy](/docs/en/custom-domain-authentication).
+:::
 
 If the Sandbox has its `public` property set to `true`, these links will be publicly accessible, otherwise the preview link will be available only to the Sandbox Organization users.
 
@@ -15,12 +22,12 @@ For programmatic access (e.g., with curl), use the X-Daytona-Preview-Token heade
 
 ```bash
 curl -H "x-daytona-preview-token: vg5c0ylmcimr8b_v1ne0u6mdnvit6gc0" \
-https://3000-sandbox-123456.proxy.daytona.work
+https://3000-sandbox-123456.proxy.daytona.works
 ```
 
 Alternatively, provide the DAYTONA_SANDBOX_AUTH_KEY query parameter as the authorization token for runtimes that don’t support additional headers (e.g., browser runtimes):
 ```bash
-curl "https://3000-sandbox-123456.proxy.daytona.work?DAYTONA_SANDBOX_AUTH_KEY=vg5c0ylmcimr8b_v1ne0u6mdnvit6gc0"
+curl "https://3000-sandbox-123456.proxy.daytona.works?DAYTONA_SANDBOX_AUTH_KEY=vg5c0ylmcimr8b_v1ne0u6mdnvit6gc0"
 ```
 
 To fetch the preview link and the authorization token for a specific port, you can simply use the SDK method:
