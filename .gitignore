@@ -72,3 +72,4 @@ examples/**/*.png
 **/poetry.lock
 !/poetry.lock
 .astro
+.github/instructions/nx.instructions.md
