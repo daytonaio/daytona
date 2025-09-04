@@ -874,6 +874,15 @@ export class SandboxService {
       throw new NotFoundException(`Sandbox with ID ${sandboxId} not found`)
     }
 
+    if (sandbox.state === newState) {
+      this.logger.debug(`Sandbox ${sandboxId} is already in state ${newState}`)
+      return
+    } else {
+      // Dry run
+      this.logger.debug(`Would update sandbox ${sandboxId} from state ${sandbox.state} to state ${newState}`)
+      return
+    }
+
     sandbox.state = newState
     await this.sandboxRepository.save(sandbox)
   }
