@@ -5,12 +5,14 @@
 
 import { ConflictException, Injectable, Logger, NotFoundException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { Repository } from 'typeorm'
+import { EntityManager, Repository, ArrayOverlap } from 'typeorm'
 import { ApiKey } from './api-key.entity'
 import * as crypto from 'crypto'
 import { OrganizationResourcePermission } from '../organization/enums/organization-resource-permission.enum'
-import { OrganizationUserService } from '../organization/services/organization-user.service'
 import { RedisLockProvider } from '../sandbox/common/redis-lock.provider'
+import { OnAsyncEvent } from '../common/decorators/on-async-event.decorator'
+import { OrganizationEvents } from '../organization/constants/organization-events.constant'
+import { OrganizationResourcePermissionsUnassignedEvent } from '../organization/events/organization-resource-permissions-unassigned.event'
 
 @Injectable()
 export class ApiKeyService {
@@ -19,7 +21,6 @@ export class ApiKeyService {
   constructor(
     @InjectRepository(ApiKey)
     private apiKeyRepository: Repository<ApiKey>,
-    private organizationUserService: OrganizationUserService,
     private readonly redisLockProvider: RedisLockProvider,
   ) {}
 
@@ -120,7 +121,7 @@ export class ApiKeyService {
       throw new NotFoundException('API key not found')
     }
 
-    await this.apiKeyRepository.remove(apiKey)
+    await this.deleteWithEntityManager(this.apiKeyRepository.manager, apiKey)
   }
 
   async updateLastUsedAt(organizationId: string, userId: string, name: string, lastUsedAt: Date): Promise<void> {
@@ -142,5 +143,26 @@ export class ApiKeyService {
       },
       { lastUsedAt },
     )
+  }
+
+  private async deleteWithEntityManager(entityManager: EntityManager, apiKey: ApiKey): Promise<void> {
+    await entityManager.remove(apiKey)
+  }
+
+  @OnAsyncEvent({
+    event: OrganizationEvents.PERMISSIONS_UNASSIGNED,
+  })
+  async handleOrganizationResourcePermissionsUnassignedEvent(
+    payload: OrganizationResourcePermissionsUnassignedEvent,
+  ): Promise<void> {
+    const apiKeysToRevoke = await this.apiKeyRepository.find({
+      where: {
+        organizationId: payload.organizationId,
+        userId: payload.userId,
+        permissions: ArrayOverlap(payload.unassignedPermissions),
+      },
+    })
+
+    await Promise.all(apiKeysToRevoke.map((apiKey) => this.deleteWithEntityManager(payload.entityManager, apiKey)))
   }
 }

@@ -4,15 +4,18 @@
  */
 
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common'
+import { EventEmitter2 } from '@nestjs/event-emitter'
 import { InjectRepository } from '@nestjs/typeorm'
-import { EntityManager, Repository } from 'typeorm'
+import { DataSource, EntityManager, Repository } from 'typeorm'
 import { OrganizationRoleService } from './organization-role.service'
 import { OrganizationEvents } from '../constants/organization-events.constant'
 import { OrganizationUserDto } from '../dto/organization-user.dto'
 import { OrganizationUser } from '../entities/organization-user.entity'
 import { OrganizationRole } from '../entities/organization-role.entity'
 import { OrganizationMemberRole } from '../enums/organization-member-role.enum'
+import { OrganizationResourcePermission } from '../enums/organization-resource-permission.enum'
 import { OrganizationInvitationAcceptedEvent } from '../events/organization-invitation-accepted.event'
+import { OrganizationResourcePermissionsUnassignedEvent } from '../events/organization-resource-permissions-unassigned.event'
 import { OnAsyncEvent } from '../../common/decorators/on-async-event.decorator'
 import { UserService } from '../../user/user.service'
 import { UserEvents } from '../../user/constants/user-events.constant'
@@ -25,6 +28,8 @@ export class OrganizationUserService {
     private readonly organizationUserRepository: Repository<OrganizationUser>,
     private readonly organizationRoleService: OrganizationRoleService,
     private readonly userService: UserService,
+    private readonly eventEmitter: EventEmitter2,
+    private readonly dataSource: DataSource,
   ) {}
 
   async findAll(organizationId: string): Promise<OrganizationUserDto[]> {
@@ -77,6 +82,7 @@ export class OrganizationUserService {
       throw new NotFoundException(`User with ID ${userId} not found in organization with ID ${organizationId}`)
     }
 
+    // validate role
     if (organizationUser.role === OrganizationMemberRole.OWNER && role !== OrganizationMemberRole.OWNER) {
       const ownersCount = await this.organizationUserRepository.count({
         where: {
@@ -90,16 +96,34 @@ export class OrganizationUserService {
       }
     }
 
+    // validate assignments
     const assignedRoles = await this.organizationRoleService.findByIds(assignedRoleIds)
     if (assignedRoles.length !== assignedRoleIds.length) {
       throw new BadRequestException('One or more role IDs are invalid')
     }
 
-    // TODO: revoke api keys
+    // check if any previous permissions are not present in the new assignments, api keys with those permissions will be revoked
+    let permissionsToRevoke: OrganizationResourcePermission[] = []
+    if (role !== OrganizationMemberRole.OWNER) {
+      const prevPermissions = this.getAssignedPermissions(organizationUser.role, organizationUser.assignedRoles)
+      const newPermissions = this.getAssignedPermissions(role, assignedRoles)
+      permissionsToRevoke = Array.from(prevPermissions).filter((permission) => !newPermissions.has(permission))
+    }
 
     organizationUser.role = role
     organizationUser.assignedRoles = assignedRoles
-    organizationUser = await this.organizationUserRepository.save(organizationUser)
+
+    if (permissionsToRevoke.length > 0) {
+      await this.dataSource.transaction(async (em) => {
+        organizationUser = await em.save(organizationUser)
+        await this.eventEmitter.emitAsync(
+          OrganizationEvents.PERMISSIONS_UNASSIGNED,
+          new OrganizationResourcePermissionsUnassignedEvent(em, organizationId, userId, permissionsToRevoke),
+        )
+      })
+    } else {
+      organizationUser = await this.organizationUserRepository.save(organizationUser)
+    }
 
     const user = await this.userService.findOne(userId)
 
@@ -200,5 +224,16 @@ export class OrganizationUserService {
     //  - auto-promote a new owner if there are other members
     */
     await Promise.all(memberships.map((membership) => this.removeWithEntityManager(payload.entityManager, membership)))
+  }
+
+  private getAssignedPermissions(
+    role: OrganizationMemberRole,
+    assignedRoles: OrganizationRole[],
+  ): Set<OrganizationResourcePermission> {
+    if (role === OrganizationMemberRole.OWNER) {
+      return new Set(Object.values(OrganizationResourcePermission))
+    }
+
+    return new Set(assignedRoles.flatMap((role) => role.permissions))
   }
 }
