@@ -573,6 +573,12 @@ export class SandboxService {
     return this.sandboxRepository.find({ where })
   }
 
+  async findByRunnerId(runnerId: string): Promise<Sandbox[]> {
+    return this.sandboxRepository.find({
+      where: { runnerId },
+    })
+  }
+
   async findOne(sandboxId: string, returnDestroyed?: boolean): Promise<Sandbox> {
     const sandbox = await this.sandboxRepository.findOne({
       where: {
@@ -863,6 +869,35 @@ export class SandboxService {
         await runnerAdapter.updateNetworkSettings(sandboxId, networkBlockAll, networkAllowList)
       }
     }
+  }
+
+  async updateStateAndDesiredState(sandboxId: string, newState: SandboxState): Promise<void> {
+    const sandbox = await this.sandboxRepository.findOne({
+      where: { id: sandboxId },
+    })
+
+    if (!sandbox) {
+      throw new NotFoundException(`Sandbox with ID ${sandboxId} not found`)
+    }
+
+    if (sandbox.state === newState) {
+      console.log(`Sandbox ${sandboxId} is already in state ${newState}`)
+      return
+    } else {
+      // Dry run
+      console.log(`Would update sandbox ${sandboxId} from state ${sandbox.state} to state ${newState}`)
+      return
+    }
+
+    sandbox.state = newState
+    switch (newState) {
+      case SandboxState.STARTED:
+        sandbox.desiredState = SandboxDesiredState.STARTED
+        break
+      case SandboxState.STOPPED:
+        sandbox.desiredState = SandboxDesiredState.STOPPED
+    }
+    await this.sandboxRepository.save(sandbox)
   }
 
   @OnEvent(WarmPoolEvents.TOPUP_REQUESTED)
