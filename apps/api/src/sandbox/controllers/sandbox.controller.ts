@@ -39,6 +39,9 @@ import {
 import { SandboxDto, SandboxLabelsDto } from '../dto/sandbox.dto'
 import { UpdateSandboxStateDto } from '../dto/update-sandbox-state.dto'
 import { RunnerService } from '../services/runner.service'
+import { RunnerAuthGuard } from '../../auth/runner-auth.guard'
+import { RunnerContextDecorator } from '../../common/decorators/runner-context.decorator'
+import { RunnerContext } from '../../common/interfaces/runner-context.interface'
 import { SandboxState } from '../enums/sandbox-state.enum'
 import { Sandbox as SandboxEntity } from '../entities/sandbox.entity'
 import { ContentTypeInterceptor } from '../../common/interceptors/content-type.interceptors'
@@ -234,28 +237,22 @@ export class SandboxController {
     return SandboxDto.fromSandbox(sandbox, runner?.domain)
   }
 
-  @Get('by-runner/:runnerId')
+  @Get('for-runner')
+  @UseGuards(RunnerAuthGuard)
   @ApiOperation({
-    summary: 'Get sandboxes for a specific runner',
+    summary: 'Get sandboxes for the authenticated runner',
     operationId: 'getSandboxesForRunner',
-  })
-  @ApiParam({
-    name: 'runnerId',
-    description: 'ID of the runner',
-    type: 'string',
   })
   @ApiResponse({
     status: 200,
-    description: 'List of sandboxes for the specified runner',
+    description: 'List of sandboxes for the authenticated runner',
     type: [SandboxDto],
   })
-  async getSandboxesForRunner(@Param('runnerId') runnerId: string): Promise<SandboxDto[]> {
-    const sandboxes = await this.sandboxService.findByRunnerId(runnerId)
+  async getSandboxesForRunner(@RunnerContextDecorator() runnerContext: RunnerContext): Promise<SandboxDto[]> {
+    const sandboxes = await this.sandboxService.findByRunnerId(runnerContext.runnerId)
 
-    let runner: Runner | null = null
-    if (runnerId) {
-      runner = await this.runnerService.findOne(runnerId)
-    }
+    // Get runner information for consistent response format
+    const runner = await this.runnerService.findOne(runnerContext.runnerId)
 
     return sandboxes.map((sandbox) => SandboxDto.fromSandbox(sandbox, runner?.domain))
   }
