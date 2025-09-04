@@ -299,7 +299,7 @@ func isBrowser(userAgent string) bool {
 	browser, _ := ua.Browser()
 	browser = strings.ToLower(browser)
 
-	browsers := []string{"chrome", "firefox", "safari", "edge", "opera", "brave", "vivaldi", "samsung", "opera"}
+	browsers := []string{"chrome", "firefox", "safari", "edge", "brave", "vivaldi", "samsung", "opera"}
 
 	return slices.Contains(browsers, browser)
 }
