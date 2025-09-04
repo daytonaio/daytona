@@ -9,23 +9,16 @@ Processes listening for HTTP traffic in port range `3000-9999` can be previewed 
 A preview link's schema consists of the port and Sandbox ID combination, e.g.:
 `https://3000-sandbox-123456.proxy.daytona.works`
 
-:::tip
-When opening the preview link in a browser, a warning page will be shown for the first time.
-This warning serves as a security measure to inform users about the potential risks of visiting the preview URL.
-
-To avoid this warning, you can upgrade to [Tier 3](/docs/en/limits) or deploy your own [custom preview proxy](/docs/en/custom-domain-authentication).
-:::
-
 If the Sandbox has its `public` property set to `true`, these links will be publicly accessible, otherwise the preview link will be available only to the Sandbox Organization users.
 
-For programmatic access (e.g., with curl), use the X-Daytona-Preview-Token header to provide the authorization token when accessing the preview URL:
+For programmatic access (e.g., with curl), use the `X-Daytona-Preview-Token` header to provide the authorization token when accessing the preview URL:
 
 ```bash
 curl -H "x-daytona-preview-token: vg5c0ylmcimr8b_v1ne0u6mdnvit6gc0" \
 https://3000-sandbox-123456.proxy.daytona.works
 ```
 
-Alternatively, provide the DAYTONA_SANDBOX_AUTH_KEY query parameter as the authorization token for runtimes that don’t support additional headers (e.g., browser runtimes):
+Alternatively, provide the `DAYTONA_SANDBOX_AUTH_KEY` query parameter as the authorization token for runtimes that don’t support additional headers (e.g., browser runtimes):
 ```bash
 curl "https://3000-sandbox-123456.proxy.daytona.works?DAYTONA_SANDBOX_AUTH_KEY=vg5c0ylmcimr8b_v1ne0u6mdnvit6gc0"
 ```
@@ -60,3 +53,16 @@ console.log(`Preview link token: ${previewInfo.token}`);
 :::tip
 If you want to serve the previews under your own domain instead of using Daytona's URLs, check out the [Custom Domain/Authentication](/docs/en/custom-domain-authentication) section.
 :::
+
+## Warning Page
+
+When opening the preview link in a browser, a warning page will be shown for the first time.
+This warning serves as a security measure to inform users about the potential risks of visiting the preview URL.
+
+The warning page will only be shown when loading the preview link in a browser.
+
+To avoid this warning you can do one of the following:
+
+- Send the `X-Daytona-Skip-Preview-Warning: true` header
+- Upgrade to [Tier 3](/docs/en/limits)
+- Deploy your own [custom preview proxy](/docs/en/custom-domain-authentication)
