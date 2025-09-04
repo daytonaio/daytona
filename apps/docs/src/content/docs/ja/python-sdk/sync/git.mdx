@@ -3,7 +3,7 @@ title: "Git"
 hideTitleOnPage: true
 ---
 
-## Git
+## Git {#git}
 
 ```python
 class Git()
@@ -34,7 +34,7 @@ sandbox.git.commit(
 )
 ```
 
-#### Git.__init__
+#### Git.**init** {#git__init__}
 
 ```python
 def __init__(sandbox_id: str, toolbox_api: ToolboxApi,
@@ -49,7 +49,7 @@ def __init__(sandbox_id: str, toolbox_api: ToolboxApi,
 - `toolbox_api` _ToolboxApi_ - サンドボックス操作用の API クライアント。
 - `get_root_dir` _Callable[[], str]_ - サンドボックスのデフォルトのルートディレクトリを取得する関数。
 
-#### Git.add
+#### Git.add {#gitadd}
 
 ```python
 @intercept_errors(message_prefix="Failed to add files: ")
@@ -64,7 +64,6 @@ def add(path: str, files: List[str]) -> None
 - `path` _str_ - Git リポジトリのルートへのパス。相対パスはユーザーの
   ルートディレクトリを基準に解決されます。
 - `files` _List[str]_ - ステージするファイルまたはディレクトリのリスト。リポジトリルートからの相対パス。
-  
 
 **例**:
 
@@ -80,7 +79,7 @@ sandbox.git.add("workspace/repo", [
 ])
 ```
 
-#### Git.branches
+#### Git.branches {#gitbranches}
 
 ```python
 @intercept_errors(message_prefix="Failed to list branches: ")
@@ -93,12 +92,10 @@ def branches(path: str) -> ListBranchResponse
 
 - `path` _str_ - Git リポジトリのルートへのパス。相対パスはユーザーの
   ルートディレクトリを基準に解決されます。
-  
 
 **戻り値**:
 
 - `ListBranchResponse` - リポジトリ内のブランチ一覧。
-  
 
 **例**:
 
@@ -107,7 +104,7 @@ response = sandbox.git.branches("workspace/repo")
 print(f"Branches: {response.branches}")
 ```
 
-#### Git.clone
+#### Git.clone {#gitclone}
 
 ```python
 @intercept_errors(message_prefix="Failed to clone repository: ")
@@ -134,7 +131,6 @@ def clone(url: str,
   リポジトリはこのコミットで detached HEAD 状態になります。
 - `username` _Optional[str]_ - 認証用の Git ユーザー名。
 - `password` _Optional[str]_ - 認証用の Git パスワードまたはトークン。
-  
 
 **例**:
 
@@ -162,7 +158,7 @@ sandbox.git.clone(
 )
 ```
 
-#### Git.commit
+#### Git.commit {#gitcommit}
 
 ```python
 @intercept_errors(message_prefix="Failed to commit changes: ")
@@ -184,7 +180,6 @@ def commit(path: str,
 - `author` _str_ - コミット作者の名前。
 - `email` _str_ - コミット作者のメールアドレス。
 - `allow_empty` _bool, optional_ - 変更がステージされていない場合でも空のコミットを作成できるようにします。デフォルトは False。
-  
 
 **例**:
 
@@ -200,7 +195,7 @@ sandbox.git.commit(
 )
 ```
 
-#### Git.push
+#### Git.push {#gitpush}
 
 ```python
 @intercept_errors(message_prefix="Failed to push changes: ")
@@ -219,7 +214,6 @@ username と password/token を指定してください。
   ルートディレクトリを基準に解決されます。
 - `username` _Optional[str]_ - 認証用の Git ユーザー名。
 - `password` _Optional[str]_ - 認証用の Git パスワードまたはトークン。
-  
 
 **例**:
 
@@ -235,7 +229,7 @@ sandbox.git.push(
 )
 ```
 
-#### Git.pull
+#### Git.pull {#gitpull}
 
 ```python
 @intercept_errors(message_prefix="Failed to pull changes: ")
@@ -253,7 +247,6 @@ username と password/token を指定してください。
   ルートディレクトリを基準に解決されます。
 - `username` _Optional[str]_ - 認証用の Git ユーザー名。
 - `password` _Optional[str]_ - 認証用の Git パスワードまたはトークン。
-  
 
 **例**:
 
@@ -269,7 +262,7 @@ sandbox.git.pull(
 )
 ```
 
-#### Git.status
+#### Git.status {#gitstatus}
 
 ```python
 @intercept_errors(message_prefix="Failed to get status: ")
@@ -282,7 +275,6 @@ def status(path: str) -> GitStatus
 
 - `path` _str_ - Git リポジトリのルートへのパス。相対パスはユーザーの
   ルートディレクトリを基準に解決されます。
-  
 
 **戻り値**:
 
@@ -292,7 +284,6 @@ def status(path: str) -> GitStatus
   - ahead: リモートに未プッシュのローカルコミット数
   - behind: ローカルに未プルのリモートコミット数
   - branch_published: ブランチがリモートリポジトリに公開済みかどうか
-  
 
 **例**:
 
@@ -303,7 +294,7 @@ print(f"Commits ahead: {status.ahead}")
 print(f"Commits behind: {status.behind}")
 ```
 
-#### Git.checkout\_branch
+#### Git.checkout_branch {#gitcheckout_branch}
 
 ```python
 @intercept_errors(message_prefix="Failed to checkout branch: ")
@@ -317,7 +308,6 @@ def checkout_branch(path: str, branch: str) -> None
 - `path` _str_ - Git リポジトリのルートへのパス。相対パスはユーザーの
   ルートディレクトリを基準に解決されます。
 - `branch` _str_ - チェックアウトするブランチ名
-  
 
 **例**:
 
@@ -326,7 +316,7 @@ def checkout_branch(path: str, branch: str) -> None
 sandbox.git.checkout_branch("workspace/repo", "feature-branch")
 ```
 
-#### Git.create\_branch
+#### Git.create_branch {#gitcreate_branch}
 
 ```python
 @intercept_errors(message_prefix="Failed to create branch: ")
@@ -340,7 +330,6 @@ def create_branch(path: str, name: str) -> None
 - `path` _str_ - Git リポジトリのルートへのパス。相対パスはユーザーの
   ルートディレクトリを基準に解決されます。
 - `name` _str_ - 作成する新しいブランチ名
-  
 
 **例**:
 
@@ -349,7 +338,7 @@ def create_branch(path: str, name: str) -> None
 sandbox.git.create_branch("workspace/repo", "new-feature")
 ```
 
-#### Git.delete\_branch
+#### Git.delete_branch {#gitdelete_branch}
 
 ```python
 @intercept_errors(message_prefix="Failed to delete branch: ")
@@ -363,7 +352,6 @@ def delete_branch(path: str, name: str) -> None
 - `path` _str_ - Git リポジトリのルートへのパス。相対パスはユーザーの
   ルートディレクトリを基準に解決されます。
 - `name` _str_ - 削除するブランチ名
-  
 
 **例**:
 
@@ -372,8 +360,7 @@ def delete_branch(path: str, name: str) -> None
 sandbox.git.delete_branch("workspace/repo", "old-feature")
 ```
 
-
-## GitCommitResponse
+## GitCommitResponse {#gitcommitresponse}
 
 ```python
 class GitCommitResponse()
@@ -384,4 +371,3 @@ Git の commit に対するレスポンス。
 **属性**:
 
 - `sha` _str_ - コミットの SHA
-
