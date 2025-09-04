@@ -59,16 +59,17 @@ const Keys: React.FC = () => {
     fetchKeys()
   }, [fetchKeys])
 
-  const handleRevoke = async (keyName: string) => {
-    setLoadingKeys((prev) => ({ ...prev, [keyName]: true }))
+  const handleRevoke = async (key: ApiKeyList) => {
+    const loadingId = getLoadingKeyId(key)
+    setLoadingKeys((prev) => ({ ...prev, [loadingId]: true }))
     try {
-      await apiKeyApi.deleteApiKey(keyName, selectedOrganization?.id)
+      await apiKeyApi.deleteApiKeyForUser(key.userId, key.name, selectedOrganization?.id)
       toast.success('API key revoked successfully')
       await fetchKeys(false)
     } catch (error) {
       handleApiError(error, 'Failed to revoke API key')
     } finally {
-      setLoadingKeys((prev) => ({ ...prev, [keyName]: false }))
+      setLoadingKeys((prev) => ({ ...prev, [loadingId]: false }))
     }
   }
 
@@ -88,6 +89,18 @@ const Keys: React.FC = () => {
     }
   }
 
+  const getLoadingKeyId = useCallback((key: ApiKeyList) => {
+    return `${key.userId}-${key.name}`
+  }, [])
+
+  const isLoadingKey = useCallback(
+    (key: ApiKeyList) => {
+      const loadingId = getLoadingKeyId(key)
+      return loadingKeys[loadingId]
+    },
+    [getLoadingKeyId, loadingKeys],
+  )
+
   return (
     <div className="px-6 py-2">
       <div className="mb-2 h-12 flex items-center justify-between">
@@ -95,7 +108,7 @@ const Keys: React.FC = () => {
         <CreateApiKeyDialog availablePermissions={availablePermissions} onCreateApiKey={handleCreateKey} />
       </div>
 
-      <ApiKeyTable data={keys} loading={loading} loadingKeys={loadingKeys} onRevoke={handleRevoke} />
+      <ApiKeyTable data={keys} loading={loading} isLoadingKey={isLoadingKey} onRevoke={handleRevoke} />
     </div>
   )
 }

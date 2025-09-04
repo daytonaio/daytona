@@ -138,6 +138,57 @@ export const ApiKeysApiAxiosParamCreator = function (configuration?: Configurati
     },
     /**
      *
+     * @summary Delete API key for user
+     * @param {string} userId
+     * @param {string} name
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    deleteApiKeyForUser: async (
+      userId: string,
+      name: string,
+      xDaytonaOrganizationID?: string,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'userId' is not null or undefined
+      assertParamExists('deleteApiKeyForUser', 'userId', userId)
+      // verify required parameter 'name' is not null or undefined
+      assertParamExists('deleteApiKeyForUser', 'name', name)
+      const localVarPath = `/api-keys/{userId}/{name}`
+        .replace(`{${'userId'}}`, encodeURIComponent(String(userId)))
+        .replace(`{${'name'}}`, encodeURIComponent(String(name)))
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      // authentication bearer required
+      // http bearer authentication required
+      await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+      // authentication oauth2 required
+
+      if (xDaytonaOrganizationID != null) {
+        localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
+      }
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     *
      * @summary Get API key
      * @param {string} name
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
@@ -326,6 +377,38 @@ export const ApiKeysApiFp = function (configuration?: Configuration) {
     },
     /**
      *
+     * @summary Delete API key for user
+     * @param {string} userId
+     * @param {string} name
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async deleteApiKeyForUser(
+      userId: string,
+      name: string,
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.deleteApiKeyForUser(
+        userId,
+        name,
+        xDaytonaOrganizationID,
+        options,
+      )
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['ApiKeysApi.deleteApiKeyForUser']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
+    /**
+     *
      * @summary Get API key
      * @param {string} name
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
@@ -435,6 +518,25 @@ export const ApiKeysApiFactory = function (configuration?: Configuration, basePa
     },
     /**
      *
+     * @summary Delete API key for user
+     * @param {string} userId
+     * @param {string} name
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    deleteApiKeyForUser(
+      userId: string,
+      name: string,
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<void> {
+      return localVarFp
+        .deleteApiKeyForUser(userId, name, xDaytonaOrganizationID, options)
+        .then((request) => request(axios, basePath))
+    },
+    /**
+     *
      * @summary Get API key
      * @param {string} name
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
@@ -505,6 +607,27 @@ export class ApiKeysApi extends BaseAPI {
   public deleteApiKey(name: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
     return ApiKeysApiFp(this.configuration)
       .deleteApiKey(name, xDaytonaOrganizationID, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   *
+   * @summary Delete API key for user
+   * @param {string} userId
+   * @param {string} name
+   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof ApiKeysApi
+   */
+  public deleteApiKeyForUser(
+    userId: string,
+    name: string,
+    xDaytonaOrganizationID?: string,
+    options?: RawAxiosRequestConfig,
+  ) {
+    return ApiKeysApiFp(this.configuration)
+      .deleteApiKeyForUser(userId, name, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 

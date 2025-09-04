@@ -54,6 +54,12 @@ export interface ApiKeyList {
    * @memberof ApiKeyList
    */
   expiresAt: Date | null
+  /**
+   * The user ID of the user who created the API key
+   * @type {string}
+   * @memberof ApiKeyList
+   */
+  userId: string
 }
 
 export const ApiKeyListPermissionsEnum = {

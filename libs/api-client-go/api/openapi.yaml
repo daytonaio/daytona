@@ -168,6 +168,44 @@ paths:
       summary: Get API key
       tags:
         - api-keys
+  /api-keys/{userId}/{name}:
+    delete:
+      operationId: deleteApiKeyForUser
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: userId
+          required: true
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: name
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '204':
+          description: API key deleted successfully.
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Delete API key for user
+      tags:
+        - api-keys
   /organizations/invitations:
     get:
       operationId: listOrganizationInvitationsForAuthenticatedUser
@@ -6439,6 +6477,7 @@ components:
           - write:registries
         name: My API Key
         value: bb_********************def
+        userId: '123'
         expiresAt: 2024-03-14T12:00:00Z
       properties:
         name:
@@ -6483,12 +6522,17 @@ components:
           format: date-time
           nullable: true
           type: string
+        userId:
+          description: The user ID of the user who created the API key
+          example: '123'
+          type: string
       required:
         - createdAt
         - expiresAt
         - lastUsedAt
         - name
         - permissions
+        - userId
         - value
       type: object
     OrganizationRole:
