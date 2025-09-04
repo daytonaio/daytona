@@ -13,7 +13,6 @@ import { UserModule } from '../user/user.module'
 import { RunnerService } from './services/runner.service'
 import { Runner } from './entities/runner.entity'
 import { RunnerController } from './controllers/runner.controller'
-import { AuthModule } from '../auth/auth.module'
 import { ToolboxService } from './services/toolbox.service'
 import { DockerRegistryModule } from '../docker-registry/docker-registry.module'
 import { SandboxManager } from './managers/sandbox.manager'
@@ -50,7 +49,6 @@ import { SshAccess } from './entities/ssh-access.entity'
 @Module({
   imports: [
     UserModule,
-    AuthModule,
     DockerRegistryModule,
     OrganizationModule,
     TypeOrmModule.forFeature([
