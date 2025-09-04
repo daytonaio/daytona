@@ -124,7 +124,7 @@ async function main() {
   } catch (error) {
     console.error('Sandbox flow error:', error)
   } finally {
-    if (sandbox) await daytona.remove(sandbox)
+    if (sandbox) await daytona.delete(sandbox)
   }
 }
 
