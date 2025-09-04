@@ -1,5 +1,5 @@
 ---
-title: Network Limits
+title: Network Limits (Firewall)
 ---
 
 import { TabItem, Tabs } from '@astrojs/starlight/components'
@@ -81,8 +81,10 @@ The `networkAllowList` accepts up to 5 CIDR network blocks separated by commas:
 - **Multiple networks**: `208.80.154.232/32,199.16.156.103/32,10.0.0.0/8`
 
 :::note
-**Essential Services**: Services that are essential for development are accessible on all tiers, including package registries (npm, PyPI), Docker Hub, Git repositories (GitHub, GitLab, Bitbucket), and system package managers (apt, yum) etc.\
+**Essential Services**: Services that are essential for development are accessible on all tiers, including package registries, container registries, Git repositories, CDN services, platform services, system package managers etc.\
 If you experience issues with any essential development services, please contact [support@daytona.io](mailto:support@daytona.io) for assistance as these should be accessible on all tiers.
+
+For a complete list of whitelisted services, see [Essential Services](#essential-services) below.
 :::
 
 ## Organization Configuration
@@ -112,13 +114,44 @@ Network limits provide several security advantages:
 - **Complies with security policies** for development environments
 - **Enables fine-grained control** over network access
 
-:::tip
-- Use specific IP addresses in your allow list rather than broad ranges
-- Test network connectivity before starting critical development work
-- Consider upgrading your tier if you need access to many external services
-- Use **`networkBlockAll`** for maximum security when external access isn't needed
+:::caution
+Enabling unrestricted network access may pose security risks when executing untrusted code. It is recommended to whitelist specific network addresses using `networkAllowList` or block all network access using `networkBlockAll` instead.
 
+Test network connectivity before starting critical development work and consider upgrading your tier if you need access to many external services.
 :::
+
+
+## Essential Services
+
+The following services are whitelisted and accessible on all tiers:
+
+- Package registries:
+  - npm: `registry.npmjs.org`, `registry.npmjs.com`, `nodejs.org`, `nodesource.com`, `npm.pkg.github.com`
+  - yarn: `classic.yarnpkg.com`, `registry.yarnpkg.com`, `repo.yarnpkg.com`, `releases.yarnpkg.com`, `yarn.npmjs.org`, `yarnpkg.netlify.com`, `dl.yarnpkg.com`, `yarnpkg.com`
+  - PyPI: `pypi.org`, `pypi.python.org`, `files.pythonhosted.org`, `bootstrap.pypa.io`
+  - Maven: `repo1.maven.org`, `repo.maven.apache.org`
+- Container registries:
+  - Docker: `download.docker.com`, `registry-1.docker.io`, `registry.docker.io`, `auth.docker.io`, `index.docker.io`, `hub.docker.com`, `docker.io`
+  - Google: `gcr.io`, `asia.gcr.io`, `eu.gcr.io`, `us.gcr.io`, `marketplace.gcr.io`, `registry.cloud.google.com`
+  - Microsoft: `mcr.microsoft.com`
+  - Quay: `quay.io`, `quay-registry.s3.amazonaws.com`
+  - Kubernetes: `registry.k8s.io`
+- Git repositories:
+  - GitHub: `github.com`, `api.github.com`, `raw.githubusercontent.com`, `github-releases.githubusercontent.com`, `codeload.github.com`, `ghcr.io`, `packages.github.com`
+  - GitLab: `gitlab.com`, `registry.gitlab.com`
+  - Bitbucket: `bitbucket.org`
+- System package managers:
+  - Ubuntu: `archive.ubuntu.com`, `security.ubuntu.com`
+  - Debian: `deb.debian.org`, `security.debian.org`, `cdn-fastly.deb.debian.org`, `ftp.debian.org`
+- CDN services:
+  - Cloudflare: `cloudflare.com`
+  - Fastly: `fastly.com`
+  - JavaScript CDNs: `unpkg.com`, `jsdelivr.net`
+- AI/ML services:
+  - Anthropic: `api.anthropic.com`
+- Platform services:
+  - Daytona: `app.daytona.io`
+
 
 ## Getting Help
 
