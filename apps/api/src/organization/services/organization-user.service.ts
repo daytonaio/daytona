@@ -57,7 +57,12 @@ export class OrganizationUserService {
     })
   }
 
-  async updateRole(organizationId: string, userId: string, role: OrganizationMemberRole): Promise<OrganizationUserDto> {
+  async updateAccess(
+    organizationId: string,
+    userId: string,
+    role: OrganizationMemberRole,
+    assignedRoleIds: string[],
+  ): Promise<OrganizationUserDto> {
     let organizationUser = await this.organizationUserRepository.findOne({
       where: {
         organizationId,
@@ -85,101 +90,15 @@ export class OrganizationUserService {
       }
     }
 
+    const assignedRoles = await this.organizationRoleService.findByIds(assignedRoleIds)
+    if (assignedRoles.length !== assignedRoleIds.length) {
+      throw new BadRequestException('One or more role IDs are invalid')
+    }
+
+    // TODO: revoke api keys
+
     organizationUser.role = role
-    organizationUser = await this.organizationUserRepository.save(organizationUser)
-
-    const user = await this.userService.findOne(userId)
-
-    return OrganizationUserDto.fromEntities(organizationUser, user)
-  }
-
-  async updateAssignedRoles(organizationId: string, userId: string, roleIds: string[]): Promise<OrganizationUserDto> {
-    let organizationUser = await this.organizationUserRepository.findOne({
-      where: {
-        organizationId,
-        userId,
-      },
-      relations: {
-        assignedRoles: true,
-      },
-    })
-
-    if (!organizationUser) {
-      throw new NotFoundException(`User with ID ${userId} not found in organization with ID ${organizationId}`)
-    }
-
-    const roles = await this.organizationRoleService.findByIds(roleIds)
-
-    if (roles.length !== roleIds.length) {
-      throw new BadRequestException('One or more role IDs are invalid')
-    }
-
-    organizationUser.assignedRoles = roles
-    organizationUser = await this.organizationUserRepository.save(organizationUser)
-
-    const user = await this.userService.findOne(userId)
-
-    return OrganizationUserDto.fromEntities(organizationUser, user)
-  }
-
-  async assignRoles(organizationId: string, userId: string, roleIds: string[]): Promise<OrganizationUserDto> {
-    let organizationUser = await this.organizationUserRepository.findOne({
-      where: {
-        organizationId,
-        userId,
-      },
-      relations: {
-        assignedRoles: true,
-      },
-    })
-
-    if (!organizationUser) {
-      throw new NotFoundException(`User with ID ${userId} not found in organization with ID ${organizationId}`)
-    }
-
-    const newRoles = await this.organizationRoleService.findByIds(roleIds)
-
-    if (newRoles.length !== roleIds.length) {
-      throw new BadRequestException('One or more role IDs are invalid')
-    }
-
-    organizationUser.assignedRoles = [
-      ...organizationUser.assignedRoles,
-      ...newRoles.filter(
-        (newRole) => !organizationUser.assignedRoles.some((existingRole) => existingRole.id === newRole.id),
-      ),
-    ]
-    organizationUser = await this.organizationUserRepository.save(organizationUser)
-
-    const user = await this.userService.findOne(userId)
-
-    return OrganizationUserDto.fromEntities(organizationUser, user)
-  }
-
-  async unassignRoles(organizationId: string, userId: string, roleIds: string[]): Promise<OrganizationUserDto> {
-    let organizationUser = await this.organizationUserRepository.findOne({
-      where: {
-        organizationId,
-        userId,
-      },
-      relations: {
-        assignedRoles: true,
-      },
-    })
-
-    if (!organizationUser) {
-      throw new NotFoundException(`User with ID ${userId} not found in organization with ID ${organizationId}`)
-    }
-
-    const removedRoles = await this.organizationRoleService.findByIds(roleIds)
-
-    if (removedRoles.length !== roleIds.length) {
-      throw new BadRequestException('One or more role IDs are invalid')
-    }
-
-    organizationUser.assignedRoles = organizationUser.assignedRoles.filter(
-      (existingRole) => !roleIds.includes(existingRole.id),
-    )
+    organizationUser.assignedRoles = assignedRoles
     organizationUser = await this.organizationUserRepository.save(organizationUser)
 
     const user = await this.userService.findOne(userId)

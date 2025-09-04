@@ -50,11 +50,9 @@ import type { OrganizationUsageOverview } from '../models'
 // @ts-ignore
 import type { OrganizationUser } from '../models'
 // @ts-ignore
-import type { UpdateAssignedOrganizationRoles } from '../models'
-// @ts-ignore
 import type { UpdateOrganizationInvitation } from '../models'
 // @ts-ignore
-import type { UpdateOrganizationMemberRole } from '../models'
+import type { UpdateOrganizationMemberAccess } from '../models'
 // @ts-ignore
 import type { UpdateOrganizationQuota } from '../models'
 // @ts-ignore
@@ -970,30 +968,30 @@ export const OrganizationsApiAxiosParamCreator = function (configuration?: Confi
     },
     /**
      *
-     * @summary Update assigned roles to organization member
+     * @summary Update access for organization member
      * @param {string} organizationId Organization ID
      * @param {string} userId User ID
-     * @param {UpdateAssignedOrganizationRoles} updateAssignedOrganizationRoles
+     * @param {UpdateOrganizationMemberAccess} updateOrganizationMemberAccess
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    updateAssignedOrganizationRoles: async (
+    updateAccessForOrganizationMember: async (
       organizationId: string,
       userId: string,
-      updateAssignedOrganizationRoles: UpdateAssignedOrganizationRoles,
+      updateOrganizationMemberAccess: UpdateOrganizationMemberAccess,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'organizationId' is not null or undefined
-      assertParamExists('updateAssignedOrganizationRoles', 'organizationId', organizationId)
+      assertParamExists('updateAccessForOrganizationMember', 'organizationId', organizationId)
       // verify required parameter 'userId' is not null or undefined
-      assertParamExists('updateAssignedOrganizationRoles', 'userId', userId)
-      // verify required parameter 'updateAssignedOrganizationRoles' is not null or undefined
+      assertParamExists('updateAccessForOrganizationMember', 'userId', userId)
+      // verify required parameter 'updateOrganizationMemberAccess' is not null or undefined
       assertParamExists(
-        'updateAssignedOrganizationRoles',
-        'updateAssignedOrganizationRoles',
-        updateAssignedOrganizationRoles,
+        'updateAccessForOrganizationMember',
+        'updateOrganizationMemberAccess',
+        updateOrganizationMemberAccess,
       )
-      const localVarPath = `/organizations/{organizationId}/users/{userId}/assigned-roles`
+      const localVarPath = `/organizations/{organizationId}/users/{userId}/access`
         .replace(`{${'organizationId'}}`, encodeURIComponent(String(organizationId)))
         .replace(`{${'userId'}}`, encodeURIComponent(String(userId)))
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
@@ -1019,7 +1017,7 @@ export const OrganizationsApiAxiosParamCreator = function (configuration?: Confi
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
       localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
       localVarRequestOptions.data = serializeDataIfNeeded(
-        updateAssignedOrganizationRoles,
+        updateOrganizationMemberAccess,
         localVarRequestOptions,
         configuration,
       )
@@ -1187,63 +1185,6 @@ export const OrganizationsApiAxiosParamCreator = function (configuration?: Confi
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
       localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
       localVarRequestOptions.data = serializeDataIfNeeded(updateOrganizationRole, localVarRequestOptions, configuration)
-
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      }
-    },
-    /**
-     *
-     * @summary Update role for organization member
-     * @param {string} organizationId Organization ID
-     * @param {string} userId User ID
-     * @param {UpdateOrganizationMemberRole} updateOrganizationMemberRole
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    updateRoleForOrganizationMember: async (
-      organizationId: string,
-      userId: string,
-      updateOrganizationMemberRole: UpdateOrganizationMemberRole,
-      options: RawAxiosRequestConfig = {},
-    ): Promise<RequestArgs> => {
-      // verify required parameter 'organizationId' is not null or undefined
-      assertParamExists('updateRoleForOrganizationMember', 'organizationId', organizationId)
-      // verify required parameter 'userId' is not null or undefined
-      assertParamExists('updateRoleForOrganizationMember', 'userId', userId)
-      // verify required parameter 'updateOrganizationMemberRole' is not null or undefined
-      assertParamExists('updateRoleForOrganizationMember', 'updateOrganizationMemberRole', updateOrganizationMemberRole)
-      const localVarPath = `/organizations/{organizationId}/users/{userId}/role`
-        .replace(`{${'organizationId'}}`, encodeURIComponent(String(organizationId)))
-        .replace(`{${'userId'}}`, encodeURIComponent(String(userId)))
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
-      let baseOptions
-      if (configuration) {
-        baseOptions = configuration.baseOptions
-      }
-
-      const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options }
-      const localVarHeaderParameter = {} as any
-      const localVarQueryParameter = {} as any
-
-      // authentication bearer required
-      // http bearer authentication required
-      await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-      // authentication oauth2 required
-
-      localVarHeaderParameter['Content-Type'] = 'application/json'
-
-      setSearchParams(localVarUrlObj, localVarQueryParameter)
-      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
-      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
-      localVarRequestOptions.data = serializeDataIfNeeded(
-        updateOrganizationMemberRole,
-        localVarRequestOptions,
-        configuration,
-      )
 
       return {
         url: toPathString(localVarUrlObj),
@@ -1776,28 +1717,28 @@ export const OrganizationsApiFp = function (configuration?: Configuration) {
     },
     /**
      *
-     * @summary Update assigned roles to organization member
+     * @summary Update access for organization member
      * @param {string} organizationId Organization ID
      * @param {string} userId User ID
-     * @param {UpdateAssignedOrganizationRoles} updateAssignedOrganizationRoles
+     * @param {UpdateOrganizationMemberAccess} updateOrganizationMemberAccess
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    async updateAssignedOrganizationRoles(
+    async updateAccessForOrganizationMember(
       organizationId: string,
       userId: string,
-      updateAssignedOrganizationRoles: UpdateAssignedOrganizationRoles,
+      updateOrganizationMemberAccess: UpdateOrganizationMemberAccess,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<OrganizationUser>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.updateAssignedOrganizationRoles(
+      const localVarAxiosArgs = await localVarAxiosParamCreator.updateAccessForOrganizationMember(
         organizationId,
         userId,
-        updateAssignedOrganizationRoles,
+        updateOrganizationMemberAccess,
         options,
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['OrganizationsApi.updateAssignedOrganizationRoles']?.[localVarOperationServerIndex]?.url
+        operationServerMap['OrganizationsApi.updateAccessForOrganizationMember']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -1891,38 +1832,6 @@ export const OrganizationsApiFp = function (configuration?: Configuration) {
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
         operationServerMap['OrganizationsApi.updateOrganizationRole']?.[localVarOperationServerIndex]?.url
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration,
-        )(axios, localVarOperationServerBasePath || basePath)
-    },
-    /**
-     *
-     * @summary Update role for organization member
-     * @param {string} organizationId Organization ID
-     * @param {string} userId User ID
-     * @param {UpdateOrganizationMemberRole} updateOrganizationMemberRole
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async updateRoleForOrganizationMember(
-      organizationId: string,
-      userId: string,
-      updateOrganizationMemberRole: UpdateOrganizationMemberRole,
-      options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<OrganizationUser>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.updateRoleForOrganizationMember(
-        organizationId,
-        userId,
-        updateOrganizationMemberRole,
-        options,
-      )
-      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
-      const localVarOperationServerBasePath =
-        operationServerMap['OrganizationsApi.updateRoleForOrganizationMember']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -2219,21 +2128,21 @@ export const OrganizationsApiFactory = function (
     },
     /**
      *
-     * @summary Update assigned roles to organization member
+     * @summary Update access for organization member
      * @param {string} organizationId Organization ID
      * @param {string} userId User ID
-     * @param {UpdateAssignedOrganizationRoles} updateAssignedOrganizationRoles
+     * @param {UpdateOrganizationMemberAccess} updateOrganizationMemberAccess
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    updateAssignedOrganizationRoles(
+    updateAccessForOrganizationMember(
       organizationId: string,
       userId: string,
-      updateAssignedOrganizationRoles: UpdateAssignedOrganizationRoles,
+      updateOrganizationMemberAccess: UpdateOrganizationMemberAccess,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<OrganizationUser> {
       return localVarFp
-        .updateAssignedOrganizationRoles(organizationId, userId, updateAssignedOrganizationRoles, options)
+        .updateAccessForOrganizationMember(organizationId, userId, updateOrganizationMemberAccess, options)
         .then((request) => request(axios, basePath))
     },
     /**
@@ -2289,25 +2198,6 @@ export const OrganizationsApiFactory = function (
     ): AxiosPromise<OrganizationRole> {
       return localVarFp
         .updateOrganizationRole(organizationId, roleId, updateOrganizationRole, options)
-        .then((request) => request(axios, basePath))
-    },
-    /**
-     *
-     * @summary Update role for organization member
-     * @param {string} organizationId Organization ID
-     * @param {string} userId User ID
-     * @param {UpdateOrganizationMemberRole} updateOrganizationMemberRole
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    updateRoleForOrganizationMember(
-      organizationId: string,
-      userId: string,
-      updateOrganizationMemberRole: UpdateOrganizationMemberRole,
-      options?: RawAxiosRequestConfig,
-    ): AxiosPromise<OrganizationUser> {
-      return localVarFp
-        .updateRoleForOrganizationMember(organizationId, userId, updateOrganizationMemberRole, options)
         .then((request) => request(axios, basePath))
     },
   }
@@ -2631,22 +2521,22 @@ export class OrganizationsApi extends BaseAPI {
 
   /**
    *
-   * @summary Update assigned roles to organization member
+   * @summary Update access for organization member
    * @param {string} organizationId Organization ID
    * @param {string} userId User ID
-   * @param {UpdateAssignedOrganizationRoles} updateAssignedOrganizationRoles
+   * @param {UpdateOrganizationMemberAccess} updateOrganizationMemberAccess
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof OrganizationsApi
    */
-  public updateAssignedOrganizationRoles(
+  public updateAccessForOrganizationMember(
     organizationId: string,
     userId: string,
-    updateAssignedOrganizationRoles: UpdateAssignedOrganizationRoles,
+    updateOrganizationMemberAccess: UpdateOrganizationMemberAccess,
     options?: RawAxiosRequestConfig,
   ) {
     return OrganizationsApiFp(this.configuration)
-      .updateAssignedOrganizationRoles(organizationId, userId, updateAssignedOrganizationRoles, options)
+      .updateAccessForOrganizationMember(organizationId, userId, updateOrganizationMemberAccess, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
@@ -2708,27 +2598,6 @@ export class OrganizationsApi extends BaseAPI {
   ) {
     return OrganizationsApiFp(this.configuration)
       .updateOrganizationRole(organizationId, roleId, updateOrganizationRole, options)
-      .then((request) => request(this.axios, this.basePath))
-  }
-
-  /**
-   *
-   * @summary Update role for organization member
-   * @param {string} organizationId Organization ID
-   * @param {string} userId User ID
-   * @param {UpdateOrganizationMemberRole} updateOrganizationMemberRole
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof OrganizationsApi
-   */
-  public updateRoleForOrganizationMember(
-    organizationId: string,
-    userId: string,
-    updateOrganizationMemberRole: UpdateOrganizationMemberRole,
-    options?: RawAxiosRequestConfig,
-  ) {
-    return OrganizationsApiFp(this.configuration)
-      .updateRoleForOrganizationMember(organizationId, userId, updateOrganizationMemberRole, options)
       .then((request) => request(this.axios, this.basePath))
   }
 }

@@ -61,36 +61,25 @@ const OrganizationMembers: React.FC = () => {
     fetchInvitations()
   }, [fetchInvitations, refreshOrganizationMembers])
 
-  const handleUpdateMemberRole = async (userId: string, role: OrganizationUserRoleEnum): Promise<boolean> => {
+  const handleUpdateMemberAccess = async (
+    userId: string,
+    role: OrganizationUserRoleEnum,
+    assignedRoleIds: string[],
+  ): Promise<boolean> => {
     if (!selectedOrganization) {
       return false
     }
     setLoadingMemberAction((prev) => ({ ...prev, [userId]: true }))
     try {
-      await organizationsApi.updateRoleForOrganizationMember(selectedOrganization.id, userId, { role })
-      toast.success('Role updated successfully')
+      await organizationsApi.updateAccessForOrganizationMember(selectedOrganization.id, userId, {
+        role,
+        assignedRoleIds,
+      })
+      toast.success('Access updated successfully')
       await refreshOrganizationMembers()
       return true
     } catch (error) {
-      handleApiError(error, 'Failed to update member role')
-      return false
-    } finally {
-      setLoadingMemberAction((prev) => ({ ...prev, [userId]: false }))
-    }
-  }
-
-  const handleUpdateAssignedOrganizationRoles = async (userId: string, roleIds: string[]): Promise<boolean> => {
-    if (!selectedOrganization) {
-      return false
-    }
-    setLoadingMemberAction((prev) => ({ ...prev, [userId]: true }))
-    try {
-      await organizationsApi.updateAssignedOrganizationRoles(selectedOrganization.id, userId, { roleIds })
-      toast.success('Assignments updated successfully')
-      await refreshOrganizationMembers()
-      return true
-    } catch (error) {
-      handleApiError(error, 'Failed to update assignments')
+      handleApiError(error, 'Failed to update access')
       return false
     } finally {
       setLoadingMemberAction((prev) => ({ ...prev, [userId]: false }))
@@ -201,10 +190,9 @@ const OrganizationMembers: React.FC = () => {
       <OrganizationMemberTable
         data={organizationMembers}
         loadingData={loadingRoles}
-        availableOrganizationRoles={roles}
-        loadingAvailableOrganizationRoles={loadingRoles}
-        onUpdateMemberRole={handleUpdateMemberRole}
-        onUpdateAssignedOrganizationRoles={handleUpdateAssignedOrganizationRoles}
+        availableAssignments={roles}
+        loadingAvailableAssignments={loadingRoles}
+        onUpdateMemberAccess={handleUpdateMemberAccess}
         onRemoveMember={handleRemoveMember}
         loadingMemberAction={loadingMemberAction}
         ownerMode={authenticatedUserIsOwner}

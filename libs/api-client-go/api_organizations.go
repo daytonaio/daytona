@@ -286,18 +286,18 @@ type OrganizationsAPI interface {
 	UnsuspendOrganizationExecute(r OrganizationsAPIUnsuspendOrganizationRequest) (*http.Response, error)
 
 	/*
-		UpdateAssignedOrganizationRoles Update assigned roles to organization member
+		UpdateAccessForOrganizationMember Update access for organization member
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 		@param organizationId Organization ID
 		@param userId User ID
-		@return OrganizationsAPIUpdateAssignedOrganizationRolesRequest
+		@return OrganizationsAPIUpdateAccessForOrganizationMemberRequest
 	*/
-	UpdateAssignedOrganizationRoles(ctx context.Context, organizationId string, userId string) OrganizationsAPIUpdateAssignedOrganizationRolesRequest
+	UpdateAccessForOrganizationMember(ctx context.Context, organizationId string, userId string) OrganizationsAPIUpdateAccessForOrganizationMemberRequest
 
-	// UpdateAssignedOrganizationRolesExecute executes the request
+	// UpdateAccessForOrganizationMemberExecute executes the request
 	//  @return OrganizationUser
-	UpdateAssignedOrganizationRolesExecute(r OrganizationsAPIUpdateAssignedOrganizationRolesRequest) (*OrganizationUser, *http.Response, error)
+	UpdateAccessForOrganizationMemberExecute(r OrganizationsAPIUpdateAccessForOrganizationMemberRequest) (*OrganizationUser, *http.Response, error)
 
 	/*
 		UpdateOrganizationInvitation Update organization invitation
@@ -339,20 +339,6 @@ type OrganizationsAPI interface {
 	// UpdateOrganizationRoleExecute executes the request
 	//  @return OrganizationRole
 	UpdateOrganizationRoleExecute(r OrganizationsAPIUpdateOrganizationRoleRequest) (*OrganizationRole, *http.Response, error)
-
-	/*
-		UpdateRoleForOrganizationMember Update role for organization member
-
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param organizationId Organization ID
-		@param userId User ID
-		@return OrganizationsAPIUpdateRoleForOrganizationMemberRequest
-	*/
-	UpdateRoleForOrganizationMember(ctx context.Context, organizationId string, userId string) OrganizationsAPIUpdateRoleForOrganizationMemberRequest
-
-	// UpdateRoleForOrganizationMemberExecute executes the request
-	//  @return OrganizationUser
-	UpdateRoleForOrganizationMemberExecute(r OrganizationsAPIUpdateRoleForOrganizationMemberRequest) (*OrganizationUser, *http.Response, error)
 }
 
 // OrganizationsAPIService OrganizationsAPI service
@@ -2429,33 +2415,33 @@ func (a *OrganizationsAPIService) UnsuspendOrganizationExecute(r OrganizationsAP
 	return localVarHTTPResponse, nil
 }
 
-type OrganizationsAPIUpdateAssignedOrganizationRolesRequest struct {
-	ctx                             context.Context
-	ApiService                      OrganizationsAPI
-	organizationId                  string
-	userId                          string
-	updateAssignedOrganizationRoles *UpdateAssignedOrganizationRoles
+type OrganizationsAPIUpdateAccessForOrganizationMemberRequest struct {
+	ctx                            context.Context
+	ApiService                     OrganizationsAPI
+	organizationId                 string
+	userId                         string
+	updateOrganizationMemberAccess *UpdateOrganizationMemberAccess
 }
 
-func (r OrganizationsAPIUpdateAssignedOrganizationRolesRequest) UpdateAssignedOrganizationRoles(updateAssignedOrganizationRoles UpdateAssignedOrganizationRoles) OrganizationsAPIUpdateAssignedOrganizationRolesRequest {
-	r.updateAssignedOrganizationRoles = &updateAssignedOrganizationRoles
+func (r OrganizationsAPIUpdateAccessForOrganizationMemberRequest) UpdateOrganizationMemberAccess(updateOrganizationMemberAccess UpdateOrganizationMemberAccess) OrganizationsAPIUpdateAccessForOrganizationMemberRequest {
+	r.updateOrganizationMemberAccess = &updateOrganizationMemberAccess
 	return r
 }
 
-func (r OrganizationsAPIUpdateAssignedOrganizationRolesRequest) Execute() (*OrganizationUser, *http.Response, error) {
-	return r.ApiService.UpdateAssignedOrganizationRolesExecute(r)
+func (r OrganizationsAPIUpdateAccessForOrganizationMemberRequest) Execute() (*OrganizationUser, *http.Response, error) {
+	return r.ApiService.UpdateAccessForOrganizationMemberExecute(r)
 }
 
 /*
-UpdateAssignedOrganizationRoles Update assigned roles to organization member
+UpdateAccessForOrganizationMember Update access for organization member
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param organizationId Organization ID
 	@param userId User ID
-	@return OrganizationsAPIUpdateAssignedOrganizationRolesRequest
+	@return OrganizationsAPIUpdateAccessForOrganizationMemberRequest
 */
-func (a *OrganizationsAPIService) UpdateAssignedOrganizationRoles(ctx context.Context, organizationId string, userId string) OrganizationsAPIUpdateAssignedOrganizationRolesRequest {
-	return OrganizationsAPIUpdateAssignedOrganizationRolesRequest{
+func (a *OrganizationsAPIService) UpdateAccessForOrganizationMember(ctx context.Context, organizationId string, userId string) OrganizationsAPIUpdateAccessForOrganizationMemberRequest {
+	return OrganizationsAPIUpdateAccessForOrganizationMemberRequest{
 		ApiService:     a,
 		ctx:            ctx,
 		organizationId: organizationId,
@@ -2466,7 +2452,7 @@ func (a *OrganizationsAPIService) UpdateAssignedOrganizationRoles(ctx context.Co
 // Execute executes the request
 //
 //	@return OrganizationUser
-func (a *OrganizationsAPIService) UpdateAssignedOrganizationRolesExecute(r OrganizationsAPIUpdateAssignedOrganizationRolesRequest) (*OrganizationUser, *http.Response, error) {
+func (a *OrganizationsAPIService) UpdateAccessForOrganizationMemberExecute(r OrganizationsAPIUpdateAccessForOrganizationMemberRequest) (*OrganizationUser, *http.Response, error) {
 	var (
 		localVarHTTPMethod  = http.MethodPost
 		localVarPostBody    interface{}
@@ -2474,20 +2460,20 @@ func (a *OrganizationsAPIService) UpdateAssignedOrganizationRolesExecute(r Organ
 		localVarReturnValue *OrganizationUser
 	)
 
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "OrganizationsAPIService.UpdateAssignedOrganizationRoles")
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "OrganizationsAPIService.UpdateAccessForOrganizationMember")
 	if err != nil {
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/organizations/{organizationId}/users/{userId}/assigned-roles"
+	localVarPath := localBasePath + "/organizations/{organizationId}/users/{userId}/access"
 	localVarPath = strings.Replace(localVarPath, "{"+"organizationId"+"}", url.PathEscape(parameterValueToString(r.organizationId, "organizationId")), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"userId"+"}", url.PathEscape(parameterValueToString(r.userId, "userId")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
-	if r.updateAssignedOrganizationRoles == nil {
-		return localVarReturnValue, nil, reportError("updateAssignedOrganizationRoles is required and must be specified")
+	if r.updateOrganizationMemberAccess == nil {
+		return localVarReturnValue, nil, reportError("updateOrganizationMemberAccess is required and must be specified")
 	}
 
 	// to determine the Content-Type header
@@ -2508,7 +2494,7 @@ func (a *OrganizationsAPIService) UpdateAssignedOrganizationRolesExecute(r Organ
 		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
 	}
 	// body params
-	localVarPostBody = r.updateAssignedOrganizationRoles
+	localVarPostBody = r.updateOrganizationMemberAccess
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
 		return localVarReturnValue, nil, err
@@ -2856,123 +2842,6 @@ func (a *OrganizationsAPIService) UpdateOrganizationRoleExecute(r OrganizationsA
 	}
 	// body params
 	localVarPostBody = r.updateOrganizationRole
-	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
-	if err != nil {
-		return localVarReturnValue, nil, err
-	}
-
-	localVarHTTPResponse, err := a.client.callAPI(req)
-	if err != nil || localVarHTTPResponse == nil {
-		return localVarReturnValue, localVarHTTPResponse, err
-	}
-
-	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
-	localVarHTTPResponse.Body.Close()
-	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
-	if err != nil {
-		return localVarReturnValue, localVarHTTPResponse, err
-	}
-
-	if localVarHTTPResponse.StatusCode >= 300 {
-		newErr := &GenericOpenAPIError{
-			body:  localVarBody,
-			error: localVarHTTPResponse.Status,
-		}
-		return localVarReturnValue, localVarHTTPResponse, newErr
-	}
-
-	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-	if err != nil {
-		newErr := &GenericOpenAPIError{
-			body:  localVarBody,
-			error: err.Error(),
-		}
-		return localVarReturnValue, localVarHTTPResponse, newErr
-	}
-
-	return localVarReturnValue, localVarHTTPResponse, nil
-}
-
-type OrganizationsAPIUpdateRoleForOrganizationMemberRequest struct {
-	ctx                          context.Context
-	ApiService                   OrganizationsAPI
-	organizationId               string
-	userId                       string
-	updateOrganizationMemberRole *UpdateOrganizationMemberRole
-}
-
-func (r OrganizationsAPIUpdateRoleForOrganizationMemberRequest) UpdateOrganizationMemberRole(updateOrganizationMemberRole UpdateOrganizationMemberRole) OrganizationsAPIUpdateRoleForOrganizationMemberRequest {
-	r.updateOrganizationMemberRole = &updateOrganizationMemberRole
-	return r
-}
-
-func (r OrganizationsAPIUpdateRoleForOrganizationMemberRequest) Execute() (*OrganizationUser, *http.Response, error) {
-	return r.ApiService.UpdateRoleForOrganizationMemberExecute(r)
-}
-
-/*
-UpdateRoleForOrganizationMember Update role for organization member
-
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param organizationId Organization ID
-	@param userId User ID
-	@return OrganizationsAPIUpdateRoleForOrganizationMemberRequest
-*/
-func (a *OrganizationsAPIService) UpdateRoleForOrganizationMember(ctx context.Context, organizationId string, userId string) OrganizationsAPIUpdateRoleForOrganizationMemberRequest {
-	return OrganizationsAPIUpdateRoleForOrganizationMemberRequest{
-		ApiService:     a,
-		ctx:            ctx,
-		organizationId: organizationId,
-		userId:         userId,
-	}
-}
-
-// Execute executes the request
-//
-//	@return OrganizationUser
-func (a *OrganizationsAPIService) UpdateRoleForOrganizationMemberExecute(r OrganizationsAPIUpdateRoleForOrganizationMemberRequest) (*OrganizationUser, *http.Response, error) {
-	var (
-		localVarHTTPMethod  = http.MethodPost
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *OrganizationUser
-	)
-
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "OrganizationsAPIService.UpdateRoleForOrganizationMember")
-	if err != nil {
-		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
-	}
-
-	localVarPath := localBasePath + "/organizations/{organizationId}/users/{userId}/role"
-	localVarPath = strings.Replace(localVarPath, "{"+"organizationId"+"}", url.PathEscape(parameterValueToString(r.organizationId, "organizationId")), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"userId"+"}", url.PathEscape(parameterValueToString(r.userId, "userId")), -1)
-
-	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := url.Values{}
-	localVarFormParams := url.Values{}
-	if r.updateOrganizationMemberRole == nil {
-		return localVarReturnValue, nil, reportError("updateOrganizationMemberRole is required and must be specified")
-	}
-
-	// to determine the Content-Type header
-	localVarHTTPContentTypes := []string{"application/json"}
-
-	// set Content-Type header
-	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
-	if localVarHTTPContentType != "" {
-		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
-	}
-
-	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{"application/json"}
-
-	// set Accept header
-	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
-	if localVarHTTPHeaderAccept != "" {
-		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
-	}
-	// body params
-	localVarPostBody = r.updateOrganizationMemberRole
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
 		return localVarReturnValue, nil, err
