@@ -44,11 +44,6 @@ export const UpdateOrganizationMemberAccess: React.FC<UpdateOrganizationMemberAc
   const [role, setRole] = useState<OrganizationUserRoleEnum>(initialRole)
   const [assignedRoleIds, setAssignedRoleIds] = useState<string[]>(initialAssignments.map((a) => a.id))
 
-  // TODO: rework to determine whether there is lack of initial permissions to display a warning
-  // const hasUnassignedRoles = useMemo(() => {
-  //   return initialData.some((role) => !roleIds.includes(role.id))
-  // }, [initialData, roleIds])
-
   const handleRoleAssignmentToggle = (roleId: string) => {
     setAssignedRoleIds((current) => {
       if (current.includes(roleId)) {
@@ -85,6 +80,12 @@ export const UpdateOrganizationMemberAccess: React.FC<UpdateOrganizationMemberAc
           <DialogDescription>
             Manage access to the organization with an appropriate role and assignments.
           </DialogDescription>
+          {role !== OrganizationUserRoleEnum.OWNER && (
+            <DialogDescription className="text-yellow-600 dark:text-yellow-400">
+              Removing assignments will automatically revoke any API keys this member created using permissions based on
+              those assignments.
+            </DialogDescription>
+          )}
         </DialogHeader>
         <form
           id="update-access-form"
@@ -151,29 +152,19 @@ export const UpdateOrganizationMemberAccess: React.FC<UpdateOrganizationMemberAc
             )}
         </form>
         <DialogFooter>
-          {!loadingAvailableAssignments ? (
-            <>
-              <DialogClose asChild>
-                <Button type="button" variant="secondary" disabled={processingUpdateAccess}>
-                  Cancel
-                </Button>
-              </DialogClose>
-              {processingUpdateAccess ? (
-                <Button type="button" variant="default" disabled>
-                  Saving...
-                </Button>
-              ) : (
-                <Button type="submit" form="update-access-form" variant="default">
-                  Save
-                </Button>
-              )}
-            </>
+          <DialogClose asChild>
+            <Button type="button" variant="secondary" disabled={processingUpdateAccess}>
+              Cancel
+            </Button>
+          </DialogClose>
+          {processingUpdateAccess ? (
+            <Button type="button" variant="default" disabled>
+              Saving...
+            </Button>
           ) : (
-            <DialogClose asChild>
-              <Button type="button" variant="secondary">
-                Close
-              </Button>
-            </DialogClose>
+            <Button type="submit" form="update-access-form" variant="default" disabled={loadingAvailableAssignments}>
+              Save
+            </Button>
           )}
         </DialogFooter>
       </DialogContent>
