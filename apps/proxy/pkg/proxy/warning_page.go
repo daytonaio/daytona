@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"slices"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -296,7 +297,11 @@ func isBrowser(userAgent string) bool {
 	ua := useragent.New(userAgent)
 
 	browser, _ := ua.Browser()
-	return browser != ""
+	browser = strings.ToLower(browser)
+
+	browsers := []string{"chrome", "firefox", "safari", "edge", "brave", "vivaldi", "samsung", "opera"}
+
+	return slices.Contains(browsers, browser)
 }
 
 // hasAcceptedWarning checks if the user has already accepted the warning
