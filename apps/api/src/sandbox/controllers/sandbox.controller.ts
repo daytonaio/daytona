@@ -37,6 +37,7 @@ import {
   ApiBearerAuth,
 } from '@nestjs/swagger'
 import { SandboxDto, SandboxLabelsDto } from '../dto/sandbox.dto'
+import { UpdateSandboxStateDto } from '../dto/update-sandbox-state.dto'
 import { RunnerService } from '../services/runner.service'
 import { SandboxState } from '../enums/sandbox-state.enum'
 import { Sandbox as SandboxEntity } from '../entities/sandbox.entity'
@@ -367,6 +368,41 @@ export class SandboxController {
   ): Promise<SandboxLabelsDto> {
     const labels = await this.sandboxService.replaceLabels(sandboxId, labelsDto.labels)
     return { labels }
+  }
+
+  @Put(':sandboxId/state')
+  @UseInterceptors(ContentTypeInterceptor)
+  @ApiOperation({
+    summary: 'Update sandbox state',
+    operationId: 'updateSandboxState',
+  })
+  @ApiParam({
+    name: 'sandboxId',
+    description: 'ID of the sandbox',
+    type: 'string',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Sandbox state has been successfully updated',
+  })
+  @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
+  @UseGuards(SandboxAccessGuard)
+  @Audit({
+    action: AuditAction.UPDATE,
+    targetType: AuditTarget.SANDBOX,
+    targetIdFromRequest: (req) => req.params.sandboxId,
+    requestMetadata: {
+      body: (req: TypedRequest<UpdateSandboxStateDto>) => ({
+        state: req.body?.state,
+      }),
+    },
+  })
+  async updateSandboxState(
+    @Param('sandboxId') sandboxId: string,
+    @Body() updateStateDto: UpdateSandboxStateDto,
+  ): Promise<void> {
+    // TOOD: Consider changing the desired state
+    await this.sandboxService.updateState(sandboxId, updateStateDto.state)
   }
 
   @Post(':sandboxId/backup')

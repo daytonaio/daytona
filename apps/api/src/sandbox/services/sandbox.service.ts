@@ -859,6 +859,19 @@ export class SandboxService {
     }
   }
 
+  async updateState(sandboxId: string, newState: SandboxState): Promise<void> {
+    const sandbox = await this.sandboxRepository.findOne({
+      where: { id: sandboxId },
+    })
+
+    if (!sandbox) {
+      throw new NotFoundException(`Sandbox with ID ${sandboxId} not found`)
+    }
+
+    sandbox.state = newState
+    await this.sandboxRepository.save(sandbox)
+  }
+
   @OnEvent(WarmPoolEvents.TOPUP_REQUESTED)
   private async createWarmPoolSandbox(event: WarmPoolTopUpRequested) {
     await this.createForWarmPool(event.warmPool)
