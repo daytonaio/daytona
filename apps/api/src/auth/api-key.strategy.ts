@@ -15,6 +15,8 @@ import { InjectRedis } from '@nestjs-modules/ioredis'
 import Redis from 'ioredis'
 import { SystemRole } from '../user/enums/system-role.enum'
 import { SshGatewayContext } from '../common/interfaces/ssh-gateway-context.interface'
+import { RunnerContext } from '../common/interfaces/runner-context.interface'
+import { RunnerService } from '../sandbox/services/runner.service'
 
 type UserCache = {
   userId: string
@@ -31,6 +33,7 @@ export class ApiKeyStrategy extends PassportStrategy(Strategy, 'api-key') implem
     private readonly apiKeyService: ApiKeyService,
     private readonly userService: UserService,
     private readonly configService: TypedConfigService,
+    private readonly runnerService: RunnerService,
   ) {
     super()
     this.logger.log('ApiKeyStrategy constructor called')
@@ -40,7 +43,7 @@ export class ApiKeyStrategy extends PassportStrategy(Strategy, 'api-key') implem
     this.logger.log('ApiKeyStrategy initialized')
   }
 
-  async validate(token: string): Promise<AuthContext | ProxyContext | SshGatewayContext> {
+  async validate(token: string): Promise<AuthContext | ProxyContext | SshGatewayContext | RunnerContext> {
     this.logger.debug('Validate method called')
     this.logger.debug(`Validating API key: ${token.substring(0, 8)}...`)
 
@@ -95,14 +98,24 @@ export class ApiKeyStrategy extends PassportStrategy(Strategy, 'api-key') implem
       this.logger.debug('Authentication successful', result)
       return result
     } catch (error) {
-      this.logger.debug('Error in validate method:', error)
-
-      if (error instanceof UnauthorizedException) {
-        throw error
-      }
-
-      throw new UnauthorizedException('Invalid API key')
+      this.logger.debug('Error checking user API key:', error)
+      // Continue to check runner API keys if user check fails
     }
+
+    try {
+      const runner = await this.runnerService.findByApiKey(token)
+      if (runner) {
+        this.logger.debug(`Runner API key found for runner: ${runner.id}`)
+        return {
+          role: 'runner',
+          runnerId: runner.id,
+        }
+      }
+    } catch (error) {
+      this.logger.debug('Error checking runner API key:', error)
+    }
+
+    throw new UnauthorizedException('Invalid API key')
   }
 
   private async getUserCache(userId: string): Promise<UserCache | null> {

@@ -95,6 +95,10 @@ export class RunnerService {
     })
   }
 
+  async findByApiKey(apiKey: string): Promise<Runner | null> {
+    return this.runnerRepository.findOneBy({ apiKey })
+  }
+
   async findBySandboxId(sandboxId: string): Promise<Runner | null> {
     const sandbox = await this.sandboxRepository.findOneBy({ id: sandboxId, state: Not(SandboxState.DESTROYED) })
     if (!sandbox) {

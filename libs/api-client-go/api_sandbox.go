@@ -124,6 +124,18 @@ type SandboxAPI interface {
 	GetSandboxExecute(r SandboxAPIGetSandboxRequest) (*Sandbox, *http.Response, error)
 
 	/*
+		GetSandboxesForRunner Get sandboxes for the authenticated runner
+
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return SandboxAPIGetSandboxesForRunnerRequest
+	*/
+	GetSandboxesForRunner(ctx context.Context) SandboxAPIGetSandboxesForRunnerRequest
+
+	// GetSandboxesForRunnerExecute executes the request
+	//  @return []Sandbox
+	GetSandboxesForRunnerExecute(r SandboxAPIGetSandboxesForRunnerRequest) ([]Sandbox, *http.Response, error)
+
+	/*
 		ListSandboxes List all sandboxes
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
@@ -236,6 +248,18 @@ type SandboxAPI interface {
 
 	// UpdatePublicStatusExecute executes the request
 	UpdatePublicStatusExecute(r SandboxAPIUpdatePublicStatusRequest) (*http.Response, error)
+
+	/*
+		UpdateSandboxState Update sandbox state
+
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId ID of the sandbox
+		@return SandboxAPIUpdateSandboxStateRequest
+	*/
+	UpdateSandboxState(ctx context.Context, sandboxId string) SandboxAPIUpdateSandboxStateRequest
+
+	// UpdateSandboxStateExecute executes the request
+	UpdateSandboxStateExecute(r SandboxAPIUpdateSandboxStateRequest) (*http.Response, error)
 
 	/*
 		ValidateSshAccess Validate SSH access for sandbox
@@ -1107,6 +1131,124 @@ func (a *SandboxAPIService) GetSandboxExecute(r SandboxAPIGetSandboxRequest) (*S
 	if r.verbose != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "verbose", r.verbose, "form", "")
 	}
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.xDaytonaOrganizationID != nil {
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Daytona-Organization-ID", r.xDaytonaOrganizationID, "simple", "")
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type SandboxAPIGetSandboxesForRunnerRequest struct {
+	ctx                    context.Context
+	ApiService             SandboxAPI
+	state                  *string
+	xDaytonaOrganizationID *string
+}
+
+func (r SandboxAPIGetSandboxesForRunnerRequest) State(state string) SandboxAPIGetSandboxesForRunnerRequest {
+	r.state = &state
+	return r
+}
+
+// Use with JWT to specify the organization ID
+func (r SandboxAPIGetSandboxesForRunnerRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) SandboxAPIGetSandboxesForRunnerRequest {
+	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
+	return r
+}
+
+func (r SandboxAPIGetSandboxesForRunnerRequest) Execute() ([]Sandbox, *http.Response, error) {
+	return r.ApiService.GetSandboxesForRunnerExecute(r)
+}
+
+/*
+GetSandboxesForRunner Get sandboxes for the authenticated runner
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return SandboxAPIGetSandboxesForRunnerRequest
+*/
+func (a *SandboxAPIService) GetSandboxesForRunner(ctx context.Context) SandboxAPIGetSandboxesForRunnerRequest {
+	return SandboxAPIGetSandboxesForRunnerRequest{
+		ApiService: a,
+		ctx:        ctx,
+	}
+}
+
+// Execute executes the request
+//
+//	@return []Sandbox
+func (a *SandboxAPIService) GetSandboxesForRunnerExecute(r SandboxAPIGetSandboxesForRunnerRequest) ([]Sandbox, *http.Response, error) {
+	var (
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue []Sandbox
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SandboxAPIService.GetSandboxesForRunner")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/sandbox/for-runner"
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.state == nil {
+		return localVarReturnValue, nil, reportError("state is required and must be specified")
+	}
+
+	parameterAddToHeaderOrQuery(localVarQueryParams, "state", r.state, "form", "")
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -2135,6 +2277,117 @@ func (a *SandboxAPIService) UpdatePublicStatusExecute(r SandboxAPIUpdatePublicSt
 	if r.xDaytonaOrganizationID != nil {
 		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Daytona-Organization-ID", r.xDaytonaOrganizationID, "simple", "")
 	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarHTTPResponse, newErr
+	}
+
+	return localVarHTTPResponse, nil
+}
+
+type SandboxAPIUpdateSandboxStateRequest struct {
+	ctx                    context.Context
+	ApiService             SandboxAPI
+	sandboxId              string
+	updateSandboxStateDto  *UpdateSandboxStateDto
+	xDaytonaOrganizationID *string
+}
+
+func (r SandboxAPIUpdateSandboxStateRequest) UpdateSandboxStateDto(updateSandboxStateDto UpdateSandboxStateDto) SandboxAPIUpdateSandboxStateRequest {
+	r.updateSandboxStateDto = &updateSandboxStateDto
+	return r
+}
+
+// Use with JWT to specify the organization ID
+func (r SandboxAPIUpdateSandboxStateRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) SandboxAPIUpdateSandboxStateRequest {
+	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
+	return r
+}
+
+func (r SandboxAPIUpdateSandboxStateRequest) Execute() (*http.Response, error) {
+	return r.ApiService.UpdateSandboxStateExecute(r)
+}
+
+/*
+UpdateSandboxState Update sandbox state
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId ID of the sandbox
+	@return SandboxAPIUpdateSandboxStateRequest
+*/
+func (a *SandboxAPIService) UpdateSandboxState(ctx context.Context, sandboxId string) SandboxAPIUpdateSandboxStateRequest {
+	return SandboxAPIUpdateSandboxStateRequest{
+		ApiService: a,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
+	}
+}
+
+// Execute executes the request
+func (a *SandboxAPIService) UpdateSandboxStateExecute(r SandboxAPIUpdateSandboxStateRequest) (*http.Response, error) {
+	var (
+		localVarHTTPMethod = http.MethodPut
+		localVarPostBody   interface{}
+		formFiles          []formFile
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SandboxAPIService.UpdateSandboxState")
+	if err != nil {
+		return nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/sandbox/{sandboxId}/state"
+	localVarPath = strings.Replace(localVarPath, "{"+"sandboxId"+"}", url.PathEscape(parameterValueToString(r.sandboxId, "sandboxId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.updateSandboxStateDto == nil {
+		return nil, reportError("updateSandboxStateDto is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.xDaytonaOrganizationID != nil {
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Daytona-Organization-ID", r.xDaytonaOrganizationID, "simple", "")
+	}
+	// body params
+	localVarPostBody = r.updateSandboxStateDto
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
 		return nil, err
