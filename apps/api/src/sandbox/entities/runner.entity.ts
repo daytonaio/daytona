@@ -47,14 +47,6 @@ export class Runner {
   class: SandboxClass
 
   @Column({
-    default: 0,
-  })
-  used: number
-
-  @Column()
-  capacity: number
-
-  @Column({
     type: 'float',
     default: 0,
   })

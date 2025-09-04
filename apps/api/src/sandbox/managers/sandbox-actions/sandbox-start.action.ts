@@ -22,6 +22,7 @@ import { ToolboxService } from '../../services/toolbox.service'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Snapshot } from '../../entities/snapshot.entity'
 import { OrganizationService } from '../../../organization/services/organization.service'
+import { TypedConfigService } from '../../../config/typed-config.service'
 
 @Injectable()
 export class SandboxStartAction extends SandboxAction {
@@ -36,6 +37,7 @@ export class SandboxStartAction extends SandboxAction {
     protected readonly snapshotService: SnapshotService,
     protected readonly dockerRegistryService: DockerRegistryService,
     protected readonly organizationService: OrganizationService,
+    protected readonly configService: TypedConfigService,
   ) {
     super(runnerService, runnerAdapterFactory, sandboxRepository, toolboxService)
   }
@@ -101,7 +103,7 @@ export class SandboxStartAction extends SandboxAction {
         snapshotRef: sandbox.buildInfo.snapshotRef,
       })
       runnerId = runner.id
-    } catch (error) {
+    } catch {
       // Continue to next assignment method
     }
 
@@ -115,7 +117,7 @@ export class SandboxStartAction extends SandboxAction {
 
     for (const snapshotRunner of snapshotRunners) {
       const runner = await this.runnerService.findOne(snapshotRunner.runnerId)
-      if (runner.used < runner.capacity) {
+      if (runner.availabilityScore >= this.configService.get('runner.declarativeBuildScoreThreshold')) {
         if (snapshotRunner.state === SnapshotRunnerState.BUILDING_SNAPSHOT) {
           await this.updateSandboxState(sandbox.id, SandboxState.BUILDING_SNAPSHOT, runner.id)
           return SYNC_AGAIN
@@ -139,7 +141,7 @@ export class SandboxStartAction extends SandboxAction {
     this.buildOnRunner(sandbox.buildInfo, runnerId, sandbox.organizationId)
 
     await this.updateSandboxState(sandbox.id, SandboxState.BUILDING_SNAPSHOT, runnerId)
-    await this.runnerService.recalculateRunnerUsage(runner)
+
     return SYNC_AGAIN
   }
 
@@ -244,16 +246,7 @@ export class SandboxStartAction extends SandboxAction {
       // If the sandbox is on a runner and its backupState is COMPLETED
       // but there are too many running sandboxes on that runner, move it to a less used runner
       if (sandbox.backupState === BackupState.COMPLETED) {
-        const usageThreshold = 35
-        const runningSandboxsCount = await this.sandboxRepository.count({
-          where: {
-            runnerId: originalRunnerId,
-            state: SandboxState.STARTED,
-          },
-        })
-        if (runningSandboxsCount > usageThreshold) {
-          //  TODO: usage should be based on compute usage
-
+        if (runner.availabilityScore < this.configService.get('runner.availabilityScoreThreshold')) {
           const availableRunners = await this.runnerService.findAvailableRunners({
             region: sandbox.region,
             sandboxClass: sandbox.class,
@@ -356,17 +349,14 @@ export class SandboxStartAction extends SandboxAction {
       const snapshotRef = baseSnapshot ? baseSnapshot.internalName : null
 
       let availableRunners = []
-      const runnersWithBaseSnapshot = snapshotRef
-        ? await this.runnerService.findAvailableRunners({
-            region: sandbox.region,
-            sandboxClass: sandbox.class,
-            snapshotRef,
-          })
-        : []
-      if (runnersWithBaseSnapshot.length > 0) {
-        availableRunners = runnersWithBaseSnapshot
+
+      if (snapshotRef) {
+        availableRunners = await this.runnerService.findAvailableRunners({
+          region: sandbox.region,
+          sandboxClass: sandbox.class,
+          snapshotRef,
+        })
       } else {
-        //  if no runner has the base snapshot, get all available runners
         availableRunners = await this.runnerService.findAvailableRunners({
           region: sandbox.region,
           sandboxClass: sandbox.class,
@@ -379,21 +369,18 @@ export class SandboxStartAction extends SandboxAction {
         return DONT_SYNC_AGAIN
       }
 
-      //  get random runner from available runners
-      const randomRunnerIndex = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1) + min)
-      const runnerId = availableRunners[randomRunnerIndex(0, availableRunners.length - 1)].id
-
-      const runner = await this.runnerService.findOne(runnerId)
+      //  get runner with highest availability score from available runners
+      const runner = availableRunners[0]
 
       //  verify the runner is still available and ready
-      if (!runner || runner.state !== RunnerState.READY || runner.unschedulable || runner.used >= runner.capacity) {
-        this.logger.warn(`Selected runner ${runnerId} is no longer available, retrying sandbox assignment`)
+      if (!runner || runner.state !== RunnerState.READY || runner.unschedulable) {
+        this.logger.warn(`Selected runner ${runner.Id} is no longer available, retrying sandbox assignment`)
         return SYNC_AGAIN
       }
 
       const runnerAdapter = await this.runnerAdapterFactory.create(runner)
 
-      await this.updateSandboxState(sandbox.id, SandboxState.RESTORING, runnerId)
+      await this.updateSandboxState(sandbox.id, SandboxState.RESTORING, runner.Id)
 
       sandbox.snapshot = validBackup
 

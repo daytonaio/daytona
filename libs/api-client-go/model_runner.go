@@ -44,10 +44,6 @@ type Runner struct {
 	GpuType string `json:"gpuType"`
 	// The class of the runner
 	Class SandboxClass `json:"class"`
-	// The current usage of the runner
-	Used float32 `json:"used"`
-	// The capacity of the runner
-	Capacity float32 `json:"capacity"`
 	// Current CPU usage percentage
 	CurrentCpuUsagePercentage *float32 `json:"currentCpuUsagePercentage,omitempty"`
 	// Current RAM usage percentage
@@ -86,7 +82,7 @@ type _Runner Runner
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewRunner(id string, domain string, apiUrl string, proxyUrl string, apiKey string, cpu float32, memory float32, disk float32, gpu float32, gpuType string, class SandboxClass, used float32, capacity float32, region string, state RunnerState, unschedulable bool, createdAt string, updatedAt string, version string) *Runner {
+func NewRunner(id string, domain string, apiUrl string, proxyUrl string, apiKey string, cpu float32, memory float32, disk float32, gpu float32, gpuType string, class SandboxClass, region string, state RunnerState, unschedulable bool, createdAt string, updatedAt string, version string) *Runner {
 	this := Runner{}
 	this.Id = id
 	this.Domain = domain
@@ -99,8 +95,6 @@ func NewRunner(id string, domain string, apiUrl string, proxyUrl string, apiKey 
 	this.Gpu = gpu
 	this.GpuType = gpuType
 	this.Class = class
-	this.Used = used
-	this.Capacity = capacity
 	this.Region = region
 	this.State = state
 	this.Unschedulable = unschedulable
@@ -380,54 +374,6 @@ func (o *Runner) GetClassOk() (*SandboxClass, bool) {
 // SetClass sets field value
 func (o *Runner) SetClass(v SandboxClass) {
 	o.Class = v
-}
-
-// GetUsed returns the Used field value
-func (o *Runner) GetUsed() float32 {
-	if o == nil {
-		var ret float32
-		return ret
-	}
-
-	return o.Used
-}
-
-// GetUsedOk returns a tuple with the Used field value
-// and a boolean to check if the value has been set.
-func (o *Runner) GetUsedOk() (*float32, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.Used, true
-}
-
-// SetUsed sets field value
-func (o *Runner) SetUsed(v float32) {
-	o.Used = v
-}
-
-// GetCapacity returns the Capacity field value
-func (o *Runner) GetCapacity() float32 {
-	if o == nil {
-		var ret float32
-		return ret
-	}
-
-	return o.Capacity
-}
-
-// GetCapacityOk returns a tuple with the Capacity field value
-// and a boolean to check if the value has been set.
-func (o *Runner) GetCapacityOk() (*float32, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.Capacity, true
-}
-
-// SetCapacity sets field value
-func (o *Runner) SetCapacity(v float32) {
-	o.Capacity = v
 }
 
 // GetCurrentCpuUsagePercentage returns the CurrentCpuUsagePercentage field value if set, zero value otherwise.
@@ -883,8 +829,6 @@ func (o Runner) ToMap() (map[string]interface{}, error) {
 	toSerialize["gpu"] = o.Gpu
 	toSerialize["gpuType"] = o.GpuType
 	toSerialize["class"] = o.Class
-	toSerialize["used"] = o.Used
-	toSerialize["capacity"] = o.Capacity
 	if !IsNil(o.CurrentCpuUsagePercentage) {
 		toSerialize["currentCpuUsagePercentage"] = o.CurrentCpuUsagePercentage
 	}
@@ -937,8 +881,6 @@ func (o *Runner) UnmarshalJSON(data []byte) (err error) {
 		"gpu",
 		"gpuType",
 		"class",
-		"used",
-		"capacity",
 		"region",
 		"state",
 		"unschedulable",
