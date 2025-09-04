@@ -567,6 +567,12 @@ export class SandboxService {
     return this.sandboxRepository.find({ where })
   }
 
+  async findByRunnerId(runnerId: string): Promise<Sandbox[]> {
+    return this.sandboxRepository.find({
+      where: { runnerId },
+    })
+  }
+
   async findOne(sandboxId: string, returnDestroyed?: boolean): Promise<Sandbox> {
     const sandbox = await this.sandboxRepository.findOne({
       where: {

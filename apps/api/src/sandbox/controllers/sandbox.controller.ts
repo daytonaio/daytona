@@ -234,6 +234,32 @@ export class SandboxController {
     return SandboxDto.fromSandbox(sandbox, runner?.domain)
   }
 
+  @Get('by-runner/:runnerId')
+  @ApiOperation({
+    summary: 'Get sandboxes for a specific runner',
+    operationId: 'getSandboxesForRunner',
+  })
+  @ApiParam({
+    name: 'runnerId',
+    description: 'ID of the runner',
+    type: 'string',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'List of sandboxes for the specified runner',
+    type: [SandboxDto],
+  })
+  async getSandboxesForRunner(@Param('runnerId') runnerId: string): Promise<SandboxDto[]> {
+    const sandboxes = await this.sandboxService.findByRunnerId(runnerId)
+
+    let runner: Runner | null = null
+    if (runnerId) {
+      runner = await this.runnerService.findOne(runnerId)
+    }
+
+    return sandboxes.map((sandbox) => SandboxDto.fromSandbox(sandbox, runner?.domain))
+  }
+
   @Delete(':sandboxId')
   @ApiOperation({
     summary: 'Delete sandbox',
