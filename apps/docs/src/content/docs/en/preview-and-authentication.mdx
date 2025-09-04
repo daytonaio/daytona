@@ -13,7 +13,7 @@ A preview link's schema consists of the port and Sandbox ID combination, e.g.:
 When opening the preview link in a browser, a warning page will be shown for the first time.
 This warning serves as a security measure to inform users about the potential risks of visiting the preview URL.
 
-To avoid this warning, you can upgrade to [Tier 3](/docs/en/limits) or deploy your own [custom preview proxy](/docs/en/custom-domain-authentication).
+To avoid this warning, you can send the `X-Daytona-Skip-Preview-Warning: true` header, upgrade to [Tier 3](/docs/en/limits) or deploy your own [custom preview proxy](/docs/en/custom-domain-authentication).
 :::
 
 If the Sandbox has its `public` property set to `true`, these links will be publicly accessible, otherwise the preview link will be available only to the Sandbox Organization users.
