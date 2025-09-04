@@ -128,7 +128,6 @@ async function bootstrap() {
         diskGiB: configService.getOrThrow('defaultRunner.disk'),
         gpu: configService.getOrThrow('defaultRunner.gpu'),
         gpuType: configService.getOrThrow('defaultRunner.gpuType'),
-        capacity: configService.getOrThrow('defaultRunner.capacity'),
         region: configService.getOrThrow('defaultRunner.region'),
         class: configService.getOrThrow('defaultRunner.class'),
         domain: configService.getOrThrow('defaultRunner.domain'),

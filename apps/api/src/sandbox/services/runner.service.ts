@@ -6,7 +6,7 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Cron, CronExpression } from '@nestjs/schedule'
-import { FindOptionsWhere, In, Not, Raw, Repository } from 'typeorm'
+import { FindOptionsWhere, In, MoreThanOrEqual, Not, Repository } from 'typeorm'
 import { Runner } from '../entities/runner.entity'
 import { CreateRunnerDto } from '../dto/create-runner.dto'
 import { SandboxClass } from '../enums/sandbox-class.enum'
@@ -23,6 +23,7 @@ import { Snapshot } from '../entities/snapshot.entity'
 import { RunnerSnapshotDto } from '../dto/runner-snapshot.dto'
 import { RunnerAdapterFactory, RunnerInfo } from '../runner-adapter/runnerAdapter'
 import { RedisLockProvider } from '../common/redis-lock.provider'
+import { TypedConfigService } from '../../config/typed-config.service'
 
 @Injectable()
 export class RunnerService {
@@ -39,6 +40,7 @@ export class RunnerService {
     @InjectRepository(Snapshot)
     private readonly snapshotRepository: Repository<Snapshot>,
     private readonly redisLockProvider: RedisLockProvider,
+    private readonly configService: TypedConfigService,
   ) {}
 
   async create(createRunnerDto: CreateRunnerDto): Promise<Runner> {
@@ -60,8 +62,6 @@ export class RunnerService {
     runner.diskGiB = createRunnerDto.diskGiB
     runner.gpu = createRunnerDto.gpu
     runner.gpuType = createRunnerDto.gpuType
-    runner.used = 0
-    runner.capacity = createRunnerDto.capacity
     runner.region = createRunnerDto.region
     runner.class = createRunnerDto.class
     runner.version = createRunnerDto.version
@@ -115,7 +115,9 @@ export class RunnerService {
     const runnerFilter: FindOptionsWhere<Runner> = {
       state: RunnerState.READY,
       unschedulable: Not(true),
-      used: Raw((alias) => `${alias} < capacity`),
+      availabilityScore: params.availabilityScoreThreshold
+        ? MoreThanOrEqual(params.availabilityScoreThreshold)
+        : MoreThanOrEqual(this.configService.get('runner.availabilityScoreThreshold')),
     }
 
     if (params.snapshotRef !== undefined) {
@@ -153,7 +155,7 @@ export class RunnerService {
       where: runnerFilter,
     })
 
-    return runners.sort((a, b) => a.used / a.capacity - b.used / b.capacity).slice(0, 10)
+    return runners.sort((a, b) => b.availabilityScore - a.availabilityScore).slice(0, 10)
   }
 
   async remove(id: string): Promise<void> {
@@ -165,13 +167,6 @@ export class RunnerService {
     if (![SandboxState.DESTROYED, SandboxState.CREATING, SandboxState.ARCHIVED].includes(event.newState)) {
       return
     }
-
-    const runner = await this.runnerRepository.findOne({ where: { id: event.sandbox.runnerId } })
-    if (!runner) {
-      throw new Error('Runner not found, cannot recalculate usage')
-    }
-
-    await this.recalculateRunnerUsage(runner)
   }
 
   private async updateRunnerState(runnerId: string, newState: RunnerState): Promise<void> {
@@ -237,7 +232,6 @@ export class RunnerService {
                 }
 
                 await this.updateRunnerStatus(runner.id, runnerInfo)
-                await this.recalculateRunnerUsage(runner)
               })(),
               new Promise((_, reject) => {
                 timeoutId = setTimeout(() => {
@@ -312,7 +306,6 @@ export class RunnerService {
         allocatedCpu: updateData.currentAllocatedCpu,
         allocatedMemoryGiB: updateData.currentAllocatedMemoryGiB,
         allocatedDiskGiB: updateData.currentAllocatedDiskGiB,
-        capacity: runner.capacity,
         runnerCpu: runner.cpu,
         runnerMemoryGiB: runner.memoryGiB,
         runnerDiskGiB: runner.diskGiB,
@@ -322,19 +315,6 @@ export class RunnerService {
     }
 
     await this.runnerRepository.update(runnerId, updateData)
-  }
-
-  async recalculateRunnerUsage(runner: Runner) {
-    const sandboxes = await this.sandboxRepository.find({
-      where: {
-        runnerId: runner.id,
-        state: Not(SandboxState.DESTROYED),
-      },
-    })
-
-    await this.runnerRepository.update(runner.id, {
-      used: sandboxes.length,
-    })
   }
 
   private isValidClass(sandboxClass: SandboxClass): boolean {
@@ -354,13 +334,11 @@ export class RunnerService {
   async getRandomAvailableRunner(params: GetRunnerParams): Promise<Runner> {
     const availableRunners = await this.findAvailableRunners(params)
 
-    //  TODO: implement a better algorithm to get a random available runner based on the runner's usage
-
     if (availableRunners.length === 0) {
       throw new BadRequestError('No available runners')
     }
 
-    // Get random runner from available runners using inclusive bounds
+    // Get random runner from the best available runners
     const randomIntFromInterval = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1) + min)
 
     return availableRunners[randomIntFromInterval(0, availableRunners.length - 1)]
@@ -455,19 +433,19 @@ export class RunnerService {
       penalty += low + medium + high + critical
     }
 
-    // RAM Penalty (starts at 40%, high impact, critical at 85%)
+    // RAM Penalty (starts at 40%, high impact, critical at 75%)
     if (params.memoryUsage > 0) {
       const low = (Math.min(params.memoryUsage, 40) / 40) * 3 // 0-40%: gradual 0-3 points
-      const medium = params.memoryUsage > 40 ? ((Math.min(params.memoryUsage, 85) - 40) / 45) * 35 : 0 // 40-85%: 35 more points
-      const critical = params.memoryUsage > 85 ? (params.memoryUsage - 85) * 6 : 0 // 85%+: 6 points per % over 85%
+      const medium = params.memoryUsage > 40 ? ((Math.min(params.memoryUsage, 75) - 40) / 35) * 35 : 0 // 40-75%: 35 more points
+      const critical = params.memoryUsage > 75 ? (params.memoryUsage - 75) * 6 : 0 // 75%+: 6 points per % over 75%
       penalty += low + medium + critical
     }
 
-    // Disk Penalty (high impact, critical at 85%)
+    // Disk Penalty (high impact, critical at 75%)
     if (params.diskUsage > 0) {
       const low = (Math.min(params.diskUsage, 60) / 60) * 3 // 0-60%: gradual 0-3 points
-      const medium = params.diskUsage > 60 ? ((Math.min(params.diskUsage, 85) - 60) / 25) * 25 : 0 // 60-85%: 25 more points
-      const critical = params.diskUsage > 85 ? (params.diskUsage - 85) * 7 : 0 // 85%+: 7 points per % over 85%
+      const medium = params.diskUsage > 60 ? ((Math.min(params.diskUsage, 75) - 60) / 15) * 25 : 0 // 60-75%: 25 more points
+      const critical = params.diskUsage > 75 ? (params.diskUsage - 75) * 7 : 0 // 75%+: 7 points per % over 75%
       penalty += low + medium + critical
     }
 
@@ -507,6 +485,7 @@ export class GetRunnerParams {
   sandboxClass?: SandboxClass
   snapshotRef?: string
   excludedRunnerIds?: string[]
+  availabilityScoreThreshold?: number
 }
 
 interface AvailabilityScoreParams {
@@ -516,7 +495,6 @@ interface AvailabilityScoreParams {
   allocatedCpu: number
   allocatedMemoryGiB: number
   allocatedDiskGiB: number
-  capacity: number
   runnerCpu: number
   runnerMemoryGiB: number
   runnerDiskGiB: number
