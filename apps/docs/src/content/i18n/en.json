@@ -67,6 +67,8 @@
   "sidebarconfig.other": "Other",
   "sidebarconfig.webTerminal": "Web Terminal",
   "sidebarconfig.webTerminalDescription": "Web Terminal access to Daytona Sandboxes.",
+  "sidebarconfig.networkLimits": "Network Limits",
+  "sidebarconfig.networkLimitsDescription": "Network egress limits for Daytona Sandboxes.",
   "sidebarconfig.sshAccess": "SSH Access",
   "sidebarconfig.sshAccessDescription": "SSH access to Daytona Sandboxes.",
   "sidebarconfig.previewAuthentication": "Preview & Authentication",
