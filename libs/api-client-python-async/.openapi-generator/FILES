@@ -136,6 +136,7 @@ daytona_api_client_async/models/update_organization_invitation.py
 daytona_api_client_async/models/update_organization_member_role.py
 daytona_api_client_async/models/update_organization_quota.py
 daytona_api_client_async/models/update_organization_role.py
+daytona_api_client_async/models/update_sandbox_state_dto.py
 daytona_api_client_async/models/user.py
 daytona_api_client_async/models/user_public_key.py
 daytona_api_client_async/models/volume_dto.py
