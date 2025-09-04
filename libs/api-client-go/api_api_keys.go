@@ -47,6 +47,19 @@ type ApiKeysAPI interface {
 	DeleteApiKeyExecute(r ApiKeysAPIDeleteApiKeyRequest) (*http.Response, error)
 
 	/*
+		DeleteApiKeyForUser Delete API key for user
+
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param userId
+		@param name
+		@return ApiKeysAPIDeleteApiKeyForUserRequest
+	*/
+	DeleteApiKeyForUser(ctx context.Context, userId string, name string) ApiKeysAPIDeleteApiKeyForUserRequest
+
+	// DeleteApiKeyForUserExecute executes the request
+	DeleteApiKeyForUserExecute(r ApiKeysAPIDeleteApiKeyForUserRequest) (*http.Response, error)
+
+	/*
 		GetApiKey Get API key
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
@@ -252,6 +265,110 @@ func (a *ApiKeysAPIService) DeleteApiKeyExecute(r ApiKeysAPIDeleteApiKeyRequest)
 	}
 
 	localVarPath := localBasePath + "/api-keys/{name}"
+	localVarPath = strings.Replace(localVarPath, "{"+"name"+"}", url.PathEscape(parameterValueToString(r.name, "name")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.xDaytonaOrganizationID != nil {
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Daytona-Organization-ID", r.xDaytonaOrganizationID, "simple", "")
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarHTTPResponse, newErr
+	}
+
+	return localVarHTTPResponse, nil
+}
+
+type ApiKeysAPIDeleteApiKeyForUserRequest struct {
+	ctx                    context.Context
+	ApiService             ApiKeysAPI
+	userId                 string
+	name                   string
+	xDaytonaOrganizationID *string
+}
+
+// Use with JWT to specify the organization ID
+func (r ApiKeysAPIDeleteApiKeyForUserRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) ApiKeysAPIDeleteApiKeyForUserRequest {
+	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
+	return r
+}
+
+func (r ApiKeysAPIDeleteApiKeyForUserRequest) Execute() (*http.Response, error) {
+	return r.ApiService.DeleteApiKeyForUserExecute(r)
+}
+
+/*
+DeleteApiKeyForUser Delete API key for user
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param userId
+	@param name
+	@return ApiKeysAPIDeleteApiKeyForUserRequest
+*/
+func (a *ApiKeysAPIService) DeleteApiKeyForUser(ctx context.Context, userId string, name string) ApiKeysAPIDeleteApiKeyForUserRequest {
+	return ApiKeysAPIDeleteApiKeyForUserRequest{
+		ApiService: a,
+		ctx:        ctx,
+		userId:     userId,
+		name:       name,
+	}
+}
+
+// Execute executes the request
+func (a *ApiKeysAPIService) DeleteApiKeyForUserExecute(r ApiKeysAPIDeleteApiKeyForUserRequest) (*http.Response, error) {
+	var (
+		localVarHTTPMethod = http.MethodDelete
+		localVarPostBody   interface{}
+		formFiles          []formFile
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ApiKeysAPIService.DeleteApiKeyForUser")
+	if err != nil {
+		return nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/api-keys/{userId}/{name}"
+	localVarPath = strings.Replace(localVarPath, "{"+"userId"+"}", url.PathEscape(parameterValueToString(r.userId, "userId")), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"name"+"}", url.PathEscape(parameterValueToString(r.name, "name")), -1)
 
 	localVarHeaderParams := make(map[string]string)

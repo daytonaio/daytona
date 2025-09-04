@@ -34,8 +34,9 @@ class ApiKeyList(BaseModel):
     permissions: List[StrictStr] = Field(description="The list of organization resource permissions assigned to the API key")
     last_used_at: Optional[datetime] = Field(description="When the API key was last used", alias="lastUsedAt")
     expires_at: Optional[datetime] = Field(description="When the API key expires", alias="expiresAt")
+    user_id: StrictStr = Field(description="The user ID of the user who created the API key", alias="userId")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["name", "value", "createdAt", "permissions", "lastUsedAt", "expiresAt"]
+    __properties: ClassVar[List[str]] = ["name", "value", "createdAt", "permissions", "lastUsedAt", "expiresAt", "userId"]
 
     @field_validator('permissions')
     def permissions_validate_enum(cls, value):
@@ -118,7 +119,8 @@ class ApiKeyList(BaseModel):
             "createdAt": obj.get("createdAt"),
             "permissions": obj.get("permissions"),
             "lastUsedAt": obj.get("lastUsedAt"),
-            "expiresAt": obj.get("expiresAt")
+            "expiresAt": obj.get("expiresAt"),
+            "userId": obj.get("userId")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

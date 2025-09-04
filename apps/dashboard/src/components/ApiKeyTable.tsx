@@ -36,13 +36,13 @@ import { TableEmptyState } from './TableEmptyState'
 interface DataTableProps {
   data: ApiKeyList[]
   loading: boolean
-  loadingKeys: Record<string, boolean>
-  onRevoke: (keyName: string) => void
+  isLoadingKey: (key: ApiKeyList) => boolean
+  onRevoke: (key: ApiKeyList) => void
 }
 
-export function ApiKeyTable({ data, loading, loadingKeys, onRevoke }: DataTableProps) {
+export function ApiKeyTable({ data, loading, isLoadingKey, onRevoke }: DataTableProps) {
   const [sorting, setSorting] = useState<SortingState>([])
-  const columns = getColumns({ onRevoke, loadingKeys })
+  const columns = getColumns({ onRevoke, isLoadingKey })
   const table = useReactTable({
     data,
     columns,
@@ -89,7 +89,7 @@ export function ApiKeyTable({ data, loading, loadingKeys, onRevoke }: DataTableP
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && 'selected'}
-                  className={`${loadingKeys[row.original.name] ? 'opacity-50 pointer-events-none' : ''}`}
+                  className={`${isLoadingKey(row.original) ? 'opacity-50 pointer-events-none' : ''}`}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell className="px-2" key={cell.id}>
@@ -156,10 +156,10 @@ const getExpiresAtColor = (expiresAt: Date | null) => {
 
 const getColumns = ({
   onRevoke,
-  loadingKeys,
+  isLoadingKey,
 }: {
-  onRevoke: (keyName: string) => void
-  loadingKeys: Record<string, boolean>
+  onRevoke: (key: ApiKeyList) => void
+  isLoadingKey: (key: ApiKeyList) => boolean
 }): ColumnDef<ApiKeyList>[] => {
   const columns: ColumnDef<ApiKeyList>[] = [
     {
@@ -276,7 +276,7 @@ const getColumns = ({
         return <div className="px-4">Actions</div>
       },
       cell: ({ row }) => {
-        const isLoading = loadingKeys[row.original.name]
+        const isLoading = isLoadingKey(row.original)
 
         return (
           <Dialog>
@@ -299,7 +299,7 @@ const getColumns = ({
                   </Button>
                 </DialogClose>
                 <DialogClose asChild>
-                  <Button variant="destructive" onClick={() => onRevoke(row.original.name)}>
+                  <Button variant="destructive" onClick={() => onRevoke(row.original)}>
                     Revoke
                   </Button>
                 </DialogClose>
