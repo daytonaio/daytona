@@ -104,7 +104,7 @@ export class RegionController {
     description: 'Region code',
     example: 'abc12345',
   })
-  @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_REGIONS])
+  @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.DELETE_REGIONS])
   @Audit({
     action: AuditAction.DELETE,
     targetType: AuditTarget.REGION,
