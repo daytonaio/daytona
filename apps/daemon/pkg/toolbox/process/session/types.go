@@ -22,7 +22,7 @@ type SessionExecuteRequest struct {
 
 type SessionExecuteResponse struct {
 	CommandId *string `json:"cmdId" validate:"optional"`
-	Output    *string `json:"output" validate:"optional"` // deprecated
+	Output    *string `json:"output" validate:"optional"`
 	Stdout    *string `json:"stdout" validate:"optional"`
 	Stderr    *string `json:"stderr" validate:"optional"`
 	ExitCode  *int    `json:"exitCode" validate:"optional"`
