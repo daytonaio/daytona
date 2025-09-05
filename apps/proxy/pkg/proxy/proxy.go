@@ -123,7 +123,7 @@ func StartProxy(config *config.Config) error {
 
 	router.Any("/*path", func(ctx *gin.Context) {
 		if ctx.Request.Method == "POST" && ctx.Request.URL.Path == ACCEPT_PREVIEW_PAGE_WARNING_PATH {
-			handleAcceptProxyWarning(ctx, config.EnableTLS)
+			handleAcceptProxyWarning(ctx, config.ProxyProtocol == "https")
 			return
 		}
 
