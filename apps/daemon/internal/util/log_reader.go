@@ -7,11 +7,22 @@ import (
 	"bufio"
 	"context"
 	"io"
+	"os"
+	"strings"
 	"time"
+
+	log "github.com/sirupsen/logrus"
 )
 
-func ReadCommandLog(ctx context.Context, logReader io.Reader, follow bool, c chan []byte, errChan chan error) {
+func ReadLog(ctx context.Context, logReader io.Reader, follow bool, c chan []byte, errChan chan error) {
+	ReadLogWithExitCode(ctx, logReader, follow, "", c, errChan)
+}
+
+func ReadLogWithExitCode(ctx context.Context, logReader io.Reader, follow bool, exitCodeFilePath string, c chan []byte, errChan chan error) {
+	log.Warnf("DZ DEBUG: ReadLogWithExitCode started, follow=%v, exitCodeFilePath=%s", follow, exitCodeFilePath)
 	reader := bufio.NewReader(logReader)
+	consecutiveEOFCount := 0
+	maxConsecutiveEOF := 50 // Check exit code after 50 consecutive EOF reads ( 50 * 20ms = 1 second)
 
 	for {
 		select {
@@ -19,7 +30,8 @@ func ReadCommandLog(ctx context.Context, logReader io.Reader, follow bool, c cha
 			return
 		default:
 			bytes := make([]byte, 1024)
-			_, err := reader.Read(bytes)
+			n, err := reader.Read(bytes)
+
 			if err != nil {
 				if err != io.EOF {
 					errChan <- err
@@ -28,11 +40,45 @@ func ReadCommandLog(ctx context.Context, logReader io.Reader, follow bool, c cha
 					errChan <- io.EOF
 					return
 				}
+
+				// EOF while following - increment counter
+				consecutiveEOFCount++
+
+				// Check exit code after maxConsecutiveEOF consecutive EOF reads
+				if exitCodeFilePath != "" && consecutiveEOFCount >= maxConsecutiveEOF {
+					hasExit := hasExitCode(exitCodeFilePath)
+					if hasExit {
+						errChan <- io.EOF
+						return
+					}
+					// Reset counter and continue
+					consecutiveEOFCount = 0
+				}
+
 				// Sleep for a short time to avoid busy-waiting
 				time.Sleep(20 * time.Millisecond)
 				continue
 			}
-			c <- bytes
+
+			// Reset EOF counter on successful read
+			if consecutiveEOFCount > 0 {
+				consecutiveEOFCount = 0
+			}
+
+			if n > 0 {
+				// Create a new slice with only the actual read data to avoid sending null bytes
+				data := make([]byte, n)
+				copy(data, bytes[:n])
+				c <- data
+			}
 		}
 	}
+}
+
+func hasExitCode(exitCodeFilePath string) bool {
+	content, err := os.ReadFile(exitCodeFilePath)
+	if err != nil {
+		return false
+	}
+	return len(strings.TrimSpace(string(content))) > 0
 }

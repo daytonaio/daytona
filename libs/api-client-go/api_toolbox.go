@@ -339,8 +339,8 @@ type ToolboxAPI interface {
 	GetSessionCommandLogs(ctx context.Context, sandboxId string, sessionId string, commandId string) ToolboxAPIGetSessionCommandLogsRequest
 
 	// GetSessionCommandLogsExecute executes the request
-	//  @return SessionCommandLogsResponse
-	GetSessionCommandLogsExecute(r ToolboxAPIGetSessionCommandLogsRequest) (*SessionCommandLogsResponse, *http.Response, error)
+	//  @return string
+	GetSessionCommandLogsExecute(r ToolboxAPIGetSessionCommandLogsRequest) (string, *http.Response, error)
 
 	/*
 		GetWindows Get windows
@@ -3324,7 +3324,7 @@ func (r ToolboxAPIGetSessionCommandLogsRequest) Follow(follow bool) ToolboxAPIGe
 	return r
 }
 
-func (r ToolboxAPIGetSessionCommandLogsRequest) Execute() (*SessionCommandLogsResponse, *http.Response, error) {
+func (r ToolboxAPIGetSessionCommandLogsRequest) Execute() (string, *http.Response, error) {
 	return r.ApiService.GetSessionCommandLogsExecute(r)
 }
 
@@ -3351,13 +3351,13 @@ func (a *ToolboxAPIService) GetSessionCommandLogs(ctx context.Context, sandboxId
 
 // Execute executes the request
 //
-//	@return SessionCommandLogsResponse
-func (a *ToolboxAPIService) GetSessionCommandLogsExecute(r ToolboxAPIGetSessionCommandLogsRequest) (*SessionCommandLogsResponse, *http.Response, error) {
+//	@return string
+func (a *ToolboxAPIService) GetSessionCommandLogsExecute(r ToolboxAPIGetSessionCommandLogsRequest) (string, *http.Response, error) {
 	var (
 		localVarHTTPMethod  = http.MethodGet
 		localVarPostBody    interface{}
 		formFiles           []formFile
-		localVarReturnValue *SessionCommandLogsResponse
+		localVarReturnValue string
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.GetSessionCommandLogs")
@@ -3387,7 +3387,7 @@ func (a *ToolboxAPIService) GetSessionCommandLogsExecute(r ToolboxAPIGetSessionC
 	}
 
 	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{"application/json"}
+	localVarHTTPHeaderAccepts := []string{"text/plain"}
 
 	// set Accept header
 	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)

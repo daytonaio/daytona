@@ -132,8 +132,6 @@ import type { SearchFilesResponse } from '../models'
 // @ts-ignore
 import type { Session } from '../models'
 // @ts-ignore
-import type { SessionCommandLogsResponse } from '../models'
-// @ts-ignore
 import type { SessionExecuteRequest } from '../models'
 // @ts-ignore
 import type { SessionExecuteResponse } from '../models'
@@ -4239,7 +4237,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
       xDaytonaOrganizationID?: string,
       follow?: boolean,
       options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<SessionCommandLogsResponse>> {
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<string>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.getSessionCommandLogs(
         sandboxId,
         sessionId,
@@ -5961,7 +5959,7 @@ export const ToolboxApiFactory = function (configuration?: Configuration, basePa
       xDaytonaOrganizationID?: string,
       follow?: boolean,
       options?: RawAxiosRequestConfig,
-    ): AxiosPromise<SessionCommandLogsResponse> {
+    ): AxiosPromise<string> {
       return localVarFp
         .getSessionCommandLogs(sandboxId, sessionId, commandId, xDaytonaOrganizationID, follow, options)
         .then((request) => request(axios, basePath))

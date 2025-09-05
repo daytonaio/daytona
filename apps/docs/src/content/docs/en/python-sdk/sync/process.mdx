@@ -457,3 +457,64 @@ Response from the command execution.
 - `result` _str_ - The output from the command execution
 - `artifacts` _Optional[ExecutionArtifacts]_ - Artifacts from the command execution
 
+## SessionExecuteResponse
+
+```python
+class SessionExecuteResponse(ApiSessionExecuteResponse)
+```
+
+Response from the session command execution.
+
+**Attributes**:
+
+- `output` _str_ - The output from the command execution
+- `exit_code` _int_ - The exit code from the command execution
+
+## SessionCommandLogsResponse
+
+```python
+class SessionCommandLogsResponse()
+```
+
+Response from the command logs.
+
+**Attributes**:
+
+- `output` _str_ - The combined output from the command
+- `stdout` _str_ - The stdout from the command
+- `stderr` _str_ - The stderr from the command
+
+#### parse\_session\_command\_logs
+
+```python
+def parse_session_command_logs(data: bytes) -> SessionCommandLogsResponse
+```
+
+Parse combined stdout/stderr output into separate streams.
+
+**Arguments**:
+
+- `data` - Combined log bytes with STDOUT_PREFIX and STDERR_PREFIX markers
+  
+
+**Returns**:
+
+  SessionCommandLogsResponse with separated stdout and stderr
+
+#### demux\_log
+
+```python
+def demux_log(data: bytes) -> tuple[bytes, bytes]
+```
+
+Demultiplex combined stdout/stderr log data.
+
+**Arguments**:
+
+- `data` - Combined log bytes with STDOUT_PREFIX and STDERR_PREFIX markers
+  
+
+**Returns**:
+
+  Tuple of (stdout_bytes, stderr_bytes)
+

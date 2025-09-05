@@ -120,7 +120,6 @@ model_screenshot_response.go
 model_search_files_response.go
 model_send_webhook_dto.go
 model_session.go
-model_session_command_logs_response.go
 model_session_execute_request.go
 model_session_execute_response.go
 model_set_snapshot_general_status_dto.go

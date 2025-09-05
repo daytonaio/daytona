@@ -10,8 +10,6 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"strings"
-	"sync"
 	"time"
 
 	"github.com/daytonaio/daemon/internal/util"
@@ -37,7 +35,7 @@ func (s *SessionController) GetSessionCommandLogs(c *gin.Context) {
 		return
 	}
 
-	stdoutPath, stderrPath, _ := command.LogFilePath(session.Dir(s.configDir))
+	logFilePath, exitCodeFilePath := command.LogFilePath(session.Dir(s.configDir))
 
 	sdkVersion := util.ExtractSdkVersionFromHeader(c.Request.Header)
 	if sdkVersion != "" {
@@ -46,7 +44,7 @@ func (s *SessionController) GetSessionCommandLogs(c *gin.Context) {
 		upgrader.Subprotocols = []string{}
 	}
 
-	versionComparison, err := util.CompareVersions(sdkVersion, "0.26.0-0")
+	versionComparison, err := util.CompareVersions(sdkVersion, "0.27.0-0")
 	if err != nil {
 		log.Error(err)
 		versionComparison = util.Pointer(1)
@@ -54,79 +52,98 @@ func (s *SessionController) GetSessionCommandLogs(c *gin.Context) {
 	isLegacy := versionComparison != nil && *versionComparison < 0 && sdkVersion != "0.0.0-dev"
 
 	if c.Request.Header.Get("Upgrade") == "websocket" {
-		stdoutFile, err := os.Open(stdoutPath)
+		logFile, err := os.Open(logFilePath)
 		if err != nil {
-			handleLogFileError(c, err)
+			if os.IsNotExist(err) {
+				c.AbortWithError(http.StatusNotFound, err)
+				return
+			}
+			if os.IsPermission(err) {
+				c.AbortWithError(http.StatusForbidden, err)
+				return
+			}
+			c.AbortWithError(http.StatusBadRequest, err)
 			return
 		}
-		defer stdoutFile.Close()
-
-		stderrFile, err := os.Open(stderrPath)
-		if err != nil {
-			handleLogFileError(c, err)
-			return
-		}
-		defer stderrFile.Close()
-
-		cleanupConn := func(conn *websocket.Conn) {
-			err := conn.WriteControl(
-				websocket.CloseMessage,
-				websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""),
-				time.Now().Add(time.Second),
-			)
-			if err != nil {
-				log.Error(err)
-			}
-			err = conn.Close()
-			if err != nil {
-				log.Error(err)
-			}
-		}
-
-		StdMux(c, isLegacy, stdoutFile, stderrFile, util.ReadCommandLog, func(conn *websocket.Conn, messages chan []byte, errors chan error) {
+		defer logFile.Close()
+		ReadLog(c, logFile, util.ReadLogWithExitCode, exitCodeFilePath, func(conn *websocket.Conn, messages chan []byte, errors chan error) {
+			var buffer []byte
 			for {
 				select {
 				case <-session.ctx.Done():
-					cleanupConn(conn)
-					return
-				case msg, ok := <-messages:
-					if !ok { // channel is closed
-						cleanupConn(conn)
-						return
+					// Flush any remaining bytes in buffer before closing
+					if isLegacy && len(buffer) > 0 {
+						remainingData := flushRemainingBuffer(&buffer)
+						if len(remainingData) > 0 {
+							err := conn.WriteMessage(websocket.TextMessage, remainingData)
+							if err != nil {
+								log.Error(err)
+							}
+						}
 					}
-					err := conn.WriteMessage(websocket.BinaryMessage, msg)
+					err := conn.WriteControl(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""), time.Now().Add(time.Second))
 					if err != nil {
-						errors <- err
-						return
+						log.Error(err)
 					}
+					conn.Close()
+					return
+				case msg := <-messages:
+					if isLegacy {
+						// Process chunks with buffering to handle prefixes split across chunks
+						processedData := processLogChunkWithPrefixFiltering(msg, &buffer)
+						if len(processedData) > 0 {
+							err := conn.WriteMessage(websocket.TextMessage, processedData)
+							if err != nil {
+								errors <- err
+								return
+							}
+						}
+					} else {
+						err := conn.WriteMessage(websocket.TextMessage, msg)
+						if err != nil {
+							errors <- err
+							return
+						}
+					}
+				case <-errors:
+					// Stream ended, flush any remaining bytes in buffer
+					if isLegacy && len(buffer) > 0 {
+						remainingData := flushRemainingBuffer(&buffer)
+						if len(remainingData) > 0 {
+							writeErr := conn.WriteMessage(websocket.TextMessage, remainingData)
+							if writeErr != nil {
+								log.Error(writeErr)
+							}
+						}
+					}
+					// The error will be handled by the main ReadLog function
+					return
 				}
 			}
 		})
 		return
 	}
 
-	stdoutBytes, err := os.ReadFile(stdoutPath)
+	logBytes, err := os.ReadFile(logFilePath)
 	if err != nil {
-		handleLogFileError(c, err)
+		if os.IsNotExist(err) {
+			c.AbortWithError(http.StatusNotFound, err)
+			return
+		}
+		if os.IsPermission(err) {
+			c.AbortWithError(http.StatusForbidden, err)
+			return
+		}
+		c.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
-	stdoutContent := strings.TrimSuffix(strings.TrimRight(string(stdoutBytes), " \n\r\t"), COMMAND_EXIT_MARKER)
-
-	stderrBytes, err := os.ReadFile(stderrPath)
-	if err != nil {
-		handleLogFileError(c, err)
-		return
-	}
-	stderrContent := strings.TrimSuffix(strings.TrimRight(string(stderrBytes), " \n\r\t"), COMMAND_EXIT_MARKER)
 
 	if isLegacy {
-		c.JSON(http.StatusOK, stdoutContent+"\n"+stderrContent)
-	} else {
-		c.JSON(http.StatusOK, SessionCommandLogsResponse{
-			Stdout: stdoutContent,
-			Stderr: stderrContent,
-		})
+		// remove prefixes from log bytes for backwards compatibility
+		logBytes = bytes.ReplaceAll(bytes.ReplaceAll(logBytes, STDOUT_PREFIX, []byte{}), STDERR_PREFIX, []byte{})
 	}
+
+	c.String(http.StatusOK, string(logBytes))
 }
 
 var upgrader = websocket.Upgrader{
@@ -135,9 +152,9 @@ var upgrader = websocket.Upgrader{
 	},
 }
 
-// StdMux reads from the stdoutReader and stderrReader and writes to the websocket.
-// Stdout chunks are prefixed with 0x01 and stderr chunks are prefixed with 0x02.
-func StdMux(ginCtx *gin.Context, isLegacy bool, stdoutReader io.Reader, stderrReader io.Reader, readFunc func(context.Context, io.Reader, bool, chan []byte, chan error), wsWriteFunc func(*websocket.Conn, chan []byte, chan error)) {
+// ReadLog reads from the logReader and writes to the websocket.
+// T is the type of the message to be read from the logReader
+func ReadLog[T any](ginCtx *gin.Context, logReader io.Reader, readFunc func(context.Context, io.Reader, bool, string, chan T, chan error), exitCodeFilePath string, wsWriteFunc func(*websocket.Conn, chan T, chan error)) {
 	followQuery := ginCtx.Query("follow")
 	follow := followQuery == "true"
 
@@ -159,74 +176,13 @@ func StdMux(ginCtx *gin.Context, isLegacy bool, stdoutReader io.Reader, stderrRe
 		ws.Close()
 	}()
 
-	msgChannel := make(chan []byte)
-	stdoutChannel := make(chan []byte)
-	stderrChannel := make(chan []byte)
+	msgChannel := make(chan T)
 	errChannel := make(chan error)
 	ctx, cancel := context.WithCancel(ginCtx.Request.Context())
 
 	defer cancel()
-	go readFunc(ctx, stdoutReader, follow, stdoutChannel, errChannel)
-	go readFunc(ctx, stderrReader, follow, stderrChannel, errChannel)
+	go readFunc(ctx, logReader, follow, exitCodeFilePath, msgChannel, errChannel)
 	go wsWriteFunc(ws, msgChannel, errChannel)
-
-	streams := []struct {
-		channel chan []byte
-		prefix  byte
-	}{
-		{stdoutChannel, 0x01},
-		{stderrChannel, 0x02},
-	}
-
-	go func() {
-		wg := sync.WaitGroup{}
-		wg.Add(2)
-
-		if isLegacy {
-			for _, stream := range streams {
-				go func(ch chan []byte) {
-					defer wg.Done()
-					for data := range ch {
-						if idx := bytes.Index(data, []byte(COMMAND_EXIT_MARKER)); idx != -1 {
-							// Send everything up to (but not including) the marker
-							data = data[:idx]
-							if len(data) > 0 {
-								msgChannel <- data
-							}
-							close(ch)
-							return
-						}
-						if len(data) > 0 {
-							msgChannel <- data
-						}
-					}
-				}(stream.channel)
-			}
-		} else {
-			for _, stream := range streams {
-				go func(ch chan []byte, prefix byte) {
-					defer wg.Done()
-					for data := range ch {
-						if idx := bytes.Index(data, []byte(COMMAND_EXIT_MARKER)); idx != -1 {
-							// Send everything up to (but not including) the marker
-							data = data[:idx]
-							if len(data) > 0 {
-								msgChannel <- append([]byte{prefix}, data...)
-							}
-							close(ch)
-							return
-						}
-						if len(data) > 0 {
-							msgChannel <- append([]byte{prefix}, data...)
-						}
-					}
-				}(stream.channel, stream.prefix)
-			}
-		}
-
-		wg.Wait()
-		close(msgChannel)
-	}()
 
 	readErr := make(chan error)
 	go func() {
@@ -259,14 +215,59 @@ func StdMux(ginCtx *gin.Context, isLegacy bool, stdoutReader io.Reader, stderrRe
 	}
 }
 
-func handleLogFileError(c *gin.Context, err error) {
-	if os.IsNotExist(err) {
-		c.AbortWithError(http.StatusNotFound, err)
-		return
+// processLogChunkWithPrefixFiltering processes log chunks with buffering to handle prefixes split across chunks
+func processLogChunkWithPrefixFiltering(chunk []byte, buffer *[]byte) []byte {
+	// Append new chunk to buffer
+	*buffer = append(*buffer, chunk...)
+
+	var result []byte
+	i := 0
+
+	for i < len(*buffer) {
+		// Check if we have enough bytes to check for prefixes
+		if len(*buffer)-i < 3 {
+			// Not enough bytes for a complete prefix, keep remaining bytes in buffer
+			*buffer = (*buffer)[i:]
+			break
+		}
+
+		// Check for STDOUT_PREFIX (0x01, 0x01, 0x01)
+		if (*buffer)[i] == STDOUT_PREFIX[0] && (*buffer)[i+1] == STDOUT_PREFIX[1] && (*buffer)[i+2] == STDOUT_PREFIX[2] {
+			// Found STDOUT_PREFIX, skip it
+			i += 3
+			continue
+		}
+
+		// Check for STDERR_PREFIX (0x02, 0x02, 0x02)
+		if (*buffer)[i] == STDERR_PREFIX[0] && (*buffer)[i+1] == STDERR_PREFIX[1] && (*buffer)[i+2] == STDERR_PREFIX[2] {
+			// Found STDERR_PREFIX, skip it
+			i += 3
+			continue
+		}
+
+		// No prefix found, add this byte to result
+		result = append(result, (*buffer)[i])
+		i++
 	}
-	if os.IsPermission(err) {
-		c.AbortWithError(http.StatusForbidden, err)
-		return
+
+	// If we processed all bytes, clear the buffer
+	if i >= len(*buffer) {
+		*buffer = (*buffer)[:0]
 	}
-	c.AbortWithError(http.StatusBadRequest, err)
+
+	return result
+}
+
+// flushRemainingBuffer processes any remaining bytes in the buffer at the end of the stream
+func flushRemainingBuffer(buffer *[]byte) []byte {
+	if len(*buffer) == 0 {
+		return nil
+	}
+
+	// At the end of stream, any remaining bytes are not prefixes (since they're incomplete)
+	// So we should output them as regular data
+	result := make([]byte, len(*buffer))
+	copy(result, *buffer)
+	*buffer = (*buffer)[:0] // Clear the buffer
+	return result
 }

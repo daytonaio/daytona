@@ -52,8 +52,8 @@ type Command struct {
 	ExitCode *int   `json:"exitCode,omitempty" validate:"optional"`
 } // @name Command
 
-func (c *Command) LogFilePath(sessionDir string) (string, string, string) {
-	return filepath.Join(sessionDir, c.Id, "output.log"), filepath.Join(sessionDir, c.Id, "stderr.log"), filepath.Join(sessionDir, c.Id, "exit_code")
+func (c *Command) LogFilePath(sessionDir string) (string, string) {
+	return filepath.Join(sessionDir, c.Id, "output.log"), filepath.Join(sessionDir, c.Id, "exit_code")
 }
 
 type SessionCommandLogsResponse struct {

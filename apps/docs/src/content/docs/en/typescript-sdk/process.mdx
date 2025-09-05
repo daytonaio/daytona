@@ -442,3 +442,56 @@ sessions.forEach(session => {
   });
 });
 ```
+
+***
+
+
+## SessionCommandLogsResponse
+
+**Properties**:
+
+- `output?` _string_
+- `stderr?` _string_
+- `stdout?` _string_
+## SessionExecuteResponse
+
+**Extends:**
+
+**Properties**:
+
+- `cmdId?` _string_ - The ID of the executed command
+    - _Inherited from_: `SessionExecuteResponse.cmdId`
+- `exitCode?` _number_ - The exit code of the executed command
+    - _Inherited from_: `SessionExecuteResponse.exitCode`
+- `output?` _string_ - The output of the executed command marked with stdout and stderr prefixes
+    - _Inherited from_: `SessionExecuteResponse.output`
+- `stderr?` _string_
+- `stdout?` _string_
+
+
+
+
+- `SessionExecuteResponse`
+## MAX\_PREFIX\_LEN
+
+```ts
+const MAX_PREFIX_LEN: number;
+```
+
+***
+
+
+## STDERR\_PREFIX\_BYTES
+
+```ts
+const STDERR_PREFIX_BYTES: Uint8Array<ArrayBuffer>;
+```
+
+***
+
+
+## STDOUT\_PREFIX\_BYTES
+
+```ts
+const STDOUT_PREFIX_BYTES: Uint8Array<ArrayBuffer>;
+```

@@ -25,17 +25,11 @@ export interface SessionExecuteResponse {
    */
   cmdId?: string
   /**
-   * The stdout of the executed command
+   * The output of the executed command marked with stdout and stderr prefixes
    * @type {string}
    * @memberof SessionExecuteResponse
    */
-  stdout?: string
-  /**
-   * The stderr of the executed command
-   * @type {string}
-   * @memberof SessionExecuteResponse
-   */
-  stderr?: string
+  output?: string
   /**
    * The exit code of the executed command
    * @type {number}

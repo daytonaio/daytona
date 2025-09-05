@@ -11,22 +11,22 @@ import re
 from typing import Callable, Dict, List, Optional
 
 import websockets
-from daytona_api_client import (
-    Command,
-    CreateSessionRequest,
-    ExecuteRequest,
-    PortPreviewUrl,
-    Session,
-    SessionCommandLogsResponse,
-    SessionExecuteResponse,
-    ToolboxApi,
-)
+from daytona_api_client import Command, CreateSessionRequest, ExecuteRequest, PortPreviewUrl, Session, ToolboxApi
 
 from .._utils.errors import intercept_errors
 from .._utils.stream import std_demux_stream
 from ..code_toolbox.sandbox_python_code_toolbox import SandboxPythonCodeToolbox
 from ..common.charts import parse_chart
-from ..common.process import CodeRunParams, ExecuteResponse, ExecutionArtifacts, SessionExecuteRequest
+from ..common.process import (
+    CodeRunParams,
+    ExecuteResponse,
+    ExecutionArtifacts,
+    SessionCommandLogsResponse,
+    SessionExecuteRequest,
+    SessionExecuteResponse,
+    demux_log,
+    parse_session_command_logs,
+)
 
 
 class Process:
@@ -335,11 +335,22 @@ class Process:
             print(result.output)  # Prints: Hello
             ```
         """
-        return self._toolbox_api.execute_session_command(
+        response = self._toolbox_api.execute_session_command(
             self._sandbox_id,
             session_id=session_id,
             session_execute_request=req,
             _request_timeout=timeout or None,
+        )
+
+        stdout, stderr = demux_log(response.output.encode("utf-8", "ignore") if response.output else b"")
+
+        return SessionExecuteResponse.model_construct(
+            cmd_id=response.cmd_id,
+            output=response.output,
+            stdout=stdout.decode("utf-8", "ignore"),
+            stderr=stderr.decode("utf-8", "ignore"),
+            exit_code=response.exit_code,
+            additional_properties=response.additional_properties,
         )
 
     @intercept_errors(message_prefix="Failed to get session command logs: ")
@@ -364,9 +375,11 @@ class Process:
             print(f"Command stderr: {logs.stderr}")
             ```
         """
-        return self._toolbox_api.get_session_command_logs(
+        response = self._toolbox_api.get_session_command_logs_without_preload_content(
             self._sandbox_id, session_id=session_id, command_id=command_id
         )
+
+        return parse_session_command_logs(response.data)
 
     @intercept_errors(message_prefix="Failed to get session command logs: ")
     async def get_session_command_logs_async(

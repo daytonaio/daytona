@@ -70,7 +70,6 @@ from daytona_api_client.models.replace_result import ReplaceResult
 from daytona_api_client.models.screenshot_response import ScreenshotResponse
 from daytona_api_client.models.search_files_response import SearchFilesResponse
 from daytona_api_client.models.session import Session
-from daytona_api_client.models.session_command_logs_response import SessionCommandLogsResponse
 from daytona_api_client.models.session_execute_request import SessionExecuteRequest
 from daytona_api_client.models.session_execute_response import SessionExecuteResponse
 from daytona_api_client.models.windows_response import WindowsResponse
@@ -6004,7 +6003,7 @@ class ToolboxApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> SessionCommandLogsResponse:
+    ) -> str:
         """Get command logs
 
         Get logs for a specific command in a session
@@ -6054,7 +6053,7 @@ class ToolboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "SessionCommandLogsResponse",
+            '200': "str",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -6087,7 +6086,7 @@ class ToolboxApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[SessionCommandLogsResponse]:
+    ) -> ApiResponse[str]:
         """Get command logs
 
         Get logs for a specific command in a session
@@ -6137,7 +6136,7 @@ class ToolboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "SessionCommandLogsResponse",
+            '200': "str",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -6220,7 +6219,7 @@ class ToolboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "SessionCommandLogsResponse",
+            '200': "str",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -6279,7 +6278,7 @@ class ToolboxApi:
         if 'Accept' not in _header_params:
             _header_params['Accept'] = self.api_client.select_header_accept(
                 [
-                    'application/json'
+                    'text/plain'
                 ]
             )
 

@@ -81,7 +81,6 @@ import {
   ProcessRestartResponseDto,
   ProcessLogsResponseDto,
   ProcessErrorsResponseDto,
-  SessionCommandLogsResponseDto,
 } from '../dto/toolbox.dto'
 import { ToolboxService } from '../services/toolbox.service'
 import { ContentTypeInterceptor } from '../../common/interceptors/content-type.interceptors'
@@ -1204,15 +1203,10 @@ export class ToolboxController {
     description: 'Get logs for a specific command in a session',
     operationId: 'getSessionCommandLogs',
   })
-  @ApiResponse({
-    status: 200,
-    description: 'Command logs',
-    type: SessionCommandLogsResponseDto,
-  })
   // When follow is true, the response is an octet stream
   @ApiResponse({
     status: 200,
-    description: 'Command log stream',
+    description: 'Command log stream marked with stdout and stderr prefixes',
     content: {
       'text/plain': {
         schema: {

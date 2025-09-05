@@ -4,6 +4,7 @@
 package session
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"net/http"
@@ -16,6 +17,13 @@ import (
 	"github.com/daytonaio/daemon/internal/util"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+
+	log "github.com/sirupsen/logrus"
+)
+
+var (
+	STDOUT_PREFIX = []byte{0x01, 0x01, 0x01}
+	STDERR_PREFIX = []byte{0x02, 0x02, 0x02}
 )
 
 // Add a standard error response struct
@@ -56,43 +64,56 @@ func (s *SessionController) SessionExecuteCommand(c *gin.Context) {
 	}
 	session.commands[*cmdId] = command
 
-	stdoutFilePath, stderrFilePath, exitCodeFilePath := command.LogFilePath(session.Dir(s.configDir))
+	logFilePath, exitCodeFilePath := command.LogFilePath(session.Dir(s.configDir))
+	logDir := filepath.Dir(logFilePath)
 
-	if err := os.MkdirAll(filepath.Dir(stdoutFilePath), 0755); err != nil {
+	if err := os.MkdirAll(logDir, 0755); err != nil {
 		c.AbortWithError(http.StatusBadRequest, fmt.Errorf("failed to create log directory: %w", err))
 		return
 	}
 
-	stdoutFile, err := os.Create(stdoutFilePath)
+	logFile, err := os.Create(logFilePath)
 	if err != nil {
-		c.AbortWithError(http.StatusBadRequest, fmt.Errorf("failed to create stdout log file: %w", err))
+		c.AbortWithError(http.StatusBadRequest, fmt.Errorf("failed to create log file: %w", err))
 		return
 	}
 
-	defer stdoutFile.Close()
-
-	stderrFile, err := os.Create(stderrFilePath)
-	if err != nil {
-		c.AbortWithError(http.StatusBadRequest, fmt.Errorf("failed to create stderr log file: %w", err))
-		return
-	}
-
-	defer stderrFile.Close()
+	defer logFile.Close()
 
 	cmdToExec := fmt.Sprintf(
-		`{ 
-			 %s; 
-			 exit_code=$?; 
-			 echo %s >&1; 
-			 echo %s >&2; 
-			 echo "$exit_code" > %s; 
-		 } > %s 2> %s`+"\n",
-		request.Command,
-		COMMAND_EXIT_MARKER, // goes into stdout log
-		COMMAND_EXIT_MARKER, // goes into stderr log
-		exitCodeFilePath,
-		stdoutFilePath,
-		stderrFilePath,
+		`{
+	log=%q
+	dir=%q
+
+	# per-command FIFOs
+	sp="$dir/stdout.pipe.%s.$$"; ep="$dir/stderr.pipe.%s.$$"
+	rm -f "$sp" "$ep" && mkfifo "$sp" "$ep" || exit 1
+
+	cleanup() { rm -f "$sp" "$ep"; }
+	trap 'cleanup' EXIT HUP INT TERM
+
+	# prefix each stream and append to shared log
+	( while IFS= read -r line || [ -n "$line" ]; do printf '%s%%s\n' "$line"; done < "$sp" ) >> "$log" & r1=$!
+	( while IFS= read -r line || [ -n "$line" ]; do printf '%s%%s\n' "$line"; done < "$ep" ) >> "$log" & r2=$!
+
+	# Run your command
+	{ %s; } > "$sp" 2> "$ep"
+	echo "$?" >> %s
+
+	# drain labelers (cleanup via trap)
+	wait "$r1" "$r2"
+
+	# Ensure unlink even if the waits failed
+	cleanup
+}
+`+"\n",
+		logFilePath,    // %q  -> log
+		logDir,         // %q  -> dir
+		*cmdId, *cmdId, // %s  %s -> fifo names
+		toOctalEscapes(STDOUT_PREFIX), // %s  -> stdout prefix
+		toOctalEscapes(STDERR_PREFIX), // %s  -> stderr prefix
+		request.Command,               // %s  -> verbatim script body
+		exitCodeFilePath,              // %q
 	)
 
 	_, err = session.stdinWriter.Write([]byte(cmdToExec))
@@ -134,28 +155,47 @@ func (s *SessionController) SessionExecuteCommand(c *gin.Context) {
 
 			sessions[sessionId].commands[*cmdId].ExitCode = &exitCodeInt
 
-			stdoutBytes, err := os.ReadFile(stdoutFilePath)
+			logBytes, err := os.ReadFile(logFilePath)
 			if err != nil {
 				c.AbortWithError(http.StatusBadRequest, fmt.Errorf("failed to read log file: %w", err))
 				return
 			}
-			stdoutContent := strings.TrimSuffix(strings.TrimRight(string(stdoutBytes), " \n\r\t"), COMMAND_EXIT_MARKER)
+			logContent := string(logBytes)
 
-			stderrBytes, err := os.ReadFile(stderrFilePath)
-			if err != nil {
-				c.AbortWithError(http.StatusBadRequest, fmt.Errorf("failed to read stderr log file: %w", err))
-				return
+			sdkVersion := util.ExtractSdkVersionFromHeader(c.Request.Header)
+			if sdkVersion != "" {
+				upgrader.Subprotocols = []string{"X-Daytona-SDK-Version~" + sdkVersion}
+			} else {
+				upgrader.Subprotocols = []string{}
 			}
-			stderrContent := strings.TrimSuffix(strings.TrimRight(string(stderrBytes), " \n\r\t"), COMMAND_EXIT_MARKER)
+
+			versionComparison, err := util.CompareVersions(sdkVersion, "0.27.0-0")
+			if err != nil {
+				log.Error(err)
+				versionComparison = util.Pointer(1)
+			}
+			isLegacy := versionComparison != nil && *versionComparison < 0 && sdkVersion != "0.0.0-dev"
+
+			if isLegacy {
+				// remove prefixes from log bytes for backwards compatibility
+				logBytes = bytes.ReplaceAll(bytes.ReplaceAll(logBytes, STDOUT_PREFIX, []byte{}), STDERR_PREFIX, []byte{})
+				logContent = string(logBytes)
+			}
 
 			c.JSON(http.StatusOK, SessionExecuteResponse{
 				CommandId: cmdId,
-				Output:    util.Pointer(stdoutContent + "\n" + stderrContent),
-				Stdout:    &stdoutContent,
-				Stderr:    &stderrContent,
+				Output:    &logContent,
 				ExitCode:  &exitCodeInt,
 			})
 			return
 		}
 	}
+}
+
+func toOctalEscapes(b []byte) string {
+	out := ""
+	for _, c := range b {
+		out += fmt.Sprintf("\\%03o", c) // e.g. 0x01 → \001
+	}
+	return out
 }

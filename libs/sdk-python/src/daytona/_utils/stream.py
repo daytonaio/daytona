@@ -9,10 +9,8 @@ import httpx
 import websockets
 from websockets.asyncio.client import Connection
 
+from ..common.process import MAX_PREFIX_LEN, STDERR_PREFIX, STDOUT_PREFIX
 from .errors import DaytonaError
-
-STDOUT_PREFIX = 0x01
-STDERR_PREFIX = 0x02
 
 
 async def process_streaming_response(
@@ -106,36 +104,105 @@ async def process_streaming_response(
 
 
 async def std_demux_stream(
-    connection: Connection, on_stdout: Callable[[bytes], None], on_stderr: Callable[[bytes], None]
+    connection: Connection,
+    on_stdout: Callable[[bytes], None],
+    on_stderr: Callable[[bytes], None],
 ) -> None:
-    """
-    Demultiplexes a WebSocket stream into separate stdout and stderr streams.
+    buf = bytearray()
+    current_data_type = None  # None | "stdout" | "stderr"
 
-    Args:
-        connection: The WebSocket connection to demultiplex.
-        on_stdout: Callback function for stdout messages.
-        on_stderr: Callback function for stderr messages.
-    """
-    while True:
-        try:
-            chunk = await connection.recv()
-        except websockets.exceptions.ConnectionClosedOK:
-            # Clean termination
-            break
-        except websockets.exceptions.ConnectionClosedError as e:
-            raise DaytonaError(f"WebSocket error: {e}") from e
+    def emit(payload: bytes):
+        if not payload:
+            return
+        if current_data_type == "stdout":
+            on_stdout(payload.decode("utf-8", "ignore"))
+        elif current_data_type == "stderr":
+            on_stderr(payload.decode("utf-8", "ignore"))
+        # If current is None, drop unlabeled bytes (shouldn't happen with proper labeling)
 
-        if isinstance(chunk, str):
-            chunk = chunk.encode("utf-8", "ignore")
+    try:
+        while True:
+            try:
+                chunk = await connection.recv()
+            except websockets.exceptions.ConnectionClosedOK:
+                break
+            except websockets.exceptions.ConnectionClosedError as e:
+                raise DaytonaError(f"WebSocket error: {e}") from e
 
-        if not chunk:
-            continue
+            # WS server sends text frames; convert to bytes so we can match control markers.
+            if isinstance(chunk, str):
+                chunk = chunk.encode("utf-8", "ignore")
 
-        prefix, data = chunk[0], chunk[1:].decode("utf-8", "ignore")
+            if not chunk:
+                continue
 
-        if prefix == STDOUT_PREFIX:
-            on_stdout(data)
-        elif prefix == STDERR_PREFIX:
-            on_stderr(data)
-        else:
-            raise DaytonaError(f"Unknown data prefix: '{prefix}'")
+            buf += chunk
+
+            # Process as much as we can, preserving only bytes that could be part of a prefix
+            while True:
+                # Calculate how many bytes we can safely process
+                # We need to keep bytes that could potentially be the start of a prefix marker
+                safe_len = len(buf)
+
+                # Check if the last few bytes could be part of a prefix marker
+                if len(buf) >= MAX_PREFIX_LEN:
+                    # Check if the last byte could be part of a prefix (must be \x01 or \x02)
+                    last_byte = buf[-1]
+                    if last_byte not in (0x01, 0x02):
+                        # Last byte can't be part of any prefix, safe to process everything
+                        safe_len = len(buf)
+                    elif len(buf) >= MAX_PREFIX_LEN + 1:
+                        # Check second-to-last byte if buffer is long enough
+                        second_last_byte = buf[-2]
+                        if second_last_byte not in (0x01, 0x02):
+                            # Second-to-last byte can't be part of any prefix, safe to process all but last byte
+                            safe_len = len(buf) - 1
+                        else:
+                            # Both last bytes could be part of prefix, keep MAX_PREFIX_LEN - 1 bytes
+                            safe_len = len(buf) - (MAX_PREFIX_LEN - 1)
+                    else:
+                        # Buffer is exactly MAX_PREFIX_LEN, keep MAX_PREFIX_LEN - 1 bytes
+                        safe_len = len(buf) - (MAX_PREFIX_LEN - 1)
+                else:
+                    # Buffer shorter than MAX_PREFIX_LEN, keep MAX_PREFIX_LEN - 1 bytes
+                    safe_len = len(buf) - (MAX_PREFIX_LEN - 1)
+
+                if safe_len <= 0:
+                    break
+
+                # Find earliest next marker within the safe region
+                si = buf.find(STDOUT_PREFIX, 0, safe_len)
+                ei = buf.find(STDERR_PREFIX, 0, safe_len)
+
+                next_idx = -1
+                next_kind = None
+                next_len = 0
+
+                if si != -1 and (ei == -1 or si < ei):
+                    next_idx, next_kind, next_len = si, "stdout", len(STDOUT_PREFIX)
+                elif ei != -1:
+                    next_idx, next_kind, next_len = ei, "stderr", len(STDERR_PREFIX)
+
+                if next_idx == -1:
+                    # No full marker in safe region: emit everything we safely can as payload
+                    to_emit = bytes(buf[:safe_len])
+                    emit(to_emit)
+                    del buf[:safe_len]
+                    break  # wait for more data to resolve any partial marker at the end
+
+                # We found a marker. Emit preceding bytes (if any) under the current stream.
+                if next_idx > 0:
+                    to_emit = bytes(buf[:next_idx])
+                    emit(to_emit)
+
+                # Advance past the marker and switch current stream
+                del buf[: next_idx + next_len]
+                current_data_type = next_kind
+
+    finally:
+        # Flush any remaining buffered payload on clean close
+        if buf and current_data_type in ("stdout", "stderr"):
+            if current_data_type == "stdout":
+                on_stdout(bytes(buf).decode("utf-8", "ignore"))
+            else:
+                on_stderr(bytes(buf).decode("utf-8", "ignore"))

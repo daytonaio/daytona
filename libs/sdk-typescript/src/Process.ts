@@ -7,9 +7,8 @@ import {
   Command,
   Configuration,
   Session,
-  SessionCommandLogsResponse,
   SessionExecuteRequest,
-  SessionExecuteResponse,
+  SessionExecuteResponse as ApiSessionExecuteResponse,
   PortPreviewUrl,
   ToolboxApi,
 } from '@daytonaio/api-client'
@@ -20,6 +19,11 @@ import { stdDemuxStream } from './utils/Stream'
 import { Buffer } from 'buffer'
 import WebSocket from 'isomorphic-ws'
 import { RUNTIME, Runtime } from './utils/Runtime'
+
+// 3-byte multiplexing markers inserted by the shell labelers
+export const STDOUT_PREFIX_BYTES = new Uint8Array([0x01, 0x01, 0x01])
+export const STDERR_PREFIX_BYTES = new Uint8Array([0x02, 0x02, 0x02])
+export const MAX_PREFIX_LEN = Math.max(STDOUT_PREFIX_BYTES.length, STDERR_PREFIX_BYTES.length)
 
 /**
  * Parameters for code execution.
@@ -33,6 +37,17 @@ export class CodeRunParams {
    * Environment variables
    */
   env?: Record<string, string>
+}
+
+export interface SessionExecuteResponse extends ApiSessionExecuteResponse {
+  stdout?: string
+  stderr?: string
+}
+
+export interface SessionCommandLogsResponse {
+  output?: string
+  stdout?: string
+  stderr?: string
 }
 
 /**
@@ -282,6 +297,19 @@ export class Process {
       undefined,
       timeout ? { timeout: timeout * 1000 } : {},
     )
+
+    // Demux the output if it exists
+    if (response.data.output) {
+      // Convert string to bytes for demuxing
+      const outputBytes = new TextEncoder().encode(response.data.output)
+      const demuxedCommandLogs = parseSessionCommandLogs(outputBytes)
+      return {
+        ...response.data,
+        stdout: demuxedCommandLogs.stdout,
+        stderr: demuxedCommandLogs.stderr,
+      }
+    }
+
     return response.data
   }
 
@@ -327,7 +355,23 @@ export class Process {
   ): Promise<SessionCommandLogsResponse | void> {
     if (!onStdout && !onStderr) {
       const response = await this.toolboxApi.getSessionCommandLogs(this.sandboxId, sessionId, commandId)
-      return response.data
+
+      // Parse the response data if it's available
+      if (response.data) {
+        // Convert string to bytes for demuxing
+        const outputBytes = new TextEncoder().encode(response.data || '')
+        const demuxedCommandLogs = parseSessionCommandLogs(outputBytes)
+
+        return {
+          output: response.data,
+          stdout: demuxedCommandLogs.stdout,
+          stderr: demuxedCommandLogs.stderr,
+        }
+      }
+
+      return {
+        output: response.data,
+      }
     }
 
     const previewLink = await this.getPreviewLink(2280)
@@ -383,4 +427,111 @@ export class Process {
   public async deleteSession(sessionId: string): Promise<void> {
     await this.toolboxApi.deleteSession(this.sandboxId, sessionId)
   }
+}
+
+/**
+ * Parse combined stdout/stderr output into separate streams.
+ *
+ * @param data - Combined log bytes with STDOUT_PREFIX_BYTES and STDERR_PREFIX_BYTES markers
+ * @returns Object with separated stdout and stderr strings
+ */
+function parseSessionCommandLogs(data: Uint8Array): SessionCommandLogsResponse {
+  const [stdoutBytes, stderrBytes] = demuxLog(data)
+
+  // Convert bytes to strings, ignoring potential encoding issues
+  const stdoutStr = new TextDecoder('utf-8', { fatal: false }).decode(stdoutBytes)
+  const stderrStr = new TextDecoder('utf-8', { fatal: false }).decode(stderrBytes)
+
+  // For backwards compatibility, output field contains the original combined data
+  const outputStr = new TextDecoder('utf-8', { fatal: false }).decode(data)
+
+  return {
+    output: outputStr,
+    stdout: stdoutStr,
+    stderr: stderrStr,
+  }
+}
+
+/**
+ * Demultiplex combined stdout/stderr log data.
+ *
+ * @param data - Combined log bytes with STDOUT_PREFIX_BYTES and STDERR_PREFIX_BYTES markers
+ * @returns Tuple of [stdout_bytes, stderr_bytes]
+ */
+function demuxLog(data: Uint8Array): [Uint8Array, Uint8Array] {
+  const outBuf: number[] = []
+  const errBuf: number[] = []
+  let state: 'none' | 'stdout' | 'stderr' = 'none'
+
+  let remaining = data
+
+  while (remaining.length > 0) {
+    // Find the nearest marker (stdout or stderr)
+    const stdoutIndex = findSubarray(remaining, STDOUT_PREFIX_BYTES)
+    const stderrIndex = findSubarray(remaining, STDERR_PREFIX_BYTES)
+
+    // Pick the closest marker index and type
+    let nextIdx = -1
+    let nextMarker: 'stdout' | 'stderr' | null = null
+    let nextLen = 0
+
+    if (stdoutIndex !== -1 && (stderrIndex === -1 || stdoutIndex < stderrIndex)) {
+      nextIdx = stdoutIndex
+      nextMarker = 'stdout'
+      nextLen = STDOUT_PREFIX_BYTES.length
+    } else if (stderrIndex !== -1) {
+      nextIdx = stderrIndex
+      nextMarker = 'stderr'
+      nextLen = STDERR_PREFIX_BYTES.length
+    }
+
+    if (nextIdx === -1) {
+      // No more markers → dump remainder into current state
+      if (state === 'stdout') {
+        outBuf.push(...remaining)
+      } else if (state === 'stderr') {
+        errBuf.push(...remaining)
+      }
+      break
+    }
+
+    // Write everything before the marker into current state
+    if (state === 'stdout') {
+      outBuf.push(...remaining.slice(0, nextIdx))
+    } else if (state === 'stderr') {
+      errBuf.push(...remaining.slice(0, nextIdx))
+    }
+
+    // Advance past marker and switch state
+    remaining = remaining.slice(nextIdx + nextLen)
+    if (nextMarker) {
+      state = nextMarker
+    }
+  }
+
+  return [new Uint8Array(outBuf), new Uint8Array(errBuf)]
+}
+
+/**
+ * Helper function to find a subarray within a larger array.
+ *
+ * @param haystack - The array to search in
+ * @param needle - The subarray to find
+ * @returns The index of the first occurrence, or -1 if not found
+ */
+function findSubarray(haystack: Uint8Array, needle: Uint8Array): number {
+  if (needle.length === 0) return 0
+  if (haystack.length < needle.length) return -1
+
+  for (let i = 0; i <= haystack.length - needle.length; i++) {
+    let found = true
+    for (let j = 0; j < needle.length; j++) {
+      if (haystack[i + j] !== needle[j]) {
+        found = false
+        break
+      }
+    }
+    if (found) return i
+  }
+  return -1
 }
