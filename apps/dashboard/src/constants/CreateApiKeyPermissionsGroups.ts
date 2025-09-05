@@ -26,4 +26,24 @@ export const CREATE_API_KEY_PERMISSIONS_GROUPS: { name: string; permissions: Cre
       CreateApiKeyPermissionsEnum.DELETE_VOLUMES,
     ],
   },
+  {
+    name: 'Regions',
+    permissions: [
+      CreateApiKeyPermissionsEnum.READ_REGIONS,
+      CreateApiKeyPermissionsEnum.WRITE_REGIONS,
+      CreateApiKeyPermissionsEnum.DELETE_REGIONS,
+    ],
+  },
+  {
+    name: 'Runners',
+    permissions: [
+      CreateApiKeyPermissionsEnum.READ_RUNNERS,
+      CreateApiKeyPermissionsEnum.WRITE_RUNNERS,
+      CreateApiKeyPermissionsEnum.DELETE_RUNNERS,
+    ],
+  },
+  {
+    name: 'Audit',
+    permissions: [CreateApiKeyPermissionsEnum.READ_AUDIT_LOGS],
+  },
 ]
