@@ -6,7 +6,7 @@
 import { Injectable, Logger, NotFoundException, OnApplicationShutdown } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Cron, CronExpression } from '@nestjs/schedule'
-import { In, IsNull, LessThan, Not, Or, Raw, Repository } from 'typeorm'
+import { In, LessThan, MoreThanOrEqual, Not, Repository } from 'typeorm'
 import { DockerRegistryService } from '../../docker-registry/services/docker-registry.service'
 import { Snapshot } from '../entities/snapshot.entity'
 import { SnapshotState } from '../enums/snapshot-state.enum'
@@ -31,6 +31,7 @@ import { RunnerAdapterFactory } from '../runner-adapter/runnerAdapter'
 import { TrackableJobExecutions } from '../../common/interfaces/trackable-job-executions'
 import { TrackJobExecution } from '../../common/decorators/track-job-execution.decorator'
 import { setTimeout as sleep } from 'timers/promises'
+import { RUNNER_MIN_AVAILABILITY_SCORE_THRESHOLD } from '../constants/runner.constants'
 
 @Injectable()
 export class SnapshotManager implements TrackableJobExecutions, OnApplicationShutdown {
@@ -702,7 +703,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
         where: {
           state: RunnerState.READY,
           unschedulable: Not(true),
-          used: Raw((alias) => `${alias} < capacity`),
+          availabilityScore: MoreThanOrEqual(RUNNER_MIN_AVAILABILITY_SCORE_THRESHOLD),
         },
       })
       // Propagate snapshot to one runner so it can be used immediately

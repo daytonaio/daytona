@@ -6,7 +6,7 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Cron } from '@nestjs/schedule'
-import { FindOptionsWhere, In, Not, Raw, Repository } from 'typeorm'
+import { FindOptionsWhere, In, MoreThanOrEqual, Not, Repository } from 'typeorm'
 import { Runner } from '../entities/runner.entity'
 import { CreateRunnerDto } from '../dto/create-runner.dto'
 import { SandboxClass } from '../enums/sandbox-class.enum'
@@ -59,8 +59,6 @@ export class RunnerService {
     runner.diskGiB = createRunnerDto.diskGiB
     runner.gpu = createRunnerDto.gpu
     runner.gpuType = createRunnerDto.gpuType
-    runner.used = 0
-    runner.capacity = createRunnerDto.capacity
     runner.region = createRunnerDto.region
     runner.class = createRunnerDto.class
     runner.version = createRunnerDto.version
@@ -110,7 +108,6 @@ export class RunnerService {
     const runnerFilter: FindOptionsWhere<Runner> = {
       state: RunnerState.READY,
       unschedulable: Not(true),
-      used: Raw((alias) => `${alias} < capacity`),
     }
 
     if (params.snapshotRef !== undefined) {
@@ -144,11 +141,15 @@ export class RunnerService {
       runnerFilter.class = params.sandboxClass
     }
 
+    if (params.availabilityScoreThreshold !== undefined) {
+      runnerFilter.availabilityScore = MoreThanOrEqual(params.availabilityScoreThreshold)
+    }
+
     const runners = await this.runnerRepository.find({
       where: runnerFilter,
     })
 
-    return runners.sort((a, b) => a.used / a.capacity - b.used / b.capacity).slice(0, 10)
+    return runners.sort((a, b) => b.availabilityScore - a.availabilityScore).slice(0, 10)
   }
 
   async remove(id: string): Promise<void> {
@@ -160,8 +161,6 @@ export class RunnerService {
     if (![SandboxState.DESTROYED, SandboxState.CREATING, SandboxState.ARCHIVED].includes(event.newState)) {
       return
     }
-
-    await this.recalculateRunnerUsage(event.sandbox.runnerId)
   }
 
   private async updateRunnerState(runnerId: string, newState: RunnerState): Promise<void> {
@@ -209,8 +208,6 @@ export class RunnerService {
         }
 
         await this.updateRunnerStatus(runner.id, runnerInfo)
-
-        await this.recalculateRunnerUsage(runner.id)
       } catch (e) {
         if (e.code === 'ECONNREFUSED') {
           this.logger.error('Runner not reachable')
@@ -260,7 +257,6 @@ export class RunnerService {
         allocatedCpu: updateData.currentAllocatedCpu,
         allocatedMemoryGiB: updateData.currentAllocatedMemoryGiB,
         allocatedDiskGiB: updateData.currentAllocatedDiskGiB,
-        capacity: runner.capacity,
         runnerCpu: runner.cpu,
         runnerMemoryGiB: runner.memoryGiB,
         runnerDiskGiB: runner.diskGiB,
@@ -270,23 +266,6 @@ export class RunnerService {
     }
 
     await this.runnerRepository.update(runnerId, updateData)
-  }
-
-  async recalculateRunnerUsage(runnerId: string) {
-    const runner = await this.runnerRepository.findOne({ where: { id: runnerId } })
-    if (!runner) {
-      throw new Error('Runner not found')
-    }
-    //  recalculate runner usage
-    const sandboxes = await this.sandboxRepository.find({
-      where: {
-        runnerId: runner.id,
-        state: Not(SandboxState.DESTROYED),
-      },
-    })
-    runner.used = sandboxes.length
-
-    await this.runnerRepository.save(runner)
   }
 
   private isValidClass(sandboxClass: SandboxClass): boolean {
@@ -305,8 +284,6 @@ export class RunnerService {
 
   async getRandomAvailableRunner(params: GetRunnerParams): Promise<Runner> {
     const availableRunners = await this.findAvailableRunners(params)
-
-    //  TODO: implement a better algorithm to get a random available runner based on the runner's usage
 
     if (availableRunners.length === 0) {
       throw new BadRequestError('No available runners')
@@ -459,6 +436,7 @@ export class GetRunnerParams {
   sandboxClass?: SandboxClass
   snapshotRef?: string
   excludedRunnerIds?: string[]
+  availabilityScoreThreshold?: number
 }
 
 interface AvailabilityScoreParams {
@@ -468,7 +446,6 @@ interface AvailabilityScoreParams {
   allocatedCpu: number
   allocatedMemoryGiB: number
   allocatedDiskGiB: number
-  capacity: number
   runnerCpu: number
   runnerMemoryGiB: number
   runnerDiskGiB: number
