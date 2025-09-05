@@ -5,8 +5,8 @@ package netrules
 
 import "strings"
 
-// SetNetWorkRules creates and configures network rules for a container
-func (manager *NetRulesManager) SetNetWorkRules(name string, sourceIp string, networkAllowList string) error {
+// SetNetworkRules creates and configures network rules for a container
+func (manager *NetRulesManager) SetNetworkRules(name string, sourceIp string, networkAllowList string) error {
 	// Parse the allowed networks
 	allowedNetworks, err := parseCidrNetworks(networkAllowList)
 	if err != nil {
@@ -47,5 +47,5 @@ func (manager *NetRulesManager) SetNetWorkRules(name string, sourceIp string, ne
 		return err
 	}
 
-	return manager.saveIptablesRules()
+	return nil
 }

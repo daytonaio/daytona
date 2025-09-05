@@ -186,6 +186,19 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
     await this.organizationRepository.save(organization)
   }
 
+  async updateSandboxDefaultLimitedNetworkEgress(
+    organizationId: string,
+    sandboxDefaultLimitedNetworkEgress: boolean,
+  ): Promise<void> {
+    const organization = await this.organizationRepository.findOne({ where: { id: organizationId } })
+    if (!organization) {
+      throw new NotFoundException(`Organization with ID ${organizationId} not found`)
+    }
+    organization.sandboxLimitedNetworkEgress = sandboxDefaultLimitedNetworkEgress
+
+    await this.organizationRepository.save(organization)
+  }
+
   private async createWithEntityManager(
     entityManager: EntityManager,
     createOrganizationDto: CreateOrganizationDto,
@@ -236,6 +249,10 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
       organization.suspendedAt = new Date()
       organization.suspensionReason = 'Payment method required'
     }
+
+    organization.sandboxLimitedNetworkEgress = this.configService.get<boolean>(
+      'ORGANIZATION_SANDBOX_DEFAULT_NETWORK_BLOCK_ALL',
+    )
 
     const owner = new OrganizationUser()
     owner.userId = createdBy
