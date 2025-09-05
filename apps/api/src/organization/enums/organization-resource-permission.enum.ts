@@ -3,11 +3,10 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
+/*
+  IMPORTANT: When adding a new permission, make sure to update apps/dashboard/src/constants/CreateApiKeyPermissionsGroups.ts accordingly
+*/
 export enum OrganizationResourcePermission {
-  // api keys
-  //   WRITE_API_KEYS = 'write:api_keys',
-  //   DELETE_API_KEYS = 'delete:api_keys',
-
   // docker registries
   WRITE_REGISTRIES = 'write:registries',
   DELETE_REGISTRIES = 'delete:registries',

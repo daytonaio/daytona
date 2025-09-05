@@ -7,8 +7,7 @@ import { Body, Controller, Delete, ForbiddenException, Get, Param, Post, UseGuar
 import { AuthGuard } from '@nestjs/passport'
 import { ApiOAuth2, ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBearerAuth } from '@nestjs/swagger'
 import { RequiredOrganizationMemberRole } from '../decorators/required-organization-member-role.decorator'
-import { UpdateAssignedOrganizationRolesDto } from '../dto/update-assigned-organization-roles.dto'
-import { UpdateOrganizationMemberRoleDto } from '../dto/update-organization-member-role.dto'
+import { UpdateOrganizationMemberAccessDto } from '../dto/update-organization-member-access.dto'
 import { OrganizationUserDto } from '../dto/organization-user.dto'
 import { OrganizationMemberRole } from '../enums/organization-member-role.enum'
 import { OrganizationActionGuard } from '../guards/organization-action.guard'
@@ -46,14 +45,14 @@ export class OrganizationUserController {
     return this.organizationUserService.findAll(organizationId)
   }
 
-  @Post('/:userId/role')
+  @Post('/:userId/access')
   @ApiOperation({
-    summary: 'Update role for organization member',
-    operationId: 'updateRoleForOrganizationMember',
+    summary: 'Update access for organization member',
+    operationId: 'updateAccessForOrganizationMember',
   })
   @ApiResponse({
     status: 200,
-    description: 'Role updated successfully',
+    description: 'Access updated successfully',
     type: OrganizationUserDto,
   })
   @ApiParam({
@@ -68,65 +67,27 @@ export class OrganizationUserController {
   })
   @RequiredOrganizationMemberRole(OrganizationMemberRole.OWNER)
   @Audit({
-    action: AuditAction.UPDATE_ROLE,
+    action: AuditAction.UPDATE_ACCESS,
     targetType: AuditTarget.ORGANIZATION_USER,
     targetIdFromRequest: (req) => req.params.userId,
     requestMetadata: {
-      body: (req: TypedRequest<UpdateOrganizationMemberRoleDto>) => ({
+      body: (req: TypedRequest<UpdateOrganizationMemberAccessDto>) => ({
         role: req.body?.role,
+        assignedRoleIds: req.body?.assignedRoleIds,
       }),
     },
   })
-  async updateRole(
+  async updateAccess(
     @AuthContext() authContext: IAuthContext,
     @Param('organizationId') organizationId: string,
     @Param('userId') userId: string,
-    @Body() dto: UpdateOrganizationMemberRoleDto,
+    @Body() dto: UpdateOrganizationMemberAccessDto,
   ): Promise<OrganizationUserDto> {
     if (authContext.userId === userId) {
-      throw new ForbiddenException('You cannot update your own role')
+      throw new ForbiddenException('You cannot update your own access')
     }
 
-    return this.organizationUserService.updateRole(organizationId, userId, dto.role)
-  }
-
-  @Post('/:userId/assigned-roles')
-  @ApiOperation({
-    summary: 'Update assigned roles to organization member',
-    operationId: 'updateAssignedOrganizationRoles',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Assigned roles updated successfully',
-    type: OrganizationUserDto,
-  })
-  @ApiParam({
-    name: 'organizationId',
-    description: 'Organization ID',
-    type: 'string',
-  })
-  @ApiParam({
-    name: 'userId',
-    description: 'User ID',
-    type: 'string',
-  })
-  @RequiredOrganizationMemberRole(OrganizationMemberRole.OWNER)
-  @Audit({
-    action: AuditAction.UPDATE_ASSIGNED_ROLES,
-    targetType: AuditTarget.ORGANIZATION_USER,
-    targetIdFromRequest: (req) => req.params.userId,
-    requestMetadata: {
-      body: (req: TypedRequest<UpdateAssignedOrganizationRolesDto>) => ({
-        roleIds: req.body?.roleIds,
-      }),
-    },
-  })
-  async updateAssignedRoles(
-    @Param('organizationId') organizationId: string,
-    @Param('userId') userId: string,
-    @Body() dto: UpdateAssignedOrganizationRolesDto,
-  ): Promise<OrganizationUserDto> {
-    return this.organizationUserService.updateAssignedRoles(organizationId, userId, dto.roleIds)
+    return this.organizationUserService.updateAccess(organizationId, userId, dto.role, dto.assignedRoleIds)
   }
 
   @Delete('/:userId')
