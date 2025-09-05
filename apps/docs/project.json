@@ -56,7 +56,12 @@
     "check-version-env": {},
     "docker": {
       "options": {
-        "target": "docs"
+        "target": "docs",
+        "build-args": [
+          "VERSION=$VERSION",
+          "PUBLIC_ALGOLIA_APP_ID=$PUBLIC_ALGOLIA_APP_ID",
+          "PUBLIC_ALGOLIA_API_KEY=$PUBLIC_ALGOLIA_API_KEY"
+        ]
       }
     }
   },

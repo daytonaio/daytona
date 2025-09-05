@@ -108,13 +108,9 @@
       "options": {
         "context": "{workspaceRoot}",
         "platforms": ["linux/amd64", "linux/arm64"],
-        "file": "docker/Dockerfile",
+        "file": "{projectRoot}/Dockerfile",
         "tags": ["daytonaio/daytona-{projectName}:$VERSION"],
-        "build-args": [
-          "VERSION=$VERSION",
-          "PUBLIC_ALGOLIA_APP_ID=$PUBLIC_ALGOLIA_APP_ID",
-          "PUBLIC_ALGOLIA_API_KEY=$PUBLIC_ALGOLIA_API_KEY"
-        ]
+        "build-args": ["VERSION=$VERSION"]
       },
       "configurations": {
         "production": {
@@ -125,13 +121,7 @@
           "tags": ["registry:5000/daytonaio/daytona-{projectName}:$VERSION"]
         }
       },
-      "dependsOn": [
-        "check-version-env",
-        {
-          "target": "build-amd64",
-          "projects": "computer-use"
-        }
-      ]
+      "dependsOn": ["check-version-env"]
     }
   },
   "release": {

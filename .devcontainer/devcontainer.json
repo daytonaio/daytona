@@ -46,7 +46,7 @@
       "upgradePackages": "false"
     },
     "ghcr.io/devcontainers/features/docker-in-docker:2.12.2": {
-      "version": "24.0.7",
+      "version": "28.4.0",
       "moby": false,
       "dockerDashComposeVersion": "v2"
     },

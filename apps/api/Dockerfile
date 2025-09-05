@@ -4,26 +4,15 @@ FROM docker:28.2.2-dind-alpine3.22 AS daytona
 RUN apk --update add --no-cache nodejs=22.16.0-r2 npm bash
 RUN npm install -g corepack && corepack enable
 
-COPY --from=golang:1.23.5-alpine /usr/local/go/ /usr/local/go/
-
-ENV PATH="/usr/local/go/bin:${PATH}"
-
 WORKDIR /daytona
 
 COPY . .
-
-# Docs build arguments
-ENV PUBLIC_WEB_URL=https://daytona.io
-ARG PUBLIC_ALGOLIA_APP_ID
-ENV PUBLIC_ALGOLIA_APP_ID=${PUBLIC_ALGOLIA_APP_ID}
-ARG PUBLIC_ALGOLIA_API_KEY
-ENV PUBLIC_ALGOLIA_API_KEY=${PUBLIC_ALGOLIA_API_KEY}
 
 ARG VERSION=0.0.1
 ENV VERSION=${VERSION}
 
 RUN yarn && \
-  SKIP_COMPUTER_USE_BUILD=true yarn build:production-skip-computer-use --nxBail=true
+  yarn nx build api --configuration=production --nxBail=true
 
 RUN mkdir -p /etc/docker && echo '{"iptables": false, "ip-forward": false, "ip-masq": false, "userland-proxy": false,"insecure-registries": ["localhost:6000"]}' > /etc/docker/daemon.json
 
@@ -107,69 +96,7 @@ ENV DEFAULT_RUNNER_CAPACITY=100
 ENV DEFAULT_RUNNER_REGION=us
 ENV DEFAULT_RUNNER_CLASS=small
 
+ENV SSH_GATEWAY_API_KEY=ssh_secret_api_token
+ENV SSH_GATEWAY_COMMAND="ssh -p 2222 {{TOKEN}}@localhost"
+
 ENTRYPOINT ["sh", "-c", "dockerd-entrypoint.sh & node dist/apps/api/main.js"]
-
-FROM alpine:3.18 AS proxy
-
-WORKDIR /usr/local/bin
-
-COPY --from=daytona /daytona/dist/apps/proxy daytona-proxy
-
-RUN chmod +x daytona-proxy
-
-ENV DAYTONA_API_URL=http://localhost:3000/api
-
-ENV PROXY_PORT=4000
-ENV PROXY_DOMAIN=proxy.localhost:4000
-ENV PROXY_API_KEY=super_secret_key
-ENV PROXY_PROTOCOL=http
-
-ENV OIDC_CLIENT_ID=daytona
-ENV OIDC_CLIENT_SECRET=
-ENV OIDC_DOMAIN=http://localhost:5556/dex
-ENV OIDC_AUDIENCE=daytona
-
-ENV REDIS_HOST=redis
-ENV REDIS_PORT=6379
-
-ENTRYPOINT ["daytona-proxy"]
-
-FROM docker:28.2.2-dind-alpine3.22 AS runner
-
-WORKDIR /usr/local/bin
-
-COPY --from=daytona /daytona/dist/apps/runner daytona-runner
-
-RUN chmod +x daytona-runner
-
-RUN mkdir -p /etc/docker && echo '{"iptables": false, "ip-forward": false, "ip-masq": false, "userland-proxy": false,"insecure-registries": ["localhost:6000"]}' > /etc/docker/daemon.json
-
-ENV ENVIRONMENT=development
-
-ENV API_PORT=3003
-ENV API_TOKEN=secret_api_token
-
-ENV DAYTONA_BINARY_PATH=/workspaces/daytona/dist/apps/daemon-amd64
-ENV LOG_FILE_PATH=/home/daytona/runner/runner.log
-
-ENV RESOURCE_LIMITS_DISABLED=true
-
-ENV AWS_ENDPOINT_URL=http://minio:9000
-ENV AWS_REGION=us-east-1
-ENV AWS_ACCESS_KEY_ID=minioadmin
-ENV AWS_SECRET_ACCESS_KEY=minioadmin
-ENV AWS_DEFAULT_BUCKET=daytona
-
-ENTRYPOINT ["sh", "-c", "dockerd & daytona-runner"]
-
-FROM node:22-alpine AS docs
-
-WORKDIR /daytona
-
-COPY --from=daytona /daytona/node_modules node_modules
-COPY --from=daytona /daytona/dist/apps/docs dist/apps/docs
-COPY --from=daytona /daytona/apps/docs/server dist/apps/docs/server
-
-WORKDIR /daytona/dist/apps/docs
-
-ENTRYPOINT ["sh", "-c", "node server/index.mjs"]

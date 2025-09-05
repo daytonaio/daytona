@@ -94,7 +94,14 @@
     "docker": {
       "options": {
         "target": "runner"
-      }
+      },
+      "dependsOn": [
+        "check-version-env",
+        {
+          "target": "build-amd64",
+          "projects": "computer-use"
+        }
+      ]
     }
   },
   "implicitDependencies": ["computer-use", "daemon"]

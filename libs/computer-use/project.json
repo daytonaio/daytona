@@ -23,6 +23,11 @@
       "options": {
         "command": "./hack/computer-use/build-computer-use-amd64.sh"
       },
+      "configurations": {
+        "production": {
+          "command": "echo 'Skipping computer-use build in production'"
+        }
+      },
       "outputs": ["{workspaceRoot}/dist/libs/computer-use-amd64"],
       "cache": true
     },

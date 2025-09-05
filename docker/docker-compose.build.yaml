@@ -3,7 +3,7 @@ services:
   api:
     build:
       context: ../
-      dockerfile: docker/Dockerfile
+      dockerfile: apps/api/Dockerfile
       target: daytona
     privileged: true
     ports:
@@ -16,14 +16,14 @@ services:
   proxy:
     build:
       context: ../
-      dockerfile: docker/Dockerfile
+      dockerfile: apps/proxy/Dockerfile
       target: proxy
     network_mode: service:api
 
   runner:
     build:
       context: ../
-      dockerfile: docker/Dockerfile
+      dockerfile: apps/runner/Dockerfile
       target: runner
     privileged: true
     network_mode: service:api
