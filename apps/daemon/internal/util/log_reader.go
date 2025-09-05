@@ -10,8 +10,6 @@ import (
 	"os"
 	"strings"
 	"time"
-
-	log "github.com/sirupsen/logrus"
 )
 
 func ReadLog(ctx context.Context, logReader io.Reader, follow bool, c chan []byte, errChan chan error) {
@@ -19,7 +17,6 @@ func ReadLog(ctx context.Context, logReader io.Reader, follow bool, c chan []byt
 }
 
 func ReadLogWithExitCode(ctx context.Context, logReader io.Reader, follow bool, exitCodeFilePath string, c chan []byte, errChan chan error) {
-	log.Warnf("DZ DEBUG: ReadLogWithExitCode started, follow=%v, exitCodeFilePath=%s", follow, exitCodeFilePath)
 	reader := bufio.NewReader(logReader)
 	consecutiveEOFCount := 0
 	maxConsecutiveEOF := 50 // Check exit code after 50 consecutive EOF reads ( 50 * 20ms = 1 second)
