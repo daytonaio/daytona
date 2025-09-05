@@ -22,6 +22,15 @@ const (
 )
 
 func handleAcceptProxyWarning(ctx *gin.Context, secure bool) {
+	// Set SameSite attribute based on security context
+	if secure {
+		// For HTTPS, use SameSite=None to allow cross-origin iframe usage
+		ctx.SetSameSite(http.SameSiteNoneMode)
+	} else {
+		// For HTTP (local dev), use SameSite=Lax
+		ctx.SetSameSite(http.SameSiteLaxMode)
+	}
+
 	// Set the acceptance cookie
 	ctx.SetCookie(
 		PREVIEW_PAGE_ACCEPT_COOKIE_NAME,
