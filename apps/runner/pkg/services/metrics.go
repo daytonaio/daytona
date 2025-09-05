@@ -14,7 +14,6 @@ import (
 	"github.com/daytonaio/runner/pkg/docker"
 	"github.com/daytonaio/runner/pkg/models"
 	"github.com/docker/docker/api/types/container"
-	"github.com/docker/docker/api/types/image"
 	"github.com/shirou/gopsutil/cpu"
 	"github.com/shirou/gopsutil/disk"
 	"github.com/shirou/gopsutil/mem"
@@ -90,9 +89,9 @@ func (s *MetricsService) collectAndCacheMetrics(ctx context.Context) error {
 	}
 
 	// Get snapshot count
-	images, err := s.docker.ApiClient().ImageList(ctx, image.ListOptions{})
+	info, err := s.docker.ApiClient().Info(ctx)
 	if err == nil {
-		metrics.SnapshotCount = len(images)
+		metrics.SnapshotCount = info.Images
 	}
 
 	// Get container allocated resources
