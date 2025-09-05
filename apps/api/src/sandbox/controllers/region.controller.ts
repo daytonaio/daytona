@@ -74,7 +74,7 @@ export class RegionController {
   @Audit({
     action: AuditAction.CREATE,
     targetType: AuditTarget.REGION,
-    targetIdFromResult: (result: RegionDto) => result?.name,
+    targetIdFromResult: (result: RegionDto) => result?.code,
     requestMetadata: {
       body: (req: TypedRequest<CreateRegionDto>) => ({
         name: req.body?.name,
