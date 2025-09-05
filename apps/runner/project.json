@@ -89,6 +89,19 @@
         "cwd": "{projectRoot}/pkg/api",
         "command": "swag fmt && swag init --parseDependency --parseInternal --parseDepth 1 -o docs -g server.go"
       }
+    },
+    "check-version-env": {},
+    "docker": {
+      "options": {
+        "target": "runner"
+      },
+      "dependsOn": [
+        "check-version-env",
+        {
+          "target": "build-amd64",
+          "projects": "computer-use"
+        }
+      ]
     }
   },
   "implicitDependencies": ["computer-use", "daemon"]

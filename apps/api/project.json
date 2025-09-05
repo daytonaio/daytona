@@ -72,9 +72,11 @@
         "passWithNoTests": true
       }
     },
-    "docker-build": {
-      "dependsOn": ["build"],
-      "command": "docker build -f apps/api/Dockerfile . -t api"
+    "check-version-env": {},
+    "docker": {
+      "options": {
+        "target": "daytona"
+      }
     },
     "migration:generate": {
       "executor": "nx:run-commands",
