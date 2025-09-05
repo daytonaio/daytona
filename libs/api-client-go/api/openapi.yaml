@@ -6475,6 +6475,9 @@ components:
               - read:regions
               - write:regions
               - delete:regions
+              - read:runners
+              - write:runners
+              - delete:runners
               - read:audit_logs
             type: string
           type: array
@@ -6528,6 +6531,9 @@ components:
               - read:regions
               - write:regions
               - delete:regions
+              - read:runners
+              - write:runners
+              - delete:runners
               - read:audit_logs
             type: string
           type: array
@@ -6586,6 +6592,9 @@ components:
               - read:regions
               - write:regions
               - delete:regions
+              - read:runners
+              - write:runners
+              - delete:runners
               - read:audit_logs
             type: string
           type: array
@@ -6651,6 +6660,9 @@ components:
               - read:regions
               - write:regions
               - delete:regions
+              - read:runners
+              - write:runners
+              - delete:runners
               - read:audit_logs
             type: string
           type: array
@@ -7018,6 +7030,9 @@ components:
               - read:regions
               - write:regions
               - delete:regions
+              - read:runners
+              - write:runners
+              - delete:runners
               - read:audit_logs
             type: string
           type: array
@@ -7058,6 +7073,9 @@ components:
               - read:regions
               - write:regions
               - delete:regions
+              - read:runners
+              - write:runners
+              - delete:runners
               - read:audit_logs
             type: string
           type: array
