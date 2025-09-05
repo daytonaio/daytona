@@ -63,6 +63,9 @@ export const ApiKeyResponsePermissionsEnum = {
   READ_REGIONS: 'read:regions',
   WRITE_REGIONS: 'write:regions',
   DELETE_REGIONS: 'delete:regions',
+  READ_RUNNERS: 'read:runners',
+  WRITE_RUNNERS: 'write:runners',
+  DELETE_RUNNERS: 'delete:runners',
   READ_AUDIT_LOGS: 'read:audit_logs',
 } as const
 
