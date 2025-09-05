@@ -1206,7 +1206,7 @@ export class ToolboxController {
   // When follow is true, the response is an octet stream
   @ApiResponse({
     status: 200,
-    description: 'Command log stream',
+    description: 'Command log stream marked with stdout and stderr prefixes',
     content: {
       'text/plain': {
         schema: {
@@ -1215,7 +1215,7 @@ export class ToolboxController {
       },
     },
   })
-  @ApiQuery({ name: 'follow', type: Boolean, required: false })
+  @ApiQuery({ name: 'follow', type: Boolean, required: false, description: 'Whether to stream the logs' })
   @ApiParam({ name: 'commandId', type: String, required: true })
   @ApiParam({ name: 'sessionId', type: String, required: true })
   @ApiParam({ name: 'sandboxId', type: String, required: true })

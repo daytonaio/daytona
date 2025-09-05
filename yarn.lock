@@ -16359,6 +16359,7 @@ __metadata:
     husky: "npm:^9.1.7"
     ioredis: "npm:^5.5.0"
     is-ci: "npm:^4.1.0"
+    isomorphic-ws: "npm:^5.0.0"
     jest: "npm:30.0.5"
     jest-environment-node: "npm:^29.7.0"
     jest-util: "npm:30.0.5"
@@ -21693,7 +21694,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"isomorphic-ws@npm:5.0.0":
+"isomorphic-ws@npm:5.0.0, isomorphic-ws@npm:^5.0.0":
   version: 5.0.0
   resolution: "isomorphic-ws@npm:5.0.0"
   peerDependencies:

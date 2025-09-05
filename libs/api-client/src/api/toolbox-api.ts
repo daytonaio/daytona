@@ -1227,7 +1227,7 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
      * @param {string} sessionId
      * @param {string} commandId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {boolean} [follow]
+     * @param {boolean} [follow] Whether to stream the logs
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
@@ -4226,7 +4226,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
      * @param {string} sessionId
      * @param {string} commandId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {boolean} [follow]
+     * @param {boolean} [follow] Whether to stream the logs
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
@@ -5948,7 +5948,7 @@ export const ToolboxApiFactory = function (configuration?: Configuration, basePa
      * @param {string} sessionId
      * @param {string} commandId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {boolean} [follow]
+     * @param {boolean} [follow] Whether to stream the logs
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
@@ -7172,7 +7172,7 @@ export class ToolboxApi extends BaseAPI {
    * @param {string} sessionId
    * @param {string} commandId
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-   * @param {boolean} [follow]
+   * @param {boolean} [follow] Whether to stream the logs
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof ToolboxApi

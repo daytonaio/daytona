@@ -15,12 +15,8 @@ async def main():
                 session_id,
                 SessionExecuteRequest(
                     command=(
-                        "counter=1; "
-                        "while (( counter <= 3 )); do "
-                        'echo "Count: $counter"; '
-                        "((counter++)); "
-                        "sleep 2; "
-                        "done"
+                        'counter=1; while (( counter <= 3 )); do echo "Count: $counter";'
+                        "((counter++)); sleep 2; done; non-existent-command"
                     ),
                     run_async=True,
                 ),
@@ -28,7 +24,10 @@ async def main():
 
             logs_task = asyncio.create_task(
                 sandbox.process.get_session_command_logs_async(
-                    session_id, command.cmd_id, lambda chunk: print(f"Log chunk: {chunk}")
+                    session_id,
+                    command.cmd_id,
+                    lambda log: print(f"[STDOUT]: {log}"),
+                    lambda log: print(f"[STDERR]: {log}"),
                 )
             )
 
