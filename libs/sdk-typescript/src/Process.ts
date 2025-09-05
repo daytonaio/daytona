@@ -267,7 +267,9 @@ export class Process {
    * @param {number} timeout - Timeout in seconds
    * @returns {Promise<SessionExecuteResponse>} Command execution results containing:
    *                                           - cmdId: Unique identifier for the executed command
-   *                                           - output: Command output (if synchronous execution)
+   *                                           - output: Combined command output (stdout and stderr) (if synchronous execution)
+   *                                           - stdout: Standard output from the command
+   *                                           - stderr: Standard error from the command
    *                                           - exitCode: Command exit status (if synchronous execution)
    *
    * @example
@@ -283,7 +285,8 @@ export class Process {
    * const result = await process.executeSessionCommand(sessionId, {
    *   command: 'pwd'
    * });
-   * console.log(result.output);  // Prints: /home/daytona
+   * console.log('[STDOUT]:', result.stdout);
+   * console.log('[STDERR]:', result.stderr);
    */
   public async executeSessionCommand(
     sessionId: string,
@@ -318,7 +321,7 @@ export class Process {
    *
    * @param {string} sessionId - Unique identifier of the session
    * @param {string} commandId - Unique identifier of the command
-   * @returns {Promise<SessionCommandLogsResponse>} Command logs containing: stdout and stderr
+   * @returns {Promise<SessionCommandLogsResponse>} Command logs containing: output (combined stdout and stderr), stdout and stderr
    *
    * @example
    * const logs = await process.getSessionCommandLogs('my-session', 'cmd-123');

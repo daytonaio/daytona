@@ -272,7 +272,9 @@ Executes a command in an existing session.
 
 - `Promise<SessionExecuteResponse>` - Command execution results containing:
     - cmdId: Unique identifier for the executed command
-    - output: Command output (if synchronous execution)
+    - output: Combined command output (stdout and stderr) (if synchronous execution)
+    - stdout: Standard output from the command
+    - stderr: Standard error from the command
     - exitCode: Command exit status (if synchronous execution)
 
 **Example:**
@@ -290,7 +292,8 @@ await process.executeSessionCommand(sessionId, {
 const result = await process.executeSessionCommand(sessionId, {
   command: 'pwd'
 });
-console.log(result.output);  // Prints: /home/daytona
+console.log('[STDOUT]:', result.stdout);
+console.log('[STDERR]:', result.stderr);
 ```
 
 ***
@@ -374,7 +377,7 @@ Get the logs for a command executed in a session.
 
 **Returns**:
 
-- `Promise<SessionCommandLogsResponse>` - Command logs containing: stdout and stderr
+- `Promise<SessionCommandLogsResponse>` - Command logs containing: output (combined stdout and stderr), stdout and stderr
 
 **Example:**
 

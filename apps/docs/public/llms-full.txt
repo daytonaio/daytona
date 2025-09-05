@@ -1,5 +1,5 @@
 # Daytona Documentation v0.0.0-dev
-# Generated on: 2025-09-01
+# Generated on: 2025-09-05
 
 
 title: API Keys
@@ -2687,20 +2687,20 @@ import { Tabs, TabItem } from '@astrojs/starlight/components'
 Processes listening for HTTP traffic in port range `3000-9999` can be previewed using preview links.
 
 A preview link's schema consists of the port and Sandbox ID combination, e.g.:
-`https://3000-sandbox-123456.proxy.daytona.work`
+`https://3000-sandbox-123456.proxy.daytona.works`
 
 If the Sandbox has its `public` property set to `true`, these links will be publicly accessible, otherwise the preview link will be available only to the Sandbox Organization users.
 
-For programmatic access (e.g., with curl), use the X-Daytona-Preview-Token header to provide the authorization token when accessing the preview URL:
+For programmatic access (e.g., with curl), use the `X-Daytona-Preview-Token` header to provide the authorization token when accessing the preview URL:
 
 ```bash
 curl -H "x-daytona-preview-token: vg5c0ylmcimr8b_v1ne0u6mdnvit6gc0" \
-https://3000-sandbox-123456.proxy.daytona.work
+https://3000-sandbox-123456.proxy.daytona.works
 ```
 
-Alternatively, provide the DAYTONA_SANDBOX_AUTH_KEY query parameter as the authorization token for runtimes that don’t support additional headers (e.g., browser runtimes):
+Alternatively, provide the `DAYTONA_SANDBOX_AUTH_KEY` query parameter as the authorization token for runtimes that don’t support additional headers (e.g., browser runtimes):
 ```bash
-curl "https://3000-sandbox-123456.proxy.daytona.work?DAYTONA_SANDBOX_AUTH_KEY=vg5c0ylmcimr8b_v1ne0u6mdnvit6gc0"
+curl "https://3000-sandbox-123456.proxy.daytona.works?DAYTONA_SANDBOX_AUTH_KEY=vg5c0ylmcimr8b_v1ne0u6mdnvit6gc0"
 ```
 
 To fetch the preview link and the authorization token for a specific port, you can simply use the SDK method:
@@ -2727,6 +2727,19 @@ console.log(`Preview link token: ${previewInfo.token}`);
 :::tip
 If you want to serve the previews under your own domain instead of using Daytona's URLs, check out the [Custom Domain/Authentication](/docs/en/custom-domain-authentication) section.
 :::
+
+## Warning Page
+
+When opening the preview link in a browser, a warning page will be shown for the first time.
+This warning serves as a security measure to inform users about the potential risks of visiting the preview URL.
+
+The warning page will only be shown when loading the preview link in a browser.
+
+To avoid this warning you can do one of the following:
+
+- Send the `X-Daytona-Skip-Preview-Warning: true` header
+- Upgrade to [Tier 3](/docs/en/limits)
+- Deploy your own [custom preview proxy](/docs/en/custom-domain-authentication)
 
 title: Process and Code Execution
 
@@ -3033,6 +3046,7 @@ The Daytona SDK provides methods to create Sandboxes with default configurations
 
     ```
 
+
     ```typescript
     import { Daytona } from '@daytonaio/sdk';
 
@@ -3047,6 +3061,7 @@ The Daytona SDK provides methods to create Sandboxes with default configurations
     // Create a Sandbox with custom labels
     const sandbox = await daytona.create({ labels: { SOME_LABEL: 'my-label' } });
     ```
+
 
 When Sandboxes are not actively used, it is recommended that they be stopped. This can be done manually [using the stop command](/docs/en/sandbox-management#stop-and-start-sandbox) or automatically by [setting the auto-stop interval](/docs/en/sandbox-management#auto-stop-and-auto-archive).
 
@@ -3085,6 +3100,7 @@ Check your available resources and limits in the [dashboard](https://app.daytona
 
     ```
 
+
     ```typescript
     import { Daytona, Image } from "@daytonaio/sdk";
 
@@ -3105,8 +3121,47 @@ Check your available resources and limits in the [dashboard](https://app.daytona
     main();
     ```
 
+
 :::note
 All resource parameters are optional. If not specified, Daytona will use default values appropriate for the selected language and use case.
+:::
+
+### Ephemeral Sandboxes
+
+Ephemeral Sandboxes are Sandboxes that are automatically deleted once they are stopped. They are useful for short-lived tasks or for testing purposes.
+
+To create an ephemeral Sandbox, set `ephemeral` to `True` when creating a Sandbox:
+
+    ```python
+    from daytona import Daytona, CreateSandboxFromSnapshotParams
+
+    daytona = Daytona()
+
+    # Create an ephemeral Sandbox
+
+    params = CreateSandboxFromSnapshotParams(
+      ephemeral=True,
+      auto_stop_interval=5 # the ephemeral sandbox will be deleted after 5 minutes of inactivity
+    )
+    sandbox = daytona.create(params)
+    ```
+
+
+    ```typescript
+    import { Daytona } from '@daytonaio/sdk';
+
+    const daytona = new Daytona();
+
+    // Create an ephemeral Sandbox
+    const sandbox = await daytona.create({
+      ephemeral: true,
+      autoStopInterval: 5 // the ephemeral sandbox will be deleted after 5 minutes of inactivity
+    });
+    ```
+
+
+:::note
+Setting ["autoDeleteInterval: 0"](#auto-delete-interval) has the same effect as setting "ephemeral" to `true`.
 :::
 
 ### Network Settings (Firewall)
@@ -3137,6 +3192,7 @@ Daytona Sandboxes provide configurable network firewall controls to enhance secu
 
     ```
 
+
     ```typescript
     import { Daytona } from '@daytonaio/sdk';
 
@@ -3152,6 +3208,7 @@ Daytona Sandboxes provide configurable network firewall controls to enhance secu
       networkAllowList: '192.168.1.0/16,10.0.0.0/24'
     });
     ```
+
 
 :::caution
 Enabling unrestricted network access may pose security risks when executing untrusted code.
@@ -3178,6 +3235,7 @@ The Daytona SDK provides methods to get information about a Sandbox, such as ID,
 
     ```
 
+
     ```typescript
     // Get Sandbox ID
     const sandboxId = sandbox.id;
@@ -3190,6 +3248,7 @@ The Daytona SDK provides methods to get information about a Sandbox, such as ID,
     console.log(sandbox.autoStopInterval)
     console.log(sandbox.state)
     ```
+
 
 To get the preview URL for a specific port, check out [Preview & Authentication](/docs/en/preview-and-authentication).
 
@@ -3218,6 +3277,7 @@ Stopped Sandboxes maintain filesystem persistence while their memory state is cl
 
     ```
 
+
     ```typescript
     const sandbox = await daytona.create({ language: 'typescript' });
 
@@ -3233,6 +3293,7 @@ Stopped Sandboxes maintain filesystem persistence while their memory state is cl
     // Start Sandbox
     await sandbox.start();
     ```
+
 
 The stopped state should be used when the Sandbox is expected to be started again soon. Otherwise, it is recommended to stop and then archive the Sandbox to eliminate disk usage costs.
 
@@ -3382,6 +3443,7 @@ If the parameter is not set, the Sandbox will not be deleted automatically.
 
     ```
 
+
     ```typescript
     const sandbox = await daytona.create({
         snapshot: "my-snapshot-name",
@@ -3394,6 +3456,7 @@ If the parameter is not set, the Sandbox will not be deleted automatically.
     // Disable auto-deletion
     await sandbox.setAutoDeleteInterval(-1)
     ```
+
 
 ## Run Indefinitely
 

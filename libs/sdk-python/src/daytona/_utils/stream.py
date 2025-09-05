@@ -105,9 +105,20 @@ async def process_streaming_response(
 
 async def std_demux_stream(
     connection: Connection,
-    on_stdout: Callable[[bytes], None],
-    on_stderr: Callable[[bytes], None],
+    on_stdout: Callable[[str], None],
+    on_stderr: Callable[[str], None],
 ) -> None:
+    """
+    Demultiplex a WebSocket stream into separate stdout and stderr streams.
+
+    Args:
+        connection: The WebSocket connection to demultiplex.
+        on_stdout: Callback function for stdout messages.
+        on_stderr: Callback function for stderr messages.
+
+    Raises:
+        DaytonaError: If the WebSocket connection closed error occurs.
+    """
     buf = bytearray()
     current_data_type = None  # None | "stdout" | "stderr"
 

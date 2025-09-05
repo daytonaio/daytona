@@ -311,7 +311,9 @@ class AsyncProcess:
         Returns:
             SessionExecuteResponse: Command execution results containing:
                 - cmd_id: Unique identifier for the executed command
-                - output: Command output (if synchronous execution)
+                - output: Combined command output (stdout and stderr) (if synchronous execution)
+                - stdout: Standard output from the command
+                - stderr: Standard error from the command
                 - exit_code: Command exit status (if synchronous execution)
 
         Example:
@@ -330,7 +332,8 @@ class AsyncProcess:
             # Read the file
             req = SessionExecuteRequest(command="cat test.txt")
             result = await sandbox.process.execute_session_command(session_id, req)
-            print(result.output)  # Prints: Hello
+            print(f"Command stdout: {result.stdout}")
+            print(f"Command stderr: {result.stderr}")
             ```
         """
         response = await self._toolbox_api.execute_session_command(
@@ -353,15 +356,17 @@ class AsyncProcess:
 
     @intercept_errors(message_prefix="Failed to get session command logs: ")
     async def get_session_command_logs(self, session_id: str, command_id: str) -> SessionCommandLogsResponse:
-        """Get the logs for a command executed in a session. Retrieves the complete output
-        (stdout and stderr) from a command executed in a session.
+        """Get the logs for a command executed in a session.
 
         Args:
             session_id (str): Unique identifier of the session.
             command_id (str): Unique identifier of the command.
 
         Returns:
-            SessionCommandLogsResponse: Command output including both stdout and stderr.
+            SessionCommandLogsResponse: Command logs including:
+                - output: Combined command output (stdout and stderr)
+                - stdout: Standard output from the command
+                - stderr: Standard error from the command
 
         Example:
             ```python
