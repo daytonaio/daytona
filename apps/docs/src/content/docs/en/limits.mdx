@@ -11,6 +11,8 @@ Daytona enforces resource limits to ensure fair usage and stability across all o
 These resources are pooled and shared across all running Sandboxes.\
 The number of Sandboxes you can run at once depends on how much CPU, RAM, and storage each one uses. You can see how to configure and estimate resource usage in the [Sandbox Management docs](/docs/en/sandbox-management/).
 
+Check your current usage and limits in the [Dashboard](https://app.daytona.io/dashboard/limits).
+
 ## Tiers & Limit Increases
 
 Organizations are automatically placed into a Tier based on verification status.\
@@ -26,20 +28,18 @@ You can unlock higher limits by completing the following steps:
 
 Once you meet the criteria for a higher tier, make sure to Upgrade by clicking the "Upgrade" button in the [Dashboard](https://app.daytona.io/dashboard/limits).
 
-:::tip
+## Manage usage dynamically
 
-### Manage usage dynamically
+You can manage your resource usage by [changing the state](http://localhost:4321/docs/sandbox-management#sandbox-lifecycle) of your Sandboxes. The table below summarizes how each state affects resource usage:
 
-This is how different sandbox states affect your available resources:
+| State      | vCPU | Memory | Storage | Notes                                                      |
+|------------|:-------:|:--------:|:------:|------------------------------------------------------------|
+| Running |   ✅    |   ✅     |  ✅   | Counts against all limits                                  |
+| Stopped |   ❌    |   ❌     |  ✅   | Frees CPU & memory, but storage is still used                 |
+| Archived|   ❌    |   ❌     |  ❌   | Data moved to cold storage, no quota impact                |
+| Deleted |   ❌    |   ❌     |  ❌   | All resources freed                                        |
 
-- **Running:** Uses Compute, Memory, and Storage.
-- **Stopped:** Frees up Compute and Memory, but uses Storage.
-- **Archived:** Frees up all resources by moving data to cold storage.
-- **Deleted:** Permanently removed, all resources freed.
-
-:::
-
-Check your current usage and limits in the [Dashboard](https://app.daytona.io/dashboard/limits).
+See [Sandbox Management](/docs/en/sandbox-management/) for more information.
 
 ## Need More?
 
