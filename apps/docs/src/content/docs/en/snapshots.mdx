@@ -23,83 +23,6 @@ Since images tagged `latest` get frequent updates, only specific tags (e.g. `0.1
 
 Once the Snapshot is pulled, validated and has an `Active` state, it is ready to be used. Define the `CreateSandboxFromSnapshotParams` object to specify the custom Snapshot to use:
 
-<Tabs>
-  <TabItem label="Python" icon="seti:python">
-    ```python
-    sandbox = daytona.create(CreateSandboxFromSnapshotParams(
-        snapshot="my-snapshot-name",
-    ))
-    ```
-  </TabItem>
-
-  <TabItem label="TypeScript" icon="seti:typescript">
-    ```typescript
-    const sandbox = await daytona.create({
-      snapshot: "my-snapshot-name",
-    })
-    ```
-  </TabItem>
-</Tabs>
-
-Full example:
-
-<Tabs>
-  <TabItem label="Python" icon="seti:python">
-    ```python
-    from daytona import Daytona, CreateSandboxFromSnapshotParams
-
-    daytona = Daytona()
-
-    sandbox = daytona.create(CreateSandboxFromSnapshotParams(
-        snapshot="my-snapshot-name",
-    ))
-
-    response = sandbox.process.code_run('print("Sum of 3 and 4 is " + str(3 + 4))')
-    if response.exit_code != 0:
-        print(f"Error running code: {response.exit_code} {response.result}")
-    else:
-        print(response.result)
-
-    sandbox.delete()
-
-    ```
-  </TabItem>
-
-  <TabItem label="TypeScript" icon="seti:typescript">
-    ```typescript
-    import { Daytona } from '@daytonaio/sdk'
-
-    async function main() {
-      // Initialize the Daytona client
-      const daytona = new Daytona()
-
-      try {
-        // Create the Sandbox instance
-        const sandbox = await daytona.create({
-          snapshot: "my-snapshot-name",
-        })
-        // Run the code securely inside the Sandbox
-        const response = await sandbox.process.codeRun(
-          'print("Sum of 3 and 4 is " + str(3 + 4))',
-        )
-        if (response.exitCode !== 0) {
-          console.error('Error running code:', response.exitCode, response.result)
-        } else {
-          console.log(response.result)
-        }
-      } catch (error) {
-        console.error('Sandbox flow error:', error)
-      } finally {
-        // Clean up the Sandbox
-        await sandbox.delete()
-      }
-    }
-
-    main()
-    ```
-  </TabItem>
-</Tabs>
-
 ### Snapshot Resources
 
 Snapshots contain the resource requirements for Daytona Sandboxes. By default, Daytona Sandboxes come with **1 vCPU**, **1GB RAM**, and **3GiB disk**.
@@ -109,34 +32,54 @@ Organizations get a maximum Sandbox resource limit of 4 vCPUs, 8GB RAM, and 10GB
 Check your available resources and limits in the [dashboard](https://app.daytona.io/dashboard/limits).
 
 <Tabs>
-  <TabItem label="Python" icon="seti:python">
-    ```python
-    from daytona import (
-        Daytona,
-        CreateSnapshotParams,
-        Image,
-        Resources,
-        CreateSandboxFromSnapshotParams,
-    )
+<TabItem label="Python" icon="seti:python">
+```python
+from daytona import (
+    Daytona,
+    CreateSnapshotParams,
+    Image,
+    Resources,
+    CreateSandboxFromSnapshotParams,
+)
 
-    daytona = Daytona()
+daytona = Daytona()
+
+# Create a Snapshot with custom resources
+
+daytona.snapshot.create(
+    CreateSnapshotParams(
+        name="my-snapshot",
+        image=Image.debian_slim("3.12"),
+        resources=Resources(
+          cpu=2,
+          memory=4,
+          disk=8,
+        ),
+    ),
+    on_logs=print,
+)
+```
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+```typescript
+import { Daytona, Image } from "@daytonaio/sdk";
 
     # Create a Snapshot with custom resources
 
-    daytona.snapshot.create(
-        CreateSnapshotParams(
-            name="my-snapshot",
-            image=Image.debian_slim("3.12"),
-            resources=Resources(
-              cpu=2,
-              memory=4,
-              disk=8,
-            ),
-        ),
-        on_logs=print,
-    )
-
-    # Create a Sandbox with custom Snapshot
+  // Create a Snapshot with custom resources
+  await daytona.snapshot.create(
+    {
+      name: "my-snapshot",
+      image: Image.debianSlim("3.13"),
+      resources: {
+        cpu: 2,
+        memory: 4,
+        disk: 8,
+      },
+    },
+    { onLogs: console.log }
+  );
+}
 
     sandbox = daytona.create(
         CreateSandboxFromSnapshotParams(
@@ -247,6 +190,29 @@ Step 1/5 : FROM alpine:latest
  ✓  Use 'harbor-transient.internal.daytona.app/daytona/trying-daytona:0.0.1' to create a new sandbox using this Snapshot
 
 ```
+
+## Using Snapshots
+
+To use a Snapshot in your Sandbox, specify the `snapshot` field in the `CreateSandboxFromSnapshotParams` object:
+
+<Tabs>
+<TabItem label="Python" icon="seti:python">
+```python
+sandbox = daytona.create(CreateSandboxFromSnapshotParams(
+    snapshot="my-snapshot-name",
+))
+```
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+```typescript
+const sandbox = await daytona.create({
+  snapshot: "my-snapshot-name",
+})
+```
+</TabItem>
+</Tabs>
+
+For examples of running code inside a sandbox, see the [Getting Started Guide](/docs/en/getting-started/#run-code-inside-a-sandbox).
 
 ## Deleting Snapshots
 
