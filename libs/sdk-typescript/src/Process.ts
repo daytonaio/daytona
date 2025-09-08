@@ -334,7 +334,8 @@ export class Process {
    *
    * @param {string} sessionId - Unique identifier of the session
    * @param {string} commandId - Unique identifier of the command
-   * @param {function} onLogs - Callback function to handle each log chunk
+   * @param {function} onStdout - Callback function to handle stdout log chunks
+   * @param {function} onStderr - Callback function to handle stderr log chunks
    * @returns {Promise<void>}
    *
    * @example

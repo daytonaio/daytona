@@ -403,8 +403,8 @@ Asynchronously retrieve and process the logs for a command executed in a session
 
 - `sessionId` _string_ - Unique identifier of the session
 - `commandId` _string_ - Unique identifier of the command
-- `onStdout` _\(chunk: string\) =\> void_
-- `onStderr` _\(chunk: string\) =\> void_
+- `onStdout` _\(chunk: string\) =\> void_ - Callback function to handle stdout log chunks
+- `onStderr` _\(chunk: string\) =\> void_ - Callback function to handle stderr log chunks
 
 **Returns**:
 
