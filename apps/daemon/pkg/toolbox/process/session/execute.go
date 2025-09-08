@@ -174,10 +174,10 @@ func (s *SessionController) SessionExecuteCommand(c *gin.Context) {
 				log.Error(err)
 				versionComparison = util.Pointer(1)
 			}
-			isLegacy := versionComparison != nil && *versionComparison < 0 && sdkVersion != "0.0.0-dev"
+			isCombinedOutput := (versionComparison != nil && *versionComparison < 0 && sdkVersion != "0.0.0-dev") || (sdkVersion == "" && c.Request.Header.Get("X-Daytona-Split-Output") != "true")
 
-			if isLegacy {
-				// remove prefixes from log bytes for backwards compatibility
+			if isCombinedOutput {
+				// remove prefixes from log bytes
 				logBytes = bytes.ReplaceAll(bytes.ReplaceAll(logBytes, STDOUT_PREFIX, []byte{}), STDERR_PREFIX, []byte{})
 				logContent = string(logBytes)
 			}

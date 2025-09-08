@@ -49,7 +49,7 @@ func (s *SessionController) GetSessionCommandLogs(c *gin.Context) {
 		log.Debug(err)
 		versionComparison = util.Pointer(1)
 	}
-	isLegacy := versionComparison != nil && *versionComparison < 0 && sdkVersion != "0.0.0-dev"
+	isCombinedOutput := (versionComparison != nil && *versionComparison < 0 && sdkVersion != "0.0.0-dev") || (sdkVersion == "" && c.Request.Header.Get("X-Daytona-Split-Output") != "true")
 
 	if c.Request.Header.Get("Upgrade") == "websocket" {
 		logFile, err := os.Open(logFilePath)
@@ -72,7 +72,7 @@ func (s *SessionController) GetSessionCommandLogs(c *gin.Context) {
 				select {
 				case <-session.ctx.Done():
 					// Flush any remaining bytes in buffer before closing
-					if isLegacy && len(buffer) > 0 {
+					if isCombinedOutput && len(buffer) > 0 {
 						remainingData := flushRemainingBuffer(&buffer)
 						if len(remainingData) > 0 {
 							err := conn.WriteMessage(websocket.TextMessage, remainingData)
@@ -88,7 +88,7 @@ func (s *SessionController) GetSessionCommandLogs(c *gin.Context) {
 					conn.Close()
 					return
 				case msg := <-messages:
-					if isLegacy {
+					if isCombinedOutput {
 						// Process chunks with buffering to handle prefixes split across chunks
 						processedData := processLogChunkWithPrefixFiltering(msg, &buffer)
 						if len(processedData) > 0 {
@@ -107,7 +107,7 @@ func (s *SessionController) GetSessionCommandLogs(c *gin.Context) {
 					}
 				case <-errors:
 					// Stream ended, flush any remaining bytes in buffer
-					if isLegacy && len(buffer) > 0 {
+					if isCombinedOutput && len(buffer) > 0 {
 						remainingData := flushRemainingBuffer(&buffer)
 						if len(remainingData) > 0 {
 							writeErr := conn.WriteMessage(websocket.TextMessage, remainingData)
@@ -138,8 +138,8 @@ func (s *SessionController) GetSessionCommandLogs(c *gin.Context) {
 		return
 	}
 
-	if isLegacy {
-		// remove prefixes from log bytes for backwards compatibility
+	if isCombinedOutput {
+		// remove prefixes from log bytes
 		logBytes = bytes.ReplaceAll(bytes.ReplaceAll(logBytes, STDOUT_PREFIX, []byte{}), STDERR_PREFIX, []byte{})
 	}
 
