@@ -221,38 +221,70 @@ func processLogChunkWithPrefixFiltering(chunk []byte, buffer *[]byte) []byte {
 	*buffer = append(*buffer, chunk...)
 
 	var result []byte
-	i := 0
+	processed := 0
 
-	for i < len(*buffer) {
+	for processed < len(*buffer) {
 		// Check if we have enough bytes to check for prefixes
-		if len(*buffer)-i < 3 {
-			// Not enough bytes for a complete prefix, keep remaining bytes in buffer
-			*buffer = (*buffer)[i:]
+		if len(*buffer)-processed < 3 {
+			// Not enough bytes for a complete prefix
+			// Check if remaining bytes could be part of a prefix
+			remainingBytes := (*buffer)[processed:]
+
+			// If remaining bytes could be start of STDOUT_PREFIX (0x01, 0x01, 0x01)
+			couldBeStdoutPrefix := true
+			for i, b := range remainingBytes {
+				if b != STDOUT_PREFIX[i] {
+					couldBeStdoutPrefix = false
+					break
+				}
+			}
+
+			// If remaining bytes could be start of STDERR_PREFIX (0x02, 0x02, 0x02)
+			couldBeStderrPrefix := true
+			for i, b := range remainingBytes {
+				if b != STDERR_PREFIX[i] {
+					couldBeStderrPrefix = false
+					break
+				}
+			}
+
+			// If remaining bytes could be part of either prefix, keep them in buffer
+			if couldBeStdoutPrefix || couldBeStderrPrefix {
+				*buffer = remainingBytes
+			} else {
+				// Remaining bytes cannot be part of any prefix, output them
+				result = append(result, remainingBytes...)
+				*buffer = (*buffer)[:0]
+			}
 			break
 		}
 
 		// Check for STDOUT_PREFIX (0x01, 0x01, 0x01)
-		if (*buffer)[i] == STDOUT_PREFIX[0] && (*buffer)[i+1] == STDOUT_PREFIX[1] && (*buffer)[i+2] == STDOUT_PREFIX[2] {
+		if (*buffer)[processed] == STDOUT_PREFIX[0] &&
+			(*buffer)[processed+1] == STDOUT_PREFIX[1] &&
+			(*buffer)[processed+2] == STDOUT_PREFIX[2] {
 			// Found STDOUT_PREFIX, skip it
-			i += 3
+			processed += 3
 			continue
 		}
 
 		// Check for STDERR_PREFIX (0x02, 0x02, 0x02)
-		if (*buffer)[i] == STDERR_PREFIX[0] && (*buffer)[i+1] == STDERR_PREFIX[1] && (*buffer)[i+2] == STDERR_PREFIX[2] {
+		if (*buffer)[processed] == STDERR_PREFIX[0] &&
+			(*buffer)[processed+1] == STDERR_PREFIX[1] &&
+			(*buffer)[processed+2] == STDERR_PREFIX[2] {
 			// Found STDERR_PREFIX, skip it
-			i += 3
+			processed += 3
 			continue
 		}
 
 		// No prefix found, add this byte to result
-		result = append(result, (*buffer)[i])
-		i++
+		result = append(result, (*buffer)[processed])
+		processed++
 	}
 
-	// If we processed all bytes, clear the buffer
-	if i >= len(*buffer) {
-		*buffer = (*buffer)[:0]
+	// Remove processed bytes from buffer
+	if processed > 0 && processed < len(*buffer) {
+		*buffer = (*buffer)[processed:]
 	}
 
 	return result
