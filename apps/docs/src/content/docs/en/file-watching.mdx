@@ -1,0 +1,133 @@
+---
+title: File Watching
+---
+
+import { TabItem, Tabs } from '@astrojs/starlight/components'
+
+Monitor file system changes in real-time within your Daytona sandbox. The file watching API allows you to watch directories for changes and respond to file system events as they happen.
+
+## Basic File Watching
+
+Watch a directory for changes using the `fs.watchDir()` method:
+
+<Tabs syncKey="language">
+<TabItem label="Python" icon="seti:python">
+```python
+from daytona import Daytona, FilesystemEventType
+
+daytona = Daytona()
+sandbox = daytona.create()
+
+# Watch the workspace directory
+handle = sandbox.fs.watch_dir("/workspace", lambda event: print(f"{event.type}: {event.name}"))
+
+# Create a file to trigger an event
+sandbox.fs.upload_file(b"Hello World!", "/workspace/test.txt")
+
+# Clean up when done
+handle.close()
+```
+</TabItem>
+<TabItem label="Typescript" icon="seti:typescript">
+```typescript
+import { Daytona, FilesystemEventType } from '@daytonaio/sdk'
+
+const daytona = new Daytona()
+const sandbox = await daytona.create()
+
+// Watch the workspace directory
+const handle = await sandbox.fs.watchDir('/workspace', (event) => {
+  console.log(`${event.type}: ${event.name}`)
+})
+
+// Create a file to trigger an event
+await sandbox.fs.uploadFile(Buffer.from('Hello World!'), '/workspace/test.txt')
+
+// Clean up when done
+await handle.close()
+```
+</TabItem>
+</Tabs>
+
+## Filtering Events
+
+You can filter events to only process specific types of changes:
+
+<Tabs syncKey="language">
+<TabItem label="Python" icon="seti:python">
+```python
+def on_file_change(event):
+    if event.type == FilesystemEventType.WRITE:
+        print(f"File modified: {event.name}")
+    elif event.type == FilesystemEventType.CREATE and not event.is_dir:
+        print(f"New file created: {event.name}")
+
+handle = sandbox.fs.watch_dir("/workspace", on_file_change)
+```
+</TabItem>
+<TabItem label="Typescript" icon="seti:typescript">
+```typescript
+const handle = await sandbox.fs.watchDir('/workspace', (event) => {
+  if (event.type === FilesystemEventType.WRITE) {
+    console.log(`File modified: ${event.name}`)
+  } else if (event.type === FilesystemEventType.CREATE && !event.isDir) {
+    console.log(`New file created: ${event.name}`)
+  }
+})
+```
+</TabItem>
+</Tabs>
+
+## Recursive Watching
+
+Enable recursive watching to monitor nested directories:
+
+<Tabs syncKey="language">
+<TabItem label="Python" icon="seti:python">
+```python
+from daytona import WatchOptions
+
+# Watch recursively
+handle = sandbox.fs.watch_dir("/workspace", lambda event: print(event), 
+                             WatchOptions(recursive=True))
+
+# This will trigger events for nested files
+sandbox.fs.upload_file(b"content", "/workspace/src/components/button.ts")
+```
+</TabItem>
+<TabItem label="Typescript" icon="seti:typescript">
+```typescript
+// Watch recursively
+const handle = await sandbox.fs.watchDir('/workspace', (event) => {
+  console.log(event)
+}, { recursive: true })
+
+// This will trigger events for nested files
+await sandbox.fs.uploadFile(Buffer.from('content'), '/workspace/src/components/button.ts')
+```
+</TabItem>
+</Tabs>
+
+## Event Types
+
+The following event types are available:
+
+- `CREATE` — File or directory created
+- `WRITE` — File content modified  
+- `REMOVE` — File or directory deleted
+- `RENAME` — File or directory renamed
+- `CHMOD` — File permissions changed
+
+Each event includes:
+- `type` — The type of file system event
+- `name` — The name of the affected file or directory
+- `is_dir` — Whether the event affects a directory
+- `timestamp` — When the event occurred
+
+## Best Practices
+
+- **Always close handles** — Call `handle.close()` when you're done watching
+- **Filter events** — Only process events you care about for better performance
+- **Handle errors** — Wrap file watching operations in try-catch blocks
+- **Consider timing** — Events may be delayed, so don't close watchers immediately after making changes
+
