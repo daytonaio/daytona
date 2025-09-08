@@ -42,7 +42,8 @@ new Process(
    clientConfig: Configuration, 
    codeToolbox: SandboxCodeToolbox, 
    toolboxApi: ToolboxApi, 
-   getRootDir: () => Promise<string>): Process
+   getRootDir: () => Promise<string>, 
+   getPreviewLink: (port: number) => Promise<PortPreviewUrl>): Process
 ```
 
 **Parameters**:
@@ -52,6 +53,7 @@ new Process(
 - `codeToolbox` _SandboxCodeToolbox_
 - `toolboxApi` _ToolboxApi_
 - `getRootDir` _\(\) =\> Promise\<string\>_
+- `getPreviewLink` _\(port: number\) =\> Promise\<PortPreviewUrl\>_
 
 
 **Returns**:
@@ -270,7 +272,9 @@ Executes a command in an existing session.
 
 - `Promise<SessionExecuteResponse>` - Command execution results containing:
     - cmdId: Unique identifier for the executed command
-    - output: Command output (if synchronous execution)
+    - output: Combined command output (stdout and stderr) (if synchronous execution)
+    - stdout: Standard output from the command
+    - stderr: Standard error from the command
     - exitCode: Command exit status (if synchronous execution)
 
 **Example:**
@@ -288,7 +292,8 @@ await process.executeSessionCommand(sessionId, {
 const result = await process.executeSessionCommand(sessionId, {
   command: 'pwd'
 });
-console.log(result.output);  // Prints: /home/daytona
+console.log('[STDOUT]:', result.stdout);
+console.log('[STDERR]:', result.stderr);
 ```
 
 ***
@@ -360,7 +365,7 @@ if (cmd.exitCode === 0) {
 ##### Call Signature
 
 ```ts
-getSessionCommandLogs(sessionId: string, commandId: string): Promise<string>
+getSessionCommandLogs(sessionId: string, commandId: string): Promise<SessionCommandLogsResponse>
 ```
 
 Get the logs for a command executed in a session.
@@ -372,13 +377,14 @@ Get the logs for a command executed in a session.
 
 **Returns**:
 
-- `Promise<string>` - Command logs
+- `Promise<SessionCommandLogsResponse>` - Command logs containing: output (combined stdout and stderr), stdout and stderr
 
 **Example:**
 
 ```ts
 const logs = await process.getSessionCommandLogs('my-session', 'cmd-123');
-console.log('Command output:', logs);
+console.log('[STDOUT]:', logs.stdout);
+console.log('[STDERR]:', logs.stderr);
 ```
 
 ##### Call Signature
@@ -387,7 +393,8 @@ console.log('Command output:', logs);
 getSessionCommandLogs(
    sessionId: string, 
    commandId: string, 
-onLogs: (chunk: string) => void): Promise<void>
+   onStdout: (chunk: string) => void, 
+onStderr: (chunk: string) => void): Promise<void>
 ```
 
 Asynchronously retrieve and process the logs for a command executed in a session as they become available.
@@ -396,7 +403,8 @@ Asynchronously retrieve and process the logs for a command executed in a session
 
 - `sessionId` _string_ - Unique identifier of the session
 - `commandId` _string_ - Unique identifier of the command
-- `onLogs` _\(chunk: string\) =\> void_ - Callback function to handle each log chunk
+- `onStdout` _\(chunk: string\) =\> void_ - Callback function to handle stdout log chunks
+- `onStderr` _\(chunk: string\) =\> void_ - Callback function to handle stderr log chunks
 
 **Returns**:
 
@@ -406,7 +414,9 @@ Asynchronously retrieve and process the logs for a command executed in a session
 
 ```ts
 const logs = await process.getSessionCommandLogs('my-session', 'cmd-123', (chunk) => {
-  console.log('Log chunk:', chunk);
+  console.log('[STDOUT]:', chunk);
+}, (chunk) => {
+  console.log('[STDERR]:', chunk);
 });
 ```
 
@@ -434,4 +444,57 @@ sessions.forEach(session => {
     console.log(`- ${cmd.command} (${cmd.exitCode})`);
   });
 });
+```
+
+***
+
+
+## SessionCommandLogsResponse
+
+**Properties**:
+
+- `output?` _string_
+- `stderr?` _string_
+- `stdout?` _string_
+## SessionExecuteResponse
+
+**Extends:**
+
+**Properties**:
+
+- `cmdId?` _string_ - The ID of the executed command
+    - _Inherited from_: `SessionExecuteResponse.cmdId`
+- `exitCode?` _number_ - The exit code of the executed command
+    - _Inherited from_: `SessionExecuteResponse.exitCode`
+- `output?` _string_ - The output of the executed command marked with stdout and stderr prefixes
+    - _Inherited from_: `SessionExecuteResponse.output`
+- `stderr?` _string_
+- `stdout?` _string_
+
+
+
+
+- `SessionExecuteResponse`
+## MAX\_PREFIX\_LEN
+
+```ts
+const MAX_PREFIX_LEN: number;
+```
+
+***
+
+
+## STDERR\_PREFIX\_BYTES
+
+```ts
+const STDERR_PREFIX_BYTES: Uint8Array<ArrayBuffer>;
+```
+
+***
+
+
+## STDOUT\_PREFIX\_BYTES
+
+```ts
+const STDOUT_PREFIX_BYTES: Uint8Array<ArrayBuffer>;
 ```

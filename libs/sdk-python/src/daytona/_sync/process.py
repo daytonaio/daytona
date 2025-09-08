@@ -7,22 +7,26 @@
 
 import base64
 import json
+import re
 from typing import Callable, Dict, List, Optional
 
-from daytona_api_client import (
-    Command,
-    CreateSessionRequest,
-    ExecuteRequest,
-    Session,
-    SessionExecuteResponse,
-    ToolboxApi,
-)
+import websockets
+from daytona_api_client import Command, CreateSessionRequest, ExecuteRequest, PortPreviewUrl, Session, ToolboxApi
 
 from .._utils.errors import intercept_errors
-from .._utils.stream import process_streaming_response
+from .._utils.stream import std_demux_stream
 from ..code_toolbox.sandbox_python_code_toolbox import SandboxPythonCodeToolbox
 from ..common.charts import parse_chart
-from ..common.process import CodeRunParams, ExecuteResponse, ExecutionArtifacts, SessionExecuteRequest
+from ..common.process import (
+    CodeRunParams,
+    ExecuteResponse,
+    ExecutionArtifacts,
+    SessionCommandLogsResponse,
+    SessionExecuteRequest,
+    SessionExecuteResponse,
+    demux_log,
+    parse_session_command_logs,
+)
 
 
 class Process:
@@ -34,6 +38,7 @@ class Process:
         code_toolbox: SandboxPythonCodeToolbox,
         toolbox_api: ToolboxApi,
         get_root_dir: Callable[[], str],
+        get_preview_link: Callable[[int], PortPreviewUrl],
     ):
         """Initialize a new Process instance.
 
@@ -47,6 +52,7 @@ class Process:
         self._code_toolbox = code_toolbox
         self._toolbox_api = toolbox_api
         self._get_root_dir = get_root_dir
+        self._get_preview_link = get_preview_link
 
     @staticmethod
     def _parse_output(lines: List[str]) -> Optional[ExecutionArtifacts]:
@@ -307,7 +313,9 @@ class Process:
         Returns:
             SessionExecuteResponse: Command execution results containing:
                 - cmd_id: Unique identifier for the executed command
-                - output: Command output (if synchronous execution)
+                - output: Combined command output (stdout and stderr) (if synchronous execution)
+                - stdout: Standard output from the command
+                - stderr: Standard error from the command
                 - exit_code: Command exit status (if synchronous execution)
 
         Example:
@@ -326,27 +334,41 @@ class Process:
             # Read the file
             req = SessionExecuteRequest(command="cat test.txt")
             result = sandbox.process.execute_session_command(session_id, req)
-            print(result.output)  # Prints: Hello
+            print(f"Command stdout: {result.stdout}")
+            print(f"Command stderr: {result.stderr}")
             ```
         """
-        return self._toolbox_api.execute_session_command(
+        response = self._toolbox_api.execute_session_command(
             self._sandbox_id,
             session_id=session_id,
             session_execute_request=req,
             _request_timeout=timeout or None,
         )
 
+        stdout, stderr = demux_log(response.output.encode("utf-8", "ignore") if response.output else b"")
+
+        return SessionExecuteResponse.model_construct(
+            cmd_id=response.cmd_id,
+            output=response.output,
+            stdout=stdout.decode("utf-8", "ignore"),
+            stderr=stderr.decode("utf-8", "ignore"),
+            exit_code=response.exit_code,
+            additional_properties=response.additional_properties,
+        )
+
     @intercept_errors(message_prefix="Failed to get session command logs: ")
-    def get_session_command_logs(self, session_id: str, command_id: str) -> str:
-        """Get the logs for a command executed in a session. Retrieves the complete output
-        (stdout and stderr) from a command executed in a session.
+    def get_session_command_logs(self, session_id: str, command_id: str) -> SessionCommandLogsResponse:
+        """Get the logs for a command executed in a session.
 
         Args:
             session_id (str): Unique identifier of the session.
             command_id (str): Unique identifier of the command.
 
         Returns:
-            str: Complete command output including both stdout and stderr.
+            SessionCommandLogsResponse: Command logs including:
+                - output: Combined command output (stdout and stderr)
+                - stdout: Standard output from the command
+                - stderr: Standard error from the command
 
         Example:
             ```python
@@ -354,34 +376,39 @@ class Process:
                 "my-session",
                 "cmd-123"
             )
-            print(f"Command output: {logs}")
+            print(f"Command stdout: {logs.stdout}")
+            print(f"Command stderr: {logs.stderr}")
             ```
         """
-        return self._toolbox_api.get_session_command_logs(
+        response = self._toolbox_api.get_session_command_logs_without_preload_content(
             self._sandbox_id, session_id=session_id, command_id=command_id
         )
 
+        return parse_session_command_logs(response.data)
+
     @intercept_errors(message_prefix="Failed to get session command logs: ")
     async def get_session_command_logs_async(
-        self, session_id: str, command_id: str, on_logs: Callable[[str], None]
+        self, session_id: str, command_id: str, on_stdout: Callable[[str], None], on_stderr: Callable[[str], None]
     ) -> None:
         """Asynchronously retrieves and processes the logs for a command executed in a session as they become available.
 
         Args:
             session_id (str): Unique identifier of the session.
             command_id (str): Unique identifier of the command.
-            on_logs (Callable[[str], None]): Callback function to handle log chunks as they arrive.
+            on_stdout (Callable[[str], None]): Callback function to handle stdout log chunks as they arrive.
+            on_stderr (Callable[[str], None]): Callback function to handle stderr log chunks as they arrive.
 
         Example:
             ```python
             await sandbox.process.get_session_command_logs_async(
                 "my-session",
                 "cmd-123",
-                lambda chunk: print(f"Log chunk: {chunk}")
+                lambda log: print(f"[STDOUT]: {log}"),
+                lambda log: print(f"[STDERR]: {log}"),
             )
             ```
         """
-        _, url, *_ = self._toolbox_api._get_session_command_logs_serialize(  # pylint: disable=protected-access
+        _, url, headers, *_ = self._toolbox_api._get_session_command_logs_serialize(  # pylint: disable=protected-access
             sandbox_id=self._sandbox_id,
             session_id=session_id,
             command_id=command_id,
@@ -393,15 +420,17 @@ class Process:
             _host_index=None,
         )
 
-        def should_terminate():
-            return (self.get_session_command(session_id, command_id)).exit_code is not None
+        preview_link = self._get_preview_link(2280)
+        url = re.sub(r"^http", "ws", preview_link.url) + url[url.index("/process") :]
 
-        await process_streaming_response(
-            url=url,
-            headers=self._toolbox_api.api_client.default_headers,
-            on_chunk=on_logs,
-            should_terminate=should_terminate,
-        )
+        async with websockets.connect(
+            url,
+            additional_headers={
+                **headers,
+                "X-Daytona-Preview-Token": preview_link.token,
+            },
+        ) as ws:
+            await std_demux_stream(ws, on_stdout, on_stderr)
 
     @intercept_errors(message_prefix="Failed to list sessions: ")
     def list_sessions(self) -> List[Session]:

@@ -15,7 +15,8 @@ Handles process and code execution within a Sandbox.
 
 ```python
 def __init__(sandbox_id: str, code_toolbox: SandboxPythonCodeToolbox,
-             toolbox_api: ToolboxApi, get_root_dir: Callable[[], str])
+             toolbox_api: ToolboxApi, get_root_dir: Callable[[], str],
+             get_preview_link: Callable[[int], PortPreviewUrl])
 ```
 
 Initialize a new Process instance.
@@ -263,7 +264,9 @@ Executes a command in the session.
 
 - `SessionExecuteResponse` - Command execution results containing:
   - cmd_id: Unique identifier for the executed command
-  - output: Command output (if synchronous execution)
+  - output: Combined command output (stdout and stderr) (if synchronous execution)
+  - stdout: Standard output from the command
+  - stderr: Standard error from the command
   - exit_code: Command exit status (if synchronous execution)
   
 
@@ -284,18 +287,19 @@ sandbox.process.execute_session_command(session_id, req)
 # Read the file
 req = SessionExecuteRequest(command="cat test.txt")
 result = sandbox.process.execute_session_command(session_id, req)
-print(result.output)  # Prints: Hello
+print(f"Command stdout: {result.stdout}")
+print(f"Command stderr: {result.stderr}")
 ```
 
 #### Process.get\_session\_command\_logs
 
 ```python
 @intercept_errors(message_prefix="Failed to get session command logs: ")
-def get_session_command_logs(session_id: str, command_id: str) -> str
+def get_session_command_logs(session_id: str,
+                             command_id: str) -> SessionCommandLogsResponse
 ```
 
-Get the logs for a command executed in a session. Retrieves the complete output
-(stdout and stderr) from a command executed in a session.
+Get the logs for a command executed in a session.
 
 **Arguments**:
 
@@ -305,7 +309,10 @@ Get the logs for a command executed in a session. Retrieves the complete output
 
 **Returns**:
 
-- `str` - Complete command output including both stdout and stderr.
+- `SessionCommandLogsResponse` - Command logs including:
+  - output: Combined command output (stdout and stderr)
+  - stdout: Standard output from the command
+  - stderr: Standard error from the command
   
 
 **Example**:
@@ -315,7 +322,8 @@ logs = sandbox.process.get_session_command_logs(
     "my-session",
     "cmd-123"
 )
-print(f"Command output: {logs}")
+print(f"Command stdout: {logs.stdout}")
+print(f"Command stderr: {logs.stderr}")
 ```
 
 #### Process.get\_session\_command\_logs\_async
@@ -323,8 +331,8 @@ print(f"Command output: {logs}")
 ```python
 @intercept_errors(message_prefix="Failed to get session command logs: ")
 async def get_session_command_logs_async(
-        session_id: str, command_id: str, on_logs: Callable[[str],
-                                                            None]) -> None
+        session_id: str, command_id: str, on_stdout: Callable[[str], None],
+        on_stderr: Callable[[str], None]) -> None
 ```
 
 Asynchronously retrieves and processes the logs for a command executed in a session as they become available.
@@ -333,7 +341,8 @@ Asynchronously retrieves and processes the logs for a command executed in a sess
 
 - `session_id` _str_ - Unique identifier of the session.
 - `command_id` _str_ - Unique identifier of the command.
-- `on_logs` _Callable[[str], None]_ - Callback function to handle log chunks as they arrive.
+- `on_stdout` _Callable[[str], None]_ - Callback function to handle stdout log chunks as they arrive.
+- `on_stderr` _Callable[[str], None]_ - Callback function to handle stderr log chunks as they arrive.
   
 
 **Example**:
@@ -342,7 +351,8 @@ Asynchronously retrieves and processes the logs for a command executed in a sess
 await sandbox.process.get_session_command_logs_async(
     "my-session",
     "cmd-123",
-    lambda chunk: print(f"Log chunk: {chunk}")
+    lambda log: print(f"[STDOUT]: {log}"),
+    lambda log: print(f"[STDERR]: {log}"),
 )
 ```
 
@@ -451,4 +461,65 @@ Response from the command execution.
 - `exit_code` _int_ - The exit code from the command execution
 - `result` _str_ - The output from the command execution
 - `artifacts` _Optional[ExecutionArtifacts]_ - Artifacts from the command execution
+
+## SessionExecuteResponse
+
+```python
+class SessionExecuteResponse(ApiSessionExecuteResponse)
+```
+
+Response from the session command execution.
+
+**Attributes**:
+
+- `output` _str_ - The output from the command execution
+- `exit_code` _int_ - The exit code from the command execution
+
+## SessionCommandLogsResponse
+
+```python
+class SessionCommandLogsResponse()
+```
+
+Response from the command logs.
+
+**Attributes**:
+
+- `output` _str_ - The combined output from the command
+- `stdout` _str_ - The stdout from the command
+- `stderr` _str_ - The stderr from the command
+
+#### parse\_session\_command\_logs
+
+```python
+def parse_session_command_logs(data: bytes) -> SessionCommandLogsResponse
+```
+
+Parse combined stdout/stderr output into separate streams.
+
+**Arguments**:
+
+- `data` - Combined log bytes with STDOUT_PREFIX and STDERR_PREFIX markers
+  
+
+**Returns**:
+
+  SessionCommandLogsResponse with separated stdout and stderr
+
+#### demux\_log
+
+```python
+def demux_log(data: bytes) -> tuple[bytes, bytes]
+```
+
+Demultiplex combined stdout/stderr log data.
+
+**Arguments**:
+
+- `data` - Combined log bytes with STDOUT_PREFIX and STDERR_PREFIX markers
+  
+
+**Returns**:
+
+  Tuple of (stdout_bytes, stderr_bytes)
 

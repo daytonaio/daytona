@@ -5990,7 +5990,7 @@ class ToolboxApi:
         session_id: StrictStr,
         command_id: StrictStr,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
-        follow: Optional[StrictBool] = None,
+        follow: Annotated[Optional[StrictBool], Field(description="Whether to stream the logs")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -6016,7 +6016,7 @@ class ToolboxApi:
         :type command_id: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
-        :param follow:
+        :param follow: Whether to stream the logs
         :type follow: bool
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -6073,7 +6073,7 @@ class ToolboxApi:
         session_id: StrictStr,
         command_id: StrictStr,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
-        follow: Optional[StrictBool] = None,
+        follow: Annotated[Optional[StrictBool], Field(description="Whether to stream the logs")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -6099,7 +6099,7 @@ class ToolboxApi:
         :type command_id: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
-        :param follow:
+        :param follow: Whether to stream the logs
         :type follow: bool
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -6156,7 +6156,7 @@ class ToolboxApi:
         session_id: StrictStr,
         command_id: StrictStr,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
-        follow: Optional[StrictBool] = None,
+        follow: Annotated[Optional[StrictBool], Field(description="Whether to stream the logs")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -6182,7 +6182,7 @@ class ToolboxApi:
         :type command_id: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
-        :param follow:
+        :param follow: Whether to stream the logs
         :type follow: bool
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
