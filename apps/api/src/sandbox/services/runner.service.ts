@@ -282,7 +282,7 @@ export class RunnerService {
       return
     }
 
-    const updateData: any = {
+    const updateData: Partial<Runner> = {
       state: RunnerState.READY,
       lastChecked: new Date(),
     }
@@ -324,9 +324,10 @@ export class RunnerService {
         state: Not(SandboxState.DESTROYED),
       },
     })
-    runner.used = sandboxes.length
 
-    await this.runnerRepository.save(runner)
+    await this.runnerRepository.update(runner.id, {
+      used: sandboxes.length,
+    })
   }
 
   private isValidClass(sandboxClass: SandboxClass): boolean {
