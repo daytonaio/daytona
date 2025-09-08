@@ -62,7 +62,7 @@ export class RunnerController {
     @Body() createRunnerDto: CreateRunnerDto,
     @AuthContext() authContext: OrganizationAuthContext,
   ): Promise<Runner> {
-    return this.runnerService.create(createRunnerDto, authContext.organization)
+    return this.runnerService.create(createRunnerDto, authContext.organizationId)
   }
 
   @Get()

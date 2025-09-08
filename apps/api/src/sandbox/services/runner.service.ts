@@ -24,7 +24,6 @@ import { RunnerSnapshotDto } from '../dto/runner-snapshot.dto'
 import { RunnerAdapterFactory, RunnerInfo } from '../runner-adapter/runnerAdapter'
 import { RedisLockProvider } from '../common/redis-lock.provider'
 import { Region } from '../entities/region.entity'
-import { OrganizationAuthContext } from '../../common/interfaces/auth-context.interface'
 import { Organization } from '../../organization/entities/organization.entity'
 
 @Injectable()
@@ -46,7 +45,7 @@ export class RunnerService {
     private readonly regionRepository: Repository<Region>,
   ) {}
 
-  async create(createRunnerDto: CreateRunnerDto, organization: Organization): Promise<Runner> {
+  async create(createRunnerDto: CreateRunnerDto, organizationId: string): Promise<Runner> {
     // Validate region and class
     if (createRunnerDto.region.trim().length === 0) {
       throw new Error('Invalid region')
@@ -58,7 +57,7 @@ export class RunnerService {
     const region = await this.regionRepository.findOne({
       where: {
         code: createRunnerDto.region,
-        organizationId: organization.id,
+        organizationId,
       },
     })
 
