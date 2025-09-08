@@ -4,6 +4,7 @@
 package session
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"net/http"
@@ -16,6 +17,13 @@ import (
 	"github.com/daytonaio/daemon/internal/util"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+
+	log "github.com/sirupsen/logrus"
+)
+
+var (
+	STDOUT_PREFIX = []byte{0x01, 0x01, 0x01}
+	STDERR_PREFIX = []byte{0x02, 0x02, 0x02}
 )
 
 // Add a standard error response struct
@@ -48,10 +56,7 @@ func (s *SessionController) SessionExecuteCommand(c *gin.Context) {
 		return
 	}
 
-	var cmdId *string
-	var logFile *os.File
-
-	cmdId = util.Pointer(uuid.NewString())
+	cmdId := util.Pointer(uuid.NewString())
 
 	command := &Command{
 		Id:      *cmdId,
@@ -60,8 +65,9 @@ func (s *SessionController) SessionExecuteCommand(c *gin.Context) {
 	session.commands[*cmdId] = command
 
 	logFilePath, exitCodeFilePath := command.LogFilePath(session.Dir(s.configDir))
+	logDir := filepath.Dir(logFilePath)
 
-	if err := os.MkdirAll(filepath.Dir(logFilePath), 0755); err != nil {
+	if err := os.MkdirAll(logDir, 0755); err != nil {
 		c.AbortWithError(http.StatusBadRequest, fmt.Errorf("failed to create log directory: %w", err))
 		return
 	}
@@ -74,7 +80,41 @@ func (s *SessionController) SessionExecuteCommand(c *gin.Context) {
 
 	defer logFile.Close()
 
-	cmdToExec := fmt.Sprintf("{ %s; } > %s 2>&1 ; echo \"$?\" > %s\n", request.Command, logFile.Name(), exitCodeFilePath)
+	cmdToExec := fmt.Sprintf(
+		`{
+	log=%q
+	dir=%q
+
+	# per-command FIFOs
+	sp="$dir/stdout.pipe.%s.$$"; ep="$dir/stderr.pipe.%s.$$"
+	rm -f "$sp" "$ep" && mkfifo "$sp" "$ep" || exit 1
+
+	cleanup() { rm -f "$sp" "$ep"; }
+	trap 'cleanup' EXIT HUP INT TERM
+
+	# prefix each stream and append to shared log
+	( while IFS= read -r line || [ -n "$line" ]; do printf '%s%%s\n' "$line"; done < "$sp" ) >> "$log" & r1=$!
+	( while IFS= read -r line || [ -n "$line" ]; do printf '%s%%s\n' "$line"; done < "$ep" ) >> "$log" & r2=$!
+
+	# Run your command
+	{ %s; } > "$sp" 2> "$ep"
+	echo "$?" >> %s
+
+	# drain labelers (cleanup via trap)
+	wait "$r1" "$r2"
+
+	# Ensure unlink even if the waits failed
+	cleanup
+}
+`+"\n",
+		logFilePath,    // %q  -> log
+		logDir,         // %q  -> dir
+		*cmdId, *cmdId, // %s  %s -> fifo names
+		toOctalEscapes(STDOUT_PREFIX), // %s  -> stdout prefix
+		toOctalEscapes(STDERR_PREFIX), // %s  -> stderr prefix
+		request.Command,               // %s  -> verbatim script body
+		exitCodeFilePath,              // %q
+	)
 
 	_, err = session.stdinWriter.Write([]byte(cmdToExec))
 	if err != nil {
@@ -120,8 +160,27 @@ func (s *SessionController) SessionExecuteCommand(c *gin.Context) {
 				c.AbortWithError(http.StatusBadRequest, fmt.Errorf("failed to read log file: %w", err))
 				return
 			}
-
 			logContent := string(logBytes)
+
+			sdkVersion := util.ExtractSdkVersionFromHeader(c.Request.Header)
+			if sdkVersion != "" {
+				upgrader.Subprotocols = []string{"X-Daytona-SDK-Version~" + sdkVersion}
+			} else {
+				upgrader.Subprotocols = []string{}
+			}
+
+			versionComparison, err := util.CompareVersions(sdkVersion, "0.27.0-0")
+			if err != nil {
+				log.Error(err)
+				versionComparison = util.Pointer(1)
+			}
+			isCombinedOutput := (versionComparison != nil && *versionComparison < 0 && sdkVersion != "0.0.0-dev") || (sdkVersion == "" && c.Request.Header.Get("X-Daytona-Split-Output") != "true")
+
+			if isCombinedOutput {
+				// remove prefixes from log bytes
+				logBytes = bytes.ReplaceAll(bytes.ReplaceAll(logBytes, STDOUT_PREFIX, []byte{}), STDERR_PREFIX, []byte{})
+				logContent = string(logBytes)
+			}
 
 			c.JSON(http.StatusOK, SessionExecuteResponse{
 				CommandId: cmdId,
@@ -131,4 +190,12 @@ func (s *SessionController) SessionExecuteCommand(c *gin.Context) {
 			return
 		}
 	}
+}
+
+func toOctalEscapes(b []byte) string {
+	out := ""
+	for _, c := range b {
+		out += fmt.Sprintf("\\%03o", c) // e.g. 0x01 → \001
+	}
+	return out
 }

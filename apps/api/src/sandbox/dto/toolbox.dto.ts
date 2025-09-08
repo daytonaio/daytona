@@ -328,7 +328,7 @@ export class SessionExecuteResponseDto {
   cmdId?: string
 
   @ApiPropertyOptional({
-    description: 'The output of the executed command',
+    description: 'The output of the executed command marked with stdout and stderr prefixes',
     example: 'total 20\ndrwxr-xr-x  4 user group  128 Mar 15 10:30 .',
   })
   @IsString()

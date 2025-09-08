@@ -22,7 +22,7 @@ var _ MappedNullable = &SessionExecuteResponse{}
 type SessionExecuteResponse struct {
 	// The ID of the executed command
 	CmdId *string `json:"cmdId,omitempty"`
-	// The output of the executed command
+	// The output of the executed command marked with stdout and stderr prefixes
 	Output *string `json:"output,omitempty"`
 	// The exit code of the executed command
 	ExitCode *float32 `json:"exitCode,omitempty"`

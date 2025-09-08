@@ -1,5 +1,5 @@
 # Daytona Documentation v0.0.0-dev
-# Generated on: 2025-09-01
+# Generated on: 2025-09-08
 
 # Daytona
 
@@ -121,6 +121,7 @@
 - [Managing Invitations](https://daytona.io/docs/en/organizations#managing-invitations)
 - [Settings](https://daytona.io/docs/en/organizations#settings)
 - [Preview & Authentication](https://daytona.io/docs/en/preview-and-authentication)
+- [Warning Page](https://daytona.io/docs/en/preview-and-authentication#warning-page)
 - [Process and Code Execution](https://daytona.io/docs/en/process-code-execution)
 - [Code Execution](https://daytona.io/docs/en/process-code-execution#code-execution)
 - [Running Code](https://daytona.io/docs/en/process-code-execution#running-code)
@@ -139,6 +140,7 @@
 - [Creating Sandboxes](https://daytona.io/docs/en/sandbox-management#creating-sandboxes)
 - [Basic Sandbox Creation](https://daytona.io/docs/en/sandbox-management#basic-sandbox-creation)
 - [Sandbox Resources](https://daytona.io/docs/en/sandbox-management#sandbox-resources)
+- [Ephemeral Sandboxes](https://daytona.io/docs/en/sandbox-management#ephemeral-sandboxes)
 - [Network Settings (Firewall)](https://daytona.io/docs/en/sandbox-management#network-settings-firewall)
 - [Sandbox Information](https://daytona.io/docs/en/sandbox-management#sandbox-information)
 - [Stop and Start Sandbox](https://daytona.io/docs/en/sandbox-management#stop-and-start-sandbox)

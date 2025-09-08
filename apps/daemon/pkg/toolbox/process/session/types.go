@@ -23,6 +23,8 @@ type SessionExecuteRequest struct {
 type SessionExecuteResponse struct {
 	CommandId *string `json:"cmdId" validate:"optional"`
 	Output    *string `json:"output" validate:"optional"`
+	Stdout    *string `json:"stdout" validate:"optional"`
+	Stderr    *string `json:"stderr" validate:"optional"`
 	ExitCode  *int    `json:"exitCode" validate:"optional"`
 } // @name SessionExecuteResponse
 
@@ -53,3 +55,8 @@ type Command struct {
 func (c *Command) LogFilePath(sessionDir string) (string, string) {
 	return filepath.Join(sessionDir, c.Id, "output.log"), filepath.Join(sessionDir, c.Id, "exit_code")
 }
+
+type SessionCommandLogsResponse struct {
+	Stdout string `json:"stdout" validate:"required"`
+	Stderr string `json:"stderr" validate:"required"`
+} // @name SessionCommandLogsResponse

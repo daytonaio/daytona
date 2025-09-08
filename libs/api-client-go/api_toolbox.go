@@ -3318,6 +3318,7 @@ func (r ToolboxAPIGetSessionCommandLogsRequest) XDaytonaOrganizationID(xDaytonaO
 	return r
 }
 
+// Whether to stream the logs
 func (r ToolboxAPIGetSessionCommandLogsRequest) Follow(follow bool) ToolboxAPIGetSessionCommandLogsRequest {
 	r.follow = &follow
 	return r

@@ -3375,7 +3375,8 @@ paths:
           schema:
             type: string
           style: simple
-        - explode: true
+        - description: Whether to stream the logs
+          explode: true
           in: query
           name: follow
           required: false
@@ -3388,7 +3389,7 @@ paths:
             text/plain:
               schema:
                 type: string
-          description: Command log stream
+          description: Command log stream marked with stdout and stderr prefixes
       security:
         - bearer: []
         - oauth2:
@@ -8538,7 +8539,8 @@ components:
           example: cmd-123
           type: string
         output:
-          description: The output of the executed command
+          description: The output of the executed command marked with stdout and stderr
+            prefixes
           example: |-
             total 20
             drwxr-xr-x  4 user group  128 Mar 15 10:30 .
