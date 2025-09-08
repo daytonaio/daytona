@@ -46,7 +46,7 @@ func (s *SessionController) GetSessionCommandLogs(c *gin.Context) {
 
 	versionComparison, err := util.CompareVersions(sdkVersion, "0.27.0-0")
 	if err != nil {
-		log.Error(err)
+		log.Debug(err)
 		versionComparison = util.Pointer(1)
 	}
 	isLegacy := versionComparison != nil && *versionComparison < 0 && sdkVersion != "0.0.0-dev"
