@@ -29,7 +29,7 @@ func PullChanges(c *gin.Context) {
 	}
 
 	gitService := git.Service{
-		ProjectDir: req.Path,
+		WorkDir: req.Path,
 	}
 
 	err := gitService.Pull(auth)

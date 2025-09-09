@@ -11,7 +11,7 @@ import (
 )
 
 func (s *Service) Checkout(branch string) error {
-	r, err := git.PlainOpen(s.ProjectDir)
+	r, err := git.PlainOpen(s.WorkDir)
 	if err != nil {
 		return fmt.Errorf("failed to open repository: %w", err)
 	}

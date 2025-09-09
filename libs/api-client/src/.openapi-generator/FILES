@@ -137,6 +137,7 @@ models/update-organization-invitation.ts
 models/update-organization-member-access.ts
 models/update-organization-quota.ts
 models/update-organization-role.ts
+models/user-home-dir-response.ts
 models/user-public-key.ts
 models/user.ts
 models/volume-dto.ts
@@ -145,4 +146,5 @@ models/webhook-app-portal-access.ts
 models/webhook-controller-get-status200-response.ts
 models/webhook-initialization-status.ts
 models/windows-response.ts
+models/work-dir-response.ts
 models/workspace.ts

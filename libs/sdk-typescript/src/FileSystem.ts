@@ -12,9 +12,8 @@ import {
   SearchFilesResponse,
   ToolboxApi,
 } from '@daytonaio/api-client'
-import { prefixRelativePath } from './utils/Path'
+import FormData from 'form-data'
 import { dynamicImport } from './utils/Import'
-import { Buffer } from 'buffer'
 import { RUNTIME, Runtime } from './utils/Runtime'
 
 /**
@@ -47,8 +46,7 @@ export type FilePermissionsParams = {
  * @interface
  * @property {string | Buffer} source - File to upload. If a Buffer, it is interpreted as the file content which is loaded into memory.
  * Make sure it fits into memory, otherwise use the local file path which content will be streamed to the Sandbox.
- * @property {string} destination - Absolute destination path in the Sandbox. Relative paths are resolved based on the user's
- * root directory.
+ * @property {string} destination - Absolute destination path in the Sandbox. Relative paths are resolved based on the sandbox working directory.
  */
 export interface FileUpload {
   source: string | Buffer
@@ -65,14 +63,12 @@ export class FileSystem {
     private readonly sandboxId: string,
     private readonly clientConfig: Configuration,
     private readonly toolboxApi: ToolboxApi,
-    private readonly getRootDir: () => Promise<string>,
   ) {}
 
   /**
    * Create a new directory in the Sandbox with specified permissions.
    *
-   * @param {string} path - Path where the directory should be created. Relative paths are resolved based on the user's
-   * root directory.
+   * @param {string} path - Path where the directory should be created. Relative paths are resolved based on the sandbox working directory.
    * @param {string} mode - Directory permissions in octal format (e.g. "755")
    * @returns {Promise<void>}
    *
@@ -81,19 +77,14 @@ export class FileSystem {
    * await fs.createFolder('app/data', '755');
    */
   public async createFolder(path: string, mode: string): Promise<void> {
-    const response = await this.toolboxApi.createFolder(
-      this.sandboxId,
-      prefixRelativePath(await this.getRootDir(), path),
-      mode,
-    )
+    const response = await this.toolboxApi.createFolder(this.sandboxId, path, mode)
     return response.data
   }
 
   /**
    * Deletes a file or directory from the Sandbox.
    *
-   * @param {string} path - Path to the file or directory to delete. Relative paths are resolved based on the user's
-   * root directory.
+   * @param {string} path - Path to the file or directory to delete. Relative paths are resolved based on the sandbox working directory.
    * @param {boolean} [recursive] - If the file is a directory, this must be true to delete it.
    * @returns {Promise<void>}
    *
@@ -104,7 +95,7 @@ export class FileSystem {
   public async deleteFile(path: string, recursive?: boolean): Promise<void> {
     const response = await this.toolboxApi.deleteFile(
       this.sandboxId,
-      prefixRelativePath(await this.getRootDir(), path),
+      path,
       undefined,
       recursive,
     )
@@ -115,8 +106,7 @@ export class FileSystem {
    * Downloads a file from the Sandbox. This method loads the entire file into memory, so it is not recommended
    * for downloading large files.
    *
-   * @param {string} remotePath - Path to the file to download. Relative paths are resolved based on the user's
-   * root directory.
+   * @param {string} remotePath - Path to the file to download. Relative paths are resolved based on the sandbox working directory.
    * @param {number} [timeout] - Timeout for the download operation in seconds. 0 means no timeout.
    * Default is 30 minutes.
    * @returns {Promise<Buffer>} The file contents as a Buffer.
@@ -131,8 +121,7 @@ export class FileSystem {
    * Downloads a file from the Sandbox and saves it to a local file. This method uses streaming to download the file,
    * so it is recommended for downloading larger files.
    *
-   * @param {string} remotePath - Path to the file to download in the Sandbox. Relative paths are resolved based on the user's
-   * root directory.
+   * @param {string} remotePath - Path to the file to download in the Sandbox. Relative paths are resolved based on the sandbox working directory.
    * @param {string} localPath - Path to save the downloaded file.
    * @param {number} [timeout] - Timeout for the download operation in seconds. 0 means no timeout.
    * Default is 30 minutes.
@@ -144,7 +133,7 @@ export class FileSystem {
    */
   public async downloadFile(remotePath: string, localPath: string, timeout?: number): Promise<void>
   public async downloadFile(src: string, dst?: string | number, timeout: number = 30 * 60): Promise<Buffer | void> {
-    const remotePath = prefixRelativePath(await this.getRootDir(), src)
+    const remotePath = src
 
     if (typeof dst !== 'string') {
       timeout = dst as number
@@ -181,8 +170,7 @@ export class FileSystem {
   /**
    * Searches for text patterns within files in the Sandbox.
    *
-   * @param {string} path - Directory to search in. Relative paths are resolved based on the user's
-   * root directory.
+   * @param {string} path - Directory to search in. Relative paths are resolved based on the sandbox working directory.
    * @param {string} pattern - Search pattern
    * @returns {Promise<Array<Match>>} Array of matches with file and line information
    *
@@ -194,19 +182,14 @@ export class FileSystem {
    * });
    */
   public async findFiles(path: string, pattern: string): Promise<Array<Match>> {
-    const response = await this.toolboxApi.findInFiles(
-      this.sandboxId,
-      prefixRelativePath(await this.getRootDir(), path),
-      pattern,
-    )
+    const response = await this.toolboxApi.findInFiles(this.sandboxId, path, pattern)
     return response.data
   }
 
   /**
    * Retrieves detailed information about a file or directory.
    *
-   * @param {string} path - Path to the file or directory. Relative paths are resolved based on the user's
-   * root directory.
+   * @param {string} path - Path to the file or directory. Relative paths are resolved based on the sandbox working directory.
    * @returns {Promise<FileInfo>} Detailed file information including size, permissions, modification time
    *
    * @example
@@ -215,18 +198,14 @@ export class FileSystem {
    * console.log(`Size: ${info.size}, Modified: ${info.modTime}`);
    */
   public async getFileDetails(path: string): Promise<FileInfo> {
-    const response = await this.toolboxApi.getFileInfo(
-      this.sandboxId,
-      prefixRelativePath(await this.getRootDir(), path),
-    )
+    const response = await this.toolboxApi.getFileInfo(this.sandboxId, path)
     return response.data
   }
 
   /**
    * Lists contents of a directory in the Sandbox.
    *
-   * @param {string} path - Directory path to list. Relative paths are resolved based on the user's
-   * root directory.
+   * @param {string} path - Directory path to list. Relative paths are resolved based on the sandbox working directory.
    * @returns {Promise<FileInfo[]>} Array of file and directory information
    *
    * @example
@@ -237,21 +216,15 @@ export class FileSystem {
    * });
    */
   public async listFiles(path: string): Promise<FileInfo[]> {
-    const response = await this.toolboxApi.listFiles(
-      this.sandboxId,
-      undefined,
-      prefixRelativePath(await this.getRootDir(), path),
-    )
+    const response = await this.toolboxApi.listFiles(this.sandboxId, undefined, path)
     return response.data
   }
 
   /**
    * Moves or renames a file or directory.
    *
-   * @param {string} source - Source path. Relative paths are resolved based on the user's
-   * root directory.
-   * @param {string} destination - Destination path. Relative paths are resolved based on the user's
-   * root directory.
+   * @param {string} source - Source path. Relative paths are resolved based on the sandbox working directory.
+   * @param {string} destination - Destination path. Relative paths are resolved based on the sandbox working directory.
    * @returns {Promise<void>}
    *
    * @example
@@ -259,18 +232,14 @@ export class FileSystem {
    * await fs.moveFiles('app/temp/data.json', 'app/data/data.json');
    */
   public async moveFiles(source: string, destination: string): Promise<void> {
-    const response = await this.toolboxApi.moveFile(
-      this.sandboxId,
-      prefixRelativePath(await this.getRootDir(), source),
-      prefixRelativePath(await this.getRootDir(), destination),
-    )
+    const response = await this.toolboxApi.moveFile(this.sandboxId, source, destination)
     return response.data
   }
 
   /**
    * Replaces text content in multiple files.
    *
-   * @param {string[]} files - Array of file paths to process. Relative paths are resolved based on the user's
+   * @param {string[]} files - Array of file paths to process. Relative paths are resolved based on the sandbox working directory.
    * @param {string} pattern - Pattern to replace
    * @param {string} newValue - Replacement text
    * @returns {Promise<Array<ReplaceResult>>} Results of the replace operation for each file
@@ -284,10 +253,6 @@ export class FileSystem {
    * );
    */
   public async replaceInFiles(files: string[], pattern: string, newValue: string): Promise<Array<ReplaceResult>> {
-    for (let i = 0; i < files.length; i++) {
-      files[i] = prefixRelativePath(await this.getRootDir(), files[i])
-    }
-
     const replaceRequest: ReplaceRequest = {
       files,
       newValue,
@@ -301,7 +266,7 @@ export class FileSystem {
   /**
    * Searches for files and directories by name pattern in the Sandbox.
    *
-   * @param {string} path - Directory to search in. Relative paths are resolved based on the user's
+   * @param {string} path - Directory to search in. Relative paths are resolved based on the sandbox working directory.
    * @param {string} pattern - File name pattern (supports globs)
    * @returns {Promise<SearchFilesResponse>} Search results with matching files
    *
@@ -311,19 +276,14 @@ export class FileSystem {
    * result.files.forEach(file => console.log(file));
    */
   public async searchFiles(path: string, pattern: string): Promise<SearchFilesResponse> {
-    const response = await this.toolboxApi.searchFiles(
-      this.sandboxId,
-      prefixRelativePath(await this.getRootDir(), path),
-      pattern,
-    )
+    const response = await this.toolboxApi.searchFiles(this.sandboxId, path, pattern)
     return response.data
   }
 
   /**
    * Sets permissions and ownership for a file or directory.
    *
-   * @param {string} path - Path to the file or directory. Relative paths are resolved based on the user's
-   * root directory.
+   * @param {string} path - Path to the file or directory. Relative paths are resolved based on the sandbox working directory.
    * @param {FilePermissionsParams} permissions - Permission settings
    * @returns {Promise<void>}
    *
@@ -338,7 +298,7 @@ export class FileSystem {
   public async setFilePermissions(path: string, permissions: FilePermissionsParams): Promise<void> {
     const response = await this.toolboxApi.setFilePermissions(
       this.sandboxId,
-      prefixRelativePath(await this.getRootDir(), path),
+      path,
       undefined,
       permissions.owner!,
       permissions.group!,
@@ -352,8 +312,7 @@ export class FileSystem {
    * for uploading large files.
    *
    * @param {Buffer} file - Buffer of the file to upload.
-   * @param {string} remotePath - Destination path in the Sandbox. Relative paths are resolved based on the user's
-   * root directory.
+   * @param {string} remotePath - Destination path in the Sandbox. Relative paths are resolved based on the sandbox working directory.
    * @param {number} [timeout] - Timeout for the upload operation in seconds. 0 means no timeout.
    * Default is 30 minutes.
    * @returns {Promise<void>}
@@ -368,8 +327,7 @@ export class FileSystem {
    * so it is recommended for uploading larger files.
    *
    * @param {string} localPath - Path to the local file to upload.
-   * @param {string} remotePath - Destination path in the Sandbox. Relative paths are resolved based on the user's
-   * root directory.
+   * @param {string} remotePath - Destination path in the Sandbox. Relative paths are resolved based on the sandbox working directory.
    * @param {number} [timeout] - Timeout for the upload operation in seconds. 0 means no timeout.
    * Default is 30 minutes.
    * @returns {Promise<void>}
@@ -417,14 +375,12 @@ export class FileSystem {
         ? FormData
         : ((await dynamicImport('form-data', 'Uploading files is not supported: ')) as any)
     const form = new FormDataClass()
-    const rootDir = await this.getRootDir()
 
     for (const [i, { source, destination }] of files.entries()) {
-      const dst = prefixRelativePath(rootDir, destination)
-      form.append(`files[${i}].path`, dst)
+      form.append(`files[${i}].path`, destination)
       const payload = await this.makeFilePayload(source)
       // the third arg sets filename in Content-Disposition
-      form.append(`files[${i}].file`, payload as any, dst)
+      form.append(`files[${i}].file`, payload as any, destination)
     }
 
     if (RUNTIME === Runtime.SERVERLESS) {

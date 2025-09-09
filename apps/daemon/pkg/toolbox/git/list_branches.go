@@ -19,7 +19,7 @@ func ListBranches(c *gin.Context) {
 	}
 
 	gitService := git.Service{
-		ProjectDir: path,
+		WorkDir: path,
 	}
 
 	branchList, err := gitService.ListBranches()

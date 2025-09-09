@@ -13,8 +13,11 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/daytonaio/daemon/internal/util"
 	"github.com/daytonaio/daemon/pkg/common"
 	"github.com/gin-gonic/gin"
+
+	log "github.com/sirupsen/logrus"
 )
 
 var sessions = map[string]*session{}
@@ -24,7 +27,24 @@ func (s *SessionController) CreateSession(c *gin.Context) {
 
 	cmd := exec.CommandContext(ctx, common.GetShell())
 	cmd.Env = os.Environ()
-	cmd.Dir = s.projectDir
+
+	// for backward compatibility (only sdk clients before 0.28.X), we use the home directory as the default directory
+	sdkVersion := util.ExtractSdkVersionFromHeader(c.Request.Header)
+	versionComparison, err := util.CompareVersions(sdkVersion, "0.28.0-0")
+	if err != nil {
+		log.Error(err)
+		versionComparison = util.Pointer(1)
+	}
+	isLegacy := versionComparison != nil && *versionComparison < 0 && sdkVersion != "0.0.0-dev"
+	if isLegacy {
+		homeDir, err := os.UserHomeDir()
+		if err != nil {
+			c.AbortWithError(http.StatusInternalServerError, err)
+			cancel()
+			return
+		}
+		cmd.Dir = homeDir
+	}
 
 	var request CreateSessionRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
