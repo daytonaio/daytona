@@ -600,7 +600,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     const sandbox = new Sandbox()
     sandbox.id = uuidv4()
     sandbox.snapshot = snapshot.ref
-    sandbox.osUser = 'root'
+    sandbox.osUser = 'root' // TOOD: check
     sandbox.disk = snapshot.disk
     sandbox.mem = snapshot.mem
     sandbox.cpu = snapshot.cpu
