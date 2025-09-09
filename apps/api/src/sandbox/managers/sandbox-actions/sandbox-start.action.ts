@@ -137,7 +137,7 @@ export class SandboxStartAction extends SandboxAction {
     this.buildOnRunner(sandbox.buildInfo, runnerId, sandbox.organizationId)
 
     await this.updateSandboxState(sandbox.id, SandboxState.BUILDING_SNAPSHOT, runnerId)
-    await this.runnerService.recalculateRunnerUsage(runnerId)
+    await this.runnerService.recalculateRunnerUsage(runner)
     return SYNC_AGAIN
   }
 
