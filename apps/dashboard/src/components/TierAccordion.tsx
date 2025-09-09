@@ -7,15 +7,13 @@ import { OrganizationTier, Tier, TierLimit } from '@/billing-api'
 import { RoutePath } from '@/enums/RoutePath'
 import { cn } from '@/lib/utils'
 import { CheckIcon, ExternalLinkIcon, Info, Loader2, MinusIcon } from 'lucide-react'
-import React, { ReactNode, useMemo, useState } from 'react'
+import React, { ReactNode, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Tooltip } from './Tooltip'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './ui/accordion'
 import { Badge } from './ui/badge'
 import { Button } from './ui/button'
 import { Skeleton } from './ui/skeleton'
-
-type TierFeatures = Record<number, ReactNode>
 
 interface Props {
   emailVerified: boolean
@@ -25,21 +23,9 @@ interface Props {
   phoneVerified: boolean
   tierLoading: boolean
   tiers: Tier[]
-  tierFeatures?: TierFeatures
+  tierFeatures?: Record<number, ReactNode>
   onUpgrade: (tier: number) => Promise<void>
   onDowngrade: (tier: number) => Promise<void>
-}
-
-export function TierAccordionSkeleton() {
-  return (
-    <div className="w-full flex flex-col gap-4">
-      <Skeleton className="h-12 w-full" />
-      <Skeleton className="h-12 w-full" />
-      <Skeleton className="h-12 w-full" />
-      <Skeleton className="h-12 w-full" />
-      <Skeleton className="h-12 w-full" />
-    </div>
-  )
 }
 
 export function TierAccordion({
@@ -54,9 +40,7 @@ export function TierAccordion({
   onUpgrade,
   onDowngrade,
 }: Props) {
-  const nextTier = useMemo(() => {
-    return organizationTier?.tier ? organizationTier.tier + 1 : 1
-  }, [organizationTier?.tier])
+  const nextTier = organizationTier?.tier ? organizationTier.tier + 1 : 1
 
   return (
     <>
@@ -89,7 +73,7 @@ export function TierAccordion({
                       })}
                     >
                       Tier {tier.tier}
-                    </span>{' '}
+                    </span>
                     {isCurrentTier && (
                       <Badge variant="outline" className="font-mono uppercase">
                         Current
@@ -186,10 +170,14 @@ export function TierAccordion({
   )
 }
 
-export function TierFeature({ children, ...props }: { children: React.ReactNode }) {
+export function TierAccordionSkeleton() {
   return (
-    <div className="flex items-center text-sm font-mono px-3 py-2 gap-2" {...props}>
-      {children}
+    <div className="w-full flex flex-col gap-4">
+      <Skeleton className="h-12 w-full" />
+      <Skeleton className="h-12 w-full" />
+      <Skeleton className="h-12 w-full" />
+      <Skeleton className="h-12 w-full" />
+      <Skeleton className="h-12 w-full" />
     </div>
   )
 }
