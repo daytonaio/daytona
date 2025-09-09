@@ -33,7 +33,6 @@ class AsyncProcess:
         sandbox_id: str,
         code_toolbox: SandboxPythonCodeToolbox,
         toolbox_api: ToolboxApi,
-        get_root_dir: Callable[[], Awaitable[str]],
         get_preview_link: Callable[[int], Awaitable[PortPreviewUrl]],
     ):
         """Initialize a new Process instance.
@@ -42,12 +41,10 @@ class AsyncProcess:
             sandbox_id (str): The ID of the Sandbox.
             code_toolbox (SandboxPythonCodeToolbox): Language-specific code execution toolbox.
             toolbox_api (ToolboxApi): API client for Sandbox operations.
-            get_root_dir (Callable[[], str]): A function to get the default root directory of the Sandbox.
         """
         self._sandbox_id = sandbox_id
         self._code_toolbox = code_toolbox
         self._toolbox_api = toolbox_api
-        self._get_root_dir = get_root_dir
         self._get_preview_link = get_preview_link
 
     @staticmethod
@@ -92,7 +89,7 @@ class AsyncProcess:
         Args:
             command (str): Shell command to execute.
             cwd (Optional[str]): Working directory for command execution. If not
-                specified, uses the Sandbox root directory. Default is the user's root directory.
+                specified, uses the sandbox working directory.
             env (Optional[Dict[str, str]]): Environment variables to set for the command.
             timeout (Optional[int]): Maximum time in seconds to wait for the command
                 to complete. 0 means wait indefinitely.
@@ -133,7 +130,7 @@ class AsyncProcess:
             command = f"{safe_env_exports} {command}"
 
         command = f'sh -c "{command}"'
-        execute_request = ExecuteRequest(command=command, cwd=cwd or await self._get_root_dir(), timeout=timeout)
+        execute_request = ExecuteRequest(command=command, cwd=cwd, timeout=timeout)
 
         response = await self._toolbox_api.execute_command(sandbox_id=self._sandbox_id, execute_request=execute_request)
 

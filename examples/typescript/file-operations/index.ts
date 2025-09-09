@@ -12,11 +12,11 @@ async function main() {
     console.log(`Created sandbox with ID: ${sandbox.id}`)
 
     //  list files in the sandbox
-    const files = await sandbox.fs.listFiles('~')
+    const files = await sandbox.fs.listFiles('.')
     console.log('Initial files:', files)
 
     //  create a new directory in the sandbox
-    const newDir = '~/project-files'
+    const newDir = 'project-files'
     await sandbox.fs.createFolder(newDir, '755')
 
     // Create a local file for demonstration

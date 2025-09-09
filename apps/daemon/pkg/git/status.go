@@ -13,7 +13,7 @@ import (
 )
 
 func (s *Service) GetGitStatus() (*GitStatus, error) {
-	repo, err := git.PlainOpen(s.ProjectDir)
+	repo, err := git.PlainOpen(s.WorkDir)
 	if err != nil {
 		return nil, err
 	}
@@ -71,7 +71,7 @@ func (s *Service) isBranchPublished() (bool, error) {
 }
 
 func (s *Service) getUpstreamBranch() (string, error) {
-	cmd := exec.Command("git", "-C", s.ProjectDir, "rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{upstream}")
+	cmd := exec.Command("git", "-C", s.WorkDir, "rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{upstream}")
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		return "", nil
@@ -89,7 +89,7 @@ func (s *Service) getAheadBehindInfo() (int, int, error) {
 		return 0, 0, nil
 	}
 
-	cmd := exec.Command("git", "-C", s.ProjectDir, "rev-list", "--left-right", "--count", fmt.Sprintf("%s...HEAD", upstream))
+	cmd := exec.Command("git", "-C", s.WorkDir, "rev-list", "--left-right", "--count", fmt.Sprintf("%s...HEAD", upstream))
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		return 0, 0, nil

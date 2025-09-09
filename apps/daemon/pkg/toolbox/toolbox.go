@@ -6,11 +6,6 @@ package toolbox
 import (
 	"context"
 	"fmt"
-	"net"
-	"net/http"
-	"os"
-	"path"
-
 	common_proxy "github.com/daytonaio/common-go/pkg/proxy"
 	"github.com/daytonaio/daemon/internal"
 	"github.com/daytonaio/daemon/pkg/toolbox/computeruse"
@@ -24,6 +19,10 @@ import (
 	"github.com/daytonaio/daemon/pkg/toolbox/process"
 	"github.com/daytonaio/daemon/pkg/toolbox/process/session"
 	"github.com/daytonaio/daemon/pkg/toolbox/proxy"
+	"net"
+	"net/http"
+	"os"
+	"path"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
@@ -32,20 +31,37 @@ import (
 )
 
 type Server struct {
-	ProjectDir  string
+	WorkDir     string
 	ComputerUse computeruse.IComputerUse
 }
 
-type ProjectDirResponse struct {
+type WorkDirResponse struct {
 	Dir string `json:"dir"`
-} // @name ProjectDirResponse
+} // @name WorkDirResponse
 
-func (s *Server) GetProjectDir(ctx *gin.Context) {
-	projectDir := ProjectDirResponse{
-		Dir: s.ProjectDir,
+type UserHomeDirResponse struct {
+	Dir string `json:"dir"`
+} // @name UserHomeDirResponse
+
+func (s *Server) GetWorkDir(ctx *gin.Context) {
+	workDir := WorkDirResponse{
+		Dir: s.WorkDir,
 	}
 
-	ctx.JSON(http.StatusOK, projectDir)
+	ctx.JSON(http.StatusOK, workDir)
+}
+
+func (s *Server) GetUserHomeDir(ctx *gin.Context) {
+	userHomeDir, err := os.UserHomeDir()
+	if err != nil {
+		ctx.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+	userHomeDirResponse := UserHomeDirResponse{
+		Dir: userHomeDir,
+	}
+
+	ctx.JSON(http.StatusOK, userHomeDirResponse)
 }
 
 func (s *Server) Start() error {
@@ -66,7 +82,10 @@ func (s *Server) Start() error {
 		})
 	})
 
-	r.GET("/project-dir", s.GetProjectDir)
+	// keep /project-dir old behavior for backward compatibility
+	r.GET("/project-dir", s.GetUserHomeDir)
+	r.GET("/user-home-dir", s.GetUserHomeDir)
+	r.GET("/work-dir", s.GetWorkDir)
 
 	dirname, err := os.UserHomeDir()
 	if err != nil {
@@ -106,7 +125,7 @@ func (s *Server) Start() error {
 	{
 		processController.POST("/execute", process.ExecuteCommand)
 
-		sessionController := session.NewSessionController(configDir, s.ProjectDir)
+		sessionController := session.NewSessionController(configDir, s.WorkDir)
 		sessionGroup := processController.Group("/session")
 		{
 			sessionGroup.GET("", sessionController.ListSessions)

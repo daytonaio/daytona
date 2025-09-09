@@ -266,8 +266,7 @@ diagnostics, and more.
 **Parameters**:
 
 - `languageId` _string_ - The language server type (e.g., "typescript")
-- `pathToProject` _string_ - Path to the project root directory. Relative paths are resolved based on the user's
-    root directory.
+- `pathToProject` _string_ - Path to the project root directory. Relative paths are resolved based on the sandbox working directory.
 
 
 **Returns**:
@@ -350,23 +349,61 @@ console.log(`Token: ${previewLink.token}`);
 
 ***
 
-#### getUserRootDir()
+#### getUserHomeDir()
+
+```ts
+getUserHomeDir(): Promise<string>
+```
+
+Gets the user's home directory path for the logged in user inside the Sandbox.
+
+**Returns**:
+
+- `Promise<string>` - The absolute path to the Sandbox user's home directory for the logged in user
+
+**Example:**
+
+```ts
+const userHomeDir = await sandbox.getUserHomeDir();
+console.log(`Sandbox user home: ${userHomeDir}`);
+```
+
+***
+
+#### ~~getUserRootDir()~~
 
 ```ts
 getUserRootDir(): Promise<string>
 ```
 
-Gets the root directory path for the logged in user inside the Sandbox.
+**Returns**:
+
+- `Promise<string>`
+
+##### Deprecated
+
+Use `getUserHomeDir` instead. This method will be removed in a future version.
+
+***
+
+#### getWorkDir()
+
+```ts
+getWorkDir(): Promise<string>
+```
+
+Gets the working directory path inside the Sandbox.
 
 **Returns**:
 
-- `Promise<string>` - The absolute path to the Sandbox root directory for the logged in user
+- `Promise<string>` - The absolute path to the Sandbox working directory. Uses the WORKDIR specified
+    in the Dockerfile if present, or falling back to the user's home directory if not.
 
 **Example:**
 
 ```ts
-const rootDir = await sandbox.getUserRootDir();
-console.log(`Sandbox root: ${rootDir}`);
+const workDir = await sandbox.getWorkDir();
+console.log(`Sandbox working directory: ${workDir}`);
 ```
 
 ***
