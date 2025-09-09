@@ -83,7 +83,6 @@ export class SnapshotService {
     }
 
     let entrypoint = createSnapshotDto.entrypoint
-    let ref: string
 
     if (createSnapshotDto.imageName) {
       const imageValidationError = this.validateImageName(createSnapshotDto.imageName)
@@ -110,10 +109,6 @@ export class SnapshotService {
             `Image size ${imageDetails.sizeGB} exceeds the maximum allowed snapshot size (${organization.maxSnapshotSize})`,
           )
         }
-
-        const defaultInternalRegistry = await this.dockerRegistryService.getDefaultInternalRegistry()
-        const hash = imageDetails.digest.split(':')[1]
-        ref = `${defaultInternalRegistry.url}/${defaultInternalRegistry.project}/daytona-${hash}:daytona`
       } catch (error) {
         this.logger.error(`Error getting image details for ${createSnapshotDto.imageName}: ${error}`)
       }
@@ -165,6 +160,9 @@ export class SnapshotService {
           await this.buildInfoRepository.save(buildInfoEntity)
           snapshot.buildInfo = buildInfoEntity
         }
+
+        const defaultInternalRegistry = await this.dockerRegistryService.getDefaultInternalRegistry()
+        snapshot.ref = `${defaultInternalRegistry.url}/${defaultInternalRegistry.project}/${buildSnapshotRef}`
       }
 
       return await this.snapshotRepository.save(snapshot)
