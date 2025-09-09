@@ -30,7 +30,7 @@ export class Migration1755521645208 implements MigrationInterface {
     // Revert snapshot states
     await queryRunner.query(`ALTER TYPE "public"."snapshot_state_enum" RENAME TO "snapshot_state_enum_old"`)
     await queryRunner.query(
-      `CREATE TYPE "public"."snapshot_state_enum" AS ENUM('pending', 'pulling', 'pending_validation', 'validating', 'active', 'inactive', 'building', 'warming_up', 'error', 'build_failed', 'removing')`,
+      `CREATE TYPE "public"."snapshot_state_enum" AS ENUM('build_pending', 'pending', 'pulling', 'pending_validation', 'validating', 'active', 'inactive', 'building', 'warming_up', 'error', 'build_failed', 'removing')`,
     )
     await queryRunner.query(`ALTER TABLE "snapshot" ALTER COLUMN "state" DROP DEFAULT`)
     await queryRunner.query(
