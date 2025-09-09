@@ -23,7 +23,7 @@ import { useAuth } from 'react-oidc-context'
 import { toast } from 'sonner'
 import { UserProfileIdentity } from './LinkedAccounts'
 
-const LimitsV2: React.FC = () => {
+const Limits: React.FC = () => {
   const { user } = useAuth()
   const { selectedOrganization } = useSelectedOrganization()
 
@@ -226,4 +226,4 @@ const LimitsV2: React.FC = () => {
   )
 }
 
-export default LimitsV2
+export default Limits
