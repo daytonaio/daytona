@@ -21,7 +21,7 @@ jobs:
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
-          password: ${{ secrets.GITHUBBOT_TOKEN }}
+          password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build and release devcontainer Multi-Platform
         uses: devcontainers/ci@v0.3
         env:
