@@ -32,3 +32,4 @@ jobs:
           cacheFrom: ghcr.io/daytonaio/daytona-devcontainer
           platform: linux/amd64,linux/arm64
           imageTag: main,latest
+          configFile: .devcontainer/devcontainer.build.json
