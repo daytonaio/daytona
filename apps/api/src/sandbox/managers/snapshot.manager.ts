@@ -766,7 +766,7 @@ export class SnapshotManager {
             const query = this.snapshotRepository
               .createQueryBuilder('s')
               .select('1')
-              .where('s."internalName" = snapshot."internalName"')
+              .where('s."ref" = snapshot."ref"')
               .andWhere('s.state = :activeState')
               .andWhere('(s."lastUsedAt" >= :twoWeeksAgo OR s."createdAt" >= :twoWeeksAgo)')
 
@@ -820,14 +820,14 @@ export class SnapshotManager {
       // Only fetch inactive snapshots that have associated snapshot runner entries
       const queryResult = await this.snapshotRepository
         .createQueryBuilder('snapshot')
-        .select('snapshot."internalName"')
+        .select('snapshot."ref"')
         .where('snapshot.state = :snapshotState', { snapshotState: SnapshotState.INACTIVE })
-        .andWhere('snapshot."internalName" IS NOT NULL')
+        .andWhere('snapshot."ref" IS NOT NULL')
         .andWhereExists(
           this.snapshotRunnerRepository
             .createQueryBuilder('snapshot_runner')
             .select('1')
-            .where('snapshot_runner."snapshotRef" = snapshot."internalName"')
+            .where('snapshot_runner."snapshotRef" = snapshot."ref"')
             .andWhere('snapshot_runner.state != :snapshotRunnerState', {
               snapshotRunnerState: SnapshotRunnerState.REMOVING,
             }),
@@ -837,7 +837,7 @@ export class SnapshotManager {
             const query = this.snapshotRepository
               .createQueryBuilder('s')
               .select('1')
-              .where('s."internalName" = snapshot."internalName"')
+              .where('s."ref" = snapshot."ref"')
               .andWhere('s.state = :snapshotState')
             return `NOT EXISTS (${query.getQuery()})`
           },
@@ -848,12 +848,12 @@ export class SnapshotManager {
         .take(100)
         .getRawMany()
 
-      const inactiveSnapshotInternalNames = queryResult.map((result) => result.internalName)
+      const inactiveSnapshotRefs = queryResult.map((result) => result.ref)
 
-      if (inactiveSnapshotInternalNames.length > 0) {
+      if (inactiveSnapshotRefs.length > 0) {
         // Set associated SnapshotRunner records to REMOVING state
         const result = await this.snapshotRunnerRepository.update(
-          { snapshotRef: In(inactiveSnapshotInternalNames) },
+          { snapshotRef: In(inactiveSnapshotRefs) },
           { state: SnapshotRunnerState.REMOVING },
         )
 
