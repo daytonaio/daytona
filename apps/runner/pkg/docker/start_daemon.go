@@ -7,20 +7,19 @@ import (
 	"context"
 	"fmt"
 
+	common_daemon "github.com/daytonaio/common-go/pkg/daemon"
 	"github.com/daytonaio/common-go/pkg/timer"
 	"github.com/docker/docker/api/types/container"
 
 	log "github.com/sirupsen/logrus"
 )
 
-const UseUserHomeAsWorkDir = "DAYTONA_USER_HOME_AS_WORKDIR"
-
 func (d *DockerClient) startDaytonaDaemon(ctx context.Context, containerId string, workDir string) error {
 	defer timer.Timer()()
 
 	daemonCmd := "/usr/local/bin/daytona"
 	if workDir == "" {
-		workDir = UseUserHomeAsWorkDir
+		workDir = common_daemon.UseUserHomeAsWorkDir
 	}
 	daemonCmd = fmt.Sprintf("%s --work-dir %s", daemonCmd, workDir)
 
