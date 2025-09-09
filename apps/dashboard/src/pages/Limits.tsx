@@ -3,151 +3,85 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
-import { useApi } from '@/hooks/useApi'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
+import { TierAccordion, TierAccordionSkeleton } from '@/components/TierAccordion'
 import { Badge } from '@/components/ui/badge'
-import { TierTable } from '@/components/TierTable'
-import { OrganizationWallet } from '@/billing-api/types/OrganizationWallet'
-import { useAuth } from 'react-oidc-context'
-import { AlertTriangle } from 'lucide-react'
-import { OrganizationUsageOverview } from '@daytonaio/api-client'
-import { handleApiError } from '@/lib/error-handling'
-import QuotaLine from '@/components/QuotaLine'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
-import { OrganizationTier, Tier } from '@/billing-api'
-import { UserProfileIdentity } from './LinkedAccounts'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { UsageOverviewIndicator } from '@/components/UsageOverviewIndicator'
+import { useDowngradeTierMutation } from '@/hooks/mutations/useDowngradeTierMutation'
+import { useUpgradeTierMutation } from '@/hooks/mutations/useUpgradeTierMutation'
+import { useOrganizationTierQuery } from '@/hooks/queries/useOrganizationTierQuery'
+import { useOrganizationUsageOverviewQuery } from '@/hooks/queries/useOrganizationUsageOverviewQuery'
+import { useOrganizationWalletQuery } from '@/hooks/queries/useOrganizationWalletQuery'
+import { useTiersQuery } from '@/hooks/queries/useTiersQuery'
+import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
+import { handleApiError } from '@/lib/error-handling'
+import { RefreshCcw } from 'lucide-react'
+import React, { useCallback, useMemo } from 'react'
+import { useAuth } from 'react-oidc-context'
 import { toast } from 'sonner'
+import { UserProfileIdentity } from './LinkedAccounts'
 import { useConfig } from '@/hooks/useConfig'
+
 
 const Limits: React.FC = () => {
   const { user } = useAuth()
-  const { billingApi, organizationsApi } = useApi()
   const { selectedOrganization } = useSelectedOrganization()
-  const [organizationTier, setOrganizationTier] = useState<OrganizationTier | null>(null)
-  const [tiers, setTiers] = useState<Tier[]>([])
-  const [wallet, setWallet] = useState<OrganizationWallet | null>(null)
-  const [usageOverview, setUsage] = useState<OrganizationUsageOverview | null>(null)
-  const [tierLoading, setTierLoading] = useState(false)
   const config = useConfig()
 
-  const fetchOrganizationTier = useCallback(async () => {
-    if (!config.billingApiUrl) {
-      return
-    }
-    if (!selectedOrganization) {
-      return
-    }
-    setTierLoading(true)
-    try {
-      const data = await billingApi.getOrganizationTier(selectedOrganization.id)
-      setOrganizationTier(data)
-    } catch (error) {
-      handleApiError(error, 'Failed to fetch organization tier')
-    } finally {
-      setTierLoading(false)
-    }
-  }, [billingApi, selectedOrganization, config.billingApiUrl])
+  const { data: organizationTier, ...organizationTierQuery } = useOrganizationTierQuery({
+    organizationId: selectedOrganization?.id || '',
+  })
+  const { data: wallet, ...walletQuery } = useOrganizationWalletQuery({
+    organizationId: selectedOrganization?.id || '',
+  })
+  const { data: tiers, ...tiersQuery } = useTiersQuery()
+  const { data: usageOverview, ...usageOverviewQuery } = useOrganizationUsageOverviewQuery(
+    {
+      organizationId: selectedOrganization?.id || '',
+    },
+    {
+      refetchInterval: 10_000,
+      refetchIntervalInBackground: true,
+      staleTime: 0,
+    },
+  )
 
-  const fetchTiers = useCallback(async () => {
-    const data = await billingApi.listTiers()
-    setTiers(data)
-  }, [billingApi])
+  const downgradeTier = useDowngradeTierMutation()
+  const upgradeTier = useUpgradeTierMutation()
 
-  const fetchOrganizationWallet = useCallback(async () => {
-    if (!config.billingApiUrl) {
-      return
-    }
-    if (!selectedOrganization) {
-      return
-    }
-    try {
-      const data = await billingApi.getOrganizationWallet(selectedOrganization.id)
-      setWallet(data)
-    } catch (error) {
-      handleApiError(error, 'Failed to fetch organization wallet')
-    }
-  }, [billingApi, selectedOrganization, config.billingApiUrl])
-
-  const fetchUsage = useCallback(async () => {
-    if (!selectedOrganization) {
-      return
-    }
-    try {
-      const response = await organizationsApi.getOrganizationUsageOverview(selectedOrganization.id)
-      setUsage(response.data)
-    } catch (error) {
-      handleApiError(error, 'Failed to fetch usage data')
-    }
-  }, [organizationsApi, selectedOrganization])
-
-  const upgradeTier = useCallback(
+  const handleUpgradeTier = useCallback(
     async (tier: number) => {
       if (!selectedOrganization) {
         return
       }
 
       try {
-        await billingApi.upgradeTier(selectedOrganization.id, tier)
+        await upgradeTier.mutateAsync({ organizationId: selectedOrganization.id, tier })
         toast.success('Tier upgraded successfully')
-        fetchOrganizationTier()
-        fetchUsage()
       } catch (error) {
         handleApiError(error, 'Failed to upgrade organization tier')
       }
     },
-    [billingApi, selectedOrganization, fetchOrganizationTier, fetchUsage],
+    [upgradeTier, selectedOrganization],
   )
 
-  const downgradeTier = useCallback(
+  const handleDowngradeTier = useCallback(
     async (tier: number) => {
       if (!selectedOrganization) {
         return
       }
 
       try {
-        await billingApi.downgradeTier(selectedOrganization.id, tier)
+        await downgradeTier.mutateAsync({ organizationId: selectedOrganization.id, tier })
         toast.success('Tier downgraded successfully')
-        fetchOrganizationTier()
-        fetchUsage()
       } catch (error) {
         handleApiError(error, 'Failed to downgrade organization tier')
       }
     },
-    [billingApi, selectedOrganization, fetchOrganizationTier, fetchUsage],
+    [downgradeTier, selectedOrganization],
   )
-
-  useEffect(() => {
-    if (config.billingApiUrl) {
-      // Fetch usage after tier because limits might have changed
-      fetchOrganizationTier().finally(() => fetchUsage())
-      fetchTiers()
-    } else {
-      fetchUsage()
-    }
-    const interval = setInterval(fetchUsage, 10000)
-    return () => clearInterval(interval)
-  }, [fetchOrganizationTier, fetchUsage, fetchTiers, config.billingApiUrl])
-
-  useEffect(() => {
-    fetchOrganizationWallet()
-  }, [fetchOrganizationWallet])
-
-  const getUsageDisplay = (current: number, total: number, unit = '') => {
-    const percentage = (current / total) * 100
-    const isHighUsage = percentage > 90
-
-    return (
-      <div className="flex items-center gap-1">
-        <span className={isHighUsage ? 'text-red-500' : undefined}>
-          {current} / {total} {unit}
-        </span>
-        {isHighUsage && <AlertTriangle className="w-4 h-4 text-red-500" />}
-      </div>
-    )
-  }
 
   const githubConnected = useMemo(() => {
     if (!user?.profile?.identities) {
@@ -158,108 +92,138 @@ const Limits: React.FC = () => {
     )
   }, [user])
 
+  // const nextTierLabel = useMemo(() => {
+  //   if (!organizationTier) {
+  //     return null
+  //   }
+
+  //   const nextTier = tiers?.find((t) => t.tier === organizationTier.tier + 1)
+  //   if (nextTier) {
+  //     return `Tier ${nextTier.tier}`
+  //   }
+
+  //   return 'Custom Tier'
+  // }, [organizationTier, tiers])
+
+  // const hasHitLimit = useMemo(() => {
+  //     if (!usageOverview) {
+  //       return false
+  //     }
+
+  //     return pastUsage.some((u) => {
+  //       return (
+  //         u.peakCpuUsage >= usageOverview.totalCpuQuota ||
+  //         u.peakMemUsage >= usageOverview.totalMemoryQuota ||
+  //         u.peakDiskUsage >= usageOverview.totalDiskQuota
+  //       )
+  //     })
+  //   }, [pastUsage, usageOverview])
+
+  const isLoading = organizationTierQuery.isLoading || tiersQuery.isLoading || walletQuery.isLoading
+  const isError =
+    organizationTierQuery.isError || tiersQuery.isError || usageOverviewQuery.isError || walletQuery.isError
+
+  const handleRetry = () => {
+    organizationTierQuery.refetch()
+    tiersQuery.refetch()
+    usageOverviewQuery.refetch()
+    walletQuery.refetch()
+  }
+
   return (
     <div className="px-6 py-2">
       <div className="mb-2 h-12 flex items-center justify-between">
         <h1 className="text-2xl font-medium">Limits</h1>
       </div>
 
-      <Card className="my-4">
-        <CardHeader>
-          <CardTitle className="flex items-center mb-2">
-            Usage Limits{' '}
-            {organizationTier && (
-              <Badge variant="outline" className="ml-2 text-sm">
-                Tier {organizationTier.tier}
-              </Badge>
-            )}
-          </CardTitle>
-          <CardDescription>
-            Limits help us mitigate misuse and manage infrastructure resources. Ensuring fair and stable access to
-            sandboxes and compute capacity across all users.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {!usageOverview && (
-            <div className="flex items-center justify-center h-full">
-              <Skeleton className="w-full h-full" />
-            </div>
-          )}
-          {usageOverview && (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Resource</TableHead>
-                  <TableHead>Usage</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                <TableRow>
-                  <TableCell>Compute</TableCell>
-                  <TableCell>
-                    <div className="max-w-80">
-                      <div className="w-full flex justify-end">
-                        {getUsageDisplay(usageOverview.currentCpuUsage, usageOverview.totalCpuQuota, 'vCPU')}
-                      </div>
-                      <QuotaLine current={usageOverview.currentCpuUsage} total={usageOverview.totalCpuQuota} />
-                    </div>
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell>Memory</TableCell>
-                  <TableCell>
-                    <div className="max-w-80">
-                      <div className="w-full flex justify-end">
-                        {getUsageDisplay(usageOverview.currentMemoryUsage, usageOverview.totalMemoryQuota, 'GiB')}
-                      </div>
-                      <QuotaLine current={usageOverview.currentMemoryUsage} total={usageOverview.totalMemoryQuota} />
-                    </div>
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell>Storage</TableCell>
-                  <TableCell>
-                    <div className="max-w-80">
-                      <div className="w-full flex justify-end">
-                        {getUsageDisplay(usageOverview.currentDiskUsage, usageOverview.totalDiskQuota, 'GiB')}
-                      </div>
-                      <QuotaLine current={usageOverview.currentDiskUsage} total={usageOverview.totalDiskQuota} />
-                    </div>
-                  </TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
-
-      {config.billingApiUrl && (
+      {/* todo: more granular error handling */}
+      {isError ? (
         <Card className="my-4">
           <CardHeader>
-            <CardTitle className="flex items-center mb-2">Increasing your limits</CardTitle>
-            {organizationTier && (
-              <CardDescription>
-                Your organization is currently in <b>Tier {organizationTier.tier}</b>. Your limits will automatically be
-                increased once you move to the next tier based on the criteria outlined below.
-                <br />
-                Note: For the top up requirements, make sure to top up in a single transaction.
-              </CardDescription>
-            )}
+            <CardTitle className="text-center">Oops, something went wrong</CardTitle>
           </CardHeader>
-          <CardContent>
-            <TierTable
-              creditCardConnected={!!wallet?.creditCardConnected}
-              organizationTier={organizationTier}
-              emailVerified={!!user?.profile?.email_verified}
-              githubConnected={githubConnected}
-              tiers={tiers}
-              phoneVerified={!!user?.profile?.phone_verified}
-              tierLoading={tierLoading}
-              onUpgrade={upgradeTier}
-              onDowngrade={downgradeTier}
-            />
+          <CardContent className="flex justify-between items-center flex-col gap-3">
+            <div>There was an error loading your limits.</div>
+            <Button variant="outline" onClick={handleRetry}>
+              <RefreshCcw className="mr-2 h-4 w-4" />
+              Retry
+            </Button>
           </CardContent>
         </Card>
+      ) : (
+        <>
+          <Card className="my-4">
+            <CardHeader>
+              <CardTitle className="flex justify-between gap-4 md:flex-row flex-col flex-wrap">
+                <div className="flex items-center gap-2">
+                  Current Usage{' '}
+                  <Badge variant="outline" className="font-mono uppercase">
+                    Tier {organizationTier?.tier}
+                  </Badge>
+                </div>
+                {usageOverviewQuery.isLoading ? (
+                  <Skeleton className="h-6 w-32" />
+                ) : (
+                  usageOverview && <UsageOverviewIndicator usage={usageOverview} isLive />
+                )}
+              </CardTitle>
+            </CardHeader>
+
+            {/* todo: implement past usage api */}
+            {/* <div className="border border-border" />
+          <CardContent>
+            <LimitUsageChart
+              title={
+                <div className="py-6">
+                  <CardTitle className="flex justify-between gap-4">Peak Usage</CardTitle>
+                </div>
+              }
+              pastUsage={pastUsage}
+              currentUsage={usageOverview}
+            />
+            {!!(hasHitLimit && nextTierLabel) && (
+              <div className="text-sm text-muted-foreground mt-4">
+                <TriangleAlertIcon className="inline-block h-4 align-middle text-yellow-600" />
+                You hit your resource limit on one or more days this month. To ensure stable performance, upgrade to{' '}
+                <span className="text-foreground">{nextTierLabel}</span>.
+              </div>
+            )}
+          </CardContent> */}
+          </Card>
+
+          {config.billingApiUrl && (
+            <Card className="my-4">
+              <CardHeader>
+                <CardTitle className="flex items-center mb-2">Upgrade your limits</CardTitle>
+                <CardDescription>
+                  Total vCPU, RAM, and Storage available across all active sandboxes. <br />
+                  Usage depends on the compute needs of each sandbox.
+                  <br />
+                  <div className="text-sm text-muted-foreground/70 mt-2">
+                    Note: for the top up requirements, make sure to top up in a single transaction.
+                  </div>
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {isLoading ? (
+                  <TierAccordionSkeleton />
+                ) : (
+                  <TierAccordion
+                    creditCardConnected={!!wallet?.creditCardConnected}
+                    organizationTier={organizationTier}
+                    emailVerified={!!user?.profile?.email_verified}
+                    githubConnected={githubConnected}
+                    tiers={tiers || []}
+                    phoneVerified={!!user?.profile?.phone_verified}
+                    tierLoading={organizationTierQuery.isLoading}
+                    onUpgrade={handleUpgradeTier}
+                    onDowngrade={handleDowngradeTier}
+                  />
+                )}
+              </CardContent>
+            </Card>
+          )}
+        </>
       )}
     </div>
   )
