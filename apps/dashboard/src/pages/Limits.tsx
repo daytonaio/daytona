@@ -24,7 +24,6 @@ import { toast } from 'sonner'
 import { UserProfileIdentity } from './LinkedAccounts'
 import { useConfig } from '@/hooks/useConfig'
 
-
 const Limits: React.FC = () => {
   const { user } = useAuth()
   const { selectedOrganization } = useSelectedOrganization()
