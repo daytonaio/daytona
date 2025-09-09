@@ -3,17 +3,23 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import React, { Suspense, useEffect } from 'react'
-import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
-import Dashboard from './pages/Dashboard'
-import Sandboxes from './pages/Sandboxes'
-import Keys from './pages/Keys'
-import { ThemeProvider } from './contexts/ThemeContext'
-import { useAuth } from 'react-oidc-context'
-import LoadingFallback from './components/LoadingFallback'
-import Snapshots from './pages/Snapshots'
-import Registries from './pages/Registries'
+import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
+import Onboarding from '@/pages/Onboarding'
+import OrganizationMembers from '@/pages/OrganizationMembers'
+import OrganizationSettings from '@/pages/OrganizationSettings'
+import UserOrganizationInvitations from '@/pages/UserOrganizationInvitations'
+import { NotificationSocketProvider } from '@/providers/NotificationSocketProvider'
+import { OrganizationsProvider } from '@/providers/OrganizationsProvider'
+import { SelectedOrganizationProvider } from '@/providers/SelectedOrganizationProvider'
+import { UserOrganizationInvitationsProvider } from '@/providers/UserOrganizationInvitationsProvider'
+import { OrganizationRolePermissionsEnum, OrganizationUserRoleEnum } from '@daytonaio/api-client'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { usePostHog } from 'posthog-js/react'
+import React, { Suspense, useEffect } from 'react'
+import { useAuth } from 'react-oidc-context'
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
+import LoadingFallback from './components/LoadingFallback'
+import { Button } from './components/ui/button'
 import {
   Dialog,
   DialogContent,
@@ -22,34 +28,39 @@ import {
   DialogHeader,
   DialogTitle,
 } from './components/ui/dialog'
-import { OrganizationsProvider } from '@/providers/OrganizationsProvider'
-import { SelectedOrganizationProvider } from '@/providers/SelectedOrganizationProvider'
-import { UserOrganizationInvitationsProvider } from '@/providers/UserOrganizationInvitationsProvider'
-import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
-import OrganizationMembers from '@/pages/OrganizationMembers'
-import OrganizationSettings from '@/pages/OrganizationSettings'
-import UserOrganizationInvitations from '@/pages/UserOrganizationInvitations'
-import { OrganizationRolePermissionsEnum, OrganizationUserRoleEnum } from '@daytonaio/api-client'
-import Limits from './pages/Limits'
-import Wallet from './pages/Wallet'
-import { NotificationSocketProvider } from '@/providers/NotificationSocketProvider'
-import { ApiProvider } from './providers/ApiProvider'
-import LandingPage from './pages/LandingPage'
-import Logout from './pages/Logout'
-import { RoutePath, getRouteSubPath } from './enums/RoutePath'
 import { DAYTONA_DOCS_URL, DAYTONA_SLACK_URL } from './constants/ExternalLinks'
-import Onboarding from '@/pages/Onboarding'
-import { Button } from './components/ui/button'
-import Volumes from './pages/Volumes'
-import NotFound from './pages/NotFound'
-import AuditLogs from './pages/AuditLogs'
-import Spending from './pages/Spending'
-import EmailVerify from './pages/EmailVerify'
+import { ThemeProvider } from './contexts/ThemeContext'
+import { RoutePath, getRouteSubPath } from './enums/RoutePath'
 import AccountSettings from './pages/AccountSettings'
+import AuditLogs from './pages/AuditLogs'
+import Dashboard from './pages/Dashboard'
+import EmailVerify from './pages/EmailVerify'
+import Keys from './pages/Keys'
+import LandingPage from './pages/LandingPage'
+import Limits from './pages/Limits'
+import Logout from './pages/Logout'
+import NotFound from './pages/NotFound'
+import Registries from './pages/Registries'
+import Sandboxes from './pages/Sandboxes'
+import Snapshots from './pages/Snapshots'
+import Spending from './pages/Spending'
+import Volumes from './pages/Volumes'
+import Wallet from './pages/Wallet'
+import { ApiProvider } from './providers/ApiProvider'
 import { BillingProvider } from './providers/BillingProvider'
 import { useConfig } from './hooks/useConfig'
 import { addPylonWidget } from './lib/pylon-widget'
 import { QueryProvider } from './providers/QueryProvider'
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      refetchOnWindowFocus: false,
+      staleTime: 1000 * 60 * 5, // 5 minutes
+    },
+  },
+})
 
 // Simple redirection components for external URLs
 const DocsRedirect = () => {
