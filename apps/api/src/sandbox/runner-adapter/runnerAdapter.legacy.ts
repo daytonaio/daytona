@@ -131,15 +131,15 @@ export class RunnerAdapterLegacy implements RunnerAdapter {
     this.toolboxApiClient = new ToolboxApi(new Configuration(), '', axiosInstance)
   }
 
-  async healthCheck(): Promise<void> {
-    const response = await this.runnerApiClient.healthCheck()
+  async healthCheck(signal?: AbortSignal): Promise<void> {
+    const response = await this.runnerApiClient.healthCheck({ signal })
     if (response.data.status !== 'ok') {
       throw new Error('Runner is not healthy')
     }
   }
 
-  async runnerInfo(): Promise<RunnerInfo> {
-    const response = await this.runnerApiClient.runnerInfo()
+  async runnerInfo(signal?: AbortSignal): Promise<RunnerInfo> {
+    const response = await this.runnerApiClient.runnerInfo({ signal })
     return {
       metrics: response.data.metrics,
     }

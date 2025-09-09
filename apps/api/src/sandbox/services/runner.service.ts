@@ -5,7 +5,7 @@
 
 import { Injectable, Logger, NotFoundException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { Cron } from '@nestjs/schedule'
+import { Cron, CronExpression } from '@nestjs/schedule'
 import { FindOptionsWhere, In, Not, Raw, Repository } from 'typeorm'
 import { Runner } from '../entities/runner.entity'
 import { CreateRunnerDto } from '../dto/create-runner.dto'
@@ -22,11 +22,11 @@ import { SnapshotRunnerState } from '../enums/snapshot-runner-state.enum'
 import { Snapshot } from '../entities/snapshot.entity'
 import { RunnerSnapshotDto } from '../dto/runner-snapshot.dto'
 import { RunnerAdapterFactory, RunnerInfo } from '../runner-adapter/runnerAdapter'
+import { RedisLockProvider } from '../common/redis-lock.provider'
 
 @Injectable()
 export class RunnerService {
   private readonly logger = new Logger(RunnerService.name)
-  private checkingRunners = false
 
   constructor(
     @InjectRepository(Runner)
@@ -38,6 +38,7 @@ export class RunnerService {
     private readonly snapshotRunnerRepository: Repository<SnapshotRunner>,
     @InjectRepository(Snapshot)
     private readonly snapshotRepository: Repository<Snapshot>,
+    private readonly redisLockProvider: RedisLockProvider,
   ) {}
 
   async create(createRunnerDto: CreateRunnerDto): Promise<Runner> {
@@ -161,7 +162,12 @@ export class RunnerService {
       return
     }
 
-    await this.recalculateRunnerUsage(event.sandbox.runnerId)
+    const runner = await this.runnerRepository.findOne({ where: { id: event.sandbox.runnerId } })
+    if (!runner) {
+      throw new Error('Runner not found, cannot recalculate usage')
+    }
+
+    await this.recalculateRunnerUsage(runner)
   }
 
   private async updateRunnerState(runnerId: string, newState: RunnerState): Promise<void> {
@@ -183,46 +189,85 @@ export class RunnerService {
     })
   }
 
-  @Cron('15 * * * * *')
+  @Cron(CronExpression.EVERY_10_SECONDS, { name: 'check-runners', waitForCompletion: true })
   private async handleCheckRunners() {
-    if (this.checkingRunners) {
+    const lockKey = 'check-runners'
+    const hasLock = await this.redisLockProvider.lock(lockKey, 60)
+    if (!hasLock) {
       return
     }
-    this.checkingRunners = true
-    const runners = await this.runnerRepository.find({
-      where: {
-        state: Not(RunnerState.DECOMMISSIONED),
-      },
-    })
-    for (const runner of runners) {
-      this.logger.debug(`Checking runner ${runner.id}`)
-      try {
-        // Get health check with status metrics
-        const runnerAdapter = await this.runnerAdapterFactory.create(runner)
-        await runnerAdapter.healthCheck()
 
-        let runnerInfo: RunnerInfo | undefined
-        try {
-          runnerInfo = await runnerAdapter.runnerInfo()
-        } catch (e) {
-          this.logger.warn(`Failed to get runner info for runner ${runner.id}: ${e.message}`)
-        }
+    try {
+      const runners = await this.runnerRepository.find({
+        where: {
+          state: Not(RunnerState.DECOMMISSIONED),
+        },
+        order: {
+          lastChecked: 'ASC',
+        },
+        take: 100,
+      })
 
-        await this.updateRunnerStatus(runner.id, runnerInfo)
+      await Promise.allSettled(
+        runners.map(async (runner) => {
+          const abortController = new AbortController()
+          let timeoutId: NodeJS.Timeout | null = null
 
-        await this.recalculateRunnerUsage(runner.id)
-      } catch (e) {
-        if (e.code === 'ECONNREFUSED') {
-          this.logger.error('Runner not reachable')
-        } else {
-          this.logger.error(`Error checking runner ${runner.id}: ${e.message}`)
-          this.logger.error(e)
-        }
+          try {
+            await Promise.race([
+              (async () => {
+                this.logger.debug(`Checking runner ${runner.id}`)
+                const runnerAdapter = await this.runnerAdapterFactory.create(runner)
 
-        await this.updateRunnerState(runner.id, RunnerState.UNRESPONSIVE)
-      }
+                // Get health check with status metrics
+                await runnerAdapter.healthCheck(abortController.signal)
+
+                let runnerInfo: RunnerInfo | undefined
+                try {
+                  runnerInfo = await runnerAdapter.runnerInfo(abortController.signal)
+                } catch (e) {
+                  this.logger.warn(`Failed to get runner info for runner ${runner.id}: ${e.message}`)
+                }
+
+                await this.updateRunnerStatus(runner.id, runnerInfo)
+                await this.recalculateRunnerUsage(runner)
+              })(),
+              new Promise((_, reject) => {
+                timeoutId = setTimeout(() => {
+                  abortController.abort()
+                  reject(new Error('Health check timeout'))
+                }, 10000)
+              }),
+            ])
+
+            // Clear timeout if operation completed successfully
+            if (timeoutId) {
+              clearTimeout(timeoutId)
+            }
+          } catch (e) {
+            // Clear timeout on any error
+            if (timeoutId) {
+              clearTimeout(timeoutId)
+            }
+
+            if (e.message === 'Health check timeout') {
+              this.logger.error(`Runner ${runner.id} health check timed out after 10 seconds`)
+            } else if (e.code === 'ECONNREFUSED') {
+              this.logger.error(`Runner ${runner.id} not reachable`)
+            } else if (e.name === 'AbortError') {
+              this.logger.error(`Runner ${runner.id} health check was aborted due to timeout`)
+            } else {
+              this.logger.error(`Error checking runner ${runner.id}: ${e.message}`)
+              this.logger.error(e)
+            }
+
+            await this.updateRunnerState(runner.id, RunnerState.UNRESPONSIVE)
+          }
+        }),
+      )
+    } finally {
+      await this.redisLockProvider.unlock(lockKey)
     }
-    this.checkingRunners = false
   }
 
   private async updateRunnerStatus(runnerId: string, runnerInfo?: RunnerInfo) {
@@ -237,7 +282,7 @@ export class RunnerService {
       return
     }
 
-    const updateData: any = {
+    const updateData: Partial<Runner> = {
       state: RunnerState.READY,
       lastChecked: new Date(),
     }
@@ -272,21 +317,17 @@ export class RunnerService {
     await this.runnerRepository.update(runnerId, updateData)
   }
 
-  async recalculateRunnerUsage(runnerId: string) {
-    const runner = await this.runnerRepository.findOne({ where: { id: runnerId } })
-    if (!runner) {
-      throw new Error('Runner not found')
-    }
-    //  recalculate runner usage
+  async recalculateRunnerUsage(runner: Runner) {
     const sandboxes = await this.sandboxRepository.find({
       where: {
         runnerId: runner.id,
         state: Not(SandboxState.DESTROYED),
       },
     })
-    runner.used = sandboxes.length
 
-    await this.runnerRepository.save(runner)
+    await this.runnerRepository.update(runner.id, {
+      used: sandboxes.length,
+    })
   }
 
   private isValidClass(sandboxClass: SandboxClass): boolean {
