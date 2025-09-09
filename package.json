@@ -69,6 +69,7 @@
     "@opentelemetry/sdk-node": "^0.203.0",
     "@opentelemetry/sdk-trace-base": "^2.0.1",
     "@opentelemetry/sdk-trace-node": "^2.0.1",
+    "@radix-ui/react-accordion": "^1.2.12",
     "@radix-ui/react-alert-dialog": "^1.1.14",
     "@radix-ui/react-checkbox": "^1.1.4",
     "@radix-ui/react-dialog": "^1.1.6",
