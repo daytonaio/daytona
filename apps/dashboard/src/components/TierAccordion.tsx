@@ -7,7 +7,7 @@ import { OrganizationTier, Tier, TierLimit } from '@/billing-api'
 import { RoutePath } from '@/enums/RoutePath'
 import { cn } from '@/lib/utils'
 import { CheckIcon, ExternalLinkIcon, Info, Loader2, MinusIcon } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import React, { ReactNode, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Tooltip } from './Tooltip'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './ui/accordion'
@@ -15,7 +15,9 @@ import { Badge } from './ui/badge'
 import { Button } from './ui/button'
 import { Skeleton } from './ui/skeleton'
 
-type Props = {
+type TierFeatures = Record<number, ReactNode>
+
+interface Props {
   emailVerified: boolean
   githubConnected: boolean
   organizationTier?: OrganizationTier | null
@@ -23,6 +25,7 @@ type Props = {
   phoneVerified: boolean
   tierLoading: boolean
   tiers: Tier[]
+  tierFeatures?: TierFeatures
   onUpgrade: (tier: number) => Promise<void>
   onDowngrade: (tier: number) => Promise<void>
 }
@@ -47,6 +50,7 @@ export function TierAccordion({
   phoneVerified,
   tierLoading,
   tiers,
+  tierFeatures,
   onUpgrade,
   onDowngrade,
 }: Props) {
@@ -68,16 +72,17 @@ export function TierAccordion({
                   Date.now() - 1000 * 60 * 60 * 24 * tier.topUpIntervalDays))
 
           const isLessThanCurrentTier = organizationTier && tier.tier < organizationTier.tier
+          const features = tierFeatures ? tierFeatures[tier.tier] : null
 
           return (
             <AccordionItem value={String(tier.tier)} key={tier.tier}>
               <AccordionTrigger
-                className={cn('w-full text-left hover:no-underline', {
+                className={cn('w-full text-left hover:no-underline items-start lg:items-center', {
                   '[&:not([data-state=open])]:opacity-40': isLessThanCurrentTier,
                 })}
               >
-                <div className="flex items-start md:items-center gap-2 w-full pr-3 md:flex-row flex-col">
-                  <div>
+                <div className="grid items-center gap-2 md:grid-cols-[3fr_7fr] lg:grid-cols-2 w-full pr-3 grid-cols-1">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <span
                       className={cn('font-mono uppercase', {
                         'text-green-500': isCurrentTier,
@@ -90,14 +95,33 @@ export function TierAccordion({
                         Current
                       </Badge>
                     )}
+                    {organizationTier && (
+                      <div className="flex items-center gap-1">
+                        <TierActionButton
+                          tier={tier.tier}
+                          currentTier={organizationTier?.tier ?? 0}
+                          canUpgrade={canUpgradeToTier(
+                            organizationTier,
+                            tier,
+                            creditCardLinked,
+                            githubConnected,
+                            phoneVerified,
+                          )}
+                          tierLoading={tierLoading}
+                          tierExpiresAt={organizationTier?.expiresAt}
+                          onUpgrade={onUpgrade}
+                          onDowngrade={onDowngrade}
+                        />
+                      </div>
+                    )}
                   </div>
-
-                  <TierLimitsBadge limit={tier.tierLimit} className="md:ml-auto" />
+                  <TierLimitsIndicator limit={tier.tierLimit} />
                 </div>
               </AccordionTrigger>
               <AccordionContent>
-                <div className="flex items-end justify-between pr-8">
+                <div className="grid md:grid-cols-[3fr_7fr] grid-cols-2 lg:grid-cols-2 gap-2 pr-8">
                   <div className="flex flex-col gap-2">
+                    <span className="text-xs uppercase font-mono text-muted-foreground/70">Requirements:</span>
                     <AdditionalTierRequirements
                       tier={tier}
                       emailVerified={emailVerified}
@@ -131,23 +155,10 @@ export function TierAccordion({
                     )}
                   </div>
 
-                  {organizationTier && (
-                    <div className="flex items-center gap-2">
-                      <TierActionButton
-                        tier={tier.tier}
-                        currentTier={organizationTier?.tier ?? 0}
-                        canUpgrade={canUpgradeToTier(
-                          organizationTier,
-                          tier,
-                          creditCardLinked,
-                          githubConnected,
-                          phoneVerified,
-                        )}
-                        tierLoading={tierLoading}
-                        tierExpiresAt={organizationTier?.expiresAt}
-                        onUpgrade={onUpgrade}
-                        onDowngrade={onDowngrade}
-                      />
+                  {features && (
+                    <div className="flex flex-col gap-2">
+                      <span className="text-xs uppercase font-mono text-muted-foreground/70">Additional Features:</span>
+                      {features}
                     </div>
                   )}
                 </div>
@@ -165,7 +176,7 @@ export function TierAccordion({
           Custom
         </span>
 
-        <Button variant="outline" asChild>
+        <Button variant="secondary" asChild>
           <a href="mailto:sales@daytona.io?subject=Custom%20Tier%20Inquiry&body=Hi%20Daytona%20Team%2C%0A%0AI%27m%20interested%20in%20a%20custom%20plan%20and%20would%20like%20to%20learn%20more%20about%20your%20options.%0A%0AHere%27s%20some%20context%3A%0A%0A-%20Your%20use%20case%3A%20%0A-%20Current%20technology%3A%20%0A-%20Requirements%3A%20%0A-%20Typical%20sandbox%20size%3A%20%0A-%20Peak%20concurrent%20sandboxes%3A%20%0A%0AThanks.">
             Contact Sales
           </a>
@@ -175,26 +186,43 @@ export function TierAccordion({
   )
 }
 
+export function TierFeature({ children, ...props }: { children: React.ReactNode }) {
+  return (
+    <div className="flex items-center text-sm font-mono px-3 py-2 gap-2" {...props}>
+      {children}
+    </div>
+  )
+}
+
 function TierLimitResource({ label, value }: { label: string; value: number | string }) {
   return (
-    <div className="flex items-center font-mono [&+&]:border-l border-border px-3 py-2 gap-2">
+    <div className="flex items-center font-mono px-3 py-2 gap-2">
       <div className="text-sm text-muted-foreground">{label}</div>{' '}
       <div className="text-sm text-foreground">{value}</div>
     </div>
   )
 }
 
-function TierLimitsBadge({ limit, className }: { limit: TierLimit; className?: string }) {
+function TierLimitsIndicator({
+  limit,
+  className,
+  children,
+}: {
+  limit: TierLimit
+  className?: string
+  children?: React.ReactNode
+}) {
   return (
     <div
       className={cn(
-        'flex items-center text-sm text-muted-foreground rounded-md border border-border font-mono',
+        'flex items-center text-sm text-muted-foreground rounded-md border border-border font-mono [&>*]:border-l [&>*]:border-border [&>*:first-child]:border-0 [&>*]:flex-1',
         className,
       )}
     >
       <TierLimitResource label="vCPU" value={limit.concurrentCPU} />
       <TierLimitResource label="RAM" value={`${limit.concurrentRAMGiB} GiB`} />
       <TierLimitResource label="DISK" value={`${limit.concurrentDiskGiB} GiB`} />
+      {children}
     </div>
   )
 }
@@ -295,6 +323,17 @@ function TierActionButton({
   if (tier === currentTier + 1) {
     return (
       <>
+        <Button
+          variant="ghost"
+          onClick={() => {
+            setTierActionLoading(true)
+            onUpgrade(tier).finally(() => setTierActionLoading(false))
+          }}
+          disabled={!canUpgrade || tierActionLoading}
+        >
+          {tierActionLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+          Upgrade
+        </Button>
         <Tooltip
           label={
             <button>
@@ -303,18 +342,6 @@ function TierActionButton({
           }
           content={<div className="max-w-80">Complete all requirements to upgrade.</div>}
         />
-
-        <Button
-          variant="outline"
-          onClick={() => {
-            setTierActionLoading(true)
-            onUpgrade(tier).finally(() => setTierActionLoading(false))
-          }}
-          disabled={!canUpgrade || tierActionLoading}
-        >
-          {tierActionLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-          Upgrade to Tier {tier}
-        </Button>
       </>
     )
   }
@@ -322,7 +349,7 @@ function TierActionButton({
   if (tier === currentTier - 1) {
     return (
       <Button
-        variant="outline"
+        variant="ghost"
         onClick={() => {
           setTierActionLoading(true)
           onDowngrade(tier).finally(() => setTierActionLoading(false))
@@ -330,7 +357,7 @@ function TierActionButton({
         disabled={tierActionLoading}
       >
         {tierActionLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-        Downgrade to Tier {tier}
+        Downgrade
       </Button>
     )
   }
