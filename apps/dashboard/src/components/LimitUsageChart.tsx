@@ -30,7 +30,7 @@ interface PastUsage {
   peakDiskUsage: number
 }
 
-export default function LimitUsageChart({
+export function LimitUsageChart({
   defaultPeriod = 30,
   defaultResources = ['ram', 'cpu', 'storage'],
   pastUsage = [],
