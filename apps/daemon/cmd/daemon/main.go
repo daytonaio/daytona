@@ -13,6 +13,7 @@ import (
 
 	golog "log"
 
+	common_daemon "github.com/daytonaio/common-go/pkg/daemon"
 	"github.com/daytonaio/daemon/cmd/daemon/config"
 	"github.com/daytonaio/daemon/pkg/ssh"
 	"github.com/daytonaio/daemon/pkg/terminal"
@@ -20,20 +21,18 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-const UseUserHomeAsWorkDir = "DAYTONA_USER_HOME_AS_WORKDIR"
-
 func main() {
 	c, err := config.GetConfig()
 	if err != nil {
 		panic(err)
 	}
 
-	workDirFlag := flag.String("work-dir", "", "optional; sets the working directory; defaults to the current directory; use "+UseUserHomeAsWorkDir+" to switch to the user's home directory")
+	workDirFlag := flag.String("work-dir", "", "optional; sets the working directory; defaults to the current directory; use "+common_daemon.UseUserHomeAsWorkDir+" to switch to the user's home directory")
 	flag.Parse()
 
-	if *workDirFlag != "" {
+	if workDirFlag != nil && *workDirFlag != "" {
 		workDir := *workDirFlag
-		if workDir == UseUserHomeAsWorkDir {
+		if workDir == common_daemon.UseUserHomeAsWorkDir {
 			workDir, err = os.UserHomeDir()
 			if err != nil {
 				panic(fmt.Errorf("failed to get user home directory: %w", err))
