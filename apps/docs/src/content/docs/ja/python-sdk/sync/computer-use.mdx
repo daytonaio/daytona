@@ -3,7 +3,7 @@ title: "コンピューター使用"
 hideTitleOnPage: true
 ---
 
-## ComputerUse
+## ComputerUse {#computeruse}
 
 ```python
 class ComputerUse()
@@ -20,7 +20,7 @@ class ComputerUse()
 - `screenshot` _Screenshot_ - スクリーンショット操作インターフェース。
 - `display` _Display_ - ディスプレイ操作インターフェース。
 
-#### ComputerUse.start
+#### ComputerUse.start {#computerusestart}
 
 ```python
 @intercept_errors(message_prefix="Failed to start computer use: ")
@@ -32,7 +32,6 @@ def start() -> ComputerUseStartResponse
 **戻り値**:
 
 - `ComputerUseStartResponse` - コンピューター使用の起動レスポンス。
-  
 
 **例**:
 
@@ -41,7 +40,7 @@ result = sandbox.computer_use.start()
 print("Computer use processes started:", result.message)
 ```
 
-#### ComputerUse.stop
+#### ComputerUse.stop {#computerusestop}
 
 ```python
 @intercept_errors(message_prefix="Failed to stop computer use: ")
@@ -53,7 +52,6 @@ def stop() -> ComputerUseStopResponse
 **戻り値**:
 
 - `ComputerUseStopResponse` - コンピューター使用の停止レスポンス。
-  
 
 **例**:
 
@@ -62,7 +60,7 @@ result = sandbox.computer_use.stop()
 print("Computer use processes stopped:", result.message)
 ```
 
-#### ComputerUse.get_status
+#### ComputerUse.get_status {#computeruseget_status}
 
 ```python
 @intercept_errors(message_prefix="Failed to get computer use status: ")
@@ -74,7 +72,6 @@ def get_status() -> ComputerUseStatusResponse
 **戻り値**:
 
 - `ComputerUseStatusResponse` - すべてのVNCデスクトッププロセスに関するステータス情報。
-  
 
 **例**:
 
@@ -83,7 +80,7 @@ response = sandbox.computer_use.get_status()
 print("Computer use status:", response.status)
 ```
 
-#### ComputerUse.get_process_status
+#### ComputerUse.get_process_status {#computeruseget_process_status}
 
 ```python
 @intercept_errors(message_prefix="Failed to get process status: ")
@@ -95,12 +92,10 @@ def get_process_status(process_name: str) -> ProcessStatusResponse
 **引数**:
 
 - `process_name` _str_ - 確認するプロセス名。
-  
 
 **戻り値**:
 
 - `ProcessStatusResponse` - 指定したプロセスに関するステータス情報。
-  
 
 **例**:
 
@@ -109,7 +104,7 @@ xvfb_status = sandbox.computer_use.get_process_status("xvfb")
 no_vnc_status = sandbox.computer_use.get_process_status("novnc")
 ```
 
-#### ComputerUse.restart_process
+#### ComputerUse.restart_process {#computeruserestart_process}
 
 ```python
 @intercept_errors(message_prefix="Failed to restart process: ")
@@ -121,12 +116,10 @@ def restart_process(process_name: str) -> ProcessRestartResponse
 **引数**:
 
 - `process_name` _str_ - 再起動するプロセス名。
-  
 
 **戻り値**:
 
 - `ProcessRestartResponse` - プロセス再起動レスポンス。
-  
 
 **例**:
 
@@ -135,7 +128,7 @@ result = sandbox.computer_use.restart_process("xfce4")
 print("XFCE4 process restarted:", result.message)
 ```
 
-#### ComputerUse.get_process_logs
+#### ComputerUse.get_process_logs {#computeruseget_process_logs}
 
 ```python
 @intercept_errors(message_prefix="Failed to get process logs: ")
@@ -147,12 +140,10 @@ def get_process_logs(process_name: str) -> ProcessLogsResponse
 **引数**:
 
 - `process_name` _str_ - ログを取得するプロセス名。
-  
 
 **戻り値**:
 
 - `ProcessLogsResponse` - プロセスのログ。
-  
 
 **例**:
 
@@ -161,7 +152,7 @@ logs = sandbox.computer_use.get_process_logs("novnc")
 print("NoVNC logs:", logs)
 ```
 
-#### ComputerUse.get_process_errors
+#### ComputerUse.get_process_errors {#computeruseget_process_errors}
 
 ```python
 @intercept_errors(message_prefix="Failed to get process errors: ")
@@ -173,12 +164,10 @@ def get_process_errors(process_name: str) -> ProcessErrorsResponse
 **引数**:
 
 - `process_name` _str_ - エラーログを取得するプロセス名。
-  
 
 **戻り値**:
 
 - `ProcessErrorsResponse` - プロセスのエラーログ。
-  
 
 **例**:
 
@@ -187,8 +176,7 @@ errors = sandbox.computer_use.get_process_errors("x11vnc")
 print("X11VNC errors:", errors)
 ```
 
-
-## マウス
+## マウス {#mouse}
 
 ```python
 class Mouse()
@@ -196,7 +184,7 @@ class Mouse()
 
 コンピューター使用機能のマウス操作。
 
-#### Mouse.get\_position
+#### Mouse.get_position {#mouseget_position}
 
 ```python
 @intercept_errors(message_prefix="Failed to get mouse position: ")
@@ -208,7 +196,6 @@ def get_position() -> MousePosition
 **戻り値**:
 
 - `MousePosition` - 現在のマウス位置（x および y 座標）。
-  
 
 **例**:
 
@@ -217,7 +204,7 @@ position = sandbox.computer_use.mouse.get_position()
 print(f"Mouse is at: {position.x}, {position.y}")
 ```
 
-#### Mouse.move
+#### Mouse.move {#mousemove}
 
 ```python
 @intercept_errors(message_prefix="Failed to move mouse: ")
@@ -230,12 +217,10 @@ def move(x: int, y: int) -> MouseMoveResponse
 
 - `x` _int_ - 移動先の x 座標。
 - `y` _int_ - 移動先の y 座標。
-  
 
 **戻り値**:
 
 - `MouseMoveResponse` - 移動操作の結果。
-  
 
 **例**:
 
@@ -244,7 +229,7 @@ result = sandbox.computer_use.mouse.move(100, 200)
 print(f"Mouse moved to: {result.x}, {result.y}")
 ```
 
-#### Mouse.click
+#### Mouse.click {#mouseclick}
 
 ```python
 @intercept_errors(message_prefix="Failed to click mouse: ")
@@ -262,12 +247,10 @@ def click(x: int,
 - `y` _int_ - クリックする y 座標。
 - `button` _str_ - クリックするボタン（'left'、'right'、'middle'）。
 - `double` _bool_ - ダブルクリックを行うかどうか。
-  
 
 **戻り値**:
 
 - `MouseClickResponse` - クリック操作の結果。
-  
 
 **例**:
 
@@ -282,7 +265,7 @@ double_click = sandbox.computer_use.mouse.click(100, 200, "left", True)
 right_click = sandbox.computer_use.mouse.click(100, 200, "right")
 ```
 
-#### Mouse.drag
+#### Mouse.drag {#mousedrag}
 
 ```python
 @intercept_errors(message_prefix="Failed to drag mouse: ")
@@ -302,12 +285,10 @@ def drag(start_x: int,
 - `end_x` _int_ - 終了 x 座標。
 - `end_y` _int_ - 終了 y 座標。
 - `button` _str_ - ドラッグに使用するボタン。
-  
 
 **戻り値**:
 
 - `MouseDragResponse` - ドラッグ操作の結果。
-  
 
 **例**:
 
@@ -316,7 +297,7 @@ result = sandbox.computer_use.mouse.drag(50, 50, 150, 150)
 print(f"Dragged from {result.from_x},{result.from_y} to {result.to_x},{result.to_y}")
 ```
 
-#### Mouse.scroll
+#### Mouse.scroll {#mousescroll}
 
 ```python
 @intercept_errors(message_prefix="Failed to scroll mouse: ")
@@ -331,12 +312,10 @@ def scroll(x: int, y: int, direction: str, amount: int = 1) -> bool
 - `y` _int_ - スクロールする y 座標。
 - `direction` _str_ - スクロール方向（'up' または 'down'）。
 - `amount` _int_ - スクロール量。
-  
 
 **戻り値**:
 
 - `bool` - スクロール操作が成功したかどうか。
-  
 
 **例**:
 
@@ -348,7 +327,7 @@ scroll_up = sandbox.computer_use.mouse.scroll(100, 200, "up", 3)
 scroll_down = sandbox.computer_use.mouse.scroll(100, 200, "down", 5)
 ```
 
-## キーボード
+## キーボード {#keyboard}
 
 ```python
 class Keyboard()
@@ -356,7 +335,7 @@ class Keyboard()
 
 コンピューター使用機能向けのキーボード操作。
 
-#### Keyboard.type
+#### Keyboard.type {#keyboardtype}
 
 ```python
 @intercept_errors(message_prefix="Failed to type text: ")
@@ -369,12 +348,10 @@ def type(text: str, delay: Optional[int] = None) -> None
 
 - `text` _str_ - 入力するテキスト。
 - `delay` _int_ - 文字間の遅延（ミリ秒）。
-  
 
 **送出**:
 
 - `DaytonaError` - 入力処理に失敗した場合。
-  
 
 **例**:
 
@@ -393,7 +370,7 @@ except Exception as e:
     print(f"Operation failed: {e}")
 ```
 
-#### Keyboard.press
+#### Keyboard.press {#keyboardpress}
 
 ```python
 @intercept_errors(message_prefix="Failed to press key: ")
@@ -406,12 +383,10 @@ def press(key: str, modifiers: Optional[List[str]] = None) -> None
 
 - `key` _str_ - 押すキー（例: 'Enter', 'Escape', 'Tab', 'a', 'A'）。
 - `modifiers` _List[str]_ - モディファイアキー（'ctrl', 'alt', 'meta', 'shift'）。
-  
 
 **送出**:
 
 - `DaytonaError` - キー押下処理に失敗した場合。
-  
 
 **例**:
 
@@ -436,7 +411,7 @@ except Exception as e:
     print(f"Operation failed: {e}")
 ```
 
-#### Keyboard.hotkey
+#### Keyboard.hotkey {#keyboardhotkey}
 
 ```python
 @intercept_errors(message_prefix="Failed to press hotkey: ")
@@ -448,12 +423,10 @@ def hotkey(keys: str) -> None
 **引数**:
 
 - `keys` _str_ - ホットキーの組み合わせ（例: 'ctrl+c', 'alt+tab', 'cmd+shift+t'）。
-  
 
 **送出**:
 
 - `DaytonaError` - ホットキー処理に失敗した場合。
-  
 
 **例**:
 
@@ -480,7 +453,7 @@ except Exception as e:
     print(f"Operation failed: {e}")
 ```
 
-## スクリーンショット
+## スクリーンショット {#screenshot}
 
 ```python
 class Screenshot()
@@ -488,7 +461,7 @@ class Screenshot()
 
 コンピューター使用機能のスクリーンショット操作。
 
-#### Screenshot.take\_full\_screen
+#### Screenshot.take_full_screen {#screenshottake_full_screen}
 
 ```python
 @intercept_errors(message_prefix="Failed to take screenshot: ")
@@ -500,12 +473,10 @@ def take_full_screen(show_cursor: bool = False) -> ScreenshotResponse
 **引数**:
 
 - `show_cursor` _bool_ - スクリーンショットにカーソルを表示するかどうか。
-  
 
 **戻り値**:
 
 - `ScreenshotResponse` - 画像をbase64エンコードしたスクリーンショットデータ。
-  
 
 **例**:
 
@@ -517,7 +488,7 @@ print(f"Screenshot size: {screenshot.width}x{screenshot.height}")
 with_cursor = sandbox.computer_use.screenshot.take_full_screen(True)
 ```
 
-#### Screenshot.take\_region
+#### Screenshot.take_region {#screenshottake_region}
 
 ```python
 @intercept_errors(message_prefix="Failed to take region screenshot: ")
@@ -531,12 +502,10 @@ def take_region(region: ScreenshotRegion,
 
 - `region` _ScreenshotRegion_ - 取得する領域。
 - `show_cursor` _bool_ - スクリーンショットにカーソルを表示するかどうか。
-  
 
 **戻り値**:
 
 - `RegionScreenshotResponse` - 画像をbase64エンコードしたスクリーンショットデータ。
-  
 
 **例**:
 
@@ -546,7 +515,7 @@ screenshot = sandbox.computer_use.screenshot.take_region(region)
 print(f"Captured region: {screenshot.region.width}x{screenshot.region.height}")
 ```
 
-#### Screenshot.take\_compressed
+#### Screenshot.take_compressed {#screenshottake_compressed}
 
 ```python
 @intercept_errors(message_prefix="Failed to take compressed screenshot: ")
@@ -560,12 +529,10 @@ def take_compressed(
 **引数**:
 
 - `options` _ScreenshotOptions_ - 圧縮および表示のオプション。
-  
 
 **戻り値**:
 
 - `CompressedScreenshotResponse` - 圧縮されたスクリーンショットデータ。
-  
 
 **例**:
 
@@ -584,7 +551,7 @@ scaled = sandbox.computer_use.screenshot.take_compressed(
 )
 ```
 
-#### Screenshot.take\_compressed\_region
+#### Screenshot.take_compressed_region {#screenshottake_compressed_region}
 
 ```python
 @intercept_errors(
@@ -601,12 +568,10 @@ def take_compressed_region(
 
 - `region` _ScreenshotRegion_ - 取得する領域。
 - `options` _ScreenshotOptions_ - 圧縮および表示のオプション。
-  
 
 **戻り値**:
 
 - `CompressedScreenshotResponse` - 圧縮されたスクリーンショットデータ。
-  
 
 **例**:
 
@@ -619,7 +584,7 @@ screenshot = sandbox.computer_use.screenshot.take_compressed_region(
 print(f"Compressed size: {screenshot.size_bytes} bytes")
 ```
 
-## ディスプレイ
+## ディスプレイ {#display}
 
 ```python
 class Display()
@@ -627,7 +592,7 @@ class Display()
 
 コンピューター使用機能のディスプレイ操作を提供します。
 
-#### Display.get_info
+#### Display.get_info {#displayget_info}
 
 ```python
 @intercept_errors(message_prefix="Failed to get display info: ")
@@ -639,7 +604,6 @@ def get_info() -> DisplayInfoResponse
 **戻り値**:
 
 - `DisplayInfoResponse` - プライマリーディスプレイおよび利用可能なすべてのディスプレイを含む情報。
-  
 
 **例**:
 
@@ -651,7 +615,7 @@ for i, display in enumerate(info.displays):
     print(f"Display {i}: {display.width}x{display.height} at {display.x},{display.y}")
 ```
 
-#### Display.get_windows
+#### Display.get_windows {#displayget_windows}
 
 ```python
 @intercept_errors(message_prefix="Failed to get windows: ")
@@ -663,7 +627,6 @@ def get_windows() -> WindowsResponse
 **戻り値**:
 
 - `WindowsResponse` - ID とタイトルを含む開いているウィンドウの一覧。
-  
 
 **例**:
 
@@ -674,7 +637,7 @@ for window in windows.windows:
     print(f"- {window.title} (ID: {window.id})")
 ```
 
-## ScreenshotRegion
+## ScreenshotRegion {#screenshotregion}
 
 ```python
 class ScreenshotRegion()
@@ -689,7 +652,7 @@ class ScreenshotRegion()
 - `width` _int_ - 領域の幅。
 - `height` _int_ - 領域の高さ。
 
-## ScreenshotOptions
+## ScreenshotOptions {#screenshotoptions}
 
 ```python
 class ScreenshotOptions()
@@ -703,4 +666,3 @@ class ScreenshotOptions()
 - `fmt` _str_ - 画像形式（例：'png'、'jpeg'、'webp'）。
 - `quality` _int_ - 圧縮品質（0〜100）。
 - `scale` _float_ - スクリーンショットのスケール係数。
-
