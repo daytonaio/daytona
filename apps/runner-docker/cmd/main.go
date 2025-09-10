@@ -17,7 +17,11 @@ import (
 	"github.com/daytonaio/runner-docker/pkg/cache"
 	"github.com/daytonaio/runner-docker/pkg/daemon"
 	"github.com/daytonaio/runner-docker/pkg/grpc"
+	"github.com/daytonaio/runner-docker/pkg/grpc/services/runner"
+	"github.com/daytonaio/runner-docker/pkg/monitor"
+	"github.com/daytonaio/runner-docker/pkg/netrules"
 	"github.com/daytonaio/runner-docker/pkg/proxy"
+	"github.com/daytonaio/runner-docker/pkg/sshgateway"
 	"github.com/docker/docker/client"
 	"github.com/lmittmann/tint"
 	"github.com/mattn/go-isatty"
@@ -47,18 +51,58 @@ func main() {
 		return
 	}
 
+	// Initialize net rules manager
+	persistent := cfg.Environment == "production"
+	netRulesManager, err := netrules.NewNetRulesManager(persistent)
+	if err != nil {
+		log.Error("Error initializing net rules manager", "error", err)
+		return
+	}
+
+	// Start Docker events monitor
+	dockerMonitor := monitor.NewDockerMonitor(dockerClient, netRulesManager, log)
+	go func() {
+		err = dockerMonitor.Start()
+		if err != nil {
+			log.Error("Error starting docker monitor", "error", err)
+			return
+		}
+	}()
+	defer dockerMonitor.Stop()
+
 	// Create cache
-	cache := cache.NewInMemoryRunnerCache(cache.InMemoryRunnerCacheConfig{
+	runnerCache := cache.NewInMemoryRunnerCache(cache.InMemoryRunnerCacheConfig{
 		Cache:         make(map[string]*cache.CacheData),
 		RetentionDays: cfg.CacheRetentionDays,
 	})
 
-	cache.Cleanup(context.Background())
+	runnerCache.Cleanup(context.Background())
 
-	daemonPath, err := daemon.WriteDaemonBinary()
+	daemonPath, err := daemon.WriteStaticBinary("daemon-amd64")
 	if err != nil {
 		log.Error("Error writing daemon binary", "error", err)
 		return
+	}
+
+	pluginPath, err := daemon.WriteStaticBinary("daytona-computer-use")
+	if err != nil {
+		log.Error("Error writing plugin binary", "error", err)
+		return
+	}
+
+	// Initialize SSH Gateway if enabled
+	var sshGatewayService *sshgateway.Service
+	if sshgateway.IsSSHGatewayEnabled() {
+		sshGatewayService = sshgateway.NewService(dockerClient, log)
+
+		go func() {
+			log.Info("Starting SSH Gateway")
+			if err := sshGatewayService.Start(context.Background()); err != nil {
+				log.Error("SSH Gateway error", "error", err)
+			}
+		}()
+	} else {
+		log.Info("Gateway disabled - set SSH_GATEWAY_ENABLE=true to enable")
 	}
 
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
@@ -77,14 +121,20 @@ func main() {
 	grpcServer := grpc.New(grpc.ServerConfig{
 		Addr:               fmt.Sprintf(":%d", cfg.Port),
 		DockerClient:       dockerClient,
-		RunnerCache:        &cache,
+		RunnerCache:        &runnerCache,
+		MetricsCache:       cache.NewMapCache[runner.SystemMetrics](),
+		MetricsInterval:    15 * time.Second,
 		DaemonPath:         daemonPath,
+		PluginPath:         pluginPath,
 		AWSAccessKeyId:     cfg.AWSAccessKeyId,
 		AWSSecretAccessKey: cfg.AWSSecretAccessKey,
 		AWSRegion:          cfg.AWSRegion,
 		AWSEndpointUrl:     cfg.AWSEndpointUrl,
 		Log:                log,
 		TLSCreds:           tlsCreds,
+		Environment:        cfg.Environment,
+		LogFilePath:        cfg.LogFilePath,
+		NetRulesManager:    netRulesManager,
 	})
 
 	// Create metrics server

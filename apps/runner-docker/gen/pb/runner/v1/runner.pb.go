@@ -373,22 +373,24 @@ func (x *RunnerInfoResponse) GetMetrics() *RunnerMetrics {
 
 // Sandbox messages
 type CreateSandboxRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	FromVolumeId  *string                `protobuf:"bytes,2,opt,name=from_volume_id,json=fromVolumeId,proto3,oneof" json:"from_volume_id,omitempty"`
-	UserId        string                 `protobuf:"bytes,3,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	Snapshot      string                 `protobuf:"bytes,4,opt,name=snapshot,proto3" json:"snapshot,omitempty"`
-	OsUser        string                 `protobuf:"bytes,5,opt,name=os_user,json=osUser,proto3" json:"os_user,omitempty"`
-	CpuQuota      int64                  `protobuf:"varint,6,opt,name=cpu_quota,json=cpuQuota,proto3" json:"cpu_quota,omitempty"`
-	GpuQuota      int64                  `protobuf:"varint,7,opt,name=gpu_quota,json=gpuQuota,proto3" json:"gpu_quota,omitempty"`
-	MemoryQuota   int64                  `protobuf:"varint,8,opt,name=memory_quota,json=memoryQuota,proto3" json:"memory_quota,omitempty"`
-	StorageQuota  int64                  `protobuf:"varint,9,opt,name=storage_quota,json=storageQuota,proto3" json:"storage_quota,omitempty"`
-	Env           map[string]string      `protobuf:"bytes,10,rep,name=env,proto3" json:"env,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	Registry      *Registry              `protobuf:"bytes,11,opt,name=registry,proto3,oneof" json:"registry,omitempty"`
-	Entrypoint    []string               `protobuf:"bytes,12,rep,name=entrypoint,proto3" json:"entrypoint,omitempty"`
-	Volumes       []*Volume              `protobuf:"bytes,13,rep,name=volumes,proto3" json:"volumes,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state            protoimpl.MessageState `protogen:"open.v1"`
+	Id               string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	FromVolumeId     *string                `protobuf:"bytes,2,opt,name=from_volume_id,json=fromVolumeId,proto3,oneof" json:"from_volume_id,omitempty"`
+	UserId           string                 `protobuf:"bytes,3,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Snapshot         string                 `protobuf:"bytes,4,opt,name=snapshot,proto3" json:"snapshot,omitempty"`
+	OsUser           string                 `protobuf:"bytes,5,opt,name=os_user,json=osUser,proto3" json:"os_user,omitempty"`
+	CpuQuota         int64                  `protobuf:"varint,6,opt,name=cpu_quota,json=cpuQuota,proto3" json:"cpu_quota,omitempty"`
+	GpuQuota         int64                  `protobuf:"varint,7,opt,name=gpu_quota,json=gpuQuota,proto3" json:"gpu_quota,omitempty"`
+	MemoryQuota      int64                  `protobuf:"varint,8,opt,name=memory_quota,json=memoryQuota,proto3" json:"memory_quota,omitempty"`
+	StorageQuota     int64                  `protobuf:"varint,9,opt,name=storage_quota,json=storageQuota,proto3" json:"storage_quota,omitempty"`
+	Env              map[string]string      `protobuf:"bytes,10,rep,name=env,proto3" json:"env,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	Registry         *Registry              `protobuf:"bytes,11,opt,name=registry,proto3,oneof" json:"registry,omitempty"`
+	Entrypoint       []string               `protobuf:"bytes,12,rep,name=entrypoint,proto3" json:"entrypoint,omitempty"`
+	Volumes          []*Volume              `protobuf:"bytes,13,rep,name=volumes,proto3" json:"volumes,omitempty"`
+	NetworkBlockAll  *bool                  `protobuf:"varint,14,opt,name=network_block_all,json=networkBlockAll,proto3,oneof" json:"network_block_all,omitempty"`
+	NetworkAllowList *string                `protobuf:"bytes,15,opt,name=network_allow_list,json=networkAllowList,proto3,oneof" json:"network_allow_list,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
 }
 
 func (x *CreateSandboxRequest) Reset() {
@@ -510,6 +512,20 @@ func (x *CreateSandboxRequest) GetVolumes() []*Volume {
 		return x.Volumes
 	}
 	return nil
+}
+
+func (x *CreateSandboxRequest) GetNetworkBlockAll() bool {
+	if x != nil && x.NetworkBlockAll != nil {
+		return *x.NetworkBlockAll
+	}
+	return false
+}
+
+func (x *CreateSandboxRequest) GetNetworkAllowList() string {
+	if x != nil && x.NetworkAllowList != nil {
+		return *x.NetworkAllowList
+	}
+	return ""
 }
 
 type CreateSandboxResponse struct {
@@ -972,6 +988,7 @@ type SandboxInfoResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	State         SandboxState           `protobuf:"varint,1,opt,name=state,proto3,enum=runner.v1.SandboxState" json:"state,omitempty"`
 	BackupState   BackupState            `protobuf:"varint,2,opt,name=backup_state,json=backupState,proto3,enum=runner.v1.BackupState" json:"backup_state,omitempty"`
+	BackupError   string                 `protobuf:"bytes,3,opt,name=backup_error,json=backupError,proto3" json:"backup_error,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1018,6 +1035,13 @@ func (x *SandboxInfoResponse) GetBackupState() BackupState {
 		return x.BackupState
 	}
 	return BackupState_BACKUP_STATE_UNSPECIFIED
+}
+
+func (x *SandboxInfoResponse) GetBackupError() string {
+	if x != nil {
+		return x.BackupError
+	}
+	return ""
 }
 
 type RemoveDestroyedSandboxRequest struct {
@@ -1196,6 +1220,206 @@ func (x *SandboxDaemonVersionResponse) GetDaemonVersion() string {
 	return ""
 }
 
+type GetNetworkSettingsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	SandboxId     string                 `protobuf:"bytes,1,opt,name=sandbox_id,json=sandboxId,proto3" json:"sandbox_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetNetworkSettingsRequest) Reset() {
+	*x = GetNetworkSettingsRequest{}
+	mi := &file_runner_v1_runner_proto_msgTypes[20]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetNetworkSettingsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetNetworkSettingsRequest) ProtoMessage() {}
+
+func (x *GetNetworkSettingsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_runner_v1_runner_proto_msgTypes[20]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetNetworkSettingsRequest.ProtoReflect.Descriptor instead.
+func (*GetNetworkSettingsRequest) Descriptor() ([]byte, []int) {
+	return file_runner_v1_runner_proto_rawDescGZIP(), []int{20}
+}
+
+func (x *GetNetworkSettingsRequest) GetSandboxId() string {
+	if x != nil {
+		return x.SandboxId
+	}
+	return ""
+}
+
+type GetNetworkSettingsResponse struct {
+	state            protoimpl.MessageState `protogen:"open.v1"`
+	NetworkBlockAll  *bool                  `protobuf:"varint,1,opt,name=network_block_all,json=networkBlockAll,proto3,oneof" json:"network_block_all,omitempty"`
+	NetworkAllowList *string                `protobuf:"bytes,2,opt,name=network_allow_list,json=networkAllowList,proto3,oneof" json:"network_allow_list,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
+}
+
+func (x *GetNetworkSettingsResponse) Reset() {
+	*x = GetNetworkSettingsResponse{}
+	mi := &file_runner_v1_runner_proto_msgTypes[21]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetNetworkSettingsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetNetworkSettingsResponse) ProtoMessage() {}
+
+func (x *GetNetworkSettingsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_runner_v1_runner_proto_msgTypes[21]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetNetworkSettingsResponse.ProtoReflect.Descriptor instead.
+func (*GetNetworkSettingsResponse) Descriptor() ([]byte, []int) {
+	return file_runner_v1_runner_proto_rawDescGZIP(), []int{21}
+}
+
+func (x *GetNetworkSettingsResponse) GetNetworkBlockAll() bool {
+	if x != nil && x.NetworkBlockAll != nil {
+		return *x.NetworkBlockAll
+	}
+	return false
+}
+
+func (x *GetNetworkSettingsResponse) GetNetworkAllowList() string {
+	if x != nil && x.NetworkAllowList != nil {
+		return *x.NetworkAllowList
+	}
+	return ""
+}
+
+type UpdateNetworkSettingsRequest struct {
+	state            protoimpl.MessageState `protogen:"open.v1"`
+	SandboxId        string                 `protobuf:"bytes,1,opt,name=sandbox_id,json=sandboxId,proto3" json:"sandbox_id,omitempty"`
+	NetworkBlockAll  *bool                  `protobuf:"varint,2,opt,name=network_block_all,json=networkBlockAll,proto3,oneof" json:"network_block_all,omitempty"`
+	NetworkAllowList *string                `protobuf:"bytes,3,opt,name=network_allow_list,json=networkAllowList,proto3,oneof" json:"network_allow_list,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
+}
+
+func (x *UpdateNetworkSettingsRequest) Reset() {
+	*x = UpdateNetworkSettingsRequest{}
+	mi := &file_runner_v1_runner_proto_msgTypes[22]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateNetworkSettingsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateNetworkSettingsRequest) ProtoMessage() {}
+
+func (x *UpdateNetworkSettingsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_runner_v1_runner_proto_msgTypes[22]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateNetworkSettingsRequest.ProtoReflect.Descriptor instead.
+func (*UpdateNetworkSettingsRequest) Descriptor() ([]byte, []int) {
+	return file_runner_v1_runner_proto_rawDescGZIP(), []int{22}
+}
+
+func (x *UpdateNetworkSettingsRequest) GetSandboxId() string {
+	if x != nil {
+		return x.SandboxId
+	}
+	return ""
+}
+
+func (x *UpdateNetworkSettingsRequest) GetNetworkBlockAll() bool {
+	if x != nil && x.NetworkBlockAll != nil {
+		return *x.NetworkBlockAll
+	}
+	return false
+}
+
+func (x *UpdateNetworkSettingsRequest) GetNetworkAllowList() string {
+	if x != nil && x.NetworkAllowList != nil {
+		return *x.NetworkAllowList
+	}
+	return ""
+}
+
+type UpdateNetworkSettingsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Message       string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateNetworkSettingsResponse) Reset() {
+	*x = UpdateNetworkSettingsResponse{}
+	mi := &file_runner_v1_runner_proto_msgTypes[23]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateNetworkSettingsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateNetworkSettingsResponse) ProtoMessage() {}
+
+func (x *UpdateNetworkSettingsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_runner_v1_runner_proto_msgTypes[23]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateNetworkSettingsResponse.ProtoReflect.Descriptor instead.
+func (*UpdateNetworkSettingsResponse) Descriptor() ([]byte, []int) {
+	return file_runner_v1_runner_proto_rawDescGZIP(), []int{23}
+}
+
+func (x *UpdateNetworkSettingsResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
 // Snapshot messages
 type Registry struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
@@ -1209,7 +1433,7 @@ type Registry struct {
 
 func (x *Registry) Reset() {
 	*x = Registry{}
-	mi := &file_runner_v1_runner_proto_msgTypes[20]
+	mi := &file_runner_v1_runner_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1221,7 +1445,7 @@ func (x *Registry) String() string {
 func (*Registry) ProtoMessage() {}
 
 func (x *Registry) ProtoReflect() protoreflect.Message {
-	mi := &file_runner_v1_runner_proto_msgTypes[20]
+	mi := &file_runner_v1_runner_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1234,7 +1458,7 @@ func (x *Registry) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Registry.ProtoReflect.Descriptor instead.
 func (*Registry) Descriptor() ([]byte, []int) {
-	return file_runner_v1_runner_proto_rawDescGZIP(), []int{20}
+	return file_runner_v1_runner_proto_rawDescGZIP(), []int{24}
 }
 
 func (x *Registry) GetUrl() string {
@@ -1275,7 +1499,7 @@ type PullSnapshotRequest struct {
 
 func (x *PullSnapshotRequest) Reset() {
 	*x = PullSnapshotRequest{}
-	mi := &file_runner_v1_runner_proto_msgTypes[21]
+	mi := &file_runner_v1_runner_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1287,7 +1511,7 @@ func (x *PullSnapshotRequest) String() string {
 func (*PullSnapshotRequest) ProtoMessage() {}
 
 func (x *PullSnapshotRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_runner_v1_runner_proto_msgTypes[21]
+	mi := &file_runner_v1_runner_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1300,7 +1524,7 @@ func (x *PullSnapshotRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PullSnapshotRequest.ProtoReflect.Descriptor instead.
 func (*PullSnapshotRequest) Descriptor() ([]byte, []int) {
-	return file_runner_v1_runner_proto_rawDescGZIP(), []int{21}
+	return file_runner_v1_runner_proto_rawDescGZIP(), []int{25}
 }
 
 func (x *PullSnapshotRequest) GetSnapshot() string {
@@ -1326,7 +1550,7 @@ type PullSnapshotResponse struct {
 
 func (x *PullSnapshotResponse) Reset() {
 	*x = PullSnapshotResponse{}
-	mi := &file_runner_v1_runner_proto_msgTypes[22]
+	mi := &file_runner_v1_runner_proto_msgTypes[26]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1338,7 +1562,7 @@ func (x *PullSnapshotResponse) String() string {
 func (*PullSnapshotResponse) ProtoMessage() {}
 
 func (x *PullSnapshotResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_runner_v1_runner_proto_msgTypes[22]
+	mi := &file_runner_v1_runner_proto_msgTypes[26]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1351,7 +1575,7 @@ func (x *PullSnapshotResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PullSnapshotResponse.ProtoReflect.Descriptor instead.
 func (*PullSnapshotResponse) Descriptor() ([]byte, []int) {
-	return file_runner_v1_runner_proto_rawDescGZIP(), []int{22}
+	return file_runner_v1_runner_proto_rawDescGZIP(), []int{26}
 }
 
 func (x *PullSnapshotResponse) GetMessage() string {
@@ -1375,7 +1599,7 @@ type BuildSnapshotRequest struct {
 
 func (x *BuildSnapshotRequest) Reset() {
 	*x = BuildSnapshotRequest{}
-	mi := &file_runner_v1_runner_proto_msgTypes[23]
+	mi := &file_runner_v1_runner_proto_msgTypes[27]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1387,7 +1611,7 @@ func (x *BuildSnapshotRequest) String() string {
 func (*BuildSnapshotRequest) ProtoMessage() {}
 
 func (x *BuildSnapshotRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_runner_v1_runner_proto_msgTypes[23]
+	mi := &file_runner_v1_runner_proto_msgTypes[27]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1400,7 +1624,7 @@ func (x *BuildSnapshotRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use BuildSnapshotRequest.ProtoReflect.Descriptor instead.
 func (*BuildSnapshotRequest) Descriptor() ([]byte, []int) {
-	return file_runner_v1_runner_proto_rawDescGZIP(), []int{23}
+	return file_runner_v1_runner_proto_rawDescGZIP(), []int{27}
 }
 
 func (x *BuildSnapshotRequest) GetSnapshot() string {
@@ -1454,7 +1678,7 @@ type BuildSnapshotResponse struct {
 
 func (x *BuildSnapshotResponse) Reset() {
 	*x = BuildSnapshotResponse{}
-	mi := &file_runner_v1_runner_proto_msgTypes[24]
+	mi := &file_runner_v1_runner_proto_msgTypes[28]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1466,7 +1690,7 @@ func (x *BuildSnapshotResponse) String() string {
 func (*BuildSnapshotResponse) ProtoMessage() {}
 
 func (x *BuildSnapshotResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_runner_v1_runner_proto_msgTypes[24]
+	mi := &file_runner_v1_runner_proto_msgTypes[28]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1479,7 +1703,7 @@ func (x *BuildSnapshotResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use BuildSnapshotResponse.ProtoReflect.Descriptor instead.
 func (*BuildSnapshotResponse) Descriptor() ([]byte, []int) {
-	return file_runner_v1_runner_proto_rawDescGZIP(), []int{24}
+	return file_runner_v1_runner_proto_rawDescGZIP(), []int{28}
 }
 
 func (x *BuildSnapshotResponse) GetMessage() string {
@@ -1499,7 +1723,7 @@ type SnapshotExistsRequest struct {
 
 func (x *SnapshotExistsRequest) Reset() {
 	*x = SnapshotExistsRequest{}
-	mi := &file_runner_v1_runner_proto_msgTypes[25]
+	mi := &file_runner_v1_runner_proto_msgTypes[29]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1511,7 +1735,7 @@ func (x *SnapshotExistsRequest) String() string {
 func (*SnapshotExistsRequest) ProtoMessage() {}
 
 func (x *SnapshotExistsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_runner_v1_runner_proto_msgTypes[25]
+	mi := &file_runner_v1_runner_proto_msgTypes[29]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1524,7 +1748,7 @@ func (x *SnapshotExistsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SnapshotExistsRequest.ProtoReflect.Descriptor instead.
 func (*SnapshotExistsRequest) Descriptor() ([]byte, []int) {
-	return file_runner_v1_runner_proto_rawDescGZIP(), []int{25}
+	return file_runner_v1_runner_proto_rawDescGZIP(), []int{29}
 }
 
 func (x *SnapshotExistsRequest) GetSnapshot() string {
@@ -1550,7 +1774,7 @@ type SnapshotExistsResponse struct {
 
 func (x *SnapshotExistsResponse) Reset() {
 	*x = SnapshotExistsResponse{}
-	mi := &file_runner_v1_runner_proto_msgTypes[26]
+	mi := &file_runner_v1_runner_proto_msgTypes[30]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1562,7 +1786,7 @@ func (x *SnapshotExistsResponse) String() string {
 func (*SnapshotExistsResponse) ProtoMessage() {}
 
 func (x *SnapshotExistsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_runner_v1_runner_proto_msgTypes[26]
+	mi := &file_runner_v1_runner_proto_msgTypes[30]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1575,7 +1799,7 @@ func (x *SnapshotExistsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SnapshotExistsResponse.ProtoReflect.Descriptor instead.
 func (*SnapshotExistsResponse) Descriptor() ([]byte, []int) {
-	return file_runner_v1_runner_proto_rawDescGZIP(), []int{26}
+	return file_runner_v1_runner_proto_rawDescGZIP(), []int{30}
 }
 
 func (x *SnapshotExistsResponse) GetExists() bool {
@@ -1595,7 +1819,7 @@ type RemoveSnapshotRequest struct {
 
 func (x *RemoveSnapshotRequest) Reset() {
 	*x = RemoveSnapshotRequest{}
-	mi := &file_runner_v1_runner_proto_msgTypes[27]
+	mi := &file_runner_v1_runner_proto_msgTypes[31]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1607,7 +1831,7 @@ func (x *RemoveSnapshotRequest) String() string {
 func (*RemoveSnapshotRequest) ProtoMessage() {}
 
 func (x *RemoveSnapshotRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_runner_v1_runner_proto_msgTypes[27]
+	mi := &file_runner_v1_runner_proto_msgTypes[31]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1620,7 +1844,7 @@ func (x *RemoveSnapshotRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RemoveSnapshotRequest.ProtoReflect.Descriptor instead.
 func (*RemoveSnapshotRequest) Descriptor() ([]byte, []int) {
-	return file_runner_v1_runner_proto_rawDescGZIP(), []int{27}
+	return file_runner_v1_runner_proto_rawDescGZIP(), []int{31}
 }
 
 func (x *RemoveSnapshotRequest) GetSnapshot() string {
@@ -1646,7 +1870,7 @@ type RemoveSnapshotResponse struct {
 
 func (x *RemoveSnapshotResponse) Reset() {
 	*x = RemoveSnapshotResponse{}
-	mi := &file_runner_v1_runner_proto_msgTypes[28]
+	mi := &file_runner_v1_runner_proto_msgTypes[32]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1658,7 +1882,7 @@ func (x *RemoveSnapshotResponse) String() string {
 func (*RemoveSnapshotResponse) ProtoMessage() {}
 
 func (x *RemoveSnapshotResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_runner_v1_runner_proto_msgTypes[28]
+	mi := &file_runner_v1_runner_proto_msgTypes[32]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1671,7 +1895,7 @@ func (x *RemoveSnapshotResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RemoveSnapshotResponse.ProtoReflect.Descriptor instead.
 func (*RemoveSnapshotResponse) Descriptor() ([]byte, []int) {
-	return file_runner_v1_runner_proto_rawDescGZIP(), []int{28}
+	return file_runner_v1_runner_proto_rawDescGZIP(), []int{32}
 }
 
 func (x *RemoveSnapshotResponse) GetMessage() string {
@@ -1691,7 +1915,7 @@ type GetSnapshotLogsRequest struct {
 
 func (x *GetSnapshotLogsRequest) Reset() {
 	*x = GetSnapshotLogsRequest{}
-	mi := &file_runner_v1_runner_proto_msgTypes[29]
+	mi := &file_runner_v1_runner_proto_msgTypes[33]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1703,7 +1927,7 @@ func (x *GetSnapshotLogsRequest) String() string {
 func (*GetSnapshotLogsRequest) ProtoMessage() {}
 
 func (x *GetSnapshotLogsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_runner_v1_runner_proto_msgTypes[29]
+	mi := &file_runner_v1_runner_proto_msgTypes[33]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1716,7 +1940,7 @@ func (x *GetSnapshotLogsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetSnapshotLogsRequest.ProtoReflect.Descriptor instead.
 func (*GetSnapshotLogsRequest) Descriptor() ([]byte, []int) {
-	return file_runner_v1_runner_proto_rawDescGZIP(), []int{29}
+	return file_runner_v1_runner_proto_rawDescGZIP(), []int{33}
 }
 
 func (x *GetSnapshotLogsRequest) GetSnapshotRef() string {
@@ -1742,7 +1966,7 @@ type GetSnapshotLogsResponse struct {
 
 func (x *GetSnapshotLogsResponse) Reset() {
 	*x = GetSnapshotLogsResponse{}
-	mi := &file_runner_v1_runner_proto_msgTypes[30]
+	mi := &file_runner_v1_runner_proto_msgTypes[34]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1754,7 +1978,7 @@ func (x *GetSnapshotLogsResponse) String() string {
 func (*GetSnapshotLogsResponse) ProtoMessage() {}
 
 func (x *GetSnapshotLogsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_runner_v1_runner_proto_msgTypes[30]
+	mi := &file_runner_v1_runner_proto_msgTypes[34]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1767,7 +1991,7 @@ func (x *GetSnapshotLogsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetSnapshotLogsResponse.ProtoReflect.Descriptor instead.
 func (*GetSnapshotLogsResponse) Descriptor() ([]byte, []int) {
-	return file_runner_v1_runner_proto_rawDescGZIP(), []int{30}
+	return file_runner_v1_runner_proto_rawDescGZIP(), []int{34}
 }
 
 func (x *GetSnapshotLogsResponse) GetContent() string {
@@ -1788,7 +2012,7 @@ type Volume struct {
 
 func (x *Volume) Reset() {
 	*x = Volume{}
-	mi := &file_runner_v1_runner_proto_msgTypes[31]
+	mi := &file_runner_v1_runner_proto_msgTypes[35]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1800,7 +2024,7 @@ func (x *Volume) String() string {
 func (*Volume) ProtoMessage() {}
 
 func (x *Volume) ProtoReflect() protoreflect.Message {
-	mi := &file_runner_v1_runner_proto_msgTypes[31]
+	mi := &file_runner_v1_runner_proto_msgTypes[35]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1813,7 +2037,7 @@ func (x *Volume) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Volume.ProtoReflect.Descriptor instead.
 func (*Volume) Descriptor() ([]byte, []int) {
-	return file_runner_v1_runner_proto_rawDescGZIP(), []int{31}
+	return file_runner_v1_runner_proto_rawDescGZIP(), []int{35}
 }
 
 func (x *Volume) GetVolumeId() string {
@@ -1846,7 +2070,7 @@ type RunnerMetrics struct {
 
 func (x *RunnerMetrics) Reset() {
 	*x = RunnerMetrics{}
-	mi := &file_runner_v1_runner_proto_msgTypes[32]
+	mi := &file_runner_v1_runner_proto_msgTypes[36]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1858,7 +2082,7 @@ func (x *RunnerMetrics) String() string {
 func (*RunnerMetrics) ProtoMessage() {}
 
 func (x *RunnerMetrics) ProtoReflect() protoreflect.Message {
-	mi := &file_runner_v1_runner_proto_msgTypes[32]
+	mi := &file_runner_v1_runner_proto_msgTypes[36]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1871,7 +2095,7 @@ func (x *RunnerMetrics) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RunnerMetrics.ProtoReflect.Descriptor instead.
 func (*RunnerMetrics) Descriptor() ([]byte, []int) {
-	return file_runner_v1_runner_proto_rawDescGZIP(), []int{32}
+	return file_runner_v1_runner_proto_rawDescGZIP(), []int{36}
 }
 
 func (x *RunnerMetrics) GetCurrentAllocatedCpu() int64 {
@@ -1936,7 +2160,7 @@ const file_runner_v1_runner_proto_rawDesc = "" +
 	"\x12RunnerInfoResponse\x127\n" +
 	"\ametrics\x18\x01 \x01(\v2\x18.runner.v1.RunnerMetricsH\x00R\ametrics\x88\x01\x01B\n" +
 	"\n" +
-	"\b_metrics\"\xb8\x04\n" +
+	"\b_metrics\"\xc9\x05\n" +
 	"\x14CreateSandboxRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12)\n" +
 	"\x0efrom_volume_id\x18\x02 \x01(\tH\x00R\ffromVolumeId\x88\x01\x01\x12\x17\n" +
@@ -1953,12 +2177,16 @@ const file_runner_v1_runner_proto_rawDesc = "" +
 	"\n" +
 	"entrypoint\x18\f \x03(\tR\n" +
 	"entrypoint\x12+\n" +
-	"\avolumes\x18\r \x03(\v2\x11.runner.v1.VolumeR\avolumes\x1a6\n" +
+	"\avolumes\x18\r \x03(\v2\x11.runner.v1.VolumeR\avolumes\x12/\n" +
+	"\x11network_block_all\x18\x0e \x01(\bH\x02R\x0fnetworkBlockAll\x88\x01\x01\x121\n" +
+	"\x12network_allow_list\x18\x0f \x01(\tH\x03R\x10networkAllowList\x88\x01\x01\x1a6\n" +
 	"\bEnvEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01B\x11\n" +
 	"\x0f_from_volume_idB\v\n" +
-	"\t_registry\"6\n" +
+	"\t_registryB\x14\n" +
+	"\x12_network_block_allB\x15\n" +
+	"\x13_network_allow_list\"6\n" +
 	"\x15CreateSandboxResponse\x12\x1d\n" +
 	"\n" +
 	"sandbox_id\x18\x01 \x01(\tR\tsandboxId\"6\n" +
@@ -1986,10 +2214,11 @@ const file_runner_v1_runner_proto_rawDesc = "" +
 	"\amessage\x18\x01 \x01(\tR\amessage\"3\n" +
 	"\x12SandboxInfoRequest\x12\x1d\n" +
 	"\n" +
-	"sandbox_id\x18\x01 \x01(\tR\tsandboxId\"\x7f\n" +
+	"sandbox_id\x18\x01 \x01(\tR\tsandboxId\"\xa2\x01\n" +
 	"\x13SandboxInfoResponse\x12-\n" +
 	"\x05state\x18\x01 \x01(\x0e2\x17.runner.v1.SandboxStateR\x05state\x129\n" +
-	"\fbackup_state\x18\x02 \x01(\x0e2\x16.runner.v1.BackupStateR\vbackupState\">\n" +
+	"\fbackup_state\x18\x02 \x01(\x0e2\x16.runner.v1.BackupStateR\vbackupState\x12!\n" +
+	"\fbackup_error\x18\x03 \x01(\tR\vbackupError\">\n" +
 	"\x1dRemoveDestroyedSandboxRequest\x12\x1d\n" +
 	"\n" +
 	"sandbox_id\x18\x01 \x01(\tR\tsandboxId\":\n" +
@@ -1999,7 +2228,24 @@ const file_runner_v1_runner_proto_rawDesc = "" +
 	"\n" +
 	"sandbox_id\x18\x01 \x01(\tR\tsandboxId\"E\n" +
 	"\x1cSandboxDaemonVersionResponse\x12%\n" +
-	"\x0edaemon_version\x18\x01 \x01(\tR\rdaemonVersion\"\xa3\x01\n" +
+	"\x0edaemon_version\x18\x01 \x01(\tR\rdaemonVersion\":\n" +
+	"\x19GetNetworkSettingsRequest\x12\x1d\n" +
+	"\n" +
+	"sandbox_id\x18\x01 \x01(\tR\tsandboxId\"\xad\x01\n" +
+	"\x1aGetNetworkSettingsResponse\x12/\n" +
+	"\x11network_block_all\x18\x01 \x01(\bH\x00R\x0fnetworkBlockAll\x88\x01\x01\x121\n" +
+	"\x12network_allow_list\x18\x02 \x01(\tH\x01R\x10networkAllowList\x88\x01\x01B\x14\n" +
+	"\x12_network_block_allB\x15\n" +
+	"\x13_network_allow_list\"\xce\x01\n" +
+	"\x1cUpdateNetworkSettingsRequest\x12\x1d\n" +
+	"\n" +
+	"sandbox_id\x18\x01 \x01(\tR\tsandboxId\x12/\n" +
+	"\x11network_block_all\x18\x02 \x01(\bH\x00R\x0fnetworkBlockAll\x88\x01\x01\x121\n" +
+	"\x12network_allow_list\x18\x03 \x01(\tH\x01R\x10networkAllowList\x88\x01\x01B\x14\n" +
+	"\x12_network_block_allB\x15\n" +
+	"\x13_network_allow_list\"9\n" +
+	"\x1dUpdateNetworkSettingsResponse\x12\x18\n" +
+	"\amessage\x18\x01 \x01(\tR\amessage\"\xa3\x01\n" +
 	"\bRegistry\x12\x10\n" +
 	"\x03url\x18\x01 \x01(\tR\x03url\x12\x1d\n" +
 	"\aproject\x18\x02 \x01(\tH\x00R\aproject\x88\x01\x01\x12\x1f\n" +
@@ -2083,7 +2329,7 @@ const file_runner_v1_runner_proto_rawDesc = "" +
 	"\vHealthCheck\x12\x1d.runner.v1.HealthCheckRequest\x1a\x1e.runner.v1.HealthCheckResponse\"\x002\\\n" +
 	"\rRunnerService\x12K\n" +
 	"\n" +
-	"RunnerInfo\x12\x1c.runner.v1.RunnerInfoRequest\x1a\x1d.runner.v1.RunnerInfoResponse\"\x002\xe1\x05\n" +
+	"RunnerInfo\x12\x1c.runner.v1.RunnerInfoRequest\x1a\x1d.runner.v1.RunnerInfoResponse\"\x002\xb4\a\n" +
 	"\x0eSandboxService\x12T\n" +
 	"\rCreateSandbox\x12\x1f.runner.v1.CreateSandboxRequest\x1a .runner.v1.CreateSandboxResponse\"\x00\x12W\n" +
 	"\x0eDestroySandbox\x12 .runner.v1.DestroySandboxRequest\x1a!.runner.v1.DestroySandboxResponse\"\x00\x12Q\n" +
@@ -2092,7 +2338,9 @@ const file_runner_v1_runner_proto_rawDesc = "" +
 	"\vStopSandbox\x12\x1d.runner.v1.StopSandboxRequest\x1a\x1e.runner.v1.StopSandboxResponse\"\x00\x12N\n" +
 	"\vSandboxInfo\x12\x1d.runner.v1.SandboxInfoRequest\x1a\x1e.runner.v1.SandboxInfoResponse\"\x00\x12o\n" +
 	"\x16RemoveDestroyedSandbox\x12(.runner.v1.RemoveDestroyedSandboxRequest\x1a).runner.v1.RemoveDestroyedSandboxResponse\"\x00\x12i\n" +
-	"\x14SandboxDaemonVersion\x12&.runner.v1.SandboxDaemonVersionRequest\x1a'.runner.v1.SandboxDaemonVersionResponse\"\x002\xca\x03\n" +
+	"\x14SandboxDaemonVersion\x12&.runner.v1.SandboxDaemonVersionRequest\x1a'.runner.v1.SandboxDaemonVersionResponse\"\x00\x12c\n" +
+	"\x12GetNetworkSettings\x12$.runner.v1.GetNetworkSettingsRequest\x1a%.runner.v1.GetNetworkSettingsResponse\"\x00\x12l\n" +
+	"\x15UpdateNetworkSettings\x12'.runner.v1.UpdateNetworkSettingsRequest\x1a(.runner.v1.UpdateNetworkSettingsResponse\"\x002\xca\x03\n" +
 	"\x0fSnapshotService\x12Q\n" +
 	"\fPullSnapshot\x12\x1e.runner.v1.PullSnapshotRequest\x1a\x1f.runner.v1.PullSnapshotResponse\"\x00\x12T\n" +
 	"\rBuildSnapshot\x12\x1f.runner.v1.BuildSnapshotRequest\x1a .runner.v1.BuildSnapshotResponse\"\x00\x12W\n" +
@@ -2115,7 +2363,7 @@ func file_runner_v1_runner_proto_rawDescGZIP() []byte {
 }
 
 var file_runner_v1_runner_proto_enumTypes = make([]protoimpl.EnumInfo, 3)
-var file_runner_v1_runner_proto_msgTypes = make([]protoimpl.MessageInfo, 34)
+var file_runner_v1_runner_proto_msgTypes = make([]protoimpl.MessageInfo, 38)
 var file_runner_v1_runner_proto_goTypes = []any{
 	(HealthStatus)(0),                      // 0: runner.v1.HealthStatus
 	(SandboxState)(0),                      // 1: runner.v1.SandboxState
@@ -2140,32 +2388,36 @@ var file_runner_v1_runner_proto_goTypes = []any{
 	(*RemoveDestroyedSandboxResponse)(nil), // 20: runner.v1.RemoveDestroyedSandboxResponse
 	(*SandboxDaemonVersionRequest)(nil),    // 21: runner.v1.SandboxDaemonVersionRequest
 	(*SandboxDaemonVersionResponse)(nil),   // 22: runner.v1.SandboxDaemonVersionResponse
-	(*Registry)(nil),                       // 23: runner.v1.Registry
-	(*PullSnapshotRequest)(nil),            // 24: runner.v1.PullSnapshotRequest
-	(*PullSnapshotResponse)(nil),           // 25: runner.v1.PullSnapshotResponse
-	(*BuildSnapshotRequest)(nil),           // 26: runner.v1.BuildSnapshotRequest
-	(*BuildSnapshotResponse)(nil),          // 27: runner.v1.BuildSnapshotResponse
-	(*SnapshotExistsRequest)(nil),          // 28: runner.v1.SnapshotExistsRequest
-	(*SnapshotExistsResponse)(nil),         // 29: runner.v1.SnapshotExistsResponse
-	(*RemoveSnapshotRequest)(nil),          // 30: runner.v1.RemoveSnapshotRequest
-	(*RemoveSnapshotResponse)(nil),         // 31: runner.v1.RemoveSnapshotResponse
-	(*GetSnapshotLogsRequest)(nil),         // 32: runner.v1.GetSnapshotLogsRequest
-	(*GetSnapshotLogsResponse)(nil),        // 33: runner.v1.GetSnapshotLogsResponse
-	(*Volume)(nil),                         // 34: runner.v1.Volume
-	(*RunnerMetrics)(nil),                  // 35: runner.v1.RunnerMetrics
-	nil,                                    // 36: runner.v1.CreateSandboxRequest.EnvEntry
+	(*GetNetworkSettingsRequest)(nil),      // 23: runner.v1.GetNetworkSettingsRequest
+	(*GetNetworkSettingsResponse)(nil),     // 24: runner.v1.GetNetworkSettingsResponse
+	(*UpdateNetworkSettingsRequest)(nil),   // 25: runner.v1.UpdateNetworkSettingsRequest
+	(*UpdateNetworkSettingsResponse)(nil),  // 26: runner.v1.UpdateNetworkSettingsResponse
+	(*Registry)(nil),                       // 27: runner.v1.Registry
+	(*PullSnapshotRequest)(nil),            // 28: runner.v1.PullSnapshotRequest
+	(*PullSnapshotResponse)(nil),           // 29: runner.v1.PullSnapshotResponse
+	(*BuildSnapshotRequest)(nil),           // 30: runner.v1.BuildSnapshotRequest
+	(*BuildSnapshotResponse)(nil),          // 31: runner.v1.BuildSnapshotResponse
+	(*SnapshotExistsRequest)(nil),          // 32: runner.v1.SnapshotExistsRequest
+	(*SnapshotExistsResponse)(nil),         // 33: runner.v1.SnapshotExistsResponse
+	(*RemoveSnapshotRequest)(nil),          // 34: runner.v1.RemoveSnapshotRequest
+	(*RemoveSnapshotResponse)(nil),         // 35: runner.v1.RemoveSnapshotResponse
+	(*GetSnapshotLogsRequest)(nil),         // 36: runner.v1.GetSnapshotLogsRequest
+	(*GetSnapshotLogsResponse)(nil),        // 37: runner.v1.GetSnapshotLogsResponse
+	(*Volume)(nil),                         // 38: runner.v1.Volume
+	(*RunnerMetrics)(nil),                  // 39: runner.v1.RunnerMetrics
+	nil,                                    // 40: runner.v1.CreateSandboxRequest.EnvEntry
 }
 var file_runner_v1_runner_proto_depIdxs = []int32{
 	0,  // 0: runner.v1.HealthCheckResponse.status:type_name -> runner.v1.HealthStatus
-	35, // 1: runner.v1.RunnerInfoResponse.metrics:type_name -> runner.v1.RunnerMetrics
-	36, // 2: runner.v1.CreateSandboxRequest.env:type_name -> runner.v1.CreateSandboxRequest.EnvEntry
-	23, // 3: runner.v1.CreateSandboxRequest.registry:type_name -> runner.v1.Registry
-	34, // 4: runner.v1.CreateSandboxRequest.volumes:type_name -> runner.v1.Volume
-	23, // 5: runner.v1.CreateBackupRequest.registry:type_name -> runner.v1.Registry
+	39, // 1: runner.v1.RunnerInfoResponse.metrics:type_name -> runner.v1.RunnerMetrics
+	40, // 2: runner.v1.CreateSandboxRequest.env:type_name -> runner.v1.CreateSandboxRequest.EnvEntry
+	27, // 3: runner.v1.CreateSandboxRequest.registry:type_name -> runner.v1.Registry
+	38, // 4: runner.v1.CreateSandboxRequest.volumes:type_name -> runner.v1.Volume
+	27, // 5: runner.v1.CreateBackupRequest.registry:type_name -> runner.v1.Registry
 	1,  // 6: runner.v1.SandboxInfoResponse.state:type_name -> runner.v1.SandboxState
 	2,  // 7: runner.v1.SandboxInfoResponse.backup_state:type_name -> runner.v1.BackupState
-	23, // 8: runner.v1.PullSnapshotRequest.registry:type_name -> runner.v1.Registry
-	23, // 9: runner.v1.BuildSnapshotRequest.registry:type_name -> runner.v1.Registry
+	27, // 8: runner.v1.PullSnapshotRequest.registry:type_name -> runner.v1.Registry
+	27, // 9: runner.v1.BuildSnapshotRequest.registry:type_name -> runner.v1.Registry
 	3,  // 10: runner.v1.HealthService.HealthCheck:input_type -> runner.v1.HealthCheckRequest
 	5,  // 11: runner.v1.RunnerService.RunnerInfo:input_type -> runner.v1.RunnerInfoRequest
 	7,  // 12: runner.v1.SandboxService.CreateSandbox:input_type -> runner.v1.CreateSandboxRequest
@@ -2176,28 +2428,32 @@ var file_runner_v1_runner_proto_depIdxs = []int32{
 	17, // 17: runner.v1.SandboxService.SandboxInfo:input_type -> runner.v1.SandboxInfoRequest
 	19, // 18: runner.v1.SandboxService.RemoveDestroyedSandbox:input_type -> runner.v1.RemoveDestroyedSandboxRequest
 	21, // 19: runner.v1.SandboxService.SandboxDaemonVersion:input_type -> runner.v1.SandboxDaemonVersionRequest
-	24, // 20: runner.v1.SnapshotService.PullSnapshot:input_type -> runner.v1.PullSnapshotRequest
-	26, // 21: runner.v1.SnapshotService.BuildSnapshot:input_type -> runner.v1.BuildSnapshotRequest
-	28, // 22: runner.v1.SnapshotService.SnapshotExists:input_type -> runner.v1.SnapshotExistsRequest
-	30, // 23: runner.v1.SnapshotService.RemoveSnapshot:input_type -> runner.v1.RemoveSnapshotRequest
-	32, // 24: runner.v1.SnapshotService.GetSnapshotLogs:input_type -> runner.v1.GetSnapshotLogsRequest
-	4,  // 25: runner.v1.HealthService.HealthCheck:output_type -> runner.v1.HealthCheckResponse
-	6,  // 26: runner.v1.RunnerService.RunnerInfo:output_type -> runner.v1.RunnerInfoResponse
-	8,  // 27: runner.v1.SandboxService.CreateSandbox:output_type -> runner.v1.CreateSandboxResponse
-	10, // 28: runner.v1.SandboxService.DestroySandbox:output_type -> runner.v1.DestroySandboxResponse
-	12, // 29: runner.v1.SandboxService.CreateBackup:output_type -> runner.v1.CreateBackupResponse
-	14, // 30: runner.v1.SandboxService.StartSandbox:output_type -> runner.v1.StartSandboxResponse
-	16, // 31: runner.v1.SandboxService.StopSandbox:output_type -> runner.v1.StopSandboxResponse
-	18, // 32: runner.v1.SandboxService.SandboxInfo:output_type -> runner.v1.SandboxInfoResponse
-	20, // 33: runner.v1.SandboxService.RemoveDestroyedSandbox:output_type -> runner.v1.RemoveDestroyedSandboxResponse
-	22, // 34: runner.v1.SandboxService.SandboxDaemonVersion:output_type -> runner.v1.SandboxDaemonVersionResponse
-	25, // 35: runner.v1.SnapshotService.PullSnapshot:output_type -> runner.v1.PullSnapshotResponse
-	27, // 36: runner.v1.SnapshotService.BuildSnapshot:output_type -> runner.v1.BuildSnapshotResponse
-	29, // 37: runner.v1.SnapshotService.SnapshotExists:output_type -> runner.v1.SnapshotExistsResponse
-	31, // 38: runner.v1.SnapshotService.RemoveSnapshot:output_type -> runner.v1.RemoveSnapshotResponse
-	33, // 39: runner.v1.SnapshotService.GetSnapshotLogs:output_type -> runner.v1.GetSnapshotLogsResponse
-	25, // [25:40] is the sub-list for method output_type
-	10, // [10:25] is the sub-list for method input_type
+	23, // 20: runner.v1.SandboxService.GetNetworkSettings:input_type -> runner.v1.GetNetworkSettingsRequest
+	25, // 21: runner.v1.SandboxService.UpdateNetworkSettings:input_type -> runner.v1.UpdateNetworkSettingsRequest
+	28, // 22: runner.v1.SnapshotService.PullSnapshot:input_type -> runner.v1.PullSnapshotRequest
+	30, // 23: runner.v1.SnapshotService.BuildSnapshot:input_type -> runner.v1.BuildSnapshotRequest
+	32, // 24: runner.v1.SnapshotService.SnapshotExists:input_type -> runner.v1.SnapshotExistsRequest
+	34, // 25: runner.v1.SnapshotService.RemoveSnapshot:input_type -> runner.v1.RemoveSnapshotRequest
+	36, // 26: runner.v1.SnapshotService.GetSnapshotLogs:input_type -> runner.v1.GetSnapshotLogsRequest
+	4,  // 27: runner.v1.HealthService.HealthCheck:output_type -> runner.v1.HealthCheckResponse
+	6,  // 28: runner.v1.RunnerService.RunnerInfo:output_type -> runner.v1.RunnerInfoResponse
+	8,  // 29: runner.v1.SandboxService.CreateSandbox:output_type -> runner.v1.CreateSandboxResponse
+	10, // 30: runner.v1.SandboxService.DestroySandbox:output_type -> runner.v1.DestroySandboxResponse
+	12, // 31: runner.v1.SandboxService.CreateBackup:output_type -> runner.v1.CreateBackupResponse
+	14, // 32: runner.v1.SandboxService.StartSandbox:output_type -> runner.v1.StartSandboxResponse
+	16, // 33: runner.v1.SandboxService.StopSandbox:output_type -> runner.v1.StopSandboxResponse
+	18, // 34: runner.v1.SandboxService.SandboxInfo:output_type -> runner.v1.SandboxInfoResponse
+	20, // 35: runner.v1.SandboxService.RemoveDestroyedSandbox:output_type -> runner.v1.RemoveDestroyedSandboxResponse
+	22, // 36: runner.v1.SandboxService.SandboxDaemonVersion:output_type -> runner.v1.SandboxDaemonVersionResponse
+	24, // 37: runner.v1.SandboxService.GetNetworkSettings:output_type -> runner.v1.GetNetworkSettingsResponse
+	26, // 38: runner.v1.SandboxService.UpdateNetworkSettings:output_type -> runner.v1.UpdateNetworkSettingsResponse
+	29, // 39: runner.v1.SnapshotService.PullSnapshot:output_type -> runner.v1.PullSnapshotResponse
+	31, // 40: runner.v1.SnapshotService.BuildSnapshot:output_type -> runner.v1.BuildSnapshotResponse
+	33, // 41: runner.v1.SnapshotService.SnapshotExists:output_type -> runner.v1.SnapshotExistsResponse
+	35, // 42: runner.v1.SnapshotService.RemoveSnapshot:output_type -> runner.v1.RemoveSnapshotResponse
+	37, // 43: runner.v1.SnapshotService.GetSnapshotLogs:output_type -> runner.v1.GetSnapshotLogsResponse
+	27, // [27:44] is the sub-list for method output_type
+	10, // [10:27] is the sub-list for method input_type
 	10, // [10:10] is the sub-list for extension type_name
 	10, // [10:10] is the sub-list for extension extendee
 	0,  // [0:10] is the sub-list for field type_name
@@ -2210,15 +2466,17 @@ func file_runner_v1_runner_proto_init() {
 	}
 	file_runner_v1_runner_proto_msgTypes[3].OneofWrappers = []any{}
 	file_runner_v1_runner_proto_msgTypes[4].OneofWrappers = []any{}
-	file_runner_v1_runner_proto_msgTypes[20].OneofWrappers = []any{}
-	file_runner_v1_runner_proto_msgTypes[23].OneofWrappers = []any{}
+	file_runner_v1_runner_proto_msgTypes[21].OneofWrappers = []any{}
+	file_runner_v1_runner_proto_msgTypes[22].OneofWrappers = []any{}
+	file_runner_v1_runner_proto_msgTypes[24].OneofWrappers = []any{}
+	file_runner_v1_runner_proto_msgTypes[27].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_runner_v1_runner_proto_rawDesc), len(file_runner_v1_runner_proto_rawDesc)),
 			NumEnums:      3,
-			NumMessages:   34,
+			NumMessages:   38,
 			NumExtensions: 0,
 			NumServices:   4,
 		},

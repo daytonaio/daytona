@@ -24,6 +24,12 @@ func (s *SandboxService) DestroySandbox(ctx context.Context, req *pb.DestroySand
 		}
 	}()
 
+	// Cancel a backup if it's already in progress
+	backup_context, ok := backup_context_map.Get(req.GetSandboxId())
+	if ok {
+		backup_context.cancel()
+	}
+
 	state, _ := s.getSandboxState(ctx, req.GetSandboxId())
 	if state == pb.SandboxState_SANDBOX_STATE_DESTROYED || state == pb.SandboxState_SANDBOX_STATE_DESTROYING {
 		metrics.SuccessCounterInc(metrics.DestroySandboxOperation)
@@ -34,7 +40,7 @@ func (s *SandboxService) DestroySandbox(ctx context.Context, req *pb.DestroySand
 
 	s.cache.SetSandboxState(ctx, req.GetSandboxId(), pb.SandboxState_SANDBOX_STATE_DESTROYING)
 
-	_, err := s.dockerClient.ContainerInspect(ctx, req.GetSandboxId())
+	ct, err := s.dockerClient.ContainerInspect(ctx, req.GetSandboxId())
 	if err != nil {
 		if errdefs.IsNotFound(err) {
 			s.cache.SetSandboxState(ctx, req.GetSandboxId(), pb.SandboxState_SANDBOX_STATE_DESTROYED)
@@ -65,6 +71,14 @@ func (s *SandboxService) DestroySandbox(ctx context.Context, req *pb.DestroySand
 		metrics.FailureCounterInc(metrics.DestroySandboxOperation)
 		return nil, common.MapDockerError(err)
 	}
+
+	go func() {
+		containerShortId := ct.ID[:12]
+		err = s.netRulesManager.DeleteNetworkRules(containerShortId)
+		if err != nil {
+			s.log.Error("Failed to delete sandbox network settings: %v", "error", err)
+		}
+	}()
 
 	s.cache.SetSandboxState(ctx, req.GetSandboxId(), pb.SandboxState_SANDBOX_STATE_DESTROYED)
 

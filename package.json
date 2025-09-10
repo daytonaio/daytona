@@ -230,7 +230,7 @@
     "tailwindcss": "3.4.3",
     "ts-jest": "29.4.1",
     "ts-node": "10.9.1",
-    "ts-proto": "^2.7.5",
+    "ts-proto": "^2.7.7",
     "tslib": "^2.8.1",
     "tsx": "^4.20.3",
     "typedoc": "~0.27.7",

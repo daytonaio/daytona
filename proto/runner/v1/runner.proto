@@ -24,6 +24,8 @@ service SandboxService {
   rpc SandboxInfo(SandboxInfoRequest) returns (SandboxInfoResponse) {}
   rpc RemoveDestroyedSandbox(RemoveDestroyedSandboxRequest) returns (RemoveDestroyedSandboxResponse) {}
   rpc SandboxDaemonVersion(SandboxDaemonVersionRequest) returns (SandboxDaemonVersionResponse) {}
+  rpc GetNetworkSettings(GetNetworkSettingsRequest) returns (GetNetworkSettingsResponse) {}
+  rpc UpdateNetworkSettings(UpdateNetworkSettingsRequest) returns (UpdateNetworkSettingsResponse) {}
 }
 
 // Snapshot service
@@ -94,6 +96,8 @@ message CreateSandboxRequest {
   optional Registry registry = 11;
   repeated string entrypoint = 12;
   repeated Volume volumes = 13;
+  optional bool network_block_all = 14;
+  optional string network_allow_list = 15;
 }
 
 message CreateSandboxResponse {
@@ -141,6 +145,7 @@ message SandboxInfoRequest {
 message SandboxInfoResponse {
   SandboxState state = 1;
   BackupState backup_state = 2;
+  string backup_error = 3;
 }
 
 message RemoveDestroyedSandboxRequest {
@@ -157,6 +162,25 @@ message SandboxDaemonVersionRequest {
 
 message SandboxDaemonVersionResponse {
   string daemon_version = 1;
+}
+
+message GetNetworkSettingsRequest {
+  string sandbox_id = 1;
+}
+
+message GetNetworkSettingsResponse {
+  optional bool network_block_all = 1;
+  optional string network_allow_list = 2;
+}
+
+message UpdateNetworkSettingsRequest {
+  string sandbox_id = 1;
+  optional bool network_block_all = 2;
+  optional string network_allow_list = 3;
+}
+
+message UpdateNetworkSettingsResponse {
+  string message = 1;
 }
 
 // Snapshot messages

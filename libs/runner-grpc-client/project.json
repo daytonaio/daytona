@@ -1,7 +1,7 @@
 {
   "name": "runner-grpc-client",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "libs/runner-grpc-client/src",
+  "sourceRoot": "libs/runner-grpc-client",
   "projectType": "library",
   "targets": {
     "build": {
