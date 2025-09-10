@@ -82,8 +82,8 @@ export const UpdateOrganizationMemberAccess: React.FC<UpdateOrganizationMemberAc
           </DialogDescription>
           {role !== OrganizationUserRoleEnum.OWNER && (
             <DialogDescription className="text-yellow-600 dark:text-yellow-400">
-              Removing assignments will automatically revoke any API keys this member created using permissions based on
-              those assignments.
+              Removing assignments will automatically revoke any API keys this member created using permissions granted
+              from those assignments.
             </DialogDescription>
           )}
         </DialogHeader>
