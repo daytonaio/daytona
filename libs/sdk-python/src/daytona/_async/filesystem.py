@@ -76,9 +76,7 @@ class AsyncFileSystem:
             await sandbox.fs.delete_file("workspace/data/old_file.txt")
             ```
         """
-        await self._toolbox_api.delete_file(
-            self._sandbox_id, path=path, recursive=recursive
-        )
+        await self._toolbox_api.delete_file(self._sandbox_id, path=path, recursive=recursive)
 
     @overload
     async def download_file(self, remote_path: str, timeout: int = 30 * 60) -> bytes:

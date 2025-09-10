@@ -78,9 +78,7 @@ class FileSystem:
             sandbox.fs.delete_file("workspace/data/old_file.txt")
             ```
         """
-        self._toolbox_api.delete_file(
-            self._sandbox_id, path=path, recursive=recursive
-        )
+        self._toolbox_api.delete_file(self._sandbox_id, path=path, recursive=recursive)
 
     @overload
     def download_file(self, remote_path: str, timeout: int = 30 * 60) -> bytes:

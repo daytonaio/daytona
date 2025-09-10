@@ -3949,7 +3949,7 @@ If you haven't built the desired image yet, and have a Dockerfile ready, you can
 Alternatively, to do it through the CLI, use the `--dockerfile` flag under `create` to pass the path to the Dockerfile you want to use and Daytona will build the Snapshot for you. The COPY/ADD commands will be automatically parsed and added to the context - to manually add files to the context you can use the `--context` flag.
 
 ```bash
-daytona snapshot create data-analysis01 --dockerfile ./Dockerfile --context ./requirements.txt
+daytona snapshot create data-analysis01 --dockerfile ./Dockerfile
 ```
 
 ```text
