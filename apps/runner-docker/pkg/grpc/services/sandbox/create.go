@@ -11,10 +11,12 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"slices"
 	"strings"
 	"sync"
 	"time"
 
+	"github.com/daytonaio/common-go/pkg/timer"
 	pb "github.com/daytonaio/runner-docker/gen/pb/runner/v1"
 	"github.com/daytonaio/runner-docker/internal/constants"
 	"github.com/daytonaio/runner-docker/internal/metrics"
@@ -22,12 +24,15 @@ import (
 	"github.com/daytonaio/runner-docker/pkg/common"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/network"
+	"github.com/docker/docker/errdefs"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
 // Sandbox endpoints
 func (s *SandboxService) CreateSandbox(ctx context.Context, req *pb.CreateSandboxRequest) (*pb.CreateSandboxResponse, error) {
+	defer timer.Timer()()
+
 	startTime := time.Now()
 	defer func() {
 		obs, err := metrics.ContainerOperationDuration.GetMetricWithLabelValues("create")
@@ -112,50 +117,51 @@ func (s *SandboxService) CreateSandbox(ctx context.Context, req *pb.CreateSandbo
 		return nil, err
 	}
 
-	// wait for the daemon to start listening on port 2280
-	container, err := s.dockerClient.ContainerInspect(ctx, c.ID)
+	containerShortId := c.ID[:12]
+	container, err := s.dockerClient.ContainerInspect(context.Background(), req.GetId())
 	if err != nil {
 		metrics.FailureCounterInc(metrics.CreateSandboxOperation)
 		return nil, common.MapDockerError(err)
 	}
+	ip := container.NetworkSettings.IPAddress
 
-	var containerIP string
-	for _, network := range container.NetworkSettings.Networks {
-		containerIP = network.IPAddress
-		break
+	if req.GetNetworkBlockAll() {
+		go func() {
+			err = s.netRulesManager.SetNetWorkRules(containerShortId, ip, "")
+			if err != nil {
+				s.log.Error("Failed to update sandbox network settings: %v", "error", err)
+			}
+		}()
+	} else if req.GetNetworkAllowList() != "" {
+		go func() {
+			err = s.netRulesManager.SetNetWorkRules(containerShortId, ip, req.GetNetworkAllowList())
+			if err != nil {
+				s.log.Error("Failed to update sandbox network settings: %v", "error", err)
+			}
+		}()
 	}
-
-	if containerIP == "" {
-		metrics.FailureCounterInc(metrics.CreateSandboxOperation)
-		return nil, errors.New("container has no IP address, it might not be running")
-	}
-
-	err = s.waitForDaemonRunning(ctx, containerIP, 10*time.Second)
-	if err != nil {
-		metrics.FailureCounterInc(metrics.CreateSandboxOperation)
-		return nil, err
-	}
-
-	metrics.SuccessCounterInc(metrics.CreateSandboxOperation)
 
 	return &pb.CreateSandboxResponse{
-		SandboxId: req.Id,
+		SandboxId: c.ID,
 	}, nil
 }
 
 func (s *SandboxService) validateImageArchitecture(ctx context.Context, image string) error {
+	defer timer.Timer()()
+
 	inspect, err := s.dockerClient.ImageInspect(ctx, image)
 	if err != nil {
-		return common.MapDockerError(err)
+		if errdefs.IsNotFound(err) {
+			return common.MapDockerError(err)
+		}
+		return fmt.Errorf("failed to inspect image: %w", err)
 	}
 
 	arch := strings.ToLower(inspect.Architecture)
 	validArchs := []string{"amd64", "x86_64"}
 
-	for _, validArch := range validArchs {
-		if arch == validArch {
-			return nil
-		}
+	if slices.Contains(validArchs, arch) {
+		return nil
 	}
 
 	return status.Error(codes.AlreadyExists, fmt.Errorf("image %s architecture (%s) is not x64 compatible", image, inspect.Architecture).Error())
@@ -200,6 +206,11 @@ func (s *SandboxService) getContainerHostConfig(ctx context.Context, req *pb.Cre
 	var binds []string
 
 	binds = append(binds, fmt.Sprintf("%s:/usr/local/bin/daytona:ro", s.daemonPath))
+
+	// Mount the plugin if available
+	if s.computerUsePluginPath != "" {
+		binds = append(binds, fmt.Sprintf("%s:/usr/local/lib/daytona-computer-use:ro", s.computerUsePluginPath))
+	}
 
 	if len(volumeMountPathBinds) > 0 {
 		binds = append(binds, volumeMountPathBinds...)
@@ -310,7 +321,7 @@ func (s *SandboxService) getVolumesMountPathBinds(ctx context.Context, volumes [
 
 func (s *SandboxService) getNodeVolumeMountPath(volumeId string) string {
 	volumePath := filepath.Join("/mnt", volumeId)
-	if s.nodeEnv == "development" {
+	if s.environment == "development" {
 		volumePath = filepath.Join("/tmp", volumeId)
 	}
 
