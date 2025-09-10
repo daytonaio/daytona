@@ -18,7 +18,7 @@ type Config struct {
 	TLSKeyFile         string `envconfig:"TLS_KEY_FILE"`
 	EnableTLS          bool   `envconfig:"ENABLE_TLS"`
 	CacheRetentionDays int    `envconfig:"CACHE_RETENTION_DAYS"`
-	NodeEnv            string `envconfig:"NODE_ENV"`
+	Environment        string `envconfig:"ENVIRONMENT"`
 	ContainerRuntime   string `envconfig:"CONTAINER_RUNTIME"`
 	ContainerNetwork   string `envconfig:"CONTAINER_NETWORK"`
 	LogFilePath        string `envconfig:"LOG_FILE_PATH"`

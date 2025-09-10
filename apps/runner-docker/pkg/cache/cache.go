@@ -11,29 +11,16 @@ import (
 	pb "github.com/daytonaio/runner-docker/gen/pb/runner/v1"
 )
 
-type SystemMetrics struct {
-	CPUUsage        float64   `json:"cpu_usage"`
-	RAMUsage        float64   `json:"ram_usage"`
-	DiskUsage       float64   `json:"disk_usage"`
-	AllocatedCPU    int64     `json:"allocated_cpu"`
-	AllocatedMemory int64     `json:"allocated_memory"`
-	AllocatedDisk   int64     `json:"allocated_disk"`
-	SnapshotCount   int64     `json:"snapshot_count"`
-	LastUpdated     time.Time `json:"last_updated"`
-}
-
 type CacheData struct {
-	SandboxState    pb.SandboxState
-	BackupState     pb.BackupState
-	DestructionTime *time.Time
-	SystemMetrics   *SystemMetrics
+	SandboxState      pb.SandboxState
+	BackupState       pb.BackupState
+	BackupErrorReason *string
+	DestructionTime   *time.Time
 }
 
 type IRunnerCache interface {
 	SetSandboxState(ctx context.Context, sandboxId string, state pb.SandboxState)
-	SetBackupState(ctx context.Context, sandboxId string, state pb.BackupState)
-	SetSystemMetrics(ctx context.Context, metrics SystemMetrics)
-	GetSystemMetrics(ctx context.Context) *SystemMetrics
+	SetBackupState(ctx context.Context, sandboxId string, state pb.BackupState, err error)
 
 	Set(ctx context.Context, sandboxId string, data CacheData)
 	Get(ctx context.Context, sandboxId string) *CacheData
@@ -80,7 +67,6 @@ func (c *InMemoryRunnerCache) SetSandboxState(ctx context.Context, sandboxId str
 			SandboxState:    state,
 			BackupState:     pb.BackupState_BACKUP_STATE_UNSPECIFIED,
 			DestructionTime: nil,
-			SystemMetrics:   nil,
 		}
 	} else {
 		data.SandboxState = state
@@ -89,59 +75,31 @@ func (c *InMemoryRunnerCache) SetSandboxState(ctx context.Context, sandboxId str
 	c.cache[sandboxId] = data
 }
 
-func (c *InMemoryRunnerCache) SetBackupState(ctx context.Context, sandboxId string, state pb.BackupState) {
+func (c *InMemoryRunnerCache) SetBackupState(ctx context.Context, sandboxId string, state pb.BackupState, err error) {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
 
 	data, ok := c.cache[sandboxId]
 	if !ok {
+		backupErrorReason := ""
+		if err != nil {
+			backupErrorReason = err.Error()
+		}
 		data = &CacheData{
-			SandboxState:    pb.SandboxState_SANDBOX_STATE_UNSPECIFIED,
-			BackupState:     state,
-			DestructionTime: nil,
-			SystemMetrics:   nil,
+			SandboxState:      pb.SandboxState_SANDBOX_STATE_UNSPECIFIED,
+			BackupState:       state,
+			BackupErrorReason: &backupErrorReason,
+			DestructionTime:   nil,
 		}
 	} else {
 		data.BackupState = state
+		if err != nil {
+			errorReason := err.Error()
+			data.BackupErrorReason = &errorReason
+		}
 	}
 
 	c.cache[sandboxId] = data
-}
-
-func (c *InMemoryRunnerCache) SetSystemMetrics(ctx context.Context, metrics SystemMetrics) {
-	c.mutex.Lock()
-	defer c.mutex.Unlock()
-
-	// Store system metrics under a special key
-	const systemMetricsKey = "__system_metrics__"
-
-	data, ok := c.cache[systemMetricsKey]
-	if !ok {
-		data = &CacheData{
-			SandboxState:    pb.SandboxState_SANDBOX_STATE_UNSPECIFIED,
-			BackupState:     pb.BackupState_BACKUP_STATE_UNSPECIFIED,
-			DestructionTime: nil,
-			SystemMetrics:   &metrics,
-		}
-	} else {
-		data.SystemMetrics = &metrics
-	}
-
-	c.cache[systemMetricsKey] = data
-}
-
-func (c *InMemoryRunnerCache) GetSystemMetrics(ctx context.Context) *SystemMetrics {
-	c.mutex.RLock()
-	defer c.mutex.RUnlock()
-
-	const systemMetricsKey = "__system_metrics__"
-
-	data, ok := c.cache[systemMetricsKey]
-	if !ok || data.SystemMetrics == nil {
-		return nil
-	}
-
-	return data.SystemMetrics
 }
 
 func (c *InMemoryRunnerCache) Set(ctx context.Context, sandboxId string, data CacheData) {
@@ -152,7 +110,6 @@ func (c *InMemoryRunnerCache) Set(ctx context.Context, sandboxId string, data Ca
 		SandboxState:    data.SandboxState,
 		BackupState:     data.BackupState,
 		DestructionTime: data.DestructionTime,
-		SystemMetrics:   data.SystemMetrics,
 	}
 }
 
@@ -166,7 +123,6 @@ func (c *InMemoryRunnerCache) Get(ctx context.Context, sandboxId string) *CacheD
 			SandboxState:    pb.SandboxState_SANDBOX_STATE_UNSPECIFIED,
 			BackupState:     pb.BackupState_BACKUP_STATE_UNSPECIFIED,
 			DestructionTime: nil,
-			SystemMetrics:   nil,
 		}
 	}
 
@@ -182,7 +138,6 @@ func (c *InMemoryRunnerCache) Remove(ctx context.Context, sandboxId string) {
 		SandboxState:    pb.SandboxState_SANDBOX_STATE_DESTROYED,
 		BackupState:     pb.BackupState_BACKUP_STATE_UNSPECIFIED,
 		DestructionTime: &destructionTime,
-		SystemMetrics:   nil,
 	}
 }
 
