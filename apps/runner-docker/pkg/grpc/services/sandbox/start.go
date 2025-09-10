@@ -12,8 +12,10 @@ import (
 	"net/url"
 	"time"
 
+	"github.com/daytonaio/common-go/pkg/timer"
 	pb "github.com/daytonaio/runner-docker/gen/pb/runner/v1"
 	"github.com/daytonaio/runner-docker/pkg/common"
+	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/pkg/stdcopy"
 	"google.golang.org/grpc/codes"
@@ -21,27 +23,37 @@ import (
 )
 
 func (s *SandboxService) StartSandbox(ctx context.Context, req *pb.StartSandboxRequest) (*pb.StartSandboxResponse, error) {
+	defer timer.Timer()()
+
 	s.cache.SetSandboxState(ctx, req.GetSandboxId(), pb.SandboxState_SANDBOX_STATE_STARTING)
+
+	// Cancel a backup if it's already in progress
+	backup_context, ok := backup_context_map.Get(req.GetSandboxId())
+	if ok {
+		backup_context.cancel()
+	}
 
 	c, err := s.dockerClient.ContainerInspect(ctx, req.GetSandboxId())
 	if err != nil {
 		return nil, common.MapDockerError(err)
 	}
 
-	var containerIP string
-	for _, network := range c.NetworkSettings.Networks {
-		containerIP = network.IPAddress
-		break
-	}
-
 	if c.State.Running {
+		containerIP, err := getContainerIP(&c)
+		if err != nil {
+			return nil, err
+		}
+
 		err = s.waitForDaemonRunning(ctx, containerIP, 10*time.Second)
 		if err != nil {
 			return nil, err
 		}
 
 		s.cache.SetSandboxState(ctx, req.GetSandboxId(), pb.SandboxState_SANDBOX_STATE_STARTED)
-		return nil, nil
+
+		return &pb.StartSandboxResponse{
+			Message: fmt.Sprintf("Sandbox %s started", req.GetSandboxId()),
+		}, nil
 	}
 
 	err = s.dockerClient.ContainerStart(ctx, req.GetSandboxId(), container.StartOptions{})
@@ -51,6 +63,16 @@ func (s *SandboxService) StartSandbox(ctx context.Context, req *pb.StartSandboxR
 
 	// make sure container is running
 	err = s.waitForContainerRunning(ctx, req.GetSandboxId(), 10*time.Second)
+	if err != nil {
+		return nil, err
+	}
+
+	c, err = s.dockerClient.ContainerInspect(ctx, req.GetSandboxId())
+	if err != nil {
+		return nil, err
+	}
+
+	containerIP, err := getContainerIP(&c)
 	if err != nil {
 		return nil, err
 	}
@@ -76,6 +98,8 @@ func (s *SandboxService) StartSandbox(ctx context.Context, req *pb.StartSandboxR
 }
 
 func (s *SandboxService) waitForContainerRunning(ctx context.Context, sandboxId string, timeout time.Duration) error {
+	defer timer.Timer()()
+
 	timeoutCtx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
@@ -100,29 +124,46 @@ func (s *SandboxService) waitForContainerRunning(ctx context.Context, sandboxId 
 }
 
 func (s *SandboxService) waitForDaemonRunning(ctx context.Context, containerIP string, timeout time.Duration) error {
+	defer timer.Timer()()
+
 	// Build the target URL
-	targetURL := fmt.Sprintf("http://%s:2280", containerIP)
+	targetURL := fmt.Sprintf("http://%s:2280/version", containerIP)
 	target, err := url.Parse(targetURL)
 	if err != nil {
-		return status.Errorf(codes.InvalidArgument, fmt.Errorf("failed to parse target URL: %w", err).Error())
+		return fmt.Errorf("failed to parse target URL: %w", err)
 	}
 
-	for i := 0; i < 10; i++ {
-		conn, err := net.DialTimeout("tcp", target.Host, timeout)
-		if err != nil {
-			time.Sleep(50 * time.Millisecond)
-			continue
+	timeoutCtx, cancel := context.WithTimeout(ctx, timeout)
+	defer cancel()
+
+	for {
+		select {
+		case <-timeoutCtx.Done():
+			return fmt.Errorf("timeout waiting for daemon to start")
+		default:
+			conn, err := net.DialTimeout("tcp", target.Host, 1*time.Second)
+			if err != nil {
+				time.Sleep(5 * time.Millisecond)
+				continue
+			}
+			conn.Close()
+			return nil
 		}
-		conn.Close()
-		break
 	}
+}
 
-	return nil
+func getContainerIP(container *types.ContainerJSON) (string, error) {
+	for _, network := range container.NetworkSettings.Networks {
+		return network.IPAddress, nil
+	}
+	return "", fmt.Errorf("no IP address found. Is the Sandbox started?")
 }
 
 func (s *SandboxService) startDaytonaDaemon(ctx context.Context, sandboxId string) error {
+	defer timer.Timer()()
+
 	execOptions := container.ExecOptions{
-		Cmd:          []string{"sh", "-c", "daytona"},
+		Cmd:          []string{"sh", "-c", "/usr/local/bin/daytona"},
 		AttachStdout: true,
 		AttachStderr: true,
 		Tty:          true,
@@ -134,12 +175,12 @@ func (s *SandboxService) startDaytonaDaemon(ctx context.Context, sandboxId strin
 
 	result, err := s.execSync(ctx, sandboxId, execOptions, execStartOptions)
 	if err != nil {
-		s.log.Error("Error starting Daytona daemon", "error", err)
+		s.log.Error("Error starting Daytona daemon: %s", "error", err.Error())
 		return nil
 	}
 
 	if result.ExitCode != 0 && result.StdErr != "" {
-		s.log.Error("Error starting Daytona daemon", "error", string(result.StdErr))
+		s.log.Error("Error starting Daytona daemon: %s", "error", string(result.StdErr))
 		return nil
 	}
 
