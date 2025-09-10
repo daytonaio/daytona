@@ -29,12 +29,14 @@ func (s *SandboxService) SandboxInfo(ctx context.Context, req *pb.SandboxInfoReq
 		return &pb.SandboxInfoResponse{
 			State:       pb.SandboxState_SANDBOX_STATE_UNSPECIFIED,
 			BackupState: pb.BackupState_BACKUP_STATE_UNSPECIFIED,
+			BackupError: "",
 		}, nil
 	}
 
 	return &pb.SandboxInfoResponse{
 		State:       data.SandboxState,
 		BackupState: data.BackupState,
+		BackupError: *data.BackupErrorReason,
 	}, nil
 }
 

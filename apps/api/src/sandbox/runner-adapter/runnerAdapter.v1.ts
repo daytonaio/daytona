@@ -28,6 +28,7 @@ import {
   BuildSnapshotRequest,
   RunnerServiceClient,
   RUNNER_SERVICE_NAME,
+  UpdateNetworkSettingsRequest,
 } from '@daytonaio/runner-grpc-client'
 import { ClientGrpc, ClientProxyFactory, Transport } from '@nestjs/microservices'
 import { ChannelCredentials, credentials, Metadata } from '@grpc/grpc-js'
@@ -349,5 +350,15 @@ export class RunnerAdapterV1 implements RunnerAdapter {
       ),
     )
     return response.daemonVersion
+  }
+
+  async updateNetworkSettings(sandboxId: string, networkBlockAll?: boolean, networkAllowList?: string): Promise<void> {
+    const request: UpdateNetworkSettingsRequest = {
+      sandboxId,
+      networkBlockAll: networkBlockAll,
+      networkAllowList: networkAllowList,
+    }
+
+    await firstValueFrom(this.sandboxServiceClient.updateNetworkSettings(request, this.getMetadata()))
   }
 }

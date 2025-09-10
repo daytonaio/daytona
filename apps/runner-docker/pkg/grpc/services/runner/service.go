@@ -5,6 +5,7 @@ package runner
 
 import (
 	"log/slog"
+	"time"
 
 	pb "github.com/daytonaio/runner-docker/gen/pb/runner/v1"
 	"github.com/daytonaio/runner-docker/pkg/cache"
@@ -14,14 +15,16 @@ import (
 type RunnerServiceConfig struct {
 	Log          *slog.Logger
 	DockerClient client.APIClient
-	Cache        cache.IRunnerCache
+	Cache        cache.ICache[SystemMetrics]
+	Interval     time.Duration
 }
 
 type RunnerService struct {
 	pb.UnimplementedRunnerServiceServer
 	log          *slog.Logger
 	dockerClient client.APIClient
-	cache        cache.IRunnerCache
+	cache        cache.ICache[SystemMetrics]
+	interval     time.Duration
 }
 
 // new service
@@ -30,5 +33,6 @@ func NewRunnerService(config RunnerServiceConfig) *RunnerService {
 		log:          config.Log.With("service", "runner"),
 		dockerClient: config.DockerClient,
 		cache:        config.Cache,
+		interval:     config.Interval,
 	}
 }
