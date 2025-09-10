@@ -95,8 +95,26 @@
     }
   },
   "release": {
+    "projects": ["apps/*", "libs/*"],
+    "changelog": {
+      "workspaceChangelog": {
+        "file": false,
+        "createRelease": "github"
+      }
+    },
     "version": {
-      "preVersionCommand": "yarn dlx nx run-many -t build"
+      "manifestRootsToUpdate": ["dist"],
+      "conventionalCommits": true
+    },
+    "conventionalCommits": {
+      "types": {
+        "__INVALID__": {
+          "semverBump": "patch",
+          "changelog": {
+            "title": "Uncategorized changes"
+          }
+        }
+      }
     }
   }
 }

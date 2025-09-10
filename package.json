@@ -14,7 +14,7 @@
     "lint:fix": "eslint \"{apps,libs,test}/**/*.{ts,tsx}\" --fix",
     "lint:jupyter": "nbqa pylint examples/jupyter --recursive=y -sn",
     "build": "nx run-many --target=build --all --parallel=$(getconf _NPROCESSORS_ONLN) --configuration=development",
-    "build:production": "nx run-many --target=build --all --parallel=$(getconf _NPROCESSORS_ONLN) --configuration=production",
+    "build:production": "nx run-many --target=build --all --parallel=$(getconf _NPROCESSORS_ONLN) --configuration=production --nxBail=true",
     "serve": "nx run-many --target=serve --all --exclude=daemon --parallel=$(getconf _NPROCESSORS_ONLN) --configuration=development",
     "serve:skip-runner": "nx run-many --target=serve --all --exclude=runner,daemon --parallel=$(getconf _NPROCESSORS_ONLN) --configuration=development",
     "serve:skip-proxy": "nx run-many --target=serve --all --exclude=proxy,daemon --parallel=$(getconf _NPROCESSORS_ONLN) --configuration=development",

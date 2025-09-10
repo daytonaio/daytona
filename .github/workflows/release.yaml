@@ -1,0 +1,93 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Version to release (start with "v")
+        required: true
+        default: 'v0.0.0-dev'
+      pypi_pkg_version:
+        description: 'PyPI package version (default: version)'
+        required: false
+      npm_pkg_version:
+        description: 'NPM package version (default: version)'
+        required: false
+      npm_tag:
+        description: 'NPM tag (default: latest)'
+        required: false
+        default: 'latest'
+
+env:
+  VERSION: ${{ inputs.version }}
+  PYPI_PKG_VERSION: ${{ inputs.pypi_pkg_version || inputs.version}}
+  NPM_PKG_VERSION: ${{ inputs.npm_pkg_version || inputs.version}}
+  NPM_TAG: ${{ inputs.npm_tag }}
+  NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+  PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/daytonaio/daytona-devcontainer:main
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-tags: true
+          fetch-depth: 0
+
+      - name: Configure git
+        run: |
+          git config --global --add safe.directory $GITHUB_WORKSPACE
+          git config --global user.name "Daytona Release Bot"
+          git config --global user.email "daytona-release@users.noreply.github.com"
+
+      - name: Dependencies
+        run: |
+          corepack enable
+          python3 -m pip install --upgrade pip
+          python3 -m pip install "poetry==2.1.3"
+          go install github.com/swaggo/swag/cmd/swag@v1.16.4
+          yarn install --immutable
+          poetry lock
+          poetry install
+          go work sync
+          go env -w GOFLAGS="-buildvcs=false"
+
+      - name: Build projects
+        run: yarn build:production
+
+      # Write version to required folders so nx release can run
+      - name: Write package.json to required folders
+        run: |
+          echo '{
+            "name": "api",
+            "version": "0.0.0"
+          }' > dist/package.json
+          echo '{
+            "name": "api",
+            "version": "0.0.0"
+          }' > apps/api/package.json
+          echo '{
+            "name": "dashboard",
+            "version": "0.0.0"
+          }' > apps/dashboard/package.json
+          echo '{
+            "name": "docs",
+            "version": "0.0.0"
+          }' > apps/docs/package.json
+          echo '{
+            "name": "runner",
+            "version": "0.0.0"
+          }' > apps/runner/package.json
+
+      - name: Create release
+        run: yarn nx release ${{ inputs.version }} --skip-publish --verbose
+
+      # Don't publish projects with nx for now
+      - name: Publish projects
+        run: yarn publish
