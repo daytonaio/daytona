@@ -6,7 +6,7 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Cron, CronExpression } from '@nestjs/schedule'
-import { In, IsNull, LessThan, Not, Or, Raw, Repository } from 'typeorm'
+import { In, LessThan, Not, Repository } from 'typeorm'
 import { DockerRegistryService } from '../../docker-registry/services/docker-registry.service'
 import { Snapshot } from '../entities/snapshot.entity'
 import { SnapshotState } from '../enums/snapshot-state.enum'
@@ -478,7 +478,7 @@ export class SnapshotManager {
       return DONT_SYNC_AGAIN
     }
 
-    // TODO: add sleep?
+    await new Promise((resolve) => setTimeout(resolve, 1000))
     return SYNC_AGAIN
   }
 
@@ -603,7 +603,11 @@ export class SnapshotManager {
     if (sandboxInfo.state === SandboxState.STARTED) {
       await this.updateSnapshotState(snapshot.id, SnapshotState.ACTIVE)
     } else {
-      await this.updateSnapshotState(snapshot.id, SnapshotState.ERROR, 'Snapshot validation failed')
+      await this.updateSnapshotState(
+        snapshot.id,
+        SnapshotState.ERROR,
+        'Validation failed, ensure your entrypoint is valid/long-running',
+      )
     }
 
     try {
@@ -642,16 +646,6 @@ export class SnapshotManager {
       const runnerAdapter = await this.runnerAdapterFactory.create(runner)
 
       await runnerAdapter.buildSnapshot(snapshot.buildInfo, snapshot.organizationId, registry, true)
-
-      // // save snapshotRunner
-
-      // const snapshotRef = `${registry.url}/${registry.project}/${snapshot.buildInfo.snapshotRef}`
-
-      // snapshot.ref = snapshotRef
-      // await this.snapshotRepository.save(snapshot)
-
-      // // Wait for 30 seconds because of Harbor's delay at making newly created snapshots available
-      // await new Promise((resolve) => setTimeout(resolve, 30000))
     } catch (err) {
       if (err.code === 'ECONNRESET') {
         // Connection reset, retry later
