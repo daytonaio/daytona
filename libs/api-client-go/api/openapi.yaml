@@ -7805,17 +7805,16 @@ components:
     CreateRunner:
       example:
         diskGiB: 1.4658129805029452
+        apiUrl: apiUrl
         apiKey: apiKey
         proxyUrl: proxyUrl
-        cpu: 0.8008281904610115
-        gpu: 5.962133916683182
-        version: version
-        capacity: 5.637376656633329
-        apiUrl: apiUrl
         memoryGiB: 6.027456183070403
         domain: domain
+        cpu: 0.8008281904610115
         region: us
+        gpu: 5.962133916683182
         class: small
+        version: version
         gpuType: gpuType
       properties:
         domain:
@@ -7843,8 +7842,6 @@ components:
             - large
           example: small
           type: string
-        capacity:
-          type: number
         region:
           example: us
           type: string
@@ -7853,7 +7850,6 @@ components:
       required:
         - apiKey
         - apiUrl
-        - capacity
         - class
         - cpu
         - diskGiB
@@ -7887,8 +7883,6 @@ components:
         apiKey: api-key-123
         currentMemoryUsagePercentage: 68.2
         availabilityScore: 85
-        used: 2
-        capacity: 10
         currentDiskUsagePercentage: 33.8
         currentCpuUsagePercentage: 45.6
         createdAt: 2023-10-01T12:00:00Z
@@ -7956,14 +7950,6 @@ components:
             - $ref: '#/components/schemas/SandboxClass'
           description: The class of the runner
           example: small
-        used:
-          description: The current usage of the runner
-          example: 2
-          type: number
-        capacity:
-          description: The capacity of the runner
-          example: 10
-          type: number
         currentCpuUsagePercentage:
           description: Current CPU usage percentage
           example: 45.6
@@ -8028,7 +8014,6 @@ components:
       required:
         - apiKey
         - apiUrl
-        - capacity
         - class
         - cpu
         - createdAt
@@ -8043,7 +8028,6 @@ components:
         - state
         - unschedulable
         - updatedAt
-        - used
         - version
       type: object
     RunnerSnapshotDto:

@@ -52,10 +52,6 @@ export class CreateRunnerDto {
   })
   class: SandboxClass
 
-  @IsNumber()
-  @ApiProperty()
-  capacity: number
-
   @IsString()
   @ApiProperty({
     example: 'us',

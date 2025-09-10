@@ -21,7 +21,6 @@ import { RunnerService } from './sandbox/services/runner.service'
 
 import { SandboxClass } from './sandbox/enums/sandbox-class.enum'
 import { getOpenApiConfig } from './openapi.config'
-import { SchedulerRegistry } from '@nestjs/schedule'
 import { EventEmitter2 } from '@nestjs/event-emitter'
 import { AuditInterceptor } from './audit/interceptors/audit.interceptor'
 
@@ -114,7 +113,6 @@ async function bootstrap() {
         diskGiB: 50,
         gpu: 0,
         gpuType: 'none',
-        capacity: 100,
         region: 'us',
         class: SandboxClass.SMALL,
         domain: 'localtest.me:3003',
