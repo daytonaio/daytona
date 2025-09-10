@@ -40,11 +40,11 @@ export function TierAccordion({
   onUpgrade,
   onDowngrade,
 }: Props) {
-  const nextTier = organizationTier?.tier ? organizationTier.tier + 1 : 1
+  const nextTiers = tiers.filter((t) => t.tier > (organizationTier?.tier || 0)).map((t) => String(t.tier))
 
   return (
     <>
-      <Accordion type="multiple" className="w-full" defaultValue={[String(nextTier)]}>
+      <Accordion type="multiple" className="w-full" defaultValue={nextTiers}>
         {tiers.map((tier) => {
           const isCurrentTier = organizationTier?.tier === tier.tier
           const topUpChecked =
