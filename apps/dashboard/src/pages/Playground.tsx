@@ -1,14 +1,18 @@
-import React, { useMemo, useState } from 'react'
+import React, { useMemo, useState, useCallback, useEffect } from 'react'
 import Editor from '@monaco-editor/react'
 import { Button } from '../components/ui/button'
 import { Card, CardContent } from '../components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select'
 import { Label } from '../components/ui/label'
-import { Daytona } from '@daytonaio/sdk'
+import { Daytona, SandboxTsCodeToolbox, SandboxPythonCodeToolbox } from '@daytonaio/sdk'
 import '../components/monaco'
 import { useAuth } from 'react-oidc-context'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { CodeLanguage, SAMPLES } from '@/playground-samples'
+import { FitAddon } from '@xterm/addon-fit'
+import { WebLinksAddon } from '@xterm/addon-web-links'
+import { useXTerm } from 'react-xtermjs'
+import '@xterm/xterm/css/xterm.css'
 
 const files = import.meta.glob('../../../../dist/libs/sdk-typescript/**/*.d.ts', {
   eager: true,
@@ -24,32 +28,44 @@ const Playground: React.FC = () => {
   const [tsCode, setTsCode] = useState<string>(SAMPLES[CodeLanguage.TypeScript].Default)
   const [pyCode, setPyCode] = useState<string>(SAMPLES[CodeLanguage.Python].Default)
   const [bashCode, setBashCode] = useState<string>(SAMPLES[CodeLanguage.Bash].Default)
-  const [output, setOutput] = useState<string>('')
   const [isRunning, setIsRunning] = useState<boolean>(false)
   const { user } = useAuth()
   const { selectedOrganization } = useSelectedOrganization()
 
-  const handleReload = () => {
-    switch (language) {
-      case CodeLanguage.TypeScript:
-        handleSampleChange(selectedSample, language)
-        break
-      case CodeLanguage.Python:
-        handleSampleChange(selectedSample, language)
-        break
-      case CodeLanguage.Bash:
-        handleSampleChange(selectedSample, language)
-        break
+  const { instance: terminal, ref: terminalRef } = useXTerm()
+
+  const fitAddon = new FitAddon()
+  const webLinksAddon = new WebLinksAddon()
+
+  useEffect(() => {
+    // Load the fit addon
+    terminal?.loadAddon(fitAddon)
+    terminal?.loadAddon(webLinksAddon)
+
+    fitAddon.fit()
+
+    // Hide cursor
+    terminal?.write('\x1b[?25l')
+
+    const handleResize = () => fitAddon.fit()
+
+    // Handle resize event
+    window.addEventListener('resize', handleResize)
+    return () => {
+      window.removeEventListener('resize', handleResize)
+      terminal?.dispose()
+      fitAddon.dispose()
+      webLinksAddon.dispose()
     }
-  }
+  }, [terminalRef, terminal])
 
-  const handleLanguageChange = (value: string) => {
-    setLanguage(value as CodeLanguage)
-    setLanguageSamples(Object.keys(SAMPLES[value as CodeLanguage]))
-    handleSampleChange('Default', value as CodeLanguage)
-  }
+  const clearTerminal = useCallback(() => {
+    if (terminal) {
+      terminal.clear()
+    }
+  }, [terminal])
 
-  const handleSampleChange = (value: string, language: CodeLanguage) => {
+  const handleSampleChange = useCallback((value: string, language: CodeLanguage) => {
     setSelectedSample(value)
     switch (language) {
       case CodeLanguage.TypeScript:
@@ -62,23 +78,51 @@ const Playground: React.FC = () => {
         setBashCode(SAMPLES[language][value])
         break
     }
-  }
+  }, [])
 
-  const handleCodeChange = (value: string | undefined) => {
-    if (value !== undefined) {
-      switch (language) {
-        case CodeLanguage.TypeScript:
-          setTsCode(value)
-          break
-        case CodeLanguage.Python:
-          setPyCode(value)
-          break
-        case CodeLanguage.Bash:
-          setBashCode(value)
-          break
-      }
+  const handleReload = useCallback(() => {
+    clearTerminal()
+    switch (language) {
+      case CodeLanguage.TypeScript:
+        handleSampleChange(selectedSample, language)
+        break
+      case CodeLanguage.Python:
+        handleSampleChange(selectedSample, language)
+        break
+      case CodeLanguage.Bash:
+        handleSampleChange(selectedSample, language)
+        break
     }
-  }
+  }, [clearTerminal, language, handleSampleChange, selectedSample])
+
+  const handleLanguageChange = useCallback(
+    (value: string) => {
+      clearTerminal()
+      setLanguage(value as CodeLanguage)
+      setLanguageSamples(Object.keys(SAMPLES[value as CodeLanguage]))
+      handleSampleChange('Default', value as CodeLanguage)
+    },
+    [clearTerminal, handleSampleChange],
+  )
+
+  const handleCodeChange = useCallback(
+    (value: string | undefined) => {
+      if (value !== undefined) {
+        switch (language) {
+          case CodeLanguage.TypeScript:
+            setTsCode(value)
+            break
+          case CodeLanguage.Python:
+            setPyCode(value)
+            break
+          case CodeLanguage.Bash:
+            setBashCode(value)
+            break
+        }
+      }
+    },
+    [language],
+  )
 
   const editorValue = useMemo(() => {
     switch (language) {
@@ -93,9 +137,14 @@ const Playground: React.FC = () => {
     }
   }, [language, tsCode, pyCode, bashCode])
 
-  const runCode = async () => {
+  const runCode = useCallback(async () => {
+    if (!terminal) return
+
     setIsRunning(true)
-    setOutput('Running code...')
+
+    // Clear terminal and show running message
+    terminal.clear()
+    terminal.write('Running code...\r\n')
 
     try {
       const daytona = new Daytona({
@@ -104,6 +153,7 @@ const Playground: React.FC = () => {
         organizationId: selectedOrganization?.id,
       })
 
+      terminal.write('Creating sandbox...\r\n')
       const sandbox = await daytona.create({
         language: language === CodeLanguage.Bash ? 'python' : language,
         labels: {
@@ -114,25 +164,49 @@ const Playground: React.FC = () => {
         autoDeleteInterval: 0,
       })
 
-      if (language === CodeLanguage.Bash) {
-        await sandbox.process.createSession('exec-session')
-        const response = await sandbox.process.executeSessionCommand('exec-session', {
-          command: bashCode,
-        })
-        setOutput(response.output ?? 'No output')
-      } else {
-        const response = await sandbox.process.codeRun(language === 'typescript' ? tsCode : pyCode)
-        setOutput(response.result)
+      terminal.write('Sandbox created. Executing code...\r\n\r\n')
+
+      let command = ''
+      switch (language) {
+        case CodeLanguage.Bash:
+          command = bashCode
+          break
+        case CodeLanguage.TypeScript:
+          command = new SandboxTsCodeToolbox().getRunCommand(tsCode)
+          break
+        case CodeLanguage.Python:
+          command = new SandboxPythonCodeToolbox().getRunCommand(pyCode)
+          break
       }
 
+      await sandbox.process.createSession('exec-session')
+      const response = await sandbox.process.executeSessionCommand('exec-session', {
+        command,
+        runAsync: true,
+      })
+      if (response.cmdId) {
+        await sandbox.process.getSessionCommandLogs(
+          'exec-session',
+          response.cmdId,
+          (stdout) => {
+            terminal.write(stdout.replace('\n', '\r\n'))
+          },
+          (stderr) => {
+            terminal.write(stderr.replace('\n', '\r\n'))
+          },
+        )
+      }
+
+      terminal.write('\r\n\r\nCleaning up sandbox...\r\n')
       await sandbox.delete()
+      terminal.write('Done!\r\n')
     } catch (error) {
       console.error(error)
-      setOutput(`Error: ${error instanceof Error ? error.message : String(error)}`)
+      terminal.write(`\r\nError: ${error instanceof Error ? error.message : String(error)}\r\n`)
     } finally {
       setIsRunning(false)
     }
-  }
+  }, [terminal, language, tsCode, pyCode, bashCode, selectedSample, user?.access_token, selectedOrganization?.id])
 
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -178,6 +252,10 @@ const Playground: React.FC = () => {
 
         <Button onClick={handleReload} className="mt-auto">
           Reload Example
+        </Button>
+
+        <Button onClick={clearTerminal} variant="outline" className="mt-auto">
+          Clear Terminal
         </Button>
       </div>
 
@@ -228,13 +306,11 @@ const Playground: React.FC = () => {
           </Card>
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-2 h-full">
           <h2 className="text-xl font-semibold">Output</h2>
           <Card>
-            <CardContent className="p-0">
-              <div className="h-[500px] bg-black text-white font-mono p-4 overflow-auto rounded-md">
-                <pre className="m-0">{output}</pre>
-              </div>
+            <CardContent className="p-0 h-[500px]">
+              <div ref={terminalRef} className="h-full w-full rounded-md overflow-hidden" />
             </CardContent>
           </Card>
         </div>

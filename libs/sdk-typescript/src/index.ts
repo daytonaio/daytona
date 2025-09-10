@@ -24,6 +24,8 @@ export { Sandbox } from './Sandbox'
 export type { SandboxCodeToolbox } from './Sandbox'
 export type { CreateSnapshotParams } from './Snapshot'
 export { ComputerUse, Mouse, Keyboard, Screenshot, Display } from './ComputerUse'
+export { SandboxTsCodeToolbox } from './code-toolbox/SandboxTsCodeToolbox'
+export { SandboxPythonCodeToolbox } from './code-toolbox/SandboxPythonCodeToolbox'
 
 // Chart and artifact types
 export { ChartType } from './types/Charts'
