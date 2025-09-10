@@ -9,6 +9,7 @@ import { Repository } from 'typeorm'
 import { Region } from '../entities/region.entity'
 import { CreateRegionDto } from '../dto/create-region.dto'
 import { Organization } from '../../organization/entities/organization.entity'
+import { DockerRegistry } from '../../docker-registry/entities/docker-registry.entity'
 
 @Injectable()
 export class RegionService {
@@ -17,10 +18,11 @@ export class RegionService {
   constructor(
     @InjectRepository(Region)
     private readonly regionRepository: Repository<Region>,
+    @InjectRepository(DockerRegistry)
+    private readonly dockerRegistryRepository: Repository<DockerRegistry>,
   ) {}
 
-  async create(organization: Organization, createRegionDto: CreateRegionDto): Promise<Region> {
-    // Check if region with same name already exists for organization
+  async create(createRegionDto: CreateRegionDto, organization: Organization): Promise<Region> {
     const existingRegion = await this.regionRepository.findOne({
       where: {
         organizationId: organization.id,
@@ -33,23 +35,31 @@ export class RegionService {
     }
 
     const region = new Region()
-    region.code = Region.generateCode()
     region.name = createRegionDto.name
     region.organizationId = organization.id
-    region.dockerRegistryId = createRegionDto.dockerRegistryId || null
 
-    const savedRegion = await this.regionRepository.save(region)
-    this.logger.debug(`Created region ${savedRegion.code} for organization ${organization.id}`)
-    return savedRegion
+    if (createRegionDto.dockerRegistryId) {
+      const dockerRegistry = await this.dockerRegistryRepository.findOne({
+        where: { id: createRegionDto.dockerRegistryId, organizationId: organization.id },
+      })
+
+      if (!dockerRegistry) {
+        throw new NotFoundException(`Docker registry with ID ${createRegionDto.dockerRegistryId} not found`)
+      }
+
+      region.dockerRegistryId = dockerRegistry.id
+    }
+
+    return await this.regionRepository.save(region)
   }
 
-  async findOne(code: string): Promise<Region> {
+  async findOne(id: string): Promise<Region> {
     const region = await this.regionRepository.findOne({
-      where: { code },
+      where: { id },
     })
 
     if (!region) {
-      throw new NotFoundException(`Region with code ${code} not found`)
+      throw new NotFoundException('Region not found')
     }
 
     return region
@@ -66,19 +76,23 @@ export class RegionService {
     })
   }
 
-  async delete(code: string): Promise<void> {
-    const region = await this.findOne(code)
-
+  async delete(id: string): Promise<void> {
+    const region = await this.findOne(id)
     await this.regionRepository.remove(region)
-    this.logger.debug(`Deleted region ${code}`)
   }
 
-  async findByNameAndOrganization(name: string, organizationId: string): Promise<Region | null> {
-    return this.regionRepository.findOne({
+  async findOneByNameAndOrganization(name: string, organizationId: string): Promise<Region> {
+    const region = await this.regionRepository.findOne({
       where: {
         name,
         organizationId,
       },
     })
+
+    if (!region) {
+      throw new NotFoundException('Region not found')
+    }
+
+    return region
   }
 }

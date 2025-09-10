@@ -97,8 +97,10 @@ export class Runner {
   })
   availabilityScore: number
 
-  @Column()
-  region: string
+  @Column({
+    type: 'uuid',
+  })
+  regionId: string
 
   @Column({
     type: 'enum',

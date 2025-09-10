@@ -24,7 +24,7 @@ import { getOpenApiConfig } from './openapi.config'
 import { SchedulerRegistry } from '@nestjs/schedule'
 import { EventEmitter2 } from '@nestjs/event-emitter'
 import { AuditInterceptor } from './audit/interceptors/audit.interceptor'
-import { LOCAL_DEVELOPMENT_RUNNER_ORGANIZATION_ID } from './sandbox/constants/runner.constants'
+import { GlobalRegionsIds } from './sandbox/constants/global-regions.constant'
 
 // https options
 const httpsEnabled = process.env.CERT_PATH && process.env.CERT_KEY_PATH
@@ -107,24 +107,21 @@ async function bootstrap() {
 
     const runners = await runnerService.findAll()
     if (!runners.find((runner) => runner.domain === 'localtest.me:3003')) {
-      await runnerService.create(
-        {
-          apiUrl: 'http://localhost:3003',
-          proxyUrl: 'http://localhost:3003',
-          apiKey: 'secret_api_token',
-          cpu: 4,
-          memoryGiB: 8,
-          diskGiB: 50,
-          gpu: 0,
-          gpuType: 'none',
-          capacity: 100,
-          region: 'us',
-          class: SandboxClass.SMALL,
-          domain: 'localtest.me:3003',
-          version: '0',
-        },
-        LOCAL_DEVELOPMENT_RUNNER_ORGANIZATION_ID,
-      )
+      await runnerService.create({
+        apiUrl: 'http://localhost:3003',
+        proxyUrl: 'http://localhost:3003',
+        apiKey: 'secret_api_token',
+        cpu: 4,
+        memoryGiB: 8,
+        diskGiB: 50,
+        gpu: 0,
+        gpuType: 'none',
+        capacity: 100,
+        regionId: GlobalRegionsIds.US,
+        class: SandboxClass.SMALL,
+        domain: 'localtest.me:3003',
+        version: '0',
+      })
     }
   }
 

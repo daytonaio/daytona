@@ -31,6 +31,7 @@ import { Audit, TypedRequest } from '../../audit/decorators/audit.decorator'
 import { AuditAction } from '../../audit/enums/audit-action.enum'
 import { AuditTarget } from '../../audit/enums/audit-target.enum'
 
+// TODO: region access guard
 @ApiTags('regions')
 @Controller('regions')
 @ApiHeader(CustomHeaders.ORGANIZATION_ID)
@@ -74,10 +75,11 @@ export class RegionController {
   @Audit({
     action: AuditAction.CREATE,
     targetType: AuditTarget.REGION,
-    targetIdFromResult: (result: RegionDto) => result?.code,
+    targetIdFromResult: (result: RegionDto) => result?.id,
     requestMetadata: {
       body: (req: TypedRequest<CreateRegionDto>) => ({
         name: req.body?.name,
+        dockerRegistryId: req.body?.dockerRegistryId,
       }),
     },
   })
@@ -85,11 +87,11 @@ export class RegionController {
     @AuthContext() authContext: OrganizationAuthContext,
     @Body() createRegionDto: CreateRegionDto,
   ): Promise<RegionDto> {
-    const region = await this.regionService.create(authContext.organization, createRegionDto)
+    const region = await this.regionService.create(createRegionDto, authContext.organization)
     return RegionDto.fromRegion(region)
   }
 
-  @Delete(':code')
+  @Delete(':id')
   @HttpCode(204)
   @ApiOperation({
     summary: 'Delete a region',
@@ -100,17 +102,17 @@ export class RegionController {
     description: 'The region has been successfully deleted.',
   })
   @ApiParam({
-    name: 'code',
-    description: 'Region code',
-    example: 'abc12345',
+    name: 'id',
+    description: 'Region ID',
+    example: '123e4567-e89b-12d3-a456-426614174000',
   })
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.DELETE_REGIONS])
   @Audit({
     action: AuditAction.DELETE,
     targetType: AuditTarget.REGION,
-    targetIdFromRequest: (req) => req.params.code,
+    targetIdFromRequest: (req) => req.params.id,
   })
-  async deleteRegion(@Param('code') code: string): Promise<void> {
-    await this.regionService.delete(code)
+  async deleteRegion(@Param('id') id: string): Promise<void> {
+    await this.regionService.delete(id)
   }
 }

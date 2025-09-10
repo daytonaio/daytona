@@ -50,7 +50,6 @@ export const RegionTable: React.FC<RegionTableProps> = ({
         <TableHeader>
           <TableRow>
             <TableHead>Name</TableHead>
-            <TableHead>Code</TableHead>
             <TableHead>Docker Registry ID</TableHead>
             <TableHead>Created</TableHead>
             <TableHead>Updated</TableHead>
@@ -61,11 +60,6 @@ export const RegionTable: React.FC<RegionTableProps> = ({
           {data.map((region) => (
             <TableRow key={region.name}>
               <TableCell className="font-medium">{region.name}</TableCell>
-              <TableCell>
-                <code className="relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm">
-                  {region.code}
-                </code>
-              </TableCell>
               <TableCell>
                 {region.dockerRegistryId ? (
                   <code className="relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm">

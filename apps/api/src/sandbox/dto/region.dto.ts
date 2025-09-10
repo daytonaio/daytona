@@ -8,10 +8,10 @@ import { Region } from '../entities/region.entity'
 
 export class RegionDto {
   @ApiProperty({
-    description: 'Region code',
-    example: 'abc12345',
+    description: 'Region ID',
+    example: '123e4567-e89b-12d3-a456-426614174000',
   })
-  code: string
+  id: string
 
   @ApiProperty({
     description: 'Region name',
@@ -46,7 +46,7 @@ export class RegionDto {
 
   static fromRegion(region: Region): RegionDto {
     return {
-      code: region.code,
+      id: region.id,
       name: region.name,
       organizationId: region.organizationId,
       dockerRegistryId: region.dockerRegistryId,

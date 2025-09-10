@@ -3,14 +3,13 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Column, CreateDateColumn, Entity, PrimaryColumn, Unique, UpdateDateColumn } from 'typeorm'
-import { nanoid } from 'nanoid'
+import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, Unique, UpdateDateColumn } from 'typeorm'
 
 @Entity()
 @Unique(['organizationId', 'name'])
 export class Region {
-  @PrimaryColumn()
-  code: string
+  @PrimaryGeneratedColumn('uuid')
+  id: string
 
   @Column()
   name: string
@@ -24,7 +23,7 @@ export class Region {
     type: 'uuid',
     nullable: true,
   })
-  dockerRegistryId: string
+  dockerRegistryId?: string
 
   @CreateDateColumn({
     type: 'timestamp with time zone',
@@ -35,8 +34,4 @@ export class Region {
     type: 'timestamp with time zone',
   })
   updatedAt: Date
-
-  static generateCode(): string {
-    return nanoid(8).toLowerCase()
-  }
 }
