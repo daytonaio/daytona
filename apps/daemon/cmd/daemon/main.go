@@ -4,15 +4,16 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"io"
 	"os"
 	"os/signal"
-	"path/filepath"
 	"syscall"
 
 	golog "log"
 
+	common_daemon "github.com/daytonaio/common-go/pkg/daemon"
 	"github.com/daytonaio/daemon/cmd/daemon/config"
 	"github.com/daytonaio/daemon/pkg/ssh"
 	"github.com/daytonaio/daemon/pkg/terminal"
@@ -25,15 +26,21 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	c.ProjectDir = filepath.Join(os.Getenv("HOME"))
 
-	if projectDir := os.Getenv("DAYTONA_PROJECT_DIR"); projectDir != "" {
-		c.ProjectDir = projectDir
-	}
+	workDirFlag := flag.String("work-dir", "", "optional; sets the working directory; defaults to the current directory; use "+common_daemon.UseUserHomeAsWorkDir+" to switch to the user's home directory")
+	flag.Parse()
 
-	if _, err := os.Stat(c.ProjectDir); os.IsNotExist(err) {
-		if err := os.MkdirAll(c.ProjectDir, 0755); err != nil {
-			panic(fmt.Errorf("failed to create project directory: %w", err))
+	if workDirFlag != nil && *workDirFlag != "" {
+		workDir := *workDirFlag
+		if workDir == common_daemon.UseUserHomeAsWorkDir {
+			workDir, err = os.UserHomeDir()
+			if err != nil {
+				panic(fmt.Errorf("failed to get user home directory: %w", err))
+			}
+		}
+		err = os.Chdir(workDir)
+		if err != nil {
+			panic(fmt.Errorf("failed to change working directory to %s: %w", workDir, err))
 		}
 	}
 
@@ -52,8 +59,13 @@ func main() {
 
 	errChan := make(chan error)
 
+	workDir, err := os.Getwd()
+	if err != nil {
+		panic(fmt.Errorf("failed to get current working directory: %w", err))
+	}
+
 	toolBoxServer := &toolbox.Server{
-		ProjectDir: c.ProjectDir,
+		WorkDir: workDir,
 	}
 
 	// Start the toolbox server in a go routine
@@ -72,8 +84,8 @@ func main() {
 	}()
 
 	sshServer := &ssh.Server{
-		ProjectDir:        c.ProjectDir,
-		DefaultProjectDir: c.ProjectDir,
+		WorkDir:        workDir,
+		DefaultWorkDir: workDir,
 	}
 	go func() {
 		if err := sshServer.Start(); err != nil {

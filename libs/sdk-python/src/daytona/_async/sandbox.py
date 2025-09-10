@@ -8,10 +8,10 @@ from typing import Dict, Optional
 from daytona_api_client_async import PortPreviewUrl
 from daytona_api_client_async import Sandbox as SandboxDto
 from daytona_api_client_async import SandboxApi, SshAccessDto, SshAccessValidationDto, ToolboxApi
+from deprecated import deprecated
 from pydantic import ConfigDict, PrivateAttr
 
 from .._utils.errors import intercept_errors
-from .._utils.path import prefix_relative_path
 from .._utils.timeout import with_timeout
 from ..common.errors import DaytonaError
 from ..common.protocols import SandboxCodeToolbox
@@ -87,11 +87,10 @@ class AsyncSandbox(SandboxDto):
         self._sandbox_api = sandbox_api
         self._toolbox_api = toolbox_api
         self._code_toolbox = code_toolbox
-        self._root_dir = ""
 
-        self._fs = AsyncFileSystem(self.id, toolbox_api, self.__get_root_dir)
-        self._git = AsyncGit(self.id, toolbox_api, self.__get_root_dir)
-        self._process = AsyncProcess(self.id, code_toolbox, toolbox_api, self.__get_root_dir, self.get_preview_link)
+        self._fs = AsyncFileSystem(self.id, toolbox_api)
+        self._git = AsyncGit(self.id, toolbox_api)
+        self._process = AsyncProcess(self.id, code_toolbox, toolbox_api, self.get_preview_link)
         self._computer_use = AsyncComputerUse(self.id, toolbox_api)
 
     @property
@@ -124,20 +123,45 @@ class AsyncSandbox(SandboxDto):
         instance = await self._sandbox_api.get_sandbox(self.id)
         self.__process_sandbox_dto(instance)
 
-    @intercept_errors(message_prefix="Failed to get sandbox root directory: ")
-    async def get_user_root_dir(self) -> str:
-        """Gets the root directory path for the logged in user inside the Sandbox.
+    @intercept_errors(message_prefix="Failed to get user home directory: ")
+    async def get_user_home_dir(self) -> str:
+        """Gets the user's home directory path inside the Sandbox.
 
         Returns:
-            str: The absolute path to the Sandbox root directory for the logged in user.
+            str: The absolute path to the user's home directory inside the Sandbox.
 
         Example:
             ```python
-            root_dir = await sandbox.get_user_root_dir()
-            print(f"Sandbox root: {root_dir}")
+            user_home_dir = await sandbox.get_user_home_dir()
+            print(f"Sandbox user home: {user_home_dir}")
             ```
         """
-        response = await self._toolbox_api.get_project_dir(self.id)
+        response = await self._toolbox_api.get_user_home_dir(self.id)
+        return response.dir
+
+    @deprecated(
+        reason=(
+            "Method is deprecated. Use `get_user_home_dir` instead. This method will be removed in a future version."
+        )
+    )
+    async def get_user_root_dir(self) -> str:
+        return await self.get_user_home_dir()
+
+    @intercept_errors(message_prefix="Failed to get working directory path: ")
+    async def get_work_dir(self) -> str:
+        """Gets the working directory path inside the Sandbox.
+
+        Returns:
+            str: The absolute path to the Sandbox working directory. Uses the WORKDIR specified in
+            the Dockerfile if present, or falling back to the user's home directory if not.
+
+        Example:
+            ```python
+            work_dir = await sandbox.get_work_dir()
+            print(f"Sandbox working directory: {work_dir}")
+            ```
+        """
+        response = await self._toolbox_api.get_work_dir(self.id)
         return response.dir
 
     def create_lsp_server(self, language_id: LspLanguageId, path_to_project: str) -> AsyncLspServer:
@@ -148,8 +172,8 @@ class AsyncSandbox(SandboxDto):
 
         Args:
             language_id (LspLanguageId): The language server type (e.g., LspLanguageId.PYTHON).
-            path_to_project (str): Path to the project root directory. Relative paths are resolved based on the user's
-            root directory.
+            path_to_project (str): Path to the project root directory. Relative paths are resolved
+            based on the sandbox working directory.
 
         Returns:
             LspServer: A new LSP server instance configured for the specified language.
@@ -161,7 +185,7 @@ class AsyncSandbox(SandboxDto):
         """
         return AsyncLspServer(
             language_id,
-            prefix_relative_path(self._root_dir, path_to_project),
+            path_to_project,
             self._toolbox_api,
             self.id,
         )
@@ -469,11 +493,6 @@ class AsyncSandbox(SandboxDto):
             token (str): The token to validate.
         """
         return (await self._sandbox_api.validate_ssh_access(token)).data
-
-    async def __get_root_dir(self) -> str:
-        if not self._root_dir:
-            self._root_dir = await self.get_user_root_dir()
-        return self._root_dir
 
     def __process_sandbox_dto(self, sandbox_dto: SandboxDto) -> None:
         self.id = sandbox_dto.id

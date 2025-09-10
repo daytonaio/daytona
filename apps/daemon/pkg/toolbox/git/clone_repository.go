@@ -36,7 +36,7 @@ func CloneRepository(c *gin.Context) {
 	}
 
 	gitService := git.Service{
-		ProjectDir: req.Path,
+		WorkDir: req.Path,
 	}
 
 	var auth *go_git_http.BasicAuth

@@ -21,7 +21,6 @@ import { Git } from './Git'
 import { CodeRunParams, Process } from './Process'
 import { LspLanguageId, LspServer } from './LspServer'
 import { DaytonaError } from './errors/DaytonaError'
-import { prefixRelativePath } from './utils/Path'
 import { ComputerUse } from './ComputerUse'
 
 /**
@@ -102,8 +101,6 @@ export class Sandbox implements SandboxDto {
   public networkBlockAll!: boolean
   public networkAllowList?: string
 
-  private rootDir: string
-
   /**
    * Creates a new Sandbox instance
    *
@@ -120,31 +117,51 @@ export class Sandbox implements SandboxDto {
     private readonly codeToolbox: SandboxCodeToolbox,
   ) {
     this.processSandboxDto(sandboxDto)
-    this.rootDir = ''
-    this.fs = new FileSystem(this.id, this.clientConfig, this.toolboxApi, async () => await this.getRootDir())
-    this.git = new Git(this.id, this.toolboxApi, async () => await this.getRootDir())
+    this.fs = new FileSystem(this.id, this.clientConfig, this.toolboxApi)
+    this.git = new Git(this.id, this.toolboxApi)
     this.process = new Process(
       this.id,
       this.clientConfig,
       this.codeToolbox,
       this.toolboxApi,
-      async () => await this.getRootDir(),
       async (port) => await this.getPreviewLink(port),
     )
     this.computerUse = new ComputerUse(this.id, this.toolboxApi)
   }
 
   /**
-   * Gets the root directory path for the logged in user inside the Sandbox.
+   * Gets the user's home directory path for the logged in user inside the Sandbox.
    *
-   * @returns {Promise<string | undefined>} The absolute path to the Sandbox root directory for the logged in user
+   * @returns {Promise<string | undefined>} The absolute path to the Sandbox user's home directory for the logged in user
    *
    * @example
-   * const rootDir = await sandbox.getUserRootDir();
-   * console.log(`Sandbox root: ${rootDir}`);
+   * const userHomeDir = await sandbox.getUserHomeDir();
+   * console.log(`Sandbox user home: ${userHomeDir}`);
+   */
+  public async getUserHomeDir(): Promise<string | undefined> {
+    const response = await this.toolboxApi.getUserHomeDir(this.id)
+    return response.data.dir
+  }
+
+  /**
+   * @deprecated Use `getUserHomeDir` instead. This method will be removed in a future version.
    */
   public async getUserRootDir(): Promise<string | undefined> {
-    const response = await this.toolboxApi.getProjectDir(this.id)
+    return this.getUserHomeDir()
+  }
+
+  /**
+   * Gets the working directory path inside the Sandbox.
+   *
+   * @returns {Promise<string | undefined>} The absolute path to the Sandbox working directory. Uses the WORKDIR specified
+   * in the Dockerfile if present, or falling back to the user's home directory if not.
+   *
+   * @example
+   * const workDir = await sandbox.getWorkDir();
+   * console.log(`Sandbox working directory: ${workDir}`);
+   */
+  public async getWorkDir(): Promise<string | undefined> {
+    const response = await this.toolboxApi.getWorkDir(this.id)
     return response.data.dir
   }
 
@@ -155,20 +172,14 @@ export class Sandbox implements SandboxDto {
    * diagnostics, and more.
    *
    * @param {LspLanguageId} languageId - The language server type (e.g., "typescript")
-   * @param {string} pathToProject - Path to the project root directory. Relative paths are resolved based on the user's
-   * root directory.
+   * @param {string} pathToProject - Path to the project root directory. Relative paths are resolved based on the sandbox working directory.
    * @returns {LspServer} A new LSP server instance configured for the specified language
    *
    * @example
    * const lsp = await sandbox.createLspServer('typescript', 'workspace/project');
    */
   public async createLspServer(languageId: LspLanguageId | string, pathToProject: string): Promise<LspServer> {
-    return new LspServer(
-      languageId as LspLanguageId,
-      prefixRelativePath(await this.getRootDir(), pathToProject),
-      this.toolboxApi,
-      this.id,
-    )
+    return new LspServer(languageId as LspLanguageId, pathToProject, this.toolboxApi, this.id)
   }
 
   /**
@@ -481,13 +492,6 @@ export class Sandbox implements SandboxDto {
    */
   public async validateSshAccess(token: string): Promise<SshAccessValidationDto> {
     return (await this.sandboxApi.validateSshAccess(token)).data
-  }
-
-  private async getRootDir(): Promise<string> {
-    if (!this.rootDir) {
-      this.rootDir = (await this.getUserRootDir()) || ''
-    }
-    return this.rootDir
   }
 
   /**

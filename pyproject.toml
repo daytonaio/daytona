@@ -29,6 +29,7 @@ matplotlib = ">=3.0.0,<4.0.0"
 unasync = ">=0.6.0,<0.7.0"
 docutils = "!=0.21.post1"
 deptry = "^0.23.0"
+ipykernel = "^6.29.5"
 
 [tool.basedpyright]
 typeCheckingMode = "off"
