@@ -30,8 +30,10 @@ import { RegionDto } from '../dto/region.dto'
 import { Audit, TypedRequest } from '../../audit/decorators/audit.decorator'
 import { AuditAction } from '../../audit/enums/audit-action.enum'
 import { AuditTarget } from '../../audit/enums/audit-target.enum'
+import { Region } from '../decorators/region.decorator'
+import { Region as RegionEntity } from '../entities/region.entity'
+import { RegionAccessGuard } from '../guards/region-access.guard'
 
-// TODO: region access guard
 @ApiTags('regions')
 @Controller('regions')
 @ApiHeader(CustomHeaders.ORGANIZATION_ID)
@@ -44,6 +46,7 @@ export class RegionController {
   constructor(private readonly regionService: RegionService) {}
 
   @Get()
+  @HttpCode(200)
   @ApiOperation({
     summary: 'List all regions',
     operationId: 'listRegions',
@@ -60,18 +63,17 @@ export class RegionController {
   }
 
   @Post()
-  @HttpCode(200)
+  @HttpCode(201)
   @UseInterceptors(ContentTypeInterceptor)
   @ApiOperation({
     summary: 'Create a new region',
     operationId: 'createRegion',
   })
   @ApiResponse({
-    status: 200,
+    status: 201,
     description: 'The region has been successfully created.',
     type: RegionDto,
   })
-  @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_REGIONS])
   @Audit({
     action: AuditAction.CREATE,
     targetType: AuditTarget.REGION,
@@ -83,11 +85,33 @@ export class RegionController {
       }),
     },
   })
+  @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_REGIONS])
   async createRegion(
     @AuthContext() authContext: OrganizationAuthContext,
     @Body() createRegionDto: CreateRegionDto,
   ): Promise<RegionDto> {
     const region = await this.regionService.create(createRegionDto, authContext.organization)
+    return RegionDto.fromRegion(region)
+  }
+
+  @Get(':id')
+  @HttpCode(200)
+  @ApiOperation({
+    summary: 'Get region by ID',
+    operationId: 'getRegionById',
+  })
+  @ApiResponse({
+    status: 200,
+    type: RegionDto,
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Region ID',
+    type: String,
+  })
+  @UseGuards(RegionAccessGuard)
+  @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.READ_REGIONS])
+  async getRegionById(@Region() region: RegionEntity): Promise<RegionDto> {
     return RegionDto.fromRegion(region)
   }
 
@@ -106,12 +130,13 @@ export class RegionController {
     description: 'Region ID',
     example: '123e4567-e89b-12d3-a456-426614174000',
   })
-  @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.DELETE_REGIONS])
   @Audit({
     action: AuditAction.DELETE,
     targetType: AuditTarget.REGION,
     targetIdFromRequest: (req) => req.params.id,
   })
+  @UseGuards(RegionAccessGuard)
+  @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.DELETE_REGIONS])
   async deleteRegion(@Param('id') id: string): Promise<void> {
     await this.regionService.delete(id)
   }

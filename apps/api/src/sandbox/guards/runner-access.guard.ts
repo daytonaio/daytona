@@ -24,7 +24,7 @@ export class RunnerAccessGuard implements CanActivate {
     const authContext: OrganizationAuthContext = request.user
 
     try {
-      const runner = await this.runnerService.findOne(runnerId)
+      const runner = await this.runnerService.findOneOrFail(runnerId)
       if (authContext.role !== SystemRole.ADMIN) {
         const region = await this.regionService.findOne(runner.regionId)
         if (region.organizationId !== authContext.organizationId) {

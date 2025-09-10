@@ -136,6 +136,16 @@ export class RunnerService {
     return this.runnerRepository.findOneBy({ id })
   }
 
+  async findOneOrFail(id: string): Promise<Runner> {
+    const runner = await this.runnerRepository.findOneBy({ id })
+
+    if (!runner) {
+      throw new NotFoundException('Runner not found')
+    }
+
+    return runner
+  }
+
   async findByIds(runnerIds: string[]): Promise<Runner[]> {
     if (runnerIds.length === 0) {
       return []
