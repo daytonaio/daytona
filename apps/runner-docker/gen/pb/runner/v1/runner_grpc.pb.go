@@ -239,6 +239,8 @@ const (
 	SandboxService_SandboxInfo_FullMethodName            = "/runner.v1.SandboxService/SandboxInfo"
 	SandboxService_RemoveDestroyedSandbox_FullMethodName = "/runner.v1.SandboxService/RemoveDestroyedSandbox"
 	SandboxService_SandboxDaemonVersion_FullMethodName   = "/runner.v1.SandboxService/SandboxDaemonVersion"
+	SandboxService_GetNetworkSettings_FullMethodName     = "/runner.v1.SandboxService/GetNetworkSettings"
+	SandboxService_UpdateNetworkSettings_FullMethodName  = "/runner.v1.SandboxService/UpdateNetworkSettings"
 )
 
 // SandboxServiceClient is the client API for SandboxService service.
@@ -255,6 +257,8 @@ type SandboxServiceClient interface {
 	SandboxInfo(ctx context.Context, in *SandboxInfoRequest, opts ...grpc.CallOption) (*SandboxInfoResponse, error)
 	RemoveDestroyedSandbox(ctx context.Context, in *RemoveDestroyedSandboxRequest, opts ...grpc.CallOption) (*RemoveDestroyedSandboxResponse, error)
 	SandboxDaemonVersion(ctx context.Context, in *SandboxDaemonVersionRequest, opts ...grpc.CallOption) (*SandboxDaemonVersionResponse, error)
+	GetNetworkSettings(ctx context.Context, in *GetNetworkSettingsRequest, opts ...grpc.CallOption) (*GetNetworkSettingsResponse, error)
+	UpdateNetworkSettings(ctx context.Context, in *UpdateNetworkSettingsRequest, opts ...grpc.CallOption) (*UpdateNetworkSettingsResponse, error)
 }
 
 type sandboxServiceClient struct {
@@ -345,6 +349,26 @@ func (c *sandboxServiceClient) SandboxDaemonVersion(ctx context.Context, in *San
 	return out, nil
 }
 
+func (c *sandboxServiceClient) GetNetworkSettings(ctx context.Context, in *GetNetworkSettingsRequest, opts ...grpc.CallOption) (*GetNetworkSettingsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetNetworkSettingsResponse)
+	err := c.cc.Invoke(ctx, SandboxService_GetNetworkSettings_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *sandboxServiceClient) UpdateNetworkSettings(ctx context.Context, in *UpdateNetworkSettingsRequest, opts ...grpc.CallOption) (*UpdateNetworkSettingsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateNetworkSettingsResponse)
+	err := c.cc.Invoke(ctx, SandboxService_UpdateNetworkSettings_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // SandboxServiceServer is the server API for SandboxService service.
 // All implementations must embed UnimplementedSandboxServiceServer
 // for forward compatibility.
@@ -359,6 +383,8 @@ type SandboxServiceServer interface {
 	SandboxInfo(context.Context, *SandboxInfoRequest) (*SandboxInfoResponse, error)
 	RemoveDestroyedSandbox(context.Context, *RemoveDestroyedSandboxRequest) (*RemoveDestroyedSandboxResponse, error)
 	SandboxDaemonVersion(context.Context, *SandboxDaemonVersionRequest) (*SandboxDaemonVersionResponse, error)
+	GetNetworkSettings(context.Context, *GetNetworkSettingsRequest) (*GetNetworkSettingsResponse, error)
+	UpdateNetworkSettings(context.Context, *UpdateNetworkSettingsRequest) (*UpdateNetworkSettingsResponse, error)
 	mustEmbedUnimplementedSandboxServiceServer()
 }
 
@@ -392,6 +418,12 @@ func (UnimplementedSandboxServiceServer) RemoveDestroyedSandbox(context.Context,
 }
 func (UnimplementedSandboxServiceServer) SandboxDaemonVersion(context.Context, *SandboxDaemonVersionRequest) (*SandboxDaemonVersionResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SandboxDaemonVersion not implemented")
+}
+func (UnimplementedSandboxServiceServer) GetNetworkSettings(context.Context, *GetNetworkSettingsRequest) (*GetNetworkSettingsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetNetworkSettings not implemented")
+}
+func (UnimplementedSandboxServiceServer) UpdateNetworkSettings(context.Context, *UpdateNetworkSettingsRequest) (*UpdateNetworkSettingsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateNetworkSettings not implemented")
 }
 func (UnimplementedSandboxServiceServer) mustEmbedUnimplementedSandboxServiceServer() {}
 func (UnimplementedSandboxServiceServer) testEmbeddedByValue()                        {}
@@ -558,6 +590,42 @@ func _SandboxService_SandboxDaemonVersion_Handler(srv interface{}, ctx context.C
 	return interceptor(ctx, in, info, handler)
 }
 
+func _SandboxService_GetNetworkSettings_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetNetworkSettingsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SandboxServiceServer).GetNetworkSettings(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SandboxService_GetNetworkSettings_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SandboxServiceServer).GetNetworkSettings(ctx, req.(*GetNetworkSettingsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SandboxService_UpdateNetworkSettings_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateNetworkSettingsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SandboxServiceServer).UpdateNetworkSettings(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SandboxService_UpdateNetworkSettings_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SandboxServiceServer).UpdateNetworkSettings(ctx, req.(*UpdateNetworkSettingsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // SandboxService_ServiceDesc is the grpc.ServiceDesc for SandboxService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -596,6 +664,14 @@ var SandboxService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SandboxDaemonVersion",
 			Handler:    _SandboxService_SandboxDaemonVersion_Handler,
+		},
+		{
+			MethodName: "GetNetworkSettings",
+			Handler:    _SandboxService_GetNetworkSettings_Handler,
+		},
+		{
+			MethodName: "UpdateNetworkSettings",
+			Handler:    _SandboxService_UpdateNetworkSettings_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -18379,7 +18379,7 @@ __metadata:
     tar: "npm:^6.2.0"
     ts-jest: "npm:29.4.1"
     ts-node: "npm:10.9.1"
-    ts-proto: "npm:^2.7.5"
+    ts-proto: "npm:^2.7.7"
     tslib: "npm:^2.8.1"
     tsx: "npm:^4.20.3"
     typedoc: "npm:~0.27.7"
@@ -35188,9 +35188,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ts-proto@npm:^2.7.5":
-  version: 2.7.5
-  resolution: "ts-proto@npm:2.7.5"
+"ts-proto@npm:^2.7.7":
+  version: 2.7.7
+  resolution: "ts-proto@npm:2.7.7"
   dependencies:
     "@bufbuild/protobuf": "npm:^2.0.0"
     case-anything: "npm:^2.1.13"
@@ -35198,7 +35198,7 @@ __metadata:
     ts-proto-descriptors: "npm:2.0.0"
   bin:
     protoc-gen-ts_proto: protoc-gen-ts_proto
-  checksum: 10c0/5182f7d79b1db95fa76ff6018998fc449a821ad2fdd1a17390350638ee286ef6e99f90d7e324141fac759b1674ebb3e75599022d4559970bf83761c803a33658
+  checksum: 10c0/fa0daf0b6d635ab87c950c4a1c79722d80cd3d3800e950a6dd36aad68cec4c39a2bb66b96f45c8fe0302672dbb571ffa5a6baa0a05702642e729a382efdc0dbc
   languageName: node
   linkType: hard
 

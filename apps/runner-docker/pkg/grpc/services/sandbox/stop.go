@@ -18,6 +18,12 @@ import (
 func (s *SandboxService) StopSandbox(ctx context.Context, req *pb.StopSandboxRequest) (*pb.StopSandboxResponse, error) {
 	s.cache.SetSandboxState(ctx, req.GetSandboxId(), pb.SandboxState_SANDBOX_STATE_STOPPING)
 
+	// Cancel a backup if it's already in progress
+	backup_context, ok := backup_context_map.Get(req.GetSandboxId())
+	if ok {
+		backup_context.cancel()
+	}
+
 	err := s.dockerClient.ContainerStop(ctx, req.GetSandboxId(), container.StopOptions{
 		Signal: "SIGKILL",
 	})

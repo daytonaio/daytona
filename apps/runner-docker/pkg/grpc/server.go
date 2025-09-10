@@ -8,6 +8,7 @@ import (
 	"log/slog"
 	"net"
 	"os"
+	"time"
 
 	pb "github.com/daytonaio/runner-docker/gen/pb/runner/v1"
 	"github.com/daytonaio/runner-docker/pkg/cache"
@@ -15,6 +16,7 @@ import (
 	"github.com/daytonaio/runner-docker/pkg/grpc/services/runner"
 	"github.com/daytonaio/runner-docker/pkg/grpc/services/sandbox"
 	"github.com/daytonaio/runner-docker/pkg/grpc/services/snapshot"
+	"github.com/daytonaio/runner-docker/pkg/netrules"
 	"github.com/docker/docker/client"
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/auth"
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
@@ -39,7 +41,10 @@ type ServerConfig struct {
 	Addr               string
 	DockerClient       *client.Client
 	RunnerCache        *cache.IRunnerCache
+	MetricsCache       cache.ICache[runner.SystemMetrics]
+	MetricsInterval    time.Duration
 	DaemonPath         string
+	PluginPath         string
 	AWSAccessKeyId     string
 	AWSSecretAccessKey string
 	AWSRegion          string
@@ -48,8 +53,9 @@ type ServerConfig struct {
 	TLSCreds           credentials.TransportCredentials
 	ContainerNetwork   string
 	ContainerRuntime   string
-	NodeEnv            string
+	Environment        string
 	LogFilePath        string
+	NetRulesManager    *netrules.NetRulesManager
 }
 
 func New(cfg ServerConfig) *Server {
@@ -81,7 +87,8 @@ func New(cfg ServerConfig) *Server {
 	runnerSvc := runner.NewRunnerService(runner.RunnerServiceConfig{
 		Log:          log,
 		DockerClient: cfg.DockerClient,
-		Cache:        *cfg.RunnerCache,
+		Cache:        cfg.MetricsCache,
+		Interval:     cfg.MetricsInterval,
 	})
 
 	snapshotSvc := snapshot.NewSnapshotService(snapshot.SnapshotServiceConfig{
@@ -93,19 +100,21 @@ func New(cfg ServerConfig) *Server {
 	})
 
 	sandboxSvc := sandbox.NewSandboxService(sandbox.SandboxServiceConfig{
-		DockerClient:       cfg.DockerClient,
-		SnapshotService:    snapshotSvc,
-		Cache:              *cfg.RunnerCache,
-		LogWriter:          os.Stdout,
-		DaemonPath:         cfg.DaemonPath,
-		AWSAccessKeyId:     cfg.AWSAccessKeyId,
-		AWSSecretAccessKey: cfg.AWSSecretAccessKey,
-		AWSRegion:          cfg.AWSRegion,
-		AWSEndpointUrl:     cfg.AWSEndpointUrl,
-		Log:                log,
-		ContainerNetwork:   cfg.ContainerNetwork,
-		ContainerRuntime:   cfg.ContainerRuntime,
-		NodeEnv:            cfg.NodeEnv,
+		DockerClient:          cfg.DockerClient,
+		SnapshotService:       snapshotSvc,
+		Cache:                 *cfg.RunnerCache,
+		LogWriter:             os.Stdout,
+		DaemonPath:            cfg.DaemonPath,
+		ComputerUsePluginPath: cfg.PluginPath,
+		AWSAccessKeyId:        cfg.AWSAccessKeyId,
+		AWSSecretAccessKey:    cfg.AWSSecretAccessKey,
+		AWSRegion:             cfg.AWSRegion,
+		AWSEndpointUrl:        cfg.AWSEndpointUrl,
+		Log:                   log,
+		ContainerNetwork:      cfg.ContainerNetwork,
+		ContainerRuntime:      cfg.ContainerRuntime,
+		Environment:           cfg.Environment,
+		NetRulesManager:       cfg.NetRulesManager,
 	})
 
 	// Register services
