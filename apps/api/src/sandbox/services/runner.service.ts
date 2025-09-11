@@ -411,7 +411,7 @@ export class RunnerService {
 
   // TODO: combine getRunnersWithMultipleSnapshotsBuilding and getRunnersWithMultipleSnapshotsPulling?
 
-  async getRunnersWithMultipleSnapshotsBuilding(maxSnapshotCount = 2): Promise<string[]> {
+  async getRunnersWithMultipleSnapshotsBuilding(maxSnapshotCount = 6): Promise<string[]> {
     const runners = await this.sandboxRepository
       .createQueryBuilder('sandbox')
       .select('sandbox.runnerId')
@@ -424,7 +424,7 @@ export class RunnerService {
     return runners.map((item) => item.runnerId)
   }
 
-  async getRunnersWithMultipleSnapshotsPulling(maxSnapshotCount = 2): Promise<string[]> {
+  async getRunnersWithMultipleSnapshotsPulling(maxSnapshotCount = 6): Promise<string[]> {
     const runners = await this.snapshotRunnerRepository
       .createQueryBuilder('snapshot_runner')
       .select('snapshot_runner.runnerId')
