@@ -18,9 +18,10 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 from typing_extensions import Annotated
 
 from pydantic import Field, StrictBool, StrictFloat, StrictInt, StrictStr
-from typing import List, Optional, Union
+from typing import Optional, Union
 from typing_extensions import Annotated
 from daytona_api_client_async.models.create_sandbox import CreateSandbox
+from daytona_api_client_async.models.paginated_sandboxes import PaginatedSandboxes
 from daytona_api_client_async.models.port_preview_url import PortPreviewUrl
 from daytona_api_client_async.models.sandbox import Sandbox
 from daytona_api_client_async.models.sandbox_labels import SandboxLabels
@@ -1168,7 +1169,6 @@ class SandboxApi:
     async def delete_sandbox(
         self,
         sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
-        force: StrictBool,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
@@ -1188,8 +1188,6 @@ class SandboxApi:
 
         :param sandbox_id: ID of the sandbox (required)
         :type sandbox_id: str
-        :param force: (required)
-        :type force: bool
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -1216,7 +1214,6 @@ class SandboxApi:
 
         _param = self._delete_sandbox_serialize(
             sandbox_id=sandbox_id,
-            force=force,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -1242,7 +1239,6 @@ class SandboxApi:
     async def delete_sandbox_with_http_info(
         self,
         sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
-        force: StrictBool,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
@@ -1262,8 +1258,6 @@ class SandboxApi:
 
         :param sandbox_id: ID of the sandbox (required)
         :type sandbox_id: str
-        :param force: (required)
-        :type force: bool
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -1290,7 +1284,6 @@ class SandboxApi:
 
         _param = self._delete_sandbox_serialize(
             sandbox_id=sandbox_id,
-            force=force,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -1316,7 +1309,6 @@ class SandboxApi:
     async def delete_sandbox_without_preload_content(
         self,
         sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
-        force: StrictBool,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
@@ -1336,8 +1328,6 @@ class SandboxApi:
 
         :param sandbox_id: ID of the sandbox (required)
         :type sandbox_id: str
-        :param force: (required)
-        :type force: bool
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -1364,7 +1354,6 @@ class SandboxApi:
 
         _param = self._delete_sandbox_serialize(
             sandbox_id=sandbox_id,
-            force=force,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -1385,7 +1374,6 @@ class SandboxApi:
     def _delete_sandbox_serialize(
         self,
         sandbox_id,
-        force,
         x_daytona_organization_id,
         _request_auth,
         _content_type,
@@ -1411,10 +1399,6 @@ class SandboxApi:
         if sandbox_id is not None:
             _path_params['sandboxId'] = sandbox_id
         # process the query parameters
-        if force is not None:
-            
-            _query_params.append(('force', force))
-            
         # process the header parameters
         if x_daytona_organization_id is not None:
             _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id
@@ -2316,9 +2300,10 @@ class SandboxApi:
     async def list_sandboxes(
         self,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
-        verbose: Annotated[Optional[StrictBool], Field(description="Include verbose output")] = None,
+        page: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Page number")] = None,
+        limit: Annotated[Optional[Union[Annotated[float, Field(le=100, strict=True, ge=1)], Annotated[int, Field(le=100, strict=True, ge=1)]]], Field(description="Number of items per page")] = None,
         labels: Annotated[Optional[StrictStr], Field(description="JSON encoded labels to filter by")] = None,
-        include_errored_deleted: Annotated[Optional[StrictBool], Field(description="Include errored and deleted sandboxes")] = None,
+        include_errored_deleted: Annotated[Optional[StrictBool], Field(description="Include errored sandboxes with deleted desired state")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2331,17 +2316,19 @@ class SandboxApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> List[Sandbox]:
+    ) -> PaginatedSandboxes:
         """List all sandboxes
 
 
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
-        :param verbose: Include verbose output
-        :type verbose: bool
+        :param page: Page number
+        :type page: float
+        :param limit: Number of items per page
+        :type limit: float
         :param labels: JSON encoded labels to filter by
         :type labels: str
-        :param include_errored_deleted: Include errored and deleted sandboxes
+        :param include_errored_deleted: Include errored sandboxes with deleted desired state
         :type include_errored_deleted: bool
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -2367,7 +2354,8 @@ class SandboxApi:
 
         _param = self._list_sandboxes_serialize(
             x_daytona_organization_id=x_daytona_organization_id,
-            verbose=verbose,
+            page=page,
+            limit=limit,
             labels=labels,
             include_errored_deleted=include_errored_deleted,
             _request_auth=_request_auth,
@@ -2377,7 +2365,7 @@ class SandboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "List[Sandbox]",
+            '200': "PaginatedSandboxes",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2394,9 +2382,10 @@ class SandboxApi:
     async def list_sandboxes_with_http_info(
         self,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
-        verbose: Annotated[Optional[StrictBool], Field(description="Include verbose output")] = None,
+        page: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Page number")] = None,
+        limit: Annotated[Optional[Union[Annotated[float, Field(le=100, strict=True, ge=1)], Annotated[int, Field(le=100, strict=True, ge=1)]]], Field(description="Number of items per page")] = None,
         labels: Annotated[Optional[StrictStr], Field(description="JSON encoded labels to filter by")] = None,
-        include_errored_deleted: Annotated[Optional[StrictBool], Field(description="Include errored and deleted sandboxes")] = None,
+        include_errored_deleted: Annotated[Optional[StrictBool], Field(description="Include errored sandboxes with deleted desired state")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2409,17 +2398,19 @@ class SandboxApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[List[Sandbox]]:
+    ) -> ApiResponse[PaginatedSandboxes]:
         """List all sandboxes
 
 
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
-        :param verbose: Include verbose output
-        :type verbose: bool
+        :param page: Page number
+        :type page: float
+        :param limit: Number of items per page
+        :type limit: float
         :param labels: JSON encoded labels to filter by
         :type labels: str
-        :param include_errored_deleted: Include errored and deleted sandboxes
+        :param include_errored_deleted: Include errored sandboxes with deleted desired state
         :type include_errored_deleted: bool
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -2445,7 +2436,8 @@ class SandboxApi:
 
         _param = self._list_sandboxes_serialize(
             x_daytona_organization_id=x_daytona_organization_id,
-            verbose=verbose,
+            page=page,
+            limit=limit,
             labels=labels,
             include_errored_deleted=include_errored_deleted,
             _request_auth=_request_auth,
@@ -2455,7 +2447,7 @@ class SandboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "List[Sandbox]",
+            '200': "PaginatedSandboxes",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2472,9 +2464,10 @@ class SandboxApi:
     async def list_sandboxes_without_preload_content(
         self,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
-        verbose: Annotated[Optional[StrictBool], Field(description="Include verbose output")] = None,
+        page: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Page number")] = None,
+        limit: Annotated[Optional[Union[Annotated[float, Field(le=100, strict=True, ge=1)], Annotated[int, Field(le=100, strict=True, ge=1)]]], Field(description="Number of items per page")] = None,
         labels: Annotated[Optional[StrictStr], Field(description="JSON encoded labels to filter by")] = None,
-        include_errored_deleted: Annotated[Optional[StrictBool], Field(description="Include errored and deleted sandboxes")] = None,
+        include_errored_deleted: Annotated[Optional[StrictBool], Field(description="Include errored sandboxes with deleted desired state")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2493,11 +2486,13 @@ class SandboxApi:
 
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
-        :param verbose: Include verbose output
-        :type verbose: bool
+        :param page: Page number
+        :type page: float
+        :param limit: Number of items per page
+        :type limit: float
         :param labels: JSON encoded labels to filter by
         :type labels: str
-        :param include_errored_deleted: Include errored and deleted sandboxes
+        :param include_errored_deleted: Include errored sandboxes with deleted desired state
         :type include_errored_deleted: bool
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -2523,7 +2518,8 @@ class SandboxApi:
 
         _param = self._list_sandboxes_serialize(
             x_daytona_organization_id=x_daytona_organization_id,
-            verbose=verbose,
+            page=page,
+            limit=limit,
             labels=labels,
             include_errored_deleted=include_errored_deleted,
             _request_auth=_request_auth,
@@ -2533,7 +2529,7 @@ class SandboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "List[Sandbox]",
+            '200': "PaginatedSandboxes",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2545,7 +2541,8 @@ class SandboxApi:
     def _list_sandboxes_serialize(
         self,
         x_daytona_organization_id,
-        verbose,
+        page,
+        limit,
         labels,
         include_errored_deleted,
         _request_auth,
@@ -2570,9 +2567,13 @@ class SandboxApi:
 
         # process the path parameters
         # process the query parameters
-        if verbose is not None:
+        if page is not None:
             
-            _query_params.append(('verbose', verbose))
+            _query_params.append(('page', page))
+            
+        if limit is not None:
+            
+            _query_params.append(('limit', limit))
             
         if labels is not None:
             

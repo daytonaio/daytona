@@ -50,6 +50,7 @@ import { SshAccess } from '../entities/ssh-access.entity'
 import { nanoid } from 'nanoid'
 import { SshAccessValidationDto } from '../dto/ssh-access.dto'
 import { VolumeService } from './volume.service'
+import { PaginatedList } from '../../common/interfaces/paginated-list.interface'
 
 const DEFAULT_CPU = 1
 const DEFAULT_MEMORY = 1
@@ -548,11 +549,18 @@ export class SandboxService {
     this.eventEmitter.emit(SandboxEvents.BACKUP_CREATED, new SandboxBackupCreatedEvent(sandbox))
   }
 
+  // TODO: sort params
+  // TODO: filter params
   async findAll(
     organizationId: string,
     labels?: { [key: string]: string },
     includeErroredDestroyed?: boolean,
-  ): Promise<Sandbox[]> {
+    page = 1,
+    limit = 10,
+  ): Promise<PaginatedList<Sandbox>> {
+    const pageNum = Number(page)
+    const limitNum = Number(limit)
+
     const baseFindOptions: FindOptionsWhere<Sandbox> = {
       organizationId,
       ...(labels ? { labels: JsonContains(labels) } : {}),
@@ -570,7 +578,21 @@ export class SandboxService {
       },
     ]
 
-    return this.sandboxRepository.find({ where })
+    const [items, total] = await this.sandboxRepository.findAndCount({
+      where,
+      order: {
+        createdAt: 'DESC',
+      },
+      skip: (pageNum - 1) * limitNum,
+      take: limitNum,
+    })
+
+    return {
+      items,
+      total,
+      page: pageNum,
+      totalPages: Math.ceil(total / limitNum),
+    }
   }
 
   async findOne(sandboxId: string, returnDestroyed?: boolean): Promise<Sandbox> {

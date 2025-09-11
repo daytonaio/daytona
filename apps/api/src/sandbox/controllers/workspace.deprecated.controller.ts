@@ -63,6 +63,7 @@ import { BadRequestError } from '../../exceptions/bad-request.exception'
 import { Audit, MASKED_AUDIT_VALUE, TypedRequest } from '../../audit/decorators/audit.decorator'
 import { AuditAction } from '../../audit/enums/audit-action.enum'
 import { AuditTarget } from '../../audit/enums/audit-target.enum'
+import { PaginatedWorkspacesDto } from '../dto/paginated-workspaces.deprecated.dto'
 
 @ApiTags('workspace')
 @Controller('workspace')
@@ -88,14 +89,20 @@ export class WorkspaceController {
   })
   @ApiResponse({
     status: 200,
-    description: 'List of all workspacees',
-    type: [WorkspaceDto],
+    description: 'Paginated list of all workspaces',
+    type: PaginatedWorkspacesDto,
   })
   @ApiQuery({
-    name: 'verbose',
+    name: 'page',
     required: false,
-    type: Boolean,
-    description: 'Include verbose output',
+    type: Number,
+    description: 'Page number',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Number of items per page',
   })
   @ApiQuery({
     name: 'labels',
@@ -104,19 +111,28 @@ export class WorkspaceController {
     example: '{"label1": "value1", "label2": "value2"}',
     description: 'JSON encoded labels to filter by',
   })
-  async listWorkspacees(
+  async listWorkspaces(
     @AuthContext() authContext: OrganizationAuthContext,
-    @Query('verbose') verbose?: boolean,
+    @Query('page') page = 1,
+    @Query('limit') limit = 10,
     @Query('labels') labelsQuery?: string,
-  ): Promise<WorkspaceDto[]> {
+  ): Promise<PaginatedWorkspacesDto> {
     const labels = labelsQuery ? JSON.parse(labelsQuery) : {}
-    const workspacees = await this.workspaceService.findAll(authContext.organizationId, labels)
-    const dtos = workspacees.map(async (workspace) => {
-      const runner = await this.runnerService.findOne(workspace.runnerId)
-      const dto = WorkspaceDto.fromSandbox(workspace, runner.domain)
-      return dto
-    })
-    return await Promise.all(dtos)
+    const result = await this.workspaceService.findAll(authContext.organizationId, labels, false, page, limit)
+
+    const runnerIds = new Set(result.items.map((s) => s.runnerId))
+    const runners = await this.runnerService.findByIds(Array.from(runnerIds))
+    const runnerMap = new Map(runners.map((runner) => [runner.id, runner]))
+
+    return {
+      items: result.items.map((workspace) => {
+        const runner = runnerMap.get(workspace.runnerId)
+        return WorkspaceDto.fromSandbox(workspace, runner?.domain)
+      }),
+      total: result.total,
+      page: result.page,
+      totalPages: result.totalPages,
+    }
   }
 
   @Post()

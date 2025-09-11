@@ -37,6 +37,7 @@ import {
   ApiBearerAuth,
 } from '@nestjs/swagger'
 import { SandboxDto, SandboxLabelsDto } from '../dto/sandbox.dto'
+import { PaginatedSandboxesDto } from '../dto/paginated-sandboxes.dto'
 import { RunnerService } from '../services/runner.service'
 import { SandboxState } from '../enums/sandbox-state.enum'
 import { Sandbox as SandboxEntity } from '../entities/sandbox.entity'
@@ -64,6 +65,7 @@ import { AuditAction } from '../../audit/enums/audit-action.enum'
 import { AuditTarget } from '../../audit/enums/audit-target.enum'
 // import { UpdateSandboxNetworkSettingsDto } from '../dto/update-sandbox-network-settings.dto'
 import { SshAccessDto, SshAccessValidationDto } from '../dto/ssh-access.dto'
+import { ListSandboxesQueryDto } from '../dto/list-sandboxes-query.dto'
 
 @ApiTags('sandbox')
 @Controller('sandbox')
@@ -88,45 +90,37 @@ export class SandboxController {
   })
   @ApiResponse({
     status: 200,
-    description: 'List of all sandboxes',
-    type: [SandboxDto],
-  })
-  @ApiQuery({
-    name: 'verbose',
-    required: false,
-    type: Boolean,
-    description: 'Include verbose output',
-  })
-  @ApiQuery({
-    name: 'labels',
-    type: String,
-    required: false,
-    example: '{"label1": "value1", "label2": "value2"}',
-    description: 'JSON encoded labels to filter by',
-  })
-  @ApiQuery({
-    name: 'includeErroredDeleted',
-    required: false,
-    type: Boolean,
-    description: 'Include errored and deleted sandboxes',
+    description: 'Paginated list of all sandboxes',
+    type: PaginatedSandboxesDto,
   })
   async listSandboxes(
     @AuthContext() authContext: OrganizationAuthContext,
-    @Query('verbose') verbose?: boolean,
-    @Query('labels') labelsQuery?: string,
-    @Query('includeErroredDeleted') includeErroredDeleted?: boolean,
-  ): Promise<SandboxDto[]> {
+    @Query() queryParams: ListSandboxesQueryDto,
+  ): Promise<PaginatedSandboxesDto> {
+    const { page, limit, labels: labelsQuery, includeErroredDeleted } = queryParams
     const labels = labelsQuery ? JSON.parse(labelsQuery) : {}
-    const sandboxes = await this.sandboxService.findAll(authContext.organizationId, labels, includeErroredDeleted)
 
-    const runnerIds = new Set(sandboxes.map((s) => s.runnerId))
+    const result = await this.sandboxService.findAll(
+      authContext.organizationId,
+      labels,
+      includeErroredDeleted,
+      page,
+      limit,
+    )
+
+    const runnerIds = new Set(result.items.map((s) => s.runnerId))
     const runners = await this.runnerService.findByIds(Array.from(runnerIds))
     const runnerMap = new Map(runners.map((runner) => [runner.id, runner]))
 
-    return sandboxes.map((sandbox) => {
-      const runner = runnerMap.get(sandbox.runnerId)
-      return SandboxDto.fromSandbox(sandbox, runner?.domain)
-    })
+    return {
+      items: result.items.map((sandbox) => {
+        const runner = runnerMap.get(sandbox.runnerId)
+        return SandboxDto.fromSandbox(sandbox, runner?.domain)
+      }),
+      total: result.total,
+      page: result.page,
+      totalPages: result.totalPages,
+    }
   }
 
   @Post()
@@ -254,11 +248,7 @@ export class SandboxController {
     targetType: AuditTarget.SANDBOX,
     targetIdFromRequest: (req) => req.params.sandboxId,
   })
-  async deleteSandbox(
-    @Param('sandboxId') sandboxId: string,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    @Query('force') force?: boolean,
-  ): Promise<void> {
+  async deleteSandbox(@Param('sandboxId') sandboxId: string): Promise<void> {
     return this.sandboxService.destroy(sandboxId)
   }
 

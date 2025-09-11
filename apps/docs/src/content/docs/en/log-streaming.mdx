@@ -35,9 +35,9 @@ import { TabItem, Tabs } from '@astrojs/starlight/components'
   import asyncio
   from daytona import Daytona, SessionExecuteRequest
 
-  async def main():
-    daytona = Daytona()
-    sandbox = daytona.create()
+async def main():
+daytona = Daytona()
+sandbox = daytona.create()
 
     session_id = "streaming-session"
     sandbox.process.create_session(session_id)
@@ -68,50 +68,50 @@ import { TabItem, Tabs } from '@astrojs/starlight/components'
     await logs_task
 
     sandbox.delete()
-    
-  if __name__ == "__main__":
-      asyncio.run(main())
 
-  ```
+if **name** == "**main**":
+asyncio.run(main())
+
+````
 </TabItem>
-  <TabItem label="Typescript" icon="seti:typescript">
-  ```typescript
-  import { Daytona, SessionExecuteRequest } from '@daytonaio/sdk'
+<TabItem label="Typescript" icon="seti:typescript">
+```typescript
+import { Daytona, SessionExecuteRequest } from '@daytonaio/sdk'
 
-  async function main() {
-    const daytona = new Daytona()
-    const sandbox = await daytona.create()
-    const sessionId = "exec-session-1"
-    await sandbox.process.createSession(sessionId)
+async function main() {
+  const daytona = new Daytona()
+  const sandbox = await daytona.create()
+  const sessionId = "exec-session-1"
+  await sandbox.process.createSession(sessionId)
 
-    const command = await sandbox.process.executeSessionCommand(
-      sessionId,
-      {
-        command: 'for i in {1..5}; do echo "Step $i"; echo "Error $i" >&2; sleep 1; done',
-        runAsync: true,
-      },
-    )
+  const command = await sandbox.process.executeSessionCommand(
+    sessionId,
+    {
+      command: 'for i in {1..5}; do echo "Step $i"; echo "Error $i" >&2; sleep 1; done',
+      runAsync: true,
+    },
+  )
 
-    // Stream logs with separate callbacks
-    const logsTask = sandbox.process.getSessionCommandLogs(
-      sessionId,
-      command.cmdId!,
-      (stdout) => console.log('[STDOUT]:', stdout),
-      (stderr) => console.log('[STDERR]:', stderr),
-    )
+  // Stream logs with separate callbacks
+  const logsTask = sandbox.process.getSessionCommandLogs(
+    sessionId,
+    command.cmdId!,
+    (stdout) => console.log('[STDOUT]:', stdout),
+    (stderr) => console.log('[STDERR]:', stderr),
+  )
 
-    console.log('Continuing execution while logs are streaming...')
-    await new Promise((resolve) => setTimeout(resolve, 3000))
-    console.log('Other operations completed!')
+  console.log('Continuing execution while logs are streaming...')
+  await new Promise((resolve) => setTimeout(resolve, 3000))
+  console.log('Other operations completed!')
 
-    // Wait for the logs to complete
-    await logsTask
+  // Wait for the logs to complete
+  await logsTask
 
-    await sandbox.delete()
-  }
+  await sandbox.delete()
+}
 
-  main()
-  ```
+main()
+````
 
   </TabItem>
 </Tabs>
@@ -127,78 +127,83 @@ periodically check all existing logs, you can use the following example to get t
   import time
   from daytona import Daytona, SessionExecuteRequest
 
-  daytona = Daytona()
-  sandbox = daytona.create()
-  session_id = "exec-session-1"
-  sandbox.process.create_session(session_id)
+daytona = Daytona()
+sandbox = daytona.create()
+session_id = "exec-session-1"
+sandbox.process.create_session(session_id)
 
-  # Execute a blocking command and wait for the result
-  command = sandbox.process.execute_session_command(
-    session_id, SessionExecuteRequest(command="echo 'Hello from stdout' && echo 'Hello from stderr' >&2")
+# Execute a blocking command and wait for the result
+
+command = sandbox.process.execute_session_command(
+session_id, SessionExecuteRequest(command="echo 'Hello from stdout' && echo 'Hello from stderr' >&2")
+)
+print(f"[STDOUT]: {command.stdout}")
+print(f"[STDERR]: {command.stderr}")
+print(f"[OUTPUT]: {command.output}")
+
+# Or execute command in the background and get the logs later
+
+command = sandbox.process.execute_session_command(
+session_id,
+SessionExecuteRequest(
+command='while true; do if (( RANDOM % 2 )); then echo "All good at $(date)"; else echo "Oops, an error at $(date)" >&2; fi; sleep 1; done',
+run_async=True
+)
+)
+time.sleep(5)
+
+# Get the logs up to the current point in time
+
+logs = sandbox.process.get_session_command_logs(session_id, command.cmd_id)
+print(f"[STDOUT]: {logs.stdout}")
+print(f"[STDERR]: {logs.stderr}")
+print(f"[OUTPUT]: {logs.output}")
+
+sandbox.delete()
+
+````
+</TabItem>
+<TabItem label="Typescript" icon="seti:typescript">
+```typescript
+import { Daytona, SessionExecuteRequest } from '@daytonaio/sdk'
+
+async function main() {
+  const daytona = new Daytona()
+  const sandbox = await daytona.create()
+  const sessionId = "exec-session-1"
+  await sandbox.process.createSession(sessionId)
+
+  // Execute a blocking command and wait for the result
+  const command = await sandbox.process.executeSessionCommand(
+    sessionId,
+    {
+      command: 'echo "Hello from stdout" && echo "Hello from stderr" >&2',
+    },
   )
-  print(f"[STDOUT]: {command.stdout}")
-  print(f"[STDERR]: {command.stderr}")
-  print(f"[OUTPUT]: {command.output}")
+  console.log(`[STDOUT]: ${command.stdout}`)
+  console.log(`[STDERR]: ${command.stderr}`)
+  console.log(`[OUTPUT]: ${command.output}`)
 
-  # Or execute command in the background and get the logs later
-  command = sandbox.process.execute_session_command(
-    session_id, 
-    SessionExecuteRequest(
-      command='while true; do if (( RANDOM % 2 )); then echo "All good at $(date)"; else echo "Oops, an error at $(date)" >&2; fi; sleep 1; done',
-      run_async=True
-    )
+  // Or execute command in the background and get the logs later
+  const command2 = await sandbox.process.executeSessionCommand(
+    sessionId,
+    {
+      command: 'while true; do if (( RANDOM % 2 )); then echo "All good at $(date)"; else echo "Oops, an error at $(date)" >&2; fi; sleep 1; done',
+      runAsync: true,
+    },
   )
-  time.sleep(5)
-  # Get the logs up to the current point in time
-  logs = sandbox.process.get_session_command_logs(session_id, command.cmd_id)
-  print(f"[STDOUT]: {logs.stdout}")
-  print(f"[STDERR]: {logs.stderr}")
-  print(f"[OUTPUT]: {logs.output}")
+  await new Promise((resolve) => setTimeout(resolve, 5000))
+  // Get the logs up to the current point in time
+  const logs = await sandbox.process.getSessionCommandLogs(sessionId, command2.cmdId!)
+  console.log(`[STDOUT]: ${logs.stdout}`)
+  console.log(`[STDERR]: ${logs.stderr}`)
+  console.log(`[OUTPUT]: ${logs.output}`)
 
-  sandbox.delete()
-  ```
-  </TabItem>
-  <TabItem label="Typescript" icon="seti:typescript">
-  ```typescript
-  import { Daytona, SessionExecuteRequest } from '@daytonaio/sdk'
+  await sandbox.delete()
+}
 
-  async function main() {
-    const daytona = new Daytona()
-    const sandbox = await daytona.create()
-    const sessionId = "exec-session-1"
-    await sandbox.process.createSession(sessionId)
-
-    // Execute a blocking command and wait for the result
-    const command = await sandbox.process.executeSessionCommand(
-      sessionId,
-      {
-        command: 'echo "Hello from stdout" && echo "Hello from stderr" >&2',
-      },
-    )
-    console.log(`[STDOUT]: ${command.stdout}`)
-    console.log(`[STDERR]: ${command.stderr}`)
-    console.log(`[OUTPUT]: ${command.output}`)
-
-    // Or execute command in the background and get the logs later
-    const command2 = await sandbox.process.executeSessionCommand(
-      sessionId,
-      {
-        command: 'while true; do if (( RANDOM % 2 )); then echo "All good at $(date)"; else echo "Oops, an error at $(date)" >&2; fi; sleep 1; done',
-        runAsync: true,
-      },
-    )
-    await new Promise((resolve) => setTimeout(resolve, 5000))
-    // Get the logs up to the current point in time
-    const logs = await sandbox.process.getSessionCommandLogs(sessionId, command2.cmdId!)
-    console.log(`[STDOUT]: ${logs.stdout}`)
-    console.log(`[STDERR]: ${logs.stderr}`)
-    console.log(`[OUTPUT]: ${logs.output}`)
-
-    await sandbox.delete()
-  }
-
-  main()
-  ```
+main()
+````
 
   </TabItem>
 </Tabs>

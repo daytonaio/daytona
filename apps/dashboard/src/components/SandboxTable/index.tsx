@@ -49,6 +49,9 @@ export function SandboxTable({
   handleCreateSshAccess,
   handleRevokeSshAccess,
   onRowClick,
+  pagination,
+  pageCount,
+  onPaginationChange,
 }: SandboxTableProps) {
   const navigate = useNavigate()
   const { authenticatedUserHasPermission } = useSelectedOrganization()
@@ -69,6 +72,9 @@ export function SandboxTable({
     getWebTerminalUrl,
     handleCreateSshAccess,
     handleRevokeSshAccess,
+    pagination,
+    pageCount,
+    onPaginationChange,
   })
 
   const [bulkDeleteDialogOpen, setBulkDeleteDialogOpen] = useState(false)
@@ -192,7 +198,7 @@ export function SandboxTable({
       </Table>
 
       <div className="flex items-center justify-end">
-        <Pagination className="pb-2 pt-6" table={table} selectionEnabled entityName="Sandboxes" />
+        <Pagination className="pb-2 pt-6" table={table} selectionEnabled={deletePermitted} entityName="Sandboxes" />
       </div>
 
       {/* Floating Action Bar */}

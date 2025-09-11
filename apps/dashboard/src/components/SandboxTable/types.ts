@@ -23,6 +23,12 @@ export interface SandboxTableProps {
   handleCreateSshAccess: (id: string) => void
   handleRevokeSshAccess: (id: string) => void
   onRowClick?: (sandbox: Sandbox) => void
+  pagination: {
+    pageIndex: number
+    pageSize: number
+  }
+  pageCount: number
+  onPaginationChange: (pagination: { pageIndex: number; pageSize: number }) => void
 }
 
 export interface SandboxTableActionsProps {

@@ -14,9 +14,8 @@ import (
 )
 
 var (
-	verboseFlag bool
-	pageFlag    int
-	limitFlag   int
+	pageFlag  int
+	limitFlag int
 )
 
 var ListCmd = &cobra.Command{
@@ -32,22 +31,23 @@ var ListCmd = &cobra.Command{
 			return err
 		}
 
-		sandboxList, res, err := apiClient.SandboxAPI.ListSandboxes(ctx).Verbose(verboseFlag).Execute()
+		page := float32(1.0)
+		limit := float32(100.0)
+
+		if cmd.Flags().Changed("page") {
+			page = float32(pageFlag)
+		}
+
+		if cmd.Flags().Changed("limit") {
+			limit = float32(limitFlag)
+		}
+
+		sandboxList, res, err := apiClient.SandboxAPI.ListSandboxes(ctx).Page(page).Limit(limit).Execute()
 		if err != nil {
 			return apiclient.HandleErrorResponse(res, err)
 		}
 
-		sandbox.SortSandboxes(&sandboxList)
-
-		start := (pageFlag - 1) * limitFlag
-		end := start + limitFlag
-		if start > len(sandboxList) {
-			start = len(sandboxList)
-		}
-		if end > len(sandboxList) {
-			end = len(sandboxList)
-		}
-		paginatedList := sandboxList[start:end]
+		sandbox.SortSandboxes(&sandboxList.Items)
 
 		if common.FormatFlag != "" {
 			formattedData := common.NewFormatter(sandboxList)
@@ -65,13 +65,12 @@ var ListCmd = &cobra.Command{
 			activeOrganizationName = &name
 		}
 
-		sandbox.ListSandboxes(paginatedList, activeOrganizationName)
+		sandbox.ListSandboxes(sandboxList.Items, activeOrganizationName)
 		return nil
 	},
 }
 
 func init() {
-	ListCmd.Flags().BoolVarP(&verboseFlag, "verbose", "v", false, "Include verbose output")
 	ListCmd.Flags().IntVarP(&pageFlag, "page", "p", 1, "Page number for pagination (starting from 1)")
 	ListCmd.Flags().IntVarP(&limitFlag, "limit", "l", 100, "Maximum number of items per page")
 	common.RegisterFormatFlag(ListCmd)

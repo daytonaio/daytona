@@ -18,9 +18,10 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 from typing_extensions import Annotated
 
 from pydantic import Field, StrictBool, StrictFloat, StrictInt, StrictStr
-from typing import List, Optional, Union
+from typing import Optional, Union
 from typing_extensions import Annotated
 from daytona_api_client.models.create_workspace import CreateWorkspace
+from daytona_api_client.models.paginated_workspaces import PaginatedWorkspaces
 from daytona_api_client.models.port_preview_url import PortPreviewUrl
 from daytona_api_client.models.sandbox_labels import SandboxLabels
 from daytona_api_client.models.workspace import Workspace
@@ -2044,8 +2045,9 @@ class WorkspaceApi:
     def list_workspaces_deprecated(
         self,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
-        verbose: Annotated[Optional[StrictBool], Field(description="Include verbose output")] = None,
         labels: Annotated[Optional[StrictStr], Field(description="JSON encoded labels to filter by")] = None,
+        limit: Annotated[Optional[Union[StrictFloat, StrictInt]], Field(description="Number of items per page")] = None,
+        page: Annotated[Optional[Union[StrictFloat, StrictInt]], Field(description="Page number")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2058,16 +2060,18 @@ class WorkspaceApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> List[Workspace]:
+    ) -> PaginatedWorkspaces:
         """(Deprecated) [DEPRECATED] List all workspaces
 
 
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
-        :param verbose: Include verbose output
-        :type verbose: bool
         :param labels: JSON encoded labels to filter by
         :type labels: str
+        :param limit: Number of items per page
+        :type limit: float
+        :param page: Page number
+        :type page: float
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -2093,8 +2097,9 @@ class WorkspaceApi:
 
         _param = self._list_workspaces_deprecated_serialize(
             x_daytona_organization_id=x_daytona_organization_id,
-            verbose=verbose,
             labels=labels,
+            limit=limit,
+            page=page,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -2102,7 +2107,7 @@ class WorkspaceApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "List[Workspace]",
+            '200': "PaginatedWorkspaces",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -2119,8 +2124,9 @@ class WorkspaceApi:
     def list_workspaces_deprecated_with_http_info(
         self,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
-        verbose: Annotated[Optional[StrictBool], Field(description="Include verbose output")] = None,
         labels: Annotated[Optional[StrictStr], Field(description="JSON encoded labels to filter by")] = None,
+        limit: Annotated[Optional[Union[StrictFloat, StrictInt]], Field(description="Number of items per page")] = None,
+        page: Annotated[Optional[Union[StrictFloat, StrictInt]], Field(description="Page number")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2133,16 +2139,18 @@ class WorkspaceApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[List[Workspace]]:
+    ) -> ApiResponse[PaginatedWorkspaces]:
         """(Deprecated) [DEPRECATED] List all workspaces
 
 
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
-        :param verbose: Include verbose output
-        :type verbose: bool
         :param labels: JSON encoded labels to filter by
         :type labels: str
+        :param limit: Number of items per page
+        :type limit: float
+        :param page: Page number
+        :type page: float
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -2168,8 +2176,9 @@ class WorkspaceApi:
 
         _param = self._list_workspaces_deprecated_serialize(
             x_daytona_organization_id=x_daytona_organization_id,
-            verbose=verbose,
             labels=labels,
+            limit=limit,
+            page=page,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -2177,7 +2186,7 @@ class WorkspaceApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "List[Workspace]",
+            '200': "PaginatedWorkspaces",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -2194,8 +2203,9 @@ class WorkspaceApi:
     def list_workspaces_deprecated_without_preload_content(
         self,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
-        verbose: Annotated[Optional[StrictBool], Field(description="Include verbose output")] = None,
         labels: Annotated[Optional[StrictStr], Field(description="JSON encoded labels to filter by")] = None,
+        limit: Annotated[Optional[Union[StrictFloat, StrictInt]], Field(description="Number of items per page")] = None,
+        page: Annotated[Optional[Union[StrictFloat, StrictInt]], Field(description="Page number")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2214,10 +2224,12 @@ class WorkspaceApi:
 
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
-        :param verbose: Include verbose output
-        :type verbose: bool
         :param labels: JSON encoded labels to filter by
         :type labels: str
+        :param limit: Number of items per page
+        :type limit: float
+        :param page: Page number
+        :type page: float
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -2243,8 +2255,9 @@ class WorkspaceApi:
 
         _param = self._list_workspaces_deprecated_serialize(
             x_daytona_organization_id=x_daytona_organization_id,
-            verbose=verbose,
             labels=labels,
+            limit=limit,
+            page=page,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -2252,7 +2265,7 @@ class WorkspaceApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "List[Workspace]",
+            '200': "PaginatedWorkspaces",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -2264,8 +2277,9 @@ class WorkspaceApi:
     def _list_workspaces_deprecated_serialize(
         self,
         x_daytona_organization_id,
-        verbose,
         labels,
+        limit,
+        page,
         _request_auth,
         _content_type,
         _headers,
@@ -2288,13 +2302,17 @@ class WorkspaceApi:
 
         # process the path parameters
         # process the query parameters
-        if verbose is not None:
-            
-            _query_params.append(('verbose', verbose))
-            
         if labels is not None:
             
             _query_params.append(('labels', labels))
+            
+        if limit is not None:
+            
+            _query_params.append(('limit', limit))
+            
+        if page is not None:
+            
+            _query_params.append(('page', page))
             
         # process the header parameters
         if x_daytona_organization_id is not None:

@@ -132,8 +132,8 @@ type SandboxAPI interface {
 	ListSandboxes(ctx context.Context) SandboxAPIListSandboxesRequest
 
 	// ListSandboxesExecute executes the request
-	//  @return []Sandbox
-	ListSandboxesExecute(r SandboxAPIListSandboxesRequest) ([]Sandbox, *http.Response, error)
+	//  @return PaginatedSandboxes
+	ListSandboxesExecute(r SandboxAPIListSandboxesRequest) (*PaginatedSandboxes, *http.Response, error)
 
 	/*
 		ReplaceLabels Replace sandbox labels
@@ -710,13 +710,7 @@ type SandboxAPIDeleteSandboxRequest struct {
 	ctx                    context.Context
 	ApiService             SandboxAPI
 	sandboxId              string
-	force                  *bool
 	xDaytonaOrganizationID *string
-}
-
-func (r SandboxAPIDeleteSandboxRequest) Force(force bool) SandboxAPIDeleteSandboxRequest {
-	r.force = &force
-	return r
 }
 
 // Use with JWT to specify the organization ID
@@ -763,11 +757,7 @@ func (a *SandboxAPIService) DeleteSandboxExecute(r SandboxAPIDeleteSandboxReques
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
-	if r.force == nil {
-		return nil, reportError("force is required and must be specified")
-	}
 
-	parameterAddToHeaderOrQuery(localVarQueryParams, "force", r.force, "form", "")
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -1168,7 +1158,8 @@ type SandboxAPIListSandboxesRequest struct {
 	ctx                    context.Context
 	ApiService             SandboxAPI
 	xDaytonaOrganizationID *string
-	verbose                *bool
+	page                   *float32
+	limit                  *float32
 	labels                 *string
 	includeErroredDeleted  *bool
 }
@@ -1179,9 +1170,15 @@ func (r SandboxAPIListSandboxesRequest) XDaytonaOrganizationID(xDaytonaOrganizat
 	return r
 }
 
-// Include verbose output
-func (r SandboxAPIListSandboxesRequest) Verbose(verbose bool) SandboxAPIListSandboxesRequest {
-	r.verbose = &verbose
+// Page number
+func (r SandboxAPIListSandboxesRequest) Page(page float32) SandboxAPIListSandboxesRequest {
+	r.page = &page
+	return r
+}
+
+// Number of items per page
+func (r SandboxAPIListSandboxesRequest) Limit(limit float32) SandboxAPIListSandboxesRequest {
+	r.limit = &limit
 	return r
 }
 
@@ -1191,13 +1188,13 @@ func (r SandboxAPIListSandboxesRequest) Labels(labels string) SandboxAPIListSand
 	return r
 }
 
-// Include errored and deleted sandboxes
+// Include errored sandboxes with deleted desired state
 func (r SandboxAPIListSandboxesRequest) IncludeErroredDeleted(includeErroredDeleted bool) SandboxAPIListSandboxesRequest {
 	r.includeErroredDeleted = &includeErroredDeleted
 	return r
 }
 
-func (r SandboxAPIListSandboxesRequest) Execute() ([]Sandbox, *http.Response, error) {
+func (r SandboxAPIListSandboxesRequest) Execute() (*PaginatedSandboxes, *http.Response, error) {
 	return r.ApiService.ListSandboxesExecute(r)
 }
 
@@ -1216,13 +1213,13 @@ func (a *SandboxAPIService) ListSandboxes(ctx context.Context) SandboxAPIListSan
 
 // Execute executes the request
 //
-//	@return []Sandbox
-func (a *SandboxAPIService) ListSandboxesExecute(r SandboxAPIListSandboxesRequest) ([]Sandbox, *http.Response, error) {
+//	@return PaginatedSandboxes
+func (a *SandboxAPIService) ListSandboxesExecute(r SandboxAPIListSandboxesRequest) (*PaginatedSandboxes, *http.Response, error) {
 	var (
 		localVarHTTPMethod  = http.MethodGet
 		localVarPostBody    interface{}
 		formFiles           []formFile
-		localVarReturnValue []Sandbox
+		localVarReturnValue *PaginatedSandboxes
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SandboxAPIService.ListSandboxes")
@@ -1236,8 +1233,17 @@ func (a *SandboxAPIService) ListSandboxesExecute(r SandboxAPIListSandboxesReques
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
 
-	if r.verbose != nil {
-		parameterAddToHeaderOrQuery(localVarQueryParams, "verbose", r.verbose, "form", "")
+	if r.page != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "page", r.page, "form", "")
+	} else {
+		var defaultValue float32 = 1
+		r.page = &defaultValue
+	}
+	if r.limit != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "limit", r.limit, "form", "")
+	} else {
+		var defaultValue float32 = 10
+		r.limit = &defaultValue
 	}
 	if r.labels != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "labels", r.labels, "form", "")
