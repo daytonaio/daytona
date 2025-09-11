@@ -1005,6 +1005,7 @@ class ToolboxApi:
         sandbox_id: StrictStr,
         path: StrictStr,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        recursive: Optional[StrictBool] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1028,6 +1029,8 @@ class ToolboxApi:
         :type path: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
+        :param recursive:
+        :type recursive: bool
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -1054,6 +1057,7 @@ class ToolboxApi:
             sandbox_id=sandbox_id,
             path=path,
             x_daytona_organization_id=x_daytona_organization_id,
+            recursive=recursive,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -1080,6 +1084,7 @@ class ToolboxApi:
         sandbox_id: StrictStr,
         path: StrictStr,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        recursive: Optional[StrictBool] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1103,6 +1108,8 @@ class ToolboxApi:
         :type path: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
+        :param recursive:
+        :type recursive: bool
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -1129,6 +1136,7 @@ class ToolboxApi:
             sandbox_id=sandbox_id,
             path=path,
             x_daytona_organization_id=x_daytona_organization_id,
+            recursive=recursive,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -1155,6 +1163,7 @@ class ToolboxApi:
         sandbox_id: StrictStr,
         path: StrictStr,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        recursive: Optional[StrictBool] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1178,6 +1187,8 @@ class ToolboxApi:
         :type path: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
+        :param recursive:
+        :type recursive: bool
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -1204,6 +1215,7 @@ class ToolboxApi:
             sandbox_id=sandbox_id,
             path=path,
             x_daytona_organization_id=x_daytona_organization_id,
+            recursive=recursive,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -1225,6 +1237,7 @@ class ToolboxApi:
         sandbox_id,
         path,
         x_daytona_organization_id,
+        recursive,
         _request_auth,
         _content_type,
         _headers,
@@ -1249,6 +1262,10 @@ class ToolboxApi:
         if sandbox_id is not None:
             _path_params['sandboxId'] = sandbox_id
         # process the query parameters
+        if recursive is not None:
+            
+            _query_params.append(('recursive', recursive))
+            
         if path is not None:
             
             _query_params.append(('path', path))

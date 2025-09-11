@@ -295,6 +295,7 @@ export class ToolboxController {
     description: 'File deleted successfully',
   })
   @ApiQuery({ name: 'path', type: String, required: true })
+  @ApiQuery({ name: 'recursive', type: Boolean, required: false })
   @ApiParam({ name: 'sandboxId', type: String, required: true })
   @Audit({
     action: AuditAction.TOOLBOX_DELETE_FILE,
