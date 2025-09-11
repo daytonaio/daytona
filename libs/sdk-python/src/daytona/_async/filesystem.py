@@ -68,11 +68,12 @@ class AsyncFileSystem:
         )
 
     @intercept_errors(message_prefix="Failed to delete file: ")
-    async def delete_file(self, path: str) -> None:
+    async def delete_file(self, path: str, recursive: bool = False) -> None:
         """Deletes a file from the Sandbox.
 
         Args:
             path (str): Absolute path to the file to delete.
+            recursive (bool): If the file is a directory, this must be true to delete it.
 
         Example:
             ```python
@@ -81,7 +82,7 @@ class AsyncFileSystem:
             ```
         """
         await self._toolbox_api.delete_file(
-            self._sandbox_id, path=prefix_relative_path(await self._get_root_dir(), path)
+            self._sandbox_id, path=prefix_relative_path(await self._get_root_dir(), path), recursive=recursive
         )
 
     @overload

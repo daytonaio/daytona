@@ -65,7 +65,7 @@ await fs.createFolder('app/data', '755');
 #### deleteFile()
 
 ```ts
-deleteFile(path: string): Promise<void>
+deleteFile(path: string, recursive?: boolean): Promise<void>
 ```
 
 Deletes a file or directory from the Sandbox.
@@ -74,6 +74,7 @@ Deletes a file or directory from the Sandbox.
 
 - `path` _string_ - Path to the file or directory to delete. Relative paths are resolved based on the user's
     root directory.
+- `recursive?` _boolean_ - If the file is a directory, this must be true to delete it.
 
 
 **Returns**:

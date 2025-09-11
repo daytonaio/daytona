@@ -94,14 +94,20 @@ export class FileSystem {
    *
    * @param {string} path - Path to the file or directory to delete. Relative paths are resolved based on the user's
    * root directory.
+   * @param {boolean} [recursive] - If the file is a directory, this must be true to delete it.
    * @returns {Promise<void>}
    *
    * @example
    * // Delete a file
    * await fs.deleteFile('app/temp.log');
    */
-  public async deleteFile(path: string): Promise<void> {
-    const response = await this.toolboxApi.deleteFile(this.sandboxId, prefixRelativePath(await this.getRootDir(), path))
+  public async deleteFile(path: string, recursive?: boolean): Promise<void> {
+    const response = await this.toolboxApi.deleteFile(
+      this.sandboxId,
+      prefixRelativePath(await this.getRootDir(), path),
+      undefined,
+      recursive,
+    )
     return response.data
   }
 
