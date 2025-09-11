@@ -20,8 +20,7 @@ import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from '@/components/ui/table'
 import { RemoveOrganizationMemberDialog } from '@/components/OrganizationMembers/RemoveOrganizationMemberDialog'
-import { UpdateOrganizationMemberRoleDialog } from '@/components/OrganizationMembers/UpdateOrganizationMemberRoleDialog'
-import { UpdateAssignedOrganizationRolesDialog } from '@/components/OrganizationMembers/UpdateAssignedOrganizationRolesDialog.tsx'
+import { UpdateOrganizationMemberAccess } from '@/components/OrganizationMembers/UpdateOrganizationMemberAccessDialog'
 import { capitalize } from '@/lib/utils'
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 import { TableEmptyState } from '../TableEmptyState'
@@ -29,10 +28,9 @@ import { TableEmptyState } from '../TableEmptyState'
 interface DataTableProps {
   data: OrganizationUser[]
   loadingData: boolean
-  availableOrganizationRoles: OrganizationRole[]
-  loadingAvailableOrganizationRoles: boolean
-  onUpdateMemberRole: (userId: string, role: OrganizationUserRoleEnum) => Promise<boolean>
-  onUpdateAssignedOrganizationRoles: (userId: string, roleIds: string[]) => Promise<boolean>
+  availableAssignments: OrganizationRole[]
+  loadingAvailableAssignments: boolean
+  onUpdateMemberAccess: (userId: string, role: OrganizationUserRoleEnum, assignedRoleIds: string[]) => Promise<boolean>
   onRemoveMember: (userId: string) => Promise<boolean>
   loadingMemberAction: Record<string, boolean>
   ownerMode: boolean
@@ -41,29 +39,27 @@ interface DataTableProps {
 export function OrganizationMemberTable({
   data,
   loadingData,
-  availableOrganizationRoles,
-  loadingAvailableOrganizationRoles,
-  onUpdateMemberRole,
-  onUpdateAssignedOrganizationRoles,
+  availableAssignments,
+  loadingAvailableAssignments,
+  onUpdateMemberAccess,
   onRemoveMember,
   loadingMemberAction,
   ownerMode,
 }: DataTableProps) {
   const [sorting, setSorting] = useState<SortingState>([])
   const [memberToUpdate, setMemberToUpdate] = useState<OrganizationUser | null>(null)
-  const [isUpdateMemberRoleDialogOpen, setIsUpdateMemberRoleDialogOpen] = useState(false)
-  const [isUpdateAssignedRolesDialogOpen, setIsUpdateAssignedRolesDialogOpen] = useState(false)
+  const [isUpdateMemberAccessDialogOpen, setIsUpdateMemberAccessDialogOpen] = useState(false)
   const [memberToRemove, setMemberToRemove] = useState<string | null>(null)
   const [isRemoveDialogOpen, setIsRemoveDialogOpen] = useState(false)
 
   const columns = getColumns({
     onUpdateMemberRole: (member) => {
       setMemberToUpdate(member)
-      setIsUpdateMemberRoleDialogOpen(true)
+      setIsUpdateMemberAccessDialogOpen(true)
     },
     onUpdateAssignedRoles: (member) => {
       setMemberToUpdate(member)
-      setIsUpdateAssignedRolesDialogOpen(true)
+      setIsUpdateMemberAccessDialogOpen(true)
     },
     onRemove: (userId: string) => {
       setMemberToRemove(userId)
@@ -89,24 +85,12 @@ export function OrganizationMemberTable({
     },
   })
 
-  const handleUpdateMemberRole = async (role: OrganizationUserRoleEnum) => {
+  const handleUpdateMemberAccess = async (role: OrganizationUserRoleEnum, assignedRoleIds: string[]) => {
     if (memberToUpdate) {
-      const success = await onUpdateMemberRole(memberToUpdate.userId, role)
+      const success = await onUpdateMemberAccess(memberToUpdate.userId, role, assignedRoleIds)
       if (success) {
         setMemberToUpdate(null)
-        setIsUpdateMemberRoleDialogOpen(false)
-      }
-      return success
-    }
-    return false
-  }
-
-  const handleUpdateAssignedRoles = async (roleIds: string[]) => {
-    if (memberToUpdate) {
-      const success = await onUpdateAssignedOrganizationRoles(memberToUpdate.userId, roleIds)
-      if (success) {
-        setMemberToUpdate(null)
-        setIsUpdateAssignedRolesDialogOpen(false)
+        setIsUpdateMemberAccessDialogOpen(false)
       }
       return success
     }
@@ -172,34 +156,20 @@ export function OrganizationMemberTable({
       </div>
 
       {memberToUpdate && (
-        <UpdateOrganizationMemberRoleDialog
-          open={isUpdateMemberRoleDialogOpen}
+        <UpdateOrganizationMemberAccess
+          open={isUpdateMemberAccessDialogOpen}
           onOpenChange={(open) => {
-            setIsUpdateMemberRoleDialogOpen(open)
+            setIsUpdateMemberAccessDialogOpen(open)
             if (!open) {
               setMemberToUpdate(null)
             }
           }}
           initialRole={memberToUpdate.role}
-          onUpdateMemberRole={handleUpdateMemberRole}
-          loading={loadingMemberAction[memberToUpdate.userId]}
-        />
-      )}
-
-      {memberToUpdate && (
-        <UpdateAssignedOrganizationRolesDialog
-          open={isUpdateAssignedRolesDialogOpen}
-          onOpenChange={(open) => {
-            setIsUpdateAssignedRolesDialogOpen(open)
-            if (!open) {
-              setMemberToUpdate(null)
-            }
-          }}
-          initialData={memberToUpdate.assignedRoles}
-          availableRoles={availableOrganizationRoles}
-          loadingAvailableRoles={loadingAvailableOrganizationRoles}
-          onUpdateAssignedRoles={handleUpdateAssignedRoles}
-          loading={loadingMemberAction[memberToUpdate.userId]}
+          initialAssignments={memberToUpdate.assignedRoles}
+          availableAssignments={availableAssignments}
+          loadingAvailableAssignments={loadingAvailableAssignments}
+          onUpdateAccess={handleUpdateMemberAccess}
+          processingUpdateAccess={loadingMemberAction[memberToUpdate.userId]}
         />
       )}
 
