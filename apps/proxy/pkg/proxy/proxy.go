@@ -102,8 +102,6 @@ func StartProxy(config *config.Config) error {
 		}
 	}))
 
-	router.Use(proxy.browserWarningMiddleware())
-
 	router.Use(func(ctx *gin.Context) {
 		if ctx.Request.Header.Get("X-Daytona-Disable-CORS") == "true" {
 			ctx.Request.Header.Del("X-Daytona-Disable-CORS")
@@ -120,6 +118,8 @@ func StartProxy(config *config.Config) error {
 
 		cors.New(corsConfig)(ctx)
 	})
+
+	router.Use(proxy.browserWarningMiddleware())
 
 	router.Any("/*path", func(ctx *gin.Context) {
 		if ctx.Request.Method == "POST" && ctx.Request.URL.Path == ACCEPT_PREVIEW_PAGE_WARNING_PATH {
