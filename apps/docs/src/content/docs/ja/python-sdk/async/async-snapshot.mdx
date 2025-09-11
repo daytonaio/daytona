@@ -3,7 +3,7 @@ title: "AsyncSnapshot"
 hideTitleOnPage: true
 ---
 
-## スナップショット
+## スナップショット \{#snapshot\}
 
 ```python
 class Snapshot(SnapshotDto)
@@ -13,25 +13,24 @@ Daytona（サンドボックスの作成・管理を行うプラットフォー�
 
 **属性**:
 
-- `id` _StrictStr_ - スナップショットの一意の識別子。
-- `organization_id` _Optional[StrictStr]_ - スナップショットの組織（ユーザー・リソースのグループ化、役割・課金・制限を含む）ID。
-- `general` _Optional[bool]_ - スナップショットが汎用かどうか。
-- `name` _StrictStr_ - スナップショットの名称。
-- `image_name` _StrictStr_ - スナップショットのイメージ名。
-- `state` _StrictStr_ - スナップショットの状態。
-- `size` _Optional[Union[StrictFloat, StrictInt]]_ - スナップショットのサイズ。
-- `entrypoint` _Optional[List[str]]_ - スナップショットのエントリーポイント。
-- `cpu` _Union[StrictFloat, StrictInt]_ - スナップショットのCPU。
-- `gpu` _Union[StrictFloat, StrictInt]_ - スナップショットのGPU。
-- `mem` _Union[StrictFloat, StrictInt]_ - スナップショットのメモリ（GiB）。
-- `disk` _Union[StrictFloat, StrictInt]_ - スナップショットのディスク（GiB）。
-- `error_reason` _Optional[StrictStr]_ - スナップショットのエラー理由。
-- `created_at` _StrictStr_ - スナップショットの作成時刻。
-- `updated_at` _StrictStr_ - スナップショットの最終更新時刻。
-- `last_used_at` _StrictStr_ - スナップショットの最終使用時刻。
+* `id` *StrictStr* - スナップショットの一意の識別子。
+* `organization_id` *Optional[StrictStr]* - スナップショットの組織（ユーザー・リソースのグループ化、役割・課金・制限を含む）ID。
+* `general` *Optional[bool]* - スナップショットが汎用かどうか。
+* `name` *StrictStr* - スナップショットの名称。
+* `image_name` *StrictStr* - スナップショットのイメージ名。
+* `state` *StrictStr* - スナップショットの状態。
+* `size` *Optional[Union[StrictFloat, StrictInt]]* - スナップショットのサイズ。
+* `entrypoint` *Optional[List[str]]* - スナップショットのエントリーポイント。
+* `cpu` *Union[StrictFloat, StrictInt]* - スナップショットのCPU。
+* `gpu` *Union[StrictFloat, StrictInt]* - スナップショットのGPU。
+* `mem` *Union[StrictFloat, StrictInt]* - スナップショットのメモリ（GiB）。
+* `disk` *Union[StrictFloat, StrictInt]* - スナップショットのディスク（GiB）。
+* `error_reason` *Optional[StrictStr]* - スナップショットのエラー理由。
+* `created_at` *StrictStr* - スナップショットの作成時刻。
+* `updated_at` *StrictStr* - スナップショットの最終更新時刻。
+* `last_used_at` *StrictStr* - スナップショットの最終使用時刻。
 
-
-## AsyncSnapshotService
+## AsyncSnapshotService \{#asyncsnapshotservice\}
 
 ```python
 class AsyncSnapshotService()
@@ -39,7 +38,7 @@ class AsyncSnapshotService()
 
 Daytonaのスナップショット（スナップショット（リソースや依存関係を含む再利用可能なイメージ/テンプレート））を管理するサービス。スナップショットの一覧、取得、作成、削除に使用できます。
 
-#### AsyncSnapshotService.list
+#### AsyncSnapshotService.list \{#asyncsnapshotservicelist\}
 
 ```python
 @intercept_errors(message_prefix="Failed to list snapshots: ")
@@ -50,8 +49,7 @@ async def list() -> List[Snapshot]
 
 **戻り値**:
 
-- `List[Snapshot]` - すべてのスナップショットのリスト。
-  
+* `List[Snapshot]` - すべてのスナップショットのリスト。
 
 **例**:
 
@@ -62,7 +60,7 @@ async with AsyncDaytona() as daytona:
         print(f"{snapshot.name} ({snapshot.image_name})")
 ```
 
-#### AsyncSnapshotService.delete
+#### AsyncSnapshotService.delete \{#asyncsnapshotservicedelete\}
 
 ```python
 @intercept_errors(message_prefix="Failed to delete snapshot: ")
@@ -73,8 +71,7 @@ async def delete(snapshot: Snapshot) -> None
 
 **引数**:
 
-- `snapshot` _Snapshot_ - 削除するスナップショット。
-  
+* `snapshot` *Snapshot* - 削除するスナップショット。
 
 **例**:
 
@@ -85,7 +82,7 @@ async with AsyncDaytona() as daytona:
     print("Snapshot deleted")
 ```
 
-#### AsyncSnapshotService.get
+#### AsyncSnapshotService.get \{#asyncsnapshotserviceget\}
 
 ```python
 @intercept_errors(message_prefix="Failed to get snapshot: ")
@@ -96,13 +93,11 @@ async def get(name: str) -> Snapshot
 
 **引数**:
 
-- `name` _str_ - 取得するスナップショット名。
-  
+* `name` *str* - 取得するスナップショット名。
 
 **戻り値**:
 
-- `Snapshot` - 取得したスナップショット。
-  
+* `Snapshot` - 取得したスナップショット。
 
 **例**:
 
@@ -112,7 +107,7 @@ async with AsyncDaytona() as daytona:
     print(f"{snapshot.name} ({snapshot.image_name})")
 ```
 
-#### AsyncSnapshotService.create
+#### AsyncSnapshotService.create \{#asyncsnapshotservicecreate\}
 
 ```python
 @intercept_errors(message_prefix="Failed to create snapshot: ")
@@ -128,9 +123,9 @@ async def create(params: CreateSnapshotParams,
 
 **引数**:
 
-- `params` _CreateSnapshotParams_ - スナップショット作成用パラメータ。
-- `on_logs` _Callable[[str], None]_ - スナップショット作成時のログを処理するコールバック関数。
-- `timeout` _Optional[float]_ - 既定ではタイムアウトなし。秒数で指定（0はタイムアウトなし）。
+* `params` *CreateSnapshotParams* - スナップショット作成用パラメータ。
+* `on_logs` *Callable[[str], None]* - スナップショット作成時のログを処理するコールバック関数。
+* `timeout` *Optional[float]* - 既定ではタイムアウトなし。秒数で指定（0はタイムアウトなし）。
 
 **例**:
 
@@ -142,7 +137,7 @@ daytona.snapshot.create(
 )
 ```
 
-#### AsyncSnapshotService.activate
+#### AsyncSnapshotService.activate \{#asyncsnapshotserviceactivate\}
 
 ```python
 async def activate(snapshot: Snapshot) -> Snapshot
@@ -152,13 +147,13 @@ async def activate(snapshot: Snapshot) -> Snapshot
 
 **引数**:
 
-- `snapshot` _Snapshot_ - 対象のスナップショットインスタンス。
+* `snapshot` *Snapshot* - 対象のスナップショットインスタンス。
 
 **戻り値**:
 
-- `Snapshot` - アクティブ化されたスナップショットインスタンス。
+* `Snapshot` - アクティブ化されたスナップショットインスタンス。
 
-#### AsyncSnapshotService.process\_image\_context
+#### AsyncSnapshotService.process_image_context \{#asyncsnapshotserviceprocess_image_context\}
 
 ```python
 @staticmethod
@@ -170,13 +165,13 @@ async def process_image_context(object_storage_api: ObjectStorageApi,
 
 **引数**:
 
-- `image` _Image_ - 対象のImageインスタンス。
+* `image` *Image* - 対象のImageインスタンス。
 
 **戻り値**:
 
-- `List[str]` - オブジェクトストレージに保存されたコンテキストハッシュのリスト。
+* `List[str]` - オブジェクトストレージに保存されたコンテキストハッシュのリスト。
 
-## CreateSnapshotParams
+## CreateSnapshotParams \{#createsnapshotparams\}
 
 ```python
 class CreateSnapshotParams(BaseModel)
@@ -186,10 +181,9 @@ class CreateSnapshotParams(BaseModel)
 
 **属性**:
 
-- `name` _Optional[str]_ - スナップショット名。
-- `image` _Union[str, Image]_ - スナップショットのイメージ。文字列が指定された場合は、
+* `name` *Optional[str]* - スナップショット名。
+* `image` *Union[str, Image]* - スナップショットのイメージ。文字列が指定された場合は、
   いずれかのレジストリで利用可能である必要があります。Image インスタンスが指定された場合は、
   Daytonaで新しいイメージを作成する際に使用されます。
-- `resources` _Optional[Resources]_ - スナップショットのリソース。
-- `entrypoint` _Optional[List[str]]_ - スナップショットのエントリポイント。
-
+* `resources` *Optional[Resources]* - スナップショットのリソース。
+* `entrypoint` *Optional[List[str]]* - スナップショットのエントリポイント。
