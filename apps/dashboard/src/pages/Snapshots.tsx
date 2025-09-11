@@ -107,10 +107,24 @@ const Snapshots: React.FC = () => {
           if (prev.items.some((i) => i.id === snapshot.id)) {
             return prev
           }
+          // Determine where the "unused" snapshots start
+          const firstUnusedIndex = prev.items.findIndex((i) => !i.lastUsedAt)
+          if (firstUnusedIndex === -1) {
+            // No unused snapshots yet; append to the end
+            const newSnapshots = [...prev.items, snapshot]
+            const newTotal = prev.total + 1
+            return {
+              ...prev,
+              items: newSnapshots.slice(0, paginationParams.pageSize),
+              total: newTotal,
+              totalPages: Math.ceil(newTotal / paginationParams.pageSize),
+            }
+          }
 
-          // Find the insertion point - used snapshots should remain at the top
-          const insertIndex =
-            prev.items.findIndex((i) => !i.lastUsedAt && i.createdAt <= snapshot.createdAt) || prev.items.length
+          // Insert within the unused section keeping newest-first (by createdAt)
+          const unusedSection = prev.items.slice(firstUnusedIndex)
+          const relativeIndex = unusedSection.findIndex((i) => i.createdAt <= snapshot.createdAt)
+          const insertIndex = firstUnusedIndex + (relativeIndex === -1 ? unusedSection.length : relativeIndex)
 
           const newSnapshots = [...prev.items]
           newSnapshots.splice(insertIndex, 0, snapshot)
