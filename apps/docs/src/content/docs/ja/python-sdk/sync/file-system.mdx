@@ -3,7 +3,7 @@ title: "ファイルシステム"
 hideTitleOnPage: true
 ---
 
-## FileSystem
+## FileSystem \{#filesystem\}
 
 ```python
 class FileSystem()
@@ -13,7 +13,7 @@ class FileSystem()
 
 このクラスは、Daytona のサンドボックス内で実行できるファイルシステム操作に対する高水準インターフェースを実装します。
 
-#### FileSystem.\_\_init\_\_
+#### FileSystem.__init__ \{#filesystem__init__\}
 
 ```python
 def __init__(sandbox_id: str, toolbox_api: ToolboxApi,
@@ -24,11 +24,11 @@ def __init__(sandbox_id: str, toolbox_api: ToolboxApi,
 
 **引数**:
 
-- `sandbox_id` _str_ - サンドボックス ID。
-- `toolbox_api` _ToolboxApi_ - サンドボックス操作用の API クライアント。
-- `get_root_dir` _Callable[[], str]_ - サンドボックスのデフォルトのルートディレクトリを取得する関数。
+* `sandbox_id` *str* - サンドボックス ID。
+* `toolbox_api` *ToolboxApi* - サンドボックス操作用の API クライアント。
+* `get_root_dir` *Callable[[], str]* - サンドボックスのデフォルトのルートディレクトリを取得する関数。
 
-#### FileSystem.create\_folder
+#### FileSystem.create_folder \{#filesystemcreate_folder\}
 
 ```python
 @intercept_errors(message_prefix="Failed to create folder: ")
@@ -39,9 +39,8 @@ def create_folder(path: str, mode: str) -> None
 
 **引数**:
 
-- `path` _str_ - フォルダを作成するパス。相対パスはユーザーのルートディレクトリを基準に解決されます。
-- `mode` _str_ - 8 進数形式のフォルダ権限（例: "755" は rwxr-xr-x）。
-  
+* `path` *str* - フォルダを作成するパス。相対パスはユーザーのルートディレクトリを基準に解決されます。
+* `mode` *str* - 8 進数形式のフォルダ権限（例: &quot;755&quot; は rwxr-xr-x）。
 
 **例**:
 
@@ -53,7 +52,7 @@ sandbox.fs.create_folder("workspace/data", "755")
 sandbox.fs.create_folder("workspace/secrets", "700")
 ```
 
-#### FileSystem.delete\_file
+#### FileSystem.delete_file \{#filesystemdelete_file\}
 
 ```python
 @intercept_errors(message_prefix="Failed to delete file: ")
@@ -64,8 +63,7 @@ def delete_file(path: str) -> None
 
 **引数**:
 
-- `path` _str_ - 削除するファイルへの絶対パス。
-  
+* `path` *str* - 削除するファイルへの絶対パス。
 
 **例**:
 
@@ -74,7 +72,7 @@ def delete_file(path: str) -> None
 sandbox.fs.delete_file("workspace/data/old_file.txt")
 ```
 
-#### FileSystem.download\_file
+#### FileSystem.download_file \{#filesystemdownload_file\}
 
 ```python
 @overload
@@ -87,14 +85,12 @@ def download_file(remote_path: str, timeout: int = 30 * 60) -> bytes
 
 **引数**:
 
-- `remote_path` _str_ - サンドボックス内のファイルへのパス。相対パスはユーザーのルートディレクトリを基準に解決されます。
-- `timeout` _int_ - ダウンロード処理のタイムアウト（秒）。0 はタイムアウトなし。デフォルトは 30 分。
-  
+* `remote_path` *str* - サンドボックス内のファイルへのパス。相対パスはユーザーのルートディレクトリを基準に解決されます。
+* `timeout` *int* - ダウンロード処理のタイムアウト（秒）。0 はタイムアウトなし。デフォルトは 30 分。
 
 **戻り値**:
 
-- `bytes` - ファイル内容の bytes オブジェクト。
-  
+* `bytes` - ファイル内容の bytes オブジェクト。
 
 **例**:
 
@@ -109,7 +105,7 @@ content = sandbox.fs.download_file("workspace/data/config.json")
 config = json.loads(content.decode('utf-8'))
 ```
 
-#### FileSystem.download\_file
+#### FileSystem.download_file \{#filesystemdownload_file\}
 
 ```python
 @overload
@@ -123,10 +119,9 @@ def download_file(remote_path: str,
 
 **引数**:
 
-- `remote_path` _str_ - サンドボックス内のファイルへのパス。相対パスはユーザーのルートディレクトリを基準に解決されます。
-- `local_path` _str_ - ローカルにファイルを保存するパス。
-- `timeout` _int_ - ダウンロード処理のタイムアウト（秒）。0 はタイムアウトなし。デフォルトは 30 分。
-  
+* `remote_path` *str* - サンドボックス内のファイルへのパス。相対パスはユーザーのルートディレクトリを基準に解決されます。
+* `local_path` *str* - ローカルにファイルを保存するパス。
+* `timeout` *int* - ダウンロード処理のタイムアウト（秒）。0 はタイムアウトなし。デフォルトは 30 分。
 
 **例**:
 
@@ -137,7 +132,7 @@ size_mb = os.path.getsize(local_path) / 1024 / 1024
 print(f"Size of the downloaded file {local_path}: {size_mb} MB")
 ```
 
-#### FileSystem.find\_files
+#### FileSystem.find_files \{#filesystemfind_files\}
 
 ```python
 @intercept_errors(message_prefix="Failed to find files: ")
@@ -148,19 +143,17 @@ def find_files(path: str, pattern: str) -> List[Match]
 
 **引数**:
 
-- `path` _str_ - 検索対象のファイルまたはディレクトリのパス。パスがディレクトリの場合、
+* `path` *str* - 検索対象のファイルまたはディレクトリのパス。パスがディレクトリの場合、
   検索は再帰的に実行されます。相対パスはユーザーの
   ルートディレクトリを基準に解決されます。
-- `pattern` _str_ - ファイル内容に対して照合する検索パターン。
-  
+* `pattern` *str* - ファイル内容に対して照合する検索パターン。
 
 **戻り値**:
 
-- `List[Match]` - ファイル内で見つかった一致のリスト。各 Match オブジェクトには以下が含まれます:
-  - file: 一致が含まれるファイルのパス
-  - line: 一致が見つかった行番号
-  - content: 一致した行の内容
-  
+* `List[Match]` - ファイル内で見つかった一致のリスト。各 Match オブジェクトには以下が含まれます:
+  * file: 一致が含まれるファイルのパス
+  * line: 一致が見つかった行番号
+  * content: 一致した行の内容
 
 **例**:
 
@@ -171,7 +164,7 @@ for match in matches:
     print(f"{match.file}:{match.line}: {match.content.strip()}")
 ```
 
-#### FileSystem.get\_file\_info
+#### FileSystem.get_file_info \{#filesystemget_file_info\}
 
 ```python
 @intercept_errors(message_prefix="Failed to get file info: ")
@@ -182,22 +175,20 @@ def get_file_info(path: str) -> FileInfo
 
 **引数**:
 
-- `path` _str_ - ファイルまたはディレクトリのパス。相対パスはユーザーの
+* `path` *str* - ファイルまたはディレクトリのパス。相対パスはユーザーの
   ルートディレクトリを基準に解決されます。
-  
 
 **戻り値**:
 
-- `FileInfo` - 次を含む詳細なファイル情報:
-  - name: ファイル名
-  - is_dir: パスがディレクトリかどうか
-  - size: バイト単位のファイルサイズ
-  - mode: ファイルのパーミッション
-  - mod_time: 最終更新タイムスタンプ
-  - permissions: 8 進数表記のファイルパーミッション
-  - owner: ファイル所有者
-  - group: ファイルグループ
-  
+* `FileInfo` - 次を含む詳細なファイル情報:
+  * name: ファイル名
+  * is_dir: パスがディレクトリかどうか
+  * size: バイト単位のファイルサイズ
+  * mode: ファイルのパーミッション
+  * mod_time: 最終更新タイムスタンプ
+  * permissions: 8 進数表記のファイルパーミッション
+  * owner: ファイル所有者
+  * group: ファイルグループ
 
 **例**:
 
@@ -214,7 +205,7 @@ if info.is_dir:
     print("Path is a directory")
 ```
 
-#### FileSystem.list\_files
+#### FileSystem.list_files \{#filesystemlist_files\}
 
 ```python
 @intercept_errors(message_prefix="Failed to list files: ")
@@ -225,15 +216,13 @@ def list_files(path: str) -> List[FileInfo]
 
 **引数**:
 
-- `path` _str_ - 内容を一覧表示するディレクトリのパス。相対パスはユーザーの
+* `path` *str* - 内容を一覧表示するディレクトリのパス。相対パスはユーザーの
   ルートディレクトリを基準に解決されます。
-  
 
 **戻り値**:
 
-- `List[FileInfo]` - ファイルおよびディレクトリ情報のリスト。各 FileInfo
+* `List[FileInfo]` - ファイルおよびディレクトリ情報のリスト。各 FileInfo
   オブジェクトには get_file_info() と同じフィールドが含まれます。
-  
 
 **例**:
 
@@ -251,7 +240,7 @@ dirs = [f for f in files if f.is_dir]
 print("Subdirectories:", ", ".join(d.name for d in dirs))
 ```
 
-#### FileSystem.move\_files
+#### FileSystem.move_files \{#filesystemmove_files\}
 
 ```python
 @intercept_errors(message_prefix="Failed to move files: ")
@@ -262,11 +251,10 @@ def move_files(source: str, destination: str) -> None
 
 **引数**:
 
-- `source` _str_ - 移動元のファイルまたはディレクトリのパス。相対パスはユーザーの
+* `source` *str* - 移動元のファイルまたはディレクトリのパス。相対パスはユーザーの
   ルートディレクトリを基準に解決されます。
-- `destination` _str_ - 移動先のパス。相対パスはユーザーの
+* `destination` *str* - 移動先のパス。相対パスはユーザーの
   ルートディレクトリを基準に解決されます。
-  
 
 **例**:
 
@@ -290,7 +278,7 @@ sandbox.fs.move_files(
 )
 ```
 
-#### FileSystem.replace\_in\_files
+#### FileSystem.replace_in_files \{#filesystemreplace_in_files\}
 
 ```python
 @intercept_errors(message_prefix="Failed to replace in files: ")
@@ -302,19 +290,17 @@ def replace_in_files(files: List[str], pattern: str,
 
 **引数**:
 
-- `files` _List[str]_ - 置換を実行するファイルパスのリスト。相対パスはユーザーの
+* `files` *List[str]* - 置換を実行するファイルパスのリスト。相対パスはユーザーの
   ルートディレクトリを基準に解決されます。
-- `pattern` _str_ - 検索するパターン。
-- `new_value` _str_ - マッチした部分を置き換えるテキスト。
-  
+* `pattern` *str* - 検索するパターン。
+* `new_value` *str* - マッチした部分を置き換えるテキスト。
 
 **戻り値**:
 
-- `List[ReplaceResult]` - 各ファイルで行われた置換を示す結果のリスト。各 ReplaceResult には次が含まれます:
-  - file: 変更されたファイルのパス
-  - success: 操作が成功したかどうか
-  - error: 操作が失敗した場合のエラーメッセージ
-  
+* `List[ReplaceResult]` - 各ファイルで行われた置換を示す結果のリスト。各 ReplaceResult には次が含まれます:
+  * file: 変更されたファイルのパス
+  * success: 操作が成功したかどうか
+  * error: 操作が失敗した場合のエラーメッセージ
 
 **例**:
 
@@ -334,7 +320,7 @@ for result in results:
         print(f"{result.file}: {result.error}")
 ```
 
-#### FileSystem.search\_files
+#### FileSystem.search_files \{#filesystemsearch_files\}
 
 ```python
 @intercept_errors(message_prefix="Failed to search files: ")
@@ -345,17 +331,15 @@ def search_files(path: str, pattern: str) -> SearchFilesResponse
 
 **引数**:
 
-- `path` _str_ - 検索を開始するルートディレクトリのパス。相対パスはユーザーの
+* `path` *str* - 検索を開始するルートディレクトリのパス。相対パスはユーザーの
   ルートディレクトリを基準に解決されます。
-- `pattern` _str_ - ファイル名にマッチさせるパターン。グロブ
-  パターン（例: Python ファイルなら "*.py"）をサポートします。
-  
+* `pattern` *str* - ファイル名にマッチさせるパターン。グロブ
+  パターン（例: Python ファイルなら &quot;*.py&quot;）をサポートします。
 
 **戻り値**:
 
-- `SearchFilesResponse` - 検索結果を含みます:
-  - files: 一致したファイルおよびディレクトリのパスのリスト
-  
+* `SearchFilesResponse` - 検索結果を含みます:
+  * files: 一致したファイルおよびディレクトリのパスのリスト
 
 **例**:
 
@@ -370,7 +354,7 @@ result = sandbox.fs.search_files("workspace/data", "test_*")
 print(f"Found {len(result.files)} test files")
 ```
 
-#### FileSystem.set\_file\_permissions
+#### FileSystem.set_file_permissions \{#filesystemset_file_permissions\}
 
 ```python
 @intercept_errors(message_prefix="Failed to set file permissions: ")
@@ -384,13 +368,12 @@ def set_file_permissions(path: str,
 
 **引数**:
 
-- `path` _str_ - ファイルまたはディレクトリのパス。相対パスはユーザーの
+* `path` *str* - ファイルまたはディレクトリのパス。相対パスはユーザーの
   ルートディレクトリを基準に解決されます。
-- `mode` _Optional[str]_ - 8 進数形式のファイルモード/パーミッション
-  （例: "644" は rw-r--r--）。
-- `owner` _Optional[str]_ - ファイルの所有ユーザー。
-- `group` _Optional[str]_ - ファイルの所有グループ。
-  
+* `mode` *Optional[str]* - 8 進数形式のファイルモード/パーミッション
+  （例: &quot;644&quot; は rw-r--r--）。
+* `owner` *Optional[str]* - ファイルの所有ユーザー。
+* `group` *Optional[str]* - ファイルの所有グループ。
 
 **例**:
 
@@ -409,7 +392,7 @@ sandbox.fs.set_file_permissions(
 )
 ```
 
-#### FileSystem.upload\_file
+#### FileSystem.upload_file \{#filesystemupload_file\}
 
 ```python
 @overload
@@ -420,11 +403,10 @@ def upload_file(file: bytes, remote_path: str, timeout: int = 30 * 60) -> None
 
 **引数**:
 
-- `file` _bytes_ - バイト列オブジェクトとしてのファイル内容。
-- `remote_path` _str_ - 宛先ファイルのパス。相対パスはユーザーの
+* `file` *bytes* - バイト列オブジェクトとしてのファイル内容。
+* `remote_path` *str* - 宛先ファイルのパス。相対パスはユーザーの
   ルートディレクトリを基準に解決されます。
-- `timeout` _int_ - アップロード処理のタイムアウト（秒）。0 はタイムアウトなし。デフォルトは 30 分。
-  
+* `timeout` *int* - アップロード処理のタイムアウト（秒）。0 はタイムアウトなし。デフォルトは 30 分。
 
 **例**:
 
@@ -445,7 +427,7 @@ content = json.dumps(data).encode('utf-8')
 sandbox.fs.upload_file(content, "tmp/config.json")
 ```
 
-#### FileSystem.upload\_file
+#### FileSystem.upload_file \{#filesystemupload_file\}
 
 ```python
 @overload
@@ -461,11 +443,10 @@ def upload_file(local_path: str,
 
 **引数**:
 
-- `local_path` _str_ - アップロードするローカルファイルのパス。
-- `remote_path` _str_ - サンドボックス内の宛先ファイルのパス。相対パスは
+* `local_path` *str* - アップロードするローカルファイルのパス。
+* `remote_path` *str* - サンドボックス内の宛先ファイルのパス。相対パスは
   ユーザーのルートディレクトリを基準に解決されます。
-- `timeout` _int_ - アップロード処理のタイムアウト（秒）。0 はタイムアウトなし。既定は 30 分。
-  
+* `timeout` *int* - アップロード処理のタイムアウト（秒）。0 はタイムアウトなし。既定は 30 分。
 
 **例**:
 
@@ -473,7 +454,7 @@ def upload_file(local_path: str,
 sandbox.fs.upload_file("local_file.txt", "tmp/large_file.txt")
 ```
 
-#### FileSystem.upload\_files
+#### FileSystem.upload_files \{#filesystemupload_files\}
 
 ```python
 @intercept_errors(message_prefix="Failed to upload files: ")
@@ -485,8 +466,8 @@ def upload_files(files: List[FileUpload], timeout: int = 30 * 60) -> None
 
 **引数**:
 
-- `files` _List[FileUpload]_ - アップロードするファイルのリスト。
-- `timeout` _int_ - アップロード処理のタイムアウト（秒）。0 はタイムアウトなし。既定は 30 分。
+* `files` *List[FileUpload]* - アップロードするファイルのリスト。
+* `timeout` *int* - アップロード処理のタイムアウト（秒）。0 はタイムアウトなし。既定は 30 分。
 
 **例**:
 
@@ -509,8 +490,7 @@ files = [
 sandbox.fs.upload_files(files)
 ```
 
-
-## FileUpload
+## FileUpload \{#fileupload\}
 
 ```python
 @dataclass
@@ -521,6 +501,5 @@ class FileUpload()
 
 **属性**:
 
-- `source` _Union[bytes, str]_ - ファイル内容。バイト列オブジェクト、またはローカルファイルパスを指定できます。バイト列を指定する場合は、メモリに収まるサイズであることを確認してください。そうでない場合は、内容がサンドボックスへストリーミングされるローカルファイルパスを使用してください。
-- `destination` _str_ - サンドボックス内の保存先の絶対パス。相対パスはユーザーのルートディレクトリを基準に解決されます。
-
+* `source` *Union[bytes, str]* - ファイル内容。バイト列オブジェクト、またはローカルファイルパスを指定できます。バイト列を指定する場合は、メモリに収まるサイズであることを確認してください。そうでない場合は、内容がサンドボックスへストリーミングされるローカルファイルパスを使用してください。
+* `destination` *str* - サンドボックス内の保存先の絶対パス。相対パスはユーザーのルートディレクトリを基準に解決されます。
