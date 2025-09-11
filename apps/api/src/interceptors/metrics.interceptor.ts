@@ -23,8 +23,7 @@ import { SnapshotDto } from '../sandbox/dto/snapshot.dto'
 import { CreateOrganizationDto } from '../organization/dto/create-organization.dto'
 import { UpdateOrganizationQuotaDto } from '../organization/dto/update-organization-quota.dto'
 import { OrganizationDto } from '../organization/dto/organization.dto'
-import { UpdateOrganizationMemberRoleDto } from '../organization/dto/update-organization-member-role.dto'
-import { UpdateAssignedOrganizationRolesDto } from '../organization/dto/update-assigned-organization-roles.dto'
+import { UpdateOrganizationMemberAccessDto } from '../organization/dto/update-organization-member-access.dto'
 import { CreateOrganizationRoleDto } from '../organization/dto/create-organization-role.dto'
 import { UpdateOrganizationRoleDto } from '../organization/dto/update-organization-role.dto'
 import { CreateOrganizationInvitationDto } from '../organization/dto/create-organization-invitation.dto'
@@ -184,16 +183,8 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
           case '/api/organizations/:organizationId/leave':
             this.captureLeaveOrganization(props, request.params.organizationId)
             break
-          case '/api/organizations/:organizationId/users/:userId/role':
-            this.captureUpdateOrganizationUserRole(
-              props,
-              request.params.organizationId,
-              request.params.userId,
-              request.body,
-            )
-            break
-          case '/api/organizations/:organizationId/users/:userId/assigned-roles':
-            this.captureUpdateOrganizationUserAssignedRoles(
+          case '/api/organizations/:organizationId/users/:userId/access':
+            this.captureUpdateOrganizationUserAccess(
               props,
               request.params.organizationId,
               request.params.userId,
@@ -698,35 +689,18 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
     })
   }
 
-  private captureUpdateOrganizationUserRole(
+  private captureUpdateOrganizationUserAccess(
     props: CommonCaptureProps,
     organizationId: string,
     userId: string,
-    request: UpdateOrganizationMemberRoleDto,
+    request: UpdateOrganizationMemberAccessDto,
   ) {
-    this.capture('api_organization_user_role_updated', props, 'api_organization_user_role_update_failed', {
+    this.capture('api_organization_user_access_updated', props, 'api_organization_user_access_update_failed', {
       organization_id: organizationId,
       organization_user_id: userId,
       organization_user_role: request.role,
+      organization_user_assigned_role_ids: request.assignedRoleIds,
     })
-  }
-
-  private captureUpdateOrganizationUserAssignedRoles(
-    props: CommonCaptureProps,
-    organizationId: string,
-    userId: string,
-    request: UpdateAssignedOrganizationRolesDto,
-  ) {
-    this.capture(
-      'api_organization_user_assigned_roles_updated',
-      props,
-      'api_organization_user_assigned_roles_update_failed',
-      {
-        organization_id: organizationId,
-        organization_user_id: userId,
-        organization_user_assigned_roles: request.roleIds,
-      },
-    )
   }
 
   private captureDeleteOrganizationUser(props: CommonCaptureProps, organizationId: string, userId: string) {

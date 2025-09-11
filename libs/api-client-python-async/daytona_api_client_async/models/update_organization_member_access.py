@@ -18,18 +18,26 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, Field, StrictStr
+from pydantic import BaseModel, ConfigDict, Field, StrictStr, field_validator
 from typing import Any, ClassVar, Dict, List
 from typing import Optional, Set
 from typing_extensions import Self
 
-class UpdateAssignedOrganizationRoles(BaseModel):
+class UpdateOrganizationMemberAccess(BaseModel):
     """
-    UpdateAssignedOrganizationRoles
+    UpdateOrganizationMemberAccess
     """ # noqa: E501
-    role_ids: List[StrictStr] = Field(description="Array of role IDs", alias="roleIds")
+    role: StrictStr = Field(description="Organization member role")
+    assigned_role_ids: List[StrictStr] = Field(description="Array of assigned role IDs", alias="assignedRoleIds")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["roleIds"]
+    __properties: ClassVar[List[str]] = ["role", "assignedRoleIds"]
+
+    @field_validator('role')
+    def role_validate_enum(cls, value):
+        """Validates the enum"""
+        if value not in set(['owner', 'member']):
+            raise ValueError("must be one of enum values ('owner', 'member')")
+        return value
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -49,7 +57,7 @@ class UpdateAssignedOrganizationRoles(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of UpdateAssignedOrganizationRoles from a JSON string"""
+        """Create an instance of UpdateOrganizationMemberAccess from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -81,7 +89,7 @@ class UpdateAssignedOrganizationRoles(BaseModel):
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of UpdateAssignedOrganizationRoles from a dict"""
+        """Create an instance of UpdateOrganizationMemberAccess from a dict"""
         if obj is None:
             return None
 
@@ -89,7 +97,8 @@ class UpdateAssignedOrganizationRoles(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "roleIds": obj.get("roleIds")
+            "role": obj.get("role") if obj.get("role") is not None else 'member',
+            "assignedRoleIds": obj.get("assignedRoleIds")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

@@ -728,9 +728,9 @@ paths:
       summary: List organization members
       tags:
         - organizations
-  /organizations/{organizationId}/users/{userId}/role:
+  /organizations/{organizationId}/users/{userId}/access:
     post:
-      operationId: updateRoleForOrganizationMember
+      operationId: updateAccessForOrganizationMember
       parameters:
         - description: Organization ID
           explode: false
@@ -752,7 +752,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateOrganizationMemberRole'
+              $ref: '#/components/schemas/UpdateOrganizationMemberAccess'
         required: true
       responses:
         '200':
@@ -760,56 +760,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/OrganizationUser'
-          description: Role updated successfully
+          description: Access updated successfully
       security:
         - bearer: []
         - oauth2:
             - openid
             - profile
             - email
-      summary: Update role for organization member
-      tags:
-        - organizations
-  /organizations/{organizationId}/users/{userId}/assigned-roles:
-    post:
-      operationId: updateAssignedOrganizationRoles
-      parameters:
-        - description: Organization ID
-          explode: false
-          in: path
-          name: organizationId
-          required: true
-          schema:
-            type: string
-          style: simple
-        - description: User ID
-          explode: false
-          in: path
-          name: userId
-          required: true
-          schema:
-            type: string
-          style: simple
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UpdateAssignedOrganizationRoles'
-        required: true
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/OrganizationUser'
-          description: Assigned roles updated successfully
-      security:
-        - bearer: []
-        - oauth2:
-            - openid
-            - profile
-            - email
-      summary: Update assigned roles to organization member
+      summary: Update access for organization member
       tags:
         - organizations
   /organizations/{organizationId}/users/{userId}:
@@ -7049,32 +7007,30 @@ components:
         - updatedAt
         - userId
       type: object
-    UpdateOrganizationMemberRole:
+    UpdateOrganizationMemberAccess:
       example:
-        role: owner
+        role: member
+        assignedRoleIds:
+          - assignedRoleIds
+          - assignedRoleIds
       properties:
         role:
+          default: member
           description: Organization member role
           enum:
             - owner
             - member
           type: string
-      required:
-        - role
-      type: object
-    UpdateAssignedOrganizationRoles:
-      example:
-        roleIds:
-          - roleIds
-          - roleIds
-      properties:
-        roleIds:
-          description: Array of role IDs
+        assignedRoleIds:
+          default:
+            - 00000000-0000-0000-0000-000000000001
+          description: Array of assigned role IDs
           items:
             type: string
           type: array
       required:
-        - roleIds
+        - assignedRoleIds
+        - role
       type: object
     CreateOrganizationInvitation:
       example:
@@ -10378,8 +10334,7 @@ components:
             - delete
             - login
             - set_default
-            - update_role
-            - update_assigned_roles
+            - update_access
             - update_quota
             - suspend
             - unsuspend
