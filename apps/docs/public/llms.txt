@@ -1,5 +1,5 @@
 # Daytona Documentation v0.0.0-dev
-# Generated on: 2025-09-08
+# Generated on: 2025-09-11
 
 # Daytona
 
@@ -94,8 +94,8 @@
 - [How to unlink an account](https://daytona.io/docs/en/linked-accounts#how-to-unlink-an-account)
 - [Need More?](https://daytona.io/docs/en/linked-accounts#need-more)
 - [Log Streaming](https://daytona.io/docs/en/log-streaming)
-- [Asynchronous](https://daytona.io/docs/en/log-streaming#asynchronous)
-- [Synchronous](https://daytona.io/docs/en/log-streaming#synchronous)
+- [Streaming Logs with Callbacks](https://daytona.io/docs/en/log-streaming#streaming-logs-with-callbacks)
+- [Retrieve All Existing Logs](https://daytona.io/docs/en/log-streaming#retrieve-all-existing-logs)
 - [Daytona MCP Server](https://daytona.io/docs/en/mcp)
 - [Prerequisites](https://daytona.io/docs/en/mcp#prerequisites)
 - [Installation and Setup](https://daytona.io/docs/en/mcp#installation-and-setup)

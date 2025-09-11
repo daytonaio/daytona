@@ -1,5 +1,5 @@
 # Daytona Documentation v0.0.0-dev
-# Generated on: 2025-09-08
+# Generated on: 2025-09-11
 
 
 title: API Keys
@@ -2216,7 +2216,11 @@ The Daytona SDK supports both:
 This guide covers how to use log streaming in both asynchronous and synchronous modes.
 Real-time streaming is especially useful for **debugging**, **monitoring**, or integrating with **observability tools**.
 
-## Asynchronous
+:::note
+Starting with version `0.27.0`, you can retrieve session command logs in two distinct streams: **stdout** and **stderr**.
+:::
+
+## Streaming Logs with Callbacks
 
 If your sandboxed process is part of a larger system and is expected to run for an extended period (or indefinitely),
 you can process logs asynchronously **in the background**, while the rest of your system continues executing.
@@ -2229,171 +2233,162 @@ This is ideal for:
 
 import { TabItem, Tabs } from '@astrojs/starlight/components'
 
-```python
-import asyncio
-from daytona import Daytona, SessionExecuteRequest
+  ```python
+  import asyncio
+  from daytona import Daytona, SessionExecuteRequest
 
-async def main():
+  async def main():
     daytona = Daytona()
     sandbox = daytona.create()
 
-    try:
-        session_id = "exec-session-1"
-        sandbox.process.create_session(session_id)
+    session_id = "streaming-session"
+    sandbox.process.create_session(session_id)
 
-        command = sandbox.process.execute_session_command(
-            session_id,
-            SessionExecuteRequest(
-                command='for i in {1..10}; do echo "Processing step $i..."; sleep 1; done',
-                var_async=True,
-            ),
-        )
+    command = sandbox.process.execute_session_command(
+      session_id,
+      SessionExecuteRequest(
+        command='for i in {1..5}; do echo "Step $i"; echo "Error $i" >&2; sleep 1; done',
+        var_async=True,
+      ),
+    )
 
-        logs_task = asyncio.create_task(
-            sandbox.process.get_session_command_logs_async(
-                session_id, command.cmd_id, lambda chunk: print(f"Log chunk: {chunk}")
-            )
-        )
+    # Stream logs with separate callbacks
+    logs_task = asyncio.create_task(
+      sandbox.process.get_session_command_logs_async(
+        session_id,
+        command.cmd_id,
+        lambda stdout: print(f"[STDOUT]: {stdout}"),
+        lambda stderr: print(f"[STDERR]: {stderr}"),
+      )
+    )
 
-        print("Continuing execution while logs are streaming...")
-        await asyncio.sleep(1)
-        print("Other operations completed!")
+    print("Continuing execution while logs are streaming...")
+    await asyncio.sleep(3)
+    print("Other operations completed!")
 
-        print("At the end wait for any asynchronous task to complete and clean up resources...")
-        await logs_task
-    except Exception as e:
-        print(f"Error: {e}")
-    finally:
-        print("Cleaning up sandbox...")
-        sandbox.delete()
+    # Wait for the logs to complete
+    await logs_task
 
-if __name__ == "__main__":
-    asyncio.run(main())
+    sandbox.delete()
+    
+  if __name__ == "__main__":
+      asyncio.run(main())
 
-```
+  ```
   ```typescript
-  import { Daytona, Sandbox } from '@daytonaio/sdk'
+  import { Daytona, SessionExecuteRequest } from '@daytonaio/sdk'
 
   async function main() {
     const daytona = new Daytona()
     const sandbox = await daytona.create()
+    const sessionId = "exec-session-1"
+    await sandbox.process.createSession(sessionId)
 
-    try {           
-      const sessionId = 'exec-session-async-logs'
-      await sandbox.process.createSession(sessionId)
+    const command = await sandbox.process.executeSessionCommand(
+      sessionId,
+      {
+        command: 'for i in {1..5}; do echo "Step $i"; echo "Error $i" >&2; sleep 1; done',
+        runAsync: true,
+      },
+    )
 
-      const command = await sandbox.process.executeSessionCommand(sessionId, {
-        command: 'for i in {1..10}; do echo "Processing step $i..."; sleep 1; done',
-        async: true,
-      })
+    // Stream logs with separate callbacks
+    const logsTask = sandbox.process.getSessionCommandLogs(
+      sessionId,
+      command.cmdId!,
+      (stdout) => console.log('[STDOUT]:', stdout),
+      (stderr) => console.log('[STDERR]:', stderr),
+    )
 
-      const logTask = sandbox.process.getSessionCommandLogs(sessionId, command.cmdId!, (chunk) => {
-        console.log('Log chunk:', chunk)
-      })
+    console.log('Continuing execution while logs are streaming...')
+    await new Promise((resolve) => setTimeout(resolve, 3000))
+    console.log('Other operations completed!')
 
-      console.log('Continuing execution while logs are streaming...')
-      sleep(1)
-      console.log('Other operations completed!')
+    // Wait for the logs to complete
+    await logsTask
 
-      console.log('At the end wait for any asynchronous task to complete and clean up resources...')
-      await logTask
-    } catch (error) {
-      console.error('Error:', error)
-    } finally {
-      console.log('Cleaning up sandbox...')
-      await sandbox.delete()
-    }
+    await sandbox.delete()
   }
 
   main()
   ```
 
 
-## Synchronous
+## Retrieve All Existing Logs
 
-If the command has a predictable duration, or if you don't need to run it in the background,
-you can process log stream synchronously. For example, you can write logs to a file or some other storage.
+If the command has a predictable duration, or if you don't need to run it in the background but want to
+periodically check all existing logs, you can use the following example to get the logs up to the current point in time.
 
   ```python
-  import asyncio
-  import os
+  import time
   from daytona import Daytona, SessionExecuteRequest
 
-  async def main():
-      daytona = Daytona()
-      sandbox = daytona.create()
+  daytona = Daytona()
+  sandbox = daytona.create()
+  session_id = "exec-session-1"
+  sandbox.process.create_session(session_id)
 
-      try:
-          session_id = "exec-session-1"
-          sandbox.process.create_session(session_id)
+  # Execute a blocking command and wait for the result
+  command = sandbox.process.execute_session_command(
+    session_id, SessionExecuteRequest(command="echo 'Hello from stdout' && echo 'Hello from stderr' >&2")
+  )
+  print(f"[STDOUT]: {command.stdout}")
+  print(f"[STDERR]: {command.stderr}")
+  print(f"[OUTPUT]: {command.output}")
 
-          command = sandbox.process.execute_session_command(
-              session_id,
-              SessionExecuteRequest(
-                  command='counter=1; while (( counter <= 5 )); do echo "Count: $counter"; ((counter++)); sleep 2; done',
-                  var_async=True,
-              ),
-          )
+  # Or execute command in the background and get the logs later
+  command = sandbox.process.execute_session_command(
+    session_id, 
+    SessionExecuteRequest(
+      command='while true; do if (( RANDOM % 2 )); then echo "All good at $(date)"; else echo "Oops, an error at $(date)" >&2; fi; sleep 1; done',
+      run_async=True
+    )
+  )
+  time.sleep(5)
+  # Get the logs up to the current point in time
+  logs = sandbox.process.get_session_command_logs(session_id, command.cmd_id)
+  print(f"[STDOUT]: {logs.stdout}")
+  print(f"[STDERR]: {logs.stderr}")
+  print(f"[OUTPUT]: {logs.output}")
 
-          log_file_path = f"./logs/logs-session_{session_id}-command_{command.cmd_id}.log"
-          os.makedirs(os.path.dirname(log_file_path), exist_ok=True)
-
-          with open(log_file_path, "w") as log_file:
-              def handle_chunk(chunk: str):
-                  #  remove null bytes
-                  clean_chunk = chunk.replace("\x00", "")
-                  #  write to file
-                  log_file.write(clean_chunk)
-                  log_file.flush()
-
-              await sandbox.process.get_session_command_logs_async(
-                  session_id, command.cmd_id, handle_chunk
-              )
-      except Exception as e:
-          print(f"Error: {e}")
-      finally:
-          print("Cleaning up sandbox...")
-          sandbox.delete()
-
-  if __name__ == "__main__":
-      asyncio.run(main())
-
+  sandbox.delete()
   ```
   ```typescript
-  import { Daytona, Sandbox } from '@daytonaio/sdk'
+  import { Daytona, SessionExecuteRequest } from '@daytonaio/sdk'
 
   async function main() {
     const daytona = new Daytona()
     const sandbox = await daytona.create()
+    const sessionId = "exec-session-1"
+    await sandbox.process.createSession(sessionId)
 
-    try {           
-      const sessionId = 'exec-session-async-logs'
-      await sandbox.process.createSession(sessionId)
+    // Execute a blocking command and wait for the result
+    const command = await sandbox.process.executeSessionCommand(
+      sessionId,
+      {
+        command: 'echo "Hello from stdout" && echo "Hello from stderr" >&2',
+      },
+    )
+    console.log(`[STDOUT]: ${command.stdout}`)
+    console.log(`[STDERR]: ${command.stderr}`)
+    console.log(`[OUTPUT]: ${command.output}`)
 
-      const command = await sandbox.process.executeSessionCommand(sessionId, {
-        command: 'counter=1; while (( counter <= 5 )); do echo "Count: $counter"; ((counter++)); sleep 2; done',
-        async: true,
-      })
+    // Or execute command in the background and get the logs later
+    const command2 = await sandbox.process.executeSessionCommand(
+      sessionId,
+      {
+        command: 'while true; do if (( RANDOM % 2 )); then echo "All good at $(date)"; else echo "Oops, an error at $(date)" >&2; fi; sleep 1; done',
+        runAsync: true,
+      },
+    )
+    await new Promise((resolve) => setTimeout(resolve, 5000))
+    // Get the logs up to the current point in time
+    const logs = await sandbox.process.getSessionCommandLogs(sessionId, command2.cmdId!)
+    console.log(`[STDOUT]: ${logs.stdout}`)
+    console.log(`[STDERR]: ${logs.stderr}`)
+    console.log(`[OUTPUT]: ${logs.output}`)
 
-      const logFilePath = `./logs/logs-session-${sessionId}-command-${command.cmdId}.log`
-      const logsDir = path.dirname(logFilePath)
-      if (!fs.existsSync(logsDir)) {
-        fs.mkdirSync(logsDir, { recursive: true })
-      }
-
-      const stream = fs.createWriteStream(logFilePath)
-      await sandbox.process.getSessionCommandLogs(sessionId, command.cmdId!, (chunk) => {
-        const cleanChunk = chunk.replace(/\x00/g, '')
-        stream.write(cleanChunk)
-      })
-      stream.end()
-      await logTask
-    } catch (error) {
-      console.error('Error:', error)
-    } finally {
-      console.log('Cleaning up sandbox...')
-      await sandbox.delete()
-    }
+    await sandbox.delete()
   }
 
   main()
