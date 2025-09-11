@@ -1000,19 +1000,19 @@
     "objectID": 125
   },
   {
-    "title": "Asynchronous",
+    "title": "Streaming Logs with Callbacks",
     "description": "If your sandboxed process is part of a larger system and is expected to run for an extended period (or indefinitely),\nyou can process logs asynchronously **in the background**, while the rest of your system continues executing.",
     "tag": "Documentation",
-    "url": "/docs/log-streaming#asynchronous",
-    "slug": "/log-streaming#asynchronous",
+    "url": "/docs/log-streaming#streaming-logs-with-callbacks",
+    "slug": "/log-streaming#streaming-logs-with-callbacks",
     "objectID": 126
   },
   {
-    "title": "Synchronous",
-    "description": "If the command has a predictable duration, or if you don't need to run it in the background,\nyou can process log stream synchronously.",
+    "title": "Retrieve All Existing Logs",
+    "description": "If the command has a predictable duration, or if you don't need to run it in the background but want to\nperiodically check all existing logs, you can use the following example to get the logs up to the current point in time.",
     "tag": "Documentation",
-    "url": "/docs/log-streaming#synchronous",
-    "slug": "/log-streaming#synchronous",
+    "url": "/docs/log-streaming#retrieve-all-existing-logs",
+    "slug": "/log-streaming#retrieve-all-existing-logs",
     "objectID": 127
   },
   {

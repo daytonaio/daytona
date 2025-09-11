@@ -267,7 +267,7 @@ export const getSidebarConfig = (
           label: labels['sidebarconfig.logStreaming'],
           description: labels['sidebarconfig.logStreamingDescription'],
           attrs: {
-            icon: 'log.svg',
+            icon: 'log2.svg',
           },
         },
       ],
