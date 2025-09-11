@@ -244,7 +244,7 @@ export class SandboxStartAction extends SandboxAction {
       await this.updateSandboxState(sandbox.id, SandboxState.PULLING_SNAPSHOT, runner.id)
     }
 
-    await this.runnerService.recalculateRunnerUsage(runner.id)
+    await this.runnerService.recalculateRunnerUsage(runner)
     return SYNC_AGAIN
   }
 

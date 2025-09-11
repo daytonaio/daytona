@@ -567,9 +567,10 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
       await this.snapshotRepository.save(snapshot)
 
       await this.validateSandboxCreationOnRunner(snapshot, runner)
+    } else {
+      snapshot.state = SnapshotState.ACTIVE
     }
 
-    snapshot.state = SnapshotState.ACTIVE
     await this.snapshotRepository.save(snapshot)
 
     await this.runnerService.createSnapshotRunnerEntry(runner.id, snapshot.ref, SnapshotRunnerState.READY)
@@ -600,7 +601,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     const sandbox = new Sandbox()
     sandbox.id = uuidv4()
     sandbox.snapshot = snapshot.ref
-    sandbox.osUser = 'root' // TOOD: check
+    sandbox.osUser = 'root' // TODO: instead of root, use the user from the snapshot
     sandbox.disk = snapshot.disk
     sandbox.mem = snapshot.mem
     sandbox.cpu = snapshot.cpu
@@ -610,27 +611,46 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
       DAYTONA_VALIDATING_SNAPSHOT_ID: snapshot.id,
     }
 
+    let validationSuccess = false
+    let creationSuccess = false
+    let errorMessage = 'Validation failed, ensure your entrypoint is valid/long-running'
+
     const registry = await this.dockerRegistryService.getDefaultInternalRegistry()
-    await runnerAdapter.createSandbox(sandbox, registry, snapshot.entrypoint)
 
-    // Wait for 5 seconds to ensure the sandbox hasn't exited
-    await new Promise((resolve) => setTimeout(resolve, 5000))
+    try {
+      await runnerAdapter.createSandbox(sandbox, registry, snapshot.entrypoint)
+      creationSuccess = true
 
-    const sandboxInfo = await runnerAdapter.sandboxInfo(sandbox.id)
-    if (sandboxInfo.state === SandboxState.STARTED) {
-      await this.updateSnapshotState(snapshot.id, SnapshotState.ACTIVE)
-    } else {
-      await this.updateSnapshotState(
-        snapshot.id,
-        SnapshotState.ERROR,
-        'Validation failed, ensure your entrypoint is valid/long-running',
-      )
+      // Wait for 5 seconds to ensure the sandbox hasn't exited
+      await new Promise((resolve) => setTimeout(resolve, 5000))
+
+      try {
+        const sandboxInfo = await runnerAdapter.sandboxInfo(sandbox.id)
+        if (sandboxInfo.state === SandboxState.STARTED) {
+          validationSuccess = true
+        }
+      } catch (error) {
+        validationSuccess = false
+        errorMessage = `Validation failed, error getting sandbox info: ${fromAxiosError(error)}`
+      }
+    } catch (error) {
+      validationSuccess = false
     }
 
     try {
-      await runnerAdapter.destroySandbox(sandbox.id)
-    } catch (error) {
-      this.logger.error(`Failed to destroy sandbox ${sandbox.id}: ${fromAxiosError(error)}`)
+      if (validationSuccess) {
+        await this.updateSnapshotState(snapshot.id, SnapshotState.ACTIVE)
+      } else {
+        await this.updateSnapshotState(snapshot.id, SnapshotState.ERROR, errorMessage)
+      }
+    } finally {
+      if (creationSuccess) {
+        try {
+          await runnerAdapter.destroySandbox(sandbox.id)
+        } catch (error) {
+          this.logger.error(`Failed to destroy sandbox ${sandbox.id}: ${fromAxiosError(error)}`)
+        }
+      }
     }
   }
 
