@@ -2028,6 +2028,13 @@ paths:
           style: simple
         - explode: true
           in: query
+          name: recursive
+          required: false
+          schema:
+            type: boolean
+          style: form
+        - explode: true
+          in: query
           name: path
           required: true
           schema:

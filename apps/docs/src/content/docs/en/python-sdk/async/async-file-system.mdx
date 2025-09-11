@@ -60,7 +60,7 @@ await sandbox.fs.create_folder("workspace/secrets", "700")
 
 ```python
 @intercept_errors(message_prefix="Failed to delete file: ")
-async def delete_file(path: str) -> None
+async def delete_file(path: str, recursive: bool = False) -> None
 ```
 
 Deletes a file from the Sandbox.
@@ -68,6 +68,7 @@ Deletes a file from the Sandbox.
 **Arguments**:
 
 - `path` _str_ - Absolute path to the file to delete.
+- `recursive` _bool_ - If the file is a directory, this must be true to delete it.
   
 
 **Example**:

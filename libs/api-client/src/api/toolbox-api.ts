@@ -323,6 +323,7 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
      * @param {string} sandboxId
      * @param {string} path
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {boolean} [recursive]
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
@@ -330,6 +331,7 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
       sandboxId: string,
       path: string,
       xDaytonaOrganizationID?: string,
+      recursive?: boolean,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'sandboxId' is not null or undefined
@@ -356,6 +358,10 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
       await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
       // authentication oauth2 required
+
+      if (recursive !== undefined) {
+        localVarQueryParameter['recursive'] = recursive
+      }
 
       if (path !== undefined) {
         localVarQueryParameter['path'] = path
@@ -3684,6 +3690,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
      * @param {string} sandboxId
      * @param {string} path
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {boolean} [recursive]
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
@@ -3691,12 +3698,14 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
       sandboxId: string,
       path: string,
       xDaytonaOrganizationID?: string,
+      recursive?: boolean,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.deleteFile(
         sandboxId,
         path,
         xDaytonaOrganizationID,
+        recursive,
         options,
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
@@ -5626,6 +5635,7 @@ export const ToolboxApiFactory = function (configuration?: Configuration, basePa
      * @param {string} sandboxId
      * @param {string} path
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {boolean} [recursive]
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
@@ -5633,10 +5643,11 @@ export const ToolboxApiFactory = function (configuration?: Configuration, basePa
       sandboxId: string,
       path: string,
       xDaytonaOrganizationID?: string,
+      recursive?: boolean,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<void> {
       return localVarFp
-        .deleteFile(sandboxId, path, xDaytonaOrganizationID, options)
+        .deleteFile(sandboxId, path, xDaytonaOrganizationID, recursive, options)
         .then((request) => request(axios, basePath))
     },
     /**
@@ -6837,13 +6848,20 @@ export class ToolboxApi extends BaseAPI {
    * @param {string} sandboxId
    * @param {string} path
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+   * @param {boolean} [recursive]
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof ToolboxApi
    */
-  public deleteFile(sandboxId: string, path: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
+  public deleteFile(
+    sandboxId: string,
+    path: string,
+    xDaytonaOrganizationID?: string,
+    recursive?: boolean,
+    options?: RawAxiosRequestConfig,
+  ) {
     return ToolboxApiFp(this.configuration)
-      .deleteFile(sandboxId, path, xDaytonaOrganizationID, options)
+      .deleteFile(sandboxId, path, xDaytonaOrganizationID, recursive, options)
       .then((request) => request(this.axios, this.basePath))
   }
 

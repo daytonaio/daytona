@@ -1281,6 +1281,7 @@ type ToolboxAPIDeleteFileRequest struct {
 	sandboxId              string
 	path                   *string
 	xDaytonaOrganizationID *string
+	recursive              *bool
 }
 
 func (r ToolboxAPIDeleteFileRequest) Path(path string) ToolboxAPIDeleteFileRequest {
@@ -1291,6 +1292,11 @@ func (r ToolboxAPIDeleteFileRequest) Path(path string) ToolboxAPIDeleteFileReque
 // Use with JWT to specify the organization ID
 func (r ToolboxAPIDeleteFileRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) ToolboxAPIDeleteFileRequest {
 	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
+	return r
+}
+
+func (r ToolboxAPIDeleteFileRequest) Recursive(recursive bool) ToolboxAPIDeleteFileRequest {
+	r.recursive = &recursive
 	return r
 }
 
@@ -1338,6 +1344,9 @@ func (a *ToolboxAPIService) DeleteFileExecute(r ToolboxAPIDeleteFileRequest) (*h
 		return nil, reportError("path is required and must be specified")
 	}
 
+	if r.recursive != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "recursive", r.recursive, "form", "")
+	}
 	parameterAddToHeaderOrQuery(localVarQueryParams, "path", r.path, "form", "")
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}

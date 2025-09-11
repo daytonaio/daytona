@@ -70,11 +70,12 @@ class FileSystem:
         )
 
     @intercept_errors(message_prefix="Failed to delete file: ")
-    def delete_file(self, path: str) -> None:
+    def delete_file(self, path: str, recursive: bool = False) -> None:
         """Deletes a file from the Sandbox.
 
         Args:
             path (str): Absolute path to the file to delete.
+            recursive (bool): If the file is a directory, this must be true to delete it.
 
         Example:
             ```python
@@ -82,7 +83,9 @@ class FileSystem:
             sandbox.fs.delete_file("workspace/data/old_file.txt")
             ```
         """
-        self._toolbox_api.delete_file(self._sandbox_id, path=prefix_relative_path(self._get_root_dir(), path))
+        self._toolbox_api.delete_file(
+            self._sandbox_id, path=prefix_relative_path(self._get_root_dir(), path), recursive=recursive
+        )
 
     @overload
     def download_file(self, remote_path: str, timeout: int = 30 * 60) -> bytes:
