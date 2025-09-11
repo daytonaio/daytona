@@ -3,7 +3,7 @@ title: "AsyncLspServer"
 hideTitleOnPage: true
 ---
 
-## AsyncLspServer
+## AsyncLspServer \{#asynclspserver\}
 
 ```python
 class AsyncLspServer()
@@ -11,7 +11,7 @@ class AsyncLspServer()
 
 コードインテリジェンスのための Language Server Protocol 機能を提供し、コード補完やシンボル検索などの IDE 相当の機能を実現します。
 
-#### AsyncLspServer.__init__
+#### AsyncLspServer.**init** \{#asynclspserver__init__\}
 
 ```python
 def __init__(language_id: LspLanguageId, path_to_project: str,
@@ -22,12 +22,12 @@ def __init__(language_id: LspLanguageId, path_to_project: str,
 
 **引数**:
 
-- `language_id` _LspLanguageId_ - 言語サーバーの種類（例: LspLanguageId.TYPESCRIPT）。
-- `path_to_project` _str_ - プロジェクトのルートディレクトリへの絶対パス。
-- `toolbox_api` _ToolboxApi_ - サンドボックス操作用の API クライアント。
-- `instance` _SandboxInstance_ - このサーバーが属するサンドボックスインスタンス。
+* `language_id` *LspLanguageId* - 言語サーバーの種類（例: LspLanguageId.TYPESCRIPT）。
+* `path_to_project` *str* - プロジェクトのルートディレクトリへの絶対パス。
+* `toolbox_api` *ToolboxApi* - サンドボックス操作用の API クライアント。
+* `instance` *SandboxInstance* - このサーバーが属するサンドボックスインスタンス。
 
-#### AsyncLspServer.start
+#### AsyncLspServer.start \{#asynclspserverstart\}
 
 ```python
 @intercept_errors(message_prefix="Failed to start LSP server: ")
@@ -46,7 +46,7 @@ await lsp.start()  # Initialize the server
 # Now ready for LSP operations
 ```
 
-#### AsyncLspServer.stop
+#### AsyncLspServer.stop \{#asynclspserverstop\}
 
 ```python
 @intercept_errors(message_prefix="Failed to stop LSP server: ")
@@ -64,7 +64,7 @@ LSP サーバーが不要になったときは、システムリソースを解�
 await lsp.stop()  # Clean up resources
 ```
 
-#### AsyncLspServer.did_open
+#### AsyncLspServer.did_open \{#asynclspserverdid_open\}
 
 ```python
 @intercept_errors(message_prefix="Failed to open file: ")
@@ -77,8 +77,7 @@ async def did_open(path: str) -> None
 
 **引数**:
 
-- `path` _str_ - 開いたファイルのパス。相対パスは LSP サーバーのコンストラクタで設定されたプロジェクトパスに基づいて解決されます。
-  
+* `path` *str* - 開いたファイルのパス。相対パスは LSP サーバーのコンストラクタで設定されたプロジェクトパスに基づいて解決されます。
 
 **例**:
 
@@ -88,7 +87,7 @@ await lsp.did_open("workspace/project/src/index.ts")
 # Now can get completions, symbols, etc. for this file
 ```
 
-#### AsyncLspServer.did_close
+#### AsyncLspServer.did_close \{#asynclspserverdid_close\}
 
 ```python
 @intercept_errors(message_prefix="Failed to close file: ")
@@ -101,8 +100,7 @@ async def did_close(path: str) -> None
 
 **引数**:
 
-- `path` _str_ - 閉じたファイルのパス。相対パスは LSP サーバーのコンストラクタで設定されたプロジェクトパスに基づいて解決されます。
-  
+* `path` *str* - 閉じたファイルのパス。相対パスは LSP サーバーのコンストラクタで設定されたプロジェクトパスに基づいて解決されます。
 
 **例**:
 
@@ -111,7 +109,7 @@ async def did_close(path: str) -> None
 await lsp.did_close("workspace/project/src/index.ts")
 ```
 
-#### AsyncLspServer.document_symbols
+#### AsyncLspServer.document_symbols \{#asynclspserverdocument_symbols\}
 
 ```python
 @intercept_errors(message_prefix="Failed to get symbols from document: ")
@@ -122,16 +120,14 @@ async def document_symbols(path: str) -> List[LspSymbol]
 
 **引数**:
 
-- `path` _str_ - シンボルを取得するファイルのパス。相対パスは LSP サーバーのコンストラクタで設定されたプロジェクトパスに基づいて解決されます。
-  
+* `path` *str* - シンボルを取得するファイルのパス。相対パスは LSP サーバーのコンストラクタで設定されたプロジェクトパスに基づいて解決されます。
 
 **戻り値**:
 
-- `List[LspSymbol]` - ドキュメント内のシンボルのリスト。各シンボルには以下が含まれます:
-  - name: シンボル名
-  - kind: シンボルの種類（関数、クラス、変数など）
-  - location: ファイル内のシンボルの位置
-  
+* `List[LspSymbol]` - ドキュメント内のシンボルのリスト。各シンボルには以下が含まれます:
+  * name: シンボル名
+  * kind: シンボルの種類（関数、クラス、変数など）
+  * location: ファイル内のシンボルの位置
 
 **例**:
 
@@ -142,7 +138,7 @@ for symbol in symbols:
     print(f"{symbol.kind} {symbol.name}: {symbol.location}")
 ```
 
-#### AsyncLspServer.workspace_symbols
+#### AsyncLspServer.workspace_symbols \{#asynclspserverworkspace_symbols\}
 
 ```python
 @deprecated(
@@ -156,14 +152,13 @@ async def workspace_symbols(query: str) -> List[LspSymbol]
 
 **引数**:
 
-- `query` _str_ - シンボル名に対してマッチさせる検索クエリ。
-  
+* `query` *str* - シンボル名に対してマッチさせる検索クエリ。
 
 **戻り値**:
 
-- `List[LspSymbol]` - すべてのファイルから一致したシンボルのリスト。
+* `List[LspSymbol]` - すべてのファイルから一致したシンボルのリスト。
 
-#### AsyncLspServer.sandbox\_symbols
+#### AsyncLspServer.sandbox_symbols \{#asynclspserversandbox_symbols\}
 
 ```python
 @intercept_errors(message_prefix="Failed to get symbols from sandbox: ")
@@ -174,16 +169,14 @@ async def sandbox_symbols(query: str) -> List[LspSymbol]
 
 **引数**:
 
-- `query` _str_ - シンボル名に対してマッチさせる検索クエリ。
-  
+* `query` *str* - シンボル名に対してマッチさせる検索クエリ。
 
 **戻り値**:
 
-- `List[LspSymbol]` - すべてのファイルから一致したシンボルのリスト。各シンボルには次が含まれます:
-  - name: シンボル名
-  - kind: シンボルの種別（関数、クラス、変数など）
-  - location: ファイル内でのシンボルの位置
-  
+* `List[LspSymbol]` - すべてのファイルから一致したシンボルのリスト。各シンボルには次が含まれます:
+  * name: シンボル名
+  * kind: シンボルの種別（関数、クラス、変数など）
+  * location: ファイル内でのシンボルの位置
 
 **例**:
 
@@ -194,7 +187,7 @@ for symbol in symbols:
     print(f"{symbol.name} in {symbol.location}")
 ```
 
-#### AsyncLspServer.completions
+#### AsyncLspServer.completions \{#asynclspservercompletions\}
 
 ```python
 @intercept_errors(message_prefix="Failed to get completions: ")
@@ -205,23 +198,21 @@ async def completions(path: str, position: Position) -> CompletionList
 
 **引数**:
 
-- `path` _str_ - ファイルパス。相対パスは、LSP サーバーのコンストラクタで設定されたプロジェクトパスを基準に解決されます。
-- `position` _Position_ - 補完候補を取得するカーソル位置。
-  
+* `path` *str* - ファイルパス。相対パスは、LSP サーバーのコンストラクタで設定されたプロジェクトパスを基準に解決されます。
+* `position` *Position* - 補完候補を取得するカーソル位置。
 
 **戻り値**:
 
-- `CompletionList` - 補完候補のリスト。次を含みます:
-  - isIncomplete: 追加の項目が存在する可能性があるか
-  - items: 補完アイテムのリスト。各アイテムには次が含まれます:
-  - label: 挿入するテキスト
-  - kind: 補完の種別
-  - detail: アイテムに関する追加情報
-  - documentation: アイテムのドキュメント
-  - sortText: リスト内での並び替えに用いるテキスト
-  - filterText: フィルタリングに用いるテキスト
-  - insertText: 実際に挿入するテキスト（label と異なる場合）
-  
+* `CompletionList` - 補完候補のリスト。次を含みます:
+  * isIncomplete: 追加の項目が存在する可能性があるか
+  * items: 補完アイテムのリスト。各アイテムには次が含まれます:
+  * label: 挿入するテキスト
+  * kind: 補完の種別
+  * detail: アイテムに関する追加情報
+  * documentation: アイテムのドキュメント
+  * sortText: リスト内での並び替えに用いるテキスト
+  * filterText: フィルタリングに用いるテキスト
+  * insertText: 実際に挿入するテキスト（label と異なる場合）
 
 **例**:
 
@@ -233,8 +224,7 @@ for item in completions.items:
     print(f"{item.label} ({item.kind}): {item.detail}")
 ```
 
-
-## LspLanguageId
+## LspLanguageId \{#lsplanguageid\}
 
 ```python
 class LspLanguageId(Enum)
@@ -243,11 +233,12 @@ class LspLanguageId(Enum)
 LSP（Language Server Protocol）の言語ID。
 
 **列挙メンバー**:
-    - `PYTHON` ("python")
-    - `TYPESCRIPT` ("typescript")
-    - `JAVASCRIPT` ("javascript")
 
-## Position
+* `PYTHON` (&quot;python&quot;)
+* `TYPESCRIPT` (&quot;typescript&quot;)
+* `JAVASCRIPT` (&quot;javascript&quot;)
+
+## Position \{#position\}
 
 ```python
 class Position()
@@ -257,10 +248,10 @@ class Position()
 
 **属性**:
 
-- `line` _int_ - ドキュメント内の0始まりの行番号。
-- `character` _int_ - 行内の0始まりの文字オフセット。
+* `line` *int* - ドキュメント内の0始まりの行番号。
+* `character` *int* - 行内の0始まりの文字オフセット。
 
-#### Position.__init__
+#### Position.**init** \{#position__init__\}
 
 ```python
 def __init__(line: int, character: int)
@@ -270,6 +261,5 @@ def __init__(line: int, character: int)
 
 **引数**:
 
-- `line` _int_ - ドキュメント内の0始まりの行番号。
-- `character` _int_ - 行内の0始まりの文字オフセット。
-
+* `line` *int* - ドキュメント内の0始まりの行番号。
+* `character` *int* - 行内の0始まりの文字オフセット。
