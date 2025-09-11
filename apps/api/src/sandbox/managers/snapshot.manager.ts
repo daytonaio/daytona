@@ -565,13 +565,11 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     if (!snapshot.skipValidation) {
       snapshot.state = SnapshotState.VALIDATING
       await this.snapshotRepository.save(snapshot)
-
       await this.validateSandboxCreationOnRunner(snapshot, runner)
     } else {
       snapshot.state = SnapshotState.ACTIVE
+      await this.snapshotRepository.save(snapshot)
     }
-
-    await this.snapshotRepository.save(snapshot)
 
     await this.runnerService.createSnapshotRunnerEntry(runner.id, snapshot.ref, SnapshotRunnerState.READY)
 
