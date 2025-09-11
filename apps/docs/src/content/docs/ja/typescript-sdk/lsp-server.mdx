@@ -3,14 +3,13 @@ title: "LspServer"
 hideTitleOnPage: true
 ---
 
-
-## LspServer
+## LspServer \{#lspserver\}
 
 コードインテリジェンスのための Language Server Protocol 機能を提供し、コード補完やシンボル検索など、IDEに近い機能を実現します。
 
-### Constructors
+### Constructors \{#constructors\}
 
-#### new LspServer()
+#### new LspServer() \{#new-lspserver\}
 
 ```ts
 new LspServer(
@@ -22,19 +21,18 @@ new LspServer(
 
 **Parameters**:
 
-- `languageId` _LspLanguageId_
-- `pathToProject` _string_
-- `toolboxApi` _ToolboxApi_
-- `sandboxId` _string_
-
+* `languageId` *LspLanguageId*
+* `pathToProject` *string*
+* `toolboxApi` *ToolboxApi*
+* `sandboxId` *string*
 
 **Returns**:
 
-- `LspServer`
+* `LspServer`
 
-### Methods
+### Methods \{#methods\}
 
-#### completions()
+#### completions() \{#completions\}
 
 ```ts
 completions(path: string, position: Position): Promise<CompletionList>
@@ -44,22 +42,21 @@ completions(path: string, position: Position): Promise<CompletionList>
 
 **Parameters**:
 
-- `path` _string_ - ファイルパス。相対パスはLSPサーバーのコンストラクタで設定されたプロジェクトパスを基準に解決されます。
-- `position` _Position_ - 補完を要求したファイル内の位置
-
+* `path` *string* - ファイルパス。相対パスはLSPサーバーのコンストラクタで設定されたプロジェクトパスを基準に解決されます。
+* `position` *Position* - 補完を要求したファイル内の位置
 
 **Returns**:
 
-- `Promise<CompletionList>` - 補完候補のリスト。次を含みます:
-    - isIncomplete: さらに候補が存在する可能性があるかどうか
-    - items: 補完アイテムのリスト。各アイテムには以下が含まれます:
-    - label: 挿入するテキスト
-    - kind: 補完の種類
-    - detail: アイテムに関する追加情報
-    - documentation: アイテムのドキュメント
-    - sortText: リスト内でのソートに用いるテキスト
-    - filterText: フィルタに用いるテキスト
-    - insertText: 実際に挿入するテキスト（label と異なる場合）
+* `Promise<CompletionList>` - 補完候補のリスト。次を含みます:
+  * isIncomplete: さらに候補が存在する可能性があるかどうか
+  * items: 補完アイテムのリスト。各アイテムには以下が含まれます:
+  * label: 挿入するテキスト
+  * kind: 補完の種類
+  * detail: アイテムに関する追加情報
+  * documentation: アイテムのドキュメント
+  * sortText: リスト内でのソートに用いるテキスト
+  * filterText: フィルタに用いるテキスト
+  * insertText: 実際に挿入するテキスト（label と異なる場合）
 
 **Example:**
 
@@ -76,7 +73,7 @@ completions.items.forEach(item => {
 
 ***
 
-#### didClose()
+#### didClose() \{#didclose\}
 
 ```ts
 didClose(path: string): Promise<void>
@@ -86,12 +83,11 @@ didClose(path: string): Promise<void>
 
 **Parameters**:
 
-- `path` _string_ - 閉じられたファイルのパス。相対パスはLSPサーバーのコンストラクタで設定されたプロジェクトパスを基準に解決されます。
-
+* `path` *string* - 閉じられたファイルのパス。相対パスはLSPサーバーのコンストラクタで設定されたプロジェクトパスを基準に解決されます。
 
 **Returns**:
 
-- `Promise<void>`
+* `Promise<void>`
 
 **Example:**
 
@@ -102,7 +98,7 @@ await lsp.didClose('workspace/project/src/index.ts');
 
 ***
 
-#### didOpen()
+#### didOpen() \{#didopen\}
 
 ```ts
 didOpen(path: string): Promise<void>
@@ -112,13 +108,12 @@ didOpen(path: string): Promise<void>
 
 **Parameters**:
 
-- `path` _string_ - 開いたファイルのパス。相対パスはユーザーの
-    ルートディレクトリを基準に解決されます。
-
+* `path` *string* - 開いたファイルのパス。相対パスはユーザーの
+  ルートディレクトリを基準に解決されます。
 
 **Returns**:
 
-- `Promise<void>`
+* `Promise<void>`
 
 **Example:**
 
@@ -130,7 +125,7 @@ await lsp.didOpen('workspace/project/src/index.ts');
 
 ***
 
-#### documentSymbols()
+#### documentSymbols() \{#documentsymbols\}
 
 ```ts
 documentSymbols(path: string): Promise<LspSymbol[]>
@@ -140,15 +135,14 @@ documentSymbols(path: string): Promise<LspSymbol[]>
 
 **Parameters**:
 
-- `path` _string_ - シンボルを取得するファイルのパス。相対パスはLSPサーバーのコンストラクタで設定されたプロジェクトパスを基準に解決されます。
-
+* `path` *string* - シンボルを取得するファイルのパス。相対パスはLSPサーバーのコンストラクタで設定されたプロジェクトパスを基準に解決されます。
 
 **Returns**:
 
-- `Promise<LspSymbol[]>` - ドキュメント内のシンボルのリスト。各シンボルには以下が含まれます:
-    - name: シンボル名
-    - kind: シンボルの種類（関数、クラス、変数など）
-    - location: ファイル内のシンボル位置
+* `Promise<LspSymbol[]>` - ドキュメント内のシンボルのリスト。各シンボルには以下が含まれます:
+  * name: シンボル名
+  * kind: シンボルの種類（関数、クラス、変数など）
+  * location: ファイル内のシンボル位置
 
 **Example:**
 
@@ -162,7 +156,7 @@ symbols.forEach(symbol => {
 
 ***
 
-#### sandboxSymbols()
+#### sandboxSymbols() \{#sandboxsymbols\}
 
 ```ts
 sandboxSymbols(query: string): Promise<LspSymbol[]>
@@ -172,15 +166,14 @@ sandboxSymbols(query: string): Promise<LspSymbol[]>
 
 **パラメータ**:
 
-- `query` _string_ - シンボル名に対して照合する検索クエリ
-
+* `query` *string* - シンボル名に対して照合する検索クエリ
 
 **戻り値**:
 
-- `Promise<LspSymbol[]>` - すべてのファイルから一致したシンボルの一覧。各シンボルには以下が含まれます:
-    - name: シンボル名
-    - kind: シンボルの種類（function、class、variable など）
-    - location: ファイル内でのシンボルの位置
+* `Promise<LspSymbol[]>` - すべてのファイルから一致したシンボルの一覧。各シンボルには以下が含まれます:
+  * name: シンボル名
+  * kind: シンボルの種類（function、class、variable など）
+  * location: ファイル内でのシンボルの位置
 
 **例:**
 
@@ -194,7 +187,7 @@ symbols.forEach(symbol => {
 
 ***
 
-#### start()
+#### start() \{#start\}
 
 ```ts
 start(): Promise<void>
@@ -205,7 +198,7 @@ Language Server を起動します。ほかの LSP 機能を使う前に呼び�
 
 **戻り値**:
 
-- `Promise<void>`
+* `Promise<void>`
 
 **例:**
 
@@ -217,7 +210,7 @@ await lsp.start();  // サーバーを初期化
 
 ***
 
-#### stop()
+#### stop() \{#stop\}
 
 ```ts
 stop(): Promise<void>
@@ -228,7 +221,7 @@ Language Server を停止します。不要になったら呼び出して、
 
 **戻り値**:
 
-- `Promise<void>`
+* `Promise<void>`
 
 **例:**
 
@@ -239,7 +232,7 @@ await lsp.stop();  // リソースをクリーンアップ
 
 ***
 
-#### ~~workspaceSymbols()~~
+#### ~~workspaceSymbols()~~ \{#workspacesymbols\}
 
 ```ts
 workspaceSymbols(query: string): Promise<LspSymbol[]>
@@ -249,44 +242,40 @@ workspaceSymbols(query: string): Promise<LspSymbol[]>
 
 **パラメータ**:
 
-- `query` _string_ - シンボル名に対して照合する検索クエリ
-
+* `query` *string* - シンボル名に対して照合する検索クエリ
 
 **戻り値**:
 
-- `Promise<LspSymbol[]>` - すべてのファイルから一致したシンボルの一覧。各シンボルには以下が含まれます:
-    - name: シンボル名
-    - kind: シンボルの種類（function、class、variable など）
-    - location: ファイル内でのシンボルの位置
+* `Promise<LspSymbol[]>` - すべてのファイルから一致したシンボルの一覧。各シンボルには以下が含まれます:
+  * name: シンボル名
+  * kind: シンボルの種類（function、class、variable など）
+  * location: ファイル内でのシンボルの位置
 
-##### 非推奨
+##### 非推奨 \{#deprecated\}
 
 代わりに `sandboxSymbols` を使用してください。このメソッドは今後のバージョンで削除されます。
 
 ***
 
-
-## LspLanguageId
+## LspLanguageId \{#lsplanguageid\}
 
 サポート対象の言語サーバータイプ。
 
 **列挙メンバー**:
 
-- `JAVASCRIPT` ("javascript")
-- `PYTHON` ("python")
-- `TYPESCRIPT` ("typescript")
+* `JAVASCRIPT` (&quot;javascript&quot;)
+* `PYTHON` (&quot;python&quot;)
+* `TYPESCRIPT` (&quot;typescript&quot;)
 
-## Position
+## Position \{#position\}
 
 テキストドキュメント内のゼロ基準の位置を表し、
 行番号と文字オフセットで指定します。
 
 **プロパティ**:
 
-- `character` _number_ - 行内のゼロ基準の文字オフセット
-- `line` _number_ - ドキュメント内のゼロ基準の行番号
-
-
+* `character` *number* - 行内のゼロ基準の文字オフセット
+* `line` *number* - ドキュメント内のゼロ基準の行番号
 
 **例:**
 
