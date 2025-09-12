@@ -12,6 +12,6 @@ type ExecuteRequest struct {
 } // @name ExecuteRequest
 
 type ExecuteResponse struct {
-	Code   int    `json:"code" validate:"required"`
-	Result string `json:"result" validate:"required"`
+	ExitCode int    `json:"exitCode" validate:"required"`
+	Result   string `json:"result" validate:"required"`
 } // @name ExecuteResponse

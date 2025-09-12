@@ -43,7 +43,7 @@ func (p *Proxy) GetProxyTarget(ctx *gin.Context) (*url.URL, map[string]string, e
 		return nil, nil, fmt.Errorf("failed to get sandbox public status: %w", err)
 	}
 
-	if !*isPublic || targetPort == TERMINAL_PORT {
+	if !*isPublic || targetPort == TERMINAL_PORT || targetPort == TOOLBOX_PORT {
 		err, didRedirect := p.Authenticate(ctx, sandboxID)
 		if err != nil {
 			if !didRedirect {
@@ -138,6 +138,28 @@ func (p *Proxy) getSandboxPublic(ctx context.Context, sandboxId string) (*bool, 
 }
 
 func (p *Proxy) getSandboxAuthKeyValid(ctx context.Context, sandboxId string, authKey string) (*bool, error) {
+	apiValidation := func() bool {
+		_, resp, _ := p.apiclient.PreviewAPI.IsValidAuthToken(context.Background(), sandboxId, authKey).Execute()
+		return resp != nil && resp.StatusCode == http.StatusOK
+	}
+
+	return p.validateAndCache(ctx, sandboxId, authKey, apiValidation)
+}
+
+func (p *Proxy) getSandboxBearerTokenValid(ctx context.Context, sandboxId string, bearerToken string) (*bool, error) {
+	apiValidation := func() bool {
+		return p.hasSandboxAccess(ctx, sandboxId, bearerToken)
+	}
+
+	return p.validateAndCache(ctx, sandboxId, bearerToken, apiValidation)
+}
+
+func (p *Proxy) validateAndCache(
+	ctx context.Context,
+	sandboxId string,
+	authKey string,
+	apiValidation func() bool,
+) (*bool, error) {
 	cacheKey := fmt.Sprintf("%s:%s", sandboxId, authKey)
 	has, err := p.sandboxAuthKeyValidCache.Has(ctx, cacheKey)
 	if err != nil {
@@ -148,14 +170,9 @@ func (p *Proxy) getSandboxAuthKeyValid(ctx context.Context, sandboxId string, au
 		return p.sandboxAuthKeyValidCache.Get(ctx, cacheKey)
 	}
 
-	isValid := false
-	_, resp, _ := p.apiclient.PreviewAPI.IsValidAuthToken(context.Background(), sandboxId, authKey).Execute()
-	if resp != nil && resp.StatusCode == http.StatusOK {
-		isValid = true
-	}
+	isValid := apiValidation()
 
-	err = p.sandboxAuthKeyValidCache.Set(ctx, cacheKey, isValid, 2*time.Minute)
-	if err != nil {
+	if err := p.sandboxAuthKeyValidCache.Set(ctx, cacheKey, isValid, 2*time.Minute); err != nil {
 		log.Errorf("Failed to set sandbox auth key valid in cache: %v", err)
 	}
 
