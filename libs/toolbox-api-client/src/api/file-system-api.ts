@@ -51,13 +51,15 @@ export const FileSystemApiAxiosParamCreator = function (configuration?: Configur
      * Create a folder with the specified path and optional permissions
      * @summary Create a folder
      * @param {string} path Folder path to create
-     * @param {string} [mode] Octal permission mode (default: 0755)
+     * @param {string} mode Octal permission mode (default: 0755)
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    createFolder: async (path: string, mode?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+    createFolder: async (path: string, mode: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
       // verify required parameter 'path' is not null or undefined
       assertParamExists('createFolder', 'path', path)
+      // verify required parameter 'mode' is not null or undefined
+      assertParamExists('createFolder', 'mode', mode)
       const localVarPath = `/files/folder`
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
@@ -401,7 +403,7 @@ export const FileSystemApiAxiosParamCreator = function (configuration?: Configur
     /**
      * Set file permissions, ownership, and group for a file or directory
      * @summary Set file permissions
-     * @param {string} [path] File or directory path
+     * @param {string} path File or directory path
      * @param {string} [owner] Owner (username or UID)
      * @param {string} [group] Group (group name or GID)
      * @param {string} [mode] File mode in octal format (e.g., 0755)
@@ -409,12 +411,14 @@ export const FileSystemApiAxiosParamCreator = function (configuration?: Configur
      * @throws {RequiredError}
      */
     setFilePermissions: async (
-      path?: string,
+      path: string,
       owner?: string,
       group?: string,
       mode?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
+      // verify required parameter 'path' is not null or undefined
+      assertParamExists('setFilePermissions', 'path', path)
       const localVarPath = `/files/permissions`
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
@@ -540,13 +544,13 @@ export const FileSystemApiFp = function (configuration?: Configuration) {
      * Create a folder with the specified path and optional permissions
      * @summary Create a folder
      * @param {string} path Folder path to create
-     * @param {string} [mode] Octal permission mode (default: 0755)
+     * @param {string} mode Octal permission mode (default: 0755)
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async createFolder(
       path: string,
-      mode?: string,
+      mode: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.createFolder(path, mode, options)
@@ -756,7 +760,7 @@ export const FileSystemApiFp = function (configuration?: Configuration) {
     /**
      * Set file permissions, ownership, and group for a file or directory
      * @summary Set file permissions
-     * @param {string} [path] File or directory path
+     * @param {string} path File or directory path
      * @param {string} [owner] Owner (username or UID)
      * @param {string} [group] Group (group name or GID)
      * @param {string} [mode] File mode in octal format (e.g., 0755)
@@ -764,7 +768,7 @@ export const FileSystemApiFp = function (configuration?: Configuration) {
      * @throws {RequiredError}
      */
     async setFilePermissions(
-      path?: string,
+      path: string,
       owner?: string,
       group?: string,
       mode?: string,
@@ -842,11 +846,11 @@ export const FileSystemApiFactory = function (configuration?: Configuration, bas
      * Create a folder with the specified path and optional permissions
      * @summary Create a folder
      * @param {string} path Folder path to create
-     * @param {string} [mode] Octal permission mode (default: 0755)
+     * @param {string} mode Octal permission mode (default: 0755)
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    createFolder(path: string, mode?: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+    createFolder(path: string, mode: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
       return localVarFp.createFolder(path, mode, options).then((request) => request(axios, basePath))
     },
     /**
@@ -936,7 +940,7 @@ export const FileSystemApiFactory = function (configuration?: Configuration, bas
     /**
      * Set file permissions, ownership, and group for a file or directory
      * @summary Set file permissions
-     * @param {string} [path] File or directory path
+     * @param {string} path File or directory path
      * @param {string} [owner] Owner (username or UID)
      * @param {string} [group] Group (group name or GID)
      * @param {string} [mode] File mode in octal format (e.g., 0755)
@@ -944,7 +948,7 @@ export const FileSystemApiFactory = function (configuration?: Configuration, bas
      * @throws {RequiredError}
      */
     setFilePermissions(
-      path?: string,
+      path: string,
       owner?: string,
       group?: string,
       mode?: string,
@@ -988,12 +992,12 @@ export class FileSystemApi extends BaseAPI {
    * Create a folder with the specified path and optional permissions
    * @summary Create a folder
    * @param {string} path Folder path to create
-   * @param {string} [mode] Octal permission mode (default: 0755)
+   * @param {string} mode Octal permission mode (default: 0755)
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof FileSystemApi
    */
-  public createFolder(path: string, mode?: string, options?: RawAxiosRequestConfig) {
+  public createFolder(path: string, mode: string, options?: RawAxiosRequestConfig) {
     return FileSystemApiFp(this.configuration)
       .createFolder(path, mode, options)
       .then((request) => request(this.axios, this.basePath))
@@ -1118,7 +1122,7 @@ export class FileSystemApi extends BaseAPI {
   /**
    * Set file permissions, ownership, and group for a file or directory
    * @summary Set file permissions
-   * @param {string} [path] File or directory path
+   * @param {string} path File or directory path
    * @param {string} [owner] Owner (username or UID)
    * @param {string} [group] Group (group name or GID)
    * @param {string} [mode] File mode in octal format (e.g., 0755)
@@ -1127,7 +1131,7 @@ export class FileSystemApi extends BaseAPI {
    * @memberof FileSystemApi
    */
   public setFilePermissions(
-    path?: string,
+    path: string,
     owner?: string,
     group?: string,
     mode?: string,

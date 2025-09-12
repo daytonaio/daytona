@@ -1057,18 +1057,22 @@ paths:
         - description: X coordinate of the region
           in: query
           name: x
+          required: true
           type: integer
         - description: Y coordinate of the region
           in: query
           name: 'y'
+          required: true
           type: integer
         - description: Width of the region
           in: query
           name: width
+          required: true
           type: integer
         - description: Height of the region
           in: query
           name: height
+          required: true
           type: integer
         - description: Whether to show cursor in screenshot
           in: query
@@ -1092,18 +1096,22 @@ paths:
         - description: X coordinate of the region
           in: query
           name: x
+          required: true
           type: integer
         - description: Y coordinate of the region
           in: query
           name: 'y'
+          required: true
           type: integer
         - description: Width of the region
           in: query
           name: width
+          required: true
           type: integer
         - description: Height of the region
           in: query
           name: height
+          required: true
           type: integer
         - description: Whether to show cursor in screenshot
           in: query
@@ -1287,6 +1295,7 @@ paths:
         - description: 'Octal permission mode (default: 0755)'
           in: query
           name: mode
+          required: true
           type: string
       responses:
         '201':
@@ -1343,6 +1352,7 @@ paths:
         - description: File or directory path
           in: query
           name: path
+          required: true
           type: string
         - description: Owner (username or UID)
           in: query
@@ -1806,7 +1816,7 @@ paths:
       summary: Stop LSP server
       tags:
         - lsp
-  /lsp/workspaceSymbols:
+  /lsp/workspacesymbols:
     get:
       description: Search for symbols across the entire workspace
       operationId: WorkspaceSymbols

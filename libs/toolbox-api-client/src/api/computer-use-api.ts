@@ -618,10 +618,10 @@ export const ComputerUseApiAxiosParamCreator = function (configuration?: Configu
     /**
      * Take a compressed screenshot of a specific region of the screen
      * @summary Take a compressed region screenshot
-     * @param {number} [x] X coordinate of the region
-     * @param {number} [y] Y coordinate of the region
-     * @param {number} [width] Width of the region
-     * @param {number} [height] Height of the region
+     * @param {number} x X coordinate of the region
+     * @param {number} y Y coordinate of the region
+     * @param {number} width Width of the region
+     * @param {number} height Height of the region
      * @param {boolean} [showCursor] Whether to show cursor in screenshot
      * @param {string} [format] Image format (png or jpeg)
      * @param {number} [quality] JPEG quality (1-100)
@@ -630,16 +630,24 @@ export const ComputerUseApiAxiosParamCreator = function (configuration?: Configu
      * @throws {RequiredError}
      */
     takeCompressedRegionScreenshot: async (
-      x?: number,
-      y?: number,
-      width?: number,
-      height?: number,
+      x: number,
+      y: number,
+      width: number,
+      height: number,
       showCursor?: boolean,
       format?: string,
       quality?: number,
       scale?: number,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
+      // verify required parameter 'x' is not null or undefined
+      assertParamExists('takeCompressedRegionScreenshot', 'x', x)
+      // verify required parameter 'y' is not null or undefined
+      assertParamExists('takeCompressedRegionScreenshot', 'y', y)
+      // verify required parameter 'width' is not null or undefined
+      assertParamExists('takeCompressedRegionScreenshot', 'width', width)
+      // verify required parameter 'height' is not null or undefined
+      assertParamExists('takeCompressedRegionScreenshot', 'height', height)
       const localVarPath = `/computeruse/screenshot/region/compressed`
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
@@ -750,22 +758,30 @@ export const ComputerUseApiAxiosParamCreator = function (configuration?: Configu
     /**
      * Take a screenshot of a specific region of the screen
      * @summary Take a region screenshot
-     * @param {number} [x] X coordinate of the region
-     * @param {number} [y] Y coordinate of the region
-     * @param {number} [width] Width of the region
-     * @param {number} [height] Height of the region
+     * @param {number} x X coordinate of the region
+     * @param {number} y Y coordinate of the region
+     * @param {number} width Width of the region
+     * @param {number} height Height of the region
      * @param {boolean} [showCursor] Whether to show cursor in screenshot
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     takeRegionScreenshot: async (
-      x?: number,
-      y?: number,
-      width?: number,
-      height?: number,
+      x: number,
+      y: number,
+      width: number,
+      height: number,
       showCursor?: boolean,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
+      // verify required parameter 'x' is not null or undefined
+      assertParamExists('takeRegionScreenshot', 'x', x)
+      // verify required parameter 'y' is not null or undefined
+      assertParamExists('takeRegionScreenshot', 'y', y)
+      // verify required parameter 'width' is not null or undefined
+      assertParamExists('takeRegionScreenshot', 'width', width)
+      // verify required parameter 'height' is not null or undefined
+      assertParamExists('takeRegionScreenshot', 'height', height)
       const localVarPath = `/computeruse/screenshot/region`
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
@@ -1264,10 +1280,10 @@ export const ComputerUseApiFp = function (configuration?: Configuration) {
     /**
      * Take a compressed screenshot of a specific region of the screen
      * @summary Take a compressed region screenshot
-     * @param {number} [x] X coordinate of the region
-     * @param {number} [y] Y coordinate of the region
-     * @param {number} [width] Width of the region
-     * @param {number} [height] Height of the region
+     * @param {number} x X coordinate of the region
+     * @param {number} y Y coordinate of the region
+     * @param {number} width Width of the region
+     * @param {number} height Height of the region
      * @param {boolean} [showCursor] Whether to show cursor in screenshot
      * @param {string} [format] Image format (png or jpeg)
      * @param {number} [quality] JPEG quality (1-100)
@@ -1276,10 +1292,10 @@ export const ComputerUseApiFp = function (configuration?: Configuration) {
      * @throws {RequiredError}
      */
     async takeCompressedRegionScreenshot(
-      x?: number,
-      y?: number,
-      width?: number,
-      height?: number,
+      x: number,
+      y: number,
+      width: number,
+      height: number,
       showCursor?: boolean,
       format?: string,
       quality?: number,
@@ -1346,19 +1362,19 @@ export const ComputerUseApiFp = function (configuration?: Configuration) {
     /**
      * Take a screenshot of a specific region of the screen
      * @summary Take a region screenshot
-     * @param {number} [x] X coordinate of the region
-     * @param {number} [y] Y coordinate of the region
-     * @param {number} [width] Width of the region
-     * @param {number} [height] Height of the region
+     * @param {number} x X coordinate of the region
+     * @param {number} y Y coordinate of the region
+     * @param {number} width Width of the region
+     * @param {number} height Height of the region
      * @param {boolean} [showCursor] Whether to show cursor in screenshot
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async takeRegionScreenshot(
-      x?: number,
-      y?: number,
-      width?: number,
-      height?: number,
+      x: number,
+      y: number,
+      width: number,
+      height: number,
       showCursor?: boolean,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ScreenshotResponse>> {
@@ -1607,10 +1623,10 @@ export const ComputerUseApiFactory = function (
     /**
      * Take a compressed screenshot of a specific region of the screen
      * @summary Take a compressed region screenshot
-     * @param {number} [x] X coordinate of the region
-     * @param {number} [y] Y coordinate of the region
-     * @param {number} [width] Width of the region
-     * @param {number} [height] Height of the region
+     * @param {number} x X coordinate of the region
+     * @param {number} y Y coordinate of the region
+     * @param {number} width Width of the region
+     * @param {number} height Height of the region
      * @param {boolean} [showCursor] Whether to show cursor in screenshot
      * @param {string} [format] Image format (png or jpeg)
      * @param {number} [quality] JPEG quality (1-100)
@@ -1619,10 +1635,10 @@ export const ComputerUseApiFactory = function (
      * @throws {RequiredError}
      */
     takeCompressedRegionScreenshot(
-      x?: number,
-      y?: number,
-      width?: number,
-      height?: number,
+      x: number,
+      y: number,
+      width: number,
+      height: number,
       showCursor?: boolean,
       format?: string,
       quality?: number,
@@ -1657,19 +1673,19 @@ export const ComputerUseApiFactory = function (
     /**
      * Take a screenshot of a specific region of the screen
      * @summary Take a region screenshot
-     * @param {number} [x] X coordinate of the region
-     * @param {number} [y] Y coordinate of the region
-     * @param {number} [width] Width of the region
-     * @param {number} [height] Height of the region
+     * @param {number} x X coordinate of the region
+     * @param {number} y Y coordinate of the region
+     * @param {number} width Width of the region
+     * @param {number} height Height of the region
      * @param {boolean} [showCursor] Whether to show cursor in screenshot
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     takeRegionScreenshot(
-      x?: number,
-      y?: number,
-      width?: number,
-      height?: number,
+      x: number,
+      y: number,
+      width: number,
+      height: number,
       showCursor?: boolean,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<ScreenshotResponse> {
@@ -1941,10 +1957,10 @@ export class ComputerUseApi extends BaseAPI {
   /**
    * Take a compressed screenshot of a specific region of the screen
    * @summary Take a compressed region screenshot
-   * @param {number} [x] X coordinate of the region
-   * @param {number} [y] Y coordinate of the region
-   * @param {number} [width] Width of the region
-   * @param {number} [height] Height of the region
+   * @param {number} x X coordinate of the region
+   * @param {number} y Y coordinate of the region
+   * @param {number} width Width of the region
+   * @param {number} height Height of the region
    * @param {boolean} [showCursor] Whether to show cursor in screenshot
    * @param {string} [format] Image format (png or jpeg)
    * @param {number} [quality] JPEG quality (1-100)
@@ -1954,10 +1970,10 @@ export class ComputerUseApi extends BaseAPI {
    * @memberof ComputerUseApi
    */
   public takeCompressedRegionScreenshot(
-    x?: number,
-    y?: number,
-    width?: number,
-    height?: number,
+    x: number,
+    y: number,
+    width: number,
+    height: number,
     showCursor?: boolean,
     format?: string,
     quality?: number,
@@ -1995,20 +2011,20 @@ export class ComputerUseApi extends BaseAPI {
   /**
    * Take a screenshot of a specific region of the screen
    * @summary Take a region screenshot
-   * @param {number} [x] X coordinate of the region
-   * @param {number} [y] Y coordinate of the region
-   * @param {number} [width] Width of the region
-   * @param {number} [height] Height of the region
+   * @param {number} x X coordinate of the region
+   * @param {number} y Y coordinate of the region
+   * @param {number} width Width of the region
+   * @param {number} height Height of the region
    * @param {boolean} [showCursor] Whether to show cursor in screenshot
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof ComputerUseApi
    */
   public takeRegionScreenshot(
-    x?: number,
-    y?: number,
-    width?: number,
-    height?: number,
+    x: number,
+    y: number,
+    width: number,
+    height: number,
     showCursor?: boolean,
     options?: RawAxiosRequestConfig,
   ) {

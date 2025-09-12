@@ -4455,10 +4455,10 @@ class ComputerUseApi:
     @validate_call
     async def take_compressed_region_screenshot(
         self,
-        x: Annotated[Optional[StrictInt], Field(description="X coordinate of the region")] = None,
-        y: Annotated[Optional[StrictInt], Field(description="Y coordinate of the region")] = None,
-        width: Annotated[Optional[StrictInt], Field(description="Width of the region")] = None,
-        height: Annotated[Optional[StrictInt], Field(description="Height of the region")] = None,
+        x: Annotated[StrictInt, Field(description="X coordinate of the region")],
+        y: Annotated[StrictInt, Field(description="Y coordinate of the region")],
+        width: Annotated[StrictInt, Field(description="Width of the region")],
+        height: Annotated[StrictInt, Field(description="Height of the region")],
         show_cursor: Annotated[Optional[StrictBool], Field(description="Whether to show cursor in screenshot")] = None,
         format: Annotated[Optional[StrictStr], Field(description="Image format (png or jpeg)")] = None,
         quality: Annotated[Optional[StrictInt], Field(description="JPEG quality (1-100)")] = None,
@@ -4480,13 +4480,13 @@ class ComputerUseApi:
 
         Take a compressed screenshot of a specific region of the screen
 
-        :param x: X coordinate of the region
+        :param x: X coordinate of the region (required)
         :type x: int
-        :param y: Y coordinate of the region
+        :param y: Y coordinate of the region (required)
         :type y: int
-        :param width: Width of the region
+        :param width: Width of the region (required)
         :type width: int
-        :param height: Height of the region
+        :param height: Height of the region (required)
         :type height: int
         :param show_cursor: Whether to show cursor in screenshot
         :type show_cursor: bool
@@ -4550,10 +4550,10 @@ class ComputerUseApi:
     @validate_call
     async def take_compressed_region_screenshot_with_http_info(
         self,
-        x: Annotated[Optional[StrictInt], Field(description="X coordinate of the region")] = None,
-        y: Annotated[Optional[StrictInt], Field(description="Y coordinate of the region")] = None,
-        width: Annotated[Optional[StrictInt], Field(description="Width of the region")] = None,
-        height: Annotated[Optional[StrictInt], Field(description="Height of the region")] = None,
+        x: Annotated[StrictInt, Field(description="X coordinate of the region")],
+        y: Annotated[StrictInt, Field(description="Y coordinate of the region")],
+        width: Annotated[StrictInt, Field(description="Width of the region")],
+        height: Annotated[StrictInt, Field(description="Height of the region")],
         show_cursor: Annotated[Optional[StrictBool], Field(description="Whether to show cursor in screenshot")] = None,
         format: Annotated[Optional[StrictStr], Field(description="Image format (png or jpeg)")] = None,
         quality: Annotated[Optional[StrictInt], Field(description="JPEG quality (1-100)")] = None,
@@ -4575,13 +4575,13 @@ class ComputerUseApi:
 
         Take a compressed screenshot of a specific region of the screen
 
-        :param x: X coordinate of the region
+        :param x: X coordinate of the region (required)
         :type x: int
-        :param y: Y coordinate of the region
+        :param y: Y coordinate of the region (required)
         :type y: int
-        :param width: Width of the region
+        :param width: Width of the region (required)
         :type width: int
-        :param height: Height of the region
+        :param height: Height of the region (required)
         :type height: int
         :param show_cursor: Whether to show cursor in screenshot
         :type show_cursor: bool
@@ -4645,10 +4645,10 @@ class ComputerUseApi:
     @validate_call
     async def take_compressed_region_screenshot_without_preload_content(
         self,
-        x: Annotated[Optional[StrictInt], Field(description="X coordinate of the region")] = None,
-        y: Annotated[Optional[StrictInt], Field(description="Y coordinate of the region")] = None,
-        width: Annotated[Optional[StrictInt], Field(description="Width of the region")] = None,
-        height: Annotated[Optional[StrictInt], Field(description="Height of the region")] = None,
+        x: Annotated[StrictInt, Field(description="X coordinate of the region")],
+        y: Annotated[StrictInt, Field(description="Y coordinate of the region")],
+        width: Annotated[StrictInt, Field(description="Width of the region")],
+        height: Annotated[StrictInt, Field(description="Height of the region")],
         show_cursor: Annotated[Optional[StrictBool], Field(description="Whether to show cursor in screenshot")] = None,
         format: Annotated[Optional[StrictStr], Field(description="Image format (png or jpeg)")] = None,
         quality: Annotated[Optional[StrictInt], Field(description="JPEG quality (1-100)")] = None,
@@ -4670,13 +4670,13 @@ class ComputerUseApi:
 
         Take a compressed screenshot of a specific region of the screen
 
-        :param x: X coordinate of the region
+        :param x: X coordinate of the region (required)
         :type x: int
-        :param y: Y coordinate of the region
+        :param y: Y coordinate of the region (required)
         :type y: int
-        :param width: Width of the region
+        :param width: Width of the region (required)
         :type width: int
-        :param height: Height of the region
+        :param height: Height of the region (required)
         :type height: int
         :param show_cursor: Whether to show cursor in screenshot
         :type show_cursor: bool
@@ -5149,10 +5149,10 @@ class ComputerUseApi:
     @validate_call
     async def take_region_screenshot(
         self,
-        x: Annotated[Optional[StrictInt], Field(description="X coordinate of the region")] = None,
-        y: Annotated[Optional[StrictInt], Field(description="Y coordinate of the region")] = None,
-        width: Annotated[Optional[StrictInt], Field(description="Width of the region")] = None,
-        height: Annotated[Optional[StrictInt], Field(description="Height of the region")] = None,
+        x: Annotated[StrictInt, Field(description="X coordinate of the region")],
+        y: Annotated[StrictInt, Field(description="Y coordinate of the region")],
+        width: Annotated[StrictInt, Field(description="Width of the region")],
+        height: Annotated[StrictInt, Field(description="Height of the region")],
         show_cursor: Annotated[Optional[StrictBool], Field(description="Whether to show cursor in screenshot")] = None,
         _request_timeout: Union[
             None,
@@ -5171,13 +5171,13 @@ class ComputerUseApi:
 
         Take a screenshot of a specific region of the screen
 
-        :param x: X coordinate of the region
+        :param x: X coordinate of the region (required)
         :type x: int
-        :param y: Y coordinate of the region
+        :param y: Y coordinate of the region (required)
         :type y: int
-        :param width: Width of the region
+        :param width: Width of the region (required)
         :type width: int
-        :param height: Height of the region
+        :param height: Height of the region (required)
         :type height: int
         :param show_cursor: Whether to show cursor in screenshot
         :type show_cursor: bool
@@ -5232,10 +5232,10 @@ class ComputerUseApi:
     @validate_call
     async def take_region_screenshot_with_http_info(
         self,
-        x: Annotated[Optional[StrictInt], Field(description="X coordinate of the region")] = None,
-        y: Annotated[Optional[StrictInt], Field(description="Y coordinate of the region")] = None,
-        width: Annotated[Optional[StrictInt], Field(description="Width of the region")] = None,
-        height: Annotated[Optional[StrictInt], Field(description="Height of the region")] = None,
+        x: Annotated[StrictInt, Field(description="X coordinate of the region")],
+        y: Annotated[StrictInt, Field(description="Y coordinate of the region")],
+        width: Annotated[StrictInt, Field(description="Width of the region")],
+        height: Annotated[StrictInt, Field(description="Height of the region")],
         show_cursor: Annotated[Optional[StrictBool], Field(description="Whether to show cursor in screenshot")] = None,
         _request_timeout: Union[
             None,
@@ -5254,13 +5254,13 @@ class ComputerUseApi:
 
         Take a screenshot of a specific region of the screen
 
-        :param x: X coordinate of the region
+        :param x: X coordinate of the region (required)
         :type x: int
-        :param y: Y coordinate of the region
+        :param y: Y coordinate of the region (required)
         :type y: int
-        :param width: Width of the region
+        :param width: Width of the region (required)
         :type width: int
-        :param height: Height of the region
+        :param height: Height of the region (required)
         :type height: int
         :param show_cursor: Whether to show cursor in screenshot
         :type show_cursor: bool
@@ -5315,10 +5315,10 @@ class ComputerUseApi:
     @validate_call
     async def take_region_screenshot_without_preload_content(
         self,
-        x: Annotated[Optional[StrictInt], Field(description="X coordinate of the region")] = None,
-        y: Annotated[Optional[StrictInt], Field(description="Y coordinate of the region")] = None,
-        width: Annotated[Optional[StrictInt], Field(description="Width of the region")] = None,
-        height: Annotated[Optional[StrictInt], Field(description="Height of the region")] = None,
+        x: Annotated[StrictInt, Field(description="X coordinate of the region")],
+        y: Annotated[StrictInt, Field(description="Y coordinate of the region")],
+        width: Annotated[StrictInt, Field(description="Width of the region")],
+        height: Annotated[StrictInt, Field(description="Height of the region")],
         show_cursor: Annotated[Optional[StrictBool], Field(description="Whether to show cursor in screenshot")] = None,
         _request_timeout: Union[
             None,
@@ -5337,13 +5337,13 @@ class ComputerUseApi:
 
         Take a screenshot of a specific region of the screen
 
-        :param x: X coordinate of the region
+        :param x: X coordinate of the region (required)
         :type x: int
-        :param y: Y coordinate of the region
+        :param y: Y coordinate of the region (required)
         :type y: int
-        :param width: Width of the region
+        :param width: Width of the region (required)
         :type width: int
-        :param height: Height of the region
+        :param height: Height of the region (required)
         :type height: int
         :param show_cursor: Whether to show cursor in screenshot
         :type show_cursor: bool

@@ -556,25 +556,29 @@ const docTemplate = `{
                         "type": "integer",
                         "description": "X coordinate of the region",
                         "name": "x",
-                        "in": "query"
+                        "in": "query",
+                        "required": true
                     },
                     {
                         "type": "integer",
                         "description": "Y coordinate of the region",
                         "name": "y",
-                        "in": "query"
+                        "in": "query",
+                        "required": true
                     },
                     {
                         "type": "integer",
                         "description": "Width of the region",
                         "name": "width",
-                        "in": "query"
+                        "in": "query",
+                        "required": true
                     },
                     {
                         "type": "integer",
                         "description": "Height of the region",
                         "name": "height",
-                        "in": "query"
+                        "in": "query",
+                        "required": true
                     },
                     {
                         "type": "boolean",
@@ -609,25 +613,29 @@ const docTemplate = `{
                         "type": "integer",
                         "description": "X coordinate of the region",
                         "name": "x",
-                        "in": "query"
+                        "in": "query",
+                        "required": true
                     },
                     {
                         "type": "integer",
                         "description": "Y coordinate of the region",
                         "name": "y",
-                        "in": "query"
+                        "in": "query",
+                        "required": true
                     },
                     {
                         "type": "integer",
                         "description": "Width of the region",
                         "name": "width",
-                        "in": "query"
+                        "in": "query",
+                        "required": true
                     },
                     {
                         "type": "integer",
                         "description": "Height of the region",
                         "name": "height",
-                        "in": "query"
+                        "in": "query",
+                        "required": true
                     },
                     {
                         "type": "boolean",
@@ -898,7 +906,8 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Octal permission mode (default: 0755)",
                         "name": "mode",
-                        "in": "query"
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -982,7 +991,8 @@ const docTemplate = `{
                         "type": "string",
                         "description": "File or directory path",
                         "name": "path",
-                        "in": "query"
+                        "in": "query",
+                        "required": true
                     },
                     {
                         "type": "string",
@@ -1680,7 +1690,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/lsp/workspaceSymbols": {
+        "/lsp/workspacesymbols": {
             "get": {
                 "description": "Search for symbols across the entire workspace",
                 "produces": [

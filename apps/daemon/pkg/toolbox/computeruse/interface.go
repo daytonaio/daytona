@@ -266,10 +266,10 @@ func WrapScreenshotHandler(fn func(*ScreenshotRequest) (*ScreenshotResponse, err
 //	@Description	Take a screenshot of a specific region of the screen
 //	@Tags			computer-use
 //	@Produce		json
-//	@Param			x			query		int		false	"X coordinate of the region"
-//	@Param			y			query		int		false	"Y coordinate of the region"
-//	@Param			width		query		int		false	"Width of the region"
-//	@Param			height		query		int		false	"Height of the region"
+//	@Param			x			query		int		true	"X coordinate of the region"
+//	@Param			y			query		int		true	"Y coordinate of the region"
+//	@Param			width		query		int		true	"Width of the region"
+//	@Param			height		query		int		true	"Height of the region"
 //	@Param			showCursor	query		bool	false	"Whether to show cursor in screenshot"
 //	@Success		200			{object}	ScreenshotResponse
 //	@Router			/computeruse/screenshot/region [get]
@@ -345,10 +345,10 @@ func WrapCompressedScreenshotHandler(fn func(*CompressedScreenshotRequest) (*Scr
 //	@Description	Take a compressed screenshot of a specific region of the screen
 //	@Tags			computer-use
 //	@Produce		json
-//	@Param			x			query		int		false	"X coordinate of the region"
-//	@Param			y			query		int		false	"Y coordinate of the region"
-//	@Param			width		query		int		false	"Width of the region"
-//	@Param			height		query		int		false	"Height of the region"
+//	@Param			x			query		int		true	"X coordinate of the region"
+//	@Param			y			query		int		true	"Y coordinate of the region"
+//	@Param			width		query		int		true	"Width of the region"
+//	@Param			height		query		int		true	"Height of the region"
 //	@Param			showCursor	query		bool	false	"Whether to show cursor in screenshot"
 //	@Param			format		query		string	false	"Image format (png or jpeg)"
 //	@Param			quality		query		int		false	"JPEG quality (1-100)"
