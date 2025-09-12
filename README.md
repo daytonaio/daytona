@@ -112,10 +112,10 @@ async function main() {
   try {
     // Create the Sandbox instance
     sandbox = await daytona.create({
-      language: 'python',
+      language: 'typescript',
     })
     // Run code securely inside the Sandbox
-    const response = await sandbox.process.codeRun('print("Sum of 3 and 4 is " + str(3 + 4))')
+    const response = await sandbox.process.codeRun('console.log("Sum of 3 and 4 is " + (3 + 4))')
     if (response.exitCode !== 0) {
       console.error('Error running code:', response.exitCode, response.result)
     } else {
