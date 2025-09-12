@@ -32,6 +32,9 @@ export class DockerRegistry {
   @Column({ nullable: true, type: 'uuid' })
   organizationId?: string
 
+  @Column({ nullable: true })
+  region?: string
+
   @Column({
     type: 'enum',
     enum: RegistryType,
