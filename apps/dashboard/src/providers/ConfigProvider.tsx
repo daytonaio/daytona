@@ -8,10 +8,12 @@ import { ReactNode, useMemo } from 'react'
 import { ConfigContext } from '../contexts/ConfigContext'
 import { suspendedFetch } from '../lib/suspended-fetch'
 import { InMemoryWebStorage, WebStorageStateStore } from 'oidc-client-ts'
-import { DaytonaConfiguration } from '@daytonaio/api-client/src'
+import { DaytonaConfiguration } from '@daytonaio/api-client'
 import { RoutePath } from '@/enums/RoutePath'
 
-const getConfig = suspendedFetch<DaytonaConfiguration>(`${import.meta.env.VITE_API_URL}/config`)
+const apiUrl = (import.meta.env.VITE_BASE_API_URL ?? window.location.origin) + '/api'
+
+const getConfig = suspendedFetch<DaytonaConfiguration>(`${apiUrl}/config`)
 
 type Props = {
   children: ReactNode
@@ -44,7 +46,7 @@ export function ConfigProvider(props: Props) {
   )
 
   return (
-    <ConfigContext.Provider value={config}>
+    <ConfigContext.Provider value={{ ...config, apiUrl }}>
       <AuthProvider {...oidcConfig}>{props.children}</AuthProvider>
     </ConfigContext.Provider>
   )

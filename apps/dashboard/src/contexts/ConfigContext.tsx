@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { DaytonaConfiguration } from '@daytonaio/api-client'
+import { DashboardConfig } from '@/types/DashboardConfig'
 import { createContext } from 'react'
 
-export const ConfigContext = createContext<DaytonaConfiguration | null>(null)
+export const ConfigContext = createContext<DashboardConfig | null>(null)

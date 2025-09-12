@@ -45,6 +45,8 @@ const configuration = {
   },
   defaultSnapshot: process.env.DEFAULT_SNAPSHOT,
   dashboardUrl: process.env.DASHBOARD_URL,
+  // Default to empty string - dashboard will then hit '/api'
+  dashboardBaseApiUrl: process.env.DASHBOARD_BASE_API_URL || '',
   transientRegistry: {
     url: process.env.TRANSIENT_REGISTRY_URL,
     admin: process.env.TRANSIENT_REGISTRY_ADMIN,

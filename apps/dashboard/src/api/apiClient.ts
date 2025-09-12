@@ -15,10 +15,10 @@ import {
   SandboxApi,
   ToolboxApi,
   AuditApi,
-  DaytonaConfiguration,
 } from '@daytonaio/api-client'
 import axios, { AxiosError } from 'axios'
 import { DaytonaError } from './errors'
+import { DashboardConfig } from '@/types/DashboardConfig'
 
 export class ApiClient {
   private config: Configuration
@@ -33,9 +33,9 @@ export class ApiClient {
   private _toolboxApi: ToolboxApi
   private _auditApi: AuditApi
 
-  constructor(config: DaytonaConfiguration, accessToken: string) {
+  constructor(config: DashboardConfig, accessToken: string) {
     this.config = new Configuration({
-      basePath: import.meta.env.VITE_API_URL,
+      basePath: config.apiUrl,
       accessToken: accessToken,
     })
 
@@ -117,7 +117,7 @@ export class ApiClient {
   public async webhookRequest(method: string, url: string, data?: any) {
     // Use the existing axios instance that's already configured with interceptors
     const axiosInstance = axios.create({
-      baseURL: import.meta.env.VITE_API_URL,
+      baseURL: this.config.basePath,
       headers: {
         Authorization: `Bearer ${this.config.accessToken}`,
       },
@@ -132,7 +132,7 @@ export class ApiClient {
 
   public get axiosInstance() {
     return axios.create({
-      baseURL: import.meta.env.VITE_API_URL,
+      baseURL: this.config.basePath,
       headers: {
         Authorization: `Bearer ${this.config.accessToken}`,
       },

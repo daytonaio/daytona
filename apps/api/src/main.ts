@@ -4,7 +4,7 @@
  */
 
 import './tracing'
-import { readFileSync } from 'node:fs'
+import { readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
 import { NestFactory } from '@nestjs/core'
 import { NestExpressApplication } from '@nestjs/platform-express'
 import { AppModule } from './app.module'
@@ -24,6 +24,7 @@ import { getOpenApiConfig } from './openapi.config'
 import { SchedulerRegistry } from '@nestjs/schedule'
 import { EventEmitter2 } from '@nestjs/event-emitter'
 import { AuditInterceptor } from './audit/interceptors/audit.interceptor'
+import { join } from 'node:path'
 
 // https options
 const httpsEnabled = process.env.CERT_PATH && process.env.CERT_KEY_PATH
@@ -121,6 +122,26 @@ async function bootstrap() {
         version: '0',
       })
     }
+  }
+
+  // Replace dashboard api url before serving
+  if (configService.get('production')) {
+    const dashboardDir = join(__dirname, '..', 'dashboard')
+    const replaceInDirectory = (dir: string) => {
+      for (const file of readdirSync(dir)) {
+        const filePath = join(dir, file)
+        if (statSync(filePath).isDirectory()) {
+          if (file === 'assets') {
+            replaceInDirectory(filePath)
+          }
+          continue
+        }
+        const fileContent = readFileSync(filePath, 'utf8')
+        const newFileContent = fileContent.replace('%DAYTONA_BASE_API_URL%', configService.get('dashboardBaseApiUrl'))
+        writeFileSync(filePath, newFileContent)
+      }
+    }
+    replaceInDirectory(dashboardDir)
   }
 
   // Starts listening for shutdown hooks

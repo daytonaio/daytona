@@ -27,6 +27,7 @@ import { DatePicker } from '@/components/ui/date-picker'
 
 interface CreateApiKeyDialogProps {
   availablePermissions: CreateApiKeyPermissionsEnum[]
+  apiUrl: string
   onCreateApiKey: (
     name: string,
     permissions: CreateApiKeyPermissionsEnum[],
@@ -34,7 +35,11 @@ interface CreateApiKeyDialogProps {
   ) => Promise<ApiKeyResponse | null>
 }
 
-export const CreateApiKeyDialog: React.FC<CreateApiKeyDialogProps> = ({ availablePermissions, onCreateApiKey }) => {
+export const CreateApiKeyDialog: React.FC<CreateApiKeyDialogProps> = ({
+  availablePermissions,
+  apiUrl,
+  onCreateApiKey,
+}) => {
   const [open, setOpen] = useState(false)
   const [name, setName] = useState('')
   const [expiresAt, setExpiresAt] = useState<Date | undefined>(undefined)
@@ -168,12 +173,9 @@ export const CreateApiKeyDialog: React.FC<CreateApiKeyDialogProps> = ({ availabl
             <div className="space-y-3">
               <Label htmlFor="api-url">API URL</Label>
               <div className="p-3 flex justify-between items-center rounded-md bg-green-100 text-green-600 dark:bg-green-900/50 dark:text-green-400">
-                {import.meta.env.VITE_API_URL}
+                {apiUrl}
                 {(copied === 'API URL' && <Check className="w-4 h-4" />) || (
-                  <Copy
-                    className="w-4 h-4 cursor-pointer"
-                    onClick={() => copyToClipboard(import.meta.env.VITE_API_URL, 'API URL')}
-                  />
+                  <Copy className="w-4 h-4 cursor-pointer" onClick={() => copyToClipboard(apiUrl, 'API URL')} />
                 )}
               </div>
             </div>
