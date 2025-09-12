@@ -1079,6 +1079,8 @@ type WorkspaceAPIListWorkspacesDeprecatedRequest struct {
 	maxDiskGiB             *float32
 	lastEventAfter         *time.Time
 	lastEventBefore        *time.Time
+	sort                   *string
+	order                  *string
 }
 
 // Use with JWT to specify the organization ID
@@ -1174,6 +1176,18 @@ func (r WorkspaceAPIListWorkspacesDeprecatedRequest) LastEventAfter(lastEventAft
 // Include items with last event before this timestamp
 func (r WorkspaceAPIListWorkspacesDeprecatedRequest) LastEventBefore(lastEventBefore time.Time) WorkspaceAPIListWorkspacesDeprecatedRequest {
 	r.lastEventBefore = &lastEventBefore
+	return r
+}
+
+// Field to sort by
+func (r WorkspaceAPIListWorkspacesDeprecatedRequest) Sort(sort string) WorkspaceAPIListWorkspacesDeprecatedRequest {
+	r.sort = &sort
+	return r
+}
+
+// Sort direction
+func (r WorkspaceAPIListWorkspacesDeprecatedRequest) Order(order string) WorkspaceAPIListWorkspacesDeprecatedRequest {
+	r.order = &order
 	return r
 }
 
@@ -1294,6 +1308,18 @@ func (a *WorkspaceAPIService) ListWorkspacesDeprecatedExecute(r WorkspaceAPIList
 	}
 	if r.lastEventBefore != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "lastEventBefore", r.lastEventBefore, "form", "")
+	}
+	if r.sort != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "sort", r.sort, "form", "")
+	} else {
+		var defaultValue string = "createdAt"
+		r.sort = &defaultValue
+	}
+	if r.order != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "order", r.order, "form", "")
+	} else {
+		var defaultValue string = "desc"
+		r.order = &defaultValue
 	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}

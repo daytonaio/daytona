@@ -1310,6 +1310,34 @@ paths:
             format: date-time
             type: string
           style: form
+        - description: Field to sort by
+          explode: true
+          in: query
+          name: sort
+          required: false
+          schema:
+            default: createdAt
+            enum:
+              - id
+              - state
+              - snapshot
+              - region
+              - updatedAt
+              - createdAt
+            type: string
+          style: form
+        - description: Sort direction
+          explode: true
+          in: query
+          name: order
+          required: false
+          schema:
+            default: desc
+            enum:
+              - asc
+              - desc
+            type: string
+          style: form
       responses:
         '200':
           content:
@@ -5252,6 +5280,34 @@ paths:
           schema:
             example: 2024-12-31T23:59:59Z
             format: date-time
+            type: string
+          style: form
+        - description: Field to sort by
+          explode: true
+          in: query
+          name: sort
+          required: false
+          schema:
+            default: createdAt
+            enum:
+              - id
+              - state
+              - snapshot
+              - region
+              - updatedAt
+              - createdAt
+            type: string
+          style: form
+        - description: Sort direction
+          explode: true
+          in: query
+          name: order
+          required: false
+          schema:
+            default: desc
+            enum:
+              - asc
+              - desc
             type: string
           style: form
       responses:

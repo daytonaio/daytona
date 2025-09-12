@@ -1175,6 +1175,8 @@ type SandboxAPIListSandboxesRequest struct {
 	maxDiskGiB             *float32
 	lastEventAfter         *time.Time
 	lastEventBefore        *time.Time
+	sort                   *string
+	order                  *string
 }
 
 // Use with JWT to specify the organization ID
@@ -1270,6 +1272,18 @@ func (r SandboxAPIListSandboxesRequest) LastEventAfter(lastEventAfter time.Time)
 // Include items with last event before this timestamp
 func (r SandboxAPIListSandboxesRequest) LastEventBefore(lastEventBefore time.Time) SandboxAPIListSandboxesRequest {
 	r.lastEventBefore = &lastEventBefore
+	return r
+}
+
+// Field to sort by
+func (r SandboxAPIListSandboxesRequest) Sort(sort string) SandboxAPIListSandboxesRequest {
+	r.sort = &sort
+	return r
+}
+
+// Sort direction
+func (r SandboxAPIListSandboxesRequest) Order(order string) SandboxAPIListSandboxesRequest {
+	r.order = &order
 	return r
 }
 
@@ -1386,6 +1400,18 @@ func (a *SandboxAPIService) ListSandboxesExecute(r SandboxAPIListSandboxesReques
 	}
 	if r.lastEventBefore != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "lastEventBefore", r.lastEventBefore, "form", "")
+	}
+	if r.sort != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "sort", r.sort, "form", "")
+	} else {
+		var defaultValue string = "createdAt"
+		r.sort = &defaultValue
+	}
+	if r.order != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "order", r.order, "form", "")
+	} else {
+		var defaultValue string = "desc"
+		r.order = &defaultValue
 	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}

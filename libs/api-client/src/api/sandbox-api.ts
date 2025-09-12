@@ -469,6 +469,8 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
      * @param {number} [maxDiskGiB] Maximum disk space in GiB
      * @param {Date} [lastEventAfter] Include items with last event after this timestamp
      * @param {Date} [lastEventBefore] Include items with last event before this timestamp
+     * @param {ListSandboxesSortEnum} [sort] Field to sort by
+     * @param {ListSandboxesOrderEnum} [order] Sort direction
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
@@ -489,6 +491,8 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
       maxDiskGiB?: number,
       lastEventAfter?: Date,
       lastEventBefore?: Date,
+      sort?: ListSandboxesSortEnum,
+      order?: ListSandboxesOrderEnum,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       const localVarPath = `/sandbox`
@@ -569,6 +573,14 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
       if (lastEventBefore !== undefined) {
         localVarQueryParameter['lastEventBefore'] =
           (lastEventBefore as any) instanceof Date ? (lastEventBefore as any).toISOString() : lastEventBefore
+      }
+
+      if (sort !== undefined) {
+        localVarQueryParameter['sort'] = sort
+      }
+
+      if (order !== undefined) {
+        localVarQueryParameter['order'] = order
       }
 
       if (xDaytonaOrganizationID != null) {
@@ -1310,6 +1322,8 @@ export const SandboxApiFp = function (configuration?: Configuration) {
      * @param {number} [maxDiskGiB] Maximum disk space in GiB
      * @param {Date} [lastEventAfter] Include items with last event after this timestamp
      * @param {Date} [lastEventBefore] Include items with last event before this timestamp
+     * @param {ListSandboxesSortEnum} [sort] Field to sort by
+     * @param {ListSandboxesOrderEnum} [order] Sort direction
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
@@ -1330,6 +1344,8 @@ export const SandboxApiFp = function (configuration?: Configuration) {
       maxDiskGiB?: number,
       lastEventAfter?: Date,
       lastEventBefore?: Date,
+      sort?: ListSandboxesSortEnum,
+      order?: ListSandboxesOrderEnum,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PaginatedSandboxes>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.listSandboxes(
@@ -1349,6 +1365,8 @@ export const SandboxApiFp = function (configuration?: Configuration) {
         maxDiskGiB,
         lastEventAfter,
         lastEventBefore,
+        sort,
+        order,
         options,
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
@@ -1806,6 +1824,8 @@ export const SandboxApiFactory = function (configuration?: Configuration, basePa
      * @param {number} [maxDiskGiB] Maximum disk space in GiB
      * @param {Date} [lastEventAfter] Include items with last event after this timestamp
      * @param {Date} [lastEventBefore] Include items with last event before this timestamp
+     * @param {ListSandboxesSortEnum} [sort] Field to sort by
+     * @param {ListSandboxesOrderEnum} [order] Sort direction
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
@@ -1826,6 +1846,8 @@ export const SandboxApiFactory = function (configuration?: Configuration, basePa
       maxDiskGiB?: number,
       lastEventAfter?: Date,
       lastEventBefore?: Date,
+      sort?: ListSandboxesSortEnum,
+      order?: ListSandboxesOrderEnum,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<PaginatedSandboxes> {
       return localVarFp
@@ -1846,6 +1868,8 @@ export const SandboxApiFactory = function (configuration?: Configuration, basePa
           maxDiskGiB,
           lastEventAfter,
           lastEventBefore,
+          sort,
+          order,
           options,
         )
         .then((request) => request(axios, basePath))
@@ -2188,6 +2212,8 @@ export class SandboxApi extends BaseAPI {
    * @param {number} [maxDiskGiB] Maximum disk space in GiB
    * @param {Date} [lastEventAfter] Include items with last event after this timestamp
    * @param {Date} [lastEventBefore] Include items with last event before this timestamp
+   * @param {ListSandboxesSortEnum} [sort] Field to sort by
+   * @param {ListSandboxesOrderEnum} [order] Sort direction
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof SandboxApi
@@ -2209,6 +2235,8 @@ export class SandboxApi extends BaseAPI {
     maxDiskGiB?: number,
     lastEventAfter?: Date,
     lastEventBefore?: Date,
+    sort?: ListSandboxesSortEnum,
+    order?: ListSandboxesOrderEnum,
     options?: RawAxiosRequestConfig,
   ) {
     return SandboxApiFp(this.configuration)
@@ -2229,6 +2257,8 @@ export class SandboxApi extends BaseAPI {
         maxDiskGiB,
         lastEventAfter,
         lastEventBefore,
+        sort,
+        order,
         options,
       )
       .then((request) => request(this.axios, this.basePath))
@@ -2427,3 +2457,23 @@ export const ListSandboxesStatesEnum = {
   ARCHIVING: 'archiving',
 } as const
 export type ListSandboxesStatesEnum = (typeof ListSandboxesStatesEnum)[keyof typeof ListSandboxesStatesEnum]
+/**
+ * @export
+ */
+export const ListSandboxesSortEnum = {
+  ID: 'id',
+  STATE: 'state',
+  SNAPSHOT: 'snapshot',
+  REGION: 'region',
+  UPDATED_AT: 'updatedAt',
+  CREATED_AT: 'createdAt',
+} as const
+export type ListSandboxesSortEnum = (typeof ListSandboxesSortEnum)[keyof typeof ListSandboxesSortEnum]
+/**
+ * @export
+ */
+export const ListSandboxesOrderEnum = {
+  ASC: 'asc',
+  DESC: 'desc',
+} as const
+export type ListSandboxesOrderEnum = (typeof ListSandboxesOrderEnum)[keyof typeof ListSandboxesOrderEnum]

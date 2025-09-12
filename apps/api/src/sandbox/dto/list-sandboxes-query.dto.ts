@@ -10,6 +10,20 @@ import { Min, Max } from 'class-validator'
 import { SandboxState } from '../enums/sandbox-state.enum'
 import { ToArray } from '../../common/decorators/to-array.decorator'
 
+export enum SortField {
+  ID = 'id',
+  STATE = 'state',
+  SNAPSHOT = 'snapshot',
+  REGION = 'region',
+  UPDATED_AT = 'updatedAt',
+  CREATED_AT = 'createdAt',
+}
+
+export enum SortDirection {
+  ASC = 'asc',
+  DESC = 'desc',
+}
+
 const VALID_QUERY_STATES = Object.values(SandboxState).filter((state) => state !== SandboxState.DESTROYED)
 
 @ApiSchema({ name: 'ListSandboxesQuery' })
@@ -209,4 +223,26 @@ export class ListSandboxesQueryDto {
   @Type(() => Date)
   @IsDate()
   lastEventBefore?: Date
+
+  @ApiProperty({
+    name: 'sort',
+    description: 'Field to sort by',
+    required: false,
+    enum: SortField,
+    default: SortField.CREATED_AT,
+  })
+  @IsOptional()
+  @IsEnum(SortField)
+  sort = SortField.CREATED_AT
+
+  @ApiProperty({
+    name: 'order',
+    description: 'Sort direction',
+    required: false,
+    enum: SortDirection,
+    default: SortDirection.DESC,
+  })
+  @IsOptional()
+  @IsEnum(SortDirection)
+  order = SortDirection.DESC
 }

@@ -2316,6 +2316,8 @@ class SandboxApi:
         max_disk_gi_b: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Maximum disk space in GiB")] = None,
         last_event_after: Annotated[Optional[datetime], Field(description="Include items with last event after this timestamp")] = None,
         last_event_before: Annotated[Optional[datetime], Field(description="Include items with last event before this timestamp")] = None,
+        sort: Annotated[Optional[StrictStr], Field(description="Field to sort by")] = None,
+        order: Annotated[Optional[StrictStr], Field(description="Sort direction")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2364,6 +2366,10 @@ class SandboxApi:
         :type last_event_after: datetime
         :param last_event_before: Include items with last event before this timestamp
         :type last_event_before: datetime
+        :param sort: Field to sort by
+        :type sort: str
+        :param order: Sort direction
+        :type order: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -2403,6 +2409,8 @@ class SandboxApi:
             max_disk_gi_b=max_disk_gi_b,
             last_event_after=last_event_after,
             last_event_before=last_event_before,
+            sort=sort,
+            order=order,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -2442,6 +2450,8 @@ class SandboxApi:
         max_disk_gi_b: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Maximum disk space in GiB")] = None,
         last_event_after: Annotated[Optional[datetime], Field(description="Include items with last event after this timestamp")] = None,
         last_event_before: Annotated[Optional[datetime], Field(description="Include items with last event before this timestamp")] = None,
+        sort: Annotated[Optional[StrictStr], Field(description="Field to sort by")] = None,
+        order: Annotated[Optional[StrictStr], Field(description="Sort direction")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2490,6 +2500,10 @@ class SandboxApi:
         :type last_event_after: datetime
         :param last_event_before: Include items with last event before this timestamp
         :type last_event_before: datetime
+        :param sort: Field to sort by
+        :type sort: str
+        :param order: Sort direction
+        :type order: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -2529,6 +2543,8 @@ class SandboxApi:
             max_disk_gi_b=max_disk_gi_b,
             last_event_after=last_event_after,
             last_event_before=last_event_before,
+            sort=sort,
+            order=order,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -2568,6 +2584,8 @@ class SandboxApi:
         max_disk_gi_b: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Maximum disk space in GiB")] = None,
         last_event_after: Annotated[Optional[datetime], Field(description="Include items with last event after this timestamp")] = None,
         last_event_before: Annotated[Optional[datetime], Field(description="Include items with last event before this timestamp")] = None,
+        sort: Annotated[Optional[StrictStr], Field(description="Field to sort by")] = None,
+        order: Annotated[Optional[StrictStr], Field(description="Sort direction")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2616,6 +2634,10 @@ class SandboxApi:
         :type last_event_after: datetime
         :param last_event_before: Include items with last event before this timestamp
         :type last_event_before: datetime
+        :param sort: Field to sort by
+        :type sort: str
+        :param order: Sort direction
+        :type order: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -2655,6 +2677,8 @@ class SandboxApi:
             max_disk_gi_b=max_disk_gi_b,
             last_event_after=last_event_after,
             last_event_before=last_event_before,
+            sort=sort,
+            order=order,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -2689,6 +2713,8 @@ class SandboxApi:
         max_disk_gi_b,
         last_event_after,
         last_event_before,
+        sort,
+        order,
         _request_auth,
         _content_type,
         _headers,
@@ -2791,6 +2817,14 @@ class SandboxApi:
                 )
             else:
                 _query_params.append(('lastEventBefore', last_event_before))
+            
+        if sort is not None:
+            
+            _query_params.append(('sort', sort))
+            
+        if order is not None:
+            
+            _query_params.append(('order', order))
             
         # process the header parameters
         if x_daytona_organization_id is not None:
