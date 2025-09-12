@@ -147,6 +147,8 @@ definitions:
     properties:
       metrics:
         $ref: '#/definitions/RunnerMetrics'
+      version:
+        type: string
     type: object
   RunnerMetrics:
     properties:

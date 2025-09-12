@@ -49,7 +49,7 @@ import { HealthModule } from './health/health.module'
           database: configService.getOrThrow('database.database'),
           autoLoadEntities: true,
           migrations: [join(__dirname, 'migrations/**/*{.ts,.js}')],
-          migrationsRun: !configService.getOrThrow('production'),
+          migrationsRun: configService.get('runMigrations') || !configService.getOrThrow('production'),
           namingStrategy: new CustomNamingStrategy(),
           manualInitialization: configService.get('skipConnections'),
         }
