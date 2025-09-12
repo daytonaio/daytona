@@ -17,8 +17,9 @@ from pydantic import validate_call, Field, StrictFloat, StrictStr, StrictInt
 from typing import Any, Dict, List, Optional, Tuple, Union
 from typing_extensions import Annotated
 
-from pydantic import Field, StrictBool, StrictFloat, StrictInt, StrictStr
-from typing import Optional, Union
+from datetime import datetime
+from pydantic import Field, StrictBool, StrictFloat, StrictInt, StrictStr, field_validator
+from typing import List, Optional, Union
 from typing_extensions import Annotated
 from daytona_api_client.models.create_sandbox import CreateSandbox
 from daytona_api_client.models.paginated_sandboxes import PaginatedSandboxes
@@ -2303,7 +2304,18 @@ class SandboxApi:
         page: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Page number")] = None,
         limit: Annotated[Optional[Union[Annotated[float, Field(le=100, strict=True, ge=1)], Annotated[int, Field(le=100, strict=True, ge=1)]]], Field(description="Number of items per page")] = None,
         labels: Annotated[Optional[StrictStr], Field(description="JSON encoded labels to filter by")] = None,
-        include_errored_deleted: Annotated[Optional[StrictBool], Field(description="Include errored sandboxes with deleted desired state")] = None,
+        include_errored_deleted: Annotated[Optional[StrictBool], Field(description="Include items that are errored with deleted desired state")] = None,
+        states: Annotated[Optional[List[StrictStr]], Field(description="List of states to filter by")] = None,
+        snapshots: Annotated[Optional[List[StrictStr]], Field(description="List of snapshot names to filter by")] = None,
+        regions: Annotated[Optional[List[StrictStr]], Field(description="List of regions to filter by")] = None,
+        min_cpu: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Minimum CPU")] = None,
+        max_cpu: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Maximum CPU")] = None,
+        min_memory_gi_b: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Minimum memory in GiB")] = None,
+        max_memory_gi_b: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Maximum memory in GiB")] = None,
+        min_disk_gi_b: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Minimum disk space in GiB")] = None,
+        max_disk_gi_b: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Maximum disk space in GiB")] = None,
+        last_event_after: Annotated[Optional[datetime], Field(description="Include items with last event after this timestamp")] = None,
+        last_event_before: Annotated[Optional[datetime], Field(description="Include items with last event before this timestamp")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2328,8 +2340,30 @@ class SandboxApi:
         :type limit: float
         :param labels: JSON encoded labels to filter by
         :type labels: str
-        :param include_errored_deleted: Include errored sandboxes with deleted desired state
+        :param include_errored_deleted: Include items that are errored with deleted desired state
         :type include_errored_deleted: bool
+        :param states: List of states to filter by
+        :type states: List[str]
+        :param snapshots: List of snapshot names to filter by
+        :type snapshots: List[str]
+        :param regions: List of regions to filter by
+        :type regions: List[str]
+        :param min_cpu: Minimum CPU
+        :type min_cpu: float
+        :param max_cpu: Maximum CPU
+        :type max_cpu: float
+        :param min_memory_gi_b: Minimum memory in GiB
+        :type min_memory_gi_b: float
+        :param max_memory_gi_b: Maximum memory in GiB
+        :type max_memory_gi_b: float
+        :param min_disk_gi_b: Minimum disk space in GiB
+        :type min_disk_gi_b: float
+        :param max_disk_gi_b: Maximum disk space in GiB
+        :type max_disk_gi_b: float
+        :param last_event_after: Include items with last event after this timestamp
+        :type last_event_after: datetime
+        :param last_event_before: Include items with last event before this timestamp
+        :type last_event_before: datetime
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -2358,6 +2392,17 @@ class SandboxApi:
             limit=limit,
             labels=labels,
             include_errored_deleted=include_errored_deleted,
+            states=states,
+            snapshots=snapshots,
+            regions=regions,
+            min_cpu=min_cpu,
+            max_cpu=max_cpu,
+            min_memory_gi_b=min_memory_gi_b,
+            max_memory_gi_b=max_memory_gi_b,
+            min_disk_gi_b=min_disk_gi_b,
+            max_disk_gi_b=max_disk_gi_b,
+            last_event_after=last_event_after,
+            last_event_before=last_event_before,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -2385,7 +2430,18 @@ class SandboxApi:
         page: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Page number")] = None,
         limit: Annotated[Optional[Union[Annotated[float, Field(le=100, strict=True, ge=1)], Annotated[int, Field(le=100, strict=True, ge=1)]]], Field(description="Number of items per page")] = None,
         labels: Annotated[Optional[StrictStr], Field(description="JSON encoded labels to filter by")] = None,
-        include_errored_deleted: Annotated[Optional[StrictBool], Field(description="Include errored sandboxes with deleted desired state")] = None,
+        include_errored_deleted: Annotated[Optional[StrictBool], Field(description="Include items that are errored with deleted desired state")] = None,
+        states: Annotated[Optional[List[StrictStr]], Field(description="List of states to filter by")] = None,
+        snapshots: Annotated[Optional[List[StrictStr]], Field(description="List of snapshot names to filter by")] = None,
+        regions: Annotated[Optional[List[StrictStr]], Field(description="List of regions to filter by")] = None,
+        min_cpu: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Minimum CPU")] = None,
+        max_cpu: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Maximum CPU")] = None,
+        min_memory_gi_b: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Minimum memory in GiB")] = None,
+        max_memory_gi_b: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Maximum memory in GiB")] = None,
+        min_disk_gi_b: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Minimum disk space in GiB")] = None,
+        max_disk_gi_b: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Maximum disk space in GiB")] = None,
+        last_event_after: Annotated[Optional[datetime], Field(description="Include items with last event after this timestamp")] = None,
+        last_event_before: Annotated[Optional[datetime], Field(description="Include items with last event before this timestamp")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2410,8 +2466,30 @@ class SandboxApi:
         :type limit: float
         :param labels: JSON encoded labels to filter by
         :type labels: str
-        :param include_errored_deleted: Include errored sandboxes with deleted desired state
+        :param include_errored_deleted: Include items that are errored with deleted desired state
         :type include_errored_deleted: bool
+        :param states: List of states to filter by
+        :type states: List[str]
+        :param snapshots: List of snapshot names to filter by
+        :type snapshots: List[str]
+        :param regions: List of regions to filter by
+        :type regions: List[str]
+        :param min_cpu: Minimum CPU
+        :type min_cpu: float
+        :param max_cpu: Maximum CPU
+        :type max_cpu: float
+        :param min_memory_gi_b: Minimum memory in GiB
+        :type min_memory_gi_b: float
+        :param max_memory_gi_b: Maximum memory in GiB
+        :type max_memory_gi_b: float
+        :param min_disk_gi_b: Minimum disk space in GiB
+        :type min_disk_gi_b: float
+        :param max_disk_gi_b: Maximum disk space in GiB
+        :type max_disk_gi_b: float
+        :param last_event_after: Include items with last event after this timestamp
+        :type last_event_after: datetime
+        :param last_event_before: Include items with last event before this timestamp
+        :type last_event_before: datetime
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -2440,6 +2518,17 @@ class SandboxApi:
             limit=limit,
             labels=labels,
             include_errored_deleted=include_errored_deleted,
+            states=states,
+            snapshots=snapshots,
+            regions=regions,
+            min_cpu=min_cpu,
+            max_cpu=max_cpu,
+            min_memory_gi_b=min_memory_gi_b,
+            max_memory_gi_b=max_memory_gi_b,
+            min_disk_gi_b=min_disk_gi_b,
+            max_disk_gi_b=max_disk_gi_b,
+            last_event_after=last_event_after,
+            last_event_before=last_event_before,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -2467,7 +2556,18 @@ class SandboxApi:
         page: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Page number")] = None,
         limit: Annotated[Optional[Union[Annotated[float, Field(le=100, strict=True, ge=1)], Annotated[int, Field(le=100, strict=True, ge=1)]]], Field(description="Number of items per page")] = None,
         labels: Annotated[Optional[StrictStr], Field(description="JSON encoded labels to filter by")] = None,
-        include_errored_deleted: Annotated[Optional[StrictBool], Field(description="Include errored sandboxes with deleted desired state")] = None,
+        include_errored_deleted: Annotated[Optional[StrictBool], Field(description="Include items that are errored with deleted desired state")] = None,
+        states: Annotated[Optional[List[StrictStr]], Field(description="List of states to filter by")] = None,
+        snapshots: Annotated[Optional[List[StrictStr]], Field(description="List of snapshot names to filter by")] = None,
+        regions: Annotated[Optional[List[StrictStr]], Field(description="List of regions to filter by")] = None,
+        min_cpu: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Minimum CPU")] = None,
+        max_cpu: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Maximum CPU")] = None,
+        min_memory_gi_b: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Minimum memory in GiB")] = None,
+        max_memory_gi_b: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Maximum memory in GiB")] = None,
+        min_disk_gi_b: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Minimum disk space in GiB")] = None,
+        max_disk_gi_b: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Maximum disk space in GiB")] = None,
+        last_event_after: Annotated[Optional[datetime], Field(description="Include items with last event after this timestamp")] = None,
+        last_event_before: Annotated[Optional[datetime], Field(description="Include items with last event before this timestamp")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2492,8 +2592,30 @@ class SandboxApi:
         :type limit: float
         :param labels: JSON encoded labels to filter by
         :type labels: str
-        :param include_errored_deleted: Include errored sandboxes with deleted desired state
+        :param include_errored_deleted: Include items that are errored with deleted desired state
         :type include_errored_deleted: bool
+        :param states: List of states to filter by
+        :type states: List[str]
+        :param snapshots: List of snapshot names to filter by
+        :type snapshots: List[str]
+        :param regions: List of regions to filter by
+        :type regions: List[str]
+        :param min_cpu: Minimum CPU
+        :type min_cpu: float
+        :param max_cpu: Maximum CPU
+        :type max_cpu: float
+        :param min_memory_gi_b: Minimum memory in GiB
+        :type min_memory_gi_b: float
+        :param max_memory_gi_b: Maximum memory in GiB
+        :type max_memory_gi_b: float
+        :param min_disk_gi_b: Minimum disk space in GiB
+        :type min_disk_gi_b: float
+        :param max_disk_gi_b: Maximum disk space in GiB
+        :type max_disk_gi_b: float
+        :param last_event_after: Include items with last event after this timestamp
+        :type last_event_after: datetime
+        :param last_event_before: Include items with last event before this timestamp
+        :type last_event_before: datetime
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -2522,6 +2644,17 @@ class SandboxApi:
             limit=limit,
             labels=labels,
             include_errored_deleted=include_errored_deleted,
+            states=states,
+            snapshots=snapshots,
+            regions=regions,
+            min_cpu=min_cpu,
+            max_cpu=max_cpu,
+            min_memory_gi_b=min_memory_gi_b,
+            max_memory_gi_b=max_memory_gi_b,
+            min_disk_gi_b=min_disk_gi_b,
+            max_disk_gi_b=max_disk_gi_b,
+            last_event_after=last_event_after,
+            last_event_before=last_event_before,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -2545,6 +2678,17 @@ class SandboxApi:
         limit,
         labels,
         include_errored_deleted,
+        states,
+        snapshots,
+        regions,
+        min_cpu,
+        max_cpu,
+        min_memory_gi_b,
+        max_memory_gi_b,
+        min_disk_gi_b,
+        max_disk_gi_b,
+        last_event_after,
+        last_event_before,
         _request_auth,
         _content_type,
         _headers,
@@ -2554,6 +2698,9 @@ class SandboxApi:
         _host = None
 
         _collection_formats: Dict[str, str] = {
+            'states': 'multi',
+            'snapshots': 'multi',
+            'regions': 'multi',
         }
 
         _path_params: Dict[str, str] = {}
@@ -2582,6 +2729,68 @@ class SandboxApi:
         if include_errored_deleted is not None:
             
             _query_params.append(('includeErroredDeleted', include_errored_deleted))
+            
+        if states is not None:
+            
+            _query_params.append(('states', states))
+            
+        if snapshots is not None:
+            
+            _query_params.append(('snapshots', snapshots))
+            
+        if regions is not None:
+            
+            _query_params.append(('regions', regions))
+            
+        if min_cpu is not None:
+            
+            _query_params.append(('minCpu', min_cpu))
+            
+        if max_cpu is not None:
+            
+            _query_params.append(('maxCpu', max_cpu))
+            
+        if min_memory_gi_b is not None:
+            
+            _query_params.append(('minMemoryGiB', min_memory_gi_b))
+            
+        if max_memory_gi_b is not None:
+            
+            _query_params.append(('maxMemoryGiB', max_memory_gi_b))
+            
+        if min_disk_gi_b is not None:
+            
+            _query_params.append(('minDiskGiB', min_disk_gi_b))
+            
+        if max_disk_gi_b is not None:
+            
+            _query_params.append(('maxDiskGiB', max_disk_gi_b))
+            
+        if last_event_after is not None:
+            if isinstance(last_event_after, datetime):
+                _query_params.append(
+                    (
+                        'lastEventAfter',
+                        last_event_after.strftime(
+                            self.api_client.configuration.datetime_format
+                        )
+                    )
+                )
+            else:
+                _query_params.append(('lastEventAfter', last_event_after))
+            
+        if last_event_before is not None:
+            if isinstance(last_event_before, datetime):
+                _query_params.append(
+                    (
+                        'lastEventBefore',
+                        last_event_before.strftime(
+                            self.api_client.configuration.datetime_format
+                        )
+                    )
+                )
+            else:
+                _query_params.append(('lastEventBefore', last_event_before))
             
         # process the header parameters
         if x_daytona_organization_id is not None:

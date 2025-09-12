@@ -457,7 +457,18 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
      * @param {number} [page] Page number
      * @param {number} [limit] Number of items per page
      * @param {string} [labels] JSON encoded labels to filter by
-     * @param {boolean} [includeErroredDeleted] Include errored sandboxes with deleted desired state
+     * @param {boolean} [includeErroredDeleted] Include items that are errored with deleted desired state
+     * @param {Array<ListSandboxesStatesEnum>} [states] List of states to filter by
+     * @param {Array<string>} [snapshots] List of snapshot names to filter by
+     * @param {Array<string>} [regions] List of regions to filter by
+     * @param {number} [minCpu] Minimum CPU
+     * @param {number} [maxCpu] Maximum CPU
+     * @param {number} [minMemoryGiB] Minimum memory in GiB
+     * @param {number} [maxMemoryGiB] Maximum memory in GiB
+     * @param {number} [minDiskGiB] Minimum disk space in GiB
+     * @param {number} [maxDiskGiB] Maximum disk space in GiB
+     * @param {Date} [lastEventAfter] Include items with last event after this timestamp
+     * @param {Date} [lastEventBefore] Include items with last event before this timestamp
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
@@ -467,6 +478,17 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
       limit?: number,
       labels?: string,
       includeErroredDeleted?: boolean,
+      states?: Array<ListSandboxesStatesEnum>,
+      snapshots?: Array<string>,
+      regions?: Array<string>,
+      minCpu?: number,
+      maxCpu?: number,
+      minMemoryGiB?: number,
+      maxMemoryGiB?: number,
+      minDiskGiB?: number,
+      maxDiskGiB?: number,
+      lastEventAfter?: Date,
+      lastEventBefore?: Date,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       const localVarPath = `/sandbox`
@@ -501,6 +523,52 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
 
       if (includeErroredDeleted !== undefined) {
         localVarQueryParameter['includeErroredDeleted'] = includeErroredDeleted
+      }
+
+      if (states) {
+        localVarQueryParameter['states'] = states
+      }
+
+      if (snapshots) {
+        localVarQueryParameter['snapshots'] = snapshots
+      }
+
+      if (regions) {
+        localVarQueryParameter['regions'] = regions
+      }
+
+      if (minCpu !== undefined) {
+        localVarQueryParameter['minCpu'] = minCpu
+      }
+
+      if (maxCpu !== undefined) {
+        localVarQueryParameter['maxCpu'] = maxCpu
+      }
+
+      if (minMemoryGiB !== undefined) {
+        localVarQueryParameter['minMemoryGiB'] = minMemoryGiB
+      }
+
+      if (maxMemoryGiB !== undefined) {
+        localVarQueryParameter['maxMemoryGiB'] = maxMemoryGiB
+      }
+
+      if (minDiskGiB !== undefined) {
+        localVarQueryParameter['minDiskGiB'] = minDiskGiB
+      }
+
+      if (maxDiskGiB !== undefined) {
+        localVarQueryParameter['maxDiskGiB'] = maxDiskGiB
+      }
+
+      if (lastEventAfter !== undefined) {
+        localVarQueryParameter['lastEventAfter'] =
+          (lastEventAfter as any) instanceof Date ? (lastEventAfter as any).toISOString() : lastEventAfter
+      }
+
+      if (lastEventBefore !== undefined) {
+        localVarQueryParameter['lastEventBefore'] =
+          (lastEventBefore as any) instanceof Date ? (lastEventBefore as any).toISOString() : lastEventBefore
       }
 
       if (xDaytonaOrganizationID != null) {
@@ -1230,7 +1298,18 @@ export const SandboxApiFp = function (configuration?: Configuration) {
      * @param {number} [page] Page number
      * @param {number} [limit] Number of items per page
      * @param {string} [labels] JSON encoded labels to filter by
-     * @param {boolean} [includeErroredDeleted] Include errored sandboxes with deleted desired state
+     * @param {boolean} [includeErroredDeleted] Include items that are errored with deleted desired state
+     * @param {Array<ListSandboxesStatesEnum>} [states] List of states to filter by
+     * @param {Array<string>} [snapshots] List of snapshot names to filter by
+     * @param {Array<string>} [regions] List of regions to filter by
+     * @param {number} [minCpu] Minimum CPU
+     * @param {number} [maxCpu] Maximum CPU
+     * @param {number} [minMemoryGiB] Minimum memory in GiB
+     * @param {number} [maxMemoryGiB] Maximum memory in GiB
+     * @param {number} [minDiskGiB] Minimum disk space in GiB
+     * @param {number} [maxDiskGiB] Maximum disk space in GiB
+     * @param {Date} [lastEventAfter] Include items with last event after this timestamp
+     * @param {Date} [lastEventBefore] Include items with last event before this timestamp
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
@@ -1240,6 +1319,17 @@ export const SandboxApiFp = function (configuration?: Configuration) {
       limit?: number,
       labels?: string,
       includeErroredDeleted?: boolean,
+      states?: Array<ListSandboxesStatesEnum>,
+      snapshots?: Array<string>,
+      regions?: Array<string>,
+      minCpu?: number,
+      maxCpu?: number,
+      minMemoryGiB?: number,
+      maxMemoryGiB?: number,
+      minDiskGiB?: number,
+      maxDiskGiB?: number,
+      lastEventAfter?: Date,
+      lastEventBefore?: Date,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PaginatedSandboxes>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.listSandboxes(
@@ -1248,6 +1338,17 @@ export const SandboxApiFp = function (configuration?: Configuration) {
         limit,
         labels,
         includeErroredDeleted,
+        states,
+        snapshots,
+        regions,
+        minCpu,
+        maxCpu,
+        minMemoryGiB,
+        maxMemoryGiB,
+        minDiskGiB,
+        maxDiskGiB,
+        lastEventAfter,
+        lastEventBefore,
         options,
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
@@ -1693,7 +1794,18 @@ export const SandboxApiFactory = function (configuration?: Configuration, basePa
      * @param {number} [page] Page number
      * @param {number} [limit] Number of items per page
      * @param {string} [labels] JSON encoded labels to filter by
-     * @param {boolean} [includeErroredDeleted] Include errored sandboxes with deleted desired state
+     * @param {boolean} [includeErroredDeleted] Include items that are errored with deleted desired state
+     * @param {Array<ListSandboxesStatesEnum>} [states] List of states to filter by
+     * @param {Array<string>} [snapshots] List of snapshot names to filter by
+     * @param {Array<string>} [regions] List of regions to filter by
+     * @param {number} [minCpu] Minimum CPU
+     * @param {number} [maxCpu] Maximum CPU
+     * @param {number} [minMemoryGiB] Minimum memory in GiB
+     * @param {number} [maxMemoryGiB] Maximum memory in GiB
+     * @param {number} [minDiskGiB] Minimum disk space in GiB
+     * @param {number} [maxDiskGiB] Maximum disk space in GiB
+     * @param {Date} [lastEventAfter] Include items with last event after this timestamp
+     * @param {Date} [lastEventBefore] Include items with last event before this timestamp
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
@@ -1703,10 +1815,39 @@ export const SandboxApiFactory = function (configuration?: Configuration, basePa
       limit?: number,
       labels?: string,
       includeErroredDeleted?: boolean,
+      states?: Array<ListSandboxesStatesEnum>,
+      snapshots?: Array<string>,
+      regions?: Array<string>,
+      minCpu?: number,
+      maxCpu?: number,
+      minMemoryGiB?: number,
+      maxMemoryGiB?: number,
+      minDiskGiB?: number,
+      maxDiskGiB?: number,
+      lastEventAfter?: Date,
+      lastEventBefore?: Date,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<PaginatedSandboxes> {
       return localVarFp
-        .listSandboxes(xDaytonaOrganizationID, page, limit, labels, includeErroredDeleted, options)
+        .listSandboxes(
+          xDaytonaOrganizationID,
+          page,
+          limit,
+          labels,
+          includeErroredDeleted,
+          states,
+          snapshots,
+          regions,
+          minCpu,
+          maxCpu,
+          minMemoryGiB,
+          maxMemoryGiB,
+          minDiskGiB,
+          maxDiskGiB,
+          lastEventAfter,
+          lastEventBefore,
+          options,
+        )
         .then((request) => request(axios, basePath))
     },
     /**
@@ -2035,7 +2176,18 @@ export class SandboxApi extends BaseAPI {
    * @param {number} [page] Page number
    * @param {number} [limit] Number of items per page
    * @param {string} [labels] JSON encoded labels to filter by
-   * @param {boolean} [includeErroredDeleted] Include errored sandboxes with deleted desired state
+   * @param {boolean} [includeErroredDeleted] Include items that are errored with deleted desired state
+   * @param {Array<ListSandboxesStatesEnum>} [states] List of states to filter by
+   * @param {Array<string>} [snapshots] List of snapshot names to filter by
+   * @param {Array<string>} [regions] List of regions to filter by
+   * @param {number} [minCpu] Minimum CPU
+   * @param {number} [maxCpu] Maximum CPU
+   * @param {number} [minMemoryGiB] Minimum memory in GiB
+   * @param {number} [maxMemoryGiB] Maximum memory in GiB
+   * @param {number} [minDiskGiB] Minimum disk space in GiB
+   * @param {number} [maxDiskGiB] Maximum disk space in GiB
+   * @param {Date} [lastEventAfter] Include items with last event after this timestamp
+   * @param {Date} [lastEventBefore] Include items with last event before this timestamp
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof SandboxApi
@@ -2046,10 +2198,39 @@ export class SandboxApi extends BaseAPI {
     limit?: number,
     labels?: string,
     includeErroredDeleted?: boolean,
+    states?: Array<ListSandboxesStatesEnum>,
+    snapshots?: Array<string>,
+    regions?: Array<string>,
+    minCpu?: number,
+    maxCpu?: number,
+    minMemoryGiB?: number,
+    maxMemoryGiB?: number,
+    minDiskGiB?: number,
+    maxDiskGiB?: number,
+    lastEventAfter?: Date,
+    lastEventBefore?: Date,
     options?: RawAxiosRequestConfig,
   ) {
     return SandboxApiFp(this.configuration)
-      .listSandboxes(xDaytonaOrganizationID, page, limit, labels, includeErroredDeleted, options)
+      .listSandboxes(
+        xDaytonaOrganizationID,
+        page,
+        limit,
+        labels,
+        includeErroredDeleted,
+        states,
+        snapshots,
+        regions,
+        minCpu,
+        maxCpu,
+        minMemoryGiB,
+        maxMemoryGiB,
+        minDiskGiB,
+        maxDiskGiB,
+        lastEventAfter,
+        lastEventBefore,
+        options,
+      )
       .then((request) => request(this.axios, this.basePath))
   }
 
@@ -2224,3 +2405,25 @@ export class SandboxApi extends BaseAPI {
       .then((request) => request(this.axios, this.basePath))
   }
 }
+
+/**
+ * @export
+ */
+export const ListSandboxesStatesEnum = {
+  CREATING: 'creating',
+  RESTORING: 'restoring',
+  DESTROYING: 'destroying',
+  STARTED: 'started',
+  STOPPED: 'stopped',
+  STARTING: 'starting',
+  STOPPING: 'stopping',
+  ERROR: 'error',
+  BUILD_FAILED: 'build_failed',
+  PENDING_BUILD: 'pending_build',
+  BUILDING_SNAPSHOT: 'building_snapshot',
+  UNKNOWN: 'unknown',
+  PULLING_SNAPSHOT: 'pulling_snapshot',
+  ARCHIVED: 'archived',
+  ARCHIVING: 'archiving',
+} as const
+export type ListSandboxesStatesEnum = (typeof ListSandboxesStatesEnum)[keyof typeof ListSandboxesStatesEnum]

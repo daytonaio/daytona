@@ -4,9 +4,13 @@
  */
 
 import { ApiProperty, ApiSchema } from '@nestjs/swagger'
-import { IsBoolean, IsInt, IsOptional, IsString } from 'class-validator'
+import { IsBoolean, IsInt, IsOptional, IsString, IsArray, IsEnum, IsDate } from 'class-validator'
 import { Type } from 'class-transformer'
 import { Min, Max } from 'class-validator'
+import { SandboxState } from '../enums/sandbox-state.enum'
+import { ToArray } from '../../common/decorators/to-array.decorator'
+
+const VALID_QUERY_STATES = Object.values(SandboxState).filter((state) => state !== SandboxState.DESTROYED)
 
 @ApiSchema({ name: 'ListSandboxesQuery' })
 export class ListSandboxesQueryDto {
@@ -53,7 +57,7 @@ export class ListSandboxesQueryDto {
 
   @ApiProperty({
     name: 'includeErroredDeleted',
-    description: 'Include errored sandboxes with deleted desired state',
+    description: 'Include items that are errored with deleted desired state',
     required: false,
     type: Boolean,
   })
@@ -61,4 +65,148 @@ export class ListSandboxesQueryDto {
   @Type(() => Boolean)
   @IsBoolean()
   includeErroredDeleted?: boolean
+
+  @ApiProperty({
+    name: 'states',
+    description: 'List of states to filter by',
+    required: false,
+    enum: VALID_QUERY_STATES,
+    isArray: true,
+  })
+  @IsOptional()
+  @ToArray()
+  @IsArray()
+  @IsEnum(VALID_QUERY_STATES, {
+    each: true,
+    message: `each value must be one of the following values: ${VALID_QUERY_STATES.join(', ')}`,
+  })
+  states?: SandboxState[]
+
+  @ApiProperty({
+    name: 'snapshots',
+    description: 'List of snapshot names to filter by',
+    required: false,
+    type: [String],
+  })
+  @IsOptional()
+  @ToArray()
+  @IsArray()
+  @IsString({ each: true })
+  snapshots?: string[]
+
+  @ApiProperty({
+    name: 'regions',
+    description: 'List of regions to filter by',
+    required: false,
+    type: [String],
+  })
+  @IsOptional()
+  @ToArray()
+  @IsArray()
+  @IsString({ each: true })
+  regions?: string[]
+
+  @ApiProperty({
+    name: 'minCpu',
+    description: 'Minimum CPU',
+    required: false,
+    type: Number,
+    minimum: 1,
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  minCpu?: number
+
+  @ApiProperty({
+    name: 'maxCpu',
+    description: 'Maximum CPU',
+    required: false,
+    type: Number,
+    minimum: 1,
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  maxCpu?: number
+
+  @ApiProperty({
+    name: 'minMemoryGiB',
+    description: 'Minimum memory in GiB',
+    required: false,
+    type: Number,
+    minimum: 1,
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  minMemoryGiB?: number
+
+  @ApiProperty({
+    name: 'maxMemoryGiB',
+    description: 'Maximum memory in GiB',
+    required: false,
+    type: Number,
+    minimum: 1,
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  maxMemoryGiB?: number
+
+  @ApiProperty({
+    name: 'minDiskGiB',
+    description: 'Minimum disk space in GiB',
+    required: false,
+    type: Number,
+    minimum: 1,
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  minDiskGiB?: number
+
+  @ApiProperty({
+    name: 'maxDiskGiB',
+    description: 'Maximum disk space in GiB',
+    required: false,
+    type: Number,
+    minimum: 1,
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  maxDiskGiB?: number
+
+  @ApiProperty({
+    name: 'lastEventAfter',
+    description: 'Include items with last event after this timestamp',
+    required: false,
+    type: String,
+    format: 'date-time',
+    example: '2024-01-01T00:00:00Z',
+  })
+  @IsOptional()
+  @Type(() => Date)
+  @IsDate()
+  lastEventAfter?: Date
+
+  @ApiProperty({
+    name: 'lastEventBefore',
+    description: 'Include items with last event before this timestamp',
+    required: false,
+    type: String,
+    format: 'date-time',
+    example: '2024-12-31T23:59:59Z',
+  })
+  @IsOptional()
+  @Type(() => Date)
+  @IsDate()
+  lastEventBefore?: Date
 }

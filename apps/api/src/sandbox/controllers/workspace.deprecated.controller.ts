@@ -64,6 +64,7 @@ import { Audit, MASKED_AUDIT_VALUE, TypedRequest } from '../../audit/decorators/
 import { AuditAction } from '../../audit/enums/audit-action.enum'
 import { AuditTarget } from '../../audit/enums/audit-target.enum'
 import { PaginatedWorkspacesDto } from '../dto/paginated-workspaces.deprecated.dto'
+import { ListWorkspacesQueryDto } from '../dto/list-workspaces-query.deprecated.dto'
 
 @ApiTags('workspace')
 @Controller('workspace')
@@ -92,33 +93,43 @@ export class WorkspaceController {
     description: 'Paginated list of all workspaces',
     type: PaginatedWorkspacesDto,
   })
-  @ApiQuery({
-    name: 'page',
-    required: false,
-    type: Number,
-    description: 'Page number',
-  })
-  @ApiQuery({
-    name: 'limit',
-    required: false,
-    type: Number,
-    description: 'Number of items per page',
-  })
-  @ApiQuery({
-    name: 'labels',
-    type: String,
-    required: false,
-    example: '{"label1": "value1", "label2": "value2"}',
-    description: 'JSON encoded labels to filter by',
-  })
   async listWorkspaces(
     @AuthContext() authContext: OrganizationAuthContext,
-    @Query('page') page = 1,
-    @Query('limit') limit = 10,
-    @Query('labels') labelsQuery?: string,
+    @Query() queryParams: ListWorkspacesQueryDto,
   ): Promise<PaginatedWorkspacesDto> {
-    const labels = labelsQuery ? JSON.parse(labelsQuery) : {}
-    const result = await this.workspaceService.findAll(authContext.organizationId, labels, false, page, limit)
+    const {
+      page,
+      limit,
+      labels,
+      includeErroredDeleted: includeErroredDestroyed,
+      states,
+      snapshots,
+      regions,
+      minCpu,
+      maxCpu,
+      minMemoryGiB,
+      maxMemoryGiB,
+      minDiskGiB,
+      maxDiskGiB,
+      lastEventAfter,
+      lastEventBefore,
+    } = queryParams
+
+    const result = await this.workspaceService.findAll(authContext.organizationId, page, limit, {
+      labels: labels ? JSON.parse(labels) : {},
+      includeErroredDestroyed,
+      states,
+      snapshots,
+      regions,
+      minCpu,
+      maxCpu,
+      minMemoryGiB,
+      maxMemoryGiB,
+      minDiskGiB,
+      maxDiskGiB,
+      lastEventAfter,
+      lastEventBefore,
+    })
 
     const runnerIds = new Set(result.items.map((s) => s.runnerId))
     const runners = await this.runnerService.findByIds(Array.from(runnerIds))

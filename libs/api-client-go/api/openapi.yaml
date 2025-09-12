@@ -1182,13 +1182,133 @@ paths:
             example: '{"label1": "value1", "label2": "value2"}'
             type: string
           style: form
-        - description: Include errored sandboxes with deleted desired state
+        - description: Include items that are errored with deleted desired state
           explode: true
           in: query
           name: includeErroredDeleted
           required: false
           schema:
             type: boolean
+          style: form
+        - description: List of states to filter by
+          explode: true
+          in: query
+          name: states
+          required: false
+          schema:
+            items:
+              enum:
+                - creating
+                - restoring
+                - destroying
+                - started
+                - stopped
+                - starting
+                - stopping
+                - error
+                - build_failed
+                - pending_build
+                - building_snapshot
+                - unknown
+                - pulling_snapshot
+                - archived
+                - archiving
+              type: string
+            type: array
+          style: form
+        - description: List of snapshot names to filter by
+          explode: true
+          in: query
+          name: snapshots
+          required: false
+          schema:
+            items:
+              type: string
+            type: array
+          style: form
+        - description: List of regions to filter by
+          explode: true
+          in: query
+          name: regions
+          required: false
+          schema:
+            items:
+              type: string
+            type: array
+          style: form
+        - description: Minimum CPU
+          explode: true
+          in: query
+          name: minCpu
+          required: false
+          schema:
+            minimum: 1
+            type: number
+          style: form
+        - description: Maximum CPU
+          explode: true
+          in: query
+          name: maxCpu
+          required: false
+          schema:
+            minimum: 1
+            type: number
+          style: form
+        - description: Minimum memory in GiB
+          explode: true
+          in: query
+          name: minMemoryGiB
+          required: false
+          schema:
+            minimum: 1
+            type: number
+          style: form
+        - description: Maximum memory in GiB
+          explode: true
+          in: query
+          name: maxMemoryGiB
+          required: false
+          schema:
+            minimum: 1
+            type: number
+          style: form
+        - description: Minimum disk space in GiB
+          explode: true
+          in: query
+          name: minDiskGiB
+          required: false
+          schema:
+            minimum: 1
+            type: number
+          style: form
+        - description: Maximum disk space in GiB
+          explode: true
+          in: query
+          name: maxDiskGiB
+          required: false
+          schema:
+            minimum: 1
+            type: number
+          style: form
+        - description: Include items with last event after this timestamp
+          explode: true
+          in: query
+          name: lastEventAfter
+          required: false
+          schema:
+            example: 2024-01-01T00:00:00Z
+            format: date-time
+            type: string
+          style: form
+        - description: Include items with last event before this timestamp
+          explode: true
+          in: query
+          name: lastEventBefore
+          required: false
+          schema:
+            example: 2024-12-31T23:59:59Z
+            format: date-time
+            type: string
           style: form
       responses:
         '200':
@@ -4976,6 +5096,27 @@ paths:
           schema:
             type: string
           style: simple
+        - description: Page number
+          explode: true
+          in: query
+          name: page
+          required: false
+          schema:
+            default: 1
+            minimum: 1
+            type: number
+          style: form
+        - description: Number of items per page
+          explode: true
+          in: query
+          name: limit
+          required: false
+          schema:
+            default: 10
+            maximum: 100
+            minimum: 1
+            type: number
+          style: form
         - description: JSON encoded labels to filter by
           explode: true
           in: query
@@ -4985,21 +5126,133 @@ paths:
             example: '{"label1": "value1", "label2": "value2"}'
             type: string
           style: form
-        - description: Number of items per page
+        - description: Include items that are errored with deleted desired state
           explode: true
           in: query
-          name: limit
+          name: includeErroredDeleted
           required: false
           schema:
+            type: boolean
+          style: form
+        - description: List of states to filter by
+          explode: true
+          in: query
+          name: states
+          required: false
+          schema:
+            items:
+              enum:
+                - creating
+                - restoring
+                - destroying
+                - started
+                - stopped
+                - starting
+                - stopping
+                - error
+                - build_failed
+                - pending_build
+                - building_snapshot
+                - unknown
+                - pulling_snapshot
+                - archived
+                - archiving
+              type: string
+            type: array
+          style: form
+        - description: List of snapshot names to filter by
+          explode: true
+          in: query
+          name: snapshots
+          required: false
+          schema:
+            items:
+              type: string
+            type: array
+          style: form
+        - description: List of regions to filter by
+          explode: true
+          in: query
+          name: regions
+          required: false
+          schema:
+            items:
+              type: string
+            type: array
+          style: form
+        - description: Minimum CPU
+          explode: true
+          in: query
+          name: minCpu
+          required: false
+          schema:
+            minimum: 1
             type: number
           style: form
-        - description: Page number
+        - description: Maximum CPU
           explode: true
           in: query
-          name: page
+          name: maxCpu
           required: false
           schema:
+            minimum: 1
             type: number
+          style: form
+        - description: Minimum memory in GiB
+          explode: true
+          in: query
+          name: minMemoryGiB
+          required: false
+          schema:
+            minimum: 1
+            type: number
+          style: form
+        - description: Maximum memory in GiB
+          explode: true
+          in: query
+          name: maxMemoryGiB
+          required: false
+          schema:
+            minimum: 1
+            type: number
+          style: form
+        - description: Minimum disk space in GiB
+          explode: true
+          in: query
+          name: minDiskGiB
+          required: false
+          schema:
+            minimum: 1
+            type: number
+          style: form
+        - description: Maximum disk space in GiB
+          explode: true
+          in: query
+          name: maxDiskGiB
+          required: false
+          schema:
+            minimum: 1
+            type: number
+          style: form
+        - description: Include items with last event after this timestamp
+          explode: true
+          in: query
+          name: lastEventAfter
+          required: false
+          schema:
+            example: 2024-01-01T00:00:00Z
+            format: date-time
+            type: string
+          style: form
+        - description: Include items with last event before this timestamp
+          explode: true
+          in: query
+          name: lastEventBefore
+          required: false
+          schema:
+            example: 2024-12-31T23:59:59Z
+            format: date-time
+            type: string
           style: form
       responses:
         '200':

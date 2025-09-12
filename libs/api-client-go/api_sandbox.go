@@ -17,7 +17,9 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"reflect"
 	"strings"
+	"time"
 )
 
 type SandboxAPI interface {
@@ -1162,6 +1164,17 @@ type SandboxAPIListSandboxesRequest struct {
 	limit                  *float32
 	labels                 *string
 	includeErroredDeleted  *bool
+	states                 *[]string
+	snapshots              *[]string
+	regions                *[]string
+	minCpu                 *float32
+	maxCpu                 *float32
+	minMemoryGiB           *float32
+	maxMemoryGiB           *float32
+	minDiskGiB             *float32
+	maxDiskGiB             *float32
+	lastEventAfter         *time.Time
+	lastEventBefore        *time.Time
 }
 
 // Use with JWT to specify the organization ID
@@ -1188,9 +1201,75 @@ func (r SandboxAPIListSandboxesRequest) Labels(labels string) SandboxAPIListSand
 	return r
 }
 
-// Include errored sandboxes with deleted desired state
+// Include items that are errored with deleted desired state
 func (r SandboxAPIListSandboxesRequest) IncludeErroredDeleted(includeErroredDeleted bool) SandboxAPIListSandboxesRequest {
 	r.includeErroredDeleted = &includeErroredDeleted
+	return r
+}
+
+// List of states to filter by
+func (r SandboxAPIListSandboxesRequest) States(states []string) SandboxAPIListSandboxesRequest {
+	r.states = &states
+	return r
+}
+
+// List of snapshot names to filter by
+func (r SandboxAPIListSandboxesRequest) Snapshots(snapshots []string) SandboxAPIListSandboxesRequest {
+	r.snapshots = &snapshots
+	return r
+}
+
+// List of regions to filter by
+func (r SandboxAPIListSandboxesRequest) Regions(regions []string) SandboxAPIListSandboxesRequest {
+	r.regions = &regions
+	return r
+}
+
+// Minimum CPU
+func (r SandboxAPIListSandboxesRequest) MinCpu(minCpu float32) SandboxAPIListSandboxesRequest {
+	r.minCpu = &minCpu
+	return r
+}
+
+// Maximum CPU
+func (r SandboxAPIListSandboxesRequest) MaxCpu(maxCpu float32) SandboxAPIListSandboxesRequest {
+	r.maxCpu = &maxCpu
+	return r
+}
+
+// Minimum memory in GiB
+func (r SandboxAPIListSandboxesRequest) MinMemoryGiB(minMemoryGiB float32) SandboxAPIListSandboxesRequest {
+	r.minMemoryGiB = &minMemoryGiB
+	return r
+}
+
+// Maximum memory in GiB
+func (r SandboxAPIListSandboxesRequest) MaxMemoryGiB(maxMemoryGiB float32) SandboxAPIListSandboxesRequest {
+	r.maxMemoryGiB = &maxMemoryGiB
+	return r
+}
+
+// Minimum disk space in GiB
+func (r SandboxAPIListSandboxesRequest) MinDiskGiB(minDiskGiB float32) SandboxAPIListSandboxesRequest {
+	r.minDiskGiB = &minDiskGiB
+	return r
+}
+
+// Maximum disk space in GiB
+func (r SandboxAPIListSandboxesRequest) MaxDiskGiB(maxDiskGiB float32) SandboxAPIListSandboxesRequest {
+	r.maxDiskGiB = &maxDiskGiB
+	return r
+}
+
+// Include items with last event after this timestamp
+func (r SandboxAPIListSandboxesRequest) LastEventAfter(lastEventAfter time.Time) SandboxAPIListSandboxesRequest {
+	r.lastEventAfter = &lastEventAfter
+	return r
+}
+
+// Include items with last event before this timestamp
+func (r SandboxAPIListSandboxesRequest) LastEventBefore(lastEventBefore time.Time) SandboxAPIListSandboxesRequest {
+	r.lastEventBefore = &lastEventBefore
 	return r
 }
 
@@ -1250,6 +1329,63 @@ func (a *SandboxAPIService) ListSandboxesExecute(r SandboxAPIListSandboxesReques
 	}
 	if r.includeErroredDeleted != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "includeErroredDeleted", r.includeErroredDeleted, "form", "")
+	}
+	if r.states != nil {
+		t := *r.states
+		if reflect.TypeOf(t).Kind() == reflect.Slice {
+			s := reflect.ValueOf(t)
+			for i := 0; i < s.Len(); i++ {
+				parameterAddToHeaderOrQuery(localVarQueryParams, "states", s.Index(i).Interface(), "form", "multi")
+			}
+		} else {
+			parameterAddToHeaderOrQuery(localVarQueryParams, "states", t, "form", "multi")
+		}
+	}
+	if r.snapshots != nil {
+		t := *r.snapshots
+		if reflect.TypeOf(t).Kind() == reflect.Slice {
+			s := reflect.ValueOf(t)
+			for i := 0; i < s.Len(); i++ {
+				parameterAddToHeaderOrQuery(localVarQueryParams, "snapshots", s.Index(i).Interface(), "form", "multi")
+			}
+		} else {
+			parameterAddToHeaderOrQuery(localVarQueryParams, "snapshots", t, "form", "multi")
+		}
+	}
+	if r.regions != nil {
+		t := *r.regions
+		if reflect.TypeOf(t).Kind() == reflect.Slice {
+			s := reflect.ValueOf(t)
+			for i := 0; i < s.Len(); i++ {
+				parameterAddToHeaderOrQuery(localVarQueryParams, "regions", s.Index(i).Interface(), "form", "multi")
+			}
+		} else {
+			parameterAddToHeaderOrQuery(localVarQueryParams, "regions", t, "form", "multi")
+		}
+	}
+	if r.minCpu != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "minCpu", r.minCpu, "form", "")
+	}
+	if r.maxCpu != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "maxCpu", r.maxCpu, "form", "")
+	}
+	if r.minMemoryGiB != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "minMemoryGiB", r.minMemoryGiB, "form", "")
+	}
+	if r.maxMemoryGiB != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "maxMemoryGiB", r.maxMemoryGiB, "form", "")
+	}
+	if r.minDiskGiB != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "minDiskGiB", r.minDiskGiB, "form", "")
+	}
+	if r.maxDiskGiB != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "maxDiskGiB", r.maxDiskGiB, "form", "")
+	}
+	if r.lastEventAfter != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "lastEventAfter", r.lastEventAfter, "form", "")
+	}
+	if r.lastEventBefore != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "lastEventBefore", r.lastEventBefore, "form", "")
 	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}

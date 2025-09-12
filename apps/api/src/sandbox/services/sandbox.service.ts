@@ -5,7 +5,17 @@
 
 import { ForbiddenException, Injectable, Logger, NotFoundException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { Not, Repository, LessThan, In, JsonContains, FindOptionsWhere } from 'typeorm'
+import {
+  Not,
+  Repository,
+  LessThan,
+  In,
+  JsonContains,
+  FindOptionsWhere,
+  MoreThanOrEqual,
+  LessThanOrEqual,
+  Between,
+} from 'typeorm'
 import { Sandbox } from '../entities/sandbox.entity'
 import { CreateSandboxDto } from '../dto/create-sandbox.dto'
 import { SandboxState } from '../enums/sandbox-state.enum'
@@ -550,30 +560,96 @@ export class SandboxService {
   }
 
   // TODO: sort params
-  // TODO: filter params
   async findAll(
     organizationId: string,
-    labels?: { [key: string]: string },
-    includeErroredDestroyed?: boolean,
     page = 1,
     limit = 10,
+    filters?: {
+      labels?: { [key: string]: string }
+      includeErroredDestroyed?: boolean
+      states?: SandboxState[]
+      snapshots?: string[]
+      regions?: string[]
+      minCpu?: number
+      maxCpu?: number
+      minMemoryGiB?: number
+      maxMemoryGiB?: number
+      minDiskGiB?: number
+      maxDiskGiB?: number
+      lastEventAfter?: Date
+      lastEventBefore?: Date
+    },
   ): Promise<PaginatedList<Sandbox>> {
     const pageNum = Number(page)
     const limitNum = Number(limit)
 
+    const {
+      labels,
+      includeErroredDestroyed,
+      states,
+      snapshots,
+      regions,
+      minCpu,
+      maxCpu,
+      minMemoryGiB,
+      maxMemoryGiB,
+      minDiskGiB,
+      maxDiskGiB,
+      lastEventAfter,
+      lastEventBefore,
+    } = filters
+
     const baseFindOptions: FindOptionsWhere<Sandbox> = {
       organizationId,
       ...(labels ? { labels: JsonContains(labels) } : {}),
+      ...(snapshots ? { snapshot: In(snapshots) } : {}),
+      ...(regions ? { region: In(regions) } : {}),
     }
+
+    if (minCpu !== undefined && maxCpu !== undefined) {
+      baseFindOptions.cpu = Between(minCpu, maxCpu)
+    } else if (minCpu !== undefined) {
+      baseFindOptions.cpu = MoreThanOrEqual(minCpu)
+    } else if (maxCpu !== undefined) {
+      baseFindOptions.cpu = LessThanOrEqual(maxCpu)
+    }
+
+    if (minMemoryGiB !== undefined && maxMemoryGiB !== undefined) {
+      baseFindOptions.mem = Between(minMemoryGiB, maxMemoryGiB)
+    } else if (minMemoryGiB !== undefined) {
+      baseFindOptions.mem = MoreThanOrEqual(minMemoryGiB)
+    } else if (maxMemoryGiB !== undefined) {
+      baseFindOptions.mem = LessThanOrEqual(maxMemoryGiB)
+    }
+
+    if (minDiskGiB !== undefined && maxDiskGiB !== undefined) {
+      baseFindOptions.disk = Between(minDiskGiB, maxDiskGiB)
+    } else if (minDiskGiB !== undefined) {
+      baseFindOptions.disk = MoreThanOrEqual(minDiskGiB)
+    } else if (maxDiskGiB !== undefined) {
+      baseFindOptions.disk = LessThanOrEqual(maxDiskGiB)
+    }
+
+    if (lastEventAfter && lastEventBefore) {
+      baseFindOptions.lastActivityAt = Between(lastEventAfter, lastEventBefore)
+    } else if (lastEventAfter) {
+      baseFindOptions.lastActivityAt = MoreThanOrEqual(lastEventAfter)
+    } else if (lastEventBefore) {
+      baseFindOptions.lastActivityAt = LessThanOrEqual(lastEventBefore)
+    }
+
+    const filteredStates = (states || Object.values(SandboxState)).filter((state) => state !== SandboxState.DESTROYED)
+    const errorStates = [SandboxState.ERROR, SandboxState.BUILD_FAILED]
+    const filteredWithoutErrorStates = filteredStates.filter((state) => !errorStates.includes(state))
 
     const where: FindOptionsWhere<Sandbox>[] = [
       {
         ...baseFindOptions,
-        state: Not(In([SandboxState.DESTROYED, SandboxState.ERROR, SandboxState.BUILD_FAILED])),
+        state: In(filteredWithoutErrorStates),
       },
       {
         ...baseFindOptions,
-        state: In([SandboxState.ERROR, SandboxState.BUILD_FAILED]),
+        state: In(errorStates),
         ...(includeErroredDestroyed ? {} : { desiredState: Not(SandboxDesiredState.DESTROYED) }),
       },
     ]

@@ -97,16 +97,39 @@ export class SandboxController {
     @AuthContext() authContext: OrganizationAuthContext,
     @Query() queryParams: ListSandboxesQueryDto,
   ): Promise<PaginatedSandboxesDto> {
-    const { page, limit, labels: labelsQuery, includeErroredDeleted } = queryParams
-    const labels = labelsQuery ? JSON.parse(labelsQuery) : {}
-
-    const result = await this.sandboxService.findAll(
-      authContext.organizationId,
-      labels,
-      includeErroredDeleted,
+    const {
       page,
       limit,
-    )
+      labels,
+      includeErroredDeleted: includeErroredDestroyed,
+      states,
+      snapshots,
+      regions,
+      minCpu,
+      maxCpu,
+      minMemoryGiB,
+      maxMemoryGiB,
+      minDiskGiB,
+      maxDiskGiB,
+      lastEventAfter,
+      lastEventBefore,
+    } = queryParams
+
+    const result = await this.sandboxService.findAll(authContext.organizationId, page, limit, {
+      labels: labels ? JSON.parse(labels) : {},
+      includeErroredDestroyed,
+      states,
+      snapshots,
+      regions,
+      minCpu,
+      maxCpu,
+      minMemoryGiB,
+      maxMemoryGiB,
+      minDiskGiB,
+      maxDiskGiB,
+      lastEventAfter,
+      lastEventBefore,
+    })
 
     const runnerIds = new Set(result.items.map((s) => s.runnerId))
     const runners = await this.runnerService.findByIds(Array.from(runnerIds))

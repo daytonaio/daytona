@@ -58,7 +58,11 @@ async function bootstrap() {
   app.useGlobalFilters(new NotFoundExceptionFilter())
   app.useGlobalInterceptors(new MetricsInterceptor())
   app.useGlobalInterceptors(app.get(AuditInterceptor))
-  app.useGlobalPipes(new ValidationPipe())
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+    }),
+  )
 
   const eventEmitter = app.get(EventEmitter2)
   eventEmitter.setMaxListeners(100)

@@ -17,7 +17,9 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"reflect"
 	"strings"
+	"time"
 )
 
 type WorkspaceAPI interface {
@@ -1062,9 +1064,21 @@ type WorkspaceAPIListWorkspacesDeprecatedRequest struct {
 	ctx                    context.Context
 	ApiService             WorkspaceAPI
 	xDaytonaOrganizationID *string
-	labels                 *string
-	limit                  *float32
 	page                   *float32
+	limit                  *float32
+	labels                 *string
+	includeErroredDeleted  *bool
+	states                 *[]string
+	snapshots              *[]string
+	regions                *[]string
+	minCpu                 *float32
+	maxCpu                 *float32
+	minMemoryGiB           *float32
+	maxMemoryGiB           *float32
+	minDiskGiB             *float32
+	maxDiskGiB             *float32
+	lastEventAfter         *time.Time
+	lastEventBefore        *time.Time
 }
 
 // Use with JWT to specify the organization ID
@@ -1073,9 +1087,9 @@ func (r WorkspaceAPIListWorkspacesDeprecatedRequest) XDaytonaOrganizationID(xDay
 	return r
 }
 
-// JSON encoded labels to filter by
-func (r WorkspaceAPIListWorkspacesDeprecatedRequest) Labels(labels string) WorkspaceAPIListWorkspacesDeprecatedRequest {
-	r.labels = &labels
+// Page number
+func (r WorkspaceAPIListWorkspacesDeprecatedRequest) Page(page float32) WorkspaceAPIListWorkspacesDeprecatedRequest {
+	r.page = &page
 	return r
 }
 
@@ -1085,9 +1099,81 @@ func (r WorkspaceAPIListWorkspacesDeprecatedRequest) Limit(limit float32) Worksp
 	return r
 }
 
-// Page number
-func (r WorkspaceAPIListWorkspacesDeprecatedRequest) Page(page float32) WorkspaceAPIListWorkspacesDeprecatedRequest {
-	r.page = &page
+// JSON encoded labels to filter by
+func (r WorkspaceAPIListWorkspacesDeprecatedRequest) Labels(labels string) WorkspaceAPIListWorkspacesDeprecatedRequest {
+	r.labels = &labels
+	return r
+}
+
+// Include items that are errored with deleted desired state
+func (r WorkspaceAPIListWorkspacesDeprecatedRequest) IncludeErroredDeleted(includeErroredDeleted bool) WorkspaceAPIListWorkspacesDeprecatedRequest {
+	r.includeErroredDeleted = &includeErroredDeleted
+	return r
+}
+
+// List of states to filter by
+func (r WorkspaceAPIListWorkspacesDeprecatedRequest) States(states []string) WorkspaceAPIListWorkspacesDeprecatedRequest {
+	r.states = &states
+	return r
+}
+
+// List of snapshot names to filter by
+func (r WorkspaceAPIListWorkspacesDeprecatedRequest) Snapshots(snapshots []string) WorkspaceAPIListWorkspacesDeprecatedRequest {
+	r.snapshots = &snapshots
+	return r
+}
+
+// List of regions to filter by
+func (r WorkspaceAPIListWorkspacesDeprecatedRequest) Regions(regions []string) WorkspaceAPIListWorkspacesDeprecatedRequest {
+	r.regions = &regions
+	return r
+}
+
+// Minimum CPU
+func (r WorkspaceAPIListWorkspacesDeprecatedRequest) MinCpu(minCpu float32) WorkspaceAPIListWorkspacesDeprecatedRequest {
+	r.minCpu = &minCpu
+	return r
+}
+
+// Maximum CPU
+func (r WorkspaceAPIListWorkspacesDeprecatedRequest) MaxCpu(maxCpu float32) WorkspaceAPIListWorkspacesDeprecatedRequest {
+	r.maxCpu = &maxCpu
+	return r
+}
+
+// Minimum memory in GiB
+func (r WorkspaceAPIListWorkspacesDeprecatedRequest) MinMemoryGiB(minMemoryGiB float32) WorkspaceAPIListWorkspacesDeprecatedRequest {
+	r.minMemoryGiB = &minMemoryGiB
+	return r
+}
+
+// Maximum memory in GiB
+func (r WorkspaceAPIListWorkspacesDeprecatedRequest) MaxMemoryGiB(maxMemoryGiB float32) WorkspaceAPIListWorkspacesDeprecatedRequest {
+	r.maxMemoryGiB = &maxMemoryGiB
+	return r
+}
+
+// Minimum disk space in GiB
+func (r WorkspaceAPIListWorkspacesDeprecatedRequest) MinDiskGiB(minDiskGiB float32) WorkspaceAPIListWorkspacesDeprecatedRequest {
+	r.minDiskGiB = &minDiskGiB
+	return r
+}
+
+// Maximum disk space in GiB
+func (r WorkspaceAPIListWorkspacesDeprecatedRequest) MaxDiskGiB(maxDiskGiB float32) WorkspaceAPIListWorkspacesDeprecatedRequest {
+	r.maxDiskGiB = &maxDiskGiB
+	return r
+}
+
+// Include items with last event after this timestamp
+func (r WorkspaceAPIListWorkspacesDeprecatedRequest) LastEventAfter(lastEventAfter time.Time) WorkspaceAPIListWorkspacesDeprecatedRequest {
+	r.lastEventAfter = &lastEventAfter
+	return r
+}
+
+// Include items with last event before this timestamp
+func (r WorkspaceAPIListWorkspacesDeprecatedRequest) LastEventBefore(lastEventBefore time.Time) WorkspaceAPIListWorkspacesDeprecatedRequest {
+	r.lastEventBefore = &lastEventBefore
 	return r
 }
 
@@ -1134,14 +1220,80 @@ func (a *WorkspaceAPIService) ListWorkspacesDeprecatedExecute(r WorkspaceAPIList
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
 
-	if r.labels != nil {
-		parameterAddToHeaderOrQuery(localVarQueryParams, "labels", r.labels, "form", "")
+	if r.page != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "page", r.page, "form", "")
+	} else {
+		var defaultValue float32 = 1
+		r.page = &defaultValue
 	}
 	if r.limit != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "limit", r.limit, "form", "")
+	} else {
+		var defaultValue float32 = 10
+		r.limit = &defaultValue
 	}
-	if r.page != nil {
-		parameterAddToHeaderOrQuery(localVarQueryParams, "page", r.page, "form", "")
+	if r.labels != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "labels", r.labels, "form", "")
+	}
+	if r.includeErroredDeleted != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "includeErroredDeleted", r.includeErroredDeleted, "form", "")
+	}
+	if r.states != nil {
+		t := *r.states
+		if reflect.TypeOf(t).Kind() == reflect.Slice {
+			s := reflect.ValueOf(t)
+			for i := 0; i < s.Len(); i++ {
+				parameterAddToHeaderOrQuery(localVarQueryParams, "states", s.Index(i).Interface(), "form", "multi")
+			}
+		} else {
+			parameterAddToHeaderOrQuery(localVarQueryParams, "states", t, "form", "multi")
+		}
+	}
+	if r.snapshots != nil {
+		t := *r.snapshots
+		if reflect.TypeOf(t).Kind() == reflect.Slice {
+			s := reflect.ValueOf(t)
+			for i := 0; i < s.Len(); i++ {
+				parameterAddToHeaderOrQuery(localVarQueryParams, "snapshots", s.Index(i).Interface(), "form", "multi")
+			}
+		} else {
+			parameterAddToHeaderOrQuery(localVarQueryParams, "snapshots", t, "form", "multi")
+		}
+	}
+	if r.regions != nil {
+		t := *r.regions
+		if reflect.TypeOf(t).Kind() == reflect.Slice {
+			s := reflect.ValueOf(t)
+			for i := 0; i < s.Len(); i++ {
+				parameterAddToHeaderOrQuery(localVarQueryParams, "regions", s.Index(i).Interface(), "form", "multi")
+			}
+		} else {
+			parameterAddToHeaderOrQuery(localVarQueryParams, "regions", t, "form", "multi")
+		}
+	}
+	if r.minCpu != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "minCpu", r.minCpu, "form", "")
+	}
+	if r.maxCpu != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "maxCpu", r.maxCpu, "form", "")
+	}
+	if r.minMemoryGiB != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "minMemoryGiB", r.minMemoryGiB, "form", "")
+	}
+	if r.maxMemoryGiB != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "maxMemoryGiB", r.maxMemoryGiB, "form", "")
+	}
+	if r.minDiskGiB != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "minDiskGiB", r.minDiskGiB, "form", "")
+	}
+	if r.maxDiskGiB != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "maxDiskGiB", r.maxDiskGiB, "form", "")
+	}
+	if r.lastEventAfter != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "lastEventAfter", r.lastEventAfter, "form", "")
+	}
+	if r.lastEventBefore != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "lastEventBefore", r.lastEventBefore, "form", "")
 	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
