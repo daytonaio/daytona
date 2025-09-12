@@ -259,7 +259,7 @@ export class RunnerAdapterLegacy implements RunnerAdapter {
     }
 
     if (sourceRegistry) {
-      request.sourceRegistry = {
+      request.registry = {
         project: sourceRegistry.project,
         url: sourceRegistry.url,
         username: sourceRegistry.username,

@@ -1371,11 +1371,11 @@ const docTemplate = `{
                 "destinationRegistry": {
                     "$ref": "#/definitions/RegistryDTO"
                 },
+                "registry": {
+                    "$ref": "#/definitions/RegistryDTO"
+                },
                 "snapshot": {
                     "type": "string"
-                },
-                "sourceRegistry": {
-                    "$ref": "#/definitions/RegistryDTO"
                 }
             }
         },

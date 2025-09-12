@@ -111,10 +111,10 @@ definitions:
     properties:
       destinationRegistry:
         $ref: '#/definitions/RegistryDTO'
+      registry:
+        $ref: '#/definitions/RegistryDTO'
       snapshot:
         type: string
-      sourceRegistry:
-        $ref: '#/definitions/RegistryDTO'
     required:
       - snapshot
     type: object

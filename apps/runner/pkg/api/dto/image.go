@@ -5,7 +5,7 @@ package dto
 
 type PullSnapshotRequestDTO struct {
 	Snapshot            string       `json:"snapshot" validate:"required"`
-	SourceRegistry      *RegistryDTO `json:"sourceRegistry,omitempty"`
+	Registry            *RegistryDTO `json:"registry,omitempty"`
 	DestinationRegistry *RegistryDTO `json:"destinationRegistry,omitempty"`
 } //	@name	PullSnapshotRequestDTO
 

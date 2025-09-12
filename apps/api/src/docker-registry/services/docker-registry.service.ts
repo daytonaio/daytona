@@ -395,8 +395,6 @@ export class DockerRegistryService {
       if (fullPath.startsWith(registryHost + '/')) {
         // Image includes registry hostname, strip it
         const projectAndRepo = fullPath.substring(registryHost.length + 1) // +1 for the slash
-        // For Harbor format like: bbox-stage/backup-sandbox-75148d5a
-        const parts = projectAndRepo.split('/')
         // Use project/repo directly as repoPath
         repoPath = projectAndRepo
       } else {
