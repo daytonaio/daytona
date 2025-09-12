@@ -201,14 +201,14 @@ Mouse operations for computer use functionality.
 
 ```python
 @intercept_errors(message_prefix="Failed to get mouse position: ")
-def get_position() -> MousePosition
+def get_position() -> MousePositionResponse
 ```
 
 Gets the current mouse cursor position.
 
 **Returns**:
 
-- `MousePosition` - Current mouse position with x and y coordinates.
+- `MousePositionResponse` - Current mouse position with x and y coordinates.
   
 
 **Example**:
@@ -222,7 +222,7 @@ print(f"Mouse is at: {position.x}, {position.y}")
 
 ```python
 @intercept_errors(message_prefix="Failed to move mouse: ")
-def move(x: int, y: int) -> MouseMoveResponse
+def move(x: int, y: int) -> MousePositionResponse
 ```
 
 Moves the mouse cursor to the specified coordinates.
@@ -235,7 +235,7 @@ Moves the mouse cursor to the specified coordinates.
 
 **Returns**:
 
-- `MouseMoveResponse` - Move operation result.
+- `MousePositionResponse` - Position after move.
   
 
 **Example**:
@@ -523,7 +523,7 @@ with_cursor = sandbox.computer_use.screenshot.take_full_screen(True)
 ```python
 @intercept_errors(message_prefix="Failed to take region screenshot: ")
 def take_region(region: ScreenshotRegion,
-                show_cursor: bool = False) -> RegionScreenshotResponse
+                show_cursor: bool = False) -> ScreenshotResponse
 ```
 
 Takes a screenshot of a specific region.
@@ -536,7 +536,7 @@ Takes a screenshot of a specific region.
 
 **Returns**:
 
-- `RegionScreenshotResponse` - Screenshot data with base64 encoded image.
+- `ScreenshotResponse` - Screenshot data with base64 encoded image.
   
 
 **Example**:
@@ -552,8 +552,7 @@ print(f"Captured region: {screenshot.region.width}x{screenshot.region.height}")
 ```python
 @intercept_errors(message_prefix="Failed to take compressed screenshot: ")
 def take_compressed(
-    options: Optional[ScreenshotOptions] = None
-) -> CompressedScreenshotResponse
+        options: Optional[ScreenshotOptions] = None) -> ScreenshotResponse
 ```
 
 Takes a compressed screenshot of the entire screen.
@@ -565,7 +564,7 @@ Takes a compressed screenshot of the entire screen.
 
 **Returns**:
 
-- `CompressedScreenshotResponse` - Compressed screenshot data.
+- `ScreenshotResponse` - Compressed screenshot data.
   
 
 **Example**:
@@ -591,9 +590,8 @@ scaled = sandbox.computer_use.screenshot.take_compressed(
 @intercept_errors(
     message_prefix="Failed to take compressed region screenshot: ")
 def take_compressed_region(
-    region: ScreenshotRegion,
-    options: Optional[ScreenshotOptions] = None
-) -> CompressedScreenshotResponse
+        region: ScreenshotRegion,
+        options: Optional[ScreenshotOptions] = None) -> ScreenshotResponse
 ```
 
 Takes a compressed screenshot of a specific region.
@@ -606,7 +604,7 @@ Takes a compressed screenshot of a specific region.
 
 **Returns**:
 
-- `CompressedScreenshotResponse` - Compressed screenshot data.
+- `ScreenshotResponse` - Compressed screenshot data.
   
 
 **Example**:

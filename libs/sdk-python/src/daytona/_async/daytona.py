@@ -5,6 +5,7 @@ import asyncio
 import json
 import time
 import warnings
+from copy import deepcopy
 from importlib.metadata import version
 from typing import Callable, Dict, List, Optional, Union, overload
 
@@ -18,7 +19,6 @@ from daytona_api_client_async import (
     SandboxState,
     SnapshotsApi,
 )
-from daytona_api_client_async import ToolboxApi as ToolboxApi
 from daytona_api_client_async import VolumesApi as VolumesApi
 from environs import Env
 
@@ -77,6 +77,7 @@ class AsyncDaytona:
     _organization_id: Optional[str] = None
     _api_url: str
     _target: Optional[str] = None
+    _api_clients: List[ApiClient] = []
 
     def __init__(self, config: Optional[DaytonaConfig] = None):
         """Initializes Daytona instance with optional configuration.
@@ -159,6 +160,7 @@ class AsyncDaytona:
         # Create API configuration without api_key
         configuration = Configuration(host=self._api_url)
         self._api_client = ApiClient(configuration)
+        self._api_clients.append(self._api_client)
         self._api_client.default_headers["Authorization"] = f"Bearer {self._api_key or self._jwt_token}"
         self._api_client.default_headers["X-Daytona-Source"] = "python-sdk"
 
@@ -187,7 +189,6 @@ class AsyncDaytona:
 
         # Initialize API clients with the api_client instance
         self._sandbox_api = SandboxApi(self._api_client)
-        self._toolbox_api = ToolboxApi(self._api_client)
         self._object_storage_api = ObjectStorageApi(self._api_client)
 
         # Initialize services
@@ -207,7 +208,7 @@ class AsyncDaytona:
         """Close the HTTP session and clean up resources.
 
         This method should be called when you're done using the AsyncDaytona instance
-        to properly close the underlying HTTP session and avoid resource leaks.
+        to properly close the underlying HTTP sessions and avoid resource leaks.
 
         Example:
             ```python
@@ -227,8 +228,9 @@ class AsyncDaytona:
             # Automatically closed
             ```
         """
-        if hasattr(self, "_api_client") and self._api_client:
-            await self._api_client.close()
+        if hasattr(self, "_api_clients") and self._api_clients:
+            for api_client in self._api_clients:
+                await api_client.close()
 
     # unasync: delete end
 
@@ -449,8 +451,8 @@ class AsyncDaytona:
 
         sandbox = AsyncSandbox(
             response,
+            self._clone_api_client(),
             self._sandbox_api,
-            self._toolbox_api,
             code_toolbox,
         )
 
@@ -542,8 +544,8 @@ class AsyncDaytona:
         code_toolbox = SandboxPythonCodeToolbox()
         return AsyncSandbox(
             sandbox_instance,
+            self._clone_api_client(),
             self._sandbox_api,
-            self._toolbox_api,
             code_toolbox,
         )
 
@@ -596,8 +598,8 @@ class AsyncDaytona:
         return [
             AsyncSandbox(
                 sandbox,
+                self._clone_api_client(),
                 self._sandbox_api,
-                self._toolbox_api,
                 self._get_code_toolbox(self._validate_language_label(sandbox.labels.get("code-toolbox-language"))),
             )
             for sandbox in sandboxes
@@ -648,3 +650,10 @@ class AsyncDaytona:
             DaytonaError: If timeout is negative; If Sandbox fails to stop or times out
         """
         await sandbox.stop(timeout)
+
+    def _clone_api_client(self):
+        config = deepcopy(self._api_client.configuration)
+        new_client = ApiClient(config)
+        new_client.default_headers = deepcopy(self._api_client.default_headers)
+        self._api_clients.append(new_client)
+        return new_client

@@ -3,13 +3,13 @@
 
 from typing import List
 
-from daytona_api_client_async import (
+from daytona_toolbox_api_client_async import (
     CompletionList,
+    LspApi,
     LspCompletionParams,
     LspDocumentRequest,
     LspServerRequest,
     LspSymbol,
-    ToolboxApi,
 )
 from deprecated import deprecated
 
@@ -27,7 +27,7 @@ class AsyncLspServer:
         self,
         language_id: LspLanguageId,
         path_to_project: str,
-        toolbox_api: ToolboxApi,
+        api_client: LspApi,
         sandbox_id: str,
     ):
         """Initializes a new LSP server instance.
@@ -35,12 +35,12 @@ class AsyncLspServer:
         Args:
             language_id (LspLanguageId): The language server type (e.g., LspLanguageId.TYPESCRIPT).
             path_to_project (str): Absolute path to the project root directory.
-            toolbox_api (ToolboxApi): API client for Sandbox operations.
+            api_client (LspApi): API client for Sandbox operations.
             instance (SandboxInstance): The Sandbox instance this server belongs to.
         """
         self._language_id = str(language_id)
         self._path_to_project = path_to_project
-        self._toolbox_api = toolbox_api
+        self._api_client = api_client
         self._sandbox_id = sandbox_id
 
     @intercept_errors(message_prefix="Failed to start LSP server: ")
@@ -57,9 +57,8 @@ class AsyncLspServer:
             # Now ready for LSP operations
             ```
         """
-        await self._toolbox_api.lsp_start(
-            self._sandbox_id,
-            lsp_server_request=LspServerRequest(
+        await self._api_client.start(
+            request=LspServerRequest(
                 language_id=self._language_id,
                 path_to_project=self._path_to_project,
             ),
@@ -78,9 +77,8 @@ class AsyncLspServer:
             await lsp.stop()  # Clean up resources
             ```
         """
-        await self._toolbox_api.lsp_stop(
-            self._sandbox_id,
-            lsp_server_request=LspServerRequest(
+        await self._api_client.stop(
+            request=LspServerRequest(
                 language_id=self._language_id,
                 path_to_project=self._path_to_project,
             ),
@@ -106,9 +104,8 @@ class AsyncLspServer:
             ```
         """
         path = prefix_relative_path(self._path_to_project, path)
-        await self._toolbox_api.lsp_did_open(
-            self._sandbox_id,
-            lsp_document_request=LspDocumentRequest(
+        await self._api_client.did_open(
+            request=LspDocumentRequest(
                 language_id=self._language_id,
                 path_to_project=self._path_to_project,
                 uri=f"file://{path}",
@@ -132,9 +129,8 @@ class AsyncLspServer:
             await lsp.did_close("workspace/project/src/index.ts")
             ```
         """
-        await self._toolbox_api.lsp_did_close(
-            self._sandbox_id,
-            lsp_document_request=LspDocumentRequest(
+        await self._api_client.did_close(
+            request=LspDocumentRequest(
                 language_id=self._language_id,
                 path_to_project=self._path_to_project,
                 uri=f"file://{prefix_relative_path(self._path_to_project, path)}",
@@ -163,8 +159,7 @@ class AsyncLspServer:
                 print(f"{symbol.kind} {symbol.name}: {symbol.location}")
             ```
         """
-        return await self._toolbox_api.lsp_document_symbols(
-            self._sandbox_id,
+        return await self._api_client.document_symbols(
             language_id=self._language_id,
             path_to_project=self._path_to_project,
             uri=f"file://{prefix_relative_path(self._path_to_project, path)}",
@@ -208,8 +203,7 @@ class AsyncLspServer:
                 print(f"{symbol.name} in {symbol.location}")
             ```
         """
-        return await self._toolbox_api.lsp_workspace_symbols(
-            self._sandbox_id,
+        return await self._api_client.workspace_symbols(
             language_id=self._language_id,
             path_to_project=self._path_to_project,
             query=query,
@@ -245,9 +239,8 @@ class AsyncLspServer:
                 print(f"{item.label} ({item.kind}): {item.detail}")
             ```
         """
-        return await self._toolbox_api.lsp_completions(
-            self._sandbox_id,
-            lsp_completion_params=LspCompletionParams(
+        return await self._api_client.completions(
+            request=LspCompletionParams(
                 language_id=self._language_id,
                 path_to_project=self._path_to_project,
                 uri=f"file://{prefix_relative_path(self._path_to_project, path)}",

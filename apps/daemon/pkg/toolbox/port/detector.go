@@ -58,6 +58,16 @@ func (d *portsDetector) Start(ctx context.Context) {
 	}
 }
 
+// GetPorts godoc
+//
+//	@Summary		Get active ports
+//	@Description	Get a list of all currently active ports
+//	@Tags			port
+//	@Produce		json
+//	@Success		200	{object}	PortList
+//	@Router			/port [get]
+//
+//	@id				GetPorts
 func (d *portsDetector) GetPorts(c *gin.Context) {
 	ports := PortList{
 		Ports: []uint{},
@@ -74,6 +84,17 @@ func (d *portsDetector) GetPorts(c *gin.Context) {
 	c.JSON(http.StatusOK, ports)
 }
 
+// IsPortInUse godoc
+//
+//	@Summary		Check if port is in use
+//	@Description	Check if a specific port is currently in use
+//	@Tags			port
+//	@Produce		json
+//	@Param			port	path		int	true	"Port number (3000-9999)"
+//	@Success		200		{object}	IsPortInUseResponse
+//	@Router			/port/{port}/in-use [get]
+//
+//	@id				IsPortInUse
 func (d *portsDetector) IsPortInUse(c *gin.Context) {
 	portParam := c.Param("port")
 

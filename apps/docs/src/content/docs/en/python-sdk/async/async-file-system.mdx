@@ -17,7 +17,7 @@ be performed within a Daytona Sandbox.
 #### AsyncFileSystem.\_\_init\_\_
 
 ```python
-def __init__(sandbox_id: str, toolbox_api: ToolboxApi,
+def __init__(sandbox_id: str, api_client: FileSystemApi,
              get_root_dir: Callable[[], Awaitable[str]])
 ```
 
@@ -26,7 +26,7 @@ Initializes a new FileSystem instance.
 **Arguments**:
 
 - `sandbox_id` _str_ - The Sandbox ID.
-- `toolbox_api` _ToolboxApi_ - API client for Sandbox operations.
+- `api_client` _FileSystemApi_ - API client for Sandbox file system operations.
 - `get_root_dir` _Callable[[], str]_ - A function to get the default root directory of the Sandbox.
 
 #### AsyncFileSystem.create\_folder

@@ -10,8 +10,8 @@ import {
   ReplaceRequest,
   ReplaceResult,
   SearchFilesResponse,
-  ToolboxApi,
 } from '@daytonaio/api-client'
+import { FileSystemApi } from '@daytonaio/toolbox-api-client'
 import { prefixRelativePath } from './utils/Path'
 import { dynamicImport } from './utils/Import'
 import { Buffer } from 'buffer'
@@ -64,7 +64,7 @@ export class FileSystem {
   constructor(
     private readonly sandboxId: string,
     private readonly clientConfig: Configuration,
-    private readonly toolboxApi: ToolboxApi,
+    private readonly apiClient: FileSystemApi,
     private readonly getRootDir: () => Promise<string>,
   ) {}
 
@@ -81,11 +81,7 @@ export class FileSystem {
    * await fs.createFolder('app/data', '755');
    */
   public async createFolder(path: string, mode: string): Promise<void> {
-    const response = await this.toolboxApi.createFolder(
-      this.sandboxId,
-      prefixRelativePath(await this.getRootDir(), path),
-      mode,
-    )
+    const response = await this.apiClient.createFolder(prefixRelativePath(await this.getRootDir(), path), mode)
     return response.data
   }
 
@@ -102,12 +98,7 @@ export class FileSystem {
    * await fs.deleteFile('app/temp.log');
    */
   public async deleteFile(path: string, recursive?: boolean): Promise<void> {
-    const response = await this.toolboxApi.deleteFile(
-      this.sandboxId,
-      prefixRelativePath(await this.getRootDir(), path),
-      undefined,
-      recursive,
-    )
+    const response = await this.apiClient.deleteFile(prefixRelativePath(await this.getRootDir(), path), recursive)
     return response.data
   }
 
@@ -148,7 +139,7 @@ export class FileSystem {
 
     if (typeof dst !== 'string') {
       timeout = dst as number
-      const { data } = await this.toolboxApi.downloadFile(this.sandboxId, remotePath, undefined, {
+      const { data } = await this.apiClient.downloadFile(remotePath, {
         responseType: 'arraybuffer',
         timeout: timeout * 1000,
       })
@@ -166,7 +157,7 @@ export class FileSystem {
 
     const fs = await dynamicImport('fs', 'Downloading file to local file is not supported: ')
 
-    const response = await this.toolboxApi.downloadFile(this.sandboxId, remotePath, undefined, {
+    const response = await this.apiClient.downloadFile(remotePath, {
       responseType: 'stream',
       timeout: timeout * 1000,
     })
@@ -194,11 +185,7 @@ export class FileSystem {
    * });
    */
   public async findFiles(path: string, pattern: string): Promise<Array<Match>> {
-    const response = await this.toolboxApi.findInFiles(
-      this.sandboxId,
-      prefixRelativePath(await this.getRootDir(), path),
-      pattern,
-    )
+    const response = await this.apiClient.findInFiles(prefixRelativePath(await this.getRootDir(), path), pattern)
     return response.data
   }
 
@@ -215,10 +202,7 @@ export class FileSystem {
    * console.log(`Size: ${info.size}, Modified: ${info.modTime}`);
    */
   public async getFileDetails(path: string): Promise<FileInfo> {
-    const response = await this.toolboxApi.getFileInfo(
-      this.sandboxId,
-      prefixRelativePath(await this.getRootDir(), path),
-    )
+    const response = await this.apiClient.getFileInfo(prefixRelativePath(await this.getRootDir(), path))
     return response.data
   }
 
@@ -237,11 +221,7 @@ export class FileSystem {
    * });
    */
   public async listFiles(path: string): Promise<FileInfo[]> {
-    const response = await this.toolboxApi.listFiles(
-      this.sandboxId,
-      undefined,
-      prefixRelativePath(await this.getRootDir(), path),
-    )
+    const response = await this.apiClient.listFiles(prefixRelativePath(await this.getRootDir(), path))
     return response.data
   }
 
@@ -259,8 +239,7 @@ export class FileSystem {
    * await fs.moveFiles('app/temp/data.json', 'app/data/data.json');
    */
   public async moveFiles(source: string, destination: string): Promise<void> {
-    const response = await this.toolboxApi.moveFile(
-      this.sandboxId,
+    const response = await this.apiClient.moveFile(
       prefixRelativePath(await this.getRootDir(), source),
       prefixRelativePath(await this.getRootDir(), destination),
     )
@@ -294,7 +273,7 @@ export class FileSystem {
       pattern,
     }
 
-    const response = await this.toolboxApi.replaceInFiles(this.sandboxId, replaceRequest)
+    const response = await this.apiClient.replaceInFiles(replaceRequest)
     return response.data
   }
 
@@ -311,11 +290,7 @@ export class FileSystem {
    * result.files.forEach(file => console.log(file));
    */
   public async searchFiles(path: string, pattern: string): Promise<SearchFilesResponse> {
-    const response = await this.toolboxApi.searchFiles(
-      this.sandboxId,
-      prefixRelativePath(await this.getRootDir(), path),
-      pattern,
-    )
+    const response = await this.apiClient.searchFiles(prefixRelativePath(await this.getRootDir(), path), pattern)
     return response.data
   }
 
@@ -336,10 +311,8 @@ export class FileSystem {
    * });
    */
   public async setFilePermissions(path: string, permissions: FilePermissionsParams): Promise<void> {
-    const response = await this.toolboxApi.setFilePermissions(
-      this.sandboxId,
+    const response = await this.apiClient.setFilePermissions(
       prefixRelativePath(await this.getRootDir(), path),
-      undefined,
       permissions.owner!,
       permissions.group!,
       permissions.mode!,
@@ -436,7 +409,7 @@ export class FileSystem {
         signal: timeout ? AbortSignal.timeout(timeout * 1000) : undefined,
       })
     } else {
-      await this.toolboxApi.uploadFiles(this.sandboxId, undefined, {
+      await this.apiClient.uploadFiles({
         data: form,
         maxRedirects: 0,
         timeout: timeout * 1000,

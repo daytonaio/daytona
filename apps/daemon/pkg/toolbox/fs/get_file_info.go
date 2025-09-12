@@ -14,6 +14,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// GetFileInfo godoc
+//
+//	@Summary		Get file information
+//	@Description	Get detailed information about a file or directory
+//	@Tags			file-system
+//	@Produce		json
+//	@Param			path	query		string	true	"File or directory path"
+//	@Success		200		{object}	FileInfo
+//	@Router			/files/info [get]
+//
+//	@id				GetFileInfo
 func GetFileInfo(c *gin.Context) {
 	path := c.Query("path")
 	if path == "" {
