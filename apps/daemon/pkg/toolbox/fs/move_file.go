@@ -14,6 +14,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// MoveFile godoc
+//
+//	@Summary		Move or rename file/directory
+//	@Description	Move or rename a file or directory from source to destination
+//	@Tags			file-system
+//	@Param			source		query	string	true	"Source file or directory path"
+//	@Param			destination	query	string	true	"Destination file or directory path"
+//	@Success		200
+//	@Router			/files/move [post]
+//
+//	@id				MoveFile
 func MoveFile(c *gin.Context) {
 	sourcePath := c.Query("source")
 	destPath := c.Query("destination")

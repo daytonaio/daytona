@@ -15,7 +15,7 @@ Handles process and code execution within a Sandbox.
 
 ```python
 def __init__(sandbox_id: str, code_toolbox: SandboxPythonCodeToolbox,
-             toolbox_api: ToolboxApi, get_root_dir: Callable[[], str],
+             api_client: ProcessApi, get_root_dir: Callable[[], str],
              get_preview_link: Callable[[int], PortPreviewUrl])
 ```
 

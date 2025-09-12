@@ -37,7 +37,7 @@ await sandbox.git.commit(
 #### AsyncGit.\_\_init\_\_
 
 ```python
-def __init__(sandbox_id: str, toolbox_api: ToolboxApi,
+def __init__(sandbox_id: str, api_client: GitApi,
              get_root_dir: Callable[[], Awaitable[str]])
 ```
 
@@ -46,7 +46,7 @@ Initializes a new Git handler instance.
 **Arguments**:
 
 - `sandbox_id` _str_ - The Sandbox ID.
-- `toolbox_api` _ToolboxApi_ - API client for Sandbox operations.
+- `api_client` _GitApi_ - API client for Sandbox Git operations.
 - `get_root_dir` _Callable[[], str]_ - A function to get the default root directory of the Sandbox.
 
 #### AsyncGit.add

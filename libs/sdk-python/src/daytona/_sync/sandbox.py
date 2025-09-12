@@ -6,11 +6,13 @@
 # Edit the async source and re-run this script.
 
 import time
+from types import MethodType
 from typing import Dict, Optional
 
 from daytona_api_client import PortPreviewUrl
 from daytona_api_client import Sandbox as SandboxDto
-from daytona_api_client import SandboxApi, SshAccessDto, SshAccessValidationDto, ToolboxApi
+from daytona_api_client import SandboxApi, SshAccessDto, SshAccessValidationDto
+from daytona_toolbox_api_client import ApiClient, ComputerUseApi, FileSystemApi, GitApi, InfoApi, LspApi, ProcessApi
 from pydantic import ConfigDict, PrivateAttr
 
 from .._utils.errors import intercept_errors
@@ -18,6 +20,7 @@ from .._utils.path import prefix_relative_path
 from .._utils.timeout import with_timeout
 from ..common.errors import DaytonaError
 from ..common.protocols import SandboxCodeToolbox
+from ..common.sandbox import TOOLBOX_PORT
 from .computer_use import ComputerUse
 from .filesystem import FileSystem
 from .git import Git
@@ -72,8 +75,8 @@ class Sandbox(SandboxDto):
     def __init__(
         self,
         sandbox_dto: SandboxDto,
+        api_client: ApiClient,
         sandbox_api: SandboxApi,
-        toolbox_api: ToolboxApi,
         code_toolbox: SandboxCodeToolbox,
     ):
         """Initialize a new Sandbox instance.
@@ -88,14 +91,36 @@ class Sandbox(SandboxDto):
         super().__init__(**sandbox_dto.model_dump())
         self.__process_sandbox_dto(sandbox_dto)
         self._sandbox_api = sandbox_api
-        self._toolbox_api = toolbox_api
         self._code_toolbox = code_toolbox
         self._root_dir = ""
+        self._api_client = api_client
+        self._api_client.configuration.host = ""
 
-        self._fs = FileSystem(self.id, toolbox_api, self.__get_root_dir)
-        self._git = Git(self.id, toolbox_api, self.__get_root_dir)
-        self._process = Process(self.id, code_toolbox, toolbox_api, self.__get_root_dir, self.get_preview_link)
-        self._computer_use = ComputerUse(self.id, toolbox_api)
+        self._fs = FileSystem(self.id, FileSystemApi(api_client), self.__get_root_dir)
+        self._git = Git(self.id, GitApi(api_client), self.__get_root_dir)
+        self._process = Process(
+            self.id, code_toolbox, ProcessApi(api_client), self.__get_root_dir, self.get_preview_link
+        )
+        self._computer_use = ComputerUse(self.id, ComputerUseApi(api_client))
+        self._info_api = InfoApi(api_client)
+
+        og_call_api = api_client.call_api
+
+        def call_api_with_lazy_host_load(_, *args, **kwargs):
+            if api_client.configuration.host == "":
+                api_client.configuration.host = (self.get_preview_link(TOOLBOX_PORT)).url
+
+            url = str(args[1])
+            if url.startswith("/"):
+                url = api_client.configuration.host + url
+                args = (args[0], url, *args[2:])
+
+            return og_call_api(*args, **kwargs)
+
+        api_client.call_api = MethodType(
+            call_api_with_lazy_host_load,
+            api_client,
+        )
 
     @property
     def fs(self) -> FileSystem:
@@ -140,7 +165,7 @@ class Sandbox(SandboxDto):
             print(f"Sandbox root: {root_dir}")
             ```
         """
-        response = self._toolbox_api.get_project_dir(self.id)
+        response = self._info_api.get_project_dir()
         return response.dir
 
     def create_lsp_server(self, language_id: LspLanguageId, path_to_project: str) -> LspServer:
@@ -165,7 +190,7 @@ class Sandbox(SandboxDto):
         return LspServer(
             language_id,
             prefix_relative_path(self._root_dir, path_to_project),
-            self._toolbox_api,
+            LspApi(self._api_client),
             self.id,
         )
 

@@ -11,6 +11,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// GetStatus godoc
+//
+//	@Summary		Get Git status
+//	@Description	Get the Git status of the repository at the specified path
+//	@Tags			git
+//	@Produce		json
+//	@Param			path	query		string	true	"Repository path"
+//	@Success		200		{object}	git.GitStatus
+//	@Router			/git/status [get]
+//
+//	@id				GetStatus
 func GetStatus(c *gin.Context) {
 	path := c.Query("path")
 	if path == "" {

@@ -5578,7 +5578,11 @@ paths:
           style: simple
       responses:
         '200':
-          description: ''
+          content:
+            application/json:
+              schema:
+                type: boolean
+          description: User access status to the sandbox
       security:
         - bearer: []
         - oauth2:

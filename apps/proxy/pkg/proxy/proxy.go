@@ -34,6 +34,7 @@ const DAYTONA_SANDBOX_AUTH_KEY_HEADER = "X-Daytona-Preview-Token"
 const DAYTONA_SANDBOX_AUTH_KEY_QUERY_PARAM = "DAYTONA_SANDBOX_AUTH_KEY"
 const DAYTONA_SANDBOX_AUTH_COOKIE_NAME = "daytona-sandbox-auth-"
 const TERMINAL_PORT = "22222"
+const TOOLBOX_PORT = "2280"
 
 type Proxy struct {
 	config       *config.Config
