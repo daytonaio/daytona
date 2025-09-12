@@ -593,36 +593,6 @@ export class SandboxService {
     return sandbox
   }
 
-  async getPortPreviewUrl(sandboxId: string, port: number): Promise<PortPreviewUrlDto> {
-    if (port < 1 || port > 65535) {
-      throw new BadRequestError('Invalid port')
-    }
-
-    const sandbox = await this.sandboxRepository.findOne({
-      where: { id: sandboxId },
-    })
-
-    if (!sandbox) {
-      throw new NotFoundException(`Sandbox with ID ${sandboxId} not found`)
-    }
-
-    // Validate sandbox is in valid state
-    if (sandbox.state !== SandboxState.STARTED) {
-      throw new SandboxError('Sandbox must be started to get port preview URL')
-    }
-
-    // Get runner info
-    const runner = await this.runnerService.findOne(sandbox.runnerId)
-    if (!runner) {
-      throw new NotFoundException(`Runner not found for sandbox ${sandboxId}`)
-    }
-
-    return {
-      url: `https://${port}-${sandbox.id}.${runner.domain}`,
-      token: sandbox.authToken,
-    }
-  }
-
   async destroy(sandboxId: string): Promise<void> {
     const sandbox = await this.sandboxRepository.findOne({
       where: {

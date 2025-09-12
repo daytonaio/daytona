@@ -637,31 +637,25 @@ export class SandboxController {
       throw new BadRequestError('Invalid port')
     }
 
-    const proxyDomain = this.configService.get('proxy.domain')
-    const proxyProtocol = this.configService.get('proxy.protocol')
-    if (proxyDomain && proxyProtocol) {
-      const sandbox = await this.sandboxService.findOne(sandboxId)
-      if (!sandbox) {
-        throw new NotFoundException(`Sandbox with ID ${sandboxId} not found`)
-      }
+    const proxyDomain = this.configService.getOrThrow('proxy.domain')
+    const proxyProtocol = this.configService.getOrThrow('proxy.protocol')
 
-      // Get runner info
-      const runner = await this.runnerService.findOne(sandbox.runnerId)
-      if (!runner) {
-        throw new NotFoundException(`Runner not found for sandbox ${sandboxId}`)
-      }
-
-      // Return new preview url only for updated sandboxes
-      if (sandbox.daemonVersion) {
-        return {
-          url: `${proxyProtocol}://${port}-${sandbox.id}.${proxyDomain}`,
-          legacyProxyUrl: `https://${port}-${sandbox.id}.${runner.domain}`,
-          token: sandbox.authToken,
-        }
-      }
+    const sandbox = await this.sandboxService.findOne(sandboxId)
+    if (!sandbox) {
+      throw new NotFoundException(`Sandbox with ID ${sandboxId} not found`)
     }
 
-    return this.sandboxService.getPortPreviewUrl(sandboxId, port)
+    // Get runner info
+    const runner = await this.runnerService.findOne(sandbox.runnerId)
+    if (!runner) {
+      throw new NotFoundException(`Runner not found for sandbox ${sandboxId}`)
+    }
+
+    return {
+      url: `${proxyProtocol}://${port}-${sandbox.id}.${proxyDomain}`,
+      legacyProxyUrl: `https://${port}-${sandbox.id}.${runner.domain}`,
+      token: sandbox.authToken,
+    }
   }
 
   @Get(':sandboxId/build-logs')
