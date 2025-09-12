@@ -47,7 +47,7 @@ class FileSystemApi:
     def create_folder(
         self,
         path: Annotated[StrictStr, Field(description="Folder path to create")],
-        mode: Annotated[Optional[StrictStr], Field(description="Octal permission mode (default: 0755)")] = None,
+        mode: Annotated[StrictStr, Field(description="Octal permission mode (default: 0755)")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -67,7 +67,7 @@ class FileSystemApi:
 
         :param path: Folder path to create (required)
         :type path: str
-        :param mode: Octal permission mode (default: 0755)
+        :param mode: Octal permission mode (default: 0755) (required)
         :type mode: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -118,7 +118,7 @@ class FileSystemApi:
     def create_folder_with_http_info(
         self,
         path: Annotated[StrictStr, Field(description="Folder path to create")],
-        mode: Annotated[Optional[StrictStr], Field(description="Octal permission mode (default: 0755)")] = None,
+        mode: Annotated[StrictStr, Field(description="Octal permission mode (default: 0755)")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -138,7 +138,7 @@ class FileSystemApi:
 
         :param path: Folder path to create (required)
         :type path: str
-        :param mode: Octal permission mode (default: 0755)
+        :param mode: Octal permission mode (default: 0755) (required)
         :type mode: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -189,7 +189,7 @@ class FileSystemApi:
     def create_folder_without_preload_content(
         self,
         path: Annotated[StrictStr, Field(description="Folder path to create")],
-        mode: Annotated[Optional[StrictStr], Field(description="Octal permission mode (default: 0755)")] = None,
+        mode: Annotated[StrictStr, Field(description="Octal permission mode (default: 0755)")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -209,7 +209,7 @@ class FileSystemApi:
 
         :param path: Folder path to create (required)
         :type path: str
-        :param mode: Octal permission mode (default: 0755)
+        :param mode: Octal permission mode (default: 0755) (required)
         :type mode: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -2479,7 +2479,7 @@ class FileSystemApi:
     @validate_call
     def set_file_permissions(
         self,
-        path: Annotated[Optional[StrictStr], Field(description="File or directory path")] = None,
+        path: Annotated[StrictStr, Field(description="File or directory path")],
         owner: Annotated[Optional[StrictStr], Field(description="Owner (username or UID)")] = None,
         group: Annotated[Optional[StrictStr], Field(description="Group (group name or GID)")] = None,
         mode: Annotated[Optional[StrictStr], Field(description="File mode in octal format (e.g., 0755)")] = None,
@@ -2500,7 +2500,7 @@ class FileSystemApi:
 
         Set file permissions, ownership, and group for a file or directory
 
-        :param path: File or directory path
+        :param path: File or directory path (required)
         :type path: str
         :param owner: Owner (username or UID)
         :type owner: str
@@ -2558,7 +2558,7 @@ class FileSystemApi:
     @validate_call
     def set_file_permissions_with_http_info(
         self,
-        path: Annotated[Optional[StrictStr], Field(description="File or directory path")] = None,
+        path: Annotated[StrictStr, Field(description="File or directory path")],
         owner: Annotated[Optional[StrictStr], Field(description="Owner (username or UID)")] = None,
         group: Annotated[Optional[StrictStr], Field(description="Group (group name or GID)")] = None,
         mode: Annotated[Optional[StrictStr], Field(description="File mode in octal format (e.g., 0755)")] = None,
@@ -2579,7 +2579,7 @@ class FileSystemApi:
 
         Set file permissions, ownership, and group for a file or directory
 
-        :param path: File or directory path
+        :param path: File or directory path (required)
         :type path: str
         :param owner: Owner (username or UID)
         :type owner: str
@@ -2637,7 +2637,7 @@ class FileSystemApi:
     @validate_call
     def set_file_permissions_without_preload_content(
         self,
-        path: Annotated[Optional[StrictStr], Field(description="File or directory path")] = None,
+        path: Annotated[StrictStr, Field(description="File or directory path")],
         owner: Annotated[Optional[StrictStr], Field(description="Owner (username or UID)")] = None,
         group: Annotated[Optional[StrictStr], Field(description="Group (group name or GID)")] = None,
         mode: Annotated[Optional[StrictStr], Field(description="File mode in octal format (e.g., 0755)")] = None,
@@ -2658,7 +2658,7 @@ class FileSystemApi:
 
         Set file permissions, ownership, and group for a file or directory
 
-        :param path: File or directory path
+        :param path: File or directory path (required)
         :type path: str
         :param owner: Owner (username or UID)
         :type owner: str

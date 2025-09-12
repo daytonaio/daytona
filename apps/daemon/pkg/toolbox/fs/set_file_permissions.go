@@ -20,7 +20,7 @@ import (
 //	@Summary		Set file permissions
 //	@Description	Set file permissions, ownership, and group for a file or directory
 //	@Tags			file-system
-//	@Param			path	query	string	false	"File or directory path"
+//	@Param			path	query	string	true	"File or directory path"
 //	@Param			owner	query	string	false	"Owner (username or UID)"
 //	@Param			group	query	string	false	"Group (group name or GID)"
 //	@Param			mode	query	string	false	"File mode in octal format (e.g., 0755)"

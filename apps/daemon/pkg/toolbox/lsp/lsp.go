@@ -260,7 +260,7 @@ func DocumentSymbols(c *gin.Context) {
 //	@Param			languageId		query	string	true	"Language ID (e.g., python, typescript)"
 //	@Param			pathToProject	query	string	true	"Path to project"
 //	@Success		200				{array}	LspSymbol
-//	@Router			/lsp/workspaceSymbols [get]
+//	@Router			/lsp/workspacesymbols [get]
 //
 //	@id				WorkspaceSymbols
 func WorkspaceSymbols(c *gin.Context) {

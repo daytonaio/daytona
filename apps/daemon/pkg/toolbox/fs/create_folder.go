@@ -19,7 +19,7 @@ import (
 //	@Tags			file-system
 //	@Accept			json
 //	@Param			path	query	string	true	"Folder path to create"
-//	@Param			mode	query	string	false	"Octal permission mode (default: 0755)"
+//	@Param			mode	query	string	true	"Octal permission mode (default: 0755)"
 //	@Success		201
 //	@Router			/files/folder [post]
 //
