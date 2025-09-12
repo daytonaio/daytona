@@ -543,24 +543,17 @@ export class WorkspaceController {
       throw new BadRequestError('Invalid port')
     }
 
-    const proxyDomain = this.configService.get('proxy.domain')
-    const proxyProtocol = this.configService.get('proxy.protocol')
-    if (proxyDomain && proxyProtocol) {
-      const workspace = await this.workspaceService.findOne(workspaceId)
-      if (!workspace) {
-        throw new NotFoundException(`Workspace with ID ${workspaceId} not found`)
-      }
-
-      // Return new preview url only for updated workspaces/sandboxes
-      if (workspace.daemonVersion) {
-        return {
-          url: `${proxyProtocol}://${port}-${workspaceId}.${proxyDomain}`,
-          token: workspace.authToken,
-        }
-      }
+    const proxyDomain = this.configService.getOrThrow('proxy.domain')
+    const proxyProtocol = this.configService.getOrThrow('proxy.protocol')
+    const workspace = await this.workspaceService.findOne(workspaceId)
+    if (!workspace) {
+      throw new NotFoundException(`Workspace with ID ${workspaceId} not found`)
     }
 
-    return this.workspaceService.getPortPreviewUrl(workspaceId, port)
+    return {
+      url: `${proxyProtocol}://${port}-${workspaceId}.${proxyDomain}`,
+      token: workspace.authToken,
+    }
   }
 
   @Get(':workspaceId/build-logs')
