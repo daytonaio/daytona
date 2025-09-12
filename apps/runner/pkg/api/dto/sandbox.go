@@ -19,6 +19,7 @@ type CreateSandboxDTO struct {
 	Volumes          []VolumeDTO       `json:"volumes,omitempty"`
 	NetworkBlockAll  *bool             `json:"networkBlockAll,omitempty"`
 	NetworkAllowList *string           `json:"networkAllowList,omitempty"`
+	Metadata         map[string]string `json:"metadata,omitempty"`
 } //	@name	CreateSandboxDTO
 
 type ResizeSandboxDTO struct {
@@ -28,6 +29,7 @@ type ResizeSandboxDTO struct {
 } //	@name	ResizeSandboxDTO
 
 type UpdateNetworkSettingsDTO struct {
-	NetworkBlockAll  *bool   `json:"networkBlockAll,omitempty"`
-	NetworkAllowList *string `json:"networkAllowList,omitempty"`
+	NetworkBlockAll    *bool   `json:"networkBlockAll,omitempty"`
+	NetworkAllowList   *string `json:"networkAllowList,omitempty"`
+	NetworkLimitEgress *bool   `json:"networkLimitEgress,omitempty"`
 } //	@name	UpdateNetworkSettingsDTO

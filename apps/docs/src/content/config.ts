@@ -289,6 +289,15 @@ export const getSidebarConfig = (
         },
         {
           type: 'link',
+          href: localizePath('/docs/network-limits', locale),
+          label: labels['sidebarconfig.networkLimits'],
+          description: labels['sidebarconfig.networkLimitsDescription'],
+          attrs: {
+            icon: 'network-limits.svg',
+          },
+        },
+        {
+          type: 'link',
           href: localizePath('/docs/ssh-access', locale),
           label: labels['sidebarconfig.sshAccess'],
           description: labels['sidebarconfig.sshAccessDescription'],

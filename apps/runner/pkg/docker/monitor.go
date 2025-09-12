@@ -107,7 +107,8 @@ func (dm *DockerMonitor) monitorEvents() error {
 	eventsChan, errsChan := dm.apiClient.Events(dm.ctx, eventFilters)
 
 	// Reconnection established successfully
-	dm.reconcileNetworkRules()
+	dm.reconcileNetworkRules("filter", "DOCKER-USER")
+	dm.reconcileNetworkRules("mangle", "PREROUTING")
 
 	for {
 		select {
@@ -150,6 +151,10 @@ func (dm *DockerMonitor) handleContainerEvent(event events.Message) {
 		if err != nil {
 			log.Errorf("Error unassigning network rules: %v", err)
 		}
+		err = dm.netRulesManager.RemoveNetworkLimiter(shortContainerID)
+		if err != nil {
+			log.Errorf("Error removing network limiter: %v", err)
+		}
 	case "destroy":
 		shortContainerID := containerID[:12]
 		err := dm.netRulesManager.DeleteNetworkRules(shortContainerID)
@@ -160,9 +165,9 @@ func (dm *DockerMonitor) handleContainerEvent(event events.Message) {
 }
 
 // reconcileNetworkRules is called when reconnection is established
-func (dm *DockerMonitor) reconcileNetworkRules() {
+func (dm *DockerMonitor) reconcileNetworkRules(table string, chain string) {
 	// List all DOCKER-USER rules that jump to Daytona chains
-	rules, err := dm.netRulesManager.ListDaytonaRules()
+	rules, err := dm.netRulesManager.ListDaytonaRules(table, chain)
 	if err != nil {
 		log.Errorf("Error listing Daytona rules: %v", err)
 		return
@@ -221,10 +226,10 @@ func (dm *DockerMonitor) reconcileNetworkRules() {
 
 		if container.NetworkSettings.IPAddress != ruleIP {
 			log.Warnf("IP mismatch for container %s: rule has %s, container has %s",
-				containerID, sourceIP, container.NetworkSettings.IPAddress)
+				containerID, ruleIP, container.NetworkSettings.IPAddress)
 
 			// Delete only this specific mismatched rule
-			if err := dm.netRulesManager.DeleteDockerUserRule(rule); err != nil {
+			if err := dm.netRulesManager.DeleteChainRule(table, chain, rule); err != nil {
 				log.Errorf("Error deleting mismatched rule for container %s: %v", containerID, err)
 			} else {
 				log.Infof("Deleted mismatched rule for container %s", containerID)
@@ -234,9 +239,9 @@ func (dm *DockerMonitor) reconcileNetworkRules() {
 }
 
 // reconcileChains removes orphaned chains for non-existent containers
-func (dm *DockerMonitor) reconcileChains() {
+func (dm *DockerMonitor) reconcileChains(table string) {
 	// List all chains that start with DAYTONA-SB-
-	chains, err := dm.netRulesManager.ListDaytonaChains()
+	chains, err := dm.netRulesManager.ListDaytonaChains(table)
 	if err != nil {
 		log.Errorf("Error listing Daytona chains: %v", err)
 		return
@@ -256,7 +261,7 @@ func (dm *DockerMonitor) reconcileChains() {
 			log.Infof("Container %s does not exist, deleting chain %s", containerID, chain)
 
 			// Delete the orphaned chain
-			if err := dm.netRulesManager.DeleteChain(chain); err != nil {
+			if err := dm.netRulesManager.ClearAndDeleteChain(table, chain); err != nil {
 				log.Errorf("Error deleting orphaned chain %s: %v", chain, err)
 			} else {
 				log.Infof("Deleted orphaned chain %s", chain)
@@ -265,9 +270,9 @@ func (dm *DockerMonitor) reconcileChains() {
 	}
 }
 
-// reconcilerLoop runs reconciliation every 5 minutes
+// reconcilerLoop runs reconciliation every minute
 func (dm *DockerMonitor) reconcilerLoop() {
-	ticker := time.NewTicker(time.Minute)
+	ticker := time.NewTicker(1 * time.Minute)
 	defer ticker.Stop()
 
 	for {
@@ -275,8 +280,11 @@ func (dm *DockerMonitor) reconcilerLoop() {
 		case <-dm.ctx.Done():
 			return
 		case <-ticker.C:
-			dm.reconcileNetworkRules()
-			dm.reconcileChains()
+			log.Debug("Reconciling network rules")
+			dm.reconcileNetworkRules("filter", "DOCKER-USER")
+			dm.reconcileNetworkRules("mangle", "PREROUTING")
+			dm.reconcileChains("filter")
+			dm.reconcileChains("mangle")
 		}
 	}
 }

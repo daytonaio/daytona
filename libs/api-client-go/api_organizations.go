@@ -339,6 +339,18 @@ type OrganizationsAPI interface {
 	// UpdateOrganizationRoleExecute executes the request
 	//  @return OrganizationRole
 	UpdateOrganizationRoleExecute(r OrganizationsAPIUpdateOrganizationRoleRequest) (*OrganizationRole, *http.Response, error)
+
+	/*
+		UpdateSandboxDefaultLimitedNetworkEgress Update sandbox default limited network egress
+
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param organizationId Organization ID
+		@return OrganizationsAPIUpdateSandboxDefaultLimitedNetworkEgressRequest
+	*/
+	UpdateSandboxDefaultLimitedNetworkEgress(ctx context.Context, organizationId string) OrganizationsAPIUpdateSandboxDefaultLimitedNetworkEgressRequest
+
+	// UpdateSandboxDefaultLimitedNetworkEgressExecute executes the request
+	UpdateSandboxDefaultLimitedNetworkEgressExecute(r OrganizationsAPIUpdateSandboxDefaultLimitedNetworkEgressRequest) (*http.Response, error)
 }
 
 // OrganizationsAPIService OrganizationsAPI service
@@ -2877,4 +2889,105 @@ func (a *OrganizationsAPIService) UpdateOrganizationRoleExecute(r OrganizationsA
 	}
 
 	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type OrganizationsAPIUpdateSandboxDefaultLimitedNetworkEgressRequest struct {
+	ctx                                            context.Context
+	ApiService                                     OrganizationsAPI
+	organizationId                                 string
+	organizationSandboxDefaultLimitedNetworkEgress *OrganizationSandboxDefaultLimitedNetworkEgress
+}
+
+func (r OrganizationsAPIUpdateSandboxDefaultLimitedNetworkEgressRequest) OrganizationSandboxDefaultLimitedNetworkEgress(organizationSandboxDefaultLimitedNetworkEgress OrganizationSandboxDefaultLimitedNetworkEgress) OrganizationsAPIUpdateSandboxDefaultLimitedNetworkEgressRequest {
+	r.organizationSandboxDefaultLimitedNetworkEgress = &organizationSandboxDefaultLimitedNetworkEgress
+	return r
+}
+
+func (r OrganizationsAPIUpdateSandboxDefaultLimitedNetworkEgressRequest) Execute() (*http.Response, error) {
+	return r.ApiService.UpdateSandboxDefaultLimitedNetworkEgressExecute(r)
+}
+
+/*
+UpdateSandboxDefaultLimitedNetworkEgress Update sandbox default limited network egress
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param organizationId Organization ID
+	@return OrganizationsAPIUpdateSandboxDefaultLimitedNetworkEgressRequest
+*/
+func (a *OrganizationsAPIService) UpdateSandboxDefaultLimitedNetworkEgress(ctx context.Context, organizationId string) OrganizationsAPIUpdateSandboxDefaultLimitedNetworkEgressRequest {
+	return OrganizationsAPIUpdateSandboxDefaultLimitedNetworkEgressRequest{
+		ApiService:     a,
+		ctx:            ctx,
+		organizationId: organizationId,
+	}
+}
+
+// Execute executes the request
+func (a *OrganizationsAPIService) UpdateSandboxDefaultLimitedNetworkEgressExecute(r OrganizationsAPIUpdateSandboxDefaultLimitedNetworkEgressRequest) (*http.Response, error) {
+	var (
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "OrganizationsAPIService.UpdateSandboxDefaultLimitedNetworkEgress")
+	if err != nil {
+		return nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/organizations/{organizationId}/sandbox-default-limited-network-egress"
+	localVarPath = strings.Replace(localVarPath, "{"+"organizationId"+"}", url.PathEscape(parameterValueToString(r.organizationId, "organizationId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.organizationSandboxDefaultLimitedNetworkEgress == nil {
+		return nil, reportError("organizationSandboxDefaultLimitedNetworkEgress is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.organizationSandboxDefaultLimitedNetworkEgress
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarHTTPResponse, newErr
+	}
+
+	return localVarHTTPResponse, nil
 }
