@@ -31,6 +31,7 @@ import { OrganizationSuspendedSnapshotDeactivatedEvent } from '../../organizatio
 import { SnapshotRunnerState } from '../enums/snapshot-runner-state.enum'
 import { PaginatedList } from '../../common/interfaces/paginated-list.interface'
 import { OrganizationUsageService } from '../../organization/services/organization-usage.service'
+import { DockerRegistryService } from '../../docker-registry/services/docker-registry.service'
 
 const IMAGE_NAME_REGEX = /^[a-zA-Z0-9_.\-:]+(\/[a-zA-Z0-9_.\-:]+)*$/
 @Injectable()
@@ -48,6 +49,7 @@ export class SnapshotService {
     private readonly snapshotRunnerRepository: Repository<SnapshotRunner>,
     private readonly organizationService: OrganizationService,
     private readonly organizationUsageService: OrganizationUsageService,
+    private readonly dockerRegistryService: DockerRegistryService,
   ) {}
 
   private validateImageName(name: string): string | null {
@@ -80,14 +82,47 @@ export class SnapshotService {
       throw new BadRequestException(nameValidationError)
     }
 
+    let entrypoint = createSnapshotDto.entrypoint
+
     if (createSnapshotDto.imageName) {
       const imageValidationError = this.validateImageName(createSnapshotDto.imageName)
       if (imageValidationError) {
         throw new BadRequestException(imageValidationError)
       }
+
+      try {
+        const imageDetails = await this.dockerRegistryService.getImageDetails(
+          createSnapshotDto.imageName,
+          organization.id,
+        )
+        if (!entrypoint || entrypoint.length === 0) {
+          if (imageDetails.entrypoint) {
+            entrypoint = imageDetails.entrypoint
+          } else if (imageDetails.cmd) {
+            entrypoint = imageDetails.cmd
+          } else {
+            entrypoint = ['sleep', 'infinity']
+          }
+        }
+        if (imageDetails.sizeGB > organization.maxSnapshotSize) {
+          throw new ForbiddenException(
+            `Image size ${imageDetails.sizeGB} exceeds the maximum allowed snapshot size (${organization.maxSnapshotSize})`,
+          )
+        }
+      } catch (error) {
+        this.logger.error(`Error getting image details for ${createSnapshotDto.imageName}: ${error}`)
+      }
     }
 
     this.organizationService.assertOrganizationIsNotSuspended(organization)
+
+    const snapshotCount = await this.snapshotRepository.count({
+      where: { organizationId: organization.id },
+    })
+
+    if (snapshotCount >= organization.snapshotQuota) {
+      throw new ForbiddenException('Reached the maximum number of snapshots in the organization')
+    }
 
     await this.validateOrganizationQuotas(
       organization,
@@ -101,7 +136,7 @@ export class SnapshotService {
         organizationId: organization.id,
         ...createSnapshotDto,
         mem: createSnapshotDto.memory, // Map memory to mem
-        state: createSnapshotDto.buildInfo ? SnapshotState.BUILD_PENDING : SnapshotState.PENDING,
+        state: SnapshotState.PENDING,
         general,
       })
 
@@ -125,6 +160,9 @@ export class SnapshotService {
           await this.buildInfoRepository.save(buildInfoEntity)
           snapshot.buildInfo = buildInfoEntity
         }
+
+        const defaultInternalRegistry = await this.dockerRegistryService.getDefaultInternalRegistry()
+        snapshot.ref = `${defaultInternalRegistry.url}/${defaultInternalRegistry.project}/${buildSnapshotRef}`
       }
 
       return await this.snapshotRepository.save(snapshot)
@@ -312,7 +350,7 @@ export class SnapshotService {
     const snapshot = await this.snapshotRepository.findOne({
       where: {
         state: Not(In([SnapshotState.ERROR, SnapshotState.BUILD_FAILED])),
-        internalName: imageName,
+        ref: imageName,
       },
     })
 
@@ -361,14 +399,14 @@ export class SnapshotService {
       const countActiveSnapshots = await this.snapshotRepository.count({
         where: {
           state: SnapshotState.ACTIVE,
-          internalName: snapshot.internalName,
+          ref: snapshot.ref,
         },
       })
 
       if (countActiveSnapshots === 0) {
         // Set associated SnapshotRunner records to REMOVING state
         const result = await this.snapshotRunnerRepository.update(
-          { snapshotRef: snapshot.internalName },
+          { snapshotRef: snapshot.ref },
           { state: SnapshotRunnerState.REMOVING },
         )
         this.logger.debug(

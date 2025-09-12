@@ -52,6 +52,10 @@ var CreateCmd = &cobra.Command{
 			createSnapshot.SetDisk(diskFlag)
 		}
 
+		if skipValidationFlag {
+			createSnapshot.SetSkipValidation(skipValidationFlag)
+		}
+
 		if usingDockerfile {
 			createBuildInfoDto, err := common.GetCreateBuildInfoDto(ctx, dockerfilePathFlag, contextFlag)
 			if err != nil {
@@ -132,6 +136,7 @@ var (
 	cpuFlag            int32
 	memoryFlag         int32
 	diskFlag           int32
+	skipValidationFlag bool
 )
 
 func init() {
@@ -142,6 +147,7 @@ func init() {
 	CreateCmd.Flags().Int32Var(&cpuFlag, "cpu", 0, "CPU cores that will be allocated to the underlying sandboxes (default: 1)")
 	CreateCmd.Flags().Int32Var(&memoryFlag, "memory", 0, "Memory that will be allocated to the underlying sandboxes in GB (default: 1)")
 	CreateCmd.Flags().Int32Var(&diskFlag, "disk", 0, "Disk space that will be allocated to the underlying sandboxes in GB (default: 3)")
+	CreateCmd.Flags().BoolVar(&skipValidationFlag, "skip-validation", false, "Skip validation of the snapshot")
 
 	CreateCmd.MarkFlagsMutuallyExclusive("image", "dockerfile")
 	CreateCmd.MarkFlagsMutuallyExclusive("image", "context")
