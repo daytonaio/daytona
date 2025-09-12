@@ -1152,7 +1152,7 @@ paths:
           schema:
             type: string
           style: simple
-        - description: Page number
+        - description: Page number of the results
           explode: true
           in: query
           name: page
@@ -1162,7 +1162,7 @@ paths:
             minimum: 1
             type: number
           style: form
-        - description: Number of items per page
+        - description: Number of results per page
           explode: true
           in: query
           name: limit
@@ -1182,12 +1182,13 @@ paths:
             example: '{"label1": "value1", "label2": "value2"}'
             type: string
           style: form
-        - description: Include items that are errored with deleted desired state
+        - description: Include results with errored state and deleted desired state
           explode: true
           in: query
           name: includeErroredDeleted
           required: false
           schema:
+            default: false
             type: boolean
           style: form
         - description: List of states to filter by
@@ -1308,6 +1309,34 @@ paths:
           schema:
             example: 2024-12-31T23:59:59Z
             format: date-time
+            type: string
+          style: form
+        - description: Field to sort by
+          explode: true
+          in: query
+          name: sort
+          required: false
+          schema:
+            default: createdAt
+            enum:
+              - id
+              - state
+              - snapshot
+              - region
+              - updatedAt
+              - createdAt
+            type: string
+          style: form
+        - description: Direction to sort by
+          explode: true
+          in: query
+          name: order
+          required: false
+          schema:
+            default: desc
+            enum:
+              - asc
+              - desc
             type: string
           style: form
       responses:
@@ -5096,7 +5125,7 @@ paths:
           schema:
             type: string
           style: simple
-        - description: Page number
+        - description: Page number of the results
           explode: true
           in: query
           name: page
@@ -5106,7 +5135,7 @@ paths:
             minimum: 1
             type: number
           style: form
-        - description: Number of items per page
+        - description: Number of results per page
           explode: true
           in: query
           name: limit
@@ -5126,12 +5155,13 @@ paths:
             example: '{"label1": "value1", "label2": "value2"}'
             type: string
           style: form
-        - description: Include items that are errored with deleted desired state
+        - description: Include results with errored state and deleted desired state
           explode: true
           in: query
           name: includeErroredDeleted
           required: false
           schema:
+            default: false
             type: boolean
           style: form
         - description: List of states to filter by
@@ -5252,6 +5282,34 @@ paths:
           schema:
             example: 2024-12-31T23:59:59Z
             format: date-time
+            type: string
+          style: form
+        - description: Field to sort by
+          explode: true
+          in: query
+          name: sort
+          required: false
+          schema:
+            default: createdAt
+            enum:
+              - id
+              - state
+              - snapshot
+              - region
+              - updatedAt
+              - createdAt
+            type: string
+          style: form
+        - description: Direction to sort by
+          explode: true
+          in: query
+          name: order
+          required: false
+          schema:
+            default: desc
+            enum:
+              - asc
+              - desc
             type: string
           style: form
       responses:

@@ -2046,10 +2046,10 @@ class WorkspaceApi:
     async def list_workspaces_deprecated(
         self,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
-        page: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Page number")] = None,
-        limit: Annotated[Optional[Union[Annotated[float, Field(le=100, strict=True, ge=1)], Annotated[int, Field(le=100, strict=True, ge=1)]]], Field(description="Number of items per page")] = None,
+        page: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Page number of the results")] = None,
+        limit: Annotated[Optional[Union[Annotated[float, Field(le=100, strict=True, ge=1)], Annotated[int, Field(le=100, strict=True, ge=1)]]], Field(description="Number of results per page")] = None,
         labels: Annotated[Optional[StrictStr], Field(description="JSON encoded labels to filter by")] = None,
-        include_errored_deleted: Annotated[Optional[StrictBool], Field(description="Include items that are errored with deleted desired state")] = None,
+        include_errored_deleted: Annotated[Optional[StrictBool], Field(description="Include results with errored state and deleted desired state")] = None,
         states: Annotated[Optional[List[StrictStr]], Field(description="List of states to filter by")] = None,
         snapshots: Annotated[Optional[List[StrictStr]], Field(description="List of snapshot names to filter by")] = None,
         regions: Annotated[Optional[List[StrictStr]], Field(description="List of regions to filter by")] = None,
@@ -2061,6 +2061,8 @@ class WorkspaceApi:
         max_disk_gi_b: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Maximum disk space in GiB")] = None,
         last_event_after: Annotated[Optional[datetime], Field(description="Include items with last event after this timestamp")] = None,
         last_event_before: Annotated[Optional[datetime], Field(description="Include items with last event before this timestamp")] = None,
+        sort: Annotated[Optional[StrictStr], Field(description="Field to sort by")] = None,
+        order: Annotated[Optional[StrictStr], Field(description="Direction to sort by")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2079,13 +2081,13 @@ class WorkspaceApi:
 
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
-        :param page: Page number
+        :param page: Page number of the results
         :type page: float
-        :param limit: Number of items per page
+        :param limit: Number of results per page
         :type limit: float
         :param labels: JSON encoded labels to filter by
         :type labels: str
-        :param include_errored_deleted: Include items that are errored with deleted desired state
+        :param include_errored_deleted: Include results with errored state and deleted desired state
         :type include_errored_deleted: bool
         :param states: List of states to filter by
         :type states: List[str]
@@ -2109,6 +2111,10 @@ class WorkspaceApi:
         :type last_event_after: datetime
         :param last_event_before: Include items with last event before this timestamp
         :type last_event_before: datetime
+        :param sort: Field to sort by
+        :type sort: str
+        :param order: Direction to sort by
+        :type order: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -2149,6 +2155,8 @@ class WorkspaceApi:
             max_disk_gi_b=max_disk_gi_b,
             last_event_after=last_event_after,
             last_event_before=last_event_before,
+            sort=sort,
+            order=order,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -2173,10 +2181,10 @@ class WorkspaceApi:
     async def list_workspaces_deprecated_with_http_info(
         self,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
-        page: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Page number")] = None,
-        limit: Annotated[Optional[Union[Annotated[float, Field(le=100, strict=True, ge=1)], Annotated[int, Field(le=100, strict=True, ge=1)]]], Field(description="Number of items per page")] = None,
+        page: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Page number of the results")] = None,
+        limit: Annotated[Optional[Union[Annotated[float, Field(le=100, strict=True, ge=1)], Annotated[int, Field(le=100, strict=True, ge=1)]]], Field(description="Number of results per page")] = None,
         labels: Annotated[Optional[StrictStr], Field(description="JSON encoded labels to filter by")] = None,
-        include_errored_deleted: Annotated[Optional[StrictBool], Field(description="Include items that are errored with deleted desired state")] = None,
+        include_errored_deleted: Annotated[Optional[StrictBool], Field(description="Include results with errored state and deleted desired state")] = None,
         states: Annotated[Optional[List[StrictStr]], Field(description="List of states to filter by")] = None,
         snapshots: Annotated[Optional[List[StrictStr]], Field(description="List of snapshot names to filter by")] = None,
         regions: Annotated[Optional[List[StrictStr]], Field(description="List of regions to filter by")] = None,
@@ -2188,6 +2196,8 @@ class WorkspaceApi:
         max_disk_gi_b: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Maximum disk space in GiB")] = None,
         last_event_after: Annotated[Optional[datetime], Field(description="Include items with last event after this timestamp")] = None,
         last_event_before: Annotated[Optional[datetime], Field(description="Include items with last event before this timestamp")] = None,
+        sort: Annotated[Optional[StrictStr], Field(description="Field to sort by")] = None,
+        order: Annotated[Optional[StrictStr], Field(description="Direction to sort by")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2206,13 +2216,13 @@ class WorkspaceApi:
 
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
-        :param page: Page number
+        :param page: Page number of the results
         :type page: float
-        :param limit: Number of items per page
+        :param limit: Number of results per page
         :type limit: float
         :param labels: JSON encoded labels to filter by
         :type labels: str
-        :param include_errored_deleted: Include items that are errored with deleted desired state
+        :param include_errored_deleted: Include results with errored state and deleted desired state
         :type include_errored_deleted: bool
         :param states: List of states to filter by
         :type states: List[str]
@@ -2236,6 +2246,10 @@ class WorkspaceApi:
         :type last_event_after: datetime
         :param last_event_before: Include items with last event before this timestamp
         :type last_event_before: datetime
+        :param sort: Field to sort by
+        :type sort: str
+        :param order: Direction to sort by
+        :type order: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -2276,6 +2290,8 @@ class WorkspaceApi:
             max_disk_gi_b=max_disk_gi_b,
             last_event_after=last_event_after,
             last_event_before=last_event_before,
+            sort=sort,
+            order=order,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -2300,10 +2316,10 @@ class WorkspaceApi:
     async def list_workspaces_deprecated_without_preload_content(
         self,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
-        page: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Page number")] = None,
-        limit: Annotated[Optional[Union[Annotated[float, Field(le=100, strict=True, ge=1)], Annotated[int, Field(le=100, strict=True, ge=1)]]], Field(description="Number of items per page")] = None,
+        page: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Page number of the results")] = None,
+        limit: Annotated[Optional[Union[Annotated[float, Field(le=100, strict=True, ge=1)], Annotated[int, Field(le=100, strict=True, ge=1)]]], Field(description="Number of results per page")] = None,
         labels: Annotated[Optional[StrictStr], Field(description="JSON encoded labels to filter by")] = None,
-        include_errored_deleted: Annotated[Optional[StrictBool], Field(description="Include items that are errored with deleted desired state")] = None,
+        include_errored_deleted: Annotated[Optional[StrictBool], Field(description="Include results with errored state and deleted desired state")] = None,
         states: Annotated[Optional[List[StrictStr]], Field(description="List of states to filter by")] = None,
         snapshots: Annotated[Optional[List[StrictStr]], Field(description="List of snapshot names to filter by")] = None,
         regions: Annotated[Optional[List[StrictStr]], Field(description="List of regions to filter by")] = None,
@@ -2315,6 +2331,8 @@ class WorkspaceApi:
         max_disk_gi_b: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Maximum disk space in GiB")] = None,
         last_event_after: Annotated[Optional[datetime], Field(description="Include items with last event after this timestamp")] = None,
         last_event_before: Annotated[Optional[datetime], Field(description="Include items with last event before this timestamp")] = None,
+        sort: Annotated[Optional[StrictStr], Field(description="Field to sort by")] = None,
+        order: Annotated[Optional[StrictStr], Field(description="Direction to sort by")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2333,13 +2351,13 @@ class WorkspaceApi:
 
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
-        :param page: Page number
+        :param page: Page number of the results
         :type page: float
-        :param limit: Number of items per page
+        :param limit: Number of results per page
         :type limit: float
         :param labels: JSON encoded labels to filter by
         :type labels: str
-        :param include_errored_deleted: Include items that are errored with deleted desired state
+        :param include_errored_deleted: Include results with errored state and deleted desired state
         :type include_errored_deleted: bool
         :param states: List of states to filter by
         :type states: List[str]
@@ -2363,6 +2381,10 @@ class WorkspaceApi:
         :type last_event_after: datetime
         :param last_event_before: Include items with last event before this timestamp
         :type last_event_before: datetime
+        :param sort: Field to sort by
+        :type sort: str
+        :param order: Direction to sort by
+        :type order: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -2403,6 +2425,8 @@ class WorkspaceApi:
             max_disk_gi_b=max_disk_gi_b,
             last_event_after=last_event_after,
             last_event_before=last_event_before,
+            sort=sort,
+            order=order,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -2437,6 +2461,8 @@ class WorkspaceApi:
         max_disk_gi_b,
         last_event_after,
         last_event_before,
+        sort,
+        order,
         _request_auth,
         _content_type,
         _headers,
@@ -2539,6 +2565,14 @@ class WorkspaceApi:
                 )
             else:
                 _query_params.append(('lastEventBefore', last_event_before))
+            
+        if sort is not None:
+            
+            _query_params.append(('sort', sort))
+            
+        if order is not None:
+            
+            _query_params.append(('order', order))
             
         # process the header parameters
         if x_daytona_organization_id is not None:

@@ -1079,6 +1079,8 @@ type WorkspaceAPIListWorkspacesDeprecatedRequest struct {
 	maxDiskGiB             *float32
 	lastEventAfter         *time.Time
 	lastEventBefore        *time.Time
+	sort                   *string
+	order                  *string
 }
 
 // Use with JWT to specify the organization ID
@@ -1087,13 +1089,13 @@ func (r WorkspaceAPIListWorkspacesDeprecatedRequest) XDaytonaOrganizationID(xDay
 	return r
 }
 
-// Page number
+// Page number of the results
 func (r WorkspaceAPIListWorkspacesDeprecatedRequest) Page(page float32) WorkspaceAPIListWorkspacesDeprecatedRequest {
 	r.page = &page
 	return r
 }
 
-// Number of items per page
+// Number of results per page
 func (r WorkspaceAPIListWorkspacesDeprecatedRequest) Limit(limit float32) WorkspaceAPIListWorkspacesDeprecatedRequest {
 	r.limit = &limit
 	return r
@@ -1105,7 +1107,7 @@ func (r WorkspaceAPIListWorkspacesDeprecatedRequest) Labels(labels string) Works
 	return r
 }
 
-// Include items that are errored with deleted desired state
+// Include results with errored state and deleted desired state
 func (r WorkspaceAPIListWorkspacesDeprecatedRequest) IncludeErroredDeleted(includeErroredDeleted bool) WorkspaceAPIListWorkspacesDeprecatedRequest {
 	r.includeErroredDeleted = &includeErroredDeleted
 	return r
@@ -1177,6 +1179,18 @@ func (r WorkspaceAPIListWorkspacesDeprecatedRequest) LastEventBefore(lastEventBe
 	return r
 }
 
+// Field to sort by
+func (r WorkspaceAPIListWorkspacesDeprecatedRequest) Sort(sort string) WorkspaceAPIListWorkspacesDeprecatedRequest {
+	r.sort = &sort
+	return r
+}
+
+// Direction to sort by
+func (r WorkspaceAPIListWorkspacesDeprecatedRequest) Order(order string) WorkspaceAPIListWorkspacesDeprecatedRequest {
+	r.order = &order
+	return r
+}
+
 func (r WorkspaceAPIListWorkspacesDeprecatedRequest) Execute() (*PaginatedWorkspaces, *http.Response, error) {
 	return r.ApiService.ListWorkspacesDeprecatedExecute(r)
 }
@@ -1237,6 +1251,9 @@ func (a *WorkspaceAPIService) ListWorkspacesDeprecatedExecute(r WorkspaceAPIList
 	}
 	if r.includeErroredDeleted != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "includeErroredDeleted", r.includeErroredDeleted, "form", "")
+	} else {
+		var defaultValue bool = false
+		r.includeErroredDeleted = &defaultValue
 	}
 	if r.states != nil {
 		t := *r.states
@@ -1294,6 +1311,18 @@ func (a *WorkspaceAPIService) ListWorkspacesDeprecatedExecute(r WorkspaceAPIList
 	}
 	if r.lastEventBefore != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "lastEventBefore", r.lastEventBefore, "form", "")
+	}
+	if r.sort != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "sort", r.sort, "form", "")
+	} else {
+		var defaultValue string = "createdAt"
+		r.sort = &defaultValue
+	}
+	if r.order != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "order", r.order, "form", "")
+	} else {
+		var defaultValue string = "desc"
+		r.order = &defaultValue
 	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}

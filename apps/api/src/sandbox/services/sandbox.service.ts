@@ -61,6 +61,7 @@ import { nanoid } from 'nanoid'
 import { SshAccessValidationDto } from '../dto/ssh-access.dto'
 import { VolumeService } from './volume.service'
 import { PaginatedList } from '../../common/interfaces/paginated-list.interface'
+import { SortField, SortDirection } from '../dto/list-sandboxes-query.dto'
 
 const DEFAULT_CPU = 1
 const DEFAULT_MEMORY = 1
@@ -559,7 +560,6 @@ export class SandboxService {
     this.eventEmitter.emit(SandboxEvents.BACKUP_CREATED, new SandboxBackupCreatedEvent(sandbox))
   }
 
-  // TODO: sort params
   async findAll(
     organizationId: string,
     page = 1,
@@ -579,6 +579,10 @@ export class SandboxService {
       lastEventAfter?: Date
       lastEventBefore?: Date
     },
+    sort?: {
+      field?: SortField
+      direction?: SortDirection
+    },
   ): Promise<PaginatedList<Sandbox>> {
     const pageNum = Number(page)
     const limitNum = Number(limit)
@@ -597,7 +601,9 @@ export class SandboxService {
       maxDiskGiB,
       lastEventAfter,
       lastEventBefore,
-    } = filters
+    } = filters || {}
+
+    const { field: sortField, direction: sortDirection } = sort || {}
 
     const baseFindOptions: FindOptionsWhere<Sandbox> = {
       organizationId,
@@ -657,7 +663,7 @@ export class SandboxService {
     const [items, total] = await this.sandboxRepository.findAndCount({
       where,
       order: {
-        createdAt: 'DESC',
+        [sortField]: sortDirection,
       },
       skip: (pageNum - 1) * limitNum,
       take: limitNum,

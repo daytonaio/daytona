@@ -1175,6 +1175,8 @@ type SandboxAPIListSandboxesRequest struct {
 	maxDiskGiB             *float32
 	lastEventAfter         *time.Time
 	lastEventBefore        *time.Time
+	sort                   *string
+	order                  *string
 }
 
 // Use with JWT to specify the organization ID
@@ -1183,13 +1185,13 @@ func (r SandboxAPIListSandboxesRequest) XDaytonaOrganizationID(xDaytonaOrganizat
 	return r
 }
 
-// Page number
+// Page number of the results
 func (r SandboxAPIListSandboxesRequest) Page(page float32) SandboxAPIListSandboxesRequest {
 	r.page = &page
 	return r
 }
 
-// Number of items per page
+// Number of results per page
 func (r SandboxAPIListSandboxesRequest) Limit(limit float32) SandboxAPIListSandboxesRequest {
 	r.limit = &limit
 	return r
@@ -1201,7 +1203,7 @@ func (r SandboxAPIListSandboxesRequest) Labels(labels string) SandboxAPIListSand
 	return r
 }
 
-// Include items that are errored with deleted desired state
+// Include results with errored state and deleted desired state
 func (r SandboxAPIListSandboxesRequest) IncludeErroredDeleted(includeErroredDeleted bool) SandboxAPIListSandboxesRequest {
 	r.includeErroredDeleted = &includeErroredDeleted
 	return r
@@ -1273,6 +1275,18 @@ func (r SandboxAPIListSandboxesRequest) LastEventBefore(lastEventBefore time.Tim
 	return r
 }
 
+// Field to sort by
+func (r SandboxAPIListSandboxesRequest) Sort(sort string) SandboxAPIListSandboxesRequest {
+	r.sort = &sort
+	return r
+}
+
+// Direction to sort by
+func (r SandboxAPIListSandboxesRequest) Order(order string) SandboxAPIListSandboxesRequest {
+	r.order = &order
+	return r
+}
+
 func (r SandboxAPIListSandboxesRequest) Execute() (*PaginatedSandboxes, *http.Response, error) {
 	return r.ApiService.ListSandboxesExecute(r)
 }
@@ -1329,6 +1343,9 @@ func (a *SandboxAPIService) ListSandboxesExecute(r SandboxAPIListSandboxesReques
 	}
 	if r.includeErroredDeleted != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "includeErroredDeleted", r.includeErroredDeleted, "form", "")
+	} else {
+		var defaultValue bool = false
+		r.includeErroredDeleted = &defaultValue
 	}
 	if r.states != nil {
 		t := *r.states
@@ -1386,6 +1403,18 @@ func (a *SandboxAPIService) ListSandboxesExecute(r SandboxAPIListSandboxesReques
 	}
 	if r.lastEventBefore != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "lastEventBefore", r.lastEventBefore, "form", "")
+	}
+	if r.sort != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "sort", r.sort, "form", "")
+	} else {
+		var defaultValue string = "createdAt"
+		r.sort = &defaultValue
+	}
+	if r.order != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "order", r.order, "form", "")
+	} else {
+		var defaultValue string = "desc"
+		r.order = &defaultValue
 	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}

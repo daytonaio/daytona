@@ -113,23 +113,34 @@ export class SandboxController {
       maxDiskGiB,
       lastEventAfter,
       lastEventBefore,
+      sort: sortField,
+      order: sortDirection,
     } = queryParams
 
-    const result = await this.sandboxService.findAll(authContext.organizationId, page, limit, {
-      labels: labels ? JSON.parse(labels) : {},
-      includeErroredDestroyed,
-      states,
-      snapshots,
-      regions,
-      minCpu,
-      maxCpu,
-      minMemoryGiB,
-      maxMemoryGiB,
-      minDiskGiB,
-      maxDiskGiB,
-      lastEventAfter,
-      lastEventBefore,
-    })
+    const result = await this.sandboxService.findAll(
+      authContext.organizationId,
+      page,
+      limit,
+      {
+        labels: labels ? JSON.parse(labels) : {},
+        includeErroredDestroyed,
+        states,
+        snapshots,
+        regions,
+        minCpu,
+        maxCpu,
+        minMemoryGiB,
+        maxMemoryGiB,
+        minDiskGiB,
+        maxDiskGiB,
+        lastEventAfter,
+        lastEventBefore,
+      },
+      {
+        field: sortField,
+        direction: sortDirection,
+      },
+    )
 
     const runnerIds = new Set(result.items.map((s) => s.runnerId))
     const runners = await this.runnerService.findByIds(Array.from(runnerIds))
