@@ -13679,6 +13679,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"axios@npm:^1.12.0":
+  version: 1.12.1
+  resolution: "axios@npm:1.12.1"
+  dependencies:
+    follow-redirects: "npm:^1.15.6"
+    form-data: "npm:^4.0.4"
+    proxy-from-env: "npm:^1.1.0"
+  checksum: 10c0/eda4dff56c02d13b950fd9487b678ac197ce5f21dfc98df73632df29e45d8dd24602a34e8d9b6e016d84a41ef7fd7fc4a7618060a72cc536b91cda1eaa9cd907
+  languageName: node
+  linkType: hard
+
 "axios@npm:^1.8.2, axios@npm:^1.8.3":
   version: 1.10.0
   resolution: "axios@npm:1.10.0"
@@ -16326,7 +16337,7 @@ __metadata:
     astro: "npm:4.16.18"
     astro-expressive-code: "npm:^0.41.2"
     autoprefixer: "npm:10.4.13"
-    axios: "npm:^1.11.0"
+    axios: "npm:^1.12.0"
     axios-debug-log: "npm:^1.0.0"
     axios-retry: "npm:^4.5.0"
     cache-manager: "npm:^6.4.1"
