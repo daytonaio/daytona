@@ -49,6 +49,7 @@ import Runners from './pages/Runners'
 import Sandboxes from './pages/Sandboxes'
 import Snapshots from './pages/Snapshots'
 import Spending from './pages/Spending'
+import Playground from './pages/Playground'
 import Volumes from './pages/Volumes'
 import Wallet from './pages/Wallet'
 import { ApiProvider } from './providers/ApiProvider'
@@ -257,6 +258,7 @@ function App() {
         />
         <Route path={getRouteSubPath(RoutePath.USER_INVITATIONS)} element={<UserOrganizationInvitations />} />
         <Route path={getRouteSubPath(RoutePath.ONBOARDING)} element={<Onboarding />} />
+        <Route path={getRouteSubPath(RoutePath.PLAYGROUND)} element={<Playground />} />
       </Route>
       <Route path="*" element={<NotFound />} />
     </Routes>

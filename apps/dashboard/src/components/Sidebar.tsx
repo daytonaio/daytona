@@ -38,6 +38,7 @@ import {
   Container,
   CreditCard,
   HardDrive,
+  Joystick,
   KeyRound,
   ListChecks,
   LockKeyhole,
@@ -192,6 +193,11 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
       // }
     }
 
+    arr.push({
+      icon: <Joystick size={16} strokeWidth={1.5} />,
+      label: 'Playground',
+      path: RoutePath.PLAYGROUND,
+    })
     return arr
   }, [authenticatedUserOrganizationMember?.role, selectedOrganization?.personal, webhooksInitialized, openAppPortal])
 
