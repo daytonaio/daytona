@@ -7,11 +7,13 @@ import { useTheme } from '@/contexts/ThemeContext'
 import { CheckIcon, ClipboardIcon } from 'lucide-react'
 import { useState } from 'react'
 import { Highlight, themes, type PrismTheme, type Token } from 'prism-react-renderer'
+import { cn } from '@/lib/utils'
 
 interface CodeBlockProps {
   code: string
   language: string
   showCopy?: boolean
+  codeAreaClassName?: string
 }
 
 interface HighlightProps {
@@ -21,7 +23,7 @@ interface HighlightProps {
   getTokenProps: (props: { token: Token; key: number }) => React.HTMLAttributes<HTMLSpanElement>
 }
 
-const CodeBlock: React.FC<CodeBlockProps> = ({ code, language, showCopy = true }) => {
+const CodeBlock: React.FC<CodeBlockProps> = ({ code, language, showCopy = true, codeAreaClassName }) => {
   const [copied, setCopied] = useState(false)
   const { theme } = useTheme()
 
@@ -39,7 +41,7 @@ const CodeBlock: React.FC<CodeBlockProps> = ({ code, language, showCopy = true }
         language={language}
       >
         {({ style, tokens, getLineProps, getTokenProps }: HighlightProps) => (
-          <pre className="p-4 rounded-lg overflow-x-auto" style={style}>
+          <pre className={cn('p-4 rounded-lg overflow-x-auto', codeAreaClassName)} style={style}>
             {tokens.map((line, i) => {
               const props = getLineProps({ line, key: i })
               // @ts-expect-error Workaround for the render error. Key should not be spread into JSX
