@@ -2,7 +2,7 @@
 title: Process and Code Execution
 ---
 
-import { Tabs, TabItem } from '@astrojs/starlight/components';
+import { TabItem, Tabs } from '@astrojs/starlight/components'
 
 The Daytona SDK provides powerful process and code execution capabilities through the `process` module in Sandboxes. This guide covers all available process operations and best practices.
 
@@ -27,7 +27,7 @@ print(greet("Daytona"))
 
 print(response.result)
 
-```
+````
 </TabItem>
 <TabItem label="TypeScript" icon="seti:typescript">
 ```typescript
@@ -47,7 +47,7 @@ response = await sandbox.process.codeRun(
     console.log(\`Hello, \${process.argv[2]}!\`);
     console.log(\`FOO: \${process.env.FOO}\`);
     `,
-    { 
+    {
       argv: ["Daytona"],
       env: { FOO: "BAR" }
     }
@@ -61,7 +61,7 @@ response = await sandbox.process.codeRun(
     5000
 );
 console.log(response.result);
-```
+````
 
 </TabItem>
 </Tabs>
@@ -92,12 +92,12 @@ print(response.result)
 # Passing environment variables
 
 response = sandbox.process.exec("echo $CUSTOM_SECRET", env={
-        "CUSTOM_SECRET": "DAYTONA"
-    }
+"CUSTOM_SECRET": "DAYTONA"
+}
 )
 print(response.result)
 
-```
+````
 </TabItem>
 <TabItem label="TypeScript" icon="seti:typescript">
 ```typescript
@@ -117,7 +117,7 @@ const response3 = await sandbox.process.executeCommand("echo $CUSTOM_SECRET", ".
 );
 console.log(response3.result);
 
-```
+````
 
 </TabItem>
 </Tabs>
@@ -145,9 +145,9 @@ for command in session.commands:
 
 sessions = sandbox.process.list_sessions()
 for session in sessions:
-    print(f"PID: {session.id}, Commands: {session.commands}")
+print(f"PID: {session.id}, Commands: {session.commands}")
 
-```
+````
 </TabItem>
 <TabItem label="TypeScript" icon="seti:typescript">
 ```typescript
@@ -164,7 +164,7 @@ for (const session of sessions) {
     console.log(`PID: ${session.id}, Commands: ${session.commands}`);
 }
 
-```
+````
 
 </TabItem>
 </Tabs>

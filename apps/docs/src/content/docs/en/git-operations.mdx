@@ -29,21 +29,21 @@ sandbox.git.clone(
 # Clone with authentication
 
 sandbox.git.clone(
-    url="https://github.com/user/repo.git",
-    path="workspace/repo",
-    username="git",
-    password="personal_access_token"
+url="https://github.com/user/repo.git",
+path="workspace/repo",
+username="git",
+password="personal_access_token"
 )
 
 # Clone specific branch
 
 sandbox.git.clone(
-    url="https://github.com/user/repo.git",
-    path="workspace/repo",
-    branch="develop"
+url="https://github.com/user/repo.git",
+path="workspace/repo",
+branch="develop"
 )
 
-```
+````
 </TabItem>
 <TabItem label="TypeScript" icon="seti:typescript">
 ```typescript
@@ -69,7 +69,7 @@ await sandbox.git.clone(
     "workspace/repo",
     "develop"
 );
-```
+````
 
 </TabItem>
 </Tabs>
@@ -95,9 +95,9 @@ for file in status.file_status:
 
 response = sandbox.git.branches("workspace/repo")
 for branch in response.branches:
-    print(f"Branch: {branch}")
+print(f"Branch: {branch}")
 
-```
+````
 </TabItem>
 <TabItem label="TypeScript" icon="seti:typescript">
 ```typescript
@@ -115,7 +115,7 @@ const response = await sandbox.git.branches("workspace/repo");
 response.branches.forEach(branch => {
     console.log(`Branch: ${branch}`);
 });
-```
+````
 
 </TabItem>
 </Tabs>
@@ -144,7 +144,7 @@ sandbox.git.checkout_branch("workspace/repo", "feature/new-feature")
 
 sandbox.git.delete_branch("workspace/repo", "feature/old-feature")
 
-```
+````
 </TabItem>
 <TabItem label="TypeScript" icon="seti:typescript">
 ```typescript
@@ -156,7 +156,7 @@ await sandbox.git.checkoutBranch("workspace/repo", "feature/new-feature");
 
 // Delete branch
 await sandbox.git.deleteBranch("workspace/repo", "feature/old-feature");
-```
+````
 
 </TabItem>
 </Tabs>
@@ -183,7 +183,7 @@ sandbox.git.add("workspace/repo", ["."])
 
 sandbox.git.commit("workspace/repo", "feat: add new feature", "John Doe", "john@example.com")
 
-```
+````
 </TabItem>
 <TabItem label="TypeScript" icon="seti:typescript">
 ```typescript
@@ -195,7 +195,7 @@ await sandbox.git.add("workspace/repo", ["."]);
 
 // Commit changes
 await sandbox.git.commit("workspace/repo", "feat: add new feature", "John Doe", "john@example.com");
-```
+````
 
 </TabItem>
 </Tabs>
@@ -219,7 +219,7 @@ sandbox.git.push("workspace/repo")
 # Pull changes
 sandbox.git.pull("workspace/repo")
 
-```
+````
 </TabItem>
 <TabItem label="TypeScript" icon="seti:typescript">
 ```typescript
@@ -228,7 +228,7 @@ await sandbox.git.push("workspace/repo");
 
 // Pull changes
 await sandbox.git.pull("workspace/repo");
-```
+````
 
 </TabItem>
 </Tabs>

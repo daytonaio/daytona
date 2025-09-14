@@ -1,5 +1,5 @@
 ---
-title: "AsyncSandbox"
+title: 'AsyncSandbox'
 hideTitleOnPage: true
 ---
 
@@ -61,7 +61,7 @@ Initialize a new Sandbox instance.
 - `toolbox_api` _ToolboxApi_ - API client for toolbox operations.
 - `code_toolbox` _SandboxCodeToolbox_ - Language-specific toolbox implementation.
 
-#### AsyncSandbox.refresh\_data
+#### AsyncSandbox.refresh_data
 
 ```python
 @intercept_errors(message_prefix="Failed to refresh sandbox data: ")
@@ -79,7 +79,7 @@ print(f"State: {sandbox.state}")
 print(f"Resources: {sandbox.cpu} CPU, {sandbox.memory} GiB RAM")
 ```
 
-#### AsyncSandbox.get\_user\_home\_dir
+#### AsyncSandbox.get_user_home_dir
 
 ```python
 @intercept_errors(message_prefix="Failed to get user home directory: ")
@@ -91,7 +91,6 @@ Gets the user's home directory path inside the Sandbox.
 **Returns**:
 
 - `str` - The absolute path to the user's home directory inside the Sandbox.
-  
 
 **Example**:
 
@@ -100,7 +99,7 @@ user_home_dir = await sandbox.get_user_home_dir()
 print(f"Sandbox user home: {user_home_dir}")
 ```
 
-#### AsyncSandbox.get\_work\_dir
+#### AsyncSandbox.get_work_dir
 
 ```python
 @intercept_errors(message_prefix="Failed to get working directory path: ")
@@ -113,7 +112,6 @@ Gets the working directory path inside the Sandbox.
 
 - `str` - The absolute path to the Sandbox working directory. Uses the WORKDIR specified in
   the Dockerfile if present, or falling back to the user's home directory if not.
-  
 
 **Example**:
 
@@ -122,7 +120,7 @@ work_dir = await sandbox.get_work_dir()
 print(f"Sandbox working directory: {work_dir}")
 ```
 
-#### AsyncSandbox.create\_lsp\_server
+#### AsyncSandbox.create_lsp_server
 
 ```python
 def create_lsp_server(language_id: LspLanguageId,
@@ -139,12 +137,10 @@ diagnostics, and more.
 - `language_id` _LspLanguageId_ - The language server type (e.g., LspLanguageId.PYTHON).
 - `path_to_project` _str_ - Path to the project root directory. Relative paths are resolved
   based on the sandbox working directory.
-  
 
 **Returns**:
 
 - `LspServer` - A new LSP server instance configured for the specified language.
-  
 
 **Example**:
 
@@ -152,7 +148,7 @@ diagnostics, and more.
 lsp = sandbox.create_lsp_server("python", "workspace/project")
 ```
 
-#### AsyncSandbox.set\_labels
+#### AsyncSandbox.set_labels
 
 ```python
 @intercept_errors(message_prefix="Failed to set labels: ")
@@ -166,12 +162,10 @@ Labels are key-value pairs that can be used to organize and identify Sandboxes.
 **Arguments**:
 
 - `labels` _Dict[str, str]_ - Dictionary of key-value pairs representing Sandbox labels.
-  
 
 **Returns**:
 
-  Dict[str, str]: Dictionary containing the updated Sandbox labels.
-  
+Dict[str, str]: Dictionary containing the updated Sandbox labels.
 
 **Example**:
 
@@ -199,12 +193,10 @@ Starts the Sandbox and waits for it to be ready.
 **Arguments**:
 
 - `timeout` _Optional[float]_ - Maximum time to wait in seconds. 0 means no timeout. Default is 60 seconds.
-  
 
 **Raises**:
 
 - `DaytonaError` - If timeout is negative. If sandbox fails to start or times out.
-  
 
 **Example**:
 
@@ -229,12 +221,10 @@ Stops the Sandbox and waits for it to be fully stopped.
 **Arguments**:
 
 - `timeout` _Optional[float]_ - Maximum time to wait in seconds. 0 means no timeout. Default is 60 seconds.
-  
 
 **Raises**:
 
 - `DaytonaError` - If timeout is negative; If sandbox fails to stop or times out
-  
 
 **Example**:
 
@@ -258,7 +248,7 @@ Deletes the Sandbox.
 - `timeout` _Optional[float]_ - Timeout (in seconds) for sandbox deletion. 0 means no timeout.
   Default is 60 seconds.
 
-#### AsyncSandbox.wait\_for\_sandbox\_start
+#### AsyncSandbox.wait_for_sandbox_start
 
 ```python
 @intercept_errors(
@@ -275,13 +265,12 @@ reaches the 'started' state, encounters an error or times out.
 **Arguments**:
 
 - `timeout` _Optional[float]_ - Maximum time to wait in seconds. 0 means no timeout. Default is 60 seconds.
-  
 
 **Raises**:
 
 - `DaytonaError` - If timeout is negative; If Sandbox fails to start or times out
 
-#### AsyncSandbox.wait\_for\_sandbox\_stop
+#### AsyncSandbox.wait_for_sandbox_stop
 
 ```python
 @intercept_errors(
@@ -300,13 +289,12 @@ Treats destroyed as stopped to cover ephemeral sandboxes that are automatically 
 **Arguments**:
 
 - `timeout` _Optional[float]_ - Maximum time to wait in seconds. 0 means no timeout. Default is 60 seconds.
-  
 
 **Raises**:
 
 - `DaytonaError` - If timeout is negative. If Sandbox fails to stop or times out.
 
-#### AsyncSandbox.set\_autostop\_interval
+#### AsyncSandbox.set_autostop_interval
 
 ```python
 @intercept_errors(message_prefix="Failed to set auto-stop interval: ")
@@ -323,12 +311,10 @@ Interactions using Sandbox Previews are not included.
 
 - `interval` _int_ - Number of minutes of inactivity before auto-stopping.
   Set to 0 to disable auto-stop. Defaults to 15.
-  
 
 **Raises**:
 
 - `DaytonaError` - If interval is negative
-  
 
 **Example**:
 
@@ -339,7 +325,7 @@ sandbox.set_autostop_interval(60)
 sandbox.set_autostop_interval(0)
 ```
 
-#### AsyncSandbox.set\_auto\_archive\_interval
+#### AsyncSandbox.set_auto_archive_interval
 
 ```python
 @intercept_errors(message_prefix="Failed to set auto-archive interval: ")
@@ -354,12 +340,10 @@ The Sandbox will automatically archive after being continuously stopped for the 
 
 - `interval` _int_ - Number of minutes after which a continuously stopped Sandbox will be auto-archived.
   Set to 0 for the maximum interval. Default is 7 days.
-  
 
 **Raises**:
 
 - `DaytonaError` - If interval is negative
-  
 
 **Example**:
 
@@ -370,7 +354,7 @@ sandbox.set_auto_archive_interval(60)
 sandbox.set_auto_archive_interval(0)
 ```
 
-#### AsyncSandbox.set\_auto\_delete\_interval
+#### AsyncSandbox.set_auto_delete_interval
 
 ```python
 @intercept_errors(message_prefix="Failed to set auto-delete interval: ")
@@ -386,7 +370,6 @@ The Sandbox will automatically delete after being continuously stopped for the s
 - `interval` _int_ - Number of minutes after which a continuously stopped Sandbox will be auto-deleted.
   Set to negative value to disable auto-delete. Set to 0 to delete immediately upon stopping.
   By default, auto-delete is disabled.
-  
 
 **Example**:
 
@@ -399,7 +382,7 @@ sandbox.set_auto_delete_interval(0)
 sandbox.set_auto_delete_interval(-1)
 ```
 
-#### AsyncSandbox.get\_preview\_link
+#### AsyncSandbox.get_preview_link
 
 ```python
 @intercept_errors(message_prefix="Failed to get preview link: ")
@@ -413,13 +396,11 @@ to the URL.
 **Arguments**:
 
 - `port` _int_ - The port to open the preview link on.
-  
 
 **Returns**:
 
 - `PortPreviewUrl` - The response object for the preview link, which includes the `url`
   and the `token` (to access private sandboxes).
-  
 
 **Example**:
 
@@ -442,7 +423,7 @@ possible to keep sandboxes available for an extended period. The tradeoff betwee
 and stopped states is that starting an archived sandbox takes more time, depending on its size.
 Sandbox must be stopped before archiving.
 
-#### AsyncSandbox.create\_ssh\_access
+#### AsyncSandbox.create_ssh_access
 
 ```python
 @intercept_errors(message_prefix="Failed to create SSH access: ")
@@ -456,7 +437,7 @@ Creates an SSH access token for the sandbox.
 
 - `expires_in_minutes` _Optional[int]_ - The number of minutes the SSH access token will be valid for.
 
-#### AsyncSandbox.revoke\_ssh\_access
+#### AsyncSandbox.revoke_ssh_access
 
 ```python
 @intercept_errors(message_prefix="Failed to revoke SSH access: ")
@@ -469,7 +450,7 @@ Revokes an SSH access token for the sandbox.
 
 - `token` _str_ - The token to revoke.
 
-#### AsyncSandbox.validate\_ssh\_access
+#### AsyncSandbox.validate_ssh_access
 
 ```python
 @intercept_errors(message_prefix="Failed to validate SSH access: ")
@@ -513,7 +494,6 @@ Resources configuration for Sandbox.
 - `memory` _Optional[int]_ - Amount of memory in GiB to allocate.
 - `disk` _Optional[int]_ - Amount of disk space in GiB to allocate.
 - `gpu` _Optional[int]_ - Number of GPUs to allocate.
-  
 
 **Example**:
 
@@ -530,4 +510,3 @@ params = CreateSandboxFromImageParams(
     resources=resources
 )
 ```
-

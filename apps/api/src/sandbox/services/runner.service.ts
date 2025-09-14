@@ -153,6 +153,12 @@ export class RunnerService {
       runnerFilter.class = params.sandboxClass
     }
 
+    if (params.experimental === true) {
+      runnerFilter.experimental = true
+    } else {
+      runnerFilter.experimental = Not(true)
+    }
+
     const runners = await this.runnerRepository.find({
       where: runnerFilter,
     })
@@ -564,6 +570,7 @@ export class GetRunnerParams {
   snapshotRef?: string
   excludedRunnerIds?: string[]
   availabilityScoreThreshold?: number
+  experimental?: boolean
 }
 
 interface AvailabilityScoreParams {

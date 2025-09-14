@@ -1,5 +1,5 @@
 ---
-title: "AsyncFileSystem"
+title: 'AsyncFileSystem'
 hideTitleOnPage: true
 ---
 
@@ -27,7 +27,7 @@ Initializes a new FileSystem instance.
 - `sandbox_id` _str_ - The Sandbox ID.
 - `toolbox_api` _ToolboxApi_ - API client for Sandbox operations.
 
-#### AsyncFileSystem.create\_folder
+#### AsyncFileSystem.create_folder
 
 ```python
 @intercept_errors(message_prefix="Failed to create folder: ")
@@ -42,7 +42,6 @@ permissions.
 - `path` _str_ - Path where the folder should be created. Relative paths are resolved based
   on the sandbox working directory.
 - `mode` _str_ - Folder permissions in octal format (e.g., "755" for rwxr-xr-x).
-  
 
 **Example**:
 
@@ -54,7 +53,7 @@ await sandbox.fs.create_folder("workspace/data", "755")
 await sandbox.fs.create_folder("workspace/secrets", "700")
 ```
 
-#### AsyncFileSystem.delete\_file
+#### AsyncFileSystem.delete_file
 
 ```python
 @intercept_errors(message_prefix="Failed to delete file: ")
@@ -67,7 +66,6 @@ Deletes a file from the Sandbox.
 
 - `path` _str_ - Path to the file to delete. Relative paths are resolved based on the sandbox working directory.
 - `recursive` _bool_ - If the file is a directory, this must be true to delete it.
-  
 
 **Example**:
 
@@ -76,7 +74,7 @@ Deletes a file from the Sandbox.
 await sandbox.fs.delete_file("workspace/data/old_file.txt")
 ```
 
-#### AsyncFileSystem.download\_file
+#### AsyncFileSystem.download_file
 
 ```python
 @overload
@@ -92,12 +90,10 @@ It can only be used for smaller files.
 - `remote_path` _str_ - Path to the file in the Sandbox. Relative paths are resolved based
   on the sandbox working directory.
 - `timeout` _int_ - Timeout for the download operation in seconds. 0 means no timeout. Default is 30 minutes.
-  
 
 **Returns**:
 
 - `bytes` - The file contents as a bytes object.
-  
 
 **Example**:
 
@@ -112,7 +108,7 @@ content = await sandbox.fs.download_file("workspace/data/config.json")
 config = json.loads(content.decode('utf-8'))
 ```
 
-#### AsyncFileSystem.download\_file
+#### AsyncFileSystem.download_file
 
 ```python
 @overload
@@ -130,7 +126,6 @@ This method is useful when you want to download larger files that may not fit in
   on the sandbox working directory.
 - `local_path` _str_ - Path to save the file locally.
 - `timeout` _int_ - Timeout for the download operation in seconds. 0 means no timeout. Default is 30 minutes.
-  
 
 **Example**:
 
@@ -199,7 +194,6 @@ the grep command.
   the search will be performed recursively. Relative paths are resolved based
   on the sandbox working directory.
 - `pattern` _str_ - Search pattern to match against file contents.
-  
 
 **Returns**:
 
@@ -207,7 +201,6 @@ the grep command.
   - file: Path to the file containing the match
   - line: The line number where the match was found
   - content: The matching line content
-  
 
 **Example**:
 
@@ -218,7 +211,7 @@ for match in matches:
     print(f"{match.file}:{match.line}: {match.content.strip()}")
 ```
 
-#### AsyncFileSystem.get\_file\_info
+#### AsyncFileSystem.get_file_info
 
 ```python
 @intercept_errors(message_prefix="Failed to get file info: ")
@@ -232,7 +225,6 @@ size, permissions, and timestamps.
 
 - `path` _str_ - Path to the file or directory. Relative paths are resolved based
   on the sandbox working directory.
-  
 
 **Returns**:
 
@@ -245,7 +237,6 @@ size, permissions, and timestamps.
   - permissions: File permissions in octal format
   - owner: File owner
   - group: File group
-  
 
 **Example**:
 
@@ -262,7 +253,7 @@ if info.is_dir:
     print("Path is a directory")
 ```
 
-#### AsyncFileSystem.list\_files
+#### AsyncFileSystem.list_files
 
 ```python
 @intercept_errors(message_prefix="Failed to list files: ")
@@ -275,13 +266,11 @@ Lists files and directories in a given path and returns their information, simil
 
 - `path` _str_ - Path to the directory to list contents from. Relative paths are resolved
   based on the sandbox working directory.
-  
 
 **Returns**:
 
 - `List[FileInfo]` - List of file and directory information. Each FileInfo
   object includes the same fields as described in get_file_info().
-  
 
 **Example**:
 
@@ -299,7 +288,7 @@ dirs = [f for f in files if f.is_dir]
 print("Subdirectories:", ", ".join(d.name for d in dirs))
 ```
 
-#### AsyncFileSystem.move\_files
+#### AsyncFileSystem.move_files
 
 ```python
 @intercept_errors(message_prefix="Failed to move files: ")
@@ -314,7 +303,6 @@ Moves or renames a file or directory. The parent directory of the destination mu
   based on the sandbox working directory.
 - `destination` _str_ - Path to the destination. Relative paths are resolved based on
   the sandbox working directory.
-  
 
 **Example**:
 
@@ -338,7 +326,7 @@ await sandbox.fs.move_files(
 )
 ```
 
-#### AsyncFileSystem.replace\_in\_files
+#### AsyncFileSystem.replace_in_files
 
 ```python
 @intercept_errors(message_prefix="Failed to replace in files: ")
@@ -354,7 +342,6 @@ Performs search and replace operations across multiple files.
   resolved based on the sandbox working directory.
 - `pattern` _str_ - Pattern to search for.
 - `new_value` _str_ - Text to replace matches with.
-  
 
 **Returns**:
 
@@ -363,7 +350,6 @@ Performs search and replace operations across multiple files.
   - file: Path to the modified file
   - success: Whether the operation was successful
   - error: Error message if the operation failed
-  
 
 **Example**:
 
@@ -383,7 +369,7 @@ for result in results:
         print(f"{result.file}: {result.error}")
 ```
 
-#### AsyncFileSystem.search\_files
+#### AsyncFileSystem.search_files
 
 ```python
 @intercept_errors(message_prefix="Failed to search files: ")
@@ -398,14 +384,12 @@ specified pattern. The pattern can be a simple string or a glob pattern.
 - `path` _str_ - Path to the root directory to start search from. Relative paths are resolved
   based on the sandbox working directory.
 - `pattern` _str_ - Pattern to match against file names. Supports glob
-  patterns (e.g., "*.py" for Python files).
-  
+  patterns (e.g., "\*.py" for Python files).
 
 **Returns**:
 
 - `SearchFilesResponse` - Search results containing:
   - files: List of matching file and directory paths
-  
 
 **Example**:
 
@@ -420,7 +404,7 @@ result = await sandbox.fs.search_files("workspace/data", "test_*")
 print(f"Found {len(result.files)} test files")
 ```
 
-#### AsyncFileSystem.set\_file\_permissions
+#### AsyncFileSystem.set_file_permissions
 
 ```python
 @intercept_errors(message_prefix="Failed to set file permissions: ")
@@ -441,7 +425,6 @@ to leave that attribute unchanged.
   (e.g., "644" for rw-r--r--).
 - `owner` _Optional[str]_ - User owner of the file.
 - `group` _Optional[str]_ - Group owner of the file.
-  
 
 **Example**:
 
@@ -460,7 +443,7 @@ await sandbox.fs.set_file_permissions(
 )
 ```
 
-#### AsyncFileSystem.upload\_file
+#### AsyncFileSystem.upload_file
 
 ```python
 @overload
@@ -479,7 +462,6 @@ small files that fit into memory.
 - `remote_path` _str_ - Path to the destination file. Relative paths are resolved based on
   the sandbox working directory.
 - `timeout` _int_ - Timeout for the upload operation in seconds. 0 means no timeout. Default is 30 minutes.
-  
 
 **Example**:
 
@@ -500,7 +482,7 @@ content = json.dumps(data).encode('utf-8')
 await sandbox.fs.upload_file(content, "tmp/config.json")
 ```
 
-#### AsyncFileSystem.upload\_file
+#### AsyncFileSystem.upload_file
 
 ```python
 @overload
@@ -520,7 +502,6 @@ not fit into memory.
 - `remote_path` _str_ - Path to the destination file in the Sandbox. Relative paths are
   resolved based on the sandbox working directory.
 - `timeout` _int_ - Timeout for the upload operation in seconds. 0 means no timeout. Default is 30 minutes.
-  
 
 **Example**:
 
@@ -528,7 +509,7 @@ not fit into memory.
 await sandbox.fs.upload_file("local_file.txt", "tmp/large_file.txt")
 ```
 
-#### AsyncFileSystem.upload\_files
+#### AsyncFileSystem.upload_files
 
 ```python
 @intercept_errors(message_prefix="Failed to upload files: ")

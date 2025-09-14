@@ -88,6 +88,8 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
       .createQueryBuilder('snapshot')
       .innerJoin('organization', 'org', 'org.id = snapshot.organizationId')
       .where('snapshot.state = :snapshotState', { snapshotState: SnapshotState.ACTIVE })
+      //  experimental snapshots are not propagated across runners
+      .andWhere('snapshot.experimental = false')
       .andWhere('org.suspended = false')
       .orderBy('snapshot.createdAt', 'ASC')
       .take(100)
