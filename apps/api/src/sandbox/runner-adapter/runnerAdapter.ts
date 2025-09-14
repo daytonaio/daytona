@@ -73,6 +73,8 @@ export interface RunnerAdapter {
     networkAllowList?: string,
     networkLimitEgress?: boolean,
   ): Promise<void>
+
+  snapshotSandbox(sandboxId: string): Promise<string>
 }
 
 @Injectable()
