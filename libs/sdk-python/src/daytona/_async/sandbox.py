@@ -496,6 +496,30 @@ class AsyncSandbox(SandboxDto):
         """
         return (await self._sandbox_api.validate_ssh_access(token)).data
 
+    @intercept_errors(message_prefix="Failed to snapshot sandbox: ")
+    async def snapshot_sandbox(self) -> str:
+        """Creates a snapshot of the sandbox.
+
+        Creates a snapshot of the current sandbox state, which can be used to create
+        new sandboxes with the same configuration and filesystem state.
+
+        Returns:
+            str: The snapshot reference/name that can be used to create new sandboxes.
+
+        Example:
+            ```python
+            snapshot_ref = await sandbox.snapshot_sandbox()
+            print(f"Created snapshot: {snapshot_ref}")
+
+            # Use the snapshot to create a new sandbox
+            new_sandbox = await daytona.create(CreateSandboxFromSnapshotParams(
+                snapshot=snapshot_ref,
+                language="python"
+            ))
+            ```
+        """
+        return await self._sandbox_api.snapshot_sandbox(self.id)
+
     def __process_sandbox_dto(self, sandbox_dto: SandboxDto) -> None:
         self.id = sandbox_dto.id
         self.name = sandbox_dto.name

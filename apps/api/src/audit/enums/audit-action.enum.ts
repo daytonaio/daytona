@@ -41,6 +41,7 @@ export enum AuditAction {
   UPDATE_SANDBOX_DEFAULT_LIMITED_NETWORK_EGRESS = 'update_sandbox_default_limited_network_egress',
   CREATE_SSH_ACCESS = 'create_ssh_access',
   REVOKE_SSH_ACCESS = 'revoke_ssh_access',
+  SNAPSHOT_SANDBOX = 'snapshot_sandbox',
 
   // toolbox actions (must be prefixed with 'toolbox_')
   TOOLBOX_DELETE_FILE = 'toolbox_delete_file',

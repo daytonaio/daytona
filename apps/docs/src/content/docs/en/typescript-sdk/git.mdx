@@ -1,8 +1,7 @@
 ---
-title: "Git"
+title: 'Git'
 hideTitleOnPage: true
 ---
-
 
 ## Git
 
@@ -20,7 +19,6 @@ new Git(sandboxId: string, toolboxApi: ToolboxApi): Git
 
 - `sandboxId` _string_
 - `toolboxApi` _ToolboxApi_
-
 
 **Returns**:
 
@@ -42,7 +40,6 @@ running 'git add' on the command line.
 - `path` _string_ - Path to the Git repository root. Relative paths are resolved based on the sandbox working directory.
 - `files` _string\[\]_ - List of file paths or directories to stage, relative to the repository root
 
-
 **Returns**:
 
 - `Promise<void>`
@@ -51,15 +48,15 @@ running 'git add' on the command line.
 
 ```ts
 // Stage a single file
-await git.add('workspace/repo', ['file.txt']);
+await git.add('workspace/repo', ['file.txt'])
 ```
 
 ```ts
 // Stage whole repository
-await git.add('workspace/repo', ['.']);
+await git.add('workspace/repo', ['.'])
 ```
 
-***
+---
 
 #### branches()
 
@@ -73,7 +70,6 @@ List branches in the repository.
 
 - `path` _string_ - Path to the Git repository root. Relative paths are resolved based on the sandbox working directory.
 
-
 **Returns**:
 
 - `Promise<ListBranchResponse>` - List of branches in the repository
@@ -81,11 +77,11 @@ List branches in the repository.
 **Example:**
 
 ```ts
-const response = await git.branches('workspace/repo');
-console.log(`Branches: ${response.branches}`);
+const response = await git.branches('workspace/repo')
+console.log(`Branches: ${response.branches}`)
 ```
 
-***
+---
 
 #### checkoutBranch()
 
@@ -100,7 +96,6 @@ Checkout branche in the repository.
 - `path` _string_ - Path to the Git repository root. Relative paths are resolved based on the sandbox working directory.
 - `branch` _string_ - Name of the branch to checkout
 
-
 **Returns**:
 
 - `Promise<void>`
@@ -108,20 +103,20 @@ Checkout branche in the repository.
 **Example:**
 
 ```ts
-await git.checkoutBranch('workspace/repo', 'new-feature');
+await git.checkoutBranch('workspace/repo', 'new-feature')
 ```
 
-***
+---
 
 #### clone()
 
 ```ts
 clone(
-   url: string, 
-   path: string, 
-   branch?: string, 
-   commitId?: string, 
-   username?: string, 
+   url: string,
+   path: string,
+   branch?: string,
+   commitId?: string,
+   username?: string,
 password?: string): Promise<void>
 ```
 
@@ -138,7 +133,6 @@ repository if credentials are provided.
 - `username?` _string_ - Git username for authentication
 - `password?` _string_ - Git password or token for authentication
 
-
 **Returns**:
 
 - `Promise<void>`
@@ -147,10 +141,7 @@ repository if credentials are provided.
 
 ```ts
 // Clone the default branch
-await git.clone(
-  'https://github.com/user/repo.git',
-  'workspace/repo'
-);
+await git.clone('https://github.com/user/repo.git', 'workspace/repo')
 ```
 
 ```ts
@@ -158,10 +149,10 @@ await git.clone(
 await git.clone(
   'https://github.com/user/private-repo.git',
   'workspace/private',
-  branch='develop',
-  username='user',
-  password='token'
-);
+  (branch = 'develop'),
+  (username = 'user'),
+  (password = 'token')
+)
 ```
 
 ```ts
@@ -169,20 +160,20 @@ await git.clone(
 await git.clone(
   'https://github.com/user/repo.git',
   'workspace/repo-old',
-  commitId='abc123'
-);
+  (commitId = 'abc123')
+)
 ```
 
-***
+---
 
 #### commit()
 
 ```ts
 commit(
-   path: string, 
-   message: string, 
-   author: string, 
-   email: string, 
+   path: string,
+   message: string,
+   author: string,
+   email: string,
 allowEmpty?: boolean): Promise<GitCommitResponse>
 ```
 
@@ -196,7 +187,6 @@ Commits staged changes.
 - `email` _string_ - Email address of the commit author
 - `allowEmpty?` _boolean_ - Allow creating an empty commit when no changes are staged
 
-
 **Returns**:
 
 - `Promise<GitCommitResponse>`
@@ -205,17 +195,17 @@ Commits staged changes.
 
 ```ts
 // Stage and commit changes
-await git.add('workspace/repo', ['README.md']);
+await git.add('workspace/repo', ['README.md'])
 await git.commit(
   'workspace/repo',
   'Update documentation',
   'John Doe',
   'john@example.com',
   true
-);
+)
 ```
 
-***
+---
 
 #### createBranch()
 
@@ -230,7 +220,6 @@ Create branch in the repository.
 - `path` _string_ - Path to the Git repository root. Relative paths are resolved based on the sandbox working directory.
 - `name` _string_ - Name of the new branch to create
 
-
 **Returns**:
 
 - `Promise<void>`
@@ -238,10 +227,10 @@ Create branch in the repository.
 **Example:**
 
 ```ts
-await git.createBranch('workspace/repo', 'new-feature');
+await git.createBranch('workspace/repo', 'new-feature')
 ```
 
-***
+---
 
 #### deleteBranch()
 
@@ -256,7 +245,6 @@ Delete branche in the repository.
 - `path` _string_ - Path to the Git repository root. Relative paths are resolved based on the sandbox working directory.
 - `name` _string_ - Name of the branch to delete
 
-
 **Returns**:
 
 - `Promise<void>`
@@ -264,17 +252,17 @@ Delete branche in the repository.
 **Example:**
 
 ```ts
-await git.deleteBranch('workspace/repo', 'new-feature');
+await git.deleteBranch('workspace/repo', 'new-feature')
 ```
 
-***
+---
 
 #### pull()
 
 ```ts
 pull(
-   path: string, 
-   username?: string, 
+   path: string,
+   username?: string,
 password?: string): Promise<void>
 ```
 
@@ -286,7 +274,6 @@ Pulls changes from the remote repository.
 - `username?` _string_ - Git username for authentication
 - `password?` _string_ - Git password or token for authentication
 
-
 **Returns**:
 
 - `Promise<void>`
@@ -295,26 +282,22 @@ Pulls changes from the remote repository.
 
 ```ts
 // Pull from a public repository
-await git.pull('workspace/repo');
+await git.pull('workspace/repo')
 ```
 
 ```ts
 // Pull from a private repository
-await git.pull(
-  'workspace/repo',
-  'user',
-  'token'
-);
+await git.pull('workspace/repo', 'user', 'token')
 ```
 
-***
+---
 
 #### push()
 
 ```ts
 push(
-   path: string, 
-   username?: string, 
+   path: string,
+   username?: string,
 password?: string): Promise<void>
 ```
 
@@ -326,7 +309,6 @@ Push local changes to the remote repository.
 - `username?` _string_ - Git username for authentication
 - `password?` _string_ - Git password or token for authentication
 
-
 **Returns**:
 
 - `Promise<void>`
@@ -335,19 +317,15 @@ Push local changes to the remote repository.
 
 ```ts
 // Push to a public repository
-await git.push('workspace/repo');
+await git.push('workspace/repo')
 ```
 
 ```ts
 // Push to a private repository
-await git.push(
-  'workspace/repo',
-  'user',
-  'token'
-);
+await git.push('workspace/repo', 'user', 'token')
 ```
 
-***
+---
 
 #### status()
 
@@ -361,27 +339,25 @@ Gets the current status of the Git repository.
 
 - `path` _string_ - Path to the Git repository root. Relative paths are resolved based on the sandbox working directory.
 
-
 **Returns**:
 
 - `Promise<GitStatus>` - Current repository status including:
-    - currentBranch: Name of the current branch
-    - ahead: Number of commits ahead of the remote branch
-    - behind: Number of commits behind the remote branch
-    - branchPublished: Whether the branch has been published to the remote repository
-    - fileStatus: List of file statuses
+  - currentBranch: Name of the current branch
+  - ahead: Number of commits ahead of the remote branch
+  - behind: Number of commits behind the remote branch
+  - branchPublished: Whether the branch has been published to the remote repository
+  - fileStatus: List of file statuses
 
 **Example:**
 
 ```ts
-const status = await sandbox.git.status('workspace/repo');
-console.log(`Current branch: ${status.currentBranch}`);
-console.log(`Commits ahead: ${status.ahead}`);
-console.log(`Commits behind: ${status.behind}`);
+const status = await sandbox.git.status('workspace/repo')
+console.log(`Current branch: ${status.currentBranch}`)
+console.log(`Commits ahead: ${status.ahead}`)
+console.log(`Commits behind: ${status.behind}`)
 ```
 
-***
-
+---
 
 ## GitCommitResponse
 

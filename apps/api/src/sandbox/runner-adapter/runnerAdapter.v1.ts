@@ -361,4 +361,8 @@ export class RunnerAdapterV1 implements RunnerAdapter {
 
     await firstValueFrom(this.sandboxServiceClient.updateNetworkSettings(request, this.getMetadata()))
   }
+
+  async snapshotSandbox(sandboxId: string): Promise<string> {
+    throw new Error('Snapshot sandbox is not supported in v1 runner')
+  }
 }
