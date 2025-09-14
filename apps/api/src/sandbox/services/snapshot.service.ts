@@ -74,7 +74,13 @@ export class SnapshotService {
     return null
   }
 
-  async createSnapshot(organization: Organization, createSnapshotDto: CreateSnapshotDto, general = false) {
+  async createSnapshot(
+    organization: Organization,
+    createSnapshotDto: CreateSnapshotDto,
+    general = false,
+    experimental = false,
+    experimentalSnapshotRunnerId?: string,
+  ) {
     const nameValidationError = this.validateSnapshotName(createSnapshotDto.name)
     if (nameValidationError) {
       throw new BadRequestException(nameValidationError)
@@ -104,6 +110,13 @@ export class SnapshotService {
         state: createSnapshotDto.buildInfo ? SnapshotState.BUILD_PENDING : SnapshotState.PENDING,
         general,
       })
+
+      if (experimental) {
+        snapshot.experimental = true
+        //  use the buildRunnerId for the experimental snapshot runner id
+        //  we don't want tointroduce a new field for this
+        snapshot.buildRunnerId = experimentalSnapshotRunnerId
+      }
 
       if (createSnapshotDto.buildInfo) {
         const buildSnapshotRef = generateBuildSnapshotRef(

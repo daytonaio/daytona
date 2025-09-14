@@ -21,6 +21,7 @@ import { RunnerAdapterFactory } from '../../runner-adapter/runnerAdapter'
 import { ToolboxService } from '../../services/toolbox.service'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Snapshot } from '../../entities/snapshot.entity'
+import { SnapshotRunner } from '../../entities/snapshot-runner.entity'
 
 @Injectable()
 export class SandboxStartAction extends SandboxAction {

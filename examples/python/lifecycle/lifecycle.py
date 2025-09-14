@@ -37,6 +37,10 @@ def main():
 
     print(f"Printing sandboxes[0] -> id: {sandboxes[0].id} state: {sandboxes[0].state}")
 
+    print("Snapshotting sandbox")
+    snapshot = sandbox.snapshot_sandbox()
+    print(f"Snapshot: {snapshot}")
+
     print("Removing sandbox")
     daytona.delete(sandbox)
     print("Sandbox removed")

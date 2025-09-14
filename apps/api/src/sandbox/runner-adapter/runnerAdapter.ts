@@ -62,6 +62,8 @@ export interface RunnerAdapter {
   getSandboxDaemonVersion(sandboxId: string): Promise<string>
 
   updateNetworkSettings(sandboxId: string, networkBlockAll?: boolean, networkAllowList?: string): Promise<void>
+
+  snapshotSandbox(sandboxId: string): Promise<string>
 }
 
 @Injectable()

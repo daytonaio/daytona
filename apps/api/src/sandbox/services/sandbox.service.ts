@@ -50,6 +50,7 @@ import { SshAccess } from '../entities/ssh-access.entity'
 import { nanoid } from 'nanoid'
 import { SshAccessValidationDto } from '../dto/ssh-access.dto'
 import { VolumeService } from './volume.service'
+import { SnapshotService } from './snapshot.service'
 
 const DEFAULT_CPU = 1
 const DEFAULT_MEMORY = 1
@@ -79,6 +80,7 @@ export class SandboxService {
     private readonly organizationService: OrganizationService,
     private readonly runnerAdapterFactory: RunnerAdapterFactory,
     private readonly organizationUsageService: OrganizationUsageService,
+    private readonly snapshotService: SnapshotService,
   ) {}
 
   private async validateOrganizationQuotas(
@@ -316,11 +318,19 @@ export class SandboxService {
       await this.volumeService.validateVolumes(organization.id, volumeIdOrNames)
     }
 
-    const runner = await this.runnerService.getRandomAvailableRunner({
-      region,
-      sandboxClass,
-      snapshotRef: snapshot.internalName,
-    })
+    let runner: Runner
+
+    //  if the snapshot is experimental, we know that the runner is the one where the sandbox is running
+    //  as at this point, the snapshot is located on the same runner as the sandbox
+    if (snapshot.experimental) {
+      runner = await this.runnerService.findOne(snapshot.buildRunnerId)
+    } else {
+      runner = await this.runnerService.getRandomAvailableRunner({
+        region,
+        sandboxClass,
+        snapshotRef: snapshot.internalName,
+      })
+    }
 
     const sandbox = new Sandbox()
 
@@ -981,5 +991,34 @@ export class SandboxService {
     }
 
     return { valid: true, sandboxId: sshAccess.sandbox.id }
+  }
+
+  async snapshotSandbox(sandboxId: string): Promise<string> {
+    const sandbox = await this.sandboxRepository.findOne({
+      where: { id: sandboxId },
+    })
+
+    const runner = await this.runnerRepository.findOne({
+      where: { id: sandbox.runnerId },
+    })
+
+    const runnerAdapter = await this.runnerAdapterFactory.create(runner)
+
+    const snapshotRef = await runnerAdapter.snapshotSandbox(sandboxId)
+
+    const organization = await this.organizationService.findOne(sandbox.organizationId)
+
+    //  create a snapshot with the experimental flag and the snapshot runner id
+    await this.snapshotService.createSnapshot(
+      organization,
+      {
+        name: snapshotRef,
+      },
+      false,
+      true,
+      runner.id,
+    )
+
+    return snapshotRef
   }
 }
