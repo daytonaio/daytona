@@ -1,5 +1,5 @@
 /* tslint:disable */
-
+/* eslint-disable */
 /**
  * Daytona
  * Daytona AI platform API Docs
@@ -65,8 +65,8 @@ export interface CreateDockerRegistry {
 export const CreateDockerRegistryRegistryTypeEnum = {
   INTERNAL: 'internal',
   ORGANIZATION: 'organization',
-  PUBLIC: 'public',
   TRANSIENT: 'transient',
+  BACKUP: 'backup',
 } as const
 
 export type CreateDockerRegistryRegistryTypeEnum =

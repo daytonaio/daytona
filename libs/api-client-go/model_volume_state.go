@@ -21,13 +21,13 @@ type VolumeState string
 
 // List of VolumeState
 const (
-	VOLUMESTATE_CREATING       VolumeState = "creating"
-	VOLUMESTATE_READY          VolumeState = "ready"
+	VOLUMESTATE_CREATING VolumeState = "creating"
+	VOLUMESTATE_READY VolumeState = "ready"
 	VOLUMESTATE_PENDING_CREATE VolumeState = "pending_create"
 	VOLUMESTATE_PENDING_DELETE VolumeState = "pending_delete"
-	VOLUMESTATE_DELETING       VolumeState = "deleting"
-	VOLUMESTATE_DELETED        VolumeState = "deleted"
-	VOLUMESTATE_ERROR          VolumeState = "error"
+	VOLUMESTATE_DELETING VolumeState = "deleting"
+	VOLUMESTATE_DELETED VolumeState = "deleted"
+	VOLUMESTATE_ERROR VolumeState = "error"
 )
 
 // All allowed values of VolumeState enum
@@ -119,3 +119,4 @@ func (v *NullableVolumeState) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+

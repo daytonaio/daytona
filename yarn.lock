@@ -3828,7 +3828,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@grpc/grpc-js@npm:^1.11.1, @grpc/grpc-js@npm:^1.7.1":
+"@grpc/grpc-js@npm:^1.11.1, @grpc/grpc-js@npm:^1.13.4, @grpc/grpc-js@npm:^1.7.1":
   version: 1.13.4
   resolution: "@grpc/grpc-js@npm:1.13.4"
   dependencies:
@@ -3838,7 +3838,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@grpc/proto-loader@npm:^0.7.13":
+"@grpc/proto-loader@npm:^0.7.13, @grpc/proto-loader@npm:^0.7.15":
   version: 0.7.15
   resolution: "@grpc/proto-loader@npm:0.7.15"
   dependencies:
@@ -5764,6 +5764,49 @@ __metadata:
     class-validator:
       optional: true
   checksum: 10c0/cd9f9236648d8a146a4e6890009415400cca7959c3976acdf6fec2ddddc73546d174e58f935b96c6b2319dc54c76e58a39bf47f41991bcd27d1cb55bca99474e
+  languageName: node
+  linkType: hard
+
+"@nestjs/microservices@npm:^11.0.13":
+  version: 11.1.6
+  resolution: "@nestjs/microservices@npm:11.1.6"
+  dependencies:
+    iterare: "npm:1.2.1"
+    tslib: "npm:2.8.1"
+  peerDependencies:
+    "@grpc/grpc-js": "*"
+    "@nestjs/common": ^11.0.0
+    "@nestjs/core": ^11.0.0
+    "@nestjs/websockets": ^11.0.0
+    amqp-connection-manager: "*"
+    amqplib: "*"
+    cache-manager: "*"
+    ioredis: "*"
+    kafkajs: "*"
+    mqtt: "*"
+    nats: "*"
+    reflect-metadata: ^0.1.12 || ^0.2.0
+    rxjs: ^7.1.0
+  peerDependenciesMeta:
+    "@grpc/grpc-js":
+      optional: true
+    "@nestjs/websockets":
+      optional: true
+    amqp-connection-manager:
+      optional: true
+    amqplib:
+      optional: true
+    cache-manager:
+      optional: true
+    ioredis:
+      optional: true
+    kafkajs:
+      optional: true
+    mqtt:
+      optional: true
+    nats:
+      optional: true
+  checksum: 10c0/c7405467083ef491d207849b59ea339e090d98599f923ac2a22d1987775c254afdccc7cb182292af2d03110b00af27a70a8c14b28b3024b07aae9386bf5b9114
   languageName: node
   linkType: hard
 
@@ -16280,6 +16323,8 @@ __metadata:
     "@dotenvx/dotenvx": "npm:^1.25.1"
     "@eslint/js": "npm:^9.8.0"
     "@esm2cjs/cacheable-lookup": "npm:^7.0.0"
+    "@grpc/grpc-js": "npm:^1.13.4"
+    "@grpc/proto-loader": "npm:^0.7.15"
     "@iarna/toml": "npm:^2.2.5"
     "@nestjs-modules/ioredis": "npm:^2.0.2"
     "@nestjs/axios": "npm:^4.0.0"
@@ -16288,6 +16333,7 @@ __metadata:
     "@nestjs/config": "npm:^4.0.0"
     "@nestjs/core": "npm:^11.0.8"
     "@nestjs/event-emitter": "npm:^3.0.1"
+    "@nestjs/microservices": "npm:^11.0.13"
     "@nestjs/passport": "npm:^11.0.5"
     "@nestjs/platform-express": "npm:^11.0.8"
     "@nestjs/platform-socket.io": "npm:^11.0.13"

@@ -104,10 +104,12 @@ async function bootstrap() {
   if (!configService.get('production')) {
     const runnerService = app.get(RunnerService)
     const runners = await runnerService.findAll()
-    if (!runners.find((runner) => runner.domain === 'localtest.me:3003')) {
+
+    const localRunnerDomain = 'localtest.me'
+    if (!runners.find((runner) => runner.domain === localRunnerDomain)) {
       await runnerService.create({
-        apiUrl: 'http://localhost:3003',
-        proxyUrl: 'http://localhost:3003',
+        apiUrl: 'http://localhost:3005',
+        proxyUrl: 'http://localhost:3005',
         apiKey: 'secret_api_token',
         cpu: 4,
         memoryGiB: 8,
@@ -117,8 +119,27 @@ async function bootstrap() {
         capacity: 100,
         region: 'us',
         class: SandboxClass.SMALL,
-        domain: 'localtest.me:3003',
+        domain: localRunnerDomain,
         version: '0',
+      })
+    }
+
+    const localGrpcRunnerDomain = 'localhost.me'
+    if (!runners.find((runner) => runner.domain === localGrpcRunnerDomain)) {
+      await runnerService.create({
+        apiUrl: 'grpc://localhost:3003',
+        proxyUrl: 'http://localhost:3004',
+        apiKey: 'secret_api_token',
+        cpu: 4,
+        memoryGiB: 8,
+        diskGiB: 50,
+        gpu: 0,
+        gpuType: 'none',
+        capacity: 100,
+        region: 'us',
+        class: SandboxClass.SMALL,
+        domain: localGrpcRunnerDomain,
+        version: '1',
       })
     }
   }

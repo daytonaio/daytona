@@ -12,10 +12,10 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
-	"fmt"
 	"time"
+	"bytes"
+	"fmt"
 )
 
 // checks if the AuditLog type satisfies the MappedNullable interface at compile time
@@ -23,20 +23,20 @@ var _ MappedNullable = &AuditLog{}
 
 // AuditLog struct for AuditLog
 type AuditLog struct {
-	Id             string                 `json:"id"`
-	ActorId        string                 `json:"actorId"`
-	ActorEmail     string                 `json:"actorEmail"`
-	OrganizationId *string                `json:"organizationId,omitempty"`
-	Action         string                 `json:"action"`
-	TargetType     *string                `json:"targetType,omitempty"`
-	TargetId       *string                `json:"targetId,omitempty"`
-	StatusCode     *float32               `json:"statusCode,omitempty"`
-	ErrorMessage   *string                `json:"errorMessage,omitempty"`
-	IpAddress      *string                `json:"ipAddress,omitempty"`
-	UserAgent      *string                `json:"userAgent,omitempty"`
-	Source         *string                `json:"source,omitempty"`
-	Metadata       map[string]interface{} `json:"metadata,omitempty"`
-	CreatedAt      time.Time              `json:"createdAt"`
+	Id string `json:"id"`
+	ActorId string `json:"actorId"`
+	ActorEmail string `json:"actorEmail"`
+	OrganizationId *string `json:"organizationId,omitempty"`
+	Action string `json:"action"`
+	TargetType *string `json:"targetType,omitempty"`
+	TargetId *string `json:"targetId,omitempty"`
+	StatusCode *float32 `json:"statusCode,omitempty"`
+	ErrorMessage *string `json:"errorMessage,omitempty"`
+	IpAddress *string `json:"ipAddress,omitempty"`
+	UserAgent *string `json:"userAgent,omitempty"`
+	Source *string `json:"source,omitempty"`
+	Metadata map[string]interface{} `json:"metadata,omitempty"`
+	CreatedAt time.Time `json:"createdAt"`
 }
 
 type _AuditLog AuditLog
@@ -472,7 +472,7 @@ func (o *AuditLog) SetCreatedAt(v time.Time) {
 }
 
 func (o AuditLog) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
+	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -533,10 +533,10 @@ func (o *AuditLog) UnmarshalJSON(data []byte) (err error) {
 	err = json.Unmarshal(data, &allProperties)
 
 	if err != nil {
-		return err
+		return err;
 	}
 
-	for _, requiredProperty := range requiredProperties {
+	for _, requiredProperty := range(requiredProperties) {
 		if _, exists := allProperties[requiredProperty]; !exists {
 			return fmt.Errorf("no value given for required property %v", requiredProperty)
 		}
@@ -592,3 +592,5 @@ func (v *NullableAuditLog) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

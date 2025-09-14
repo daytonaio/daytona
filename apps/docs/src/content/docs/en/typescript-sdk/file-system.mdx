@@ -1,8 +1,7 @@
 ---
-title: "FileSystem"
+title: 'FileSystem'
 hideTitleOnPage: true
 ---
-
 
 ## FileSystem
 
@@ -14,8 +13,8 @@ Provides file system operations within a Sandbox.
 
 ```ts
 new FileSystem(
-   sandboxId: string, 
-   clientConfig: Configuration, 
+   sandboxId: string,
+   clientConfig: Configuration,
    toolboxApi: ToolboxApi): FileSystem
 ```
 
@@ -24,7 +23,6 @@ new FileSystem(
 - `sandboxId` _string_
 - `clientConfig` _Configuration_
 - `toolboxApi` _ToolboxApi_
-
 
 **Returns**:
 
@@ -45,7 +43,6 @@ Create a new directory in the Sandbox with specified permissions.
 - `path` _string_ - Path where the directory should be created. Relative paths are resolved based on the sandbox working directory.
 - `mode` _string_ - Directory permissions in octal format (e.g. "755")
 
-
 **Returns**:
 
 - `Promise<void>`
@@ -54,10 +51,10 @@ Create a new directory in the Sandbox with specified permissions.
 
 ```ts
 // Create a directory with standard permissions
-await fs.createFolder('app/data', '755');
+await fs.createFolder('app/data', '755')
 ```
 
-***
+---
 
 #### deleteFile()
 
@@ -72,7 +69,6 @@ Deletes a file or directory from the Sandbox.
 - `path` _string_ - Path to the file or directory to delete. Relative paths are resolved based on the sandbox working directory.
 - `recursive?` _boolean_ - If the file is a directory, this must be true to delete it.
 
-
 **Returns**:
 
 - `Promise<void>`
@@ -81,10 +77,10 @@ Deletes a file or directory from the Sandbox.
 
 ```ts
 // Delete a file
-await fs.deleteFile('app/temp.log');
+await fs.deleteFile('app/temp.log')
 ```
 
-***
+---
 
 #### downloadFile()
 
@@ -101,7 +97,7 @@ for downloading large files.
 
 - `remotePath` _string_ - Path to the file to download. Relative paths are resolved based on the sandbox working directory.
 - `timeout?` _number_ - Timeout for the download operation in seconds. 0 means no timeout.
-    Default is 30 minutes.
+  Default is 30 minutes.
 
 **Returns**:
 
@@ -111,16 +107,16 @@ for downloading large files.
 
 ```ts
 // Download and process a file
-const fileBuffer = await fs.downloadFile('tmp/data.json');
-console.log('File content:', fileBuffer.toString());
+const fileBuffer = await fs.downloadFile('tmp/data.json')
+console.log('File content:', fileBuffer.toString())
 ```
 
 ##### Call Signature
 
 ```ts
 downloadFile(
-   remotePath: string, 
-   localPath: string, 
+   remotePath: string,
+   localPath: string,
 timeout?: number): Promise<void>
 ```
 
@@ -132,7 +128,7 @@ so it is recommended for downloading larger files.
 - `remotePath` _string_ - Path to the file to download in the Sandbox. Relative paths are resolved based on the sandbox working directory.
 - `localPath` _string_ - Path to save the downloaded file.
 - `timeout?` _number_ - Timeout for the download operation in seconds. 0 means no timeout.
-    Default is 30 minutes.
+  Default is 30 minutes.
 
 **Returns**:
 
@@ -142,10 +138,10 @@ so it is recommended for downloading larger files.
 
 ```ts
 // Download and save a file
-await fs.downloadFile('tmp/data.json', 'local_file.json');
+await fs.downloadFile('tmp/data.json', 'local_file.json')
 ```
 
-***
+---
 
 #### findFiles()
 
@@ -160,7 +156,6 @@ Searches for text patterns within files in the Sandbox.
 - `path` _string_ - Directory to search in. Relative paths are resolved based on the sandbox working directory.
 - `pattern` _string_ - Search pattern
 
-
 **Returns**:
 
 - `Promise<Match[]>` - Array of matches with file and line information
@@ -169,13 +164,13 @@ Searches for text patterns within files in the Sandbox.
 
 ```ts
 // Find all TODO comments in TypeScript files
-const matches = await fs.findFiles('app/src', 'TODO:');
+const matches = await fs.findFiles('app/src', 'TODO:')
 matches.forEach(match => {
-  console.log(`${match.file}:${match.line}: ${match.content}`);
-});
+  console.log(`${match.file}:${match.line}: ${match.content}`)
+})
 ```
 
-***
+---
 
 #### getFileDetails()
 
@@ -189,7 +184,6 @@ Retrieves detailed information about a file or directory.
 
 - `path` _string_ - Path to the file or directory. Relative paths are resolved based on the sandbox working directory.
 
-
 **Returns**:
 
 - `Promise<FileInfo>` - Detailed file information including size, permissions, modification time
@@ -198,11 +192,11 @@ Retrieves detailed information about a file or directory.
 
 ```ts
 // Get file details
-const info = await fs.getFileDetails('app/config.json');
-console.log(`Size: ${info.size}, Modified: ${info.modTime}`);
+const info = await fs.getFileDetails('app/config.json')
+console.log(`Size: ${info.size}, Modified: ${info.modTime}`)
 ```
 
-***
+---
 
 #### listFiles()
 
@@ -216,7 +210,6 @@ Lists contents of a directory in the Sandbox.
 
 - `path` _string_ - Directory path to list. Relative paths are resolved based on the sandbox working directory.
 
-
 **Returns**:
 
 - `Promise<FileInfo[]>` - Array of file and directory information
@@ -225,13 +218,13 @@ Lists contents of a directory in the Sandbox.
 
 ```ts
 // List directory contents
-const files = await fs.listFiles('app/src');
+const files = await fs.listFiles('app/src')
 files.forEach(file => {
-  console.log(`${file.name} (${file.size} bytes)`);
-});
+  console.log(`${file.name} (${file.size} bytes)`)
+})
 ```
 
-***
+---
 
 #### moveFiles()
 
@@ -246,7 +239,6 @@ Moves or renames a file or directory.
 - `source` _string_ - Source path. Relative paths are resolved based on the sandbox working directory.
 - `destination` _string_ - Destination path. Relative paths are resolved based on the sandbox working directory.
 
-
 **Returns**:
 
 - `Promise<void>`
@@ -255,17 +247,17 @@ Moves or renames a file or directory.
 
 ```ts
 // Move a file to a new location
-await fs.moveFiles('app/temp/data.json', 'app/data/data.json');
+await fs.moveFiles('app/temp/data.json', 'app/data/data.json')
 ```
 
-***
+---
 
 #### replaceInFiles()
 
 ```ts
 replaceInFiles(
-   files: string[], 
-   pattern: string, 
+   files: string[],
+   pattern: string,
 newValue: string): Promise<ReplaceResult[]>
 ```
 
@@ -276,7 +268,6 @@ Replaces text content in multiple files.
 - `files` _string\[\]_ - Array of file paths to process. Relative paths are resolved based on the sandbox working directory.
 - `pattern` _string_ - Pattern to replace
 - `newValue` _string_ - Replacement text
-
 
 **Returns**:
 
@@ -290,10 +281,10 @@ const results = await fs.replaceInFiles(
   ['app/package.json', 'app/version.ts'],
   '"version": "1.0.0"',
   '"version": "1.1.0"'
-);
+)
 ```
 
-***
+---
 
 #### searchFiles()
 
@@ -308,7 +299,6 @@ Searches for files and directories by name pattern in the Sandbox.
 - `path` _string_ - Directory to search in. Relative paths are resolved based on the sandbox working directory.
 - `pattern` _string_ - File name pattern (supports globs)
 
-
 **Returns**:
 
 - `Promise<SearchFilesResponse>` - Search results with matching files
@@ -317,11 +307,11 @@ Searches for files and directories by name pattern in the Sandbox.
 
 ```ts
 // Find all TypeScript files
-const result = await fs.searchFiles('app', '*.ts');
-result.files.forEach(file => console.log(file));
+const result = await fs.searchFiles('app', '*.ts')
+result.files.forEach(file => console.log(file))
 ```
 
-***
+---
 
 #### setFilePermissions()
 
@@ -336,7 +326,6 @@ Sets permissions and ownership for a file or directory.
 - `path` _string_ - Path to the file or directory. Relative paths are resolved based on the sandbox working directory.
 - `permissions` _FilePermissionsParams_ - Permission settings
 
-
 **Returns**:
 
 - `Promise<void>`
@@ -348,11 +337,11 @@ Sets permissions and ownership for a file or directory.
 await fs.setFilePermissions('app/script.sh', {
   owner: 'daytona',
   group: 'users',
-  mode: '755'  // Execute permission for shell script
-});
+  mode: '755', // Execute permission for shell script
+})
 ```
 
-***
+---
 
 #### uploadFile()
 
@@ -360,8 +349,8 @@ await fs.setFilePermissions('app/script.sh', {
 
 ```ts
 uploadFile(
-   file: Buffer, 
-   remotePath: string, 
+   file: Buffer,
+   remotePath: string,
 timeout?: number): Promise<void>
 ```
 
@@ -373,7 +362,7 @@ for uploading large files.
 - `file` _Buffer_ - Buffer of the file to upload.
 - `remotePath` _string_ - Destination path in the Sandbox. Relative paths are resolved based on the sandbox working directory.
 - `timeout?` _number_ - Timeout for the upload operation in seconds. 0 means no timeout.
-    Default is 30 minutes.
+  Default is 30 minutes.
 
 **Returns**:
 
@@ -383,15 +372,15 @@ for uploading large files.
 
 ```ts
 // Upload a configuration file
-await fs.uploadFile(Buffer.from('{"setting": "value"}'), 'tmp/config.json');
+await fs.uploadFile(Buffer.from('{"setting": "value"}'), 'tmp/config.json')
 ```
 
 ##### Call Signature
 
 ```ts
 uploadFile(
-   localPath: string, 
-   remotePath: string, 
+   localPath: string,
+   remotePath: string,
 timeout?: number): Promise<void>
 ```
 
@@ -403,7 +392,7 @@ so it is recommended for uploading larger files.
 - `localPath` _string_ - Path to the local file to upload.
 - `remotePath` _string_ - Destination path in the Sandbox. Relative paths are resolved based on the sandbox working directory.
 - `timeout?` _number_ - Timeout for the upload operation in seconds. 0 means no timeout.
-    Default is 30 minutes.
+  Default is 30 minutes.
 
 **Returns**:
 
@@ -413,10 +402,10 @@ so it is recommended for uploading larger files.
 
 ```ts
 // Upload a local file
-await fs.uploadFile('local_file.txt', 'tmp/file.txt');
+await fs.uploadFile('local_file.txt', 'tmp/file.txt')
 ```
 
-***
+---
 
 #### uploadFiles()
 
@@ -431,8 +420,7 @@ they will be overwritten.
 
 - `files` _FileUpload\[\]_ - Array of files to upload.
 - `timeout?` _number = ..._ - Timeout for the upload operation in seconds. 0 means no timeout.
-    Default is 30 minutes.
-
+  Default is 30 minutes.
 
 **Returns**:
 
@@ -445,22 +433,21 @@ they will be overwritten.
 const files = [
   {
     source: Buffer.from('Content of file 1'),
-    destination: '/tmp/file1.txt'
+    destination: '/tmp/file1.txt',
   },
   {
     source: 'app/data/file2.txt',
-    destination: '/tmp/file2.txt'
+    destination: '/tmp/file2.txt',
   },
   {
     source: Buffer.from('{"key": "value"}'),
-    destination: '/tmp/config.json'
-  }
-];
-await fs.uploadFiles(files);
+    destination: '/tmp/config.json',
+  },
+]
+await fs.uploadFiles(files)
 ```
 
-***
-
+---
 
 ## FilePermissionsParams
 
@@ -471,10 +458,6 @@ Parameters for setting file permissions in the Sandbox.
 - `group?` _string_ - Group owner of the file
 - `mode?` _string_ - File mode/permissions in octal format (e.g. "644")
 - `owner?` _string_ - User owner of the file
-    
-
-
-
 
 **Example:**
 
@@ -482,9 +465,10 @@ Parameters for setting file permissions in the Sandbox.
 const permissions: FilePermissionsParams = {
   mode: '644',
   owner: 'daytona',
-  group: 'users'
-};
+  group: 'users',
+}
 ```
+
 ## FileUpload
 
 Represents a file to be uploaded to the Sandbox.
@@ -493,4 +477,4 @@ Represents a file to be uploaded to the Sandbox.
 
 - `destination` _string_ - Absolute destination path in the Sandbox. Relative paths are resolved based on the sandbox working directory.
 - `source` _string \| Buffer\<ArrayBufferLike\>_ - File to upload. If a Buffer, it is interpreted as the file content which is loaded into memory.
-    Make sure it fits into memory, otherwise use the local file path which content will be streamed to the Sandbox.
+  Make sure it fits into memory, otherwise use the local file path which content will be streamed to the Sandbox.

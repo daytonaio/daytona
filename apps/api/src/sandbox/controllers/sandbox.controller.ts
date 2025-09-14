@@ -855,4 +855,30 @@ export class SandboxController {
 
     return waitForStarted
   }
+
+  @Post(':sandboxId/snapshot')
+  @ApiOperation({
+    summary: 'Snapshot sandbox',
+    operationId: 'snapshotSandbox',
+  })
+  @ApiParam({
+    name: 'sandboxId',
+    description: 'ID of the sandbox',
+    type: 'string',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Sandbox has been snapshot',
+    type: String,
+  })
+  @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
+  @UseGuards(SandboxAccessGuard)
+  @Audit({
+    action: AuditAction.SNAPSHOT_SANDBOX,
+    targetType: AuditTarget.SANDBOX,
+    targetIdFromRequest: (req) => req.params.sandboxId,
+  })
+  async snapshotSandbox(@Param('sandboxId') sandboxId: string): Promise<string> {
+    return this.sandboxService.snapshotSandbox(sandboxId)
+  }
 }

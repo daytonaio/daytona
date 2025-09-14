@@ -20,13 +20,14 @@ import (
 	"strings"
 )
 
+
 type AuditAPI interface {
 
 	/*
-		CreateAuditLog Create audit log entry
+	CreateAuditLog Create audit log entry
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@return AuditAPICreateAuditLogRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return AuditAPICreateAuditLogRequest
 	*/
 	CreateAuditLog(ctx context.Context) AuditAPICreateAuditLogRequest
 
@@ -35,10 +36,10 @@ type AuditAPI interface {
 	CreateAuditLogExecute(r AuditAPICreateAuditLogRequest) (*AuditLog, *http.Response, error)
 
 	/*
-		GetAllAuditLogs Get all audit logs
+	GetAllAuditLogs Get all audit logs
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@return AuditAPIGetAllAuditLogsRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return AuditAPIGetAllAuditLogsRequest
 	*/
 	GetAllAuditLogs(ctx context.Context) AuditAPIGetAllAuditLogsRequest
 
@@ -47,11 +48,11 @@ type AuditAPI interface {
 	GetAllAuditLogsExecute(r AuditAPIGetAllAuditLogsRequest) (*PaginatedAuditLogs, *http.Response, error)
 
 	/*
-		GetOrganizationAuditLogs Get audit logs for organization
+	GetOrganizationAuditLogs Get audit logs for organization
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param organizationId Organization ID
-		@return AuditAPIGetOrganizationAuditLogsRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param organizationId Organization ID
+	@return AuditAPIGetOrganizationAuditLogsRequest
 	*/
 	GetOrganizationAuditLogs(ctx context.Context, organizationId string) AuditAPIGetOrganizationAuditLogsRequest
 
@@ -64,8 +65,8 @@ type AuditAPI interface {
 type AuditAPIService service
 
 type AuditAPICreateAuditLogRequest struct {
-	ctx            context.Context
-	ApiService     AuditAPI
+	ctx context.Context
+	ApiService AuditAPI
 	createAuditLog *CreateAuditLog
 }
 
@@ -81,25 +82,24 @@ func (r AuditAPICreateAuditLogRequest) Execute() (*AuditLog, *http.Response, err
 /*
 CreateAuditLog Create audit log entry
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return AuditAPICreateAuditLogRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return AuditAPICreateAuditLogRequest
 */
 func (a *AuditAPIService) CreateAuditLog(ctx context.Context) AuditAPICreateAuditLogRequest {
 	return AuditAPICreateAuditLogRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-//
-//	@return AuditLog
+//  @return AuditLog
 func (a *AuditAPIService) CreateAuditLogExecute(r AuditAPICreateAuditLogRequest) (*AuditLog, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPost
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *AuditLog
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *AuditLog
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AuditAPIService.CreateAuditLog")
@@ -173,10 +173,10 @@ func (a *AuditAPIService) CreateAuditLogExecute(r AuditAPICreateAuditLogRequest)
 }
 
 type AuditAPIGetAllAuditLogsRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService AuditAPI
-	limit      *float32
-	page       *float32
+	limit *float32
+	page *float32
 }
 
 // Number of items per page (default: 10)
@@ -198,25 +198,24 @@ func (r AuditAPIGetAllAuditLogsRequest) Execute() (*PaginatedAuditLogs, *http.Re
 /*
 GetAllAuditLogs Get all audit logs
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return AuditAPIGetAllAuditLogsRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return AuditAPIGetAllAuditLogsRequest
 */
 func (a *AuditAPIService) GetAllAuditLogs(ctx context.Context) AuditAPIGetAllAuditLogsRequest {
 	return AuditAPIGetAllAuditLogsRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-//
-//	@return PaginatedAuditLogs
+//  @return PaginatedAuditLogs
 func (a *AuditAPIService) GetAllAuditLogsExecute(r AuditAPIGetAllAuditLogsRequest) (*PaginatedAuditLogs, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *PaginatedAuditLogs
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *PaginatedAuditLogs
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AuditAPIService.GetAllAuditLogs")
@@ -291,11 +290,11 @@ func (a *AuditAPIService) GetAllAuditLogsExecute(r AuditAPIGetAllAuditLogsReques
 }
 
 type AuditAPIGetOrganizationAuditLogsRequest struct {
-	ctx            context.Context
-	ApiService     AuditAPI
+	ctx context.Context
+	ApiService AuditAPI
 	organizationId string
-	limit          *float32
-	page           *float32
+	limit *float32
+	page *float32
 }
 
 // Number of items per page (default: 10)
@@ -317,27 +316,26 @@ func (r AuditAPIGetOrganizationAuditLogsRequest) Execute() (*PaginatedAuditLogs,
 /*
 GetOrganizationAuditLogs Get audit logs for organization
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param organizationId Organization ID
-	@return AuditAPIGetOrganizationAuditLogsRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param organizationId Organization ID
+ @return AuditAPIGetOrganizationAuditLogsRequest
 */
 func (a *AuditAPIService) GetOrganizationAuditLogs(ctx context.Context, organizationId string) AuditAPIGetOrganizationAuditLogsRequest {
 	return AuditAPIGetOrganizationAuditLogsRequest{
-		ApiService:     a,
-		ctx:            ctx,
+		ApiService: a,
+		ctx: ctx,
 		organizationId: organizationId,
 	}
 }
 
 // Execute executes the request
-//
-//	@return PaginatedAuditLogs
+//  @return PaginatedAuditLogs
 func (a *AuditAPIService) GetOrganizationAuditLogsExecute(r AuditAPIGetOrganizationAuditLogsRequest) (*PaginatedAuditLogs, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *PaginatedAuditLogs
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *PaginatedAuditLogs
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AuditAPIService.GetOrganizationAuditLogs")

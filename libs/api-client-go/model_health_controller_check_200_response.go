@@ -20,9 +20,9 @@ var _ MappedNullable = &HealthControllerCheck200Response{}
 
 // HealthControllerCheck200Response struct for HealthControllerCheck200Response
 type HealthControllerCheck200Response struct {
-	Status  *string                                               `json:"status,omitempty"`
-	Info    map[string]HealthControllerCheck200ResponseInfoValue  `json:"info,omitempty"`
-	Error   map[string]HealthControllerCheck200ResponseInfoValue  `json:"error,omitempty"`
+	Status *string `json:"status,omitempty"`
+	Info map[string]HealthControllerCheck200ResponseInfoValue `json:"info,omitempty"`
+	Error map[string]HealthControllerCheck200ResponseInfoValue `json:"error,omitempty"`
 	Details *map[string]HealthControllerCheck200ResponseInfoValue `json:"details,omitempty"`
 }
 
@@ -174,7 +174,7 @@ func (o *HealthControllerCheck200Response) SetDetails(v map[string]HealthControl
 }
 
 func (o HealthControllerCheck200Response) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
+	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -233,3 +233,5 @@ func (v *NullableHealthControllerCheck200Response) UnmarshalJSON(src []byte) err
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

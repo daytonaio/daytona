@@ -12,8 +12,8 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
+	"bytes"
 	"fmt"
 )
 
@@ -22,12 +22,12 @@ var _ MappedNullable = &CreateAuditLog{}
 
 // CreateAuditLog struct for CreateAuditLog
 type CreateAuditLog struct {
-	ActorId        string  `json:"actorId"`
-	ActorEmail     string  `json:"actorEmail"`
+	ActorId string `json:"actorId"`
+	ActorEmail string `json:"actorEmail"`
 	OrganizationId *string `json:"organizationId,omitempty"`
-	Action         string  `json:"action"`
-	TargetType     *string `json:"targetType,omitempty"`
-	TargetId       *string `json:"targetId,omitempty"`
+	Action string `json:"action"`
+	TargetType *string `json:"targetType,omitempty"`
+	TargetId *string `json:"targetId,omitempty"`
 }
 
 type _CreateAuditLog CreateAuditLog
@@ -221,7 +221,7 @@ func (o *CreateAuditLog) SetTargetId(v string) {
 }
 
 func (o CreateAuditLog) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
+	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -260,10 +260,10 @@ func (o *CreateAuditLog) UnmarshalJSON(data []byte) (err error) {
 	err = json.Unmarshal(data, &allProperties)
 
 	if err != nil {
-		return err
+		return err;
 	}
 
-	for _, requiredProperty := range requiredProperties {
+	for _, requiredProperty := range(requiredProperties) {
 		if _, exists := allProperties[requiredProperty]; !exists {
 			return fmt.Errorf("no value given for required property %v", requiredProperty)
 		}
@@ -319,3 +319,5 @@ func (v *NullableCreateAuditLog) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

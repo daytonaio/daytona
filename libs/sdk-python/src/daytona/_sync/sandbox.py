@@ -497,6 +497,35 @@ class Sandbox(SandboxDto):
         """
         return (self._sandbox_api.validate_ssh_access(token)).data
 
+    @intercept_errors(message_prefix="Failed to snapshot sandbox: ")
+    def snapshot_sandbox(self) -> str:
+        """Creates a snapshot of the sandbox.
+
+        Creates a snapshot of the current sandbox state, which can be used to create
+        new sandboxes with the same configuration and filesystem state.
+
+        Returns:
+            str: The snapshot reference/name that can be used to create new sandboxes.
+
+        Example:
+            ```python
+            snapshot_ref = sandbox.snapshot_sandbox()
+            print(f"Created snapshot: {snapshot_ref}")
+
+            # Use the snapshot to create a new sandbox
+            new_sandbox = daytona.create(CreateSandboxFromSnapshotParams(
+                snapshot=snapshot_ref,
+                language="python"
+            ))
+            ```
+        """
+        return self._sandbox_api.snapshot_sandbox(self.id)
+
+    def __get_root_dir(self) -> str:
+        if not self._root_dir:
+            self._root_dir = self.get_user_root_dir()
+        return self._root_dir
+
     def __process_sandbox_dto(self, sandbox_dto: SandboxDto) -> None:
         self.id = sandbox_dto.id
         self.organization_id = sandbox_dto.organization_id

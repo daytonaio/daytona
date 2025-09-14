@@ -12,10 +12,10 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
-	"fmt"
 	"time"
+	"bytes"
+	"fmt"
 )
 
 // checks if the SnapshotDto type satisfies the MappedNullable interface at compile time
@@ -23,22 +23,22 @@ var _ MappedNullable = &SnapshotDto{}
 
 // SnapshotDto struct for SnapshotDto
 type SnapshotDto struct {
-	Id             string          `json:"id"`
-	OrganizationId *string         `json:"organizationId,omitempty"`
-	General        bool            `json:"general"`
-	Name           string          `json:"name"`
-	ImageName      *string         `json:"imageName,omitempty"`
-	State          SnapshotState   `json:"state"`
-	Size           NullableFloat32 `json:"size"`
-	Entrypoint     []string        `json:"entrypoint"`
-	Cpu            float32         `json:"cpu"`
-	Gpu            float32         `json:"gpu"`
-	Mem            float32         `json:"mem"`
-	Disk           float32         `json:"disk"`
-	ErrorReason    NullableString  `json:"errorReason"`
-	CreatedAt      time.Time       `json:"createdAt"`
-	UpdatedAt      time.Time       `json:"updatedAt"`
-	LastUsedAt     NullableTime    `json:"lastUsedAt"`
+	Id string `json:"id"`
+	OrganizationId *string `json:"organizationId,omitempty"`
+	General bool `json:"general"`
+	Name string `json:"name"`
+	ImageName *string `json:"imageName,omitempty"`
+	State SnapshotState `json:"state"`
+	Size NullableFloat32 `json:"size"`
+	Entrypoint []string `json:"entrypoint"`
+	Cpu float32 `json:"cpu"`
+	Gpu float32 `json:"gpu"`
+	Mem float32 `json:"mem"`
+	Disk float32 `json:"disk"`
+	ErrorReason NullableString `json:"errorReason"`
+	CreatedAt time.Time `json:"createdAt"`
+	UpdatedAt time.Time `json:"updatedAt"`
+	LastUsedAt NullableTime `json:"lastUsedAt"`
 	// Build information for the snapshot
 	BuildInfo *BuildInfo `json:"buildInfo,omitempty"`
 }
@@ -517,7 +517,7 @@ func (o *SnapshotDto) SetBuildInfo(v BuildInfo) {
 }
 
 func (o SnapshotDto) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
+	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -580,10 +580,10 @@ func (o *SnapshotDto) UnmarshalJSON(data []byte) (err error) {
 	err = json.Unmarshal(data, &allProperties)
 
 	if err != nil {
-		return err
+		return err;
 	}
 
-	for _, requiredProperty := range requiredProperties {
+	for _, requiredProperty := range(requiredProperties) {
 		if _, exists := allProperties[requiredProperty]; !exists {
 			return fmt.Errorf("no value given for required property %v", requiredProperty)
 		}
@@ -639,3 +639,5 @@ func (v *NullableSnapshotDto) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

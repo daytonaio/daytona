@@ -93,12 +93,7 @@ export class FileSystem {
    * await fs.deleteFile('app/temp.log');
    */
   public async deleteFile(path: string, recursive?: boolean): Promise<void> {
-    const response = await this.toolboxApi.deleteFile(
-      this.sandboxId,
-      path,
-      undefined,
-      recursive,
-    )
+    const response = await this.toolboxApi.deleteFile(this.sandboxId, path, undefined, recursive)
     return response.data
   }
 
