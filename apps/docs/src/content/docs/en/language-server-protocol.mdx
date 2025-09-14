@@ -21,11 +21,11 @@ sandbox = daytona.create()
 
 # Create LSP server for Python
 lsp_server = sandbox.create_lsp_server(
-    language_id=LspLanguageId.PYTHON,
-    path_to_project="workspace/project"
+language_id=LspLanguageId.PYTHON,
+path_to_project="workspace/project"
 )
 
-```
+````
 </TabItem>
 <TabItem label="TypeScript" icon="seti:typescript">
 ```typescript
@@ -42,7 +42,7 @@ const lspServer = await sandbox.createLspServer(
     LspLanguageId.TYPESCRIPT,
     "workspace/project"
 )
-```
+````
 
 </TabItem>
 </Tabs>

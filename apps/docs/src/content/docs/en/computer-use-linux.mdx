@@ -12,7 +12,7 @@ We recommend using this instance type for most tasks.
 ## Common Use Cases
 
 - **GUI Application Testing** - Automate interactions with desktop applications, click buttons, fill forms, and validate UI behavior
-- **Visual Testing & Screenshots** - Capture screenshots of applications, compare UI states, and perform visual regression testing  
+- **Visual Testing & Screenshots** - Capture screenshots of applications, compare UI states, and perform visual regression testing
 - **Desktop Automation** - Automate repetitive desktop tasks, file management through GUI, and complex workflows
 - **Human-in-the-Loop** - Access the VNC interface directly from the [Daytona Dashboard](https://app.daytona.io/dashboard/sandboxes) to manually control and interact with the desktop environment alongside automated scripts
 
@@ -21,11 +21,13 @@ We recommend using this instance type for most tasks.
 Choose your preferred SDK to get started with computer use automation:
 
 ### TypeScript SDK
+
 Complete API reference for computer use operations in TypeScript.
 
 [View TypeScript SDK →](/docs/en/typescript-sdk/computer-use)
 
-### Python SDK  
+### Python SDK
+
 Complete API reference for computer use operations in Python (sync & async).
 
 [View Python SDK →](/docs/en/python-sdk/sync/computer-use)
@@ -60,6 +62,7 @@ Complete API reference for computer use operations in Python (sync & async).
     sandbox.computer_use.keyboard.type('Hello, Linux!')
     sandbox.computer_use.keyboard.hotkey('ctrl+s')
     ```
+
   </TabItem>
 
   <TabItem label="TypeScript" icon="seti:typescript">
@@ -88,10 +91,12 @@ Complete API reference for computer use operations in Python (sync & async).
     await sandbox.computerUse.keyboard.type('Hello, Linux!');
     await sandbox.computerUse.keyboard.hotkey('ctrl+s');
     ```
+
   </TabItem>
 </Tabs>
 
 **Environment Variables (.env file):**
+
 ```bash
 DAYTONA_API_KEY=your-api-key-here
 DAYTONA_API_URL=https://app.daytona.io/api
@@ -99,5 +104,5 @@ DAYTONA_API_URL=https://app.daytona.io/api
 
 ## Related Documentation
 
-- [Computer Use - Windows](/docs/en/computer-use-windows)  
+- [Computer Use - Windows](/docs/en/computer-use-windows)
 - [Computer Use - macOS](/docs/en/computer-use-macos)

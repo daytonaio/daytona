@@ -305,4 +305,8 @@ export class RunnerAdapterLegacy implements RunnerAdapter {
 
     await this.sandboxApiClient.updateNetworkSettings(sandboxId, updateNetworkSettingsDto)
   }
+
+  async snapshotSandbox(sandboxId: string): Promise<string> {
+    throw new Error('Snapshot sandbox is not supported in legacy runner')
+  }
 }
