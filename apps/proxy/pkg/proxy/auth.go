@@ -7,11 +7,28 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
 
 func (p *Proxy) Authenticate(ctx *gin.Context, sandboxId string) (err error, didRedirect bool) {
+	// Try Authorization header with Bearer token
+	authHeader := ctx.Request.Header.Get("Authorization")
+	if authHeader != "" && strings.HasPrefix(authHeader, "Bearer ") {
+		bearerToken := strings.TrimSpace(strings.TrimPrefix(authHeader, "Bearer "))
+		isValid, err := p.getSandboxBearerTokenValid(ctx, sandboxId, bearerToken)
+		if err != nil {
+			return fmt.Errorf("failed to get sandbox bearer token valid status: %w", err), false
+		}
+
+		if !*isValid {
+			return errors.New("invalid bearer token"), false
+		} else {
+			return nil, false
+		}
+	}
+
 	authKey := ctx.Request.Header.Get(DAYTONA_SANDBOX_AUTH_KEY_HEADER)
 	if authKey == "" {
 		if ctx.Query(DAYTONA_SANDBOX_AUTH_KEY_QUERY_PARAM) != "" {
@@ -60,5 +77,5 @@ func (p *Proxy) Authenticate(ctx *gin.Context, sandboxId string) (err error, did
 		}
 	}
 
-	return errors.New("auth key is required. Authenticate via a Header, Query Param or Cookie"), false
+	return errors.New("missing authentication: provide a preview access token (via header, query parameter, or cookie) or use an API key or JWT"), false
 }
