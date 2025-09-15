@@ -645,7 +645,6 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
       groupType: 'organization',
       groupKey: response.id,
       properties: {
-        id: response.id,
         name: request.name,
         created_at: response.createdAt,
         created_by: response.createdBy,
