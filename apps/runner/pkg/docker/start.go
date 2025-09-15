@@ -19,7 +19,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func (d *DockerClient) Start(ctx context.Context, containerId string) error {
+func (d *DockerClient) Start(ctx context.Context, containerId string, metadata map[string]string) error {
 	defer timer.Timer()()
 	d.cache.SetSandboxState(ctx, containerId, enums.SandboxStateStarting)
 
@@ -83,6 +83,16 @@ func (d *DockerClient) Start(ctx context.Context, containerId string) error {
 	}
 
 	d.cache.SetSandboxState(ctx, containerId, enums.SandboxStateStarted)
+
+	if metadata["limitNetworkEgress"] == "true" {
+		go func() {
+			containerShortId := c.ID[:12]
+			err = d.netRulesManager.SetNetworkLimiter(containerShortId, containerIP)
+			if err != nil {
+				log.Errorf("Failed to set network limiter: %v", err)
+			}
+		}()
+	}
 
 	return nil
 }

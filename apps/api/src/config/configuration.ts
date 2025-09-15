@@ -90,6 +90,8 @@ const configuration = {
     serverUrl: process.env.SVIX_SERVER_URL,
   },
   sshGatewayApiKey: process.env.SSH_GATEWAY_API_KEY,
+  organizationSandboxDefaultLimitedNetworkEgress:
+    process.env.ORGANIZATION_SANDBOX_DEFAULT_LIMITED_NETWORK_EGRESS === 'true',
 }
 
 export { configuration }

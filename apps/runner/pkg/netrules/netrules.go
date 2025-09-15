@@ -4,11 +4,14 @@
 package netrules
 
 import (
+	"context"
 	"os/exec"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/coreos/go-iptables/iptables"
+	log "github.com/sirupsen/logrus"
 )
 
 // NetRulesManager provides thread-safe operations for managing network rules
@@ -16,6 +19,8 @@ type NetRulesManager struct {
 	ipt        *iptables.IPTables
 	mu         sync.Mutex
 	persistent bool
+	ctx        context.Context
+	cancel     context.CancelFunc
 }
 
 // NewNetRulesManager creates a new instance of NetRulesManager
@@ -25,10 +30,30 @@ func NewNetRulesManager(persistent bool) (*NetRulesManager, error) {
 		return nil, err
 	}
 
+	ctx, cancel := context.WithCancel(context.Background())
+
 	return &NetRulesManager{
 		ipt:        ipt,
 		persistent: persistent,
+		ctx:        ctx,
+		cancel:     cancel,
 	}, nil
+}
+
+func (manager *NetRulesManager) Start() error {
+	// Start periodic reconciliation
+	if manager.persistent {
+		go manager.persistRulesLoop()
+	}
+
+	return nil
+}
+
+// Stop gracefully stops the NetRulesManager
+func (manager *NetRulesManager) Stop() {
+	if manager.cancel != nil {
+		manager.cancel()
+	}
 }
 
 // saveIptablesRules saves the current iptables rules to make them persistent
@@ -41,11 +66,11 @@ func (manager *NetRulesManager) saveIptablesRules() error {
 }
 
 // ListDaytonaRules returns all DOCKER-USER rules that jump to Daytona chains
-func (manager *NetRulesManager) ListDaytonaRules() ([]string, error) {
+func (manager *NetRulesManager) ListDaytonaRules(table string, chain string) ([]string, error) {
 	manager.mu.Lock()
 	defer manager.mu.Unlock()
 
-	rules, err := manager.ipt.List("filter", "DOCKER-USER")
+	rules, err := manager.ipt.List(table, chain)
 	if err != nil {
 		return nil, err
 	}
@@ -60,8 +85,8 @@ func (manager *NetRulesManager) ListDaytonaRules() ([]string, error) {
 	return daytonaRules, nil
 }
 
-// DeleteDockerUserRule deletes a specific rule from DOCKER-USER chain
-func (manager *NetRulesManager) DeleteDockerUserRule(rule string) error {
+// DeleteChainRule deletes a specific rule from a specific chain
+func (manager *NetRulesManager) DeleteChainRule(table string, chain string, rule string) error {
 	manager.mu.Lock()
 	defer manager.mu.Unlock()
 
@@ -70,19 +95,15 @@ func (manager *NetRulesManager) DeleteDockerUserRule(rule string) error {
 		return err
 	}
 
-	if err := manager.ipt.Delete("filter", "DOCKER-USER", args...); err != nil {
-		return err
-	}
-
-	return manager.saveIptablesRules()
+	return manager.ipt.Delete(table, chain, args...)
 }
 
 // ListDaytonaChains returns all chains that start with DAYTONA-SB-
-func (manager *NetRulesManager) ListDaytonaChains() ([]string, error) {
+func (manager *NetRulesManager) ListDaytonaChains(table string) ([]string, error) {
 	manager.mu.Lock()
 	defer manager.mu.Unlock()
 
-	chains, err := manager.ipt.ListChains("filter")
+	chains, err := manager.ipt.ListChains(table)
 	if err != nil {
 		return nil, err
 	}
@@ -97,14 +118,30 @@ func (manager *NetRulesManager) ListDaytonaChains() ([]string, error) {
 	return daytonaChains, nil
 }
 
-// DeleteChain deletes a specific chain
-func (manager *NetRulesManager) DeleteChain(chainName string) error {
+// ClearAndDeleteChain deletes a specific table chain
+func (manager *NetRulesManager) ClearAndDeleteChain(table string, name string) error {
 	manager.mu.Lock()
 	defer manager.mu.Unlock()
 
-	if err := manager.ipt.ClearAndDeleteChain("filter", chainName); err != nil {
-		return err
-	}
+	return manager.ipt.ClearAndDeleteChain(table, name)
+}
 
-	return manager.saveIptablesRules()
+// persistRulesLoop persists the iptables rules
+func (manager *NetRulesManager) persistRulesLoop() {
+	ticker := time.NewTicker(time.Minute)
+	defer ticker.Stop()
+
+	log.Info("Starting iptables persistence loop")
+
+	for {
+		select {
+		case <-manager.ctx.Done():
+			log.Info("Stopping iptables persistence loop")
+			return
+		case <-ticker.C:
+			if err := manager.saveIptablesRules(); err != nil {
+				log.Errorf("Failed to save iptables rules: %v", err)
+			}
+		}
+	}
 }

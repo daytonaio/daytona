@@ -89,6 +89,7 @@ model_mouse_scroll_response.go
 model_organization.go
 model_organization_invitation.go
 model_organization_role.go
+model_organization_sandbox_default_limited_network_egress.go
 model_organization_suspension.go
 model_organization_usage_overview.go
 model_organization_user.go

@@ -36,9 +36,5 @@ func (manager *NetRulesManager) DeleteNetworkRules(name string) error {
 	}
 
 	// Then delete the chain and all its rules
-	if err := manager.ipt.ClearAndDeleteChain("filter", chainName); err != nil {
-		return err
-	}
-
-	return manager.saveIptablesRules()
+	return manager.ipt.ClearAndDeleteChain("filter", chainName)
 }

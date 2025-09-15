@@ -41,8 +41,13 @@ export interface RunnerAdapter {
   runnerInfo(signal?: AbortSignal): Promise<RunnerInfo>
 
   sandboxInfo(sandboxId: string): Promise<RunnerSandboxInfo>
-  createSandbox(sandbox: Sandbox, registry?: DockerRegistry, entrypoint?: string[]): Promise<void>
-  startSandbox(sandboxId: string): Promise<void>
+  createSandbox(
+    sandbox: Sandbox,
+    registry?: DockerRegistry,
+    entrypoint?: string[],
+    metadata?: { [key: string]: string },
+  ): Promise<void>
+  startSandbox(sandboxId: string, metadata?: { [key: string]: string }): Promise<void>
   stopSandbox(sandboxId: string): Promise<void>
   destroySandbox(sandboxId: string): Promise<void>
   removeDestroyedSandbox(sandboxId: string): Promise<void>
@@ -61,7 +66,12 @@ export interface RunnerAdapter {
 
   getSandboxDaemonVersion(sandboxId: string): Promise<string>
 
-  updateNetworkSettings(sandboxId: string, networkBlockAll?: boolean, networkAllowList?: string): Promise<void>
+  updateNetworkSettings(
+    sandboxId: string,
+    networkBlockAll?: boolean,
+    networkAllowList?: string,
+    networkLimitEgress?: boolean,
+  ): Promise<void>
 }
 
 @Injectable()

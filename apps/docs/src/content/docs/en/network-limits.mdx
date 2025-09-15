@@ -1,0 +1,163 @@
+---
+title: Network Limits (Firewall)
+---
+
+import { TabItem, Tabs } from '@astrojs/starlight/components'
+
+Daytona provides network egress limiting for sandboxes to control internet access. This feature can be automatically applied based on your organization's billing tier or manually configured for specific sandboxes.
+
+## Tier-Based Network Restrictions
+
+Network limits are automatically applied to sandboxes based on your organization's billing tier. This provides secure and controlled internet access for development environments:
+
+- **Tier 1 & Tier 2**: Network access is restricted and cannot be overridden at the sandbox level
+- **Tier 3 & Tier 4**: Full internet access is available by default, with the ability to configure custom network settings
+
+:::note
+**Tier 1 & 2**: Organization-level network restrictions take precedence over sandbox-level settings. Even if you specify `networkAllowList` when creating a sandbox, the organization's network restrictions will still apply.
+:::
+
+To learn more about organization tiers and limits, see the [Limits documentation](/docs/limits/).
+
+## Managing Network Access
+
+### Creating Sandboxes with Network Restrictions
+
+You can control network access when creating sandboxes using the `networkAllowList` and `networkBlockAll` parameters:
+
+<Tabs>
+<TabItem label="Python" icon="seti:python">
+
+```python
+from daytona import CreateSandboxFromSnapshotParams, Daytona
+
+daytona = Daytona()
+
+# Allow access to specific IP addresses (Wikipedia, X/Twitter, private network)
+sandbox = daytona.create(CreateSandboxFromSnapshotParams(
+    network_allow_list='208.80.154.232/32,199.16.156.103/32,192.168.1.0/24'
+))
+
+# Or block all network access
+sandbox = daytona.create(CreateSandboxFromSnapshotParams(
+    network_block_all=True
+))
+```
+
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+
+```typescript
+import { Daytona } from '@daytonaio/sdk'
+
+const daytona = new Daytona()
+
+// Allow access to specific IP addresses (Wikipedia, X/Twitter, private network)
+const sandbox = await daytona.create({
+  networkAllowList: '208.80.154.232/32,199.16.156.103/32,192.168.1.0/24'
+})
+
+// Or block all network access
+const sandbox = await daytona.create({
+  networkBlockAll: true
+})
+```
+
+</TabItem>
+</Tabs>
+
+
+:::note
+If both `networkBlockAll` and `networkAllowList` are specified, `networkBlockAll` takes precedence and all network access will be blocked, ignoring the allow list.
+:::
+
+
+### Network Allow List Format
+
+The `networkAllowList` accepts up to 5 CIDR network blocks separated by commas:
+
+- **Single IP**: `208.80.154.232/32` (Wikipedia)
+- **Subnet**: `192.168.1.0/24` (Private network)
+- **Multiple networks**: `208.80.154.232/32,199.16.156.103/32,10.0.0.0/8`
+
+:::note
+**Essential Services**: Services that are essential for development are accessible on all tiers, including package registries, container registries, Git repositories, CDN services, platform services, system package managers etc.\
+If you experience issues with any essential development services, please contact [support@daytona.io](mailto:support@daytona.io) for assistance as these should be accessible on all tiers.
+
+For a complete list of whitelisted services, see [Essential Services](#essential-services) below.
+:::
+
+## Organization Configuration
+
+The network access policies for your organization are set automatically depending on your organization's limits tier and cannot be modified by organization administrators. These policies determine the default network behavior for all sandboxes in your organization.
+
+## Testing Network Access
+
+To test network connectivity from your sandbox:
+
+```bash
+# Test HTTP connectivity to allowed addresses
+curl -I https://208.80.154.232
+
+# Test package manager access (allowed on all tiers)
+apt update  # For Ubuntu/Debian
+npm ping    # For Node.js
+pip install --dry-run requests  # For Python
+```
+
+## Security Benefits
+
+Network limits provide several security advantages:
+
+- **Prevents data exfiltration** from sandboxes
+- **Reduces attack surface** by limiting external connections
+- **Complies with security policies** for development environments
+- **Enables fine-grained control** over network access
+
+:::caution
+Enabling unrestricted network access may pose security risks when executing untrusted code. It is recommended to whitelist specific network addresses using `networkAllowList` or block all network access using `networkBlockAll` instead.
+
+Test network connectivity before starting critical development work and consider upgrading your tier if you need access to many external services.
+:::
+
+
+## Essential Services
+
+The following services are whitelisted and accessible on all tiers:
+
+- Package registries:
+  - npm: `registry.npmjs.org`, `registry.npmjs.com`, `nodejs.org`, `nodesource.com`, `npm.pkg.github.com`
+  - yarn: `classic.yarnpkg.com`, `registry.yarnpkg.com`, `repo.yarnpkg.com`, `releases.yarnpkg.com`, `yarn.npmjs.org`, `yarnpkg.netlify.com`, `dl.yarnpkg.com`, `yarnpkg.com`
+  - PyPI: `pypi.org`, `pypi.python.org`, `files.pythonhosted.org`, `bootstrap.pypa.io`
+  - Maven: `repo1.maven.org`, `repo.maven.apache.org`
+- Container registries:
+  - Docker: `download.docker.com`, `registry-1.docker.io`, `registry.docker.io`, `auth.docker.io`, `index.docker.io`, `hub.docker.com`, `docker.io`
+  - Google: `gcr.io`, `asia.gcr.io`, `eu.gcr.io`, `us.gcr.io`, `marketplace.gcr.io`, `registry.cloud.google.com`
+  - Microsoft: `mcr.microsoft.com`
+  - Quay: `quay.io`, `quay-registry.s3.amazonaws.com`
+  - Kubernetes: `registry.k8s.io`
+- Git repositories:
+  - GitHub: `github.com`, `api.github.com`, `raw.githubusercontent.com`, `github-releases.githubusercontent.com`, `codeload.github.com`, `ghcr.io`, `packages.github.com`
+  - GitLab: `gitlab.com`, `registry.gitlab.com`
+  - Bitbucket: `bitbucket.org`
+- System package managers:
+  - Ubuntu: `archive.ubuntu.com`, `security.ubuntu.com`
+  - Debian: `deb.debian.org`, `security.debian.org`, `cdn-fastly.deb.debian.org`, `ftp.debian.org`
+- CDN services:
+  - Cloudflare: `cloudflare.com`
+  - Fastly: `fastly.com`
+  - JavaScript CDNs: `unpkg.com`, `jsdelivr.net`
+- AI/ML services:
+  - Anthropic: `api.anthropic.com`
+- Platform services:
+  - Daytona: `app.daytona.io`
+
+
+## Getting Help
+
+If you encounter network access issues or need unrestricted network access
+
+1. Check your **organization tier** in the [Dashboard](https://app.daytona.io/dashboard/limits)
+2. Upgrade your **organization tier** by completing the required verification steps to unlock higher limits tiers automatically
+3. Verify your **network allow list** configuration
+4. Contact support at [support@daytona.io](mailto:support@daytona.io) for assistance
