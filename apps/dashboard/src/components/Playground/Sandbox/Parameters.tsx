@@ -5,25 +5,28 @@
 
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion'
 import { SandboxParametersSections, sandboxParametersSectionsData } from '@/enums/Playground'
+import { usePlaygroundSandboxParams } from './hook'
 import { Plus, Minus } from 'lucide-react'
 import { useState } from 'react'
 
 const SandboxParameters: React.FC = () => {
-  const [openedParametersSection, setOpenedParametersSection] = useState<SandboxParametersSections[]>([
+  const [openedParametersSections, setOpenedParametersSections] = useState<SandboxParametersSections[]>([
     SandboxParametersSections.SANDBOX_MANAGMENT,
   ])
+
+  const { setPlaygroundSandboxParameterValue } = usePlaygroundSandboxParams()
 
   return (
     <div className="flex flex-col space-y-2">
       <Accordion
         type="multiple"
-        value={openedParametersSection}
+        value={openedParametersSections}
         onValueChange={(parametersSections) =>
-          setOpenedParametersSection(parametersSections as SandboxParametersSections[])
+          setOpenedParametersSections(parametersSections as SandboxParametersSections[])
         }
       >
         {sandboxParametersSectionsData.map((section) => {
-          const isCollapsed = !openedParametersSection.includes(section.value as SandboxParametersSections)
+          const isCollapsed = !openedParametersSections.includes(section.value as SandboxParametersSections)
           return (
             <AccordionItem value={section.value}>
               <AccordionTrigger icon={isCollapsed ? <Plus /> : <Minus />}>{section.label}</AccordionTrigger>

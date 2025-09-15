@@ -8,10 +8,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { CodeLanguage } from '@daytonaio/sdk-typescript/src'
 import { codeSnippetSupportedLanguages } from '@/enums/Playground'
 import CodeBlock from '@/components/CodeBlock'
+import { usePlaygroundSandboxParams } from './hook'
 import { useMemo, useState } from 'react'
 
 const SandboxCodeSnippetsResponse: React.FC = () => {
   const [codeSnippetLanguage, setCodeSnippetLanguage] = useState<CodeLanguage>(CodeLanguage.PYTHON)
+
+  const { playgroundSandboxParametersState } = usePlaygroundSandboxParams()
+
   const sandboxCodeSnippetsData = useMemo(
     () => ({
       [CodeLanguage.PYTHON]: {
