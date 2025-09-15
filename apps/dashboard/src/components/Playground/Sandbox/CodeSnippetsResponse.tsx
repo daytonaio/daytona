@@ -92,6 +92,7 @@ console.log(response.result);
             <TabsList className="px-4 w-full flex-shrink-0">
               {codeSnippetSupportedLanguages.map((language) => (
                 <TabsTrigger
+                  key={language.value}
                   value={language.value}
                   className={codeSnippetLanguage === language.value ? 'bg-foreground/10' : ''}
                 >
@@ -103,7 +104,7 @@ console.log(response.result);
               ))}
             </TabsList>
             {codeSnippetSupportedLanguages.map((language) => (
-              <TabsContent value={language.value}>
+              <TabsContent key={language.value} value={language.value}>
                 <CodeBlock
                   language={language.value}
                   code={sandboxCodeSnippetsData[language.value].code}

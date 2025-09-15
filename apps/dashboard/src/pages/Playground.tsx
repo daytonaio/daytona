@@ -26,6 +26,7 @@ const Playground: React.FC = () => {
               <div className="w-full flex items-center justify-center overflow-x-auto space-x-4">
                 {playgroundCategoriesData.map((category) => (
                   <Button
+                    key={category.value}
                     variant={category.value === playgroundCategory ? 'default' : 'secondary'}
                     className="text-md"
                     onClick={() => setPlaygroundCategory(category.value)}

@@ -11,9 +11,6 @@ export interface PlaygroundSandboxParams {
   language?: CodeLanguage
   resources?: Resources
   createFromImageParams?: CreateSandboxFromImageParams
-  autoStopInterval?: number
-  autoArchiveInterval?: number
-  autoDeleteInterval?: number
   languageCodeToRun?: string
   shellCodeToRun?: string
 }
