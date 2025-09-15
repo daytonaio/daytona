@@ -91,6 +91,7 @@ export const CreateAuditLogActionEnum = {
   GET_WEBHOOK_APP_PORTAL_ACCESS: 'get_webhook_app_portal_access',
   SEND_WEBHOOK_MESSAGE: 'send_webhook_message',
   INITIALIZE_WEBHOOKS: 'initialize_webhooks',
+  UPDATE_SANDBOX_DEFAULT_LIMITED_NETWORK_EGRESS: 'update_sandbox_default_limited_network_egress',
   TOOLBOX_DELETE_FILE: 'toolbox_delete_file',
   TOOLBOX_DOWNLOAD_FILE: 'toolbox_download_file',
   TOOLBOX_CREATE_FOLDER: 'toolbox_create_folder',

@@ -53,6 +53,10 @@ definitions:
       memoryQuota:
         minimum: 1
         type: integer
+      metadata:
+        additionalProperties:
+          type: string
+        type: object
       networkAllowList:
         type: string
       networkBlockAll:
@@ -185,6 +189,8 @@ definitions:
       networkAllowList:
         type: string
       networkBlockAll:
+        type: boolean
+      networkLimitEgress:
         type: boolean
     type: object
   dto.VolumeDTO:
@@ -615,6 +621,11 @@ paths:
           name: sandboxId
           required: true
           type: string
+        - description: Metadata
+          in: body
+          name: metadata
+          schema:
+            type: object
       produces:
         - application/json
       responses:

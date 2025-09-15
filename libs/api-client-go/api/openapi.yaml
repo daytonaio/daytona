@@ -562,6 +562,36 @@ paths:
       summary: Get organization by sandbox ID
       tags:
         - organizations
+  /organizations/{organizationId}/sandbox-default-limited-network-egress:
+    post:
+      operationId: updateSandboxDefaultLimitedNetworkEgress
+      parameters:
+        - description: Organization ID
+          explode: false
+          in: path
+          name: organizationId
+          required: true
+          schema:
+            type: string
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrganizationSandboxDefaultLimitedNetworkEgress'
+        required: true
+      responses:
+        '204':
+          description: Sandbox default limited network egress updated successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Update sandbox default limited network egress
+      tags:
+        - organizations
   /organizations/{organizationId}/roles:
     get:
       operationId: listOrganizationRoles
@@ -6670,6 +6700,7 @@ components:
         suspended: true
         createdAt: 2000-01-23T04:56:07.000+00:00
         maxCpuPerSandbox: 5.637376656633329
+        sandboxLimitedNetworkEgress: true
         suspendedUntil: 2000-01-23T04:56:07.000+00:00
         maxDiskPerSandbox: 7.061401241503109
         createdBy: createdBy
@@ -6735,6 +6766,9 @@ components:
         maxDiskPerSandbox:
           description: Max disk per sandbox
           type: number
+        sandboxLimitedNetworkEgress:
+          description: Sandbox default network block all
+          type: boolean
       required:
         - createdAt
         - createdBy
@@ -6744,6 +6778,7 @@ components:
         - maxMemoryPerSandbox
         - name
         - personal
+        - sandboxLimitedNetworkEgress
         - suspended
         - suspendedAt
         - suspendedUntil
@@ -6869,6 +6904,16 @@ components:
         - reason
         - suspensionCleanupGracePeriodHours
         - until
+      type: object
+    OrganizationSandboxDefaultLimitedNetworkEgress:
+      example:
+        sandboxDefaultLimitedNetworkEgress: true
+      properties:
+        sandboxDefaultLimitedNetworkEgress:
+          description: Sandbox default limited network egress
+          type: boolean
+      required:
+        - sandboxDefaultLimitedNetworkEgress
       type: object
     CreateOrganizationRole:
       example:
@@ -10369,6 +10414,7 @@ components:
             - get_webhook_app_portal_access
             - send_webhook_message
             - initialize_webhooks
+            - update_sandbox_default_limited_network_egress
             - toolbox_delete_file
             - toolbox_download_file
             - toolbox_create_folder

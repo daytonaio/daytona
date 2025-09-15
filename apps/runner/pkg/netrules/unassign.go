@@ -35,5 +35,5 @@ func (manager *NetRulesManager) UnassignNetworkRules(name string) error {
 		}
 	}
 
-	return manager.saveIptablesRules()
+	return nil
 }
