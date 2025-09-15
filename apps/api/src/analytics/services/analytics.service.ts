@@ -90,6 +90,7 @@ export class AnalyticsService {
       groupType: 'organization',
       groupKey: payload.id,
       properties: {
+        id: payload.id,
         name: `Personal - ${payload.createdBy}`,
         created_at: payload.createdAt,
         created_by: payload.createdBy,
