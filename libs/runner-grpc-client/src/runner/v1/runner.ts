@@ -5,11 +5,11 @@
 // source: runner/v1/runner.proto
 
 /* eslint-disable */
-import type { Metadata } from "@grpc/grpc-js";
-import { GrpcMethod, GrpcStreamMethod } from "@nestjs/microservices";
-import { Observable } from "rxjs";
+import type { Metadata } from '@grpc/grpc-js'
+import { GrpcMethod, GrpcStreamMethod } from '@nestjs/microservices'
+import { Observable } from 'rxjs'
 
-export const protobufPackage = "runner.v1";
+export const protobufPackage = 'runner.v1'
 
 export enum HealthStatus {
   HEALTH_STATUS_UNSPECIFIED = 0,
@@ -44,209 +44,207 @@ export enum BackupState {
 }
 
 /** Health messages */
-export interface HealthCheckRequest {
-}
+export interface HealthCheckRequest {}
 
 export interface HealthCheckResponse {
-  status: HealthStatus;
-  version: string;
+  status: HealthStatus
+  version: string
 }
 
 /** Runner messages */
-export interface RunnerInfoRequest {
-}
+export interface RunnerInfoRequest {}
 
 export interface RunnerInfoResponse {
-  metrics?: RunnerMetrics | undefined;
+  metrics?: RunnerMetrics | undefined
 }
 
 /** Sandbox messages */
 export interface CreateSandboxRequest {
-  id: string;
-  fromVolumeId?: string | undefined;
-  userId: string;
-  snapshot: string;
-  osUser: string;
-  cpuQuota: number;
-  gpuQuota: number;
-  memoryQuota: number;
-  storageQuota: number;
-  env: { [key: string]: string };
-  registry?: Registry | undefined;
-  entrypoint: string[];
-  volumes: Volume[];
-  networkBlockAll?: boolean | undefined;
-  networkAllowList?: string | undefined;
+  id: string
+  fromVolumeId?: string | undefined
+  userId: string
+  snapshot: string
+  osUser: string
+  cpuQuota: number
+  gpuQuota: number
+  memoryQuota: number
+  storageQuota: number
+  env: { [key: string]: string }
+  registry?: Registry | undefined
+  entrypoint: string[]
+  volumes: Volume[]
+  networkBlockAll?: boolean | undefined
+  networkAllowList?: string | undefined
 }
 
 export interface CreateSandboxRequest_EnvEntry {
-  key: string;
-  value: string;
+  key: string
+  value: string
 }
 
 export interface CreateSandboxResponse {
-  sandboxId: string;
+  sandboxId: string
 }
 
 export interface DestroySandboxRequest {
-  sandboxId: string;
+  sandboxId: string
 }
 
 export interface DestroySandboxResponse {
-  message: string;
+  message: string
 }
 
 export interface CreateBackupRequest {
-  sandboxId: string;
-  registry: Registry | undefined;
-  snapshot: string;
+  sandboxId: string
+  registry: Registry | undefined
+  snapshot: string
 }
 
 export interface CreateBackupResponse {
-  message: string;
+  message: string
 }
 
 export interface StartSandboxRequest {
-  sandboxId: string;
+  sandboxId: string
 }
 
 export interface StartSandboxResponse {
-  message: string;
+  message: string
 }
 
 export interface StopSandboxRequest {
-  sandboxId: string;
+  sandboxId: string
 }
 
 export interface StopSandboxResponse {
-  message: string;
+  message: string
 }
 
 export interface SandboxInfoRequest {
-  sandboxId: string;
+  sandboxId: string
 }
 
 export interface SandboxInfoResponse {
-  state: SandboxState;
-  backupState: BackupState;
-  backupError: string;
+  state: SandboxState
+  backupState: BackupState
+  backupError: string
 }
 
 export interface RemoveDestroyedSandboxRequest {
-  sandboxId: string;
+  sandboxId: string
 }
 
 export interface RemoveDestroyedSandboxResponse {
-  message: string;
+  message: string
 }
 
 export interface SandboxDaemonVersionRequest {
-  sandboxId: string;
+  sandboxId: string
 }
 
 export interface SandboxDaemonVersionResponse {
-  daemonVersion: string;
+  daemonVersion: string
 }
 
 export interface GetNetworkSettingsRequest {
-  sandboxId: string;
+  sandboxId: string
 }
 
 export interface GetNetworkSettingsResponse {
-  networkBlockAll?: boolean | undefined;
-  networkAllowList?: string | undefined;
+  networkBlockAll?: boolean | undefined
+  networkAllowList?: string | undefined
 }
 
 export interface UpdateNetworkSettingsRequest {
-  sandboxId: string;
-  networkBlockAll?: boolean | undefined;
-  networkAllowList?: string | undefined;
+  sandboxId: string
+  networkBlockAll?: boolean | undefined
+  networkAllowList?: string | undefined
 }
 
 export interface UpdateNetworkSettingsResponse {
-  message: string;
+  message: string
 }
 
 /** Snapshot messages */
 export interface Registry {
-  url: string;
-  project?: string | undefined;
-  username?: string | undefined;
-  password?: string | undefined;
+  url: string
+  project?: string | undefined
+  username?: string | undefined
+  password?: string | undefined
 }
 
 export interface PullSnapshotRequest {
-  snapshot: string;
-  registry: Registry | undefined;
+  snapshot: string
+  registry: Registry | undefined
 }
 
 export interface PullSnapshotResponse {
-  message: string;
+  message: string
 }
 
 export interface BuildSnapshotRequest {
-  snapshot?: string | undefined;
-  registry?: Registry | undefined;
-  dockerfile: string;
-  organizationId: string;
-  context: string[];
-  pushToInternalRegistry?: boolean | undefined;
+  snapshot?: string | undefined
+  registry?: Registry | undefined
+  dockerfile: string
+  organizationId: string
+  context: string[]
+  pushToInternalRegistry?: boolean | undefined
 }
 
 export interface BuildSnapshotResponse {
-  message: string;
+  message: string
 }
 
 export interface SnapshotExistsRequest {
-  snapshot: string;
-  includeLatest: boolean;
+  snapshot: string
+  includeLatest: boolean
 }
 
 export interface SnapshotExistsResponse {
-  exists: boolean;
+  exists: boolean
 }
 
 export interface RemoveSnapshotRequest {
-  snapshot: string;
-  force: boolean;
+  snapshot: string
+  force: boolean
 }
 
 export interface RemoveSnapshotResponse {
-  message: string;
+  message: string
 }
 
 export interface GetSnapshotLogsRequest {
-  snapshotRef: string;
-  follow: boolean;
+  snapshotRef: string
+  follow: boolean
 }
 
 export interface GetSnapshotLogsResponse {
-  content: string;
+  content: string
 }
 
 /** Add Volume message for CreateSandboxRequest */
 export interface Volume {
-  volumeId: string;
-  mountPath: string;
+  volumeId: string
+  mountPath: string
 }
 
 /** Add RunnerMetrics message for RunnerInfoResponse */
 export interface RunnerMetrics {
-  currentAllocatedCpu: number;
-  currentAllocatedDiskGiB: number;
-  currentAllocatedMemoryGiB: number;
-  currentCpuUsagePercentage: number;
-  currentDiskUsagePercentage: number;
-  currentMemoryUsagePercentage: number;
-  currentSnapshotCount: number;
+  currentAllocatedCpu: number
+  currentAllocatedDiskGiB: number
+  currentAllocatedMemoryGiB: number
+  currentCpuUsagePercentage: number
+  currentDiskUsagePercentage: number
+  currentMemoryUsagePercentage: number
+  currentSnapshotCount: number
 }
 
-export const RUNNER_V1_PACKAGE_NAME = "runner.v1";
+export const RUNNER_V1_PACKAGE_NAME = 'runner.v1'
 
 /** Health service */
 
 export interface HealthServiceClient {
-  healthCheck(request: HealthCheckRequest, metadata: Metadata, ...rest: any): Observable<HealthCheckResponse>;
+  healthCheck(request: HealthCheckRequest, metadata: Metadata, ...rest: any): Observable<HealthCheckResponse>
 }
 
 /** Health service */
@@ -256,30 +254,30 @@ export interface HealthServiceController {
     request: HealthCheckRequest,
     metadata: Metadata,
     ...rest: any
-  ): Promise<HealthCheckResponse> | Observable<HealthCheckResponse> | HealthCheckResponse;
+  ): Promise<HealthCheckResponse> | Observable<HealthCheckResponse> | HealthCheckResponse
 }
 
 export function HealthServiceControllerMethods() {
   return function (constructor: Function) {
-    const grpcMethods: string[] = ["healthCheck"];
+    const grpcMethods: string[] = ['healthCheck']
     for (const method of grpcMethods) {
-      const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
-      GrpcMethod("HealthService", method)(constructor.prototype[method], method, descriptor);
+      const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method)
+      GrpcMethod('HealthService', method)(constructor.prototype[method], method, descriptor)
     }
-    const grpcStreamMethods: string[] = [];
+    const grpcStreamMethods: string[] = []
     for (const method of grpcStreamMethods) {
-      const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
-      GrpcStreamMethod("HealthService", method)(constructor.prototype[method], method, descriptor);
+      const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method)
+      GrpcStreamMethod('HealthService', method)(constructor.prototype[method], method, descriptor)
     }
-  };
+  }
 }
 
-export const HEALTH_SERVICE_NAME = "HealthService";
+export const HEALTH_SERVICE_NAME = 'HealthService'
 
 /** Runner service */
 
 export interface RunnerServiceClient {
-  runnerInfo(request: RunnerInfoRequest, metadata: Metadata, ...rest: any): Observable<RunnerInfoResponse>;
+  runnerInfo(request: RunnerInfoRequest, metadata: Metadata, ...rest: any): Observable<RunnerInfoResponse>
 }
 
 /** Runner service */
@@ -289,64 +287,64 @@ export interface RunnerServiceController {
     request: RunnerInfoRequest,
     metadata: Metadata,
     ...rest: any
-  ): Promise<RunnerInfoResponse> | Observable<RunnerInfoResponse> | RunnerInfoResponse;
+  ): Promise<RunnerInfoResponse> | Observable<RunnerInfoResponse> | RunnerInfoResponse
 }
 
 export function RunnerServiceControllerMethods() {
   return function (constructor: Function) {
-    const grpcMethods: string[] = ["runnerInfo"];
+    const grpcMethods: string[] = ['runnerInfo']
     for (const method of grpcMethods) {
-      const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
-      GrpcMethod("RunnerService", method)(constructor.prototype[method], method, descriptor);
+      const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method)
+      GrpcMethod('RunnerService', method)(constructor.prototype[method], method, descriptor)
     }
-    const grpcStreamMethods: string[] = [];
+    const grpcStreamMethods: string[] = []
     for (const method of grpcStreamMethods) {
-      const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
-      GrpcStreamMethod("RunnerService", method)(constructor.prototype[method], method, descriptor);
+      const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method)
+      GrpcStreamMethod('RunnerService', method)(constructor.prototype[method], method, descriptor)
     }
-  };
+  }
 }
 
-export const RUNNER_SERVICE_NAME = "RunnerService";
+export const RUNNER_SERVICE_NAME = 'RunnerService'
 
 /** Sandbox service */
 
 export interface SandboxServiceClient {
-  createSandbox(request: CreateSandboxRequest, metadata: Metadata, ...rest: any): Observable<CreateSandboxResponse>;
+  createSandbox(request: CreateSandboxRequest, metadata: Metadata, ...rest: any): Observable<CreateSandboxResponse>
 
-  destroySandbox(request: DestroySandboxRequest, metadata: Metadata, ...rest: any): Observable<DestroySandboxResponse>;
+  destroySandbox(request: DestroySandboxRequest, metadata: Metadata, ...rest: any): Observable<DestroySandboxResponse>
 
-  createBackup(request: CreateBackupRequest, metadata: Metadata, ...rest: any): Observable<CreateBackupResponse>;
+  createBackup(request: CreateBackupRequest, metadata: Metadata, ...rest: any): Observable<CreateBackupResponse>
 
-  startSandbox(request: StartSandboxRequest, metadata: Metadata, ...rest: any): Observable<StartSandboxResponse>;
+  startSandbox(request: StartSandboxRequest, metadata: Metadata, ...rest: any): Observable<StartSandboxResponse>
 
-  stopSandbox(request: StopSandboxRequest, metadata: Metadata, ...rest: any): Observable<StopSandboxResponse>;
+  stopSandbox(request: StopSandboxRequest, metadata: Metadata, ...rest: any): Observable<StopSandboxResponse>
 
-  sandboxInfo(request: SandboxInfoRequest, metadata: Metadata, ...rest: any): Observable<SandboxInfoResponse>;
+  sandboxInfo(request: SandboxInfoRequest, metadata: Metadata, ...rest: any): Observable<SandboxInfoResponse>
 
   removeDestroyedSandbox(
     request: RemoveDestroyedSandboxRequest,
     metadata: Metadata,
     ...rest: any
-  ): Observable<RemoveDestroyedSandboxResponse>;
+  ): Observable<RemoveDestroyedSandboxResponse>
 
   sandboxDaemonVersion(
     request: SandboxDaemonVersionRequest,
     metadata: Metadata,
     ...rest: any
-  ): Observable<SandboxDaemonVersionResponse>;
+  ): Observable<SandboxDaemonVersionResponse>
 
   getNetworkSettings(
     request: GetNetworkSettingsRequest,
     metadata: Metadata,
     ...rest: any
-  ): Observable<GetNetworkSettingsResponse>;
+  ): Observable<GetNetworkSettingsResponse>
 
   updateNetworkSettings(
     request: UpdateNetworkSettingsRequest,
     metadata: Metadata,
     ...rest: any
-  ): Observable<UpdateNetworkSettingsResponse>;
+  ): Observable<UpdateNetworkSettingsResponse>
 }
 
 /** Sandbox service */
@@ -356,37 +354,37 @@ export interface SandboxServiceController {
     request: CreateSandboxRequest,
     metadata: Metadata,
     ...rest: any
-  ): Promise<CreateSandboxResponse> | Observable<CreateSandboxResponse> | CreateSandboxResponse;
+  ): Promise<CreateSandboxResponse> | Observable<CreateSandboxResponse> | CreateSandboxResponse
 
   destroySandbox(
     request: DestroySandboxRequest,
     metadata: Metadata,
     ...rest: any
-  ): Promise<DestroySandboxResponse> | Observable<DestroySandboxResponse> | DestroySandboxResponse;
+  ): Promise<DestroySandboxResponse> | Observable<DestroySandboxResponse> | DestroySandboxResponse
 
   createBackup(
     request: CreateBackupRequest,
     metadata: Metadata,
     ...rest: any
-  ): Promise<CreateBackupResponse> | Observable<CreateBackupResponse> | CreateBackupResponse;
+  ): Promise<CreateBackupResponse> | Observable<CreateBackupResponse> | CreateBackupResponse
 
   startSandbox(
     request: StartSandboxRequest,
     metadata: Metadata,
     ...rest: any
-  ): Promise<StartSandboxResponse> | Observable<StartSandboxResponse> | StartSandboxResponse;
+  ): Promise<StartSandboxResponse> | Observable<StartSandboxResponse> | StartSandboxResponse
 
   stopSandbox(
     request: StopSandboxRequest,
     metadata: Metadata,
     ...rest: any
-  ): Promise<StopSandboxResponse> | Observable<StopSandboxResponse> | StopSandboxResponse;
+  ): Promise<StopSandboxResponse> | Observable<StopSandboxResponse> | StopSandboxResponse
 
   sandboxInfo(
     request: SandboxInfoRequest,
     metadata: Metadata,
     ...rest: any
-  ): Promise<SandboxInfoResponse> | Observable<SandboxInfoResponse> | SandboxInfoResponse;
+  ): Promise<SandboxInfoResponse> | Observable<SandboxInfoResponse> | SandboxInfoResponse
 
   removeDestroyedSandbox(
     request: RemoveDestroyedSandboxRequest,
@@ -395,71 +393,71 @@ export interface SandboxServiceController {
   ):
     | Promise<RemoveDestroyedSandboxResponse>
     | Observable<RemoveDestroyedSandboxResponse>
-    | RemoveDestroyedSandboxResponse;
+    | RemoveDestroyedSandboxResponse
 
   sandboxDaemonVersion(
     request: SandboxDaemonVersionRequest,
     metadata: Metadata,
     ...rest: any
-  ): Promise<SandboxDaemonVersionResponse> | Observable<SandboxDaemonVersionResponse> | SandboxDaemonVersionResponse;
+  ): Promise<SandboxDaemonVersionResponse> | Observable<SandboxDaemonVersionResponse> | SandboxDaemonVersionResponse
 
   getNetworkSettings(
     request: GetNetworkSettingsRequest,
     metadata: Metadata,
     ...rest: any
-  ): Promise<GetNetworkSettingsResponse> | Observable<GetNetworkSettingsResponse> | GetNetworkSettingsResponse;
+  ): Promise<GetNetworkSettingsResponse> | Observable<GetNetworkSettingsResponse> | GetNetworkSettingsResponse
 
   updateNetworkSettings(
     request: UpdateNetworkSettingsRequest,
     metadata: Metadata,
     ...rest: any
-  ): Promise<UpdateNetworkSettingsResponse> | Observable<UpdateNetworkSettingsResponse> | UpdateNetworkSettingsResponse;
+  ): Promise<UpdateNetworkSettingsResponse> | Observable<UpdateNetworkSettingsResponse> | UpdateNetworkSettingsResponse
 }
 
 export function SandboxServiceControllerMethods() {
   return function (constructor: Function) {
     const grpcMethods: string[] = [
-      "createSandbox",
-      "destroySandbox",
-      "createBackup",
-      "startSandbox",
-      "stopSandbox",
-      "sandboxInfo",
-      "removeDestroyedSandbox",
-      "sandboxDaemonVersion",
-      "getNetworkSettings",
-      "updateNetworkSettings",
-    ];
+      'createSandbox',
+      'destroySandbox',
+      'createBackup',
+      'startSandbox',
+      'stopSandbox',
+      'sandboxInfo',
+      'removeDestroyedSandbox',
+      'sandboxDaemonVersion',
+      'getNetworkSettings',
+      'updateNetworkSettings',
+    ]
     for (const method of grpcMethods) {
-      const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
-      GrpcMethod("SandboxService", method)(constructor.prototype[method], method, descriptor);
+      const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method)
+      GrpcMethod('SandboxService', method)(constructor.prototype[method], method, descriptor)
     }
-    const grpcStreamMethods: string[] = [];
+    const grpcStreamMethods: string[] = []
     for (const method of grpcStreamMethods) {
-      const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
-      GrpcStreamMethod("SandboxService", method)(constructor.prototype[method], method, descriptor);
+      const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method)
+      GrpcStreamMethod('SandboxService', method)(constructor.prototype[method], method, descriptor)
     }
-  };
+  }
 }
 
-export const SANDBOX_SERVICE_NAME = "SandboxService";
+export const SANDBOX_SERVICE_NAME = 'SandboxService'
 
 /** Snapshot service */
 
 export interface SnapshotServiceClient {
-  pullSnapshot(request: PullSnapshotRequest, metadata: Metadata, ...rest: any): Observable<PullSnapshotResponse>;
+  pullSnapshot(request: PullSnapshotRequest, metadata: Metadata, ...rest: any): Observable<PullSnapshotResponse>
 
-  buildSnapshot(request: BuildSnapshotRequest, metadata: Metadata, ...rest: any): Observable<BuildSnapshotResponse>;
+  buildSnapshot(request: BuildSnapshotRequest, metadata: Metadata, ...rest: any): Observable<BuildSnapshotResponse>
 
-  snapshotExists(request: SnapshotExistsRequest, metadata: Metadata, ...rest: any): Observable<SnapshotExistsResponse>;
+  snapshotExists(request: SnapshotExistsRequest, metadata: Metadata, ...rest: any): Observable<SnapshotExistsResponse>
 
-  removeSnapshot(request: RemoveSnapshotRequest, metadata: Metadata, ...rest: any): Observable<RemoveSnapshotResponse>;
+  removeSnapshot(request: RemoveSnapshotRequest, metadata: Metadata, ...rest: any): Observable<RemoveSnapshotResponse>
 
   getSnapshotLogs(
     request: GetSnapshotLogsRequest,
     metadata: Metadata,
     ...rest: any
-  ): Observable<GetSnapshotLogsResponse>;
+  ): Observable<GetSnapshotLogsResponse>
 }
 
 /** Snapshot service */
@@ -469,52 +467,52 @@ export interface SnapshotServiceController {
     request: PullSnapshotRequest,
     metadata: Metadata,
     ...rest: any
-  ): Promise<PullSnapshotResponse> | Observable<PullSnapshotResponse> | PullSnapshotResponse;
+  ): Promise<PullSnapshotResponse> | Observable<PullSnapshotResponse> | PullSnapshotResponse
 
   buildSnapshot(
     request: BuildSnapshotRequest,
     metadata: Metadata,
     ...rest: any
-  ): Promise<BuildSnapshotResponse> | Observable<BuildSnapshotResponse> | BuildSnapshotResponse;
+  ): Promise<BuildSnapshotResponse> | Observable<BuildSnapshotResponse> | BuildSnapshotResponse
 
   snapshotExists(
     request: SnapshotExistsRequest,
     metadata: Metadata,
     ...rest: any
-  ): Promise<SnapshotExistsResponse> | Observable<SnapshotExistsResponse> | SnapshotExistsResponse;
+  ): Promise<SnapshotExistsResponse> | Observable<SnapshotExistsResponse> | SnapshotExistsResponse
 
   removeSnapshot(
     request: RemoveSnapshotRequest,
     metadata: Metadata,
     ...rest: any
-  ): Promise<RemoveSnapshotResponse> | Observable<RemoveSnapshotResponse> | RemoveSnapshotResponse;
+  ): Promise<RemoveSnapshotResponse> | Observable<RemoveSnapshotResponse> | RemoveSnapshotResponse
 
   getSnapshotLogs(
     request: GetSnapshotLogsRequest,
     metadata: Metadata,
     ...rest: any
-  ): Observable<GetSnapshotLogsResponse>;
+  ): Observable<GetSnapshotLogsResponse>
 }
 
 export function SnapshotServiceControllerMethods() {
   return function (constructor: Function) {
     const grpcMethods: string[] = [
-      "pullSnapshot",
-      "buildSnapshot",
-      "snapshotExists",
-      "removeSnapshot",
-      "getSnapshotLogs",
-    ];
+      'pullSnapshot',
+      'buildSnapshot',
+      'snapshotExists',
+      'removeSnapshot',
+      'getSnapshotLogs',
+    ]
     for (const method of grpcMethods) {
-      const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
-      GrpcMethod("SnapshotService", method)(constructor.prototype[method], method, descriptor);
+      const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method)
+      GrpcMethod('SnapshotService', method)(constructor.prototype[method], method, descriptor)
     }
-    const grpcStreamMethods: string[] = [];
+    const grpcStreamMethods: string[] = []
     for (const method of grpcStreamMethods) {
-      const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
-      GrpcStreamMethod("SnapshotService", method)(constructor.prototype[method], method, descriptor);
+      const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method)
+      GrpcStreamMethod('SnapshotService', method)(constructor.prototype[method], method, descriptor)
     }
-  };
+  }
 }
 
-export const SNAPSHOT_SERVICE_NAME = "SnapshotService";
+export const SNAPSHOT_SERVICE_NAME = 'SnapshotService'

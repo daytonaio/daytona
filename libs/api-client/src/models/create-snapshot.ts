@@ -76,4 +76,10 @@ export interface CreateSnapshot {
    * @memberof CreateSnapshot
    */
   buildInfo?: CreateBuildInfo
+  /**
+   * Whether the snapshot is experimental
+   * @type {boolean}
+   * @memberof CreateSnapshot
+   */
+  experimental?: boolean
 }

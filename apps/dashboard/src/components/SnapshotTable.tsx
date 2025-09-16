@@ -303,6 +303,11 @@ const getColumns = ({
                 System
               </span>
             )}
+            {snapshot.experimental && (
+              <span className="px-2 py-0.5 text-xs rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300">
+                Experimental
+              </span>
+            )}
           </div>
         )
       },

@@ -85,4 +85,11 @@ export class CreateSnapshotDto {
   @IsOptional()
   @IsObject()
   buildInfo?: CreateBuildInfoDto
+
+  @ApiPropertyOptional({
+    description: 'Whether the snapshot is experimental',
+  })
+  @IsBoolean()
+  @IsOptional()
+  experimental?: boolean
 }

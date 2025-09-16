@@ -127,4 +127,10 @@ export interface SnapshotDto {
    * @memberof SnapshotDto
    */
   buildInfo?: BuildInfo
+  /**
+   * Whether the snapshot is experimental
+   * @type {boolean}
+   * @memberof SnapshotDto
+   */
+  experimental?: boolean
 }

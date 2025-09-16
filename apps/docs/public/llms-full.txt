@@ -2663,11 +2663,9 @@ const sandbox = await daytona.create({
 ```
 
 
-
 :::note
 If both `networkBlockAll` and `networkAllowList` are specified, `networkBlockAll` takes precedence and all network access will be blocked, ignoring the allow list.
 :::
-
 
 ### Network Allow List Format
 
@@ -2717,7 +2715,6 @@ Enabling unrestricted network access may pose security risks when executing untr
 Test network connectivity before starting critical development work and consider upgrading your tier if you need access to many external services.
 :::
 
-
 ## Essential Services
 
 The following services are whitelisted and accessible on all tiers:
@@ -2748,7 +2745,6 @@ The following services are whitelisted and accessible on all tiers:
   - Anthropic: `api.anthropic.com`
 - Platform services:
   - Daytona: `app.daytona.io`
-
 
 ## Getting Help
 
@@ -3319,7 +3315,6 @@ Setting ["autoDeleteInterval: 0"](#auto-delete-interval) has the same effect as 
 
 Daytona Sandboxes provide configurable network firewall controls to enhance security and manage connectivity. By default, network access follows standard security policies, but you can customize network settings when creating a Sandbox.
 Learn more about network limits in the [Network Limits](/docs/en/network-limits) documentation.
-
 
 ## Sandbox Information
 

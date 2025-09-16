@@ -40,6 +40,8 @@ type CreateSnapshot struct {
 	Disk *int32 `json:"disk,omitempty"`
 	// Build information for the snapshot
 	BuildInfo *CreateBuildInfo `json:"buildInfo,omitempty"`
+	// Whether the snapshot is experimental
+	Experimental *bool `json:"experimental,omitempty"`
 }
 
 type _CreateSnapshot CreateSnapshot
@@ -342,6 +344,38 @@ func (o *CreateSnapshot) SetBuildInfo(v CreateBuildInfo) {
 	o.BuildInfo = &v
 }
 
+// GetExperimental returns the Experimental field value if set, zero value otherwise.
+func (o *CreateSnapshot) GetExperimental() bool {
+	if o == nil || IsNil(o.Experimental) {
+		var ret bool
+		return ret
+	}
+	return *o.Experimental
+}
+
+// GetExperimentalOk returns a tuple with the Experimental field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *CreateSnapshot) GetExperimentalOk() (*bool, bool) {
+	if o == nil || IsNil(o.Experimental) {
+		return nil, false
+	}
+	return o.Experimental, true
+}
+
+// HasExperimental returns a boolean if a field has been set.
+func (o *CreateSnapshot) HasExperimental() bool {
+	if o != nil && !IsNil(o.Experimental) {
+		return true
+	}
+
+	return false
+}
+
+// SetExperimental gets a reference to the given bool and assigns it to the Experimental field.
+func (o *CreateSnapshot) SetExperimental(v bool) {
+	o.Experimental = &v
+}
+
 func (o CreateSnapshot) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -376,6 +410,9 @@ func (o CreateSnapshot) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.BuildInfo) {
 		toSerialize["buildInfo"] = o.BuildInfo
+	}
+	if !IsNil(o.Experimental) {
+		toSerialize["experimental"] = o.Experimental
 	}
 	return toSerialize, nil
 }

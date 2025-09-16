@@ -66,6 +66,12 @@ export class SnapshotDto {
   })
   buildInfo?: BuildInfoDto
 
+  @ApiPropertyOptional({
+    description: 'Whether the snapshot is experimental',
+    example: false,
+  })
+  experimental?: boolean
+
   static fromSnapshot(snapshot: Snapshot): SnapshotDto {
     return {
       id: snapshot.id,
@@ -84,6 +90,7 @@ export class SnapshotDto {
       createdAt: snapshot.createdAt,
       updatedAt: snapshot.updatedAt,
       lastUsedAt: snapshot.lastUsedAt,
+      experimental: snapshot.experimental,
       buildInfo: snapshot.buildInfo
         ? {
             dockerfileContent: snapshot.buildInfo.dockerfileContent,

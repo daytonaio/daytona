@@ -9330,6 +9330,7 @@ components:
         entrypoint: sleep infinity
         name: ubuntu-4vcpu-8ram-100gb
         cpu: 1
+        experimental: true
         gpu: 0
       properties:
         name:
@@ -9369,6 +9370,9 @@ components:
           allOf:
             - $ref: '#/components/schemas/CreateBuildInfo'
           description: Build information for the snapshot
+        experimental:
+          description: Whether the snapshot is experimental
+          type: boolean
       required:
         - name
       type: object
@@ -10414,6 +10418,7 @@ components:
             - get_webhook_app_portal_access
             - send_webhook_message
             - initialize_webhooks
+            - snapshot_sandbox
             - update_sandbox_default_limited_network_egress
             - toolbox_delete_file
             - toolbox_download_file

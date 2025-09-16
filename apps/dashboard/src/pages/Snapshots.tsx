@@ -25,6 +25,7 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Checkbox } from '@/components/ui/checkbox'
 import { toast } from 'sonner'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { useNotificationSocket } from '@/hooks/useNotificationSocket'
@@ -56,6 +57,7 @@ const Snapshots: React.FC = () => {
   const [cpu, setCpu] = useState<number | undefined>(undefined)
   const [memory, setMemory] = useState<number | undefined>(undefined)
   const [disk, setDisk] = useState<number | undefined>(undefined)
+  const [experimental, setExperimental] = useState<boolean>(false)
 
   const { selectedOrganization, authenticatedUserHasPermission } = useSelectedOrganization()
 
@@ -228,6 +230,7 @@ const Snapshots: React.FC = () => {
           cpu,
           memory,
           disk,
+          experimental,
         },
         selectedOrganization?.id,
       )
@@ -235,6 +238,7 @@ const Snapshots: React.FC = () => {
       setNewSnapshotName('')
       setNewImageName('') // Add this line to clear the image name
       setNewEntrypoint('')
+      setExperimental(false)
       toast.success(`Creating snapshot ${newSnapshotName}`)
 
       if (paginationParams.pageIndex !== 0) {
@@ -379,6 +383,7 @@ const Snapshots: React.FC = () => {
           setCpu(undefined)
           setMemory(undefined)
           setDisk(undefined)
+          setExperimental(false)
         }}
       >
         <div className="mb-2 h-12 flex items-center justify-between">
@@ -495,6 +500,18 @@ const Snapshots: React.FC = () => {
                 <p className="text-sm text-muted-foreground mt-1 pl-1">
                   If not specified, default values will be used (1 vCPU, 1 GiB memory, 3 GiB storage).
                 </p>
+              </div>
+              <div className="space-y-3">
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="experimental"
+                    checked={experimental}
+                    onCheckedChange={(checked) => setExperimental(checked === true)}
+                  />
+                  <Label htmlFor="experimental" className="text-sm font-medium">
+                    Experimental
+                  </Label>
+                </div>
               </div>
             </form>
             <DialogFooter>
