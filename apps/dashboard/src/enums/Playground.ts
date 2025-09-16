@@ -28,7 +28,6 @@ export enum SandboxParametersSections {
 
 export const sandboxParametersSectionsData = [
   { value: 'sandbox_managment', label: 'Managment' },
-  { value: 'agent_toolbox', label: 'Agent Toolbox' },
   { value: 'file_system', label: 'File System' },
   { value: 'git_operations', label: 'Git Operations' },
   { value: 'process_code_execution', label: 'Process & Code Execution' },
