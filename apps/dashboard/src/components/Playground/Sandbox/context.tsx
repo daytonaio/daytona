@@ -3,14 +3,14 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { CodeLanguage, Resources, CreateSandboxFromImageParams } from '@daytonaio/sdk-typescript/src'
+import { CodeLanguage, Resources, CreateSandboxBaseParams } from '@daytonaio/sdk-typescript/src'
 import { createContext } from 'react'
 
 export interface PlaygroundSandboxParams {
   apiKey?: string
   language?: CodeLanguage
   resources?: Resources
-  createFromImageParams?: CreateSandboxFromImageParams
+  createSandboxBaseParams?: CreateSandboxBaseParams
   languageCodeToRun?: string
   shellCodeToRun?: string
 }
