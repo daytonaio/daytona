@@ -30,23 +30,10 @@ const SandboxManagmentParameters: React.FC<SandboxManagmentParametersProps> = ({
   const [sandboxLanguage, setSandboxLanguage] = useState<CodeLanguage | undefined>(
     playgroundSandboxParametersState['language'],
   )
-  const [resources, setResources] = useState<Resources>(
-    playgroundSandboxParametersState['resources'] || {
-      cpu: 2,
-      // gpu: 0,
-      memory: 4,
-      disk: 8,
-    },
+  const [resources, setResources] = useState<Resources>(playgroundSandboxParametersState['resources'])
+  const [sandboxFromImageParams, setSandboxFromImageParams] = useState<CreateSandboxBaseParams>(
+    playgroundSandboxParametersState['createSandboxBaseParams'],
   )
-  const [sandboxFromImageParams, setSandboxFromImageParams] = useState<CreateSandboxBaseParams>(() => {
-    const createFromImageParamsCtxValue =
-      playgroundSandboxParametersState && playgroundSandboxParametersState['createSandboxBaseParams']
-    return {
-      autoStopInterval: (createFromImageParamsCtxValue && createFromImageParamsCtxValue['autoStopInterval']) ?? 15,
-      autoArchiveInterval: (createFromImageParamsCtxValue && createFromImageParamsCtxValue['autoArchiveInterval']) ?? 7,
-      autoDeleteInterval: (createFromImageParamsCtxValue && createFromImageParamsCtxValue['autoDeleteInterval']) ?? -1,
-    }
-  })
   // Available languages
   const languageOptions = [
     {
@@ -71,7 +58,7 @@ const SandboxManagmentParameters: React.FC<SandboxManagmentParametersProps> = ({
     key: 'autoStopInterval' | 'autoArchiveInterval' | 'autoDeleteInterval'
   })[] = [
     { label: 'Stop (min):', key: 'autoStopInterval', min: 0, max: Infinity, placeholder: '15' },
-    { label: 'Archive (days)', key: 'autoArchiveInterval', min: 0, max: 30, placeholder: '7' },
+    { label: 'Archive (min)', key: 'autoArchiveInterval', min: 0, max: Infinity, placeholder: '7' },
     { label: 'Delete (min):', key: 'autoDeleteInterval', min: -1, max: Infinity, placeholder: '' },
   ]
 

@@ -9,8 +9,8 @@ import { createContext } from 'react'
 export interface PlaygroundSandboxParams {
   apiKey?: string
   language?: CodeLanguage
-  resources?: Resources
-  createSandboxBaseParams?: CreateSandboxBaseParams
+  resources: Resources
+  createSandboxBaseParams: CreateSandboxBaseParams
   languageCodeToRun?: string
   shellCodeToRun?: string
 }
