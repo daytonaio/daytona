@@ -316,11 +316,26 @@ export class SandboxService {
       await this.volumeService.validateVolumes(organization.id, volumeIdOrNames)
     }
 
-    const runner = await this.runnerService.getRandomAvailableRunner({
-      region,
-      sandboxClass,
-      snapshotRef: snapshot.internalName,
-    })
+    let runner: Runner
+
+    //  if the snapshot is experimental, we know that the runner is the one where the sandbox is running
+    //  as at this point, the snapshot is located on the same runner as the sandbox
+    if (snapshot.experimental) {
+      if (snapshot.general) {
+        runner = await this.runnerService.getRandomAvailableRunner({
+          region,
+          experimental: true,
+        })
+      } else {
+        runner = await this.runnerService.findOne(snapshot.buildRunnerId)
+      }
+    } else {
+      runner = await this.runnerService.getRandomAvailableRunner({
+        region,
+        sandboxClass,
+        snapshotRef: snapshot.internalName,
+      })
+    }
 
     const sandbox = new Sandbox()
 
