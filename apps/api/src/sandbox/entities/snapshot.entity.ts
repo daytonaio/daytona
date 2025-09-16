@@ -99,4 +99,9 @@ export class Snapshot {
 
   @Column({ nullable: true })
   buildRunnerId?: string
+
+  //  experimental snapshot is not propagated accross runners nor stored in the snapshot registry
+  //  it's used for testing purposes
+  @Column({ default: false })
+  experimental?: boolean
 }

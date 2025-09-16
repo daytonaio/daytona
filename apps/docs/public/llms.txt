@@ -1,5 +1,5 @@
 # Daytona Documentation v0.0.0-dev
-# Generated on: 2025-09-11
+# Generated on: 2025-09-16
 
 # Daytona
 
@@ -112,6 +112,16 @@
 - [Command Execution](https://daytona.io/docs/en/mcp#command-execution)
 - [Troubleshooting](https://daytona.io/docs/en/mcp#troubleshooting)
 - [Support](https://daytona.io/docs/en/mcp#support)
+- [Network Limits (Firewall)](https://daytona.io/docs/en/network-limits)
+- [Tier-Based Network Restrictions](https://daytona.io/docs/en/network-limits#tier-based-network-restrictions)
+- [Managing Network Access](https://daytona.io/docs/en/network-limits#managing-network-access)
+- [Creating Sandboxes with Network Restrictions](https://daytona.io/docs/en/network-limits#creating-sandboxes-with-network-restrictions)
+- [Network Allow List Format](https://daytona.io/docs/en/network-limits#network-allow-list-format)
+- [Organization Configuration](https://daytona.io/docs/en/network-limits#organization-configuration)
+- [Testing Network Access](https://daytona.io/docs/en/network-limits#testing-network-access)
+- [Security Benefits](https://daytona.io/docs/en/network-limits#security-benefits)
+- [Essential Services](https://daytona.io/docs/en/network-limits#essential-services)
+- [Getting Help](https://daytona.io/docs/en/network-limits#getting-help)
 - [Organizations](https://daytona.io/docs/en/organizations)
 - [Personal vs Collaborative Organizations](https://daytona.io/docs/en/organizations#personal-vs-collaborative-organizations)
 - [Organization Roles](https://daytona.io/docs/en/organizations#organization-roles)

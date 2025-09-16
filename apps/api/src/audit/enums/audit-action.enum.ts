@@ -38,6 +38,7 @@ export enum AuditAction {
   GET_WEBHOOK_APP_PORTAL_ACCESS = 'get_webhook_app_portal_access',
   SEND_WEBHOOK_MESSAGE = 'send_webhook_message',
   INITIALIZE_WEBHOOKS = 'initialize_webhooks',
+  SNAPSHOT_SANDBOX = 'snapshot_sandbox',
   UPDATE_SANDBOX_DEFAULT_LIMITED_NETWORK_EGRESS = 'update_sandbox_default_limited_network_egress',
 
   // toolbox actions (must be prefixed with 'toolbox_')
