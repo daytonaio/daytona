@@ -8,7 +8,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { CodeLanguage } from '@daytonaio/sdk-typescript/src'
 import { codeSnippetSupportedLanguages } from '@/enums/Playground'
 import CodeBlock from '@/components/CodeBlock'
+import { Button } from '@/components/ui/button'
 import { usePlaygroundSandboxParams } from './hook'
+import { Play } from 'lucide-react'
 import { useMemo, useState } from 'react'
 
 const SandboxCodeSnippetsResponse: React.FC = () => {
@@ -157,6 +159,9 @@ console.log(greet("Daytona"));`
                   </div>
                 </TabsTrigger>
               ))}
+              <Button variant="outline" className="ml-auto">
+                <Play className="w-4 h-4" /> Run
+              </Button>
             </TabsList>
             {codeSnippetSupportedLanguages.map((language) => (
               <TabsContent key={language.value} value={language.value}>
