@@ -1,23 +1,96 @@
+'use client'
+
 /*
  * Copyright 2025 Daytona Platforms Inc.
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import React, { useEffect, useState, useCallback, ReactNode } from 'react'
+import type React from 'react'
+import { useEffect, useState, useCallback, type ReactNode } from 'react'
 import { useApi } from '@/hooks/useApi'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
-import { OrganizationWallet } from '@/billing-api/types/OrganizationWallet'
-import { OrganizationTier } from '@/billing-api/types/OrganizationTier'
-import { Tier } from '@/billing-api/types/tier'
-import { OrganizationEmail } from '@/billing-api'
-import { BillingContext, IBillingContext } from '@/contexts/BillingContext'
+import type { OrganizationWallet } from '@/billing-api/types/OrganizationWallet'
+import type { OrganizationTier } from '@/billing-api/types/OrganizationTier'
+import type { Tier } from '@/billing-api/types/tier'
+import type { OrganizationEmail } from '@/billing-api'
+import { BillingContext, type IBillingContext } from '@/contexts/BillingContext'
 import { handleApiError } from '@/lib/error-handling'
-import { suspend } from 'suspend-react'
 import { OrganizationUserRoleEnum } from '@daytonaio/api-client'
 
 interface BillingProviderProps {
   children: ReactNode
 }
+
+const MOCK_WALLET: OrganizationWallet = {
+  balanceCents: 15075, // $150.75 in cents
+  ongoingBalanceCents: 2500, // $25.00 in ongoing charges
+  name: 'Development Wallet',
+  creditCardConnected: true,
+  automaticTopUp: {
+    thresholdAmount: 1000, // $10.00 threshold
+    targetAmount: 5000, // $50.00 target
+  },
+}
+
+const MOCK_ORGANIZATION_TIER: OrganizationTier = {
+  tier: 2, // Pro tier level
+  largestSuccessfulPaymentDate: new Date('2024-01-15'),
+  largestSuccessfulPaymentCents: 2900, // $29.00 in cents
+  expiresAt: new Date('2024-12-31'),
+  hasVerifiedBusinessEmail: true,
+}
+
+const MOCK_TIERS: Tier[] = [
+  {
+    tier: 0, // Free tier
+    tierLimit: {
+      concurrentCPU: 2,
+      concurrentRAMGiB: 4,
+      concurrentDiskGiB: 10,
+    },
+    minTopUpAmountCents: 1000, // $10.00 minimum top-up
+    topUpIntervalDays: 30,
+  },
+  {
+    tier: 1, // Pro tier
+    tierLimit: {
+      concurrentCPU: 8,
+      concurrentRAMGiB: 16,
+      concurrentDiskGiB: 100,
+    },
+    minTopUpAmountCents: 2000, // $20.00 minimum top-up
+    topUpIntervalDays: 30,
+  },
+  {
+    tier: 2, // Enterprise tier
+    tierLimit: {
+      concurrentCPU: 32,
+      concurrentRAMGiB: 64,
+      concurrentDiskGiB: 500,
+    },
+    minTopUpAmountCents: 5000, // $50.00 minimum top-up
+    topUpIntervalDays: 30,
+  },
+]
+
+const MOCK_ORGANIZATION_EMAILS: OrganizationEmail[] = [
+  {
+    email: 'billing@example.com',
+    verified: true,
+    owner: true,
+    business: true,
+    verifiedAt: new Date('2024-01-01'),
+  },
+  {
+    email: 'admin@example.com',
+    verified: true,
+    owner: false,
+    business: false,
+    verifiedAt: new Date('2024-01-15'),
+  },
+]
+
+const MOCK_BILLING_PORTAL_URL = 'https://billing.stripe.com/p/session/test_mock_session_id'
 
 export const BillingProvider: React.FC<BillingProviderProps> = ({ children }) => {
   const { billingApi } = useApi()
@@ -33,6 +106,13 @@ export const BillingProvider: React.FC<BillingProviderProps> = ({ children }) =>
       if (!import.meta.env.VITE_BILLING_API_URL || !selectedOrganizationId || !isOwner()) {
         return null
       }
+
+      // Return mock data for local development
+      if (import.meta.env.VITE_BILLING_API_URL === 'http://localhost:6100') {
+        console.log('[MOCK] Returning mock wallet data')
+        return MOCK_WALLET
+      }
+
       try {
         return await billingApi.getOrganizationWallet(selectedOrganizationId)
       } catch (error) {
@@ -48,6 +128,13 @@ export const BillingProvider: React.FC<BillingProviderProps> = ({ children }) =>
       if (!import.meta.env.VITE_BILLING_API_URL || !selectedOrganizationId || !isOwner()) {
         return null
       }
+
+      // Return mock data for local development
+      if (import.meta.env.VITE_BILLING_API_URL === 'http://localhost:6100') {
+        console.log('[MOCK] Returning mock organization tier data')
+        return MOCK_ORGANIZATION_TIER
+      }
+
       return await billingApi.getOrganizationTier(selectedOrganizationId)
     },
     [billingApi, isOwner],
@@ -57,6 +144,13 @@ export const BillingProvider: React.FC<BillingProviderProps> = ({ children }) =>
     if (!import.meta.env.VITE_BILLING_API_URL) {
       return []
     }
+
+    // Return mock data for local development
+    if (import.meta.env.VITE_BILLING_API_URL === 'http://localhost:6100') {
+      console.log('[MOCK] Returning mock tiers data')
+      return MOCK_TIERS
+    }
+
     try {
       return await billingApi.listTiers()
     } catch (error) {
@@ -70,6 +164,13 @@ export const BillingProvider: React.FC<BillingProviderProps> = ({ children }) =>
       if (!import.meta.env.VITE_BILLING_API_URL || !selectedOrganizationId || !isOwner()) {
         return []
       }
+
+      // Return mock data for local development
+      if (import.meta.env.VITE_BILLING_API_URL === 'http://localhost:6100') {
+        console.log('[MOCK] Returning mock organization emails data')
+        return MOCK_ORGANIZATION_EMAILS
+      }
+
       return await billingApi.listOrganizationEmails(selectedOrganizationId)
     },
     [billingApi, isOwner],
@@ -80,36 +181,34 @@ export const BillingProvider: React.FC<BillingProviderProps> = ({ children }) =>
       if (!import.meta.env.VITE_BILLING_API_URL || !selectedOrganizationId || !isOwner()) {
         return null
       }
+
+      // Return mock data for local development
+      if (import.meta.env.VITE_BILLING_API_URL === 'http://localhost:6100') {
+        console.log('[MOCK] Returning mock billing portal URL')
+        return MOCK_BILLING_PORTAL_URL
+      }
+
       return await billingApi.getOrganizationBillingPortalUrl(selectedOrganizationId)
     },
     [billingApi, isOwner],
   )
 
   // Wallet state
-  const [wallet, setWallet] = useState<OrganizationWallet | null>(
-    suspend(() => getWallet(selectedOrganization?.id), ['wallet']),
-  )
+  const [wallet, setWallet] = useState<OrganizationWallet | null>(null)
   const [walletLoading, setWalletLoading] = useState(true)
 
   // Tier state
-  const [organizationTier, setOrganizationTier] = useState<OrganizationTier | null>(() =>
-    suspend(() => getOrganizationTier(selectedOrganization?.id), ['organizationTier']),
-  )
+  const [organizationTier, setOrganizationTier] = useState<OrganizationTier | null>(null)
   const [tierLoading, setTierLoading] = useState(false)
-
-  const [tiers, setTiers] = useState<Tier[]>(() => suspend(() => getTiers(), ['tiers']))
+  const [tiers, setTiers] = useState<Tier[]>([])
   const [tiersLoading, setTiersLoading] = useState(false)
 
   // Organization emails state
-  const [organizationEmails, setOrganizationEmails] = useState<OrganizationEmail[]>(() =>
-    suspend(() => getOrganizationEmails(selectedOrganization?.id), ['organizationEmails']),
-  )
+  const [organizationEmails, setOrganizationEmails] = useState<OrganizationEmail[]>([])
   const [organizationEmailsLoading, setOrganizationEmailsLoading] = useState(true)
 
   // Billing portal state
-  const [billingPortalUrl, setBillingPortalUrl] = useState<string | null>(() =>
-    suspend(() => getBillingPortalUrl(selectedOrganization?.id), ['billingPortalUrl']),
-  )
+  const [billingPortalUrl, setBillingPortalUrl] = useState<string | null>(null)
   const [billingPortalUrlLoading, setBillingPortalUrlLoading] = useState(true)
 
   // Fetch wallet data
@@ -195,7 +294,6 @@ export const BillingProvider: React.FC<BillingProviderProps> = ({ children }) =>
     if (!import.meta.env.VITE_BILLING_API_URL) {
       return
     }
-
     if (selectedOrganization && isOwner()) {
       refreshWallet()
       refreshTier()
@@ -225,7 +323,6 @@ export const BillingProvider: React.FC<BillingProviderProps> = ({ children }) =>
     wallet,
     walletLoading,
     refreshWallet,
-
     // Tier data
     organizationTier,
     tierLoading,
@@ -233,12 +330,10 @@ export const BillingProvider: React.FC<BillingProviderProps> = ({ children }) =>
     tiersLoading,
     refreshTier,
     refreshTiers,
-
     // Organization emails
     organizationEmails,
     organizationEmailsLoading,
     refreshOrganizationEmails,
-
     // Billing portal
     billingPortalUrl,
     billingPortalUrlLoading,
