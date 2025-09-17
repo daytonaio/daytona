@@ -5,7 +5,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { CodeLanguage } from '@daytonaio/sdk-typescript/src'
+import { CodeLanguage } from '@daytonaio/sdk'
 import { codeSnippetSupportedLanguages } from '@/enums/Playground'
 import CodeBlock from '@/components/CodeBlock'
 import { Button } from '@/components/ui/button'

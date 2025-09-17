@@ -4,7 +4,7 @@
  */
 import PythonIcon from '@/assets/python.svg'
 import TypescriptIcon from '@/assets/typescript.svg'
-import { CodeLanguage } from '@daytonaio/sdk-typescript/src'
+import { CodeLanguage } from '@daytonaio/sdk'
 
 export enum PlaygroundCategories {
   SANDBOX = 'sandbox',
