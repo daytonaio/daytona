@@ -402,9 +402,14 @@ export class SandboxStartAction extends SandboxAction {
       const runner = await this.runnerService.findOne(sandbox.runnerId)
       const runnerAdapter = await this.runnerAdapterFactory.create(runner)
 
-      await runnerAdapter.startSandbox(sandbox.id, {
-        limitNetworkEgress: String(organization.sandboxLimitedNetworkEgress),
-      })
+      let metadata: { [key: string]: string } | undefined = undefined
+      if (organization) {
+        metadata = {
+          limitNetworkEgress: String(organization.sandboxLimitedNetworkEgress),
+        }
+      }
+
+      await runnerAdapter.startSandbox(sandbox.id, metadata)
 
       await this.updateSandboxState(sandbox.id, SandboxState.STARTING)
 
