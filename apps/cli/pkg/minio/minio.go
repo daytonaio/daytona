@@ -103,7 +103,7 @@ func (c *Client) ProcessDirectory(ctx context.Context, dirPath, orgID string, ex
 			return err
 		}
 
-		relPath, err := filepath.Rel(filepath.Dir(dirPath), file)
+		relPath, err := filepath.Rel(dirPath, file)
 		if err != nil {
 			return err
 		}
