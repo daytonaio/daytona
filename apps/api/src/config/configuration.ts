@@ -92,6 +92,7 @@ const configuration = {
   sshGatewayApiKey: process.env.SSH_GATEWAY_API_KEY,
   organizationSandboxDefaultLimitedNetworkEgress:
     process.env.ORGANIZATION_SANDBOX_DEFAULT_LIMITED_NETWORK_EGRESS === 'true',
+  billingEnabled: process.env.BILLING_ENABLED === 'true',
 }
 
 export { configuration }

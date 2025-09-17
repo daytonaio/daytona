@@ -41,6 +41,7 @@ import { OrganizationSuspendedSnapshotDeactivatedEvent } from '../events/organiz
 import { TrackJobExecution } from '../../common/decorators/track-job-execution.decorator'
 import { TrackableJobExecutions } from '../../common/interfaces/trackable-job-executions'
 import { setTimeout } from 'timers/promises'
+import { TypedConfigService } from '../../config/typed-config.service'
 
 @Injectable()
 export class OrganizationService implements OnModuleInit, TrackableJobExecutions, OnApplicationShutdown {
@@ -55,7 +56,7 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
     @InjectRepository(Snapshot)
     private readonly snapshotRepository: Repository<Snapshot>,
     private readonly eventEmitter: EventEmitter2,
-    private readonly configService: ConfigService,
+    private readonly configService: TypedConfigService,
     private readonly redisLockProvider: RedisLockProvider,
   ) {}
 
@@ -244,15 +245,13 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
       organization.suspended = true
       organization.suspendedAt = new Date()
       organization.suspensionReason = 'Please verify your email address'
-    } else if (this.configService.get<boolean>('BILLING_ENABLED') && !personal) {
+    } else if (this.configService.get('billingEnabled') && !personal) {
       organization.suspended = true
       organization.suspendedAt = new Date()
       organization.suspensionReason = 'Payment method required'
     }
 
-    organization.sandboxLimitedNetworkEgress = this.configService.get<boolean>(
-      'ORGANIZATION_SANDBOX_DEFAULT_NETWORK_BLOCK_ALL',
-    )
+    organization.sandboxLimitedNetworkEgress = this.configService.get('organizationSandboxDefaultLimitedNetworkEgress')
 
     const owner = new OrganizationUser()
     owner.userId = createdBy
