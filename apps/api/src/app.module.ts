@@ -14,7 +14,7 @@ import { ServeStaticModule } from '@nestjs/serve-static'
 import { join } from 'path'
 import { ApiKeyModule } from './api-key/api-key.module'
 import { seconds, ThrottlerModule } from '@nestjs/throttler'
-import { RateLimitGuard } from './common/guards/rate-limit.guard'
+import { AnonymousRateLimitGuard } from './common/guards/anonymous-rate-limit.guard'
 import { DockerRegistryModule } from './docker-registry/docker-registry.module'
 import { RedisModule, getRedisConnectionToken } from '@nestjs-modules/ioredis'
 import { ScheduleModule } from '@nestjs/schedule'
@@ -146,24 +146,24 @@ import { APP_GUARD } from '@nestjs/core'
       'throttler',
     ),
     ThrottlerModule.forRootAsync({
-      useFactory: async (redis: Redis) => {
+      useFactory: async (redis: Redis, configService: TypedConfigService) => {
         return {
           throttlers: [
             {
               name: 'anonymous',
-              ttl: seconds(100),
-              limit: 5,
+              ttl: seconds(configService.get('rateLimit.anonymous.ttl')),
+              limit: configService.get('rateLimit.anonymous.limit'),
             },
             {
               name: 'authenticated',
-              ttl: seconds(30),
-              limit: 20000,
+              ttl: seconds(configService.get('rateLimit.authenticated.ttl')),
+              limit: configService.get('rateLimit.authenticated.limit'),
             },
           ],
           storage: new ThrottlerStorageRedisService(redis),
         }
       },
-      inject: [getRedisConnectionToken('throttler')],
+      inject: [getRedisConnectionToken('throttler'), TypedConfigService],
     }),
     EventEmitterModule.forRoot({
       maxListeners: 100,
@@ -218,7 +218,7 @@ import { APP_GUARD } from '@nestjs/core'
     AppService,
     {
       provide: APP_GUARD,
-      useClass: RateLimitGuard,
+      useClass: AnonymousRateLimitGuard,
     },
   ],
 })

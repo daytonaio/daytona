@@ -179,8 +179,18 @@ const configuration = {
     diskPenaltyThreshold: parseInt(process.env.RUNNER_DISK_PENALTY_THRESHOLD || '75', 10),
   },
   apiKey: {
-    validationCacheTtlSeconds: parseInt(process.env.API_KEY_VALIDATION_CACHE_TTL_SECONDS || '10', 10),
-    userCacheTtlSeconds: parseInt(process.env.API_KEY_USER_CACHE_TTL_SECONDS || '60', 10),
+    validationCacheTtl: parseInt(process.env.API_KEY_VALIDATION_CACHE_TTL || '10', 10),
+    userCacheTtl: parseInt(process.env.API_KEY_USER_CACHE_TTL || '60', 10),
+  },
+  rateLimit: {
+    anonymous: {
+      ttl: parseInt(process.env.RATE_LIMIT_ANONYMOUS_TTL || '100', 10),
+      limit: parseInt(process.env.RATE_LIMIT_ANONYMOUS_LIMIT || '5', 10),
+    },
+    authenticated: {
+      ttl: parseInt(process.env.RATE_LIMIT_AUTHENTICATED_TTL || '30', 10),
+      limit: parseInt(process.env.RATE_LIMIT_AUTHENTICATED_LIMIT || '20000', 10),
+    },
   },
   log: {
     console: {
