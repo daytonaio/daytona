@@ -138,7 +138,7 @@ func init() {
 	CreateCmd.Flags().StringVarP(&entrypointFlag, "entrypoint", "e", "", "The entrypoint command for the snapshot")
 	CreateCmd.Flags().StringVarP(&imageNameFlag, "image", "i", "", "The image name for the snapshot")
 	CreateCmd.Flags().StringVarP(&dockerfilePathFlag, "dockerfile", "f", "", "Path to Dockerfile to build")
-	CreateCmd.Flags().StringArrayVarP(&contextFlag, "context", "c", []string{}, "Files or directories to include in the build context (can be specified multiple times)")
+	CreateCmd.Flags().StringArrayVarP(&contextFlag, "context", "c", []string{}, "Files or directories to include in the build context (can be specified multiple times). If not provided, context will be automatically determined from COPY/ADD commands in the Dockerfile")
 	CreateCmd.Flags().Int32Var(&cpuFlag, "cpu", 0, "CPU cores that will be allocated to the underlying sandboxes (default: 1)")
 	CreateCmd.Flags().Int32Var(&memoryFlag, "memory", 0, "Memory that will be allocated to the underlying sandboxes in GB (default: 1)")
 	CreateCmd.Flags().Int32Var(&diskFlag, "disk", 0, "Disk space that will be allocated to the underlying sandboxes in GB (default: 3)")
