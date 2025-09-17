@@ -3,7 +3,7 @@ title: "AsyncGit"
 hideTitleOnPage: true
 ---
 
-## AsyncGit
+## AsyncGit \{#asyncgit\}
 
 ```python
 class AsyncGit()
@@ -34,7 +34,7 @@ await sandbox.git.commit(
 )
 ```
 
-#### AsyncGit.__init__
+#### AsyncGit.**init** \{#asyncgit&#95;&#95;init&#95;&#95;\}
 
 ```python
 def __init__(sandbox_id: str, toolbox_api: ToolboxApi,
@@ -45,11 +45,11 @@ def __init__(sandbox_id: str, toolbox_api: ToolboxApi,
 
 **引数**:
 
-- `sandbox_id` _str_ - サンドボックスID。
-- `toolbox_api` _ToolboxApi_ - サンドボックス操作用のAPIクライアント。
-- `get_root_dir` _Callable[[], str]_ - サンドボックスのデフォルトのルートディレクトリを取得する関数。
+* `sandbox_id` *str* - サンドボックスID。
+* `toolbox_api` *ToolboxApi* - サンドボックス操作用のAPIクライアント。
+* `get_root_dir` *Callable[[], str]* - サンドボックスのデフォルトのルートディレクトリを取得する関数。
 
-#### AsyncGit.add
+#### AsyncGit.add \{#asyncgitadd\}
 
 ```python
 @intercept_errors(message_prefix="Failed to add files: ")
@@ -61,10 +61,9 @@ async def add(path: str, files: List[str]) -> None
 
 **引数**:
 
-- `path` _str_ - Gitリポジトリのルートへのパス。相対パスはユーザーの
+* `path` *str* - Gitリポジトリのルートへのパス。相対パスはユーザーの
   ルートディレクトリを基準に解決されます。
-- `files` _List[str]_ - リポジトリルートからの相対パスで、ステージするファイルまたはディレクトリのリスト。
-  
+* `files` *List[str]* - リポジトリルートからの相対パスで、ステージするファイルまたはディレクトリのリスト。
 
 **例**:
 
@@ -80,7 +79,7 @@ await sandbox.git.add("workspace/repo", [
 ])
 ```
 
-#### AsyncGit.branches
+#### AsyncGit.branches \{#asyncgitbranches\}
 
 ```python
 @intercept_errors(message_prefix="Failed to list branches: ")
@@ -91,14 +90,12 @@ async def branches(path: str) -> ListBranchResponse
 
 **引数**:
 
-- `path` _str_ - Gitリポジトリのルートへのパス。相対パスはユーザーの
+* `path` *str* - Gitリポジトリのルートへのパス。相対パスはユーザーの
   ルートディレクトリを基準に解決されます。
-  
 
 **返り値**:
 
-- `ListBranchResponse` - リポジトリ内のブランチ一覧。
-  
+* `ListBranchResponse` - リポジトリ内のブランチ一覧。
 
 **例**:
 
@@ -107,7 +104,7 @@ response = await sandbox.git.branches("workspace/repo")
 print(f"Branches: {response.branches}")
 ```
 
-#### AsyncGit.clone
+#### AsyncGit.clone \{#asyncgitclone\}
 
 ```python
 @intercept_errors(message_prefix="Failed to clone repository: ")
@@ -125,16 +122,15 @@ async def clone(url: str,
 
 **引数**:
 
-- `url` _str_ - クローン元のリポジトリURL。
-- `path` _str_ - リポジトリをクローンするパス。相対パスはユーザーの
+* `url` *str* - クローン元のリポジトリURL。
+* `path` *str* - リポジトリをクローンするパス。相対パスはユーザーの
   ルートディレクトリを基準に解決されます。
-- `branch` _Optional[str]_ - クローンするブランチ。未指定の場合は
+* `branch` *Optional[str]* - クローンするブランチ。未指定の場合は
   デフォルトブランチをクローンします。
-- `commit_id` _Optional[str]_ - クローンするコミット。指定された場合、
+* `commit_id` *Optional[str]* - クローンするコミット。指定された場合、
   リポジトリはこのコミットのdetached HEAD状態になります。
-- `username` _Optional[str]_ - 認証用のGitユーザー名。
-- `password` _Optional[str]_ - 認証用のGitパスワードまたはトークン。
-  
+* `username` *Optional[str]* - 認証用のGitユーザー名。
+* `password` *Optional[str]* - 認証用のGitパスワードまたはトークン。
 
 **例**:
 
@@ -162,7 +158,7 @@ await sandbox.git.clone(
 )
 ```
 
-#### AsyncGit.commit
+#### AsyncGit.commit \{#asyncgitcommit\}
 
 ```python
 @intercept_errors(message_prefix="Failed to commit changes: ")
@@ -177,12 +173,11 @@ async def commit(path: str,
 
 **引数**:
 
-- `path` _str_ - Git リポジトリのルートへのパス。相対パスはユーザーのルートディレクトリを基準に解決されます。
-- `message` _str_ - 変更内容を説明するコミットメッセージ。
-- `author` _str_ - コミット作者の名前。
-- `email` _str_ - コミット作者のメールアドレス。
-- `allow_empty` _bool, optional_ - 変更がステージされていない場合でも空のコミットの作成を許可します。デフォルトは False。
-  
+* `path` *str* - Git リポジトリのルートへのパス。相対パスはユーザーのルートディレクトリを基準に解決されます。
+* `message` *str* - 変更内容を説明するコミットメッセージ。
+* `author` *str* - コミット作者の名前。
+* `email` *str* - コミット作者のメールアドレス。
+* `allow_empty` *bool, optional* - 変更がステージされていない場合でも空のコミットの作成を許可します。デフォルトは False。
 
 **例**:
 
@@ -198,7 +193,7 @@ await sandbox.git.commit(
 )
 ```
 
-#### AsyncGit.push
+#### AsyncGit.push \{#asyncgitpush\}
 
 ```python
 @intercept_errors(message_prefix="Failed to push changes: ")
@@ -211,10 +206,9 @@ async def push(path: str,
 
 **引数**:
 
-- `path` _str_ - Git リポジトリのルートへのパス。相対パスはユーザーのルートディレクトリを基準に解決されます。
-- `username` _Optional[str]_ - 認証用の Git ユーザー名。
-- `password` _Optional[str]_ - 認証用の Git パスワードまたはトークン。
-  
+* `path` *str* - Git リポジトリのルートへのパス。相対パスはユーザーのルートディレクトリを基準に解決されます。
+* `username` *Optional[str]* - 認証用の Git ユーザー名。
+* `password` *Optional[str]* - 認証用の Git パスワードまたはトークン。
 
 **例**:
 
@@ -230,7 +224,7 @@ await sandbox.git.push(
 )
 ```
 
-#### AsyncGit.pull
+#### AsyncGit.pull \{#asyncgitpull\}
 
 ```python
 @intercept_errors(message_prefix="Failed to pull changes: ")
@@ -243,10 +237,9 @@ async def pull(path: str,
 
 **引数**:
 
-- `path` _str_ - Git リポジトリのルートへのパス。相対パスはユーザーのルートディレクトリを基準に解決されます。
-- `username` _Optional[str]_ - 認証用の Git ユーザー名。
-- `password` _Optional[str]_ - 認証用の Git パスワードまたはトークン。
-  
+* `path` *str* - Git リポジトリのルートへのパス。相対パスはユーザーのルートディレクトリを基準に解決されます。
+* `username` *Optional[str]* - 認証用の Git ユーザー名。
+* `password` *Optional[str]* - 認証用の Git パスワードまたはトークン。
 
 **例**:
 
@@ -262,7 +255,7 @@ await sandbox.git.pull(
 )
 ```
 
-#### AsyncGit.status
+#### AsyncGit.status \{#asyncgitstatus\}
 
 ```python
 @intercept_errors(message_prefix="Failed to get status: ")
@@ -273,18 +266,16 @@ async def status(path: str) -> GitStatus
 
 **引数**:
 
-- `path` _str_ - Git リポジトリのルートへのパス。相対パスはユーザーのルートディレクトリを基準に解決されます。
-  
+* `path` *str* - Git リポジトリのルートへのパス。相対パスはユーザーのルートディレクトリを基準に解決されます。
 
 **戻り値**:
 
-- `GitStatus` - 以下を含むリポジトリのステータス情報:
-  - current_branch: 現在のブランチ名
-  - file_status: ファイルのステータス一覧
-  - ahead: リモートに未プッシュのローカルコミット数
-  - behind: ローカルに未プルのリモートコミット数
-  - branch_published: ブランチがリモートリポジトリに公開済みかどうか
-  
+* `GitStatus` - 以下を含むリポジトリのステータス情報:
+  * current&#95;branch: 現在のブランチ名
+  * file&#95;status: ファイルのステータス一覧
+  * ahead: リモートに未プッシュのローカルコミット数
+  * behind: ローカルに未プルのリモートコミット数
+  * branch&#95;published: ブランチがリモートリポジトリに公開済みかどうか
 
 **例**:
 
@@ -295,7 +286,7 @@ print(f"Commits ahead: {status.ahead}")
 print(f"Commits behind: {status.behind}")
 ```
 
-#### AsyncGit.checkout_branch
+#### AsyncGit.checkout&#95;branch \{#asyncgitcheckout&#95;branch\}
 
 ```python
 @intercept_errors(message_prefix="Failed to checkout branch: ")
@@ -306,9 +297,8 @@ async def checkout_branch(path: str, branch: str) -> None
 
 **引数**:
 
-- `path` _str_ - Git リポジトリのルートへのパス。相対パスはユーザーのルートディレクトリを基準に解決されます。
-- `branch` _str_ - チェックアウトするブランチ名
-  
+* `path` *str* - Git リポジトリのルートへのパス。相対パスはユーザーのルートディレクトリを基準に解決されます。
+* `branch` *str* - チェックアウトするブランチ名
 
 **例**:
 
@@ -317,7 +307,7 @@ async def checkout_branch(path: str, branch: str) -> None
 await sandbox.git.checkout_branch("workspace/repo", "feature-branch")
 ```
 
-#### AsyncGit.create_branch
+#### AsyncGit.create&#95;branch \{#asyncgitcreate&#95;branch\}
 
 ```python
 @intercept_errors(message_prefix="Failed to create branch: ")
@@ -328,9 +318,8 @@ async def create_branch(path: str, name: str) -> None
 
 **引数**:
 
-- `path` _str_ - Git リポジトリのルートへのパス。相対パスはユーザーのルートディレクトリを基準に解決されます。
-- `name` _str_ - 作成する新しいブランチ名
-  
+* `path` *str* - Git リポジトリのルートへのパス。相対パスはユーザーのルートディレクトリを基準に解決されます。
+* `name` *str* - 作成する新しいブランチ名
 
 **例**:
 
@@ -339,7 +328,7 @@ async def create_branch(path: str, name: str) -> None
 await sandbox.git.create_branch("workspace/repo", "new-feature")
 ```
 
-#### AsyncGit.delete\_branch
+#### AsyncGit.delete&#95;branch \{#asyncgitdelete&#95;branch\}
 
 ```python
 @intercept_errors(message_prefix="Failed to delete branch: ")
@@ -350,10 +339,9 @@ async def delete_branch(path: str, name: str) -> None
 
 **引数**:
 
-- `path` _str_ - Gitリポジトリのルートへのパス。相対パスはユーザーの
+* `path` *str* - Gitリポジトリのルートへのパス。相対パスはユーザーの
   ルートディレクトリを基準に解決されます。
-- `name` _str_ - 削除するブランチ名
-  
+* `name` *str* - 削除するブランチ名
 
 **例**:
 
@@ -362,8 +350,7 @@ async def delete_branch(path: str, name: str) -> None
 await sandbox.git.delete_branch("workspace/repo", "old-feature")
 ```
 
-
-## GitCommitResponse
+## GitCommitResponse \{#gitcommitresponse\}
 
 ```python
 class GitCommitResponse()
@@ -373,5 +360,4 @@ Git の commit 操作に対するレスポンス。
 
 **属性**:
 
-- `sha` _str_ - コミットの SHA
-
+* `sha` *str* - コミットの SHA
