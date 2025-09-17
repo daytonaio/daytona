@@ -203,7 +203,10 @@ export class RunnerService {
           state: Not(RunnerState.DECOMMISSIONED),
         },
         order: {
-          lastChecked: 'ASC',
+          lastChecked: {
+            direction: 'ASC',
+            nulls: 'FIRST',
+          },
         },
         take: 100,
       })
