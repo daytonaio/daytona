@@ -274,6 +274,41 @@ export const getSidebarConfig = (
     },
     {
       type: 'group',
+      label: labels['sidebarconfig.computerUse'],
+      homePageHref: localizePath('/docs', locale),
+      category: NavigationCategory.GENERAL,
+      entries: [
+        {
+          type: 'link',
+          href: localizePath('/docs/computer-use-linux', locale),
+          label: labels['sidebarconfig.computerUseLinux'],
+          description: labels['sidebarconfig.computerUseLinuxDescription'],
+          attrs: {
+            icon: 'linux.svg',
+          },
+        },
+        {
+          type: 'link',
+          href: localizePath('/docs/computer-use-windows', locale),
+          label: labels['sidebarconfig.computerUseWindows'],
+          description: labels['sidebarconfig.computerUseWindowsDescription'],
+          attrs: {
+            icon: 'windows.svg',
+          },
+        },
+        {
+          type: 'link',
+          href: localizePath('/docs/computer-use-macos', locale),
+          label: labels['sidebarconfig.computerUseMacOS'],
+          description: labels['sidebarconfig.computerUseMacOSDescription'],
+          attrs: {
+            icon: 'apple.svg',
+          },
+        },
+      ],
+    },
+    {
+      type: 'group',
       label: labels['sidebarconfig.other'],
       homePageHref: localizePath('/docs', locale),
       category: NavigationCategory.GENERAL,

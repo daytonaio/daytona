@@ -1,0 +1,11 @@
+<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Icon">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M2 2C2 1.44772 2.44772 1 3 1H13C13.5523 1 14 1.44772 14 2V10C14 10.5523 13.5523 11 13 11H3C2.44772 11 2 10.5523 2 10V2ZM3 2V10H13V2H3Z" fill="white"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M1 13C1 12.4477 1.44772 12 2 12H14C14.5523 12 15 12.4477 15 13V14C15 14.5523 14.5523 15 14 15H2C1.44772 15 1 14.5523 1 14V13ZM2 13V14H14V13H2Z" fill="white"/>
+<circle cx="4" cy="4" r="0.5" fill="white"/>
+<circle cx="6" cy="4" r="0.5" fill="white"/>
+<circle cx="8" cy="4" r="0.5" fill="white"/>
+<path d="M4 6H12V7H4V6Z" fill="white"/>
+<path d="M4 8H10V9H4V8Z" fill="white"/>
+</g>
+</svg>
