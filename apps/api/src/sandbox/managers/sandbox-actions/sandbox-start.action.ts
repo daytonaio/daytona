@@ -394,9 +394,15 @@ export class SandboxStartAction extends SandboxAction {
       await this.updateSandboxState(sandbox.id, SandboxState.RESTORING, runnerId)
 
       sandbox.snapshot = validBackup
-      await runnerAdapter.createSandbox(sandbox, registry, undefined, {
-        limitNetworkEgress: String(organization.sandboxLimitedNetworkEgress),
-      })
+
+      let metadata: { [key: string]: string } | undefined = undefined
+      if (organization) {
+        metadata = {
+          limitNetworkEgress: String(organization.sandboxLimitedNetworkEgress),
+        }
+      }
+
+      await runnerAdapter.createSandbox(sandbox, registry, undefined, metadata)
     } else {
       // if sandbox has runner, start sandbox
       const runner = await this.runnerService.findOne(sandbox.runnerId)
