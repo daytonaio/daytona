@@ -291,14 +291,28 @@ func GetCreateBuildInfoDto(ctx context.Context, dockerfilePath string, contextPa
 		return nil, fmt.Errorf("failed to read dockerfile: %w", err)
 	}
 
+	dockerfileDir := filepath.Dir(dockerfileAbsPath)
+
 	// If no context paths are provided, automatically parse the Dockerfile to find them
 	if len(contextPaths) == 0 {
-		dockerfileDir := filepath.Dir(dockerfileAbsPath)
 		autoContextPaths, err := parseDockerfileForSources(string(dockerfileContent), dockerfileDir)
 		if err != nil {
 			return nil, fmt.Errorf("failed to parse dockerfile for context: %w", err)
 		}
 		contextPaths = autoContextPaths
+	} else {
+		var resolvedContextPaths []string
+		for _, contextPath := range contextPaths {
+			var absPath string
+			if filepath.IsAbs(contextPath) {
+				absPath = contextPath
+			} else {
+				// Resolve relative paths relative to the Dockerfile directory, not current working directory
+				absPath = filepath.Join(dockerfileDir, contextPath)
+			}
+			resolvedContextPaths = append(resolvedContextPaths, absPath)
+		}
+		contextPaths = resolvedContextPaths
 	}
 
 	apiClient, err := apiclient_cli.GetApiClient(nil, nil)

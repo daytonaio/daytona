@@ -66,6 +66,110 @@ func (c *Client) UploadFile(ctx context.Context, objectName string, data []byte)
 	return nil
 }
 
+func readIgnoreFile(rootPath, filename string) []string {
+	ignoreFile := filepath.Join(rootPath, filename)
+	content, err := os.ReadFile(ignoreFile)
+	if err != nil {
+		return nil
+	}
+
+	var patterns []string
+	lines := strings.Split(string(content), "\n")
+	for _, line := range lines {
+		line = strings.TrimSpace(line)
+		// Skip empty lines and comments
+		if line == "" || strings.HasPrefix(line, "#") {
+			continue
+		}
+		patterns = append(patterns, line)
+	}
+	return patterns
+}
+
+func matchPattern(filePath string, patterns []string) bool {
+	filePath = filepath.ToSlash(filePath)
+
+	for _, pattern := range patterns {
+		pattern = filepath.ToSlash(pattern)
+
+		if strings.HasSuffix(pattern, "/") {
+			pattern = strings.TrimSuffix(pattern, "/")
+			if strings.HasPrefix(filePath, pattern+"/") || filePath == pattern {
+				return true
+			}
+			continue
+		}
+
+		// Handle double star patterns (**) - matches any number of directories
+		if strings.Contains(pattern, "**") {
+			// Convert ** to a simpler pattern for basic matching
+			parts := strings.Split(pattern, "**")
+			if len(parts) == 2 {
+				prefix := parts[0]
+				suffix := parts[1]
+
+				// Remove trailing/leading slashes from prefix/suffix
+				prefix = strings.TrimSuffix(prefix, "/")
+				suffix = strings.TrimPrefix(suffix, "/")
+
+				if prefix == "" && suffix != "" {
+					// Pattern like **/node_modules
+					if strings.Contains(filePath, "/"+suffix) || strings.HasSuffix(filePath, suffix) || filePath == suffix {
+						return true
+					}
+				} else if prefix != "" && suffix == "" {
+					// Pattern like .git/**
+					if strings.HasPrefix(filePath, prefix+"/") || filePath == prefix {
+						return true
+					}
+				} else if prefix != "" && suffix != "" {
+					// Pattern like src/**/test
+					if strings.HasPrefix(filePath, prefix+"/") && (strings.Contains(filePath, "/"+suffix) || strings.HasSuffix(filePath, suffix)) {
+						return true
+					}
+				}
+			}
+			continue
+		}
+
+		if strings.Contains(pattern, "*") {
+			matched, err := filepath.Match(pattern, filepath.Base(filePath))
+			if err == nil && matched {
+				return true
+			}
+			// Also check full path for patterns like */node_modules
+			matched, err = filepath.Match(pattern, filePath)
+			if err == nil && matched {
+				return true
+			}
+			continue
+		}
+
+		// Handle exact matches and prefix matches
+		if filePath == pattern ||
+			strings.HasPrefix(filePath, pattern+"/") ||
+			filepath.Base(filePath) == pattern {
+			return true
+		}
+	}
+	return false
+}
+
+func shouldExcludeFile(filePath, rootPath string) bool {
+	relPath, err := filepath.Rel(rootPath, filePath)
+	if err != nil {
+		return false
+	}
+
+	dockerignorePatterns := readIgnoreFile(rootPath, ".dockerignore")
+
+	if len(dockerignorePatterns) == 0 {
+		return false
+	}
+
+	return matchPattern(relPath, dockerignorePatterns)
+}
+
 func (c *Client) ListObjects(ctx context.Context, prefix string) ([]string, error) {
 	var objects []string
 
@@ -84,6 +188,12 @@ func (c *Client) ListObjects(ctx context.Context, prefix string) ([]string, erro
 }
 
 func (c *Client) ProcessDirectory(ctx context.Context, dirPath, orgID string, existingObjects map[string]bool) ([]string, error) {
+	// Check if .dockerignore exists and provide helpful message if context is large
+	dockerignoreExists := false
+	if _, err := os.Stat(filepath.Join(dirPath, ".dockerignore")); err == nil {
+		dockerignoreExists = true
+	}
+
 	tarFile, err := os.Create(CONTEXT_TAR_FILE_NAME)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create tar file: %w", err)
@@ -93,9 +203,27 @@ func (c *Client) ProcessDirectory(ctx context.Context, dirPath, orgID string, ex
 	tw := tar.NewWriter(tarFile)
 	defer tw.Close()
 
+	fileCount := 0
+	totalSize := int64(0)
+
+	warned := false
 	err = filepath.Walk(dirPath, func(file string, fi os.FileInfo, err error) error {
 		if err != nil {
 			return err
+		}
+
+		if fi.Name() == CONTEXT_TAR_FILE_NAME {
+			return nil
+		}
+
+		if shouldExcludeFile(file, dirPath) {
+			relPath, _ := filepath.Rel(dirPath, file)
+			if fi.IsDir() {
+				fmt.Printf("Excluding directory: %s\n", relPath)
+				return filepath.SkipDir
+			}
+			fmt.Printf("Excluding file: %s\n", relPath)
+			return nil
 		}
 
 		header, err := tar.FileInfoHeader(fi, fi.Name())
@@ -115,6 +243,19 @@ func (c *Client) ProcessDirectory(ctx context.Context, dirPath, orgID string, ex
 
 		// Write file contents if regular file
 		if fi.Mode().IsRegular() {
+			fileCount++
+			totalSize += fi.Size()
+
+			if fileCount%1000 == 0 {
+				fmt.Printf("Processing... %d files, %.2f MB total\n", fileCount, float64(totalSize)/(1024*1024))
+			}
+
+			// Warn if context is getting very large (only warn once)
+			if totalSize > 100*1024*1024 && !dockerignoreExists && !warned {
+				fmt.Printf("Warning: Context size exceeds 100MB. Consider adding a .dockerignore file to exclude unnecessary files.\n")
+				warned = true
+			}
+
 			f, err := os.Open(file)
 			if err != nil {
 				return err
@@ -128,8 +269,13 @@ func (c *Client) ProcessDirectory(ctx context.Context, dirPath, orgID string, ex
 	})
 
 	if err != nil {
+		if strings.Contains(err.Error(), "write too long") {
+			return nil, fmt.Errorf("context directory is too large for tar archive. Please create a .dockerignore file to exclude large directories like .git, node_modules, dist, etc. Original error: %w", err)
+		}
 		return nil, fmt.Errorf("failed to process directory: %w", err)
 	}
+
+	fmt.Printf("Context processing complete: %d files, %.2f MB total\n", fileCount, float64(totalSize)/(1024*1024))
 
 	hasher := sha256.New()
 	hasher.Write([]byte(dirPath))
