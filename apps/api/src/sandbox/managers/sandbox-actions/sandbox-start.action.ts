@@ -199,9 +199,14 @@ export class SandboxStartAction extends SandboxAction {
       entrypoint = this.getEntrypointFromDockerfile(sandbox.buildInfo.dockerfileContent)
     }
 
-    await runnerAdapter.createSandbox(sandbox, registry, entrypoint, {
-      limitNetworkEgress: String(organization.sandboxLimitedNetworkEgress),
-    })
+    let metadata: { [key: string]: string } | undefined = undefined
+    if (organization) {
+      metadata = {
+        limitNetworkEgress: String(organization.sandboxLimitedNetworkEgress),
+      }
+    }
+
+    await runnerAdapter.createSandbox(sandbox, registry, entrypoint, metadata)
 
     await this.updateSandboxState(sandbox.id, SandboxState.CREATING)
     //  sync states again immediately for sandbox
