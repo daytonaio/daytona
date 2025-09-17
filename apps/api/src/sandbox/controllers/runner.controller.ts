@@ -20,9 +20,11 @@ import { AuditTarget } from '../../audit/enums/audit-target.enum'
 import { SshGatewayGuard } from '../../auth/ssh-gateway.guard'
 import { CombinedAuthGuard } from '../../auth/combined-auth.guard'
 import { OrGuard } from '../../auth/or.guard'
+import { AuthenticatedRateLimitGuard } from '../../common/guards/authenticated-rate-limit.guard'
+
 @ApiTags('runners')
 @Controller('runners')
-@UseGuards(CombinedAuthGuard, OrGuard([SystemActionGuard, ProxyGuard, SshGatewayGuard]))
+@UseGuards(CombinedAuthGuard, AuthenticatedRateLimitGuard, OrGuard([SystemActionGuard, ProxyGuard, SshGatewayGuard]))
 @RequiredApiRole([SystemRole.ADMIN, 'proxy', 'ssh-gateway'])
 @ApiOAuth2(['openid', 'profile', 'email'])
 @ApiBearerAuth()

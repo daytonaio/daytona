@@ -22,13 +22,12 @@ import { Audit, TypedRequest } from '../audit/decorators/audit.decorator'
 import { AuditAction } from '../audit/enums/audit-action.enum'
 import { AuditTarget } from '../audit/enums/audit-target.enum'
 import { ApiKey } from './api-key.entity'
-import { RateLimitGuard } from '../common/guards/rate-limit.guard'
+import { AuthenticatedRateLimitGuard } from '../common/guards/authenticated-rate-limit.guard'
 
 @ApiTags('api-keys')
 @Controller('api-keys')
 @ApiHeader(CustomHeaders.ORGANIZATION_ID)
-@UseGuards(RateLimitGuard)
-@UseGuards(CombinedAuthGuard, OrganizationResourceActionGuard)
+@UseGuards(CombinedAuthGuard, AuthenticatedRateLimitGuard, OrganizationResourceActionGuard)
 @ApiOAuth2(['openid', 'profile', 'email'])
 @ApiBearerAuth()
 export class ApiKeyController {

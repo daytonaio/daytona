@@ -59,11 +59,12 @@ import { Audit, TypedRequest } from '../../audit/decorators/audit.decorator'
 import { AuditAction } from '../../audit/enums/audit-action.enum'
 import { AuditTarget } from '../../audit/enums/audit-target.enum'
 import { ListSnapshotsQueryDto } from '../dto/list-snapshots-query.dto'
+import { AuthenticatedRateLimitGuard } from '../../common/guards/authenticated-rate-limit.guard'
 
 @ApiTags('snapshots')
 @Controller('snapshots')
 @ApiHeader(CustomHeaders.ORGANIZATION_ID)
-@UseGuards(CombinedAuthGuard, SystemActionGuard, OrganizationResourceActionGuard)
+@UseGuards(CombinedAuthGuard, AuthenticatedRateLimitGuard, SystemActionGuard, OrganizationResourceActionGuard)
 @ApiOAuth2(['openid', 'profile', 'email'])
 @ApiBearerAuth()
 export class SnapshotController {
