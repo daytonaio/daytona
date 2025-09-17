@@ -28,9 +28,9 @@ func (s *SessionController) CreateSession(c *gin.Context) {
 	cmd := exec.CommandContext(ctx, common.GetShell())
 	cmd.Env = os.Environ()
 
-	// for backward compatibility (only sdk clients before 0.102.X), we use the home directory as the default directory
+	// for backward compatibility (only sdk clients before 0.103.X), we use the home directory as the default directory
 	sdkVersion := util.ExtractSdkVersionFromHeader(c.Request.Header)
-	versionComparison, err := util.CompareVersions(sdkVersion, "0.102.0-0")
+	versionComparison, err := util.CompareVersions(sdkVersion, "0.103.0-0")
 	if err != nil {
 		log.Error(err)
 		versionComparison = util.Pointer(1)
