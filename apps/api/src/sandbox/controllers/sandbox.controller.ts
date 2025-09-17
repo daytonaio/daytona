@@ -69,11 +69,12 @@ import { AuditTarget } from '../../audit/enums/audit-target.enum'
 import { SshAccessDto, SshAccessValidationDto } from '../dto/ssh-access.dto'
 import { ListSandboxesQueryDto } from '../dto/list-sandboxes-query.dto'
 import { RegionDto } from '../dto/region.dto'
+import { AuthenticatedRateLimitGuard } from '../../common/guards/authenticated-rate-limit.guard'
 
 @ApiTags('sandbox')
 @Controller('sandbox')
 @ApiHeader(CustomHeaders.ORGANIZATION_ID)
-@UseGuards(CombinedAuthGuard, OrganizationResourceActionGuard)
+@UseGuards(CombinedAuthGuard, AuthenticatedRateLimitGuard, OrganizationResourceActionGuard)
 @ApiOAuth2(['openid', 'profile', 'email'])
 @ApiBearerAuth()
 export class SandboxController {
