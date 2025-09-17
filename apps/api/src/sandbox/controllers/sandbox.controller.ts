@@ -824,10 +824,10 @@ export class SandboxController {
       // eslint-disable-next-line
       let timeout: NodeJS.Timeout
       const handleStateUpdated = (event: SandboxStateUpdatedEvent) => {
-        latestSandbox = event.sandbox
         if (event.sandbox.id !== sandbox.id) {
           return
         }
+        latestSandbox = event.sandbox
         if (event.sandbox.state === SandboxState.STARTED) {
           this.eventEmitter.off(SandboxEvents.STATE_UPDATED, handleStateUpdated)
           clearTimeout(timeout)
