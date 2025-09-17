@@ -107,6 +107,7 @@ import { Audit, MASKED_AUDIT_VALUE, TypedRequest } from '../../audit/decorators/
 import { AuditTarget } from '../../audit/enums/audit-target.enum'
 import { InjectRedis } from '@nestjs-modules/ioredis'
 import { Redis } from 'ioredis'
+import { AuthenticatedRateLimitGuard } from '../../common/guards/authenticated-rate-limit.guard'
 
 followRedirects.maxRedirects = 10
 followRedirects.maxBodyLength = 50 * 1024 * 1024
@@ -121,7 +122,7 @@ const RUNNER_INFO_CACHE_TTL = 2 * 60 // 2 minutes
 @ApiTags('toolbox')
 @Controller('toolbox')
 @ApiHeader(CustomHeaders.ORGANIZATION_ID)
-@UseGuards(CombinedAuthGuard, OrganizationResourceActionGuard, SandboxAccessGuard)
+@UseGuards(CombinedAuthGuard, AuthenticatedRateLimitGuard, OrganizationResourceActionGuard, SandboxAccessGuard)
 @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
 @ApiOAuth2(['openid', 'profile', 'email'])
 @ApiBearerAuth()

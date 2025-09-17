@@ -19,9 +19,10 @@ import { AuditAction } from '../../audit/enums/audit-action.enum'
 import { AuditTarget } from '../../audit/enums/audit-target.enum'
 
 import { CombinedAuthGuard } from '../../auth/combined-auth.guard'
+import { AuthenticatedRateLimitGuard } from '../../common/guards/authenticated-rate-limit.guard'
 @ApiTags('runners')
 @Controller('runners')
-@UseGuards(CombinedAuthGuard, SystemActionGuard, ProxyGuard)
+@UseGuards(CombinedAuthGuard, AuthenticatedRateLimitGuard, SystemActionGuard, ProxyGuard)
 @RequiredApiRole([SystemRole.ADMIN, 'proxy'])
 @ApiOAuth2(['openid', 'profile', 'email'])
 @ApiBearerAuth()
