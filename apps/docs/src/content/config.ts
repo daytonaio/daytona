@@ -326,7 +326,7 @@ export const getSidebarConfig = (
         },
         {
           type: 'link',
-          href: '/docs/audit-logs',
+          href: localizePath('/docs/audit-logs', locale),
           label: labels['sidebarconfig.auditLogs'],
           description: labels['sidebarconfig.auditLogsDescription'],
           attrs: {
@@ -344,7 +344,7 @@ export const getSidebarConfig = (
         },
         {
           type: 'link',
-          href: '/docs/regions',
+          href: localizePath('/docs/regions', locale),
           label: labels['sidebarconfig.regions'],
           description: labels['sidebarconfig.regionsDescription'],
           attrs: {
