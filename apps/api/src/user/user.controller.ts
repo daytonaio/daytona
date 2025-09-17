@@ -37,10 +37,11 @@ import { CreateLinkedAccountDto } from './dto/create-linked-account.dto'
 import { Audit, TypedRequest } from '../audit/decorators/audit.decorator'
 import { AuditAction } from '../audit/enums/audit-action.enum'
 import { AuditTarget } from '../audit/enums/audit-target.enum'
+import { AuthenticatedRateLimitGuard } from '../common/guards/authenticated-rate-limit.guard'
 
 @ApiTags('users')
 @Controller('users')
-@UseGuards(CombinedAuthGuard, SystemActionGuard)
+@UseGuards(CombinedAuthGuard, AuthenticatedRateLimitGuard, SystemActionGuard)
 @ApiOAuth2(['openid', 'profile', 'email'])
 @ApiBearerAuth()
 export class UserController {
