@@ -124,6 +124,7 @@ export class Process {
     // Return enhanced response with parsed artifacts
     return {
       ...response.data,
+      exitCode: response.data.code,
       result: artifacts.stdout,
       artifacts,
     }

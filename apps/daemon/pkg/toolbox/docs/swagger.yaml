@@ -119,12 +119,12 @@ definitions:
     type: object
   ExecuteResponse:
     properties:
-      exitCode:
+      code:
         type: integer
       result:
         type: string
     required:
-      - exitCode
+      - code
       - result
     type: object
   FileInfo:

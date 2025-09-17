@@ -20,6 +20,7 @@ from daytona_api_client_async import (
     SnapshotsApi,
 )
 from daytona_api_client_async import VolumesApi as VolumesApi
+from daytona_toolbox_api_client_async import ApiClient as ToolboxApiClient
 from environs import Env
 
 from .._utils.enum import to_enum
@@ -77,7 +78,7 @@ class AsyncDaytona:
     _organization_id: Optional[str] = None
     _api_url: str
     _target: Optional[str] = None
-    _api_clients: List[ApiClient] = []
+    _api_clients: List[ApiClient | ToolboxApiClient] = []
 
     def __init__(self, config: Optional[DaytonaConfig] = None):
         """Initializes Daytona instance with optional configuration.
@@ -451,7 +452,7 @@ class AsyncDaytona:
 
         sandbox = AsyncSandbox(
             response,
-            self._clone_api_client(),
+            self._clone_api_client_to_toolbox_api_client(),
             self._sandbox_api,
             code_toolbox,
         )
@@ -544,7 +545,7 @@ class AsyncDaytona:
         code_toolbox = SandboxPythonCodeToolbox()
         return AsyncSandbox(
             sandbox_instance,
-            self._clone_api_client(),
+            self._clone_api_client_to_toolbox_api_client(),
             self._sandbox_api,
             code_toolbox,
         )
@@ -598,7 +599,7 @@ class AsyncDaytona:
         return [
             AsyncSandbox(
                 sandbox,
-                self._clone_api_client(),
+                self._clone_api_client_to_toolbox_api_client(),
                 self._sandbox_api,
                 self._get_code_toolbox(self._validate_language_label(sandbox.labels.get("code-toolbox-language"))),
             )
@@ -651,9 +652,9 @@ class AsyncDaytona:
         """
         await sandbox.stop(timeout)
 
-    def _clone_api_client(self):
+    def _clone_api_client_to_toolbox_api_client(self):
         config = deepcopy(self._api_client.configuration)
-        new_client = ApiClient(config)
+        new_client = ToolboxApiClient(config)
         new_client.default_headers = deepcopy(self._api_client.default_headers)
         self._api_clients.append(new_client)
         return new_client

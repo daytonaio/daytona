@@ -228,7 +228,7 @@
     "ts-jest": "29.4.1",
     "ts-node": "10.9.1",
     "tslib": "^2.8.1",
-    "tsx": "^4.20.3",
+    "tsx": "^4.20.5",
     "typedoc": "~0.27.7",
     "typedoc-plugin-markdown": "~4.4.2",
     "typedoc-plugin-merge-modules": "~6.1.0",

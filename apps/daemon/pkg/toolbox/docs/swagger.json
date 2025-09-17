@@ -1968,9 +1968,9 @@
     },
     "ExecuteResponse": {
       "type": "object",
-      "required": ["exitCode", "result"],
+      "required": ["code", "result"],
       "properties": {
-        "exitCode": {
+        "code": {
           "type": "integer"
         },
         "result": {

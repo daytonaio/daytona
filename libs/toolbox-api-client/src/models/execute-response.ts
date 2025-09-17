@@ -23,7 +23,7 @@ export interface ExecuteResponse {
    * @type {number}
    * @memberof ExecuteResponse
    */
-  exitCode: number
+  code: number
   /**
    *
    * @type {string}

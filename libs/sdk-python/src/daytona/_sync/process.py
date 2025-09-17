@@ -148,7 +148,7 @@ class Process:
         # Create new response with processed output and charts
         # TODO: Remove model_construct once everything is migrated to pydantic # pylint: disable=fixme
         return ExecuteResponse.model_construct(
-            exit_code=response.exit_code,
+            exit_code=response.code,
             result=artifacts.stdout,
             artifacts=artifacts,
             additional_properties=response.additional_properties,

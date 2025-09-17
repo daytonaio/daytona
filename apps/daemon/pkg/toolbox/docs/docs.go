@@ -2287,11 +2287,11 @@ const docTemplate = `{
         "ExecuteResponse": {
             "type": "object",
             "required": [
-                "exitCode",
+                "code",
                 "result"
             ],
             "properties": {
-                "exitCode": {
+                "code": {
                     "type": "integer"
                 },
                 "result": {

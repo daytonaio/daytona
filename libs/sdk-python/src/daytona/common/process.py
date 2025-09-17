@@ -80,6 +80,7 @@ class ExecuteResponse(ClientExecuteResponse):
         artifacts (Optional[ExecutionArtifacts]): Artifacts from the command execution
     """
 
+    exit_code: int
     artifacts: Optional[ExecutionArtifacts] = None
 
     # TODO: Remove model_config once everything is migrated to pydantic # pylint: disable=fixme

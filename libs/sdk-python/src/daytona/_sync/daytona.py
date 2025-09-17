@@ -24,6 +24,7 @@ from daytona_api_client import (
     SnapshotsApi,
 )
 from daytona_api_client import VolumesApi as VolumesApi
+from daytona_toolbox_api_client import ApiClient as ToolboxApiClient
 from environs import Env
 
 from .._utils.enum import to_enum
@@ -78,7 +79,7 @@ class Daytona:
     _organization_id: Optional[str] = None
     _api_url: str
     _target: Optional[str] = None
-    _api_clients: List[ApiClient] = []
+    _api_clients: List[ApiClient | ToolboxApiClient] = []
 
     def __init__(self, config: Optional[DaytonaConfig] = None):
         """Initializes Daytona instance with optional configuration.
@@ -413,7 +414,7 @@ class Daytona:
 
         sandbox = Sandbox(
             response,
-            self._clone_api_client(),
+            self._clone_api_client_to_toolbox_api_client(),
             self._sandbox_api,
             code_toolbox,
         )
@@ -506,7 +507,7 @@ class Daytona:
         code_toolbox = SandboxPythonCodeToolbox()
         return Sandbox(
             sandbox_instance,
-            self._clone_api_client(),
+            self._clone_api_client_to_toolbox_api_client(),
             self._sandbox_api,
             code_toolbox,
         )
@@ -560,7 +561,7 @@ class Daytona:
         return [
             Sandbox(
                 sandbox,
-                self._clone_api_client(),
+                self._clone_api_client_to_toolbox_api_client(),
                 self._sandbox_api,
                 self._get_code_toolbox(self._validate_language_label(sandbox.labels.get("code-toolbox-language"))),
             )
@@ -613,9 +614,9 @@ class Daytona:
         """
         sandbox.stop(timeout)
 
-    def _clone_api_client(self):
+    def _clone_api_client_to_toolbox_api_client(self):
         config = deepcopy(self._api_client.configuration)
-        new_client = ApiClient(config)
+        new_client = ToolboxApiClient(config)
         new_client.default_headers = deepcopy(self._api_client.default_headers)
         self._api_clients.append(new_client)
         return new_client
