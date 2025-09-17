@@ -26,7 +26,7 @@ func (d *DockerClient) BuildImage(ctx context.Context, buildImageDto dto.BuildSn
 	}
 
 	if d.logWriter != nil {
-		d.logWriter.Write([]byte("Building image...\n"))
+		d.logWriter.Write([]byte("Building image with BuildKit enabled...\n"))
 	}
 
 	// Check if image already exists
@@ -147,7 +147,8 @@ func (d *DockerClient) BuildImage(ctx context.Context, buildImageDto dto.BuildSn
 		Remove:      true,
 		ForceRemove: true,
 		PullParent:  true,
-		Platform:    "linux/amd64", // Force AMD64 architecture
+		Platform:    "linux/amd64",         // Force AMD64 architecture
+		Version:     types.BuilderBuildKit, // Enable BuildKit for advanced Dockerfile features like --chmod, --chown, etc.
 	})
 	if err != nil {
 		return fmt.Errorf("failed to build image: %w", err)
