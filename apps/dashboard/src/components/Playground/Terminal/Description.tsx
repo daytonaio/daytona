@@ -1,3 +1,8 @@
+/*
+ * Copyright 2025 Daytona Platforms Inc.
+ * SPDX-License-Identifier: AGPL-3.0
+ */
+
 const TerminalDescription: React.FC = () => {
   return (
     <div className="flex flex-col items-center space-y-3 py-8">

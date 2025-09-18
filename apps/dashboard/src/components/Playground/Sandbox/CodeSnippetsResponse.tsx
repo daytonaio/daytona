@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button'
 import { usePlaygroundSandboxParams } from './hook'
 import { Play } from 'lucide-react'
 import { useMemo, useState } from 'react'
+import ResponseCard from '../ResponseCard'
 
 const SandboxCodeSnippetsResponse: React.FC = () => {
   const [codeSnippetLanguage, setCodeSnippetLanguage] = useState<CodeLanguage>(CodeLanguage.PYTHON)
@@ -175,18 +176,7 @@ console.log(greet("Daytona"));`
           </Tabs>
         </CardContent>
       </Card>
-      <Card className="w-full">
-        <CardHeader>
-          <CardTitle>Response</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="rounded-lg">
-            <pre className="max-w-full bg-zinc-900 text-zinc-100 h-[250px] p-4 rounded-lg overflow-x-auto overflow-y-auto text-sm font-mono">
-              <code>{`Terminal output text`}</code>
-            </pre>
-          </div>
-        </CardContent>
-      </Card>
+      <ResponseCard responseText="Response test text" />
     </>
   )
 }

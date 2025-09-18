@@ -1,3 +1,8 @@
+/*
+ * Copyright 2025 Daytona Platforms Inc.
+ * SPDX-License-Identifier: AGPL-3.0
+ */
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { handleApiError } from '@/lib/error-handling'
 import { useState, useEffect, useCallback } from 'react'

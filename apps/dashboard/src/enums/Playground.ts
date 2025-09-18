@@ -20,20 +20,33 @@ export const playgroundCategoriesData = [
 
 export enum SandboxParametersSections {
   SANDBOX_MANAGMENT = 'sandbox_managment',
-  AGENT_TOOLBOX = 'agent_toolbox',
   FILE_SYSTEM = 'file_system',
   GIT_OPERATIONS = 'git_operations',
   PROCESS_CODE_EXECUTION = 'process_code_execution',
 }
 
 export const sandboxParametersSectionsData = [
-  { value: 'sandbox_managment', label: 'Managment' },
-  { value: 'file_system', label: 'File System' },
-  { value: 'git_operations', label: 'Git Operations' },
-  { value: 'process_code_execution', label: 'Process & Code Execution' },
+  { value: SandboxParametersSections.SANDBOX_MANAGMENT, label: 'Managment' },
+  { value: SandboxParametersSections.FILE_SYSTEM, label: 'File System' },
+  { value: SandboxParametersSections.GIT_OPERATIONS, label: 'Git Operations' },
+  { value: SandboxParametersSections.PROCESS_CODE_EXECUTION, label: 'Process & Code Execution' },
 ]
 
 export const codeSnippetSupportedLanguages = [
   { value: CodeLanguage.PYTHON, label: 'Python', icon: PythonIcon },
   { value: CodeLanguage.TYPESCRIPT, label: 'TypeScript', icon: TypescriptIcon },
+]
+
+export enum VNCInteractionOptionsSections {
+  DISPLAY = 'display',
+  KEYBOARD = 'keyboard',
+  MOUSE = 'mouse',
+  SCREENSHOT = 'screenshot',
+}
+
+export const VNCInteractionOptionsSectionsData = [
+  { value: VNCInteractionOptionsSections.DISPLAY, label: 'Display' },
+  { value: VNCInteractionOptionsSections.KEYBOARD, label: 'Keyboard' },
+  { value: VNCInteractionOptionsSections.MOUSE, label: 'Mouse' },
+  { value: VNCInteractionOptionsSections.SCREENSHOT, label: 'Screenshot' },
 ]

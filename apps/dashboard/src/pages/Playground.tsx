@@ -9,6 +9,8 @@ import SandboxCodeSnippetsResponse from '@/components/Playground/Sandbox/CodeSni
 import SandboxParameters from '@/components/Playground/Sandbox/Parameters'
 import TerminalDescription from '@/components/Playground/Terminal/Description'
 import WebTerminal from '@/components/Playground/Terminal/WebTerminal'
+import VNCInteractionOptions from '@/components/Playground/VNC/Interaction'
+import VNCDesktopWindowResponse from '@/components/Playground/VNC/DesktopWindowResponse'
 import { useApi } from '@/hooks/useApi'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { PlaygroundCategories, playgroundCategoriesData } from '@/enums/Playground'
@@ -54,6 +56,7 @@ const Playground: React.FC = () => {
             <CardContent>
               {playgroundCategory === PlaygroundCategories.SANDBOX && <SandboxParameters />}
               {playgroundCategory === PlaygroundCategories.TERMINAL && <TerminalDescription />}
+              {playgroundCategory === PlaygroundCategories.VNC && <VNCInteractionOptions />}
             </CardContent>
           </Card>
           <div className="flex-1 min-w-0 flex flex-col space-y-2">
@@ -61,6 +64,7 @@ const Playground: React.FC = () => {
             {playgroundCategory === PlaygroundCategories.TERMINAL && (
               <WebTerminal sandboxId="93eb77da-54a2-4f34-872e-6c9843be0228" getPortPreviewUrl={getPortPreviewUrl} />
             )}
+            {playgroundCategory === PlaygroundCategories.VNC && <VNCDesktopWindowResponse />}
           </div>
         </div>
       </PlaygroundSandboxParamsProvider>
