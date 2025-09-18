@@ -3377,7 +3377,9 @@ When available, your Sandbox will launch in milliseconds instead of cold-booting
 
 Daytona Sandboxes come with **1 vCPU**, **1GB RAM**, and **3GiB disk** by default.
 
-Need more power? Use the `Resources` class to define exactly what you need: CPU, memory, and disk space are all customizable.
+Use the `Resources` class to define exactly what you need: CPU, memory, and disk space are all customizable.
+
+Organizations get a maximum Sandbox resource limit of 4 vCPUs, 8GB RAM, and 10GB disk. Need more power? Contact [support@daytona.io](mailto:support@daytona.io) and let us know your use case.
 
 Check your available resources and limits in the [dashboard](https://app.daytona.io/dashboard/limits).
 
@@ -3825,7 +3827,7 @@ Full example:
 
 Snapshots contain the resource requirements for Daytona Sandboxes. By default, Daytona Sandboxes come with **1 vCPU**, **1GB RAM**, and **3GiB disk**.
 
-Need more power? Use the `Resources` class to define exactly what you need: CPU, memory, and disk space are all customizable.
+Organizations get a maximum Sandbox resource limit of 4 vCPUs, 8GB RAM, and 10GB disk. Need more power? Contact [support@daytona.io](mailto:support@daytona.io) and let us know your use case.
 
 Check your available resources and limits in the [dashboard](https://app.daytona.io/dashboard/limits).
 
@@ -3946,7 +3948,7 @@ If you haven't built the desired image yet, and have a Dockerfile ready, you can
 Alternatively, to do it through the CLI, use the `--dockerfile` flag under `create` to pass the path to the Dockerfile you want to use and Daytona will build the Snapshot for you. The COPY/ADD commands will be automatically parsed and added to the context - to manually add files to the context you can use the `--context` flag.
 
 ```bash
-daytona snapshot create data-analysis01 --dockerfile ./Dockerfile --context ./requirements.txt
+daytona snapshot create data-analysis01 --dockerfile ./Dockerfile
 ```
 
 ```text
