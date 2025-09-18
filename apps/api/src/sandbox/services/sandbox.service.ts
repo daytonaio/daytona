@@ -50,6 +50,7 @@ import { SshAccess } from '../entities/ssh-access.entity'
 import { nanoid } from 'nanoid'
 import { SshAccessValidationDto } from '../dto/ssh-access.dto'
 import { VolumeService } from './volume.service'
+import { RedisLockProvider } from '../common/redis-lock.provider'
 
 const DEFAULT_CPU = 1
 const DEFAULT_MEMORY = 1
@@ -79,6 +80,7 @@ export class SandboxService {
     private readonly organizationService: OrganizationService,
     private readonly runnerAdapterFactory: RunnerAdapterFactory,
     private readonly organizationUsageService: OrganizationUsageService,
+    private readonly redisLockProvider: RedisLockProvider,
   ) {}
 
   private async validateOrganizationQuotas(
@@ -702,6 +704,9 @@ export class SandboxService {
   }
 
   async start(sandboxId: string, organization: Organization): Promise<void> {
+    const lockKey = `sandbox:${sandboxId}:start`
+    await this.redisLockProvider.waitForLock(lockKey, 60)
+
     let pendingCpuIncrement: number | undefined
     let pendingMemoryIncrement: number | undefined
     let pendingDiskIncrement: number | undefined
@@ -775,6 +780,8 @@ export class SandboxService {
         pendingDiskIncrement,
       )
       throw error
+    } finally {
+      await this.redisLockProvider.unlock(lockKey)
     }
   }
 
