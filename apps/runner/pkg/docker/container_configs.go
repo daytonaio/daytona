@@ -41,11 +41,14 @@ func (d *DockerClient) getContainerCreateConfig(ctx context.Context, sandboxDto 
 	for key, value := range sandboxDto.Env {
 		envVars = append(envVars, fmt.Sprintf("%s=%s", key, value))
 	}
-	
+
 	labels := make(map[string]string)
 	if sandboxDto.Metadata != nil {
 		if orgID, ok := sandboxDto.Metadata["organizationId"]; ok && orgID != "" {
 			labels["daytona.organization_id"] = orgID
+		}
+		if orgName, ok := sandboxDto.Metadata["organizationName"]; ok && orgName != "" {
+			labels["daytona.organization_name"] = orgName
 		}
 	}
 
