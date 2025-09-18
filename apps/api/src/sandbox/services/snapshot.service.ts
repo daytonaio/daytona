@@ -31,6 +31,7 @@ import { OrganizationSuspendedSnapshotDeactivatedEvent } from '../../organizatio
 import { SnapshotRunnerState } from '../enums/snapshot-runner-state.enum'
 import { PaginatedList } from '../../common/interfaces/paginated-list.interface'
 import { OrganizationUsageService } from '../../organization/services/organization-usage.service'
+import { RedisLockProvider } from '../common/redis-lock.provider'
 
 const IMAGE_NAME_REGEX = /^[a-zA-Z0-9_.\-:]+(\/[a-zA-Z0-9_.\-:]+)*$/
 @Injectable()
@@ -48,6 +49,7 @@ export class SnapshotService {
     private readonly snapshotRunnerRepository: Repository<SnapshotRunner>,
     private readonly organizationService: OrganizationService,
     private readonly organizationUsageService: OrganizationUsageService,
+    private readonly redisLockProvider: RedisLockProvider,
   ) {}
 
   private validateImageName(name: string): string | null {
@@ -75,66 +77,80 @@ export class SnapshotService {
   }
 
   async createSnapshot(organization: Organization, createSnapshotDto: CreateSnapshotDto, general = false) {
-    const nameValidationError = this.validateSnapshotName(createSnapshotDto.name)
-    if (nameValidationError) {
-      throw new BadRequestException(nameValidationError)
-    }
-
-    if (createSnapshotDto.imageName) {
-      const imageValidationError = this.validateImageName(createSnapshotDto.imageName)
-      if (imageValidationError) {
-        throw new BadRequestException(imageValidationError)
-      }
-    }
-
-    this.organizationService.assertOrganizationIsNotSuspended(organization)
-
-    await this.validateOrganizationQuotas(
-      organization,
-      createSnapshotDto.cpu,
-      createSnapshotDto.memory,
-      createSnapshotDto.disk,
-    )
+    let pendingSnapshotCountIncrement: number | undefined
 
     try {
-      const snapshot = this.snapshotRepository.create({
-        organizationId: organization.id,
-        ...createSnapshotDto,
-        mem: createSnapshotDto.memory, // Map memory to mem
-        state: createSnapshotDto.buildInfo ? SnapshotState.BUILD_PENDING : SnapshotState.PENDING,
-        general,
-      })
+      const nameValidationError = this.validateSnapshotName(createSnapshotDto.name)
+      if (nameValidationError) {
+        throw new BadRequestException(nameValidationError)
+      }
 
-      if (createSnapshotDto.buildInfo) {
-        const buildSnapshotRef = generateBuildSnapshotRef(
-          createSnapshotDto.buildInfo.dockerfileContent,
-          createSnapshotDto.buildInfo.contextHashes,
-        )
-
-        // Check if buildInfo with the same snapshotRef already exists
-        const existingBuildInfo = await this.buildInfoRepository.findOne({
-          where: { snapshotRef: buildSnapshotRef },
-        })
-
-        if (existingBuildInfo) {
-          snapshot.buildInfo = existingBuildInfo
-        } else {
-          const buildInfoEntity = this.buildInfoRepository.create({
-            ...createSnapshotDto.buildInfo,
-          })
-          await this.buildInfoRepository.save(buildInfoEntity)
-          snapshot.buildInfo = buildInfoEntity
+      if (createSnapshotDto.imageName) {
+        const imageValidationError = this.validateImageName(createSnapshotDto.imageName)
+        if (imageValidationError) {
+          throw new BadRequestException(imageValidationError)
         }
       }
 
-      return await this.snapshotRepository.save(snapshot)
-    } catch (error) {
-      if (error.code === '23505') {
-        // PostgreSQL unique violation error code
-        throw new ConflictException(
-          `Snapshot with name "${createSnapshotDto.name}" already exists for this organization`,
-        )
+      this.organizationService.assertOrganizationIsNotSuspended(organization)
+
+      const newSnapshotCount = 1
+
+      const { pendingSnapshotCountIncremented } = await this.validateOrganizationQuotas(
+        organization,
+        newSnapshotCount,
+        createSnapshotDto.cpu,
+        createSnapshotDto.memory,
+        createSnapshotDto.disk,
+      )
+
+      if (pendingSnapshotCountIncremented) {
+        pendingSnapshotCountIncrement = newSnapshotCount
       }
+
+      try {
+        const snapshot = this.snapshotRepository.create({
+          organizationId: organization.id,
+          ...createSnapshotDto,
+          mem: createSnapshotDto.memory, // Map memory to mem
+          state: createSnapshotDto.buildInfo ? SnapshotState.BUILD_PENDING : SnapshotState.PENDING,
+          general,
+        })
+
+        if (createSnapshotDto.buildInfo) {
+          const buildSnapshotRef = generateBuildSnapshotRef(
+            createSnapshotDto.buildInfo.dockerfileContent,
+            createSnapshotDto.buildInfo.contextHashes,
+          )
+
+          // Check if buildInfo with the same snapshotRef already exists
+          const existingBuildInfo = await this.buildInfoRepository.findOne({
+            where: { snapshotRef: buildSnapshotRef },
+          })
+
+          if (existingBuildInfo) {
+            snapshot.buildInfo = existingBuildInfo
+          } else {
+            const buildInfoEntity = this.buildInfoRepository.create({
+              ...createSnapshotDto.buildInfo,
+            })
+            await this.buildInfoRepository.save(buildInfoEntity)
+            snapshot.buildInfo = buildInfoEntity
+          }
+        }
+
+        return await this.snapshotRepository.save(snapshot)
+      } catch (error) {
+        if (error.code === '23505') {
+          // PostgreSQL unique violation error code
+          throw new ConflictException(
+            `Snapshot with name "${createSnapshotDto.name}" already exists for this organization`,
+          )
+        }
+        throw error
+      }
+    } catch (error) {
+      await this.rollbackPendingUsage(organization.id, pendingSnapshotCountIncrement)
       throw error
     }
   }
@@ -228,10 +244,13 @@ export class SnapshotService {
 
   private async validateOrganizationQuotas(
     organization: Organization,
+    addedSnapshotCount: number,
     cpu?: number,
     memory?: number,
     disk?: number,
-  ): Promise<void> {
+  ): Promise<{
+    pendingSnapshotCountIncremented: boolean
+  }> {
     // validate per-sandbox quotas
     if (cpu && cpu > organization.maxCpuPerSandbox) {
       throw new ForbiddenException(
@@ -250,10 +269,8 @@ export class SnapshotService {
     }
 
     // validate usage quotas
-    // start by incrementing the pending usage
-    await this.organizationUsageService.incrementPendingSnapshotUsage(organization.id, 1)
+    await this.organizationUsageService.incrementPendingSnapshotUsage(organization.id, addedSnapshotCount)
 
-    // get the current usage overview
     const usageOverview = await this.organizationUsageService.getSnapshotUsageOverview(organization.id)
 
     try {
@@ -261,13 +278,24 @@ export class SnapshotService {
         throw new ForbiddenException(`Snapshot quota exceeded. Maximum allowed: ${organization.snapshotQuota}`)
       }
     } catch (error) {
-      // rollback the pending usage
-      try {
-        await this.organizationUsageService.decrementPendingSnapshotUsage(organization.id, 1)
-      } catch (error) {
-        this.logger.error(`Error rolling back pending usage: ${error}`)
-      }
+      await this.rollbackPendingUsage(organization.id, addedSnapshotCount)
       throw error
+    }
+
+    return {
+      pendingSnapshotCountIncremented: true,
+    }
+  }
+
+  async rollbackPendingUsage(organizationId: string, pendingSnapshotCountIncrement?: number): Promise<void> {
+    if (!pendingSnapshotCountIncrement) {
+      return
+    }
+
+    try {
+      await this.organizationUsageService.decrementPendingSnapshotUsage(organizationId, pendingSnapshotCountIncrement)
+    } catch (error) {
+      this.logger.error(`Error rolling back pending snapshot usage: ${error}`)
     }
   }
 
@@ -283,29 +311,53 @@ export class SnapshotService {
   }
 
   async activateSnapshot(snapshotId: string, organization: Organization): Promise<Snapshot> {
-    const snapshot = await this.snapshotRepository.findOne({
-      where: { id: snapshotId },
-    })
+    const lockKey = `snapshot:${snapshotId}:activate`
+    await this.redisLockProvider.waitForLock(lockKey, 60)
 
-    if (!snapshot) {
-      throw new NotFoundException(`Snapshot ${snapshotId} not found`)
+    let pendingSnapshotCountIncrement: number | undefined
+
+    try {
+      const snapshot = await this.snapshotRepository.findOne({
+        where: { id: snapshotId },
+      })
+
+      if (!snapshot) {
+        throw new NotFoundException(`Snapshot ${snapshotId} not found`)
+      }
+
+      if (snapshot.state === SnapshotState.ACTIVE) {
+        throw new BadRequestException(`Snapshot ${snapshotId} is already active`)
+      }
+
+      if (snapshot.state !== SnapshotState.INACTIVE) {
+        throw new BadRequestException(`Snapshot ${snapshotId} cannot be activated - it is in ${snapshot.state} state`)
+      }
+
+      this.organizationService.assertOrganizationIsNotSuspended(organization)
+
+      const activatedSnapshotCount = 1
+
+      const { pendingSnapshotCountIncremented } = await this.validateOrganizationQuotas(
+        organization,
+        activatedSnapshotCount,
+        snapshot.cpu,
+        snapshot.mem,
+        snapshot.disk,
+      )
+
+      if (pendingSnapshotCountIncremented) {
+        pendingSnapshotCountIncrement = activatedSnapshotCount
+      }
+
+      snapshot.state = SnapshotState.ACTIVE
+      snapshot.lastUsedAt = new Date()
+      return await this.snapshotRepository.save(snapshot)
+    } catch (error) {
+      await this.rollbackPendingUsage(organization.id, pendingSnapshotCountIncrement)
+      throw error
+    } finally {
+      await this.redisLockProvider.unlock(lockKey)
     }
-
-    if (snapshot.state === SnapshotState.ACTIVE) {
-      throw new BadRequestException(`Snapshot ${snapshotId} is already active`)
-    }
-
-    if (snapshot.state !== SnapshotState.INACTIVE) {
-      throw new BadRequestException(`Snapshot ${snapshotId} cannot be activated - it is in ${snapshot.state} state`)
-    }
-
-    this.organizationService.assertOrganizationIsNotSuspended(organization)
-
-    await this.validateOrganizationQuotas(organization, snapshot.cpu, snapshot.mem, snapshot.disk)
-
-    snapshot.state = SnapshotState.ACTIVE
-    snapshot.lastUsedAt = new Date()
-    return await this.snapshotRepository.save(snapshot)
   }
 
   async canCleanupImage(imageName: string): Promise<boolean> {
