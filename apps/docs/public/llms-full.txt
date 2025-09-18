@@ -166,6 +166,8 @@ You can view usage for CPU, RAM, and Storage, and toggle between area and bar ch
 title: Computer Use - Linux
 description: Programmatic desktop automation and GUI interaction for Linux environments using Daytona.
 
+import { TabItem, Tabs } from '@astrojs/starlight/components'
+
 ## What is Computer Use?
 
 **Computer Use** enables programmatic control of desktop environments within Daytona sandboxes. It provides mouse, keyboard, screenshot, and display operations for automating GUI interactions and testing desktop applications.
@@ -193,33 +195,60 @@ Complete API reference for computer use operations in Python (sync & async).
 
 [View Python SDK →](/docs/en/python-sdk/sync/computer-use)
 
-## Quick Example (TypeScript)
+## Quick Example
 
-```typescript
-import { Daytona } from '@daytonaio/sdk';
+    ```typescript
+    import { Daytona } from '@daytonaio/sdk';
 
-// Initialize using environment variables (recommended)
-const daytona = new Daytona();
-// Or explicitly configure:
-// const daytona = new Daytona({
-//     apiKey: process.env.DAYTONA_API_KEY,
-//     apiUrl: process.env.DAYTONA_API_URL || 'https://app.daytona.io/api'
-// });
+    // Initialize using environment variables (recommended)
+    const daytona = new Daytona();
+    // Or explicitly configure:
+    // const daytona = new Daytona({
+    //     apiKey: process.env.DAYTONA_API_KEY,
+    //     apiUrl: process.env.DAYTONA_API_URL || 'https://app.daytona.io/api'
+    // });
 
-// Create sandbox from default snapshot (includes desktop environment)
-const sandbox = await daytona.create();
+    // Create sandbox from default snapshot (includes desktop environment)
+    const sandbox = await daytona.create();
 
-// Start computer use processes
-await sandbox.computerUse.start();
+    // Start computer use processes
+    await sandbox.computerUse.start();
 
-// Take a screenshot
-const screenshot = await sandbox.computerUse.screenshot.takeFullScreen();
+    // Take a screenshot
+    const screenshot = await sandbox.computerUse.screenshot.takeFullScreen();
 
-// Click and type
-await sandbox.computerUse.mouse.click(100, 200);
-await sandbox.computerUse.keyboard.type('Hello, Linux!');
-await sandbox.computerUse.keyboard.hotkey('ctrl+s');
-```
+    // Click and type
+    await sandbox.computerUse.mouse.click(100, 200);
+    await sandbox.computerUse.keyboard.type('Hello, Linux!');
+    await sandbox.computerUse.keyboard.hotkey('ctrl+s');
+    ```
+
+    ```python
+    from daytona import Daytona
+
+    # Initialize using environment variables (recommended)
+    daytona = Daytona()
+    # Or explicitly configure:
+    # daytona = Daytona(
+    #     api_key=os.getenv('DAYTONA_API_KEY'),
+    #     api_url=os.getenv('DAYTONA_API_URL', 'https://app.daytona.io/api')
+    # )
+
+    # Create sandbox from default snapshot (includes desktop environment)
+    sandbox = daytona.create()
+
+    # Start computer use processes
+    result = sandbox.computer_use.start()
+    print("Computer use started:", result.message)
+
+    # Take a screenshot
+    screenshot = sandbox.computer_use.screenshot.take_full_screen()
+
+    # Click and type
+    sandbox.computer_use.mouse.click(100, 200)
+    sandbox.computer_use.keyboard.type('Hello, Linux!')
+    sandbox.computer_use.keyboard.hotkey('ctrl+s')
+    ```
 
 **Environment Variables (.env file):**
 ```bash

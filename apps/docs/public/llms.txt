@@ -28,7 +28,7 @@
 - [SDK References](https://daytona.io/docs/en/computer-use-linux#sdk-references)
 - [TypeScript SDK](https://daytona.io/docs/en/computer-use-linux#typescript-sdk)
 - [Python SDK](https://daytona.io/docs/en/computer-use-linux#python-sdk-)
-- [Quick Example (TypeScript)](https://daytona.io/docs/en/computer-use-linux#quick-example-typescript)
+- [Quick Example](https://daytona.io/docs/en/computer-use-linux#quick-example)
 - [Related Documentation](https://daytona.io/docs/en/computer-use-linux#related-documentation)
 - [Computer Use - macOS](https://daytona.io/docs/en/computer-use-macos)
 - [What is Computer Use?](https://daytona.io/docs/en/computer-use-macos#what-is-computer-use)
