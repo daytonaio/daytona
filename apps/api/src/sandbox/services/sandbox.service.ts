@@ -309,7 +309,7 @@ export class SandboxService {
       })
 
       if (warmPoolSandbox) {
-        return await this.assignWarmPoolSandbox(warmPoolSandbox, createSandboxDto, organization.id)
+        return await this.assignWarmPoolSandbox(warmPoolSandbox, createSandboxDto, organization)
       }
     } else {
       const volumeIdOrNames = createSandboxDto.volumes.map((v) => v.volumeId)
@@ -372,11 +372,11 @@ export class SandboxService {
   private async assignWarmPoolSandbox(
     warmPoolSandbox: Sandbox,
     createSandboxDto: CreateSandboxDto,
-    organizationId: string,
+    organization: Organization,
   ): Promise<SandboxDto> {
     warmPoolSandbox.public = createSandboxDto.public || false
     warmPoolSandbox.labels = createSandboxDto.labels || {}
-    warmPoolSandbox.organizationId = organizationId
+    warmPoolSandbox.organizationId = organization.id
     warmPoolSandbox.createdAt = new Date()
 
     if (createSandboxDto.autoStopInterval !== undefined) {
@@ -407,12 +407,17 @@ export class SandboxService {
       throw new NotFoundException(`Runner with ID ${warmPoolSandbox.runnerId} not found`)
     }
 
-    if (createSandboxDto.networkBlockAll !== undefined || createSandboxDto.networkAllowList !== undefined) {
+    if (
+      createSandboxDto.networkBlockAll !== undefined ||
+      createSandboxDto.networkAllowList !== undefined ||
+      organization.sandboxLimitedNetworkEgress
+    ) {
       const runnerAdapter = await this.runnerAdapterFactory.create(runner)
       await runnerAdapter.updateNetworkSettings(
         warmPoolSandbox.id,
         createSandboxDto.networkBlockAll,
         createSandboxDto.networkAllowList,
+        organization.sandboxLimitedNetworkEgress,
       )
     }
 
