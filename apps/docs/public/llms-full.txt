@@ -1,5 +1,5 @@
 # Daytona Documentation v0.0.0-dev
-# Generated on: 2025-09-11
+# Generated on: 2025-09-18
 
 
 title: API Keys
@@ -162,6 +162,135 @@ Set both **Threshold** and **Target** to `0` to disable automatic top-up.
 The **Cost Breakdown** chart displays cost usage by resource.
 
 You can view usage for CPU, RAM, and Storage, and toggle between area and bar charts.
+
+title: Computer Use - Linux
+description: Programmatic desktop automation and GUI interaction for Linux environments using Daytona.
+
+## What is Computer Use?
+
+**Computer Use** enables programmatic control of desktop environments within Daytona sandboxes. It provides mouse, keyboard, screenshot, and display operations for automating GUI interactions and testing desktop applications.
+
+We recommend using this instance type for most tasks.
+
+## Common Use Cases
+
+- **GUI Application Testing** - Automate interactions with desktop applications, click buttons, fill forms, and validate UI behavior
+- **Visual Testing & Screenshots** - Capture screenshots of applications, compare UI states, and perform visual regression testing  
+- **Desktop Automation** - Automate repetitive desktop tasks, file management through GUI, and complex workflows
+- **Human-in-the-Loop** - Access the VNC interface directly from the [Daytona Dashboard](https://app.daytona.io/dashboard/sandboxes) to manually control and interact with the desktop environment alongside automated scripts
+
+## SDK References
+
+Choose your preferred SDK to get started with computer use automation:
+
+### TypeScript SDK
+Complete API reference for computer use operations in TypeScript.
+
+[View TypeScript SDK →](/docs/en/typescript-sdk/computer-use)
+
+### Python SDK  
+Complete API reference for computer use operations in Python (sync & async).
+
+[View Python SDK →](/docs/en/python-sdk/sync/computer-use)
+
+## Quick Example (TypeScript)
+
+```typescript
+import { Daytona } from '@daytonaio/sdk';
+
+// Initialize using environment variables (recommended)
+const daytona = new Daytona();
+// Or explicitly configure:
+// const daytona = new Daytona({
+//     apiKey: process.env.DAYTONA_API_KEY,
+//     apiUrl: process.env.DAYTONA_API_URL || 'https://app.daytona.io/api'
+// });
+
+// Create sandbox from default snapshot (includes desktop environment)
+const sandbox = await daytona.create();
+
+// Start computer use processes
+await sandbox.computerUse.start();
+
+// Take a screenshot
+const screenshot = await sandbox.computerUse.screenshot.takeFullScreen();
+
+// Click and type
+await sandbox.computerUse.mouse.click(100, 200);
+await sandbox.computerUse.keyboard.type('Hello, Linux!');
+await sandbox.computerUse.keyboard.hotkey('ctrl+s');
+```
+
+**Environment Variables (.env file):**
+```bash
+DAYTONA_API_KEY=your-api-key-here
+DAYTONA_API_URL=https://app.daytona.io/api
+```
+
+## Related Documentation
+
+- [Computer Use - Windows](/docs/en/computer-use-windows)  
+- [Computer Use - macOS](/docs/en/computer-use-macos)
+
+title: Computer Use - macOS
+description: Programmatic desktop automation and GUI interaction for macOS environments using Daytona.
+
+:::caution[Alpha Access Required]
+macOS Computer Use is currently in **private alpha**. To request access, please fill out the [macOS Access Request Form](https://docs.google.com/forms/d/e/1FAIpQLSc9xlGZ49OjWNkyzDPC9Ip3InMRR0ZXY3tcoD-PFQj3ck6gzQ/viewform?usp=sharing&ouid=103304973264148733944).
+
+Once submitted, our team will review your request and reach out with setup instructions and availability details.
+:::
+
+## What is Computer Use?
+
+**Computer Use** enables programmatic control of desktop environments within Daytona sandboxes. It provides mouse, keyboard, screenshot, and display operations for automating GUI interactions and testing desktop applications.
+
+We recommend using this instance type if you need to interact with macOS-only applications.
+
+## Common Use Cases
+
+- **GUI Application Testing** - Automate interactions with native macOS applications, click buttons, fill forms, and validate UI behavior
+- **Visual Testing & Screenshots** - Capture screenshots of applications, compare UI states, and perform visual regression testing
+- **Desktop Automation** - Automate repetitive macOS desktop tasks, file management through GUI, and complex workflows
+
+## Getting Started
+
+Once you have access to the macOS Computer Use alpha, you'll be able to programmatically control macOS desktop environments within your Daytona sandboxes. The functionality will include mouse operations, keyboard automation, screenshot capture, and display management specifically optimized for macOS environments.
+
+## Related Documentation
+
+- [Computer Use - Linux](/docs/en/computer-use-linux)  
+- [Computer Use - Windows](/docs/en/computer-use-windows)
+
+title: Computer Use - Windows
+description: Programmatic desktop automation and GUI interaction for Windows environments using Daytona.
+
+:::caution[Alpha Access Required]
+Windows Computer Use is currently in **private alpha**. To request access, please fill out the [Access Request Form](https://docs.google.com/forms/d/e/1FAIpQLSfoK-77-VpfsMubw8F4f1opCxIL1AyJUgnM0ONYup5hZ0RTvQ/viewform?usp=dialog).
+
+Once submitted, our team will review your request and reach out with setup instructions and availability details.
+:::
+
+## What is Computer Use?
+
+**Computer Use** enables programmatic control of desktop environments within Daytona sandboxes. It provides mouse, keyboard, screenshot, and display operations for automating GUI interactions and testing desktop applications.
+
+We recommend using this instance type if you need to interact with Windows-only applications.
+
+## Common Use Cases
+
+- **GUI Application Testing** - Automate interactions with Windows desktop applications, click buttons, fill forms, and validate UI behavior
+- **Visual Testing & Screenshots** - Capture screenshots of applications, compare UI states, and perform visual regression testing
+- **Desktop Automation** - Automate repetitive Windows desktop tasks, file management through GUI, and complex workflows
+
+## Getting Started
+
+Once you have access to the Windows Computer Use alpha, you'll be able to programmatically control Windows desktop environments within your Daytona sandboxes. The functionality will include mouse operations, keyboard automation, screenshot capture, and display management specifically optimized for Windows environments.
+
+## Related Documentation
+
+- [Computer Use - Linux](/docs/en/computer-use-linux)  
+- [Computer Use - macOS](/docs/en/computer-use-macos)
 
 title: Configuration
 
@@ -2603,6 +2732,162 @@ For additional assistance:
 - Visit [daytona.io](https://daytona.io)
 - Contact support at support@daytona.io
 
+title: Network Limits (Firewall)
+
+import { TabItem, Tabs } from '@astrojs/starlight/components'
+
+Daytona provides network egress limiting for sandboxes to control internet access. This feature can be automatically applied based on your organization's billing tier or manually configured for specific sandboxes.
+
+## Tier-Based Network Restrictions
+
+Network limits are automatically applied to sandboxes based on your organization's billing tier. This provides secure and controlled internet access for development environments:
+
+- **Tier 1 & Tier 2**: Network access is restricted and cannot be overridden at the sandbox level
+- **Tier 3 & Tier 4**: Full internet access is available by default, with the ability to configure custom network settings
+
+:::note
+**Tier 1 & 2**: Organization-level network restrictions take precedence over sandbox-level settings. Even if you specify `networkAllowList` when creating a sandbox, the organization's network restrictions will still apply.
+:::
+
+To learn more about organization tiers and limits, see the [Limits documentation](/docs/limits/).
+
+## Managing Network Access
+
+### Creating Sandboxes with Network Restrictions
+
+You can control network access when creating sandboxes using the `networkAllowList` and `networkBlockAll` parameters:
+
+
+```python
+from daytona import CreateSandboxFromSnapshotParams, Daytona
+
+daytona = Daytona()
+
+# Allow access to specific IP addresses (Wikipedia, X/Twitter, private network)
+sandbox = daytona.create(CreateSandboxFromSnapshotParams(
+    network_allow_list='208.80.154.232/32,199.16.156.103/32,192.168.1.0/24'
+))
+
+# Or block all network access
+sandbox = daytona.create(CreateSandboxFromSnapshotParams(
+    network_block_all=True
+))
+```
+
+
+```typescript
+import { Daytona } from '@daytonaio/sdk'
+
+const daytona = new Daytona()
+
+// Allow access to specific IP addresses (Wikipedia, X/Twitter, private network)
+const sandbox = await daytona.create({
+  networkAllowList: '208.80.154.232/32,199.16.156.103/32,192.168.1.0/24'
+})
+
+// Or block all network access
+const sandbox = await daytona.create({
+  networkBlockAll: true
+})
+```
+
+
+
+:::note
+If both `networkBlockAll` and `networkAllowList` are specified, `networkBlockAll` takes precedence and all network access will be blocked, ignoring the allow list.
+:::
+
+
+### Network Allow List Format
+
+The `networkAllowList` accepts up to 5 CIDR network blocks separated by commas:
+
+- **Single IP**: `208.80.154.232/32` (Wikipedia)
+- **Subnet**: `192.168.1.0/24` (Private network)
+- **Multiple networks**: `208.80.154.232/32,199.16.156.103/32,10.0.0.0/8`
+
+:::note
+**Essential Services**: Services that are essential for development are accessible on all tiers, including package registries, container registries, Git repositories, CDN services, platform services, system package managers etc.\
+If you experience issues with any essential development services, please contact [support@daytona.io](mailto:support@daytona.io) for assistance as these should be accessible on all tiers.
+
+For a complete list of whitelisted services, see [Essential Services](#essential-services) below.
+:::
+
+## Organization Configuration
+
+The network access policies for your organization are set automatically depending on your organization's limits tier and cannot be modified by organization administrators. These policies determine the default network behavior for all sandboxes in your organization.
+
+## Testing Network Access
+
+To test network connectivity from your sandbox:
+
+```bash
+# Test HTTP connectivity to allowed addresses
+curl -I https://208.80.154.232
+
+# Test package manager access (allowed on all tiers)
+apt update  # For Ubuntu/Debian
+npm ping    # For Node.js
+pip install --dry-run requests  # For Python
+```
+
+## Security Benefits
+
+Network limits provide several security advantages:
+
+- **Prevents data exfiltration** from sandboxes
+- **Reduces attack surface** by limiting external connections
+- **Complies with security policies** for development environments
+- **Enables fine-grained control** over network access
+
+:::caution
+Enabling unrestricted network access may pose security risks when executing untrusted code. It is recommended to whitelist specific network addresses using `networkAllowList` or block all network access using `networkBlockAll` instead.
+
+Test network connectivity before starting critical development work and consider upgrading your tier if you need access to many external services.
+:::
+
+
+## Essential Services
+
+The following services are whitelisted and accessible on all tiers:
+
+- Package registries:
+  - npm: `registry.npmjs.org`, `registry.npmjs.com`, `nodejs.org`, `nodesource.com`, `npm.pkg.github.com`
+  - yarn: `classic.yarnpkg.com`, `registry.yarnpkg.com`, `repo.yarnpkg.com`, `releases.yarnpkg.com`, `yarn.npmjs.org`, `yarnpkg.netlify.com`, `dl.yarnpkg.com`, `yarnpkg.com`
+  - PyPI: `pypi.org`, `pypi.python.org`, `files.pythonhosted.org`, `bootstrap.pypa.io`
+  - Maven: `repo1.maven.org`, `repo.maven.apache.org`
+- Container registries:
+  - Docker: `download.docker.com`, `registry-1.docker.io`, `registry.docker.io`, `auth.docker.io`, `index.docker.io`, `hub.docker.com`, `docker.io`
+  - Google: `gcr.io`, `asia.gcr.io`, `eu.gcr.io`, `us.gcr.io`, `marketplace.gcr.io`, `registry.cloud.google.com`
+  - Microsoft: `mcr.microsoft.com`
+  - Quay: `quay.io`, `quay-registry.s3.amazonaws.com`
+  - Kubernetes: `registry.k8s.io`
+- Git repositories:
+  - GitHub: `github.com`, `api.github.com`, `raw.githubusercontent.com`, `github-releases.githubusercontent.com`, `codeload.github.com`, `ghcr.io`, `packages.github.com`
+  - GitLab: `gitlab.com`, `registry.gitlab.com`
+  - Bitbucket: `bitbucket.org`
+- System package managers:
+  - Ubuntu: `archive.ubuntu.com`, `security.ubuntu.com`
+  - Debian: `deb.debian.org`, `security.debian.org`, `cdn-fastly.deb.debian.org`, `ftp.debian.org`
+- CDN services:
+  - Cloudflare: `cloudflare.com`
+  - Fastly: `fastly.com`
+  - JavaScript CDNs: `unpkg.com`, `jsdelivr.net`
+- AI/ML services:
+  - Anthropic: `api.anthropic.com`
+- Platform services:
+  - Daytona: `app.daytona.io`
+
+
+## Getting Help
+
+If you encounter network access issues or need unrestricted network access
+
+1. Check your **organization tier** in the [Dashboard](https://app.daytona.io/dashboard/limits)
+2. Upgrade your **organization tier** by completing the required verification steps to unlock higher limits tiers automatically
+3. Verify your **network allow list** configuration
+4. Contact support at [support@daytona.io](mailto:support@daytona.io) for assistance
+
 title: Organizations
 
 import { TabItem, Tabs } from '@astrojs/starlight/components'
@@ -3161,54 +3446,9 @@ Setting ["autoDeleteInterval: 0"](#auto-delete-interval) has the same effect as 
 
 ### Network Settings (Firewall)
 
-Daytona Sandboxes provide configurable network firewall controls to enhance security and manage connectivity. By default, network access follows standard security policies, but you can customize network settings when creating a Sandbox:
+Daytona Sandboxes provide configurable network firewall controls to enhance security and manage connectivity. By default, network access follows standard security policies, but you can customize network settings when creating a Sandbox.
+Learn more about network limits in the [Network Limits](/docs/en/network-limits) documentation.
 
-- To block all network access, set `networkBlockAll` to `True`
-- To restrict network access to specific addresses, set `networkAllowList` to a comma-separated list of up to 5 CIDR blocks
-
-    ```python
-    from daytona import Daytona, CreateSandboxFromSnapshotParams
-
-    daytona = Daytona()
-
-    # Block all network access
-
-    params = CreateSandboxFromSnapshotParams(
-      network_block_all=True
-    )
-    sandbox = daytona.create(params)
-
-    # Explicitly allow list of network addresses
-
-    params = CreateSandboxFromSnapshotParams(
-      network_allow_list="192.168.1.0/16,10.0.0.0/24"
-    )
-    sandbox = daytona.create(params)
-
-    ```
-
-
-    ```typescript
-    import { Daytona } from '@daytonaio/sdk';
-
-    const daytona = new Daytona();
-
-    // Block all network access
-    const sandbox = await daytona.create({
-      networkBlockAll: true
-    });
-
-    // Explicitly allow list of network addresses
-    const sandbox = await daytona.create({
-      networkAllowList: '192.168.1.0/16,10.0.0.0/24'
-    });
-    ```
-
-
-:::caution
-Enabling unrestricted network access may pose security risks when executing untrusted code.
-It is recommended to whitelist specific network addresses using `networkAllowList` or block all network access using `networkBlockAll` instead.
-:::
 
 ## Sandbox Information
 
