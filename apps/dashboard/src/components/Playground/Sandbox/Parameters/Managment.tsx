@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { CodeLanguage, Resources, CreateSandboxBaseParams } from '@daytonaio/sdk-typescript/src'
 import { ApiKeyList } from '@daytonaio/api-client'
-import { usePlaygroundSandboxParams } from '../hook'
+import { usePlayground } from '@/hooks/usePlayground'
 import { Loader2 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 
@@ -25,14 +25,12 @@ interface NumberParameterFormItem {
 }
 
 const SandboxManagmentParameters: React.FC<SandboxManagmentParametersProps> = ({ apiKeys, apiKeysLoading }) => {
-  const { playgroundSandboxParametersState, setPlaygroundSandboxParameterValue } = usePlaygroundSandboxParams()
-  const [sandboxApiKey, setSandboxApiKey] = useState<string | undefined>(playgroundSandboxParametersState['apiKey']) //*AKO NE POSTOJI NIJEDAN -> VRIJEDNOST NEK BUDE default
-  const [sandboxLanguage, setSandboxLanguage] = useState<CodeLanguage | undefined>(
-    playgroundSandboxParametersState['language'],
-  )
-  const [resources, setResources] = useState<Resources>(playgroundSandboxParametersState['resources'])
+  const { sandboxParametersState, setSandboxParameterValue } = usePlayground()
+  const [sandboxApiKey, setSandboxApiKey] = useState<string | undefined>(sandboxParametersState['apiKey']) //*AKO NE POSTOJI NIJEDAN -> VRIJEDNOST NEK BUDE default
+  const [sandboxLanguage, setSandboxLanguage] = useState<CodeLanguage | undefined>(sandboxParametersState['language'])
+  const [resources, setResources] = useState<Resources>(sandboxParametersState['resources'])
   const [sandboxFromImageParams, setSandboxFromImageParams] = useState<CreateSandboxBaseParams>(
-    playgroundSandboxParametersState['createSandboxBaseParams'],
+    sandboxParametersState['createSandboxBaseParams'],
   )
   // Available languages
   const languageOptions = [
@@ -74,7 +72,7 @@ const SandboxManagmentParameters: React.FC<SandboxManagmentParametersProps> = ({
           value={sandboxApiKey}
           onValueChange={(value) => {
             setSandboxApiKey(value)
-            setPlaygroundSandboxParameterValue('apiKey', value)
+            setSandboxParameterValue('apiKey', value)
           }}
         >
           <SelectTrigger className="w-full rounded-lg" aria-label="Select API key">
@@ -102,7 +100,7 @@ const SandboxManagmentParameters: React.FC<SandboxManagmentParametersProps> = ({
           value={sandboxLanguage}
           onValueChange={(value) => {
             setSandboxLanguage(value as CodeLanguage)
-            setPlaygroundSandboxParameterValue('language', value as CodeLanguage)
+            setSandboxParameterValue('language', value as CodeLanguage)
           }}
         >
           <SelectTrigger className="w-full box-border rounded-lg" aria-label="Select sandbox language">
@@ -136,7 +134,7 @@ const SandboxManagmentParameters: React.FC<SandboxManagmentParametersProps> = ({
                 onChange={(e) => {
                   const resourcesNew = { ...resources, [resource.key]: e.target.value }
                   setResources(resourcesNew)
-                  setPlaygroundSandboxParameterValue('resources', resourcesNew)
+                  setSandboxParameterValue('resources', resourcesNew)
                 }}
               />
             </div>
@@ -162,7 +160,7 @@ const SandboxManagmentParameters: React.FC<SandboxManagmentParametersProps> = ({
                 onChange={(e) => {
                   const sandboxFromImageParamsNew = { ...sandboxFromImageParams, [lifecycleParam.key]: e.target.value }
                   setSandboxFromImageParams(sandboxFromImageParamsNew)
-                  setPlaygroundSandboxParameterValue('createSandboxBaseParams', sandboxFromImageParamsNew)
+                  setSandboxParameterValue('createSandboxBaseParams', sandboxFromImageParamsNew)
                 }}
               />
             </div>

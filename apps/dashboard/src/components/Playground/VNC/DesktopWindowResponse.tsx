@@ -5,8 +5,11 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import ResponseCard from '../ResponseCard'
+import { usePlayground } from '@/hooks/usePlayground'
 
 const VNCDesktopWindowResponse: React.FC = () => {
+  const { VNCInteractionOptionsParamsState } = usePlayground()
+
   return (
     <>
       <Card className="w-full">
@@ -17,7 +20,7 @@ const VNCDesktopWindowResponse: React.FC = () => {
           <div className="w-full aspect-[4/3] md:aspect-[16/9] bg-white"></div>
         </CardContent>
       </Card>
-      <ResponseCard responseText="test" />
+      <ResponseCard responseText={VNCInteractionOptionsParamsState.responseText || ''} />
     </>
   )
 }

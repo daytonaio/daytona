@@ -14,7 +14,7 @@ import VNCDesktopWindowResponse from '@/components/Playground/VNC/DesktopWindowR
 import { useApi } from '@/hooks/useApi'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { PlaygroundCategories, playgroundCategoriesData } from '@/enums/Playground'
-import { PlaygroundSandboxParamsProvider } from '@/components/Playground/Sandbox/provider'
+import { PlaygroundProvider } from '@/providers/PlaygroundProvider'
 import { useState, useCallback } from 'react'
 
 const Playground: React.FC = () => {
@@ -36,7 +36,7 @@ const Playground: React.FC = () => {
       <div className="mb-2 h-12 flex items-center justify-between">
         <h1 className="text-2xl font-medium">Playground</h1>
       </div>
-      <PlaygroundSandboxParamsProvider>
+      <PlaygroundProvider>
         <div className="w-full flex flex-1 flex-col space-y-2 md:flex-row md:space-x-2 md:space-y-0">
           <Card className="basis-full md:basis-1/3 md:max-w-[33.33%] flex-shrink-0 min-h-full">
             <CardHeader>
@@ -67,7 +67,7 @@ const Playground: React.FC = () => {
             {playgroundCategory === PlaygroundCategories.VNC && <VNCDesktopWindowResponse />}
           </div>
         </div>
-      </PlaygroundSandboxParamsProvider>
+      </PlaygroundProvider>
     </div>
   )
 }
