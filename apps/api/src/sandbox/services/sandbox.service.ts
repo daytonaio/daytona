@@ -175,7 +175,7 @@ export class SandboxService {
         pendingDiskIncrement,
       )
     } catch (error) {
-      this.logger.error(`Error rolling back pending usage: ${error}`)
+      this.logger.error(`Error rolling back pending sandbox usage: ${error}`)
     }
   }
 
