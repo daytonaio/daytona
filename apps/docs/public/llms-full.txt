@@ -168,8 +168,6 @@ description: Programmatic desktop automation and GUI interaction for Linux envir
 
 import { TabItem, Tabs } from '@astrojs/starlight/components'
 
-## What is Computer Use?
-
 **Computer Use** enables programmatic control of desktop environments within Daytona sandboxes. It provides mouse, keyboard, screenshot, and display operations for automating GUI interactions and testing desktop applications.
 
 We recommend using this instance type for most tasks.
@@ -264,17 +262,15 @@ DAYTONA_API_URL=https://app.daytona.io/api
 title: Computer Use - macOS
 description: Programmatic desktop automation and GUI interaction for macOS environments using Daytona.
 
+**Computer Use** enables programmatic control of desktop environments within Daytona sandboxes. It provides mouse, keyboard, screenshot, and display operations for automating GUI interactions and testing desktop applications.
+
+We recommend using this instance type if you need to interact with macOS-only applications.
+
 :::caution[Alpha Access Required]
 macOS Computer Use is currently in **private alpha**. To request access, please fill out the [macOS Access Request Form](https://docs.google.com/forms/d/e/1FAIpQLSc9xlGZ49OjWNkyzDPC9Ip3InMRR0ZXY3tcoD-PFQj3ck6gzQ/viewform?usp=sharing&ouid=103304973264148733944).
 
 Once submitted, our team will review your request and reach out with setup instructions and availability details.
 :::
-
-## What is Computer Use?
-
-**Computer Use** enables programmatic control of desktop environments within Daytona sandboxes. It provides mouse, keyboard, screenshot, and display operations for automating GUI interactions and testing desktop applications.
-
-We recommend using this instance type if you need to interact with macOS-only applications.
 
 ## Common Use Cases
 
@@ -294,17 +290,15 @@ Once you have access to the macOS Computer Use alpha, you'll be able to programm
 title: Computer Use - Windows
 description: Programmatic desktop automation and GUI interaction for Windows environments using Daytona.
 
+**Computer Use** enables programmatic control of desktop environments within Daytona sandboxes. It provides mouse, keyboard, screenshot, and display operations for automating GUI interactions and testing desktop applications.
+
+We recommend using this instance type if you need to interact with Windows-only applications.
+
 :::caution[Alpha Access Required]
 Windows Computer Use is currently in **private alpha**. To request access, please fill out the [Access Request Form](https://docs.google.com/forms/d/e/1FAIpQLSfoK-77-VpfsMubw8F4f1opCxIL1AyJUgnM0ONYup5hZ0RTvQ/viewform?usp=dialog).
 
 Once submitted, our team will review your request and reach out with setup instructions and availability details.
 :::
-
-## What is Computer Use?
-
-**Computer Use** enables programmatic control of desktop environments within Daytona sandboxes. It provides mouse, keyboard, screenshot, and display operations for automating GUI interactions and testing desktop applications.
-
-We recommend using this instance type if you need to interact with Windows-only applications.
 
 ## Common Use Cases
 
