@@ -8,11 +8,11 @@ import { OnEvent } from '@nestjs/event-emitter'
 import { InjectRepository } from '@nestjs/typeorm'
 import { InjectRedis } from '@nestjs-modules/ioredis'
 import { Redis } from 'ioredis'
-import { In, Not, Repository } from 'typeorm'
+import { In, Repository } from 'typeorm'
 import { SANDBOX_STATES_CONSUMING_COMPUTE } from '../constants/sandbox-states-consuming-compute.constant'
 import { SANDBOX_STATES_CONSUMING_DISK } from '../constants/sandbox-states-consuming-disk.constant'
-import { SNAPSHOT_USAGE_IGNORED_STATES } from '../constants/snapshot-usage-ignored-states.constant'
-import { VOLUME_USAGE_IGNORED_STATES } from '../constants/volume-usage-ignored-states.constant'
+import { SNAPSHOT_STATES_CONSUMING_RESOURCES } from '../constants/snapshot-states-consuming-resources.constant'
+import { VOLUME_STATES_CONSUMING_RESOURCES } from '../constants/volume-states-consuming-resources.constant'
 import { OrganizationUsageOverviewDto } from '../dto/organization-usage-overview.dto'
 import {
   PendingSandboxUsageOverviewInternalDto,
@@ -633,7 +633,7 @@ export class OrganizationUsageService {
     const snapshotUsage = await this.snapshotRepository.count({
       where: {
         organizationId,
-        state: Not(In(SNAPSHOT_USAGE_IGNORED_STATES)),
+        state: In(SNAPSHOT_STATES_CONSUMING_RESOURCES),
       },
     })
 
@@ -658,7 +658,7 @@ export class OrganizationUsageService {
     const volumeUsage = await this.volumeRepository.count({
       where: {
         organizationId,
-        state: Not(In(VOLUME_USAGE_IGNORED_STATES)),
+        state: In(VOLUME_STATES_CONSUMING_RESOURCES),
       },
     })
 
@@ -1187,7 +1187,12 @@ export class OrganizationUsageService {
     await this.redisLockProvider.waitForLock(lockKey, 60)
 
     try {
-      const countDelta = this.calculateQuotaUsageDelta(1, event.oldState, event.newState, SNAPSHOT_USAGE_IGNORED_STATES)
+      const countDelta = this.calculateQuotaUsageDelta(
+        1,
+        event.oldState,
+        event.newState,
+        SNAPSHOT_STATES_CONSUMING_RESOURCES,
+      )
 
       if (countDelta !== 0) {
         await this.updateCurrentQuotaUsage(event.snapshot.organizationId, 'snapshot_count', countDelta)
@@ -1225,7 +1230,12 @@ export class OrganizationUsageService {
     await this.redisLockProvider.waitForLock(lockKey, 60)
 
     try {
-      const countDelta = this.calculateQuotaUsageDelta(1, event.oldState, event.newState, VOLUME_USAGE_IGNORED_STATES)
+      const countDelta = this.calculateQuotaUsageDelta(
+        1,
+        event.oldState,
+        event.newState,
+        VOLUME_STATES_CONSUMING_RESOURCES,
+      )
 
       if (countDelta !== 0) {
         await this.updateCurrentQuotaUsage(event.volume.organizationId, 'volume_count', countDelta)
