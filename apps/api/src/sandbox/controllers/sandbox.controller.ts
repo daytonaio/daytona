@@ -39,10 +39,9 @@ import {
 import { SandboxDto, SandboxLabelsDto } from '../dto/sandbox.dto'
 import { RunnerService } from '../services/runner.service'
 import { SandboxState } from '../enums/sandbox-state.enum'
-import { Sandbox as SandboxEntity } from '../entities/sandbox.entity'
+import { Sandbox } from '../entities/sandbox.entity'
 import { ContentTypeInterceptor } from '../../common/interceptors/content-type.interceptors'
 import { Runner } from '../entities/runner.entity'
-import { Sandbox } from '../decorators/sandbox.decorator'
 import { SandboxAccessGuard } from '../guards/sandbox-access.guard'
 import { CustomHeaders } from '../../common/constants/header.constants'
 import { AuthContext } from '../../common/decorators/auth-context.decorator'
@@ -221,10 +220,12 @@ export class SandboxController {
   })
   @UseGuards(SandboxAccessGuard)
   async getSandbox(
-    @Sandbox() sandbox: SandboxEntity,
+    @Param('sandboxId') sandboxId: string,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     @Query('verbose') verbose?: boolean,
   ): Promise<SandboxDto> {
+    const sandbox = await this.sandboxService.findOne(sandboxId, true)
+
     let runner: Runner
     if (sandbox.runnerId) {
       runner = await this.runnerService.findOne(sandbox.runnerId)
@@ -819,7 +820,7 @@ export class SandboxController {
 
   // wait up to `timeoutSeconds` for the sandbox to start; if it doesn’t, return current sandbox
   private async waitForSandboxStarted(sandbox: SandboxDto, timeoutSeconds: number): Promise<SandboxDto> {
-    let latestSandbox: SandboxEntity
+    let latestSandbox: Sandbox
     const waitForStarted = new Promise<SandboxDto>((resolve, reject) => {
       // eslint-disable-next-line
       let timeout: NodeJS.Timeout
