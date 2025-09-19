@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ToolboxApi, ListBranchResponse, GitStatus } from '@daytonaio/api-client'
+import { GitApi, ListBranchResponse, GitStatus } from '@daytonaio/toolbox-api-client'
 import { prefixRelativePath } from './utils/Path'
 
 /**
@@ -24,7 +24,7 @@ export interface GitCommitResponse {
 export class Git {
   constructor(
     private readonly sandboxId: string,
-    private readonly toolboxApi: ToolboxApi,
+    private readonly apiClient: GitApi,
     private readonly getRootDir: () => Promise<string>,
   ) {}
 
@@ -46,7 +46,7 @@ export class Git {
    * await git.add('workspace/repo', ['.']);
    */
   public async add(path: string, files: string[]): Promise<void> {
-    await this.toolboxApi.gitAddFiles(this.sandboxId, {
+    await this.apiClient.addFiles({
       path: prefixRelativePath(await this.getRootDir(), path),
       files,
     })
@@ -64,10 +64,7 @@ export class Git {
    * console.log(`Branches: ${response.branches}`);
    */
   public async branches(path: string): Promise<ListBranchResponse> {
-    const response = await this.toolboxApi.gitListBranches(
-      this.sandboxId,
-      prefixRelativePath(await this.getRootDir(), path),
-    )
+    const response = await this.apiClient.listBranches(prefixRelativePath(await this.getRootDir(), path))
     return response.data
   }
 
@@ -83,7 +80,7 @@ export class Git {
    * await git.createBranch('workspace/repo', 'new-feature');
    */
   public async createBranch(path: string, name: string): Promise<void> {
-    await this.toolboxApi.gitCreateBranch(this.sandboxId, {
+    await this.apiClient.createBranch({
       path: prefixRelativePath(await this.getRootDir(), path),
       name,
     })
@@ -102,7 +99,7 @@ export class Git {
    * await git.deleteBranch('workspace/repo', 'new-feature');
    */
   public async deleteBranch(path: string, name: string): Promise<void> {
-    await this.toolboxApi.gitDeleteBranch(this.sandboxId, {
+    await this.apiClient.deleteBranch({
       path: prefixRelativePath(await this.getRootDir(), path),
       name,
     })
@@ -121,7 +118,7 @@ export class Git {
    * await git.checkoutBranch('workspace/repo', 'new-feature');
    */
   public async checkoutBranch(path: string, branch: string): Promise<void> {
-    await this.toolboxApi.gitCheckoutBranch(this.sandboxId, {
+    await this.apiClient.checkoutBranch({
       path: prefixRelativePath(await this.getRootDir(), path),
       branch,
     })
@@ -175,7 +172,7 @@ export class Git {
     username?: string,
     password?: string,
   ): Promise<void> {
-    await this.toolboxApi.gitCloneRepository(this.sandboxId, {
+    await this.apiClient.cloneRepository({
       url: url,
       branch: branch,
       path: prefixRelativePath(await this.getRootDir(), path),
@@ -215,7 +212,7 @@ export class Git {
     email: string,
     allowEmpty?: boolean,
   ): Promise<GitCommitResponse> {
-    const response = await this.toolboxApi.gitCommitChanges(this.sandboxId, {
+    const response = await this.apiClient.commitChanges({
       path: prefixRelativePath(await this.getRootDir(), path),
       message,
       author,
@@ -249,7 +246,7 @@ export class Git {
    * );
    */
   public async push(path: string, username?: string, password?: string): Promise<void> {
-    await this.toolboxApi.gitPushChanges(this.sandboxId, {
+    await this.apiClient.pushChanges({
       path: prefixRelativePath(await this.getRootDir(), path),
       username,
       password,
@@ -278,7 +275,7 @@ export class Git {
    * );
    */
   public async pull(path: string, username?: string, password?: string): Promise<void> {
-    await this.toolboxApi.gitPullChanges(this.sandboxId, {
+    await this.apiClient.pullChanges({
       path: prefixRelativePath(await this.getRootDir(), path),
       username,
       password,
@@ -304,10 +301,7 @@ export class Git {
    * console.log(`Commits behind: ${status.behind}`);
    */
   public async status(path: string): Promise<GitStatus> {
-    const response = await this.toolboxApi.gitGetStatus(
-      this.sandboxId,
-      prefixRelativePath(await this.getRootDir(), path),
-    )
+    const response = await this.apiClient.getStatus(prefixRelativePath(await this.getRootDir(), path))
     return response.data
   }
 }

@@ -91,42 +91,42 @@ func (m *ComputerUseRPCClient) GetMousePosition() (*MousePositionResponse, error
 	return &resp, err
 }
 
-func (m *ComputerUseRPCClient) MoveMouse(request *MoveMouseRequest) (*MousePositionResponse, error) {
+func (m *ComputerUseRPCClient) MoveMouse(request *MouseMoveRequest) (*MousePositionResponse, error) {
 	var resp MousePositionResponse
 	err := m.client.Call("Plugin.MoveMouse", request, &resp)
 	return &resp, err
 }
 
-func (m *ComputerUseRPCClient) Click(request *ClickRequest) (*MouseClickResponse, error) {
+func (m *ComputerUseRPCClient) Click(request *MouseClickRequest) (*MouseClickResponse, error) {
 	var resp MouseClickResponse
 	err := m.client.Call("Plugin.Click", request, &resp)
 	return &resp, err
 }
 
-func (m *ComputerUseRPCClient) Drag(request *DragRequest) (*MouseDragResponse, error) {
+func (m *ComputerUseRPCClient) Drag(request *MouseDragRequest) (*MouseDragResponse, error) {
 	var resp MouseDragResponse
 	err := m.client.Call("Plugin.Drag", request, &resp)
 	return &resp, err
 }
 
-func (m *ComputerUseRPCClient) Scroll(request *ScrollRequest) (*ScrollResponse, error) {
+func (m *ComputerUseRPCClient) Scroll(request *MouseScrollRequest) (*ScrollResponse, error) {
 	var resp ScrollResponse
 	err := m.client.Call("Plugin.Scroll", request, &resp)
 	return &resp, err
 }
 
 // Keyboard control methods
-func (m *ComputerUseRPCClient) TypeText(request *TypeTextRequest) (*Empty, error) {
+func (m *ComputerUseRPCClient) TypeText(request *KeyboardTypeRequest) (*Empty, error) {
 	err := m.client.Call("Plugin.TypeText", request, new(Empty))
 	return new(Empty), err
 }
 
-func (m *ComputerUseRPCClient) PressKey(request *PressKeyRequest) (*Empty, error) {
+func (m *ComputerUseRPCClient) PressKey(request *KeyboardPressRequest) (*Empty, error) {
 	err := m.client.Call("Plugin.PressKey", request, new(Empty))
 	return new(Empty), err
 }
 
-func (m *ComputerUseRPCClient) PressHotkey(request *PressHotkeyRequest) (*Empty, error) {
+func (m *ComputerUseRPCClient) PressHotkey(request *KeyboardHotkeyRequest) (*Empty, error) {
 	err := m.client.Call("Plugin.PressHotkey", request, new(Empty))
 	return new(Empty), err
 }
@@ -145,8 +145,8 @@ func (m *ComputerUseRPCClient) GetWindows() (*WindowsResponse, error) {
 }
 
 // Status method
-func (m *ComputerUseRPCClient) GetStatus() (*StatusResponse, error) {
-	var resp StatusResponse
+func (m *ComputerUseRPCClient) GetStatus() (*ComputerUseStatusResponse, error) {
+	var resp ComputerUseStatusResponse
 	err := m.client.Call("Plugin.GetStatus", new(any), &resp)
 	return &resp, err
 }

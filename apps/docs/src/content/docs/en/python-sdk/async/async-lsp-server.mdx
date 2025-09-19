@@ -16,7 +16,7 @@ IDE-like features such as code completion, symbol search, and more.
 
 ```python
 def __init__(language_id: LspLanguageId, path_to_project: str,
-             toolbox_api: ToolboxApi, sandbox_id: str)
+             api_client: LspApi, sandbox_id: str)
 ```
 
 Initializes a new LSP server instance.
@@ -25,7 +25,7 @@ Initializes a new LSP server instance.
 
 - `language_id` _LspLanguageId_ - The language server type (e.g., LspLanguageId.TYPESCRIPT).
 - `path_to_project` _str_ - Absolute path to the project root directory.
-- `toolbox_api` _ToolboxApi_ - API client for Sandbox operations.
+- `api_client` _LspApi_ - API client for Sandbox operations.
 - `instance` _SandboxInstance_ - The Sandbox instance this server belongs to.
 
 #### AsyncLspServer.start

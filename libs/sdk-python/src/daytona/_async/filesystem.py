@@ -9,7 +9,14 @@ from typing import Awaitable, Callable, List, Union, overload
 import aiofiles
 import aiofiles.os
 import httpx
-from daytona_api_client_async import FileInfo, Match, ReplaceRequest, ReplaceResult, SearchFilesResponse, ToolboxApi
+from daytona_toolbox_api_client_async import (
+    FileInfo,
+    FileSystemApi,
+    Match,
+    ReplaceRequest,
+    ReplaceResult,
+    SearchFilesResponse,
+)
 
 from .._utils.errors import intercept_errors
 from .._utils.path import prefix_relative_path
@@ -26,18 +33,18 @@ class AsyncFileSystem:
     def __init__(
         self,
         sandbox_id: str,
-        toolbox_api: ToolboxApi,
+        api_client: FileSystemApi,
         get_root_dir: Callable[[], Awaitable[str]],
     ):
         """Initializes a new FileSystem instance.
 
         Args:
             sandbox_id (str): The Sandbox ID.
-            toolbox_api (ToolboxApi): API client for Sandbox operations.
+            api_client (FileSystemApi): API client for Sandbox file system operations.
             get_root_dir (Callable[[], str]): A function to get the default root directory of the Sandbox.
         """
         self._sandbox_id = sandbox_id
-        self._toolbox_api = toolbox_api
+        self._api_client = api_client
         self._get_root_dir = get_root_dir
 
     @intercept_errors(message_prefix="Failed to create folder: ")
@@ -61,8 +68,7 @@ class AsyncFileSystem:
         """
         path = prefix_relative_path(await self._get_root_dir(), path)
         print(f"Creating folder {path} with mode {mode}")
-        await self._toolbox_api.create_folder(
-            self._sandbox_id,
+        await self._api_client.create_folder(
             path=path,
             mode=mode,
         )
@@ -81,8 +87,8 @@ class AsyncFileSystem:
             await sandbox.fs.delete_file("workspace/data/old_file.txt")
             ```
         """
-        await self._toolbox_api.delete_file(
-            self._sandbox_id, path=prefix_relative_path(await self._get_root_dir(), path), recursive=recursive
+        await self._api_client.delete_file(
+            path=prefix_relative_path(await self._get_root_dir(), path), recursive=recursive
         )
 
     @overload
@@ -137,8 +143,7 @@ class AsyncFileSystem:
         if len(args) == 1 or (len(args) == 2 and isinstance(args[1], int)):
             remote_path = args[0]
             timeout = args[1] if len(args) == 2 else 30 * 60
-            return await self._toolbox_api.download_file(
-                self._sandbox_id,
+            return await self._api_client.download_file(
                 path=prefix_relative_path(await self._get_root_dir(), remote_path),
                 _request_timeout=timeout or None,
             )
@@ -147,10 +152,8 @@ class AsyncFileSystem:
         local_path = args[1]
         timeout = args[2] if len(args) == 3 else 30 * 60
         # pylint: disable=protected-access
-        method, url, headers, *_ = self._toolbox_api._download_file_serialize(
-            self._sandbox_id,
+        method, url, headers, *_ = self._api_client._download_file_serialize(
             path=prefix_relative_path(await self._get_root_dir(), remote_path),
-            x_daytona_organization_id=None,
             _request_auth=None,
             _content_type=None,
             _headers=None,
@@ -195,8 +198,7 @@ class AsyncFileSystem:
                 print(f"{match.file}:{match.line}: {match.content.strip()}")
             ```
         """
-        return await self._toolbox_api.find_in_files(
-            self._sandbox_id,
+        return await self._api_client.find_in_files(
             path=prefix_relative_path(await self._get_root_dir(), path),
             pattern=pattern,
         )
@@ -235,9 +237,7 @@ class AsyncFileSystem:
                 print("Path is a directory")
             ```
         """
-        return await self._toolbox_api.get_file_info(
-            self._sandbox_id, path=prefix_relative_path(await self._get_root_dir(), path)
-        )
+        return await self._api_client.get_file_info(path=prefix_relative_path(await self._get_root_dir(), path))
 
     @intercept_errors(message_prefix="Failed to list files: ")
     async def list_files(self, path: str) -> List[FileInfo]:
@@ -266,9 +266,7 @@ class AsyncFileSystem:
             print("Subdirectories:", ", ".join(d.name for d in dirs))
             ```
         """
-        return await self._toolbox_api.list_files(
-            self._sandbox_id, path=prefix_relative_path(await self._get_root_dir(), path)
-        )
+        return await self._api_client.list_files(path=prefix_relative_path(await self._get_root_dir(), path))
 
     @intercept_errors(message_prefix="Failed to move files: ")
     async def move_files(self, source: str, destination: str) -> None:
@@ -301,8 +299,7 @@ class AsyncFileSystem:
             )
             ```
         """
-        await self._toolbox_api.move_file(
-            self._sandbox_id,
+        await self._api_client.move_file(
             source=prefix_relative_path(await self._get_root_dir(), source),
             destination=prefix_relative_path(await self._get_root_dir(), destination),
         )
@@ -347,7 +344,7 @@ class AsyncFileSystem:
 
         replace_request = ReplaceRequest(files=files, new_value=new_value, pattern=pattern)
 
-        return await self._toolbox_api.replace_in_files(self._sandbox_id, replace_request=replace_request)
+        return await self._api_client.replace_in_files(request=replace_request)
 
     @intercept_errors(message_prefix="Failed to search files: ")
     async def search_files(self, path: str, pattern: str) -> SearchFilesResponse:
@@ -376,8 +373,7 @@ class AsyncFileSystem:
             print(f"Found {len(result.files)} test files")
             ```
         """
-        return await self._toolbox_api.search_files(
-            self._sandbox_id,
+        return await self._api_client.search_files(
             path=prefix_relative_path(await self._get_root_dir(), path),
             pattern=pattern,
         )
@@ -411,8 +407,7 @@ class AsyncFileSystem:
             )
             ```
         """
-        await self._toolbox_api.set_file_permissions(
-            self._sandbox_id,
+        await self._api_client.set_file_permissions(
             path=prefix_relative_path(await self._get_root_dir(), path),
             mode=mode,
             owner=owner,
@@ -519,9 +514,7 @@ class AsyncFileSystem:
                 file_fields[f"files[{i}].file"] = (filename, stream)
 
             # pylint: disable=protected-access
-            _, url, headers, *_ = self._toolbox_api._upload_files_serialize(
-                self._sandbox_id, None, None, None, None, None
-            )
+            _, url, headers, *_ = self._api_client._upload_files_serialize(None, None, None, None)
             # strip any prior Content-Type so HTTPX can set its own multipart header
             headers.pop("Content-Type", None)
 

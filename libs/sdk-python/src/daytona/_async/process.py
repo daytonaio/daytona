@@ -7,7 +7,8 @@ import re
 from typing import Awaitable, Callable, Dict, List, Optional
 
 import websockets
-from daytona_api_client_async import Command, CreateSessionRequest, ExecuteRequest, PortPreviewUrl, Session, ToolboxApi
+from daytona_api_client_async import PortPreviewUrl
+from daytona_toolbox_api_client_async import Command, CreateSessionRequest, ExecuteRequest, ProcessApi, Session
 
 from .._utils.errors import intercept_errors
 from .._utils.stream import std_demux_stream
@@ -32,7 +33,7 @@ class AsyncProcess:
         self,
         sandbox_id: str,
         code_toolbox: SandboxPythonCodeToolbox,
-        toolbox_api: ToolboxApi,
+        api_client: ProcessApi,
         get_root_dir: Callable[[], Awaitable[str]],
         get_preview_link: Callable[[int], Awaitable[PortPreviewUrl]],
     ):
@@ -46,7 +47,7 @@ class AsyncProcess:
         """
         self._sandbox_id = sandbox_id
         self._code_toolbox = code_toolbox
-        self._toolbox_api = toolbox_api
+        self._api_client = api_client
         self._get_root_dir = get_root_dir
         self._get_preview_link = get_preview_link
 
@@ -135,7 +136,7 @@ class AsyncProcess:
         command = f'sh -c "{command}"'
         execute_request = ExecuteRequest(command=command, cwd=cwd or await self._get_root_dir(), timeout=timeout)
 
-        response = await self._toolbox_api.execute_command(sandbox_id=self._sandbox_id, execute_request=execute_request)
+        response = await self._api_client.execute_command(request=execute_request)
 
         # Post-process the output to extract ExecutionArtifacts
         artifacts = AsyncProcess._parse_output(response.result.splitlines())
@@ -143,7 +144,7 @@ class AsyncProcess:
         # Create new response with processed output and charts
         # TODO: Remove model_construct once everything is migrated to pydantic # pylint: disable=fixme
         return ExecuteResponse.model_construct(
-            exit_code=response.exit_code,
+            exit_code=response.code,
             result=artifacts.stdout,
             artifacts=artifacts,
             additional_properties=response.additional_properties,
@@ -245,7 +246,7 @@ class AsyncProcess:
             ```
         """
         request = CreateSessionRequest(sessionId=session_id)
-        await self._toolbox_api.create_session(self._sandbox_id, create_session_request=request)
+        await self._api_client.create_session(request=request)
 
     @intercept_errors(message_prefix="Failed to get session: ")
     async def get_session(self, session_id: str) -> Session:
@@ -266,7 +267,7 @@ class AsyncProcess:
                 print(f"Command: {cmd.command}")
             ```
         """
-        return await self._toolbox_api.get_session(self._sandbox_id, session_id=session_id)
+        return await self._api_client.get_session(session_id=session_id)
 
     @intercept_errors(message_prefix="Failed to get session command: ")
     async def get_session_command(self, session_id: str, command_id: str) -> Command:
@@ -289,9 +290,7 @@ class AsyncProcess:
                 print(f"Command {cmd.command} completed successfully")
             ```
         """
-        return await self._toolbox_api.get_session_command(
-            self._sandbox_id, session_id=session_id, command_id=command_id
-        )
+        return await self._api_client.get_session_command(session_id=session_id, command_id=command_id)
 
     @intercept_errors(message_prefix="Failed to execute session command: ")
     async def execute_session_command(
@@ -336,10 +335,9 @@ class AsyncProcess:
             print(f"Command stderr: {result.stderr}")
             ```
         """
-        response = await self._toolbox_api.execute_session_command(
-            self._sandbox_id,
+        response = await self._api_client.session_execute_command(
             session_id=session_id,
-            session_execute_request=req,
+            request=req,
             _request_timeout=timeout or None,
         )
 
@@ -378,8 +376,8 @@ class AsyncProcess:
             print(f"Command stderr: {logs.stderr}")
             ```
         """
-        response = await self._toolbox_api.get_session_command_logs_without_preload_content(
-            self._sandbox_id, session_id=session_id, command_id=command_id
+        response = await self._api_client.get_session_command_logs_without_preload_content(
+            session_id=session_id, command_id=command_id
         )
 
         # unasync: delete start
@@ -411,11 +409,9 @@ class AsyncProcess:
             )
             ```
         """
-        _, url, headers, *_ = self._toolbox_api._get_session_command_logs_serialize(  # pylint: disable=protected-access
-            sandbox_id=self._sandbox_id,
+        _, url, headers, *_ = self._api_client._get_session_command_logs_serialize(  # pylint: disable=protected-access
             session_id=session_id,
             command_id=command_id,
-            x_daytona_organization_id=None,
             follow=True,
             _request_auth=None,
             _content_type=None,
@@ -454,7 +450,7 @@ class AsyncProcess:
                 print(f"  Commands: {len(session.commands)}")
             ```
         """
-        return await self._toolbox_api.list_sessions(self._sandbox_id)
+        return await self._api_client.list_sessions()
 
     @intercept_errors(message_prefix="Failed to delete session: ")
     async def delete_session(self, session_id: str) -> None:
@@ -474,4 +470,4 @@ class AsyncProcess:
             await sandbox.process.delete_session("temp-session")
             ```
         """
-        await self._toolbox_api.delete_session(self._sandbox_id, session_id=session_id)
+        await self._api_client.delete_session(session_id=session_id)

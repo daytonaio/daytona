@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ExecuteResponse as ClientExecuteResponse } from '@daytonaio/api-client'
+import { ExecuteResponse as ClientExecuteResponse } from '@daytonaio/toolbox-api-client'
 import { Chart } from './Charts'
 
 /**

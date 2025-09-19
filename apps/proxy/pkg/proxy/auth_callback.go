@@ -157,7 +157,7 @@ func (p *Proxy) hasSandboxAccess(ctx context.Context, sandboxId string, authToke
 
 	apiClient := apiclient.NewAPIClient(clientConfig)
 
-	res, _ := apiClient.PreviewAPI.HasSandboxAccess(ctx, sandboxId).Execute()
+	_, res, _ := apiClient.PreviewAPI.HasSandboxAccess(ctx, sandboxId).Execute()
 
 	return res != nil && res.StatusCode == http.StatusOK
 }
