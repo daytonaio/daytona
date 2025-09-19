@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Module, NestModule, MiddlewareConsumer, RequestMethod } from '@nestjs/common'
+import { Module, NestModule, MiddlewareConsumer, RequestMethod, ExecutionContext } from '@nestjs/common'
 import { VersionHeaderMiddleware } from './common/middleware/version-header.middleware'
 import { AppService } from './app.service'
 import { UserModule } from './user/user.module'
@@ -31,6 +31,8 @@ import { CustomNamingStrategy } from './common/utils/naming-strategy.util'
 import { MaintenanceMiddleware } from './common/middleware/maintenance.middleware'
 import { AuditModule } from './audit/audit.module'
 import { HealthModule } from './health/health.module'
+import { OpenFeatureModule } from '@openfeature/nestjs-sdk'
+import { OpenFeaturePostHogProvider } from './common/providers/openfeature-posthog.provider'
 
 @Module({
   imports: [
@@ -112,6 +114,22 @@ import { HealthModule } from './health/health.module'
     ObjectStorageModule,
     AuditModule,
     HealthModule,
+    OpenFeatureModule.forRoot({
+      contextFactory: (request: ExecutionContext) => {
+        const req = request.switchToHttp().getRequest()
+
+        return {
+          targetingKey: req.user?.userId,
+          organizationId: req.user?.organizationId,
+        }
+      },
+      defaultProvider: new OpenFeaturePostHogProvider({
+        clientOptions: {
+          host: process.env.POSTHOG_HOST,
+        },
+        apiKey: process.env.POSTHOG_API_KEY,
+      }),
+    }),
   ],
   controllers: [],
   providers: [AppService],
