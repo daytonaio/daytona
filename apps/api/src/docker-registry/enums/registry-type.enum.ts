@@ -4,8 +4,8 @@
  */
 
 export enum RegistryType {
-  INTERNAL = 'internal',
+  INTERNAL = 'internal', // Used for internal snapshots
   ORGANIZATION = 'organization',
-  PUBLIC = 'public',
   TRANSIENT = 'transient',
+  BACKUP = 'backup',
 }

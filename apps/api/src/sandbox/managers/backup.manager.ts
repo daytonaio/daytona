@@ -107,7 +107,7 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
 
               try {
                 //  todo: remove the catch handler asap
-                await this.setBackupPending(sandbox.id).catch((error) => {
+                await this.setBackupPending(sandbox).catch((error) => {
                   if (error instanceof BadRequestError && error.message === 'A backup is already in progress') {
                     return
                   }
@@ -236,7 +236,7 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
             }
 
             try {
-              await this.setBackupPending(sandbox.id)
+              await this.setBackupPending(sandbox)
             } catch (error) {
               this.logger.error(`Error processing backup for sandbox ${sandbox.id}:`, error)
             } finally {
@@ -251,15 +251,7 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
     }
   }
 
-  async setBackupPending(sandboxId: string): Promise<void> {
-    const sandbox = await this.sandboxRepository.findOneByOrFail({
-      id: sandboxId,
-    })
-
-    if (!sandbox) {
-      throw new ResourceNotFoundError('Sandbox not found')
-    }
-
+  async setBackupPending(sandbox: Sandbox): Promise<void> {
     if (sandbox.backupState === BackupState.COMPLETED) {
       return
     }
@@ -279,21 +271,18 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
       return
     }
 
-    // Get default registry
-    const registry = await this.dockerRegistryService.getDefaultInternalRegistry()
+    // Get available backup registry
+    const registry = await this.dockerRegistryService.getAvailableBackupRegistry(sandbox.region)
     if (!registry) {
-      throw new BadRequestError('No default registry configured')
+      throw new BadRequestError('No backup registry configured')
     }
 
     // Generate backup snapshot name
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
     const backupSnapshot = `${registry.url.replace('https://', '').replace('http://', '')}/${registry.project}/backup-${sandbox.id}:${timestamp}`
 
-    const sandboxToUpdate = await this.sandboxRepository.findOneByOrFail({
-      id: sandbox.id,
-    })
-    sandboxToUpdate.setBackupState(BackupState.PENDING, backupSnapshot, registry.id)
-    await this.sandboxRepository.save(sandboxToUpdate)
+    sandbox.setBackupState(BackupState.PENDING, backupSnapshot, registry.id)
+    await this.sandboxRepository.save(sandbox)
   }
 
   private async checkBackupProgress(sandbox: Sandbox): Promise<void> {
@@ -406,7 +395,7 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
   @OnEvent(SandboxEvents.ARCHIVED)
   @TrackJobExecution()
   private async handleSandboxArchivedEvent(event: SandboxArchivedEvent) {
-    this.setBackupPending(event.sandbox.id)
+    this.setBackupPending(event.sandbox)
   }
 
   @OnEvent(SandboxEvents.DESTROYED)
