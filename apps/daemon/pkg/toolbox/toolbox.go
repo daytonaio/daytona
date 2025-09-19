@@ -89,13 +89,13 @@ func (s *Server) Start() error {
 
 	dirname, err := os.UserHomeDir()
 	if err != nil {
-		log.Fatal(err)
+		return fmt.Errorf("failed to get user home directory: %w", err)
 	}
 
 	configDir := path.Join(dirname, ".daytona")
 	err = os.MkdirAll(configDir, 0755)
 	if err != nil {
-		log.Fatal(err)
+		return fmt.Errorf("failed to create config directory: %w", err)
 	}
 
 	log.Println("configDir", configDir)
