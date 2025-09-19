@@ -129,6 +129,29 @@ export class DockerRegistryService {
     })
   }
 
+  async getAvailableBackupRegistry(preferredRegion: string): Promise<DockerRegistry | null> {
+    const registries = await this.dockerRegistryRepository.find({
+      where: { registryType: RegistryType.BACKUP, isDefault: true },
+    })
+
+    if (registries.length === 0) {
+      return null
+    }
+
+    // Filter registries by preferred region
+    const preferredRegionRegistries = registries.filter((registry) => registry.region === preferredRegion)
+
+    // If we have registries in the preferred region, randomly select one
+    if (preferredRegionRegistries.length > 0) {
+      const randomIndex = Math.floor(Math.random() * preferredRegionRegistries.length)
+      return preferredRegionRegistries[randomIndex]
+    }
+
+    // If no registry found in preferred region, return any available registry
+    const randomIndex = Math.floor(Math.random() * registries.length)
+    return registries[randomIndex]
+  }
+
   async findOneBySnapshotImageName(imageName: string, organizationId?: string): Promise<DockerRegistry | null> {
     const whereCondition = organizationId
       ? [
