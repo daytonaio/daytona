@@ -295,13 +295,7 @@ func Start(ctx *gin.Context) {
 		return
 	}
 
-	containerInfo, err := runner.Docker.ContainerInspect(ctx.Request.Context(), sandboxId)
-	if err != nil {
-		ctx.Error(err)
-		return
-	}
-
-	err = runner.Docker.Start(ctx.Request.Context(), sandboxId, metadata, containerInfo.Config.WorkingDir)
+	err = runner.Docker.Start(ctx.Request.Context(), sandboxId, metadata)
 
 	if err != nil {
 		runner.Cache.SetSandboxState(ctx, sandboxId, enums.SandboxStateError)

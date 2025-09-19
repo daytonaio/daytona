@@ -11,16 +11,12 @@ import (
 	"github.com/daytonaio/runner/cmd/runner/config"
 	"github.com/daytonaio/runner/pkg/api/dto"
 	"github.com/docker/docker/api/types/network"
-	"github.com/docker/docker/errdefs"
 
 	"github.com/docker/docker/api/types/container"
 )
 
 func (d *DockerClient) getContainerConfigs(ctx context.Context, sandboxDto dto.CreateSandboxDTO, volumeMountPathBinds []string) (*container.Config, *container.HostConfig, *network.NetworkingConfig, error) {
-	containerConfig, err := d.getContainerCreateConfig(ctx, sandboxDto)
-	if err != nil {
-		return nil, nil, nil, err
-	}
+	containerConfig := d.getContainerCreateConfig(sandboxDto)
 
 	hostConfig, err := d.getContainerHostConfig(ctx, sandboxDto, volumeMountPathBinds)
 	if err != nil {
@@ -31,7 +27,7 @@ func (d *DockerClient) getContainerConfigs(ctx context.Context, sandboxDto dto.C
 	return containerConfig, hostConfig, networkingConfig, nil
 }
 
-func (d *DockerClient) getContainerCreateConfig(ctx context.Context, sandboxDto dto.CreateSandboxDTO) (*container.Config, error) {
+func (d *DockerClient) getContainerCreateConfig(sandboxDto dto.CreateSandboxDTO) *container.Config {
 	envVars := []string{
 		"DAYTONA_SANDBOX_ID=" + sandboxDto.Id,
 		"DAYTONA_SANDBOX_SNAPSHOT=" + sandboxDto.Snapshot,
@@ -52,14 +48,6 @@ func (d *DockerClient) getContainerCreateConfig(ctx context.Context, sandboxDto 
 		}
 	}
 
-	imageInfo, _, err := d.apiClient.ImageInspectWithRaw(ctx, sandboxDto.Snapshot)
-	if err != nil {
-		if errdefs.IsNotFound(err) {
-			return nil, err
-		}
-		return nil, fmt.Errorf("failed to inspect image: %w", err)
-	}
-
 	return &container.Config{
 		Hostname: sandboxDto.Id,
 		Image:    sandboxDto.Snapshot,
@@ -69,8 +57,7 @@ func (d *DockerClient) getContainerCreateConfig(ctx context.Context, sandboxDto 
 		Labels:       labels,
 		AttachStdout: true,
 		AttachStderr: true,
-		WorkingDir:   imageInfo.Config.WorkingDir,
-	}, nil
+	}
 }
 
 func (d *DockerClient) getContainerHostConfig(ctx context.Context, sandboxDto dto.CreateSandboxDTO, volumeMountPathBinds []string) (*container.HostConfig, error) {

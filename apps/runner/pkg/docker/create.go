@@ -39,21 +39,8 @@ func (d *DockerClient) Create(ctx context.Context, sandboxDto dto.CreateSandboxD
 		return sandboxDto.Id, nil
 	}
 
-	volumeMountPathBinds := make([]string, 0)
-	if sandboxDto.Volumes != nil {
-		volumeMountPathBinds, err = d.getVolumesMountPathBinds(ctx, sandboxDto.Volumes)
-		if err != nil {
-			return "", err
-		}
-	}
-
-	containerConfig, hostConfig, networkingConfig, err := d.getContainerConfigs(ctx, sandboxDto, volumeMountPathBinds)
-	if err != nil {
-		return "", err
-	}
-
 	if state == enums.SandboxStateStopped || state == enums.SandboxStateCreating {
-		err = d.Start(ctx, sandboxDto.Id, sandboxDto.Metadata, containerConfig.WorkingDir)
+		err = d.Start(ctx, sandboxDto.Id, sandboxDto.Metadata)
 		if err != nil {
 			return "", err
 		}
@@ -77,12 +64,25 @@ func (d *DockerClient) Create(ctx context.Context, sandboxDto dto.CreateSandboxD
 		return "", err
 	}
 
+	volumeMountPathBinds := make([]string, 0)
+	if sandboxDto.Volumes != nil {
+		volumeMountPathBinds, err = d.getVolumesMountPathBinds(ctx, sandboxDto.Volumes)
+		if err != nil {
+			return "", err
+		}
+	}
+
+	containerConfig, hostConfig, networkingConfig, err := d.getContainerConfigs(ctx, sandboxDto, volumeMountPathBinds)
+	if err != nil {
+		return "", err
+	}
+
 	c, err := d.apiClient.ContainerCreate(ctx, containerConfig, hostConfig, networkingConfig, nil, sandboxDto.Id)
 	if err != nil {
 		return "", err
 	}
 
-	err = d.Start(ctx, sandboxDto.Id, sandboxDto.Metadata, containerConfig.WorkingDir)
+	err = d.Start(ctx, sandboxDto.Id, sandboxDto.Metadata)
 	if err != nil {
 		return "", err
 	}
