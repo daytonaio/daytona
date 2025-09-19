@@ -9,19 +9,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { CodeLanguage, Resources, CreateSandboxBaseParams } from '@daytonaio/sdk-typescript/src'
 import { ApiKeyList } from '@daytonaio/api-client'
 import { usePlayground } from '@/hooks/usePlayground'
+import { NumberParameterFormItem } from '@/enums/Playground'
 import { Loader2 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 
 type SandboxManagmentParametersProps = {
   apiKeys: ApiKeyList[]
   apiKeysLoading: boolean
-}
-
-interface NumberParameterFormItem {
-  label: string
-  min: number
-  max: number
-  placeholder: string
 }
 
 const SandboxManagmentParameters: React.FC<SandboxManagmentParametersProps> = ({ apiKeys, apiKeysLoading }) => {
@@ -132,7 +126,8 @@ const SandboxManagmentParameters: React.FC<SandboxManagmentParametersProps> = ({
                 placeholder={resource.placeholder}
                 value={resources[resource.key]}
                 onChange={(e) => {
-                  const resourcesNew = { ...resources, [resource.key]: e.target.value }
+                  const newValue = e.target.value ? Number(e.target.value) : undefined
+                  const resourcesNew = { ...resources, [resource.key]: newValue }
                   setResources(resourcesNew)
                   setSandboxParameterValue('resources', resourcesNew)
                 }}
@@ -158,7 +153,8 @@ const SandboxManagmentParameters: React.FC<SandboxManagmentParametersProps> = ({
                 placeholder={lifecycleParam.placeholder}
                 value={sandboxFromImageParams[lifecycleParam.key]}
                 onChange={(e) => {
-                  const sandboxFromImageParamsNew = { ...sandboxFromImageParams, [lifecycleParam.key]: e.target.value }
+                  const newValue = e.target.value ? Number(e.target.value) : undefined
+                  const sandboxFromImageParamsNew = { ...sandboxFromImageParams, [lifecycleParam.key]: newValue }
                   setSandboxFromImageParams(sandboxFromImageParamsNew)
                   setSandboxParameterValue('createSandboxBaseParams', sandboxFromImageParamsNew)
                 }}

@@ -18,6 +18,15 @@ export const playgroundCategoriesData = [
   { value: PlaygroundCategories.VNC, label: 'VNC' },
 ]
 
+export interface NumberParameterFormItem {
+  label: string
+  min: number
+  max: number
+  placeholder: string
+  step?: number
+  required?: boolean
+}
+
 export enum SandboxParametersSections {
   SANDBOX_MANAGMENT = 'sandbox_managment',
   FILE_SYSTEM = 'file_system',
@@ -50,3 +59,27 @@ export const VNCInteractionOptionsSectionsData = [
   { value: VNCInteractionOptionsSections.MOUSE, label: 'Mouse' },
   { value: VNCInteractionOptionsSections.SCREENSHOT, label: 'Screenshot' },
 ]
+
+export enum ScreenshotFormatOption {
+  JPEG = 'jpeg',
+  PNG = 'png',
+  WEBP = 'webp',
+}
+
+export interface CustomizedScreenshotOptions extends Omit<ScreenshotOptions, 'format'> {
+  format?: ScreenshotFormatOption
+}
+
+export enum ScreenshotActions {
+  TAKE_COMPRESSED = 'takeCompressed',
+  TAKE_COMPRESSED_REGION = 'takeCompressedRegion',
+  TAKE_FULL_SCREEN = 'takeFullScreen',
+  TAKE_REGION = 'takeRegion',
+}
+
+export type ScreenshotActionFormData = {
+  label: string
+  description: string
+  methodName: ScreenshotActions
+  usesScreenshotRegion?: boolean
+}

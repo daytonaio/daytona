@@ -10,6 +10,7 @@ import {
   VNCInteractionOptionsParams,
   SetVNCInteractionOptionsParamValue,
 } from '@/contexts/PlaygroundContext'
+import { ScreenshotFormatOption } from '@/enums/Playground'
 import { useState } from 'react'
 
 export const PlaygroundProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -28,7 +29,20 @@ export const PlaygroundProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     },
   })
   const [VNCInteractionOptionsParamsState, setVNCInteractionOptionsParamsState] = useState<VNCInteractionOptionsParams>(
-    {},
+    {
+      screenshotOptionsConfig: {
+        showCursor: false,
+        format: ScreenshotFormatOption.PNG,
+        quality: 100,
+        scale: 1,
+      },
+      screenshotRegionConfig: {
+        x: 100,
+        y: 100,
+        width: 300,
+        height: 200,
+      },
+    },
   )
 
   const setSandboxParameterValue: SetSandboxParamsValue = (key, value) => {
