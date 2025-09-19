@@ -33,7 +33,7 @@ export class DockerRegistry {
   organizationId?: string
 
   @Column({ nullable: true })
-  region?: string
+  region: string | null
 
   @Column({
     type: 'enum',
