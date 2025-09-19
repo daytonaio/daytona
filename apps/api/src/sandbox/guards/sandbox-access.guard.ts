@@ -21,15 +21,14 @@ export class SandboxAccessGuard implements CanActivate {
     const authContext: OrganizationAuthContext = request.user
 
     try {
-      const sandbox = await this.sandboxService.findOne(sandboxId, true)
+      const sandboxOrganizationId = await this.sandboxService.getOrganizationId(sandboxId)
       if (
         authContext.role !== 'ssh-gateway' &&
         authContext.role !== SystemRole.ADMIN &&
-        sandbox.organizationId !== authContext.organizationId
+        sandboxOrganizationId !== authContext.organizationId
       ) {
         throw new ForbiddenException('Request organization ID does not match resource organization ID')
       }
-      request.sandbox = sandbox
       return true
     } catch (error) {
       throw new NotFoundException(`Sandbox with ID ${sandboxId} not found`)

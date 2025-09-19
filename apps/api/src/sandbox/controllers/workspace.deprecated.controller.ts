@@ -41,11 +41,9 @@ import { SandboxLabelsDto as WorkspaceLabelsDto } from '../dto/sandbox.dto'
 import { WorkspaceDto } from '../dto/workspace.deprecated.dto'
 import { RunnerService } from '../services/runner.service'
 import { SandboxState as WorkspaceState } from '../enums/sandbox-state.enum'
-import { Sandbox as WorkspaceEntity } from '../entities/sandbox.entity'
 import { ContentTypeInterceptor } from '../../common/interceptors/content-type.interceptors'
 import { Runner } from '../entities/runner.entity'
 import { InjectRedis } from '@nestjs-modules/ioredis'
-import { Sandbox as Workspace } from '../decorators/sandbox.decorator'
 import { SandboxAccessGuard as WorkspaceAccessGuard } from '../guards/sandbox-access.guard'
 import { CustomHeaders } from '../../common/constants/header.constants'
 import { AuthContext } from '../../common/decorators/auth-context.decorator'
@@ -215,10 +213,12 @@ export class WorkspaceController {
   })
   @UseGuards(WorkspaceAccessGuard)
   async getWorkspace(
-    @Workspace() workspace: WorkspaceEntity,
+    @Param('workspaceId') workspaceId: string,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     @Query('verbose') verbose?: boolean,
   ): Promise<WorkspaceDto> {
+    const workspace = await this.workspaceService.findOne(workspaceId, true)
+
     let runner: Runner
     if (workspace.runnerId) {
       runner = await this.runnerService.findOne(workspace.runnerId)

@@ -681,6 +681,22 @@ export class SandboxService {
     return sandbox
   }
 
+  async getOrganizationId(sandboxId: string): Promise<string> {
+    const sandbox = await this.sandboxRepository.findOne({
+      where: {
+        id: sandboxId,
+      },
+      select: ['organizationId'],
+      loadEagerRelations: false,
+    })
+
+    if (!sandbox || !sandbox.organizationId) {
+      throw new NotFoundException(`Sandbox with ID ${sandboxId} not found`)
+    }
+
+    return sandbox.organizationId
+  }
+
   async destroy(sandboxId: string): Promise<void> {
     const sandbox = await this.sandboxRepository.findOne({
       where: {
