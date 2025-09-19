@@ -2003,6 +2003,7 @@ paths:
         - runners
   /toolbox/{sandboxId}/toolbox/project-dir:
     get:
+      deprecated: true
       operationId: getProjectDir
       parameters:
         - description: Use with JWT to specify the organization ID
@@ -2034,6 +2035,76 @@ paths:
             - profile
             - email
       summary: Get sandbox project dir
+      tags:
+        - toolbox
+  /toolbox/{sandboxId}/toolbox/user-home-dir:
+    get:
+      operationId: getUserHomeDir
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: sandboxId
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserHomeDirResponse'
+          description: User home directory retrieved successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Get sandbox user home dir
+      tags:
+        - toolbox
+  /toolbox/{sandboxId}/toolbox/work-dir:
+    get:
+      operationId: getWorkDir
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: sandboxId
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkDirResponse'
+          description: Work-dir retrieved successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Get sandbox work-dir
       tags:
         - toolbox
   /toolbox/{sandboxId}/toolbox/files:
@@ -8078,6 +8149,20 @@ components:
         - runnerSnapshotId
       type: object
     ProjectDirResponse:
+      example:
+        dir: dir
+      properties:
+        dir:
+          type: string
+      type: object
+    UserHomeDirResponse:
+      example:
+        dir: dir
+      properties:
+        dir:
+          type: string
+      type: object
+    WorkDirResponse:
       example:
         dir: dir
       properties:

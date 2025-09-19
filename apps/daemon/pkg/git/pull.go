@@ -10,7 +10,7 @@ import (
 )
 
 func (s *Service) Pull(auth *http.BasicAuth) error {
-	repo, err := git.PlainOpen(s.ProjectDir)
+	repo, err := git.PlainOpen(s.WorkDir)
 	if err != nil {
 		return err
 	}

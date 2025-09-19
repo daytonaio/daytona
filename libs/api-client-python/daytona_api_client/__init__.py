@@ -162,6 +162,7 @@ from daytona_api_client.models.update_organization_member_access import UpdateOr
 from daytona_api_client.models.update_organization_quota import UpdateOrganizationQuota
 from daytona_api_client.models.update_organization_role import UpdateOrganizationRole
 from daytona_api_client.models.user import User
+from daytona_api_client.models.user_home_dir_response import UserHomeDirResponse
 from daytona_api_client.models.user_public_key import UserPublicKey
 from daytona_api_client.models.volume_dto import VolumeDto
 from daytona_api_client.models.volume_state import VolumeState
@@ -169,4 +170,5 @@ from daytona_api_client.models.webhook_app_portal_access import WebhookAppPortal
 from daytona_api_client.models.webhook_controller_get_status200_response import WebhookControllerGetStatus200Response
 from daytona_api_client.models.webhook_initialization_status import WebhookInitializationStatus
 from daytona_api_client.models.windows_response import WindowsResponse
+from daytona_api_client.models.work_dir_response import WorkDirResponse
 from daytona_api_client.models.workspace import Workspace

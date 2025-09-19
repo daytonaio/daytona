@@ -61,7 +61,6 @@ export class Process {
     private readonly clientConfig: Configuration,
     private readonly codeToolbox: SandboxCodeToolbox,
     private readonly toolboxApi: ToolboxApi,
-    private readonly getRootDir: () => Promise<string>,
     private readonly getPreviewLink: (port: number) => Promise<PortPreviewUrl>,
   ) {}
 
@@ -69,8 +68,7 @@ export class Process {
    * Executes a shell command in the Sandbox.
    *
    * @param {string} command - Shell command to execute
-   * @param {string} [cwd] - Working directory for command execution. If not specified, uses the Sandbox root directory.
-   * Default is the user's root directory.
+   * @param {string} [cwd] - Working directory for command execution. If not specified, uses the sandbox working directory.
    * @param {Record<string, string>} [env] - Environment variables to set for the command
    * @param {number} [timeout] - Maximum time in seconds to wait for the command to complete. 0 means wait indefinitely.
    * @returns {Promise<ExecuteResponse>} Command execution results containing:
@@ -116,7 +114,7 @@ export class Process {
     const response = await this.toolboxApi.executeCommand(this.sandboxId, {
       command,
       timeout,
-      cwd: cwd ?? (await this.getRootDir()),
+      cwd: cwd,
     })
 
     // Parse artifacts from the output

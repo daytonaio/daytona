@@ -16,8 +16,7 @@ Provides file system operations within a Sandbox.
 new FileSystem(
    sandboxId: string, 
    clientConfig: Configuration, 
-   toolboxApi: ToolboxApi, 
-   getRootDir: () => Promise<string>): FileSystem
+   toolboxApi: ToolboxApi): FileSystem
 ```
 
 **Parameters**:
@@ -25,7 +24,6 @@ new FileSystem(
 - `sandboxId` _string_
 - `clientConfig` _Configuration_
 - `toolboxApi` _ToolboxApi_
-- `getRootDir` _\(\) =\> Promise\<string\>_
 
 
 **Returns**:
@@ -44,8 +42,7 @@ Create a new directory in the Sandbox with specified permissions.
 
 **Parameters**:
 
-- `path` _string_ - Path where the directory should be created. Relative paths are resolved based on the user's
-    root directory.
+- `path` _string_ - Path where the directory should be created. Relative paths are resolved based on the sandbox working directory.
 - `mode` _string_ - Directory permissions in octal format (e.g. "755")
 
 
@@ -72,8 +69,7 @@ Deletes a file or directory from the Sandbox.
 
 **Parameters**:
 
-- `path` _string_ - Path to the file or directory to delete. Relative paths are resolved based on the user's
-    root directory.
+- `path` _string_ - Path to the file or directory to delete. Relative paths are resolved based on the sandbox working directory.
 - `recursive?` _boolean_ - If the file is a directory, this must be true to delete it.
 
 
@@ -103,8 +99,7 @@ for downloading large files.
 
 **Parameters**:
 
-- `remotePath` _string_ - Path to the file to download. Relative paths are resolved based on the user's
-    root directory.
+- `remotePath` _string_ - Path to the file to download. Relative paths are resolved based on the sandbox working directory.
 - `timeout?` _number_ - Timeout for the download operation in seconds. 0 means no timeout.
     Default is 30 minutes.
 
@@ -134,8 +129,7 @@ so it is recommended for downloading larger files.
 
 **Parameters**:
 
-- `remotePath` _string_ - Path to the file to download in the Sandbox. Relative paths are resolved based on the user's
-    root directory.
+- `remotePath` _string_ - Path to the file to download in the Sandbox. Relative paths are resolved based on the sandbox working directory.
 - `localPath` _string_ - Path to save the downloaded file.
 - `timeout?` _number_ - Timeout for the download operation in seconds. 0 means no timeout.
     Default is 30 minutes.
@@ -163,8 +157,7 @@ Searches for text patterns within files in the Sandbox.
 
 **Parameters**:
 
-- `path` _string_ - Directory to search in. Relative paths are resolved based on the user's
-    root directory.
+- `path` _string_ - Directory to search in. Relative paths are resolved based on the sandbox working directory.
 - `pattern` _string_ - Search pattern
 
 
@@ -194,8 +187,7 @@ Retrieves detailed information about a file or directory.
 
 **Parameters**:
 
-- `path` _string_ - Path to the file or directory. Relative paths are resolved based on the user's
-    root directory.
+- `path` _string_ - Path to the file or directory. Relative paths are resolved based on the sandbox working directory.
 
 
 **Returns**:
@@ -222,8 +214,7 @@ Lists contents of a directory in the Sandbox.
 
 **Parameters**:
 
-- `path` _string_ - Directory path to list. Relative paths are resolved based on the user's
-    root directory.
+- `path` _string_ - Directory path to list. Relative paths are resolved based on the sandbox working directory.
 
 
 **Returns**:
@@ -252,10 +243,8 @@ Moves or renames a file or directory.
 
 **Parameters**:
 
-- `source` _string_ - Source path. Relative paths are resolved based on the user's
-    root directory.
-- `destination` _string_ - Destination path. Relative paths are resolved based on the user's
-    root directory.
+- `source` _string_ - Source path. Relative paths are resolved based on the sandbox working directory.
+- `destination` _string_ - Destination path. Relative paths are resolved based on the sandbox working directory.
 
 
 **Returns**:
@@ -284,7 +273,7 @@ Replaces text content in multiple files.
 
 **Parameters**:
 
-- `files` _string\[\]_ - Array of file paths to process. Relative paths are resolved based on the user's
+- `files` _string\[\]_ - Array of file paths to process. Relative paths are resolved based on the sandbox working directory.
 - `pattern` _string_ - Pattern to replace
 - `newValue` _string_ - Replacement text
 
@@ -316,7 +305,7 @@ Searches for files and directories by name pattern in the Sandbox.
 
 **Parameters**:
 
-- `path` _string_ - Directory to search in. Relative paths are resolved based on the user's
+- `path` _string_ - Directory to search in. Relative paths are resolved based on the sandbox working directory.
 - `pattern` _string_ - File name pattern (supports globs)
 
 
@@ -344,8 +333,7 @@ Sets permissions and ownership for a file or directory.
 
 **Parameters**:
 
-- `path` _string_ - Path to the file or directory. Relative paths are resolved based on the user's
-    root directory.
+- `path` _string_ - Path to the file or directory. Relative paths are resolved based on the sandbox working directory.
 - `permissions` _FilePermissionsParams_ - Permission settings
 
 
@@ -383,8 +371,7 @@ for uploading large files.
 **Parameters**:
 
 - `file` _Buffer_ - Buffer of the file to upload.
-- `remotePath` _string_ - Destination path in the Sandbox. Relative paths are resolved based on the user's
-    root directory.
+- `remotePath` _string_ - Destination path in the Sandbox. Relative paths are resolved based on the sandbox working directory.
 - `timeout?` _number_ - Timeout for the upload operation in seconds. 0 means no timeout.
     Default is 30 minutes.
 
@@ -414,8 +401,7 @@ so it is recommended for uploading larger files.
 **Parameters**:
 
 - `localPath` _string_ - Path to the local file to upload.
-- `remotePath` _string_ - Destination path in the Sandbox. Relative paths are resolved based on the user's
-    root directory.
+- `remotePath` _string_ - Destination path in the Sandbox. Relative paths are resolved based on the sandbox working directory.
 - `timeout?` _number_ - Timeout for the upload operation in seconds. 0 means no timeout.
     Default is 30 minutes.
 
@@ -505,7 +491,6 @@ Represents a file to be uploaded to the Sandbox.
 
 **Properties**:
 
-- `destination` _string_ - Absolute destination path in the Sandbox. Relative paths are resolved based on the user's
-    root directory.
+- `destination` _string_ - Absolute destination path in the Sandbox. Relative paths are resolved based on the sandbox working directory.
 - `source` _string \| Buffer\<ArrayBufferLike\>_ - File to upload. If a Buffer, it is interpreted as the file content which is loaded into memory.
     Make sure it fits into memory, otherwise use the local file path which content will be streamed to the Sandbox.

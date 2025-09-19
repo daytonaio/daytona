@@ -5,18 +5,26 @@ package docker
 
 import (
 	"context"
+	"fmt"
 
+	common_daemon "github.com/daytonaio/common-go/pkg/daemon"
 	"github.com/daytonaio/common-go/pkg/timer"
 	"github.com/docker/docker/api/types/container"
 
 	log "github.com/sirupsen/logrus"
 )
 
-func (d *DockerClient) startDaytonaDaemon(ctx context.Context, containerId string) error {
+func (d *DockerClient) startDaytonaDaemon(ctx context.Context, containerId string, workDir string) error {
 	defer timer.Timer()()
 
+	daemonCmd := "/usr/local/bin/daytona"
+	if workDir == "" {
+		workDir = common_daemon.UseUserHomeAsWorkDir
+	}
+	daemonCmd = fmt.Sprintf("%s --work-dir %s", daemonCmd, workDir)
+
 	execOptions := container.ExecOptions{
-		Cmd:          []string{"sh", "-c", "/usr/local/bin/daytona"},
+		Cmd:          []string{"sh", "-c", daemonCmd},
 		AttachStdout: true,
 		AttachStderr: true,
 		Tty:          true,

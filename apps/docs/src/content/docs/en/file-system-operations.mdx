@@ -10,7 +10,7 @@ The Daytona SDK provides comprehensive file system operations through the `fs` m
 
 Daytona SDK provides an option to interact with the file system in Sandboxes. You can perform various operations like listing files, creating directories, reading and writing files, and more.
 
-For simplicity, file operations by default assume you are operating in the root directory of the Sandbox user - e.g. `workspace` implies `/home/[username]/workspace`, but you are free to provide an absolute workdir path as well - which should start with a leading slash `/`.
+For simplicity, file operations by default assume you are operating in the root directory of the Sandbox user - e.g. `workspace` implies `/home/[username]/workspace`, but you are free to provide an absolute workDir path as well - which should start with a leading slash `/`.
 
 ### Listing Files and Directories
 
@@ -151,7 +151,7 @@ await sandbox.fs.uploadFiles(files)
 
 ### Downloading Files
 
-The following commands downloads the file `file1.txt` from the Sandbox user's root directory and prints out the content:
+The following commands downloads the file `file1.txt` from the Sandbox working directory and prints out the content:
 
 <Tabs>
 <TabItem label="Python" icon="seti:python">

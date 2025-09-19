@@ -19,7 +19,7 @@ func CheckoutBranch(c *gin.Context) {
 	}
 
 	gitService := git.Service{
-		ProjectDir: req.Path,
+		WorkDir: req.Path,
 	}
 
 	if err := gitService.Checkout(req.Branch); err != nil {
