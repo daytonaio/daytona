@@ -37,11 +37,10 @@ class CreateRunner(BaseModel):
     gpu: Union[StrictFloat, StrictInt]
     gpu_type: StrictStr = Field(alias="gpuType")
     var_class: StrictStr = Field(alias="class")
-    capacity: Union[StrictFloat, StrictInt]
     region: StrictStr
     version: StrictStr
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["domain", "apiUrl", "proxyUrl", "apiKey", "cpu", "memoryGiB", "diskGiB", "gpu", "gpuType", "class", "capacity", "region", "version"]
+    __properties: ClassVar[List[str]] = ["domain", "apiUrl", "proxyUrl", "apiKey", "cpu", "memoryGiB", "diskGiB", "gpu", "gpuType", "class", "region", "version"]
 
     @field_validator('var_class')
     def var_class_validate_enum(cls, value):
@@ -118,7 +117,6 @@ class CreateRunner(BaseModel):
             "gpu": obj.get("gpu"),
             "gpuType": obj.get("gpuType"),
             "class": obj.get("class"),
-            "capacity": obj.get("capacity"),
             "region": obj.get("region"),
             "version": obj.get("version")
         })
