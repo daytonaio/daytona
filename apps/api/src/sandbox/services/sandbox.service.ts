@@ -50,6 +50,7 @@ import { SshAccess } from '../entities/ssh-access.entity'
 import { nanoid } from 'nanoid'
 import { SshAccessValidationDto } from '../dto/ssh-access.dto'
 import { VolumeService } from './volume.service'
+import { RedisLockProvider } from '../common/redis-lock.provider'
 
 const DEFAULT_CPU = 1
 const DEFAULT_MEMORY = 1
@@ -79,6 +80,7 @@ export class SandboxService {
     private readonly organizationService: OrganizationService,
     private readonly runnerAdapterFactory: RunnerAdapterFactory,
     private readonly organizationUsageService: OrganizationUsageService,
+    private readonly redisLockProvider: RedisLockProvider,
   ) {}
 
   private async validateOrganizationQuotas(
@@ -87,7 +89,11 @@ export class SandboxService {
     memory: number,
     disk: number,
     excludeSandboxId?: string,
-  ): Promise<void> {
+  ): Promise<{
+    pendingCpuIncremented: boolean
+    pendingMemoryIncremented: boolean
+    pendingDiskIncremented: boolean
+  }> {
     // validate per-sandbox quotas
     if (cpu > organization.maxCpuPerSandbox) {
       throw new ForbiddenException(
@@ -106,7 +112,6 @@ export class SandboxService {
     }
 
     // validate usage quotas
-    // start by incrementing the pending usage
     const {
       cpuIncremented: pendingCpuIncremented,
       memoryIncremented: pendingMemoryIncremented,
@@ -119,7 +124,6 @@ export class SandboxService {
       excludeSandboxId,
     )
 
-    // get the current usage overview
     const usageOverview = await this.organizationUsageService.getSandboxUsageOverview(organization.id, excludeSandboxId)
 
     try {
@@ -137,18 +141,41 @@ export class SandboxService {
         throw new ForbiddenException(`Total disk quota exceeded. Maximum allowed: ${organization.totalDiskQuota}GiB`)
       }
     } catch (error) {
-      // rollback the pending usage
-      try {
-        await this.organizationUsageService.decrementPendingSandboxUsage(
-          organization.id,
-          pendingCpuIncremented ? cpu : undefined,
-          pendingMemoryIncremented ? memory : undefined,
-          pendingDiskIncremented ? disk : undefined,
-        )
-      } catch (error) {
-        this.logger.error(`Error rolling back pending usage: ${error}`)
-      }
+      await this.rollbackPendingUsage(
+        organization.id,
+        pendingCpuIncremented ? cpu : undefined,
+        pendingMemoryIncremented ? memory : undefined,
+        pendingDiskIncremented ? disk : undefined,
+      )
       throw error
+    }
+
+    return {
+      pendingCpuIncremented,
+      pendingMemoryIncremented,
+      pendingDiskIncremented,
+    }
+  }
+
+  async rollbackPendingUsage(
+    organizationId: string,
+    pendingCpuIncrement?: number,
+    pendingMemoryIncrement?: number,
+    pendingDiskIncrement?: number,
+  ): Promise<void> {
+    if (!pendingCpuIncrement && !pendingMemoryIncrement && !pendingDiskIncrement) {
+      return
+    }
+
+    try {
+      await this.organizationUsageService.decrementPendingSandboxUsage(
+        organizationId,
+        pendingCpuIncrement,
+        pendingMemoryIncrement,
+        pendingDiskIncrement,
+      )
+    } catch (error) {
+      this.logger.error(`Error rolling back pending sandbox usage: ${error}`)
     }
   }
 
@@ -230,143 +257,170 @@ export class SandboxService {
     organization: Organization,
     useSandboxResourceParams_deprecated?: boolean,
   ): Promise<SandboxDto> {
-    const region = this.getValidatedOrDefaultRegion(createSandboxDto.target)
-    const sandboxClass = this.getValidatedOrDefaultClass(createSandboxDto.class)
+    let pendingCpuIncrement: number | undefined
+    let pendingMemoryIncrement: number | undefined
+    let pendingDiskIncrement: number | undefined
 
-    let snapshotIdOrName = createSandboxDto.snapshot
+    try {
+      const region = this.getValidatedOrDefaultRegion(createSandboxDto.target)
+      const sandboxClass = this.getValidatedOrDefaultClass(createSandboxDto.class)
 
-    if (!createSandboxDto.snapshot?.trim()) {
-      snapshotIdOrName = this.configService.getOrThrow('defaultSnapshot')
-    }
+      let snapshotIdOrName = createSandboxDto.snapshot
 
-    const snapshotFilter: FindOptionsWhere<Snapshot>[] = [
-      { organizationId: organization.id, name: snapshotIdOrName },
-      { general: true, name: snapshotIdOrName },
-    ]
-
-    if (isValidUuid(snapshotIdOrName)) {
-      snapshotFilter.push(
-        { organizationId: organization.id, id: snapshotIdOrName },
-        { general: true, id: snapshotIdOrName },
-      )
-    }
-
-    const snapshots = await this.snapshotRepository.find({
-      where: snapshotFilter,
-    })
-
-    if (snapshots.length === 0) {
-      throw new BadRequestError(`Snapshot ${snapshotIdOrName} not found. Did you add it through the Daytona Dashboard?`)
-    }
-
-    let snapshot = snapshots.find((s) => s.state === SnapshotState.ACTIVE)
-
-    if (!snapshot) {
-      snapshot = snapshots[0]
-    }
-
-    if (snapshot.state !== SnapshotState.ACTIVE) {
-      throw new BadRequestError(`Snapshot ${snapshotIdOrName} is ${snapshot.state}`)
-    }
-
-    let cpu = snapshot.cpu
-    let mem = snapshot.mem
-    let disk = snapshot.disk
-    let gpu = snapshot.gpu
-
-    // Remove the deprecated behavior in a future release
-    if (useSandboxResourceParams_deprecated) {
-      if (createSandboxDto.cpu) {
-        cpu = createSandboxDto.cpu
+      if (!createSandboxDto.snapshot?.trim()) {
+        snapshotIdOrName = this.configService.getOrThrow('defaultSnapshot')
       }
-      if (createSandboxDto.memory) {
-        mem = createSandboxDto.memory
-      }
-      if (createSandboxDto.disk) {
-        disk = createSandboxDto.disk
-      }
-      if (createSandboxDto.gpu) {
-        gpu = createSandboxDto.gpu
-      }
-    }
 
-    this.organizationService.assertOrganizationIsNotSuspended(organization)
+      const snapshotFilter: FindOptionsWhere<Snapshot>[] = [
+        { organizationId: organization.id, name: snapshotIdOrName },
+        { general: true, name: snapshotIdOrName },
+      ]
 
-    await this.validateOrganizationQuotas(organization, cpu, mem, disk)
+      if (isValidUuid(snapshotIdOrName)) {
+        snapshotFilter.push(
+          { organizationId: organization.id, id: snapshotIdOrName },
+          { general: true, id: snapshotIdOrName },
+        )
+      }
 
-    if (!createSandboxDto.volumes || createSandboxDto.volumes.length === 0) {
-      const warmPoolSandbox = await this.warmPoolService.fetchWarmPoolSandbox({
-        organizationId: organization.id,
-        snapshot: snapshotIdOrName,
-        target: createSandboxDto.target,
-        class: createSandboxDto.class,
-        cpu: cpu,
-        mem: mem,
-        disk: disk,
-        osUser: createSandboxDto.user,
-        env: createSandboxDto.env,
-        state: SandboxState.STARTED,
+      const snapshots = await this.snapshotRepository.find({
+        where: snapshotFilter,
       })
 
-      if (warmPoolSandbox) {
-        return await this.assignWarmPoolSandbox(warmPoolSandbox, createSandboxDto, organization)
+      if (snapshots.length === 0) {
+        throw new BadRequestError(
+          `Snapshot ${snapshotIdOrName} not found. Did you add it through the Daytona Dashboard?`,
+        )
       }
-    } else {
-      const volumeIdOrNames = createSandboxDto.volumes.map((v) => v.volumeId)
-      await this.volumeService.validateVolumes(organization.id, volumeIdOrNames)
+
+      let snapshot = snapshots.find((s) => s.state === SnapshotState.ACTIVE)
+
+      if (!snapshot) {
+        snapshot = snapshots[0]
+      }
+
+      if (snapshot.state !== SnapshotState.ACTIVE) {
+        throw new BadRequestError(`Snapshot ${snapshotIdOrName} is ${snapshot.state}`)
+      }
+
+      let cpu = snapshot.cpu
+      let mem = snapshot.mem
+      let disk = snapshot.disk
+      let gpu = snapshot.gpu
+
+      // Remove the deprecated behavior in a future release
+      if (useSandboxResourceParams_deprecated) {
+        if (createSandboxDto.cpu) {
+          cpu = createSandboxDto.cpu
+        }
+        if (createSandboxDto.memory) {
+          mem = createSandboxDto.memory
+        }
+        if (createSandboxDto.disk) {
+          disk = createSandboxDto.disk
+        }
+        if (createSandboxDto.gpu) {
+          gpu = createSandboxDto.gpu
+        }
+      }
+
+      this.organizationService.assertOrganizationIsNotSuspended(organization)
+
+      const { pendingCpuIncremented, pendingMemoryIncremented, pendingDiskIncremented } =
+        await this.validateOrganizationQuotas(organization, cpu, mem, disk)
+
+      if (pendingCpuIncremented) {
+        pendingCpuIncrement = cpu
+      }
+      if (pendingMemoryIncremented) {
+        pendingMemoryIncrement = mem
+      }
+      if (pendingDiskIncremented) {
+        pendingDiskIncrement = disk
+      }
+
+      if (!createSandboxDto.volumes || createSandboxDto.volumes.length === 0) {
+        const warmPoolSandbox = await this.warmPoolService.fetchWarmPoolSandbox({
+          organizationId: organization.id,
+          snapshot: snapshotIdOrName,
+          target: createSandboxDto.target,
+          class: createSandboxDto.class,
+          cpu: cpu,
+          mem: mem,
+          disk: disk,
+          osUser: createSandboxDto.user,
+          env: createSandboxDto.env,
+          state: SandboxState.STARTED,
+        })
+
+        if (warmPoolSandbox) {
+          return await this.assignWarmPoolSandbox(warmPoolSandbox, createSandboxDto, organization)
+        }
+      } else {
+        const volumeIdOrNames = createSandboxDto.volumes.map((v) => v.volumeId)
+        await this.volumeService.validateVolumes(organization.id, volumeIdOrNames)
+      }
+
+      const runner = await this.runnerService.getRandomAvailableRunner({
+        region,
+        sandboxClass,
+        snapshotRef: snapshot.internalName,
+      })
+
+      const sandbox = new Sandbox()
+
+      sandbox.organizationId = organization.id
+
+      //  TODO: make configurable
+      sandbox.region = region
+      sandbox.class = sandboxClass
+      sandbox.snapshot = snapshot.name
+      //  TODO: default user should be configurable
+      sandbox.osUser = createSandboxDto.user || 'daytona'
+      sandbox.env = createSandboxDto.env || {}
+      sandbox.labels = createSandboxDto.labels || {}
+      sandbox.volumes = createSandboxDto.volumes || []
+
+      sandbox.cpu = cpu
+      sandbox.gpu = gpu
+      sandbox.mem = mem
+      sandbox.disk = disk
+
+      sandbox.public = createSandboxDto.public || false
+
+      if (createSandboxDto.networkBlockAll !== undefined) {
+        sandbox.networkBlockAll = createSandboxDto.networkBlockAll
+      }
+
+      if (createSandboxDto.networkAllowList !== undefined) {
+        sandbox.networkAllowList = this.resolveNetworkAllowList(createSandboxDto.networkAllowList)
+      }
+
+      if (createSandboxDto.autoStopInterval !== undefined) {
+        sandbox.autoStopInterval = this.resolveAutoStopInterval(createSandboxDto.autoStopInterval)
+      }
+
+      if (createSandboxDto.autoArchiveInterval !== undefined) {
+        sandbox.autoArchiveInterval = this.resolveAutoArchiveInterval(createSandboxDto.autoArchiveInterval)
+      }
+
+      if (createSandboxDto.autoDeleteInterval !== undefined) {
+        sandbox.autoDeleteInterval = createSandboxDto.autoDeleteInterval
+      }
+
+      sandbox.runnerId = runner.id
+
+      await this.sandboxRepository.insert(sandbox)
+      return SandboxDto.fromSandbox(sandbox, runner.domain)
+    } catch (error) {
+      await this.rollbackPendingUsage(
+        organization.id,
+        pendingCpuIncrement,
+        pendingMemoryIncrement,
+        pendingDiskIncrement,
+      )
+      throw error
     }
-
-    const runner = await this.runnerService.getRandomAvailableRunner({
-      region,
-      sandboxClass,
-      snapshotRef: snapshot.internalName,
-    })
-
-    const sandbox = new Sandbox()
-
-    sandbox.organizationId = organization.id
-
-    //  TODO: make configurable
-    sandbox.region = region
-    sandbox.class = sandboxClass
-    sandbox.snapshot = snapshot.name
-    //  TODO: default user should be configurable
-    sandbox.osUser = createSandboxDto.user || 'daytona'
-    sandbox.env = createSandboxDto.env || {}
-    sandbox.labels = createSandboxDto.labels || {}
-    sandbox.volumes = createSandboxDto.volumes || []
-
-    sandbox.cpu = cpu
-    sandbox.gpu = gpu
-    sandbox.mem = mem
-    sandbox.disk = disk
-
-    sandbox.public = createSandboxDto.public || false
-
-    if (createSandboxDto.networkBlockAll !== undefined) {
-      sandbox.networkBlockAll = createSandboxDto.networkBlockAll
-    }
-
-    if (createSandboxDto.networkAllowList !== undefined) {
-      sandbox.networkAllowList = this.resolveNetworkAllowList(createSandboxDto.networkAllowList)
-    }
-
-    if (createSandboxDto.autoStopInterval !== undefined) {
-      sandbox.autoStopInterval = this.resolveAutoStopInterval(createSandboxDto.autoStopInterval)
-    }
-
-    if (createSandboxDto.autoArchiveInterval !== undefined) {
-      sandbox.autoArchiveInterval = this.resolveAutoArchiveInterval(createSandboxDto.autoArchiveInterval)
-    }
-
-    if (createSandboxDto.autoDeleteInterval !== undefined) {
-      sandbox.autoDeleteInterval = createSandboxDto.autoDeleteInterval
-    }
-
-    sandbox.runnerId = runner.id
-
-    await this.sandboxRepository.insert(sandbox)
-    return SandboxDto.fromSandbox(sandbox, runner.domain)
   }
 
   private async assignWarmPoolSandbox(
@@ -432,99 +486,128 @@ export class SandboxService {
   }
 
   async createFromBuildInfo(createSandboxDto: CreateSandboxDto, organization: Organization): Promise<SandboxDto> {
-    const region = this.getValidatedOrDefaultRegion(createSandboxDto.target)
-    const sandboxClass = this.getValidatedOrDefaultClass(createSandboxDto.class)
-
-    const cpu = createSandboxDto.cpu || DEFAULT_CPU
-    const mem = createSandboxDto.memory || DEFAULT_MEMORY
-    const disk = createSandboxDto.disk || DEFAULT_DISK
-    const gpu = createSandboxDto.gpu || DEFAULT_GPU
-
-    this.organizationService.assertOrganizationIsNotSuspended(organization)
-
-    await this.validateOrganizationQuotas(organization, cpu, mem, disk)
-
-    if (createSandboxDto.volumes && createSandboxDto.volumes.length > 0) {
-      const volumeIdOrNames = createSandboxDto.volumes.map((v) => v.volumeId)
-      await this.volumeService.validateVolumes(organization.id, volumeIdOrNames)
-    }
-
-    const sandbox = new Sandbox()
-
-    sandbox.organizationId = organization.id
-
-    sandbox.region = region
-    sandbox.class = sandboxClass
-    sandbox.osUser = createSandboxDto.user || 'daytona'
-    sandbox.env = createSandboxDto.env || {}
-    sandbox.labels = createSandboxDto.labels || {}
-    sandbox.volumes = createSandboxDto.volumes || []
-
-    sandbox.cpu = cpu
-    sandbox.gpu = gpu
-    sandbox.mem = mem
-    sandbox.disk = disk
-    sandbox.public = createSandboxDto.public || false
-
-    if (createSandboxDto.networkBlockAll !== undefined) {
-      sandbox.networkBlockAll = createSandboxDto.networkBlockAll
-    }
-
-    if (createSandboxDto.networkAllowList !== undefined) {
-      sandbox.networkAllowList = this.resolveNetworkAllowList(createSandboxDto.networkAllowList)
-    }
-
-    if (createSandboxDto.autoStopInterval !== undefined) {
-      sandbox.autoStopInterval = this.resolveAutoStopInterval(createSandboxDto.autoStopInterval)
-    }
-
-    if (createSandboxDto.autoArchiveInterval !== undefined) {
-      sandbox.autoArchiveInterval = this.resolveAutoArchiveInterval(createSandboxDto.autoArchiveInterval)
-    }
-
-    if (createSandboxDto.autoDeleteInterval !== undefined) {
-      sandbox.autoDeleteInterval = createSandboxDto.autoDeleteInterval
-    }
-
-    const buildInfoSnapshotRef = generateBuildSnapshotRef(
-      createSandboxDto.buildInfo.dockerfileContent,
-      createSandboxDto.buildInfo.contextHashes,
-    )
-
-    // Check if buildInfo with the same snapshotRef already exists
-    const existingBuildInfo = await this.buildInfoRepository.findOne({
-      where: { snapshotRef: buildInfoSnapshotRef },
-    })
-
-    if (existingBuildInfo) {
-      sandbox.buildInfo = existingBuildInfo
-      await this.buildInfoRepository.update(sandbox.buildInfo.snapshotRef, { lastUsedAt: new Date() })
-    } else {
-      const buildInfoEntity = this.buildInfoRepository.create({
-        ...createSandboxDto.buildInfo,
-      })
-      await this.buildInfoRepository.save(buildInfoEntity)
-      sandbox.buildInfo = buildInfoEntity
-    }
-
-    let runner: Runner
+    let pendingCpuIncrement: number | undefined
+    let pendingMemoryIncrement: number | undefined
+    let pendingDiskIncrement: number | undefined
 
     try {
-      runner = await this.runnerService.getRandomAvailableRunner({
-        region: sandbox.region,
-        sandboxClass: sandbox.class,
-        snapshotRef: sandbox.buildInfo.snapshotRef,
-      })
-      sandbox.runnerId = runner.id
-    } catch (error) {
-      if (error instanceof BadRequestError == false || error.message !== 'No available runners' || !sandbox.buildInfo) {
-        throw error
-      }
-      sandbox.state = SandboxState.PENDING_BUILD
-    }
+      const region = this.getValidatedOrDefaultRegion(createSandboxDto.target)
+      const sandboxClass = this.getValidatedOrDefaultClass(createSandboxDto.class)
 
-    await this.sandboxRepository.insert(sandbox)
-    return SandboxDto.fromSandbox(sandbox, runner?.domain)
+      const cpu = createSandboxDto.cpu || DEFAULT_CPU
+      const mem = createSandboxDto.memory || DEFAULT_MEMORY
+      const disk = createSandboxDto.disk || DEFAULT_DISK
+      const gpu = createSandboxDto.gpu || DEFAULT_GPU
+
+      this.organizationService.assertOrganizationIsNotSuspended(organization)
+
+      const { pendingCpuIncremented, pendingMemoryIncremented, pendingDiskIncremented } =
+        await this.validateOrganizationQuotas(organization, cpu, mem, disk)
+
+      if (pendingCpuIncremented) {
+        pendingCpuIncrement = cpu
+      }
+      if (pendingMemoryIncremented) {
+        pendingMemoryIncrement = mem
+      }
+      if (pendingDiskIncremented) {
+        pendingDiskIncrement = disk
+      }
+
+      if (createSandboxDto.volumes && createSandboxDto.volumes.length > 0) {
+        const volumeIdOrNames = createSandboxDto.volumes.map((v) => v.volumeId)
+        await this.volumeService.validateVolumes(organization.id, volumeIdOrNames)
+      }
+
+      const sandbox = new Sandbox()
+
+      sandbox.organizationId = organization.id
+
+      sandbox.region = region
+      sandbox.class = sandboxClass
+      sandbox.osUser = createSandboxDto.user || 'daytona'
+      sandbox.env = createSandboxDto.env || {}
+      sandbox.labels = createSandboxDto.labels || {}
+      sandbox.volumes = createSandboxDto.volumes || []
+
+      sandbox.cpu = cpu
+      sandbox.gpu = gpu
+      sandbox.mem = mem
+      sandbox.disk = disk
+      sandbox.public = createSandboxDto.public || false
+
+      if (createSandboxDto.networkBlockAll !== undefined) {
+        sandbox.networkBlockAll = createSandboxDto.networkBlockAll
+      }
+
+      if (createSandboxDto.networkAllowList !== undefined) {
+        sandbox.networkAllowList = this.resolveNetworkAllowList(createSandboxDto.networkAllowList)
+      }
+
+      if (createSandboxDto.autoStopInterval !== undefined) {
+        sandbox.autoStopInterval = this.resolveAutoStopInterval(createSandboxDto.autoStopInterval)
+      }
+
+      if (createSandboxDto.autoArchiveInterval !== undefined) {
+        sandbox.autoArchiveInterval = this.resolveAutoArchiveInterval(createSandboxDto.autoArchiveInterval)
+      }
+
+      if (createSandboxDto.autoDeleteInterval !== undefined) {
+        sandbox.autoDeleteInterval = createSandboxDto.autoDeleteInterval
+      }
+
+      const buildInfoSnapshotRef = generateBuildSnapshotRef(
+        createSandboxDto.buildInfo.dockerfileContent,
+        createSandboxDto.buildInfo.contextHashes,
+      )
+
+      // Check if buildInfo with the same snapshotRef already exists
+      const existingBuildInfo = await this.buildInfoRepository.findOne({
+        where: { snapshotRef: buildInfoSnapshotRef },
+      })
+
+      if (existingBuildInfo) {
+        sandbox.buildInfo = existingBuildInfo
+        await this.buildInfoRepository.update(sandbox.buildInfo.snapshotRef, { lastUsedAt: new Date() })
+      } else {
+        const buildInfoEntity = this.buildInfoRepository.create({
+          ...createSandboxDto.buildInfo,
+        })
+        await this.buildInfoRepository.save(buildInfoEntity)
+        sandbox.buildInfo = buildInfoEntity
+      }
+
+      let runner: Runner
+
+      try {
+        runner = await this.runnerService.getRandomAvailableRunner({
+          region: sandbox.region,
+          sandboxClass: sandbox.class,
+          snapshotRef: sandbox.buildInfo.snapshotRef,
+        })
+        sandbox.runnerId = runner.id
+      } catch (error) {
+        if (
+          error instanceof BadRequestError == false ||
+          error.message !== 'No available runners' ||
+          !sandbox.buildInfo
+        ) {
+          throw error
+        }
+        sandbox.state = SandboxState.PENDING_BUILD
+      }
+
+      await this.sandboxRepository.insert(sandbox)
+      return SandboxDto.fromSandbox(sandbox, runner?.domain)
+    } catch (error) {
+      await this.rollbackPendingUsage(
+        organization.id,
+        pendingCpuIncrement,
+        pendingMemoryIncrement,
+        pendingDiskIncrement,
+      )
+      throw error
+    }
   }
 
   async createBackup(sandboxId: string): Promise<void> {
@@ -621,51 +704,85 @@ export class SandboxService {
   }
 
   async start(sandboxId: string, organization: Organization): Promise<void> {
-    const sandbox = await this.sandboxRepository.findOne({
-      where: {
-        id: sandboxId,
-      },
-    })
+    const lockKey = `sandbox:${sandboxId}:start`
+    await this.redisLockProvider.waitForLock(lockKey, 60)
 
-    if (!sandbox) {
-      throw new NotFoundException(`Sandbox with ID ${sandboxId} not found`)
-    }
+    let pendingCpuIncrement: number | undefined
+    let pendingMemoryIncrement: number | undefined
+    let pendingDiskIncrement: number | undefined
 
-    if (String(sandbox.state) !== String(sandbox.desiredState)) {
-      // Allow start of stopped | archived and archiving | archived sandboxes
-      if (
-        sandbox.desiredState !== SandboxDesiredState.ARCHIVED ||
-        (sandbox.state !== SandboxState.STOPPED && sandbox.state !== SandboxState.ARCHIVING)
-      ) {
-        throw new SandboxError('State change in progress')
+    try {
+      const sandbox = await this.sandboxRepository.findOne({
+        where: {
+          id: sandboxId,
+        },
+      })
+
+      if (!sandbox) {
+        throw new NotFoundException(`Sandbox with ID ${sandboxId} not found`)
       }
-    }
 
-    if (![SandboxState.STOPPED, SandboxState.ARCHIVED, SandboxState.ARCHIVING].includes(sandbox.state)) {
-      throw new SandboxError('Sandbox is not in valid state')
-    }
-
-    this.organizationService.assertOrganizationIsNotSuspended(organization)
-
-    await this.validateOrganizationQuotas(organization, sandbox.cpu, sandbox.mem, sandbox.disk, sandbox.id)
-
-    if (sandbox.runnerId) {
-      // Add runner readiness check
-      const runner = await this.runnerService.findOne(sandbox.runnerId)
-      if (runner.state !== RunnerState.READY) {
-        throw new SandboxError('Runner is not ready')
+      if (sandbox.state === SandboxState.STARTED && sandbox.desiredState === SandboxDesiredState.STARTED) {
+        return
       }
+
+      if (String(sandbox.state) !== String(sandbox.desiredState)) {
+        // Allow start of stopped | archived and archiving | archived sandboxes
+        if (
+          sandbox.desiredState !== SandboxDesiredState.ARCHIVED ||
+          (sandbox.state !== SandboxState.STOPPED && sandbox.state !== SandboxState.ARCHIVING)
+        ) {
+          throw new SandboxError('State change in progress')
+        }
+      }
+
+      if (![SandboxState.STOPPED, SandboxState.ARCHIVED, SandboxState.ARCHIVING].includes(sandbox.state)) {
+        throw new SandboxError('Sandbox is not in valid state')
+      }
+
+      if (sandbox.runnerId) {
+        // Add runner readiness check
+        const runner = await this.runnerService.findOne(sandbox.runnerId)
+        if (runner.state !== RunnerState.READY) {
+          throw new SandboxError('Runner is not ready')
+        }
+      }
+
+      if (sandbox.pending) {
+        throw new SandboxError('Sandbox state change in progress')
+      }
+
+      this.organizationService.assertOrganizationIsNotSuspended(organization)
+
+      const { pendingCpuIncremented, pendingMemoryIncremented, pendingDiskIncremented } =
+        await this.validateOrganizationQuotas(organization, sandbox.cpu, sandbox.mem, sandbox.disk, sandbox.id)
+
+      if (pendingCpuIncremented) {
+        pendingCpuIncrement = sandbox.cpu
+      }
+      if (pendingMemoryIncremented) {
+        pendingMemoryIncrement = sandbox.mem
+      }
+      if (pendingDiskIncremented) {
+        pendingDiskIncrement = sandbox.disk
+      }
+
+      sandbox.pending = true
+      sandbox.desiredState = SandboxDesiredState.STARTED
+      await this.sandboxRepository.save(sandbox)
+
+      this.eventEmitter.emit(SandboxEvents.STARTED, new SandboxStartedEvent(sandbox))
+    } catch (error) {
+      await this.rollbackPendingUsage(
+        organization.id,
+        pendingCpuIncrement,
+        pendingMemoryIncrement,
+        pendingDiskIncrement,
+      )
+      throw error
+    } finally {
+      await this.redisLockProvider.unlock(lockKey)
     }
-
-    if (sandbox.pending) {
-      throw new SandboxError('Sandbox state change in progress')
-    }
-
-    sandbox.pending = true
-    sandbox.desiredState = SandboxDesiredState.STARTED
-    await this.sandboxRepository.save(sandbox)
-
-    this.eventEmitter.emit(SandboxEvents.STARTED, new SandboxStartedEvent(sandbox))
   }
 
   async stop(sandboxId: string): Promise<void> {
