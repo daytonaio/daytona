@@ -1,5 +1,5 @@
 # Daytona Documentation v0.0.0-dev
-# Generated on: 2025-09-18
+# Generated on: 2025-09-19
 
 
 title: API Keys
@@ -1217,7 +1217,7 @@ The Daytona SDK provides comprehensive file system operations through the `fs` m
 
 Daytona SDK provides an option to interact with the file system in Sandboxes. You can perform various operations like listing files, creating directories, reading and writing files, and more.
 
-For simplicity, file operations by default assume you are operating in the root directory of the Sandbox user - e.g. `workspace` implies `/home/[username]/workspace`, but you are free to provide an absolute workdir path as well - which should start with a leading slash `/`.
+For simplicity, file operations by default assume you are operating in the root directory of the Sandbox user - e.g. `workspace` implies `/home/[username]/workspace`, but you are free to provide an absolute workDir path as well - which should start with a leading slash `/`.
 
 ### Listing Files and Directories
 
@@ -1334,7 +1334,7 @@ await sandbox.fs.uploadFiles(files)
 
 ### Downloading Files
 
-The following commands downloads the file `file1.txt` from the Sandbox user's root directory and prints out the content:
+The following commands downloads the file `file1.txt` from the Sandbox working directory and prints out the content:
 
 ```python
 
@@ -1887,7 +1887,8 @@ The Daytona SDK provides built-in Git support through the `git` module in Sandbo
 
 Daytona SDK provides an option to clone, check status, and manage Git repositories in Sandboxes. You can interact with Git repositories using the `git` module.
 
-Similarly to file operations the starting cloning dir is the current Sandbox user's root - e.g. `workspace/repo` implies `/home/[username]/workspace/repo`, but you are free to provide an absolute workdir path as well (by starting the path with `/`).
+Similarly to file operations the starting cloning dir is the current Sandbox working directory. Uses the WORKDIR specified in
+the Dockerfile if present, or falling back to the user's home directory if not - e.g. `workspace/repo` implies `/my-work-dir/workspace/repo`, but you are free to provide an absolute workDir path as well (by starting the path with `/`).
 
 ### Cloning Repositories
 
@@ -2199,7 +2200,8 @@ The Daytona SDK provides Language Server Protocol (LSP) support through Sandbox 
 
 ## Creating LSP Servers
 
-Daytona SDK provides an option to create LSP servers using Python and TypeScript. The `path_to_project` starting point defaults to the current Sandbox user's root - e.g. `workspace/project` implies `/home/[username]/workspace/project`, but by starting with `/`, you may define an absolute path as well.
+Daytona SDK provides an option to create LSP servers using Python and TypeScript. The `path_to_project` starting point defaults to the current Sandbox working directory. Uses the WORKDIR specified in
+the Dockerfile if present, or falling back to the user's home directory if not - e.g. `workspace/project` implies `/my-work-dir/workspace/project`, but by starting with `/`, you may define an absolute path as well.
 
 ```python
 from daytona import Daytona, LspLanguageId
@@ -3106,7 +3108,8 @@ console.log(response.result);
 
 ## Process Execution
 
-Daytona SDK provides an option to execute shell commands and manage background processes in Sandboxes. The workdir for executing defaults to the current Sandbox user's root - e.g. `workspace/repo` implies `/home/[username]/workspace/repo`, but you can override it with an absolute path (by starting the path with `/`).
+Daytona SDK provides an option to execute shell commands and manage background processes in Sandboxes. The workDir for executing defaults to the current Sandbox working directory. Uses the WORKDIR specified in
+the Dockerfile if present, or falling back to the user's home directory if not - e.g. `workspace/repo` implies `/my-work-dir/workspace/repo`, but you can override it with an absolute path (by starting the path with `/`).
 
 ### Running Commands
 
@@ -3142,7 +3145,7 @@ const response2 = await sandbox.process.executeCommand("sleep 3", "workspace/src
 console.log(response2.result);
 
 // Passing environment variables
-const response3 = await sandbox.process.executeCommand("echo $CUSTOM_SECRET", "~", {
+const response3 = await sandbox.process.executeCommand("echo $CUSTOM_SECRET", ".", {
         "CUSTOM_SECRET": "DAYTONA"
     }
 );
@@ -3946,7 +3949,7 @@ If you haven't built the desired image yet, and have a Dockerfile ready, you can
 Alternatively, to do it through the CLI, use the `--dockerfile` flag under `create` to pass the path to the Dockerfile you want to use and Daytona will build the Snapshot for you. The COPY/ADD commands will be automatically parsed and added to the context - to manually add files to the context you can use the `--context` flag.
 
 ```bash
-daytona snapshot create data-analysis01 --dockerfile ./Dockerfile --context ./requirements.txt
+daytona snapshot create data-analysis01 --dockerfile ./Dockerfile
 ```
 
 ```text

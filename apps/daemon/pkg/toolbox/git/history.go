@@ -19,7 +19,7 @@ func GetCommitHistory(c *gin.Context) {
 	}
 
 	gitService := git.Service{
-		ProjectDir: path,
+		WorkDir: path,
 	}
 
 	log, err := gitService.Log()

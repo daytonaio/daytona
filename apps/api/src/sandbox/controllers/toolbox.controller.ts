@@ -81,6 +81,8 @@ import {
   ProcessRestartResponseDto,
   ProcessLogsResponseDto,
   ProcessErrorsResponseDto,
+  UserHomeDirResponseDto,
+  WorkDirResponseDto,
 } from '../dto/toolbox.dto'
 import { ToolboxService } from '../services/toolbox.service'
 import { ContentTypeInterceptor } from '../../common/interceptors/content-type.interceptors'
@@ -249,6 +251,7 @@ export class ToolboxController {
   @ApiOperation({
     summary: 'Get sandbox project dir',
     operationId: 'getProjectDir',
+    deprecated: true,
   })
   @ApiResponse({
     status: 200,
@@ -261,7 +264,45 @@ export class ToolboxController {
     @Res() res: ServerResponse<IncomingMessage>,
     @Next() next: NextFunction,
   ): Promise<void> {
-    return this.toolboxProxy(req, res, next)
+    return await this.toolboxProxy(req, res, next)
+  }
+
+  @Get(':sandboxId/toolbox/user-home-dir')
+  @ApiOperation({
+    summary: 'Get sandbox user home dir',
+    operationId: 'getUserHomeDir',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'User home directory retrieved successfully',
+    type: UserHomeDirResponseDto,
+  })
+  @ApiParam({ name: 'sandboxId', type: String, required: true })
+  async getUserHomeDir(
+    @Request() req: RawBodyRequest<IncomingMessage>,
+    @Res() res: ServerResponse<IncomingMessage>,
+    @Next() next: NextFunction,
+  ): Promise<void> {
+    return await this.toolboxProxy(req, res, next)
+  }
+
+  @Get(':sandboxId/toolbox/work-dir')
+  @ApiOperation({
+    summary: 'Get sandbox work-dir',
+    operationId: 'getWorkDir',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Work-dir retrieved successfully',
+    type: WorkDirResponseDto,
+  })
+  @ApiParam({ name: 'sandboxId', type: String, required: true })
+  async getWorkDir(
+    @Request() req: RawBodyRequest<IncomingMessage>,
+    @Res() res: ServerResponse<IncomingMessage>,
+    @Next() next: NextFunction,
+  ): Promise<void> {
+    return await this.toolboxProxy(req, res, next)
   }
 
   @Get(':sandboxId/toolbox/files')

@@ -135,6 +135,7 @@ model_update_organization_member_access.go
 model_update_organization_quota.go
 model_update_organization_role.go
 model_user.go
+model_user_home_dir_response.go
 model_user_public_key.go
 model_volume_dto.go
 model_volume_state.go
@@ -142,6 +143,7 @@ model_webhook_app_portal_access.go
 model_webhook_controller_get_status_200_response.go
 model_webhook_initialization_status.go
 model_windows_response.go
+model_work_dir_response.go
 model_workspace.go
 response.go
 utils.go

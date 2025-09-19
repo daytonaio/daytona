@@ -62,14 +62,14 @@ type IGitService interface {
 }
 
 type Service struct {
-	ProjectDir        string
+	WorkDir           string
 	GitConfigFileName string
 	LogWriter         io.Writer
 	OpenRepository    *git.Repository
 }
 
 func (s *Service) RepositoryExists() (bool, error) {
-	_, err := os.Stat(filepath.Join(s.ProjectDir, ".git"))
+	_, err := os.Stat(filepath.Join(s.WorkDir, ".git"))
 	if os.IsNotExist(err) {
 		return false, nil
 	}
