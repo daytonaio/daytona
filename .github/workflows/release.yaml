@@ -90,4 +90,6 @@ jobs:
 
       # Don't publish projects with nx for now
       - name: Publish projects
-        run: yarn publish
+        run: |
+          source .venv/bin/activate
+          yarn publish
