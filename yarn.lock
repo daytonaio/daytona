@@ -6647,6 +6647,44 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@openfeature/core@npm:^1.9.0":
+  version: 1.9.0
+  resolution: "@openfeature/core@npm:1.9.0"
+  checksum: 10c0/957ee82fff323850e5255e46eb91222b2ec364fce7e8dd8f1277e0b24c0f9464714f9793a9492ede5b5c4f1457f3bfec885a86122d3ee01bfe678ba6b6ddbc08
+  languageName: node
+  linkType: hard
+
+"@openfeature/nestjs-sdk@npm:^0.2.5":
+  version: 0.2.5
+  resolution: "@openfeature/nestjs-sdk@npm:0.2.5"
+  peerDependencies:
+    "@nestjs/common": ^8.0.0 || ^9.0.0 || ^10.0.0 || ^11.0.0
+    "@nestjs/core": ^8.0.0 || ^9.0.0 || ^10.0.0 || ^11.0.0
+    "@openfeature/server-sdk": ^1.17.1
+    rxjs: ^6.0.0 || ^7.0.0 || 8.0.0
+  checksum: 10c0/ef03f26b02cfe5e93ae54423e0230f0191bb28fe44e90513a8da173c87d05a33b3bcdd14f33bd21987ffcfd7cdfdb50e09cbe0df62c160a72f69c2809db0029a
+  languageName: node
+  linkType: hard
+
+"@openfeature/react-sdk@npm:^1.0.1":
+  version: 1.0.1
+  resolution: "@openfeature/react-sdk@npm:1.0.1"
+  peerDependencies:
+    "@openfeature/web-sdk": ^1.5.0
+    react: ">=16.8.0"
+  checksum: 10c0/204033d57736d2c443df9718791eab305a8e3671c314e2a83a1e2e0eae03d16dffc488330c4de50531742356a79522f1d4ee5ad1f51b431b930b9470ccfb0894
+  languageName: node
+  linkType: hard
+
+"@openfeature/server-sdk@npm:^1.19.0":
+  version: 1.19.0
+  resolution: "@openfeature/server-sdk@npm:1.19.0"
+  peerDependencies:
+    "@openfeature/core": ^1.9.0
+  checksum: 10c0/3b0f2b63123323403d6b93326799c20a2f4ce80f8f39e834857b0685a3beb7a084f1ff316a469cbe006f69b9a4ff75deddf9fabd7ea8e25517c99081d0bfba8c
+  languageName: node
+  linkType: hard
+
 "@opentelemetry/api-logs@npm:0.203.0":
   version: 0.203.0
   resolution: "@opentelemetry/api-logs@npm:0.203.0"
@@ -16275,6 +16313,10 @@ __metadata:
     "@nx/webpack": "npm:21.4.1"
     "@nx/workspace": "npm:21.4.1"
     "@openapitools/openapi-generator-cli": "npm:^2.16.3"
+    "@openfeature/core": "npm:^1.9.0"
+    "@openfeature/nestjs-sdk": "npm:^0.2.5"
+    "@openfeature/react-sdk": "npm:^1.0.1"
+    "@openfeature/server-sdk": "npm:^1.19.0"
     "@opentelemetry/exporter-trace-otlp-http": "npm:^0.203.0"
     "@opentelemetry/instrumentation-express": "npm:^0.52.0"
     "@opentelemetry/instrumentation-http": "npm:^0.203.0"
