@@ -59,7 +59,7 @@ const VNCScreenshootOperations: React.FC = () => {
     { label: 'Height', key: 'height', min: 0, max: Infinity, placeholder: '200', required: true },
   ]
 
-  const screenshotActionsFromData: ScreenshotActionFormData[] = [
+  const screenshotActionsFormData: ScreenshotActionFormData[] = [
     {
       methodName: ScreenshotActions.TAKE_COMPRESSED,
       label: 'takeCompressed()',
@@ -109,7 +109,6 @@ const VNCScreenshootOperations: React.FC = () => {
     <div>
       <div className="space-y-2 mt-4">
         <div className="w-full text-center mb-4">
-          {' '}
           <Label htmlFor="screenshot-options">Screenshot Options</Label>
         </div>
         <div id="screenshot-options" className="px-4 space-y-2">
@@ -180,7 +179,6 @@ const VNCScreenshootOperations: React.FC = () => {
       </div>
       <div className="space-y-2 mt-4">
         <div className="w-full text-center mb-4">
-          {' '}
           <Label htmlFor="screenshot-options">Screenshot Region</Label>
         </div>
         <div id="screenshot-region" className="px-4 space-y-2">
@@ -213,12 +211,14 @@ const VNCScreenshootOperations: React.FC = () => {
         </div>
       </div>
       <div className="space-y-6 mt-6">
-        {screenshotActionsFromData.map((screenshotAction) => (
+        {screenshotActionsFormData.map((screenshotAction) => (
           <div key={screenshotAction.methodName}>
             <div className="flex items-center justify-between">
               <div>
-                <Label>{screenshotAction.label}</Label>
-                <p className="text-sm text-muted-foreground mt-1 pl-1">{screenshotAction.description}</p>
+                <Label htmlFor={screenshotAction.methodName}>{screenshotAction.label}</Label>
+                <p id={screenshotAction.methodName} className="text-sm text-muted-foreground mt-1 pl-1">
+                  {screenshotAction.description}
+                </p>
               </div>
               <Button
                 disabled={!!runningScreenshotActionMethod}

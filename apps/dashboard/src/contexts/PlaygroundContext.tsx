@@ -32,13 +32,32 @@ export interface SandboxParams {
 export type SetSandboxParamsValue = <K extends keyof SandboxParams>(key: K, value: SandboxParams[K]) => void
 
 export interface VNCInteractionOptionsParams {
-  keyboardHotKeyParams: KeyboardHotKey
-  keyboardPressParams: KeyboardPress
-  keyboardTypeParams: KeyboardType
-  mouseClickParams: MouseClick
-  mouseDragParams: MouseDrag
-  mouseMoveParams: MouseMove
-  mouseScrollParams: MouseScroll
+  keyboardHotKey?: string
+  keyboardPressKey?: string
+  keyboardTypeText?: string
+  mouseClickParams?: {
+    x: number
+    y: number
+    button?: string
+    double?: boolean
+  }
+  mouseDragParams?: {
+    startX: number
+    startY: number
+    endX: number
+    endY: number
+    button?: string
+  }
+  mouseMoveParams?: {
+    x: number
+    y: number
+  }
+  mouseScrollParams?: {
+    x: number
+    y: number
+    direction: 'up' | 'down'
+    amount?: number
+  }
   screenshotOptionsConfig: CustomizedScreenshotOptions
   screenshotRegionConfig: ScreenshotRegion
   responseText?: string

@@ -30,6 +30,9 @@ export const PlaygroundProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   })
   const [VNCInteractionOptionsParamsState, setVNCInteractionOptionsParamsState] = useState<VNCInteractionOptionsParams>(
     {
+      keyboardHotKeyParams: { keys: '' },
+      keyboardPressParams: { key: '' },
+      keyboardTypeParams: { text: '' },
       screenshotOptionsConfig: {
         showCursor: false,
         format: ScreenshotFormatOption.PNG,

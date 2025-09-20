@@ -18,14 +18,24 @@ export const playgroundCategoriesData = [
   { value: PlaygroundCategories.VNC, label: 'VNC' },
 ]
 
-export interface NumberParameterFormItem {
+export interface ParameterFormItem {
   label: string
-  min: number
-  max: number
   placeholder: string
-  step?: number
+  key: string
   required?: boolean
 }
+
+export interface NumberParameterFormItem extends ParameterFormItem {
+  min: number
+  max: number
+  step?: number
+}
+
+// keyof (A | B | C) gives intersections of types i.e. type = common properties to A,B,C
+// KeysOf gives us keyof A | keyof B | keyof C behaviour
+export type KeysOf<T> = T extends any ? keyof T : never
+
+export type ParameterFormData<T> = ((ParameterFormItem | NumberParameterFormItem) & { key: KeysOf<T> })[]
 
 export enum SandboxParametersSections {
   SANDBOX_MANAGMENT = 'sandbox_managment',
@@ -60,6 +70,59 @@ export const VNCInteractionOptionsSectionsData = [
   { value: VNCInteractionOptionsSections.SCREENSHOT, label: 'Screenshot' },
 ]
 
+export type KeyboardHotKey = {
+  keys: string
+}
+
+export type KeyboardPress = {
+  key: string
+  modifiers?: string[]
+}
+
+export type KeyboardType = {
+  text: string
+  delay?: number
+}
+
+export enum KeyboardActions {
+  HOTKEY = 'hotkey',
+  PRESS = 'press',
+  TYPE = 'type',
+}
+
+export type KeyboardActionFormData<T extends KeyboardHotKey | KeyboardPress | KeyboardType> =
+  PlaygroundActionFormData<KeyboardActions> & {
+    parametersFormItems: ParameterFormData<T>
+    parametersState: T
+  }
+
+export type MouseClick = {
+  x: number
+  y: number
+  button?: string
+  double?: boolean
+}
+
+export type MouseDrag = {
+  startX: number
+  startY: number
+  endX: number
+  endY: number
+  button?: string
+}
+
+export type MouseMove = {
+  x: number
+  y: number
+}
+
+export type MouseScroll = {
+  x: number
+  y: number
+  direction: 'up' | 'down'
+  amount?: number
+}
+
 export enum ScreenshotFormatOption {
   JPEG = 'jpeg',
   PNG = 'png',
@@ -70,6 +133,12 @@ export interface CustomizedScreenshotOptions extends Omit<ScreenshotOptions, 'fo
   format?: ScreenshotFormatOption
 }
 
+interface PlaygroundActionFormData<T> {
+  label: string
+  description: string
+  methodName: T
+}
+
 export enum ScreenshotActions {
   TAKE_COMPRESSED = 'takeCompressed',
   TAKE_COMPRESSED_REGION = 'takeCompressedRegion',
@@ -77,9 +146,6 @@ export enum ScreenshotActions {
   TAKE_REGION = 'takeRegion',
 }
 
-export type ScreenshotActionFormData = {
-  label: string
-  description: string
-  methodName: ScreenshotActions
+export type ScreenshotActionFormData = PlaygroundActionFormData<ScreenshotActions> & {
   usesScreenshotRegion?: boolean
 }
