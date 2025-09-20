@@ -64,7 +64,12 @@ const Playground: React.FC = () => {
             {playgroundCategory === PlaygroundCategories.TERMINAL && (
               <WebTerminal sandboxId="93eb77da-54a2-4f34-872e-6c9843be0228" getPortPreviewUrl={getPortPreviewUrl} />
             )}
-            {playgroundCategory === PlaygroundCategories.VNC && <VNCDesktopWindowResponse />}
+            {playgroundCategory === PlaygroundCategories.VNC && (
+              <VNCDesktopWindowResponse
+                sandboxId="01783788-2096-40e7-86a6-18e92ff38782"
+                getPortPreviewUrl={getPortPreviewUrl}
+              />
+            )}
           </div>
         </div>
       </PlaygroundProvider>

@@ -42,17 +42,11 @@ const WebTerminal: React.FC<WebTerminalProps> = ({ sandboxId, getPortPreviewUrl 
         <CardContent>
           <div className="w-full h-[400px]">
             {loadingTerminalUrl || !terminalUrl ? (
-              <div className="h-full bg-black text-white flex items-center justify-center rounded-lg">
+              <div className="h-full flex items-center justify-center rounded-lg">
                 <p>{loadingTerminalUrl ? 'Loading terminal...' : 'Unable to open the terminal. Please try again.'}</p>
               </div>
             ) : (
-              <iframe
-                title="Interactive web terminal for sandbox"
-                src={terminalUrl}
-                width={'100%'}
-                height={'100%'}
-                style={{ backgroundColor: '#000' }}
-              />
+              <iframe title="Interactive web terminal for sandbox" src={terminalUrl} width={'100%'} height={'100%'} />
             )}
           </div>
         </CardContent>
