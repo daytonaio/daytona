@@ -16,9 +16,11 @@ import { toast } from 'sonner'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { CreateApiKeyDialog } from '@/components/CreateApiKeyDialog'
 import { handleApiError } from '@/lib/error-handling'
+import { useConfig } from '@/hooks/useConfig'
 
 const Keys: React.FC = () => {
   const { apiKeyApi } = useApi()
+  const { apiUrl } = useConfig()
   const [keys, setKeys] = useState<ApiKeyList[]>([])
   const [loading, setLoading] = useState(true)
   const [loadingKeys, setLoadingKeys] = useState<Record<string, boolean>>({})
@@ -105,7 +107,11 @@ const Keys: React.FC = () => {
     <div className="px-6 py-2">
       <div className="mb-2 h-12 flex items-center justify-between">
         <h1 className="text-2xl font-medium">API Keys</h1>
-        <CreateApiKeyDialog availablePermissions={availablePermissions} onCreateApiKey={handleCreateKey} />
+        <CreateApiKeyDialog
+          availablePermissions={availablePermissions}
+          onCreateApiKey={handleCreateKey}
+          apiUrl={apiUrl}
+        />
       </div>
 
       <ApiKeyTable data={keys} loading={loading} isLoadingKey={isLoadingKey} onRevoke={handleRevoke} />

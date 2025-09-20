@@ -96,5 +96,6 @@
   "sidebarconfig.asyncPython": "Async Python",
   "sidebarconfig.asyncDaytona": "AsyncDaytona",
   "sidebarconfig.asyncSandbox": "AsyncSandbox",
-  "sidebarconfig.dataAnalysis": "Data Analysis with AI"
+  "sidebarconfig.dataAnalysis": "Data Analysis with AI",
+  "sidebarconfig.runningLocally": "Running Locally"
 }

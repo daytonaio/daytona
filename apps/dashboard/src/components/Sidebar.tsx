@@ -58,8 +58,11 @@ import { Logo, LogoText } from '@/assets/Logo'
 import { useWebhooks } from '@/hooks/useWebhooks'
 interface SidebarProps {
   isBannerVisible: boolean
+  billingEnabled: boolean
+  version: string
 }
-export function Sidebar({ isBannerVisible }: SidebarProps) {
+
+export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarProps) {
   const { theme, setTheme } = useTheme()
   const { user, signoutRedirect } = useAuth()
   const navigate = useNavigate()
@@ -149,10 +152,7 @@ export function Sidebar({ isBannerVisible }: SidebarProps) {
   ])
 
   const billingItems = useMemo(() => {
-    if (
-      !import.meta.env.VITE_BILLING_API_URL ||
-      authenticatedUserOrganizationMember?.role !== OrganizationUserRoleEnum.OWNER
-    ) {
+    if (!billingEnabled || authenticatedUserOrganizationMember?.role !== OrganizationUserRoleEnum.OWNER) {
       return []
     }
 
@@ -168,7 +168,7 @@ export function Sidebar({ isBannerVisible }: SidebarProps) {
         path: RoutePath.BILLING_WALLET,
       },
     ]
-  }, [authenticatedUserOrganizationMember?.role])
+  }, [billingEnabled, authenticatedUserOrganizationMember?.role])
 
   const handleSignOut = () => {
     signoutRedirect()
@@ -372,6 +372,11 @@ export function Sidebar({ isBannerVisible }: SidebarProps) {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+          </SidebarMenuItem>
+          <SidebarMenuItem key="version">
+            <div className="flex items-center w-full justify-center gap-2 pt-2">
+              <span className="text-xs text-muted-foreground">Version {version}</span>
+            </div>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>

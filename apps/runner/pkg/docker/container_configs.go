@@ -5,7 +5,6 @@ package docker
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
 	"github.com/daytonaio/runner/cmd/runner/config"
@@ -13,6 +12,7 @@ import (
 	"github.com/docker/docker/api/types/network"
 
 	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/api/types/system"
 )
 
 func (d *DockerClient) getContainerConfigs(ctx context.Context, sandboxDto dto.CreateSandboxDTO, volumeMountPathBinds []string) (*container.Config, *container.HostConfig, *network.NetworkingConfig, error) {
@@ -77,13 +77,16 @@ func (d *DockerClient) getContainerHostConfig(ctx context.Context, sandboxDto dt
 	hostConfig := &container.HostConfig{
 		Privileged: true,
 		ExtraHosts: []string{"host.docker.internal:host-gateway"},
-		Resources: container.Resources{
+		Binds:      binds,
+	}
+
+	if !d.resourceLimitsDisabled {
+		hostConfig.Resources = container.Resources{
 			CPUPeriod:  100000,
 			CPUQuota:   sandboxDto.CpuQuota * 100000,
 			Memory:     sandboxDto.MemoryQuota * 1024 * 1024 * 1024,
 			MemorySwap: sandboxDto.MemoryQuota * 1024 * 1024 * 1024,
-		},
-		Binds: binds,
+		}
 	}
 
 	containerRuntime := config.GetContainerRuntime()
@@ -91,11 +94,12 @@ func (d *DockerClient) getContainerHostConfig(ctx context.Context, sandboxDto dt
 		hostConfig.Runtime = containerRuntime
 	}
 
-	filesystem, err := d.getFilesystem(ctx)
+	info, err := d.apiClient.Info(ctx)
 	if err != nil {
 		return nil, err
 	}
 
+	filesystem := d.getFilesystem(info)
 	if filesystem == "xfs" {
 		hostConfig.StorageOpt = map[string]string{
 			"size": fmt.Sprintf("%dG", sandboxDto.StorageQuota),
@@ -117,17 +121,12 @@ func (d *DockerClient) getContainerNetworkingConfig(_ context.Context) *network.
 	return nil
 }
 
-func (d *DockerClient) getFilesystem(ctx context.Context) (string, error) {
-	info, err := d.apiClient.Info(ctx)
-	if err != nil {
-		return "", err
-	}
-
+func (d *DockerClient) getFilesystem(info system.Info) string {
 	for _, driver := range info.DriverStatus {
 		if driver[0] == "Backing Filesystem" {
-			return driver[1], nil
+			return driver[1]
 		}
 	}
 
-	return "", errors.New("filesystem not found")
+	return ""
 }

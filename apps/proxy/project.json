@@ -12,7 +12,9 @@
         "outputPath": "dist/apps/proxy"
       },
       "configurations": {
-        "production": {}
+        "production": {
+          "flags": ["-ldflags \"-X 'github.com/daytonaio/proxy/internal.Version=$VERSION'\""]
+        }
       }
     },
     "serve": {
@@ -37,6 +39,13 @@
     },
     "lint": {
       "executor": "@nx-go/nx-go:lint"
-    }
+    },
+    "check-version-env": {},
+    "docker": {
+      "options": {
+        "target": "proxy"
+      }
+    },
+    "push-manifest": {}
   }
 }

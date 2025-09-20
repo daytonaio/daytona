@@ -28,4 +28,10 @@ export interface RunnerInfoResponseDTO {
    * @memberof RunnerInfoResponseDTO
    */
   metrics?: RunnerMetrics
+  /**
+   *
+   * @type {string}
+   * @memberof RunnerInfoResponseDTO
+   */
+  version?: string
 }
