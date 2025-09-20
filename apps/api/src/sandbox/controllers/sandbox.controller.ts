@@ -37,7 +37,11 @@ import {
   ApiBearerAuth,
 } from '@nestjs/swagger'
 import { SandboxDto, SandboxLabelsDto } from '../dto/sandbox.dto'
+import { UpdateSandboxStateDto } from '../dto/update-sandbox-state.dto'
 import { RunnerService } from '../services/runner.service'
+import { RunnerAuthGuard } from '../../auth/runner-auth.guard'
+import { RunnerContextDecorator } from '../../common/decorators/runner-context.decorator'
+import { RunnerContext } from '../../common/interfaces/runner-context.interface'
 import { SandboxState } from '../enums/sandbox-state.enum'
 import { Sandbox } from '../entities/sandbox.entity'
 import { ContentTypeInterceptor } from '../../common/interceptors/content-type.interceptors'
@@ -195,6 +199,29 @@ export class SandboxController {
     }
 
     return sandbox
+  }
+
+  @Get('for-runner')
+  @UseGuards(RunnerAuthGuard)
+  @ApiOperation({
+    summary: 'Get sandboxes for the authenticated runner',
+    operationId: 'getSandboxesForRunner',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'List of sandboxes for the authenticated runner',
+    type: [SandboxDto],
+  })
+  async getSandboxesForRunner(
+    @RunnerContextDecorator() runnerContext: RunnerContext,
+    @Query('state') state?: SandboxState,
+  ): Promise<SandboxDto[]> {
+    const sandboxes = await this.sandboxService.findByRunnerId(runnerContext.runnerId, state)
+
+    // Get runner information for consistent response format
+    const runner = await this.runnerService.findOne(runnerContext.runnerId)
+
+    return sandboxes.map((sandbox) => SandboxDto.fromSandbox(sandbox, runner?.domain))
   }
 
   @Get(':sandboxId')
@@ -368,6 +395,30 @@ export class SandboxController {
   ): Promise<SandboxLabelsDto> {
     const labels = await this.sandboxService.replaceLabels(sandboxId, labelsDto.labels)
     return { labels }
+  }
+
+  @Put(':sandboxId/state')
+  @UseInterceptors(ContentTypeInterceptor)
+  @ApiOperation({
+    summary: 'Update sandbox state',
+    operationId: 'updateSandboxState',
+  })
+  @ApiParam({
+    name: 'sandboxId',
+    description: 'ID of the sandbox',
+    type: 'string',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Sandbox state has been successfully updated',
+  })
+  @UseGuards(RunnerAuthGuard)
+  @UseGuards(SandboxAccessGuard)
+  async updateSandboxState(
+    @Param('sandboxId') sandboxId: string,
+    @Body() updateStateDto: UpdateSandboxStateDto,
+  ): Promise<void> {
+    await this.sandboxService.updateStateAndDesiredState(sandboxId, updateStateDto.state)
   }
 
   @Post(':sandboxId/backup')

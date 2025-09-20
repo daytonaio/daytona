@@ -12,13 +12,14 @@ export interface BaseAuthContext {
   role: ApiRole
 }
 
-export type ApiRole = SystemRole | 'proxy' | 'ssh-gateway'
+export type ApiRole = SystemRole | 'proxy' | 'runner' | 'ssh-gateway'
 
 export interface AuthContext extends BaseAuthContext {
   userId: string
   email: string
   apiKey?: ApiKey
   organizationId?: string
+  runnerId?: string
 }
 
 export function isAuthContext(user: BaseAuthContext): user is AuthContext {

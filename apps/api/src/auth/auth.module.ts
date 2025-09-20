@@ -9,6 +9,7 @@ import { JwtStrategy } from './jwt.strategy'
 import { ApiKeyStrategy } from './api-key.strategy'
 import { UserModule } from '../user/user.module'
 import { ApiKeyModule } from '../api-key/api-key.module'
+import { SandboxModule } from '../sandbox/sandbox.module'
 import { TypedConfigService } from '../config/typed-config.service'
 import { HttpModule, HttpService } from '@nestjs/axios'
 import { OidcMetadata } from 'oidc-client-ts'
@@ -26,6 +27,7 @@ import { catchError, map } from 'rxjs/operators'
     TypedConfigModule,
     UserModule,
     ApiKeyModule,
+    SandboxModule,
     HttpModule,
   ],
   providers: [

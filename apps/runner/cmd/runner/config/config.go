@@ -14,6 +14,7 @@ import (
 )
 
 type Config struct {
+	ServerUrl          string `envconfig:"SERVER_URL" validate:"required"`
 	ApiToken           string `envconfig:"API_TOKEN" validate:"required"`
 	ApiPort            int    `envconfig:"API_PORT"`
 	TLSCertFile        string `envconfig:"TLS_CERT_FILE"`
