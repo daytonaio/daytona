@@ -121,9 +121,21 @@ const configuration = {
     class: process.env.DEFAULT_RUNNER_CLASS ? (process.env.DEFAULT_RUNNER_CLASS as SandboxClass) : undefined,
     version: process.env.DEFAULT_RUNNER_VERSION || '0',
   },
-  runner: {
-    declarativeBuildScoreThreshold: parseInt(process.env.RUNNER_DECLARATIVE_BUILD_SCORE_THRESHOLD || '50', 10),
-    availabilityScoreThreshold: parseInt(process.env.RUNNER_AVAILABILITY_SCORE_THRESHOLD || '50', 10),
+  runnerUsage: {
+    declarativeBuildScoreThreshold: parseInt(process.env.RUNNER_DECLARATIVE_BUILD_SCORE_THRESHOLD || '60', 10),
+    availabilityScoreThreshold: parseInt(process.env.RUNNER_AVAILABILITY_SCORE_THRESHOLD || '60', 10),
+    cpuUsageWeight: parseFloat(process.env.RUNNER_CPU_USAGE_WEIGHT || '0.25'),
+    memoryUsageWeight: parseFloat(process.env.RUNNER_MEMORY_USAGE_WEIGHT || '0.4'),
+    diskUsageWeight: parseFloat(process.env.RUNNER_DISK_USAGE_WEIGHT || '0.4'),
+    allocatedCpuWeight: parseFloat(process.env.RUNNER_ALLOCATED_CPU_WEIGHT || '0.03'),
+    allocatedMemoryWeight: parseFloat(process.env.RUNNER_ALLOCATED_MEMORY_WEIGHT || '0.03'),
+    allocatedDiskWeight: parseFloat(process.env.RUNNER_ALLOCATED_DISK_WEIGHT || '0.03'),
+    cpuPenaltyExponent: parseFloat(process.env.RUNNER_CPU_PENALTY_EXPONENT || '0.15'),
+    memoryPenaltyExponent: parseFloat(process.env.RUNNER_MEMORY_PENALTY_EXPONENT || '0.15'),
+    diskPenaltyExponent: parseFloat(process.env.RUNNER_DISK_PENALTY_EXPONENT || '0.15'),
+    cpuPenaltyThreshold: parseInt(process.env.RUNNER_CPU_PENALTY_THRESHOLD || '90', 10),
+    memoryPenaltyThreshold: parseInt(process.env.RUNNER_MEMORY_PENALTY_THRESHOLD || '75', 10),
+    diskPenaltyThreshold: parseInt(process.env.RUNNER_DISK_PENALTY_THRESHOLD || '75', 10),
   },
 }
 

@@ -117,7 +117,7 @@ export class RunnerService {
       unschedulable: Not(true),
       availabilityScore: params.availabilityScoreThreshold
         ? MoreThanOrEqual(params.availabilityScoreThreshold)
-        : MoreThanOrEqual(this.configService.get('runner.availabilityScoreThreshold')),
+        : MoreThanOrEqual(this.configService.get('runnerUsage.availabilityScoreThreshold')),
     }
 
     if (params.snapshotRef !== undefined) {
@@ -422,61 +422,112 @@ export class RunnerService {
   }
 
   private calculateAvailabilityScore(params: AvailabilityScoreParams): number {
-    let penalty = 0
+    return this.calculateTOPSISScore(params)
+  }
 
-    // CPU Penalty (reduced impact, starts at 40%)
-    if (params.cpuUsage > 0) {
-      const low = (Math.min(params.cpuUsage, 40) / 40) * 1 // 0-40%: gradual 0-1 points
-      const medium = params.cpuUsage > 40 ? ((Math.min(params.cpuUsage, 85) - 40) / 45) * 18 : 0 // 40-85%: 18 more points
-      const high = params.cpuUsage > 85 ? ((Math.min(params.cpuUsage, 95) - 85) / 10) * 12 : 0 // 85-95%: 12 more points
-      const critical = params.cpuUsage > 95 ? (params.cpuUsage - 95) * 3 : 0 // 95%+: 3 points per % over 95%
-      penalty += low + medium + high + critical
+  private calculateTOPSISScore(params: AvailabilityScoreParams): number {
+    // Define ideal (best) and anti-ideal (worst) values
+    const ideal = {
+      cpu: 0,
+      memory: 0,
+      disk: 0,
+      allocCpu: 100, // 100% means no overallocation
+      allocMem: 100,
+      allocDisk: 100,
     }
 
-    // RAM Penalty (starts at 40%, high impact, critical at 75%)
-    if (params.memoryUsage > 0) {
-      const low = (Math.min(params.memoryUsage, 40) / 40) * 3 // 0-40%: gradual 0-3 points
-      const medium = params.memoryUsage > 40 ? ((Math.min(params.memoryUsage, 75) - 40) / 35) * 35 : 0 // 40-75%: 35 more points
-      const critical = params.memoryUsage > 75 ? (params.memoryUsage - 75) * 6 : 0 // 75%+: 6 points per % over 75%
-      penalty += low + medium + critical
+    const antiIdeal = {
+      cpu: 100,
+      memory: 100,
+      disk: 100,
+      allocCpu: 500, // 500% means severe overallocation
+      allocMem: 500,
+      allocDisk: 500,
     }
 
-    // Disk Penalty (high impact, critical at 75%)
-    if (params.diskUsage > 0) {
-      const low = (Math.min(params.diskUsage, 60) / 60) * 3 // 0-60%: gradual 0-3 points
-      const medium = params.diskUsage > 60 ? ((Math.min(params.diskUsage, 75) - 60) / 15) * 25 : 0 // 60-75%: 25 more points
-      const critical = params.diskUsage > 75 ? (params.diskUsage - 75) * 7 : 0 // 75%+: 7 points per % over 75%
-      penalty += low + medium + critical
-    }
+    // Weights based on your requirements
+    const weights = [
+      this.configService.get('runnerUsage.cpuUsageWeight'),
+      this.configService.get('runnerUsage.memoryUsageWeight'),
+      this.configService.get('runnerUsage.diskUsageWeight'),
+      this.configService.get('runnerUsage.allocatedCpuWeight'),
+      this.configService.get('runnerUsage.allocatedMemoryWeight'),
+      this.configService.get('runnerUsage.allocatedDiskWeight'),
+    ]
 
-    // Allocated CPU Ratio Penalty (minimal impact, starts at 250% of runner CPU capacity)
+    const cpuPenaltyExponent = this.configService.get('runnerUsage.cpuPenaltyExponent')
+    const memoryPenaltyExponent = this.configService.get('runnerUsage.memoryPenaltyExponent')
+    const diskPenaltyExponent = this.configService.get('runnerUsage.diskPenaltyExponent')
+
+    const cpuPenaltyThreshold = this.configService.get('runnerUsage.cpuPenaltyThreshold')
+    const memoryPenaltyThreshold = this.configService.get('runnerUsage.memoryPenaltyThreshold')
+    const diskPenaltyThreshold = this.configService.get('runnerUsage.diskPenaltyThreshold')
+
+    // Calculate allocation ratios
     const allocatedCpuRatio = (params.allocatedCpu / params.runnerCpu) * 100
-    if (allocatedCpuRatio > 250) {
-      const low = allocatedCpuRatio > 250 ? ((Math.min(allocatedCpuRatio, 300) - 250) / 50) * 0.5 : 0 // 250-300%: 0.5 points
-      const medium = allocatedCpuRatio > 300 ? ((Math.min(allocatedCpuRatio, 350) - 300) / 50) * 1 : 0 // 300-350%: 1 more points
-      const critical = allocatedCpuRatio > 350 ? (allocatedCpuRatio - 350) * 0.025 : 0 // 350%+: 0.025 points per % over 350%
-      penalty += low + medium + critical
-    }
-
-    // Allocated Memory Ratio Penalty (minimal impact, starts at 250% of runner memory capacity)
     const allocatedMemoryRatio = (params.allocatedMemoryGiB / params.runnerMemoryGiB) * 100
-    if (allocatedMemoryRatio > 250) {
-      const low = allocatedMemoryRatio > 250 ? ((Math.min(allocatedMemoryRatio, 300) - 250) / 50) * 0.5 : 0 // 250-300%: 0.5 points
-      const medium = allocatedMemoryRatio > 300 ? ((Math.min(allocatedMemoryRatio, 350) - 300) / 50) * 1 : 0 // 300-350%: 1 more points
-      const critical = allocatedMemoryRatio > 350 ? (allocatedMemoryRatio - 350) * 0.025 : 0 // 350%+: 0.025 points per % over 350%
-      penalty += low + medium + critical
-    }
-
-    // Allocated Disk Ratio Penalty (minimal impact, starts at 250% of runner disk capacity)
     const allocatedDiskRatio = (params.allocatedDiskGiB / params.runnerDiskGiB) * 100
-    if (allocatedDiskRatio > 250) {
-      const low = allocatedDiskRatio > 250 ? ((Math.min(allocatedDiskRatio, 300) - 250) / 50) * 0.5 : 0 // 250-300%: 0.5 points
-      const medium = allocatedDiskRatio > 300 ? ((Math.min(allocatedDiskRatio, 350) - 300) / 50) * 1 : 0 // 300-350%: 1 more points
-      const critical = allocatedDiskRatio > 350 ? (allocatedDiskRatio - 350) * 0.025 : 0 // 350%+: 0.025 points per % over 350%
-      penalty += low + medium + critical
+
+    // Current values array
+    const current = [
+      params.cpuUsage,
+      params.memoryUsage,
+      params.diskUsage,
+      allocatedCpuRatio,
+      allocatedMemoryRatio,
+      allocatedDiskRatio,
+    ]
+
+    // Ideal and anti-ideal arrays
+    const idealValues = [ideal.cpu, ideal.memory, ideal.disk, ideal.allocCpu, ideal.allocMem, ideal.allocDisk]
+
+    const antiIdealValues = [
+      antiIdeal.cpu,
+      antiIdeal.memory,
+      antiIdeal.disk,
+      antiIdeal.allocCpu,
+      antiIdeal.allocMem,
+      antiIdeal.allocDisk,
+    ]
+
+    // Calculate weighted Euclidean distances
+    let distanceToIdeal = 0
+    let distanceToAntiIdeal = 0
+
+    for (let i = 0; i < current.length; i++) {
+      const normalizedCurrent = current[i] / 100 // Normalize to 0-1 scale for allocation ratios >100%
+      const normalizedIdeal = idealValues[i] / 100
+      const normalizedAntiIdeal = antiIdealValues[i] / 100
+
+      distanceToIdeal += weights[i] * Math.pow(normalizedCurrent - normalizedIdeal, 2)
+      distanceToAntiIdeal += weights[i] * Math.pow(normalizedCurrent - normalizedAntiIdeal, 2)
     }
 
-    return Math.max(0, Math.round(100 - penalty))
+    distanceToIdeal = Math.sqrt(distanceToIdeal)
+    distanceToAntiIdeal = Math.sqrt(distanceToAntiIdeal)
+
+    // TOPSIS relative closeness score (0 to 1)
+    let topsisScore = distanceToAntiIdeal / (distanceToIdeal + distanceToAntiIdeal)
+
+    // Apply exponential penalties for critical thresholds
+    let penaltyMultiplier = 1
+
+    if (params.cpuUsage >= cpuPenaltyThreshold) {
+      penaltyMultiplier *= Math.exp(-cpuPenaltyExponent * (params.cpuUsage - cpuPenaltyThreshold))
+    }
+
+    if (params.memoryUsage >= memoryPenaltyThreshold) {
+      penaltyMultiplier *= Math.exp(-memoryPenaltyExponent * (params.memoryUsage - memoryPenaltyThreshold))
+    }
+
+    if (params.diskUsage >= diskPenaltyThreshold) {
+      penaltyMultiplier *= Math.exp(-diskPenaltyExponent * (params.diskUsage - diskPenaltyThreshold))
+    }
+
+    // Apply penalty
+    topsisScore *= penaltyMultiplier
+
+    return Math.round(topsisScore * 100)
   }
 }
 

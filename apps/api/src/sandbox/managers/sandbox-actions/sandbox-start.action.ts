@@ -117,7 +117,7 @@ export class SandboxStartAction extends SandboxAction {
 
     for (const snapshotRunner of snapshotRunners) {
       const runner = await this.runnerService.findOne(snapshotRunner.runnerId)
-      if (runner.availabilityScore >= this.configService.get('runner.declarativeBuildScoreThreshold')) {
+      if (runner.availabilityScore >= this.configService.get('runnerUsage.declarativeBuildScoreThreshold')) {
         if (snapshotRunner.state === SnapshotRunnerState.BUILDING_SNAPSHOT) {
           await this.updateSandboxState(sandbox.id, SandboxState.BUILDING_SNAPSHOT, runner.id)
           return SYNC_AGAIN
@@ -246,7 +246,7 @@ export class SandboxStartAction extends SandboxAction {
       // If the sandbox is on a runner and its backupState is COMPLETED
       // but there are too many running sandboxes on that runner, move it to a less used runner
       if (sandbox.backupState === BackupState.COMPLETED) {
-        if (runner.availabilityScore < this.configService.get('runner.availabilityScoreThreshold')) {
+        if (runner.availabilityScore < this.configService.get('runnerUsage.availabilityScoreThreshold')) {
           const availableRunners = await this.runnerService.findAvailableRunners({
             region: sandbox.region,
             sandboxClass: sandbox.class,
