@@ -1258,6 +1258,43 @@ paths:
       summary: Create a new sandbox
       tags:
         - sandbox
+  /sandbox/for-runner:
+    get:
+      operationId: getSandboxesForRunner
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - explode: true
+          in: query
+          name: state
+          required: true
+          schema:
+            type: string
+          style: form
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Sandbox'
+                type: array
+          description: List of sandboxes for the authenticated runner
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Get sandboxes for the authenticated runner
+      tags:
+        - sandbox
   /sandbox/{sandboxId}:
     delete:
       operationId: deleteSandbox
@@ -1449,6 +1486,44 @@ paths:
             - profile
             - email
       summary: Replace sandbox labels
+      tags:
+        - sandbox
+  /sandbox/{sandboxId}/state:
+    put:
+      operationId: updateSandboxState
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - description: ID of the sandbox
+          explode: false
+          in: path
+          name: sandboxId
+          required: true
+          schema:
+            type: string
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateSandboxStateDto'
+        required: true
+      responses:
+        '200':
+          description: Sandbox state has been successfully updated
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Update sandbox state
       tags:
         - sandbox
   /sandbox/{sandboxId}/backup:
@@ -7787,6 +7862,34 @@ components:
           type: object
       required:
         - labels
+      type: object
+    UpdateSandboxStateDto:
+      example:
+        state: started
+      properties:
+        state:
+          description: The new state for the sandbox
+          enum:
+            - creating
+            - restoring
+            - destroyed
+            - destroying
+            - started
+            - stopped
+            - starting
+            - stopping
+            - error
+            - build_failed
+            - pending_build
+            - building_snapshot
+            - unknown
+            - pulling_snapshot
+            - archived
+            - archiving
+          example: started
+          type: string
+      required:
+        - state
       type: object
     PortPreviewUrl:
       example:

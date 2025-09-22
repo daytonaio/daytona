@@ -161,6 +161,7 @@ from daytona_api_client.models.update_organization_invitation import UpdateOrgan
 from daytona_api_client.models.update_organization_member_access import UpdateOrganizationMemberAccess
 from daytona_api_client.models.update_organization_quota import UpdateOrganizationQuota
 from daytona_api_client.models.update_organization_role import UpdateOrganizationRole
+from daytona_api_client.models.update_sandbox_state_dto import UpdateSandboxStateDto
 from daytona_api_client.models.user import User
 from daytona_api_client.models.user_home_dir_response import UserHomeDirResponse
 from daytona_api_client.models.user_public_key import UserPublicKey
