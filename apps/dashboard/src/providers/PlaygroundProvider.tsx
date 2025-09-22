@@ -10,7 +10,7 @@ import {
   VNCInteractionOptionsParams,
   SetVNCInteractionOptionsParamValue,
 } from '@/contexts/PlaygroundContext'
-import { ScreenshotFormatOption } from '@/enums/Playground'
+import { ScreenshotFormatOption, MouseButton, MouseScrollDirection } from '@/enums/Playground'
 import { useState } from 'react'
 
 export const PlaygroundProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -33,6 +33,29 @@ export const PlaygroundProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       keyboardHotKeyParams: { keys: '' },
       keyboardPressParams: { key: '' },
       keyboardTypeParams: { text: '' },
+      mouseClickParams: {
+        x: 100,
+        y: 100,
+        button: MouseButton.LEFT,
+        double: false,
+      },
+      mouseDragParams: {
+        startX: 100,
+        startY: 100,
+        endX: 200,
+        endY: 200,
+        button: MouseButton.LEFT,
+      },
+      mouseMoveParams: {
+        x: 100,
+        y: 100,
+      },
+      mouseScrollParams: {
+        x: 100,
+        y: 100,
+        direction: MouseScrollDirection.DOWN,
+        amount: 1,
+      },
       screenshotOptionsConfig: {
         showCursor: false,
         format: ScreenshotFormatOption.PNG,

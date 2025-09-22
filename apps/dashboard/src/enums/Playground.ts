@@ -96,10 +96,21 @@ export type KeyboardActionFormData<T extends KeyboardHotKey | KeyboardPress | Ke
     parametersState: T
   }
 
+export enum MouseButton {
+  LEFT = 'left',
+  RIGHT = 'right',
+  MIDDLE = 'middle',
+}
+
+export enum MouseScrollDirection {
+  UP = 'up',
+  DOWN = 'down',
+}
+
 export type MouseClick = {
   x: number
   y: number
-  button?: string
+  button?: MouseButton
   double?: boolean
 }
 
@@ -108,7 +119,7 @@ export type MouseDrag = {
   startY: number
   endX: number
   endY: number
-  button?: string
+  button?: MouseButton
 }
 
 export type MouseMove = {
@@ -119,8 +130,16 @@ export type MouseMove = {
 export type MouseScroll = {
   x: number
   y: number
-  direction: 'up' | 'down'
+  direction: MouseScrollDirection
   amount?: number
+}
+
+export enum MouseActions {
+  CLICK = 'click',
+  DRAG = 'drag',
+  MOVE = 'move',
+  SCROLL = 'scroll',
+  GET_POSITION = 'getPosition',
 }
 
 export enum ScreenshotFormatOption {
@@ -133,7 +152,7 @@ export interface CustomizedScreenshotOptions extends Omit<ScreenshotOptions, 'fo
   format?: ScreenshotFormatOption
 }
 
-interface PlaygroundActionFormData<T> {
+export interface PlaygroundActionFormData<T> {
   label: string
   description: string
   methodName: T
