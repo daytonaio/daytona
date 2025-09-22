@@ -58,21 +58,20 @@ func DownloadFiles(c *gin.Context) {
 	}
 	defer mw.Close() // ensure final boundary is written
 
-	for _, rawPath := range req.Paths {
-		absPath, err := filepath.Abs(rawPath)
-		if err != nil || !fileExists(absPath) {
-			writeErrorPart(c, mw, absPath, fmt.Sprintf("file not found or invalid: %s", absPath))
+	for _, path := range req.Paths {
+		if !fileExists(path) {
+			writeErrorPart(c, mw, path, fmt.Sprintf("file not found or invalid: %s", path))
 			continue
 		}
 
-		f, err := os.Open(absPath)
+		f, err := os.Open(path)
 		if err != nil {
-			writeErrorPart(c, mw, absPath, fmt.Sprintf("error opening file: %v", err))
+			writeErrorPart(c, mw, path, fmt.Sprintf("error opening file: %v", err))
 			continue
 		}
 
-		if err := writeFilePart(c.Request.Context(), mw, absPath, f); err != nil {
-			writeErrorPart(c, mw, absPath,
+		if err := writeFilePart(c.Request.Context(), mw, path, f); err != nil {
+			writeErrorPart(c, mw, path,
 				fmt.Sprintf("error streaming file: %v", err))
 		}
 		f.Close()
@@ -80,8 +79,8 @@ func DownloadFiles(c *gin.Context) {
 }
 
 // Streams a file part using io.Copy and respects context cancellation.
-func writeFilePart(ctx context.Context, mw *multipart.Writer, absPath string, r io.Reader) error {
-	ctype := mime.TypeByExtension(filepath.Ext(absPath))
+func writeFilePart(ctx context.Context, mw *multipart.Writer, path string, r io.Reader) error {
+	ctype := mime.TypeByExtension(filepath.Ext(path))
 	if ctype == "" {
 		ctype = "application/octet-stream"
 	}
@@ -89,7 +88,7 @@ func writeFilePart(ctx context.Context, mw *multipart.Writer, absPath string, r 
 	hdr := textproto.MIMEHeader{}
 	hdr.Set("Content-Type", ctype)
 	hdr.Set("Content-Disposition",
-		fmt.Sprintf(`form-data; name="%s"; filename="%s"`, "file", absPath),
+		fmt.Sprintf(`form-data; name="%s"; filename="%s"`, "file", path),
 	)
 
 	part, err := mw.CreatePart(hdr)
@@ -104,11 +103,11 @@ func writeFilePart(ctx context.Context, mw *multipart.Writer, absPath string, r 
 }
 
 // Writes an error message as a multipart part.
-func writeErrorPart(ctx *gin.Context, mw *multipart.Writer, absPath, text string) {
+func writeErrorPart(ctx *gin.Context, mw *multipart.Writer, path, text string) {
 	hdr := textproto.MIMEHeader{}
 	hdr.Set("Content-Type", "text/plain; charset=utf-8")
 	hdr.Set("Content-Disposition",
-		fmt.Sprintf(`form-data; name="%s"; filename="%s"`, "error", absPath),
+		fmt.Sprintf(`form-data; name="%s"; filename="%s"`, "error", path),
 	)
 	if part, err := mw.CreatePart(hdr); err == nil {
 		_, err := io.WriteString(part, text)
