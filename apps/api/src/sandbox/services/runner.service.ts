@@ -117,7 +117,7 @@ export class RunnerService {
       unschedulable: Not(true),
       availabilityScore: params.availabilityScoreThreshold
         ? MoreThanOrEqual(params.availabilityScoreThreshold)
-        : MoreThanOrEqual(this.configService.get('runner.availabilityScoreThreshold')),
+        : MoreThanOrEqual(this.configService.get('runnerUsage.availabilityScoreThreshold')),
     }
 
     if (params.snapshotRef !== undefined) {
@@ -422,6 +422,103 @@ export class RunnerService {
   }
 
   private calculateAvailabilityScore(params: AvailabilityScoreParams): number {
+    return this.calculateTOPSISScore(params)
+  }
+
+  private calculateTOPSISScore(params: AvailabilityScoreParams): number {
+    // Define ideal (best) and anti-ideal (worst) values
+    const ideal = {
+      cpu: 0,
+      memory: 0,
+      disk: 0,
+      allocCpu: 100, // 100% means no overallocation
+      allocMem: 100,
+      allocDisk: 100,
+    }
+
+    const antiIdeal = {
+      cpu: 100,
+      memory: 100,
+      disk: 100,
+      allocCpu: 500, // 500% means severe overallocation
+      allocMem: 500,
+      allocDisk: 500,
+    }
+
+    // Weights based on your requirements
+    const weights = [
+      this.configService.get('runnerUsage.cpuUsageWeight'),
+      this.configService.get('runnerUsage.memoryUsageWeight'),
+      this.configService.get('runnerUsage.diskUsageWeight'),
+      this.configService.get('runnerUsage.allocatedCpuWeight'),
+      this.configService.get('runnerUsage.allocatedMemoryWeight'),
+      this.configService.get('runnerUsage.allocatedDiskWeight'),
+    ]
+
+    // Calculate allocation ratios
+    const allocatedCpuRatio = (params.allocatedCpu / params.runnerCpu) * 100
+    const allocatedMemoryRatio = (params.allocatedMemoryGiB / params.runnerMemoryGiB) * 100
+    const allocatedDiskRatio = (params.allocatedDiskGiB / params.runnerDiskGiB) * 100
+
+    // Current values array
+    const current = [
+      params.cpuUsage,
+      params.memoryUsage,
+      params.diskUsage,
+      allocatedCpuRatio,
+      allocatedMemoryRatio,
+      allocatedDiskRatio,
+    ]
+
+    // Ideal and anti-ideal arrays
+    const idealValues = [ideal.cpu, ideal.memory, ideal.disk, ideal.allocCpu, ideal.allocMem, ideal.allocDisk]
+
+    const antiIdealValues = [
+      antiIdeal.cpu,
+      antiIdeal.memory,
+      antiIdeal.disk,
+      antiIdeal.allocCpu,
+      antiIdeal.allocMem,
+      antiIdeal.allocDisk,
+    ]
+
+    // Calculate weighted Euclidean distances
+    let distanceToIdeal = 0
+    let distanceToAntiIdeal = 0
+
+    for (let i = 0; i < current.length; i++) {
+      const normalizedCurrent = current[i] / 100 // Normalize to 0-1 scale for allocation ratios >100%
+      const normalizedIdeal = idealValues[i] / 100
+      const normalizedAntiIdeal = antiIdealValues[i] / 100
+
+      distanceToIdeal += weights[i] * Math.pow(normalizedCurrent - normalizedIdeal, 2)
+      distanceToAntiIdeal += weights[i] * Math.pow(normalizedCurrent - normalizedAntiIdeal, 2)
+    }
+
+    distanceToIdeal = Math.sqrt(distanceToIdeal)
+    distanceToAntiIdeal = Math.sqrt(distanceToAntiIdeal)
+
+    // TOPSIS relative closeness score (0 to 1)
+    let topsisScore = distanceToAntiIdeal / (distanceToIdeal + distanceToAntiIdeal)
+
+    // Apply exponential penalties for critical thresholds (your 75% requirement)
+    let penaltyMultiplier = 1
+
+    if (params.memoryUsage > 75) {
+      penaltyMultiplier *= Math.exp(-0.15 * (params.memoryUsage - 75))
+    }
+
+    if (params.diskUsage > 75) {
+      penaltyMultiplier *= Math.exp(-0.15 * (params.diskUsage - 75))
+    }
+
+    // Apply penalty
+    topsisScore *= penaltyMultiplier
+
+    return Math.round(topsisScore * 100)
+  }
+
+  private calculateScoreLegacy(params: AvailabilityScoreParams): number {
     let penalty = 0
 
     // CPU Penalty (reduced impact, starts at 40%)
