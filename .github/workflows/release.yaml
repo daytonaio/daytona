@@ -118,10 +118,11 @@ jobs:
           overwrite: true
 
       # Don't publish projects with nx for now
-      - name: Publish projects
-        run: |
-          source .venv/bin/activate
-          yarn publish
+      # TODO: Add back ASAP
+      # - name: Publish projects
+      #   run: |
+      #     source .venv/bin/activate
+      #     yarn publish
 
   # Separately build docker images for AMD64 and ARM64
   docker_build:
