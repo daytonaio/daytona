@@ -125,6 +125,13 @@ func main() {
 	})
 	metricsService.StartMetricsCollection(ctx)
 
+	// Initialize sandbox state synchronization service
+	sandboxSyncService := services.NewSandboxSyncService(services.SandboxSyncServiceConfig{
+		Docker:   dockerClient,
+		Interval: 10 * time.Second, // Sync every 10 seconds
+	})
+	sandboxSyncService.StartSyncProcess(ctx)
+
 	// Initialize SSH Gateway if enabled
 	var sshGatewayService *sshgateway.Service
 	if sshgateway.IsSSHGatewayEnabled() {
