@@ -16,8 +16,6 @@ import {
   MouseScroll,
   ParameterFormData,
   MouseActions,
-  PlaygroundActionFormData,
-  ParameterFormItem,
   NumberParameterFormItem,
   MouseScrollDirection,
 } from '@/enums/Playground'
@@ -107,7 +105,7 @@ const VNCMouseOperations: React.FC = () => {
         return
       }
     }
-    //TODO -> API CALL
+    //TODO -> API call + set API response as responseText if present
     setMouseActionError({}) // Reset error
     setRunningMouseActionMethod(null)
   }
@@ -266,7 +264,6 @@ const VNCMouseOperations: React.FC = () => {
             onClickHandler={() => onMouseActionRunClick(MouseActions.GET_POSITION, [], {})} // No parameters required for this action
           />
         </div>
-        <div></div>
       </div>
       <div className="space-y-4">
         <div className="flex items-center justify-between">

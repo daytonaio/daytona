@@ -70,6 +70,11 @@ export const VNCInteractionOptionsSectionsData = [
   { value: VNCInteractionOptionsSections.SCREENSHOT, label: 'Screenshot' },
 ]
 
+export enum DisplayActions {
+  GET_INFO = 'getInfo',
+  GET_WINDOWS = 'getWindows',
+}
+
 export type KeyboardHotKey = {
   keys: string
 }

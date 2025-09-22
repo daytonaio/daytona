@@ -82,7 +82,7 @@ const VNCKeyboardOperations: React.FC = () => {
       }
     }
     // KeyboardPress modifiers postprocessing: .split(',').map(item => item.trim()).filter(item => item !== '')
-    //TODO -> API CALL
+    //TODO -> API call + set API response as responseText if present
     setKeyboardActionError({}) // Reset error
     setRunningKeyboardActionMethod(null)
   }

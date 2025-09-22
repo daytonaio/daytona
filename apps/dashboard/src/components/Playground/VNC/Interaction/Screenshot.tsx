@@ -100,7 +100,7 @@ const VNCScreenshootOperations: React.FC = () => {
         return
       }
     }
-    //TODO -> API CALL
+    //TODO -> API call + set API response as responseText if present
     setScreenshotActionError({}) // Reset error
     setRunningScreenshotActionMethod(null)
   }
