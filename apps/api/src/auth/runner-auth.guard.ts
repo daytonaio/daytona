@@ -12,7 +12,7 @@ export class RunnerAuthGuard implements CanActivate {
   private readonly logger = new Logger(RunnerAuthGuard.name)
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    // Throws if not proxy context
+    // Throws if not runner context
     getAuthContext(context, isRunnerContext)
     return true
   }
