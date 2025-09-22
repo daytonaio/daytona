@@ -1021,12 +1021,16 @@ export class SandboxService {
     switch (newState) {
       case SandboxState.STARTED:
         sandbox.desiredState = SandboxDesiredState.STARTED
+        break
       case SandboxState.STOPPED:
         sandbox.desiredState = SandboxDesiredState.STOPPED
+        break
       case SandboxState.ARCHIVED:
         sandbox.desiredState = SandboxDesiredState.ARCHIVED
+        break
       case SandboxState.DESTROYED:
         sandbox.desiredState = SandboxDesiredState.DESTROYED
+        break
     }
     await this.sandboxRepository.save(sandbox)
   }
