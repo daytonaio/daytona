@@ -11,6 +11,18 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// CreateBranch godoc
+//
+//	@Summary		Create a new branch
+//	@Description	Create a new branch in the Git repository
+//	@Tags			git
+//	@Accept			json
+//	@Produce		json
+//	@Param			request	body	GitBranchRequest	true	"Create branch request"
+//	@Success		201
+//	@Router			/git/branches [post]
+//
+//	@id				CreateBranch
 func CreateBranch(c *gin.Context) {
 	var req GitBranchRequest
 	if err := c.ShouldBindJSON(&req); err != nil {

@@ -22,6 +22,18 @@ import (
 
 var sessions = map[string]*session{}
 
+// CreateSession godoc
+//
+//	@Summary		Create a new session
+//	@Description	Create a new shell session for command execution
+//	@Tags			process
+//	@Accept			json
+//	@Produce		json
+//	@Param			request	body	CreateSessionRequest	true	"Session creation request"
+//	@Success		201
+//	@Router			/process/session [post]
+//
+//	@id				CreateSession
 func (s *SessionController) CreateSession(c *gin.Context) {
 	ctx, cancel := context.WithCancel(context.Background())
 
@@ -92,6 +104,16 @@ func (s *SessionController) CreateSession(c *gin.Context) {
 	c.Status(http.StatusCreated)
 }
 
+// DeleteSession godoc
+//
+//	@Summary		Delete a session
+//	@Description	Delete an existing shell session
+//	@Tags			process
+//	@Param			sessionId	path	string	true	"Session ID"
+//	@Success		204
+//	@Router			/process/session/{sessionId} [delete]
+//
+//	@id				DeleteSession
 func (s *SessionController) DeleteSession(c *gin.Context) {
 	sessionId := c.Param("sessionId")
 
@@ -113,6 +135,16 @@ func (s *SessionController) DeleteSession(c *gin.Context) {
 	c.Status(http.StatusNoContent)
 }
 
+// ListSessions godoc
+//
+//	@Summary		List all sessions
+//	@Description	Get a list of all active shell sessions
+//	@Tags			process
+//	@Produce		json
+//	@Success		200	{array}	Session
+//	@Router			/process/session [get]
+//
+//	@id				ListSessions
 func (s *SessionController) ListSessions(c *gin.Context) {
 	sessionDTOs := []Session{}
 
@@ -132,6 +164,17 @@ func (s *SessionController) ListSessions(c *gin.Context) {
 	c.JSON(http.StatusOK, sessionDTOs)
 }
 
+// GetSession godoc
+//
+//	@Summary		Get session details
+//	@Description	Get details of a specific session including its commands
+//	@Tags			process
+//	@Produce		json
+//	@Param			sessionId	path		string	true	"Session ID"
+//	@Success		200			{object}	Session
+//	@Router			/process/session/{sessionId} [get]
+//
+//	@id				GetSession
 func (s *SessionController) GetSession(c *gin.Context) {
 	sessionId := c.Param("sessionId")
 
@@ -153,6 +196,18 @@ func (s *SessionController) GetSession(c *gin.Context) {
 	})
 }
 
+// GetSessionCommand godoc
+//
+//	@Summary		Get session command details
+//	@Description	Get details of a specific command within a session
+//	@Tags			process
+//	@Produce		json
+//	@Param			sessionId	path		string	true	"Session ID"
+//	@Param			commandId	path		string	true	"Command ID"
+//	@Success		200			{object}	Command
+//	@Router			/process/session/{sessionId}/command/{commandId} [get]
+//
+//	@id				GetSessionCommand
 func (s *SessionController) GetSessionCommand(c *gin.Context) {
 	sessionId := c.Param("sessionId")
 	cmdId := c.Param("commandId")

@@ -14,6 +14,8 @@ package-mode = false
 daytona = {path = "libs/sdk-python", develop = true}
 daytona_api_client = {path = "libs/api-client-python", develop = true}
 daytona_api_client_async = {path = "libs/api-client-python-async", develop = true}
+daytona_toolbox_api_client = {path = "libs/toolbox-api-client-python", develop = true}
+daytona_toolbox_api_client_async = {path = "libs/toolbox-api-client-python-async", develop = true}
 
 [tool.poetry.group.dev.dependencies]
 pydoc-markdown = ">=4.8.0,<5.0.0"
@@ -29,7 +31,7 @@ matplotlib = ">=3.0.0,<4.0.0"
 unasync = ">=0.6.0,<0.7.0"
 docutils = "!=0.21.post1"
 deptry = "^0.23.0"
-ipykernel = "^6.29.5"
+ipykernel = "^6.30.1"
 
 [tool.basedpyright]
 typeCheckingMode = "off"

@@ -1,5 +1,5 @@
 ---
-title: "ComputerUse"
+title: 'ComputerUse'
 hideTitleOnPage: true
 ---
 
@@ -33,7 +33,6 @@ Starts all computer use processes (Xvfb, xfce4, x11vnc, novnc).
 **Returns**:
 
 - `ComputerUseStartResponse` - Computer use start response.
-  
 
 **Example**:
 
@@ -54,7 +53,6 @@ Stops all computer use processes.
 **Returns**:
 
 - `ComputerUseStopResponse` - Computer use stop response.
-  
 
 **Example**:
 
@@ -63,7 +61,7 @@ result = sandbox.computer_use.stop()
 print("Computer use processes stopped:", result.message)
 ```
 
-#### ComputerUse.get\_status
+#### ComputerUse.get_status
 
 ```python
 @intercept_errors(message_prefix="Failed to get computer use status: ")
@@ -75,7 +73,6 @@ Gets the status of all computer use processes.
 **Returns**:
 
 - `ComputerUseStatusResponse` - Status information about all VNC desktop processes.
-  
 
 **Example**:
 
@@ -84,7 +81,7 @@ response = sandbox.computer_use.get_status()
 print("Computer use status:", response.status)
 ```
 
-#### ComputerUse.get\_process\_status
+#### ComputerUse.get_process_status
 
 ```python
 @intercept_errors(message_prefix="Failed to get process status: ")
@@ -96,12 +93,10 @@ Gets the status of a specific VNC process.
 **Arguments**:
 
 - `process_name` _str_ - Name of the process to check.
-  
 
 **Returns**:
 
 - `ProcessStatusResponse` - Status information about the specific process.
-  
 
 **Example**:
 
@@ -110,7 +105,7 @@ xvfb_status = sandbox.computer_use.get_process_status("xvfb")
 no_vnc_status = sandbox.computer_use.get_process_status("novnc")
 ```
 
-#### ComputerUse.restart\_process
+#### ComputerUse.restart_process
 
 ```python
 @intercept_errors(message_prefix="Failed to restart process: ")
@@ -122,12 +117,10 @@ Restarts a specific VNC process.
 **Arguments**:
 
 - `process_name` _str_ - Name of the process to restart.
-  
 
 **Returns**:
 
 - `ProcessRestartResponse` - Process restart response.
-  
 
 **Example**:
 
@@ -136,7 +129,7 @@ result = sandbox.computer_use.restart_process("xfce4")
 print("XFCE4 process restarted:", result.message)
 ```
 
-#### ComputerUse.get\_process\_logs
+#### ComputerUse.get_process_logs
 
 ```python
 @intercept_errors(message_prefix="Failed to get process logs: ")
@@ -148,12 +141,10 @@ Gets logs for a specific VNC process.
 **Arguments**:
 
 - `process_name` _str_ - Name of the process to get logs for.
-  
 
 **Returns**:
 
 - `ProcessLogsResponse` - Process logs.
-  
 
 **Example**:
 
@@ -162,7 +153,7 @@ logs = sandbox.computer_use.get_process_logs("novnc")
 print("NoVNC logs:", logs)
 ```
 
-#### ComputerUse.get\_process\_errors
+#### ComputerUse.get_process_errors
 
 ```python
 @intercept_errors(message_prefix="Failed to get process errors: ")
@@ -174,12 +165,10 @@ Gets error logs for a specific VNC process.
 **Arguments**:
 
 - `process_name` _str_ - Name of the process to get error logs for.
-  
 
 **Returns**:
 
 - `ProcessErrorsResponse` - Process error logs.
-  
 
 **Example**:
 
@@ -187,7 +176,6 @@ Gets error logs for a specific VNC process.
 errors = sandbox.computer_use.get_process_errors("x11vnc")
 print("X11VNC errors:", errors)
 ```
-
 
 ## Mouse
 
@@ -197,19 +185,18 @@ class Mouse()
 
 Mouse operations for computer use functionality.
 
-#### Mouse.get\_position
+#### Mouse.get_position
 
 ```python
 @intercept_errors(message_prefix="Failed to get mouse position: ")
-def get_position() -> MousePosition
+def get_position() -> MousePositionResponse
 ```
 
 Gets the current mouse cursor position.
 
 **Returns**:
 
-- `MousePosition` - Current mouse position with x and y coordinates.
-  
+- `MousePositionResponse` - Current mouse position with x and y coordinates.
 
 **Example**:
 
@@ -222,7 +209,7 @@ print(f"Mouse is at: {position.x}, {position.y}")
 
 ```python
 @intercept_errors(message_prefix="Failed to move mouse: ")
-def move(x: int, y: int) -> MouseMoveResponse
+def move(x: int, y: int) -> MousePositionResponse
 ```
 
 Moves the mouse cursor to the specified coordinates.
@@ -231,12 +218,10 @@ Moves the mouse cursor to the specified coordinates.
 
 - `x` _int_ - The x coordinate to move to.
 - `y` _int_ - The y coordinate to move to.
-  
 
 **Returns**:
 
-- `MouseMoveResponse` - Move operation result.
-  
+- `MousePositionResponse` - Position after move.
 
 **Example**:
 
@@ -263,12 +248,10 @@ Clicks the mouse at the specified coordinates.
 - `y` _int_ - The y coordinate to click at.
 - `button` _str_ - The mouse button to click ('left', 'right', 'middle').
 - `double` _bool_ - Whether to perform a double-click.
-  
 
 **Returns**:
 
 - `MouseClickResponse` - Click operation result.
-  
 
 **Example**:
 
@@ -303,12 +286,10 @@ Drags the mouse from start coordinates to end coordinates.
 - `end_x` _int_ - The ending x coordinate.
 - `end_y` _int_ - The ending y coordinate.
 - `button` _str_ - The mouse button to use for dragging.
-  
 
 **Returns**:
 
 - `MouseDragResponse` - Drag operation result.
-  
 
 **Example**:
 
@@ -332,12 +313,10 @@ Scrolls the mouse wheel at the specified coordinates.
 - `y` _int_ - The y coordinate to scroll at.
 - `direction` _str_ - The direction to scroll ('up' or 'down').
 - `amount` _int_ - The amount to scroll.
-  
 
 **Returns**:
 
 - `bool` - Whether the scroll operation was successful.
-  
 
 **Example**:
 
@@ -370,12 +349,10 @@ Types the specified text.
 
 - `text` _str_ - The text to type.
 - `delay` _int_ - Delay between characters in milliseconds.
-  
 
 **Raises**:
 
 - `DaytonaError` - If the type operation fails.
-  
 
 **Example**:
 
@@ -407,12 +384,10 @@ Presses a key with optional modifiers.
 
 - `key` _str_ - The key to press (e.g., 'Enter', 'Escape', 'Tab', 'a', 'A').
 - `modifiers` _List[str]_ - Modifier keys ('ctrl', 'alt', 'meta', 'shift').
-  
 
 **Raises**:
 
 - `DaytonaError` - If the press operation fails.
-  
 
 **Example**:
 
@@ -449,12 +424,10 @@ Presses a hotkey combination.
 **Arguments**:
 
 - `keys` _str_ - The hotkey combination (e.g., 'ctrl+c', 'alt+tab', 'cmd+shift+t').
-  
 
 **Raises**:
 
 - `DaytonaError` - If the hotkey operation fails.
-  
 
 **Example**:
 
@@ -489,7 +462,7 @@ class Screenshot()
 
 Screenshot operations for computer use functionality.
 
-#### Screenshot.take\_full\_screen
+#### Screenshot.take_full_screen
 
 ```python
 @intercept_errors(message_prefix="Failed to take screenshot: ")
@@ -501,12 +474,10 @@ Takes a screenshot of the entire screen.
 **Arguments**:
 
 - `show_cursor` _bool_ - Whether to show the cursor in the screenshot.
-  
 
 **Returns**:
 
 - `ScreenshotResponse` - Screenshot data with base64 encoded image.
-  
 
 **Example**:
 
@@ -518,12 +489,12 @@ print(f"Screenshot size: {screenshot.width}x{screenshot.height}")
 with_cursor = sandbox.computer_use.screenshot.take_full_screen(True)
 ```
 
-#### Screenshot.take\_region
+#### Screenshot.take_region
 
 ```python
 @intercept_errors(message_prefix="Failed to take region screenshot: ")
 def take_region(region: ScreenshotRegion,
-                show_cursor: bool = False) -> RegionScreenshotResponse
+                show_cursor: bool = False) -> ScreenshotResponse
 ```
 
 Takes a screenshot of a specific region.
@@ -532,12 +503,10 @@ Takes a screenshot of a specific region.
 
 - `region` _ScreenshotRegion_ - The region to capture.
 - `show_cursor` _bool_ - Whether to show the cursor in the screenshot.
-  
 
 **Returns**:
 
-- `RegionScreenshotResponse` - Screenshot data with base64 encoded image.
-  
+- `ScreenshotResponse` - Screenshot data with base64 encoded image.
 
 **Example**:
 
@@ -547,13 +516,12 @@ screenshot = sandbox.computer_use.screenshot.take_region(region)
 print(f"Captured region: {screenshot.region.width}x{screenshot.region.height}")
 ```
 
-#### Screenshot.take\_compressed
+#### Screenshot.take_compressed
 
 ```python
 @intercept_errors(message_prefix="Failed to take compressed screenshot: ")
 def take_compressed(
-    options: Optional[ScreenshotOptions] = None
-) -> CompressedScreenshotResponse
+        options: Optional[ScreenshotOptions] = None) -> ScreenshotResponse
 ```
 
 Takes a compressed screenshot of the entire screen.
@@ -561,12 +529,10 @@ Takes a compressed screenshot of the entire screen.
 **Arguments**:
 
 - `options` _ScreenshotOptions_ - Compression and display options.
-  
 
 **Returns**:
 
-- `CompressedScreenshotResponse` - Compressed screenshot data.
-  
+- `ScreenshotResponse` - Compressed screenshot data.
 
 **Example**:
 
@@ -585,15 +551,14 @@ scaled = sandbox.computer_use.screenshot.take_compressed(
 )
 ```
 
-#### Screenshot.take\_compressed\_region
+#### Screenshot.take_compressed_region
 
 ```python
 @intercept_errors(
     message_prefix="Failed to take compressed region screenshot: ")
 def take_compressed_region(
-    region: ScreenshotRegion,
-    options: Optional[ScreenshotOptions] = None
-) -> CompressedScreenshotResponse
+        region: ScreenshotRegion,
+        options: Optional[ScreenshotOptions] = None) -> ScreenshotResponse
 ```
 
 Takes a compressed screenshot of a specific region.
@@ -602,12 +567,10 @@ Takes a compressed screenshot of a specific region.
 
 - `region` _ScreenshotRegion_ - The region to capture.
 - `options` _ScreenshotOptions_ - Compression and display options.
-  
 
 **Returns**:
 
-- `CompressedScreenshotResponse` - Compressed screenshot data.
-  
+- `ScreenshotResponse` - Compressed screenshot data.
 
 **Example**:
 
@@ -628,7 +591,7 @@ class Display()
 
 Display operations for computer use functionality.
 
-#### Display.get\_info
+#### Display.get_info
 
 ```python
 @intercept_errors(message_prefix="Failed to get display info: ")
@@ -640,7 +603,6 @@ Gets information about the displays.
 **Returns**:
 
 - `DisplayInfoResponse` - Display information including primary display and all available displays.
-  
 
 **Example**:
 
@@ -652,7 +614,7 @@ for i, display in enumerate(info.displays):
     print(f"Display {i}: {display.width}x{display.height} at {display.x},{display.y}")
 ```
 
-#### Display.get\_windows
+#### Display.get_windows
 
 ```python
 @intercept_errors(message_prefix="Failed to get windows: ")
@@ -664,7 +626,6 @@ Gets the list of open windows.
 **Returns**:
 
 - `WindowsResponse` - List of open windows with their IDs and titles.
-  
 
 **Example**:
 
@@ -704,4 +665,3 @@ Options for screenshot compression and display.
 - `fmt` _str_ - Image format (e.g., 'png', 'jpeg', 'webp').
 - `quality` _int_ - Compression quality (0-100).
 - `scale` _float_ - Scale factor for the screenshot.
-
