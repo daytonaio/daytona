@@ -1,0 +1,171 @@
+---
+title: ローカルで Daytona を実行する
+---
+
+このガイドでは、Docker Compose を使用してローカル環境で Daytona を実行する手順を説明します。
+
+Compose ファイルは、Daytona リポジトリ内の [docker](https://github.com/daytonaio/daytona/tree/main/docker) フォルダーにあります。
+
+:::caution
+
+* このセットアップは現在開発中であり、**本番環境での使用は安全ではありません**
+* 本番環境向けのデプロイガイドは別途提供されます
+  :::
+
+## 概要 \{#overview\}
+
+Docker Compose の構成には、Daytona を稼働させるために必要なサービスがすべて含まれています:
+
+* **API**: Daytona のメインアプリケーションサーバー
+* **Proxy**: リクエストのプロキシサービス
+* **Runner**: Daytona のランナーをホストするサービス
+* **SSH Gateway**: サンドボックスへの SSH アクセスを処理するサービス
+* **Database**: データ永続化用の PostgreSQL データベース
+* **Redis**: キャッシュとセッション用のインメモリデータストア
+* **Dex**: OIDC 認証プロバイダー
+* **Registry**: Web UI を備えた Docker イメージレジストリ
+* **MinIO**: S3 互換のオブジェクトストレージ
+* **MailDev**: メールテスト用サービス
+* **Jaeger**: 分散トレーシング
+* **PgAdmin**: データベース管理インターフェース
+
+## クイックスタート \{#quick-start\}
+
+1. Daytona リポジトリをクローンする
+
+2. [Docker と Docker Compose をインストールする](https://docs.docker.com/get-docker/)
+
+3. すべてのサービスを起動するために（Daytona リポジトリのルートから）次のコマンドを実行します：
+
+   ```bash
+   docker compose -f docker/docker-compose.yaml up -d
+   ```
+
+4. サービスにアクセス:
+   * Daytona Dashboard: http://localhost:3000
+     * アクセス情報: dev@daytona.io `password`
+     * http://localhost:3000/dashboard/snapshots でデフォルトのスナップショットが有効になっていることを確認してください
+   * PgAdmin: http://localhost:5050
+   * Registry UI: http://localhost:5100
+   * MinIO Console: http://localhost:9001 (minioadmin / minioadmin)
+
+## プロキシURLのDNS設定 \{#dns-setup-for-proxy-urls\}
+
+ローカル開発では、`*.proxy.localhost` ドメインを `127.0.0.1` に解決する必要があります。
+
+```bash
+./scripts/setup-proxy-dns.sh
+```
+
+これは、`address=/proxy.localhost/127.0.0.1` を用いて dnsmasq を設定します。
+
+**この設定がない場合**、SDK のサンプルやプロキシへの直接アクセスは機能しません。
+
+## 開発メモ \{#development-notes\}
+
+* サービス間の通信を簡素化するため、共有ネットワークを使用しています
+* データベースとストレージのデータは Docker のボリュームに永続化されます
+* テスト目的で、レジストリはイメージの削除を許可するように設定されています
+* サンドボックスのリソース制限は無効化されています。これは、sock がマウントされていない DinD 環境では cgroup をパーティション分割できないためです
+
+## Daytona 用 Auth0 設定ガイド \{#auth0-configuration-guide-for-daytona\}
+
+### ステップ 1: Auth0 テナントを作成する \{#step-1-create-your-auth0-tenant\}
+
+まず https://auth0.com/signup にアクセスしてサインアップを開始します。ユースケースに応じてアカウント種別を選択します。業務向けアプリケーションなら `Company`、個人プロジェクトなら `Personal` を選びます。\
+「Let&#39;s get setup」ページで、`My Daytona` のようなアプリケーション名を入力し、アプリケーション種別として `Single Page Application (SPA)` を選択します。認証方法は、まず `Email and Password` から始めるとよいでしょう。Google、GitHub、Facebook などのソーシャルプロバイダーは後から追加できます。設定が完了したら、右下の `Create Application` をクリックします。
+
+### ステップ 2: シングルページアプリケーションを設定する \{#step-2-configure-your-single-page-application\}
+
+左サイドバーの `Applications` &gt; `Applications` に移動し、作成したアプリケーションを選択します。`Settings` タブをクリックし、下へスクロールしてコールバック URL とオリジン URL を設定する `Application URIs` セクションを見つけます。
+`Allowed Callback URIs` フィールドに、次の URL を追加します:
+
+```
+http://localhost:3000
+http://localhost:3000/api/oauth2-redirect.html
+http://localhost:4000/callback
+http://proxy.localhost:4000/callback
+```
+
+「`Allowed Logout URIs`」に、次を追加します：
+
+```
+http://localhost:3000
+```
+
+「Allowed Web Origins」には、次を追加します：
+
+```
+http://localhost:3000
+```
+
+ページ下部の `Save Changes` をクリックして、これらの設定を適用してください。
+
+### ステップ 3: Machine-to-Machine アプリケーションを作成する \{#step-3-create-machine-to-machine-application\}
+
+Auth0 の Management API とやり取りするには、Machine-to-Machine アプリケーションが必要です。`Applications` &gt; `Applications` に移動し、`Create Application` をクリックします。タイプに `Machine to Machine Applications` を選択し、`My Management API M2M` のようなわかりやすい名前を付けます。
+アプリケーションを作成したら、新しい M2M アプリケーションの `APIs` タブに移動します。トグルまたは `Authorize` ボタンをクリックして `Auth0 Management API` を見つけ、承認します。\
+承認後、権限を設定するために Management API の横にあるドロップダウン矢印をクリックします。M2M アプリケーションに次の権限を付与します:
+
+```
+read:users
+update:users
+read:connections
+create:guardian_enrollment_tickets
+read:connections_options
+```
+
+`Save` をクリックして、これらの権限の変更を適用します。
+
+### ステップ 4: カスタム API のセットアップ \{#step-4-set-up-custom-api\}
+
+Daytona アプリケーションでは、認証と認可を処理するためのカスタム API が必要です。左サイドバーの `Applications` &gt; `APIs` に移動し、`Create API` をクリックします。`My Daytona API` のようなわかりやすい名前を入力し、`my-daytona-api` のような識別子を指定します。識別子はアプリケーションの設定で使用される一意の文字列である必要があります。\
+API を作成したら、`Permissions` タブでアプリケーションが使用するスコープを定義します。以下の各権限を、対応する説明とともに追加します:
+
+| 権限                         | 説明                                        |
+| --------------------------- | ------------------------------------------- |
+| `read:node`                 | ワークスペースのノード情報を取得            |
+| `create:node`               | 新規ワークスペースノードのレコードを作成    |
+| `create:user`               | ユーザーアカウントを作成                    |
+| `read:users`                | すべてのユーザーアカウントを取得            |
+| `regenerate-key-pair:users` | ユーザーの SSH 鍵ペアを再生成               |
+| `read:workspaces`           | ワークスペースを読み取り（ユーザースコープ） |
+| `create:registry`           | 新規 Docker レジストリの認証レコードを作成  |
+| `read:registries`           | すべての Docker レジストリレコードを取得    |
+| `read:registry`             | Docker レジストリレコードを取得             |
+| `write:registry`            | Docker レジストリレコードを作成または更新   |
+
+### ステップ 5: 環境変数の設定 \{#step-5-configure-environment-variables\}
+
+Auth0 のセットアップをすべて完了したら、Daytona のデプロイ環境で環境変数を設定する必要があります。これらの変数により、先ほど構成した Auth0 サービスとアプリケーションが接続されます。
+
+#### 設定値の確認方法 \{#finding-your-configuration-values\}
+
+必要な値は Auth0 ダッシュボードで確認できます。SPA アプリケーションの設定は、`Applications` &gt; `Applications` から該当の SPA アプリを選択し、`Settings` タブをクリックします。M2M アプリケーションも同様に、Machine-to-Machine アプリを選択してください。カスタム API の設定は、`Applications` &gt; `APIs` でカスタム API を選択し、`Settings` を開きます。
+
+#### API サービスの設定 \{#api-service-configuration\}
+
+API サービス向けに、以下の環境変数を設定します：
+
+```bash
+OIDC_CLIENT_ID=your_spa_app_client_id
+OIDC_ISSUER_BASE_URL=your_spa_app_domain
+OIDC_AUDIENCE=your_custom_api_identifier
+OIDC_MANAGEMENT_API_ENABLED=true
+OIDC_MANAGEMENT_API_CLIENT_ID=your_m2m_app_client_id
+OIDC_MANAGEMENT_API_CLIENT_SECRET=your_m2m_app_client_secret
+OIDC_MANAGEMENT_API_AUDIENCE=your_auth0_managment_api_identifier
+```
+
+#### プロキシサービスの設定 \{#proxy-service-configuration\}
+
+プロキシサービスで次の環境変数を設定します：
+
+```bash
+OIDC_CLIENT_ID=your_spa_app_client_id
+OIDC_CLIENT_SECRET=
+OIDC_DOMAIN=your_spa_app_domain
+OIDC_AUDIENCE=your_custom_api_identifier（末尾スラッシュ付き）
+```
+
+プロキシ環境では、`OIDC_CLIENT_SECRET` を空のままにしておく必要がある点に留意してください。
