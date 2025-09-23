@@ -45,6 +45,7 @@ export class SandboxAccessGuard implements CanActivate {
 
       return true
     } catch (error) {
+      console.error(error)
       throw new NotFoundException(`Sandbox with ID ${sandboxId} not found`)
     }
   }
