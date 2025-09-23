@@ -97,5 +97,6 @@
   "sidebarconfig.asyncDaytona": "AsyncDaytona",
   "sidebarconfig.asyncSandbox": "AsyncSandbox",
   "sidebarconfig.dataAnalysis": "Data Analysis with AI",
-  "sidebarconfig.runningLocally": "Running Locally"
+  "sidebarconfig.ossDeployment": "Open Source",
+  "sidebarconfig.deployments": "Deployments"
 }

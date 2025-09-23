@@ -404,10 +404,18 @@ export const getSidebarConfig = (
             icon: 'chart.svg',
           },
         },
+      ],
+    },
+    {
+      type: 'group',
+      label: labels['sidebarconfig.deployments'],
+      homePageHref: localizePath('/docs', locale),
+      category: NavigationCategory.GENERAL,
+      entries: [
         {
           type: 'link',
-          href: localizePath('/docs/running-locally', locale),
-          label: labels['sidebarconfig.runningLocally'],
+          href: localizePath('/docs/oss-deployment', locale),
+          label: labels['sidebarconfig.ossDeployment'],
           disablePagination: true,
           attrs: {
             icon: 'computer.svg',
