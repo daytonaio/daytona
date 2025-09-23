@@ -552,6 +552,71 @@ module DaytonaApiClient
       return data, status_code, headers
     end
 
+    # Get sandboxes for the authenticated runner
+    # @param state [String] 
+    # @param [Hash] opts the optional parameters
+    # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
+    # @return [Array<Sandbox>]
+    def get_sandboxes_for_runner(state, opts = {})
+      data, _status_code, _headers = get_sandboxes_for_runner_with_http_info(state, opts)
+      data
+    end
+
+    # Get sandboxes for the authenticated runner
+    # @param state [String] 
+    # @param [Hash] opts the optional parameters
+    # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
+    # @return [Array<(Array<Sandbox>, Integer, Hash)>] Array<Sandbox> data, response status code and response headers
+    def get_sandboxes_for_runner_with_http_info(state, opts = {})
+      if @api_client.config.debugging
+        @api_client.config.logger.debug 'Calling API: SandboxApi.get_sandboxes_for_runner ...'
+      end
+      # verify the required parameter 'state' is set
+      if @api_client.config.client_side_validation && state.nil?
+        fail ArgumentError, "Missing the required parameter 'state' when calling SandboxApi.get_sandboxes_for_runner"
+      end
+      # resource path
+      local_var_path = '/sandbox/for-runner'
+
+      # query parameters
+      query_params = opts[:query_params] || {}
+      query_params[:'state'] = state
+
+      # header parameters
+      header_params = opts[:header_params] || {}
+      # HTTP header 'Accept' (if needed)
+      header_params['Accept'] = @api_client.select_header_accept(['application/json']) unless header_params['Accept']
+      header_params[:'X-Daytona-Organization-ID'] = opts[:'x_daytona_organization_id'] if !opts[:'x_daytona_organization_id'].nil?
+
+      # form parameters
+      form_params = opts[:form_params] || {}
+
+      # http body (model)
+      post_body = opts[:debug_body]
+
+      # return_type
+      return_type = opts[:debug_return_type] || 'Array<Sandbox>'
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
+
+      new_options = opts.merge(
+        :operation => :"SandboxApi.get_sandboxes_for_runner",
+        :header_params => header_params,
+        :query_params => query_params,
+        :form_params => form_params,
+        :body => post_body,
+        :auth_names => auth_names,
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:GET, local_var_path, new_options)
+      if @api_client.config.debugging
+        @api_client.config.logger.debug "API called: SandboxApi#get_sandboxes_for_runner\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+      end
+      return data, status_code, headers
+    end
+
     # List all sandboxes
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
@@ -1153,6 +1218,79 @@ module DaytonaApiClient
       data, status_code, headers = @api_client.call_api(:POST, local_var_path, new_options)
       if @api_client.config.debugging
         @api_client.config.logger.debug "API called: SandboxApi#update_public_status\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+      end
+      return data, status_code, headers
+    end
+
+    # Update sandbox state
+    # @param sandbox_id [String] ID of the sandbox
+    # @param update_sandbox_state_dto [UpdateSandboxStateDto] 
+    # @param [Hash] opts the optional parameters
+    # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
+    # @return [nil]
+    def update_sandbox_state(sandbox_id, update_sandbox_state_dto, opts = {})
+      update_sandbox_state_with_http_info(sandbox_id, update_sandbox_state_dto, opts)
+      nil
+    end
+
+    # Update sandbox state
+    # @param sandbox_id [String] ID of the sandbox
+    # @param update_sandbox_state_dto [UpdateSandboxStateDto] 
+    # @param [Hash] opts the optional parameters
+    # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
+    # @return [Array<(nil, Integer, Hash)>] nil, response status code and response headers
+    def update_sandbox_state_with_http_info(sandbox_id, update_sandbox_state_dto, opts = {})
+      if @api_client.config.debugging
+        @api_client.config.logger.debug 'Calling API: SandboxApi.update_sandbox_state ...'
+      end
+      # verify the required parameter 'sandbox_id' is set
+      if @api_client.config.client_side_validation && sandbox_id.nil?
+        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling SandboxApi.update_sandbox_state"
+      end
+      # verify the required parameter 'update_sandbox_state_dto' is set
+      if @api_client.config.client_side_validation && update_sandbox_state_dto.nil?
+        fail ArgumentError, "Missing the required parameter 'update_sandbox_state_dto' when calling SandboxApi.update_sandbox_state"
+      end
+      # resource path
+      local_var_path = '/sandbox/{sandboxId}/state'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s))
+
+      # query parameters
+      query_params = opts[:query_params] || {}
+
+      # header parameters
+      header_params = opts[:header_params] || {}
+      # HTTP header 'Content-Type'
+      content_type = @api_client.select_header_content_type(['application/json'])
+      if !content_type.nil?
+          header_params['Content-Type'] = content_type
+      end
+      header_params[:'X-Daytona-Organization-ID'] = opts[:'x_daytona_organization_id'] if !opts[:'x_daytona_organization_id'].nil?
+
+      # form parameters
+      form_params = opts[:form_params] || {}
+
+      # http body (model)
+      post_body = opts[:debug_body] || @api_client.object_to_http_body(update_sandbox_state_dto)
+
+      # return_type
+      return_type = opts[:debug_return_type]
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
+
+      new_options = opts.merge(
+        :operation => :"SandboxApi.update_sandbox_state",
+        :header_params => header_params,
+        :query_params => query_params,
+        :form_params => form_params,
+        :body => post_body,
+        :auth_names => auth_names,
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:PUT, local_var_path, new_options)
+      if @api_client.config.debugging
+        @api_client.config.logger.debug "API called: SandboxApi#update_sandbox_state\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end

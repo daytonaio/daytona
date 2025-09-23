@@ -14,60 +14,22 @@ require 'date'
 require 'time'
 
 module DaytonaApiClient
-  class CreateDockerRegistry
-    # Registry name
-    attr_accessor :name
+  class OidcConfig
+    # OIDC issuer
+    attr_accessor :issuer
 
-    # Registry URL
-    attr_accessor :url
+    # OIDC client ID
+    attr_accessor :client_id
 
-    # Registry username
-    attr_accessor :username
-
-    # Registry password
-    attr_accessor :password
-
-    # Registry project
-    attr_accessor :project
-
-    # Registry type
-    attr_accessor :registry_type
-
-    # Set as default registry
-    attr_accessor :is_default
-
-    class EnumAttributeValidator
-      attr_reader :datatype
-      attr_reader :allowable_values
-
-      def initialize(datatype, allowable_values)
-        @allowable_values = allowable_values.map do |value|
-          case datatype.to_s
-          when /Integer/i
-            value.to_i
-          when /Float/i
-            value.to_f
-          else
-            value
-          end
-        end
-      end
-
-      def valid?(value)
-        !value || allowable_values.include?(value)
-      end
-    end
+    # OIDC audience
+    attr_accessor :audience
 
     # Attribute mapping from ruby-style variable name to JSON key.
     def self.attribute_map
       {
-        :'name' => :'name',
-        :'url' => :'url',
-        :'username' => :'username',
-        :'password' => :'password',
-        :'project' => :'project',
-        :'registry_type' => :'registryType',
-        :'is_default' => :'isDefault'
+        :'issuer' => :'issuer',
+        :'client_id' => :'clientId',
+        :'audience' => :'audience'
       }
     end
 
@@ -84,13 +46,9 @@ module DaytonaApiClient
     # Attribute type mapping.
     def self.openapi_types
       {
-        :'name' => :'String',
-        :'url' => :'String',
-        :'username' => :'String',
-        :'password' => :'String',
-        :'project' => :'String',
-        :'registry_type' => :'String',
-        :'is_default' => :'Boolean'
+        :'issuer' => :'String',
+        :'client_id' => :'String',
+        :'audience' => :'String'
       }
     end
 
@@ -104,54 +62,34 @@ module DaytonaApiClient
     # @param [Hash] attributes Model attributes in the form of hash
     def initialize(attributes = {})
       if (!attributes.is_a?(Hash))
-        fail ArgumentError, "The input argument (attributes) must be a hash in `DaytonaApiClient::CreateDockerRegistry` initialize method"
+        fail ArgumentError, "The input argument (attributes) must be a hash in `DaytonaApiClient::OidcConfig` initialize method"
       end
 
       # check to see if the attribute exists and convert string to symbol for hash key
       acceptable_attribute_map = self.class.acceptable_attribute_map
       attributes = attributes.each_with_object({}) { |(k, v), h|
         if (!acceptable_attribute_map.key?(k.to_sym))
-          fail ArgumentError, "`#{k}` is not a valid attribute in `DaytonaApiClient::CreateDockerRegistry`. Please check the name to make sure it's valid. List of attributes: " + acceptable_attribute_map.keys.inspect
+          fail ArgumentError, "`#{k}` is not a valid attribute in `DaytonaApiClient::OidcConfig`. Please check the name to make sure it's valid. List of attributes: " + acceptable_attribute_map.keys.inspect
         end
         h[k.to_sym] = v
       }
 
-      if attributes.key?(:'name')
-        self.name = attributes[:'name']
+      if attributes.key?(:'issuer')
+        self.issuer = attributes[:'issuer']
       else
-        self.name = nil
+        self.issuer = nil
       end
 
-      if attributes.key?(:'url')
-        self.url = attributes[:'url']
+      if attributes.key?(:'client_id')
+        self.client_id = attributes[:'client_id']
       else
-        self.url = nil
+        self.client_id = nil
       end
 
-      if attributes.key?(:'username')
-        self.username = attributes[:'username']
+      if attributes.key?(:'audience')
+        self.audience = attributes[:'audience']
       else
-        self.username = nil
-      end
-
-      if attributes.key?(:'password')
-        self.password = attributes[:'password']
-      else
-        self.password = nil
-      end
-
-      if attributes.key?(:'project')
-        self.project = attributes[:'project']
-      end
-
-      if attributes.key?(:'registry_type')
-        self.registry_type = attributes[:'registry_type']
-      else
-        self.registry_type = 'organization'
-      end
-
-      if attributes.key?(:'is_default')
-        self.is_default = attributes[:'is_default']
+        self.audience = nil
       end
     end
 
@@ -160,24 +98,16 @@ module DaytonaApiClient
     def list_invalid_properties
       warn '[DEPRECATED] the `list_invalid_properties` method is obsolete'
       invalid_properties = Array.new
-      if @name.nil?
-        invalid_properties.push('invalid value for "name", name cannot be nil.')
+      if @issuer.nil?
+        invalid_properties.push('invalid value for "issuer", issuer cannot be nil.')
       end
 
-      if @url.nil?
-        invalid_properties.push('invalid value for "url", url cannot be nil.')
+      if @client_id.nil?
+        invalid_properties.push('invalid value for "client_id", client_id cannot be nil.')
       end
 
-      if @username.nil?
-        invalid_properties.push('invalid value for "username", username cannot be nil.')
-      end
-
-      if @password.nil?
-        invalid_properties.push('invalid value for "password", password cannot be nil.')
-      end
-
-      if @registry_type.nil?
-        invalid_properties.push('invalid value for "registry_type", registry_type cannot be nil.')
+      if @audience.nil?
+        invalid_properties.push('invalid value for "audience", audience cannot be nil.')
       end
 
       invalid_properties
@@ -187,64 +117,40 @@ module DaytonaApiClient
     # @return true if the model is valid
     def valid?
       warn '[DEPRECATED] the `valid?` method is obsolete'
-      return false if @name.nil?
-      return false if @url.nil?
-      return false if @username.nil?
-      return false if @password.nil?
-      return false if @registry_type.nil?
-      registry_type_validator = EnumAttributeValidator.new('String', ["internal", "organization", "transient", "backup"])
-      return false unless registry_type_validator.valid?(@registry_type)
+      return false if @issuer.nil?
+      return false if @client_id.nil?
+      return false if @audience.nil?
       true
     end
 
     # Custom attribute writer method with validation
-    # @param [Object] name Value to be assigned
-    def name=(name)
-      if name.nil?
-        fail ArgumentError, 'name cannot be nil'
+    # @param [Object] issuer Value to be assigned
+    def issuer=(issuer)
+      if issuer.nil?
+        fail ArgumentError, 'issuer cannot be nil'
       end
 
-      @name = name
+      @issuer = issuer
     end
 
     # Custom attribute writer method with validation
-    # @param [Object] url Value to be assigned
-    def url=(url)
-      if url.nil?
-        fail ArgumentError, 'url cannot be nil'
+    # @param [Object] client_id Value to be assigned
+    def client_id=(client_id)
+      if client_id.nil?
+        fail ArgumentError, 'client_id cannot be nil'
       end
 
-      @url = url
+      @client_id = client_id
     end
 
     # Custom attribute writer method with validation
-    # @param [Object] username Value to be assigned
-    def username=(username)
-      if username.nil?
-        fail ArgumentError, 'username cannot be nil'
+    # @param [Object] audience Value to be assigned
+    def audience=(audience)
+      if audience.nil?
+        fail ArgumentError, 'audience cannot be nil'
       end
 
-      @username = username
-    end
-
-    # Custom attribute writer method with validation
-    # @param [Object] password Value to be assigned
-    def password=(password)
-      if password.nil?
-        fail ArgumentError, 'password cannot be nil'
-      end
-
-      @password = password
-    end
-
-    # Custom attribute writer method checking allowed values (enum).
-    # @param [Object] registry_type Object to be assigned
-    def registry_type=(registry_type)
-      validator = EnumAttributeValidator.new('String', ["internal", "organization", "transient", "backup"])
-      unless validator.valid?(registry_type)
-        fail ArgumentError, "invalid value for \"registry_type\", must be one of #{validator.allowable_values}."
-      end
-      @registry_type = registry_type
+      @audience = audience
     end
 
     # Checks equality by comparing each attribute.
@@ -252,13 +158,9 @@ module DaytonaApiClient
     def ==(o)
       return true if self.equal?(o)
       self.class == o.class &&
-          name == o.name &&
-          url == o.url &&
-          username == o.username &&
-          password == o.password &&
-          project == o.project &&
-          registry_type == o.registry_type &&
-          is_default == o.is_default
+          issuer == o.issuer &&
+          client_id == o.client_id &&
+          audience == o.audience
     end
 
     # @see the `==` method
@@ -270,7 +172,7 @@ module DaytonaApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [name, url, username, password, project, registry_type, is_default].hash
+      [issuer, client_id, audience].hash
     end
 
     # Builds the object from hash
