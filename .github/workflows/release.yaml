@@ -52,6 +52,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      - uses: dev-hanz-ops/install-gh-cli-action@v0.2.1
 
       - name: System dependencies
         run: |
@@ -80,7 +81,9 @@ jobs:
           go env -w GOFLAGS="-buildvcs=false"
 
       - name: Build projects
-        run: yarn build:production
+        run: |
+          yarn build:production
+          yarn nx build-amd64 runner --configuration=production --nxBail=true
 
       # Write version to required folders so nx release can run
       - name: Write package.json to required folders
@@ -108,6 +111,10 @@ jobs:
 
       - name: Create release
         run: yarn nx release ${{ inputs.version }} --skip-publish --verbose
+
+      - name: Upload runner to release assets
+        run: |
+          gh release upload ${{ inputs.version }} dist/apps/runner-amd64#daytona-runner-${{ inputs.version }}-amd64 --clobber
 
       - name: Upload computer-use artifact
         uses: actions/upload-artifact@v4
