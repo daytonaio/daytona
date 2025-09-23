@@ -11,5 +11,5 @@ export interface RunnerContext extends BaseAuthContext {
 }
 
 export function isRunnerContext(user: BaseAuthContext): user is RunnerContext {
-  return 'role' in user && (user.role === 'runner' || user.role === 'admin')
+  return 'role' in user && user.role === 'runner'
 }
