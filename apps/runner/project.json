@@ -51,6 +51,11 @@
           "GOARCH": "amd64"
         }
       },
+      "configurations": {
+        "production": {
+          "flags": ["-ldflags \"-X 'github.com/daytonaio/runner/internal.Version=$VERSION'\""]
+        }
+      },
       "dependsOn": ["copy-daemon-bin", "copy-computeruse-plugin"]
     },
     "serve": {
