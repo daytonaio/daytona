@@ -4,7 +4,6 @@
  */
 
 import {
-  ToolboxApi,
   SandboxState,
   SandboxApi,
   Sandbox as SandboxDto,
@@ -16,12 +15,16 @@ import {
   SshAccessDto,
   SshAccessValidationDto,
 } from '@daytonaio/api-client'
+import { FileSystemApi, GitApi, ProcessApi, LspApi, InfoApi, ComputerUseApi } from '@daytonaio/toolbox-api-client'
 import { FileSystem } from './FileSystem'
 import { Git } from './Git'
 import { CodeRunParams, Process } from './Process'
 import { LspLanguageId, LspServer } from './LspServer'
 import { DaytonaError } from './errors/DaytonaError'
 import { ComputerUse } from './ComputerUse'
+import { AxiosInstance } from 'axios'
+
+const TOOLBOX_PORT = 2280
 
 /**
  * Interface defining methods that a code toolbox must implement
@@ -101,32 +104,47 @@ export class Sandbox implements SandboxDto {
   public networkBlockAll!: boolean
   public networkAllowList?: string
 
+  private infoApi: InfoApi
+
   /**
    * Creates a new Sandbox instance
    *
    * @param {SandboxDto} sandboxDto - The API Sandbox instance
    * @param {SandboxApi} sandboxApi - API client for Sandbox operations
-   * @param {ToolboxApi} toolboxApi - API client for toolbox operations
+   * @param {InfoApi} infoApi - API client for info operations
    * @param {SandboxCodeToolbox} codeToolbox - Language-specific toolbox implementation
    */
   constructor(
     sandboxDto: SandboxDto,
     private readonly clientConfig: Configuration,
+    private readonly axiosInstance: AxiosInstance,
     private readonly sandboxApi: SandboxApi,
-    private readonly toolboxApi: ToolboxApi,
     private readonly codeToolbox: SandboxCodeToolbox,
   ) {
     this.processSandboxDto(sandboxDto)
-    this.fs = new FileSystem(this.id, this.clientConfig, this.toolboxApi)
-    this.git = new Git(this.id, this.toolboxApi)
+
+    // Lazy load the base URL for the toolbox
+    const baseUrlPlaceholder = 'dtn-placeholder'
+    this.axiosInstance.defaults.baseURL = baseUrlPlaceholder
+    this.axiosInstance.interceptors.request.use(async (config) => {
+      if (this.axiosInstance.defaults.baseURL === baseUrlPlaceholder) {
+        this.axiosInstance.defaults.baseURL = (await this.getPreviewLink(TOOLBOX_PORT)).url
+        config.baseURL = this.axiosInstance.defaults.baseURL
+      }
+      return config
+    })
+
+    // Initialize Services
+    this.fs = new FileSystem(this.id, this.clientConfig, new FileSystemApi(this.clientConfig, '', this.axiosInstance))
+    this.git = new Git(new GitApi(this.clientConfig, '', this.axiosInstance))
     this.process = new Process(
-      this.id,
       this.clientConfig,
       this.codeToolbox,
-      this.toolboxApi,
+      new ProcessApi(this.clientConfig, '', this.axiosInstance),
       async (port) => await this.getPreviewLink(port),
     )
-    this.computerUse = new ComputerUse(this.id, this.toolboxApi)
+    this.computerUse = new ComputerUse(new ComputerUseApi(this.clientConfig, '', this.axiosInstance))
+    this.infoApi = new InfoApi(this.clientConfig, '', this.axiosInstance)
   }
 
   /**
@@ -139,7 +157,7 @@ export class Sandbox implements SandboxDto {
    * console.log(`Sandbox user home: ${userHomeDir}`);
    */
   public async getUserHomeDir(): Promise<string | undefined> {
-    const response = await this.toolboxApi.getUserHomeDir(this.id)
+    const response = await this.infoApi.getUserHomeDir()
     return response.data.dir
   }
 
@@ -161,7 +179,7 @@ export class Sandbox implements SandboxDto {
    * console.log(`Sandbox working directory: ${workDir}`);
    */
   public async getWorkDir(): Promise<string | undefined> {
-    const response = await this.toolboxApi.getWorkDir(this.id)
+    const response = await this.infoApi.getWorkDir()
     return response.data.dir
   }
 
@@ -179,7 +197,11 @@ export class Sandbox implements SandboxDto {
    * const lsp = await sandbox.createLspServer('typescript', 'workspace/project');
    */
   public async createLspServer(languageId: LspLanguageId | string, pathToProject: string): Promise<LspServer> {
-    return new LspServer(languageId as LspLanguageId, pathToProject, this.toolboxApi, this.id)
+    return new LspServer(
+      languageId as LspLanguageId,
+      pathToProject,
+      new LspApi(this.clientConfig, '', this.axiosInstance),
+    )
   }
 
   /**
@@ -501,6 +523,9 @@ export class Sandbox implements SandboxDto {
    * @returns {void}
    */
   private processSandboxDto(sandboxDto: SandboxDto) {
+    if (sandboxDto.state == SandboxState.STARTED && this.state != sandboxDto.state) {
+      // get preview link and store it in toolbox config
+    }
     this.id = sandboxDto.id
     this.organizationId = sandboxDto.organizationId
     this.snapshot = sandboxDto.snapshot

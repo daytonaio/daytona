@@ -1,6 +1,10 @@
 // Copyright 2025 Daytona Platforms Inc.
 // SPDX-License-Identifier: AGPL-3.0
 
+//	@title			Daytona Daemon API
+//	@version		v0.0.0-dev
+//	@description	Daytona Daemon API
+
 package toolbox
 
 import (
@@ -24,8 +28,11 @@ import (
 	"os"
 	"path"
 
+	"github.com/daytonaio/daemon/pkg/toolbox/docs"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
+	swaggerfiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -43,6 +50,16 @@ type UserHomeDirResponse struct {
 	Dir string `json:"dir"`
 } // @name UserHomeDirResponse
 
+// GetWorkDir godoc
+//
+//	@Summary		Get working directory
+//	@Description	Get the current working directory path. This is default directory used for running commands.
+//	@Tags			info
+//	@Produce		json
+//	@Success		200	{object}	WorkDirResponse
+//	@Router			/work-dir [get]
+//
+//	@id				GetWorkDir
 func (s *Server) GetWorkDir(ctx *gin.Context) {
 	workDir := WorkDirResponse{
 		Dir: s.WorkDir,
@@ -51,6 +68,16 @@ func (s *Server) GetWorkDir(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, workDir)
 }
 
+// GetUserHomeDir godoc
+//
+//	@Summary		Get user home directory
+//	@Description	Get the current user home directory path.
+//	@Tags			info
+//	@Produce		json
+//	@Success		200	{object}	UserHomeDirResponse
+//	@Router			/user-home-dir [get]
+//
+//	@id				GetUserHomeDir
 func (s *Server) GetUserHomeDir(ctx *gin.Context) {
 	userHomeDir, err := os.UserHomeDir()
 	if err != nil {
@@ -64,7 +91,27 @@ func (s *Server) GetUserHomeDir(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, userHomeDirResponse)
 }
 
+// GetVersion godoc
+//
+//	@Summary		Get version
+//	@Description	Get the current daemon version
+//	@Tags			info
+//	@Produce		json
+//	@Success		200	{object}	map[string]string
+//	@Router			/version [get]
+//
+//	@id				GetVersion
+func (s *Server) GetVersion(ctx *gin.Context) {
+	ctx.JSON(http.StatusOK, gin.H{
+		"version": internal.Version,
+	})
+}
+
 func (s *Server) Start() error {
+	docs.SwaggerInfo.Description = "Daytona Daemon API"
+	docs.SwaggerInfo.Title = "Daytona Daemon API"
+	docs.SwaggerInfo.BasePath = "/"
+
 	// Set Gin to release mode in production
 	if os.Getenv("ENVIRONMENT") == "production" {
 		gin.SetMode(gin.ReleaseMode)
@@ -76,11 +123,12 @@ func (s *Server) Start() error {
 	r.Use(middlewares.ErrorMiddleware())
 	binding.Validator = new(DefaultValidator)
 
-	r.GET("/version", func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, gin.H{
-			"version": internal.Version,
-		})
-	})
+	// Add swagger UI in development mode
+	if os.Getenv("ENVIRONMENT") != "production" {
+		r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
+	}
+
+	r.GET("/version", s.GetVersion)
 
 	// keep /project-dir old behavior for backward compatibility
 	r.GET("/project-dir", s.GetUserHomeDir)
@@ -288,7 +336,16 @@ func (s *Server) computerUseDisabledMiddleware() gin.HandlerFunc {
 	}
 }
 
-// Computer use management handlers
+// startComputerUse godoc
+//
+//	@Summary		Start computer use processes
+//	@Description	Start all computer use processes and return their status
+//	@Tags			computer-use
+//	@Produce		json
+//	@Success		200	{object}	ComputerUseStartResponse
+//	@Router			/computeruse/start [post]
+//
+//	@id				StartComputerUse
 func (s *Server) startComputerUse(ctx *gin.Context) {
 	_, err := s.ComputerUse.Start()
 	if err != nil {
@@ -314,6 +371,16 @@ func (s *Server) startComputerUse(ctx *gin.Context) {
 	})
 }
 
+// stopComputerUse godoc
+//
+//	@Summary		Stop computer use processes
+//	@Description	Stop all computer use processes and return their status
+//	@Tags			computer-use
+//	@Produce		json
+//	@Success		200	{object}	ComputerUseStopResponse
+//	@Router			/computeruse/stop [post]
+//
+//	@id				StopComputerUse
 func (s *Server) stopComputerUse(ctx *gin.Context) {
 	_, err := s.ComputerUse.Stop()
 	if err != nil {
@@ -338,6 +405,16 @@ func (s *Server) stopComputerUse(ctx *gin.Context) {
 	})
 }
 
+// getComputerUseStatus godoc
+//
+//	@Summary		Get computer use process status
+//	@Description	Get the status of all computer use processes
+//	@Tags			computer-use
+//	@Produce		json
+//	@Success		200	{object}	ComputerUseStatusResponse
+//	@Router			/computeruse/process-status [get]
+//
+//	@id				GetComputerUseStatus
 func (s *Server) getComputerUseStatus(ctx *gin.Context) {
 	status, err := s.ComputerUse.GetProcessStatus()
 	if err != nil {
@@ -352,6 +429,17 @@ func (s *Server) getComputerUseStatus(ctx *gin.Context) {
 	})
 }
 
+// getProcessStatus godoc
+//
+//	@Summary		Get specific process status
+//	@Description	Check if a specific computer use process is running
+//	@Tags			computer-use
+//	@Produce		json
+//	@Param			processName	path		string	true	"Process name to check"
+//	@Success		200			{object}	ProcessStatusResponse
+//	@Router			/computeruse/process/{processName}/status [get]
+//
+//	@id				GetProcessStatus
 func (s *Server) getProcessStatus(ctx *gin.Context) {
 	processName := ctx.Param("processName")
 	req := &computeruse.ProcessRequest{
@@ -372,6 +460,17 @@ func (s *Server) getProcessStatus(ctx *gin.Context) {
 	})
 }
 
+// restartProcess godoc
+//
+//	@Summary		Restart specific process
+//	@Description	Restart a specific computer use process
+//	@Tags			computer-use
+//	@Produce		json
+//	@Param			processName	path		string	true	"Process name to restart"
+//	@Success		200			{object}	ProcessRestartResponse
+//	@Router			/computeruse/process/{processName}/restart [post]
+//
+//	@id				RestartProcess
 func (s *Server) restartProcess(ctx *gin.Context) {
 	processName := ctx.Param("processName")
 	req := &computeruse.ProcessRequest{
@@ -392,6 +491,17 @@ func (s *Server) restartProcess(ctx *gin.Context) {
 	})
 }
 
+// getProcessLogs godoc
+//
+//	@Summary		Get process logs
+//	@Description	Get logs for a specific computer use process
+//	@Tags			computer-use
+//	@Produce		json
+//	@Param			processName	path		string	true	"Process name to get logs for"
+//	@Success		200			{object}	ProcessLogsResponse
+//	@Router			/computeruse/process/{processName}/logs [get]
+//
+//	@id				GetProcessLogs
 func (s *Server) getProcessLogs(ctx *gin.Context) {
 	processName := ctx.Param("processName")
 	req := &computeruse.ProcessRequest{
@@ -412,6 +522,17 @@ func (s *Server) getProcessLogs(ctx *gin.Context) {
 	})
 }
 
+// getProcessErrors godoc
+//
+//	@Summary		Get process errors
+//	@Description	Get errors for a specific computer use process
+//	@Tags			computer-use
+//	@Produce		json
+//	@Param			processName	path		string	true	"Process name to get errors for"
+//	@Success		200			{object}	ProcessErrorsResponse
+//	@Router			/computeruse/process/{processName}/errors [get]
+//
+//	@id				GetProcessErrors
 func (s *Server) getProcessErrors(ctx *gin.Context) {
 	processName := ctx.Param("processName")
 	req := &computeruse.ProcessRequest{

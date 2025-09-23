@@ -27,7 +27,7 @@ func (u *ComputerUse) GetMousePosition() (*computeruse.MousePositionResponse, er
 	}, nil
 }
 
-func (u *ComputerUse) MoveMouse(req *computeruse.MoveMouseRequest) (*computeruse.MousePositionResponse, error) {
+func (u *ComputerUse) MoveMouse(req *computeruse.MouseMoveRequest) (*computeruse.MousePositionResponse, error) {
 	robotgo.Move(req.X, req.Y)
 
 	// Small delay to ensure movement completes
@@ -44,7 +44,7 @@ func (u *ComputerUse) MoveMouse(req *computeruse.MoveMouseRequest) (*computeruse
 	}, nil
 }
 
-func (u *ComputerUse) Click(req *computeruse.ClickRequest) (*computeruse.MouseClickResponse, error) {
+func (u *ComputerUse) Click(req *computeruse.MouseClickRequest) (*computeruse.MouseClickResponse, error) {
 	// Default to left button
 	if req.Button == "" {
 		req.Button = "left"
@@ -84,7 +84,7 @@ func moveMouseSmoothly(startX, startY, endX, endY, steps int) {
 	}
 }
 
-func (u *ComputerUse) Drag(req *computeruse.DragRequest) (*computeruse.MouseDragResponse, error) {
+func (u *ComputerUse) Drag(req *computeruse.MouseDragRequest) (*computeruse.MouseDragResponse, error) {
 	// Default to left button
 	if req.Button == "" {
 		req.Button = "left"
@@ -134,7 +134,7 @@ func (u *ComputerUse) Drag(req *computeruse.DragRequest) (*computeruse.MouseDrag
 	}, nil
 }
 
-func (u *ComputerUse) Scroll(req *computeruse.ScrollRequest) (*computeruse.ScrollResponse, error) {
+func (u *ComputerUse) Scroll(req *computeruse.MouseScrollRequest) (*computeruse.ScrollResponse, error) {
 	// Default amount if not specified
 	if req.Amount == 0 {
 		req.Amount = 3
