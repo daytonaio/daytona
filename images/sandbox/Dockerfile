@@ -7,6 +7,7 @@ RUN apt-get update && apt-get install -y \
     python3-pip \
     python3-venv \
     ripgrep \
+    inotify-tools \
     chromium \
     # X11 libraries required for computer use plugin
     libx11-6 \
