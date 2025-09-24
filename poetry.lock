@@ -1057,6 +1057,7 @@ aiofiles = ">=24.1.0,<24.2.0"
 Deprecated = ">=1.2.18,<2.0.0"
 environs = ">=10.0.0,<15.0.0"
 httpx = ">=0.28.0,<0.29.0"
+multipart = ">=1.0.0,<2.0.0"
 obstore = ">=0.7.0,<0.8.0"
 pydantic = ">=2.4.2,<3.0.0"
 toml = ">=0.10.0,<0.11.0"
@@ -2628,6 +2629,22 @@ files = [
 
 [package.dependencies]
 typing-extensions = {version = ">=4.1.0", markers = "python_version < \"3.11\""}
+
+[[package]]
+name = "multipart"
+version = "1.2.1"
+description = "Parser for multipart/form-data"
+optional = false
+python-versions = ">=3.8"
+groups = ["main"]
+files = [
+    {file = "multipart-1.2.1-py3-none-any.whl", hash = "sha256:c03dc203bc2e67f6b46a599467ae0d87cf71d7530504b2c1ff4a9ea21d8b8c8c"},
+    {file = "multipart-1.2.1.tar.gz", hash = "sha256:829b909b67bc1ad1c6d4488fcdc6391c2847842b08323addf5200db88dbe9480"},
+]
+
+[package.extras]
+dev = ["build", "pytest", "pytest-cov", "twine"]
+docs = ["sphinx (>=8,<9)", "sphinx-autobuild"]
 
 [[package]]
 name = "mypy-extensions"

@@ -73,10 +73,36 @@ async function main() {
     //  replace content in config file
     await sandbox.fs.replaceInFiles([path.join(newDir, 'config.json')], '"debug": true', '"debug": false')
 
-    //  download the modified config file
-    console.log('Downloading updated config file:')
-    const configContent = await sandbox.fs.downloadFile(path.join(newDir, 'config.json'))
-    console.log(configContent.toString())
+    // Download multiple files - mix of local file and memory download
+    console.log('Downloading multiple files:')
+    const downloadResults = await sandbox.fs.downloadFiles([
+      {
+        source: path.join(newDir, 'config.json'),
+        destination: 'local-config.json',
+      },
+      {
+        source: path.join(newDir, 'example.txt'),
+      },
+      {
+        source: path.join(newDir, 'script.sh'),
+        destination: 'local-script.sh',
+      },
+    ])
+
+    for (const result of downloadResults) {
+      if (result.error) {
+        console.error(`Error downloading ${result.source}: ${result.error}`)
+      } else if (typeof result.result === 'string') {
+        console.log(`Downloaded ${result.source} to ${result.result}`)
+      } else {
+        console.log(`Downloaded ${result.source} to memory (${result.result?.length} bytes)`)
+      }
+    }
+
+    // Single file download example
+    console.log('Single file download example:')
+    const reportBuffer = await sandbox.fs.downloadFile(path.join(newDir, 'config.json'))
+    console.log('Config content:', reportBuffer.toString())
 
     // Create a report of all operations
     const reportData = `
@@ -84,7 +110,7 @@ Project Files Report:
 ---------------------
 Time: ${new Date().toISOString()}
 Files: ${matches.files.length} JSON files found
-Config: ${configContent.includes('"debug": false') ? 'Production mode' : 'Debug mode'}
+Config: ${reportBuffer.includes('"debug": false') ? 'Production mode' : 'Debug mode'}
 Script: ${scriptResult.exitCode === 0 ? 'Executed successfully' : 'Failed'}
     `.trim()
 
@@ -93,6 +119,8 @@ Script: ${scriptResult.exitCode === 0 ? 'Executed successfully' : 'Failed'}
 
     // Clean up local file
     fs.unlinkSync(localFilePath)
+    if (fs.existsSync('local-config.json')) fs.unlinkSync('local-config.json')
+    if (fs.existsSync('local-script.sh')) fs.unlinkSync('local-script.sh')
   } catch (error) {
     console.error('Error:', error)
   } finally {
