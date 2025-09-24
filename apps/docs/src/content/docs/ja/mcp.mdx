@@ -6,39 +6,39 @@ import { TabItem, Tabs } from '@astrojs/starlight/components'
 
 Daytona Model Context Protocol (MCP) サーバーは、AIエージェントがDaytonaの機能にプログラムからアクセスし、操作できるようにします。本ガイドでは、各種AIエージェントでMCPサーバーをセットアップして利用する方法を解説します。
 
-## 前提条件
+## 前提条件 \{#prerequisites\}
 
 開始する前に、以下を用意してください:
 
-- Daytona アカウント
-- Daytona CLI がインストールされていること
-- 互換性のある AI エージェント（Claude Desktop App、Claude Code、Cursor、または Windsurf）
+* Daytona アカウント
+* Daytona CLI がインストールされていること
+* 互換性のある AI エージェント（Claude Desktop App、Claude Code、Cursor、または Windsurf）
 
-## インストールとセットアップ
+## インストールとセットアップ \{#installation-and-setup\}
 
-### 1. Daytona CLI のインストール
+### 1. Daytona CLI のインストール \{#1-install-daytona-cli\}
 
 <Tabs>
-<TabItem label="Mac/Linux">
-```bash
-brew install daytonaio/cli/daytona
-```
+  <TabItem label="Mac/Linux">
+    ```bash
+    brew install daytonaio/cli/daytona
+    ```
+  </TabItem>
 
-</TabItem>
-<TabItem label="Windows">
-```bash
-powershell -Command "irm https://get.daytona.io/windows | iex"
-```
-</TabItem>
+  <TabItem label="Windows">
+    ```bash
+    powershell -Command "irm https://get.daytona.io/windows | iex"
+    ```
+  </TabItem>
 </Tabs>
 
-### 2. Daytona に認証する
+### 2. Daytona に認証する \{#2-authenticate-with-daytona\}
 
 ```bash
 daytona login
 ```
 
-### 3. MCPサーバーを初期化
+### 3. MCPサーバーを初期化 \{#3-initialize-mcp-server\}
 
 使用するAIエージェントで Daytona の MCPサーバーを初期化します:
 
@@ -46,11 +46,11 @@ daytona login
 daytona mcp init [claude/cursor/windsurf]
 ```
 
-### 4. AIエージェントを起動
+### 4. AIエージェントを起動 \{#4-open-your-ai-agent\}
 
 初期化後、AIエージェントのアプリケーションを起動して、Daytona の機能の利用を開始します。
 
-## 他のAIエージェントとの統合
+## 他のAIエージェントとの統合 \{#integration-with-other-ai-agents\}
 
 Daytona MCP を他のAIエージェントと統合するには、次の手順に従ってください。
 
@@ -89,128 +89,128 @@ Windows ユーザーは、`env` フィールドに次を追加してください
 
 2. 設定を反映するため、AI エージェントを開き直すか再起動します。
 
-## 利用可能なツール
+## 利用可能なツール \{#available-tools\}
 
-### サンドボックス管理
+### サンドボックス管理 \{#sandbox-management\}
 
-- **サンドボックスの作成**
+* **サンドボックスの作成**
 
-  - 新しい Daytona サンドボックスを作成します
-  - パラメータ:
-    - `target` (default: "us"): ターゲット (リージョン)
-    - `snapshot`: サンドボックス用のスナップショット (任意)
-    - `auto_stop_interval` (default: "15"): 自動停止までの分数 (0 で無効)
-    - `auto_archive_interval` (default: "10080"): 自動アーカイブまでの分数 (0 の場合は最大間隔が適用)
+  * 新しい Daytona サンドボックスを作成します
+  * パラメータ:
+    * `target` (default: &quot;us&quot;): ターゲット (リージョン)
+    * `snapshot`: サンドボックス用のスナップショット (任意)
+    * `auto_stop_interval` (default: &quot;15&quot;): 自動停止までの分数 (0 で無効)
+    * `auto_archive_interval` (default: &quot;10080&quot;): 自動アーカイブまでの分数 (0 の場合は最大間隔が適用)
 
-- **サンドボックスの破棄**
-  - 既存の Daytona サンドボックスを削除します
+* **サンドボックスの破棄**
+  * 既存の Daytona サンドボックスを削除します
 
-### ファイル操作
+### ファイル操作 \{#file-operations\}
 
-- **ファイルのダウンロード**
+* **ファイルのダウンロード**
 
-  - Daytona サンドボックスからファイルをダウンロードします
-  - コンテンツをテキストまたは base64 エンコード画像として返します
-  - パラメータ:
-    - `file_path`: ファイルパス
+  * Daytona サンドボックスからファイルをダウンロードします
+  * コンテンツをテキストまたは base64 エンコード画像として返します
+  * パラメータ:
+    * `file_path`: ファイルパス
 
-- **ファイルのアップロード**
+* **ファイルのアップロード**
 
-  - Daytona サンドボックスにファイルをアップロードします
-  - テキストまたは base64 エンコードのバイナリをサポート
-  - 必要な親ディレクトリを自動作成
-  - 適切な権限でセッション中はファイルを保持
-  - 上書き制御をサポートし、元のファイル形式を維持
-  - パラメータ:
-    - `file_path`: アップロードするファイルのパス
-    - `content`: アップロードするファイルの内容
-    - `encoding`: アップロードするファイルのエンコーディング
-    - `overwrite`: 既存の場合に上書きするか
+  * Daytona サンドボックスにファイルをアップロードします
+  * テキストまたは base64 エンコードのバイナリをサポート
+  * 必要な親ディレクトリを自動作成
+  * 適切な権限でセッション中はファイルを保持
+  * 上書き制御をサポートし、元のファイル形式を維持
+  * パラメータ:
+    * `file_path`: アップロードするファイルのパス
+    * `content`: アップロードするファイルの内容
+    * `encoding`: アップロードするファイルのエンコーディング
+    * `overwrite`: 既存の場合に上書きするか
 
-- **フォルダーの作成**
+* **フォルダーの作成**
 
-  - サンドボックスに新しいディレクトリを作成します
-  - パラメータ:
-    - `folder_path`: 作成するパス
-    - `mode`: ディレクトリのパーミッション (default: 0755)
+  * サンドボックスに新しいディレクトリを作成します
+  * パラメータ:
+    * `folder_path`: 作成するパス
+    * `mode`: ディレクトリのパーミッション (default: 0755)
 
-- **ファイル情報の取得**
+* **ファイル情報の取得**
 
-  - ファイル情報を取得します
-  - パラメータ:
-    - `file_path`: ファイルパス
+  * ファイル情報を取得します
+  * パラメータ:
+    * `file_path`: ファイルパス
 
-- **ファイル一覧**
+* **ファイル一覧**
 
-  - ディレクトリの内容を一覧表示します
-  - パラメータ:
-    - `path`: ディレクトリパス (デフォルトはカレントディレクトリ)
+  * ディレクトリの内容を一覧表示します
+  * パラメータ:
+    * `path`: ディレクトリパス (デフォルトはカレントディレクトリ)
 
-- **ファイルの移動**
+* **ファイルの移動**
 
-  - ファイルを移動またはリネームします
-  - パラメータ:
-    - `source_path`: ソースの場所
-    - `dest_path`: 移動先の場所
+  * ファイルを移動またはリネームします
+  * パラメータ:
+    * `source_path`: ソースの場所
+    * `dest_path`: 移動先の場所
 
-- **ファイルの削除**
-  - ファイルまたはディレクトリを削除します
-  - パラメータ:
-    - `file_path`: 削除対象のパス
+* **ファイルの削除**
+  * ファイルまたはディレクトリを削除します
+  * パラメータ:
+    * `file_path`: 削除対象のパス
 
-### プレビュー
+### プレビュー \{#preview\}
 
-- **プレビューリンク**
-  - Web アプリケーション向けにアクセス可能なプレビュー URL を生成します
-  - ローカルポートを外部に公開するための安全なトンネルを作成
-  - 指定ポートのサーバー稼働状況を検証
-  - トラブルシューティング用の診断情報を提供
-  - サービス整理のためのカスタム説明とメタデータをサポート
-  - パラメータ:
-    - `port`: 公開するポート
-    - `description`: サービスの説明
-    - `check_server`: ポートでサーバーが稼働中かを確認
+* **プレビューリンク**
+  * Web アプリケーション向けにアクセス可能なプレビュー URL を生成します
+  * ローカルポートを外部に公開するための安全なトンネルを作成
+  * 指定ポートのサーバー稼働状況を検証
+  * トラブルシューティング用の診断情報を提供
+  * サービス整理のためのカスタム説明とメタデータをサポート
+  * パラメータ:
+    * `port`: 公開するポート
+    * `description`: サービスの説明
+    * `check_server`: ポートでサーバーが稼働中かを確認
 
-### Git 操作
+### Git 操作 \{#git-operations\}
 
-- **Git Clone**
-  - Git リポジトリをクローンします
-  - パラメータ:
-    - `url`: リポジトリの URL
-    - `path`: ターゲットディレクトリ (デフォルトはカレント)
-    - `branch`: クローンするブランチ
-    - `commit_id`: クローンする特定のコミット
-    - `username`: Git ユーザー名
-    - `password`: Git パスワード
+* **Git Clone**
+  * Git リポジトリをクローンします
+  * パラメータ:
+    * `url`: リポジトリの URL
+    * `path`: ターゲットディレクトリ (デフォルトはカレント)
+    * `branch`: クローンするブランチ
+    * `commit_id`: クローンする特定のコミット
+    * `username`: Git ユーザー名
+    * `password`: Git パスワード
 
-### コマンド実行
+### コマンド実行 \{#command-execution\}
 
-- **コマンドの実行**
-  - Daytona 環境でシェルコマンドを実行します
-  - stdout、stderr、終了コードを返します
-  - コマンドはサンドボックスユーザー権限で実行されます
-  - パラメータ:
-    - `command`: 実行するコマンド
+* **コマンドの実行**
+  * Daytona 環境でシェルコマンドを実行します
+  * stdout、stderr、終了コードを返します
+  * コマンドはサンドボックスユーザー権限で実行されます
+  * パラメータ:
+    * `command`: 実行するコマンド
 
-## トラブルシューティング
+## トラブルシューティング \{#troubleshooting\}
 
 一般的な問題と解決策:
 
-- **認証の問題**
+* **認証の問題**
 
-  - 資格情報を更新するために `daytona login` を実行する
+  * 資格情報を更新するために `daytona login` を実行する
 
-- **接続エラー**
+* **接続エラー**
 
-  - MCPサーバーの構成を確認する
-  - サーバーのステータスを確認する
+  * MCPサーバーの構成を確認する
+  * サーバーのステータスを確認する
 
-- **サンドボックスのエラー**
-  - `daytona sandbox list` を使用してサンドボックスのステータスを確認する
+* **サンドボックスのエラー**
+  * `daytona sandbox list` を使用してサンドボックスのステータスを確認する
 
-## サポート
+## サポート \{#support\}
 
 サポートが必要な場合は、次をご利用ください:
 
-- [daytona.io](https://daytona.io) をご覧ください
-- support@daytona.io までお問い合わせください
+* [daytona.io](https://daytona.io) をご覧ください
+* support@daytona.io までお問い合わせください
