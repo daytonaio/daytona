@@ -48,6 +48,7 @@ from daytona_api_client.models.create_workspace import CreateWorkspace
 from daytona_api_client.models.daytona_configuration import DaytonaConfiguration
 from daytona_api_client.models.display_info_response import DisplayInfoResponse
 from daytona_api_client.models.docker_registry import DockerRegistry
+from daytona_api_client.models.download_files import DownloadFiles
 from daytona_api_client.models.execute_request import ExecuteRequest
 from daytona_api_client.models.execute_response import ExecuteResponse
 from daytona_api_client.models.file_info import FileInfo
