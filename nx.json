@@ -157,6 +157,12 @@
     },
     "conventionalCommits": {
       "types": {
+        "refactor": {
+          "semverBump": "patch",
+          "changelog": {
+            "title": "Refactor"
+          }
+        },
         "__INVALID__": {
           "semverBump": "patch",
           "changelog": {
