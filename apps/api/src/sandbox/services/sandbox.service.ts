@@ -25,7 +25,6 @@ import { EventEmitter2, OnEvent } from '@nestjs/event-emitter'
 import { WarmPoolEvents } from '../constants/warmpool-events.constants'
 import { WarmPoolTopUpRequested } from '../events/warmpool-topup-requested.event'
 import { Runner } from '../entities/runner.entity'
-import { PortPreviewUrlDto } from '../dto/port-preview-url.dto'
 import { Organization } from '../../organization/entities/organization.entity'
 import { SandboxEvents } from '../constants/sandbox-events.constants'
 import { SandboxStateUpdatedEvent } from '../events/sandbox-state-updated.event'
@@ -127,17 +126,17 @@ export class SandboxService {
     const usageOverview = await this.organizationUsageService.getSandboxUsageOverview(organization.id, excludeSandboxId)
 
     try {
-      if (usageOverview.currentCpuUsage + usageOverview.pendingCpuUsage > organization.totalCpuQuota) {
+      if (usageOverview.currentCpuUsage + (usageOverview.pendingCpuUsage ?? 0) > organization.totalCpuQuota) {
         throw new ForbiddenException(`Total CPU quota exceeded. Maximum allowed: ${organization.totalCpuQuota}`)
       }
 
-      if (usageOverview.currentMemoryUsage + usageOverview.pendingMemoryUsage > organization.totalMemoryQuota) {
+      if (usageOverview.currentMemoryUsage + (usageOverview.pendingMemoryUsage ?? 0) > organization.totalMemoryQuota) {
         throw new ForbiddenException(
           `Total memory quota exceeded. Maximum allowed: ${organization.totalMemoryQuota}GiB`,
         )
       }
 
-      if (usageOverview.currentDiskUsage + usageOverview.pendingDiskUsage > organization.totalDiskQuota) {
+      if (usageOverview.currentDiskUsage + (usageOverview.pendingDiskUsage ?? 0) > organization.totalDiskQuota) {
         throw new ForbiddenException(`Total disk quota exceeded. Maximum allowed: ${organization.totalDiskQuota}GiB`)
       }
     } catch (error) {
@@ -271,6 +270,10 @@ export class SandboxService {
         snapshotIdOrName = this.configService.getOrThrow('defaultSnapshot')
       }
 
+      if (!snapshotIdOrName) {
+        throw new BadRequestError('Snapshot ID or name is required')
+      }
+
       const snapshotFilter: FindOptionsWhere<Snapshot>[] = [
         { organizationId: organization.id, name: snapshotIdOrName },
         { general: true, name: snapshotIdOrName },
@@ -293,11 +296,8 @@ export class SandboxService {
         )
       }
 
-      let snapshot = snapshots.find((s) => s.state === SnapshotState.ACTIVE)
-
-      if (!snapshot) {
-        snapshot = snapshots[0]
-      }
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      const snapshot = snapshots.find((s) => s.state === SnapshotState.ACTIVE) ?? snapshots[0]!
 
       if (snapshot.state !== SnapshotState.ACTIVE) {
         throw new BadRequestError(`Snapshot ${snapshotIdOrName} is ${snapshot.state}`)
@@ -343,13 +343,13 @@ export class SandboxService {
         const warmPoolSandbox = await this.warmPoolService.fetchWarmPoolSandbox({
           organizationId: organization.id,
           snapshot: snapshotIdOrName,
-          target: createSandboxDto.target,
-          class: createSandboxDto.class,
+          target: region,
+          class: sandboxClass,
           cpu: cpu,
           mem: mem,
           disk: disk,
-          osUser: createSandboxDto.user,
-          env: createSandboxDto.env,
+          osUser: createSandboxDto.user ?? 'daytona',
+          env: createSandboxDto.env ?? {},
           state: SandboxState.STARTED,
         })
 
@@ -411,7 +411,7 @@ export class SandboxService {
       sandbox.runnerId = runner.id
 
       await this.sandboxRepository.insert(sandbox)
-      return SandboxDto.fromSandbox(sandbox, runner.domain)
+      return new SandboxDto(sandbox, runner.domain)
     } catch (error) {
       await this.rollbackPendingUsage(
         organization.id,
@@ -482,7 +482,7 @@ export class SandboxService {
       SandboxEvents.STATE_UPDATED,
       new SandboxStateUpdatedEvent(warmPoolSandbox, SandboxState.STARTED, SandboxState.STARTED),
     )
-    return SandboxDto.fromSandbox(result, runner.domain)
+    return new SandboxDto(result, runner.domain)
   }
 
   async createFromBuildInfo(createSandboxDto: CreateSandboxDto, organization: Organization): Promise<SandboxDto> {
@@ -556,6 +556,10 @@ export class SandboxService {
         sandbox.autoDeleteInterval = createSandboxDto.autoDeleteInterval
       }
 
+      if (!createSandboxDto.buildInfo) {
+        throw new BadRequestError('Build info is required')
+      }
+
       const buildInfoSnapshotRef = generateBuildSnapshotRef(
         createSandboxDto.buildInfo.dockerfileContent,
         createSandboxDto.buildInfo.contextHashes,
@@ -577,7 +581,7 @@ export class SandboxService {
         sandbox.buildInfo = buildInfoEntity
       }
 
-      let runner: Runner
+      let runner: Runner | undefined
 
       try {
         runner = await this.runnerService.getRandomAvailableRunner({
@@ -598,7 +602,7 @@ export class SandboxService {
       }
 
       await this.sandboxRepository.insert(sandbox)
-      return SandboxDto.fromSandbox(sandbox, runner?.domain)
+      return new SandboxDto(sandbox, runner?.domain)
     } catch (error) {
       await this.rollbackPendingUsage(
         organization.id,
@@ -822,6 +826,9 @@ export class SandboxService {
       if (sandbox.runnerId) {
         // Add runner readiness check
         const runner = await this.runnerService.findOne(sandbox.runnerId)
+        if (!runner) {
+          throw new SandboxError('Runner not found')
+        }
         if (runner.state !== RunnerState.READY) {
           throw new SandboxError('Runner is not ready')
         }
@@ -925,7 +932,7 @@ export class SandboxService {
     return region.trim()
   }
 
-  private getValidatedOrDefaultClass(sandboxClass: SandboxClass): SandboxClass {
+  private getValidatedOrDefaultClass(sandboxClass?: SandboxClass): SandboxClass {
     if (!sandboxClass) {
       return SandboxClass.SMALL
     }
@@ -963,7 +970,7 @@ export class SandboxService {
       updatedAt: LessThan(twentyFourHoursAgo),
     })
 
-    if (destroyedSandboxs.affected > 0) {
+    if (destroyedSandboxs.affected && destroyedSandboxs.affected > 0) {
       this.logger.debug(`Cleaned up ${destroyedSandboxs.affected} destroyed sandboxes`)
     }
   }
@@ -1107,7 +1114,7 @@ export class SandboxService {
     // Log any failed sandbox destructions
     results.forEach((result, index) => {
       if (result.status === 'rejected') {
-        this.logger.error(`Failed to destroy sandbox ${sandboxes[index].id}: ${result.reason}`)
+        this.logger.error(`Failed to destroy sandbox ${sandboxes[index]?.id}: ${result.reason}`)
       }
     })
   }
@@ -1194,13 +1201,13 @@ export class SandboxService {
     })
 
     if (!sshAccess) {
-      return { valid: false, sandboxId: null }
+      return new SshAccessValidationDto(false, '')
     }
 
     // Check if token is expired
     const isExpired = sshAccess.expiresAt < new Date()
     if (isExpired) {
-      return { valid: false, sandboxId: null }
+      return new SshAccessValidationDto(false, '')
     }
 
     // Get runner information if sandbox exists
@@ -1210,15 +1217,10 @@ export class SandboxService {
       })
 
       if (runner) {
-        return {
-          valid: true,
-          sandboxId: sshAccess.sandbox.id,
-          runnerId: runner.id,
-          runnerDomain: runner.domain,
-        }
+        return new SshAccessValidationDto(true, sshAccess.sandbox.id, runner.id, runner.domain)
       }
     }
 
-    return { valid: true, sandboxId: sshAccess.sandbox.id }
+    return new SshAccessValidationDto(true, sshAccess.sandbox.id)
   }
 }

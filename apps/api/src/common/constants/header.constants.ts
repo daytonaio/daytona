@@ -3,16 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-export const CustomHeaders: {
-  [key: string]: {
-    name: string
-    description?: string
-    required?: boolean
-    schema?: {
-      type?: string
-    }
-  }
-} = {
+export const CustomHeaders = {
   ORGANIZATION_ID: {
     name: 'X-Daytona-Organization-ID',
     description: 'Use with JWT to specify the organization ID',
@@ -37,4 +28,4 @@ export const CustomHeaders: {
       type: 'string',
     },
   },
-}
+} as const

@@ -19,7 +19,6 @@ import { SandboxState } from '../enums/sandbox-state.enum'
 import { Sandbox } from '../entities/sandbox.entity'
 import { SnapshotRunner } from '../entities/snapshot-runner.entity'
 import { SnapshotRunnerState } from '../enums/snapshot-runner-state.enum'
-import { Snapshot } from '../entities/snapshot.entity'
 import { RunnerSnapshotDto } from '../dto/runner-snapshot.dto'
 import { RunnerAdapterFactory, RunnerInfo } from '../runner-adapter/runnerAdapter'
 import { RedisLockProvider } from '../common/redis-lock.provider'
@@ -37,8 +36,6 @@ export class RunnerService {
     private readonly sandboxRepository: Repository<Sandbox>,
     @InjectRepository(SnapshotRunner)
     private readonly snapshotRunnerRepository: Repository<SnapshotRunner>,
-    @InjectRepository(Snapshot)
-    private readonly snapshotRepository: Repository<Snapshot>,
     private readonly redisLockProvider: RedisLockProvider,
     private readonly configService: TypedConfigService,
   ) {}
@@ -131,7 +128,8 @@ export class RunnerService {
       let runnerIds = snapshotRunners.map((snapshotRunner) => snapshotRunner.runnerId)
 
       if (params.excludedRunnerIds?.length) {
-        runnerIds = runnerIds.filter((id) => !params.excludedRunnerIds.includes(id))
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- We know the excluded runner ids are not undefined
+        runnerIds = runnerIds.filter((id) => !params.excludedRunnerIds!.includes(id))
       }
 
       if (!runnerIds.length) {
@@ -341,16 +339,26 @@ export class RunnerService {
     // Get random runner from the best available runners
     const randomIntFromInterval = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1) + min)
 
-    return availableRunners[randomIntFromInterval(0, availableRunners.length - 1)]
+    const availableRunner = availableRunners[randomIntFromInterval(0, availableRunners.length - 1)]
+
+    if (!availableRunner) {
+      throw new BadRequestError('No available runners')
+    }
+
+    return availableRunner
   }
 
-  async getSnapshotRunner(runnerId, snapshotRef: string): Promise<SnapshotRunner> {
-    return this.snapshotRunnerRepository.findOne({
+  async getSnapshotRunner(runnerId: string, snapshotRef: string): Promise<SnapshotRunner> {
+    const snapshotRunner = await this.snapshotRunnerRepository.findOne({
       where: {
         runnerId: runnerId,
         snapshotRef: snapshotRef,
       },
     })
+    if (!snapshotRunner) {
+      throw new BadRequestError('Snapshot runner not found')
+    }
+    return snapshotRunner
   }
 
   async getSnapshotRunners(snapshotRef: string): Promise<SnapshotRunner[]> {
@@ -414,11 +422,19 @@ export class RunnerService {
 
     this.logger.debug(`Found ${runners.length} runners with IDs: ${runners.map((r) => r.id).join(', ')}`)
 
-    // Map to DTO format, including the snapshot runner ID
-    return runners.map((runner) => {
-      const snapshotRunner = snapshotRunners.find((sr) => sr.runnerId === runner.id)
-      return new RunnerSnapshotDto(snapshotRunner.id, runner.id, runner.domain)
+    const srMap = new Map<string, SnapshotRunner>()
+    snapshotRunners.forEach((sr) => {
+      srMap.set(sr.runnerId, sr)
     })
+
+    // Map to DTO format, including the snapshot runner ID
+    return runners
+      .filter((runner) => srMap.has(runner.id))
+      .map((runner) => {
+        const snapshotRunner = srMap.get(runner.id)
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- We know the snapshot runner exists based on the filter
+        return new RunnerSnapshotDto(snapshotRunner!.id, runner.id, runner.domain)
+      })
   }
 
   private calculateAvailabilityScore(params: AvailabilityScoreParams): number {

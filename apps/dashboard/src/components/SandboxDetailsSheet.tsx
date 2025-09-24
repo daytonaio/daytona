@@ -3,14 +3,14 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { Sandbox, SandboxState } from '@daytonaio/api-client'
 import { SandboxState as SandboxStateComponent } from './SandboxTable/SandboxState'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Tabs, TabsContent } from '@/components/ui/tabs'
 import { getRelativeTimeString } from '@/lib/utils'
-import { Archive, Camera, X, GitFork, Trash, Play, Tag } from 'lucide-react'
+import { Archive, X, Trash, Play, Tag } from 'lucide-react'
 
 interface SandboxDetailsSheetProps {
   sandbox: Sandbox | null
@@ -35,10 +35,12 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
   handleStop,
   handleDelete,
   handleArchive,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   getWebTerminalUrl,
   writePermitted,
   deletePermitted,
 }) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [terminalUrl, setTerminalUrl] = useState<string | null>(null)
 
   // TODO: uncomment when we enable the terminal tab

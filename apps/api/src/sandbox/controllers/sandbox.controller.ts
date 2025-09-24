@@ -19,7 +19,7 @@ import {
   NotFoundException,
   Res,
   Request,
-  RawBodyRequest,
+  type RawBodyRequest,
   Next,
   ParseBoolPipe,
 } from '@nestjs/common'
@@ -41,7 +41,7 @@ import { UpdateSandboxStateDto } from '../dto/update-sandbox-state.dto'
 import { RunnerService } from '../services/runner.service'
 import { RunnerAuthGuard } from '../../auth/runner-auth.guard'
 import { RunnerContextDecorator } from '../../common/decorators/runner-context.decorator'
-import { RunnerContext } from '../../common/interfaces/runner-context.interface'
+import type { RunnerContext } from '../../common/interfaces/runner-context.interface'
 import { SandboxState } from '../enums/sandbox-state.enum'
 import { Sandbox } from '../entities/sandbox.entity'
 import { ContentTypeInterceptor } from '../../common/interceptors/content-type.interceptors'
@@ -49,13 +49,13 @@ import { Runner } from '../entities/runner.entity'
 import { SandboxAccessGuard } from '../guards/sandbox-access.guard'
 import { CustomHeaders } from '../../common/constants/header.constants'
 import { AuthContext } from '../../common/decorators/auth-context.decorator'
-import { OrganizationAuthContext } from '../../common/interfaces/auth-context.interface'
+import type { OrganizationAuthContext } from '../../common/interfaces/auth-context.interface'
 import { RequiredOrganizationResourcePermissions } from '../../organization/decorators/required-organization-resource-permissions.decorator'
 import { OrganizationResourcePermission } from '../../organization/enums/organization-resource-permission.enum'
 import { OrganizationResourceActionGuard } from '../../organization/guards/organization-resource-action.guard'
 import { PortPreviewUrlDto } from '../dto/port-preview-url.dto'
 import { IncomingMessage, ServerResponse } from 'http'
-import { NextFunction } from 'http-proxy-middleware/dist/types'
+import type { NextFunction } from 'http-proxy-middleware/dist/types'
 import { LogProxy } from '../proxy/log-proxy'
 import { BadRequestError } from '../../exceptions/bad-request.exception'
 import { TypedConfigService } from '../../config/typed-config.service'
@@ -122,13 +122,13 @@ export class SandboxController {
     const labels = labelsQuery ? JSON.parse(labelsQuery) : {}
     const sandboxes = await this.sandboxService.findAll(authContext.organizationId, labels, includeErroredDeleted)
 
-    const runnerIds = new Set(sandboxes.map((s) => s.runnerId))
+    const runnerIds = new Set(sandboxes.map((s) => s.runnerId).filter((id) => id !== undefined))
     const runners = await this.runnerService.findByIds(Array.from(runnerIds))
     const runnerMap = new Map(runners.map((runner) => [runner.id, runner]))
 
     return sandboxes.map((sandbox) => {
-      const runner = runnerMap.get(sandbox.runnerId)
-      return SandboxDto.fromSandbox(sandbox, runner?.domain)
+      const runner = sandbox.runnerId ? runnerMap.get(sandbox.runnerId) : undefined
+      return new SandboxDto(sandbox, runner?.domain)
     })
   }
 
@@ -243,7 +243,8 @@ export class SandboxController {
 
     // Get runner information for consistent response format
     const runner = await this.runnerService.findOne(runnerContext.runnerId)
-    return sandboxes.map((sandbox) => SandboxDto.fromSandbox(sandbox, runner?.domain))
+
+    return sandboxes.map((sandbox) => new SandboxDto(sandbox, runner?.domain))
   }
 
   @Get(':sandboxId')
@@ -275,12 +276,12 @@ export class SandboxController {
   ): Promise<SandboxDto> {
     const sandbox = await this.sandboxService.findOne(sandboxId)
 
-    let runner: Runner
+    let runner: Runner | null = null
     if (sandbox.runnerId) {
       runner = await this.runnerService.findOne(sandbox.runnerId)
     }
 
-    return SandboxDto.fromSandbox(sandbox, runner?.domain)
+    return new SandboxDto(sandbox, runner?.domain)
   }
 
   @Delete(':sandboxId')
@@ -340,9 +341,12 @@ export class SandboxController {
     @Param('sandboxId') sandboxId: string,
   ): Promise<SandboxDto> {
     await this.sandboxService.start(sandboxId, authContext.organization)
-    let sandbox = SandboxDto.fromSandbox(await this.sandboxService.findOne(sandboxId), '')
+    let sandbox = new SandboxDto(await this.sandboxService.findOne(sandboxId), '')
 
-    if (![SandboxState.ARCHIVED, SandboxState.RESTORING, SandboxState.STARTED].includes(sandbox.state)) {
+    if (
+      !sandbox.state ||
+      ![SandboxState.ARCHIVED, SandboxState.RESTORING, SandboxState.STARTED].includes(sandbox.state)
+    ) {
       sandbox = await this.waitForSandboxStarted(sandbox, 30)
     }
 
@@ -719,6 +723,10 @@ export class SandboxController {
       throw new NotFoundException(`Sandbox with ID ${sandboxId} not found`)
     }
 
+    if (!sandbox.runnerId) {
+      throw new NotFoundException(`Runner not found for sandbox ${sandboxId}`)
+    }
+
     // Get runner info
     const runner = await this.runnerService.findOne(sandbox.runnerId)
     if (!runner) {
@@ -774,15 +782,12 @@ export class SandboxController {
       throw new NotFoundException(`Runner for sandbox ${sandboxId} not found`)
     }
 
-    const logProxy = new LogProxy(
-      runner.apiUrl,
-      sandbox.buildInfo.snapshotRef.split(':')[0],
-      runner.apiKey,
-      follow === true,
-      req,
-      res,
-      next,
-    )
+    const snapshotRef = sandbox.buildInfo.snapshotRef.split(':')[0]
+    if (!snapshotRef) {
+      throw new NotFoundException(`Snapshot ref not found for sandbox ${sandboxId}`)
+    }
+
+    const logProxy = new LogProxy(runner.apiUrl, snapshotRef, runner.apiKey, follow === true, req, res, next)
     return logProxy.create()
   }
 
@@ -825,7 +830,7 @@ export class SandboxController {
     @Query('expiresInMinutes') expiresInMinutes?: number,
   ): Promise<SshAccessDto> {
     const sshAccess = await this.sandboxService.createSshAccess(sandboxId, expiresInMinutes)
-    return SshAccessDto.fromSshAccess(sshAccess)
+    return new SshAccessDto(sshAccess)
   }
 
   @Delete(':sandboxId/ssh-access')
@@ -882,13 +887,7 @@ export class SandboxController {
     type: SshAccessValidationDto,
   })
   async validateSshAccess(@Query('token') token: string): Promise<SshAccessValidationDto> {
-    const result = await this.sandboxService.validateSshAccess(token)
-    return SshAccessValidationDto.fromValidationResult(
-      result.valid,
-      result.sandboxId,
-      result.runnerId,
-      result.runnerDomain,
-    )
+    return await this.sandboxService.validateSshAccess(token)
   }
 
   // wait up to `timeoutSeconds` for the sandbox to start; if it doesn’t, return current sandbox
@@ -905,7 +904,7 @@ export class SandboxController {
         if (event.sandbox.state === SandboxState.STARTED) {
           this.eventEmitter.off(SandboxEvents.STATE_UPDATED, handleStateUpdated)
           clearTimeout(timeout)
-          resolve(SandboxDto.fromSandbox(event.sandbox, ''))
+          resolve(new SandboxDto(event.sandbox))
         }
         if (event.sandbox.state === SandboxState.ERROR || event.sandbox.state === SandboxState.BUILD_FAILED) {
           this.eventEmitter.off(SandboxEvents.STATE_UPDATED, handleStateUpdated)
@@ -919,7 +918,7 @@ export class SandboxController {
       timeout = setTimeout(() => {
         this.eventEmitter.off(SandboxEvents.STATE_UPDATED, handleStateUpdated)
         if (latestSandbox) {
-          resolve(SandboxDto.fromSandbox(latestSandbox, ''))
+          resolve(new SandboxDto(latestSandbox))
         } else {
           resolve(sandbox)
         }

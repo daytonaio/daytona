@@ -3,9 +3,8 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Injectable, Logger } from '@nestjs/common'
+import { Injectable } from '@nestjs/common'
 import { Runner } from '../entities/runner.entity'
-import { ModuleRef } from '@nestjs/core'
 import { RunnerAdapterLegacy } from './runnerAdapter.legacy'
 import { BuildInfo } from '../entities/build-info.entity'
 import { DockerRegistry } from '../../docker-registry/entities/docker-registry.entity'
@@ -76,14 +75,10 @@ export interface RunnerAdapter {
 
 @Injectable()
 export class RunnerAdapterFactory {
-  private readonly logger = new Logger(RunnerAdapterFactory.name)
-
-  constructor(private moduleRef: ModuleRef) {}
-
   async create(runner: Runner): Promise<RunnerAdapter> {
     switch (runner.version) {
       case '0': {
-        const adapter = await this.moduleRef.create(RunnerAdapterLegacy)
+        const adapter = new RunnerAdapterLegacy(runner)
         await adapter.init(runner)
         return adapter
       }

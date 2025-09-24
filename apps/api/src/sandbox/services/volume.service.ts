@@ -41,7 +41,7 @@ export class VolumeService {
     const usageOverview = await this.organizationUsageService.getVolumeUsageOverview(organization.id)
 
     try {
-      if (usageOverview.currentVolumeUsage + usageOverview.pendingVolumeUsage > organization.volumeQuota) {
+      if (usageOverview.currentVolumeUsage + (usageOverview.pendingVolumeUsage ?? 0) > organization.volumeQuota) {
         throw new ForbiddenException(`Volume quota exceeded. Maximum allowed: ${organization.volumeQuota}`)
       }
     } catch (error) {

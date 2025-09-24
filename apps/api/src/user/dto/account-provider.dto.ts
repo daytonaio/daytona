@@ -15,4 +15,9 @@ export class AccountProviderDto {
   @ApiProperty()
   @IsString()
   displayName: string
+
+  private constructor() {
+    this.name = ''
+    this.displayName = ''
+  }
 }

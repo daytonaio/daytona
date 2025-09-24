@@ -7,7 +7,7 @@ import axios from 'axios'
 import axiosDebug from 'axios-debug-log'
 import axiosRetry from 'axios-retry'
 
-import { Injectable, Logger } from '@nestjs/common'
+import { Logger } from '@nestjs/common'
 import { RunnerAdapter, RunnerInfo, RunnerSandboxInfo } from './runnerAdapter'
 import { Runner } from '../entities/runner.entity'
 import {
@@ -32,7 +32,6 @@ import { BackupState } from '../enums/backup-state.enum'
 
 const isDebugEnabled = process.env.DEBUG === 'true'
 
-@Injectable()
 export class RunnerAdapterLegacy implements RunnerAdapter {
   private readonly logger = new Logger(RunnerAdapterLegacy.name)
   private sandboxApiClient: SandboxApi
@@ -40,49 +39,7 @@ export class RunnerAdapterLegacy implements RunnerAdapter {
   private runnerApiClient: DefaultApi
   private toolboxApiClient: ToolboxApi
 
-  private convertSandboxState(state: EnumsSandboxState): SandboxState {
-    switch (state) {
-      case EnumsSandboxState.SandboxStateCreating:
-        return SandboxState.CREATING
-      case EnumsSandboxState.SandboxStateRestoring:
-        return SandboxState.RESTORING
-      case EnumsSandboxState.SandboxStateDestroyed:
-        return SandboxState.DESTROYED
-      case EnumsSandboxState.SandboxStateDestroying:
-        return SandboxState.DESTROYING
-      case EnumsSandboxState.SandboxStateStarted:
-        return SandboxState.STARTED
-      case EnumsSandboxState.SandboxStateStopped:
-        return SandboxState.STOPPED
-      case EnumsSandboxState.SandboxStateStarting:
-        return SandboxState.STARTING
-      case EnumsSandboxState.SandboxStateStopping:
-        return SandboxState.STOPPING
-      case EnumsSandboxState.SandboxStateError:
-        return SandboxState.ERROR
-      case EnumsSandboxState.SandboxStatePullingSnapshot:
-        return SandboxState.PULLING_SNAPSHOT
-      default:
-        return SandboxState.UNKNOWN
-    }
-  }
-
-  private convertBackupState(state: EnumsBackupState): BackupState {
-    switch (state) {
-      case EnumsBackupState.BackupStatePending:
-        return BackupState.PENDING
-      case EnumsBackupState.BackupStateInProgress:
-        return BackupState.IN_PROGRESS
-      case EnumsBackupState.BackupStateCompleted:
-        return BackupState.COMPLETED
-      case EnumsBackupState.BackupStateFailed:
-        return BackupState.ERROR
-      default:
-        return BackupState.NONE
-    }
-  }
-
-  public async init(runner: Runner): Promise<void> {
+  constructor(runner: Runner) {
     const axiosInstance = axios.create({
       baseURL: runner.apiUrl,
       headers: {
@@ -131,6 +88,52 @@ export class RunnerAdapterLegacy implements RunnerAdapter {
     this.toolboxApiClient = new ToolboxApi(new Configuration(), '', axiosInstance)
   }
 
+  // This is required by the RunnerAdapter interface, but we don't need to do anything here
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function
+  public async init(runner: Runner): Promise<void> {}
+
+  private convertSandboxState(state: EnumsSandboxState): SandboxState {
+    switch (state) {
+      case EnumsSandboxState.SandboxStateCreating:
+        return SandboxState.CREATING
+      case EnumsSandboxState.SandboxStateRestoring:
+        return SandboxState.RESTORING
+      case EnumsSandboxState.SandboxStateDestroyed:
+        return SandboxState.DESTROYED
+      case EnumsSandboxState.SandboxStateDestroying:
+        return SandboxState.DESTROYING
+      case EnumsSandboxState.SandboxStateStarted:
+        return SandboxState.STARTED
+      case EnumsSandboxState.SandboxStateStopped:
+        return SandboxState.STOPPED
+      case EnumsSandboxState.SandboxStateStarting:
+        return SandboxState.STARTING
+      case EnumsSandboxState.SandboxStateStopping:
+        return SandboxState.STOPPING
+      case EnumsSandboxState.SandboxStateError:
+        return SandboxState.ERROR
+      case EnumsSandboxState.SandboxStatePullingSnapshot:
+        return SandboxState.PULLING_SNAPSHOT
+      default:
+        return SandboxState.UNKNOWN
+    }
+  }
+
+  private convertBackupState(state: EnumsBackupState): BackupState {
+    switch (state) {
+      case EnumsBackupState.BackupStatePending:
+        return BackupState.PENDING
+      case EnumsBackupState.BackupStateInProgress:
+        return BackupState.IN_PROGRESS
+      case EnumsBackupState.BackupStateCompleted:
+        return BackupState.COMPLETED
+      case EnumsBackupState.BackupStateFailed:
+        return BackupState.ERROR
+      default:
+        return BackupState.NONE
+    }
+  }
+
   async healthCheck(signal?: AbortSignal): Promise<void> {
     const response = await this.runnerApiClient.healthCheck({ signal })
     if (response.data.status !== 'ok') {
@@ -148,8 +151,10 @@ export class RunnerAdapterLegacy implements RunnerAdapter {
   async sandboxInfo(sandboxId: string): Promise<RunnerSandboxInfo> {
     const sandboxInfo = await this.sandboxApiClient.info(sandboxId)
     return {
-      state: this.convertSandboxState(sandboxInfo.data.state),
-      backupState: this.convertBackupState(sandboxInfo.data.backupState),
+      state: sandboxInfo.data.state ? this.convertSandboxState(sandboxInfo.data.state) : SandboxState.UNKNOWN,
+      backupState: sandboxInfo.data.backupState
+        ? this.convertBackupState(sandboxInfo.data.backupState)
+        : BackupState.NONE,
       backupErrorReason: sandboxInfo.data.backupError,
     }
   }
@@ -160,6 +165,10 @@ export class RunnerAdapterLegacy implements RunnerAdapter {
     entrypoint?: string[],
     metadata?: { [key: string]: string },
   ): Promise<void> {
+    if (!sandbox.snapshot) {
+      throw new Error('Snapshot is required')
+    }
+
     const createSandboxDto: CreateSandboxDTO = {
       id: sandbox.id,
       userId: sandbox.organizationId,
@@ -207,19 +216,15 @@ export class RunnerAdapterLegacy implements RunnerAdapter {
     await this.sandboxApiClient.removeDestroyed(sandboxId)
   }
 
-  async createBackup(sandbox: Sandbox, backupSnapshotName: string, registry?: DockerRegistry): Promise<void> {
+  async createBackup(sandbox: Sandbox, backupSnapshotName: string, registry: DockerRegistry): Promise<void> {
     const request: CreateBackupDTO = {
       snapshot: backupSnapshotName,
-      registry: undefined,
-    }
-
-    if (registry) {
-      request.registry = {
+      registry: {
         project: registry.project,
         url: registry.url,
         username: registry.username,
         password: registry.password,
-      }
+      },
     }
 
     await this.sandboxApiClient.createBackup(sandbox.id, request)
@@ -233,8 +238,9 @@ export class RunnerAdapterLegacy implements RunnerAdapter {
   ): Promise<void> {
     const request: BuildSnapshotRequestDTO = {
       snapshot: buildInfo.snapshotRef,
-      dockerfile: buildInfo.dockerfileContent,
-      organizationId: organizationId,
+      // TODO: verify this
+      dockerfile: buildInfo.dockerfileContent ?? '',
+      organizationId: organizationId ?? '',
       context: buildInfo.contextHashes,
       pushToInternalRegistry: pushToInternalRegistry,
     }
@@ -274,7 +280,7 @@ export class RunnerAdapterLegacy implements RunnerAdapter {
 
   async snapshotExists(snapshotName: string): Promise<boolean> {
     const response = await this.snapshotApiClient.snapshotExists(snapshotName)
-    return response.data.exists
+    return !!response.data.exists
   }
 
   async getSnapshotLogs(snapshotRef: string, follow: boolean): Promise<string> {

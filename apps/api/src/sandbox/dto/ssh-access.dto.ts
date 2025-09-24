@@ -43,15 +43,13 @@ export class SshAccessDto {
   })
   updatedAt: Date
 
-  static fromSshAccess(sshAccess: SshAccess): SshAccessDto {
-    const dto = new SshAccessDto()
-    dto.id = sshAccess.id
-    dto.sandboxId = sshAccess.sandboxId
-    dto.token = sshAccess.token
-    dto.expiresAt = sshAccess.expiresAt
-    dto.createdAt = sshAccess.createdAt
-    dto.updatedAt = sshAccess.updatedAt
-    return dto
+  constructor(sshAccess: SshAccess) {
+    this.id = sshAccess.id
+    this.sandboxId = sshAccess.sandboxId
+    this.token = sshAccess.token
+    this.expiresAt = sshAccess.expiresAt
+    this.createdAt = sshAccess.createdAt
+    this.updatedAt = sshAccess.updatedAt
   }
 }
 
@@ -82,18 +80,11 @@ export class SshAccessValidationDto {
   })
   runnerDomain?: string
 
-  static fromValidationResult(
-    valid: boolean,
-    sandboxId: string,
-    runnerId?: string,
-    runnerDomain?: string,
-  ): SshAccessValidationDto {
-    const dto = new SshAccessValidationDto()
-    dto.valid = valid
-    dto.sandboxId = sandboxId
-    dto.runnerId = runnerId
-    dto.runnerDomain = runnerDomain
-    return dto
+  constructor(valid: boolean, sandboxId: string, runnerId?: string, runnerDomain?: string) {
+    this.valid = valid
+    this.sandboxId = sandboxId
+    this.runnerId = runnerId
+    this.runnerDomain = runnerDomain
   }
 }
 
@@ -109,4 +100,9 @@ export class RevokeSshAccessDto {
     example: 'abc123def456ghi789jkl012mno345pqr678stu901vwx234yz',
   })
   token: string
+
+  private constructor() {
+    this.sandboxId = ''
+    this.token = ''
+  }
 }
