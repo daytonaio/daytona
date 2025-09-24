@@ -461,18 +461,18 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
     /**
      *
      * @summary Get sandboxes for the authenticated runner
-     * @param {string} state
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {string} [states] Comma-separated list of sandbox states to filter by
+     * @param {boolean} [skipReconcilingSandboxes] Skip sandboxes where state differs from desired state
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     getSandboxesForRunner: async (
-      state: string,
       xDaytonaOrganizationID?: string,
+      states?: string,
+      skipReconcilingSandboxes?: boolean,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
-      // verify required parameter 'state' is not null or undefined
-      assertParamExists('getSandboxesForRunner', 'state', state)
       const localVarPath = `/sandbox/for-runner`
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
@@ -491,8 +491,12 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
 
       // authentication oauth2 required
 
-      if (state !== undefined) {
-        localVarQueryParameter['state'] = state
+      if (states !== undefined) {
+        localVarQueryParameter['states'] = states
+      }
+
+      if (skipReconcilingSandboxes !== undefined) {
+        localVarQueryParameter['skipReconcilingSandboxes'] = skipReconcilingSandboxes
       }
 
       if (xDaytonaOrganizationID != null) {
@@ -1335,19 +1339,22 @@ export const SandboxApiFp = function (configuration?: Configuration) {
     /**
      *
      * @summary Get sandboxes for the authenticated runner
-     * @param {string} state
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {string} [states] Comma-separated list of sandbox states to filter by
+     * @param {boolean} [skipReconcilingSandboxes] Skip sandboxes where state differs from desired state
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async getSandboxesForRunner(
-      state: string,
       xDaytonaOrganizationID?: string,
+      states?: string,
+      skipReconcilingSandboxes?: boolean,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Sandbox>>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.getSandboxesForRunner(
-        state,
         xDaytonaOrganizationID,
+        states,
+        skipReconcilingSandboxes,
         options,
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
@@ -1858,18 +1865,20 @@ export const SandboxApiFactory = function (configuration?: Configuration, basePa
     /**
      *
      * @summary Get sandboxes for the authenticated runner
-     * @param {string} state
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {string} [states] Comma-separated list of sandbox states to filter by
+     * @param {boolean} [skipReconcilingSandboxes] Skip sandboxes where state differs from desired state
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     getSandboxesForRunner(
-      state: string,
       xDaytonaOrganizationID?: string,
+      states?: string,
+      skipReconcilingSandboxes?: boolean,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<Array<Sandbox>> {
       return localVarFp
-        .getSandboxesForRunner(state, xDaytonaOrganizationID, options)
+        .getSandboxesForRunner(xDaytonaOrganizationID, states, skipReconcilingSandboxes, options)
         .then((request) => request(axios, basePath))
     },
     /**
@@ -2240,15 +2249,21 @@ export class SandboxApi extends BaseAPI {
   /**
    *
    * @summary Get sandboxes for the authenticated runner
-   * @param {string} state
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+   * @param {string} [states] Comma-separated list of sandbox states to filter by
+   * @param {boolean} [skipReconcilingSandboxes] Skip sandboxes where state differs from desired state
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof SandboxApi
    */
-  public getSandboxesForRunner(state: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
+  public getSandboxesForRunner(
+    xDaytonaOrganizationID?: string,
+    states?: string,
+    skipReconcilingSandboxes?: boolean,
+    options?: RawAxiosRequestConfig,
+  ) {
     return SandboxApiFp(this.configuration)
-      .getSandboxesForRunner(state, xDaytonaOrganizationID, options)
+      .getSandboxesForRunner(xDaytonaOrganizationID, states, skipReconcilingSandboxes, options)
       .then((request) => request(this.axios, this.basePath))
   }
 

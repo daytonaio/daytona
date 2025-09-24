@@ -661,14 +661,51 @@ export class SandboxService {
     return this.sandboxRepository.find({ where })
   }
 
-  async findByRunnerId(runnerId: string, state?: SandboxState): Promise<Sandbox[]> {
-    const where: FindOptionsWhere<Sandbox> = { runnerId }
-    if (state) {
-      where.state = state
+  private getDesiredStateForState(state: SandboxState): SandboxDesiredState | undefined {
+    switch (state) {
+      case SandboxState.STARTED:
+        return SandboxDesiredState.STARTED
+      case SandboxState.STOPPED:
+        return SandboxDesiredState.STOPPED
+      case SandboxState.ARCHIVED:
+        return SandboxDesiredState.ARCHIVED
+      case SandboxState.DESTROYED:
+        return SandboxDesiredState.DESTROYED
+      default:
+        return undefined
     }
-    return this.sandboxRepository.find({
-      where,
-    })
+  }
+
+  private hasValidDesiredState(state: SandboxState): boolean {
+    return this.getDesiredStateForState(state) !== undefined
+  }
+
+  async findByRunnerId(
+    runnerId: string,
+    states?: SandboxState[],
+    skipReconcilingSandboxes?: boolean,
+  ): Promise<Sandbox[]> {
+    const where: FindOptionsWhere<Sandbox> = { runnerId }
+    if (states && states.length > 0) {
+      // Validate that all states have corresponding desired states
+      states.forEach((state) => {
+        if (!this.hasValidDesiredState(state)) {
+          throw new BadRequestError(`State ${state} does not have a corresponding desired state`)
+        }
+      })
+      where.state = In(states)
+    }
+
+    let sandboxes = await this.sandboxRepository.find({ where })
+
+    if (skipReconcilingSandboxes) {
+      sandboxes = sandboxes.filter((sandbox) => {
+        const expectedDesiredState = this.getDesiredStateForState(sandbox.state)
+        return expectedDesiredState !== undefined && expectedDesiredState === sandbox.desiredState
+      })
+    }
+
+    return sandboxes
   }
 
   async findOne(sandboxId: string, returnDestroyed?: boolean): Promise<Sandbox> {
@@ -1018,19 +1055,9 @@ export class SandboxService {
     }
 
     sandbox.state = newState
-    switch (newState) {
-      case SandboxState.STARTED:
-        sandbox.desiredState = SandboxDesiredState.STARTED
-        break
-      case SandboxState.STOPPED:
-        sandbox.desiredState = SandboxDesiredState.STOPPED
-        break
-      case SandboxState.ARCHIVED:
-        sandbox.desiredState = SandboxDesiredState.ARCHIVED
-        break
-      case SandboxState.DESTROYED:
-        sandbox.desiredState = SandboxDesiredState.DESTROYED
-        break
+    const desiredState = this.getDesiredStateForState(newState)
+    if (desiredState) {
+      sandbox.desiredState = desiredState
     }
     await this.sandboxRepository.save(sandbox)
   }

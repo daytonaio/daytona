@@ -55,7 +55,7 @@ func (s *SandboxSyncService) GetLocalContainerStates(ctx context.Context) (map[s
 		// Get the current state of this container
 		state, err := s.docker.DeduceSandboxState(ctx, sandboxId)
 		if err != nil {
-			log.Warnf("Failed to deduce state for sandbox %s: %v", sandboxId, err)
+			log.Debugf("Failed to deduce state for sandbox %s: %v", sandboxId, err)
 			continue
 		}
 
@@ -73,8 +73,9 @@ func (s *SandboxSyncService) GetRemoteSandboxStates(ctx context.Context) (map[st
 		}
 		s.client = client
 	}
-
-	sandboxes, _, err := s.client.SandboxAPI.GetSandboxesForRunner(ctx).State(string(apiclient.SANDBOXSTATE_STARTED)).Execute()
+	sandboxes, _, err := s.client.SandboxAPI.GetSandboxesForRunner(ctx).
+		States(string(apiclient.SANDBOXSTATE_STARTED)).SkipReconcilingSandboxes(true).
+		Execute()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get sandboxes from API: %w", err)
 	}
