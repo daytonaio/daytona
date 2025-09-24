@@ -207,6 +207,18 @@ export class SandboxController {
     summary: 'Get sandboxes for the authenticated runner',
     operationId: 'getSandboxesForRunner',
   })
+  @ApiQuery({
+    name: 'states',
+    required: false,
+    type: String,
+    description: 'Comma-separated list of sandbox states to filter by',
+  })
+  @ApiQuery({
+    name: 'skipReconcilingSandboxes',
+    required: false,
+    type: Boolean,
+    description: 'Skip sandboxes where state differs from desired state',
+  })
   @ApiResponse({
     status: 200,
     description: 'List of sandboxes for the authenticated runner',
@@ -214,13 +226,23 @@ export class SandboxController {
   })
   async getSandboxesForRunner(
     @RunnerContextDecorator() runnerContext: RunnerContext,
-    @Query('state') state?: SandboxState,
+    @Query('states') states?: string,
+    @Query('skipReconcilingSandboxes') skipReconcilingSandboxes?: string,
   ): Promise<SandboxDto[]> {
-    const sandboxes = await this.sandboxService.findByRunnerId(runnerContext.runnerId, state)
+    const stateArray = states
+      ? states.split(',').map((s) => {
+          if (!Object.values(SandboxState).includes(s as SandboxState)) {
+            throw new BadRequestError(`Invalid sandbox state: ${s}`)
+          }
+          return s as SandboxState
+        })
+      : undefined
+
+    const skip = skipReconcilingSandboxes === 'true'
+    const sandboxes = await this.sandboxService.findByRunnerId(runnerContext.runnerId, stateArray, skip)
 
     // Get runner information for consistent response format
     const runner = await this.runnerService.findOne(runnerContext.runnerId)
-
     return sandboxes.map((sandbox) => SandboxDto.fromSandbox(sandbox, runner?.domain))
   }
 

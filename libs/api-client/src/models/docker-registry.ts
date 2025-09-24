@@ -71,8 +71,8 @@ export interface DockerRegistry {
 export const DockerRegistryRegistryTypeEnum = {
   INTERNAL: 'internal',
   ORGANIZATION: 'organization',
-  PUBLIC: 'public',
   TRANSIENT: 'transient',
+  BACKUP: 'backup',
 } as const
 
 export type DockerRegistryRegistryTypeEnum =

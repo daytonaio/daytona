@@ -1284,12 +1284,21 @@ paths:
           schema:
             type: string
           style: simple
-        - explode: true
+        - description: Comma-separated list of sandbox states to filter by
+          explode: true
           in: query
-          name: state
-          required: true
+          name: states
+          required: false
           schema:
             type: string
+          style: form
+        - description: Skip sandboxes where state differs from desired state
+          explode: true
+          in: query
+          name: skipReconcilingSandboxes
+          required: false
+          schema:
+            type: boolean
           style: form
       responses:
         '200':
@@ -1359,14 +1368,6 @@ paths:
           schema:
             type: string
           style: simple
-        - description: Include verbose output
-          explode: true
-          in: query
-          name: verbose
-          required: false
-          schema:
-            type: boolean
-          style: form
         - description: ID of the sandbox
           explode: false
           in: path
@@ -1375,6 +1376,14 @@ paths:
           schema:
             type: string
           style: simple
+        - description: Include verbose output
+          explode: true
+          in: query
+          name: verbose
+          required: false
+          schema:
+            type: boolean
+          style: form
       responses:
         '200':
           content:
@@ -5283,14 +5292,6 @@ paths:
           schema:
             type: string
           style: simple
-        - description: Include verbose output
-          explode: true
-          in: query
-          name: verbose
-          required: false
-          schema:
-            type: boolean
-          style: form
         - description: ID of the workspace
           explode: false
           in: path
@@ -5299,6 +5300,14 @@ paths:
           schema:
             type: string
           style: simple
+        - description: Include verbose output
+          explode: true
+          in: query
+          name: verbose
+          required: false
+          schema:
+            type: boolean
+          style: form
       responses:
         '200':
           content:
@@ -10333,8 +10342,8 @@ components:
           enum:
             - internal
             - organization
-            - public
             - transient
+            - backup
           type: string
         isDefault:
           description: Set as default registry
@@ -10382,8 +10391,8 @@ components:
           enum:
             - internal
             - organization
-            - public
             - transient
+            - backup
           example: internal
           type: string
         createdAt:
