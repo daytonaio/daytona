@@ -2316,8 +2316,9 @@ class SandboxApi:
     @validate_call
     async def get_sandboxes_for_runner(
         self,
-        state: StrictStr,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        states: Annotated[Optional[StrictStr], Field(description="Comma-separated list of sandbox states to filter by")] = None,
+        skip_reconciling_sandboxes: Annotated[Optional[StrictBool], Field(description="Skip sandboxes where state differs from desired state")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2334,10 +2335,12 @@ class SandboxApi:
         """Get sandboxes for the authenticated runner
 
 
-        :param state: (required)
-        :type state: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
+        :param states: Comma-separated list of sandbox states to filter by
+        :type states: str
+        :param skip_reconciling_sandboxes: Skip sandboxes where state differs from desired state
+        :type skip_reconciling_sandboxes: bool
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -2361,8 +2364,9 @@ class SandboxApi:
         """ # noqa: E501
 
         _param = self._get_sandboxes_for_runner_serialize(
-            state=state,
             x_daytona_organization_id=x_daytona_organization_id,
+            states=states,
+            skip_reconciling_sandboxes=skip_reconciling_sandboxes,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -2386,8 +2390,9 @@ class SandboxApi:
     @validate_call
     async def get_sandboxes_for_runner_with_http_info(
         self,
-        state: StrictStr,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        states: Annotated[Optional[StrictStr], Field(description="Comma-separated list of sandbox states to filter by")] = None,
+        skip_reconciling_sandboxes: Annotated[Optional[StrictBool], Field(description="Skip sandboxes where state differs from desired state")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2404,10 +2409,12 @@ class SandboxApi:
         """Get sandboxes for the authenticated runner
 
 
-        :param state: (required)
-        :type state: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
+        :param states: Comma-separated list of sandbox states to filter by
+        :type states: str
+        :param skip_reconciling_sandboxes: Skip sandboxes where state differs from desired state
+        :type skip_reconciling_sandboxes: bool
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -2431,8 +2438,9 @@ class SandboxApi:
         """ # noqa: E501
 
         _param = self._get_sandboxes_for_runner_serialize(
-            state=state,
             x_daytona_organization_id=x_daytona_organization_id,
+            states=states,
+            skip_reconciling_sandboxes=skip_reconciling_sandboxes,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -2456,8 +2464,9 @@ class SandboxApi:
     @validate_call
     async def get_sandboxes_for_runner_without_preload_content(
         self,
-        state: StrictStr,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        states: Annotated[Optional[StrictStr], Field(description="Comma-separated list of sandbox states to filter by")] = None,
+        skip_reconciling_sandboxes: Annotated[Optional[StrictBool], Field(description="Skip sandboxes where state differs from desired state")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2474,10 +2483,12 @@ class SandboxApi:
         """Get sandboxes for the authenticated runner
 
 
-        :param state: (required)
-        :type state: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
+        :param states: Comma-separated list of sandbox states to filter by
+        :type states: str
+        :param skip_reconciling_sandboxes: Skip sandboxes where state differs from desired state
+        :type skip_reconciling_sandboxes: bool
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -2501,8 +2512,9 @@ class SandboxApi:
         """ # noqa: E501
 
         _param = self._get_sandboxes_for_runner_serialize(
-            state=state,
             x_daytona_organization_id=x_daytona_organization_id,
+            states=states,
+            skip_reconciling_sandboxes=skip_reconciling_sandboxes,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -2521,8 +2533,9 @@ class SandboxApi:
 
     def _get_sandboxes_for_runner_serialize(
         self,
-        state,
         x_daytona_organization_id,
+        states,
+        skip_reconciling_sandboxes,
         _request_auth,
         _content_type,
         _headers,
@@ -2545,9 +2558,13 @@ class SandboxApi:
 
         # process the path parameters
         # process the query parameters
-        if state is not None:
+        if states is not None:
             
-            _query_params.append(('state', state))
+            _query_params.append(('states', states))
+            
+        if skip_reconciling_sandboxes is not None:
+            
+            _query_params.append(('skipReconcilingSandboxes', skip_reconciling_sandboxes))
             
         # process the header parameters
         if x_daytona_organization_id is not None:

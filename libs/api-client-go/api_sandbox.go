@@ -1189,20 +1189,28 @@ func (a *SandboxAPIService) GetSandboxExecute(r SandboxAPIGetSandboxRequest) (*S
 }
 
 type SandboxAPIGetSandboxesForRunnerRequest struct {
-	ctx                    context.Context
-	ApiService             SandboxAPI
-	state                  *string
-	xDaytonaOrganizationID *string
-}
-
-func (r SandboxAPIGetSandboxesForRunnerRequest) State(state string) SandboxAPIGetSandboxesForRunnerRequest {
-	r.state = &state
-	return r
+	ctx                      context.Context
+	ApiService               SandboxAPI
+	xDaytonaOrganizationID   *string
+	states                   *string
+	skipReconcilingSandboxes *bool
 }
 
 // Use with JWT to specify the organization ID
 func (r SandboxAPIGetSandboxesForRunnerRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) SandboxAPIGetSandboxesForRunnerRequest {
 	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
+	return r
+}
+
+// Comma-separated list of sandbox states to filter by
+func (r SandboxAPIGetSandboxesForRunnerRequest) States(states string) SandboxAPIGetSandboxesForRunnerRequest {
+	r.states = &states
+	return r
+}
+
+// Skip sandboxes where state differs from desired state
+func (r SandboxAPIGetSandboxesForRunnerRequest) SkipReconcilingSandboxes(skipReconcilingSandboxes bool) SandboxAPIGetSandboxesForRunnerRequest {
+	r.skipReconcilingSandboxes = &skipReconcilingSandboxes
 	return r
 }
 
@@ -1244,11 +1252,13 @@ func (a *SandboxAPIService) GetSandboxesForRunnerExecute(r SandboxAPIGetSandboxe
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
-	if r.state == nil {
-		return localVarReturnValue, nil, reportError("state is required and must be specified")
-	}
 
-	parameterAddToHeaderOrQuery(localVarQueryParams, "state", r.state, "form", "")
+	if r.states != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "states", r.states, "form", "")
+	}
+	if r.skipReconcilingSandboxes != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "skipReconcilingSandboxes", r.skipReconcilingSandboxes, "form", "")
+	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
