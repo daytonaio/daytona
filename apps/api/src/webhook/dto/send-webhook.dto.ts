@@ -28,4 +28,10 @@ export class SendWebhookDto {
   @IsOptional()
   @IsString()
   eventId?: string
+
+  constructor(eventType: string, payload: Record<string, any>, eventId?: string) {
+    this.eventType = eventType
+    this.payload = payload
+    this.eventId = eventId
+  }
 }
