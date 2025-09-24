@@ -54,21 +54,13 @@ export class ApiKeyListDto {
   })
   userId: string
 
-  constructor(partial: Partial<ApiKeyListDto>) {
-    Object.assign(this, partial)
-  }
-
-  static fromApiKey(apiKey: ApiKey): ApiKeyListDto {
-    const maskedValue = `${apiKey.keyPrefix}********************${apiKey.keySuffix}`
-
-    return new ApiKeyListDto({
-      name: apiKey.name,
-      value: maskedValue,
-      createdAt: apiKey.createdAt,
-      permissions: apiKey.permissions,
-      lastUsedAt: apiKey.lastUsedAt,
-      expiresAt: apiKey.expiresAt,
-      userId: apiKey.userId,
-    })
+  constructor(apiKey: ApiKey) {
+    this.name = apiKey.name
+    this.value = `${apiKey.keyPrefix}********************${apiKey.keySuffix}`
+    this.createdAt = apiKey.createdAt
+    this.permissions = apiKey.permissions
+    this.lastUsedAt = apiKey.lastUsedAt ?? undefined
+    this.expiresAt = apiKey.expiresAt ?? undefined
+    this.userId = apiKey.userId
   }
 }

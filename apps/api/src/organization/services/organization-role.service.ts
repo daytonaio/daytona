@@ -9,23 +9,31 @@ import { In, Repository } from 'typeorm'
 import { CreateOrganizationRoleDto } from '../dto/create-organization-role.dto'
 import { UpdateOrganizationRoleDto } from '../dto/update-organization-role.dto'
 import { OrganizationRole } from '../entities/organization-role.entity'
+import { OrganizationService } from './organization.service'
 
 @Injectable()
 export class OrganizationRoleService {
   constructor(
     @InjectRepository(OrganizationRole)
     private readonly organizationRoleRepository: Repository<OrganizationRole>,
+    private readonly organizationService: OrganizationService,
   ) {}
 
   async create(
     organizationId: string,
     createOrganizationRoleDto: CreateOrganizationRoleDto,
   ): Promise<OrganizationRole> {
-    const role = new OrganizationRole()
-    role.organizationId = organizationId
-    role.name = createOrganizationRoleDto.name
-    role.description = createOrganizationRoleDto.description
-    role.permissions = createOrganizationRoleDto.permissions
+    const organization = await this.organizationService.findOne(organizationId)
+    if (!organization) {
+      throw new NotFoundException(`Organization with ID ${organizationId} not found`)
+    }
+
+    const role = new OrganizationRole({
+      organization,
+      name: createOrganizationRoleDto.name,
+      description: createOrganizationRoleDto.description,
+      permissions: createOrganizationRoleDto.permissions,
+    })
     return this.organizationRoleRepository.save(role)
   }
 

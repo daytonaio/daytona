@@ -60,4 +60,26 @@ export class RunnerStatusDto {
     example: '0.0.1',
   })
   version: string
+
+  private constructor(createParams: {
+    currentCpuUsagePercentage: number
+    currentMemoryUsagePercentage: number
+    currentDiskUsagePercentage: number
+    currentAllocatedCpu: number
+    currentAllocatedMemoryGiB: number
+    currentAllocatedDiskGiB: number
+    currentSnapshotCount: number
+    status: string
+    version: string
+  }) {
+    this.currentCpuUsagePercentage = createParams.currentCpuUsagePercentage
+    this.currentMemoryUsagePercentage = createParams.currentMemoryUsagePercentage
+    this.currentDiskUsagePercentage = createParams.currentDiskUsagePercentage
+    this.currentAllocatedCpu = createParams.currentAllocatedCpu
+    this.currentAllocatedMemoryGiB = createParams.currentAllocatedMemoryGiB
+    this.currentAllocatedDiskGiB = createParams.currentAllocatedDiskGiB
+    this.currentSnapshotCount = createParams.currentSnapshotCount
+    this.status = createParams.status
+    this.version = createParams.version
+  }
 }

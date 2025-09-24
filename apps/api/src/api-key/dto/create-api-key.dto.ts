@@ -39,4 +39,10 @@ export class CreateApiKeyDto {
   @Type(() => Date)
   @IsDate()
   expiresAt?: Date
+
+  constructor(name: string, permissions: OrganizationResourcePermission[], expiresAt?: Date) {
+    this.name = name
+    this.permissions = permissions
+    this.expiresAt = expiresAt
+  }
 }

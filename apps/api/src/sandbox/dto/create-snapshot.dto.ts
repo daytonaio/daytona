@@ -85,4 +85,8 @@ export class CreateSnapshotDto {
   @IsOptional()
   @IsObject()
   buildInfo?: CreateBuildInfoDto
+
+  constructor(name: string) {
+    this.name = name
+  }
 }

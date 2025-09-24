@@ -24,4 +24,10 @@ export class OrganizationSuspensionDto {
   })
   @IsOptional()
   suspensionCleanupGracePeriodHours?: number
+
+  constructor(params: { reason: string; until?: Date; suspensionCleanupGracePeriodHours?: number }) {
+    this.reason = params.reason
+    this.until = params.until
+    this.suspensionCleanupGracePeriodHours = params.suspensionCleanupGracePeriodHours
+  }
 }

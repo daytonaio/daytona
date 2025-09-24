@@ -1,5 +1,5 @@
 /* tslint:disable */
-
+/* eslint-disable */
 /**
  * Daytona
  * Daytona AI platform API Docs
@@ -12,18 +12,21 @@
  * Do not edit the class manually.
  */
 
+
+
 /**
- *
+ * 
  * @export
  * @interface HealthControllerCheck200ResponseInfoValue
  */
 export interface HealthControllerCheck200ResponseInfoValue {
-  [key: string]: any
+    [key: string]: any;
 
-  /**
-   *
-   * @type {string}
-   * @memberof HealthControllerCheck200ResponseInfoValue
-   */
-  status: string
+    /**
+     * 
+     * @type {string}
+     * @memberof HealthControllerCheck200ResponseInfoValue
+     */
+    'status': string;
 }
+

@@ -5,13 +5,14 @@
 
 import { Injectable, NestMiddleware } from '@nestjs/common'
 import { Request, Response, NextFunction } from 'express'
-// import { version } from '../../../package.json'
+import { TypedConfigService } from '../../config/typed-config.service'
 
 @Injectable()
 export class VersionHeaderMiddleware implements NestMiddleware {
-  use(req: Request, res: Response, next: NextFunction) {
-    // TODO: Fetch version from package.json
-    // res.setHeader('X-Daytona-Api-Version', `v${version}`)
+  constructor(private readonly configService: TypedConfigService) {}
+
+  use(_: Request, res: Response, next: NextFunction) {
+    res.setHeader('X-Daytona-Api-Version', this.configService.get('version') || 'unknown')
     next()
   }
 }

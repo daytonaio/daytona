@@ -15,7 +15,7 @@ export class CombinedAuthGuard extends AuthGuard(['jwt', 'api-key']) {
     this.logger.debug('CombinedAuthGuard constructor called')
   }
 
-  async canActivate(context: ExecutionContext): Promise<boolean> {
+  override async canActivate(context: ExecutionContext): Promise<boolean> {
     this.logger.debug('CombinedAuthGuard.canActivate called')
     try {
       const result = await super.canActivate(context)
@@ -27,7 +27,7 @@ export class CombinedAuthGuard extends AuthGuard(['jwt', 'api-key']) {
     }
   }
 
-  handleRequest(err: any, user: any, info: any, context: ExecutionContext) {
+  override handleRequest(err: any, user: any, info: any, context: ExecutionContext) {
     this.logger.debug('CombinedAuthGuard.handleRequest called')
     this.logger.debug('Error:', err)
     this.logger.debug('User:', user)

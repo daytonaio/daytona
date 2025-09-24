@@ -7,7 +7,6 @@ import { Logger, OnModuleInit, UnauthorizedException } from '@nestjs/common'
 import { WebSocketGateway, WebSocketServer, OnGatewayInit } from '@nestjs/websockets'
 import { Server, Socket } from 'socket.io'
 import { createAdapter } from '@socket.io/redis-adapter'
-import { OrganizationService } from '../../organization/services/organization.service'
 import { SandboxEvents } from '../../sandbox/constants/sandbox-events.constants'
 import { SandboxState } from '../../sandbox/enums/sandbox-state.enum'
 import { SandboxDto } from '../../sandbox/dto/sandbox.dto'
@@ -32,11 +31,11 @@ export class NotificationGateway implements OnGatewayInit, OnModuleInit {
   private readonly logger = new Logger(NotificationGateway.name)
 
   @WebSocketServer()
+  // @ts-expect-error (server is set by the decorator)
   server: Server
 
   constructor(
     private readonly jwtStrategy: JwtStrategy,
-    private readonly organizationService: OrganizationService,
     @InjectRedis() private readonly redis: Redis,
   ) {}
 
@@ -59,6 +58,10 @@ export class NotificationGateway implements OnGatewayInit, OnModuleInit {
       try {
         const payload = await this.jwtStrategy.verifyToken(token)
 
+        if (!payload.sub) {
+          throw new UnauthorizedException()
+        }
+
         // Join the user room for user scoped notifications
         await socket.join(payload.sub)
 
@@ -69,7 +72,7 @@ export class NotificationGateway implements OnGatewayInit, OnModuleInit {
         }
 
         next()
-      } catch (error) {
+      } catch {
         next(new UnauthorizedException())
       }
     })
@@ -94,16 +97,25 @@ export class NotificationGateway implements OnGatewayInit, OnModuleInit {
   }
 
   emitSnapshotCreated(snapshot: SnapshotDto) {
+    if (!snapshot.organizationId) {
+      return
+    }
     this.server.to(snapshot.organizationId).emit(SnapshotEvents.CREATED, snapshot)
   }
 
   emitSnapshotStateUpdated(snapshot: SnapshotDto, oldState: SnapshotState, newState: SnapshotState) {
+    if (!snapshot.organizationId) {
+      return
+    }
     this.server
       .to(snapshot.organizationId)
       .emit(SnapshotEvents.STATE_UPDATED, { snapshot: snapshot, oldState, newState })
   }
 
   emitSnapshotRemoved(snapshot: SnapshotDto) {
+    if (!snapshot.organizationId) {
+      return
+    }
     this.server.to(snapshot.organizationId).emit(SnapshotEvents.REMOVED, snapshot.id)
   }
 
@@ -120,10 +132,16 @@ export class NotificationGateway implements OnGatewayInit, OnModuleInit {
   }
 
   emitAuditLogCreated(auditLog: AuditLogDto) {
+    if (!auditLog.organizationId) {
+      return
+    }
     this.server.to(auditLog.organizationId).emit(AuditLogEvents.CREATED, auditLog)
   }
 
   emitAuditLogUpdated(auditLog: AuditLogDto) {
+    if (!auditLog.organizationId) {
+      return
+    }
     this.server.to(auditLog.organizationId).emit(AuditLogEvents.UPDATED, auditLog)
   }
 }

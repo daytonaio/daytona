@@ -8,6 +8,7 @@ import { Organization } from './organization.entity'
 import { OrganizationUser } from './organization-user.entity'
 import { OrganizationResourcePermission } from '../enums/organization-resource-permission.enum'
 import { OrganizationInvitation } from './organization-invitation.entity'
+import { v4 } from 'uuid'
 
 @Entity()
 export class OrganizationRole {
@@ -54,4 +55,26 @@ export class OrganizationRole {
     type: 'timestamp with time zone',
   })
   updatedAt: Date
+
+  constructor(createParams: {
+    organization: Organization
+    name: string
+    description: string
+    permissions: OrganizationResourcePermission[]
+    isGlobal?: boolean
+    users?: OrganizationUser[]
+    invitations?: OrganizationInvitation[]
+  }) {
+    this.id = v4()
+    this.name = createParams.name
+    this.description = createParams.description
+    this.permissions = createParams.permissions
+    this.isGlobal = createParams.isGlobal ?? false
+    this.organization = createParams.organization
+    this.organizationId = createParams.organization.id
+    this.users = createParams.users || []
+    this.invitations = createParams.invitations || []
+    this.createdAt = new Date()
+    this.updatedAt = new Date()
+  }
 }

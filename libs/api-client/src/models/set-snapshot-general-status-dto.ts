@@ -1,5 +1,5 @@
 /* tslint:disable */
-
+/* eslint-disable */
 /**
  * Daytona
  * Daytona AI platform API Docs
@@ -12,16 +12,19 @@
  * Do not edit the class manually.
  */
 
+
+
 /**
- *
+ * 
  * @export
  * @interface SetSnapshotGeneralStatusDto
  */
 export interface SetSnapshotGeneralStatusDto {
-  /**
-   * Whether the snapshot is general
-   * @type {boolean}
-   * @memberof SetSnapshotGeneralStatusDto
-   */
-  general: boolean
+    /**
+     * Whether the snapshot is general
+     * @type {boolean}
+     * @memberof SetSnapshotGeneralStatusDto
+     */
+    'general': boolean;
 }
+

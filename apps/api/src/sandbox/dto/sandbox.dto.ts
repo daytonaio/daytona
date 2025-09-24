@@ -25,6 +25,11 @@ export class SandboxVolume {
     example: '/data',
   })
   mountPath: string
+
+  private constructor() {
+    this.volumeId = ''
+    this.mountPath = ''
+  }
 }
 
 @ApiSchema({ name: 'Sandbox' })
@@ -249,45 +254,36 @@ export class SandboxDto {
   @IsOptional()
   daemonVersion?: string
 
-  static fromSandbox(sandbox: Sandbox, runnerDomain: string): SandboxDto {
-    return {
-      id: sandbox.id,
-      organizationId: sandbox.organizationId,
-      target: sandbox.region,
-      snapshot: sandbox.snapshot,
-      user: sandbox.osUser,
-      env: sandbox.env,
-      cpu: sandbox.cpu,
-      gpu: sandbox.gpu,
-      memory: sandbox.mem,
-      disk: sandbox.disk,
-      public: sandbox.public,
-      networkBlockAll: sandbox.networkBlockAll,
-      networkAllowList: sandbox.networkAllowList,
-      labels: sandbox.labels,
-      volumes: sandbox.volumes,
-      state: this.getSandboxState(sandbox),
-      desiredState: sandbox.desiredState,
-      errorReason: sandbox.errorReason,
-      backupState: sandbox.backupState,
-      backupCreatedAt: sandbox.lastBackupAt?.toISOString(),
-      autoStopInterval: sandbox.autoStopInterval,
-      autoArchiveInterval: sandbox.autoArchiveInterval,
-      autoDeleteInterval: sandbox.autoDeleteInterval,
-      class: sandbox.class,
-      createdAt: sandbox.createdAt?.toISOString(),
-      updatedAt: sandbox.updatedAt?.toISOString(),
-      buildInfo: sandbox.buildInfo
-        ? {
-            dockerfileContent: sandbox.buildInfo.dockerfileContent,
-            contextHashes: sandbox.buildInfo.contextHashes,
-            createdAt: sandbox.buildInfo.createdAt,
-            updatedAt: sandbox.buildInfo.updatedAt,
-          }
-        : undefined,
-      runnerDomain: runnerDomain,
-      daemonVersion: sandbox.daemonVersion,
-    }
+  constructor(sandbox: Sandbox, runnerDomain?: string) {
+    this.id = sandbox.id
+    this.organizationId = sandbox.organizationId
+    this.target = sandbox.region
+    this.snapshot = sandbox.snapshot ?? ''
+    this.user = sandbox.osUser
+    this.env = sandbox.env
+    this.cpu = sandbox.cpu
+    this.gpu = sandbox.gpu
+    this.memory = sandbox.mem
+    this.disk = sandbox.disk
+    this.public = sandbox.public
+    this.networkBlockAll = sandbox.networkBlockAll
+    this.networkAllowList = sandbox.networkAllowList ?? undefined
+    this.labels = sandbox.labels ?? {}
+    this.volumes = sandbox.volumes
+    this.state = SandboxDto.getSandboxState(sandbox)
+    this.desiredState = sandbox.desiredState
+    this.errorReason = sandbox.errorReason ?? undefined
+    this.backupState = sandbox.backupState
+    this.backupCreatedAt = sandbox.lastBackupAt?.toISOString()
+    this.autoStopInterval = sandbox.autoStopInterval
+    this.autoArchiveInterval = sandbox.autoArchiveInterval
+    this.autoDeleteInterval = sandbox.autoDeleteInterval
+    this.class = sandbox.class
+    this.createdAt = sandbox.createdAt?.toISOString()
+    this.updatedAt = sandbox.updatedAt?.toISOString()
+    this.buildInfo = sandbox.buildInfo ? new BuildInfoDto(sandbox.buildInfo) : undefined
+    this.runnerDomain = runnerDomain
+    this.daemonVersion = sandbox.daemonVersion ?? undefined
   }
 
   private static getSandboxState(sandbox: Sandbox): SandboxState {
@@ -330,4 +326,8 @@ export class SandboxLabelsDto {
     additionalProperties: { type: 'string' },
   })
   labels: { [key: string]: string }
+
+  private constructor() {
+    this.labels = {}
+  }
 }

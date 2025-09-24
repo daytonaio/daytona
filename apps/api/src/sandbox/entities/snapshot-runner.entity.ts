@@ -5,6 +5,7 @@
 
 import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm'
 import { SnapshotRunnerState } from '../enums/snapshot-runner-state.enum'
+import { v4 } from 'uuid'
 
 @Entity()
 export class SnapshotRunner {
@@ -19,7 +20,7 @@ export class SnapshotRunner {
   state: SnapshotRunnerState
 
   @Column({ nullable: true })
-  errorReason?: string
+  errorReason: string | null
 
   @Column({
     //  todo: remove default
@@ -39,4 +40,19 @@ export class SnapshotRunner {
     type: 'timestamp with time zone',
   })
   updatedAt: Date
+
+  constructor(createParams: {
+    snapshotRef: string
+    runnerId: string
+    state?: SnapshotRunnerState
+    errorReason?: string
+  }) {
+    this.id = v4()
+    this.snapshotRef = createParams.snapshotRef
+    this.runnerId = createParams.runnerId
+    this.state = createParams.state ?? SnapshotRunnerState.PULLING_SNAPSHOT
+    this.errorReason = createParams.errorReason ?? null
+    this.createdAt = new Date()
+    this.updatedAt = new Date()
+  }
 }

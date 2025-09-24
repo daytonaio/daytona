@@ -23,6 +23,11 @@ export class Announcement {
   @IsString()
   @IsOptional()
   learnMoreUrl?: string
+
+  constructor(text: string, learnMoreUrl?: string) {
+    this.text = text
+    this.learnMoreUrl = learnMoreUrl
+  }
 }
 
 @ApiSchema({ name: 'PosthogConfig' })
@@ -40,6 +45,11 @@ export class PosthogConfig {
   })
   @IsString()
   host: string
+
+  constructor(apiKey: string, host: string) {
+    this.apiKey = apiKey
+    this.host = host
+  }
 }
 
 @ApiSchema({ name: 'OidcConfig' })
@@ -64,6 +74,12 @@ export class OidcConfig {
   })
   @IsString()
   audience: string
+
+  constructor(issuer: string, clientId: string, audience: string) {
+    this.issuer = issuer
+    this.clientId = clientId
+    this.audience = audience
+  }
 }
 
 @ApiExtraModels(Announcement)
@@ -185,7 +201,7 @@ export class ConfigurationDto {
       clientId: configService.getOrThrow('oidc.clientId'),
       audience: configService.getOrThrow('oidc.audience'),
     }
-    this.linkedAccountsEnabled = configService.get('oidc.managementApi.enabled')
+    this.linkedAccountsEnabled = !!configService.get('oidc.managementApi.enabled')
     this.proxyTemplateUrl = configService.getOrThrow('proxy.templateUrl')
     this.defaultSnapshot = configService.getOrThrow('defaultSnapshot')
     this.dashboardUrl = configService.getOrThrow('dashboardUrl')
@@ -200,15 +216,19 @@ export class ConfigurationDto {
       this.billingApiUrl = configService.get('billingApiUrl')
     }
 
-    if (configService.get('posthog.apiKey')) {
+    const posthogApiKey = configService.get('posthog.apiKey')
+    const posthogHost = configService.get('posthog.host')
+    if (posthogApiKey && posthogHost) {
       this.posthog = {
-        apiKey: configService.get('posthog.apiKey'),
-        host: configService.get('posthog.host'),
+        apiKey: posthogApiKey,
+        host: posthogHost,
       }
     }
     if (configService.get('pylonAppId')) {
       this.pylonAppId = configService.get('pylonAppId')
     }
+
+    this.announcements = {}
     // TODO: announcements
     // this.announcements = configService.get('announcements')
   }

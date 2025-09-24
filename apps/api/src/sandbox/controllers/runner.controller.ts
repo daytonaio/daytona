@@ -99,7 +99,7 @@ export class RunnerController {
   })
   async getRunnerBySandboxId(@Param('sandboxId') sandboxId: string): Promise<RunnerDto> {
     const runner = await this.runnerService.findBySandboxId(sandboxId)
-    return RunnerDto.fromRunner(runner)
+    return new RunnerDto(runner)
   }
 
   @Get('/by-snapshot-ref')

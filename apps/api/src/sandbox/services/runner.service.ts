@@ -19,7 +19,6 @@ import { SandboxState } from '../enums/sandbox-state.enum'
 import { Sandbox } from '../entities/sandbox.entity'
 import { SnapshotRunner } from '../entities/snapshot-runner.entity'
 import { SnapshotRunnerState } from '../enums/snapshot-runner-state.enum'
-import { Snapshot } from '../entities/snapshot.entity'
 import { RunnerSnapshotDto } from '../dto/runner-snapshot.dto'
 import { RunnerAdapterFactory, RunnerInfo } from '../runner-adapter/runnerAdapter'
 import { RedisLockProvider } from '../common/redis-lock.provider'
@@ -37,8 +36,6 @@ export class RunnerService {
     private readonly sandboxRepository: Repository<Sandbox>,
     @InjectRepository(SnapshotRunner)
     private readonly snapshotRunnerRepository: Repository<SnapshotRunner>,
-    @InjectRepository(Snapshot)
-    private readonly snapshotRepository: Repository<Snapshot>,
     private readonly redisLockProvider: RedisLockProvider,
     private readonly configService: TypedConfigService,
   ) {}
@@ -52,19 +49,20 @@ export class RunnerService {
       throw new Error('Invalid class')
     }
 
-    const runner = new Runner()
-    runner.domain = createRunnerDto.domain
-    runner.apiUrl = createRunnerDto.apiUrl
-    runner.proxyUrl = createRunnerDto.proxyUrl
-    runner.apiKey = createRunnerDto.apiKey
-    runner.cpu = createRunnerDto.cpu
-    runner.memoryGiB = createRunnerDto.memoryGiB
-    runner.diskGiB = createRunnerDto.diskGiB
-    runner.gpu = createRunnerDto.gpu
-    runner.gpuType = createRunnerDto.gpuType
-    runner.region = createRunnerDto.region
-    runner.class = createRunnerDto.class
-    runner.version = createRunnerDto.version
+    const runner = new Runner({
+      domain: createRunnerDto.domain,
+      apiUrl: createRunnerDto.apiUrl,
+      proxyUrl: createRunnerDto.proxyUrl,
+      apiKey: createRunnerDto.apiKey,
+      cpu: createRunnerDto.cpu,
+      memoryGiB: createRunnerDto.memoryGiB,
+      diskGiB: createRunnerDto.diskGiB,
+      gpu: createRunnerDto.gpu,
+      gpuType: createRunnerDto.gpuType,
+      region: createRunnerDto.region,
+      class: createRunnerDto.class,
+      version: createRunnerDto.version,
+    })
 
     return this.runnerRepository.save(runner)
   }
@@ -85,6 +83,14 @@ export class RunnerService {
     return this.runnerRepository.findOneBy({ id })
   }
 
+  async findOneOrFail(id: string): Promise<Runner> {
+    const runner = await this.runnerRepository.findOneBy({ id })
+    if (!runner) {
+      throw new NotFoundException(`Runner with ID ${id} not found`)
+    }
+    return runner
+  }
+
   async findByIds(runnerIds: string[]): Promise<Runner[]> {
     if (runnerIds.length === 0) {
       return []
@@ -99,7 +105,7 @@ export class RunnerService {
     return this.runnerRepository.findOneBy({ apiKey })
   }
 
-  async findBySandboxId(sandboxId: string): Promise<Runner | null> {
+  async findBySandboxId(sandboxId: string): Promise<Runner> {
     const sandbox = await this.sandboxRepository.findOneBy({ id: sandboxId, state: Not(SandboxState.DESTROYED) })
     if (!sandbox) {
       throw new NotFoundException(`Sandbox with ID ${sandboxId} not found`)
@@ -108,7 +114,7 @@ export class RunnerService {
       throw new NotFoundException(`Sandbox with ID ${sandboxId} does not have a runner`)
     }
 
-    return this.runnerRepository.findOneBy({ id: sandbox.runnerId })
+    return this.runnerRepository.findOneByOrFail({ id: sandbox.runnerId })
   }
 
   async findAvailableRunners(params: GetRunnerParams): Promise<Runner[]> {
@@ -131,7 +137,8 @@ export class RunnerService {
       let runnerIds = snapshotRunners.map((snapshotRunner) => snapshotRunner.runnerId)
 
       if (params.excludedRunnerIds?.length) {
-        runnerIds = runnerIds.filter((id) => !params.excludedRunnerIds.includes(id))
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- We know the excluded runner ids are not undefined
+        runnerIds = runnerIds.filter((id) => !params.excludedRunnerIds!.includes(id))
       }
 
       if (!runnerIds.length) {
@@ -189,7 +196,7 @@ export class RunnerService {
   }
 
   @Cron(CronExpression.EVERY_10_SECONDS, { name: 'check-runners', waitForCompletion: true })
-  private async handleCheckRunners() {
+  async _handleCheckRunners() {
     const lockKey = 'check-runners'
     const hasLock = await this.redisLockProvider.lock(lockKey, 60)
     if (!hasLock) {
@@ -341,16 +348,26 @@ export class RunnerService {
     // Get random runner from the best available runners
     const randomIntFromInterval = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1) + min)
 
-    return availableRunners[randomIntFromInterval(0, availableRunners.length - 1)]
+    const availableRunner = availableRunners[randomIntFromInterval(0, availableRunners.length - 1)]
+
+    if (!availableRunner) {
+      throw new BadRequestError('No available runners')
+    }
+
+    return availableRunner
   }
 
-  async getSnapshotRunner(runnerId, snapshotRef: string): Promise<SnapshotRunner> {
-    return this.snapshotRunnerRepository.findOne({
+  async getSnapshotRunner(runnerId: string, snapshotRef: string): Promise<SnapshotRunner> {
+    const snapshotRunner = await this.snapshotRunnerRepository.findOne({
       where: {
         runnerId: runnerId,
         snapshotRef: snapshotRef,
       },
     })
+    if (!snapshotRunner) {
+      throw new BadRequestError('Snapshot runner not found')
+    }
+    return snapshotRunner
   }
 
   async getSnapshotRunners(snapshotRef: string): Promise<SnapshotRunner[]> {
@@ -371,13 +388,12 @@ export class RunnerService {
     state: SnapshotRunnerState,
     errorReason?: string,
   ): Promise<void> {
-    const snapshotRunner = new SnapshotRunner()
-    snapshotRunner.runnerId = runnerId
-    snapshotRunner.snapshotRef = snapshotRef
-    snapshotRunner.state = state
-    if (errorReason) {
-      snapshotRunner.errorReason = errorReason
-    }
+    const snapshotRunner = new SnapshotRunner({
+      runnerId,
+      snapshotRef,
+      state,
+      errorReason,
+    })
     await this.snapshotRunnerRepository.save(snapshotRunner)
   }
 
@@ -414,11 +430,19 @@ export class RunnerService {
 
     this.logger.debug(`Found ${runners.length} runners with IDs: ${runners.map((r) => r.id).join(', ')}`)
 
-    // Map to DTO format, including the snapshot runner ID
-    return runners.map((runner) => {
-      const snapshotRunner = snapshotRunners.find((sr) => sr.runnerId === runner.id)
-      return new RunnerSnapshotDto(snapshotRunner.id, runner.id, runner.domain)
+    const srMap = new Map<string, SnapshotRunner>()
+    snapshotRunners.forEach((sr) => {
+      srMap.set(sr.runnerId, sr)
     })
+
+    // Map to DTO format, including the snapshot runner ID
+    return runners
+      .filter((runner) => srMap.has(runner.id))
+      .map((runner) => {
+        const snapshotRunner = srMap.get(runner.id)
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- We know the snapshot runner exists based on the filter
+        return new RunnerSnapshotDto(snapshotRunner!.id, runner.id, runner.domain)
+      })
   }
 
   private calculateAvailabilityScore(params: AvailabilityScoreParams): number {
@@ -453,7 +477,7 @@ export class RunnerService {
       this.configService.getOrThrow('runnerUsage.allocatedCpuWeight'),
       this.configService.getOrThrow('runnerUsage.allocatedMemoryWeight'),
       this.configService.getOrThrow('runnerUsage.allocatedDiskWeight'),
-    ]
+    ] as const
 
     const cpuPenaltyExponent = this.configService.getOrThrow('runnerUsage.cpuPenaltyExponent')
     const memoryPenaltyExponent = this.configService.getOrThrow('runnerUsage.memoryPenaltyExponent')
@@ -476,10 +500,10 @@ export class RunnerService {
       allocatedCpuRatio,
       allocatedMemoryRatio,
       allocatedDiskRatio,
-    ]
+    ] as const
 
     // Ideal and anti-ideal arrays
-    const idealValues = [ideal.cpu, ideal.memory, ideal.disk, ideal.allocCpu, ideal.allocMem, ideal.allocDisk]
+    const idealValues = [ideal.cpu, ideal.memory, ideal.disk, ideal.allocCpu, ideal.allocMem, ideal.allocDisk] as const
 
     const antiIdealValues = [
       antiIdeal.cpu,
@@ -488,13 +512,13 @@ export class RunnerService {
       antiIdeal.allocCpu,
       antiIdeal.allocMem,
       antiIdeal.allocDisk,
-    ]
+    ] as const
 
     // Calculate weighted Euclidean distances
     let distanceToIdeal = 0
     let distanceToAntiIdeal = 0
 
-    for (let i = 0; i < current.length; i++) {
+    for (const i of [0, 1, 2, 3, 4, 5] as const) {
       const normalizedCurrent = current[i] / 100 // Normalize to 0-1 scale for allocation ratios >100%
       const normalizedIdeal = idealValues[i] / 100
       const normalizedAntiIdeal = antiIdealValues[i] / 100

@@ -4,8 +4,8 @@
  */
 
 export class UpdateAuditLogInternalDto {
-  statusCode?: number
-  errorMessage?: string
-  targetId?: string
-  organizationId?: string
+  statusCode?: number | null
+  errorMessage?: string | null
+  targetId?: string | null
+  organizationId?: string | null
 }

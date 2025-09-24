@@ -5,7 +5,7 @@
 
 import { Body, Controller, Get, Param, Post, Query, UseGuards, Request as Req } from '@nestjs/common'
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiOAuth2, ApiParam, ApiQuery } from '@nestjs/swagger'
-import { Request } from 'express'
+import { type Request } from 'express'
 import { AuditLogDto } from '../dto/audit-log.dto'
 import { PaginatedAuditLogsDto } from '../dto/paginated-audit-logs.dto'
 import { CreateAuditLogDto } from '../dto/create-audit-log.dto'
@@ -53,7 +53,7 @@ export class AuditController {
   async getAllLogs(@Query('page') page = 1, @Query('limit') limit = 10): Promise<PaginatedAuditLogsDto> {
     const result = await this.auditService.getLogs(page, limit)
     return {
-      items: result.items.map(AuditLogDto.fromAuditLog),
+      items: result.items.map((item) => new AuditLogDto(item)),
       total: result.total,
       page: result.page,
       totalPages: result.totalPages,
@@ -95,7 +95,7 @@ export class AuditController {
   ): Promise<PaginatedAuditLogsDto> {
     const result = await this.auditService.getLogs(page, limit, organizationId)
     return {
-      items: result.items.map(AuditLogDto.fromAuditLog),
+      items: result.items.map((item) => new AuditLogDto(item)),
       total: result.total,
       page: result.page,
       totalPages: result.totalPages,
@@ -125,6 +125,6 @@ export class AuditController {
       userAgent: req.get('user-agent'),
       source: req.get(CustomHeaders.SOURCE.name),
     })
-    return AuditLogDto.fromAuditLog(auditLog)
+    return new AuditLogDto(auditLog)
   }
 }

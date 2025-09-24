@@ -4,7 +4,7 @@
  */
 
 import { ApiProperty, ApiPropertyOptional, ApiSchema } from '@nestjs/swagger'
-import { AuditLog, AuditLogMetadata } from '../entities/audit-log.entity'
+import { AuditLog, type AuditLogMetadata } from '../entities/audit-log.entity'
 
 @ApiSchema({ name: 'AuditLog' })
 export class AuditLogDto {
@@ -53,22 +53,20 @@ export class AuditLogDto {
   @ApiProperty()
   createdAt: Date
 
-  static fromAuditLog(auditLog: AuditLog): AuditLogDto {
-    return {
-      id: auditLog.id,
-      actorId: auditLog.actorId,
-      actorEmail: auditLog.actorEmail,
-      organizationId: auditLog.organizationId,
-      action: auditLog.action,
-      targetType: auditLog.targetType,
-      targetId: auditLog.targetId,
-      statusCode: auditLog.statusCode,
-      errorMessage: auditLog.errorMessage,
-      ipAddress: auditLog.ipAddress,
-      userAgent: auditLog.userAgent,
-      source: auditLog.source,
-      metadata: auditLog.metadata,
-      createdAt: auditLog.createdAt,
-    }
+  constructor(auditLog: AuditLog) {
+    this.id = auditLog.id
+    this.actorId = auditLog.actorId
+    this.actorEmail = auditLog.actorEmail
+    this.organizationId = auditLog.organizationId ?? undefined
+    this.action = auditLog.action
+    this.targetType = auditLog.targetType ?? undefined
+    this.targetId = auditLog.targetId ?? undefined
+    this.statusCode = auditLog.statusCode ?? undefined
+    this.errorMessage = auditLog.errorMessage ?? undefined
+    this.ipAddress = auditLog.ipAddress ?? undefined
+    this.userAgent = auditLog.userAgent ?? undefined
+    this.source = auditLog.source ?? undefined
+    this.metadata = auditLog.metadata ?? undefined
+    this.createdAt = auditLog.createdAt
   }
 }

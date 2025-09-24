@@ -1,5 +1,5 @@
 /* tslint:disable */
-
+/* eslint-disable */
 /**
  * Daytona
  * Daytona AI platform API Docs
@@ -12,30 +12,33 @@
  * Do not edit the class manually.
  */
 
+
+
 /**
- *
+ * 
  * @export
  * @interface UpdateOrganizationMemberAccess
  */
 export interface UpdateOrganizationMemberAccess {
-  /**
-   * Organization member role
-   * @type {string}
-   * @memberof UpdateOrganizationMemberAccess
-   */
-  role: UpdateOrganizationMemberAccessRoleEnum
-  /**
-   * Array of assigned role IDs
-   * @type {Array<string>}
-   * @memberof UpdateOrganizationMemberAccess
-   */
-  assignedRoleIds: Array<string>
+    /**
+     * Organization member role
+     * @type {string}
+     * @memberof UpdateOrganizationMemberAccess
+     */
+    'role': UpdateOrganizationMemberAccessRoleEnum;
+    /**
+     * Array of assigned role IDs
+     * @type {Array<string>}
+     * @memberof UpdateOrganizationMemberAccess
+     */
+    'assignedRoleIds': Array<string>;
 }
 
 export const UpdateOrganizationMemberAccessRoleEnum = {
-  OWNER: 'owner',
-  MEMBER: 'member',
-} as const
+    OWNER: 'owner',
+    MEMBER: 'member'
+} as const;
 
-export type UpdateOrganizationMemberAccessRoleEnum =
-  (typeof UpdateOrganizationMemberAccessRoleEnum)[keyof typeof UpdateOrganizationMemberAccessRoleEnum]
+export type UpdateOrganizationMemberAccessRoleEnum = typeof UpdateOrganizationMemberAccessRoleEnum[keyof typeof UpdateOrganizationMemberAccessRoleEnum];
+
+

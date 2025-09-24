@@ -66,7 +66,7 @@ async function bootstrap() {
 
   // Runtime flags for migrations for run and revert migrations
   if (process.argv.length > 2) {
-    if (process.argv[2].startsWith('--migration-')) {
+    if (process.argv[2]?.startsWith('--migration-')) {
       const dataSource = app.get(DataSource)
       dataSource.setOptions({ logging: true })
       const migrationExecutor = new MigrationExecutor(dataSource)
@@ -87,7 +87,8 @@ async function bootstrap() {
         Logger.error('Invalid flag. API key name is required.')
         process.exit(1)
       }
-      await createAdminApiKey(app, process.argv[3])
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      await createAdminApiKey(app, process.argv[3]!)
     } else {
       Logger.error('Invalid flag')
       process.exit(1)
@@ -99,6 +100,7 @@ async function bootstrap() {
   const globalPrefix = 'api'
   app.setGlobalPrefix(globalPrefix)
 
+  const oidcAudience = configService.get('oidc.audience')
   const documentFactory = () => SwaggerModule.createDocument(app, getOpenApiConfig(configService.get('oidc.issuer')))
   SwaggerModule.setup('api', app, documentFactory, {
     swaggerOptions: {
@@ -106,9 +108,7 @@ async function bootstrap() {
         clientId: configService.get('oidc.clientId'),
         appName: 'Daytona AI',
         scopes: ['openid', 'profile', 'email'],
-        additionalQueryStringParams: {
-          audience: configService.get('oidc.audience'),
-        },
+        additionalQueryStringParams: oidcAudience ? { audience: oidcAudience } : {},
       },
     },
   })
@@ -137,7 +137,8 @@ async function bootstrap() {
   }
 
   // Replace dashboard api url before serving
-  if (configService.get('production')) {
+  const dashboardBaseApiUrl = configService.get('dashboardBaseApiUrl')
+  if (configService.get('production') && dashboardBaseApiUrl) {
     const dashboardDir = join(__dirname, '..', 'dashboard')
     const replaceInDirectory = (dir: string) => {
       for (const file of readdirSync(dir)) {
@@ -150,10 +151,7 @@ async function bootstrap() {
         }
         Logger.log(`Replacing %DAYTONA_BASE_API_URL% in ${filePath}`)
         const fileContent = readFileSync(filePath, 'utf8')
-        const newFileContent = fileContent.replaceAll(
-          '%DAYTONA_BASE_API_URL%',
-          configService.get('dashboardBaseApiUrl'),
-        )
+        const newFileContent = fileContent.replaceAll('%DAYTONA_BASE_API_URL%', dashboardBaseApiUrl)
         writeFileSync(filePath, newFileContent)
       }
     }
@@ -164,7 +162,7 @@ async function bootstrap() {
   app.enableShutdownHooks()
 
   const host = '0.0.0.0'
-  const port = configService.get('port')
+  const port = configService.getOrThrow('port')
   await app.listen(port, host)
   Logger.log(`🚀 Daytona API is running on: http://${host}:${port}/${globalPrefix}`)
 

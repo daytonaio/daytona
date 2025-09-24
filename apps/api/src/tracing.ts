@@ -32,7 +32,9 @@ if (process.env.LOG_LEVEL) {
 }
 
 const logger = new NestJSDiagLogger('OpenTelemetry')
-logger.localInstance.setLogLevels(logLevels)
+if (logger.localInstance?.setLogLevels) {
+  logger.localInstance.setLogLevels(logLevels)
+}
 
 if (process.env.OTEL_ENABLED === 'true') {
   // Enable OpenTelemetry diagnostics

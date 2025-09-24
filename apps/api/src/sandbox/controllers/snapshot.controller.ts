@@ -15,16 +15,15 @@ import {
   UseGuards,
   HttpCode,
   ForbiddenException,
-  Logger,
   NotFoundException,
   Res,
   Request,
-  RawBodyRequest,
+  type RawBodyRequest,
   Next,
   ParseBoolPipe,
 } from '@nestjs/common'
 import { IncomingMessage, ServerResponse } from 'http'
-import { NextFunction } from 'express'
+import { type NextFunction } from 'express'
 import { SnapshotService } from '../services/snapshot.service'
 import { RunnerService } from '../services/runner.service'
 import {
@@ -43,7 +42,7 @@ import { PaginatedSnapshotsDto } from '../dto/paginated-snapshots.dto'
 import { SnapshotAccessGuard } from '../guards/snapshot-access.guard'
 import { CustomHeaders } from '../../common/constants/header.constants'
 import { AuthContext } from '../../common/decorators/auth-context.decorator'
-import { OrganizationAuthContext } from '../../common/interfaces/auth-context.interface'
+import { type OrganizationAuthContext } from '../../common/interfaces/auth-context.interface'
 import { RequiredOrganizationResourcePermissions } from '../../organization/decorators/required-organization-resource-permissions.decorator'
 import { OrganizationResourcePermission } from '../../organization/enums/organization-resource-permission.enum'
 import { OrganizationResourceActionGuard } from '../../organization/guards/organization-resource-action.guard'
@@ -66,8 +65,6 @@ import { AuditTarget } from '../../audit/enums/audit-target.enum'
 @ApiOAuth2(['openid', 'profile', 'email'])
 @ApiBearerAuth()
 export class SnapshotController {
-  private readonly logger = new Logger(SnapshotController.name)
-
   constructor(
     private readonly snapshotService: SnapshotService,
     private readonly runnerService: RunnerService,
@@ -130,7 +127,7 @@ export class SnapshotController {
 
     // TODO: consider - if using transient registry, prepend the snapshot name with the username
     const snapshot = await this.snapshotService.createSnapshot(authContext.organization, createSnapshotDto)
-    return SnapshotDto.fromSnapshot(snapshot)
+    return new SnapshotDto(snapshot)
   }
 
   @Get('can-cleanup-image')
@@ -181,11 +178,11 @@ export class SnapshotController {
     try {
       // Try to get by ID
       snapshot = await this.snapshotService.getSnapshot(snapshotIdOrName)
-    } catch (error) {
+    } catch {
       // If not found by ID, try by name
       snapshot = await this.snapshotService.getSnapshotByName(snapshotIdOrName, authContext.organizationId)
     }
-    return SnapshotDto.fromSnapshot(snapshot)
+    return new SnapshotDto(snapshot)
   }
 
   @Delete(':id')
@@ -241,7 +238,7 @@ export class SnapshotController {
   ): Promise<PaginatedSnapshotsDto> {
     const result = await this.snapshotService.getAllSnapshots(authContext.organizationId, page, limit)
     return {
-      items: result.items.map(SnapshotDto.fromSnapshot),
+      items: result.items.map((snapshot) => new SnapshotDto(snapshot)),
       total: result.total,
       page: result.page,
       totalPages: result.totalPages,
@@ -278,7 +275,7 @@ export class SnapshotController {
     @Body() dto: SetSnapshotGeneralStatusDto,
   ): Promise<SnapshotDto> {
     const snapshot = await this.snapshotService.setSnapshotGeneralStatus(snapshotId, dto.general)
-    return SnapshotDto.fromSnapshot(snapshot)
+    return new SnapshotDto(snapshot)
   }
 
   @Get(':id/build-logs')
@@ -328,6 +325,10 @@ export class SnapshotController {
       throw new NotFoundException(`Build runner for snapshot ${snapshotId} not found`)
     }
 
+    if (!snapshot.buildInfo?.snapshotRef) {
+      throw new BadRequestError(`Snapshot ${snapshotId} is missing build snapshot reference`)
+    }
+
     const logProxy = new LogProxy(
       runner.apiUrl,
       snapshot.buildInfo.snapshotRef,
@@ -375,7 +376,7 @@ export class SnapshotController {
     @AuthContext() authContext: OrganizationAuthContext,
   ): Promise<SnapshotDto> {
     const snapshot = await this.snapshotService.activateSnapshot(snapshotId, authContext.organization)
-    return SnapshotDto.fromSnapshot(snapshot)
+    return new SnapshotDto(snapshot)
   }
 
   @Post(':id/deactivate')

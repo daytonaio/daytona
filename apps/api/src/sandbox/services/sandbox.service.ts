@@ -25,7 +25,6 @@ import { EventEmitter2, OnEvent } from '@nestjs/event-emitter'
 import { WarmPoolEvents } from '../constants/warmpool-events.constants'
 import { WarmPoolTopUpRequested } from '../events/warmpool-topup-requested.event'
 import { Runner } from '../entities/runner.entity'
-import { PortPreviewUrlDto } from '../dto/port-preview-url.dto'
 import { Organization } from '../../organization/entities/organization.entity'
 import { SandboxEvents } from '../constants/sandbox-events.constants'
 import { SandboxStateUpdatedEvent } from '../events/sandbox-state-updated.event'
@@ -47,7 +46,6 @@ import { RunnerAdapterFactory } from '../runner-adapter/runnerAdapter'
 import { validateNetworkAllowList } from '../utils/network-validation.util'
 import { OrganizationUsageService } from '../../organization/services/organization-usage.service'
 import { SshAccess } from '../entities/ssh-access.entity'
-import { nanoid } from 'nanoid'
 import { SshAccessValidationDto } from '../dto/ssh-access.dto'
 import { VolumeService } from './volume.service'
 import { RedisLockProvider } from '../common/redis-lock.provider'
@@ -127,17 +125,17 @@ export class SandboxService {
     const usageOverview = await this.organizationUsageService.getSandboxUsageOverview(organization.id, excludeSandboxId)
 
     try {
-      if (usageOverview.currentCpuUsage + usageOverview.pendingCpuUsage > organization.totalCpuQuota) {
+      if (usageOverview.currentCpuUsage + (usageOverview.pendingCpuUsage ?? 0) > organization.totalCpuQuota) {
         throw new ForbiddenException(`Total CPU quota exceeded. Maximum allowed: ${organization.totalCpuQuota}`)
       }
 
-      if (usageOverview.currentMemoryUsage + usageOverview.pendingMemoryUsage > organization.totalMemoryQuota) {
+      if (usageOverview.currentMemoryUsage + (usageOverview.pendingMemoryUsage ?? 0) > organization.totalMemoryQuota) {
         throw new ForbiddenException(
           `Total memory quota exceeded. Maximum allowed: ${organization.totalMemoryQuota}GiB`,
         )
       }
 
-      if (usageOverview.currentDiskUsage + usageOverview.pendingDiskUsage > organization.totalDiskQuota) {
+      if (usageOverview.currentDiskUsage + (usageOverview.pendingDiskUsage ?? 0) > organization.totalDiskQuota) {
         throw new ForbiddenException(`Total disk quota exceeded. Maximum allowed: ${organization.totalDiskQuota}GiB`)
       }
     } catch (error) {
@@ -214,21 +212,19 @@ export class SandboxService {
   }
 
   async createForWarmPool(warmPoolItem: WarmPool): Promise<Sandbox> {
-    const sandbox = new Sandbox()
+    const sandbox = new Sandbox({
+      organizationId: SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION,
+      region: warmPoolItem.target,
+      class: warmPoolItem.class,
+      osUser: 'daytona',
+      env: warmPoolItem.env,
+      cpu: warmPoolItem.cpu,
+      gpu: warmPoolItem.gpu,
+      mem: warmPoolItem.mem,
+      disk: warmPoolItem.disk,
+    })
 
-    sandbox.organizationId = SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION
-
-    sandbox.region = warmPoolItem.target
-    sandbox.class = warmPoolItem.class
     sandbox.snapshot = warmPoolItem.snapshot
-    //  TODO: default user should be configurable
-    sandbox.osUser = 'daytona'
-    sandbox.env = warmPoolItem.env || {}
-
-    sandbox.cpu = warmPoolItem.cpu
-    sandbox.gpu = warmPoolItem.gpu
-    sandbox.mem = warmPoolItem.mem
-    sandbox.disk = warmPoolItem.disk
 
     const snapshot = await this.snapshotRepository.findOne({
       where: [
@@ -238,6 +234,10 @@ export class SandboxService {
     })
     if (!snapshot) {
       throw new BadRequestError(`Snapshot ${sandbox.snapshot} not found while creating warm pool sandbox`)
+    }
+
+    if (!snapshot.internalName) {
+      throw new BadRequestError(`Snapshot ${sandbox.snapshot} is not ready yet`)
     }
 
     const runner = await this.runnerService.getRandomAvailableRunner({
@@ -271,6 +271,10 @@ export class SandboxService {
         snapshotIdOrName = this.configService.getOrThrow('defaultSnapshot')
       }
 
+      if (!snapshotIdOrName) {
+        throw new BadRequestError('Snapshot ID or name is required')
+      }
+
       const snapshotFilter: FindOptionsWhere<Snapshot>[] = [
         { organizationId: organization.id, name: snapshotIdOrName },
         { general: true, name: snapshotIdOrName },
@@ -293,14 +297,15 @@ export class SandboxService {
         )
       }
 
-      let snapshot = snapshots.find((s) => s.state === SnapshotState.ACTIVE)
-
-      if (!snapshot) {
-        snapshot = snapshots[0]
-      }
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      const snapshot = snapshots.find((s) => s.state === SnapshotState.ACTIVE) ?? snapshots[0]!
 
       if (snapshot.state !== SnapshotState.ACTIVE) {
         throw new BadRequestError(`Snapshot ${snapshotIdOrName} is ${snapshot.state}`)
+      }
+
+      if (!snapshot.internalName) {
+        throw new BadRequestError(`Snapshot ${snapshotIdOrName} is not ready yet`)
       }
 
       let cpu = snapshot.cpu
@@ -343,13 +348,13 @@ export class SandboxService {
         const warmPoolSandbox = await this.warmPoolService.fetchWarmPoolSandbox({
           organizationId: organization.id,
           snapshot: snapshotIdOrName,
-          target: createSandboxDto.target,
-          class: createSandboxDto.class,
+          target: region,
+          class: sandboxClass,
           cpu: cpu,
           mem: mem,
           disk: disk,
-          osUser: createSandboxDto.user,
-          env: createSandboxDto.env,
+          osUser: createSandboxDto.user ?? 'daytona',
+          env: createSandboxDto.env ?? {},
           state: SandboxState.STARTED,
         })
 
@@ -367,26 +372,21 @@ export class SandboxService {
         snapshotRef: snapshot.internalName,
       })
 
-      const sandbox = new Sandbox()
-
-      sandbox.organizationId = organization.id
-
-      //  TODO: make configurable
-      sandbox.region = region
-      sandbox.class = sandboxClass
-      sandbox.snapshot = snapshot.name
-      //  TODO: default user should be configurable
-      sandbox.osUser = createSandboxDto.user || 'daytona'
-      sandbox.env = createSandboxDto.env || {}
-      sandbox.labels = createSandboxDto.labels || {}
-      sandbox.volumes = createSandboxDto.volumes || []
-
-      sandbox.cpu = cpu
-      sandbox.gpu = gpu
-      sandbox.mem = mem
-      sandbox.disk = disk
-
-      sandbox.public = createSandboxDto.public || false
+      const sandbox = new Sandbox({
+        organizationId: organization.id,
+        region,
+        class: sandboxClass,
+        snapshot: snapshot.name,
+        osUser: createSandboxDto.user || 'daytona',
+        env: createSandboxDto.env,
+        labels: createSandboxDto.labels,
+        volumes: createSandboxDto.volumes,
+        cpu,
+        mem,
+        disk,
+        gpu,
+        public: createSandboxDto.public,
+      })
 
       if (createSandboxDto.networkBlockAll !== undefined) {
         sandbox.networkBlockAll = createSandboxDto.networkBlockAll
@@ -411,7 +411,7 @@ export class SandboxService {
       sandbox.runnerId = runner.id
 
       await this.sandboxRepository.insert(sandbox)
-      return SandboxDto.fromSandbox(sandbox, runner.domain)
+      return new SandboxDto(sandbox, runner.domain)
     } catch (error) {
       await this.rollbackPendingUsage(
         organization.id,
@@ -482,7 +482,7 @@ export class SandboxService {
       SandboxEvents.STATE_UPDATED,
       new SandboxStateUpdatedEvent(warmPoolSandbox, SandboxState.STARTED, SandboxState.STARTED),
     )
-    return SandboxDto.fromSandbox(result, runner.domain)
+    return new SandboxDto(result, runner.domain)
   }
 
   async createFromBuildInfo(createSandboxDto: CreateSandboxDto, organization: Organization): Promise<SandboxDto> {
@@ -519,26 +519,22 @@ export class SandboxService {
         await this.volumeService.validateVolumes(organization.id, volumeIdOrNames)
       }
 
-      const sandbox = new Sandbox()
-
-      sandbox.organizationId = organization.id
-
-      sandbox.region = region
-      sandbox.class = sandboxClass
-      sandbox.osUser = createSandboxDto.user || 'daytona'
-      sandbox.env = createSandboxDto.env || {}
-      sandbox.labels = createSandboxDto.labels || {}
-      sandbox.volumes = createSandboxDto.volumes || []
-
-      sandbox.cpu = cpu
-      sandbox.gpu = gpu
-      sandbox.mem = mem
-      sandbox.disk = disk
-      sandbox.public = createSandboxDto.public || false
-
-      if (createSandboxDto.networkBlockAll !== undefined) {
-        sandbox.networkBlockAll = createSandboxDto.networkBlockAll
-      }
+      const sandbox = new Sandbox({
+        organizationId: organization.id,
+        region,
+        class: sandboxClass,
+        osUser: createSandboxDto.user || 'daytona',
+        env: createSandboxDto.env,
+        labels: createSandboxDto.labels,
+        volumes: createSandboxDto.volumes,
+        cpu,
+        gpu,
+        mem,
+        disk,
+        public: createSandboxDto.public,
+        networkBlockAll: createSandboxDto.networkBlockAll,
+        autoDeleteInterval: createSandboxDto.autoDeleteInterval,
+      })
 
       if (createSandboxDto.networkAllowList !== undefined) {
         sandbox.networkAllowList = this.resolveNetworkAllowList(createSandboxDto.networkAllowList)
@@ -552,8 +548,8 @@ export class SandboxService {
         sandbox.autoArchiveInterval = this.resolveAutoArchiveInterval(createSandboxDto.autoArchiveInterval)
       }
 
-      if (createSandboxDto.autoDeleteInterval !== undefined) {
-        sandbox.autoDeleteInterval = createSandboxDto.autoDeleteInterval
+      if (!createSandboxDto.buildInfo) {
+        throw new BadRequestError('Build info is required')
       }
 
       const buildInfoSnapshotRef = generateBuildSnapshotRef(
@@ -577,7 +573,7 @@ export class SandboxService {
         sandbox.buildInfo = buildInfoEntity
       }
 
-      let runner: Runner
+      let runner: Runner | undefined
 
       try {
         runner = await this.runnerService.getRandomAvailableRunner({
@@ -598,7 +594,7 @@ export class SandboxService {
       }
 
       await this.sandboxRepository.insert(sandbox)
-      return SandboxDto.fromSandbox(sandbox, runner?.domain)
+      return new SandboxDto(sandbox, runner?.domain)
     } catch (error) {
       await this.rollbackPendingUsage(
         organization.id,
@@ -822,6 +818,9 @@ export class SandboxService {
       if (sandbox.runnerId) {
         // Add runner readiness check
         const runner = await this.runnerService.findOne(sandbox.runnerId)
+        if (!runner) {
+          throw new SandboxError('Runner not found')
+        }
         if (runner.state !== RunnerState.READY) {
           throw new SandboxError('Runner is not ready')
         }
@@ -925,7 +924,7 @@ export class SandboxService {
     return region.trim()
   }
 
-  private getValidatedOrDefaultClass(sandboxClass: SandboxClass): SandboxClass {
+  private getValidatedOrDefaultClass(sandboxClass?: SandboxClass): SandboxClass {
     if (!sandboxClass) {
       return SandboxClass.SMALL
     }
@@ -963,24 +962,24 @@ export class SandboxService {
       updatedAt: LessThan(twentyFourHoursAgo),
     })
 
-    if (destroyedSandboxs.affected > 0) {
+    if (destroyedSandboxs.affected && destroyedSandboxs.affected > 0) {
       this.logger.debug(`Cleaned up ${destroyedSandboxs.affected} destroyed sandboxes`)
     }
   }
 
   @Cron(CronExpression.EVERY_10_MINUTES)
-  async cleanupBuildFailedSandboxes() {
+  async _cleanupBuildFailedSandboxes() {
     const twentyFourHoursAgo = new Date()
     twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24)
 
-    const destroyedSandboxs = await this.sandboxRepository.delete({
+    const destroyedSandboxes = await this.sandboxRepository.delete({
       state: SandboxState.BUILD_FAILED,
       desiredState: SandboxDesiredState.DESTROYED,
       updatedAt: LessThan(twentyFourHoursAgo),
     })
 
-    if (destroyedSandboxs.affected > 0) {
-      this.logger.debug(`Cleaned up ${destroyedSandboxs.affected} build failed sandboxes`)
+    if (destroyedSandboxes?.affected) {
+      this.logger.debug(`Cleaned up ${destroyedSandboxes.affected} build failed sandboxes`)
     }
   }
 
@@ -1075,12 +1074,12 @@ export class SandboxService {
   }
 
   @OnEvent(WarmPoolEvents.TOPUP_REQUESTED)
-  private async createWarmPoolSandbox(event: WarmPoolTopUpRequested) {
+  async _createWarmPoolSandbox(event: WarmPoolTopUpRequested) {
     await this.createForWarmPool(event.warmPool)
   }
 
   @Cron(CronExpression.EVERY_MINUTE)
-  private async handleUnschedulableRunners() {
+  async _handleUnschedulableRunners() {
     const runners = await this.runnerRepository.find({ where: { unschedulable: true } })
 
     if (runners.length === 0) {
@@ -1107,7 +1106,7 @@ export class SandboxService {
     // Log any failed sandbox destructions
     results.forEach((result, index) => {
       if (result.status === 'rejected') {
-        this.logger.error(`Failed to destroy sandbox ${sandboxes[index].id}: ${result.reason}`)
+        this.logger.error(`Failed to destroy sandbox ${sandboxes[index]?.id}: ${result.reason}`)
       }
     })
   }
@@ -1161,16 +1160,15 @@ export class SandboxService {
   }
 
   async createSshAccess(sandboxId: string, expiresInMinutes = 60): Promise<SshAccess> {
-    //  check if sandbox exists
-    await this.findOne(sandboxId)
+    const sandbox = await this.findOne(sandboxId)
 
     // Revoke any existing SSH access for this sandbox
     await this.revokeSshAccess(sandboxId)
 
-    const sshAccess = new SshAccess()
-    sshAccess.sandboxId = sandboxId
-    sshAccess.token = nanoid(32)
-    sshAccess.expiresAt = new Date(Date.now() + expiresInMinutes * 60 * 1000)
+    const sshAccess = new SshAccess({
+      sandbox,
+      expiresAt: new Date(Date.now() + expiresInMinutes * 60 * 1000),
+    })
 
     return await this.sshAccessRepository.save(sshAccess)
   }
@@ -1194,13 +1192,13 @@ export class SandboxService {
     })
 
     if (!sshAccess) {
-      return { valid: false, sandboxId: null }
+      return new SshAccessValidationDto(false, '')
     }
 
     // Check if token is expired
     const isExpired = sshAccess.expiresAt < new Date()
     if (isExpired) {
-      return { valid: false, sandboxId: null }
+      return new SshAccessValidationDto(false, '')
     }
 
     // Get runner information if sandbox exists
@@ -1210,15 +1208,10 @@ export class SandboxService {
       })
 
       if (runner) {
-        return {
-          valid: true,
-          sandboxId: sshAccess.sandbox.id,
-          runnerId: runner.id,
-          runnerDomain: runner.domain,
-        }
+        return new SshAccessValidationDto(true, sshAccess.sandbox.id, runner.id, runner.domain)
       }
     }
 
-    return { valid: true, sandboxId: sshAccess.sandbox.id }
+    return new SshAccessValidationDto(true, sshAccess.sandbox.id)
   }
 }

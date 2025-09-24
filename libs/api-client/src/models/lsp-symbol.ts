@@ -12,32 +12,34 @@
  * Do not edit the class manually.
  */
 
+
 // May contain unused imports in some cases
 // @ts-ignore
-import type { LspLocation } from './lsp-location'
+import type { LspLocation } from './lsp-location';
 
 /**
- *
+ * 
  * @export
  * @interface LspSymbol
  */
 export interface LspSymbol {
-  /**
-   *
-   * @type {number}
-   * @memberof LspSymbol
-   */
-  kind: number
-  /**
-   *
-   * @type {LspLocation}
-   * @memberof LspSymbol
-   */
-  location: LspLocation
-  /**
-   *
-   * @type {string}
-   * @memberof LspSymbol
-   */
-  name: string
+    /**
+     * 
+     * @type {number}
+     * @memberof LspSymbol
+     */
+    'kind': number;
+    /**
+     * 
+     * @type {LspLocation}
+     * @memberof LspSymbol
+     */
+    'location': LspLocation;
+    /**
+     * 
+     * @type {string}
+     * @memberof LspSymbol
+     */
+    'name': string;
 }
+

@@ -1,5 +1,5 @@
 /* tslint:disable */
-
+/* eslint-disable */
 /**
  * Daytona
  * Daytona AI platform API Docs
@@ -12,22 +12,25 @@
  * Do not edit the class manually.
  */
 
+
+
 /**
- *
+ * 
  * @export
  * @interface ComputerUseStartResponse
  */
 export interface ComputerUseStartResponse {
-  /**
-   * A message indicating the result of starting computer use processes
-   * @type {string}
-   * @memberof ComputerUseStartResponse
-   */
-  message: string
-  /**
-   * Status information about all VNC desktop processes after starting
-   * @type {object}
-   * @memberof ComputerUseStartResponse
-   */
-  status: object
+    /**
+     * A message indicating the result of starting computer use processes
+     * @type {string}
+     * @memberof ComputerUseStartResponse
+     */
+    'message': string;
+    /**
+     * Status information about all VNC desktop processes after starting
+     * @type {object}
+     * @memberof ComputerUseStartResponse
+     */
+    'status': object;
 }
+

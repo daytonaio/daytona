@@ -1,5 +1,5 @@
 /* tslint:disable */
-
+/* eslint-disable */
 /**
  * Daytona
  * Daytona AI platform API Docs
@@ -12,40 +12,43 @@
  * Do not edit the class manually.
  */
 
+
+
 /**
- *
+ * 
  * @export
  * @interface UpdateDockerRegistry
  */
 export interface UpdateDockerRegistry {
-  /**
-   * Registry name
-   * @type {string}
-   * @memberof UpdateDockerRegistry
-   */
-  name: string
-  /**
-   * Registry URL
-   * @type {string}
-   * @memberof UpdateDockerRegistry
-   */
-  url: string
-  /**
-   * Registry username
-   * @type {string}
-   * @memberof UpdateDockerRegistry
-   */
-  username: string
-  /**
-   * Registry password
-   * @type {string}
-   * @memberof UpdateDockerRegistry
-   */
-  password?: string
-  /**
-   * Registry project
-   * @type {string}
-   * @memberof UpdateDockerRegistry
-   */
-  project?: string
+    /**
+     * Registry name
+     * @type {string}
+     * @memberof UpdateDockerRegistry
+     */
+    'name': string;
+    /**
+     * Registry URL
+     * @type {string}
+     * @memberof UpdateDockerRegistry
+     */
+    'url': string;
+    /**
+     * Registry username
+     * @type {string}
+     * @memberof UpdateDockerRegistry
+     */
+    'username': string;
+    /**
+     * Registry password
+     * @type {string}
+     * @memberof UpdateDockerRegistry
+     */
+    'password'?: string;
+    /**
+     * Registry project
+     * @type {string}
+     * @memberof UpdateDockerRegistry
+     */
+    'project'?: string;
 }
+

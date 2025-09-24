@@ -11,11 +11,10 @@ import {
   Body,
   Param,
   Request,
-  Logger,
   UseGuards,
   HttpCode,
   UseInterceptors,
-  RawBodyRequest,
+  type RawBodyRequest,
   Res,
   Next,
 } from '@nestjs/common'
@@ -98,9 +97,9 @@ import {
   LspSymbolDto,
   LspServerRequestDto,
 } from '../dto/lsp.dto'
-import { createProxyMiddleware, RequestHandler, fixRequestBody, Options } from 'http-proxy-middleware'
+import { createProxyMiddleware, type RequestHandler, fixRequestBody, Options } from 'http-proxy-middleware'
 import { IncomingMessage } from 'http'
-import { NextFunction } from 'express'
+import { type NextFunction } from 'express'
 import { ServerResponse } from 'http'
 import { SandboxAccessGuard } from '../guards/sandbox-access.guard'
 import { CustomHeaders } from '../../common/constants/header.constants'
@@ -134,7 +133,6 @@ const RUNNER_INFO_CACHE_TTL = 2 * 60 // 2 minutes
 @ApiOAuth2(['openid', 'profile', 'email'])
 @ApiBearerAuth()
 export class ToolboxController {
-  private readonly logger = new Logger(ToolboxController.name)
   private readonly toolboxProxy: RequestHandler<
     RawBodyRequest<IncomingMessage>,
     ServerResponse<IncomingMessage>,
@@ -153,7 +151,13 @@ export class ToolboxController {
     const commonProxyOptions: Options = {
       router: async (req: RawBodyRequest<IncomingMessage>) => {
         // eslint-disable-next-line no-useless-escape
-        const sandboxId = req.url.match(/^\/api\/toolbox\/([^\/]+)\/toolbox/)?.[1]
+        const sandboxId = req.url?.match(/^\/api\/toolbox\/([^\/]+)\/toolbox/)?.[1]
+        if (!sandboxId) {
+          // @ts-expect-error - used later to throw error
+          req._err = new BadRequestException('Invalid sandbox ID in path')
+          return 'http://target-error'
+        }
+
         try {
           const runnerInfo = await this.getRunnerInfo(sandboxId)
 
@@ -210,9 +214,6 @@ export class ToolboxController {
           }
           fixRequestBody(proxyReq, req)
         },
-        proxyRes: (proxyRes, req, res) => {
-          // console.log('proxyRes', proxyRes)
-        },
       },
     }
 
@@ -230,8 +231,11 @@ export class ToolboxController {
   private async getRunnerInfo(sandboxId: string): Promise<RunnerInfo> {
     let runnerInfo: RunnerInfo | null = null
     try {
-      const cached: { value: RunnerInfo } = JSON.parse(await this.redis.get(`${RUNNER_INFO_CACHE_PREFIX}${sandboxId}`))
-      runnerInfo = cached.value
+      const cache = await this.redis.get(`${RUNNER_INFO_CACHE_PREFIX}${sandboxId}`)
+      if (cache) {
+        const cached: { value: RunnerInfo } = JSON.parse(cache)
+        runnerInfo = cached.value
+      }
     } catch {
       // Ignore error and fetch from db
     }

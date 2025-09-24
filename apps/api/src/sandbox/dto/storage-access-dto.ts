@@ -41,4 +41,20 @@ export class StorageAccessDto {
     example: 'daytona',
   })
   bucket: string
+
+  private constructor(
+    accessKey: string,
+    secret: string,
+    sessionToken: string,
+    storageUrl: string,
+    organizationId: string,
+    bucket: string,
+  ) {
+    this.accessKey = accessKey
+    this.secret = secret
+    this.sessionToken = sessionToken
+    this.storageUrl = storageUrl
+    this.organizationId = organizationId
+    this.bucket = bucket
+  }
 }

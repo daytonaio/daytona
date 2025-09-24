@@ -46,14 +46,12 @@ export class WebhookInitializationStatusDto {
   })
   updatedAt: string
 
-  static fromWebhookInitialization(webhookInitialization: WebhookInitialization): WebhookInitializationStatusDto {
-    return {
-      organizationId: webhookInitialization.organizationId,
-      svixApplicationId: webhookInitialization.svixApplicationId,
-      lastError: webhookInitialization.lastError,
-      retryCount: webhookInitialization.retryCount,
-      createdAt: webhookInitialization.createdAt.toISOString(),
-      updatedAt: webhookInitialization.updatedAt.toISOString(),
-    }
+  constructor(webhookInitialization: WebhookInitialization) {
+    this.organizationId = webhookInitialization.organizationId
+    this.svixApplicationId = webhookInitialization.svixApplicationId
+    this.lastError = webhookInitialization.lastError
+    this.retryCount = webhookInitialization.retryCount
+    this.createdAt = webhookInitialization.createdAt.toISOString()
+    this.updatedAt = webhookInitialization.updatedAt.toISOString()
   }
 }

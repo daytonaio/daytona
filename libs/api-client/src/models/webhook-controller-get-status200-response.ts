@@ -1,5 +1,5 @@
 /* tslint:disable */
-
+/* eslint-disable */
 /**
  * Daytona
  * Daytona AI platform API Docs
@@ -12,16 +12,19 @@
  * Do not edit the class manually.
  */
 
+
+
 /**
- *
+ * 
  * @export
  * @interface WebhookControllerGetStatus200Response
  */
 export interface WebhookControllerGetStatus200Response {
-  /**
-   *
-   * @type {boolean}
-   * @memberof WebhookControllerGetStatus200Response
-   */
-  enabled?: boolean
+    /**
+     * 
+     * @type {boolean}
+     * @memberof WebhookControllerGetStatus200Response
+     */
+    'enabled'?: boolean;
 }
+

@@ -8,7 +8,7 @@ import { trace, context } from '@opentelemetry/api'
 const tracer = trace.getTracer('daytona-api')
 
 export function OtelSpan(name?: string) {
-  return (target: object, propertyKey: string | symbol, descriptor: PropertyDescriptor) => {
+  return (target: object, _: string | symbol, descriptor: PropertyDescriptor) => {
     const originalMethod = descriptor.value
     descriptor.value = async function (...args: any[]) {
       const spanName = name || `${target.constructor.name}.${originalMethod.name}`

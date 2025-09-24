@@ -1,5 +1,5 @@
 /* tslint:disable */
-
+/* eslint-disable */
 /**
  * Daytona
  * Daytona AI platform API Docs
@@ -12,22 +12,25 @@
  * Do not edit the class manually.
  */
 
+
+
 /**
- *
+ * 
  * @export
  * @interface ProcessLogsResponse
  */
 export interface ProcessLogsResponse {
-  /**
-   * The name of the VNC process whose logs were retrieved
-   * @type {string}
-   * @memberof ProcessLogsResponse
-   */
-  processName: string
-  /**
-   * The log output from the specified VNC process
-   * @type {string}
-   * @memberof ProcessLogsResponse
-   */
-  logs: string
+    /**
+     * The name of the VNC process whose logs were retrieved
+     * @type {string}
+     * @memberof ProcessLogsResponse
+     */
+    'processName': string;
+    /**
+     * The log output from the specified VNC process
+     * @type {string}
+     * @memberof ProcessLogsResponse
+     */
+    'logs': string;
 }
+

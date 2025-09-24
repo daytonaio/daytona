@@ -11,7 +11,6 @@ import { Sandbox } from '../entities/sandbox.entity'
 import { SandboxState } from '../enums/sandbox-state.enum'
 import { RunnerService } from '../services/runner.service'
 import { RunnerState } from '../enums/runner-state.enum'
-import { ResourceNotFoundError } from '../../exceptions/not-found.exception'
 import { BadRequestError } from '../../exceptions/bad-request.exception'
 import { DockerRegistryService } from '../../docker-registry/services/docker-registry.service'
 import { BackupState } from '../enums/backup-state.enum'
@@ -53,7 +52,7 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
 
   //  on init
   async onApplicationBootstrap() {
-    await this.adHocBackupCheck()
+    await this._adHocBackupCheck()
   }
 
   async onApplicationShutdown() {
@@ -67,7 +66,7 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
   //  todo: make frequency configurable or more efficient
   @Cron(CronExpression.EVERY_5_MINUTES, { name: 'ad-hoc-backup-check' })
   @TrackJobExecution()
-  async adHocBackupCheck(): Promise<void> {
+  async _adHocBackupCheck(): Promise<void> {
     const lockKey = 'ad-hoc-backup-check'
     const hasLock = await this.redisLockProvider.lock(lockKey, 5 * 60)
     if (!hasLock) {
@@ -131,7 +130,7 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
 
   @Cron(CronExpression.EVERY_10_SECONDS, { name: 'check-backup-states' })
   @TrackJobExecution()
-  async checkBackupStates(): Promise<void> {
+  async _checkBackupStates(): Promise<void> {
     //  lock the sync to only run one instance at a time
     const lockKey = 'check-backup-states'
     const hasLock = await this.redisLockProvider.lock(lockKey, 10)
@@ -227,7 +226,7 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
 
   @Cron(CronExpression.EVERY_10_SECONDS, { name: 'sync-stop-state-create-backups' })
   @TrackJobExecution()
-  async syncStopStateCreateBackups(): Promise<void> {
+  async _syncStopStateCreateBackups(): Promise<void> {
     const lockKey = 'sync-stop-state-create-backups'
     const hasLock = await this.redisLockProvider.lock(lockKey, 10)
     if (!hasLock) {
@@ -305,8 +304,12 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
   }
 
   private async checkBackupProgress(sandbox: Sandbox): Promise<void> {
+    if (!sandbox.runnerId) {
+      throw new BadRequestError(`Cannot check backup progress for sandbox ${sandbox.id} without assigned runner`)
+    }
+
     try {
-      const runner = await this.runnerService.findOne(sandbox.runnerId)
+      const runner = await this.runnerService.findOneOrFail(sandbox.runnerId)
       const runnerAdapter = await this.runnerAdapterFactory.create(runner)
 
       // Get sandbox info from runner
@@ -341,7 +344,14 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
   }
 
   private async deleteSandboxBackupRepositoryFromRegistry(sandbox: Sandbox): Promise<void> {
+    if (!sandbox.backupRegistryId) {
+      return
+    }
+
     const registry = await this.dockerRegistryService.findOne(sandbox.backupRegistryId)
+    if (!registry) {
+      return
+    }
 
     try {
       await this.dockerProvider.deleteSandboxRepository(sandbox.id, registry)
@@ -354,6 +364,14 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
   }
 
   private async handlePendingBackup(sandbox: Sandbox): Promise<void> {
+    if (!sandbox.runnerId) {
+      throw new BadRequestError(`Cannot create backup for sandbox ${sandbox.id} without assigned runner`)
+    }
+
+    if (!sandbox.backupSnapshot || !sandbox.backupRegistryId) {
+      throw new BadRequestError(`Sandbox ${sandbox.id} is missing backup snapshot or registry information`)
+    }
+
     const lockKey = `runner-${sandbox.runnerId}-backup-lock`
     try {
       await this.redisLockProvider.waitForLock(lockKey, 10)
@@ -373,7 +391,7 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
         throw new Error('Registry not found')
       }
 
-      const runner = await this.runnerService.findOne(sandbox.runnerId)
+      const runner = await this.runnerService.findOneOrFail(sandbox.runnerId)
       const runnerAdapter = await this.runnerAdapterFactory.create(runner)
 
       //  check if backup is already in progress on the runner
@@ -413,19 +431,19 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
 
   @OnEvent(SandboxEvents.ARCHIVED)
   @TrackJobExecution()
-  private async handleSandboxArchivedEvent(event: SandboxArchivedEvent) {
+  async _handleSandboxArchivedEvent(event: SandboxArchivedEvent) {
     this.setBackupPending(event.sandbox)
   }
 
   @OnEvent(SandboxEvents.DESTROYED)
   @TrackJobExecution()
-  private async handleSandboxDestroyedEvent(event: SandboxDestroyedEvent) {
+  async _handleSandboxDestroyedEvent(event: SandboxDestroyedEvent) {
     this.deleteSandboxBackupRepositoryFromRegistry(event.sandbox)
   }
 
   @OnEvent(SandboxEvents.BACKUP_CREATED)
   @TrackJobExecution()
-  private async handleSandboxBackupCreatedEvent(event: SandboxBackupCreatedEvent) {
+  async _handleSandboxBackupCreatedEvent(event: SandboxBackupCreatedEvent) {
     this.handlePendingBackup(event.sandbox)
   }
 }

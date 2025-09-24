@@ -5,6 +5,7 @@
 
 import { ApiProperty, ApiSchema } from '@nestjs/swagger'
 import { AuditLogDto } from './audit-log.dto'
+import { type PaginatedList } from '../../common/interfaces/paginated-list.interface'
 
 @ApiSchema({ name: 'PaginatedAuditLogs' })
 export class PaginatedAuditLogsDto {
@@ -19,4 +20,11 @@ export class PaginatedAuditLogsDto {
 
   @ApiProperty()
   totalPages: number
+
+  constructor(auditLogs: PaginatedList<AuditLogDto>) {
+    this.items = auditLogs.items
+    this.total = auditLogs.total
+    this.page = auditLogs.page
+    this.totalPages = auditLogs.totalPages
+  }
 }

@@ -15,10 +15,11 @@ import { AuditLogUpdatedEvent } from '../events/audit-log-updated.event'
 export class AuditLogSubscriber implements EntitySubscriberInterface<AuditLog> {
   private readonly logger = new Logger(AuditLogSubscriber.name)
 
-  @Inject(EventEmitter2)
-  private eventEmitter: EventEmitter2
-
-  constructor(dataSource: DataSource) {
+  constructor(
+    dataSource: DataSource,
+    @Inject(EventEmitter2)
+    private eventEmitter: EventEmitter2,
+  ) {
     dataSource.subscribers.push(this)
   }
 

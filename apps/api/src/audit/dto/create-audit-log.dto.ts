@@ -36,4 +36,20 @@ export class CreateAuditLogDto {
   @ApiPropertyOptional()
   @IsOptional()
   targetId?: string
+
+  constructor(createParams: {
+    actorId: string
+    actorEmail: string
+    organizationId?: string
+    action: AuditAction
+    targetType?: AuditTarget
+    targetId?: string
+  }) {
+    this.actorId = createParams.actorId
+    this.actorEmail = createParams.actorEmail
+    this.organizationId = createParams.organizationId
+    this.action = createParams.action
+    this.targetType = createParams.targetType
+    this.targetId = createParams.targetId
+  }
 }
