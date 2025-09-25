@@ -150,7 +150,16 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
           backupStates: [BackupState.PENDING, BackupState.IN_PROGRESS],
         })
         .andWhere('r.state = :ready', { ready: RunnerState.READY })
-        .orderBy('sandbox.lastBackupAt', 'ASC')
+        .orderBy(
+          'CASE sandbox.state ' +
+            `WHEN '${SandboxState.ARCHIVING}' THEN 1 ` + // Manual archival action
+            `WHEN '${SandboxState.STOPPED}' THEN 2 ` + // Auto-archive poller
+            `WHEN '${SandboxState.STARTED}' THEN 3 ` + // Ad-hoc backup poller
+            'END',
+          'ASC',
+        )
+        .addOrderBy('sandbox.lastBackupAt', 'ASC') // Process the one with the oldest lastBackupAt
+        .addOrderBy('sandbox.createdAt', 'ASC') // If there hasn't been a backup yet, process older sandboxes first
         .take(100)
         .getMany()
 
