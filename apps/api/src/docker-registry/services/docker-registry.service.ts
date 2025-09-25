@@ -147,9 +147,16 @@ export class DockerRegistryService {
       return preferredRegionRegistries[randomIndex]
     }
 
-    // If no registry found in preferred region, return any available registry
-    const randomIndex = Math.floor(Math.random() * registries.length)
-    return registries[randomIndex]
+    // If no registry found in preferred region, try to find a fallback registry
+    const fallbackRegistries = registries.filter((registry) => registry.isFallback === true)
+
+    if (fallbackRegistries.length > 0) {
+      const randomIndex = Math.floor(Math.random() * fallbackRegistries.length)
+      return fallbackRegistries[randomIndex]
+    }
+
+    // If no fallback registry found either, throw an error
+    throw new Error('No backup registry available')
   }
 
   async findOneBySnapshotImageName(imageName: string, organizationId?: string): Promise<DockerRegistry | null> {
