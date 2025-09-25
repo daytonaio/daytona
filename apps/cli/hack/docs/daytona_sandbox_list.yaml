@@ -13,10 +13,6 @@ options:
     shorthand: p
     default_value: '1'
     usage: Page number for pagination (starting from 1)
-  - name: verbose
-    shorthand: v
-    default_value: 'false'
-    usage: Include verbose output
 inherited_options:
   - name: help
     default_value: 'false'

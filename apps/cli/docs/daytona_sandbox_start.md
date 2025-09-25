@@ -6,12 +6,6 @@ Start a sandbox
 daytona sandbox start [SANDBOX_ID] [flags]
 ```
 
-### Options
-
-```
-  -a, --all   Start all sandboxes
-```
-
 ### Options inherited from parent commands
 
 ```
