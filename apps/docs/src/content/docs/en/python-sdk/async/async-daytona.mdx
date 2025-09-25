@@ -339,7 +339,9 @@ print(f"Sandbox ID: {sandbox.id} State: {sandbox.state}")
 
 ```python
 @intercept_errors(message_prefix="Failed to list sandboxes: ")
-async def list(labels: Optional[Dict[str, str]] = None) -> List[AsyncSandbox]
+async def list(labels: Optional[Dict[str, str]] = None,
+               page: Optional[int] = None,
+               limit: Optional[int] = None) -> List[AsyncSandbox]
 ```
 
 Lists Sandboxes filtered by labels.
@@ -347,17 +349,19 @@ Lists Sandboxes filtered by labels.
 **Arguments**:
 
 - `labels` _Optional[Dict[str, str]]_ - Labels to filter Sandboxes.
+- `page` _Optional[int]_ - Page number for pagination (starting from 1).
+- `limit` _Optional[int]_ - Maximum number of items per page.
   
 
 **Returns**:
 
-- `List[Sandbox]` - List of Sandbox instances that match the labels.
+- `List[Sandbox]` - Paginated list of Sandbox instances that match the labels.
   
 
 **Example**:
 
 ```python
-sandboxes = await daytona.list(labels={"my-label": "my-value"})
+sandboxes = await daytona.list(labels={"my-label": "my-value"}, page=2, limit=10)
 for sandbox in sandboxes:
     print(f"{sandbox.id}: {sandbox.status}")
 ```
