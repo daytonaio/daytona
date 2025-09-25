@@ -282,7 +282,7 @@ class AsyncSandbox(SandboxDto):
             timeout (Optional[float]): Timeout (in seconds) for sandbox deletion. 0 means no timeout.
                 Default is 60 seconds.
         """
-        await self._sandbox_api.delete_sandbox(self.id, force=True, _request_timeout=timeout or None)
+        await self._sandbox_api.delete_sandbox(self.id, _request_timeout=timeout or None)
         await self.refresh_data()
 
     @intercept_errors(message_prefix="Failure during waiting for sandbox to start: ")
