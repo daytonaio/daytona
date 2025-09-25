@@ -102,7 +102,9 @@ models/organization-usage-overview.ts
 models/organization-user.ts
 models/organization.ts
 models/paginated-audit-logs.ts
-models/paginated-snapshots-dto.ts
+models/paginated-sandboxes.ts
+models/paginated-snapshots.ts
+models/paginated-workspaces.ts
 models/port-preview-url.ts
 models/position.ts
 models/posthog-config.ts
@@ -118,6 +120,7 @@ models/pty-resize-request.ts
 models/pty-session-info.ts
 models/range.ts
 models/region-screenshot-response.ts
+models/region.ts
 models/registry-push-access-dto.ts
 models/replace-request.ts
 models/replace-result.ts

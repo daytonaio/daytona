@@ -94,7 +94,9 @@ from daytona_api_client.models.organization_suspension import OrganizationSuspen
 from daytona_api_client.models.organization_usage_overview import OrganizationUsageOverview
 from daytona_api_client.models.organization_user import OrganizationUser
 from daytona_api_client.models.paginated_audit_logs import PaginatedAuditLogs
-from daytona_api_client.models.paginated_snapshots_dto import PaginatedSnapshotsDto
+from daytona_api_client.models.paginated_sandboxes import PaginatedSandboxes
+from daytona_api_client.models.paginated_snapshots import PaginatedSnapshots
+from daytona_api_client.models.paginated_workspaces import PaginatedWorkspaces
 from daytona_api_client.models.port_preview_url import PortPreviewUrl
 from daytona_api_client.models.position import Position
 from daytona_api_client.models.posthog_config import PosthogConfig
@@ -109,6 +111,7 @@ from daytona_api_client.models.pty_list_response import PtyListResponse
 from daytona_api_client.models.pty_resize_request import PtyResizeRequest
 from daytona_api_client.models.pty_session_info import PtySessionInfo
 from daytona_api_client.models.range import Range
+from daytona_api_client.models.region import Region
 from daytona_api_client.models.region_screenshot_response import RegionScreenshotResponse
 from daytona_api_client.models.registry_push_access_dto import RegistryPushAccessDto
 from daytona_api_client.models.replace_request import ReplaceRequest

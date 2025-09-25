@@ -17,11 +17,14 @@ from pydantic import validate_call, Field, StrictFloat, StrictStr, StrictInt
 from typing import Any, Dict, List, Optional, Tuple, Union
 from typing_extensions import Annotated
 
-from pydantic import Field, StrictBool, StrictFloat, StrictInt, StrictStr
+from datetime import datetime
+from pydantic import Field, StrictBool, StrictFloat, StrictInt, StrictStr, field_validator
 from typing import List, Optional, Union
 from typing_extensions import Annotated
 from daytona_api_client_async.models.create_sandbox import CreateSandbox
+from daytona_api_client_async.models.paginated_sandboxes import PaginatedSandboxes
 from daytona_api_client_async.models.port_preview_url import PortPreviewUrl
+from daytona_api_client_async.models.region import Region
 from daytona_api_client_async.models.sandbox import Sandbox
 from daytona_api_client_async.models.sandbox_labels import SandboxLabels
 from daytona_api_client_async.models.ssh_access_dto import SshAccessDto
@@ -1169,7 +1172,6 @@ class SandboxApi:
     async def delete_sandbox(
         self,
         sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
-        force: StrictBool,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
@@ -1189,8 +1191,6 @@ class SandboxApi:
 
         :param sandbox_id: ID of the sandbox (required)
         :type sandbox_id: str
-        :param force: (required)
-        :type force: bool
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -1217,7 +1217,6 @@ class SandboxApi:
 
         _param = self._delete_sandbox_serialize(
             sandbox_id=sandbox_id,
-            force=force,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -1243,7 +1242,6 @@ class SandboxApi:
     async def delete_sandbox_with_http_info(
         self,
         sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
-        force: StrictBool,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
@@ -1263,8 +1261,6 @@ class SandboxApi:
 
         :param sandbox_id: ID of the sandbox (required)
         :type sandbox_id: str
-        :param force: (required)
-        :type force: bool
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -1291,7 +1287,6 @@ class SandboxApi:
 
         _param = self._delete_sandbox_serialize(
             sandbox_id=sandbox_id,
-            force=force,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -1317,7 +1312,6 @@ class SandboxApi:
     async def delete_sandbox_without_preload_content(
         self,
         sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
-        force: StrictBool,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
@@ -1337,8 +1331,6 @@ class SandboxApi:
 
         :param sandbox_id: ID of the sandbox (required)
         :type sandbox_id: str
-        :param force: (required)
-        :type force: bool
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -1365,7 +1357,6 @@ class SandboxApi:
 
         _param = self._delete_sandbox_serialize(
             sandbox_id=sandbox_id,
-            force=force,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -1386,7 +1377,6 @@ class SandboxApi:
     def _delete_sandbox_serialize(
         self,
         sandbox_id,
-        force,
         x_daytona_organization_id,
         _request_auth,
         _content_type,
@@ -1412,10 +1402,6 @@ class SandboxApi:
         if sandbox_id is not None:
             _path_params['sandboxId'] = sandbox_id
         # process the query parameters
-        if force is not None:
-            
-            _query_params.append(('force', force))
-            
         # process the header parameters
         if x_daytona_organization_id is not None:
             _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id
@@ -2314,6 +2300,265 @@ class SandboxApi:
 
 
     @validate_call
+    async def get_sandbox_regions(
+        self,
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> List[Region]:
+        """List all regions where sandboxes have been created
+
+
+        :param x_daytona_organization_id: Use with JWT to specify the organization ID
+        :type x_daytona_organization_id: str
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._get_sandbox_regions_serialize(
+            x_daytona_organization_id=x_daytona_organization_id,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "List[Region]",
+        }
+        response_data = await self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        await response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        ).data
+
+
+    @validate_call
+    async def get_sandbox_regions_with_http_info(
+        self,
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> ApiResponse[List[Region]]:
+        """List all regions where sandboxes have been created
+
+
+        :param x_daytona_organization_id: Use with JWT to specify the organization ID
+        :type x_daytona_organization_id: str
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._get_sandbox_regions_serialize(
+            x_daytona_organization_id=x_daytona_organization_id,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "List[Region]",
+        }
+        response_data = await self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        await response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        )
+
+
+    @validate_call
+    async def get_sandbox_regions_without_preload_content(
+        self,
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> RESTResponseType:
+        """List all regions where sandboxes have been created
+
+
+        :param x_daytona_organization_id: Use with JWT to specify the organization ID
+        :type x_daytona_organization_id: str
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._get_sandbox_regions_serialize(
+            x_daytona_organization_id=x_daytona_organization_id,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "List[Region]",
+        }
+        response_data = await self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        return response_data.response
+
+
+    def _get_sandbox_regions_serialize(
+        self,
+        x_daytona_organization_id,
+        _request_auth,
+        _content_type,
+        _headers,
+        _host_index,
+    ) -> RequestSerialized:
+
+        _host = None
+
+        _collection_formats: Dict[str, str] = {
+        }
+
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        ] = {}
+        _body_params: Optional[bytes] = None
+
+        # process the path parameters
+        # process the query parameters
+        # process the header parameters
+        if x_daytona_organization_id is not None:
+            _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id
+        # process the form parameters
+        # process the body parameter
+
+
+        # set the HTTP header `Accept`
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
+                [
+                    'application/json'
+                ]
+            )
+
+
+        # authentication setting
+        _auth_settings: List[str] = [
+            'bearer', 
+            'oauth2'
+        ]
+
+        return self.api_client.param_serialize(
+            method='GET',
+            resource_path='/sandbox/regions',
+            path_params=_path_params,
+            query_params=_query_params,
+            header_params=_header_params,
+            body=_body_params,
+            post_params=_form_params,
+            files=_files,
+            auth_settings=_auth_settings,
+            collection_formats=_collection_formats,
+            _host=_host,
+            _request_auth=_request_auth
+        )
+
+
+
+
+    @validate_call
     async def get_sandboxes_for_runner(
         self,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
@@ -2610,9 +2855,24 @@ class SandboxApi:
     async def list_sandboxes(
         self,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
-        verbose: Annotated[Optional[StrictBool], Field(description="Include verbose output")] = None,
+        page: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Page number of the results")] = None,
+        limit: Annotated[Optional[Union[Annotated[float, Field(le=100, strict=True, ge=1)], Annotated[int, Field(le=100, strict=True, ge=1)]]], Field(description="Number of results per page")] = None,
+        id: Annotated[Optional[StrictStr], Field(description="Filter by partial ID match")] = None,
         labels: Annotated[Optional[StrictStr], Field(description="JSON encoded labels to filter by")] = None,
-        include_errored_deleted: Annotated[Optional[StrictBool], Field(description="Include errored and deleted sandboxes")] = None,
+        include_errored_deleted: Annotated[Optional[StrictBool], Field(description="Include results with errored state and deleted desired state")] = None,
+        states: Annotated[Optional[List[StrictStr]], Field(description="List of states to filter by")] = None,
+        snapshots: Annotated[Optional[List[StrictStr]], Field(description="List of snapshot names to filter by")] = None,
+        regions: Annotated[Optional[List[StrictStr]], Field(description="List of regions to filter by")] = None,
+        min_cpu: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Minimum CPU")] = None,
+        max_cpu: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Maximum CPU")] = None,
+        min_memory_gi_b: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Minimum memory in GiB")] = None,
+        max_memory_gi_b: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Maximum memory in GiB")] = None,
+        min_disk_gi_b: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Minimum disk space in GiB")] = None,
+        max_disk_gi_b: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Maximum disk space in GiB")] = None,
+        last_event_after: Annotated[Optional[datetime], Field(description="Include items with last event after this timestamp")] = None,
+        last_event_before: Annotated[Optional[datetime], Field(description="Include items with last event before this timestamp")] = None,
+        sort: Annotated[Optional[StrictStr], Field(description="Field to sort by")] = None,
+        order: Annotated[Optional[StrictStr], Field(description="Direction to sort by")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2625,18 +2885,48 @@ class SandboxApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> List[Sandbox]:
+    ) -> PaginatedSandboxes:
         """List all sandboxes
 
 
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
-        :param verbose: Include verbose output
-        :type verbose: bool
+        :param page: Page number of the results
+        :type page: float
+        :param limit: Number of results per page
+        :type limit: float
+        :param id: Filter by partial ID match
+        :type id: str
         :param labels: JSON encoded labels to filter by
         :type labels: str
-        :param include_errored_deleted: Include errored and deleted sandboxes
+        :param include_errored_deleted: Include results with errored state and deleted desired state
         :type include_errored_deleted: bool
+        :param states: List of states to filter by
+        :type states: List[str]
+        :param snapshots: List of snapshot names to filter by
+        :type snapshots: List[str]
+        :param regions: List of regions to filter by
+        :type regions: List[str]
+        :param min_cpu: Minimum CPU
+        :type min_cpu: float
+        :param max_cpu: Maximum CPU
+        :type max_cpu: float
+        :param min_memory_gi_b: Minimum memory in GiB
+        :type min_memory_gi_b: float
+        :param max_memory_gi_b: Maximum memory in GiB
+        :type max_memory_gi_b: float
+        :param min_disk_gi_b: Minimum disk space in GiB
+        :type min_disk_gi_b: float
+        :param max_disk_gi_b: Maximum disk space in GiB
+        :type max_disk_gi_b: float
+        :param last_event_after: Include items with last event after this timestamp
+        :type last_event_after: datetime
+        :param last_event_before: Include items with last event before this timestamp
+        :type last_event_before: datetime
+        :param sort: Field to sort by
+        :type sort: str
+        :param order: Direction to sort by
+        :type order: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -2661,9 +2951,24 @@ class SandboxApi:
 
         _param = self._list_sandboxes_serialize(
             x_daytona_organization_id=x_daytona_organization_id,
-            verbose=verbose,
+            page=page,
+            limit=limit,
+            id=id,
             labels=labels,
             include_errored_deleted=include_errored_deleted,
+            states=states,
+            snapshots=snapshots,
+            regions=regions,
+            min_cpu=min_cpu,
+            max_cpu=max_cpu,
+            min_memory_gi_b=min_memory_gi_b,
+            max_memory_gi_b=max_memory_gi_b,
+            min_disk_gi_b=min_disk_gi_b,
+            max_disk_gi_b=max_disk_gi_b,
+            last_event_after=last_event_after,
+            last_event_before=last_event_before,
+            sort=sort,
+            order=order,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -2671,7 +2976,7 @@ class SandboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "List[Sandbox]",
+            '200': "PaginatedSandboxes",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2688,9 +2993,24 @@ class SandboxApi:
     async def list_sandboxes_with_http_info(
         self,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
-        verbose: Annotated[Optional[StrictBool], Field(description="Include verbose output")] = None,
+        page: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Page number of the results")] = None,
+        limit: Annotated[Optional[Union[Annotated[float, Field(le=100, strict=True, ge=1)], Annotated[int, Field(le=100, strict=True, ge=1)]]], Field(description="Number of results per page")] = None,
+        id: Annotated[Optional[StrictStr], Field(description="Filter by partial ID match")] = None,
         labels: Annotated[Optional[StrictStr], Field(description="JSON encoded labels to filter by")] = None,
-        include_errored_deleted: Annotated[Optional[StrictBool], Field(description="Include errored and deleted sandboxes")] = None,
+        include_errored_deleted: Annotated[Optional[StrictBool], Field(description="Include results with errored state and deleted desired state")] = None,
+        states: Annotated[Optional[List[StrictStr]], Field(description="List of states to filter by")] = None,
+        snapshots: Annotated[Optional[List[StrictStr]], Field(description="List of snapshot names to filter by")] = None,
+        regions: Annotated[Optional[List[StrictStr]], Field(description="List of regions to filter by")] = None,
+        min_cpu: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Minimum CPU")] = None,
+        max_cpu: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Maximum CPU")] = None,
+        min_memory_gi_b: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Minimum memory in GiB")] = None,
+        max_memory_gi_b: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Maximum memory in GiB")] = None,
+        min_disk_gi_b: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Minimum disk space in GiB")] = None,
+        max_disk_gi_b: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Maximum disk space in GiB")] = None,
+        last_event_after: Annotated[Optional[datetime], Field(description="Include items with last event after this timestamp")] = None,
+        last_event_before: Annotated[Optional[datetime], Field(description="Include items with last event before this timestamp")] = None,
+        sort: Annotated[Optional[StrictStr], Field(description="Field to sort by")] = None,
+        order: Annotated[Optional[StrictStr], Field(description="Direction to sort by")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2703,18 +3023,48 @@ class SandboxApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[List[Sandbox]]:
+    ) -> ApiResponse[PaginatedSandboxes]:
         """List all sandboxes
 
 
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
-        :param verbose: Include verbose output
-        :type verbose: bool
+        :param page: Page number of the results
+        :type page: float
+        :param limit: Number of results per page
+        :type limit: float
+        :param id: Filter by partial ID match
+        :type id: str
         :param labels: JSON encoded labels to filter by
         :type labels: str
-        :param include_errored_deleted: Include errored and deleted sandboxes
+        :param include_errored_deleted: Include results with errored state and deleted desired state
         :type include_errored_deleted: bool
+        :param states: List of states to filter by
+        :type states: List[str]
+        :param snapshots: List of snapshot names to filter by
+        :type snapshots: List[str]
+        :param regions: List of regions to filter by
+        :type regions: List[str]
+        :param min_cpu: Minimum CPU
+        :type min_cpu: float
+        :param max_cpu: Maximum CPU
+        :type max_cpu: float
+        :param min_memory_gi_b: Minimum memory in GiB
+        :type min_memory_gi_b: float
+        :param max_memory_gi_b: Maximum memory in GiB
+        :type max_memory_gi_b: float
+        :param min_disk_gi_b: Minimum disk space in GiB
+        :type min_disk_gi_b: float
+        :param max_disk_gi_b: Maximum disk space in GiB
+        :type max_disk_gi_b: float
+        :param last_event_after: Include items with last event after this timestamp
+        :type last_event_after: datetime
+        :param last_event_before: Include items with last event before this timestamp
+        :type last_event_before: datetime
+        :param sort: Field to sort by
+        :type sort: str
+        :param order: Direction to sort by
+        :type order: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -2739,9 +3089,24 @@ class SandboxApi:
 
         _param = self._list_sandboxes_serialize(
             x_daytona_organization_id=x_daytona_organization_id,
-            verbose=verbose,
+            page=page,
+            limit=limit,
+            id=id,
             labels=labels,
             include_errored_deleted=include_errored_deleted,
+            states=states,
+            snapshots=snapshots,
+            regions=regions,
+            min_cpu=min_cpu,
+            max_cpu=max_cpu,
+            min_memory_gi_b=min_memory_gi_b,
+            max_memory_gi_b=max_memory_gi_b,
+            min_disk_gi_b=min_disk_gi_b,
+            max_disk_gi_b=max_disk_gi_b,
+            last_event_after=last_event_after,
+            last_event_before=last_event_before,
+            sort=sort,
+            order=order,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -2749,7 +3114,7 @@ class SandboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "List[Sandbox]",
+            '200': "PaginatedSandboxes",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2766,9 +3131,24 @@ class SandboxApi:
     async def list_sandboxes_without_preload_content(
         self,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
-        verbose: Annotated[Optional[StrictBool], Field(description="Include verbose output")] = None,
+        page: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Page number of the results")] = None,
+        limit: Annotated[Optional[Union[Annotated[float, Field(le=100, strict=True, ge=1)], Annotated[int, Field(le=100, strict=True, ge=1)]]], Field(description="Number of results per page")] = None,
+        id: Annotated[Optional[StrictStr], Field(description="Filter by partial ID match")] = None,
         labels: Annotated[Optional[StrictStr], Field(description="JSON encoded labels to filter by")] = None,
-        include_errored_deleted: Annotated[Optional[StrictBool], Field(description="Include errored and deleted sandboxes")] = None,
+        include_errored_deleted: Annotated[Optional[StrictBool], Field(description="Include results with errored state and deleted desired state")] = None,
+        states: Annotated[Optional[List[StrictStr]], Field(description="List of states to filter by")] = None,
+        snapshots: Annotated[Optional[List[StrictStr]], Field(description="List of snapshot names to filter by")] = None,
+        regions: Annotated[Optional[List[StrictStr]], Field(description="List of regions to filter by")] = None,
+        min_cpu: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Minimum CPU")] = None,
+        max_cpu: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Maximum CPU")] = None,
+        min_memory_gi_b: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Minimum memory in GiB")] = None,
+        max_memory_gi_b: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Maximum memory in GiB")] = None,
+        min_disk_gi_b: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Minimum disk space in GiB")] = None,
+        max_disk_gi_b: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Maximum disk space in GiB")] = None,
+        last_event_after: Annotated[Optional[datetime], Field(description="Include items with last event after this timestamp")] = None,
+        last_event_before: Annotated[Optional[datetime], Field(description="Include items with last event before this timestamp")] = None,
+        sort: Annotated[Optional[StrictStr], Field(description="Field to sort by")] = None,
+        order: Annotated[Optional[StrictStr], Field(description="Direction to sort by")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2787,12 +3167,42 @@ class SandboxApi:
 
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
-        :param verbose: Include verbose output
-        :type verbose: bool
+        :param page: Page number of the results
+        :type page: float
+        :param limit: Number of results per page
+        :type limit: float
+        :param id: Filter by partial ID match
+        :type id: str
         :param labels: JSON encoded labels to filter by
         :type labels: str
-        :param include_errored_deleted: Include errored and deleted sandboxes
+        :param include_errored_deleted: Include results with errored state and deleted desired state
         :type include_errored_deleted: bool
+        :param states: List of states to filter by
+        :type states: List[str]
+        :param snapshots: List of snapshot names to filter by
+        :type snapshots: List[str]
+        :param regions: List of regions to filter by
+        :type regions: List[str]
+        :param min_cpu: Minimum CPU
+        :type min_cpu: float
+        :param max_cpu: Maximum CPU
+        :type max_cpu: float
+        :param min_memory_gi_b: Minimum memory in GiB
+        :type min_memory_gi_b: float
+        :param max_memory_gi_b: Maximum memory in GiB
+        :type max_memory_gi_b: float
+        :param min_disk_gi_b: Minimum disk space in GiB
+        :type min_disk_gi_b: float
+        :param max_disk_gi_b: Maximum disk space in GiB
+        :type max_disk_gi_b: float
+        :param last_event_after: Include items with last event after this timestamp
+        :type last_event_after: datetime
+        :param last_event_before: Include items with last event before this timestamp
+        :type last_event_before: datetime
+        :param sort: Field to sort by
+        :type sort: str
+        :param order: Direction to sort by
+        :type order: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -2817,9 +3227,24 @@ class SandboxApi:
 
         _param = self._list_sandboxes_serialize(
             x_daytona_organization_id=x_daytona_organization_id,
-            verbose=verbose,
+            page=page,
+            limit=limit,
+            id=id,
             labels=labels,
             include_errored_deleted=include_errored_deleted,
+            states=states,
+            snapshots=snapshots,
+            regions=regions,
+            min_cpu=min_cpu,
+            max_cpu=max_cpu,
+            min_memory_gi_b=min_memory_gi_b,
+            max_memory_gi_b=max_memory_gi_b,
+            min_disk_gi_b=min_disk_gi_b,
+            max_disk_gi_b=max_disk_gi_b,
+            last_event_after=last_event_after,
+            last_event_before=last_event_before,
+            sort=sort,
+            order=order,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -2827,7 +3252,7 @@ class SandboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "List[Sandbox]",
+            '200': "PaginatedSandboxes",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2839,9 +3264,24 @@ class SandboxApi:
     def _list_sandboxes_serialize(
         self,
         x_daytona_organization_id,
-        verbose,
+        page,
+        limit,
+        id,
         labels,
         include_errored_deleted,
+        states,
+        snapshots,
+        regions,
+        min_cpu,
+        max_cpu,
+        min_memory_gi_b,
+        max_memory_gi_b,
+        min_disk_gi_b,
+        max_disk_gi_b,
+        last_event_after,
+        last_event_before,
+        sort,
+        order,
         _request_auth,
         _content_type,
         _headers,
@@ -2851,6 +3291,9 @@ class SandboxApi:
         _host = None
 
         _collection_formats: Dict[str, str] = {
+            'states': 'multi',
+            'snapshots': 'multi',
+            'regions': 'multi',
         }
 
         _path_params: Dict[str, str] = {}
@@ -2864,9 +3307,17 @@ class SandboxApi:
 
         # process the path parameters
         # process the query parameters
-        if verbose is not None:
+        if page is not None:
             
-            _query_params.append(('verbose', verbose))
+            _query_params.append(('page', page))
+            
+        if limit is not None:
+            
+            _query_params.append(('limit', limit))
+            
+        if id is not None:
+            
+            _query_params.append(('id', id))
             
         if labels is not None:
             
@@ -2875,6 +3326,76 @@ class SandboxApi:
         if include_errored_deleted is not None:
             
             _query_params.append(('includeErroredDeleted', include_errored_deleted))
+            
+        if states is not None:
+            
+            _query_params.append(('states', states))
+            
+        if snapshots is not None:
+            
+            _query_params.append(('snapshots', snapshots))
+            
+        if regions is not None:
+            
+            _query_params.append(('regions', regions))
+            
+        if min_cpu is not None:
+            
+            _query_params.append(('minCpu', min_cpu))
+            
+        if max_cpu is not None:
+            
+            _query_params.append(('maxCpu', max_cpu))
+            
+        if min_memory_gi_b is not None:
+            
+            _query_params.append(('minMemoryGiB', min_memory_gi_b))
+            
+        if max_memory_gi_b is not None:
+            
+            _query_params.append(('maxMemoryGiB', max_memory_gi_b))
+            
+        if min_disk_gi_b is not None:
+            
+            _query_params.append(('minDiskGiB', min_disk_gi_b))
+            
+        if max_disk_gi_b is not None:
+            
+            _query_params.append(('maxDiskGiB', max_disk_gi_b))
+            
+        if last_event_after is not None:
+            if isinstance(last_event_after, datetime):
+                _query_params.append(
+                    (
+                        'lastEventAfter',
+                        last_event_after.strftime(
+                            self.api_client.configuration.datetime_format
+                        )
+                    )
+                )
+            else:
+                _query_params.append(('lastEventAfter', last_event_after))
+            
+        if last_event_before is not None:
+            if isinstance(last_event_before, datetime):
+                _query_params.append(
+                    (
+                        'lastEventBefore',
+                        last_event_before.strftime(
+                            self.api_client.configuration.datetime_format
+                        )
+                    )
+                )
+            else:
+                _query_params.append(('lastEventBefore', last_event_before))
+            
+        if sort is not None:
+            
+            _query_params.append(('sort', sort))
+            
+        if order is not None:
+            
+            _query_params.append(('order', order))
             
         # process the header parameters
         if x_daytona_organization_id is not None:
