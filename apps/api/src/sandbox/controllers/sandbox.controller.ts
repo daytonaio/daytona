@@ -67,6 +67,7 @@ import { AuditAction } from '../../audit/enums/audit-action.enum'
 import { AuditTarget } from '../../audit/enums/audit-target.enum'
 // import { UpdateSandboxNetworkSettingsDto } from '../dto/update-sandbox-network-settings.dto'
 import { SshAccessDto, SshAccessValidationDto } from '../dto/ssh-access.dto'
+import { RegionDto } from '../dto/region.dto'
 
 @ApiTags('sandbox')
 @Controller('sandbox')
@@ -125,11 +126,21 @@ export class SandboxController {
     const runnerIds = new Set(sandboxes.map((s) => s.runnerId))
     const runners = await this.runnerService.findByIds(Array.from(runnerIds))
     const runnerMap = new Map(runners.map((runner) => [runner.id, runner]))
+  }
 
-    return sandboxes.map((sandbox) => {
-      const runner = runnerMap.get(sandbox.runnerId)
-      return SandboxDto.fromSandbox(sandbox, runner?.domain)
-    })
+  @Get('regions')
+  @ApiOperation({
+    summary: 'List all regions where sandboxes have been created',
+    operationId: 'getSandboxRegions',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'List of regions where sandboxes have been created',
+    type: [RegionDto],
+  })
+  async getSandboxRegions(@AuthContext() authContext: OrganizationAuthContext): Promise<RegionDto[]> {
+    const regions = await this.sandboxService.getDistinctRegions(authContext.organizationId)
+    return regions.map((region) => ({ name: region }))
   }
 
   @Post()

@@ -1221,4 +1221,15 @@ export class SandboxService {
 
     return { valid: true, sandboxId: sshAccess.sandbox.id }
   }
+
+  async getDistinctRegions(organizationId: string): Promise<string[]> {
+    const result = await this.sandboxRepository
+      .createQueryBuilder('sandbox')
+      .select('DISTINCT sandbox.region', 'region')
+      .where('sandbox.organizationId = :organizationId', { organizationId })
+      .orderBy('sandbox.region', 'ASC')
+      .getRawMany()
+
+    return result.map((row) => row.region)
+  }
 }
