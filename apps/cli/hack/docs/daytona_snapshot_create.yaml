@@ -6,7 +6,7 @@ options:
     shorthand: c
     default_value: '[]'
     usage: |
-      Files or directories to include in the build context (can be specified multiple times)
+      Files or directories to include in the build context (can be specified multiple times). If not provided, context will be automatically determined from COPY/ADD commands in the Dockerfile
   - name: cpu
     default_value: '0'
     usage: |

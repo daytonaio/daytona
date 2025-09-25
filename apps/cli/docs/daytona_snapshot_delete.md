@@ -6,12 +6,6 @@ Delete a snapshot
 daytona snapshot delete [SNAPSHOT_ID] [flags]
 ```
 
-### Options
-
-```
-  -a, --all   Delete all snapshots
-```
-
 ### Options inherited from parent commands
 
 ```

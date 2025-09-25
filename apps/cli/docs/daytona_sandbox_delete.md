@@ -6,13 +6,6 @@ Delete a sandbox
 daytona sandbox delete [SANDBOX_ID] [flags]
 ```
 
-### Options
-
-```
-  -a, --all     Delete all sandboxes
-  -f, --force   Force delete
-```
-
 ### Options inherited from parent commands
 
 ```

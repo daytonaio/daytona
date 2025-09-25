@@ -1,11 +1,6 @@
 name: daytona sandbox start
 synopsis: Start a sandbox
 usage: daytona sandbox start [SANDBOX_ID] [flags]
-options:
-  - name: all
-    shorthand: a
-    default_value: 'false'
-    usage: Start all sandboxes
 inherited_options:
   - name: help
     default_value: 'false'
