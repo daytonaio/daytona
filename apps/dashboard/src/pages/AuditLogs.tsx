@@ -46,8 +46,8 @@ const AuditLogs: React.FC = () => {
         const response = (
           await auditApi.getOrganizationAuditLogs(
             selectedOrganization.id,
+            paginationParams.pageIndex + 1, // 1-indexed
             paginationParams.pageSize,
-            paginationParams.pageIndex + 1,
           )
         ).data
         setData(response)
