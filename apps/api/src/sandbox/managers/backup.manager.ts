@@ -158,7 +158,7 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
             'END',
           'ASC',
         )
-        .addOrderBy('sandbox.lastBackupAt', 'ASC') // Process the one with the oldest lastBackupAt
+        .addOrderBy('sandbox.lastBackupAt', 'ASC', 'NULLS FIRST') // Process sandboxes with no backups first, then oldest to newest
         .addOrderBy('sandbox.createdAt', 'ASC') // If there hasn't been a backup yet, process older sandboxes first
         .take(100)
         .getMany()
