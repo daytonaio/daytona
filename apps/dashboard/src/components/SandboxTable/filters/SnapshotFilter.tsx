@@ -4,21 +4,31 @@
  */
 
 import { SnapshotDto } from '@daytonaio/api-client'
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
-import { Skeleton } from '@/components/ui/skeleton'
+import { Command, CommandEmpty, CommandGroup, CommandItem, CommandList } from '@/components/ui/command'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { cn } from '@/lib/utils'
-import { Check } from 'lucide-react'
+import { Check, Loader2 } from 'lucide-react'
 import { X } from 'lucide-react'
+import { useState } from 'react'
+import { DebouncedInput } from '@/components/DebouncedInput'
 
 interface SnapshotFilterProps {
   value: string[]
   onFilterChange: (value: string[] | undefined) => void
   snapshots: SnapshotDto[]
-  loadingSnapshots: boolean
+  isLoading: boolean
+  hasMore?: boolean
+  onChangeSnapshotSearchValue: (name?: string) => void
 }
 
-export function SnapshotFilterIndicator({ value, onFilterChange, snapshots, loadingSnapshots }: SnapshotFilterProps) {
+export function SnapshotFilterIndicator({
+  value,
+  onFilterChange,
+  snapshots,
+  isLoading,
+  hasMore,
+  onChangeSnapshotSearchValue,
+}: SnapshotFilterProps) {
   return (
     <div className="flex items-center h-6 gap-0.5 rounded-sm border border-border bg-muted/80 hover:bg-muted/50 text-sm">
       <Popover>
@@ -31,7 +41,9 @@ export function SnapshotFilterIndicator({ value, onFilterChange, snapshots, load
             value={value}
             onFilterChange={onFilterChange}
             snapshots={snapshots}
-            loadingSnapshots={loadingSnapshots}
+            isLoading={isLoading}
+            hasMore={hasMore}
+            onChangeSnapshotSearchValue={onChangeSnapshotSearchValue}
           />
         </PopoverContent>
       </Popover>
@@ -43,7 +55,16 @@ export function SnapshotFilterIndicator({ value, onFilterChange, snapshots, load
   )
 }
 
-export function SnapshotFilter({ value, onFilterChange, snapshots, loadingSnapshots }: SnapshotFilterProps) {
+export function SnapshotFilter({
+  value,
+  onFilterChange,
+  snapshots,
+  isLoading,
+  hasMore,
+  onChangeSnapshotSearchValue,
+}: SnapshotFilterProps) {
+  const [searchValue, setSearchValue] = useState('')
+
   const handleSelect = (snapshotName: string) => {
     const newValue = value.includes(snapshotName)
       ? value.filter((name) => name !== snapshotName)
@@ -51,27 +72,52 @@ export function SnapshotFilter({ value, onFilterChange, snapshots, loadingSnapsh
     onFilterChange(newValue.length > 0 ? newValue : undefined)
   }
 
+  const handleSearchChange = (search: string | number) => {
+    const searchStr = String(search)
+    setSearchValue(searchStr)
+    if (onChangeSnapshotSearchValue) {
+      onChangeSnapshotSearchValue(searchStr || undefined)
+    }
+  }
+
   return (
     <Command>
       <div className="flex items-center gap-2 justify-between p-2">
-        <CommandInput placeholder="Filter by snapshot..." className="border border-border rounded-md h-8" />
+        <DebouncedInput
+          placeholder="Filter by snapshot..."
+          className="border border-border rounded-md h-8 flex-1"
+          value={searchValue}
+          onChange={handleSearchChange}
+        />
         <button
           className="text-sm text-muted-foreground hover:text-primary px-2"
-          onClick={() => onFilterChange(undefined)}
+          onClick={() => {
+            onFilterChange(undefined)
+            setSearchValue('')
+            if (onChangeSnapshotSearchValue) {
+              onChangeSnapshotSearchValue(undefined)
+            }
+          }}
         >
           Clear
         </button>
       </div>
+      {hasMore && (
+        <div className="px-2 pb-2">
+          <div className="text-xs text-muted-foreground bg-muted/50 rounded px-2 py-1">
+            Please refine your search to see more Snapshots.
+          </div>
+        </div>
+      )}
       <CommandList>
-        {loadingSnapshots ? (
-          <div className="p-1">
-            <Skeleton className="h-8 w-full mb-1" />
-            <Skeleton className="h-8 w-full mb-1" />
-            <Skeleton className="h-8 w-full" />
+        {isLoading ? (
+          <div className="flex items-center justify-center py-6">
+            <Loader2 className="h-4 w-4 animate-spin mr-2" />
+            <span className="text-sm text-muted-foreground">Loading Snapshots...</span>
           </div>
         ) : (
           <>
-            <CommandEmpty>No snapshots found.</CommandEmpty>
+            <CommandEmpty>No Snapshots found.</CommandEmpty>
             <CommandGroup>
               {snapshots.map((snapshot) => (
                 <CommandItem

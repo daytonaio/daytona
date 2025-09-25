@@ -260,7 +260,7 @@ export class Sandbox implements SandboxDto {
    * @returns {Promise<void>}
    */
   public async delete(timeout = 60): Promise<void> {
-    await this.sandboxApi.deleteSandbox(this.id, true, undefined, { timeout: timeout * 1000 })
+    await this.sandboxApi.deleteSandbox(this.id, undefined, { timeout: timeout * 1000 })
     await this.refreshData()
   }
 

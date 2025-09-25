@@ -38,6 +38,7 @@ import {
 } from '@nestjs/swagger'
 import { SandboxDto, SandboxLabelsDto } from '../dto/sandbox.dto'
 import { UpdateSandboxStateDto } from '../dto/update-sandbox-state.dto'
+import { PaginatedSandboxesDto } from '../dto/paginated-sandboxes.dto'
 import { RunnerService } from '../services/runner.service'
 import { RunnerAuthGuard } from '../../auth/runner-auth.guard'
 import { RunnerContextDecorator } from '../../common/decorators/runner-context.decorator'
@@ -67,6 +68,7 @@ import { AuditAction } from '../../audit/enums/audit-action.enum'
 import { AuditTarget } from '../../audit/enums/audit-target.enum'
 // import { UpdateSandboxNetworkSettingsDto } from '../dto/update-sandbox-network-settings.dto'
 import { SshAccessDto, SshAccessValidationDto } from '../dto/ssh-access.dto'
+import { ListSandboxesQueryDto } from '../dto/list-sandboxes-query.dto'
 import { RegionDto } from '../dto/region.dto'
 
 @ApiTags('sandbox')
@@ -92,40 +94,73 @@ export class SandboxController {
   })
   @ApiResponse({
     status: 200,
-    description: 'List of all sandboxes',
-    type: [SandboxDto],
-  })
-  @ApiQuery({
-    name: 'verbose',
-    required: false,
-    type: Boolean,
-    description: 'Include verbose output',
-  })
-  @ApiQuery({
-    name: 'labels',
-    type: String,
-    required: false,
-    example: '{"label1": "value1", "label2": "value2"}',
-    description: 'JSON encoded labels to filter by',
-  })
-  @ApiQuery({
-    name: 'includeErroredDeleted',
-    required: false,
-    type: Boolean,
-    description: 'Include errored and deleted sandboxes',
+    description: 'Paginated list of all sandboxes',
+    type: PaginatedSandboxesDto,
   })
   async listSandboxes(
     @AuthContext() authContext: OrganizationAuthContext,
-    @Query('verbose') verbose?: boolean,
-    @Query('labels') labelsQuery?: string,
-    @Query('includeErroredDeleted') includeErroredDeleted?: boolean,
-  ): Promise<SandboxDto[]> {
-    const labels = labelsQuery ? JSON.parse(labelsQuery) : {}
-    const sandboxes = await this.sandboxService.findAll(authContext.organizationId, labels, includeErroredDeleted)
+    @Query() queryParams: ListSandboxesQueryDto,
+  ): Promise<PaginatedSandboxesDto> {
+    const {
+      page,
+      limit,
+      id,
+      labels,
+      includeErroredDeleted: includeErroredDestroyed,
+      states,
+      snapshots,
+      regions,
+      minCpu,
+      maxCpu,
+      minMemoryGiB,
+      maxMemoryGiB,
+      minDiskGiB,
+      maxDiskGiB,
+      lastEventAfter,
+      lastEventBefore,
+      sort: sortField,
+      order: sortDirection,
+    } = queryParams
 
-    const runnerIds = new Set(sandboxes.map((s) => s.runnerId))
+    const result = await this.sandboxService.findAll(
+      authContext.organizationId,
+      page,
+      limit,
+      {
+        id,
+        labels: labels ? JSON.parse(labels) : {},
+        includeErroredDestroyed,
+        states,
+        snapshots,
+        regions,
+        minCpu,
+        maxCpu,
+        minMemoryGiB,
+        maxMemoryGiB,
+        minDiskGiB,
+        maxDiskGiB,
+        lastEventAfter,
+        lastEventBefore,
+      },
+      {
+        field: sortField,
+        direction: sortDirection,
+      },
+    )
+
+    const runnerIds = new Set(result.items.map((s) => s.runnerId))
     const runners = await this.runnerService.findByIds(Array.from(runnerIds))
     const runnerMap = new Map(runners.map((runner) => [runner.id, runner]))
+
+    return {
+      items: result.items.map((sandbox) => {
+        const runner = runnerMap.get(sandbox.runnerId)
+        return SandboxDto.fromSandbox(sandbox, runner?.domain)
+      }),
+      total: result.total,
+      page: result.page,
+      totalPages: result.totalPages,
+    }
   }
 
   @Get('regions')
@@ -315,11 +350,7 @@ export class SandboxController {
     targetType: AuditTarget.SANDBOX,
     targetIdFromRequest: (req) => req.params.sandboxId,
   })
-  async deleteSandbox(
-    @Param('sandboxId') sandboxId: string,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    @Query('force') force?: boolean,
-  ): Promise<void> {
+  async deleteSandbox(@Param('sandboxId') sandboxId: string): Promise<void> {
     return this.sandboxService.destroy(sandboxId)
   }
 

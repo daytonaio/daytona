@@ -535,29 +535,39 @@ class Daytona:
         """
         if sandbox_id:
             return self.get(sandbox_id)
-        sandboxes = self.list(labels)
+        sandboxes = self.list(labels, page=1, limit=1)
         if len(sandboxes) == 0:
             raise DaytonaError(f"No sandbox found with labels {labels}")
         return sandboxes[0]
 
     @intercept_errors(message_prefix="Failed to list sandboxes: ")
-    def list(self, labels: Optional[Dict[str, str]] = None) -> List[Sandbox]:
+    def list(
+        self, labels: Optional[Dict[str, str]] = None, page: Optional[int] = None, limit: Optional[int] = None
+    ) -> List[Sandbox]:
         """Lists Sandboxes filtered by labels.
 
         Args:
             labels (Optional[Dict[str, str]]): Labels to filter Sandboxes.
+            page (Optional[int]): Page number for pagination (starting from 1).
+            limit (Optional[int]): Maximum number of items per page.
 
         Returns:
-            List[Sandbox]: List of Sandbox instances that match the labels.
+            List[Sandbox]: Paginated list of Sandbox instances that match the labels.
 
         Example:
             ```python
-            sandboxes = daytona.list(labels={"my-label": "my-value"})
+            sandboxes = daytona.list(labels={"my-label": "my-value"}, page=2, limit=10)
             for sandbox in sandboxes:
                 print(f"{sandbox.id}: {sandbox.status}")
             ```
         """
-        sandboxes = self._sandbox_api.list_sandboxes(labels=json.dumps(labels))
+        if page is not None and page < 1:
+            raise DaytonaError("page must be a positive integer")
+
+        if limit is not None and limit < 1:
+            raise DaytonaError("limit must be a positive integer")
+
+        response = self._sandbox_api.list_sandboxes(labels=json.dumps(labels), page=page, limit=limit)
 
         return [
             Sandbox(
@@ -566,7 +576,7 @@ class Daytona:
                 self._toolbox_api,
                 self._get_code_toolbox(self._validate_language_label(sandbox.labels.get("code-toolbox-language"))),
             )
-            for sandbox in sandboxes
+            for sandbox in response.items
         ]
 
     def _validate_language_label(self, language: Optional[str]) -> CodeLanguage:

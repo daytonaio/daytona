@@ -573,7 +573,7 @@ export class Daytona {
       return this.get(filter.id)
     }
 
-    const sandboxes = await this.list(filter.labels)
+    const sandboxes = await this.list(filter.labels, 1, 1)
     if (sandboxes.length === 0) {
       const errMsg = `No sandbox found with labels ${JSON.stringify(filter.labels)}`
       throw new DaytonaError(errMsg)
@@ -582,24 +582,28 @@ export class Daytona {
   }
 
   /**
-   * Lists all Sandboxes filtered by labels.
+   * Returns paginated list of Sandboxes filtered by labels.
    *
    * @param {Record<string, string>} [labels] - Labels to filter Sandboxes
+   * @param {number} [page] - Page number for pagination (starting from 1)
+   * @param {number} [limit] - Maximum number of items per page
    * @returns {Promise<Sandbox[]>} Array of Sandboxes that match the labels.
    *
    * @example
-   * const sandboxes = await daytona.list({ 'my-label': 'my-value' });
+   * const sandboxes = await daytona.list({ 'my-label': 'my-value' }, 2, 10);
    * for (const sandbox of sandboxes) {
    *     console.log(`${sandbox.id}: ${sandbox.state}`);
    * }
    */
-  public async list(labels?: Record<string, string>): Promise<Sandbox[]> {
+  public async list(labels?: Record<string, string>, page?: number, limit?: number): Promise<Sandbox[]> {
     const response = await this.sandboxApi.listSandboxes(
       undefined,
+      page,
+      limit,
       undefined,
       labels ? JSON.stringify(labels) : undefined,
     )
-    return response.data.map((sandbox) => {
+    return response.data.items.map((sandbox) => {
       const language = sandbox.labels?.['code-toolbox-language'] as CodeLanguage
 
       return new Sandbox(sandbox, this.clientConfig, this.sandboxApi, this.toolboxApi, this.getCodeToolbox(language))
