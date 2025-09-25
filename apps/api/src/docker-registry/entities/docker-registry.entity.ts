@@ -26,6 +26,9 @@ export class DockerRegistry {
   @Column({ default: false })
   isDefault: boolean
 
+  @Column({ default: false })
+  isFallback: boolean
+
   @Column({ default: '' })
   project: string
 
