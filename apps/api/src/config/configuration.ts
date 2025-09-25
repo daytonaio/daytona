@@ -98,8 +98,11 @@ const configuration = {
     authToken: process.env.SVIX_AUTH_TOKEN,
     serverUrl: process.env.SVIX_SERVER_URL,
   },
-  sshGatewayApiKey: process.env.SSH_GATEWAY_API_KEY,
-  sshGatewayCommand: process.env.SSH_GATEWAY_COMMAND,
+  sshGateway: {
+    apiKey: process.env.SSH_GATEWAY_API_KEY,
+    command: process.env.SSH_GATEWAY_COMMAND,
+    publicKey: process.env.SSH_GATEWAY_PUBLIC_KEY,
+  },
   organizationSandboxDefaultLimitedNetworkEgress:
     process.env.ORGANIZATION_SANDBOX_DEFAULT_LIMITED_NETWORK_EGRESS === 'true',
   pylonAppId: process.env.PYLON_APP_ID,
