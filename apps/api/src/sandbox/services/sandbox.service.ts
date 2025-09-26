@@ -51,6 +51,7 @@ import { nanoid } from 'nanoid'
 import { SshAccessValidationDto } from '../dto/ssh-access.dto'
 import { VolumeService } from './volume.service'
 import { RedisLockProvider } from '../common/redis-lock.provider'
+import { GlobalRegionsIds } from '../constants/global-regions.constant'
 
 const DEFAULT_CPU = 1
 const DEFAULT_MEMORY = 1
@@ -218,7 +219,7 @@ export class SandboxService {
 
     sandbox.organizationId = SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION
 
-    sandbox.region = warmPoolItem.target
+    sandbox.regionId = warmPoolItem.regionId
     sandbox.class = warmPoolItem.class
     sandbox.snapshot = warmPoolItem.snapshot
     //  TODO: default user should be configurable
@@ -241,7 +242,7 @@ export class SandboxService {
     }
 
     const runner = await this.runnerService.getRandomAvailableRunner({
-      region: sandbox.region,
+      regionId: sandbox.regionId,
       sandboxClass: sandbox.class,
       snapshotRef: snapshot.internalName,
     })
@@ -262,7 +263,7 @@ export class SandboxService {
     let pendingDiskIncrement: number | undefined
 
     try {
-      const region = this.getValidatedOrDefaultRegion(createSandboxDto.target)
+      const regionId = this.getValidatedOrDefaultRegionId(createSandboxDto.target)
       const sandboxClass = this.getValidatedOrDefaultClass(createSandboxDto.class)
 
       let snapshotIdOrName = createSandboxDto.snapshot
@@ -343,7 +344,7 @@ export class SandboxService {
         const warmPoolSandbox = await this.warmPoolService.fetchWarmPoolSandbox({
           organizationId: organization.id,
           snapshot: snapshotIdOrName,
-          target: createSandboxDto.target,
+          regionId: createSandboxDto.target,
           class: createSandboxDto.class,
           cpu: cpu,
           mem: mem,
@@ -362,7 +363,7 @@ export class SandboxService {
       }
 
       const runner = await this.runnerService.getRandomAvailableRunner({
-        region,
+        regionId,
         sandboxClass,
         snapshotRef: snapshot.internalName,
       })
@@ -372,7 +373,7 @@ export class SandboxService {
       sandbox.organizationId = organization.id
 
       //  TODO: make configurable
-      sandbox.region = region
+      sandbox.regionId = regionId
       sandbox.class = sandboxClass
       sandbox.snapshot = snapshot.name
       //  TODO: default user should be configurable
@@ -491,7 +492,7 @@ export class SandboxService {
     let pendingDiskIncrement: number | undefined
 
     try {
-      const region = this.getValidatedOrDefaultRegion(createSandboxDto.target)
+      const regionId = this.getValidatedOrDefaultRegionId(createSandboxDto.target)
       const sandboxClass = this.getValidatedOrDefaultClass(createSandboxDto.class)
 
       const cpu = createSandboxDto.cpu || DEFAULT_CPU
@@ -523,7 +524,7 @@ export class SandboxService {
 
       sandbox.organizationId = organization.id
 
-      sandbox.region = region
+      sandbox.regionId = regionId
       sandbox.class = sandboxClass
       sandbox.osUser = createSandboxDto.user || 'daytona'
       sandbox.env = createSandboxDto.env || {}
@@ -581,7 +582,7 @@ export class SandboxService {
 
       try {
         runner = await this.runnerService.getRandomAvailableRunner({
-          region: sandbox.region,
+          regionId: sandbox.regionId,
           sandboxClass: sandbox.class,
           snapshotRef: sandbox.buildInfo.snapshotRef,
         })
@@ -917,12 +918,12 @@ export class SandboxService {
     await this.sandboxRepository.save(sandbox)
   }
 
-  private getValidatedOrDefaultRegion(region?: string): string {
-    if (!region || region.trim().length === 0) {
-      return 'us'
+  private getValidatedOrDefaultRegionId(regionId?: string): string {
+    if (!regionId || regionId.trim().length === 0) {
+      return GlobalRegionsIds.US
     }
 
-    return region.trim()
+    return regionId.trim()
   }
 
   private getValidatedOrDefaultClass(sandboxClass: SandboxClass): SandboxClass {

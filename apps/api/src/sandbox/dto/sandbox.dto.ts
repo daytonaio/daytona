@@ -253,7 +253,7 @@ export class SandboxDto {
     return {
       id: sandbox.id,
       organizationId: sandbox.organizationId,
-      target: sandbox.region,
+      target: sandbox.regionId,
       snapshot: sandbox.snapshot,
       user: sandbox.osUser,
       env: sandbox.env,

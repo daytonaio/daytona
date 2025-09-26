@@ -33,10 +33,8 @@ export class Sandbox {
   })
   organizationId: string
 
-  @Column({
-    default: 'us',
-  })
-  region: string
+  @Column()
+  regionId: string
 
   @Column({
     type: 'uuid',
