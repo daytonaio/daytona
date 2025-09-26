@@ -1172,8 +1172,8 @@ class SandboxApi:
     def delete_sandbox(
         self,
         sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
-        force: StrictBool,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        force: Annotated[Optional[StrictBool], Field(description="Force delete sandbox")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1192,10 +1192,10 @@ class SandboxApi:
 
         :param sandbox_id: ID of the sandbox (required)
         :type sandbox_id: str
-        :param force: (required)
-        :type force: bool
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
+        :param force: Force delete sandbox
+        :type force: bool
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -1220,8 +1220,8 @@ class SandboxApi:
 
         _param = self._delete_sandbox_serialize(
             sandbox_id=sandbox_id,
-            force=force,
             x_daytona_organization_id=x_daytona_organization_id,
+            force=force,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -1246,8 +1246,8 @@ class SandboxApi:
     def delete_sandbox_with_http_info(
         self,
         sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
-        force: StrictBool,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        force: Annotated[Optional[StrictBool], Field(description="Force delete sandbox")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1266,10 +1266,10 @@ class SandboxApi:
 
         :param sandbox_id: ID of the sandbox (required)
         :type sandbox_id: str
-        :param force: (required)
-        :type force: bool
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
+        :param force: Force delete sandbox
+        :type force: bool
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -1294,8 +1294,8 @@ class SandboxApi:
 
         _param = self._delete_sandbox_serialize(
             sandbox_id=sandbox_id,
-            force=force,
             x_daytona_organization_id=x_daytona_organization_id,
+            force=force,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -1320,8 +1320,8 @@ class SandboxApi:
     def delete_sandbox_without_preload_content(
         self,
         sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
-        force: StrictBool,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        force: Annotated[Optional[StrictBool], Field(description="Force delete sandbox")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1340,10 +1340,10 @@ class SandboxApi:
 
         :param sandbox_id: ID of the sandbox (required)
         :type sandbox_id: str
-        :param force: (required)
-        :type force: bool
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
+        :param force: Force delete sandbox
+        :type force: bool
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -1368,8 +1368,8 @@ class SandboxApi:
 
         _param = self._delete_sandbox_serialize(
             sandbox_id=sandbox_id,
-            force=force,
             x_daytona_organization_id=x_daytona_organization_id,
+            force=force,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -1389,8 +1389,8 @@ class SandboxApi:
     def _delete_sandbox_serialize(
         self,
         sandbox_id,
-        force,
         x_daytona_organization_id,
+        force,
         _request_auth,
         _content_type,
         _headers,
