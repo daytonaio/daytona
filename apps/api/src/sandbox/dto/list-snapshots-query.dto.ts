@@ -4,8 +4,9 @@
  */
 
 import { ApiProperty, ApiSchema } from '@nestjs/swagger'
-import { IsInt, IsOptional, IsString, IsEnum, Min, Max } from 'class-validator'
-import { Type } from 'class-transformer'
+import { IsOptional, IsString, IsEnum } from 'class-validator'
+import { PageNumber } from '../../common/decorators/page-number.decorator'
+import { PageLimit } from '../../common/decorators/page-limit.decorator'
 
 export enum SnapshotSortField {
   NAME = 'name',
@@ -21,34 +22,10 @@ export enum SnapshotSortDirection {
 
 @ApiSchema({ name: 'ListSnapshotsQuery' })
 export class ListSnapshotsQueryDto {
-  @ApiProperty({
-    name: 'page',
-    description: 'Page number of the results',
-    required: false,
-    type: Number,
-    minimum: 1,
-    default: 1,
-  })
-  @IsOptional()
-  @Type(() => Number)
-  @IsInt()
-  @Min(1)
+  @PageNumber(1)
   page = 1
 
-  @ApiProperty({
-    name: 'limit',
-    description: 'Number of results per page',
-    required: false,
-    type: Number,
-    minimum: 1,
-    maximum: 100,
-    default: 10,
-  })
-  @IsOptional()
-  @Type(() => Number)
-  @IsInt()
-  @Min(1)
-  @Max(100)
+  @PageLimit(10)
   limit = 10
 
   @ApiProperty({
