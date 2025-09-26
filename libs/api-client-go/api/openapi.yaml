@@ -1592,10 +1592,11 @@ paths:
           schema:
             type: string
           style: simple
-        - explode: true
+        - description: Force delete sandbox
+          explode: true
           in: query
           name: force
-          required: true
+          required: false
           schema:
             type: boolean
           style: form

@@ -391,6 +391,12 @@ export class SandboxController {
     description: 'ID of the sandbox',
     type: 'string',
   })
+  @ApiQuery({
+    name: 'force',
+    required: false,
+    type: Boolean,
+    description: 'Force delete sandbox',
+  })
   @ApiResponse({
     status: 200,
     description: 'Sandbox has been deleted',
