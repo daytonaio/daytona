@@ -92,18 +92,6 @@ export interface Runner {
    */
   class: SandboxClass
   /**
-   * The current usage of the runner
-   * @type {number}
-   * @memberof Runner
-   */
-  used: number
-  /**
-   * The capacity of the runner
-   * @type {number}
-   * @memberof Runner
-   */
-  capacity: number
-  /**
    * Current CPU usage percentage
    * @type {number}
    * @memberof Runner
