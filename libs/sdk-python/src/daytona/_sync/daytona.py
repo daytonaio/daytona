@@ -564,7 +564,7 @@ class Daytona:
         if limit is not None and limit < 1:
             raise DaytonaError("limit must be a positive integer")
 
-        response = self._sandbox_api.list_sandboxes(labels=json.dumps(labels), page=page, limit=limit)
+        response = self._sandbox_api.list_sandboxes_paginated(labels=json.dumps(labels), page=page, limit=limit)
 
         return [
             Sandbox(

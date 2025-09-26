@@ -2855,6 +2855,316 @@ class SandboxApi:
     def list_sandboxes(
         self,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        verbose: Annotated[Optional[StrictBool], Field(description="Include verbose output")] = None,
+        labels: Annotated[Optional[StrictStr], Field(description="JSON encoded labels to filter by")] = None,
+        include_errored_deleted: Annotated[Optional[StrictBool], Field(description="Include errored and deleted sandboxes")] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> List[Sandbox]:
+        """List all sandboxes
+
+
+        :param x_daytona_organization_id: Use with JWT to specify the organization ID
+        :type x_daytona_organization_id: str
+        :param verbose: Include verbose output
+        :type verbose: bool
+        :param labels: JSON encoded labels to filter by
+        :type labels: str
+        :param include_errored_deleted: Include errored and deleted sandboxes
+        :type include_errored_deleted: bool
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._list_sandboxes_serialize(
+            x_daytona_organization_id=x_daytona_organization_id,
+            verbose=verbose,
+            labels=labels,
+            include_errored_deleted=include_errored_deleted,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "List[Sandbox]",
+        }
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        ).data
+
+
+    @validate_call
+    def list_sandboxes_with_http_info(
+        self,
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        verbose: Annotated[Optional[StrictBool], Field(description="Include verbose output")] = None,
+        labels: Annotated[Optional[StrictStr], Field(description="JSON encoded labels to filter by")] = None,
+        include_errored_deleted: Annotated[Optional[StrictBool], Field(description="Include errored and deleted sandboxes")] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> ApiResponse[List[Sandbox]]:
+        """List all sandboxes
+
+
+        :param x_daytona_organization_id: Use with JWT to specify the organization ID
+        :type x_daytona_organization_id: str
+        :param verbose: Include verbose output
+        :type verbose: bool
+        :param labels: JSON encoded labels to filter by
+        :type labels: str
+        :param include_errored_deleted: Include errored and deleted sandboxes
+        :type include_errored_deleted: bool
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._list_sandboxes_serialize(
+            x_daytona_organization_id=x_daytona_organization_id,
+            verbose=verbose,
+            labels=labels,
+            include_errored_deleted=include_errored_deleted,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "List[Sandbox]",
+        }
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        )
+
+
+    @validate_call
+    def list_sandboxes_without_preload_content(
+        self,
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        verbose: Annotated[Optional[StrictBool], Field(description="Include verbose output")] = None,
+        labels: Annotated[Optional[StrictStr], Field(description="JSON encoded labels to filter by")] = None,
+        include_errored_deleted: Annotated[Optional[StrictBool], Field(description="Include errored and deleted sandboxes")] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> RESTResponseType:
+        """List all sandboxes
+
+
+        :param x_daytona_organization_id: Use with JWT to specify the organization ID
+        :type x_daytona_organization_id: str
+        :param verbose: Include verbose output
+        :type verbose: bool
+        :param labels: JSON encoded labels to filter by
+        :type labels: str
+        :param include_errored_deleted: Include errored and deleted sandboxes
+        :type include_errored_deleted: bool
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._list_sandboxes_serialize(
+            x_daytona_organization_id=x_daytona_organization_id,
+            verbose=verbose,
+            labels=labels,
+            include_errored_deleted=include_errored_deleted,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "List[Sandbox]",
+        }
+        response_data = self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        return response_data.response
+
+
+    def _list_sandboxes_serialize(
+        self,
+        x_daytona_organization_id,
+        verbose,
+        labels,
+        include_errored_deleted,
+        _request_auth,
+        _content_type,
+        _headers,
+        _host_index,
+    ) -> RequestSerialized:
+
+        _host = None
+
+        _collection_formats: Dict[str, str] = {
+        }
+
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        ] = {}
+        _body_params: Optional[bytes] = None
+
+        # process the path parameters
+        # process the query parameters
+        if verbose is not None:
+            
+            _query_params.append(('verbose', verbose))
+            
+        if labels is not None:
+            
+            _query_params.append(('labels', labels))
+            
+        if include_errored_deleted is not None:
+            
+            _query_params.append(('includeErroredDeleted', include_errored_deleted))
+            
+        # process the header parameters
+        if x_daytona_organization_id is not None:
+            _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id
+        # process the form parameters
+        # process the body parameter
+
+
+        # set the HTTP header `Accept`
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
+                [
+                    'application/json'
+                ]
+            )
+
+
+        # authentication setting
+        _auth_settings: List[str] = [
+            'bearer', 
+            'oauth2'
+        ]
+
+        return self.api_client.param_serialize(
+            method='GET',
+            resource_path='/sandbox',
+            path_params=_path_params,
+            query_params=_query_params,
+            header_params=_header_params,
+            body=_body_params,
+            post_params=_form_params,
+            files=_files,
+            auth_settings=_auth_settings,
+            collection_formats=_collection_formats,
+            _host=_host,
+            _request_auth=_request_auth
+        )
+
+
+
+
+    @validate_call
+    def list_sandboxes_paginated(
+        self,
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         page: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Page number of the results")] = None,
         limit: Annotated[Optional[Union[Annotated[float, Field(le=100, strict=True, ge=1)], Annotated[int, Field(le=100, strict=True, ge=1)]]], Field(description="Number of results per page")] = None,
         id: Annotated[Optional[StrictStr], Field(description="Filter by partial ID match")] = None,
@@ -2886,7 +3196,7 @@ class SandboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> PaginatedSandboxes:
-        """List all sandboxes
+        """List all sandboxes paginated
 
 
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -2949,7 +3259,7 @@ class SandboxApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._list_sandboxes_serialize(
+        _param = self._list_sandboxes_paginated_serialize(
             x_daytona_organization_id=x_daytona_organization_id,
             page=page,
             limit=limit,
@@ -2990,7 +3300,7 @@ class SandboxApi:
 
 
     @validate_call
-    def list_sandboxes_with_http_info(
+    def list_sandboxes_paginated_with_http_info(
         self,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         page: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Page number of the results")] = None,
@@ -3024,7 +3334,7 @@ class SandboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[PaginatedSandboxes]:
-        """List all sandboxes
+        """List all sandboxes paginated
 
 
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -3087,7 +3397,7 @@ class SandboxApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._list_sandboxes_serialize(
+        _param = self._list_sandboxes_paginated_serialize(
             x_daytona_organization_id=x_daytona_organization_id,
             page=page,
             limit=limit,
@@ -3128,7 +3438,7 @@ class SandboxApi:
 
 
     @validate_call
-    def list_sandboxes_without_preload_content(
+    def list_sandboxes_paginated_without_preload_content(
         self,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         page: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Page number of the results")] = None,
@@ -3162,7 +3472,7 @@ class SandboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """List all sandboxes
+        """List all sandboxes paginated
 
 
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -3225,7 +3535,7 @@ class SandboxApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._list_sandboxes_serialize(
+        _param = self._list_sandboxes_paginated_serialize(
             x_daytona_organization_id=x_daytona_organization_id,
             page=page,
             limit=limit,
@@ -3261,7 +3571,7 @@ class SandboxApi:
         return response_data.response
 
 
-    def _list_sandboxes_serialize(
+    def _list_sandboxes_paginated_serialize(
         self,
         x_daytona_organization_id,
         page,
@@ -3421,7 +3731,7 @@ class SandboxApi:
 
         return self.api_client.param_serialize(
             method='GET',
-            resource_path='/sandbox',
+            resource_path='/sandbox/paginated',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,

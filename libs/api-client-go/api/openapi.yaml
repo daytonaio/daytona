@@ -1196,6 +1196,94 @@ paths:
           schema:
             type: string
           style: simple
+        - description: Include verbose output
+          explode: true
+          in: query
+          name: verbose
+          required: false
+          schema:
+            type: boolean
+          style: form
+        - description: JSON encoded labels to filter by
+          explode: true
+          in: query
+          name: labels
+          required: false
+          schema:
+            example: '{"label1": "value1", "label2": "value2"}'
+            type: string
+          style: form
+        - description: Include errored and deleted sandboxes
+          explode: true
+          in: query
+          name: includeErroredDeleted
+          required: false
+          schema:
+            type: boolean
+          style: form
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Sandbox'
+                type: array
+          description: List of all sandboxes
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: List all sandboxes
+      tags:
+        - sandbox
+    post:
+      operationId: createSandbox
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSandbox'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Sandbox'
+          description: The sandbox has been successfully created.
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Create a new sandbox
+      tags:
+        - sandbox
+  /sandbox/paginated:
+    get:
+      operationId: listSandboxesPaginated
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
         - description: Page number of the results
           explode: true
           in: query
@@ -1405,40 +1493,7 @@ paths:
             - openid
             - profile
             - email
-      summary: List all sandboxes
-      tags:
-        - sandbox
-    post:
-      operationId: createSandbox
-      parameters:
-        - description: Use with JWT to specify the organization ID
-          explode: false
-          in: header
-          name: X-Daytona-Organization-ID
-          required: false
-          schema:
-            type: string
-          style: simple
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CreateSandbox'
-        required: true
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Sandbox'
-          description: The sandbox has been successfully created.
-      security:
-        - bearer: []
-        - oauth2:
-            - openid
-            - profile
-            - email
-      summary: Create a new sandbox
+      summary: List all sandboxes paginated
       tags:
         - sandbox
   /sandbox/regions:

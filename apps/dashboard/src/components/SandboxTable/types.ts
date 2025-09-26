@@ -7,9 +7,9 @@ import {
   Sandbox,
   SandboxState,
   SnapshotDto,
-  ListSandboxesSortEnum,
-  ListSandboxesOrderEnum,
-  ListSandboxesStatesEnum,
+  ListSandboxesPaginatedSortEnum,
+  ListSandboxesPaginatedOrderEnum,
+  ListSandboxesPaginatedStatesEnum,
   Region,
 } from '@daytonaio/api-client'
 import { Table, SortingState, ColumnFiltersState } from '@tanstack/react-table'
@@ -85,35 +85,35 @@ export const convertTableSortingToApiSorting = (sorting: SortingState): SandboxS
   }
 
   const sort = sorting[0]
-  let field: ListSandboxesSortEnum
+  let field: ListSandboxesPaginatedSortEnum
 
   switch (sort.id) {
     case 'id':
-      field = ListSandboxesSortEnum.ID
+      field = ListSandboxesPaginatedSortEnum.ID
       break
     case 'state':
-      field = ListSandboxesSortEnum.STATE
+      field = ListSandboxesPaginatedSortEnum.STATE
       break
     case 'snapshot':
-      field = ListSandboxesSortEnum.SNAPSHOT
+      field = ListSandboxesPaginatedSortEnum.SNAPSHOT
       break
     case 'region':
     case 'target':
-      field = ListSandboxesSortEnum.REGION
+      field = ListSandboxesPaginatedSortEnum.REGION
       break
     case 'lastEvent':
     case 'updatedAt':
-      field = ListSandboxesSortEnum.UPDATED_AT
+      field = ListSandboxesPaginatedSortEnum.UPDATED_AT
       break
     case 'createdAt':
     default:
-      field = ListSandboxesSortEnum.CREATED_AT
+      field = ListSandboxesPaginatedSortEnum.CREATED_AT
       break
   }
 
   return {
     field,
-    direction: sort.desc ? ListSandboxesOrderEnum.DESC : ListSandboxesOrderEnum.ASC,
+    direction: sort.desc ? ListSandboxesPaginatedOrderEnum.DESC : ListSandboxesPaginatedOrderEnum.ASC,
   }
 }
 
@@ -129,7 +129,7 @@ export const convertTableFiltersToApiFilters = (columnFilters: ColumnFiltersStat
         break
       case 'state':
         if (Array.isArray(filter.value) && filter.value.length > 0) {
-          filters.states = filter.value as ListSandboxesStatesEnum[]
+          filters.states = filter.value as ListSandboxesPaginatedStatesEnum[]
         }
         break
       case 'snapshot':
@@ -209,28 +209,28 @@ export const convertApiSortingToTableSorting = (sorting: SandboxSorting): Sortin
 
   let id: string
   switch (sorting.field) {
-    case ListSandboxesSortEnum.ID:
+    case ListSandboxesPaginatedSortEnum.ID:
       id = 'id'
       break
-    case ListSandboxesSortEnum.STATE:
+    case ListSandboxesPaginatedSortEnum.STATE:
       id = 'state'
       break
-    case ListSandboxesSortEnum.SNAPSHOT:
+    case ListSandboxesPaginatedSortEnum.SNAPSHOT:
       id = 'snapshot'
       break
-    case ListSandboxesSortEnum.REGION:
+    case ListSandboxesPaginatedSortEnum.REGION:
       id = 'region'
       break
-    case ListSandboxesSortEnum.UPDATED_AT:
+    case ListSandboxesPaginatedSortEnum.UPDATED_AT:
       id = 'lastEvent'
       break
-    case ListSandboxesSortEnum.CREATED_AT:
+    case ListSandboxesPaginatedSortEnum.CREATED_AT:
     default:
       id = 'createdAt'
       break
   }
 
-  return [{ id, desc: sorting.direction === ListSandboxesOrderEnum.DESC }]
+  return [{ id, desc: sorting.direction === ListSandboxesPaginatedOrderEnum.DESC }]
 }
 
 export const convertApiFiltersToTableFilters = (filters: SandboxFilters): ColumnFiltersState => {
