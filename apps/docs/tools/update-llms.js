@@ -125,7 +125,7 @@ const generateLlmsTxtFile = docsData => {
     ...docsData.map(doc => `- [${doc.title}](https://daytona.io${doc.url})`),
   ]
   fs.writeFileSync(
-    path.join(__dirname, '../public/llms.txt'),
+    path.join(__dirname, '../../../dist/apps/docs/dist/client/llms.txt'),
     llmsContent.join('\n'),
     'utf8'
   )
@@ -136,7 +136,7 @@ const generateLlmsFullTxtFile = fullContent => {
   const content = [getVersionHeader(), fullContent].join('\n\n')
 
   fs.writeFileSync(
-    path.join(__dirname, '../public/llms-full.txt'),
+    path.join(__dirname, '../../../dist/apps/docs/dist/client/llms-full.txt'),
     content,
     'utf8'
   )
