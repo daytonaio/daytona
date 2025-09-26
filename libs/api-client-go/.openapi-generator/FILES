@@ -101,7 +101,6 @@ model_organization_user.go
 model_paginated_audit_logs.go
 model_paginated_sandboxes.go
 model_paginated_snapshots.go
-model_paginated_workspaces.go
 model_port_preview_url.go
 model_position.go
 model_posthog_config.go

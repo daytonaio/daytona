@@ -34,8 +34,6 @@ import { BASE_PATH, COLLECTION_FORMATS, type RequestArgs, BaseAPI, RequiredError
 // @ts-ignore
 import type { CreateWorkspace } from '../models'
 // @ts-ignore
-import type { PaginatedWorkspaces } from '../models'
-// @ts-ignore
 import type { PortPreviewUrl } from '../models'
 // @ts-ignore
 import type { SandboxLabels } from '../models'
@@ -417,48 +415,16 @@ export const WorkspaceApiAxiosParamCreator = function (configuration?: Configura
      *
      * @summary [DEPRECATED] List all workspaces
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {number} [page] Page number of the results
-     * @param {number} [limit] Number of results per page
-     * @param {string} [id] Filter by partial ID match
+     * @param {boolean} [verbose] Include verbose output
      * @param {string} [labels] JSON encoded labels to filter by
-     * @param {boolean} [includeErroredDeleted] Include results with errored state and deleted desired state
-     * @param {Array<ListWorkspacesDeprecatedStatesEnum>} [states] List of states to filter by
-     * @param {Array<string>} [snapshots] List of snapshot names to filter by
-     * @param {Array<string>} [regions] List of regions to filter by
-     * @param {number} [minCpu] Minimum CPU
-     * @param {number} [maxCpu] Maximum CPU
-     * @param {number} [minMemoryGiB] Minimum memory in GiB
-     * @param {number} [maxMemoryGiB] Maximum memory in GiB
-     * @param {number} [minDiskGiB] Minimum disk space in GiB
-     * @param {number} [maxDiskGiB] Maximum disk space in GiB
-     * @param {Date} [lastEventAfter] Include items with last event after this timestamp
-     * @param {Date} [lastEventBefore] Include items with last event before this timestamp
-     * @param {ListWorkspacesDeprecatedSortEnum} [sort] Field to sort by
-     * @param {ListWorkspacesDeprecatedOrderEnum} [order] Direction to sort by
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
      */
     listWorkspacesDeprecated: async (
       xDaytonaOrganizationID?: string,
-      page?: number,
-      limit?: number,
-      id?: string,
+      verbose?: boolean,
       labels?: string,
-      includeErroredDeleted?: boolean,
-      states?: Array<ListWorkspacesDeprecatedStatesEnum>,
-      snapshots?: Array<string>,
-      regions?: Array<string>,
-      minCpu?: number,
-      maxCpu?: number,
-      minMemoryGiB?: number,
-      maxMemoryGiB?: number,
-      minDiskGiB?: number,
-      maxDiskGiB?: number,
-      lastEventAfter?: Date,
-      lastEventBefore?: Date,
-      sort?: ListWorkspacesDeprecatedSortEnum,
-      order?: ListWorkspacesDeprecatedOrderEnum,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       const localVarPath = `/workspace`
@@ -479,78 +445,12 @@ export const WorkspaceApiAxiosParamCreator = function (configuration?: Configura
 
       // authentication oauth2 required
 
-      if (page !== undefined) {
-        localVarQueryParameter['page'] = page
-      }
-
-      if (limit !== undefined) {
-        localVarQueryParameter['limit'] = limit
-      }
-
-      if (id !== undefined) {
-        localVarQueryParameter['id'] = id
+      if (verbose !== undefined) {
+        localVarQueryParameter['verbose'] = verbose
       }
 
       if (labels !== undefined) {
         localVarQueryParameter['labels'] = labels
-      }
-
-      if (includeErroredDeleted !== undefined) {
-        localVarQueryParameter['includeErroredDeleted'] = includeErroredDeleted
-      }
-
-      if (states) {
-        localVarQueryParameter['states'] = states
-      }
-
-      if (snapshots) {
-        localVarQueryParameter['snapshots'] = snapshots
-      }
-
-      if (regions) {
-        localVarQueryParameter['regions'] = regions
-      }
-
-      if (minCpu !== undefined) {
-        localVarQueryParameter['minCpu'] = minCpu
-      }
-
-      if (maxCpu !== undefined) {
-        localVarQueryParameter['maxCpu'] = maxCpu
-      }
-
-      if (minMemoryGiB !== undefined) {
-        localVarQueryParameter['minMemoryGiB'] = minMemoryGiB
-      }
-
-      if (maxMemoryGiB !== undefined) {
-        localVarQueryParameter['maxMemoryGiB'] = maxMemoryGiB
-      }
-
-      if (minDiskGiB !== undefined) {
-        localVarQueryParameter['minDiskGiB'] = minDiskGiB
-      }
-
-      if (maxDiskGiB !== undefined) {
-        localVarQueryParameter['maxDiskGiB'] = maxDiskGiB
-      }
-
-      if (lastEventAfter !== undefined) {
-        localVarQueryParameter['lastEventAfter'] =
-          (lastEventAfter as any) instanceof Date ? (lastEventAfter as any).toISOString() : lastEventAfter
-      }
-
-      if (lastEventBefore !== undefined) {
-        localVarQueryParameter['lastEventBefore'] =
-          (lastEventBefore as any) instanceof Date ? (lastEventBefore as any).toISOString() : lastEventBefore
-      }
-
-      if (sort !== undefined) {
-        localVarQueryParameter['sort'] = sort
-      }
-
-      if (order !== undefined) {
-        localVarQueryParameter['order'] = order
       }
 
       if (xDaytonaOrganizationID != null) {
@@ -1111,70 +1011,22 @@ export const WorkspaceApiFp = function (configuration?: Configuration) {
      *
      * @summary [DEPRECATED] List all workspaces
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {number} [page] Page number of the results
-     * @param {number} [limit] Number of results per page
-     * @param {string} [id] Filter by partial ID match
+     * @param {boolean} [verbose] Include verbose output
      * @param {string} [labels] JSON encoded labels to filter by
-     * @param {boolean} [includeErroredDeleted] Include results with errored state and deleted desired state
-     * @param {Array<ListWorkspacesDeprecatedStatesEnum>} [states] List of states to filter by
-     * @param {Array<string>} [snapshots] List of snapshot names to filter by
-     * @param {Array<string>} [regions] List of regions to filter by
-     * @param {number} [minCpu] Minimum CPU
-     * @param {number} [maxCpu] Maximum CPU
-     * @param {number} [minMemoryGiB] Minimum memory in GiB
-     * @param {number} [maxMemoryGiB] Maximum memory in GiB
-     * @param {number} [minDiskGiB] Minimum disk space in GiB
-     * @param {number} [maxDiskGiB] Maximum disk space in GiB
-     * @param {Date} [lastEventAfter] Include items with last event after this timestamp
-     * @param {Date} [lastEventBefore] Include items with last event before this timestamp
-     * @param {ListWorkspacesDeprecatedSortEnum} [sort] Field to sort by
-     * @param {ListWorkspacesDeprecatedOrderEnum} [order] Direction to sort by
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
      */
     async listWorkspacesDeprecated(
       xDaytonaOrganizationID?: string,
-      page?: number,
-      limit?: number,
-      id?: string,
+      verbose?: boolean,
       labels?: string,
-      includeErroredDeleted?: boolean,
-      states?: Array<ListWorkspacesDeprecatedStatesEnum>,
-      snapshots?: Array<string>,
-      regions?: Array<string>,
-      minCpu?: number,
-      maxCpu?: number,
-      minMemoryGiB?: number,
-      maxMemoryGiB?: number,
-      minDiskGiB?: number,
-      maxDiskGiB?: number,
-      lastEventAfter?: Date,
-      lastEventBefore?: Date,
-      sort?: ListWorkspacesDeprecatedSortEnum,
-      order?: ListWorkspacesDeprecatedOrderEnum,
       options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PaginatedWorkspaces>> {
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Workspace>>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.listWorkspacesDeprecated(
         xDaytonaOrganizationID,
-        page,
-        limit,
-        id,
+        verbose,
         labels,
-        includeErroredDeleted,
-        states,
-        snapshots,
-        regions,
-        minCpu,
-        maxCpu,
-        minMemoryGiB,
-        maxMemoryGiB,
-        minDiskGiB,
-        maxDiskGiB,
-        lastEventAfter,
-        lastEventBefore,
-        sort,
-        order,
         options,
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
@@ -1529,73 +1381,20 @@ export const WorkspaceApiFactory = function (configuration?: Configuration, base
      *
      * @summary [DEPRECATED] List all workspaces
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {number} [page] Page number of the results
-     * @param {number} [limit] Number of results per page
-     * @param {string} [id] Filter by partial ID match
+     * @param {boolean} [verbose] Include verbose output
      * @param {string} [labels] JSON encoded labels to filter by
-     * @param {boolean} [includeErroredDeleted] Include results with errored state and deleted desired state
-     * @param {Array<ListWorkspacesDeprecatedStatesEnum>} [states] List of states to filter by
-     * @param {Array<string>} [snapshots] List of snapshot names to filter by
-     * @param {Array<string>} [regions] List of regions to filter by
-     * @param {number} [minCpu] Minimum CPU
-     * @param {number} [maxCpu] Maximum CPU
-     * @param {number} [minMemoryGiB] Minimum memory in GiB
-     * @param {number} [maxMemoryGiB] Maximum memory in GiB
-     * @param {number} [minDiskGiB] Minimum disk space in GiB
-     * @param {number} [maxDiskGiB] Maximum disk space in GiB
-     * @param {Date} [lastEventAfter] Include items with last event after this timestamp
-     * @param {Date} [lastEventBefore] Include items with last event before this timestamp
-     * @param {ListWorkspacesDeprecatedSortEnum} [sort] Field to sort by
-     * @param {ListWorkspacesDeprecatedOrderEnum} [order] Direction to sort by
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
      */
     listWorkspacesDeprecated(
       xDaytonaOrganizationID?: string,
-      page?: number,
-      limit?: number,
-      id?: string,
+      verbose?: boolean,
       labels?: string,
-      includeErroredDeleted?: boolean,
-      states?: Array<ListWorkspacesDeprecatedStatesEnum>,
-      snapshots?: Array<string>,
-      regions?: Array<string>,
-      minCpu?: number,
-      maxCpu?: number,
-      minMemoryGiB?: number,
-      maxMemoryGiB?: number,
-      minDiskGiB?: number,
-      maxDiskGiB?: number,
-      lastEventAfter?: Date,
-      lastEventBefore?: Date,
-      sort?: ListWorkspacesDeprecatedSortEnum,
-      order?: ListWorkspacesDeprecatedOrderEnum,
       options?: RawAxiosRequestConfig,
-    ): AxiosPromise<PaginatedWorkspaces> {
+    ): AxiosPromise<Array<Workspace>> {
       return localVarFp
-        .listWorkspacesDeprecated(
-          xDaytonaOrganizationID,
-          page,
-          limit,
-          id,
-          labels,
-          includeErroredDeleted,
-          states,
-          snapshots,
-          regions,
-          minCpu,
-          maxCpu,
-          minMemoryGiB,
-          maxMemoryGiB,
-          minDiskGiB,
-          maxDiskGiB,
-          lastEventAfter,
-          lastEventBefore,
-          sort,
-          order,
-          options,
-        )
+        .listWorkspacesDeprecated(xDaytonaOrganizationID, verbose, labels, options)
         .then((request) => request(axios, basePath))
     },
     /**
@@ -1876,24 +1675,8 @@ export class WorkspaceApi extends BaseAPI {
    *
    * @summary [DEPRECATED] List all workspaces
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-   * @param {number} [page] Page number of the results
-   * @param {number} [limit] Number of results per page
-   * @param {string} [id] Filter by partial ID match
+   * @param {boolean} [verbose] Include verbose output
    * @param {string} [labels] JSON encoded labels to filter by
-   * @param {boolean} [includeErroredDeleted] Include results with errored state and deleted desired state
-   * @param {Array<ListWorkspacesDeprecatedStatesEnum>} [states] List of states to filter by
-   * @param {Array<string>} [snapshots] List of snapshot names to filter by
-   * @param {Array<string>} [regions] List of regions to filter by
-   * @param {number} [minCpu] Minimum CPU
-   * @param {number} [maxCpu] Maximum CPU
-   * @param {number} [minMemoryGiB] Minimum memory in GiB
-   * @param {number} [maxMemoryGiB] Maximum memory in GiB
-   * @param {number} [minDiskGiB] Minimum disk space in GiB
-   * @param {number} [maxDiskGiB] Maximum disk space in GiB
-   * @param {Date} [lastEventAfter] Include items with last event after this timestamp
-   * @param {Date} [lastEventBefore] Include items with last event before this timestamp
-   * @param {ListWorkspacesDeprecatedSortEnum} [sort] Field to sort by
-   * @param {ListWorkspacesDeprecatedOrderEnum} [order] Direction to sort by
    * @param {*} [options] Override http request option.
    * @deprecated
    * @throws {RequiredError}
@@ -1901,49 +1684,12 @@ export class WorkspaceApi extends BaseAPI {
    */
   public listWorkspacesDeprecated(
     xDaytonaOrganizationID?: string,
-    page?: number,
-    limit?: number,
-    id?: string,
+    verbose?: boolean,
     labels?: string,
-    includeErroredDeleted?: boolean,
-    states?: Array<ListWorkspacesDeprecatedStatesEnum>,
-    snapshots?: Array<string>,
-    regions?: Array<string>,
-    minCpu?: number,
-    maxCpu?: number,
-    minMemoryGiB?: number,
-    maxMemoryGiB?: number,
-    minDiskGiB?: number,
-    maxDiskGiB?: number,
-    lastEventAfter?: Date,
-    lastEventBefore?: Date,
-    sort?: ListWorkspacesDeprecatedSortEnum,
-    order?: ListWorkspacesDeprecatedOrderEnum,
     options?: RawAxiosRequestConfig,
   ) {
     return WorkspaceApiFp(this.configuration)
-      .listWorkspacesDeprecated(
-        xDaytonaOrganizationID,
-        page,
-        limit,
-        id,
-        labels,
-        includeErroredDeleted,
-        states,
-        snapshots,
-        regions,
-        minCpu,
-        maxCpu,
-        minMemoryGiB,
-        maxMemoryGiB,
-        minDiskGiB,
-        maxDiskGiB,
-        lastEventAfter,
-        lastEventBefore,
-        sort,
-        order,
-        options,
-      )
+      .listWorkspacesDeprecated(xDaytonaOrganizationID, verbose, labels, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
@@ -2075,48 +1821,3 @@ export class WorkspaceApi extends BaseAPI {
       .then((request) => request(this.axios, this.basePath))
   }
 }
-
-/**
- * @export
- */
-export const ListWorkspacesDeprecatedStatesEnum = {
-  CREATING: 'creating',
-  RESTORING: 'restoring',
-  DESTROYING: 'destroying',
-  STARTED: 'started',
-  STOPPED: 'stopped',
-  STARTING: 'starting',
-  STOPPING: 'stopping',
-  ERROR: 'error',
-  BUILD_FAILED: 'build_failed',
-  PENDING_BUILD: 'pending_build',
-  BUILDING_SNAPSHOT: 'building_snapshot',
-  UNKNOWN: 'unknown',
-  PULLING_SNAPSHOT: 'pulling_snapshot',
-  ARCHIVED: 'archived',
-  ARCHIVING: 'archiving',
-} as const
-export type ListWorkspacesDeprecatedStatesEnum =
-  (typeof ListWorkspacesDeprecatedStatesEnum)[keyof typeof ListWorkspacesDeprecatedStatesEnum]
-/**
- * @export
- */
-export const ListWorkspacesDeprecatedSortEnum = {
-  ID: 'id',
-  STATE: 'state',
-  SNAPSHOT: 'snapshot',
-  REGION: 'region',
-  UPDATED_AT: 'updatedAt',
-  CREATED_AT: 'createdAt',
-} as const
-export type ListWorkspacesDeprecatedSortEnum =
-  (typeof ListWorkspacesDeprecatedSortEnum)[keyof typeof ListWorkspacesDeprecatedSortEnum]
-/**
- * @export
- */
-export const ListWorkspacesDeprecatedOrderEnum = {
-  ASC: 'asc',
-  DESC: 'desc',
-} as const
-export type ListWorkspacesDeprecatedOrderEnum =
-  (typeof ListWorkspacesDeprecatedOrderEnum)[keyof typeof ListWorkspacesDeprecatedOrderEnum]

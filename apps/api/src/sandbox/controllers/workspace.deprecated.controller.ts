@@ -61,8 +61,6 @@ import { BadRequestError } from '../../exceptions/bad-request.exception'
 import { Audit, MASKED_AUDIT_VALUE, TypedRequest } from '../../audit/decorators/audit.decorator'
 import { AuditAction } from '../../audit/enums/audit-action.enum'
 import { AuditTarget } from '../../audit/enums/audit-target.enum'
-import { PaginatedWorkspacesDto } from '../dto/paginated-workspaces.deprecated.dto'
-import { ListWorkspacesQueryDto } from '../dto/list-workspaces-query.deprecated.dto'
 
 @ApiTags('workspace')
 @Controller('workspace')
@@ -88,73 +86,35 @@ export class WorkspaceController {
   })
   @ApiResponse({
     status: 200,
-    description: 'Paginated list of all workspaces',
-    type: PaginatedWorkspacesDto,
+    description: 'List of all workspacees',
+    type: [WorkspaceDto],
   })
-  async listWorkspaces(
+  @ApiQuery({
+    name: 'verbose',
+    required: false,
+    type: Boolean,
+    description: 'Include verbose output',
+  })
+  @ApiQuery({
+    name: 'labels',
+    type: String,
+    required: false,
+    example: '{"label1": "value1", "label2": "value2"}',
+    description: 'JSON encoded labels to filter by',
+  })
+  async listWorkspacees(
     @AuthContext() authContext: OrganizationAuthContext,
-    @Query() queryParams: ListWorkspacesQueryDto,
-  ): Promise<PaginatedWorkspacesDto> {
-    const {
-      page,
-      limit,
-      id,
-      labels,
-      includeErroredDeleted: includeErroredDestroyed,
-      states,
-      snapshots,
-      regions,
-      minCpu,
-      maxCpu,
-      minMemoryGiB,
-      maxMemoryGiB,
-      minDiskGiB,
-      maxDiskGiB,
-      lastEventAfter,
-      lastEventBefore,
-      sort: sortField,
-      order: sortDirection,
-    } = queryParams
-
-    const result = await this.workspaceService.findAll(
-      authContext.organizationId,
-      page,
-      limit,
-      {
-        id,
-        labels: labels ? JSON.parse(labels) : {},
-        includeErroredDestroyed,
-        states,
-        snapshots,
-        regions,
-        minCpu,
-        maxCpu,
-        minMemoryGiB,
-        maxMemoryGiB,
-        minDiskGiB,
-        maxDiskGiB,
-        lastEventAfter,
-        lastEventBefore,
-      },
-      {
-        field: sortField,
-        direction: sortDirection,
-      },
-    )
-
-    const runnerIds = new Set(result.items.map((s) => s.runnerId))
-    const runners = await this.runnerService.findByIds(Array.from(runnerIds))
-    const runnerMap = new Map(runners.map((runner) => [runner.id, runner]))
-
-    return {
-      items: result.items.map((workspace) => {
-        const runner = runnerMap.get(workspace.runnerId)
-        return WorkspaceDto.fromSandbox(workspace, runner?.domain)
-      }),
-      total: result.total,
-      page: result.page,
-      totalPages: result.totalPages,
-    }
+    @Query('verbose') verbose?: boolean,
+    @Query('labels') labelsQuery?: string,
+  ): Promise<WorkspaceDto[]> {
+    const labels = labelsQuery ? JSON.parse(labelsQuery) : {}
+    const workspacees = await this.workspaceService.findAllDeprecated(authContext.organizationId, labels)
+    const dtos = workspacees.map(async (workspace) => {
+      const runner = await this.runnerService.findOne(workspace.runnerId)
+      const dto = WorkspaceDto.fromSandbox(workspace, runner.domain)
+      return dto
+    })
+    return await Promise.all(dtos)
   }
 
   @Post()
