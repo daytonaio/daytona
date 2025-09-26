@@ -5,18 +5,7 @@
 
 import { ForbiddenException, Injectable, Logger, NotFoundException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import {
-  Not,
-  Repository,
-  LessThan,
-  In,
-  JsonContains,
-  FindOptionsWhere,
-  MoreThanOrEqual,
-  LessThanOrEqual,
-  Between,
-  ILike,
-} from 'typeorm'
+import { Not, Repository, LessThan, In, JsonContains, FindOptionsWhere, ILike } from 'typeorm'
 import { Sandbox } from '../entities/sandbox.entity'
 import { CreateSandboxDto } from '../dto/create-sandbox.dto'
 import { SandboxState } from '../enums/sandbox-state.enum'
@@ -64,6 +53,7 @@ import { VolumeService } from './volume.service'
 import { RedisLockProvider } from '../common/redis-lock.provider'
 import { PaginatedList } from '../../common/interfaces/paginated-list.interface'
 import { SandboxSortField, SandboxSortDirection } from '../dto/list-sandboxes-query.dto'
+import { createRangeFilter } from '../../common/utils/range-filter'
 
 const DEFAULT_CPU = 1
 const DEFAULT_MEMORY = 1
@@ -729,37 +719,10 @@ export class SandboxService {
       ...(regions ? { region: In(regions) } : {}),
     }
 
-    if (minCpu !== undefined && maxCpu !== undefined) {
-      baseFindOptions.cpu = Between(minCpu, maxCpu)
-    } else if (minCpu !== undefined) {
-      baseFindOptions.cpu = MoreThanOrEqual(minCpu)
-    } else if (maxCpu !== undefined) {
-      baseFindOptions.cpu = LessThanOrEqual(maxCpu)
-    }
-
-    if (minMemoryGiB !== undefined && maxMemoryGiB !== undefined) {
-      baseFindOptions.mem = Between(minMemoryGiB, maxMemoryGiB)
-    } else if (minMemoryGiB !== undefined) {
-      baseFindOptions.mem = MoreThanOrEqual(minMemoryGiB)
-    } else if (maxMemoryGiB !== undefined) {
-      baseFindOptions.mem = LessThanOrEqual(maxMemoryGiB)
-    }
-
-    if (minDiskGiB !== undefined && maxDiskGiB !== undefined) {
-      baseFindOptions.disk = Between(minDiskGiB, maxDiskGiB)
-    } else if (minDiskGiB !== undefined) {
-      baseFindOptions.disk = MoreThanOrEqual(minDiskGiB)
-    } else if (maxDiskGiB !== undefined) {
-      baseFindOptions.disk = LessThanOrEqual(maxDiskGiB)
-    }
-
-    if (lastEventAfter && lastEventBefore) {
-      baseFindOptions.lastActivityAt = Between(lastEventAfter, lastEventBefore)
-    } else if (lastEventAfter) {
-      baseFindOptions.lastActivityAt = MoreThanOrEqual(lastEventAfter)
-    } else if (lastEventBefore) {
-      baseFindOptions.lastActivityAt = LessThanOrEqual(lastEventBefore)
-    }
+    baseFindOptions.cpu = createRangeFilter(minCpu, maxCpu)
+    baseFindOptions.mem = createRangeFilter(minMemoryGiB, maxMemoryGiB)
+    baseFindOptions.disk = createRangeFilter(minDiskGiB, maxDiskGiB)
+    baseFindOptions.lastActivityAt = createRangeFilter(lastEventAfter, lastEventBefore)
 
     const filteredStates = (states || Object.values(SandboxState)).filter((state) => state !== SandboxState.DESTROYED)
     const errorStates = [SandboxState.ERROR, SandboxState.BUILD_FAILED]
