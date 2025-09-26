@@ -402,7 +402,11 @@ export class SandboxController {
     targetType: AuditTarget.SANDBOX,
     targetIdFromRequest: (req) => req.params.sandboxId,
   })
-  async deleteSandbox(@Param('sandboxId') sandboxId: string): Promise<void> {
+  async deleteSandbox(
+    @Param('sandboxId') sandboxId: string,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    @Query('force') force?: boolean,
+  ): Promise<void> {
     return this.sandboxService.destroy(sandboxId)
   }
 
