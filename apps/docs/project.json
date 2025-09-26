@@ -60,7 +60,8 @@
         "build-args": [
           "VERSION=$VERSION",
           "PUBLIC_ALGOLIA_APP_ID=$PUBLIC_ALGOLIA_APP_ID",
-          "PUBLIC_ALGOLIA_API_KEY=$PUBLIC_ALGOLIA_API_KEY"
+          "PUBLIC_ALGOLIA_API_KEY=$PUBLIC_ALGOLIA_API_KEY",
+          "PUBLIC_WEB_URL=$PUBLIC_WEB_URL"
         ]
       }
     },

@@ -4,12 +4,9 @@ import starlight from '@astrojs/starlight'
 import { ExpressiveCodeTheme } from '@astrojs/starlight/expressive-code'
 import { defineConfig } from 'astro/config'
 import fs from 'node:fs'
-import { loadEnv } from 'vite'
 
 import config from './gt.config.json'
 import { generateI18nConfig } from './src/i18n/generateI18nConfig'
-
-const { PUBLIC_WEB_URL } = loadEnv(import.meta.env.MODE, process.cwd(), '')
 
 const jsonDarkString = fs.readFileSync(
   new URL(`src/assets/themes/daytona-code-dark.json`, import.meta.url),
@@ -24,7 +21,7 @@ const myThemeLight = ExpressiveCodeTheme.fromJSONString(jsonLightString)
 
 // https://astro.build/config
 export default defineConfig({
-  site: PUBLIC_WEB_URL,
+  site: process.env.PUBLIC_WEB_URL,
   base: '/docs',
   integrations: [
     react(),
