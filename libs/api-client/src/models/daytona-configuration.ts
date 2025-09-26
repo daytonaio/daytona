@@ -112,4 +112,10 @@ export interface DaytonaConfiguration {
    * @memberof DaytonaConfiguration
    */
   sshGatewayCommand?: string
+  /**
+   * Base64 encoded SSH Gateway public key
+   * @type {string}
+   * @memberof DaytonaConfiguration
+   */
+  sshGatewayPublicKey?: string
 }

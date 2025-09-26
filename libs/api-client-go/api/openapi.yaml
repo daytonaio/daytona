@@ -6634,6 +6634,7 @@ components:
     DaytonaConfiguration:
       example:
         dashboardUrl: https://dashboard.example.com
+        sshGatewayPublicKey: ssh-gateway-public-key
         billingApiUrl: https://billing.example.com
         linkedAccountsEnabled: true
         version: 0.0.1
@@ -6711,6 +6712,10 @@ components:
         sshGatewayCommand:
           description: SSH Gateway command
           example: 'ssh -p 2222 {{TOKEN}}@localhost'
+          type: string
+        sshGatewayPublicKey:
+          description: Base64 encoded SSH Gateway public key
+          example: ssh-gateway-public-key
           type: string
       required:
         - announcements
