@@ -48,3 +48,7 @@ export type {
 } from '@daytonaio/api-client'
 
 export type { ScreenshotRegion, ScreenshotOptions } from './ComputerUse'
+
+export * from './Process'
+export * from './PtyHandle'
+export * from './types/Pty'

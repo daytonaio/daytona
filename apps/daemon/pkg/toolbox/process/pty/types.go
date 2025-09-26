@@ -1,0 +1,98 @@
+// Copyright 2025 Daytona Platforms Inc.
+// SPDX-License-Identifier: AGPL-3.0
+
+package pty
+
+import (
+	"context"
+	"os"
+	"os/exec"
+	"sync"
+	"time"
+
+	"github.com/gorilla/websocket"
+)
+
+// Constants
+const (
+	writeWait = 10 * time.Second
+	readLimit = 64 * 1024
+)
+
+// PTYController handles PTY-related HTTP endpoints
+type PTYController struct {
+	workDir string
+}
+
+// PTYManager manages multiple PTY sessions
+type PTYManager struct {
+	mu       sync.RWMutex
+	sessions map[string]*PTYSession
+}
+
+// wsClient represents a WebSocket client connection
+type wsClient struct {
+	id   string
+	conn *websocket.Conn
+	send chan []byte // outbound queue for this client (PTY -> WS)
+}
+
+// PTYSession represents a single PTY session with multi-client support
+type PTYSession struct {
+	info PTYSessionInfo
+
+	cmd    *exec.Cmd
+	ptmx   *os.File
+	ctx    context.Context
+	cancel context.CancelFunc
+
+	// multi-attach
+	clients   map[string]*wsClient
+	clientsMu sync.RWMutex
+
+	// funnel of all client inputs -> single PTY writer (preserves ordering)
+	inCh chan []byte
+
+	// guards general session fields (info/cmd/ptmx)
+	mu sync.Mutex
+}
+
+// PTYSessionInfo contains metadata about a PTY session
+type PTYSessionInfo struct {
+	ID        string            `json:"id"`
+	Cwd       string            `json:"cwd"`
+	Envs      map[string]string `json:"envs"`
+	Cols      uint16            `json:"cols"`
+	Rows      uint16            `json:"rows"`
+	CreatedAt time.Time         `json:"createdAt"`
+	Active    bool              `json:"active"`
+	LazyStart bool              `json:"lazyStart"` // Whether this session uses lazy start
+}
+
+// API Request/Response types
+
+// PTYCreateRequest represents a request to create a new PTY session
+type PTYCreateRequest struct {
+	ID        string            `json:"id"`
+	Cwd       string            `json:"cwd,omitempty"`
+	Envs      map[string]string `json:"envs,omitempty"`
+	Cols      uint16            `json:"cols"`
+	Rows      uint16            `json:"rows"`
+	LazyStart bool              `json:"lazyStart,omitempty"` // Don't start PTY until first client connects
+} // @name PTYCreateRequest
+
+// PTYCreateResponse represents the response when creating a PTY session
+type PTYCreateResponse struct {
+	SessionID string `json:"sessionId"`
+} // @name PTYCreateResponse
+
+// PTYListResponse represents the response when listing PTY sessions
+type PTYListResponse struct {
+	Sessions []PTYSessionInfo `json:"sessions"`
+} // @name PTYListResponse
+
+// PTYResizeRequest represents a request to resize a PTY session
+type PTYResizeRequest struct {
+	Cols uint16 `json:"cols" binding:"required,min=1,max=1000"`
+	Rows uint16 `json:"rows" binding:"required,min=1,max=1000"`
+} // @name PTYResizeRequest

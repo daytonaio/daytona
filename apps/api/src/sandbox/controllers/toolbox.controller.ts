@@ -83,6 +83,11 @@ import {
   ProcessErrorsResponseDto,
   UserHomeDirResponseDto,
   WorkDirResponseDto,
+  PtyCreateRequestDto,
+  PtyCreateResponseDto,
+  PtySessionInfoDto,
+  PtyListResponseDto,
+  PtyResizeRequestDto,
 } from '../dto/toolbox.dto'
 import { ToolboxService } from '../services/toolbox.service'
 import { ContentTypeInterceptor } from '../../common/interceptors/content-type.interceptors'
@@ -1295,6 +1300,145 @@ export class ToolboxController {
     @Next() next: NextFunction,
   ): Promise<void> {
     return this.toolboxProxy(req, res, next)
+  }
+
+  // PTY endpoints
+  @Get(':sandboxId/toolbox/process/pty')
+  @ApiOperation({
+    summary: 'List PTY sessions',
+    description: 'List all active PTY sessions in the sandbox',
+    operationId: 'listPTYSessions',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'PTY sessions retrieved successfully',
+    type: PtyListResponseDto,
+  })
+  @ApiParam({ name: 'sandboxId', type: String, required: true })
+  async listPtySessions(
+    @Request() req: RawBodyRequest<IncomingMessage>,
+    @Res() res: ServerResponse<IncomingMessage>,
+    @Next() next: NextFunction,
+  ): Promise<void> {
+    return await this.toolboxProxy(req, res, next)
+  }
+
+  @Post(':sandboxId/toolbox/process/pty')
+  @HttpCode(201)
+  @UseInterceptors(ContentTypeInterceptor)
+  @ApiOperation({
+    summary: 'Create PTY session',
+    description: 'Create a new PTY session in the sandbox',
+    operationId: 'createPTYSession',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'PTY session created successfully',
+    type: PtyCreateResponseDto,
+  })
+  @ApiBody({
+    type: PtyCreateRequestDto,
+  })
+  @ApiParam({ name: 'sandboxId', type: String, required: true })
+  async createPtySession(
+    @Request() req: RawBodyRequest<IncomingMessage>,
+    @Res() res: ServerResponse<IncomingMessage>,
+    @Next() next: NextFunction,
+  ): Promise<void> {
+    return await this.toolboxProxy(req, res, next)
+  }
+
+  @Get(':sandboxId/toolbox/process/pty/:sessionId')
+  @ApiOperation({
+    summary: 'Get PTY session',
+    description: 'Get PTY session information by ID',
+    operationId: 'getPTYSession',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'PTY session retrieved successfully',
+    type: PtySessionInfoDto,
+  })
+  @ApiParam({ name: 'sessionId', type: String, required: true })
+  @ApiParam({ name: 'sandboxId', type: String, required: true })
+  async getPtySession(
+    @Request() req: RawBodyRequest<IncomingMessage>,
+    @Res() res: ServerResponse<IncomingMessage>,
+    @Next() next: NextFunction,
+  ): Promise<void> {
+    return await this.toolboxProxy(req, res, next)
+  }
+
+  @Post(':sandboxId/toolbox/process/pty/:sessionId/resize')
+  @ApiOperation({
+    summary: 'Resize PTY session',
+    description: 'Resize a PTY session',
+    operationId: 'resizePTYSession',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'PTY session resized successfully',
+    type: PtySessionInfoDto,
+  })
+  @ApiParam({ name: 'sessionId', type: String, required: true })
+  @ApiParam({ name: 'sandboxId', type: String, required: true })
+  @ApiBody({
+    type: PtyResizeRequestDto,
+  })
+  async resizePtySession(
+    @Request() req: RawBodyRequest<IncomingMessage>,
+    @Res() res: ServerResponse<IncomingMessage>,
+    @Next() next: NextFunction,
+  ): Promise<void> {
+    return await this.toolboxProxy(req, res, next)
+  }
+
+  @Delete(':sandboxId/toolbox/process/pty/:sessionId')
+  @ApiOperation({
+    summary: 'Delete PTY session',
+    description: 'Delete a PTY session and terminate the associated process',
+    operationId: 'deletePTYSession',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'PTY session deleted successfully',
+  })
+  @ApiParam({ name: 'sessionId', type: String, required: true })
+  @ApiParam({ name: 'sandboxId', type: String, required: true })
+  async deletePtySession(
+    @Request() req: RawBodyRequest<IncomingMessage>,
+    @Res() res: ServerResponse<IncomingMessage>,
+    @Next() next: NextFunction,
+  ): Promise<void> {
+    return await this.toolboxProxy(req, res, next)
+  }
+
+  @Get(':sandboxId/toolbox/process/pty/:sessionId/connect')
+  @ApiOperation({
+    summary: 'Connect to PTY session via WebSocket',
+    description: 'Upgrade HTTP connection to WebSocket for real-time PTY interaction',
+    operationId: 'connectPTYSession',
+  })
+  @ApiResponse({
+    status: 101,
+    description: 'WebSocket connection established successfully',
+    content: {
+      'application/octet-stream': {
+        schema: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
+  @ApiParam({ name: 'sessionId', type: String, required: true })
+  @ApiParam({ name: 'sandboxId', type: String, required: true })
+  async connectPtySession(
+    @Request() req: RawBodyRequest<IncomingMessage>,
+    @Res() res: ServerResponse<IncomingMessage>,
+    @Next() next: NextFunction,
+  ): Promise<void> {
+    return await this.toolboxProxy(req, res, next)
   }
 
   @Post(':sandboxId/toolbox/lsp/completions')

@@ -853,3 +853,131 @@ export class ProcessErrorsResponseDto {
   })
   errors: string
 }
+
+// PTY DTOs
+@ApiSchema({ name: 'PtyCreateRequest' })
+export class PtyCreateRequestDto {
+  @ApiProperty({
+    description: 'The unique identifier for the PTY session',
+    example: 'pty-session-12345',
+  })
+  id: string
+
+  @ApiPropertyOptional({
+    description: "Starting directory for the PTY session, defaults to the sandbox's working directory",
+    example: '/home/user',
+  })
+  cwd?: string
+
+  @ApiPropertyOptional({
+    description: 'Environment variables for the PTY session',
+    type: Object,
+    example: { TERM: 'xterm-256color', PS1: '\\u@daytona:\\w$ ' },
+  })
+  envs?: Record<string, string>
+
+  @ApiPropertyOptional({
+    description: 'Number of terminal columns',
+    example: 80,
+  })
+  cols?: number
+
+  @ApiPropertyOptional({
+    description: 'Number of terminal rows',
+    example: 24,
+  })
+  rows?: number
+
+  @ApiPropertyOptional({
+    description: 'Whether to start the PTY session lazily (only start when first client connects)',
+    example: false,
+    default: false,
+  })
+  lazyStart?: boolean
+}
+
+@ApiSchema({ name: 'PtyCreateResponse' })
+export class PtyCreateResponseDto {
+  @ApiProperty({
+    description: 'The unique identifier for the created PTY session',
+    example: 'pty-session-12345',
+  })
+  sessionId: string
+}
+
+@ApiSchema({ name: 'PtySessionInfo' })
+export class PtySessionInfoDto {
+  @ApiProperty({
+    description: 'The unique identifier for the PTY session',
+    example: 'pty-session-12345',
+  })
+  id: string
+
+  @ApiProperty({
+    description: "Starting directory for the PTY session, defaults to the sandbox's working directory",
+    example: '/home/user',
+  })
+  cwd: string
+
+  @ApiProperty({
+    description: 'Environment variables for the PTY session',
+    type: Object,
+    example: { TERM: 'xterm-256color', PS1: '\\u@daytona:\\w$ ' },
+  })
+  envs: Record<string, string>
+
+  @ApiProperty({
+    description: 'Number of terminal columns',
+    example: 80,
+  })
+  cols: number
+
+  @ApiProperty({
+    description: 'Number of terminal rows',
+    example: 24,
+  })
+  rows: number
+
+  @ApiProperty({
+    description: 'When the PTY session was created',
+    example: '2024-01-15T10:30:45Z',
+  })
+  createdAt: string
+
+  @ApiProperty({
+    description: 'Whether the PTY session is currently active',
+    example: true,
+  })
+  active: boolean
+
+  @ApiProperty({
+    description: 'Whether the PTY session uses lazy start (only start when first client connects)',
+    example: false,
+    default: false,
+  })
+  lazyStart: boolean
+}
+
+@ApiSchema({ name: 'PtyListResponse' })
+export class PtyListResponseDto {
+  @ApiProperty({
+    description: 'List of active PTY sessions',
+    type: [PtySessionInfoDto],
+  })
+  sessions: PtySessionInfoDto[]
+}
+
+@ApiSchema({ name: 'PtyResizeRequest' })
+export class PtyResizeRequestDto {
+  @ApiProperty({
+    description: 'Number of terminal columns',
+    example: 80,
+  })
+  cols: number
+
+  @ApiProperty({
+    description: 'Number of terminal rows',
+    example: 24,
+  })
+  rows: number
+}

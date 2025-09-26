@@ -1,0 +1,254 @@
+---
+title: Pseudo Terminal (PTY)
+---
+
+import { TabItem, Tabs } from '@astrojs/starlight/components'
+
+The Daytona SDK provides powerful pseudo terminal (PTY) capabilities through the `process` module in Sandboxes. PTY sessions allow you to create interactive terminal sessions that can execute commands, handle user input, and manage terminal operations.
+
+## What is PTY?
+
+A PTY (Pseudo Terminal) is a virtual terminal interface that allows programs to interact with a shell as if they were connected to a real terminal. PTY sessions in Daytona enable:
+
+- Interactive command execution with real-time input/output
+- Terminal resizing capabilities
+- Process management with kill operations
+- Real-time data streaming from terminal sessions
+
+## Interactive Commands with PTY
+
+PTY sessions excel at handling interactive commands that require user input and can be resized during execution.
+
+<Tabs>
+<TabItem label="Python" icon="seti:python">
+```python
+import time
+from daytona import Daytona, Sandbox
+from daytona.common.pty import PtySize
+
+def handle_pty_data(data: bytes):
+text = data.decode("utf-8", errors="replace")
+print(text, end="")
+
+# Create PTY session
+
+pty_handle = sandbox.process.create_pty_session(
+id="interactive-session",
+pty_size=PtySize(cols=300, rows=100)
+)
+
+# Send interactive command
+
+pty_handle.send_input('printf "Are you accepting the terms and conditions? (y/n): " && read confirm && if [ "$confirm" = "y" ]; then echo "You accepted"; else echo "You did not accept"; fi\n')
+time.sleep(1)
+pty_handle.send_input("y\n")
+
+# Resize terminal
+
+pty_session_info = pty_handle.resize(PtySize(cols=210, rows=110))
+print(f"PTY session resized to {pty_session_info.cols}x{pty_session_info.rows}")
+
+# Exit the session
+
+pty_handle.send_input('exit\n')
+
+# Handle output using iterator
+
+for data in pty_handle:
+handle_pty_data(data)
+
+print(f"Session completed with exit code: {pty_handle.exit_code}")
+
+````
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+```typescript
+import { Daytona, Sandbox } from '@daytonaio/sdk'
+
+// Create PTY session
+const ptyHandle = await sandbox.process.createPty({
+  id: 'interactive-session',
+  cols: 300,
+  rows: 100,
+  onData: (data) => {
+    const text = new TextDecoder().decode(data)
+    process.stdout.write(text)
+  },
+})
+
+await ptyHandle.waitForConnection()
+
+// Send interactive command
+await ptyHandle.sendInput('printf "Are you accepting the terms and conditions? (y/n): " && read confirm && if [ "$confirm" = "y" ]; then echo "You accepted"; else echo "You did not accept"; fi\n')
+await new Promise(resolve => setTimeout(resolve, 1000))
+await ptyHandle.sendInput('y\n')
+
+// Resize terminal
+const ptySessionInfo = await sandbox.process.resizePtySession(ptySessionId, 210, 110)
+console.log(`\nPTY session resized to ${ptySessionInfo.cols}x${ptySessionInfo.rows}`)
+
+// Exit the session
+await ptyHandle.sendInput('exit\n')
+
+// Wait for completion
+const result = await ptyHandle.wait()
+console.log(`Session completed with exit code: ${result.exitCode}`)
+````
+
+</TabItem>
+</Tabs>
+
+## Long-Running Processes with PTY
+
+PTY sessions are perfect for managing long-running processes that need to be monitored or terminated.
+
+<Tabs>
+<TabItem label="Python" icon="seti:python">
+```python
+import time
+from daytona import Daytona, Sandbox
+from daytona.common.pty import PtySize
+
+def handle_pty_data(data: bytes):
+text = data.decode("utf-8", errors="replace")
+print(text, end="")
+
+# Create PTY session
+
+pty_handle = sandbox.process.create_pty_session(
+id="long-running-session",
+pty_size=PtySize(cols=120, rows=30)
+)
+
+# Start a long-running process
+
+pty_handle.send_input('while true; do echo "Running... $(date)"; sleep 1; done\n')
+
+# Using thread and wait() method to handle PTY output
+
+thread = threading.Thread(target=pty_handle.wait, args=(handle_pty_data, 10))
+thread.start()
+
+time.sleep(3) # Let it run for a bit
+
+print("Killing long-running process...")
+pty_handle.kill()
+
+thread.join()
+
+print(f"\nProcess terminated with exit code: {result.exit_code}")
+if result.error:
+print(f"Termination reason: {result.error}")
+
+````
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+```typescript
+import { Daytona, Sandbox } from '@daytonaio/sdk'
+
+// Create PTY session
+const ptyHandle = await sandbox.process.createPty({
+  id: 'long-running-session',
+  cols: 120,
+  rows: 30,
+  onData: (data) => {
+    const text = new TextDecoder().decode(data)
+    process.stdout.write(text)
+  },
+})
+
+await ptyHandle.waitForConnection()
+
+// Start a long-running process
+await ptyHandle.sendInput('while true; do echo "Running... $(date)"; sleep 1; done\n')
+await new Promise(resolve => setTimeout(resolve, 3000)) // Let it run for a bit
+
+console.log('Killing long-running process...')
+await ptyHandle.kill()
+
+// Wait for termination
+const result = await ptyHandle.wait()
+console.log(`\nProcess terminated with exit code: ${result.exitCode}`)
+if (result.error) {
+    console.log(`Termination reason: ${result.error}`)
+}
+````
+
+</TabItem>
+</Tabs>
+
+## Best Practices
+
+### Resource Management
+
+Always clean up PTY sessions to prevent resource leaks:
+
+<Tabs>
+<TabItem label="Python" icon="seti:python">
+```python
+# Python: Use try/finally
+pty_handle = None
+try:
+    pty_handle = sandbox.process.create_pty_session(id="session", pty_size=PtySize(cols=120, rows=30))
+    # Do work...
+finally:
+    if pty_handle:
+        pty_handle.kill()
+```
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+```typescript
+// TypeScript: Use try/finally
+let ptyHandle
+try {
+  ptyHandle = await sandbox.process.createPty({
+    id: 'session',
+    cols: 120,
+    rows: 30,
+  })
+  // Do work...
+} finally {
+  if (ptyHandle) await ptyHandle.kill()
+}
+```
+</TabItem>
+</Tabs>
+
+### Error Handling
+
+Monitor exit codes and handle errors appropriately:
+
+<Tabs>
+<TabItem label="Python" icon="seti:python">
+```python
+# Python: Check exit codes
+result = pty_handle.wait()
+if result.exit_code != 0:
+    print(f"Command failed: {result.exit_code}")
+    print(f"Error: {result.error}")
+```
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+```typescript
+// TypeScript: Check exit codes
+const result = await ptyHandle.wait()
+if (result.exitCode !== 0) {
+  console.log(`Command failed: ${result.exitCode}`)
+  console.log(`Error: ${result.error}`)
+}
+```
+</TabItem>
+</Tabs>
+
+## Common Use Cases
+
+- **Interactive Development**: REPLs, debuggers, and development tools
+- **Build Processes**: Running and monitoring compilation, testing, or deployment
+- **System Administration**: Remote server management and configuration
+- **User Interfaces**: Terminal-based applications requiring user interaction
+
+## Troubleshooting
+
+**Connection Issues**: Verify sandbox status, network connectivity, and proper session IDs.
+**Performance Issues**: Use appropriate terminal dimensions and efficient data handlers.
+**Process Management**: Use explicit `kill()` calls and proper timeout handling for long-running processes.

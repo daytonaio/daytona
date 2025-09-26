@@ -39,6 +39,21 @@ type ToolboxAPI interface {
 	ClickMouseExecute(r ToolboxAPIClickMouseRequest) (*MouseClickResponse, *http.Response, error)
 
 	/*
+		ConnectPTYSession Connect to PTY session via WebSocket
+
+		Upgrade HTTP connection to WebSocket for real-time PTY interaction
+
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@param sessionId
+		@return ToolboxAPIConnectPTYSessionRequest
+	*/
+	ConnectPTYSession(ctx context.Context, sandboxId string, sessionId string) ToolboxAPIConnectPTYSessionRequest
+
+	// ConnectPTYSessionExecute executes the request
+	ConnectPTYSessionExecute(r ToolboxAPIConnectPTYSessionRequest) (*http.Response, error)
+
+	/*
 		CreateFolder Create folder
 
 		Create folder inside sandbox
@@ -51,6 +66,21 @@ type ToolboxAPI interface {
 
 	// CreateFolderExecute executes the request
 	CreateFolderExecute(r ToolboxAPICreateFolderRequest) (*http.Response, error)
+
+	/*
+		CreatePTYSession Create PTY session
+
+		Create a new PTY session in the sandbox
+
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPICreatePTYSessionRequest
+	*/
+	CreatePTYSession(ctx context.Context, sandboxId string) ToolboxAPICreatePTYSessionRequest
+
+	// CreatePTYSessionExecute executes the request
+	//  @return PtyCreateResponse
+	CreatePTYSessionExecute(r ToolboxAPICreatePTYSessionRequest) (*PtyCreateResponse, *http.Response, error)
 
 	/*
 		CreateSession Create session
@@ -79,6 +109,21 @@ type ToolboxAPI interface {
 
 	// DeleteFileExecute executes the request
 	DeleteFileExecute(r ToolboxAPIDeleteFileRequest) (*http.Response, error)
+
+	/*
+		DeletePTYSession Delete PTY session
+
+		Delete a PTY session and terminate the associated process
+
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@param sessionId
+		@return ToolboxAPIDeletePTYSessionRequest
+	*/
+	DeletePTYSession(ctx context.Context, sandboxId string, sessionId string) ToolboxAPIDeletePTYSessionRequest
+
+	// DeletePTYSessionExecute executes the request
+	DeletePTYSessionExecute(r ToolboxAPIDeletePTYSessionRequest) (*http.Response, error)
 
 	/*
 		DeleteSession Delete session
@@ -248,6 +293,22 @@ type ToolboxAPI interface {
 	// GetMousePositionExecute executes the request
 	//  @return MousePosition
 	GetMousePositionExecute(r ToolboxAPIGetMousePositionRequest) (*MousePosition, *http.Response, error)
+
+	/*
+		GetPTYSession Get PTY session
+
+		Get PTY session information by ID
+
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@param sessionId
+		@return ToolboxAPIGetPTYSessionRequest
+	*/
+	GetPTYSession(ctx context.Context, sandboxId string, sessionId string) ToolboxAPIGetPTYSessionRequest
+
+	// GetPTYSessionExecute executes the request
+	//  @return PtySessionInfo
+	GetPTYSessionExecute(r ToolboxAPIGetPTYSessionRequest) (*PtySessionInfo, *http.Response, error)
 
 	/*
 		GetProcessErrors Get process errors
@@ -576,6 +637,21 @@ type ToolboxAPI interface {
 	ListFilesExecute(r ToolboxAPIListFilesRequest) ([]FileInfo, *http.Response, error)
 
 	/*
+		ListPTYSessions List PTY sessions
+
+		List all active PTY sessions in the sandbox
+
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPIListPTYSessionsRequest
+	*/
+	ListPTYSessions(ctx context.Context, sandboxId string) ToolboxAPIListPTYSessionsRequest
+
+	// ListPTYSessionsExecute executes the request
+	//  @return PtyListResponse
+	ListPTYSessionsExecute(r ToolboxAPIListPTYSessionsRequest) (*PtyListResponse, *http.Response, error)
+
+	/*
 		ListSessions List sessions
 
 		List all active sessions in the sandbox
@@ -762,6 +838,22 @@ type ToolboxAPI interface {
 	// ReplaceInFilesExecute executes the request
 	//  @return []ReplaceResult
 	ReplaceInFilesExecute(r ToolboxAPIReplaceInFilesRequest) ([]ReplaceResult, *http.Response, error)
+
+	/*
+		ResizePTYSession Resize PTY session
+
+		Resize a PTY session
+
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@param sessionId
+		@return ToolboxAPIResizePTYSessionRequest
+	*/
+	ResizePTYSession(ctx context.Context, sandboxId string, sessionId string) ToolboxAPIResizePTYSessionRequest
+
+	// ResizePTYSessionExecute executes the request
+	//  @return PtySessionInfo
+	ResizePTYSessionExecute(r ToolboxAPIResizePTYSessionRequest) (*PtySessionInfo, *http.Response, error)
 
 	/*
 		RestartProcess Restart process
@@ -1087,6 +1179,112 @@ func (a *ToolboxAPIService) ClickMouseExecute(r ToolboxAPIClickMouseRequest) (*M
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
+type ToolboxAPIConnectPTYSessionRequest struct {
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	sessionId              string
+	xDaytonaOrganizationID *string
+}
+
+// Use with JWT to specify the organization ID
+func (r ToolboxAPIConnectPTYSessionRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) ToolboxAPIConnectPTYSessionRequest {
+	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
+	return r
+}
+
+func (r ToolboxAPIConnectPTYSessionRequest) Execute() (*http.Response, error) {
+	return r.ApiService.ConnectPTYSessionExecute(r)
+}
+
+/*
+ConnectPTYSession Connect to PTY session via WebSocket
+
+Upgrade HTTP connection to WebSocket for real-time PTY interaction
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@param sessionId
+	@return ToolboxAPIConnectPTYSessionRequest
+*/
+func (a *ToolboxAPIService) ConnectPTYSession(ctx context.Context, sandboxId string, sessionId string) ToolboxAPIConnectPTYSessionRequest {
+	return ToolboxAPIConnectPTYSessionRequest{
+		ApiService: a,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
+		sessionId:  sessionId,
+	}
+}
+
+// Execute executes the request
+func (a *ToolboxAPIService) ConnectPTYSessionExecute(r ToolboxAPIConnectPTYSessionRequest) (*http.Response, error) {
+	var (
+		localVarHTTPMethod = http.MethodGet
+		localVarPostBody   interface{}
+		formFiles          []formFile
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.ConnectPTYSession")
+	if err != nil {
+		return nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/toolbox/{sandboxId}/toolbox/process/pty/{sessionId}/connect"
+	localVarPath = strings.Replace(localVarPath, "{"+"sandboxId"+"}", url.PathEscape(parameterValueToString(r.sandboxId, "sandboxId")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"sessionId"+"}", url.PathEscape(parameterValueToString(r.sessionId, "sessionId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/octet-stream"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.xDaytonaOrganizationID != nil {
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Daytona-Organization-ID", r.xDaytonaOrganizationID, "simple", "")
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarHTTPResponse, newErr
+	}
+
+	return localVarHTTPResponse, nil
+}
+
 type ToolboxAPICreateFolderRequest struct {
 	ctx                    context.Context
 	ApiService             ToolboxAPI
@@ -1207,6 +1405,131 @@ func (a *ToolboxAPIService) CreateFolderExecute(r ToolboxAPICreateFolderRequest)
 	}
 
 	return localVarHTTPResponse, nil
+}
+
+type ToolboxAPICreatePTYSessionRequest struct {
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	ptyCreateRequest       *PtyCreateRequest
+	xDaytonaOrganizationID *string
+}
+
+func (r ToolboxAPICreatePTYSessionRequest) PtyCreateRequest(ptyCreateRequest PtyCreateRequest) ToolboxAPICreatePTYSessionRequest {
+	r.ptyCreateRequest = &ptyCreateRequest
+	return r
+}
+
+// Use with JWT to specify the organization ID
+func (r ToolboxAPICreatePTYSessionRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) ToolboxAPICreatePTYSessionRequest {
+	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
+	return r
+}
+
+func (r ToolboxAPICreatePTYSessionRequest) Execute() (*PtyCreateResponse, *http.Response, error) {
+	return r.ApiService.CreatePTYSessionExecute(r)
+}
+
+/*
+CreatePTYSession Create PTY session
+
+Create a new PTY session in the sandbox
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPICreatePTYSessionRequest
+*/
+func (a *ToolboxAPIService) CreatePTYSession(ctx context.Context, sandboxId string) ToolboxAPICreatePTYSessionRequest {
+	return ToolboxAPICreatePTYSessionRequest{
+		ApiService: a,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
+	}
+}
+
+// Execute executes the request
+//
+//	@return PtyCreateResponse
+func (a *ToolboxAPIService) CreatePTYSessionExecute(r ToolboxAPICreatePTYSessionRequest) (*PtyCreateResponse, *http.Response, error) {
+	var (
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *PtyCreateResponse
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.CreatePTYSession")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/toolbox/{sandboxId}/toolbox/process/pty"
+	localVarPath = strings.Replace(localVarPath, "{"+"sandboxId"+"}", url.PathEscape(parameterValueToString(r.sandboxId, "sandboxId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.ptyCreateRequest == nil {
+		return localVarReturnValue, nil, reportError("ptyCreateRequest is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.xDaytonaOrganizationID != nil {
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Daytona-Organization-ID", r.xDaytonaOrganizationID, "simple", "")
+	}
+	// body params
+	localVarPostBody = r.ptyCreateRequest
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
 type ToolboxAPICreateSessionRequest struct {
@@ -1395,6 +1718,112 @@ func (a *ToolboxAPIService) DeleteFileExecute(r ToolboxAPIDeleteFileRequest) (*h
 		parameterAddToHeaderOrQuery(localVarQueryParams, "recursive", r.recursive, "form", "")
 	}
 	parameterAddToHeaderOrQuery(localVarQueryParams, "path", r.path, "form", "")
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.xDaytonaOrganizationID != nil {
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Daytona-Organization-ID", r.xDaytonaOrganizationID, "simple", "")
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarHTTPResponse, newErr
+	}
+
+	return localVarHTTPResponse, nil
+}
+
+type ToolboxAPIDeletePTYSessionRequest struct {
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	sessionId              string
+	xDaytonaOrganizationID *string
+}
+
+// Use with JWT to specify the organization ID
+func (r ToolboxAPIDeletePTYSessionRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) ToolboxAPIDeletePTYSessionRequest {
+	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
+	return r
+}
+
+func (r ToolboxAPIDeletePTYSessionRequest) Execute() (*http.Response, error) {
+	return r.ApiService.DeletePTYSessionExecute(r)
+}
+
+/*
+DeletePTYSession Delete PTY session
+
+Delete a PTY session and terminate the associated process
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@param sessionId
+	@return ToolboxAPIDeletePTYSessionRequest
+*/
+func (a *ToolboxAPIService) DeletePTYSession(ctx context.Context, sandboxId string, sessionId string) ToolboxAPIDeletePTYSessionRequest {
+	return ToolboxAPIDeletePTYSessionRequest{
+		ApiService: a,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
+		sessionId:  sessionId,
+	}
+}
+
+// Execute executes the request
+func (a *ToolboxAPIService) DeletePTYSessionExecute(r ToolboxAPIDeletePTYSessionRequest) (*http.Response, error) {
+	var (
+		localVarHTTPMethod = http.MethodDelete
+		localVarPostBody   interface{}
+		formFiles          []formFile
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.DeletePTYSession")
+	if err != nil {
+		return nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/toolbox/{sandboxId}/toolbox/process/pty/{sessionId}"
+	localVarPath = strings.Replace(localVarPath, "{"+"sandboxId"+"}", url.PathEscape(parameterValueToString(r.sandboxId, "sandboxId")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"sessionId"+"}", url.PathEscape(parameterValueToString(r.sessionId, "sessionId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -2719,6 +3148,124 @@ func (a *ToolboxAPIService) GetMousePositionExecute(r ToolboxAPIGetMousePosition
 
 	localVarPath := localBasePath + "/toolbox/{sandboxId}/toolbox/computeruse/mouse/position"
 	localVarPath = strings.Replace(localVarPath, "{"+"sandboxId"+"}", url.PathEscape(parameterValueToString(r.sandboxId, "sandboxId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.xDaytonaOrganizationID != nil {
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Daytona-Organization-ID", r.xDaytonaOrganizationID, "simple", "")
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ToolboxAPIGetPTYSessionRequest struct {
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	sessionId              string
+	xDaytonaOrganizationID *string
+}
+
+// Use with JWT to specify the organization ID
+func (r ToolboxAPIGetPTYSessionRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) ToolboxAPIGetPTYSessionRequest {
+	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
+	return r
+}
+
+func (r ToolboxAPIGetPTYSessionRequest) Execute() (*PtySessionInfo, *http.Response, error) {
+	return r.ApiService.GetPTYSessionExecute(r)
+}
+
+/*
+GetPTYSession Get PTY session
+
+Get PTY session information by ID
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@param sessionId
+	@return ToolboxAPIGetPTYSessionRequest
+*/
+func (a *ToolboxAPIService) GetPTYSession(ctx context.Context, sandboxId string, sessionId string) ToolboxAPIGetPTYSessionRequest {
+	return ToolboxAPIGetPTYSessionRequest{
+		ApiService: a,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
+		sessionId:  sessionId,
+	}
+}
+
+// Execute executes the request
+//
+//	@return PtySessionInfo
+func (a *ToolboxAPIService) GetPTYSessionExecute(r ToolboxAPIGetPTYSessionRequest) (*PtySessionInfo, *http.Response, error) {
+	var (
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *PtySessionInfo
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.GetPTYSession")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/toolbox/{sandboxId}/toolbox/process/pty/{sessionId}"
+	localVarPath = strings.Replace(localVarPath, "{"+"sandboxId"+"}", url.PathEscape(parameterValueToString(r.sandboxId, "sandboxId")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"sessionId"+"}", url.PathEscape(parameterValueToString(r.sessionId, "sessionId")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -5370,6 +5917,120 @@ func (a *ToolboxAPIService) ListFilesExecute(r ToolboxAPIListFilesRequest) ([]Fi
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
+type ToolboxAPIListPTYSessionsRequest struct {
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	xDaytonaOrganizationID *string
+}
+
+// Use with JWT to specify the organization ID
+func (r ToolboxAPIListPTYSessionsRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) ToolboxAPIListPTYSessionsRequest {
+	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
+	return r
+}
+
+func (r ToolboxAPIListPTYSessionsRequest) Execute() (*PtyListResponse, *http.Response, error) {
+	return r.ApiService.ListPTYSessionsExecute(r)
+}
+
+/*
+ListPTYSessions List PTY sessions
+
+List all active PTY sessions in the sandbox
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPIListPTYSessionsRequest
+*/
+func (a *ToolboxAPIService) ListPTYSessions(ctx context.Context, sandboxId string) ToolboxAPIListPTYSessionsRequest {
+	return ToolboxAPIListPTYSessionsRequest{
+		ApiService: a,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
+	}
+}
+
+// Execute executes the request
+//
+//	@return PtyListResponse
+func (a *ToolboxAPIService) ListPTYSessionsExecute(r ToolboxAPIListPTYSessionsRequest) (*PtyListResponse, *http.Response, error) {
+	var (
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *PtyListResponse
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.ListPTYSessions")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/toolbox/{sandboxId}/toolbox/process/pty"
+	localVarPath = strings.Replace(localVarPath, "{"+"sandboxId"+"}", url.PathEscape(parameterValueToString(r.sandboxId, "sandboxId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.xDaytonaOrganizationID != nil {
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Daytona-Organization-ID", r.xDaytonaOrganizationID, "simple", "")
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
 type ToolboxAPIListSessionsRequest struct {
 	ctx                    context.Context
 	ApiService             ToolboxAPI
@@ -6910,6 +7571,135 @@ func (a *ToolboxAPIService) ReplaceInFilesExecute(r ToolboxAPIReplaceInFilesRequ
 	}
 	// body params
 	localVarPostBody = r.replaceRequest
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ToolboxAPIResizePTYSessionRequest struct {
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	sessionId              string
+	ptyResizeRequest       *PtyResizeRequest
+	xDaytonaOrganizationID *string
+}
+
+func (r ToolboxAPIResizePTYSessionRequest) PtyResizeRequest(ptyResizeRequest PtyResizeRequest) ToolboxAPIResizePTYSessionRequest {
+	r.ptyResizeRequest = &ptyResizeRequest
+	return r
+}
+
+// Use with JWT to specify the organization ID
+func (r ToolboxAPIResizePTYSessionRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) ToolboxAPIResizePTYSessionRequest {
+	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
+	return r
+}
+
+func (r ToolboxAPIResizePTYSessionRequest) Execute() (*PtySessionInfo, *http.Response, error) {
+	return r.ApiService.ResizePTYSessionExecute(r)
+}
+
+/*
+ResizePTYSession Resize PTY session
+
+Resize a PTY session
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@param sessionId
+	@return ToolboxAPIResizePTYSessionRequest
+*/
+func (a *ToolboxAPIService) ResizePTYSession(ctx context.Context, sandboxId string, sessionId string) ToolboxAPIResizePTYSessionRequest {
+	return ToolboxAPIResizePTYSessionRequest{
+		ApiService: a,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
+		sessionId:  sessionId,
+	}
+}
+
+// Execute executes the request
+//
+//	@return PtySessionInfo
+func (a *ToolboxAPIService) ResizePTYSessionExecute(r ToolboxAPIResizePTYSessionRequest) (*PtySessionInfo, *http.Response, error) {
+	var (
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *PtySessionInfo
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.ResizePTYSession")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/toolbox/{sandboxId}/toolbox/process/pty/{sessionId}/resize"
+	localVarPath = strings.Replace(localVarPath, "{"+"sandboxId"+"}", url.PathEscape(parameterValueToString(r.sandboxId, "sandboxId")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"sessionId"+"}", url.PathEscape(parameterValueToString(r.sessionId, "sessionId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.ptyResizeRequest == nil {
+		return localVarReturnValue, nil, reportError("ptyResizeRequest is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.xDaytonaOrganizationID != nil {
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Daytona-Organization-ID", r.xDaytonaOrganizationID, "simple", "")
+	}
+	// body params
+	localVarPostBody = r.ptyResizeRequest
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
 		return localVarReturnValue, nil, err

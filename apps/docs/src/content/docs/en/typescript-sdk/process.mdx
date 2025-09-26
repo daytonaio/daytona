@@ -138,6 +138,112 @@ if (response.artifacts?.charts) {
 
 ***
 
+#### connectPty()
+
+```ts
+connectPty(sessionId: string, options?: PtyConnectOptions): Promise<PtyHandle>
+```
+
+Connect to an existing PTY session in the sandbox.
+
+Establishes a WebSocket connection to an existing PTY session, allowing you to
+interact with a previously created terminal session.
+
+**Parameters**:
+
+- `sessionId` _string_ - ID of the PTY session to connect to
+- `options?` _PtyConnectOptions_ - Options for the connection including data handler
+
+
+**Returns**:
+
+- `Promise<PtyHandle>` - PTY handle for managing the session
+
+**Example:**
+
+```ts
+// Connect to an existing PTY session
+const handle = await process.connectPty('my-session', {
+  onData: (data) => {
+    // Handle terminal output
+    const text = new TextDecoder().decode(data);
+    process.stdout.write(text);
+  },
+});
+
+// Wait for connection to be established
+await handle.waitForConnection();
+
+// Send commands to the existing session
+await handle.sendInput('pwd\n');
+await handle.sendInput('ls -la\n');
+await handle.sendInput('exit\n');
+
+// Wait for completion
+const result = await handle.wait();
+console.log(`Session exited with code: ${result.exitCode}`);
+
+// Clean up
+await handle.disconnect();
+```
+
+***
+
+#### createPty()
+
+```ts
+createPty(options?: PtyCreateOptions & PtyConnectOptions): Promise<PtyHandle>
+```
+
+Create a new PTY (pseudo-terminal) session in the sandbox.
+
+Creates an interactive terminal session that can execute commands and handle user input.
+The PTY session behaves like a real terminal, supporting features like command history.
+
+**Parameters**:
+
+- `options?` _PtyCreateOptions & PtyConnectOptions_ - PTY session configuration including creation and connection options
+
+
+**Returns**:
+
+- `Promise<PtyHandle>` - PTY handle for managing the session
+
+**Example:**
+
+```ts
+// Create a PTY session with custom configuration
+const ptyHandle = await process.createPty({
+  id: 'my-interactive-session',
+  cwd: '/workspace',
+  envs: { TERM: 'xterm-256color', LANG: 'en_US.UTF-8' },
+  cols: 120,
+  rows: 30,
+  onData: (data) => {
+    // Handle terminal output
+    const text = new TextDecoder().decode(data);
+    process.stdout.write(text);
+  },
+});
+
+// Wait for connection to be established
+await ptyHandle.waitForConnection();
+
+// Send commands to the terminal
+await ptyHandle.sendInput('ls -la\n');
+await ptyHandle.sendInput('echo "Hello, PTY!"\n');
+await ptyHandle.sendInput('exit\n');
+
+// Wait for completion and get result
+const result = await ptyHandle.wait();
+console.log(`PTY session completed with exit code: ${result.exitCode}`);
+
+// Clean up
+await ptyHandle.disconnect();
+```
+
+***
+
 #### createSession()
 
 ```ts
@@ -295,6 +401,48 @@ console.log('[STDERR]:', result.stderr);
 
 ***
 
+#### getPtySessionInfo()
+
+```ts
+getPtySessionInfo(sessionId: string): Promise<PtySessionInfo>
+```
+
+Get detailed information about a specific PTY session.
+
+Retrieves comprehensive information about a PTY session including its current state,
+configuration, and metadata.
+
+**Parameters**:
+
+- `sessionId` _string_ - ID of the PTY session to retrieve information for
+
+
+**Returns**:
+
+- `Promise<PtySessionInfo>` - PTY session information
+
+**Throws**:
+
+If the PTY session doesn't exist
+
+**Example:**
+
+```ts
+// Get details about a specific PTY session
+const session = await process.getPtySessionInfo('my-session');
+
+console.log(`Session ID: ${session.id}`);
+console.log(`Active: ${session.active}`);
+console.log(`Working Directory: ${session.cwd}`);
+console.log(`Terminal Size: ${session.cols}x${session.rows}`);
+
+if (session.processId) {
+  console.log(`Process ID: ${session.processId}`);
+}
+```
+
+***
+
 #### getSession()
 
 ```ts
@@ -419,6 +567,83 @@ const logs = await process.getSessionCommandLogs('my-session', 'cmd-123', (chunk
 
 ***
 
+#### killPtySession()
+
+```ts
+killPtySession(sessionId: string): Promise<void>
+```
+
+Kill a PTY session and terminate its associated process.
+
+Forcefully terminates the PTY session and cleans up all associated resources.
+This will close any active connections and kill the underlying shell process.
+
+**Parameters**:
+
+- `sessionId` _string_ - ID of the PTY session to kill
+
+
+**Returns**:
+
+- `Promise<void>`
+
+**Throws**:
+
+If the PTY session doesn't exist or cannot be killed
+
+##### Note
+
+This operation is irreversible. Any unsaved work in the terminal session will be lost.
+
+**Example:**
+
+```ts
+// Kill a specific PTY session
+await process.killPtySession('my-session');
+
+// Verify the session is no longer active
+try {
+  const info = await process.getPtySessionInfo('my-session');
+  console.log(`Session still exists but active: ${info.active}`);
+} catch (error) {
+  console.log('Session has been completely removed');
+}
+```
+
+***
+
+#### listPtySessions()
+
+```ts
+listPtySessions(): Promise<PtySessionInfo[]>
+```
+
+List all PTY sessions in the sandbox.
+
+Retrieves information about all PTY sessions, both active and inactive,
+that have been created in this sandbox.
+
+**Returns**:
+
+- `Promise<PtySessionInfo[]>` - Array of PTY session information
+
+**Example:**
+
+```ts
+// List all PTY sessions
+const sessions = await process.listPtySessions();
+
+for (const session of sessions) {
+  console.log(`Session ID: ${session.id}`);
+  console.log(`Active: ${session.active}`);
+  console.log(`Created: ${session.createdAt}`);
+  }
+  console.log('---');
+}
+```
+
+***
+
 #### listSessions()
 
 ```ts
@@ -441,6 +666,54 @@ sessions.forEach(session => {
     console.log(`- ${cmd.command} (${cmd.exitCode})`);
   });
 });
+```
+
+***
+
+#### resizePtySession()
+
+```ts
+resizePtySession(
+   sessionId: string, 
+   cols: number, 
+rows: number): Promise<PtySessionInfo>
+```
+
+Resize a PTY session's terminal dimensions.
+
+Changes the terminal size of an active PTY session. This is useful when the
+client terminal is resized or when you need to adjust the display for different
+output requirements.
+
+**Parameters**:
+
+- `sessionId` _string_ - ID of the PTY session to resize
+- `cols` _number_ - New number of terminal columns
+- `rows` _number_ - New number of terminal rows
+
+
+**Returns**:
+
+- `Promise<PtySessionInfo>` - Updated session information reflecting the new terminal size
+
+**Throws**:
+
+If the PTY session doesn't exist or resize operation fails
+
+##### Note
+
+The resize operation will send a SIGWINCH signal to the shell process,
+allowing terminal applications to adapt to the new size.
+
+**Example:**
+
+```ts
+// Resize a PTY session to a larger terminal
+const updatedInfo = await process.resizePtySession('my-session', 150, 40);
+console.log(`Terminal resized to ${updatedInfo.cols}x${updatedInfo.rows}`);
+
+// You can also use the PtyHandle's resize method
+await ptyHandle.resize(150, 40); // cols, rows
 ```
 
 ***
