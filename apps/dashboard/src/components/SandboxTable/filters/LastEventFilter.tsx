@@ -13,8 +13,8 @@ import { format } from 'date-fns'
 import { CalendarIcon, X } from 'lucide-react'
 
 interface LastEventFilterProps {
-  value: Date[]
-  onFilterChange: (value: Date[] | undefined) => void
+  value: (Date | undefined)[]
+  onFilterChange: (value: (Date | undefined)[] | undefined) => void
 }
 
 export function LastEventFilterIndicator({ value, onFilterChange }: LastEventFilterProps) {
@@ -24,7 +24,12 @@ export function LastEventFilterIndicator({ value, onFilterChange }: LastEventFil
         <PopoverTrigger className="max-w-[220px] overflow-hidden text-ellipsis whitespace-nowrap text-muted-foreground px-2">
           Last Event:{' '}
           <span className="text-primary font-medium">
-            {value.length > 0 ? `${value.map((d) => format(d, 'PPP')).join(' - ')}` : ''}
+            {value.some((d) => d !== undefined)
+              ? `${value
+                  .filter((d): d is Date => d !== undefined)
+                  .map((d) => format(d, 'PPP'))
+                  .join(' - ')}`
+              : ''}
           </span>
         </PopoverTrigger>
         <PopoverContent className="p-3 w-auto" align="start">
@@ -40,8 +45,8 @@ export function LastEventFilterIndicator({ value, onFilterChange }: LastEventFil
 }
 
 interface LastEventFilterContentProps {
-  onFilterChange: (value: Date[] | undefined) => void
-  value: Date[]
+  onFilterChange: (value: (Date | undefined)[] | undefined) => void
+  value: (Date | undefined)[]
 }
 
 export function LastEventFilter({ onFilterChange, value }: LastEventFilterContentProps) {
@@ -50,14 +55,16 @@ export function LastEventFilter({ onFilterChange, value }: LastEventFilterConten
 
   const handleFromDateSelect = (selectedDate: Date | undefined) => {
     setFromDate(selectedDate)
-    const dates = [selectedDate, toDate].filter(Boolean) as Date[]
-    onFilterChange(dates.length > 0 ? dates : undefined)
+    const dates = [selectedDate, toDate]
+    const hasAnyDate = dates.some((date) => date !== undefined)
+    onFilterChange(hasAnyDate ? dates : undefined)
   }
 
   const handleToDateSelect = (selectedDate: Date | undefined) => {
     setToDate(selectedDate)
-    const dates = [fromDate, selectedDate].filter(Boolean) as Date[]
-    onFilterChange(dates.length > 0 ? dates : undefined)
+    const dates = [fromDate, selectedDate]
+    const hasAnyDate = dates.some((date) => date !== undefined)
+    onFilterChange(hasAnyDate ? dates : undefined)
   }
 
   const handleClear = () => {

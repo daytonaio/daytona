@@ -10,7 +10,6 @@ daytona sandbox info [SANDBOX_ID] [flags]
 
 ```
   -f, --format string   Output format. Must be one of (yaml, json)
-  -v, --verbose         Include verbose output
 ```
 
 ### Options inherited from parent commands

@@ -108,7 +108,7 @@ export class WorkspaceController {
     @Query('labels') labelsQuery?: string,
   ): Promise<WorkspaceDto[]> {
     const labels = labelsQuery ? JSON.parse(labelsQuery) : {}
-    const workspacees = await this.workspaceService.findAll(authContext.organizationId, labels)
+    const workspacees = await this.workspaceService.findAllDeprecated(authContext.organizationId, labels)
     const dtos = workspacees.map(async (workspace) => {
       const runner = await this.runnerService.findOne(workspace.runnerId)
       const dto = WorkspaceDto.fromSandbox(workspace, runner.domain)

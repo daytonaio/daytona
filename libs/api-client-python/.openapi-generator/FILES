@@ -101,7 +101,8 @@ daytona_api_client/models/organization_suspension.py
 daytona_api_client/models/organization_usage_overview.py
 daytona_api_client/models/organization_user.py
 daytona_api_client/models/paginated_audit_logs.py
-daytona_api_client/models/paginated_snapshots_dto.py
+daytona_api_client/models/paginated_sandboxes.py
+daytona_api_client/models/paginated_snapshots.py
 daytona_api_client/models/port_preview_url.py
 daytona_api_client/models/position.py
 daytona_api_client/models/posthog_config.py
@@ -111,6 +112,7 @@ daytona_api_client/models/process_restart_response.py
 daytona_api_client/models/process_status_response.py
 daytona_api_client/models/project_dir_response.py
 daytona_api_client/models/range.py
+daytona_api_client/models/region.py
 daytona_api_client/models/region_screenshot_response.py
 daytona_api_client/models/registry_push_access_dto.py
 daytona_api_client/models/replace_request.py

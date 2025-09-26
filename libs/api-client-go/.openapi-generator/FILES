@@ -99,7 +99,8 @@ model_organization_suspension.go
 model_organization_usage_overview.go
 model_organization_user.go
 model_paginated_audit_logs.go
-model_paginated_snapshots_dto.go
+model_paginated_sandboxes.go
+model_paginated_snapshots.go
 model_port_preview_url.go
 model_position.go
 model_posthog_config.go
@@ -109,6 +110,7 @@ model_process_restart_response.go
 model_process_status_response.go
 model_project_dir_response.go
 model_range.go
+model_region.go
 model_region_screenshot_response.go
 model_registry_push_access_dto.go
 model_replace_request.go

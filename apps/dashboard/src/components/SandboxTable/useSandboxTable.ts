@@ -3,26 +3,28 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Sandbox } from '@daytonaio/api-client'
+import { Sandbox, Region } from '@daytonaio/api-client'
 import {
-  ColumnFiltersState,
-  SortingState,
   useReactTable,
   getCoreRowModel,
   getFacetedRowModel,
   getFacetedUniqueValues,
-  getFilteredRowModel,
   getPaginationRowModel,
-  getSortedRowModel,
 } from '@tanstack/react-table'
-import { useState, useMemo } from 'react'
-import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
+import { useMemo } from 'react'
 import { FacetedFilterOption } from './types'
 import { getColumns } from './columns'
+import {
+  convertApiSortingToTableSorting,
+  convertApiFiltersToTableFilters,
+  convertTableSortingToApiSorting,
+  convertTableFiltersToApiFilters,
+} from './types'
+import { SandboxFilters, SandboxSorting } from '@/hooks/useSandboxes'
 
 interface UseSandboxTableProps {
   data: Sandbox[]
-  loadingSandboxes: Record<string, boolean>
+  sandboxIsLoading: Record<string, boolean>
   writePermitted: boolean
   deletePermitted: boolean
   handleStart: (id: string) => void
@@ -33,11 +35,22 @@ interface UseSandboxTableProps {
   getWebTerminalUrl: (id: string) => Promise<string | null>
   handleCreateSshAccess: (id: string) => void
   handleRevokeSshAccess: (id: string) => void
+  pagination: {
+    pageIndex: number
+    pageSize: number
+  }
+  pageCount: number
+  onPaginationChange: (pagination: { pageIndex: number; pageSize: number }) => void
+  sorting: SandboxSorting
+  onSortingChange: (sorting: SandboxSorting) => void
+  filters: SandboxFilters
+  onFiltersChange: (filters: SandboxFilters) => void
+  regionsData: Region[]
 }
 
 export function useSandboxTable({
   data,
-  loadingSandboxes,
+  sandboxIsLoading,
   writePermitted,
   deletePermitted,
   handleStart,
@@ -48,34 +61,25 @@ export function useSandboxTable({
   getWebTerminalUrl,
   handleCreateSshAccess,
   handleRevokeSshAccess,
+  pagination,
+  pageCount,
+  onPaginationChange,
+  sorting,
+  onSortingChange,
+  filters,
+  onFiltersChange,
+  regionsData,
 }: UseSandboxTableProps) {
-  const [sorting, setSorting] = useState<SortingState>([
-    {
-      id: 'lastEvent',
-      desc: true,
-    },
-  ])
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
-
-  const labelOptions: FacetedFilterOption[] = useMemo(() => {
-    const labels = new Set<string>()
-    data.forEach((sandbox) => {
-      Object.entries(sandbox.labels ?? {}).forEach(([key, value]) => {
-        labels.add(`${key}: ${value}`)
-      })
-    })
-    return Array.from(labels).map((label) => ({ label, value: label }))
-  }, [data])
+  // Convert API sorting and filters to table format for internal use
+  const tableSorting = useMemo(() => convertApiSortingToTableSorting(sorting), [sorting])
+  const tableFilters = useMemo(() => convertApiFiltersToTableFilters(filters), [filters])
 
   const regionOptions: FacetedFilterOption[] = useMemo(() => {
-    const regions = new Set<string>()
-    data.forEach((sandbox) => {
-      if (sandbox.target) {
-        regions.add(sandbox.target)
-      }
-    })
-    return Array.from(regions).map((region) => ({ label: region, value: region }))
-  }, [data])
+    return regionsData.map((region) => ({
+      label: region.name,
+      value: region.name,
+    }))
+  }, [regionsData])
 
   const columns = useMemo(
     () =>
@@ -86,7 +90,7 @@ export function useSandboxTable({
         handleArchive,
         handleVnc,
         getWebTerminalUrl,
-        loadingSandboxes,
+        sandboxIsLoading,
         writePermitted,
         deletePermitted,
         handleCreateSshAccess,
@@ -99,7 +103,7 @@ export function useSandboxTable({
       handleArchive,
       handleVnc,
       getWebTerminalUrl,
-      loadingSandboxes,
+      sandboxIsLoading,
       writePermitted,
       deletePermitted,
       handleCreateSshAccess,
@@ -110,35 +114,45 @@ export function useSandboxTable({
   const table = useReactTable({
     data,
     columns,
-    onColumnFiltersChange: setColumnFilters,
+    manualFiltering: true,
+    onColumnFiltersChange: (updater) => {
+      const newTableFilters = typeof updater === 'function' ? updater(table.getState().columnFilters) : updater
+      const newApiFilters = convertTableFiltersToApiFilters(newTableFilters)
+      onFiltersChange(newApiFilters)
+    },
     getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    onSortingChange: setSorting,
-    getSortedRowModel: getSortedRowModel(),
+    manualSorting: true,
+    onSortingChange: (updater) => {
+      const newTableSorting = typeof updater === 'function' ? updater(table.getState().sorting) : updater
+      const newApiSorting = convertTableSortingToApiSorting(newTableSorting)
+      onSortingChange(newApiSorting)
+    },
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
-    getFilteredRowModel: getFilteredRowModel(),
+    manualPagination: true,
+    pageCount: pageCount,
+    onPaginationChange: (updater) => {
+      const newPagination = typeof updater === 'function' ? updater(table.getState().pagination) : updater
+      onPaginationChange(newPagination)
+    },
+    getPaginationRowModel: getPaginationRowModel(),
     state: {
-      sorting,
-      columnFilters,
+      sorting: tableSorting,
+      columnFilters: tableFilters,
+      pagination: {
+        pageIndex: pagination.pageIndex,
+        pageSize: pagination.pageSize,
+      },
     },
     defaultColumn: {
       size: 100,
     },
-    enableRowSelection: true,
+    enableRowSelection: deletePermitted,
     getRowId: (row) => row.id,
-    initialState: {
-      pagination: {
-        pageSize: DEFAULT_PAGE_SIZE,
-      },
-    },
   })
 
   return {
     table,
-    labelOptions,
     regionOptions,
-    sorting,
-    columnFilters,
   }
 }

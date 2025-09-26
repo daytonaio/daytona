@@ -1,5 +1,5 @@
 # Daytona Documentation v0.0.0-dev
-# Generated on: 2025-09-22
+# Generated on: 2025-09-26
 
 # Daytona
 
@@ -145,6 +145,17 @@
 - [Available Assignments](https://daytona.io/docs/en/organizations#available-assignments)
 - [Managing Invitations](https://daytona.io/docs/en/organizations#managing-invitations)
 - [Settings](https://daytona.io/docs/en/organizations#settings)
+- [Open Source Deployment](https://daytona.io/docs/en/oss-deployment)
+- [Overview](https://daytona.io/docs/en/oss-deployment#overview)
+- [Quick Start](https://daytona.io/docs/en/oss-deployment#quick-start)
+- [DNS Setup for Proxy URLs](https://daytona.io/docs/en/oss-deployment#dns-setup-for-proxy-urls)
+- [Development Notes](https://daytona.io/docs/en/oss-deployment#development-notes)
+- [Auth0 Configuration Guide for Daytona](https://daytona.io/docs/en/oss-deployment#auth0-configuration-guide-for-daytona)
+- [Step 1: Create Your Auth0 Tenant](https://daytona.io/docs/en/oss-deployment#step-1-create-your-auth0-tenant)
+- [Step 2: Configure Your Single Page Application](https://daytona.io/docs/en/oss-deployment#step-2-configure-your-single-page-application)
+- [Step 3: Create Machine-to-Machine Application](https://daytona.io/docs/en/oss-deployment#step-3-create-machine-to-machine-application)
+- [Step 4: Set Up Custom API](https://daytona.io/docs/en/oss-deployment#step-4-set-up-custom-api)
+- [Step 5: Configure Environment Variables](https://daytona.io/docs/en/oss-deployment#step-5-configure-environment-variables)
 - [Preview & Authentication](https://daytona.io/docs/en/preview-and-authentication)
 - [Warning Page](https://daytona.io/docs/en/preview-and-authentication#warning-page)
 - [Process and Code Execution](https://daytona.io/docs/en/process-code-execution)

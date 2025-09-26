@@ -4,7 +4,7 @@
  */
 
 import { Body, Controller, Get, Param, Post, Query, UseGuards, Request as Req } from '@nestjs/common'
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiOAuth2, ApiParam, ApiQuery } from '@nestjs/swagger'
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiOAuth2, ApiParam } from '@nestjs/swagger'
 import { Request } from 'express'
 import { AuditLogDto } from '../dto/audit-log.dto'
 import { PaginatedAuditLogsDto } from '../dto/paginated-audit-logs.dto'
@@ -18,6 +18,7 @@ import { OrganizationResourceActionGuard } from '../../organization/guards/organ
 import { RequiredOrganizationResourcePermissions } from '../../organization/decorators/required-organization-resource-permissions.decorator'
 import { OrganizationResourcePermission } from '../../organization/enums/organization-resource-permission.enum'
 import { SystemRole } from '../../user/enums/system-role.enum'
+import { ListAuditLogsQueryDto } from '../dto/list-audit-logs-query.dto'
 
 @ApiTags('audit')
 @Controller('audit')
@@ -37,20 +38,9 @@ export class AuditController {
     description: 'Paginated list of all audit logs',
     type: PaginatedAuditLogsDto,
   })
-  @ApiQuery({
-    name: 'page',
-    required: false,
-    type: Number,
-    description: 'Page number (default: 1)',
-  })
-  @ApiQuery({
-    name: 'limit',
-    required: false,
-    type: Number,
-    description: 'Number of items per page (default: 10)',
-  })
   @RequiredSystemRole(SystemRole.ADMIN)
-  async getAllLogs(@Query('page') page = 1, @Query('limit') limit = 10): Promise<PaginatedAuditLogsDto> {
+  async getAllLogs(@Query() queryParams: ListAuditLogsQueryDto): Promise<PaginatedAuditLogsDto> {
+    const { page, limit } = queryParams
     const result = await this.auditService.getLogs(page, limit)
     return {
       items: result.items.map(AuditLogDto.fromAuditLog),
@@ -75,24 +65,12 @@ export class AuditController {
     description: 'Organization ID',
     type: 'string',
   })
-  @ApiQuery({
-    name: 'page',
-    required: false,
-    type: Number,
-    description: 'Page number (default: 1)',
-  })
-  @ApiQuery({
-    name: 'limit',
-    required: false,
-    type: Number,
-    description: 'Number of items per page (default: 10)',
-  })
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.READ_AUDIT_LOGS])
   async getOrganizationLogs(
     @Param('organizationId') organizationId: string,
-    @Query('page') page = 1,
-    @Query('limit') limit = 10,
+    @Query() queryParams: ListAuditLogsQueryDto,
   ): Promise<PaginatedAuditLogsDto> {
+    const { page, limit } = queryParams
     const result = await this.auditService.getLogs(page, limit, organizationId)
     return {
       items: result.items.map(AuditLogDto.fromAuditLog),

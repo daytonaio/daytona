@@ -58,6 +58,7 @@ import { Snapshot } from '../entities/snapshot.entity'
 import { Audit, TypedRequest } from '../../audit/decorators/audit.decorator'
 import { AuditAction } from '../../audit/enums/audit-action.enum'
 import { AuditTarget } from '../../audit/enums/audit-target.enum'
+import { ListSnapshotsQueryDto } from '../dto/list-snapshots-query.dto'
 
 @ApiTags('snapshots')
 @Controller('snapshots')
@@ -217,29 +218,25 @@ export class SnapshotController {
     summary: 'List all snapshots',
     operationId: 'getAllSnapshots',
   })
-  @ApiQuery({
-    name: 'page',
-    required: false,
-    type: Number,
-    description: 'Page number',
-  })
-  @ApiQuery({
-    name: 'limit',
-    required: false,
-    type: Number,
-    description: 'Number of items per page',
-  })
   @ApiResponse({
     status: 200,
-    description: 'List of all snapshots with pagination',
+    description: 'Paginated list of all snapshots',
     type: PaginatedSnapshotsDto,
   })
   async getAllSnapshots(
     @AuthContext() authContext: OrganizationAuthContext,
-    @Query('page') page = 1,
-    @Query('limit') limit = 10,
+    @Query() queryParams: ListSnapshotsQueryDto,
   ): Promise<PaginatedSnapshotsDto> {
-    const result = await this.snapshotService.getAllSnapshots(authContext.organizationId, page, limit)
+    const { page, limit, name, sort, order } = queryParams
+
+    const result = await this.snapshotService.getAllSnapshots(
+      authContext.organizationId,
+      page,
+      limit,
+      { name },
+      { field: sort, direction: order },
+    )
+
     return {
       items: result.items.map(SnapshotDto.fromSnapshot),
       total: result.total,

@@ -10666,6 +10666,43 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@tanstack/query-core@npm:5.90.1":
+  version: 5.90.1
+  resolution: "@tanstack/query-core@npm:5.90.1"
+  checksum: 10c0/2c98402fa4d129bdf69e121e87e2438fc19059ff4adaad2da5996b14a308ff33b8b26a52ff967751872483e29c9749799d83a77a42af6ca4559967b475d7ecb3
+  languageName: node
+  linkType: hard
+
+"@tanstack/query-devtools@npm:5.90.1":
+  version: 5.90.1
+  resolution: "@tanstack/query-devtools@npm:5.90.1"
+  checksum: 10c0/3b69e5441438acf0e753adbf187abf54b5b2e19d7c6d1e465d97278cb8c248bb86d3be193092d50414e4093cbf014093103517cb523daae003e53c867f3c11c2
+  languageName: node
+  linkType: hard
+
+"@tanstack/react-query-devtools@npm:^5.90.1":
+  version: 5.90.1
+  resolution: "@tanstack/react-query-devtools@npm:5.90.1"
+  dependencies:
+    "@tanstack/query-devtools": "npm:5.90.1"
+  peerDependencies:
+    "@tanstack/react-query": ^5.90.1
+    react: ^18 || ^19
+  checksum: 10c0/09e366623a011f322a362f9d646abb5645064db545233398e02ab03b083cb9de27f401ad0594e8b420ad915cdca1971747b3cf3a45201c11167b5554eb24c29c
+  languageName: node
+  linkType: hard
+
+"@tanstack/react-query@npm:^5.90.1":
+  version: 5.90.1
+  resolution: "@tanstack/react-query@npm:5.90.1"
+  dependencies:
+    "@tanstack/query-core": "npm:5.90.1"
+  peerDependencies:
+    react: ^18 || ^19
+  checksum: 10c0/57ffcdc565e7e00e8fb26354e55f886a9c4f3f7727cd4348b7518cc23b7339c230fdb459262116d323625accaefa0c849cb3278b507b7342ceda2783de5f3893
+  languageName: node
+  linkType: hard
+
 "@tanstack/react-table@npm:^8.21.2":
   version: 8.21.3
   resolution: "@tanstack/react-table@npm:8.21.3"
@@ -16309,6 +16346,8 @@ __metadata:
     "@swc/core": "npm:~1.5.7"
     "@swc/helpers": "npm:~0.5.11"
     "@tailwindcss/postcss": "npm:^4.1.11"
+    "@tanstack/react-query": "npm:^5.90.1"
+    "@tanstack/react-query-devtools": "npm:^5.90.1"
     "@tanstack/react-table": "npm:^8.21.2"
     "@trivago/prettier-plugin-sort-imports": "npm:^5.2.2"
     "@types/busboy": "npm:^1.0.0"

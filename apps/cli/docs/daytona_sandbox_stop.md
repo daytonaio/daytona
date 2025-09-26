@@ -6,12 +6,6 @@ Stop a sandbox
 daytona sandbox stop [SANDBOX_ID] [flags]
 ```
 
-### Options
-
-```
-  -a, --all   Stop all sandboxes
-```
-
 ### Options inherited from parent commands
 
 ```
