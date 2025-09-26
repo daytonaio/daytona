@@ -723,7 +723,7 @@ export class SandboxService {
 
     const baseFindOptions: FindOptionsWhere<Sandbox> = {
       organizationId,
-      ...(id ? { id: ILike(`%${id}%`) } : {}),
+      ...(id ? { id: ILike(`${id}%`) } : {}),
       ...(labels ? { labels: JsonContains(labels) } : {}),
       ...(snapshots ? { snapshot: In(snapshots) } : {}),
       ...(regions ? { region: In(regions) } : {}),
