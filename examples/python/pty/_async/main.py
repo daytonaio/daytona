@@ -23,25 +23,22 @@ async def interactive_pty_session(sandbox: AsyncSandbox):
     )
 
     # Send interactive command
-    print("\nSending interactive read command...")
-    await pty_handle.send_input('read -p "Enter your name: " name && echo "Hello, $name!"\n')
+    await pty_handle.send_input('printf "Enter your name: " && read name && printf "Hello, %s\\n" "$name"\n')
 
     # Wait and respond
     await asyncio.sleep(1)
-    print("\nResponding with 'Bob'...")
     await pty_handle.send_input("Bob\n")
 
+    await asyncio.sleep(1)
     pty_session_info = await sandbox.process.resize_pty_session(pty_session_id, PtySize(cols=80, rows=25))
     print(f"\nPTY session resized to {pty_session_info.cols}x{pty_session_info.rows}")
 
     # Send another command
     await asyncio.sleep(1)
-    print("\nSending directory listing command...")
     await pty_handle.send_input("ls -la\n")
 
     # Send exit command
     await asyncio.sleep(1)
-    print("\nSending exit command...")
     await pty_handle.send_input("exit\n")
 
     # Wait for PTY to exit
@@ -76,7 +73,6 @@ async def kill_pty_session(sandbox: AsyncSandbox):
     await asyncio.sleep(3)
 
     # Kill the PTY session
-    print("\nKilling PTY session...")
     await pty_handle.kill()
 
     # Wait for PTY to terminate

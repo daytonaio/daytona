@@ -34,12 +34,12 @@ print(text, end="")
 
 pty_handle = sandbox.process.create_pty_session(
 id="interactive-session",
-pty_size=PtySize(cols=200, rows=100)
+pty_size=PtySize(cols=300, rows=100)
 )
 
 # Send interactive command
 
-pty_handle.send_input('read -p "Are you accepting the terms and conditions? (y/n): " name && echo "Hello, $name!"\n')
+pty_handle.send_input('printf "Are you accepting the terms and conditions? (y/n): " && read confirm && if [ "$confirm" = "y" ]; then echo "You accepted"; else echo "You did not accept"; fi\n')
 time.sleep(1)
 pty_handle.send_input("y\n")
 
@@ -68,7 +68,7 @@ import { Daytona, Sandbox } from '@daytonaio/sdk'
 // Create PTY session
 const ptyHandle = await sandbox.process.createPty({
   id: 'interactive-session',
-  cols: 200,
+  cols: 300,
   rows: 100,
   onData: (data) => {
     const text = new TextDecoder().decode(data)
@@ -79,7 +79,7 @@ const ptyHandle = await sandbox.process.createPty({
 await ptyHandle.waitForConnection()
 
 // Send interactive command
-await ptyHandle.sendInput('read -p "Are you accepting the terms and conditions? (y/n): " confirm && if [ "$confirm" = "y" ]; then echo "You accepted the terms and conditions"; else echo "You did not accept the terms and conditions"; fi\n')
+await ptyHandle.sendInput('printf "Are you accepting the terms and conditions? (y/n): " && read confirm && if [ "$confirm" = "y" ]; then echo "You accepted"; else echo "You did not accept"; fi\n')
 await new Promise(resolve => setTimeout(resolve, 1000))
 await ptyHandle.sendInput('y\n')
 

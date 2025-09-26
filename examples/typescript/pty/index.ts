@@ -19,11 +19,10 @@ async function interactivePtySession(sandbox: Sandbox) {
 
   // Send interactive command
   console.log('\nSending interactive read command...')
-  await ptyHandle.sendInput('read -p "Enter your name: " name && echo "Hello, $name!"\n')
+  await ptyHandle.sendInput('printf "Enter your name: " && read name && printf "Hello, %s\\n" "$name"\n')
 
   // Wait and respond
   await new Promise((resolve) => setTimeout(resolve, 1000))
-  console.log("\nResponding with 'Bob'...")
   await ptyHandle.sendInput('Bob\n')
 
   // Resize the PTY session
@@ -32,12 +31,10 @@ async function interactivePtySession(sandbox: Sandbox) {
 
   // Send another command
   await new Promise((resolve) => setTimeout(resolve, 1000))
-  console.log('\nSending directory listing command...')
   await ptyHandle.sendInput('ls -la\n')
 
   // Send exit command
   await new Promise((resolve) => setTimeout(resolve, 1000))
-  console.log('\nSending exit command...')
   await ptyHandle.sendInput('exit\n')
 
   // Wait for PTY to exit
@@ -73,7 +70,6 @@ async function killPtySession(sandbox: Sandbox) {
   await new Promise((resolve) => setTimeout(resolve, 3000))
 
   // Kill the PTY session
-  console.log('\nKilling PTY session...')
   await ptyHandle.kill()
 
   // Wait for PTY to terminate
