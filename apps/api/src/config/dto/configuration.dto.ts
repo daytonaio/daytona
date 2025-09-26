@@ -169,6 +169,14 @@ export class ConfigurationDto {
   @IsString()
   sshGatewayCommand?: string
 
+  @ApiPropertyOptional({
+    description: 'Base64 encoded SSH Gateway public key',
+    example: 'ssh-gateway-public-key',
+  })
+  @IsOptional()
+  @IsString()
+  sshGatewayPublicKey?: string
+
   constructor(configService: TypedConfigService) {
     this.version = configService.getOrThrow('version')
 
@@ -185,7 +193,8 @@ export class ConfigurationDto {
     this.maintananceMode = configService.getOrThrow('maintananceMode')
     this.environment = configService.getOrThrow('environment')
 
-    this.sshGatewayCommand = configService.get('sshGatewayCommand')
+    this.sshGatewayCommand = configService.get('sshGateway.command')
+    this.sshGatewayPublicKey = configService.get('sshGateway.publicKey')
 
     if (configService.get('billingApiUrl')) {
       this.billingApiUrl = configService.get('billingApiUrl')
