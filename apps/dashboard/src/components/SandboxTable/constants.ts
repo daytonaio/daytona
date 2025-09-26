@@ -20,7 +20,7 @@ const STATE_LABEL_MAPPING: Record<SandboxState, string> = {
   [SandboxState.STARTING]: 'Starting',
   [SandboxState.STOPPING]: 'Stopping',
   [SandboxState.DESTROYING]: 'Deleting',
-  [SandboxState.DESTROYED]: 'Destroyed',
+  [SandboxState.DESTROYED]: 'Deleted',
   [SandboxState.PULLING_SNAPSHOT]: 'Pulling Snapshot',
   [SandboxState.UNKNOWN]: 'Unknown',
   [SandboxState.ARCHIVING]: 'Archiving',
