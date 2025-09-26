@@ -111,6 +111,11 @@ models/process-logs-response.ts
 models/process-restart-response.ts
 models/process-status-response.ts
 models/project-dir-response.ts
+models/pty-create-request.ts
+models/pty-create-response.ts
+models/pty-list-response.ts
+models/pty-resize-request.ts
+models/pty-session-info.ts
 models/range.ts
 models/region-screenshot-response.ts
 models/registry-push-access-dto.ts

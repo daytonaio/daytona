@@ -98,5 +98,7 @@
   "sidebarconfig.asyncSandbox": "AsyncSandbox",
   "sidebarconfig.dataAnalysis": "Data Analysis with AI",
   "sidebarconfig.ossDeployment": "Open Source",
-  "sidebarconfig.deployments": "Deployments"
+  "sidebarconfig.deployments": "Deployments",
+  "sidebarconfig.pty": "Pseudo Terminal (PTY)",
+  "sidebarconfig.ptyDescription": "Learn how to manage PTY sessions in your Sandboxes using the Daytona SDK."
 }

@@ -3607,6 +3607,257 @@ paths:
       summary: Get command logs
       tags:
         - toolbox
+  /toolbox/{sandboxId}/toolbox/process/pty:
+    get:
+      description: List all active PTY sessions in the sandbox
+      operationId: listPTYSessions
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: sandboxId
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PtyListResponse'
+          description: PTY sessions retrieved successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: List PTY sessions
+      tags:
+        - toolbox
+    post:
+      description: Create a new PTY session in the sandbox
+      operationId: createPTYSession
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: sandboxId
+          required: true
+          schema:
+            type: string
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PtyCreateRequest'
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PtyCreateResponse'
+          description: PTY session created successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Create PTY session
+      tags:
+        - toolbox
+  /toolbox/{sandboxId}/toolbox/process/pty/{sessionId}:
+    delete:
+      description: Delete a PTY session and terminate the associated process
+      operationId: deletePTYSession
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: sandboxId
+          required: true
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: sessionId
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          description: PTY session deleted successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Delete PTY session
+      tags:
+        - toolbox
+    get:
+      description: Get PTY session information by ID
+      operationId: getPTYSession
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: sandboxId
+          required: true
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: sessionId
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PtySessionInfo'
+          description: PTY session retrieved successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Get PTY session
+      tags:
+        - toolbox
+  /toolbox/{sandboxId}/toolbox/process/pty/{sessionId}/resize:
+    post:
+      description: Resize a PTY session
+      operationId: resizePTYSession
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: sandboxId
+          required: true
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: sessionId
+          required: true
+          schema:
+            type: string
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PtyResizeRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PtySessionInfo'
+          description: PTY session resized successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Resize PTY session
+      tags:
+        - toolbox
+  /toolbox/{sandboxId}/toolbox/process/pty/{sessionId}/connect:
+    get:
+      description: Upgrade HTTP connection to WebSocket for real-time PTY interaction
+      operationId: connectPTYSession
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: sandboxId
+          required: true
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: sessionId
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '101':
+          content:
+            application/octet-stream:
+              schema:
+                format: binary
+                type: string
+          description: WebSocket connection established successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Connect to PTY session via WebSocket
+      tags:
+        - toolbox
   /toolbox/{sandboxId}/toolbox/lsp/completions:
     post:
       description: The Completion request is sent from the client to the server to
@@ -8970,6 +9221,169 @@ components:
           description: The exit code of the executed command
           example: 0
           type: number
+      type: object
+    PtySessionInfo:
+      example:
+        cwd: /home/user
+        createdAt: 2024-01-15T10:30:45Z
+        lazyStart: false
+        envs:
+          TERM: xterm-256color
+          PS1: '\u@daytona:\w$ '
+        active: true
+        id: pty-session-12345
+        rows: 24
+        cols: 80
+      properties:
+        id:
+          description: The unique identifier for the PTY session
+          example: pty-session-12345
+          type: string
+        cwd:
+          description: "Starting directory for the PTY session, defaults to the sandbox's\
+            \ working directory"
+          example: /home/user
+          type: string
+        envs:
+          description: Environment variables for the PTY session
+          example:
+            TERM: xterm-256color
+            PS1: '\u@daytona:\w$ '
+          type: object
+        cols:
+          description: Number of terminal columns
+          example: 80
+          type: number
+        rows:
+          description: Number of terminal rows
+          example: 24
+          type: number
+        createdAt:
+          description: When the PTY session was created
+          example: 2024-01-15T10:30:45Z
+          type: string
+        active:
+          description: Whether the PTY session is currently active
+          example: true
+          type: boolean
+        lazyStart:
+          default: false
+          description: Whether the PTY session uses lazy start (only start when first
+            client connects)
+          example: false
+          type: boolean
+      required:
+        - active
+        - cols
+        - createdAt
+        - cwd
+        - envs
+        - id
+        - lazyStart
+        - rows
+      type: object
+    PtyListResponse:
+      example:
+        sessions:
+          - cwd: /home/user
+            createdAt: 2024-01-15T10:30:45Z
+            lazyStart: false
+            envs:
+              TERM: xterm-256color
+              PS1: '\u@daytona:\w$ '
+            active: true
+            id: pty-session-12345
+            rows: 24
+            cols: 80
+          - cwd: /home/user
+            createdAt: 2024-01-15T10:30:45Z
+            lazyStart: false
+            envs:
+              TERM: xterm-256color
+              PS1: '\u@daytona:\w$ '
+            active: true
+            id: pty-session-12345
+            rows: 24
+            cols: 80
+      properties:
+        sessions:
+          description: List of active PTY sessions
+          items:
+            $ref: '#/components/schemas/PtySessionInfo'
+          type: array
+      required:
+        - sessions
+      type: object
+    PtyCreateRequest:
+      example:
+        cwd: /home/user
+        lazyStart: false
+        envs:
+          TERM: xterm-256color
+          PS1: '\u@daytona:\w$ '
+        id: pty-session-12345
+        rows: 24
+        cols: 80
+      properties:
+        id:
+          description: The unique identifier for the PTY session
+          example: pty-session-12345
+          type: string
+        cwd:
+          description: "Starting directory for the PTY session, defaults to the sandbox's\
+            \ working directory"
+          example: /home/user
+          type: string
+        envs:
+          description: Environment variables for the PTY session
+          example:
+            TERM: xterm-256color
+            PS1: '\u@daytona:\w$ '
+          type: object
+        cols:
+          description: Number of terminal columns
+          example: 80
+          type: number
+        rows:
+          description: Number of terminal rows
+          example: 24
+          type: number
+        lazyStart:
+          default: false
+          description: Whether to start the PTY session lazily (only start when first
+            client connects)
+          example: false
+          type: boolean
+      required:
+        - id
+      type: object
+    PtyCreateResponse:
+      example:
+        sessionId: pty-session-12345
+      properties:
+        sessionId:
+          description: The unique identifier for the created PTY session
+          example: pty-session-12345
+          type: string
+      required:
+        - sessionId
+      type: object
+    PtyResizeRequest:
+      example:
+        rows: 24
+        cols: 80
+      properties:
+        cols:
+          description: Number of terminal columns
+          example: 80
+          type: number
+        rows:
+          description: Number of terminal rows
+          example: 24
+          type: number
+      required:
+        - cols
+        - rows
       type: object
     Position:
       example:

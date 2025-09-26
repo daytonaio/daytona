@@ -263,6 +263,15 @@ export const getSidebarConfig = (
         },
         {
           type: 'link',
+          href: localizePath('/docs/pty', locale),
+          label: labels['sidebarconfig.pty'],
+          description: labels['sidebarconfig.ptyDescription'],
+          attrs: {
+            icon: 'terminal.svg',
+          },
+        },
+        {
+          type: 'link',
           href: localizePath('/docs/log-streaming', locale),
           label: labels['sidebarconfig.logStreaming'],
           description: labels['sidebarconfig.logStreamingDescription'],
