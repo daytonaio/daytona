@@ -552,12 +552,71 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
      *
      * @summary List all sandboxes
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {boolean} [verbose] Include verbose output
+     * @param {string} [labels] JSON encoded labels to filter by
+     * @param {boolean} [includeErroredDeleted] Include errored and deleted sandboxes
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    listSandboxes: async (
+      xDaytonaOrganizationID?: string,
+      verbose?: boolean,
+      labels?: string,
+      includeErroredDeleted?: boolean,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      const localVarPath = `/sandbox`
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      // authentication bearer required
+      // http bearer authentication required
+      await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+      // authentication oauth2 required
+
+      if (verbose !== undefined) {
+        localVarQueryParameter['verbose'] = verbose
+      }
+
+      if (labels !== undefined) {
+        localVarQueryParameter['labels'] = labels
+      }
+
+      if (includeErroredDeleted !== undefined) {
+        localVarQueryParameter['includeErroredDeleted'] = includeErroredDeleted
+      }
+
+      if (xDaytonaOrganizationID != null) {
+        localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
+      }
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     *
+     * @summary List all sandboxes paginated
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {number} [page] Page number of the results
      * @param {number} [limit] Number of results per page
      * @param {string} [id] Filter by partial ID match
      * @param {string} [labels] JSON encoded labels to filter by
      * @param {boolean} [includeErroredDeleted] Include results with errored state and deleted desired state
-     * @param {Array<ListSandboxesStatesEnum>} [states] List of states to filter by
+     * @param {Array<ListSandboxesPaginatedStatesEnum>} [states] List of states to filter by
      * @param {Array<string>} [snapshots] List of snapshot names to filter by
      * @param {Array<string>} [regions] List of regions to filter by
      * @param {number} [minCpu] Minimum CPU
@@ -568,19 +627,19 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
      * @param {number} [maxDiskGiB] Maximum disk space in GiB
      * @param {Date} [lastEventAfter] Include items with last event after this timestamp
      * @param {Date} [lastEventBefore] Include items with last event before this timestamp
-     * @param {ListSandboxesSortEnum} [sort] Field to sort by
-     * @param {ListSandboxesOrderEnum} [order] Direction to sort by
+     * @param {ListSandboxesPaginatedSortEnum} [sort] Field to sort by
+     * @param {ListSandboxesPaginatedOrderEnum} [order] Direction to sort by
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    listSandboxes: async (
+    listSandboxesPaginated: async (
       xDaytonaOrganizationID?: string,
       page?: number,
       limit?: number,
       id?: string,
       labels?: string,
       includeErroredDeleted?: boolean,
-      states?: Array<ListSandboxesStatesEnum>,
+      states?: Array<ListSandboxesPaginatedStatesEnum>,
       snapshots?: Array<string>,
       regions?: Array<string>,
       minCpu?: number,
@@ -591,11 +650,11 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
       maxDiskGiB?: number,
       lastEventAfter?: Date,
       lastEventBefore?: Date,
-      sort?: ListSandboxesSortEnum,
-      order?: ListSandboxesOrderEnum,
+      sort?: ListSandboxesPaginatedSortEnum,
+      order?: ListSandboxesPaginatedOrderEnum,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
-      const localVarPath = `/sandbox`
+      const localVarPath = `/sandbox/paginated`
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
       let baseOptions
@@ -1521,12 +1580,47 @@ export const SandboxApiFp = function (configuration?: Configuration) {
      *
      * @summary List all sandboxes
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {boolean} [verbose] Include verbose output
+     * @param {string} [labels] JSON encoded labels to filter by
+     * @param {boolean} [includeErroredDeleted] Include errored and deleted sandboxes
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async listSandboxes(
+      xDaytonaOrganizationID?: string,
+      verbose?: boolean,
+      labels?: string,
+      includeErroredDeleted?: boolean,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Sandbox>>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.listSandboxes(
+        xDaytonaOrganizationID,
+        verbose,
+        labels,
+        includeErroredDeleted,
+        options,
+      )
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['SandboxApi.listSandboxes']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
+    /**
+     *
+     * @summary List all sandboxes paginated
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {number} [page] Page number of the results
      * @param {number} [limit] Number of results per page
      * @param {string} [id] Filter by partial ID match
      * @param {string} [labels] JSON encoded labels to filter by
      * @param {boolean} [includeErroredDeleted] Include results with errored state and deleted desired state
-     * @param {Array<ListSandboxesStatesEnum>} [states] List of states to filter by
+     * @param {Array<ListSandboxesPaginatedStatesEnum>} [states] List of states to filter by
      * @param {Array<string>} [snapshots] List of snapshot names to filter by
      * @param {Array<string>} [regions] List of regions to filter by
      * @param {number} [minCpu] Minimum CPU
@@ -1537,19 +1631,19 @@ export const SandboxApiFp = function (configuration?: Configuration) {
      * @param {number} [maxDiskGiB] Maximum disk space in GiB
      * @param {Date} [lastEventAfter] Include items with last event after this timestamp
      * @param {Date} [lastEventBefore] Include items with last event before this timestamp
-     * @param {ListSandboxesSortEnum} [sort] Field to sort by
-     * @param {ListSandboxesOrderEnum} [order] Direction to sort by
+     * @param {ListSandboxesPaginatedSortEnum} [sort] Field to sort by
+     * @param {ListSandboxesPaginatedOrderEnum} [order] Direction to sort by
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    async listSandboxes(
+    async listSandboxesPaginated(
       xDaytonaOrganizationID?: string,
       page?: number,
       limit?: number,
       id?: string,
       labels?: string,
       includeErroredDeleted?: boolean,
-      states?: Array<ListSandboxesStatesEnum>,
+      states?: Array<ListSandboxesPaginatedStatesEnum>,
       snapshots?: Array<string>,
       regions?: Array<string>,
       minCpu?: number,
@@ -1560,11 +1654,11 @@ export const SandboxApiFp = function (configuration?: Configuration) {
       maxDiskGiB?: number,
       lastEventAfter?: Date,
       lastEventBefore?: Date,
-      sort?: ListSandboxesSortEnum,
-      order?: ListSandboxesOrderEnum,
+      sort?: ListSandboxesPaginatedSortEnum,
+      order?: ListSandboxesPaginatedOrderEnum,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PaginatedSandboxes>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.listSandboxes(
+      const localVarAxiosArgs = await localVarAxiosParamCreator.listSandboxesPaginated(
         xDaytonaOrganizationID,
         page,
         limit,
@@ -1588,7 +1682,7 @@ export const SandboxApiFp = function (configuration?: Configuration) {
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['SandboxApi.listSandboxes']?.[localVarOperationServerIndex]?.url
+        operationServerMap['SandboxApi.listSandboxesPaginated']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -2087,12 +2181,33 @@ export const SandboxApiFactory = function (configuration?: Configuration, basePa
      *
      * @summary List all sandboxes
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {boolean} [verbose] Include verbose output
+     * @param {string} [labels] JSON encoded labels to filter by
+     * @param {boolean} [includeErroredDeleted] Include errored and deleted sandboxes
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    listSandboxes(
+      xDaytonaOrganizationID?: string,
+      verbose?: boolean,
+      labels?: string,
+      includeErroredDeleted?: boolean,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<Array<Sandbox>> {
+      return localVarFp
+        .listSandboxes(xDaytonaOrganizationID, verbose, labels, includeErroredDeleted, options)
+        .then((request) => request(axios, basePath))
+    },
+    /**
+     *
+     * @summary List all sandboxes paginated
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {number} [page] Page number of the results
      * @param {number} [limit] Number of results per page
      * @param {string} [id] Filter by partial ID match
      * @param {string} [labels] JSON encoded labels to filter by
      * @param {boolean} [includeErroredDeleted] Include results with errored state and deleted desired state
-     * @param {Array<ListSandboxesStatesEnum>} [states] List of states to filter by
+     * @param {Array<ListSandboxesPaginatedStatesEnum>} [states] List of states to filter by
      * @param {Array<string>} [snapshots] List of snapshot names to filter by
      * @param {Array<string>} [regions] List of regions to filter by
      * @param {number} [minCpu] Minimum CPU
@@ -2103,19 +2218,19 @@ export const SandboxApiFactory = function (configuration?: Configuration, basePa
      * @param {number} [maxDiskGiB] Maximum disk space in GiB
      * @param {Date} [lastEventAfter] Include items with last event after this timestamp
      * @param {Date} [lastEventBefore] Include items with last event before this timestamp
-     * @param {ListSandboxesSortEnum} [sort] Field to sort by
-     * @param {ListSandboxesOrderEnum} [order] Direction to sort by
+     * @param {ListSandboxesPaginatedSortEnum} [sort] Field to sort by
+     * @param {ListSandboxesPaginatedOrderEnum} [order] Direction to sort by
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    listSandboxes(
+    listSandboxesPaginated(
       xDaytonaOrganizationID?: string,
       page?: number,
       limit?: number,
       id?: string,
       labels?: string,
       includeErroredDeleted?: boolean,
-      states?: Array<ListSandboxesStatesEnum>,
+      states?: Array<ListSandboxesPaginatedStatesEnum>,
       snapshots?: Array<string>,
       regions?: Array<string>,
       minCpu?: number,
@@ -2126,12 +2241,12 @@ export const SandboxApiFactory = function (configuration?: Configuration, basePa
       maxDiskGiB?: number,
       lastEventAfter?: Date,
       lastEventBefore?: Date,
-      sort?: ListSandboxesSortEnum,
-      order?: ListSandboxesOrderEnum,
+      sort?: ListSandboxesPaginatedSortEnum,
+      order?: ListSandboxesPaginatedOrderEnum,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<PaginatedSandboxes> {
       return localVarFp
-        .listSandboxes(
+        .listSandboxesPaginated(
           xDaytonaOrganizationID,
           page,
           limit,
@@ -2532,12 +2647,35 @@ export class SandboxApi extends BaseAPI {
    *
    * @summary List all sandboxes
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+   * @param {boolean} [verbose] Include verbose output
+   * @param {string} [labels] JSON encoded labels to filter by
+   * @param {boolean} [includeErroredDeleted] Include errored and deleted sandboxes
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof SandboxApi
+   */
+  public listSandboxes(
+    xDaytonaOrganizationID?: string,
+    verbose?: boolean,
+    labels?: string,
+    includeErroredDeleted?: boolean,
+    options?: RawAxiosRequestConfig,
+  ) {
+    return SandboxApiFp(this.configuration)
+      .listSandboxes(xDaytonaOrganizationID, verbose, labels, includeErroredDeleted, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   *
+   * @summary List all sandboxes paginated
+   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {number} [page] Page number of the results
    * @param {number} [limit] Number of results per page
    * @param {string} [id] Filter by partial ID match
    * @param {string} [labels] JSON encoded labels to filter by
    * @param {boolean} [includeErroredDeleted] Include results with errored state and deleted desired state
-   * @param {Array<ListSandboxesStatesEnum>} [states] List of states to filter by
+   * @param {Array<ListSandboxesPaginatedStatesEnum>} [states] List of states to filter by
    * @param {Array<string>} [snapshots] List of snapshot names to filter by
    * @param {Array<string>} [regions] List of regions to filter by
    * @param {number} [minCpu] Minimum CPU
@@ -2548,20 +2686,20 @@ export class SandboxApi extends BaseAPI {
    * @param {number} [maxDiskGiB] Maximum disk space in GiB
    * @param {Date} [lastEventAfter] Include items with last event after this timestamp
    * @param {Date} [lastEventBefore] Include items with last event before this timestamp
-   * @param {ListSandboxesSortEnum} [sort] Field to sort by
-   * @param {ListSandboxesOrderEnum} [order] Direction to sort by
+   * @param {ListSandboxesPaginatedSortEnum} [sort] Field to sort by
+   * @param {ListSandboxesPaginatedOrderEnum} [order] Direction to sort by
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof SandboxApi
    */
-  public listSandboxes(
+  public listSandboxesPaginated(
     xDaytonaOrganizationID?: string,
     page?: number,
     limit?: number,
     id?: string,
     labels?: string,
     includeErroredDeleted?: boolean,
-    states?: Array<ListSandboxesStatesEnum>,
+    states?: Array<ListSandboxesPaginatedStatesEnum>,
     snapshots?: Array<string>,
     regions?: Array<string>,
     minCpu?: number,
@@ -2572,12 +2710,12 @@ export class SandboxApi extends BaseAPI {
     maxDiskGiB?: number,
     lastEventAfter?: Date,
     lastEventBefore?: Date,
-    sort?: ListSandboxesSortEnum,
-    order?: ListSandboxesOrderEnum,
+    sort?: ListSandboxesPaginatedSortEnum,
+    order?: ListSandboxesPaginatedOrderEnum,
     options?: RawAxiosRequestConfig,
   ) {
     return SandboxApiFp(this.configuration)
-      .listSandboxes(
+      .listSandboxesPaginated(
         xDaytonaOrganizationID,
         page,
         limit,
@@ -2798,7 +2936,7 @@ export class SandboxApi extends BaseAPI {
 /**
  * @export
  */
-export const ListSandboxesStatesEnum = {
+export const ListSandboxesPaginatedStatesEnum = {
   CREATING: 'creating',
   RESTORING: 'restoring',
   DESTROYING: 'destroying',
@@ -2815,11 +2953,12 @@ export const ListSandboxesStatesEnum = {
   ARCHIVED: 'archived',
   ARCHIVING: 'archiving',
 } as const
-export type ListSandboxesStatesEnum = (typeof ListSandboxesStatesEnum)[keyof typeof ListSandboxesStatesEnum]
+export type ListSandboxesPaginatedStatesEnum =
+  (typeof ListSandboxesPaginatedStatesEnum)[keyof typeof ListSandboxesPaginatedStatesEnum]
 /**
  * @export
  */
-export const ListSandboxesSortEnum = {
+export const ListSandboxesPaginatedSortEnum = {
   ID: 'id',
   STATE: 'state',
   SNAPSHOT: 'snapshot',
@@ -2827,12 +2966,14 @@ export const ListSandboxesSortEnum = {
   UPDATED_AT: 'updatedAt',
   CREATED_AT: 'createdAt',
 } as const
-export type ListSandboxesSortEnum = (typeof ListSandboxesSortEnum)[keyof typeof ListSandboxesSortEnum]
+export type ListSandboxesPaginatedSortEnum =
+  (typeof ListSandboxesPaginatedSortEnum)[keyof typeof ListSandboxesPaginatedSortEnum]
 /**
  * @export
  */
-export const ListSandboxesOrderEnum = {
+export const ListSandboxesPaginatedOrderEnum = {
   ASC: 'asc',
   DESC: 'desc',
 } as const
-export type ListSandboxesOrderEnum = (typeof ListSandboxesOrderEnum)[keyof typeof ListSandboxesOrderEnum]
+export type ListSandboxesPaginatedOrderEnum =
+  (typeof ListSandboxesPaginatedOrderEnum)[keyof typeof ListSandboxesPaginatedOrderEnum]

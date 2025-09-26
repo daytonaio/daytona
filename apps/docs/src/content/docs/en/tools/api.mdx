@@ -506,6 +506,21 @@ import Label from '@components/Label.astro'
 | Name | Location | Required | Type | Description |
 | :--- | :------- | :------- | :--- | :---------- |
 | **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
+| **`verbose`** | query | false | undefined | Include verbose output |
+| **`labels`** | query | false | undefined | JSON encoded labels to filter by |
+
+### Responses
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | List of all sandboxes |
+
+
+## GET /sandbox/paginated
+
+### Parameters
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
 | **`page`** | query | false | undefined | Page number of the results |
 | **`limit`** | query | false | undefined | Number of results per page |
 | **`id`** | query | false | undefined | Filter by partial ID match |
@@ -529,6 +544,7 @@ import Label from '@components/Label.astro'
 | Status Code | Description |
 | :-------- | :---------- |
 | **`200`** | Paginated list of all sandboxes |
+
 
 ## POST /sandbox
 

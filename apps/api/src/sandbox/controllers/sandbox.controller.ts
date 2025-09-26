@@ -94,10 +94,62 @@ export class SandboxController {
   })
   @ApiResponse({
     status: 200,
+    description: 'List of all sandboxes',
+    type: [SandboxDto],
+  })
+  @ApiQuery({
+    name: 'verbose',
+    required: false,
+    type: Boolean,
+    description: 'Include verbose output',
+  })
+  @ApiQuery({
+    name: 'labels',
+    type: String,
+    required: false,
+    example: '{"label1": "value1", "label2": "value2"}',
+    description: 'JSON encoded labels to filter by',
+  })
+  @ApiQuery({
+    name: 'includeErroredDeleted',
+    required: false,
+    type: Boolean,
+    description: 'Include errored and deleted sandboxes',
+  })
+  async listSandboxes(
+    @AuthContext() authContext: OrganizationAuthContext,
+    @Query('verbose') verbose?: boolean,
+    @Query('labels') labelsQuery?: string,
+    @Query('includeErroredDeleted') includeErroredDeleted?: boolean,
+  ): Promise<SandboxDto[]> {
+    const labels = labelsQuery ? JSON.parse(labelsQuery) : {}
+    const sandboxes = await this.sandboxService.findAllDeprecated(
+      authContext.organizationId,
+      labels,
+      includeErroredDeleted,
+    )
+
+    const runnerIds = new Set(sandboxes.map((s) => s.runnerId))
+    const runners = await this.runnerService.findByIds(Array.from(runnerIds))
+    const runnerMap = new Map(runners.map((runner) => [runner.id, runner]))
+
+    return sandboxes.map((sandbox) => {
+      const runner = runnerMap.get(sandbox.runnerId)
+      return SandboxDto.fromSandbox(sandbox, runner?.domain)
+    })
+  }
+
+  @Get('paginated')
+  @ApiOperation({
+    summary: 'List all sandboxes paginated',
+    operationId: 'listSandboxesPaginated',
+  })
+  @ApiResponse({
+    status: 200,
     description: 'Paginated list of all sandboxes',
     type: PaginatedSandboxesDto,
   })
-  async listSandboxes(
+  async listSandboxesPaginated(
     @AuthContext() authContext: OrganizationAuthContext,
     @Query() queryParams: ListSandboxesQueryDto,
   ): Promise<PaginatedSandboxesDto> {

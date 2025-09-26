@@ -158,8 +158,20 @@ type SandboxAPI interface {
 	ListSandboxes(ctx context.Context) SandboxAPIListSandboxesRequest
 
 	// ListSandboxesExecute executes the request
+	//  @return []Sandbox
+	ListSandboxesExecute(r SandboxAPIListSandboxesRequest) ([]Sandbox, *http.Response, error)
+
+	/*
+		ListSandboxesPaginated List all sandboxes paginated
+
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return SandboxAPIListSandboxesPaginatedRequest
+	*/
+	ListSandboxesPaginated(ctx context.Context) SandboxAPIListSandboxesPaginatedRequest
+
+	// ListSandboxesPaginatedExecute executes the request
 	//  @return PaginatedSandboxes
-	ListSandboxesExecute(r SandboxAPIListSandboxesRequest) (*PaginatedSandboxes, *http.Response, error)
+	ListSandboxesPaginatedExecute(r SandboxAPIListSandboxesPaginatedRequest) (*PaginatedSandboxes, *http.Response, error)
 
 	/*
 		ReplaceLabels Replace sandbox labels
@@ -1432,6 +1444,144 @@ type SandboxAPIListSandboxesRequest struct {
 	ctx                    context.Context
 	ApiService             SandboxAPI
 	xDaytonaOrganizationID *string
+	verbose                *bool
+	labels                 *string
+	includeErroredDeleted  *bool
+}
+
+// Use with JWT to specify the organization ID
+func (r SandboxAPIListSandboxesRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) SandboxAPIListSandboxesRequest {
+	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
+	return r
+}
+
+// Include verbose output
+func (r SandboxAPIListSandboxesRequest) Verbose(verbose bool) SandboxAPIListSandboxesRequest {
+	r.verbose = &verbose
+	return r
+}
+
+// JSON encoded labels to filter by
+func (r SandboxAPIListSandboxesRequest) Labels(labels string) SandboxAPIListSandboxesRequest {
+	r.labels = &labels
+	return r
+}
+
+// Include errored and deleted sandboxes
+func (r SandboxAPIListSandboxesRequest) IncludeErroredDeleted(includeErroredDeleted bool) SandboxAPIListSandboxesRequest {
+	r.includeErroredDeleted = &includeErroredDeleted
+	return r
+}
+
+func (r SandboxAPIListSandboxesRequest) Execute() ([]Sandbox, *http.Response, error) {
+	return r.ApiService.ListSandboxesExecute(r)
+}
+
+/*
+ListSandboxes List all sandboxes
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return SandboxAPIListSandboxesRequest
+*/
+func (a *SandboxAPIService) ListSandboxes(ctx context.Context) SandboxAPIListSandboxesRequest {
+	return SandboxAPIListSandboxesRequest{
+		ApiService: a,
+		ctx:        ctx,
+	}
+}
+
+// Execute executes the request
+//
+//	@return []Sandbox
+func (a *SandboxAPIService) ListSandboxesExecute(r SandboxAPIListSandboxesRequest) ([]Sandbox, *http.Response, error) {
+	var (
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue []Sandbox
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SandboxAPIService.ListSandboxes")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/sandbox"
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	if r.verbose != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "verbose", r.verbose, "form", "")
+	}
+	if r.labels != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "labels", r.labels, "form", "")
+	}
+	if r.includeErroredDeleted != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "includeErroredDeleted", r.includeErroredDeleted, "form", "")
+	}
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.xDaytonaOrganizationID != nil {
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Daytona-Organization-ID", r.xDaytonaOrganizationID, "simple", "")
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type SandboxAPIListSandboxesPaginatedRequest struct {
+	ctx                    context.Context
+	ApiService             SandboxAPI
+	xDaytonaOrganizationID *string
 	page                   *float32
 	limit                  *float32
 	id                     *string
@@ -1453,131 +1603,131 @@ type SandboxAPIListSandboxesRequest struct {
 }
 
 // Use with JWT to specify the organization ID
-func (r SandboxAPIListSandboxesRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) SandboxAPIListSandboxesRequest {
+func (r SandboxAPIListSandboxesPaginatedRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) SandboxAPIListSandboxesPaginatedRequest {
 	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
 	return r
 }
 
 // Page number of the results
-func (r SandboxAPIListSandboxesRequest) Page(page float32) SandboxAPIListSandboxesRequest {
+func (r SandboxAPIListSandboxesPaginatedRequest) Page(page float32) SandboxAPIListSandboxesPaginatedRequest {
 	r.page = &page
 	return r
 }
 
 // Number of results per page
-func (r SandboxAPIListSandboxesRequest) Limit(limit float32) SandboxAPIListSandboxesRequest {
+func (r SandboxAPIListSandboxesPaginatedRequest) Limit(limit float32) SandboxAPIListSandboxesPaginatedRequest {
 	r.limit = &limit
 	return r
 }
 
 // Filter by partial ID match
-func (r SandboxAPIListSandboxesRequest) Id(id string) SandboxAPIListSandboxesRequest {
+func (r SandboxAPIListSandboxesPaginatedRequest) Id(id string) SandboxAPIListSandboxesPaginatedRequest {
 	r.id = &id
 	return r
 }
 
 // JSON encoded labels to filter by
-func (r SandboxAPIListSandboxesRequest) Labels(labels string) SandboxAPIListSandboxesRequest {
+func (r SandboxAPIListSandboxesPaginatedRequest) Labels(labels string) SandboxAPIListSandboxesPaginatedRequest {
 	r.labels = &labels
 	return r
 }
 
 // Include results with errored state and deleted desired state
-func (r SandboxAPIListSandboxesRequest) IncludeErroredDeleted(includeErroredDeleted bool) SandboxAPIListSandboxesRequest {
+func (r SandboxAPIListSandboxesPaginatedRequest) IncludeErroredDeleted(includeErroredDeleted bool) SandboxAPIListSandboxesPaginatedRequest {
 	r.includeErroredDeleted = &includeErroredDeleted
 	return r
 }
 
 // List of states to filter by
-func (r SandboxAPIListSandboxesRequest) States(states []string) SandboxAPIListSandboxesRequest {
+func (r SandboxAPIListSandboxesPaginatedRequest) States(states []string) SandboxAPIListSandboxesPaginatedRequest {
 	r.states = &states
 	return r
 }
 
 // List of snapshot names to filter by
-func (r SandboxAPIListSandboxesRequest) Snapshots(snapshots []string) SandboxAPIListSandboxesRequest {
+func (r SandboxAPIListSandboxesPaginatedRequest) Snapshots(snapshots []string) SandboxAPIListSandboxesPaginatedRequest {
 	r.snapshots = &snapshots
 	return r
 }
 
 // List of regions to filter by
-func (r SandboxAPIListSandboxesRequest) Regions(regions []string) SandboxAPIListSandboxesRequest {
+func (r SandboxAPIListSandboxesPaginatedRequest) Regions(regions []string) SandboxAPIListSandboxesPaginatedRequest {
 	r.regions = &regions
 	return r
 }
 
 // Minimum CPU
-func (r SandboxAPIListSandboxesRequest) MinCpu(minCpu float32) SandboxAPIListSandboxesRequest {
+func (r SandboxAPIListSandboxesPaginatedRequest) MinCpu(minCpu float32) SandboxAPIListSandboxesPaginatedRequest {
 	r.minCpu = &minCpu
 	return r
 }
 
 // Maximum CPU
-func (r SandboxAPIListSandboxesRequest) MaxCpu(maxCpu float32) SandboxAPIListSandboxesRequest {
+func (r SandboxAPIListSandboxesPaginatedRequest) MaxCpu(maxCpu float32) SandboxAPIListSandboxesPaginatedRequest {
 	r.maxCpu = &maxCpu
 	return r
 }
 
 // Minimum memory in GiB
-func (r SandboxAPIListSandboxesRequest) MinMemoryGiB(minMemoryGiB float32) SandboxAPIListSandboxesRequest {
+func (r SandboxAPIListSandboxesPaginatedRequest) MinMemoryGiB(minMemoryGiB float32) SandboxAPIListSandboxesPaginatedRequest {
 	r.minMemoryGiB = &minMemoryGiB
 	return r
 }
 
 // Maximum memory in GiB
-func (r SandboxAPIListSandboxesRequest) MaxMemoryGiB(maxMemoryGiB float32) SandboxAPIListSandboxesRequest {
+func (r SandboxAPIListSandboxesPaginatedRequest) MaxMemoryGiB(maxMemoryGiB float32) SandboxAPIListSandboxesPaginatedRequest {
 	r.maxMemoryGiB = &maxMemoryGiB
 	return r
 }
 
 // Minimum disk space in GiB
-func (r SandboxAPIListSandboxesRequest) MinDiskGiB(minDiskGiB float32) SandboxAPIListSandboxesRequest {
+func (r SandboxAPIListSandboxesPaginatedRequest) MinDiskGiB(minDiskGiB float32) SandboxAPIListSandboxesPaginatedRequest {
 	r.minDiskGiB = &minDiskGiB
 	return r
 }
 
 // Maximum disk space in GiB
-func (r SandboxAPIListSandboxesRequest) MaxDiskGiB(maxDiskGiB float32) SandboxAPIListSandboxesRequest {
+func (r SandboxAPIListSandboxesPaginatedRequest) MaxDiskGiB(maxDiskGiB float32) SandboxAPIListSandboxesPaginatedRequest {
 	r.maxDiskGiB = &maxDiskGiB
 	return r
 }
 
 // Include items with last event after this timestamp
-func (r SandboxAPIListSandboxesRequest) LastEventAfter(lastEventAfter time.Time) SandboxAPIListSandboxesRequest {
+func (r SandboxAPIListSandboxesPaginatedRequest) LastEventAfter(lastEventAfter time.Time) SandboxAPIListSandboxesPaginatedRequest {
 	r.lastEventAfter = &lastEventAfter
 	return r
 }
 
 // Include items with last event before this timestamp
-func (r SandboxAPIListSandboxesRequest) LastEventBefore(lastEventBefore time.Time) SandboxAPIListSandboxesRequest {
+func (r SandboxAPIListSandboxesPaginatedRequest) LastEventBefore(lastEventBefore time.Time) SandboxAPIListSandboxesPaginatedRequest {
 	r.lastEventBefore = &lastEventBefore
 	return r
 }
 
 // Field to sort by
-func (r SandboxAPIListSandboxesRequest) Sort(sort string) SandboxAPIListSandboxesRequest {
+func (r SandboxAPIListSandboxesPaginatedRequest) Sort(sort string) SandboxAPIListSandboxesPaginatedRequest {
 	r.sort = &sort
 	return r
 }
 
 // Direction to sort by
-func (r SandboxAPIListSandboxesRequest) Order(order string) SandboxAPIListSandboxesRequest {
+func (r SandboxAPIListSandboxesPaginatedRequest) Order(order string) SandboxAPIListSandboxesPaginatedRequest {
 	r.order = &order
 	return r
 }
 
-func (r SandboxAPIListSandboxesRequest) Execute() (*PaginatedSandboxes, *http.Response, error) {
-	return r.ApiService.ListSandboxesExecute(r)
+func (r SandboxAPIListSandboxesPaginatedRequest) Execute() (*PaginatedSandboxes, *http.Response, error) {
+	return r.ApiService.ListSandboxesPaginatedExecute(r)
 }
 
 /*
-ListSandboxes List all sandboxes
+ListSandboxesPaginated List all sandboxes paginated
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return SandboxAPIListSandboxesRequest
+	@return SandboxAPIListSandboxesPaginatedRequest
 */
-func (a *SandboxAPIService) ListSandboxes(ctx context.Context) SandboxAPIListSandboxesRequest {
-	return SandboxAPIListSandboxesRequest{
+func (a *SandboxAPIService) ListSandboxesPaginated(ctx context.Context) SandboxAPIListSandboxesPaginatedRequest {
+	return SandboxAPIListSandboxesPaginatedRequest{
 		ApiService: a,
 		ctx:        ctx,
 	}
@@ -1586,7 +1736,7 @@ func (a *SandboxAPIService) ListSandboxes(ctx context.Context) SandboxAPIListSan
 // Execute executes the request
 //
 //	@return PaginatedSandboxes
-func (a *SandboxAPIService) ListSandboxesExecute(r SandboxAPIListSandboxesRequest) (*PaginatedSandboxes, *http.Response, error) {
+func (a *SandboxAPIService) ListSandboxesPaginatedExecute(r SandboxAPIListSandboxesPaginatedRequest) (*PaginatedSandboxes, *http.Response, error) {
 	var (
 		localVarHTTPMethod  = http.MethodGet
 		localVarPostBody    interface{}
@@ -1594,12 +1744,12 @@ func (a *SandboxAPIService) ListSandboxesExecute(r SandboxAPIListSandboxesReques
 		localVarReturnValue *PaginatedSandboxes
 	)
 
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SandboxAPIService.ListSandboxes")
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SandboxAPIService.ListSandboxesPaginated")
 	if err != nil {
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/sandbox"
+	localVarPath := localBasePath + "/sandbox/paginated"
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
