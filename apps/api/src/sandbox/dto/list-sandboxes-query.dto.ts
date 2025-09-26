@@ -25,6 +25,9 @@ export enum SandboxSortDirection {
   DESC = 'desc',
 }
 
+export const DEFAULT_SANDBOX_SORT_FIELD = SandboxSortField.CREATED_AT
+export const DEFAULT_SANDBOX_SORT_DIRECTION = SandboxSortDirection.DESC
+
 const VALID_QUERY_STATES = Object.values(SandboxState).filter((state) => state !== SandboxState.DESTROYED)
 
 @ApiSchema({ name: 'ListSandboxesQuery' })
@@ -218,20 +221,20 @@ export class ListSandboxesQueryDto {
     description: 'Field to sort by',
     required: false,
     enum: SandboxSortField,
-    default: SandboxSortField.CREATED_AT,
+    default: DEFAULT_SANDBOX_SORT_FIELD,
   })
   @IsOptional()
   @IsEnum(SandboxSortField)
-  sort = SandboxSortField.CREATED_AT
+  sort = DEFAULT_SANDBOX_SORT_FIELD
 
   @ApiProperty({
     name: 'order',
     description: 'Direction to sort by',
     required: false,
     enum: SandboxSortDirection,
-    default: SandboxSortDirection.DESC,
+    default: DEFAULT_SANDBOX_SORT_DIRECTION,
   })
   @IsOptional()
   @IsEnum(SandboxSortDirection)
-  order = SandboxSortDirection.DESC
+  order = DEFAULT_SANDBOX_SORT_DIRECTION
 }
