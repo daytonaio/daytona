@@ -649,6 +649,31 @@ export class SandboxService {
     this.eventEmitter.emit(SandboxEvents.BACKUP_CREATED, new SandboxBackupCreatedEvent(sandbox))
   }
 
+  async findAllDeprecated(
+    organizationId: string,
+    labels?: { [key: string]: string },
+    includeErroredDestroyed?: boolean,
+  ): Promise<Sandbox[]> {
+    const baseFindOptions: FindOptionsWhere<Sandbox> = {
+      organizationId,
+      ...(labels ? { labels: JsonContains(labels) } : {}),
+    }
+
+    const where: FindOptionsWhere<Sandbox>[] = [
+      {
+        ...baseFindOptions,
+        state: Not(In([SandboxState.DESTROYED, SandboxState.ERROR, SandboxState.BUILD_FAILED])),
+      },
+      {
+        ...baseFindOptions,
+        state: In([SandboxState.ERROR, SandboxState.BUILD_FAILED]),
+        ...(includeErroredDestroyed ? {} : { desiredState: Not(SandboxDesiredState.DESTROYED) }),
+      },
+    ]
+
+    return this.sandboxRepository.find({ where })
+  }
+
   async findAll(
     organizationId: string,
     page = 1,

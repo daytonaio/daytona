@@ -17,9 +17,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-	"reflect"
 	"strings"
-	"time"
 )
 
 type WorkspaceAPI interface {
@@ -144,9 +142,9 @@ type WorkspaceAPI interface {
 	ListWorkspacesDeprecated(ctx context.Context) WorkspaceAPIListWorkspacesDeprecatedRequest
 
 	// ListWorkspacesDeprecatedExecute executes the request
-	//  @return PaginatedWorkspaces
+	//  @return []Workspace
 	// Deprecated
-	ListWorkspacesDeprecatedExecute(r WorkspaceAPIListWorkspacesDeprecatedRequest) (*PaginatedWorkspaces, *http.Response, error)
+	ListWorkspacesDeprecatedExecute(r WorkspaceAPIListWorkspacesDeprecatedRequest) ([]Workspace, *http.Response, error)
 
 	/*
 		ReplaceLabelsWorkspaceDeprecated [DEPRECATED] Replace workspace labels
@@ -1064,24 +1062,8 @@ type WorkspaceAPIListWorkspacesDeprecatedRequest struct {
 	ctx                    context.Context
 	ApiService             WorkspaceAPI
 	xDaytonaOrganizationID *string
-	page                   *float32
-	limit                  *float32
-	id                     *string
+	verbose                *bool
 	labels                 *string
-	includeErroredDeleted  *bool
-	states                 *[]string
-	snapshots              *[]string
-	regions                *[]string
-	minCpu                 *float32
-	maxCpu                 *float32
-	minMemoryGiB           *float32
-	maxMemoryGiB           *float32
-	minDiskGiB             *float32
-	maxDiskGiB             *float32
-	lastEventAfter         *time.Time
-	lastEventBefore        *time.Time
-	sort                   *string
-	order                  *string
 }
 
 // Use with JWT to specify the organization ID
@@ -1090,21 +1072,9 @@ func (r WorkspaceAPIListWorkspacesDeprecatedRequest) XDaytonaOrganizationID(xDay
 	return r
 }
 
-// Page number of the results
-func (r WorkspaceAPIListWorkspacesDeprecatedRequest) Page(page float32) WorkspaceAPIListWorkspacesDeprecatedRequest {
-	r.page = &page
-	return r
-}
-
-// Number of results per page
-func (r WorkspaceAPIListWorkspacesDeprecatedRequest) Limit(limit float32) WorkspaceAPIListWorkspacesDeprecatedRequest {
-	r.limit = &limit
-	return r
-}
-
-// Filter by partial ID match
-func (r WorkspaceAPIListWorkspacesDeprecatedRequest) Id(id string) WorkspaceAPIListWorkspacesDeprecatedRequest {
-	r.id = &id
+// Include verbose output
+func (r WorkspaceAPIListWorkspacesDeprecatedRequest) Verbose(verbose bool) WorkspaceAPIListWorkspacesDeprecatedRequest {
+	r.verbose = &verbose
 	return r
 }
 
@@ -1114,91 +1084,7 @@ func (r WorkspaceAPIListWorkspacesDeprecatedRequest) Labels(labels string) Works
 	return r
 }
 
-// Include results with errored state and deleted desired state
-func (r WorkspaceAPIListWorkspacesDeprecatedRequest) IncludeErroredDeleted(includeErroredDeleted bool) WorkspaceAPIListWorkspacesDeprecatedRequest {
-	r.includeErroredDeleted = &includeErroredDeleted
-	return r
-}
-
-// List of states to filter by
-func (r WorkspaceAPIListWorkspacesDeprecatedRequest) States(states []string) WorkspaceAPIListWorkspacesDeprecatedRequest {
-	r.states = &states
-	return r
-}
-
-// List of snapshot names to filter by
-func (r WorkspaceAPIListWorkspacesDeprecatedRequest) Snapshots(snapshots []string) WorkspaceAPIListWorkspacesDeprecatedRequest {
-	r.snapshots = &snapshots
-	return r
-}
-
-// List of regions to filter by
-func (r WorkspaceAPIListWorkspacesDeprecatedRequest) Regions(regions []string) WorkspaceAPIListWorkspacesDeprecatedRequest {
-	r.regions = &regions
-	return r
-}
-
-// Minimum CPU
-func (r WorkspaceAPIListWorkspacesDeprecatedRequest) MinCpu(minCpu float32) WorkspaceAPIListWorkspacesDeprecatedRequest {
-	r.minCpu = &minCpu
-	return r
-}
-
-// Maximum CPU
-func (r WorkspaceAPIListWorkspacesDeprecatedRequest) MaxCpu(maxCpu float32) WorkspaceAPIListWorkspacesDeprecatedRequest {
-	r.maxCpu = &maxCpu
-	return r
-}
-
-// Minimum memory in GiB
-func (r WorkspaceAPIListWorkspacesDeprecatedRequest) MinMemoryGiB(minMemoryGiB float32) WorkspaceAPIListWorkspacesDeprecatedRequest {
-	r.minMemoryGiB = &minMemoryGiB
-	return r
-}
-
-// Maximum memory in GiB
-func (r WorkspaceAPIListWorkspacesDeprecatedRequest) MaxMemoryGiB(maxMemoryGiB float32) WorkspaceAPIListWorkspacesDeprecatedRequest {
-	r.maxMemoryGiB = &maxMemoryGiB
-	return r
-}
-
-// Minimum disk space in GiB
-func (r WorkspaceAPIListWorkspacesDeprecatedRequest) MinDiskGiB(minDiskGiB float32) WorkspaceAPIListWorkspacesDeprecatedRequest {
-	r.minDiskGiB = &minDiskGiB
-	return r
-}
-
-// Maximum disk space in GiB
-func (r WorkspaceAPIListWorkspacesDeprecatedRequest) MaxDiskGiB(maxDiskGiB float32) WorkspaceAPIListWorkspacesDeprecatedRequest {
-	r.maxDiskGiB = &maxDiskGiB
-	return r
-}
-
-// Include items with last event after this timestamp
-func (r WorkspaceAPIListWorkspacesDeprecatedRequest) LastEventAfter(lastEventAfter time.Time) WorkspaceAPIListWorkspacesDeprecatedRequest {
-	r.lastEventAfter = &lastEventAfter
-	return r
-}
-
-// Include items with last event before this timestamp
-func (r WorkspaceAPIListWorkspacesDeprecatedRequest) LastEventBefore(lastEventBefore time.Time) WorkspaceAPIListWorkspacesDeprecatedRequest {
-	r.lastEventBefore = &lastEventBefore
-	return r
-}
-
-// Field to sort by
-func (r WorkspaceAPIListWorkspacesDeprecatedRequest) Sort(sort string) WorkspaceAPIListWorkspacesDeprecatedRequest {
-	r.sort = &sort
-	return r
-}
-
-// Direction to sort by
-func (r WorkspaceAPIListWorkspacesDeprecatedRequest) Order(order string) WorkspaceAPIListWorkspacesDeprecatedRequest {
-	r.order = &order
-	return r
-}
-
-func (r WorkspaceAPIListWorkspacesDeprecatedRequest) Execute() (*PaginatedWorkspaces, *http.Response, error) {
+func (r WorkspaceAPIListWorkspacesDeprecatedRequest) Execute() ([]Workspace, *http.Response, error) {
 	return r.ApiService.ListWorkspacesDeprecatedExecute(r)
 }
 
@@ -1219,15 +1105,15 @@ func (a *WorkspaceAPIService) ListWorkspacesDeprecated(ctx context.Context) Work
 
 // Execute executes the request
 //
-//	@return PaginatedWorkspaces
+//	@return []Workspace
 //
 // Deprecated
-func (a *WorkspaceAPIService) ListWorkspacesDeprecatedExecute(r WorkspaceAPIListWorkspacesDeprecatedRequest) (*PaginatedWorkspaces, *http.Response, error) {
+func (a *WorkspaceAPIService) ListWorkspacesDeprecatedExecute(r WorkspaceAPIListWorkspacesDeprecatedRequest) ([]Workspace, *http.Response, error) {
 	var (
 		localVarHTTPMethod  = http.MethodGet
 		localVarPostBody    interface{}
 		formFiles           []formFile
-		localVarReturnValue *PaginatedWorkspaces
+		localVarReturnValue []Workspace
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WorkspaceAPIService.ListWorkspacesDeprecated")
@@ -1241,98 +1127,11 @@ func (a *WorkspaceAPIService) ListWorkspacesDeprecatedExecute(r WorkspaceAPIList
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
 
-	if r.page != nil {
-		parameterAddToHeaderOrQuery(localVarQueryParams, "page", r.page, "form", "")
-	} else {
-		var defaultValue float32 = 1
-		r.page = &defaultValue
-	}
-	if r.limit != nil {
-		parameterAddToHeaderOrQuery(localVarQueryParams, "limit", r.limit, "form", "")
-	} else {
-		var defaultValue float32 = 10
-		r.limit = &defaultValue
-	}
-	if r.id != nil {
-		parameterAddToHeaderOrQuery(localVarQueryParams, "id", r.id, "form", "")
+	if r.verbose != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "verbose", r.verbose, "form", "")
 	}
 	if r.labels != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "labels", r.labels, "form", "")
-	}
-	if r.includeErroredDeleted != nil {
-		parameterAddToHeaderOrQuery(localVarQueryParams, "includeErroredDeleted", r.includeErroredDeleted, "form", "")
-	} else {
-		var defaultValue bool = false
-		r.includeErroredDeleted = &defaultValue
-	}
-	if r.states != nil {
-		t := *r.states
-		if reflect.TypeOf(t).Kind() == reflect.Slice {
-			s := reflect.ValueOf(t)
-			for i := 0; i < s.Len(); i++ {
-				parameterAddToHeaderOrQuery(localVarQueryParams, "states", s.Index(i).Interface(), "form", "multi")
-			}
-		} else {
-			parameterAddToHeaderOrQuery(localVarQueryParams, "states", t, "form", "multi")
-		}
-	}
-	if r.snapshots != nil {
-		t := *r.snapshots
-		if reflect.TypeOf(t).Kind() == reflect.Slice {
-			s := reflect.ValueOf(t)
-			for i := 0; i < s.Len(); i++ {
-				parameterAddToHeaderOrQuery(localVarQueryParams, "snapshots", s.Index(i).Interface(), "form", "multi")
-			}
-		} else {
-			parameterAddToHeaderOrQuery(localVarQueryParams, "snapshots", t, "form", "multi")
-		}
-	}
-	if r.regions != nil {
-		t := *r.regions
-		if reflect.TypeOf(t).Kind() == reflect.Slice {
-			s := reflect.ValueOf(t)
-			for i := 0; i < s.Len(); i++ {
-				parameterAddToHeaderOrQuery(localVarQueryParams, "regions", s.Index(i).Interface(), "form", "multi")
-			}
-		} else {
-			parameterAddToHeaderOrQuery(localVarQueryParams, "regions", t, "form", "multi")
-		}
-	}
-	if r.minCpu != nil {
-		parameterAddToHeaderOrQuery(localVarQueryParams, "minCpu", r.minCpu, "form", "")
-	}
-	if r.maxCpu != nil {
-		parameterAddToHeaderOrQuery(localVarQueryParams, "maxCpu", r.maxCpu, "form", "")
-	}
-	if r.minMemoryGiB != nil {
-		parameterAddToHeaderOrQuery(localVarQueryParams, "minMemoryGiB", r.minMemoryGiB, "form", "")
-	}
-	if r.maxMemoryGiB != nil {
-		parameterAddToHeaderOrQuery(localVarQueryParams, "maxMemoryGiB", r.maxMemoryGiB, "form", "")
-	}
-	if r.minDiskGiB != nil {
-		parameterAddToHeaderOrQuery(localVarQueryParams, "minDiskGiB", r.minDiskGiB, "form", "")
-	}
-	if r.maxDiskGiB != nil {
-		parameterAddToHeaderOrQuery(localVarQueryParams, "maxDiskGiB", r.maxDiskGiB, "form", "")
-	}
-	if r.lastEventAfter != nil {
-		parameterAddToHeaderOrQuery(localVarQueryParams, "lastEventAfter", r.lastEventAfter, "form", "")
-	}
-	if r.lastEventBefore != nil {
-		parameterAddToHeaderOrQuery(localVarQueryParams, "lastEventBefore", r.lastEventBefore, "form", "")
-	}
-	if r.sort != nil {
-		parameterAddToHeaderOrQuery(localVarQueryParams, "sort", r.sort, "form", "")
-	} else {
-		var defaultValue string = "createdAt"
-		r.sort = &defaultValue
-	}
-	if r.order != nil {
-		parameterAddToHeaderOrQuery(localVarQueryParams, "order", r.order, "form", "")
-	} else {
-		var defaultValue string = "desc"
-		r.order = &defaultValue
 	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}

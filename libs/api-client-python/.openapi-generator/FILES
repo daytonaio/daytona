@@ -103,7 +103,6 @@ daytona_api_client/models/organization_user.py
 daytona_api_client/models/paginated_audit_logs.py
 daytona_api_client/models/paginated_sandboxes.py
 daytona_api_client/models/paginated_snapshots.py
-daytona_api_client/models/paginated_workspaces.py
 daytona_api_client/models/port_preview_url.py
 daytona_api_client/models/position.py
 daytona_api_client/models/posthog_config.py

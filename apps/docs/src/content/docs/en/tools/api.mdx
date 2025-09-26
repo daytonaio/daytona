@@ -2002,29 +2002,13 @@ Get list of open windows
 | Name | Location | Required | Type | Description |
 | :--- | :------- | :------- | :--- | :---------- |
 | **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
-| **`page`** | query | false | undefined | Page number of the results |
-| **`limit`** | query | false | undefined | Number of results per page |
-| **`id`** | query | false | undefined | Filter by partial ID match |
+| **`verbose`** | query | false | undefined | Include verbose output |
 | **`labels`** | query | false | undefined | JSON encoded labels to filter by |
-| **`includeErroredDeleted`** | query | false | undefined | Include results with errored state and deleted desired state |
-| **`states`** | query | false | undefined | List of states to filter by |
-| **`snapshots`** | query | false | undefined | List of snapshot names to filter by |
-| **`regions`** | query | false | undefined | List of regions to filter by |
-| **`minCpu`** | query | false | undefined | Minimum CPU |
-| **`maxCpu`** | query | false | undefined | Maximum CPU |
-| **`minMemoryGiB`** | query | false | undefined | Minimum memory in GiB |
-| **`maxMemoryGiB`** | query | false | undefined | Maximum memory in GiB |
-| **`minDiskGiB`** | query | false | undefined | Minimum disk space in GiB |
-| **`maxDiskGiB`** | query | false | undefined | Maximum disk space in GiB |
-| **`lastEventAfter`** | query | false | undefined | Include items with last event after this timestamp |
-| **`lastEventBefore`** | query | false | undefined | Include items with last event before this timestamp |
-| **`sort`** | query | false | undefined | Field to sort by |
-| **`order`** | query | false | undefined | Direction to sort by |
 
 ### Responses
 | Status Code | Description |
 | :-------- | :---------- |
-| **`200`** | Paginated list of all workspaces |
+| **`200`** | List of all workspacees |
 
 ## POST /workspace
 
