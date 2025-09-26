@@ -30,9 +30,13 @@ function processContent(content) {
     .trim()
 }
 
-function extractSentence(text) {
-  const match = text.match(/[^.!?]*[.!?]/)
-  return match ? match[0].trim() : text.trim().split('\n')[0]
+function extractSentences(text) {
+  // return text
+  const match = text.match(/[^.!?]*[.!?]/g)
+  const sentences = match ? match.map(m => m.trim()) : text.trim().split('\n')
+  return sentences.length > 0
+    ? sentences.filter(s => s.endsWith('.')).join(' ')
+    : ''
 }
 
 function extractHyperlinks(text) {
@@ -50,24 +54,23 @@ function extractRealSentence(text) {
     .filter(s => s.length > 0)
   for (const sentence of sentences) {
     if (isSentence(sentence)) {
-      const hyperlinkMatch = sentence.match(/^\[([^\]]+)\]\(([^\)]+)\)/)
-      if (hyperlinkMatch) {
-        return extractSentence(hyperlinkMatch[1])
-      }
-      return extractSentence(sentence)
+      return extractSentences(sentence)
     }
   }
   return ''
 }
 
 function extractHeadings(content, slug) {
-  const headingRegex = /^(#{1,6})\s+(.*)\n([^#]*)/gm
+  const headingRegex = /^(#{1,6})\s+(.*)\n([\s\S]*?)(?=^#{1,6}\s+|\z)/gm
   let match
   const headings = []
 
   while ((match = headingRegex.exec(content)) !== null) {
     const heading = match[2].trim()
     const textBelow = match[3].trim()
+    if (heading === 'Using a Local Image') {
+      console.log(heading, textBelow)
+    }
     const description = extractHyperlinks(extractRealSentence(textBelow))
     const headingSlug = `${slug}#${heading
       .toLowerCase()
@@ -146,7 +149,7 @@ function searchDocs() {
 function main() {
   const docsData = searchDocs()
   fs.writeFileSync(
-    path.join(__dirname, '../public/search.json'),
+    path.join(__dirname, '../../../dist/apps/docs/dist/client/search.json'),
     JSON.stringify(docsData, null, 2),
     'utf8'
   )
