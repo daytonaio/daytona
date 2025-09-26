@@ -4,10 +4,12 @@
  */
 
 import { ApiProperty, ApiSchema } from '@nestjs/swagger'
-import { IsBoolean, IsInt, IsOptional, IsString, IsArray, IsEnum, IsDate, Min, Max } from 'class-validator'
+import { IsBoolean, IsInt, IsOptional, IsString, IsArray, IsEnum, IsDate, Min } from 'class-validator'
 import { Type } from 'class-transformer'
 import { SandboxState } from '../enums/sandbox-state.enum'
 import { ToArray } from '../../common/decorators/to-array.decorator'
+import { PageNumber } from '../../common/decorators/page-number.decorator'
+import { PageLimit } from '../../common/decorators/page-limit.decorator'
 
 export enum SandboxSortField {
   ID = 'id',
@@ -27,34 +29,10 @@ const VALID_QUERY_STATES = Object.values(SandboxState).filter((state) => state !
 
 @ApiSchema({ name: 'ListSandboxesQuery' })
 export class ListSandboxesQueryDto {
-  @ApiProperty({
-    name: 'page',
-    description: 'Page number of the results',
-    required: false,
-    type: Number,
-    minimum: 1,
-    default: 1,
-  })
-  @IsOptional()
-  @Type(() => Number)
-  @IsInt()
-  @Min(1)
+  @PageNumber(1)
   page = 1
 
-  @ApiProperty({
-    name: 'limit',
-    description: 'Number of results per page',
-    required: false,
-    type: Number,
-    minimum: 1,
-    maximum: 100,
-    default: 10,
-  })
-  @IsOptional()
-  @Type(() => Number)
-  @IsInt()
-  @Min(1)
-  @Max(100)
+  @PageLimit(10)
   limit = 10
 
   @ApiProperty({
