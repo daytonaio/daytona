@@ -47,7 +47,7 @@ export class ApiKeyStrategy extends PassportStrategy(Strategy, 'api-key') implem
     this.logger.debug('Validate method called')
     this.logger.debug(`Validating API key: ${token.substring(0, 8)}...`)
 
-    const sshGatewayApiKey = this.configService.getOrThrow('sshGatewayApiKey')
+    const sshGatewayApiKey = this.configService.getOrThrow('sshGateway.apiKey')
     if (sshGatewayApiKey === token) {
       return {
         role: 'ssh-gateway',

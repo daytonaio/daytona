@@ -50,6 +50,8 @@ type DaytonaConfiguration struct {
 	BillingApiUrl *string `json:"billingApiUrl,omitempty"`
 	// SSH Gateway command
 	SshGatewayCommand *string `json:"sshGatewayCommand,omitempty"`
+	// Base64 encoded SSH Gateway public key
+	SshGatewayPublicKey *string `json:"sshGatewayPublicKey,omitempty"`
 }
 
 type _DaytonaConfiguration DaytonaConfiguration
@@ -449,6 +451,38 @@ func (o *DaytonaConfiguration) SetSshGatewayCommand(v string) {
 	o.SshGatewayCommand = &v
 }
 
+// GetSshGatewayPublicKey returns the SshGatewayPublicKey field value if set, zero value otherwise.
+func (o *DaytonaConfiguration) GetSshGatewayPublicKey() string {
+	if o == nil || IsNil(o.SshGatewayPublicKey) {
+		var ret string
+		return ret
+	}
+	return *o.SshGatewayPublicKey
+}
+
+// GetSshGatewayPublicKeyOk returns a tuple with the SshGatewayPublicKey field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *DaytonaConfiguration) GetSshGatewayPublicKeyOk() (*string, bool) {
+	if o == nil || IsNil(o.SshGatewayPublicKey) {
+		return nil, false
+	}
+	return o.SshGatewayPublicKey, true
+}
+
+// HasSshGatewayPublicKey returns a boolean if a field has been set.
+func (o *DaytonaConfiguration) HasSshGatewayPublicKey() bool {
+	if o != nil && !IsNil(o.SshGatewayPublicKey) {
+		return true
+	}
+
+	return false
+}
+
+// SetSshGatewayPublicKey gets a reference to the given string and assigns it to the SshGatewayPublicKey field.
+func (o *DaytonaConfiguration) SetSshGatewayPublicKey(v string) {
+	o.SshGatewayPublicKey = &v
+}
+
 func (o DaytonaConfiguration) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -480,6 +514,9 @@ func (o DaytonaConfiguration) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.SshGatewayCommand) {
 		toSerialize["sshGatewayCommand"] = o.SshGatewayCommand
+	}
+	if !IsNil(o.SshGatewayPublicKey) {
+		toSerialize["sshGatewayPublicKey"] = o.SshGatewayPublicKey
 	}
 	return toSerialize, nil
 }
