@@ -22,23 +22,20 @@ def interactive_pty_session(sandbox: Sandbox):
 
     # Send interactive command
     print("\nSending interactive read command...")
-    pty_handle.send_input('read -p "Enter your name: " name && echo "Hello, $name!"\n')
+    pty_handle.send_input('printf "Enter your name: " && read name && printf "Hello, %s\\n" "$name"\n')
 
     # Wait and respond
     time.sleep(1)
-    print("\nResponding with 'Alice'...")
     pty_handle.send_input("Alice\n")
 
     pty_handle.resize(PtySize(cols=80, rows=25))
 
     # Send another command
     time.sleep(1)
-    print("\nSending directory listing command...")
     pty_handle.send_input("ls -la\n")
 
     # Send exit command
     time.sleep(1)
-    print("\nSending exit command...")
     pty_handle.send_input("exit\n")
 
     # Using iterator to handle PTY data
@@ -70,7 +67,6 @@ def kill_pty_session(sandbox: Sandbox):
     pty_handle.send_input('while true; do echo "Running... $(date)"; sleep 1; done\n')
 
     # Using thread and wait() method to handle PTY output
-    print("\n--- Using thread and wait() method to handle PTY output ---")
     thread = threading.Thread(target=pty_handle.wait, args=(handle_pty_data, 10))
     thread.start()
 
@@ -78,7 +74,6 @@ def kill_pty_session(sandbox: Sandbox):
     time.sleep(3)
 
     # Kill the PTY session
-    print("\nKilling PTY session...")
     pty_handle.kill()
 
     thread.join()

@@ -54,7 +54,7 @@ func (s *PTYSession) start() error {
 		return errors.New("no shell resolved")
 	}
 
-	cmd := exec.CommandContext(ctx, shell)
+	cmd := exec.CommandContext(ctx, shell, "-i", "-l")
 	cmd.Dir = s.info.Cwd
 
 	// Env
