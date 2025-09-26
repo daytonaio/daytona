@@ -52,7 +52,12 @@ import { SshAccessValidationDto } from '../dto/ssh-access.dto'
 import { VolumeService } from './volume.service'
 import { RedisLockProvider } from '../common/redis-lock.provider'
 import { PaginatedList } from '../../common/interfaces/paginated-list.interface'
-import { SandboxSortField, SandboxSortDirection } from '../dto/list-sandboxes-query.dto'
+import {
+  SandboxSortField,
+  SandboxSortDirection,
+  DEFAULT_SANDBOX_SORT_FIELD,
+  DEFAULT_SANDBOX_SORT_DIRECTION,
+} from '../dto/list-sandboxes-query.dto'
 import { createRangeFilter } from '../../common/utils/range-filter'
 
 const DEFAULT_CPU = 1
@@ -709,7 +714,8 @@ export class SandboxService {
       lastEventBefore,
     } = filters || {}
 
-    const { field: sortField, direction: sortDirection } = sort || {}
+    const { field: sortField = DEFAULT_SANDBOX_SORT_FIELD, direction: sortDirection = DEFAULT_SANDBOX_SORT_DIRECTION } =
+      sort || {}
 
     const baseFindOptions: FindOptionsWhere<Sandbox> = {
       organizationId,
