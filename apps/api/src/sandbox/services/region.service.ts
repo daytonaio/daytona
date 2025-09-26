@@ -34,9 +34,7 @@ export class RegionService {
       throw new ConflictException(`Region with name ${createRegionDto.name} already exists in this organization`)
     }
 
-    const region = new Region()
-    region.name = createRegionDto.name
-    region.organizationId = organization.id
+    const region = new Region(createRegionDto.name, organization.id)
 
     if (createRegionDto.dockerRegistryId) {
       const dockerRegistry = await this.dockerRegistryRepository.findOne({

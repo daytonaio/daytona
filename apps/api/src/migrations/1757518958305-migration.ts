@@ -24,12 +24,9 @@ export class Migration1757518958305 implements MigrationInterface {
       `INSERT INTO "region" ("id", "name", "organizationId", "dockerRegistryId") VALUES ('${GlobalRegionsIds.EU}', 'eu', '${GLOBAL_REGION_ORGANIZATION_ID}', NULL)`,
     )
 
-    // switch to runner region reference to uuid
+    // switch runner region reference to id
     await queryRunner.renameColumn('runner', 'region', 'regionId')
     await queryRunner.query(`ALTER TABLE "runner" ALTER COLUMN "regionId" DROP DEFAULT`)
-    await queryRunner.query(`UPDATE "runner" SET "regionId" = '${GlobalRegionsIds.US}' WHERE "regionId" = 'us'`)
-    await queryRunner.query(`UPDATE "runner" SET "regionId" = '${GlobalRegionsIds.EU}' WHERE "regionId" = 'eu'`)
-    await queryRunner.query(`ALTER TABLE "runner" ALTER COLUMN "regionId" TYPE uuid USING "regionId"::uuid`)
 
     // update api key permission enum
     await queryRunner.query(`ALTER TYPE "public"."api_key_permissions_enum" RENAME TO "api_key_permissions_enum_old"`)
@@ -78,11 +75,6 @@ export class Migration1757518958305 implements MigrationInterface {
     await queryRunner.query(`ALTER TYPE "public"."api_key_permissions_enum_old" RENAME TO "api_key_permissions_enum"`)
 
     // revert to region varchar
-    await queryRunner.query(
-      `ALTER TABLE "runner" ALTER COLUMN "regionId" TYPE character varying USING "regionId"::character varying`,
-    )
-    await queryRunner.query(`UPDATE "runner" SET "regionId" = 'us' WHERE "regionId" = '${GlobalRegionsIds.US}'`)
-    await queryRunner.query(`UPDATE "runner" SET "regionId" = 'eu' WHERE "regionId" = '${GlobalRegionsIds.EU}'`)
     await queryRunner.renameColumn('runner', 'regionId', 'region')
     await queryRunner.query(`ALTER TABLE "runner" ALTER COLUMN "region" SET DEFAULT 'us'`)
 
