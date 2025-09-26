@@ -217,7 +217,7 @@ export class WorkspaceController {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     @Query('verbose') verbose?: boolean,
   ): Promise<WorkspaceDto> {
-    const workspace = await this.workspaceService.findOne(workspaceId, true)
+    const workspace = await this.workspaceService.findOne(workspaceId)
 
     let runner: Runner
     if (workspace.runnerId) {

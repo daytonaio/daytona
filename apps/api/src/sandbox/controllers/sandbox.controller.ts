@@ -273,7 +273,7 @@ export class SandboxController {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     @Query('verbose') verbose?: boolean,
   ): Promise<SandboxDto> {
-    const sandbox = await this.sandboxService.findOne(sandboxId, true)
+    const sandbox = await this.sandboxService.findOne(sandboxId)
 
     let runner: Runner
     if (sandbox.runnerId) {
