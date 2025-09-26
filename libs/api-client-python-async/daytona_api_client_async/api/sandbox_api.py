@@ -1172,6 +1172,7 @@ class SandboxApi:
     async def delete_sandbox(
         self,
         sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
+        force: StrictBool,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
@@ -1191,6 +1192,8 @@ class SandboxApi:
 
         :param sandbox_id: ID of the sandbox (required)
         :type sandbox_id: str
+        :param force: (required)
+        :type force: bool
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -1217,6 +1220,7 @@ class SandboxApi:
 
         _param = self._delete_sandbox_serialize(
             sandbox_id=sandbox_id,
+            force=force,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -1242,6 +1246,7 @@ class SandboxApi:
     async def delete_sandbox_with_http_info(
         self,
         sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
+        force: StrictBool,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
@@ -1261,6 +1266,8 @@ class SandboxApi:
 
         :param sandbox_id: ID of the sandbox (required)
         :type sandbox_id: str
+        :param force: (required)
+        :type force: bool
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -1287,6 +1294,7 @@ class SandboxApi:
 
         _param = self._delete_sandbox_serialize(
             sandbox_id=sandbox_id,
+            force=force,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -1312,6 +1320,7 @@ class SandboxApi:
     async def delete_sandbox_without_preload_content(
         self,
         sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
+        force: StrictBool,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
@@ -1331,6 +1340,8 @@ class SandboxApi:
 
         :param sandbox_id: ID of the sandbox (required)
         :type sandbox_id: str
+        :param force: (required)
+        :type force: bool
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -1357,6 +1368,7 @@ class SandboxApi:
 
         _param = self._delete_sandbox_serialize(
             sandbox_id=sandbox_id,
+            force=force,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -1377,6 +1389,7 @@ class SandboxApi:
     def _delete_sandbox_serialize(
         self,
         sandbox_id,
+        force,
         x_daytona_organization_id,
         _request_auth,
         _content_type,
@@ -1402,6 +1415,10 @@ class SandboxApi:
         if sandbox_id is not None:
             _path_params['sandboxId'] = sandbox_id
         # process the query parameters
+        if force is not None:
+            
+            _query_params.append(('force', force))
+            
         # process the header parameters
         if x_daytona_organization_id is not None:
             _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id
