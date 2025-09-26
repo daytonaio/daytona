@@ -30,8 +30,6 @@ import { RegionDto } from '../dto/region.dto'
 import { Audit, TypedRequest } from '../../audit/decorators/audit.decorator'
 import { AuditAction } from '../../audit/enums/audit-action.enum'
 import { AuditTarget } from '../../audit/enums/audit-target.enum'
-import { Region } from '../decorators/region.decorator'
-import { Region as RegionEntity } from '../entities/region.entity'
 import { RegionAccessGuard } from '../guards/region-access.guard'
 
 @ApiTags('regions')
@@ -111,7 +109,8 @@ export class RegionController {
   })
   @UseGuards(RegionAccessGuard)
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.READ_REGIONS])
-  async getRegionById(@Region() region: RegionEntity): Promise<RegionDto> {
+  async getRegionById(@Param('id') id: string): Promise<RegionDto> {
+    const region = await this.regionService.findOne(id)
     return RegionDto.fromRegion(region)
   }
 

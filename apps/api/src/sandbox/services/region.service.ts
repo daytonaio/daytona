@@ -65,6 +65,22 @@ export class RegionService {
     return region
   }
 
+  async getOrganizationId(regionId: string): Promise<string> {
+    const region = await this.regionRepository.findOne({
+      where: {
+        id: regionId,
+      },
+      select: ['organizationId'],
+      loadEagerRelations: false,
+    })
+
+    if (!region || !region.organizationId) {
+      throw new NotFoundException('Region not found')
+    }
+
+    return region.organizationId
+  }
+
   async findAll(organizationId: string): Promise<Region[]> {
     return this.regionRepository.find({
       where: {

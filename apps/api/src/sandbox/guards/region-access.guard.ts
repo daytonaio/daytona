@@ -20,11 +20,10 @@ export class RegionAccessGuard implements CanActivate {
     const authContext: OrganizationAuthContext = request.user
 
     try {
-      const region = await this.regionService.findOne(regionId)
-      if (authContext.role !== SystemRole.ADMIN && region.organizationId !== authContext.organizationId) {
+      const regionOrganizationId = await this.regionService.getOrganizationId(regionId)
+      if (authContext.role !== SystemRole.ADMIN && regionOrganizationId !== authContext.organizationId) {
         throw new ForbiddenException('Request organization ID does not match resource organization ID')
       }
-      request.region = region
       return true
     } catch (error) {
       throw new NotFoundException(`Region with ID ${regionId} not found`)
