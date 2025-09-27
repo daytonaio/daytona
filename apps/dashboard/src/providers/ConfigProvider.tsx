@@ -32,7 +32,7 @@ export function ConfigProvider(props: Props) {
       extraQueryParams: {
         audience: config.oidc.audience,
       },
-      scope: 'openid profile email offline_access',
+      scope: 'openid profile email',
       redirect_uri: window.location.origin,
       staleStateAgeInSeconds: 60,
       accessTokenExpiringNotificationTimeInSeconds: 290,
