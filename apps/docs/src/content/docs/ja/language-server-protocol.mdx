@@ -1,110 +1,111 @@
 ---
-title: Language Server Protocol
+title: LSP (言語サーバープロトコル)
 ---
 
 import { TabItem, Tabs } from '@astrojs/starlight/components'
 
-Daytona（デイトナ）SDKは、サンドボックスインスタンス経由でLSP（Language Server Protocol）をサポートします。これにより、コード補完や診断などの高度な言語機能を利用できます。
+Daytona SDKは、サンドボックスインスタンスを介してLSP (言語サーバープロトコル) をサポートします。これにより、コード補完や診断などの高度な言語機能を利用できます。
 
-## LSPサーバーの作成
+## LSPサーバーの作成 \{#creating-lsp-servers\}
 
-Daytona（デイトナ）SDKは、PythonおよびTypeScriptでLSPサーバーを作成する機能を提供します。`path_to_project` の基準パスはデフォルトで現在のサンドボックスユーザーのホーム直下です。たとえば `workspace/project` は `/home/[username]/workspace/project` を指します。先頭を `/` にすることで絶対パスも指定できます。
-
-<Tabs>
-<TabItem label="Python" icon="seti:python">
-```python
-from daytona import Daytona, LspLanguageId
-
-# サンドボックスを作成
-
-daytona = Daytona()
-sandbox = daytona.create()
-
-# Python用のLSPサーバーを作成
-
-lsp_server = sandbox.create_lsp_server(
-    language_id=LspLanguageId.PYTHON,
-    path_to_project="workspace/project"
-)
-
-```
-</TabItem>
-<TabItem label="TypeScript" icon="seti:typescript">
-```typescript
-import { Daytona, LspLanguageId } from '@daytonaio/sdk'
-
-// サンドボックスを作成
-const daytona = new Daytona()
-const sandbox = await daytona.create({
-    language: 'typescript'
-})
-
-// TypeScript用のLSPサーバーを作成
-const lspServer = await sandbox.createLspServer(
-    LspLanguageId.TYPESCRIPT,
-    "workspace/project"
-)
-```
-
-</TabItem>
-</Tabs>
-
-## サポート対象の言語
-
-Daytona SDK では、Python および TypeScript の `LspLanguageId` 列挙体を使用して、各種言語向けの LSP サーバーを作成できます。
+Daytona SDK は、Python と TypeScript で LSP サーバーを作成する機能を提供します。`path_to_project` の基準パスは、デフォルトで現在のサンドボックスの作業ディレクトリです。Dockerfile に WORKDIR が指定されていればそれを使用し、なければユーザーのホームディレクトリが使用されます。例: `workspace/project` は `/my-work-dir/workspace/project` を指します。先頭を `/` にすると、絶対パスを指定できます。
 
 <Tabs>
-<TabItem label="Python" icon="seti:python">
-```python
-from daytona import LspLanguageId
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    from daytona import Daytona, LspLanguageId
 
-# 利用可能な言語 ID
+    # Create Sandbox
 
-LspLanguageId.PYTHON
-LspLanguageId.TYPESCRIPT
+    daytona = Daytona()
+    sandbox = daytona.create()
 
-```
-</TabItem>
-<TabItem label="TypeScript" icon="seti:typescript">
-```typescript
-import { LspLanguageId } from '@daytonaio/sdk'
+    # Create LSP server for Python
 
-// 利用可能な言語 ID
-LspLanguageId.PYTHON      
-LspLanguageId.TYPESCRIPT    
-```
+    lsp_server = sandbox.create_lsp_server(
+        language_id=LspLanguageId.PYTHON,
+        path_to_project="workspace/project"
+    )
 
-</TabItem>
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    import { Daytona, LspLanguageId } from '@daytonaio/sdk'
+
+    // Create sandbox
+    const daytona = new Daytona()
+    const sandbox = await daytona.create({
+        language: 'typescript'
+    })
+
+    // Create LSP server for TypeScript
+    const lspServer = await sandbox.createLspServer(
+        LspLanguageId.TYPESCRIPT,
+        "workspace/project"
+    )
+    ```
+  </TabItem>
 </Tabs>
 
-- `LspLanguageId.PYTHON`: Python 向け言語サーバー。
-- `LspLanguageId.TYPESCRIPT`: TypeScript/JavaScript 向け言語サーバー。
+## 対応言語 \{#supported-languages\}
 
-## LSP 機能
+Daytona SDK は、Python と TypeScript の `LspLanguageId` 列挙型を使用して、各種言語向けの LSP サーバーを作成できます。
+
+<Tabs>
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    from daytona import LspLanguageId
+
+    # 利用可能な言語 ID
+
+    LspLanguageId.PYTHON
+    LspLanguageId.TYPESCRIPT
+
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    import { LspLanguageId } from '@daytonaio/sdk'
+
+    // 利用可能な言語 ID
+    LspLanguageId.PYTHON      
+    LspLanguageId.TYPESCRIPT    
+    ```
+  </TabItem>
+</Tabs>
+
+* `LspLanguageId.PYTHON`: Python の言語サーバー。
+* `LspLanguageId.TYPESCRIPT`: TypeScript/JavaScript の言語サーバー。
+
+## LSP 機能 \{#lsp-features\}
 
 Daytona SDK は、コード解析や編集のための各種 LSP 機能を提供します。
 
-### コード補完
+### コード補完 \{#code-completion\}
 
-Daytona SDK では、Python と TypeScript を用いて、ファイル内の特定位置のコード補完候補を取得できます。
+Daytona SDK は、Python および TypeScript で、ファイル内の特定位置に対するコード補完を取得する機能を提供します。
 
 <Tabs>
-<TabItem label="Python" icon="seti:python">
-```python
-completions = lsp_server.completions(
-    path="workspace/project/main.py",
-    position={"line": 10, "character": 15}
-)
-print(f"Completions: {completions}")
-```
-</TabItem>
-<TabItem label="TypeScript" icon="seti:typescript">
-```typescript
-const completions = await lspServer.completions(
-    "workspace/project/main.ts",
-    { line: 10, character: 15 }
-)
-console.log('Completions:', completions)
-```
-</TabItem>
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    completions = lsp_server.completions(
+        path="workspace/project/main.py",
+        position={"line": 10, "character": 15}
+    )
+    print(f"Completions: {completions}")
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    const completions = await lspServer.completions(
+        "workspace/project/main.ts",
+        { line: 10, character: 15 }
+    )
+    console.log('Completions:', completions)
+    ```
+  </TabItem>
 </Tabs>

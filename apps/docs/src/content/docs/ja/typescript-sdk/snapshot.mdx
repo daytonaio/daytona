@@ -3,14 +3,13 @@ title: "スナップショット"
 hideTitleOnPage: true
 ---
 
-
-## SnapshotService
+## SnapshotService \{#snapshotservice\}
 
 Daytona スナップショットを管理するためのサービス。スナップショットの一覧表示、取得、作成、削除に利用できます。
 
-### Constructors
+### Constructors \{#constructors\}
 
-#### new SnapshotService()
+#### new SnapshotService() \{#new-snapshotservice\}
 
 ```ts
 new SnapshotService(
@@ -21,18 +20,17 @@ new SnapshotService(
 
 **Parameters**:
 
-- `clientConfig` _Configuration_
-- `snapshotsApi` _SnapshotsApi_
-- `objectStorageApi` _ObjectStorageApi_
-
+* `clientConfig` *Configuration*
+* `snapshotsApi` *SnapshotsApi*
+* `objectStorageApi` *ObjectStorageApi*
 
 **Returns**:
 
-- `SnapshotService`
+* `SnapshotService`
 
-### Methods
+### Methods \{#methods\}
 
-#### activate()
+#### activate() \{#activate\}
 
 ```ts
 activate(snapshot: Snapshot): Promise<Snapshot>
@@ -42,16 +40,15 @@ activate(snapshot: Snapshot): Promise<Snapshot>
 
 **Parameters**:
 
-- `snapshot` _Snapshot_ - 有効化するスナップショット
-
+* `snapshot` *Snapshot* - 有効化するスナップショット
 
 **Returns**:
 
-- `Promise<Snapshot>` - 有効化された Snapshot インスタンス
+* `Promise<Snapshot>` - 有効化された Snapshot インスタンス
 
 ***
 
-#### create()
+#### create() \{#create\}
 
 ```ts
 create(params: CreateSnapshotParams, options: {
@@ -64,15 +61,14 @@ create(params: CreateSnapshotParams, options: {
 
 **Parameters**:
 
-- `params` _CreateSnapshotParams_ - スナップショット作成用のパラメータ。
-- `options` _作成処理のオプション。_
-- `onLogs?` _\(chunk: string\) =\> void_ - スナップショット作成時のログを処理するコールバック関数。
-- `timeout?` _number_ - 既定ではタイムアウトなし。秒単位（0 はタイムアウトなし）。
-
+* `params` *CreateSnapshotParams* - スナップショット作成用のパラメータ。
+* `options` *作成処理のオプション。*
+* `onLogs?` *(chunk: string) =&gt; void* - スナップショット作成時のログを処理するコールバック関数。
+* `timeout?` *number* - 既定ではタイムアウトなし。秒単位（0 はタイムアウトなし）。
 
 **Returns**:
 
-- `Promise<Snapshot>`
+* `Promise<Snapshot>`
 
 **Example:**
 
@@ -83,7 +79,7 @@ await daytona.snapshot.create({ name: 'my-snapshot', image: image }, { onLogs: c
 
 ***
 
-#### delete()
+#### delete() \{#delete\}
 
 ```ts
 delete(snapshot: Snapshot): Promise<void>
@@ -93,12 +89,11 @@ delete(snapshot: Snapshot): Promise<void>
 
 **Parameters**:
 
-- `snapshot` _Snapshot_ - 削除するスナップショット
-
+* `snapshot` *Snapshot* - 削除するスナップショット
 
 **Returns**:
 
-- `Promise<void>`
+* `Promise<void>`
 
 **Throws**:
 
@@ -115,7 +110,7 @@ console.log("Snapshot deleted successfully");
 
 ***
 
-#### get()
+#### get() \{#get\}
 
 ```ts
 get(name: string): Promise<Snapshot>
@@ -125,12 +120,11 @@ get(name: string): Promise<Snapshot>
 
 **Parameters**:
 
-- `name` _string_ - 取得するスナップショットの名前
-
+* `name` *string* - 取得するスナップショットの名前
 
 **Returns**:
 
-- `Promise<Snapshot>` - 要求されたスナップショット
+* `Promise<Snapshot>` - 要求されたスナップショット
 
 **Throws**:
 
@@ -146,7 +140,7 @@ console.log(`Snapshot ${snapshot.name} is in state ${snapshot.state}`);
 
 ***
 
-#### list()
+#### list() \{#list\}
 
 ```ts
 list(): Promise<Snapshot[]>
@@ -156,7 +150,7 @@ list(): Promise<Snapshot[]>
 
 **Returns**:
 
-- `Promise<Snapshot[]>` - ユーザーがアクセス可能なすべてのスナップショットの一覧
+* `Promise<Snapshot[]>` - ユーザーがアクセス可能なすべてのスナップショットの一覧
 
 **Example:**
 
@@ -169,8 +163,7 @@ snapshots.forEach(snapshot => console.log(`${snapshot.name} (${snapshot.imageNam
 
 ***
 
-
-## CreateSnapshotParams
+## CreateSnapshotParams \{#createsnapshotparams\}
 
 ```ts
 type CreateSnapshotParams = {
@@ -185,13 +178,12 @@ type CreateSnapshotParams = {
 
 **型宣言**:
 
-- `entrypoint?` _string\[\]_
-- `image` _string \| Image_
-- `name` _string_
-- `resources?` _Resources_
+* `entrypoint?` *string[]*
+* `image` *string | Image*
+* `name` *string*
+* `resources?` *Resources*
 
-
-## スナップショット
+## スナップショット \{#snapshot\}
 
 ```ts
 type Snapshot = SnapshotDto & {
@@ -203,5 +195,4 @@ type Snapshot = SnapshotDto & {
 
 **型定義**:
 
-- `\_\_brand` _"Snapshot"_
-
+* `\_\_brand` *&quot;Snapshot&quot;*

@@ -3,20 +3,19 @@ title: "チャート"
 hideTitleOnPage: true
 ---
 
-
-## ChartType
+## ChartType \{#charttype\}
 
 チャートの種類
 
 **列挙メンバー**:
 
-- `BAR`（"bar"）
-- `LINE`（"line"）
-- `PIE`（"pie"）
-- `SCATTER`（"scatter"）
-- `UNKNOWN`（"unknown"）
+* `BAR`（&quot;bar&quot;）
+* `LINE`（&quot;line&quot;）
+* `PIE`（&quot;pie&quot;）
+* `SCATTER`（&quot;scatter&quot;）
+* `UNKNOWN`（&quot;unknown&quot;）
 
-## parseChart()
+## parseChart() \{#parsechart\}
 
 ```ts
 function parseChart(data: any): Chart
@@ -24,17 +23,15 @@ function parseChart(data: any): Chart
 
 **パラメータ**:
 
-- `data` _any_
-
+* `data` *any*
 
 **戻り値**:
 
-- `Chart`
+* `Chart`
 
 ***
 
-
-## BarChart
+## BarChart \{#barchart\}
 
 ```ts
 type BarChart = Chart2D & {
@@ -47,12 +44,10 @@ type BarChart = Chart2D & {
 
 **型定義**:
 
-- `elements` _BarData\[\]_ - 棒グラフの要素
-- `type` _BAR_ - グラフの種類
-    
+* `elements` *BarData[]* - 棒グラフの要素
+* `type` *BAR* - グラフの種類
 
-
-## BarData
+## BarData \{#bardata\}
 
 ```ts
 type BarData = {
@@ -66,13 +61,11 @@ type BarData = {
 
 **型定義**:
 
-- `group` _string_ - バーの属するグループ
-- `label` _string_ - バーのラベル
-- `value` _string_ - バーの値
-    
+* `group` *string* - バーの属するグループ
+* `label` *string* - バーのラベル
+* `value` *string* - バーの値
 
-
-## BoxAndWhiskerChart
+## BoxAndWhiskerChart \{#boxandwhiskerchart\}
 
 ```ts
 type BoxAndWhiskerChart = Chart2D & {
@@ -85,12 +78,10 @@ type BoxAndWhiskerChart = Chart2D & {
 
 **型定義**:
 
-- `elements` _BoxAndWhiskerData\[\]_ - 図の箱ひげ要素
-- `type` _BOX\_AND\_WHISKER_ - 図の種類
-    
+* `elements` *BoxAndWhiskerData[]* - 図の箱ひげ要素
+* `type` *BOX&#95;AND&#95;WHISKER* - 図の種類
 
-
-## BoxAndWhiskerData
+## BoxAndWhiskerData \{#boxandwhiskerdata\}
 
 ```ts
 type BoxAndWhiskerData = {
@@ -107,15 +98,14 @@ type BoxAndWhiskerData = {
 
 **型定義**:
 
-- `first_quartile` _number_ - 箱ひげの第1四分位数
-- `label` _string_ - 箱ひげのラベル
-- `max` _number_ - 箱ひげの第3四分位数
-- `median` _number_ - 箱ひげの中央値
-- `min` _number_ - 箱ひげの最小値
-- `outliers` _number[]_
+* `first_quartile` *number* - 箱ひげの第1四分位数
+* `label` *string* - 箱ひげのラベル
+* `max` *number* - 箱ひげの第3四分位数
+* `median` *number* - 箱ひげの中央値
+* `min` *number* - 箱ひげの最小値
+* `outliers` *number[]*
 
-
-## チャート
+## チャート \{#chart\}
 
 ```ts
 type Chart = {
@@ -130,14 +120,12 @@ matplotlib のメタデータを含むチャートを表します。
 
 **型定義**:
 
-- `elements` _any\[\]_ - チャートの要素
-- `png?` _string_ - base64 でエンコードされたチャートの PNG 表現
-- `title` _string_ - チャートのタイトル
-- `type` _ChartType_ - チャートのタイプ
-    
+* `elements` *any[]* - チャートの要素
+* `png?` *string* - base64 でエンコードされたチャートの PNG 表現
+* `title` *string* - チャートのタイトル
+* `type` *ChartType* - チャートのタイプ
 
-
-## Chart2D
+## Chart2D \{#chart2d\}
 
 ```ts
 type Chart2D = Chart & {
@@ -150,12 +138,10 @@ type Chart2D = Chart & {
 
 **型宣言**:
 
-- `x\_label?` _string_ - x軸のラベル
-- `y\_label?` _string_ - y軸のラベル
-    
+* `x\_label?` *string* - x軸のラベル
+* `y\_label?` *string* - y軸のラベル
 
-
-## CompositeChart
+## CompositeChart \{#compositechart\}
 
 ```ts
 type CompositeChart = Chart & {
@@ -168,12 +154,10 @@ type CompositeChart = Chart & {
 
 **型宣言**:
 
-- `elements` _Chart\[\]_ - 合成チャートを構成するチャート群
-- `type` _COMPOSITE\_CHART_ - チャートのタイプ
-    
+* `elements` *Chart[]* - 合成チャートを構成するチャート群
+* `type` *COMPOSITE&#95;CHART* - チャートのタイプ
 
-
-## LineChart
+## LineChart \{#linechart\}
 
 ```ts
 type LineChart = PointChart & {
@@ -185,11 +169,9 @@ type LineChart = PointChart & {
 
 **型定義**:
 
-- `type` _LINE_ - チャートのタイプ
-    
+* `type` *LINE* - チャートのタイプ
 
-
-## PieChart
+## PieChart \{#piechart\}
 
 ```ts
 type PieChart = Chart & {
@@ -202,12 +184,10 @@ type PieChart = Chart & {
 
 **型定義**:
 
-- `elements` _PieData\[\]_ - グラフの各扇形（スライス）
-- `type` _PIE_ - グラフのタイプ
-    
+* `elements` *PieData[]* - グラフの各扇形（スライス）
+* `type` *PIE* - グラフのタイプ
 
-
-## PieData
+## PieData \{#piedata\}
 
 ```ts
 type PieData = {
@@ -221,13 +201,11 @@ type PieData = {
 
 **型定義**:
 
-- `angle` _number_ - スライスの角度
-- `label` _string_ - スライスのラベル
-- `radius` _number_ - スライスの半径
-    
+* `angle` *number* - スライスの角度
+* `label` *string* - スライスのラベル
+* `radius` *number* - スライスの半径
 
-
-## PointChart
+## PointChart \{#pointchart\}
 
 ```ts
 type PointChart = Chart2D & {
@@ -245,17 +223,15 @@ type PointChart = Chart2D & {
 
 **型定義**:
 
-- `elements` _PointData\[\]_ - グラフの点
-- `x\_scale` _string_ - x軸のスケール
-- `x\_tick\_labels` _string\[\]_ - x軸の目盛ラベル
-- `x\_ticks` _\(number \| string\)\[\]_ - x軸の目盛
-- `y\_scale` _string_ - y軸のスケール
-- `y\_tick\_labels` _string\[\]_ - y軸の目盛ラベル
-- `y\_ticks` _\(number \| string\)\[\]_ - y軸の目盛
-    
+* `elements` *PointData[]* - グラフの点
+* `x\_scale` *string* - x軸のスケール
+* `x\_tick\_labels` *string[]* - x軸の目盛ラベル
+* `x\_ticks` *(number | string)[]* - x軸の目盛
+* `y\_scale` *string* - y軸のスケール
+* `y\_tick\_labels` *string[]* - y軸の目盛ラベル
+* `y\_ticks` *(number | string)[]* - y軸の目盛
 
-
-## PointData
+## PointData \{#pointdata\}
 
 ```ts
 type PointData = {
@@ -268,12 +244,10 @@ type PointData = {
 
 **型宣言**:
 
-- `label` _string_ - 点のラベル
-- `points` _\[number \| string, number \| string\]\[\]_ - チャートの座標点一覧
-    
+* `label` *string* - 点のラベル
+* `points` *[number | string, number | string][]* - チャートの座標点一覧
 
-
-## ScatterChart
+## ScatterChart \{#scatterchart\}
 
 ```ts
 type ScatterChart = PointChart & {
@@ -285,5 +259,4 @@ type ScatterChart = PointChart & {
 
 **型宣言**:
 
-- `type` _SCATTER_ - チャートの種類
-
+* `type` *SCATTER* - チャートの種類

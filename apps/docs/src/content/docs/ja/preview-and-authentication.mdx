@@ -2,45 +2,67 @@
 title: プレビューと認証
 ---
 
-import { Tabs, TabItem } from '@astrojs/starlight/components';
+import { Tabs, TabItem } from '@astrojs/starlight/components'
 
-ポート範囲 `3000-9999` でHTTPトラフィックを待ち受けるプロセスは、プレビューリンクで公開して確認できます。
+ポート範囲 `3000-9999` で HTTP トラフィックを待ち受けるプロセスは、プレビューリンクで公開できます。
 
-プレビューリンクの形式はポート番号とサンドボックス（Sandbox）IDの組み合わせです。例:
-`https://3000-sandbox-123456.proxy.daytona.work`
+プレビューリンクは、ポートとサンドボックス ID の組み合わせで構成されます。例:
+`https://3000-sandbox-123456.proxy.daytona.works`
 
-サンドボックスの `public` プロパティが `true` の場合、これらのリンクは一般公開されます。そうでない場合、プレビューリンクにアクセスできるのは当該サンドボックスの組織（Organization）ユーザーのみです。
+サンドボックスの `public` プロパティが `true` の場合、これらのリンクは誰でもアクセスできます。そうでない場合は、プレビューリンクはそのサンドボックスの組織のユーザーのみが利用できます。
 
-プログラムからアクセスする場合（例: `curl`）、プレビュートークン（x-daytona-preview-token）をヘッダーに指定してプレビューURLへアクセスします:
+プログラムからアクセスする場合（例: curl）、プレビュー URL にアクセスする際の認可トークンとして `X-Daytona-Preview-Token` ヘッダーを使用してください:
 
 ```bash
 curl -H "x-daytona-preview-token: vg5c0ylmcimr8b_v1ne0u6mdnvit6gc0" \
-https://3000-sandbox-123456.proxy.daytona.work
+https://3000-sandbox-123456.proxy.daytona.works
 ```
 
-特定のポートに対応するプレビューリンクとトークンを取得するには、SDKのメソッドを使用します:
+もしくは、追加ヘッダーをサポートしないランタイム（例: ブラウザランタイム）のために、クエリパラメータ `DAYTONA_SANDBOX_AUTH_KEY` で認可トークンを渡すこともできます:
+
+```bash
+curl "https://3000-sandbox-123456.proxy.daytona.works?DAYTONA_SANDBOX_AUTH_KEY=vg5c0ylmcimr8b_v1ne0u6mdnvit6gc0"
+```
+
+特定のポートに対するプレビューリンクと認可トークンは、SDK のメソッドで取得できます:
 
 <Tabs>
-<TabItem label="Python" icon="seti:python">
-```python
+  <TabItem label="Python" icon="seti:python">
+    ```python
 
-preview_info = sandbox.get_preview_link(3000)
+    preview_info = sandbox.get_preview_link(3000)
 
-print(f"Preview link url: {preview_info.url}")
-print(f"Preview link token: {preview_info.token}")
+    print(f"Preview link url: {preview_info.url}")
+    print(f"Preview link token: {preview_info.token}")
 
-```
+    ```
+  </TabItem>
 
-</TabItem>
-<TabItem label="TypeScript" icon="seti:typescript">
-```typescript
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
 
-const previewInfo = await sandbox.getPreviewUrl(3000);
+    const previewInfo = await sandbox.getPreviewUrl(3000);
 
-console.log(`Preview link url: ${previewInfo.url}`);
-console.log(`Preview link token: ${previewInfo.token}`);
+    console.log(`Preview link url: ${previewInfo.url}`);
+    console.log(`Preview link token: ${previewInfo.token}`);
 
-```
-
-</TabItem>
+    ```
+  </TabItem>
 </Tabs>
+
+:::tip
+Daytona の URL を使わずに独自ドメインでプレビューを提供したい場合は、[カスタムドメイン/認証](/docs/ja/custom-domain-authentication) セクションを参照してください。
+:::
+
+## 警告ページ \{#warning-page\}
+
+ブラウザでプレビューリンクを開くと、初回は警告ページが表示されます。
+この警告は、プレビューURLにアクセスする際の潜在的なリスクを利用者に知らせるためのセキュリティ対策です。
+
+警告ページは、ブラウザでプレビューリンクを読み込む場合にのみ表示されます。
+
+この警告を回避するには、次のいずれかを実施してください:
+
+* `X-Daytona-Skip-Preview-Warning: true` ヘッダーを送信する
+* [Tier 3](/docs/ja/limits) にアップグレードする
+* 独自の[カスタムプレビュー用プロキシ](/docs/ja/custom-domain-authentication)をデプロイする
