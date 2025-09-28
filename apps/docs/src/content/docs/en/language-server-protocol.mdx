@@ -17,12 +17,10 @@ the Dockerfile if present, or falling back to the user's home directory if not -
 from daytona import Daytona, LspLanguageId
 
 # Create Sandbox
-
 daytona = Daytona()
 sandbox = daytona.create()
 
 # Create LSP server for Python
-
 lsp_server = sandbox.create_lsp_server(
     language_id=LspLanguageId.PYTHON,
     path_to_project="workspace/project"

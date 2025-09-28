@@ -18,10 +18,12 @@ You can select the region during the Daytona [configuration](/docs/en/configurat
 ```python
 from daytona import Daytona, DaytonaConfig
 
+# Configure Daytona to use the US region
 config = DaytonaConfig(
     target="us"
 )
 
+# Initialize the Daytona client with the specified configuration
 daytona = Daytona(config)
 ```
 </TabItem>
@@ -29,6 +31,7 @@ daytona = Daytona(config)
 ```typescript
 import { Daytona } from '@daytonaio/sdk';
 
+// Configure Daytona to use the EU region
 const daytona: Daytona = new Daytona({
     target: "eu"
 });
