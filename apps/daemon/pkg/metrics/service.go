@@ -15,16 +15,18 @@ type Service struct {
 	collector    MetricsCollector
 	cache        *ResourceMetrics
 	updatePeriod time.Duration
+	sandboxId    string
 	mu           sync.RWMutex
 	stopChan     chan struct{}
 	stoppedChan  chan struct{}
 }
 
 // NewService creates a new metrics service with the given collector and update period
-func NewService(collector MetricsCollector, updatePeriod time.Duration) *Service {
+func NewService(collector MetricsCollector, updatePeriod time.Duration, sandboxId string) *Service {
 	return &Service{
 		collector:    collector,
 		updatePeriod: updatePeriod,
+		sandboxId:    sandboxId,
 		cache:        &ResourceMetrics{},
 		stopChan:     make(chan struct{}),
 		stoppedChan:  make(chan struct{}),
@@ -56,28 +58,65 @@ func (s *Service) GetMetrics() ResourceMetrics {
 }
 
 func (s *Service) collect() error {
+	var lastError error
+	metrics := &ResourceMetrics{}
+
+	// Track which metrics were successfully collected
+	var cpuCollected, memCollected, diskCollected bool
+
+	// Collect CPU metrics
 	cpu, err := s.collector.GetCPUPercentage()
 	if err != nil {
-		return err
+		log.Warnf("Failed to collect CPU metrics: %v", err)
+		lastError = err
+	} else {
+		metrics.CPUPercentage = cpu
+		cpuCollected = true
 	}
 
+	// Collect Memory metrics
 	memory, err := s.collector.GetMemoryPercentage()
 	if err != nil {
-		return err
+		log.Warnf("Failed to collect Memory metrics: %v", err)
+		lastError = err
+	} else {
+		metrics.MemoryPercentage = memory
+		memCollected = true
 	}
 
+	// Collect Disk metrics
 	disk, err := s.collector.GetDiskPercentage()
 	if err != nil {
-		return err
+		log.Warnf("Failed to collect Disk metrics: %v", err)
+		lastError = err
+	} else {
+		metrics.DiskPercentage = disk
+		diskCollected = true
 	}
 
-	s.mu.Lock()
-	s.cache.CPUPercentage = cpu
-	s.cache.MemoryPercentage = memory
-	s.cache.DiskPercentage = disk
-	s.mu.Unlock()
+	// Update cache if we collected any metrics successfully
+	if cpuCollected || memCollected || diskCollected {
+		s.mu.Lock()
+		// Only update metrics that were successfully collected
+		if cpuCollected {
+			s.cache.CPUPercentage = metrics.CPUPercentage
+		}
+		if memCollected {
+			s.cache.MemoryPercentage = metrics.MemoryPercentage
+		}
+		if diskCollected {
+			s.cache.DiskPercentage = metrics.DiskPercentage
+		}
+		s.mu.Unlock()
 
-	return nil
+		log.Infof("%s: CPU: %.1f%%, MEM: %.1f%%, DISK: %.1f%%",
+			s.sandboxId,
+			metrics.CPUPercentage,
+			metrics.MemoryPercentage,
+			metrics.DiskPercentage)
+	}
+
+	return lastError
 }
 
 func (s *Service) periodicCollection() {

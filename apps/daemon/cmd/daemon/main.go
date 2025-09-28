@@ -85,9 +85,16 @@ func main() {
 		}
 	}()
 
+	// Get sandbox ID from environment
+	sandboxId := os.Getenv("DAYTONA_SANDBOX_ID")
+	if sandboxId == "" {
+		log.Warn("DAYTONA_SANDBOX_ID environment variable not set")
+		sandboxId = "unknown"
+	}
+
 	// Initialize and start metrics service
-	metricsCollector := metrics.NewMockCollector()
-	metricsService := metrics.NewService(metricsCollector, 30*time.Second)
+	metricsCollector := metrics.NewCollector("/") // Using root path for disk metrics
+	metricsService := metrics.NewService(metricsCollector, 10*time.Second, sandboxId)
 	if err := metricsService.Start(); err != nil {
 		log.Errorf("Failed to start metrics service: %v", err)
 	}
