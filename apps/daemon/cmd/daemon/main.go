@@ -10,11 +10,13 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	golog "log"
 
 	common_daemon "github.com/daytonaio/common-go/pkg/daemon"
 	"github.com/daytonaio/daemon/cmd/daemon/config"
+	"github.com/daytonaio/daemon/pkg/metrics"
 	"github.com/daytonaio/daemon/pkg/ssh"
 	"github.com/daytonaio/daemon/pkg/terminal"
 	"github.com/daytonaio/daemon/pkg/toolbox"
@@ -83,6 +85,13 @@ func main() {
 		}
 	}()
 
+	// Initialize and start metrics service
+	metricsCollector := metrics.NewMockCollector()
+	metricsService := metrics.NewService(metricsCollector, 30*time.Second)
+	if err := metricsService.Start(); err != nil {
+		log.Errorf("Failed to start metrics service: %v", err)
+	}
+
 	sshServer := &ssh.Server{
 		WorkDir:        workDir,
 		DefaultWorkDir: workDir,
@@ -113,6 +122,9 @@ func main() {
 			log.Errorf("Failed to stop computer use: %v", err)
 		}
 	}
+
+	log.Info("Stopping metrics service...")
+	metricsService.Stop()
 
 	log.Info("Shutdown complete")
 }
