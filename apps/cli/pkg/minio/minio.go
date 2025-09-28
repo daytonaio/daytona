@@ -277,8 +277,13 @@ func (c *Client) ProcessDirectory(ctx context.Context, dirPath, orgID string, ex
 
 	fmt.Printf("Context processing complete: %d files, %.2f MB total\n", fileCount, float64(totalSize)/(1024*1024))
 
+	// Seek to start of tar file before calculating hash
+	if _, err := tarFile.Seek(0, 0); err != nil {
+		return nil, fmt.Errorf("failed to seek tar file: %w", err)
+	}
+
+	// Calculate hash of tar contents
 	hasher := sha256.New()
-	hasher.Write([]byte(dirPath))
 	if _, err := io.Copy(hasher, tarFile); err != nil {
 		return nil, fmt.Errorf("failed to hash tar: %w", err)
 	}
