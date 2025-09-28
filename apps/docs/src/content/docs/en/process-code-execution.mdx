@@ -66,6 +66,8 @@ console.log(response.result);
 </TabItem>
 </Tabs>
 
+See: [code_run (Python SDK)](/docs/python-sdk/sync/process/#processcode_run), [codeRun (TypeScript SDK)](/docs/typescript-sdk/process/#coderun)
+
 ## Process Execution
 
 Daytona SDK provides an option to execute shell commands and manage background processes in Sandboxes. The workDir for executing defaults to the current Sandbox working directory. Uses the WORKDIR specified in
@@ -120,6 +122,8 @@ console.log(response3.result);
 </TabItem>
 </Tabs>
 
+See: [exec (Python SDK)](/docs/python-sdk/sync/process/#processexec), [executeCommand (TypeScript SDK)](/docs/typescript-sdk/process/#executecommand)
+
 ## Sessions (Background Processes)
 
 Daytona SDK provides an option to start, stop, and manage background process sessions in Sandboxes. You can run long-running commands, monitor process status, and list all running processes.
@@ -165,6 +169,8 @@ for (const session of sessions) {
 </TabItem>
 </Tabs>
 
+See: [get_session (Python SDK)](/docs/python-sdk/sync/process/#processget_session), [list_sessions (Python SDK)](/docs/python-sdk/sync/process/#processlist_sessions), [getSession (TypeScript SDK)](/docs/typescript-sdk/process/#getsession), [listSessions (TypeScript SDK)](/docs/typescript-sdk/process/#listsessions)
+
 ## Best Practices
 
 Daytona SDK provides best practices for process and code execution in Sandboxes.
@@ -202,6 +208,8 @@ Daytona SDK provides best practices for process and code execution in Sandboxes.
    ```
 </TabItem>
 </Tabs>
+
+See: [create_session (Python SDK)](/docs/python-sdk/sync/process/#processcreate_session), [delete_session (Python SDK)](/docs/python-sdk/sync/process/#processdelete_session), [createSession (TypeScript SDK)](/docs/typescript-sdk/process/#createsession), [deleteSession (TypeScript SDK)](/docs/typescript-sdk/process/#deletesession)
 
 2. **Error Handling**
 
