@@ -4,10 +4,12 @@ title: Preview & Authentication
 
 import { Tabs, TabItem } from '@astrojs/starlight/components'
 
-Processes listening for HTTP traffic in port range `3000-9999` can be previewed using preview links.
+The Daytona SDK provides a method to generate preview links for Sandboxes. A preview link's schema consists of the port, Sandbox ID and Runner combination (e.g.
+`https://3000-sandbox-123456.proxy.daytona.works`).
 
-A preview link's schema consists of the port and Sandbox ID combination, e.g.:
-`https://3000-sandbox-123456.proxy.daytona.works`
+Any process listening for HTTP traffic on ports 3000–9999 can be previewed.
+
+## Fetching a Preview Link
 
 To fetch the preview link and the authorization token for a specific port, you can simply use the SDK method:
 

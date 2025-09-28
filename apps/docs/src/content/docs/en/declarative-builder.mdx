@@ -17,6 +17,8 @@ The declarative builder system supports two primary workflows:
 
 You can create dynamic images on-the-fly when creating Sandboxes. This is ideal for iterating quickly without creating separate Snapshots.
 
+Dynamic images are cached for 24 hours, and will be automatically reused when running the same script. Thus, subsequent runs on the same Runner will be almost instantaneous.
+
 <Tabs>
 <TabItem label="Python" icon="seti:python">
 ```python
@@ -57,12 +59,6 @@ const sandbox = await daytona.create(
 </Tabs>
 
 See: [CreateSandboxFromImageParams (Python SDK)](/docs/python-sdk/sync/daytona#createsandboxfromimageparams), [CreateSandboxFromImageParams (TypeScript SDK)](/docs/typescript-sdk/daytona#createsandboxfromimageparams)
-
-:::tip
-Once you've run the Sandbox creation from a dynamic image a single time, the image will get cached for the next 24 hours and any subsequent Sandbox creation that lands on the same Runner will be almost instantaneous.
-
-This means you can use the same script every time and Daytona will take of caching the image properly.
-:::
 
 ### Creating Pre-built Snapshots
 
@@ -290,7 +286,7 @@ See: [run_commands (Python SDK)](/docs/python-sdk/common/image#imagerun_commands
 
 ### Dockerfile Integration
 
-Use an existing Dockerfile for your image or add custom Dockerfile commands:
+Integrate existing Dockerfiles or add custom Dockerfile commands:
 
 <Tabs>
 <TabItem label="Python" icon="seti:python">
@@ -323,10 +319,10 @@ See: [dockerfile_commands (Python SDK)](/docs/python-sdk/common/image#imagedocke
 
 ## Best Practices
 
+Use the following best practices when working with the declarative builder:
+
 1. **Layer Optimization**: Group related operations to minimize Docker layers
 2. **Cache Utilization**: Identical build commands and context will be cached and subsequent builds will be almost instant
 3. **Security**: Create non-root users for application workloads
 4. **Resource Efficiency**: Use slim base images when appropriate
 5. **Context Minimization**: Only include necessary files in the build context
-
-The declarative builder streamlines the development workflow by providing a programmatic, maintainable approach to container image creation while preserving the full power and flexibility of Docker.

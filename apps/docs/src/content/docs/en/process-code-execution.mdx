@@ -173,13 +173,15 @@ See: [get_session (Python SDK)](/docs/python-sdk/sync/process/#processget_sessio
 
 ## Best Practices
 
-Daytona SDK provides best practices for process and code execution in Sandboxes.
+Use the following best practices when working with process and code execution in Daytona SDK.
 
-1. **Resource Management**
+### Resource Management
 
-- Use sessions for long-running operations
-- Clean up sessions after execution
-- Handle session exceptions properly
+The following best practices apply to managing resources when executing processes:
+
+1. Use [sessions](#sessions-background-processes) for long-running operations
+2. Clean up sessions after execution
+3. Handle session exceptions properly
 
 <Tabs>
 <TabItem label="Python" icon="seti:python">
@@ -211,7 +213,9 @@ Daytona SDK provides best practices for process and code execution in Sandboxes.
 
 See: [create_session (Python SDK)](/docs/python-sdk/sync/process/#processcreate_session), [delete_session (Python SDK)](/docs/python-sdk/sync/process/#processdelete_session), [createSession (TypeScript SDK)](/docs/typescript-sdk/process/#createsession), [deleteSession (TypeScript SDK)](/docs/typescript-sdk/process/#deletesession)
 
-2. **Error Handling**
+### Error Handling
+
+The following best practices apply to error handling when executing processes:
 
 - Handle process exceptions properly
 - Log error details for debugging

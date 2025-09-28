@@ -8,8 +8,7 @@ The Daytona SDK provides Language Server Protocol (LSP) support through Sandbox 
 
 ## Creating LSP Servers
 
-Daytona SDK provides an option to create LSP servers using Python and TypeScript. The `path_to_project` starting point defaults to the current Sandbox working directory. Uses the WORKDIR specified in
-the Dockerfile if present, or falling back to the user's home directory if not - e.g. `workspace/project` implies `/my-work-dir/workspace/project`, but by starting with `/`, you may define an absolute path as well.
+Daytona SDK provides an option to create LSP servers in Python and TypeScript. The `path_to_project` argument is relative to the current Sandbox working directory when no leading `/` is used. The working directory is specified by WORKDIR when it is present in the Dockerfile, and otherwise falls back to the user's home directory.
 
 <Tabs>
 <TabItem label="Python" icon="seti:python">
@@ -48,9 +47,8 @@ const lspServer = await sandbox.createLspServer(
 </TabItem>
 </Tabs>
 
-## Supported Languages
+See: [create_lsp_server (Python SDK)](/docs/python-sdk/sync/sandbox#sandboxcreate_lsp_server), [createLspServer (TypeScript SDK)](/docs/typescript-sdk/sandbox#createlspserver)
 
-Daytona SDK provides an option to create LSP servers for various languages through the `LspLanguageId` enum in Python and TypeScript.
 ### Supported Languages
 
 The supported languages for creating LSP servers with the Daytona SDK are defined by the `LspLanguageId` enum:
@@ -64,7 +62,7 @@ See: [LspLanguageId (Python SDK)](/docs/python-sdk/sync/lsp-server/#lsplanguagei
 
 ## LSP Features
 
-Daytona SDK provides various LSP features for code analysis and editing.
+Daytona SDK provides LSP features for code analysis and editing.
 
 ### Code Completion
 

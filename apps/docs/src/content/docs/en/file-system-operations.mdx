@@ -10,7 +10,7 @@ The Daytona SDK provides comprehensive file system operations through the `fs` m
 
 Daytona SDK provides an option to interact with the file system in Sandboxes. You can perform various operations like listing files, creating directories, reading and writing files, and more.
 
-For simplicity, file operations by default assume you are operating in the root directory of the Sandbox user - e.g. `workspace` implies `/home/[username]/workspace`, but you are free to provide an absolute workDir path as well - which should start with a leading slash `/`.
+File operations assume you are operating in the Sandbox user's home directory (e.g. `workspace` implies `/home/[username]/workspace`). Use a leading `/` when providing absolute paths.
 
 ### Listing Files and Directories
 
@@ -76,7 +76,7 @@ Daytona SDK provides options to read, write, upload, download, and delete files 
 
 #### Uploading a Single File
 
-If you want to upload a single file, you can do it as follows:
+The following example shows how to upload a single file:
 
 <Tabs>
 <TabItem label="Python" icon="seti:python">
@@ -238,7 +238,7 @@ See: [download_files (Python SDK)](/docs/python-sdk/sync/file-system/#filesystem
 
 ### Deleting files
 
-Once you no longer need them, simply delete files by using the `delete_file` function.
+The following example shows how to delete a file:
 
 <Tabs>
 <TabItem label="Python" icon="seti:python">
