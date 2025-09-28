@@ -10,28 +10,28 @@ Daytona's declarative builder provides a powerful, code-first approach to defini
 
 The declarative builder system supports two primary workflows:
 
-1. [**Dynamic Images**](#dynamic-image-building): Build images with varying dependencies _on demand_ when creating Sandboxes
+1. [**Declarative Images**](#declarative-image-building): Build images with varying dependencies _on demand_ when creating Sandboxes
 2. [**Pre-built Snapshots**](#creating-pre-built-snapshots): Create and register _ready-to-use_ [Snapshots](/docs/snapshots) that can be shared across multiple Sandboxes
 
-### Dynamic Image Building
+### Declarative Image Building
 
-You can create dynamic images on-the-fly when creating Sandboxes. This is ideal for iterating quickly without creating separate Snapshots.
+You can create declarative images on-the-fly when creating Sandboxes. This is ideal for iterating quickly without creating separate Snapshots.
 
-Dynamic images are cached for 24 hours, and will be automatically reused when running the same script. Thus, subsequent runs on the same Runner will be almost instantaneous.
+Declarative images are cached for 24 hours, and will be automatically reused when running the same script. Thus, subsequent runs on the same Runner will be almost instantaneous.
 
 <Tabs>
 <TabItem label="Python" icon="seti:python">
 ```python
-# Define a simple dynamic image with Python packages
-dynamic_image = (
+# Define a simple declarative image with Python packages
+declarative_image = (
     Image.debian_slim("3.12")
     .pip_install(["requests", "pytest"])
     .workdir("/home/daytona")
 )
 
-# Create a new Sandbox with the dynamic image and stream the build logs
+# Create a new Sandbox with the declarative image and stream the build logs
 sandbox = daytona.create(
-    CreateSandboxFromImageParams(image=dynamic_image),
+    CreateSandboxFromImageParams(image=declarative_image),
     timeout=0,
     on_snapshot_create_logs=print,
 )
@@ -39,15 +39,15 @@ sandbox = daytona.create(
 </TabItem>
 <TabItem label="TypeScript" icon="seti:typescript">
 ```typescript
-// Define a simple dynamic image with Python packages
-const dynamicImage = Image.debianSlim('3.12')
+// Define a simple declarative image with Python packages
+const declarativeImage = Image.debianSlim('3.12')
   .pipInstall(['requests', 'pytest'])
   .workdir('/home/daytona')
 
-// Create a new Sandbox with the dynamic image and stream the build logs
+// Create a new Sandbox with the declarative image and stream the build logs
 const sandbox = await daytona.create(
   {
-    image: dynamicImage,
+    image: declarativeImage,
   },
   {
     timeout: 0,
