@@ -2,15 +2,13 @@
  * Copyright 2025 Daytona Platforms Inc.
  * SPDX-License-Identifier: AGPL-3.0
  */
-import { Label } from '@/components/ui/label'
-import { Button } from '@/components/ui/button'
 import InlineInputFormControl from '../../Inputs/InlineInputFormControl'
 import FormTextInput from '../../Inputs/TextInput'
 import FormNumberInput from '../../Inputs/NumberInput'
 import { KeyboardActions, KeyboardActionFormData, ParameterFormData, NumberParameterFormItem } from '@/enums/Playground'
 import { KeyboardHotKey, KeyboardPress, KeyboardType } from '@/enums/Playground'
 import { usePlayground } from '@/hooks/usePlayground'
-import { Loader2, Play } from 'lucide-react'
+import PlaygroundActionForm from '../../ActionForm'
 import { useState } from 'react'
 
 const VNCKeyboardOperations: React.FC = () => {
@@ -61,7 +59,7 @@ const VNCKeyboardOperations: React.FC = () => {
     },
   ]
 
-  const onKeyboardActionRunClick = <T extends KeyboardHotKey | KeyboardPress | KeyboardType>(
+  const onKeyboardActionRunClick = async <T extends KeyboardHotKey | KeyboardPress | KeyboardType>(
     keyboardActionFormData: KeyboardActionFormData<T>,
     keyboardActionParamsFormData: ParameterFormData<T>,
     keyboardActionParamsState: T,
@@ -93,40 +91,18 @@ const VNCKeyboardOperations: React.FC = () => {
     <div className="space-y-6">
       {keyboardActionsFormData.map((keyboardAction) => (
         <div key={keyboardAction.methodName} className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <Label htmlFor={keyboardAction.methodName}>{keyboardAction.label}</Label>
-              <p id={keyboardAction.methodName} className="text-sm text-muted-foreground mt-1 pl-1">
-                {keyboardAction.description}
-              </p>
-            </div>
-            <div>
-              {' '}
-              <Button
-                disabled={!!runningKeyboardActionMethod}
-                variant="outline"
-                title="Run"
-                onClick={() =>
-                  onKeyboardActionRunClick<typeof keyboardAction.parametersState>(
-                    keyboardAction,
-                    keyboardAction.parametersFormItems,
-                    keyboardAction.parametersState,
-                  )
-                }
-              >
-                {runningKeyboardActionMethod === keyboardAction.methodName ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Play className="w-4 h-4" />
-                )}
-              </Button>
-            </div>
-          </div>
-          <div>
-            {keyboardActionError[keyboardAction.methodName] && (
-              <p className="text-sm text-red-500 mt-2">{keyboardActionError[keyboardAction.methodName]}</p>
-            )}
-          </div>
+          <PlaygroundActionForm<KeyboardActions>
+            actionFormItem={keyboardAction}
+            onRunActionClick={() =>
+              onKeyboardActionRunClick<typeof keyboardAction.parametersState>(
+                keyboardAction,
+                keyboardAction.parametersFormItems,
+                keyboardAction.parametersState,
+              )
+            }
+            runningActionMethodName={runningKeyboardActionMethod}
+            actionError={keyboardActionError[keyboardAction.methodName]}
+          />
           <div className="px-4 space-y-2">
             {keyboardAction.methodName === KeyboardActions.HOTKEY && (
               <InlineInputFormControl formItem={hotKeyParamsFormData[0]}>

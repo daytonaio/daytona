@@ -3,11 +3,10 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 import { usePlayground } from '@/hooks/usePlayground'
-import { Label } from '@/components/ui/label'
-import { Button } from '@/components/ui/button'
 import InlineInputFormControl from '../../Inputs/InlineInputFormControl'
 import FormNumberInput from '../../Inputs/NumberInput'
 import FormSelectInput from '../../Inputs/SelectInput'
+import FormCheckboxInput from '../../Inputs/CheckboxInput'
 import {
   MouseClick,
   MouseButton,
@@ -19,10 +18,11 @@ import {
   NumberParameterFormItem,
   MouseScrollDirection,
   ParameterFormItem,
+  PlaygroundActionFormDataBasic,
+  MouseActionFormData,
 } from '@/enums/Playground'
-import { Loader2, Play } from 'lucide-react'
-import React, { useState, MouseEvent } from 'react'
-import FormCheckboxInput from '../../Inputs/CheckboxInput'
+import PlaygroundActionForm from '../../ActionForm'
+import React, { useState } from 'react'
 
 const mouseButtonFormData: ParameterFormItem & { key: 'button' } = {
   label: 'Button',
@@ -110,12 +110,51 @@ const VNCMouseOperations: React.FC = () => {
     mouseScrollAmountFormData,
   ]
 
-  const onMouseActionRunClick = <T extends MouseClick | MouseDrag | MouseMove | MouseScroll | object>(
-    mouseActionMethodName: MouseActions,
+  const mouseActionsWithParamsFormData: MouseActionFormData<MouseClick | MouseDrag | MouseMove | MouseScroll>[] = [
+    {
+      methodName: MouseActions.CLICK,
+      label: 'click()',
+      description: 'Clicks the mouse at the specified coordinates',
+      parametersFormItems: mouseClickParamsFormData,
+      parametersState: mouseClickParams,
+    },
+    {
+      methodName: MouseActions.DRAG,
+      label: 'drag()',
+      description: 'Drags the mouse from start coordinates to end coordinates',
+      parametersFormItems: mouseDragParamsFormData,
+      parametersState: mouseDragParams,
+    },
+    {
+      methodName: MouseActions.MOVE,
+      label: 'move()',
+      description: 'Moves the mouse cursor to the specified coordinates',
+      parametersFormItems: mouseMoveParamsFormData,
+      parametersState: mouseMoveParams,
+    },
+    {
+      methodName: MouseActions.SCROLL,
+      label: 'scroll()',
+      description: 'Scrolls the mouse wheel at the specified coordinates',
+      parametersFormItems: mouseScrollParamsFormData,
+      parametersState: mouseScrollParams,
+    },
+  ]
+
+  const mouseActionsWithoutParamsFormData: PlaygroundActionFormDataBasic<MouseActions>[] = [
+    {
+      methodName: MouseActions.GET_POSITION,
+      label: 'getPosition()',
+      description: 'Gets the current mouse cursor position',
+    },
+  ]
+
+  const onMouseActionRunClick = async <T extends MouseClick | MouseDrag | MouseMove | MouseScroll>(
+    mouseActionFormData: MouseActionFormData<T>,
     mouseActionParamsFormData: ParameterFormData<T>,
     mouseActionParamsState: T,
   ) => {
-    setRunningMouseActionMethod(mouseActionMethodName)
+    setRunningMouseActionMethod(mouseActionFormData.methodName)
     // Validate if all required params are set if they exist
     if (mouseActionParamsFormData.some((formItem) => formItem.required)) {
       const mouseActionEmptyParamFormItem = mouseActionParamsFormData
@@ -126,7 +165,7 @@ const VNCMouseOperations: React.FC = () => {
         })
       if (mouseActionEmptyParamFormItem) {
         setMouseActionError({
-          [mouseActionMethodName]: `${mouseActionEmptyParamFormItem?.label} parameter is required for this action`,
+          [mouseActionFormData.methodName]: `${mouseActionEmptyParamFormItem?.label} parameter is required for this action`,
         })
         setRunningMouseActionMethod(null)
         return
@@ -137,226 +176,168 @@ const VNCMouseOperations: React.FC = () => {
     setRunningMouseActionMethod(null)
   }
 
-  type MouseActionRunButtonProps = {
-    mouseActionMethodName: MouseActions
-    onClickHandler: (event: MouseEvent<HTMLButtonElement>) => void
-  }
-
-  const MouseActionRunButton = ({ onClickHandler, mouseActionMethodName }: MouseActionRunButtonProps) => {
-    return (
-      <div>
-        <Button disabled={!!runningMouseActionMethod} variant="outline" title="Run" onClick={onClickHandler}>
-          {runningMouseActionMethod === mouseActionMethodName ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <Play className="w-4 h-4" />
-          )}
-        </Button>
-      </div>
-    )
-  }
-
   return (
     <div className="space-y-6">
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <Label htmlFor={MouseActions.CLICK}>click()</Label>
-            <p id={MouseActions.CLICK} className="text-sm text-muted-foreground mt-1 pl-1">
-              Clicks the mouse at the specified coordinates
-            </p>
-          </div>
-          <MouseActionRunButton
-            mouseActionMethodName={MouseActions.CLICK}
-            onClickHandler={() => onMouseActionRunClick(MouseActions.CLICK, mouseClickParamsFormData, mouseClickParams)}
-          />
-        </div>
-        <div>
-          {mouseActionError[MouseActions.CLICK] && (
-            <p className="text-sm text-red-500 mt-2">{mouseActionError[MouseActions.CLICK]}</p>
-          )}
-        </div>
-        <div className="px-4 space-y-2">
-          {mouseClickNumberParamsFormData.map((mouseClickNumberParamFormItem) => (
-            <InlineInputFormControl key={mouseClickNumberParamFormItem.key} formItem={mouseClickNumberParamFormItem}>
-              <FormNumberInput
-                numberValue={mouseClickParams[mouseClickNumberParamFormItem.key]}
-                numberFormItem={mouseClickNumberParamFormItem}
-                onChangeHandler={(value) => {
-                  const mouseClickParamsNew = { ...mouseClickParams, [mouseClickNumberParamFormItem.key]: value }
-                  setMouseClickParams(mouseClickParamsNew)
-                  setVNCInteractionOptionsParamValue('mouseClickParams', mouseClickParamsNew)
-                }}
-              />
-            </InlineInputFormControl>
-          ))}
-          <MouseButtonSelect<MouseClick>
-            paramsStateObject={mouseClickParams}
-            paramsStateSetter={setMouseClickParams}
-            contextParamsPropertyName="mouseClickParams"
-          />
-          <InlineInputFormControl formItem={mouseDoubleClickFormData}>
-            <FormCheckboxInput
-              checkedValue={mouseClickParams[mouseDoubleClickFormData.key as 'double']}
-              formItem={mouseDoubleClickFormData}
-              onChangeHandler={(checked) => {
-                const mouseClickParamsNew = { ...mouseClickParams, [mouseDoubleClickFormData.key]: checked }
-                setMouseClickParams(mouseClickParamsNew)
-                setVNCInteractionOptionsParamValue('mouseClickParams', mouseClickParamsNew)
-              }}
-            />
-          </InlineInputFormControl>
-        </div>
-      </div>
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <Label htmlFor={MouseActions.DRAG}>drag()</Label>
-            <p id={MouseActions.DRAG} className="text-sm text-muted-foreground mt-1 pl-1">
-              Drags the mouse from start coordinates to end coordinates
-            </p>
-          </div>
-          <MouseActionRunButton
-            mouseActionMethodName={MouseActions.DRAG}
-            onClickHandler={() => onMouseActionRunClick(MouseActions.DRAG, mouseDragParamsFormData, mouseDragParams)}
-          />
-        </div>
-        <div>
-          {mouseActionError[MouseActions.DRAG] && (
-            <p className="text-sm text-red-500 mt-2">{mouseActionError[MouseActions.DRAG]}</p>
-          )}
-        </div>
-        <div className="px-4 space-y-2">
-          {mouseDragNumberParamsFormData.map((mouseDragNumberParamFormItem) => (
-            <InlineInputFormControl key={mouseDragNumberParamFormItem.key} formItem={mouseDragNumberParamFormItem}>
-              <FormNumberInput
-                numberValue={mouseDragParams[mouseDragNumberParamFormItem.key]}
-                numberFormItem={mouseDragNumberParamFormItem}
-                onChangeHandler={(value) => {
-                  const mouseDragParamsNew = { ...mouseDragParams, [mouseDragNumberParamFormItem.key]: value }
-                  setMouseDragParams(mouseDragParamsNew)
-                  setVNCInteractionOptionsParamValue('mouseDragParams', mouseDragParamsNew)
-                }}
-              />
-            </InlineInputFormControl>
-          ))}
-          <MouseButtonSelect<MouseDrag>
-            paramsStateObject={mouseDragParams}
-            paramsStateSetter={setMouseDragParams}
-            contextParamsPropertyName="mouseDragParams"
-          />
-        </div>
-      </div>
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <Label htmlFor={MouseActions.GET_POSITION}>getPosition()</Label>
-            <p id={MouseActions.GET_POSITION} className="text-sm text-muted-foreground mt-1 pl-1">
-              Gets the current mouse cursor position
-            </p>
-          </div>
-          <MouseActionRunButton
-            mouseActionMethodName={MouseActions.GET_POSITION}
-            onClickHandler={() => onMouseActionRunClick(MouseActions.GET_POSITION, [], {})} // No parameters required for this action
-          />
-        </div>
-      </div>
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <Label htmlFor={MouseActions.MOVE}>move()</Label>
-            <p id={MouseActions.MOVE} className="text-sm text-muted-foreground mt-1 pl-1">
-              Moves the mouse cursor to the specified coordinates
-            </p>
-          </div>
-          <MouseActionRunButton
-            mouseActionMethodName={MouseActions.MOVE}
-            onClickHandler={() => onMouseActionRunClick(MouseActions.MOVE, mouseMoveParamsFormData, mouseMoveParams)}
-          />
-        </div>
-        <div>
-          {mouseActionError[MouseActions.MOVE] && (
-            <p className="text-sm text-red-500 mt-2">{mouseActionError[MouseActions.MOVE]}</p>
-          )}
-        </div>
-        <div className="px-4 space-y-2">
-          {mouseMoveNumberParamsFormData.map((mouseMoveNumberParamFormItem) => (
-            <InlineInputFormControl key={mouseMoveNumberParamFormItem.key} formItem={mouseMoveNumberParamFormItem}>
-              <FormNumberInput
-                numberValue={mouseMoveParams[mouseMoveNumberParamFormItem.key]}
-                numberFormItem={mouseMoveNumberParamFormItem}
-                onChangeHandler={(value) => {
-                  const mouseMoveParamsNew = { ...mouseMoveParams, [mouseMoveNumberParamFormItem.key]: value }
-                  setMouseMoveParams(mouseMoveParamsNew)
-                  setVNCInteractionOptionsParamValue('mouseMoveParams', mouseMoveParamsNew)
-                }}
-              />
-            </InlineInputFormControl>
-          ))}
-        </div>
-      </div>
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <Label htmlFor={MouseActions.SCROLL}>scroll()</Label>
-            <p id={MouseActions.SCROLL} className="text-sm text-muted-foreground mt-1 pl-1">
-              Scrolls the mouse wheel at the specified coordinates
-            </p>
-          </div>
-          <MouseActionRunButton
-            mouseActionMethodName={MouseActions.SCROLL}
-            onClickHandler={() =>
-              onMouseActionRunClick(MouseActions.SCROLL, mouseScrollParamsFormData, mouseScrollParams)
+      {mouseActionsWithParamsFormData.map((mouseActionFormData) => (
+        <div key={mouseActionFormData.methodName} className="space-y-4">
+          <PlaygroundActionForm<MouseActions>
+            actionFormItem={mouseActionFormData}
+            onRunActionClick={() =>
+              onMouseActionRunClick<typeof mouseActionFormData.parametersState>(
+                mouseActionFormData,
+                mouseActionFormData.parametersFormItems,
+                mouseActionFormData.parametersState,
+              )
             }
+            runningActionMethodName={runningMouseActionMethod}
+            actionError={mouseActionError[mouseActionFormData.methodName]}
+          />
+          <div className="px-4 space-y-2">
+            {mouseActionFormData.methodName === MouseActions.CLICK && (
+              <>
+                {mouseClickNumberParamsFormData.map((mouseClickNumberParamFormItem) => (
+                  <InlineInputFormControl
+                    key={mouseClickNumberParamFormItem.key}
+                    formItem={mouseClickNumberParamFormItem}
+                  >
+                    <FormNumberInput
+                      numberValue={mouseClickParams[mouseClickNumberParamFormItem.key]}
+                      numberFormItem={mouseClickNumberParamFormItem}
+                      onChangeHandler={(value) => {
+                        const mouseClickParamsNew = { ...mouseClickParams, [mouseClickNumberParamFormItem.key]: value }
+                        setMouseClickParams(mouseClickParamsNew)
+                        setVNCInteractionOptionsParamValue('mouseClickParams', mouseClickParamsNew)
+                      }}
+                    />
+                  </InlineInputFormControl>
+                ))}
+                <MouseButtonSelect<MouseClick>
+                  paramsStateObject={mouseClickParams}
+                  paramsStateSetter={setMouseClickParams}
+                  contextParamsPropertyName="mouseClickParams"
+                />
+                <InlineInputFormControl formItem={mouseDoubleClickFormData}>
+                  <FormCheckboxInput
+                    checkedValue={mouseClickParams[mouseDoubleClickFormData.key as 'double']}
+                    formItem={mouseDoubleClickFormData}
+                    onChangeHandler={(checked) => {
+                      const mouseClickParamsNew = { ...mouseClickParams, [mouseDoubleClickFormData.key]: checked }
+                      setMouseClickParams(mouseClickParamsNew)
+                      setVNCInteractionOptionsParamValue('mouseClickParams', mouseClickParamsNew)
+                    }}
+                  />
+                </InlineInputFormControl>
+              </>
+            )}
+            {mouseActionFormData.methodName === MouseActions.DRAG && (
+              <>
+                {mouseDragNumberParamsFormData.map((mouseDragNumberParamFormItem) => (
+                  <InlineInputFormControl
+                    key={mouseDragNumberParamFormItem.key}
+                    formItem={mouseDragNumberParamFormItem}
+                  >
+                    <FormNumberInput
+                      numberValue={mouseDragParams[mouseDragNumberParamFormItem.key]}
+                      numberFormItem={mouseDragNumberParamFormItem}
+                      onChangeHandler={(value) => {
+                        const mouseDragParamsNew = { ...mouseDragParams, [mouseDragNumberParamFormItem.key]: value }
+                        setMouseDragParams(mouseDragParamsNew)
+                        setVNCInteractionOptionsParamValue('mouseDragParams', mouseDragParamsNew)
+                      }}
+                    />
+                  </InlineInputFormControl>
+                ))}
+                <MouseButtonSelect<MouseDrag>
+                  paramsStateObject={mouseDragParams}
+                  paramsStateSetter={setMouseDragParams}
+                  contextParamsPropertyName="mouseDragParams"
+                />
+              </>
+            )}
+            {mouseActionFormData.methodName === MouseActions.MOVE && (
+              <>
+                {mouseMoveNumberParamsFormData.map((mouseMoveNumberParamFormItem) => (
+                  <InlineInputFormControl
+                    key={mouseMoveNumberParamFormItem.key}
+                    formItem={mouseMoveNumberParamFormItem}
+                  >
+                    <FormNumberInput
+                      numberValue={mouseMoveParams[mouseMoveNumberParamFormItem.key]}
+                      numberFormItem={mouseMoveNumberParamFormItem}
+                      onChangeHandler={(value) => {
+                        const mouseMoveParamsNew = { ...mouseMoveParams, [mouseMoveNumberParamFormItem.key]: value }
+                        setMouseMoveParams(mouseMoveParamsNew)
+                        setVNCInteractionOptionsParamValue('mouseMoveParams', mouseMoveParamsNew)
+                      }}
+                    />
+                  </InlineInputFormControl>
+                ))}
+              </>
+            )}
+            {mouseActionFormData.methodName === MouseActions.SCROLL && (
+              <>
+                {mouseScrollNumberParamsFormData.map((mouseScrollNumberParamFormItem) => (
+                  <InlineInputFormControl
+                    key={mouseScrollNumberParamFormItem.key}
+                    formItem={mouseScrollNumberParamFormItem}
+                  >
+                    <FormNumberInput
+                      numberValue={mouseScrollParams[mouseScrollNumberParamFormItem.key]}
+                      numberFormItem={mouseScrollNumberParamFormItem}
+                      onChangeHandler={(value) => {
+                        const mouseScrollParamsNew = {
+                          ...mouseScrollParams,
+                          [mouseScrollNumberParamFormItem.key]: value,
+                        }
+                        setMouseScrollParams(mouseScrollParamsNew)
+                        setVNCInteractionOptionsParamValue('mouseScrollParams', mouseScrollParamsNew)
+                      }}
+                    />
+                  </InlineInputFormControl>
+                ))}
+                <InlineInputFormControl formItem={mouseScrollDirectionFormData}>
+                  <FormSelectInput
+                    selectOptions={mouseScrollDirectionOptions}
+                    selectValue={mouseScrollParams[mouseScrollDirectionFormData.key]}
+                    formItem={mouseScrollDirectionFormData}
+                    onChangeHandler={(value) => {
+                      const mouseScrollParamsNew = {
+                        ...mouseScrollParams,
+                        [mouseScrollDirectionFormData.key]: value as MouseScrollDirection,
+                      }
+                      setMouseScrollParams(mouseScrollParamsNew)
+                      setVNCInteractionOptionsParamValue('mouseScrollParams', mouseScrollParamsNew)
+                    }}
+                  />
+                </InlineInputFormControl>
+                <InlineInputFormControl formItem={mouseScrollAmountFormData}>
+                  <FormNumberInput
+                    numberValue={mouseScrollParams[mouseScrollAmountFormData.key]}
+                    numberFormItem={mouseScrollAmountFormData}
+                    onChangeHandler={(value) => {
+                      const mouseScrollParamsNew = { ...mouseScrollParams, [mouseScrollAmountFormData.key]: value }
+                      setMouseScrollParams(mouseScrollParamsNew)
+                      setVNCInteractionOptionsParamValue('mouseScrollParams', mouseScrollParamsNew)
+                    }}
+                  />
+                </InlineInputFormControl>
+              </>
+            )}
+          </div>
+        </div>
+      ))}
+      {mouseActionsWithoutParamsFormData.map((mouseActionFormData) => (
+        <div key={mouseActionFormData.methodName} className="space-y-4">
+          <PlaygroundActionForm<MouseActions>
+            actionFormItem={mouseActionFormData}
+            onRunActionClick={async () => {
+              return
+            }}
+            runningActionMethodName={runningMouseActionMethod}
+            actionError={mouseActionError[mouseActionFormData.methodName]}
           />
         </div>
-        <div>
-          {mouseActionError[MouseActions.SCROLL] && (
-            <p className="text-sm text-red-500 mt-2">{mouseActionError[MouseActions.SCROLL]}</p>
-          )}
-        </div>
-        <div className="px-4 space-y-2">
-          {mouseScrollNumberParamsFormData.map((mouseScrollNumberParamFormItem) => (
-            <InlineInputFormControl key={mouseScrollNumberParamFormItem.key} formItem={mouseScrollNumberParamFormItem}>
-              <FormNumberInput
-                numberValue={mouseScrollParams[mouseScrollNumberParamFormItem.key]}
-                numberFormItem={mouseScrollNumberParamFormItem}
-                onChangeHandler={(value) => {
-                  const mouseScrollParamsNew = { ...mouseScrollParams, [mouseScrollNumberParamFormItem.key]: value }
-                  setMouseScrollParams(mouseScrollParamsNew)
-                  setVNCInteractionOptionsParamValue('mouseScrollParams', mouseScrollParamsNew)
-                }}
-              />
-            </InlineInputFormControl>
-          ))}
-          <InlineInputFormControl formItem={mouseScrollDirectionFormData}>
-            <FormSelectInput
-              selectOptions={mouseScrollDirectionOptions}
-              selectValue={mouseScrollParams[mouseScrollDirectionFormData.key]}
-              formItem={mouseScrollDirectionFormData}
-              onChangeHandler={(value) => {
-                const mouseScrollParamsNew = {
-                  ...mouseScrollParams,
-                  [mouseScrollDirectionFormData.key]: value as MouseScrollDirection,
-                }
-                setMouseScrollParams(mouseScrollParamsNew)
-                setVNCInteractionOptionsParamValue('mouseScrollParams', mouseScrollParamsNew)
-              }}
-            />
-          </InlineInputFormControl>
-          <InlineInputFormControl formItem={mouseScrollAmountFormData}>
-            <FormNumberInput
-              numberValue={mouseScrollParams[mouseScrollAmountFormData.key]}
-              numberFormItem={mouseScrollAmountFormData}
-              onChangeHandler={(value) => {
-                const mouseScrollParamsNew = { ...mouseScrollParams, [mouseScrollAmountFormData.key]: value }
-                setMouseScrollParams(mouseScrollParamsNew)
-                setVNCInteractionOptionsParamValue('mouseScrollParams', mouseScrollParamsNew)
-              }}
-            />
-          </InlineInputFormControl>
-        </div>
-      </div>
+      ))}
     </div>
   )
 }

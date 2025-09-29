@@ -96,10 +96,7 @@ export enum KeyboardActions {
 }
 
 export type KeyboardActionFormData<T extends KeyboardHotKey | KeyboardPress | KeyboardType> =
-  PlaygroundActionFormData<KeyboardActions> & {
-    parametersFormItems: ParameterFormData<T>
-    parametersState: T
-  }
+  PlaygroundActionWithParamsFormData<KeyboardActions, T>
 
 export enum MouseButton {
   LEFT = 'left',
@@ -147,6 +144,9 @@ export enum MouseActions {
   GET_POSITION = 'getPosition',
 }
 
+export type MouseActionFormData<T extends MouseClick | MouseDrag | MouseMove | MouseScroll> =
+  PlaygroundActionWithParamsFormData<MouseActions, T>
+
 export enum ScreenshotFormatOption {
   JPEG = 'jpeg',
   PNG = 'png',
@@ -157,10 +157,15 @@ export interface CustomizedScreenshotOptions extends Omit<ScreenshotOptions, 'fo
   format?: ScreenshotFormatOption
 }
 
-export interface PlaygroundActionFormData<T> {
+export interface PlaygroundActionFormDataBasic<T> {
   label: string
   description: string
   methodName: T
+}
+
+export type PlaygroundActionWithParamsFormData<A, T> = PlaygroundActionFormDataBasic<A> & {
+  parametersFormItems: ParameterFormData<T>
+  parametersState: T
 }
 
 export enum ScreenshotActions {
@@ -170,6 +175,6 @@ export enum ScreenshotActions {
   TAKE_REGION = 'takeRegion',
 }
 
-export type ScreenshotActionFormData = PlaygroundActionFormData<ScreenshotActions> & {
+export type ScreenshotActionFormData = PlaygroundActionFormDataBasic<ScreenshotActions> & {
   usesScreenshotRegion?: boolean
 }

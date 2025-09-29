@@ -96,7 +96,7 @@ const VNCScreenshootOperations: React.FC = () => {
     },
   ]
 
-  const onScreenshotActionRunClick = (screenshotActionFormData: ScreenshotActionFormData) => {
+  const onScreenshotActionRunClick = async (screenshotActionFormData: ScreenshotActionFormData) => {
     setRunningScreenshotActionMethod(screenshotActionFormData.methodName)
     // Validate if all ScreenshotRegion parameters are set
     if (screenshotActionFormData.usesScreenshotRegion) {
@@ -188,29 +188,12 @@ const VNCScreenshootOperations: React.FC = () => {
       <div className="space-y-6 mt-6">
         {screenshotActionsFormData.map((screenshotAction) => (
           <div key={screenshotAction.methodName}>
-            <div className="flex items-center justify-between">
-              <div>
-                <Label htmlFor={screenshotAction.methodName}>{screenshotAction.label}</Label>
-                <p id={screenshotAction.methodName} className="text-sm text-muted-foreground mt-1 pl-1">
-                  {screenshotAction.description}
-                </p>
-              </div>
-              <Button
-                disabled={!!runningScreenshotActionMethod}
-                variant="outline"
-                title="Run"
-                onClick={() => onScreenshotActionRunClick(screenshotAction)}
-              >
-                {runningScreenshotActionMethod === screenshotAction.methodName ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Play className="w-4 h-4" />
-                )}
-              </Button>
-            </div>
-            {screenshotActionError[screenshotAction.methodName] && (
-              <p className="text-sm text-red-500 mt-2">{screenshotActionError[screenshotAction.methodName]}</p>
-            )}
+            <PlaygroundActionForm<ScreenshotActions>
+              actionFormItem={screenshotAction}
+              onRunActionClick={() => onScreenshotActionRunClick(screenshotAction)}
+              runningActionMethodName={runningScreenshotActionMethod}
+              actionError={screenshotActionError[screenshotAction.methodName]}
+            />
           </div>
         ))}
       </div>
