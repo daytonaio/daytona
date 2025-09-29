@@ -1046,7 +1046,7 @@ export class SandboxService {
     }
 
     if (sandbox.state === newState) {
-      console.log(`Sandbox ${sandboxId} is already in state ${newState}`)
+      this.logger.debug(`Sandbox ${sandboxId} is already in state ${newState}`)
       return
     }
 
