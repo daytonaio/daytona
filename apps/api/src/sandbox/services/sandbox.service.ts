@@ -1046,11 +1046,7 @@ export class SandboxService {
     }
 
     if (sandbox.state === newState) {
-      console.log(`Sandbox ${sandboxId} is already in state ${newState}`)
-      return
-    } else {
-      // Dry run
-      console.log(`Would update sandbox ${sandboxId} from state ${sandbox.state} to state ${newState}`)
+      this.logger.debug(`Sandbox ${sandboxId} is already in state ${newState}`)
       return
     }
 
