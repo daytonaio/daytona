@@ -116,6 +116,10 @@ jobs:
         run: |
           gh release upload ${{ inputs.version }} dist/apps/runner-amd64#daytona-runner-${{ inputs.version }}-amd64 --clobber
 
+      - name: Upload daemon to release assets
+        run: |
+          gh release upload ${{ inputs.version }} dist/apps/daemon-amd64#daytona-daemon-${{ inputs.version }}-amd64 --clobber
+
       - name: Upload computer-use artifact
         uses: actions/upload-artifact@v4
         with:
