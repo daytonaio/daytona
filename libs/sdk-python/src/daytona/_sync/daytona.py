@@ -30,6 +30,7 @@ from .._utils.enum import to_enum
 from .._utils.errors import DaytonaError, intercept_errors
 from .._utils.stream import process_streaming_response
 from .._utils.timeout import with_timeout
+from ..code_toolbox.sandbox_js_code_toolbox import SandboxJsCodeToolbox
 from ..code_toolbox.sandbox_python_code_toolbox import SandboxPythonCodeToolbox
 from ..code_toolbox.sandbox_ts_code_toolbox import SandboxTsCodeToolbox
 from ..common.daytona import (
@@ -449,7 +450,9 @@ class Daytona:
         language = enum_language
 
         match language:
-            case CodeLanguage.JAVASCRIPT | CodeLanguage.TYPESCRIPT:
+            case CodeLanguage.JAVASCRIPT:
+                return SandboxJsCodeToolbox()
+            case CodeLanguage.TYPESCRIPT:
                 return SandboxTsCodeToolbox()
             case CodeLanguage.PYTHON:
                 return SandboxPythonCodeToolbox()
