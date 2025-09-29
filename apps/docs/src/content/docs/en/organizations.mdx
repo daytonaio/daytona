@@ -22,31 +22,38 @@ Every Daytona user starts with a **Personal Organization**, ideal for solo use a
 
 Users can switch between their Personal and Collaborative Organizations using the dropdown in the sidebar. Each Organization has its own sandboxes, API keys, and resource quotas.
 
-## Organization Roles
+## Managing Members
 
-Users within an Organization can have one of two different **Roles**: `Owner` and `Member`. `Owners` have full
-administrative access to the Organization and its resources. `Members` have no administrative access
-to the Organization, while their access to Organization resources is based on **Assignments**.
+### Organization Roles
+
+Users within an Organization can have one of two different Roles:
+- **Owners** have full
+administrative access to the Organization and its resources. Organization Owners can perform administrative actions such as:
+- **Members** have no administrative access
+to the Organization, while their access to Organization resources is based on [**Assignments**](#available-assignments).
 
 ### Administrative Actions
 
-Organization `Owners` can perform administrative actions such as:
+Organization Owners can perform administrative actions such as:
 
-- Invite new users to the Organization
-- Manage pending invitations
-- Change Role of a user in the Organization
-- Update Assignments for an Organization Member
+- [Invite new users to the Organization](#inviting-new-users)
+- [Manage pending invitations](#managing-invitations)
+- Change [Role](#organization-roles) of a user in the Organization
+- Update [Assignments](#available-assignments) for an Organization Member
 - Remove user from the Organization
 - Inspect audit logs
-- Delete Organization
+- [Delete Organization](#organization-settings)
 
-## Inviting New Users
+### Inviting New Users
 
-As an Organization `Owner`, to invite a new user to your Organization, navigate to the _Members page_,
-click on _Invite Member_, enter the email address of the user you want to invite, and choose a **Role**.
-If you select the `Member` role, you can also define their **Assignments**.
+As an Organization **Owner**, to invite a new user to your Organization:
 
-## Available Assignments
+1. Navigate to the _Members page_.
+2. Click on _Invite Member_.
+3. Enter the email address of the user you want to invite.
+4. Choose a [Role](#organization-roles) for the new user. If you select the `Member` role, define their [Assignments](#available-assignments).
+
+### Available Assignments
 
 The list of available **Assignments** includes:
 
@@ -61,13 +68,13 @@ The list of available **Assignments** includes:
 | **`Super Admin`**       | Grants full access to all resources in the organization             |
 | **`Auditor`**           | Grants access to audit logs in the organization                     |
 
-## Managing Invitations
+### Managing Invitations
 
 To view their pending invitations to join other Organizations, users can navigate to the _Invitations
 page_ by expanding the dropdown at the bottom of the sidebar, and clicking on _Invitations_. Once a user
 accepts an invitation to join an Organization, they get access to resource quotas assigned to that
-Organization and they may proceed by issuing a new API key and creating sandboxes.
+Organization and they may proceed by issuing a new [API key](/docs/en/api-keys) and creating sandboxes.
 
-## Settings
+## Organization Settings
 
-The Settings subpage in the Dashboard allows you to view the Organization ID and Name and to delete the Organization if you don't need it anymore. This action is irreversible, so please proceed with caution. Personal Organizations are there by default and cannot be deleted.
+The [Settings](https://app.daytona.io/dashboard/settings) subpage in the Dashboard allows you to view the Organization ID and Name and to delete the Organization if you don't need it anymore. This action is irreversible, so please proceed with caution. Personal Organizations are there by default and cannot be deleted.

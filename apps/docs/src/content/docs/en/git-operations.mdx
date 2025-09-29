@@ -74,6 +74,8 @@ await sandbox.git.clone(
 </TabItem>
 </Tabs>
 
+See: [clone (Python SDK)](/docs/python-sdk/sync/git/#gitclone), [clone (TypeScript SDK)](/docs/typescript-sdk/git/#clone)
+
 ### Repository Status
 
 Daytona SDK provides an option to check the status of Git repositories in Sandboxes. You can get the current branch, modified files, number of commits ahead and behind main branch using Python and TypeScript.
@@ -118,6 +120,8 @@ response.branches.forEach(branch => {
 </TabItem>
 </Tabs>
 
+See: [status (Python SDK)](/docs/python-sdk/sync/git/#gitstatus), [status (TypeScript SDK)](/docs/typescript-sdk/git/#status)
+
 ## Branch Operations
 
 Daytona SDK provides an option to manage branches in Git repositories. You can create, switch, and delete branches.
@@ -157,6 +161,8 @@ await sandbox.git.deleteBranch("workspace/repo", "feature/old-feature");
 </TabItem>
 </Tabs>
 
+See: [create_branch (Python SDK)](/docs/python-sdk/sync/git/#gitcreate_branch), [checkout_branch (Python SDK)](/docs/python-sdk/sync/git/#gitcheckout_branch), [delete_branch (Python SDK)](/docs/python-sdk/sync/git/#gitdelete_branch), [createBranch (TypeScript SDK)](/docs/typescript-sdk/git/#createbranch), [checkoutBranch (TypeScript SDK)](/docs/typescript-sdk/git/#checkoutbranch), [deleteBranch (TypeScript SDK)](/docs/typescript-sdk/git/#deletebranch)
+
 ## Staging and Committing
 
 Daytona SDK provides an option to stage and commit changes in Git repositories. You can stage specific files, all changes, and commit with a message using Python and TypeScript.
@@ -194,13 +200,15 @@ await sandbox.git.commit("workspace/repo", "feat: add new feature", "John Doe", 
 </TabItem>
 </Tabs>
 
+See: [add (Python SDK)](/docs/python-sdk/sync/git/#gitadd), [commit (Python SDK)](/docs/python-sdk/sync/git/#gitcommit), [add (TypeScript SDK)](/docs/typescript-sdk/git/#add), [commit (TypeScript SDK)](/docs/typescript-sdk/git/#commit)
+
 ## Remote Operations
 
-Daytona SDK provides an option to work with remote repositories in Git. You can push changes, pull changes, and list remotes.
+Daytona SDK provides an option to work with remote repositories in Git.
 
 ### Working with Remotes
 
-Daytona SDK provides an option to push, pull, and list remotes in Git repositories using Python and TypeScript.
+Daytona SDK provides an option to push and pull changes using Python and TypeScript.
 
 <Tabs>
 <TabItem label="Python" icon="seti:python">
@@ -209,7 +217,6 @@ Daytona SDK provides an option to push, pull, and list remotes in Git repositori
 sandbox.git.push("workspace/repo")
 
 # Pull changes
-
 sandbox.git.pull("workspace/repo")
 
 ```
@@ -225,3 +232,5 @@ await sandbox.git.pull("workspace/repo");
 
 </TabItem>
 </Tabs>
+
+See: [push (Python SDK)](/docs/python-sdk/sync/git/#gitpush), [pull (Python SDK)](/docs/python-sdk/sync/git/#gitpull), [push (TypeScript SDK)](/docs/typescript-sdk/git/#push), [pull (TypeScript SDK)](/docs/typescript-sdk/git/#pull)

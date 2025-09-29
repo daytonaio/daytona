@@ -74,6 +74,8 @@ The Daytona SDK provides methods to create Sandboxes with default configurations
   </TabItem>
 </Tabs>
 
+See: [create (Python SDK)](/docs/en/python-sdk/sync/daytona#daytonacreate), [create (TypeScript SDK)](/docs/en/typescript-sdk/daytona#create)
+
 When Sandboxes are not actively used, it is recommended that they be stopped. This can be done manually [using the stop command](/docs/en/sandbox-management#stop-and-start-sandbox) or automatically by [setting the auto-stop interval](/docs/en/sandbox-management#auto-stop-and-auto-archive).
 
 :::note
@@ -287,6 +289,8 @@ Stopped Sandboxes maintain filesystem persistence while their memory state is cl
   </TabItem>
 </Tabs>
 
+See: [stop (Python SDK)](/docs/python-sdk/sync/sandbox#sandboxstop), [start (Python SDK)](/docs/python-sdk/sync/sandbox#sandboxstart), [find_one (Python SDK)](/docs/python-sdk/sync/daytona#daytonafind_one), [stop (TypeScript SDK)](/docs/typescript-sdk/sandbox#stop), [start (TypeScript SDK)](/docs/typescript-sdk/sandbox#start), [findOne (TypeScript SDK)](/docs/typescript-sdk/daytona#findone)
+
 The stopped state should be used when the Sandbox is expected to be started again soon. Otherwise, it is recommended to stop and then archive the Sandbox to eliminate disk usage costs.
 
 ## Archive Sandbox
@@ -314,6 +318,8 @@ A Sandbox must be stopped before it can be archived, and can be started again in
   </TabItem>
 </Tabs>
 
+See: [archive (Python SDK)](/docs/python-sdk/sync/sandbox#sandboxarchive), [archive (TypeScript SDK)](/docs/typescript-sdk/sandbox#archive)
+
 ## Delete Sandbox
 
 The Daytona SDK provides methods to delete Sandboxes using Python and TypeScript.
@@ -334,6 +340,8 @@ The Daytona SDK provides methods to delete Sandboxes using Python and TypeScript
   </TabItem>
 </Tabs>
 
+See: [delete (Python SDK)](/docs/python-sdk/sync/sandbox#sandboxdelete), [delete (TypeScript SDK)](/docs/typescript-sdk/sandbox#delete)
+
 :::tip
 Check out the [Daytona CLI](/docs/en/getting-started#setting-up-the-daytona-cli) if you prefer managing Sandboxes through the terminal:
 
@@ -342,15 +350,13 @@ daytona sandbox list
 ```
 
 ```text
+Sandbox               State           Region        Last Event
+───────────────────────────────────────────────────────────────────────────
+ugliest_quokka        STARTED         us            1 hour ago
 
-    Sandbox               State           Region        Last Event
-    ────────────────────────────────────────────────────────────────────────────────────
-    ugliest_quokka        STARTED         us            1 hour ago
+associated_yak        STARTED         us            14 hours ago
 
-    associated_yak        STARTED         us            14 hours ago
-
-    developed_lemur       STARTED         us            17 hours ago
-
+developed_lemur       STARTED         us            17 hours ago
 ```
 
 ```bash

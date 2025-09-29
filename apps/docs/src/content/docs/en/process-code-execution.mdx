@@ -66,6 +66,8 @@ console.log(response.result);
 </TabItem>
 </Tabs>
 
+See: [code_run (Python SDK)](/docs/python-sdk/sync/process/#processcode_run), [codeRun (TypeScript SDK)](/docs/typescript-sdk/process/#coderun)
+
 ## Process Execution
 
 Daytona SDK provides an option to execute shell commands and manage background processes in Sandboxes. The workDir for executing defaults to the current Sandbox working directory. Uses the WORKDIR specified in
@@ -120,6 +122,8 @@ console.log(response3.result);
 </TabItem>
 </Tabs>
 
+See: [exec (Python SDK)](/docs/python-sdk/sync/process/#processexec), [executeCommand (TypeScript SDK)](/docs/typescript-sdk/process/#executecommand)
+
 ## Sessions (Background Processes)
 
 Daytona SDK provides an option to start, stop, and manage background process sessions in Sandboxes. You can run long-running commands, monitor process status, and list all running processes.
@@ -165,15 +169,19 @@ for (const session of sessions) {
 </TabItem>
 </Tabs>
 
+See: [get_session (Python SDK)](/docs/python-sdk/sync/process/#processget_session), [list_sessions (Python SDK)](/docs/python-sdk/sync/process/#processlist_sessions), [getSession (TypeScript SDK)](/docs/typescript-sdk/process/#getsession), [listSessions (TypeScript SDK)](/docs/typescript-sdk/process/#listsessions)
+
 ## Best Practices
 
-Daytona SDK provides best practices for process and code execution in Sandboxes.
+Use the following best practices when working with process and code execution in Daytona SDK.
 
-1. **Resource Management**
+### Resource Management
 
-- Use sessions for long-running operations
-- Clean up sessions after execution
-- Handle session exceptions properly
+The following best practices apply to managing resources when executing processes:
+
+1. Use [sessions](#sessions-background-processes) for long-running operations
+2. Clean up sessions after execution
+3. Handle session exceptions properly
 
 <Tabs>
 <TabItem label="Python" icon="seti:python">
@@ -203,7 +211,11 @@ Daytona SDK provides best practices for process and code execution in Sandboxes.
 </TabItem>
 </Tabs>
 
-2. **Error Handling**
+See: [create_session (Python SDK)](/docs/python-sdk/sync/process/#processcreate_session), [delete_session (Python SDK)](/docs/python-sdk/sync/process/#processdelete_session), [createSession (TypeScript SDK)](/docs/typescript-sdk/process/#createsession), [deleteSession (TypeScript SDK)](/docs/typescript-sdk/process/#deletesession)
+
+### Error Handling
+
+The following best practices apply to error handling when executing processes:
 
 - Handle process exceptions properly
 - Log error details for debugging
@@ -237,22 +249,10 @@ try {
 
 ## Common Issues
 
-Daytona SDK provides an option to troubleshoot common issues related to process execution and code execution.
+To troubleshoot common issues related to process and code execution, refer to the following table:
 
-### Process Execution Failed
-
-- Check command syntax
-- Verify required dependencies
-- Ensure sufficient permissions
-
-### Process Timeout
-
-- Adjust timeout settings
-- Optimize long-running operations
-- Consider using background processes
-
-### Resource Limits
-
-- Monitor process memory usage
-- Handle process cleanup properly
-- Use appropriate resource constraints
+| Issue | Solutions |
+|-------|-----------|
+| `Process Execution Failed` | • Check command syntax<br/>• Verify required dependencies<br/>• Ensure sufficient permissions |
+| `Process Timeout` | • Adjust timeout settings<br/>• Optimize long-running operations<br/>• Consider using background processes |
+| `Resource Limits` | • Monitor process memory usage<br/>• Handle process cleanup properly<br/>• Use appropriate resource constraints |
