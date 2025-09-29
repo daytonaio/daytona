@@ -15,6 +15,8 @@ import {
   SandboxApi,
   ToolboxApi,
   AuditApi,
+  RegionsApi,
+  RunnersApi,
 } from '@daytonaio/api-client'
 import axios, { AxiosError } from 'axios'
 import { DaytonaError } from './errors'
@@ -32,6 +34,8 @@ export class ApiClient {
   private _volumeApi: VolumesApi
   private _toolboxApi: ToolboxApi
   private _auditApi: AuditApi
+  private _regionsApi: RegionsApi
+  private _runnersApi: RunnersApi
 
   constructor(config: DashboardConfig, accessToken: string) {
     this.config = new Configuration({
@@ -68,6 +72,8 @@ export class ApiClient {
     this._volumeApi = new VolumesApi(this.config, undefined, axiosInstance)
     this._toolboxApi = new ToolboxApi(this.config, undefined, axiosInstance)
     this._auditApi = new AuditApi(this.config, undefined, axiosInstance)
+    this._regionsApi = new RegionsApi(this.config, undefined, axiosInstance)
+    this._runnersApi = new RunnersApi(this.config, undefined, axiosInstance)
   }
 
   public setAccessToken(accessToken: string) {
@@ -137,5 +143,13 @@ export class ApiClient {
         Authorization: `Bearer ${this.config.accessToken}`,
       },
     })
+  }
+
+  public get regionsApi() {
+    return this._regionsApi
+  }
+
+  public get runnersApi() {
+    return this._runnersApi
   }
 }
