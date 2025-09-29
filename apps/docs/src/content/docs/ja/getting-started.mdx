@@ -1,18 +1,18 @@
 ---
-title: はじめに
+title: はじめよう
 ---
 
 import { TabItem, Tabs } from '@astrojs/starlight/components'
 
-Daytona SDKはDaytonaと連携するための公式[Python](/docs/ja/python-sdk)および[TypeScript](/docs/ja/typescript-sdk)インターフェースを提供し、開発環境をプログラムで管理し、コードを実行できます。[Python SDK](/docs/ja/python-sdk)は同期・非同期の両方のプログラミングモデルをサポートしており、非同期クラスには`Async`の接頭辞が付きます。
+Daytona SDK は、Daytona と連携するための公式の [Python](/docs/ja/python-sdk) および [TypeScript](/docs/ja/typescript-sdk) インターフェースを提供し、開発環境のプログラムによる管理やコードの実行を可能にします。[Python SDK](/docs/ja/python-sdk) は同期・非同期の両方のプログラミングモデルをサポートしており、非同期クラスには接頭辞として `Async` が付きます。
 
-手順に従って、AIエージェント向けの最初のDaytona サンドボックス（Daytonaが管理する隔離された一時的な実行環境）を作成・実行しましょう。
+ステップバイステップのガイドに従って、AI エージェント向けの最初の Daytona サンドボックスを作成・実行してください。
 
-環境変数の設定やステージング環境での実験的機能へのアクセスなど、追加の設定手順については[Configuration](/docs/ja/configuration)を参照してください。
+環境変数の設定や、ステージング環境での実験的機能へのアクセスなど、追加の設定手順については [Configuration](/docs/ja/configuration) を参照してください。
 
-## Daytona SDK をインストールする
+## Daytona SDK のインストール \{#install-the-daytona-sdk\}
 
-Daytona は、Daytona プラットフォームと連携するための公式 Python および TypeScript の SDK を提供しています。お好みの方法で SDK をインストールしてください。
+Daytona は、Daytona プラットフォームと連携するための公式 Python および TypeScript 向け SDK を提供しています。以下のいずれかの方法で SDK をインストールしてください。
 
 <Tabs>
   <TabItem label="Python" icon="seti:python">
@@ -23,19 +23,19 @@ Daytona は、Daytona プラットフォームと連携するための公式 Pyt
 
   <TabItem label="TypeScript" icon="seti:typescript">
     ```bash
-    # npm を使用
+    # npm を使用する場合
     npm install @daytonaio/sdk
 
-    # yarn を使用
+    # yarn を使用する場合
     yarn add @daytonaio/sdk
 
-    # pnpm を使用
+    # pnpm を使用する場合
     pnpm add @daytonaio/sdk
     ```
   </TabItem>
 </Tabs>
 
-## サンドボックス内でコードを実行する
+## サンドボックス内でコードを実行する \{#run-code-inside-a-sandbox\}
 
 次のコードを実行して、Daytona のサンドボックスを作成し、コマンドを実行します。
 
@@ -47,7 +47,7 @@ Daytona は、Daytona プラットフォームと連携するための公式 Pyt
     # Daytona クライアントを初期化
     daytona = Daytona(DaytonaConfig(api_key="YOUR_API_KEY"))
 
-    # サンドボックスのインスタンスを作成
+    # サンドボックスを作成
     sandbox = daytona.create()
 
     # サンドボックス内で安全にコードを実行
@@ -74,7 +74,7 @@ Daytona は、Daytona プラットフォームと連携するための公式 Pyt
 
       let sandbox;
       try {
-        // サンドボックスのインスタンスを作成
+        // サンドボックスを作成
         sandbox = await daytona.create({
           language: "python",
         });
@@ -117,7 +117,7 @@ Daytona は、Daytona プラットフォームと連携するための公式 Pyt
   </TabItem>
 </Tabs>
 
-## アプリをプレビュー
+## アプリをプレビュー \{#preview-your-app\}
 
 次のスニペットは、シンプルな Flask アプリを含むファイルを Daytona のサンドボックスにアップロードします。Web サーバーはポート `3000` で起動し、提供されたプレビューURLからアクセスできます。
 
@@ -240,15 +240,15 @@ Daytona は、Daytona プラットフォームと連携するための公式 Pyt
   </TabItem>
 </Tabs>
 
-このエンドポイントにプログラムからアクセスする必要がありますか？[プレビューと認証](/docs/ja/preview-and-authentication)をご覧ください。
+このエンドポイントにプログラムからアクセスしたい場合は、[プレビューと認証](/docs/ja/preview-and-authentication)をご覧ください。
 
 :::tip
-ポート `22222` のプレビューURLを表示するか、Dashboard -> Sandboxes に移動して Terminal のアイコンをクリックすると、サンドボックスの[Web Terminal](/docs/ja/web-terminal)にアクセスできます。
+ポート `22222` のプレビューURLを表示するか、Dashboard -&gt; Sandboxes に移動して Terminal のアイコンをクリックすると、サンドボックスの [Web Terminal](/docs/ja/web-terminal) にアクセスできます。
 :::
 
-## LLM に接続する
+## LLM に接続する \{#connect-to-an-llm\}
 
-次のスニペットは、Anthropic API を用いて LLM に接続し、Claude に 25 の階乗を求めるコードの生成を依頼し、そのコードを Daytona のサンドボックス（Daytonaが管理する隔離された一時的な実行環境）内で実行します。
+次のスニペットでは、Anthropic API を用いて LLM に接続し、Claude に 25 の階乗を求めるコードの生成を依頼し、そのコードを Daytona のサンドボックス内で実行します。
 
 <Tabs>
   <TabItem label="Python" icon="seti:python">
@@ -390,24 +390,24 @@ Daytona は、Daytona プラットフォームと連携するための公式 Pyt
   </TabItem>
 </Tabs>
 
-## 追加の例
+## 追加のサンプル \{#additional-examples\}
 
-Daytona SDK の [Python の例](https://github.com/daytonaio/daytona/tree/main/examples/python) または [TypeScript/JavaScript の例](https://github.com/daytonaio/daytona/tree/main/examples/typescript) を使ってサンドボックス（Daytonaが管理する隔離された一時的な実行環境）を作成し、コードを実行しましょう。
+Daytona SDK の [Python サンプル](https://github.com/daytonaio/daytona/tree/main/examples/python) または [TypeScript/JavaScript サンプル](https://github.com/daytonaio/daytona/tree/main/examples/typescript)を使ってサンドボックスを作成し、コードを実行します。
 
-LLM を活用して Daytona 上での開発を加速できます。/llms.txt ファイルをコピーし、プロジェクトやチャットのコンテキストに含めてください: [llms-full.txt](https://www.daytona.io/docs/llms-full.txt) または [llms.txt](https://www.daytona.io/docs/llms.txt)
+LLM を活用して Daytona 上での開発を加速しましょう。/llms.txt ファイルをコピーして、プロジェクトまたはチャットのコンテキストに組み込んでください: [llms-full.txt](https://www.daytona.io/docs/llms-full.txt) または [llms.txt](https://www.daytona.io/docs/llms.txt)
 
-[GitHub](https://github.com/daytonaio/daytona) 上の Daytona SDK リポジトリを参照して、さらに詳しく学びましょう。
+[GitHub](https://github.com/daytonaio/daytona) 上の Daytona SDK リポジトリを確認して、詳しく学びましょう。
 
-## ViteプロジェクトでのDaytona
+## Vite プロジェクトでの Daytona \{#daytona-in-vite-projects\}
 
-ViteベースのプロジェクトでDaytona SDKを使用する場合、互換性を確保するためにNodeのポリフィルを設定する必要があります。`vite.config.ts` のplugins配列に以下の設定を追加してください：
+Vite ベースのプロジェクトで Daytona SDK を使用する場合は、互換性を確保するために Node のポリフィルを設定する必要があります。`vite.config.ts` の plugins 配列に次の設定を追加してください。
 
 ```typescript
 import { nodePolyfills } from 'vite-plugin-node-polyfills'
 
 export default defineConfig({
   plugins: [
-    // ... other plugins
+    // ... その他のプラグイン
     nodePolyfills({
       globals: { global: true, process: true, Buffer: true },
       overrides: {
@@ -415,13 +415,13 @@ export default defineConfig({
       },
     }),
   ],
-  // ... rest of your config
+  // ... 設定の残りの部分
 })
 ```
 
-## Next.js プロジェクトにおける Daytona
+## Next.js プロジェクトでの Daytona \{#daytona-in-nextjs-projects\}
 
-Next.js プロジェクトで Daytona SDK を使用する場合、利用中のバンドラーに応じて Webpack や Turbopack との互換性を保つため、Node のポリフィルを設定する必要があります。次の設定を `next.config.ts` に追加してください:
+Next.js プロジェクトで Daytona SDK を使用する場合、利用するバンドラー（Webpack または Turbopack）との互換性を確保するため、Node のポリフィルを設定する必要があります。`next.config.ts` に次の設定を追加してください。
 
 ```typescript
 import type { NextConfig } from 'next'
@@ -451,9 +451,9 @@ const nextConfig: NextConfig = {
 export default nextConfig
 ```
 
-## Daytona CLI のセットアップ
+## Daytona CLI のセットアップ \{#setting-up-the-daytona-cli\}
 
-[ローカルデバイス上のイメージ](/docs/ja/snapshots#using-a-local-image)を使用する場合、またはコマンドラインインターフェースでサンドボックスを管理したい場合は、次のコマンドで Daytona CLI をインストールしてください:
+[ローカルデバイスのイメージ](/docs/ja/snapshots#using-a-local-image)を使用する場合や、コマンドラインインターフェイスでサンドボックスを管理したい場合は、次のコマンドを実行して Daytona CLI をインストールしてください。
 
 <Tabs>
   <TabItem label="Mac/Linux">
