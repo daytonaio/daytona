@@ -207,7 +207,7 @@ export class SandboxWarmPoolService {
         cpu: event.sandbox.cpu,
         mem: event.sandbox.mem,
         disk: event.sandbox.disk,
-        regionId: event.sandbox.region,
+        regionId: event.sandbox.regionId,
         env: event.sandbox.env,
         gpu: event.sandbox.gpu,
         osUser: event.sandbox.osUser,
