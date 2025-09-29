@@ -16,6 +16,7 @@ import {
   Camera,
   HardDrive,
   MemoryStick,
+  RefreshCw,
 } from 'lucide-react'
 import { Button } from '../ui/button'
 import {
@@ -53,6 +54,8 @@ export function SandboxTableHeader({
   snapshotsDataIsLoading,
   snapshotsDataHasMore,
   onChangeSnapshotSearchValue,
+  onRefresh,
+  isRefreshing = false,
 }: SandboxTableHeaderProps) {
   const [open, setOpen] = React.useState(false)
   const currentSort = table.getState().sorting[0]?.id || ''
@@ -74,6 +77,17 @@ export function SandboxTableHeader({
           placeholder="Search by ID"
           className="max-w-[200px]"
         />
+
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={onRefresh}
+          disabled={isRefreshing}
+          className="flex items-center gap-2"
+        >
+          <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+          Refresh
+        </Button>
 
         <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild>

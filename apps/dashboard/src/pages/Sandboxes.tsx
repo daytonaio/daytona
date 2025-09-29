@@ -111,6 +111,7 @@ const Sandboxes: React.FC = () => {
     data: sandboxesData,
     isLoading: sandboxesDataIsLoading,
     error: sandboxesDataError,
+    refetch: refetchSandboxesData,
   } = useSandboxes(queryKey, queryParams)
 
   useEffect(() => {
@@ -180,6 +181,21 @@ const Sandboxes: React.FC = () => {
 
   const [sandboxIsLoading, setSandboxIsLoading] = useState<Record<string, boolean>>({})
   const [sandboxStateIsTransitioning, setSandboxStateIsTransitioning] = useState<Record<string, boolean>>({}) // display transition animation
+
+  // Manual Refreshing
+
+  const [sandboxDataIsRefreshing, setSandboxDataIsRefreshing] = useState(false)
+
+  const handleRefresh = useCallback(async () => {
+    setSandboxDataIsRefreshing(true)
+    try {
+      await refetchSandboxesData()
+    } catch (error) {
+      handleApiError(error, 'Failed to refresh sandboxes')
+    } finally {
+      setSandboxDataIsRefreshing(false)
+    }
+  }, [refetchSandboxesData])
 
   // Delete Sandbox Dialog
 
@@ -799,6 +815,8 @@ const Sandboxes: React.FC = () => {
         getWebTerminalUrl={getWebTerminalUrl}
         handleCreateSshAccess={openCreateSshDialog}
         handleRevokeSshAccess={openRevokeSshDialog}
+        handleRefresh={handleRefresh}
+        isRefreshing={sandboxDataIsRefreshing}
         data={sandboxesData?.items || []}
         loading={sandboxesDataIsLoading}
         snapshots={snapshotsData?.items || []}

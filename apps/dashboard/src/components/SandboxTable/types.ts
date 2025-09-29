@@ -35,6 +35,8 @@ export interface SandboxTableProps {
   getWebTerminalUrl: (id: string) => Promise<string | null>
   handleCreateSshAccess: (id: string) => void
   handleRevokeSshAccess: (id: string) => void
+  handleRefresh: () => void
+  isRefreshing?: boolean
   onRowClick?: (sandbox: Sandbox) => void
   pagination: {
     pageIndex: number
@@ -71,6 +73,8 @@ export interface SandboxTableHeaderProps {
   snapshotsDataIsLoading: boolean
   snapshotsDataHasMore?: boolean
   onChangeSnapshotSearchValue: (name?: string) => void
+  onRefresh: () => void
+  isRefreshing?: boolean
 }
 
 export interface FacetedFilterOption {

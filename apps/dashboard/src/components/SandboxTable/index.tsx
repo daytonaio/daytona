@@ -52,6 +52,8 @@ export function SandboxTable({
   getWebTerminalUrl,
   handleCreateSshAccess,
   handleRevokeSshAccess,
+  handleRefresh,
+  isRefreshing,
   onRowClick,
   pagination,
   pageCount,
@@ -117,6 +119,8 @@ export function SandboxTable({
         snapshotsDataIsLoading={snapshotsDataIsLoading}
         snapshotsDataHasMore={snapshotsDataHasMore}
         onChangeSnapshotSearchValue={onChangeSnapshotSearchValue}
+        onRefresh={handleRefresh}
+        isRefreshing={isRefreshing}
       />
 
       <Table className="border-separate border-spacing-0">
