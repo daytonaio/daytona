@@ -118,7 +118,7 @@ const configuration = {
     gpu: parseInt(process.env.DEFAULT_RUNNER_GPU || '0', 10),
     gpuType: process.env.DEFAULT_RUNNER_GPU_TYPE,
     capacity: parseInt(process.env.DEFAULT_RUNNER_CAPACITY || '100', 10),
-    region: process.env.DEFAULT_RUNNER_REGION,
+    regionId: process.env.DEFAULT_RUNNER_REGION_ID,
     class: process.env.DEFAULT_RUNNER_CLASS ? (process.env.DEFAULT_RUNNER_CLASS as SandboxClass) : undefined,
     version: process.env.DEFAULT_RUNNER_VERSION || '0',
   },

@@ -29,6 +29,11 @@ export enum OrganizationResourcePermission {
   WRITE_REGIONS = 'write:regions',
   DELETE_REGIONS = 'delete:regions',
 
+  // runners
+  READ_RUNNERS = 'read:runners',
+  WRITE_RUNNERS = 'write:runners',
+  DELETE_RUNNERS = 'delete:runners',
+
   // audit
   READ_AUDIT_LOGS = 'read:audit_logs',
 }

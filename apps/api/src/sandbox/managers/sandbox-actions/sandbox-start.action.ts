@@ -96,7 +96,7 @@ export class SandboxStartAction extends SandboxAction {
     let runnerId: string
     try {
       const runner = await this.runnerService.getRandomAvailableRunner({
-        region: sandbox.regionId,
+        regionId: sandbox.regionId,
         sandboxClass: sandbox.class,
         snapshotRef: sandbox.buildInfo.snapshotRef,
       })
@@ -130,7 +130,7 @@ export class SandboxStartAction extends SandboxAction {
 
     // Try to assign a new available runner
     const runner = await this.runnerService.getRandomAvailableRunner({
-      region: sandbox.regionId,
+      regionId: sandbox.regionId,
       sandboxClass: sandbox.class,
       excludedRunnerIds: excludedRunnerIds,
     })
@@ -255,7 +255,7 @@ export class SandboxStartAction extends SandboxAction {
           //  TODO: usage should be based on compute usage
 
           const availableRunners = await this.runnerService.findAvailableRunners({
-            region: sandbox.regionId,
+            regionId: sandbox.regionId,
             sandboxClass: sandbox.class,
           })
           const lessUsedRunners = availableRunners.filter((runner) => runner.id !== originalRunnerId)
@@ -358,7 +358,7 @@ export class SandboxStartAction extends SandboxAction {
       let availableRunners = []
       const runnersWithBaseSnapshot = snapshotRef
         ? await this.runnerService.findAvailableRunners({
-            region: sandbox.regionId,
+            regionId: sandbox.regionId,
             sandboxClass: sandbox.class,
             snapshotRef,
           })
@@ -368,7 +368,7 @@ export class SandboxStartAction extends SandboxAction {
       } else {
         //  if no runner has the base snapshot, get all available runners
         availableRunners = await this.runnerService.findAvailableRunners({
-          region: sandbox.regionId,
+          regionId: sandbox.regionId,
           sandboxClass: sandbox.class,
         })
       }

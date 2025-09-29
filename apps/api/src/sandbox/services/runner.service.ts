@@ -8,7 +8,7 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { Cron, CronExpression } from '@nestjs/schedule'
 import { FindOptionsWhere, In, Not, Raw, Repository } from 'typeorm'
 import { Runner } from '../entities/runner.entity'
-import { CreateRunnerDto } from '../dto/create-runner.dto'
+import { CreateRunnerInternalDto } from '../dto/create-runner-internal.dto'
 import { SandboxClass } from '../enums/sandbox-class.enum'
 import { RunnerState } from '../enums/runner-state.enum'
 import { BadRequestError } from '../../exceptions/bad-request.exception'
@@ -23,6 +23,7 @@ import { Snapshot } from '../entities/snapshot.entity'
 import { RunnerSnapshotDto } from '../dto/runner-snapshot.dto'
 import { RunnerAdapterFactory, RunnerInfo } from '../runner-adapter/runnerAdapter'
 import { RedisLockProvider } from '../common/redis-lock.provider'
+import { Region } from '../entities/region.entity'
 
 @Injectable()
 export class RunnerService {
@@ -39,15 +40,24 @@ export class RunnerService {
     @InjectRepository(Snapshot)
     private readonly snapshotRepository: Repository<Snapshot>,
     private readonly redisLockProvider: RedisLockProvider,
+    @InjectRepository(Region)
+    private readonly regionRepository: Repository<Region>,
   ) {}
 
-  async create(createRunnerDto: CreateRunnerDto): Promise<Runner> {
-    // Validate region and class
-    if (createRunnerDto.region.trim().length === 0) {
-      throw new Error('Invalid region')
-    }
+  async create(createRunnerDto: CreateRunnerInternalDto, organizationId?: string): Promise<Runner> {
     if (!this.isValidClass(createRunnerDto.class)) {
       throw new Error('Invalid class')
+    }
+
+    const region = await this.regionRepository.findOne({
+      where: {
+        id: createRunnerDto.regionId,
+        organizationId,
+      },
+    })
+
+    if (!region) {
+      throw new Error('Invalid region')
     }
 
     const runner = new Runner()
@@ -62,15 +72,56 @@ export class RunnerService {
     runner.gpuType = createRunnerDto.gpuType
     runner.used = 0
     runner.capacity = createRunnerDto.capacity
-    runner.region = createRunnerDto.region
+    runner.regionId = createRunnerDto.regionId
     runner.class = createRunnerDto.class
     runner.version = createRunnerDto.version
 
     return this.runnerRepository.save(runner)
   }
 
-  async findAll(): Promise<Runner[]> {
-    return this.runnerRepository.find()
+  async findAll(organizationId?: string, regionName?: string): Promise<Runner[]> {
+    if (organizationId && regionName) {
+      return this.findAllByRegionName(organizationId, regionName)
+    } else if (organizationId) {
+      return this.findAllByOrganizationId(organizationId)
+    } else {
+      return this.runnerRepository.find()
+    }
+  }
+
+  async findAllByRegionName(organizationId: string, regionName: string): Promise<Runner[]> {
+    const region = await this.regionRepository.findOne({
+      where: {
+        name: regionName,
+        organizationId,
+      },
+    })
+
+    if (!region) {
+      throw new NotFoundException('Region not found')
+    }
+
+    return this.runnerRepository.find({
+      where: {
+        regionId: region.id,
+      },
+    })
+  }
+
+  async findAllByOrganizationId(organizationId: string): Promise<Runner[]> {
+    const regions = await this.regionRepository.find({
+      where: {
+        organizationId,
+      },
+    })
+
+    const runnerIds = regions.map((region) => region.id)
+
+    return this.runnerRepository.find({
+      where: {
+        regionId: In(runnerIds),
+      },
+    })
   }
 
   async findAllReady(): Promise<Runner[]> {
@@ -83,6 +134,16 @@ export class RunnerService {
 
   async findOne(id: string): Promise<Runner | null> {
     return this.runnerRepository.findOneBy({ id })
+  }
+
+  async findOneOrFail(id: string): Promise<Runner> {
+    const runner = await this.runnerRepository.findOneBy({ id })
+
+    if (!runner) {
+      throw new NotFoundException('Runner not found')
+    }
+
+    return runner
   }
 
   async findByIds(runnerIds: string[]): Promise<Runner[]> {
@@ -141,8 +202,8 @@ export class RunnerService {
       runnerFilter.id = Not(In(params.excludedRunnerIds))
     }
 
-    if (params.region !== undefined) {
-      runnerFilter.region = params.region
+    if (params.regionId !== undefined) {
+      runnerFilter.regionId = params.regionId
     }
 
     if (params.sandboxClass !== undefined) {
@@ -158,6 +219,22 @@ export class RunnerService {
 
   async remove(id: string): Promise<void> {
     await this.runnerRepository.delete(id)
+  }
+
+  async getRegionId(runnerId: string): Promise<string> {
+    const runner = await this.runnerRepository.findOne({
+      where: {
+        id: runnerId,
+      },
+      select: ['regionId'],
+      loadEagerRelations: false,
+    })
+
+    if (!runner || !runner.regionId) {
+      throw new NotFoundException('Runner not found')
+    }
+
+    return runner.regionId
   }
 
   @OnEvent(SandboxEvents.STATE_UPDATED)
@@ -341,8 +418,15 @@ export class RunnerService {
     return Object.values(SandboxClass).includes(sandboxClass)
   }
 
-  async updateSchedulingStatus(id: string, unschedulable: boolean): Promise<Runner> {
-    const runner = await this.runnerRepository.findOne({ where: { id } })
+  async updateSchedulingStatus(id: string, unschedulable: boolean, runner?: Runner): Promise<Runner> {
+    if (runner && runner.id !== id) {
+      throw new Error('Runner ID mismatch')
+    }
+
+    if (!runner) {
+      runner = await this.runnerRepository.findOne({ where: { id } })
+    }
+
     if (!runner) {
       throw new Error('Runner not found')
     }
@@ -503,7 +587,7 @@ export class RunnerService {
 }
 
 export class GetRunnerParams {
-  region?: string
+  regionId?: string
   sandboxClass?: SandboxClass
   snapshotRef?: string
   excludedRunnerIds?: string[]
