@@ -40,7 +40,7 @@ export class Sandbox {
   @Column({
     default: 'us',
   })
-  region: string
+  regionId: string
 
   @Column({
     type: 'uuid',
