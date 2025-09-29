@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   app:
     build:
@@ -9,11 +7,16 @@ services:
     volumes:
       - ..:/workspaces/daytona
 
-  dex:
-    image: dexidp/dex:v2.42.0
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.3.3
+    command:
+      - start-dev
+      - --import-realm
+    environment:
+      - KC_BOOTSTRAP_ADMIN_USERNAME=admin
+      - KC_BOOTSTRAP_ADMIN_PASSWORD=admin
     volumes:
-      - ./dex/config.yaml:/etc/dex/config.yaml
-    command: ['dex', 'serve', '/etc/dex/config.yaml']
+      - ./keycloak:/opt/keycloak/data/import
     network_mode: service:app
 
   db:
