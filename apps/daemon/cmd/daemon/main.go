@@ -93,6 +93,7 @@ func main() {
 	}
 
 	// Initialize and start metrics service
+	log.Infof("Starting metrics service for sandbox %s", sandboxId)
 	metricsCollector := metrics.NewCollector("/") // Using root path for disk metrics
 	metricsService := metrics.NewService(metricsCollector, 10*time.Second, sandboxId)
 	if err := metricsService.Start(); err != nil {
