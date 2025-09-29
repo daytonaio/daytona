@@ -68,9 +68,6 @@ function extractHeadings(content, slug) {
   while ((match = headingRegex.exec(content)) !== null) {
     const heading = match[2].trim()
     const textBelow = match[3].trim()
-    if (heading === 'Using a Local Image') {
-      console.log(heading, textBelow)
-    }
     const description = extractHyperlinks(extractRealSentence(textBelow))
     const headingSlug = `${slug}#${heading
       .toLowerCase()
