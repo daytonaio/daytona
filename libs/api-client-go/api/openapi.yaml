@@ -1985,9 +1985,23 @@ paths:
   /runners:
     get:
       operationId: listRunners
-      parameters: []
+      parameters:
+        - description: Filter runners by region name
+          explode: true
+          in: query
+          name: region
+          required: false
+          schema:
+            type: string
+          style: form
       responses:
         '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Runner'
+                type: array
           description: ''
       security:
         - bearer: []
@@ -2009,6 +2023,10 @@ paths:
         required: true
       responses:
         '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Runner'
           description: ''
       security:
         - bearer: []
@@ -2019,11 +2037,12 @@ paths:
       summary: Create runner
       tags:
         - runners
-  /runners/{id}/scheduling:
-    patch:
-      operationId: updateRunnerScheduling
+  /runners/{id}:
+    delete:
+      operationId: deleteRunner
       parameters:
-        - explode: false
+        - description: Runner ID
+          explode: false
           in: path
           name: id
           required: true
@@ -2031,7 +2050,7 @@ paths:
             type: string
           style: simple
       responses:
-        '200':
+        '204':
           description: ''
       security:
         - bearer: []
@@ -2039,16 +2058,16 @@ paths:
             - openid
             - profile
             - email
-      summary: Update runner scheduling status
+      summary: Delete runner
       tags:
         - runners
-  /runners/by-sandbox/{sandboxId}:
     get:
-      operationId: getRunnerBySandboxId
+      operationId: getRunnerById
       parameters:
-        - explode: false
+        - description: Runner ID
+          explode: false
           in: path
-          name: sandboxId
+          name: id
           required: true
           schema:
             type: string
@@ -2059,44 +2078,42 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Runner'
-          description: Runner found
+          description: ''
       security:
         - bearer: []
         - oauth2:
             - openid
             - profile
             - email
-      summary: Get runner by sandbox ID
+      summary: Get runner by ID
       tags:
         - runners
-  /runners/by-snapshot-ref:
-    get:
-      operationId: getRunnersBySnapshotRef
+  /runners/{id}/scheduling:
+    patch:
+      operationId: updateRunnerScheduling
       parameters:
-        - description: Snapshot ref
-          explode: true
-          in: query
-          name: ref
+        - description: Runner ID
+          explode: false
+          in: path
+          name: id
           required: true
           schema:
             type: string
-          style: form
+          style: simple
       responses:
         '200':
           content:
             application/json:
               schema:
-                items:
-                  $ref: '#/components/schemas/RunnerSnapshotDto'
-                type: array
-          description: Runners found for the snapshot
+                $ref: '#/components/schemas/Runner'
+          description: ''
       security:
         - bearer: []
         - oauth2:
             - openid
             - profile
             - email
-      summary: Get runners by snapshot ref
+      summary: Update runner scheduling status
       tags:
         - runners
   /toolbox/{sandboxId}/toolbox/project-dir:
@@ -6005,6 +6022,136 @@ paths:
       summary: Get volume details by name
       tags:
         - volumes
+  /regions:
+    get:
+      operationId: listRegions
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/RegionDto'
+                type: array
+          description: List of all regions
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: List all regions
+      tags:
+        - regions
+    post:
+      operationId: createRegion
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateRegion'
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegionDto'
+          description: The region has been successfully created.
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Create a new region
+      tags:
+        - regions
+  /regions/{id}:
+    delete:
+      operationId: deleteRegion
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - description: Region ID
+          explode: false
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '204':
+          description: The region has been successfully deleted.
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Delete a region
+      tags:
+        - regions
+    get:
+      operationId: getRegionById
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - description: Region ID
+          explode: false
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegionDto'
+          description: ''
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Get region by ID
+      tags:
+        - regions
   /docker-registry:
     get:
       operationId: listRegistries
@@ -6755,6 +6902,12 @@ components:
               - read:volumes
               - write:volumes
               - delete:volumes
+              - read:regions
+              - write:regions
+              - delete:regions
+              - read:runners
+              - write:runners
+              - delete:runners
               - read:audit_logs
             type: string
           type: array
@@ -6805,6 +6958,12 @@ components:
               - read:volumes
               - write:volumes
               - delete:volumes
+              - read:regions
+              - write:regions
+              - delete:regions
+              - read:runners
+              - write:runners
+              - delete:runners
               - read:audit_logs
             type: string
           type: array
@@ -6860,6 +7019,12 @@ components:
               - read:volumes
               - write:volumes
               - delete:volumes
+              - read:regions
+              - write:regions
+              - delete:regions
+              - read:runners
+              - write:runners
+              - delete:runners
               - read:audit_logs
             type: string
           type: array
@@ -6922,6 +7087,12 @@ components:
               - read:volumes
               - write:volumes
               - delete:volumes
+              - read:regions
+              - write:regions
+              - delete:regions
+              - read:runners
+              - write:runners
+              - delete:runners
               - read:audit_logs
             type: string
           type: array
@@ -7301,6 +7472,12 @@ components:
               - read:volumes
               - write:volumes
               - delete:volumes
+              - read:regions
+              - write:regions
+              - delete:regions
+              - read:runners
+              - write:runners
+              - delete:runners
               - read:audit_logs
             type: string
           type: array
@@ -7338,6 +7515,12 @@ components:
               - read:volumes
               - write:volumes
               - delete:volumes
+              - read:regions
+              - write:regions
+              - delete:regions
+              - read:runners
+              - write:runners
+              - delete:runners
               - read:audit_logs
             type: string
           type: array
@@ -8198,18 +8381,13 @@ components:
     CreateRunner:
       example:
         diskGiB: 1.4658129805029452
-        apiKey: apiKey
-        proxyUrl: proxyUrl
-        cpu: 0.8008281904610115
-        gpu: 5.962133916683182
-        version: version
-        capacity: 5.637376656633329
         apiUrl: apiUrl
+        apiKey: apiKey
+        regionId: regionId
+        proxyUrl: proxyUrl
         memoryGiB: 6.027456183070403
         domain: domain
-        region: us
-        class: small
-        gpuType: gpuType
+        cpu: 0.8008281904610115
       properties:
         domain:
           type: string
@@ -8225,38 +8403,17 @@ components:
           type: number
         diskGiB:
           type: number
-        gpu:
-          type: number
-        gpuType:
-          type: string
-        class:
-          enum:
-            - small
-            - medium
-            - large
-          example: small
-          type: string
-        capacity:
-          type: number
-        region:
-          example: us
-          type: string
-        version:
+        regionId:
           type: string
       required:
         - apiKey
         - apiUrl
-        - capacity
-        - class
         - cpu
         - diskGiB
         - domain
-        - gpu
-        - gpuType
         - memoryGiB
         - proxyUrl
-        - region
-        - version
+        - regionId
       type: object
     SandboxClass:
       description: The class of the runner
@@ -8301,8 +8458,8 @@ components:
         currentSnapshotCount: 12
         version: '0'
         disk: 100
+        regionId: 123e4567-e89b-12d3-a456-426614174000
         domain: runner1.example.com
-        region: us
         lastChecked: 2024-10-01T12:00:00Z
       properties:
         id:
@@ -8389,9 +8546,9 @@ components:
           description: Runner availability score
           example: 85
           type: number
-        region:
-          description: The region of the runner
-          example: us
+        regionId:
+          description: The region ID of the runner
+          example: 123e4567-e89b-12d3-a456-426614174000
           type: string
         state:
           allOf:
@@ -8432,35 +8589,12 @@ components:
         - id
         - memory
         - proxyUrl
-        - region
+        - regionId
         - state
         - unschedulable
         - updatedAt
         - used
         - version
-      type: object
-    RunnerSnapshotDto:
-      example:
-        runnerDomain: runner.example.com
-        runnerId: 123e4567-e89b-12d3-a456-426614174000
-        runnerSnapshotId: 123e4567-e89b-12d3-a456-426614174000
-      properties:
-        runnerSnapshotId:
-          description: Runner snapshot ID
-          example: 123e4567-e89b-12d3-a456-426614174000
-          type: string
-        runnerId:
-          description: Runner ID
-          example: 123e4567-e89b-12d3-a456-426614174000
-          type: string
-        runnerDomain:
-          description: Runner domain
-          example: runner.example.com
-          type: string
-      required:
-        - runnerDomain
-        - runnerId
-        - runnerSnapshotId
       type: object
     ProjectDirResponse:
       example:
@@ -10374,6 +10508,52 @@ components:
       required:
         - name
       type: object
+    RegionDto:
+      example:
+        organizationId: 123e4567-e89b-12d3-a456-426614174000
+        createdAt: 2023-01-01T00:00:00.000Z
+        name: us-east-1
+        id: 123e4567-e89b-12d3-a456-426614174000
+        updatedAt: 2023-01-01T00:00:00.000Z
+      properties:
+        id:
+          description: Region ID
+          example: 123e4567-e89b-12d3-a456-426614174000
+          type: string
+        name:
+          description: Region name
+          example: us-east-1
+          type: string
+        organizationId:
+          description: Organization ID
+          example: 123e4567-e89b-12d3-a456-426614174000
+          type: string
+        createdAt:
+          description: Creation timestamp
+          example: 2023-01-01T00:00:00.000Z
+          type: string
+        updatedAt:
+          description: Last update timestamp
+          example: 2023-01-01T00:00:00.000Z
+          type: string
+      required:
+        - createdAt
+        - id
+        - name
+        - organizationId
+        - updatedAt
+      type: object
+    CreateRegion:
+      example:
+        name: us-east-1
+      properties:
+        name:
+          description: Region name
+          example: us-east-1
+          type: string
+      required:
+        - name
+      type: object
     CreateDockerRegistry:
       example:
         registryType: organization
@@ -10422,6 +10602,7 @@ components:
       example:
         registryType: internal
         createdAt: 2024-01-31T12:00:00Z
+        regionId: 123e4567-e89b-12d3-a456-426614174000
         name: My Docker Hub
         project: my-project
         id: 123e4567-e89b-12d3-a456-426614174000
@@ -10468,11 +10649,17 @@ components:
           example: 2024-01-31T12:00:00Z
           format: date-time
           type: string
+        regionId:
+          description: Region ID
+          example: 123e4567-e89b-12d3-a456-426614174000
+          nullable: true
+          type: string
       required:
         - createdAt
         - id
         - name
         - project
+        - regionId
         - registryType
         - updatedAt
         - url
@@ -10865,6 +11052,7 @@ components:
             - snapshot
             - user
             - volume
+            - region
           type: string
         targetId:
           type: string

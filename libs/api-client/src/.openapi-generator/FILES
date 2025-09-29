@@ -9,6 +9,7 @@ api/health-api.ts
 api/object-storage-api.ts
 api/organizations-api.ts
 api/preview-api.ts
+api/regions-api.ts
 api/runners-api.ts
 api/sandbox-api.ts
 api/snapshots-api.ts
@@ -45,6 +46,7 @@ models/create-organization-invitation.ts
 models/create-organization-quota.ts
 models/create-organization-role.ts
 models/create-organization.ts
+models/create-region.ts
 models/create-runner.ts
 models/create-sandbox.ts
 models/create-session-request.ts
@@ -112,11 +114,11 @@ models/process-restart-response.ts
 models/process-status-response.ts
 models/project-dir-response.ts
 models/range.ts
+models/region-dto.ts
 models/region-screenshot-response.ts
 models/registry-push-access-dto.ts
 models/replace-request.ts
 models/replace-result.ts
-models/runner-snapshot-dto.ts
 models/runner-state.ts
 models/runner.ts
 models/sandbox-class.ts

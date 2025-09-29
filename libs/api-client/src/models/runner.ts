@@ -152,11 +152,11 @@ export interface Runner {
    */
   availabilityScore?: number
   /**
-   * The region of the runner
+   * The region ID of the runner
    * @type {string}
    * @memberof Runner
    */
-  region: string
+  regionId: string
   /**
    * The state of the runner
    * @type {RunnerState}

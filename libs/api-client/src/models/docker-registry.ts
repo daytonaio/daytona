@@ -66,6 +66,12 @@ export interface DockerRegistry {
    * @memberof DockerRegistry
    */
   updatedAt: Date
+  /**
+   * Region ID
+   * @type {string}
+   * @memberof DockerRegistry
+   */
+  regionId: string | null
 }
 
 export const DockerRegistryRegistryTypeEnum = {

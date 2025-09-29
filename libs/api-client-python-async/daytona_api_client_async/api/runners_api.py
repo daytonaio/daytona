@@ -18,11 +18,10 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 from typing_extensions import Annotated
 
 from pydantic import Field, StrictStr
-from typing import List
+from typing import List, Optional
 from typing_extensions import Annotated
 from daytona_api_client_async.models.create_runner import CreateRunner
 from daytona_api_client_async.models.runner import Runner
-from daytona_api_client_async.models.runner_snapshot_dto import RunnerSnapshotDto
 
 from daytona_api_client_async.api_client import ApiClient, RequestSerialized
 from daytona_api_client_async.api_response import ApiResponse
@@ -58,7 +57,7 @@ class RunnersApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> None:
+    ) -> Runner:
         """Create runner
 
 
@@ -95,7 +94,7 @@ class RunnersApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '201': None,
+            '201': "Runner",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -124,7 +123,7 @@ class RunnersApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[None]:
+    ) -> ApiResponse[Runner]:
         """Create runner
 
 
@@ -161,7 +160,7 @@ class RunnersApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '201': None,
+            '201': "Runner",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -227,7 +226,7 @@ class RunnersApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '201': None,
+            '201': "Runner",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -268,6 +267,13 @@ class RunnersApi:
             _body_params = create_runner
 
 
+        # set the HTTP header `Accept`
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
+                [
+                    'application/json'
+                ]
+            )
 
         # set the HTTP header `Content-Type`
         if _content_type:
@@ -308,9 +314,9 @@ class RunnersApi:
 
 
     @validate_call
-    async def get_runner_by_sandbox_id(
+    async def delete_runner(
         self,
-        sandbox_id: StrictStr,
+        id: Annotated[StrictStr, Field(description="Runner ID")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -323,12 +329,12 @@ class RunnersApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> Runner:
-        """Get runner by sandbox ID
+    ) -> None:
+        """Delete runner
 
 
-        :param sandbox_id: (required)
-        :type sandbox_id: str
+        :param id: Runner ID (required)
+        :type id: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -351,8 +357,8 @@ class RunnersApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._get_runner_by_sandbox_id_serialize(
-            sandbox_id=sandbox_id,
+        _param = self._delete_runner_serialize(
+            id=id,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -360,7 +366,7 @@ class RunnersApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Runner",
+            '204': None,
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -374,9 +380,9 @@ class RunnersApi:
 
 
     @validate_call
-    async def get_runner_by_sandbox_id_with_http_info(
+    async def delete_runner_with_http_info(
         self,
-        sandbox_id: StrictStr,
+        id: Annotated[StrictStr, Field(description="Runner ID")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -389,12 +395,12 @@ class RunnersApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[Runner]:
-        """Get runner by sandbox ID
+    ) -> ApiResponse[None]:
+        """Delete runner
 
 
-        :param sandbox_id: (required)
-        :type sandbox_id: str
+        :param id: Runner ID (required)
+        :type id: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -417,8 +423,8 @@ class RunnersApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._get_runner_by_sandbox_id_serialize(
-            sandbox_id=sandbox_id,
+        _param = self._delete_runner_serialize(
+            id=id,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -426,7 +432,7 @@ class RunnersApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Runner",
+            '204': None,
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -440,9 +446,9 @@ class RunnersApi:
 
 
     @validate_call
-    async def get_runner_by_sandbox_id_without_preload_content(
+    async def delete_runner_without_preload_content(
         self,
-        sandbox_id: StrictStr,
+        id: Annotated[StrictStr, Field(description="Runner ID")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -456,11 +462,11 @@ class RunnersApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Get runner by sandbox ID
+        """Delete runner
 
 
-        :param sandbox_id: (required)
-        :type sandbox_id: str
+        :param id: Runner ID (required)
+        :type id: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -483,8 +489,8 @@ class RunnersApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._get_runner_by_sandbox_id_serialize(
-            sandbox_id=sandbox_id,
+        _param = self._delete_runner_serialize(
+            id=id,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -492,7 +498,7 @@ class RunnersApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Runner",
+            '204': None,
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -501,9 +507,9 @@ class RunnersApi:
         return response_data.response
 
 
-    def _get_runner_by_sandbox_id_serialize(
+    def _delete_runner_serialize(
         self,
-        sandbox_id,
+        id,
         _request_auth,
         _content_type,
         _headers,
@@ -525,21 +531,14 @@ class RunnersApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
-        if sandbox_id is not None:
-            _path_params['sandboxId'] = sandbox_id
+        if id is not None:
+            _path_params['id'] = id
         # process the query parameters
         # process the header parameters
         # process the form parameters
         # process the body parameter
 
 
-        # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
-                [
-                    'application/json'
-                ]
-            )
 
 
         # authentication setting
@@ -549,8 +548,8 @@ class RunnersApi:
         ]
 
         return self.api_client.param_serialize(
-            method='GET',
-            resource_path='/runners/by-sandbox/{sandboxId}',
+            method='DELETE',
+            resource_path='/runners/{id}',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -567,9 +566,9 @@ class RunnersApi:
 
 
     @validate_call
-    async def get_runners_by_snapshot_ref(
+    async def get_runner_by_id(
         self,
-        ref: Annotated[StrictStr, Field(description="Snapshot ref")],
+        id: Annotated[StrictStr, Field(description="Runner ID")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -582,12 +581,12 @@ class RunnersApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> List[RunnerSnapshotDto]:
-        """Get runners by snapshot ref
+    ) -> Runner:
+        """Get runner by ID
 
 
-        :param ref: Snapshot ref (required)
-        :type ref: str
+        :param id: Runner ID (required)
+        :type id: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -610,8 +609,8 @@ class RunnersApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._get_runners_by_snapshot_ref_serialize(
-            ref=ref,
+        _param = self._get_runner_by_id_serialize(
+            id=id,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -619,7 +618,7 @@ class RunnersApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "List[RunnerSnapshotDto]",
+            '200': "Runner",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -633,9 +632,9 @@ class RunnersApi:
 
 
     @validate_call
-    async def get_runners_by_snapshot_ref_with_http_info(
+    async def get_runner_by_id_with_http_info(
         self,
-        ref: Annotated[StrictStr, Field(description="Snapshot ref")],
+        id: Annotated[StrictStr, Field(description="Runner ID")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -648,12 +647,12 @@ class RunnersApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[List[RunnerSnapshotDto]]:
-        """Get runners by snapshot ref
+    ) -> ApiResponse[Runner]:
+        """Get runner by ID
 
 
-        :param ref: Snapshot ref (required)
-        :type ref: str
+        :param id: Runner ID (required)
+        :type id: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -676,8 +675,8 @@ class RunnersApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._get_runners_by_snapshot_ref_serialize(
-            ref=ref,
+        _param = self._get_runner_by_id_serialize(
+            id=id,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -685,7 +684,7 @@ class RunnersApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "List[RunnerSnapshotDto]",
+            '200': "Runner",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -699,9 +698,9 @@ class RunnersApi:
 
 
     @validate_call
-    async def get_runners_by_snapshot_ref_without_preload_content(
+    async def get_runner_by_id_without_preload_content(
         self,
-        ref: Annotated[StrictStr, Field(description="Snapshot ref")],
+        id: Annotated[StrictStr, Field(description="Runner ID")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -715,11 +714,11 @@ class RunnersApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Get runners by snapshot ref
+        """Get runner by ID
 
 
-        :param ref: Snapshot ref (required)
-        :type ref: str
+        :param id: Runner ID (required)
+        :type id: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -742,8 +741,8 @@ class RunnersApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._get_runners_by_snapshot_ref_serialize(
-            ref=ref,
+        _param = self._get_runner_by_id_serialize(
+            id=id,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -751,7 +750,7 @@ class RunnersApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "List[RunnerSnapshotDto]",
+            '200': "Runner",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -760,9 +759,9 @@ class RunnersApi:
         return response_data.response
 
 
-    def _get_runners_by_snapshot_ref_serialize(
+    def _get_runner_by_id_serialize(
         self,
-        ref,
+        id,
         _request_auth,
         _content_type,
         _headers,
@@ -784,11 +783,9 @@ class RunnersApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
+        if id is not None:
+            _path_params['id'] = id
         # process the query parameters
-        if ref is not None:
-            
-            _query_params.append(('ref', ref))
-            
         # process the header parameters
         # process the form parameters
         # process the body parameter
@@ -811,7 +808,7 @@ class RunnersApi:
 
         return self.api_client.param_serialize(
             method='GET',
-            resource_path='/runners/by-snapshot-ref',
+            resource_path='/runners/{id}',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -830,6 +827,7 @@ class RunnersApi:
     @validate_call
     async def list_runners(
         self,
+        region: Annotated[Optional[StrictStr], Field(description="Filter runners by region name")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -842,10 +840,12 @@ class RunnersApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> None:
+    ) -> List[Runner]:
         """List all runners
 
 
+        :param region: Filter runners by region name
+        :type region: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -869,6 +869,7 @@ class RunnersApi:
         """ # noqa: E501
 
         _param = self._list_runners_serialize(
+            region=region,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -876,7 +877,7 @@ class RunnersApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            '200': "List[Runner]",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -892,6 +893,7 @@ class RunnersApi:
     @validate_call
     async def list_runners_with_http_info(
         self,
+        region: Annotated[Optional[StrictStr], Field(description="Filter runners by region name")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -904,10 +906,12 @@ class RunnersApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[None]:
+    ) -> ApiResponse[List[Runner]]:
         """List all runners
 
 
+        :param region: Filter runners by region name
+        :type region: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -931,6 +935,7 @@ class RunnersApi:
         """ # noqa: E501
 
         _param = self._list_runners_serialize(
+            region=region,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -938,7 +943,7 @@ class RunnersApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            '200': "List[Runner]",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -954,6 +959,7 @@ class RunnersApi:
     @validate_call
     async def list_runners_without_preload_content(
         self,
+        region: Annotated[Optional[StrictStr], Field(description="Filter runners by region name")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -970,6 +976,8 @@ class RunnersApi:
         """List all runners
 
 
+        :param region: Filter runners by region name
+        :type region: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -993,6 +1001,7 @@ class RunnersApi:
         """ # noqa: E501
 
         _param = self._list_runners_serialize(
+            region=region,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -1000,7 +1009,7 @@ class RunnersApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            '200': "List[Runner]",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1011,6 +1020,7 @@ class RunnersApi:
 
     def _list_runners_serialize(
         self,
+        region,
         _request_auth,
         _content_type,
         _headers,
@@ -1033,11 +1043,22 @@ class RunnersApi:
 
         # process the path parameters
         # process the query parameters
+        if region is not None:
+            
+            _query_params.append(('region', region))
+            
         # process the header parameters
         # process the form parameters
         # process the body parameter
 
 
+        # set the HTTP header `Accept`
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
+                [
+                    'application/json'
+                ]
+            )
 
 
         # authentication setting
@@ -1067,7 +1088,7 @@ class RunnersApi:
     @validate_call
     async def update_runner_scheduling(
         self,
-        id: StrictStr,
+        id: Annotated[StrictStr, Field(description="Runner ID")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1080,11 +1101,11 @@ class RunnersApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> None:
+    ) -> Runner:
         """Update runner scheduling status
 
 
-        :param id: (required)
+        :param id: Runner ID (required)
         :type id: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -1117,7 +1138,7 @@ class RunnersApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            '200': "Runner",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1133,7 +1154,7 @@ class RunnersApi:
     @validate_call
     async def update_runner_scheduling_with_http_info(
         self,
-        id: StrictStr,
+        id: Annotated[StrictStr, Field(description="Runner ID")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1146,11 +1167,11 @@ class RunnersApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[None]:
+    ) -> ApiResponse[Runner]:
         """Update runner scheduling status
 
 
-        :param id: (required)
+        :param id: Runner ID (required)
         :type id: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -1183,7 +1204,7 @@ class RunnersApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            '200': "Runner",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1199,7 +1220,7 @@ class RunnersApi:
     @validate_call
     async def update_runner_scheduling_without_preload_content(
         self,
-        id: StrictStr,
+        id: Annotated[StrictStr, Field(description="Runner ID")],
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1216,7 +1237,7 @@ class RunnersApi:
         """Update runner scheduling status
 
 
-        :param id: (required)
+        :param id: Runner ID (required)
         :type id: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -1249,7 +1270,7 @@ class RunnersApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            '200': "Runner",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1290,6 +1311,13 @@ class RunnersApi:
         # process the body parameter
 
 
+        # set the HTTP header `Accept`
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
+                [
+                    'application/json'
+                ]
+            )
 
 
         # authentication setting
