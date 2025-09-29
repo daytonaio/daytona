@@ -68,6 +68,7 @@ import { AuditTarget } from '../../audit/enums/audit-target.enum'
 // import { UpdateSandboxNetworkSettingsDto } from '../dto/update-sandbox-network-settings.dto'
 import { SshAccessDto, SshAccessValidationDto } from '../dto/ssh-access.dto'
 import { SandboxNotificationDto } from '../dto/sandbox-notification.dto'
+import { DaemonAuthGuard } from '../../auth/daemon-auth.guard'
 
 @ApiTags('sandbox')
 @Controller('sandbox')
@@ -908,7 +909,7 @@ export class SandboxController {
     status: 200,
     description: 'Notification has been processed',
   })
-  @UseGuards(SandboxAccessGuard)
+  @UseGuards(DaemonAuthGuard, SandboxAccessGuard)
   async createSandboxNotification(
     @Param('sandboxId') sandboxId: string,
     @Body() notification: SandboxNotificationDto,

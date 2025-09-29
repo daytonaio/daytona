@@ -708,6 +708,12 @@ export class SandboxService {
     return sandboxes
   }
 
+  async findByAuthToken(authToken: string): Promise<Sandbox | null> {
+    return this.sandboxRepository.findOne({
+      where: { authToken },
+    })
+  }
+
   async findOne(sandboxId: string, returnDestroyed?: boolean): Promise<Sandbox> {
     const sandbox = await this.sandboxRepository.findOne({
       where: {
