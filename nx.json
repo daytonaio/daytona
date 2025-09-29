@@ -163,6 +163,12 @@
             "title": "Refactor"
           }
         },
+        "chore": {
+          "semverBump": "patch",
+          "changelog": {
+            "title": "Chores"
+          }
+        },
         "__INVALID__": {
           "semverBump": "patch",
           "changelog": {
