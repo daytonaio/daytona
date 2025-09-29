@@ -239,7 +239,7 @@ func (a *AuditAPIService) GetAllAuditLogsExecute(r AuditAPIGetAllAuditLogsReques
 	if r.limit != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "limit", r.limit, "form", "")
 	} else {
-		var defaultValue float32 = 10
+		var defaultValue float32 = 100
 		r.limit = &defaultValue
 	}
 	// to determine the Content-Type header
@@ -367,7 +367,7 @@ func (a *AuditAPIService) GetOrganizationAuditLogsExecute(r AuditAPIGetOrganizat
 	if r.limit != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "limit", r.limit, "form", "")
 	} else {
-		var defaultValue float32 = 10
+		var defaultValue float32 = 100
 		r.limit = &defaultValue
 	}
 	// to determine the Content-Type header

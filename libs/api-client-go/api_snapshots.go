@@ -682,7 +682,7 @@ func (a *SnapshotsAPIService) GetAllSnapshotsExecute(r SnapshotsAPIGetAllSnapsho
 	if r.limit != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "limit", r.limit, "form", "")
 	} else {
-		var defaultValue float32 = 10
+		var defaultValue float32 = 100
 		r.limit = &defaultValue
 	}
 	if r.name != nil {

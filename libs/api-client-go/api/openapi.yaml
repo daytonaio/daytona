@@ -1300,8 +1300,8 @@ paths:
           name: limit
           required: false
           schema:
-            default: 10
-            maximum: 100
+            default: 100
+            maximum: 200
             minimum: 1
             type: number
           style: form
@@ -5345,8 +5345,8 @@ paths:
           name: limit
           required: false
           schema:
-            default: 10
-            maximum: 100
+            default: 100
+            maximum: 200
             minimum: 1
             type: number
           style: form
@@ -6973,8 +6973,8 @@ paths:
           name: limit
           required: false
           schema:
-            default: 10
-            maximum: 100
+            default: 100
+            maximum: 200
             minimum: 1
             type: number
           style: form
@@ -7047,8 +7047,8 @@ paths:
           name: limit
           required: false
           schema:
-            default: 10
-            maximum: 100
+            default: 100
+            maximum: 200
             minimum: 1
             type: number
           style: form

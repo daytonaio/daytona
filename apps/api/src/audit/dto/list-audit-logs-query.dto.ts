@@ -12,6 +12,6 @@ export class ListAuditLogsQueryDto {
   @PageNumber(1)
   page = 1
 
-  @PageLimit(10)
-  limit = 10
+  @PageLimit(100)
+  limit = 100
 }

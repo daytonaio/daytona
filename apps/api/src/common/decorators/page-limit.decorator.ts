@@ -8,7 +8,7 @@ import { ApiProperty } from '@nestjs/swagger'
 import { IsOptional, IsInt, Min, Max } from 'class-validator'
 import { Type } from 'class-transformer'
 
-export function PageLimit(defaultValue = 10) {
+export function PageLimit(defaultValue = 100) {
   return applyDecorators(
     ApiProperty({
       name: 'limit',
@@ -16,13 +16,13 @@ export function PageLimit(defaultValue = 10) {
       required: false,
       type: Number,
       minimum: 1,
-      maximum: 100,
+      maximum: 200,
       default: defaultValue,
     }),
     IsOptional(),
     Type(() => Number),
     IsInt(),
     Min(1),
-    Max(100),
+    Max(200),
   )
 }

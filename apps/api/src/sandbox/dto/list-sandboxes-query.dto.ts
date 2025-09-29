@@ -35,8 +35,8 @@ export class ListSandboxesQueryDto {
   @PageNumber(1)
   page = 1
 
-  @PageLimit(10)
-  limit = 10
+  @PageLimit(100)
+  limit = 100
 
   @ApiProperty({
     name: 'id',

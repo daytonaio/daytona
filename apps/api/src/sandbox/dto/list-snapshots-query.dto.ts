@@ -25,8 +25,8 @@ export class ListSnapshotsQueryDto {
   @PageNumber(1)
   page = 1
 
-  @PageLimit(10)
-  limit = 10
+  @PageLimit(100)
+  limit = 100
 
   @ApiProperty({
     name: 'name',
