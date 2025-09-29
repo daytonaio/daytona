@@ -15,14 +15,22 @@
       "executor": "nx:run-commands",
       "options": {
         "cwd": "{projectRoot}",
-        "command": "astro build"
+        "commands": [
+          "astro build",
+          "node ./tools/update-search.js",
+          "node ./tools/update-llms.js"
+        ],
+        "parallel": false
       },
       "configurations": {
         "production": {
-          "command": "astro build --prod"
+          "commands": [
+            "astro build --prod",
+            "node ./tools/update-search.js",
+            "node ./tools/update-llms.js"
+          ]
         }
-      },
-      "dependsOn": ["update-llms", "update-search"]
+      }
     },
     "update-cli-reference": {
       "executor": "nx:run-commands",
@@ -38,20 +46,6 @@
         "command": "node ./update-api-reference.js"
       },
       "dependsOn": ["api:openapi"]
-    },
-    "update-llms": {
-      "executor": "nx:run-commands",
-      "options": {
-        "cwd": "{projectRoot}/tools",
-        "command": "node ./update-llms.js"
-      }
-    },
-    "update-search": {
-      "executor": "nx:run-commands",
-      "options": {
-        "cwd": "{projectRoot}/tools",
-        "command": "node ./update-search.js"
-      }
     },
     "check-version-env": {},
     "docker": {
