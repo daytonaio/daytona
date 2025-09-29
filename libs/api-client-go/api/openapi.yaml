@@ -1592,14 +1592,6 @@ paths:
           schema:
             type: string
           style: simple
-        - description: Force delete sandbox
-          explode: true
-          in: query
-          name: force
-          required: false
-          schema:
-            type: boolean
-          style: form
       responses:
         '200':
           description: Sandbox has been deleted

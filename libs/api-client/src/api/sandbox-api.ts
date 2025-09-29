@@ -258,14 +258,12 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
      * @summary Delete sandbox
      * @param {string} sandboxId ID of the sandbox
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {boolean} [force] Force delete sandbox
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     deleteSandbox: async (
       sandboxId: string,
       xDaytonaOrganizationID?: string,
-      force?: boolean,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'sandboxId' is not null or undefined
@@ -287,10 +285,6 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
       await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
       // authentication oauth2 required
-
-      if (force !== undefined) {
-        localVarQueryParameter['force'] = force
-      }
 
       if (xDaytonaOrganizationID != null) {
         localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
@@ -1407,20 +1401,17 @@ export const SandboxApiFp = function (configuration?: Configuration) {
      * @summary Delete sandbox
      * @param {string} sandboxId ID of the sandbox
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {boolean} [force] Force delete sandbox
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async deleteSandbox(
       sandboxId: string,
       xDaytonaOrganizationID?: string,
-      force?: boolean,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.deleteSandbox(
         sandboxId,
         xDaytonaOrganizationID,
-        force,
         options,
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
@@ -2088,18 +2079,16 @@ export const SandboxApiFactory = function (configuration?: Configuration, basePa
      * @summary Delete sandbox
      * @param {string} sandboxId ID of the sandbox
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {boolean} [force] Force delete sandbox
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     deleteSandbox(
       sandboxId: string,
       xDaytonaOrganizationID?: string,
-      force?: boolean,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<void> {
       return localVarFp
-        .deleteSandbox(sandboxId, xDaytonaOrganizationID, force, options)
+        .deleteSandbox(sandboxId, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
@@ -2546,19 +2535,13 @@ export class SandboxApi extends BaseAPI {
    * @summary Delete sandbox
    * @param {string} sandboxId ID of the sandbox
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-   * @param {boolean} [force] Force delete sandbox
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof SandboxApi
    */
-  public deleteSandbox(
-    sandboxId: string,
-    xDaytonaOrganizationID?: string,
-    force?: boolean,
-    options?: RawAxiosRequestConfig,
-  ) {
+  public deleteSandbox(sandboxId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
     return SandboxApiFp(this.configuration)
-      .deleteSandbox(sandboxId, xDaytonaOrganizationID, force, options)
+      .deleteSandbox(sandboxId, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 

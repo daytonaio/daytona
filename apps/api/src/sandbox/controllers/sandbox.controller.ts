@@ -391,12 +391,6 @@ export class SandboxController {
     description: 'ID of the sandbox',
     type: 'string',
   })
-  @ApiQuery({
-    name: 'force',
-    required: false,
-    type: Boolean,
-    description: 'Force delete sandbox',
-  })
   @ApiResponse({
     status: 200,
     description: 'Sandbox has been deleted',
@@ -408,11 +402,7 @@ export class SandboxController {
     targetType: AuditTarget.SANDBOX,
     targetIdFromRequest: (req) => req.params.sandboxId,
   })
-  async deleteSandbox(
-    @Param('sandboxId') sandboxId: string,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    @Query('force') force?: boolean,
-  ): Promise<void> {
+  async deleteSandbox(@Param('sandboxId') sandboxId: string): Promise<void> {
     return this.sandboxService.destroy(sandboxId)
   }
 

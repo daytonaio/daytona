@@ -761,18 +761,11 @@ type SandboxAPIDeleteSandboxRequest struct {
 	ApiService             SandboxAPI
 	sandboxId              string
 	xDaytonaOrganizationID *string
-	force                  *bool
 }
 
 // Use with JWT to specify the organization ID
 func (r SandboxAPIDeleteSandboxRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) SandboxAPIDeleteSandboxRequest {
 	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
-	return r
-}
-
-// Force delete sandbox
-func (r SandboxAPIDeleteSandboxRequest) Force(force bool) SandboxAPIDeleteSandboxRequest {
-	r.force = &force
 	return r
 }
 
@@ -815,9 +808,6 @@ func (a *SandboxAPIService) DeleteSandboxExecute(r SandboxAPIDeleteSandboxReques
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
 
-	if r.force != nil {
-		parameterAddToHeaderOrQuery(localVarQueryParams, "force", r.force, "form", "")
-	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
