@@ -31,7 +31,7 @@ import { LogExecution } from '../../common/decorators/log-execution.decorator'
 
 export type FetchWarmPoolSandboxParams = {
   snapshot: string
-  target: string
+  regionId: string
   class: SandboxClass
   cpu: number
   mem: number
@@ -94,7 +94,7 @@ export class SandboxWarmPoolService {
     const warmPoolItem = await this.warmPoolRepository.findOne({
       where: {
         snapshot: snapshot.name,
-        target: params.target,
+        regionId: params.regionId,
         class: params.class,
         cpu: params.cpu,
         mem: params.mem,
@@ -107,7 +107,7 @@ export class SandboxWarmPoolService {
     if (warmPoolItem) {
       const unschedulableRunners = await this.runnerRepository.find({
         where: {
-          region: params.target,
+          regionId: params.regionId,
           unschedulable: true,
         },
       })
@@ -123,7 +123,7 @@ export class SandboxWarmPoolService {
           osUser: warmPoolItem.osUser,
           env: warmPoolItem.env,
           organizationId: SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION,
-          region: warmPoolItem.target,
+          regionId: warmPoolItem.regionId,
           state: SandboxState.STARTED,
         },
         take: 10,
@@ -167,7 +167,7 @@ export class SandboxWarmPoolService {
             class: warmPoolItem.class,
             osUser: warmPoolItem.osUser,
             env: warmPoolItem.env,
-            region: warmPoolItem.target,
+            regionId: warmPoolItem.regionId,
             cpu: warmPoolItem.cpu,
             gpu: warmPoolItem.gpu,
             mem: warmPoolItem.mem,
@@ -209,7 +209,7 @@ export class SandboxWarmPoolService {
         cpu: event.sandbox.cpu,
         mem: event.sandbox.mem,
         disk: event.sandbox.disk,
-        target: event.sandbox.region,
+        regionId: event.sandbox.region,
         env: event.sandbox.env,
         gpu: event.sandbox.gpu,
         osUser: event.sandbox.osUser,
@@ -227,7 +227,7 @@ export class SandboxWarmPoolService {
         class: warmPoolItem.class,
         osUser: warmPoolItem.osUser,
         env: warmPoolItem.env,
-        region: warmPoolItem.target,
+        regionId: warmPoolItem.regionId,
         cpu: warmPoolItem.cpu,
         gpu: warmPoolItem.gpu,
         mem: warmPoolItem.mem,
