@@ -91,7 +91,10 @@ func ReadBuildLogs(ctx context.Context, params ReadLogParams) {
 					}
 					return
 				}
-				log.Errorf("Error reading from stream: %v", err)
+				// Don't log context.Canceled as it's an expected case when streaming is stopped
+				if err != context.Canceled {
+					log.Errorf("Error reading from stream: %v", err)
+				}
 				return
 			}
 		}
