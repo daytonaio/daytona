@@ -228,8 +228,8 @@ export class SandboxController {
     type: [RegionDto],
   })
   async getSandboxRegions(@AuthContext() authContext: OrganizationAuthContext): Promise<RegionDto[]> {
-    const regions = await this.sandboxService.getDistinctRegions(authContext.organizationId)
-    return regions.map((region) => ({ name: region }))
+    // TODO: refactor
+    return []
   }
 
   @Post()
