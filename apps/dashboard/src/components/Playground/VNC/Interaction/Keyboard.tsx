@@ -3,8 +3,10 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 import { Label } from '@/components/ui/label'
-import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import InlineInputFormControl from '../../Inputs/InlineInputFormControl'
+import FormTextInput from '../../Inputs/TextInput'
+import FormNumberInput from '../../Inputs/NumberInput'
 import { KeyboardActions, KeyboardActionFormData, ParameterFormData, NumberParameterFormItem } from '@/enums/Playground'
 import { KeyboardHotKey, KeyboardPress, KeyboardType } from '@/enums/Playground'
 import { usePlayground } from '@/hooks/usePlayground'
@@ -81,7 +83,7 @@ const VNCKeyboardOperations: React.FC = () => {
         return
       }
     }
-    // KeyboardPress modifiers postprocessing: .split(',').map(item => item.trim()).filter(item => item !== '')
+    //TODO -> Add KeyboardPress modifiers field postprocessing: .split(',').map(item => item.trim()).filter(item => item !== '')
     //TODO -> API call + set API response as responseText if present
     setKeyboardActionError({}) // Reset error
     setRunningKeyboardActionMethod(null)
@@ -127,113 +129,59 @@ const VNCKeyboardOperations: React.FC = () => {
           </div>
           <div className="px-4 space-y-2">
             {keyboardAction.methodName === KeyboardActions.HOTKEY && (
-              <div className="flex items-center gap-4">
-                <Label htmlFor={hotKeyParamsFormData[0].key} className="w-32 flex-shrink-0">
-                  <span>
-                    {hotKeyParamsFormData[0].required ? <span className="text-red-500">* </span> : null}
-                    <span>{`${hotKeyParamsFormData[0].label}:`}</span>
-                  </span>
-                </Label>
-                <Input
-                  id={hotKeyParamsFormData[0].key}
-                  className="w-full"
-                  placeholder={hotKeyParamsFormData[0].placeholder}
-                  value={hotKeyParams[hotKeyParamsFormData[0].key]}
-                  onChange={(e) => {
-                    const hotKeyParamsNew = { ...hotKeyParams, [hotKeyParamsFormData[0].key]: e.target.value }
+              <InlineInputFormControl formItem={hotKeyParamsFormData[0]}>
+                <FormTextInput
+                  formItem={hotKeyParamsFormData[0]}
+                  textValue={hotKeyParams[hotKeyParamsFormData[0].key]}
+                  onChangeHandler={(value) => {
+                    const hotKeyParamsNew = { ...hotKeyParams, [hotKeyParamsFormData[0].key]: value }
                     setHotKeyParams(hotKeyParamsNew)
                     setVNCInteractionOptionsParamValue('keyboardHotKeyParams', hotKeyParamsNew)
                   }}
                 />
-              </div>
+              </InlineInputFormControl>
             )}
             {keyboardAction.methodName === KeyboardActions.PRESS && (
               <>
-                <div className="flex items-center gap-4">
-                  <Label htmlFor={pressParamsFormData[0].key} className="w-32 flex-shrink-0">
-                    <span>
-                      {pressParamsFormData[0].required ? <span className="text-red-500">* </span> : null}
-                      <span>{`${pressParamsFormData[0].label}:`}</span>
-                    </span>
-                  </Label>
-                  <Input
-                    id={pressParamsFormData[0].key}
-                    className="w-full"
-                    placeholder={pressParamsFormData[0].placeholder}
-                    value={pressParams[pressParamsFormData[0].key]}
-                    onChange={(e) => {
-                      const pressParamsNew = { ...pressParams, [pressParamsFormData[0].key]: e.target.value }
-                      setPressParams(pressParamsNew)
-                      setVNCInteractionOptionsParamValue('keyboardPressParams', pressParamsNew)
-                    }}
-                  />
-                </div>
-                <div className="flex items-center gap-4">
-                  <Label htmlFor={pressParamsFormData[1].key} className="w-32 flex-shrink-0">
-                    <span>
-                      {pressParamsFormData[1].required ? <span className="text-red-500">* </span> : null}
-                      <span>{`${pressParamsFormData[1].label}:`}</span>
-                    </span>
-                  </Label>
-                  <Input
-                    id={pressParamsFormData[1].key}
-                    className="w-full"
-                    placeholder={pressParamsFormData[1].placeholder}
-                    value={pressParams[pressParamsFormData[1].key]}
-                    onChange={(e) => {
-                      const pressParamsNew = { ...pressParams, [pressParamsFormData[1].key]: e.target.value }
-                      setPressParams(pressParamsNew)
-                      setVNCInteractionOptionsParamValue('keyboardPressParams', pressParamsNew)
-                    }}
-                  />
-                </div>
+                {pressParamsFormData.map((pressParamFormItem) => (
+                  <InlineInputFormControl key={pressParamFormItem.key} formItem={pressParamFormItem}>
+                    <FormTextInput
+                      formItem={pressParamFormItem}
+                      textValue={pressParams[pressParamFormItem.key]}
+                      onChangeHandler={(value) => {
+                        const pressParamsNew = { ...pressParams, [pressParamFormItem.key]: value }
+                        setPressParams(pressParamsNew)
+                        setVNCInteractionOptionsParamValue('keyboardPressParams', pressParamsNew)
+                      }}
+                    />
+                  </InlineInputFormControl>
+                ))}
               </>
             )}
             {keyboardAction.methodName === KeyboardActions.TYPE && (
               <>
-                <div className="flex items-center gap-4">
-                  <Label htmlFor={typeParamsFormData[0].key} className="w-32 flex-shrink-0">
-                    <span>
-                      {typeParamsFormData[0].required ? <span className="text-red-500">* </span> : null}
-                      <span>{`${typeParamsFormData[0].label}:`}</span>
-                    </span>
-                  </Label>
-                  <Input
-                    id={typeParamsFormData[0].key}
-                    className="w-full"
-                    placeholder={typeParamsFormData[0].placeholder}
-                    value={typeParams[typeParamsFormData[0].key]}
-                    onChange={(e) => {
-                      const typeParamsNew = { ...typeParams, [typeParamsFormData[0].key]: e.target.value }
+                <InlineInputFormControl formItem={typeParamsFormData[0]}>
+                  <FormTextInput
+                    formItem={typeParamsFormData[0]}
+                    textValue={typeParams[typeParamsFormData[0].key as 'text']}
+                    onChangeHandler={(value) => {
+                      const typeParamsNew = { ...typeParams, [typeParamsFormData[0].key]: value }
                       setTypeParams(typeParamsNew)
                       setVNCInteractionOptionsParamValue('keyboardTypeParams', typeParamsNew)
                     }}
                   />
-                </div>
-                <div className="flex items-center gap-4">
-                  <Label htmlFor={typeParamsFormData[1].key} className="w-32 flex-shrink-0">
-                    <span>
-                      {typeParamsFormData[1].required ? <span className="text-red-500">* </span> : null}
-                      <span>{`${typeParamsFormData[1].label}:`}</span>
-                    </span>
-                  </Label>
-                  <Input
-                    id={typeParamsFormData[1].key}
-                    type="number"
-                    className="w-full"
-                    min={(typeParamsFormData[1] as NumberParameterFormItem).min}
-                    max={(typeParamsFormData[1] as NumberParameterFormItem).max}
-                    placeholder={typeParamsFormData[1].placeholder}
-                    step={(typeParamsFormData[1] as NumberParameterFormItem).step}
-                    value={typeParams[typeParamsFormData[1].key]}
-                    onChange={(e) => {
-                      const newValue = e.target.value ? Number(e.target.value) : undefined
-                      const typeParamsNew = { ...typeParams, [typeParamsFormData[1].key]: newValue }
+                </InlineInputFormControl>
+                <InlineInputFormControl formItem={typeParamsFormData[1]}>
+                  <FormNumberInput
+                    numberFormItem={typeParamsFormData[1] as NumberParameterFormItem}
+                    numberValue={typeParams[typeParamsFormData[1].key as 'delay']}
+                    onChangeHandler={(value) => {
+                      const typeParamsNew = { ...typeParams, [typeParamsFormData[1].key]: value }
                       setTypeParams(typeParamsNew)
                       setVNCInteractionOptionsParamValue('keyboardTypeParams', typeParamsNew)
                     }}
                   />
-                </div>
+                </InlineInputFormControl>
               </>
             )}
           </div>

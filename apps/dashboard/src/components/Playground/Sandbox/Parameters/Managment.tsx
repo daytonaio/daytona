@@ -4,17 +4,17 @@
  */
 
 import { Label } from '@/components/ui/label'
-import { Input } from '@/components/ui/input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import StackedInputFormControl from '../../Inputs/StackedInputFormControl'
+import FormSelectInput from '../../Inputs/SelectInput'
+import FormNumberInput from '../../Inputs/NumberInput'
 import { CodeLanguage, Resources, CreateSandboxBaseParams } from '@daytonaio/sdk-typescript/src'
 import { ApiKeyList } from '@daytonaio/api-client'
 import { usePlayground } from '@/hooks/usePlayground'
-import { NumberParameterFormItem } from '@/enums/Playground'
-import { Loader2 } from 'lucide-react'
+import { NumberParameterFormItem, ParameterFormItem } from '@/enums/Playground'
 import { useState, useEffect } from 'react'
 
 type SandboxManagmentParametersProps = {
-  apiKeys: ApiKeyList[]
+  apiKeys: (ApiKeyList & { label: string })[] // For FormSelectInput selectOptions prop compatibility
   apiKeysLoading: boolean
 }
 
@@ -26,6 +26,18 @@ const SandboxManagmentParameters: React.FC<SandboxManagmentParametersProps> = ({
   const [sandboxFromImageParams, setSandboxFromImageParams] = useState<CreateSandboxBaseParams>(
     sandboxParametersState['createSandboxBaseParams'],
   )
+  const apiKeyFormData: ParameterFormItem = {
+    label: 'API key',
+    key: 'apiKey',
+    placeholder: 'API key',
+  }
+
+  const languageFormData: ParameterFormItem = {
+    label: 'Language',
+    key: 'language',
+    placeholder: 'Select sandbox language',
+  }
+
   // Available languages
   const languageOptions = [
     {
@@ -46,6 +58,7 @@ const SandboxManagmentParameters: React.FC<SandboxManagmentParametersProps> = ({
     { label: 'Memory (GiB):', key: 'memory', min: 1, max: Infinity, placeholder: '1' },
     { label: 'Storage (GiB):', key: 'disk', min: 1, max: Infinity, placeholder: '3' },
   ]
+
   const lifecycleParamsFormData: (NumberParameterFormItem & {
     key: 'autoStopInterval' | 'autoArchiveInterval' | 'autoDeleteInterval'
   })[] = [
@@ -60,106 +73,60 @@ const SandboxManagmentParameters: React.FC<SandboxManagmentParametersProps> = ({
 
   return (
     <>
-      <div className="space-y-2">
-        <Label htmlFor="api_key">API key</Label>
-        <Select
-          value={sandboxApiKey}
-          onValueChange={(value) => {
+      <StackedInputFormControl formItem={apiKeyFormData}>
+        <FormSelectInput
+          selectOptions={apiKeys}
+          selectValue={sandboxApiKey}
+          formItem={apiKeyFormData}
+          onChangeHandler={(value) => {
             setSandboxApiKey(value)
-            setSandboxParameterValue('apiKey', value)
+            setSandboxParameterValue(apiKeyFormData.key as 'apiKey', value)
           }}
-        >
-          <SelectTrigger className="w-full rounded-lg" aria-label="Select API key">
-            {apiKeysLoading ? (
-              <div className="w-full flex items-center justify-center gap-2">
-                <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-                <span className="text-muted-foreground">Loading...</span>
-              </div>
-            ) : (
-              <SelectValue id="api_key" placeholder="API key" />
-            )}
-          </SelectTrigger>
-          <SelectContent className="rounded-xl">
-            {apiKeys.map((key) => (
-              <SelectItem key={key.value} value={key.value}>
-                {key.value}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="language">Language</Label>
-        <Select
-          value={sandboxLanguage}
-          onValueChange={(value) => {
+          loading={apiKeysLoading}
+        />
+      </StackedInputFormControl>
+      <StackedInputFormControl formItem={languageFormData}>
+        <FormSelectInput
+          selectOptions={languageOptions}
+          selectValue={sandboxLanguage}
+          formItem={languageFormData}
+          onChangeHandler={(value) => {
             setSandboxLanguage(value as CodeLanguage)
-            setSandboxParameterValue('language', value as CodeLanguage)
+            setSandboxParameterValue(languageFormData.key as 'language', value as CodeLanguage)
           }}
-        >
-          <SelectTrigger className="w-full box-border rounded-lg" aria-label="Select sandbox language">
-            <SelectValue id="language" placeholder="Language" />
-          </SelectTrigger>
-          <SelectContent className="rounded-xl">
-            {languageOptions.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
-                {option.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+        />
+      </StackedInputFormControl>
       <div className="space-y-2">
         <Label htmlFor="resources">Resources</Label>
         <div id="resources" className="px-4 space-y-2">
-          {resourcesFormData.map((resource) => (
-            <div key={resource.key} className="flex items-center gap-4">
-              <Label htmlFor={resource.key} className="w-32 flex-shrink-0">
-                {resource.label}
-              </Label>
-              <Input
-                id={resource.key}
-                type="number"
-                className="w-full"
-                min={resource.min}
-                max={resource.max}
-                placeholder={resource.placeholder}
-                value={resources[resource.key]}
-                onChange={(e) => {
-                  const newValue = e.target.value ? Number(e.target.value) : undefined
-                  const resourcesNew = { ...resources, [resource.key]: newValue }
-                  setResources(resourcesNew)
-                  setSandboxParameterValue('resources', resourcesNew)
-                }}
-              />
-            </div>
+          {resourcesFormData.map((resourceParamFormItem) => (
+            <FormNumberInput
+              key={resourceParamFormItem.key}
+              numberValue={resources[resourceParamFormItem.key]}
+              numberFormItem={resourceParamFormItem}
+              onChangeHandler={(value) => {
+                const resourcesNew = { ...resources, [resourceParamFormItem.key]: value }
+                setResources(resourcesNew)
+                setSandboxParameterValue('resources', resourcesNew)
+              }}
+            />
           ))}
         </div>
       </div>
       <div className="space-y-2">
         <Label htmlFor="lifecycle">Lifecycle</Label>
         <div id="lifecycle" className="px-4 space-y-2">
-          {lifecycleParamsFormData.map((lifecycleParam) => (
-            <div key={lifecycleParam.key} className="flex items-center gap-4">
-              <Label htmlFor={lifecycleParam.key} className="w-32 flex-shrink-0">
-                {lifecycleParam.label}
-              </Label>
-              <Input
-                id={lifecycleParam.key}
-                type="number"
-                className="w-full"
-                min={lifecycleParam.min}
-                max={lifecycleParam.max}
-                placeholder={lifecycleParam.placeholder}
-                value={sandboxFromImageParams[lifecycleParam.key]}
-                onChange={(e) => {
-                  const newValue = e.target.value ? Number(e.target.value) : undefined
-                  const sandboxFromImageParamsNew = { ...sandboxFromImageParams, [lifecycleParam.key]: newValue }
-                  setSandboxFromImageParams(sandboxFromImageParamsNew)
-                  setSandboxParameterValue('createSandboxBaseParams', sandboxFromImageParamsNew)
-                }}
-              />
-            </div>
+          {lifecycleParamsFormData.map((lifecycleParamFormItem) => (
+            <FormNumberInput
+              key={lifecycleParamFormItem.key}
+              numberValue={sandboxFromImageParams[lifecycleParamFormItem.key]}
+              numberFormItem={lifecycleParamFormItem}
+              onChangeHandler={(value) => {
+                const sandboxFromImageParamsNew = { ...sandboxFromImageParams, [lifecycleParamFormItem.key]: value }
+                setSandboxFromImageParams(sandboxFromImageParamsNew)
+                setSandboxParameterValue('createSandboxBaseParams', sandboxFromImageParamsNew)
+              }}
+            />
           ))}
         </div>
       </div>

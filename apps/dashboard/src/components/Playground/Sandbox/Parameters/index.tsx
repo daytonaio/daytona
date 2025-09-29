@@ -60,7 +60,10 @@ const SandboxParameters: React.FC = () => {
                 {!isCollapsed && (
                   <div className="px-2 space-y-4">
                     {section.value === SandboxParametersSections.SANDBOX_MANAGMENT && (
-                      <SandboxManagmentParameters apiKeys={apiKeys} apiKeysLoading={apiKeysLoading} />
+                      <SandboxManagmentParameters
+                        apiKeys={apiKeys.map((apiKey) => ({ ...apiKey, label: apiKey.name }))}
+                        apiKeysLoading={apiKeysLoading}
+                      />
                     )}
                   </div>
                 )}

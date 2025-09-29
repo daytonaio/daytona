@@ -3,11 +3,11 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 import { usePlayground } from '@/hooks/usePlayground'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
-import { Checkbox } from '@/components/ui/checkbox'
+import InlineInputFormControl from '../../Inputs/InlineInputFormControl'
+import FormNumberInput from '../../Inputs/NumberInput'
+import FormSelectInput from '../../Inputs/SelectInput'
 import {
   MouseClick,
   MouseButton,
@@ -18,9 +18,17 @@ import {
   MouseActions,
   NumberParameterFormItem,
   MouseScrollDirection,
+  ParameterFormItem,
 } from '@/enums/Playground'
 import { Loader2, Play } from 'lucide-react'
 import React, { useState, MouseEvent } from 'react'
+import FormCheckboxInput from '../../Inputs/CheckboxInput'
+
+const mouseButtonFormData: ParameterFormItem & { key: 'button' } = {
+  label: 'Button',
+  key: 'button',
+  placeholder: 'Select mouse button',
+}
 
 const VNCMouseOperations: React.FC = () => {
   const { VNCInteractionOptionsParamsState, setVNCInteractionOptionsParamValue } = usePlayground()
@@ -39,10 +47,17 @@ const VNCMouseOperations: React.FC = () => {
     { label: 'Coord X', key: 'x', min: 0, max: Infinity, placeholder: '100', required: true },
     { label: 'Coord Y', key: 'y', min: 0, max: Infinity, placeholder: '100', required: true },
   ]
+
+  const mouseDoubleClickFormData: ParameterFormItem & { key: 'double' } = {
+    label: 'Double click',
+    key: 'double',
+    placeholder: 'Is mouse double click',
+  }
+
   const mouseClickParamsFormData: ParameterFormData<MouseClick> = [
     ...mouseClickNumberParamsFormData,
-    { label: 'Button', key: 'button', placeholder: 'Mouse button' },
-    { label: 'Double click', key: 'double', placeholder: '' },
+    mouseButtonFormData,
+    mouseDoubleClickFormData,
   ]
 
   const mouseDragNumberParamsFormData: (NumberParameterFormItem & { key: 'startX' | 'startY' | 'endX' | 'endY' })[] = [
@@ -51,10 +66,7 @@ const VNCMouseOperations: React.FC = () => {
     { label: 'End X', key: 'endX', min: 0, max: Infinity, placeholder: '100', required: true },
     { label: 'End Y', key: 'endY', min: 0, max: Infinity, placeholder: '100', required: true },
   ]
-  const mouseDragParamsFormData: ParameterFormData<MouseDrag> = [
-    ...mouseDragNumberParamsFormData,
-    { label: 'Button', key: 'button', placeholder: 'Mouse button' },
-  ]
+  const mouseDragParamsFormData: ParameterFormData<MouseDrag> = [...mouseDragNumberParamsFormData, mouseButtonFormData]
 
   const mouseMoveNumberParamsFormData: (NumberParameterFormItem & { key: 'x' | 'y' })[] = [
     { label: 'Coord X', key: 'x', min: 0, max: Infinity, placeholder: '100', required: true },
@@ -66,13 +78,14 @@ const VNCMouseOperations: React.FC = () => {
     { label: 'Coord X', key: 'x', min: 0, max: Infinity, placeholder: '100', required: true },
     { label: 'Coord Y', key: 'y', min: 0, max: Infinity, placeholder: '100', required: true },
   ]
-  const mouseScrollParamsFormData: ParameterFormData<MouseScroll> = [
-    ...mouseScrollNumberParamsFormData,
-    { label: 'Scroll direction', key: 'direction', placeholder: 'Mouse scroll direction' },
-    { label: 'Scroll amount', key: 'amount', placeholder: 'Mouse scroll amount' },
-  ]
 
-  const scrollDirectionOptions = [
+  const mouseScrollDirectionFormData: ParameterFormItem & { key: 'direction' } = {
+    label: 'Scroll direction',
+    key: 'direction',
+    placeholder: 'Mouse scroll direction',
+  }
+
+  const mouseScrollDirectionOptions = [
     {
       value: MouseScrollDirection.DOWN,
       label: 'Down',
@@ -81,6 +94,20 @@ const VNCMouseOperations: React.FC = () => {
       value: MouseScrollDirection.UP,
       label: 'Up',
     },
+  ]
+
+  const mouseScrollAmountFormData: NumberParameterFormItem & { key: 'amount' } = {
+    label: 'Scroll amount',
+    key: 'amount',
+    placeholder: 'Mouse scroll amount',
+    min: 1,
+    max: Infinity,
+  }
+
+  const mouseScrollParamsFormData: ParameterFormData<MouseScroll> = [
+    ...mouseScrollNumberParamsFormData,
+    mouseScrollDirectionFormData,
+    mouseScrollAmountFormData,
   ]
 
   const onMouseActionRunClick = <T extends MouseClick | MouseDrag | MouseMove | MouseScroll | object>(
@@ -150,53 +177,35 @@ const VNCMouseOperations: React.FC = () => {
           )}
         </div>
         <div className="px-4 space-y-2">
-          {mouseClickNumberParamsFormData.map((mouseClickNumberParam) => (
-            <div key={mouseClickNumberParam.key} className="flex items-center gap-4">
-              <Label htmlFor={mouseClickNumberParam.key} className="w-32 flex-shrink-0">
-                <span>
-                  {mouseClickNumberParam.required ? <span className="text-red-500">* </span> : null}
-                  <span>{`${mouseClickNumberParam.label}:`}</span>
-                </span>
-              </Label>
-              <Input
-                id={mouseClickNumberParam.key}
-                type="number"
-                className="w-full"
-                min={mouseClickNumberParam.min}
-                max={mouseClickNumberParam.max}
-                placeholder={mouseClickNumberParam.placeholder}
-                step={mouseClickNumberParam.step}
-                value={mouseClickParams[mouseClickNumberParam.key]}
-                onChange={(e) => {
-                  const newValue = e.target.value ? Number(e.target.value) : undefined
-                  const mouseClickParamsNew = { ...mouseClickParams, [mouseClickNumberParam.key]: newValue }
+          {mouseClickNumberParamsFormData.map((mouseClickNumberParamFormItem) => (
+            <InlineInputFormControl key={mouseClickNumberParamFormItem.key} formItem={mouseClickNumberParamFormItem}>
+              <FormNumberInput
+                numberValue={mouseClickParams[mouseClickNumberParamFormItem.key]}
+                numberFormItem={mouseClickNumberParamFormItem}
+                onChangeHandler={(value) => {
+                  const mouseClickParamsNew = { ...mouseClickParams, [mouseClickNumberParamFormItem.key]: value }
                   setMouseClickParams(mouseClickParamsNew)
                   setVNCInteractionOptionsParamValue('mouseClickParams', mouseClickParamsNew)
                 }}
               />
-            </div>
+            </InlineInputFormControl>
           ))}
           <MouseButtonSelect<MouseClick>
             paramsStateObject={mouseClickParams}
             paramsStateSetter={setMouseClickParams}
             contextParamsPropertyName="mouseClickParams"
           />
-          <div className="flex items-center gap-4">
-            <Label htmlFor="double_click" className="w-32 flex-shrink-0">
-              Double:
-            </Label>
-            <div className="flex-1 text-center">
-              <Checkbox
-                id="double_click"
-                checked={mouseClickParams['double']}
-                onCheckedChange={(value) => {
-                  const mouseClickParamsNew = { ...mouseClickParams, double: !!value }
-                  setMouseClickParams(mouseClickParamsNew)
-                  setVNCInteractionOptionsParamValue('mouseClickParams', mouseClickParamsNew)
-                }}
-              />
-            </div>
-          </div>
+          <InlineInputFormControl formItem={mouseDoubleClickFormData}>
+            <FormCheckboxInput
+              checkedValue={mouseClickParams[mouseDoubleClickFormData.key as 'double']}
+              formItem={mouseDoubleClickFormData}
+              onChangeHandler={(checked) => {
+                const mouseClickParamsNew = { ...mouseClickParams, [mouseDoubleClickFormData.key]: checked }
+                setMouseClickParams(mouseClickParamsNew)
+                setVNCInteractionOptionsParamValue('mouseClickParams', mouseClickParamsNew)
+              }}
+            />
+          </InlineInputFormControl>
         </div>
       </div>
       <div className="space-y-4">
@@ -218,31 +227,18 @@ const VNCMouseOperations: React.FC = () => {
           )}
         </div>
         <div className="px-4 space-y-2">
-          {mouseDragNumberParamsFormData.map((mouseDragNumberParam) => (
-            <div key={mouseDragNumberParam.key} className="flex items-center gap-4">
-              <Label htmlFor={mouseDragNumberParam.key} className="w-32 flex-shrink-0">
-                <span>
-                  {mouseDragNumberParam.required ? <span className="text-red-500">* </span> : null}
-                  <span>{`${mouseDragNumberParam.label}:`}</span>
-                </span>
-              </Label>
-              <Input
-                id={mouseDragNumberParam.key}
-                type="number"
-                className="w-full"
-                min={mouseDragNumberParam.min}
-                max={mouseDragNumberParam.max}
-                placeholder={mouseDragNumberParam.placeholder}
-                step={mouseDragNumberParam.step}
-                value={mouseDragParams[mouseDragNumberParam.key]}
-                onChange={(e) => {
-                  const newValue = e.target.value ? Number(e.target.value) : undefined
-                  const mouseDragParamsNew = { ...mouseDragParams, [mouseDragNumberParam.key]: newValue }
+          {mouseDragNumberParamsFormData.map((mouseDragNumberParamFormItem) => (
+            <InlineInputFormControl key={mouseDragNumberParamFormItem.key} formItem={mouseDragNumberParamFormItem}>
+              <FormNumberInput
+                numberValue={mouseDragParams[mouseDragNumberParamFormItem.key]}
+                numberFormItem={mouseDragNumberParamFormItem}
+                onChangeHandler={(value) => {
+                  const mouseDragParamsNew = { ...mouseDragParams, [mouseDragNumberParamFormItem.key]: value }
                   setMouseDragParams(mouseDragParamsNew)
                   setVNCInteractionOptionsParamValue('mouseDragParams', mouseDragParamsNew)
                 }}
               />
-            </div>
+            </InlineInputFormControl>
           ))}
           <MouseButtonSelect<MouseDrag>
             paramsStateObject={mouseDragParams}
@@ -284,34 +280,20 @@ const VNCMouseOperations: React.FC = () => {
           )}
         </div>
         <div className="px-4 space-y-2">
-          {mouseMoveNumberParamsFormData.map((mouseMoveNumberParam) => (
-            <div key={mouseMoveNumberParam.key} className="flex items-center gap-4">
-              <Label htmlFor={mouseMoveNumberParam.key} className="w-32 flex-shrink-0">
-                <span>
-                  {mouseMoveNumberParam.required ? <span className="text-red-500">* </span> : null}
-                  <span>{`${mouseMoveNumberParam.label}:`}</span>
-                </span>
-              </Label>
-              <Input
-                id={mouseMoveNumberParam.key}
-                type="number"
-                className="w-full"
-                min={mouseMoveNumberParam.min}
-                max={mouseMoveNumberParam.max}
-                placeholder={mouseMoveNumberParam.placeholder}
-                step={mouseMoveNumberParam.step}
-                value={mouseMoveParams[mouseMoveNumberParam.key]}
-                onChange={(e) => {
-                  const newValue = e.target.value ? Number(e.target.value) : undefined
-                  const mouseMoveParamsNew = { ...mouseMoveParams, [mouseMoveNumberParam.key]: newValue }
+          {mouseMoveNumberParamsFormData.map((mouseMoveNumberParamFormItem) => (
+            <InlineInputFormControl key={mouseMoveNumberParamFormItem.key} formItem={mouseMoveNumberParamFormItem}>
+              <FormNumberInput
+                numberValue={mouseMoveParams[mouseMoveNumberParamFormItem.key]}
+                numberFormItem={mouseMoveNumberParamFormItem}
+                onChangeHandler={(value) => {
+                  const mouseMoveParamsNew = { ...mouseMoveParams, [mouseMoveNumberParamFormItem.key]: value }
                   setMouseMoveParams(mouseMoveParamsNew)
                   setVNCInteractionOptionsParamValue('mouseMoveParams', mouseMoveParamsNew)
                 }}
               />
-            </div>
+            </InlineInputFormControl>
           ))}
         </div>
-        <div></div>
       </div>
       <div className="space-y-4">
         <div className="flex items-center justify-between">
@@ -334,79 +316,45 @@ const VNCMouseOperations: React.FC = () => {
           )}
         </div>
         <div className="px-4 space-y-2">
-          {mouseScrollNumberParamsFormData.map((mouseScrollNumberParam) => (
-            <div key={mouseScrollNumberParam.key} className="flex items-center gap-4">
-              <Label htmlFor={mouseScrollNumberParam.key} className="w-32 flex-shrink-0">
-                <span>
-                  {mouseScrollNumberParam.required ? <span className="text-red-500">* </span> : null}
-                  <span>{`${mouseScrollNumberParam.label}:`}</span>
-                </span>
-              </Label>
-              <Input
-                id={mouseScrollNumberParam.key}
-                type="number"
-                className="w-full"
-                min={mouseScrollNumberParam.min}
-                max={mouseScrollNumberParam.max}
-                placeholder={mouseScrollNumberParam.placeholder}
-                step={mouseScrollNumberParam.step}
-                value={mouseScrollParams[mouseScrollNumberParam.key]}
-                onChange={(e) => {
-                  const newValue = e.target.value ? Number(e.target.value) : undefined
-                  const mouseScrollParamsNew = { ...mouseScrollParams, [mouseScrollNumberParam.key]: newValue }
+          {mouseScrollNumberParamsFormData.map((mouseScrollNumberParamFormItem) => (
+            <InlineInputFormControl key={mouseScrollNumberParamFormItem.key} formItem={mouseScrollNumberParamFormItem}>
+              <FormNumberInput
+                numberValue={mouseScrollParams[mouseScrollNumberParamFormItem.key]}
+                numberFormItem={mouseScrollNumberParamFormItem}
+                onChangeHandler={(value) => {
+                  const mouseScrollParamsNew = { ...mouseScrollParams, [mouseScrollNumberParamFormItem.key]: value }
                   setMouseScrollParams(mouseScrollParamsNew)
                   setVNCInteractionOptionsParamValue('mouseScrollParams', mouseScrollParamsNew)
                 }}
               />
-            </div>
+            </InlineInputFormControl>
           ))}
-          <div className="flex items-center gap-4">
-            <Label htmlFor="scroll_direction" className="w-32 flex-shrink-0">
-              <span>
-                <span className="text-red-500">* </span>
-                <span>Direction:</span>
-              </span>
-            </Label>
-            <Select
-              value={mouseScrollParams['direction']}
-              onValueChange={(direction) => {
-                const mouseScrollParamsNew = { ...mouseScrollParams, direction: direction as MouseScrollDirection }
-                setMouseScrollParams(mouseScrollParamsNew)
-                setVNCInteractionOptionsParamValue('mouseScrollParams', mouseScrollParamsNew)
-              }}
-            >
-              <SelectTrigger className="w-full box-border rounded-lg" aria-label="Select scroll direction">
-                <SelectValue id="scroll_direction" placeholder="Scroll direction" />
-              </SelectTrigger>
-              <SelectContent className="rounded-xl">
-                {scrollDirectionOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="flex items-center gap-4">
-            <Label htmlFor="scroll_amount" className="w-32 flex-shrink-0">
-              <span>Amount:</span>
-            </Label>
-            <Input
-              id="scroll_amount"
-              type="number"
-              className="w-full"
-              min={1}
-              max={Infinity}
-              placeholder="The amount to scroll"
-              value={mouseScrollParams['amount']}
-              onChange={(e) => {
-                const newValue = e.target.value ? Number(e.target.value) : undefined
-                const mouseScrollParamsNew = { ...mouseScrollParams, amount: newValue }
+          <InlineInputFormControl formItem={mouseScrollDirectionFormData}>
+            <FormSelectInput
+              selectOptions={mouseScrollDirectionOptions}
+              selectValue={mouseScrollParams[mouseScrollDirectionFormData.key]}
+              formItem={mouseScrollDirectionFormData}
+              onChangeHandler={(value) => {
+                const mouseScrollParamsNew = {
+                  ...mouseScrollParams,
+                  [mouseScrollDirectionFormData.key]: value as MouseScrollDirection,
+                }
                 setMouseScrollParams(mouseScrollParamsNew)
                 setVNCInteractionOptionsParamValue('mouseScrollParams', mouseScrollParamsNew)
               }}
             />
-          </div>
+          </InlineInputFormControl>
+          <InlineInputFormControl formItem={mouseScrollAmountFormData}>
+            <FormNumberInput
+              numberValue={mouseScrollParams[mouseScrollAmountFormData.key]}
+              numberFormItem={mouseScrollAmountFormData}
+              onChangeHandler={(value) => {
+                const mouseScrollParamsNew = { ...mouseScrollParams, [mouseScrollAmountFormData.key]: value }
+                setMouseScrollParams(mouseScrollParamsNew)
+                setVNCInteractionOptionsParamValue('mouseScrollParams', mouseScrollParamsNew)
+              }}
+            />
+          </InlineInputFormControl>
         </div>
       </div>
     </div>
@@ -442,30 +390,18 @@ const MouseButtonSelect = <T extends MouseClick | MouseDrag>({
   ]
 
   return (
-    <div className="flex items-center gap-4">
-      <Label htmlFor="mouse_button" className="w-32 flex-shrink-0">
-        Button:
-      </Label>
-      <Select
-        value={paramsStateObject['button']}
-        onValueChange={(button) => {
-          const paramsStateObjectNew = { ...paramsStateObject, button: button as MouseButton }
+    <InlineInputFormControl formItem={mouseButtonFormData}>
+      <FormSelectInput
+        selectOptions={mouseButtonOptions}
+        selectValue={paramsStateObject[mouseButtonFormData.key as 'button']}
+        formItem={mouseButtonFormData}
+        onChangeHandler={(value) => {
+          const paramsStateObjectNew = { ...paramsStateObject, [mouseButtonFormData.key]: value as MouseButton }
           paramsStateSetter(paramsStateObjectNew)
           setVNCInteractionOptionsParamValue(contextParamsPropertyName, paramsStateObjectNew)
         }}
-      >
-        <SelectTrigger className="w-full box-border rounded-lg" aria-label="Select mouse button">
-          <SelectValue id="mouse_button" placeholder="Mouse button" />
-        </SelectTrigger>
-        <SelectContent className="rounded-xl">
-          {mouseButtonOptions.map((option) => (
-            <SelectItem key={option.value} value={option.value}>
-              {option.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    </div>
+      />
+    </InlineInputFormControl>
   )
 }
 

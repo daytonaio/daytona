@@ -37,6 +37,12 @@ const VNCScreenshootOperations: React.FC = () => {
     { label: 'Quality', key: 'quality', min: 1, max: 100, placeholder: '95' },
   ]
 
+  const screenshotFormatFormData: ParameterFormItem = {
+    label: 'Format',
+    key: 'format',
+    placeholder: 'Select screenshot image format',
+  }
+
   const screenshotFormatOptions = [
     {
       value: ScreenshotFormatOption.PNG,
@@ -51,6 +57,12 @@ const VNCScreenshootOperations: React.FC = () => {
       label: 'WebP',
     },
   ]
+
+  const screenshotShowCursorFormData: ParameterFormItem = {
+    label: 'Show cursor',
+    key: 'showCursor',
+    placeholder: 'Show cursor in screenshot',
+  }
 
   const screenshotRegionNumberParametersFormData: (NumberParameterFormItem & { key: keyof ScreenshotRegion })[] = [
     { label: 'Top left X', key: 'x', min: 0, max: Infinity, placeholder: '100', required: true },
@@ -112,69 +124,45 @@ const VNCScreenshootOperations: React.FC = () => {
           <Label htmlFor="screenshot-options">Screenshot Options</Label>
         </div>
         <div id="screenshot-options" className="px-4 space-y-2">
-          <div className="flex items-center gap-4">
-            <Label htmlFor="format" className="w-32 flex-shrink-0">
-              Format:
-            </Label>
-            <Select
-              value={screenshotOptions['format']}
-              onValueChange={(format) => {
-                const screenshotOptionsNew = { ...screenshotOptions, format: format as ScreenshotFormatOption }
+          <InlineInputFormControl formItem={screenshotFormatFormData}>
+            <FormSelectInput
+              selectOptions={screenshotFormatOptions}
+              selectValue={screenshotOptions[screenshotFormatFormData.key as 'format']}
+              formItem={screenshotFormatFormData}
+              onChangeHandler={(value) => {
+                const screenshotOptionsNew = {
+                  ...screenshotOptions,
+                  [screenshotFormatFormData.key]: value as ScreenshotFormatOption,
+                }
                 setScreenshotOptions(screenshotOptionsNew)
                 setVNCInteractionOptionsParamValue('screenshotOptionsConfig', screenshotOptionsNew)
               }}
-            >
-              <SelectTrigger className="w-full box-border rounded-lg" aria-label="Select screenshot format">
-                <SelectValue id="format" placeholder="Format" />
-              </SelectTrigger>
-              <SelectContent className="rounded-xl">
-                {screenshotFormatOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          {screenshotOptionsNumberParametersFormData.map((screenshotOptionParam) => (
-            <div key={screenshotOptionParam.key} className="flex items-center gap-4">
-              <Label htmlFor={screenshotOptionParam.key} className="w-32 flex-shrink-0">
-                {`${screenshotOptionParam.label}:`}
-              </Label>
-              <Input
-                id={screenshotOptionParam.key}
-                type="number"
-                className="w-full"
-                min={screenshotOptionParam.min}
-                max={screenshotOptionParam.max}
-                placeholder={screenshotOptionParam.placeholder}
-                step={screenshotOptionParam.step}
-                value={screenshotOptions[screenshotOptionParam.key]}
-                onChange={(e) => {
-                  const newValue = e.target.value ? Number(e.target.value) : undefined
-                  const screenshotOptionsNew = { ...screenshotOptions, [screenshotOptionParam.key]: newValue }
+            />
+          </InlineInputFormControl>
+          {screenshotOptionsNumberParametersFormData.map((screenshotOptionParamFormItem) => (
+            <InlineInputFormControl key={screenshotOptionParamFormItem.key} formItem={screenshotOptionParamFormItem}>
+              <FormNumberInput
+                numberValue={screenshotOptions[screenshotOptionParamFormItem.key]}
+                numberFormItem={screenshotOptionParamFormItem}
+                onChangeHandler={(value) => {
+                  const screenshotOptionsNew = { ...screenshotOptions, [screenshotOptionParamFormItem.key]: value }
                   setScreenshotOptions(screenshotOptionsNew)
                   setVNCInteractionOptionsParamValue('screenshotOptionsConfig', screenshotOptionsNew)
                 }}
               />
-            </div>
+            </InlineInputFormControl>
           ))}
-          <div className="flex items-center gap-4">
-            <Label htmlFor="show_cursor" className="w-32 flex-shrink-0">
-              Show cursor:
-            </Label>
-            <div className="flex-1 text-center">
-              <Checkbox
-                id="show_cursor"
-                checked={screenshotOptions['showCursor']}
-                onCheckedChange={(value) => {
-                  const screenshotOptionsNew = { ...screenshotOptions, showCursor: !!value }
-                  setScreenshotOptions(screenshotOptionsNew)
-                  setVNCInteractionOptionsParamValue('screenshotOptionsConfig', screenshotOptionsNew)
-                }}
-              />
-            </div>
-          </div>
+          <InlineInputFormControl formItem={screenshotShowCursorFormData}>
+            <FormCheckboxInput
+              checkedValue={screenshotOptions[screenshotShowCursorFormData.key as 'showCursor']}
+              formItem={screenshotShowCursorFormData}
+              onChangeHandler={(checked) => {
+                const screenshotOptionsNew = { ...screenshotOptions, [screenshotShowCursorFormData.key]: checked }
+                setScreenshotOptions(screenshotOptionsNew)
+                setVNCInteractionOptionsParamValue('screenshotOptionsConfig', screenshotOptionsNew)
+              }}
+            />
+          </InlineInputFormControl>
         </div>
       </div>
       <div className="space-y-2 mt-4">
@@ -182,31 +170,18 @@ const VNCScreenshootOperations: React.FC = () => {
           <Label htmlFor="screenshot-options">Screenshot Region</Label>
         </div>
         <div id="screenshot-region" className="px-4 space-y-2">
-          {screenshotRegionNumberParametersFormData.map((screenshotRegionParam) => (
-            <div key={screenshotRegionParam.key} className="flex items-center gap-4">
-              <Label htmlFor={screenshotRegionParam.key} className="w-32 flex-shrink-0">
-                <span>
-                  {screenshotRegionParam.required ? <span className="text-red-500">* </span> : null}
-                  <span>{`${screenshotRegionParam.label}:`}</span>
-                </span>
-              </Label>
-              <Input
-                id={screenshotRegionParam.key}
-                type="number"
-                className="w-full"
-                min={screenshotRegionParam.min}
-                max={screenshotRegionParam.max}
-                placeholder={screenshotRegionParam.placeholder}
-                step={screenshotRegionParam.step}
-                value={screenshotRegion[screenshotRegionParam.key]}
-                onChange={(e) => {
-                  const newValue = e.target.value ? Number(e.target.value) : undefined
-                  const screenshotRegionNew = { ...screenshotRegion, [screenshotRegionParam.key]: newValue }
+          {screenshotRegionNumberParametersFormData.map((screenshotRegionParamFormItem) => (
+            <InlineInputFormControl key={screenshotRegionParamFormItem.key} formItem={screenshotRegionParamFormItem}>
+              <FormNumberInput
+                numberValue={screenshotRegion[screenshotRegionParamFormItem.key]}
+                numberFormItem={screenshotRegionParamFormItem}
+                onChangeHandler={(value) => {
+                  const screenshotRegionNew = { ...screenshotRegion, [screenshotRegionParamFormItem.key]: value }
                   setScreenshotRegion(screenshotRegionNew)
                   setVNCInteractionOptionsParamValue('screenshotRegionConfig', screenshotRegionNew)
                 }}
               />
-            </div>
+            </InlineInputFormControl>
           ))}
         </div>
       </div>

@@ -66,7 +66,7 @@ const Playground: React.FC = () => {
             )}
             {playgroundCategory === PlaygroundCategories.VNC && (
               <VNCDesktopWindowResponse
-                sandboxId="01783788-2096-40e7-86a6-18e92ff38782"
+                sandboxId="dda297bb-6afc-4439-a3ac-1c2b42ec5f2c"
                 getPortPreviewUrl={getPortPreviewUrl}
               />
             )}

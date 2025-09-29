@@ -81,7 +81,7 @@ export type KeyboardHotKey = {
 
 export type KeyboardPress = {
   key: string
-  modifiers?: string[]
+  modifiers?: string
 }
 
 export type KeyboardType = {
