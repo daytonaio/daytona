@@ -117,7 +117,6 @@ func (s *SandboxSyncService) PerformSync(ctx context.Context) error {
 	for sandboxId, localState := range localStates {
 		remoteState, exists := remoteStates[sandboxId]
 		if !exists {
-			log.Warnf("Sandbox %s exists locally but not in remote API", sandboxId)
 			continue
 		}
 
@@ -139,8 +138,6 @@ func (s *SandboxSyncService) PerformSync(ctx context.Context) error {
 
 	if syncCount > 0 {
 		log.Infof("Synchronized %d sandbox states", syncCount)
-	} else {
-		log.Debug("All sandbox states are in sync")
 	}
 
 	return nil
