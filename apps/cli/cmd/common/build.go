@@ -307,8 +307,12 @@ func GetCreateBuildInfoDto(ctx context.Context, dockerfilePath string, contextPa
 			if filepath.IsAbs(contextPath) {
 				absPath = contextPath
 			} else {
-				// Resolve relative paths relative to the Dockerfile directory, not current working directory
-				absPath = filepath.Join(dockerfileDir, contextPath)
+				// When context paths are provided manually (via --context flag),
+				// resolve them relative to the current working directory
+				absPath, err = filepath.Abs(contextPath)
+				if err != nil {
+					return nil, fmt.Errorf("failed to resolve context path %s: %w", contextPath, err)
+				}
 			}
 			resolvedContextPaths = append(resolvedContextPaths, absPath)
 		}
