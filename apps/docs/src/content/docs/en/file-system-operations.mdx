@@ -10,7 +10,7 @@ The Daytona SDK provides comprehensive file system operations through the `fs` m
 
 Daytona SDK provides an option to interact with the file system in Sandboxes. You can perform various operations like listing files, creating directories, reading and writing files, and more.
 
-For simplicity, file operations by default assume you are operating in the root directory of the Sandbox user - e.g. `workspace` implies `/home/[username]/workspace`, but you are free to provide an absolute workDir path as well - which should start with a leading slash `/`.
+File operations assume you are operating in the Sandbox user's home directory (e.g. `workspace` implies `/home/[username]/workspace`). Use a leading `/` when providing absolute paths.
 
 ### Listing Files and Directories
 
@@ -46,6 +46,8 @@ files.forEach(file => {
 </TabItem>
 </Tabs>
 
+See: [list_files (Python SDK)](/docs/python-sdk/sync/file-system/#filesystemlist_files), [listFiles (TypeScript SDK)](/docs/typescript-sdk/file-system/#listfiles)
+
 ### Creating Directories
 
 Daytona SDK provides an option to create directories with specific permissions using Python and TypeScript.
@@ -66,13 +68,15 @@ await sandbox.fs.createFolder("workspace/new-dir", "755")
 </TabItem>
 </Tabs>
 
+See: [create_folder (Python SDK)](/docs/python-sdk/sync/file-system/#filesystemcreate_folder), [createFolder (TypeScript SDK)](/docs/typescript-sdk/file-system/#createfolder)
+
 ### Uploading Files
 
 Daytona SDK provides options to read, write, upload, download, and delete files in Sandboxes using Python and TypeScript.
 
 #### Uploading a Single File
 
-If you want to upload a single file, you can do it as follows:
+The following example shows how to upload a single file:
 
 <Tabs>
 <TabItem label="Python" icon="seti:python">
@@ -92,6 +96,8 @@ await sandbox.fs.uploadFile(fileContent, "data.txt")
 
 </TabItem>
 </Tabs>
+
+See: [upload_file (Python SDK)](/docs/python-sdk/sync/file-system/#filesystemupload_file), [uploadFile (TypeScript SDK)](/docs/typescript-sdk/file-system/#uploadfile)
 
 #### Uploading Multiple Files
 
@@ -149,6 +155,8 @@ await sandbox.fs.uploadFiles(files)
 </TabItem>
 </Tabs>
 
+See: [upload_files (Python SDK)](/docs/python-sdk/sync/file-system/#filesystemupload_files), [uploadFiles (TypeScript SDK)](/docs/typescript-sdk/file-system/#uploadfiles)
+
 ### Downloading Files
 
 #### Downloading a Single File
@@ -179,6 +187,8 @@ console.log('File content:', downloadedFile.toString())
 
 </TabItem>
 </Tabs>
+
+See: [download_file (Python SDK)](/docs/python-sdk/sync/file-system/#filesystemdownload_file), [downloadFile (TypeScript SDK)](/docs/typescript-sdk/file-system/#downloadfile)
 
 #### Downloading Multiple Files
 
@@ -224,9 +234,11 @@ results.forEach(result => {
 </TabItem>
 </Tabs>
 
+See: [download_files (Python SDK)](/docs/python-sdk/sync/file-system/#filesystemdownload_files), [downloadFiles (TypeScript SDK)](/docs/typescript-sdk/file-system/#downloadfiles)
+
 ### Deleting files
 
-Once you no longer need them, simply delete files by using the `delete_file` function.
+The following example shows how to delete a file:
 
 <Tabs>
 <TabItem label="Python" icon="seti:python">
@@ -244,6 +256,8 @@ await sandbox.fs.deleteFile("workspace/file.txt")
 
 </TabItem>
 </Tabs>
+
+See: [delete_file (Python SDK)](/docs/python-sdk/sync/file-system/#filesystemdelete_file), [deleteFile (TypeScript SDK)](/docs/typescript-sdk/file-system/#deletefile)
 
 ## Advanced Operations
 
@@ -278,6 +292,8 @@ console.log(`Permissions: ${fileInfo.permissions}`)
 
 </TabItem>
 </Tabs>
+
+See: [set_file_permissions (Python SDK)](/docs/python-sdk/sync/file-system/#filesystemset_file_permissions), [setFilePermissions (TypeScript SDK)](/docs/typescript-sdk/file-system/#setfilepermissions)
 
 ### File Search and Replace
 
@@ -330,3 +346,5 @@ await sandbox.fs.replaceInFiles(
 
 </TabItem>
 </Tabs>
+
+See: [find_files (Python SDK)](/docs/python-sdk/sync/file-system/#filesystemfind_files), [replace_in_files (Python SDK)](/docs/python-sdk/sync/file-system/#filesystemreplace_in_files), [findFiles (TypeScript SDK)](/docs/typescript-sdk/file-system/#findfiles), [replaceInFiles (TypeScript SDK)](/docs/typescript-sdk/file-system/#replaceinfiles)
