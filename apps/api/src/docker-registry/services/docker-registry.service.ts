@@ -129,7 +129,7 @@ export class DockerRegistryService {
     })
   }
 
-  async getAvailableBackupRegistry(preferredRegion: string): Promise<DockerRegistry | null> {
+  async getAvailableBackupRegistry(preferredRegionId: string): Promise<DockerRegistry | null> {
     const registries = await this.dockerRegistryRepository.find({
       where: { registryType: RegistryType.BACKUP, isDefault: true },
     })
@@ -139,7 +139,7 @@ export class DockerRegistryService {
     }
 
     // Filter registries by preferred region
-    const preferredRegionRegistries = registries.filter((registry) => registry.region === preferredRegion)
+    const preferredRegionRegistries = registries.filter((registry) => registry.regionId === preferredRegionId)
 
     // If we have registries in the preferred region, randomly select one
     if (preferredRegionRegistries.length > 0) {
