@@ -13,6 +13,8 @@ import { RedisLockProvider } from '../sandbox/common/redis-lock.provider'
 import { OnAsyncEvent } from '../common/decorators/on-async-event.decorator'
 import { OrganizationEvents } from '../organization/constants/organization-events.constant'
 import { OrganizationResourcePermissionsUnassignedEvent } from '../organization/events/organization-resource-permissions-unassigned.event'
+import { InjectRedis } from '@nestjs-modules/ioredis'
+import Redis from 'ioredis'
 
 @Injectable()
 export class ApiKeyService {
@@ -22,6 +24,7 @@ export class ApiKeyService {
     @InjectRepository(ApiKey)
     private apiKeyRepository: Repository<ApiKey>,
     private readonly redisLockProvider: RedisLockProvider,
+    @InjectRedis() private readonly redis: Redis,
   ) {}
 
   private generateApiKeyValue(): string {
@@ -147,6 +150,18 @@ export class ApiKeyService {
 
   private async deleteWithEntityManager(entityManager: EntityManager, apiKey: ApiKey): Promise<void> {
     await entityManager.remove(apiKey)
+    // Invalidate cache when API key is deleted
+    await this.invalidateApiKeyCache(apiKey.keyHash)
+  }
+
+  private async invalidateApiKeyCache(keyHash: string): Promise<void> {
+    try {
+      const cacheKey = `api-key:validation:${keyHash}`
+      await this.redis.del(cacheKey)
+      this.logger.debug(`Invalidated cache for API key: ${cacheKey}`)
+    } catch (error) {
+      this.logger.error('Error invalidating API key cache:', error)
+    }
   }
 
   @OnAsyncEvent({

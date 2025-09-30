@@ -68,6 +68,12 @@ export class ApiKeyStrategy extends PassportStrategy(Strategy, 'api-key') implem
         // Cache miss - validate from database
         apiKey = await this.apiKeyService.getApiKeyByValue(token)
         this.logger.debug(`API key found for userId: ${apiKey.userId}`)
+
+        // Check expiry BEFORE caching to prevent storing expired keys
+        if (apiKey.expiresAt && apiKey.expiresAt < new Date()) {
+          throw new UnauthorizedException('This API key has expired')
+        }
+
         const validationCacheTtl = this.configService.get('apiKey.validationCacheTtlSeconds')
         const cacheKey = `api-key:validation:${this.apiKeyService.generateApiKeyHash(token)}`
         await this.redis.setex(cacheKey, validationCacheTtl, JSON.stringify(apiKey))
