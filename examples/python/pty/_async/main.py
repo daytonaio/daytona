@@ -1,8 +1,7 @@
 import asyncio
 import sys
 
-from daytona import AsyncDaytona, AsyncSandbox
-from daytona.common.pty import PtySize
+from daytona import AsyncDaytona, AsyncSandbox, PtySize
 
 
 async def interactive_pty_session(sandbox: AsyncSandbox):

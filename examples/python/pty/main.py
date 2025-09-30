@@ -2,8 +2,7 @@ import sys
 import threading
 import time
 
-from daytona import Daytona, Sandbox
-from daytona.common.pty import PtySize
+from daytona import Daytona, PtySize, Sandbox
 
 
 def interactive_pty_session(sandbox: Sandbox):
