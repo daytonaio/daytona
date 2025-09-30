@@ -148,8 +148,10 @@ class AsyncFileSystem:
         local_path = args[1]
         timeout = args[2] if len(args) == 3 else 30 * 60
         # pylint: disable=protected-access
-        response = await self.download_files(
-            [FileDownloadRequest(source=remote_path, destination=local_path)], timeout=timeout
+        response = (
+            await self.download_files(
+                [FileDownloadRequest(source=remote_path, destination=local_path)], timeout=timeout
+            )
         )[0]
         if response.error:
             raise DaytonaError(response.error)
