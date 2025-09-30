@@ -9,6 +9,7 @@ import (
 
 	common_daemon "github.com/daytonaio/common-go/pkg/daemon"
 	"github.com/daytonaio/common-go/pkg/timer"
+	"github.com/daytonaio/runner/cmd/runner/config"
 	"github.com/docker/docker/api/types/container"
 
 	log "github.com/sirupsen/logrus"
@@ -23,11 +24,18 @@ func (d *DockerClient) startDaytonaDaemon(ctx context.Context, containerId strin
 	}
 	daemonCmd = fmt.Sprintf("%s --work-dir %s", daemonCmd, workDir)
 
+	cfg, err := config.GetConfig()
+	if err != nil {
+		log.Errorf("Failed to get config: %v", err)
+		return err
+	}
+
 	execOptions := container.ExecOptions{
 		Cmd:          []string{"sh", "-c", daemonCmd},
 		AttachStdout: true,
 		AttachStderr: true,
 		Tty:          true,
+		Env:          []string{fmt.Sprintf("DAYTONA_API_URL=%s", cfg.ServerUrl)},
 	}
 
 	execStartOptions := container.ExecStartOptions{
