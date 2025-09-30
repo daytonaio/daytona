@@ -8,6 +8,7 @@ import {
   SandboxState,
   SandboxApi,
   Sandbox as SandboxDto,
+  PaginatedSandboxes as PaginatedSandboxesDto,
   PortPreviewUrl,
   SandboxVolume,
   BuildInfo,
@@ -528,4 +529,8 @@ export class Sandbox implements SandboxDto {
     this.networkBlockAll = sandboxDto.networkBlockAll
     this.networkAllowList = sandboxDto.networkAllowList
   }
+}
+
+export interface PaginatedSandboxes extends Omit<PaginatedSandboxesDto, 'items'> {
+  items: Sandbox[]
 }

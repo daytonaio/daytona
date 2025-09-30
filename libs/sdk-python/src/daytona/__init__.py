@@ -13,7 +13,7 @@ from ._async.computer_use import (
     ScreenshotRegion,
 )
 from ._async.daytona import AsyncDaytona
-from ._async.sandbox import AsyncSandbox
+from ._async.sandbox import AsyncPaginatedSandboxes, AsyncSandbox
 from ._sync.daytona import Daytona
 from ._sync.sandbox import Sandbox
 from .common.charts import (
@@ -69,6 +69,7 @@ __all__ = [
     "VolumeMount",
     "AsyncDaytona",
     "AsyncSandbox",
+    "AsyncPaginatedSandboxes",
     "AsyncComputerUse",
     "AsyncMouse",
     "AsyncKeyboard",

@@ -35,10 +35,10 @@ async function main() {
     console.log(response.result)
   }
 
-  const sandboxes = await daytona.list()
-  console.log('Total sandboxes count:', sandboxes.length)
+  const result = await daytona.list()
+  console.log('Total sandboxes count:', result.total)
 
-  console.log(`Printing sandboxes[0] -> id: ${sandboxes[0].id} state: ${sandboxes[0].state}`)
+  console.log(`Printing first sandbox -> id: ${result.items[0].id} state: ${result.items[0].state}`)
 
   console.log('Deleting sandbox')
   await sandbox.delete()

@@ -722,6 +722,26 @@ or encounters an error.
 **Throws**:
 
 - `DaytonaError` - If the sandbox fails to stop within the timeout period.
+
+## PaginatedSandboxes
+
+**Extends:**
+
+**Properties**:
+
+- `items` _Sandbox\[\]_
+- `page` _number_
+    - _Inherited from_: `PaginatedSandboxes.page`
+- `total` _number_
+    - _Inherited from_: `PaginatedSandboxes.total`
+- `totalPages` _number_
+    - _Inherited from_: `PaginatedSandboxes.totalPages`
+
+
+
+
+- `Omit`\<`PaginatedSandboxesDto`, `"items"`\>
+
 ## SandboxCodeToolbox
 
 Interface defining methods that a code toolbox must implement

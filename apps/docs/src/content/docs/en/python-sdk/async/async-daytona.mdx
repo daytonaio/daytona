@@ -299,7 +299,7 @@ Gets a Sandbox by its ID.
 
 ```python
 sandbox = await daytona.get("my-sandbox-id")
-print(sandbox.status)
+print(sandbox.state)
 ```
 
 #### AsyncDaytona.find\_one
@@ -341,10 +341,10 @@ print(f"Sandbox ID: {sandbox.id} State: {sandbox.state}")
 @intercept_errors(message_prefix="Failed to list sandboxes: ")
 async def list(labels: Optional[Dict[str, str]] = None,
                page: Optional[int] = None,
-               limit: Optional[int] = None) -> List[AsyncSandbox]
+               limit: Optional[int] = None) -> AsyncPaginatedSandboxes
 ```
 
-Lists Sandboxes filtered by labels.
+Returns paginated list of Sandboxes filtered by labels.
 
 **Arguments**:
 
@@ -355,15 +355,15 @@ Lists Sandboxes filtered by labels.
 
 **Returns**:
 
-- `List[Sandbox]` - Paginated list of Sandbox instances that match the labels.
+- `AsyncPaginatedSandboxes` - Paginated list of Sandbox instances that match the labels.
   
 
 **Example**:
 
 ```python
-sandboxes = await daytona.list(labels={"my-label": "my-value"}, page=2, limit=10)
-for sandbox in sandboxes:
-    print(f"{sandbox.id}: {sandbox.status}")
+result = await daytona.list(labels={"my-label": "my-value"}, page=2, limit=10)
+for sandbox in result.items:
+    print(f"{sandbox.id}: {sandbox.state}")
 ```
 
 #### AsyncDaytona.start

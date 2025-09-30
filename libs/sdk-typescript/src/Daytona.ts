@@ -19,7 +19,7 @@ import { SandboxTsCodeToolbox } from './code-toolbox/SandboxTsCodeToolbox'
 import { SandboxJsCodeToolbox } from './code-toolbox/SandboxJsCodeToolbox'
 import { DaytonaError, DaytonaNotFoundError } from './errors/DaytonaError'
 import { Image } from './Image'
-import { Sandbox } from './Sandbox'
+import { Sandbox, PaginatedSandboxes } from './Sandbox'
 import { SnapshotService } from './Snapshot'
 import { VolumeService } from './Volume'
 import * as packageJson from '../package.json'
@@ -573,12 +573,12 @@ export class Daytona {
       return this.get(filter.id)
     }
 
-    const sandboxes = await this.list(filter.labels, 1, 1)
-    if (sandboxes.length === 0) {
+    const result = await this.list(filter.labels, 1, 1)
+    if (result.items.length === 0) {
       const errMsg = `No sandbox found with labels ${JSON.stringify(filter.labels)}`
       throw new DaytonaError(errMsg)
     }
-    return sandboxes[0]
+    return result.items[0]
   }
 
   /**
@@ -587,15 +587,15 @@ export class Daytona {
    * @param {Record<string, string>} [labels] - Labels to filter Sandboxes
    * @param {number} [page] - Page number for pagination (starting from 1)
    * @param {number} [limit] - Maximum number of items per page
-   * @returns {Promise<Sandbox[]>} Array of Sandboxes that match the labels.
+   * @returns {Promise<PaginatedSandboxes>} Paginated list of Sandboxes that match the labels.
    *
    * @example
-   * const sandboxes = await daytona.list({ 'my-label': 'my-value' }, 2, 10);
-   * for (const sandbox of sandboxes) {
+   * const result = await daytona.list({ 'my-label': 'my-value' }, 2, 10);
+   * for (const sandbox of result.items) {
    *     console.log(`${sandbox.id}: ${sandbox.state}`);
    * }
    */
-  public async list(labels?: Record<string, string>, page?: number, limit?: number): Promise<Sandbox[]> {
+  public async list(labels?: Record<string, string>, page?: number, limit?: number): Promise<PaginatedSandboxes> {
     const response = await this.sandboxApi.listSandboxesPaginated(
       undefined,
       page,
@@ -603,11 +603,16 @@ export class Daytona {
       undefined,
       labels ? JSON.stringify(labels) : undefined,
     )
-    return response.data.items.map((sandbox) => {
-      const language = sandbox.labels?.['code-toolbox-language'] as CodeLanguage
 
-      return new Sandbox(sandbox, this.clientConfig, this.sandboxApi, this.toolboxApi, this.getCodeToolbox(language))
-    })
+    return {
+      items: response.data.items.map((sandbox) => {
+        const language = sandbox.labels?.['code-toolbox-language'] as CodeLanguage
+        return new Sandbox(sandbox, this.clientConfig, this.sandboxApi, this.toolboxApi, this.getCodeToolbox(language))
+      }),
+      total: response.data.total,
+      page: response.data.page,
+      totalPages: response.data.totalPages,
+    }
   }
 
   /**

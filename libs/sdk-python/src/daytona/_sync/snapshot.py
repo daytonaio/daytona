@@ -20,10 +20,8 @@ from .._utils.stream import process_streaming_response
 from .._utils.timeout import with_timeout
 from ..common.errors import DaytonaError
 from ..common.image import Image
-from ..common.snapshot import CreateSnapshotParams, Snapshot
+from ..common.snapshot import CreateSnapshotParams, PaginatedSnapshots, Snapshot
 from .object_storage import ObjectStorage
-
-SNAPSHOTS_FETCH_LIMIT = 200
 
 
 class SnapshotService:
@@ -34,24 +32,37 @@ class SnapshotService:
         self.__object_storage_api = object_storage_api
 
     @intercept_errors(message_prefix="Failed to list snapshots: ")
-    def list(self) -> List[Snapshot]:
-        """List all Snapshots.
+    def list(self, page: Optional[int] = None, limit: Optional[int] = None) -> PaginatedSnapshots:
+        """Returns paginated list of Snapshots.
+
+        Args:
+            page (Optional[int]): Page number for pagination (starting from 1).
+            limit (Optional[int]): Maximum number of items per page.
 
         Returns:
-            List[Snapshot]: List of all Snapshots.
+            PaginatedSnapshots: Paginated list of Snapshots.
 
         Example:
             ```python
             daytona = Daytona()
-            snapshots = daytona.snapshot.list()
-            for snapshot in snapshots:
+            result = daytona.snapshot.list(page=2, limit=10)
+            for snapshot in result.items:
                 print(f"{snapshot.name} ({snapshot.image_name})")
             ```
         """
-        response = self.__snapshots_api.get_all_snapshots(limit=SNAPSHOTS_FETCH_LIMIT)
-        if response.total > SNAPSHOTS_FETCH_LIMIT:
-            response = self.__snapshots_api.get_all_snapshots(limit=response.total)
-        return [Snapshot.from_dto(snapshot) for snapshot in response.items]
+        if page is not None and page < 1:
+            raise DaytonaError("page must be a positive integer")
+
+        if limit is not None and limit < 1:
+            raise DaytonaError("limit must be a positive integer")
+
+        response = self.__snapshots_api.get_all_snapshots(limit=limit, page=page)
+        return PaginatedSnapshots(
+            items=[Snapshot.from_dto(snapshot) for snapshot in response.items],
+            total=response.total,
+            page=response.page,
+            total_pages=response.total_pages,
+        )
 
     @intercept_errors(message_prefix="Failed to delete snapshot: ")
     def delete(self, snapshot: Snapshot) -> None:
