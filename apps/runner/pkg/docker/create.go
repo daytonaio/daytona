@@ -41,7 +41,7 @@ func (d *DockerClient) Create(ctx context.Context, sandboxDto dto.CreateSandboxD
 	}
 
 	if state == enums.SandboxStateStopped || state == enums.SandboxStateCreating {
-		err = d.Start(ctx, sandboxDto.Id, sandboxDto.Metadata)
+		err = d.Start(ctx, sandboxDto.Id, sandboxDto.Metadata, sandboxDto.Token)
 		if err != nil {
 			return "", err
 		}
@@ -86,7 +86,7 @@ func (d *DockerClient) Create(ctx context.Context, sandboxDto dto.CreateSandboxD
 		return "", err
 	}
 
-	err = d.Start(ctx, sandboxDto.Id, sandboxDto.Metadata)
+	err = d.Start(ctx, sandboxDto.Id, sandboxDto.Metadata, sandboxDto.Token)
 	if err != nil {
 		return "", err
 	}

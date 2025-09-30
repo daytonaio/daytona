@@ -6,8 +6,14 @@ package toolbox
 import (
 	"context"
 	"fmt"
+	"net"
+	"net/http"
+	"os"
+	"path"
+
 	common_proxy "github.com/daytonaio/common-go/pkg/proxy"
 	"github.com/daytonaio/daemon/internal"
+	"github.com/daytonaio/daemon/pkg/apiclient"
 	"github.com/daytonaio/daemon/pkg/toolbox/computeruse"
 	"github.com/daytonaio/daemon/pkg/toolbox/computeruse/manager"
 	"github.com/daytonaio/daemon/pkg/toolbox/config"
@@ -19,10 +25,6 @@ import (
 	"github.com/daytonaio/daemon/pkg/toolbox/process"
 	"github.com/daytonaio/daemon/pkg/toolbox/process/session"
 	"github.com/daytonaio/daemon/pkg/toolbox/proxy"
-	"net"
-	"net/http"
-	"os"
-	"path"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
@@ -80,6 +82,21 @@ func (s *Server) Start() error {
 		ctx.JSON(http.StatusOK, gin.H{
 			"version": internal.Version,
 		})
+	})
+
+	r.POST("/api-access", func(ctx *gin.Context) {
+		var apiAccess apiclient.ApiAccess
+		if err := ctx.ShouldBindJSON(&apiAccess); err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+			return
+		}
+
+		if err := apiclient.SetApiAccess(&apiAccess); err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		ctx.Status(http.StatusOK)
 	})
 
 	// keep /project-dir old behavior for backward compatibility

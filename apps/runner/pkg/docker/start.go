@@ -40,7 +40,7 @@ func (d *DockerClient) Start(ctx context.Context, containerId string, metadata m
 			return err
 		}
 
-		err = d.waitForDaemonRunning(ctx, containerIP, 10*time.Second)
+		err = d.waitForDaemonRunning(ctx, containerIP, 10*time.Second, token)
 		if err != nil {
 			return err
 		}
@@ -77,7 +77,7 @@ func (d *DockerClient) Start(ctx context.Context, containerId string, metadata m
 		}
 	}()
 
-	err = d.waitForDaemonRunning(ctx, containerIP, 10*time.Second)
+	err = d.waitForDaemonRunning(ctx, containerIP, 10*time.Second, token)
 	if err != nil {
 		return err
 	}
@@ -130,7 +130,7 @@ func (d *DockerClient) waitForContainerRunning(ctx context.Context, containerId 
 	}
 }
 
-func (d *DockerClient) waitForDaemonRunning(ctx context.Context, containerIP string, timeout time.Duration) error {
+func (d *DockerClient) waitForDaemonRunning(ctx context.Context, containerIP string, timeout time.Duration, token string) error {
 	defer timer.Timer()()
 
 	// Build the target URL
@@ -154,6 +154,11 @@ func (d *DockerClient) waitForDaemonRunning(ctx context.Context, containerIP str
 				continue
 			}
 			conn.Close()
+
+			if err := d.configureDaemonApiAccess(containerIP, token); err != nil {
+				return fmt.Errorf("failed to configure daemon API access: %w", err)
+			}
+
 			return nil
 		}
 	}
