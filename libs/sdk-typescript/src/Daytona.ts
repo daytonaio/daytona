@@ -16,6 +16,7 @@ import {
 import axios, { AxiosError } from 'axios'
 import { SandboxPythonCodeToolbox } from './code-toolbox/SandboxPythonCodeToolbox'
 import { SandboxTsCodeToolbox } from './code-toolbox/SandboxTsCodeToolbox'
+import { SandboxJsCodeToolbox } from './code-toolbox/SandboxJsCodeToolbox'
 import { DaytonaError, DaytonaNotFoundError } from './errors/DaytonaError'
 import { Image } from './Image'
 import { Sandbox } from './Sandbox'
@@ -661,6 +662,7 @@ export class Daytona {
   private getCodeToolbox(language?: CodeLanguage) {
     switch (language) {
       case CodeLanguage.JAVASCRIPT:
+        return new SandboxJsCodeToolbox()
       case CodeLanguage.TYPESCRIPT:
         return new SandboxTsCodeToolbox()
       case CodeLanguage.PYTHON:
