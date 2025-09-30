@@ -541,23 +541,13 @@ class Process:
         Raises:
             DaytonaError: If the PTY session doesn't exist or connection fails.
         """
-        _, url, headers, *_ = self._toolbox_api._connect_pty_session_serialize(  # pylint: disable=protected-access
-            sandbox_id=self._sandbox_id,
-            session_id=session_id,
-            x_daytona_organization_id=None,
-            _request_auth=None,
-            _content_type=None,
-            _headers=None,
-            _host_index=None,
-        )
-
         preview_link = self._get_preview_link(2280)
-        url = re.sub(r"^http", "ws", preview_link.url) + url[url.index("/process") :]
+        url = re.sub(r"^http", "ws", preview_link.url) + f"/process/pty/{session_id}/connect"
 
         ws = connect(
             url,
             additional_headers={
-                **headers,
+                **self._toolbox_api.api_client.default_headers,
                 "X-Daytona-Preview-Token": preview_link.token,
             },
         )

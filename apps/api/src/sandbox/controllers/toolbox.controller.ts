@@ -1413,34 +1413,6 @@ export class ToolboxController {
     return await this.toolboxProxy(req, res, next)
   }
 
-  @Get(':sandboxId/toolbox/process/pty/:sessionId/connect')
-  @ApiOperation({
-    summary: 'Connect to PTY session via WebSocket',
-    description: 'Upgrade HTTP connection to WebSocket for real-time PTY interaction',
-    operationId: 'connectPTYSession',
-  })
-  @ApiResponse({
-    status: 101,
-    description: 'WebSocket connection established successfully',
-    content: {
-      'application/octet-stream': {
-        schema: {
-          type: 'string',
-          format: 'binary',
-        },
-      },
-    },
-  })
-  @ApiParam({ name: 'sessionId', type: String, required: true })
-  @ApiParam({ name: 'sandboxId', type: String, required: true })
-  async connectPtySession(
-    @Request() req: RawBodyRequest<IncomingMessage>,
-    @Res() res: ServerResponse<IncomingMessage>,
-    @Next() next: NextFunction,
-  ): Promise<void> {
-    return await this.toolboxProxy(req, res, next)
-  }
-
   @Post(':sandboxId/toolbox/lsp/completions')
   @HttpCode(200)
   @UseInterceptors(ContentTypeInterceptor)

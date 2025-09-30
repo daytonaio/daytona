@@ -3814,50 +3814,6 @@ paths:
       summary: Resize PTY session
       tags:
         - toolbox
-  /toolbox/{sandboxId}/toolbox/process/pty/{sessionId}/connect:
-    get:
-      description: Upgrade HTTP connection to WebSocket for real-time PTY interaction
-      operationId: connectPTYSession
-      parameters:
-        - description: Use with JWT to specify the organization ID
-          explode: false
-          in: header
-          name: X-Daytona-Organization-ID
-          required: false
-          schema:
-            type: string
-          style: simple
-        - explode: false
-          in: path
-          name: sandboxId
-          required: true
-          schema:
-            type: string
-          style: simple
-        - explode: false
-          in: path
-          name: sessionId
-          required: true
-          schema:
-            type: string
-          style: simple
-      responses:
-        '101':
-          content:
-            application/octet-stream:
-              schema:
-                format: binary
-                type: string
-          description: WebSocket connection established successfully
-      security:
-        - bearer: []
-        - oauth2:
-            - openid
-            - profile
-            - email
-      summary: Connect to PTY session via WebSocket
-      tags:
-        - toolbox
   /toolbox/{sandboxId}/toolbox/lsp/completions:
     post:
       description: The Completion request is sent from the client to the server to
