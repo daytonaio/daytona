@@ -26,35 +26,40 @@ load_env_file() {
     return 1
 }
 
-# Try loading environment files in order of precedence
-if [ -n "$DAYTONA_ENV_FILE" ]; then
-    if ! load_env_file "$DAYTONA_ENV_FILE"; then
-        echo "Warning: Environment file specified by DAYTONA_ENV_FILE ($DAYTONA_ENV_FILE) not found"
+# If --skip-env-file is passed, skip loading env files
+for arg in "$@"; do
+    if [ "$arg" == "--skip-env-file" ]; then
+        echo "Skipping loading of environment files"
+        SKIP_ENV_FILE=true
+        break
     fi
-elif load_env_file "${SCRIPT_DIR}/../.env.local"; then
-    : # Successfully loaded CLI .env
-elif load_env_file "${SCRIPT_DIR}/../.env"; then
-    : # Successfully loaded CLI .env
-elif load_env_file "${PROJECT_ROOT}/.env.local"; then
-    : # Successfully loaded root .env
-elif load_env_file "${PROJECT_ROOT}/.env"; then
-    : # Successfully loaded root .env
-else
-    echo "Note: No .env file found, using default values"
+done
+
+if [ "$SKIP_ENV_FILE" != "true" ]; then
+    echo "Loading environment files"
+    # Try loading environment files in order of precedence
+    if [ -n "$DAYTONA_ENV_FILE" ]; then
+        if ! load_env_file "$DAYTONA_ENV_FILE"; then
+            echo "Warning: Environment file specified by DAYTONA_ENV_FILE ($DAYTONA_ENV_FILE) not found"
+        fi
+    elif load_env_file "${SCRIPT_DIR}/../.env.local"; then
+        : # Successfully loaded CLI .env
+    elif load_env_file "${SCRIPT_DIR}/../.env"; then
+        : # Successfully loaded CLI .env
+    elif load_env_file "${PROJECT_ROOT}/.env.local"; then
+        : # Successfully loaded root .env
+    elif load_env_file "${PROJECT_ROOT}/.env"; then
+        : # Successfully loaded root .env
+    else
+        echo "Note: No .env file found, using default values"
+    fi
 fi
 
-
 # Set default values
-: "${DAYTONA_VERSION:=v0.0.0-dev}"
-: "${GOOS:=linux}"
-: "${GOARCH:=amd64}"
-: "${CGO_ENABLED:=0}"
-
-# Export for build
-export DAYTONA_VERSION
-export GOOS
-export GOARCH
-export CGO_ENABLED
+DAYTONA_VERSION=${VERSION:-v0.0.0-dev}
+GOOS=${GOOS:-linux}
+GOARCH=${GOARCH:-amd64}
+CGO_ENABLED=${CGO_ENABLED:-0}
 
 # Validate required variables
 REQUIRED_VARS=(
