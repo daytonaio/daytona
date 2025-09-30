@@ -261,7 +261,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
         })
         .andWhere('sandbox."desiredState"::text != sandbox.state::text')
         .andWhere('sandbox."desiredState"::text != :archived', { archived: SandboxDesiredState.ARCHIVED })
-        .orderBy('sandbox."lastActivityAt"', 'ASC')
+        .orderBy('sandbox."lastActivityAt"', 'DESC')
 
       const stream = await queryBuilder.stream()
       let processedCount = 0
