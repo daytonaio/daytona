@@ -75,7 +75,7 @@ export class ApiKeyStrategy extends PassportStrategy(Strategy, 'api-key') implem
         }
 
         const validationCacheTtl = this.configService.get('apiKey.validationCacheTtlSeconds')
-        const cacheKey = `api-key:validation:${this.apiKeyService.generateApiKeyHash(token)}`
+        const cacheKey = this.generateValidationCacheKey(token)
         await this.redis.setex(cacheKey, validationCacheTtl, JSON.stringify(apiKey))
       }
       if (apiKey.expiresAt && apiKey.expiresAt < new Date()) {
@@ -98,7 +98,7 @@ export class ApiKeyStrategy extends PassportStrategy(Strategy, 'api-key') implem
           email: user.email,
         }
         const userCacheTtl = this.configService.get('apiKey.userCacheTtlSeconds')
-        await this.redis.setex(`api-key:user:${apiKey.userId}`, userCacheTtl, JSON.stringify(userCache))
+        await this.redis.setex(this.generateUserCacheKey(apiKey.userId), userCacheTtl, JSON.stringify(userCache))
       }
 
       const result = {
@@ -147,7 +147,7 @@ export class ApiKeyStrategy extends PassportStrategy(Strategy, 'api-key') implem
 
   private async getApiKeyCache(token: string): Promise<ApiKey | null> {
     try {
-      const cacheKey = `api-key:validation:${this.apiKeyService.generateApiKeyHash(token)}`
+      const cacheKey = this.generateValidationCacheKey(token)
       const cached = await this.redis.get(cacheKey)
       if (cached) {
         this.logger.debug('Using cached API key validation')
@@ -169,5 +169,13 @@ export class ApiKeyStrategy extends PassportStrategy(Strategy, 'api-key') implem
       this.logger.error('Error getting API key cache:', error)
       return null
     }
+  }
+
+  private generateValidationCacheKey(token: string): string {
+    return `api-key:validation:${this.apiKeyService.generateApiKeyHash(token)}`
+  }
+
+  private generateUserCacheKey(userId: string): string {
+    return `api-key:user:${userId}`
   }
 }
