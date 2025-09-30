@@ -28,10 +28,8 @@ func (s *PTYSession) attachWebSocket(ws *websocket.Conn) {
 	}
 
 	// Register client FIRST so it can receive PTY output via broadcast
-	s.clientsMu.Lock()
-	s.clients[cl.id] = cl
-	count := len(s.clients)
-	s.clientsMu.Unlock()
+	s.clients.Set(cl.id, cl)
+	count := s.clients.Count()
 	log.Infof("Client %s attached to PTY session %s (clients=%d)", cl.id, s.info.ID, count)
 
 	// Start PTY data flow - writer (PTY -> this client)
@@ -50,16 +48,11 @@ func (s *PTYSession) attachWebSocket(ws *websocket.Conn) {
 	s.clientReader(cl)
 
 	// on exit, unregister
-	s.clientsMu.Lock()
-	delete(s.clients, cl.id)
-	s.clientsMu.Unlock()
+	s.clients.Remove(cl.id)
 
-	close(cl.send)
-	_ = cl.conn.Close()
+	cl.close()
 
-	s.clientsMu.RLock()
-	remaining := len(s.clients)
-	s.clientsMu.RUnlock()
+	remaining := s.clients.Count()
 	log.Infof("Client %s detached from PTY session %s (clients=%d)", cl.id, s.info.ID, remaining)
 }
 
@@ -109,17 +102,16 @@ func (s *PTYSession) clientReader(cl *wsClient) {
 func (s *PTYSession) broadcast(b []byte) {
 	// send to each client; drop slow clients to avoid stalling the PTY
 	s.clientsMu.RLock()
-	for id, cl := range s.clients {
+	for id, cl := range s.clients.Items() {
 		select {
 		case cl.send <- b:
 		default:
 			// client's outbound queue is full -> drop the client
 			go func(id string, cl *wsClient) {
-				log.Warnf("Dropping slow client %s on session %s", id, s.info.ID)
 				_ = cl.conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(
 					websocket.ClosePolicyViolation, "slow consumer",
 				))
-				_ = cl.conn.Close()
+				cl.close()
 			}(id, cl)
 		}
 	}
@@ -172,13 +164,12 @@ func (s *PTYSession) closeClientsWithExitCode(exitCode int, exitReason string) {
 	closeJSON, _ := json.Marshal(closeData)
 
 	s.clientsMu.Lock()
-	for id, cl := range s.clients {
+	for id, cl := range s.clients.Items() {
 		_ = cl.conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(
 			wsCloseCode, string(closeJSON),
 		))
-		_ = cl.conn.Close()
-		close(cl.send)
-		delete(s.clients, id)
+		cl.close()
+		s.clients.Remove(id)
 	}
 	s.clientsMu.Unlock()
 }

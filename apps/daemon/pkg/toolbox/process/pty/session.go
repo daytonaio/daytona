@@ -37,10 +37,6 @@ func (s *PTYSession) start() error {
 		return errors.New("PTY session has already been used and cannot be restarted")
 	}
 
-	// (re)init multi-attach state
-	if s.clients == nil {
-		s.clients = make(map[string]*wsClient)
-	}
 	if s.inCh == nil {
 		s.inCh = make(chan []byte, 1024)
 	}
@@ -73,7 +69,7 @@ func (s *PTYSession) start() error {
 	s.ptmx = ptmx
 	s.info.Active = true
 
-	log.Infof("Started PTY session %s with PID %d", s.info.ID, s.cmd.Process.Pid)
+	log.Debugf("Started PTY session %s with PID %d", s.info.ID, s.cmd.Process.Pid)
 
 	// 1) PTY -> clients broadcaster
 	go s.ptyReadLoop()
@@ -123,7 +119,7 @@ func (s *PTYSession) start() error {
 		// Remove session from manager - process has exited and won't be reused
 		ptyManager.Delete(sessionID)
 
-		log.Infof("PTY session %s process exited with code %d%s and cleaned up", sessionID, exitCode, exitReason)
+		log.Debugf("PTY session %s process exited with code %d%s and cleaned up", sessionID, exitCode, exitReason)
 	}()
 
 	return nil
@@ -219,11 +215,12 @@ func (s *PTYSession) resize(cols, rows uint16) error {
 	}
 
 	if cols > 1000 {
-		cols = 1000
+		return fmt.Errorf("cols must be less than 1000")
 	}
 	if rows > 1000 {
-		rows = 1000
+		return fmt.Errorf("rows must be less than 1000")
 	}
+
 	s.info.Cols = cols
 	s.info.Rows = rows
 

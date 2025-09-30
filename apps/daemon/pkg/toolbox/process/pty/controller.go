@@ -9,8 +9,10 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/daytonaio/daemon/internal/util"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
+	cmap "github.com/orcaman/concurrent-map/v2"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -49,18 +51,28 @@ func (p *PTYController) CreatePTYSession(c *gin.Context) {
 	if req.Envs["TERM"] == "" {
 		req.Envs["TERM"] = "xterm-256color"
 	}
-	if req.Cols <= 0 {
-		req.Cols = 80
+	if req.Cols == nil {
+		req.Cols = util.Pointer(uint16(80))
 	}
-	if req.Rows <= 0 {
-		req.Rows = 24
+	if req.Rows == nil {
+		req.Rows = util.Pointer(uint16(24))
 	}
-	// clamp extremes to avoid ioctl errors
-	if req.Cols > 1000 {
-		req.Cols = 1000
+	if *req.Cols <= 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid value for cols - must be greater than 0"})
+		return
 	}
-	if req.Rows > 1000 {
-		req.Rows = 1000
+	if *req.Rows <= 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid value for rows - must be greater than 0"})
+		return
+	}
+	// Set upper limits to avoid ioctl errors
+	if *req.Cols > 1000 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid value for cols - must be less than 1000"})
+		return
+	}
+	if *req.Rows > 1000 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid value for rows - must be less than 1000"})
+		return
 	}
 
 	session := &PTYSession{
@@ -68,12 +80,13 @@ func (p *PTYController) CreatePTYSession(c *gin.Context) {
 			ID:        req.ID,
 			Cwd:       req.Cwd,
 			Envs:      req.Envs,
-			Cols:      req.Cols,
-			Rows:      req.Rows,
+			Cols:      *req.Cols,
+			Rows:      *req.Rows,
 			CreatedAt: time.Now(),
 			Active:    false,
 			LazyStart: req.LazyStart,
 		},
+		clients: cmap.New[*wsClient](),
 	}
 
 	// Add to manager first to prevent race conditions
@@ -123,7 +136,7 @@ func (p *PTYController) DeletePTYSession(c *gin.Context) {
 
 	if s, ok := ptyManager.Delete(id); ok {
 		s.kill()
-		log.Infof("Deleted PTY session %s", id)
+		log.Debugf("Deleted PTY session %s", id)
 		c.JSON(http.StatusOK, gin.H{"message": "PTY session deleted"})
 		return
 	}
@@ -145,59 +158,20 @@ func (p *PTYController) ConnectPTYSession(c *gin.Context) {
 		return
 	}
 
-	// Validate session existence and send control message
-	session, ok := ptyManager.Get(id)
-	if !ok {
-		log.Warnf("PTY session %s not found", id)
+	session, err := ptyManager.VerifyPTYSessionReady(id)
+	if err != nil {
+		log.Debugf("failed to connect to PTY session: %v", err)
 		// Send error control message
 		errorMsg := map[string]interface{}{
 			"type":   "control",
 			"status": "error",
-			"error":  "PTY session not found",
+			"error":  "Failed to connect to PTY session: " + err.Error(),
 		}
 		if errorJSON, err := json.Marshal(errorMsg); err == nil {
 			_ = ws.WriteMessage(websocket.TextMessage, errorJSON)
 		}
 		_ = ws.Close()
 		return
-	}
-
-	sessionInfo := session.Info()
-
-	// Handle inactive sessions based on lazy start flag
-	if !sessionInfo.Active {
-		if sessionInfo.LazyStart {
-			// Lazy start session - start PTY on first client connection
-			log.Infof("Starting lazy PTY session %s on first client connection", id)
-			if err := session.start(); err != nil {
-				log.WithError(err).Errorf("Failed to start lazy PTY session %s", id)
-				// Send error control message
-				errorMsg := map[string]interface{}{
-					"type":   "control",
-					"status": "error",
-					"error":  "Failed to start PTY session",
-				}
-				if errorJSON, err := json.Marshal(errorMsg); err == nil {
-					_ = ws.WriteMessage(websocket.TextMessage, errorJSON)
-				}
-				_ = ws.Close()
-				return
-			}
-		} else {
-			// Non-lazy session that's inactive means it has terminated
-			log.Warnf("PTY session %s has terminated and is no longer available", id)
-			// Send error control message
-			errorMsg := map[string]interface{}{
-				"type":   "control",
-				"status": "error",
-				"error":  fmt.Sprintf("PTY session '%s' has terminated and is no longer available", id),
-			}
-			if errorJSON, err := json.Marshal(errorMsg); err == nil {
-				_ = ws.WriteMessage(websocket.TextMessage, errorJSON)
-			}
-			_ = ws.Close()
-			return
-		}
 	}
 
 	// Attach to session - this will send the control message internally
@@ -212,29 +186,24 @@ func (p *PTYController) ResizePTYSession(c *gin.Context) {
 		return
 	}
 
-	session, ok := ptyManager.Get(id)
-	if !ok {
-		c.JSON(http.StatusNotFound, gin.H{"error": "PTY session not found"})
-		return
-	}
-
-	sessionInfo := session.Info()
-
-	// Check if session can be resized
-	if !sessionInfo.Active {
-		if sessionInfo.LazyStart {
-			// Lazy start session not yet started - allow resize (will update session info)
-			log.Infof("Resizing lazy PTY session %s before it starts", id)
-		} else {
-			// Non-lazy session that's inactive means it has terminated
-			c.JSON(http.StatusGone, gin.H{"error": fmt.Sprintf("PTY session '%s' has terminated and cannot be resized", id)})
-			return
-		}
-	}
-
 	var req PTYResizeRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if req.Cols > 1000 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "cols must be less than 1000"})
+		return
+	}
+	if req.Rows > 1000 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "rows must be less than 1000"})
+		return
+	}
+
+	session, err := ptyManager.VerifyPTYSessionForResize(id)
+	if err != nil {
+		c.JSON(http.StatusGone, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -242,7 +211,7 @@ func (p *PTYController) ResizePTYSession(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	log.Infof("Resized PTY session %s to %dx%d", id, req.Cols, req.Rows)
+	log.Debugf("Resized PTY session %s to %dx%d", id, req.Cols, req.Rows)
 
 	// Return updated session info
 	updatedInfo := session.Info()

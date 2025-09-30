@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
+	cmap "github.com/orcaman/concurrent-map/v2"
 )
 
 // Constants
@@ -26,15 +27,15 @@ type PTYController struct {
 
 // PTYManager manages multiple PTY sessions
 type PTYManager struct {
-	mu       sync.RWMutex
-	sessions map[string]*PTYSession
+	sessions cmap.ConcurrentMap[string, *PTYSession]
 }
 
 // wsClient represents a WebSocket client connection
 type wsClient struct {
-	id   string
-	conn *websocket.Conn
-	send chan []byte // outbound queue for this client (PTY -> WS)
+	id        string
+	conn      *websocket.Conn
+	send      chan []byte // outbound queue for this client (PTY -> WS)
+	closeOnce sync.Once
 }
 
 // PTYSession represents a single PTY session with multi-client support
@@ -47,7 +48,7 @@ type PTYSession struct {
 	cancel context.CancelFunc
 
 	// multi-attach
-	clients   map[string]*wsClient
+	clients   cmap.ConcurrentMap[string, *wsClient]
 	clientsMu sync.RWMutex
 
 	// funnel of all client inputs -> single PTY writer (preserves ordering)
@@ -76,8 +77,8 @@ type PTYCreateRequest struct {
 	ID        string            `json:"id"`
 	Cwd       string            `json:"cwd,omitempty"`
 	Envs      map[string]string `json:"envs,omitempty"`
-	Cols      uint16            `json:"cols"`
-	Rows      uint16            `json:"rows"`
+	Cols      *uint16           `json:"cols" validate:"optional"`
+	Rows      *uint16           `json:"rows" validate:"optional"`
 	LazyStart bool              `json:"lazyStart,omitempty"` // Don't start PTY until first client connects
 } // @name PTYCreateRequest
 
