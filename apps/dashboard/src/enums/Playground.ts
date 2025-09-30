@@ -157,12 +157,14 @@ export interface CustomizedScreenshotOptions extends Omit<ScreenshotOptions, 'fo
   format?: ScreenshotFormatOption
 }
 
+// Form data structure for actions which don't require any parameters for their execution
 export interface PlaygroundActionFormDataBasic<A> {
   label: string
   description: string
   methodName: A
 }
 
+// Form data structure for actions which use certain parameters for their execution
 export type PlaygroundActionWithParamsFormData<A, T> = PlaygroundActionFormDataBasic<A> & {
   parametersFormItems: ParameterFormData<T>
   parametersState: T
