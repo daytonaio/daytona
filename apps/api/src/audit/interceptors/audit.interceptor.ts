@@ -115,16 +115,21 @@ export class AuditInterceptor implements NestInterceptor {
     return result?.organizationId || request.user.organizationId
   }
 
+  /**
+   * Resolves the identifier of the target resource from the initial request or the response object.
+   *
+   * Prioritizes resolving the ID from the response object as the request may not include a unique resource identifier (e.g. delete sandbox by name).
+   */
   private resolveTargetId(auditContext: AuditContext, request: RequestWithUser, result?: any): string | null {
-    if (auditContext.targetIdFromRequest) {
-      const targetId = auditContext.targetIdFromRequest(request)
+    if (auditContext.targetIdFromResult && result) {
+      const targetId = auditContext.targetIdFromResult(result)
       if (targetId) {
         return targetId
       }
     }
 
-    if (auditContext.targetIdFromResult && result) {
-      const targetId = auditContext.targetIdFromResult(result)
+    if (auditContext.targetIdFromRequest) {
+      const targetId = auditContext.targetIdFromRequest(request)
       if (targetId) {
         return targetId
       }

@@ -18,6 +18,7 @@ import (
 
 type CreateSandboxArgs struct {
 	Id                  *string                    `json:"id,omitempty"`
+	Name                *string                    `json:"name,omitempty"`
 	Target              *string                    `json:"target,omitempty"`
 	Snapshot            *string                    `json:"snapshot,omitempty"`
 	User                *string                    `json:"user,omitempty"`
@@ -41,6 +42,7 @@ func GetCreateSandboxTool() mcp.Tool {
 	return mcp.NewTool("create_sandbox",
 		mcp.WithDescription("Create a new sandbox with Daytona"),
 		mcp.WithString("id", mcp.Description("If a sandbox ID is provided it is first checked if it exists and is running, if so, the existing sandbox will be used. However, a model is not able to provide custom sandbox ID but only the ones Daytona commands return and should always leave ID field empty if the intention is to create a new sandbox.")),
+		mcp.WithString("name", mcp.Description("Name of the sandbox. If not provided, the sandbox ID will be used as the name.")),
 		mcp.WithString("target", mcp.DefaultString("us"), mcp.Description("Target region of the sandbox.")),
 		mcp.WithString("snapshot", mcp.Description("Snapshot of the sandbox (don't specify any if not explicitly instructed from user). Cannot be specified when using a build info entry.")),
 		mcp.WithString("user", mcp.Description("User associated with the sandbox.")),
@@ -118,6 +120,10 @@ func CreateSandbox(ctx context.Context, request mcp.CallToolRequest, args Create
 
 func createSandboxRequest(args CreateSandboxArgs) (*apiclient.CreateSandbox, error) {
 	createSandbox := apiclient.NewCreateSandbox()
+
+	if args.Name != nil && *args.Name != "" {
+		createSandbox.SetName(*args.Name)
+	}
 
 	if args.BuildInfo != nil {
 		if args.Snapshot != nil && *args.Snapshot != "" {

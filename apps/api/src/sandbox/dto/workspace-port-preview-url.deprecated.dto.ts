@@ -6,15 +6,8 @@
 import { ApiProperty, ApiSchema } from '@nestjs/swagger'
 import { IsString } from 'class-validator'
 
-@ApiSchema({ name: 'PortPreviewUrl' })
-export class PortPreviewUrlDto {
-  @ApiProperty({
-    description: 'ID of the sandbox',
-    example: '123456',
-  })
-  @IsString()
-  sandboxId: string
-
+@ApiSchema({ name: 'WorkspacePortPreviewUrl' })
+export class WorkspacePortPreviewUrlDto {
   @ApiProperty({
     description: 'Preview url',
     example: 'https://123456-mysandbox.runner.com',

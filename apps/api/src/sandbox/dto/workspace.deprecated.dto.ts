@@ -36,13 +36,6 @@ export class SandboxInfoDto {
 
 @ApiSchema({ name: 'Workspace' })
 export class WorkspaceDto extends SandboxDto {
-  @ApiProperty({
-    description: 'The name of the workspace',
-    example: 'MyWorkspace',
-    default: '',
-  })
-  name: string
-
   @ApiPropertyOptional({
     description: 'The image used for the workspace',
     example: 'daytonaio/workspace:latest',
@@ -75,9 +68,6 @@ export class WorkspaceDto extends SandboxDto {
 
   constructor() {
     super()
-    if (this.name === '') {
-      this.name = this.id
-    }
   }
 
   static fromSandbox(sandbox: Sandbox, runnerDomain: string): WorkspaceDto {
@@ -88,12 +78,11 @@ export class WorkspaceDto extends SandboxDto {
   static fromSandboxDto(sandboxDto: SandboxDto): WorkspaceDto {
     return {
       ...sandboxDto,
-      name: sandboxDto.id,
       image: sandboxDto.snapshot,
       snapshotState: sandboxDto.backupState,
       snapshotCreatedAt: sandboxDto.backupCreatedAt,
       info: {
-        name: sandboxDto.id,
+        name: sandboxDto.name,
         created: sandboxDto.createdAt,
         providerMetadata: JSON.stringify({
           state: sandboxDto.state,

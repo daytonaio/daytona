@@ -16,7 +16,8 @@ export class SandboxAccessGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest()
     // TODO: remove deprecated request.params.workspaceId param once we remove the deprecated workspace controller
-    const sandboxId: string = request.params.sandboxId || request.params.id || request.params.workspaceId
+    const sandboxIdOrName: string =
+      request.params.sandboxIdOrName || request.params.sandboxId || request.params.id || request.params.workspaceId
 
     // TODO: initialize authContext safely
     const authContext: BaseAuthContext = request.user
@@ -26,14 +27,17 @@ export class SandboxAccessGuard implements CanActivate {
       if (isRunnerContext(authContext)) {
         // For runner authentication, verify that the runner ID matches the sandbox's runner ID
         const runnerContext = authContext as RunnerContext
-        const sandboxRunnerId = await this.sandboxService.getRunnerId(sandboxId)
+        const sandboxRunnerId = await this.sandboxService.getRunnerId(sandboxIdOrName)
         if (sandboxRunnerId !== runnerContext.runnerId) {
           throw new ForbiddenException('Runner ID does not match sandbox runner ID')
         }
       } else {
         // For user/organization authentication, check organization access
         const orgAuthContext = authContext as OrganizationAuthContext
-        const sandboxOrganizationId = await this.sandboxService.getOrganizationId(sandboxId)
+        const sandboxOrganizationId = await this.sandboxService.getOrganizationId(
+          sandboxIdOrName,
+          orgAuthContext.organizationId,
+        )
         if (
           orgAuthContext.role !== 'ssh-gateway' &&
           orgAuthContext.role !== SystemRole.ADMIN &&
@@ -48,7 +52,7 @@ export class SandboxAccessGuard implements CanActivate {
       if (!(error instanceof NotFoundException)) {
         console.error(error)
       }
-      throw new NotFoundException(`Sandbox with ID ${sandboxId} not found`)
+      throw new NotFoundException(`Sandbox with ID ${sandboxIdOrName} not found`)
     }
   }
 }

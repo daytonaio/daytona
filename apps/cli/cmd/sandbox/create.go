@@ -39,6 +39,9 @@ var CreateCmd = &cobra.Command{
 		if snapshotFlag != "" {
 			createSandbox.SetSnapshot(snapshotFlag)
 		}
+		if nameFlag != "" {
+			createSandbox.SetName(nameFlag)
+		}
 		if userFlag != "" {
 			createSandbox.SetUser(userFlag)
 		}
@@ -195,6 +198,7 @@ var CreateCmd = &cobra.Command{
 
 var (
 	snapshotFlag         string
+	nameFlag             string
 	userFlag             string
 	envFlag              []string
 	labelsFlag           []string
@@ -217,6 +221,7 @@ var (
 
 func init() {
 	CreateCmd.Flags().StringVar(&snapshotFlag, "snapshot", "", "Snapshot to use for the sandbox")
+	CreateCmd.Flags().StringVar(&nameFlag, "name", "", "Name of the sandbox")
 	CreateCmd.Flags().StringVar(&userFlag, "user", "", "User associated with the sandbox")
 	CreateCmd.Flags().StringArrayVarP(&envFlag, "env", "e", []string{}, "Environment variables (format: KEY=VALUE)")
 	CreateCmd.Flags().StringArrayVarP(&labelsFlag, "label", "l", []string{}, "Labels (format: KEY=VALUE)")
