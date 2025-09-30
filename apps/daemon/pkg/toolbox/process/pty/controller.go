@@ -57,14 +57,6 @@ func (p *PTYController) CreatePTYSession(c *gin.Context) {
 	if req.Rows == nil {
 		req.Rows = util.Pointer(uint16(24))
 	}
-	if *req.Cols <= 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid value for cols - must be greater than 0"})
-		return
-	}
-	if *req.Rows <= 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid value for rows - must be greater than 0"})
-		return
-	}
 	// Set upper limits to avoid ioctl errors
 	if *req.Cols > 1000 {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid value for cols - must be less than 1000"})
