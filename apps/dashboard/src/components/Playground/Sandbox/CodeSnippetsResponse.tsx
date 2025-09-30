@@ -20,6 +20,7 @@ const SandboxCodeSnippetsResponse: React.FC = () => {
   const { sandboxParametersState } = usePlayground()
 
   const objectHasAnyValue = (obj: object) => Object.values(obj).some((v) => v !== '' && v !== undefined)
+
   const indentString = (string: string, indentationCount: number) => {
     let indentationString = ''
     for (let i = 0; i < indentationCount; i++) indentationString += '\t'

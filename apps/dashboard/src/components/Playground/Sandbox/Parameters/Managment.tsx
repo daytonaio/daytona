@@ -20,7 +20,7 @@ type SandboxManagmentParametersProps = {
 
 const SandboxManagmentParameters: React.FC<SandboxManagmentParametersProps> = ({ apiKeys, apiKeysLoading }) => {
   const { sandboxParametersState, setSandboxParameterValue } = usePlayground()
-  const [sandboxApiKey, setSandboxApiKey] = useState<string | undefined>(sandboxParametersState['apiKey']) //*AKO NE POSTOJI NIJEDAN -> VRIJEDNOST NEK BUDE default
+  const [sandboxApiKey, setSandboxApiKey] = useState<string | undefined>(sandboxParametersState['apiKey'])
   const [sandboxLanguage, setSandboxLanguage] = useState<CodeLanguage | undefined>(sandboxParametersState['language'])
   const [resources, setResources] = useState<Resources>(sandboxParametersState['resources'])
   const [sandboxFromImageParams, setSandboxFromImageParams] = useState<CreateSandboxBaseParams>(

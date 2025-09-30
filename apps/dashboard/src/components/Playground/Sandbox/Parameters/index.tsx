@@ -18,7 +18,7 @@ const SandboxParameters: React.FC = () => {
     SandboxParametersSections.SANDBOX_MANAGMENT,
   ])
 
-  // Available API keys -> fetch here instead of SandboxManagmentParameters to prevent fetch on every accordion open/close
+  // Available API keys -> fetch here instead of in SandboxManagmentParameters to prevent fetch on every accordion open/close
   const [apiKeys, setApiKeys] = useState<ApiKeyList[]>([])
   const [apiKeysLoading, setApiKeysLoading] = useState(true)
   const { apiKeyApi } = useApi()

@@ -20,7 +20,6 @@ import { useState } from 'react'
 
 export const PlaygroundProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [sandboxParametersState, setSandboxParametersState] = useState<SandboxParams>({
-    // Default values
     resources: {
       cpu: 2,
       // gpu: 0,
@@ -130,10 +129,11 @@ export const PlaygroundProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       setRunningActionMethod(null)
       return
     }
+    // Reset error
     setActionRuntimeError((prev) => ({
       ...prev,
       [actionFormData.methodName]: null,
-    })) // Reset error
+    }))
     return await runPlaygroundAction(actionFormData, invokeApi)
   }
 

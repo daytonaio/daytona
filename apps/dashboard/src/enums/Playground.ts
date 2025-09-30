@@ -2,6 +2,7 @@
  * Copyright 2025 Daytona Platforms Inc.
  * SPDX-License-Identifier: AGPL-3.0
  */
+
 import PythonIcon from '@/assets/python.svg'
 import TypescriptIcon from '@/assets/typescript.svg'
 import { CodeLanguage, ScreenshotOptions, ScreenshotRegion } from '@daytonaio/sdk'
