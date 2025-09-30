@@ -968,6 +968,21 @@ export class SandboxService {
     }
   }
 
+  @Cron(CronExpression.EVERY_10_MINUTES)
+  async cleanupBuildFailedSandboxs() {
+    const sevenDaysAgo = new Date()
+    sevenDaysAgo.setHours(sevenDaysAgo.getHours() - 24 * 7)
+
+    const destroyedSandboxs = await this.sandboxRepository.delete({
+      state: SandboxState.BUILD_FAILED,
+      updatedAt: LessThan(sevenDaysAgo),
+    })
+
+    if (destroyedSandboxs.affected > 0) {
+      this.logger.debug(`Cleaned up ${destroyedSandboxs.affected} build failed sandboxes`)
+    }
+  }
+
   async setAutostopInterval(sandboxId: string, interval: number): Promise<void> {
     const sandbox = await this.sandboxRepository.findOne({
       where: { id: sandboxId },
