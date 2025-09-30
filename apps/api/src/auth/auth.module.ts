@@ -35,6 +35,10 @@ import { catchError, map } from 'rxjs/operators'
     {
       provide: JwtStrategy,
       useFactory: async (userService: UserService, httpService: HttpService, configService: TypedConfigService) => {
+        if (configService.get('skipConnections')) {
+          return
+        }
+
         // Get the OpenID configuration from the issuer
         const discoveryUrl = `${configService.get('oidc.issuer')}/.well-known/openid-configuration`
         const metadata = await firstValueFrom(
