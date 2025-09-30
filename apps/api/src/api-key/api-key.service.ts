@@ -28,7 +28,7 @@ export class ApiKeyService {
     return `dtn_${crypto.randomBytes(32).toString('hex')}`
   }
 
-  private generateApiKeyHash(value: string): string {
+  public generateApiKeyHash(value: string): string {
     return crypto.createHash('sha256').update(value).digest('hex')
   }
 

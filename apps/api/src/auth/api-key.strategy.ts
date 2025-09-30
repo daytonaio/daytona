@@ -7,6 +7,7 @@ import { Injectable, UnauthorizedException, Logger, OnModuleInit } from '@nestjs
 import { PassportStrategy } from '@nestjs/passport'
 import { Strategy } from 'passport-http-bearer'
 import { ApiKeyService } from '../api-key/api-key.service'
+import { ApiKey } from '../api-key/api-key.entity'
 import { UserService } from '../user/user.service'
 import { AuthContext } from '../common/interfaces/auth-context.interface'
 import { TypedConfigService } from '../config/typed-config.service'
@@ -62,19 +63,13 @@ export class ApiKeyStrategy extends PassportStrategy(Strategy, 'api-key') implem
     }
 
     try {
-      // Check cache first (10 second TTL)
-      const cacheKey = `api-key:validation:${this.generateApiKeyHash(token)}`
-      const cached = await this.redis.get(cacheKey)
-
-      let apiKey
-      if (cached) {
-        this.logger.debug('Using cached API key validation')
-        apiKey = JSON.parse(cached)
-      } else {
+      let apiKey = await this.getApiKeyCache(token)
+      if (!apiKey) {
         // Cache miss - validate from database
         apiKey = await this.apiKeyService.getApiKeyByValue(token)
         this.logger.debug(`API key found for userId: ${apiKey.userId}`)
-        const validationCacheTtl = this.configService.get('apiKey.validationCacheTtl')
+        const validationCacheTtl = this.configService.get('apiKey.validationCacheTtlSeconds')
+        const cacheKey = `api-key:validation:${this.apiKeyService.generateApiKeyHash(token)}`
         await this.redis.setex(cacheKey, validationCacheTtl, JSON.stringify(apiKey))
       }
       if (apiKey.expiresAt && apiKey.expiresAt < new Date()) {
@@ -96,8 +91,8 @@ export class ApiKeyStrategy extends PassportStrategy(Strategy, 'api-key') implem
           role: user.role,
           email: user.email,
         }
-        const userCacheTtl = this.configService.get('apiKey.userCacheTtl')
-        await this.redis.set(`api-key:user:${apiKey.userId}`, JSON.stringify(userCache), 'EX', userCacheTtl)
+        const userCacheTtl = this.configService.get('apiKey.userCacheTtlSeconds')
+        await this.redis.setex(`api-key:user:${apiKey.userId}`, userCacheTtl, JSON.stringify(userCache))
       }
 
       const result = {
@@ -144,8 +139,29 @@ export class ApiKeyStrategy extends PassportStrategy(Strategy, 'api-key') implem
     }
   }
 
-  private generateApiKeyHash(value: string): string {
-    const crypto = require('crypto')
-    return crypto.createHash('sha256').update(value).digest('hex')
+  private async getApiKeyCache(token: string): Promise<ApiKey | null> {
+    try {
+      const cacheKey = `api-key:validation:${this.apiKeyService.generateApiKeyHash(token)}`
+      const cached = await this.redis.get(cacheKey)
+      if (cached) {
+        this.logger.debug('Using cached API key validation')
+        const apiKey = JSON.parse(cached)
+        // Parse Date fields from cached data
+        if (apiKey.createdAt) {
+          apiKey.createdAt = new Date(apiKey.createdAt)
+        }
+        if (apiKey.lastUsedAt) {
+          apiKey.lastUsedAt = new Date(apiKey.lastUsedAt)
+        }
+        if (apiKey.expiresAt) {
+          apiKey.expiresAt = new Date(apiKey.expiresAt)
+        }
+        return apiKey
+      }
+      return null
+    } catch (error) {
+      this.logger.error('Error getting API key cache:', error)
+      return null
+    }
   }
 }

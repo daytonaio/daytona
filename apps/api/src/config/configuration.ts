@@ -123,8 +123,8 @@ const configuration = {
     version: process.env.DEFAULT_RUNNER_VERSION || '0',
   },
   apiKey: {
-    validationCacheTtl: parseInt(process.env.API_KEY_VALIDATION_CACHE_TTL || '10', 10),
-    userCacheTtl: parseInt(process.env.API_KEY_USER_CACHE_TTL || '60', 10),
+    validationCacheTtlSeconds: parseInt(process.env.API_KEY_VALIDATION_CACHE_TTL_SECONDS || '10', 10),
+    userCacheTtlSeconds: parseInt(process.env.API_KEY_USER_CACHE_TTL_SECONDS || '60', 10),
   },
 }
 
