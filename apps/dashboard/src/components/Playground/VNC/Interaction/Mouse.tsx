@@ -21,6 +21,7 @@ import {
   PlaygroundActionFormDataBasic,
   MouseActionFormData,
 } from '@/enums/Playground'
+import { PlaygroundActionInvokeApi } from '@/contexts/PlaygroundContext'
 import PlaygroundActionForm from '../../ActionForm'
 import React, { useState } from 'react'
 
@@ -31,7 +32,12 @@ const mouseButtonFormData: ParameterFormItem & { key: 'button' } = {
 }
 
 const VNCMouseOperations: React.FC = () => {
-  const { VNCInteractionOptionsParamsState, setVNCInteractionOptionsParamValue } = usePlayground()
+  const {
+    VNCInteractionOptionsParamsState,
+    setVNCInteractionOptionsParamValue,
+    runPlaygroundActionWithParams,
+    runPlaygroundActionWithoutParams,
+  } = usePlayground()
   const [mouseClickParams, setMouseClickParams] = useState<MouseClick>(
     VNCInteractionOptionsParamsState['mouseClickParams'],
   )
@@ -40,8 +46,6 @@ const VNCMouseOperations: React.FC = () => {
   const [mouseScrollParams, setMouseScrollParams] = useState<MouseScroll>(
     VNCInteractionOptionsParamsState['mouseScrollParams'],
   )
-  const [runningMouseActionMethod, setRunningMouseActionMethod] = useState<MouseActions | null>(null)
-  const [mouseActionError, setMouseActionError] = useState<Partial<Record<MouseActions, string>>>({})
 
   const mouseClickNumberParamsFormData: (NumberParameterFormItem & { key: 'x' | 'y' })[] = [
     { label: 'Coord X', key: 'x', min: 0, max: Infinity, placeholder: '100', required: true },
@@ -149,31 +153,9 @@ const VNCMouseOperations: React.FC = () => {
     },
   ]
 
-  const onMouseActionRunClick = async <T extends MouseClick | MouseDrag | MouseMove | MouseScroll>(
-    mouseActionFormData: MouseActionFormData<T>,
-    mouseActionParamsFormData: ParameterFormData<T>,
-    mouseActionParamsState: T,
-  ) => {
-    setRunningMouseActionMethod(mouseActionFormData.methodName)
-    // Validate if all required params are set if they exist
-    if (mouseActionParamsFormData.some((formItem) => formItem.required)) {
-      const mouseActionEmptyParamFormItem = mouseActionParamsFormData
-        .filter((formItem) => formItem.required)
-        .find((formItem) => {
-          const value = mouseActionParamsState[formItem.key]
-          return value === '' || value === undefined
-        })
-      if (mouseActionEmptyParamFormItem) {
-        setMouseActionError({
-          [mouseActionFormData.methodName]: `${mouseActionEmptyParamFormItem?.label} parameter is required for this action`,
-        })
-        setRunningMouseActionMethod(null)
-        return
-      }
-    }
-    //TODO -> API call + set API response as responseText if present
-    setMouseActionError({}) // Reset error
-    setRunningMouseActionMethod(null)
+  //TODO -> Implementation
+  const mouseActionAPICall: PlaygroundActionInvokeApi = async (mouseActionFormData) => {
+    // API call + set API response as responseText if present
   }
 
   return (
@@ -182,15 +164,7 @@ const VNCMouseOperations: React.FC = () => {
         <div key={mouseActionFormData.methodName} className="space-y-4">
           <PlaygroundActionForm<MouseActions>
             actionFormItem={mouseActionFormData}
-            onRunActionClick={() =>
-              onMouseActionRunClick<typeof mouseActionFormData.parametersState>(
-                mouseActionFormData,
-                mouseActionFormData.parametersFormItems,
-                mouseActionFormData.parametersState,
-              )
-            }
-            runningActionMethodName={runningMouseActionMethod}
-            actionError={mouseActionError[mouseActionFormData.methodName]}
+            onRunActionClick={() => runPlaygroundActionWithParams(mouseActionFormData, mouseActionAPICall)}
           />
           <div className="px-4 space-y-2">
             {mouseActionFormData.methodName === MouseActions.CLICK && (
@@ -330,11 +304,7 @@ const VNCMouseOperations: React.FC = () => {
         <div key={mouseActionFormData.methodName} className="space-y-4">
           <PlaygroundActionForm<MouseActions>
             actionFormItem={mouseActionFormData}
-            onRunActionClick={async () => {
-              return
-            }}
-            runningActionMethodName={runningMouseActionMethod}
-            actionError={mouseActionError[mouseActionFormData.methodName]}
+            onRunActionClick={() => runPlaygroundActionWithoutParams(mouseActionFormData, mouseActionAPICall)}
           />
         </div>
       ))}

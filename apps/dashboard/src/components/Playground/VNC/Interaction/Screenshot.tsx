@@ -22,22 +22,21 @@ import PlaygroundActionForm from '../../ActionForm'
 import { useState } from 'react'
 
 const VNCScreenshootOperations: React.FC = () => {
-  const { VNCInteractionOptionsParamsState, setVNCInteractionOptionsParamValue } = usePlayground()
+  const { VNCInteractionOptionsParamsState, setVNCInteractionOptionsParamValue, runPlaygroundActionWithParams } =
+    usePlayground()
   const [screenshotOptions, setScreenshotOptions] = useState<CustomizedScreenshotOptions>(
     VNCInteractionOptionsParamsState['screenshotOptionsConfig'],
   )
   const [screenshotRegion, setScreenshotRegion] = useState<ScreenshotRegion>(
     VNCInteractionOptionsParamsState['screenshotRegionConfig'],
   )
-  const [runningScreenshotActionMethod, setRunningScreenshotActionMethod] = useState<ScreenshotActions | null>(null)
-  const [screenshotActionError, setScreenshotActionError] = useState<Partial<Record<ScreenshotActions, string>>>({})
 
   const screenshotOptionsNumberParametersFormData: (NumberParameterFormItem & { key: 'quality' | 'scale' })[] = [
     { label: 'Scale', key: 'scale', min: 0.1, max: 1, placeholder: '0.5', step: 0.1 },
     { label: 'Quality', key: 'quality', min: 1, max: 100, placeholder: '95' },
   ]
 
-  const screenshotFormatFormData: ParameterFormItem = {
+  const screenshotFormatFormData: ParameterFormItem & { key: 'format' } = {
     label: 'Format',
     key: 'format',
     placeholder: 'Select screenshot image format',
@@ -58,11 +57,17 @@ const VNCScreenshootOperations: React.FC = () => {
     },
   ]
 
-  const screenshotShowCursorFormData: ParameterFormItem = {
+  const screenshotShowCursorFormData: ParameterFormItem & { key: 'showCursor' } = {
     label: 'Show cursor',
     key: 'showCursor',
     placeholder: 'Show cursor in screenshot',
   }
+
+  const screenshotOptionsFormData: ParameterFormData<CustomizedScreenshotOptions> = [
+    ...screenshotOptionsNumberParametersFormData,
+    screenshotFormatFormData,
+    screenshotShowCursorFormData,
+  ]
 
   const screenshotRegionNumberParametersFormData: (NumberParameterFormItem & { key: keyof ScreenshotRegion })[] = [
     { label: 'Top left X', key: 'x', min: 0, max: Infinity, placeholder: '100', required: true },
@@ -71,50 +76,46 @@ const VNCScreenshootOperations: React.FC = () => {
     { label: 'Height', key: 'height', min: 0, max: Infinity, placeholder: '200', required: true },
   ]
 
-  const screenshotActionsFormData: ScreenshotActionFormData[] = [
+  const screenshotActionsFormData: ScreenshotActionFormData<ScreenshotRegion | CustomizedScreenshotOptions>[] = [
     {
       methodName: ScreenshotActions.TAKE_COMPRESSED,
       label: 'takeCompressed()',
       description: 'Takes a compressed screenshot of the entire screen',
+      parametersFormItems: screenshotOptionsFormData,
+      parametersState: screenshotOptions,
     },
     {
       methodName: ScreenshotActions.TAKE_COMPRESSED_REGION,
       label: 'takeCompressedRegion()',
       description: 'Takes a compressed screenshot of a specific region',
-      usesScreenshotRegion: true,
+      parametersFormItems: [...screenshotOptionsFormData, ...screenshotRegionNumberParametersFormData],
+      parametersState: {
+        ...screenshotOptions,
+        ...screenshotRegion,
+      },
     },
     {
       methodName: ScreenshotActions.TAKE_FULL_SCREEN,
       label: 'takeFullScreen()',
       description: 'Takes a screenshot of the entire screen',
+      parametersFormItems: [screenshotShowCursorFormData],
+      parametersState: screenshotOptions,
     },
     {
       methodName: ScreenshotActions.TAKE_REGION,
       label: 'takeRegion()',
       description: 'Takes a screenshot of a specific region',
-      usesScreenshotRegion: true,
+      parametersFormItems: [...screenshotRegionNumberParametersFormData, screenshotShowCursorFormData],
+      parametersState: {
+        ...screenshotRegion,
+        ...screenshotOptions,
+      },
     },
   ]
 
-  const onScreenshotActionRunClick = async (screenshotActionFormData: ScreenshotActionFormData) => {
-    setRunningScreenshotActionMethod(screenshotActionFormData.methodName)
-    // Validate if all ScreenshotRegion parameters are set
-    if (screenshotActionFormData.usesScreenshotRegion) {
-      const screenshotRegionEmptyParamKey = Object.keys(screenshotRegion).find((key) => {
-        const value = screenshotRegion[key as keyof ScreenshotRegion]
-        return value === undefined
-      })
-      if (screenshotRegionEmptyParamKey) {
-        setScreenshotActionError({
-          [screenshotActionFormData.methodName]: `${screenshotRegionNumberParametersFormData.find((screenshotRegionParam) => screenshotRegionParam.key === screenshotRegionEmptyParamKey)?.label} parameter is required for this action`,
-        })
-        setRunningScreenshotActionMethod(null)
-        return
-      }
-    }
-    //TODO -> API call + set API response as responseText if present
-    setScreenshotActionError({}) // Reset error
-    setRunningScreenshotActionMethod(null)
+  //TODO -> Implementation
+  const screenshotActionAPICall: PlaygroundActionInvokeApi = async (screenshotActionFormData) => {
+    // API call + set API response as responseText if present
   }
 
   return (
@@ -190,9 +191,7 @@ const VNCScreenshootOperations: React.FC = () => {
           <div key={screenshotAction.methodName}>
             <PlaygroundActionForm<ScreenshotActions>
               actionFormItem={screenshotAction}
-              onRunActionClick={() => onScreenshotActionRunClick(screenshotAction)}
-              runningActionMethodName={runningScreenshotActionMethod}
-              actionError={screenshotActionError[screenshotAction.methodName]}
+              onRunActionClick={() => runPlaygroundActionWithParams(screenshotAction, screenshotActionAPICall)}
             />
           </div>
         ))}

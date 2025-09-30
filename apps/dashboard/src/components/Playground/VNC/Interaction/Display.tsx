@@ -3,11 +3,12 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 import { DisplayActions, PlaygroundActionFormDataBasic } from '@/enums/Playground'
+import { usePlayground } from '@/hooks/usePlayground'
+import { PlaygroundActionInvokeApi } from '@/contexts/PlaygroundContext'
 import PlaygroundActionForm from '../../ActionForm'
-import { useState } from 'react'
 
 const VNCDisplayOperations: React.FC = () => {
-  const [runningDisplayActionMethod, setRunningDisplayActionMethod] = useState<DisplayActions | null>(null)
+  const { runPlaygroundActionWithoutParams } = usePlayground()
 
   const displayActionsFormData: PlaygroundActionFormDataBasic<DisplayActions>[] = [
     {
@@ -22,10 +23,9 @@ const VNCDisplayOperations: React.FC = () => {
     },
   ]
 
-  const onDisplayActionRunClick = async (displayActionMethodName: DisplayActions) => {
-    setRunningDisplayActionMethod(displayActionMethodName)
-    //TODO -> API call + set API response as responseText if present
-    setRunningDisplayActionMethod(null)
+  //TODO -> Implementation
+  const displayActionAPICall: PlaygroundActionInvokeApi = async (displayActionFormData) => {
+    return
   }
 
   return (
@@ -34,8 +34,7 @@ const VNCDisplayOperations: React.FC = () => {
         <div key={displayActionFormData.methodName} className="space-y-4">
           <PlaygroundActionForm<DisplayActions>
             actionFormItem={displayActionFormData}
-            onRunActionClick={() => onDisplayActionRunClick(displayActionFormData.methodName)}
-            runningActionMethodName={runningDisplayActionMethod}
+            onRunActionClick={() => runPlaygroundActionWithoutParams(displayActionFormData, displayActionAPICall)}
           />
         </div>
       ))}

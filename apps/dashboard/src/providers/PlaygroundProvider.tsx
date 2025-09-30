@@ -9,6 +9,11 @@ import {
   SetSandboxParamsValue,
   VNCInteractionOptionsParams,
   SetVNCInteractionOptionsParamValue,
+  RunningActionMethodName,
+  ActionRuntimeError,
+  ValidatePlaygroundActionRequiredParams,
+  RunPlaygroundActionBasic,
+  RunPlaygroundActionWithParams,
 } from '@/contexts/PlaygroundContext'
 import { ScreenshotFormatOption, MouseButton, MouseScrollDirection } from '@/enums/Playground'
 import { useState } from 'react'
@@ -79,6 +84,59 @@ export const PlaygroundProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     setVNCInteractionOptionsParamsState((prev) => ({ ...prev, [key]: value }))
   }
 
+  const [runningActionMethod, setRunningActionMethod] = useState<RunningActionMethodName>(null)
+  const [actionRuntimeError, setActionRuntimeError] = useState<ActionRuntimeError>({})
+
+  const validatePlaygroundActionRequiredParams: ValidatePlaygroundActionRequiredParams = (
+    actionParamsFormData,
+    actionParamsState,
+  ) => {
+    if (actionParamsFormData.some((formItem) => formItem.required)) {
+      const emptyFormItem = actionParamsFormData
+        .filter((formItem) => formItem.required)
+        .find((formItem) => {
+          const value = actionParamsState[formItem.key]
+          return value === '' || value === undefined
+        })
+
+      if (emptyFormItem) {
+        return `${emptyFormItem.label} parameter is required for this action`
+      }
+    }
+
+    return undefined
+  }
+
+  const runPlaygroundAction: RunPlaygroundActionBasic = async (actionFormData, invokeApi) => {
+    setRunningActionMethod(actionFormData.methodName)
+    try {
+      await invokeApi(actionFormData)
+    } catch (error) {
+      console.log('API call error', error)
+    }
+    setTimeout(() => setRunningActionMethod(null), 5000)
+  }
+
+  const runPlaygroundActionWithParams: RunPlaygroundActionWithParams = async (actionFormData, invokeApi) => {
+    const validationError = validatePlaygroundActionRequiredParams(
+      actionFormData.parametersFormItems,
+      actionFormData.parametersState,
+    )
+    if (validationError) {
+      setActionRuntimeError((prev) => ({
+        ...prev,
+        [actionFormData.methodName]: validationError,
+      }))
+      setRunningActionMethod(null)
+      return
+    }
+    setActionRuntimeError((prev) => ({
+      ...prev,
+      [actionFormData.methodName]: null,
+    })) // Reset error
+    return await runPlaygroundAction(actionFormData, invokeApi)
+  }
+
   return (
     <PlaygroundContext.Provider
       value={{
@@ -86,6 +144,10 @@ export const PlaygroundProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         setSandboxParameterValue,
         VNCInteractionOptionsParamsState,
         setVNCInteractionOptionsParamValue,
+        runPlaygroundActionWithParams,
+        runPlaygroundActionWithoutParams: runPlaygroundAction,
+        runningActionMethod,
+        actionRuntimeError,
       }}
     >
       {children}

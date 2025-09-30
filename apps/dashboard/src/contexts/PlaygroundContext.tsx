@@ -81,7 +81,11 @@ export type SetVNCInteractionOptionsParamValue = <K extends keyof VNCInteraction
 // Currently running action, or none
 export type RunningActionMethodName = PlaygroundActions | null
 
+<<<<<<< HEAD
 // Mapping between action and runtime error message (if any)
+=======
+// >Mapping between action and runtime error message (if any)
+>>>>>>> 056b8131 (runPlaygroundActionWithParams and runPlaygroundActionWithoutParams general methods defined, runningActionMethod and actionRuntimeError moved to PlaygroundContext, screenshoot actions form data adjust to follow PlaygroundActionWithParamsFormData type)
 export type ActionRuntimeError = Partial<Record<PlaygroundActions, string>>
 
 // Method for validation of required params for a given action

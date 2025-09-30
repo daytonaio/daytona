@@ -1,27 +1,18 @@
 import { Label } from '@/components/ui/label'
-import { PlaygroundActionFormDataBasic } from '@/enums/Playground'
+import { PlaygroundActionFormDataBasic, PlaygroundActions } from '@/enums/Playground'
 import PlaygroundActionRunButton from './ActionRunButton'
+import { usePlayground } from '@/hooks/usePlayground'
 
-type PlaygroundActionFormProps<T> = {
-  actionFormItem: PlaygroundActionFormDataBasic<T>
+type PlaygroundActionFormProps<A> = {
+  actionFormItem: PlaygroundActionFormDataBasic<A>
   onRunActionClick: () => Promise<void>
-  runningActionMethodName: T | null
-  actionError?: string
 }
 
-function PlaygroundActionForm<T>({
+function PlaygroundActionForm<A extends PlaygroundActions>({
   actionFormItem,
   onRunActionClick,
-  runningActionMethodName,
-  actionError,
-}: PlaygroundActionFormProps<T>) {
-  const onRunActionButtonClick = async (actionMethodName: T) => {
-    try {
-      await onRunActionClick()
-    } catch (error) {
-      console.log('Action error', error)
-    }
-  }
+}: PlaygroundActionFormProps<A>) {
+  const { runningActionMethod, actionRuntimeError } = usePlayground()
 
   return (
     <>
@@ -33,12 +24,16 @@ function PlaygroundActionForm<T>({
           </p>
         </div>
         <PlaygroundActionRunButton
-          isDisabled={!!runningActionMethodName}
-          isRunning={runningActionMethodName === actionFormItem.methodName}
-          onRunActionClick={() => onRunActionButtonClick(actionFormItem.methodName)}
+          isDisabled={!!runningActionMethod}
+          isRunning={runningActionMethod === actionFormItem.methodName}
+          onRunActionClick={onRunActionClick}
         />
       </div>
-      <div>{actionError && <p className="text-sm text-red-500 mt-2">{actionError}</p>}</div>
+      <div>
+        {actionRuntimeError[actionFormItem.methodName] && (
+          <p className="text-sm text-red-500 mt-2">{actionRuntimeError[actionFormItem.methodName]}</p>
+        )}
+      </div>
     </>
   )
 }

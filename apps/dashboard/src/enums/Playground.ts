@@ -4,7 +4,7 @@
  */
 import PythonIcon from '@/assets/python.svg'
 import TypescriptIcon from '@/assets/typescript.svg'
-import { CodeLanguage } from '@daytonaio/sdk'
+import { CodeLanguage, ScreenshotOptions, ScreenshotRegion } from '@daytonaio/sdk'
 
 export enum PlaygroundCategories {
   SANDBOX = 'sandbox',
@@ -157,10 +157,10 @@ export interface CustomizedScreenshotOptions extends Omit<ScreenshotOptions, 'fo
   format?: ScreenshotFormatOption
 }
 
-export interface PlaygroundActionFormDataBasic<T> {
+export interface PlaygroundActionFormDataBasic<A> {
   label: string
   description: string
-  methodName: T
+  methodName: A
 }
 
 export type PlaygroundActionWithParamsFormData<A, T> = PlaygroundActionFormDataBasic<A> & {
@@ -175,6 +175,7 @@ export enum ScreenshotActions {
   TAKE_REGION = 'takeRegion',
 }
 
-export type ScreenshotActionFormData = PlaygroundActionFormDataBasic<ScreenshotActions> & {
-  usesScreenshotRegion?: boolean
-}
+export type ScreenshotActionFormData<T extends ScreenshotRegion | CustomizedScreenshotOptions> =
+  PlaygroundActionWithParamsFormData<ScreenshotActions, T>
+
+export type PlaygroundActions = DisplayActions | KeyboardActions | MouseActions | ScreenshotActions

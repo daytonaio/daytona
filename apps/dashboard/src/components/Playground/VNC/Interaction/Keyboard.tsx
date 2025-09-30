@@ -7,19 +7,19 @@ import FormTextInput from '../../Inputs/TextInput'
 import FormNumberInput from '../../Inputs/NumberInput'
 import { KeyboardActions, KeyboardActionFormData, ParameterFormData, NumberParameterFormItem } from '@/enums/Playground'
 import { KeyboardHotKey, KeyboardPress, KeyboardType } from '@/enums/Playground'
+import { PlaygroundActionInvokeApi } from '@/contexts/PlaygroundContext'
 import { usePlayground } from '@/hooks/usePlayground'
 import PlaygroundActionForm from '../../ActionForm'
 import { useState } from 'react'
 
 const VNCKeyboardOperations: React.FC = () => {
-  const { VNCInteractionOptionsParamsState, setVNCInteractionOptionsParamValue } = usePlayground()
+  const { VNCInteractionOptionsParamsState, setVNCInteractionOptionsParamValue, runPlaygroundActionWithParams } =
+    usePlayground()
   const [hotKeyParams, setHotKeyParams] = useState<KeyboardHotKey>(
     VNCInteractionOptionsParamsState['keyboardHotKeyParams'],
   )
   const [pressParams, setPressParams] = useState<KeyboardPress>(VNCInteractionOptionsParamsState['keyboardPressParams'])
   const [typeParams, setTypeParams] = useState<KeyboardType>(VNCInteractionOptionsParamsState['keyboardTypeParams'])
-  const [runningKeyboardActionMethod, setRunningKeyboardActionMethod] = useState<KeyboardActions | null>(null)
-  const [keyboardActionError, setKeyboardActionError] = useState<Partial<Record<KeyboardActions, string>>>({})
 
   const hotKeyParamsFormData: ParameterFormData<KeyboardHotKey> = [
     { label: 'Keys', key: 'keys', placeholder: 'ctrl+c, alt+tab', required: true },
@@ -59,32 +59,10 @@ const VNCKeyboardOperations: React.FC = () => {
     },
   ]
 
-  const onKeyboardActionRunClick = async <T extends KeyboardHotKey | KeyboardPress | KeyboardType>(
-    keyboardActionFormData: KeyboardActionFormData<T>,
-    keyboardActionParamsFormData: ParameterFormData<T>,
-    keyboardActionParamsState: T,
-  ) => {
-    setRunningKeyboardActionMethod(keyboardActionFormData.methodName)
-    // Validate if all required params are set if they exist
-    if (keyboardActionParamsFormData.some((formItem) => formItem.required)) {
-      const keyboardActionEmptyParamFormItem = keyboardActionParamsFormData
-        .filter((formItem) => formItem.required)
-        .find((formItem) => {
-          const value = keyboardActionParamsState[formItem.key]
-          return value === '' || value === undefined
-        })
-      if (keyboardActionEmptyParamFormItem) {
-        setKeyboardActionError({
-          [keyboardActionFormData.methodName]: `${keyboardActionEmptyParamFormItem?.label} parameter is required for this action`,
-        })
-        setRunningKeyboardActionMethod(null)
-        return
-      }
-    }
-    //TODO -> Add KeyboardPress modifiers field postprocessing: .split(',').map(item => item.trim()).filter(item => item !== '')
-    //TODO -> API call + set API response as responseText if present
-    setKeyboardActionError({}) // Reset error
-    setRunningKeyboardActionMethod(null)
+  //TODO -> Implementation
+  const keyboardActionAPICall: PlaygroundActionInvokeApi = async (keyboardActionFormData) => {
+    // If KeyboardPress action -> do modifiers field postprocessing: .split(',').map(item => item.trim()).filter(item => item !== '')
+    // API call + set API response as responseText if present
   }
 
   return (
@@ -93,15 +71,7 @@ const VNCKeyboardOperations: React.FC = () => {
         <div key={keyboardAction.methodName} className="space-y-4">
           <PlaygroundActionForm<KeyboardActions>
             actionFormItem={keyboardAction}
-            onRunActionClick={() =>
-              onKeyboardActionRunClick<typeof keyboardAction.parametersState>(
-                keyboardAction,
-                keyboardAction.parametersFormItems,
-                keyboardAction.parametersState,
-              )
-            }
-            runningActionMethodName={runningKeyboardActionMethod}
-            actionError={keyboardActionError[keyboardAction.methodName]}
+            onRunActionClick={() => runPlaygroundActionWithParams(keyboardAction, keyboardActionAPICall)}
           />
           <div className="px-4 space-y-2">
             {keyboardAction.methodName === KeyboardActions.HOTKEY && (
