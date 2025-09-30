@@ -117,7 +117,7 @@ export class RunnerService {
       unschedulable: Not(true),
       availabilityScore: params.availabilityScoreThreshold
         ? MoreThanOrEqual(params.availabilityScoreThreshold)
-        : MoreThanOrEqual(this.configService.get('runnerUsage.availabilityScoreThreshold')),
+        : MoreThanOrEqual(this.configService.getOrThrow('runnerUsage.availabilityScoreThreshold')),
     }
 
     if (params.snapshotRef !== undefined) {
@@ -447,21 +447,21 @@ export class RunnerService {
 
     // Weights based on your requirements
     const weights = [
-      this.configService.get('runnerUsage.cpuUsageWeight'),
-      this.configService.get('runnerUsage.memoryUsageWeight'),
-      this.configService.get('runnerUsage.diskUsageWeight'),
-      this.configService.get('runnerUsage.allocatedCpuWeight'),
-      this.configService.get('runnerUsage.allocatedMemoryWeight'),
-      this.configService.get('runnerUsage.allocatedDiskWeight'),
+      this.configService.getOrThrow('runnerUsage.cpuUsageWeight'),
+      this.configService.getOrThrow('runnerUsage.memoryUsageWeight'),
+      this.configService.getOrThrow('runnerUsage.diskUsageWeight'),
+      this.configService.getOrThrow('runnerUsage.allocatedCpuWeight'),
+      this.configService.getOrThrow('runnerUsage.allocatedMemoryWeight'),
+      this.configService.getOrThrow('runnerUsage.allocatedDiskWeight'),
     ]
 
-    const cpuPenaltyExponent = this.configService.get('runnerUsage.cpuPenaltyExponent')
-    const memoryPenaltyExponent = this.configService.get('runnerUsage.memoryPenaltyExponent')
-    const diskPenaltyExponent = this.configService.get('runnerUsage.diskPenaltyExponent')
+    const cpuPenaltyExponent = this.configService.getOrThrow('runnerUsage.cpuPenaltyExponent')
+    const memoryPenaltyExponent = this.configService.getOrThrow('runnerUsage.memoryPenaltyExponent')
+    const diskPenaltyExponent = this.configService.getOrThrow('runnerUsage.diskPenaltyExponent')
 
-    const cpuPenaltyThreshold = this.configService.get('runnerUsage.cpuPenaltyThreshold')
-    const memoryPenaltyThreshold = this.configService.get('runnerUsage.memoryPenaltyThreshold')
-    const diskPenaltyThreshold = this.configService.get('runnerUsage.diskPenaltyThreshold')
+    const cpuPenaltyThreshold = this.configService.getOrThrow('runnerUsage.cpuPenaltyThreshold')
+    const memoryPenaltyThreshold = this.configService.getOrThrow('runnerUsage.memoryPenaltyThreshold')
+    const diskPenaltyThreshold = this.configService.getOrThrow('runnerUsage.diskPenaltyThreshold')
 
     // Calculate allocation ratios
     const allocatedCpuRatio = (params.allocatedCpu / params.runnerCpu) * 100
