@@ -62,9 +62,21 @@ export class ApiKeyStrategy extends PassportStrategy(Strategy, 'api-key') implem
     }
 
     try {
-      const apiKey = await this.apiKeyService.getApiKeyByValue(token)
-      this.logger.debug(`API key found for userId: ${apiKey.userId}`)
+      // Check cache first (10 second TTL)
+      const cacheKey = `api-key:validation:${this.generateApiKeyHash(token)}`
+      const cached = await this.redis.get(cacheKey)
 
+      let apiKey
+      if (cached) {
+        this.logger.debug('Using cached API key validation')
+        apiKey = JSON.parse(cached)
+      } else {
+        // Cache miss - validate from database
+        apiKey = await this.apiKeyService.getApiKeyByValue(token)
+        this.logger.debug(`API key found for userId: ${apiKey.userId}`)
+        const validationCacheTtl = this.configService.get('apiKey.validationCacheTtl')
+        await this.redis.setex(cacheKey, validationCacheTtl, JSON.stringify(apiKey))
+      }
       if (apiKey.expiresAt && apiKey.expiresAt < new Date()) {
         throw new UnauthorizedException('This API key has expired')
       }
@@ -84,7 +96,8 @@ export class ApiKeyStrategy extends PassportStrategy(Strategy, 'api-key') implem
           role: user.role,
           email: user.email,
         }
-        await this.redis.set(`api-key:user:${apiKey.userId}`, JSON.stringify(userCache), 'EX', 60)
+        const userCacheTtl = this.configService.get('apiKey.userCacheTtl')
+        await this.redis.set(`api-key:user:${apiKey.userId}`, JSON.stringify(userCache), 'EX', userCacheTtl)
       }
 
       const result = {
@@ -129,5 +142,10 @@ export class ApiKeyStrategy extends PassportStrategy(Strategy, 'api-key') implem
       this.logger.error('Error getting user cache:', error)
       return null
     }
+  }
+
+  private generateApiKeyHash(value: string): string {
+    const crypto = require('crypto')
+    return crypto.createHash('sha256').update(value).digest('hex')
   }
 }
