@@ -19,7 +19,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func (d *DockerClient) Start(ctx context.Context, containerId string, metadata map[string]string) error {
+func (d *DockerClient) Start(ctx context.Context, containerId string, metadata map[string]string, token string) error {
 	defer timer.Timer()()
 	d.cache.SetSandboxState(ctx, containerId, enums.SandboxStateStarting)
 
@@ -83,6 +83,13 @@ func (d *DockerClient) Start(ctx context.Context, containerId string, metadata m
 	}
 
 	d.cache.SetSandboxState(ctx, containerId, enums.SandboxStateStarted)
+
+	if token != "" {
+		if metadata == nil {
+			metadata = make(map[string]string)
+		}
+		metadata["token"] = token
+	}
 
 	if metadata["limitNetworkEgress"] == "true" {
 		go func() {

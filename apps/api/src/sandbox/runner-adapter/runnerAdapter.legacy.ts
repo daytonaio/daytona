@@ -186,13 +186,14 @@ export class RunnerAdapterLegacy implements RunnerAdapter {
       networkBlockAll: sandbox.networkBlockAll,
       networkAllowList: sandbox.networkAllowList,
       metadata: metadata,
+      token: sandbox.authToken,
     }
 
     await this.sandboxApiClient.create(createSandboxDto)
   }
 
-  async startSandbox(sandboxId: string, metadata?: { [key: string]: string }): Promise<void> {
-    await this.sandboxApiClient.start(sandboxId, metadata)
+  async startSandbox(sandboxId: string, metadata?: { [key: string]: string }, token?: string): Promise<void> {
+    await this.sandboxApiClient.start(sandboxId, metadata, token)
   }
 
   async stopSandbox(sandboxId: string): Promise<void> {

@@ -856,6 +856,15 @@ export class SandboxService {
       sandbox.desiredState = SandboxDesiredState.STARTED
       await this.sandboxRepository.save(sandbox)
 
+      // Pass the auth token to the runner
+      if (sandbox.runnerId) {
+        const runner = await this.runnerService.findOne(sandbox.runnerId)
+        if (runner) {
+          const runnerAdapter = await this.runnerAdapterFactory.create(runner)
+          await runnerAdapter.startSandbox(sandbox.id, {}, sandbox.authToken)
+        }
+      }
+
       this.eventEmitter.emit(SandboxEvents.STARTED, new SandboxStartedEvent(sandbox))
     } catch (error) {
       await this.rollbackPendingUsage(
