@@ -954,7 +954,7 @@ export class SandboxService {
   }
 
   @Cron(CronExpression.EVERY_10_MINUTES)
-  async cleanupDestroyedSandboxs() {
+  async cleanupDestroyedSandboxes() {
     const twentyFourHoursAgo = new Date()
     twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24)
 
@@ -969,7 +969,7 @@ export class SandboxService {
   }
 
   @Cron(CronExpression.EVERY_10_MINUTES)
-  async cleanupBuildFailedSandboxs() {
+  async cleanupBuildFailedSandboxes() {
     const sevenDaysAgo = new Date()
     sevenDaysAgo.setHours(sevenDaysAgo.getHours() - 24 * 7)
 
