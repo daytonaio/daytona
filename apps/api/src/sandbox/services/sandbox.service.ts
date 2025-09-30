@@ -25,7 +25,6 @@ import { EventEmitter2, OnEvent } from '@nestjs/event-emitter'
 import { WarmPoolEvents } from '../constants/warmpool-events.constants'
 import { WarmPoolTopUpRequested } from '../events/warmpool-topup-requested.event'
 import { Runner } from '../entities/runner.entity'
-import { PortPreviewUrlDto } from '../dto/port-preview-url.dto'
 import { Organization } from '../../organization/entities/organization.entity'
 import { SandboxEvents } from '../constants/sandbox-events.constants'
 import { SandboxStateUpdatedEvent } from '../events/sandbox-state-updated.event'
@@ -48,6 +47,7 @@ import { validateNetworkAllowList } from '../utils/network-validation.util'
 import { OrganizationUsageService } from '../../organization/services/organization-usage.service'
 import { SshAccess } from '../entities/ssh-access.entity'
 import { nanoid } from 'nanoid'
+import { v4 as uuidv4 } from 'uuid'
 import { SshAccessValidationDto } from '../dto/ssh-access.dto'
 import { VolumeService } from './volume.service'
 import { RedisLockProvider } from '../common/redis-lock.provider'
@@ -82,6 +82,54 @@ export class SandboxService {
     private readonly organizationUsageService: OrganizationUsageService,
     private readonly redisLockProvider: RedisLockProvider,
   ) {}
+
+  async findByIdOrName(sandboxIdOrName: string, organizationId?: string): Promise<Sandbox | null> {
+    if (isValidUuid(sandboxIdOrName)) {
+      const sandbox = await this.sandboxRepository.findOne({
+        where: {
+          id: sandboxIdOrName,
+          ...(organizationId ? { organizationId: organizationId } : {}),
+        },
+      })
+      if (sandbox) {
+        return sandbox
+      }
+    }
+
+    if (organizationId) {
+      const sandbox = await this.sandboxRepository.findOne({
+        where: {
+          name: sandboxIdOrName,
+          organizationId: organizationId,
+        },
+      })
+      if (sandbox) {
+        return sandbox
+      }
+    }
+
+    return null
+  }
+
+  async findOneByIdOrName(
+    sandboxIdOrName: string,
+    organizationId: string,
+    returnDestroyed?: boolean,
+  ): Promise<Sandbox> {
+    const sandbox = await this.findByIdOrName(sandboxIdOrName, organizationId)
+
+    if (
+      !sandbox ||
+      (!returnDestroyed && sandbox.state === SandboxState.DESTROYED) ||
+      (!returnDestroyed &&
+        [SandboxState.ERROR, SandboxState.BUILD_FAILED].includes(sandbox.state) &&
+        sandbox.desiredState !== SandboxDesiredState.DESTROYED)
+    ) {
+      throw new NotFoundException(`Sandbox with ID or name ${sandboxIdOrName} not found`)
+    }
+
+    return sandbox
+  }
 
   private async validateOrganizationQuotas(
     organization: Organization,
@@ -179,15 +227,11 @@ export class SandboxService {
     }
   }
 
-  async archive(sandboxId: string): Promise<void> {
-    const sandbox = await this.sandboxRepository.findOne({
-      where: {
-        id: sandboxId,
-      },
-    })
+  async archive(sandboxIdOrName: string, organizationId?: string): Promise<void> {
+    const sandbox = await this.findByIdOrName(sandboxIdOrName, organizationId)
 
     if (!sandbox) {
-      throw new NotFoundException(`Sandbox with ID ${sandboxId} not found`)
+      throw new NotFoundException(`Sandbox with ID or name ${sandboxIdOrName} not found`)
     }
 
     if (String(sandbox.state) !== String(sandbox.desiredState)) {
@@ -369,7 +413,27 @@ export class SandboxService {
 
       const sandbox = new Sandbox()
 
+      sandbox.id = uuidv4()
       sandbox.organizationId = organization.id
+
+      // Set name - use provided name or fallback to ID
+      if (createSandboxDto.name) {
+        // Check if sandbox with same name already exists for organization
+        const existingSandbox = await this.sandboxRepository.findOne({
+          where: {
+            organizationId: organization.id,
+            name: createSandboxDto.name,
+          },
+        })
+
+        if (existingSandbox) {
+          throw new BadRequestError(`Sandbox with name "${createSandboxDto.name}" already exists`)
+        }
+
+        sandbox.name = createSandboxDto.name
+      } else {
+        sandbox.name = sandbox.id
+      }
 
       //  TODO: make configurable
       sandbox.region = region
@@ -428,6 +492,25 @@ export class SandboxService {
     createSandboxDto: CreateSandboxDto,
     organization: Organization,
   ): Promise<SandboxDto> {
+    // Warm pool sandboxes already have predefined IDs, so we can set name immediately
+    if (createSandboxDto.name) {
+      // Check if sandbox with same name already exists for organization
+      const existingSandbox = await this.sandboxRepository.findOne({
+        where: {
+          organizationId: organization.id,
+          name: createSandboxDto.name,
+        },
+      })
+
+      if (existingSandbox) {
+        throw new BadRequestError(`Sandbox with name "${createSandboxDto.name}" already exists`)
+      }
+
+      warmPoolSandbox.name = createSandboxDto.name
+    } else {
+      warmPoolSandbox.name = warmPoolSandbox.id
+    }
+
     warmPoolSandbox.public = createSandboxDto.public || false
     warmPoolSandbox.labels = createSandboxDto.labels || {}
     warmPoolSandbox.organizationId = organization.id
@@ -521,7 +604,27 @@ export class SandboxService {
 
       const sandbox = new Sandbox()
 
+      sandbox.id = uuidv4()
       sandbox.organizationId = organization.id
+
+      // Set name - use provided name or fallback to ID
+      if (createSandboxDto.name) {
+        // Check if sandbox with same name already exists for organization
+        const existingSandbox = await this.sandboxRepository.findOne({
+          where: {
+            organizationId: organization.id,
+            name: createSandboxDto.name,
+          },
+        })
+
+        if (existingSandbox) {
+          throw new BadRequestError(`Sandbox with name "${createSandboxDto.name}" already exists`)
+        }
+
+        sandbox.name = createSandboxDto.name
+      } else {
+        sandbox.name = sandbox.id
+      }
 
       sandbox.region = region
       sandbox.class = sandboxClass
@@ -610,15 +713,11 @@ export class SandboxService {
     }
   }
 
-  async createBackup(sandboxId: string): Promise<void> {
-    const sandbox = await this.sandboxRepository.findOne({
-      where: {
-        id: sandboxId,
-      },
-    })
+  async createBackup(sandboxIdOrName: string, organizationId?: string): Promise<Sandbox> {
+    const sandbox = await this.findByIdOrName(sandboxIdOrName, organizationId)
 
     if (!sandbox) {
-      throw new NotFoundException(`Sandbox with ID ${sandboxId} not found`)
+      throw new NotFoundException(`Sandbox with ID or name ${sandboxIdOrName} not found`)
     }
 
     if (sandbox.autoDeleteInterval === 0) {
@@ -629,11 +728,13 @@ export class SandboxService {
       throw new SandboxError('Sandbox backup is already in progress')
     }
 
-    await this.sandboxRepository.update(sandboxId, {
+    await this.sandboxRepository.update(sandbox.id, {
       backupState: BackupState.PENDING,
     })
 
     this.eventEmitter.emit(SandboxEvents.BACKUP_CREATED, new SandboxBackupCreatedEvent(sandbox))
+
+    return sandbox
   }
 
   async findAll(
@@ -728,47 +829,69 @@ export class SandboxService {
     return sandbox
   }
 
-  async getOrganizationId(sandboxId: string): Promise<string> {
+  async getOrganizationId(sandboxIdOrName: string): Promise<string> {
+    if (isValidUuid(sandboxIdOrName)) {
+      const sandbox = await this.sandboxRepository.findOne({
+        where: {
+          id: sandboxIdOrName,
+        },
+        select: ['organizationId'],
+        loadEagerRelations: false,
+      })
+      if (sandbox?.organizationId) {
+        return sandbox.organizationId
+      }
+    }
+
     const sandbox = await this.sandboxRepository.findOne({
       where: {
-        id: sandboxId,
+        name: sandboxIdOrName,
       },
       select: ['organizationId'],
       loadEagerRelations: false,
     })
 
     if (!sandbox || !sandbox.organizationId) {
-      throw new NotFoundException(`Sandbox with ID ${sandboxId} not found`)
+      throw new NotFoundException(`Sandbox with ID or name ${sandboxIdOrName} not found`)
     }
 
     return sandbox.organizationId
   }
 
-  async getRunnerId(sandboxId: string): Promise<string | null> {
+  async getRunnerId(sandboxIdOrName: string): Promise<string | null> {
+    if (isValidUuid(sandboxIdOrName)) {
+      const sandbox = await this.sandboxRepository.findOne({
+        where: {
+          id: sandboxIdOrName,
+        },
+        select: ['runnerId'],
+        loadEagerRelations: false,
+      })
+      if (sandbox) {
+        return sandbox.runnerId || null
+      }
+    }
+
     const sandbox = await this.sandboxRepository.findOne({
       where: {
-        id: sandboxId,
+        name: sandboxIdOrName,
       },
       select: ['runnerId'],
       loadEagerRelations: false,
     })
 
     if (!sandbox) {
-      throw new NotFoundException(`Sandbox with ID ${sandboxId} not found`)
+      throw new NotFoundException(`Sandbox with ID or name ${sandboxIdOrName} not found`)
     }
 
     return sandbox.runnerId || null
   }
 
-  async destroy(sandboxId: string): Promise<void> {
-    const sandbox = await this.sandboxRepository.findOne({
-      where: {
-        id: sandboxId,
-      },
-    })
+  async destroy(sandboxIdOrName: string, organizationId?: string): Promise<void> {
+    const sandbox = await this.findByIdOrName(sandboxIdOrName, organizationId)
 
     if (!sandbox) {
-      throw new NotFoundException(`Sandbox with ID ${sandboxId} not found`)
+      throw new NotFoundException(`Sandbox with ID or name ${sandboxIdOrName} not found`)
     }
 
     if (sandbox.pending) {
@@ -782,8 +905,8 @@ export class SandboxService {
     this.eventEmitter.emit(SandboxEvents.DESTROYED, new SandboxDestroyedEvent(sandbox))
   }
 
-  async start(sandboxId: string, organization: Organization): Promise<void> {
-    const lockKey = `sandbox:${sandboxId}:start`
+  async start(sandboxIdOrName: string, organization: Organization): Promise<void> {
+    const lockKey = `sandbox:${sandboxIdOrName}:start`
     await this.redisLockProvider.waitForLock(lockKey, 60)
 
     let pendingCpuIncrement: number | undefined
@@ -791,14 +914,10 @@ export class SandboxService {
     let pendingDiskIncrement: number | undefined
 
     try {
-      const sandbox = await this.sandboxRepository.findOne({
-        where: {
-          id: sandboxId,
-        },
-      })
+      const sandbox = await this.findByIdOrName(sandboxIdOrName, organization.id)
 
       if (!sandbox) {
-        throw new NotFoundException(`Sandbox with ID ${sandboxId} not found`)
+        throw new NotFoundException(`Sandbox with ID or name ${sandboxIdOrName} not found`)
       }
 
       if (sandbox.state === SandboxState.STARTED && sandbox.desiredState === SandboxDesiredState.STARTED) {
@@ -864,15 +983,11 @@ export class SandboxService {
     }
   }
 
-  async stop(sandboxId: string): Promise<void> {
-    const sandbox = await this.sandboxRepository.findOne({
-      where: {
-        id: sandboxId,
-      },
-    })
+  async stop(sandboxIdOrName: string, organizationId?: string): Promise<void> {
+    const sandbox = await this.findByIdOrName(sandboxIdOrName, organizationId)
 
     if (!sandbox) {
-      throw new NotFoundException(`Sandbox with ID ${sandboxId} not found`)
+      throw new NotFoundException(`Sandbox with ID or name ${sandboxIdOrName} not found`)
     }
 
     if (String(sandbox.state) !== String(sandbox.desiredState)) {
@@ -904,17 +1019,17 @@ export class SandboxService {
     }
   }
 
-  async updatePublicStatus(sandboxId: string, isPublic: boolean): Promise<void> {
-    const sandbox = await this.sandboxRepository.findOne({
-      where: { id: sandboxId },
-    })
+  async updatePublicStatus(sandboxIdOrName: string, isPublic: boolean, organizationId?: string): Promise<Sandbox> {
+    const sandbox = await this.findByIdOrName(sandboxIdOrName, organizationId)
 
     if (!sandbox) {
-      throw new NotFoundException(`Sandbox with ID ${sandboxId} not found`)
+      throw new NotFoundException(`Sandbox with ID or name ${sandboxIdOrName} not found`)
     }
 
     sandbox.public = isPublic
     await this.sandboxRepository.save(sandbox)
+
+    return sandbox
   }
 
   private getValidatedOrDefaultRegion(region?: string): string {
@@ -937,13 +1052,15 @@ export class SandboxService {
     }
   }
 
-  async replaceLabels(sandboxId: string, labels: { [key: string]: string }): Promise<{ [key: string]: string }> {
-    const sandbox = await this.sandboxRepository.findOne({
-      where: { id: sandboxId },
-    })
+  async replaceLabels(
+    sandboxIdOrName: string,
+    labels: { [key: string]: string },
+    organizationId?: string,
+  ): Promise<{ [key: string]: string }> {
+    const sandbox = await this.findByIdOrName(sandboxIdOrName, organizationId)
 
     if (!sandbox) {
-      throw new NotFoundException(`Sandbox with ID ${sandboxId} not found`)
+      throw new NotFoundException(`Sandbox with ID or name ${sandboxIdOrName} not found`)
     }
 
     // Replace all labels
@@ -968,52 +1085,55 @@ export class SandboxService {
     }
   }
 
-  async setAutostopInterval(sandboxId: string, interval: number): Promise<void> {
-    const sandbox = await this.sandboxRepository.findOne({
-      where: { id: sandboxId },
-    })
+  async setAutostopInterval(sandboxIdOrName: string, interval: number, organizationId?: string): Promise<Sandbox> {
+    const sandbox = await this.findByIdOrName(sandboxIdOrName, organizationId)
 
     if (!sandbox) {
-      throw new NotFoundException(`Sandbox with ID ${sandboxId} not found`)
+      throw new NotFoundException(`Sandbox with ID or name ${sandboxIdOrName} not found`)
     }
 
     sandbox.autoStopInterval = this.resolveAutoStopInterval(interval)
     await this.sandboxRepository.save(sandbox)
+
+    return sandbox
   }
 
-  async setAutoArchiveInterval(sandboxId: string, interval: number): Promise<void> {
-    const sandbox = await this.sandboxRepository.findOne({
-      where: { id: sandboxId },
-    })
+  async setAutoArchiveInterval(sandboxIdOrName: string, interval: number, organizationId?: string): Promise<Sandbox> {
+    const sandbox = await this.findByIdOrName(sandboxIdOrName, organizationId)
 
     if (!sandbox) {
-      throw new NotFoundException(`Sandbox with ID ${sandboxId} not found`)
+      throw new NotFoundException(`Sandbox with ID or name ${sandboxIdOrName} not found`)
     }
 
     sandbox.autoArchiveInterval = this.resolveAutoArchiveInterval(interval)
     await this.sandboxRepository.save(sandbox)
+
+    return sandbox
   }
 
-  async setAutoDeleteInterval(sandboxId: string, interval: number): Promise<void> {
-    const sandbox = await this.sandboxRepository.findOne({
-      where: { id: sandboxId },
-    })
+  async setAutoDeleteInterval(sandboxIdOrName: string, interval: number, organizationId?: string): Promise<Sandbox> {
+    const sandbox = await this.findByIdOrName(sandboxIdOrName, organizationId)
 
     if (!sandbox) {
-      throw new NotFoundException(`Sandbox with ID ${sandboxId} not found`)
+      throw new NotFoundException(`Sandbox with ID or name ${sandboxIdOrName} not found`)
     }
 
     sandbox.autoDeleteInterval = interval
     await this.sandboxRepository.save(sandbox)
+
+    return sandbox
   }
 
-  async updateNetworkSettings(sandboxId: string, networkBlockAll?: boolean, networkAllowList?: string): Promise<void> {
-    const sandbox = await this.sandboxRepository.findOne({
-      where: { id: sandboxId },
-    })
+  async updateNetworkSettings(
+    sandboxIdOrName: string,
+    networkBlockAll?: boolean,
+    networkAllowList?: string,
+    organizationId?: string,
+  ): Promise<Sandbox> {
+    const sandbox = await this.findByIdOrName(sandboxIdOrName, organizationId)
 
     if (!sandbox) {
-      throw new NotFoundException(`Sandbox with ID ${sandboxId} not found`)
+      throw new NotFoundException(`Sandbox with ID or name ${sandboxIdOrName} not found`)
     }
 
     if (networkBlockAll !== undefined) {
@@ -1031,15 +1151,15 @@ export class SandboxService {
       const runner = await this.runnerService.findOne(sandbox.runnerId)
       if (runner) {
         const runnerAdapter = await this.runnerAdapterFactory.create(runner)
-        await runnerAdapter.updateNetworkSettings(sandboxId, networkBlockAll, networkAllowList)
+        await runnerAdapter.updateNetworkSettings(sandbox.id, networkBlockAll, networkAllowList)
       }
     }
+
+    return sandbox
   }
 
-  async updateStateAndDesiredState(sandboxId: string, newState: SandboxState): Promise<void> {
-    const sandbox = await this.sandboxRepository.findOne({
-      where: { id: sandboxId },
-    })
+  async updateStateAndDesiredState(sandboxId: string, newState: SandboxState, organizationId?: string): Promise<void> {
+    const sandbox = await this.findByIdOrName(sandboxId, organizationId)
 
     if (!sandbox) {
       throw new NotFoundException(`Sandbox with ID ${sandboxId} not found`)
@@ -1110,7 +1230,7 @@ export class SandboxService {
 
   @OnEvent(OrganizationEvents.SUSPENDED_SANDBOX_STOPPED)
   async handleSuspendedSandboxStopped(event: OrganizationSuspendedSandboxStoppedEvent) {
-    await this.stop(event.sandboxId).catch((error) => {
+    await this.stop(event.sandboxId, event.organizationId).catch((error) => {
       //  log the error for now, but don't throw it as it will be retried
       this.logger.error(`Error stopping sandbox from suspended organization. SandboxId: ${event.sandboxId}: `, error)
     })
@@ -1144,29 +1264,33 @@ export class SandboxService {
     return networkAllowList
   }
 
-  async createSshAccess(sandboxId: string, expiresInMinutes = 60): Promise<SshAccess> {
+  async createSshAccess(sandboxIdOrName: string, expiresInMinutes = 60, organizationId?: string): Promise<SshAccess> {
     //  check if sandbox exists
-    await this.findOne(sandboxId)
+    const sandbox = await this.findByIdOrName(sandboxIdOrName, organizationId)
 
     // Revoke any existing SSH access for this sandbox
-    await this.revokeSshAccess(sandboxId)
+    await this.revokeSshAccess(sandbox.id)
 
     const sshAccess = new SshAccess()
-    sshAccess.sandboxId = sandboxId
+    sshAccess.sandboxId = sandbox.id
     sshAccess.token = nanoid(32)
     sshAccess.expiresAt = new Date(Date.now() + expiresInMinutes * 60 * 1000)
 
     return await this.sshAccessRepository.save(sshAccess)
   }
 
-  async revokeSshAccess(sandboxId: string, token?: string): Promise<void> {
+  async revokeSshAccess(sandboxIdOrName: string, token?: string, organizationId?: string): Promise<string> {
+    const sandbox = await this.findByIdOrName(sandboxIdOrName, organizationId)
+
     if (token) {
       // Revoke specific SSH access by token
-      await this.sshAccessRepository.delete({ sandboxId, token })
+      await this.sshAccessRepository.delete({ sandboxId: sandbox.id, token })
     } else {
       // Revoke all SSH access for the sandbox
-      await this.sshAccessRepository.delete({ sandboxId })
+      await this.sshAccessRepository.delete({ sandboxId: sandbox.id })
     }
+
+    return sandbox.id
   }
 
   async validateSshAccess(token: string): Promise<SshAccessValidationDto> {

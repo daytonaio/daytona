@@ -4,5 +4,8 @@
  */
 
 export class OrganizationSuspendedSandboxStoppedEvent {
-  constructor(public readonly sandboxId: string) {}
+  constructor(
+    public readonly sandboxId: string,
+    public readonly organizationId: string,
+  ) {}
 }

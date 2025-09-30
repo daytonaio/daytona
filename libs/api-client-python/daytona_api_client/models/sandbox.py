@@ -33,6 +33,7 @@ class Sandbox(BaseModel):
     """ # noqa: E501
     id: StrictStr = Field(description="The ID of the sandbox")
     organization_id: StrictStr = Field(description="The organization ID of the sandbox", alias="organizationId")
+    name: StrictStr = Field(description="The name of the sandbox")
     snapshot: Optional[StrictStr] = Field(default=None, description="The snapshot used for the sandbox")
     user: StrictStr = Field(description="The user associated with the project")
     env: Dict[str, StrictStr] = Field(description="Environment variables for the sandbox")
@@ -61,7 +62,7 @@ class Sandbox(BaseModel):
     var_class: Optional[StrictStr] = Field(default=None, description="The class of the sandbox", alias="class")
     daemon_version: Optional[StrictStr] = Field(default=None, description="The version of the daemon running in the sandbox", alias="daemonVersion")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["id", "organizationId", "snapshot", "user", "env", "labels", "public", "networkBlockAll", "networkAllowList", "target", "cpu", "gpu", "memory", "disk", "state", "desiredState", "errorReason", "backupState", "backupCreatedAt", "autoStopInterval", "autoArchiveInterval", "autoDeleteInterval", "runnerDomain", "volumes", "buildInfo", "createdAt", "updatedAt", "class", "daemonVersion"]
+    __properties: ClassVar[List[str]] = ["id", "organizationId", "name", "snapshot", "user", "env", "labels", "public", "networkBlockAll", "networkAllowList", "target", "cpu", "gpu", "memory", "disk", "state", "desiredState", "errorReason", "backupState", "backupCreatedAt", "autoStopInterval", "autoArchiveInterval", "autoDeleteInterval", "runnerDomain", "volumes", "buildInfo", "createdAt", "updatedAt", "class", "daemonVersion"]
 
     @field_validator('backup_state')
     def backup_state_validate_enum(cls, value):
@@ -153,6 +154,7 @@ class Sandbox(BaseModel):
         _obj = cls.model_validate({
             "id": obj.get("id"),
             "organizationId": obj.get("organizationId"),
+            "name": obj.get("name"),
             "snapshot": obj.get("snapshot"),
             "user": obj.get("user"),
             "env": obj.get("env"),

@@ -13,6 +13,14 @@ import { IsValidNetworkAllowList } from '../decorators/is-valid-network-allow-li
 @ApiSchema({ name: 'CreateSandbox' })
 export class CreateSandboxDto {
   @ApiPropertyOptional({
+    description: 'The name of the sandbox. If not provided, the sandbox ID will be used as the name',
+    example: 'MySandbox',
+  })
+  @IsOptional()
+  @IsString()
+  name?: string
+
+  @ApiPropertyOptional({
     description: 'The ID or name of the snapshot used for the sandbox',
     example: 'ubuntu-4vcpu-8ram-100gb',
   })

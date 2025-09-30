@@ -47,6 +47,12 @@ export interface Workspace {
    */
   organizationId: string
   /**
+   * The name of the sandbox
+   * @type {string}
+   * @memberof Workspace
+   */
+  name: string
+  /**
    * The snapshot used for the sandbox
    * @type {string}
    * @memberof Workspace
@@ -209,12 +215,6 @@ export interface Workspace {
    * @memberof Workspace
    */
   daemonVersion?: string
-  /**
-   * The name of the workspace
-   * @type {string}
-   * @memberof Workspace
-   */
-  name: string
   /**
    * The image used for the workspace
    * @type {string}

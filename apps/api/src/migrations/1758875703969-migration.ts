@@ -1,0 +1,19 @@
+import { MigrationInterface, QueryRunner } from 'typeorm'
+
+export class Migration1758875703969 implements MigrationInterface {
+  name = 'Migration1758875703969'
+
+  public async up(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(`ALTER TABLE "sandbox" ADD "name" character varying`)
+    await queryRunner.query(`UPDATE "sandbox" SET "name" = "id" WHERE "name" IS NULL`)
+    await queryRunner.query(`ALTER TABLE "sandbox" ALTER COLUMN "name" SET NOT NULL`)
+    await queryRunner.query(
+      `ALTER TABLE "sandbox" ADD CONSTRAINT "sandbox_organizationId_name_unique" UNIQUE ("organizationId", "name")`,
+    )
+  }
+
+  public async down(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(`ALTER TABLE "sandbox" DROP CONSTRAINT "sandbox_organizationId_name_unique"`)
+    await queryRunner.query(`ALTER TABLE "sandbox" DROP COLUMN "name"`)
+  }
+}

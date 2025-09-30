@@ -8,10 +8,10 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  Generated,
   JoinColumn,
   ManyToOne,
-  PrimaryColumn,
+  PrimaryGeneratedColumn,
+  Unique,
   UpdateDateColumn,
 } from 'typeorm'
 import { SandboxState } from '../enums/sandbox-state.enum'
@@ -23,15 +23,18 @@ import { SandboxVolume } from '../dto/sandbox.dto'
 import { BuildInfo } from './build-info.entity'
 
 @Entity()
+@Unique(['organizationId', 'name'])
 export class Sandbox {
-  @PrimaryColumn()
-  @Generated('uuid')
+  @PrimaryGeneratedColumn('uuid')
   id: string
 
   @Column({
     type: 'uuid',
   })
   organizationId: string
+
+  @Column()
+  name: string
 
   @Column({
     default: 'us',

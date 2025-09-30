@@ -346,7 +346,7 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
     sandboxes.map((sandbox) =>
       this.eventEmitter.emitAsync(
         OrganizationEvents.SUSPENDED_SANDBOX_STOPPED,
-        new OrganizationSuspendedSandboxStoppedEvent(sandbox.id),
+        new OrganizationSuspendedSandboxStoppedEvent(sandbox.id, sandbox.organizationId),
       ),
     )
 

@@ -49,7 +49,7 @@ class SandboxApi:
     @validate_call
     async def archive_sandbox(
         self,
-        sandbox_id: StrictStr,
+        sandbox_id_or_name: StrictStr,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
@@ -63,12 +63,12 @@ class SandboxApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> None:
+    ) -> Sandbox:
         """Archive sandbox
 
 
-        :param sandbox_id: (required)
-        :type sandbox_id: str
+        :param sandbox_id_or_name: (required)
+        :type sandbox_id_or_name: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -94,7 +94,7 @@ class SandboxApi:
         """ # noqa: E501
 
         _param = self._archive_sandbox_serialize(
-            sandbox_id=sandbox_id,
+            sandbox_id_or_name=sandbox_id_or_name,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -103,7 +103,7 @@ class SandboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            '200': "Sandbox",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -119,7 +119,7 @@ class SandboxApi:
     @validate_call
     async def archive_sandbox_with_http_info(
         self,
-        sandbox_id: StrictStr,
+        sandbox_id_or_name: StrictStr,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
@@ -133,12 +133,12 @@ class SandboxApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[None]:
+    ) -> ApiResponse[Sandbox]:
         """Archive sandbox
 
 
-        :param sandbox_id: (required)
-        :type sandbox_id: str
+        :param sandbox_id_or_name: (required)
+        :type sandbox_id_or_name: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -164,7 +164,7 @@ class SandboxApi:
         """ # noqa: E501
 
         _param = self._archive_sandbox_serialize(
-            sandbox_id=sandbox_id,
+            sandbox_id_or_name=sandbox_id_or_name,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -173,7 +173,7 @@ class SandboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            '200': "Sandbox",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -189,7 +189,7 @@ class SandboxApi:
     @validate_call
     async def archive_sandbox_without_preload_content(
         self,
-        sandbox_id: StrictStr,
+        sandbox_id_or_name: StrictStr,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
@@ -207,8 +207,8 @@ class SandboxApi:
         """Archive sandbox
 
 
-        :param sandbox_id: (required)
-        :type sandbox_id: str
+        :param sandbox_id_or_name: (required)
+        :type sandbox_id_or_name: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -234,7 +234,7 @@ class SandboxApi:
         """ # noqa: E501
 
         _param = self._archive_sandbox_serialize(
-            sandbox_id=sandbox_id,
+            sandbox_id_or_name=sandbox_id_or_name,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -243,7 +243,7 @@ class SandboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            '200': "Sandbox",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -254,7 +254,7 @@ class SandboxApi:
 
     def _archive_sandbox_serialize(
         self,
-        sandbox_id,
+        sandbox_id_or_name,
         x_daytona_organization_id,
         _request_auth,
         _content_type,
@@ -277,275 +277,8 @@ class SandboxApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
-        if sandbox_id is not None:
-            _path_params['sandboxId'] = sandbox_id
-        # process the query parameters
-        # process the header parameters
-        if x_daytona_organization_id is not None:
-            _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id
-        # process the form parameters
-        # process the body parameter
-
-
-
-
-        # authentication setting
-        _auth_settings: List[str] = [
-            'bearer', 
-            'oauth2'
-        ]
-
-        return self.api_client.param_serialize(
-            method='POST',
-            resource_path='/sandbox/{sandboxId}/archive',
-            path_params=_path_params,
-            query_params=_query_params,
-            header_params=_header_params,
-            body=_body_params,
-            post_params=_form_params,
-            files=_files,
-            auth_settings=_auth_settings,
-            collection_formats=_collection_formats,
-            _host=_host,
-            _request_auth=_request_auth
-        )
-
-
-
-
-    @validate_call
-    async def create_backup(
-        self,
-        sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
-        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> Sandbox:
-        """Create sandbox backup
-
-
-        :param sandbox_id: ID of the sandbox (required)
-        :type sandbox_id: str
-        :param x_daytona_organization_id: Use with JWT to specify the organization ID
-        :type x_daytona_organization_id: str
-        :param _request_timeout: timeout setting for this request. If one
-                                 number provided, it will be total request
-                                 timeout. It can also be a pair (tuple) of
-                                 (connection, read) timeouts.
-        :type _request_timeout: int, tuple(int, int), optional
-        :param _request_auth: set to override the auth_settings for an a single
-                              request; this effectively ignores the
-                              authentication in the spec for a single request.
-        :type _request_auth: dict, optional
-        :param _content_type: force content-type for the request.
-        :type _content_type: str, Optional
-        :param _headers: set to override the headers for a single
-                         request; this effectively ignores the headers
-                         in the spec for a single request.
-        :type _headers: dict, optional
-        :param _host_index: set to override the host_index for a single
-                            request; this effectively ignores the host_index
-                            in the spec for a single request.
-        :type _host_index: int, optional
-        :return: Returns the result object.
-        """ # noqa: E501
-
-        _param = self._create_backup_serialize(
-            sandbox_id=sandbox_id,
-            x_daytona_organization_id=x_daytona_organization_id,
-            _request_auth=_request_auth,
-            _content_type=_content_type,
-            _headers=_headers,
-            _host_index=_host_index
-        )
-
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Sandbox",
-        }
-        response_data = await self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
-        await response_data.read()
-        return self.api_client.response_deserialize(
-            response_data=response_data,
-            response_types_map=_response_types_map,
-        ).data
-
-
-    @validate_call
-    async def create_backup_with_http_info(
-        self,
-        sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
-        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[Sandbox]:
-        """Create sandbox backup
-
-
-        :param sandbox_id: ID of the sandbox (required)
-        :type sandbox_id: str
-        :param x_daytona_organization_id: Use with JWT to specify the organization ID
-        :type x_daytona_organization_id: str
-        :param _request_timeout: timeout setting for this request. If one
-                                 number provided, it will be total request
-                                 timeout. It can also be a pair (tuple) of
-                                 (connection, read) timeouts.
-        :type _request_timeout: int, tuple(int, int), optional
-        :param _request_auth: set to override the auth_settings for an a single
-                              request; this effectively ignores the
-                              authentication in the spec for a single request.
-        :type _request_auth: dict, optional
-        :param _content_type: force content-type for the request.
-        :type _content_type: str, Optional
-        :param _headers: set to override the headers for a single
-                         request; this effectively ignores the headers
-                         in the spec for a single request.
-        :type _headers: dict, optional
-        :param _host_index: set to override the host_index for a single
-                            request; this effectively ignores the host_index
-                            in the spec for a single request.
-        :type _host_index: int, optional
-        :return: Returns the result object.
-        """ # noqa: E501
-
-        _param = self._create_backup_serialize(
-            sandbox_id=sandbox_id,
-            x_daytona_organization_id=x_daytona_organization_id,
-            _request_auth=_request_auth,
-            _content_type=_content_type,
-            _headers=_headers,
-            _host_index=_host_index
-        )
-
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Sandbox",
-        }
-        response_data = await self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
-        await response_data.read()
-        return self.api_client.response_deserialize(
-            response_data=response_data,
-            response_types_map=_response_types_map,
-        )
-
-
-    @validate_call
-    async def create_backup_without_preload_content(
-        self,
-        sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
-        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> RESTResponseType:
-        """Create sandbox backup
-
-
-        :param sandbox_id: ID of the sandbox (required)
-        :type sandbox_id: str
-        :param x_daytona_organization_id: Use with JWT to specify the organization ID
-        :type x_daytona_organization_id: str
-        :param _request_timeout: timeout setting for this request. If one
-                                 number provided, it will be total request
-                                 timeout. It can also be a pair (tuple) of
-                                 (connection, read) timeouts.
-        :type _request_timeout: int, tuple(int, int), optional
-        :param _request_auth: set to override the auth_settings for an a single
-                              request; this effectively ignores the
-                              authentication in the spec for a single request.
-        :type _request_auth: dict, optional
-        :param _content_type: force content-type for the request.
-        :type _content_type: str, Optional
-        :param _headers: set to override the headers for a single
-                         request; this effectively ignores the headers
-                         in the spec for a single request.
-        :type _headers: dict, optional
-        :param _host_index: set to override the host_index for a single
-                            request; this effectively ignores the host_index
-                            in the spec for a single request.
-        :type _host_index: int, optional
-        :return: Returns the result object.
-        """ # noqa: E501
-
-        _param = self._create_backup_serialize(
-            sandbox_id=sandbox_id,
-            x_daytona_organization_id=x_daytona_organization_id,
-            _request_auth=_request_auth,
-            _content_type=_content_type,
-            _headers=_headers,
-            _host_index=_host_index
-        )
-
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Sandbox",
-        }
-        response_data = await self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
-        return response_data.response
-
-
-    def _create_backup_serialize(
-        self,
-        sandbox_id,
-        x_daytona_organization_id,
-        _request_auth,
-        _content_type,
-        _headers,
-        _host_index,
-    ) -> RequestSerialized:
-
-        _host = None
-
-        _collection_formats: Dict[str, str] = {
-        }
-
-        _path_params: Dict[str, str] = {}
-        _query_params: List[Tuple[str, str]] = []
-        _header_params: Dict[str, Optional[str]] = _headers or {}
-        _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
-        ] = {}
-        _body_params: Optional[bytes] = None
-
-        # process the path parameters
-        if sandbox_id is not None:
-            _path_params['sandboxId'] = sandbox_id
+        if sandbox_id_or_name is not None:
+            _path_params['sandboxIdOrName'] = sandbox_id_or_name
         # process the query parameters
         # process the header parameters
         if x_daytona_organization_id is not None:
@@ -571,7 +304,281 @@ class SandboxApi:
 
         return self.api_client.param_serialize(
             method='POST',
-            resource_path='/sandbox/{sandboxId}/backup',
+            resource_path='/sandbox/{sandboxIdOrName}/archive',
+            path_params=_path_params,
+            query_params=_query_params,
+            header_params=_header_params,
+            body=_body_params,
+            post_params=_form_params,
+            files=_files,
+            auth_settings=_auth_settings,
+            collection_formats=_collection_formats,
+            _host=_host,
+            _request_auth=_request_auth
+        )
+
+
+
+
+    @validate_call
+    async def create_backup(
+        self,
+        sandbox_id_or_name: Annotated[StrictStr, Field(description="ID or name of the sandbox")],
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> Sandbox:
+        """Create sandbox backup
+
+
+        :param sandbox_id_or_name: ID or name of the sandbox (required)
+        :type sandbox_id_or_name: str
+        :param x_daytona_organization_id: Use with JWT to specify the organization ID
+        :type x_daytona_organization_id: str
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._create_backup_serialize(
+            sandbox_id_or_name=sandbox_id_or_name,
+            x_daytona_organization_id=x_daytona_organization_id,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "Sandbox",
+        }
+        response_data = await self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        await response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        ).data
+
+
+    @validate_call
+    async def create_backup_with_http_info(
+        self,
+        sandbox_id_or_name: Annotated[StrictStr, Field(description="ID or name of the sandbox")],
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> ApiResponse[Sandbox]:
+        """Create sandbox backup
+
+
+        :param sandbox_id_or_name: ID or name of the sandbox (required)
+        :type sandbox_id_or_name: str
+        :param x_daytona_organization_id: Use with JWT to specify the organization ID
+        :type x_daytona_organization_id: str
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._create_backup_serialize(
+            sandbox_id_or_name=sandbox_id_or_name,
+            x_daytona_organization_id=x_daytona_organization_id,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "Sandbox",
+        }
+        response_data = await self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        await response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        )
+
+
+    @validate_call
+    async def create_backup_without_preload_content(
+        self,
+        sandbox_id_or_name: Annotated[StrictStr, Field(description="ID or name of the sandbox")],
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> RESTResponseType:
+        """Create sandbox backup
+
+
+        :param sandbox_id_or_name: ID or name of the sandbox (required)
+        :type sandbox_id_or_name: str
+        :param x_daytona_organization_id: Use with JWT to specify the organization ID
+        :type x_daytona_organization_id: str
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._create_backup_serialize(
+            sandbox_id_or_name=sandbox_id_or_name,
+            x_daytona_organization_id=x_daytona_organization_id,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "Sandbox",
+        }
+        response_data = await self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        return response_data.response
+
+
+    def _create_backup_serialize(
+        self,
+        sandbox_id_or_name,
+        x_daytona_organization_id,
+        _request_auth,
+        _content_type,
+        _headers,
+        _host_index,
+    ) -> RequestSerialized:
+
+        _host = None
+
+        _collection_formats: Dict[str, str] = {
+        }
+
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        ] = {}
+        _body_params: Optional[bytes] = None
+
+        # process the path parameters
+        if sandbox_id_or_name is not None:
+            _path_params['sandboxIdOrName'] = sandbox_id_or_name
+        # process the query parameters
+        # process the header parameters
+        if x_daytona_organization_id is not None:
+            _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id
+        # process the form parameters
+        # process the body parameter
+
+
+        # set the HTTP header `Accept`
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
+                [
+                    'application/json'
+                ]
+            )
+
+
+        # authentication setting
+        _auth_settings: List[str] = [
+            'bearer', 
+            'oauth2'
+        ]
+
+        return self.api_client.param_serialize(
+            method='POST',
+            resource_path='/sandbox/{sandboxIdOrName}/backup',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -877,7 +884,7 @@ class SandboxApi:
     @validate_call
     async def create_ssh_access(
         self,
-        sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
+        sandbox_id_or_name: Annotated[StrictStr, Field(description="ID or name of the sandbox")],
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         expires_in_minutes: Annotated[Optional[Union[StrictFloat, StrictInt]], Field(description="Expiration time in minutes (default: 60)")] = None,
         _request_timeout: Union[
@@ -896,8 +903,8 @@ class SandboxApi:
         """Create SSH access for sandbox
 
 
-        :param sandbox_id: ID of the sandbox (required)
-        :type sandbox_id: str
+        :param sandbox_id_or_name: ID or name of the sandbox (required)
+        :type sandbox_id_or_name: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
         :param expires_in_minutes: Expiration time in minutes (default: 60)
@@ -925,7 +932,7 @@ class SandboxApi:
         """ # noqa: E501
 
         _param = self._create_ssh_access_serialize(
-            sandbox_id=sandbox_id,
+            sandbox_id_or_name=sandbox_id_or_name,
             x_daytona_organization_id=x_daytona_organization_id,
             expires_in_minutes=expires_in_minutes,
             _request_auth=_request_auth,
@@ -951,7 +958,7 @@ class SandboxApi:
     @validate_call
     async def create_ssh_access_with_http_info(
         self,
-        sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
+        sandbox_id_or_name: Annotated[StrictStr, Field(description="ID or name of the sandbox")],
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         expires_in_minutes: Annotated[Optional[Union[StrictFloat, StrictInt]], Field(description="Expiration time in minutes (default: 60)")] = None,
         _request_timeout: Union[
@@ -970,8 +977,8 @@ class SandboxApi:
         """Create SSH access for sandbox
 
 
-        :param sandbox_id: ID of the sandbox (required)
-        :type sandbox_id: str
+        :param sandbox_id_or_name: ID or name of the sandbox (required)
+        :type sandbox_id_or_name: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
         :param expires_in_minutes: Expiration time in minutes (default: 60)
@@ -999,7 +1006,7 @@ class SandboxApi:
         """ # noqa: E501
 
         _param = self._create_ssh_access_serialize(
-            sandbox_id=sandbox_id,
+            sandbox_id_or_name=sandbox_id_or_name,
             x_daytona_organization_id=x_daytona_organization_id,
             expires_in_minutes=expires_in_minutes,
             _request_auth=_request_auth,
@@ -1025,7 +1032,7 @@ class SandboxApi:
     @validate_call
     async def create_ssh_access_without_preload_content(
         self,
-        sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
+        sandbox_id_or_name: Annotated[StrictStr, Field(description="ID or name of the sandbox")],
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         expires_in_minutes: Annotated[Optional[Union[StrictFloat, StrictInt]], Field(description="Expiration time in minutes (default: 60)")] = None,
         _request_timeout: Union[
@@ -1044,8 +1051,8 @@ class SandboxApi:
         """Create SSH access for sandbox
 
 
-        :param sandbox_id: ID of the sandbox (required)
-        :type sandbox_id: str
+        :param sandbox_id_or_name: ID or name of the sandbox (required)
+        :type sandbox_id_or_name: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
         :param expires_in_minutes: Expiration time in minutes (default: 60)
@@ -1073,7 +1080,7 @@ class SandboxApi:
         """ # noqa: E501
 
         _param = self._create_ssh_access_serialize(
-            sandbox_id=sandbox_id,
+            sandbox_id_or_name=sandbox_id_or_name,
             x_daytona_organization_id=x_daytona_organization_id,
             expires_in_minutes=expires_in_minutes,
             _request_auth=_request_auth,
@@ -1094,7 +1101,7 @@ class SandboxApi:
 
     def _create_ssh_access_serialize(
         self,
-        sandbox_id,
+        sandbox_id_or_name,
         x_daytona_organization_id,
         expires_in_minutes,
         _request_auth,
@@ -1118,8 +1125,8 @@ class SandboxApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
-        if sandbox_id is not None:
-            _path_params['sandboxId'] = sandbox_id
+        if sandbox_id_or_name is not None:
+            _path_params['sandboxIdOrName'] = sandbox_id_or_name
         # process the query parameters
         if expires_in_minutes is not None:
             
@@ -1149,7 +1156,7 @@ class SandboxApi:
 
         return self.api_client.param_serialize(
             method='POST',
-            resource_path='/sandbox/{sandboxId}/ssh-access',
+            resource_path='/sandbox/{sandboxIdOrName}/ssh-access',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -1168,7 +1175,7 @@ class SandboxApi:
     @validate_call
     async def delete_sandbox(
         self,
-        sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
+        sandbox_id_or_name: Annotated[StrictStr, Field(description="ID or name of the sandbox")],
         force: StrictBool,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
@@ -1183,12 +1190,12 @@ class SandboxApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> None:
+    ) -> Sandbox:
         """Delete sandbox
 
 
-        :param sandbox_id: ID of the sandbox (required)
-        :type sandbox_id: str
+        :param sandbox_id_or_name: ID or name of the sandbox (required)
+        :type sandbox_id_or_name: str
         :param force: (required)
         :type force: bool
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -1216,7 +1223,7 @@ class SandboxApi:
         """ # noqa: E501
 
         _param = self._delete_sandbox_serialize(
-            sandbox_id=sandbox_id,
+            sandbox_id_or_name=sandbox_id_or_name,
             force=force,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -1226,7 +1233,7 @@ class SandboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            '200': "Sandbox",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1242,7 +1249,7 @@ class SandboxApi:
     @validate_call
     async def delete_sandbox_with_http_info(
         self,
-        sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
+        sandbox_id_or_name: Annotated[StrictStr, Field(description="ID or name of the sandbox")],
         force: StrictBool,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
@@ -1257,12 +1264,12 @@ class SandboxApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[None]:
+    ) -> ApiResponse[Sandbox]:
         """Delete sandbox
 
 
-        :param sandbox_id: ID of the sandbox (required)
-        :type sandbox_id: str
+        :param sandbox_id_or_name: ID or name of the sandbox (required)
+        :type sandbox_id_or_name: str
         :param force: (required)
         :type force: bool
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -1290,7 +1297,7 @@ class SandboxApi:
         """ # noqa: E501
 
         _param = self._delete_sandbox_serialize(
-            sandbox_id=sandbox_id,
+            sandbox_id_or_name=sandbox_id_or_name,
             force=force,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -1300,7 +1307,7 @@ class SandboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            '200': "Sandbox",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1316,7 +1323,7 @@ class SandboxApi:
     @validate_call
     async def delete_sandbox_without_preload_content(
         self,
-        sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
+        sandbox_id_or_name: Annotated[StrictStr, Field(description="ID or name of the sandbox")],
         force: StrictBool,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
@@ -1335,8 +1342,8 @@ class SandboxApi:
         """Delete sandbox
 
 
-        :param sandbox_id: ID of the sandbox (required)
-        :type sandbox_id: str
+        :param sandbox_id_or_name: ID or name of the sandbox (required)
+        :type sandbox_id_or_name: str
         :param force: (required)
         :type force: bool
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -1364,7 +1371,7 @@ class SandboxApi:
         """ # noqa: E501
 
         _param = self._delete_sandbox_serialize(
-            sandbox_id=sandbox_id,
+            sandbox_id_or_name=sandbox_id_or_name,
             force=force,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -1374,7 +1381,7 @@ class SandboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            '200': "Sandbox",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1385,7 +1392,7 @@ class SandboxApi:
 
     def _delete_sandbox_serialize(
         self,
-        sandbox_id,
+        sandbox_id_or_name,
         force,
         x_daytona_organization_id,
         _request_auth,
@@ -1409,8 +1416,8 @@ class SandboxApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
-        if sandbox_id is not None:
-            _path_params['sandboxId'] = sandbox_id
+        if sandbox_id_or_name is not None:
+            _path_params['sandboxIdOrName'] = sandbox_id_or_name
         # process the query parameters
         if force is not None:
             
@@ -1423,6 +1430,13 @@ class SandboxApi:
         # process the body parameter
 
 
+        # set the HTTP header `Accept`
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
+                [
+                    'application/json'
+                ]
+            )
 
 
         # authentication setting
@@ -1433,7 +1447,7 @@ class SandboxApi:
 
         return self.api_client.param_serialize(
             method='DELETE',
-            resource_path='/sandbox/{sandboxId}',
+            resource_path='/sandbox/{sandboxIdOrName}',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -1452,7 +1466,7 @@ class SandboxApi:
     @validate_call
     async def get_build_logs(
         self,
-        sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
+        sandbox_id_or_name: Annotated[StrictStr, Field(description="ID or name of the sandbox")],
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         follow: Annotated[Optional[StrictBool], Field(description="Whether to follow the logs stream")] = None,
         _request_timeout: Union[
@@ -1471,8 +1485,8 @@ class SandboxApi:
         """Get build logs
 
 
-        :param sandbox_id: ID of the sandbox (required)
-        :type sandbox_id: str
+        :param sandbox_id_or_name: ID or name of the sandbox (required)
+        :type sandbox_id_or_name: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
         :param follow: Whether to follow the logs stream
@@ -1500,7 +1514,7 @@ class SandboxApi:
         """ # noqa: E501
 
         _param = self._get_build_logs_serialize(
-            sandbox_id=sandbox_id,
+            sandbox_id_or_name=sandbox_id_or_name,
             x_daytona_organization_id=x_daytona_organization_id,
             follow=follow,
             _request_auth=_request_auth,
@@ -1526,7 +1540,7 @@ class SandboxApi:
     @validate_call
     async def get_build_logs_with_http_info(
         self,
-        sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
+        sandbox_id_or_name: Annotated[StrictStr, Field(description="ID or name of the sandbox")],
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         follow: Annotated[Optional[StrictBool], Field(description="Whether to follow the logs stream")] = None,
         _request_timeout: Union[
@@ -1545,8 +1559,8 @@ class SandboxApi:
         """Get build logs
 
 
-        :param sandbox_id: ID of the sandbox (required)
-        :type sandbox_id: str
+        :param sandbox_id_or_name: ID or name of the sandbox (required)
+        :type sandbox_id_or_name: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
         :param follow: Whether to follow the logs stream
@@ -1574,7 +1588,7 @@ class SandboxApi:
         """ # noqa: E501
 
         _param = self._get_build_logs_serialize(
-            sandbox_id=sandbox_id,
+            sandbox_id_or_name=sandbox_id_or_name,
             x_daytona_organization_id=x_daytona_organization_id,
             follow=follow,
             _request_auth=_request_auth,
@@ -1600,7 +1614,7 @@ class SandboxApi:
     @validate_call
     async def get_build_logs_without_preload_content(
         self,
-        sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
+        sandbox_id_or_name: Annotated[StrictStr, Field(description="ID or name of the sandbox")],
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         follow: Annotated[Optional[StrictBool], Field(description="Whether to follow the logs stream")] = None,
         _request_timeout: Union[
@@ -1619,8 +1633,8 @@ class SandboxApi:
         """Get build logs
 
 
-        :param sandbox_id: ID of the sandbox (required)
-        :type sandbox_id: str
+        :param sandbox_id_or_name: ID or name of the sandbox (required)
+        :type sandbox_id_or_name: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
         :param follow: Whether to follow the logs stream
@@ -1648,7 +1662,7 @@ class SandboxApi:
         """ # noqa: E501
 
         _param = self._get_build_logs_serialize(
-            sandbox_id=sandbox_id,
+            sandbox_id_or_name=sandbox_id_or_name,
             x_daytona_organization_id=x_daytona_organization_id,
             follow=follow,
             _request_auth=_request_auth,
@@ -1669,7 +1683,7 @@ class SandboxApi:
 
     def _get_build_logs_serialize(
         self,
-        sandbox_id,
+        sandbox_id_or_name,
         x_daytona_organization_id,
         follow,
         _request_auth,
@@ -1693,8 +1707,8 @@ class SandboxApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
-        if sandbox_id is not None:
-            _path_params['sandboxId'] = sandbox_id
+        if sandbox_id_or_name is not None:
+            _path_params['sandboxIdOrName'] = sandbox_id_or_name
         # process the query parameters
         if follow is not None:
             
@@ -1717,7 +1731,7 @@ class SandboxApi:
 
         return self.api_client.param_serialize(
             method='GET',
-            resource_path='/sandbox/{sandboxId}/build-logs',
+            resource_path='/sandbox/{sandboxIdOrName}/build-logs',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -1736,7 +1750,7 @@ class SandboxApi:
     @validate_call
     async def get_port_preview_url(
         self,
-        sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
+        sandbox_id_or_name: Annotated[StrictStr, Field(description="ID or name of the sandbox")],
         port: Annotated[Union[StrictFloat, StrictInt], Field(description="Port number to get preview URL for")],
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
@@ -1755,8 +1769,8 @@ class SandboxApi:
         """Get preview URL for a sandbox port
 
 
-        :param sandbox_id: ID of the sandbox (required)
-        :type sandbox_id: str
+        :param sandbox_id_or_name: ID or name of the sandbox (required)
+        :type sandbox_id_or_name: str
         :param port: Port number to get preview URL for (required)
         :type port: float
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -1784,7 +1798,7 @@ class SandboxApi:
         """ # noqa: E501
 
         _param = self._get_port_preview_url_serialize(
-            sandbox_id=sandbox_id,
+            sandbox_id_or_name=sandbox_id_or_name,
             port=port,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -1810,7 +1824,7 @@ class SandboxApi:
     @validate_call
     async def get_port_preview_url_with_http_info(
         self,
-        sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
+        sandbox_id_or_name: Annotated[StrictStr, Field(description="ID or name of the sandbox")],
         port: Annotated[Union[StrictFloat, StrictInt], Field(description="Port number to get preview URL for")],
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
@@ -1829,8 +1843,8 @@ class SandboxApi:
         """Get preview URL for a sandbox port
 
 
-        :param sandbox_id: ID of the sandbox (required)
-        :type sandbox_id: str
+        :param sandbox_id_or_name: ID or name of the sandbox (required)
+        :type sandbox_id_or_name: str
         :param port: Port number to get preview URL for (required)
         :type port: float
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -1858,7 +1872,7 @@ class SandboxApi:
         """ # noqa: E501
 
         _param = self._get_port_preview_url_serialize(
-            sandbox_id=sandbox_id,
+            sandbox_id_or_name=sandbox_id_or_name,
             port=port,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -1884,7 +1898,7 @@ class SandboxApi:
     @validate_call
     async def get_port_preview_url_without_preload_content(
         self,
-        sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
+        sandbox_id_or_name: Annotated[StrictStr, Field(description="ID or name of the sandbox")],
         port: Annotated[Union[StrictFloat, StrictInt], Field(description="Port number to get preview URL for")],
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
@@ -1903,8 +1917,8 @@ class SandboxApi:
         """Get preview URL for a sandbox port
 
 
-        :param sandbox_id: ID of the sandbox (required)
-        :type sandbox_id: str
+        :param sandbox_id_or_name: ID or name of the sandbox (required)
+        :type sandbox_id_or_name: str
         :param port: Port number to get preview URL for (required)
         :type port: float
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -1932,7 +1946,7 @@ class SandboxApi:
         """ # noqa: E501
 
         _param = self._get_port_preview_url_serialize(
-            sandbox_id=sandbox_id,
+            sandbox_id_or_name=sandbox_id_or_name,
             port=port,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -1953,7 +1967,7 @@ class SandboxApi:
 
     def _get_port_preview_url_serialize(
         self,
-        sandbox_id,
+        sandbox_id_or_name,
         port,
         x_daytona_organization_id,
         _request_auth,
@@ -1977,8 +1991,8 @@ class SandboxApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
-        if sandbox_id is not None:
-            _path_params['sandboxId'] = sandbox_id
+        if sandbox_id_or_name is not None:
+            _path_params['sandboxIdOrName'] = sandbox_id_or_name
         if port is not None:
             _path_params['port'] = port
         # process the query parameters
@@ -2006,7 +2020,7 @@ class SandboxApi:
 
         return self.api_client.param_serialize(
             method='GET',
-            resource_path='/sandbox/{sandboxId}/ports/{port}/preview-url',
+            resource_path='/sandbox/{sandboxIdOrName}/ports/{port}/preview-url',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -2025,7 +2039,7 @@ class SandboxApi:
     @validate_call
     async def get_sandbox(
         self,
-        sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
+        sandbox_id_or_name: Annotated[StrictStr, Field(description="ID or name of the sandbox")],
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         verbose: Annotated[Optional[StrictBool], Field(description="Include verbose output")] = None,
         _request_timeout: Union[
@@ -2044,8 +2058,8 @@ class SandboxApi:
         """Get sandbox details
 
 
-        :param sandbox_id: ID of the sandbox (required)
-        :type sandbox_id: str
+        :param sandbox_id_or_name: ID or name of the sandbox (required)
+        :type sandbox_id_or_name: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
         :param verbose: Include verbose output
@@ -2073,7 +2087,7 @@ class SandboxApi:
         """ # noqa: E501
 
         _param = self._get_sandbox_serialize(
-            sandbox_id=sandbox_id,
+            sandbox_id_or_name=sandbox_id_or_name,
             x_daytona_organization_id=x_daytona_organization_id,
             verbose=verbose,
             _request_auth=_request_auth,
@@ -2099,7 +2113,7 @@ class SandboxApi:
     @validate_call
     async def get_sandbox_with_http_info(
         self,
-        sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
+        sandbox_id_or_name: Annotated[StrictStr, Field(description="ID or name of the sandbox")],
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         verbose: Annotated[Optional[StrictBool], Field(description="Include verbose output")] = None,
         _request_timeout: Union[
@@ -2118,8 +2132,8 @@ class SandboxApi:
         """Get sandbox details
 
 
-        :param sandbox_id: ID of the sandbox (required)
-        :type sandbox_id: str
+        :param sandbox_id_or_name: ID or name of the sandbox (required)
+        :type sandbox_id_or_name: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
         :param verbose: Include verbose output
@@ -2147,7 +2161,7 @@ class SandboxApi:
         """ # noqa: E501
 
         _param = self._get_sandbox_serialize(
-            sandbox_id=sandbox_id,
+            sandbox_id_or_name=sandbox_id_or_name,
             x_daytona_organization_id=x_daytona_organization_id,
             verbose=verbose,
             _request_auth=_request_auth,
@@ -2173,7 +2187,7 @@ class SandboxApi:
     @validate_call
     async def get_sandbox_without_preload_content(
         self,
-        sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
+        sandbox_id_or_name: Annotated[StrictStr, Field(description="ID or name of the sandbox")],
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         verbose: Annotated[Optional[StrictBool], Field(description="Include verbose output")] = None,
         _request_timeout: Union[
@@ -2192,8 +2206,8 @@ class SandboxApi:
         """Get sandbox details
 
 
-        :param sandbox_id: ID of the sandbox (required)
-        :type sandbox_id: str
+        :param sandbox_id_or_name: ID or name of the sandbox (required)
+        :type sandbox_id_or_name: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
         :param verbose: Include verbose output
@@ -2221,7 +2235,7 @@ class SandboxApi:
         """ # noqa: E501
 
         _param = self._get_sandbox_serialize(
-            sandbox_id=sandbox_id,
+            sandbox_id_or_name=sandbox_id_or_name,
             x_daytona_organization_id=x_daytona_organization_id,
             verbose=verbose,
             _request_auth=_request_auth,
@@ -2242,7 +2256,7 @@ class SandboxApi:
 
     def _get_sandbox_serialize(
         self,
-        sandbox_id,
+        sandbox_id_or_name,
         x_daytona_organization_id,
         verbose,
         _request_auth,
@@ -2266,8 +2280,8 @@ class SandboxApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
-        if sandbox_id is not None:
-            _path_params['sandboxId'] = sandbox_id
+        if sandbox_id_or_name is not None:
+            _path_params['sandboxIdOrName'] = sandbox_id_or_name
         # process the query parameters
         if verbose is not None:
             
@@ -2297,7 +2311,7 @@ class SandboxApi:
 
         return self.api_client.param_serialize(
             method='GET',
-            resource_path='/sandbox/{sandboxId}',
+            resource_path='/sandbox/{sandboxIdOrName}',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -2919,7 +2933,7 @@ class SandboxApi:
     @validate_call
     async def replace_labels(
         self,
-        sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
+        sandbox_id_or_name: Annotated[StrictStr, Field(description="ID or name of the sandbox")],
         sandbox_labels: SandboxLabels,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
@@ -2938,8 +2952,8 @@ class SandboxApi:
         """Replace sandbox labels
 
 
-        :param sandbox_id: ID of the sandbox (required)
-        :type sandbox_id: str
+        :param sandbox_id_or_name: ID or name of the sandbox (required)
+        :type sandbox_id_or_name: str
         :param sandbox_labels: (required)
         :type sandbox_labels: SandboxLabels
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -2967,7 +2981,7 @@ class SandboxApi:
         """ # noqa: E501
 
         _param = self._replace_labels_serialize(
-            sandbox_id=sandbox_id,
+            sandbox_id_or_name=sandbox_id_or_name,
             sandbox_labels=sandbox_labels,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -2993,7 +3007,7 @@ class SandboxApi:
     @validate_call
     async def replace_labels_with_http_info(
         self,
-        sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
+        sandbox_id_or_name: Annotated[StrictStr, Field(description="ID or name of the sandbox")],
         sandbox_labels: SandboxLabels,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
@@ -3012,8 +3026,8 @@ class SandboxApi:
         """Replace sandbox labels
 
 
-        :param sandbox_id: ID of the sandbox (required)
-        :type sandbox_id: str
+        :param sandbox_id_or_name: ID or name of the sandbox (required)
+        :type sandbox_id_or_name: str
         :param sandbox_labels: (required)
         :type sandbox_labels: SandboxLabels
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -3041,7 +3055,7 @@ class SandboxApi:
         """ # noqa: E501
 
         _param = self._replace_labels_serialize(
-            sandbox_id=sandbox_id,
+            sandbox_id_or_name=sandbox_id_or_name,
             sandbox_labels=sandbox_labels,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -3067,7 +3081,7 @@ class SandboxApi:
     @validate_call
     async def replace_labels_without_preload_content(
         self,
-        sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
+        sandbox_id_or_name: Annotated[StrictStr, Field(description="ID or name of the sandbox")],
         sandbox_labels: SandboxLabels,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
@@ -3086,8 +3100,8 @@ class SandboxApi:
         """Replace sandbox labels
 
 
-        :param sandbox_id: ID of the sandbox (required)
-        :type sandbox_id: str
+        :param sandbox_id_or_name: ID or name of the sandbox (required)
+        :type sandbox_id_or_name: str
         :param sandbox_labels: (required)
         :type sandbox_labels: SandboxLabels
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -3115,7 +3129,7 @@ class SandboxApi:
         """ # noqa: E501
 
         _param = self._replace_labels_serialize(
-            sandbox_id=sandbox_id,
+            sandbox_id_or_name=sandbox_id_or_name,
             sandbox_labels=sandbox_labels,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -3136,7 +3150,7 @@ class SandboxApi:
 
     def _replace_labels_serialize(
         self,
-        sandbox_id,
+        sandbox_id_or_name,
         sandbox_labels,
         x_daytona_organization_id,
         _request_auth,
@@ -3160,8 +3174,8 @@ class SandboxApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
-        if sandbox_id is not None:
-            _path_params['sandboxId'] = sandbox_id
+        if sandbox_id_or_name is not None:
+            _path_params['sandboxIdOrName'] = sandbox_id_or_name
         # process the query parameters
         # process the header parameters
         if x_daytona_organization_id is not None:
@@ -3202,7 +3216,7 @@ class SandboxApi:
 
         return self.api_client.param_serialize(
             method='PUT',
-            resource_path='/sandbox/{sandboxId}/labels',
+            resource_path='/sandbox/{sandboxIdOrName}/labels',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -3221,7 +3235,7 @@ class SandboxApi:
     @validate_call
     async def revoke_ssh_access(
         self,
-        sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
+        sandbox_id_or_name: Annotated[StrictStr, Field(description="ID or name of the sandbox")],
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         token: Annotated[Optional[StrictStr], Field(description="SSH access token to revoke. If not provided, all SSH access for the sandbox will be revoked.")] = None,
         _request_timeout: Union[
@@ -3240,8 +3254,8 @@ class SandboxApi:
         """Revoke SSH access for sandbox
 
 
-        :param sandbox_id: ID of the sandbox (required)
-        :type sandbox_id: str
+        :param sandbox_id_or_name: ID or name of the sandbox (required)
+        :type sandbox_id_or_name: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
         :param token: SSH access token to revoke. If not provided, all SSH access for the sandbox will be revoked.
@@ -3269,7 +3283,7 @@ class SandboxApi:
         """ # noqa: E501
 
         _param = self._revoke_ssh_access_serialize(
-            sandbox_id=sandbox_id,
+            sandbox_id_or_name=sandbox_id_or_name,
             x_daytona_organization_id=x_daytona_organization_id,
             token=token,
             _request_auth=_request_auth,
@@ -3295,7 +3309,7 @@ class SandboxApi:
     @validate_call
     async def revoke_ssh_access_with_http_info(
         self,
-        sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
+        sandbox_id_or_name: Annotated[StrictStr, Field(description="ID or name of the sandbox")],
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         token: Annotated[Optional[StrictStr], Field(description="SSH access token to revoke. If not provided, all SSH access for the sandbox will be revoked.")] = None,
         _request_timeout: Union[
@@ -3314,8 +3328,8 @@ class SandboxApi:
         """Revoke SSH access for sandbox
 
 
-        :param sandbox_id: ID of the sandbox (required)
-        :type sandbox_id: str
+        :param sandbox_id_or_name: ID or name of the sandbox (required)
+        :type sandbox_id_or_name: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
         :param token: SSH access token to revoke. If not provided, all SSH access for the sandbox will be revoked.
@@ -3343,7 +3357,7 @@ class SandboxApi:
         """ # noqa: E501
 
         _param = self._revoke_ssh_access_serialize(
-            sandbox_id=sandbox_id,
+            sandbox_id_or_name=sandbox_id_or_name,
             x_daytona_organization_id=x_daytona_organization_id,
             token=token,
             _request_auth=_request_auth,
@@ -3369,7 +3383,7 @@ class SandboxApi:
     @validate_call
     async def revoke_ssh_access_without_preload_content(
         self,
-        sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
+        sandbox_id_or_name: Annotated[StrictStr, Field(description="ID or name of the sandbox")],
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         token: Annotated[Optional[StrictStr], Field(description="SSH access token to revoke. If not provided, all SSH access for the sandbox will be revoked.")] = None,
         _request_timeout: Union[
@@ -3388,8 +3402,8 @@ class SandboxApi:
         """Revoke SSH access for sandbox
 
 
-        :param sandbox_id: ID of the sandbox (required)
-        :type sandbox_id: str
+        :param sandbox_id_or_name: ID or name of the sandbox (required)
+        :type sandbox_id_or_name: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
         :param token: SSH access token to revoke. If not provided, all SSH access for the sandbox will be revoked.
@@ -3417,7 +3431,7 @@ class SandboxApi:
         """ # noqa: E501
 
         _param = self._revoke_ssh_access_serialize(
-            sandbox_id=sandbox_id,
+            sandbox_id_or_name=sandbox_id_or_name,
             x_daytona_organization_id=x_daytona_organization_id,
             token=token,
             _request_auth=_request_auth,
@@ -3438,7 +3452,7 @@ class SandboxApi:
 
     def _revoke_ssh_access_serialize(
         self,
-        sandbox_id,
+        sandbox_id_or_name,
         x_daytona_organization_id,
         token,
         _request_auth,
@@ -3462,8 +3476,8 @@ class SandboxApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
-        if sandbox_id is not None:
-            _path_params['sandboxId'] = sandbox_id
+        if sandbox_id_or_name is not None:
+            _path_params['sandboxIdOrName'] = sandbox_id_or_name
         # process the query parameters
         if token is not None:
             
@@ -3486,7 +3500,7 @@ class SandboxApi:
 
         return self.api_client.param_serialize(
             method='DELETE',
-            resource_path='/sandbox/{sandboxId}/ssh-access',
+            resource_path='/sandbox/{sandboxIdOrName}/ssh-access',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -3505,7 +3519,7 @@ class SandboxApi:
     @validate_call
     async def set_auto_archive_interval(
         self,
-        sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
+        sandbox_id_or_name: Annotated[StrictStr, Field(description="ID or name of the sandbox")],
         interval: Annotated[Union[StrictFloat, StrictInt], Field(description="Auto-archive interval in minutes (0 means the maximum interval will be used)")],
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
@@ -3520,12 +3534,12 @@ class SandboxApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> None:
+    ) -> Sandbox:
         """Set sandbox auto-archive interval
 
 
-        :param sandbox_id: ID of the sandbox (required)
-        :type sandbox_id: str
+        :param sandbox_id_or_name: ID or name of the sandbox (required)
+        :type sandbox_id_or_name: str
         :param interval: Auto-archive interval in minutes (0 means the maximum interval will be used) (required)
         :type interval: float
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -3553,7 +3567,7 @@ class SandboxApi:
         """ # noqa: E501
 
         _param = self._set_auto_archive_interval_serialize(
-            sandbox_id=sandbox_id,
+            sandbox_id_or_name=sandbox_id_or_name,
             interval=interval,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -3563,7 +3577,7 @@ class SandboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            '200': "Sandbox",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -3579,7 +3593,7 @@ class SandboxApi:
     @validate_call
     async def set_auto_archive_interval_with_http_info(
         self,
-        sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
+        sandbox_id_or_name: Annotated[StrictStr, Field(description="ID or name of the sandbox")],
         interval: Annotated[Union[StrictFloat, StrictInt], Field(description="Auto-archive interval in minutes (0 means the maximum interval will be used)")],
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
@@ -3594,12 +3608,12 @@ class SandboxApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[None]:
+    ) -> ApiResponse[Sandbox]:
         """Set sandbox auto-archive interval
 
 
-        :param sandbox_id: ID of the sandbox (required)
-        :type sandbox_id: str
+        :param sandbox_id_or_name: ID or name of the sandbox (required)
+        :type sandbox_id_or_name: str
         :param interval: Auto-archive interval in minutes (0 means the maximum interval will be used) (required)
         :type interval: float
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -3627,7 +3641,7 @@ class SandboxApi:
         """ # noqa: E501
 
         _param = self._set_auto_archive_interval_serialize(
-            sandbox_id=sandbox_id,
+            sandbox_id_or_name=sandbox_id_or_name,
             interval=interval,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -3637,7 +3651,7 @@ class SandboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            '200': "Sandbox",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -3653,7 +3667,7 @@ class SandboxApi:
     @validate_call
     async def set_auto_archive_interval_without_preload_content(
         self,
-        sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
+        sandbox_id_or_name: Annotated[StrictStr, Field(description="ID or name of the sandbox")],
         interval: Annotated[Union[StrictFloat, StrictInt], Field(description="Auto-archive interval in minutes (0 means the maximum interval will be used)")],
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
@@ -3672,8 +3686,8 @@ class SandboxApi:
         """Set sandbox auto-archive interval
 
 
-        :param sandbox_id: ID of the sandbox (required)
-        :type sandbox_id: str
+        :param sandbox_id_or_name: ID or name of the sandbox (required)
+        :type sandbox_id_or_name: str
         :param interval: Auto-archive interval in minutes (0 means the maximum interval will be used) (required)
         :type interval: float
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -3701,7 +3715,7 @@ class SandboxApi:
         """ # noqa: E501
 
         _param = self._set_auto_archive_interval_serialize(
-            sandbox_id=sandbox_id,
+            sandbox_id_or_name=sandbox_id_or_name,
             interval=interval,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -3711,7 +3725,7 @@ class SandboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            '200': "Sandbox",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -3722,7 +3736,7 @@ class SandboxApi:
 
     def _set_auto_archive_interval_serialize(
         self,
-        sandbox_id,
+        sandbox_id_or_name,
         interval,
         x_daytona_organization_id,
         _request_auth,
@@ -3746,841 +3760,10 @@ class SandboxApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
-        if sandbox_id is not None:
-            _path_params['sandboxId'] = sandbox_id
+        if sandbox_id_or_name is not None:
+            _path_params['sandboxIdOrName'] = sandbox_id_or_name
         if interval is not None:
             _path_params['interval'] = interval
-        # process the query parameters
-        # process the header parameters
-        if x_daytona_organization_id is not None:
-            _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id
-        # process the form parameters
-        # process the body parameter
-
-
-
-
-        # authentication setting
-        _auth_settings: List[str] = [
-            'bearer', 
-            'oauth2'
-        ]
-
-        return self.api_client.param_serialize(
-            method='POST',
-            resource_path='/sandbox/{sandboxId}/autoarchive/{interval}',
-            path_params=_path_params,
-            query_params=_query_params,
-            header_params=_header_params,
-            body=_body_params,
-            post_params=_form_params,
-            files=_files,
-            auth_settings=_auth_settings,
-            collection_formats=_collection_formats,
-            _host=_host,
-            _request_auth=_request_auth
-        )
-
-
-
-
-    @validate_call
-    async def set_auto_delete_interval(
-        self,
-        sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
-        interval: Annotated[Union[StrictFloat, StrictInt], Field(description="Auto-delete interval in minutes (negative value means disabled, 0 means delete immediately upon stopping)")],
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
-        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> None:
-        """Set sandbox auto-delete interval
-
-
-        :param sandbox_id: ID of the sandbox (required)
-        :type sandbox_id: str
-        :param interval: Auto-delete interval in minutes (negative value means disabled, 0 means delete immediately upon stopping) (required)
-        :type interval: float
-        :param x_daytona_organization_id: Use with JWT to specify the organization ID
-        :type x_daytona_organization_id: str
-        :param _request_timeout: timeout setting for this request. If one
-                                 number provided, it will be total request
-                                 timeout. It can also be a pair (tuple) of
-                                 (connection, read) timeouts.
-        :type _request_timeout: int, tuple(int, int), optional
-        :param _request_auth: set to override the auth_settings for an a single
-                              request; this effectively ignores the
-                              authentication in the spec for a single request.
-        :type _request_auth: dict, optional
-        :param _content_type: force content-type for the request.
-        :type _content_type: str, Optional
-        :param _headers: set to override the headers for a single
-                         request; this effectively ignores the headers
-                         in the spec for a single request.
-        :type _headers: dict, optional
-        :param _host_index: set to override the host_index for a single
-                            request; this effectively ignores the host_index
-                            in the spec for a single request.
-        :type _host_index: int, optional
-        :return: Returns the result object.
-        """ # noqa: E501
-
-        _param = self._set_auto_delete_interval_serialize(
-            sandbox_id=sandbox_id,
-            interval=interval,
-            x_daytona_organization_id=x_daytona_organization_id,
-            _request_auth=_request_auth,
-            _content_type=_content_type,
-            _headers=_headers,
-            _host_index=_host_index
-        )
-
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
-        }
-        response_data = await self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
-        await response_data.read()
-        return self.api_client.response_deserialize(
-            response_data=response_data,
-            response_types_map=_response_types_map,
-        ).data
-
-
-    @validate_call
-    async def set_auto_delete_interval_with_http_info(
-        self,
-        sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
-        interval: Annotated[Union[StrictFloat, StrictInt], Field(description="Auto-delete interval in minutes (negative value means disabled, 0 means delete immediately upon stopping)")],
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
-        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[None]:
-        """Set sandbox auto-delete interval
-
-
-        :param sandbox_id: ID of the sandbox (required)
-        :type sandbox_id: str
-        :param interval: Auto-delete interval in minutes (negative value means disabled, 0 means delete immediately upon stopping) (required)
-        :type interval: float
-        :param x_daytona_organization_id: Use with JWT to specify the organization ID
-        :type x_daytona_organization_id: str
-        :param _request_timeout: timeout setting for this request. If one
-                                 number provided, it will be total request
-                                 timeout. It can also be a pair (tuple) of
-                                 (connection, read) timeouts.
-        :type _request_timeout: int, tuple(int, int), optional
-        :param _request_auth: set to override the auth_settings for an a single
-                              request; this effectively ignores the
-                              authentication in the spec for a single request.
-        :type _request_auth: dict, optional
-        :param _content_type: force content-type for the request.
-        :type _content_type: str, Optional
-        :param _headers: set to override the headers for a single
-                         request; this effectively ignores the headers
-                         in the spec for a single request.
-        :type _headers: dict, optional
-        :param _host_index: set to override the host_index for a single
-                            request; this effectively ignores the host_index
-                            in the spec for a single request.
-        :type _host_index: int, optional
-        :return: Returns the result object.
-        """ # noqa: E501
-
-        _param = self._set_auto_delete_interval_serialize(
-            sandbox_id=sandbox_id,
-            interval=interval,
-            x_daytona_organization_id=x_daytona_organization_id,
-            _request_auth=_request_auth,
-            _content_type=_content_type,
-            _headers=_headers,
-            _host_index=_host_index
-        )
-
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
-        }
-        response_data = await self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
-        await response_data.read()
-        return self.api_client.response_deserialize(
-            response_data=response_data,
-            response_types_map=_response_types_map,
-        )
-
-
-    @validate_call
-    async def set_auto_delete_interval_without_preload_content(
-        self,
-        sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
-        interval: Annotated[Union[StrictFloat, StrictInt], Field(description="Auto-delete interval in minutes (negative value means disabled, 0 means delete immediately upon stopping)")],
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
-        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> RESTResponseType:
-        """Set sandbox auto-delete interval
-
-
-        :param sandbox_id: ID of the sandbox (required)
-        :type sandbox_id: str
-        :param interval: Auto-delete interval in minutes (negative value means disabled, 0 means delete immediately upon stopping) (required)
-        :type interval: float
-        :param x_daytona_organization_id: Use with JWT to specify the organization ID
-        :type x_daytona_organization_id: str
-        :param _request_timeout: timeout setting for this request. If one
-                                 number provided, it will be total request
-                                 timeout. It can also be a pair (tuple) of
-                                 (connection, read) timeouts.
-        :type _request_timeout: int, tuple(int, int), optional
-        :param _request_auth: set to override the auth_settings for an a single
-                              request; this effectively ignores the
-                              authentication in the spec for a single request.
-        :type _request_auth: dict, optional
-        :param _content_type: force content-type for the request.
-        :type _content_type: str, Optional
-        :param _headers: set to override the headers for a single
-                         request; this effectively ignores the headers
-                         in the spec for a single request.
-        :type _headers: dict, optional
-        :param _host_index: set to override the host_index for a single
-                            request; this effectively ignores the host_index
-                            in the spec for a single request.
-        :type _host_index: int, optional
-        :return: Returns the result object.
-        """ # noqa: E501
-
-        _param = self._set_auto_delete_interval_serialize(
-            sandbox_id=sandbox_id,
-            interval=interval,
-            x_daytona_organization_id=x_daytona_organization_id,
-            _request_auth=_request_auth,
-            _content_type=_content_type,
-            _headers=_headers,
-            _host_index=_host_index
-        )
-
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
-        }
-        response_data = await self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
-        return response_data.response
-
-
-    def _set_auto_delete_interval_serialize(
-        self,
-        sandbox_id,
-        interval,
-        x_daytona_organization_id,
-        _request_auth,
-        _content_type,
-        _headers,
-        _host_index,
-    ) -> RequestSerialized:
-
-        _host = None
-
-        _collection_formats: Dict[str, str] = {
-        }
-
-        _path_params: Dict[str, str] = {}
-        _query_params: List[Tuple[str, str]] = []
-        _header_params: Dict[str, Optional[str]] = _headers or {}
-        _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
-        ] = {}
-        _body_params: Optional[bytes] = None
-
-        # process the path parameters
-        if sandbox_id is not None:
-            _path_params['sandboxId'] = sandbox_id
-        if interval is not None:
-            _path_params['interval'] = interval
-        # process the query parameters
-        # process the header parameters
-        if x_daytona_organization_id is not None:
-            _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id
-        # process the form parameters
-        # process the body parameter
-
-
-
-
-        # authentication setting
-        _auth_settings: List[str] = [
-            'bearer', 
-            'oauth2'
-        ]
-
-        return self.api_client.param_serialize(
-            method='POST',
-            resource_path='/sandbox/{sandboxId}/autodelete/{interval}',
-            path_params=_path_params,
-            query_params=_query_params,
-            header_params=_header_params,
-            body=_body_params,
-            post_params=_form_params,
-            files=_files,
-            auth_settings=_auth_settings,
-            collection_formats=_collection_formats,
-            _host=_host,
-            _request_auth=_request_auth
-        )
-
-
-
-
-    @validate_call
-    async def set_autostop_interval(
-        self,
-        sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
-        interval: Annotated[Union[StrictFloat, StrictInt], Field(description="Auto-stop interval in minutes (0 to disable)")],
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
-        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> None:
-        """Set sandbox auto-stop interval
-
-
-        :param sandbox_id: ID of the sandbox (required)
-        :type sandbox_id: str
-        :param interval: Auto-stop interval in minutes (0 to disable) (required)
-        :type interval: float
-        :param x_daytona_organization_id: Use with JWT to specify the organization ID
-        :type x_daytona_organization_id: str
-        :param _request_timeout: timeout setting for this request. If one
-                                 number provided, it will be total request
-                                 timeout. It can also be a pair (tuple) of
-                                 (connection, read) timeouts.
-        :type _request_timeout: int, tuple(int, int), optional
-        :param _request_auth: set to override the auth_settings for an a single
-                              request; this effectively ignores the
-                              authentication in the spec for a single request.
-        :type _request_auth: dict, optional
-        :param _content_type: force content-type for the request.
-        :type _content_type: str, Optional
-        :param _headers: set to override the headers for a single
-                         request; this effectively ignores the headers
-                         in the spec for a single request.
-        :type _headers: dict, optional
-        :param _host_index: set to override the host_index for a single
-                            request; this effectively ignores the host_index
-                            in the spec for a single request.
-        :type _host_index: int, optional
-        :return: Returns the result object.
-        """ # noqa: E501
-
-        _param = self._set_autostop_interval_serialize(
-            sandbox_id=sandbox_id,
-            interval=interval,
-            x_daytona_organization_id=x_daytona_organization_id,
-            _request_auth=_request_auth,
-            _content_type=_content_type,
-            _headers=_headers,
-            _host_index=_host_index
-        )
-
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
-        }
-        response_data = await self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
-        await response_data.read()
-        return self.api_client.response_deserialize(
-            response_data=response_data,
-            response_types_map=_response_types_map,
-        ).data
-
-
-    @validate_call
-    async def set_autostop_interval_with_http_info(
-        self,
-        sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
-        interval: Annotated[Union[StrictFloat, StrictInt], Field(description="Auto-stop interval in minutes (0 to disable)")],
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
-        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[None]:
-        """Set sandbox auto-stop interval
-
-
-        :param sandbox_id: ID of the sandbox (required)
-        :type sandbox_id: str
-        :param interval: Auto-stop interval in minutes (0 to disable) (required)
-        :type interval: float
-        :param x_daytona_organization_id: Use with JWT to specify the organization ID
-        :type x_daytona_organization_id: str
-        :param _request_timeout: timeout setting for this request. If one
-                                 number provided, it will be total request
-                                 timeout. It can also be a pair (tuple) of
-                                 (connection, read) timeouts.
-        :type _request_timeout: int, tuple(int, int), optional
-        :param _request_auth: set to override the auth_settings for an a single
-                              request; this effectively ignores the
-                              authentication in the spec for a single request.
-        :type _request_auth: dict, optional
-        :param _content_type: force content-type for the request.
-        :type _content_type: str, Optional
-        :param _headers: set to override the headers for a single
-                         request; this effectively ignores the headers
-                         in the spec for a single request.
-        :type _headers: dict, optional
-        :param _host_index: set to override the host_index for a single
-                            request; this effectively ignores the host_index
-                            in the spec for a single request.
-        :type _host_index: int, optional
-        :return: Returns the result object.
-        """ # noqa: E501
-
-        _param = self._set_autostop_interval_serialize(
-            sandbox_id=sandbox_id,
-            interval=interval,
-            x_daytona_organization_id=x_daytona_organization_id,
-            _request_auth=_request_auth,
-            _content_type=_content_type,
-            _headers=_headers,
-            _host_index=_host_index
-        )
-
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
-        }
-        response_data = await self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
-        await response_data.read()
-        return self.api_client.response_deserialize(
-            response_data=response_data,
-            response_types_map=_response_types_map,
-        )
-
-
-    @validate_call
-    async def set_autostop_interval_without_preload_content(
-        self,
-        sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
-        interval: Annotated[Union[StrictFloat, StrictInt], Field(description="Auto-stop interval in minutes (0 to disable)")],
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
-        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> RESTResponseType:
-        """Set sandbox auto-stop interval
-
-
-        :param sandbox_id: ID of the sandbox (required)
-        :type sandbox_id: str
-        :param interval: Auto-stop interval in minutes (0 to disable) (required)
-        :type interval: float
-        :param x_daytona_organization_id: Use with JWT to specify the organization ID
-        :type x_daytona_organization_id: str
-        :param _request_timeout: timeout setting for this request. If one
-                                 number provided, it will be total request
-                                 timeout. It can also be a pair (tuple) of
-                                 (connection, read) timeouts.
-        :type _request_timeout: int, tuple(int, int), optional
-        :param _request_auth: set to override the auth_settings for an a single
-                              request; this effectively ignores the
-                              authentication in the spec for a single request.
-        :type _request_auth: dict, optional
-        :param _content_type: force content-type for the request.
-        :type _content_type: str, Optional
-        :param _headers: set to override the headers for a single
-                         request; this effectively ignores the headers
-                         in the spec for a single request.
-        :type _headers: dict, optional
-        :param _host_index: set to override the host_index for a single
-                            request; this effectively ignores the host_index
-                            in the spec for a single request.
-        :type _host_index: int, optional
-        :return: Returns the result object.
-        """ # noqa: E501
-
-        _param = self._set_autostop_interval_serialize(
-            sandbox_id=sandbox_id,
-            interval=interval,
-            x_daytona_organization_id=x_daytona_organization_id,
-            _request_auth=_request_auth,
-            _content_type=_content_type,
-            _headers=_headers,
-            _host_index=_host_index
-        )
-
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
-        }
-        response_data = await self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
-        return response_data.response
-
-
-    def _set_autostop_interval_serialize(
-        self,
-        sandbox_id,
-        interval,
-        x_daytona_organization_id,
-        _request_auth,
-        _content_type,
-        _headers,
-        _host_index,
-    ) -> RequestSerialized:
-
-        _host = None
-
-        _collection_formats: Dict[str, str] = {
-        }
-
-        _path_params: Dict[str, str] = {}
-        _query_params: List[Tuple[str, str]] = []
-        _header_params: Dict[str, Optional[str]] = _headers or {}
-        _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
-        ] = {}
-        _body_params: Optional[bytes] = None
-
-        # process the path parameters
-        if sandbox_id is not None:
-            _path_params['sandboxId'] = sandbox_id
-        if interval is not None:
-            _path_params['interval'] = interval
-        # process the query parameters
-        # process the header parameters
-        if x_daytona_organization_id is not None:
-            _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id
-        # process the form parameters
-        # process the body parameter
-
-
-
-
-        # authentication setting
-        _auth_settings: List[str] = [
-            'bearer', 
-            'oauth2'
-        ]
-
-        return self.api_client.param_serialize(
-            method='POST',
-            resource_path='/sandbox/{sandboxId}/autostop/{interval}',
-            path_params=_path_params,
-            query_params=_query_params,
-            header_params=_header_params,
-            body=_body_params,
-            post_params=_form_params,
-            files=_files,
-            auth_settings=_auth_settings,
-            collection_formats=_collection_formats,
-            _host=_host,
-            _request_auth=_request_auth
-        )
-
-
-
-
-    @validate_call
-    async def start_sandbox(
-        self,
-        sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
-        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> Sandbox:
-        """Start sandbox
-
-
-        :param sandbox_id: ID of the sandbox (required)
-        :type sandbox_id: str
-        :param x_daytona_organization_id: Use with JWT to specify the organization ID
-        :type x_daytona_organization_id: str
-        :param _request_timeout: timeout setting for this request. If one
-                                 number provided, it will be total request
-                                 timeout. It can also be a pair (tuple) of
-                                 (connection, read) timeouts.
-        :type _request_timeout: int, tuple(int, int), optional
-        :param _request_auth: set to override the auth_settings for an a single
-                              request; this effectively ignores the
-                              authentication in the spec for a single request.
-        :type _request_auth: dict, optional
-        :param _content_type: force content-type for the request.
-        :type _content_type: str, Optional
-        :param _headers: set to override the headers for a single
-                         request; this effectively ignores the headers
-                         in the spec for a single request.
-        :type _headers: dict, optional
-        :param _host_index: set to override the host_index for a single
-                            request; this effectively ignores the host_index
-                            in the spec for a single request.
-        :type _host_index: int, optional
-        :return: Returns the result object.
-        """ # noqa: E501
-
-        _param = self._start_sandbox_serialize(
-            sandbox_id=sandbox_id,
-            x_daytona_organization_id=x_daytona_organization_id,
-            _request_auth=_request_auth,
-            _content_type=_content_type,
-            _headers=_headers,
-            _host_index=_host_index
-        )
-
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Sandbox",
-        }
-        response_data = await self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
-        await response_data.read()
-        return self.api_client.response_deserialize(
-            response_data=response_data,
-            response_types_map=_response_types_map,
-        ).data
-
-
-    @validate_call
-    async def start_sandbox_with_http_info(
-        self,
-        sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
-        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[Sandbox]:
-        """Start sandbox
-
-
-        :param sandbox_id: ID of the sandbox (required)
-        :type sandbox_id: str
-        :param x_daytona_organization_id: Use with JWT to specify the organization ID
-        :type x_daytona_organization_id: str
-        :param _request_timeout: timeout setting for this request. If one
-                                 number provided, it will be total request
-                                 timeout. It can also be a pair (tuple) of
-                                 (connection, read) timeouts.
-        :type _request_timeout: int, tuple(int, int), optional
-        :param _request_auth: set to override the auth_settings for an a single
-                              request; this effectively ignores the
-                              authentication in the spec for a single request.
-        :type _request_auth: dict, optional
-        :param _content_type: force content-type for the request.
-        :type _content_type: str, Optional
-        :param _headers: set to override the headers for a single
-                         request; this effectively ignores the headers
-                         in the spec for a single request.
-        :type _headers: dict, optional
-        :param _host_index: set to override the host_index for a single
-                            request; this effectively ignores the host_index
-                            in the spec for a single request.
-        :type _host_index: int, optional
-        :return: Returns the result object.
-        """ # noqa: E501
-
-        _param = self._start_sandbox_serialize(
-            sandbox_id=sandbox_id,
-            x_daytona_organization_id=x_daytona_organization_id,
-            _request_auth=_request_auth,
-            _content_type=_content_type,
-            _headers=_headers,
-            _host_index=_host_index
-        )
-
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Sandbox",
-        }
-        response_data = await self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
-        await response_data.read()
-        return self.api_client.response_deserialize(
-            response_data=response_data,
-            response_types_map=_response_types_map,
-        )
-
-
-    @validate_call
-    async def start_sandbox_without_preload_content(
-        self,
-        sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
-        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> RESTResponseType:
-        """Start sandbox
-
-
-        :param sandbox_id: ID of the sandbox (required)
-        :type sandbox_id: str
-        :param x_daytona_organization_id: Use with JWT to specify the organization ID
-        :type x_daytona_organization_id: str
-        :param _request_timeout: timeout setting for this request. If one
-                                 number provided, it will be total request
-                                 timeout. It can also be a pair (tuple) of
-                                 (connection, read) timeouts.
-        :type _request_timeout: int, tuple(int, int), optional
-        :param _request_auth: set to override the auth_settings for an a single
-                              request; this effectively ignores the
-                              authentication in the spec for a single request.
-        :type _request_auth: dict, optional
-        :param _content_type: force content-type for the request.
-        :type _content_type: str, Optional
-        :param _headers: set to override the headers for a single
-                         request; this effectively ignores the headers
-                         in the spec for a single request.
-        :type _headers: dict, optional
-        :param _host_index: set to override the host_index for a single
-                            request; this effectively ignores the host_index
-                            in the spec for a single request.
-        :type _host_index: int, optional
-        :return: Returns the result object.
-        """ # noqa: E501
-
-        _param = self._start_sandbox_serialize(
-            sandbox_id=sandbox_id,
-            x_daytona_organization_id=x_daytona_organization_id,
-            _request_auth=_request_auth,
-            _content_type=_content_type,
-            _headers=_headers,
-            _host_index=_host_index
-        )
-
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Sandbox",
-        }
-        response_data = await self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
-        return response_data.response
-
-
-    def _start_sandbox_serialize(
-        self,
-        sandbox_id,
-        x_daytona_organization_id,
-        _request_auth,
-        _content_type,
-        _headers,
-        _host_index,
-    ) -> RequestSerialized:
-
-        _host = None
-
-        _collection_formats: Dict[str, str] = {
-        }
-
-        _path_params: Dict[str, str] = {}
-        _query_params: List[Tuple[str, str]] = []
-        _header_params: Dict[str, Optional[str]] = _headers or {}
-        _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
-        ] = {}
-        _body_params: Optional[bytes] = None
-
-        # process the path parameters
-        if sandbox_id is not None:
-            _path_params['sandboxId'] = sandbox_id
         # process the query parameters
         # process the header parameters
         if x_daytona_organization_id is not None:
@@ -4606,7 +3789,7 @@ class SandboxApi:
 
         return self.api_client.param_serialize(
             method='POST',
-            resource_path='/sandbox/{sandboxId}/start',
+            resource_path='/sandbox/{sandboxIdOrName}/autoarchive/{interval}',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -4623,9 +3806,10 @@ class SandboxApi:
 
 
     @validate_call
-    async def stop_sandbox(
+    async def set_auto_delete_interval(
         self,
-        sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
+        sandbox_id_or_name: Annotated[StrictStr, Field(description="ID or name of the sandbox")],
+        interval: Annotated[Union[StrictFloat, StrictInt], Field(description="Auto-delete interval in minutes (negative value means disabled, 0 means delete immediately upon stopping)")],
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
@@ -4639,12 +3823,14 @@ class SandboxApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> None:
-        """Stop sandbox
+    ) -> Sandbox:
+        """Set sandbox auto-delete interval
 
 
-        :param sandbox_id: ID of the sandbox (required)
-        :type sandbox_id: str
+        :param sandbox_id_or_name: ID or name of the sandbox (required)
+        :type sandbox_id_or_name: str
+        :param interval: Auto-delete interval in minutes (negative value means disabled, 0 means delete immediately upon stopping) (required)
+        :type interval: float
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -4669,8 +3855,9 @@ class SandboxApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._stop_sandbox_serialize(
-            sandbox_id=sandbox_id,
+        _param = self._set_auto_delete_interval_serialize(
+            sandbox_id_or_name=sandbox_id_or_name,
+            interval=interval,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -4679,7 +3866,7 @@ class SandboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            '200': "Sandbox",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -4693,9 +3880,10 @@ class SandboxApi:
 
 
     @validate_call
-    async def stop_sandbox_with_http_info(
+    async def set_auto_delete_interval_with_http_info(
         self,
-        sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
+        sandbox_id_or_name: Annotated[StrictStr, Field(description="ID or name of the sandbox")],
+        interval: Annotated[Union[StrictFloat, StrictInt], Field(description="Auto-delete interval in minutes (negative value means disabled, 0 means delete immediately upon stopping)")],
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
@@ -4709,12 +3897,14 @@ class SandboxApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[None]:
-        """Stop sandbox
+    ) -> ApiResponse[Sandbox]:
+        """Set sandbox auto-delete interval
 
 
-        :param sandbox_id: ID of the sandbox (required)
-        :type sandbox_id: str
+        :param sandbox_id_or_name: ID or name of the sandbox (required)
+        :type sandbox_id_or_name: str
+        :param interval: Auto-delete interval in minutes (negative value means disabled, 0 means delete immediately upon stopping) (required)
+        :type interval: float
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -4739,8 +3929,9 @@ class SandboxApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._stop_sandbox_serialize(
-            sandbox_id=sandbox_id,
+        _param = self._set_auto_delete_interval_serialize(
+            sandbox_id_or_name=sandbox_id_or_name,
+            interval=interval,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -4749,7 +3940,7 @@ class SandboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            '200': "Sandbox",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -4763,9 +3954,10 @@ class SandboxApi:
 
 
     @validate_call
-    async def stop_sandbox_without_preload_content(
+    async def set_auto_delete_interval_without_preload_content(
         self,
-        sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
+        sandbox_id_or_name: Annotated[StrictStr, Field(description="ID or name of the sandbox")],
+        interval: Annotated[Union[StrictFloat, StrictInt], Field(description="Auto-delete interval in minutes (negative value means disabled, 0 means delete immediately upon stopping)")],
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
@@ -4780,11 +3972,13 @@ class SandboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Stop sandbox
+        """Set sandbox auto-delete interval
 
 
-        :param sandbox_id: ID of the sandbox (required)
-        :type sandbox_id: str
+        :param sandbox_id_or_name: ID or name of the sandbox (required)
+        :type sandbox_id_or_name: str
+        :param interval: Auto-delete interval in minutes (negative value means disabled, 0 means delete immediately upon stopping) (required)
+        :type interval: float
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -4809,8 +4003,9 @@ class SandboxApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._stop_sandbox_serialize(
-            sandbox_id=sandbox_id,
+        _param = self._set_auto_delete_interval_serialize(
+            sandbox_id_or_name=sandbox_id_or_name,
+            interval=interval,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -4819,7 +4014,7 @@ class SandboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            '200': "Sandbox",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -4828,9 +4023,10 @@ class SandboxApi:
         return response_data.response
 
 
-    def _stop_sandbox_serialize(
+    def _set_auto_delete_interval_serialize(
         self,
-        sandbox_id,
+        sandbox_id_or_name,
+        interval,
         x_daytona_organization_id,
         _request_auth,
         _content_type,
@@ -4853,8 +4049,10 @@ class SandboxApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
-        if sandbox_id is not None:
-            _path_params['sandboxId'] = sandbox_id
+        if sandbox_id_or_name is not None:
+            _path_params['sandboxIdOrName'] = sandbox_id_or_name
+        if interval is not None:
+            _path_params['interval'] = interval
         # process the query parameters
         # process the header parameters
         if x_daytona_organization_id is not None:
@@ -4863,6 +4061,13 @@ class SandboxApi:
         # process the body parameter
 
 
+        # set the HTTP header `Accept`
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
+                [
+                    'application/json'
+                ]
+            )
 
 
         # authentication setting
@@ -4873,7 +4078,844 @@ class SandboxApi:
 
         return self.api_client.param_serialize(
             method='POST',
-            resource_path='/sandbox/{sandboxId}/stop',
+            resource_path='/sandbox/{sandboxIdOrName}/autodelete/{interval}',
+            path_params=_path_params,
+            query_params=_query_params,
+            header_params=_header_params,
+            body=_body_params,
+            post_params=_form_params,
+            files=_files,
+            auth_settings=_auth_settings,
+            collection_formats=_collection_formats,
+            _host=_host,
+            _request_auth=_request_auth
+        )
+
+
+
+
+    @validate_call
+    async def set_autostop_interval(
+        self,
+        sandbox_id_or_name: Annotated[StrictStr, Field(description="ID or name of the sandbox")],
+        interval: Annotated[Union[StrictFloat, StrictInt], Field(description="Auto-stop interval in minutes (0 to disable)")],
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> Sandbox:
+        """Set sandbox auto-stop interval
+
+
+        :param sandbox_id_or_name: ID or name of the sandbox (required)
+        :type sandbox_id_or_name: str
+        :param interval: Auto-stop interval in minutes (0 to disable) (required)
+        :type interval: float
+        :param x_daytona_organization_id: Use with JWT to specify the organization ID
+        :type x_daytona_organization_id: str
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._set_autostop_interval_serialize(
+            sandbox_id_or_name=sandbox_id_or_name,
+            interval=interval,
+            x_daytona_organization_id=x_daytona_organization_id,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "Sandbox",
+        }
+        response_data = await self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        await response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        ).data
+
+
+    @validate_call
+    async def set_autostop_interval_with_http_info(
+        self,
+        sandbox_id_or_name: Annotated[StrictStr, Field(description="ID or name of the sandbox")],
+        interval: Annotated[Union[StrictFloat, StrictInt], Field(description="Auto-stop interval in minutes (0 to disable)")],
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> ApiResponse[Sandbox]:
+        """Set sandbox auto-stop interval
+
+
+        :param sandbox_id_or_name: ID or name of the sandbox (required)
+        :type sandbox_id_or_name: str
+        :param interval: Auto-stop interval in minutes (0 to disable) (required)
+        :type interval: float
+        :param x_daytona_organization_id: Use with JWT to specify the organization ID
+        :type x_daytona_organization_id: str
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._set_autostop_interval_serialize(
+            sandbox_id_or_name=sandbox_id_or_name,
+            interval=interval,
+            x_daytona_organization_id=x_daytona_organization_id,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "Sandbox",
+        }
+        response_data = await self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        await response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        )
+
+
+    @validate_call
+    async def set_autostop_interval_without_preload_content(
+        self,
+        sandbox_id_or_name: Annotated[StrictStr, Field(description="ID or name of the sandbox")],
+        interval: Annotated[Union[StrictFloat, StrictInt], Field(description="Auto-stop interval in minutes (0 to disable)")],
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> RESTResponseType:
+        """Set sandbox auto-stop interval
+
+
+        :param sandbox_id_or_name: ID or name of the sandbox (required)
+        :type sandbox_id_or_name: str
+        :param interval: Auto-stop interval in minutes (0 to disable) (required)
+        :type interval: float
+        :param x_daytona_organization_id: Use with JWT to specify the organization ID
+        :type x_daytona_organization_id: str
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._set_autostop_interval_serialize(
+            sandbox_id_or_name=sandbox_id_or_name,
+            interval=interval,
+            x_daytona_organization_id=x_daytona_organization_id,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "Sandbox",
+        }
+        response_data = await self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        return response_data.response
+
+
+    def _set_autostop_interval_serialize(
+        self,
+        sandbox_id_or_name,
+        interval,
+        x_daytona_organization_id,
+        _request_auth,
+        _content_type,
+        _headers,
+        _host_index,
+    ) -> RequestSerialized:
+
+        _host = None
+
+        _collection_formats: Dict[str, str] = {
+        }
+
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        ] = {}
+        _body_params: Optional[bytes] = None
+
+        # process the path parameters
+        if sandbox_id_or_name is not None:
+            _path_params['sandboxIdOrName'] = sandbox_id_or_name
+        if interval is not None:
+            _path_params['interval'] = interval
+        # process the query parameters
+        # process the header parameters
+        if x_daytona_organization_id is not None:
+            _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id
+        # process the form parameters
+        # process the body parameter
+
+
+        # set the HTTP header `Accept`
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
+                [
+                    'application/json'
+                ]
+            )
+
+
+        # authentication setting
+        _auth_settings: List[str] = [
+            'bearer', 
+            'oauth2'
+        ]
+
+        return self.api_client.param_serialize(
+            method='POST',
+            resource_path='/sandbox/{sandboxIdOrName}/autostop/{interval}',
+            path_params=_path_params,
+            query_params=_query_params,
+            header_params=_header_params,
+            body=_body_params,
+            post_params=_form_params,
+            files=_files,
+            auth_settings=_auth_settings,
+            collection_formats=_collection_formats,
+            _host=_host,
+            _request_auth=_request_auth
+        )
+
+
+
+
+    @validate_call
+    async def start_sandbox(
+        self,
+        sandbox_id_or_name: Annotated[StrictStr, Field(description="ID or name of the sandbox")],
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> Sandbox:
+        """Start sandbox
+
+
+        :param sandbox_id_or_name: ID or name of the sandbox (required)
+        :type sandbox_id_or_name: str
+        :param x_daytona_organization_id: Use with JWT to specify the organization ID
+        :type x_daytona_organization_id: str
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._start_sandbox_serialize(
+            sandbox_id_or_name=sandbox_id_or_name,
+            x_daytona_organization_id=x_daytona_organization_id,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "Sandbox",
+        }
+        response_data = await self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        await response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        ).data
+
+
+    @validate_call
+    async def start_sandbox_with_http_info(
+        self,
+        sandbox_id_or_name: Annotated[StrictStr, Field(description="ID or name of the sandbox")],
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> ApiResponse[Sandbox]:
+        """Start sandbox
+
+
+        :param sandbox_id_or_name: ID or name of the sandbox (required)
+        :type sandbox_id_or_name: str
+        :param x_daytona_organization_id: Use with JWT to specify the organization ID
+        :type x_daytona_organization_id: str
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._start_sandbox_serialize(
+            sandbox_id_or_name=sandbox_id_or_name,
+            x_daytona_organization_id=x_daytona_organization_id,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "Sandbox",
+        }
+        response_data = await self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        await response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        )
+
+
+    @validate_call
+    async def start_sandbox_without_preload_content(
+        self,
+        sandbox_id_or_name: Annotated[StrictStr, Field(description="ID or name of the sandbox")],
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> RESTResponseType:
+        """Start sandbox
+
+
+        :param sandbox_id_or_name: ID or name of the sandbox (required)
+        :type sandbox_id_or_name: str
+        :param x_daytona_organization_id: Use with JWT to specify the organization ID
+        :type x_daytona_organization_id: str
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._start_sandbox_serialize(
+            sandbox_id_or_name=sandbox_id_or_name,
+            x_daytona_organization_id=x_daytona_organization_id,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "Sandbox",
+        }
+        response_data = await self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        return response_data.response
+
+
+    def _start_sandbox_serialize(
+        self,
+        sandbox_id_or_name,
+        x_daytona_organization_id,
+        _request_auth,
+        _content_type,
+        _headers,
+        _host_index,
+    ) -> RequestSerialized:
+
+        _host = None
+
+        _collection_formats: Dict[str, str] = {
+        }
+
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        ] = {}
+        _body_params: Optional[bytes] = None
+
+        # process the path parameters
+        if sandbox_id_or_name is not None:
+            _path_params['sandboxIdOrName'] = sandbox_id_or_name
+        # process the query parameters
+        # process the header parameters
+        if x_daytona_organization_id is not None:
+            _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id
+        # process the form parameters
+        # process the body parameter
+
+
+        # set the HTTP header `Accept`
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
+                [
+                    'application/json'
+                ]
+            )
+
+
+        # authentication setting
+        _auth_settings: List[str] = [
+            'bearer', 
+            'oauth2'
+        ]
+
+        return self.api_client.param_serialize(
+            method='POST',
+            resource_path='/sandbox/{sandboxIdOrName}/start',
+            path_params=_path_params,
+            query_params=_query_params,
+            header_params=_header_params,
+            body=_body_params,
+            post_params=_form_params,
+            files=_files,
+            auth_settings=_auth_settings,
+            collection_formats=_collection_formats,
+            _host=_host,
+            _request_auth=_request_auth
+        )
+
+
+
+
+    @validate_call
+    async def stop_sandbox(
+        self,
+        sandbox_id_or_name: Annotated[StrictStr, Field(description="ID or name of the sandbox")],
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> Sandbox:
+        """Stop sandbox
+
+
+        :param sandbox_id_or_name: ID or name of the sandbox (required)
+        :type sandbox_id_or_name: str
+        :param x_daytona_organization_id: Use with JWT to specify the organization ID
+        :type x_daytona_organization_id: str
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._stop_sandbox_serialize(
+            sandbox_id_or_name=sandbox_id_or_name,
+            x_daytona_organization_id=x_daytona_organization_id,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "Sandbox",
+        }
+        response_data = await self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        await response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        ).data
+
+
+    @validate_call
+    async def stop_sandbox_with_http_info(
+        self,
+        sandbox_id_or_name: Annotated[StrictStr, Field(description="ID or name of the sandbox")],
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> ApiResponse[Sandbox]:
+        """Stop sandbox
+
+
+        :param sandbox_id_or_name: ID or name of the sandbox (required)
+        :type sandbox_id_or_name: str
+        :param x_daytona_organization_id: Use with JWT to specify the organization ID
+        :type x_daytona_organization_id: str
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._stop_sandbox_serialize(
+            sandbox_id_or_name=sandbox_id_or_name,
+            x_daytona_organization_id=x_daytona_organization_id,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "Sandbox",
+        }
+        response_data = await self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        await response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        )
+
+
+    @validate_call
+    async def stop_sandbox_without_preload_content(
+        self,
+        sandbox_id_or_name: Annotated[StrictStr, Field(description="ID or name of the sandbox")],
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> RESTResponseType:
+        """Stop sandbox
+
+
+        :param sandbox_id_or_name: ID or name of the sandbox (required)
+        :type sandbox_id_or_name: str
+        :param x_daytona_organization_id: Use with JWT to specify the organization ID
+        :type x_daytona_organization_id: str
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._stop_sandbox_serialize(
+            sandbox_id_or_name=sandbox_id_or_name,
+            x_daytona_organization_id=x_daytona_organization_id,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "Sandbox",
+        }
+        response_data = await self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        return response_data.response
+
+
+    def _stop_sandbox_serialize(
+        self,
+        sandbox_id_or_name,
+        x_daytona_organization_id,
+        _request_auth,
+        _content_type,
+        _headers,
+        _host_index,
+    ) -> RequestSerialized:
+
+        _host = None
+
+        _collection_formats: Dict[str, str] = {
+        }
+
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        ] = {}
+        _body_params: Optional[bytes] = None
+
+        # process the path parameters
+        if sandbox_id_or_name is not None:
+            _path_params['sandboxIdOrName'] = sandbox_id_or_name
+        # process the query parameters
+        # process the header parameters
+        if x_daytona_organization_id is not None:
+            _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id
+        # process the form parameters
+        # process the body parameter
+
+
+        # set the HTTP header `Accept`
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
+                [
+                    'application/json'
+                ]
+            )
+
+
+        # authentication setting
+        _auth_settings: List[str] = [
+            'bearer', 
+            'oauth2'
+        ]
+
+        return self.api_client.param_serialize(
+            method='POST',
+            resource_path='/sandbox/{sandboxIdOrName}/stop',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -4892,7 +4934,7 @@ class SandboxApi:
     @validate_call
     async def update_public_status(
         self,
-        sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
+        sandbox_id_or_name: Annotated[StrictStr, Field(description="ID or name of the sandbox")],
         is_public: Annotated[StrictBool, Field(description="Public status to set")],
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
@@ -4907,12 +4949,12 @@ class SandboxApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> None:
+    ) -> Sandbox:
         """Update public status
 
 
-        :param sandbox_id: ID of the sandbox (required)
-        :type sandbox_id: str
+        :param sandbox_id_or_name: ID or name of the sandbox (required)
+        :type sandbox_id_or_name: str
         :param is_public: Public status to set (required)
         :type is_public: bool
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -4940,7 +4982,7 @@ class SandboxApi:
         """ # noqa: E501
 
         _param = self._update_public_status_serialize(
-            sandbox_id=sandbox_id,
+            sandbox_id_or_name=sandbox_id_or_name,
             is_public=is_public,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -4950,7 +4992,7 @@ class SandboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '201': None,
+            '200': "Sandbox",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -4966,7 +5008,7 @@ class SandboxApi:
     @validate_call
     async def update_public_status_with_http_info(
         self,
-        sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
+        sandbox_id_or_name: Annotated[StrictStr, Field(description="ID or name of the sandbox")],
         is_public: Annotated[StrictBool, Field(description="Public status to set")],
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
@@ -4981,12 +5023,12 @@ class SandboxApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[None]:
+    ) -> ApiResponse[Sandbox]:
         """Update public status
 
 
-        :param sandbox_id: ID of the sandbox (required)
-        :type sandbox_id: str
+        :param sandbox_id_or_name: ID or name of the sandbox (required)
+        :type sandbox_id_or_name: str
         :param is_public: Public status to set (required)
         :type is_public: bool
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -5014,7 +5056,7 @@ class SandboxApi:
         """ # noqa: E501
 
         _param = self._update_public_status_serialize(
-            sandbox_id=sandbox_id,
+            sandbox_id_or_name=sandbox_id_or_name,
             is_public=is_public,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -5024,7 +5066,7 @@ class SandboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '201': None,
+            '200': "Sandbox",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -5040,7 +5082,7 @@ class SandboxApi:
     @validate_call
     async def update_public_status_without_preload_content(
         self,
-        sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
+        sandbox_id_or_name: Annotated[StrictStr, Field(description="ID or name of the sandbox")],
         is_public: Annotated[StrictBool, Field(description="Public status to set")],
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
@@ -5059,8 +5101,8 @@ class SandboxApi:
         """Update public status
 
 
-        :param sandbox_id: ID of the sandbox (required)
-        :type sandbox_id: str
+        :param sandbox_id_or_name: ID or name of the sandbox (required)
+        :type sandbox_id_or_name: str
         :param is_public: Public status to set (required)
         :type is_public: bool
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -5088,7 +5130,7 @@ class SandboxApi:
         """ # noqa: E501
 
         _param = self._update_public_status_serialize(
-            sandbox_id=sandbox_id,
+            sandbox_id_or_name=sandbox_id_or_name,
             is_public=is_public,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -5098,7 +5140,7 @@ class SandboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '201': None,
+            '200': "Sandbox",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -5109,7 +5151,7 @@ class SandboxApi:
 
     def _update_public_status_serialize(
         self,
-        sandbox_id,
+        sandbox_id_or_name,
         is_public,
         x_daytona_organization_id,
         _request_auth,
@@ -5133,8 +5175,8 @@ class SandboxApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
-        if sandbox_id is not None:
-            _path_params['sandboxId'] = sandbox_id
+        if sandbox_id_or_name is not None:
+            _path_params['sandboxIdOrName'] = sandbox_id_or_name
         if is_public is not None:
             _path_params['isPublic'] = is_public
         # process the query parameters
@@ -5145,6 +5187,13 @@ class SandboxApi:
         # process the body parameter
 
 
+        # set the HTTP header `Accept`
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
+                [
+                    'application/json'
+                ]
+            )
 
 
         # authentication setting
@@ -5155,7 +5204,7 @@ class SandboxApi:
 
         return self.api_client.param_serialize(
             method='POST',
-            resource_path='/sandbox/{sandboxId}/public/{isPublic}',
+            resource_path='/sandbox/{sandboxIdOrName}/public/{isPublic}',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -5174,7 +5223,7 @@ class SandboxApi:
     @validate_call
     async def update_sandbox_state(
         self,
-        sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
+        sandbox_id_or_name: Annotated[StrictStr, Field(description="ID or name of the sandbox")],
         update_sandbox_state_dto: UpdateSandboxStateDto,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
@@ -5193,8 +5242,8 @@ class SandboxApi:
         """Update sandbox state
 
 
-        :param sandbox_id: ID of the sandbox (required)
-        :type sandbox_id: str
+        :param sandbox_id_or_name: ID or name of the sandbox (required)
+        :type sandbox_id_or_name: str
         :param update_sandbox_state_dto: (required)
         :type update_sandbox_state_dto: UpdateSandboxStateDto
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -5222,7 +5271,7 @@ class SandboxApi:
         """ # noqa: E501
 
         _param = self._update_sandbox_state_serialize(
-            sandbox_id=sandbox_id,
+            sandbox_id_or_name=sandbox_id_or_name,
             update_sandbox_state_dto=update_sandbox_state_dto,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -5248,7 +5297,7 @@ class SandboxApi:
     @validate_call
     async def update_sandbox_state_with_http_info(
         self,
-        sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
+        sandbox_id_or_name: Annotated[StrictStr, Field(description="ID or name of the sandbox")],
         update_sandbox_state_dto: UpdateSandboxStateDto,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
@@ -5267,8 +5316,8 @@ class SandboxApi:
         """Update sandbox state
 
 
-        :param sandbox_id: ID of the sandbox (required)
-        :type sandbox_id: str
+        :param sandbox_id_or_name: ID or name of the sandbox (required)
+        :type sandbox_id_or_name: str
         :param update_sandbox_state_dto: (required)
         :type update_sandbox_state_dto: UpdateSandboxStateDto
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -5296,7 +5345,7 @@ class SandboxApi:
         """ # noqa: E501
 
         _param = self._update_sandbox_state_serialize(
-            sandbox_id=sandbox_id,
+            sandbox_id_or_name=sandbox_id_or_name,
             update_sandbox_state_dto=update_sandbox_state_dto,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -5322,7 +5371,7 @@ class SandboxApi:
     @validate_call
     async def update_sandbox_state_without_preload_content(
         self,
-        sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
+        sandbox_id_or_name: Annotated[StrictStr, Field(description="ID or name of the sandbox")],
         update_sandbox_state_dto: UpdateSandboxStateDto,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
@@ -5341,8 +5390,8 @@ class SandboxApi:
         """Update sandbox state
 
 
-        :param sandbox_id: ID of the sandbox (required)
-        :type sandbox_id: str
+        :param sandbox_id_or_name: ID or name of the sandbox (required)
+        :type sandbox_id_or_name: str
         :param update_sandbox_state_dto: (required)
         :type update_sandbox_state_dto: UpdateSandboxStateDto
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -5370,7 +5419,7 @@ class SandboxApi:
         """ # noqa: E501
 
         _param = self._update_sandbox_state_serialize(
-            sandbox_id=sandbox_id,
+            sandbox_id_or_name=sandbox_id_or_name,
             update_sandbox_state_dto=update_sandbox_state_dto,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -5391,7 +5440,7 @@ class SandboxApi:
 
     def _update_sandbox_state_serialize(
         self,
-        sandbox_id,
+        sandbox_id_or_name,
         update_sandbox_state_dto,
         x_daytona_organization_id,
         _request_auth,
@@ -5415,8 +5464,8 @@ class SandboxApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
-        if sandbox_id is not None:
-            _path_params['sandboxId'] = sandbox_id
+        if sandbox_id_or_name is not None:
+            _path_params['sandboxIdOrName'] = sandbox_id_or_name
         # process the query parameters
         # process the header parameters
         if x_daytona_organization_id is not None:
@@ -5450,7 +5499,7 @@ class SandboxApi:
 
         return self.api_client.param_serialize(
             method='PUT',
-            resource_path='/sandbox/{sandboxId}/state',
+            resource_path='/sandbox/{sandboxIdOrName}/state',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,

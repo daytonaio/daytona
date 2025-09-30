@@ -16,7 +16,8 @@ export class SandboxAccessGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest()
     // TODO: remove deprecated request.params.workspaceId param once we remove the deprecated workspace controller
-    const sandboxId: string = request.params.sandboxId || request.params.id || request.params.workspaceId
+    const sandboxId: string =
+      request.params.sandboxIdOrName || request.params.sandboxId || request.params.id || request.params.workspaceId
 
     // TODO: initialize authContext safely
     const authContext: BaseAuthContext = request.user

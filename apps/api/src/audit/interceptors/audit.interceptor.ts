@@ -115,16 +115,22 @@ export class AuditInterceptor implements NestInterceptor {
     return result?.organizationId || request.user.organizationId
   }
 
+  /**
+   * Resolve the target ID from the result or request
+   * If the target ID is not found, return null
+   * We prioritize the result over the request since the request can contain sandbox name instead of the ID
+   * and we want to avoid creating audit logs with a sandbox name if possible
+   */
   private resolveTargetId(auditContext: AuditContext, request: RequestWithUser, result?: any): string | null {
-    if (auditContext.targetIdFromRequest) {
-      const targetId = auditContext.targetIdFromRequest(request)
+    if (auditContext.targetIdFromResult && result) {
+      const targetId = auditContext.targetIdFromResult(result)
       if (targetId) {
         return targetId
       }
     }
 
-    if (auditContext.targetIdFromResult && result) {
-      const targetId = auditContext.targetIdFromResult(result)
+    if (auditContext.targetIdFromRequest) {
+      const targetId = auditContext.targetIdFromRequest(request)
       if (targetId) {
         return targetId
       }
