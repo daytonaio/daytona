@@ -54,7 +54,7 @@ class PreviewApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> None:
+    ) -> bool:
         """Check if user has access to the sandbox
 
 
@@ -91,7 +91,7 @@ class PreviewApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            '200': "bool",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -120,7 +120,7 @@ class PreviewApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[None]:
+    ) -> ApiResponse[bool]:
         """Check if user has access to the sandbox
 
 
@@ -157,7 +157,7 @@ class PreviewApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            '200': "bool",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -223,7 +223,7 @@ class PreviewApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            '200': "bool",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -264,6 +264,13 @@ class PreviewApi:
         # process the body parameter
 
 
+        # set the HTTP header `Accept`
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
+                [
+                    'application/json'
+                ]
+            )
 
 
         # authentication setting

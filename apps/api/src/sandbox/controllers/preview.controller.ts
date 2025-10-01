@@ -119,6 +119,11 @@ export class PreviewController {
     summary: 'Check if user has access to the sandbox',
     operationId: 'hasSandboxAccess',
   })
+  @ApiResponse({
+    status: 200,
+    description: 'User access status to the sandbox',
+    type: Boolean,
+  })
   @UseGuards(CombinedAuthGuard)
   @ApiOAuth2(['openid', 'profile', 'email'])
   @ApiBearerAuth()

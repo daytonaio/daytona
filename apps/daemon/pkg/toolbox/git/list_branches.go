@@ -11,6 +11,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// ListBranches godoc
+//
+//	@Summary		List branches
+//	@Description	Get a list of all branches in the Git repository
+//	@Tags			git
+//	@Produce		json
+//	@Param			path	query		string	true	"Repository path"
+//	@Success		200		{object}	ListBranchResponse
+//	@Router			/git/branches [get]
+//
+//	@id				ListBranches
 func ListBranches(c *gin.Context) {
 	path := c.Query("path")
 	if path == "" {

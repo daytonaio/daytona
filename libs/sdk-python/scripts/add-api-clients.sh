@@ -10,7 +10,9 @@ if [ -n "$PYPI_PKG_VERSION" ]; then
   echo "Adding API clients at version $PYPI_PKG_VERSION"
   poetry add \
     "daytona_api_client@$PYPI_PKG_VERSION" \
-    "daytona_api_client_async@$PYPI_PKG_VERSION"
+    "daytona_api_client_async@$PYPI_PKG_VERSION"\
+    "daytona_toolbox_api_client@$PYPI_PKG_VERSION"\
+    "daytona_toolbox_api_client_async@$PYPI_PKG_VERSION"
 else
   echo "PYPI_PKG_VERSION not set; skipping add-api-clients"
 fi
