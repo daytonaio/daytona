@@ -1,6 +1,6 @@
 {
   "name": "@daytonaio/api-client",
-  "version": "0.103.0-rc.3",
+  "version": "0.0.0-dev",
   "description": "OpenAPI client for @daytonaio/api-client",
   "author": "OpenAPI-Generator Contributors",
   "repository": {
