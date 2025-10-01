@@ -21,7 +21,6 @@ import {
 import { createContext } from 'react'
 
 export interface SandboxParams {
-  apiKey?: string
   language?: CodeLanguage
   resources: Resources
   createSandboxBaseParams: CreateSandboxBaseParams

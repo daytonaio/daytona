@@ -8,29 +8,17 @@ import StackedInputFormControl from '../../Inputs/StackedInputFormControl'
 import FormSelectInput from '../../Inputs/SelectInput'
 import FormNumberInput from '../../Inputs/NumberInput'
 import { CodeLanguage, Resources, CreateSandboxBaseParams } from '@daytonaio/sdk-typescript/src'
-import { ApiKeyList } from '@daytonaio/api-client'
 import { usePlayground } from '@/hooks/usePlayground'
 import { NumberParameterFormItem, ParameterFormItem } from '@/enums/Playground'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 
-type SandboxManagmentParametersProps = {
-  apiKeys: (ApiKeyList & { label: string })[] // For FormSelectInput selectOptions prop compatibility
-  apiKeysLoading: boolean
-}
-
-const SandboxManagmentParameters: React.FC<SandboxManagmentParametersProps> = ({ apiKeys, apiKeysLoading }) => {
+const SandboxManagmentParameters: React.FC = () => {
   const { sandboxParametersState, setSandboxParameterValue } = usePlayground()
-  const [sandboxApiKey, setSandboxApiKey] = useState<string | undefined>(sandboxParametersState['apiKey'])
   const [sandboxLanguage, setSandboxLanguage] = useState<CodeLanguage | undefined>(sandboxParametersState['language'])
   const [resources, setResources] = useState<Resources>(sandboxParametersState['resources'])
   const [sandboxFromImageParams, setSandboxFromImageParams] = useState<CreateSandboxBaseParams>(
     sandboxParametersState['createSandboxBaseParams'],
   )
-  const apiKeyFormData: ParameterFormItem = {
-    label: 'API key',
-    key: 'apiKey',
-    placeholder: 'API key',
-  }
 
   const languageFormData: ParameterFormItem = {
     label: 'Language',
@@ -67,24 +55,8 @@ const SandboxManagmentParameters: React.FC<SandboxManagmentParametersProps> = ({
     { label: 'Delete (min):', key: 'autoDeleteInterval', min: -1, max: Infinity, placeholder: '' },
   ]
 
-  useEffect(() => {
-    if (!apiKeysLoading && !apiKeys.length) setSandboxApiKey('default') // If no available keys set to default value
-  }, [apiKeysLoading, apiKeys])
-
   return (
     <>
-      <StackedInputFormControl formItem={apiKeyFormData}>
-        <FormSelectInput
-          selectOptions={apiKeys}
-          selectValue={sandboxApiKey}
-          formItem={apiKeyFormData}
-          onChangeHandler={(value) => {
-            setSandboxApiKey(value)
-            setSandboxParameterValue(apiKeyFormData.key as 'apiKey', value)
-          }}
-          loading={apiKeysLoading}
-        />
-      </StackedInputFormControl>
       <StackedInputFormControl formItem={languageFormData}>
         <FormSelectInput
           selectOptions={languageOptions}

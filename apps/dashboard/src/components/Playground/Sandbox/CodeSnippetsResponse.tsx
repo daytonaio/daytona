@@ -35,7 +35,7 @@ const SandboxCodeSnippetsResponse: React.FC = () => {
 }
 console.log(greet("Daytona"));`
   sandboxParametersState['shellCodeToRun'] = 'ls -la'
-  const useConfigObject = sandboxParametersState['apiKey']
+  const useConfigObject = false
   const useLanguageParam = sandboxParametersState['language']
   const useResources = objectHasAnyValue(sandboxParametersState['resources'])
   const createSandboxParamsExist = objectHasAnyValue(sandboxParametersState['createSandboxBaseParams'])
@@ -47,9 +47,7 @@ console.log(greet("Daytona"));`
     typeScriptCodeSnippet += '\nasync function main() {'
     if (useConfigObject) {
       pythonCodeSnippet += '\n# Define the configuration\n'
-      pythonCodeSnippet += `config = DaytonaConfig(api_key="${sandboxParametersState['apiKey']}")\n`
       typeScriptCodeSnippet += '\n\t// Define the configuration\n'
-      typeScriptCodeSnippet += `\tconst config: DaytonaConfig = { apiKey: "${sandboxParametersState['apiKey']}" }\n`
     }
     pythonCodeSnippet += `\n# Initialize the Daytona client\n`
     typeScriptCodeSnippet += `\n\t// Initialize the Daytona client\n`

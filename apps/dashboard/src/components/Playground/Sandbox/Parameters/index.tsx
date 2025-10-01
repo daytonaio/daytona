@@ -5,40 +5,14 @@
 
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion'
 import { SandboxParametersSections, sandboxParametersSectionsData } from '@/enums/Playground'
-import { ApiKeyList } from '@daytonaio/api-client'
-import { useApi } from '@/hooks/useApi'
-import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
-import { handleApiError } from '@/lib/error-handling'
 import SandboxManagmentParameters from './Managment'
 import { Plus, Minus } from 'lucide-react'
-import { useState, useEffect, useCallback } from 'react'
+import { useState } from 'react'
 
 const SandboxParameters: React.FC = () => {
   const [openedParametersSections, setOpenedParametersSections] = useState<SandboxParametersSections[]>([
     SandboxParametersSections.SANDBOX_MANAGMENT,
   ])
-
-  // Available API keys -> fetch here instead of in SandboxManagmentParameters to prevent fetch on every accordion open/close
-  const [apiKeys, setApiKeys] = useState<ApiKeyList[]>([])
-  const [apiKeysLoading, setApiKeysLoading] = useState(true)
-  const { apiKeyApi } = useApi()
-  const { selectedOrganization } = useSelectedOrganization()
-  const fetchKeys = useCallback(async () => {
-    if (!selectedOrganization) return
-    setApiKeysLoading(true)
-    try {
-      const response = await apiKeyApi.listApiKeys(selectedOrganization.id)
-      setApiKeys(response.data)
-    } catch (error) {
-      handleApiError(error, 'Failed to fetch API keys')
-    } finally {
-      setApiKeysLoading(false)
-    }
-  }, [apiKeyApi, selectedOrganization])
-
-  useEffect(() => {
-    fetchKeys()
-  }, [fetchKeys])
 
   return (
     <div className="flex flex-col space-y-2">
@@ -59,12 +33,7 @@ const SandboxParameters: React.FC = () => {
               <AccordionContent>
                 {!isCollapsed && (
                   <div className="px-2 space-y-4">
-                    {section.value === SandboxParametersSections.SANDBOX_MANAGMENT && (
-                      <SandboxManagmentParameters
-                        apiKeys={apiKeys.map((apiKey) => ({ ...apiKey, label: apiKey.name }))}
-                        apiKeysLoading={apiKeysLoading}
-                      />
-                    )}
+                    {section.value === SandboxParametersSections.SANDBOX_MANAGMENT && <SandboxManagmentParameters />}
                   </div>
                 )}
               </AccordionContent>
