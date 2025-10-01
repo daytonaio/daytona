@@ -79,18 +79,6 @@ export class RunnerDto {
   @IsEnum(SandboxClass)
   class: SandboxClass
 
-  @ApiProperty({
-    description: 'The current usage of the runner',
-    example: 2,
-  })
-  used: number
-
-  @ApiProperty({
-    description: 'The capacity of the runner',
-    example: 10,
-  })
-  capacity: number
-
   @ApiPropertyOptional({
     description: 'Current CPU usage percentage',
     example: 45.6,
@@ -199,8 +187,6 @@ export class RunnerDto {
       gpu: runner.gpu,
       gpuType: runner.gpuType,
       class: runner.class,
-      used: runner.used,
-      capacity: runner.capacity,
       currentCpuUsagePercentage: runner.currentCpuUsagePercentage,
       currentMemoryUsagePercentage: runner.currentMemoryUsagePercentage,
       currentDiskUsagePercentage: runner.currentDiskUsagePercentage,

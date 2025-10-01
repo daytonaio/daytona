@@ -80,12 +80,6 @@ export interface CreateRunner {
   class: CreateRunnerClassEnum
   /**
    *
-   * @type {number}
-   * @memberof CreateRunner
-   */
-  capacity: number
-  /**
-   *
    * @type {string}
    * @memberof CreateRunner
    */

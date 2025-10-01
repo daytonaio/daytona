@@ -6,7 +6,7 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Cron, CronExpression } from '@nestjs/schedule'
-import { FindOptionsWhere, In, Not, Raw, Repository } from 'typeorm'
+import { FindOptionsWhere, In, MoreThanOrEqual, Not, Repository } from 'typeorm'
 import { Runner } from '../entities/runner.entity'
 import { CreateRunnerDto } from '../dto/create-runner.dto'
 import { SandboxClass } from '../enums/sandbox-class.enum'
@@ -23,6 +23,7 @@ import { Snapshot } from '../entities/snapshot.entity'
 import { RunnerSnapshotDto } from '../dto/runner-snapshot.dto'
 import { RunnerAdapterFactory, RunnerInfo } from '../runner-adapter/runnerAdapter'
 import { RedisLockProvider } from '../common/redis-lock.provider'
+import { TypedConfigService } from '../../config/typed-config.service'
 
 @Injectable()
 export class RunnerService {
@@ -39,6 +40,7 @@ export class RunnerService {
     @InjectRepository(Snapshot)
     private readonly snapshotRepository: Repository<Snapshot>,
     private readonly redisLockProvider: RedisLockProvider,
+    private readonly configService: TypedConfigService,
   ) {}
 
   async create(createRunnerDto: CreateRunnerDto): Promise<Runner> {
@@ -60,8 +62,6 @@ export class RunnerService {
     runner.diskGiB = createRunnerDto.diskGiB
     runner.gpu = createRunnerDto.gpu
     runner.gpuType = createRunnerDto.gpuType
-    runner.used = 0
-    runner.capacity = createRunnerDto.capacity
     runner.region = createRunnerDto.region
     runner.class = createRunnerDto.class
     runner.version = createRunnerDto.version
@@ -115,7 +115,9 @@ export class RunnerService {
     const runnerFilter: FindOptionsWhere<Runner> = {
       state: RunnerState.READY,
       unschedulable: Not(true),
-      used: Raw((alias) => `${alias} < capacity`),
+      availabilityScore: params.availabilityScoreThreshold
+        ? MoreThanOrEqual(params.availabilityScoreThreshold)
+        : MoreThanOrEqual(this.configService.getOrThrow('runnerUsage.availabilityScoreThreshold')),
     }
 
     if (params.snapshotRef !== undefined) {
@@ -153,7 +155,7 @@ export class RunnerService {
       where: runnerFilter,
     })
 
-    return runners.sort((a, b) => a.used / a.capacity - b.used / b.capacity).slice(0, 10)
+    return runners.sort((a, b) => b.availabilityScore - a.availabilityScore).slice(0, 10)
   }
 
   async remove(id: string): Promise<void> {
@@ -165,13 +167,6 @@ export class RunnerService {
     if (![SandboxState.DESTROYED, SandboxState.CREATING, SandboxState.ARCHIVED].includes(event.newState)) {
       return
     }
-
-    const runner = await this.runnerRepository.findOne({ where: { id: event.sandbox.runnerId } })
-    if (!runner) {
-      throw new Error('Runner not found, cannot recalculate usage')
-    }
-
-    await this.recalculateRunnerUsage(runner)
   }
 
   private async updateRunnerState(runnerId: string, newState: RunnerState): Promise<void> {
@@ -237,7 +232,6 @@ export class RunnerService {
                 }
 
                 await this.updateRunnerStatus(runner.id, runnerInfo)
-                await this.recalculateRunnerUsage(runner)
               })(),
               new Promise((_, reject) => {
                 timeoutId = setTimeout(() => {
@@ -312,7 +306,6 @@ export class RunnerService {
         allocatedCpu: updateData.currentAllocatedCpu,
         allocatedMemoryGiB: updateData.currentAllocatedMemoryGiB,
         allocatedDiskGiB: updateData.currentAllocatedDiskGiB,
-        capacity: runner.capacity,
         runnerCpu: runner.cpu,
         runnerMemoryGiB: runner.memoryGiB,
         runnerDiskGiB: runner.diskGiB,
@@ -322,19 +315,6 @@ export class RunnerService {
     }
 
     await this.runnerRepository.update(runnerId, updateData)
-  }
-
-  async recalculateRunnerUsage(runner: Runner) {
-    const sandboxes = await this.sandboxRepository.find({
-      where: {
-        runnerId: runner.id,
-        state: Not(SandboxState.DESTROYED),
-      },
-    })
-
-    await this.runnerRepository.update(runner.id, {
-      used: sandboxes.length,
-    })
   }
 
   private isValidClass(sandboxClass: SandboxClass): boolean {
@@ -354,13 +334,11 @@ export class RunnerService {
   async getRandomAvailableRunner(params: GetRunnerParams): Promise<Runner> {
     const availableRunners = await this.findAvailableRunners(params)
 
-    //  TODO: implement a better algorithm to get a random available runner based on the runner's usage
-
     if (availableRunners.length === 0) {
       throw new BadRequestError('No available runners')
     }
 
-    // Get random runner from available runners using inclusive bounds
+    // Get random runner from the best available runners
     const randomIntFromInterval = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1) + min)
 
     return availableRunners[randomIntFromInterval(0, availableRunners.length - 1)]
@@ -444,61 +422,112 @@ export class RunnerService {
   }
 
   private calculateAvailabilityScore(params: AvailabilityScoreParams): number {
-    let penalty = 0
+    return this.calculateTOPSISScore(params)
+  }
 
-    // CPU Penalty (reduced impact, starts at 40%)
-    if (params.cpuUsage > 0) {
-      const low = (Math.min(params.cpuUsage, 40) / 40) * 1 // 0-40%: gradual 0-1 points
-      const medium = params.cpuUsage > 40 ? ((Math.min(params.cpuUsage, 85) - 40) / 45) * 18 : 0 // 40-85%: 18 more points
-      const high = params.cpuUsage > 85 ? ((Math.min(params.cpuUsage, 95) - 85) / 10) * 12 : 0 // 85-95%: 12 more points
-      const critical = params.cpuUsage > 95 ? (params.cpuUsage - 95) * 3 : 0 // 95%+: 3 points per % over 95%
-      penalty += low + medium + high + critical
+  private calculateTOPSISScore(params: AvailabilityScoreParams): number {
+    // Define ideal (best) and anti-ideal (worst) values
+    const ideal = {
+      cpu: 0,
+      memory: 0,
+      disk: 0,
+      allocCpu: 100, // 100% means no overallocation
+      allocMem: 100,
+      allocDisk: 100,
     }
 
-    // RAM Penalty (starts at 40%, high impact, critical at 85%)
-    if (params.memoryUsage > 0) {
-      const low = (Math.min(params.memoryUsage, 40) / 40) * 3 // 0-40%: gradual 0-3 points
-      const medium = params.memoryUsage > 40 ? ((Math.min(params.memoryUsage, 85) - 40) / 45) * 35 : 0 // 40-85%: 35 more points
-      const critical = params.memoryUsage > 85 ? (params.memoryUsage - 85) * 6 : 0 // 85%+: 6 points per % over 85%
-      penalty += low + medium + critical
+    const antiIdeal = {
+      cpu: 100,
+      memory: 100,
+      disk: 100,
+      allocCpu: 500, // 500% means severe overallocation
+      allocMem: 500,
+      allocDisk: 500,
     }
 
-    // Disk Penalty (high impact, critical at 85%)
-    if (params.diskUsage > 0) {
-      const low = (Math.min(params.diskUsage, 60) / 60) * 3 // 0-60%: gradual 0-3 points
-      const medium = params.diskUsage > 60 ? ((Math.min(params.diskUsage, 85) - 60) / 25) * 25 : 0 // 60-85%: 25 more points
-      const critical = params.diskUsage > 85 ? (params.diskUsage - 85) * 7 : 0 // 85%+: 7 points per % over 85%
-      penalty += low + medium + critical
-    }
+    // Weights based on your requirements
+    const weights = [
+      this.configService.getOrThrow('runnerUsage.cpuUsageWeight'),
+      this.configService.getOrThrow('runnerUsage.memoryUsageWeight'),
+      this.configService.getOrThrow('runnerUsage.diskUsageWeight'),
+      this.configService.getOrThrow('runnerUsage.allocatedCpuWeight'),
+      this.configService.getOrThrow('runnerUsage.allocatedMemoryWeight'),
+      this.configService.getOrThrow('runnerUsage.allocatedDiskWeight'),
+    ]
 
-    // Allocated CPU Ratio Penalty (minimal impact, starts at 250% of runner CPU capacity)
+    const cpuPenaltyExponent = this.configService.getOrThrow('runnerUsage.cpuPenaltyExponent')
+    const memoryPenaltyExponent = this.configService.getOrThrow('runnerUsage.memoryPenaltyExponent')
+    const diskPenaltyExponent = this.configService.getOrThrow('runnerUsage.diskPenaltyExponent')
+
+    const cpuPenaltyThreshold = this.configService.getOrThrow('runnerUsage.cpuPenaltyThreshold')
+    const memoryPenaltyThreshold = this.configService.getOrThrow('runnerUsage.memoryPenaltyThreshold')
+    const diskPenaltyThreshold = this.configService.getOrThrow('runnerUsage.diskPenaltyThreshold')
+
+    // Calculate allocation ratios
     const allocatedCpuRatio = (params.allocatedCpu / params.runnerCpu) * 100
-    if (allocatedCpuRatio > 250) {
-      const low = allocatedCpuRatio > 250 ? ((Math.min(allocatedCpuRatio, 300) - 250) / 50) * 0.5 : 0 // 250-300%: 0.5 points
-      const medium = allocatedCpuRatio > 300 ? ((Math.min(allocatedCpuRatio, 350) - 300) / 50) * 1 : 0 // 300-350%: 1 more points
-      const critical = allocatedCpuRatio > 350 ? (allocatedCpuRatio - 350) * 0.025 : 0 // 350%+: 0.025 points per % over 350%
-      penalty += low + medium + critical
-    }
-
-    // Allocated Memory Ratio Penalty (minimal impact, starts at 250% of runner memory capacity)
     const allocatedMemoryRatio = (params.allocatedMemoryGiB / params.runnerMemoryGiB) * 100
-    if (allocatedMemoryRatio > 250) {
-      const low = allocatedMemoryRatio > 250 ? ((Math.min(allocatedMemoryRatio, 300) - 250) / 50) * 0.5 : 0 // 250-300%: 0.5 points
-      const medium = allocatedMemoryRatio > 300 ? ((Math.min(allocatedMemoryRatio, 350) - 300) / 50) * 1 : 0 // 300-350%: 1 more points
-      const critical = allocatedMemoryRatio > 350 ? (allocatedMemoryRatio - 350) * 0.025 : 0 // 350%+: 0.025 points per % over 350%
-      penalty += low + medium + critical
-    }
-
-    // Allocated Disk Ratio Penalty (minimal impact, starts at 250% of runner disk capacity)
     const allocatedDiskRatio = (params.allocatedDiskGiB / params.runnerDiskGiB) * 100
-    if (allocatedDiskRatio > 250) {
-      const low = allocatedDiskRatio > 250 ? ((Math.min(allocatedDiskRatio, 300) - 250) / 50) * 0.5 : 0 // 250-300%: 0.5 points
-      const medium = allocatedDiskRatio > 300 ? ((Math.min(allocatedDiskRatio, 350) - 300) / 50) * 1 : 0 // 300-350%: 1 more points
-      const critical = allocatedDiskRatio > 350 ? (allocatedDiskRatio - 350) * 0.025 : 0 // 350%+: 0.025 points per % over 350%
-      penalty += low + medium + critical
+
+    // Current values array
+    const current = [
+      params.cpuUsage,
+      params.memoryUsage,
+      params.diskUsage,
+      allocatedCpuRatio,
+      allocatedMemoryRatio,
+      allocatedDiskRatio,
+    ]
+
+    // Ideal and anti-ideal arrays
+    const idealValues = [ideal.cpu, ideal.memory, ideal.disk, ideal.allocCpu, ideal.allocMem, ideal.allocDisk]
+
+    const antiIdealValues = [
+      antiIdeal.cpu,
+      antiIdeal.memory,
+      antiIdeal.disk,
+      antiIdeal.allocCpu,
+      antiIdeal.allocMem,
+      antiIdeal.allocDisk,
+    ]
+
+    // Calculate weighted Euclidean distances
+    let distanceToIdeal = 0
+    let distanceToAntiIdeal = 0
+
+    for (let i = 0; i < current.length; i++) {
+      const normalizedCurrent = current[i] / 100 // Normalize to 0-1 scale for allocation ratios >100%
+      const normalizedIdeal = idealValues[i] / 100
+      const normalizedAntiIdeal = antiIdealValues[i] / 100
+
+      distanceToIdeal += weights[i] * Math.pow(normalizedCurrent - normalizedIdeal, 2)
+      distanceToAntiIdeal += weights[i] * Math.pow(normalizedCurrent - normalizedAntiIdeal, 2)
     }
 
-    return Math.max(0, Math.round(100 - penalty))
+    distanceToIdeal = Math.sqrt(distanceToIdeal)
+    distanceToAntiIdeal = Math.sqrt(distanceToAntiIdeal)
+
+    // TOPSIS relative closeness score (0 to 1)
+    let topsisScore = distanceToAntiIdeal / (distanceToIdeal + distanceToAntiIdeal)
+
+    // Apply exponential penalties for critical thresholds
+    let penaltyMultiplier = 1
+
+    if (params.cpuUsage >= cpuPenaltyThreshold) {
+      penaltyMultiplier *= Math.exp(-cpuPenaltyExponent * (params.cpuUsage - cpuPenaltyThreshold))
+    }
+
+    if (params.memoryUsage >= memoryPenaltyThreshold) {
+      penaltyMultiplier *= Math.exp(-memoryPenaltyExponent * (params.memoryUsage - memoryPenaltyThreshold))
+    }
+
+    if (params.diskUsage >= diskPenaltyThreshold) {
+      penaltyMultiplier *= Math.exp(-diskPenaltyExponent * (params.diskUsage - diskPenaltyThreshold))
+    }
+
+    // Apply penalty
+    topsisScore *= penaltyMultiplier
+
+    return Math.round(topsisScore * 100)
   }
 }
 
@@ -507,6 +536,7 @@ export class GetRunnerParams {
   sandboxClass?: SandboxClass
   snapshotRef?: string
   excludedRunnerIds?: string[]
+  availabilityScoreThreshold?: number
 }
 
 interface AvailabilityScoreParams {
@@ -516,7 +546,6 @@ interface AvailabilityScoreParams {
   allocatedCpu: number
   allocatedMemoryGiB: number
   allocatedDiskGiB: number
-  capacity: number
   runnerCpu: number
   runnerMemoryGiB: number
   runnerDiskGiB: number

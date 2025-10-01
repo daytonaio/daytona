@@ -48,7 +48,6 @@ export class RunnerController {
         gpu: req.body?.gpu,
         gpuType: req.body?.gpuType,
         class: req.body?.class,
-        capacity: req.body?.capacity,
         region: req.body?.region,
       }),
     },
