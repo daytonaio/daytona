@@ -373,8 +373,9 @@ export class SandboxStartAction extends SandboxAction {
         return DONT_SYNC_AGAIN
       }
 
-      //  get runner with highest availability score from available runners
-      const runner = availableRunners[0]
+      //  get random runner from available runners
+      const randomRunnerIndex = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1) + min)
+      const runner = availableRunners[randomRunnerIndex(0, availableRunners.length - 1)].id
 
       //  verify the runner is still available and ready
       if (!runner || runner.state !== RunnerState.READY || runner.unschedulable) {
