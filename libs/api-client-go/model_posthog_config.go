@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 )
@@ -25,7 +24,8 @@ type PosthogConfig struct {
 	// PostHog API key
 	ApiKey string `json:"apiKey"`
 	// PostHog host URL
-	Host string `json:"host"`
+	Host                 string `json:"host"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _PosthogConfig PosthogConfig
@@ -109,6 +109,11 @@ func (o PosthogConfig) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["apiKey"] = o.ApiKey
 	toSerialize["host"] = o.Host
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -137,15 +142,21 @@ func (o *PosthogConfig) UnmarshalJSON(data []byte) (err error) {
 
 	varPosthogConfig := _PosthogConfig{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varPosthogConfig)
+	err = json.Unmarshal(data, &varPosthogConfig)
 
 	if err != nil {
 		return err
 	}
 
 	*o = PosthogConfig(varPosthogConfig)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "apiKey")
+		delete(additionalProperties, "host")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

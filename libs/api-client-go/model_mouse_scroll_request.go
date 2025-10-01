@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 )
@@ -29,7 +28,8 @@ type MouseScrollRequest struct {
 	// The scroll direction (up, down)
 	Direction string `json:"direction"`
 	// The number of scroll units to scroll. Defaults to 1
-	Amount *float32 `json:"amount,omitempty"`
+	Amount               *float32 `json:"amount,omitempty"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _MouseScrollRequest MouseScrollRequest
@@ -174,6 +174,11 @@ func (o MouseScrollRequest) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.Amount) {
 		toSerialize["amount"] = o.Amount
 	}
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -203,15 +208,23 @@ func (o *MouseScrollRequest) UnmarshalJSON(data []byte) (err error) {
 
 	varMouseScrollRequest := _MouseScrollRequest{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varMouseScrollRequest)
+	err = json.Unmarshal(data, &varMouseScrollRequest)
 
 	if err != nil {
 		return err
 	}
 
 	*o = MouseScrollRequest(varMouseScrollRequest)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "x")
+		delete(additionalProperties, "y")
+		delete(additionalProperties, "direction")
+		delete(additionalProperties, "amount")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

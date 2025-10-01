@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 )
@@ -25,7 +24,8 @@ type KeyboardPressRequest struct {
 	// The key to press (e.g., a, b, c, enter, space, etc.)
 	Key string `json:"key"`
 	// Array of modifier keys to press along with the main key (ctrl, alt, shift, cmd)
-	Modifiers []string `json:"modifiers,omitempty"`
+	Modifiers            []string `json:"modifiers,omitempty"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _KeyboardPressRequest KeyboardPressRequest
@@ -118,6 +118,11 @@ func (o KeyboardPressRequest) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.Modifiers) {
 		toSerialize["modifiers"] = o.Modifiers
 	}
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -145,15 +150,21 @@ func (o *KeyboardPressRequest) UnmarshalJSON(data []byte) (err error) {
 
 	varKeyboardPressRequest := _KeyboardPressRequest{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varKeyboardPressRequest)
+	err = json.Unmarshal(data, &varKeyboardPressRequest)
 
 	if err != nil {
 		return err
 	}
 
 	*o = KeyboardPressRequest(varKeyboardPressRequest)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "key")
+		delete(additionalProperties, "modifiers")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 )
@@ -27,9 +26,10 @@ type LspCompletionParams struct {
 	// Path to the project
 	PathToProject string `json:"pathToProject"`
 	// Document URI
-	Uri      string             `json:"uri"`
-	Position Position           `json:"position"`
-	Context  *CompletionContext `json:"context,omitempty"`
+	Uri                  string             `json:"uri"`
+	Position             Position           `json:"position"`
+	Context              *CompletionContext `json:"context,omitempty"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _LspCompletionParams LspCompletionParams
@@ -200,6 +200,11 @@ func (o LspCompletionParams) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.Context) {
 		toSerialize["context"] = o.Context
 	}
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -230,15 +235,24 @@ func (o *LspCompletionParams) UnmarshalJSON(data []byte) (err error) {
 
 	varLspCompletionParams := _LspCompletionParams{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varLspCompletionParams)
+	err = json.Unmarshal(data, &varLspCompletionParams)
 
 	if err != nil {
 		return err
 	}
 
 	*o = LspCompletionParams(varLspCompletionParams)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "languageId")
+		delete(additionalProperties, "pathToProject")
+		delete(additionalProperties, "uri")
+		delete(additionalProperties, "position")
+		delete(additionalProperties, "context")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

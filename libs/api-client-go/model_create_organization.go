@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 )
@@ -23,7 +22,8 @@ var _ MappedNullable = &CreateOrganization{}
 // CreateOrganization struct for CreateOrganization
 type CreateOrganization struct {
 	// The name of organization
-	Name string `json:"name"`
+	Name                 string `json:"name"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _CreateOrganization CreateOrganization
@@ -81,6 +81,11 @@ func (o CreateOrganization) MarshalJSON() ([]byte, error) {
 func (o CreateOrganization) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["name"] = o.Name
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -108,15 +113,20 @@ func (o *CreateOrganization) UnmarshalJSON(data []byte) (err error) {
 
 	varCreateOrganization := _CreateOrganization{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varCreateOrganization)
+	err = json.Unmarshal(data, &varCreateOrganization)
 
 	if err != nil {
 		return err
 	}
 
 	*o = CreateOrganization(varCreateOrganization)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "name")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

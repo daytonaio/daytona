@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 )
@@ -22,12 +21,13 @@ var _ MappedNullable = &GitCloneRequest{}
 
 // GitCloneRequest struct for GitCloneRequest
 type GitCloneRequest struct {
-	Url      string  `json:"url"`
-	Path     string  `json:"path"`
-	Username *string `json:"username,omitempty"`
-	Password *string `json:"password,omitempty"`
-	Branch   *string `json:"branch,omitempty"`
-	CommitId *string `json:"commit_id,omitempty"`
+	Url                  string  `json:"url"`
+	Path                 string  `json:"path"`
+	Username             *string `json:"username,omitempty"`
+	Password             *string `json:"password,omitempty"`
+	Branch               *string `json:"branch,omitempty"`
+	CommitId             *string `json:"commit_id,omitempty"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _GitCloneRequest GitCloneRequest
@@ -251,6 +251,11 @@ func (o GitCloneRequest) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.CommitId) {
 		toSerialize["commit_id"] = o.CommitId
 	}
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -279,15 +284,25 @@ func (o *GitCloneRequest) UnmarshalJSON(data []byte) (err error) {
 
 	varGitCloneRequest := _GitCloneRequest{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varGitCloneRequest)
+	err = json.Unmarshal(data, &varGitCloneRequest)
 
 	if err != nil {
 		return err
 	}
 
 	*o = GitCloneRequest(varGitCloneRequest)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "url")
+		delete(additionalProperties, "path")
+		delete(additionalProperties, "username")
+		delete(additionalProperties, "password")
+		delete(additionalProperties, "branch")
+		delete(additionalProperties, "commit_id")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

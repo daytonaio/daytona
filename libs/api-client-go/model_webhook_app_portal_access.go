@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 )
@@ -23,7 +22,8 @@ var _ MappedNullable = &WebhookAppPortalAccess{}
 // WebhookAppPortalAccess struct for WebhookAppPortalAccess
 type WebhookAppPortalAccess struct {
 	// The URL to the webhook app portal
-	Url string `json:"url"`
+	Url                  string `json:"url"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _WebhookAppPortalAccess WebhookAppPortalAccess
@@ -81,6 +81,11 @@ func (o WebhookAppPortalAccess) MarshalJSON() ([]byte, error) {
 func (o WebhookAppPortalAccess) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["url"] = o.Url
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -108,15 +113,20 @@ func (o *WebhookAppPortalAccess) UnmarshalJSON(data []byte) (err error) {
 
 	varWebhookAppPortalAccess := _WebhookAppPortalAccess{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varWebhookAppPortalAccess)
+	err = json.Unmarshal(data, &varWebhookAppPortalAccess)
 
 	if err != nil {
 		return err
 	}
 
 	*o = WebhookAppPortalAccess(varWebhookAppPortalAccess)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "url")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

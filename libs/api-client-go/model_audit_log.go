@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"time"
@@ -23,20 +22,21 @@ var _ MappedNullable = &AuditLog{}
 
 // AuditLog struct for AuditLog
 type AuditLog struct {
-	Id             string                 `json:"id"`
-	ActorId        string                 `json:"actorId"`
-	ActorEmail     string                 `json:"actorEmail"`
-	OrganizationId *string                `json:"organizationId,omitempty"`
-	Action         string                 `json:"action"`
-	TargetType     *string                `json:"targetType,omitempty"`
-	TargetId       *string                `json:"targetId,omitempty"`
-	StatusCode     *float32               `json:"statusCode,omitempty"`
-	ErrorMessage   *string                `json:"errorMessage,omitempty"`
-	IpAddress      *string                `json:"ipAddress,omitempty"`
-	UserAgent      *string                `json:"userAgent,omitempty"`
-	Source         *string                `json:"source,omitempty"`
-	Metadata       map[string]interface{} `json:"metadata,omitempty"`
-	CreatedAt      time.Time              `json:"createdAt"`
+	Id                   string                 `json:"id"`
+	ActorId              string                 `json:"actorId"`
+	ActorEmail           string                 `json:"actorEmail"`
+	OrganizationId       *string                `json:"organizationId,omitempty"`
+	Action               string                 `json:"action"`
+	TargetType           *string                `json:"targetType,omitempty"`
+	TargetId             *string                `json:"targetId,omitempty"`
+	StatusCode           *float32               `json:"statusCode,omitempty"`
+	ErrorMessage         *string                `json:"errorMessage,omitempty"`
+	IpAddress            *string                `json:"ipAddress,omitempty"`
+	UserAgent            *string                `json:"userAgent,omitempty"`
+	Source               *string                `json:"source,omitempty"`
+	Metadata             map[string]interface{} `json:"metadata,omitempty"`
+	CreatedAt            time.Time              `json:"createdAt"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _AuditLog AuditLog
@@ -513,6 +513,11 @@ func (o AuditLog) ToMap() (map[string]interface{}, error) {
 		toSerialize["metadata"] = o.Metadata
 	}
 	toSerialize["createdAt"] = o.CreatedAt
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -544,15 +549,33 @@ func (o *AuditLog) UnmarshalJSON(data []byte) (err error) {
 
 	varAuditLog := _AuditLog{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varAuditLog)
+	err = json.Unmarshal(data, &varAuditLog)
 
 	if err != nil {
 		return err
 	}
 
 	*o = AuditLog(varAuditLog)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "id")
+		delete(additionalProperties, "actorId")
+		delete(additionalProperties, "actorEmail")
+		delete(additionalProperties, "organizationId")
+		delete(additionalProperties, "action")
+		delete(additionalProperties, "targetType")
+		delete(additionalProperties, "targetId")
+		delete(additionalProperties, "statusCode")
+		delete(additionalProperties, "errorMessage")
+		delete(additionalProperties, "ipAddress")
+		delete(additionalProperties, "userAgent")
+		delete(additionalProperties, "source")
+		delete(additionalProperties, "metadata")
+		delete(additionalProperties, "createdAt")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 )
@@ -22,8 +21,9 @@ var _ MappedNullable = &Position{}
 
 // Position struct for Position
 type Position struct {
-	Line      float32 `json:"line"`
-	Character float32 `json:"character"`
+	Line                 float32 `json:"line"`
+	Character            float32 `json:"character"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _Position Position
@@ -107,6 +107,11 @@ func (o Position) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["line"] = o.Line
 	toSerialize["character"] = o.Character
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -135,15 +140,21 @@ func (o *Position) UnmarshalJSON(data []byte) (err error) {
 
 	varPosition := _Position{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varPosition)
+	err = json.Unmarshal(data, &varPosition)
 
 	if err != nil {
 		return err
 	}
 
 	*o = Position(varPosition)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "line")
+		delete(additionalProperties, "character")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

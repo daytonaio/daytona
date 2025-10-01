@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"time"
@@ -29,6 +28,7 @@ type OrganizationSuspension struct {
 	Until time.Time `json:"until"`
 	// Suspension cleanup grace period hours
 	SuspensionCleanupGracePeriodHours float32 `json:"suspensionCleanupGracePeriodHours"`
+	AdditionalProperties              map[string]interface{}
 }
 
 type _OrganizationSuspension OrganizationSuspension
@@ -138,6 +138,11 @@ func (o OrganizationSuspension) ToMap() (map[string]interface{}, error) {
 	toSerialize["reason"] = o.Reason
 	toSerialize["until"] = o.Until
 	toSerialize["suspensionCleanupGracePeriodHours"] = o.SuspensionCleanupGracePeriodHours
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -167,15 +172,22 @@ func (o *OrganizationSuspension) UnmarshalJSON(data []byte) (err error) {
 
 	varOrganizationSuspension := _OrganizationSuspension{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varOrganizationSuspension)
+	err = json.Unmarshal(data, &varOrganizationSuspension)
 
 	if err != nil {
 		return err
 	}
 
 	*o = OrganizationSuspension(varOrganizationSuspension)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "reason")
+		delete(additionalProperties, "until")
+		delete(additionalProperties, "suspensionCleanupGracePeriodHours")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

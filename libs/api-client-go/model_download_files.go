@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 )
@@ -23,7 +22,8 @@ var _ MappedNullable = &DownloadFiles{}
 // DownloadFiles struct for DownloadFiles
 type DownloadFiles struct {
 	// List of remote file paths to download
-	Paths []string `json:"paths"`
+	Paths                []string `json:"paths"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _DownloadFiles DownloadFiles
@@ -81,6 +81,11 @@ func (o DownloadFiles) MarshalJSON() ([]byte, error) {
 func (o DownloadFiles) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["paths"] = o.Paths
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -108,15 +113,20 @@ func (o *DownloadFiles) UnmarshalJSON(data []byte) (err error) {
 
 	varDownloadFiles := _DownloadFiles{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varDownloadFiles)
+	err = json.Unmarshal(data, &varDownloadFiles)
 
 	if err != nil {
 		return err
 	}
 
 	*o = DownloadFiles(varDownloadFiles)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "paths")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

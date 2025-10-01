@@ -20,8 +20,11 @@ var _ MappedNullable = &WorkDirResponse{}
 
 // WorkDirResponse struct for WorkDirResponse
 type WorkDirResponse struct {
-	Dir *string `json:"dir,omitempty"`
+	Dir                  *string `json:"dir,omitempty"`
+	AdditionalProperties map[string]interface{}
 }
+
+type _WorkDirResponse WorkDirResponse
 
 // NewWorkDirResponse instantiates a new WorkDirResponse object
 // This constructor will assign default values to properties that have it defined,
@@ -85,7 +88,33 @@ func (o WorkDirResponse) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.Dir) {
 		toSerialize["dir"] = o.Dir
 	}
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
+}
+
+func (o *WorkDirResponse) UnmarshalJSON(data []byte) (err error) {
+	varWorkDirResponse := _WorkDirResponse{}
+
+	err = json.Unmarshal(data, &varWorkDirResponse)
+
+	if err != nil {
+		return err
+	}
+
+	*o = WorkDirResponse(varWorkDirResponse)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "dir")
+		o.AdditionalProperties = additionalProperties
+	}
+
+	return err
 }
 
 type NullableWorkDirResponse struct {

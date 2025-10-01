@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 )
@@ -25,7 +24,8 @@ type UpdateOrganizationMemberAccess struct {
 	// Organization member role
 	Role string `json:"role"`
 	// Array of assigned role IDs
-	AssignedRoleIds []string `json:"assignedRoleIds"`
+	AssignedRoleIds      []string `json:"assignedRoleIds"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _UpdateOrganizationMemberAccess UpdateOrganizationMemberAccess
@@ -111,6 +111,11 @@ func (o UpdateOrganizationMemberAccess) ToMap() (map[string]interface{}, error) 
 	toSerialize := map[string]interface{}{}
 	toSerialize["role"] = o.Role
 	toSerialize["assignedRoleIds"] = o.AssignedRoleIds
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -139,15 +144,21 @@ func (o *UpdateOrganizationMemberAccess) UnmarshalJSON(data []byte) (err error) 
 
 	varUpdateOrganizationMemberAccess := _UpdateOrganizationMemberAccess{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varUpdateOrganizationMemberAccess)
+	err = json.Unmarshal(data, &varUpdateOrganizationMemberAccess)
 
 	if err != nil {
 		return err
 	}
 
 	*o = UpdateOrganizationMemberAccess(varUpdateOrganizationMemberAccess)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "role")
+		delete(additionalProperties, "assignedRoleIds")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

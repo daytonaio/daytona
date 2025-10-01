@@ -20,10 +20,13 @@ var _ MappedNullable = &ReplaceResult{}
 
 // ReplaceResult struct for ReplaceResult
 type ReplaceResult struct {
-	File    *string `json:"file,omitempty"`
-	Success *bool   `json:"success,omitempty"`
-	Error   *string `json:"error,omitempty"`
+	File                 *string `json:"file,omitempty"`
+	Success              *bool   `json:"success,omitempty"`
+	Error                *string `json:"error,omitempty"`
+	AdditionalProperties map[string]interface{}
 }
+
+type _ReplaceResult ReplaceResult
 
 // NewReplaceResult instantiates a new ReplaceResult object
 // This constructor will assign default values to properties that have it defined,
@@ -157,7 +160,35 @@ func (o ReplaceResult) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.Error) {
 		toSerialize["error"] = o.Error
 	}
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
+}
+
+func (o *ReplaceResult) UnmarshalJSON(data []byte) (err error) {
+	varReplaceResult := _ReplaceResult{}
+
+	err = json.Unmarshal(data, &varReplaceResult)
+
+	if err != nil {
+		return err
+	}
+
+	*o = ReplaceResult(varReplaceResult)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "file")
+		delete(additionalProperties, "success")
+		delete(additionalProperties, "error")
+		o.AdditionalProperties = additionalProperties
+	}
+
+	return err
 }
 
 type NullableReplaceResult struct {

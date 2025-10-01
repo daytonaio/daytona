@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 )
@@ -25,7 +24,8 @@ type ExecuteResponse struct {
 	// Exit code
 	ExitCode float32 `json:"exitCode"`
 	// Command output
-	Result string `json:"result"`
+	Result               string `json:"result"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _ExecuteResponse ExecuteResponse
@@ -109,6 +109,11 @@ func (o ExecuteResponse) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["exitCode"] = o.ExitCode
 	toSerialize["result"] = o.Result
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -137,15 +142,21 @@ func (o *ExecuteResponse) UnmarshalJSON(data []byte) (err error) {
 
 	varExecuteResponse := _ExecuteResponse{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varExecuteResponse)
+	err = json.Unmarshal(data, &varExecuteResponse)
 
 	if err != nil {
 		return err
 	}
 
 	*o = ExecuteResponse(varExecuteResponse)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "exitCode")
+		delete(additionalProperties, "result")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

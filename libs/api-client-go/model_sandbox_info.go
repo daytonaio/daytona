@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 )
@@ -28,7 +27,8 @@ type SandboxInfo struct {
 	// Deprecated
 	Name string `json:"name"`
 	// Additional metadata provided by the provider
-	ProviderMetadata *string `json:"providerMetadata,omitempty"`
+	ProviderMetadata     *string `json:"providerMetadata,omitempty"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _SandboxInfo SandboxInfo
@@ -152,6 +152,11 @@ func (o SandboxInfo) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.ProviderMetadata) {
 		toSerialize["providerMetadata"] = o.ProviderMetadata
 	}
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -180,15 +185,22 @@ func (o *SandboxInfo) UnmarshalJSON(data []byte) (err error) {
 
 	varSandboxInfo := _SandboxInfo{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varSandboxInfo)
+	err = json.Unmarshal(data, &varSandboxInfo)
 
 	if err != nil {
 		return err
 	}
 
 	*o = SandboxInfo(varSandboxInfo)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "created")
+		delete(additionalProperties, "name")
+		delete(additionalProperties, "providerMetadata")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

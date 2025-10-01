@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"time"
@@ -38,7 +37,8 @@ type DockerRegistry struct {
 	// Creation timestamp
 	CreatedAt time.Time `json:"createdAt"`
 	// Last update timestamp
-	UpdatedAt time.Time `json:"updatedAt"`
+	UpdatedAt            time.Time `json:"updatedAt"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _DockerRegistry DockerRegistry
@@ -278,6 +278,11 @@ func (o DockerRegistry) ToMap() (map[string]interface{}, error) {
 	toSerialize["registryType"] = o.RegistryType
 	toSerialize["createdAt"] = o.CreatedAt
 	toSerialize["updatedAt"] = o.UpdatedAt
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -312,15 +317,27 @@ func (o *DockerRegistry) UnmarshalJSON(data []byte) (err error) {
 
 	varDockerRegistry := _DockerRegistry{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varDockerRegistry)
+	err = json.Unmarshal(data, &varDockerRegistry)
 
 	if err != nil {
 		return err
 	}
 
 	*o = DockerRegistry(varDockerRegistry)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "id")
+		delete(additionalProperties, "name")
+		delete(additionalProperties, "url")
+		delete(additionalProperties, "username")
+		delete(additionalProperties, "project")
+		delete(additionalProperties, "registryType")
+		delete(additionalProperties, "createdAt")
+		delete(additionalProperties, "updatedAt")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

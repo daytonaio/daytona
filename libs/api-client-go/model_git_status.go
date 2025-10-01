@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 )
@@ -22,11 +21,12 @@ var _ MappedNullable = &GitStatus{}
 
 // GitStatus struct for GitStatus
 type GitStatus struct {
-	CurrentBranch   string       `json:"currentBranch"`
-	FileStatus      []FileStatus `json:"fileStatus"`
-	Ahead           *float32     `json:"ahead,omitempty"`
-	Behind          *float32     `json:"behind,omitempty"`
-	BranchPublished *bool        `json:"branchPublished,omitempty"`
+	CurrentBranch        string       `json:"currentBranch"`
+	FileStatus           []FileStatus `json:"fileStatus"`
+	Ahead                *float32     `json:"ahead,omitempty"`
+	Behind               *float32     `json:"behind,omitempty"`
+	BranchPublished      *bool        `json:"branchPublished,omitempty"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _GitStatus GitStatus
@@ -215,6 +215,11 @@ func (o GitStatus) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.BranchPublished) {
 		toSerialize["branchPublished"] = o.BranchPublished
 	}
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -243,15 +248,24 @@ func (o *GitStatus) UnmarshalJSON(data []byte) (err error) {
 
 	varGitStatus := _GitStatus{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varGitStatus)
+	err = json.Unmarshal(data, &varGitStatus)
 
 	if err != nil {
 		return err
 	}
 
 	*o = GitStatus(varGitStatus)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "currentBranch")
+		delete(additionalProperties, "fileStatus")
+		delete(additionalProperties, "ahead")
+		delete(additionalProperties, "behind")
+		delete(additionalProperties, "branchPublished")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 )
@@ -29,7 +28,8 @@ type MouseClickRequest struct {
 	// The mouse button to click (left, right, middle). Defaults to left
 	Button *string `json:"button,omitempty"`
 	// Whether to perform a double-click instead of a single click
-	Double *bool `json:"double,omitempty"`
+	Double               *bool `json:"double,omitempty"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _MouseClickRequest MouseClickRequest
@@ -183,6 +183,11 @@ func (o MouseClickRequest) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.Double) {
 		toSerialize["double"] = o.Double
 	}
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -211,15 +216,23 @@ func (o *MouseClickRequest) UnmarshalJSON(data []byte) (err error) {
 
 	varMouseClickRequest := _MouseClickRequest{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varMouseClickRequest)
+	err = json.Unmarshal(data, &varMouseClickRequest)
 
 	if err != nil {
 		return err
 	}
 
 	*o = MouseClickRequest(varMouseClickRequest)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "x")
+		delete(additionalProperties, "y")
+		delete(additionalProperties, "button")
+		delete(additionalProperties, "double")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

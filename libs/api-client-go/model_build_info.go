@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"time"
@@ -30,7 +29,8 @@ type BuildInfo struct {
 	// The creation timestamp
 	CreatedAt time.Time `json:"createdAt"`
 	// The last update timestamp
-	UpdatedAt time.Time `json:"updatedAt"`
+	UpdatedAt            time.Time `json:"updatedAt"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _BuildInfo BuildInfo
@@ -184,6 +184,11 @@ func (o BuildInfo) ToMap() (map[string]interface{}, error) {
 	}
 	toSerialize["createdAt"] = o.CreatedAt
 	toSerialize["updatedAt"] = o.UpdatedAt
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -212,15 +217,23 @@ func (o *BuildInfo) UnmarshalJSON(data []byte) (err error) {
 
 	varBuildInfo := _BuildInfo{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varBuildInfo)
+	err = json.Unmarshal(data, &varBuildInfo)
 
 	if err != nil {
 		return err
 	}
 
 	*o = BuildInfo(varBuildInfo)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "dockerfileContent")
+		delete(additionalProperties, "contextHashes")
+		delete(additionalProperties, "createdAt")
+		delete(additionalProperties, "updatedAt")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

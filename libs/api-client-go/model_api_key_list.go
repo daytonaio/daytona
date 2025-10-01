@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"time"
@@ -36,7 +35,8 @@ type ApiKeyList struct {
 	// When the API key expires
 	ExpiresAt NullableTime `json:"expiresAt"`
 	// The user ID of the user who created the API key
-	UserId string `json:"userId"`
+	UserId               string `json:"userId"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _ApiKeyList ApiKeyList
@@ -254,6 +254,11 @@ func (o ApiKeyList) ToMap() (map[string]interface{}, error) {
 	toSerialize["lastUsedAt"] = o.LastUsedAt.Get()
 	toSerialize["expiresAt"] = o.ExpiresAt.Get()
 	toSerialize["userId"] = o.UserId
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -287,15 +292,26 @@ func (o *ApiKeyList) UnmarshalJSON(data []byte) (err error) {
 
 	varApiKeyList := _ApiKeyList{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varApiKeyList)
+	err = json.Unmarshal(data, &varApiKeyList)
 
 	if err != nil {
 		return err
 	}
 
 	*o = ApiKeyList(varApiKeyList)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "name")
+		delete(additionalProperties, "value")
+		delete(additionalProperties, "createdAt")
+		delete(additionalProperties, "permissions")
+		delete(additionalProperties, "lastUsedAt")
+		delete(additionalProperties, "expiresAt")
+		delete(additionalProperties, "userId")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 )
@@ -25,7 +24,8 @@ type ProcessStatusResponse struct {
 	// The name of the VNC process being checked
 	ProcessName string `json:"processName"`
 	// Whether the specified VNC process is currently running
-	Running bool `json:"running"`
+	Running              bool `json:"running"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _ProcessStatusResponse ProcessStatusResponse
@@ -109,6 +109,11 @@ func (o ProcessStatusResponse) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["processName"] = o.ProcessName
 	toSerialize["running"] = o.Running
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -137,15 +142,21 @@ func (o *ProcessStatusResponse) UnmarshalJSON(data []byte) (err error) {
 
 	varProcessStatusResponse := _ProcessStatusResponse{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varProcessStatusResponse)
+	err = json.Unmarshal(data, &varProcessStatusResponse)
 
 	if err != nil {
 		return err
 	}
 
 	*o = ProcessStatusResponse(varProcessStatusResponse)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "processName")
+		delete(additionalProperties, "running")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

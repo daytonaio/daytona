@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 )
@@ -22,10 +21,11 @@ var _ MappedNullable = &PaginatedSnapshotsDto{}
 
 // PaginatedSnapshotsDto struct for PaginatedSnapshotsDto
 type PaginatedSnapshotsDto struct {
-	Items      []SnapshotDto `json:"items"`
-	Total      float32       `json:"total"`
-	Page       float32       `json:"page"`
-	TotalPages float32       `json:"totalPages"`
+	Items                []SnapshotDto `json:"items"`
+	Total                float32       `json:"total"`
+	Page                 float32       `json:"page"`
+	TotalPages           float32       `json:"totalPages"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _PaginatedSnapshotsDto PaginatedSnapshotsDto
@@ -161,6 +161,11 @@ func (o PaginatedSnapshotsDto) ToMap() (map[string]interface{}, error) {
 	toSerialize["total"] = o.Total
 	toSerialize["page"] = o.Page
 	toSerialize["totalPages"] = o.TotalPages
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -191,15 +196,23 @@ func (o *PaginatedSnapshotsDto) UnmarshalJSON(data []byte) (err error) {
 
 	varPaginatedSnapshotsDto := _PaginatedSnapshotsDto{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varPaginatedSnapshotsDto)
+	err = json.Unmarshal(data, &varPaginatedSnapshotsDto)
 
 	if err != nil {
 		return err
 	}
 
 	*o = PaginatedSnapshotsDto(varPaginatedSnapshotsDto)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "items")
+		delete(additionalProperties, "total")
+		delete(additionalProperties, "page")
+		delete(additionalProperties, "totalPages")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

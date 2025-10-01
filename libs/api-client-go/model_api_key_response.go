@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"time"
@@ -32,7 +31,8 @@ type ApiKeyResponse struct {
 	// The list of organization resource permissions assigned to the API key
 	Permissions []string `json:"permissions"`
 	// When the API key expires
-	ExpiresAt NullableTime `json:"expiresAt"`
+	ExpiresAt            NullableTime `json:"expiresAt"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _ApiKeyResponse ApiKeyResponse
@@ -196,6 +196,11 @@ func (o ApiKeyResponse) ToMap() (map[string]interface{}, error) {
 	toSerialize["createdAt"] = o.CreatedAt
 	toSerialize["permissions"] = o.Permissions
 	toSerialize["expiresAt"] = o.ExpiresAt.Get()
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -227,15 +232,24 @@ func (o *ApiKeyResponse) UnmarshalJSON(data []byte) (err error) {
 
 	varApiKeyResponse := _ApiKeyResponse{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varApiKeyResponse)
+	err = json.Unmarshal(data, &varApiKeyResponse)
 
 	if err != nil {
 		return err
 	}
 
 	*o = ApiKeyResponse(varApiKeyResponse)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "name")
+		delete(additionalProperties, "value")
+		delete(additionalProperties, "createdAt")
+		delete(additionalProperties, "permissions")
+		delete(additionalProperties, "expiresAt")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

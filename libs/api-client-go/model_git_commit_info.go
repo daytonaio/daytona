@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 )
@@ -22,11 +21,12 @@ var _ MappedNullable = &GitCommitInfo{}
 
 // GitCommitInfo struct for GitCommitInfo
 type GitCommitInfo struct {
-	Hash      string `json:"hash"`
-	Message   string `json:"message"`
-	Author    string `json:"author"`
-	Email     string `json:"email"`
-	Timestamp string `json:"timestamp"`
+	Hash                 string `json:"hash"`
+	Message              string `json:"message"`
+	Author               string `json:"author"`
+	Email                string `json:"email"`
+	Timestamp            string `json:"timestamp"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _GitCommitInfo GitCommitInfo
@@ -188,6 +188,11 @@ func (o GitCommitInfo) ToMap() (map[string]interface{}, error) {
 	toSerialize["author"] = o.Author
 	toSerialize["email"] = o.Email
 	toSerialize["timestamp"] = o.Timestamp
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -219,15 +224,24 @@ func (o *GitCommitInfo) UnmarshalJSON(data []byte) (err error) {
 
 	varGitCommitInfo := _GitCommitInfo{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varGitCommitInfo)
+	err = json.Unmarshal(data, &varGitCommitInfo)
 
 	if err != nil {
 		return err
 	}
 
 	*o = GitCommitInfo(varGitCommitInfo)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "hash")
+		delete(additionalProperties, "message")
+		delete(additionalProperties, "author")
+		delete(additionalProperties, "email")
+		delete(additionalProperties, "timestamp")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

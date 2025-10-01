@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 )
@@ -28,6 +27,7 @@ type CreateUser struct {
 	PersonalOrganizationQuota *CreateOrganizationQuota `json:"personalOrganizationQuota,omitempty"`
 	Role                      *string                  `json:"role,omitempty"`
 	EmailVerified             *bool                    `json:"emailVerified,omitempty"`
+	AdditionalProperties      map[string]interface{}
 }
 
 type _CreateUser CreateUser
@@ -251,6 +251,11 @@ func (o CreateUser) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.EmailVerified) {
 		toSerialize["emailVerified"] = o.EmailVerified
 	}
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -279,15 +284,25 @@ func (o *CreateUser) UnmarshalJSON(data []byte) (err error) {
 
 	varCreateUser := _CreateUser{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varCreateUser)
+	err = json.Unmarshal(data, &varCreateUser)
 
 	if err != nil {
 		return err
 	}
 
 	*o = CreateUser(varCreateUser)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "id")
+		delete(additionalProperties, "name")
+		delete(additionalProperties, "email")
+		delete(additionalProperties, "personalOrganizationQuota")
+		delete(additionalProperties, "role")
+		delete(additionalProperties, "emailVerified")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

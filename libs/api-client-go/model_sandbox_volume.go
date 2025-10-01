@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 )
@@ -25,7 +24,8 @@ type SandboxVolume struct {
 	// The ID of the volume
 	VolumeId string `json:"volumeId"`
 	// The mount path for the volume
-	MountPath string `json:"mountPath"`
+	MountPath            string `json:"mountPath"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _SandboxVolume SandboxVolume
@@ -109,6 +109,11 @@ func (o SandboxVolume) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["volumeId"] = o.VolumeId
 	toSerialize["mountPath"] = o.MountPath
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -137,15 +142,21 @@ func (o *SandboxVolume) UnmarshalJSON(data []byte) (err error) {
 
 	varSandboxVolume := _SandboxVolume{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varSandboxVolume)
+	err = json.Unmarshal(data, &varSandboxVolume)
 
 	if err != nil {
 		return err
 	}
 
 	*o = SandboxVolume(varSandboxVolume)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "volumeId")
+		delete(additionalProperties, "mountPath")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

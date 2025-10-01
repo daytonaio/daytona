@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 )
@@ -25,7 +24,8 @@ type PtyResizeRequest struct {
 	// Number of terminal columns
 	Cols float32 `json:"cols"`
 	// Number of terminal rows
-	Rows float32 `json:"rows"`
+	Rows                 float32 `json:"rows"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _PtyResizeRequest PtyResizeRequest
@@ -109,6 +109,11 @@ func (o PtyResizeRequest) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["cols"] = o.Cols
 	toSerialize["rows"] = o.Rows
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -137,15 +142,21 @@ func (o *PtyResizeRequest) UnmarshalJSON(data []byte) (err error) {
 
 	varPtyResizeRequest := _PtyResizeRequest{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varPtyResizeRequest)
+	err = json.Unmarshal(data, &varPtyResizeRequest)
 
 	if err != nil {
 		return err
 	}
 
 	*o = PtyResizeRequest(varPtyResizeRequest)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "cols")
+		delete(additionalProperties, "rows")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

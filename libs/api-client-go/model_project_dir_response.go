@@ -20,8 +20,11 @@ var _ MappedNullable = &ProjectDirResponse{}
 
 // ProjectDirResponse struct for ProjectDirResponse
 type ProjectDirResponse struct {
-	Dir *string `json:"dir,omitempty"`
+	Dir                  *string `json:"dir,omitempty"`
+	AdditionalProperties map[string]interface{}
 }
+
+type _ProjectDirResponse ProjectDirResponse
 
 // NewProjectDirResponse instantiates a new ProjectDirResponse object
 // This constructor will assign default values to properties that have it defined,
@@ -85,7 +88,33 @@ func (o ProjectDirResponse) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.Dir) {
 		toSerialize["dir"] = o.Dir
 	}
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
+}
+
+func (o *ProjectDirResponse) UnmarshalJSON(data []byte) (err error) {
+	varProjectDirResponse := _ProjectDirResponse{}
+
+	err = json.Unmarshal(data, &varProjectDirResponse)
+
+	if err != nil {
+		return err
+	}
+
+	*o = ProjectDirResponse(varProjectDirResponse)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "dir")
+		o.AdditionalProperties = additionalProperties
+	}
+
+	return err
 }
 
 type NullableProjectDirResponse struct {

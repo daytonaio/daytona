@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"time"
@@ -40,7 +39,8 @@ type SnapshotDto struct {
 	UpdatedAt      time.Time       `json:"updatedAt"`
 	LastUsedAt     NullableTime    `json:"lastUsedAt"`
 	// Build information for the snapshot
-	BuildInfo *BuildInfo `json:"buildInfo,omitempty"`
+	BuildInfo            *BuildInfo `json:"buildInfo,omitempty"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _SnapshotDto SnapshotDto
@@ -551,6 +551,11 @@ func (o SnapshotDto) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.BuildInfo) {
 		toSerialize["buildInfo"] = o.BuildInfo
 	}
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -591,15 +596,36 @@ func (o *SnapshotDto) UnmarshalJSON(data []byte) (err error) {
 
 	varSnapshotDto := _SnapshotDto{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varSnapshotDto)
+	err = json.Unmarshal(data, &varSnapshotDto)
 
 	if err != nil {
 		return err
 	}
 
 	*o = SnapshotDto(varSnapshotDto)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "id")
+		delete(additionalProperties, "organizationId")
+		delete(additionalProperties, "general")
+		delete(additionalProperties, "name")
+		delete(additionalProperties, "imageName")
+		delete(additionalProperties, "state")
+		delete(additionalProperties, "size")
+		delete(additionalProperties, "entrypoint")
+		delete(additionalProperties, "cpu")
+		delete(additionalProperties, "gpu")
+		delete(additionalProperties, "mem")
+		delete(additionalProperties, "disk")
+		delete(additionalProperties, "errorReason")
+		delete(additionalProperties, "createdAt")
+		delete(additionalProperties, "updatedAt")
+		delete(additionalProperties, "lastUsedAt")
+		delete(additionalProperties, "buildInfo")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

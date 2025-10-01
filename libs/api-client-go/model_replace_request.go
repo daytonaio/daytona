@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 )
@@ -22,9 +21,10 @@ var _ MappedNullable = &ReplaceRequest{}
 
 // ReplaceRequest struct for ReplaceRequest
 type ReplaceRequest struct {
-	Files    []string `json:"files"`
-	Pattern  string   `json:"pattern"`
-	NewValue string   `json:"newValue"`
+	Files                []string `json:"files"`
+	Pattern              string   `json:"pattern"`
+	NewValue             string   `json:"newValue"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _ReplaceRequest ReplaceRequest
@@ -134,6 +134,11 @@ func (o ReplaceRequest) ToMap() (map[string]interface{}, error) {
 	toSerialize["files"] = o.Files
 	toSerialize["pattern"] = o.Pattern
 	toSerialize["newValue"] = o.NewValue
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -163,15 +168,22 @@ func (o *ReplaceRequest) UnmarshalJSON(data []byte) (err error) {
 
 	varReplaceRequest := _ReplaceRequest{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varReplaceRequest)
+	err = json.Unmarshal(data, &varReplaceRequest)
 
 	if err != nil {
 		return err
 	}
 
 	*o = ReplaceRequest(varReplaceRequest)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "files")
+		delete(additionalProperties, "pattern")
+		delete(additionalProperties, "newValue")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

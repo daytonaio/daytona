@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 )
@@ -39,7 +38,8 @@ type CreateSnapshot struct {
 	// Disk space allocated to the sandbox in GB
 	Disk *int32 `json:"disk,omitempty"`
 	// Build information for the snapshot
-	BuildInfo *CreateBuildInfo `json:"buildInfo,omitempty"`
+	BuildInfo            *CreateBuildInfo `json:"buildInfo,omitempty"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _CreateSnapshot CreateSnapshot
@@ -377,6 +377,11 @@ func (o CreateSnapshot) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.BuildInfo) {
 		toSerialize["buildInfo"] = o.BuildInfo
 	}
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -404,15 +409,28 @@ func (o *CreateSnapshot) UnmarshalJSON(data []byte) (err error) {
 
 	varCreateSnapshot := _CreateSnapshot{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varCreateSnapshot)
+	err = json.Unmarshal(data, &varCreateSnapshot)
 
 	if err != nil {
 		return err
 	}
 
 	*o = CreateSnapshot(varCreateSnapshot)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "name")
+		delete(additionalProperties, "imageName")
+		delete(additionalProperties, "entrypoint")
+		delete(additionalProperties, "general")
+		delete(additionalProperties, "cpu")
+		delete(additionalProperties, "gpu")
+		delete(additionalProperties, "memory")
+		delete(additionalProperties, "disk")
+		delete(additionalProperties, "buildInfo")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

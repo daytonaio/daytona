@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 )
@@ -33,7 +32,8 @@ type StorageAccessDto struct {
 	// Organization ID
 	OrganizationId string `json:"organizationId"`
 	// S3 bucket name
-	Bucket string `json:"bucket"`
+	Bucket               string `json:"bucket"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _StorageAccessDto StorageAccessDto
@@ -221,6 +221,11 @@ func (o StorageAccessDto) ToMap() (map[string]interface{}, error) {
 	toSerialize["storageUrl"] = o.StorageUrl
 	toSerialize["organizationId"] = o.OrganizationId
 	toSerialize["bucket"] = o.Bucket
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -253,15 +258,25 @@ func (o *StorageAccessDto) UnmarshalJSON(data []byte) (err error) {
 
 	varStorageAccessDto := _StorageAccessDto{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varStorageAccessDto)
+	err = json.Unmarshal(data, &varStorageAccessDto)
 
 	if err != nil {
 		return err
 	}
 
 	*o = StorageAccessDto(varStorageAccessDto)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "accessKey")
+		delete(additionalProperties, "secret")
+		delete(additionalProperties, "sessionToken")
+		delete(additionalProperties, "storageUrl")
+		delete(additionalProperties, "organizationId")
+		delete(additionalProperties, "bucket")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

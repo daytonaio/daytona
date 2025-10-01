@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 )
@@ -28,7 +27,8 @@ type SessionExecuteRequest struct {
 	RunAsync *bool `json:"runAsync,omitempty"`
 	// Deprecated: Use runAsync instead. Whether to execute the command asynchronously
 	// Deprecated
-	Async *bool `json:"async,omitempty"`
+	Async                *bool `json:"async,omitempty"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _SessionExecuteRequest SessionExecuteRequest
@@ -159,6 +159,11 @@ func (o SessionExecuteRequest) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.Async) {
 		toSerialize["async"] = o.Async
 	}
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -186,15 +191,22 @@ func (o *SessionExecuteRequest) UnmarshalJSON(data []byte) (err error) {
 
 	varSessionExecuteRequest := _SessionExecuteRequest{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varSessionExecuteRequest)
+	err = json.Unmarshal(data, &varSessionExecuteRequest)
 
 	if err != nil {
 		return err
 	}
 
 	*o = SessionExecuteRequest(varSessionExecuteRequest)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "command")
+		delete(additionalProperties, "runAsync")
+		delete(additionalProperties, "async")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

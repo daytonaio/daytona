@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 )
@@ -37,7 +36,8 @@ type PtySessionInfo struct {
 	// Whether the PTY session is currently active
 	Active bool `json:"active"`
 	// Whether the PTY session uses lazy start (only start when first client connects)
-	LazyStart bool `json:"lazyStart"`
+	LazyStart            bool `json:"lazyStart"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _PtySessionInfo PtySessionInfo
@@ -279,6 +279,11 @@ func (o PtySessionInfo) ToMap() (map[string]interface{}, error) {
 	toSerialize["createdAt"] = o.CreatedAt
 	toSerialize["active"] = o.Active
 	toSerialize["lazyStart"] = o.LazyStart
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -313,15 +318,27 @@ func (o *PtySessionInfo) UnmarshalJSON(data []byte) (err error) {
 
 	varPtySessionInfo := _PtySessionInfo{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varPtySessionInfo)
+	err = json.Unmarshal(data, &varPtySessionInfo)
 
 	if err != nil {
 		return err
 	}
 
 	*o = PtySessionInfo(varPtySessionInfo)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "id")
+		delete(additionalProperties, "cwd")
+		delete(additionalProperties, "envs")
+		delete(additionalProperties, "cols")
+		delete(additionalProperties, "rows")
+		delete(additionalProperties, "createdAt")
+		delete(additionalProperties, "active")
+		delete(additionalProperties, "lazyStart")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 )
@@ -25,7 +24,8 @@ type CreateLinkedAccount struct {
 	// The authentication provider of the secondary account
 	Provider string `json:"provider"`
 	// The user ID of the secondary account
-	UserId string `json:"userId"`
+	UserId               string `json:"userId"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _CreateLinkedAccount CreateLinkedAccount
@@ -109,6 +109,11 @@ func (o CreateLinkedAccount) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["provider"] = o.Provider
 	toSerialize["userId"] = o.UserId
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -137,15 +142,21 @@ func (o *CreateLinkedAccount) UnmarshalJSON(data []byte) (err error) {
 
 	varCreateLinkedAccount := _CreateLinkedAccount{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varCreateLinkedAccount)
+	err = json.Unmarshal(data, &varCreateLinkedAccount)
 
 	if err != nil {
 		return err
 	}
 
 	*o = CreateLinkedAccount(varCreateLinkedAccount)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "provider")
+		delete(additionalProperties, "userId")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

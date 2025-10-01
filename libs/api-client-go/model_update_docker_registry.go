@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 )
@@ -31,7 +30,8 @@ type UpdateDockerRegistry struct {
 	// Registry password
 	Password *string `json:"password,omitempty"`
 	// Registry project
-	Project *string `json:"project,omitempty"`
+	Project              *string `json:"project,omitempty"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _UpdateDockerRegistry UpdateDockerRegistry
@@ -211,6 +211,11 @@ func (o UpdateDockerRegistry) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.Project) {
 		toSerialize["project"] = o.Project
 	}
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -240,15 +245,24 @@ func (o *UpdateDockerRegistry) UnmarshalJSON(data []byte) (err error) {
 
 	varUpdateDockerRegistry := _UpdateDockerRegistry{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varUpdateDockerRegistry)
+	err = json.Unmarshal(data, &varUpdateDockerRegistry)
 
 	if err != nil {
 		return err
 	}
 
 	*o = UpdateDockerRegistry(varUpdateDockerRegistry)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "name")
+		delete(additionalProperties, "url")
+		delete(additionalProperties, "username")
+		delete(additionalProperties, "password")
+		delete(additionalProperties, "project")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

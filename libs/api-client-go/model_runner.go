@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 )
@@ -73,7 +72,8 @@ type Runner struct {
 	// The last update timestamp of the runner
 	UpdatedAt string `json:"updatedAt"`
 	// The version of the runner
-	Version string `json:"version"`
+	Version              string `json:"version"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _Runner Runner
@@ -862,6 +862,11 @@ func (o Runner) ToMap() (map[string]interface{}, error) {
 	toSerialize["createdAt"] = o.CreatedAt
 	toSerialize["updatedAt"] = o.UpdatedAt
 	toSerialize["version"] = o.Version
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -905,15 +910,45 @@ func (o *Runner) UnmarshalJSON(data []byte) (err error) {
 
 	varRunner := _Runner{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varRunner)
+	err = json.Unmarshal(data, &varRunner)
 
 	if err != nil {
 		return err
 	}
 
 	*o = Runner(varRunner)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "id")
+		delete(additionalProperties, "domain")
+		delete(additionalProperties, "apiUrl")
+		delete(additionalProperties, "proxyUrl")
+		delete(additionalProperties, "apiKey")
+		delete(additionalProperties, "cpu")
+		delete(additionalProperties, "memory")
+		delete(additionalProperties, "disk")
+		delete(additionalProperties, "gpu")
+		delete(additionalProperties, "gpuType")
+		delete(additionalProperties, "class")
+		delete(additionalProperties, "currentCpuUsagePercentage")
+		delete(additionalProperties, "currentMemoryUsagePercentage")
+		delete(additionalProperties, "currentDiskUsagePercentage")
+		delete(additionalProperties, "currentAllocatedCpu")
+		delete(additionalProperties, "currentAllocatedMemoryGiB")
+		delete(additionalProperties, "currentAllocatedDiskGiB")
+		delete(additionalProperties, "currentSnapshotCount")
+		delete(additionalProperties, "availabilityScore")
+		delete(additionalProperties, "region")
+		delete(additionalProperties, "state")
+		delete(additionalProperties, "lastChecked")
+		delete(additionalProperties, "unschedulable")
+		delete(additionalProperties, "createdAt")
+		delete(additionalProperties, "updatedAt")
+		delete(additionalProperties, "version")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 )
@@ -23,7 +22,8 @@ var _ MappedNullable = &KeyboardHotkeyRequest{}
 // KeyboardHotkeyRequest struct for KeyboardHotkeyRequest
 type KeyboardHotkeyRequest struct {
 	// The hotkey combination to press (e.g., \"ctrl+c\", \"cmd+v\", \"alt+tab\")
-	Keys string `json:"keys"`
+	Keys                 string `json:"keys"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _KeyboardHotkeyRequest KeyboardHotkeyRequest
@@ -81,6 +81,11 @@ func (o KeyboardHotkeyRequest) MarshalJSON() ([]byte, error) {
 func (o KeyboardHotkeyRequest) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["keys"] = o.Keys
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -108,15 +113,20 @@ func (o *KeyboardHotkeyRequest) UnmarshalJSON(data []byte) (err error) {
 
 	varKeyboardHotkeyRequest := _KeyboardHotkeyRequest{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varKeyboardHotkeyRequest)
+	err = json.Unmarshal(data, &varKeyboardHotkeyRequest)
 
 	if err != nil {
 		return err
 	}
 
 	*o = KeyboardHotkeyRequest(varKeyboardHotkeyRequest)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "keys")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }
