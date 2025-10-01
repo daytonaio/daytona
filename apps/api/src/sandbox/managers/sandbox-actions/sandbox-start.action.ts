@@ -23,6 +23,7 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { Snapshot } from '../../entities/snapshot.entity'
 import { OrganizationService } from '../../../organization/services/organization.service'
 import { TypedConfigService } from '../../../config/typed-config.service'
+import { Runner } from '../../entities/runner.entity'
 
 @Injectable()
 export class SandboxStartAction extends SandboxAction {
@@ -348,9 +349,9 @@ export class SandboxStartAction extends SandboxAction {
 
       const snapshotRef = baseSnapshot ? baseSnapshot.internalName : null
 
-      let availableRunners = []
+      let availableRunners: Runner[] = []
 
-      const runnersWithBaseSnapshot = snapshotRef
+      const runnersWithBaseSnapshot: Runner[] = snapshotRef
         ? await this.runnerService.findAvailableRunners({
             region: sandbox.region,
             sandboxClass: sandbox.class,
@@ -375,17 +376,17 @@ export class SandboxStartAction extends SandboxAction {
 
       //  get random runner from available runners
       const randomRunnerIndex = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1) + min)
-      const runner = availableRunners[randomRunnerIndex(0, availableRunners.length - 1)].id
+      const runner = availableRunners[randomRunnerIndex(0, availableRunners.length - 1)]
 
       //  verify the runner is still available and ready
       if (!runner || runner.state !== RunnerState.READY || runner.unschedulable) {
-        this.logger.warn(`Selected runner ${runner.Id} is no longer available, retrying sandbox assignment`)
+        this.logger.warn(`Selected runner ${runner.id} is no longer available, retrying sandbox assignment`)
         return SYNC_AGAIN
       }
 
       const runnerAdapter = await this.runnerAdapterFactory.create(runner)
 
-      await this.updateSandboxState(sandbox.id, SandboxState.RESTORING, runner.Id)
+      await this.updateSandboxState(sandbox.id, SandboxState.RESTORING, runner.id)
 
       sandbox.snapshot = validBackup
 
