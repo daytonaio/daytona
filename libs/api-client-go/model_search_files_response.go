@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 )
@@ -22,7 +21,8 @@ var _ MappedNullable = &SearchFilesResponse{}
 
 // SearchFilesResponse struct for SearchFilesResponse
 type SearchFilesResponse struct {
-	Files []string `json:"files"`
+	Files                []string `json:"files"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _SearchFilesResponse SearchFilesResponse
@@ -80,6 +80,11 @@ func (o SearchFilesResponse) MarshalJSON() ([]byte, error) {
 func (o SearchFilesResponse) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["files"] = o.Files
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -107,15 +112,20 @@ func (o *SearchFilesResponse) UnmarshalJSON(data []byte) (err error) {
 
 	varSearchFilesResponse := _SearchFilesResponse{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varSearchFilesResponse)
+	err = json.Unmarshal(data, &varSearchFilesResponse)
 
 	if err != nil {
 		return err
 	}
 
 	*o = SearchFilesResponse(varSearchFilesResponse)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "files")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

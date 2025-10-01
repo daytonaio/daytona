@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 )
@@ -33,7 +32,8 @@ type WebhookInitializationStatus struct {
 	// When the webhook initialization was created
 	CreatedAt string `json:"createdAt"`
 	// When the webhook initialization was last updated
-	UpdatedAt string `json:"updatedAt"`
+	UpdatedAt            string `json:"updatedAt"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _WebhookInitializationStatus WebhookInitializationStatus
@@ -225,6 +225,11 @@ func (o WebhookInitializationStatus) ToMap() (map[string]interface{}, error) {
 	toSerialize["retryCount"] = o.RetryCount
 	toSerialize["createdAt"] = o.CreatedAt
 	toSerialize["updatedAt"] = o.UpdatedAt
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -257,15 +262,25 @@ func (o *WebhookInitializationStatus) UnmarshalJSON(data []byte) (err error) {
 
 	varWebhookInitializationStatus := _WebhookInitializationStatus{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varWebhookInitializationStatus)
+	err = json.Unmarshal(data, &varWebhookInitializationStatus)
 
 	if err != nil {
 		return err
 	}
 
 	*o = WebhookInitializationStatus(varWebhookInitializationStatus)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "organizationId")
+		delete(additionalProperties, "svixApplicationId")
+		delete(additionalProperties, "lastError")
+		delete(additionalProperties, "retryCount")
+		delete(additionalProperties, "createdAt")
+		delete(additionalProperties, "updatedAt")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

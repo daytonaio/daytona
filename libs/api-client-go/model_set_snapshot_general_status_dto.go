@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 )
@@ -23,7 +22,8 @@ var _ MappedNullable = &SetSnapshotGeneralStatusDto{}
 // SetSnapshotGeneralStatusDto struct for SetSnapshotGeneralStatusDto
 type SetSnapshotGeneralStatusDto struct {
 	// Whether the snapshot is general
-	General bool `json:"general"`
+	General              bool `json:"general"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _SetSnapshotGeneralStatusDto SetSnapshotGeneralStatusDto
@@ -81,6 +81,11 @@ func (o SetSnapshotGeneralStatusDto) MarshalJSON() ([]byte, error) {
 func (o SetSnapshotGeneralStatusDto) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["general"] = o.General
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -108,15 +113,20 @@ func (o *SetSnapshotGeneralStatusDto) UnmarshalJSON(data []byte) (err error) {
 
 	varSetSnapshotGeneralStatusDto := _SetSnapshotGeneralStatusDto{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varSetSnapshotGeneralStatusDto)
+	err = json.Unmarshal(data, &varSetSnapshotGeneralStatusDto)
 
 	if err != nil {
 		return err
 	}
 
 	*o = SetSnapshotGeneralStatusDto(varSetSnapshotGeneralStatusDto)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "general")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

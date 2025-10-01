@@ -20,8 +20,11 @@ var _ MappedNullable = &UserHomeDirResponse{}
 
 // UserHomeDirResponse struct for UserHomeDirResponse
 type UserHomeDirResponse struct {
-	Dir *string `json:"dir,omitempty"`
+	Dir                  *string `json:"dir,omitempty"`
+	AdditionalProperties map[string]interface{}
 }
+
+type _UserHomeDirResponse UserHomeDirResponse
 
 // NewUserHomeDirResponse instantiates a new UserHomeDirResponse object
 // This constructor will assign default values to properties that have it defined,
@@ -85,7 +88,33 @@ func (o UserHomeDirResponse) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.Dir) {
 		toSerialize["dir"] = o.Dir
 	}
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
+}
+
+func (o *UserHomeDirResponse) UnmarshalJSON(data []byte) (err error) {
+	varUserHomeDirResponse := _UserHomeDirResponse{}
+
+	err = json.Unmarshal(data, &varUserHomeDirResponse)
+
+	if err != nil {
+		return err
+	}
+
+	*o = UserHomeDirResponse(varUserHomeDirResponse)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "dir")
+		o.AdditionalProperties = additionalProperties
+	}
+
+	return err
 }
 
 type NullableUserHomeDirResponse struct {

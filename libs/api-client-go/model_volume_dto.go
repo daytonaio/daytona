@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 )
@@ -37,7 +36,8 @@ type VolumeDto struct {
 	// Last used timestamp
 	LastUsedAt NullableString `json:"lastUsedAt,omitempty"`
 	// The error reason of the volume
-	ErrorReason NullableString `json:"errorReason"`
+	ErrorReason          NullableString `json:"errorReason"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _VolumeDto VolumeDto
@@ -299,6 +299,11 @@ func (o VolumeDto) ToMap() (map[string]interface{}, error) {
 		toSerialize["lastUsedAt"] = o.LastUsedAt.Get()
 	}
 	toSerialize["errorReason"] = o.ErrorReason.Get()
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -332,15 +337,27 @@ func (o *VolumeDto) UnmarshalJSON(data []byte) (err error) {
 
 	varVolumeDto := _VolumeDto{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varVolumeDto)
+	err = json.Unmarshal(data, &varVolumeDto)
 
 	if err != nil {
 		return err
 	}
 
 	*o = VolumeDto(varVolumeDto)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "id")
+		delete(additionalProperties, "name")
+		delete(additionalProperties, "organizationId")
+		delete(additionalProperties, "state")
+		delete(additionalProperties, "createdAt")
+		delete(additionalProperties, "updatedAt")
+		delete(additionalProperties, "lastUsedAt")
+		delete(additionalProperties, "errorReason")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

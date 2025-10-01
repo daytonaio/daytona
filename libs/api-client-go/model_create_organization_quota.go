@@ -20,16 +20,19 @@ var _ MappedNullable = &CreateOrganizationQuota{}
 
 // CreateOrganizationQuota struct for CreateOrganizationQuota
 type CreateOrganizationQuota struct {
-	TotalCpuQuota       *float32 `json:"totalCpuQuota,omitempty"`
-	TotalMemoryQuota    *float32 `json:"totalMemoryQuota,omitempty"`
-	TotalDiskQuota      *float32 `json:"totalDiskQuota,omitempty"`
-	MaxCpuPerSandbox    *float32 `json:"maxCpuPerSandbox,omitempty"`
-	MaxMemoryPerSandbox *float32 `json:"maxMemoryPerSandbox,omitempty"`
-	MaxDiskPerSandbox   *float32 `json:"maxDiskPerSandbox,omitempty"`
-	SnapshotQuota       *float32 `json:"snapshotQuota,omitempty"`
-	MaxSnapshotSize     *float32 `json:"maxSnapshotSize,omitempty"`
-	VolumeQuota         *float32 `json:"volumeQuota,omitempty"`
+	TotalCpuQuota        *float32 `json:"totalCpuQuota,omitempty"`
+	TotalMemoryQuota     *float32 `json:"totalMemoryQuota,omitempty"`
+	TotalDiskQuota       *float32 `json:"totalDiskQuota,omitempty"`
+	MaxCpuPerSandbox     *float32 `json:"maxCpuPerSandbox,omitempty"`
+	MaxMemoryPerSandbox  *float32 `json:"maxMemoryPerSandbox,omitempty"`
+	MaxDiskPerSandbox    *float32 `json:"maxDiskPerSandbox,omitempty"`
+	SnapshotQuota        *float32 `json:"snapshotQuota,omitempty"`
+	MaxSnapshotSize      *float32 `json:"maxSnapshotSize,omitempty"`
+	VolumeQuota          *float32 `json:"volumeQuota,omitempty"`
+	AdditionalProperties map[string]interface{}
 }
+
+type _CreateOrganizationQuota CreateOrganizationQuota
 
 // NewCreateOrganizationQuota instantiates a new CreateOrganizationQuota object
 // This constructor will assign default values to properties that have it defined,
@@ -373,7 +376,41 @@ func (o CreateOrganizationQuota) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.VolumeQuota) {
 		toSerialize["volumeQuota"] = o.VolumeQuota
 	}
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
+}
+
+func (o *CreateOrganizationQuota) UnmarshalJSON(data []byte) (err error) {
+	varCreateOrganizationQuota := _CreateOrganizationQuota{}
+
+	err = json.Unmarshal(data, &varCreateOrganizationQuota)
+
+	if err != nil {
+		return err
+	}
+
+	*o = CreateOrganizationQuota(varCreateOrganizationQuota)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "totalCpuQuota")
+		delete(additionalProperties, "totalMemoryQuota")
+		delete(additionalProperties, "totalDiskQuota")
+		delete(additionalProperties, "maxCpuPerSandbox")
+		delete(additionalProperties, "maxMemoryPerSandbox")
+		delete(additionalProperties, "maxDiskPerSandbox")
+		delete(additionalProperties, "snapshotQuota")
+		delete(additionalProperties, "maxSnapshotSize")
+		delete(additionalProperties, "volumeQuota")
+		o.AdditionalProperties = additionalProperties
+	}
+
+	return err
 }
 
 type NullableCreateOrganizationQuota struct {

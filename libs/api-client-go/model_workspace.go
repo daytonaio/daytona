@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 )
@@ -90,7 +89,8 @@ type Workspace struct {
 	// The creation timestamp of the last snapshot
 	SnapshotCreatedAt *string `json:"snapshotCreatedAt,omitempty"`
 	// Additional information about the sandbox
-	Info *SandboxInfo `json:"info,omitempty"`
+	Info                 *SandboxInfo `json:"info,omitempty"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _Workspace Workspace
@@ -1200,6 +1200,11 @@ func (o Workspace) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.Info) {
 		toSerialize["info"] = o.Info
 	}
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -1239,15 +1244,53 @@ func (o *Workspace) UnmarshalJSON(data []byte) (err error) {
 
 	varWorkspace := _Workspace{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varWorkspace)
+	err = json.Unmarshal(data, &varWorkspace)
 
 	if err != nil {
 		return err
 	}
 
 	*o = Workspace(varWorkspace)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "id")
+		delete(additionalProperties, "organizationId")
+		delete(additionalProperties, "snapshot")
+		delete(additionalProperties, "user")
+		delete(additionalProperties, "env")
+		delete(additionalProperties, "labels")
+		delete(additionalProperties, "public")
+		delete(additionalProperties, "networkBlockAll")
+		delete(additionalProperties, "networkAllowList")
+		delete(additionalProperties, "target")
+		delete(additionalProperties, "cpu")
+		delete(additionalProperties, "gpu")
+		delete(additionalProperties, "memory")
+		delete(additionalProperties, "disk")
+		delete(additionalProperties, "state")
+		delete(additionalProperties, "desiredState")
+		delete(additionalProperties, "errorReason")
+		delete(additionalProperties, "backupState")
+		delete(additionalProperties, "backupCreatedAt")
+		delete(additionalProperties, "autoStopInterval")
+		delete(additionalProperties, "autoArchiveInterval")
+		delete(additionalProperties, "autoDeleteInterval")
+		delete(additionalProperties, "runnerDomain")
+		delete(additionalProperties, "volumes")
+		delete(additionalProperties, "buildInfo")
+		delete(additionalProperties, "createdAt")
+		delete(additionalProperties, "updatedAt")
+		delete(additionalProperties, "class")
+		delete(additionalProperties, "daemonVersion")
+		delete(additionalProperties, "name")
+		delete(additionalProperties, "image")
+		delete(additionalProperties, "snapshotState")
+		delete(additionalProperties, "snapshotCreatedAt")
+		delete(additionalProperties, "info")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

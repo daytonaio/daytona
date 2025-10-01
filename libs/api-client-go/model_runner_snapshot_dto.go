@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 )
@@ -27,7 +26,8 @@ type RunnerSnapshotDto struct {
 	// Runner ID
 	RunnerId string `json:"runnerId"`
 	// Runner domain
-	RunnerDomain string `json:"runnerDomain"`
+	RunnerDomain         string `json:"runnerDomain"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _RunnerSnapshotDto RunnerSnapshotDto
@@ -137,6 +137,11 @@ func (o RunnerSnapshotDto) ToMap() (map[string]interface{}, error) {
 	toSerialize["runnerSnapshotId"] = o.RunnerSnapshotId
 	toSerialize["runnerId"] = o.RunnerId
 	toSerialize["runnerDomain"] = o.RunnerDomain
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -166,15 +171,22 @@ func (o *RunnerSnapshotDto) UnmarshalJSON(data []byte) (err error) {
 
 	varRunnerSnapshotDto := _RunnerSnapshotDto{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varRunnerSnapshotDto)
+	err = json.Unmarshal(data, &varRunnerSnapshotDto)
 
 	if err != nil {
 		return err
 	}
 
 	*o = RunnerSnapshotDto(varRunnerSnapshotDto)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "runnerSnapshotId")
+		delete(additionalProperties, "runnerId")
+		delete(additionalProperties, "runnerDomain")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

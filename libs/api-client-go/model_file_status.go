@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 )
@@ -22,10 +21,11 @@ var _ MappedNullable = &FileStatus{}
 
 // FileStatus struct for FileStatus
 type FileStatus struct {
-	Name     string `json:"name"`
-	Staging  string `json:"staging"`
-	Worktree string `json:"worktree"`
-	Extra    string `json:"extra"`
+	Name                 string `json:"name"`
+	Staging              string `json:"staging"`
+	Worktree             string `json:"worktree"`
+	Extra                string `json:"extra"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _FileStatus FileStatus
@@ -161,6 +161,11 @@ func (o FileStatus) ToMap() (map[string]interface{}, error) {
 	toSerialize["staging"] = o.Staging
 	toSerialize["worktree"] = o.Worktree
 	toSerialize["extra"] = o.Extra
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -191,15 +196,23 @@ func (o *FileStatus) UnmarshalJSON(data []byte) (err error) {
 
 	varFileStatus := _FileStatus{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varFileStatus)
+	err = json.Unmarshal(data, &varFileStatus)
 
 	if err != nil {
 		return err
 	}
 
 	*o = FileStatus(varFileStatus)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "name")
+		delete(additionalProperties, "staging")
+		delete(additionalProperties, "worktree")
+		delete(additionalProperties, "extra")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

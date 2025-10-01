@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 )
@@ -22,7 +21,8 @@ var _ MappedNullable = &CreateVolume{}
 
 // CreateVolume struct for CreateVolume
 type CreateVolume struct {
-	Name string `json:"name"`
+	Name                 string `json:"name"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _CreateVolume CreateVolume
@@ -80,6 +80,11 @@ func (o CreateVolume) MarshalJSON() ([]byte, error) {
 func (o CreateVolume) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["name"] = o.Name
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -107,15 +112,20 @@ func (o *CreateVolume) UnmarshalJSON(data []byte) (err error) {
 
 	varCreateVolume := _CreateVolume{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varCreateVolume)
+	err = json.Unmarshal(data, &varCreateVolume)
 
 	if err != nil {
 		return err
 	}
 
 	*o = CreateVolume(varCreateVolume)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "name")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

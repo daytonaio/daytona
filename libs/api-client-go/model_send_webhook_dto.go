@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 )
@@ -27,7 +26,8 @@ type SendWebhookDto struct {
 	// The payload data to send
 	Payload map[string]interface{} `json:"payload"`
 	// Optional event ID for idempotency
-	EventId *string `json:"eventId,omitempty"`
+	EventId              *string `json:"eventId,omitempty"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _SendWebhookDto SendWebhookDto
@@ -146,6 +146,11 @@ func (o SendWebhookDto) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.EventId) {
 		toSerialize["eventId"] = o.EventId
 	}
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -174,15 +179,22 @@ func (o *SendWebhookDto) UnmarshalJSON(data []byte) (err error) {
 
 	varSendWebhookDto := _SendWebhookDto{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varSendWebhookDto)
+	err = json.Unmarshal(data, &varSendWebhookDto)
 
 	if err != nil {
 		return err
 	}
 
 	*o = SendWebhookDto(varSendWebhookDto)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "eventType")
+		delete(additionalProperties, "payload")
+		delete(additionalProperties, "eventId")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

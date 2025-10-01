@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"time"
@@ -34,7 +33,8 @@ type SshAccessDto struct {
 	// When the SSH access was created
 	CreatedAt time.Time `json:"createdAt"`
 	// When the SSH access was last updated
-	UpdatedAt time.Time `json:"updatedAt"`
+	UpdatedAt            time.Time `json:"updatedAt"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _SshAccessDto SshAccessDto
@@ -222,6 +222,11 @@ func (o SshAccessDto) ToMap() (map[string]interface{}, error) {
 	toSerialize["expiresAt"] = o.ExpiresAt
 	toSerialize["createdAt"] = o.CreatedAt
 	toSerialize["updatedAt"] = o.UpdatedAt
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -254,15 +259,25 @@ func (o *SshAccessDto) UnmarshalJSON(data []byte) (err error) {
 
 	varSshAccessDto := _SshAccessDto{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varSshAccessDto)
+	err = json.Unmarshal(data, &varSshAccessDto)
 
 	if err != nil {
 		return err
 	}
 
 	*o = SshAccessDto(varSshAccessDto)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "id")
+		delete(additionalProperties, "sandboxId")
+		delete(additionalProperties, "token")
+		delete(additionalProperties, "expiresAt")
+		delete(additionalProperties, "createdAt")
+		delete(additionalProperties, "updatedAt")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

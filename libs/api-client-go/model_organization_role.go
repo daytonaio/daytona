@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"time"
@@ -36,7 +35,8 @@ type OrganizationRole struct {
 	// Creation timestamp
 	CreatedAt time.Time `json:"createdAt"`
 	// Last update timestamp
-	UpdatedAt time.Time `json:"updatedAt"`
+	UpdatedAt            time.Time `json:"updatedAt"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _OrganizationRole OrganizationRole
@@ -250,6 +250,11 @@ func (o OrganizationRole) ToMap() (map[string]interface{}, error) {
 	toSerialize["isGlobal"] = o.IsGlobal
 	toSerialize["createdAt"] = o.CreatedAt
 	toSerialize["updatedAt"] = o.UpdatedAt
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -283,15 +288,26 @@ func (o *OrganizationRole) UnmarshalJSON(data []byte) (err error) {
 
 	varOrganizationRole := _OrganizationRole{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varOrganizationRole)
+	err = json.Unmarshal(data, &varOrganizationRole)
 
 	if err != nil {
 		return err
 	}
 
 	*o = OrganizationRole(varOrganizationRole)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "id")
+		delete(additionalProperties, "name")
+		delete(additionalProperties, "description")
+		delete(additionalProperties, "permissions")
+		delete(additionalProperties, "isGlobal")
+		delete(additionalProperties, "createdAt")
+		delete(additionalProperties, "updatedAt")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

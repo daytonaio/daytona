@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 )
@@ -27,7 +26,8 @@ type PortPreviewUrl struct {
 	// Access token
 	Token string `json:"token"`
 	// Legacy preview url using runner domain
-	LegacyProxyUrl *string `json:"legacyProxyUrl,omitempty"`
+	LegacyProxyUrl       *string `json:"legacyProxyUrl,omitempty"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _PortPreviewUrl PortPreviewUrl
@@ -146,6 +146,11 @@ func (o PortPreviewUrl) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.LegacyProxyUrl) {
 		toSerialize["legacyProxyUrl"] = o.LegacyProxyUrl
 	}
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -174,15 +179,22 @@ func (o *PortPreviewUrl) UnmarshalJSON(data []byte) (err error) {
 
 	varPortPreviewUrl := _PortPreviewUrl{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varPortPreviewUrl)
+	err = json.Unmarshal(data, &varPortPreviewUrl)
 
 	if err != nil {
 		return err
 	}
 
 	*o = PortPreviewUrl(varPortPreviewUrl)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "url")
+		delete(additionalProperties, "token")
+		delete(additionalProperties, "legacyProxyUrl")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

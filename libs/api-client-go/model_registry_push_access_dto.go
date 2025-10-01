@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 )
@@ -33,7 +32,8 @@ type RegistryPushAccessDto struct {
 	// Registry project ID
 	Project string `json:"project"`
 	// Token expiration time in ISO format
-	ExpiresAt string `json:"expiresAt"`
+	ExpiresAt            string `json:"expiresAt"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _RegistryPushAccessDto RegistryPushAccessDto
@@ -221,6 +221,11 @@ func (o RegistryPushAccessDto) ToMap() (map[string]interface{}, error) {
 	toSerialize["registryId"] = o.RegistryId
 	toSerialize["project"] = o.Project
 	toSerialize["expiresAt"] = o.ExpiresAt
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -253,15 +258,25 @@ func (o *RegistryPushAccessDto) UnmarshalJSON(data []byte) (err error) {
 
 	varRegistryPushAccessDto := _RegistryPushAccessDto{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varRegistryPushAccessDto)
+	err = json.Unmarshal(data, &varRegistryPushAccessDto)
 
 	if err != nil {
 		return err
 	}
 
 	*o = RegistryPushAccessDto(varRegistryPushAccessDto)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "username")
+		delete(additionalProperties, "secret")
+		delete(additionalProperties, "registryUrl")
+		delete(additionalProperties, "registryId")
+		delete(additionalProperties, "project")
+		delete(additionalProperties, "expiresAt")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

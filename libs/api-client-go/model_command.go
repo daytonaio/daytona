@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 )
@@ -27,7 +26,8 @@ type Command struct {
 	// The command that was executed
 	Command string `json:"command"`
 	// The exit code of the command
-	ExitCode *float32 `json:"exitCode,omitempty"`
+	ExitCode             *float32 `json:"exitCode,omitempty"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _Command Command
@@ -146,6 +146,11 @@ func (o Command) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.ExitCode) {
 		toSerialize["exitCode"] = o.ExitCode
 	}
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -174,15 +179,22 @@ func (o *Command) UnmarshalJSON(data []byte) (err error) {
 
 	varCommand := _Command{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varCommand)
+	err = json.Unmarshal(data, &varCommand)
 
 	if err != nil {
 		return err
 	}
 
 	*o = Command(varCommand)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "id")
+		delete(additionalProperties, "command")
+		delete(additionalProperties, "exitCode")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

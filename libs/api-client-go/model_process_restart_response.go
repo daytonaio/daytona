@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 )
@@ -25,7 +24,8 @@ type ProcessRestartResponse struct {
 	// A message indicating the result of restarting the process
 	Message string `json:"message"`
 	// The name of the VNC process that was restarted
-	ProcessName string `json:"processName"`
+	ProcessName          string `json:"processName"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _ProcessRestartResponse ProcessRestartResponse
@@ -109,6 +109,11 @@ func (o ProcessRestartResponse) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["message"] = o.Message
 	toSerialize["processName"] = o.ProcessName
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -137,15 +142,21 @@ func (o *ProcessRestartResponse) UnmarshalJSON(data []byte) (err error) {
 
 	varProcessRestartResponse := _ProcessRestartResponse{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varProcessRestartResponse)
+	err = json.Unmarshal(data, &varProcessRestartResponse)
 
 	if err != nil {
 		return err
 	}
 
 	*o = ProcessRestartResponse(varProcessRestartResponse)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "message")
+		delete(additionalProperties, "processName")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

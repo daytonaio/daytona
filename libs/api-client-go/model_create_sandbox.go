@@ -55,8 +55,11 @@ type CreateSandbox struct {
 	// Array of volumes to attach to the sandbox
 	Volumes []SandboxVolume `json:"volumes,omitempty"`
 	// Build information for the sandbox
-	BuildInfo *CreateBuildInfo `json:"buildInfo,omitempty"`
+	BuildInfo            *CreateBuildInfo `json:"buildInfo,omitempty"`
+	AdditionalProperties map[string]interface{}
 }
+
+type _CreateSandbox CreateSandbox
 
 // NewCreateSandbox instantiates a new CreateSandbox object
 // This constructor will assign default values to properties that have it defined,
@@ -715,7 +718,50 @@ func (o CreateSandbox) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.BuildInfo) {
 		toSerialize["buildInfo"] = o.BuildInfo
 	}
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
+}
+
+func (o *CreateSandbox) UnmarshalJSON(data []byte) (err error) {
+	varCreateSandbox := _CreateSandbox{}
+
+	err = json.Unmarshal(data, &varCreateSandbox)
+
+	if err != nil {
+		return err
+	}
+
+	*o = CreateSandbox(varCreateSandbox)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "snapshot")
+		delete(additionalProperties, "user")
+		delete(additionalProperties, "env")
+		delete(additionalProperties, "labels")
+		delete(additionalProperties, "public")
+		delete(additionalProperties, "networkBlockAll")
+		delete(additionalProperties, "networkAllowList")
+		delete(additionalProperties, "class")
+		delete(additionalProperties, "target")
+		delete(additionalProperties, "cpu")
+		delete(additionalProperties, "gpu")
+		delete(additionalProperties, "memory")
+		delete(additionalProperties, "disk")
+		delete(additionalProperties, "autoStopInterval")
+		delete(additionalProperties, "autoArchiveInterval")
+		delete(additionalProperties, "autoDeleteInterval")
+		delete(additionalProperties, "volumes")
+		delete(additionalProperties, "buildInfo")
+		o.AdditionalProperties = additionalProperties
+	}
+
+	return err
 }
 
 type NullableCreateSandbox struct {

@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 )
@@ -22,14 +21,15 @@ var _ MappedNullable = &FileInfo{}
 
 // FileInfo struct for FileInfo
 type FileInfo struct {
-	Name        string  `json:"name"`
-	IsDir       bool    `json:"isDir"`
-	Size        float32 `json:"size"`
-	ModTime     string  `json:"modTime"`
-	Mode        string  `json:"mode"`
-	Permissions string  `json:"permissions"`
-	Owner       string  `json:"owner"`
-	Group       string  `json:"group"`
+	Name                 string  `json:"name"`
+	IsDir                bool    `json:"isDir"`
+	Size                 float32 `json:"size"`
+	ModTime              string  `json:"modTime"`
+	Mode                 string  `json:"mode"`
+	Permissions          string  `json:"permissions"`
+	Owner                string  `json:"owner"`
+	Group                string  `json:"group"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _FileInfo FileInfo
@@ -269,6 +269,11 @@ func (o FileInfo) ToMap() (map[string]interface{}, error) {
 	toSerialize["permissions"] = o.Permissions
 	toSerialize["owner"] = o.Owner
 	toSerialize["group"] = o.Group
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -303,15 +308,27 @@ func (o *FileInfo) UnmarshalJSON(data []byte) (err error) {
 
 	varFileInfo := _FileInfo{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varFileInfo)
+	err = json.Unmarshal(data, &varFileInfo)
 
 	if err != nil {
 		return err
 	}
 
 	*o = FileInfo(varFileInfo)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "name")
+		delete(additionalProperties, "isDir")
+		delete(additionalProperties, "size")
+		delete(additionalProperties, "modTime")
+		delete(additionalProperties, "mode")
+		delete(additionalProperties, "permissions")
+		delete(additionalProperties, "owner")
+		delete(additionalProperties, "group")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

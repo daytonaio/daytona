@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 )
@@ -22,8 +21,9 @@ var _ MappedNullable = &Range{}
 
 // Range struct for Range
 type Range struct {
-	Start Position `json:"start"`
-	End   Position `json:"end"`
+	Start                Position `json:"start"`
+	End                  Position `json:"end"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _Range Range
@@ -107,6 +107,11 @@ func (o Range) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["start"] = o.Start
 	toSerialize["end"] = o.End
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -135,15 +140,21 @@ func (o *Range) UnmarshalJSON(data []byte) (err error) {
 
 	varRange := _Range{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varRange)
+	err = json.Unmarshal(data, &varRange)
 
 	if err != nil {
 		return err
 	}
 
 	*o = Range(varRange)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "start")
+		delete(additionalProperties, "end")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

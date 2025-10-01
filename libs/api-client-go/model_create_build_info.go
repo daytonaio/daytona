@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 )
@@ -25,7 +24,8 @@ type CreateBuildInfo struct {
 	// The Dockerfile content used for the build
 	DockerfileContent string `json:"dockerfileContent"`
 	// The context hashes used for the build
-	ContextHashes []string `json:"contextHashes,omitempty"`
+	ContextHashes        []string `json:"contextHashes,omitempty"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _CreateBuildInfo CreateBuildInfo
@@ -118,6 +118,11 @@ func (o CreateBuildInfo) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.ContextHashes) {
 		toSerialize["contextHashes"] = o.ContextHashes
 	}
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -145,15 +150,21 @@ func (o *CreateBuildInfo) UnmarshalJSON(data []byte) (err error) {
 
 	varCreateBuildInfo := _CreateBuildInfo{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varCreateBuildInfo)
+	err = json.Unmarshal(data, &varCreateBuildInfo)
 
 	if err != nil {
 		return err
 	}
 
 	*o = CreateBuildInfo(varCreateBuildInfo)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "dockerfileContent")
+		delete(additionalProperties, "contextHashes")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

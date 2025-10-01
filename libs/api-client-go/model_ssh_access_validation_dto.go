@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 )
@@ -29,7 +28,8 @@ type SshAccessValidationDto struct {
 	// ID of the runner hosting the sandbox
 	RunnerId *string `json:"runnerId,omitempty"`
 	// Domain of the runner hosting the sandbox
-	RunnerDomain *string `json:"runnerDomain,omitempty"`
+	RunnerDomain         *string `json:"runnerDomain,omitempty"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _SshAccessValidationDto SshAccessValidationDto
@@ -183,6 +183,11 @@ func (o SshAccessValidationDto) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.RunnerDomain) {
 		toSerialize["runnerDomain"] = o.RunnerDomain
 	}
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -211,15 +216,23 @@ func (o *SshAccessValidationDto) UnmarshalJSON(data []byte) (err error) {
 
 	varSshAccessValidationDto := _SshAccessValidationDto{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varSshAccessValidationDto)
+	err = json.Unmarshal(data, &varSshAccessValidationDto)
 
 	if err != nil {
 		return err
 	}
 
 	*o = SshAccessValidationDto(varSshAccessValidationDto)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "valid")
+		delete(additionalProperties, "sandboxId")
+		delete(additionalProperties, "runnerId")
+		delete(additionalProperties, "runnerDomain")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"time"
@@ -28,7 +27,8 @@ type UpdateOrganizationInvitation struct {
 	// Array of role IDs
 	AssignedRoleIds []string `json:"assignedRoleIds"`
 	// Expiration date of the invitation
-	ExpiresAt *time.Time `json:"expiresAt,omitempty"`
+	ExpiresAt            *time.Time `json:"expiresAt,omitempty"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _UpdateOrganizationInvitation UpdateOrganizationInvitation
@@ -147,6 +147,11 @@ func (o UpdateOrganizationInvitation) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.ExpiresAt) {
 		toSerialize["expiresAt"] = o.ExpiresAt
 	}
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -175,15 +180,22 @@ func (o *UpdateOrganizationInvitation) UnmarshalJSON(data []byte) (err error) {
 
 	varUpdateOrganizationInvitation := _UpdateOrganizationInvitation{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varUpdateOrganizationInvitation)
+	err = json.Unmarshal(data, &varUpdateOrganizationInvitation)
 
 	if err != nil {
 		return err
 	}
 
 	*o = UpdateOrganizationInvitation(varUpdateOrganizationInvitation)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "role")
+		delete(additionalProperties, "assignedRoleIds")
+		delete(additionalProperties, "expiresAt")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

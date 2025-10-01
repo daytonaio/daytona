@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 )
@@ -25,7 +24,8 @@ type MouseClickResponse struct {
 	// The actual X coordinate where the click occurred
 	X float32 `json:"x"`
 	// The actual Y coordinate where the click occurred
-	Y float32 `json:"y"`
+	Y                    float32 `json:"y"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _MouseClickResponse MouseClickResponse
@@ -109,6 +109,11 @@ func (o MouseClickResponse) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["x"] = o.X
 	toSerialize["y"] = o.Y
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -137,15 +142,21 @@ func (o *MouseClickResponse) UnmarshalJSON(data []byte) (err error) {
 
 	varMouseClickResponse := _MouseClickResponse{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varMouseClickResponse)
+	err = json.Unmarshal(data, &varMouseClickResponse)
 
 	if err != nil {
 		return err
 	}
 
 	*o = MouseClickResponse(varMouseClickResponse)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "x")
+		delete(additionalProperties, "y")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

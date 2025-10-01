@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 )
@@ -33,7 +32,8 @@ type PtyCreateRequest struct {
 	// Number of terminal rows
 	Rows *float32 `json:"rows,omitempty"`
 	// Whether to start the PTY session lazily (only start when first client connects)
-	LazyStart *bool `json:"lazyStart,omitempty"`
+	LazyStart            *bool `json:"lazyStart,omitempty"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _PtyCreateRequest PtyCreateRequest
@@ -270,6 +270,11 @@ func (o PtyCreateRequest) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.LazyStart) {
 		toSerialize["lazyStart"] = o.LazyStart
 	}
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -297,15 +302,25 @@ func (o *PtyCreateRequest) UnmarshalJSON(data []byte) (err error) {
 
 	varPtyCreateRequest := _PtyCreateRequest{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varPtyCreateRequest)
+	err = json.Unmarshal(data, &varPtyCreateRequest)
 
 	if err != nil {
 		return err
 	}
 
 	*o = PtyCreateRequest(varPtyCreateRequest)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "id")
+		delete(additionalProperties, "cwd")
+		delete(additionalProperties, "envs")
+		delete(additionalProperties, "cols")
+		delete(additionalProperties, "rows")
+		delete(additionalProperties, "lazyStart")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"time"
@@ -59,6 +58,7 @@ type Organization struct {
 	MaxDiskPerSandbox float32 `json:"maxDiskPerSandbox"`
 	// Sandbox default network block all
 	SandboxLimitedNetworkEgress bool `json:"sandboxLimitedNetworkEgress"`
+	AdditionalProperties        map[string]interface{}
 }
 
 type _Organization Organization
@@ -558,6 +558,11 @@ func (o Organization) ToMap() (map[string]interface{}, error) {
 	toSerialize["maxMemoryPerSandbox"] = o.MaxMemoryPerSandbox
 	toSerialize["maxDiskPerSandbox"] = o.MaxDiskPerSandbox
 	toSerialize["sandboxLimitedNetworkEgress"] = o.SandboxLimitedNetworkEgress
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -602,15 +607,37 @@ func (o *Organization) UnmarshalJSON(data []byte) (err error) {
 
 	varOrganization := _Organization{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varOrganization)
+	err = json.Unmarshal(data, &varOrganization)
 
 	if err != nil {
 		return err
 	}
 
 	*o = Organization(varOrganization)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "id")
+		delete(additionalProperties, "name")
+		delete(additionalProperties, "createdBy")
+		delete(additionalProperties, "personal")
+		delete(additionalProperties, "createdAt")
+		delete(additionalProperties, "updatedAt")
+		delete(additionalProperties, "suspended")
+		delete(additionalProperties, "suspendedAt")
+		delete(additionalProperties, "suspensionReason")
+		delete(additionalProperties, "suspendedUntil")
+		delete(additionalProperties, "suspensionCleanupGracePeriodHours")
+		delete(additionalProperties, "totalCpuQuota")
+		delete(additionalProperties, "totalMemoryQuota")
+		delete(additionalProperties, "totalDiskQuota")
+		delete(additionalProperties, "maxCpuPerSandbox")
+		delete(additionalProperties, "maxMemoryPerSandbox")
+		delete(additionalProperties, "maxDiskPerSandbox")
+		delete(additionalProperties, "sandboxLimitedNetworkEgress")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

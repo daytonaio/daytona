@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 )
@@ -22,13 +21,14 @@ var _ MappedNullable = &CompletionItem{}
 
 // CompletionItem struct for CompletionItem
 type CompletionItem struct {
-	Label         string                 `json:"label"`
-	Kind          *float32               `json:"kind,omitempty"`
-	Detail        *string                `json:"detail,omitempty"`
-	Documentation map[string]interface{} `json:"documentation,omitempty"`
-	SortText      *string                `json:"sortText,omitempty"`
-	FilterText    *string                `json:"filterText,omitempty"`
-	InsertText    *string                `json:"insertText,omitempty"`
+	Label                string                 `json:"label"`
+	Kind                 *float32               `json:"kind,omitempty"`
+	Detail               *string                `json:"detail,omitempty"`
+	Documentation        map[string]interface{} `json:"documentation,omitempty"`
+	SortText             *string                `json:"sortText,omitempty"`
+	FilterText           *string                `json:"filterText,omitempty"`
+	InsertText           *string                `json:"insertText,omitempty"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _CompletionItem CompletionItem
@@ -296,6 +296,11 @@ func (o CompletionItem) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.InsertText) {
 		toSerialize["insertText"] = o.InsertText
 	}
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -323,15 +328,26 @@ func (o *CompletionItem) UnmarshalJSON(data []byte) (err error) {
 
 	varCompletionItem := _CompletionItem{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varCompletionItem)
+	err = json.Unmarshal(data, &varCompletionItem)
 
 	if err != nil {
 		return err
 	}
 
 	*o = CompletionItem(varCompletionItem)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "label")
+		delete(additionalProperties, "kind")
+		delete(additionalProperties, "detail")
+		delete(additionalProperties, "documentation")
+		delete(additionalProperties, "sortText")
+		delete(additionalProperties, "filterText")
+		delete(additionalProperties, "insertText")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

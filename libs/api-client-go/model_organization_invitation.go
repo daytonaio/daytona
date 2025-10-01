@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"time"
@@ -44,7 +43,8 @@ type OrganizationInvitation struct {
 	// Creation timestamp
 	CreatedAt time.Time `json:"createdAt"`
 	// Last update timestamp
-	UpdatedAt time.Time `json:"updatedAt"`
+	UpdatedAt            time.Time `json:"updatedAt"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _OrganizationInvitation OrganizationInvitation
@@ -362,6 +362,11 @@ func (o OrganizationInvitation) ToMap() (map[string]interface{}, error) {
 	toSerialize["assignedRoles"] = o.AssignedRoles
 	toSerialize["createdAt"] = o.CreatedAt
 	toSerialize["updatedAt"] = o.UpdatedAt
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -399,15 +404,30 @@ func (o *OrganizationInvitation) UnmarshalJSON(data []byte) (err error) {
 
 	varOrganizationInvitation := _OrganizationInvitation{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varOrganizationInvitation)
+	err = json.Unmarshal(data, &varOrganizationInvitation)
 
 	if err != nil {
 		return err
 	}
 
 	*o = OrganizationInvitation(varOrganizationInvitation)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "id")
+		delete(additionalProperties, "email")
+		delete(additionalProperties, "invitedBy")
+		delete(additionalProperties, "organizationId")
+		delete(additionalProperties, "organizationName")
+		delete(additionalProperties, "expiresAt")
+		delete(additionalProperties, "status")
+		delete(additionalProperties, "role")
+		delete(additionalProperties, "assignedRoles")
+		delete(additionalProperties, "createdAt")
+		delete(additionalProperties, "updatedAt")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

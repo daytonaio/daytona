@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 )
@@ -22,8 +21,9 @@ var _ MappedNullable = &CompletionList{}
 
 // CompletionList struct for CompletionList
 type CompletionList struct {
-	IsIncomplete bool             `json:"isIncomplete"`
-	Items        []CompletionItem `json:"items"`
+	IsIncomplete         bool             `json:"isIncomplete"`
+	Items                []CompletionItem `json:"items"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _CompletionList CompletionList
@@ -107,6 +107,11 @@ func (o CompletionList) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["isIncomplete"] = o.IsIncomplete
 	toSerialize["items"] = o.Items
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -135,15 +140,21 @@ func (o *CompletionList) UnmarshalJSON(data []byte) (err error) {
 
 	varCompletionList := _CompletionList{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varCompletionList)
+	err = json.Unmarshal(data, &varCompletionList)
 
 	if err != nil {
 		return err
 	}
 
 	*o = CompletionList(varCompletionList)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "isIncomplete")
+		delete(additionalProperties, "items")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

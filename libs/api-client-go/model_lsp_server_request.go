@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 )
@@ -25,7 +24,8 @@ type LspServerRequest struct {
 	// Language identifier
 	LanguageId string `json:"languageId"`
 	// Path to the project
-	PathToProject string `json:"pathToProject"`
+	PathToProject        string `json:"pathToProject"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _LspServerRequest LspServerRequest
@@ -109,6 +109,11 @@ func (o LspServerRequest) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["languageId"] = o.LanguageId
 	toSerialize["pathToProject"] = o.PathToProject
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -137,15 +142,21 @@ func (o *LspServerRequest) UnmarshalJSON(data []byte) (err error) {
 
 	varLspServerRequest := _LspServerRequest{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varLspServerRequest)
+	err = json.Unmarshal(data, &varLspServerRequest)
 
 	if err != nil {
 		return err
 	}
 
 	*o = LspServerRequest(varLspServerRequest)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "languageId")
+		delete(additionalProperties, "pathToProject")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 )
@@ -24,7 +23,8 @@ var _ MappedNullable = &GitAddRequest{}
 type GitAddRequest struct {
 	Path string `json:"path"`
 	// files to add (use . for all files)
-	Files []string `json:"files"`
+	Files                []string `json:"files"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _GitAddRequest GitAddRequest
@@ -108,6 +108,11 @@ func (o GitAddRequest) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["path"] = o.Path
 	toSerialize["files"] = o.Files
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -136,15 +141,21 @@ func (o *GitAddRequest) UnmarshalJSON(data []byte) (err error) {
 
 	varGitAddRequest := _GitAddRequest{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varGitAddRequest)
+	err = json.Unmarshal(data, &varGitAddRequest)
 
 	if err != nil {
 		return err
 	}
 
 	*o = GitAddRequest(varGitAddRequest)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "path")
+		delete(additionalProperties, "files")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

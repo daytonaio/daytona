@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 )
@@ -25,7 +24,8 @@ type ProcessLogsResponse struct {
 	// The name of the VNC process whose logs were retrieved
 	ProcessName string `json:"processName"`
 	// The log output from the specified VNC process
-	Logs string `json:"logs"`
+	Logs                 string `json:"logs"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _ProcessLogsResponse ProcessLogsResponse
@@ -109,6 +109,11 @@ func (o ProcessLogsResponse) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["processName"] = o.ProcessName
 	toSerialize["logs"] = o.Logs
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -137,15 +142,21 @@ func (o *ProcessLogsResponse) UnmarshalJSON(data []byte) (err error) {
 
 	varProcessLogsResponse := _ProcessLogsResponse{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varProcessLogsResponse)
+	err = json.Unmarshal(data, &varProcessLogsResponse)
 
 	if err != nil {
 		return err
 	}
 
 	*o = ProcessLogsResponse(varProcessLogsResponse)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "processName")
+		delete(additionalProperties, "logs")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }
