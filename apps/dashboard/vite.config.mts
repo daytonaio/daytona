@@ -61,12 +61,12 @@ export default defineConfig((mode) => ({
   ],
   resolve: {
     alias: [
-        // Resolve @daytonaio/sdk to the built distribution
+      // Resolve @daytonaio/sdk to the built distribution
       {
         find: '@daytonaio/sdk',
         replacement: path.resolve(__dirname, '../../libs/sdk-typescript/src'),
       },
-// Target @ but not @daytonaio,
+      // Target @ but not @daytonaio,
       {
         // find: /^@(?!daytonaio)/,
         find: '@',

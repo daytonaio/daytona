@@ -32,34 +32,6 @@ export interface SandboxParams {
 export type SetSandboxParamsValue = <K extends keyof SandboxParams>(key: K, value: SandboxParams[K]) => void
 
 export interface VNCInteractionOptionsParams {
-<<<<<<< HEAD
-  keyboardHotKey?: string
-  keyboardPressKey?: string
-  keyboardTypeText?: string
-  mouseClickParams?: {
-    x: number
-    y: number
-    button?: string
-    double?: boolean
-  }
-  mouseDragParams?: {
-    startX: number
-    startY: number
-    endX: number
-    endY: number
-    button?: string
-  }
-  mouseMoveParams?: {
-    x: number
-    y: number
-  }
-  mouseScrollParams?: {
-    x: number
-    y: number
-    direction: 'up' | 'down'
-    amount?: number
-  }
-=======
   keyboardHotKeyParams: KeyboardHotKey
   keyboardPressParams: KeyboardPress
   keyboardTypeParams: KeyboardType
@@ -67,7 +39,6 @@ export interface VNCInteractionOptionsParams {
   mouseDragParams: MouseDrag
   mouseMoveParams: MouseMove
   mouseScrollParams: MouseScroll
->>>>>>> 85e5f5f3 (VNC mouse operations form)
   screenshotOptionsConfig: CustomizedScreenshotOptions
   screenshotRegionConfig: ScreenshotRegion
   responseText?: string
@@ -81,15 +52,7 @@ export type SetVNCInteractionOptionsParamValue = <K extends keyof VNCInteraction
 // Currently running action, or none
 export type RunningActionMethodName = PlaygroundActions | null
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 // Mapping between action and runtime error message (if any)
-=======
-// >Mapping between action and runtime error message (if any)
->>>>>>> 056b8131 (runPlaygroundActionWithParams and runPlaygroundActionWithoutParams general methods defined, runningActionMethod and actionRuntimeError moved to PlaygroundContext, screenshoot actions form data adjust to follow PlaygroundActionWithParamsFormData type)
-=======
-// Mapping between action and runtime error message (if any)
->>>>>>> 1fb19d8e (Final formating touches and comments update)
 export type ActionRuntimeError = Partial<Record<PlaygroundActions, string>>
 
 // Method for validation of required params for a given action

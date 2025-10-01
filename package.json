@@ -152,6 +152,7 @@
     "passport": "^0.7.0",
     "passport-http-bearer": "^1.0.1",
     "passport-jwt": "^4.0.1",
+    "path-browserify-win32": "^2.0.1",
     "pathe": "^2.0.3",
     "pg": "^8.13.3",
     "pg-query-stream": "^4.10.3",
@@ -197,6 +198,8 @@
   "devDependencies": {
     "@babel/preset-env": "^7.22.0",
     "@babel/preset-typescript": "^7.22.0",
+    "@esbuild-plugins/node-globals-polyfill": "^0.2.3",
+    "@esbuild-plugins/node-modules-polyfill": "^0.2.2",
     "@eslint/js": "^9.8.0",
     "@nestjs/schematics": "11.0.7",
     "@nestjs/testing": "^11.0.8",
