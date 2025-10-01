@@ -28,6 +28,7 @@ import { SandboxBackupCreatedEvent } from '../events/sandbox-backup-created.even
 import { SandboxArchivedEvent } from '../events/sandbox-archived.event'
 import { RunnerAdapterFactory } from '../runner-adapter/runnerAdapter'
 import { TypedConfigService } from '../../config/typed-config.service'
+import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
 
 import { TrackJobExecution } from '../../common/decorators/track-job-execution.decorator'
 import { TrackableJobExecutions } from '../../common/interfaces/trackable-job-executions'
@@ -140,8 +141,9 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
     }
 
     try {
-      const sandboxes = await this.sandboxRepository
+      const queryBuilder = this.sandboxRepository
         .createQueryBuilder('sandbox')
+        .select(['sandbox.id'])
         .innerJoin('runner', 'r', 'r.id = sandbox.runnerId')
         .where('sandbox.state IN (:...states)', {
           states: [SandboxState.ARCHIVING, SandboxState.STARTED, SandboxState.STOPPED],
@@ -170,54 +172,94 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
         .orderBy('state_priority', 'ASC')
         .addOrderBy('sandbox.lastBackupAt', 'ASC', 'NULLS FIRST') // Process sandboxes with no backups first
         .addOrderBy('sandbox.createdAt', 'ASC') // For equal lastBackupAt, process older sandboxes first
-        .take(100)
-        .getMany()
 
-      await Promise.allSettled(
-        sandboxes.map(async (s) => {
-          const lockKey = `sandbox-backup-${s.id}`
-          const hasLock = await this.redisLockProvider.lock(lockKey, 60)
-          if (!hasLock) {
-            return
-          }
+      const stream = await queryBuilder.stream()
+      let processedCount = 0
+      const maxProcessPerRun = 5000
+      const pendingProcesses: Promise<void>[] = []
 
-          try {
-            //  get the latest sandbox state
-            const sandbox = await this.sandboxRepository.findOneByOrFail({
-              id: s.id,
-            })
-
-            try {
-              switch (sandbox.backupState) {
-                case BackupState.PENDING: {
-                  await this.handlePendingBackup(sandbox)
-                  break
-                }
-                case BackupState.IN_PROGRESS: {
-                  await this.checkBackupProgress(sandbox)
-                  break
-                }
-              }
-            } catch (error) {
-              //  if error, retry 10 times
-              const errorRetryKey = `${lockKey}-error-retry`
-              const errorRetryCount = await this.redis.get(errorRetryKey)
-              if (!errorRetryCount) {
-                await this.redis.setex(errorRetryKey, 300, '1')
-              } else if (parseInt(errorRetryCount) > 10) {
-                this.logger.error(`Error processing backup for sandbox ${sandbox.id}:`, fromAxiosError(error))
-                await this.updateSandboxBackupState(sandbox.id, BackupState.ERROR, fromAxiosError(error).message)
-              } else {
-                await this.redis.setex(errorRetryKey, 300, errorRetryCount + 1)
-              }
+      try {
+        await new Promise<void>((resolve, reject) => {
+          stream.on('data', async (row: any) => {
+            if (processedCount >= maxProcessPerRun) {
+              resolve()
+              return
             }
-          } catch (error) {
-            this.logger.error(`Error processing backup for sandbox ${s.id}:`, error)
-          } finally {
-            await this.redisLockProvider.unlock(lockKey)
-          }
-        }),
-      )
+
+            const lockKey = `sandbox-backup-${row.sandbox_id}`
+            if (await this.redisLockProvider.locked(lockKey)) {
+              return
+            }
+
+            const processPromise = (async () => {
+              const hasLock = await this.redisLockProvider.lock(lockKey, 60)
+              if (!hasLock) {
+                return
+              }
+
+              try {
+                //  get the latest sandbox state
+                const sandbox = await this.sandboxRepository.findOneByOrFail({
+                  id: row.sandbox_id,
+                })
+
+                try {
+                  switch (sandbox.backupState) {
+                    case BackupState.PENDING: {
+                      await this.handlePendingBackup(sandbox)
+                      break
+                    }
+                    case BackupState.IN_PROGRESS: {
+                      await this.checkBackupProgress(sandbox)
+                      break
+                    }
+                  }
+                } catch (error) {
+                  //  if error, retry 10 times
+                  const errorRetryKey = `${lockKey}-error-retry`
+                  const errorRetryCount = await this.redis.get(errorRetryKey)
+                  if (!errorRetryCount) {
+                    await this.redis.setex(errorRetryKey, 300, '1')
+                  } else if (parseInt(errorRetryCount) > 10) {
+                    this.logger.error(`Error processing backup for sandbox ${sandbox.id}:`, fromAxiosError(error))
+                    await this.updateSandboxBackupState(sandbox.id, BackupState.ERROR, fromAxiosError(error).message)
+                  } else {
+                    await this.redis.setex(errorRetryKey, 300, errorRetryCount + 1)
+                  }
+                }
+              } catch (error) {
+                this.logger.error(`Error processing backup for sandbox ${row.sandbox_id}:`, error)
+              } finally {
+                await this.redisLockProvider.unlock(lockKey)
+              }
+            })()
+
+            pendingProcesses.push(processPromise)
+            processedCount++
+
+            // Limit concurrent processing to avoid overwhelming the system
+            if (pendingProcesses.length >= 10) {
+              stream.pause()
+              Promise.allSettled(pendingProcesses.splice(0, pendingProcesses.length))
+                .then(() => stream.resume())
+                .catch(reject)
+            }
+          })
+          stream.on('end', () => {
+            Promise.all(pendingProcesses)
+              .then(() => {
+                resolve()
+              })
+              .catch(reject)
+          })
+
+          stream.on('error', reject)
+        })
+      } finally {
+        if (!stream.destroyed) {
+          stream.destroy()
+        }
+      }
     } catch (error) {
       this.logger.error(`Error processing backups: `, error)
     } finally {

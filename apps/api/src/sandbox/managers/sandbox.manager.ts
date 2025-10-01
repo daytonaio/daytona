@@ -156,7 +156,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
         order: {
           lastBackupAt: 'ASC',
         },
-        take: 100,
+        take: 200,
       })
 
       await Promise.all(
@@ -265,14 +265,20 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
 
       const stream = await queryBuilder.stream()
       let processedCount = 0
-      const maxProcessPerRun = 100
+      const maxProcessPerRun = 1000
       const pendingProcesses: Promise<void>[] = []
 
       try {
         await new Promise<void>((resolve, reject) => {
-          stream.on('data', (row: any) => {
+          stream.on('data', async (row: any) => {
             if (processedCount >= maxProcessPerRun) {
               resolve()
+              return
+            }
+
+            const lockKey = SYNC_INSTANCE_STATE_LOCK_KEY + row.sandbox_id
+            if (await this.redisLockProvider.locked(lockKey)) {
+              // Sandbox is already being processed, skip it
               return
             }
 
@@ -284,7 +290,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
             // Limit concurrent processing to avoid overwhelming the system
             if (pendingProcesses.length >= 10) {
               stream.pause()
-              Promise.all(pendingProcesses.splice(0, pendingProcesses.length))
+              Promise.allSettled(pendingProcesses.splice(0, pendingProcesses.length))
                 .then(() => stream.resume())
                 .catch(reject)
             }
