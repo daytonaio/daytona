@@ -38,6 +38,7 @@ from .common.filesystem import FileDownloadRequest, FileDownloadResponse, FileUp
 from .common.image import Image
 from .common.lsp_server import LspLanguageId
 from .common.process import CodeRunParams, SessionExecuteRequest
+from .common.pty import PtySize
 from .common.sandbox import Resources
 from .common.snapshot import CreateSnapshotParams
 from .common.volume import VolumeMount
@@ -80,4 +81,5 @@ __all__ = [
     "CreateSandboxFromImageParams",
     "CreateSandboxFromSnapshotParams",
     "CreateSnapshotParams",
+    "PtySize",
 ]

@@ -110,6 +110,11 @@ daytona_api_client_async/models/process_logs_response.py
 daytona_api_client_async/models/process_restart_response.py
 daytona_api_client_async/models/process_status_response.py
 daytona_api_client_async/models/project_dir_response.py
+daytona_api_client_async/models/pty_create_request.py
+daytona_api_client_async/models/pty_create_response.py
+daytona_api_client_async/models/pty_list_response.py
+daytona_api_client_async/models/pty_resize_request.py
+daytona_api_client_async/models/pty_session_info.py
 daytona_api_client_async/models/range.py
 daytona_api_client_async/models/region_screenshot_response.py
 daytona_api_client_async/models/registry_push_access_dto.py

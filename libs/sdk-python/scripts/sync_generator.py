@@ -65,6 +65,7 @@ ADDITIONAL_REPLACEMENTS = {
     "aiofiles.open": "open",
     # aioboto3 replacement
     "aioboto3": "boto3",
+    "async_pty_handle": "pty_handle",
 }
 
 # Complex regex-based tweaks
@@ -83,6 +84,9 @@ POST_REPLACEMENTS = [
     (re.compile(r"\.aiter_bytes\b"), ".iter_bytes"),
     # Update module imports
     (re.compile(r"from daytona\._async"), "from daytona._sync"),
+    # Fix websockets imports from asyncio to sync
+    (re.compile(r"from websockets\.asyncio\.client import"), "from websockets.sync.client import"),
+    (re.compile(r"import websockets\.asyncio\.client"), "import websockets.sync.client"),
     # Documentation cleanup
     (re.compile(r"\basynchronous methods\b"), "methods"),
     (re.compile(r"\basynchronous\b"), "synchronous"),
@@ -1013,6 +1017,105 @@ def manage_asyncio_imports(text: str) -> str:
     return "".join(new_lines)
 
 
+def manage_typing_imports(text: str) -> str:
+    """
+    Manage typing imports based on usage:
+    - Remove unused typing imports (Union, Optional, List, Dict, Callable, etc.)
+    - Keep only the typing imports that are actually used in the code
+    """
+    lines = text.splitlines(keepends=True)
+
+    # Build non-import text to check usage
+    non_import_text = ""
+    for line in lines:
+        if not (line.strip().startswith("from typing import") or line.strip().startswith("import typing")):
+            non_import_text += line
+
+    new_lines = []
+    in_multiline_import = False
+    paren_count = 0
+
+    for i, line in enumerate(lines):
+        # Handle "from typing import ..." lines
+        m = re.match(r"^\s*from typing import (.+)$", line)
+        if m:
+            # Parse the imported items, handling multiline imports
+            import_content = m.group(1)
+            j = i + 1
+
+            # Check if this is a multiline import (contains opening parenthesis)
+            if "(" in import_content and ")" not in import_content:
+                while j < len(lines) and ")" not in lines[j]:
+                    import_content += lines[j].replace("\n", " ")
+                    j += 1
+                if j < len(lines):
+                    import_content += lines[j].replace("\n", " ")
+                    j += 1
+
+                # Skip the lines we've consumed
+                for skip_idx in range(i + 1, j):
+                    if skip_idx < len(lines):
+                        lines[skip_idx] = ""
+
+            # Remove parentheses and split by comma
+            import_content = import_content.replace("(", "").replace(")", "")
+            imported_items = [item.strip() for item in import_content.split(",") if item.strip()]
+
+            # Check which items are actually used
+            used_imports = []
+            for item in imported_items:
+                # Clean up any aliases (e.g., "Dict as MyDict" -> "Dict")
+                clean_item = item.split(" as ")[0].strip()
+
+                # Check if this typing import is used in the code
+                # Look for the item as a word boundary
+                pattern = rf"\b{re.escape(clean_item)}\b"
+                if re.search(pattern, non_import_text):
+                    used_imports.append(item)
+
+            # Only keep the line if there are used imports
+            if used_imports:
+                if len(used_imports) == 1:
+                    new_lines.append(f"from typing import {used_imports[0]}\n")
+                elif len(used_imports) <= 3:
+                    new_lines.append(f"from typing import {', '.join(used_imports)}\n")
+                else:
+                    # Use multiline import for many items
+                    new_lines.append("from typing import (\n")
+                    for idx, item in enumerate(used_imports):
+                        if idx == len(used_imports) - 1:
+                            new_lines.append(f"    {item},\n")
+                        else:
+                            new_lines.append(f"    {item},\n")
+                    new_lines.append(")\n")
+            # else: skip this line (remove unused import)
+            continue
+
+        # Handle "import typing" lines
+        if re.match(r"^\s*import typing\s*$", line):
+            # Check if typing.X is used anywhere
+            if re.search(r"\btyping\.", non_import_text):
+                new_lines.append(line)  # Keep the import
+            # else: skip this line (remove unused import)
+            continue
+
+        # Track multi-line imports by counting parentheses
+        if line.strip().startswith(("import ", "from ")):
+            paren_count += line.count("(") - line.count(")")
+            if paren_count > 0:
+                in_multiline_import = True
+        elif in_multiline_import:
+            paren_count += line.count("(") - line.count(")")
+            if paren_count <= 0:
+                in_multiline_import = False
+                paren_count = 0
+
+        # Add all other lines
+        new_lines.append(line)
+
+    return "".join(new_lines)
+
+
 def replace_with_constructor_as_var(text: str) -> str:
     """
     Convert:
@@ -1185,6 +1288,9 @@ def post_process(path: Path):
 
     # 11) Manage asyncio and time imports (add if needed based on usage, remove if unused)
     text = manage_asyncio_imports(text)
+
+    # 11.5) Manage typing imports (remove unused typing imports)
+    text = manage_typing_imports(text)
 
     # 12) Inject auto‐gen banner if it's missing in the first few lines
     lines = text.splitlines(keepends=True)
