@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 )
@@ -27,7 +26,8 @@ type OidcConfig struct {
 	// OIDC client ID
 	ClientId string `json:"clientId"`
 	// OIDC audience
-	Audience string `json:"audience"`
+	Audience             string `json:"audience"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _OidcConfig OidcConfig
@@ -137,6 +137,11 @@ func (o OidcConfig) ToMap() (map[string]interface{}, error) {
 	toSerialize["issuer"] = o.Issuer
 	toSerialize["clientId"] = o.ClientId
 	toSerialize["audience"] = o.Audience
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -166,15 +171,22 @@ func (o *OidcConfig) UnmarshalJSON(data []byte) (err error) {
 
 	varOidcConfig := _OidcConfig{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varOidcConfig)
+	err = json.Unmarshal(data, &varOidcConfig)
 
 	if err != nil {
 		return err
 	}
 
 	*o = OidcConfig(varOidcConfig)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "issuer")
+		delete(additionalProperties, "clientId")
+		delete(additionalProperties, "audience")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

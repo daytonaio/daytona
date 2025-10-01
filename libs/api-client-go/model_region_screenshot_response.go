@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 )
@@ -27,7 +26,8 @@ type RegionScreenshotResponse struct {
 	// The current cursor position when the region screenshot was taken
 	CursorPosition map[string]interface{} `json:"cursorPosition,omitempty"`
 	// The size of the screenshot data in bytes
-	SizeBytes *float32 `json:"sizeBytes,omitempty"`
+	SizeBytes            *float32 `json:"sizeBytes,omitempty"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _RegionScreenshotResponse RegionScreenshotResponse
@@ -155,6 +155,11 @@ func (o RegionScreenshotResponse) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.SizeBytes) {
 		toSerialize["sizeBytes"] = o.SizeBytes
 	}
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -182,15 +187,22 @@ func (o *RegionScreenshotResponse) UnmarshalJSON(data []byte) (err error) {
 
 	varRegionScreenshotResponse := _RegionScreenshotResponse{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varRegionScreenshotResponse)
+	err = json.Unmarshal(data, &varRegionScreenshotResponse)
 
 	if err != nil {
 		return err
 	}
 
 	*o = RegionScreenshotResponse(varRegionScreenshotResponse)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "screenshot")
+		delete(additionalProperties, "cursorPosition")
+		delete(additionalProperties, "sizeBytes")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

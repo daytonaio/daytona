@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 )
@@ -22,9 +21,10 @@ var _ MappedNullable = &GitRepoRequest{}
 
 // GitRepoRequest struct for GitRepoRequest
 type GitRepoRequest struct {
-	Path     string  `json:"path"`
-	Username *string `json:"username,omitempty"`
-	Password *string `json:"password,omitempty"`
+	Path                 string  `json:"path"`
+	Username             *string `json:"username,omitempty"`
+	Password             *string `json:"password,omitempty"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _GitRepoRequest GitRepoRequest
@@ -152,6 +152,11 @@ func (o GitRepoRequest) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.Password) {
 		toSerialize["password"] = o.Password
 	}
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -179,15 +184,22 @@ func (o *GitRepoRequest) UnmarshalJSON(data []byte) (err error) {
 
 	varGitRepoRequest := _GitRepoRequest{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varGitRepoRequest)
+	err = json.Unmarshal(data, &varGitRepoRequest)
 
 	if err != nil {
 		return err
 	}
 
 	*o = GitRepoRequest(varGitRepoRequest)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "path")
+		delete(additionalProperties, "username")
+		delete(additionalProperties, "password")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 )
@@ -25,7 +24,8 @@ type ComputerUseStopResponse struct {
 	// A message indicating the result of stopping computer use processes
 	Message string `json:"message"`
 	// Status information about all VNC desktop processes after stopping
-	Status map[string]interface{} `json:"status"`
+	Status               map[string]interface{} `json:"status"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _ComputerUseStopResponse ComputerUseStopResponse
@@ -109,6 +109,11 @@ func (o ComputerUseStopResponse) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["message"] = o.Message
 	toSerialize["status"] = o.Status
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -137,15 +142,21 @@ func (o *ComputerUseStopResponse) UnmarshalJSON(data []byte) (err error) {
 
 	varComputerUseStopResponse := _ComputerUseStopResponse{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varComputerUseStopResponse)
+	err = json.Unmarshal(data, &varComputerUseStopResponse)
 
 	if err != nil {
 		return err
 	}
 
 	*o = ComputerUseStopResponse(varComputerUseStopResponse)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "message")
+		delete(additionalProperties, "status")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

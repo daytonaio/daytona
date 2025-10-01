@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 )
@@ -22,8 +21,9 @@ var _ MappedNullable = &CompletionContext{}
 
 // CompletionContext struct for CompletionContext
 type CompletionContext struct {
-	TriggerKind      float32 `json:"triggerKind"`
-	TriggerCharacter *string `json:"triggerCharacter,omitempty"`
+	TriggerKind          float32 `json:"triggerKind"`
+	TriggerCharacter     *string `json:"triggerCharacter,omitempty"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _CompletionContext CompletionContext
@@ -116,6 +116,11 @@ func (o CompletionContext) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.TriggerCharacter) {
 		toSerialize["triggerCharacter"] = o.TriggerCharacter
 	}
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -143,15 +148,21 @@ func (o *CompletionContext) UnmarshalJSON(data []byte) (err error) {
 
 	varCompletionContext := _CompletionContext{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varCompletionContext)
+	err = json.Unmarshal(data, &varCompletionContext)
 
 	if err != nil {
 		return err
 	}
 
 	*o = CompletionContext(varCompletionContext)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "triggerKind")
+		delete(additionalProperties, "triggerCharacter")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

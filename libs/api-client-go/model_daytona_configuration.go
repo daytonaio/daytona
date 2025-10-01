@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 )
@@ -51,7 +50,8 @@ type DaytonaConfiguration struct {
 	// SSH Gateway command
 	SshGatewayCommand *string `json:"sshGatewayCommand,omitempty"`
 	// Base64 encoded SSH Gateway public key
-	SshGatewayPublicKey *string `json:"sshGatewayPublicKey,omitempty"`
+	SshGatewayPublicKey  *string `json:"sshGatewayPublicKey,omitempty"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _DaytonaConfiguration DaytonaConfiguration
@@ -518,6 +518,11 @@ func (o DaytonaConfiguration) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.SshGatewayPublicKey) {
 		toSerialize["sshGatewayPublicKey"] = o.SshGatewayPublicKey
 	}
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -554,15 +559,34 @@ func (o *DaytonaConfiguration) UnmarshalJSON(data []byte) (err error) {
 
 	varDaytonaConfiguration := _DaytonaConfiguration{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varDaytonaConfiguration)
+	err = json.Unmarshal(data, &varDaytonaConfiguration)
 
 	if err != nil {
 		return err
 	}
 
 	*o = DaytonaConfiguration(varDaytonaConfiguration)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "version")
+		delete(additionalProperties, "posthog")
+		delete(additionalProperties, "oidc")
+		delete(additionalProperties, "linkedAccountsEnabled")
+		delete(additionalProperties, "announcements")
+		delete(additionalProperties, "pylonAppId")
+		delete(additionalProperties, "proxyTemplateUrl")
+		delete(additionalProperties, "defaultSnapshot")
+		delete(additionalProperties, "dashboardUrl")
+		delete(additionalProperties, "maxAutoArchiveInterval")
+		delete(additionalProperties, "maintananceMode")
+		delete(additionalProperties, "environment")
+		delete(additionalProperties, "billingApiUrl")
+		delete(additionalProperties, "sshGatewayCommand")
+		delete(additionalProperties, "sshGatewayPublicKey")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

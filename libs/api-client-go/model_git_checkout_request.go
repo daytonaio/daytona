@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 )
@@ -22,8 +21,9 @@ var _ MappedNullable = &GitCheckoutRequest{}
 
 // GitCheckoutRequest struct for GitCheckoutRequest
 type GitCheckoutRequest struct {
-	Path   string `json:"path"`
-	Branch string `json:"branch"`
+	Path                 string `json:"path"`
+	Branch               string `json:"branch"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _GitCheckoutRequest GitCheckoutRequest
@@ -107,6 +107,11 @@ func (o GitCheckoutRequest) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["path"] = o.Path
 	toSerialize["branch"] = o.Branch
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -135,15 +140,21 @@ func (o *GitCheckoutRequest) UnmarshalJSON(data []byte) (err error) {
 
 	varGitCheckoutRequest := _GitCheckoutRequest{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varGitCheckoutRequest)
+	err = json.Unmarshal(data, &varGitCheckoutRequest)
 
 	if err != nil {
 		return err
 	}
 
 	*o = GitCheckoutRequest(varGitCheckoutRequest)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "path")
+		delete(additionalProperties, "branch")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

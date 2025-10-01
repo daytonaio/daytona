@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 )
@@ -25,7 +24,8 @@ type Session struct {
 	// The ID of the session
 	SessionId string `json:"sessionId"`
 	// The list of commands executed in this session
-	Commands []Command `json:"commands"`
+	Commands             []Command `json:"commands"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _Session Session
@@ -113,6 +113,11 @@ func (o Session) ToMap() (map[string]interface{}, error) {
 	if o.Commands != nil {
 		toSerialize["commands"] = o.Commands
 	}
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -141,15 +146,21 @@ func (o *Session) UnmarshalJSON(data []byte) (err error) {
 
 	varSession := _Session{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varSession)
+	err = json.Unmarshal(data, &varSession)
 
 	if err != nil {
 		return err
 	}
 
 	*o = Session(varSession)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "sessionId")
+		delete(additionalProperties, "commands")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

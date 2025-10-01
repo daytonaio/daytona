@@ -20,8 +20,11 @@ var _ MappedNullable = &WebhookControllerGetStatus200Response{}
 
 // WebhookControllerGetStatus200Response struct for WebhookControllerGetStatus200Response
 type WebhookControllerGetStatus200Response struct {
-	Enabled *bool `json:"enabled,omitempty"`
+	Enabled              *bool `json:"enabled,omitempty"`
+	AdditionalProperties map[string]interface{}
 }
+
+type _WebhookControllerGetStatus200Response WebhookControllerGetStatus200Response
 
 // NewWebhookControllerGetStatus200Response instantiates a new WebhookControllerGetStatus200Response object
 // This constructor will assign default values to properties that have it defined,
@@ -85,7 +88,33 @@ func (o WebhookControllerGetStatus200Response) ToMap() (map[string]interface{}, 
 	if !IsNil(o.Enabled) {
 		toSerialize["enabled"] = o.Enabled
 	}
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
+}
+
+func (o *WebhookControllerGetStatus200Response) UnmarshalJSON(data []byte) (err error) {
+	varWebhookControllerGetStatus200Response := _WebhookControllerGetStatus200Response{}
+
+	err = json.Unmarshal(data, &varWebhookControllerGetStatus200Response)
+
+	if err != nil {
+		return err
+	}
+
+	*o = WebhookControllerGetStatus200Response(varWebhookControllerGetStatus200Response)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "enabled")
+		o.AdditionalProperties = additionalProperties
+	}
+
+	return err
 }
 
 type NullableWebhookControllerGetStatus200Response struct {

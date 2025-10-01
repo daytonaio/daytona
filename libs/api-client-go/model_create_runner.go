@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 )
@@ -22,18 +21,19 @@ var _ MappedNullable = &CreateRunner{}
 
 // CreateRunner struct for CreateRunner
 type CreateRunner struct {
-	Domain    string  `json:"domain"`
-	ApiUrl    string  `json:"apiUrl"`
-	ProxyUrl  string  `json:"proxyUrl"`
-	ApiKey    string  `json:"apiKey"`
-	Cpu       float32 `json:"cpu"`
-	MemoryGiB float32 `json:"memoryGiB"`
-	DiskGiB   float32 `json:"diskGiB"`
-	Gpu       float32 `json:"gpu"`
-	GpuType   string  `json:"gpuType"`
-	Class     string  `json:"class"`
-	Region    string  `json:"region"`
-	Version   string  `json:"version"`
+	Domain               string  `json:"domain"`
+	ApiUrl               string  `json:"apiUrl"`
+	ProxyUrl             string  `json:"proxyUrl"`
+	ApiKey               string  `json:"apiKey"`
+	Cpu                  float32 `json:"cpu"`
+	MemoryGiB            float32 `json:"memoryGiB"`
+	DiskGiB              float32 `json:"diskGiB"`
+	Gpu                  float32 `json:"gpu"`
+	GpuType              string  `json:"gpuType"`
+	Class                string  `json:"class"`
+	Region               string  `json:"region"`
+	Version              string  `json:"version"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _CreateRunner CreateRunner
@@ -377,6 +377,11 @@ func (o CreateRunner) ToMap() (map[string]interface{}, error) {
 	toSerialize["class"] = o.Class
 	toSerialize["region"] = o.Region
 	toSerialize["version"] = o.Version
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -415,15 +420,31 @@ func (o *CreateRunner) UnmarshalJSON(data []byte) (err error) {
 
 	varCreateRunner := _CreateRunner{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varCreateRunner)
+	err = json.Unmarshal(data, &varCreateRunner)
 
 	if err != nil {
 		return err
 	}
 
 	*o = CreateRunner(varCreateRunner)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "domain")
+		delete(additionalProperties, "apiUrl")
+		delete(additionalProperties, "proxyUrl")
+		delete(additionalProperties, "apiKey")
+		delete(additionalProperties, "cpu")
+		delete(additionalProperties, "memoryGiB")
+		delete(additionalProperties, "diskGiB")
+		delete(additionalProperties, "gpu")
+		delete(additionalProperties, "gpuType")
+		delete(additionalProperties, "class")
+		delete(additionalProperties, "region")
+		delete(additionalProperties, "version")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

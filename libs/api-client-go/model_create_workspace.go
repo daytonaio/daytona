@@ -49,8 +49,11 @@ type CreateWorkspace struct {
 	// Array of volumes to attach to the workspace
 	Volumes []SandboxVolume `json:"volumes,omitempty"`
 	// Build information for the workspace
-	BuildInfo *CreateBuildInfo `json:"buildInfo,omitempty"`
+	BuildInfo            *CreateBuildInfo `json:"buildInfo,omitempty"`
+	AdditionalProperties map[string]interface{}
 }
+
+type _CreateWorkspace CreateWorkspace
 
 // NewCreateWorkspace instantiates a new CreateWorkspace object
 // This constructor will assign default values to properties that have it defined,
@@ -604,7 +607,47 @@ func (o CreateWorkspace) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.BuildInfo) {
 		toSerialize["buildInfo"] = o.BuildInfo
 	}
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
+}
+
+func (o *CreateWorkspace) UnmarshalJSON(data []byte) (err error) {
+	varCreateWorkspace := _CreateWorkspace{}
+
+	err = json.Unmarshal(data, &varCreateWorkspace)
+
+	if err != nil {
+		return err
+	}
+
+	*o = CreateWorkspace(varCreateWorkspace)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "image")
+		delete(additionalProperties, "user")
+		delete(additionalProperties, "env")
+		delete(additionalProperties, "labels")
+		delete(additionalProperties, "public")
+		delete(additionalProperties, "class")
+		delete(additionalProperties, "target")
+		delete(additionalProperties, "cpu")
+		delete(additionalProperties, "gpu")
+		delete(additionalProperties, "memory")
+		delete(additionalProperties, "disk")
+		delete(additionalProperties, "autoStopInterval")
+		delete(additionalProperties, "autoArchiveInterval")
+		delete(additionalProperties, "volumes")
+		delete(additionalProperties, "buildInfo")
+		o.AdditionalProperties = additionalProperties
+	}
+
+	return err
 }
 
 type NullableCreateWorkspace struct {

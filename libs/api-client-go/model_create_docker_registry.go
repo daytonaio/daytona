@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 )
@@ -35,7 +34,8 @@ type CreateDockerRegistry struct {
 	// Registry type
 	RegistryType string `json:"registryType"`
 	// Set as default registry
-	IsDefault *bool `json:"isDefault,omitempty"`
+	IsDefault            *bool `json:"isDefault,omitempty"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _CreateDockerRegistry CreateDockerRegistry
@@ -269,6 +269,11 @@ func (o CreateDockerRegistry) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.IsDefault) {
 		toSerialize["isDefault"] = o.IsDefault
 	}
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -300,15 +305,26 @@ func (o *CreateDockerRegistry) UnmarshalJSON(data []byte) (err error) {
 
 	varCreateDockerRegistry := _CreateDockerRegistry{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varCreateDockerRegistry)
+	err = json.Unmarshal(data, &varCreateDockerRegistry)
 
 	if err != nil {
 		return err
 	}
 
 	*o = CreateDockerRegistry(varCreateDockerRegistry)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "name")
+		delete(additionalProperties, "url")
+		delete(additionalProperties, "username")
+		delete(additionalProperties, "password")
+		delete(additionalProperties, "project")
+		delete(additionalProperties, "registryType")
+		delete(additionalProperties, "isDefault")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

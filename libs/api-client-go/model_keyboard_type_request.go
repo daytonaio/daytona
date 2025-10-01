@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 )
@@ -25,7 +24,8 @@ type KeyboardTypeRequest struct {
 	// The text to type using the keyboard
 	Text string `json:"text"`
 	// Delay in milliseconds between keystrokes. Defaults to 0
-	Delay *float32 `json:"delay,omitempty"`
+	Delay                *float32 `json:"delay,omitempty"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _KeyboardTypeRequest KeyboardTypeRequest
@@ -118,6 +118,11 @@ func (o KeyboardTypeRequest) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.Delay) {
 		toSerialize["delay"] = o.Delay
 	}
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -145,15 +150,21 @@ func (o *KeyboardTypeRequest) UnmarshalJSON(data []byte) (err error) {
 
 	varKeyboardTypeRequest := _KeyboardTypeRequest{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varKeyboardTypeRequest)
+	err = json.Unmarshal(data, &varKeyboardTypeRequest)
 
 	if err != nil {
 		return err
 	}
 
 	*o = KeyboardTypeRequest(varKeyboardTypeRequest)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "text")
+		delete(additionalProperties, "delay")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

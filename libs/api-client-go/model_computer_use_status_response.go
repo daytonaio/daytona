@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 )
@@ -23,7 +22,8 @@ var _ MappedNullable = &ComputerUseStatusResponse{}
 // ComputerUseStatusResponse struct for ComputerUseStatusResponse
 type ComputerUseStatusResponse struct {
 	// Status of computer use services (active, partial, inactive, error)
-	Status string `json:"status"`
+	Status               string `json:"status"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _ComputerUseStatusResponse ComputerUseStatusResponse
@@ -81,6 +81,11 @@ func (o ComputerUseStatusResponse) MarshalJSON() ([]byte, error) {
 func (o ComputerUseStatusResponse) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["status"] = o.Status
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -108,15 +113,20 @@ func (o *ComputerUseStatusResponse) UnmarshalJSON(data []byte) (err error) {
 
 	varComputerUseStatusResponse := _ComputerUseStatusResponse{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varComputerUseStatusResponse)
+	err = json.Unmarshal(data, &varComputerUseStatusResponse)
 
 	if err != nil {
 		return err
 	}
 
 	*o = ComputerUseStatusResponse(varComputerUseStatusResponse)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "status")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

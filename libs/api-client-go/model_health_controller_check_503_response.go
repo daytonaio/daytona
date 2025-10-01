@@ -20,11 +20,14 @@ var _ MappedNullable = &HealthControllerCheck503Response{}
 
 // HealthControllerCheck503Response struct for HealthControllerCheck503Response
 type HealthControllerCheck503Response struct {
-	Status  *string                                               `json:"status,omitempty"`
-	Info    map[string]HealthControllerCheck200ResponseInfoValue  `json:"info,omitempty"`
-	Error   map[string]HealthControllerCheck200ResponseInfoValue  `json:"error,omitempty"`
-	Details *map[string]HealthControllerCheck200ResponseInfoValue `json:"details,omitempty"`
+	Status               *string                                               `json:"status,omitempty"`
+	Info                 map[string]HealthControllerCheck200ResponseInfoValue  `json:"info,omitempty"`
+	Error                map[string]HealthControllerCheck200ResponseInfoValue  `json:"error,omitempty"`
+	Details              *map[string]HealthControllerCheck200ResponseInfoValue `json:"details,omitempty"`
+	AdditionalProperties map[string]interface{}
 }
+
+type _HealthControllerCheck503Response HealthControllerCheck503Response
 
 // NewHealthControllerCheck503Response instantiates a new HealthControllerCheck503Response object
 // This constructor will assign default values to properties that have it defined,
@@ -195,7 +198,36 @@ func (o HealthControllerCheck503Response) ToMap() (map[string]interface{}, error
 	if !IsNil(o.Details) {
 		toSerialize["details"] = o.Details
 	}
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
+}
+
+func (o *HealthControllerCheck503Response) UnmarshalJSON(data []byte) (err error) {
+	varHealthControllerCheck503Response := _HealthControllerCheck503Response{}
+
+	err = json.Unmarshal(data, &varHealthControllerCheck503Response)
+
+	if err != nil {
+		return err
+	}
+
+	*o = HealthControllerCheck503Response(varHealthControllerCheck503Response)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "status")
+		delete(additionalProperties, "info")
+		delete(additionalProperties, "error")
+		delete(additionalProperties, "details")
+		o.AdditionalProperties = additionalProperties
+	}
+
+	return err
 }
 
 type NullableHealthControllerCheck503Response struct {

@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 )
@@ -23,7 +22,8 @@ var _ MappedNullable = &PtyListResponse{}
 // PtyListResponse struct for PtyListResponse
 type PtyListResponse struct {
 	// List of active PTY sessions
-	Sessions []PtySessionInfo `json:"sessions"`
+	Sessions             []PtySessionInfo `json:"sessions"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _PtyListResponse PtyListResponse
@@ -81,6 +81,11 @@ func (o PtyListResponse) MarshalJSON() ([]byte, error) {
 func (o PtyListResponse) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["sessions"] = o.Sessions
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -108,15 +113,20 @@ func (o *PtyListResponse) UnmarshalJSON(data []byte) (err error) {
 
 	varPtyListResponse := _PtyListResponse{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varPtyListResponse)
+	err = json.Unmarshal(data, &varPtyListResponse)
 
 	if err != nil {
 		return err
 	}
 
 	*o = PtyListResponse(varPtyListResponse)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "sessions")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

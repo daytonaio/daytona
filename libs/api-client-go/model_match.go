@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 )
@@ -22,9 +21,10 @@ var _ MappedNullable = &Match{}
 
 // Match struct for Match
 type Match struct {
-	File    string  `json:"file"`
-	Line    float32 `json:"line"`
-	Content string  `json:"content"`
+	File                 string  `json:"file"`
+	Line                 float32 `json:"line"`
+	Content              string  `json:"content"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _Match Match
@@ -134,6 +134,11 @@ func (o Match) ToMap() (map[string]interface{}, error) {
 	toSerialize["file"] = o.File
 	toSerialize["line"] = o.Line
 	toSerialize["content"] = o.Content
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -163,15 +168,22 @@ func (o *Match) UnmarshalJSON(data []byte) (err error) {
 
 	varMatch := _Match{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varMatch)
+	err = json.Unmarshal(data, &varMatch)
 
 	if err != nil {
 		return err
 	}
 
 	*o = Match(varMatch)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "file")
+		delete(additionalProperties, "line")
+		delete(additionalProperties, "content")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

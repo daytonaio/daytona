@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 )
@@ -31,7 +30,8 @@ type MouseDragRequest struct {
 	// The ending Y coordinate for the drag operation
 	EndY float32 `json:"endY"`
 	// The mouse button to use for dragging (left, right, middle). Defaults to left
-	Button *string `json:"button,omitempty"`
+	Button               *string `json:"button,omitempty"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _MouseDragRequest MouseDragRequest
@@ -202,6 +202,11 @@ func (o MouseDragRequest) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.Button) {
 		toSerialize["button"] = o.Button
 	}
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -232,15 +237,24 @@ func (o *MouseDragRequest) UnmarshalJSON(data []byte) (err error) {
 
 	varMouseDragRequest := _MouseDragRequest{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varMouseDragRequest)
+	err = json.Unmarshal(data, &varMouseDragRequest)
 
 	if err != nil {
 		return err
 	}
 
 	*o = MouseDragRequest(varMouseDragRequest)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "startX")
+		delete(additionalProperties, "startY")
+		delete(additionalProperties, "endX")
+		delete(additionalProperties, "endY")
+		delete(additionalProperties, "button")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

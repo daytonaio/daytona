@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 )
@@ -25,7 +24,8 @@ type Announcement struct {
 	// The announcement text
 	Text string `json:"text"`
 	// URL to learn more about the announcement
-	LearnMoreUrl *string `json:"learnMoreUrl,omitempty"`
+	LearnMoreUrl         *string `json:"learnMoreUrl,omitempty"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _Announcement Announcement
@@ -118,6 +118,11 @@ func (o Announcement) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.LearnMoreUrl) {
 		toSerialize["learnMoreUrl"] = o.LearnMoreUrl
 	}
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -145,15 +150,21 @@ func (o *Announcement) UnmarshalJSON(data []byte) (err error) {
 
 	varAnnouncement := _Announcement{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varAnnouncement)
+	err = json.Unmarshal(data, &varAnnouncement)
 
 	if err != nil {
 		return err
 	}
 
 	*o = Announcement(varAnnouncement)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "text")
+		delete(additionalProperties, "learnMoreUrl")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

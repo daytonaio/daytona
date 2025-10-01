@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 )
@@ -23,7 +22,8 @@ var _ MappedNullable = &SandboxLabels{}
 // SandboxLabels struct for SandboxLabels
 type SandboxLabels struct {
 	// Key-value pairs of labels
-	Labels map[string]string `json:"labels"`
+	Labels               map[string]string `json:"labels"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _SandboxLabels SandboxLabels
@@ -81,6 +81,11 @@ func (o SandboxLabels) MarshalJSON() ([]byte, error) {
 func (o SandboxLabels) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["labels"] = o.Labels
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -108,15 +113,20 @@ func (o *SandboxLabels) UnmarshalJSON(data []byte) (err error) {
 
 	varSandboxLabels := _SandboxLabels{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varSandboxLabels)
+	err = json.Unmarshal(data, &varSandboxLabels)
 
 	if err != nil {
 		return err
 	}
 
 	*o = SandboxLabels(varSandboxLabels)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "labels")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

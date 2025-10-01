@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 )
@@ -80,7 +79,8 @@ type Sandbox struct {
 	// Deprecated
 	Class *string `json:"class,omitempty"`
 	// The version of the daemon running in the sandbox
-	DaemonVersion *string `json:"daemonVersion,omitempty"`
+	DaemonVersion        *string `json:"daemonVersion,omitempty"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _Sandbox Sandbox
@@ -1022,6 +1022,11 @@ func (o Sandbox) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.DaemonVersion) {
 		toSerialize["daemonVersion"] = o.DaemonVersion
 	}
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -1060,15 +1065,48 @@ func (o *Sandbox) UnmarshalJSON(data []byte) (err error) {
 
 	varSandbox := _Sandbox{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varSandbox)
+	err = json.Unmarshal(data, &varSandbox)
 
 	if err != nil {
 		return err
 	}
 
 	*o = Sandbox(varSandbox)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "id")
+		delete(additionalProperties, "organizationId")
+		delete(additionalProperties, "snapshot")
+		delete(additionalProperties, "user")
+		delete(additionalProperties, "env")
+		delete(additionalProperties, "labels")
+		delete(additionalProperties, "public")
+		delete(additionalProperties, "networkBlockAll")
+		delete(additionalProperties, "networkAllowList")
+		delete(additionalProperties, "target")
+		delete(additionalProperties, "cpu")
+		delete(additionalProperties, "gpu")
+		delete(additionalProperties, "memory")
+		delete(additionalProperties, "disk")
+		delete(additionalProperties, "state")
+		delete(additionalProperties, "desiredState")
+		delete(additionalProperties, "errorReason")
+		delete(additionalProperties, "backupState")
+		delete(additionalProperties, "backupCreatedAt")
+		delete(additionalProperties, "autoStopInterval")
+		delete(additionalProperties, "autoArchiveInterval")
+		delete(additionalProperties, "autoDeleteInterval")
+		delete(additionalProperties, "runnerDomain")
+		delete(additionalProperties, "volumes")
+		delete(additionalProperties, "buildInfo")
+		delete(additionalProperties, "createdAt")
+		delete(additionalProperties, "updatedAt")
+		delete(additionalProperties, "class")
+		delete(additionalProperties, "daemonVersion")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

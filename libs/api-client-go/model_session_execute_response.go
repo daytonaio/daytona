@@ -25,8 +25,11 @@ type SessionExecuteResponse struct {
 	// The output of the executed command marked with stdout and stderr prefixes
 	Output *string `json:"output,omitempty"`
 	// The exit code of the executed command
-	ExitCode *float32 `json:"exitCode,omitempty"`
+	ExitCode             *float32 `json:"exitCode,omitempty"`
+	AdditionalProperties map[string]interface{}
 }
+
+type _SessionExecuteResponse SessionExecuteResponse
 
 // NewSessionExecuteResponse instantiates a new SessionExecuteResponse object
 // This constructor will assign default values to properties that have it defined,
@@ -160,7 +163,35 @@ func (o SessionExecuteResponse) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.ExitCode) {
 		toSerialize["exitCode"] = o.ExitCode
 	}
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
+}
+
+func (o *SessionExecuteResponse) UnmarshalJSON(data []byte) (err error) {
+	varSessionExecuteResponse := _SessionExecuteResponse{}
+
+	err = json.Unmarshal(data, &varSessionExecuteResponse)
+
+	if err != nil {
+		return err
+	}
+
+	*o = SessionExecuteResponse(varSessionExecuteResponse)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "cmdId")
+		delete(additionalProperties, "output")
+		delete(additionalProperties, "exitCode")
+		o.AdditionalProperties = additionalProperties
+	}
+
+	return err
 }
 
 type NullableSessionExecuteResponse struct {

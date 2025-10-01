@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"time"
@@ -32,7 +31,8 @@ type User struct {
 	// User public keys
 	PublicKeys []UserPublicKey `json:"publicKeys"`
 	// Creation timestamp
-	CreatedAt time.Time `json:"createdAt"`
+	CreatedAt            time.Time `json:"createdAt"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _User User
@@ -194,6 +194,11 @@ func (o User) ToMap() (map[string]interface{}, error) {
 	toSerialize["email"] = o.Email
 	toSerialize["publicKeys"] = o.PublicKeys
 	toSerialize["createdAt"] = o.CreatedAt
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -225,15 +230,24 @@ func (o *User) UnmarshalJSON(data []byte) (err error) {
 
 	varUser := _User{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varUser)
+	err = json.Unmarshal(data, &varUser)
 
 	if err != nil {
 		return err
 	}
 
 	*o = User(varUser)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "id")
+		delete(additionalProperties, "name")
+		delete(additionalProperties, "email")
+		delete(additionalProperties, "publicKeys")
+		delete(additionalProperties, "createdAt")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

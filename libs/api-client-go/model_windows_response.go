@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 )
@@ -25,7 +24,8 @@ type WindowsResponse struct {
 	// Array of window information for all visible windows
 	Windows []map[string]interface{} `json:"windows"`
 	// The total number of windows found
-	Count float32 `json:"count"`
+	Count                float32 `json:"count"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _WindowsResponse WindowsResponse
@@ -109,6 +109,11 @@ func (o WindowsResponse) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["windows"] = o.Windows
 	toSerialize["count"] = o.Count
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -137,15 +142,21 @@ func (o *WindowsResponse) UnmarshalJSON(data []byte) (err error) {
 
 	varWindowsResponse := _WindowsResponse{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varWindowsResponse)
+	err = json.Unmarshal(data, &varWindowsResponse)
 
 	if err != nil {
 		return err
 	}
 
 	*o = WindowsResponse(varWindowsResponse)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "windows")
+		delete(additionalProperties, "count")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

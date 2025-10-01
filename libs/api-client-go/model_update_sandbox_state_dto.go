@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 )
@@ -23,7 +22,8 @@ var _ MappedNullable = &UpdateSandboxStateDto{}
 // UpdateSandboxStateDto struct for UpdateSandboxStateDto
 type UpdateSandboxStateDto struct {
 	// The new state for the sandbox
-	State string `json:"state"`
+	State                string `json:"state"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _UpdateSandboxStateDto UpdateSandboxStateDto
@@ -81,6 +81,11 @@ func (o UpdateSandboxStateDto) MarshalJSON() ([]byte, error) {
 func (o UpdateSandboxStateDto) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["state"] = o.State
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -108,15 +113,20 @@ func (o *UpdateSandboxStateDto) UnmarshalJSON(data []byte) (err error) {
 
 	varUpdateSandboxStateDto := _UpdateSandboxStateDto{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varUpdateSandboxStateDto)
+	err = json.Unmarshal(data, &varUpdateSandboxStateDto)
 
 	if err != nil {
 		return err
 	}
 
 	*o = UpdateSandboxStateDto(varUpdateSandboxStateDto)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "state")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

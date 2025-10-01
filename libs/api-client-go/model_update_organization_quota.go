@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 )
@@ -22,15 +21,16 @@ var _ MappedNullable = &UpdateOrganizationQuota{}
 
 // UpdateOrganizationQuota struct for UpdateOrganizationQuota
 type UpdateOrganizationQuota struct {
-	TotalCpuQuota       NullableFloat32 `json:"totalCpuQuota"`
-	TotalMemoryQuota    NullableFloat32 `json:"totalMemoryQuota"`
-	TotalDiskQuota      NullableFloat32 `json:"totalDiskQuota"`
-	MaxCpuPerSandbox    NullableFloat32 `json:"maxCpuPerSandbox"`
-	MaxMemoryPerSandbox NullableFloat32 `json:"maxMemoryPerSandbox"`
-	MaxDiskPerSandbox   NullableFloat32 `json:"maxDiskPerSandbox"`
-	SnapshotQuota       NullableFloat32 `json:"snapshotQuota"`
-	MaxSnapshotSize     NullableFloat32 `json:"maxSnapshotSize"`
-	VolumeQuota         NullableFloat32 `json:"volumeQuota"`
+	TotalCpuQuota        NullableFloat32 `json:"totalCpuQuota"`
+	TotalMemoryQuota     NullableFloat32 `json:"totalMemoryQuota"`
+	TotalDiskQuota       NullableFloat32 `json:"totalDiskQuota"`
+	MaxCpuPerSandbox     NullableFloat32 `json:"maxCpuPerSandbox"`
+	MaxMemoryPerSandbox  NullableFloat32 `json:"maxMemoryPerSandbox"`
+	MaxDiskPerSandbox    NullableFloat32 `json:"maxDiskPerSandbox"`
+	SnapshotQuota        NullableFloat32 `json:"snapshotQuota"`
+	MaxSnapshotSize      NullableFloat32 `json:"maxSnapshotSize"`
+	VolumeQuota          NullableFloat32 `json:"volumeQuota"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _UpdateOrganizationQuota UpdateOrganizationQuota
@@ -314,6 +314,11 @@ func (o UpdateOrganizationQuota) ToMap() (map[string]interface{}, error) {
 	toSerialize["snapshotQuota"] = o.SnapshotQuota.Get()
 	toSerialize["maxSnapshotSize"] = o.MaxSnapshotSize.Get()
 	toSerialize["volumeQuota"] = o.VolumeQuota.Get()
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -349,15 +354,28 @@ func (o *UpdateOrganizationQuota) UnmarshalJSON(data []byte) (err error) {
 
 	varUpdateOrganizationQuota := _UpdateOrganizationQuota{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varUpdateOrganizationQuota)
+	err = json.Unmarshal(data, &varUpdateOrganizationQuota)
 
 	if err != nil {
 		return err
 	}
 
 	*o = UpdateOrganizationQuota(varUpdateOrganizationQuota)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "totalCpuQuota")
+		delete(additionalProperties, "totalMemoryQuota")
+		delete(additionalProperties, "totalDiskQuota")
+		delete(additionalProperties, "maxCpuPerSandbox")
+		delete(additionalProperties, "maxMemoryPerSandbox")
+		delete(additionalProperties, "maxDiskPerSandbox")
+		delete(additionalProperties, "snapshotQuota")
+		delete(additionalProperties, "maxSnapshotSize")
+		delete(additionalProperties, "volumeQuota")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

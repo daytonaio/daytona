@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 )
@@ -22,12 +21,13 @@ var _ MappedNullable = &CreateAuditLog{}
 
 // CreateAuditLog struct for CreateAuditLog
 type CreateAuditLog struct {
-	ActorId        string  `json:"actorId"`
-	ActorEmail     string  `json:"actorEmail"`
-	OrganizationId *string `json:"organizationId,omitempty"`
-	Action         string  `json:"action"`
-	TargetType     *string `json:"targetType,omitempty"`
-	TargetId       *string `json:"targetId,omitempty"`
+	ActorId              string  `json:"actorId"`
+	ActorEmail           string  `json:"actorEmail"`
+	OrganizationId       *string `json:"organizationId,omitempty"`
+	Action               string  `json:"action"`
+	TargetType           *string `json:"targetType,omitempty"`
+	TargetId             *string `json:"targetId,omitempty"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _CreateAuditLog CreateAuditLog
@@ -242,6 +242,11 @@ func (o CreateAuditLog) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.TargetId) {
 		toSerialize["targetId"] = o.TargetId
 	}
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -271,15 +276,25 @@ func (o *CreateAuditLog) UnmarshalJSON(data []byte) (err error) {
 
 	varCreateAuditLog := _CreateAuditLog{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varCreateAuditLog)
+	err = json.Unmarshal(data, &varCreateAuditLog)
 
 	if err != nil {
 		return err
 	}
 
 	*o = CreateAuditLog(varCreateAuditLog)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "actorId")
+		delete(additionalProperties, "actorEmail")
+		delete(additionalProperties, "organizationId")
+		delete(additionalProperties, "action")
+		delete(additionalProperties, "targetType")
+		delete(additionalProperties, "targetId")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

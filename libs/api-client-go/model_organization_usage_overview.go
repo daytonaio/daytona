@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 )
@@ -32,6 +31,7 @@ type OrganizationUsageOverview struct {
 	CurrentSnapshotUsage float32 `json:"currentSnapshotUsage"`
 	TotalVolumeQuota     float32 `json:"totalVolumeQuota"`
 	CurrentVolumeUsage   float32 `json:"currentVolumeUsage"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _OrganizationUsageOverview OrganizationUsageOverview
@@ -323,6 +323,11 @@ func (o OrganizationUsageOverview) ToMap() (map[string]interface{}, error) {
 	toSerialize["currentSnapshotUsage"] = o.CurrentSnapshotUsage
 	toSerialize["totalVolumeQuota"] = o.TotalVolumeQuota
 	toSerialize["currentVolumeUsage"] = o.CurrentVolumeUsage
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -359,15 +364,29 @@ func (o *OrganizationUsageOverview) UnmarshalJSON(data []byte) (err error) {
 
 	varOrganizationUsageOverview := _OrganizationUsageOverview{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varOrganizationUsageOverview)
+	err = json.Unmarshal(data, &varOrganizationUsageOverview)
 
 	if err != nil {
 		return err
 	}
 
 	*o = OrganizationUsageOverview(varOrganizationUsageOverview)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "totalCpuQuota")
+		delete(additionalProperties, "totalMemoryQuota")
+		delete(additionalProperties, "totalDiskQuota")
+		delete(additionalProperties, "currentCpuUsage")
+		delete(additionalProperties, "currentMemoryUsage")
+		delete(additionalProperties, "currentDiskUsage")
+		delete(additionalProperties, "totalSnapshotQuota")
+		delete(additionalProperties, "currentSnapshotUsage")
+		delete(additionalProperties, "totalVolumeQuota")
+		delete(additionalProperties, "currentVolumeUsage")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

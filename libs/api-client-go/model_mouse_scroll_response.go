@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 )
@@ -23,7 +22,8 @@ var _ MappedNullable = &MouseScrollResponse{}
 // MouseScrollResponse struct for MouseScrollResponse
 type MouseScrollResponse struct {
 	// Whether the mouse scroll operation was successful
-	Success bool `json:"success"`
+	Success              bool `json:"success"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _MouseScrollResponse MouseScrollResponse
@@ -81,6 +81,11 @@ func (o MouseScrollResponse) MarshalJSON() ([]byte, error) {
 func (o MouseScrollResponse) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["success"] = o.Success
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -108,15 +113,20 @@ func (o *MouseScrollResponse) UnmarshalJSON(data []byte) (err error) {
 
 	varMouseScrollResponse := _MouseScrollResponse{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varMouseScrollResponse)
+	err = json.Unmarshal(data, &varMouseScrollResponse)
 
 	if err != nil {
 		return err
 	}
 
 	*o = MouseScrollResponse(varMouseScrollResponse)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "success")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

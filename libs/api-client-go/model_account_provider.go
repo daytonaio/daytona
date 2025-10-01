@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 )
@@ -22,8 +21,9 @@ var _ MappedNullable = &AccountProvider{}
 
 // AccountProvider struct for AccountProvider
 type AccountProvider struct {
-	Name        string `json:"name"`
-	DisplayName string `json:"displayName"`
+	Name                 string `json:"name"`
+	DisplayName          string `json:"displayName"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _AccountProvider AccountProvider
@@ -107,6 +107,11 @@ func (o AccountProvider) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["name"] = o.Name
 	toSerialize["displayName"] = o.DisplayName
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -135,15 +140,21 @@ func (o *AccountProvider) UnmarshalJSON(data []byte) (err error) {
 
 	varAccountProvider := _AccountProvider{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varAccountProvider)
+	err = json.Unmarshal(data, &varAccountProvider)
 
 	if err != nil {
 		return err
 	}
 
 	*o = AccountProvider(varAccountProvider)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "name")
+		delete(additionalProperties, "displayName")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }

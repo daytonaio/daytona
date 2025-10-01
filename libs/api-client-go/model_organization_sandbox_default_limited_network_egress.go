@@ -12,7 +12,6 @@ Contact: support@daytona.com
 package apiclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 )
@@ -24,6 +23,7 @@ var _ MappedNullable = &OrganizationSandboxDefaultLimitedNetworkEgress{}
 type OrganizationSandboxDefaultLimitedNetworkEgress struct {
 	// Sandbox default limited network egress
 	SandboxDefaultLimitedNetworkEgress bool `json:"sandboxDefaultLimitedNetworkEgress"`
+	AdditionalProperties               map[string]interface{}
 }
 
 type _OrganizationSandboxDefaultLimitedNetworkEgress OrganizationSandboxDefaultLimitedNetworkEgress
@@ -81,6 +81,11 @@ func (o OrganizationSandboxDefaultLimitedNetworkEgress) MarshalJSON() ([]byte, e
 func (o OrganizationSandboxDefaultLimitedNetworkEgress) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["sandboxDefaultLimitedNetworkEgress"] = o.SandboxDefaultLimitedNetworkEgress
+
+	for key, value := range o.AdditionalProperties {
+		toSerialize[key] = value
+	}
+
 	return toSerialize, nil
 }
 
@@ -108,15 +113,20 @@ func (o *OrganizationSandboxDefaultLimitedNetworkEgress) UnmarshalJSON(data []by
 
 	varOrganizationSandboxDefaultLimitedNetworkEgress := _OrganizationSandboxDefaultLimitedNetworkEgress{}
 
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varOrganizationSandboxDefaultLimitedNetworkEgress)
+	err = json.Unmarshal(data, &varOrganizationSandboxDefaultLimitedNetworkEgress)
 
 	if err != nil {
 		return err
 	}
 
 	*o = OrganizationSandboxDefaultLimitedNetworkEgress(varOrganizationSandboxDefaultLimitedNetworkEgress)
+
+	additionalProperties := make(map[string]interface{})
+
+	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "sandboxDefaultLimitedNetworkEgress")
+		o.AdditionalProperties = additionalProperties
+	}
 
 	return err
 }
