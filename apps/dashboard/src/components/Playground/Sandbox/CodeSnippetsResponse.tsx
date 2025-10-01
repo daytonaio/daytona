@@ -5,18 +5,30 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { CodeLanguage } from '@daytonaio/sdk'
+import {
+  Daytona,
+  Image,
+  CodeLanguage,
+  CreateSandboxFromSnapshotParams,
+  CreateSandboxFromImageParams,
+} from '@daytonaio/sdk'
 import { codeSnippetSupportedLanguages } from '@/enums/Playground'
 import CodeBlock from '@/components/CodeBlock'
 import { Button } from '@/components/ui/button'
 import { usePlayground } from '@/hooks/usePlayground'
-import { Play } from 'lucide-react'
+import { Loader2, Play } from 'lucide-react'
+import { useAuth } from 'react-oidc-context'
+import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { useMemo, useState } from 'react'
 import ResponseCard from '../ResponseCard'
 
 const SandboxCodeSnippetsResponse: React.FC = () => {
   const [codeSnippetLanguage, setCodeSnippetLanguage] = useState<CodeLanguage>(CodeLanguage.PYTHON)
+  const [codeSnippetOutput, setCodeSnippetOutput] = useState<string>('')
+  const [isCodeSnippetRunning, setIsCodeSnippetRunning] = useState<boolean>(false)
 
+  const { user } = useAuth()
+  const { selectedOrganization } = useSelectedOrganization()
   const { sandboxParametersState } = usePlayground()
 
   const objectHasAnyValue = (obj: object) => Object.values(obj).some((v) => v !== '' && v !== undefined)
@@ -36,9 +48,22 @@ const SandboxCodeSnippetsResponse: React.FC = () => {
 console.log(greet("Daytona"));`
   sandboxParametersState['shellCodeToRun'] = 'ls -la'
   const useConfigObject = false
+
   const useLanguageParam = sandboxParametersState['language']
+
   const useResources = objectHasAnyValue(sandboxParametersState['resources'])
+  const useResourcesCPU = useResources && 'cpu' in sandboxParametersState['resources']
+  const useResourcesMemory = useResources && 'memory' in sandboxParametersState['resources']
+  const useResourcesDisk = useResources && 'disk' in sandboxParametersState['resources']
+
   const createSandboxParamsExist = objectHasAnyValue(sandboxParametersState['createSandboxBaseParams'])
+  const useAutoStopInterval =
+    createSandboxParamsExist && 'autoStopInterval' in sandboxParametersState['createSandboxBaseParams']
+  const useAutoArchiveInterval =
+    createSandboxParamsExist && 'autoArchiveInterval' in sandboxParametersState['createSandboxBaseParams']
+  const useAutoDeleteInterval =
+    createSandboxParamsExist && 'autoDeleteInterval' in sandboxParametersState['createSandboxBaseParams']
+
   const useSandboxCreateParams = useLanguageParam || useResources || createSandboxParamsExist
 
   const sandboxCodeSnippetsData = useMemo(() => {
@@ -55,11 +80,11 @@ console.log(greet("Daytona"));`
     typeScriptCodeSnippet += `\tconst daytona = new Daytona(${useConfigObject ? 'config' : ''})\n`
     if (useResources) {
       pythonCodeSnippet += '\n# Create a Sandbox with custom resources\nresources = Resources(\n'
-      if (sandboxParametersState['resources']['cpu'])
+      if (useResourcesCPU)
         pythonCodeSnippet += `\tcpu=${sandboxParametersState['resources']['cpu']},  # ${sandboxParametersState['resources']['cpu']} CPU cores\n`
-      if (sandboxParametersState['resources']['memory'])
+      if (useResourcesMemory)
         pythonCodeSnippet += `\tmemory=${sandboxParametersState['resources']['memory']},  # ${sandboxParametersState['resources']['memory']}GB RAM\n`
-      if (sandboxParametersState['resources']['disk'])
+      if (useResourcesDisk)
         pythonCodeSnippet += `\tdisk=${sandboxParametersState['resources']['disk']},  # ${sandboxParametersState['resources']['disk']}GB disk space\n`
       pythonCodeSnippet += ')\n'
     }
@@ -68,11 +93,11 @@ console.log(greet("Daytona"));`
       if (useResources) pythonCodeSnippet += '\tresources=resources,\n'
       if (useLanguageParam) pythonCodeSnippet += `\tlanguage="${sandboxParametersState['language']}"\n`
       if (createSandboxParamsExist) {
-        if (sandboxParametersState['createSandboxBaseParams']['autoStopInterval'])
+        if (useAutoStopInterval)
           pythonCodeSnippet += `\tauto_stop_interval=${sandboxParametersState['createSandboxBaseParams']['autoStopInterval']},\t # ${sandboxParametersState['createSandboxBaseParams']['autoStopInterval'] == 0 ? 'Disables the auto-stop feature' : `Sandbox will be stopped after ${sandboxParametersState['createSandboxBaseParams']['autoStopInterval']} minute${sandboxParametersState['createSandboxBaseParams']['autoStopInterval'] > 1 ? 's' : ''}`}\n`
-        if (sandboxParametersState['createSandboxBaseParams']['autoArchiveInterval'])
+        if (useAutoArchiveInterval)
           pythonCodeSnippet += `\tauto_archive_interval=${sandboxParametersState['createSandboxBaseParams']['autoArchiveInterval']},\t # Auto-archive after a Sandbox has been stopped for ${sandboxParametersState['createSandboxBaseParams']['autoArchiveInterval'] == 0 ? '30 days' : `${sandboxParametersState['createSandboxBaseParams']['autoArchiveInterval']} minutes`}\n`
-        if (sandboxParametersState['createSandboxBaseParams']['autoDeleteInterval'])
+        if (useAutoDeleteInterval)
           pythonCodeSnippet += `\tauto_delete_interval=${sandboxParametersState['createSandboxBaseParams']['autoDeleteInterval']},\t # ${sandboxParametersState['createSandboxBaseParams']['autoDeleteInterval'] == 0 ? 'Sandbox will be deleted immediately after stopping' : sandboxParametersState['createSandboxBaseParams']['autoDeleteInterval'] == -1 ? 'Auto-delete functionality disabled' : `Auto-delete after a Sandbox has been stopped for ${sandboxParametersState['createSandboxBaseParams']['autoDeleteInterval']} minutes`}\n`
       }
       pythonCodeSnippet += ')\n'
@@ -82,21 +107,21 @@ console.log(greet("Daytona"));`
     typeScriptCodeSnippet += `\t\t// Create the Sandbox instance\n\t\tconst sandbox = await daytona.create(${useSandboxCreateParams ? '{\n\t\t\timage: Image.debianSlim("3.13"),\n' : ''}`
     if (useResources) {
       typeScriptCodeSnippet += '\t\t\tresources: {\n'
-      if (sandboxParametersState['resources']['cpu'])
+      if (useResourcesCPU)
         typeScriptCodeSnippet += `\t\t\t\tcpu: ${sandboxParametersState['resources']['cpu']},  // ${sandboxParametersState['resources']['cpu']} CPU cores\n`
-      if (sandboxParametersState['resources']['memory'])
+      if (useResourcesMemory)
         typeScriptCodeSnippet += `\t\t\t\tmemory: ${sandboxParametersState['resources']['memory']},  // ${sandboxParametersState['resources']['memory']}GB RAM\n`
-      if (sandboxParametersState['resources']['disk'])
+      if (useResourcesDisk)
         typeScriptCodeSnippet += `\t\t\t\tdisk: ${sandboxParametersState['resources']['disk']},  // ${sandboxParametersState['resources']['disk']}GB disk space\n`
       typeScriptCodeSnippet += '\t\t\t},\n'
     }
     if (useLanguageParam) typeScriptCodeSnippet += `\t\t\tlanguage: '${sandboxParametersState['language']}',\n`
     if (createSandboxParamsExist) {
-      if (sandboxParametersState['createSandboxBaseParams']['autoStopInterval'])
+      if (useAutoStopInterval)
         typeScriptCodeSnippet += `\t\t\tautoStopInterval: ${sandboxParametersState['createSandboxBaseParams']['autoStopInterval']},\t // ${sandboxParametersState['createSandboxBaseParams']['autoStopInterval'] == 0 ? 'Disables the auto-stop feature' : `Sandbox will be stopped after ${sandboxParametersState['createSandboxBaseParams']['autoStopInterval']} minute${sandboxParametersState['createSandboxBaseParams']['autoStopInterval'] > 1 ? 's' : ''}`}\n`
-      if (sandboxParametersState['createSandboxBaseParams']['autoArchiveInterval'])
+      if (useAutoArchiveInterval)
         typeScriptCodeSnippet += `\t\t\tautoArchiveInterval: ${sandboxParametersState['createSandboxBaseParams']['autoArchiveInterval']},\t // Auto-archive after a Sandbox has been stopped for ${sandboxParametersState['createSandboxBaseParams']['autoArchiveInterval'] == 0 ? '30 days' : `${sandboxParametersState['createSandboxBaseParams']['autoArchiveInterval']} minutes`}\n`
-      if (sandboxParametersState['createSandboxBaseParams']['autoDeleteInterval'])
+      if (useAutoDeleteInterval)
         typeScriptCodeSnippet += `\t\t\tautoDeleteInterval: ${sandboxParametersState['createSandboxBaseParams']['autoDeleteInterval']},\t // ${sandboxParametersState['createSandboxBaseParams']['autoDeleteInterval'] == 0 ? 'Sandbox will be deleted immediately after stopping' : sandboxParametersState['createSandboxBaseParams']['autoDeleteInterval'] == -1 ? 'Auto-delete functionality disabled' : `Auto-delete after a Sandbox has been stopped for ${sandboxParametersState['createSandboxBaseParams']['autoDeleteInterval']} minutes`}\n`
     }
     if (useSandboxCreateParams) typeScriptCodeSnippet += '\t\t})\n'
@@ -129,10 +154,75 @@ console.log(greet("Daytona"));`
     useConfigObject,
     useLanguageParam,
     useResources,
+    useResourcesCPU,
+    useResourcesMemory,
+    useResourcesDisk,
     createSandboxParamsExist,
+    useAutoStopInterval,
+    useAutoArchiveInterval,
+    useAutoDeleteInterval,
     useSandboxCreateParams,
     sandboxParametersState,
   ])
+
+  const runCodeSnippet = async () => {
+    setIsCodeSnippetRunning(true)
+    setCodeSnippetOutput('Running code...')
+
+    try {
+      const daytona = new Daytona({
+        jwtToken: user?.access_token,
+        apiUrl: import.meta.env.VITE_API_URL,
+        organizationId: selectedOrganization?.id,
+      })
+      let createSandboxFromImageParams: CreateSandboxFromImageParams
+      const createSandboxFromSnapshotParams: CreateSandboxFromSnapshotParams = { snapshot: 'vnc-snapshot' }
+      const createSandboxFromImage = useSandboxCreateParams
+      if (createSandboxFromImage) {
+        // Set CreateSandboxFromImageParams specific params
+        createSandboxFromImageParams = { image: Image.debianSlim('3.13') }
+        if (useResources) {
+          createSandboxFromImageParams.resources = {}
+          if (useResourcesCPU) createSandboxFromImageParams.resources.cpu = sandboxParametersState['resources']['cpu']
+          if (useResourcesMemory)
+            createSandboxFromImageParams.resources.memory = sandboxParametersState['resources']['memory']
+          if (useResourcesDisk)
+            createSandboxFromImageParams.resources.disk = sandboxParametersState['resources']['disk']
+        }
+      }
+      const createSandboxParams: CreateSandboxFromImageParams | CreateSandboxFromSnapshotParams = createSandboxFromImage
+        ? createSandboxFromImageParams
+        : createSandboxFromSnapshotParams
+      // Set CreateSandboxBaseParams params whch are common for both params types
+      if (useLanguageParam) createSandboxParams.language = sandboxParametersState['language']
+      if (useAutoStopInterval)
+        createSandboxParams.autoStopInterval = sandboxParametersState['createSandboxBaseParams']['autoStopInterval']
+      if (useAutoArchiveInterval)
+        createSandboxParams.autoArchiveInterval =
+          sandboxParametersState['createSandboxBaseParams']['autoArchiveInterval']
+      if (useAutoDeleteInterval)
+        createSandboxParams.autoDeleteInterval = sandboxParametersState['createSandboxBaseParams']['autoDeleteInterval']
+      createSandboxParams.labels = { 'daytona-playground': 'true' }
+      if (useLanguageParam)
+        createSandboxParams.labels['daytona-playground-language'] = sandboxParametersState['language']
+      const sandbox = await daytona.create(createSandboxParams)
+      setCodeSnippetOutput(
+        `Sandbox successfully created: ${sandbox.id}${useLanguageParam ? '\nRunning code inside sandbox...' : ''}`,
+      )
+      if (useLanguageParam) {
+        const codeRunResponse = await sandbox.process.codeRun(
+          createSandboxParams.language === CodeLanguage.PYTHON ? 'print("Hello World!")' : 'console.log("Hello world")',
+        )
+        setCodeSnippetOutput(codeRunResponse.result)
+      }
+    } catch (error) {
+      console.error(error)
+      setCodeSnippetOutput(`Error: ${error instanceof Error ? error.message : String(error)}`)
+    } finally {
+      setIsCodeSnippetRunning(false)
+    }
+  }
+
   return (
     <>
       <Card className="w-full">
@@ -158,8 +248,8 @@ console.log(greet("Daytona"));`
                   </div>
                 </TabsTrigger>
               ))}
-              <Button variant="outline" className="ml-auto">
-                <Play className="w-4 h-4" /> Run
+              <Button disabled={isCodeSnippetRunning} variant="outline" className="ml-auto" onClick={runCodeSnippet}>
+                {isCodeSnippetRunning ? <Loader2 className="h-4 w-4 animate-spin" /> : <Play className="w-4 h-4" />} Run
               </Button>
             </TabsList>
             {codeSnippetSupportedLanguages.map((language) => (
@@ -174,7 +264,7 @@ console.log(greet("Daytona"));`
           </Tabs>
         </CardContent>
       </Card>
-      <ResponseCard responseText="Response test text" />
+      <ResponseCard responseText={codeSnippetOutput} />
     </>
   )
 }
