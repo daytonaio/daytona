@@ -4,6 +4,16 @@
   "sourceRoot": "libs/runner-grpc-client",
   "projectType": "library",
   "targets": {
+    "proto": {
+      "executor": "nx:run-commands",
+      "options": {
+        "parallel": false,
+        "commands": [
+          "buf generate --template {projectRoot}/buf.gen.yaml",
+          "sh {projectRoot}/generate-index.sh {projectRoot}"
+        ]
+      }
+    },
     "build": {
       "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],
@@ -12,7 +22,8 @@
         "main": "libs/runner-grpc-client/src/index.ts",
         "tsConfig": "libs/runner-grpc-client/tsconfig.lib.json",
         "assets": ["libs/runner-grpc-client/*.md"]
-      }
+      },
+      "dependsOn": ["proto"]
     }
   },
   "tags": []

@@ -13,6 +13,7 @@ import { RunnerService } from '../../services/runner.service'
 import { RunnerAdapterFactory } from '../../runner-adapter/runnerAdapter'
 import { Repository } from 'typeorm'
 import { InjectRepository } from '@nestjs/typeorm'
+import { ServiceError, status } from '@grpc/grpc-js'
 
 @Injectable()
 export class SandboxDestroyAction extends SandboxAction {
@@ -51,7 +52,10 @@ export class SandboxDestroyAction extends SandboxAction {
           }
         } catch (e) {
           //  if the sandbox is not found on runner, it is already destroyed
-          if (e.response?.status !== 404) {
+          if (e.response && e.response.status !== 404) {
+            throw e
+          }
+          if ((e as ServiceError).code !== status.NOT_FOUND) {
             throw e
           }
         }
@@ -70,7 +74,10 @@ export class SandboxDestroyAction extends SandboxAction {
           await runnerAdapter.destroySandbox(sandbox.id)
         } catch (e) {
           //  if the sandbox is not found on runner, it is already destroyed
-          if (e.response?.status !== 404) {
+          if (e.response && e.response.status !== 404) {
+            throw e
+          }
+          if ((e as ServiceError).code !== status.NOT_FOUND) {
             throw e
           }
         }

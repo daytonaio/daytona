@@ -1,0 +1,392 @@
+syntax = "proto3";
+
+package runner.v2alpha;
+
+import "google/api/annotations.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+
+option go_package = "github.com/daytonaio/runner-docker/gen/pb/runner/v2alpha";
+option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
+  info: {
+    title: "Daytona Node Agent API"
+    version: "2.0"
+    description: "API for managing VM sandboxes and rootfs images"
+    contact: {
+      name: "Daytona Platforms Inc."
+      url: "https://github.com/daytonaio"
+      email: "support@daytona.io"
+    }
+  }
+  security_definitions: {
+    security: {
+      key: "BearerAuth"
+      value: {
+        type: TYPE_API_KEY
+        in: IN_HEADER
+        name: "Authorization"
+        description: "Authentication token, prefixed by Bearer: Bearer <token>"
+      }
+    }
+  }
+  security: {
+    security_requirement: {
+      key: "BearerAuth"
+      value: {}
+    }
+  }
+};
+
+// Status service
+service StatusService {
+  rpc Health(HealthRequest) returns (HealthResponse) {
+    option (google.api.http) = {get: "/api/v2/health"};
+  }
+  rpc Stats(StatsRequest) returns (StatsResponse) {
+    option (google.api.http) = {get: "/api/v2/stats"};
+  }
+  rpc Info(InfoRequest) returns (InfoResponse) {
+    option (google.api.http) = {get: "/api/v2/info"};
+  }
+}
+
+// Sandbox service
+service SandboxService {
+  rpc CreateSandbox(CreateSandboxRequest) returns (CreateSandboxResponse) {
+    option (google.api.http) = {
+      post: "/api/v2/sandbox"
+      body: "*"
+    };
+  }
+  rpc DestroySandbox(DestroySandboxRequest) returns (DestroySandboxResponse) {
+    option (google.api.http) = {delete: "/api/v2/sandbox/{id}"};
+  }
+  rpc SnapshotSandbox(SnapshotSandboxRequest) returns (SnapshotSandboxResponse) {
+    option (google.api.http) = {post: "/api/v2/sandbox/{id}/snapshot"};
+  }
+  rpc StartSandbox(StartSandboxRequest) returns (StartSandboxResponse) {
+    option (google.api.http) = {post: "/api/v2/sandbox/{id}/start"};
+  }
+  rpc StopSandbox(StopSandboxRequest) returns (StopSandboxResponse) {
+    option (google.api.http) = {post: "/api/v2/sandbox/{id}/stop"};
+  }
+  rpc GetSandbox(GetSandboxRequest) returns (GetSandboxResponse) {
+    option (google.api.http) = {get: "/api/v2/sandbox/{id}"};
+  }
+  rpc ListSandboxes(ListSandboxesRequest) returns (ListSandboxesResponse) {
+    option (google.api.http) = {get: "/api/v2/sandbox"};
+  }
+}
+
+// Snapshot service
+service SnapshotService {
+  rpc CreateSnapshot(CreateSnapshotRequest) returns (CreateSnapshotResponse) {
+    option (google.api.http) = {
+      post: "/api/v2/snapshot"
+      body: "*"
+    };
+  }
+  rpc PullSnapshot(PullSnapshotRequest) returns (PullSnapshotResponse) {
+    option (google.api.http) = {
+      post: "/api/v2/snapshot/{id}/pull"
+      body: "*"
+    };
+  }
+  rpc PushSnapshot(PushSnapshotRequest) returns (PushSnapshotResponse) {
+    option (google.api.http) = {
+      post: "/api/v2/snapshot/{id}/push"
+      body: "*"
+    };
+  }
+  rpc GetSnapshot(GetSnapshotRequest) returns (GetSnapshotResponse) {
+    option (google.api.http) = {get: "/api/v2/snapshot/{id}"};
+  }
+  rpc RemoveSnapshot(RemoveSnapshotRequest) returns (RemoveSnapshotResponse) {
+    option (google.api.http) = {
+      delete: "/api/v2/snapshot/{id}"
+      response_body: ""
+    };
+  }
+  rpc ListSnapshots(ListSnapshotsRequest) returns (ListSnapshotsResponse) {
+    option (google.api.http) = {get: "/api/v2/snapshot"};
+  }
+  rpc GetSnapshotLogs(GetSnapshotLogsRequest) returns (GetSnapshotLogsResponse) {
+    option (google.api.http) = {get: "/api/v2/snapshot/{id}/logs"};
+  }
+}
+
+// SnapshotType defines the type of snapshot to create or use
+enum SnapshotType {
+  SNAPSHOT_TYPE_UNSPECIFIED = 0;
+  SNAPSHOT_TYPE_FILESYSTEM = 1;
+  SNAPSHOT_TYPE_FULL = 2;
+}
+
+// SandboxState represents the current state of a sandbox instance
+enum SandboxState {
+  SANDBOX_STATE_UNSPECIFIED = 0;
+  SANDBOX_STATE_CREATING = 1;
+  SANDBOX_STATE_RESTORING = 2;
+  SANDBOX_STATE_DESTROYED = 3;
+  SANDBOX_STATE_DESTROYING = 4;
+  SANDBOX_STATE_STARTED = 5;
+  SANDBOX_STATE_STOPPED = 6;
+  SANDBOX_STATE_STARTING = 7;
+  SANDBOX_STATE_STOPPING = 8;
+  SANDBOX_STATE_RESIZING = 9;
+  SANDBOX_STATE_ERROR = 10;
+}
+
+// SnapshotState represents the current phase of snapshot creation
+enum SnapshotState {
+  SNAPSHOT_STATE_UNSPECIFIED = 0;
+  SNAPSHOT_STATE_PULLING_IMAGE = 2;
+  SNAPSHOT_STATE_CONVERTING_IMAGE = 3;
+  SNAPSHOT_STATE_CREATING = 4;
+  SNAPSHOT_STATE_FINISHED = 5;
+}
+
+// Registry configuration for container registry access
+message Registry {
+  string url = 1;
+  string project = 2;
+  string username = 3;
+  string password = 4;
+}
+
+// S3 configuration for AWS S3 storage access
+message S3 {
+  string bucket = 1;
+  string access_key = 2;
+  string secret_key = 3;
+}
+
+// HostPath configuration for local filesystem access
+message HostPath {
+  string path = 1;
+}
+
+// Resources defines the compute and storage resources for a sandbox or snapshot
+message Resources {
+  int32 vcpu_count = 1;
+  int32 mem_size_gb = 2;
+  int32 disk_size_gb = 3;
+}
+
+// Volume represents a storage volume to be mounted in a sandbox
+message Volume {
+  string volume_id = 1;
+  string mount_path = 2;
+}
+
+// RunnerMetrics provides current resource usage and allocation statistics
+message RunnerMetrics {
+  uint32 current_allocated_cpu = 1;
+  uint32 current_allocated_disk_gi_b = 2;
+  uint32 current_allocated_memory_gi_b = 3;
+  double current_cpu_usage_percentage = 4;
+  double current_disk_usage_percentage = 5;
+  double current_memory_usage_percentage = 6;
+  uint32 current_snapshot_count = 7;
+}
+
+// Sandbox represents a running sandbox instance with its configuration and state
+message Sandbox {
+  string id = 1;
+  string snapshot_id = 2;
+  string ip_address = 3;
+  string tap_device = 4;
+  SandboxState state = 5;
+}
+
+// Snapshot represents a system snapshot that can be used to create sandboxes
+message Snapshot {
+  string id = 1;
+  string oci_image = 2;
+  Resources resources = 3;
+  SnapshotState state = 4;
+  SnapshotType snapshot_type = 5;
+  string parent_id = 6;
+}
+
+// HealthStatus represents the health state of a service or component
+enum HealthStatus {
+  HEALTH_STATUS_UNSPECIFIED = 0;
+  HEALTH_STATUS_HEALTHY = 1;
+  HEALTH_STATUS_UNHEALTHY = 2;
+}
+
+// HealthCheckRequest is an empty request to check service health
+message HealthRequest {}
+
+// HealthCheckResponse contains the health status and version information
+message HealthResponse {
+  HealthStatus status = 1;
+  string version = 2;
+}
+
+// StatsRequest is an empty request to get service stats
+message StatsRequest {}
+
+// StatsResponse contains the stats information
+message StatsResponse {
+  RunnerMetrics metrics = 1;
+  optional double testiranje = 2;
+  optional string poruka = 3;
+}
+
+// InfoRequest is an empty request to get service info
+message InfoRequest {}
+
+// InfoResponse contains the info information
+message InfoResponse {
+  string version = 1;
+}
+
+// CreateSandboxRequest contains parameters for creating a new sandbox
+message CreateSandboxRequest {
+  string id = 1;
+  string snapshot_id = 2;
+  repeated Volume volumes = 3;
+}
+
+// CreateSandboxResponse contains the created sandbox information
+message CreateSandboxResponse {
+  Sandbox sandbox = 1;
+}
+
+// SnapshotSandboxRequest contains parameters for creating a snapshot from a sandbox
+message SnapshotSandboxRequest {
+  string id = 1;
+  SnapshotType snapshot_type = 2;
+}
+
+// SnapshotSandboxResponse contains the created snapshot information
+message SnapshotSandboxResponse {
+  Snapshot snapshot = 1;
+}
+
+// DestroySandboxRequest contains parameters for destroying a sandbox
+message DestroySandboxRequest {
+  string id = 1;
+}
+
+// DestroySandboxResponse contains the result of sandbox destruction
+message DestroySandboxResponse {
+  string message = 1;
+}
+
+// StartSandboxRequest contains parameters for starting a sandbox
+message StartSandboxRequest {
+  string id = 1;
+}
+
+// StartSandboxResponse contains the result of starting a sandbox
+message StartSandboxResponse {
+  string message = 1;
+}
+
+// StopSandboxRequest contains parameters for stopping a sandbox
+message StopSandboxRequest {
+  string id = 1;
+}
+
+// StopSandboxResponse contains the result of stopping a sandbox
+message StopSandboxResponse {
+  string message = 1;
+}
+
+// GetSandboxRequest contains parameters for retrieving sandbox information
+message GetSandboxRequest {
+  string id = 1;
+}
+
+// GetSandboxResponse contains the requested sandbox information
+message GetSandboxResponse {
+  Sandbox sandbox = 3;
+}
+
+// ListSandboxesRequest is an empty request to list all sandboxes
+message ListSandboxesRequest {}
+
+// ListSandboxesResponse contains a list of all sandboxes
+message ListSandboxesResponse {
+  repeated Sandbox sandboxes = 1;
+}
+
+// CreateSnapshotRequest contains parameters for creating a new snapshot
+message CreateSnapshotRequest {
+  string id = 1;
+  string oci_image = 2;
+  Resources resources = 3;
+  SnapshotType snapshot_type = 4;
+  bool publish = 8;
+}
+
+// CreateSnapshotResponse contains the created snapshot information
+message CreateSnapshotResponse {
+  Snapshot snapshot = 1;
+}
+
+// PullSnapshotRequest contains parameters for pulling a snapshot from storage
+message PullSnapshotRequest {
+  string id = 1;
+  oneof storage_type {
+    Registry registry = 2;
+    S3 s3 = 3;
+    HostPath host_path = 4;
+  }
+}
+
+// PullSnapshotResponse contains the pulled snapshot information
+message PullSnapshotResponse {
+  Snapshot snapshot = 1;
+}
+
+// PushSnapshotRequest contains parameters for pushing a snapshot to storage
+message PushSnapshotRequest {
+  string id = 1;
+  oneof storage_type {
+    Registry registry = 5;
+    S3 s3 = 6;
+    HostPath host_path = 7;
+  }
+}
+
+// PushSnapshotResponse contains the pushed snapshot information
+message PushSnapshotResponse {}
+
+// GetSnapshotRequest contains parameters for retrieving snapshot information
+message GetSnapshotRequest {
+  string id = 1;
+}
+
+// GetSnapshotResponse contains the requested snapshot information
+message GetSnapshotResponse {
+  Snapshot snapshot = 1;
+}
+
+// RemoveSnapshotRequest contains parameters for removing a snapshot
+message RemoveSnapshotRequest {
+  string id = 1;
+}
+
+// RemoveSnapshotResponse is an empty response for snapshot removal
+message RemoveSnapshotResponse {}
+
+// GetSnapshotLogsRequest contains parameters for retrieving snapshot logs
+message GetSnapshotLogsRequest {
+  string id = 1;
+}
+
+// GetSnapshotLogsResponse contains snapshot log content
+message GetSnapshotLogsResponse {
+  string content = 1; // Log content as a string
+}
+
+// ListSnapshotsRequest is an empty request to list all snapshots
+message ListSnapshotsRequest {}
+
+// ListSnapshotsResponse contains a list of all snapshots
+message ListSnapshotsResponse {
+  repeated Snapshot snapshots = 1; // List of all snapshot instances
+}
