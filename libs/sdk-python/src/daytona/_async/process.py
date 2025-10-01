@@ -4,10 +4,21 @@
 import base64
 import json
 import re
-from typing import Awaitable, Callable, Dict, List, Optional
+from typing import Awaitable, Callable, Dict, List, Optional, Union
 
 import websockets
-from daytona_api_client_async import Command, CreateSessionRequest, ExecuteRequest, PortPreviewUrl, Session, ToolboxApi
+from daytona_api_client_async import (
+    Command,
+    CreateSessionRequest,
+    ExecuteRequest,
+    PortPreviewUrl,
+    PtyCreateRequest,
+    PtyResizeRequest,
+    PtySessionInfo,
+    Session,
+    ToolboxApi,
+)
+from websockets.asyncio.client import connect
 
 from .._utils.errors import intercept_errors
 from .._utils.stream import std_demux_stream
@@ -23,6 +34,8 @@ from ..common.process import (
     demux_log,
     parse_session_command_logs,
 )
+from ..common.pty import PtySize
+from ..handle.async_pty_handle import AsyncPtyHandle
 
 
 class AsyncProcess:
@@ -472,3 +485,222 @@ class AsyncProcess:
             ```
         """
         await self._toolbox_api.delete_session(self._sandbox_id, session_id=session_id)
+
+    @intercept_errors(message_prefix="Failed to create PTY session: ")
+    async def create_pty_session(
+        self,
+        id: str,
+        # unasync: delete start
+        on_data: Union[Callable[[bytes], None], Callable[[bytes], Awaitable[None]]] = None,
+        # unasync: delete end
+        cwd: Optional[str] = None,
+        envs: Optional[Dict[str, str]] = None,
+        pty_size: Optional[PtySize] = None,
+    ) -> AsyncPtyHandle:
+        """Creates a new PTY (pseudo-terminal) session in the Sandbox.
+
+        Creates an interactive terminal session that can execute commands and handle user input.
+        The PTY session behaves like a real terminal, supporting features like command history.
+
+        Args:
+            id: Unique identifier for the PTY session. Must be unique within the Sandbox.
+            cwd: Working directory for the PTY session. Defaults to the sandbox's working directory.
+            env: Environment variables to set in the PTY session. These will be merged with
+                the Sandbox's default environment variables.
+            pty_size: Terminal size configuration. Defaults to 80x24 if not specified.
+
+        Returns:
+            AsyncPtyHandle: Handle for managing the created PTY session. Use this to send input,
+                           receive output, resize the terminal, and manage the session lifecycle.
+
+        Raises:
+            DaytonaError: If the PTY session creation fails or the session ID is already in use.
+        """
+        response = await self._toolbox_api.create_pty_session(
+            self._sandbox_id,
+            pty_create_request=PtyCreateRequest(
+                id=id,
+                cwd=cwd,
+                envs=envs,
+                cols=pty_size.cols if pty_size else None,
+                rows=pty_size.rows if pty_size else None,
+                lazy_start=True,
+            ),
+        )
+
+        return await self.connect_pty_session(
+            response.session_id,
+            # unasync: delete start
+            on_data,
+            # unasync: delete end
+        )
+
+    @intercept_errors(message_prefix="Failed to connect PTY session: ")
+    async def connect_pty_session(
+        self,
+        session_id: str,
+        # unasync: delete start
+        on_data: Union[Callable[[bytes], None], Callable[[bytes], Awaitable[None]]],
+        # unasync: delete end
+    ) -> AsyncPtyHandle:
+        """Connects to an existing PTY session in the Sandbox.
+
+        Establishes a WebSocket connection to an existing PTY session, allowing you to
+        interact with a previously created terminal session.
+
+        Args:
+            session_id: Unique identifier of the PTY session to connect to.
+
+        Returns:
+            AsyncPtyHandle: Handle for managing the connected PTY session.
+
+        Raises:
+            DaytonaError: If the PTY session doesn't exist or connection fails.
+        """
+        preview_link = await self._get_preview_link(2280)
+        url = re.sub(r"^http", "ws", preview_link.url) + f"/process/pty/{session_id}/connect"
+
+        ws = await connect(
+            url,
+            additional_headers={
+                **self._toolbox_api.api_client.default_headers,
+                "X-Daytona-Preview-Token": preview_link.token,
+            },
+        )
+
+        # Create resize and kill handlers
+        async def resize_handler(pty_size: PtySize) -> PtySessionInfo:
+            return await self.resize_pty_session(session_id, pty_size)
+
+        async def kill_handler() -> None:
+            await self.kill_pty_session(session_id)
+
+        handle = AsyncPtyHandle(
+            ws,
+            # unasync: delete start
+            on_data,
+            # unasync: delete end
+            session_id=session_id,
+            handle_resize=resize_handler,
+            handle_kill=kill_handler,
+        )
+        await handle.wait_for_connection()
+        return handle
+
+    @intercept_errors(message_prefix="Failed to list PTY sessions: ")
+    async def list_pty_sessions(self) -> List[PtySessionInfo]:
+        """Lists all PTY sessions in the Sandbox.
+
+        Retrieves information about all PTY sessions in this Sandbox.
+
+        Returns:
+            List[PtySessionInfo]: List of PTY session information objects containing
+                                details about each session's state, creation time, and configuration.
+
+        Example:
+            ```python
+            # List all PTY sessions
+            sessions = await sandbox.process.list_pty_sessions()
+
+            for session in sessions:
+                print(f"Session ID: {session.id}")
+                print(f"Active: {session.active}")
+                print(f"Created: {session.created_at}")
+            ```
+        """
+        return await self._toolbox_api.list_pty_sessions(self._sandbox_id)
+
+    @intercept_errors(message_prefix="Failed to get PTY session info: ")
+    async def get_pty_session_info(self, session_id: str) -> PtySessionInfo:
+        """Gets detailed information about a specific PTY session.
+
+        Retrieves comprehensive information about a PTY session including its current state,
+        configuration, and metadata.
+
+        Args:
+            session_id: Unique identifier of the PTY session to retrieve information for.
+
+        Returns:
+            PtySessionInfo: Detailed information about the PTY session including ID, state,
+                           creation time, working directory, environment variables, and more.
+
+        Raises:
+            DaytonaError: If the PTY session doesn't exist.
+
+        Example:
+            ```python
+            # Get details about a specific PTY session
+            session_info = await sandbox.process.get_pty_session_info("my-session")
+
+            print(f"Session ID: {session_info.id}")
+            print(f"Active: {session_info.active}")
+            print(f"Working Directory: {session_info.cwd}")
+            print(f"Terminal Size: {session_info.cols}x{session_info.rows}")
+            ```
+        """
+        return await self._toolbox_api.get_pty_session(self._sandbox_id, session_id=session_id)
+
+    @intercept_errors(message_prefix="Failed to kill PTY session: ")
+    async def kill_pty_session(self, session_id: str) -> None:
+        """Kills a PTY session and terminates its associated process.
+
+        Forcefully terminates the PTY session and cleans up all associated resources.
+        This will close any active connections and kill the underlying shell process.
+        This operation is irreversible. Any unsaved work in the terminal session will be lost.
+
+        Args:
+            session_id: Unique identifier of the PTY session to kill.
+
+        Raises:
+            DaytonaError: If the PTY session doesn't exist or cannot be killed.
+
+        Example:
+            ```python
+            # Kill a specific PTY session
+            await sandbox.process.kill_pty_session("my-session")
+
+            # Verify the session no longer exists
+            pty_sessions = await sandbox.process.list_pty_sessions()
+            for pty_session in pty_sessions:
+                print(f"PTY session: {pty_session.id}")
+            ```
+        """
+        await self._toolbox_api.delete_pty_session(self._sandbox_id, session_id=session_id)
+
+    @intercept_errors(message_prefix="Failed to resize PTY session: ")
+    async def resize_pty_session(self, session_id: str, pty_size: PtySize) -> PtySessionInfo:
+        """Resizes a PTY session's terminal dimensions.
+
+        Changes the terminal size of an active PTY session. This is useful when the
+        client terminal is resized or when you need to adjust the display for different
+        output requirements.
+
+        Args:
+            session_id: Unique identifier of the PTY session to resize.
+            pty_size: New terminal dimensions containing the desired columns and rows.
+
+        Returns:
+            PtySessionInfo: Updated session information reflecting the new terminal size.
+
+        Raises:
+            DaytonaError: If the PTY session doesn't exist or resize operation fails.
+
+        Example:
+            ```python
+            from daytona.common.pty import PtySize
+
+            # Resize a PTY session to a larger terminal
+            new_size = PtySize(rows=40, cols=150)
+            updated_info = await sandbox.process.resize_pty_session("my-session", new_size)
+
+            print(f"Terminal resized to {updated_info.cols}x{updated_info.rows}")
+
+            # You can also use the AsyncPtyHandle's resize method
+            await pty_handle.resize(new_size)
+            ```
+        """
+        return await self._toolbox_api.resize_pty_session(
+            self._sandbox_id,
+            session_id=session_id,
+            pty_resize_request=PtyResizeRequest(cols=pty_size.cols, rows=pty_size.rows),
+        )

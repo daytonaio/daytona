@@ -11,6 +11,8 @@ import {
   SessionExecuteResponse as ApiSessionExecuteResponse,
   PortPreviewUrl,
   ToolboxApi,
+  PtySessionInfo,
+  PtyCreateRequest,
 } from '@daytonaio/api-client'
 import { SandboxCodeToolbox } from './Sandbox'
 import { ExecuteResponse } from './types/ExecuteResponse'
@@ -19,6 +21,8 @@ import { stdDemuxStream } from './utils/Stream'
 import { Buffer } from 'buffer'
 import WebSocket from 'isomorphic-ws'
 import { RUNTIME, Runtime } from './utils/Runtime'
+import { PtyHandle } from './PtyHandle'
+import { PtyCreateOptions, PtyConnectOptions } from './types/Pty'
 
 // 3-byte multiplexing markers inserted by the shell labelers
 export const STDOUT_PREFIX_BYTES = new Uint8Array([0x01, 0x01, 0x01])
@@ -379,20 +383,7 @@ export class Process {
     const previewLink = await this.getPreviewLink(2280)
     const url = `${previewLink.url.replace(/^http/, 'ws')}/process/session/${sessionId}/command/${commandId}/logs?follow=true`
 
-    let ws: WebSocket
-    if (RUNTIME === Runtime.BROWSER) {
-      ws = new WebSocket(
-        url + '&DAYTONA_SANDBOX_AUTH_KEY=' + previewLink.token,
-        `X-Daytona-SDK-Version~${this.clientConfig.baseOptions.headers['X-Daytona-SDK-Version']}`,
-      )
-    } else {
-      ws = new WebSocket(url, {
-        headers: {
-          ...this.clientConfig.baseOptions.headers,
-          'X-Daytona-Preview-Token': previewLink.token,
-        },
-      })
-    }
+    const ws = createWebSocket(url, previewLink.token, this.clientConfig.baseOptions?.headers || {})
 
     await stdDemuxStream(ws, onStdout, onStderr)
   }
@@ -428,6 +419,223 @@ export class Process {
    */
   public async deleteSession(sessionId: string): Promise<void> {
     await this.toolboxApi.deleteSession(this.sandboxId, sessionId)
+  }
+
+  /**
+   * Create a new PTY (pseudo-terminal) session in the sandbox.
+   *
+   * Creates an interactive terminal session that can execute commands and handle user input.
+   * The PTY session behaves like a real terminal, supporting features like command history.
+   *
+   * @param {PtyCreateOptions & PtyConnectOptions} options - PTY session configuration including creation and connection options
+   * @returns {Promise<PtyHandle>} PTY handle for managing the session
+   *
+   * @example
+   * // Create a PTY session with custom configuration
+   * const ptyHandle = await process.createPty({
+   *   id: 'my-interactive-session',
+   *   cwd: '/workspace',
+   *   envs: { TERM: 'xterm-256color', LANG: 'en_US.UTF-8' },
+   *   cols: 120,
+   *   rows: 30,
+   *   onData: (data) => {
+   *     // Handle terminal output
+   *     const text = new TextDecoder().decode(data);
+   *     process.stdout.write(text);
+   *   },
+   * });
+   *
+   * // Wait for connection to be established
+   * await ptyHandle.waitForConnection();
+   *
+   * // Send commands to the terminal
+   * await ptyHandle.sendInput('ls -la\n');
+   * await ptyHandle.sendInput('echo "Hello, PTY!"\n');
+   * await ptyHandle.sendInput('exit\n');
+   *
+   * // Wait for completion and get result
+   * const result = await ptyHandle.wait();
+   * console.log(`PTY session completed with exit code: ${result.exitCode}`);
+   *
+   * // Clean up
+   * await ptyHandle.disconnect();
+   */
+  public async createPty(options?: PtyCreateOptions & PtyConnectOptions): Promise<PtyHandle> {
+    const request: PtyCreateRequest = {
+      id: options.id,
+      cwd: options.cwd,
+      envs: options.envs,
+      cols: options.cols,
+      rows: options.rows,
+      lazyStart: true,
+    }
+
+    const response = await this.toolboxApi.createPTYSession(this.sandboxId, request)
+
+    return await this.connectPty(response.data.sessionId, options)
+  }
+
+  /**
+   * Connect to an existing PTY session in the sandbox.
+   *
+   * Establishes a WebSocket connection to an existing PTY session, allowing you to
+   * interact with a previously created terminal session.
+   *
+   * @param {string} sessionId - ID of the PTY session to connect to
+   * @param {PtyConnectOptions} options - Options for the connection including data handler
+   * @returns {Promise<PtyHandle>} PTY handle for managing the session
+   *
+   * @example
+   * // Connect to an existing PTY session
+   * const handle = await process.connectPty('my-session', {
+   *   onData: (data) => {
+   *     // Handle terminal output
+   *     const text = new TextDecoder().decode(data);
+   *     process.stdout.write(text);
+   *   },
+   * });
+   *
+   * // Wait for connection to be established
+   * await handle.waitForConnection();
+   *
+   * // Send commands to the existing session
+   * await handle.sendInput('pwd\n');
+   * await handle.sendInput('ls -la\n');
+   * await handle.sendInput('exit\n');
+   *
+   * // Wait for completion
+   * const result = await handle.wait();
+   * console.log(`Session exited with code: ${result.exitCode}`);
+   *
+   * // Clean up
+   * await handle.disconnect();
+   */
+  public async connectPty(sessionId: string, options?: PtyConnectOptions): Promise<PtyHandle> {
+    // Get preview link for WebSocket connection
+    const previewLink = await this.getPreviewLink(2280)
+    const url = `${previewLink.url.replace(/^http/, 'ws')}/process/pty/${sessionId}/connect`
+
+    const ws = createWebSocket(url, previewLink.token, this.clientConfig.baseOptions?.headers || {})
+
+    const handle = new PtyHandle(
+      ws,
+      (cols: number, rows: number) => this.resizePtySession(sessionId, cols, rows),
+      () => this.killPtySession(sessionId),
+      options.onData,
+      sessionId,
+    )
+    await handle.waitForConnection()
+    return handle
+  }
+
+  /**
+   * List all PTY sessions in the sandbox.
+   *
+   * Retrieves information about all PTY sessions, both active and inactive,
+   * that have been created in this sandbox.
+   *
+   * @returns {Promise<PtySessionInfo[]>} Array of PTY session information
+   *
+   * @example
+   * // List all PTY sessions
+   * const sessions = await process.listPtySessions();
+   *
+   * for (const session of sessions) {
+   *   console.log(`Session ID: ${session.id}`);
+   *   console.log(`Active: ${session.active}`);
+   *   console.log(`Created: ${session.createdAt}`);
+   *   }
+   *   console.log('---');
+   * }
+   */
+  public async listPtySessions(): Promise<PtySessionInfo[]> {
+    return (await this.toolboxApi.listPTYSessions(this.sandboxId)).data.sessions
+  }
+
+  /**
+   * Get detailed information about a specific PTY session.
+   *
+   * Retrieves comprehensive information about a PTY session including its current state,
+   * configuration, and metadata.
+   *
+   * @param {string} sessionId - ID of the PTY session to retrieve information for
+   * @returns {Promise<PtySessionInfo>} PTY session information
+   *
+   * @throws {Error} If the PTY session doesn't exist
+   *
+   * @example
+   * // Get details about a specific PTY session
+   * const session = await process.getPtySessionInfo('my-session');
+   *
+   * console.log(`Session ID: ${session.id}`);
+   * console.log(`Active: ${session.active}`);
+   * console.log(`Working Directory: ${session.cwd}`);
+   * console.log(`Terminal Size: ${session.cols}x${session.rows}`);
+   *
+   * if (session.processId) {
+   *   console.log(`Process ID: ${session.processId}`);
+   * }
+   */
+  public async getPtySessionInfo(sessionId: string): Promise<PtySessionInfo> {
+    return (await this.toolboxApi.getPTYSession(this.sandboxId, sessionId)).data
+  }
+
+  /**
+   * Kill a PTY session and terminate its associated process.
+   *
+   * Forcefully terminates the PTY session and cleans up all associated resources.
+   * This will close any active connections and kill the underlying shell process.
+   *
+   * @param {string} sessionId - ID of the PTY session to kill
+   * @returns {Promise<void>}
+   *
+   * @throws {Error} If the PTY session doesn't exist or cannot be killed
+   *
+   * @note This operation is irreversible. Any unsaved work in the terminal session will be lost.
+   *
+   * @example
+   * // Kill a specific PTY session
+   * await process.killPtySession('my-session');
+   *
+   * // Verify the session is no longer active
+   * try {
+   *   const info = await process.getPtySessionInfo('my-session');
+   *   console.log(`Session still exists but active: ${info.active}`);
+   * } catch (error) {
+   *   console.log('Session has been completely removed');
+   * }
+   */
+  public async killPtySession(sessionId: string): Promise<void> {
+    await this.toolboxApi.deletePTYSession(this.sandboxId, sessionId)
+  }
+
+  /**
+   * Resize a PTY session's terminal dimensions.
+   *
+   * Changes the terminal size of an active PTY session. This is useful when the
+   * client terminal is resized or when you need to adjust the display for different
+   * output requirements.
+   *
+   * @param {string} sessionId - ID of the PTY session to resize
+   * @param {number} cols - New number of terminal columns
+   * @param {number} rows - New number of terminal rows
+   * @returns {Promise<PtySessionInfo>} Updated session information reflecting the new terminal size
+   *
+   * @throws {Error} If the PTY session doesn't exist or resize operation fails
+   *
+   * @note The resize operation will send a SIGWINCH signal to the shell process,
+   * allowing terminal applications to adapt to the new size.
+   *
+   * @example
+   * // Resize a PTY session to a larger terminal
+   * const updatedInfo = await process.resizePtySession('my-session', 150, 40);
+   * console.log(`Terminal resized to ${updatedInfo.cols}x${updatedInfo.rows}`);
+   *
+   * // You can also use the PtyHandle's resize method
+   * await ptyHandle.resize(150, 40); // cols, rows
+   */
+  public async resizePtySession(sessionId: string, cols: number, rows: number): Promise<PtySessionInfo> {
+    return (await this.toolboxApi.resizePTYSession(this.sandboxId, sessionId, { cols, rows })).data
   }
 }
 
@@ -536,4 +744,20 @@ function findSubarray(haystack: Uint8Array, needle: Uint8Array): number {
     if (found) return i
   }
   return -1
+}
+
+function createWebSocket(url: string, token: string, headers: Record<string, string>): WebSocket {
+  if (RUNTIME === Runtime.BROWSER) {
+    return new WebSocket(
+      url + '&DAYTONA_SANDBOX_AUTH_KEY=' + token,
+      `X-Daytona-SDK-Version~${headers['X-Daytona-SDK-Version']}`,
+    )
+  } else {
+    return new WebSocket(url, {
+      headers: {
+        ...headers,
+        'X-Daytona-Preview-Token': token,
+      },
+    })
+  }
 }
