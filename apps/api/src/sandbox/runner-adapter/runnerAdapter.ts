@@ -6,6 +6,7 @@
 import { Injectable, Logger } from '@nestjs/common'
 import { Runner } from '../entities/runner.entity'
 import { RunnerAdapterV1 } from './runnerAdapter.v1'
+import { RunnerAdapterV2 } from './runnerAdapter.v2'
 import { ModuleRef } from '@nestjs/core'
 import { RunnerAdapterLegacy } from './runnerAdapter.legacy'
 import { BuildInfo } from '../entities/build-info.entity'
@@ -92,6 +93,11 @@ export class RunnerAdapterFactory {
       }
       case '1': {
         const adapter = await this.moduleRef.create(RunnerAdapterV1)
+        await adapter.init(runner)
+        return adapter
+      }
+      case '2': {
+        const adapter = await this.moduleRef.create(RunnerAdapterV2)
         await adapter.init(runner)
         return adapter
       }
