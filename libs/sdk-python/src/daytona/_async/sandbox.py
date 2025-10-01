@@ -474,7 +474,7 @@ class AsyncSandbox(SandboxDto):
         Args:
             expires_in_minutes (Optional[int]): The number of minutes the SSH access token will be valid for.
         """
-        return (await self._sandbox_api.create_ssh_access(self.id, expires_in_minutes=expires_in_minutes)).data
+        return await self._sandbox_api.create_ssh_access(self.id, expires_in_minutes=expires_in_minutes)
 
     @intercept_errors(message_prefix="Failed to revoke SSH access: ")
     async def revoke_ssh_access(self, token: str) -> None:
