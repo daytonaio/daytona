@@ -366,13 +366,14 @@ export class SandboxService {
 
       //  if the snapshot is experimental, we know that the runner is the one where the sandbox is running
       //  as at this point, the snapshot is located on the same runner as the sandbox
-      if (snapshot.experimental) {
+      if (snapshot.experimental && snapshot.buildRunnerId) {
         runner = await this.runnerService.findOne(snapshot.buildRunnerId)
       } else {
         runner = await this.runnerService.getRandomAvailableRunner({
           region,
           sandboxClass,
           snapshotRef: snapshot.internalName,
+          experimental: snapshot.experimental,
         })
       }
 

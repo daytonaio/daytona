@@ -15,6 +15,7 @@
         "target": "node",
         "compiler": "tsc",
         "sourceMap": true,
+        "buildLibsFromSource": false,
         "webpackConfig": "apps/api/webpack.config.js",
         "assets": [
           {
@@ -23,7 +24,7 @@
             "output": "./assets/"
           },
           {
-            "input": "proto",
+            "input": "apps/api/proto",
             "glob": "**/*",
             "output": "./proto/"
           }
@@ -35,6 +36,13 @@
           "extractLicenses": true,
           "inspect": false
         }
+      },
+      "dependsOn": ["^build", "proto"]
+    },
+    "proto": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "buf export . --output apps/api/proto"
       }
     },
     "openapi": {

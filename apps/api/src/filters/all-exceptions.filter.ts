@@ -3,11 +3,13 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { ExceptionFilter, Catch, ArgumentsHost, HttpException, HttpStatus } from '@nestjs/common'
+import { ExceptionFilter, Catch, ArgumentsHost, HttpException, HttpStatus, Logger } from '@nestjs/common'
 import { HttpAdapterHost } from '@nestjs/core'
 
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
+  private readonly logger = new Logger(AllExceptionsFilter.name)
+
   constructor(private readonly httpAdapterHost: HttpAdapterHost) {}
 
   private handleCustomError(errorMessage: string): {
@@ -57,6 +59,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
         error = 'Http Exception'
       }
     } else if (exception instanceof Error) {
+      this.logger.error(exception)
       const customError = this.handleCustomError(exception.message)
       statusCode = customError.statusCode
       error = customError.errorType
