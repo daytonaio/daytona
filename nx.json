@@ -100,6 +100,11 @@
       "dependsOn": ["^build"],
       "inputs": ["production", "^production"]
     },
+    "@nx/webpack:webpack": {
+      "cache": true,
+      "dependsOn": ["^build"],
+      "inputs": ["production", "^production"]
+    },
     "check-version-env": {
       "executor": "nx:run-commands",
       "options": {

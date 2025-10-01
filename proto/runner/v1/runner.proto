@@ -30,7 +30,7 @@ service SandboxService {
 
 // Snapshot service
 service SnapshotService {
-  rpc PullSnapshot (PullSnapshotRequest) returns (PullSnapshotResponse) {}
+  rpc PullSnapshot(PullSnapshotRequest) returns (PullSnapshotResponse) {}
   rpc BuildSnapshot(BuildSnapshotRequest) returns (BuildSnapshotResponse) {}
   rpc SnapshotExists(SnapshotExistsRequest) returns (SnapshotExistsResponse) {}
   rpc RemoveSnapshot(RemoveSnapshotRequest) returns (RemoveSnapshotResponse) {}

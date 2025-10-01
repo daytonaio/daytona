@@ -11,25 +11,7 @@ import { BuildInfo } from '../entities/build-info.entity'
 import { DockerRegistry } from '../../docker-registry/entities/docker-registry.entity'
 import { SandboxState } from '../enums/sandbox-state.enum'
 import { BackupState } from '../enums/backup-state.enum'
-import {
-  SandboxState as RunnerSandboxState,
-  BackupState as RunnerBackupState,
-  RUNNER_V1_PACKAGE_NAME,
-  SandboxServiceClient,
-  SnapshotServiceClient,
-  HealthServiceClient,
-  SANDBOX_SERVICE_NAME,
-  SNAPSHOT_SERVICE_NAME,
-  HEALTH_SERVICE_NAME,
-  HealthStatus,
-  CreateSandboxRequest,
-  CreateBackupRequest,
-  PullSnapshotRequest,
-  BuildSnapshotRequest,
-  RunnerServiceClient,
-  RUNNER_SERVICE_NAME,
-  UpdateNetworkSettingsRequest,
-} from '@daytonaio/runner-grpc-client'
+import { v1 } from '@daytonaio/runner-grpc-client'
 import { ClientGrpc, ClientProxyFactory, Transport } from '@nestjs/microservices'
 import { ChannelCredentials, credentials, Metadata } from '@grpc/grpc-js'
 import { join } from 'node:path'
@@ -39,48 +21,48 @@ import { firstValueFrom } from 'rxjs'
 export class RunnerAdapterV1 implements RunnerAdapter {
   private readonly logger = new Logger(RunnerAdapterV1.name)
   private runnerClient: ClientGrpc
-  private sandboxServiceClient: SandboxServiceClient
-  private snapshotServiceClient: SnapshotServiceClient
-  private healthServiceClient: HealthServiceClient
-  private runnerServiceClient: RunnerServiceClient
+  private sandboxServiceClient: v1.SandboxServiceClient
+  private snapshotServiceClient: v1.SnapshotServiceClient
+  private healthServiceClient: v1.HealthServiceClient
+  private runnerServiceClient: v1.RunnerServiceClient
   private runner: Runner
 
-  private convertSandboxState(state: RunnerSandboxState): SandboxState {
+  private convertSandboxState(state: v1.SandboxState): SandboxState {
     switch (state) {
-      case RunnerSandboxState.SANDBOX_STATE_CREATING:
+      case v1.SandboxState.SANDBOX_STATE_CREATING:
         return SandboxState.CREATING
-      case RunnerSandboxState.SANDBOX_STATE_RESTORING:
+      case v1.SandboxState.SANDBOX_STATE_RESTORING:
         return SandboxState.RESTORING
-      case RunnerSandboxState.SANDBOX_STATE_DESTROYED:
+      case v1.SandboxState.SANDBOX_STATE_DESTROYED:
         return SandboxState.DESTROYED
-      case RunnerSandboxState.SANDBOX_STATE_DESTROYING:
+      case v1.SandboxState.SANDBOX_STATE_DESTROYING:
         return SandboxState.DESTROYING
-      case RunnerSandboxState.SANDBOX_STATE_STARTED:
+      case v1.SandboxState.SANDBOX_STATE_STARTED:
         return SandboxState.STARTED
-      case RunnerSandboxState.SANDBOX_STATE_STOPPED:
+      case v1.SandboxState.SANDBOX_STATE_STOPPED:
         return SandboxState.STOPPED
-      case RunnerSandboxState.SANDBOX_STATE_STARTING:
+      case v1.SandboxState.SANDBOX_STATE_STARTING:
         return SandboxState.STARTING
-      case RunnerSandboxState.SANDBOX_STATE_STOPPING:
+      case v1.SandboxState.SANDBOX_STATE_STOPPING:
         return SandboxState.STOPPING
-      case RunnerSandboxState.SANDBOX_STATE_ERROR:
+      case v1.SandboxState.SANDBOX_STATE_ERROR:
         return SandboxState.ERROR
-      case RunnerSandboxState.SANDBOX_STATE_PULLING_SNAPSHOT:
+      case v1.SandboxState.SANDBOX_STATE_PULLING_SNAPSHOT:
         return SandboxState.PULLING_SNAPSHOT
       default:
         return SandboxState.UNKNOWN
     }
   }
 
-  private convertBackupState(state: RunnerBackupState): BackupState {
+  private convertBackupState(state: v1.BackupState): BackupState {
     switch (state) {
-      case RunnerBackupState.BACKUP_STATE_PENDING:
+      case v1.BackupState.BACKUP_STATE_PENDING:
         return BackupState.PENDING
-      case RunnerBackupState.BACKUP_STATE_IN_PROGRESS:
+      case v1.BackupState.BACKUP_STATE_IN_PROGRESS:
         return BackupState.IN_PROGRESS
-      case RunnerBackupState.BACKUP_STATE_COMPLETED:
+      case v1.BackupState.BACKUP_STATE_COMPLETED:
         return BackupState.COMPLETED
-      case RunnerBackupState.BACKUP_STATE_FAILED:
+      case v1.BackupState.BACKUP_STATE_FAILED:
         return BackupState.ERROR
       default:
         return BackupState.NONE
@@ -117,7 +99,7 @@ export class RunnerAdapterV1 implements RunnerAdapter {
       options: {
         credentials: creds,
         url: url,
-        package: RUNNER_V1_PACKAGE_NAME,
+        package: v1.RUNNER_V1_PACKAGE_NAME,
         protoPath: [join(__dirname, 'proto/runner/v1/runner.proto')],
         loader: {
           includeDirs: [join(__dirname, 'proto')],
@@ -125,15 +107,15 @@ export class RunnerAdapterV1 implements RunnerAdapter {
         },
       },
     })
-    this.sandboxServiceClient = this.runnerClient.getService<SandboxServiceClient>(SANDBOX_SERVICE_NAME)
-    this.snapshotServiceClient = this.runnerClient.getService<SnapshotServiceClient>(SNAPSHOT_SERVICE_NAME)
-    this.healthServiceClient = this.runnerClient.getService<HealthServiceClient>(HEALTH_SERVICE_NAME)
-    this.runnerServiceClient = this.runnerClient.getService<RunnerServiceClient>(RUNNER_SERVICE_NAME)
+    this.sandboxServiceClient = this.runnerClient.getService<v1.SandboxServiceClient>(v1.SANDBOX_SERVICE_NAME)
+    this.snapshotServiceClient = this.runnerClient.getService<v1.SnapshotServiceClient>(v1.SNAPSHOT_SERVICE_NAME)
+    this.healthServiceClient = this.runnerClient.getService<v1.HealthServiceClient>(v1.HEALTH_SERVICE_NAME)
+    this.runnerServiceClient = this.runnerClient.getService<v1.RunnerServiceClient>(v1.RUNNER_SERVICE_NAME)
   }
 
   async healthCheck(): Promise<void> {
     const response = await firstValueFrom(this.healthServiceClient.healthCheck({}, this.getMetadata()))
-    if (response.status !== HealthStatus.HEALTH_STATUS_HEALTHY) {
+    if (response.status !== v1.HealthStatus.HEALTH_STATUS_HEALTHY) {
       throw new Error('Runner is not healthy')
     }
   }
@@ -169,7 +151,7 @@ export class RunnerAdapterV1 implements RunnerAdapter {
   }
 
   async createSandbox(sandbox: Sandbox, registry: DockerRegistry, entrypoint?: string[]): Promise<void> {
-    const request: CreateSandboxRequest = {
+    const request: v1.CreateSandboxRequest = {
       id: sandbox.id,
       snapshot: sandbox.snapshot,
       osUser: sandbox.osUser,
@@ -239,7 +221,7 @@ export class RunnerAdapterV1 implements RunnerAdapter {
   }
 
   async createBackup(sandbox: Sandbox, backupSnapshotName: string, registry?: DockerRegistry): Promise<void> {
-    const request: CreateBackupRequest = {
+    const request: v1.CreateBackupRequest = {
       sandboxId: sandbox.id,
       snapshot: backupSnapshotName,
       registry: undefined,
@@ -275,7 +257,7 @@ export class RunnerAdapterV1 implements RunnerAdapter {
     registry?: DockerRegistry,
     pushToInternalRegistry?: boolean,
   ): Promise<void> {
-    const request: BuildSnapshotRequest = {
+    const request: v1.BuildSnapshotRequest = {
       snapshot: buildInfo.snapshotRef,
       registry: undefined,
       dockerfile: buildInfo.dockerfileContent,
@@ -297,7 +279,7 @@ export class RunnerAdapterV1 implements RunnerAdapter {
   }
 
   async pullSnapshot(snapshotName: string, registry?: DockerRegistry): Promise<void> {
-    const request: PullSnapshotRequest = {
+    const request: v1.PullSnapshotRequest = {
       snapshot: snapshotName,
       registry: undefined,
     }
@@ -353,7 +335,7 @@ export class RunnerAdapterV1 implements RunnerAdapter {
   }
 
   async updateNetworkSettings(sandboxId: string, networkBlockAll?: boolean, networkAllowList?: string): Promise<void> {
-    const request: UpdateNetworkSettingsRequest = {
+    const request: v1.UpdateNetworkSettingsRequest = {
       sandboxId,
       networkBlockAll: networkBlockAll,
       networkAllowList: networkAllowList,

@@ -191,12 +191,14 @@ export class SandboxStartAction extends SandboxAction {
       const snapshot = await this.snapshotService.getSnapshotByName(sandbox.snapshot, sandbox.organizationId)
       const internalSnapshotName = snapshot.internalName
 
-      registry = await this.dockerRegistryService.findOneBySnapshotImageName(
-        internalSnapshotName,
-        sandbox.organizationId,
-      )
-      if (!registry) {
-        throw new Error('No registry found for snapshot')
+      if (!snapshot.experimental) {
+        registry = await this.dockerRegistryService.findOneBySnapshotImageName(
+          internalSnapshotName,
+          sandbox.organizationId,
+        )
+        if (!registry) {
+          throw new Error('No registry found for snapshot')
+        }
       }
 
       sandbox.snapshot = internalSnapshotName

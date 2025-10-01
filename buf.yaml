@@ -2,6 +2,9 @@
 version: v2
 modules:
   - path: proto
+deps:
+  - buf.build/googleapis/googleapis
+  - buf.build/grpc-ecosystem/grpc-gateway
 lint:
   use:
     - STANDARD

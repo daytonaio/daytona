@@ -87,27 +87,6 @@ export class SnapshotService {
   ) {
     let pendingSnapshotCountIncrement: number | undefined
 
-    const nameValidationError = this.validateSnapshotName(createSnapshotDto.name)
-    if (nameValidationError) {
-      throw new BadRequestException(nameValidationError)
-    }
-
-    if (createSnapshotDto.imageName) {
-      const imageValidationError = this.validateImageName(createSnapshotDto.imageName)
-      if (imageValidationError) {
-        throw new BadRequestException(imageValidationError)
-      }
-    }
-
-    this.organizationService.assertOrganizationIsNotSuspended(organization)
-
-    await this.validateOrganizationQuotas(
-      organization,
-      createSnapshotDto.cpu,
-      createSnapshotDto.memory,
-      createSnapshotDto.disk,
-    )
-
     try {
       const nameValidationError = this.validateSnapshotName(createSnapshotDto.name)
       if (nameValidationError) {
@@ -138,16 +117,27 @@ export class SnapshotService {
       }
 
       try {
+        let initialState = SnapshotState.PENDING
+
+        if (createSnapshotDto.buildInfo) {
+          initialState = SnapshotState.BUILD_PENDING
+        }
+
+        if (experimental) {
+          initialState = SnapshotState.ACTIVE
+        }
+
         const snapshot = this.snapshotRepository.create({
           organizationId: organization.id,
           ...createSnapshotDto,
           mem: createSnapshotDto.memory, // Map memory to mem
-          state: createSnapshotDto.buildInfo ? SnapshotState.BUILD_PENDING : SnapshotState.PENDING,
+          state: initialState,
           general,
         })
 
         if (experimental) {
           snapshot.experimental = true
+          snapshot.internalName = createSnapshotDto.name
           //  use the buildRunnerId for the experimental snapshot runner id
           //  we don't want tointroduce a new field for this
           snapshot.buildRunnerId = experimentalSnapshotRunnerId
@@ -175,7 +165,18 @@ export class SnapshotService {
           }
         }
 
-        return await this.snapshotRepository.save(snapshot)
+        await this.snapshotRepository.save(snapshot)
+
+        if (experimental) {
+          // todo add duplicate checks etc
+          const snapshotRunner = new SnapshotRunner()
+          snapshotRunner.runnerId = experimentalSnapshotRunnerId
+          snapshotRunner.snapshotRef = snapshot.internalName
+          snapshotRunner.state = SnapshotRunnerState.READY
+          await this.snapshotRunnerRepository.save(snapshotRunner)
+        }
+
+        return snapshot
       } catch (error) {
         if (error.code === '23505') {
           // PostgreSQL unique violation error code
