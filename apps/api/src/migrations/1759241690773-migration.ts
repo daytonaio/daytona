@@ -14,7 +14,7 @@ export class Migration1759241690773 implements MigrationInterface {
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(`ALTER TABLE "runner" ADD "capacity" integer NOT NULL`)
+    await queryRunner.query(`ALTER TABLE "runner" ADD "capacity" integer NOT NULL DEFAULT '1000'`)
     await queryRunner.query(`ALTER TABLE "runner" ADD "used" integer NOT NULL DEFAULT '0'`)
   }
 }
