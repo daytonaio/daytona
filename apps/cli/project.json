@@ -9,7 +9,7 @@
       "executor": "@nx-go/nx-go:build",
       "options": {
         "main": "{projectRoot}/main.go",
-        "outputPath": "dist/apps/cli"
+        "outputPath": "dist/apps/cli/cli"
       }
     },
     "format": {
