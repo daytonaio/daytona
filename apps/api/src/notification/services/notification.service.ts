@@ -37,21 +37,21 @@ export class NotificationService {
   @OnEvent(SandboxEvents.CREATED)
   async handleSandboxCreated(event: SandboxCreatedEvent) {
     const runner = await this.runnerService.findOne(event.sandbox.runnerId)
-    const dto = SandboxDto.fromSandbox(event.sandbox, runner.domain)
+    const dto = new SandboxDto(event.sandbox, runner.domain)
     this.notificationGateway.emitSandboxCreated(dto)
   }
 
   @OnEvent(SandboxEvents.STATE_UPDATED)
   async handleSandboxStateUpdated(event: SandboxStateUpdatedEvent) {
     const runner = await this.runnerService.findOne(event.sandbox.runnerId)
-    const dto = SandboxDto.fromSandbox(event.sandbox, runner.domain)
+    const dto = new SandboxDto(event.sandbox, runner.domain)
     this.notificationGateway.emitSandboxStateUpdated(dto, event.oldState, event.newState)
   }
 
   @OnEvent(SandboxEvents.DESIRED_STATE_UPDATED)
   async handleSandboxDesiredStateUpdated(event: SandboxDesiredStateUpdatedEvent) {
     const runner = await this.runnerService.findOne(event.sandbox.runnerId)
-    const dto = SandboxDto.fromSandbox(event.sandbox, runner.domain)
+    const dto = new SandboxDto(event.sandbox, runner.domain)
     this.notificationGateway.emitSandboxDesiredStateUpdated(dto, event.oldDesiredState, event.newDesiredState)
   }
 

@@ -82,6 +82,14 @@ export class RunnerService {
     return this.runnerRepository.findOneBy({ id })
   }
 
+  async findOneOrFail(id: string): Promise<Runner> {
+    const runner = await this.runnerRepository.findOneBy({ id })
+    if (!runner) {
+      throw new NotFoundException(`Runner with ID ${id} not found`)
+    }
+    return runner
+  }
+
   async findByIds(runnerIds: string[]): Promise<Runner[]> {
     if (runnerIds.length === 0) {
       return []
@@ -187,7 +195,7 @@ export class RunnerService {
   }
 
   @Cron(CronExpression.EVERY_10_SECONDS, { name: 'check-runners', waitForCompletion: true })
-  private async handleCheckRunners() {
+  async _handleCheckRunners() {
     const lockKey = 'check-runners'
     const hasLock = await this.redisLockProvider.lock(lockKey, 60)
     if (!hasLock) {
@@ -469,7 +477,7 @@ export class RunnerService {
       this.configService.getOrThrow('runnerUsage.allocatedCpuWeight'),
       this.configService.getOrThrow('runnerUsage.allocatedMemoryWeight'),
       this.configService.getOrThrow('runnerUsage.allocatedDiskWeight'),
-    ]
+    ] as const
 
     const cpuPenaltyExponent = this.configService.getOrThrow('runnerUsage.cpuPenaltyExponent')
     const memoryPenaltyExponent = this.configService.getOrThrow('runnerUsage.memoryPenaltyExponent')
@@ -492,10 +500,10 @@ export class RunnerService {
       allocatedCpuRatio,
       allocatedMemoryRatio,
       allocatedDiskRatio,
-    ]
+    ] as const
 
     // Ideal and anti-ideal arrays
-    const idealValues = [ideal.cpu, ideal.memory, ideal.disk, ideal.allocCpu, ideal.allocMem, ideal.allocDisk]
+    const idealValues = [ideal.cpu, ideal.memory, ideal.disk, ideal.allocCpu, ideal.allocMem, ideal.allocDisk] as const
 
     const antiIdealValues = [
       antiIdeal.cpu,
@@ -504,13 +512,13 @@ export class RunnerService {
       antiIdeal.allocCpu,
       antiIdeal.allocMem,
       antiIdeal.allocDisk,
-    ]
+    ] as const
 
     // Calculate weighted Euclidean distances
     let distanceToIdeal = 0
     let distanceToAntiIdeal = 0
 
-    for (let i = 0; i < current.length; i++) {
+    for (const i of [0, 1, 2, 3, 4, 5] as const) {
       const normalizedCurrent = current[i] / 100 // Normalize to 0-1 scale for allocation ratios >100%
       const normalizedIdeal = idealValues[i] / 100
       const normalizedAntiIdeal = antiIdealValues[i] / 100

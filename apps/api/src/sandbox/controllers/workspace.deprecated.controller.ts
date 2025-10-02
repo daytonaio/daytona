@@ -111,7 +111,7 @@ export class WorkspaceController {
     const workspacees = await this.workspaceService.findAll(authContext.organizationId, labels)
     const dtos = workspacees.map(async (workspace) => {
       const runner = await this.runnerService.findOne(workspace.runnerId)
-      const dto = WorkspaceDto.fromSandbox(workspace, runner.domain)
+      const dto = new WorkspaceDto(workspace, runner.domain)
       return dto
     })
     return await Promise.all(dtos)
@@ -224,7 +224,7 @@ export class WorkspaceController {
       runner = await this.runnerService.findOne(workspace.runnerId)
     }
 
-    return WorkspaceDto.fromSandbox(workspace, runner?.domain)
+    return new WorkspaceDto(workspace, runner?.domain)
   }
 
   @Delete(':workspaceId')

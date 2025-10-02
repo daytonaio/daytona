@@ -976,18 +976,18 @@ export class SandboxService {
   }
 
   @Cron(CronExpression.EVERY_10_MINUTES)
-  async cleanupBuildFailedSandboxes() {
+  async _cleanupBuildFailedSandboxes() {
     const twentyFourHoursAgo = new Date()
     twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24)
 
-    const destroyedSandboxs = await this.sandboxRepository.delete({
+    const destroyedSandboxes = await this.sandboxRepository.delete({
       state: SandboxState.BUILD_FAILED,
       desiredState: SandboxDesiredState.DESTROYED,
       updatedAt: LessThan(twentyFourHoursAgo),
     })
 
-    if (destroyedSandboxs.affected > 0) {
-      this.logger.debug(`Cleaned up ${destroyedSandboxs.affected} build failed sandboxes`)
+    if (destroyedSandboxes?.affected) {
+      this.logger.debug(`Cleaned up ${destroyedSandboxes.affected} build failed sandboxes`)
     }
   }
 
@@ -1082,12 +1082,12 @@ export class SandboxService {
   }
 
   @OnEvent(WarmPoolEvents.TOPUP_REQUESTED)
-  private async createWarmPoolSandbox(event: WarmPoolTopUpRequested) {
+  async _createWarmPoolSandbox(event: WarmPoolTopUpRequested) {
     await this.createForWarmPool(event.warmPool)
   }
 
   @Cron(CronExpression.EVERY_MINUTE)
-  private async handleUnschedulableRunners() {
+  async _handleUnschedulableRunners() {
     const runners = await this.runnerRepository.find({ where: { unschedulable: true } })
 
     if (runners.length === 0) {

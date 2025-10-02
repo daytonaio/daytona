@@ -15,7 +15,6 @@ import { SnapshotRunner } from '../entities/snapshot-runner.entity'
 import { Runner } from '../entities/runner.entity'
 import { RunnerState } from '../enums/runner-state.enum'
 import { SnapshotRunnerState } from '../enums/snapshot-runner-state.enum'
-import { v4 as uuidv4 } from 'uuid'
 import { RunnerNotReadyError } from '../errors/runner-not-ready.error'
 import { RegistryType } from '../../docker-registry/enums/registry-type.enum'
 import { RedisLockProvider } from '../common/redis-lock.provider'
@@ -38,9 +37,6 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
   activeJobs = new Set<string>()
 
   private readonly logger = new Logger(SnapshotManager.name)
-  //  generate a unique instance id used to ensure only one instance of the worker is handing the
-  //  snapshot activation
-  private readonly instanceId = uuidv4()
 
   constructor(
     @InjectRedis() private readonly redis: Redis,

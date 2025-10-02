@@ -1,5 +1,5 @@
 /* tslint:disable */
-
+/* eslint-disable */
 /**
  * Daytona
  * Daytona AI platform API Docs
@@ -12,16 +12,19 @@
  * Do not edit the class manually.
  */
 
+
+
 /**
- *
+ * 
  * @export
  * @interface WorkDirResponse
  */
 export interface WorkDirResponse {
-  /**
-   *
-   * @type {string}
-   * @memberof WorkDirResponse
-   */
-  dir?: string
+    /**
+     * 
+     * @type {string}
+     * @memberof WorkDirResponse
+     */
+    'dir'?: string;
 }
+

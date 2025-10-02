@@ -60,7 +60,7 @@ export class RunnerAdapterLegacy implements RunnerAdapter {
           (error as any).cause?.code === 'ECONNRESET'
         )
       },
-      onRetry: (retryCount, error, requestConfig) => {
+      onRetry: (retryCount, _, requestConfig) => {
         this.logger.warn(
           `Retrying request due to ECONNRESET (attempt ${retryCount}): ${requestConfig.method?.toUpperCase()} ${requestConfig.url}`,
         )
@@ -90,7 +90,7 @@ export class RunnerAdapterLegacy implements RunnerAdapter {
 
   // This is required by the RunnerAdapter interface, but we don't need to do anything here
   // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function
-  public async init(runner: Runner): Promise<void> {}
+  public async init(_: Runner): Promise<void> {}
 
   private convertSandboxState(state: EnumsSandboxState): SandboxState {
     switch (state) {

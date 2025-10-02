@@ -73,16 +73,11 @@ export class WorkspaceDto extends SandboxDto {
   @IsOptional()
   info?: SandboxInfoDto
 
-  constructor() {
-    super()
+  constructor(sandbox: Sandbox, runnerDomain: string) {
+    super(sandbox, runnerDomain)
     if (this.name === '') {
       this.name = this.id
     }
-  }
-
-  static fromSandbox(sandbox: Sandbox, runnerDomain: string): WorkspaceDto {
-    const dto = super.fromSandbox(sandbox, runnerDomain)
-    return this.fromSandboxDto(dto)
   }
 
   static fromSandboxDto(sandboxDto: SandboxDto): WorkspaceDto {

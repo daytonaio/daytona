@@ -208,7 +208,7 @@ export class VolumeService {
   }
 
   @OnEvent(SandboxEvents.CREATED)
-  private async handleSandboxCreatedEvent(event: SandboxCreatedEvent) {
+  async _handleSandboxCreatedEvent(event: SandboxCreatedEvent) {
     if (!event.sandbox.volumes.length) {
       return
     }

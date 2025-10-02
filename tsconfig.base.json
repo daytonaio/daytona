@@ -10,11 +10,13 @@
     "importHelpers": true,
     "target": "ES2022",
     "module": "commonjs",
-    "lib": ["es2022", "dom"],
+    "lib": [
+      "es2022",
+      "dom"
+    ],
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
-
     "allowUnusedLabels": false,
     "allowUnreachableCode": false,
     // "exactOptionalPropertyTypes": true,
@@ -31,12 +33,20 @@
     "strictFunctionTypes": true,
     "strictPropertyInitialization": true,
     "strictBindCallApply": true,
-
     "paths": {
-      "@daytonaio/api-client": ["libs/api-client/src/index.ts"],
-      "@daytonaio/runner-api-client": ["libs/runner-api-client/src/index.ts"],
-      "@daytonaio/sdk": ["libs/sdk-typescript/src/index.ts"]
+      "@daytonaio/api-client": [
+        "libs/api-client/src/index.ts"
+      ],
+      "@daytonaio/runner-api-client": [
+        "libs/runner-api-client/src/index.ts"
+      ],
+      "@daytonaio/sdk": [
+        "libs/sdk-typescript/src/index.ts"
+      ]
     }
   },
-  "exclude": ["node_modules", "tmp"]
+  "exclude": [
+    "node_modules",
+    "tmp"
+  ]
 }

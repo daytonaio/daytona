@@ -300,7 +300,7 @@ export class SnapshotService {
   }
 
   @OnEvent(SandboxEvents.CREATED)
-  private async handleSandboxCreatedEvent(event: SandboxCreatedEvent) {
+  async _handleSandboxCreatedEvent(event: SandboxCreatedEvent) {
     if (!event.sandbox.snapshot) {
       return
     }
