@@ -95,7 +95,7 @@ func BuildSnapshot(ctx *gin.Context) {
 
 	tag := request.Snapshot
 
-	if request.PushToInternalRegistry {
+	if request.PushToInternalRegistry || request.PushToSnapshotRegistry {
 		if request.Registry.Project == nil {
 			ctx.Error(common.NewBadRequestError(errors.New("project is required when pushing to internal registry")))
 			return
@@ -109,7 +109,7 @@ func BuildSnapshot(ctx *gin.Context) {
 		return
 	}
 
-	if request.PushToInternalRegistry {
+	if request.PushToInternalRegistry || request.PushToSnapshotRegistry {
 		err = runner.Docker.PushImage(ctx.Request.Context(), tag, request.Registry)
 		if err != nil {
 			ctx.Error(err)

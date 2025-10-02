@@ -59,11 +59,11 @@ const configuration = {
     password: process.env.TRANSIENT_REGISTRY_PASSWORD,
     projectId: process.env.TRANSIENT_REGISTRY_PROJECT_ID,
   },
-  internalRegistry: {
-    url: process.env.INTERNAL_REGISTRY_URL,
-    admin: process.env.INTERNAL_REGISTRY_ADMIN,
-    password: process.env.INTERNAL_REGISTRY_PASSWORD,
-    projectId: process.env.INTERNAL_REGISTRY_PROJECT_ID,
+  snapshotRegistry: {
+    url: process.env.SNAPSHOT_REGISTRY_URL,
+    admin: process.env.SNAPSHOT_REGISTRY_ADMIN,
+    password: process.env.SNAPSHOT_REGISTRY_PASSWORD,
+    projectId: process.env.SNAPSHOT_REGISTRY_PROJECT_ID,
   },
   s3: {
     endpoint: process.env.S3_ENDPOINT,

@@ -42,7 +42,7 @@ export class DockerRegistryDto {
   @ApiProperty({
     description: 'Registry type',
     enum: RegistryType,
-    example: RegistryType.INTERNAL,
+    example: RegistryType.SOURCE,
   })
   registryType: RegistryType
 

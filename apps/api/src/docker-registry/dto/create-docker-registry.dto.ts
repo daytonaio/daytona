@@ -33,7 +33,7 @@ export class CreateDockerRegistryDto {
   @ApiProperty({
     description: 'Registry type',
     enum: RegistryType,
-    default: RegistryType.ORGANIZATION,
+    default: RegistryType.SOURCE,
   })
   @IsEnum(RegistryType)
   registryType: RegistryType

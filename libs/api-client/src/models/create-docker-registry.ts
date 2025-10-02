@@ -63,10 +63,10 @@ export interface CreateDockerRegistry {
 }
 
 export const CreateDockerRegistryRegistryTypeEnum = {
-  INTERNAL: 'internal',
-  ORGANIZATION: 'organization',
-  TRANSIENT: 'transient',
+  SNAPSHOT: 'snapshot',
+  SOURCE: 'source',
   BACKUP: 'backup',
+  TRANSIENT: 'transient',
 } as const
 
 export type CreateDockerRegistryRegistryTypeEnum =

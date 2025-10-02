@@ -44,7 +44,7 @@ export class AppService implements OnApplicationBootstrap, OnApplicationShutdown
 
     await this.initializeAdminUser()
     await this.initializeTransientRegistry()
-    await this.initializeInternalRegistry()
+    await this.initializeSnapshotRegistry()
     await this.initializeDefaultSnapshot()
   }
 
@@ -120,35 +120,35 @@ Admin user created with API key: ${value}
     this.logger.log('Default transient registry initialized successfully')
   }
 
-  private async initializeInternalRegistry(): Promise<void> {
-    const existingRegistry = await this.dockerRegistryService.getDefaultInternalRegistry()
+  private async initializeSnapshotRegistry(): Promise<void> {
+    const existingRegistry = await this.dockerRegistryService.getDefaultSnapshotRegistry()
     if (existingRegistry) {
       return
     }
 
-    const registryUrl = this.configService.getOrThrow('internalRegistry.url')
-    const registryAdmin = this.configService.getOrThrow('internalRegistry.admin')
-    const registryPassword = this.configService.getOrThrow('internalRegistry.password')
-    const registryProjectId = this.configService.getOrThrow('internalRegistry.projectId')
+    const registryUrl = this.configService.getOrThrow('snapshotRegistry.url')
+    const registryAdmin = this.configService.getOrThrow('snapshotRegistry.admin')
+    const registryPassword = this.configService.getOrThrow('snapshotRegistry.password')
+    const registryProjectId = this.configService.getOrThrow('snapshotRegistry.projectId')
 
     if (!registryUrl || !registryAdmin || !registryPassword || !registryProjectId) {
-      this.logger.warn('Registry configuration not found, skipping internal registry setup')
+      this.logger.warn('Registry configuration not found, skipping snapshot registry setup')
       return
     }
 
-    this.logger.log('Initializing default internal registry...')
+    this.logger.log('Initializing default snapshot registry...')
 
     await this.dockerRegistryService.create({
-      name: 'Internal Registry',
+      name: 'Snapshot Registry',
       url: registryUrl,
       username: registryAdmin,
       password: registryPassword,
       project: registryProjectId,
-      registryType: RegistryType.INTERNAL,
+      registryType: RegistryType.SNAPSHOT,
       isDefault: true,
     })
 
-    this.logger.log('Default internal registry initialized successfully')
+    this.logger.log('Default snapshot registry initialized successfully')
   }
 
   private async initializeDefaultSnapshot(): Promise<void> {
