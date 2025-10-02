@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
+import { v4 } from 'uuid'
 import { RegistryType } from './../../docker-registry/enums/registry-type.enum'
 import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm'
 
@@ -33,7 +34,7 @@ export class DockerRegistry {
   project: string
 
   @Column({ nullable: true, type: 'uuid' })
-  organizationId?: string
+  organizationId: string | null
 
   @Column({ nullable: true })
   region: string | null
@@ -54,4 +55,31 @@ export class DockerRegistry {
     type: 'timestamp with time zone',
   })
   updatedAt: Date
+
+  constructor(createParams: {
+    name: string
+    url: string
+    username: string
+    password: string
+    isDefault?: boolean
+    isFallback?: boolean
+    project?: string
+    organizationId: string | null
+    region?: string | null
+    registryType?: RegistryType
+  }) {
+    this.id = v4()
+    this.name = createParams.name
+    this.url = createParams.url
+    this.username = createParams.username
+    this.password = createParams.password
+    this.isDefault = createParams.isDefault ?? false
+    this.isFallback = createParams.isFallback ?? false
+    this.project = createParams.project ?? ''
+    this.organizationId = createParams.organizationId
+    this.region = createParams.region ?? null
+    this.registryType = createParams.registryType ?? RegistryType.INTERNAL
+    this.createdAt = new Date()
+    this.updatedAt = new Date()
+  }
 }

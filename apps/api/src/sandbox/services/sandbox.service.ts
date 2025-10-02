@@ -46,7 +46,6 @@ import { RunnerAdapterFactory } from '../runner-adapter/runnerAdapter'
 import { validateNetworkAllowList } from '../utils/network-validation.util'
 import { OrganizationUsageService } from '../../organization/services/organization-usage.service'
 import { SshAccess } from '../entities/ssh-access.entity'
-import { nanoid } from 'nanoid'
 import { SshAccessValidationDto } from '../dto/ssh-access.dto'
 import { VolumeService } from './volume.service'
 import { RedisLockProvider } from '../common/redis-lock.provider'
@@ -213,21 +212,19 @@ export class SandboxService {
   }
 
   async createForWarmPool(warmPoolItem: WarmPool): Promise<Sandbox> {
-    const sandbox = new Sandbox()
+    const sandbox = new Sandbox({
+      organizationId: SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION,
+      region: warmPoolItem.target,
+      class: warmPoolItem.class,
+      osUser: 'daytona',
+      env: warmPoolItem.env,
+      cpu: warmPoolItem.cpu,
+      gpu: warmPoolItem.gpu,
+      mem: warmPoolItem.mem,
+      disk: warmPoolItem.disk,
+    })
 
-    sandbox.organizationId = SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION
-
-    sandbox.region = warmPoolItem.target
-    sandbox.class = warmPoolItem.class
     sandbox.snapshot = warmPoolItem.snapshot
-    //  TODO: default user should be configurable
-    sandbox.osUser = 'daytona'
-    sandbox.env = warmPoolItem.env || {}
-
-    sandbox.cpu = warmPoolItem.cpu
-    sandbox.gpu = warmPoolItem.gpu
-    sandbox.mem = warmPoolItem.mem
-    sandbox.disk = warmPoolItem.disk
 
     const snapshot = await this.snapshotRepository.findOne({
       where: [
@@ -237,6 +234,10 @@ export class SandboxService {
     })
     if (!snapshot) {
       throw new BadRequestError(`Snapshot ${sandbox.snapshot} not found while creating warm pool sandbox`)
+    }
+
+    if (!snapshot.internalName) {
+      throw new BadRequestError(`Snapshot ${sandbox.snapshot} is not ready yet`)
     }
 
     const runner = await this.runnerService.getRandomAvailableRunner({
@@ -303,6 +304,10 @@ export class SandboxService {
         throw new BadRequestError(`Snapshot ${snapshotIdOrName} is ${snapshot.state}`)
       }
 
+      if (!snapshot.internalName) {
+        throw new BadRequestError(`Snapshot ${snapshotIdOrName} is not ready yet`)
+      }
+
       let cpu = snapshot.cpu
       let mem = snapshot.mem
       let disk = snapshot.disk
@@ -367,26 +372,21 @@ export class SandboxService {
         snapshotRef: snapshot.internalName,
       })
 
-      const sandbox = new Sandbox()
-
-      sandbox.organizationId = organization.id
-
-      //  TODO: make configurable
-      sandbox.region = region
-      sandbox.class = sandboxClass
-      sandbox.snapshot = snapshot.name
-      //  TODO: default user should be configurable
-      sandbox.osUser = createSandboxDto.user || 'daytona'
-      sandbox.env = createSandboxDto.env || {}
-      sandbox.labels = createSandboxDto.labels || {}
-      sandbox.volumes = createSandboxDto.volumes || []
-
-      sandbox.cpu = cpu
-      sandbox.gpu = gpu
-      sandbox.mem = mem
-      sandbox.disk = disk
-
-      sandbox.public = createSandboxDto.public || false
+      const sandbox = new Sandbox({
+        organizationId: organization.id,
+        region,
+        class: sandboxClass,
+        snapshot: snapshot.name,
+        osUser: createSandboxDto.user || 'daytona',
+        env: createSandboxDto.env,
+        labels: createSandboxDto.labels,
+        volumes: createSandboxDto.volumes,
+        cpu,
+        mem,
+        disk,
+        gpu,
+        public: createSandboxDto.public,
+      })
 
       if (createSandboxDto.networkBlockAll !== undefined) {
         sandbox.networkBlockAll = createSandboxDto.networkBlockAll
@@ -519,26 +519,22 @@ export class SandboxService {
         await this.volumeService.validateVolumes(organization.id, volumeIdOrNames)
       }
 
-      const sandbox = new Sandbox()
-
-      sandbox.organizationId = organization.id
-
-      sandbox.region = region
-      sandbox.class = sandboxClass
-      sandbox.osUser = createSandboxDto.user || 'daytona'
-      sandbox.env = createSandboxDto.env || {}
-      sandbox.labels = createSandboxDto.labels || {}
-      sandbox.volumes = createSandboxDto.volumes || []
-
-      sandbox.cpu = cpu
-      sandbox.gpu = gpu
-      sandbox.mem = mem
-      sandbox.disk = disk
-      sandbox.public = createSandboxDto.public || false
-
-      if (createSandboxDto.networkBlockAll !== undefined) {
-        sandbox.networkBlockAll = createSandboxDto.networkBlockAll
-      }
+      const sandbox = new Sandbox({
+        organizationId: organization.id,
+        region,
+        class: sandboxClass,
+        osUser: createSandboxDto.user || 'daytona',
+        env: createSandboxDto.env,
+        labels: createSandboxDto.labels,
+        volumes: createSandboxDto.volumes,
+        cpu,
+        gpu,
+        mem,
+        disk,
+        public: createSandboxDto.public,
+        networkBlockAll: createSandboxDto.networkBlockAll,
+        autoDeleteInterval: createSandboxDto.autoDeleteInterval,
+      })
 
       if (createSandboxDto.networkAllowList !== undefined) {
         sandbox.networkAllowList = this.resolveNetworkAllowList(createSandboxDto.networkAllowList)
@@ -550,10 +546,6 @@ export class SandboxService {
 
       if (createSandboxDto.autoArchiveInterval !== undefined) {
         sandbox.autoArchiveInterval = this.resolveAutoArchiveInterval(createSandboxDto.autoArchiveInterval)
-      }
-
-      if (createSandboxDto.autoDeleteInterval !== undefined) {
-        sandbox.autoDeleteInterval = createSandboxDto.autoDeleteInterval
       }
 
       if (!createSandboxDto.buildInfo) {
@@ -1168,16 +1160,15 @@ export class SandboxService {
   }
 
   async createSshAccess(sandboxId: string, expiresInMinutes = 60): Promise<SshAccess> {
-    //  check if sandbox exists
-    await this.findOne(sandboxId)
+    const sandbox = await this.findOne(sandboxId)
 
     // Revoke any existing SSH access for this sandbox
     await this.revokeSshAccess(sandboxId)
 
-    const sshAccess = new SshAccess()
-    sshAccess.sandboxId = sandboxId
-    sshAccess.token = nanoid(32)
-    sshAccess.expiresAt = new Date(Date.now() + expiresInMinutes * 60 * 1000)
+    const sshAccess = new SshAccess({
+      sandbox,
+      expiresAt: new Date(Date.now() + expiresInMinutes * 60 * 1000),
+    })
 
     return await this.sshAccessRepository.save(sshAccess)
   }

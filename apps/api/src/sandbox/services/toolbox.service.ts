@@ -86,6 +86,10 @@ export class ToolboxService {
         throw new NotFoundException('Sandbox not found')
       }
 
+      if (!sandbox.runnerId) {
+        throw new NotFoundException('Sandbox is not assigned to a runner')
+      }
+
       const runner = await this.runnerRepository.findOne({
         where: { id: sandbox.runnerId },
       })

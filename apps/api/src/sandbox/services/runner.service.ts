@@ -49,19 +49,20 @@ export class RunnerService {
       throw new Error('Invalid class')
     }
 
-    const runner = new Runner()
-    runner.domain = createRunnerDto.domain
-    runner.apiUrl = createRunnerDto.apiUrl
-    runner.proxyUrl = createRunnerDto.proxyUrl
-    runner.apiKey = createRunnerDto.apiKey
-    runner.cpu = createRunnerDto.cpu
-    runner.memoryGiB = createRunnerDto.memoryGiB
-    runner.diskGiB = createRunnerDto.diskGiB
-    runner.gpu = createRunnerDto.gpu
-    runner.gpuType = createRunnerDto.gpuType
-    runner.region = createRunnerDto.region
-    runner.class = createRunnerDto.class
-    runner.version = createRunnerDto.version
+    const runner = new Runner({
+      domain: createRunnerDto.domain,
+      apiUrl: createRunnerDto.apiUrl,
+      proxyUrl: createRunnerDto.proxyUrl,
+      apiKey: createRunnerDto.apiKey,
+      cpu: createRunnerDto.cpu,
+      memoryGiB: createRunnerDto.memoryGiB,
+      diskGiB: createRunnerDto.diskGiB,
+      gpu: createRunnerDto.gpu,
+      gpuType: createRunnerDto.gpuType,
+      region: createRunnerDto.region,
+      class: createRunnerDto.class,
+      version: createRunnerDto.version,
+    })
 
     return this.runnerRepository.save(runner)
   }
@@ -104,7 +105,7 @@ export class RunnerService {
     return this.runnerRepository.findOneBy({ apiKey })
   }
 
-  async findBySandboxId(sandboxId: string): Promise<Runner | null> {
+  async findBySandboxId(sandboxId: string): Promise<Runner> {
     const sandbox = await this.sandboxRepository.findOneBy({ id: sandboxId, state: Not(SandboxState.DESTROYED) })
     if (!sandbox) {
       throw new NotFoundException(`Sandbox with ID ${sandboxId} not found`)
@@ -113,7 +114,7 @@ export class RunnerService {
       throw new NotFoundException(`Sandbox with ID ${sandboxId} does not have a runner`)
     }
 
-    return this.runnerRepository.findOneBy({ id: sandbox.runnerId })
+    return this.runnerRepository.findOneByOrFail({ id: sandbox.runnerId })
   }
 
   async findAvailableRunners(params: GetRunnerParams): Promise<Runner[]> {
@@ -387,13 +388,12 @@ export class RunnerService {
     state: SnapshotRunnerState,
     errorReason?: string,
   ): Promise<void> {
-    const snapshotRunner = new SnapshotRunner()
-    snapshotRunner.runnerId = runnerId
-    snapshotRunner.snapshotRef = snapshotRef
-    snapshotRunner.state = state
-    if (errorReason) {
-      snapshotRunner.errorReason = errorReason
-    }
+    const snapshotRunner = new SnapshotRunner({
+      runnerId,
+      snapshotRef,
+      state,
+      errorReason,
+    })
     await this.snapshotRunnerRepository.save(snapshotRunner)
   }
 

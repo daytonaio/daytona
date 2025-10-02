@@ -193,7 +193,7 @@ export class RunnerAdapterLegacy implements RunnerAdapter {
         mountPath: volume.mountPath,
       })),
       networkBlockAll: sandbox.networkBlockAll,
-      networkAllowList: sandbox.networkAllowList,
+      networkAllowList: sandbox.networkAllowList ?? undefined,
       metadata: metadata,
     }
 
@@ -241,7 +241,7 @@ export class RunnerAdapterLegacy implements RunnerAdapter {
       // TODO: verify this
       dockerfile: buildInfo.dockerfileContent ?? '',
       organizationId: organizationId ?? '',
-      context: buildInfo.contextHashes,
+      context: buildInfo.contextHashes ?? [],
       pushToInternalRegistry: pushToInternalRegistry,
     }
 

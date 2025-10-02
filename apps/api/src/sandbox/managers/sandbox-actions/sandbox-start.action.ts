@@ -221,7 +221,7 @@ export class SandboxStartAction extends SandboxAction {
       }
 
       sandbox.snapshot = internalSnapshotName
-      entrypoint = snapshot.entrypoint
+      entrypoint = snapshot.entrypoint ?? undefined
     } else {
       sandbox.snapshot = sandbox.buildInfo.snapshotRef
       entrypoint = this.getEntrypointFromDockerfile(sandbox.buildInfo.dockerfileContent || '')

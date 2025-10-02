@@ -199,39 +199,21 @@ export class Sandbox {
     // Optional params (all have defaults or are nullable)
     region?: string
     runnerId?: string | null
-    prevRunnerId?: string | null
     class?: SandboxClass
-    state?: SandboxState
-    desiredState?: SandboxDesiredState
     snapshot?: string | null
-    errorReason?: string | null
     env?: { [key: string]: string }
     public?: boolean
     networkBlockAll?: boolean
     networkAllowList?: string | null
     labels?: { [key: string]: string } | null
-    backupRegistryId?: string | null
-    backupSnapshot?: string | null
-    lastBackupAt?: Date | null
-    backupState?: BackupState
-    backupErrorReason?: string | null
-    existingBackupSnapshots?: Array<{
-      snapshotName: string
-      createdAt: Date
-    }>
     cpu?: number
     gpu?: number
     mem?: number
     disk?: number
     volumes?: SandboxVolume[]
-    createdAt?: Date
-    updatedAt?: Date
-    lastActivityAt?: Date | null
     autoStopInterval?: number
     autoArchiveInterval?: number
     autoDeleteInterval?: number
-    pending?: boolean
-    authToken?: string
     buildInfo?: BuildInfo | null
     daemonVersion?: string | null
   }) {
@@ -241,36 +223,36 @@ export class Sandbox {
 
     this.region = createSandboxParams.region ?? 'us'
     this.runnerId = createSandboxParams.runnerId ?? null
-    this.prevRunnerId = createSandboxParams.prevRunnerId ?? null
+    this.prevRunnerId = null
     this.class = createSandboxParams.class ?? SandboxClass.SMALL
-    this.state = createSandboxParams.state ?? SandboxState.UNKNOWN
-    this.desiredState = createSandboxParams.desiredState ?? SandboxDesiredState.STARTED
+    this.state = SandboxState.UNKNOWN
+    this.desiredState = SandboxDesiredState.STARTED
+    this.errorReason = null
     this.snapshot = createSandboxParams.snapshot ?? null
-    this.errorReason = createSandboxParams.errorReason ?? null
     this.env = createSandboxParams.env ?? {}
     this.public = createSandboxParams.public ?? false
     this.networkBlockAll = createSandboxParams.networkBlockAll ?? false
     this.networkAllowList = createSandboxParams.networkAllowList ?? null
     this.labels = createSandboxParams.labels ?? null
-    this.backupRegistryId = createSandboxParams.backupRegistryId ?? null
-    this.backupSnapshot = createSandboxParams.backupSnapshot ?? null
-    this.lastBackupAt = createSandboxParams.lastBackupAt ?? null
-    this.backupState = createSandboxParams.backupState ?? BackupState.NONE
-    this.backupErrorReason = createSandboxParams.backupErrorReason ?? null
-    this.existingBackupSnapshots = createSandboxParams.existingBackupSnapshots ?? []
+    this.backupRegistryId = null
+    this.backupSnapshot = null
+    this.lastBackupAt = null
+    this.backupState = BackupState.NONE
+    this.backupErrorReason = null
+    this.existingBackupSnapshots = []
     this.cpu = createSandboxParams.cpu ?? 2
     this.gpu = createSandboxParams.gpu ?? 0
     this.mem = createSandboxParams.mem ?? 4
     this.disk = createSandboxParams.disk ?? 10
     this.volumes = createSandboxParams.volumes ?? []
-    this.createdAt = createSandboxParams.createdAt ?? new Date()
-    this.updatedAt = createSandboxParams.updatedAt ?? new Date()
-    this.lastActivityAt = createSandboxParams.lastActivityAt ?? null
+    this.createdAt = new Date()
+    this.updatedAt = new Date()
+    this.lastActivityAt = null
     this.autoStopInterval = createSandboxParams.autoStopInterval ?? 15
     this.autoArchiveInterval = createSandboxParams.autoArchiveInterval ?? 7 * 24 * 60
     this.autoDeleteInterval = createSandboxParams.autoDeleteInterval ?? -1
-    this.pending = createSandboxParams.pending ?? false
-    this.authToken = createSandboxParams.authToken ?? ''
+    this.pending = false
+    this.authToken = ''
     this.buildInfo = createSandboxParams.buildInfo ?? null
     this.daemonVersion = createSandboxParams.daemonVersion ?? null
   }

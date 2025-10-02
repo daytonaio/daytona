@@ -5,7 +5,7 @@
 
 import { Injectable, Logger, OnApplicationShutdown, OnModuleInit } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { Repository, In } from 'typeorm'
+import { Repository, In, IsNull } from 'typeorm'
 import { Volume } from '../entities/volume.entity'
 import { VolumeState } from '../enums/volume-state.enum'
 import { Cron, CronExpression } from '@nestjs/schedule'
@@ -182,7 +182,7 @@ export class VolumeManager implements OnModuleInit, TrackableJobExecutions, OnAp
               },
               {
                 Key: 'OrganizationId',
-                Value: volume.organizationId,
+                Value: volume.organizationId || 'unknown',
               },
               {
                 Key: 'Environment',
@@ -234,7 +234,7 @@ export class VolumeManager implements OnModuleInit, TrackableJobExecutions, OnAp
 
       // Delete any existing volume record with the deleted state and the same name in the same organization
       await this.volumeRepository.delete({
-        organizationId: volume.organizationId,
+        organizationId: volume.organizationId ? volume.organizationId : IsNull(),
         name: `${volume.name}-deleted`,
         state: VolumeState.DELETED,
       })

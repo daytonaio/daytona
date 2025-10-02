@@ -409,6 +409,10 @@ export class SnapshotService {
     snapshot.state = SnapshotState.INACTIVE
     await this.snapshotRepository.save(snapshot)
 
+    if (!snapshot.internalName) {
+      return
+    }
+
     try {
       const countActiveSnapshots = await this.snapshotRepository.count({
         where: {

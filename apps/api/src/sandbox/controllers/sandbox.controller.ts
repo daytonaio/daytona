@@ -11,7 +11,6 @@ import {
   Body,
   Param,
   Query,
-  Logger,
   UseGuards,
   HttpCode,
   UseInterceptors,
@@ -75,8 +74,6 @@ import { SshAccessDto, SshAccessValidationDto } from '../dto/ssh-access.dto'
 @ApiOAuth2(['openid', 'profile', 'email'])
 @ApiBearerAuth()
 export class SandboxController {
-  private readonly logger = new Logger(SandboxController.name)
-
   constructor(
     private readonly runnerService: RunnerService,
     private readonly sandboxService: SandboxService,
@@ -115,14 +112,13 @@ export class SandboxController {
   })
   async listSandboxes(
     @AuthContext() authContext: OrganizationAuthContext,
-    @Query('verbose') verbose?: boolean,
     @Query('labels') labelsQuery?: string,
     @Query('includeErroredDeleted') includeErroredDeleted?: boolean,
   ): Promise<SandboxDto[]> {
     const labels = labelsQuery ? JSON.parse(labelsQuery) : {}
     const sandboxes = await this.sandboxService.findAll(authContext.organizationId, labels, includeErroredDeleted)
 
-    const runnerIds = new Set(sandboxes.map((s) => s.runnerId).filter((id) => id !== undefined))
+    const runnerIds = new Set(sandboxes.map((s) => s.runnerId).filter((id) => id !== null))
     const runners = await this.runnerService.findByIds(Array.from(runnerIds))
     const runnerMap = new Map(runners.map((runner) => [runner.id, runner]))
 
@@ -269,11 +265,7 @@ export class SandboxController {
     type: SandboxDto,
   })
   @UseGuards(SandboxAccessGuard)
-  async getSandbox(
-    @Param('sandboxId') sandboxId: string,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    @Query('verbose') verbose?: boolean,
-  ): Promise<SandboxDto> {
+  async getSandbox(@Param('sandboxId') sandboxId: string): Promise<SandboxDto> {
     const sandbox = await this.sandboxService.findOne(sandboxId)
 
     let runner: Runner | null = null
@@ -305,11 +297,7 @@ export class SandboxController {
     targetType: AuditTarget.SANDBOX,
     targetIdFromRequest: (req) => req.params.sandboxId,
   })
-  async deleteSandbox(
-    @Param('sandboxId') sandboxId: string,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    @Query('force') force?: boolean,
-  ): Promise<void> {
+  async deleteSandbox(@Param('sandboxId') sandboxId: string): Promise<void> {
     return this.sandboxService.destroy(sandboxId)
   }
 
@@ -352,9 +340,6 @@ export class SandboxController {
 
     if (!sandbox.runnerDomain && sandbox.state != SandboxState.ARCHIVED) {
       const runner = await this.runnerService.findBySandboxId(sandboxId)
-      if (!runner) {
-        throw new NotFoundException(`Runner for sandbox ${sandboxId} not found`)
-      }
       sandbox.runnerDomain = runner.domain
     }
 

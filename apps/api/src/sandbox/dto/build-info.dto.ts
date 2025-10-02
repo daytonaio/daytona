@@ -4,6 +4,7 @@
  */
 
 import { ApiProperty, ApiPropertyOptional, ApiSchema } from '@nestjs/swagger'
+import { BuildInfo } from '../entities/build-info.entity'
 
 @ApiSchema({ name: 'BuildInfo' })
 export class BuildInfoDto {
@@ -29,4 +30,11 @@ export class BuildInfoDto {
     description: 'The last update timestamp',
   })
   updatedAt: Date
+
+  constructor(buildInfo: BuildInfo) {
+    this.dockerfileContent = buildInfo.dockerfileContent ?? undefined
+    this.contextHashes = buildInfo.contextHashes ?? undefined
+    this.createdAt = buildInfo.createdAt
+    this.updatedAt = buildInfo.updatedAt
+  }
 }

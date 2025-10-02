@@ -239,10 +239,11 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
             }
 
             if (!snapshotRunner) {
-              snapshotRunner = new SnapshotRunner()
-              snapshotRunner.snapshotRef = internalSnapshotName
-              snapshotRunner.runnerId = runner.id
-              snapshotRunner.state = SnapshotRunnerState.PULLING_SNAPSHOT
+              snapshotRunner = new SnapshotRunner({
+                runnerId: runner.id,
+                snapshotRef: internalSnapshotName,
+                state: SnapshotRunnerState.PULLING_SNAPSHOT,
+              })
               await this.snapshotRunnerRepository.save(snapshotRunner)
               await this.propagateSnapshotToRunner(internalSnapshotName, runner)
             } else if (snapshotRunner.state === SnapshotRunnerState.PULLING_SNAPSHOT) {
@@ -270,7 +271,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
   }
 
   async propagateSnapshotToRunner(internalSnapshotName: string, runner: Runner) {
-    let dockerRegistry = await this.dockerRegistryService.findOneBySnapshotImageName(internalSnapshotName)
+    let dockerRegistry = await this.dockerRegistryService.findOneBySnapshotImageName(internalSnapshotName, null)
 
     // If no registry found by image name, use the default internal registry
     if (!dockerRegistry) {
@@ -361,6 +362,11 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
 
     await Promise.all(
       snapshots.map(async (snapshot) => {
+        if (!snapshot.internalName) {
+          await this.snapshotRepository.remove(snapshot)
+          return
+        }
+
         const countActiveSnapshots = await this.snapshotRepository.count({
           where: {
             state: SnapshotState.ACTIVE,
@@ -532,13 +538,18 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
   }
 
   async handleSnapshotStateRemoving(snapshot: Snapshot) {
-    const snapshotRunnerItems = await this.snapshotRunnerRepository.find({
+    if (!snapshot.internalName) {
+      await this.snapshotRepository.remove(snapshot)
+      return
+    }
+
+    const snapshotRunnerItems = await this.snapshotRunnerRepository.count({
       where: {
         snapshotRef: snapshot.internalName,
       },
     })
 
-    if (snapshotRunnerItems.length === 0) {
+    if (snapshotRunnerItems === 0) {
       await this.snapshotRepository.remove(snapshot)
     }
   }
@@ -589,7 +600,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
 
       const runnerAdapter = await this.runnerAdapterFactory.create(runner)
 
-      await runnerAdapter.buildSnapshot(snapshot.buildInfo, snapshot.organizationId, registry, true)
+      await runnerAdapter.buildSnapshot(snapshot.buildInfo, snapshot.organizationId ?? undefined, registry, true)
 
       // save snapshotRunner
 
@@ -781,7 +792,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
       }
 
       // Create and start the container
-      containerId = await this.dockerProvider.create(localImageName, snapshot.entrypoint)
+      containerId = await this.dockerProvider.create(localImageName, snapshot.entrypoint ?? undefined)
 
       // Wait for 1 minute while checking container state
       const startTime = Date.now()

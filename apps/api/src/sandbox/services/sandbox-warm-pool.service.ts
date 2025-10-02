@@ -197,6 +197,11 @@ export class SandboxWarmPoolService {
     if (event.newOrganizationId === SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION) {
       return
     }
+
+    if (!event.sandbox.snapshot) {
+      return
+    }
+
     const warmPoolItem = await this.warmPoolRepository.findOne({
       where: {
         snapshot: event.sandbox.snapshot,

@@ -62,16 +62,15 @@ export class VolumeDto {
   })
   errorReason?: string
 
-  static fromVolume(volume: Volume): VolumeDto {
-    return {
-      id: volume.id,
-      name: volume.name,
-      organizationId: volume.organizationId,
-      state: volume.state,
-      createdAt: volume.createdAt?.toISOString(),
-      updatedAt: volume.updatedAt?.toISOString(),
-      lastUsedAt: volume.lastUsedAt?.toISOString(),
-      errorReason: volume.errorReason,
-    }
+  constructor(volume: Volume) {
+    this.id = volume.id
+    this.name = volume.name
+    // TODO: Why is org id required in dto
+    this.organizationId = volume.organizationId ?? ''
+    this.state = volume.state
+    this.createdAt = volume.createdAt?.toISOString()
+    this.updatedAt = volume.updatedAt?.toISOString()
+    this.lastUsedAt = volume.lastUsedAt?.toISOString()
+    this.errorReason = volume.errorReason ?? undefined
   }
 }

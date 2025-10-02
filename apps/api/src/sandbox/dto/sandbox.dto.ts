@@ -267,12 +267,12 @@ export class SandboxDto {
     this.disk = sandbox.disk
     this.public = sandbox.public
     this.networkBlockAll = sandbox.networkBlockAll
-    this.networkAllowList = sandbox.networkAllowList
-    this.labels = sandbox.labels
+    this.networkAllowList = sandbox.networkAllowList ?? undefined
+    this.labels = sandbox.labels ?? {}
     this.volumes = sandbox.volumes
     this.state = SandboxDto.getSandboxState(sandbox)
     this.desiredState = sandbox.desiredState
-    this.errorReason = sandbox.errorReason
+    this.errorReason = sandbox.errorReason ?? undefined
     this.backupState = sandbox.backupState
     this.backupCreatedAt = sandbox.lastBackupAt?.toISOString()
     this.autoStopInterval = sandbox.autoStopInterval
@@ -281,16 +281,9 @@ export class SandboxDto {
     this.class = sandbox.class
     this.createdAt = sandbox.createdAt?.toISOString()
     this.updatedAt = sandbox.updatedAt?.toISOString()
-    this.buildInfo = sandbox.buildInfo
-      ? {
-          dockerfileContent: sandbox.buildInfo.dockerfileContent,
-          contextHashes: sandbox.buildInfo.contextHashes,
-          createdAt: sandbox.buildInfo.createdAt,
-          updatedAt: sandbox.buildInfo.updatedAt,
-        }
-      : undefined
+    this.buildInfo = sandbox.buildInfo ? new BuildInfoDto(sandbox.buildInfo) : undefined
     this.runnerDomain = runnerDomain
-    this.daemonVersion = sandbox.daemonVersion
+    this.daemonVersion = sandbox.daemonVersion ?? undefined
   }
 
   private static getSandboxState(sandbox: Sandbox): SandboxState {

@@ -28,7 +28,7 @@ export abstract class SandboxAction {
     sandboxId: string,
     state: SandboxState,
     runnerId?: string | null | undefined,
-    errorReason?: string,
+    errorReason?: string | null,
     daemonVersion?: string,
   ) {
     const sandbox = await this.sandboxRepository.findOneByOrFail({
