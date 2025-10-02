@@ -143,6 +143,11 @@ export class Organization {
   })
   sandboxLimitedNetworkEgress: boolean
 
+  @Column({
+    default: false,
+  })
+  blockSharedInfrastructure: boolean
+
   @CreateDateColumn({
     type: 'timestamp with time zone',
   })
