@@ -42,10 +42,6 @@ const SandboxCodeSnippetsResponse: React.FC = () => {
       .join('\n')
   }
 
-  sandboxParametersState['languageCodeToRun'] = `function greet(name: string): string {
-    return \`Hello, \${name}!\`;
-}
-console.log(greet("Daytona"));`
   sandboxParametersState['shellCodeToRun'] = 'ls -la'
   const useConfigObject = false // Currently not needed, we use jwtToken for client config
 
@@ -230,12 +226,32 @@ console.log(greet("Daytona"));`
     if (useLanguageParam) {
       const pythonIndentation = '\t'
       const typeScriptIndentation = '\t\t'
+      let languageCodeToRun = ''
+      switch (sandboxParametersState['language']) {
+        case CodeLanguage.PYTHON:
+          languageCodeToRun = `def greet(name):
+\treturn f"Hello, {name}!"
+print(greet("Daytona"))`
+          break
+        case CodeLanguage.TYPESCRIPT:
+          languageCodeToRun = `function greet(name: string): string {
+\treturn \`Hello, \${name}!\`;
+}
+console.log(greet("Daytona"));`
+          break
+        case CodeLanguage.JAVASCRIPT:
+          languageCodeToRun = `function greet(name) {
+\treturn \`Hello, \${name}!\`;
+}
+console.log(greet("Daytona"));`
+          break
+      }
       //TODO -> Set sandboxParametersState['languageCodeToRun'] value based on the selected sandbox language(sandboxParametersState['language'])
       python = [
         '\n\n# Run code securely inside the Sandbox',
-        "response = sandbox.process.code_run('",
-        indentString(sandboxParametersState.languageCodeToRun, pythonIndentation.length),
-        "')",
+        'response = sandbox.process.code_run(',
+        `'''${languageCodeToRun}'''`,
+        ')',
         'if response.exit_code != 0:',
         `${pythonIndentation}print(f"Error: {response.exit_code} {response.result}")`,
         'else:',
@@ -244,7 +260,7 @@ console.log(greet("Daytona"));`
       typeScript = [
         `\n\n${typeScriptIndentation}// Run code securely inside the Sandbox`,
         `${typeScriptIndentation}const response = await sandbox.process.codeRun(\``,
-        indentString(sandboxParametersState.languageCodeToRun, typeScriptIndentation.length + 1),
+        `${languageCodeToRun}`,
         `${typeScriptIndentation}\`)`,
         `${typeScriptIndentation}if (response.exitCode !== 0) {`,
         `${typeScriptIndentation + '\t'}console.error("Error running code:", response.exitCode, response.result)`,
