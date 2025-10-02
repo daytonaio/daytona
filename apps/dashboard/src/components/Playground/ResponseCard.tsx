@@ -6,14 +6,15 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 type ResponseCardProps = {
+  titleText?: string
   responseText: string
 }
 
-const ResponseCard: React.FC<ResponseCardProps> = ({ responseText }) => {
+const ResponseCard: React.FC<ResponseCardProps> = ({ titleText, responseText }) => {
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle>Response</CardTitle>
+        <CardTitle>{titleText || 'Response'}</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="rounded-lg">
