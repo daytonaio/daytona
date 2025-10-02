@@ -2,13 +2,13 @@ name: daytona sandbox delete
 synopsis: Delete a sandbox
 usage: daytona sandbox delete [SANDBOX_ID] [flags]
 options:
-    - name: all
-      shorthand: a
-      default_value: "false"
-      usage: Delete all sandboxes
+  - name: all
+    shorthand: a
+    default_value: 'false'
+    usage: Delete all sandboxes
 inherited_options:
-    - name: help
-      default_value: "false"
-      usage: help for daytona
+  - name: help
+    default_value: 'false'
+    usage: help for daytona
 see_also:
-    - daytona sandbox - Manage Daytona sandboxes
+  - daytona sandbox - Manage Daytona sandboxes
