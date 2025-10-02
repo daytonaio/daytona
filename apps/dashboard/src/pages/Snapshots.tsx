@@ -533,6 +533,7 @@ const Snapshots: React.FC = () => {
           onActivate={handleActivate}
           onDeactivate={handleDeactivate}
           pageCount={snapshotsData.totalPages}
+          totalItems={snapshotsData.total}
           onPaginationChange={handlePaginationChange}
           pagination={{
             pageIndex: paginationParams.pageIndex,

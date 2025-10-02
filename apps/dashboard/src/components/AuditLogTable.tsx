@@ -20,10 +20,11 @@ interface Props {
     pageSize: number
   }
   pageCount: number
+  totalItems: number
   onPaginationChange: (pagination: { pageIndex: number; pageSize: number }) => void
 }
 
-export function AuditLogTable({ data, loading, pagination, pageCount, onPaginationChange }: Props) {
+export function AuditLogTable({ data, loading, pagination, pageCount, onPaginationChange, totalItems }: Props) {
   const columns = getColumns()
 
   const table = useReactTable({
@@ -108,7 +109,7 @@ export function AuditLogTable({ data, loading, pagination, pageCount, onPaginati
           </TableBody>
         </Table>
       </div>
-      <Pagination table={table} className="mt-4" entityName="Logs" />
+      <Pagination table={table} className="mt-4" entityName="Logs" totalItems={totalItems} />
     </div>
   )
 }

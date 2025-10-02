@@ -145,6 +145,7 @@ const AuditLogs: React.FC = () => {
         data={data.items}
         loading={loadingData}
         pageCount={data.totalPages}
+        totalItems={data.total}
         onPaginationChange={handlePaginationChange}
         pagination={{
           pageIndex: paginationParams.pageIndex,

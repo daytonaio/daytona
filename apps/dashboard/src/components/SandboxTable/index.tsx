@@ -57,6 +57,7 @@ export function SandboxTable({
   onRowClick,
   pagination,
   pageCount,
+  totalItems,
   onPaginationChange,
   sorting,
   onSortingChange,
@@ -217,7 +218,13 @@ export function SandboxTable({
       </Table>
 
       <div className="flex items-center justify-end">
-        <Pagination className="pb-2 pt-6" table={table} selectionEnabled={deletePermitted} entityName="Sandboxes" />
+        <Pagination
+          className="pb-2 pt-6"
+          table={table}
+          selectionEnabled={deletePermitted}
+          entityName="Sandboxes"
+          totalItems={totalItems}
+        />
       </div>
 
       {/* Floating Action Bar */}
@@ -237,7 +244,7 @@ export function SandboxTable({
           >
             <div className="bg-background text-foreground border border-border rounded-lg shadow-lg pl-3 pr-2 py-1 flex items-center justify-between gap-4">
               <div className="text-sm text-muted-foreground">
-                {selectedCount} {selectedCount === 1 ? 'sandbox' : 'sandboxes'} selected
+                {selectedCount} {selectedCount === 1 ? 'item' : 'items'} selected
               </div>
               <AlertDialog open={bulkDeleteDialogOpen} onOpenChange={setBulkDeleteDialogOpen}>
                 <AlertDialogTrigger asChild>
@@ -251,7 +258,7 @@ export function SandboxTable({
                     <AlertDialogTitle>Delete Sandboxes</AlertDialogTitle>
                     <AlertDialogDescription>
                       Are you sure you want to delete{' '}
-                      {selectedCount === 1 ? 'this sandbox' : `these ${selectedCount} sandboxes`}? This action cannot be
+                      {selectedCount === 1 ? 'this item' : `these ${selectedCount} items`}? This action cannot be
                       undone.
                     </AlertDialogDescription>
                   </AlertDialogHeader>

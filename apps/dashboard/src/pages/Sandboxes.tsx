@@ -830,6 +830,7 @@ const Sandboxes: React.FC = () => {
           setShowSandboxDetails(true)
         }}
         pageCount={sandboxesData?.totalPages || 0}
+        totalItems={sandboxesData?.total || 0}
         onPaginationChange={handlePaginationChange}
         pagination={{
           pageIndex: paginationParams.pageIndex,

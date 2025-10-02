@@ -43,6 +43,7 @@ export interface SandboxTableProps {
     pageSize: number
   }
   pageCount: number
+  totalItems: number
   onPaginationChange: (pagination: { pageIndex: number; pageSize: number }) => void
   sorting: SandboxSorting
   onSortingChange: (sorting: SandboxSorting) => void
