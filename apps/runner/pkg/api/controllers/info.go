@@ -25,7 +25,7 @@ func RunnerInfo(ctx *gin.Context) {
 	runnerInstance := runner.GetInstance(nil)
 
 	// Get cached system metrics
-	metrics := runnerInstance.MetricsService.GetSystemMetrics(ctx.Request.Context())
+	metrics := runnerInstance.MetricsService.GetMetrics()
 
 	response := dto.RunnerInfoResponseDTO{
 		Metrics: &dto.RunnerMetrics{
