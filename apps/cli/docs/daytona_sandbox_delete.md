@@ -6,6 +6,12 @@ Delete a sandbox
 daytona sandbox delete [SANDBOX_ID] [flags]
 ```
 
+### Options
+
+```
+  -a, --all   Delete all sandboxes
+```
+
 ### Options inherited from parent commands
 
 ```
@@ -14,4 +20,4 @@ daytona sandbox delete [SANDBOX_ID] [flags]
 
 ### SEE ALSO
 
-- [daytona sandbox](daytona_sandbox.md) - Manage Daytona sandboxes
+- [daytona sandbox](daytona_sandbox.md)  - Manage Daytona sandboxes
