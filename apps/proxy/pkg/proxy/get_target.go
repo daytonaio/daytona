@@ -101,7 +101,7 @@ func (p *Proxy) getRunnerInfo(ctx context.Context, sandboxId string) (*RunnerInf
 	}
 
 	info := RunnerInfo{
-		ApiUrl: runner.ApiUrl,
+		ApiUrl: runner.ProxyUrl,
 		ApiKey: runner.ApiKey,
 	}
 
