@@ -117,14 +117,11 @@ func main() {
 
 	sandboxService := services.NewSandboxService(runnerCache, dockerClient)
 
-	metricsCache := cache.NewMapCache[models.SystemMetrics]()
-
 	metricsService := services.NewMetricsService(services.MetricsServiceConfig{
-		Docker:   dockerClient,
-		Cache:    metricsCache,
-		Interval: 15 * time.Second,
+		Docker:     dockerClient,
+		WindowSize: 60,
 	})
-	metricsService.StartMetricsCollection(ctx)
+	metricsService.Start(ctx)
 
 	// Initialize sandbox state synchronization service
 	sandboxSyncService := services.NewSandboxSyncService(services.SandboxSyncServiceConfig{
