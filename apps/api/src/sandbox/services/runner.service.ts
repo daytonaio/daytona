@@ -299,7 +299,7 @@ export class RunnerService {
       updateData.currentAllocatedDiskGiB = metrics.currentAllocatedDiskGiB || 0
       updateData.currentSnapshotCount = metrics.currentSnapshotCount || 0
 
-      updateData.availabilityScore = this.calculateAvailabilityScore({
+      updateData.availabilityScore = this.calculateAvailabilityScore(runnerId, {
         cpuUsage: updateData.currentCpuUsagePercentage,
         memoryUsage: updateData.currentMemoryUsagePercentage,
         diskUsage: updateData.currentDiskUsagePercentage,
@@ -421,7 +421,21 @@ export class RunnerService {
     })
   }
 
-  private calculateAvailabilityScore(params: AvailabilityScoreParams): number {
+  private calculateAvailabilityScore(runnerId: string, params: AvailabilityScoreParams): number {
+    if (
+      params.cpuUsage < 0 ||
+      params.memoryUsage < 0 ||
+      params.diskUsage < 0 ||
+      params.allocatedCpu < 0 ||
+      params.allocatedMemoryGiB < 0 ||
+      params.allocatedDiskGiB < 0
+    ) {
+      this.logger.warn(
+        `Runner ${runnerId} has negative values for CPU, memory, disk, allocated CPU, allocated memory, or allocated disk`,
+      )
+      return 0
+    }
+
     return this.calculateTOPSISScore(params)
   }
 
