@@ -41,7 +41,6 @@ export class DockerRegistry {
   @Column({
     type: 'enum',
     enum: RegistryType,
-    default: RegistryType.INTERNAL,
   })
   registryType: RegistryType
 

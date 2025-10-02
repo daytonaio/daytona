@@ -59,7 +59,7 @@ func NewCreateDockerRegistry(name string, url string, username string, password 
 // but it doesn't guarantee that properties required by API are set
 func NewCreateDockerRegistryWithDefaults() *CreateDockerRegistry {
 	this := CreateDockerRegistry{}
-	var registryType string = "organization"
+	var registryType string = "source"
 	this.RegistryType = registryType
 	return &this
 }

@@ -11215,7 +11215,7 @@ components:
       type: object
     CreateDockerRegistry:
       example:
-        registryType: organization
+        registryType: source
         password: password
         isDefault: true
         name: name
@@ -11239,13 +11239,13 @@ components:
           description: Registry project
           type: string
         registryType:
-          default: organization
+          default: source
           description: Registry type
           enum:
-            - internal
-            - organization
-            - transient
+            - snapshot
+            - source
             - backup
+            - transient
           type: string
         isDefault:
           description: Set as default registry
@@ -11259,7 +11259,7 @@ components:
       type: object
     DockerRegistry:
       example:
-        registryType: internal
+        registryType: source
         createdAt: 2024-01-31T12:00:00Z
         name: My Docker Hub
         project: my-project
@@ -11291,11 +11291,11 @@ components:
         registryType:
           description: Registry type
           enum:
-            - internal
-            - organization
-            - transient
+            - snapshot
+            - source
             - backup
-          example: internal
+            - transient
+          example: source
           type: string
         createdAt:
           description: Creation timestamp

@@ -79,12 +79,13 @@ export class DockerRegistryController {
     @AuthContext() authContext: OrganizationAuthContext,
     @Body() createDockerRegistryDto: CreateDockerRegistryDto,
   ): Promise<DockerRegistryDto> {
-    if (createDockerRegistryDto.registryType !== RegistryType.ORGANIZATION && authContext.role !== SystemRole.ADMIN) {
+    if (createDockerRegistryDto.registryType !== RegistryType.SOURCE && authContext.role !== SystemRole.ADMIN) {
       throw new ForbiddenException(
         `Insufficient permissions for creating ${createDockerRegistryDto.registryType} registries`,
       )
     }
 
+    // TODO: move to admin controller
     if (createDockerRegistryDto.isDefault && authContext.role !== SystemRole.ADMIN) {
       throw new ForbiddenException('Insufficient permissions for setting a default registry')
     }

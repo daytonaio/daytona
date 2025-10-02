@@ -42,8 +42,8 @@ class DockerRegistry(BaseModel):
     @field_validator('registry_type')
     def registry_type_validate_enum(cls, value):
         """Validates the enum"""
-        if value not in set(['internal', 'organization', 'transient', 'backup']):
-            raise ValueError("must be one of enum values ('internal', 'organization', 'transient', 'backup')")
+        if value not in set(['snapshot', 'source', 'backup', 'transient']):
+            raise ValueError("must be one of enum values ('snapshot', 'source', 'backup', 'transient')")
         return value
 
     model_config = ConfigDict(
