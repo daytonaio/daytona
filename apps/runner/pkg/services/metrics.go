@@ -72,25 +72,33 @@ func (s *MetricsService) collectAndCacheMetrics(ctx context.Context) error {
 
 	// Get CPU metrics
 	cpuPercent, err := cpu.Percent(15*time.Second, false)
-	if err == nil {
+	if err != nil {
+		log.Errorf("Error getting CPU metrics: %v", err)
+	} else {
 		metrics.CPUUsage = cpuPercent[0]
 	}
 
 	// Get memory metrics
 	memory, err := mem.VirtualMemory()
-	if err == nil {
+	if err != nil {
+		log.Errorf("Error getting memory metrics: %v", err)
+	} else {
 		metrics.RAMUsage = (float64(memory.Total-memory.Available) / float64(memory.Total)) * 100
 	}
 
 	// Get disk metrics
 	diskUsage, err := disk.Usage("/var/lib/docker")
-	if err == nil {
+	if err != nil {
+		log.Errorf("Error getting disk metrics: %v", err)
+	} else {
 		metrics.DiskUsage = diskUsage.UsedPercent
 	}
 
 	// Get snapshot count
 	info, err := s.docker.ApiClient().Info(ctx)
-	if err == nil {
+	if err != nil {
+		log.Errorf("Error getting snapshot count: %v", err)
+	} else {
 		metrics.SnapshotCount = info.Images
 	}
 
@@ -105,6 +113,8 @@ func (s *MetricsService) collectAndCacheMetrics(ctx context.Context) error {
 func (s *MetricsService) GetSystemMetrics(ctx context.Context) *models.SystemMetrics {
 	metrics, err := s.cache.Get(ctx, systemMetricsKey)
 	if err != nil || metrics == nil {
+		log.Errorf("Error getting system metrics: %v", err)
+
 		// Return default values if no metrics are cached
 		return &models.SystemMetrics{
 			CPUUsage:        -1.0,
@@ -134,7 +144,9 @@ func (s *MetricsService) getAllocatedResources(ctx context.Context, metrics *mod
 
 	for _, ctr := range containers {
 		cpu, memory, disk, err := s.getContainerAllocatedResources(ctx, ctr.ID)
-		if err == nil {
+		if err != nil {
+			log.Errorf("Error getting allocated resources for container %s: %v", ctr.ID, err)
+		} else {
 			// For CPU and memory: only count running containers
 			if ctr.State == "running" {
 				totalAllocatedCpuMicroseconds += cpu
@@ -146,21 +158,9 @@ func (s *MetricsService) getAllocatedResources(ctx context.Context, metrics *mod
 	}
 
 	// Convert to original API units
-	totalAllocatedCpuVCPUs := totalAllocatedCpuMicroseconds / 100000           // Convert back to vCPUs
-	totalAllocatedMemoryGB := totalAllocatedMemoryBytes / (1024 * 1024 * 1024) // Convert back to GB
-
-	// Only update if values are valid (not 0 or -1)
-	// Note: 0 can be valid for allocated resources (no containers running)
-	// so we only check for -1
-	if totalAllocatedCpuVCPUs != -1 {
-		metrics.AllocatedCPU = totalAllocatedCpuVCPUs
-	}
-	if totalAllocatedMemoryGB != -1 {
-		metrics.AllocatedMemory = totalAllocatedMemoryGB
-	}
-	if totalAllocatedDiskGB != -1 {
-		metrics.AllocatedDisk = totalAllocatedDiskGB
-	}
+	metrics.AllocatedCPU = totalAllocatedCpuMicroseconds / 100000              // Convert back to vCPUs
+	metrics.AllocatedMemory = totalAllocatedMemoryBytes / (1024 * 1024 * 1024) // Convert back to GB
+	metrics.AllocatedDisk = totalAllocatedDiskGB
 }
 
 func (s *MetricsService) getContainerAllocatedResources(ctx context.Context, containerId string) (int64, int64, int64, error) {
@@ -177,7 +177,7 @@ func (s *MetricsService) getContainerAllocatedResources(ctx context.Context, con
 	if containerJSON.HostConfig != nil {
 		resources := containerJSON.HostConfig.Resources
 
-		// CPU allocation (convert from quota to total microseconds if quota is set)
+		// CPU allocation
 		if resources.CPUQuota > 0 {
 			allocatedCpu = resources.CPUQuota
 		}
@@ -191,8 +191,13 @@ func (s *MetricsService) getContainerAllocatedResources(ctx context.Context, con
 		if containerJSON.HostConfig.StorageOpt != nil {
 			if sizeStr, exists := containerJSON.HostConfig.StorageOpt["size"]; exists {
 				// Parse size string like "10G" and convert to GB
-				if diskGB, err := s.parseStorageQuotaGB(sizeStr); err == nil {
-					allocatedDisk = diskGB
+				diskGB, err := s.parseStorageQuotaGB(sizeStr)
+				if err != nil {
+					log.Errorf("Error parsing storage quota for container %s: %v", containerId, err)
+				} else {
+					if diskGB > 0 {
+						allocatedDisk = diskGB
+					}
 				}
 			}
 		}
