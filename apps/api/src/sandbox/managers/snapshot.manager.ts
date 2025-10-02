@@ -214,6 +214,11 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
       ]
 
       const propagateLimit = Math.ceil(runners.length / 3) - snapshotRunnersDistinctRunnersIds.length
+
+      if (propagateLimit <= 0) {
+        return
+      }
+
       const unallocatedRunners = runners.filter(
         (runner) => !snapshotRunnersDistinctRunnersIds.some((snapshotRunnerId) => snapshotRunnerId === runner.id),
       )
