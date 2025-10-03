@@ -89,14 +89,14 @@ export const AuditApiAxiosParamCreator = function (configuration?: Configuration
     /**
      *
      * @summary Get all audit logs
-     * @param {number} [limit] Number of items per page (default: 10)
-     * @param {number} [page] Page number (default: 1)
+     * @param {number} [page] Page number of the results
+     * @param {number} [limit] Number of results per page
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     getAllAuditLogs: async (
-      limit?: number,
       page?: number,
+      limit?: number,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       const localVarPath = `/audit`
@@ -117,12 +117,12 @@ export const AuditApiAxiosParamCreator = function (configuration?: Configuration
 
       // authentication oauth2 required
 
-      if (limit !== undefined) {
-        localVarQueryParameter['limit'] = limit
-      }
-
       if (page !== undefined) {
         localVarQueryParameter['page'] = page
+      }
+
+      if (limit !== undefined) {
+        localVarQueryParameter['limit'] = limit
       }
 
       setSearchParams(localVarUrlObj, localVarQueryParameter)
@@ -138,15 +138,15 @@ export const AuditApiAxiosParamCreator = function (configuration?: Configuration
      *
      * @summary Get audit logs for organization
      * @param {string} organizationId Organization ID
-     * @param {number} [limit] Number of items per page (default: 10)
-     * @param {number} [page] Page number (default: 1)
+     * @param {number} [page] Page number of the results
+     * @param {number} [limit] Number of results per page
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     getOrganizationAuditLogs: async (
       organizationId: string,
-      limit?: number,
       page?: number,
+      limit?: number,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'organizationId' is not null or undefined
@@ -172,12 +172,12 @@ export const AuditApiAxiosParamCreator = function (configuration?: Configuration
 
       // authentication oauth2 required
 
-      if (limit !== undefined) {
-        localVarQueryParameter['limit'] = limit
-      }
-
       if (page !== undefined) {
         localVarQueryParameter['page'] = page
+      }
+
+      if (limit !== undefined) {
+        localVarQueryParameter['limit'] = limit
       }
 
       setSearchParams(localVarUrlObj, localVarQueryParameter)
@@ -225,17 +225,17 @@ export const AuditApiFp = function (configuration?: Configuration) {
     /**
      *
      * @summary Get all audit logs
-     * @param {number} [limit] Number of items per page (default: 10)
-     * @param {number} [page] Page number (default: 1)
+     * @param {number} [page] Page number of the results
+     * @param {number} [limit] Number of results per page
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async getAllAuditLogs(
-      limit?: number,
       page?: number,
+      limit?: number,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PaginatedAuditLogs>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.getAllAuditLogs(limit, page, options)
+      const localVarAxiosArgs = await localVarAxiosParamCreator.getAllAuditLogs(page, limit, options)
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
         operationServerMap['AuditApi.getAllAuditLogs']?.[localVarOperationServerIndex]?.url
@@ -251,21 +251,21 @@ export const AuditApiFp = function (configuration?: Configuration) {
      *
      * @summary Get audit logs for organization
      * @param {string} organizationId Organization ID
-     * @param {number} [limit] Number of items per page (default: 10)
-     * @param {number} [page] Page number (default: 1)
+     * @param {number} [page] Page number of the results
+     * @param {number} [limit] Number of results per page
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async getOrganizationAuditLogs(
       organizationId: string,
-      limit?: number,
       page?: number,
+      limit?: number,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PaginatedAuditLogs>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.getOrganizationAuditLogs(
         organizationId,
-        limit,
         page,
+        limit,
         options,
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
@@ -302,31 +302,31 @@ export const AuditApiFactory = function (configuration?: Configuration, basePath
     /**
      *
      * @summary Get all audit logs
-     * @param {number} [limit] Number of items per page (default: 10)
-     * @param {number} [page] Page number (default: 1)
+     * @param {number} [page] Page number of the results
+     * @param {number} [limit] Number of results per page
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    getAllAuditLogs(limit?: number, page?: number, options?: RawAxiosRequestConfig): AxiosPromise<PaginatedAuditLogs> {
-      return localVarFp.getAllAuditLogs(limit, page, options).then((request) => request(axios, basePath))
+    getAllAuditLogs(page?: number, limit?: number, options?: RawAxiosRequestConfig): AxiosPromise<PaginatedAuditLogs> {
+      return localVarFp.getAllAuditLogs(page, limit, options).then((request) => request(axios, basePath))
     },
     /**
      *
      * @summary Get audit logs for organization
      * @param {string} organizationId Organization ID
-     * @param {number} [limit] Number of items per page (default: 10)
-     * @param {number} [page] Page number (default: 1)
+     * @param {number} [page] Page number of the results
+     * @param {number} [limit] Number of results per page
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     getOrganizationAuditLogs(
       organizationId: string,
-      limit?: number,
       page?: number,
+      limit?: number,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<PaginatedAuditLogs> {
       return localVarFp
-        .getOrganizationAuditLogs(organizationId, limit, page, options)
+        .getOrganizationAuditLogs(organizationId, page, limit, options)
         .then((request) => request(axios, basePath))
     },
   }
@@ -356,15 +356,15 @@ export class AuditApi extends BaseAPI {
   /**
    *
    * @summary Get all audit logs
-   * @param {number} [limit] Number of items per page (default: 10)
-   * @param {number} [page] Page number (default: 1)
+   * @param {number} [page] Page number of the results
+   * @param {number} [limit] Number of results per page
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof AuditApi
    */
-  public getAllAuditLogs(limit?: number, page?: number, options?: RawAxiosRequestConfig) {
+  public getAllAuditLogs(page?: number, limit?: number, options?: RawAxiosRequestConfig) {
     return AuditApiFp(this.configuration)
-      .getAllAuditLogs(limit, page, options)
+      .getAllAuditLogs(page, limit, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
@@ -372,20 +372,20 @@ export class AuditApi extends BaseAPI {
    *
    * @summary Get audit logs for organization
    * @param {string} organizationId Organization ID
-   * @param {number} [limit] Number of items per page (default: 10)
-   * @param {number} [page] Page number (default: 1)
+   * @param {number} [page] Page number of the results
+   * @param {number} [limit] Number of results per page
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof AuditApi
    */
   public getOrganizationAuditLogs(
     organizationId: string,
-    limit?: number,
     page?: number,
+    limit?: number,
     options?: RawAxiosRequestConfig,
   ) {
     return AuditApiFp(this.configuration)
-      .getOrganizationAuditLogs(organizationId, limit, page, options)
+      .getOrganizationAuditLogs(organizationId, page, limit, options)
       .then((request) => request(this.axios, this.basePath))
   }
 }

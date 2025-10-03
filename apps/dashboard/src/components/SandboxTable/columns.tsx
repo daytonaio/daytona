@@ -4,7 +4,7 @@
  */
 
 import React from 'react'
-import { Sandbox, SandboxState } from '@daytonaio/api-client'
+import { Sandbox } from '@daytonaio/api-client'
 import { ColumnDef } from '@tanstack/react-table'
 import { ArrowUp, ArrowDown } from 'lucide-react'
 import { Checkbox } from '../ui/checkbox'
@@ -12,9 +12,6 @@ import { getRelativeTimeString } from '@/lib/utils'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip'
 import { SandboxState as SandboxStateComponent } from './SandboxState'
 import { SandboxTableActions } from './SandboxTableActions'
-import { STATE_PRIORITY_ORDER } from './constants'
-import { ResourceFilterValue } from './filters/ResourceFilter'
-import { arrayIncludesFilter, arrayIntersectionFilter, resourceRangeFilter, dateRangeFilter } from './filters/utils'
 
 interface SortableHeaderProps {
   column: any
@@ -49,7 +46,7 @@ interface GetColumnsProps {
   handleArchive: (id: string) => void
   handleVnc: (id: string) => void
   getWebTerminalUrl: (id: string) => Promise<string | null>
-  loadingSandboxes: Record<string, boolean>
+  sandboxIsLoading: Record<string, boolean>
   writePermitted: boolean
   deletePermitted: boolean
   handleCreateSshAccess: (id: string) => void
@@ -63,7 +60,7 @@ export function getColumns({
   handleArchive,
   handleVnc,
   getWebTerminalUrl,
-  loadingSandboxes,
+  sandboxIsLoading,
   writePermitted,
   deletePermitted,
   handleCreateSshAccess,
@@ -84,7 +81,7 @@ export function getColumns({
           checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')}
           onCheckedChange={(value) => {
             for (const row of table.getRowModel().rows) {
-              if (loadingSandboxes[row.original.id]) {
+              if (sandboxIsLoading[row.original.id]) {
                 row.toggleSelected(false)
               } else {
                 row.toggleSelected(!!value)
@@ -138,17 +135,6 @@ export function getColumns({
         </div>
       ),
       accessorKey: 'state',
-      sortingFn: (rowA, rowB) => {
-        const stateA = rowA.original.state || SandboxState.UNKNOWN
-        const stateB = rowB.original.state || SandboxState.UNKNOWN
-
-        if (stateA === stateB) {
-          return 0
-        }
-
-        return STATE_PRIORITY_ORDER[stateA] - STATE_PRIORITY_ORDER[stateB]
-      },
-      filterFn: (row, id, value) => arrayIncludesFilter(row, id, value),
     },
     {
       id: 'snapshot',
@@ -167,7 +153,6 @@ export function getColumns({
         )
       },
       accessorKey: 'snapshot',
-      filterFn: (row, id, value) => arrayIncludesFilter(row, id, value),
     },
     {
       id: 'region',
@@ -179,7 +164,6 @@ export function getColumns({
         return <span>{row.original.target}</span>
       },
       accessorKey: 'target',
-      filterFn: (row, id, value) => arrayIncludesFilter(row, id, value),
     },
     {
       id: 'resources',
@@ -205,7 +189,6 @@ export function getColumns({
           </div>
         )
       },
-      filterFn: (row, id, value: ResourceFilterValue) => resourceRangeFilter(row, value),
     },
     {
       id: 'labels',
@@ -242,7 +225,6 @@ export function getColumns({
         )
       },
       accessorFn: (row) => Object.entries(row.labels ?? {}).map(([key, value]) => `${key}: ${value}`),
-      filterFn: (row, id, value) => arrayIntersectionFilter(row, id, value),
     },
     {
       id: 'lastEvent',
@@ -250,7 +232,6 @@ export function getColumns({
       header: ({ column }) => {
         return <SortableHeader column={column} label="Last Event" />
       },
-      filterFn: (row, id, value) => dateRangeFilter(row, id, value),
       accessorFn: (row) => getLastEvent(row).date,
       cell: ({ row }) => {
         return <span>{getLastEvent(row.original).relativeTimeString}</span>
@@ -266,7 +247,7 @@ export function getColumns({
             sandbox={row.original}
             writePermitted={writePermitted}
             deletePermitted={deletePermitted}
-            isLoading={loadingSandboxes[row.original.id]}
+            isLoading={sandboxIsLoading[row.original.id]}
             onStart={handleStart}
             onStop={handleStop}
             onDelete={handleDelete}

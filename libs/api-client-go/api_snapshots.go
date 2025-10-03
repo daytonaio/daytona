@@ -80,8 +80,8 @@ type SnapshotsAPI interface {
 	GetAllSnapshots(ctx context.Context) SnapshotsAPIGetAllSnapshotsRequest
 
 	// GetAllSnapshotsExecute executes the request
-	//  @return PaginatedSnapshotsDto
-	GetAllSnapshotsExecute(r SnapshotsAPIGetAllSnapshotsRequest) (*PaginatedSnapshotsDto, *http.Response, error)
+	//  @return PaginatedSnapshots
+	GetAllSnapshotsExecute(r SnapshotsAPIGetAllSnapshotsRequest) (*PaginatedSnapshots, *http.Response, error)
 
 	/*
 		GetSnapshot Get snapshot by ID or name
@@ -591,8 +591,11 @@ type SnapshotsAPIGetAllSnapshotsRequest struct {
 	ctx                    context.Context
 	ApiService             SnapshotsAPI
 	xDaytonaOrganizationID *string
-	limit                  *float32
 	page                   *float32
+	limit                  *float32
+	name                   *string
+	sort                   *string
+	order                  *string
 }
 
 // Use with JWT to specify the organization ID
@@ -601,19 +604,37 @@ func (r SnapshotsAPIGetAllSnapshotsRequest) XDaytonaOrganizationID(xDaytonaOrgan
 	return r
 }
 
-// Number of items per page
-func (r SnapshotsAPIGetAllSnapshotsRequest) Limit(limit float32) SnapshotsAPIGetAllSnapshotsRequest {
-	r.limit = &limit
-	return r
-}
-
-// Page number
+// Page number of the results
 func (r SnapshotsAPIGetAllSnapshotsRequest) Page(page float32) SnapshotsAPIGetAllSnapshotsRequest {
 	r.page = &page
 	return r
 }
 
-func (r SnapshotsAPIGetAllSnapshotsRequest) Execute() (*PaginatedSnapshotsDto, *http.Response, error) {
+// Number of results per page
+func (r SnapshotsAPIGetAllSnapshotsRequest) Limit(limit float32) SnapshotsAPIGetAllSnapshotsRequest {
+	r.limit = &limit
+	return r
+}
+
+// Filter by partial name match
+func (r SnapshotsAPIGetAllSnapshotsRequest) Name(name string) SnapshotsAPIGetAllSnapshotsRequest {
+	r.name = &name
+	return r
+}
+
+// Field to sort by
+func (r SnapshotsAPIGetAllSnapshotsRequest) Sort(sort string) SnapshotsAPIGetAllSnapshotsRequest {
+	r.sort = &sort
+	return r
+}
+
+// Direction to sort by
+func (r SnapshotsAPIGetAllSnapshotsRequest) Order(order string) SnapshotsAPIGetAllSnapshotsRequest {
+	r.order = &order
+	return r
+}
+
+func (r SnapshotsAPIGetAllSnapshotsRequest) Execute() (*PaginatedSnapshots, *http.Response, error) {
 	return r.ApiService.GetAllSnapshotsExecute(r)
 }
 
@@ -632,13 +653,13 @@ func (a *SnapshotsAPIService) GetAllSnapshots(ctx context.Context) SnapshotsAPIG
 
 // Execute executes the request
 //
-//	@return PaginatedSnapshotsDto
-func (a *SnapshotsAPIService) GetAllSnapshotsExecute(r SnapshotsAPIGetAllSnapshotsRequest) (*PaginatedSnapshotsDto, *http.Response, error) {
+//	@return PaginatedSnapshots
+func (a *SnapshotsAPIService) GetAllSnapshotsExecute(r SnapshotsAPIGetAllSnapshotsRequest) (*PaginatedSnapshots, *http.Response, error) {
 	var (
 		localVarHTTPMethod  = http.MethodGet
 		localVarPostBody    interface{}
 		formFiles           []formFile
-		localVarReturnValue *PaginatedSnapshotsDto
+		localVarReturnValue *PaginatedSnapshots
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SnapshotsAPIService.GetAllSnapshots")
@@ -652,11 +673,32 @@ func (a *SnapshotsAPIService) GetAllSnapshotsExecute(r SnapshotsAPIGetAllSnapsho
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
 
-	if r.limit != nil {
-		parameterAddToHeaderOrQuery(localVarQueryParams, "limit", r.limit, "form", "")
-	}
 	if r.page != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "page", r.page, "form", "")
+	} else {
+		var defaultValue float32 = 1
+		r.page = &defaultValue
+	}
+	if r.limit != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "limit", r.limit, "form", "")
+	} else {
+		var defaultValue float32 = 100
+		r.limit = &defaultValue
+	}
+	if r.name != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "name", r.name, "form", "")
+	}
+	if r.sort != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "sort", r.sort, "form", "")
+	} else {
+		var defaultValue string = "lastUsedAt"
+		r.sort = &defaultValue
+	}
+	if r.order != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "order", r.order, "form", "")
+	} else {
+		var defaultValue string = "desc"
+		r.order = &defaultValue
 	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}

@@ -3,7 +3,9 @@
 
 from typing import List, Optional, Union
 
-from daytona_api_client import BuildInfo, SnapshotDto
+from daytona_api_client import BuildInfo
+from daytona_api_client import PaginatedSnapshots as PaginatedSnapshotsDto
+from daytona_api_client import SnapshotDto
 from daytona_api_client_async import BuildInfo as AsyncBuildInfo
 from pydantic import BaseModel
 
@@ -38,6 +40,17 @@ class Snapshot(SnapshotDto):
     @classmethod
     def from_dto(cls, dto: SnapshotDto) -> "Snapshot":
         return cls(**dto.__dict__)
+
+
+class PaginatedSnapshots(PaginatedSnapshotsDto):
+    """Represents a paginated list of Daytona Snapshots.
+
+    Attributes:
+        items (List[Snapshot]): List of Snapshot instances in the current page.
+        total (int): Total number of Snapshots across all pages.
+        page (int): Current page number.
+        total_pages (int): Total number of pages available.
+    """
 
 
 class CreateSnapshotParams(BaseModel):

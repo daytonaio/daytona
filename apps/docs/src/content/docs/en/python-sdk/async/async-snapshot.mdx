@@ -43,22 +43,29 @@ Service for managing Daytona Snapshots. Can be used to list, get, create and del
 
 ```python
 @intercept_errors(message_prefix="Failed to list snapshots: ")
-async def list() -> List[Snapshot]
+async def list(page: Optional[int] = None,
+               limit: Optional[int] = None) -> PaginatedSnapshots
 ```
 
-List all Snapshots.
+Returns paginated list of Snapshots.
+
+**Arguments**:
+
+- `page` _Optional[int]_ - Page number for pagination (starting from 1).
+- `limit` _Optional[int]_ - Maximum number of items per page.
+  
 
 **Returns**:
 
-- `List[Snapshot]` - List of all Snapshots.
+- `PaginatedSnapshots` - Paginated list of Snapshots.
   
 
 **Example**:
 
 ```python
 async with AsyncDaytona() as daytona:
-    snapshots = await daytona.snapshot.list()
-    for snapshot in snapshots:
+    result = await daytona.snapshot.list(page=2, limit=10)
+    for snapshot in result.items:
         print(f"{snapshot.name} ({snapshot.image_name})")
 ```
 
@@ -175,6 +182,21 @@ Processes the image context by uploading it to object storage.
 **Returns**:
 
 - `List[str]` - List of context hashes stored in object storage.
+
+## PaginatedSnapshots
+
+```python
+class PaginatedSnapshots(PaginatedSnapshotsDto)
+```
+
+Represents a paginated list of Daytona Snapshots.
+
+**Attributes**:
+
+- `items` _List[Snapshot]_ - List of Snapshot instances in the current page.
+- `total` _int_ - Total number of Snapshots across all pages.
+- `page` _int_ - Current page number.
+- `total_pages` _int_ - Total number of pages available.
 
 ## CreateSnapshotParams
 

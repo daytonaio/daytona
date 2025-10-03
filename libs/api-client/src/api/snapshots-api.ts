@@ -34,7 +34,7 @@ import { BASE_PATH, COLLECTION_FORMATS, type RequestArgs, BaseAPI, RequiredError
 // @ts-ignore
 import type { CreateSnapshot } from '../models'
 // @ts-ignore
-import type { PaginatedSnapshotsDto } from '../models'
+import type { PaginatedSnapshots } from '../models'
 // @ts-ignore
 import type { SetSnapshotGeneralStatusDto } from '../models'
 // @ts-ignore
@@ -236,15 +236,21 @@ export const SnapshotsApiAxiosParamCreator = function (configuration?: Configura
      *
      * @summary List all snapshots
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {number} [limit] Number of items per page
-     * @param {number} [page] Page number
+     * @param {number} [page] Page number of the results
+     * @param {number} [limit] Number of results per page
+     * @param {string} [name] Filter by partial name match
+     * @param {GetAllSnapshotsSortEnum} [sort] Field to sort by
+     * @param {GetAllSnapshotsOrderEnum} [order] Direction to sort by
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     getAllSnapshots: async (
       xDaytonaOrganizationID?: string,
-      limit?: number,
       page?: number,
+      limit?: number,
+      name?: string,
+      sort?: GetAllSnapshotsSortEnum,
+      order?: GetAllSnapshotsOrderEnum,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       const localVarPath = `/snapshots`
@@ -265,12 +271,24 @@ export const SnapshotsApiAxiosParamCreator = function (configuration?: Configura
 
       // authentication oauth2 required
 
+      if (page !== undefined) {
+        localVarQueryParameter['page'] = page
+      }
+
       if (limit !== undefined) {
         localVarQueryParameter['limit'] = limit
       }
 
-      if (page !== undefined) {
-        localVarQueryParameter['page'] = page
+      if (name !== undefined) {
+        localVarQueryParameter['name'] = name
+      }
+
+      if (sort !== undefined) {
+        localVarQueryParameter['sort'] = sort
+      }
+
+      if (order !== undefined) {
+        localVarQueryParameter['order'] = order
       }
 
       if (xDaytonaOrganizationID != null) {
@@ -604,21 +622,30 @@ export const SnapshotsApiFp = function (configuration?: Configuration) {
      *
      * @summary List all snapshots
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {number} [limit] Number of items per page
-     * @param {number} [page] Page number
+     * @param {number} [page] Page number of the results
+     * @param {number} [limit] Number of results per page
+     * @param {string} [name] Filter by partial name match
+     * @param {GetAllSnapshotsSortEnum} [sort] Field to sort by
+     * @param {GetAllSnapshotsOrderEnum} [order] Direction to sort by
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async getAllSnapshots(
       xDaytonaOrganizationID?: string,
-      limit?: number,
       page?: number,
+      limit?: number,
+      name?: string,
+      sort?: GetAllSnapshotsSortEnum,
+      order?: GetAllSnapshotsOrderEnum,
       options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PaginatedSnapshotsDto>> {
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PaginatedSnapshots>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.getAllSnapshots(
         xDaytonaOrganizationID,
-        limit,
         page,
+        limit,
+        name,
+        sort,
+        order,
         options,
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
@@ -828,19 +855,25 @@ export const SnapshotsApiFactory = function (configuration?: Configuration, base
      *
      * @summary List all snapshots
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {number} [limit] Number of items per page
-     * @param {number} [page] Page number
+     * @param {number} [page] Page number of the results
+     * @param {number} [limit] Number of results per page
+     * @param {string} [name] Filter by partial name match
+     * @param {GetAllSnapshotsSortEnum} [sort] Field to sort by
+     * @param {GetAllSnapshotsOrderEnum} [order] Direction to sort by
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     getAllSnapshots(
       xDaytonaOrganizationID?: string,
-      limit?: number,
       page?: number,
+      limit?: number,
+      name?: string,
+      sort?: GetAllSnapshotsSortEnum,
+      order?: GetAllSnapshotsOrderEnum,
       options?: RawAxiosRequestConfig,
-    ): AxiosPromise<PaginatedSnapshotsDto> {
+    ): AxiosPromise<PaginatedSnapshots> {
       return localVarFp
-        .getAllSnapshots(xDaytonaOrganizationID, limit, page, options)
+        .getAllSnapshots(xDaytonaOrganizationID, page, limit, name, sort, order, options)
         .then((request) => request(axios, basePath))
     },
     /**
@@ -985,20 +1018,26 @@ export class SnapshotsApi extends BaseAPI {
    *
    * @summary List all snapshots
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-   * @param {number} [limit] Number of items per page
-   * @param {number} [page] Page number
+   * @param {number} [page] Page number of the results
+   * @param {number} [limit] Number of results per page
+   * @param {string} [name] Filter by partial name match
+   * @param {GetAllSnapshotsSortEnum} [sort] Field to sort by
+   * @param {GetAllSnapshotsOrderEnum} [order] Direction to sort by
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof SnapshotsApi
    */
   public getAllSnapshots(
     xDaytonaOrganizationID?: string,
-    limit?: number,
     page?: number,
+    limit?: number,
+    name?: string,
+    sort?: GetAllSnapshotsSortEnum,
+    order?: GetAllSnapshotsOrderEnum,
     options?: RawAxiosRequestConfig,
   ) {
     return SnapshotsApiFp(this.configuration)
-      .getAllSnapshots(xDaytonaOrganizationID, limit, page, options)
+      .getAllSnapshots(xDaytonaOrganizationID, page, limit, name, sort, order, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
@@ -1074,3 +1113,22 @@ export class SnapshotsApi extends BaseAPI {
       .then((request) => request(this.axios, this.basePath))
   }
 }
+
+/**
+ * @export
+ */
+export const GetAllSnapshotsSortEnum = {
+  NAME: 'name',
+  STATE: 'state',
+  LAST_USED_AT: 'lastUsedAt',
+  CREATED_AT: 'createdAt',
+} as const
+export type GetAllSnapshotsSortEnum = (typeof GetAllSnapshotsSortEnum)[keyof typeof GetAllSnapshotsSortEnum]
+/**
+ * @export
+ */
+export const GetAllSnapshotsOrderEnum = {
+  ASC: 'asc',
+  DESC: 'desc',
+} as const
+export type GetAllSnapshotsOrderEnum = (typeof GetAllSnapshotsOrderEnum)[keyof typeof GetAllSnapshotsOrderEnum]

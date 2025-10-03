@@ -3,9 +3,10 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { ApiProperty } from '@nestjs/swagger'
+import { ApiProperty, ApiSchema } from '@nestjs/swagger'
 import { SnapshotDto } from './snapshot.dto'
 
+@ApiSchema({ name: 'PaginatedSnapshots' })
 export class PaginatedSnapshotsDto {
   @ApiProperty({ type: [SnapshotDto] })
   items: SnapshotDto[]

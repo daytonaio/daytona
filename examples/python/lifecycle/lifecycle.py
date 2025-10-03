@@ -32,10 +32,10 @@ def main():
     else:
         print(response.result)
 
-    sandboxes = daytona.list()
-    print("Total sandboxes count:", len(sandboxes))
+    result = daytona.list()
+    print("Total sandboxes count:", result.total)
 
-    print(f"Printing sandboxes[0] -> id: {sandboxes[0].id} state: {sandboxes[0].state}")
+    print(f"Printing first sandbox -> id: {result.items[0].id} state: {result.items[0].state}")
 
     print("Removing sandbox")
     daytona.delete(sandbox)

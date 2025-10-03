@@ -6,12 +6,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { useApi } from '@/hooks/useApi'
 import { Plus } from 'lucide-react'
-import {
-  SnapshotDto,
-  SnapshotState,
-  OrganizationRolePermissionsEnum,
-  PaginatedSnapshotsDto,
-} from '@daytonaio/api-client'
+import { SnapshotDto, SnapshotState, OrganizationRolePermissionsEnum, PaginatedSnapshots } from '@daytonaio/api-client'
 import { SnapshotTable } from '@/components/SnapshotTable'
 import {
   Dialog,
@@ -38,7 +33,7 @@ const Snapshots: React.FC = () => {
   const { notificationSocket } = useNotificationSocket()
 
   const { snapshotApi } = useApi()
-  const [snapshotsData, setSnapshotsData] = useState<PaginatedSnapshotsDto>({
+  const [snapshotsData, setSnapshotsData] = useState<PaginatedSnapshots>({
     items: [],
     total: 0,
     page: 1,
@@ -76,8 +71,8 @@ const Snapshots: React.FC = () => {
         const response = (
           await snapshotApi.getAllSnapshots(
             selectedOrganization.id,
-            paginationParams.pageSize,
             paginationParams.pageIndex + 1,
+            paginationParams.pageSize,
           )
         ).data
         setSnapshotsData(response)
@@ -538,6 +533,7 @@ const Snapshots: React.FC = () => {
           onActivate={handleActivate}
           onDeactivate={handleDeactivate}
           pageCount={snapshotsData.totalPages}
+          totalItems={snapshotsData.total}
           onPaginationChange={handlePaginationChange}
           pagination={{
             pageIndex: paginationParams.pageIndex,

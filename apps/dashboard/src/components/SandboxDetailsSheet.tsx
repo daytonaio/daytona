@@ -16,7 +16,7 @@ interface SandboxDetailsSheetProps {
   sandbox: Sandbox | null
   open: boolean
   onOpenChange: (open: boolean) => void
-  loadingSandboxes: Record<string, boolean>
+  sandboxIsLoading: Record<string, boolean>
   handleStart: (id: string) => void
   handleStop: (id: string) => void
   handleDelete: (id: string) => void
@@ -30,7 +30,7 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
   sandbox,
   open,
   onOpenChange,
-  loadingSandboxes,
+  sandboxIsLoading,
   handleStart,
   handleStop,
   handleDelete,
@@ -74,7 +74,7 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
                   <Button
                     variant="outline"
                     onClick={() => handleStop(sandbox.id)}
-                    disabled={loadingSandboxes[sandbox.id]}
+                    disabled={sandboxIsLoading[sandbox.id]}
                   >
                     Stop
                   </Button>
@@ -83,7 +83,7 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
                   <Button
                     variant="outline"
                     onClick={() => handleStart(sandbox.id)}
-                    disabled={loadingSandboxes[sandbox.id]}
+                    disabled={sandboxIsLoading[sandbox.id]}
                   >
                     <Play className="w-4 h-4" />
                     Start
@@ -93,7 +93,7 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
                   <Button
                     variant="outline"
                     onClick={() => handleFork(sandbox.id)}
-                    disabled={loadingSandboxes[sandbox.id]}
+                    disabled={sandboxIsLoading[sandbox.id]}
                   >
                     <GitFork className="w-4 h-4" />
                     Fork
@@ -103,7 +103,7 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
                   <Button
                     variant="outline"
                     onClick={() => handleSnapshot(sandbox.id)}
-                    disabled={loadingSandboxes[sandbox.id]}
+                    disabled={sandboxIsLoading[sandbox.id]}
                   >
                     <Camera className="w-4 h-4" />
                     Snapshot
@@ -114,7 +114,7 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
                     variant="outline"
                     className="w-8 h-8"
                     onClick={() => handleArchive(sandbox.id)}
-                    disabled={loadingSandboxes[sandbox.id]}
+                    disabled={sandboxIsLoading[sandbox.id]}
                   >
                     <Archive className="w-4 h-4" />
                   </Button>
@@ -126,7 +126,7 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
                 variant="outline"
                 className="w-8 h-8"
                 onClick={() => handleDelete(sandbox.id)}
-                disabled={loadingSandboxes[sandbox.id]}
+                disabled={sandboxIsLoading[sandbox.id]}
               >
                 <Trash className="w-4 h-4" />
               </Button>
@@ -135,7 +135,7 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
               variant="outline"
               className="w-8 h-8"
               onClick={() => onOpenChange(false)}
-              disabled={loadingSandboxes[sandbox.id]}
+              disabled={sandboxIsLoading[sandbox.id]}
             >
               <X className="w-4 h-4" />
             </Button>

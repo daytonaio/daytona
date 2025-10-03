@@ -4,23 +4,18 @@
  */
 
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover'
-import { Command, CommandList, CommandGroup, CommandItem, CommandInput } from '@/components/ui/command'
-import { cn } from '@/lib/utils'
-import { Check } from 'lucide-react'
-import { X } from 'lucide-react'
-import { FacetedFilterOption } from '@/components/ui/data-table-faceted-filter'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import { X, Plus, Trash2 } from 'lucide-react'
+import { useState } from 'react'
 
 interface LabelFilterProps {
   value: string[]
   onFilterChange: (value: string[] | undefined) => void
-  options: FacetedFilterOption[]
 }
 
-export function LabelFilterIndicator({
-  value,
-  onFilterChange,
-  options,
-}: Pick<LabelFilterProps, 'value' | 'onFilterChange' | 'options'>) {
+export function LabelFilterIndicator({ value, onFilterChange }: Pick<LabelFilterProps, 'value' | 'onFilterChange'>) {
   return (
     <div className="flex items-center h-6 gap-0.5 rounded-sm border border-border bg-muted/80 hover:bg-muted/50 text-sm">
       <Popover>
@@ -28,8 +23,8 @@ export function LabelFilterIndicator({
           Labels: <span className="text-primary font-medium">{value.length} selected</span>
         </PopoverTrigger>
 
-        <PopoverContent className="p-0 w-[240px]" align="start">
-          <LabelFilter value={value} onFilterChange={onFilterChange} options={options} />
+        <PopoverContent className="p-0 w-[320px]" align="start">
+          <LabelFilter value={value} onFilterChange={onFilterChange} />
         </PopoverContent>
       </Popover>
 
@@ -40,51 +35,121 @@ export function LabelFilterIndicator({
   )
 }
 
-export function LabelFilter({ value, onFilterChange, options }: LabelFilterProps) {
+export function LabelFilter({ value, onFilterChange }: LabelFilterProps) {
+  const [newKey, setNewKey] = useState('')
+  const [newValue, setNewValue] = useState('')
+
+  // Convert string array back to key-value pairs for display
+  const labelPairs = value.map((labelString) => {
+    const [key, ...valueParts] = labelString.split(': ')
+    return { key: key || '', value: valueParts.join(': ') || '' }
+  })
+
+  const addKeyValuePair = () => {
+    if (newKey.trim() && newValue.trim()) {
+      const newLabelString = `${newKey.trim()}: ${newValue.trim()}`
+      const updatedValue = [...value, newLabelString]
+      onFilterChange(updatedValue)
+      setNewKey('')
+      setNewValue('')
+    }
+  }
+
+  const removeKeyValuePair = (index: number) => {
+    const updatedValue = value.filter((_, i) => i !== index)
+    onFilterChange(updatedValue.length > 0 ? updatedValue : undefined)
+  }
+
+  const clearAll = () => {
+    onFilterChange(undefined)
+  }
+
   return (
-    <Command>
-      <div className="flex items-center gap-2 justify-between p-2">
-        <CommandInput placeholder="Filter by label..." className="border border-border rounded-md h-8" />
-        <button
-          className="text-sm text-muted-foreground hover:text-primary px-2"
-          onClick={() => onFilterChange(undefined)}
-        >
+    <div className="p-3 space-y-3">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <h4 className="text-sm font-medium">Labels</h4>
+        <button className="text-sm text-muted-foreground hover:text-primary pl-2" onClick={clearAll}>
           Clear
         </button>
       </div>
-      <CommandList>
-        <CommandGroup>
-          {options.map((option) => (
-            <CommandItem
-              key={option.value}
-              onSelect={() => {
-                const newValue = value.includes(option.value)
-                  ? value.filter((v) => v !== option.value)
-                  : [...value, option.value]
-                onFilterChange(newValue.length > 0 ? newValue : undefined)
-              }}
-            >
-              <div className="flex items-center">
-                <div
-                  className={cn(
-                    'mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary',
-                    value.includes(option.value)
-                      ? 'bg-primary text-primary-foreground'
-                      : 'opacity-50 [&_svg]:invisible',
-                  )}
-                >
-                  <Check className={cn('h-4 w-4')} />
-                </div>
-                <div className="truncate max-w-md rounded-sm bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-200 px-1">
-                  {option.label.split(':')[0]}
-                </div>
 
-                <span className="ml-2 text-muted-foreground">{option.label.split(':')[1]}</span>
+      {/* Current key-value pairs */}
+      {labelPairs.length > 0 && (
+        <div className="space-y-2">
+          <div className="space-y-1 max-h-32 overflow-y-auto">
+            {labelPairs.map((pair, index) => (
+              <div key={index} className="flex items-center gap-2 p-2 bg-muted/50 rounded-sm">
+                <div className="flex-1 flex items-center gap-1 text-sm min-w-0">
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="truncate flex-shrink-0 max-w-[50%] rounded-sm bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-200 px-1 cursor-default">
+                          {pair.key}
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p className="max-w-[300px] break-words">{pair.key}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span className="truncate flex-1 text-muted-foreground cursor-default">{pair.value}</span>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p className="max-w-[300px] break-words">{pair.value}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
+                <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => removeKeyValuePair(index)}>
+                  <Trash2 className="h-3 w-3" />
+                </Button>
               </div>
-            </CommandItem>
-          ))}
-        </CommandGroup>
-      </CommandList>
-    </Command>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Add new key-value pair */}
+      <div className="space-y-2">
+        <div className="space-y-2">
+          <Input
+            placeholder="Key"
+            value={newKey}
+            onChange={(e) => setNewKey(e.target.value)}
+            className="h-8"
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && newKey.trim() && newValue.trim()) {
+                addKeyValuePair()
+              }
+            }}
+          />
+          <Input
+            placeholder="Value"
+            value={newValue}
+            onChange={(e) => setNewValue(e.target.value)}
+            className="h-8"
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && newKey.trim() && newValue.trim()) {
+                addKeyValuePair()
+              }
+            }}
+          />
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full h-8"
+            onClick={addKeyValuePair}
+            disabled={!newKey.trim() || !newValue.trim()}
+          >
+            <Plus className="h-3 w-3 mr-1" />
+            Add Label
+          </Button>
+        </div>
+      </div>
+    </div>
   )
 }

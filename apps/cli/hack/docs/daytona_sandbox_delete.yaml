@@ -6,10 +6,6 @@ options:
     shorthand: a
     default_value: 'false'
     usage: Delete all sandboxes
-  - name: force
-    shorthand: f
-    default_value: 'false'
-    usage: Force delete
 inherited_options:
   - name: help
     default_value: 'false'

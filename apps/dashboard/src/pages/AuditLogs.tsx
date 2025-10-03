@@ -46,8 +46,8 @@ const AuditLogs: React.FC = () => {
         const response = (
           await auditApi.getOrganizationAuditLogs(
             selectedOrganization.id,
+            paginationParams.pageIndex + 1, // 1-indexed
             paginationParams.pageSize,
-            paginationParams.pageIndex + 1,
           )
         ).data
         setData(response)
@@ -145,6 +145,7 @@ const AuditLogs: React.FC = () => {
         data={data.items}
         loading={loadingData}
         pageCount={data.totalPages}
+        totalItems={data.total}
         onPaginationChange={handlePaginationChange}
         pagination={{
           pageIndex: paginationParams.pageIndex,

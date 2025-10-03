@@ -16,6 +16,7 @@ import {
   Camera,
   HardDrive,
   MemoryStick,
+  RefreshCw,
 } from 'lucide-react'
 import { Button } from '../ui/button'
 import {
@@ -47,10 +48,14 @@ const RESOURCE_FILTERS = [
 
 export function SandboxTableHeader({
   table,
-  labelOptions,
   regionOptions,
+  regionsDataIsLoading,
   snapshots,
-  loadingSnapshots,
+  snapshotsDataIsLoading,
+  snapshotsDataHasMore,
+  onChangeSnapshotSearchValue,
+  onRefresh,
+  isRefreshing = false,
 }: SandboxTableHeaderProps) {
   const [open, setOpen] = React.useState(false)
   const currentSort = table.getState().sorting[0]?.id || ''
@@ -72,6 +77,17 @@ export function SandboxTableHeader({
           placeholder="Search by ID"
           className="max-w-[200px]"
         />
+
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={onRefresh}
+          disabled={isRefreshing}
+          className="flex items-center gap-2"
+        >
+          <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+          Refresh
+        </Button>
 
         <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild>
@@ -168,7 +184,9 @@ export function SandboxTableHeader({
                     value={(table.getColumn('snapshot')?.getFilterValue() as string[]) || []}
                     onFilterChange={(value) => table.getColumn('snapshot')?.setFilterValue(value)}
                     snapshots={snapshots}
-                    loadingSnapshots={loadingSnapshots}
+                    isLoading={snapshotsDataIsLoading}
+                    hasMore={snapshotsDataHasMore}
+                    onChangeSnapshotSearchValue={onChangeSnapshotSearchValue}
                   />
                 </DropdownMenuSubContent>
               </DropdownMenuPortal>
@@ -184,6 +202,7 @@ export function SandboxTableHeader({
                     value={(table.getColumn('region')?.getFilterValue() as string[]) || []}
                     onFilterChange={(value) => table.getColumn('region')?.setFilterValue(value)}
                     options={regionOptions}
+                    isLoading={regionsDataIsLoading}
                   />
                 </DropdownMenuSubContent>
               </DropdownMenuPortal>
@@ -215,7 +234,6 @@ export function SandboxTableHeader({
                   <LabelFilter
                     value={(table.getColumn('labels')?.getFilterValue() as string[]) || []}
                     onFilterChange={(value) => table.getColumn('labels')?.setFilterValue(value)}
-                    options={labelOptions}
                   />
                 </DropdownMenuSubContent>
               </DropdownMenuPortal>
@@ -228,7 +246,7 @@ export function SandboxTableHeader({
               <DropdownMenuPortal>
                 <DropdownMenuSubContent className="p-3 w-92">
                   <LastEventFilter
-                    onFilterChange={(value: Date[] | undefined) => table.getColumn('lastEvent')?.setFilterValue(value)}
+                    onFilterChange={(value) => table.getColumn('lastEvent')?.setFilterValue(value)}
                     value={(table.getColumn('lastEvent')?.getFilterValue() as Date[]) || []}
                   />
                 </DropdownMenuSubContent>
@@ -251,7 +269,9 @@ export function SandboxTableHeader({
             value={(table.getColumn('snapshot')?.getFilterValue() as string[]) || []}
             onFilterChange={(value) => table.getColumn('snapshot')?.setFilterValue(value)}
             snapshots={snapshots}
-            loadingSnapshots={loadingSnapshots}
+            isLoading={snapshotsDataIsLoading}
+            hasMore={snapshotsDataHasMore}
+            onChangeSnapshotSearchValue={onChangeSnapshotSearchValue}
           />
         )}
 
@@ -260,6 +280,7 @@ export function SandboxTableHeader({
             value={(table.getColumn('region')?.getFilterValue() as string[]) || []}
             onFilterChange={(value) => table.getColumn('region')?.setFilterValue(value)}
             options={regionOptions}
+            isLoading={regionsDataIsLoading}
           />
         )}
 
@@ -279,7 +300,6 @@ export function SandboxTableHeader({
           <LabelFilterIndicator
             value={(table.getColumn('labels')?.getFilterValue() as string[]) || []}
             onFilterChange={(value) => table.getColumn('labels')?.setFilterValue(value)}
-            options={labelOptions}
           />
         )}
 

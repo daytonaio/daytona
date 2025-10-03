@@ -24,60 +24,18 @@ var StartCmd = &cobra.Command{
 			return err
 		}
 
-		sandboxList, res, err := apiClient.SandboxAPI.ListSandboxes(ctx).Execute()
+		sandboxIdArg := args[0]
+
+		_, res, err := apiClient.SandboxAPI.StartSandbox(ctx, sandboxIdArg).Execute()
 		if err != nil {
 			return apiclient.HandleErrorResponse(res, err)
 		}
 
-		if len(args) == 0 {
-			if allFlag {
-				var startedCount int
-
-				for _, s := range sandboxList {
-					_, res, err := apiClient.SandboxAPI.StartSandbox(ctx, s.Id).Execute()
-					if err != nil {
-						fmt.Printf("Failed to start sandbox %s: %s\n", s.Id, apiclient.HandleErrorResponse(res, err))
-					} else {
-						startedCount++
-					}
-				}
-
-				view_common.RenderInfoMessageBold(fmt.Sprintf("Started %d sandboxes", startedCount))
-				return nil
-			}
-			return cmd.Help()
-		}
-
-		startArg := args[0]
-		var sandboxCount int
-
-		for _, s := range sandboxList {
-			if s.Id == args[0] {
-				startArg = s.Id
-				sandboxCount++
-			}
-		}
-
-		switch sandboxCount {
-		case 0:
-			return fmt.Errorf("sandbox %s not found", args[0])
-		case 1:
-			_, res, err := apiClient.SandboxAPI.StartSandbox(ctx, startArg).Execute()
-			if err != nil {
-				return apiclient.HandleErrorResponse(res, err)
-			}
-
-			view_common.RenderInfoMessageBold(fmt.Sprintf("Sandbox %s started", args[0]))
-		default:
-			return fmt.Errorf("multiple sandboxes with name %s found - please use the sandbox ID instead", args[0])
-		}
+		view_common.RenderInfoMessageBold(fmt.Sprintf("Sandbox %s started", sandboxIdArg))
 
 		return nil
 	},
 }
 
-var allFlag bool
-
 func init() {
-	StartCmd.Flags().BoolVarP(&allFlag, "all", "a", false, "Start all sandboxes")
 }

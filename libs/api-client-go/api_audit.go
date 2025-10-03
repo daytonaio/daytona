@@ -175,19 +175,19 @@ func (a *AuditAPIService) CreateAuditLogExecute(r AuditAPICreateAuditLogRequest)
 type AuditAPIGetAllAuditLogsRequest struct {
 	ctx        context.Context
 	ApiService AuditAPI
-	limit      *float32
 	page       *float32
+	limit      *float32
 }
 
-// Number of items per page (default: 10)
-func (r AuditAPIGetAllAuditLogsRequest) Limit(limit float32) AuditAPIGetAllAuditLogsRequest {
-	r.limit = &limit
+// Page number of the results
+func (r AuditAPIGetAllAuditLogsRequest) Page(page float32) AuditAPIGetAllAuditLogsRequest {
+	r.page = &page
 	return r
 }
 
-// Page number (default: 1)
-func (r AuditAPIGetAllAuditLogsRequest) Page(page float32) AuditAPIGetAllAuditLogsRequest {
-	r.page = &page
+// Number of results per page
+func (r AuditAPIGetAllAuditLogsRequest) Limit(limit float32) AuditAPIGetAllAuditLogsRequest {
+	r.limit = &limit
 	return r
 }
 
@@ -230,11 +230,17 @@ func (a *AuditAPIService) GetAllAuditLogsExecute(r AuditAPIGetAllAuditLogsReques
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
 
-	if r.limit != nil {
-		parameterAddToHeaderOrQuery(localVarQueryParams, "limit", r.limit, "form", "")
-	}
 	if r.page != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "page", r.page, "form", "")
+	} else {
+		var defaultValue float32 = 1
+		r.page = &defaultValue
+	}
+	if r.limit != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "limit", r.limit, "form", "")
+	} else {
+		var defaultValue float32 = 100
+		r.limit = &defaultValue
 	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
@@ -294,19 +300,19 @@ type AuditAPIGetOrganizationAuditLogsRequest struct {
 	ctx            context.Context
 	ApiService     AuditAPI
 	organizationId string
-	limit          *float32
 	page           *float32
+	limit          *float32
 }
 
-// Number of items per page (default: 10)
-func (r AuditAPIGetOrganizationAuditLogsRequest) Limit(limit float32) AuditAPIGetOrganizationAuditLogsRequest {
-	r.limit = &limit
+// Page number of the results
+func (r AuditAPIGetOrganizationAuditLogsRequest) Page(page float32) AuditAPIGetOrganizationAuditLogsRequest {
+	r.page = &page
 	return r
 }
 
-// Page number (default: 1)
-func (r AuditAPIGetOrganizationAuditLogsRequest) Page(page float32) AuditAPIGetOrganizationAuditLogsRequest {
-	r.page = &page
+// Number of results per page
+func (r AuditAPIGetOrganizationAuditLogsRequest) Limit(limit float32) AuditAPIGetOrganizationAuditLogsRequest {
+	r.limit = &limit
 	return r
 }
 
@@ -352,11 +358,17 @@ func (a *AuditAPIService) GetOrganizationAuditLogsExecute(r AuditAPIGetOrganizat
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
 
-	if r.limit != nil {
-		parameterAddToHeaderOrQuery(localVarQueryParams, "limit", r.limit, "form", "")
-	}
 	if r.page != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "page", r.page, "form", "")
+	} else {
+		var defaultValue float32 = 1
+		r.page = &defaultValue
+	}
+	if r.limit != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "limit", r.limit, "form", "")
+	} else {
+		var defaultValue float32 = 100
+		r.limit = &defaultValue
 	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}

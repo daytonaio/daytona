@@ -6,8 +6,9 @@
 # Edit the async source and re-run this script.
 
 import time
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 
+from daytona_api_client import PaginatedSandboxes as PaginatedSandboxesDto
 from daytona_api_client import PortPreviewUrl
 from daytona_api_client import Sandbox as SandboxDto
 from daytona_api_client import SandboxApi, SshAccessDto, SshAccessValidationDto, ToolboxApi
@@ -285,7 +286,7 @@ class Sandbox(SandboxDto):
             timeout (Optional[float]): Timeout (in seconds) for sandbox deletion. 0 means no timeout.
                 Default is 60 seconds.
         """
-        self._sandbox_api.delete_sandbox(self.id, force=True, _request_timeout=timeout or None)
+        self._sandbox_api.delete_sandbox(self.id, _request_timeout=timeout or None)
         self.refresh_data()
 
     @intercept_errors(message_prefix="Failure during waiting for sandbox to start: ")
@@ -524,3 +525,18 @@ class Sandbox(SandboxDto):
         self.updated_at = sandbox_dto.updated_at
         self.network_block_all = sandbox_dto.network_block_all
         self.network_allow_list = sandbox_dto.network_allow_list
+
+
+class PaginatedSandboxes(PaginatedSandboxesDto):
+    """Represents a paginated list of Daytona Sandboxes.
+
+    Attributes:
+        items (List[Sandbox]): List of Sandbox instances in the current page.
+        total (int): Total number of Sandboxes across all pages.
+        page (int): Current page number.
+        total_pages (int): Total number of pages available.
+    """
+
+    items: List[Sandbox]
+
+    model_config = ConfigDict(arbitrary_types_allowed=True)

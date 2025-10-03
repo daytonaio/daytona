@@ -10,14 +10,13 @@ import {
   SnapshotState,
   CreateSnapshot,
   Configuration,
+  PaginatedSnapshots as PaginatedSnapshotsDto,
 } from '@daytonaio/api-client'
 import { DaytonaError } from './errors/DaytonaError'
 import { Image } from './Image'
 import { Resources } from './Daytona'
 import { processStreamingResponse } from './utils/Stream'
 import { dynamicImport } from './utils/Import'
-
-const SNAPSHOTS_FETCH_LIMIT = 200
 
 /**
  * Represents a Daytona Snapshot which is a pre-configured sandbox.
@@ -40,6 +39,18 @@ const SNAPSHOTS_FETCH_LIMIT = 200
  * @property {Date} lastUsedAt - Timestamp when the Snapshot was last used.
  */
 export type Snapshot = SnapshotDto & { __brand: 'Snapshot' }
+
+/**
+ * Represents a paginated list of Daytona Snapshots.
+ *
+ * @property {Snapshot[]} items - List of Snapshot instances in the current page.
+ * @property {number} total - Total number of Snapshots across all pages.
+ * @property {number} page - Current page number.
+ * @property {number} totalPages - Total number of pages available.
+ */
+export interface PaginatedSnapshots extends Omit<PaginatedSnapshotsDto, 'items'> {
+  items: Snapshot[]
+}
 
 /**
  * Parameters for creating a new snapshot.
@@ -70,22 +81,26 @@ export class SnapshotService {
   ) {}
 
   /**
-   * List all Snapshots.
+   * List paginated list of Snapshots.
    *
-   * @returns {Promise<Snapshot[]>} List of all Snapshots accessible to the user
+   * @param {number} [page] - Page number for pagination (starting from 1)
+   * @param {number} [limit] - Maximum number of items per page
+   * @returns {Promise<PaginatedSnapshots>} Paginated list of Snapshots
    *
    * @example
    * const daytona = new Daytona();
-   * const snapshots = await daytona.snapshot.list();
-   * console.log(`Found ${snapshots.length} snapshots`);
-   * snapshots.forEach(snapshot => console.log(`${snapshot.name} (${snapshot.imageName})`));
+   * const result = await daytona.snapshot.list(2, 10);
+   * console.log(`Found ${result.total} snapshots`);
+   * result.items.forEach(snapshot => console.log(`${snapshot.name} (${snapshot.imageName})`));
    */
-  async list(): Promise<Snapshot[]> {
-    let response = await this.snapshotsApi.getAllSnapshots(undefined, SNAPSHOTS_FETCH_LIMIT)
-    if (response.data.total > SNAPSHOTS_FETCH_LIMIT) {
-      response = await this.snapshotsApi.getAllSnapshots(undefined, response.data.total)
+  async list(page?: number, limit?: number): Promise<PaginatedSnapshots> {
+    const response = await this.snapshotsApi.getAllSnapshots(undefined, page, limit)
+    return {
+      items: response.data.items.map((snapshot) => snapshot as Snapshot),
+      total: response.data.total,
+      page: response.data.page,
+      totalPages: response.data.totalPages,
     }
-    return response.data.items as Snapshot[]
   }
 
   /**
