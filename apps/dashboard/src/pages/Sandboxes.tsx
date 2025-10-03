@@ -343,6 +343,12 @@ const Sandboxes: React.FC = () => {
       oldState: SandboxState
       newState: SandboxState
     }) => {
+      // warm pool sandboxes
+      if (data.oldState === data.newState && data.newState === SandboxState.STARTED) {
+        handleSandboxCreatedEvent(data.sandbox)
+        return
+      }
+
       let updatedState = data.newState
 
       // error,build_failed | destroyed should be displayed as destroyed in the UI
