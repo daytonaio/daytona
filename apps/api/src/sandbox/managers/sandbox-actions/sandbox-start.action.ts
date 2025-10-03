@@ -193,7 +193,7 @@ export class SandboxStartAction extends SandboxAction {
         await this.updateSandboxState(sandbox.id, SandboxState.UNKNOWN, runner.id)
         return SYNC_AGAIN
       }
-    } catch (error) {
+    } catch {
       // Continue to next assignment method
     }
 
@@ -206,7 +206,7 @@ export class SandboxStartAction extends SandboxAction {
     for (const snapshotRunner of snapshotRunners) {
       // Consider removing the runner usage rate check or improving it
       const runner = await this.runnerService.findOne(snapshotRunner.runnerId)
-      if (runner.used < runner.capacity) {
+      if (runner.availabilityScore >= this.configService.getOrThrow('runnerUsage.declarativeBuildScoreThreshold')) {
         if (snapshotRunner.state === targetState) {
           await this.updateSandboxState(sandbox.id, targetSandboxState, runner.id)
           return SYNC_AGAIN
@@ -231,7 +231,7 @@ export class SandboxStartAction extends SandboxAction {
         sandboxClass: sandbox.class,
         excludedRunnerIds: excludedRunnerIds,
       })
-    } catch (error) {
+    } catch {
       // TODO: reconsider the timeout here
       // No runners available, wait for 3 seconds and retry
       await new Promise((resolve) => setTimeout(resolve, 3000))
@@ -248,7 +248,6 @@ export class SandboxStartAction extends SandboxAction {
       await this.updateSandboxState(sandbox.id, SandboxState.PULLING_SNAPSHOT, runner.id)
     }
 
-    await this.runnerService.recalculateRunnerUsage(runner)
     return SYNC_AGAIN
   }
 
