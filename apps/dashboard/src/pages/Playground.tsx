@@ -62,13 +62,10 @@ const Playground: React.FC = () => {
           <div className="flex-1 min-w-0 flex flex-col space-y-2">
             {playgroundCategory === PlaygroundCategories.SANDBOX && <SandboxCodeSnippetsResponse />}
             {playgroundCategory === PlaygroundCategories.TERMINAL && (
-              <WebTerminal sandboxId="93eb77da-54a2-4f34-872e-6c9843be0228" getPortPreviewUrl={getPortPreviewUrl} />
+              <WebTerminal getPortPreviewUrl={getPortPreviewUrl} />
             )}
             {playgroundCategory === PlaygroundCategories.VNC && (
-              <VNCDesktopWindowResponse
-                sandboxId="dda297bb-6afc-4439-a3ac-1c2b42ec5f2c"
-                getPortPreviewUrl={getPortPreviewUrl}
-              />
+              <VNCDesktopWindowResponse getPortPreviewUrl={getPortPreviewUrl} />
             )}
           </div>
         </div>
