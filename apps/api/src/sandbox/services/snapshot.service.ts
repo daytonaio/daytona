@@ -12,7 +12,7 @@ import {
   Logger,
 } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { Repository, Not, In, Raw } from 'typeorm'
+import { Repository, Not, In, Raw, ILike, FindOptionsWhere } from 'typeorm'
 import { Snapshot } from '../entities/snapshot.entity'
 import { SnapshotState } from '../enums/snapshot-state.enum'
 import { CreateSnapshotDto } from '../dto/create-snapshot.dto'
@@ -32,6 +32,7 @@ import { SnapshotRunnerState } from '../enums/snapshot-runner-state.enum'
 import { PaginatedList } from '../../common/interfaces/paginated-list.interface'
 import { OrganizationUsageService } from '../../organization/services/organization-usage.service'
 import { RedisLockProvider } from '../common/redis-lock.provider'
+import { SnapshotSortDirection, SnapshotSortField } from '../dto/list-snapshots-query.dto'
 
 const IMAGE_NAME_REGEX = /^[a-zA-Z0-9_.\-:]+(\/[a-zA-Z0-9_.\-:]+)*$/
 @Injectable()
@@ -170,20 +171,45 @@ export class SnapshotService {
     await this.snapshotRepository.save(snapshot)
   }
 
-  async getAllSnapshots(organizationId: string, page = 1, limit = 10): Promise<PaginatedList<Snapshot>> {
+  async getAllSnapshots(
+    organizationId: string,
+    page = 1,
+    limit = 10,
+    filters?: { name?: string },
+    sort?: { field?: SnapshotSortField; direction?: SnapshotSortDirection },
+  ): Promise<PaginatedList<Snapshot>> {
     const pageNum = Number(page)
     const limitNum = Number(limit)
 
+    const { name } = filters || {}
+    const { field: sortField, direction: sortDirection } = sort || {}
+
+    const baseFindOptions: FindOptionsWhere<Snapshot> = {
+      ...(name ? { name: ILike(`%${name}%`) } : {}),
+    }
+
+    // Retrieve all snapshots belonging to the organization as well as all general snapshots
+    const where: FindOptionsWhere<Snapshot>[] = [
+      {
+        ...baseFindOptions,
+        organizationId,
+      },
+      {
+        ...baseFindOptions,
+        general: true,
+        hideFromUsers: false,
+      },
+    ]
+
     const [items, total] = await this.snapshotRepository.findAndCount({
-      // Retrieve all snapshots belonging to the organization as well as all general snapshots
-      where: [{ organizationId }, { general: true, hideFromUsers: false }],
+      where,
       order: {
         general: 'ASC', // Sort general snapshots last
-        lastUsedAt: {
-          direction: 'DESC',
+        [sortField]: {
+          direction: sortDirection,
           nulls: 'LAST',
         },
-        createdAt: 'DESC',
+        ...(sortField !== SnapshotSortField.CREATED_AT && { createdAt: 'DESC' }),
       },
       skip: (pageNum - 1) * limitNum,
       take: limitNum,

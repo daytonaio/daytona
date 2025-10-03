@@ -17,7 +17,7 @@ from pydantic import validate_call, Field, StrictFloat, StrictStr, StrictInt
 from typing import Any, Dict, List, Optional, Tuple, Union
 from typing_extensions import Annotated
 
-from pydantic import Field, StrictFloat, StrictInt, StrictStr
+from pydantic import Field, StrictStr
 from typing import Optional, Union
 from typing_extensions import Annotated
 from daytona_api_client_async.models.audit_log import AuditLog
@@ -317,8 +317,8 @@ class AuditApi:
     @validate_call
     async def get_all_audit_logs(
         self,
-        limit: Annotated[Optional[Union[StrictFloat, StrictInt]], Field(description="Number of items per page (default: 10)")] = None,
-        page: Annotated[Optional[Union[StrictFloat, StrictInt]], Field(description="Page number (default: 1)")] = None,
+        page: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Page number of the results")] = None,
+        limit: Annotated[Optional[Union[Annotated[float, Field(le=200, strict=True, ge=1)], Annotated[int, Field(le=200, strict=True, ge=1)]]], Field(description="Number of results per page")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -335,10 +335,10 @@ class AuditApi:
         """Get all audit logs
 
 
-        :param limit: Number of items per page (default: 10)
-        :type limit: float
-        :param page: Page number (default: 1)
+        :param page: Page number of the results
         :type page: float
+        :param limit: Number of results per page
+        :type limit: float
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -362,8 +362,8 @@ class AuditApi:
         """ # noqa: E501
 
         _param = self._get_all_audit_logs_serialize(
-            limit=limit,
             page=page,
+            limit=limit,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -387,8 +387,8 @@ class AuditApi:
     @validate_call
     async def get_all_audit_logs_with_http_info(
         self,
-        limit: Annotated[Optional[Union[StrictFloat, StrictInt]], Field(description="Number of items per page (default: 10)")] = None,
-        page: Annotated[Optional[Union[StrictFloat, StrictInt]], Field(description="Page number (default: 1)")] = None,
+        page: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Page number of the results")] = None,
+        limit: Annotated[Optional[Union[Annotated[float, Field(le=200, strict=True, ge=1)], Annotated[int, Field(le=200, strict=True, ge=1)]]], Field(description="Number of results per page")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -405,10 +405,10 @@ class AuditApi:
         """Get all audit logs
 
 
-        :param limit: Number of items per page (default: 10)
-        :type limit: float
-        :param page: Page number (default: 1)
+        :param page: Page number of the results
         :type page: float
+        :param limit: Number of results per page
+        :type limit: float
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -432,8 +432,8 @@ class AuditApi:
         """ # noqa: E501
 
         _param = self._get_all_audit_logs_serialize(
-            limit=limit,
             page=page,
+            limit=limit,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -457,8 +457,8 @@ class AuditApi:
     @validate_call
     async def get_all_audit_logs_without_preload_content(
         self,
-        limit: Annotated[Optional[Union[StrictFloat, StrictInt]], Field(description="Number of items per page (default: 10)")] = None,
-        page: Annotated[Optional[Union[StrictFloat, StrictInt]], Field(description="Page number (default: 1)")] = None,
+        page: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Page number of the results")] = None,
+        limit: Annotated[Optional[Union[Annotated[float, Field(le=200, strict=True, ge=1)], Annotated[int, Field(le=200, strict=True, ge=1)]]], Field(description="Number of results per page")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -475,10 +475,10 @@ class AuditApi:
         """Get all audit logs
 
 
-        :param limit: Number of items per page (default: 10)
-        :type limit: float
-        :param page: Page number (default: 1)
+        :param page: Page number of the results
         :type page: float
+        :param limit: Number of results per page
+        :type limit: float
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -502,8 +502,8 @@ class AuditApi:
         """ # noqa: E501
 
         _param = self._get_all_audit_logs_serialize(
-            limit=limit,
             page=page,
+            limit=limit,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -522,8 +522,8 @@ class AuditApi:
 
     def _get_all_audit_logs_serialize(
         self,
-        limit,
         page,
+        limit,
         _request_auth,
         _content_type,
         _headers,
@@ -546,13 +546,13 @@ class AuditApi:
 
         # process the path parameters
         # process the query parameters
-        if limit is not None:
-            
-            _query_params.append(('limit', limit))
-            
         if page is not None:
             
             _query_params.append(('page', page))
+            
+        if limit is not None:
+            
+            _query_params.append(('limit', limit))
             
         # process the header parameters
         # process the form parameters
@@ -596,8 +596,8 @@ class AuditApi:
     async def get_organization_audit_logs(
         self,
         organization_id: Annotated[StrictStr, Field(description="Organization ID")],
-        limit: Annotated[Optional[Union[StrictFloat, StrictInt]], Field(description="Number of items per page (default: 10)")] = None,
-        page: Annotated[Optional[Union[StrictFloat, StrictInt]], Field(description="Page number (default: 1)")] = None,
+        page: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Page number of the results")] = None,
+        limit: Annotated[Optional[Union[Annotated[float, Field(le=200, strict=True, ge=1)], Annotated[int, Field(le=200, strict=True, ge=1)]]], Field(description="Number of results per page")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -616,10 +616,10 @@ class AuditApi:
 
         :param organization_id: Organization ID (required)
         :type organization_id: str
-        :param limit: Number of items per page (default: 10)
-        :type limit: float
-        :param page: Page number (default: 1)
+        :param page: Page number of the results
         :type page: float
+        :param limit: Number of results per page
+        :type limit: float
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -644,8 +644,8 @@ class AuditApi:
 
         _param = self._get_organization_audit_logs_serialize(
             organization_id=organization_id,
-            limit=limit,
             page=page,
+            limit=limit,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -670,8 +670,8 @@ class AuditApi:
     async def get_organization_audit_logs_with_http_info(
         self,
         organization_id: Annotated[StrictStr, Field(description="Organization ID")],
-        limit: Annotated[Optional[Union[StrictFloat, StrictInt]], Field(description="Number of items per page (default: 10)")] = None,
-        page: Annotated[Optional[Union[StrictFloat, StrictInt]], Field(description="Page number (default: 1)")] = None,
+        page: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Page number of the results")] = None,
+        limit: Annotated[Optional[Union[Annotated[float, Field(le=200, strict=True, ge=1)], Annotated[int, Field(le=200, strict=True, ge=1)]]], Field(description="Number of results per page")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -690,10 +690,10 @@ class AuditApi:
 
         :param organization_id: Organization ID (required)
         :type organization_id: str
-        :param limit: Number of items per page (default: 10)
-        :type limit: float
-        :param page: Page number (default: 1)
+        :param page: Page number of the results
         :type page: float
+        :param limit: Number of results per page
+        :type limit: float
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -718,8 +718,8 @@ class AuditApi:
 
         _param = self._get_organization_audit_logs_serialize(
             organization_id=organization_id,
-            limit=limit,
             page=page,
+            limit=limit,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -744,8 +744,8 @@ class AuditApi:
     async def get_organization_audit_logs_without_preload_content(
         self,
         organization_id: Annotated[StrictStr, Field(description="Organization ID")],
-        limit: Annotated[Optional[Union[StrictFloat, StrictInt]], Field(description="Number of items per page (default: 10)")] = None,
-        page: Annotated[Optional[Union[StrictFloat, StrictInt]], Field(description="Page number (default: 1)")] = None,
+        page: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Page number of the results")] = None,
+        limit: Annotated[Optional[Union[Annotated[float, Field(le=200, strict=True, ge=1)], Annotated[int, Field(le=200, strict=True, ge=1)]]], Field(description="Number of results per page")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -764,10 +764,10 @@ class AuditApi:
 
         :param organization_id: Organization ID (required)
         :type organization_id: str
-        :param limit: Number of items per page (default: 10)
-        :type limit: float
-        :param page: Page number (default: 1)
+        :param page: Page number of the results
         :type page: float
+        :param limit: Number of results per page
+        :type limit: float
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -792,8 +792,8 @@ class AuditApi:
 
         _param = self._get_organization_audit_logs_serialize(
             organization_id=organization_id,
-            limit=limit,
             page=page,
+            limit=limit,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -813,8 +813,8 @@ class AuditApi:
     def _get_organization_audit_logs_serialize(
         self,
         organization_id,
-        limit,
         page,
+        limit,
         _request_auth,
         _content_type,
         _headers,
@@ -839,13 +839,13 @@ class AuditApi:
         if organization_id is not None:
             _path_params['organizationId'] = organization_id
         # process the query parameters
-        if limit is not None:
-            
-            _query_params.append(('limit', limit))
-            
         if page is not None:
             
             _query_params.append(('page', page))
+            
+        if limit is not None:
+            
+            _query_params.append(('limit', limit))
             
         # process the header parameters
         # process the form parameters

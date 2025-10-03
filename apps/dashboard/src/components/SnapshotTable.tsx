@@ -46,6 +46,7 @@ interface DataTableProps {
     pageSize: number
   }
   pageCount: number
+  totalItems: number
   onPaginationChange: (pagination: { pageIndex: number; pageSize: number }) => void
 }
 
@@ -58,6 +59,7 @@ export function SnapshotTable({
   onDeactivate,
   pagination,
   pageCount,
+  totalItems,
   onBulkDelete,
   onPaginationChange,
 }: DataTableProps) {
@@ -268,7 +270,7 @@ export function SnapshotTable({
             </PopoverContent>
           </Popover>
         )}
-        {deletePermitted && <Pagination table={table} selectionEnabled entityName="Snapshots" />}
+        <Pagination table={table} selectionEnabled={deletePermitted} entityName="Snapshots" totalItems={totalItems} />
       </div>
     </div>
   )

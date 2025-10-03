@@ -17,11 +17,11 @@ from pydantic import validate_call, Field, StrictFloat, StrictStr, StrictInt
 from typing import Any, Dict, List, Optional, Tuple, Union
 from typing_extensions import Annotated
 
-from pydantic import Field, StrictBool, StrictFloat, StrictInt, StrictStr
+from pydantic import Field, StrictBool, StrictStr, field_validator
 from typing import Optional, Union
 from typing_extensions import Annotated
 from daytona_api_client.models.create_snapshot import CreateSnapshot
-from daytona_api_client.models.paginated_snapshots_dto import PaginatedSnapshotsDto
+from daytona_api_client.models.paginated_snapshots import PaginatedSnapshots
 from daytona_api_client.models.set_snapshot_general_status_dto import SetSnapshotGeneralStatusDto
 from daytona_api_client.models.snapshot_dto import SnapshotDto
 
@@ -1160,8 +1160,11 @@ class SnapshotsApi:
     def get_all_snapshots(
         self,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
-        limit: Annotated[Optional[Union[StrictFloat, StrictInt]], Field(description="Number of items per page")] = None,
-        page: Annotated[Optional[Union[StrictFloat, StrictInt]], Field(description="Page number")] = None,
+        page: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Page number of the results")] = None,
+        limit: Annotated[Optional[Union[Annotated[float, Field(le=200, strict=True, ge=1)], Annotated[int, Field(le=200, strict=True, ge=1)]]], Field(description="Number of results per page")] = None,
+        name: Annotated[Optional[StrictStr], Field(description="Filter by partial name match")] = None,
+        sort: Annotated[Optional[StrictStr], Field(description="Field to sort by")] = None,
+        order: Annotated[Optional[StrictStr], Field(description="Direction to sort by")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1174,16 +1177,22 @@ class SnapshotsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> PaginatedSnapshotsDto:
+    ) -> PaginatedSnapshots:
         """List all snapshots
 
 
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
-        :param limit: Number of items per page
-        :type limit: float
-        :param page: Page number
+        :param page: Page number of the results
         :type page: float
+        :param limit: Number of results per page
+        :type limit: float
+        :param name: Filter by partial name match
+        :type name: str
+        :param sort: Field to sort by
+        :type sort: str
+        :param order: Direction to sort by
+        :type order: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -1208,8 +1217,11 @@ class SnapshotsApi:
 
         _param = self._get_all_snapshots_serialize(
             x_daytona_organization_id=x_daytona_organization_id,
-            limit=limit,
             page=page,
+            limit=limit,
+            name=name,
+            sort=sort,
+            order=order,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -1217,7 +1229,7 @@ class SnapshotsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "PaginatedSnapshotsDto",
+            '200': "PaginatedSnapshots",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -1234,8 +1246,11 @@ class SnapshotsApi:
     def get_all_snapshots_with_http_info(
         self,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
-        limit: Annotated[Optional[Union[StrictFloat, StrictInt]], Field(description="Number of items per page")] = None,
-        page: Annotated[Optional[Union[StrictFloat, StrictInt]], Field(description="Page number")] = None,
+        page: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Page number of the results")] = None,
+        limit: Annotated[Optional[Union[Annotated[float, Field(le=200, strict=True, ge=1)], Annotated[int, Field(le=200, strict=True, ge=1)]]], Field(description="Number of results per page")] = None,
+        name: Annotated[Optional[StrictStr], Field(description="Filter by partial name match")] = None,
+        sort: Annotated[Optional[StrictStr], Field(description="Field to sort by")] = None,
+        order: Annotated[Optional[StrictStr], Field(description="Direction to sort by")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1248,16 +1263,22 @@ class SnapshotsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[PaginatedSnapshotsDto]:
+    ) -> ApiResponse[PaginatedSnapshots]:
         """List all snapshots
 
 
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
-        :param limit: Number of items per page
-        :type limit: float
-        :param page: Page number
+        :param page: Page number of the results
         :type page: float
+        :param limit: Number of results per page
+        :type limit: float
+        :param name: Filter by partial name match
+        :type name: str
+        :param sort: Field to sort by
+        :type sort: str
+        :param order: Direction to sort by
+        :type order: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -1282,8 +1303,11 @@ class SnapshotsApi:
 
         _param = self._get_all_snapshots_serialize(
             x_daytona_organization_id=x_daytona_organization_id,
-            limit=limit,
             page=page,
+            limit=limit,
+            name=name,
+            sort=sort,
+            order=order,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -1291,7 +1315,7 @@ class SnapshotsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "PaginatedSnapshotsDto",
+            '200': "PaginatedSnapshots",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -1308,8 +1332,11 @@ class SnapshotsApi:
     def get_all_snapshots_without_preload_content(
         self,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
-        limit: Annotated[Optional[Union[StrictFloat, StrictInt]], Field(description="Number of items per page")] = None,
-        page: Annotated[Optional[Union[StrictFloat, StrictInt]], Field(description="Page number")] = None,
+        page: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Page number of the results")] = None,
+        limit: Annotated[Optional[Union[Annotated[float, Field(le=200, strict=True, ge=1)], Annotated[int, Field(le=200, strict=True, ge=1)]]], Field(description="Number of results per page")] = None,
+        name: Annotated[Optional[StrictStr], Field(description="Filter by partial name match")] = None,
+        sort: Annotated[Optional[StrictStr], Field(description="Field to sort by")] = None,
+        order: Annotated[Optional[StrictStr], Field(description="Direction to sort by")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1328,10 +1355,16 @@ class SnapshotsApi:
 
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
-        :param limit: Number of items per page
-        :type limit: float
-        :param page: Page number
+        :param page: Page number of the results
         :type page: float
+        :param limit: Number of results per page
+        :type limit: float
+        :param name: Filter by partial name match
+        :type name: str
+        :param sort: Field to sort by
+        :type sort: str
+        :param order: Direction to sort by
+        :type order: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -1356,8 +1389,11 @@ class SnapshotsApi:
 
         _param = self._get_all_snapshots_serialize(
             x_daytona_organization_id=x_daytona_organization_id,
-            limit=limit,
             page=page,
+            limit=limit,
+            name=name,
+            sort=sort,
+            order=order,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -1365,7 +1401,7 @@ class SnapshotsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "PaginatedSnapshotsDto",
+            '200': "PaginatedSnapshots",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -1377,8 +1413,11 @@ class SnapshotsApi:
     def _get_all_snapshots_serialize(
         self,
         x_daytona_organization_id,
-        limit,
         page,
+        limit,
+        name,
+        sort,
+        order,
         _request_auth,
         _content_type,
         _headers,
@@ -1401,13 +1440,25 @@ class SnapshotsApi:
 
         # process the path parameters
         # process the query parameters
+        if page is not None:
+            
+            _query_params.append(('page', page))
+            
         if limit is not None:
             
             _query_params.append(('limit', limit))
             
-        if page is not None:
+        if name is not None:
             
-            _query_params.append(('page', page))
+            _query_params.append(('name', name))
+            
+        if sort is not None:
+            
+            _query_params.append(('sort', sort))
+            
+        if order is not None:
+            
+            _query_params.append(('order', order))
             
         # process the header parameters
         if x_daytona_organization_id is not None:

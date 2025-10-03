@@ -5,6 +5,14 @@ description: A reference of supported operations using the Daytona API.
 
 import Label from '@components/Label.astro'
 
+## GET /config
+
+### Responses
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | Daytona configuration |
+
+
 ## POST /api-keys
 
 ### Parameters
@@ -63,6 +71,21 @@ import Label from '@components/Label.astro'
 | Name | Location | Required | Type | Description |
 | :--- | :------- | :------- | :--- | :---------- |
 | **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
+| **`name`** | path | true | undefined | undefined |
+
+### Responses
+| Status Code | Description |
+| :-------- | :---------- |
+| **`204`** | API key deleted successfully. |
+
+
+## DELETE /api-keys/\{userId\}/\{name\}
+
+### Parameters
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
+| **`userId`** | path | true | undefined | undefined |
 | **`name`** | path | true | undefined | undefined |
 
 ### Responses
@@ -218,6 +241,32 @@ import Label from '@components/Label.astro'
 | **`204`** | Organization unsuspended successfully |
 
 
+## GET /organizations/by-sandbox-id/\{sandboxId\}
+
+### Parameters
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`sandboxId`** | path | true | undefined | Sandbox ID |
+
+### Responses
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | Organization |
+
+
+## POST /organizations/\{organizationId\}/sandbox-default-limited-network-egress
+
+### Parameters
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`organizationId`** | path | true | undefined | Organization ID |
+
+### Responses
+| Status Code | Description |
+| :-------- | :---------- |
+| **`204`** | Sandbox default limited network egress updated successfully |
+
+
 ## POST /organizations/\{organizationId\}/roles
 
 ### Parameters
@@ -283,7 +332,7 @@ import Label from '@components/Label.astro'
 | **`200`** | List of organization members |
 
 
-## POST /organizations/\{organizationId\}/users/\{userId\}/role
+## POST /organizations/\{organizationId\}/users/\{userId\}/access
 
 ### Parameters
 | Name | Location | Required | Type | Description |
@@ -294,21 +343,7 @@ import Label from '@components/Label.astro'
 ### Responses
 | Status Code | Description |
 | :-------- | :---------- |
-| **`200`** | Role updated successfully |
-
-
-## POST /organizations/\{organizationId\}/users/\{userId\}/assigned-roles
-
-### Parameters
-| Name | Location | Required | Type | Description |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`organizationId`** | path | true | undefined | Organization ID |
-| **`userId`** | path | true | undefined | User ID |
-
-### Responses
-| Status Code | Description |
-| :-------- | :---------- |
-| **`200`** | Assigned roles updated successfully |
+| **`200`** | Access updated successfully |
 
 
 ## DELETE /organizations/\{organizationId\}/users/\{userId\}
@@ -444,6 +479,14 @@ import Label from '@components/Label.astro'
 | **`204`** | Account unlinked successfully |
 
 
+## POST /users/mfa/sms/enroll
+
+### Responses
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | SMS MFA enrollment URL |
+
+
 ## GET /users/\{id\}
 
 ### Parameters
@@ -471,6 +514,38 @@ import Label from '@components/Label.astro'
 | :-------- | :---------- |
 | **`200`** | List of all sandboxes |
 
+
+## GET /sandbox/paginated
+
+### Parameters
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
+| **`page`** | query | false | undefined | Page number of the results |
+| **`limit`** | query | false | undefined | Number of results per page |
+| **`id`** | query | false | undefined | Filter by partial ID match |
+| **`labels`** | query | false | undefined | JSON encoded labels to filter by |
+| **`includeErroredDeleted`** | query | false | undefined | Include results with errored state and deleted desired state |
+| **`states`** | query | false | undefined | List of states to filter by |
+| **`snapshots`** | query | false | undefined | List of snapshot names to filter by |
+| **`regions`** | query | false | undefined | List of regions to filter by |
+| **`minCpu`** | query | false | undefined | Minimum CPU |
+| **`maxCpu`** | query | false | undefined | Maximum CPU |
+| **`minMemoryGiB`** | query | false | undefined | Minimum memory in GiB |
+| **`maxMemoryGiB`** | query | false | undefined | Maximum memory in GiB |
+| **`minDiskGiB`** | query | false | undefined | Minimum disk space in GiB |
+| **`maxDiskGiB`** | query | false | undefined | Maximum disk space in GiB |
+| **`lastEventAfter`** | query | false | undefined | Include items with last event after this timestamp |
+| **`lastEventBefore`** | query | false | undefined | Include items with last event before this timestamp |
+| **`sort`** | query | false | undefined | Field to sort by |
+| **`order`** | query | false | undefined | Direction to sort by |
+
+### Responses
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | Paginated list of all sandboxes |
+
+
 ## POST /sandbox
 
 ### Parameters
@@ -484,14 +559,42 @@ import Label from '@components/Label.astro'
 | **`200`** | The sandbox has been successfully created. |
 
 
+## GET /sandbox/regions
+
+### Parameters
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
+
+### Responses
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | List of regions where sandboxes have been created |
+
+
+## GET /sandbox/for-runner
+
+### Parameters
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
+| **`states`** | query | false | undefined | Comma-separated list of sandbox states to filter by |
+| **`skipReconcilingSandboxes`** | query | false | undefined | Skip sandboxes where state differs from desired state |
+
+### Responses
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | List of sandboxes for the authenticated runner |
+
+
 ## GET /sandbox/\{sandboxId\}
 
 ### Parameters
 | Name | Location | Required | Type | Description |
 | :--- | :------- | :------- | :--- | :---------- |
 | **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
-| **`verbose`** | query | false | undefined | Include verbose output |
 | **`sandboxId`** | path | true | undefined | ID of the sandbox |
+| **`verbose`** | query | false | undefined | Include verbose output |
 
 ### Responses
 | Status Code | Description |
@@ -505,7 +608,6 @@ import Label from '@components/Label.astro'
 | :--- | :------- | :------- | :--- | :---------- |
 | **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
 | **`sandboxId`** | path | true | undefined | ID of the sandbox |
-| **`force`** | query | true | undefined | undefined |
 
 ### Responses
 | Status Code | Description |
@@ -524,7 +626,7 @@ import Label from '@components/Label.astro'
 ### Responses
 | Status Code | Description |
 | :-------- | :---------- |
-| **`200`** | Sandbox has been started |
+| **`200`** | Sandbox has been started or is being restored from archived state |
 
 
 ## POST /sandbox/\{sandboxId\}/stop
@@ -553,6 +655,20 @@ import Label from '@components/Label.astro'
 | Status Code | Description |
 | :-------- | :---------- |
 | **`200`** | Labels have been successfully replaced |
+
+
+## PUT /sandbox/\{sandboxId\}/state
+
+### Parameters
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
+| **`sandboxId`** | path | true | undefined | ID of the sandbox |
+
+### Responses
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | Sandbox state has been successfully updated |
 
 
 ## POST /sandbox/\{sandboxId\}/backup
@@ -614,6 +730,21 @@ import Label from '@components/Label.astro'
 | **`200`** | Auto-archive interval has been set |
 
 
+## POST /sandbox/\{sandboxId\}/autodelete/\{interval\}
+
+### Parameters
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
+| **`sandboxId`** | path | true | undefined | ID of the sandbox |
+| **`interval`** | path | true | undefined | Auto-delete interval in minutes (negative value means disabled, 0 means delete immediately upon stopping) |
+
+### Responses
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | Auto-delete interval has been set |
+
+
 ## POST /sandbox/\{sandboxId\}/archive
 
 ### Parameters
@@ -658,6 +789,49 @@ import Label from '@components/Label.astro'
 | **`200`** | Build logs stream |
 
 
+## POST /sandbox/\{sandboxId\}/ssh-access
+
+### Parameters
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
+| **`sandboxId`** | path | true | undefined | ID of the sandbox |
+| **`expiresInMinutes`** | query | false | undefined | Expiration time in minutes (default: 60) |
+
+### Responses
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | SSH access has been created |
+
+## DELETE /sandbox/\{sandboxId\}/ssh-access
+
+### Parameters
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
+| **`sandboxId`** | path | true | undefined | ID of the sandbox |
+| **`token`** | query | false | undefined | SSH access token to revoke. If not provided, all SSH access for the sandbox will be revoked. |
+
+### Responses
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | SSH access has been revoked |
+
+
+## GET /sandbox/ssh-access/validate
+
+### Parameters
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
+| **`token`** | query | true | undefined | SSH access token to validate |
+
+### Responses
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | SSH access validation result |
+
+
 ## POST /runners
 
 ### Responses
@@ -699,12 +873,12 @@ import Label from '@components/Label.astro'
 | **`200`** | Runner found |
 
 
-## GET /runners/by-snapshot
+## GET /runners/by-snapshot-ref
 
 ### Parameters
 | Name | Location | Required | Type | Description |
 | :--- | :------- | :------- | :--- | :---------- |
-| **`internalName`** | query | true | undefined | Internal name of the snapshot |
+| **`ref`** | query | true | undefined | Snapshot ref |
 
 ### Responses
 | Status Code | Description |
@@ -724,6 +898,34 @@ import Label from '@components/Label.astro'
 | Status Code | Description |
 | :-------- | :---------- |
 | **`200`** | Project directory retrieved successfully |
+
+
+## GET /toolbox/\{sandboxId\}/toolbox/user-home-dir
+
+### Parameters
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
+| **`sandboxId`** | path | true | undefined | undefined |
+
+### Responses
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | User home directory retrieved successfully |
+
+
+## GET /toolbox/\{sandboxId\}/toolbox/work-dir
+
+### Parameters
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
+| **`sandboxId`** | path | true | undefined | undefined |
+
+### Responses
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | Work-dir retrieved successfully |
 
 
 ## GET /toolbox/\{sandboxId\}/toolbox/files
@@ -748,6 +950,7 @@ Delete file inside sandbox
 | :--- | :------- | :------- | :--- | :---------- |
 | **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
 | **`sandboxId`** | path | true | undefined | undefined |
+| **`recursive`** | query | false | undefined | undefined |
 | **`path`** | query | true | undefined | undefined |
 
 ### Responses
@@ -770,6 +973,21 @@ Download file from sandbox
 | Status Code | Description |
 | :-------- | :---------- |
 | **`200`** | File downloaded successfully |
+
+
+## POST /toolbox/\{sandboxId\}/toolbox/files/bulk-download
+Streams back a multipart/form-data bundle of the requested paths
+
+### Parameters
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
+| **`sandboxId`** | path | true | undefined | undefined |
+
+### Responses
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | A multipart/form-data response with each file as a part |
 
 
 ## GET /toolbox/\{sandboxId\}/toolbox/files/find
@@ -1206,12 +1424,12 @@ Get logs for a specific command in a session
 | **`sandboxId`** | path | true | undefined | undefined |
 | **`sessionId`** | path | true | undefined | undefined |
 | **`commandId`** | path | true | undefined | undefined |
-| **`follow`** | query | false | undefined | undefined |
+| **`follow`** | query | false | undefined | Whether to stream the logs |
 
 ### Responses
 | Status Code | Description |
 | :-------- | :---------- |
-| **`200`** | Command log stream |
+| **`200`** | Command log stream marked with stdout and stderr prefixes |
 
 
 ## POST /toolbox/\{sandboxId\}/toolbox/lsp/completions
@@ -1325,6 +1543,343 @@ The workspace symbol request is sent from the client to the server to list proje
 | **`200`** | OK |
 
 
+## POST /toolbox/\{sandboxId\}/toolbox/computeruse/start
+Start all VNC desktop processes (Xvfb, xfce4, x11vnc, novnc)
+
+### Parameters
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
+| **`sandboxId`** | path | true | undefined | undefined |
+
+### Responses
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | Computer use processes started successfully |
+
+
+## POST /toolbox/\{sandboxId\}/toolbox/computeruse/stop
+Stop all VNC desktop processes (Xvfb, xfce4, x11vnc, novnc)
+
+### Parameters
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
+| **`sandboxId`** | path | true | undefined | undefined |
+
+### Responses
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | Computer use processes stopped successfully |
+
+
+## GET /toolbox/\{sandboxId\}/toolbox/computeruse/status
+Get status of all VNC desktop processes
+
+### Parameters
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
+| **`sandboxId`** | path | true | undefined | undefined |
+
+### Responses
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | Computer use status retrieved successfully |
+
+
+## GET /toolbox/\{sandboxId\}/toolbox/computeruse/process/\{processName\}/status
+Get status of a specific VNC process
+
+### Parameters
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
+| **`processName`** | path | true | undefined | undefined |
+| **`sandboxId`** | path | true | undefined | undefined |
+
+### Responses
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | Process status retrieved successfully |
+
+
+## POST /toolbox/\{sandboxId\}/toolbox/computeruse/process/\{processName\}/restart
+Restart a specific VNC process
+
+### Parameters
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
+| **`processName`** | path | true | undefined | undefined |
+| **`sandboxId`** | path | true | undefined | undefined |
+
+### Responses
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | Process restarted successfully |
+
+
+## GET /toolbox/\{sandboxId\}/toolbox/computeruse/process/\{processName\}/logs
+Get logs for a specific VNC process
+
+### Parameters
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
+| **`processName`** | path | true | undefined | undefined |
+| **`sandboxId`** | path | true | undefined | undefined |
+
+### Responses
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | Process logs retrieved successfully |
+
+
+## GET /toolbox/\{sandboxId\}/toolbox/computeruse/process/\{processName\}/errors
+Get error logs for a specific VNC process
+
+### Parameters
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
+| **`processName`** | path | true | undefined | undefined |
+| **`sandboxId`** | path | true | undefined | undefined |
+
+### Responses
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | Process errors retrieved successfully |
+
+
+## GET /toolbox/\{sandboxId\}/toolbox/computeruse/mouse/position
+Get current mouse cursor position
+
+### Parameters
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
+| **`sandboxId`** | path | true | undefined | undefined |
+
+### Responses
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | Mouse position retrieved successfully |
+
+
+## POST /toolbox/\{sandboxId\}/toolbox/computeruse/mouse/move
+Move mouse cursor to specified coordinates
+
+### Parameters
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
+| **`sandboxId`** | path | true | undefined | undefined |
+
+### Responses
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | Mouse moved successfully |
+
+
+## POST /toolbox/\{sandboxId\}/toolbox/computeruse/mouse/click
+Click mouse at specified coordinates
+
+### Parameters
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
+| **`sandboxId`** | path | true | undefined | undefined |
+
+### Responses
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | Mouse clicked successfully |
+
+
+## POST /toolbox/\{sandboxId\}/toolbox/computeruse/mouse/drag
+Drag mouse from start to end coordinates
+
+### Parameters
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
+| **`sandboxId`** | path | true | undefined | undefined |
+
+### Responses
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | Mouse dragged successfully |
+
+
+## POST /toolbox/\{sandboxId\}/toolbox/computeruse/mouse/scroll
+Scroll mouse at specified coordinates
+
+### Parameters
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
+| **`sandboxId`** | path | true | undefined | undefined |
+
+### Responses
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | Mouse scrolled successfully |
+
+
+## POST /toolbox/\{sandboxId\}/toolbox/computeruse/keyboard/type
+Type text using keyboard
+
+### Parameters
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
+| **`sandboxId`** | path | true | undefined | undefined |
+
+### Responses
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | Text typed successfully |
+
+
+## POST /toolbox/\{sandboxId\}/toolbox/computeruse/keyboard/key
+Press a key with optional modifiers
+
+### Parameters
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
+| **`sandboxId`** | path | true | undefined | undefined |
+
+### Responses
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | Key pressed successfully |
+
+
+## POST /toolbox/\{sandboxId\}/toolbox/computeruse/keyboard/hotkey
+Press a hotkey combination
+
+### Parameters
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
+| **`sandboxId`** | path | true | undefined | undefined |
+
+### Responses
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | Hotkey pressed successfully |
+
+
+## GET /toolbox/\{sandboxId\}/toolbox/computeruse/screenshot
+Take a screenshot of the entire screen
+
+### Parameters
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
+| **`sandboxId`** | path | true | undefined | undefined |
+| **`show_cursor`** | query | false | undefined | undefined |
+
+### Responses
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | Screenshot taken successfully |
+
+
+## GET /toolbox/\{sandboxId\}/toolbox/computeruse/screenshot/region
+Take a screenshot of a specific region
+
+### Parameters
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
+| **`sandboxId`** | path | true | undefined | undefined |
+| **`show_cursor`** | query | false | undefined | undefined |
+| **`height`** | query | true | undefined | undefined |
+| **`width`** | query | true | undefined | undefined |
+| **`y`** | query | true | undefined | undefined |
+| **`x`** | query | true | undefined | undefined |
+
+### Responses
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | Region screenshot taken successfully |
+
+
+## GET /toolbox/\{sandboxId\}/toolbox/computeruse/screenshot/compressed
+Take a compressed screenshot with format, quality, and scale options
+
+### Parameters
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
+| **`sandboxId`** | path | true | undefined | undefined |
+| **`scale`** | query | false | undefined | undefined |
+| **`quality`** | query | false | undefined | undefined |
+| **`format`** | query | false | undefined | undefined |
+| **`show_cursor`** | query | false | undefined | undefined |
+
+### Responses
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | Compressed screenshot taken successfully |
+
+
+## GET /toolbox/\{sandboxId\}/toolbox/computeruse/screenshot/region/compressed
+Take a compressed screenshot of a specific region
+
+### Parameters
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
+| **`sandboxId`** | path | true | undefined | undefined |
+| **`scale`** | query | false | undefined | undefined |
+| **`quality`** | query | false | undefined | undefined |
+| **`format`** | query | false | undefined | undefined |
+| **`show_cursor`** | query | false | undefined | undefined |
+| **`height`** | query | true | undefined | undefined |
+| **`width`** | query | true | undefined | undefined |
+| **`y`** | query | true | undefined | undefined |
+| **`x`** | query | true | undefined | undefined |
+
+### Responses
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | Compressed region screenshot taken successfully |
+
+
+## GET /toolbox/\{sandboxId\}/toolbox/computeruse/display/info
+Get information about displays
+
+### Parameters
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
+| **`sandboxId`** | path | true | undefined | undefined |
+
+### Responses
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | Display info retrieved successfully |
+
+
+## GET /toolbox/\{sandboxId\}/toolbox/computeruse/display/windows
+Get list of open windows
+
+### Parameters
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
+| **`sandboxId`** | path | true | undefined | undefined |
+
+### Responses
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | Windows list retrieved successfully |
+
+
 ## POST /snapshots
 
 ### Parameters
@@ -1344,13 +1899,30 @@ The workspace symbol request is sent from the client to the server to list proje
 | Name | Location | Required | Type | Description |
 | :--- | :------- | :------- | :--- | :---------- |
 | **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
-| **`limit`** | query | false | undefined | Number of items per page |
-| **`page`** | query | false | undefined | Page number |
+| **`page`** | query | false | undefined | Page number of the results |
+| **`limit`** | query | false | undefined | Number of results per page |
+| **`name`** | query | false | undefined | Filter by partial name match |
+| **`sort`** | query | false | undefined | Field to sort by |
+| **`order`** | query | false | undefined | Direction to sort by |
 
 ### Responses
 | Status Code | Description |
 | :-------- | :---------- |
-| **`200`** | List of all snapshots with pagination |
+| **`200`** | Paginated list of all snapshots |
+
+
+## GET /snapshots/can-cleanup-image
+
+### Parameters
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
+| **`imageName`** | query | true | undefined | Image name with tag to check |
+
+### Responses
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | Boolean indicating if image can be cleaned up |
 
 
 ## GET /snapshots/\{id\}
@@ -1379,20 +1951,6 @@ The workspace symbol request is sent from the client to the server to list proje
 | Status Code | Description |
 | :-------- | :---------- |
 | **`200`** | Snapshot has been deleted |
-
-
-## PATCH /snapshots/\{id\}/toggle
-
-### Parameters
-| Name | Location | Required | Type | Description |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
-| **`id`** | path | true | undefined | Snapshot ID |
-
-### Responses
-| Status Code | Description |
-| :-------- | :---------- |
-| **`200`** | Snapshot state has been toggled |
 
 
 ## PATCH /snapshots/\{id\}/general
@@ -1440,6 +1998,20 @@ The workspace symbol request is sent from the client to the server to list proje
 | **`404`** | Snapshot not found |
 
 
+## POST /snapshots/\{id\}/deactivate
+
+### Parameters
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
+| **`id`** | path | true | undefined | Snapshot ID |
+
+### Responses
+| Status Code | Description |
+| :-------- | :---------- |
+| **`204`** | The snapshot has been successfully deactivated. |
+
+
 ## GET /workspace
 
 ### Parameters
@@ -1473,8 +2045,8 @@ The workspace symbol request is sent from the client to the server to list proje
 | Name | Location | Required | Type | Description |
 | :--- | :------- | :------- | :--- | :---------- |
 | **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
-| **`verbose`** | query | false | undefined | Include verbose output |
 | **`workspaceId`** | path | true | undefined | ID of the workspace |
+| **`verbose`** | query | false | undefined | Include verbose output |
 
 ### Responses
 | Status Code | Description |
@@ -1488,7 +2060,7 @@ The workspace symbol request is sent from the client to the server to list proje
 | :--- | :------- | :------- | :--- | :---------- |
 | **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
 | **`workspaceId`** | path | true | undefined | ID of the workspace |
-| **`force`** | query | true | undefined | undefined |
+| **`force`** | query | false  | undefined | undefined |
 
 ### Responses
 | Status Code | Description |
@@ -1595,21 +2167,6 @@ The workspace symbol request is sent from the client to the server to list proje
 | Status Code | Description |
 | :-------- | :---------- |
 | **`200`** | Auto-archive interval has been set |
-
-
-## POST /sandbox/\{sandboxId\}/autodelete/\{interval\}
-
-### Parameters
-| Name | Location | Required | Type | Description |
-| :--- | :------- | :------- | :--- | :---------- |
-| **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
-| **`sandboxId`** | path | true | undefined | ID of the sandbox |
-| **`interval`** | path | true | undefined | Auto-delete interval in minutes (negative value means disabled, 0 means delete immediately upon stopping) |
-
-### Responses
-| Status Code | Description |
-| :-------- | :---------- |
-| **`200`** | Auto-delete interval has been set |
 
 
 ## POST /workspace/\{workspaceId\}/archive
@@ -1855,6 +2412,93 @@ The workspace symbol request is sent from the client to the server to list proje
 | **`200`** | The docker registry has been set as default. |
 
 
+## POST /webhooks/organizations/\{organizationId\}/app-portal-access
+
+### Parameters
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
+| **`organizationId`** | path | true | undefined | undefined |
+
+### Responses
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | App Portal access generated successfully |
+
+
+## POST /webhooks/organizations/\{organizationId\}/send
+
+### Parameters
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
+| **`organizationId`** | path | true | undefined | undefined |
+
+### Responses
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | Webhook message sent successfully |
+
+
+## GET /webhooks/organizations/\{organizationId\}/messages/\{messageId\}/attempts
+
+### Parameters
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
+| **`organizationId`** | path | true | undefined | undefined |
+| **`messageId`** | path | true | undefined | undefined |
+
+### Responses
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | List of delivery attempts |
+
+
+## GET /webhooks/status
+
+### Parameters
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
+
+### Responses
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | Webhook service status |
+
+
+## GET /webhooks/organizations/\{organizationId\}/initialization-status
+
+### Parameters
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
+| **`organizationId`** | path | true | undefined | undefined |
+
+### Responses
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | Webhook initialization status |
+| **`404`** | Webhook initialization status not found |
+
+
+## POST /webhooks/organizations/\{organizationId\}/initialize
+
+### Parameters
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
+| **`organizationId`** | path | true | undefined | undefined |
+
+### Responses
+| Status Code | Description |
+| :-------- | :---------- |
+| **`201`** | Webhooks initialized successfully |
+| **`403`** | User does not have access to this organization |
+| **`404`** | Organization not found |
+
+
 ## GET /object-storage/push-access
 
 ### Parameters
@@ -1866,6 +2510,51 @@ The workspace symbol request is sent from the client to the server to list proje
 | Status Code | Description |
 | :-------- | :---------- |
 | **`200`** | Temporary storage access has been generated |
+
+
+## GET /audit
+
+### Parameters
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`page`** | query | false | undefined | Page number of the results |
+| **`limit`** | query | false | undefined | Number of results per page |
+
+### Responses
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | Paginated list of all audit logs |
+
+## POST /audit
+
+### Responses
+| Status Code | Description |
+| :-------- | :---------- |
+| **`201`** | Audit log entry created successfully |
+
+
+## GET /audit/organizations/\{organizationId\}
+
+### Parameters
+| Name | Location | Required | Type | Description |
+| :--- | :------- | :------- | :--- | :---------- |
+| **`organizationId`** | path | true | undefined | Organization ID |
+| **`page`** | query | false | undefined | Page number of the results |
+| **`limit`** | query | false | undefined | Number of results per page |
+
+### Responses
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | Paginated list of organization audit logs |
+
+
+## GET /health
+
+### Responses
+| Status Code | Description |
+| :-------- | :---------- |
+| **`200`** | The Health Check is successful |
+| **`503`** | The Health Check is not successful |
 
 
 

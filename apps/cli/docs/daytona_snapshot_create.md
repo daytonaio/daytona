@@ -9,7 +9,7 @@ daytona snapshot create [SNAPSHOT] [flags]
 ### Options
 
 ```
-  -c, --context stringArray   Files or directories to include in the build context (can be specified multiple times)
+  -c, --context stringArray   Files or directories to include in the build context (can be specified multiple times). If not provided, context will be automatically determined from COPY/ADD commands in the Dockerfile
       --cpu int32             CPU cores that will be allocated to the underlying sandboxes (default: 1)
       --disk int32            Disk space that will be allocated to the underlying sandboxes in GB (default: 3)
   -f, --dockerfile string     Path to Dockerfile to build

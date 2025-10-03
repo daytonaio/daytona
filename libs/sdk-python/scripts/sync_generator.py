@@ -61,6 +61,7 @@ ADDITIONAL_REPLACEMENTS = {
     "AsyncProcess": "Process",
     "AsyncDaytona": "Daytona",
     "AsyncSandbox": "Sandbox",
+    "AsyncPaginatedSandboxes": "PaginatedSandboxes",
     # aiofiles replacement
     "aiofiles.open": "open",
     # aioboto3 replacement

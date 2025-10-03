@@ -6,7 +6,7 @@
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover'
 import { Command, CommandList, CommandGroup, CommandItem, CommandInput, CommandEmpty } from '@/components/ui/command'
 import { cn } from '@/lib/utils'
-import { Check } from 'lucide-react'
+import { Check, Loader2 } from 'lucide-react'
 import { X } from 'lucide-react'
 import { FacetedFilterOption } from '../types'
 
@@ -14,9 +14,10 @@ interface RegionFilterProps {
   value: string[]
   onFilterChange: (value: string[] | undefined) => void
   options?: FacetedFilterOption[]
+  isLoading?: boolean
 }
 
-export function RegionFilterIndicator({ value, onFilterChange, options }: RegionFilterProps) {
+export function RegionFilterIndicator({ value, onFilterChange, options, isLoading }: RegionFilterProps) {
   const selectedRegionLabels = value
     .map((v) => options?.find((r) => r.value === v)?.label)
     .filter(Boolean)
@@ -33,7 +34,7 @@ export function RegionFilterIndicator({ value, onFilterChange, options }: Region
         </PopoverTrigger>
 
         <PopoverContent className="p-0 w-72" align="start">
-          <RegionFilter value={value} onFilterChange={onFilterChange} options={options} />
+          <RegionFilter value={value} onFilterChange={onFilterChange} options={options} isLoading={isLoading} />
         </PopoverContent>
       </Popover>
 
@@ -44,7 +45,7 @@ export function RegionFilterIndicator({ value, onFilterChange, options }: Region
   )
 }
 
-export function RegionFilter({ value, onFilterChange, options }: RegionFilterProps) {
+export function RegionFilter({ value, onFilterChange, options, isLoading }: RegionFilterProps) {
   return (
     <Command>
       <div className="flex items-center gap-2 justify-between p-2">
@@ -57,34 +58,43 @@ export function RegionFilter({ value, onFilterChange, options }: RegionFilterPro
         </button>
       </div>
       <CommandList>
-        <CommandEmpty>No regions found.</CommandEmpty>
-        <CommandGroup>
-          {options?.map((region) => (
-            <CommandItem
-              key={region.value}
-              onSelect={() => {
-                const newValue = value.includes(region.value)
-                  ? value.filter((v) => v !== region.value)
-                  : [...value, region.value]
-                onFilterChange(newValue.length > 0 ? newValue : undefined)
-              }}
-            >
-              <div className="flex items-center">
-                <div
-                  className={cn(
-                    'mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary',
-                    value.includes(region.value)
-                      ? 'bg-primary text-primary-foreground'
-                      : 'opacity-50 [&_svg]:invisible',
-                  )}
+        {isLoading ? (
+          <div className="flex items-center justify-center py-6">
+            <Loader2 className="h-4 w-4 animate-spin mr-2" />
+            <span className="text-sm text-muted-foreground">Loading regions...</span>
+          </div>
+        ) : (
+          <>
+            <CommandEmpty>No regions found.</CommandEmpty>
+            <CommandGroup>
+              {options?.map((region) => (
+                <CommandItem
+                  key={region.value}
+                  onSelect={() => {
+                    const newValue = value.includes(region.value)
+                      ? value.filter((v) => v !== region.value)
+                      : [...value, region.value]
+                    onFilterChange(newValue.length > 0 ? newValue : undefined)
+                  }}
                 >
-                  <Check className={cn('h-4 w-4')} />
-                </div>
-                {region.label}
-              </div>
-            </CommandItem>
-          ))}
-        </CommandGroup>
+                  <div className="flex items-center">
+                    <div
+                      className={cn(
+                        'mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary',
+                        value.includes(region.value)
+                          ? 'bg-primary text-primary-foreground'
+                          : 'opacity-50 [&_svg]:invisible',
+                      )}
+                    >
+                      <Check className={cn('h-4 w-4')} />
+                    </div>
+                    {region.label}
+                  </div>
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </>
+        )}
       </CommandList>
     </Command>
   )

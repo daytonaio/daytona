@@ -7,7 +7,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/daytonaio/daytona/cli/apiclient"
+	"github.com/daytonaio/apiclient"
+	apiclient_cli "github.com/daytonaio/daytona/cli/apiclient"
 	"github.com/daytonaio/daytona/cli/cmd/common"
 	view_common "github.com/daytonaio/daytona/cli/views/common"
 	"github.com/spf13/cobra"
@@ -20,54 +21,65 @@ var DeleteCmd = &cobra.Command{
 	Aliases: common.GetAliases("delete"),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
-		var snapshotId string
-		var snapshotName string
 
-		apiClient, err := apiclient.GetApiClient(nil, nil)
+		apiClient, err := apiclient_cli.GetApiClient(nil, nil)
 		if err != nil {
 			return err
 		}
 
-		snapshotList, res, err := apiClient.SnapshotsAPI.GetAllSnapshots(ctx).Execute()
-		if err != nil {
-			return apiclient.HandleErrorResponse(res, err)
-		}
-
-		if len(snapshotList.Items) == 0 {
-			view_common.RenderInfoMessageBold("No snapshots to delete")
-			return nil
-		}
-
+		// Handle case when no snapshot ID is provided and allFlag is true
 		if len(args) == 0 {
 			if allFlag {
-				for _, snapshot := range snapshotList.Items {
+				page := float32(1.0)
+				limit := float32(200.0) // 200 is the maximum limit for the API
+				var allSnapshots []apiclient.SnapshotDto
+
+				for {
+					snapshotBatch, res, err := apiClient.SnapshotsAPI.GetAllSnapshots(ctx).Page(page).Limit(limit).Execute()
+					if err != nil {
+						return apiclient_cli.HandleErrorResponse(res, err)
+					}
+
+					allSnapshots = append(allSnapshots, snapshotBatch.Items...)
+
+					if len(snapshotBatch.Items) < int(limit) || page >= snapshotBatch.TotalPages {
+						break
+					}
+					page++
+				}
+
+				if len(allSnapshots) == 0 {
+					view_common.RenderInfoMessageBold("No snapshots to delete")
+					return nil
+				}
+
+				var deletedCount int
+
+				for _, snapshot := range allSnapshots {
 					res, err := apiClient.SnapshotsAPI.RemoveSnapshot(ctx, snapshot.Id).Execute()
 					if err != nil {
-						view_common.RenderInfoMessageBold(fmt.Sprintf("Failed to delete snapshot %s: %s", snapshot.Id, apiclient.HandleErrorResponse(res, err)))
+						fmt.Printf("Failed to delete snapshot %s: %s\n", snapshot.Id, apiclient_cli.HandleErrorResponse(res, err))
 					} else {
-						view_common.RenderInfoMessageBold(fmt.Sprintf("Snapshot %s deleted", snapshot.Id))
+						deletedCount++
 					}
 				}
 
+				view_common.RenderInfoMessageBold(fmt.Sprintf("Deleted %d snapshots", deletedCount))
 				return nil
 			}
 			return cmd.Help()
 		}
 
-		for _, snapshot := range snapshotList.Items {
-			if snapshot.Id == args[0] || snapshot.Name == args[0] {
-				snapshotId = snapshot.Id
-				snapshotName = snapshot.Name
-				break
-			}
-		}
+		// Handle case when a snapshot ID is provided
+		snapshotIdArg := args[0]
 
-		res, err = apiClient.SnapshotsAPI.RemoveSnapshot(ctx, snapshotId).Execute()
+		res, err := apiClient.SnapshotsAPI.RemoveSnapshot(ctx, snapshotIdArg).Execute()
 		if err != nil {
-			return apiclient.HandleErrorResponse(res, err)
+			return apiclient_cli.HandleErrorResponse(res, err)
 		}
 
-		view_common.RenderInfoMessageBold(fmt.Sprintf("Snapshot %s deleted", snapshotName))
+		view_common.RenderInfoMessageBold(fmt.Sprintf("Snapshot %s deleted", snapshotIdArg))
+
 		return nil
 	},
 }

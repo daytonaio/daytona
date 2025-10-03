@@ -149,26 +149,54 @@ console.log(`Snapshot ${snapshot.name} is in state ${snapshot.state}`);
 #### list()
 
 ```ts
-list(): Promise<Snapshot[]>
+list(page?: number, limit?: number): Promise<PaginatedSnapshots>
 ```
 
-List all Snapshots.
+List paginated list of Snapshots.
+
+**Parameters**:
+
+- `page?` _number_ - Page number for pagination (starting from 1)
+- `limit?` _number_ - Maximum number of items per page
+
 
 **Returns**:
 
-- `Promise<Snapshot[]>` - List of all Snapshots accessible to the user
+- `Promise<PaginatedSnapshots>` - Paginated list of Snapshots
 
 **Example:**
 
 ```ts
 const daytona = new Daytona();
-const snapshots = await daytona.snapshot.list();
-console.log(`Found ${snapshots.length} snapshots`);
-snapshots.forEach(snapshot => console.log(`${snapshot.name} (${snapshot.imageName})`));
+const result = await daytona.snapshot.list(2, 10);
+console.log(`Found ${result.total} snapshots`);
+result.items.forEach(snapshot => console.log(`${snapshot.name} (${snapshot.imageName})`));
 ```
 
 ***
 
+
+## PaginatedSnapshots
+
+Represents a paginated list of Daytona Snapshots.
+
+**Properties**:
+
+- `items` _Snapshot\[\]_ - List of Snapshot instances in the current page.
+- `page` _number_ - Current page number.
+    - _Inherited from_: `Omit.page`
+- `total` _number_ - Total number of Snapshots across all pages.
+    - _Inherited from_: `Omit.total`
+- `totalPages` _number_ - Total number of pages available.
+    
+    - _Inherited from_: `Omit.totalPages`
+
+
+
+
+**Extends:**
+
+- `Omit`\<`PaginatedSnapshotsDto`, `"items"`\>
 
 ## CreateSnapshotParams
 

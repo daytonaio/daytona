@@ -5,7 +5,7 @@
 
 import { ForbiddenException, Injectable, Logger, NotFoundException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { Not, Repository, LessThan, In, JsonContains, FindOptionsWhere } from 'typeorm'
+import { Not, Repository, LessThan, In, JsonContains, FindOptionsWhere, ILike } from 'typeorm'
 import { Sandbox } from '../entities/sandbox.entity'
 import { CreateSandboxDto } from '../dto/create-sandbox.dto'
 import { SandboxState } from '../enums/sandbox-state.enum'
@@ -51,6 +51,14 @@ import { nanoid } from 'nanoid'
 import { SshAccessValidationDto } from '../dto/ssh-access.dto'
 import { VolumeService } from './volume.service'
 import { RedisLockProvider } from '../common/redis-lock.provider'
+import { PaginatedList } from '../../common/interfaces/paginated-list.interface'
+import {
+  SandboxSortField,
+  SandboxSortDirection,
+  DEFAULT_SANDBOX_SORT_FIELD,
+  DEFAULT_SANDBOX_SORT_DIRECTION,
+} from '../dto/list-sandboxes-query.dto'
+import { createRangeFilter } from '../../common/utils/range-filter'
 
 const DEFAULT_CPU = 1
 const DEFAULT_MEMORY = 1
@@ -636,7 +644,7 @@ export class SandboxService {
     this.eventEmitter.emit(SandboxEvents.BACKUP_CREATED, new SandboxBackupCreatedEvent(sandbox))
   }
 
-  async findAll(
+  async findAllDeprecated(
     organizationId: string,
     labels?: { [key: string]: string },
     includeErroredDestroyed?: boolean,
@@ -659,6 +667,104 @@ export class SandboxService {
     ]
 
     return this.sandboxRepository.find({ where })
+  }
+
+  async findAll(
+    organizationId: string,
+    page = 1,
+    limit = 10,
+    filters?: {
+      id?: string
+      labels?: { [key: string]: string }
+      includeErroredDestroyed?: boolean
+      states?: SandboxState[]
+      snapshots?: string[]
+      regions?: string[]
+      minCpu?: number
+      maxCpu?: number
+      minMemoryGiB?: number
+      maxMemoryGiB?: number
+      minDiskGiB?: number
+      maxDiskGiB?: number
+      lastEventAfter?: Date
+      lastEventBefore?: Date
+    },
+    sort?: {
+      field?: SandboxSortField
+      direction?: SandboxSortDirection
+    },
+  ): Promise<PaginatedList<Sandbox>> {
+    const pageNum = Number(page)
+    const limitNum = Number(limit)
+
+    const {
+      id,
+      labels,
+      includeErroredDestroyed,
+      states,
+      snapshots,
+      regions,
+      minCpu,
+      maxCpu,
+      minMemoryGiB,
+      maxMemoryGiB,
+      minDiskGiB,
+      maxDiskGiB,
+      lastEventAfter,
+      lastEventBefore,
+    } = filters || {}
+
+    const { field: sortField = DEFAULT_SANDBOX_SORT_FIELD, direction: sortDirection = DEFAULT_SANDBOX_SORT_DIRECTION } =
+      sort || {}
+
+    const baseFindOptions: FindOptionsWhere<Sandbox> = {
+      organizationId,
+      ...(id ? { id: ILike(`${id}%`) } : {}),
+      ...(labels ? { labels: JsonContains(labels) } : {}),
+      ...(snapshots ? { snapshot: In(snapshots) } : {}),
+      ...(regions ? { region: In(regions) } : {}),
+    }
+
+    baseFindOptions.cpu = createRangeFilter(minCpu, maxCpu)
+    baseFindOptions.mem = createRangeFilter(minMemoryGiB, maxMemoryGiB)
+    baseFindOptions.disk = createRangeFilter(minDiskGiB, maxDiskGiB)
+    baseFindOptions.lastActivityAt = createRangeFilter(lastEventAfter, lastEventBefore)
+
+    const filteredStates = (states || Object.values(SandboxState)).filter((state) => state !== SandboxState.DESTROYED)
+    const errorStates = [SandboxState.ERROR, SandboxState.BUILD_FAILED]
+    const filteredWithoutErrorStates = filteredStates.filter((state) => !errorStates.includes(state))
+
+    const where: FindOptionsWhere<Sandbox>[] = [
+      {
+        ...baseFindOptions,
+        state: In(filteredWithoutErrorStates),
+      },
+      {
+        ...baseFindOptions,
+        state: In(errorStates),
+        ...(includeErroredDestroyed ? {} : { desiredState: Not(SandboxDesiredState.DESTROYED) }),
+      },
+    ]
+
+    const [items, total] = await this.sandboxRepository.findAndCount({
+      where,
+      order: {
+        [sortField]: {
+          direction: sortDirection,
+          nulls: 'LAST',
+        },
+        ...(sortField !== SandboxSortField.CREATED_AT && { createdAt: 'DESC' }),
+      },
+      skip: (pageNum - 1) * limitNum,
+      take: limitNum,
+    })
+
+    return {
+      items,
+      total,
+      page: pageNum,
+      totalPages: Math.ceil(total / limitNum),
+    }
   }
 
   private getDesiredStateForState(state: SandboxState): SandboxDesiredState | undefined {
@@ -1220,5 +1326,16 @@ export class SandboxService {
     }
 
     return { valid: true, sandboxId: sshAccess.sandbox.id }
+  }
+
+  async getDistinctRegions(organizationId: string): Promise<string[]> {
+    const result = await this.sandboxRepository
+      .createQueryBuilder('sandbox')
+      .select('DISTINCT sandbox.region', 'region')
+      .where('sandbox.organizationId = :organizationId', { organizationId })
+      .orderBy('sandbox.region', 'ASC')
+      .getRawMany()
+
+    return result.map((row) => row.region)
   }
 }

@@ -24,7 +24,7 @@ import { SandboxTableProps } from './types'
 import { useSandboxTable } from './useSandboxTable'
 import { SandboxTableHeader } from './SandboxTableHeader'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
-import { OrganizationRolePermissionsEnum } from '@daytonaio/api-client'
+import { OrganizationRolePermissionsEnum, SandboxState } from '@daytonaio/api-client'
 import { cn } from '@/lib/utils'
 import { Container, Trash2 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
@@ -34,11 +34,15 @@ import { useSidebar } from '@/components/ui/sidebar'
 
 export function SandboxTable({
   data,
-  loadingSandboxes,
-  transitioningSandboxes,
+  sandboxIsLoading,
+  sandboxStateIsTransitioning,
   loading,
   snapshots,
-  loadingSnapshots,
+  snapshotsDataIsLoading,
+  snapshotsDataHasMore,
+  onChangeSnapshotSearchValue,
+  regionsData,
+  regionsDataIsLoading,
   handleStart,
   handleStop,
   handleDelete,
@@ -48,7 +52,17 @@ export function SandboxTable({
   getWebTerminalUrl,
   handleCreateSshAccess,
   handleRevokeSshAccess,
+  handleRefresh,
+  isRefreshing,
   onRowClick,
+  pagination,
+  pageCount,
+  totalItems,
+  onPaginationChange,
+  sorting,
+  onSortingChange,
+  filters,
+  onFiltersChange,
 }: SandboxTableProps) {
   const navigate = useNavigate()
   const { authenticatedUserHasPermission } = useSelectedOrganization()
@@ -56,9 +70,9 @@ export function SandboxTable({
   const deletePermitted = authenticatedUserHasPermission(OrganizationRolePermissionsEnum.DELETE_SANDBOXES)
   const { state: sidebarState } = useSidebar()
 
-  const { table, labelOptions, regionOptions } = useSandboxTable({
+  const { table, regionOptions } = useSandboxTable({
     data,
-    loadingSandboxes,
+    sandboxIsLoading,
     writePermitted,
     deletePermitted,
     handleStart,
@@ -69,6 +83,14 @@ export function SandboxTable({
     getWebTerminalUrl,
     handleCreateSshAccess,
     handleRevokeSshAccess,
+    pagination,
+    pageCount,
+    onPaginationChange,
+    sorting,
+    onSortingChange,
+    filters,
+    onFiltersChange,
+    regionsData,
   })
 
   const [bulkDeleteDialogOpen, setBulkDeleteDialogOpen] = useState(false)
@@ -92,10 +114,14 @@ export function SandboxTable({
     <>
       <SandboxTableHeader
         table={table}
-        labelOptions={labelOptions}
         regionOptions={regionOptions}
+        regionsDataIsLoading={regionsDataIsLoading}
         snapshots={snapshots}
-        loadingSnapshots={loadingSnapshots}
+        snapshotsDataIsLoading={snapshotsDataIsLoading}
+        snapshotsDataHasMore={snapshotsDataHasMore}
+        onChangeSnapshotSearchValue={onChangeSnapshotSearchValue}
+        onRefresh={handleRefresh}
+        isRefreshing={isRefreshing}
       />
 
       <Table className="border-separate border-spacing-0">
@@ -135,11 +161,11 @@ export function SandboxTable({
                 key={row.id}
                 data-state={row.getIsSelected() && 'selected'}
                 className={`${
-                  loadingSandboxes[row.original.id]
+                  sandboxIsLoading[row.original.id] || row.original.state === SandboxState.DESTROYED
                     ? 'opacity-80 pointer-events-none'
                     : '[&:hover>*:nth-child(2)]:underline'
                 } ${
-                  transitioningSandboxes[row.original.id]
+                  sandboxStateIsTransitioning[row.original.id]
                     ? 'bg-muted transition-colors duration-300 animate-pulse'
                     : 'transition-colors duration-300'
                 } ${onRowClick ? 'cursor-pointer' : ''}`}
@@ -192,7 +218,13 @@ export function SandboxTable({
       </Table>
 
       <div className="flex items-center justify-end">
-        <Pagination className="pb-2 pt-6" table={table} selectionEnabled entityName="Sandboxes" />
+        <Pagination
+          className="pb-2 pt-6"
+          table={table}
+          selectionEnabled={deletePermitted}
+          entityName="Sandboxes"
+          totalItems={totalItems}
+        />
       </div>
 
       {/* Floating Action Bar */}
@@ -212,7 +244,7 @@ export function SandboxTable({
           >
             <div className="bg-background text-foreground border border-border rounded-lg shadow-lg pl-3 pr-2 py-1 flex items-center justify-between gap-4">
               <div className="text-sm text-muted-foreground">
-                {selectedCount} {selectedCount === 1 ? 'sandbox' : 'sandboxes'} selected
+                {selectedCount} {selectedCount === 1 ? 'item' : 'items'} selected
               </div>
               <AlertDialog open={bulkDeleteDialogOpen} onOpenChange={setBulkDeleteDialogOpen}>
                 <AlertDialogTrigger asChild>
@@ -226,7 +258,7 @@ export function SandboxTable({
                     <AlertDialogTitle>Delete Sandboxes</AlertDialogTitle>
                     <AlertDialogDescription>
                       Are you sure you want to delete{' '}
-                      {selectedCount === 1 ? 'this sandbox' : `these ${selectedCount} sandboxes`}? This action cannot be
+                      {selectedCount === 1 ? 'this item' : `these ${selectedCount} items`}? This action cannot be
                       undone.
                     </AlertDialogDescription>
                   </AlertDialogHeader>

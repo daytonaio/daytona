@@ -249,7 +249,7 @@ Gets a Sandbox by its ID.
 
 ```python
 sandbox = daytona.get("my-sandbox-id")
-print(sandbox.status)
+print(sandbox.state)
 ```
 
 #### Daytona.find\_one
@@ -289,27 +289,31 @@ print(f"Sandbox ID: {sandbox.id} State: {sandbox.state}")
 
 ```python
 @intercept_errors(message_prefix="Failed to list sandboxes: ")
-def list(labels: Optional[Dict[str, str]] = None) -> List[Sandbox]
+def list(labels: Optional[Dict[str, str]] = None,
+         page: Optional[int] = None,
+         limit: Optional[int] = None) -> PaginatedSandboxes
 ```
 
-Lists Sandboxes filtered by labels.
+Returns paginated list of Sandboxes filtered by labels.
 
 **Arguments**:
 
 - `labels` _Optional[Dict[str, str]]_ - Labels to filter Sandboxes.
+- `page` _Optional[int]_ - Page number for pagination (starting from 1).
+- `limit` _Optional[int]_ - Maximum number of items per page.
   
 
 **Returns**:
 
-- `List[Sandbox]` - List of Sandbox instances that match the labels.
+- `PaginatedSandboxes` - Paginated list of Sandbox instances that match the labels.
   
 
 **Example**:
 
 ```python
-sandboxes = daytona.list(labels={"my-label": "my-value"})
-for sandbox in sandboxes:
-    print(f"{sandbox.id}: {sandbox.status}")
+result = daytona.list(labels={"my-label": "my-value"}, page=2, limit=10)
+for sandbox in result.items:
+    print(f"{sandbox.id}: {sandbox.state}")
 ```
 
 #### Daytona.start
