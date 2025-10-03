@@ -6946,6 +6946,7 @@ paths:
                 $ref: '#/components/schemas/StorageAccessDto'
           description: Temporary storage access has been generated
       security:
+        - bearer: []
         - oauth2:
             - openid
             - profile
