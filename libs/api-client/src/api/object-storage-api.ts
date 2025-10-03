@@ -62,6 +62,10 @@ export const ObjectStorageApiAxiosParamCreator = function (configuration?: Confi
       const localVarHeaderParameter = {} as any
       const localVarQueryParameter = {} as any
 
+      // authentication bearer required
+      // http bearer authentication required
+      await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
       // authentication oauth2 required
 
       if (xDaytonaOrganizationID != null) {

@@ -4,7 +4,7 @@
  */
 
 import { Controller, Get, UseGuards, HttpCode } from '@nestjs/common'
-import { ApiOAuth2, ApiTags, ApiOperation, ApiResponse, ApiHeader } from '@nestjs/swagger'
+import { ApiOAuth2, ApiTags, ApiOperation, ApiResponse, ApiHeader, ApiBearerAuth } from '@nestjs/swagger'
 import { CombinedAuthGuard } from '../../auth/combined-auth.guard'
 import { OrganizationAuthContext } from '../../common/interfaces/auth-context.interface'
 import { ObjectStorageService } from '../services/object-storage.service'
@@ -18,6 +18,7 @@ import { AuthContext } from '../../common/decorators/auth-context.decorator'
 @ApiHeader(CustomHeaders.ORGANIZATION_ID)
 @UseGuards(CombinedAuthGuard, OrganizationResourceActionGuard)
 @ApiOAuth2(['openid', 'profile', 'email'])
+@ApiBearerAuth()
 export class ObjectStorageController {
   constructor(private readonly objectStorageService: ObjectStorageService) {}
 
