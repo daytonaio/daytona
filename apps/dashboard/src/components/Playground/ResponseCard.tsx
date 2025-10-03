@@ -4,10 +4,11 @@
  */
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { ReactNode } from 'react'
 
 type ResponseCardProps = {
   titleText?: string
-  responseText: string
+  responseText: string | ReactNode
 }
 
 const ResponseCard: React.FC<ResponseCardProps> = ({ titleText, responseText }) => {

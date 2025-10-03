@@ -19,12 +19,12 @@ import { usePlayground } from '@/hooks/usePlayground'
 import { Loader2, Play } from 'lucide-react'
 import { useAuth } from 'react-oidc-context'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
-import { useCallback, useMemo, useState } from 'react'
+import { ReactNode, useCallback, useMemo, useState } from 'react'
 import ResponseCard from '../ResponseCard'
 
 const SandboxCodeSnippetsResponse: React.FC = () => {
   const [codeSnippetLanguage, setCodeSnippetLanguage] = useState<CodeLanguage>(CodeLanguage.PYTHON)
-  const [codeSnippetOutput, setCodeSnippetOutput] = useState<string>('')
+  const [codeSnippetOutput, setCodeSnippetOutput] = useState<string | ReactNode>('')
   const [isCodeSnippetRunning, setIsCodeSnippetRunning] = useState<boolean>(false)
 
   const { user } = useAuth()
@@ -37,6 +37,7 @@ const SandboxCodeSnippetsResponse: React.FC = () => {
   const useConfigObject = false // Currently not needed, we use jwtToken for client config
 
   const useLanguageParam = sandboxParametersState['language']
+  const shellCommandExists = sandboxParametersState['shellCommandToRun']
 
   const useResources = objectHasAnyValue(sandboxParametersState['resources'])
   const useResourcesCPU = useResources && sandboxParametersState['resources']['cpu'] !== undefined
@@ -265,7 +266,7 @@ console.log(greet("Daytona"));`
   const getShellCodeToRunSnippet = useCallback(() => {
     let python = '',
       typeScript = ''
-    if (sandboxParametersState['shellCommandToRun']) {
+    if (shellCommandExists) {
       python = [
         '\n\n# Execute shell commands',
         `response = sandbox.process.exec("${sandboxParametersState['shellCommandToRun']}")`,
@@ -279,7 +280,7 @@ console.log(greet("Daytona"));`
       ].join('\n')
     }
     return { python, typeScript }
-  }, [sandboxParametersState])
+  }, [shellCommandExists, sandboxParametersState])
 
   const sandboxCodeSnippetsData = useMemo(() => {
     const { python: pythonImport, typeScript: typeScriptImport } = getImportsCodeSnippet()
@@ -323,7 +324,7 @@ main().catch(console.error)`,
 
   const runCodeSnippet = async () => {
     setIsCodeSnippetRunning(true)
-    let codeSnippetOutput = 'Creating sandbox...'
+    let codeSnippetOutput = 'Creating sandbox...\n'
     setCodeSnippetOutput(codeSnippetOutput)
 
     try {
@@ -371,18 +372,33 @@ main().catch(console.error)`,
         codeSnippetOutput += `\nCode run result: ${codeRunResponse.result}`
         setCodeSnippetOutput(codeSnippetOutput)
       }
-      if (sandboxParametersState['shellCommandToRun']) {
+      if (shellCommandExists) {
         setCodeSnippetOutput(codeSnippetOutput + '\nRunning shell command...')
         const shellCommandResponse = await sandbox.process.executeCommand(sandboxParametersState['shellCommandToRun'])
         codeSnippetOutput += `\nShell command result: ${shellCommandResponse.result}`
         setCodeSnippetOutput(codeSnippetOutput)
       }
-      setCodeSnippetOutput(
-        codeSnippetOutput + '\n🎉 Code and shell command executed successfully. Sandbox session finished.',
-      )
+      let sessionFinishedMessage = '\n'
+      if (useLanguageParam && shellCommandExists) {
+        sessionFinishedMessage += '🎉 Code and shell command executed successfully. '
+      } else if (useLanguageParam) {
+        sessionFinishedMessage += '🎉 Code executed successfully. '
+      } else if (shellCommandExists) {
+        sessionFinishedMessage += '🎉 Shell command executed successfully. '
+      }
+      setCodeSnippetOutput(codeSnippetOutput + sessionFinishedMessage + 'Sandbox session finished.')
     } catch (error) {
       console.error(error)
-      setCodeSnippetOutput(codeSnippetOutput + `Error: ${error instanceof Error ? error.message : String(error)}`)
+      setCodeSnippetOutput(
+        <>
+          <span>{codeSnippetOutput}</span>
+          <br />
+          <span>
+            <span className="text-red-500">Error: </span>
+            <span>{error instanceof Error ? error.message : String(error)}</span>
+          </span>
+        </>,
+      )
     } finally {
       setIsCodeSnippetRunning(false)
     }
