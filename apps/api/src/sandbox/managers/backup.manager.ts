@@ -11,7 +11,6 @@ import { Sandbox } from '../entities/sandbox.entity'
 import { SandboxState } from '../enums/sandbox-state.enum'
 import { RunnerService } from '../services/runner.service'
 import { RunnerState } from '../enums/runner-state.enum'
-import { ResourceNotFoundError } from '../../exceptions/not-found.exception'
 import { BadRequestError } from '../../exceptions/bad-request.exception'
 import { DockerRegistryService } from '../../docker-registry/services/docker-registry.service'
 import { BackupState } from '../enums/backup-state.enum'
@@ -32,6 +31,7 @@ import { TypedConfigService } from '../../config/typed-config.service'
 import { TrackJobExecution } from '../../common/decorators/track-job-execution.decorator'
 import { TrackableJobExecutions } from '../../common/interfaces/trackable-job-executions'
 import { setTimeout } from 'timers/promises'
+import { LogExecution } from '../../common/decorators/log-execution.decorator'
 
 @Injectable()
 export class BackupManager implements TrackableJobExecutions, OnApplicationShutdown {
@@ -67,6 +67,7 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
   //  todo: make frequency configurable or more efficient
   @Cron(CronExpression.EVERY_5_MINUTES, { name: 'ad-hoc-backup-check' })
   @TrackJobExecution()
+  @LogExecution('ad-hoc-backup-check')
   async adHocBackupCheck(): Promise<void> {
     const lockKey = 'ad-hoc-backup-check'
     const hasLock = await this.redisLockProvider.lock(lockKey, 5 * 60)
@@ -131,6 +132,7 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
 
   @Cron(CronExpression.EVERY_10_SECONDS, { name: 'check-backup-states' })
   @TrackJobExecution()
+  @LogExecution('check-backup-states')
   async checkBackupStates(): Promise<void> {
     //  lock the sync to only run one instance at a time
     const lockKey = 'check-backup-states'
@@ -227,6 +229,7 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
 
   @Cron(CronExpression.EVERY_10_SECONDS, { name: 'sync-stop-state-create-backups' })
   @TrackJobExecution()
+  @LogExecution('sync-stop-state-create-backups')
   async syncStopStateCreateBackups(): Promise<void> {
     const lockKey = 'sync-stop-state-create-backups'
     const hasLock = await this.redisLockProvider.lock(lockKey, 10)

@@ -19,6 +19,7 @@ import { SandboxUsagePeriodArchive } from '../entities/sandbox-usage-period-arch
 import { TrackableJobExecutions } from '../../common/interfaces/trackable-job-executions'
 import { TrackJobExecution } from '../../common/decorators/track-job-execution.decorator'
 import { setTimeout as sleep } from 'timers/promises'
+import { LogExecution } from '../../common/decorators/log-execution.decorator'
 
 @Injectable()
 export class UsageService implements TrackableJobExecutions, OnApplicationShutdown {
@@ -112,6 +113,7 @@ export class UsageService implements TrackableJobExecutions, OnApplicationShutdo
 
   @Cron(CronExpression.EVERY_MINUTE, { name: 'close-and-reopen-usage-periods' })
   @TrackJobExecution()
+  @LogExecution('close-and-reopen-usage-periods')
   async closeAndReopenUsagePeriods() {
     if (!(await this.redisLockProvider.lock('close-and-reopen-usage-periods', 60))) {
       return
@@ -169,6 +171,7 @@ export class UsageService implements TrackableJobExecutions, OnApplicationShutdo
 
   @Cron(CronExpression.EVERY_MINUTE, { name: 'archive-usage-periods' })
   @TrackJobExecution()
+  @LogExecution('archive-usage-periods')
   async archiveUsagePeriods() {
     const lockKey = 'archive-usage-periods'
     if (!(await this.redisLockProvider.lock(lockKey, 60))) {

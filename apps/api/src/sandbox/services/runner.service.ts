@@ -24,6 +24,7 @@ import { RunnerSnapshotDto } from '../dto/runner-snapshot.dto'
 import { RunnerAdapterFactory, RunnerInfo } from '../runner-adapter/runnerAdapter'
 import { RedisLockProvider } from '../common/redis-lock.provider'
 import { TypedConfigService } from '../../config/typed-config.service'
+import { LogExecution } from '../../common/decorators/log-execution.decorator'
 
 @Injectable()
 export class RunnerService {
@@ -189,6 +190,7 @@ export class RunnerService {
   }
 
   @Cron(CronExpression.EVERY_10_SECONDS, { name: 'check-runners', waitForCompletion: true })
+  @LogExecution('check-runners')
   private async handleCheckRunners() {
     const lockKey = 'check-runners'
     const hasLock = await this.redisLockProvider.lock(lockKey, 60)
