@@ -1352,6 +1352,7 @@ paths:
                 - pending_build
                 - building_snapshot
                 - unknown
+                - pending_pull
                 - pulling_snapshot
                 - archived
                 - archiving
