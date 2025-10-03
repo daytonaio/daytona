@@ -21,10 +21,10 @@ import { useState } from 'react'
 export const PlaygroundProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [sandboxParametersState, setSandboxParametersState] = useState<SandboxParams>({
     resources: {
-      cpu: 2,
+      cpu: 1,
       // gpu: 0,
-      memory: 4,
-      disk: 8,
+      memory: 1,
+      disk: 3,
     },
     createSandboxBaseParams: {
       autoStopInterval: 15,

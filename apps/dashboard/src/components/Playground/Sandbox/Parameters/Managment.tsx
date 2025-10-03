@@ -5,6 +5,7 @@
 
 import { Label } from '@/components/ui/label'
 import StackedInputFormControl from '../../Inputs/StackedInputFormControl'
+import InlineInputFormControl from '../../Inputs/InlineInputFormControl'
 import FormSelectInput from '../../Inputs/SelectInput'
 import FormNumberInput from '../../Inputs/NumberInput'
 import { CodeLanguage, Resources, CreateSandboxBaseParams } from '@daytonaio/sdk-typescript/src'
@@ -42,17 +43,17 @@ const SandboxManagmentParameters: React.FC = () => {
     },
   ]
   const resourcesFormData: (NumberParameterFormItem & { key: keyof Resources })[] = [
-    { label: 'Compute (vCPU):', key: 'cpu', min: 1, max: Infinity, placeholder: '1' },
-    { label: 'Memory (GiB):', key: 'memory', min: 1, max: Infinity, placeholder: '1' },
-    { label: 'Storage (GiB):', key: 'disk', min: 1, max: Infinity, placeholder: '3' },
+    { label: 'Compute (vCPU)', key: 'cpu', min: 1, max: Infinity, placeholder: '1' },
+    { label: 'Memory (GiB)', key: 'memory', min: 1, max: Infinity, placeholder: '1' },
+    { label: 'Storage (GiB)', key: 'disk', min: 1, max: Infinity, placeholder: '3' },
   ]
 
   const lifecycleParamsFormData: (NumberParameterFormItem & {
     key: 'autoStopInterval' | 'autoArchiveInterval' | 'autoDeleteInterval'
   })[] = [
-    { label: 'Stop (min):', key: 'autoStopInterval', min: 0, max: Infinity, placeholder: '15' },
+    { label: 'Stop (min)', key: 'autoStopInterval', min: 0, max: Infinity, placeholder: '15' },
     { label: 'Archive (min)', key: 'autoArchiveInterval', min: 0, max: Infinity, placeholder: '7' },
-    { label: 'Delete (min):', key: 'autoDeleteInterval', min: -1, max: Infinity, placeholder: '' },
+    { label: 'Delete (min)', key: 'autoDeleteInterval', min: -1, max: Infinity, placeholder: '' },
   ]
 
   return (
@@ -72,16 +73,17 @@ const SandboxManagmentParameters: React.FC = () => {
         <Label htmlFor="resources">Resources</Label>
         <div id="resources" className="px-4 space-y-2">
           {resourcesFormData.map((resourceParamFormItem) => (
-            <FormNumberInput
-              key={resourceParamFormItem.key}
-              numberValue={resources[resourceParamFormItem.key]}
-              numberFormItem={resourceParamFormItem}
-              onChangeHandler={(value) => {
-                const resourcesNew = { ...resources, [resourceParamFormItem.key]: value }
-                setResources(resourcesNew)
-                setSandboxParameterValue('resources', resourcesNew)
-              }}
-            />
+            <InlineInputFormControl key={resourceParamFormItem.key} formItem={resourceParamFormItem}>
+              <FormNumberInput
+                numberValue={resources[resourceParamFormItem.key]}
+                numberFormItem={resourceParamFormItem}
+                onChangeHandler={(value) => {
+                  const resourcesNew = { ...resources, [resourceParamFormItem.key]: value }
+                  setResources(resourcesNew)
+                  setSandboxParameterValue('resources', resourcesNew)
+                }}
+              />
+            </InlineInputFormControl>
           ))}
         </div>
       </div>
@@ -89,16 +91,17 @@ const SandboxManagmentParameters: React.FC = () => {
         <Label htmlFor="lifecycle">Lifecycle</Label>
         <div id="lifecycle" className="px-4 space-y-2">
           {lifecycleParamsFormData.map((lifecycleParamFormItem) => (
-            <FormNumberInput
-              key={lifecycleParamFormItem.key}
-              numberValue={sandboxFromImageParams[lifecycleParamFormItem.key]}
-              numberFormItem={lifecycleParamFormItem}
-              onChangeHandler={(value) => {
-                const sandboxFromImageParamsNew = { ...sandboxFromImageParams, [lifecycleParamFormItem.key]: value }
-                setSandboxFromImageParams(sandboxFromImageParamsNew)
-                setSandboxParameterValue('createSandboxBaseParams', sandboxFromImageParamsNew)
-              }}
-            />
+            <InlineInputFormControl key={lifecycleParamFormItem.key} formItem={lifecycleParamFormItem}>
+              <FormNumberInput
+                numberValue={sandboxFromImageParams[lifecycleParamFormItem.key]}
+                numberFormItem={lifecycleParamFormItem}
+                onChangeHandler={(value) => {
+                  const sandboxFromImageParamsNew = { ...sandboxFromImageParams, [lifecycleParamFormItem.key]: value }
+                  setSandboxFromImageParams(sandboxFromImageParamsNew)
+                  setSandboxParameterValue('createSandboxBaseParams', sandboxFromImageParamsNew)
+                }}
+              />
+            </InlineInputFormControl>
           ))}
         </div>
       </div>
