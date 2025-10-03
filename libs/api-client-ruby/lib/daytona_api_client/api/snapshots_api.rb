@@ -282,9 +282,12 @@ module DaytonaApiClient
     # List all snapshots
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
-    # @option opts [Float] :limit Number of items per page
-    # @option opts [Float] :page Page number
-    # @return [PaginatedSnapshotsDto]
+    # @option opts [Float] :page Page number of the results (default to 1)
+    # @option opts [Float] :limit Number of results per page (default to 100)
+    # @option opts [String] :name Filter by partial name match
+    # @option opts [String] :sort Field to sort by (default to 'lastUsedAt')
+    # @option opts [String] :order Direction to sort by (default to 'desc')
+    # @return [PaginatedSnapshots]
     def get_all_snapshots(opts = {})
       data, _status_code, _headers = get_all_snapshots_with_http_info(opts)
       data
@@ -293,20 +296,46 @@ module DaytonaApiClient
     # List all snapshots
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
-    # @option opts [Float] :limit Number of items per page
-    # @option opts [Float] :page Page number
-    # @return [Array<(PaginatedSnapshotsDto, Integer, Hash)>] PaginatedSnapshotsDto data, response status code and response headers
+    # @option opts [Float] :page Page number of the results (default to 1)
+    # @option opts [Float] :limit Number of results per page (default to 100)
+    # @option opts [String] :name Filter by partial name match
+    # @option opts [String] :sort Field to sort by (default to 'lastUsedAt')
+    # @option opts [String] :order Direction to sort by (default to 'desc')
+    # @return [Array<(PaginatedSnapshots, Integer, Hash)>] PaginatedSnapshots data, response status code and response headers
     def get_all_snapshots_with_http_info(opts = {})
       if @api_client.config.debugging
         @api_client.config.logger.debug 'Calling API: SnapshotsApi.get_all_snapshots ...'
+      end
+      if @api_client.config.client_side_validation && !opts[:'page'].nil? && opts[:'page'] < 1
+        fail ArgumentError, 'invalid value for "opts[:"page"]" when calling SnapshotsApi.get_all_snapshots, must be greater than or equal to 1.'
+      end
+
+      if @api_client.config.client_side_validation && !opts[:'limit'].nil? && opts[:'limit'] > 200
+        fail ArgumentError, 'invalid value for "opts[:"limit"]" when calling SnapshotsApi.get_all_snapshots, must be smaller than or equal to 200.'
+      end
+
+      if @api_client.config.client_side_validation && !opts[:'limit'].nil? && opts[:'limit'] < 1
+        fail ArgumentError, 'invalid value for "opts[:"limit"]" when calling SnapshotsApi.get_all_snapshots, must be greater than or equal to 1.'
+      end
+
+      allowable_values = ["name", "state", "lastUsedAt", "createdAt"]
+      if @api_client.config.client_side_validation && opts[:'sort'] && !allowable_values.include?(opts[:'sort'])
+        fail ArgumentError, "invalid value for \"sort\", must be one of #{allowable_values}"
+      end
+      allowable_values = ["asc", "desc"]
+      if @api_client.config.client_side_validation && opts[:'order'] && !allowable_values.include?(opts[:'order'])
+        fail ArgumentError, "invalid value for \"order\", must be one of #{allowable_values}"
       end
       # resource path
       local_var_path = '/snapshots'
 
       # query parameters
       query_params = opts[:query_params] || {}
-      query_params[:'limit'] = opts[:'limit'] if !opts[:'limit'].nil?
       query_params[:'page'] = opts[:'page'] if !opts[:'page'].nil?
+      query_params[:'limit'] = opts[:'limit'] if !opts[:'limit'].nil?
+      query_params[:'name'] = opts[:'name'] if !opts[:'name'].nil?
+      query_params[:'sort'] = opts[:'sort'] if !opts[:'sort'].nil?
+      query_params[:'order'] = opts[:'order'] if !opts[:'order'].nil?
 
       # header parameters
       header_params = opts[:header_params] || {}
@@ -321,7 +350,7 @@ module DaytonaApiClient
       post_body = opts[:debug_body]
 
       # return_type
-      return_type = opts[:debug_return_type] || 'PaginatedSnapshotsDto'
+      return_type = opts[:debug_return_type] || 'PaginatedSnapshots'
 
       # auth_names
       auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']

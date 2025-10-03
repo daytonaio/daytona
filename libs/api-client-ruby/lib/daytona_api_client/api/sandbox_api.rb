@@ -283,22 +283,20 @@ module DaytonaApiClient
 
     # Delete sandbox
     # @param sandbox_id [String] ID of the sandbox
-    # @param force [Boolean] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [nil]
-    def delete_sandbox(sandbox_id, force, opts = {})
-      delete_sandbox_with_http_info(sandbox_id, force, opts)
+    def delete_sandbox(sandbox_id, opts = {})
+      delete_sandbox_with_http_info(sandbox_id, opts)
       nil
     end
 
     # Delete sandbox
     # @param sandbox_id [String] ID of the sandbox
-    # @param force [Boolean] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
     # @return [Array<(nil, Integer, Hash)>] nil, response status code and response headers
-    def delete_sandbox_with_http_info(sandbox_id, force, opts = {})
+    def delete_sandbox_with_http_info(sandbox_id, opts = {})
       if @api_client.config.debugging
         @api_client.config.logger.debug 'Calling API: SandboxApi.delete_sandbox ...'
       end
@@ -306,16 +304,11 @@ module DaytonaApiClient
       if @api_client.config.client_side_validation && sandbox_id.nil?
         fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling SandboxApi.delete_sandbox"
       end
-      # verify the required parameter 'force' is set
-      if @api_client.config.client_side_validation && force.nil?
-        fail ArgumentError, "Missing the required parameter 'force' when calling SandboxApi.delete_sandbox"
-      end
       # resource path
       local_var_path = '/sandbox/{sandboxId}'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s))
 
       # query parameters
       query_params = opts[:query_params] || {}
-      query_params[:'force'] = force
 
       # header parameters
       header_params = opts[:header_params] || {}
@@ -552,35 +545,92 @@ module DaytonaApiClient
       return data, status_code, headers
     end
 
-    # Get sandboxes for the authenticated runner
-    # @param state [String] 
+    # List all regions where sandboxes have been created
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
+    # @return [Array<Region>]
+    def get_sandbox_regions(opts = {})
+      data, _status_code, _headers = get_sandbox_regions_with_http_info(opts)
+      data
+    end
+
+    # List all regions where sandboxes have been created
+    # @param [Hash] opts the optional parameters
+    # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
+    # @return [Array<(Array<Region>, Integer, Hash)>] Array<Region> data, response status code and response headers
+    def get_sandbox_regions_with_http_info(opts = {})
+      if @api_client.config.debugging
+        @api_client.config.logger.debug 'Calling API: SandboxApi.get_sandbox_regions ...'
+      end
+      # resource path
+      local_var_path = '/sandbox/regions'
+
+      # query parameters
+      query_params = opts[:query_params] || {}
+
+      # header parameters
+      header_params = opts[:header_params] || {}
+      # HTTP header 'Accept' (if needed)
+      header_params['Accept'] = @api_client.select_header_accept(['application/json']) unless header_params['Accept']
+      header_params[:'X-Daytona-Organization-ID'] = opts[:'x_daytona_organization_id'] if !opts[:'x_daytona_organization_id'].nil?
+
+      # form parameters
+      form_params = opts[:form_params] || {}
+
+      # http body (model)
+      post_body = opts[:debug_body]
+
+      # return_type
+      return_type = opts[:debug_return_type] || 'Array<Region>'
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
+
+      new_options = opts.merge(
+        :operation => :"SandboxApi.get_sandbox_regions",
+        :header_params => header_params,
+        :query_params => query_params,
+        :form_params => form_params,
+        :body => post_body,
+        :auth_names => auth_names,
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:GET, local_var_path, new_options)
+      if @api_client.config.debugging
+        @api_client.config.logger.debug "API called: SandboxApi#get_sandbox_regions\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+      end
+      return data, status_code, headers
+    end
+
+    # Get sandboxes for the authenticated runner
+    # @param [Hash] opts the optional parameters
+    # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
+    # @option opts [String] :states Comma-separated list of sandbox states to filter by
+    # @option opts [Boolean] :skip_reconciling_sandboxes Skip sandboxes where state differs from desired state
     # @return [Array<Sandbox>]
-    def get_sandboxes_for_runner(state, opts = {})
-      data, _status_code, _headers = get_sandboxes_for_runner_with_http_info(state, opts)
+    def get_sandboxes_for_runner(opts = {})
+      data, _status_code, _headers = get_sandboxes_for_runner_with_http_info(opts)
       data
     end
 
     # Get sandboxes for the authenticated runner
-    # @param state [String] 
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
+    # @option opts [String] :states Comma-separated list of sandbox states to filter by
+    # @option opts [Boolean] :skip_reconciling_sandboxes Skip sandboxes where state differs from desired state
     # @return [Array<(Array<Sandbox>, Integer, Hash)>] Array<Sandbox> data, response status code and response headers
-    def get_sandboxes_for_runner_with_http_info(state, opts = {})
+    def get_sandboxes_for_runner_with_http_info(opts = {})
       if @api_client.config.debugging
         @api_client.config.logger.debug 'Calling API: SandboxApi.get_sandboxes_for_runner ...'
-      end
-      # verify the required parameter 'state' is set
-      if @api_client.config.client_side_validation && state.nil?
-        fail ArgumentError, "Missing the required parameter 'state' when calling SandboxApi.get_sandboxes_for_runner"
       end
       # resource path
       local_var_path = '/sandbox/for-runner'
 
       # query parameters
       query_params = opts[:query_params] || {}
-      query_params[:'state'] = state
+      query_params[:'states'] = opts[:'states'] if !opts[:'states'].nil?
+      query_params[:'skipReconcilingSandboxes'] = opts[:'skip_reconciling_sandboxes'] if !opts[:'skip_reconciling_sandboxes'].nil?
 
       # header parameters
       header_params = opts[:header_params] || {}
@@ -680,6 +730,166 @@ module DaytonaApiClient
       data, status_code, headers = @api_client.call_api(:GET, local_var_path, new_options)
       if @api_client.config.debugging
         @api_client.config.logger.debug "API called: SandboxApi#list_sandboxes\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+      end
+      return data, status_code, headers
+    end
+
+    # List all sandboxes paginated
+    # @param [Hash] opts the optional parameters
+    # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
+    # @option opts [Float] :page Page number of the results (default to 1)
+    # @option opts [Float] :limit Number of results per page (default to 100)
+    # @option opts [String] :id Filter by partial ID match
+    # @option opts [String] :labels JSON encoded labels to filter by
+    # @option opts [Boolean] :include_errored_deleted Include results with errored state and deleted desired state (default to false)
+    # @option opts [Array<String>] :states List of states to filter by
+    # @option opts [Array<String>] :snapshots List of snapshot names to filter by
+    # @option opts [Array<String>] :regions List of regions to filter by
+    # @option opts [Float] :min_cpu Minimum CPU
+    # @option opts [Float] :max_cpu Maximum CPU
+    # @option opts [Float] :min_memory_gi_b Minimum memory in GiB
+    # @option opts [Float] :max_memory_gi_b Maximum memory in GiB
+    # @option opts [Float] :min_disk_gi_b Minimum disk space in GiB
+    # @option opts [Float] :max_disk_gi_b Maximum disk space in GiB
+    # @option opts [Time] :last_event_after Include items with last event after this timestamp
+    # @option opts [Time] :last_event_before Include items with last event before this timestamp
+    # @option opts [String] :sort Field to sort by (default to 'createdAt')
+    # @option opts [String] :order Direction to sort by (default to 'desc')
+    # @return [PaginatedSandboxes]
+    def list_sandboxes_paginated(opts = {})
+      data, _status_code, _headers = list_sandboxes_paginated_with_http_info(opts)
+      data
+    end
+
+    # List all sandboxes paginated
+    # @param [Hash] opts the optional parameters
+    # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
+    # @option opts [Float] :page Page number of the results (default to 1)
+    # @option opts [Float] :limit Number of results per page (default to 100)
+    # @option opts [String] :id Filter by partial ID match
+    # @option opts [String] :labels JSON encoded labels to filter by
+    # @option opts [Boolean] :include_errored_deleted Include results with errored state and deleted desired state (default to false)
+    # @option opts [Array<String>] :states List of states to filter by
+    # @option opts [Array<String>] :snapshots List of snapshot names to filter by
+    # @option opts [Array<String>] :regions List of regions to filter by
+    # @option opts [Float] :min_cpu Minimum CPU
+    # @option opts [Float] :max_cpu Maximum CPU
+    # @option opts [Float] :min_memory_gi_b Minimum memory in GiB
+    # @option opts [Float] :max_memory_gi_b Maximum memory in GiB
+    # @option opts [Float] :min_disk_gi_b Minimum disk space in GiB
+    # @option opts [Float] :max_disk_gi_b Maximum disk space in GiB
+    # @option opts [Time] :last_event_after Include items with last event after this timestamp
+    # @option opts [Time] :last_event_before Include items with last event before this timestamp
+    # @option opts [String] :sort Field to sort by (default to 'createdAt')
+    # @option opts [String] :order Direction to sort by (default to 'desc')
+    # @return [Array<(PaginatedSandboxes, Integer, Hash)>] PaginatedSandboxes data, response status code and response headers
+    def list_sandboxes_paginated_with_http_info(opts = {})
+      if @api_client.config.debugging
+        @api_client.config.logger.debug 'Calling API: SandboxApi.list_sandboxes_paginated ...'
+      end
+      if @api_client.config.client_side_validation && !opts[:'page'].nil? && opts[:'page'] < 1
+        fail ArgumentError, 'invalid value for "opts[:"page"]" when calling SandboxApi.list_sandboxes_paginated, must be greater than or equal to 1.'
+      end
+
+      if @api_client.config.client_side_validation && !opts[:'limit'].nil? && opts[:'limit'] > 200
+        fail ArgumentError, 'invalid value for "opts[:"limit"]" when calling SandboxApi.list_sandboxes_paginated, must be smaller than or equal to 200.'
+      end
+
+      if @api_client.config.client_side_validation && !opts[:'limit'].nil? && opts[:'limit'] < 1
+        fail ArgumentError, 'invalid value for "opts[:"limit"]" when calling SandboxApi.list_sandboxes_paginated, must be greater than or equal to 1.'
+      end
+
+      allowable_values = ["creating", "restoring", "destroying", "started", "stopped", "starting", "stopping", "error", "build_failed", "pending_build", "building_snapshot", "unknown", "pulling_snapshot", "archived", "archiving"]
+      if @api_client.config.client_side_validation && opts[:'states'] && !opts[:'states'].all? { |item| allowable_values.include?(item) }
+        fail ArgumentError, "invalid value for \"states\", must include one of #{allowable_values}"
+      end
+      if @api_client.config.client_side_validation && !opts[:'min_cpu'].nil? && opts[:'min_cpu'] < 1
+        fail ArgumentError, 'invalid value for "opts[:"min_cpu"]" when calling SandboxApi.list_sandboxes_paginated, must be greater than or equal to 1.'
+      end
+
+      if @api_client.config.client_side_validation && !opts[:'max_cpu'].nil? && opts[:'max_cpu'] < 1
+        fail ArgumentError, 'invalid value for "opts[:"max_cpu"]" when calling SandboxApi.list_sandboxes_paginated, must be greater than or equal to 1.'
+      end
+
+      if @api_client.config.client_side_validation && !opts[:'min_memory_gi_b'].nil? && opts[:'min_memory_gi_b'] < 1
+        fail ArgumentError, 'invalid value for "opts[:"min_memory_gi_b"]" when calling SandboxApi.list_sandboxes_paginated, must be greater than or equal to 1.'
+      end
+
+      if @api_client.config.client_side_validation && !opts[:'max_memory_gi_b'].nil? && opts[:'max_memory_gi_b'] < 1
+        fail ArgumentError, 'invalid value for "opts[:"max_memory_gi_b"]" when calling SandboxApi.list_sandboxes_paginated, must be greater than or equal to 1.'
+      end
+
+      if @api_client.config.client_side_validation && !opts[:'min_disk_gi_b'].nil? && opts[:'min_disk_gi_b'] < 1
+        fail ArgumentError, 'invalid value for "opts[:"min_disk_gi_b"]" when calling SandboxApi.list_sandboxes_paginated, must be greater than or equal to 1.'
+      end
+
+      if @api_client.config.client_side_validation && !opts[:'max_disk_gi_b'].nil? && opts[:'max_disk_gi_b'] < 1
+        fail ArgumentError, 'invalid value for "opts[:"max_disk_gi_b"]" when calling SandboxApi.list_sandboxes_paginated, must be greater than or equal to 1.'
+      end
+
+      allowable_values = ["id", "state", "snapshot", "region", "updatedAt", "createdAt"]
+      if @api_client.config.client_side_validation && opts[:'sort'] && !allowable_values.include?(opts[:'sort'])
+        fail ArgumentError, "invalid value for \"sort\", must be one of #{allowable_values}"
+      end
+      allowable_values = ["asc", "desc"]
+      if @api_client.config.client_side_validation && opts[:'order'] && !allowable_values.include?(opts[:'order'])
+        fail ArgumentError, "invalid value for \"order\", must be one of #{allowable_values}"
+      end
+      # resource path
+      local_var_path = '/sandbox/paginated'
+
+      # query parameters
+      query_params = opts[:query_params] || {}
+      query_params[:'page'] = opts[:'page'] if !opts[:'page'].nil?
+      query_params[:'limit'] = opts[:'limit'] if !opts[:'limit'].nil?
+      query_params[:'id'] = opts[:'id'] if !opts[:'id'].nil?
+      query_params[:'labels'] = opts[:'labels'] if !opts[:'labels'].nil?
+      query_params[:'includeErroredDeleted'] = opts[:'include_errored_deleted'] if !opts[:'include_errored_deleted'].nil?
+      query_params[:'states'] = @api_client.build_collection_param(opts[:'states'], :multi) if !opts[:'states'].nil?
+      query_params[:'snapshots'] = @api_client.build_collection_param(opts[:'snapshots'], :multi) if !opts[:'snapshots'].nil?
+      query_params[:'regions'] = @api_client.build_collection_param(opts[:'regions'], :multi) if !opts[:'regions'].nil?
+      query_params[:'minCpu'] = opts[:'min_cpu'] if !opts[:'min_cpu'].nil?
+      query_params[:'maxCpu'] = opts[:'max_cpu'] if !opts[:'max_cpu'].nil?
+      query_params[:'minMemoryGiB'] = opts[:'min_memory_gi_b'] if !opts[:'min_memory_gi_b'].nil?
+      query_params[:'maxMemoryGiB'] = opts[:'max_memory_gi_b'] if !opts[:'max_memory_gi_b'].nil?
+      query_params[:'minDiskGiB'] = opts[:'min_disk_gi_b'] if !opts[:'min_disk_gi_b'].nil?
+      query_params[:'maxDiskGiB'] = opts[:'max_disk_gi_b'] if !opts[:'max_disk_gi_b'].nil?
+      query_params[:'lastEventAfter'] = opts[:'last_event_after'] if !opts[:'last_event_after'].nil?
+      query_params[:'lastEventBefore'] = opts[:'last_event_before'] if !opts[:'last_event_before'].nil?
+      query_params[:'sort'] = opts[:'sort'] if !opts[:'sort'].nil?
+      query_params[:'order'] = opts[:'order'] if !opts[:'order'].nil?
+
+      # header parameters
+      header_params = opts[:header_params] || {}
+      # HTTP header 'Accept' (if needed)
+      header_params['Accept'] = @api_client.select_header_accept(['application/json']) unless header_params['Accept']
+      header_params[:'X-Daytona-Organization-ID'] = opts[:'x_daytona_organization_id'] if !opts[:'x_daytona_organization_id'].nil?
+
+      # form parameters
+      form_params = opts[:form_params] || {}
+
+      # http body (model)
+      post_body = opts[:debug_body]
+
+      # return_type
+      return_type = opts[:debug_return_type] || 'PaginatedSandboxes'
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
+
+      new_options = opts.merge(
+        :operation => :"SandboxApi.list_sandboxes_paginated",
+        :header_params => header_params,
+        :query_params => query_params,
+        :form_params => form_params,
+        :body => post_body,
+        :auth_names => auth_names,
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:GET, local_var_path, new_options)
+      if @api_client.config.debugging
+        @api_client.config.logger.debug "API called: SandboxApi#list_sandboxes_paginated\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end

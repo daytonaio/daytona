@@ -87,8 +87,8 @@ module DaytonaApiClient
 
     # Get all audit logs
     # @param [Hash] opts the optional parameters
-    # @option opts [Float] :limit Number of items per page (default: 10)
-    # @option opts [Float] :page Page number (default: 1)
+    # @option opts [Float] :page Page number of the results (default to 1)
+    # @option opts [Float] :limit Number of results per page (default to 100)
     # @return [PaginatedAuditLogs]
     def get_all_audit_logs(opts = {})
       data, _status_code, _headers = get_all_audit_logs_with_http_info(opts)
@@ -97,20 +97,32 @@ module DaytonaApiClient
 
     # Get all audit logs
     # @param [Hash] opts the optional parameters
-    # @option opts [Float] :limit Number of items per page (default: 10)
-    # @option opts [Float] :page Page number (default: 1)
+    # @option opts [Float] :page Page number of the results (default to 1)
+    # @option opts [Float] :limit Number of results per page (default to 100)
     # @return [Array<(PaginatedAuditLogs, Integer, Hash)>] PaginatedAuditLogs data, response status code and response headers
     def get_all_audit_logs_with_http_info(opts = {})
       if @api_client.config.debugging
         @api_client.config.logger.debug 'Calling API: AuditApi.get_all_audit_logs ...'
       end
+      if @api_client.config.client_side_validation && !opts[:'page'].nil? && opts[:'page'] < 1
+        fail ArgumentError, 'invalid value for "opts[:"page"]" when calling AuditApi.get_all_audit_logs, must be greater than or equal to 1.'
+      end
+
+      if @api_client.config.client_side_validation && !opts[:'limit'].nil? && opts[:'limit'] > 200
+        fail ArgumentError, 'invalid value for "opts[:"limit"]" when calling AuditApi.get_all_audit_logs, must be smaller than or equal to 200.'
+      end
+
+      if @api_client.config.client_side_validation && !opts[:'limit'].nil? && opts[:'limit'] < 1
+        fail ArgumentError, 'invalid value for "opts[:"limit"]" when calling AuditApi.get_all_audit_logs, must be greater than or equal to 1.'
+      end
+
       # resource path
       local_var_path = '/audit'
 
       # query parameters
       query_params = opts[:query_params] || {}
-      query_params[:'limit'] = opts[:'limit'] if !opts[:'limit'].nil?
       query_params[:'page'] = opts[:'page'] if !opts[:'page'].nil?
+      query_params[:'limit'] = opts[:'limit'] if !opts[:'limit'].nil?
 
       # header parameters
       header_params = opts[:header_params] || {}
@@ -149,8 +161,8 @@ module DaytonaApiClient
     # Get audit logs for organization
     # @param organization_id [String] Organization ID
     # @param [Hash] opts the optional parameters
-    # @option opts [Float] :limit Number of items per page (default: 10)
-    # @option opts [Float] :page Page number (default: 1)
+    # @option opts [Float] :page Page number of the results (default to 1)
+    # @option opts [Float] :limit Number of results per page (default to 100)
     # @return [PaginatedAuditLogs]
     def get_organization_audit_logs(organization_id, opts = {})
       data, _status_code, _headers = get_organization_audit_logs_with_http_info(organization_id, opts)
@@ -160,8 +172,8 @@ module DaytonaApiClient
     # Get audit logs for organization
     # @param organization_id [String] Organization ID
     # @param [Hash] opts the optional parameters
-    # @option opts [Float] :limit Number of items per page (default: 10)
-    # @option opts [Float] :page Page number (default: 1)
+    # @option opts [Float] :page Page number of the results (default to 1)
+    # @option opts [Float] :limit Number of results per page (default to 100)
     # @return [Array<(PaginatedAuditLogs, Integer, Hash)>] PaginatedAuditLogs data, response status code and response headers
     def get_organization_audit_logs_with_http_info(organization_id, opts = {})
       if @api_client.config.debugging
@@ -171,13 +183,25 @@ module DaytonaApiClient
       if @api_client.config.client_side_validation && organization_id.nil?
         fail ArgumentError, "Missing the required parameter 'organization_id' when calling AuditApi.get_organization_audit_logs"
       end
+      if @api_client.config.client_side_validation && !opts[:'page'].nil? && opts[:'page'] < 1
+        fail ArgumentError, 'invalid value for "opts[:"page"]" when calling AuditApi.get_organization_audit_logs, must be greater than or equal to 1.'
+      end
+
+      if @api_client.config.client_side_validation && !opts[:'limit'].nil? && opts[:'limit'] > 200
+        fail ArgumentError, 'invalid value for "opts[:"limit"]" when calling AuditApi.get_organization_audit_logs, must be smaller than or equal to 200.'
+      end
+
+      if @api_client.config.client_side_validation && !opts[:'limit'].nil? && opts[:'limit'] < 1
+        fail ArgumentError, 'invalid value for "opts[:"limit"]" when calling AuditApi.get_organization_audit_logs, must be greater than or equal to 1.'
+      end
+
       # resource path
       local_var_path = '/audit/organizations/{organizationId}'.sub('{' + 'organizationId' + '}', CGI.escape(organization_id.to_s))
 
       # query parameters
       query_params = opts[:query_params] || {}
-      query_params[:'limit'] = opts[:'limit'] if !opts[:'limit'].nil?
       query_params[:'page'] = opts[:'page'] if !opts[:'page'].nil?
+      query_params[:'limit'] = opts[:'limit'] if !opts[:'limit'].nil?
 
       # header parameters
       header_params = opts[:header_params] || {}

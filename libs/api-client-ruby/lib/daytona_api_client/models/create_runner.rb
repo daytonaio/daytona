@@ -35,8 +35,6 @@ module DaytonaApiClient
 
     attr_accessor :_class
 
-    attr_accessor :capacity
-
     attr_accessor :region
 
     attr_accessor :version
@@ -76,7 +74,6 @@ module DaytonaApiClient
         :'gpu' => :'gpu',
         :'gpu_type' => :'gpuType',
         :'_class' => :'class',
-        :'capacity' => :'capacity',
         :'region' => :'region',
         :'version' => :'version'
       }
@@ -105,7 +102,6 @@ module DaytonaApiClient
         :'gpu' => :'Float',
         :'gpu_type' => :'String',
         :'_class' => :'String',
-        :'capacity' => :'Float',
         :'region' => :'String',
         :'version' => :'String'
       }
@@ -193,12 +189,6 @@ module DaytonaApiClient
         self._class = nil
       end
 
-      if attributes.key?(:'capacity')
-        self.capacity = attributes[:'capacity']
-      else
-        self.capacity = nil
-      end
-
       if attributes.key?(:'region')
         self.region = attributes[:'region']
       else
@@ -257,10 +247,6 @@ module DaytonaApiClient
         invalid_properties.push('invalid value for "_class", _class cannot be nil.')
       end
 
-      if @capacity.nil?
-        invalid_properties.push('invalid value for "capacity", capacity cannot be nil.')
-      end
-
       if @region.nil?
         invalid_properties.push('invalid value for "region", region cannot be nil.')
       end
@@ -288,7 +274,6 @@ module DaytonaApiClient
       return false if @_class.nil?
       _class_validator = EnumAttributeValidator.new('String', ["small", "medium", "large"])
       return false unless _class_validator.valid?(@_class)
-      return false if @capacity.nil?
       return false if @region.nil?
       return false if @version.nil?
       true
@@ -395,16 +380,6 @@ module DaytonaApiClient
     end
 
     # Custom attribute writer method with validation
-    # @param [Object] capacity Value to be assigned
-    def capacity=(capacity)
-      if capacity.nil?
-        fail ArgumentError, 'capacity cannot be nil'
-      end
-
-      @capacity = capacity
-    end
-
-    # Custom attribute writer method with validation
     # @param [Object] region Value to be assigned
     def region=(region)
       if region.nil?
@@ -439,7 +414,6 @@ module DaytonaApiClient
           gpu == o.gpu &&
           gpu_type == o.gpu_type &&
           _class == o._class &&
-          capacity == o.capacity &&
           region == o.region &&
           version == o.version
     end
@@ -453,7 +427,7 @@ module DaytonaApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [domain, api_url, proxy_url, api_key, cpu, memory_gi_b, disk_gi_b, gpu, gpu_type, _class, capacity, region, version].hash
+      [domain, api_url, proxy_url, api_key, cpu, memory_gi_b, disk_gi_b, gpu, gpu_type, _class, region, version].hash
     end
 
     # Builds the object from hash
