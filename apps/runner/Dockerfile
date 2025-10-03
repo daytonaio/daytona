@@ -43,4 +43,6 @@ ENV AWS_ACCESS_KEY_ID=minioadmin
 ENV AWS_SECRET_ACCESS_KEY=minioadmin
 ENV AWS_DEFAULT_BUCKET=daytona
 
+ENV SERVER_URL=http://api:3000/api
+
 ENTRYPOINT ["sh", "-c", "dockerd & daytona-runner"]
