@@ -47,8 +47,9 @@ class SnapshotDto(BaseModel):
     updated_at: datetime = Field(alias="updatedAt")
     last_used_at: Optional[datetime] = Field(alias="lastUsedAt")
     build_info: Optional[BuildInfo] = Field(default=None, description="Build information for the snapshot", alias="buildInfo")
+    skip_validation: StrictBool = Field(alias="skipValidation")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["id", "organizationId", "general", "name", "imageName", "state", "size", "entrypoint", "cpu", "gpu", "mem", "disk", "errorReason", "createdAt", "updatedAt", "lastUsedAt", "buildInfo"]
+    __properties: ClassVar[List[str]] = ["id", "organizationId", "general", "name", "imageName", "state", "size", "entrypoint", "cpu", "gpu", "mem", "disk", "errorReason", "createdAt", "updatedAt", "lastUsedAt", "buildInfo", "skipValidation"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -147,7 +148,8 @@ class SnapshotDto(BaseModel):
             "createdAt": obj.get("createdAt"),
             "updatedAt": obj.get("updatedAt"),
             "lastUsedAt": obj.get("lastUsedAt"),
-            "buildInfo": BuildInfo.from_dict(obj["buildInfo"]) if obj.get("buildInfo") is not None else None
+            "buildInfo": BuildInfo.from_dict(obj["buildInfo"]) if obj.get("buildInfo") is not None else None,
+            "skipValidation": obj.get("skipValidation")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

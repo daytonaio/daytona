@@ -33,8 +33,9 @@ import { PaginatedList } from '../../common/interfaces/paginated-list.interface'
 import { OrganizationUsageService } from '../../organization/services/organization-usage.service'
 import { RedisLockProvider } from '../common/redis-lock.provider'
 import { SnapshotSortDirection, SnapshotSortField } from '../dto/list-snapshots-query.dto'
+import { DockerRegistryService } from '../../docker-registry/services/docker-registry.service'
 
-const IMAGE_NAME_REGEX = /^[a-zA-Z0-9_.\-:]+(\/[a-zA-Z0-9_.\-:]+)*$/
+const IMAGE_NAME_REGEX = /^[a-zA-Z0-9_.\-:]+(\/[a-zA-Z0-9_.\-:]+)*(@sha256:[a-f0-9]{64})?$/
 @Injectable()
 export class SnapshotService {
   private readonly logger = new Logger(SnapshotService.name)
@@ -51,11 +52,22 @@ export class SnapshotService {
     private readonly organizationService: OrganizationService,
     private readonly organizationUsageService: OrganizationUsageService,
     private readonly redisLockProvider: RedisLockProvider,
+    private readonly dockerRegistryService: DockerRegistryService,
   ) {}
 
   private validateImageName(name: string): string | null {
+    // Check for digest format (@sha256:hash)
+    if (name.includes('@sha256:')) {
+      const [imageName, digest] = name.split('@sha256:')
+      if (!imageName || !digest || !/^[a-f0-9]{64}$/.test(digest)) {
+        return 'Invalid digest format. Must be image@sha256:64_hex_characters'
+      }
+      return null
+    }
+
+    // Handle tag format (image:tag)
     if (!name.includes(':') || name.endsWith(':') || /:\s*$/.test(name)) {
-      return 'Image name must include a tag (e.g., ubuntu:22.04)'
+      return 'Image name must include a tag (e.g., ubuntu:22.04) or digest (@sha256:...)'
     }
 
     if (name.endsWith(':latest')) {
@@ -81,6 +93,8 @@ export class SnapshotService {
     let pendingSnapshotCountIncrement: number | undefined
 
     try {
+      let entrypoint = createSnapshotDto.entrypoint
+
       const nameValidationError = this.validateSnapshotName(createSnapshotDto.name)
       if (nameValidationError) {
         throw new BadRequestException(nameValidationError)
@@ -93,7 +107,38 @@ export class SnapshotService {
         }
       }
 
+      try {
+        const imageDetails = await this.dockerRegistryService.getImageDetails(
+          createSnapshotDto.imageName,
+          organization.id,
+        )
+        if (!entrypoint || entrypoint.length === 0) {
+          if (imageDetails.entrypoint) {
+            entrypoint = imageDetails.entrypoint
+          } else if (imageDetails.cmd) {
+            entrypoint = imageDetails.cmd
+          } else {
+            entrypoint = ['sleep', 'infinity']
+          }
+        }
+        if (imageDetails.sizeGB > organization.maxSnapshotSize) {
+          throw new ForbiddenException(
+            `Image size ${imageDetails.sizeGB} exceeds the maximum allowed snapshot size (${organization.maxSnapshotSize})`,
+          )
+        }
+      } catch (error) {
+        this.logger.warn(`Could not get image details for ${createSnapshotDto.imageName}: ${error}`)
+      }
+
       this.organizationService.assertOrganizationIsNotSuspended(organization)
+
+      const snapshotCount = await this.snapshotRepository.count({
+        where: { organizationId: organization.id },
+      })
+
+      if (snapshotCount >= organization.snapshotQuota) {
+        throw new ForbiddenException('Reached the maximum number of snapshots in the organization')
+      }
 
       const newSnapshotCount = 1
 
@@ -114,7 +159,7 @@ export class SnapshotService {
           organizationId: organization.id,
           ...createSnapshotDto,
           mem: createSnapshotDto.memory, // Map memory to mem
-          state: createSnapshotDto.buildInfo ? SnapshotState.BUILD_PENDING : SnapshotState.PENDING,
+          state: SnapshotState.PENDING,
           general,
         })
 
@@ -138,6 +183,9 @@ export class SnapshotService {
             await this.buildInfoRepository.save(buildInfoEntity)
             snapshot.buildInfo = buildInfoEntity
           }
+
+          const defaultInternalRegistry = await this.dockerRegistryService.getDefaultInternalRegistry()
+          snapshot.ref = `${defaultInternalRegistry.url}/${defaultInternalRegistry.project}/${buildSnapshotRef}`
         }
 
         return await this.snapshotRepository.save(snapshot)
@@ -390,7 +438,7 @@ export class SnapshotService {
     const snapshot = await this.snapshotRepository.findOne({
       where: {
         state: Not(In([SnapshotState.ERROR, SnapshotState.BUILD_FAILED])),
-        internalName: imageName,
+        ref: imageName,
       },
     })
 
@@ -439,14 +487,14 @@ export class SnapshotService {
       const countActiveSnapshots = await this.snapshotRepository.count({
         where: {
           state: SnapshotState.ACTIVE,
-          internalName: snapshot.internalName,
+          ref: snapshot.ref,
         },
       })
 
       if (countActiveSnapshots === 0) {
         // Set associated SnapshotRunner records to REMOVING state
         const result = await this.snapshotRunnerRepository.update(
-          { snapshotRef: snapshot.internalName },
+          { snapshotRef: snapshot.ref },
           { state: SnapshotRunnerState.REMOVING },
         )
         this.logger.debug(

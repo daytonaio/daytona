@@ -8,7 +8,7 @@ import axiosDebug from 'axios-debug-log'
 import axiosRetry from 'axios-retry'
 
 import { Injectable, Logger } from '@nestjs/common'
-import { RunnerAdapter, RunnerInfo, RunnerSandboxInfo } from './runnerAdapter'
+import { RunnerAdapter, RunnerInfo, RunnerSandboxInfo, RunnerSnapshotInfo } from './runnerAdapter'
 import { Runner } from '../entities/runner.entity'
 import {
   Configuration,
@@ -255,7 +255,11 @@ export class RunnerAdapterLegacy implements RunnerAdapter {
     await this.snapshotApiClient.removeSnapshot(snapshotName)
   }
 
-  async pullSnapshot(snapshotName: string, registry?: DockerRegistry): Promise<void> {
+  async pullSnapshot(
+    snapshotName: string,
+    registry?: DockerRegistry,
+    destinationRegistry?: DockerRegistry,
+  ): Promise<void> {
     const request: PullSnapshotRequestDTO = {
       snapshot: snapshotName,
     }
@@ -269,12 +273,32 @@ export class RunnerAdapterLegacy implements RunnerAdapter {
       }
     }
 
+    if (destinationRegistry) {
+      request.destinationRegistry = {
+        project: destinationRegistry.project,
+        url: destinationRegistry.url,
+        username: destinationRegistry.username,
+        password: destinationRegistry.password,
+      }
+    }
+
     await this.snapshotApiClient.pullSnapshot(request)
   }
 
   async snapshotExists(snapshotName: string): Promise<boolean> {
     const response = await this.snapshotApiClient.snapshotExists(snapshotName)
     return response.data.exists
+  }
+
+  async getSnapshotInfo(snapshotName: string): Promise<RunnerSnapshotInfo> {
+    const response = await this.snapshotApiClient.getSnapshotInfo(snapshotName)
+    return {
+      name: response.data.name || '',
+      sizeGB: response.data.sizeGB,
+      entrypoint: response.data.entrypoint,
+      cmd: response.data.cmd,
+      hash: response.data.hash,
+    }
   }
 
   async getSnapshotLogs(snapshotRef: string, follow: boolean): Promise<string> {
