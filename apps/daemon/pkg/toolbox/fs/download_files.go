@@ -32,12 +32,20 @@ func (cw *ctxWriter) Write(p []byte) (int, error) {
 	return cw.w.Write(p)
 }
 
-// Streams requested files (and per-file errors) as multipart/form-data.
-// Honors client cancellations via Context.
+// DownloadFiles godoc
+//
+//	@Summary		Download multiple files
+//	@Description	Download multiple files by providing their paths
+//	@Tags			file-system
+//	@Accept			json
+//	@Produce		multipart/form-data
+//	@Param			downloadFiles	body		FilesDownloadRequest	true	"Paths of files to download"
+//	@Success		200				{object}	gin.H
+//	@Router			/files/bulk-download [post]
+//
+//	@id				DownloadFiles
 func DownloadFiles(c *gin.Context) {
-	var req struct {
-		Paths []string `json:"paths"`
-	}
+	var req FilesDownloadRequest
 	if err := c.BindJSON(&req); err != nil || len(req.Paths) == 0 {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"error": "request body must be {\"paths\": [ ... ]} and non-empty",

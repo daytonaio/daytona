@@ -57,7 +57,7 @@
     "format": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "cd {projectRoot} && go fmt ./... && prettier --write \"**/*.{yaml,html}\""
+        "command": "cd {projectRoot} && go fmt ./... && prettier --write \"**/*.{yaml,html,json}\""
       }
     },
     "test": {
@@ -65,6 +65,13 @@
     },
     "lint": {
       "executor": "@nx-go/nx-go:lint"
+    },
+    "openapi": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}/pkg/toolbox",
+        "command": "swag fmt && swag init --parseDependency --parseInternal --parseDepth 1 -o docs -g toolbox.go"
+      }
     }
   }
 }
