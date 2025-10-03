@@ -807,8 +807,11 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
       throw new Error('No default internal registry configured')
     }
 
-    //  get tag from snapshot name
-    const tag = snapshot.imageName.split(':')[1]
+    // take only image:tag part without optional registry:port/project
+    const image = snapshot.imageName.split('/').at(-1)
+
+    //  get tag from snapshot image
+    const tag = image.split(':')[1]
     const internalSnapshotName = `${registry.url.replace(/^(https?:\/\/)/, '')}/${registry.project}/${snapshot.id}:${tag}`
 
     snapshot.internalName = internalSnapshotName
