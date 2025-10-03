@@ -7,7 +7,6 @@ import { ApiProperty, ApiSchema } from '@nestjs/swagger'
 import { OrganizationMemberRole } from '../enums/organization-member-role.enum'
 import { OrganizationRoleDto } from './organization-role.dto'
 import { OrganizationUser } from '../entities/organization-user.entity'
-import { User } from '../../user/user.entity'
 
 @ApiSchema({ name: 'OrganizationUser' })
 export class OrganizationUserDto {
@@ -53,14 +52,14 @@ export class OrganizationUserDto {
   })
   updatedAt: Date
 
-  static fromEntities(organizationUser: OrganizationUser, user: User | null | undefined): OrganizationUserDto {
-    const dto: OrganizationUserDto = {
-      ...organizationUser,
-      assignedRoles: organizationUser.assignedRoles.map(OrganizationRoleDto.fromOrganizationRole),
-      name: user ? user.name : '',
-      email: user ? user.email : '',
-    }
-
-    return dto
+  constructor(organizationUser: OrganizationUser, name = '', email = '') {
+    this.userId = organizationUser.userId
+    this.organizationId = organizationUser.organizationId
+    this.name = name
+    this.email = email
+    this.role = organizationUser.role
+    this.assignedRoles = organizationUser.assignedRoles.map((role) => new OrganizationRoleDto(role))
+    this.createdAt = organizationUser.createdAt
+    this.updatedAt = organizationUser.updatedAt
   }
 }

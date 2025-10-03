@@ -251,9 +251,11 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
 
     organization.sandboxLimitedNetworkEgress = this.configService.get('organizationSandboxDefaultLimitedNetworkEgress')
 
-    const owner = new OrganizationUser()
-    owner.userId = createdBy
-    owner.role = OrganizationMemberRole.OWNER
+    const owner = new OrganizationUser({
+      organization,
+      userId: createdBy,
+      role: OrganizationMemberRole.OWNER,
+    })
 
     organization.users = [owner]
 

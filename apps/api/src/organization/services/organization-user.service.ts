@@ -20,6 +20,7 @@ import { OnAsyncEvent } from '../../common/decorators/on-async-event.decorator'
 import { UserService } from '../../user/user.service'
 import { UserEvents } from '../../user/constants/user-events.constant'
 import { UserDeletedEvent } from '../../user/events/user-deleted.event'
+import { Organization } from '../entities/organization.entity'
 
 @Injectable()
 export class OrganizationUserService {
@@ -47,7 +48,7 @@ export class OrganizationUserService {
 
     const dtos: OrganizationUserDto[] = organizationUsers.map((orgUser) => {
       const user = userMap.get(orgUser.userId)
-      return OrganizationUserDto.fromEntities(orgUser, user)
+      return new OrganizationUserDto(orgUser, user?.name, user?.email)
     })
 
     return dtos
@@ -127,7 +128,7 @@ export class OrganizationUserService {
 
     const user = await this.userService.findOne(userId)
 
-    return OrganizationUserDto.fromEntities(organizationUser, user)
+    return new OrganizationUserDto(organizationUser, user?.name, user?.email)
   }
 
   async delete(organizationId: string, userId: string): Promise<void> {
@@ -177,11 +178,14 @@ export class OrganizationUserService {
     role: OrganizationMemberRole,
     assignedRoles: OrganizationRole[],
   ): Promise<OrganizationUser> {
-    const organizationUser = new OrganizationUser()
-    organizationUser.organizationId = organizationId
-    organizationUser.userId = userId
-    organizationUser.role = role
-    organizationUser.assignedRoles = assignedRoles
+    const organization = await entityManager.findOneByOrFail(Organization, { id: organizationId })
+
+    const organizationUser = new OrganizationUser({
+      userId,
+      role,
+      assignedRoles,
+      organization,
+    })
     return entityManager.save(organizationUser)
   }
 

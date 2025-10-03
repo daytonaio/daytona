@@ -36,58 +36,76 @@ export class NotificationService {
 
   @OnEvent(SandboxEvents.CREATED)
   async handleSandboxCreated(event: SandboxCreatedEvent) {
-    const runner = await this.runnerService.findOne(event.sandbox.runnerId)
-    const dto = new SandboxDto(event.sandbox, runner.domain)
+    let runnerDomain: string | undefined = undefined
+
+    if (event.sandbox.runnerId) {
+      const runner = await this.runnerService.findOne(event.sandbox.runnerId)
+      runnerDomain = runner?.domain
+    }
+
+    const dto = new SandboxDto(event.sandbox, runnerDomain)
     this.notificationGateway.emitSandboxCreated(dto)
   }
 
   @OnEvent(SandboxEvents.STATE_UPDATED)
   async handleSandboxStateUpdated(event: SandboxStateUpdatedEvent) {
-    const runner = await this.runnerService.findOne(event.sandbox.runnerId)
-    const dto = new SandboxDto(event.sandbox, runner.domain)
+    let runnerDomain: string | undefined = undefined
+
+    if (event.sandbox.runnerId) {
+      const runner = await this.runnerService.findOne(event.sandbox.runnerId)
+      runnerDomain = runner?.domain
+    }
+
+    const dto = new SandboxDto(event.sandbox, runnerDomain)
     this.notificationGateway.emitSandboxStateUpdated(dto, event.oldState, event.newState)
   }
 
   @OnEvent(SandboxEvents.DESIRED_STATE_UPDATED)
   async handleSandboxDesiredStateUpdated(event: SandboxDesiredStateUpdatedEvent) {
-    const runner = await this.runnerService.findOne(event.sandbox.runnerId)
-    const dto = new SandboxDto(event.sandbox, runner.domain)
+    let runnerDomain: string | undefined = undefined
+
+    if (event.sandbox.runnerId) {
+      const runner = await this.runnerService.findOne(event.sandbox.runnerId)
+      runnerDomain = runner?.domain
+    }
+
+    const dto = new SandboxDto(event.sandbox, runnerDomain)
     this.notificationGateway.emitSandboxDesiredStateUpdated(dto, event.oldDesiredState, event.newDesiredState)
   }
 
   @OnEvent(SnapshotEvents.CREATED)
   async handleSnapshotCreated(event: SnapshotCreatedEvent) {
-    const dto = SnapshotDto.fromSnapshot(event.snapshot)
+    const dto = new SnapshotDto(event.snapshot)
     this.notificationGateway.emitSnapshotCreated(dto)
   }
 
   @OnEvent(SnapshotEvents.STATE_UPDATED)
   async handleSnapshotStateUpdated(event: SnapshotStateUpdatedEvent) {
-    const dto = SnapshotDto.fromSnapshot(event.snapshot)
+    const dto = new SnapshotDto(event.snapshot)
     this.notificationGateway.emitSnapshotStateUpdated(dto, event.oldState, event.newState)
   }
 
   @OnEvent(SnapshotEvents.REMOVED)
   async handleSnapshotRemoved(event: SnapshotRemovedEvent) {
-    const dto = SnapshotDto.fromSnapshot(event.snapshot)
+    const dto = new SnapshotDto(event.snapshot)
     this.notificationGateway.emitSnapshotRemoved(dto)
   }
 
   @OnEvent(VolumeEvents.CREATED)
   async handleVolumeCreated(event: VolumeCreatedEvent) {
-    const dto = VolumeDto.fromVolume(event.volume)
+    const dto = new VolumeDto(event.volume)
     this.notificationGateway.emitVolumeCreated(dto)
   }
 
   @OnEvent(VolumeEvents.STATE_UPDATED)
   async handleVolumeStateUpdated(event: VolumeStateUpdatedEvent) {
-    const dto = VolumeDto.fromVolume(event.volume)
+    const dto = new VolumeDto(event.volume)
     this.notificationGateway.emitVolumeStateUpdated(dto, event.oldState, event.newState)
   }
 
   @OnEvent(VolumeEvents.LAST_USED_AT_UPDATED)
   async handleVolumeLastUsedAtUpdated(event: VolumeLastUsedAtUpdatedEvent) {
-    const dto = VolumeDto.fromVolume(event.volume)
+    const dto = new VolumeDto(event.volume)
     this.notificationGateway.emitVolumeLastUsedAtUpdated(dto)
   }
 

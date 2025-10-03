@@ -14,7 +14,7 @@ import { OrganizationMemberRole } from '../enums/organization-member-role.enum'
 import { OrganizationActionGuard } from '../guards/organization-action.guard'
 import { OrganizationInvitationService } from '../services/organization-invitation.service'
 import { AuthContext } from '../../common/decorators/auth-context.decorator'
-import { AuthContext as IAuthContext } from '../../common/interfaces/auth-context.interface'
+import { type AuthContext as IAuthContext } from '../../common/interfaces/auth-context.interface'
 import { Audit, TypedRequest } from '../../audit/decorators/audit.decorator'
 import { AuditAction } from '../../audit/enums/audit-action.enum'
 import { AuditTarget } from '../../audit/enums/audit-target.enum'
@@ -66,7 +66,7 @@ export class OrganizationInvitationController {
       createOrganizationInvitationDto,
       authContext.email,
     )
-    return OrganizationInvitationDto.fromOrganizationInvitation(invitation)
+    return new OrganizationInvitationDto(invitation)
   }
 
   @Put('/:invitationId')
@@ -103,12 +103,13 @@ export class OrganizationInvitationController {
     },
   })
   async update(
-    @Param('organizationId') organizationId: string,
+    // TODO: Is organizationId needed here?
+    @Param('organizationId') _organizationId: string,
     @Param('invitationId') invitationId: string,
     @Body() updateOrganizationInvitationDto: UpdateOrganizationInvitationDto,
   ): Promise<OrganizationInvitationDto> {
     const invitation = await this.organizationInvitationService.update(invitationId, updateOrganizationInvitationDto)
-    return OrganizationInvitationDto.fromOrganizationInvitation(invitation)
+    return new OrganizationInvitationDto(invitation)
   }
 
   @Get()
@@ -128,7 +129,7 @@ export class OrganizationInvitationController {
   })
   async findPending(@Param('organizationId') organizationId: string): Promise<OrganizationInvitationDto[]> {
     const invitations = await this.organizationInvitationService.findPending(organizationId)
-    return invitations.map(OrganizationInvitationDto.fromOrganizationInvitation)
+    return invitations.map((invitation) => new OrganizationInvitationDto(invitation))
   }
 
   @Post('/:invitationId/cancel')
@@ -157,7 +158,8 @@ export class OrganizationInvitationController {
     targetIdFromRequest: (req) => req.params.invitationId,
   })
   async cancel(
-    @Param('organizationId') organizationId: string,
+    // TODO: Is organizationId needed here?
+    @Param('organizationId') _organizationId: string,
     @Param('invitationId') invitationId: string,
   ): Promise<void> {
     return this.organizationInvitationService.cancel(invitationId)

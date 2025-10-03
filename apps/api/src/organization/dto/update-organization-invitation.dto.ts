@@ -32,4 +32,10 @@ export class UpdateOrganizationInvitationDto {
   @Type(() => Date)
   @IsDate()
   expiresAt?: Date
+
+  constructor(params: { role: OrganizationMemberRole; assignedRoleIds: string[]; expiresAt?: Date }) {
+    this.role = params.role
+    this.assignedRoleIds = params.assignedRoleIds
+    this.expiresAt = params.expiresAt
+  }
 }
