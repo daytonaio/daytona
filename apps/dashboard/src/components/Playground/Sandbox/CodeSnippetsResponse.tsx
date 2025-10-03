@@ -323,7 +323,8 @@ main().catch(console.error)`,
 
   const runCodeSnippet = async () => {
     setIsCodeSnippetRunning(true)
-    setCodeSnippetOutput('Running code...')
+    let codeSnippetOutput = 'Creating sandbox...'
+    setCodeSnippetOutput(codeSnippetOutput)
 
     try {
       const daytona = new Daytona({
@@ -362,20 +363,26 @@ main().catch(console.error)`,
       if (useLanguageParam)
         createSandboxParams.labels['daytona-playground-language'] = sandboxParametersState['language']
       const sandbox = await daytona.create(createSandboxParams)
-      setCodeSnippetOutput(
-        `Sandbox successfully created: ${sandbox.id}${useLanguageParam ? '\nRunning code inside sandbox...' : ''}`,
-      )
+      codeSnippetOutput = `Sandbox successfully created: ${sandbox.id}\n`
+      setCodeSnippetOutput(codeSnippetOutput)
       if (useLanguageParam) {
+        setCodeSnippetOutput(codeSnippetOutput + '\nRunning code...')
         const codeRunResponse = await sandbox.process.codeRun(getLanguageCodeToRun())
-        setCodeSnippetOutput(codeRunResponse.result)
+        codeSnippetOutput += `\nCode run result: ${codeRunResponse.result}`
+        setCodeSnippetOutput(codeSnippetOutput)
       }
       if (sandboxParametersState['shellCommandToRun']) {
+        setCodeSnippetOutput(codeSnippetOutput + '\nRunning shell command...')
         const shellCommandResponse = await sandbox.process.executeCommand(sandboxParametersState['shellCommandToRun'])
-        setCodeSnippetOutput(shellCommandResponse.result)
+        codeSnippetOutput += `\nShell command result: ${shellCommandResponse.result}`
+        setCodeSnippetOutput(codeSnippetOutput)
       }
+      setCodeSnippetOutput(
+        codeSnippetOutput + '\n🎉 Code and shell command executed successfully. Sandbox session finished.',
+      )
     } catch (error) {
       console.error(error)
-      setCodeSnippetOutput(`Error: ${error instanceof Error ? error.message : String(error)}`)
+      setCodeSnippetOutput(codeSnippetOutput + `Error: ${error instanceof Error ? error.message : String(error)}`)
     } finally {
       setIsCodeSnippetRunning(false)
     }
