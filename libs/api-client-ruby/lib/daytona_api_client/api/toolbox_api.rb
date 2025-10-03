@@ -174,6 +174,83 @@ module DaytonaApiClient
       return data, status_code, headers
     end
 
+    # Create PTY session
+    # Create a new PTY session in the sandbox
+    # @param sandbox_id [String] 
+    # @param pty_create_request [PtyCreateRequest] 
+    # @param [Hash] opts the optional parameters
+    # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
+    # @return [PtyCreateResponse]
+    def create_pty_session(sandbox_id, pty_create_request, opts = {})
+      data, _status_code, _headers = create_pty_session_with_http_info(sandbox_id, pty_create_request, opts)
+      data
+    end
+
+    # Create PTY session
+    # Create a new PTY session in the sandbox
+    # @param sandbox_id [String] 
+    # @param pty_create_request [PtyCreateRequest] 
+    # @param [Hash] opts the optional parameters
+    # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
+    # @return [Array<(PtyCreateResponse, Integer, Hash)>] PtyCreateResponse data, response status code and response headers
+    def create_pty_session_with_http_info(sandbox_id, pty_create_request, opts = {})
+      if @api_client.config.debugging
+        @api_client.config.logger.debug 'Calling API: ToolboxApi.create_pty_session ...'
+      end
+      # verify the required parameter 'sandbox_id' is set
+      if @api_client.config.client_side_validation && sandbox_id.nil?
+        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.create_pty_session"
+      end
+      # verify the required parameter 'pty_create_request' is set
+      if @api_client.config.client_side_validation && pty_create_request.nil?
+        fail ArgumentError, "Missing the required parameter 'pty_create_request' when calling ToolboxApi.create_pty_session"
+      end
+      # resource path
+      local_var_path = '/toolbox/{sandboxId}/toolbox/process/pty'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s))
+
+      # query parameters
+      query_params = opts[:query_params] || {}
+
+      # header parameters
+      header_params = opts[:header_params] || {}
+      # HTTP header 'Accept' (if needed)
+      header_params['Accept'] = @api_client.select_header_accept(['application/json']) unless header_params['Accept']
+      # HTTP header 'Content-Type'
+      content_type = @api_client.select_header_content_type(['application/json'])
+      if !content_type.nil?
+          header_params['Content-Type'] = content_type
+      end
+      header_params[:'X-Daytona-Organization-ID'] = opts[:'x_daytona_organization_id'] if !opts[:'x_daytona_organization_id'].nil?
+
+      # form parameters
+      form_params = opts[:form_params] || {}
+
+      # http body (model)
+      post_body = opts[:debug_body] || @api_client.object_to_http_body(pty_create_request)
+
+      # return_type
+      return_type = opts[:debug_return_type] || 'PtyCreateResponse'
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
+
+      new_options = opts.merge(
+        :operation => :"ToolboxApi.create_pty_session",
+        :header_params => header_params,
+        :query_params => query_params,
+        :form_params => form_params,
+        :body => post_body,
+        :auth_names => auth_names,
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:POST, local_var_path, new_options)
+      if @api_client.config.debugging
+        @api_client.config.logger.debug "API called: ToolboxApi#create_pty_session\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+      end
+      return data, status_code, headers
+    end
+
     # Create session
     # Create a new session in the sandbox
     # @param sandbox_id [String] 
@@ -323,6 +400,76 @@ module DaytonaApiClient
       return data, status_code, headers
     end
 
+    # Delete PTY session
+    # Delete a PTY session and terminate the associated process
+    # @param sandbox_id [String] 
+    # @param session_id [String] 
+    # @param [Hash] opts the optional parameters
+    # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
+    # @return [nil]
+    def delete_pty_session(sandbox_id, session_id, opts = {})
+      delete_pty_session_with_http_info(sandbox_id, session_id, opts)
+      nil
+    end
+
+    # Delete PTY session
+    # Delete a PTY session and terminate the associated process
+    # @param sandbox_id [String] 
+    # @param session_id [String] 
+    # @param [Hash] opts the optional parameters
+    # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
+    # @return [Array<(nil, Integer, Hash)>] nil, response status code and response headers
+    def delete_pty_session_with_http_info(sandbox_id, session_id, opts = {})
+      if @api_client.config.debugging
+        @api_client.config.logger.debug 'Calling API: ToolboxApi.delete_pty_session ...'
+      end
+      # verify the required parameter 'sandbox_id' is set
+      if @api_client.config.client_side_validation && sandbox_id.nil?
+        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.delete_pty_session"
+      end
+      # verify the required parameter 'session_id' is set
+      if @api_client.config.client_side_validation && session_id.nil?
+        fail ArgumentError, "Missing the required parameter 'session_id' when calling ToolboxApi.delete_pty_session"
+      end
+      # resource path
+      local_var_path = '/toolbox/{sandboxId}/toolbox/process/pty/{sessionId}'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s)).sub('{' + 'sessionId' + '}', CGI.escape(session_id.to_s))
+
+      # query parameters
+      query_params = opts[:query_params] || {}
+
+      # header parameters
+      header_params = opts[:header_params] || {}
+      header_params[:'X-Daytona-Organization-ID'] = opts[:'x_daytona_organization_id'] if !opts[:'x_daytona_organization_id'].nil?
+
+      # form parameters
+      form_params = opts[:form_params] || {}
+
+      # http body (model)
+      post_body = opts[:debug_body]
+
+      # return_type
+      return_type = opts[:debug_return_type]
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
+
+      new_options = opts.merge(
+        :operation => :"ToolboxApi.delete_pty_session",
+        :header_params => header_params,
+        :query_params => query_params,
+        :form_params => form_params,
+        :body => post_body,
+        :auth_names => auth_names,
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:DELETE, local_var_path, new_options)
+      if @api_client.config.debugging
+        @api_client.config.logger.debug "API called: ToolboxApi#delete_pty_session\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+      end
+      return data, status_code, headers
+    end
+
     # Delete session
     # Delete a specific session
     # @param sandbox_id [String] 
@@ -462,6 +609,83 @@ module DaytonaApiClient
       data, status_code, headers = @api_client.call_api(:GET, local_var_path, new_options)
       if @api_client.config.debugging
         @api_client.config.logger.debug "API called: ToolboxApi#download_file\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+      end
+      return data, status_code, headers
+    end
+
+    # Download multiple files
+    # Streams back a multipart/form-data bundle of the requested paths
+    # @param sandbox_id [String] 
+    # @param download_files [DownloadFiles] 
+    # @param [Hash] opts the optional parameters
+    # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
+    # @return [File]
+    def download_files(sandbox_id, download_files, opts = {})
+      data, _status_code, _headers = download_files_with_http_info(sandbox_id, download_files, opts)
+      data
+    end
+
+    # Download multiple files
+    # Streams back a multipart/form-data bundle of the requested paths
+    # @param sandbox_id [String] 
+    # @param download_files [DownloadFiles] 
+    # @param [Hash] opts the optional parameters
+    # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
+    # @return [Array<(File, Integer, Hash)>] File data, response status code and response headers
+    def download_files_with_http_info(sandbox_id, download_files, opts = {})
+      if @api_client.config.debugging
+        @api_client.config.logger.debug 'Calling API: ToolboxApi.download_files ...'
+      end
+      # verify the required parameter 'sandbox_id' is set
+      if @api_client.config.client_side_validation && sandbox_id.nil?
+        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.download_files"
+      end
+      # verify the required parameter 'download_files' is set
+      if @api_client.config.client_side_validation && download_files.nil?
+        fail ArgumentError, "Missing the required parameter 'download_files' when calling ToolboxApi.download_files"
+      end
+      # resource path
+      local_var_path = '/toolbox/{sandboxId}/toolbox/files/bulk-download'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s))
+
+      # query parameters
+      query_params = opts[:query_params] || {}
+
+      # header parameters
+      header_params = opts[:header_params] || {}
+      # HTTP header 'Accept' (if needed)
+      header_params['Accept'] = @api_client.select_header_accept(['application/json']) unless header_params['Accept']
+      # HTTP header 'Content-Type'
+      content_type = @api_client.select_header_content_type(['application/json'])
+      if !content_type.nil?
+          header_params['Content-Type'] = content_type
+      end
+      header_params[:'X-Daytona-Organization-ID'] = opts[:'x_daytona_organization_id'] if !opts[:'x_daytona_organization_id'].nil?
+
+      # form parameters
+      form_params = opts[:form_params] || {}
+
+      # http body (model)
+      post_body = opts[:debug_body] || @api_client.object_to_http_body(download_files)
+
+      # return_type
+      return_type = opts[:debug_return_type] || 'File'
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
+
+      new_options = opts.merge(
+        :operation => :"ToolboxApi.download_files",
+        :header_params => header_params,
+        :query_params => query_params,
+        :form_params => form_params,
+        :body => post_body,
+        :auth_names => auth_names,
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:POST, local_var_path, new_options)
+      if @api_client.config.debugging
+        @api_client.config.logger.debug "API called: ToolboxApi#download_files\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end
@@ -1330,6 +1554,78 @@ module DaytonaApiClient
       data, status_code, headers = @api_client.call_api(:GET, local_var_path, new_options)
       if @api_client.config.debugging
         @api_client.config.logger.debug "API called: ToolboxApi#get_project_dir\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+      end
+      return data, status_code, headers
+    end
+
+    # Get PTY session
+    # Get PTY session information by ID
+    # @param sandbox_id [String] 
+    # @param session_id [String] 
+    # @param [Hash] opts the optional parameters
+    # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
+    # @return [PtySessionInfo]
+    def get_pty_session(sandbox_id, session_id, opts = {})
+      data, _status_code, _headers = get_pty_session_with_http_info(sandbox_id, session_id, opts)
+      data
+    end
+
+    # Get PTY session
+    # Get PTY session information by ID
+    # @param sandbox_id [String] 
+    # @param session_id [String] 
+    # @param [Hash] opts the optional parameters
+    # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
+    # @return [Array<(PtySessionInfo, Integer, Hash)>] PtySessionInfo data, response status code and response headers
+    def get_pty_session_with_http_info(sandbox_id, session_id, opts = {})
+      if @api_client.config.debugging
+        @api_client.config.logger.debug 'Calling API: ToolboxApi.get_pty_session ...'
+      end
+      # verify the required parameter 'sandbox_id' is set
+      if @api_client.config.client_side_validation && sandbox_id.nil?
+        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.get_pty_session"
+      end
+      # verify the required parameter 'session_id' is set
+      if @api_client.config.client_side_validation && session_id.nil?
+        fail ArgumentError, "Missing the required parameter 'session_id' when calling ToolboxApi.get_pty_session"
+      end
+      # resource path
+      local_var_path = '/toolbox/{sandboxId}/toolbox/process/pty/{sessionId}'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s)).sub('{' + 'sessionId' + '}', CGI.escape(session_id.to_s))
+
+      # query parameters
+      query_params = opts[:query_params] || {}
+
+      # header parameters
+      header_params = opts[:header_params] || {}
+      # HTTP header 'Accept' (if needed)
+      header_params['Accept'] = @api_client.select_header_accept(['application/json']) unless header_params['Accept']
+      header_params[:'X-Daytona-Organization-ID'] = opts[:'x_daytona_organization_id'] if !opts[:'x_daytona_organization_id'].nil?
+
+      # form parameters
+      form_params = opts[:form_params] || {}
+
+      # http body (model)
+      post_body = opts[:debug_body]
+
+      # return_type
+      return_type = opts[:debug_return_type] || 'PtySessionInfo'
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
+
+      new_options = opts.merge(
+        :operation => :"ToolboxApi.get_pty_session",
+        :header_params => header_params,
+        :query_params => query_params,
+        :form_params => form_params,
+        :body => post_body,
+        :auth_names => auth_names,
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:GET, local_var_path, new_options)
+      if @api_client.config.debugging
+        @api_client.config.logger.debug "API called: ToolboxApi#get_pty_session\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end
@@ -2647,6 +2943,72 @@ module DaytonaApiClient
       return data, status_code, headers
     end
 
+    # List PTY sessions
+    # List all active PTY sessions in the sandbox
+    # @param sandbox_id [String] 
+    # @param [Hash] opts the optional parameters
+    # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
+    # @return [PtyListResponse]
+    def list_pty_sessions(sandbox_id, opts = {})
+      data, _status_code, _headers = list_pty_sessions_with_http_info(sandbox_id, opts)
+      data
+    end
+
+    # List PTY sessions
+    # List all active PTY sessions in the sandbox
+    # @param sandbox_id [String] 
+    # @param [Hash] opts the optional parameters
+    # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
+    # @return [Array<(PtyListResponse, Integer, Hash)>] PtyListResponse data, response status code and response headers
+    def list_pty_sessions_with_http_info(sandbox_id, opts = {})
+      if @api_client.config.debugging
+        @api_client.config.logger.debug 'Calling API: ToolboxApi.list_pty_sessions ...'
+      end
+      # verify the required parameter 'sandbox_id' is set
+      if @api_client.config.client_side_validation && sandbox_id.nil?
+        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.list_pty_sessions"
+      end
+      # resource path
+      local_var_path = '/toolbox/{sandboxId}/toolbox/process/pty'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s))
+
+      # query parameters
+      query_params = opts[:query_params] || {}
+
+      # header parameters
+      header_params = opts[:header_params] || {}
+      # HTTP header 'Accept' (if needed)
+      header_params['Accept'] = @api_client.select_header_accept(['application/json']) unless header_params['Accept']
+      header_params[:'X-Daytona-Organization-ID'] = opts[:'x_daytona_organization_id'] if !opts[:'x_daytona_organization_id'].nil?
+
+      # form parameters
+      form_params = opts[:form_params] || {}
+
+      # http body (model)
+      post_body = opts[:debug_body]
+
+      # return_type
+      return_type = opts[:debug_return_type] || 'PtyListResponse'
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
+
+      new_options = opts.merge(
+        :operation => :"ToolboxApi.list_pty_sessions",
+        :header_params => header_params,
+        :query_params => query_params,
+        :form_params => form_params,
+        :body => post_body,
+        :auth_names => auth_names,
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:GET, local_var_path, new_options)
+      if @api_client.config.debugging
+        @api_client.config.logger.debug "API called: ToolboxApi#list_pty_sessions\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+      end
+      return data, status_code, headers
+    end
+
     # List sessions
     # List all active sessions in the sandbox
     # @param sandbox_id [String] 
@@ -3642,6 +4004,89 @@ module DaytonaApiClient
       data, status_code, headers = @api_client.call_api(:POST, local_var_path, new_options)
       if @api_client.config.debugging
         @api_client.config.logger.debug "API called: ToolboxApi#replace_in_files\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+      end
+      return data, status_code, headers
+    end
+
+    # Resize PTY session
+    # Resize a PTY session
+    # @param sandbox_id [String] 
+    # @param session_id [String] 
+    # @param pty_resize_request [PtyResizeRequest] 
+    # @param [Hash] opts the optional parameters
+    # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
+    # @return [PtySessionInfo]
+    def resize_pty_session(sandbox_id, session_id, pty_resize_request, opts = {})
+      data, _status_code, _headers = resize_pty_session_with_http_info(sandbox_id, session_id, pty_resize_request, opts)
+      data
+    end
+
+    # Resize PTY session
+    # Resize a PTY session
+    # @param sandbox_id [String] 
+    # @param session_id [String] 
+    # @param pty_resize_request [PtyResizeRequest] 
+    # @param [Hash] opts the optional parameters
+    # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
+    # @return [Array<(PtySessionInfo, Integer, Hash)>] PtySessionInfo data, response status code and response headers
+    def resize_pty_session_with_http_info(sandbox_id, session_id, pty_resize_request, opts = {})
+      if @api_client.config.debugging
+        @api_client.config.logger.debug 'Calling API: ToolboxApi.resize_pty_session ...'
+      end
+      # verify the required parameter 'sandbox_id' is set
+      if @api_client.config.client_side_validation && sandbox_id.nil?
+        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling ToolboxApi.resize_pty_session"
+      end
+      # verify the required parameter 'session_id' is set
+      if @api_client.config.client_side_validation && session_id.nil?
+        fail ArgumentError, "Missing the required parameter 'session_id' when calling ToolboxApi.resize_pty_session"
+      end
+      # verify the required parameter 'pty_resize_request' is set
+      if @api_client.config.client_side_validation && pty_resize_request.nil?
+        fail ArgumentError, "Missing the required parameter 'pty_resize_request' when calling ToolboxApi.resize_pty_session"
+      end
+      # resource path
+      local_var_path = '/toolbox/{sandboxId}/toolbox/process/pty/{sessionId}/resize'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s)).sub('{' + 'sessionId' + '}', CGI.escape(session_id.to_s))
+
+      # query parameters
+      query_params = opts[:query_params] || {}
+
+      # header parameters
+      header_params = opts[:header_params] || {}
+      # HTTP header 'Accept' (if needed)
+      header_params['Accept'] = @api_client.select_header_accept(['application/json']) unless header_params['Accept']
+      # HTTP header 'Content-Type'
+      content_type = @api_client.select_header_content_type(['application/json'])
+      if !content_type.nil?
+          header_params['Content-Type'] = content_type
+      end
+      header_params[:'X-Daytona-Organization-ID'] = opts[:'x_daytona_organization_id'] if !opts[:'x_daytona_organization_id'].nil?
+
+      # form parameters
+      form_params = opts[:form_params] || {}
+
+      # http body (model)
+      post_body = opts[:debug_body] || @api_client.object_to_http_body(pty_resize_request)
+
+      # return_type
+      return_type = opts[:debug_return_type] || 'PtySessionInfo'
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
+
+      new_options = opts.merge(
+        :operation => :"ToolboxApi.resize_pty_session",
+        :header_params => header_params,
+        :query_params => query_params,
+        :form_params => form_params,
+        :body => post_body,
+        :auth_names => auth_names,
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:POST, local_var_path, new_options)
+      if @api_client.config.debugging
+        @api_client.config.logger.debug "API called: ToolboxApi#resize_pty_session\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end

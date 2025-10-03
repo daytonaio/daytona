@@ -24,7 +24,7 @@
 
 git_push.sh
 .travis.yml
-spec/*
+spec/**
 .gitlab-ci.yml
-docs/*
+docs/**
 README.md

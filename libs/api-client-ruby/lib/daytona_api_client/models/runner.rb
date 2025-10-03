@@ -48,12 +48,6 @@ module DaytonaApiClient
     # The class of the runner
     attr_accessor :_class
 
-    # The current usage of the runner
-    attr_accessor :used
-
-    # The capacity of the runner
-    attr_accessor :capacity
-
     # Current CPU usage percentage
     attr_accessor :current_cpu_usage_percentage
 
@@ -135,8 +129,6 @@ module DaytonaApiClient
         :'gpu' => :'gpu',
         :'gpu_type' => :'gpuType',
         :'_class' => :'class',
-        :'used' => :'used',
-        :'capacity' => :'capacity',
         :'current_cpu_usage_percentage' => :'currentCpuUsagePercentage',
         :'current_memory_usage_percentage' => :'currentMemoryUsagePercentage',
         :'current_disk_usage_percentage' => :'currentDiskUsagePercentage',
@@ -179,8 +171,6 @@ module DaytonaApiClient
         :'gpu' => :'Float',
         :'gpu_type' => :'String',
         :'_class' => :'SandboxClass',
-        :'used' => :'Float',
-        :'capacity' => :'Float',
         :'current_cpu_usage_percentage' => :'Float',
         :'current_memory_usage_percentage' => :'Float',
         :'current_disk_usage_percentage' => :'Float',
@@ -285,18 +275,6 @@ module DaytonaApiClient
         self._class = attributes[:'_class']
       else
         self._class = nil
-      end
-
-      if attributes.key?(:'used')
-        self.used = attributes[:'used']
-      else
-        self.used = nil
-      end
-
-      if attributes.key?(:'capacity')
-        self.capacity = attributes[:'capacity']
-      else
-        self.capacity = nil
       end
 
       if attributes.key?(:'current_cpu_usage_percentage')
@@ -421,14 +399,6 @@ module DaytonaApiClient
         invalid_properties.push('invalid value for "_class", _class cannot be nil.')
       end
 
-      if @used.nil?
-        invalid_properties.push('invalid value for "used", used cannot be nil.')
-      end
-
-      if @capacity.nil?
-        invalid_properties.push('invalid value for "capacity", capacity cannot be nil.')
-      end
-
       if @region.nil?
         invalid_properties.push('invalid value for "region", region cannot be nil.')
       end
@@ -471,8 +441,6 @@ module DaytonaApiClient
       return false if @gpu.nil?
       return false if @gpu_type.nil?
       return false if @_class.nil?
-      return false if @used.nil?
-      return false if @capacity.nil?
       return false if @region.nil?
       return false if @state.nil?
       return false if @unschedulable.nil?
@@ -593,26 +561,6 @@ module DaytonaApiClient
     end
 
     # Custom attribute writer method with validation
-    # @param [Object] used Value to be assigned
-    def used=(used)
-      if used.nil?
-        fail ArgumentError, 'used cannot be nil'
-      end
-
-      @used = used
-    end
-
-    # Custom attribute writer method with validation
-    # @param [Object] capacity Value to be assigned
-    def capacity=(capacity)
-      if capacity.nil?
-        fail ArgumentError, 'capacity cannot be nil'
-      end
-
-      @capacity = capacity
-    end
-
-    # Custom attribute writer method with validation
     # @param [Object] region Value to be assigned
     def region=(region)
       if region.nil?
@@ -688,8 +636,6 @@ module DaytonaApiClient
           gpu == o.gpu &&
           gpu_type == o.gpu_type &&
           _class == o._class &&
-          used == o.used &&
-          capacity == o.capacity &&
           current_cpu_usage_percentage == o.current_cpu_usage_percentage &&
           current_memory_usage_percentage == o.current_memory_usage_percentage &&
           current_disk_usage_percentage == o.current_disk_usage_percentage &&
@@ -716,7 +662,7 @@ module DaytonaApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [id, domain, api_url, proxy_url, api_key, cpu, memory, disk, gpu, gpu_type, _class, used, capacity, current_cpu_usage_percentage, current_memory_usage_percentage, current_disk_usage_percentage, current_allocated_cpu, current_allocated_memory_gi_b, current_allocated_disk_gi_b, current_snapshot_count, availability_score, region, state, last_checked, unschedulable, created_at, updated_at, version].hash
+      [id, domain, api_url, proxy_url, api_key, cpu, memory, disk, gpu, gpu_type, _class, current_cpu_usage_percentage, current_memory_usage_percentage, current_disk_usage_percentage, current_allocated_cpu, current_allocated_memory_gi_b, current_allocated_disk_gi_b, current_snapshot_count, availability_score, region, state, last_checked, unschedulable, created_at, updated_at, version].hash
     end
 
     # Builds the object from hash
