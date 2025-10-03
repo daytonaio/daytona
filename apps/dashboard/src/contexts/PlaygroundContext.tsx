@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { CodeLanguage, Resources, CreateSandboxBaseParams, ScreenshotRegion } from '@daytonaio/sdk'
+import { CodeLanguage, Resources, CreateSandboxBaseParams, ScreenshotRegion, Daytona } from '@daytonaio/sdk'
 import {
   KeyboardHotKey,
   KeyboardPress,
@@ -85,6 +85,7 @@ export interface IPlaygroundContext {
   runPlaygroundActionWithoutParams: RunPlaygroundActionBasic
   runningActionMethod: RunningActionMethodName
   actionRuntimeError: ActionRuntimeError
+  DaytonaClient: Daytona
 }
 
 export const PlaygroundContext = createContext<IPlaygroundContext | null>(null)

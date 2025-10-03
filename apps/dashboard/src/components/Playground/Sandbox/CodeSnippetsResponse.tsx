@@ -6,19 +6,17 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
-  Daytona,
   Image,
   CodeLanguage,
   CreateSandboxFromSnapshotParams,
   CreateSandboxFromImageParams,
+  Sandbox,
 } from '@daytonaio/sdk'
 import { codeSnippetSupportedLanguages } from '@/enums/Playground'
 import CodeBlock from '@/components/CodeBlock'
 import { Button } from '@/components/ui/button'
 import { usePlayground } from '@/hooks/usePlayground'
 import { Loader2, Play } from 'lucide-react'
-import { useAuth } from 'react-oidc-context'
-import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { ReactNode, useCallback, useMemo, useState } from 'react'
 import ResponseCard from '../ResponseCard'
 
@@ -27,9 +25,7 @@ const SandboxCodeSnippetsResponse: React.FC = () => {
   const [codeSnippetOutput, setCodeSnippetOutput] = useState<string | ReactNode>('')
   const [isCodeSnippetRunning, setIsCodeSnippetRunning] = useState<boolean>(false)
 
-  const { user } = useAuth()
-  const { selectedOrganization } = useSelectedOrganization()
-  const { sandboxParametersState } = usePlayground()
+  const { sandboxParametersState, DaytonaClient } = usePlayground()
 
   const objectHasAnyValue = (obj: object) => Object.values(obj).some((v) => v !== '' && v !== undefined)
 
@@ -326,15 +322,11 @@ main().catch(console.error)`,
     setIsCodeSnippetRunning(true)
     let codeSnippetOutput = 'Creating sandbox...\n'
     setCodeSnippetOutput(codeSnippetOutput)
+    let sandbox: Sandbox
 
     try {
-      const daytona = new Daytona({
-        jwtToken: user?.access_token,
-        apiUrl: import.meta.env.VITE_API_URL,
-        organizationId: selectedOrganization?.id,
-      })
       let createSandboxFromImageParams: CreateSandboxFromImageParams
-      const createSandboxFromSnapshotParams: CreateSandboxFromSnapshotParams = { snapshot: 'vnc-snapshot' }
+      const createSandboxFromSnapshotParams: CreateSandboxFromSnapshotParams = { snapshot: 'ubuntu:24.04' }
       const createSandboxFromImage = useSandboxCreateParams
       if (createSandboxFromImage) {
         // Set CreateSandboxFromImageParams specific params
@@ -363,7 +355,7 @@ main().catch(console.error)`,
       createSandboxParams.labels = { 'daytona-playground': 'true' }
       if (useLanguageParam)
         createSandboxParams.labels['daytona-playground-language'] = sandboxParametersState['language']
-      const sandbox = await daytona.create(createSandboxParams)
+      sandbox = await DaytonaClient.create(createSandboxParams)
       codeSnippetOutput = `Sandbox successfully created: ${sandbox.id}\n`
       setCodeSnippetOutput(codeSnippetOutput)
       if (useLanguageParam) {
@@ -400,6 +392,13 @@ main().catch(console.error)`,
         </>,
       )
     } finally {
+      if (sandbox) {
+        try {
+          await sandbox.delete()
+        } catch (cleanupError) {
+          console.error('Failed to delete sandbox during cleanup:', cleanupError)
+        }
+      }
       setIsCodeSnippetRunning(false)
     }
   }

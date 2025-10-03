@@ -16,7 +16,10 @@ import {
   RunPlaygroundActionWithParams,
 } from '@/contexts/PlaygroundContext'
 import { ScreenshotFormatOption, MouseButton, MouseScrollDirection } from '@/enums/Playground'
-import { useState } from 'react'
+import { Daytona } from '@daytonaio/sdk'
+import { useAuth } from 'react-oidc-context'
+import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
+import { useState, useMemo } from 'react'
 
 export const PlaygroundProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [sandboxParametersState, setSandboxParametersState] = useState<SandboxParams>({
@@ -74,6 +77,9 @@ export const PlaygroundProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       },
     },
   )
+
+  const { user } = useAuth()
+  const { selectedOrganization } = useSelectedOrganization()
 
   const setSandboxParameterValue: SetSandboxParamsValue = (key, value) => {
     setSandboxParametersState((prev) => ({ ...prev, [key]: value }))
@@ -137,6 +143,15 @@ export const PlaygroundProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     return await runPlaygroundAction(actionFormData, invokeApi)
   }
 
+  const DaytonaClient = useMemo(() => {
+    if (!user?.access_token) return null
+    return new Daytona({
+      jwtToken: user.access_token,
+      apiUrl: import.meta.env.VITE_API_URL,
+      organizationId: selectedOrganization?.id,
+    })
+  }, [user?.access_token, selectedOrganization?.id])
+
   return (
     <PlaygroundContext.Provider
       value={{
@@ -148,6 +163,7 @@ export const PlaygroundProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         runPlaygroundActionWithoutParams: runPlaygroundAction,
         runningActionMethod,
         actionRuntimeError,
+        DaytonaClient,
       }}
     >
       {children}
