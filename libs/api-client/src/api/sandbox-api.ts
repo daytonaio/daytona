@@ -2982,6 +2982,7 @@ export const ListSandboxesPaginatedStatesEnum = {
   PENDING_BUILD: 'pending_build',
   BUILDING_SNAPSHOT: 'building_snapshot',
   UNKNOWN: 'unknown',
+  PENDING_PULL: 'pending_pull',
   PULLING_SNAPSHOT: 'pulling_snapshot',
   ARCHIVED: 'archived',
   ARCHIVING: 'archiving',

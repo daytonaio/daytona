@@ -40,6 +40,7 @@ type SnapshotDto struct {
 	LastUsedAt     NullableTime    `json:"lastUsedAt"`
 	// Build information for the snapshot
 	BuildInfo            *BuildInfo `json:"buildInfo,omitempty"`
+	SkipValidation       bool       `json:"skipValidation"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -576,6 +577,7 @@ func (o SnapshotDto) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.BuildInfo) {
 		toSerialize["buildInfo"] = o.BuildInfo
 	}
+	toSerialize["skipValidation"] = o.SkipValidation
 
 	for key, value := range o.AdditionalProperties {
 		toSerialize[key] = value
@@ -650,6 +652,7 @@ func (o *SnapshotDto) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "updatedAt")
 		delete(additionalProperties, "lastUsedAt")
 		delete(additionalProperties, "buildInfo")
+		delete(additionalProperties, "skipValidation")
 		o.AdditionalProperties = additionalProperties
 	}
 

@@ -38,7 +38,9 @@ type CreateSnapshot struct {
 	// Disk space allocated to the sandbox in GB
 	Disk *int32 `json:"disk,omitempty"`
 	// Build information for the snapshot
-	BuildInfo            *CreateBuildInfo `json:"buildInfo,omitempty"`
+	BuildInfo *CreateBuildInfo `json:"buildInfo,omitempty"`
+	// Whether to skip validation for the snapshot
+	SkipValidation       *bool `json:"skipValidation,omitempty"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -409,6 +411,9 @@ func (o CreateSnapshot) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.BuildInfo) {
 		toSerialize["buildInfo"] = o.BuildInfo
 	}
+	if !IsNil(o.SkipValidation) {
+		toSerialize["skipValidation"] = o.SkipValidation
+	}
 
 	for key, value := range o.AdditionalProperties {
 		toSerialize[key] = value
@@ -461,6 +466,7 @@ func (o *CreateSnapshot) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "memory")
 		delete(additionalProperties, "disk")
 		delete(additionalProperties, "buildInfo")
+		delete(additionalProperties, "skipValidation")
 		o.AdditionalProperties = additionalProperties
 	}
 
