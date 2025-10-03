@@ -19,6 +19,7 @@ import { deleteS3Bucket } from '../../common/utils/delete-s3-bucket'
 import { TrackableJobExecutions } from '../../common/interfaces/trackable-job-executions'
 import { TrackJobExecution } from '../../common/decorators/track-job-execution.decorator'
 import { setTimeout } from 'timers/promises'
+import { LogExecution } from '../../common/decorators/log-execution.decorator'
 
 const VOLUME_STATE_LOCK_KEY = 'volume-state-'
 
@@ -84,8 +85,9 @@ export class VolumeManager implements OnModuleInit, TrackableJobExecutions, OnAp
     }
   }
 
-  @Cron(CronExpression.EVERY_5_SECONDS)
+  @Cron(CronExpression.EVERY_5_SECONDS, { name: 'process-pending-volumes', waitForCompletion: true })
   @TrackJobExecution()
+  @LogExecution('process-pending-volumes')
   async processPendingVolumes() {
     try {
       // Lock the entire process

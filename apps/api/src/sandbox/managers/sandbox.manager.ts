@@ -38,6 +38,7 @@ import { TypedConfigService } from '../../config/typed-config.service'
 import { TrackJobExecution } from '../../common/decorators/track-job-execution.decorator'
 import { TrackableJobExecutions } from '../../common/interfaces/trackable-job-executions'
 import { setTimeout } from 'timers/promises'
+import { LogExecution } from '../../common/decorators/log-execution.decorator'
 
 export const SYNC_INSTANCE_STATE_LOCK_KEY = 'sync-instance-state-'
 
@@ -71,6 +72,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
   @Cron(CronExpression.EVERY_MINUTE, { name: 'auto-stop-check' })
   @TrackJobExecution()
   @OtelSpan()
+  @LogExecution('auto-stop-check')
   async autostopCheck(): Promise<void> {
     const lockKey = 'auto-stop-check-worker-selected'
     //  lock the sync to only run one instance at a time
@@ -137,6 +139,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
 
   @Cron(CronExpression.EVERY_MINUTE, { name: 'auto-archive-check' })
   @TrackJobExecution()
+  @LogExecution('auto-archive-check')
   async autoArchiveCheck(): Promise<void> {
     const lockKey = 'auto-archive-check-worker-selected'
     //  lock the sync to only run one instance at a time
@@ -185,6 +188,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
 
   @Cron(CronExpression.EVERY_MINUTE, { name: 'auto-delete-check' })
   @TrackJobExecution()
+  @LogExecution('auto-delete-check')
   async autoDeleteCheck(): Promise<void> {
     const lockKey = 'auto-delete-check-worker-selected'
     //  lock the sync to only run one instance at a time
@@ -246,6 +250,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
   @Cron(CronExpression.EVERY_10_SECONDS, { name: 'sync-states' })
   @TrackJobExecution()
   @OtelSpan()
+  @LogExecution('sync-states')
   async syncStates(): Promise<void> {
     const globalLockKey = 'sync-states'
     if (!(await this.redisLockProvider.lock(globalLockKey, 30))) {
@@ -312,6 +317,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
 
   @Cron(CronExpression.EVERY_10_SECONDS, { name: 'sync-archived-desired-states' })
   @TrackJobExecution()
+  @LogExecution('sync-archived-desired-states')
   async syncArchivedDesiredStates(): Promise<void> {
     const lockKey = 'sync-archived-desired-states'
     if (!(await this.redisLockProvider.lock(lockKey, 30))) {
