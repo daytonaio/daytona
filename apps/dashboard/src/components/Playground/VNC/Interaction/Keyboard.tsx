@@ -6,14 +6,26 @@
 import InlineInputFormControl from '../../Inputs/InlineInputFormControl'
 import FormTextInput from '../../Inputs/TextInput'
 import FormNumberInput from '../../Inputs/NumberInput'
-import { KeyboardActions, KeyboardActionFormData, ParameterFormData, NumberParameterFormItem } from '@/enums/Playground'
-import { KeyboardHotKey, KeyboardPress, KeyboardType } from '@/enums/Playground'
+import {
+  KeyboardActions,
+  KeyboardActionFormData,
+  ParameterFormData,
+  NumberParameterFormItem,
+  KeyboardHotKey,
+  KeyboardPress,
+  KeyboardType,
+  VNCInteractionOptionsSectionComponentProps,
+} from '@/enums/Playground'
 import { PlaygroundActionInvokeApi } from '@/contexts/PlaygroundContext'
 import { usePlayground } from '@/hooks/usePlayground'
 import PlaygroundActionForm from '../../ActionForm'
 import { useState } from 'react'
 
-const VNCKeyboardOperations: React.FC = () => {
+const VNCKeyboardOperations: React.FC<VNCInteractionOptionsSectionComponentProps> = ({
+  disableActions,
+  ComputerUseClient,
+  wrapVNCInvokeApi,
+}) => {
   const { VNCInteractionOptionsParamsState, setVNCInteractionOptionsParamValue, runPlaygroundActionWithParams } =
     usePlayground()
   const [hotKeyParams, setHotKeyParams] = useState<KeyboardHotKey>(
@@ -60,10 +72,30 @@ const VNCKeyboardOperations: React.FC = () => {
     },
   ]
 
-  //TODO -> Implementation
+  // Disable logic ensures that this method is called when ComputerUseClient exists
   const keyboardActionAPICall: PlaygroundActionInvokeApi = async (keyboardActionFormData) => {
-    // If KeyboardPress action -> do modifiers field postprocessing: .split(',').map(item => item.trim()).filter(item => item !== '')
-    // API call + set API response as responseText if present
+    const KeyboardActionsClient = ComputerUseClient.keyboard
+    // All keyboard actions have Promise<void> return type -> we don't need the reponse
+    switch (keyboardActionFormData.methodName) {
+      case KeyboardActions.HOTKEY:
+        await KeyboardActionsClient[KeyboardActions.HOTKEY](hotKeyParams.keys)
+        break
+      case KeyboardActions.PRESS:
+        await KeyboardActionsClient[KeyboardActions.PRESS](
+          pressParams.key,
+          pressParams.modifiers
+            ? pressParams.modifiers
+                .split(',')
+                .map((item) => item.trim())
+                .filter((item) => item !== '')
+            : undefined,
+        )
+        break
+      case KeyboardActions.TYPE:
+        await KeyboardActionsClient[KeyboardActions.TYPE](typeParams.text, typeParams.delay ?? undefined)
+        break
+    }
+    setVNCInteractionOptionsParamValue('responseText', '')
   }
 
   return (
@@ -72,7 +104,10 @@ const VNCKeyboardOperations: React.FC = () => {
         <div key={keyboardAction.methodName} className="space-y-4">
           <PlaygroundActionForm<KeyboardActions>
             actionFormItem={keyboardAction}
-            onRunActionClick={() => runPlaygroundActionWithParams(keyboardAction, keyboardActionAPICall)}
+            onRunActionClick={() =>
+              runPlaygroundActionWithParams(keyboardAction, wrapVNCInvokeApi(keyboardActionAPICall))
+            }
+            disable={disableActions}
           />
           <div className="px-4 space-y-2">
             {keyboardAction.methodName === KeyboardActions.HOTKEY && (

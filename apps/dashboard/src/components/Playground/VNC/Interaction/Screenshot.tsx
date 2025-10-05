@@ -11,17 +11,25 @@ import FormCheckboxInput from '../../Inputs/CheckboxInput'
 import { usePlayground } from '@/hooks/usePlayground'
 import { PlaygroundActionInvokeApi } from '@/contexts/PlaygroundContext'
 import { ScreenshotRegion } from '@daytonaio/sdk'
+import { ScreenshotResponse, RegionScreenshotResponse, CompressedScreenshotResponse } from '@daytonaio/api-client'
 import {
   CustomizedScreenshotOptions,
   ScreenshotActions,
   ScreenshotActionFormData,
   ParameterFormData,
+  VNCInteractionOptionsSectionComponentProps,
+  NumberParameterFormItem,
+  ParameterFormItem,
+  ScreenshotFormatOption,
 } from '@/enums/Playground'
-import { NumberParameterFormItem, ParameterFormItem, ScreenshotFormatOption } from '@/enums/Playground'
 import PlaygroundActionForm from '../../ActionForm'
 import { useState } from 'react'
 
-const VNCScreenshootOperations: React.FC = () => {
+const VNCScreenshootOperations: React.FC<VNCInteractionOptionsSectionComponentProps> = ({
+  disableActions,
+  ComputerUseClient,
+  wrapVNCInvokeApi,
+}) => {
   const { VNCInteractionOptionsParamsState, setVNCInteractionOptionsParamValue, runPlaygroundActionWithParams } =
     usePlayground()
   const [screenshotOptions, setScreenshotOptions] = useState<CustomizedScreenshotOptions>(
@@ -113,9 +121,46 @@ const VNCScreenshootOperations: React.FC = () => {
     },
   ]
 
-  //TODO -> Implementation
+  // Disable logic ensures that this method is called when ComputerUseClient exists
   const screenshotActionAPICall: PlaygroundActionInvokeApi = async (screenshotActionFormData) => {
-    // API call + set API response as responseText if present
+    const ScreenshotActionsClient = ComputerUseClient.screenshot
+    let screenshotActionResponse: ScreenshotResponse | RegionScreenshotResponse | CompressedScreenshotResponse
+    switch (screenshotActionFormData.methodName) {
+      case ScreenshotActions.TAKE_COMPRESSED: {
+        screenshotActionResponse = await ScreenshotActionsClient[ScreenshotActions.TAKE_COMPRESSED](
+          screenshotOptions ?? undefined,
+        )
+        break
+      }
+      case ScreenshotActions.TAKE_COMPRESSED_REGION: {
+        screenshotActionResponse = await ScreenshotActionsClient[ScreenshotActions.TAKE_COMPRESSED_REGION](
+          screenshotRegion,
+          screenshotOptions ?? undefined,
+        )
+        break
+      }
+      case ScreenshotActions.TAKE_FULL_SCREEN: {
+        screenshotActionResponse = await ScreenshotActionsClient[ScreenshotActions.TAKE_FULL_SCREEN](
+          screenshotOptions.showCursor,
+        )
+        break
+      }
+      case ScreenshotActions.TAKE_REGION: {
+        screenshotActionResponse = await ScreenshotActionsClient[ScreenshotActions.TAKE_REGION](
+          screenshotRegion,
+          screenshotOptions.showCursor,
+        )
+        break
+      }
+    }
+    // All screenshot actions responses have these fields in common
+    type CursorPositionType = { x: number; y: number }
+    const screenshotActionsResponseText = [
+      `Screenshot (base64): ${screenshotActionResponse.screenshot}`,
+      `Size: ${screenshotActionResponse.sizeBytes ?? 'unknown'}`,
+      `Cursor position: ${screenshotActionResponse.cursorPosition ? `(${(screenshotActionResponse.cursorPosition as CursorPositionType).x}, ${(screenshotActionResponse.cursorPosition as CursorPositionType).y})` : ''}`,
+    ].join('\n')
+    setVNCInteractionOptionsParamValue('responseText', screenshotActionsResponseText)
   }
 
   return (
@@ -191,7 +236,10 @@ const VNCScreenshootOperations: React.FC = () => {
           <div key={screenshotAction.methodName}>
             <PlaygroundActionForm<ScreenshotActions>
               actionFormItem={screenshotAction}
-              onRunActionClick={() => runPlaygroundActionWithParams(screenshotAction, screenshotActionAPICall)}
+              onRunActionClick={() =>
+                runPlaygroundActionWithParams(screenshotAction, wrapVNCInvokeApi(screenshotActionAPICall))
+              }
+              disable={disableActions}
             />
           </div>
         ))}

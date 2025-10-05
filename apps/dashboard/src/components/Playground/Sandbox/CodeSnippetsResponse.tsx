@@ -17,6 +17,7 @@ import CodeBlock from '@/components/CodeBlock'
 import { Button } from '@/components/ui/button'
 import { usePlayground } from '@/hooks/usePlayground'
 import { Loader2, Play } from 'lucide-react'
+import { createErrorMessageOutput } from '@/lib/playground'
 import { ReactNode, useCallback, useMemo, useState } from 'react'
 import ResponseCard from '../ResponseCard'
 
@@ -385,10 +386,7 @@ main().catch(console.error)`,
         <>
           <span>{codeSnippetOutput}</span>
           <br />
-          <span>
-            <span className="text-red-500">Error: </span>
-            <span>{error instanceof Error ? error.message : String(error)}</span>
-          </span>
+          {createErrorMessageOutput(error)}
         </>,
       )
     } finally {

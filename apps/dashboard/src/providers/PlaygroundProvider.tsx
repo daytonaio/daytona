@@ -19,7 +19,7 @@ import { ScreenshotFormatOption, MouseButton, MouseScrollDirection } from '@/enu
 import { Daytona } from '@daytonaio/sdk'
 import { useAuth } from 'react-oidc-context'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 
 export const PlaygroundProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [sandboxParametersState, setSandboxParametersState] = useState<SandboxParams>({
@@ -75,73 +75,77 @@ export const PlaygroundProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         width: 300,
         height: 200,
       },
+      VNCUrl: null,
     },
   )
 
   const { user } = useAuth()
   const { selectedOrganization } = useSelectedOrganization()
 
-  const setSandboxParameterValue: SetSandboxParamsValue = (key, value) => {
+  const setSandboxParameterValue: SetSandboxParamsValue = useCallback((key, value) => {
     setSandboxParametersState((prev) => ({ ...prev, [key]: value }))
-  }
+  }, [])
 
-  const setVNCInteractionOptionsParamValue: SetVNCInteractionOptionsParamValue = (key, value) => {
+  const setVNCInteractionOptionsParamValue: SetVNCInteractionOptionsParamValue = useCallback((key, value) => {
     setVNCInteractionOptionsParamsState((prev) => ({ ...prev, [key]: value }))
-  }
+  }, [])
 
   const [runningActionMethod, setRunningActionMethod] = useState<RunningActionMethodName>(null)
   const [actionRuntimeError, setActionRuntimeError] = useState<ActionRuntimeError>({})
 
-  const validatePlaygroundActionRequiredParams: ValidatePlaygroundActionRequiredParams = (
-    actionParamsFormData,
-    actionParamsState,
-  ) => {
-    if (actionParamsFormData.some((formItem) => formItem.required)) {
-      const emptyFormItem = actionParamsFormData
-        .filter((formItem) => formItem.required)
-        .find((formItem) => {
-          const value = actionParamsState[formItem.key]
-          return value === '' || value === undefined
-        })
+  const validatePlaygroundActionRequiredParams: ValidatePlaygroundActionRequiredParams = useCallback(
+    (actionParamsFormData, actionParamsState) => {
+      if (actionParamsFormData.some((formItem) => formItem.required)) {
+        const emptyFormItem = actionParamsFormData
+          .filter((formItem) => formItem.required)
+          .find((formItem) => {
+            const value = actionParamsState[formItem.key]
+            return value === '' || value === undefined
+          })
 
-      if (emptyFormItem) {
-        return `${emptyFormItem.label} parameter is required for this action`
+        if (emptyFormItem) {
+          return `${emptyFormItem.label} parameter is required for this action`
+        }
       }
-    }
 
-    return undefined
-  }
+      return undefined
+    },
+    [],
+  )
 
-  const runPlaygroundAction: RunPlaygroundActionBasic = async (actionFormData, invokeApi) => {
+  const runPlaygroundAction: RunPlaygroundActionBasic = useCallback(async (actionFormData, invokeApi) => {
     setRunningActionMethod(actionFormData.methodName)
     try {
       await invokeApi(actionFormData)
+      setRunningActionMethod(null)
     } catch (error) {
-      console.log('API call error', error)
+      console.error('API call error', error)
     }
-    setTimeout(() => setRunningActionMethod(null), 5000)
-  }
+  }, [])
 
-  const runPlaygroundActionWithParams: RunPlaygroundActionWithParams = async (actionFormData, invokeApi) => {
-    const validationError = validatePlaygroundActionRequiredParams(
-      actionFormData.parametersFormItems,
-      actionFormData.parametersState,
-    )
-    if (validationError) {
+  const runPlaygroundActionWithParams: RunPlaygroundActionWithParams = useCallback(
+    async (actionFormData, invokeApi) => {
+      const validationError = validatePlaygroundActionRequiredParams(
+        actionFormData.parametersFormItems,
+        actionFormData.parametersState,
+      )
+      if (validationError) {
+        setActionRuntimeError((prev) => ({
+          ...prev,
+          [actionFormData.methodName]: validationError,
+        }))
+        setRunningActionMethod(null)
+        return
+      }
+      // Reset error
       setActionRuntimeError((prev) => ({
         ...prev,
-        [actionFormData.methodName]: validationError,
+        [actionFormData.methodName]: null,
       }))
-      setRunningActionMethod(null)
-      return
-    }
-    // Reset error
-    setActionRuntimeError((prev) => ({
-      ...prev,
-      [actionFormData.methodName]: null,
-    }))
-    return await runPlaygroundAction(actionFormData, invokeApi)
-  }
+      return await runPlaygroundAction(actionFormData, invokeApi)
+    },
+    [runPlaygroundAction, validatePlaygroundActionRequiredParams],
+  )
 
   const DaytonaClient = useMemo(() => {
     if (!user?.access_token) return null

@@ -3,13 +3,22 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { DisplayActions, PlaygroundActionFormDataBasic } from '@/enums/Playground'
+import {
+  DisplayActions,
+  PlaygroundActionFormDataBasic,
+  VNCInteractionOptionsSectionComponentProps,
+} from '@/enums/Playground'
 import { usePlayground } from '@/hooks/usePlayground'
 import { PlaygroundActionInvokeApi } from '@/contexts/PlaygroundContext'
+import { DisplayInfoResponse, WindowsResponse } from '@daytonaio/api-client'
 import PlaygroundActionForm from '../../ActionForm'
 
-const VNCDisplayOperations: React.FC = () => {
-  const { runPlaygroundActionWithoutParams } = usePlayground()
+const VNCDisplayOperations: React.FC<VNCInteractionOptionsSectionComponentProps> = ({
+  disableActions,
+  ComputerUseClient,
+  wrapVNCInvokeApi,
+}) => {
+  const { runPlaygroundActionWithoutParams, setVNCInteractionOptionsParamValue } = usePlayground()
 
   const displayActionsFormData: PlaygroundActionFormDataBasic<DisplayActions>[] = [
     {
@@ -24,9 +33,30 @@ const VNCDisplayOperations: React.FC = () => {
     },
   ]
 
-  //TODO -> Implementation
+  // Disable logic ensures that this method is called when ComputerUseClient exists
   const displayActionAPICall: PlaygroundActionInvokeApi = async (displayActionFormData) => {
-    return
+    const displayActionResponse = await ComputerUseClient.display[displayActionFormData.methodName as DisplayActions]()
+    let displayActionResponseText = ''
+    switch (displayActionFormData.methodName) {
+      case DisplayActions.GET_INFO: {
+        const displayInfoResponse = displayActionResponse as DisplayInfoResponse
+        displayInfoResponse.displays.forEach(
+          (display: { width: number; height: number; x: number; y: number }, index) =>
+            (displayActionResponseText += `Display ${index}: ${display.width}x${display.height} at ${display.x},${display.y}\n`),
+        )
+        break
+      }
+      case DisplayActions.GET_WINDOWS: {
+        const displayWindowsResponse = displayActionResponse as WindowsResponse
+        displayActionResponseText += `Found ${displayWindowsResponse.count} open windows:\n`
+        displayWindowsResponse.windows.forEach(
+          (window: { title: string; id: string }) =>
+            (displayActionResponseText += `- ${window.title} (ID: ${window.id})\n`),
+        )
+        break
+      }
+    }
+    setVNCInteractionOptionsParamValue('responseText', displayActionResponseText)
   }
 
   return (
@@ -35,7 +65,10 @@ const VNCDisplayOperations: React.FC = () => {
         <div key={displayActionFormData.methodName} className="space-y-4">
           <PlaygroundActionForm<DisplayActions>
             actionFormItem={displayActionFormData}
-            onRunActionClick={() => runPlaygroundActionWithoutParams(displayActionFormData, displayActionAPICall)}
+            onRunActionClick={() =>
+              runPlaygroundActionWithoutParams(displayActionFormData, wrapVNCInvokeApi(displayActionAPICall))
+            }
+            disable={disableActions}
           />
         </div>
       ))}

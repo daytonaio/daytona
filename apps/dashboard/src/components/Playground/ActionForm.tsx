@@ -11,11 +11,13 @@ import { usePlayground } from '@/hooks/usePlayground'
 type PlaygroundActionFormProps<A> = {
   actionFormItem: PlaygroundActionFormDataBasic<A>
   onRunActionClick: () => Promise<void>
+  disable?: boolean
 }
 
 function PlaygroundActionForm<A extends PlaygroundActions>({
   actionFormItem,
   onRunActionClick,
+  disable,
 }: PlaygroundActionFormProps<A>) {
   const { runningActionMethod, actionRuntimeError } = usePlayground()
 
@@ -29,7 +31,7 @@ function PlaygroundActionForm<A extends PlaygroundActions>({
           </p>
         </div>
         <PlaygroundActionRunButton
-          isDisabled={!!runningActionMethod}
+          isDisabled={disable || !!runningActionMethod}
           isRunning={runningActionMethod === actionFormItem.methodName}
           onRunActionClick={onRunActionClick}
         />

@@ -5,7 +5,8 @@
 
 import PythonIcon from '@/assets/python.svg'
 import TypescriptIcon from '@/assets/typescript.svg'
-import { CodeLanguage, ScreenshotOptions, ScreenshotRegion } from '@daytonaio/sdk'
+import { PlaygroundActionInvokeApi } from '@/contexts/PlaygroundContext'
+import { CodeLanguage, ScreenshotOptions, ScreenshotRegion, ComputerUse } from '@daytonaio/sdk'
 
 export enum PlaygroundCategories {
   SANDBOX = 'sandbox',
@@ -62,6 +63,18 @@ export enum VNCInteractionOptionsSections {
   KEYBOARD = 'keyboard',
   MOUSE = 'mouse',
   SCREENSHOT = 'screenshot',
+}
+
+export type WrapVNCInvokeApiType = (
+  invokeApi: PlaygroundActionInvokeApi,
+) => <A, T>(
+  actionFormData: PlaygroundActionFormDataBasic<A> | PlaygroundActionWithParamsFormData<A, T>,
+) => Promise<void>
+
+export type VNCInteractionOptionsSectionComponentProps = {
+  disableActions: boolean
+  ComputerUseClient: ComputerUse
+  wrapVNCInvokeApi: WrapVNCInvokeApiType
 }
 
 export const VNCInteractionOptionsSectionsData = [

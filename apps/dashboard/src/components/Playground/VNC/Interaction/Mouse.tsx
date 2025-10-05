@@ -21,6 +21,7 @@ import {
   ParameterFormItem,
   PlaygroundActionFormDataBasic,
   MouseActionFormData,
+  VNCInteractionOptionsSectionComponentProps,
 } from '@/enums/Playground'
 import { PlaygroundActionInvokeApi } from '@/contexts/PlaygroundContext'
 import PlaygroundActionForm from '../../ActionForm'
@@ -32,7 +33,11 @@ const mouseButtonFormData: ParameterFormItem & { key: 'button' } = {
   placeholder: 'Select mouse button',
 }
 
-const VNCMouseOperations: React.FC = () => {
+const VNCMouseOperations: React.FC<VNCInteractionOptionsSectionComponentProps> = ({
+  disableActions,
+  ComputerUseClient,
+  wrapVNCInvokeApi,
+}) => {
   const {
     VNCInteractionOptionsParamsState,
     setVNCInteractionOptionsParamValue,
@@ -154,9 +159,56 @@ const VNCMouseOperations: React.FC = () => {
     },
   ]
 
-  //TODO -> Implementation
+  // Disable logic ensures that this method is called when ComputerUseClient exists
   const mouseActionAPICall: PlaygroundActionInvokeApi = async (mouseActionFormData) => {
-    // API call + set API response as responseText if present
+    const MouseActionsClient = ComputerUseClient.mouse
+    let mouseActionResponseText = ''
+    switch (mouseActionFormData.methodName) {
+      case MouseActions.CLICK: {
+        const mouseClickResponse = await MouseActionsClient[MouseActions.CLICK](
+          mouseClickParams.x,
+          mouseClickParams.y,
+          mouseClickParams.button ?? undefined,
+          mouseClickParams.double,
+        )
+        mouseActionResponseText = `Mouse clicked at (${mouseClickResponse.x}, ${mouseClickResponse.y})`
+        break
+      }
+      case MouseActions.DRAG: {
+        const mouseDragResponse = await MouseActionsClient[MouseActions.DRAG](
+          mouseDragParams.startX,
+          mouseDragParams.startY,
+          mouseDragParams.endX,
+          mouseDragParams.endY,
+          mouseDragParams.button ?? undefined,
+        )
+        mouseActionResponseText = `Mouse drag ended at (${mouseDragResponse.x}, ${mouseDragResponse.y})`
+        break
+      }
+      case MouseActions.MOVE: {
+        const mouseMoveResponse = await MouseActionsClient[MouseActions.MOVE](mouseMoveParams.x, mouseMoveParams.y)
+        mouseActionResponseText = `Mouse moved to (${mouseMoveResponse.x}, ${mouseMoveResponse.y})`
+        break
+      }
+      case MouseActions.SCROLL: {
+        const mouseScrollResponse = await MouseActionsClient[MouseActions.SCROLL](
+          mouseScrollParams.x,
+          mouseScrollParams.y,
+          mouseScrollParams.direction,
+          mouseScrollParams.amount ?? undefined,
+        )
+        mouseActionResponseText = mouseScrollResponse
+          ? `Mouse scrolled ${mouseScrollParams.direction} at (${mouseScrollParams.x}, ${mouseScrollParams.y}) by ${mouseScrollParams.amount ?? 1}`
+          : `Failed to scroll ${mouseScrollParams.direction} at (${mouseScrollParams.x}, ${mouseScrollParams.y})`
+        break
+      }
+      case MouseActions.GET_POSITION: {
+        const mousePositionResponse = await MouseActionsClient[MouseActions.GET_POSITION]()
+        mouseActionResponseText = `Mouse is at (${mousePositionResponse.x}, ${mousePositionResponse.y})`
+        break
+      }
+    }
+    setVNCInteractionOptionsParamValue('responseText', mouseActionResponseText)
   }
 
   return (
@@ -165,7 +217,10 @@ const VNCMouseOperations: React.FC = () => {
         <div key={mouseActionFormData.methodName} className="space-y-4">
           <PlaygroundActionForm<MouseActions>
             actionFormItem={mouseActionFormData}
-            onRunActionClick={() => runPlaygroundActionWithParams(mouseActionFormData, mouseActionAPICall)}
+            onRunActionClick={() =>
+              runPlaygroundActionWithParams(mouseActionFormData, wrapVNCInvokeApi(mouseActionAPICall))
+            }
+            disable={disableActions}
           />
           <div className="px-4 space-y-2">
             {mouseActionFormData.methodName === MouseActions.CLICK && (
@@ -305,7 +360,10 @@ const VNCMouseOperations: React.FC = () => {
         <div key={mouseActionFormData.methodName} className="space-y-4">
           <PlaygroundActionForm<MouseActions>
             actionFormItem={mouseActionFormData}
-            onRunActionClick={() => runPlaygroundActionWithoutParams(mouseActionFormData, mouseActionAPICall)}
+            onRunActionClick={() =>
+              runPlaygroundActionWithoutParams(mouseActionFormData, wrapVNCInvokeApi(mouseActionAPICall))
+            }
+            disable={disableActions}
           />
         </div>
       ))}

@@ -18,7 +18,8 @@ import {
   PlaygroundActionFormDataBasic,
   PlaygroundActionWithParamsFormData,
 } from '@/enums/Playground'
-import { createContext } from 'react'
+import { UseTemporarySandboxResult } from '@/hooks/useTemporarySandbox'
+import { createContext, ReactNode } from 'react'
 
 export interface SandboxParams {
   language?: CodeLanguage
@@ -40,7 +41,9 @@ export interface VNCInteractionOptionsParams {
   mouseScrollParams: MouseScroll
   screenshotOptionsConfig: CustomizedScreenshotOptions
   screenshotRegionConfig: ScreenshotRegion
-  responseText?: string
+  responseText?: string | ReactNode
+  VNCSandboxData?: UseTemporarySandboxResult
+  VNCUrl: string | null
 }
 
 export type SetVNCInteractionOptionsParamValue = <K extends keyof VNCInteractionOptionsParams>(

@@ -3,13 +3,19 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { useEffect, useRef, useCallback, useState } from 'react'
+import { useEffect, useRef, useCallback, useState, useMemo } from 'react'
 import { usePlayground } from '@/hooks/usePlayground'
 import { Sandbox } from '@daytonaio/sdk'
 
+export type UseTemporarySandboxResult = {
+  sandbox: Sandbox | null
+  isLoading: boolean
+  error: string | null
+}
+
 // This hook manages the full lifecycle of a temporary sandbox: it creates a sandbox when the component mounts and automatically deletes it when the component unmounts.
 // NOTE: Using in development mode with React.Strict will trigger double call of useEffect and will cause 2 sandbox creations and only 1 sandbox deletion -> result is 1 dangling sandbox. To prevent this comment React.Strict element.
-export function useTemporarySandbox() {
+export function useTemporarySandbox(): UseTemporarySandboxResult {
   const sandboxRef = useRef<Sandbox | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -54,9 +60,12 @@ export function useTemporarySandbox() {
     }
   }, [createSandbox])
 
-  return {
-    sandbox: sandboxRef.current,
-    isLoading,
-    error,
-  }
+  return useMemo(
+    () => ({
+      sandbox: sandboxRef.current,
+      isLoading,
+      error,
+    }),
+    [sandboxRef, isLoading, error],
+  )
 }
