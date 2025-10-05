@@ -109,6 +109,9 @@ export class Sandbox {
   @Column({ nullable: true, type: 'timestamp with time zone' })
   lastBackupAt: Date | null
 
+  @Column({ nullable: true, type: 'timestamp with time zone' })
+  backupStartedAt: Date | null
+
   @Column({
     type: 'enum',
     enum: BackupState,
@@ -203,6 +206,7 @@ export class Sandbox {
     switch (state) {
       case BackupState.NONE:
         this.backupSnapshot = null
+        this.backupStartedAt = null
         break
       case BackupState.COMPLETED: {
         const now = new Date()
@@ -215,12 +219,21 @@ export class Sandbox {
           },
         ]
         this.backupErrorReason = null
+        this.backupStartedAt = null
         if (this.desiredState === SandboxDesiredState.ARCHIVED) {
           if (this.state === SandboxState.ARCHIVING || this.state === SandboxState.STOPPED) {
             this.state = SandboxState.ARCHIVED
             this.runnerId = null
           }
         }
+        break
+      }
+      case BackupState.IN_PROGRESS: {
+        this.backupStartedAt = new Date()
+        break
+      }
+      case BackupState.ERROR: {
+        this.backupStartedAt = null
         break
       }
     }
