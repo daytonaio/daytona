@@ -194,4 +194,44 @@ export enum ScreenshotActions {
 export type ScreenshotActionFormData<T extends ScreenshotRegion | CustomizedScreenshotOptions> =
   PlaygroundActionWithParamsFormData<ScreenshotActions, T>
 
-export type PlaygroundActions = DisplayActions | KeyboardActions | MouseActions | ScreenshotActions
+export enum FileSystemActions {
+  LIST_FILES = 'listFiles',
+  CREATE_FOLDER = 'createFolder',
+  UPLOAD_FILE = 'uploadFile',
+  UPLOAD_FILES = 'uploadFiles',
+  DOWNLOAD_FILE = 'downloadFile',
+  DOWNLOAD_FILES = 'downloadFiles',
+  DELETE_FILE = 'deleteFile',
+}
+
+export enum GitOperationsActions {
+  GIT_CLONE = 'clone',
+  GIT_STATUS = 'status',
+  GIT_BRANCHES_LIST = 'branches',
+  CREATE_BRANCH = 'createBranch',
+  CHECKOUT_BRANCH = 'checkoutBranch',
+  DELETE_BRANCH = 'deleteBranch',
+  GIT_ADD = 'add',
+  GIT_COMMIT = 'commit',
+  GIT_PUSH = 'push',
+  GIT_PULL = 'pull',
+}
+
+export enum ProcessCodeExecutionActions {
+  CODE_RUN = 'codeRun',
+  SHELL_COMMANDS_RUN = 'executeCommand',
+  CREATE_SESSION = 'createSession',
+  GET_SESSION = 'getSession',
+  LIST_SESSIONS = 'listSessions',
+  DELETE_SESSION = 'deleteSession',
+}
+
+// Actions enums values represent method names for TypeScript SDK
+export type PlaygroundActions =
+  | DisplayActions
+  | KeyboardActions
+  | MouseActions
+  | ScreenshotActions
+  | FileSystemActions
+  | GitOperationsActions
+  | ProcessCodeExecutionActions

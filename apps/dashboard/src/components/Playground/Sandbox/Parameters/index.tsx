@@ -5,7 +5,10 @@
 
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion'
 import { SandboxParametersSections, sandboxParametersSectionsData } from '@/enums/Playground'
+import SandboxFileSystem from './FileSystem'
+import SandboxGitOperations from './GitOperations'
 import SandboxManagmentParameters from './Managment'
+import SandboxProcessCodeExecution from './ProcessCodeExecution'
 import { Plus, Minus } from 'lucide-react'
 import { useState } from 'react'
 
@@ -33,7 +36,12 @@ const SandboxParameters: React.FC = () => {
               <AccordionContent>
                 {!isCollapsed && (
                   <div className="px-2 space-y-4">
+                    {section.value === SandboxParametersSections.FILE_SYSTEM && <SandboxFileSystem />}
+                    {section.value === SandboxParametersSections.GIT_OPERATIONS && <SandboxGitOperations />}
                     {section.value === SandboxParametersSections.SANDBOX_MANAGMENT && <SandboxManagmentParameters />}
+                    {section.value === SandboxParametersSections.PROCESS_CODE_EXECUTION && (
+                      <SandboxProcessCodeExecution />
+                    )}
                   </div>
                 )}
               </AccordionContent>
