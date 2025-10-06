@@ -1,5 +1,5 @@
 /* tslint:disable */
-
+/* eslint-disable */
 /**
  * Daytona
  * Daytona AI platform API Docs
@@ -12,34 +12,37 @@
  * Do not edit the class manually.
  */
 
+
+
 /**
- *
+ * 
  * @export
  * @interface PortPreviewUrl
  */
 export interface PortPreviewUrl {
-  /**
-   * ID of the sandbox
-   * @type {string}
-   * @memberof PortPreviewUrl
-   */
-  sandboxId: string
-  /**
-   * Preview url
-   * @type {string}
-   * @memberof PortPreviewUrl
-   */
-  url: string
-  /**
-   * Access token
-   * @type {string}
-   * @memberof PortPreviewUrl
-   */
-  token: string
-  /**
-   * Legacy preview url using runner domain
-   * @type {string}
-   * @memberof PortPreviewUrl
-   */
-  legacyProxyUrl?: string
+    /**
+     * ID of the sandbox
+     * @type {string}
+     * @memberof PortPreviewUrl
+     */
+    'sandboxId': string;
+    /**
+     * Preview url
+     * @type {string}
+     * @memberof PortPreviewUrl
+     */
+    'url': string;
+    /**
+     * Access token
+     * @type {string}
+     * @memberof PortPreviewUrl
+     */
+    'token': string;
+    /**
+     * Legacy preview url using runner domain
+     * @type {string}
+     * @memberof PortPreviewUrl
+     */
+    'legacyProxyUrl'?: string;
 }
+

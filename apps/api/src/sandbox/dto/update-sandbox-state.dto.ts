@@ -15,4 +15,8 @@ export class UpdateSandboxStateDto {
     example: SandboxState.STARTED,
   })
   state: SandboxState
+
+  constructor(state: SandboxState) {
+    this.state = state
+  }
 }

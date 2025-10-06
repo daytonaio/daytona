@@ -59,7 +59,7 @@ export function getRelativeTimeString(
       date,
       relativeTimeString: isFuture ? `in ${years}y` : `${years}y ago`,
     }
-  } catch (e) {
+  } catch {
     return { date: new Date(), relativeTimeString: fallback }
   }
 }

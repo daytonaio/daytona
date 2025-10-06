@@ -27,7 +27,7 @@ import { DockerRegistry } from '../decorators/docker-registry.decorator'
 import { DockerRegistry as DockerRegistryEntity } from '../entities/docker-registry.entity'
 import { CustomHeaders } from '../../common/constants/header.constants'
 import { AuthContext } from '../../common/decorators/auth-context.decorator'
-import { OrganizationAuthContext } from '../../common/interfaces/auth-context.interface'
+import { type OrganizationAuthContext } from '../../common/interfaces/auth-context.interface'
 import { RequiredOrganizationResourcePermissions } from '../../organization/decorators/required-organization-resource-permissions.decorator'
 import { OrganizationResourcePermission } from '../../organization/enums/organization-resource-permission.enum'
 import { OrganizationResourceActionGuard } from '../../organization/guards/organization-resource-action.guard'
@@ -90,7 +90,7 @@ export class DockerRegistryController {
     }
 
     const dockerRegistry = await this.dockerRegistryService.create(createDockerRegistryDto, authContext.organizationId)
-    return DockerRegistryDto.fromDockerRegistry(dockerRegistry)
+    return new DockerRegistryDto(dockerRegistry)
   }
 
   @Get()
@@ -105,7 +105,7 @@ export class DockerRegistryController {
   })
   async findAll(@AuthContext() authContext: OrganizationAuthContext): Promise<DockerRegistryDto[]> {
     const dockerRegistries = await this.dockerRegistryService.findAll(authContext.organizationId)
-    return dockerRegistries.map(DockerRegistryDto.fromDockerRegistry)
+    return dockerRegistries.map((reg) => new DockerRegistryDto(reg))
   }
 
   @Get('registry-push-access')
@@ -141,7 +141,7 @@ export class DockerRegistryController {
   })
   @UseGuards(DockerRegistryAccessGuard)
   async findOne(@DockerRegistry() registry: DockerRegistryEntity): Promise<DockerRegistryDto> {
-    return DockerRegistryDto.fromDockerRegistry(registry)
+    return new DockerRegistryDto(registry)
   }
 
   @Patch(':id')
@@ -180,7 +180,7 @@ export class DockerRegistryController {
     @Body() updateDockerRegistryDto: UpdateDockerRegistryDto,
   ): Promise<DockerRegistryDto> {
     const dockerRegistry = await this.dockerRegistryService.update(registryId, updateDockerRegistryDto)
-    return DockerRegistryDto.fromDockerRegistry(dockerRegistry)
+    return new DockerRegistryDto(dockerRegistry)
   }
 
   @Delete(':id')
@@ -233,6 +233,6 @@ export class DockerRegistryController {
   })
   async setDefault(@Param('id') registryId: string): Promise<DockerRegistryDto> {
     const dockerRegistry = await this.dockerRegistryService.setDefault(registryId)
-    return DockerRegistryDto.fromDockerRegistry(dockerRegistry)
+    return new DockerRegistryDto(dockerRegistry)
   }
 }

@@ -7,6 +7,7 @@ import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, Up
 import { OrganizationUser } from './organization-user.entity'
 import { OrganizationRole } from './organization-role.entity'
 import { OrganizationInvitation } from './organization-invitation.entity'
+import { v4 } from 'uuid'
 
 @Entity()
 export class Organization {
@@ -119,12 +120,13 @@ export class Organization {
     nullable: true,
     type: 'timestamp with time zone',
   })
-  suspendedAt?: Date
+  suspendedAt: Date | null
 
   @Column({
     nullable: true,
+    type: String,
   })
-  suspensionReason?: string
+  suspensionReason: string | null
 
   @Column({
     type: 'int',
@@ -136,7 +138,7 @@ export class Organization {
     nullable: true,
     type: 'timestamp with time zone',
   })
-  suspendedUntil?: Date
+  suspendedUntil: Date | null
 
   @Column({
     default: false,
@@ -152,4 +154,52 @@ export class Organization {
     type: 'timestamp with time zone',
   })
   updatedAt: Date
+
+  constructor(createParams: {
+    name: string
+    createdBy: string
+    telemetryEnabled?: boolean
+    personal?: boolean
+    totalCpuQuota?: number
+    totalMemoryQuota?: number
+    totalDiskQuota?: number
+    maxCpuPerSandbox?: number
+    maxMemoryPerSandbox?: number
+    maxDiskPerSandbox?: number
+    maxSnapshotSize?: number
+    snapshotQuota?: number
+    volumeQuota?: number
+    suspended?: boolean
+    suspendedAt?: Date | null
+    suspensionReason?: string | null
+    suspensionCleanupGracePeriodHours?: number
+    suspendedUntil?: Date
+    sandboxLimitedNetworkEgress?: boolean
+  }) {
+    this.id = v4()
+    this.name = createParams.name
+    this.createdBy = createParams.createdBy
+    this.telemetryEnabled = createParams.telemetryEnabled ?? true
+    this.personal = createParams.personal ?? false
+    this.totalCpuQuota = createParams.totalCpuQuota ?? 10
+    this.totalMemoryQuota = createParams.totalMemoryQuota ?? 10
+    this.totalDiskQuota = createParams.totalDiskQuota ?? 30
+    this.maxCpuPerSandbox = createParams.maxCpuPerSandbox ?? 4
+    this.maxMemoryPerSandbox = createParams.maxMemoryPerSandbox ?? 8
+    this.maxDiskPerSandbox = createParams.maxDiskPerSandbox ?? 10
+    this.maxSnapshotSize = createParams.maxSnapshotSize ?? 20
+    this.snapshotQuota = createParams.snapshotQuota ?? 100
+    this.volumeQuota = createParams.volumeQuota ?? 100
+    this.suspended = createParams.suspended ?? false
+    this.suspendedAt = createParams.suspendedAt ?? null
+    this.suspensionReason = createParams.suspensionReason ?? null
+    this.suspensionCleanupGracePeriodHours = createParams.suspensionCleanupGracePeriodHours ?? 24
+    this.suspendedUntil = createParams.suspendedUntil ?? null
+    this.sandboxLimitedNetworkEgress = createParams.sandboxLimitedNetworkEgress ?? false
+    this.createdAt = new Date()
+    this.updatedAt = new Date()
+    this.roles = []
+    this.users = []
+    this.invitations = []
+  }
 }

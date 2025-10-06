@@ -74,6 +74,12 @@ export class AuditInterceptor implements NestInterceptor {
     next: CallHandler,
     observer: Subscriber<any>,
   ): Promise<void> {
+    if (!request.user) {
+      this.logger.error('No user context found for audited request:', request.url)
+      observer.error(new UnauthorizedException())
+      return
+    }
+
     try {
       const auditLog = await this.auditService.createLog({
         actorId: request.user.userId,
@@ -112,7 +118,7 @@ export class AuditInterceptor implements NestInterceptor {
   }
 
   private resolveOrganizationId(request: RequestWithUser, result?: any): string | null {
-    return result?.organizationId || request.user.organizationId
+    return result?.organizationId || request.user?.organizationId
   }
 
   /**

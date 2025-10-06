@@ -43,7 +43,7 @@ const CodeBlock: React.FC<CodeBlockProps> = ({ code, language, showCopy = true }
             {tokens.map((line, i) => {
               const props = getLineProps({ line, key: i })
               // @ts-expect-error Workaround for the render error. Key should not be spread into JSX
-              const { key, ...rest } = props
+              const { key: _, ...rest } = props
               return (
                 <div key={i} {...rest}>
                   {line.map((token, key) => {

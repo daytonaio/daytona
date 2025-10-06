@@ -59,13 +59,19 @@ const Spending = () => {
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-4">Spending</h1>
-      <UsageChart
-        title="Cost Breakdown"
-        usageData={[...pastOrganizationUsage, ...(currentOrganizationUsage ? [currentOrganizationUsage] : [])].map(
-          convertUsageToChartData,
-        )}
-        showTotal
-      />
+      {currentOrganizationUsageLoading || pastOrganizationUsageLoading ? (
+        <p>Loading...</p>
+      ) : pastOrganizationUsage.length === 0 && !currentOrganizationUsage ? (
+        <p>No usage data available.</p>
+      ) : (
+        <UsageChart
+          title="Cost Breakdown"
+          usageData={[...pastOrganizationUsage, ...(currentOrganizationUsage ? [currentOrganizationUsage] : [])].map(
+            convertUsageToChartData,
+          )}
+          showTotal
+        />
+      )}
     </div>
   )
 }

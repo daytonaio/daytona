@@ -42,4 +42,22 @@ export class CreateDockerRegistryDto {
   @IsBoolean()
   @IsOptional()
   isDefault?: boolean
+
+  constructor(
+    name: string,
+    url: string,
+    username: string,
+    password: string,
+    project?: string,
+    registryType: RegistryType = RegistryType.ORGANIZATION,
+    isDefault?: boolean,
+  ) {
+    this.name = name
+    this.url = url
+    this.username = username
+    this.password = password
+    this.project = project
+    this.registryType = registryType
+    this.isDefault = isDefault
+  }
 }

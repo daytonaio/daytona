@@ -11,7 +11,7 @@ import { TypedConfigService } from '../../config/typed-config.service'
 export class MaintenanceMiddleware implements NestMiddleware {
   constructor(private readonly configService: TypedConfigService) {}
 
-  use(req: Request, res: Response, next: NextFunction) {
+  use(_: Request, __: Response, next: NextFunction) {
     const isMaintenanceMode = this.configService.get('maintananceMode')
 
     if (isMaintenanceMode) {

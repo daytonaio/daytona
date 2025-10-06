@@ -1,5 +1,5 @@
 /* tslint:disable */
-
+/* eslint-disable */
 /**
  * Daytona
  * Daytona AI platform API Docs
@@ -12,46 +12,49 @@
  * Do not edit the class manually.
  */
 
+
+
 /**
- *
+ * 
  * @export
  * @interface WebhookInitializationStatus
  */
 export interface WebhookInitializationStatus {
-  /**
-   * Organization ID
-   * @type {string}
-   * @memberof WebhookInitializationStatus
-   */
-  organizationId: string
-  /**
-   * The ID of the Svix application
-   * @type {string}
-   * @memberof WebhookInitializationStatus
-   */
-  svixApplicationId: string | null
-  /**
-   * The error reason for the last initialization attempt
-   * @type {string}
-   * @memberof WebhookInitializationStatus
-   */
-  lastError: string | null
-  /**
-   * The number of times the initialization has been attempted
-   * @type {number}
-   * @memberof WebhookInitializationStatus
-   */
-  retryCount: number
-  /**
-   * When the webhook initialization was created
-   * @type {string}
-   * @memberof WebhookInitializationStatus
-   */
-  createdAt: string
-  /**
-   * When the webhook initialization was last updated
-   * @type {string}
-   * @memberof WebhookInitializationStatus
-   */
-  updatedAt: string
+    /**
+     * Organization ID
+     * @type {string}
+     * @memberof WebhookInitializationStatus
+     */
+    'organizationId': string;
+    /**
+     * The ID of the Svix application
+     * @type {string}
+     * @memberof WebhookInitializationStatus
+     */
+    'svixApplicationId': string | null;
+    /**
+     * The error reason for the last initialization attempt
+     * @type {string}
+     * @memberof WebhookInitializationStatus
+     */
+    'lastError': string | null;
+    /**
+     * The number of times the initialization has been attempted
+     * @type {number}
+     * @memberof WebhookInitializationStatus
+     */
+    'retryCount': number;
+    /**
+     * When the webhook initialization was created
+     * @type {string}
+     * @memberof WebhookInitializationStatus
+     */
+    'createdAt': string;
+    /**
+     * When the webhook initialization was last updated
+     * @type {string}
+     * @memberof WebhookInitializationStatus
+     */
+    'updatedAt': string;
 }
+

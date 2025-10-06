@@ -4,6 +4,7 @@
  */
 
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm'
+import { v4 } from 'uuid'
 
 @Entity('sandbox_usage_periods')
 export class SandboxUsagePeriod {
@@ -38,17 +39,36 @@ export class SandboxUsagePeriod {
   @Column()
   region: string
 
-  public static fromUsagePeriod(usagePeriod: SandboxUsagePeriod) {
-    const usagePeriodEntity = new SandboxUsagePeriod()
-    usagePeriodEntity.sandboxId = usagePeriod.sandboxId
-    usagePeriodEntity.organizationId = usagePeriod.organizationId
-    usagePeriodEntity.startAt = usagePeriod.startAt
-    usagePeriodEntity.endAt = usagePeriod.endAt
-    usagePeriodEntity.cpu = usagePeriod.cpu
-    usagePeriodEntity.gpu = usagePeriod.gpu
-    usagePeriodEntity.mem = usagePeriod.mem
-    usagePeriodEntity.disk = usagePeriod.disk
-    usagePeriodEntity.region = usagePeriod.region
-    return usagePeriodEntity
+  constructor({
+    sandboxId,
+    organizationId,
+    startAt,
+    endAt,
+    cpu,
+    gpu,
+    mem,
+    disk,
+    region,
+  }: {
+    sandboxId: string
+    organizationId: string
+    startAt: Date
+    endAt: Date | null
+    cpu: number
+    gpu: number
+    mem: number
+    disk: number
+    region: string
+  }) {
+    this.id = v4()
+    this.sandboxId = sandboxId
+    this.organizationId = organizationId
+    this.startAt = startAt
+    this.endAt = endAt
+    this.cpu = cpu
+    this.gpu = gpu
+    this.mem = mem
+    this.disk = disk
+    this.region = region
   }
 }

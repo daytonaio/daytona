@@ -12,20 +12,23 @@ import { OrganizationService } from '../services/organization.service'
 import { OrganizationUserService } from '../services/organization-user.service'
 import { OrganizationAuthContext } from '../../common/interfaces/auth-context.interface'
 import { SystemRole } from '../../user/enums/system-role.enum'
+import Redis from 'ioredis'
+import { InjectRedis } from '@nestjs-modules/ioredis'
 
 @Injectable()
 export class OrganizationActionGuard extends OrganizationAccessGuard {
-  protected readonly logger = new Logger(OrganizationActionGuard.name)
+  protected override readonly logger = new Logger(OrganizationActionGuard.name)
 
   constructor(
     organizationService: OrganizationService,
     organizationUserService: OrganizationUserService,
     private readonly reflector: Reflector,
+    @InjectRedis() redis: Redis,
   ) {
-    super(organizationService, organizationUserService)
+    super(organizationService, organizationUserService, redis)
   }
 
-  async canActivate(context: ExecutionContext): Promise<boolean> {
+  override async canActivate(context: ExecutionContext): Promise<boolean> {
     if (!(await super.canActivate(context))) {
       return false
     }

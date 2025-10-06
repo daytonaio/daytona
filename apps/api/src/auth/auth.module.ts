@@ -58,9 +58,14 @@ import { catchError, map } from 'rxjs/operators'
           // Replace localhost URLs with Docker network URLs for internal API use
           jwksUri = metadata.jwks_uri.replace(publicIssuer, internalIssuer)
         }
+
+        const audience = configService.get('oidc.audience')
+        if (!audience) {
+          throw new Error('OIDC audience is not configured')
+        }
         return new JwtStrategy(
           {
-            audience: configService.get('oidc.audience'),
+            audience,
             issuer: metadata.issuer,
             jwksUri: jwksUri,
           },

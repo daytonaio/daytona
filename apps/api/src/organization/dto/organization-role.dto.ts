@@ -46,17 +46,13 @@ export class OrganizationRoleDto {
   })
   updatedAt: Date
 
-  static fromOrganizationRole(role: OrganizationRole): OrganizationRoleDto {
-    const dto: OrganizationRoleDto = {
-      id: role.id,
-      name: role.name,
-      description: role.description,
-      permissions: role.permissions,
-      isGlobal: role.isGlobal,
-      createdAt: role.createdAt,
-      updatedAt: role.updatedAt,
-    }
-
-    return dto
+  constructor(role: OrganizationRole) {
+    this.id = role.id
+    this.name = role.name
+    this.description = role.description
+    this.permissions = role.permissions
+    this.isGlobal = role.isGlobal
+    this.createdAt = role.createdAt
+    this.updatedAt = role.updatedAt
   }
 }

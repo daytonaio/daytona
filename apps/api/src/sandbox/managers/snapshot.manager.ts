@@ -15,7 +15,6 @@ import { SnapshotRunner } from '../entities/snapshot-runner.entity'
 import { Runner } from '../entities/runner.entity'
 import { RunnerState } from '../enums/runner-state.enum'
 import { SnapshotRunnerState } from '../enums/snapshot-runner-state.enum'
-import { v4 as uuidv4 } from 'uuid'
 import { RunnerNotReadyError } from '../errors/runner-not-ready.error'
 import { RegistryType } from '../../docker-registry/enums/registry-type.enum'
 import { RedisLockProvider } from '../common/redis-lock.provider'
@@ -39,9 +38,6 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
   activeJobs = new Set<string>()
 
   private readonly logger = new Logger(SnapshotManager.name)
-  //  generate a unique instance id used to ensure only one instance of the worker is handing the
-  //  snapshot activation
-  private readonly instanceId = uuidv4()
 
   constructor(
     @InjectRedis() private readonly redis: Redis,
@@ -100,6 +96,10 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
 
     await Promise.all(
       snapshots.map((snapshot) => {
+        if (!snapshot.internalName) {
+          this.logger.warn(`Snapshot ${snapshot.id} has no internal name, skipping`)
+          return
+        }
         this.propagateSnapshotToRunners(snapshot.internalName).catch((err) => {
           this.logger.error(`Error propagating snapshot ${snapshot.id} to runners: ${err}`)
         })
@@ -247,10 +247,11 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
             }
 
             if (!snapshotRunner) {
-              snapshotRunner = new SnapshotRunner()
-              snapshotRunner.snapshotRef = internalSnapshotName
-              snapshotRunner.runnerId = runner.id
-              snapshotRunner.state = SnapshotRunnerState.PULLING_SNAPSHOT
+              snapshotRunner = new SnapshotRunner({
+                runnerId: runner.id,
+                snapshotRef: internalSnapshotName,
+                state: SnapshotRunnerState.PULLING_SNAPSHOT,
+              })
               await this.snapshotRunnerRepository.save(snapshotRunner)
               await this.propagateSnapshotToRunner(internalSnapshotName, runner)
             } else if (snapshotRunner.state === SnapshotRunnerState.PULLING_SNAPSHOT) {
@@ -258,9 +259,11 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
             }
           } catch (err) {
             this.logger.error(`Error propagating snapshot to runner ${runner.id}: ${fromAxiosError(err)}`)
-            snapshotRunner.state = SnapshotRunnerState.ERROR
-            snapshotRunner.errorReason = err.message
-            await this.snapshotRunnerRepository.update(snapshotRunner.id, snapshotRunner)
+            if (snapshotRunner) {
+              snapshotRunner.state = SnapshotRunnerState.ERROR
+              snapshotRunner.errorReason = err.message
+              await this.snapshotRunnerRepository.update(snapshotRunner.id, snapshotRunner)
+            }
           }
         }),
       )
@@ -276,7 +279,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
   }
 
   async propagateSnapshotToRunner(internalSnapshotName: string, runner: Runner) {
-    let dockerRegistry = await this.dockerRegistryService.findOneBySnapshotImageName(internalSnapshotName)
+    let dockerRegistry = await this.dockerRegistryService.findOneBySnapshotImageName(internalSnapshotName, null)
 
     // If no registry found by image name, use the default internal registry
     if (!dockerRegistry) {
@@ -368,6 +371,11 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
 
     await Promise.all(
       snapshots.map(async (snapshot) => {
+        if (!snapshot.internalName) {
+          await this.snapshotRepository.remove(snapshot)
+          return
+        }
+
         const countActiveSnapshots = await this.snapshotRepository.count({
           where: {
             state: SnapshotState.ACTIVE,
@@ -434,7 +442,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
               //  temp workaround to avoid race condition between api instances
               {
                 let imageName = snapshot.imageName
-                if (snapshot.buildInfo) {
+                if (snapshot.buildInfo && snapshot.internalName) {
                   imageName = snapshot.internalName
                 }
                 if (!(await this.dockerProvider.imageExists(imageName))) {
@@ -541,13 +549,18 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
   }
 
   async handleSnapshotStateRemoving(snapshot: Snapshot) {
-    const snapshotRunnerItems = await this.snapshotRunnerRepository.find({
+    if (!snapshot.internalName) {
+      await this.snapshotRepository.remove(snapshot)
+      return
+    }
+
+    const snapshotRunnerItems = await this.snapshotRunnerRepository.count({
       where: {
         snapshotRef: snapshot.internalName,
       },
     })
 
-    if (snapshotRunnerItems.length === 0) {
+    if (snapshotRunnerItems === 0) {
       await this.snapshotRepository.remove(snapshot)
     }
   }
@@ -592,9 +605,13 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
 
       const registry = await this.dockerRegistryService.getDefaultInternalRegistry()
 
+      if (!registry) {
+        throw new Error('No default internal registry configured')
+      }
+
       const runnerAdapter = await this.runnerAdapterFactory.create(runner)
 
-      await runnerAdapter.buildSnapshot(snapshot.buildInfo, snapshot.organizationId, registry, true)
+      await runnerAdapter.buildSnapshot(snapshot.buildInfo, snapshot.organizationId ?? undefined, registry, true)
 
       // save snapshotRunner
 
@@ -620,7 +637,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
   }
 
   async handleSnapshotStatePending(snapshot: Snapshot) {
-    let dockerRegistry: DockerRegistry
+    let dockerRegistry: DockerRegistry | null
 
     await this.updateSnapshotState(snapshot.id, SnapshotState.PULLING)
 
@@ -629,7 +646,9 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     if (snapshot.buildInfo) {
       //  get the default internal registry
       dockerRegistry = await this.dockerRegistryService.getDefaultInternalRegistry()
-      localImageName = snapshot.internalName
+      if (snapshot.internalName) {
+        localImageName = snapshot.internalName
+      }
     } else {
       //  find docker registry based on snapshot name and organization id
       dockerRegistry = await this.dockerRegistryService.findOneBySnapshotImageName(
@@ -639,11 +658,19 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     }
 
     // Use the dockerRegistry for pulling the snapshot
-    await this.dockerProvider.pullImage(localImageName, dockerRegistry)
+    await this.dockerProvider.pullImage(localImageName, dockerRegistry ?? undefined)
   }
 
   async handleSnapshotStatePulling(snapshot: Snapshot) {
+    if (!snapshot.organizationId) {
+      throw new Error('Snapshot organization ID not found')
+    }
+
     const localImageName = snapshot.buildInfo ? snapshot.internalName : snapshot.imageName
+    if (!localImageName) {
+      throw new Error('Image name not found')
+    }
+
     // Check timeout first
     const timeoutMinutes = 15
     const timeoutMs = timeoutMinutes * 60 * 1000
@@ -720,7 +747,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
         },
       })
       // Propagate snapshot to one runner so it can be used immediately
-      if (runner) {
+      if (runner && snapshot.internalName) {
         await this.propagateSnapshotToRunner(snapshot.internalName, runner)
       }
       await this.updateSnapshotState(snapshot.id, SnapshotState.ACTIVE)
@@ -771,9 +798,12 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
 
     try {
       const localImageName = snapshot.buildInfo ? snapshot.internalName : snapshot.imageName
+      if (!localImageName) {
+        throw new Error('Image name not found')
+      }
 
       // Create and start the container
-      containerId = await this.dockerProvider.create(localImageName, snapshot.entrypoint)
+      containerId = await this.dockerProvider.create(localImageName, snapshot.entrypoint ?? undefined)
 
       // Wait for 1 minute while checking container state
       const startTime = Date.now()
@@ -816,6 +846,10 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     // take only image:tag part without optional registry:port/project
     const image = snapshot.imageName.split('/').at(-1)
 
+    if (!image) {
+      throw new Error('Invalid image name')
+    }
+
     //  get tag from snapshot image
     const tag = image.split(':')[1]
     const internalSnapshotName = `${registry.url.replace(/^(https?:\/\/)/, '')}/${registry.project}/${snapshot.id}:${tag}`
@@ -844,7 +878,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     const dockerRegistry = await this.dockerRegistryService.getDefaultInternalRegistry()
     //  await this.redis.setex(lockKey, 360, this.instanceId)
 
-    await runnerAdapter.pullSnapshot(snapshotRunner.snapshotRef, dockerRegistry)
+    await runnerAdapter.pullSnapshot(snapshotRunner.snapshotRef, dockerRegistry ?? undefined)
   }
 
   private async updateSnapshotState(snapshotId: string, state: SnapshotState, errorReason?: string) {
@@ -891,7 +925,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
         { state: SnapshotRunnerState.REMOVING },
       )
 
-      if (result.affected > 0) {
+      if (result.affected && result.affected > 0) {
         this.logger.debug(`Marked ${result.affected} SnapshotRunners for removal due to unused BuildInfo`)
       }
     } catch (error) {

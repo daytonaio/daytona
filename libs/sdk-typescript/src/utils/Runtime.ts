@@ -57,7 +57,7 @@ export function getEnvVar(name: string): string | undefined {
     return process.env[name]
   }
   if (RUNTIME === Runtime.DENO) {
-    return Deno.env.get(name)
+    return Deno?.env.get(name)
   }
 
   return undefined

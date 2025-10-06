@@ -12,4 +12,8 @@ export class RegionDto {
     example: 'us',
   })
   name: string
+
+  constructor(name: string) {
+    this.name = name
+  }
 }

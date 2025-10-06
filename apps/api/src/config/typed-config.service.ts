@@ -36,7 +36,7 @@ export class TypedConfigService {
    * @param key The configuration key (can be nested using dot notation)
    * @returns The configuration value with proper typing
    */
-  get<K extends Paths<Configuration>>(key: K): PathValue<Configuration, K> {
+  get<K extends Paths<Configuration>>(key: K): PathValue<Configuration, K> | undefined {
     return this.configService.get(key)
   }
 

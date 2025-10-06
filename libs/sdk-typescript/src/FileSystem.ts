@@ -169,6 +169,10 @@ export class FileSystem {
 
       const response = await this.downloadFiles([{ source: remotePath }], timeout)
 
+      if (!response[0]) {
+        throw new DaytonaError('No response received from the server')
+      }
+
       if (response[0].error) {
         throw new DaytonaError(response[0].error)
       }
@@ -177,6 +181,10 @@ export class FileSystem {
     }
 
     const response = await this.downloadFiles([{ source: remotePath, destination: dst }], timeout)
+
+    if (!response[0]) {
+      throw new DaytonaError('No response received from the server')
+    }
 
     if (response[0].error) {
       throw new DaytonaError(response[0].error)

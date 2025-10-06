@@ -29,4 +29,12 @@ export class UpdateDockerRegistryDto {
   @IsString()
   @IsOptional()
   project?: string
+
+  constructor(name: string, url: string, username: string, password?: string, project?: string) {
+    this.name = name
+    this.url = url
+    this.username = username
+    this.password = password
+    this.project = project
+  }
 }

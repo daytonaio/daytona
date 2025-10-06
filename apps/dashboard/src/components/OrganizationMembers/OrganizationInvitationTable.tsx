@@ -178,7 +178,7 @@ export function OrganizationInvitationTable({
             }
           }}
           onCancelInvitation={handleConfirmCancel}
-          loading={loadingInvitationAction[invitationToCancel]}
+          loading={!!loadingInvitationAction[invitationToCancel]}
         />
       )}
     </>

@@ -131,7 +131,7 @@ export class WebhookController {
     if (!status) {
       throw new NotFoundException('Webhook initialization status not found')
     }
-    return WebhookInitializationStatusDto.fromWebhookInitialization(status)
+    return new WebhookInitializationStatusDto(status)
   }
 
   @Post('organizations/:organizationId/initialize')

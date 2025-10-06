@@ -30,4 +30,11 @@ export class UpdateUserDto {
   @IsBoolean()
   @IsOptional()
   emailVerified?: boolean
+
+  private constructor() {
+    this.name = ''
+    this.email = ''
+    this.role = SystemRole.USER
+    this.emailVerified = false
+  }
 }

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { ConflictException, Injectable, Logger, NotFoundException } from '@nestjs/common'
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { EntityManager, Repository, ArrayOverlap } from 'typeorm'
 import { ApiKey } from './api-key.entity'
@@ -16,8 +16,6 @@ import { OrganizationResourcePermissionsUnassignedEvent } from '../organization/
 
 @Injectable()
 export class ApiKeyService {
-  private readonly logger = new Logger(ApiKeyService.name)
-
   constructor(
     @InjectRepository(ApiKey)
     private apiKeyRepository: Repository<ApiKey>,

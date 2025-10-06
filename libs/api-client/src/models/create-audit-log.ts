@@ -1,5 +1,5 @@
 /* tslint:disable */
-
+/* eslint-disable */
 /**
  * Daytona
  * Daytona AI platform API Docs
@@ -12,48 +12,50 @@
  * Do not edit the class manually.
  */
 
+
+
 /**
- *
+ * 
  * @export
  * @interface CreateAuditLog
  */
 export interface CreateAuditLog {
-  /**
-   *
-   * @type {string}
-   * @memberof CreateAuditLog
-   */
-  actorId: string
-  /**
-   *
-   * @type {string}
-   * @memberof CreateAuditLog
-   */
-  actorEmail: string
-  /**
-   *
-   * @type {string}
-   * @memberof CreateAuditLog
-   */
-  organizationId?: string
-  /**
-   *
-   * @type {string}
-   * @memberof CreateAuditLog
-   */
-  action: CreateAuditLogActionEnum
-  /**
-   *
-   * @type {string}
-   * @memberof CreateAuditLog
-   */
-  targetType?: CreateAuditLogTargetTypeEnum
-  /**
-   *
-   * @type {string}
-   * @memberof CreateAuditLog
-   */
-  targetId?: string
+    /**
+     * 
+     * @type {string}
+     * @memberof CreateAuditLog
+     */
+    'actorId': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CreateAuditLog
+     */
+    'actorEmail': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CreateAuditLog
+     */
+    'organizationId'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CreateAuditLog
+     */
+    'action': CreateAuditLogActionEnum;
+    /**
+     * 
+     * @type {string}
+     * @memberof CreateAuditLog
+     */
+    'targetType'?: CreateAuditLogTargetTypeEnum;
+    /**
+     * 
+     * @type {string}
+     * @memberof CreateAuditLog
+     */
+    'targetId'?: string;
 }
 
 export const CreateAuditLogActionEnum = {
@@ -119,20 +121,21 @@ export const CreateAuditLogActionEnum = {
   TOOLBOX_COMPUTER_USE_RESTART_PROCESS: 'toolbox_computer_use_restart_process',
 } as const
 
-export type CreateAuditLogActionEnum = (typeof CreateAuditLogActionEnum)[keyof typeof CreateAuditLogActionEnum]
+export type CreateAuditLogActionEnum = typeof CreateAuditLogActionEnum[keyof typeof CreateAuditLogActionEnum];
 export const CreateAuditLogTargetTypeEnum = {
-  API_KEY: 'api_key',
-  ORGANIZATION: 'organization',
-  ORGANIZATION_INVITATION: 'organization_invitation',
-  ORGANIZATION_ROLE: 'organization_role',
-  ORGANIZATION_USER: 'organization_user',
-  DOCKER_REGISTRY: 'docker_registry',
-  RUNNER: 'runner',
-  SANDBOX: 'sandbox',
-  SNAPSHOT: 'snapshot',
-  USER: 'user',
-  VOLUME: 'volume',
-} as const
+    API_KEY: 'api_key',
+    ORGANIZATION: 'organization',
+    ORGANIZATION_INVITATION: 'organization_invitation',
+    ORGANIZATION_ROLE: 'organization_role',
+    ORGANIZATION_USER: 'organization_user',
+    DOCKER_REGISTRY: 'docker_registry',
+    RUNNER: 'runner',
+    SANDBOX: 'sandbox',
+    SNAPSHOT: 'snapshot',
+    USER: 'user',
+    VOLUME: 'volume'
+} as const;
 
-export type CreateAuditLogTargetTypeEnum =
-  (typeof CreateAuditLogTargetTypeEnum)[keyof typeof CreateAuditLogTargetTypeEnum]
+export type CreateAuditLogTargetTypeEnum = typeof CreateAuditLogTargetTypeEnum[keyof typeof CreateAuditLogTargetTypeEnum];
+
+

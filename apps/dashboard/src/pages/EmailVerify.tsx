@@ -40,6 +40,7 @@ export default function EmailVerify() {
           navigate(RoutePath.BILLING_WALLET)
         }, 1000)
       } catch (error) {
+        console.error(error)
         setVerificationStatus('error')
         setErrorMessage('An error occurred while verifying your email')
       }

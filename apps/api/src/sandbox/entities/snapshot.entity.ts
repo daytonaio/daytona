@@ -17,6 +17,7 @@ import {
 import { SnapshotRunner } from './snapshot-runner.entity'
 import { SnapshotState } from '../enums/snapshot-state.enum'
 import { BuildInfo } from './build-info.entity'
+import { v4 } from 'uuid'
 
 @Entity()
 @Unique(['organizationId', 'name'])
@@ -28,7 +29,7 @@ export class Snapshot {
     nullable: true,
     type: 'uuid',
   })
-  organizationId?: string
+  organizationId: string | null
 
   //  general snapshot is available to all organizations
   @Column({ default: false })
@@ -40,8 +41,8 @@ export class Snapshot {
   @Column()
   imageName: string
 
-  @Column({ nullable: true })
-  internalName?: string
+  @Column({ nullable: true, type: String })
+  internalName: string | null
 
   @Column({
     type: 'enum',
@@ -50,11 +51,11 @@ export class Snapshot {
   })
   state: SnapshotState
 
-  @Column({ nullable: true })
-  errorReason?: string
+  @Column({ nullable: true, type: String })
+  errorReason: string | null
 
   @Column({ type: 'float', nullable: true })
-  size?: number
+  size: number | null
 
   @Column({ type: 'int', default: 1 })
   cpu: number
@@ -75,7 +76,7 @@ export class Snapshot {
   runners: SnapshotRunner[]
 
   @Column({ array: true, type: 'text', nullable: true })
-  entrypoint?: string[]
+  entrypoint: string[] | null
 
   @CreateDateColumn({
     type: 'timestamp with time zone',
@@ -87,16 +88,54 @@ export class Snapshot {
   })
   updatedAt: Date
 
-  @Column({ nullable: true })
-  lastUsedAt?: Date
+  @Column({ nullable: true, type: 'timestamp with time zone' })
+  lastUsedAt: Date | null
 
   @ManyToOne(() => BuildInfo, (buildInfo) => buildInfo.snapshots, {
     nullable: true,
     eager: true,
   })
   @JoinColumn()
-  buildInfo?: BuildInfo
+  buildInfo: BuildInfo | null
 
-  @Column({ nullable: true })
-  buildRunnerId?: string
+  @Column({ nullable: true, type: String })
+  buildRunnerId: string | null
+
+  constructor(createParams: {
+    organizationId: string | null
+    name: string
+    imageName: string
+    cpu?: number
+    gpu?: number
+    mem?: number
+    disk?: number
+    entrypoint?: string[] | null
+    general?: boolean
+    hideFromUsers?: boolean
+    buildInfo?: BuildInfo
+    buildRunnerId?: string
+  }) {
+    this.id = v4()
+    this.organizationId = createParams.organizationId
+    this.name = createParams.name
+    this.imageName = createParams.imageName
+    this.cpu = createParams.cpu ?? 1
+    this.gpu = createParams.gpu ?? 0
+    this.mem = createParams.mem ?? 1
+    this.disk = createParams.disk ?? 3
+    this.entrypoint = createParams.entrypoint ?? null
+    this.general = createParams.general ?? false
+    this.hideFromUsers = createParams.hideFromUsers ?? false
+    this.buildRunnerId = createParams.buildRunnerId ?? null
+    this.buildInfo = createParams.buildInfo ?? null
+    this.runners = []
+
+    this.createdAt = new Date()
+    this.updatedAt = new Date()
+    this.state = SnapshotState.PENDING
+    this.size = null
+    this.errorReason = null
+    this.lastUsedAt = null
+    this.internalName = null
+  }
 }

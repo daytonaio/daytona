@@ -25,6 +25,7 @@ const LandingPage: React.FC = () => {
         returnTo: location.pathname + location.search,
       },
     })
+    return null
   }
 }
 

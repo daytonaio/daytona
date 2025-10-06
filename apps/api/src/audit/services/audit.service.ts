@@ -43,19 +43,20 @@ export class AuditService implements OnModuleInit {
   }
 
   async createLog(createDto: CreateAuditLogInternalDto): Promise<AuditLog> {
-    const auditLog = new AuditLog()
-    auditLog.actorId = createDto.actorId
-    auditLog.actorEmail = createDto.actorEmail
-    auditLog.organizationId = createDto.organizationId
-    auditLog.action = createDto.action
-    auditLog.targetType = createDto.targetType
-    auditLog.targetId = createDto.targetId
-    auditLog.statusCode = createDto.statusCode
-    auditLog.errorMessage = createDto.errorMessage
-    auditLog.ipAddress = createDto.ipAddress
-    auditLog.userAgent = createDto.userAgent
-    auditLog.source = createDto.source
-    auditLog.metadata = createDto.metadata
+    const auditLog = new AuditLog({
+      actorId: createDto.actorId,
+      actorEmail: createDto.actorEmail,
+      organizationId: createDto.organizationId,
+      action: createDto.action,
+      targetType: createDto.targetType,
+      targetId: createDto.targetId,
+      statusCode: createDto.statusCode,
+      errorMessage: createDto.errorMessage,
+      ipAddress: createDto.ipAddress,
+      userAgent: createDto.userAgent,
+      source: createDto.source,
+      metadata: createDto.metadata,
+    })
 
     if (this.configService.get('audit.consoleLogEnabled')) {
       this.logger.log(`Creating audit log: ${JSON.stringify(auditLog)}`)
@@ -70,19 +71,19 @@ export class AuditService implements OnModuleInit {
       throw new NotFoundException(`Audit log with ID ${id} not found`)
     }
 
-    if (updateDto.statusCode) {
+    if (updateDto.statusCode !== undefined) {
       auditLog.statusCode = updateDto.statusCode
     }
 
-    if (updateDto.errorMessage) {
+    if (updateDto.errorMessage !== undefined) {
       auditLog.errorMessage = updateDto.errorMessage
     }
 
-    if (updateDto.targetId) {
+    if (updateDto.targetId !== undefined) {
       auditLog.targetId = updateDto.targetId
     }
 
-    if (updateDto.organizationId) {
+    if (updateDto.organizationId !== undefined) {
       auditLog.organizationId = updateDto.organizationId
     }
 

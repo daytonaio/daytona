@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Injectable, NotFoundException, HttpException, BadRequestException, Logger } from '@nestjs/common'
+import { Injectable, NotFoundException, HttpException, BadRequestException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { Sandbox } from '../entities/sandbox.entity'
@@ -14,8 +14,6 @@ import { RedisLockProvider } from '../common/redis-lock.provider'
 
 @Injectable()
 export class ToolboxService {
-  private readonly logger = new Logger(ToolboxService.name)
-
   constructor(
     @InjectRepository(Sandbox)
     private readonly sandboxRepository: Repository<Sandbox>,
@@ -86,6 +84,10 @@ export class ToolboxService {
 
       if (!sandbox) {
         throw new NotFoundException('Sandbox not found')
+      }
+
+      if (!sandbox.runnerId) {
+        throw new NotFoundException('Sandbox is not assigned to a runner')
       }
 
       const runner = await this.runnerRepository.findOne({

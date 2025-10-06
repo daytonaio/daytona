@@ -33,4 +33,28 @@ export class OrganizationUsageOverviewDto {
   totalVolumeQuota: number
   @ApiProperty()
   currentVolumeUsage: number
+
+  constructor(params: {
+    totalCpuQuota: number
+    totalMemoryQuota: number
+    totalDiskQuota: number
+    currentCpuUsage: number
+    currentMemoryUsage: number
+    currentDiskUsage: number
+    totalSnapshotQuota: number
+    currentSnapshotUsage: number
+    totalVolumeQuota: number
+    currentVolumeUsage: number
+  }) {
+    this.totalCpuQuota = params.totalCpuQuota
+    this.totalMemoryQuota = params.totalMemoryQuota
+    this.totalDiskQuota = params.totalDiskQuota
+    this.currentCpuUsage = params.currentCpuUsage
+    this.currentMemoryUsage = params.currentMemoryUsage
+    this.currentDiskUsage = params.currentDiskUsage
+    this.totalSnapshotQuota = params.totalSnapshotQuota
+    this.currentSnapshotUsage = params.currentSnapshotUsage
+    this.totalVolumeQuota = params.totalVolumeQuota
+    this.currentVolumeUsage = params.currentVolumeUsage
+  }
 }

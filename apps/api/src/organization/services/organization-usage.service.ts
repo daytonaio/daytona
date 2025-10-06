@@ -85,7 +85,7 @@ export class OrganizationUsageService {
     }
 
     if (!organization) {
-      organization = await this.organizationRepository.findOne({ where: { id: organizationId } })
+      organization = await this.organizationRepository.findOneOrFail({ where: { id: organizationId } })
     }
 
     if (!organization) {
@@ -335,18 +335,18 @@ export class OrganizationUsageService {
     }
 
     // Validate current usage values are non-negative numbers
-    const parsedCpuUsage = this.parseNonNegativeCachedValue(cpuUsage)
-    const parsedMemoryUsage = this.parseNonNegativeCachedValue(memoryUsage)
-    const parsedDiskUsage = this.parseNonNegativeCachedValue(diskUsage)
+    const parsedCpuUsage = this.parseNonNegativeCachedValue(cpuUsage ?? null)
+    const parsedMemoryUsage = this.parseNonNegativeCachedValue(memoryUsage ?? null)
+    const parsedDiskUsage = this.parseNonNegativeCachedValue(diskUsage ?? null)
 
     if (parsedCpuUsage === null || parsedMemoryUsage === null || parsedDiskUsage === null) {
       return null
     }
 
     // Parse pending usage values (null is acceptable)
-    const parsedPendingCpuUsage = this.parseNonNegativeCachedValue(pendingCpuUsage)
-    const parsedPendingMemoryUsage = this.parseNonNegativeCachedValue(pendingMemoryUsage)
-    const parsedPendingDiskUsage = this.parseNonNegativeCachedValue(pendingDiskUsage)
+    const parsedPendingCpuUsage = this.parseNonNegativeCachedValue(pendingCpuUsage ?? null)
+    const parsedPendingMemoryUsage = this.parseNonNegativeCachedValue(pendingMemoryUsage ?? null)
+    const parsedPendingDiskUsage = this.parseNonNegativeCachedValue(pendingDiskUsage ?? null)
 
     return {
       currentCpuUsage: parsedCpuUsage,
@@ -383,9 +383,9 @@ export class OrganizationUsageService {
 
     const [pendingCpuUsage, pendingMemoryUsage, pendingDiskUsage] = result
 
-    const parsedPendingCpuUsage = this.parseNonNegativeCachedValue(pendingCpuUsage)
-    const parsedPendingMemoryUsage = this.parseNonNegativeCachedValue(pendingMemoryUsage)
-    const parsedPendingDiskUsage = this.parseNonNegativeCachedValue(pendingDiskUsage)
+    const parsedPendingCpuUsage = this.parseNonNegativeCachedValue(pendingCpuUsage ?? null)
+    const parsedPendingMemoryUsage = this.parseNonNegativeCachedValue(pendingMemoryUsage ?? null)
+    const parsedPendingDiskUsage = this.parseNonNegativeCachedValue(pendingDiskUsage ?? null)
 
     return {
       pendingCpuUsage: parsedPendingCpuUsage,
@@ -430,14 +430,14 @@ export class OrganizationUsageService {
     }
 
     // Validate current usage values are non-negative numbers
-    const parsedCurrentSnapshotUsage = this.parseNonNegativeCachedValue(currentSnapshotUsage)
+    const parsedCurrentSnapshotUsage = this.parseNonNegativeCachedValue(currentSnapshotUsage ?? null)
 
     if (parsedCurrentSnapshotUsage === null) {
       return null
     }
 
     // Parse pending usage values (null is acceptable)
-    const parsedPendingSnapshotUsage = this.parseNonNegativeCachedValue(pendingSnapshotUsage)
+    const parsedPendingSnapshotUsage = this.parseNonNegativeCachedValue(pendingSnapshotUsage ?? null)
 
     return {
       currentSnapshotUsage: parsedCurrentSnapshotUsage,
@@ -467,7 +467,7 @@ export class OrganizationUsageService {
     const [pendingSnapshotUsage] = result
 
     // Parse pending usage values (null is acceptable)
-    const parsedPendingSnapshotUsage = this.parseNonNegativeCachedValue(pendingSnapshotUsage)
+    const parsedPendingSnapshotUsage = this.parseNonNegativeCachedValue(pendingSnapshotUsage ?? null)
 
     return {
       pendingSnapshotUsage: parsedPendingSnapshotUsage,
@@ -510,14 +510,14 @@ export class OrganizationUsageService {
     }
 
     // Validate current usage values are non-negative numbers
-    const parsedCurrentVolumeUsage = this.parseNonNegativeCachedValue(currentVolumeUsage)
+    const parsedCurrentVolumeUsage = this.parseNonNegativeCachedValue(currentVolumeUsage ?? null)
 
     if (parsedCurrentVolumeUsage === null) {
       return null
     }
 
     // Parse pending usage values (null is acceptable)
-    const parsedPendingVolumeUsage = this.parseNonNegativeCachedValue(pendingVolumeUsage)
+    const parsedPendingVolumeUsage = this.parseNonNegativeCachedValue(pendingVolumeUsage ?? null)
 
     return {
       currentVolumeUsage: parsedCurrentVolumeUsage,
@@ -548,7 +548,7 @@ export class OrganizationUsageService {
     const [pendingVolumeUsage] = result
 
     // Parse pending usage values (null is acceptable)
-    const parsedPendingVolumeUsage = this.parseNonNegativeCachedValue(pendingVolumeUsage)
+    const parsedPendingVolumeUsage = this.parseNonNegativeCachedValue(pendingVolumeUsage ?? null)
 
     return {
       pendingVolumeUsage: parsedPendingVolumeUsage,
@@ -582,11 +582,13 @@ export class OrganizationUsageService {
    */
   async fetchSandboxUsageFromDb(organizationId: string): Promise<SandboxUsageOverviewInternalDto> {
     // fetch from db
-    const sandboxUsageMetrics: {
-      used_cpu: number
-      used_mem: number
-      used_disk: number
-    } = await this.sandboxRepository
+    const sandboxUsageMetrics:
+      | {
+          used_cpu: number
+          used_mem: number
+          used_disk: number
+        }
+      | undefined = await this.sandboxRepository
       .createQueryBuilder('sandbox')
       .select([
         'SUM(CASE WHEN sandbox.state IN (:...statesConsumingCompute) THEN sandbox.cpu ELSE 0 END) as used_cpu',
@@ -597,6 +599,10 @@ export class OrganizationUsageService {
       .setParameter('statesConsumingCompute', SANDBOX_STATES_CONSUMING_COMPUTE)
       .setParameter('statesConsumingDisk', SANDBOX_STATES_CONSUMING_DISK)
       .getRawOne()
+
+    if (!sandboxUsageMetrics) {
+      throw new Error(`Failed to fetch sandbox usage metrics from database for organization ${organizationId}`)
+    }
 
     const cpuUsage = Number(sandboxUsageMetrics.used_cpu) || 0
     const memoryUsage = Number(sandboxUsageMetrics.used_mem) || 0
@@ -1080,7 +1086,7 @@ export class OrganizationUsageService {
   }
 
   @OnEvent(SandboxEvents.CREATED)
-  async handleSandboxCreated(event: SandboxCreatedEvent) {
+  async _handleSandboxCreated(event: SandboxCreatedEvent) {
     const lockKey = `sandbox:${event.sandbox.id}:quota-usage-update`
     await this.redisLockProvider.waitForLock(lockKey, 60)
 
@@ -1099,7 +1105,7 @@ export class OrganizationUsageService {
   }
 
   @OnEvent(SandboxEvents.STATE_UPDATED)
-  async handleSandboxStateUpdated(event: SandboxStateUpdatedEvent) {
+  async _handleSandboxStateUpdated(event: SandboxStateUpdatedEvent) {
     const lockKey = `sandbox:${event.sandbox.id}:quota-usage-update`
     await this.redisLockProvider.waitForLock(lockKey, 60)
 
@@ -1165,7 +1171,11 @@ export class OrganizationUsageService {
   }
 
   @OnEvent(SnapshotEvents.CREATED)
-  async handleSnapshotCreated(event: SnapshotCreatedEvent) {
+  async _handleSnapshotCreated(event: SnapshotCreatedEvent) {
+    if (!event.snapshot.organizationId) {
+      return
+    }
+
     const lockKey = `snapshot:${event.snapshot.id}:quota-usage-update`
     await this.redisLockProvider.waitForLock(lockKey, 60)
 
@@ -1182,7 +1192,11 @@ export class OrganizationUsageService {
   }
 
   @OnEvent(SnapshotEvents.STATE_UPDATED)
-  async handleSnapshotStateUpdated(event: SnapshotStateUpdatedEvent) {
+  async _handleSnapshotStateUpdated(event: SnapshotStateUpdatedEvent) {
+    if (!event.snapshot.organizationId) {
+      return
+    }
+
     const lockKey = `snapshot:${event.snapshot.id}:quota-usage-update`
     await this.redisLockProvider.waitForLock(lockKey, 60)
 
@@ -1208,7 +1222,11 @@ export class OrganizationUsageService {
   }
 
   @OnEvent(VolumeEvents.CREATED)
-  async handleVolumeCreated(event: VolumeCreatedEvent) {
+  async _handleVolumeCreated(event: VolumeCreatedEvent) {
+    if (!event.volume.organizationId) {
+      return
+    }
+
     const lockKey = `volume:${event.volume.id}:quota-usage-update`
     await this.redisLockProvider.waitForLock(lockKey, 60)
 
@@ -1225,7 +1243,11 @@ export class OrganizationUsageService {
   }
 
   @OnEvent(VolumeEvents.STATE_UPDATED)
-  async handleVolumeStateUpdated(event: VolumeStateUpdatedEvent) {
+  async _handleVolumeStateUpdated(event: VolumeStateUpdatedEvent) {
+    if (!event.volume.organizationId) {
+      return
+    }
+
     const lockKey = `volume:${event.volume.id}:quota-usage-update`
     await this.redisLockProvider.waitForLock(lockKey, 60)
 

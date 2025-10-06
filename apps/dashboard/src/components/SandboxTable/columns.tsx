@@ -248,7 +248,7 @@ export function getColumns({
             sandbox={row.original}
             writePermitted={writePermitted}
             deletePermitted={deletePermitted}
-            isLoading={sandboxIsLoading[row.original.id]}
+            isLoading={!!sandboxIsLoading[row.original.id]}
             onStart={handleStart}
             onStop={handleStop}
             onDelete={handleDelete}

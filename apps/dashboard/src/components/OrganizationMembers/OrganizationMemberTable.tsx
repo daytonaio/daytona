@@ -169,7 +169,7 @@ export function OrganizationMemberTable({
           availableAssignments={availableAssignments}
           loadingAvailableAssignments={loadingAvailableAssignments}
           onUpdateAccess={handleUpdateMemberAccess}
-          processingUpdateAccess={loadingMemberAction[memberToUpdate.userId]}
+          processingUpdateAccess={!!loadingMemberAction[memberToUpdate.userId]}
         />
       )}
 
@@ -183,7 +183,7 @@ export function OrganizationMemberTable({
             }
           }}
           onRemoveMember={handleConfirmRemove}
-          loading={loadingMemberAction[memberToRemove]}
+          loading={!!loadingMemberAction[memberToRemove]}
         />
       )}
     </>

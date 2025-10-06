@@ -1,5 +1,5 @@
 /* tslint:disable */
-
+/* eslint-disable */
 /**
  * Daytona
  * Daytona AI platform API Docs
@@ -12,16 +12,19 @@
  * Do not edit the class manually.
  */
 
+
+
 /**
- *
+ * 
  * @export
  * @interface UserHomeDirResponse
  */
 export interface UserHomeDirResponse {
-  /**
-   *
-   * @type {string}
-   * @memberof UserHomeDirResponse
-   */
-  dir?: string
+    /**
+     * 
+     * @type {string}
+     * @memberof UserHomeDirResponse
+     */
+    'dir'?: string;
 }
+

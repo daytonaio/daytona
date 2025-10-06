@@ -9,19 +9,13 @@ import { WebhookService } from './webhook.service'
 import { SandboxEvents } from '../../sandbox/constants/sandbox-events.constants'
 import { SnapshotEvents } from '../../sandbox/constants/snapshot-events'
 import { VolumeEvents } from '../../sandbox/constants/volume-events'
-import { AuditLogEvents } from '../../audit/constants/audit-log-events.constant'
-import { UserEvents } from '../../user/constants/user-events.constant'
 import { SandboxCreatedEvent } from '../../sandbox/events/sandbox-create.event'
 import { SandboxStateUpdatedEvent } from '../../sandbox/events/sandbox-state-updated.event'
-import { SandboxDesiredStateUpdatedEvent } from '../../sandbox/events/sandbox-desired-state-updated.event'
 import { SnapshotCreatedEvent } from '../../sandbox/events/snapshot-created.event'
 import { SnapshotStateUpdatedEvent } from '../../sandbox/events/snapshot-state-updated.event'
 import { SnapshotRemovedEvent } from '../../sandbox/events/snapshot-removed.event'
 import { VolumeCreatedEvent } from '../../sandbox/events/volume-created.event'
 import { VolumeStateUpdatedEvent } from '../../sandbox/events/volume-state-updated.event'
-import { VolumeLastUsedAtUpdatedEvent } from '../../sandbox/events/volume-last-used-at-updated.event'
-import { AuditLogCreatedEvent } from '../../audit/events/audit-log-created.event'
-import { AuditLogUpdatedEvent } from '../../audit/events/audit-log-updated.event'
 import { WebhookEvents } from '../constants/webhook-events.constants'
 
 @Injectable()
@@ -74,6 +68,10 @@ export class WebhookEventHandlerService {
       return
     }
 
+    if (!event.snapshot.organizationId) {
+      return
+    }
+
     try {
       await this.webhookService.sendWebhook(event.snapshot.organizationId, WebhookEvents.SNAPSHOT_CREATED, {
         id: event.snapshot.id,
@@ -90,6 +88,10 @@ export class WebhookEventHandlerService {
   @OnEvent(SnapshotEvents.STATE_UPDATED)
   async handleSnapshotStateUpdated(event: SnapshotStateUpdatedEvent) {
     if (!this.webhookService.isEnabled()) {
+      return
+    }
+
+    if (!event.snapshot.organizationId) {
       return
     }
 
@@ -113,6 +115,10 @@ export class WebhookEventHandlerService {
       return
     }
 
+    if (!event.snapshot.organizationId) {
+      return
+    }
+
     try {
       await this.webhookService.sendWebhook(event.snapshot.organizationId, WebhookEvents.SNAPSHOT_REMOVED, {
         id: event.snapshot.id,
@@ -128,6 +134,10 @@ export class WebhookEventHandlerService {
   @OnEvent(VolumeEvents.CREATED)
   async handleVolumeCreated(event: VolumeCreatedEvent) {
     if (!this.webhookService.isEnabled()) {
+      return
+    }
+
+    if (!event.volume.organizationId) {
       return
     }
 
@@ -147,6 +157,10 @@ export class WebhookEventHandlerService {
   @OnEvent(VolumeEvents.STATE_UPDATED)
   async handleVolumeStateUpdated(event: VolumeStateUpdatedEvent) {
     if (!this.webhookService.isEnabled()) {
+      return
+    }
+
+    if (!event.volume.organizationId) {
       return
     }
 

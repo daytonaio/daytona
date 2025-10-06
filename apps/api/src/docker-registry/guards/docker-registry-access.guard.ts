@@ -26,7 +26,7 @@ export class DockerRegistryAccessGuard implements CanActivate {
       }
       request.dockerRegistry = dockerRegistry
       return true
-    } catch (error) {
+    } catch {
       throw new NotFoundException(`Docker registry with ID ${dockerRegistryId} not found`)
     }
   }

@@ -32,8 +32,6 @@ import { SandboxStopAction } from './sandbox-actions/sandbox-stop.action'
 import { SandboxDestroyAction } from './sandbox-actions/sandbox-destroy.action'
 import { SandboxArchiveAction } from './sandbox-actions/sandbox-archive.action'
 import { SYNC_AGAIN, DONT_SYNC_AGAIN } from './sandbox-actions/sandbox.action'
-import { EventEmitter2 } from '@nestjs/event-emitter'
-import { TypedConfigService } from '../../config/typed-config.service'
 
 import { TrackJobExecution } from '../../common/decorators/track-job-execution.decorator'
 import { TrackableJobExecutions } from '../../common/interfaces/trackable-job-executions'
@@ -56,8 +54,6 @@ export class SandboxManager extends LockableEntity implements TrackableJobExecut
     private readonly sandboxStopAction: SandboxStopAction,
     private readonly sandboxDestroyAction: SandboxDestroyAction,
     private readonly sandboxArchiveAction: SandboxArchiveAction,
-    private readonly eventEmitter: EventEmitter2,
-    private readonly configService: TypedConfigService,
   ) {
     super(redisLockProvider)
   }
@@ -78,7 +74,7 @@ export class SandboxManager extends LockableEntity implements TrackableJobExecut
   @TrackJobExecution()
   @OtelSpan()
   @LogExecution('auto-stop-check')
-  async autostopCheck(): Promise<void> {
+  async _autostopCheck(): Promise<void> {
     const lockKey = 'auto-stop-check-worker-selected'
     //  lock the sync to only run one instance at a time
     if (!(await this.redisLockProvider.lock(lockKey, 60))) {
@@ -144,7 +140,7 @@ export class SandboxManager extends LockableEntity implements TrackableJobExecut
   @Cron(CronExpression.EVERY_MINUTE, { name: 'auto-archive-check' })
   @TrackJobExecution()
   @LogExecution('auto-archive-check')
-  async autoArchiveCheck(): Promise<void> {
+  async _autoArchiveCheck(): Promise<void> {
     const lockKey = 'auto-archive-check-worker-selected'
     //  lock the sync to only run one instance at a time
     if (!(await this.redisLockProvider.lock(lockKey, 60))) {
@@ -192,7 +188,7 @@ export class SandboxManager extends LockableEntity implements TrackableJobExecut
   @Cron(CronExpression.EVERY_MINUTE, { name: 'auto-delete-check' })
   @TrackJobExecution()
   @LogExecution('auto-delete-check')
-  async autoDeleteCheck(): Promise<void> {
+  async _autoDeleteCheck(): Promise<void> {
     const lockKey = 'auto-delete-check-worker-selected'
     //  lock the sync to only run one instance at a time
     if (!(await this.redisLockProvider.lock(lockKey, 60))) {
@@ -253,7 +249,7 @@ export class SandboxManager extends LockableEntity implements TrackableJobExecut
   @TrackJobExecution()
   @OtelSpan()
   @LogExecution('sync-states')
-  async syncStates(): Promise<void> {
+  async _syncStates(): Promise<void> {
     const globalLockKey = 'sync-states'
     if (!(await this.redisLockProvider.lock(globalLockKey, 30))) {
       return
@@ -320,7 +316,7 @@ export class SandboxManager extends LockableEntity implements TrackableJobExecut
   @Cron(CronExpression.EVERY_10_SECONDS, { name: 'sync-archived-desired-states' })
   @TrackJobExecution()
   @LogExecution('sync-archived-desired-states')
-  async syncArchivedDesiredStates(): Promise<void> {
+  async _syncArchivedDesiredStates(): Promise<void> {
     const lockKey = 'sync-archived-desired-states'
     if (!(await this.redisLockProvider.lock(lockKey, 30))) {
       return
@@ -412,31 +408,31 @@ export class SandboxManager extends LockableEntity implements TrackableJobExecut
 
   @OnEvent(SandboxEvents.ARCHIVED)
   @TrackJobExecution()
-  private async handleSandboxArchivedEvent(event: SandboxArchivedEvent) {
+  async _handleSandboxArchivedEvent(event: SandboxArchivedEvent) {
     this.syncInstanceState(event.sandbox.id).catch(this.logger.error)
   }
 
   @OnEvent(SandboxEvents.DESTROYED)
   @TrackJobExecution()
-  private async handleSandboxDestroyedEvent(event: SandboxDestroyedEvent) {
+  async _handleSandboxDestroyedEvent(event: SandboxDestroyedEvent) {
     this.syncInstanceState(event.sandbox.id).catch(this.logger.error)
   }
 
   @OnEvent(SandboxEvents.STARTED)
   @TrackJobExecution()
-  private async handleSandboxStartedEvent(event: SandboxStartedEvent) {
+  async _handleSandboxStartedEvent(event: SandboxStartedEvent) {
     this.syncInstanceState(event.sandbox.id).catch(this.logger.error)
   }
 
   @OnEvent(SandboxEvents.STOPPED)
   @TrackJobExecution()
-  private async handleSandboxStoppedEvent(event: SandboxStoppedEvent) {
+  async _handleSandboxStoppedEvent(event: SandboxStoppedEvent) {
     this.syncInstanceState(event.sandbox.id).catch(this.logger.error)
   }
 
   @OnEvent(SandboxEvents.CREATED)
   @TrackJobExecution()
-  private async handleSandboxCreatedEvent(event: SandboxCreatedEvent) {
+  async _handleSandboxCreatedEvent(event: SandboxCreatedEvent) {
     this.syncInstanceState(event.sandbox.id).catch(this.logger.error)
   }
 }

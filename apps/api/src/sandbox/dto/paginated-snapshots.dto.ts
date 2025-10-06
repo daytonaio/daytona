@@ -19,4 +19,11 @@ export class PaginatedSnapshotsDto {
 
   @ApiProperty()
   totalPages: number
+
+  constructor(items: SnapshotDto[], total: number, page: number, totalPages: number) {
+    this.items = items
+    this.total = total
+    this.page = page
+    this.totalPages = totalPages
+  }
 }

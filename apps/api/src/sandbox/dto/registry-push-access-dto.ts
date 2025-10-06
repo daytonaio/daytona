@@ -41,4 +41,20 @@ export class RegistryPushAccessDto {
     example: '2023-12-31T23:59:59Z',
   })
   expiresAt: string
+
+  private constructor(
+    username: string,
+    secret: string,
+    registryUrl: string,
+    registryId: string,
+    project: string,
+    expiresAt: string,
+  ) {
+    this.username = username
+    this.secret = secret
+    this.registryUrl = registryUrl
+    this.registryId = registryId
+    this.project = project
+    this.expiresAt = expiresAt
+  }
 }

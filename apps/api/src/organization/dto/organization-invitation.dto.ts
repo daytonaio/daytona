@@ -69,21 +69,17 @@ export class OrganizationInvitationDto {
   })
   updatedAt: Date
 
-  static fromOrganizationInvitation(invitation: OrganizationInvitation): OrganizationInvitationDto {
-    const dto: OrganizationInvitationDto = {
-      id: invitation.id,
-      email: invitation.email,
-      invitedBy: invitation.invitedBy,
-      organizationId: invitation.organizationId,
-      organizationName: invitation.organization.name,
-      expiresAt: invitation.expiresAt,
-      status: invitation.status,
-      role: invitation.role,
-      assignedRoles: invitation.assignedRoles.map(OrganizationRoleDto.fromOrganizationRole),
-      createdAt: invitation.createdAt,
-      updatedAt: invitation.updatedAt,
-    }
-
-    return dto
+  constructor(invitation: OrganizationInvitation) {
+    this.id = invitation.id
+    this.email = invitation.email
+    this.invitedBy = invitation.invitedBy
+    this.organizationId = invitation.organizationId
+    this.organizationName = invitation.organization.name
+    this.expiresAt = invitation.expiresAt
+    this.status = invitation.status
+    this.role = invitation.role
+    this.assignedRoles = invitation.assignedRoles.map((role) => new OrganizationRoleDto(role))
+    this.createdAt = invitation.createdAt
+    this.updatedAt = invitation.updatedAt
   }
 }

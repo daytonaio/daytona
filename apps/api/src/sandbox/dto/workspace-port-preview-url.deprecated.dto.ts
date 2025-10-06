@@ -29,4 +29,10 @@ export class WorkspacePortPreviewUrlDto {
   })
   @IsString()
   legacyProxyUrl?: string
+
+  constructor(url: string, token: string, legacyProxyUrl?: string) {
+    this.url = url
+    this.token = token
+    this.legacyProxyUrl = legacyProxyUrl
+  }
 }

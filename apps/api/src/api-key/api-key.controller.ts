@@ -12,8 +12,8 @@ import { ApiKeyListDto } from './dto/api-key-list.dto'
 import { CombinedAuthGuard } from '../auth/combined-auth.guard'
 import { CustomHeaders } from '../common/constants/header.constants'
 import { AuthContext } from '../common/decorators/auth-context.decorator'
-import { AuthContext as IAuthContext } from '../common/interfaces/auth-context.interface'
-import { OrganizationAuthContext } from '../common/interfaces/auth-context.interface'
+import { type AuthContext as IAuthContext } from '../common/interfaces/auth-context.interface'
+import { type OrganizationAuthContext } from '../common/interfaces/auth-context.interface'
 import { OrganizationMemberRole } from '../organization/enums/organization-member-role.enum'
 import { OrganizationResourcePermission } from '../organization/enums/organization-resource-permission.enum'
 import { OrganizationResourceActionGuard } from '../organization/guards/organization-resource-action.guard'
@@ -68,7 +68,7 @@ export class ApiKeyController {
       createApiKeyDto.expiresAt,
     )
 
-    return ApiKeyResponseDto.fromApiKey(apiKey, value)
+    return new ApiKeyResponseDto(apiKey, value)
   }
 
   @Get()
@@ -91,7 +91,7 @@ export class ApiKeyController {
       apiKeys = await this.apiKeyService.getApiKeys(authContext.organizationId, authContext.userId)
     }
 
-    return apiKeys.map((apiKey) => ApiKeyListDto.fromApiKey(apiKey))
+    return apiKeys.map((apiKey) => new ApiKeyListDto(apiKey))
   }
 
   @Get('current')
@@ -109,7 +109,7 @@ export class ApiKeyController {
       throw new ForbiddenException('Authenticate with an API key to use this endpoint')
     }
 
-    return ApiKeyListDto.fromApiKey(authContext.apiKey)
+    return new ApiKeyListDto(authContext.apiKey)
   }
 
   @Get(':name')
@@ -127,7 +127,7 @@ export class ApiKeyController {
     @Param('name') name: string,
   ): Promise<ApiKeyListDto> {
     const apiKey = await this.apiKeyService.getApiKeyByName(authContext.organizationId, authContext.userId, name)
-    return ApiKeyListDto.fromApiKey(apiKey)
+    return new ApiKeyListDto(apiKey)
   }
 
   @Delete(':name')

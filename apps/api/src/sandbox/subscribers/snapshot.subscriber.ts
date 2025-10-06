@@ -14,10 +14,11 @@ import { SnapshotRemovedEvent } from '../events/snapshot-removed.event'
 
 @EventSubscriber()
 export class SnapshotSubscriber implements EntitySubscriberInterface<Snapshot> {
-  @Inject(EventEmitter2)
-  private eventEmitter: EventEmitter2
-
-  constructor(dataSource: DataSource) {
+  constructor(
+    dataSource: DataSource,
+    @Inject(EventEmitter2)
+    private eventEmitter: EventEmitter2,
+  ) {
     dataSource.subscribers.push(this)
   }
 
@@ -32,12 +33,18 @@ export class SnapshotSubscriber implements EntitySubscriberInterface<Snapshot> {
   afterUpdate(event: UpdateEvent<Snapshot>) {
     const updatedColumns = event.updatedColumns.map((col) => col.propertyName)
 
+    if (!event.entity) {
+      return
+    }
+
+    const entity = event.entity as Snapshot
+
     updatedColumns.forEach((column) => {
       switch (column) {
         case 'state':
           this.eventEmitter.emit(
             SnapshotEvents.STATE_UPDATED,
-            new SnapshotStateUpdatedEvent(event.entity as Snapshot, event.databaseEntity[column], event.entity[column]),
+            new SnapshotStateUpdatedEvent(entity, event.databaseEntity[column], entity[column]),
           )
           break
         default:

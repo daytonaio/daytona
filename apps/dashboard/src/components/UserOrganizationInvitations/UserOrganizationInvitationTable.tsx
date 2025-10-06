@@ -133,7 +133,7 @@ export function UserOrganizationInvitationTable({
             }
           }}
           onDeclineInvitation={handleConfirmDecline}
-          loading={loadingInvitationAction[invitationToDecline.id]}
+          loading={!!loadingInvitationAction[invitationToDecline.id]}
         />
       )}
     </>

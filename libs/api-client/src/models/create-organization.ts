@@ -1,5 +1,5 @@
 /* tslint:disable */
-
+/* eslint-disable */
 /**
  * Daytona
  * Daytona AI platform API Docs
@@ -12,16 +12,19 @@
  * Do not edit the class manually.
  */
 
+
+
 /**
- *
+ * 
  * @export
  * @interface CreateOrganization
  */
 export interface CreateOrganization {
-  /**
-   * The name of organization
-   * @type {string}
-   * @memberof CreateOrganization
-   */
-  name: string
+    /**
+     * The name of organization
+     * @type {string}
+     * @memberof CreateOrganization
+     */
+    'name': string;
 }
+

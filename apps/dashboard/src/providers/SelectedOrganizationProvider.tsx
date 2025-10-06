@@ -32,6 +32,9 @@ export function SelectedOrganizationProvider(props: Props) {
       return storedId
     } else if (organizations.length > 0) {
       const defaultOrg = organizations.find((org) => org.personal) || organizations[0]
+      if (!defaultOrg) {
+        return null
+      }
       localStorage.setItem(LocalStorageKey.SelectedOrganizationId, defaultOrg.id)
       return defaultOrg.id
     } else {
@@ -46,6 +49,9 @@ export function SelectedOrganizationProvider(props: Props) {
     }
     if (!selectedOrganizationId || !organizations.some((org) => org.id === selectedOrganizationId)) {
       const defaultOrg = organizations.find((org) => org.personal) || organizations[0]
+      if (!defaultOrg) {
+        return
+      }
       localStorage.setItem(LocalStorageKey.SelectedOrganizationId, defaultOrg.id)
       setSelectedOrganizationId(defaultOrg.id)
     }

@@ -58,18 +58,14 @@ export class DockerRegistryDto {
   })
   updatedAt: Date
 
-  static fromDockerRegistry(dockerRegistry: DockerRegistry): DockerRegistryDto {
-    const dto: DockerRegistryDto = {
-      id: dockerRegistry.id,
-      name: dockerRegistry.name,
-      url: dockerRegistry.url,
-      username: dockerRegistry.username,
-      project: dockerRegistry.project,
-      registryType: dockerRegistry.registryType,
-      createdAt: dockerRegistry.createdAt,
-      updatedAt: dockerRegistry.updatedAt,
-    }
-
-    return dto
+  constructor(dockerRegistry: DockerRegistry) {
+    this.id = dockerRegistry.id
+    this.name = dockerRegistry.name
+    this.url = dockerRegistry.url
+    this.username = dockerRegistry.username
+    this.project = dockerRegistry.project
+    this.registryType = dockerRegistry.registryType
+    this.createdAt = dockerRegistry.createdAt
+    this.updatedAt = dockerRegistry.updatedAt
   }
 }

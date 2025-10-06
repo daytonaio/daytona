@@ -280,7 +280,7 @@ export class SnapshotService {
       bucketName: pushAccessCreds.bucket,
     })
 
-    const contextHashes = []
+    const contextHashes: string[] = []
     for (const context of image.contextList) {
       const contextHash = await objectStorage.upload(
         context.sourcePath,

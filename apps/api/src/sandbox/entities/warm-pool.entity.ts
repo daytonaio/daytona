@@ -5,6 +5,7 @@
 
 import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm'
 import { SandboxClass } from '../enums/sandbox-class.enum'
+import { v4 } from 'uuid'
 
 @Entity()
 export class WarmPool {
@@ -47,8 +48,8 @@ export class WarmPool {
   @Column()
   osUser: string
 
-  @Column({ nullable: true })
-  errorReason?: string
+  @Column({ nullable: true, type: String })
+  errorReason: string | null
 
   @Column({
     type: 'simple-json',
@@ -65,4 +66,34 @@ export class WarmPool {
     type: 'timestamp with time zone',
   })
   updatedAt: Date
+
+  constructor(createParams: {
+    pool: number
+    snapshot: string
+    target: string
+    cpu: number
+    mem: number
+    disk: number
+    gpu: number
+    gpuType: string
+    class: SandboxClass
+    osUser: string
+    env?: { [key: string]: string }
+  }) {
+    this.id = v4()
+    this.pool = createParams.pool
+    this.snapshot = createParams.snapshot
+    this.target = createParams.target
+    this.cpu = createParams.cpu
+    this.mem = createParams.mem
+    this.disk = createParams.disk
+    this.gpu = createParams.gpu
+    this.gpuType = createParams.gpuType
+    this.class = createParams.class
+    this.osUser = createParams.osUser
+    this.env = createParams.env || {}
+    this.errorReason = null
+    this.createdAt = new Date()
+    this.updatedAt = new Date()
+  }
 }

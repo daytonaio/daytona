@@ -96,7 +96,7 @@ export function SnapshotTable({
       header: ({ table }) => (
         <Checkbox
           checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')}
-          onCheckedChange={(value) => {
+          onCheckedChange={() => {
             table.getRowModel().rows.forEach((row) => {
               if (!row.original.general) {
                 row.toggleSelected()

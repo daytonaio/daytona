@@ -5,8 +5,8 @@
 
 import { DocumentBuilder } from '@nestjs/swagger'
 
-const getOpenApiConfig = (oidcIssuer: string) =>
-  new DocumentBuilder()
+const getOpenApiConfig = (oidcIssuer?: string) => {
+  const builder = new DocumentBuilder()
     .setTitle('Daytona')
     .addServer('http://localhost:3000')
     .setDescription('Daytona AI platform API Docs')
@@ -17,11 +17,18 @@ const getOpenApiConfig = (oidcIssuer: string) =>
       scheme: 'bearer',
       description: 'API Key access',
     })
-    .addOAuth2({
-      type: 'openIdConnect',
-      flows: undefined,
-      openIdConnectUrl: `${oidcIssuer}/.well-known/openid-configuration`,
-    })
-    .build()
+
+  if (oidcIssuer) {
+    return builder
+      .addOAuth2({
+        type: 'openIdConnect',
+        flows: undefined,
+        openIdConnectUrl: `${oidcIssuer}/.well-known/openid-configuration`,
+      })
+      .build()
+  }
+
+  return builder.build()
+}
 
 export { getOpenApiConfig }

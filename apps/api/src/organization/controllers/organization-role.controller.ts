@@ -58,7 +58,7 @@ export class OrganizationRoleController {
     @Body() createOrganizationRoleDto: CreateOrganizationRoleDto,
   ): Promise<OrganizationRoleDto> {
     const role = await this.organizationRoleService.create(organizationId, createOrganizationRoleDto)
-    return OrganizationRoleDto.fromOrganizationRole(role)
+    return new OrganizationRoleDto(role)
   }
 
   @Get()
@@ -78,7 +78,7 @@ export class OrganizationRoleController {
   })
   async findAll(@Param('organizationId') organizationId: string): Promise<OrganizationRoleDto[]> {
     const roles = await this.organizationRoleService.findAll(organizationId)
-    return roles.map(OrganizationRoleDto.fromOrganizationRole)
+    return roles.map((role) => new OrganizationRoleDto(role))
   }
 
   @Put('/:roleId')
@@ -114,12 +114,13 @@ export class OrganizationRoleController {
     },
   })
   async updateRole(
-    @Param('organizationId') organizationId: string,
+    // TODO: Is this needed here?
+    @Param('organizationId') _organizationId: string,
     @Param('roleId') roleId: string,
     @Body() updateOrganizationRoleDto: UpdateOrganizationRoleDto,
   ): Promise<OrganizationRoleDto> {
     const updatedRole = await this.organizationRoleService.update(roleId, updateOrganizationRoleDto)
-    return OrganizationRoleDto.fromOrganizationRole(updatedRole)
+    return new OrganizationRoleDto(updatedRole)
   }
 
   @Delete('/:roleId')
@@ -146,7 +147,8 @@ export class OrganizationRoleController {
     targetType: AuditTarget.ORGANIZATION_ROLE,
     targetIdFromRequest: (req) => req.params.roleId,
   })
-  async delete(@Param('organizationId') organizationId: string, @Param('roleId') roleId: string): Promise<void> {
+  // TODO: Is organizationId needed here?
+  async delete(@Param('organizationId') _organizationId: string, @Param('roleId') roleId: string): Promise<void> {
     return this.organizationRoleService.delete(roleId)
   }
 }

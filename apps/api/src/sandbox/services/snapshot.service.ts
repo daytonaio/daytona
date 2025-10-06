@@ -205,10 +205,14 @@ export class SnapshotService {
       where,
       order: {
         general: 'ASC', // Sort general snapshots last
-        [sortField]: {
-          direction: sortDirection,
-          nulls: 'LAST',
-        },
+        ...(sortField
+          ? {
+              [sortField]: {
+                direction: sortDirection,
+                nulls: 'LAST',
+              },
+            }
+          : {}),
         ...(sortField !== SnapshotSortField.CREATED_AT && { createdAt: 'DESC' }),
       },
       skip: (pageNum - 1) * limitNum,
@@ -300,7 +304,7 @@ export class SnapshotService {
     const usageOverview = await this.organizationUsageService.getSnapshotUsageOverview(organization.id)
 
     try {
-      if (usageOverview.currentSnapshotUsage + usageOverview.pendingSnapshotUsage > organization.snapshotQuota) {
+      if (usageOverview.currentSnapshotUsage + (usageOverview.pendingSnapshotUsage ?? 0) > organization.snapshotQuota) {
         throw new ForbiddenException(`Snapshot quota exceeded. Maximum allowed: ${organization.snapshotQuota}`)
       }
     } catch (error) {
@@ -326,7 +330,7 @@ export class SnapshotService {
   }
 
   @OnEvent(SandboxEvents.CREATED)
-  private async handleSandboxCreatedEvent(event: SandboxCreatedEvent) {
+  async _handleSandboxCreatedEvent(event: SandboxCreatedEvent) {
     if (!event.sandbox.snapshot) {
       return
     }
@@ -434,6 +438,10 @@ export class SnapshotService {
 
     snapshot.state = SnapshotState.INACTIVE
     await this.snapshotRepository.save(snapshot)
+
+    if (!snapshot.internalName) {
+      return
+    }
 
     try {
       const countActiveSnapshots = await this.snapshotRepository.count({

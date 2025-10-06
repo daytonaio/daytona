@@ -36,4 +36,11 @@ export class PortPreviewUrlDto {
   })
   @IsString()
   legacyProxyUrl?: string
+
+  constructor(sandboxId: string, url: string, token: string, legacyProxyUrl?: string) {
+    this.sandboxId = sandboxId
+    this.url = url
+    this.token = token
+    this.legacyProxyUrl = legacyProxyUrl
+  }
 }
