@@ -70,6 +70,8 @@ import { AuditTarget } from '../../audit/enums/audit-target.enum'
 import { SshAccessDto, SshAccessValidationDto } from '../dto/ssh-access.dto'
 import { ListSandboxesQueryDto } from '../dto/list-sandboxes-query.dto'
 import { RegionDto } from '../dto/region.dto'
+import { SandboxNotificationDto } from '../dto/sandbox-notification.dto'
+import { DaemonAuthGuard } from '../../auth/daemon-auth.guard'
 
 @ApiTags('sandbox')
 @Controller('sandbox')
@@ -986,6 +988,29 @@ export class SandboxController {
   }
 
   // wait up to `timeoutSeconds` for the sandbox to start; if it doesn’t, return current sandbox
+  @Post(':sandboxId/notification')
+  @HttpCode(200)
+  @ApiOperation({
+    summary: 'Create a sandbox notification',
+    operationId: 'createSandboxNotification',
+  })
+  @ApiParam({
+    name: 'sandboxId',
+    description: 'ID of the sandbox',
+    type: 'string',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Notification has been processed',
+  })
+  @UseGuards(DaemonAuthGuard, SandboxAccessGuard)
+  async createSandboxNotification(
+    @Param('sandboxId') sandboxId: string,
+    @Body() notification: SandboxNotificationDto,
+  ): Promise<void> {
+    this.logger.log(`Sandbox ${sandboxId}: ${notification.message}`)
+  }
+
   private async waitForSandboxStarted(sandbox: SandboxDto, timeoutSeconds: number): Promise<SandboxDto> {
     let latestSandbox: Sandbox
     const waitForStarted = new Promise<SandboxDto>((resolve, reject) => {

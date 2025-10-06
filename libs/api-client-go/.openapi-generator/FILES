@@ -128,6 +128,7 @@ model_sandbox_class.go
 model_sandbox_desired_state.go
 model_sandbox_info.go
 model_sandbox_labels.go
+model_sandbox_notification_dto.go
 model_sandbox_state.go
 model_sandbox_volume.go
 model_screenshot_response.go

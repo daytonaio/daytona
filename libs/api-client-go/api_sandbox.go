@@ -62,6 +62,18 @@ type SandboxAPI interface {
 	CreateSandboxExecute(r SandboxAPICreateSandboxRequest) (*Sandbox, *http.Response, error)
 
 	/*
+		CreateSandboxNotification Create a sandbox notification
+
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId ID of the sandbox
+		@return SandboxAPICreateSandboxNotificationRequest
+	*/
+	CreateSandboxNotification(ctx context.Context, sandboxId string) SandboxAPICreateSandboxNotificationRequest
+
+	// CreateSandboxNotificationExecute executes the request
+	CreateSandboxNotificationExecute(r SandboxAPICreateSandboxNotificationRequest) (*http.Response, error)
+
+	/*
 		CreateSshAccess Create SSH access for sandbox
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
@@ -632,6 +644,117 @@ func (a *SandboxAPIService) CreateSandboxExecute(r SandboxAPICreateSandboxReques
 	}
 
 	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type SandboxAPICreateSandboxNotificationRequest struct {
+	ctx                    context.Context
+	ApiService             SandboxAPI
+	sandboxId              string
+	sandboxNotificationDto *SandboxNotificationDto
+	xDaytonaOrganizationID *string
+}
+
+func (r SandboxAPICreateSandboxNotificationRequest) SandboxNotificationDto(sandboxNotificationDto SandboxNotificationDto) SandboxAPICreateSandboxNotificationRequest {
+	r.sandboxNotificationDto = &sandboxNotificationDto
+	return r
+}
+
+// Use with JWT to specify the organization ID
+func (r SandboxAPICreateSandboxNotificationRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) SandboxAPICreateSandboxNotificationRequest {
+	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
+	return r
+}
+
+func (r SandboxAPICreateSandboxNotificationRequest) Execute() (*http.Response, error) {
+	return r.ApiService.CreateSandboxNotificationExecute(r)
+}
+
+/*
+CreateSandboxNotification Create a sandbox notification
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId ID of the sandbox
+	@return SandboxAPICreateSandboxNotificationRequest
+*/
+func (a *SandboxAPIService) CreateSandboxNotification(ctx context.Context, sandboxId string) SandboxAPICreateSandboxNotificationRequest {
+	return SandboxAPICreateSandboxNotificationRequest{
+		ApiService: a,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
+	}
+}
+
+// Execute executes the request
+func (a *SandboxAPIService) CreateSandboxNotificationExecute(r SandboxAPICreateSandboxNotificationRequest) (*http.Response, error) {
+	var (
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SandboxAPIService.CreateSandboxNotification")
+	if err != nil {
+		return nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/sandbox/{sandboxId}/notification"
+	localVarPath = strings.Replace(localVarPath, "{"+"sandboxId"+"}", url.PathEscape(parameterValueToString(r.sandboxId, "sandboxId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.sandboxNotificationDto == nil {
+		return nil, reportError("sandboxNotificationDto is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.xDaytonaOrganizationID != nil {
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Daytona-Organization-ID", r.xDaytonaOrganizationID, "simple", "")
+	}
+	// body params
+	localVarPostBody = r.sandboxNotificationDto
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarHTTPResponse, newErr
+	}
+
+	return localVarHTTPResponse, nil
 }
 
 type SandboxAPICreateSshAccessRequest struct {

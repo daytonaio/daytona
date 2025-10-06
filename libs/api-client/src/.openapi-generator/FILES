@@ -130,6 +130,7 @@ models/sandbox-class.ts
 models/sandbox-desired-state.ts
 models/sandbox-info.ts
 models/sandbox-labels.ts
+models/sandbox-notification-dto.ts
 models/sandbox-state.ts
 models/sandbox-volume.ts
 models/sandbox.ts

@@ -814,6 +814,12 @@ export class SandboxService {
     return sandboxes
   }
 
+  async findByAuthToken(authToken: string): Promise<Sandbox | null> {
+    return this.sandboxRepository.findOne({
+      where: { authToken },
+    })
+  }
+
   async findOne(sandboxId: string, returnDestroyed?: boolean): Promise<Sandbox> {
     const sandbox = await this.sandboxRepository.findOne({
       where: {
@@ -955,6 +961,15 @@ export class SandboxService {
       sandbox.pending = true
       sandbox.desiredState = SandboxDesiredState.STARTED
       await this.sandboxRepository.save(sandbox)
+
+      // Pass the auth token to the runner
+      if (sandbox.runnerId) {
+        const runner = await this.runnerService.findOne(sandbox.runnerId)
+        if (runner) {
+          const runnerAdapter = await this.runnerAdapterFactory.create(runner)
+          await runnerAdapter.startSandbox(sandbox.id, {}, sandbox.authToken)
+        }
+      }
 
       this.eventEmitter.emit(SandboxEvents.STARTED, new SandboxStartedEvent(sandbox))
     } catch (error) {

@@ -7,6 +7,7 @@ import { Module } from '@nestjs/common'
 import { PassportModule } from '@nestjs/passport'
 import { JwtStrategy } from './jwt.strategy'
 import { ApiKeyStrategy } from './api-key.strategy'
+import { DaemonStrategy } from './daemon.strategy'
 import { UserModule } from '../user/user.module'
 import { ApiKeyModule } from '../api-key/api-key.module'
 import { SandboxModule } from '../sandbox/sandbox.module'
@@ -32,6 +33,7 @@ import { catchError, map } from 'rxjs/operators'
   ],
   providers: [
     ApiKeyStrategy,
+    DaemonStrategy,
     {
       provide: JwtStrategy,
       useFactory: async (userService: UserService, httpService: HttpService, configService: TypedConfigService) => {
@@ -70,6 +72,6 @@ import { catchError, map } from 'rxjs/operators'
       inject: [UserService, HttpService, TypedConfigService],
     },
   ],
-  exports: [PassportModule, JwtStrategy, ApiKeyStrategy],
+  exports: [PassportModule, JwtStrategy, ApiKeyStrategy, DaemonStrategy],
 })
 export class AuthModule {}

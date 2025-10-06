@@ -47,7 +47,7 @@ export interface RunnerAdapter {
     entrypoint?: string[],
     metadata?: { [key: string]: string },
   ): Promise<void>
-  startSandbox(sandboxId: string, metadata?: { [key: string]: string }): Promise<void>
+  startSandbox(sandboxId: string, metadata?: { [key: string]: string }, token?: string): Promise<void>
   stopSandbox(sandboxId: string): Promise<void>
   destroySandbox(sandboxId: string): Promise<void>
   removeDestroyedSandbox(sandboxId: string): Promise<void>

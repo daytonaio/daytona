@@ -19,7 +19,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func (d *DockerClient) Start(ctx context.Context, containerId string, metadata map[string]string) error {
+func (d *DockerClient) Start(ctx context.Context, containerId string, metadata map[string]string, token string) error {
 	defer timer.Timer()()
 	d.cache.SetSandboxState(ctx, containerId, enums.SandboxStateStarting)
 
@@ -40,7 +40,7 @@ func (d *DockerClient) Start(ctx context.Context, containerId string, metadata m
 			return err
 		}
 
-		err = d.waitForDaemonRunning(ctx, containerIP, 10*time.Second)
+		err = d.waitForDaemonRunning(ctx, containerIP, 10*time.Second, token)
 		if err != nil {
 			return err
 		}
@@ -77,12 +77,19 @@ func (d *DockerClient) Start(ctx context.Context, containerId string, metadata m
 		}
 	}()
 
-	err = d.waitForDaemonRunning(ctx, containerIP, 10*time.Second)
+	err = d.waitForDaemonRunning(ctx, containerIP, 10*time.Second, token)
 	if err != nil {
 		return err
 	}
 
 	d.cache.SetSandboxState(ctx, containerId, enums.SandboxStateStarted)
+
+	if token != "" {
+		if metadata == nil {
+			metadata = make(map[string]string)
+		}
+		metadata["token"] = token
+	}
 
 	if metadata["limitNetworkEgress"] == "true" {
 		go func() {
@@ -123,7 +130,7 @@ func (d *DockerClient) waitForContainerRunning(ctx context.Context, containerId 
 	}
 }
 
-func (d *DockerClient) waitForDaemonRunning(ctx context.Context, containerIP string, timeout time.Duration) error {
+func (d *DockerClient) waitForDaemonRunning(ctx context.Context, containerIP string, timeout time.Duration, token string) error {
 	defer timer.Timer()()
 
 	// Build the target URL
@@ -147,6 +154,11 @@ func (d *DockerClient) waitForDaemonRunning(ctx context.Context, containerIP str
 				continue
 			}
 			conn.Close()
+
+			if err := d.configureDaemonApiAccess(containerIP, token); err != nil {
+				return fmt.Errorf("failed to configure daemon API access: %w", err)
+			}
+
 			return nil
 		}
 	}

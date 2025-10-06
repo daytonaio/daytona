@@ -330,7 +330,12 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    start: async (sandboxId: string, metadata?: object, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+    start: async (
+      sandboxId: string,
+      metadata?: object,
+      token?: string,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
       // verify required parameter 'sandboxId' is not null or undefined
       assertParamExists('start', 'sandboxId', sandboxId)
       const localVarPath = `/sandboxes/{sandboxId}/start`.replace(
@@ -347,6 +352,9 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
       const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options }
       const localVarHeaderParameter = {} as any
       const localVarQueryParameter = {} as any
+      if (token !== undefined) {
+        localVarQueryParameter['token'] = token
+      }
 
       // authentication Bearer required
       await setApiKeyToObject(localVarHeaderParameter, 'Authorization', configuration)
@@ -632,9 +640,10 @@ export const SandboxApiFp = function (configuration?: Configuration) {
     async start(
       sandboxId: string,
       metadata?: object,
+      token?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<string>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.start(sandboxId, metadata, options)
+      const localVarAxiosArgs = await localVarAxiosParamCreator.start(sandboxId, metadata, token, options)
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
         operationServerMap['SandboxApi.start']?.[localVarOperationServerIndex]?.url
@@ -783,8 +792,8 @@ export const SandboxApiFactory = function (configuration?: Configuration, basePa
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    start(sandboxId: string, metadata?: object, options?: RawAxiosRequestConfig): AxiosPromise<string> {
-      return localVarFp.start(sandboxId, metadata, options).then((request) => request(axios, basePath))
+    start(sandboxId: string, metadata?: object, token?: string, options?: RawAxiosRequestConfig): AxiosPromise<string> {
+      return localVarFp.start(sandboxId, metadata, token, options).then((request) => request(axios, basePath))
     },
     /**
      * Stop sandbox
@@ -930,9 +939,9 @@ export class SandboxApi extends BaseAPI {
    * @throws {RequiredError}
    * @memberof SandboxApi
    */
-  public start(sandboxId: string, metadata?: object, options?: RawAxiosRequestConfig) {
+  public start(sandboxId: string, metadata?: object, token?: string, options?: RawAxiosRequestConfig) {
     return SandboxApiFp(this.configuration)
-      .start(sandboxId, metadata, options)
+      .start(sandboxId, metadata, token, options)
       .then((request) => request(this.axios, this.basePath))
   }
 

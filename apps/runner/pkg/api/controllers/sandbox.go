@@ -274,6 +274,7 @@ func GetNetworkSettings(ctx *gin.Context) {
 //	@Produce		json
 //	@Param			sandboxId	path		string	true	"Sandbox ID"
 //	@Param			metadata	body		object	false	"Metadata"
+//	@Param			token		query		string	false	"Auth token"
 //	@Success		200			{string}	string	"Sandbox started"
 //	@Failure		400			{object}	common.ErrorResponse
 //	@Failure		401			{object}	common.ErrorResponse
@@ -295,7 +296,8 @@ func Start(ctx *gin.Context) {
 		return
 	}
 
-	err = runner.Docker.Start(ctx.Request.Context(), sandboxId, metadata)
+	token := ctx.Query("token")
+	err = runner.Docker.Start(ctx.Request.Context(), sandboxId, metadata, token)
 
 	if err != nil {
 		runner.Cache.SetSandboxState(ctx, sandboxId, enums.SandboxStateError)

@@ -585,6 +585,12 @@ const docTemplate = `{
                         "schema": {
                             "type": "object"
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "Auth token",
+                        "name": "token",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -1272,6 +1278,9 @@ const docTemplate = `{
                 "storageQuota": {
                     "type": "integer",
                     "minimum": 1
+                },
+                "token": {
+                    "type": "string"
                 },
                 "userId": {
                     "type": "string"

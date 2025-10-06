@@ -130,6 +130,7 @@ daytona_api_client_async/models/sandbox_class.py
 daytona_api_client_async/models/sandbox_desired_state.py
 daytona_api_client_async/models/sandbox_info.py
 daytona_api_client_async/models/sandbox_labels.py
+daytona_api_client_async/models/sandbox_notification_dto.py
 daytona_api_client_async/models/sandbox_state.py
 daytona_api_client_async/models/sandbox_volume.py
 daytona_api_client_async/models/screenshot_response.py

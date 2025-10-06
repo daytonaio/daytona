@@ -121,4 +121,10 @@ export interface CreateSandboxDTO {
    * @memberof CreateSandboxDTO
    */
   volumes?: Array<DtoVolumeDTO>
+  /**
+   *
+   * @type {string}
+   * @memberof CreateSandboxDTO
+   */
+  token?: string
 }

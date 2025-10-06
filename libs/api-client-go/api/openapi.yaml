@@ -2229,6 +2229,44 @@ paths:
       summary: Validate SSH access for sandbox
       tags:
         - sandbox
+  /sandbox/{sandboxId}/notification:
+    post:
+      operationId: createSandboxNotification
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - description: ID of the sandbox
+          explode: false
+          in: path
+          name: sandboxId
+          required: true
+          schema:
+            type: string
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SandboxNotificationDto'
+        required: true
+      responses:
+        '200':
+          description: Notification has been processed
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Create a sandbox notification
+      tags:
+        - sandbox
   /runners:
     get:
       operationId: listRunners
@@ -8803,6 +8841,17 @@ components:
       required:
         - sandboxId
         - valid
+      type: object
+    SandboxNotificationDto:
+      example:
+        message: Your sandbox is running low on memory
+      properties:
+        message:
+          description: The notification message
+          example: Your sandbox is running low on memory
+          type: string
+      required:
+        - message
       type: object
     CreateRunner:
       example:

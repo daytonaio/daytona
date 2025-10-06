@@ -19,6 +19,7 @@ type CreateSandboxDTO struct {
 	Volumes          []VolumeDTO       `json:"volumes,omitempty"`
 	NetworkBlockAll  *bool             `json:"networkBlockAll,omitempty"`
 	NetworkAllowList *string           `json:"networkAllowList,omitempty"`
+	Token            string            `json:"token,omitempty"`
 	Metadata         map[string]string `json:"metadata,omitempty"`
 } //	@name	CreateSandboxDTO
 

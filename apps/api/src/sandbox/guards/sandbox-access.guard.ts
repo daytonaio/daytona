@@ -7,6 +7,7 @@ import { Injectable, CanActivate, ExecutionContext, NotFoundException, Forbidden
 import { SandboxService } from '../services/sandbox.service'
 import { OrganizationAuthContext, BaseAuthContext } from '../../common/interfaces/auth-context.interface'
 import { isRunnerContext, RunnerContext } from '../../common/interfaces/runner-context.interface'
+import { isDaemonContext, DaemonContext } from '../../common/interfaces/daemon-context.interface'
 import { SystemRole } from '../../user/enums/system-role.enum'
 
 @Injectable()
@@ -29,6 +30,12 @@ export class SandboxAccessGuard implements CanActivate {
         const sandboxRunnerId = await this.sandboxService.getRunnerId(sandboxId)
         if (sandboxRunnerId !== runnerContext.runnerId) {
           throw new ForbiddenException('Runner ID does not match sandbox runner ID')
+        }
+      } else if (isDaemonContext(authContext)) {
+        // For daemon authentication, verify that the sandbox ID matches
+        const daemonContext = authContext as DaemonContext
+        if (sandboxId !== daemonContext.sandboxId) {
+          throw new ForbiddenException('Daemon sandbox ID does not match requested sandbox ID')
         }
       } else {
         // For user/organization authentication, check organization access
