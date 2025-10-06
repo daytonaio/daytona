@@ -367,6 +367,19 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
       return
     }
 
+    // If the sync process lasts for more than 5 minutes, set the sandbox to error state
+    // Archived timeouts should be handled by the archive action itself
+    if (
+      sandbox.desiredState !== SandboxDesiredState.ARCHIVED &&
+      new Date().getTime() - sandbox.updatedAt.getTime() > 300000
+    ) {
+      sandbox.state = SandboxState.ERROR
+      sandbox.errorReason = 'Failed to resolve desired state in over 5 minutes'
+      await this.sandboxRepository.save(sandbox)
+      await this.redisLockProvider.unlock(lockKey)
+      return
+    }
+
     let syncState = DONT_SYNC_AGAIN
 
     try {
