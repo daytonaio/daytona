@@ -30,11 +30,11 @@ const SandboxCodeSnippetsResponse: React.FC = () => {
 
   const objectHasAnyValue = (obj: object) => Object.values(obj).some((v) => v !== '' && v !== undefined)
 
-  sandboxParametersState['shellCommandToRun'] = 'ls -la'
   const useConfigObject = false // Currently not needed, we use jwtToken for client config
 
   const useLanguageParam = sandboxParametersState['language']
-  const shellCommandExists = sandboxParametersState['shellCommandToRun']
+  const shellCommandExists = sandboxParametersState['shellCommandRunParams'].shellCommand
+  const codeToRunExists = sandboxParametersState['codeRunParams'].languageCode
 
   const useResources = objectHasAnyValue(sandboxParametersState['resources'])
   const useResourcesCPU = useResources && sandboxParametersState['resources']['cpu'] !== undefined
@@ -209,36 +209,16 @@ const SandboxCodeSnippetsResponse: React.FC = () => {
     return { python, typeScript }
   }, [useSandboxCreateParams, getSandboxParamsSnippet])
 
-  const getLanguageCodeToRun = useCallback(() => {
-    switch (sandboxParametersState['language']) {
-      case CodeLanguage.PYTHON:
-        return `def greet(name):
-\treturn f"Hello, {name}!"
-print(greet("Daytona"))`
-      case CodeLanguage.TYPESCRIPT:
-        return `function greet(name: string): string {
-\treturn \`Hello, \${name}!\`;
-}
-console.log(greet("Daytona"));`
-      case CodeLanguage.JAVASCRIPT:
-        return `function greet(name) {
-\treturn \`Hello, \${name}!\`;
-}
-console.log(greet("Daytona"));`
-    }
-  }, [sandboxParametersState])
-
   const getLanguageCodeToRunSnippet = useCallback(() => {
     let python = '',
       typeScript = ''
-    if (useLanguageParam) {
+    if (codeToRunExists) {
       const pythonIndentation = '\t'
       const typeScriptIndentation = '\t\t'
-      const languageCodeToRun = getLanguageCodeToRun()
       python = [
         '\n\n# Run code securely inside the Sandbox',
         'response = sandbox.process.code_run(',
-        `'''${languageCodeToRun}'''`,
+        `'''${sandboxParametersState['codeRunParams'].languageCode}'''`,
         ')',
         'if response.exit_code != 0:',
         `${pythonIndentation}print(f"Error: {response.exit_code} {response.result}")`,
@@ -248,7 +228,7 @@ console.log(greet("Daytona"));`
       typeScript = [
         `\n\n${typeScriptIndentation}// Run code securely inside the Sandbox`,
         `${typeScriptIndentation}const response = await sandbox.process.codeRun(\``,
-        `${languageCodeToRun}`,
+        `${sandboxParametersState['codeRunParams'].languageCode}`,
         `${typeScriptIndentation}\`)`,
         `${typeScriptIndentation}if (response.exitCode !== 0) {`,
         `${typeScriptIndentation + '\t'}console.error("Error running code:", response.exitCode, response.result)`,
@@ -258,7 +238,7 @@ console.log(greet("Daytona"));`
       ].join('\n')
     }
     return { python, typeScript }
-  }, [useLanguageParam, getLanguageCodeToRun])
+  }, [codeToRunExists, sandboxParametersState])
 
   const getShellCodeToRunSnippet = useCallback(() => {
     let python = '',
@@ -266,13 +246,13 @@ console.log(greet("Daytona"));`
     if (shellCommandExists) {
       python = [
         '\n\n# Execute shell commands',
-        `response = sandbox.process.exec("${sandboxParametersState['shellCommandToRun']}")`,
+        `response = sandbox.process.exec("${sandboxParametersState['shellCommandRunParams'].shellCommand}")`,
         'print(response.result)',
       ].join('\n')
       const typeScriptIndentation = '\t\t'
       typeScript = [
         `\n\n${typeScriptIndentation}// Execute shell commands`,
-        `${typeScriptIndentation}const response = await sandbox.process.executeCommand('${sandboxParametersState['shellCommandToRun']}')`,
+        `${typeScriptIndentation}const response = await sandbox.process.executeCommand('${sandboxParametersState['shellCommandRunParams'].shellCommand}')`,
         `${typeScriptIndentation}console.log(response.result)`,
       ].join('\n')
     }
@@ -359,22 +339,24 @@ main().catch(console.error)`,
       sandbox = await DaytonaClient.create(createSandboxParams)
       codeSnippetOutput = `Sandbox successfully created: ${sandbox.id}\n`
       setCodeSnippetOutput(codeSnippetOutput)
-      if (useLanguageParam) {
+      if (codeToRunExists) {
         setCodeSnippetOutput(codeSnippetOutput + '\nRunning code...')
-        const codeRunResponse = await sandbox.process.codeRun(getLanguageCodeToRun())
+        const codeRunResponse = await sandbox.process.codeRun(sandboxParametersState['codeRunParams'].languageCode)
         codeSnippetOutput += `\nCode run result: ${codeRunResponse.result}`
         setCodeSnippetOutput(codeSnippetOutput)
       }
       if (shellCommandExists) {
         setCodeSnippetOutput(codeSnippetOutput + '\nRunning shell command...')
-        const shellCommandResponse = await sandbox.process.executeCommand(sandboxParametersState['shellCommandToRun'])
+        const shellCommandResponse = await sandbox.process.executeCommand(
+          sandboxParametersState['shellCommandRunParams'].shellCommand,
+        )
         codeSnippetOutput += `\nShell command result: ${shellCommandResponse.result}`
         setCodeSnippetOutput(codeSnippetOutput)
       }
       let sessionFinishedMessage = '\n'
-      if (useLanguageParam && shellCommandExists) {
+      if (codeToRunExists && shellCommandExists) {
         sessionFinishedMessage += '🎉 Code and shell command executed successfully. '
-      } else if (useLanguageParam) {
+      } else if (codeToRunExists) {
         sessionFinishedMessage += '🎉 Code executed successfully. '
       } else if (shellCommandExists) {
         sessionFinishedMessage += '🎉 Shell command executed successfully. '

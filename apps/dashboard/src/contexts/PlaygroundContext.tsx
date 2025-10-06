@@ -17,6 +17,8 @@ import {
   ParameterFormData,
   PlaygroundActionFormDataBasic,
   PlaygroundActionWithParamsFormData,
+  CodeRunParams,
+  ShellCommandRunParams,
 } from '@/enums/Playground'
 import { UseTemporarySandboxResult } from '@/hooks/useTemporarySandbox'
 import { createContext, ReactNode } from 'react'
@@ -25,8 +27,9 @@ export interface SandboxParams {
   language?: CodeLanguage
   resources: Resources
   createSandboxBaseParams: CreateSandboxBaseParams
-  languageCodeToRun?: string
-  shellCodeToRun?: string
+  // Process and Code Execution params
+  codeRunParams: CodeRunParams
+  shellCommandRunParams: ShellCommandRunParams
 }
 
 export type SetSandboxParamsValue = <K extends keyof SandboxParams>(key: K, value: SandboxParams[K]) => void

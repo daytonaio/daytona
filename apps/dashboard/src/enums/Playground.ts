@@ -220,10 +220,14 @@ export enum GitOperationsActions {
 export enum ProcessCodeExecutionActions {
   CODE_RUN = 'codeRun',
   SHELL_COMMANDS_RUN = 'executeCommand',
-  CREATE_SESSION = 'createSession',
-  GET_SESSION = 'getSession',
-  LIST_SESSIONS = 'listSessions',
-  DELETE_SESSION = 'deleteSession',
+}
+
+export type CodeRunParams = {
+  languageCode?: string
+}
+
+export type ShellCommandRunParams = {
+  shellCommand?: string
 }
 
 // Actions enums values represent method names for TypeScript SDK

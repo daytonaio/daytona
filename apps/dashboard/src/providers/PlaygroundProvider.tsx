@@ -19,6 +19,7 @@ import { ScreenshotFormatOption, MouseButton, MouseScrollDirection } from '@/enu
 import { Daytona } from '@daytonaio/sdk'
 import { useAuth } from 'react-oidc-context'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
+import { getLanguageCodeToRun } from '@/lib/playground'
 import { useState, useMemo, useCallback } from 'react'
 
 export const PlaygroundProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -33,6 +34,12 @@ export const PlaygroundProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       autoStopInterval: 15,
       autoArchiveInterval: 7,
       autoDeleteInterval: -1,
+    },
+    codeRunParams: {
+      languageCode: getLanguageCodeToRun(),
+    },
+    shellCommandRunParams: {
+      shellCommand: 'ls -la', // Current default and fixed value
     },
   })
   const [VNCInteractionOptionsParamsState, setVNCInteractionOptionsParamsState] = useState<VNCInteractionOptionsParams>(

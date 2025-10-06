@@ -3,10 +3,40 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { ProcessCodeExecutionActions, PlaygroundActionFormDataBasic } from '@/enums/Playground'
+import {
+  ProcessCodeExecutionActions,
+  PlaygroundActionFormDataBasic,
+  CodeRunParams,
+  ShellCommandRunParams,
+  ParameterFormItem,
+} from '@/enums/Playground'
+import { usePlayground } from '@/hooks/usePlayground'
+import { CodeLanguage } from '@daytonaio/sdk'
 import PlaygroundActionForm from '../../ActionForm'
+import StackedInputFormControl from '../../Inputs/StackedInputFormControl'
+import CodeBlock from '@/components/CodeBlock'
+import { getLanguageCodeToRun } from '@/lib/playground'
+import { useEffect, useState } from 'react'
 
 const SandboxProcessCodeExecution: React.FC = () => {
+  const { sandboxParametersState, setSandboxParameterValue } = usePlayground()
+  const [codeRunParams, setCodeRunParams] = useState<CodeRunParams>(sandboxParametersState['codeRunParams'])
+  const [shellCommandRunParams, setShellCommandRunParams] = useState<ShellCommandRunParams>(
+    sandboxParametersState['shellCommandRunParams'],
+  )
+
+  const codeRunLanguageCodeFormData: ParameterFormItem & { key: 'languageCode' } = {
+    label: 'Code to execute',
+    key: 'languageCode',
+    placeholder: 'Write the code you want to execute inside the sandbox',
+  }
+
+  const shellCommandFormData: ParameterFormItem & { key: 'shellCommand' } = {
+    label: 'Shell command',
+    key: 'shellCommand',
+    placeholder: 'Enter a shell command to run inside the sandbox',
+  }
+
   const processCodeExecutionActionsFormData: PlaygroundActionFormDataBasic<ProcessCodeExecutionActions>[] = [
     {
       methodName: ProcessCodeExecutionActions.CODE_RUN,
@@ -18,36 +48,40 @@ const SandboxProcessCodeExecution: React.FC = () => {
       label: 'executeCommand()',
       description: 'Executes a shell command in the Sandbox',
     },
-    {
-      methodName: ProcessCodeExecutionActions.CREATE_SESSION,
-      label: 'createSession()',
-      description: 'Creates a new long-running background session in the Sandbox',
-    },
-    {
-      methodName: ProcessCodeExecutionActions.GET_SESSION,
-      label: 'getSession()',
-      description: 'Gets a session in the Sandbox',
-    },
-    {
-      methodName: ProcessCodeExecutionActions.LIST_SESSIONS,
-      label: 'listSessions()',
-      description: 'Lists all sessions in the Sandbox',
-    },
-    {
-      methodName: ProcessCodeExecutionActions.DELETE_SESSION,
-      label: 'deleteSession()',
-      description: 'Terminates and removes a session from the Sandbox, cleaning up any resources associated with it',
-    },
   ]
+
+  // Change code to run based on selected sandbox language
+  useEffect(() => {
+    setCodeRunParams((prev) => {
+      const codeRunParamsNew = { ...prev, languageCode: getLanguageCodeToRun(sandboxParametersState.language) }
+      setSandboxParameterValue('codeRunParams', codeRunParamsNew)
+      return codeRunParamsNew
+    })
+  }, [sandboxParametersState.language, setSandboxParameterValue])
 
   return (
     <div className="space-y-6">
-      {processCodeExecutionActionsFormData.map((processCodeExecutionActionFormData) => (
-        <div key={processCodeExecutionActionFormData.methodName} className="space-y-4">
+      {processCodeExecutionActionsFormData.map((processCodeExecutionAction) => (
+        <div key={processCodeExecutionAction.methodName} className="space-y-4">
           <PlaygroundActionForm<ProcessCodeExecutionActions>
-            actionFormItem={processCodeExecutionActionFormData}
+            actionFormItem={processCodeExecutionAction}
             hideRunActionButton
           />
+          <div className="px-4 space-y-2">
+            {processCodeExecutionAction.methodName === ProcessCodeExecutionActions.CODE_RUN && (
+              <StackedInputFormControl formItem={codeRunLanguageCodeFormData}>
+                <CodeBlock
+                  language={sandboxParametersState.language || CodeLanguage.PYTHON} // Python is default language if none specified
+                  code={codeRunParams[codeRunLanguageCodeFormData.key] || ''}
+                />
+              </StackedInputFormControl>
+            )}
+            {processCodeExecutionAction.methodName === ProcessCodeExecutionActions.SHELL_COMMANDS_RUN && (
+              <StackedInputFormControl formItem={shellCommandFormData}>
+                <CodeBlock language="bash" code={shellCommandRunParams[shellCommandFormData.key] || ''} />
+              </StackedInputFormControl>
+            )}
+          </div>
         </div>
       ))}
     </div>
