@@ -6,6 +6,7 @@
 import {
   GitOperationsActions,
   ParameterFormData,
+  ParameterFormItem,
   GitCloneParams,
   GitStatusParams,
   GitBranchesParams,
@@ -39,13 +40,12 @@ const SandboxGitOperations: React.FC = () => {
     { label: 'Password', key: 'authPassword', placeholder: 'Git password or token for authentication' },
   ]
 
-  const gitStatusParamsFormData: ParameterFormData<GitStatusParams> = [
-    { label: 'Repo location', key: 'repositoryPath', placeholder: 'Path to the Git repository root', required: true },
-  ]
-
-  const gitBranchesParamsFormData: ParameterFormData<GitBranchesParams> = [
-    { label: 'Repo location', key: 'repositoryPath', placeholder: 'Path to the Git repository root', required: true },
-  ]
+  const gitRepoLocationFormData: ParameterFormItem & { key: 'repositoryPath' } = {
+    label: 'Repo location',
+    key: 'repositoryPath',
+    placeholder: 'Path to the Git repository root',
+    required: true,
+  }
 
   const gitOperationsActionsFormData: GitOperationsActionFormData<
     GitCloneParams | GitStatusParams | GitBranchesParams
@@ -61,14 +61,14 @@ const SandboxGitOperations: React.FC = () => {
       methodName: GitOperationsActions.GIT_STATUS,
       label: 'status()',
       description: 'Gets the current Git repository status',
-      parametersFormItems: gitStatusParamsFormData,
+      parametersFormItems: [gitRepoLocationFormData],
       parametersState: gitStatusParams,
     },
     {
       methodName: GitOperationsActions.GIT_BRANCHES_LIST,
       label: 'branches()',
       description: 'Lists branches in the repository',
-      parametersFormItems: gitBranchesParamsFormData,
+      parametersFormItems: [gitRepoLocationFormData],
       parametersState: gitBranchesParams,
     },
   ]
@@ -101,14 +101,14 @@ const SandboxGitOperations: React.FC = () => {
               </>
             )}
             {gitOperationsAction.methodName === GitOperationsActions.GIT_STATUS && (
-              <InlineInputFormControl formItem={gitStatusParamsFormData[0]}>
+              <InlineInputFormControl formItem={gitRepoLocationFormData}>
                 <FormTextInput
-                  formItem={gitStatusParamsFormData[0]}
-                  textValue={gitStatusParams[gitStatusParamsFormData[0].key]}
+                  formItem={gitRepoLocationFormData}
+                  textValue={gitStatusParams[gitRepoLocationFormData.key]}
                   onChangeHandler={(value) =>
                     sandboxCodeSnippetActionParamValueSetter(
                       gitOperationsAction,
-                      gitStatusParamsFormData[0],
+                      gitRepoLocationFormData,
                       setGitStatusParams,
                       'gitStatusParams',
                       value,
@@ -118,14 +118,14 @@ const SandboxGitOperations: React.FC = () => {
               </InlineInputFormControl>
             )}
             {gitOperationsAction.methodName === GitOperationsActions.GIT_BRANCHES_LIST && (
-              <InlineInputFormControl formItem={gitBranchesParamsFormData[0]}>
+              <InlineInputFormControl formItem={gitRepoLocationFormData}>
                 <FormTextInput
-                  formItem={gitBranchesParamsFormData[0]}
-                  textValue={gitBranchesParams[gitBranchesParamsFormData[0].key]}
+                  formItem={gitRepoLocationFormData}
+                  textValue={gitBranchesParams[gitRepoLocationFormData.key]}
                   onChangeHandler={(value) =>
                     sandboxCodeSnippetActionParamValueSetter(
                       gitOperationsAction,
-                      gitBranchesParamsFormData[0],
+                      gitRepoLocationFormData,
                       setGitBranchesParams,
                       'gitBranchesParams',
                       value,

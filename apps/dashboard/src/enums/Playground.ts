@@ -194,15 +194,28 @@ export enum ScreenshotActions {
 export type ScreenshotActionFormData<T extends ScreenshotRegion | CustomizedScreenshotOptions> =
   PlaygroundActionWithParamsFormData<ScreenshotActions, T>
 
+export type ListFilesParams = {
+  directoryPath: string
+}
+
+export type CreateFolderParams = {
+  folderDestinationPath: string
+  permissions: string
+}
+
+export type DeleteFileParams = {
+  filePath: string
+  recursive?: boolean
+}
+
 export enum FileSystemActions {
   LIST_FILES = 'listFiles',
   CREATE_FOLDER = 'createFolder',
-  UPLOAD_FILE = 'uploadFile',
-  UPLOAD_FILES = 'uploadFiles',
-  DOWNLOAD_FILE = 'downloadFile',
-  DOWNLOAD_FILES = 'downloadFiles',
   DELETE_FILE = 'deleteFile',
 }
+
+export type FileSystemActionFormData<T extends ListFilesParams | CreateFolderParams | DeleteFileParams> =
+  PlaygroundActionWithParamsFormData<FileSystemActions, T>
 
 export type GitCloneParams = {
   repositoryURL: string

@@ -24,6 +24,9 @@ import {
   ShellCommandRunParams,
   SandboxCodeSnippetsActions,
   ParameterFormItem,
+  ListFilesParams,
+  CreateFolderParams,
+  DeleteFileParams,
 } from '@/enums/Playground'
 import { UseTemporarySandboxResult } from '@/hooks/useTemporarySandbox'
 import { createContext, ReactNode } from 'react'
@@ -32,6 +35,10 @@ export interface SandboxParams {
   language?: CodeLanguage
   resources: Resources
   createSandboxBaseParams: CreateSandboxBaseParams
+  // File system operations params
+  listFilesParams: ListFilesParams
+  createFolderParams: CreateFolderParams
+  deleteFileParams: DeleteFileParams
   // Git operations params
   gitCloneParams: GitCloneParams
   gitStatusParams: GitStatusParams

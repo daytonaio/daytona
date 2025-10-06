@@ -37,6 +37,17 @@ export const PlaygroundProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       autoArchiveInterval: 7,
       autoDeleteInterval: -1,
     },
+    listFilesParams: {
+      directoryPath: 'workspace/new-dir',
+    },
+    createFolderParams: {
+      folderDestinationPath: 'workspace/new-dir',
+      permissions: '755',
+    },
+    deleteFileParams: {
+      filePath: 'workspace/new-dir',
+      recursive: true,
+    },
     gitCloneParams: {
       repositoryURL: 'https://github.com/octocat/Hello-World.git',
       cloneDestinationPath: 'workspace/repo',

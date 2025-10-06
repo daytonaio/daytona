@@ -12,13 +12,18 @@ import {
   CreateSandboxFromImageParams,
   Sandbox,
 } from '@daytonaio/sdk'
-import { codeSnippetSupportedLanguages, GitOperationsActions, ProcessCodeExecutionActions } from '@/enums/Playground'
+import {
+  codeSnippetSupportedLanguages,
+  FileSystemActions,
+  GitOperationsActions,
+  ProcessCodeExecutionActions,
+} from '@/enums/Playground'
 import CodeBlock from '@/components/CodeBlock'
 import { Button } from '@/components/ui/button'
 import { usePlayground } from '@/hooks/usePlayground'
 import { Loader2, Play } from 'lucide-react'
 import { createErrorMessageOutput } from '@/lib/playground'
-import { ReactNode, useCallback, useMemo, useState } from 'react'
+import { ReactNode, useCallback, useMemo, useState, useRef } from 'react'
 import ResponseCard from '../ResponseCard'
 
 const SandboxCodeSnippetsResponse: React.FC = () => {
@@ -30,9 +35,42 @@ const SandboxCodeSnippetsResponse: React.FC = () => {
 
   const objectHasAnyValue = (obj: object) => Object.values(obj).some((v) => v !== '' && v !== undefined)
 
+  // useRef prevents new object reference creation on every render which would triger useEffect calls on every render
+  const codeSnippetsSectionStartNewLinesData = useRef({
+    isFileSystemOperationsFirstSectionSnippet: false,
+    isGitOperationsFirstSectionSnippet: false,
+  })
+  // Reset values to false on every render beacuse of possible sections layout change
+  for (const property in codeSnippetsSectionStartNewLinesData.current)
+    codeSnippetsSectionStartNewLinesData.current[property] = false
+
+  // Helper method do determine number of new line characters on the beginning of each code snippets sections to ensure consistent spacing
+  const getCodeSnippetsSectionStartNewLines = useCallback(
+    (sectionPropertyName: keyof typeof codeSnippetsSectionStartNewLinesData.current) => {
+      // For first section we need double new line character, for others just one
+      let sectionStartNewLines = '\n'
+      if (!codeSnippetsSectionStartNewLinesData.current[sectionPropertyName]) {
+        // Signalize that first snippet section is encountered so that subsequent sections use single new line character
+        codeSnippetsSectionStartNewLinesData.current[sectionPropertyName] = true
+        sectionStartNewLines = '\n\n'
+      }
+      return sectionStartNewLines
+    },
+    [],
+  )
+
   const useConfigObject = false // Currently not needed, we use jwtToken for client config
 
   const useLanguageParam = sandboxParametersState['language']
+
+  const fileSystemListFilesLocationSet = !actionRuntimeError[FileSystemActions.LIST_FILES]
+
+  // All parameters are required
+  const fileSystemCreateFolderParamsSet = !actionRuntimeError[FileSystemActions.CREATE_FOLDER]
+
+  const fileSystemDeleteFileRequiredParamsSet = !actionRuntimeError[FileSystemActions.DELETE_FILE]
+  const useFileSystemDeleteFileRecursive =
+    fileSystemDeleteFileRequiredParamsSet && sandboxParametersState['deleteFileParams'].recursive === true
 
   const shellCommandExists = !actionRuntimeError[ProcessCodeExecutionActions.SHELL_COMMANDS_RUN]
 
@@ -221,6 +259,66 @@ const SandboxCodeSnippetsResponse: React.FC = () => {
     return { python, typeScript }
   }, [useSandboxCreateParams, getSandboxParamsSnippet])
 
+  const getFileSystemOperationsSnippet = useCallback(() => {
+    const python = [],
+      typeScript = []
+    const pythonIndentation = '\t'
+    const typeScriptIndentation = '\t\t\t'
+    if (fileSystemCreateFolderParamsSet) {
+      // First section always has double new line characters -> we don't need getCodeSnippetsSectionStartNewLines return value, just signalize that first section is found
+      getCodeSnippetsSectionStartNewLines('isFileSystemOperationsFirstSectionSnippet')
+      python.push(
+        '\n\n# Create folder with specific permissions',
+        `sandbox.fs.create_folder("${sandboxParametersState['createFolderParams'].folderDestinationPath}", "${sandboxParametersState['createFolderParams'].permissions}")`,
+      )
+      typeScript.push(
+        `\n\n${typeScriptIndentation.slice(0, -1)}// Create folder with specific permissions`,
+        `${typeScriptIndentation.slice(0, -1)}await sandbox.fs.createFolder("${sandboxParametersState['createFolderParams'].folderDestinationPath}", "${sandboxParametersState['createFolderParams'].permissions}")`,
+      )
+    }
+    if (fileSystemListFilesLocationSet) {
+      const sectionStartNewLines = getCodeSnippetsSectionStartNewLines('isFileSystemOperationsFirstSectionSnippet')
+      python.push(
+        `${sectionStartNewLines}# List files in a directory`,
+        `files = sandbox.fs.list_files("${sandboxParametersState['listFilesParams'].directoryPath}")`,
+        'for file in files:',
+        `${pythonIndentation}print(f"Name: {file.name}")`,
+        `${pythonIndentation}print(f"Is directory: {file.is_dir}")`,
+        `${pythonIndentation}print(f"Size: {file.size}")`,
+        `${pythonIndentation}print(f"Modified: {file.mod_time}")`,
+      )
+      typeScript.push(
+        `${sectionStartNewLines}${typeScriptIndentation.slice(0, -1)}// List files in a directory`,
+        `${typeScriptIndentation.slice(0, -1)}const files = await sandbox.fs.listFiles("${sandboxParametersState['listFilesParams'].directoryPath}")`,
+        `${typeScriptIndentation.slice(0, -1)}files.forEach(file => {`,
+        `${typeScriptIndentation}console.log(\`Name: \${file.name}\`)`,
+        `${typeScriptIndentation}console.log(\`Is directory: \${file.isDir}\`)`,
+        `${typeScriptIndentation}console.log(\`Size: \${file.size}\`)`,
+        `${typeScriptIndentation}console.log(\`Modified: \${file.modTime}\`)`,
+        `${typeScriptIndentation.slice(0, -1)}})`,
+      )
+    }
+    if (fileSystemDeleteFileRequiredParamsSet) {
+      const sectionStartNewLines = getCodeSnippetsSectionStartNewLines('isFileSystemOperationsFirstSectionSnippet')
+      python.push(
+        `${sectionStartNewLines}# Delete ${useFileSystemDeleteFileRecursive ? 'directory' : 'file'}`,
+        `sandbox.fs.delete_file("${sandboxParametersState['deleteFileParams'].filePath}"${useFileSystemDeleteFileRecursive ? ', true' : ''})`,
+      )
+      typeScript.push(
+        `${sectionStartNewLines}${typeScriptIndentation.slice(0, -1)}// Delete ${useFileSystemDeleteFileRecursive ? 'directory' : 'file'}`,
+        `${typeScriptIndentation.slice(0, -1)}await sandbox.fs.deleteFile("${sandboxParametersState['deleteFileParams'].filePath}"${useFileSystemDeleteFileRecursive ? ', true' : ''})`,
+      )
+    }
+    return { python: python.join('\n'), typeScript: typeScript.join('\n') }
+  }, [
+    sandboxParametersState,
+    getCodeSnippetsSectionStartNewLines,
+    fileSystemListFilesLocationSet,
+    fileSystemCreateFolderParamsSet,
+    fileSystemDeleteFileRequiredParamsSet,
+    useFileSystemDeleteFileRecursive,
+  ])
+
   const getLanguageCodeToRunSnippet = useCallback(() => {
     let python = '',
       typeScript = ''
@@ -277,6 +375,8 @@ const SandboxCodeSnippetsResponse: React.FC = () => {
     const pythonIndentation = '\t'
     const typeScriptIndentation = '\t\t\t'
     if (gitCloneOperationRequiredParamsSet) {
+      // First section always has double new line characters -> we don't need getCodeSnippetsSectionStartNewLines return value, just signalize that first section is found
+      getCodeSnippetsSectionStartNewLines('isGitOperationsFirstSectionSnippet')
       python.push(
         '\n\n# Clone git repository',
         'sandbox.git.clone(',
@@ -313,8 +413,9 @@ const SandboxCodeSnippetsResponse: React.FC = () => {
       )
     }
     if (gitStatusOperationLocationSet) {
+      const sectionStartNewLines = getCodeSnippetsSectionStartNewLines('isGitOperationsFirstSectionSnippet')
       python.push(
-        '\n# Get repository status',
+        `${sectionStartNewLines}# Get repository status`,
         `status = sandbox.git.status("${sandboxParametersState['gitStatusParams'].repositoryPath}")`,
         'print(f"Current branch: {status.current_branch}")',
         'print(f"Commits ahead: {status.ahead}")',
@@ -323,7 +424,7 @@ const SandboxCodeSnippetsResponse: React.FC = () => {
         '\tprint(f"File: {file.name}")',
       )
       typeScript.push(
-        `\n${typeScriptIndentation.slice(0, -1)}// Get repository status`,
+        `${sectionStartNewLines}${typeScriptIndentation.slice(0, -1)}// Get repository status`,
         `${typeScriptIndentation.slice(0, -1)}const status = await sandbox.git.status("${sandboxParametersState['gitStatusParams'].repositoryPath}")`,
         `${typeScriptIndentation.slice(0, -1)}console.log(\`Current branch: \${status.currentBranch}\`)`,
         `${typeScriptIndentation.slice(0, -1)}console.log(\`Commits ahead: \${status.ahead}\`)`,
@@ -334,14 +435,15 @@ const SandboxCodeSnippetsResponse: React.FC = () => {
       )
     }
     if (gitBranchesOperationLocationSet) {
+      const sectionStartNewLines = getCodeSnippetsSectionStartNewLines('isGitOperationsFirstSectionSnippet')
       python.push(
-        '\n# List branches',
+        `${sectionStartNewLines}# List branches`,
         `response = sandbox.git.branches("${sandboxParametersState['gitBranchesParams'].repositoryPath}")`,
         'for branch in response.branches:',
         '\tprint(f"Branch: {branch}")',
       )
       typeScript.push(
-        `\n${typeScriptIndentation.slice(0, -1)}// List branches`,
+        `${sectionStartNewLines}${typeScriptIndentation.slice(0, -1)}// List branches`,
         `${typeScriptIndentation.slice(0, -1)}const response = await sandbox.git.branches("${sandboxParametersState['gitBranchesParams'].repositoryPath}")`,
         `${typeScriptIndentation.slice(0, -1)}response.branches.forEach(branch => {`,
         `${typeScriptIndentation}console.log(\`Branch: \${branch}\`)`,
@@ -351,6 +453,7 @@ const SandboxCodeSnippetsResponse: React.FC = () => {
     return { python: python.filter(Boolean).join('\n'), typeScript: typeScript.filter(Boolean).join('\n') }
   }, [
     sandboxParametersState,
+    getCodeSnippetsSectionStartNewLines,
     gitCloneOperationRequiredParamsSet,
     useGitCloneBranch,
     useGitCloneCommitId,
@@ -370,18 +473,20 @@ const SandboxCodeSnippetsResponse: React.FC = () => {
     const { python: pythonLanguageCodeToRun, typeScript: typeScriptLanguageCodeToRun } = getLanguageCodeToRunSnippet()
     const { python: pythonShellCodeToRun, typeScript: typeScriptShellCodeToRun } = getShellCodeToRunSnippet()
     const { python: pythonGitOperations, typeScript: typeScriptGitOperations } = getGitOperationsSnippet()
+    const { python: pythonFileSystemOperations, typeScript: typeScriptFileSystemOperations } =
+      getFileSystemOperationsSnippet()
     return {
       [CodeLanguage.PYTHON]: {
         code: `${pythonImport}${pythonDaytonaConfig}
 ${pythonDaytonaClient}${pythonResources}${pythonSandboxParams}
-${pythonDaytonaCreate}${pythonLanguageCodeToRun}${pythonShellCodeToRun}${pythonGitOperations}`,
+${pythonDaytonaCreate}${pythonLanguageCodeToRun}${pythonShellCodeToRun}${pythonFileSystemOperations}${pythonGitOperations}`,
       },
       [CodeLanguage.TYPESCRIPT]: {
         code: `${typeScriptImport}${typeScriptDaytonaConfig}
 async function main() {
 ${typeScriptDaytonaClient}
 \ttry {
-${typeScriptDaytonaCreate}${typeScriptLanguageCodeToRun}${typeScriptShellCodeToRun}${typeScriptGitOperations}
+${typeScriptDaytonaCreate}${typeScriptLanguageCodeToRun}${typeScriptShellCodeToRun}${typeScriptFileSystemOperations}${typeScriptGitOperations}
 \t} catch (error) {
 \t\tconsole.error("Sandbox flow error:", error)
 \t}
@@ -400,6 +505,7 @@ main().catch(console.error)`,
     getLanguageCodeToRunSnippet,
     getShellCodeToRunSnippet,
     getGitOperationsSnippet,
+    getFileSystemOperationsSnippet,
   ])
 
   const runCodeSnippet = async () => {
@@ -466,6 +572,39 @@ main().catch(console.error)`,
       }
       codeSnippetOutput += codeRunShellCommandFinishedMessage + '\n'
       setCodeSnippetOutput(codeSnippetOutput)
+      if (fileSystemCreateFolderParamsSet) {
+        setCodeSnippetOutput(codeSnippetOutput + '\nCreating directory...')
+        await sandbox.fs.createFolder(
+          sandboxParametersState['createFolderParams'].folderDestinationPath,
+          sandboxParametersState['createFolderParams'].permissions,
+        )
+        codeSnippetOutput += '\n🎉 Directory created successfully.\n'
+        setCodeSnippetOutput(codeSnippetOutput)
+      }
+      if (fileSystemListFilesLocationSet) {
+        setCodeSnippetOutput(codeSnippetOutput + '\nListing directory files...')
+        const files = await sandbox.fs.listFiles(sandboxParametersState['listFilesParams'].directoryPath)
+        codeSnippetOutput += '\nDirectory content:'
+        codeSnippetOutput += '\n'
+        files.forEach((file) => {
+          codeSnippetOutput += `Name: ${file.name}\n`
+          codeSnippetOutput += `Is directory: ${file.isDir}\n`
+          codeSnippetOutput += `Size: ${file.size}\n`
+          codeSnippetOutput += `Modified: ${file.modTime}\n`
+        })
+        setCodeSnippetOutput(codeSnippetOutput)
+      }
+      if (fileSystemDeleteFileRequiredParamsSet) {
+        setCodeSnippetOutput(
+          codeSnippetOutput + `\nDeleting ${useFileSystemDeleteFileRecursive ? 'directory' : 'file'}...`,
+        )
+        await sandbox.fs.deleteFile(
+          sandboxParametersState['deleteFileParams'].filePath,
+          useFileSystemDeleteFileRecursive || false,
+        )
+        codeSnippetOutput += `\n🎉 ${useFileSystemDeleteFileRecursive ? 'Directory' : 'File'} deleted successfully.\n`
+        setCodeSnippetOutput(codeSnippetOutput)
+      }
       if (gitCloneOperationRequiredParamsSet) {
         setCodeSnippetOutput(codeSnippetOutput + '\nCloning repo...')
         await sandbox.git.clone(
