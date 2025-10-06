@@ -74,8 +74,8 @@ export class AuditOpenSearchStorageAdapter implements AuditLogStorageAdapter, On
   }
 
   async getAllLogs(
-    page?: number,
-    limit?: number,
+    page = 0,
+    limit = 1000,
     filters?: AuditLogFilter,
     nextToken?: string,
   ): Promise<PaginatedList<AuditLog>> {
@@ -87,8 +87,8 @@ export class AuditOpenSearchStorageAdapter implements AuditLogStorageAdapter, On
 
   async getOrganizationLogs(
     organizationId: string,
-    page?: number,
-    limit?: number,
+    page = 0,
+    limit = 1000,
     filters?: AuditLogFilter,
     nextToken?: string,
   ): Promise<PaginatedList<AuditLog>> {
@@ -192,20 +192,21 @@ export class AuditOpenSearchStorageAdapter implements AuditLogStorageAdapter, On
   }
 
   private mapSourceToAuditLog(source: any): AuditLog {
-    const auditLog = new AuditLog()
+    const auditLog = new AuditLog({
+      actorId: source.actorId,
+      actorEmail: source.actorEmail,
+      organizationId: source.organizationId,
+      action: source.action,
+      targetType: source.targetType,
+      targetId: source.targetId,
+      statusCode: source.statusCode,
+      errorMessage: source.errorMessage,
+      ipAddress: source.ipAddress,
+      userAgent: source.userAgent,
+      source: source.source,
+      metadata: source.metadata,
+    })
     auditLog.id = source.id
-    auditLog.actorId = source.actorId
-    auditLog.actorEmail = source.actorEmail
-    auditLog.organizationId = source.organizationId
-    auditLog.action = source.action
-    auditLog.targetType = source.targetType
-    auditLog.targetId = source.targetId
-    auditLog.statusCode = source.statusCode
-    auditLog.errorMessage = source.errorMessage
-    auditLog.ipAddress = source.ipAddress
-    auditLog.userAgent = source.userAgent
-    auditLog.source = source.source
-    auditLog.metadata = source.metadata
     auditLog.createdAt = new Date(source.createdAt)
     return auditLog
   }
@@ -390,12 +391,7 @@ export class AuditOpenSearchStorageAdapter implements AuditLogStorageAdapter, On
     }
   }
 
-  private buildSearchBody(
-    query: QueryContainer,
-    page?: number,
-    limit?: number,
-    nextToken?: string,
-  ): Search_RequestBody {
+  private buildSearchBody(query: QueryContainer, page: number, limit: number, nextToken?: string): Search_RequestBody {
     const size = limit
     const searchBody: Search_RequestBody = {
       query,
@@ -437,8 +433,8 @@ export class AuditOpenSearchStorageAdapter implements AuditLogStorageAdapter, On
 
   private async processSearchResponse(
     response: any,
-    page?: number,
-    limit?: number,
+    page: number,
+    limit: number,
     nextToken?: string,
     query?: QueryContainer,
   ): Promise<PaginatedList<AuditLog>> {

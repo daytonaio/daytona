@@ -3,8 +3,6 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Injectable } from '@nestjs/common'
-import { InjectRepository } from '@nestjs/typeorm'
 import { RunnerService } from '../../services/runner.service'
 import { RunnerAdapterFactory } from '../../runner-adapter/runnerAdapter'
 import { Sandbox } from '../../entities/sandbox.entity'
@@ -17,12 +15,10 @@ export const SYNC_AGAIN = 'sync-again'
 export const DONT_SYNC_AGAIN = 'dont-sync-again'
 export type SyncState = typeof SYNC_AGAIN | typeof DONT_SYNC_AGAIN
 
-@Injectable()
 export abstract class SandboxAction {
-  constructor(
+  protected constructor(
     protected readonly runnerService: RunnerService,
     protected runnerAdapterFactory: RunnerAdapterFactory,
-    @InjectRepository(Sandbox)
     protected readonly sandboxRepository: Repository<Sandbox>,
     protected readonly toolboxService: ToolboxService,
   ) {}
@@ -33,7 +29,7 @@ export abstract class SandboxAction {
     sandboxId: string,
     state: SandboxState,
     runnerId?: string | null | undefined,
-    errorReason?: string,
+    errorReason?: string | null,
     daemonVersion?: string,
   ) {
     const sandbox = await this.sandboxRepository.findOneByOrFail({

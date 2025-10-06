@@ -174,34 +174,32 @@ export class RunnerDto {
   })
   version: string
 
-  static fromRunner(runner: Runner): RunnerDto {
-    return {
-      id: runner.id,
-      domain: runner.domain,
-      apiUrl: runner.apiUrl,
-      proxyUrl: runner.proxyUrl,
-      apiKey: runner.apiKey,
-      cpu: runner.cpu,
-      memory: runner.memoryGiB,
-      disk: runner.diskGiB,
-      gpu: runner.gpu,
-      gpuType: runner.gpuType,
-      class: runner.class,
-      currentCpuUsagePercentage: runner.currentCpuUsagePercentage,
-      currentMemoryUsagePercentage: runner.currentMemoryUsagePercentage,
-      currentDiskUsagePercentage: runner.currentDiskUsagePercentage,
-      currentAllocatedCpu: runner.currentAllocatedCpu,
-      currentAllocatedMemoryGiB: runner.currentAllocatedMemoryGiB,
-      currentAllocatedDiskGiB: runner.currentAllocatedDiskGiB,
-      currentSnapshotCount: runner.currentSnapshotCount,
-      availabilityScore: runner.availabilityScore,
-      region: runner.region,
-      state: runner.state,
-      lastChecked: runner.lastChecked?.toISOString(),
-      unschedulable: runner.unschedulable,
-      createdAt: runner.createdAt.toISOString(),
-      updatedAt: runner.updatedAt.toISOString(),
-      version: runner.version,
-    }
+  constructor(runner: Runner) {
+    this.id = runner.id
+    this.domain = runner.domain
+    this.apiUrl = runner.apiUrl
+    this.proxyUrl = runner.proxyUrl
+    this.apiKey = runner.apiKey
+    this.cpu = runner.cpu
+    this.memory = runner.memoryGiB
+    this.disk = runner.diskGiB
+    this.gpu = runner.gpu
+    this.gpuType = runner.gpuType
+    this.class = runner.class
+    this.currentCpuUsagePercentage = runner.currentCpuUsagePercentage
+    this.currentMemoryUsagePercentage = runner.currentMemoryUsagePercentage
+    this.currentDiskUsagePercentage = runner.currentDiskUsagePercentage
+    this.currentAllocatedCpu = runner.currentAllocatedCpu
+    this.currentAllocatedMemoryGiB = runner.currentAllocatedMemoryGiB
+    this.currentAllocatedDiskGiB = runner.currentAllocatedDiskGiB
+    this.currentSnapshotCount = runner.currentSnapshotCount
+    this.availabilityScore = runner.availabilityScore
+    this.region = runner.region
+    this.state = runner.state
+    this.lastChecked = runner.lastChecked?.toISOString()
+    this.unschedulable = runner.unschedulable
+    this.createdAt = runner.createdAt.toISOString()
+    this.updatedAt = runner.updatedAt.toISOString()
+    this.version = runner.version
   }
 }

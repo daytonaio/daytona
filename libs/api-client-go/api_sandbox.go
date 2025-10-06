@@ -1476,20 +1476,14 @@ type SandboxAPIListSandboxesRequest struct {
 	ctx                    context.Context
 	ApiService             SandboxAPI
 	xDaytonaOrganizationID *string
-	verbose                *bool
 	labels                 *string
 	includeErroredDeleted  *bool
+	verbose                *bool
 }
 
 // Use with JWT to specify the organization ID
 func (r SandboxAPIListSandboxesRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) SandboxAPIListSandboxesRequest {
 	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
-	return r
-}
-
-// Include verbose output
-func (r SandboxAPIListSandboxesRequest) Verbose(verbose bool) SandboxAPIListSandboxesRequest {
-	r.verbose = &verbose
 	return r
 }
 
@@ -1502,6 +1496,12 @@ func (r SandboxAPIListSandboxesRequest) Labels(labels string) SandboxAPIListSand
 // Include errored and deleted sandboxes
 func (r SandboxAPIListSandboxesRequest) IncludeErroredDeleted(includeErroredDeleted bool) SandboxAPIListSandboxesRequest {
 	r.includeErroredDeleted = &includeErroredDeleted
+	return r
+}
+
+// Include verbose output
+func (r SandboxAPIListSandboxesRequest) Verbose(verbose bool) SandboxAPIListSandboxesRequest {
+	r.verbose = &verbose
 	return r
 }
 
@@ -1544,14 +1544,14 @@ func (a *SandboxAPIService) ListSandboxesExecute(r SandboxAPIListSandboxesReques
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
 
-	if r.verbose != nil {
-		parameterAddToHeaderOrQuery(localVarQueryParams, "verbose", r.verbose, "form", "")
-	}
 	if r.labels != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "labels", r.labels, "form", "")
 	}
 	if r.includeErroredDeleted != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "includeErroredDeleted", r.includeErroredDeleted, "form", "")
+	}
+	if r.verbose != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "verbose", r.verbose, "form", "")
 	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}

@@ -13,7 +13,7 @@ import { ApiOAuth2 } from '@nestjs/swagger'
 import { RegistryPushAccessDto } from '../../sandbox/dto/registry-push-access-dto'
 import {
   DOCKER_REGISTRY_PROVIDER,
-  IDockerRegistryProvider,
+  type IDockerRegistryProvider,
 } from './../../docker-registry/providers/docker-registry.provider.interface'
 import { RegistryType } from './../../docker-registry/enums/registry-type.enum'
 
@@ -86,7 +86,9 @@ export class DockerRegistryService {
     if (updateDto.password) {
       registry.password = updateDto.password
     }
-    registry.project = updateDto.project
+    if (updateDto.project) {
+      registry.project = updateDto.project
+    }
 
     return this.dockerRegistryRepository.save(registry)
   }
@@ -149,7 +151,7 @@ export class DockerRegistryService {
     // If we have registries in the preferred region, randomly select one
     if (preferredRegionRegistries.length > 0) {
       const randomIndex = Math.floor(Math.random() * preferredRegionRegistries.length)
-      return preferredRegionRegistries[randomIndex]
+      return preferredRegionRegistries[randomIndex] || null
     }
 
     // If no registry found in preferred region, try to find a fallback registry
@@ -157,14 +159,14 @@ export class DockerRegistryService {
 
     if (fallbackRegistries.length > 0) {
       const randomIndex = Math.floor(Math.random() * fallbackRegistries.length)
-      return fallbackRegistries[randomIndex]
+      return fallbackRegistries[randomIndex] || null
     }
 
     // If no fallback registry found either, throw an error
     throw new Error('No backup registry available')
   }
 
-  async findOneBySnapshotImageName(imageName: string, organizationId?: string): Promise<DockerRegistry | null> {
+  async findOneBySnapshotImageName(imageName: string, organizationId: string | null): Promise<DockerRegistry | null> {
     const whereCondition = organizationId
       ? [
           { organizationId, registryType: In([RegistryType.INTERNAL, RegistryType.ORGANIZATION]) },
@@ -247,14 +249,19 @@ export class DockerRegistryService {
 
     // Parse fully qualified image name
     // Example: harbor-test.internal.daytona.app/daytona/busybox:1.36.1
-    const [nameWithTag, tag] = imageName.split(':')
+    const [nameWithTag, tag] = imageName.includes(':')
+      ? (imageName.split(':') as [string, string])
+      : ([imageName, 'latest'] as const)
+    if (!tag) {
+      throw new Error('Image tag is required to remove an image')
+    }
 
     // Remove registry hostname if present
     const parts = nameWithTag.split('/')
-    let project: string
-    let repository: string
+    let project: string | undefined = undefined
+    let repository: string | undefined = undefined
 
-    if (parts.length >= 3 && parts[0].includes('.')) {
+    if (parts.length >= 3 && parts[0]?.includes('.')) {
       // Format: hostname/project/repository
       project = parts[1]
       repository = parts.slice(2).join('/')
@@ -263,6 +270,12 @@ export class DockerRegistryService {
       ;[project, repository] = parts
     } else {
       throw new Error('Invalid image name format. Expected: [registry]/project/repository[:tag]')
+    }
+
+    if (!project || !repository) {
+      throw new Error(
+        `Both project and repository are required to remove an image. Got project: ${project}, repository: ${repository}`,
+      )
     }
 
     try {

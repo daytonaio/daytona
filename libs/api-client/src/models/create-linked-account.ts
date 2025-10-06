@@ -1,5 +1,5 @@
 /* tslint:disable */
-
+/* eslint-disable */
 /**
  * Daytona
  * Daytona AI platform API Docs
@@ -12,22 +12,25 @@
  * Do not edit the class manually.
  */
 
+
+
 /**
- *
+ * 
  * @export
  * @interface CreateLinkedAccount
  */
 export interface CreateLinkedAccount {
-  /**
-   * The authentication provider of the secondary account
-   * @type {string}
-   * @memberof CreateLinkedAccount
-   */
-  provider: string
-  /**
-   * The user ID of the secondary account
-   * @type {string}
-   * @memberof CreateLinkedAccount
-   */
-  userId: string
+    /**
+     * The authentication provider of the secondary account
+     * @type {string}
+     * @memberof CreateLinkedAccount
+     */
+    'provider': string;
+    /**
+     * The user ID of the secondary account
+     * @type {string}
+     * @memberof CreateLinkedAccount
+     */
+    'userId': string;
 }
+

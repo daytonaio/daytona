@@ -10,7 +10,7 @@ import { KafkaContext } from '@nestjs/microservices'
  * @returns A decorator function that commits the offset of the Kafka message.
  */
 export function AutoCommitOffset(): MethodDecorator {
-  return function (target: any, propertyKey: string | symbol, descriptor: PropertyDescriptor): PropertyDescriptor {
+  return function (_: any, __: string | symbol, descriptor: PropertyDescriptor): PropertyDescriptor {
     const originalMethod = descriptor.value
 
     descriptor.value = async function (...args: any[]) {

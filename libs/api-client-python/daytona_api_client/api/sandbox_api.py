@@ -2869,9 +2869,9 @@ class SandboxApi:
     def list_sandboxes(
         self,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
-        verbose: Annotated[Optional[StrictBool], Field(description="Include verbose output")] = None,
         labels: Annotated[Optional[StrictStr], Field(description="JSON encoded labels to filter by")] = None,
         include_errored_deleted: Annotated[Optional[StrictBool], Field(description="Include errored and deleted sandboxes")] = None,
+        verbose: Annotated[Optional[StrictBool], Field(description="Include verbose output")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2890,12 +2890,12 @@ class SandboxApi:
 
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
-        :param verbose: Include verbose output
-        :type verbose: bool
         :param labels: JSON encoded labels to filter by
         :type labels: str
         :param include_errored_deleted: Include errored and deleted sandboxes
         :type include_errored_deleted: bool
+        :param verbose: Include verbose output
+        :type verbose: bool
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -2920,9 +2920,9 @@ class SandboxApi:
 
         _param = self._list_sandboxes_serialize(
             x_daytona_organization_id=x_daytona_organization_id,
-            verbose=verbose,
             labels=labels,
             include_errored_deleted=include_errored_deleted,
+            verbose=verbose,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -2947,9 +2947,9 @@ class SandboxApi:
     def list_sandboxes_with_http_info(
         self,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
-        verbose: Annotated[Optional[StrictBool], Field(description="Include verbose output")] = None,
         labels: Annotated[Optional[StrictStr], Field(description="JSON encoded labels to filter by")] = None,
         include_errored_deleted: Annotated[Optional[StrictBool], Field(description="Include errored and deleted sandboxes")] = None,
+        verbose: Annotated[Optional[StrictBool], Field(description="Include verbose output")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2968,12 +2968,12 @@ class SandboxApi:
 
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
-        :param verbose: Include verbose output
-        :type verbose: bool
         :param labels: JSON encoded labels to filter by
         :type labels: str
         :param include_errored_deleted: Include errored and deleted sandboxes
         :type include_errored_deleted: bool
+        :param verbose: Include verbose output
+        :type verbose: bool
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -2998,9 +2998,9 @@ class SandboxApi:
 
         _param = self._list_sandboxes_serialize(
             x_daytona_organization_id=x_daytona_organization_id,
-            verbose=verbose,
             labels=labels,
             include_errored_deleted=include_errored_deleted,
+            verbose=verbose,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -3025,9 +3025,9 @@ class SandboxApi:
     def list_sandboxes_without_preload_content(
         self,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
-        verbose: Annotated[Optional[StrictBool], Field(description="Include verbose output")] = None,
         labels: Annotated[Optional[StrictStr], Field(description="JSON encoded labels to filter by")] = None,
         include_errored_deleted: Annotated[Optional[StrictBool], Field(description="Include errored and deleted sandboxes")] = None,
+        verbose: Annotated[Optional[StrictBool], Field(description="Include verbose output")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -3046,12 +3046,12 @@ class SandboxApi:
 
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
-        :param verbose: Include verbose output
-        :type verbose: bool
         :param labels: JSON encoded labels to filter by
         :type labels: str
         :param include_errored_deleted: Include errored and deleted sandboxes
         :type include_errored_deleted: bool
+        :param verbose: Include verbose output
+        :type verbose: bool
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -3076,9 +3076,9 @@ class SandboxApi:
 
         _param = self._list_sandboxes_serialize(
             x_daytona_organization_id=x_daytona_organization_id,
-            verbose=verbose,
             labels=labels,
             include_errored_deleted=include_errored_deleted,
+            verbose=verbose,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -3098,9 +3098,9 @@ class SandboxApi:
     def _list_sandboxes_serialize(
         self,
         x_daytona_organization_id,
-        verbose,
         labels,
         include_errored_deleted,
+        verbose,
         _request_auth,
         _content_type,
         _headers,
@@ -3123,10 +3123,6 @@ class SandboxApi:
 
         # process the path parameters
         # process the query parameters
-        if verbose is not None:
-            
-            _query_params.append(('verbose', verbose))
-            
         if labels is not None:
             
             _query_params.append(('labels', labels))
@@ -3134,6 +3130,10 @@ class SandboxApi:
         if include_errored_deleted is not None:
             
             _query_params.append(('includeErroredDeleted', include_errored_deleted))
+            
+        if verbose is not None:
+            
+            _query_params.append(('verbose', verbose))
             
         # process the header parameters
         if x_daytona_organization_id is not None:

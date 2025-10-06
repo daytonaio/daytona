@@ -18,10 +18,10 @@ export const AuditPublisherProvider: Provider = {
     configService: TypedConfigService,
     kafkaService: ClientKafka,
     auditStorageAdapter: AuditLogStorageAdapter,
-  ): AuditLogPublisher => {
+  ): AuditLogPublisher | undefined => {
     const auditConfig = configService.get('audit')
 
-    if (!auditConfig.publish.enabled) {
+    if (!auditConfig?.publish.enabled) {
       return
     }
 

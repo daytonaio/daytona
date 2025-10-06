@@ -21,7 +21,7 @@ export const AuditStorageAdapterProvider: Provider = {
     opensearchClient: OpensearchClient,
     auditLogRepository: Repository<AuditLog>,
   ): AuditLogStorageAdapter => {
-    const auditConfig = configService.get('audit')
+    const auditConfig = configService.getOrThrow('audit')
 
     if (auditConfig.publish.enabled) {
       switch (auditConfig.publish.storageAdapter) {

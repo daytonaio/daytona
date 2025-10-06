@@ -3,19 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import {
-  Controller,
-  Get,
-  Post,
-  Delete,
-  Body,
-  Param,
-  Logger,
-  UseGuards,
-  HttpCode,
-  UseInterceptors,
-  Query,
-} from '@nestjs/common'
+import { Controller, Get, Post, Delete, Body, Param, UseGuards, HttpCode, UseInterceptors, Query } from '@nestjs/common'
 import {
   ApiOAuth2,
   ApiResponse,
@@ -32,7 +20,7 @@ import { CreateVolumeDto } from '../dto/create-volume.dto'
 import { ContentTypeInterceptor } from '../../common/interceptors/content-type.interceptors'
 import { CustomHeaders } from '../../common/constants/header.constants'
 import { AuthContext } from '../../common/decorators/auth-context.decorator'
-import { OrganizationAuthContext } from '../../common/interfaces/auth-context.interface'
+import { type OrganizationAuthContext } from '../../common/interfaces/auth-context.interface'
 import { RequiredOrganizationResourcePermissions } from '../../organization/decorators/required-organization-resource-permissions.decorator'
 import { OrganizationResourcePermission } from '../../organization/enums/organization-resource-permission.enum'
 import { OrganizationResourceActionGuard } from '../../organization/guards/organization-resource-action.guard'
@@ -49,8 +37,6 @@ import { VolumeAccessGuard } from '../guards/volume-access.guard'
 @ApiOAuth2(['openid', 'profile', 'email'])
 @ApiBearerAuth()
 export class VolumeController {
-  private readonly logger = new Logger(VolumeController.name)
-
   constructor(private readonly volumeService: VolumeService) {}
 
   @Get()
@@ -75,7 +61,7 @@ export class VolumeController {
     @Query('includeDeleted') includeDeleted = false,
   ): Promise<VolumeDto[]> {
     const volumes = await this.volumeService.findAll(authContext.organizationId, includeDeleted)
-    return volumes.map(VolumeDto.fromVolume)
+    return volumes.map((volume) => new VolumeDto(volume))
   }
 
   @Post()
@@ -106,7 +92,7 @@ export class VolumeController {
     @Body() createVolumeDto: CreateVolumeDto,
   ): Promise<VolumeDto> {
     const volume = await this.volumeService.create(authContext.organization, createVolumeDto)
-    return VolumeDto.fromVolume(volume)
+    return new VolumeDto(volume)
   }
 
   @Get(':volumeId')
@@ -128,7 +114,7 @@ export class VolumeController {
   @UseGuards(VolumeAccessGuard)
   async getVolume(@Param('volumeId') volumeId: string): Promise<VolumeDto> {
     const volume = await this.volumeService.findOne(volumeId)
-    return VolumeDto.fromVolume(volume)
+    return new VolumeDto(volume)
   }
 
   @Delete(':volumeId')
@@ -178,6 +164,6 @@ export class VolumeController {
     @Param('name') name: string,
   ): Promise<VolumeDto> {
     const volume = await this.volumeService.findByName(authContext.organizationId, name)
-    return VolumeDto.fromVolume(volume)
+    return new VolumeDto(volume)
   }
 }

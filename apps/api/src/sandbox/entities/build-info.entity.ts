@@ -21,10 +21,10 @@ export class BuildInfo {
   snapshotRef: string
 
   @Column({ type: 'text', nullable: true })
-  dockerfileContent?: string
+  dockerfileContent: string | null
 
   @Column('simple-array', { nullable: true })
-  contextHashes?: string[]
+  contextHashes: string[] | null
 
   @OneToMany(() => Snapshot, (snapshot) => snapshot.buildInfo)
   snapshots: Snapshot[]
@@ -47,6 +47,17 @@ export class BuildInfo {
 
   @BeforeInsert()
   generateHash() {
-    this.snapshotRef = generateBuildInfoHash(this.dockerfileContent, this.contextHashes)
+    this.snapshotRef = generateBuildInfoHash(this.dockerfileContent || '', this.contextHashes || [])
+  }
+
+  constructor(createParams: { dockerfileContent?: string; contextHashes?: string[] }) {
+    this.dockerfileContent = createParams.dockerfileContent ?? null
+    this.contextHashes = createParams.contextHashes ?? null
+    this.snapshotRef = generateBuildInfoHash(this.dockerfileContent || '', this.contextHashes || [])
+    this.snapshots = []
+    this.sandboxes = []
+    this.lastUsedAt = new Date()
+    this.createdAt = new Date()
+    this.updatedAt = new Date()
   }
 }

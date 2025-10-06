@@ -10,7 +10,7 @@ import path from 'path'
 import { OnAsyncEvent } from '../../common/decorators/on-async-event.decorator'
 import { OrganizationEvents } from '../../organization/constants/organization-events.constant'
 import { OrganizationInvitationCreatedEvent } from '../../organization/events/organization-invitation-created.event'
-import { EmailModuleOptions } from '../email.module'
+import { type EmailModuleOptions } from '../email.module'
 
 @Injectable()
 export class EmailService {
@@ -18,7 +18,7 @@ export class EmailService {
   private readonly logger = new Logger(EmailService.name)
 
   constructor(@Inject('EMAIL_MODULE_OPTIONS') private readonly options: EmailModuleOptions) {
-    const { host, port, user, password, secure, from, dashboardUrl } = this.options
+    const { host, port, user, password, secure, from } = this.options
 
     if (!host || !port || !from) {
       this.logger.warn('Email configuration not found, email functionality will be disabled')

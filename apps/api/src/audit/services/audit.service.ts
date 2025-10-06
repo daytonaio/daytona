@@ -12,10 +12,9 @@ import { UpdateAuditLogInternalDto } from '../dto/update-audit-log-internal.dto'
 import { AuditLog } from '../entities/audit-log.entity'
 import { PaginatedList } from '../../common/interfaces/paginated-list.interface'
 import { TypedConfigService } from '../../config/typed-config.service'
-import { RedisLockProvider } from '../../sandbox/common/redis-lock.provider'
 import { AUDIT_LOG_PUBLISHER, AUDIT_STORAGE_ADAPTER } from '../constants/audit-tokens'
-import { AuditLogStorageAdapter } from '../interfaces/audit-storage.interface'
-import { AuditLogPublisher } from '../interfaces/audit-publisher.interface'
+import { type AuditLogStorageAdapter } from '../interfaces/audit-storage.interface'
+import { type AuditLogPublisher } from '../interfaces/audit-publisher.interface'
 import { AuditLogFilter } from '../interfaces/audit-filter.interface'
 import { DistributedLock } from '../../common/decorators/distributed-lock.decorator'
 import { WithInstrumentation } from '../../common/decorators/otel.decorator'
@@ -28,7 +27,6 @@ export class AuditService implements OnApplicationBootstrap {
     @InjectRepository(AuditLog)
     private readonly auditLogRepository: Repository<AuditLog>,
     private readonly configService: TypedConfigService,
-    private readonly redisLockProvider: RedisLockProvider,
     private readonly schedulerRegistry: SchedulerRegistry,
     @Inject(AUDIT_STORAGE_ADAPTER)
     private readonly auditStorageAdapter: AuditLogStorageAdapter,
@@ -38,7 +36,7 @@ export class AuditService implements OnApplicationBootstrap {
   ) {}
 
   onApplicationBootstrap() {
-    const auditConfig = this.configService.get('audit')
+    const auditConfig = this.configService.getOrThrow('audit')
 
     // Enable publish cron job if publish is enabled
     if (auditConfig.publish.enabled) {
@@ -59,19 +57,20 @@ export class AuditService implements OnApplicationBootstrap {
   }
 
   async createLog(createDto: CreateAuditLogInternalDto): Promise<AuditLog> {
-    const auditLog = new AuditLog()
-    auditLog.actorId = createDto.actorId
-    auditLog.actorEmail = createDto.actorEmail
-    auditLog.organizationId = createDto.organizationId
-    auditLog.action = createDto.action
-    auditLog.targetType = createDto.targetType
-    auditLog.targetId = createDto.targetId
-    auditLog.statusCode = createDto.statusCode
-    auditLog.errorMessage = createDto.errorMessage
-    auditLog.ipAddress = createDto.ipAddress
-    auditLog.userAgent = createDto.userAgent
-    auditLog.source = createDto.source
-    auditLog.metadata = createDto.metadata
+    const auditLog = new AuditLog({
+      actorId: createDto.actorId,
+      actorEmail: createDto.actorEmail,
+      organizationId: createDto.organizationId,
+      action: createDto.action,
+      targetType: createDto.targetType,
+      targetId: createDto.targetId,
+      statusCode: createDto.statusCode,
+      errorMessage: createDto.errorMessage,
+      ipAddress: createDto.ipAddress,
+      userAgent: createDto.userAgent,
+      source: createDto.source,
+      metadata: createDto.metadata,
+    })
 
     return this.auditLogRepository.save(auditLog)
   }
@@ -82,19 +81,19 @@ export class AuditService implements OnApplicationBootstrap {
       throw new NotFoundException(`Audit log with ID ${id} not found`)
     }
 
-    if (updateDto.statusCode) {
+    if (updateDto.statusCode !== undefined) {
       auditLog.statusCode = updateDto.statusCode
     }
 
-    if (updateDto.errorMessage) {
+    if (updateDto.errorMessage !== undefined) {
       auditLog.errorMessage = updateDto.errorMessage
     }
 
-    if (updateDto.targetId) {
+    if (updateDto.targetId !== undefined) {
       auditLog.targetId = updateDto.targetId
     }
 
-    if (updateDto.organizationId) {
+    if (updateDto.organizationId !== undefined) {
       auditLog.organizationId = updateDto.organizationId
     }
 

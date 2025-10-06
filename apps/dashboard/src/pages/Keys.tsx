@@ -98,7 +98,7 @@ const Keys: React.FC = () => {
   const isLoadingKey = useCallback(
     (key: ApiKeyList) => {
       const loadingId = getLoadingKeyId(key)
-      return loadingKeys[loadingId]
+      return !!loadingKeys[loadingId]
     },
     [getLoadingKeyId, loadingKeys],
   )

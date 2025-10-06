@@ -14,10 +14,11 @@ import { VolumeLastUsedAtUpdatedEvent } from '../events/volume-last-used-at-upda
 
 @EventSubscriber()
 export class VolumeSubscriber implements EntitySubscriberInterface<Volume> {
-  @Inject(EventEmitter2)
-  private eventEmitter: EventEmitter2
-
-  constructor(dataSource: DataSource) {
+  constructor(
+    dataSource: DataSource,
+    @Inject(EventEmitter2)
+    private eventEmitter: EventEmitter2,
+  ) {
     dataSource.subscribers.push(this)
   }
 
@@ -32,12 +33,18 @@ export class VolumeSubscriber implements EntitySubscriberInterface<Volume> {
   afterUpdate(event: UpdateEvent<Volume>) {
     const updatedColumns = event.updatedColumns.map((col) => col.propertyName)
 
+    if (!event.entity) {
+      return
+    }
+
+    const entity = event.entity as Volume
+
     updatedColumns.forEach((column) => {
       switch (column) {
         case 'state':
           this.eventEmitter.emit(
             VolumeEvents.STATE_UPDATED,
-            new VolumeStateUpdatedEvent(event.entity as Volume, event.databaseEntity[column], event.entity[column]),
+            new VolumeStateUpdatedEvent(entity, event.databaseEntity[column], entity[column]),
           )
           break
         case 'lastUsedAt':

@@ -41,13 +41,10 @@ export class ApiKeyResponseDto {
   })
   expiresAt?: Date
 
-  static fromApiKey(apiKey: ApiKey, value: string): ApiKeyResponseDto {
-    return {
-      name: apiKey.name,
-      value,
-      createdAt: apiKey.createdAt,
-      permissions: apiKey.permissions,
-      expiresAt: apiKey.expiresAt,
-    }
+  constructor(apiKey: ApiKey, value: string) {
+    this.name = apiKey.name
+    this.value = value
+    this.permissions = apiKey.permissions
+    this.createdAt = apiKey.createdAt
   }
 }

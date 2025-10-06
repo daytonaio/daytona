@@ -38,4 +38,9 @@ export class CreateUserDto {
   @IsBoolean()
   @IsOptional()
   emailVerified?: boolean
+
+  private constructor() {
+    this.id = ''
+    this.name = ''
+  }
 }

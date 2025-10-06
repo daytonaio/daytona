@@ -6,7 +6,7 @@
 import { Controller, Inject, Logger, UseFilters } from '@nestjs/common'
 import { Ctx, EventPattern, KafkaContext, Payload } from '@nestjs/microservices'
 import { AuditLog } from '../../entities/audit-log.entity'
-import { AuditLogStorageAdapter } from '../../interfaces/audit-storage.interface'
+import { type AuditLogStorageAdapter } from '../../interfaces/audit-storage.interface'
 import { AutoCommitOffset } from '../../../common/decorators/autocommit-offset.decorator'
 import { AUDIT_KAFKA_TOPIC, AUDIT_STORAGE_ADAPTER } from '../../constants/audit-tokens'
 import { KafkaMaxRetryExceptionFilter } from '../../../filters/kafka-exception.filter'
@@ -20,7 +20,8 @@ export class AuditKafkaConsumerController {
 
   @EventPattern(AUDIT_KAFKA_TOPIC)
   @AutoCommitOffset()
-  public async handleAuditLogMessage(@Payload() message: AuditLog, @Ctx() context: KafkaContext): Promise<void> {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  public async handleAuditLogMessage(@Payload() message: AuditLog, @Ctx() _: KafkaContext): Promise<void> {
     this.logger.debug('Handling audit log message', { message })
     await this.auditStorageAdapter.write([message])
   }

@@ -16,11 +16,11 @@ import { OrganizationUser } from '../entities/organization-user.entity'
 @Injectable()
 export class OrganizationAccessGuard implements CanActivate {
   protected readonly logger = new Logger(OrganizationAccessGuard.name)
-  @InjectRedis() private readonly redis: Redis
 
   constructor(
     private readonly organizationService: OrganizationService,
     private readonly organizationUserService: OrganizationUserService,
+    @InjectRedis() private readonly redis: Redis,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {

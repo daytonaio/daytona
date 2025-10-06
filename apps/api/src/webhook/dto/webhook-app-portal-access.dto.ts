@@ -12,4 +12,8 @@ export class WebhookAppPortalAccessDto {
     example: 'https://app.svix.com/app_1234567890',
   })
   url: string
+
+  constructor(url: string) {
+    this.url = url
+  }
 }

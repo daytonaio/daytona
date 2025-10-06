@@ -11,7 +11,6 @@ import {
   Body,
   Param,
   Query,
-  Logger,
   UseGuards,
   HttpCode,
   UseInterceptors,
@@ -20,11 +19,10 @@ import {
   ForbiddenException,
   Res,
   Request,
-  RawBodyRequest,
+  type RawBodyRequest,
   Next,
   ParseBoolPipe,
 } from '@nestjs/common'
-import Redis from 'ioredis'
 import { CombinedAuthGuard } from '../../auth/combined-auth.guard'
 import { SandboxService as WorkspaceService } from '../services/sandbox.service'
 import {
@@ -42,17 +40,16 @@ import { WorkspaceDto } from '../dto/workspace.deprecated.dto'
 import { RunnerService } from '../services/runner.service'
 import { SandboxState as WorkspaceState } from '../enums/sandbox-state.enum'
 import { ContentTypeInterceptor } from '../../common/interceptors/content-type.interceptors'
-import { InjectRedis } from '@nestjs-modules/ioredis'
 import { SandboxAccessGuard as WorkspaceAccessGuard } from '../guards/sandbox-access.guard'
 import { CustomHeaders } from '../../common/constants/header.constants'
 import { AuthContext } from '../../common/decorators/auth-context.decorator'
-import { OrganizationAuthContext } from '../../common/interfaces/auth-context.interface'
+import { type OrganizationAuthContext } from '../../common/interfaces/auth-context.interface'
 import { RequiredOrganizationResourcePermissions } from '../../organization/decorators/required-organization-resource-permissions.decorator'
 import { OrganizationResourcePermission } from '../../organization/enums/organization-resource-permission.enum'
 import { OrganizationResourceActionGuard } from '../../organization/guards/organization-resource-action.guard'
 import { WorkspacePortPreviewUrlDto } from '../dto/workspace-port-preview-url.deprecated.dto'
 import { IncomingMessage, ServerResponse } from 'http'
-import { NextFunction } from 'http-proxy-middleware/dist/types'
+import { type NextFunction } from 'http-proxy-middleware/dist/types'
 import { LogProxy } from '../proxy/log-proxy'
 import { CreateWorkspaceDto } from '../dto/create-workspace.deprecated.dto'
 import { TypedConfigService } from '../../config/typed-config.service'
@@ -68,10 +65,7 @@ import { AuditTarget } from '../../audit/enums/audit-target.enum'
 @ApiOAuth2(['openid', 'profile', 'email'])
 @ApiBearerAuth()
 export class WorkspaceController {
-  private readonly logger = new Logger(WorkspaceController.name)
-
   constructor(
-    @InjectRedis() private readonly redis: Redis,
     private readonly runnerService: RunnerService,
     private readonly workspaceService: WorkspaceService,
     private readonly configService: TypedConfigService,
@@ -103,14 +97,13 @@ export class WorkspaceController {
   })
   async listWorkspacees(
     @AuthContext() authContext: OrganizationAuthContext,
-    @Query('verbose') verbose?: boolean,
+    @Query('verbose') _?: boolean,
     @Query('labels') labelsQuery?: string,
   ): Promise<WorkspaceDto[]> {
     const labels = labelsQuery ? JSON.parse(labelsQuery) : {}
     const workspacees = await this.workspaceService.findAllDeprecated(authContext.organizationId, labels)
     const dtos = workspacees.map(async (workspace) => {
-      const dto = WorkspaceDto.fromSandbox(workspace)
-      return dto
+      return new WorkspaceDto(workspace)
     })
     return await Promise.all(dtos)
   }
@@ -165,7 +158,8 @@ export class WorkspaceController {
 
     const organization = authContext.organization
 
-    const workspace = WorkspaceDto.fromSandboxDto(
+    const workspace = new WorkspaceDto(
+      // @ts-expect-error ignore
       await this.workspaceService.createFromSnapshot(
         {
           ...createWorkspaceDto,
@@ -213,11 +207,10 @@ export class WorkspaceController {
   async getWorkspace(
     @Param('workspaceId') workspaceId: string,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    @Query('verbose') verbose?: boolean,
+    @Query('verbose') _?: boolean,
   ): Promise<WorkspaceDto> {
     const workspace = await this.workspaceService.findOne(workspaceId, true)
-
-    return WorkspaceDto.fromSandbox(workspace)
+    return new WorkspaceDto(workspace)
   }
 
   @Delete(':workspaceId')
@@ -245,7 +238,7 @@ export class WorkspaceController {
   async removeWorkspace(
     @Param('workspaceId') workspaceId: string,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    @Query('force') force?: boolean,
+    @Query('force') _?: boolean,
   ): Promise<void> {
     await this.workspaceService.destroy(workspaceId)
   }
@@ -341,7 +334,7 @@ export class WorkspaceController {
     @Body() labelsDto: WorkspaceLabelsDto,
   ): Promise<WorkspaceLabelsDto> {
     const { labels } = await this.workspaceService.replaceLabels(workspaceId, labelsDto.labels)
-    return { labels }
+    return new WorkspaceLabelsDto(labels ?? undefined)
   }
 
   @Post(':workspaceId/backup')
@@ -543,10 +536,10 @@ export class WorkspaceController {
       throw new NotFoundException(`Workspace with ID ${workspaceId} not found`)
     }
 
-    return {
-      url: `${proxyProtocol}://${port}-${workspaceId}.${proxyDomain}`,
-      token: workspace.authToken,
-    }
+    return new WorkspacePortPreviewUrlDto(
+      `${proxyProtocol}://${port}-${workspaceId}.${proxyDomain}`,
+      workspace.authToken,
+    )
   }
 
   @Get(':workspaceId/build-logs')
@@ -594,7 +587,8 @@ export class WorkspaceController {
 
     const logProxy = new LogProxy(
       runner.apiUrl,
-      workspace.buildInfo.snapshotRef.split(':')[0],
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      workspace.buildInfo.snapshotRef.split(':')[0]!,
       runner.apiKey,
       follow === true,
       req,
@@ -611,7 +605,7 @@ export class WorkspaceController {
   ): Promise<WorkspaceState> {
     const startTime = Date.now()
 
-    let workspaceState: WorkspaceState
+    let workspaceState: WorkspaceState = WorkspaceState.CREATING
     while (Date.now() - startTime < timeout) {
       const workspace = await this.workspaceService.findOne(workspaceId)
       workspaceState = workspace.state

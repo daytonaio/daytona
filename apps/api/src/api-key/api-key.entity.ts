@@ -42,9 +42,31 @@ export class ApiKey {
   @Column()
   createdAt: Date
 
-  @Column({ nullable: true })
-  lastUsedAt?: Date
+  @Column({ nullable: true, type: 'timestamp with time zone' })
+  lastUsedAt: Date | null
 
-  @Column({ nullable: true })
-  expiresAt?: Date
+  @Column({ nullable: true, type: 'timestamp with time zone' })
+  expiresAt: Date | null
+
+  constructor(createParams: {
+    organizationId: string
+    userId: string
+    name: string
+    keyHash: string
+    keyPrefix: string
+    keySuffix: string
+    permissions: OrganizationResourcePermission[]
+    expiresAt?: Date | null
+  }) {
+    this.organizationId = createParams.organizationId
+    this.userId = createParams.userId
+    this.name = createParams.name
+    this.keyHash = createParams.keyHash
+    this.keyPrefix = createParams.keyPrefix
+    this.keySuffix = createParams.keySuffix
+    this.permissions = createParams.permissions
+    this.createdAt = new Date()
+    this.expiresAt = createParams.expiresAt || null
+    this.lastUsedAt = null
+  }
 }

@@ -143,7 +143,7 @@ export function getColumns({
           <div>
             <OrganizationEmailsTableActions
               email={row.original}
-              isLoading={loadingEmails[row.original.email]}
+              isLoading={!!loadingEmails[row.original.email]}
               onDelete={handleDelete}
               onResendVerification={handleResendVerification}
             />

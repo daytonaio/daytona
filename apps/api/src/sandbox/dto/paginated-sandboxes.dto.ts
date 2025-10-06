@@ -19,4 +19,11 @@ export class PaginatedSandboxesDto {
 
   @ApiProperty()
   totalPages: number
+
+  constructor(items: SandboxDto[], total: number, page: number, totalPages: number) {
+    this.items = items
+    this.total = total
+    this.page = page
+    this.totalPages = totalPages
+  }
 }

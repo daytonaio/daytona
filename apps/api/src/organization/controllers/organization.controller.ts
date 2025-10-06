@@ -29,7 +29,7 @@ import { OrganizationService } from '../services/organization.service'
 import { OrganizationUserService } from '../services/organization-user.service'
 import { OrganizationInvitationService } from '../services/organization-invitation.service'
 import { AuthContext } from '../../common/decorators/auth-context.decorator'
-import { AuthContext as IAuthContext } from '../../common/interfaces/auth-context.interface'
+import { type AuthContext as IAuthContext } from '../../common/interfaces/auth-context.interface'
 import { SystemActionGuard } from '../../auth/system-action.guard'
 import { RequiredApiRole, RequiredSystemRole } from '../../common/decorators/required-role.decorator'
 import { SystemRole } from '../../user/enums/system-role.enum'
@@ -71,7 +71,7 @@ export class OrganizationController {
   @UseGuards(AuthGuard('jwt'))
   async findInvitationsByUser(@AuthContext() authContext: IAuthContext): Promise<OrganizationInvitationDto[]> {
     const invitations = await this.organizationInvitationService.findByUser(authContext.userId)
-    return invitations.map(OrganizationInvitationDto.fromOrganizationInvitation)
+    return invitations.map((invitation) => new OrganizationInvitationDto(invitation))
   }
 
   @Get('/invitations/count')
@@ -119,12 +119,12 @@ export class OrganizationController {
       if (!EmailUtils.areEqual(invitation.email, authContext.email)) {
         throw new ForbiddenException('User email does not match invitation email')
       }
-    } catch (error) {
+    } catch {
       throw new NotFoundException(`Organization invitation with ID ${invitationId} not found`)
     }
 
     const acceptedInvitation = await this.organizationInvitationService.accept(invitationId, authContext.userId)
-    return OrganizationInvitationDto.fromOrganizationInvitation(acceptedInvitation)
+    return new OrganizationInvitationDto(acceptedInvitation)
   }
 
   @Post('/invitations/:invitationId/decline')
@@ -156,7 +156,7 @@ export class OrganizationController {
       if (!EmailUtils.areEqual(invitation.email, authContext.email)) {
         throw new ForbiddenException('User email does not match invitation email')
       }
-    } catch (error) {
+    } catch {
       throw new NotFoundException(`Organization invitation with ID ${invitationId} not found`)
     }
 
@@ -189,12 +189,12 @@ export class OrganizationController {
     @Body() createOrganizationDto: CreateOrganizationDto,
   ): Promise<OrganizationDto> {
     const user = await this.userService.findOne(authContext.userId)
-    if (!user.emailVerified) {
+    if (!user?.emailVerified) {
       throw new ForbiddenException('Please verify your email address')
     }
 
     const organization = await this.organizationService.create(createOrganizationDto, authContext.userId, false, true)
-    return OrganizationDto.fromOrganization(organization)
+    return new OrganizationDto(organization)
   }
 
   @Get()
@@ -210,7 +210,7 @@ export class OrganizationController {
   @UseGuards(AuthGuard('jwt'))
   async findAll(@AuthContext() authContext: IAuthContext): Promise<OrganizationDto[]> {
     const organizations = await this.organizationService.findByUser(authContext.userId)
-    return organizations.map(OrganizationDto.fromOrganization)
+    return organizations.map((org) => new OrganizationDto(org))
   }
 
   @Get('/:organizationId')
@@ -235,7 +235,7 @@ export class OrganizationController {
       throw new NotFoundException(`Organization with ID ${organizationId} not found`)
     }
 
-    return OrganizationDto.fromOrganization(organization)
+    return new OrganizationDto(organization)
   }
 
   @Delete('/:organizationId')
@@ -323,7 +323,7 @@ export class OrganizationController {
     @Body() updateOrganizationQuotaDto: UpdateOrganizationQuotaDto,
   ): Promise<OrganizationDto> {
     const organization = await this.organizationService.updateQuota(organizationId, updateOrganizationQuotaDto)
-    return OrganizationDto.fromOrganization(organization)
+    return new OrganizationDto(organization)
   }
 
   @Post('/:organizationId/leave')
@@ -441,7 +441,7 @@ export class OrganizationController {
       throw new NotFoundException(`Organization with sandbox ID ${sandboxId} not found`)
     }
 
-    return OrganizationDto.fromOrganization(organization)
+    return new OrganizationDto(organization)
   }
 
   @Post('/:organizationId/sandbox-default-limited-network-egress')

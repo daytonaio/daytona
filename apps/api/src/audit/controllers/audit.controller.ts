@@ -47,7 +47,7 @@ export class AuditController {
       query.nextToken,
     )
     return {
-      items: result.items.map(AuditLogDto.fromAuditLog),
+      items: result.items.map((item) => new AuditLogDto(item)),
       total: result.total,
       page: result.page,
       totalPages: result.totalPages,
@@ -86,7 +86,7 @@ export class AuditController {
       query.nextToken,
     )
     return {
-      items: result.items.map(AuditLogDto.fromAuditLog),
+      items: result.items.map((item) => new AuditLogDto(item)),
       total: result.total,
       page: result.page,
       totalPages: result.totalPages,

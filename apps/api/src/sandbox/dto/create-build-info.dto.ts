@@ -24,4 +24,8 @@ export class CreateBuildInfoDto {
   @IsString({ each: true })
   @IsOptional()
   contextHashes?: string[]
+
+  constructor(dockerfileContent: string) {
+    this.dockerfileContent = dockerfileContent
+  }
 }

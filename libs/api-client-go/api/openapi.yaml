@@ -1200,14 +1200,6 @@ paths:
           schema:
             type: string
           style: simple
-        - description: Include verbose output
-          explode: true
-          in: query
-          name: verbose
-          required: false
-          schema:
-            type: boolean
-          style: form
         - description: JSON encoded labels to filter by
           explode: true
           in: query
@@ -1221,6 +1213,14 @@ paths:
           explode: true
           in: query
           name: includeErroredDeleted
+          required: false
+          schema:
+            type: boolean
+          style: form
+        - description: Include verbose output
+          explode: true
+          in: query
+          name: verbose
           required: false
           schema:
             type: boolean

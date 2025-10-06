@@ -3,17 +3,13 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { ForbiddenException, Inject, Logger } from '@nestjs/common'
-import { EventEmitter2 } from '@nestjs/event-emitter'
+import { ForbiddenException, Logger } from '@nestjs/common'
 import { DataSource, EntitySubscriberInterface, EventSubscriber, UpdateEvent } from 'typeorm'
 import { AuditLog } from '../entities/audit-log.entity'
 
 @EventSubscriber()
 export class AuditLogSubscriber implements EntitySubscriberInterface<AuditLog> {
   private readonly logger = new Logger(AuditLogSubscriber.name)
-
-  @Inject(EventEmitter2)
-  private eventEmitter: EventEmitter2
 
   constructor(dataSource: DataSource) {
     dataSource.subscribers.push(this)

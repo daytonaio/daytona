@@ -16,10 +16,11 @@ import { SandboxOrganizationUpdatedEvent } from '../events/sandbox-organization-
 
 @EventSubscriber()
 export class SandboxSubscriber implements EntitySubscriberInterface<Sandbox> {
-  @Inject(EventEmitter2)
-  private eventEmitter: EventEmitter2
-
-  constructor(dataSource: DataSource) {
+  constructor(
+    dataSource: DataSource,
+    @Inject(EventEmitter2)
+    private eventEmitter: EventEmitter2,
+  ) {
     dataSource.subscribers.push(this)
   }
 
@@ -34,42 +35,36 @@ export class SandboxSubscriber implements EntitySubscriberInterface<Sandbox> {
   afterUpdate(event: UpdateEvent<Sandbox>) {
     const updatedColumns = event.updatedColumns.map((col) => col.propertyName)
 
+    if (!event.entity) {
+      return
+    }
+
+    const entity = event.entity as Sandbox
+
     updatedColumns.forEach((column) => {
       switch (column) {
         case 'organizationId':
           this.eventEmitter.emit(
             SandboxEvents.ORGANIZATION_UPDATED,
-            new SandboxOrganizationUpdatedEvent(
-              event.entity as Sandbox,
-              event.databaseEntity[column],
-              event.entity[column],
-            ),
+            new SandboxOrganizationUpdatedEvent(entity, event.databaseEntity[column], entity[column]),
           )
           break
         case 'public':
           this.eventEmitter.emit(
             SandboxEvents.PUBLIC_STATUS_UPDATED,
-            new SandboxPublicStatusUpdatedEvent(
-              event.entity as Sandbox,
-              event.databaseEntity[column],
-              event.entity[column],
-            ),
+            new SandboxPublicStatusUpdatedEvent(entity, event.databaseEntity[column], entity[column]),
           )
           break
         case 'desiredState':
           this.eventEmitter.emit(
             SandboxEvents.DESIRED_STATE_UPDATED,
-            new SandboxDesiredStateUpdatedEvent(
-              event.entity as Sandbox,
-              event.databaseEntity[column],
-              event.entity[column],
-            ),
+            new SandboxDesiredStateUpdatedEvent(entity, event.databaseEntity[column], entity[column]),
           )
           break
         case 'state':
           this.eventEmitter.emit(
             SandboxEvents.STATE_UPDATED,
-            new SandboxStateUpdatedEvent(event.entity as Sandbox, event.databaseEntity[column], event.entity[column]),
+            new SandboxStateUpdatedEvent(entity, event.databaseEntity[column], entity[column]),
           )
           break
         default:

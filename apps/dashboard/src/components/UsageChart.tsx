@@ -72,7 +72,7 @@ export function UsageChart({ usageData, showTotal, title }: UsageChartProps) {
     if (filteredData.length < timeRange) {
       const missingData: UsageChartData[] = []
       for (let i = 0; i < timeRange - filteredData.length; i++) {
-        const refDate = filteredData.length > 0 ? filteredData[0].date : new Date()
+        const refDate = filteredData.length > 0 && filteredData[0] ? filteredData[0].date : new Date()
         missingData.push({
           date: subMonths(new Date(refDate), i + 1).toISOString(),
           diskGB: 0,

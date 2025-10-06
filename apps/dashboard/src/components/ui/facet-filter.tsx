@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import * as React from 'react'
 import { Check, PlusCircle } from 'lucide-react'
 
 import { cn } from '@/lib/utils'

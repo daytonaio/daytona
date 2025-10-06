@@ -34,4 +34,10 @@ export class UpdateOrganizationRoleDto {
   @ArrayNotEmpty()
   @IsEnum(OrganizationResourcePermission, { each: true })
   permissions: OrganizationResourcePermission[]
+
+  constructor(params: { name: string; description: string; permissions: OrganizationResourcePermission[] }) {
+    this.name = params.name
+    this.description = params.description
+    this.permissions = params.permissions
+  }
 }

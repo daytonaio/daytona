@@ -52,4 +52,19 @@ export class OrganizationUser {
     type: 'timestamp with time zone',
   })
   updatedAt: Date
+
+  constructor(createParams: {
+    organization: Organization
+    userId: string
+    role?: OrganizationMemberRole
+    assignedRoles?: OrganizationRole[]
+  }) {
+    this.organizationId = createParams.organization.id
+    this.userId = createParams.userId
+    this.role = createParams.role || OrganizationMemberRole.MEMBER
+    this.organization = createParams.organization
+    this.assignedRoles = createParams.assignedRoles || []
+    this.createdAt = new Date()
+    this.updatedAt = new Date()
+  }
 }

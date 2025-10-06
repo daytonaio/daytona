@@ -19,7 +19,7 @@ type DistributedLockOptions = {
  * @returns A decorator function that handles Redis locking
  */
 export function DistributedLock(options?: DistributedLockOptions): MethodDecorator {
-  return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+  return function (target: any, propertyKey: string | symbol, descriptor: PropertyDescriptor) {
     const originalMethod = descriptor.value
 
     descriptor.value = async function (...args: any[]) {
@@ -30,7 +30,7 @@ export function DistributedLock(options?: DistributedLockOptions): MethodDecorat
       const redisLockProvider: RedisLockProvider = this.redisLockProvider
 
       // Generate lock key
-      const lockKey = `lock:${options?.lockKey ?? target.constructor.name}.${propertyKey}`
+      const lockKey = `lock:${options?.lockKey ?? target.constructor.name}.${String(propertyKey)}`
 
       // Set default TTL if not provided
       const lockTtlMs = options?.lockTtl || 30 // 30 seconds default

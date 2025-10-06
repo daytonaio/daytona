@@ -228,21 +228,20 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
       throw new ForbiddenException('You have reached the maximum number of created organizations')
     }
 
-    let organization = new Organization()
-
-    organization.name = createOrganizationDto.name
-    organization.createdBy = createdBy
-    organization.personal = personal
-
-    organization.totalCpuQuota = quota.totalCpuQuota
-    organization.totalMemoryQuota = quota.totalMemoryQuota
-    organization.totalDiskQuota = quota.totalDiskQuota
-    organization.maxCpuPerSandbox = quota.maxCpuPerSandbox
-    organization.maxMemoryPerSandbox = quota.maxMemoryPerSandbox
-    organization.maxDiskPerSandbox = quota.maxDiskPerSandbox
-    organization.snapshotQuota = quota.snapshotQuota
-    organization.maxSnapshotSize = quota.maxSnapshotSize
-    organization.volumeQuota = quota.volumeQuota
+    let organization = new Organization({
+      name: createOrganizationDto.name,
+      createdBy,
+      personal,
+      totalCpuQuota: quota.totalCpuQuota,
+      totalMemoryQuota: quota.totalMemoryQuota,
+      totalDiskQuota: quota.totalDiskQuota,
+      maxCpuPerSandbox: quota.maxCpuPerSandbox,
+      maxMemoryPerSandbox: quota.maxMemoryPerSandbox,
+      maxDiskPerSandbox: quota.maxDiskPerSandbox,
+      snapshotQuota: quota.snapshotQuota,
+      maxSnapshotSize: quota.maxSnapshotSize,
+      volumeQuota: quota.volumeQuota,
+    })
 
     if (!creatorEmailVerified) {
       organization.suspended = true
@@ -254,11 +253,15 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
       organization.suspensionReason = 'Payment method required'
     }
 
-    organization.sandboxLimitedNetworkEgress = this.configService.get('organizationSandboxDefaultLimitedNetworkEgress')
+    organization.sandboxLimitedNetworkEgress = !!this.configService.get(
+      'organizationSandboxDefaultLimitedNetworkEgress',
+    )
 
-    const owner = new OrganizationUser()
-    owner.userId = createdBy
-    owner.role = OrganizationMemberRole.OWNER
+    const owner = new OrganizationUser({
+      organization,
+      userId: createdBy,
+      role: OrganizationMemberRole.OWNER,
+    })
 
     organization.users = [owner]
 

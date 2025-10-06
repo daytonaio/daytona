@@ -1,5 +1,5 @@
 /* tslint:disable */
-
+/* eslint-disable */
 /**
  * Daytona
  * Daytona AI platform API Docs
@@ -12,28 +12,31 @@
  * Do not edit the class manually.
  */
 
+
+
 /**
- *
+ * 
  * @export
  * @interface ReplaceRequest
  */
 export interface ReplaceRequest {
-  /**
-   *
-   * @type {Array<string>}
-   * @memberof ReplaceRequest
-   */
-  files: Array<string>
-  /**
-   *
-   * @type {string}
-   * @memberof ReplaceRequest
-   */
-  pattern: string
-  /**
-   *
-   * @type {string}
-   * @memberof ReplaceRequest
-   */
-  newValue: string
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof ReplaceRequest
+     */
+    'files': Array<string>;
+    /**
+     * 
+     * @type {string}
+     * @memberof ReplaceRequest
+     */
+    'pattern': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ReplaceRequest
+     */
+    'newValue': string;
 }
+

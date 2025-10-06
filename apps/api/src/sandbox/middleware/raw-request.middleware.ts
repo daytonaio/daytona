@@ -11,7 +11,7 @@ import getRawBody from 'raw-body'
 export class RawRequestMiddleware implements NestMiddleware {
   private logger = new Logger('RawRequest')
 
-  async use(req: Request, res: Response, next: NextFunction) {
+  async use(req: Request, _: Response, next: NextFunction) {
     if (req.method === 'POST' && req.headers['content-type'] !== 'application/json') {
       const rawBody = await getRawBody(req)
       const bodyStr = rawBody.toString()

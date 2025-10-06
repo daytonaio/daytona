@@ -36,4 +36,12 @@ export class WebhookInitialization {
     type: 'timestamp with time zone',
   })
   updatedAt: Date
+
+  constructor(organizationId: string, retryCount = 0, svixApplicationId?: string) {
+    this.organizationId = organizationId
+    this.svixApplicationId = svixApplicationId
+    this.retryCount = retryCount
+    this.createdAt = new Date()
+    this.updatedAt = new Date()
+  }
 }

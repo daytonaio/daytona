@@ -12,12 +12,7 @@ import { TypedConfigService } from '../../config/typed-config.service'
  * ref: https://github.com/iamolegga/nestjs-pino/issues/2004
  *
  */
-export function swapMessageAndObject(
-  this: pino.Logger,
-  args: Parameters<pino.LogFn>,
-  method: pino.LogFn,
-  level: number,
-): void {
+export function swapMessageAndObject(this: pino.Logger, args: Parameters<pino.LogFn>, method: pino.LogFn): void {
   // Type guard helper
   const isPlainObject = (val: unknown): val is Record<string, unknown> => {
     return typeof val === 'object' && val !== null && !Array.isArray(val)
@@ -97,10 +92,10 @@ type LogConfig = ReturnType<typeof TypedConfigService.prototype.get<'log'>>
 export function getPinoTransport(
   isProduction: boolean,
   logConfig: LogConfig,
-): TransportSingleOptions<Record<string, any>> {
+): TransportSingleOptions<Record<string, any>> | undefined {
   switch (true) {
     // if console disabled, set destination to /dev/null
-    case logConfig.console.disabled:
+    case logConfig?.console.disabled:
       return {
         target: 'pino/file',
         options: {

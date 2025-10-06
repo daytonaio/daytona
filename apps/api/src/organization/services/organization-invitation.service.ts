@@ -10,7 +10,6 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common'
-import { ConfigService } from '@nestjs/config'
 import { EventEmitter2 } from '@nestjs/event-emitter'
 import { InjectRepository } from '@nestjs/typeorm'
 import { DataSource, MoreThan, Repository } from 'typeorm'
@@ -38,7 +37,6 @@ export class OrganizationInvitationService {
     private readonly userService: UserService,
     private readonly eventEmitter: EventEmitter2,
     private readonly dataSource: DataSource,
-    private readonly configService: ConfigService,
   ) {}
 
   async create(
@@ -76,13 +74,13 @@ export class OrganizationInvitationService {
       throw new ConflictException(`User with email "${normalizedEmail}" already invited to this organization`)
     }
 
-    let invitation = new OrganizationInvitation()
-    invitation.organizationId = organizationId
-    invitation.organization = organization
-    invitation.email = normalizedEmail
-    invitation.expiresAt = createOrganizationInvitationDto.expiresAt || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
-    invitation.role = createOrganizationInvitationDto.role
-    invitation.invitedBy = invitedBy
+    let invitation = new OrganizationInvitation({
+      email: normalizedEmail,
+      organization: organization,
+      expiresAt: createOrganizationInvitationDto.expiresAt || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      role: createOrganizationInvitationDto.role,
+      invitedBy: invitedBy,
+    })
 
     const assignedRoles = await this.organizationRoleService.findByIds(createOrganizationInvitationDto.assignedRoleIds)
     if (assignedRoles.length !== createOrganizationInvitationDto.assignedRoleIds.length) {

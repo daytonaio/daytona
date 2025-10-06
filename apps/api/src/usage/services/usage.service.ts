@@ -75,22 +75,17 @@ export class UsageService implements TrackableJobExecutions, OnApplicationShutdo
   }
 
   private async createUsagePeriod(event: SandboxStateUpdatedEvent, diskOnly = false) {
-    const usagePeriod = new SandboxUsagePeriod()
-    usagePeriod.sandboxId = event.sandbox.id
-    usagePeriod.startAt = new Date()
-    usagePeriod.endAt = null
-    if (!diskOnly) {
-      usagePeriod.cpu = event.sandbox.cpu
-      usagePeriod.gpu = event.sandbox.gpu
-      usagePeriod.mem = event.sandbox.mem
-    } else {
-      usagePeriod.cpu = 0
-      usagePeriod.gpu = 0
-      usagePeriod.mem = 0
-    }
-    usagePeriod.disk = event.sandbox.disk
-    usagePeriod.organizationId = event.sandbox.organizationId
-    usagePeriod.region = event.sandbox.region
+    const usagePeriod = new SandboxUsagePeriod({
+      sandboxId: event.sandbox.id,
+      organizationId: event.sandbox.organizationId,
+      startAt: new Date(),
+      endAt: null,
+      cpu: diskOnly ? 0 : event.sandbox.cpu,
+      gpu: diskOnly ? 0 : event.sandbox.gpu,
+      mem: diskOnly ? 0 : event.sandbox.mem,
+      disk: event.sandbox.disk,
+      region: event.sandbox.region,
+    })
 
     await this.sandboxUsagePeriodRepository.save(usagePeriod)
   }
@@ -99,7 +94,7 @@ export class UsageService implements TrackableJobExecutions, OnApplicationShutdo
     const lastUsagePeriod = await this.sandboxUsagePeriodRepository.findOne({
       where: {
         sandboxId,
-        endAt: null,
+        endAt: IsNull(),
       },
       order: {
         startAt: 'DESC',
@@ -155,7 +150,7 @@ export class UsageService implements TrackableJobExecutions, OnApplicationShutdo
 
           if (sandbox && (sandbox.state === SandboxState.STARTED || sandbox.state === SandboxState.STOPPED)) {
             // Create new usage period
-            const newUsagePeriod = SandboxUsagePeriod.fromUsagePeriod(usagePeriod)
+            const newUsagePeriod = new SandboxUsagePeriod(usagePeriod)
             newUsagePeriod.startAt = closeTime
             newUsagePeriod.endAt = null
             await transactionalEntityManager.save(newUsagePeriod)
@@ -202,7 +197,9 @@ export class UsageService implements TrackableJobExecutions, OnApplicationShutdo
         SandboxUsagePeriod,
         usagePeriods.map((usagePeriod) => usagePeriod.id),
       )
-      await transactionalEntityManager.save(usagePeriods.map(SandboxUsagePeriodArchive.fromUsagePeriod))
+      await transactionalEntityManager.save(
+        usagePeriods.map((usagePeriod) => new SandboxUsagePeriodArchive(usagePeriod)),
+      )
     })
 
     await this.redisLockProvider.unlock(lockKey)

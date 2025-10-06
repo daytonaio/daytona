@@ -19,4 +19,9 @@ export class CreateLinkedAccountDto {
   })
   @IsString()
   userId: string
+
+  private constructor() {
+    this.provider = ''
+    this.userId = ''
+  }
 }

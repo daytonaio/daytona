@@ -5,6 +5,7 @@
 
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm'
 import { SandboxUsagePeriod } from './sandbox-usage-period.entity'
+import { v4 } from 'uuid'
 
 // Duplicate of SandboxUsagePeriod
 // Used to archive usage periods and keep the original table lightweight
@@ -42,17 +43,20 @@ export class SandboxUsagePeriodArchive {
   @Column()
   region: string
 
-  public static fromUsagePeriod(usagePeriod: SandboxUsagePeriod) {
-    const usagePeriodEntity = new SandboxUsagePeriodArchive()
-    usagePeriodEntity.sandboxId = usagePeriod.sandboxId
-    usagePeriodEntity.organizationId = usagePeriod.organizationId
-    usagePeriodEntity.startAt = usagePeriod.startAt
-    usagePeriodEntity.endAt = usagePeriod.endAt
-    usagePeriodEntity.cpu = usagePeriod.cpu
-    usagePeriodEntity.gpu = usagePeriod.gpu
-    usagePeriodEntity.mem = usagePeriod.mem
-    usagePeriodEntity.disk = usagePeriod.disk
-    usagePeriodEntity.region = usagePeriod.region
-    return usagePeriodEntity
+  constructor(usagePeriod: SandboxUsagePeriod) {
+    if (!usagePeriod.endAt) {
+      throw new Error('Usage period must be closed is required')
+    }
+
+    this.id = v4()
+    this.sandboxId = usagePeriod.sandboxId
+    this.organizationId = usagePeriod.organizationId
+    this.startAt = usagePeriod.startAt
+    this.endAt = usagePeriod.endAt
+    this.cpu = usagePeriod.cpu
+    this.gpu = usagePeriod.gpu
+    this.mem = usagePeriod.mem
+    this.disk = usagePeriod.disk
+    this.region = usagePeriod.region
   }
 }

@@ -1,5 +1,5 @@
 /* tslint:disable */
-
+/* eslint-disable */
 /**
  * Daytona
  * Daytona AI platform API Docs
@@ -12,46 +12,49 @@
  * Do not edit the class manually.
  */
 
+
+
 /**
- *
+ * 
  * @export
  * @interface PtyCreateRequest
  */
 export interface PtyCreateRequest {
-  /**
-   * The unique identifier for the PTY session
-   * @type {string}
-   * @memberof PtyCreateRequest
-   */
-  id: string
-  /**
-   * Starting directory for the PTY session, defaults to the sandbox\'s working directory
-   * @type {string}
-   * @memberof PtyCreateRequest
-   */
-  cwd?: string
-  /**
-   * Environment variables for the PTY session
-   * @type {object}
-   * @memberof PtyCreateRequest
-   */
-  envs?: object
-  /**
-   * Number of terminal columns
-   * @type {number}
-   * @memberof PtyCreateRequest
-   */
-  cols?: number
-  /**
-   * Number of terminal rows
-   * @type {number}
-   * @memberof PtyCreateRequest
-   */
-  rows?: number
-  /**
-   * Whether to start the PTY session lazily (only start when first client connects)
-   * @type {boolean}
-   * @memberof PtyCreateRequest
-   */
-  lazyStart?: boolean
+    /**
+     * The unique identifier for the PTY session
+     * @type {string}
+     * @memberof PtyCreateRequest
+     */
+    'id': string;
+    /**
+     * Starting directory for the PTY session, defaults to the sandbox\'s working directory
+     * @type {string}
+     * @memberof PtyCreateRequest
+     */
+    'cwd'?: string;
+    /**
+     * Environment variables for the PTY session
+     * @type {object}
+     * @memberof PtyCreateRequest
+     */
+    'envs'?: object;
+    /**
+     * Number of terminal columns
+     * @type {number}
+     * @memberof PtyCreateRequest
+     */
+    'cols'?: number;
+    /**
+     * Number of terminal rows
+     * @type {number}
+     * @memberof PtyCreateRequest
+     */
+    'rows'?: number;
+    /**
+     * Whether to start the PTY session lazily (only start when first client connects)
+     * @type {boolean}
+     * @memberof PtyCreateRequest
+     */
+    'lazyStart'?: boolean;
 }
+

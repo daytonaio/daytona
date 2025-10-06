@@ -6,7 +6,7 @@
 import { Injectable, Logger, Inject, OnModuleInit } from '@nestjs/common'
 import { AuditLog } from '../entities/audit-log.entity'
 import { AuditLogPublisher } from '../interfaces/audit-publisher.interface'
-import { AuditLogStorageAdapter } from '../interfaces/audit-storage.interface'
+import { type AuditLogStorageAdapter } from '../interfaces/audit-storage.interface'
 import { AUDIT_STORAGE_ADAPTER } from '../constants/audit-tokens'
 
 @Injectable()

@@ -83,4 +83,27 @@ export class OrganizationInvitation {
     type: 'timestamp with time zone',
   })
   updatedAt: Date
+
+  constructor(createParams: {
+    organization: Organization
+    invitedBy: string
+    email: string
+    id?: string
+    role?: OrganizationMemberRole
+    assignedRoles?: OrganizationRole[]
+    expiresAt: Date
+    status?: OrganizationInvitationStatus
+  }) {
+    this.id = createParams.id || ''
+    this.organization = createParams.organization
+    this.organizationId = createParams.organization.id
+    this.invitedBy = createParams.invitedBy
+    this.email = createParams.email
+    this.role = createParams.role || OrganizationMemberRole.MEMBER
+    this.assignedRoles = createParams.assignedRoles || []
+    this.expiresAt = createParams.expiresAt
+    this.status = createParams.status || OrganizationInvitationStatus.PENDING
+    this.createdAt = new Date()
+    this.updatedAt = new Date()
+  }
 }

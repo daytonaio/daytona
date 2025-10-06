@@ -4,6 +4,7 @@
  */
 
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, Index } from 'typeorm'
+import { v4 } from 'uuid'
 
 export type AuditLogMetadata = Record<string, any>
 
@@ -22,38 +23,69 @@ export class AuditLog {
   })
   actorEmail: string
 
-  @Column({ nullable: true })
-  organizationId?: string
+  @Column({ nullable: true, type: String })
+  organizationId: string | null
 
   @Column()
   action: string
 
-  @Column({ nullable: true })
-  targetType?: string
+  @Column({ nullable: true, type: String })
+  targetType: string | null
 
-  @Column({ nullable: true })
-  targetId?: string
+  @Column({ nullable: true, type: String })
+  targetId: string | null
 
-  @Column({ nullable: true })
-  statusCode?: number
+  @Column({ nullable: true, type: Number })
+  statusCode: number | null
 
-  @Column({ nullable: true })
-  errorMessage?: string
+  @Column({ nullable: true, type: String })
+  errorMessage: string | null
 
-  @Column({ nullable: true })
-  ipAddress?: string
+  @Column({ nullable: true, type: String })
+  ipAddress: string | null
 
-  @Column({ type: 'text', nullable: true })
-  userAgent?: string
+  @Column({ nullable: true, type: String })
+  userAgent: string | null
 
-  @Column({ nullable: true })
-  source?: string
+  @Column({ nullable: true, type: String })
+  source: string | null
 
   @Column({ type: 'jsonb', nullable: true })
-  metadata?: AuditLogMetadata
+  metadata: AuditLogMetadata | null
 
   @CreateDateColumn({
     type: 'timestamp with time zone',
   })
   createdAt: Date
+
+  constructor(createParams: {
+    actorId: string
+    actorEmail: string
+    organizationId?: string | null
+    action: string
+    targetType?: string | null
+    targetId?: string | null
+    statusCode?: number | null
+    errorMessage?: string | null
+    ipAddress?: string | null
+    userAgent?: string | null
+    source?: string | null
+    metadata?: AuditLogMetadata | null
+  }) {
+    this.id = v4()
+    this.actorId = createParams.actorId
+    this.actorEmail = createParams.actorEmail
+    this.organizationId = createParams.organizationId ?? null
+    this.action = createParams.action
+    this.targetType = createParams.targetType ?? null
+    this.targetId = createParams.targetId ?? null
+    this.statusCode = createParams.statusCode ?? null
+    this.errorMessage = createParams.errorMessage ?? null
+    this.ipAddress = createParams.ipAddress ?? null
+    this.userAgent = createParams.userAgent ?? null
+    this.source = createParams.source ?? null
+    this.metadata = createParams.metadata ?? null
+
+    this.createdAt = new Date()
+  }
 }

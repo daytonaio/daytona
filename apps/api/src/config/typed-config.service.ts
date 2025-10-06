@@ -41,7 +41,7 @@ export class TypedConfigService {
    * @param key The configuration key (can be nested using dot notation)
    * @returns The configuration value with proper typing
    */
-  get<K extends Paths<Configuration>>(key: K): PathValue<Configuration, K> {
+  get<K extends Paths<Configuration>>(key: K): PathValue<Configuration, K> | undefined {
     return this.configService.get(key)
   }
 
@@ -81,7 +81,7 @@ export class TypedConfigService {
         : undefined
 
     return {
-      brokers: this.get('kafka.brokers')
+      brokers: this.getOrThrow('kafka.brokers')
         .split(',')
         .map((broker) => broker.trim()),
       ssl: this.get('kafka.tls.enabled')
@@ -99,7 +99,7 @@ export class TypedConfigService {
    */
   getOpenSearchConfig(): ClientOptions {
     const nodes = this.get('opensearch.nodes')
-      .split(',')
+      ?.split(',')
       .map((node) => node.trim())
     const username = this.get('opensearch.username')
     const password = this.get('opensearch.password')
@@ -130,7 +130,7 @@ export class TypedConfigService {
             },
           }),
           service: 'es',
-          region: this.get('opensearch.aws.region'),
+          region: this.getOrThrow('opensearch.aws.region'),
         })
       } else {
         signer = AwsSigv4Signer({
@@ -139,7 +139,7 @@ export class TypedConfigService {
             return credentialsProvider()
           },
           service: 'es',
-          region: this.get('opensearch.aws.region'),
+          region: this.getOrThrow('opensearch.aws.region'),
         })
       }
       return {

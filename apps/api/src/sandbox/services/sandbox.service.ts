@@ -15,7 +15,6 @@ import { RunnerService } from './runner.service'
 import { SandboxError } from '../../exceptions/sandbox-error.exception'
 import { BadRequestError } from '../../exceptions/bad-request.exception'
 import { Cron, CronExpression } from '@nestjs/schedule'
-import { RunnerState } from '../enums/runner-state.enum'
 import { BackupState } from '../enums/backup-state.enum'
 import { Snapshot } from '../entities/snapshot.entity'
 import { SnapshotState } from '../enums/snapshot-state.enum'
@@ -64,7 +63,6 @@ import {
   PER_SANDBOX_LIMIT_MESSAGE,
 } from '../../common/constants/error-messages'
 import { LockableEntity } from '../../common/services/lockable-entity.service'
-import { customAlphabet as customNanoid, urlAlphabet } from 'nanoid'
 import { WithInstrumentation } from '../../common/decorators/otel.decorator'
 
 const DEFAULT_CPU = 1
@@ -150,19 +148,19 @@ export class SandboxService extends LockableEntity {
     try {
       const upgradeTierMessage = UPGRADE_TIER_MESSAGE(this.configService.getOrThrow('dashboardUrl'))
 
-      if (usageOverview.currentCpuUsage + usageOverview.pendingCpuUsage > organization.totalCpuQuota) {
+      if (usageOverview.currentCpuUsage + (usageOverview.pendingCpuUsage ?? 0) > organization.totalCpuQuota) {
         throw new ForbiddenException(
           `Total CPU limit exceeded. Maximum allowed: ${organization.totalCpuQuota}.\n${upgradeTierMessage}`,
         )
       }
 
-      if (usageOverview.currentMemoryUsage + usageOverview.pendingMemoryUsage > organization.totalMemoryQuota) {
+      if (usageOverview.currentMemoryUsage + (usageOverview.pendingMemoryUsage ?? 0) > organization.totalMemoryQuota) {
         throw new ForbiddenException(
           `Total memory limit exceeded. Maximum allowed: ${organization.totalMemoryQuota}GiB.\n${upgradeTierMessage}`,
         )
       }
 
-      if (usageOverview.currentDiskUsage + usageOverview.pendingDiskUsage > organization.totalDiskQuota) {
+      if (usageOverview.currentDiskUsage + (usageOverview.pendingDiskUsage ?? 0) > organization.totalDiskQuota) {
         throw new ForbiddenException(
           `Total disk limit exceeded. Maximum allowed: ${organization.totalDiskQuota}GiB.\n${ARCHIVE_SANDBOXES_MESSAGE}\n${upgradeTierMessage}`,
         )
@@ -239,21 +237,19 @@ export class SandboxService extends LockableEntity {
   }
 
   async createForWarmPool(warmPoolItem: WarmPool): Promise<Sandbox> {
-    const sandbox = new Sandbox()
+    const sandbox = new Sandbox({
+      organizationId: SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION,
+      region: warmPoolItem.target,
+      class: warmPoolItem.class,
+      osUser: 'daytona',
+      env: warmPoolItem.env,
+      cpu: warmPoolItem.cpu,
+      gpu: warmPoolItem.gpu,
+      mem: warmPoolItem.mem,
+      disk: warmPoolItem.disk,
+    })
 
-    sandbox.organizationId = SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION
-
-    sandbox.region = warmPoolItem.target
-    sandbox.class = warmPoolItem.class
     sandbox.snapshot = warmPoolItem.snapshot
-    //  TODO: default user should be configurable
-    sandbox.osUser = 'daytona'
-    sandbox.env = warmPoolItem.env || {}
-
-    sandbox.cpu = warmPoolItem.cpu
-    sandbox.gpu = warmPoolItem.gpu
-    sandbox.mem = warmPoolItem.mem
-    sandbox.disk = warmPoolItem.disk
 
     const snapshot = await this.snapshotRepository.findOne({
       where: [
@@ -263,6 +259,10 @@ export class SandboxService extends LockableEntity {
     })
     if (!snapshot) {
       throw new BadRequestError(`Snapshot ${sandbox.snapshot} not found while creating warm pool sandbox`)
+    }
+
+    if (!snapshot.internalName) {
+      throw new BadRequestError(`Snapshot ${sandbox.snapshot} is not ready yet`)
     }
 
     const runner = await this.runnerService.getRandomAvailableRunner({
@@ -296,6 +296,10 @@ export class SandboxService extends LockableEntity {
         snapshotIdOrName = this.configService.getOrThrow('defaultSnapshot')
       }
 
+      if (!snapshotIdOrName) {
+        throw new BadRequestError('Snapshot ID or name is required')
+      }
+
       const snapshotFilter: FindOptionsWhere<Snapshot>[] = [
         { organizationId: organization.id, name: snapshotIdOrName },
         { general: true, name: snapshotIdOrName },
@@ -318,14 +322,15 @@ export class SandboxService extends LockableEntity {
         )
       }
 
-      let snapshot = snapshots.find((s) => s.state === SnapshotState.ACTIVE)
-
-      if (!snapshot) {
-        snapshot = snapshots[0]
-      }
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      const snapshot = snapshots.find((s) => s.state === SnapshotState.ACTIVE) ?? snapshots[0]!
 
       if (snapshot.state !== SnapshotState.ACTIVE) {
         throw new BadRequestError(`Snapshot ${snapshotIdOrName} is ${snapshot.state}`)
+      }
+
+      if (!snapshot.internalName) {
+        throw new BadRequestError(`Snapshot ${snapshotIdOrName} is not ready yet`)
       }
 
       let cpu = snapshot.cpu
@@ -368,13 +373,13 @@ export class SandboxService extends LockableEntity {
         const warmPoolSandbox = await this.warmPoolService.fetchWarmPoolSandbox({
           organizationId: organization.id,
           snapshot: snapshotIdOrName,
-          target: createSandboxDto.target,
-          class: createSandboxDto.class,
+          target: region,
+          class: sandboxClass,
           cpu: cpu,
           mem: mem,
           disk: disk,
-          osUser: createSandboxDto.user,
-          env: createSandboxDto.env,
+          osUser: createSandboxDto.user ?? 'daytona',
+          env: createSandboxDto.env ?? {},
           state: SandboxState.STARTED,
         })
 
@@ -392,26 +397,22 @@ export class SandboxService extends LockableEntity {
         snapshotRef: snapshot.internalName,
       })
 
-      const sandbox = new Sandbox(createSandboxDto.name)
-
-      sandbox.organizationId = organization.id
-
-      //  TODO: make configurable
-      sandbox.region = region
-      sandbox.class = sandboxClass
-      sandbox.snapshot = snapshot.name
-      //  TODO: default user should be configurable
-      sandbox.osUser = createSandboxDto.user || 'daytona'
-      sandbox.env = createSandboxDto.env || {}
-      sandbox.labels = createSandboxDto.labels || {}
-      sandbox.volumes = createSandboxDto.volumes || []
-
-      sandbox.cpu = cpu
-      sandbox.gpu = gpu
-      sandbox.mem = mem
-      sandbox.disk = disk
-
-      sandbox.public = createSandboxDto.public || false
+      const sandbox = new Sandbox({
+        name: createSandboxDto.name,
+        organizationId: organization.id,
+        region,
+        class: sandboxClass,
+        snapshot: snapshot.name,
+        osUser: createSandboxDto.user || 'daytona',
+        env: createSandboxDto.env,
+        labels: createSandboxDto.labels,
+        volumes: createSandboxDto.volumes,
+        cpu,
+        mem,
+        disk,
+        gpu,
+        public: createSandboxDto.public,
+      })
 
       if (createSandboxDto.networkBlockAll !== undefined) {
         sandbox.networkBlockAll = createSandboxDto.networkBlockAll
@@ -436,7 +437,7 @@ export class SandboxService extends LockableEntity {
       sandbox.runnerId = runner.id
 
       await this.sandboxRepository.insert(sandbox)
-      return SandboxDto.fromSandbox(sandbox)
+      return new SandboxDto(sandbox)
     } catch (error) {
       if (error.code === '23505') {
         throw new ConflictException(`Sandbox with name ${createSandboxDto.name} already exists`)
@@ -516,7 +517,7 @@ export class SandboxService extends LockableEntity {
       SandboxEvents.STATE_UPDATED,
       new SandboxStateUpdatedEvent(warmPoolSandbox, SandboxState.STARTED, SandboxState.STARTED),
     )
-    return SandboxDto.fromSandbox(result)
+    return new SandboxDto(result)
   }
 
   async createFromBuildInfo(createSandboxDto: CreateSandboxDto, organization: Organization): Promise<SandboxDto> {
@@ -553,26 +554,23 @@ export class SandboxService extends LockableEntity {
         await this.volumeService.validateVolumes(organization.id, volumeIdOrNames)
       }
 
-      const sandbox = new Sandbox(createSandboxDto.name)
-
-      sandbox.organizationId = organization.id
-
-      sandbox.region = region
-      sandbox.class = sandboxClass
-      sandbox.osUser = createSandboxDto.user || 'daytona'
-      sandbox.env = createSandboxDto.env || {}
-      sandbox.labels = createSandboxDto.labels || {}
-      sandbox.volumes = createSandboxDto.volumes || []
-
-      sandbox.cpu = cpu
-      sandbox.gpu = gpu
-      sandbox.mem = mem
-      sandbox.disk = disk
-      sandbox.public = createSandboxDto.public || false
-
-      if (createSandboxDto.networkBlockAll !== undefined) {
-        sandbox.networkBlockAll = createSandboxDto.networkBlockAll
-      }
+      const sandbox = new Sandbox({
+        name: createSandboxDto.name,
+        organizationId: organization.id,
+        region,
+        class: sandboxClass,
+        osUser: createSandboxDto.user || 'daytona',
+        env: createSandboxDto.env,
+        labels: createSandboxDto.labels,
+        volumes: createSandboxDto.volumes,
+        cpu,
+        gpu,
+        mem,
+        disk,
+        public: createSandboxDto.public,
+        networkBlockAll: createSandboxDto.networkBlockAll,
+        autoDeleteInterval: createSandboxDto.autoDeleteInterval,
+      })
 
       if (createSandboxDto.networkAllowList !== undefined) {
         sandbox.networkAllowList = this.resolveNetworkAllowList(createSandboxDto.networkAllowList)
@@ -586,8 +584,8 @@ export class SandboxService extends LockableEntity {
         sandbox.autoArchiveInterval = this.resolveAutoArchiveInterval(createSandboxDto.autoArchiveInterval)
       }
 
-      if (createSandboxDto.autoDeleteInterval !== undefined) {
-        sandbox.autoDeleteInterval = createSandboxDto.autoDeleteInterval
+      if (!createSandboxDto.buildInfo) {
+        throw new BadRequestError('Build info is required')
       }
 
       const buildInfoSnapshotRef = generateBuildSnapshotRef(
@@ -611,7 +609,7 @@ export class SandboxService extends LockableEntity {
         sandbox.buildInfo = buildInfoEntity
       }
 
-      let runner: Runner
+      let runner: Runner | undefined
 
       try {
         runner = await this.runnerService.getRandomAvailableRunner({
@@ -632,7 +630,7 @@ export class SandboxService extends LockableEntity {
       }
 
       await this.sandboxRepository.insert(sandbox)
-      return SandboxDto.fromSandbox(sandbox)
+      return new SandboxDto(sandbox)
     } catch (error) {
       if (error.code === '23505') {
         throw new ConflictException(`Sandbox with name ${createSandboxDto.name} already exists`)
@@ -1088,7 +1086,7 @@ export class SandboxService extends LockableEntity {
     return region.trim()
   }
 
-  private getValidatedOrDefaultClass(sandboxClass: SandboxClass): SandboxClass {
+  private getValidatedOrDefaultClass(sandboxClass?: SandboxClass): SandboxClass {
     if (!sandboxClass) {
       return SandboxClass.SMALL
     }
@@ -1126,7 +1124,7 @@ export class SandboxService extends LockableEntity {
       updatedAt: LessThan(twentyFourHoursAgo),
     })
 
-    if (destroyedSandboxs.affected > 0) {
+    if (destroyedSandboxs.affected && destroyedSandboxs.affected > 0) {
       this.logger.debug(`Cleaned up ${destroyedSandboxs.affected} destroyed sandboxes`)
     }
   }
@@ -1134,18 +1132,18 @@ export class SandboxService extends LockableEntity {
   @Cron(CronExpression.EVERY_10_MINUTES, { name: 'cleanup-build-failed-sandboxes' })
   @LogExecution('cleanup-build-failed-sandboxes')
   @WithInstrumentation()
-  async cleanupBuildFailedSandboxes() {
+  async _cleanupBuildFailedSandboxes() {
     const twentyFourHoursAgo = new Date()
     twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24)
 
-    const destroyedSandboxs = await this.sandboxRepository.delete({
+    const destroyedSandboxes = await this.sandboxRepository.delete({
       state: SandboxState.BUILD_FAILED,
       desiredState: SandboxDesiredState.DESTROYED,
       updatedAt: LessThan(twentyFourHoursAgo),
     })
 
-    if (destroyedSandboxs.affected > 0) {
-      this.logger.debug(`Cleaned up ${destroyedSandboxs.affected} build failed sandboxes`)
+    if (destroyedSandboxes?.affected) {
+      this.logger.debug(`Cleaned up ${destroyedSandboxes.affected} build failed sandboxes`)
     }
   }
 
@@ -1240,14 +1238,14 @@ export class SandboxService extends LockableEntity {
   }
 
   @OnEvent(WarmPoolEvents.TOPUP_REQUESTED)
-  private async createWarmPoolSandbox(event: WarmPoolTopUpRequested) {
+  async _createWarmPoolSandbox(event: WarmPoolTopUpRequested) {
     await this.createForWarmPool(event.warmPool)
   }
 
   @Cron(CronExpression.EVERY_MINUTE, { name: 'handle-unschedulable-runners' })
   @LogExecution('handle-unschedulable-runners')
   @WithInstrumentation()
-  private async handleUnschedulableRunners() {
+  async _handleUnschedulableRunners() {
     const runners = await this.runnerRepository.find({ where: { unschedulable: true } })
 
     if (runners.length === 0) {
@@ -1274,7 +1272,7 @@ export class SandboxService extends LockableEntity {
     // Log any failed sandbox destructions
     results.forEach((result, index) => {
       if (result.status === 'rejected') {
-        this.logger.error(`Failed to destroy sandbox ${sandboxes[index].id}: ${result.reason}`)
+        this.logger.error(`Failed to destroy sandbox ${sandboxes[index]?.id}: ${result.reason}`)
       }
     })
   }
@@ -1334,11 +1332,10 @@ export class SandboxService extends LockableEntity {
     // Revoke any existing SSH access for this sandbox
     await this.revokeSshAccess(sandbox.id)
 
-    const sshAccess = new SshAccess()
-    sshAccess.sandboxId = sandbox.id
-    // Generate a safe token that can't doesn't have _ or - to avoid CLI issues
-    sshAccess.token = customNanoid(urlAlphabet.replace('_', '').replace('-', ''))(32)
-    sshAccess.expiresAt = new Date(Date.now() + expiresInMinutes * 60 * 1000)
+    const sshAccess = new SshAccess({
+      sandbox,
+      expiresAt: new Date(Date.now() + expiresInMinutes * 60 * 1000),
+    })
 
     return await this.sshAccessRepository.save(sshAccess)
   }
@@ -1366,30 +1363,16 @@ export class SandboxService extends LockableEntity {
     })
 
     if (!sshAccess) {
-      return { valid: false, sandboxId: null }
+      return new SshAccessValidationDto(false, '')
     }
 
     // Check if token is expired
     const isExpired = sshAccess.expiresAt < new Date()
     if (isExpired) {
-      return { valid: false, sandboxId: null }
+      return new SshAccessValidationDto(false, '')
     }
 
-    // Get runner information if sandbox exists
-    if (sshAccess.sandbox && sshAccess.sandbox.runnerId) {
-      const runner = await this.runnerRepository.findOne({
-        where: { id: sshAccess.sandbox.runnerId },
-      })
-
-      if (runner) {
-        return {
-          valid: true,
-          sandboxId: sshAccess.sandbox.id,
-        }
-      }
-    }
-
-    return { valid: true, sandboxId: sshAccess.sandbox.id }
+    return new SshAccessValidationDto(true, sshAccess.sandbox.id)
   }
 
   async getDistinctRegions(organizationId: string): Promise<string[]> {

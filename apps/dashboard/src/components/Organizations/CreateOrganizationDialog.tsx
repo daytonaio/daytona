@@ -107,7 +107,7 @@ export const CreateOrganizationDialog: React.FC<CreateOrganizationDialogProps> =
                     <Link
                       to={RoutePath.BILLING_WALLET}
                       className="text-blue-500 hover:underline"
-                      onClick={(e) => {
+                      onClick={() => {
                         onOpenChange(false)
                       }}
                     >

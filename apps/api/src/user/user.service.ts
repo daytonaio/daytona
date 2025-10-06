@@ -27,21 +27,16 @@ export class UserService {
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
-    let user = new User()
-    user.id = createUserDto.id
-    user.name = createUserDto.name
     const keyPair = await this.generatePrivateKey()
-    user.keyPair = keyPair
-    user.publicKeys = []
-    user.emailVerified = createUserDto.emailVerified
-
-    if (createUserDto.email) {
-      user.email = createUserDto.email
-    }
-
-    if (createUserDto.role) {
-      user.role = createUserDto.role
-    }
+    let user = new User(
+      createUserDto.id,
+      createUserDto.name,
+      createUserDto.email ?? '',
+      createUserDto.emailVerified ?? false,
+      keyPair,
+      [],
+      createUserDto.role,
+    )
 
     await this.dataSource.transaction(async (em) => {
       user = await em.save(user)
@@ -95,6 +90,9 @@ export class UserService {
 
   async regenerateKeyPair(id: string): Promise<User> {
     const user = await this.userRepository.findOneBy({ id: id })
+    if (!user) {
+      throw new NotFoundException(`User with ID ${id} not found.`)
+    }
     const keyPair = await this.generatePrivateKey()
     user.keyPair = keyPair
     return this.userRepository.save(user)

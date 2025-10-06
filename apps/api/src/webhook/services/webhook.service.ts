@@ -4,10 +4,8 @@
  */
 
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common'
-import { OnEvent } from '@nestjs/event-emitter'
 import { TypedConfigService } from '../../config/typed-config.service'
 import { Svix } from 'svix'
-import { OrganizationEvents } from '../../organization/constants/organization-events.constant'
 import { Organization } from '../../organization/entities/organization.entity'
 import { InjectRepository } from '@nestjs/typeorm'
 import { WebhookInitialization } from '../entities/webhook-initialization.entity'
@@ -81,11 +79,7 @@ export class WebhookService implements OnModuleInit {
       )
       return existingWebhookInitialization.svixApplicationId
     } else {
-      existingWebhookInitialization = new WebhookInitialization()
-      existingWebhookInitialization.organizationId = organization.id
-      existingWebhookInitialization.svixApplicationId = null
-      existingWebhookInitialization.retryCount = -1
-      existingWebhookInitialization.lastError = null
+      existingWebhookInitialization = new WebhookInitialization(organization.id, -1)
     }
 
     try {
@@ -95,7 +89,7 @@ export class WebhookService implements OnModuleInit {
       })
       existingWebhookInitialization.svixApplicationId = svixApp.id
       existingWebhookInitialization.retryCount = existingWebhookInitialization.retryCount + 1
-      existingWebhookInitialization.lastError = null
+      existingWebhookInitialization.lastError = undefined
 
       await this.webhookInitializationRepository.save(existingWebhookInitialization)
 

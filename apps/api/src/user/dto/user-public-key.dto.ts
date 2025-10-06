@@ -4,7 +4,7 @@
  */
 
 import { ApiProperty, ApiSchema } from '@nestjs/swagger'
-import { UserPublicKey } from '../user.entity'
+import type { UserPublicKey } from '../user.entity'
 
 @ApiSchema({ name: 'UserPublicKey' })
 export class UserPublicKeyDto {
@@ -18,12 +18,8 @@ export class UserPublicKeyDto {
   })
   name: string
 
-  static fromUserPublicKey(publicKey: UserPublicKey): UserPublicKeyDto {
-    const dto: UserPublicKeyDto = {
-      key: publicKey.key,
-      name: publicKey.name,
-    }
-
-    return dto
+  constructor(publicKey: UserPublicKey) {
+    this.key = publicKey.key
+    this.name = publicKey.name
   }
 }

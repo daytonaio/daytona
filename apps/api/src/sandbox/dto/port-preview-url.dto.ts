@@ -28,4 +28,10 @@ export class PortPreviewUrlDto {
   })
   @IsString()
   token: string
+
+  constructor(sandboxId: string, url: string, token: string) {
+    this.sandboxId = sandboxId
+    this.url = url
+    this.token = token
+  }
 }

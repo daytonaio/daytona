@@ -38,7 +38,7 @@ export class User {
     type: 'simple-json',
     nullable: true,
   })
-  keyPair: UserSSHKeyPair
+  keyPair: UserSSHKeyPair | null
 
   @Column('simple-json')
   publicKeys: UserPublicKey[]
@@ -54,4 +54,23 @@ export class User {
     type: 'timestamp with time zone',
   })
   createdAt: Date
+
+  constructor(
+    id: string,
+    name: string,
+    email: string,
+    emailVerified: boolean,
+    keyPair: UserSSHKeyPair | null,
+    publicKeys: UserPublicKey[],
+    role: SystemRole = SystemRole.USER,
+  ) {
+    this.id = id
+    this.name = name
+    this.email = email
+    this.emailVerified = emailVerified
+    this.keyPair = keyPair
+    this.publicKeys = publicKeys
+    this.role = role
+    this.createdAt = new Date()
+  }
 }

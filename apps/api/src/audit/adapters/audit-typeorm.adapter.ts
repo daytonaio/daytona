@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Logger } from '@nestjs/common'
 import { AuditLogStorageAdapter } from '../interfaces/audit-storage.interface'
 import { InjectRepository } from '@nestjs/typeorm'
 import { AuditLog } from '../entities/audit-log.entity'
@@ -13,18 +12,16 @@ import { AuditLogFilter } from '../interfaces/audit-filter.interface'
 import { createRangeFilter } from '../../common/utils/range-filter'
 
 export class AuditTypeormStorageAdapter implements AuditLogStorageAdapter {
-  private readonly logger = new Logger(AuditTypeormStorageAdapter.name)
-
   constructor(
     @InjectRepository(AuditLog)
     private readonly auditLogRepository: Repository<AuditLog>,
   ) {}
 
-  async write(auditLogs: AuditLog[]): Promise<void> {
+  async write(): Promise<void> {
     throw new Error('Typeorm adapter does not support writing audit logs.')
   }
 
-  async getAllLogs(page?: number, limit = 1000, filters?: AuditLogFilter): Promise<PaginatedList<AuditLog>> {
+  async getAllLogs(page = 1, limit = 1000, filters?: AuditLogFilter): Promise<PaginatedList<AuditLog>> {
     const options: FindManyOptions<AuditLog> = {
       order: {
         createdAt: 'DESC',
@@ -48,7 +45,7 @@ export class AuditTypeormStorageAdapter implements AuditLogStorageAdapter {
 
   async getOrganizationLogs(
     organizationId: string,
-    page?: number,
+    page = 1,
     limit = 1000,
     filters?: AuditLogFilter,
   ): Promise<PaginatedList<AuditLog>> {

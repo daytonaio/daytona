@@ -1,5 +1,5 @@
 /* tslint:disable */
-
+/* eslint-disable */
 /**
  * Daytona
  * Daytona AI platform API Docs
@@ -12,16 +12,19 @@
  * Do not edit the class manually.
  */
 
+
+
 /**
- *
+ * 
  * @export
  * @interface PtyCreateResponse
  */
 export interface PtyCreateResponse {
-  /**
-   * The unique identifier for the created PTY session
-   * @type {string}
-   * @memberof PtyCreateResponse
-   */
-  sessionId: string
+    /**
+     * The unique identifier for the created PTY session
+     * @type {string}
+     * @memberof PtyCreateResponse
+     */
+    'sessionId': string;
 }
+

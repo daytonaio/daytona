@@ -1,5 +1,5 @@
 /* tslint:disable */
-
+/* eslint-disable */
 /**
  * Daytona
  * Daytona AI platform API Docs
@@ -12,6 +12,8 @@
  * Do not edit the class manually.
  */
 
+
+
 /**
  * The desired state of the sandbox
  * @export
@@ -19,11 +21,14 @@
  */
 
 export const SandboxDesiredState = {
-  DESTROYED: 'destroyed',
-  STARTED: 'started',
-  STOPPED: 'stopped',
-  RESIZED: 'resized',
-  ARCHIVED: 'archived',
-} as const
+    DESTROYED: 'destroyed',
+    STARTED: 'started',
+    STOPPED: 'stopped',
+    RESIZED: 'resized',
+    ARCHIVED: 'archived'
+} as const;
 
-export type SandboxDesiredState = (typeof SandboxDesiredState)[keyof typeof SandboxDesiredState]
+export type SandboxDesiredState = typeof SandboxDesiredState[keyof typeof SandboxDesiredState];
+
+
+

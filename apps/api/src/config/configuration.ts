@@ -10,7 +10,7 @@ const configuration = {
   version: process.env.VERSION || '0.0.0-dev',
   environment: process.env.ENVIRONMENT,
   runMigrations: process.env.RUN_MIGRATIONS === 'true',
-  port: parseInt(process.env.PORT, 10),
+  port: parseInt(process.env.PORT || '3000', 10),
   appUrl: process.env.APP_URL,
   database: {
     host: process.env.DB_HOST,

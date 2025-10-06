@@ -21,6 +21,10 @@ export class AuditKafkaPublisher implements AuditLogPublisher, OnModuleInit {
   }
 
   async write(auditLogs: AuditLog[]): Promise<void> {
+    if (!this.kafkaService.producer) {
+      throw new Error('Kafka producer is not initialized')
+    }
+
     const messages: Message[] = auditLogs.map((auditLog) => ({
       key: auditLog.organizationId,
       value: JSON.stringify(auditLog),

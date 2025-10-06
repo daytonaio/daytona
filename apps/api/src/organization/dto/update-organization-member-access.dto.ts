@@ -26,4 +26,9 @@ export class UpdateOrganizationMemberAccessDto {
   @IsArray()
   @IsString({ each: true })
   assignedRoleIds: string[]
+
+  constructor(params: { role: OrganizationMemberRole; assignedRoleIds: string[] }) {
+    this.role = params.role
+    this.assignedRoleIds = params.assignedRoleIds
+  }
 }

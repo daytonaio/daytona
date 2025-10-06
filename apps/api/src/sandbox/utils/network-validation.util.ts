@@ -17,7 +17,7 @@ export function validateNetworkAllowList(networkAllowList: string): void {
 
     const [ipAddress, prefixLength] = network.split('/')
 
-    if (!isIPv4(ipAddress)) {
+    if (!ipAddress || !isIPv4(ipAddress)) {
       throw new Error(`Invalid IP address: "${ipAddress}" in network "${network}". Must be a valid IPv4 address`)
     }
 

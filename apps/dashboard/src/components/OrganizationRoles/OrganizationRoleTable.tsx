@@ -177,7 +177,7 @@ export function OrganizationRoleTable({
             }
           }}
           onDeleteRole={handleConfirmDeleteRole}
-          loading={loadingRoleAction[roleToDelete]}
+          loading={!!loadingRoleAction[roleToDelete]}
         />
       )}
     </>

@@ -66,32 +66,25 @@ export class SnapshotDto {
   })
   buildInfo?: BuildInfoDto
 
-  static fromSnapshot(snapshot: Snapshot): SnapshotDto {
-    return {
-      id: snapshot.id,
-      organizationId: snapshot.organizationId,
-      general: snapshot.general,
-      name: snapshot.name,
-      imageName: snapshot.imageName,
-      state: snapshot.state,
-      size: snapshot.size,
-      entrypoint: snapshot.entrypoint,
-      cpu: snapshot.cpu,
-      gpu: snapshot.gpu,
-      mem: snapshot.mem,
-      disk: snapshot.disk,
-      errorReason: snapshot.errorReason,
-      createdAt: snapshot.createdAt,
-      updatedAt: snapshot.updatedAt,
-      lastUsedAt: snapshot.lastUsedAt,
-      buildInfo: snapshot.buildInfo
-        ? {
-            dockerfileContent: snapshot.buildInfo.dockerfileContent,
-            contextHashes: snapshot.buildInfo.contextHashes,
-            createdAt: snapshot.buildInfo.createdAt,
-            updatedAt: snapshot.buildInfo.updatedAt,
-          }
-        : undefined,
+  constructor(snapshot: Snapshot) {
+    this.id = snapshot.id
+    this.organizationId = snapshot.organizationId ?? undefined
+    this.general = snapshot.general
+    this.name = snapshot.name
+    this.imageName = snapshot.imageName
+    this.state = snapshot.state
+    this.size = snapshot.size ?? undefined
+    this.entrypoint = snapshot.entrypoint ?? undefined
+    this.cpu = snapshot.cpu
+    this.gpu = snapshot.gpu
+    this.mem = snapshot.mem
+    this.disk = snapshot.disk
+    this.errorReason = snapshot.errorReason ?? undefined
+    this.createdAt = snapshot.createdAt
+    this.updatedAt = snapshot.updatedAt
+    this.lastUsedAt = snapshot.lastUsedAt ?? undefined
+    if (snapshot.buildInfo) {
+      this.buildInfo = new BuildInfoDto(snapshot.buildInfo)
     }
   }
 }

@@ -1,5 +1,5 @@
 /* tslint:disable */
-
+/* eslint-disable */
 /**
  * Daytona
  * Daytona AI platform API Docs
@@ -12,16 +12,19 @@
  * Do not edit the class manually.
  */
 
+
+
 /**
- *
+ * 
  * @export
  * @interface KeyboardHotkeyRequest
  */
 export interface KeyboardHotkeyRequest {
-  /**
-   * The hotkey combination to press (e.g., \"ctrl+c\", \"cmd+v\", \"alt+tab\")
-   * @type {string}
-   * @memberof KeyboardHotkeyRequest
-   */
-  keys: string
+    /**
+     * The hotkey combination to press (e.g., \"ctrl+c\", \"cmd+v\", \"alt+tab\")
+     * @type {string}
+     * @memberof KeyboardHotkeyRequest
+     */
+    'keys': string;
 }
+

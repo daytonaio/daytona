@@ -18,17 +18,22 @@ import { InjectRepository } from '@nestjs/typeorm'
 @Injectable()
 export class SandboxStopAction extends SandboxAction {
   constructor(
-    protected runnerService: RunnerService,
-    protected runnerAdapterFactory: RunnerAdapterFactory,
+    runnerService: RunnerService,
+    runnerAdapterFactory: RunnerAdapterFactory,
     @InjectRepository(Sandbox)
-    protected sandboxRepository: Repository<Sandbox>,
-    protected toolboxService: ToolboxService,
+    sandboxRepository: Repository<Sandbox>,
+    toolboxService: ToolboxService,
   ) {
     super(runnerService, runnerAdapterFactory, sandboxRepository, toolboxService)
   }
 
   async run(sandbox: Sandbox): Promise<SyncState> {
-    const runner = await this.runnerService.findOne(sandbox.runnerId)
+    if (!sandbox.runnerId) {
+      throw new Error(`Runner ID is not set for sandbox ${sandbox.id}`)
+    }
+
+    // get runner
+    const runner = await this.runnerService.findOneOrFail(sandbox.runnerId)
     if (runner.state !== RunnerState.READY) {
       return DONT_SYNC_AGAIN
     }

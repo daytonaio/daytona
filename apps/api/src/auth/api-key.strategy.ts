@@ -74,7 +74,7 @@ export class ApiKeyStrategy extends PassportStrategy(Strategy, 'api-key') implem
           throw new UnauthorizedException('This API key has expired')
         }
 
-        const validationCacheTtl = this.configService.get('apiKey.validationCacheTtlSeconds')
+        const validationCacheTtl = this.configService.getOrThrow('apiKey.validationCacheTtlSeconds')
         const cacheKey = this.generateValidationCacheKey(token)
         await this.redis.setex(cacheKey, validationCacheTtl, JSON.stringify(apiKey))
       }
@@ -97,7 +97,7 @@ export class ApiKeyStrategy extends PassportStrategy(Strategy, 'api-key') implem
           role: user.role,
           email: user.email,
         }
-        const userCacheTtl = this.configService.get('apiKey.userCacheTtlSeconds')
+        const userCacheTtl = this.configService.getOrThrow('apiKey.userCacheTtlSeconds')
         await this.redis.setex(this.generateUserCacheKey(apiKey.userId), userCacheTtl, JSON.stringify(userCache))
       }
 

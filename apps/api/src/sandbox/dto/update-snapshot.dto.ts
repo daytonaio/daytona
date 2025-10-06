@@ -14,4 +14,8 @@ export class SetSnapshotGeneralStatusDto {
   })
   @IsBoolean()
   general: boolean
+
+  private constructor(general: boolean) {
+    this.general = general
+  }
 }

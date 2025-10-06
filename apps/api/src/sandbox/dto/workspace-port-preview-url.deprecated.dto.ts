@@ -21,4 +21,9 @@ export class WorkspacePortPreviewUrlDto {
   })
   @IsString()
   token: string
+
+  constructor(url: string, token: string) {
+    this.url = url
+    this.token = token
+  }
 }

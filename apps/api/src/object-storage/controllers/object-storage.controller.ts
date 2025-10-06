@@ -6,7 +6,7 @@
 import { Controller, Get, UseGuards, HttpCode } from '@nestjs/common'
 import { ApiOAuth2, ApiTags, ApiOperation, ApiResponse, ApiHeader, ApiBearerAuth } from '@nestjs/swagger'
 import { CombinedAuthGuard } from '../../auth/combined-auth.guard'
-import { OrganizationAuthContext } from '../../common/interfaces/auth-context.interface'
+import { type OrganizationAuthContext } from '../../common/interfaces/auth-context.interface'
 import { ObjectStorageService } from '../services/object-storage.service'
 import { StorageAccessDto } from '../../sandbox/dto/storage-access-dto'
 import { CustomHeaders } from '../../common/constants/header.constants'

@@ -7,7 +7,6 @@ import { Injectable, CanActivate, ExecutionContext, ForbiddenException, NotFound
 import { OrganizationAuthContext } from '../../common/interfaces/auth-context.interface'
 import { SystemRole } from '../../user/enums/system-role.enum'
 import { VolumeService } from '../services/volume.service'
-import { Volume } from '../entities/volume.entity'
 
 @Injectable()
 export class VolumeAccessGuard implements CanActivate {
@@ -29,7 +28,7 @@ export class VolumeAccessGuard implements CanActivate {
       if (authContext.role !== SystemRole.ADMIN && volumeOrganizationId !== authContext.organizationId) {
         throw new ForbiddenException('Request organization ID does not match resource organization ID')
       }
-    } catch (error) {
+    } catch {
       throw new NotFoundException(`Volume with ID or name ${volumeIdOrName} not found`)
     }
 

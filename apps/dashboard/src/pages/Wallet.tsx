@@ -344,6 +344,10 @@ const Wallet = () => {
                       className="mb-4"
                       value={automaticTopUp?.thresholdAmount ? [automaticTopUp.thresholdAmount] : undefined}
                       onValueChange={(value) => {
+                        if (!value[0]) {
+                          return
+                        }
+
                         let targetAmount = automaticTopUp?.targetAmount ?? 0
                         if (value[0] > targetAmount - 10) {
                           targetAmount = value[0] + 10
@@ -386,6 +390,9 @@ const Wallet = () => {
                       step={0.5}
                       value={automaticTopUp?.targetAmount ? [automaticTopUp.targetAmount] : undefined}
                       onValueChange={(value) => {
+                        if (!value[0]) {
+                          return
+                        }
                         const thresholdAmount = automaticTopUp?.thresholdAmount ?? 0
                         if (value[0] <= 10 && value[0] < thresholdAmount) {
                           return

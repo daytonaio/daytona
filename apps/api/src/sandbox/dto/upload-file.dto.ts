@@ -1,3 +1,6 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
+// Don't check types here because they are only used for API documentation
 /*
  * Copyright 2025 Daytona Platforms Inc.
  * SPDX-License-Identifier: AGPL-3.0

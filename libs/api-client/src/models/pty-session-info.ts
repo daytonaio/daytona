@@ -1,5 +1,5 @@
 /* tslint:disable */
-
+/* eslint-disable */
 /**
  * Daytona
  * Daytona AI platform API Docs
@@ -12,58 +12,61 @@
  * Do not edit the class manually.
  */
 
+
+
 /**
- *
+ * 
  * @export
  * @interface PtySessionInfo
  */
 export interface PtySessionInfo {
-  /**
-   * The unique identifier for the PTY session
-   * @type {string}
-   * @memberof PtySessionInfo
-   */
-  id: string
-  /**
-   * Starting directory for the PTY session, defaults to the sandbox\'s working directory
-   * @type {string}
-   * @memberof PtySessionInfo
-   */
-  cwd: string
-  /**
-   * Environment variables for the PTY session
-   * @type {object}
-   * @memberof PtySessionInfo
-   */
-  envs: object
-  /**
-   * Number of terminal columns
-   * @type {number}
-   * @memberof PtySessionInfo
-   */
-  cols: number
-  /**
-   * Number of terminal rows
-   * @type {number}
-   * @memberof PtySessionInfo
-   */
-  rows: number
-  /**
-   * When the PTY session was created
-   * @type {string}
-   * @memberof PtySessionInfo
-   */
-  createdAt: string
-  /**
-   * Whether the PTY session is currently active
-   * @type {boolean}
-   * @memberof PtySessionInfo
-   */
-  active: boolean
-  /**
-   * Whether the PTY session uses lazy start (only start when first client connects)
-   * @type {boolean}
-   * @memberof PtySessionInfo
-   */
-  lazyStart: boolean
+    /**
+     * The unique identifier for the PTY session
+     * @type {string}
+     * @memberof PtySessionInfo
+     */
+    'id': string;
+    /**
+     * Starting directory for the PTY session, defaults to the sandbox\'s working directory
+     * @type {string}
+     * @memberof PtySessionInfo
+     */
+    'cwd': string;
+    /**
+     * Environment variables for the PTY session
+     * @type {object}
+     * @memberof PtySessionInfo
+     */
+    'envs': object;
+    /**
+     * Number of terminal columns
+     * @type {number}
+     * @memberof PtySessionInfo
+     */
+    'cols': number;
+    /**
+     * Number of terminal rows
+     * @type {number}
+     * @memberof PtySessionInfo
+     */
+    'rows': number;
+    /**
+     * When the PTY session was created
+     * @type {string}
+     * @memberof PtySessionInfo
+     */
+    'createdAt': string;
+    /**
+     * Whether the PTY session is currently active
+     * @type {boolean}
+     * @memberof PtySessionInfo
+     */
+    'active': boolean;
+    /**
+     * Whether the PTY session uses lazy start (only start when first client connects)
+     * @type {boolean}
+     * @memberof PtySessionInfo
+     */
+    'lazyStart': boolean;
 }
+

@@ -4,7 +4,7 @@
  */
 
 import Redis from 'ioredis'
-import { Controller, Get, Param, Logger, NotFoundException, UseGuards, Req } from '@nestjs/common'
+import { Controller, Get, Param, NotFoundException, UseGuards, Req } from '@nestjs/common'
 import { SandboxService } from '../services/sandbox.service'
 import { ApiResponse, ApiOperation, ApiParam, ApiTags, ApiOAuth2, ApiBearerAuth } from '@nestjs/swagger'
 import { InjectRedis } from '@nestjs-modules/ioredis'
@@ -14,8 +14,6 @@ import { OrganizationService } from '../../organization/services/organization.se
 @ApiTags('preview')
 @Controller('preview')
 export class PreviewController {
-  private readonly logger = new Logger(PreviewController.name)
-
   constructor(
     @InjectRedis() private readonly redis: Redis,
     private readonly sandboxService: SandboxService,

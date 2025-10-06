@@ -23,8 +23,6 @@ import { SandboxState } from '../enums/sandbox-state.enum'
 import { Runner } from '../entities/runner.entity'
 import { WarmPoolTopUpRequested } from '../events/warmpool-topup-requested.event'
 import { WarmPoolEvents } from '../constants/warmpool-events.constants'
-import { InjectRedis } from '@nestjs-modules/ioredis'
-import { Redis } from 'ioredis'
 import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
 import { isValidUuid } from '../../common/utils/uuid'
 import { LogExecution } from '../../common/decorators/log-execution.decorator'
@@ -60,7 +58,6 @@ export class SandboxWarmPoolService {
     private readonly configService: ConfigService,
     @Inject(EventEmitter2)
     private eventEmitter: EventEmitter2,
-    @InjectRedis() private readonly redis: Redis,
   ) {}
 
   //  on init
@@ -70,7 +67,7 @@ export class SandboxWarmPoolService {
 
   async fetchWarmPoolSandbox(params: FetchWarmPoolSandboxParams): Promise<Sandbox | null> {
     //  validate snapshot
-    const sandboxSnapshot = params.snapshot || this.configService.get<string>('DEFAULT_SNAPSHOT')
+    const sandboxSnapshot = params.snapshot || this.configService.getOrThrow<string>('DEFAULT_SNAPSHOT')
 
     const snapshotFilter: FindOptionsWhere<Snapshot>[] = [
       { organizationId: params.organizationId, name: sandboxSnapshot, state: SnapshotState.ACTIVE },
@@ -181,7 +178,7 @@ export class SandboxWarmPoolService {
 
         const missingCount = warmPoolItem.pool - sandboxCount
         if (missingCount > 0) {
-          const promises = []
+          const promises: Promise<any>[] = []
           this.logger.debug(`Creating ${missingCount} sandboxes for warm pool id ${warmPoolItem.id}`)
 
           for (let i = 0; i < missingCount; i++) {
@@ -204,6 +201,11 @@ export class SandboxWarmPoolService {
     if (event.newOrganizationId === SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION) {
       return
     }
+
+    if (!event.sandbox.snapshot) {
+      return
+    }
+
     const warmPoolItem = await this.warmPoolRepository.findOne({
       where: {
         snapshot: event.sandbox.snapshot,

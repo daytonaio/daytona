@@ -7,7 +7,6 @@ import Docker from 'dockerode'
 import { Inject, Injectable, OnModuleInit, Logger } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import axios from 'axios'
-import path from 'path'
 import { DockerRegistryService } from '../../docker-registry/services/docker-registry.service'
 import { DockerRegistry } from '../../docker-registry/entities/docker-registry.entity'
 
@@ -16,10 +15,6 @@ export class DockerProvider implements OnModuleInit {
   public docker: Docker
 
   private readonly logger = new Logger(DockerProvider.name)
-  private readonly DAYTONA_BINARY_PATH = path.join(process.cwd(), '.tmp', 'binaries', 'daytona')
-  private readonly daytonaBinaryUrl: string
-  private readonly TERMINAL_BINARY_PATH = path.join(process.cwd(), '.tmp', 'binaries', 'terminal')
-  private readonly terminalBinaryUrl: string
 
   constructor(
     @Inject(ConfigService)
@@ -33,8 +28,6 @@ export class DockerProvider implements OnModuleInit {
     } else {
       this.docker = new Docker({ socketPath: '/var/run/docker.sock' })
     }
-    this.daytonaBinaryUrl = this.configService.get<string>('DAYTONA_BINARY_URL')
-    this.terminalBinaryUrl = this.configService.get<string>('TERMINAL_BINARY_URL')
   }
 
   async onModuleInit() {
@@ -48,93 +41,12 @@ export class DockerProvider implements OnModuleInit {
     }
   }
 
-  public async startTerminalProcess(container: Docker.Container, port = 22222): Promise<void> {
-    try {
-      // First check if bash is available
-      const execCheckBash = await container.exec({
-        Cmd: ['which', 'bash'],
-        AttachStdout: true,
-        AttachStderr: true,
-      })
-
-      const shell = await new Promise<string>((resolve) => {
-        execCheckBash.start({}, (err, stream) => {
-          if (err) {
-            resolve('sh')
-            return
-          }
-
-          let output = ''
-          stream.on('data', (chunk) => {
-            output += chunk.toString()
-          })
-
-          stream.on('end', () => {
-            resolve(output.trim() ? 'bash' : 'sh')
-          })
-        })
-      })
-
-      // Start the terminal process
-      const execTerminal = await container.exec({
-        Cmd: ['terminal', '-p', port.toString(), '-W', shell],
-        AttachStdout: false,
-        AttachStderr: false,
-        Tty: true,
-      })
-
-      await execTerminal.start({
-        Detach: true,
-      })
-    } catch (error) {
-      this.logger.error('Error starting terminal process:', error)
-      // Don't throw the error to prevent breaking the sandbox creation
-    }
-  }
-
-  private async startDaytonaAgent(container: Docker.Container): Promise<void> {
-    try {
-      const execDaytona = await container.exec({
-        Cmd: ['daytona', 'agent'],
-        //  Cmd: ['python3', '-m', 'http.server', '2280'],
-        AttachStdout: true,
-        AttachStderr: true,
-        Tty: true,
-      })
-
-      await execDaytona.start(
-        {
-          Detach: false,
-        },
-        (err, stream) => {
-          if (err) {
-            this.logger.error('Error in Daytona agent stream:', err)
-            return
-          }
-
-          stream.on('data', (chunk) => {
-            this.logger.log('Daytona agent output:', chunk.toString())
-          })
-
-          stream.on('error', (err) => {
-            this.logger.error('Daytona agent stream error:', err)
-          })
-        },
-      )
-
-      return
-    } catch (error) {
-      this.logger.error('Error starting Daytona agent process:', error)
-      // Don't throw the error to prevent breaking the sandbox creation
-    }
-  }
-
   async containerExists(containerId: string): Promise<boolean> {
     try {
       const container = this.docker.getContainer(containerId)
       await container.inspect()
       return true
-    } catch (error) {
+    } catch {
       return false
     }
   }
@@ -154,29 +66,8 @@ export class DockerProvider implements OnModuleInit {
       Env: ['DAYTONA_SANDBOX_ID=init-image', 'DAYTONA_SANDBOX_USER=root', `DAYTONA_SANDBOX_SNAPSHOT=${imageName}`],
       Entrypoint: entrypoint,
       platform: 'linux/amd64', // Force AMD64 architecture
-      HostConfig: {
-        Binds: [
-          //  `${dirPath}:${osHome}/project`,  // Direct path binding
-          ...(this.daytonaBinaryUrl ? [`${this.DAYTONA_BINARY_PATH}:/usr/local/bin/daytona`] : []),
-          ...(this.terminalBinaryUrl ? [`${this.TERMINAL_BINARY_PATH}:/usr/local/bin/terminal`] : []),
-        ],
-        // StorageOpt: {
-        //   size: `${sandbox.volume.quota}G`,
-        // },
-        //  Runtime: 'sysbox-runc',
-        //  Privileged: true,
-      },
     })
     await container.start()
-
-    // Start both processes in parallel without waiting
-    if (this.daytonaBinaryUrl) {
-      this.startDaytonaAgent(container).catch((err) => this.logger.error('Failed to start Daytona agent:', err))
-    }
-
-    if (this.terminalBinaryUrl) {
-      this.startTerminalProcess(container).catch((err) => this.logger.error('Failed to start terminal process:', err))
-    }
 
     return container.id
   }
@@ -420,7 +311,7 @@ export class DockerProvider implements OnModuleInit {
       const container = this.docker.getContainer(containerId)
       await container.inspect()
       return false
-    } catch (error) {
+    } catch {
       return true
     }
   }
@@ -578,15 +469,6 @@ export class DockerProvider implements OnModuleInit {
     try {
       const container = this.docker.getContainer(containerId)
       await container.start()
-
-      // Start both processes in parallel without waiting
-      if (this.daytonaBinaryUrl) {
-        this.startDaytonaAgent(container).catch((err) => this.logger.error('Failed to start Daytona agent:', err))
-      }
-
-      if (this.terminalBinaryUrl) {
-        this.startTerminalProcess(container).catch((err) => this.logger.error('Failed to start terminal process:', err))
-      }
     } catch (error) {
       this.logger.error('Error starting Docker container:', error)
       throw error // Rethrow or handle as needed
@@ -647,6 +529,11 @@ export class DockerProvider implements OnModuleInit {
 
           let errorEvent: Error | null = null
           let done = false
+
+          if (!stream) {
+            reject(new Error('No stream returned from Docker push'))
+            return
+          }
 
           this.docker.modem.followProgress(
             stream,

@@ -147,6 +147,14 @@ export class ObjectStorageService {
           throw new BadRequestException('AWS STS response did not return expected credentials')
         }
 
+        if (
+          !response.Credentials.AccessKeyId ||
+          !response.Credentials.SecretAccessKey ||
+          !response.Credentials.SessionToken
+        ) {
+          throw new BadRequestException('AWS STS response is missing required credential fields')
+        }
+
         return {
           accessKey: response.Credentials.AccessKeyId,
           secret: response.Credentials.SecretAccessKey,

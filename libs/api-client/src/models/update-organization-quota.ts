@@ -1,5 +1,5 @@
 /* tslint:disable */
-
+/* eslint-disable */
 /**
  * Daytona
  * Daytona AI platform API Docs
@@ -12,64 +12,67 @@
  * Do not edit the class manually.
  */
 
+
+
 /**
- *
+ * 
  * @export
  * @interface UpdateOrganizationQuota
  */
 export interface UpdateOrganizationQuota {
-  /**
-   *
-   * @type {number}
-   * @memberof UpdateOrganizationQuota
-   */
-  totalCpuQuota: number | null
-  /**
-   *
-   * @type {number}
-   * @memberof UpdateOrganizationQuota
-   */
-  totalMemoryQuota: number | null
-  /**
-   *
-   * @type {number}
-   * @memberof UpdateOrganizationQuota
-   */
-  totalDiskQuota: number | null
-  /**
-   *
-   * @type {number}
-   * @memberof UpdateOrganizationQuota
-   */
-  maxCpuPerSandbox: number | null
-  /**
-   *
-   * @type {number}
-   * @memberof UpdateOrganizationQuota
-   */
-  maxMemoryPerSandbox: number | null
-  /**
-   *
-   * @type {number}
-   * @memberof UpdateOrganizationQuota
-   */
-  maxDiskPerSandbox: number | null
-  /**
-   *
-   * @type {number}
-   * @memberof UpdateOrganizationQuota
-   */
-  snapshotQuota: number | null
-  /**
-   *
-   * @type {number}
-   * @memberof UpdateOrganizationQuota
-   */
-  maxSnapshotSize: number | null
-  /**
-   *
-   * @type {number}
-   * @memberof UpdateOrganizationQuota
-   */
-  volumeQuota: number | null
+    /**
+     * 
+     * @type {number}
+     * @memberof UpdateOrganizationQuota
+     */
+    'totalCpuQuota': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof UpdateOrganizationQuota
+     */
+    'totalMemoryQuota': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof UpdateOrganizationQuota
+     */
+    'totalDiskQuota': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof UpdateOrganizationQuota
+     */
+    'maxCpuPerSandbox': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof UpdateOrganizationQuota
+     */
+    'maxMemoryPerSandbox': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof UpdateOrganizationQuota
+     */
+    'maxDiskPerSandbox': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof UpdateOrganizationQuota
+     */
+    'snapshotQuota': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof UpdateOrganizationQuota
+     */
+    'maxSnapshotSize': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof UpdateOrganizationQuota
+     */
+    'volumeQuota': number | null;
 }
+

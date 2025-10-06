@@ -10,7 +10,6 @@ import { SandboxEvents } from '../../sandbox/constants/sandbox-events.constants'
 import { SandboxDto } from '../../sandbox/dto/sandbox.dto'
 import { SandboxCreatedEvent } from '../../sandbox/events/sandbox-create.event'
 import { SandboxStateUpdatedEvent } from '../../sandbox/events/sandbox-state-updated.event'
-import { RunnerService } from '../../sandbox/services/runner.service'
 import { SnapshotCreatedEvent } from '../../sandbox/events/snapshot-created.event'
 import { SnapshotEvents } from '../../sandbox/constants/snapshot-events'
 import { SnapshotDto } from '../../sandbox/dto/snapshot.dto'
@@ -25,62 +24,60 @@ import { SandboxDesiredStateUpdatedEvent } from '../../sandbox/events/sandbox-de
 
 @Injectable()
 export class NotificationService {
-  constructor(
-    private readonly notificationGateway: NotificationGateway,
-    private readonly runnerService: RunnerService,
-  ) {}
+  constructor(private readonly notificationGateway: NotificationGateway) {}
 
   @OnEvent(SandboxEvents.CREATED)
   async handleSandboxCreated(event: SandboxCreatedEvent) {
-    const dto = SandboxDto.fromSandbox(event.sandbox)
-    this.notificationGateway.emitSandboxCreated(dto)
+    this.notificationGateway.emitSandboxCreated(new SandboxDto(event.sandbox))
   }
 
   @OnEvent(SandboxEvents.STATE_UPDATED)
   async handleSandboxStateUpdated(event: SandboxStateUpdatedEvent) {
-    const dto = SandboxDto.fromSandbox(event.sandbox)
-    this.notificationGateway.emitSandboxStateUpdated(dto, event.oldState, event.newState)
+    this.notificationGateway.emitSandboxStateUpdated(new SandboxDto(event.sandbox), event.oldState, event.newState)
   }
 
   @OnEvent(SandboxEvents.DESIRED_STATE_UPDATED)
   async handleSandboxDesiredStateUpdated(event: SandboxDesiredStateUpdatedEvent) {
-    const dto = SandboxDto.fromSandbox(event.sandbox)
-    this.notificationGateway.emitSandboxDesiredStateUpdated(dto, event.oldDesiredState, event.newDesiredState)
+    this.notificationGateway.emitSandboxDesiredStateUpdated(
+      new SandboxDto(event.sandbox),
+      event.oldDesiredState,
+      event.newDesiredState,
+    )
   }
 
   @OnEvent(SnapshotEvents.CREATED)
   async handleSnapshotCreated(event: SnapshotCreatedEvent) {
-    const dto = SnapshotDto.fromSnapshot(event.snapshot)
+    const dto = new SnapshotDto(event.snapshot)
     this.notificationGateway.emitSnapshotCreated(dto)
   }
 
   @OnEvent(SnapshotEvents.STATE_UPDATED)
   async handleSnapshotStateUpdated(event: SnapshotStateUpdatedEvent) {
-    const dto = SnapshotDto.fromSnapshot(event.snapshot)
+    const dto = new SnapshotDto(event.snapshot)
     this.notificationGateway.emitSnapshotStateUpdated(dto, event.oldState, event.newState)
   }
 
   @OnEvent(SnapshotEvents.REMOVED)
   async handleSnapshotRemoved(event: SnapshotRemovedEvent) {
-    const dto = SnapshotDto.fromSnapshot(event.snapshot)
+    const dto = new SnapshotDto(event.snapshot)
     this.notificationGateway.emitSnapshotRemoved(dto)
   }
 
   @OnEvent(VolumeEvents.CREATED)
   async handleVolumeCreated(event: VolumeCreatedEvent) {
-    const dto = VolumeDto.fromVolume(event.volume)
+    const dto = new VolumeDto(event.volume)
     this.notificationGateway.emitVolumeCreated(dto)
   }
 
   @OnEvent(VolumeEvents.STATE_UPDATED)
   async handleVolumeStateUpdated(event: VolumeStateUpdatedEvent) {
-    const dto = VolumeDto.fromVolume(event.volume)
+    const dto = new VolumeDto(event.volume)
     this.notificationGateway.emitVolumeStateUpdated(dto, event.oldState, event.newState)
   }
 
   @OnEvent(VolumeEvents.LAST_USED_AT_UPDATED)
   async handleVolumeLastUsedAtUpdated(event: VolumeLastUsedAtUpdatedEvent) {
-    const dto = VolumeDto.fromVolume(event.volume)
+    const dto = new VolumeDto(event.volume)
     this.notificationGateway.emitVolumeLastUsedAtUpdated(dto)
   }
 }

@@ -44,13 +44,13 @@ import { getPinoTransport, swapMessageAndObject } from './common/utils/pino.util
         const isProduction = configService.get('production')
         return {
           pinoHttp: {
-            autoLogging: logConfig.requests.enabled,
-            level: logConfig.level,
+            autoLogging: logConfig?.requests.enabled,
+            level: logConfig?.level,
             hooks: {
               logMethod: swapMessageAndObject,
             },
             quietReqLogger: true,
-            transport: getPinoTransport(isProduction, logConfig),
+            transport: getPinoTransport(!!isProduction, logConfig),
           },
         }
       },
@@ -74,6 +74,7 @@ import { getPinoTransport, swapMessageAndObject } from './common/utils/pino.util
           migrationsRun: configService.get('runMigrations') || !configService.getOrThrow('production'),
           namingStrategy: new CustomNamingStrategy(),
           manualInitialization: configService.get('skipConnections'),
+          entitySkipConstructor: true,
         }
       },
     }),
@@ -128,13 +129,17 @@ import { getPinoTransport, swapMessageAndObject } from './common/utils/pino.util
     EmailModule.forRootAsync({
       inject: [TypedConfigService],
       useFactory: (configService: TypedConfigService) => {
+        if (!configService.get('smtp.host') || !configService.get('smtp.port') || !configService.get('smtp.from')) {
+          return undefined
+        }
+
         return {
-          host: configService.get('smtp.host'),
-          port: configService.get('smtp.port'),
-          user: configService.get('smtp.user'),
-          password: configService.get('smtp.password'),
-          secure: configService.get('smtp.secure'),
-          from: configService.get('smtp.from'),
+          host: configService.getOrThrow('smtp.host'),
+          port: configService.getOrThrow('smtp.port'),
+          user: configService.getOrThrow('smtp.user'),
+          password: configService.getOrThrow('smtp.password'),
+          secure: configService.getOrThrow('smtp.secure'),
+          from: configService.getOrThrow('smtp.from'),
           dashboardUrl: configService.getOrThrow('dashboardUrl'),
         }
       },

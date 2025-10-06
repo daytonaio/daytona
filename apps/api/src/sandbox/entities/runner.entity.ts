@@ -6,6 +6,7 @@
 import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm'
 import { SandboxClass } from '../enums/sandbox-class.enum'
 import { RunnerState } from '../enums/runner-state.enum'
+import { v4 } from 'uuid'
 
 @Entity()
 export class Runner {
@@ -108,7 +109,7 @@ export class Runner {
     nullable: true,
     type: 'timestamp with time zone',
   })
-  lastChecked: Date
+  lastChecked: Date | null
 
   @Column({
     default: false,
@@ -124,4 +125,46 @@ export class Runner {
     type: 'timestamp with time zone',
   })
   updatedAt: Date
+
+  constructor(createParams: {
+    domain: string
+    apiUrl: string
+    proxyUrl: string
+    apiKey: string
+    cpu: number
+    memoryGiB: number
+    diskGiB: number
+    gpu: number
+    gpuType: string
+    class: SandboxClass
+    region: string
+    version?: string
+  }) {
+    this.id = v4()
+    this.domain = createParams.domain
+    this.apiUrl = createParams.apiUrl
+    this.proxyUrl = createParams.proxyUrl
+    this.apiKey = createParams.apiKey
+    this.cpu = createParams.cpu
+    this.memoryGiB = createParams.memoryGiB
+    this.diskGiB = createParams.diskGiB
+    this.gpu = createParams.gpu
+    this.gpuType = createParams.gpuType
+    this.class = createParams.class
+    this.region = createParams.region
+    this.version = createParams.version ?? '0'
+    this.state = RunnerState.INITIALIZING
+    this.currentCpuUsagePercentage = 0
+    this.currentMemoryUsagePercentage = 0
+    this.currentDiskUsagePercentage = 0
+    this.currentAllocatedCpu = 0
+    this.currentAllocatedMemoryGiB = 0
+    this.currentAllocatedDiskGiB = 0
+    this.currentSnapshotCount = 0
+    this.availabilityScore = 0
+    this.unschedulable = false
+    this.lastChecked = null
+    this.createdAt = new Date()
+    this.updatedAt = new Date()
+  }
 }

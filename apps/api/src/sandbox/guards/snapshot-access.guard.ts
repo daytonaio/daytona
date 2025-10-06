@@ -24,7 +24,7 @@ export class SnapshotAccessGuard implements CanActivate {
 
     try {
       snapshot = await this.snapshotService.getSnapshot(snapshotId)
-    } catch (error) {
+    } catch {
       // If not found by ID, try by name
       snapshot = await this.snapshotService.getSnapshotByName(snapshotId, authContext.organizationId)
     }

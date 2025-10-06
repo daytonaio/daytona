@@ -9,7 +9,6 @@ import { Repository, Not, In } from 'typeorm'
 import { Volume } from '../entities/volume.entity'
 import { VolumeState } from '../enums/volume-state.enum'
 import { CreateVolumeDto } from '../dto/create-volume.dto'
-import { v4 as uuidv4 } from 'uuid'
 import { BadRequestError } from '../../exceptions/bad-request.exception'
 import { Organization } from '../../organization/entities/organization.entity'
 import { OnEvent } from '@nestjs/event-emitter'
@@ -41,7 +40,7 @@ export class VolumeService {
     const usageOverview = await this.organizationUsageService.getVolumeUsageOverview(organization.id)
 
     try {
-      if (usageOverview.currentVolumeUsage + usageOverview.pendingVolumeUsage > organization.volumeQuota) {
+      if (usageOverview.currentVolumeUsage + (usageOverview.pendingVolumeUsage ?? 0) > organization.volumeQuota) {
         throw new ForbiddenException(`Volume quota exceeded. Maximum allowed: ${organization.volumeQuota}`)
       }
     } catch (error) {
@@ -80,13 +79,10 @@ export class VolumeService {
         pendingVolumeCountIncrement = newVolumeCount
       }
 
-      const volume = new Volume()
-
-      // Generate ID
-      volume.id = uuidv4()
-
-      // Set name from DTO or use ID as default
-      volume.name = createVolumeDto.name || volume.id
+      const volume = new Volume({
+        organizationId: organization.id,
+        name: createVolumeDto.name,
+      })
 
       // Check if volume with same name already exists for organization
       const existingVolume = await this.volumeRepository.findOne({
@@ -100,9 +96,6 @@ export class VolumeService {
       if (existingVolume) {
         throw new BadRequestError(`Volume with name ${volume.name} already exists`)
       }
-
-      volume.organizationId = organization.id
-      volume.state = VolumeState.PENDING_CREATE
 
       const savedVolume = await this.volumeRepository.save(volume)
       this.logger.debug(`Created volume ${savedVolume.id} for organization ${organization.id}`)
@@ -236,7 +229,7 @@ export class VolumeService {
   }
 
   @OnEvent(SandboxEvents.CREATED)
-  private async handleSandboxCreatedEvent(event: SandboxCreatedEvent) {
+  async _handleSandboxCreatedEvent(event: SandboxCreatedEvent) {
     if (!event.sandbox.volumes.length) {
       return
     }

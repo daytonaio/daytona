@@ -118,7 +118,7 @@ export function useSandboxes(queryKey: QueryKey, params: SandboxQueryParams) {
               total: paginatedData.total + 1,
             }
           }
-        } catch (error) {
+        } catch {
           // TODO: rethrow if not 4xx
         }
       }

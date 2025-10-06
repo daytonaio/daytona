@@ -35,15 +35,11 @@ export class UserDto {
   })
   createdAt: Date
 
-  static fromUser(user: User): UserDto {
-    const dto: UserDto = {
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      publicKeys: user.publicKeys.map(UserPublicKeyDto.fromUserPublicKey),
-      createdAt: user.createdAt,
-    }
-
-    return dto
+  constructor(user: User) {
+    this.id = user.id
+    this.name = user.name
+    this.email = user.email
+    this.publicKeys = user.publicKeys.map((publicKey) => new UserPublicKeyDto(publicKey))
+    this.createdAt = user.createdAt
   }
 }

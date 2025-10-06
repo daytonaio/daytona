@@ -16,24 +16,26 @@ import { InjectRedis } from '@nestjs-modules/ioredis'
 import Redis from 'ioredis'
 import { RunnerAdapterFactory } from '../../runner-adapter/runnerAdapter'
 import { ToolboxService } from '../../services/toolbox.service'
-import { TypedConfigService } from '../../../config/typed-config.service'
 
 @Injectable()
 export class SandboxArchiveAction extends SandboxAction {
   constructor(
-    protected runnerService: RunnerService,
-    protected runnerAdapterFactory: RunnerAdapterFactory,
+    runnerService: RunnerService,
+    runnerAdapterFactory: RunnerAdapterFactory,
     @InjectRepository(Sandbox)
-    protected sandboxRepository: Repository<Sandbox>,
+    sandboxRepository: Repository<Sandbox>,
     private readonly redisLockProvider: RedisLockProvider,
     @InjectRedis() private readonly redis: Redis,
-    protected toolboxService: ToolboxService,
-    private readonly configService: TypedConfigService,
+    toolboxService: ToolboxService,
   ) {
     super(runnerService, runnerAdapterFactory, sandboxRepository, toolboxService)
   }
 
   async run(sandbox: Sandbox): Promise<SyncState> {
+    if (!sandbox.runnerId) {
+      throw new Error(`Cannot archive sandbox ${sandbox.id} without runnerId`)
+    }
+
     const lockKey = 'archive-lock-' + sandbox.runnerId
     if (!(await this.redisLockProvider.lock(lockKey, 10))) {
       return DONT_SYNC_AGAIN
@@ -76,7 +78,7 @@ export class SandboxArchiveAction extends SandboxAction {
 
         //  when the backup is completed, destroy the sandbox on the runner
         //  and deassociate the sandbox from the runner
-        const runner = await this.runnerService.findOne(sandbox.runnerId)
+        const runner = await this.runnerService.findOneOrFail(sandbox.runnerId)
         const runnerAdapter = await this.runnerAdapterFactory.create(runner)
 
         try {

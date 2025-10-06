@@ -32,6 +32,12 @@ export class SandboxInfoDto {
   })
   @IsOptional()
   providerMetadata?: string
+
+  constructor(created: string, name: string, providerMetadata?: string) {
+    this.created = created
+    this.name = name
+    this.providerMetadata = providerMetadata
+  }
 }
 
 @ApiSchema({ name: 'Workspace' })
@@ -66,39 +72,8 @@ export class WorkspaceDto extends SandboxDto {
   @IsOptional()
   info?: SandboxInfoDto
 
-  constructor() {
-    super()
-  }
-
-  static fromSandbox(sandbox: Sandbox): WorkspaceDto {
-    const dto = super.fromSandbox(sandbox)
-    return this.fromSandboxDto(dto)
-  }
-
-  static fromSandboxDto(sandboxDto: SandboxDto): WorkspaceDto {
-    return {
-      ...sandboxDto,
-      image: sandboxDto.snapshot,
-      snapshotState: sandboxDto.backupState,
-      snapshotCreatedAt: sandboxDto.backupCreatedAt,
-      info: {
-        name: sandboxDto.name,
-        created: sandboxDto.createdAt,
-        providerMetadata: JSON.stringify({
-          state: sandboxDto.state,
-          region: sandboxDto.target,
-          class: sandboxDto.class,
-          updatedAt: sandboxDto.updatedAt,
-          lastSnapshot: sandboxDto.backupCreatedAt,
-          cpu: sandboxDto.cpu,
-          gpu: sandboxDto.gpu,
-          memory: sandboxDto.memory,
-          disk: sandboxDto.disk,
-          autoStopInterval: sandboxDto.autoStopInterval,
-          autoArchiveInterval: sandboxDto.autoArchiveInterval,
-          daemonVersion: sandboxDto.daemonVersion,
-        }),
-      },
-    }
+  constructor(sandbox: Sandbox) {
+    super(sandbox)
+    this.image = sandbox.snapshot || ''
   }
 }

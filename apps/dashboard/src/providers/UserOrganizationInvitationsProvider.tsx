@@ -23,7 +23,7 @@ export function UserOrganizationInvitationsProvider(props: Props) {
     try {
       const count = (await organizationsApi.getOrganizationInvitationsCountForAuthenticatedUser()).data
       setCount(count)
-    } catch (e) {
+    } catch {
       // silently fail
     }
   }, [organizationsApi])

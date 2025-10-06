@@ -16,4 +16,8 @@ export class CreateOrganizationDto {
   @IsString()
   @IsNotEmpty()
   name: string
+
+  constructor(name: string) {
+    this.name = name
+  }
 }

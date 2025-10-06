@@ -12,38 +12,40 @@
  * Do not edit the class manually.
  */
 
+
 // May contain unused imports in some cases
 // @ts-ignore
-import type { SnapshotDto } from './snapshot-dto'
+import type { SnapshotDto } from './snapshot-dto';
 
 /**
- *
+ * 
  * @export
  * @interface PaginatedSnapshotsDto
  */
 export interface PaginatedSnapshotsDto {
-  /**
-   *
-   * @type {Array<SnapshotDto>}
-   * @memberof PaginatedSnapshotsDto
-   */
-  items: Array<SnapshotDto>
-  /**
-   *
-   * @type {number}
-   * @memberof PaginatedSnapshotsDto
-   */
-  total: number
-  /**
-   *
-   * @type {number}
-   * @memberof PaginatedSnapshotsDto
-   */
-  page: number
-  /**
-   *
-   * @type {number}
-   * @memberof PaginatedSnapshotsDto
-   */
-  totalPages: number
+    /**
+     * 
+     * @type {Array<SnapshotDto>}
+     * @memberof PaginatedSnapshotsDto
+     */
+    'items': Array<SnapshotDto>;
+    /**
+     * 
+     * @type {number}
+     * @memberof PaginatedSnapshotsDto
+     */
+    'total': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof PaginatedSnapshotsDto
+     */
+    'page': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof PaginatedSnapshotsDto
+     */
+    'totalPages': number;
 }
+

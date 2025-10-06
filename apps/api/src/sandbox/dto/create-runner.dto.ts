@@ -61,4 +61,32 @@ export class CreateRunnerDto {
   @IsString()
   @ApiProperty()
   version: string
+
+  constructor(createParams: {
+    domain: string
+    apiUrl: string
+    proxyUrl: string
+    apiKey: string
+    cpu: number
+    memoryGiB: number
+    diskGiB: number
+    gpu: number
+    gpuType: string
+    class: SandboxClass
+    region: string
+    version: string
+  }) {
+    this.domain = createParams.domain
+    this.apiUrl = createParams.apiUrl
+    this.proxyUrl = createParams.proxyUrl
+    this.apiKey = createParams.apiKey
+    this.cpu = createParams.cpu
+    this.memoryGiB = createParams.memoryGiB
+    this.diskGiB = createParams.diskGiB
+    this.gpu = createParams.gpu
+    this.gpuType = createParams.gpuType
+    this.class = createParams.class
+    this.region = createParams.region
+    this.version = createParams.version
+  }
 }

@@ -54,7 +54,7 @@ const Dashboard: React.FC = () => {
       return [null, null]
     }
 
-    return [Object.values(config.announcements)[0].text, Object.values(config.announcements)[0].learnMoreUrl]
+    return [Object.values(config.announcements)[0]?.text, Object.values(config.announcements)[0]?.learnMoreUrl]
   }, [config.announcements])
   const [isBannerVisible, setIsBannerVisible] = useState(false)
 

@@ -1,5 +1,5 @@
 /* tslint:disable */
-
+/* eslint-disable */
 /**
  * Daytona
  * Daytona AI platform API Docs
@@ -12,22 +12,25 @@
  * Do not edit the class manually.
  */
 
+
+
 /**
- *
+ * 
  * @export
  * @interface PtyResizeRequest
  */
 export interface PtyResizeRequest {
-  /**
-   * Number of terminal columns
-   * @type {number}
-   * @memberof PtyResizeRequest
-   */
-  cols: number
-  /**
-   * Number of terminal rows
-   * @type {number}
-   * @memberof PtyResizeRequest
-   */
-  rows: number
+    /**
+     * Number of terminal columns
+     * @type {number}
+     * @memberof PtyResizeRequest
+     */
+    'cols': number;
+    /**
+     * Number of terminal rows
+     * @type {number}
+     * @memberof PtyResizeRequest
+     */
+    'rows': number;
 }
+

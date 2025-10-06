@@ -23,6 +23,7 @@ import WebSocket from 'isomorphic-ws'
 import { RUNTIME, Runtime } from './utils/Runtime'
 import { PtyHandle } from './PtyHandle'
 import { PtyCreateOptions, PtyConnectOptions } from './types/Pty'
+import { v4 } from 'uuid'
 
 // 3-byte multiplexing markers inserted by the shell labelers
 export const STDOUT_PREFIX_BYTES = new Uint8Array([0x01, 0x01, 0x01])
@@ -385,7 +386,17 @@ export class Process {
 
     const ws = createWebSocket(url, previewLink.token, this.clientConfig.baseOptions?.headers || {})
 
-    await stdDemuxStream(ws, onStdout, onStderr)
+    await stdDemuxStream(
+      ws,
+      onStdout ??
+        (() => {
+          /* empty */
+        }),
+      onStderr ??
+        (() => {
+          /* empty */
+        }),
+    )
   }
 
   /**
@@ -462,11 +473,11 @@ export class Process {
    */
   public async createPty(options?: PtyCreateOptions & PtyConnectOptions): Promise<PtyHandle> {
     const request: PtyCreateRequest = {
-      id: options.id,
-      cwd: options.cwd,
-      envs: options.envs,
-      cols: options.cols,
-      rows: options.rows,
+      id: options?.id ?? v4(),
+      cwd: options?.cwd,
+      envs: options?.envs,
+      cols: options?.cols,
+      rows: options?.rows,
       lazyStart: true,
     }
 
@@ -521,7 +532,10 @@ export class Process {
       ws,
       (cols: number, rows: number) => this.resizePtySession(sessionId, cols, rows),
       () => this.killPtySession(sessionId),
-      options.onData,
+      options?.onData ||
+        (() => {
+          /* empty */
+        }),
       sessionId,
     )
     await handle.waitForConnection()

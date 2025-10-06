@@ -68,6 +68,10 @@ export class WebhookEventHandlerService {
       return
     }
 
+    if (!event.snapshot.organizationId) {
+      return
+    }
+
     try {
       await this.webhookService.sendWebhook(event.snapshot.organizationId, WebhookEvents.SNAPSHOT_CREATED, {
         id: event.snapshot.id,
@@ -84,6 +88,10 @@ export class WebhookEventHandlerService {
   @OnEvent(SnapshotEvents.STATE_UPDATED)
   async handleSnapshotStateUpdated(event: SnapshotStateUpdatedEvent) {
     if (!this.webhookService.isEnabled()) {
+      return
+    }
+
+    if (!event.snapshot.organizationId) {
       return
     }
 
@@ -107,6 +115,10 @@ export class WebhookEventHandlerService {
       return
     }
 
+    if (!event.snapshot.organizationId) {
+      return
+    }
+
     try {
       await this.webhookService.sendWebhook(event.snapshot.organizationId, WebhookEvents.SNAPSHOT_REMOVED, {
         id: event.snapshot.id,
@@ -122,6 +134,10 @@ export class WebhookEventHandlerService {
   @OnEvent(VolumeEvents.CREATED)
   async handleVolumeCreated(event: VolumeCreatedEvent) {
     if (!this.webhookService.isEnabled()) {
+      return
+    }
+
+    if (!event.volume.organizationId) {
       return
     }
 
@@ -141,6 +157,10 @@ export class WebhookEventHandlerService {
   @OnEvent(VolumeEvents.STATE_UPDATED)
   async handleVolumeStateUpdated(event: VolumeStateUpdatedEvent) {
     if (!this.webhookService.isEnabled()) {
+      return
+    }
+
+    if (!event.volume.organizationId) {
       return
     }
 

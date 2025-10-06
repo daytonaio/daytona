@@ -1,5 +1,5 @@
 /* tslint:disable */
-
+/* eslint-disable */
 /**
  * Daytona
  * Daytona AI platform API Docs
@@ -12,16 +12,19 @@
  * Do not edit the class manually.
  */
 
+
+
 /**
- *
+ * 
  * @export
  * @interface DownloadFiles
  */
 export interface DownloadFiles {
-  /**
-   * List of remote file paths to download
-   * @type {Array<string>}
-   * @memberof DownloadFiles
-   */
-  paths: Array<string>
+    /**
+     * List of remote file paths to download
+     * @type {Array<string>}
+     * @memberof DownloadFiles
+     */
+    'paths': Array<string>;
 }
+

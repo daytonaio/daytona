@@ -22,7 +22,7 @@ import { CombinedAuthGuard } from '../../auth/combined-auth.guard'
 import { OrGuard } from '../../auth/or.guard'
 import { RunnerAuthGuard } from '../../auth/runner-auth.guard'
 import { RunnerContextDecorator } from '../../common/decorators/runner-context.decorator'
-import { RunnerContext } from '../../common/interfaces/runner-context.interface'
+import { type RunnerContext } from '../../common/interfaces/runner-context.interface'
 
 @ApiTags('runners')
 @Controller('runners')
@@ -73,7 +73,7 @@ export class RunnerController {
     type: RunnerDto,
   })
   async getInfoForAuthenticatedRunner(@RunnerContextDecorator() runnerContext: RunnerContext): Promise<RunnerDto> {
-    return RunnerDto.fromRunner(runnerContext.runner)
+    return new RunnerDto(runnerContext.runner)
   }
 
   @Get()
@@ -119,7 +119,7 @@ export class RunnerController {
   })
   async getRunnerBySandboxId(@Param('sandboxId') sandboxId: string): Promise<RunnerDto> {
     const runner = await this.runnerService.findBySandboxId(sandboxId)
-    return RunnerDto.fromRunner(runner)
+    return new RunnerDto(runner)
   }
 
   @Get('/by-snapshot-ref')

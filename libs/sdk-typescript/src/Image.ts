@@ -538,7 +538,7 @@ export class Image {
       pythonVersion = SUPPORTED_PYTHON_SERIES[SUPPORTED_PYTHON_SERIES.length - 1]
     }
 
-    if (!SUPPORTED_PYTHON_SERIES.includes(pythonVersion)) {
+    if (!pythonVersion || !SUPPORTED_PYTHON_SERIES.includes(pythonVersion)) {
       throw new Error(
         `Unsupported Python version: ${pythonVersion}. ` +
           `Daytona supports the following series: ${SUPPORTED_PYTHON_SERIES.join(', ')}`,
@@ -626,7 +626,7 @@ export class Image {
 
         return {
           sources: elements.slice(0, -1),
-          dest: elements[elements.length - 1],
+          dest: elements[elements.length - 1] ?? '',
         }
       } catch {
         return null
@@ -640,9 +640,9 @@ export class Image {
     let sourcesStartIdx = 0
     for (let i = 0; i < splitParts.length; i++) {
       const part = splitParts[i]
-      if (part.startsWith('--')) {
+      if (part?.startsWith('--')) {
         // Skip the flag and its value if it has one
-        if (!part.includes('=') && i + 1 < splitParts.length && !splitParts[i + 1].startsWith('--')) {
+        if (!part.includes('=') && i + 1 < splitParts.length && !splitParts[i + 1]?.startsWith('--')) {
           sourcesStartIdx = i + 2
         } else {
           sourcesStartIdx = i + 1
@@ -659,7 +659,7 @@ export class Image {
 
     return {
       sources: splitParts.slice(sourcesStartIdx, -1),
-      dest: splitParts[splitParts.length - 1],
+      dest: splitParts[splitParts.length - 1] ?? '',
     }
   }
 }

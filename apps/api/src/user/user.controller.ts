@@ -23,7 +23,7 @@ import { CreateUserDto } from './dto/create-user.dto'
 import { ApiOAuth2, ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger'
 import { CombinedAuthGuard } from '../auth/combined-auth.guard'
 import { AuthContext } from '../common/decorators/auth-context.decorator'
-import { AuthContext as IAuthContext } from '../common/interfaces/auth-context.interface'
+import type { AuthContext as IAuthContext } from '../common/interfaces/auth-context.interface'
 import { UserDto } from './dto/user.dto'
 import { SystemActionGuard } from '../auth/system-action.guard'
 import { RequiredSystemRole } from '../common/decorators/required-role.decorator'
@@ -67,7 +67,7 @@ export class UserController {
       throw new NotFoundException(`User with ID ${authContext.userId} not found`)
     }
 
-    return UserDto.fromUser(user)
+    return new UserDto(user)
   }
 
   @Post()
@@ -187,7 +187,7 @@ export class UserController {
     @Body() createLinkedAccountDto: CreateLinkedAccountDto,
   ): Promise<void> {
     const authenticatedUser = await this.userService.findOne(authContext.userId)
-    if (!authenticatedUser.emailVerified) {
+    if (!authenticatedUser?.emailVerified) {
       throw new ForbiddenException('Please verify your email address')
     }
 
@@ -324,7 +324,7 @@ export class UserController {
       throw new NotFoundException(`User with ID ${id} not found`)
     }
 
-    return UserDto.fromUser(user)
+    return new UserDto(user)
   }
 
   private async getManagementApiToken(): Promise<string> {

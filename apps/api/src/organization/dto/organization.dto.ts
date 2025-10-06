@@ -98,28 +98,24 @@ export class OrganizationDto {
   })
   sandboxLimitedNetworkEgress: boolean
 
-  static fromOrganization(organization: Organization): OrganizationDto {
-    const dto: OrganizationDto = {
-      id: organization.id,
-      name: organization.name,
-      createdBy: organization.createdBy,
-      personal: organization.personal,
-      createdAt: organization.createdAt,
-      updatedAt: organization.updatedAt,
-      suspended: organization.suspended,
-      suspensionReason: organization.suspensionReason,
-      suspendedAt: organization.suspendedAt,
-      suspendedUntil: organization.suspendedUntil,
-      suspensionCleanupGracePeriodHours: organization.suspensionCleanupGracePeriodHours,
-      totalCpuQuota: organization.totalCpuQuota,
-      totalMemoryQuota: organization.totalMemoryQuota,
-      totalDiskQuota: organization.totalDiskQuota,
-      maxCpuPerSandbox: organization.maxCpuPerSandbox,
-      maxMemoryPerSandbox: organization.maxMemoryPerSandbox,
-      maxDiskPerSandbox: organization.maxDiskPerSandbox,
-      sandboxLimitedNetworkEgress: organization.sandboxLimitedNetworkEgress,
-    }
-
-    return dto
+  constructor(organization: Organization) {
+    this.id = organization.id
+    this.name = organization.name
+    this.createdBy = organization.createdBy
+    this.personal = organization.personal
+    this.createdAt = organization.createdAt
+    this.updatedAt = organization.updatedAt
+    this.suspended = organization.suspended
+    this.suspensionReason = organization.suspensionReason ?? undefined
+    this.suspendedAt = organization.suspendedAt ?? undefined
+    this.suspendedUntil = organization.suspendedUntil ?? undefined
+    this.suspensionCleanupGracePeriodHours = organization.suspensionCleanupGracePeriodHours
+    this.totalCpuQuota = organization.totalCpuQuota
+    this.totalMemoryQuota = organization.totalMemoryQuota
+    this.totalDiskQuota = organization.totalDiskQuota
+    this.maxCpuPerSandbox = organization.maxCpuPerSandbox
+    this.maxMemoryPerSandbox = organization.maxMemoryPerSandbox
+    this.maxDiskPerSandbox = organization.maxDiskPerSandbox
+    this.sandboxLimitedNetworkEgress = organization.sandboxLimitedNetworkEgress
   }
 }

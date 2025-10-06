@@ -580,7 +580,12 @@ export class Daytona {
       const errMsg = `No sandbox found with labels ${JSON.stringify(filter.labels)}`
       throw new DaytonaError(errMsg)
     }
-    return result.items[0]
+    const sandbox = result.items[0]
+    if (!sandbox) {
+      const errMsg = `No sandbox found with labels ${JSON.stringify(filter.labels)}`
+      throw new DaytonaError(errMsg)
+    }
+    return sandbox
   }
 
   /**
@@ -603,8 +608,7 @@ export class Daytona {
       page,
       limit,
       undefined,
-      undefined,
-      labels ? JSON.stringify(labels) : undefined,
+      labels && Object.keys(labels).length > 0 ? JSON.stringify(labels) : undefined,
     )
 
     return {

@@ -11,7 +11,6 @@ import {
   Body,
   Param,
   Query,
-  Logger,
   UseGuards,
   HttpCode,
   UseInterceptors,
@@ -19,7 +18,7 @@ import {
   NotFoundException,
   Res,
   Request,
-  RawBodyRequest,
+  type RawBodyRequest,
   Next,
   ParseBoolPipe,
 } from '@nestjs/common'
@@ -42,20 +41,20 @@ import { PaginatedSandboxesDto } from '../dto/paginated-sandboxes.dto'
 import { RunnerService } from '../services/runner.service'
 import { RunnerAuthGuard } from '../../auth/runner-auth.guard'
 import { RunnerContextDecorator } from '../../common/decorators/runner-context.decorator'
-import { RunnerContext } from '../../common/interfaces/runner-context.interface'
+import type { RunnerContext } from '../../common/interfaces/runner-context.interface'
 import { SandboxState } from '../enums/sandbox-state.enum'
 import { Sandbox } from '../entities/sandbox.entity'
 import { ContentTypeInterceptor } from '../../common/interceptors/content-type.interceptors'
 import { SandboxAccessGuard } from '../guards/sandbox-access.guard'
 import { CustomHeaders } from '../../common/constants/header.constants'
 import { AuthContext } from '../../common/decorators/auth-context.decorator'
-import { OrganizationAuthContext } from '../../common/interfaces/auth-context.interface'
+import type { OrganizationAuthContext } from '../../common/interfaces/auth-context.interface'
 import { RequiredOrganizationResourcePermissions } from '../../organization/decorators/required-organization-resource-permissions.decorator'
 import { OrganizationResourcePermission } from '../../organization/enums/organization-resource-permission.enum'
 import { OrganizationResourceActionGuard } from '../../organization/guards/organization-resource-action.guard'
 import { PortPreviewUrlDto } from '../dto/port-preview-url.dto'
 import { IncomingMessage, ServerResponse } from 'http'
-import { NextFunction } from 'http-proxy-middleware/dist/types'
+import type { NextFunction } from 'http-proxy-middleware/dist/types'
 import { LogProxy } from '../proxy/log-proxy'
 import { BadRequestError } from '../../exceptions/bad-request.exception'
 import { TypedConfigService } from '../../config/typed-config.service'
@@ -77,8 +76,6 @@ import { RegionDto } from '../dto/region.dto'
 @ApiOAuth2(['openid', 'profile', 'email'])
 @ApiBearerAuth()
 export class SandboxController {
-  private readonly logger = new Logger(SandboxController.name)
-
   constructor(
     private readonly runnerService: RunnerService,
     private readonly sandboxService: SandboxService,
@@ -117,7 +114,6 @@ export class SandboxController {
   })
   async listSandboxes(
     @AuthContext() authContext: OrganizationAuthContext,
-    @Query('verbose') verbose?: boolean,
     @Query('labels') labelsQuery?: string,
     @Query('includeErroredDeleted') includeErroredDeleted?: boolean,
   ): Promise<SandboxDto[]> {
@@ -129,7 +125,7 @@ export class SandboxController {
     )
 
     return sandboxes.map((sandbox) => {
-      return SandboxDto.fromSandbox(sandbox)
+      return new SandboxDto(sandbox)
     })
   }
 
@@ -198,7 +194,7 @@ export class SandboxController {
 
     return {
       items: result.items.map((sandbox) => {
-        return SandboxDto.fromSandbox(sandbox)
+        return new SandboxDto(sandbox)
       }),
       total: result.total,
       page: result.page,
@@ -331,7 +327,7 @@ export class SandboxController {
     const skip = skipReconcilingSandboxes === 'true'
     const sandboxes = await this.sandboxService.findByRunnerId(runnerContext.runnerId, stateArray, skip)
 
-    return sandboxes.map((sandbox) => SandboxDto.fromSandbox(sandbox))
+    return sandboxes.map((sandbox) => new SandboxDto(sandbox))
   }
 
   @Get(':sandboxIdOrName')
@@ -359,12 +355,9 @@ export class SandboxController {
   async getSandbox(
     @AuthContext() authContext: OrganizationAuthContext,
     @Param('sandboxIdOrName') sandboxIdOrName: string,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    @Query('verbose') verbose?: boolean,
   ): Promise<SandboxDto> {
     const sandbox = await this.sandboxService.findOneByIdOrName(sandboxIdOrName, authContext.organizationId)
-
-    return SandboxDto.fromSandbox(sandbox)
+    return new SandboxDto(sandbox)
   }
 
   @Delete(':sandboxIdOrName')
@@ -395,7 +388,7 @@ export class SandboxController {
     @Param('sandboxIdOrName') sandboxIdOrName: string,
   ): Promise<SandboxDto> {
     const sandbox = await this.sandboxService.destroy(sandboxIdOrName, authContext.organizationId)
-    return SandboxDto.fromSandbox(sandbox)
+    return new SandboxDto(sandbox)
   }
 
   @Post(':sandboxIdOrName/start')
@@ -427,9 +420,12 @@ export class SandboxController {
     @Param('sandboxIdOrName') sandboxIdOrName: string,
   ): Promise<SandboxDto> {
     const sbx = await this.sandboxService.start(sandboxIdOrName, authContext.organization)
-    let sandbox = SandboxDto.fromSandbox(sbx)
+    let sandbox = new SandboxDto(sbx)
 
-    if (![SandboxState.ARCHIVED, SandboxState.RESTORING, SandboxState.STARTED].includes(sandbox.state)) {
+    if (
+      !sandbox.state ||
+      ![SandboxState.ARCHIVED, SandboxState.RESTORING, SandboxState.STARTED].includes(sandbox.state)
+    ) {
       sandbox = await this.waitForSandboxStarted(sandbox, 30)
     }
 
@@ -465,7 +461,7 @@ export class SandboxController {
     @Param('sandboxIdOrName') sandboxIdOrName: string,
   ): Promise<SandboxDto> {
     const sandbox = await this.sandboxService.stop(sandboxIdOrName, authContext.organizationId)
-    return SandboxDto.fromSandbox(sandbox)
+    return new SandboxDto(sandbox)
   }
 
   @Put(':sandboxIdOrName/labels')
@@ -507,7 +503,7 @@ export class SandboxController {
       labelsDto.labels,
       authContext.organizationId,
     )
-    return SandboxDto.fromSandbox(sandbox)
+    return new SandboxDto(sandbox)
   }
 
   @Put(':sandboxId/state')
@@ -562,7 +558,7 @@ export class SandboxController {
     @Param('sandboxIdOrName') sandboxIdOrName: string,
   ): Promise<SandboxDto> {
     const sandbox = await this.sandboxService.createBackup(sandboxIdOrName, authContext.organizationId)
-    return SandboxDto.fromSandbox(sandbox)
+    return new SandboxDto(sandbox)
   }
 
   @Post(':sandboxIdOrName/public/:isPublic')
@@ -604,7 +600,7 @@ export class SandboxController {
     @Param('isPublic') isPublic: boolean,
   ): Promise<SandboxDto> {
     const sandbox = await this.sandboxService.updatePublicStatus(sandboxIdOrName, isPublic, authContext.organizationId)
-    return SandboxDto.fromSandbox(sandbox)
+    return new SandboxDto(sandbox)
   }
 
   @Post(':sandboxIdOrName/autostop/:interval')
@@ -646,7 +642,7 @@ export class SandboxController {
     @Param('interval') interval: number,
   ): Promise<SandboxDto> {
     const sandbox = await this.sandboxService.setAutostopInterval(sandboxIdOrName, interval, authContext.organizationId)
-    return SandboxDto.fromSandbox(sandbox)
+    return new SandboxDto(sandbox)
   }
 
   @Post(':sandboxIdOrName/autoarchive/:interval')
@@ -692,7 +688,7 @@ export class SandboxController {
       interval,
       authContext.organizationId,
     )
-    return SandboxDto.fromSandbox(sandbox)
+    return new SandboxDto(sandbox)
   }
 
   @Post(':sandboxIdOrName/autodelete/:interval')
@@ -739,7 +735,7 @@ export class SandboxController {
       interval,
       authContext.organizationId,
     )
-    return SandboxDto.fromSandbox(sandbox)
+    return new SandboxDto(sandbox)
   }
 
   // TODO: Network settings endpoint will not be enabled for now
@@ -783,7 +779,7 @@ export class SandboxController {
   //     networkSettings.networkAllowList,
   //     authContext.organizationId,
   //   )
-  //   return SandboxDto.fromSandbox(sandbox, '')
+  //   return new SandboxDto(sandbox)
   // }
 
   @Post(':sandboxIdOrName/archive')
@@ -810,7 +806,7 @@ export class SandboxController {
     @Param('sandboxIdOrName') sandboxIdOrName: string,
   ): Promise<SandboxDto> {
     const sandbox = await this.sandboxService.archive(sandboxIdOrName, authContext.organizationId)
-    return SandboxDto.fromSandbox(sandbox)
+    return new SandboxDto(sandbox)
   }
 
   @Get(':sandboxIdOrName/ports/:port/preview-url')
@@ -848,17 +844,15 @@ export class SandboxController {
 
     const sandbox = await this.sandboxService.findOneByIdOrName(sandboxIdOrName, authContext.organizationId)
 
-    // Get runner info
-    const runner = await this.runnerService.findOne(sandbox.runnerId)
-    if (!runner) {
-      throw new NotFoundException(`Runner not found for sandbox ${sandboxIdOrName}`)
+    if (!sandbox.runnerId) {
+      throw new NotFoundException(`Runner not found for sandbox ${sandbox.id}`)
     }
 
-    return {
-      sandboxId: sandbox.id,
-      url: `${proxyProtocol}://${port}-${sandbox.id}.${proxyDomain}`,
-      token: sandbox.authToken,
-    }
+    return new PortPreviewUrlDto(
+      sandbox.id,
+      `${proxyProtocol}://${port}-${sandbox.id}.${proxyDomain}`,
+      sandbox.authToken,
+    )
   }
 
   @Get(':sandboxIdOrName/build-logs')
@@ -904,15 +898,12 @@ export class SandboxController {
       throw new NotFoundException(`Runner for sandbox ${sandboxIdOrName} not found`)
     }
 
-    const logProxy = new LogProxy(
-      runner.apiUrl,
-      sandbox.buildInfo.snapshotRef.split(':')[0],
-      runner.apiKey,
-      follow === true,
-      req,
-      res,
-      next,
-    )
+    const snapshotRef = sandbox.buildInfo.snapshotRef.split(':')[0]
+    if (!snapshotRef) {
+      throw new NotFoundException(`Snapshot ref not found for sandbox ${sandbox.id}`)
+    }
+
+    const logProxy = new LogProxy(runner.apiUrl, snapshotRef, runner.apiKey, follow === true, req, res, next)
     return logProxy.create()
   }
 
@@ -961,7 +952,7 @@ export class SandboxController {
       expiresInMinutes,
       authContext.organizationId,
     )
-    return SshAccessDto.fromSshAccess(sshAccess)
+    return new SshAccessDto(sshAccess)
   }
 
   @Delete(':sandboxIdOrName/ssh-access')
@@ -1005,7 +996,7 @@ export class SandboxController {
     @Query('token') token?: string,
   ): Promise<SandboxDto> {
     const sandbox = await this.sandboxService.revokeSshAccess(sandboxIdOrName, token, authContext.organizationId)
-    return SandboxDto.fromSandbox(sandbox)
+    return new SandboxDto(sandbox)
   }
 
   @Get('ssh-access/validate')
@@ -1025,8 +1016,7 @@ export class SandboxController {
     type: SshAccessValidationDto,
   })
   async validateSshAccess(@Query('token') token: string): Promise<SshAccessValidationDto> {
-    const result = await this.sandboxService.validateSshAccess(token)
-    return SshAccessValidationDto.fromValidationResult(result.valid, result.sandboxId)
+    return await this.sandboxService.validateSshAccess(token)
   }
 
   // wait up to `timeoutSeconds` for the sandbox to start; if it doesn’t, return current sandbox
@@ -1043,7 +1033,7 @@ export class SandboxController {
         if (event.sandbox.state === SandboxState.STARTED) {
           this.eventEmitter.off(SandboxEvents.STATE_UPDATED, handleStateUpdated)
           clearTimeout(timeout)
-          resolve(SandboxDto.fromSandbox(event.sandbox))
+          resolve(new SandboxDto(event.sandbox))
         }
         if (event.sandbox.state === SandboxState.ERROR || event.sandbox.state === SandboxState.BUILD_FAILED) {
           this.eventEmitter.off(SandboxEvents.STATE_UPDATED, handleStateUpdated)
@@ -1057,7 +1047,7 @@ export class SandboxController {
       timeout = setTimeout(() => {
         this.eventEmitter.off(SandboxEvents.STATE_UPDATED, handleStateUpdated)
         if (latestSandbox) {
-          resolve(SandboxDto.fromSandbox(latestSandbox))
+          resolve(new SandboxDto(latestSandbox))
         } else {
           resolve(sandbox)
         }

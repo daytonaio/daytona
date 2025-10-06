@@ -1,5 +1,5 @@
 /* tslint:disable */
-
+/* eslint-disable */
 /**
  * Daytona
  * Daytona AI platform API Docs
@@ -12,22 +12,25 @@
  * Do not edit the class manually.
  */
 
+
+
 /**
- *
+ * 
  * @export
  * @interface ProcessRestartResponse
  */
 export interface ProcessRestartResponse {
-  /**
-   * A message indicating the result of restarting the process
-   * @type {string}
-   * @memberof ProcessRestartResponse
-   */
-  message: string
-  /**
-   * The name of the VNC process that was restarted
-   * @type {string}
-   * @memberof ProcessRestartResponse
-   */
-  processName: string
+    /**
+     * A message indicating the result of restarting the process
+     * @type {string}
+     * @memberof ProcessRestartResponse
+     */
+    'message': string;
+    /**
+     * The name of the VNC process that was restarted
+     * @type {string}
+     * @memberof ProcessRestartResponse
+     */
+    'processName': string;
 }
+

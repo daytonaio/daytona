@@ -12,38 +12,40 @@
  * Do not edit the class manually.
  */
 
+
 // May contain unused imports in some cases
 // @ts-ignore
-import type { HealthControllerCheck200ResponseInfoValue } from './health-controller-check200-response-info-value'
+import type { HealthControllerCheck200ResponseInfoValue } from './health-controller-check200-response-info-value';
 
 /**
- *
+ * 
  * @export
  * @interface HealthControllerCheck200Response
  */
 export interface HealthControllerCheck200Response {
-  /**
-   *
-   * @type {string}
-   * @memberof HealthControllerCheck200Response
-   */
-  status?: string
-  /**
-   *
-   * @type {{ [key: string]: HealthControllerCheck200ResponseInfoValue; }}
-   * @memberof HealthControllerCheck200Response
-   */
-  info?: { [key: string]: HealthControllerCheck200ResponseInfoValue } | null
-  /**
-   *
-   * @type {{ [key: string]: HealthControllerCheck200ResponseInfoValue; }}
-   * @memberof HealthControllerCheck200Response
-   */
-  error?: { [key: string]: HealthControllerCheck200ResponseInfoValue } | null
-  /**
-   *
-   * @type {{ [key: string]: HealthControllerCheck200ResponseInfoValue; }}
-   * @memberof HealthControllerCheck200Response
-   */
-  details?: { [key: string]: HealthControllerCheck200ResponseInfoValue }
+    /**
+     * 
+     * @type {string}
+     * @memberof HealthControllerCheck200Response
+     */
+    'status'?: string;
+    /**
+     * 
+     * @type {{ [key: string]: HealthControllerCheck200ResponseInfoValue; }}
+     * @memberof HealthControllerCheck200Response
+     */
+    'info'?: { [key: string]: HealthControllerCheck200ResponseInfoValue; } | null;
+    /**
+     * 
+     * @type {{ [key: string]: HealthControllerCheck200ResponseInfoValue; }}
+     * @memberof HealthControllerCheck200Response
+     */
+    'error'?: { [key: string]: HealthControllerCheck200ResponseInfoValue; } | null;
+    /**
+     * 
+     * @type {{ [key: string]: HealthControllerCheck200ResponseInfoValue; }}
+     * @memberof HealthControllerCheck200Response
+     */
+    'details'?: { [key: string]: HealthControllerCheck200ResponseInfoValue; };
 }
+

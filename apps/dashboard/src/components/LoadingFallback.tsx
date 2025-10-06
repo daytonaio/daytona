@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import React from 'react'
 import {
   SidebarGroup,
   SidebarInset,

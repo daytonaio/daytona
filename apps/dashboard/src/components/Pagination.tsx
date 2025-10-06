@@ -17,13 +17,7 @@ interface PaginationProps<TData> {
   totalItems?: number
 }
 
-export function Pagination<TData>({
-  table,
-  selectionEnabled,
-  className,
-  entityName,
-  totalItems,
-}: PaginationProps<TData>) {
+export function Pagination<TData>({ table, selectionEnabled, className, totalItems }: PaginationProps<TData>) {
   return (
     <div className={`flex flex-col sm:flex-row gap-2 sm:items-center justify-between w-full ${className}`}>
       <div className="flex items-center gap-4">

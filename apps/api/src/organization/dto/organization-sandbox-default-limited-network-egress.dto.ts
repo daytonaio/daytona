@@ -11,4 +11,8 @@ export class OrganizationSandboxDefaultLimitedNetworkEgressDto {
     description: 'Sandbox default limited network egress',
   })
   sandboxDefaultLimitedNetworkEgress: boolean
+
+  constructor(sandboxDefaultLimitedNetworkEgress: boolean) {
+    this.sandboxDefaultLimitedNetworkEgress = sandboxDefaultLimitedNetworkEgress
+  }
 }

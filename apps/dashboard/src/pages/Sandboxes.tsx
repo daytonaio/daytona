@@ -326,7 +326,7 @@ const Sandboxes: React.FC = () => {
   // Subscribe to Sandbox Events
 
   useEffect(() => {
-    const handleSandboxCreatedEvent = (sandbox: Sandbox) => {
+    const handleSandboxCreatedEvent = (_: Sandbox) => {
       const isFirstPage = paginationParams.pageIndex === 0
       const isDefaultFilters = Object.keys(filters).length === 0
       const isDefaultSorting =

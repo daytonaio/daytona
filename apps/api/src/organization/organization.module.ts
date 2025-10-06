@@ -59,6 +59,7 @@ import { OrganizationUsageService } from './services/organization-usage.service'
     OrganizationUserService,
     OrganizationInvitationService,
     OrganizationUsageService,
+    RedisLockProvider,
   ],
 })
 export class OrganizationModule {}
