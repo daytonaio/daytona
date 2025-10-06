@@ -6,6 +6,7 @@ package docker
 import (
 	"context"
 	"errors"
+	"time"
 
 	"github.com/daytonaio/runner/pkg/api/dto"
 	"github.com/daytonaio/runner/pkg/models/enums"
@@ -34,7 +35,7 @@ func (d *DockerClient) StartBackupCreate(ctx context.Context, containerId string
 	d.cache.SetBackupState(ctx, containerId, enums.BackupStateInProgress, nil)
 
 	go func() {
-		ctx, cancel := context.WithCancel(context.Background())
+		ctx, cancel := context.WithTimeout(context.Background(), 1*time.Hour)
 
 		defer func() {
 			backupContext, ok := backup_context_map.Get(containerId)
@@ -49,8 +50,13 @@ func (d *DockerClient) StartBackupCreate(ctx context.Context, containerId string
 		err := d.commitContainer(ctx, containerId, backupDto.Snapshot)
 		if err != nil {
 			if errors.Is(err, context.Canceled) {
+				// Check if it was cancelled due to timeout
+				if ctx.Err() == context.DeadlineExceeded {
+					log.Errorf("Backup commit for container %s timed out after 1 hour", containerId)
+				} else {
+					log.Infof("Backup commit for container %s canceled", containerId)
+				}
 				d.cache.SetBackupState(ctx, containerId, enums.BackupStateNone, nil)
-				log.Infof("Backup for container %s canceled", containerId)
 				return
 			}
 			log.Errorf("Error committing container %s: %v", containerId, err)
@@ -58,11 +64,22 @@ func (d *DockerClient) StartBackupCreate(ctx context.Context, containerId string
 			return
 		}
 
-		err = d.PushImage(ctx, backupDto.Snapshot, &backupDto.Registry)
+		// Commit successful, create a fresh timeout context for push operation
+		pushCtx, pushCancel := context.WithTimeout(context.Background(), 1*time.Hour)
+		defer pushCancel()
+
+		backup_context_map.Set(containerId, backupContext{pushCtx, pushCancel})
+
+		err = d.PushImage(pushCtx, backupDto.Snapshot, &backupDto.Registry)
 		if err != nil {
 			if errors.Is(err, context.Canceled) {
+				// Check if it was cancelled due to timeout
+				if pushCtx.Err() == context.DeadlineExceeded {
+					log.Errorf("Backup push for container %s timed out after 1 hour", containerId)
+				} else {
+					log.Infof("Backup push for container %s canceled", containerId)
+				}
 				d.cache.SetBackupState(ctx, containerId, enums.BackupStateNone, nil)
-				log.Infof("Backup for container %s canceled", containerId)
 				return
 			}
 			log.Errorf("Error pushing image %s: %v", backupDto.Snapshot, err)
