@@ -3,71 +3,138 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { GitOperationsActions, PlaygroundActionFormDataBasic } from '@/enums/Playground'
+import {
+  GitOperationsActions,
+  ParameterFormData,
+  GitCloneParams,
+  GitStatusParams,
+  GitBranchesParams,
+  GitOperationsActionFormData,
+} from '@/enums/Playground'
+import { usePlayground } from '@/hooks/usePlayground'
+import InlineInputFormControl from '../../Inputs/InlineInputFormControl'
+import FormTextInput from '../../Inputs/TextInput'
 import PlaygroundActionForm from '../../ActionForm'
+import { useState } from 'react'
 
 const SandboxGitOperations: React.FC = () => {
-  const gitOperationsActionsFormData: PlaygroundActionFormDataBasic<GitOperationsActions>[] = [
+  const { sandboxParametersState, sandboxCodeSnippetActionParamValueSetter } = usePlayground()
+  const [gitCloneParams, setGitCloneParams] = useState<GitCloneParams>(sandboxParametersState['gitCloneParams'])
+  const [gitStatusParams, setGitStatusParams] = useState<GitStatusParams>(sandboxParametersState['gitStatusParams'])
+  const [gitBranchesParams, setGitBranchesParams] = useState<GitBranchesParams>(
+    sandboxParametersState['gitBranchesParams'],
+  )
+
+  const gitCloneParamsFormData: ParameterFormData<GitCloneParams> = [
+    { label: 'URL', key: 'repositoryURL', placeholder: 'Repository URL to clone from', required: true },
+    {
+      label: 'Destination',
+      key: 'cloneDestinationPath',
+      placeholder: 'Path where the repository should be cloned',
+      required: true,
+    },
+    { label: 'Branch', key: 'branchToClone', placeholder: 'Specific branch to clone' },
+    { label: 'Commit', key: 'commitToClone', placeholder: 'Specific commit to clone' },
+    { label: 'Username', key: 'authUsername', placeholder: 'Git username for authentication' },
+    { label: 'Password', key: 'authPassword', placeholder: 'Git password or token for authentication' },
+  ]
+
+  const gitStatusParamsFormData: ParameterFormData<GitStatusParams> = [
+    { label: 'Repo location', key: 'repositoryPath', placeholder: 'Path to the Git repository root', required: true },
+  ]
+
+  const gitBranchesParamsFormData: ParameterFormData<GitBranchesParams> = [
+    { label: 'Repo location', key: 'repositoryPath', placeholder: 'Path to the Git repository root', required: true },
+  ]
+
+  const gitOperationsActionsFormData: GitOperationsActionFormData<
+    GitCloneParams | GitStatusParams | GitBranchesParams
+  >[] = [
     {
       methodName: GitOperationsActions.GIT_CLONE,
       label: 'clone()',
       description: 'Clones a Git repository into the specified path',
+      parametersFormItems: gitCloneParamsFormData,
+      parametersState: gitCloneParams,
     },
     {
       methodName: GitOperationsActions.GIT_STATUS,
       label: 'status()',
       description: 'Gets the current Git repository status',
+      parametersFormItems: gitStatusParamsFormData,
+      parametersState: gitStatusParams,
     },
     {
       methodName: GitOperationsActions.GIT_BRANCHES_LIST,
       label: 'branches()',
       description: 'Lists branches in the repository',
-    },
-    {
-      methodName: GitOperationsActions.CREATE_BRANCH,
-      label: 'createBranch()',
-      description: 'Creates branch in the repository',
-    },
-    {
-      methodName: GitOperationsActions.CHECKOUT_BRANCH,
-      label: 'checkoutBranch()',
-      description: 'Checkout branch in the repository',
-    },
-    {
-      methodName: GitOperationsActions.DELETE_BRANCH,
-      label: 'deleteBranch()',
-      description: 'Deletes branch in the repository',
-    },
-    {
-      methodName: GitOperationsActions.GIT_ADD,
-      label: 'add()',
-      description: 'Stages the specified files for the next commit',
-    },
-    {
-      methodName: GitOperationsActions.GIT_COMMIT,
-      label: 'commit()',
-      description: 'Creates a new commit with the staged changes',
-    },
-    {
-      methodName: GitOperationsActions.GIT_PUSH,
-      label: 'push()',
-      description: 'Pushes all local commits on the current branch to the remote repository',
-    },
-    {
-      methodName: GitOperationsActions.GIT_PULL,
-      label: 'pull()',
-      description: 'Pulls changes from the remote repository',
+      parametersFormItems: gitBranchesParamsFormData,
+      parametersState: gitBranchesParams,
     },
   ]
 
   return (
     <div className="space-y-6">
-      {gitOperationsActionsFormData.map((gitOperationsActionFormData) => (
-        <div key={gitOperationsActionFormData.methodName} className="space-y-4">
-          <PlaygroundActionForm<GitOperationsActions>
-            actionFormItem={gitOperationsActionFormData}
-            hideRunActionButton
-          />
+      {gitOperationsActionsFormData.map((gitOperationsAction) => (
+        <div key={gitOperationsAction.methodName} className="space-y-4">
+          <PlaygroundActionForm<GitOperationsActions> actionFormItem={gitOperationsAction} hideRunActionButton />
+          <div className="px-4 space-y-2">
+            {gitOperationsAction.methodName === GitOperationsActions.GIT_CLONE && (
+              <>
+                {gitCloneParamsFormData.map((gitCloneParamFormItem) => (
+                  <InlineInputFormControl key={gitCloneParamFormItem.key} formItem={gitCloneParamFormItem}>
+                    <FormTextInput
+                      formItem={gitCloneParamFormItem}
+                      textValue={gitCloneParams[gitCloneParamFormItem.key]}
+                      onChangeHandler={(value) =>
+                        sandboxCodeSnippetActionParamValueSetter(
+                          gitOperationsAction,
+                          gitCloneParamFormItem,
+                          setGitCloneParams,
+                          'gitCloneParams',
+                          value,
+                        )
+                      }
+                    />
+                  </InlineInputFormControl>
+                ))}
+              </>
+            )}
+            {gitOperationsAction.methodName === GitOperationsActions.GIT_STATUS && (
+              <InlineInputFormControl formItem={gitStatusParamsFormData[0]}>
+                <FormTextInput
+                  formItem={gitStatusParamsFormData[0]}
+                  textValue={gitStatusParams[gitStatusParamsFormData[0].key]}
+                  onChangeHandler={(value) =>
+                    sandboxCodeSnippetActionParamValueSetter(
+                      gitOperationsAction,
+                      gitStatusParamsFormData[0],
+                      setGitStatusParams,
+                      'gitStatusParams',
+                      value,
+                    )
+                  }
+                />
+              </InlineInputFormControl>
+            )}
+            {gitOperationsAction.methodName === GitOperationsActions.GIT_BRANCHES_LIST && (
+              <InlineInputFormControl formItem={gitBranchesParamsFormData[0]}>
+                <FormTextInput
+                  formItem={gitBranchesParamsFormData[0]}
+                  textValue={gitBranchesParams[gitBranchesParamsFormData[0].key]}
+                  onChangeHandler={(value) =>
+                    sandboxCodeSnippetActionParamValueSetter(
+                      gitOperationsAction,
+                      gitBranchesParamsFormData[0],
+                      setGitBranchesParams,
+                      'gitBranchesParams',
+                      value,
+                    )
+                  }
+                />
+              </InlineInputFormControl>
+            )}
+          </div>
         </div>
       ))}
     </div>

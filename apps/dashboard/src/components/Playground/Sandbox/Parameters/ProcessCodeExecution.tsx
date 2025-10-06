@@ -5,10 +5,10 @@
 
 import {
   ProcessCodeExecutionActions,
-  PlaygroundActionFormDataBasic,
   CodeRunParams,
   ShellCommandRunParams,
   ParameterFormItem,
+  ProcessCodeExecutionOperationsActionFormData,
 } from '@/enums/Playground'
 import { usePlayground } from '@/hooks/usePlayground'
 import { CodeLanguage } from '@daytonaio/sdk'
@@ -29,24 +29,32 @@ const SandboxProcessCodeExecution: React.FC = () => {
     label: 'Code to execute',
     key: 'languageCode',
     placeholder: 'Write the code you want to execute inside the sandbox',
+    required: true,
   }
 
   const shellCommandFormData: ParameterFormItem & { key: 'shellCommand' } = {
     label: 'Shell command',
     key: 'shellCommand',
     placeholder: 'Enter a shell command to run inside the sandbox',
+    required: true,
   }
 
-  const processCodeExecutionActionsFormData: PlaygroundActionFormDataBasic<ProcessCodeExecutionActions>[] = [
+  const processCodeExecutionActionsFormData: ProcessCodeExecutionOperationsActionFormData<
+    CodeRunParams | ShellCommandRunParams
+  >[] = [
     {
       methodName: ProcessCodeExecutionActions.CODE_RUN,
       label: 'codeRun()',
       description: 'Executes code in the Sandbox using the appropriate language runtime',
+      parametersFormItems: [codeRunLanguageCodeFormData],
+      parametersState: codeRunParams,
     },
     {
       methodName: ProcessCodeExecutionActions.SHELL_COMMANDS_RUN,
       label: 'executeCommand()',
       description: 'Executes a shell command in the Sandbox',
+      parametersFormItems: [shellCommandFormData],
+      parametersState: shellCommandRunParams,
     },
   ]
 
@@ -59,6 +67,7 @@ const SandboxProcessCodeExecution: React.FC = () => {
     })
   }, [sandboxParametersState.language, setSandboxParameterValue])
 
+  //TODO -> Currently codeRun and executeCommand values are fixed -> when we enable user to define them implement onChange handlers with validateSandboxCodeSnippetAction logic
   return (
     <div className="space-y-6">
       {processCodeExecutionActionsFormData.map((processCodeExecutionAction) => (

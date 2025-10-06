@@ -14,6 +14,8 @@ import {
   ValidatePlaygroundActionRequiredParams,
   RunPlaygroundActionBasic,
   RunPlaygroundActionWithParams,
+  ValidateSandboxCodeSnippetActionWithParams,
+  SandboxCodeSnippetActionParamValueSetter,
 } from '@/contexts/PlaygroundContext'
 import { ScreenshotFormatOption, MouseButton, MouseScrollDirection } from '@/enums/Playground'
 import { Daytona } from '@daytonaio/sdk'
@@ -34,6 +36,16 @@ export const PlaygroundProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       autoStopInterval: 15,
       autoArchiveInterval: 7,
       autoDeleteInterval: -1,
+    },
+    gitCloneParams: {
+      repositoryURL: 'https://github.com/octocat/Hello-World.git',
+      cloneDestinationPath: 'workspace/repo',
+    },
+    gitStatusParams: {
+      repositoryPath: 'workspace/repo',
+    },
+    gitBranchesParams: {
+      repositoryPath: 'workspace/repo',
     },
     codeRunParams: {
       languageCode: getLanguageCodeToRun(),
@@ -154,6 +166,40 @@ export const PlaygroundProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     [runPlaygroundAction, validatePlaygroundActionRequiredParams],
   )
 
+  const validateSandboxCodeSnippetAction: ValidateSandboxCodeSnippetActionWithParams = useCallback(
+    (actionFormData, parametersState) => {
+      const validationError = validatePlaygroundActionRequiredParams(
+        actionFormData.parametersFormItems,
+        parametersState,
+      )
+      if (validationError) {
+        setActionRuntimeError((prev) => ({
+          ...prev,
+          [actionFormData.methodName]: validationError,
+        }))
+      } // Reset error
+      else
+        setActionRuntimeError((prev) => ({
+          ...prev,
+          [actionFormData.methodName]: null,
+        }))
+    },
+    [validatePlaygroundActionRequiredParams],
+  )
+
+  const sandboxCodeSnippetActionParamValueSetter: SandboxCodeSnippetActionParamValueSetter = useCallback(
+    (actionFormData, paramFormData, setState, sandboxParameterKey, value) => {
+      setState((prev) => {
+        const newState = { ...prev, [paramFormData.key]: value }
+        setSandboxParameterValue(sandboxParameterKey, newState)
+        // Validate action params
+        validateSandboxCodeSnippetAction(actionFormData, newState)
+        return newState
+      })
+    },
+    [setSandboxParameterValue, validateSandboxCodeSnippetAction],
+  )
+
   const DaytonaClient = useMemo(() => {
     if (!user?.access_token) return null
     return new Daytona({
@@ -172,6 +218,8 @@ export const PlaygroundProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         setVNCInteractionOptionsParamValue,
         runPlaygroundActionWithParams,
         runPlaygroundActionWithoutParams: runPlaygroundAction,
+        validateSandboxCodeSnippetAction,
+        sandboxCodeSnippetActionParamValueSetter,
         runningActionMethod,
         actionRuntimeError,
         DaytonaClient,

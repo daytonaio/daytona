@@ -17,8 +17,13 @@ import {
   ParameterFormData,
   PlaygroundActionFormDataBasic,
   PlaygroundActionWithParamsFormData,
+  GitCloneParams,
+  GitStatusParams,
+  GitBranchesParams,
   CodeRunParams,
   ShellCommandRunParams,
+  SandboxCodeSnippetsActions,
+  ParameterFormItem,
 } from '@/enums/Playground'
 import { UseTemporarySandboxResult } from '@/hooks/useTemporarySandbox'
 import { createContext, ReactNode } from 'react'
@@ -27,6 +32,10 @@ export interface SandboxParams {
   language?: CodeLanguage
   resources: Resources
   createSandboxBaseParams: CreateSandboxBaseParams
+  // Git operations params
+  gitCloneParams: GitCloneParams
+  gitStatusParams: GitStatusParams
+  gitBranchesParams: GitBranchesParams
   // Process and Code Execution params
   codeRunParams: CodeRunParams
   shellCommandRunParams: ShellCommandRunParams
@@ -82,6 +91,19 @@ export type PlaygroundActionInvokeApi = <A, T>(
   actionFormData: PlaygroundActionFormDataBasic<A> | PlaygroundActionWithParamsFormData<A, T>,
 ) => Promise<void>
 
+export type ValidateSandboxCodeSnippetActionWithParams = <A extends SandboxCodeSnippetsActions, T>(
+  actionFormData: PlaygroundActionWithParamsFormData<A, T>,
+  parametersState: T,
+) => void
+
+export type SandboxCodeSnippetActionParamValueSetter = <A extends SandboxCodeSnippetsActions, T>(
+  actionFormData: PlaygroundActionWithParamsFormData<A, T>,
+  paramFormData: ParameterFormItem,
+  setState: React.Dispatch<React.SetStateAction<T>>,
+  sandboxParameterKey: keyof SandboxParams,
+  value: any,
+) => void
+
 export interface IPlaygroundContext {
   sandboxParametersState: SandboxParams
   setSandboxParameterValue: SetSandboxParamsValue
@@ -89,6 +111,8 @@ export interface IPlaygroundContext {
   setVNCInteractionOptionsParamValue: SetVNCInteractionOptionsParamValue
   runPlaygroundActionWithParams: RunPlaygroundActionWithParams
   runPlaygroundActionWithoutParams: RunPlaygroundActionBasic
+  validateSandboxCodeSnippetAction: ValidateSandboxCodeSnippetActionWithParams
+  sandboxCodeSnippetActionParamValueSetter: SandboxCodeSnippetActionParamValueSetter
   runningActionMethod: RunningActionMethodName
   actionRuntimeError: ActionRuntimeError
   DaytonaClient: Daytona

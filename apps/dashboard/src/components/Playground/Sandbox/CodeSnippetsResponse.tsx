@@ -12,7 +12,7 @@ import {
   CreateSandboxFromImageParams,
   Sandbox,
 } from '@daytonaio/sdk'
-import { codeSnippetSupportedLanguages } from '@/enums/Playground'
+import { codeSnippetSupportedLanguages, GitOperationsActions, ProcessCodeExecutionActions } from '@/enums/Playground'
 import CodeBlock from '@/components/CodeBlock'
 import { Button } from '@/components/ui/button'
 import { usePlayground } from '@/hooks/usePlayground'
@@ -26,15 +26,27 @@ const SandboxCodeSnippetsResponse: React.FC = () => {
   const [codeSnippetOutput, setCodeSnippetOutput] = useState<string | ReactNode>('')
   const [isCodeSnippetRunning, setIsCodeSnippetRunning] = useState<boolean>(false)
 
-  const { sandboxParametersState, DaytonaClient } = usePlayground()
+  const { sandboxParametersState, DaytonaClient, actionRuntimeError } = usePlayground()
 
   const objectHasAnyValue = (obj: object) => Object.values(obj).some((v) => v !== '' && v !== undefined)
 
   const useConfigObject = false // Currently not needed, we use jwtToken for client config
 
   const useLanguageParam = sandboxParametersState['language']
-  const shellCommandExists = sandboxParametersState['shellCommandRunParams'].shellCommand
-  const codeToRunExists = sandboxParametersState['codeRunParams'].languageCode
+
+  const shellCommandExists = !actionRuntimeError[ProcessCodeExecutionActions.SHELL_COMMANDS_RUN]
+
+  const codeToRunExists = !actionRuntimeError[ProcessCodeExecutionActions.CODE_RUN]
+
+  const gitCloneOperationRequiredParamsSet = !actionRuntimeError[GitOperationsActions.GIT_CLONE]
+  const useGitCloneBranch = sandboxParametersState['gitCloneParams'].branchToClone
+  const useGitCloneCommitId = sandboxParametersState['gitCloneParams'].commitToClone
+  const useGitCloneUsername = sandboxParametersState['gitCloneParams'].authUsername
+  const useGitClonePassword = sandboxParametersState['gitCloneParams'].authPassword
+
+  const gitStatusOperationLocationSet = !actionRuntimeError[GitOperationsActions.GIT_STATUS]
+
+  const gitBranchesOperationLocationSet = !actionRuntimeError[GitOperationsActions.GIT_BRANCHES_LIST]
 
   const useResources = objectHasAnyValue(sandboxParametersState['resources'])
   const useResourcesCPU = useResources && sandboxParametersState['resources']['cpu'] !== undefined
@@ -259,6 +271,95 @@ const SandboxCodeSnippetsResponse: React.FC = () => {
     return { python, typeScript }
   }, [shellCommandExists, sandboxParametersState])
 
+  const getGitOperationsSnippet = useCallback(() => {
+    const python = [],
+      typeScript = []
+    const pythonIndentation = '\t'
+    const typeScriptIndentation = '\t\t\t'
+    if (gitCloneOperationRequiredParamsSet) {
+      python.push(
+        '\n\n# Clone git repository',
+        'sandbox.git.clone(',
+        `${pythonIndentation}url="${sandboxParametersState['gitCloneParams'].repositoryURL}",`,
+        `${pythonIndentation}path="${sandboxParametersState['gitCloneParams'].cloneDestinationPath}",`,
+        useGitCloneBranch
+          ? `${pythonIndentation}branch="${sandboxParametersState['gitCloneParams'].branchToClone}",`
+          : '',
+        useGitCloneCommitId
+          ? `${pythonIndentation}commit_id="${sandboxParametersState['gitCloneParams'].commitToClone}",`
+          : '',
+        useGitCloneUsername
+          ? `${pythonIndentation}username="${sandboxParametersState['gitCloneParams'].authUsername}",`
+          : '',
+        useGitClonePassword
+          ? `${pythonIndentation}password="${sandboxParametersState['gitCloneParams'].authPassword}"`
+          : '',
+        ')',
+      )
+      typeScript.push(
+        `\n\n${typeScriptIndentation.slice(0, -1)}// Clone git repository`,
+        `${typeScriptIndentation.slice(0, -1)}await sandbox.git.clone(`,
+        `${typeScriptIndentation}"${sandboxParametersState['gitCloneParams'].repositoryURL}",`,
+        `${typeScriptIndentation}"${sandboxParametersState['gitCloneParams'].cloneDestinationPath}",`,
+        useGitCloneBranch ? `${typeScriptIndentation}"${sandboxParametersState['gitCloneParams'].branchToClone}",` : '',
+        useGitCloneCommitId
+          ? `${typeScriptIndentation}"${sandboxParametersState['gitCloneParams'].commitToClone}",`
+          : '',
+        useGitCloneUsername
+          ? `${typeScriptIndentation}"${sandboxParametersState['gitCloneParams'].authUsername}",`
+          : '',
+        useGitClonePassword ? `${typeScriptIndentation}"${sandboxParametersState['gitCloneParams'].authPassword}"` : '',
+        `${typeScriptIndentation.slice(0, -1)})`,
+      )
+    }
+    if (gitStatusOperationLocationSet) {
+      python.push(
+        '\n# Get repository status',
+        `status = sandbox.git.status("${sandboxParametersState['gitStatusParams'].repositoryPath}")`,
+        'print(f"Current branch: {status.current_branch}")',
+        'print(f"Commits ahead: {status.ahead}")',
+        'print(f"Commits behind: {status.behind}")',
+        'for file in status.file_status:',
+        '\tprint(f"File: {file.name}")',
+      )
+      typeScript.push(
+        `\n${typeScriptIndentation.slice(0, -1)}// Get repository status`,
+        `${typeScriptIndentation.slice(0, -1)}const status = await sandbox.git.status("${sandboxParametersState['gitStatusParams'].repositoryPath}")`,
+        `${typeScriptIndentation.slice(0, -1)}console.log(\`Current branch: \${status.currentBranch}\`)`,
+        `${typeScriptIndentation.slice(0, -1)}console.log(\`Commits ahead: \${status.ahead}\`)`,
+        `${typeScriptIndentation.slice(0, -1)}console.log(\`Commits behind: \${status.behind}\`)`,
+        `${typeScriptIndentation.slice(0, -1)}status.fileStatus.forEach(file => {`,
+        `${typeScriptIndentation}console.log(\`File: \${file.name}\`)`,
+        `${typeScriptIndentation.slice(0, -1)}})`,
+      )
+    }
+    if (gitBranchesOperationLocationSet) {
+      python.push(
+        '\n# List branches',
+        `response = sandbox.git.branches("${sandboxParametersState['gitBranchesParams'].repositoryPath}")`,
+        'for branch in response.branches:',
+        '\tprint(f"Branch: {branch}")',
+      )
+      typeScript.push(
+        `\n${typeScriptIndentation.slice(0, -1)}// List branches`,
+        `${typeScriptIndentation.slice(0, -1)}const response = await sandbox.git.branches("${sandboxParametersState['gitBranchesParams'].repositoryPath}")`,
+        `${typeScriptIndentation.slice(0, -1)}response.branches.forEach(branch => {`,
+        `${typeScriptIndentation}console.log(\`Branch: \${branch}\`)`,
+        `${typeScriptIndentation.slice(0, -1)}})`,
+      )
+    }
+    return { python: python.filter(Boolean).join('\n'), typeScript: typeScript.filter(Boolean).join('\n') }
+  }, [
+    sandboxParametersState,
+    gitCloneOperationRequiredParamsSet,
+    useGitCloneBranch,
+    useGitCloneCommitId,
+    useGitCloneUsername,
+    useGitClonePassword,
+    gitStatusOperationLocationSet,
+    gitBranchesOperationLocationSet,
+  ])
+
   const sandboxCodeSnippetsData = useMemo(() => {
     const { python: pythonImport, typeScript: typeScriptImport } = getImportsCodeSnippet()
     const { python: pythonDaytonaConfig, typeScript: typeScriptDaytonaConfig } = getDaytonaConfigCodeSnippet()
@@ -268,18 +369,19 @@ const SandboxCodeSnippetsResponse: React.FC = () => {
     const { python: pythonDaytonaCreate, typeScript: typeScriptDaytonaCreate } = getDaytonaCreateSnippet()
     const { python: pythonLanguageCodeToRun, typeScript: typeScriptLanguageCodeToRun } = getLanguageCodeToRunSnippet()
     const { python: pythonShellCodeToRun, typeScript: typeScriptShellCodeToRun } = getShellCodeToRunSnippet()
+    const { python: pythonGitOperations, typeScript: typeScriptGitOperations } = getGitOperationsSnippet()
     return {
       [CodeLanguage.PYTHON]: {
         code: `${pythonImport}${pythonDaytonaConfig}
 ${pythonDaytonaClient}${pythonResources}${pythonSandboxParams}
-${pythonDaytonaCreate}${pythonLanguageCodeToRun}${pythonShellCodeToRun}`,
+${pythonDaytonaCreate}${pythonLanguageCodeToRun}${pythonShellCodeToRun}${pythonGitOperations}`,
       },
       [CodeLanguage.TYPESCRIPT]: {
         code: `${typeScriptImport}${typeScriptDaytonaConfig}
 async function main() {
 ${typeScriptDaytonaClient}
 \ttry {
-${typeScriptDaytonaCreate}${typeScriptLanguageCodeToRun}${typeScriptShellCodeToRun}
+${typeScriptDaytonaCreate}${typeScriptLanguageCodeToRun}${typeScriptShellCodeToRun}${typeScriptGitOperations}
 \t} catch (error) {
 \t\tconsole.error("Sandbox flow error:", error)
 \t}
@@ -297,6 +399,7 @@ main().catch(console.error)`,
     getDaytonaCreateSnippet,
     getLanguageCodeToRunSnippet,
     getShellCodeToRunSnippet,
+    getGitOperationsSnippet,
   ])
 
   const runCodeSnippet = async () => {
@@ -353,15 +456,46 @@ main().catch(console.error)`,
         codeSnippetOutput += `\nShell command result: ${shellCommandResponse.result}`
         setCodeSnippetOutput(codeSnippetOutput)
       }
-      let sessionFinishedMessage = '\n'
+      let codeRunShellCommandFinishedMessage = '\n'
       if (codeToRunExists && shellCommandExists) {
-        sessionFinishedMessage += '🎉 Code and shell command executed successfully. '
+        codeRunShellCommandFinishedMessage += '🎉 Code and shell command executed successfully.'
       } else if (codeToRunExists) {
-        sessionFinishedMessage += '🎉 Code executed successfully. '
+        codeRunShellCommandFinishedMessage += '🎉 Code executed successfully.'
       } else if (shellCommandExists) {
-        sessionFinishedMessage += '🎉 Shell command executed successfully. '
+        codeRunShellCommandFinishedMessage += '🎉 Shell command executed successfully.'
       }
-      setCodeSnippetOutput(codeSnippetOutput + sessionFinishedMessage + 'Sandbox session finished.')
+      codeSnippetOutput += codeRunShellCommandFinishedMessage + '\n'
+      setCodeSnippetOutput(codeSnippetOutput)
+      if (gitCloneOperationRequiredParamsSet) {
+        setCodeSnippetOutput(codeSnippetOutput + '\nCloning repo...')
+        await sandbox.git.clone(
+          sandboxParametersState['gitCloneParams'].repositoryURL,
+          sandboxParametersState['gitCloneParams'].cloneDestinationPath,
+          useGitCloneBranch ? sandboxParametersState['gitCloneParams'].branchToClone : undefined,
+          useGitCloneCommitId ? sandboxParametersState['gitCloneParams'].commitToClone : undefined,
+          useGitCloneUsername ? sandboxParametersState['gitCloneParams'].authUsername : undefined,
+          useGitClonePassword ? sandboxParametersState['gitCloneParams'].authPassword : undefined,
+        )
+        codeSnippetOutput += '\n🎉 Repository cloned successfully.\n'
+        setCodeSnippetOutput(codeSnippetOutput)
+      }
+      if (gitStatusOperationLocationSet) {
+        setCodeSnippetOutput(codeSnippetOutput + '\nFetching repository status...')
+        const status = await sandbox.git.status(sandboxParametersState['gitStatusParams'].repositoryPath)
+        codeSnippetOutput += `\nCurrent branch: ${status.currentBranch}\n`
+        codeSnippetOutput += `Commits ahead: ${status.ahead}\n`
+        codeSnippetOutput += `Commits behind: ${status.behind}\n`
+        status.fileStatus.forEach((file) => (codeSnippetOutput += `File: ${file.name}\n`))
+        setCodeSnippetOutput(codeSnippetOutput)
+      }
+      if (gitBranchesOperationLocationSet) {
+        setCodeSnippetOutput(codeSnippetOutput + '\nFetching repository branches...')
+        const response = await sandbox.git.branches(sandboxParametersState['gitBranchesParams'].repositoryPath)
+        codeSnippetOutput += '\n'
+        response.branches.forEach((branch) => (codeSnippetOutput += `Branch: ${branch}\n`))
+        setCodeSnippetOutput(codeSnippetOutput)
+      }
+      setCodeSnippetOutput(codeSnippetOutput + '\nSandbox session finished.')
     } catch (error) {
       console.error(error)
       setCodeSnippetOutput(

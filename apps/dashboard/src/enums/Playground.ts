@@ -204,18 +204,31 @@ export enum FileSystemActions {
   DELETE_FILE = 'deleteFile',
 }
 
+export type GitCloneParams = {
+  repositoryURL: string
+  cloneDestinationPath: string
+  branchToClone?: string
+  commitToClone?: string
+  authUsername?: string
+  authPassword?: string
+}
+
+export type GitStatusParams = {
+  repositoryPath: string
+}
+
+export type GitBranchesParams = {
+  repositoryPath: string
+}
+
 export enum GitOperationsActions {
   GIT_CLONE = 'clone',
   GIT_STATUS = 'status',
   GIT_BRANCHES_LIST = 'branches',
-  CREATE_BRANCH = 'createBranch',
-  CHECKOUT_BRANCH = 'checkoutBranch',
-  DELETE_BRANCH = 'deleteBranch',
-  GIT_ADD = 'add',
-  GIT_COMMIT = 'commit',
-  GIT_PUSH = 'push',
-  GIT_PULL = 'pull',
 }
+
+export type GitOperationsActionFormData<T extends GitCloneParams | GitStatusParams | GitBranchesParams> =
+  PlaygroundActionWithParamsFormData<GitOperationsActions, T>
 
 export enum ProcessCodeExecutionActions {
   CODE_RUN = 'codeRun',
@@ -230,12 +243,15 @@ export type ShellCommandRunParams = {
   shellCommand?: string
 }
 
+export type ProcessCodeExecutionOperationsActionFormData<T extends CodeRunParams | ShellCommandRunParams> =
+  PlaygroundActionWithParamsFormData<ProcessCodeExecutionActions, T>
+
+export type SandboxCodeSnippetsActions = FileSystemActions | GitOperationsActions | ProcessCodeExecutionActions
+
 // Actions enums values represent method names for TypeScript SDK
 export type PlaygroundActions =
   | DisplayActions
   | KeyboardActions
   | MouseActions
   | ScreenshotActions
-  | FileSystemActions
-  | GitOperationsActions
-  | ProcessCodeExecutionActions
+  | SandboxCodeSnippetsActions
