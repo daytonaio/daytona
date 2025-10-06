@@ -12,6 +12,18 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// ReplaceInFiles godoc
+//
+//	@Summary		Replace text in files
+//	@Description	Replace text pattern with new value in multiple files
+//	@Tags			file-system
+//	@Accept			json
+//	@Produce		json
+//	@Param			request	body	ReplaceRequest	true	"Replace request"
+//	@Success		200		{array}	ReplaceResult
+//	@Router			/files/replace [post]
+//
+//	@id				ReplaceInFiles
 func ReplaceInFiles(c *gin.Context) {
 	var req ReplaceRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
