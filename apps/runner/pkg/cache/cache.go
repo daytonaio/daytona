@@ -29,7 +29,7 @@ func GetStatesCache() *StatesCache {
 	return statesCache
 }
 
-func (sc *StatesCache) SetSandboxState(ctx context.Context, sandboxId string, state enums.SandboxState) error {
+func (sc *StatesCache) SetSandboxState(ctx context.Context, sandboxId string, state enums.SandboxState) {
 	// Get existing state or create new one
 	existing, err := sc.Get(ctx, sandboxId)
 	if err != nil {
@@ -41,10 +41,10 @@ func (sc *StatesCache) SetSandboxState(ctx context.Context, sandboxId string, st
 	existing.SandboxState = state
 
 	// Save back to cache
-	return sc.Set(ctx, sandboxId, *existing, 7*24*time.Hour)
+	_ = sc.Set(ctx, sandboxId, *existing, 7*24*time.Hour)
 }
 
-func (sc *StatesCache) SetBackupState(ctx context.Context, sandboxId string, state enums.BackupState, backupErr error) error {
+func (sc *StatesCache) SetBackupState(ctx context.Context, sandboxId string, state enums.BackupState, backupErr error) {
 	// Get existing state or create new one
 	existing, err := sc.Get(ctx, sandboxId)
 	if err != nil {
@@ -64,5 +64,5 @@ func (sc *StatesCache) SetBackupState(ctx context.Context, sandboxId string, sta
 	}
 
 	// Save back to cache
-	return sc.Set(ctx, sandboxId, *existing, 7*24*time.Hour)
+	_ = sc.Set(ctx, sandboxId, *existing, 7*24*time.Hour)
 }
