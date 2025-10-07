@@ -44,7 +44,7 @@ const Dashboard: React.FC = () => {
     const excludedRoutes = [RoutePath.BILLING_WALLET, RoutePath.USER_INVITATIONS]
     const shouldSkipRedirect = excludedRoutes.some((route) => location.pathname.startsWith(route))
 
-    if ((!wallet || wallet?.ongoingBalanceCents <= 0) && !shouldSkipRedirect) {
+    if (wallet && wallet.ongoingBalanceCents <= 0 && !shouldSkipRedirect) {
       navigate(RoutePath.BILLING_WALLET)
     }
   }, [wallet, config.billingApiUrl]) // Only depend on wallet to avoid infinite loops from navigation

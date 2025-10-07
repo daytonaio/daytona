@@ -39,7 +39,7 @@ export const BillingProvider: React.FC<BillingProviderProps> = ({ children }) =>
         return await billingApi.getOrganizationWallet(selectedOrganizationId)
       } catch (error) {
         handleApiError(error, 'Failed to fetch wallet data')
-        throw error
+        return null
       }
     },
     [billingApi, isOwner, config.billingApiUrl],
@@ -50,7 +50,12 @@ export const BillingProvider: React.FC<BillingProviderProps> = ({ children }) =>
       if (!config.billingApiUrl || !selectedOrganizationId || !isOwner()) {
         return null
       }
-      return await billingApi.getOrganizationTier(selectedOrganizationId)
+      try {
+        return await billingApi.getOrganizationTier(selectedOrganizationId)
+      } catch (error) {
+        handleApiError(error, 'Failed to fetch organization tier')
+        return null
+      }
     },
     [billingApi, isOwner, config.billingApiUrl],
   )
@@ -63,7 +68,7 @@ export const BillingProvider: React.FC<BillingProviderProps> = ({ children }) =>
       return await billingApi.listTiers()
     } catch (error) {
       handleApiError(error, 'Failed to fetch tiers')
-      throw error
+      return []
     }
   }, [billingApi, config.billingApiUrl])
 
@@ -72,7 +77,12 @@ export const BillingProvider: React.FC<BillingProviderProps> = ({ children }) =>
       if (!config.billingApiUrl || !selectedOrganizationId || !isOwner()) {
         return []
       }
-      return await billingApi.listOrganizationEmails(selectedOrganizationId)
+      try {
+        return await billingApi.listOrganizationEmails(selectedOrganizationId)
+      } catch (error) {
+        handleApiError(error, 'Failed to fetch organization emails')
+        return []
+      }
     },
     [billingApi, isOwner, config.billingApiUrl],
   )
@@ -82,7 +92,12 @@ export const BillingProvider: React.FC<BillingProviderProps> = ({ children }) =>
       if (!config.billingApiUrl || !selectedOrganizationId || !isOwner()) {
         return null
       }
-      return await billingApi.getOrganizationBillingPortalUrl(selectedOrganizationId)
+      try {
+        return await billingApi.getOrganizationBillingPortalUrl(selectedOrganizationId)
+      } catch (error) {
+        handleApiError(error, 'Failed to fetch billing portal url')
+        return null
+      }
     },
     [billingApi, isOwner, config.billingApiUrl],
   )
