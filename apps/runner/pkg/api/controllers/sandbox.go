@@ -12,6 +12,8 @@ import (
 	"github.com/daytonaio/runner/pkg/models/enums"
 	"github.com/daytonaio/runner/pkg/runner"
 	"github.com/gin-gonic/gin"
+
+	common_errors "github.com/daytonaio/common-go/pkg/errors"
 )
 
 // Create 			godoc
@@ -34,7 +36,7 @@ func Create(ctx *gin.Context) {
 	var createSandboxDto dto.CreateSandboxDTO
 	err := ctx.ShouldBindJSON(&createSandboxDto)
 	if err != nil {
-		ctx.Error(common.NewInvalidBodyRequestError(err))
+		ctx.Error(common_errors.NewInvalidBodyRequestError(err))
 		return
 	}
 
@@ -110,7 +112,7 @@ func CreateBackup(ctx *gin.Context) {
 	var createBackupDTO dto.CreateBackupDTO
 	err := ctx.ShouldBindJSON(&createBackupDTO)
 	if err != nil {
-		ctx.Error(common.NewInvalidBodyRequestError(err))
+		ctx.Error(common_errors.NewInvalidBodyRequestError(err))
 		return
 	}
 
@@ -147,7 +149,7 @@ func Resize(ctx *gin.Context) {
 	var resizeDto dto.ResizeSandboxDTO
 	err := ctx.ShouldBindJSON(&resizeDto)
 	if err != nil {
-		ctx.Error(common.NewInvalidBodyRequestError(err))
+		ctx.Error(common_errors.NewInvalidBodyRequestError(err))
 		return
 	}
 
@@ -186,7 +188,7 @@ func UpdateNetworkSettings(ctx *gin.Context) {
 	var updateNetworkSettingsDto dto.UpdateNetworkSettingsDTO
 	err := ctx.ShouldBindJSON(&updateNetworkSettingsDto)
 	if err != nil {
-		ctx.Error(common.NewInvalidBodyRequestError(err))
+		ctx.Error(common_errors.NewInvalidBodyRequestError(err))
 		return
 	}
 
@@ -195,27 +197,27 @@ func UpdateNetworkSettings(ctx *gin.Context) {
 
 	info, err := runner.Docker.ContainerInspect(ctx.Request.Context(), sandboxId)
 	if err != nil {
-		ctx.Error(common.NewInvalidBodyRequestError(err))
+		ctx.Error(common_errors.NewInvalidBodyRequestError(err))
 		return
 	}
 	containerShortId := info.ID[:12]
 
 	// Return error if container does not have an IP address
 	if info.NetworkSettings.IPAddress == "" {
-		ctx.Error(common.NewInvalidBodyRequestError(errors.New("sandbox does not have an IP address")))
+		ctx.Error(common_errors.NewInvalidBodyRequestError(errors.New("sandbox does not have an IP address")))
 		return
 	}
 
 	if updateNetworkSettingsDto.NetworkBlockAll != nil && *updateNetworkSettingsDto.NetworkBlockAll {
 		err = runner.NetRulesManager.SetNetworkRules(containerShortId, info.NetworkSettings.IPAddress, "")
 		if err != nil {
-			ctx.Error(common.NewInvalidBodyRequestError(err))
+			ctx.Error(common_errors.NewInvalidBodyRequestError(err))
 			return
 		}
 	} else if updateNetworkSettingsDto.NetworkAllowList != nil {
 		err = runner.NetRulesManager.SetNetworkRules(containerShortId, info.NetworkSettings.IPAddress, *updateNetworkSettingsDto.NetworkAllowList)
 		if err != nil {
-			ctx.Error(common.NewInvalidBodyRequestError(err))
+			ctx.Error(common_errors.NewInvalidBodyRequestError(err))
 			return
 		}
 	}
@@ -223,7 +225,7 @@ func UpdateNetworkSettings(ctx *gin.Context) {
 	if updateNetworkSettingsDto.NetworkLimitEgress != nil && *updateNetworkSettingsDto.NetworkLimitEgress {
 		err = runner.NetRulesManager.SetNetworkLimiter(containerShortId, info.NetworkSettings.IPAddress)
 		if err != nil {
-			ctx.Error(common.NewInvalidBodyRequestError(err))
+			ctx.Error(common_errors.NewInvalidBodyRequestError(err))
 			return
 		}
 	}
@@ -291,7 +293,7 @@ func Start(ctx *gin.Context) {
 	var metadata map[string]string
 	err := ctx.ShouldBindJSON(&metadata)
 	if err != nil {
-		ctx.Error(common.NewInvalidBodyRequestError(err))
+		ctx.Error(common_errors.NewInvalidBodyRequestError(err))
 		return
 	}
 
@@ -396,7 +398,7 @@ func RemoveDestroyed(ctx *gin.Context) {
 
 	err := runner.SandboxService.RemoveDestroyedSandbox(ctx.Request.Context(), sandboxId)
 	if err != nil {
-		if !common.IsNotFoundError(err) {
+		if !common_errors.IsNotFoundError(err) {
 			ctx.Error(err)
 			return
 		}

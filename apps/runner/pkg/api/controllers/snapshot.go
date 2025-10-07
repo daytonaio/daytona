@@ -15,10 +15,11 @@ import (
 
 	"github.com/daytonaio/runner/cmd/runner/config"
 	"github.com/daytonaio/runner/pkg/api/dto"
-	"github.com/daytonaio/runner/pkg/common"
 	"github.com/daytonaio/runner/pkg/runner"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
+
+	common_errors "github.com/daytonaio/common-go/pkg/errors"
 )
 
 // PullSnapshot godoc
@@ -41,7 +42,7 @@ func PullSnapshot(ctx *gin.Context) {
 	var request dto.PullSnapshotRequestDTO
 	err := ctx.ShouldBindJSON(&request)
 	if err != nil {
-		ctx.Error(common.NewInvalidBodyRequestError(err))
+		ctx.Error(common_errors.NewInvalidBodyRequestError(err))
 		return
 	}
 
@@ -76,12 +77,12 @@ func BuildSnapshot(ctx *gin.Context) {
 	var request dto.BuildSnapshotRequestDTO
 	err := ctx.ShouldBindJSON(&request)
 	if err != nil {
-		ctx.Error(common.NewInvalidBodyRequestError(err))
+		ctx.Error(common_errors.NewInvalidBodyRequestError(err))
 		return
 	}
 
 	if !strings.Contains(request.Snapshot, ":") || strings.HasSuffix(request.Snapshot, ":") {
-		ctx.Error(common.NewBadRequestError(errors.New("snapshot name must include a valid tag")))
+		ctx.Error(common_errors.NewBadRequestError(errors.New("snapshot name must include a valid tag")))
 		return
 	}
 
@@ -97,7 +98,7 @@ func BuildSnapshot(ctx *gin.Context) {
 
 	if request.PushToInternalRegistry {
 		if request.Registry.Project == nil {
-			ctx.Error(common.NewBadRequestError(errors.New("project is required when pushing to internal registry")))
+			ctx.Error(common_errors.NewBadRequestError(errors.New("project is required when pushing to internal registry")))
 			return
 		}
 		tag = fmt.Sprintf("%s/%s/%s", request.Registry.Url, *request.Registry.Project, request.Snapshot)
@@ -139,7 +140,7 @@ func BuildSnapshot(ctx *gin.Context) {
 func SnapshotExists(ctx *gin.Context) {
 	snapshot := ctx.Query("snapshot")
 	if snapshot == "" {
-		ctx.Error(common.NewBadRequestError(errors.New("snapshot parameter is required")))
+		ctx.Error(common_errors.NewBadRequestError(errors.New("snapshot parameter is required")))
 		return
 	}
 
@@ -175,7 +176,7 @@ func SnapshotExists(ctx *gin.Context) {
 func RemoveSnapshot(ctx *gin.Context) {
 	snapshot := ctx.Query("snapshot")
 	if snapshot == "" {
-		ctx.Error(common.NewBadRequestError(errors.New("snapshot parameter is required")))
+		ctx.Error(common_errors.NewBadRequestError(errors.New("snapshot parameter is required")))
 		return
 	}
 
@@ -213,7 +214,7 @@ type SnapshotExistsResponse struct {
 func GetBuildLogs(ctx *gin.Context) {
 	snapshotRef := ctx.Query("snapshotRef")
 	if snapshotRef == "" {
-		ctx.Error(common.NewBadRequestError(errors.New("snapshotRef parameter is required")))
+		ctx.Error(common_errors.NewBadRequestError(errors.New("snapshotRef parameter is required")))
 		return
 	}
 
@@ -221,12 +222,12 @@ func GetBuildLogs(ctx *gin.Context) {
 
 	logFilePath, err := config.GetBuildLogFilePath(snapshotRef)
 	if err != nil {
-		ctx.Error(common.NewCustomError(http.StatusInternalServerError, err.Error(), "INTERNAL_SERVER_ERROR"))
+		ctx.Error(common_errors.NewCustomError(http.StatusInternalServerError, err.Error(), "INTERNAL_SERVER_ERROR"))
 		return
 	}
 
 	if _, err := os.Stat(logFilePath); os.IsNotExist(err) {
-		ctx.Error(common.NewNotFoundError(fmt.Errorf("build logs not found for ref: %s", snapshotRef)))
+		ctx.Error(common_errors.NewNotFoundError(fmt.Errorf("build logs not found for ref: %s", snapshotRef)))
 		return
 	}
 
@@ -234,7 +235,7 @@ func GetBuildLogs(ctx *gin.Context) {
 
 	file, err := os.Open(logFilePath)
 	if err != nil {
-		ctx.Error(common.NewCustomError(http.StatusInternalServerError, err.Error(), "INTERNAL_SERVER_ERROR"))
+		ctx.Error(common_errors.NewCustomError(http.StatusInternalServerError, err.Error(), "INTERNAL_SERVER_ERROR"))
 		return
 	}
 	defer file.Close()
@@ -243,7 +244,7 @@ func GetBuildLogs(ctx *gin.Context) {
 	if !follow {
 		_, err = io.Copy(ctx.Writer, file)
 		if err != nil {
-			ctx.Error(common.NewCustomError(http.StatusInternalServerError, err.Error(), "INTERNAL_SERVER_ERROR"))
+			ctx.Error(common_errors.NewCustomError(http.StatusInternalServerError, err.Error(), "INTERNAL_SERVER_ERROR"))
 		}
 		return
 	}
@@ -260,7 +261,7 @@ func GetBuildLogs(ctx *gin.Context) {
 
 	flusher, ok := ctx.Writer.(http.Flusher)
 	if !ok {
-		ctx.Error(common.NewCustomError(http.StatusInternalServerError, "Streaming not supported", "STREAMING_NOT_SUPPORTED"))
+		ctx.Error(common_errors.NewCustomError(http.StatusInternalServerError, "Streaming not supported", "STREAMING_NOT_SUPPORTED"))
 		return
 	}
 

@@ -15,6 +15,8 @@ import (
 	"github.com/docker/docker/errdefs"
 
 	log "github.com/sirupsen/logrus"
+
+	common_errors "github.com/daytonaio/common-go/pkg/errors"
 )
 
 func (d *DockerClient) Destroy(ctx context.Context, containerId string) error {
@@ -92,7 +94,7 @@ func (d *DockerClient) RemoveDestroyed(ctx context.Context, containerId string) 
 	}
 
 	if state != enums.SandboxStateDestroyed {
-		return common.NewBadRequestError(fmt.Errorf("container %s is not in destroyed state", containerId))
+		return common_errors.NewBadRequestError(fmt.Errorf("container %s is not in destroyed state", containerId))
 	}
 
 	// Use exponential backoff helper for container removal

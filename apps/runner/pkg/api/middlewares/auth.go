@@ -9,8 +9,9 @@ import (
 	"strings"
 
 	"github.com/daytonaio/runner/internal/constants"
-	"github.com/daytonaio/runner/pkg/common"
 	"github.com/gin-gonic/gin"
+
+	common_errors "github.com/daytonaio/common-go/pkg/errors"
 )
 
 func AuthMiddleware() gin.HandlerFunc {
@@ -23,7 +24,7 @@ func AuthMiddleware() gin.HandlerFunc {
 		ctx.Request.Header.Del(constants.DAYTONA_AUTHORIZATION_HEADER)
 
 		if authHeader == "" {
-			ctx.Error(common.NewUnauthorizedError(errors.New("authorization header required")))
+			ctx.Error(common_errors.NewUnauthorizedError(errors.New("authorization header required")))
 			ctx.Abort()
 			return
 		}
@@ -31,7 +32,7 @@ func AuthMiddleware() gin.HandlerFunc {
 		// Split "Bearer <token>"
 		parts := strings.Split(authHeader, " ")
 		if len(parts) != 2 || parts[0] != constants.BEARER_AUTH_HEADER {
-			ctx.Error(common.NewUnauthorizedError(errors.New("invalid authorization header format")))
+			ctx.Error(common_errors.NewUnauthorizedError(errors.New("invalid authorization header format")))
 			ctx.Abort()
 			return
 		}
@@ -39,7 +40,7 @@ func AuthMiddleware() gin.HandlerFunc {
 		token := parts[1]
 		// Compare with API token from environment variable
 		if token != os.Getenv("API_TOKEN") {
-			ctx.Error(common.NewUnauthorizedError(errors.New("invalid token")))
+			ctx.Error(common_errors.NewUnauthorizedError(errors.New("invalid token")))
 			ctx.Abort()
 			return
 		}

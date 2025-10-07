@@ -11,9 +11,10 @@ import (
 	"strings"
 
 	proxy "github.com/daytonaio/common-go/pkg/proxy"
-	"github.com/daytonaio/runner/pkg/common"
 	"github.com/daytonaio/runner/pkg/runner"
 	"github.com/gin-gonic/gin"
+
+	common_errors "github.com/daytonaio/common-go/pkg/errors"
 )
 
 // ProxyRequest handles proxying requests to a sandbox's container
@@ -48,14 +49,14 @@ func getProxyTarget(ctx *gin.Context) (*url.URL, map[string]string, error) {
 
 	sandboxId := ctx.Param("sandboxId")
 	if sandboxId == "" {
-		ctx.Error(common.NewBadRequestError(errors.New("sandbox ID is required")))
+		ctx.Error(common_errors.NewBadRequestError(errors.New("sandbox ID is required")))
 		return nil, nil, errors.New("sandbox ID is required")
 	}
 
 	// Get container details
 	container, err := runner.Docker.ContainerInspect(ctx.Request.Context(), sandboxId)
 	if err != nil {
-		ctx.Error(common.NewNotFoundError(fmt.Errorf("sandbox container not found: %w", err)))
+		ctx.Error(common_errors.NewNotFoundError(fmt.Errorf("sandbox container not found: %w", err)))
 		return nil, nil, fmt.Errorf("sandbox container not found: %w", err)
 	}
 
@@ -67,7 +68,7 @@ func getProxyTarget(ctx *gin.Context) (*url.URL, map[string]string, error) {
 
 	if containerIP == "" {
 		message := "no IP address found. Is the Sandbox started?"
-		ctx.Error(common.NewBadRequestError(errors.New(message)))
+		ctx.Error(common_errors.NewBadRequestError(errors.New(message)))
 		return nil, nil, errors.New(message)
 	}
 
@@ -87,7 +88,7 @@ func getProxyTarget(ctx *gin.Context) (*url.URL, map[string]string, error) {
 	// Create the complete target URL with path
 	target, err := url.Parse(fmt.Sprintf("%s%s", targetURL, path))
 	if err != nil {
-		ctx.Error(common.NewBadRequestError(fmt.Errorf("failed to parse target URL: %w", err)))
+		ctx.Error(common_errors.NewBadRequestError(fmt.Errorf("failed to parse target URL: %w", err)))
 		return nil, nil, fmt.Errorf("failed to parse target URL: %w", err)
 	}
 

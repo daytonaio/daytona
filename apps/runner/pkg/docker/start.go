@@ -11,12 +11,13 @@ import (
 	"time"
 
 	"github.com/daytonaio/common-go/pkg/timer"
-	"github.com/daytonaio/runner/pkg/common"
 	"github.com/daytonaio/runner/pkg/models/enums"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 
 	log "github.com/sirupsen/logrus"
+
+	common_errors "github.com/daytonaio/common-go/pkg/errors"
 )
 
 func (d *DockerClient) Start(ctx context.Context, containerId string, metadata map[string]string) error {
@@ -130,7 +131,7 @@ func (d *DockerClient) waitForDaemonRunning(ctx context.Context, containerIP str
 	targetURL := fmt.Sprintf("http://%s:2280/version", containerIP)
 	target, err := url.Parse(targetURL)
 	if err != nil {
-		return common.NewBadRequestError(fmt.Errorf("failed to parse target URL: %w", err))
+		return common_errors.NewBadRequestError(fmt.Errorf("failed to parse target URL: %w", err))
 	}
 
 	timeoutCtx, cancel := context.WithTimeout(ctx, timeout)
