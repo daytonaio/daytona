@@ -17,6 +17,8 @@ import { IORedisInstrumentation } from '@opentelemetry/instrumentation-ioredis'
 import { PgInstrumentation } from '@opentelemetry/instrumentation-pg'
 import { diag, DiagLogger, DiagLogLevel } from '@opentelemetry/api'
 import { CompressionAlgorithm } from '@opentelemetry/otlp-exporter-base'
+import { KafkaJsInstrumentation } from '@opentelemetry/instrumentation-kafkajs'
+import { getAppMode } from './common/utils/app-mode'
 
 // Custom OpenTelemetry logger that uses NestJS Logger
 class NestJSDiagLogger extends Logger implements DiagLogger {
@@ -51,9 +53,12 @@ if (process.env.OTEL_ENABLED === 'true') {
     compression: CompressionAlgorithm.GZIP,
   })
 
+  const appMode = getAppMode()
+  const serviceNameSuffix = appMode === 'api' ? 'api' : appMode === 'worker' ? 'worker' : 'api'
+
   const sdk = new NodeSDK({
     resource: resourceFromAttributes({
-      [ATTR_SERVICE_NAME]: 'api',
+      [ATTR_SERVICE_NAME]: `daytona-${serviceNameSuffix}`,
       [ATTR_DEPLOYMENT_ENVIRONMENT_NAME]: process.env.ENVIRONMENT,
     }),
     traceExporter,
@@ -63,6 +68,7 @@ if (process.env.OTEL_ENABLED === 'true') {
       new NestInstrumentation(),
       new IORedisInstrumentation({ requireParentSpan: true }),
       new PgInstrumentation({ requireParentSpan: true }),
+      new KafkaJsInstrumentation(),
     ],
     spanProcessors: [
       new BatchSpanProcessor(traceExporter, {

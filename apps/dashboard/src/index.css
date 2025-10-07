@@ -126,3 +126,22 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+@layer base {
+  /* Hide native time dropdown UI */
+  input[type='time']::-webkit-calendar-picker-indicator {
+    display: none;
+    -webkit-appearance: none;
+  }
+
+  input[type='time']::-webkit-clear-button,
+  input[type='time']::-webkit-inner-spin-button {
+    display: none;
+    -webkit-appearance: none;
+  }
+
+  /* Firefox support */
+  input[type='time'] {
+    -moz-appearance: textfield;
+  }
+}
