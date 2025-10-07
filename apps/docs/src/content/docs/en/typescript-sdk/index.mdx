@@ -62,3 +62,64 @@ const daytona = new Daytona({
   target: 'us'
 });
 ```
+
+## Multiple Runtime Support
+
+The Daytona TypeScript SDK works across multiple JavaScript runtimes including Node.js, Deno, Bun, browsers, and serverless platforms (Cloudflare Workers, AWS Lambda, Azure Functions, etc.).
+
+:::note[Browser and Framework Configuration]
+When using the SDK in browser-based environments or frameworks like Vite and Next.js, you'll need to configure node polyfills. See the sections below for setup instructions.
+:::
+
+### Daytona in Vite Projects
+
+When using Daytona SDK in a Vite-based project, you need to configure node polyfills to ensure compatibility. Add the following configuration to your `vite.config.ts` file in the plugins array:
+
+```typescript
+import { nodePolyfills } from 'vite-plugin-node-polyfills'
+
+export default defineConfig({
+  plugins: [
+    // ... other plugins
+    nodePolyfills({
+      globals: { global: true, process: true, Buffer: true },
+      overrides: {
+        path: 'path-browserify-win32',
+      },
+    }),
+  ],
+  // ... rest of your config
+})
+```
+
+### Daytona in Next.js Projects
+
+When using Daytona SDK in a Next.js project, you need to configure node polyfills to ensure compatibility with Webpack and Turbopack bundlers (depending on what you're using). Add the following configuration to your `next.config.ts` file:
+
+```typescript
+import type { NextConfig } from 'next'
+import NodePolyfillPlugin from 'node-polyfill-webpack-plugin'
+import { env, nodeless } from 'unenv'
+
+const { alias: turbopackAlias } = env(nodeless, {})
+
+const nextConfig: NextConfig = {
+  // Turbopack
+  experimental: {
+    turbo: {
+      resolveAlias: {
+        ...turbopackAlias,
+      },
+    },
+  },
+  // Webpack
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      config.plugins.push(new NodePolyfillPlugin())
+    }
+    return config
+  },
+}
+
+export default nextConfig
+```

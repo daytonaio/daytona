@@ -401,7 +401,15 @@ Speed up your development on Daytona using LLMs. Copy the /llms.txt files and in
 
 Learn more by checking out the Daytona SDK repository on [GitHub](https://github.com/daytonaio/daytona).
 
-## Daytona in Vite Projects
+## Multiple Runtime Support
+
+The Daytona TypeScript SDK works across multiple JavaScript runtimes including Node.js, Deno, Bun, browsers, and serverless platforms (Cloudflare Workers, AWS Lambda, Azure Functions, etc.).
+
+:::note[Browser and Framework Configuration]
+When using the SDK in browser-based environments or frameworks like Vite and Next.js, you'll need to configure node polyfills. See the sections below for setup instructions.
+:::
+
+### Daytona in Vite Projects
 
 When using Daytona SDK in a Vite-based project, you need to configure node polyfills to ensure compatibility. Add the following configuration to your `vite.config.ts` file in the plugins array:
 
@@ -422,7 +430,7 @@ export default defineConfig({
 })
 ```
 
-## Daytona in Next.js Projects
+### Daytona in Next.js Projects
 
 When using Daytona SDK in a Next.js project, you need to configure node polyfills to ensure compatibility with Webpack and Turbopack bundlers (depending on what you're using). Add the following configuration to your `next.config.ts` file:
 
