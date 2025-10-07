@@ -37,7 +37,6 @@ daytona_api_client_async/models/computer_use_start_response.py
 daytona_api_client_async/models/computer_use_status_response.py
 daytona_api_client_async/models/computer_use_stop_response.py
 daytona_api_client_async/models/create_api_key.py
-daytona_api_client_async/models/create_audit_log.py
 daytona_api_client_async/models/create_build_info.py
 daytona_api_client_async/models/create_docker_registry.py
 daytona_api_client_async/models/create_linked_account.py

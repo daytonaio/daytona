@@ -21,8 +21,6 @@ import { VolumeEvents } from '../../sandbox/constants/volume-events'
 import { VolumeDto } from '../../sandbox/dto/volume.dto'
 import { VolumeState } from '../../sandbox/enums/volume-state.enum'
 import { SandboxDesiredState } from '../../sandbox/enums/sandbox-desired-state.enum'
-import { AuditLogEvents } from '../../audit/constants/audit-log-events.constant'
-import { AuditLogDto } from '../../audit/dto/audit-log.dto'
 
 @WebSocketGateway({
   path: '/api/socket.io/',
@@ -117,13 +115,5 @@ export class NotificationGateway implements OnGatewayInit, OnModuleInit {
 
   emitVolumeLastUsedAtUpdated(volume: VolumeDto) {
     this.server.to(volume.organizationId).emit(VolumeEvents.LAST_USED_AT_UPDATED, volume)
-  }
-
-  emitAuditLogCreated(auditLog: AuditLogDto) {
-    this.server.to(auditLog.organizationId).emit(AuditLogEvents.CREATED, auditLog)
-  }
-
-  emitAuditLogUpdated(auditLog: AuditLogDto) {
-    this.server.to(auditLog.organizationId).emit(AuditLogEvents.UPDATED, auditLog)
   }
 }

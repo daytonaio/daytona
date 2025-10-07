@@ -37,7 +37,6 @@ models/computer-use-start-response.ts
 models/computer-use-status-response.ts
 models/computer-use-stop-response.ts
 models/create-api-key.ts
-models/create-audit-log.ts
 models/create-build-info.ts
 models/create-docker-registry.ts
 models/create-linked-account.ts

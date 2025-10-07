@@ -204,7 +204,7 @@ export class OrganizationInvitationService {
     })
   }
 
-  async accept(invitationId: string, userId: string): Promise<void> {
+  async accept(invitationId: string, userId: string): Promise<OrganizationInvitation> {
     const invitation = await this.prepareStatusUpdate(invitationId, OrganizationInvitationStatus.ACCEPTED)
 
     await this.dataSource.transaction(async (em) => {
@@ -220,6 +220,7 @@ export class OrganizationInvitationService {
         ),
       )
     })
+    return invitation
   }
 
   async decline(invitationId: string): Promise<void> {
