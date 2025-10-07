@@ -51,7 +51,7 @@ func (d *DockerClient) Create(ctx context.Context, sandboxDto dto.CreateSandboxD
 		return sandboxDto.Id, nil
 	}
 
-	d.cache.SetSandboxState(ctx, sandboxDto.Id, enums.SandboxStateCreating)
+	d.statesCache.SetSandboxState(ctx, sandboxDto.Id, enums.SandboxStateCreating)
 
 	ctx = context.WithValue(ctx, constants.ID_KEY, sandboxDto.Id)
 	err = d.PullImage(ctx, sandboxDto.Snapshot, sandboxDto.Registry)
@@ -59,7 +59,7 @@ func (d *DockerClient) Create(ctx context.Context, sandboxDto dto.CreateSandboxD
 		return "", err
 	}
 
-	d.cache.SetSandboxState(ctx, sandboxDto.Id, enums.SandboxStateCreating)
+	d.statesCache.SetSandboxState(ctx, sandboxDto.Id, enums.SandboxStateCreating)
 
 	err = d.validateImageArchitecture(ctx, sandboxDto.Snapshot)
 	if err != nil {

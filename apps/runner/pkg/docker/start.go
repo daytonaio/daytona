@@ -22,7 +22,7 @@ import (
 
 func (d *DockerClient) Start(ctx context.Context, containerId string, metadata map[string]string) error {
 	defer timer.Timer()()
-	d.cache.SetSandboxState(ctx, containerId, enums.SandboxStateStarting)
+	d.statesCache.SetSandboxState(ctx, containerId, enums.SandboxStateStarting)
 
 	// Cancel a backup if it's already in progress
 	backup_context, ok := backup_context_map.Get(containerId)
@@ -46,7 +46,7 @@ func (d *DockerClient) Start(ctx context.Context, containerId string, metadata m
 			return err
 		}
 
-		d.cache.SetSandboxState(ctx, containerId, enums.SandboxStateStarted)
+		d.statesCache.SetSandboxState(ctx, containerId, enums.SandboxStateStarted)
 		return nil
 	}
 
@@ -83,7 +83,7 @@ func (d *DockerClient) Start(ctx context.Context, containerId string, metadata m
 		return err
 	}
 
-	d.cache.SetSandboxState(ctx, containerId, enums.SandboxStateStarted)
+	d.statesCache.SetSandboxState(ctx, containerId, enums.SandboxStateStarted)
 
 	if metadata["limitNetworkEgress"] == "true" {
 		go func() {

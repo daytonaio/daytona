@@ -29,11 +29,11 @@ import (
 //	@Description	Pull a snapshot from a registry
 //	@Param			request	body		dto.PullSnapshotRequestDTO	true	"Pull snapshot"
 //	@Success		200		{string}	string						"Snapshot successfully pulled"
-//	@Failure		400		{object}	common.ErrorResponse
-//	@Failure		401		{object}	common.ErrorResponse
-//	@Failure		404		{object}	common.ErrorResponse
-//	@Failure		409		{object}	common.ErrorResponse
-//	@Failure		500		{object}	common.ErrorResponse
+//	@Failure		400		{object}	common_errors.ErrorResponse
+//	@Failure		401		{object}	common_errors.ErrorResponse
+//	@Failure		404		{object}	common_errors.ErrorResponse
+//	@Failure		409		{object}	common_errors.ErrorResponse
+//	@Failure		500		{object}	common_errors.ErrorResponse
 //
 //	@Router			/snapshots/pull [post]
 //
@@ -64,11 +64,11 @@ func PullSnapshot(ctx *gin.Context) {
 //	@Description	Build a snapshot from a Dockerfile and context hashes
 //	@Param			request	body		dto.BuildSnapshotRequestDTO	true	"Build snapshot request"
 //	@Success		200		{string}	string						"Snapshot successfully built"
-//	@Failure		400		{object}	common.ErrorResponse
-//	@Failure		401		{object}	common.ErrorResponse
-//	@Failure		404		{object}	common.ErrorResponse
-//	@Failure		409		{object}	common.ErrorResponse
-//	@Failure		500		{object}	common.ErrorResponse
+//	@Failure		400		{object}	common_errors.ErrorResponse
+//	@Failure		401		{object}	common_errors.ErrorResponse
+//	@Failure		404		{object}	common_errors.ErrorResponse
+//	@Failure		409		{object}	common_errors.ErrorResponse
+//	@Failure		500		{object}	common_errors.ErrorResponse
 //
 //	@Router			/snapshots/build [post]
 //
@@ -129,11 +129,11 @@ func BuildSnapshot(ctx *gin.Context) {
 //	@Produce		json
 //	@Param			snapshot	query		string	true	"Snapshot name and tag"	example:"nginx:latest"
 //	@Success		200			{object}	SnapshotExistsResponse
-//	@Failure		400			{object}	common.ErrorResponse
-//	@Failure		401			{object}	common.ErrorResponse
-//	@Failure		404			{object}	common.ErrorResponse
-//	@Failure		409			{object}	common.ErrorResponse
-//	@Failure		500			{object}	common.ErrorResponse
+//	@Failure		400			{object}	common_errors.ErrorResponse
+//	@Failure		401			{object}	common_errors.ErrorResponse
+//	@Failure		404			{object}	common_errors.ErrorResponse
+//	@Failure		409			{object}	common_errors.ErrorResponse
+//	@Failure		500			{object}	common_errors.ErrorResponse
 //	@Router			/snapshots/exists [get]
 //
 //	@id				SnapshotExists
@@ -165,11 +165,11 @@ func SnapshotExists(ctx *gin.Context) {
 //	@Produce		json
 //	@Param			snapshot	query		string	true	"Snapshot name and tag"	example:"nginx:latest"
 //	@Success		200			{string}	string	"Snapshot successfully removed"
-//	@Failure		400			{object}	common.ErrorResponse
-//	@Failure		401			{object}	common.ErrorResponse
-//	@Failure		404			{object}	common.ErrorResponse
-//	@Failure		409			{object}	common.ErrorResponse
-//	@Failure		500			{object}	common.ErrorResponse
+//	@Failure		400			{object}	common_errors.ErrorResponse
+//	@Failure		401			{object}	common_errors.ErrorResponse
+//	@Failure		404			{object}	common_errors.ErrorResponse
+//	@Failure		409			{object}	common_errors.ErrorResponse
+//	@Failure		500			{object}	common_errors.ErrorResponse
 //	@Router			/snapshots/remove [post]
 //
 //	@id				RemoveSnapshot
@@ -203,10 +203,10 @@ type SnapshotExistsResponse struct {
 //	@Param			snapshotRef	query		string	true	"Snapshot ID or snapshot ref without the tag"
 //	@Param			follow		query		boolean	false	"Whether to follow the log output"
 //	@Success		200			{string}	string	"Build logs stream"
-//	@Failure		400			{object}	common.ErrorResponse
-//	@Failure		401			{object}	common.ErrorResponse
-//	@Failure		404			{object}	common.ErrorResponse
-//	@Failure		500			{object}	common.ErrorResponse
+//	@Failure		400			{object}	common_errors.ErrorResponse
+//	@Failure		401			{object}	common_errors.ErrorResponse
+//	@Failure		404			{object}	common_errors.ErrorResponse
+//	@Failure		500			{object}	common_errors.ErrorResponse
 //
 //	@Router			/snapshots/logs [get]
 //

@@ -19,7 +19,6 @@ import (
 	"github.com/daytonaio/runner/pkg/cache"
 	"github.com/daytonaio/runner/pkg/daemon"
 	"github.com/daytonaio/runner/pkg/docker"
-	"github.com/daytonaio/runner/pkg/models"
 	"github.com/daytonaio/runner/pkg/netrules"
 	"github.com/daytonaio/runner/pkg/runner"
 	"github.com/daytonaio/runner/pkg/services"
@@ -78,17 +77,6 @@ func main() {
 	defer monitor.Stop()
 	defer netRulesManager.Stop()
 
-	runnerCache := cache.NewInMemoryRunnerCache(cache.InMemoryRunnerCacheConfig{
-		Cache:         make(map[string]*models.CacheData),
-		RetentionDays: cfg.CacheRetentionDays,
-	})
-
-	// Start cleanup job with a cancellable context
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
-	runnerCache.Cleanup(ctx)
-
 	daemonPath, err := daemon.WriteStaticBinary("daemon-amd64")
 	if err != nil {
 		log.Errorf("Error writing daemon binary: %v", err)
@@ -101,9 +89,14 @@ func main() {
 		return
 	}
 
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	statesCache := cache.GetStatesCache()
+
 	dockerClient := docker.NewDockerClient(docker.DockerClientConfig{
 		ApiClient:              cli,
-		Cache:                  runnerCache,
+		StatesCache:            statesCache,
 		LogWriter:              os.Stdout,
 		AWSRegion:              cfg.AWSRegion,
 		AWSEndpointUrl:         cfg.AWSEndpointUrl,
@@ -115,7 +108,7 @@ func main() {
 		ResourceLimitsDisabled: cfg.ResourceLimitsDisabled,
 	})
 
-	sandboxService := services.NewSandboxService(runnerCache, dockerClient)
+	sandboxService := services.NewSandboxService(statesCache, dockerClient)
 
 	metricsService := services.NewMetricsService(services.MetricsServiceConfig{
 		Docker:   dockerClient,
@@ -146,7 +139,7 @@ func main() {
 	}
 
 	_ = runner.GetInstance(&runner.RunnerInstanceConfig{
-		Cache:             runnerCache,
+		StatesCache:       statesCache,
 		Docker:            dockerClient,
 		SandboxService:    sandboxService,
 		MetricsService:    metricsService,

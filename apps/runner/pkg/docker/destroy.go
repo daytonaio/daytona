@@ -40,12 +40,12 @@ func (d *DockerClient) Destroy(ctx context.Context, containerId string) error {
 		return nil
 	}
 
-	d.cache.SetSandboxState(ctx, containerId, enums.SandboxStateDestroying)
+	d.statesCache.SetSandboxState(ctx, containerId, enums.SandboxStateDestroying)
 
 	ct, err := d.ContainerInspect(ctx, containerId)
 	if err != nil {
 		if errdefs.IsNotFound(err) {
-			d.cache.SetSandboxState(ctx, containerId, enums.SandboxStateDestroyed)
+			d.statesCache.SetSandboxState(ctx, containerId, enums.SandboxStateDestroyed)
 		}
 		return err
 	}
@@ -66,7 +66,7 @@ func (d *DockerClient) Destroy(ctx context.Context, containerId string) error {
 	if err != nil {
 		// Handle NotFound error case
 		if errdefs.IsNotFound(err) {
-			d.cache.SetSandboxState(ctx, containerId, enums.SandboxStateDestroyed)
+			d.statesCache.SetSandboxState(ctx, containerId, enums.SandboxStateDestroyed)
 			return nil
 		}
 		return err
@@ -80,7 +80,7 @@ func (d *DockerClient) Destroy(ctx context.Context, containerId string) error {
 		}
 	}()
 
-	d.cache.SetSandboxState(ctx, containerId, enums.SandboxStateDestroyed)
+	d.statesCache.SetSandboxState(ctx, containerId, enums.SandboxStateDestroyed)
 
 	return nil
 }

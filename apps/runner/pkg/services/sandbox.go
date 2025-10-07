@@ -13,30 +13,29 @@ import (
 )
 
 type SandboxService struct {
-	cache  cache.IRunnerCache
-	docker *docker.DockerClient
+	statesCache *cache.StatesCache
+	docker      *docker.DockerClient
 }
 
-func NewSandboxService(cache cache.IRunnerCache, docker *docker.DockerClient) *SandboxService {
+func NewSandboxService(statesCache *cache.StatesCache, docker *docker.DockerClient) *SandboxService {
 	return &SandboxService{
-		cache:  cache,
-		docker: docker,
+		statesCache: statesCache,
+		docker:      docker,
 	}
 }
 
-func (s *SandboxService) GetSandboxStatesInfo(ctx context.Context, sandboxId string) *models.CacheData {
+func (s *SandboxService) GetSandboxStatesInfo(ctx context.Context, sandboxId string) *models.CachedStates {
 	sandboxState, err := s.docker.DeduceSandboxState(ctx, sandboxId)
 	if err == nil {
-		s.cache.SetSandboxState(ctx, sandboxId, sandboxState)
+		s.statesCache.SetSandboxState(ctx, sandboxId, sandboxState)
 	}
 
-	data := s.cache.Get(ctx, sandboxId)
-
-	if data == nil {
-		return &models.CacheData{
-			SandboxState:    enums.SandboxStateUnknown,
-			BackupState:     enums.BackupStateNone,
-			DestructionTime: nil,
+	data, err := s.statesCache.Get(ctx, sandboxId)
+	if err != nil {
+		return &models.CachedStates{
+			SandboxState:      enums.SandboxStateUnknown,
+			BackupState:       enums.BackupStateNone,
+			BackupErrorReason: nil,
 		}
 	}
 
