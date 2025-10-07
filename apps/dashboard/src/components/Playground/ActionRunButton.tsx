@@ -9,7 +9,7 @@ import { Loader2, Play } from 'lucide-react'
 type PlaygroundActionRunButtonProps = {
   isDisabled: boolean
   isRunning: boolean
-  onRunActionClick: () => void
+  onRunActionClick?: () => Promise<void>
 }
 
 const PlaygroundActionRunButton: React.FC<PlaygroundActionRunButtonProps> = ({

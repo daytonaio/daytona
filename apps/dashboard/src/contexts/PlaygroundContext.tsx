@@ -103,10 +103,10 @@ export type ValidateSandboxCodeSnippetActionWithParams = <A extends SandboxCodeS
   parametersState: T,
 ) => void
 
-export type SandboxCodeSnippetActionParamValueSetter = <A extends SandboxCodeSnippetsActions, T>(
+export type SandboxCodeSnippetActionParamValueSetter = <A extends SandboxCodeSnippetsActions, T, S extends T>( // S type is one of types contained inside T union
   actionFormData: PlaygroundActionWithParamsFormData<A, T>,
   paramFormData: ParameterFormItem,
-  setState: React.Dispatch<React.SetStateAction<T>>,
+  setState: React.Dispatch<React.SetStateAction<S>>,
   sandboxParameterKey: keyof SandboxParams,
   value: any,
 ) => void
@@ -122,7 +122,7 @@ export interface IPlaygroundContext {
   sandboxCodeSnippetActionParamValueSetter: SandboxCodeSnippetActionParamValueSetter
   runningActionMethod: RunningActionMethodName
   actionRuntimeError: ActionRuntimeError
-  DaytonaClient: Daytona
+  DaytonaClient: Daytona | null
 }
 
 export const PlaygroundContext = createContext<IPlaygroundContext | null>(null)

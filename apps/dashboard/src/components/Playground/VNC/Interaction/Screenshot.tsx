@@ -10,7 +10,7 @@ import FormNumberInput from '../../Inputs/NumberInput'
 import FormCheckboxInput from '../../Inputs/CheckboxInput'
 import { usePlayground } from '@/hooks/usePlayground'
 import { PlaygroundActionInvokeApi } from '@/contexts/PlaygroundContext'
-import { ScreenshotRegion } from '@daytonaio/sdk'
+import { ScreenshotRegion, ComputerUse } from '@daytonaio/sdk'
 import { ScreenshotResponse, RegionScreenshotResponse, CompressedScreenshotResponse } from '@daytonaio/api-client'
 import {
   CustomizedScreenshotOptions,
@@ -121,10 +121,12 @@ const VNCScreenshootOperations: React.FC<VNCInteractionOptionsSectionComponentPr
     },
   ]
 
-  // Disable logic ensures that this method is called when ComputerUseClient exists
+  // Disable logic ensures that this method is called when ComputerUseClient exists -> we use as ComputerUse to silence TS compiler
   const screenshotActionAPICall: PlaygroundActionInvokeApi = async (screenshotActionFormData) => {
-    const ScreenshotActionsClient = ComputerUseClient.screenshot
-    let screenshotActionResponse: ScreenshotResponse | RegionScreenshotResponse | CompressedScreenshotResponse
+    const ScreenshotActionsClient = (ComputerUseClient as ComputerUse).screenshot
+    let screenshotActionResponse: ScreenshotResponse | RegionScreenshotResponse | CompressedScreenshotResponse = {
+      screenshot: '',
+    }
     switch (screenshotActionFormData.methodName) {
       case ScreenshotActions.TAKE_COMPRESSED: {
         screenshotActionResponse = await ScreenshotActionsClient[ScreenshotActions.TAKE_COMPRESSED](

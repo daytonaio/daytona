@@ -18,6 +18,7 @@ import {
 } from '@/enums/Playground'
 import { PlaygroundActionInvokeApi } from '@/contexts/PlaygroundContext'
 import { usePlayground } from '@/hooks/usePlayground'
+import { ComputerUse } from '@daytonaio/sdk'
 import PlaygroundActionForm from '../../ActionForm'
 import { useState } from 'react'
 
@@ -72,9 +73,9 @@ const VNCKeyboardOperations: React.FC<VNCInteractionOptionsSectionComponentProps
     },
   ]
 
-  // Disable logic ensures that this method is called when ComputerUseClient exists
+  // Disable logic ensures that this method is called when ComputerUseClient exists -> we use as ComputerUse to silence TS compiler
   const keyboardActionAPICall: PlaygroundActionInvokeApi = async (keyboardActionFormData) => {
-    const KeyboardActionsClient = ComputerUseClient.keyboard
+    const KeyboardActionsClient = (ComputerUseClient as ComputerUse).keyboard
     // All keyboard actions have Promise<void> return type -> we don't need the reponse
     switch (keyboardActionFormData.methodName) {
       case KeyboardActions.HOTKEY:

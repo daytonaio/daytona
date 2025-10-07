@@ -133,7 +133,7 @@ const VNCDesktopWindowResponse: React.FC<VNCDesktopWindowResponseProps> = ({ get
       // Temporary sandbox created -> setup VNC
       const setupVNCComputerUse = async () => {
         setLoadingVNCUrl(true)
-        await getVNCComputerUseUrl(VNCSandboxData.sandbox)
+        await getVNCComputerUseUrl(VNCSandboxData.sandbox as Sandbox) // if (VNCSandboxData.sandbox) guarantes that value isn't null so we put as Sandbox to silence TS compiler
         setLoadingVNCUrl(false)
       }
       setupVNCComputerUse()

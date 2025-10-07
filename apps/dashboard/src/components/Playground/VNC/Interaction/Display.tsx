@@ -11,6 +11,7 @@ import {
 import { usePlayground } from '@/hooks/usePlayground'
 import { PlaygroundActionInvokeApi } from '@/contexts/PlaygroundContext'
 import { DisplayInfoResponse, WindowsResponse } from '@daytonaio/api-client'
+import { ComputerUse } from '@daytonaio/sdk'
 import PlaygroundActionForm from '../../ActionForm'
 
 const VNCDisplayOperations: React.FC<VNCInteractionOptionsSectionComponentProps> = ({
@@ -33,26 +34,36 @@ const VNCDisplayOperations: React.FC<VNCInteractionOptionsSectionComponentProps>
     },
   ]
 
-  // Disable logic ensures that this method is called when ComputerUseClient exists
+  // Disable logic ensures that this method is called when ComputerUseClient exists -> we use as ComputerUse to silence TS compiler
   const displayActionAPICall: PlaygroundActionInvokeApi = async (displayActionFormData) => {
-    const displayActionResponse = await ComputerUseClient.display[displayActionFormData.methodName as DisplayActions]()
+    const displayActionResponse = await (ComputerUseClient as ComputerUse).display[
+      displayActionFormData.methodName as DisplayActions
+    ]()
     let displayActionResponseText = ''
     switch (displayActionFormData.methodName) {
       case DisplayActions.GET_INFO: {
         const displayInfoResponse = displayActionResponse as DisplayInfoResponse
-        displayInfoResponse.displays.forEach(
-          (display: { width: number; height: number; x: number; y: number }, index) =>
-            (displayActionResponseText += `Display ${index}: ${display.width}x${display.height} at ${display.x},${display.y}\n`),
-        )
+        type Display = {
+          width: number
+          height: number
+          x: number
+          y: number
+        }
+        ;(displayInfoResponse.displays as Display[]).forEach((display, index) => {
+          displayActionResponseText += `Display ${index}: ${display.width}x${display.height} at ${display.x},${display.y}\n`
+        })
         break
       }
       case DisplayActions.GET_WINDOWS: {
         const displayWindowsResponse = displayActionResponse as WindowsResponse
         displayActionResponseText += `Found ${displayWindowsResponse.count} open windows:\n`
-        displayWindowsResponse.windows.forEach(
-          (window: { title: string; id: string }) =>
-            (displayActionResponseText += `- ${window.title} (ID: ${window.id})\n`),
-        )
+        type Window = {
+          title: string
+          id: string
+        }
+        ;(displayWindowsResponse.windows as Window[]).forEach((window) => {
+          displayActionResponseText += `- ${window.title} (ID: ${window.id})\n`
+        })
         break
       }
     }

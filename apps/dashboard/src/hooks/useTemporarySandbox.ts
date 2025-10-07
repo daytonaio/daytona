@@ -32,7 +32,10 @@ export function useTemporarySandbox(): UseTemporarySandboxResult {
       }
       sandboxRef.current = null
     }
-
+    if (!DaytonaClient) {
+      setError('Unable to create Daytona client: missing access token or organization ID.')
+      return
+    }
     // Create new sandbox
     try {
       setIsLoading(true)

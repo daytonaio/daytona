@@ -73,7 +73,7 @@ export type WrapVNCInvokeApiType = (
 
 export type VNCInteractionOptionsSectionComponentProps = {
   disableActions: boolean
-  ComputerUseClient: ComputerUse
+  ComputerUseClient: ComputerUse | null
   wrapVNCInvokeApi: WrapVNCInvokeApiType
 }
 

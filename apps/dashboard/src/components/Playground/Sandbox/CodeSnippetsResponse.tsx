@@ -26,6 +26,14 @@ import { createErrorMessageOutput } from '@/lib/playground'
 import { ReactNode, useCallback, useMemo, useState, useRef } from 'react'
 import ResponseCard from '../ResponseCard'
 
+type CodeSnippetsSectionStartNewLinesData = {
+  isFileSystemOperationsFirstSectionSnippet: boolean
+  isGitOperationsFirstSectionSnippet: boolean
+}
+
+// Type for the keys
+type CodeSnippetsSectionFlagKey = keyof CodeSnippetsSectionStartNewLinesData
+
 const SandboxCodeSnippetsResponse: React.FC = () => {
   const [codeSnippetLanguage, setCodeSnippetLanguage] = useState<CodeLanguage>(CodeLanguage.PYTHON)
   const [codeSnippetOutput, setCodeSnippetOutput] = useState<string | ReactNode>('')
@@ -36,28 +44,25 @@ const SandboxCodeSnippetsResponse: React.FC = () => {
   const objectHasAnyValue = (obj: object) => Object.values(obj).some((v) => v !== '' && v !== undefined)
 
   // useRef prevents new object reference creation on every render which would triger useEffect calls on every render
-  const codeSnippetsSectionStartNewLinesData = useRef({
+  const codeSnippetsSectionStartNewLinesData = useRef<CodeSnippetsSectionStartNewLinesData>({
     isFileSystemOperationsFirstSectionSnippet: false,
     isGitOperationsFirstSectionSnippet: false,
   })
   // Reset values to false on every render beacuse of possible sections layout change
   for (const property in codeSnippetsSectionStartNewLinesData.current)
-    codeSnippetsSectionStartNewLinesData.current[property] = false
+    codeSnippetsSectionStartNewLinesData.current[property as CodeSnippetsSectionFlagKey] = false
 
   // Helper method do determine number of new line characters on the beginning of each code snippets sections to ensure consistent spacing
-  const getCodeSnippetsSectionStartNewLines = useCallback(
-    (sectionPropertyName: keyof typeof codeSnippetsSectionStartNewLinesData.current) => {
-      // For first section we need double new line character, for others just one
-      let sectionStartNewLines = '\n'
-      if (!codeSnippetsSectionStartNewLinesData.current[sectionPropertyName]) {
-        // Signalize that first snippet section is encountered so that subsequent sections use single new line character
-        codeSnippetsSectionStartNewLinesData.current[sectionPropertyName] = true
-        sectionStartNewLines = '\n\n'
-      }
-      return sectionStartNewLines
-    },
-    [],
-  )
+  const getCodeSnippetsSectionStartNewLines = useCallback((sectionPropertyName: CodeSnippetsSectionFlagKey) => {
+    // For first section we need double new line character, for others just one
+    let sectionStartNewLines = '\n'
+    if (!codeSnippetsSectionStartNewLinesData.current[sectionPropertyName]) {
+      // Signalize that first snippet section is encountered so that subsequent sections use single new line character
+      codeSnippetsSectionStartNewLinesData.current[sectionPropertyName] = true
+      sectionStartNewLines = '\n\n'
+    }
+    return sectionStartNewLines
+  }, [])
 
   const useConfigObject = false // Currently not needed, we use jwtToken for client config
 
@@ -197,7 +202,7 @@ const SandboxCodeSnippetsResponse: React.FC = () => {
         ...(createSandboxParamsExist
           ? [
               useAutoStopInterval
-                ? `${pythonIndentation}auto_stop_interval=${sandboxParametersState['createSandboxBaseParams']['autoStopInterval']}, # ${sandboxParametersState['createSandboxBaseParams']['autoStopInterval'] == 0 ? 'Disables the auto-stop feature' : `Sandbox will be stopped after ${sandboxParametersState['createSandboxBaseParams']['autoStopInterval']} minute${sandboxParametersState['createSandboxBaseParams']['autoStopInterval'] > 1 ? 's' : ''}`}`
+                ? `${pythonIndentation}auto_stop_interval=${sandboxParametersState['createSandboxBaseParams']['autoStopInterval']}, # ${sandboxParametersState['createSandboxBaseParams']['autoStopInterval'] == 0 ? 'Disables the auto-stop feature' : `Sandbox will be stopped after ${sandboxParametersState['createSandboxBaseParams']['autoStopInterval']} minute${(sandboxParametersState['createSandboxBaseParams']['autoStopInterval'] as number) > 1 ? 's' : ''}`}` // useAutoStopInterval guarantes that value isn't undefined so we put as number to silence TS compiler
                 : '',
               useAutoArchiveInterval
                 ? `${pythonIndentation}auto_archive_interval=${sandboxParametersState['createSandboxBaseParams']['autoArchiveInterval']}, # Auto-archive after a Sandbox has been stopped for ${sandboxParametersState['createSandboxBaseParams']['autoArchiveInterval'] == 0 ? '30 days' : `${sandboxParametersState['createSandboxBaseParams']['autoArchiveInterval']} minutes`}`
@@ -218,7 +223,7 @@ const SandboxCodeSnippetsResponse: React.FC = () => {
         ...(createSandboxParamsExist
           ? [
               useAutoStopInterval
-                ? `${typeScriptIndentation}autoStopInterval: ${sandboxParametersState['createSandboxBaseParams']['autoStopInterval']}, // ${sandboxParametersState['createSandboxBaseParams']['autoStopInterval'] == 0 ? 'Disables the auto-stop feature' : `Sandbox will be stopped after ${sandboxParametersState['createSandboxBaseParams']['autoStopInterval']} minute${sandboxParametersState['createSandboxBaseParams']['autoStopInterval'] > 1 ? 's' : ''}`}`
+                ? `${typeScriptIndentation}autoStopInterval: ${sandboxParametersState['createSandboxBaseParams']['autoStopInterval']}, // ${sandboxParametersState['createSandboxBaseParams']['autoStopInterval'] == 0 ? 'Disables the auto-stop feature' : `Sandbox will be stopped after ${sandboxParametersState['createSandboxBaseParams']['autoStopInterval']} minute${(sandboxParametersState['createSandboxBaseParams']['autoStopInterval'] as number) > 1 ? 's' : ''}`}` // useAutoStopInterval guarantes that value isn't undefined so we put as number to silence TS compiler
                 : '',
               useAutoArchiveInterval
                 ? `${typeScriptIndentation}autoArchiveInterval: ${sandboxParametersState['createSandboxBaseParams']['autoArchiveInterval']}, // Auto-archive after a Sandbox has been stopped for ${sandboxParametersState['createSandboxBaseParams']['autoArchiveInterval'] == 0 ? '30 days' : `${sandboxParametersState['createSandboxBaseParams']['autoArchiveInterval']} minutes`}`
@@ -512,15 +517,15 @@ main().catch(console.error)`,
     setIsCodeSnippetRunning(true)
     let codeSnippetOutput = 'Creating sandbox...\n'
     setCodeSnippetOutput(codeSnippetOutput)
-    let sandbox: Sandbox
+    let sandbox: Sandbox | undefined
 
     try {
-      let createSandboxFromImageParams: CreateSandboxFromImageParams
-      const createSandboxFromSnapshotParams: CreateSandboxFromSnapshotParams = { snapshot: 'ubuntu:24.04' }
+      if (!DaytonaClient) throw new Error('Unable to create Daytona client: missing access token or organization ID.')
+      const createSandboxFromImageParams: CreateSandboxFromImageParams = { image: Image.debianSlim('3.13') } // Default and fixed image if CreateSandboxFromImageParams are used
+      const createSandboxFromSnapshotParams: CreateSandboxFromSnapshotParams = { snapshot: '' } // Currently createSandboxFromSnapshotParams isn't supported but we put it for easier compatibility later + its used with empty snapshot when createSandboxFromImage is false
       const createSandboxFromImage = useSandboxCreateParams
       if (createSandboxFromImage) {
         // Set CreateSandboxFromImageParams specific params
-        createSandboxFromImageParams = { image: Image.debianSlim('3.13') }
         if (useResources) {
           createSandboxFromImageParams.resources = {}
           if (useResourcesCPU) createSandboxFromImageParams.resources.cpu = sandboxParametersState['resources']['cpu']
@@ -544,20 +549,22 @@ main().catch(console.error)`,
         createSandboxParams.autoDeleteInterval = sandboxParametersState['createSandboxBaseParams']['autoDeleteInterval']
       createSandboxParams.labels = { 'daytona-playground': 'true' }
       if (useLanguageParam)
-        createSandboxParams.labels['daytona-playground-language'] = sandboxParametersState['language']
+        createSandboxParams.labels['daytona-playground-language'] = sandboxParametersState['language'] as string // useLanguageParam guarantes that value isn't undefined so we put as string to silence TS compiler
       sandbox = await DaytonaClient.create(createSandboxParams)
       codeSnippetOutput = `Sandbox successfully created: ${sandbox.id}\n`
       setCodeSnippetOutput(codeSnippetOutput)
       if (codeToRunExists) {
         setCodeSnippetOutput(codeSnippetOutput + '\nRunning code...')
-        const codeRunResponse = await sandbox.process.codeRun(sandboxParametersState['codeRunParams'].languageCode)
+        const codeRunResponse = await sandbox.process.codeRun(
+          sandboxParametersState['codeRunParams'].languageCode as string,
+        ) // codeToRunExists guarantes that value isn't undefined so we put as string to silence TS compiler
         codeSnippetOutput += `\nCode run result: ${codeRunResponse.result}`
         setCodeSnippetOutput(codeSnippetOutput)
       }
       if (shellCommandExists) {
         setCodeSnippetOutput(codeSnippetOutput + '\nRunning shell command...')
         const shellCommandResponse = await sandbox.process.executeCommand(
-          sandboxParametersState['shellCommandRunParams'].shellCommand,
+          sandboxParametersState['shellCommandRunParams'].shellCommand as string, // shellCommandExists guarantes that value isn't undefined so we put as string to silence TS compiler
         )
         codeSnippetOutput += `\nShell command result: ${shellCommandResponse.result}`
         setCodeSnippetOutput(codeSnippetOutput)

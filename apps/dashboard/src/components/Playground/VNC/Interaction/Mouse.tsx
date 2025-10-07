@@ -24,6 +24,7 @@ import {
   VNCInteractionOptionsSectionComponentProps,
 } from '@/enums/Playground'
 import { PlaygroundActionInvokeApi } from '@/contexts/PlaygroundContext'
+import { ComputerUse } from '@daytonaio/sdk'
 import PlaygroundActionForm from '../../ActionForm'
 import React, { useState } from 'react'
 
@@ -159,9 +160,9 @@ const VNCMouseOperations: React.FC<VNCInteractionOptionsSectionComponentProps> =
     },
   ]
 
-  // Disable logic ensures that this method is called when ComputerUseClient exists
+  // Disable logic ensures that this method is called when ComputerUseClient exists -> we use as ComputerUse to silence TS compiler
   const mouseActionAPICall: PlaygroundActionInvokeApi = async (mouseActionFormData) => {
-    const MouseActionsClient = ComputerUseClient.mouse
+    const MouseActionsClient = (ComputerUseClient as ComputerUse).mouse
     let mouseActionResponseText = ''
     switch (mouseActionFormData.methodName) {
       case MouseActions.CLICK: {
