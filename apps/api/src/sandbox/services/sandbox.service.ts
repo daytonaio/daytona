@@ -925,14 +925,6 @@ export class SandboxService {
         throw new SandboxError('Sandbox is not in valid state')
       }
 
-      if (sandbox.runnerId) {
-        // Add runner readiness check
-        const runner = await this.runnerService.findOne(sandbox.runnerId)
-        if (runner.state !== RunnerState.READY) {
-          throw new SandboxError('Runner is not ready')
-        }
-      }
-
       if (sandbox.pending) {
         throw new SandboxError('Sandbox state change in progress')
       }

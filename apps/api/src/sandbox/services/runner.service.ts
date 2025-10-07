@@ -214,57 +214,67 @@ export class RunnerService {
 
       await Promise.allSettled(
         runners.map(async (runner) => {
-          const abortController = new AbortController()
-          let timeoutId: NodeJS.Timeout | null = null
+          const shouldRetry = runner.state === RunnerState.READY
+          const retryDelays = shouldRetry ? [500, 1000] : []
 
-          try {
-            await Promise.race([
-              (async () => {
-                this.logger.debug(`Checking runner ${runner.id}`)
-                const runnerAdapter = await this.runnerAdapterFactory.create(runner)
-
-                // Get health check with status metrics
-                await runnerAdapter.healthCheck(abortController.signal)
-
-                let runnerInfo: RunnerInfo | undefined
-                try {
-                  runnerInfo = await runnerAdapter.runnerInfo(abortController.signal)
-                } catch (e) {
-                  this.logger.warn(`Failed to get runner info for runner ${runner.id}: ${e.message}`)
-                }
-
-                await this.updateRunnerStatus(runner.id, runnerInfo)
-              })(),
-              new Promise((_, reject) => {
-                timeoutId = setTimeout(() => {
-                  abortController.abort()
-                  reject(new Error('Health check timeout'))
-                }, 10000)
-              }),
-            ])
-
-            // Clear timeout if operation completed successfully
-            if (timeoutId) {
-              clearTimeout(timeoutId)
-            }
-          } catch (e) {
-            // Clear timeout on any error
-            if (timeoutId) {
-              clearTimeout(timeoutId)
+          for (let attempt = 0; attempt <= retryDelays.length; attempt++) {
+            if (attempt > 0) {
+              await new Promise((resolve) => setTimeout(resolve, retryDelays[attempt - 1]))
             }
 
-            if (e.message === 'Health check timeout') {
-              this.logger.error(`Runner ${runner.id} health check timed out after 10 seconds`)
-            } else if (e.code === 'ECONNREFUSED') {
-              this.logger.error(`Runner ${runner.id} not reachable`)
-            } else if (e.name === 'AbortError') {
-              this.logger.error(`Runner ${runner.id} health check was aborted due to timeout`)
-            } else {
-              this.logger.error(`Error checking runner ${runner.id}: ${e.message}`)
-              this.logger.error(e)
-            }
+            const abortController = new AbortController()
+            let timeoutId: NodeJS.Timeout | null = null
 
-            await this.updateRunnerState(runner.id, RunnerState.UNRESPONSIVE)
+            try {
+              await Promise.race([
+                (async () => {
+                  this.logger.debug(`Checking runner ${runner.id}`)
+                  const runnerAdapter = await this.runnerAdapterFactory.create(runner)
+
+                  await runnerAdapter.healthCheck(abortController.signal)
+
+                  let runnerInfo: RunnerInfo | undefined
+                  try {
+                    runnerInfo = await runnerAdapter.runnerInfo(abortController.signal)
+                  } catch (e) {
+                    this.logger.warn(`Failed to get runner info for runner ${runner.id}: ${e.message}`)
+                  }
+
+                  await this.updateRunnerStatus(runner.id, runnerInfo)
+                })(),
+                new Promise((_, reject) => {
+                  timeoutId = setTimeout(() => {
+                    abortController.abort()
+                    reject(new Error('Health check timeout'))
+                  }, 3000)
+                }),
+              ])
+
+              if (timeoutId) {
+                clearTimeout(timeoutId)
+              }
+              return // Success, exit retry loop
+            } catch (e) {
+              if (timeoutId) {
+                clearTimeout(timeoutId)
+              }
+
+              if (e.message === 'Health check timeout') {
+                this.logger.error(`Runner ${runner.id} health check timed out after 3 seconds`)
+              } else if (e.code === 'ECONNREFUSED') {
+                this.logger.error(`Runner ${runner.id} not reachable`)
+              } else if (e.name === 'AbortError') {
+                this.logger.error(`Runner ${runner.id} health check was aborted due to timeout`)
+              } else {
+                this.logger.error(`Error checking runner ${runner.id}: ${e.message}`)
+                this.logger.error(e)
+              }
+
+              // If last attempt, mark as unresponsive
+              if (attempt === retryDelays.length) {
+                await this.updateRunnerState(runner.id, RunnerState.UNRESPONSIVE)
+              }
+            }
           }
         }),
       )
