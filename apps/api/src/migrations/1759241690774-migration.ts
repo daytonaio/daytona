@@ -5,8 +5,8 @@
 
 import { MigrationInterface, QueryRunner } from 'typeorm'
 
-export class Migration1757513754039 implements MigrationInterface {
-  name = 'Migration1757513754039'
+export class Migration1759241690774 implements MigrationInterface {
+  name = 'Migration1759241690774'
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.renameColumn('snapshot', 'internalName', 'ref')
