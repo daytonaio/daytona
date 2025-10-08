@@ -1278,7 +1278,11 @@ export class SandboxService {
 
     const sshAccess = new SshAccess()
     sshAccess.sandboxId = sandboxId
-    sshAccess.token = nanoid(32)
+    let token: string
+    do {
+      token = nanoid(32)
+    } while (token[0] === '-' || token[0] === '_')
+    sshAccess.token = token
     sshAccess.expiresAt = new Date(Date.now() + expiresInMinutes * 60 * 1000)
 
     return await this.sshAccessRepository.save(sshAccess)
