@@ -19,16 +19,31 @@ export interface AuditLogStorageAdapter {
 
   /**
    * Get all audit logs
+   * @param page - Page number (1-based) for offset-based pagination
+   * @param limit - Number of items per page
+   * @param filters - Optional filters
+   * @param nextToken - Cursor token for cursor-based pagination (takes precedence over page)
    */
-  getAllLogs(page?: number, limit?: number, filters?: AuditLogFilter): Promise<PaginatedList<AuditLog>>
+  getAllLogs(
+    page?: number,
+    limit?: number,
+    filters?: AuditLogFilter,
+    nextToken?: string,
+  ): Promise<PaginatedList<AuditLog>>
 
   /**
    * Get audit logs for organization
+   * @param organizationId - Organization ID
+   * @param page - Page number (1-based) for offset-based pagination
+   * @param limit - Number of items per page
+   * @param filters - Optional filters
+   * @param nextToken - Cursor token for cursor-based pagination (takes precedence over page)
    */
   getOrganizationLogs(
     organizationId: string,
     page?: number,
     limit?: number,
     filters?: AuditLogFilter,
+    nextToken?: string,
   ): Promise<PaginatedList<AuditLog>>
 }

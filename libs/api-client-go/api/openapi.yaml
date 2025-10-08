@@ -7039,6 +7039,15 @@ paths:
             format: date-time
             type: string
           style: form
+        - description: "Token for cursor-based pagination. When provided, takes precedence\
+            \ over page parameter."
+          explode: true
+          in: query
+          name: nextToken
+          required: false
+          schema:
+            type: string
+          style: form
       responses:
         '200':
           content:
@@ -7104,6 +7113,15 @@ paths:
           required: false
           schema:
             format: date-time
+            type: string
+          style: form
+        - description: "Token for cursor-based pagination. When provided, takes precedence\
+            \ over page parameter."
+          explode: true
+          in: query
+          name: nextToken
+          required: false
+          schema:
             type: string
           style: form
       responses:
@@ -11576,6 +11594,7 @@ components:
     PaginatedAuditLogs:
       example:
         total: 6.027456183070403
+        nextToken: nextToken
         totalPages: 5.962133916683182
         page: 1.4658129805029452
         items:
@@ -11620,6 +11639,9 @@ components:
           type: number
         totalPages:
           type: number
+        nextToken:
+          description: Token for next page in cursor-based pagination
+          type: string
       required:
         - items
         - page
