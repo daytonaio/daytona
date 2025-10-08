@@ -21,10 +21,12 @@ var _ MappedNullable = &PaginatedAuditLogs{}
 
 // PaginatedAuditLogs struct for PaginatedAuditLogs
 type PaginatedAuditLogs struct {
-	Items                []AuditLog `json:"items"`
-	Total                float32    `json:"total"`
-	Page                 float32    `json:"page"`
-	TotalPages           float32    `json:"totalPages"`
+	Items      []AuditLog `json:"items"`
+	Total      float32    `json:"total"`
+	Page       float32    `json:"page"`
+	TotalPages float32    `json:"totalPages"`
+	// Token for next page in cursor-based pagination
+	NextToken            *string `json:"nextToken,omitempty"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -147,6 +149,38 @@ func (o *PaginatedAuditLogs) SetTotalPages(v float32) {
 	o.TotalPages = v
 }
 
+// GetNextToken returns the NextToken field value if set, zero value otherwise.
+func (o *PaginatedAuditLogs) GetNextToken() string {
+	if o == nil || IsNil(o.NextToken) {
+		var ret string
+		return ret
+	}
+	return *o.NextToken
+}
+
+// GetNextTokenOk returns a tuple with the NextToken field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *PaginatedAuditLogs) GetNextTokenOk() (*string, bool) {
+	if o == nil || IsNil(o.NextToken) {
+		return nil, false
+	}
+	return o.NextToken, true
+}
+
+// HasNextToken returns a boolean if a field has been set.
+func (o *PaginatedAuditLogs) HasNextToken() bool {
+	if o != nil && !IsNil(o.NextToken) {
+		return true
+	}
+
+	return false
+}
+
+// SetNextToken gets a reference to the given string and assigns it to the NextToken field.
+func (o *PaginatedAuditLogs) SetNextToken(v string) {
+	o.NextToken = &v
+}
+
 func (o PaginatedAuditLogs) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -161,6 +195,9 @@ func (o PaginatedAuditLogs) ToMap() (map[string]interface{}, error) {
 	toSerialize["total"] = o.Total
 	toSerialize["page"] = o.Page
 	toSerialize["totalPages"] = o.TotalPages
+	if !IsNil(o.NextToken) {
+		toSerialize["nextToken"] = o.NextToken
+	}
 
 	for key, value := range o.AdditionalProperties {
 		toSerialize[key] = value
@@ -211,6 +248,7 @@ func (o *PaginatedAuditLogs) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "total")
 		delete(additionalProperties, "page")
 		delete(additionalProperties, "totalPages")
+		delete(additionalProperties, "nextToken")
 		o.AdditionalProperties = additionalProperties
 	}
 

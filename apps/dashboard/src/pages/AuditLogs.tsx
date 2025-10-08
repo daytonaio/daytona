@@ -23,6 +23,7 @@ const AuditLogs: React.FC = () => {
     total: 0,
     page: 1,
     totalPages: 0,
+    nextToken: undefined,
   })
   const [loadingData, setLoadingData] = useState(true)
   const [autoRefresh, setAutoRefresh] = useState(false)
@@ -35,6 +36,8 @@ const AuditLogs: React.FC = () => {
     pageIndex: 0,
     pageSize: 10,
   })
+  const [currentCursor, setCurrentCursor] = useState<string | undefined>(undefined)
+  const [cursorHistory, setCursorHistory] = useState<string[]>([])
 
   // Quick ranges configuration
   const auditLogQuickRanges: QuickRangesConfig = useMemo(
@@ -49,7 +52,7 @@ const AuditLogs: React.FC = () => {
   )
 
   const fetchData = useCallback(
-    async (showTableLoadingState = true, customDateRange?: DateRange) => {
+    async (showTableLoadingState = true, customDateRange?: DateRange, cursor?: string) => {
       if (!selectedOrganization) {
         return
       }
@@ -71,6 +74,7 @@ const AuditLogs: React.FC = () => {
             paginationParams.pageSize,
             currentRange.from,
             currentRange.to,
+            cursor, // Use passed cursor parameter
           )
         ).data
 
@@ -84,14 +88,54 @@ const AuditLogs: React.FC = () => {
     [auditApi, selectedOrganization, paginationParams.pageIndex, paginationParams.pageSize, dateRange],
   )
 
-  const handlePaginationChange = useCallback(({ pageIndex, pageSize }: { pageIndex: number; pageSize: number }) => {
-    setPaginationParams({ pageIndex, pageSize })
-    setLoadingData(true)
-  }, [])
+  const handlePaginationChange = useCallback(
+    ({ pageIndex, pageSize }: { pageIndex: number; pageSize: number }) => {
+      if (pageSize !== paginationParams.pageSize) {
+        // Reset to first page when changing page size
+        setPaginationParams({ pageIndex: 0, pageSize })
+        setCurrentCursor(undefined)
+        setCursorHistory([])
+      } else if (pageIndex > paginationParams.pageIndex) {
+        // Next page - use cursor if available
+        if (data.nextToken) {
+          // Store current cursor in history before moving to next
+          if (currentCursor) {
+            setCursorHistory((prev) => [...prev, currentCursor])
+          }
+          setCurrentCursor(data.nextToken)
+          setPaginationParams((prev) => ({ ...prev, pageIndex: prev.pageIndex + 1 }))
+        } else {
+          // Regular offset pagination
+          setCurrentCursor(undefined)
+          setCursorHistory([])
+          setPaginationParams({ pageIndex, pageSize })
+        }
+      } else if (pageIndex < paginationParams.pageIndex) {
+        // Previous page - check if we can go back in cursor history
+        if (currentCursor && cursorHistory.length > 0) {
+          // Go back in cursor pagination
+          const previousCursor = cursorHistory[cursorHistory.length - 1]
+          setCursorHistory((prev) => prev.slice(0, -1))
+          setCurrentCursor(previousCursor)
+          setPaginationParams((prev) => ({ ...prev, pageIndex: prev.pageIndex - 1 }))
+        } else {
+          // Go back to offset pagination
+          setCurrentCursor(undefined)
+          setCursorHistory([])
+          setPaginationParams({ pageIndex, pageSize })
+        }
+      } else {
+        // Same page, just update params
+        setPaginationParams({ pageIndex, pageSize })
+      }
+      setLoadingData(true)
+    },
+    [paginationParams.pageIndex, paginationParams.pageSize, data.nextToken, currentCursor, cursorHistory],
+  )
 
   useEffect(() => {
-    fetchData()
-  }, [fetchData])
+    fetchData(true, undefined, currentCursor)
+  }, [fetchData, currentCursor, paginationParams.pageIndex, paginationParams.pageSize])
 
   // Auto-refresh
   useInterval(
@@ -101,7 +145,7 @@ const AuditLogs: React.FC = () => {
       }
 
       const currentRange = dateRangePickerRef.current.getCurrentRange()
-      fetchData(false, currentRange)
+      fetchData(false, currentRange, currentCursor)
     },
     autoRefresh ? 5000 : null,
   )
@@ -130,7 +174,9 @@ const AuditLogs: React.FC = () => {
   const handleDateRangeChange = useCallback((range: DateRange) => {
     setDateRange(range)
     setPaginationParams({ pageIndex: 0, pageSize: 10 })
-    setData((prev) => ({ ...prev, page: 1 }))
+    setCurrentCursor(undefined)
+    setCursorHistory([])
+    setData((prev) => ({ ...prev, page: 1, nextToken: undefined }))
   }, [])
 
   return (
@@ -167,6 +213,8 @@ const AuditLogs: React.FC = () => {
           pageIndex: paginationParams.pageIndex,
           pageSize: paginationParams.pageSize,
         }}
+        // Pass cursor pagination info to the table
+        nextToken={data.nextToken}
       />
     </div>
   )

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Logger, OnModuleInit } from '@nestjs/common'
+import { BadRequestException, Logger, OnModuleInit } from '@nestjs/common'
 import { errors } from '@opensearch-project/opensearch'
 import { AuditLog } from '../entities/audit-log.entity'
 import { PaginatedList } from '../../common/interfaces/paginated-list.interface'
@@ -13,7 +13,10 @@ import { TypedConfigService } from '../../config/typed-config.service'
 import { OpensearchClient } from 'nestjs-opensearch'
 import { PolicyEnvelope } from '@opensearch-project/opensearch/api/_types/ism._common.js'
 import { QueryContainer } from '@opensearch-project/opensearch/api/_types/_common.query_dsl.js'
-import { Bulk_RequestBody } from '@opensearch-project/opensearch/api/index.js'
+import { Bulk_RequestBody, Search_RequestBody } from '@opensearch-project/opensearch/api/index.js'
+
+// Safe limit for offset-based pagination to avoid hitting OpenSearch's 10000 limit
+const MAX_OFFSET_PAGINATION_LIMIT = 10000
 
 export class AuditOpenSearchStorageAdapter implements AuditLogStorageAdapter, OnModuleInit {
   private readonly logger = new Logger(AuditOpenSearchStorageAdapter.name)
@@ -70,52 +73,16 @@ export class AuditOpenSearchStorageAdapter implements AuditLogStorageAdapter, On
     }
   }
 
-  async getAllLogs(page?: number, limit?: number, filters?: AuditLogFilter): Promise<PaginatedList<AuditLog>> {
-    const from = (page - 1) * limit
-    const size = limit
-
-    // Build the main query for audit logs
-    const query: QueryContainer = {
-      bool: {
-        filter: [
-          {
-            range: {
-              createdAt: {
-                gte: filters?.from?.toISOString(),
-                lte: filters?.to?.toISOString(),
-              },
-            },
-          },
-        ],
-      },
-    }
-
-    // Get total number of audit logs
-    const totalResponse = await this.client.count({
-      index: this.indexName,
-      body: {
-        query,
-      },
-    })
-    const total = totalResponse.body.count
-
-    // Get the audit logs with proper pagination
-    const response = await this.client.search({
-      index: this.indexName,
-      body: {
-        query,
-        sort: [{ createdAt: { order: 'desc' } }],
-        from,
-        size,
-      },
-    })
-
-    return {
-      items: response.body.hits?.hits?.map((hit) => this.mapSourceToAuditLog(hit._source)) || [],
-      total,
-      page,
-      totalPages: Math.ceil(total / limit),
-    }
+  async getAllLogs(
+    page?: number,
+    limit?: number,
+    filters?: AuditLogFilter,
+    nextToken?: string,
+  ): Promise<PaginatedList<AuditLog>> {
+    const query = this.buildDateRangeQuery(filters)
+    const searchBody = this.buildSearchBody(query, page, limit, nextToken)
+    const response = await this.executeSearch(searchBody)
+    return this.processSearchResponse(response, page, limit, nextToken, query)
   }
 
   async getOrganizationLogs(
@@ -123,57 +90,16 @@ export class AuditOpenSearchStorageAdapter implements AuditLogStorageAdapter, On
     page?: number,
     limit?: number,
     filters?: AuditLogFilter,
+    nextToken?: string,
   ): Promise<PaginatedList<AuditLog>> {
     if (!organizationId) {
       throw new Error('Organization ID is required')
     }
 
-    const from = (page - 1) * limit
-    const size = limit
-
-    // Build the main query for audit logs
-    const query: QueryContainer = {
-      bool: {
-        filter: [
-          {
-            term: { organizationId: organizationId },
-          },
-          {
-            range: {
-              createdAt: {
-                gt: filters?.from?.toISOString(),
-                lt: filters?.to?.toISOString(),
-              },
-            },
-          },
-        ],
-      },
-    }
-
-    // Get total number of audit logs
-    const totalResponse = await this.client.count({
-      index: this.indexName,
-      body: { query },
-    })
-    const total = totalResponse.body.count
-
-    // Get the audit logs with proper pagination
-    const response = await this.client.search({
-      index: this.indexName,
-      body: {
-        query,
-        sort: [{ createdAt: { order: 'desc' } }],
-        from,
-        size,
-      },
-    })
-
-    return {
-      items: response.body.hits?.hits?.map((hit) => this.mapSourceToAuditLog(hit._source)) || [],
-      total,
-      page,
-      totalPages: Math.ceil(total / limit),
-    }
+    const query = this.buildOrganizationQuery(organizationId, filters)
+    const searchBody = this.buildSearchBody(query, page, limit, nextToken)
+    const response = await this.executeSearch(searchBody)
+    return this.processSearchResponse(response, page, limit, nextToken, query)
   }
 
   private async initialize() {
@@ -424,6 +350,130 @@ export class AuditOpenSearchStorageAdapter implements AuditLogStorageAdapter, On
       this.logger.log(`Applied ILM policy ${policyName} to index template ${templateName}`)
     } catch (error) {
       this.logger.error(`Failed to apply ILM policy to index template: ${error.message}`)
+    }
+  }
+
+  private buildDateRangeQuery(filters?: AuditLogFilter): QueryContainer {
+    return {
+      bool: {
+        filter: [
+          {
+            range: {
+              createdAt: {
+                gte: filters?.from?.toISOString(),
+                lte: filters?.to?.toISOString(),
+              },
+            },
+          },
+        ],
+      },
+    }
+  }
+
+  private buildOrganizationQuery(organizationId: string, filters?: AuditLogFilter): QueryContainer {
+    return {
+      bool: {
+        filter: [
+          {
+            term: { organizationId },
+          },
+          {
+            range: {
+              createdAt: {
+                gte: filters?.from?.toISOString(),
+                lte: filters?.to?.toISOString(),
+              },
+            },
+          },
+        ],
+      },
+    }
+  }
+
+  private buildSearchBody(
+    query: QueryContainer,
+    page?: number,
+    limit?: number,
+    nextToken?: string,
+  ): Search_RequestBody {
+    const size = limit
+    const searchBody: Search_RequestBody = {
+      query,
+      sort: [{ createdAt: { order: 'desc' } }],
+      size: size + 1, // Request one extra to check if there are more results
+    }
+
+    if (nextToken) {
+      // Cursor-based pagination using search_after
+      try {
+        const searchAfter = JSON.parse(Buffer.from(nextToken, 'base64').toString())
+        searchBody.search_after = searchAfter
+        this.logger.debug(`Using cursor-based pagination with search_after: ${JSON.stringify(searchAfter)}`)
+      } catch {
+        throw new Error(`Invalid nextToken provided: ${nextToken}`)
+      }
+    } else {
+      // Offset-based pagination - only use when within safe limits
+      const from = (page - 1) * limit
+      if (from + size <= MAX_OFFSET_PAGINATION_LIMIT) {
+        searchBody.from = from
+        this.logger.debug(`Using offset-based pagination: from=${from}, size=${size + 1}`)
+      } else {
+        throw new BadRequestException(
+          `Offset-based pagination not supported for page ${page} with limit ${limit}. Please use cursor-based pagination with nextToken parameter instead.`,
+        )
+      }
+    }
+
+    return searchBody
+  }
+
+  private async executeSearch(searchBody: Search_RequestBody) {
+    return await this.client.search({
+      index: this.indexName,
+      body: searchBody,
+    })
+  }
+
+  private async processSearchResponse(
+    response: any,
+    page?: number,
+    limit?: number,
+    nextToken?: string,
+    query?: QueryContainer,
+  ): Promise<PaginatedList<AuditLog>> {
+    const size = limit
+    const hits = response.body.hits?.hits || []
+    const hasMore = hits.length > size
+    const items = hasMore ? hits.slice(0, size) : hits
+
+    // Generate nextToken when there are more results and we're approaching limits
+    let nextTokenResult: string | undefined
+    const currentOffset = nextToken ? 0 : (page - 1) * limit // If using cursor, we don't know the exact offset
+    const nextPageOffset = currentOffset + limit
+    const wouldExceedLimit = nextPageOffset >= MAX_OFFSET_PAGINATION_LIMIT
+
+    // Only generate nextToken if we're already using cursor pagination OR if the next page would exceed the limit
+    if (hasMore && items.length > 0 && (nextToken || wouldExceedLimit)) {
+      const lastItem = items[items.length - 1]
+      const searchAfter = [lastItem._source.createdAt]
+      nextTokenResult = Buffer.from(JSON.stringify(searchAfter)).toString('base64')
+    }
+
+    // Calculate totals - always get accurate count as it's efficient
+    const totalResponse = await this.client.count({
+      index: this.indexName,
+      body: { query },
+    })
+    const total = totalResponse.body.count
+    const totalPages = Math.ceil(total / limit)
+
+    return {
+      items: items.map((hit) => this.mapSourceToAuditLog(hit._source)),
+      total,
+      page: page || 1,
+      totalPages,
+      nextToken: nextTokenResult,
     }
   }
 }

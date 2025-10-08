@@ -48,6 +48,7 @@ class AuditApi:
         limit: Annotated[Optional[Union[Annotated[float, Field(le=200, strict=True, ge=1)], Annotated[int, Field(le=200, strict=True, ge=1)]]], Field(description="Number of results per page")] = None,
         var_from: Annotated[Optional[datetime], Field(description="From date (ISO 8601 format)")] = None,
         to: Annotated[Optional[datetime], Field(description="To date (ISO 8601 format)")] = None,
+        next_token: Annotated[Optional[StrictStr], Field(description="Token for cursor-based pagination. When provided, takes precedence over page parameter.")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -72,6 +73,8 @@ class AuditApi:
         :type var_from: datetime
         :param to: To date (ISO 8601 format)
         :type to: datetime
+        :param next_token: Token for cursor-based pagination. When provided, takes precedence over page parameter.
+        :type next_token: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -99,6 +102,7 @@ class AuditApi:
             limit=limit,
             var_from=var_from,
             to=to,
+            next_token=next_token,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -126,6 +130,7 @@ class AuditApi:
         limit: Annotated[Optional[Union[Annotated[float, Field(le=200, strict=True, ge=1)], Annotated[int, Field(le=200, strict=True, ge=1)]]], Field(description="Number of results per page")] = None,
         var_from: Annotated[Optional[datetime], Field(description="From date (ISO 8601 format)")] = None,
         to: Annotated[Optional[datetime], Field(description="To date (ISO 8601 format)")] = None,
+        next_token: Annotated[Optional[StrictStr], Field(description="Token for cursor-based pagination. When provided, takes precedence over page parameter.")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -150,6 +155,8 @@ class AuditApi:
         :type var_from: datetime
         :param to: To date (ISO 8601 format)
         :type to: datetime
+        :param next_token: Token for cursor-based pagination. When provided, takes precedence over page parameter.
+        :type next_token: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -177,6 +184,7 @@ class AuditApi:
             limit=limit,
             var_from=var_from,
             to=to,
+            next_token=next_token,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -204,6 +212,7 @@ class AuditApi:
         limit: Annotated[Optional[Union[Annotated[float, Field(le=200, strict=True, ge=1)], Annotated[int, Field(le=200, strict=True, ge=1)]]], Field(description="Number of results per page")] = None,
         var_from: Annotated[Optional[datetime], Field(description="From date (ISO 8601 format)")] = None,
         to: Annotated[Optional[datetime], Field(description="To date (ISO 8601 format)")] = None,
+        next_token: Annotated[Optional[StrictStr], Field(description="Token for cursor-based pagination. When provided, takes precedence over page parameter.")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -228,6 +237,8 @@ class AuditApi:
         :type var_from: datetime
         :param to: To date (ISO 8601 format)
         :type to: datetime
+        :param next_token: Token for cursor-based pagination. When provided, takes precedence over page parameter.
+        :type next_token: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -255,6 +266,7 @@ class AuditApi:
             limit=limit,
             var_from=var_from,
             to=to,
+            next_token=next_token,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -277,6 +289,7 @@ class AuditApi:
         limit,
         var_from,
         to,
+        next_token,
         _request_auth,
         _content_type,
         _headers,
@@ -333,6 +346,10 @@ class AuditApi:
             else:
                 _query_params.append(('to', to))
             
+        if next_token is not None:
+            
+            _query_params.append(('nextToken', next_token))
+            
         # process the header parameters
         # process the form parameters
         # process the body parameter
@@ -379,6 +396,7 @@ class AuditApi:
         limit: Annotated[Optional[Union[Annotated[float, Field(le=200, strict=True, ge=1)], Annotated[int, Field(le=200, strict=True, ge=1)]]], Field(description="Number of results per page")] = None,
         var_from: Annotated[Optional[datetime], Field(description="From date (ISO 8601 format)")] = None,
         to: Annotated[Optional[datetime], Field(description="To date (ISO 8601 format)")] = None,
+        next_token: Annotated[Optional[StrictStr], Field(description="Token for cursor-based pagination. When provided, takes precedence over page parameter.")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -405,6 +423,8 @@ class AuditApi:
         :type var_from: datetime
         :param to: To date (ISO 8601 format)
         :type to: datetime
+        :param next_token: Token for cursor-based pagination. When provided, takes precedence over page parameter.
+        :type next_token: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -433,6 +453,7 @@ class AuditApi:
             limit=limit,
             var_from=var_from,
             to=to,
+            next_token=next_token,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -461,6 +482,7 @@ class AuditApi:
         limit: Annotated[Optional[Union[Annotated[float, Field(le=200, strict=True, ge=1)], Annotated[int, Field(le=200, strict=True, ge=1)]]], Field(description="Number of results per page")] = None,
         var_from: Annotated[Optional[datetime], Field(description="From date (ISO 8601 format)")] = None,
         to: Annotated[Optional[datetime], Field(description="To date (ISO 8601 format)")] = None,
+        next_token: Annotated[Optional[StrictStr], Field(description="Token for cursor-based pagination. When provided, takes precedence over page parameter.")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -487,6 +509,8 @@ class AuditApi:
         :type var_from: datetime
         :param to: To date (ISO 8601 format)
         :type to: datetime
+        :param next_token: Token for cursor-based pagination. When provided, takes precedence over page parameter.
+        :type next_token: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -515,6 +539,7 @@ class AuditApi:
             limit=limit,
             var_from=var_from,
             to=to,
+            next_token=next_token,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -543,6 +568,7 @@ class AuditApi:
         limit: Annotated[Optional[Union[Annotated[float, Field(le=200, strict=True, ge=1)], Annotated[int, Field(le=200, strict=True, ge=1)]]], Field(description="Number of results per page")] = None,
         var_from: Annotated[Optional[datetime], Field(description="From date (ISO 8601 format)")] = None,
         to: Annotated[Optional[datetime], Field(description="To date (ISO 8601 format)")] = None,
+        next_token: Annotated[Optional[StrictStr], Field(description="Token for cursor-based pagination. When provided, takes precedence over page parameter.")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -569,6 +595,8 @@ class AuditApi:
         :type var_from: datetime
         :param to: To date (ISO 8601 format)
         :type to: datetime
+        :param next_token: Token for cursor-based pagination. When provided, takes precedence over page parameter.
+        :type next_token: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -597,6 +625,7 @@ class AuditApi:
             limit=limit,
             var_from=var_from,
             to=to,
+            next_token=next_token,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -620,6 +649,7 @@ class AuditApi:
         limit,
         var_from,
         to,
+        next_token,
         _request_auth,
         _content_type,
         _headers,
@@ -677,6 +707,10 @@ class AuditApi:
                 )
             else:
                 _query_params.append(('to', to))
+            
+        if next_token is not None:
+            
+            _query_params.append(('nextToken', next_token))
             
         # process the header parameters
         # process the form parameters

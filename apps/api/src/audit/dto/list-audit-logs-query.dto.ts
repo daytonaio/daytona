@@ -6,7 +6,7 @@
 import { ApiPropertyOptional, ApiSchema } from '@nestjs/swagger'
 import { PageNumber } from '../../common/decorators/page-number.decorator'
 import { PageLimit } from '../../common/decorators/page-limit.decorator'
-import { IsDate, IsOptional } from 'class-validator'
+import { IsDate, IsOptional, IsString } from 'class-validator'
 import { Type } from 'class-transformer'
 
 @ApiSchema({ name: 'ListAuditLogsQuery' })
@@ -28,4 +28,12 @@ export class ListAuditLogsQueryDto {
   @Type(() => Date)
   @IsDate()
   to?: Date
+
+  @ApiPropertyOptional({
+    type: String,
+    description: 'Token for cursor-based pagination. When provided, takes precedence over page parameter.',
+  })
+  @IsOptional()
+  @IsString()
+  nextToken?: string
 }

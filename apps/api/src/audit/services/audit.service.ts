@@ -98,8 +98,13 @@ export class AuditService implements OnApplicationBootstrap {
     return this.auditLogRepository.save(auditLog)
   }
 
-  async getAllLogs(page = 1, limit = 10, filters?: AuditLogFilter): Promise<PaginatedList<AuditLog>> {
-    return this.auditStorageAdapter.getAllLogs(page, limit, filters)
+  async getAllLogs(
+    page = 1,
+    limit = 10,
+    filters?: AuditLogFilter,
+    nextToken?: string,
+  ): Promise<PaginatedList<AuditLog>> {
+    return this.auditStorageAdapter.getAllLogs(page, limit, filters, nextToken)
   }
 
   async getOrganizationLogs(
@@ -107,8 +112,9 @@ export class AuditService implements OnApplicationBootstrap {
     page = 1,
     limit = 10,
     filters?: AuditLogFilter,
+    nextToken?: string,
   ): Promise<PaginatedList<AuditLog>> {
-    return this.auditStorageAdapter.getOrganizationLogs(organizationId, page, limit, filters)
+    return this.auditStorageAdapter.getOrganizationLogs(organizationId, page, limit, filters, nextToken)
   }
 
   @Cron(CronExpression.EVERY_DAY_AT_2AM, {

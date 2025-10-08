@@ -59,6 +59,7 @@ type AuditAPIGetAllAuditLogsRequest struct {
 	limit      *float32
 	from       *time.Time
 	to         *time.Time
+	nextToken  *string
 }
 
 // Page number of the results
@@ -82,6 +83,12 @@ func (r AuditAPIGetAllAuditLogsRequest) From(from time.Time) AuditAPIGetAllAudit
 // To date (ISO 8601 format)
 func (r AuditAPIGetAllAuditLogsRequest) To(to time.Time) AuditAPIGetAllAuditLogsRequest {
 	r.to = &to
+	return r
+}
+
+// Token for cursor-based pagination. When provided, takes precedence over page parameter.
+func (r AuditAPIGetAllAuditLogsRequest) NextToken(nextToken string) AuditAPIGetAllAuditLogsRequest {
+	r.nextToken = &nextToken
 	return r
 }
 
@@ -141,6 +148,9 @@ func (a *AuditAPIService) GetAllAuditLogsExecute(r AuditAPIGetAllAuditLogsReques
 	}
 	if r.to != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "to", r.to, "form", "")
+	}
+	if r.nextToken != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "nextToken", r.nextToken, "form", "")
 	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
@@ -204,6 +214,7 @@ type AuditAPIGetOrganizationAuditLogsRequest struct {
 	limit          *float32
 	from           *time.Time
 	to             *time.Time
+	nextToken      *string
 }
 
 // Page number of the results
@@ -227,6 +238,12 @@ func (r AuditAPIGetOrganizationAuditLogsRequest) From(from time.Time) AuditAPIGe
 // To date (ISO 8601 format)
 func (r AuditAPIGetOrganizationAuditLogsRequest) To(to time.Time) AuditAPIGetOrganizationAuditLogsRequest {
 	r.to = &to
+	return r
+}
+
+// Token for cursor-based pagination. When provided, takes precedence over page parameter.
+func (r AuditAPIGetOrganizationAuditLogsRequest) NextToken(nextToken string) AuditAPIGetOrganizationAuditLogsRequest {
+	r.nextToken = &nextToken
 	return r
 }
 
@@ -289,6 +306,9 @@ func (a *AuditAPIService) GetOrganizationAuditLogsExecute(r AuditAPIGetOrganizat
 	}
 	if r.to != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "to", r.to, "form", "")
+	}
+	if r.nextToken != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "nextToken", r.nextToken, "form", "")
 	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}

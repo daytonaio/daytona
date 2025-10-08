@@ -19,4 +19,7 @@ export class PaginatedAuditLogsDto {
 
   @ApiProperty()
   totalPages: number
+
+  @ApiProperty({ required: false, description: 'Token for next page in cursor-based pagination' })
+  nextToken?: string
 }

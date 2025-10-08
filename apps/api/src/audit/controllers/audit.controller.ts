@@ -37,15 +37,21 @@ export class AuditController {
   })
   @RequiredSystemRole(SystemRole.ADMIN)
   async getAllLogs(@Query() query: ListAuditLogsQueryDto): Promise<PaginatedAuditLogsDto> {
-    const result = await this.auditService.getAllLogs(query.page, query.limit, {
-      from: query.from,
-      to: query.to,
-    })
+    const result = await this.auditService.getAllLogs(
+      query.page,
+      query.limit,
+      {
+        from: query.from,
+        to: query.to,
+      },
+      query.nextToken,
+    )
     return {
       items: result.items.map(AuditLogDto.fromAuditLog),
       total: result.total,
       page: result.page,
       totalPages: result.totalPages,
+      nextToken: result.nextToken,
     }
   }
 
@@ -69,15 +75,22 @@ export class AuditController {
     @Param('organizationId') organizationId: string,
     @Query() query: ListAuditLogsQueryDto,
   ): Promise<PaginatedAuditLogsDto> {
-    const result = await this.auditService.getOrganizationLogs(organizationId, query.page, query.limit, {
-      from: query.from,
-      to: query.to,
-    })
+    const result = await this.auditService.getOrganizationLogs(
+      organizationId,
+      query.page,
+      query.limit,
+      {
+        from: query.from,
+        to: query.to,
+      },
+      query.nextToken,
+    )
     return {
       items: result.items.map(AuditLogDto.fromAuditLog),
       total: result.total,
       page: result.page,
       totalPages: result.totalPages,
+      nextToken: result.nextToken,
     }
   }
 }
