@@ -335,7 +335,16 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
           await this.updateSandboxBackupState(sandbox.id, BackupState.PENDING)
           break
         }
-        // If still in progress or any other state, do nothing and wait for next sync
+        // If still in progress, check if it has been more than an hour and timeout if so
+        case BackupState.IN_PROGRESS: {
+          const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000)
+          if (sandbox.backupStartedAt && sandbox.backupStartedAt < oneHourAgo) {
+            await this.updateSandboxBackupState(sandbox.id, BackupState.NONE)
+            return
+          }
+          break
+        }
+        // If pending, do nothing and wait for next sync
       }
     } catch (error) {
       await this.updateSandboxBackupState(sandbox.id, BackupState.ERROR, fromAxiosError(error).message)
