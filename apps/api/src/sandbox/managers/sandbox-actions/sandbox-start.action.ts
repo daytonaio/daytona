@@ -403,6 +403,11 @@ export class SandboxStartAction extends SandboxAction {
     } else {
       // if sandbox has runner, start sandbox
       const runner = await this.runnerService.findOne(sandbox.runnerId)
+
+      if (runner.state !== RunnerState.READY) {
+        return DONT_SYNC_AGAIN
+      }
+
       const runnerAdapter = await this.runnerAdapterFactory.create(runner)
 
       let metadata: { [key: string]: string } | undefined = undefined
