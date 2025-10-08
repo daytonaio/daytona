@@ -915,7 +915,7 @@ export class SandboxController {
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
   @UseGuards(SandboxAccessGuard)
   @Audit({
-    action: AuditAction.CREATE,
+    action: AuditAction.CREATE_SSH_ACCESS,
     targetType: AuditTarget.SANDBOX,
     targetIdFromRequest: (req) => req.params.sandboxId,
     requestMetadata: {
@@ -956,7 +956,7 @@ export class SandboxController {
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
   @UseGuards(SandboxAccessGuard)
   @Audit({
-    action: AuditAction.DELETE,
+    action: AuditAction.REVOKE_SSH_ACCESS,
     targetType: AuditTarget.SANDBOX,
     targetIdFromRequest: (req) => req.params.sandboxId,
     requestMetadata: {
