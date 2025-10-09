@@ -6,12 +6,14 @@
 # Edit the async source and re-run this script.
 
 import time
-from typing import Dict, List, Optional
+from types import MethodType
+from typing import Callable, Dict, List, Optional
 
 from daytona_api_client import PaginatedSandboxes as PaginatedSandboxesDto
 from daytona_api_client import PortPreviewUrl
 from daytona_api_client import Sandbox as SandboxDto
-from daytona_api_client import SandboxApi, SshAccessDto, SshAccessValidationDto, ToolboxApi
+from daytona_api_client import SandboxApi, SshAccessDto, SshAccessValidationDto
+from daytona_toolbox_api_client import ApiClient, ComputerUseApi, FileSystemApi, GitApi, InfoApi, LspApi, ProcessApi
 from deprecated import deprecated
 from pydantic import ConfigDict, PrivateAttr
 
@@ -73,9 +75,10 @@ class Sandbox(SandboxDto):
     def __init__(
         self,
         sandbox_dto: SandboxDto,
+        api_client: ApiClient,
         sandbox_api: SandboxApi,
-        toolbox_api: ToolboxApi,
         code_toolbox: SandboxCodeToolbox,
+        get_proxy_toolbox_url: Callable[[], str],
     ):
         """Initialize a new Sandbox instance.
 
@@ -83,19 +86,42 @@ class Sandbox(SandboxDto):
             id (str): Unique identifier for the Sandbox.
             instance (SandboxInstance): The underlying Sandbox instance.
             sandbox_api (SandboxApi): API client for Sandbox operations.
-            toolbox_api (ToolboxApi): API client for toolbox operations.
+            api_client (ApiClient): API client for toolbox operations.
             code_toolbox (SandboxCodeToolbox): Language-specific toolbox implementation.
         """
         super().__init__(**sandbox_dto.model_dump())
         self.__process_sandbox_dto(sandbox_dto)
         self._sandbox_api = sandbox_api
-        self._toolbox_api = toolbox_api
         self._code_toolbox = code_toolbox
+        self._api_client = api_client
+        self._api_client.configuration.host = ""
 
-        self._fs = FileSystem(self.id, toolbox_api)
-        self._git = Git(self.id, toolbox_api)
-        self._process = Process(self.id, code_toolbox, toolbox_api, self.get_preview_link)
-        self._computer_use = ComputerUse(self.id, toolbox_api)
+        self._fs = FileSystem(FileSystemApi(api_client))
+        self._git = Git(GitApi(api_client))
+        self._process = Process(code_toolbox, ProcessApi(api_client), self.get_preview_link)
+        self._computer_use = ComputerUse(ComputerUseApi(api_client))
+        self._info_api = InfoApi(api_client)
+
+        og_call_api = api_client.call_api
+
+        def call_api_with_lazy_host_load(_, *args, **kwargs):
+            if api_client.configuration.host == "":
+                api_client.configuration.host = get_proxy_toolbox_url()
+                if not api_client.configuration.host.endswith("/"):
+                    api_client.configuration.host += "/"
+                api_client.configuration.host += self.id
+
+            url = str(args[1])
+            if url.startswith("/"):
+                url = api_client.configuration.host + url
+                args = (args[0], url, *args[2:])
+
+            return og_call_api(*args, **kwargs)
+
+        api_client.call_api = MethodType(
+            call_api_with_lazy_host_load,
+            api_client,
+        )
 
     @property
     def fs(self) -> FileSystem:
@@ -140,7 +166,7 @@ class Sandbox(SandboxDto):
             print(f"Sandbox user home: {user_home_dir}")
             ```
         """
-        response = self._toolbox_api.get_user_home_dir(self.id)
+        response = self._info_api.get_user_home_dir()
         return response.dir
 
     @deprecated(
@@ -165,7 +191,7 @@ class Sandbox(SandboxDto):
             print(f"Sandbox working directory: {work_dir}")
             ```
         """
-        response = self._toolbox_api.get_work_dir(self.id)
+        response = self._info_api.get_work_dir()
         return response.dir
 
     def create_lsp_server(self, language_id: LspLanguageId, path_to_project: str) -> LspServer:
@@ -190,8 +216,7 @@ class Sandbox(SandboxDto):
         return LspServer(
             language_id,
             path_to_project,
-            self._toolbox_api,
-            self.id,
+            LspApi(self._api_client),
         )
 
     @intercept_errors(message_prefix="Failed to set labels: ")

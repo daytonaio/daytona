@@ -14,6 +14,16 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// UploadFiles godoc
+//
+//	@Summary		Upload multiple files
+//	@Description	Upload multiple files with their destination paths
+//	@Tags			file-system
+//	@Accept			multipart/form-data
+//	@Success		200
+//	@Router			/files/bulk-upload [post]
+//
+//	@id				UploadFiles
 func UploadFiles(c *gin.Context) {
 	reader, err := c.Request.MultipartReader()
 	if err != nil {

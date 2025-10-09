@@ -10,6 +10,18 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// UploadFile godoc
+//
+//	@Summary		Upload a file
+//	@Description	Upload a file to the specified path
+//	@Tags			file-system
+//	@Accept			multipart/form-data
+//	@Param			path	query		string	true	"Destination path for the uploaded file"
+//	@Param			file	formData	file	true	"File to upload"
+//	@Success		200		{object}	gin.H
+//	@Router			/files/upload [post]
+//
+//	@id				UploadFile
 func UploadFile(c *gin.Context) {
 	path := c.Query("path")
 	if path == "" {
