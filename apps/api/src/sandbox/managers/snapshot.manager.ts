@@ -406,7 +406,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
   }
 
   async syncSnapshotState(snapshotId: string): Promise<void> {
-    const lockKey = `check-snapshot-state-lock-${snapshotId}`
+    const lockKey = `sync-snapshot-state-${snapshotId}`
     if (!(await this.redisLockProvider.lock(lockKey, 720))) {
       return
     }

@@ -42,7 +42,7 @@ export function parseDockerImage(imageName: string): DockerImageInfo {
   } as DockerImageInfo
 
   // Check for digest format first
-  let parts: string[]
+  let parts: string[] = []
   if (imageName.includes('@sha256:')) {
     const [nameWithoutDigest, digest] = imageName.split('@sha256:')
     if (digest) {
