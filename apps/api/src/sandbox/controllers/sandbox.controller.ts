@@ -534,15 +534,15 @@ export class SandboxController {
     return SandboxDto.fromSandbox(sandbox, '')
   }
 
-  @Put(':sandboxIdOrName/state')
+  @Put(':sandboxId/state')
   @UseInterceptors(ContentTypeInterceptor)
   @ApiOperation({
     summary: 'Update sandbox state',
     operationId: 'updateSandboxState',
   })
   @ApiParam({
-    name: 'sandboxIdOrName',
-    description: 'ID or name of the sandbox',
+    name: 'sandboxId',
+    description: 'ID of the sandbox',
     type: 'string',
   })
   @ApiResponse({
@@ -552,15 +552,10 @@ export class SandboxController {
   @UseGuards(RunnerAuthGuard)
   @UseGuards(SandboxAccessGuard)
   async updateSandboxState(
-    @AuthContext() authContext: OrganizationAuthContext,
-    @Param('sandboxIdOrName') sandboxIdOrName: string,
+    @Param('sandboxId') sandboxId: string,
     @Body() updateStateDto: UpdateSandboxStateDto,
   ): Promise<void> {
-    await this.sandboxService.updateStateAndDesiredState(
-      sandboxIdOrName,
-      updateStateDto.state,
-      authContext.organizationId,
-    )
+    await this.sandboxService.updateStateAndDesiredState(sandboxId, updateStateDto.state)
   }
 
   @Post(':sandboxIdOrName/backup')

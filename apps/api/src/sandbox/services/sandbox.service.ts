@@ -1175,8 +1175,14 @@ export class SandboxService {
     return sandbox
   }
 
-  async updateStateAndDesiredState(sandboxId: string, newState: SandboxState, organizationId?: string): Promise<void> {
-    const sandbox = await this.findOneByIdOrName(sandboxId, organizationId)
+  async updateStateAndDesiredState(sandboxId: string, newState: SandboxState): Promise<void> {
+    const sandbox = await this.sandboxRepository.findOne({
+      where: { id: sandboxId },
+    })
+
+    if (!sandbox) {
+      throw new NotFoundException(`Sandbox with ID ${sandboxId} not found`)
+    }
 
     if (sandbox.state === newState) {
       this.logger.debug(`Sandbox ${sandboxId} is already in state ${newState}`)
