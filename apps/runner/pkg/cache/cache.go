@@ -21,14 +21,23 @@ type StatesCache struct {
 var statesCache *StatesCache
 
 func GetStatesCache(cacheRetentionDays int) *StatesCache {
-	if statesCache == nil {
-		statesCache = &StatesCache{
-			ICache:             common_cache.NewMapCache[models.CachedStates](),
-			cacheRetentionDays: cacheRetentionDays,
-		}
+	if cacheRetentionDays <= 0 {
+		cacheRetentionDays = 7
 	}
 
-	return statesCache
+	if statesCache != nil {
+		if statesCache.cacheRetentionDays != cacheRetentionDays {
+			statesCache.cacheRetentionDays = cacheRetentionDays
+		}
+
+		return statesCache
+	}
+
+	return &StatesCache{
+		ICache:             common_cache.NewMapCache[models.CachedStates](),
+		cacheRetentionDays: cacheRetentionDays,
+	}
+
 }
 
 func (sc *StatesCache) SetSandboxState(ctx context.Context, sandboxId string, state enums.SandboxState) {
