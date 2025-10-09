@@ -19,6 +19,8 @@ import { RegistryType } from './../../docker-registry/enums/registry-type.enum'
 import { parseDockerImage } from '../../common/utils/docker-image.util'
 import axios from 'axios'
 
+const timeoutMs = 3000
+
 @Injectable()
 @ApiOAuth2(['openid', 'profile', 'email'])
 export class DockerRegistryService {
@@ -357,7 +359,7 @@ export class DockerRegistryService {
           Authorization: `Basic ${encodedCredentials}`,
         },
         validateStatus: (status) => status < 500,
-        timeout: 30000,
+        timeout: timeoutMs,
       })
 
       if (response.status === 200) {
@@ -443,7 +445,7 @@ export class DockerRegistryService {
         url: manifestUrl,
         headers,
         validateStatus: (status) => status < 500,
-        timeout: 30000,
+        timeout: timeoutMs,
       })
 
       if (manifestResponse.status >= 300) {
@@ -481,7 +483,7 @@ export class DockerRegistryService {
           url: platformManifestUrl,
           headers,
           validateStatus: (status) => status < 500,
-          timeout: 30000,
+          timeout: timeoutMs,
         })
 
         if (platformResponse.status >= 300) {
@@ -531,7 +533,7 @@ export class DockerRegistryService {
         url: configUrl,
         headers: configHeaders,
         validateStatus: (status) => status < 500,
-        timeout: 30000,
+        timeout: timeoutMs,
       })
 
       if (configResponse.status >= 300) {
@@ -582,7 +584,7 @@ export class DockerRegistryService {
           Authorization: `Basic ${encodedCredentials}`,
         },
         validateStatus: (status) => status < 500,
-        timeout: 30000,
+        timeout: timeoutMs,
       })
 
       if (tagsResponse.status === 404) {
@@ -620,7 +622,7 @@ export class DockerRegistryService {
               Accept: 'application/vnd.docker.distribution.manifest.v2+json',
             },
             validateStatus: (status) => status < 500,
-            timeout: 30000,
+            timeout: timeoutMs,
           })
 
           if (manifestResponse.status >= 300) {
@@ -644,7 +646,7 @@ export class DockerRegistryService {
               Authorization: `Basic ${encodedCredentials}`,
             },
             validateStatus: (status) => status < 500,
-            timeout: 30000,
+            timeout: timeoutMs,
           })
 
           if (deleteResponse.status < 300) {
@@ -699,7 +701,7 @@ export class DockerRegistryService {
           Accept: 'application/vnd.docker.distribution.manifest.v2+json',
         },
         validateStatus: (status) => status < 500,
-        timeout: 30000,
+        timeout: timeoutMs,
       })
 
       if (manifestResponse.status >= 300) {
@@ -723,7 +725,7 @@ export class DockerRegistryService {
           Authorization: `Basic ${encodedCredentials}`,
         },
         validateStatus: (status) => status < 500,
-        timeout: 30000,
+        timeout: timeoutMs,
       })
 
       if (deleteResponse.status < 300) {
