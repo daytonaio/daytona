@@ -110,15 +110,15 @@ export function getColumns({
       enableHiding: false,
     },
     {
-      id: 'id',
+      id: 'name',
       header: ({ column }) => {
-        return <SortableHeader column={column} label="ID" />
+        return <SortableHeader column={column} label="Name" />
       },
-      accessorKey: 'id',
+      accessorKey: 'name',
       cell: ({ row }) => {
         return (
           <div className=" w-full truncate">
-            <span>{row.original.id}</span>
+            <span>{row.original.name}</span>
           </div>
         )
       },
