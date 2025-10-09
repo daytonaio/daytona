@@ -619,7 +619,7 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {number} [page] Page number of the results
      * @param {number} [limit] Number of results per page
-     * @param {string} [id] Filter by partial ID match
+     * @param {string} [name] Filter by partial name match
      * @param {string} [labels] JSON encoded labels to filter by
      * @param {boolean} [includeErroredDeleted] Include results with errored state and deleted desired state
      * @param {Array<ListSandboxesPaginatedStatesEnum>} [states] List of states to filter by
@@ -642,7 +642,7 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
       xDaytonaOrganizationID?: string,
       page?: number,
       limit?: number,
-      id?: string,
+      name?: string,
       labels?: string,
       includeErroredDeleted?: boolean,
       states?: Array<ListSandboxesPaginatedStatesEnum>,
@@ -686,8 +686,8 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
         localVarQueryParameter['limit'] = limit
       }
 
-      if (id !== undefined) {
-        localVarQueryParameter['id'] = id
+      if (name !== undefined) {
+        localVarQueryParameter['name'] = name
       }
 
       if (labels !== undefined) {
@@ -1627,7 +1627,7 @@ export const SandboxApiFp = function (configuration?: Configuration) {
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {number} [page] Page number of the results
      * @param {number} [limit] Number of results per page
-     * @param {string} [id] Filter by partial ID match
+     * @param {string} [name] Filter by partial name match
      * @param {string} [labels] JSON encoded labels to filter by
      * @param {boolean} [includeErroredDeleted] Include results with errored state and deleted desired state
      * @param {Array<ListSandboxesPaginatedStatesEnum>} [states] List of states to filter by
@@ -1650,7 +1650,7 @@ export const SandboxApiFp = function (configuration?: Configuration) {
       xDaytonaOrganizationID?: string,
       page?: number,
       limit?: number,
-      id?: string,
+      name?: string,
       labels?: string,
       includeErroredDeleted?: boolean,
       states?: Array<ListSandboxesPaginatedStatesEnum>,
@@ -1672,7 +1672,7 @@ export const SandboxApiFp = function (configuration?: Configuration) {
         xDaytonaOrganizationID,
         page,
         limit,
-        id,
+        name,
         labels,
         includeErroredDeleted,
         states,
@@ -2222,7 +2222,7 @@ export const SandboxApiFactory = function (configuration?: Configuration, basePa
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {number} [page] Page number of the results
      * @param {number} [limit] Number of results per page
-     * @param {string} [id] Filter by partial ID match
+     * @param {string} [name] Filter by partial name match
      * @param {string} [labels] JSON encoded labels to filter by
      * @param {boolean} [includeErroredDeleted] Include results with errored state and deleted desired state
      * @param {Array<ListSandboxesPaginatedStatesEnum>} [states] List of states to filter by
@@ -2245,7 +2245,7 @@ export const SandboxApiFactory = function (configuration?: Configuration, basePa
       xDaytonaOrganizationID?: string,
       page?: number,
       limit?: number,
-      id?: string,
+      name?: string,
       labels?: string,
       includeErroredDeleted?: boolean,
       states?: Array<ListSandboxesPaginatedStatesEnum>,
@@ -2268,7 +2268,7 @@ export const SandboxApiFactory = function (configuration?: Configuration, basePa
           xDaytonaOrganizationID,
           page,
           limit,
-          id,
+          name,
           labels,
           includeErroredDeleted,
           states,
@@ -2690,7 +2690,7 @@ export class SandboxApi extends BaseAPI {
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {number} [page] Page number of the results
    * @param {number} [limit] Number of results per page
-   * @param {string} [id] Filter by partial ID match
+   * @param {string} [name] Filter by partial name match
    * @param {string} [labels] JSON encoded labels to filter by
    * @param {boolean} [includeErroredDeleted] Include results with errored state and deleted desired state
    * @param {Array<ListSandboxesPaginatedStatesEnum>} [states] List of states to filter by
@@ -2714,7 +2714,7 @@ export class SandboxApi extends BaseAPI {
     xDaytonaOrganizationID?: string,
     page?: number,
     limit?: number,
-    id?: string,
+    name?: string,
     labels?: string,
     includeErroredDeleted?: boolean,
     states?: Array<ListSandboxesPaginatedStatesEnum>,
@@ -2737,7 +2737,7 @@ export class SandboxApi extends BaseAPI {
         xDaytonaOrganizationID,
         page,
         limit,
-        id,
+        name,
         labels,
         includeErroredDeleted,
         states,
@@ -2977,7 +2977,7 @@ export type ListSandboxesPaginatedStatesEnum =
  * @export
  */
 export const ListSandboxesPaginatedSortEnum = {
-  ID: 'id',
+  NAME: 'name',
   STATE: 'state',
   SNAPSHOT: 'snapshot',
   REGION: 'region',

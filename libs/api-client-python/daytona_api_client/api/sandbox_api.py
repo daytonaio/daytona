@@ -3181,7 +3181,7 @@ class SandboxApi:
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         page: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Page number of the results")] = None,
         limit: Annotated[Optional[Union[Annotated[float, Field(le=200, strict=True, ge=1)], Annotated[int, Field(le=200, strict=True, ge=1)]]], Field(description="Number of results per page")] = None,
-        id: Annotated[Optional[StrictStr], Field(description="Filter by partial ID match")] = None,
+        name: Annotated[Optional[StrictStr], Field(description="Filter by partial name match")] = None,
         labels: Annotated[Optional[StrictStr], Field(description="JSON encoded labels to filter by")] = None,
         include_errored_deleted: Annotated[Optional[StrictBool], Field(description="Include results with errored state and deleted desired state")] = None,
         states: Annotated[Optional[List[StrictStr]], Field(description="List of states to filter by")] = None,
@@ -3219,8 +3219,8 @@ class SandboxApi:
         :type page: float
         :param limit: Number of results per page
         :type limit: float
-        :param id: Filter by partial ID match
-        :type id: str
+        :param name: Filter by partial name match
+        :type name: str
         :param labels: JSON encoded labels to filter by
         :type labels: str
         :param include_errored_deleted: Include results with errored state and deleted desired state
@@ -3277,7 +3277,7 @@ class SandboxApi:
             x_daytona_organization_id=x_daytona_organization_id,
             page=page,
             limit=limit,
-            id=id,
+            name=name,
             labels=labels,
             include_errored_deleted=include_errored_deleted,
             states=states,
@@ -3319,7 +3319,7 @@ class SandboxApi:
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         page: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Page number of the results")] = None,
         limit: Annotated[Optional[Union[Annotated[float, Field(le=200, strict=True, ge=1)], Annotated[int, Field(le=200, strict=True, ge=1)]]], Field(description="Number of results per page")] = None,
-        id: Annotated[Optional[StrictStr], Field(description="Filter by partial ID match")] = None,
+        name: Annotated[Optional[StrictStr], Field(description="Filter by partial name match")] = None,
         labels: Annotated[Optional[StrictStr], Field(description="JSON encoded labels to filter by")] = None,
         include_errored_deleted: Annotated[Optional[StrictBool], Field(description="Include results with errored state and deleted desired state")] = None,
         states: Annotated[Optional[List[StrictStr]], Field(description="List of states to filter by")] = None,
@@ -3357,8 +3357,8 @@ class SandboxApi:
         :type page: float
         :param limit: Number of results per page
         :type limit: float
-        :param id: Filter by partial ID match
-        :type id: str
+        :param name: Filter by partial name match
+        :type name: str
         :param labels: JSON encoded labels to filter by
         :type labels: str
         :param include_errored_deleted: Include results with errored state and deleted desired state
@@ -3415,7 +3415,7 @@ class SandboxApi:
             x_daytona_organization_id=x_daytona_organization_id,
             page=page,
             limit=limit,
-            id=id,
+            name=name,
             labels=labels,
             include_errored_deleted=include_errored_deleted,
             states=states,
@@ -3457,7 +3457,7 @@ class SandboxApi:
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         page: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Page number of the results")] = None,
         limit: Annotated[Optional[Union[Annotated[float, Field(le=200, strict=True, ge=1)], Annotated[int, Field(le=200, strict=True, ge=1)]]], Field(description="Number of results per page")] = None,
-        id: Annotated[Optional[StrictStr], Field(description="Filter by partial ID match")] = None,
+        name: Annotated[Optional[StrictStr], Field(description="Filter by partial name match")] = None,
         labels: Annotated[Optional[StrictStr], Field(description="JSON encoded labels to filter by")] = None,
         include_errored_deleted: Annotated[Optional[StrictBool], Field(description="Include results with errored state and deleted desired state")] = None,
         states: Annotated[Optional[List[StrictStr]], Field(description="List of states to filter by")] = None,
@@ -3495,8 +3495,8 @@ class SandboxApi:
         :type page: float
         :param limit: Number of results per page
         :type limit: float
-        :param id: Filter by partial ID match
-        :type id: str
+        :param name: Filter by partial name match
+        :type name: str
         :param labels: JSON encoded labels to filter by
         :type labels: str
         :param include_errored_deleted: Include results with errored state and deleted desired state
@@ -3553,7 +3553,7 @@ class SandboxApi:
             x_daytona_organization_id=x_daytona_organization_id,
             page=page,
             limit=limit,
-            id=id,
+            name=name,
             labels=labels,
             include_errored_deleted=include_errored_deleted,
             states=states,
@@ -3590,7 +3590,7 @@ class SandboxApi:
         x_daytona_organization_id,
         page,
         limit,
-        id,
+        name,
         labels,
         include_errored_deleted,
         states,
@@ -3639,9 +3639,9 @@ class SandboxApi:
             
             _query_params.append(('limit', limit))
             
-        if id is not None:
+        if name is not None:
             
-            _query_params.append(('id', id))
+            _query_params.append(('name', name))
             
         if labels is not None:
             

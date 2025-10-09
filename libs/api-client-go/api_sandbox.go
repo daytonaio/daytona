@@ -1616,7 +1616,7 @@ type SandboxAPIListSandboxesPaginatedRequest struct {
 	xDaytonaOrganizationID *string
 	page                   *float32
 	limit                  *float32
-	id                     *string
+	name                   *string
 	labels                 *string
 	includeErroredDeleted  *bool
 	states                 *[]string
@@ -1652,9 +1652,9 @@ func (r SandboxAPIListSandboxesPaginatedRequest) Limit(limit float32) SandboxAPI
 	return r
 }
 
-// Filter by partial ID match
-func (r SandboxAPIListSandboxesPaginatedRequest) Id(id string) SandboxAPIListSandboxesPaginatedRequest {
-	r.id = &id
+// Filter by partial name match
+func (r SandboxAPIListSandboxesPaginatedRequest) Name(name string) SandboxAPIListSandboxesPaginatedRequest {
+	r.name = &name
 	return r
 }
 
@@ -1799,8 +1799,8 @@ func (a *SandboxAPIService) ListSandboxesPaginatedExecute(r SandboxAPIListSandbo
 		var defaultValue float32 = 100
 		r.limit = &defaultValue
 	}
-	if r.id != nil {
-		parameterAddToHeaderOrQuery(localVarQueryParams, "id", r.id, "form", "")
+	if r.name != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "name", r.name, "form", "")
 	}
 	if r.labels != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "labels", r.labels, "form", "")

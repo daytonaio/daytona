@@ -1305,10 +1305,10 @@ paths:
             minimum: 1
             type: number
           style: form
-        - description: Filter by partial ID match
+        - description: Filter by partial name match
           explode: true
           in: query
-          name: id
+          name: name
           required: false
           schema:
             example: abc123
@@ -1460,7 +1460,7 @@ paths:
           schema:
             default: createdAt
             enum:
-              - id
+              - name
               - state
               - snapshot
               - region
