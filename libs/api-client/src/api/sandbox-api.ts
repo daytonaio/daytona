@@ -1176,25 +1176,25 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
     /**
      *
      * @summary Update sandbox state
-     * @param {string} sandboxIdOrName ID or name of the sandbox
+     * @param {string} sandboxId ID of the sandbox
      * @param {UpdateSandboxStateDto} updateSandboxStateDto
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     updateSandboxState: async (
-      sandboxIdOrName: string,
+      sandboxId: string,
       updateSandboxStateDto: UpdateSandboxStateDto,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
-      // verify required parameter 'sandboxIdOrName' is not null or undefined
-      assertParamExists('updateSandboxState', 'sandboxIdOrName', sandboxIdOrName)
+      // verify required parameter 'sandboxId' is not null or undefined
+      assertParamExists('updateSandboxState', 'sandboxId', sandboxId)
       // verify required parameter 'updateSandboxStateDto' is not null or undefined
       assertParamExists('updateSandboxState', 'updateSandboxStateDto', updateSandboxStateDto)
-      const localVarPath = `/sandbox/{sandboxIdOrName}/state`.replace(
-        `{${'sandboxIdOrName'}}`,
-        encodeURIComponent(String(sandboxIdOrName)),
+      const localVarPath = `/sandbox/{sandboxId}/state`.replace(
+        `{${'sandboxId'}}`,
+        encodeURIComponent(String(sandboxId)),
       )
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
@@ -1954,20 +1954,20 @@ export const SandboxApiFp = function (configuration?: Configuration) {
     /**
      *
      * @summary Update sandbox state
-     * @param {string} sandboxIdOrName ID or name of the sandbox
+     * @param {string} sandboxId ID of the sandbox
      * @param {UpdateSandboxStateDto} updateSandboxStateDto
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async updateSandboxState(
-      sandboxIdOrName: string,
+      sandboxId: string,
       updateSandboxStateDto: UpdateSandboxStateDto,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.updateSandboxState(
-        sandboxIdOrName,
+        sandboxId,
         updateSandboxStateDto,
         xDaytonaOrganizationID,
         options,
@@ -2439,20 +2439,20 @@ export const SandboxApiFactory = function (configuration?: Configuration, basePa
     /**
      *
      * @summary Update sandbox state
-     * @param {string} sandboxIdOrName ID or name of the sandbox
+     * @param {string} sandboxId ID of the sandbox
      * @param {UpdateSandboxStateDto} updateSandboxStateDto
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     updateSandboxState(
-      sandboxIdOrName: string,
+      sandboxId: string,
       updateSandboxStateDto: UpdateSandboxStateDto,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<void> {
       return localVarFp
-        .updateSandboxState(sandboxIdOrName, updateSandboxStateDto, xDaytonaOrganizationID, options)
+        .updateSandboxState(sandboxId, updateSandboxStateDto, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
@@ -2917,7 +2917,7 @@ export class SandboxApi extends BaseAPI {
   /**
    *
    * @summary Update sandbox state
-   * @param {string} sandboxIdOrName ID or name of the sandbox
+   * @param {string} sandboxId ID of the sandbox
    * @param {UpdateSandboxStateDto} updateSandboxStateDto
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
@@ -2925,13 +2925,13 @@ export class SandboxApi extends BaseAPI {
    * @memberof SandboxApi
    */
   public updateSandboxState(
-    sandboxIdOrName: string,
+    sandboxId: string,
     updateSandboxStateDto: UpdateSandboxStateDto,
     xDaytonaOrganizationID?: string,
     options?: RawAxiosRequestConfig,
   ) {
     return SandboxApiFp(this.configuration)
-      .updateSandboxState(sandboxIdOrName, updateSandboxStateDto, xDaytonaOrganizationID, options)
+      .updateSandboxState(sandboxId, updateSandboxStateDto, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 

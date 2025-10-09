@@ -6061,7 +6061,7 @@ class SandboxApi:
     @validate_call
     async def update_sandbox_state(
         self,
-        sandbox_id_or_name: Annotated[StrictStr, Field(description="ID or name of the sandbox")],
+        sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
         update_sandbox_state_dto: UpdateSandboxStateDto,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
@@ -6080,8 +6080,8 @@ class SandboxApi:
         """Update sandbox state
 
 
-        :param sandbox_id_or_name: ID or name of the sandbox (required)
-        :type sandbox_id_or_name: str
+        :param sandbox_id: ID of the sandbox (required)
+        :type sandbox_id: str
         :param update_sandbox_state_dto: (required)
         :type update_sandbox_state_dto: UpdateSandboxStateDto
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -6109,7 +6109,7 @@ class SandboxApi:
         """ # noqa: E501
 
         _param = self._update_sandbox_state_serialize(
-            sandbox_id_or_name=sandbox_id_or_name,
+            sandbox_id=sandbox_id,
             update_sandbox_state_dto=update_sandbox_state_dto,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -6135,7 +6135,7 @@ class SandboxApi:
     @validate_call
     async def update_sandbox_state_with_http_info(
         self,
-        sandbox_id_or_name: Annotated[StrictStr, Field(description="ID or name of the sandbox")],
+        sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
         update_sandbox_state_dto: UpdateSandboxStateDto,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
@@ -6154,8 +6154,8 @@ class SandboxApi:
         """Update sandbox state
 
 
-        :param sandbox_id_or_name: ID or name of the sandbox (required)
-        :type sandbox_id_or_name: str
+        :param sandbox_id: ID of the sandbox (required)
+        :type sandbox_id: str
         :param update_sandbox_state_dto: (required)
         :type update_sandbox_state_dto: UpdateSandboxStateDto
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -6183,7 +6183,7 @@ class SandboxApi:
         """ # noqa: E501
 
         _param = self._update_sandbox_state_serialize(
-            sandbox_id_or_name=sandbox_id_or_name,
+            sandbox_id=sandbox_id,
             update_sandbox_state_dto=update_sandbox_state_dto,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -6209,7 +6209,7 @@ class SandboxApi:
     @validate_call
     async def update_sandbox_state_without_preload_content(
         self,
-        sandbox_id_or_name: Annotated[StrictStr, Field(description="ID or name of the sandbox")],
+        sandbox_id: Annotated[StrictStr, Field(description="ID of the sandbox")],
         update_sandbox_state_dto: UpdateSandboxStateDto,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
@@ -6228,8 +6228,8 @@ class SandboxApi:
         """Update sandbox state
 
 
-        :param sandbox_id_or_name: ID or name of the sandbox (required)
-        :type sandbox_id_or_name: str
+        :param sandbox_id: ID of the sandbox (required)
+        :type sandbox_id: str
         :param update_sandbox_state_dto: (required)
         :type update_sandbox_state_dto: UpdateSandboxStateDto
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -6257,7 +6257,7 @@ class SandboxApi:
         """ # noqa: E501
 
         _param = self._update_sandbox_state_serialize(
-            sandbox_id_or_name=sandbox_id_or_name,
+            sandbox_id=sandbox_id,
             update_sandbox_state_dto=update_sandbox_state_dto,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -6278,7 +6278,7 @@ class SandboxApi:
 
     def _update_sandbox_state_serialize(
         self,
-        sandbox_id_or_name,
+        sandbox_id,
         update_sandbox_state_dto,
         x_daytona_organization_id,
         _request_auth,
@@ -6302,8 +6302,8 @@ class SandboxApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
-        if sandbox_id_or_name is not None:
-            _path_params['sandboxIdOrName'] = sandbox_id_or_name
+        if sandbox_id is not None:
+            _path_params['sandboxId'] = sandbox_id
         # process the query parameters
         # process the header parameters
         if x_daytona_organization_id is not None:
@@ -6337,7 +6337,7 @@ class SandboxApi:
 
         return self.api_client.param_serialize(
             method='PUT',
-            resource_path='/sandbox/{sandboxIdOrName}/state',
+            resource_path='/sandbox/{sandboxId}/state',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,

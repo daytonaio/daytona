@@ -1766,7 +1766,7 @@ paths:
       summary: Replace sandbox labels
       tags:
         - sandbox
-  /sandbox/{sandboxIdOrName}/state:
+  /sandbox/{sandboxId}/state:
     put:
       operationId: updateSandboxState
       parameters:
@@ -1778,10 +1778,10 @@ paths:
           schema:
             type: string
           style: simple
-        - description: ID or name of the sandbox
+        - description: ID of the sandbox
           explode: false
           in: path
-          name: sandboxIdOrName
+          name: sandboxId
           required: true
           schema:
             type: string

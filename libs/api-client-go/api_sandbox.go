@@ -287,10 +287,10 @@ type SandboxAPI interface {
 		UpdateSandboxState Update sandbox state
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param sandboxIdOrName ID or name of the sandbox
+		@param sandboxId ID of the sandbox
 		@return SandboxAPIUpdateSandboxStateRequest
 	*/
-	UpdateSandboxState(ctx context.Context, sandboxIdOrName string) SandboxAPIUpdateSandboxStateRequest
+	UpdateSandboxState(ctx context.Context, sandboxId string) SandboxAPIUpdateSandboxStateRequest
 
 	// UpdateSandboxStateExecute executes the request
 	UpdateSandboxStateExecute(r SandboxAPIUpdateSandboxStateRequest) (*http.Response, error)
@@ -2873,7 +2873,7 @@ func (a *SandboxAPIService) UpdatePublicStatusExecute(r SandboxAPIUpdatePublicSt
 type SandboxAPIUpdateSandboxStateRequest struct {
 	ctx                    context.Context
 	ApiService             SandboxAPI
-	sandboxIdOrName        string
+	sandboxId              string
 	updateSandboxStateDto  *UpdateSandboxStateDto
 	xDaytonaOrganizationID *string
 }
@@ -2897,14 +2897,14 @@ func (r SandboxAPIUpdateSandboxStateRequest) Execute() (*http.Response, error) {
 UpdateSandboxState Update sandbox state
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxIdOrName ID or name of the sandbox
+	@param sandboxId ID of the sandbox
 	@return SandboxAPIUpdateSandboxStateRequest
 */
-func (a *SandboxAPIService) UpdateSandboxState(ctx context.Context, sandboxIdOrName string) SandboxAPIUpdateSandboxStateRequest {
+func (a *SandboxAPIService) UpdateSandboxState(ctx context.Context, sandboxId string) SandboxAPIUpdateSandboxStateRequest {
 	return SandboxAPIUpdateSandboxStateRequest{
-		ApiService:      a,
-		ctx:             ctx,
-		sandboxIdOrName: sandboxIdOrName,
+		ApiService: a,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
@@ -2921,8 +2921,8 @@ func (a *SandboxAPIService) UpdateSandboxStateExecute(r SandboxAPIUpdateSandboxS
 		return nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/sandbox/{sandboxIdOrName}/state"
-	localVarPath = strings.Replace(localVarPath, "{"+"sandboxIdOrName"+"}", url.PathEscape(parameterValueToString(r.sandboxIdOrName, "sandboxIdOrName")), -1)
+	localVarPath := localBasePath + "/sandbox/{sandboxId}/state"
+	localVarPath = strings.Replace(localVarPath, "{"+"sandboxId"+"}", url.PathEscape(parameterValueToString(r.sandboxId, "sandboxId")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
