@@ -843,7 +843,7 @@ export class SandboxService {
       !sandbox ||
       (!returnDestroyed &&
         [SandboxState.ERROR, SandboxState.BUILD_FAILED].includes(sandbox.state) &&
-        sandbox.desiredState !== SandboxDesiredState.DESTROYED)
+        sandbox.desiredState === SandboxDesiredState.DESTROYED)
     ) {
       throw new NotFoundException(`Sandbox with ID or name ${sandboxIdOrName} not found`)
     }
@@ -863,7 +863,7 @@ export class SandboxService {
       !sandbox ||
       (!returnDestroyed &&
         [SandboxState.ERROR, SandboxState.BUILD_FAILED].includes(sandbox.state) &&
-        sandbox.desiredState !== SandboxDesiredState.DESTROYED)
+        sandbox.desiredState === SandboxDesiredState.DESTROYED)
     ) {
       throw new NotFoundException(`Sandbox with ID ${sandboxId} not found`)
     }
