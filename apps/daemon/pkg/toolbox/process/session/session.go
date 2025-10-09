@@ -12,6 +12,8 @@ import (
 	"os/exec"
 	"strconv"
 	"strings"
+	"syscall"
+	"time"
 
 	"github.com/daytonaio/daemon/internal/util"
 	"github.com/daytonaio/daemon/pkg/common"
@@ -27,6 +29,11 @@ func (s *SessionController) CreateSession(c *gin.Context) {
 
 	cmd := exec.CommandContext(ctx, common.GetShell())
 	cmd.Env = os.Environ()
+
+	// Set up a new process group so we can kill all child processes when the session is deleted
+	cmd.SysProcAttr = &syscall.SysProcAttr{
+		Setpgid: true,
+	}
 
 	// for backward compatibility (only sdk clients before 0.103.X), we use the home directory as the default directory
 	sdkVersion := util.ExtractSdkVersionFromHeader(c.Request.Header)
@@ -99,6 +106,39 @@ func (s *SessionController) DeleteSession(c *gin.Context) {
 	if !ok {
 		c.AbortWithError(http.StatusNotFound, errors.New("session not found"))
 		return
+	}
+
+	if session.cmd != nil && session.cmd.Process != nil {
+		pid := session.cmd.Process.Pid
+
+		err := syscall.Kill(-pid, syscall.SIGTERM)
+		if err != nil {
+			log.Warnf("SIGTERM failed for session %s, trying SIGKILL: %v", sessionId, err)
+			if err := syscall.Kill(-pid, syscall.SIGKILL); err != nil {
+				log.Warnf("Failed to SIGKILL session %s: %v", sessionId, err)
+			}
+		} else {
+			const gracePeriod = 10
+			terminated := false
+
+			// Check every 100ms if process group terminated (gracePeriod is in seconds)
+			for i := 0; i < gracePeriod*10; i++ {
+				if syscall.Kill(-pid, 0) != nil {
+					log.Debugf("Session %s terminated gracefully", sessionId)
+					terminated = true
+					break
+				}
+				time.Sleep(100 * time.Millisecond)
+			}
+
+			// Final check and SIGKILL if still alive
+			if !terminated && syscall.Kill(-pid, 0) == nil {
+				log.Debugf("Session %s timeout, sending SIGKILL", sessionId)
+				if err := syscall.Kill(-pid, syscall.SIGKILL); err != nil {
+					log.Warnf("Failed to SIGKILL session %s: %v", sessionId, err)
+				}
+			}
+		}
 	}
 
 	session.cancel()
