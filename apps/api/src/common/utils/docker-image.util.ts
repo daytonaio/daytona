@@ -51,10 +51,13 @@ export function parseDockerImage(imageName: string): DockerImageInfo {
     // Split remaining parts
     parts = nameWithoutDigest.split('/')
   } else {
-    // Handle tag format
-    const [nameWithoutTag, tag] = imageName.split(':')
-    if (tag) {
-      result.tag = tag
+    const lastSlashIndex = imageName.lastIndexOf('/')
+    const lastColonIndex = imageName.lastIndexOf(':')
+    const hasTag = lastColonIndex > lastSlashIndex
+
+    const nameWithoutTag = hasTag ? imageName.substring(0, lastColonIndex) : imageName
+    if (hasTag) {
+      result.tag = imageName.substring(lastColonIndex + 1)
     }
     // Split remaining parts
     parts = nameWithoutTag.split('/')
