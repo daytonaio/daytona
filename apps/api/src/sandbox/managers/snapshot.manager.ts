@@ -944,24 +944,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
         } else {
           snapshot.entrypoint = [snapshotInfoResponse.entrypoint]
         }
-        // Use the cmd if it is present
-        if (snapshotInfoResponse.cmd) {
-          if (Array.isArray(snapshotInfoResponse.cmd)) {
-            snapshot.cmd = snapshotInfoResponse.cmd
-          } else {
-            snapshot.cmd = [snapshotInfoResponse.cmd]
-          }
-        }
       } else {
-        // If entrypoint is not present, set it from cmd
-        if (Array.isArray(snapshotInfoResponse.cmd)) {
-          snapshot.entrypoint = snapshotInfoResponse.cmd
-        } else {
-          snapshot.entrypoint = [snapshotInfoResponse.cmd]
-        }
-      }
-
-      if (!snapshot.entrypoint && !snapshot.cmd) {
         snapshot.entrypoint = ['sleep', 'infinity']
       }
     }
