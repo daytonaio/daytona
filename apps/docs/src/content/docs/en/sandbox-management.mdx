@@ -28,7 +28,7 @@ If you want to prolong the auto-stop interval, you can [set the auto-stop interv
 
 ### Basic Sandbox Creation
 
-The Daytona SDK provides methods to create Sandboxes with default configurations, specific languages, or custom labels using Python and TypeScript.
+The Daytona SDK provides methods to create Sandboxes with default configurations, specific languages, custom names, or custom labels using Python and TypeScript.
 
 <Tabs>
   <TabItem label="Python" icon="seti:python">
@@ -44,6 +44,11 @@ The Daytona SDK provides methods to create Sandboxes with default configurations
     # Create a Sandbox with specific language
 
     params = CreateSandboxFromSnapshotParams(language="python")
+    sandbox = daytona.create(params)
+
+    # Create a Sandbox with a custom name
+
+    params = CreateSandboxFromSnapshotParams(name="my-sandbox")
     sandbox = daytona.create(params)
 
     # Create a Sandbox with custom labels
@@ -67,12 +72,19 @@ The Daytona SDK provides methods to create Sandboxes with default configurations
     // Create a Sandbox with specific language
     const sandbox = await daytona.create({ language: 'typescript' });
 
+    // Create a Sandbox with a custom name
+    const sandbox = await daytona.create({ name: 'my-sandbox' });
+
     // Create a Sandbox with custom labels
     const sandbox = await daytona.create({ labels: { SOME_LABEL: 'my-label' } });
     ```
 
   </TabItem>
 </Tabs>
+
+:::note
+**Sandbox Names**: You can specify a custom name for your sandbox using the `name` parameter. If not provided, the sandbox ID will be used as the name. Sandbox names are reusable - once a sandbox with a specific name is destroyed, that name becomes available for use again.
+:::
 
 See: [create (Python SDK)](/docs/en/python-sdk/sync/daytona#daytonacreate), [create (TypeScript SDK)](/docs/en/typescript-sdk/daytona#create)
 

@@ -245,7 +245,10 @@ console.log(`Sandbox state: ${sandbox.state}`);
 #### list()
 
 ```ts
-list(labels?: Record<string, string>, page?: number, limit?: number): Promise<PaginatedSandboxes>
+list(
+   labels?: Record<string, string>, 
+   page?: number, 
+limit?: number): Promise<PaginatedSandboxes>
 ```
 
 Returns paginated list of Sandboxes filtered by labels.
@@ -346,6 +349,7 @@ Base parameters for creating a new Sandbox.
 - `ephemeral?` _boolean_ - Whether the Sandbox should be ephemeral. If true, autoDeleteInterval will be set to 0.
 - `labels?` _Record\<string, string\>_ - Sandbox labels
 - `language?` _string_ - Programming language for direct code execution
+- `name?` _string_
 - `networkAllowList?` _string_ - Comma-separated list of allowed CIDR network addresses for the Sandbox
 - `networkBlockAll?` _boolean_ - Whether to block all network access for the Sandbox
 - `public?` _boolean_ - Is the Sandbox port preview public
@@ -366,6 +370,7 @@ Parameters for creating a new Sandbox.
     the image will be dynamically built.
 - `labels?` _Record\<string, string\>_
 - `language?` _string_
+- `name?` _string_
 - `networkAllowList?` _string_
 - `networkBlockAll?` _boolean_
 - `public?` _boolean_
@@ -386,6 +391,7 @@ Parameters for creating a new Sandbox from a snapshot.
 - `ephemeral?` _boolean_
 - `labels?` _Record\<string, string\>_
 - `language?` _string_
+- `name?` _string_
 - `networkAllowList?` _string_
 - `networkBlockAll?` _boolean_
 - `public?` _boolean_
