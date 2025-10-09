@@ -104,7 +104,7 @@ export class NotificationGateway implements OnGatewayInit, OnModuleInit {
   }
 
   emitSnapshotRemoved(snapshot: SnapshotDto) {
-    this.server.to(snapshot.organizationId).emit(SnapshotEvents.REMOVED, snapshot.id)
+    this.server.to(snapshot.organizationId).emit(SnapshotEvents.REMOVED, snapshot)
   }
 
   emitVolumeCreated(volume: VolumeDto) {
