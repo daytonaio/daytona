@@ -15,14 +15,16 @@ import (
 
 type StatesCache struct {
 	common_cache.ICache[models.CachedStates]
+	cacheRetentionDays int
 }
 
 var statesCache *StatesCache
 
-func GetStatesCache() *StatesCache {
+func GetStatesCache(cacheRetentionDays int) *StatesCache {
 	if statesCache == nil {
 		statesCache = &StatesCache{
-			ICache: common_cache.NewMapCache[models.CachedStates](),
+			ICache:             common_cache.NewMapCache[models.CachedStates](),
+			cacheRetentionDays: cacheRetentionDays,
 		}
 	}
 
@@ -41,7 +43,7 @@ func (sc *StatesCache) SetSandboxState(ctx context.Context, sandboxId string, st
 	existing.SandboxState = state
 
 	// Save back to cache
-	_ = sc.Set(ctx, sandboxId, *existing, 7*24*time.Hour)
+	_ = sc.Set(ctx, sandboxId, *existing, sc.getEntryExpiration())
 }
 
 func (sc *StatesCache) SetBackupState(ctx context.Context, sandboxId string, state enums.BackupState, backupErr error) {
@@ -64,5 +66,9 @@ func (sc *StatesCache) SetBackupState(ctx context.Context, sandboxId string, sta
 	}
 
 	// Save back to cache
-	_ = sc.Set(ctx, sandboxId, *existing, 7*24*time.Hour)
+	_ = sc.Set(ctx, sandboxId, *existing, sc.getEntryExpiration())
+}
+
+func (sc *StatesCache) getEntryExpiration() time.Duration {
+	return time.Duration(sc.cacheRetentionDays) * 24 * time.Hour
 }
