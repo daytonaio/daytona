@@ -159,5 +159,6 @@ model_webhook_initialization_status.go
 model_windows_response.go
 model_work_dir_response.go
 model_workspace.go
+model_workspace_port_preview_url.go
 response.go
 utils.go

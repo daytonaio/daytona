@@ -23,16 +23,15 @@ from typing import Any, ClassVar, Dict, List, Optional
 from typing import Optional, Set
 from typing_extensions import Self
 
-class PortPreviewUrl(BaseModel):
+class WorkspacePortPreviewUrl(BaseModel):
     """
-    PortPreviewUrl
+    WorkspacePortPreviewUrl
     """ # noqa: E501
-    sandbox_id: StrictStr = Field(description="ID of the sandbox", alias="sandboxId")
     url: StrictStr = Field(description="Preview url")
     token: StrictStr = Field(description="Access token")
     legacy_proxy_url: Optional[StrictStr] = Field(default=None, description="Legacy preview url using runner domain", alias="legacyProxyUrl")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["sandboxId", "url", "token", "legacyProxyUrl"]
+    __properties: ClassVar[List[str]] = ["url", "token", "legacyProxyUrl"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -52,7 +51,7 @@ class PortPreviewUrl(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of PortPreviewUrl from a JSON string"""
+        """Create an instance of WorkspacePortPreviewUrl from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -84,7 +83,7 @@ class PortPreviewUrl(BaseModel):
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of PortPreviewUrl from a dict"""
+        """Create an instance of WorkspacePortPreviewUrl from a dict"""
         if obj is None:
             return None
 
@@ -92,7 +91,6 @@ class PortPreviewUrl(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "sandboxId": obj.get("sandboxId"),
             "url": obj.get("url"),
             "token": obj.get("token"),
             "legacyProxyUrl": obj.get("legacyProxyUrl")

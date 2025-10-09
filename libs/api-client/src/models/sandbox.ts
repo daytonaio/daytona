@@ -44,6 +44,12 @@ export interface Sandbox {
    */
   organizationId: string
   /**
+   * The name of the sandbox
+   * @type {string}
+   * @memberof Sandbox
+   */
+  name: string
+  /**
    * The snapshot used for the sandbox
    * @type {string}
    * @memberof Sandbox

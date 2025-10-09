@@ -29,6 +29,7 @@ class CreateSandbox(BaseModel):
     """
     CreateSandbox
     """ # noqa: E501
+    name: Optional[StrictStr] = Field(default=None, description="The name of the sandbox. If not provided, the sandbox ID will be used as the name")
     snapshot: Optional[StrictStr] = Field(default=None, description="The ID or name of the snapshot used for the sandbox")
     user: Optional[StrictStr] = Field(default=None, description="The user associated with the project")
     env: Optional[Dict[str, StrictStr]] = Field(default=None, description="Environment variables for the sandbox")
@@ -48,7 +49,7 @@ class CreateSandbox(BaseModel):
     volumes: Optional[List[SandboxVolume]] = Field(default=None, description="Array of volumes to attach to the sandbox")
     build_info: Optional[CreateBuildInfo] = Field(default=None, description="Build information for the sandbox", alias="buildInfo")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["snapshot", "user", "env", "labels", "public", "networkBlockAll", "networkAllowList", "class", "target", "cpu", "gpu", "memory", "disk", "autoStopInterval", "autoArchiveInterval", "autoDeleteInterval", "volumes", "buildInfo"]
+    __properties: ClassVar[List[str]] = ["name", "snapshot", "user", "env", "labels", "public", "networkBlockAll", "networkAllowList", "class", "target", "cpu", "gpu", "memory", "disk", "autoStopInterval", "autoArchiveInterval", "autoDeleteInterval", "volumes", "buildInfo"]
 
     @field_validator('var_class')
     def var_class_validate_enum(cls, value):
@@ -128,6 +129,7 @@ class CreateSandbox(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
+            "name": obj.get("name"),
             "snapshot": obj.get("snapshot"),
             "user": obj.get("user"),
             "env": obj.get("env"),

@@ -25,6 +25,8 @@ type Sandbox struct {
 	Id string `json:"id"`
 	// The organization ID of the sandbox
 	OrganizationId string `json:"organizationId"`
+	// The name of the sandbox
+	Name string `json:"name"`
 	// The snapshot used for the sandbox
 	Snapshot *string `json:"snapshot,omitempty"`
 	// The user associated with the project
@@ -89,10 +91,11 @@ type _Sandbox Sandbox
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewSandbox(id string, organizationId string, user string, env map[string]string, labels map[string]string, public bool, networkBlockAll bool, target string, cpu float32, gpu float32, memory float32, disk float32) *Sandbox {
+func NewSandbox(id string, organizationId string, name string, user string, env map[string]string, labels map[string]string, public bool, networkBlockAll bool, target string, cpu float32, gpu float32, memory float32, disk float32) *Sandbox {
 	this := Sandbox{}
 	this.Id = id
 	this.OrganizationId = organizationId
+	this.Name = name
 	this.User = user
 	this.Env = env
 	this.Labels = labels
@@ -160,6 +163,30 @@ func (o *Sandbox) GetOrganizationIdOk() (*string, bool) {
 // SetOrganizationId sets field value
 func (o *Sandbox) SetOrganizationId(v string) {
 	o.OrganizationId = v
+}
+
+// GetName returns the Name field value
+func (o *Sandbox) GetName() string {
+	if o == nil {
+		var ret string
+		return ret
+	}
+
+	return o.Name
+}
+
+// GetNameOk returns a tuple with the Name field value
+// and a boolean to check if the value has been set.
+func (o *Sandbox) GetNameOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.Name, true
+}
+
+// SetName sets field value
+func (o *Sandbox) SetName(v string) {
+	o.Name = v
 }
 
 // GetSnapshot returns the Snapshot field value if set, zero value otherwise.
@@ -961,6 +988,7 @@ func (o Sandbox) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["id"] = o.Id
 	toSerialize["organizationId"] = o.OrganizationId
+	toSerialize["name"] = o.Name
 	if !IsNil(o.Snapshot) {
 		toSerialize["snapshot"] = o.Snapshot
 	}
@@ -1037,6 +1065,7 @@ func (o *Sandbox) UnmarshalJSON(data []byte) (err error) {
 	requiredProperties := []string{
 		"id",
 		"organizationId",
+		"name",
 		"user",
 		"env",
 		"labels",
@@ -1078,6 +1107,7 @@ func (o *Sandbox) UnmarshalJSON(data []byte) (err error) {
 	if err = json.Unmarshal(data, &additionalProperties); err == nil {
 		delete(additionalProperties, "id")
 		delete(additionalProperties, "organizationId")
+		delete(additionalProperties, "name")
 		delete(additionalProperties, "snapshot")
 		delete(additionalProperties, "user")
 		delete(additionalProperties, "env")

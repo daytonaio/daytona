@@ -76,6 +76,7 @@ export class Sandbox implements SandboxDto {
   public readonly computerUse: ComputerUse
 
   public id!: string
+  public name!: string
   public organizationId!: string
   public snapshot?: string
   public user!: string
@@ -503,6 +504,7 @@ export class Sandbox implements SandboxDto {
    */
   private processSandboxDto(sandboxDto: SandboxDto) {
     this.id = sandboxDto.id
+    this.name = sandboxDto.name
     this.organizationId = sandboxDto.organizationId
     this.snapshot = sandboxDto.snapshot
     this.user = sandboxDto.user

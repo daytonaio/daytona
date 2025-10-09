@@ -132,6 +132,7 @@ export interface Resources {
  * @property {boolean} [ephemeral] - Whether the Sandbox should be ephemeral. If true, autoDeleteInterval will be set to 0.
  */
 export type CreateSandboxBaseParams = {
+  name?: string
   user?: string
   language?: CodeLanguage | string
   envVars?: Record<string, string>
@@ -174,11 +175,11 @@ export type CreateSandboxFromSnapshotParams = CreateSandboxBaseParams & {
  * Filter for Sandboxes.
  *
  * @interface
- * @property {string} [id] - The ID of the Sandbox to retrieve
+ * @property {string} [idOrName] - The ID or name of the Sandbox to retrieve
  * @property {Record<string, string>} [labels] - Labels to filter Sandboxes
  */
 export type SandboxFilter = {
-  id?: string
+  idOrName?: string
   labels?: Record<string, string>
 }
 
@@ -469,6 +470,7 @@ export class Daytona {
 
       const response = await this.sandboxApi.createSandbox(
         {
+          name: params.name,
           snapshot: snapshot,
           buildInfo,
           user: params.user,
@@ -540,17 +542,17 @@ export class Daytona {
   }
 
   /**
-   * Gets a Sandbox by its ID.
+   * Gets a Sandbox by its ID or name.
    *
-   * @param {string} sandboxId - The ID of the Sandbox to retrieve
+   * @param {string} sandboxIdOrName - The ID or name of the Sandbox to retrieve
    * @returns {Promise<Sandbox>} The Sandbox
    *
    * @example
-   * const sandbox = await daytona.get('my-sandbox-id');
+   * const sandbox = await daytona.get('my-sandbox-id-or-name');
    * console.log(`Sandbox state: ${sandbox.state}`);
    */
-  public async get(sandboxId: string): Promise<Sandbox> {
-    const response = await this.sandboxApi.getSandbox(sandboxId)
+  public async get(sandboxIdOrName: string): Promise<Sandbox> {
+    const response = await this.sandboxApi.getSandbox(sandboxIdOrName)
     const sandboxInstance = response.data
     const language = sandboxInstance.labels && sandboxInstance.labels['code-toolbox-language']
     const codeToolbox = this.getCodeToolbox(language as CodeLanguage)
@@ -559,18 +561,18 @@ export class Daytona {
   }
 
   /**
-   * Finds a Sandbox by its ID or labels.
+   * Finds a Sandbox by its ID or name or labels.
    *
    * @param {SandboxFilter} filter - Filter for Sandboxes
-   * @returns {Promise<Sandbox>} First Sandbox that matches the ID or labels.
+   * @returns {Promise<Sandbox>} First Sandbox that matches the ID or name or labels.
    *
    * @example
    * const sandbox = await daytona.findOne({ labels: { 'my-label': 'my-value' } });
    * console.log(`Sandbox ID: ${sandbox.id}, State: ${sandbox.state}`);
    */
   public async findOne(filter: SandboxFilter): Promise<Sandbox> {
-    if (filter.id) {
-      return this.get(filter.id)
+    if (filter.idOrName) {
+      return this.get(filter.idOrName)
     }
 
     const result = await this.list(filter.labels, 1, 1)

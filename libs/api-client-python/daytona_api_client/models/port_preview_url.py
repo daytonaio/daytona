@@ -27,11 +27,12 @@ class PortPreviewUrl(BaseModel):
     """
     PortPreviewUrl
     """ # noqa: E501
+    sandbox_id: StrictStr = Field(description="ID of the sandbox", alias="sandboxId")
     url: StrictStr = Field(description="Preview url")
     token: StrictStr = Field(description="Access token")
     legacy_proxy_url: Optional[StrictStr] = Field(default=None, description="Legacy preview url using runner domain", alias="legacyProxyUrl")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["url", "token", "legacyProxyUrl"]
+    __properties: ClassVar[List[str]] = ["sandboxId", "url", "token", "legacyProxyUrl"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -91,6 +92,7 @@ class PortPreviewUrl(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
+            "sandboxId": obj.get("sandboxId"),
             "url": obj.get("url"),
             "token": obj.get("token"),
             "legacyProxyUrl": obj.get("legacyProxyUrl")

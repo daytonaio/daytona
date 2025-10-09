@@ -93,6 +93,7 @@ class CreateSandboxBaseParams(BaseModel):
     """Base parameters for creating a new Sandbox.
 
     Attributes:
+        name (Optional[str]): Name of the Sandbox.
         language (Optional[CodeLanguage]): Programming language for the Sandbox. Defaults to "python".
         os_user (Optional[str]): OS user for the Sandbox.
         env_vars (Optional[Dict[str, str]]): Environment variables to set in the Sandbox.
@@ -115,6 +116,7 @@ class CreateSandboxBaseParams(BaseModel):
             If True, auto_delete_interval will be set to 0.
     """
 
+    name: Optional[str] = None
     language: Optional[CodeLanguage] = None
     os_user: Optional[str] = None
     env_vars: Optional[Dict[str, str]] = None

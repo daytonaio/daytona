@@ -154,3 +154,4 @@ from daytona_api_client.models.webhook_initialization_status import WebhookIniti
 from daytona_api_client.models.windows_response import WindowsResponse
 from daytona_api_client.models.work_dir_response import WorkDirResponse
 from daytona_api_client.models.workspace import Workspace
+from daytona_api_client.models.workspace_port_preview_url import WorkspacePortPreviewUrl

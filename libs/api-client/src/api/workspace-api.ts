@@ -34,11 +34,11 @@ import { BASE_PATH, COLLECTION_FORMATS, type RequestArgs, BaseAPI, RequiredError
 // @ts-ignore
 import type { CreateWorkspace } from '../models'
 // @ts-ignore
-import type { PortPreviewUrl } from '../models'
-// @ts-ignore
 import type { SandboxLabels } from '../models'
 // @ts-ignore
 import type { Workspace } from '../models'
+// @ts-ignore
+import type { WorkspacePortPreviewUrl } from '../models'
 /**
  * WorkspaceApi - axios parameter creator
  * @export
@@ -956,7 +956,7 @@ export const WorkspaceApiFp = function (configuration?: Configuration) {
       port: number,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PortPreviewUrl>> {
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<WorkspacePortPreviewUrl>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.getPortPreviewUrlWorkspaceDeprecated(
         workspaceId,
         port,
@@ -1352,7 +1352,7 @@ export const WorkspaceApiFactory = function (configuration?: Configuration, base
       port: number,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
-    ): AxiosPromise<PortPreviewUrl> {
+    ): AxiosPromise<WorkspacePortPreviewUrl> {
       return localVarFp
         .getPortPreviewUrlWorkspaceDeprecated(workspaceId, port, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))

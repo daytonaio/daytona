@@ -58,21 +58,21 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
     /**
      *
      * @summary Archive sandbox
-     * @param {string} sandboxId
+     * @param {string} sandboxIdOrName
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     archiveSandbox: async (
-      sandboxId: string,
+      sandboxIdOrName: string,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
-      // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('archiveSandbox', 'sandboxId', sandboxId)
-      const localVarPath = `/sandbox/{sandboxId}/archive`.replace(
-        `{${'sandboxId'}}`,
-        encodeURIComponent(String(sandboxId)),
+      // verify required parameter 'sandboxIdOrName' is not null or undefined
+      assertParamExists('archiveSandbox', 'sandboxIdOrName', sandboxIdOrName)
+      const localVarPath = `/sandbox/{sandboxIdOrName}/archive`.replace(
+        `{${'sandboxIdOrName'}}`,
+        encodeURIComponent(String(sandboxIdOrName)),
       )
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
@@ -106,21 +106,21 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
     /**
      *
      * @summary Create sandbox backup
-     * @param {string} sandboxId ID of the sandbox
+     * @param {string} sandboxIdOrName ID or name of the sandbox
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     createBackup: async (
-      sandboxId: string,
+      sandboxIdOrName: string,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
-      // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('createBackup', 'sandboxId', sandboxId)
-      const localVarPath = `/sandbox/{sandboxId}/backup`.replace(
-        `{${'sandboxId'}}`,
-        encodeURIComponent(String(sandboxId)),
+      // verify required parameter 'sandboxIdOrName' is not null or undefined
+      assertParamExists('createBackup', 'sandboxIdOrName', sandboxIdOrName)
+      const localVarPath = `/sandbox/{sandboxIdOrName}/backup`.replace(
+        `{${'sandboxIdOrName'}}`,
+        encodeURIComponent(String(sandboxIdOrName)),
       )
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
@@ -202,23 +202,23 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
     /**
      *
      * @summary Create SSH access for sandbox
-     * @param {string} sandboxId ID of the sandbox
+     * @param {string} sandboxIdOrName ID or name of the sandbox
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {number} [expiresInMinutes] Expiration time in minutes (default: 60)
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     createSshAccess: async (
-      sandboxId: string,
+      sandboxIdOrName: string,
       xDaytonaOrganizationID?: string,
       expiresInMinutes?: number,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
-      // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('createSshAccess', 'sandboxId', sandboxId)
-      const localVarPath = `/sandbox/{sandboxId}/ssh-access`.replace(
-        `{${'sandboxId'}}`,
-        encodeURIComponent(String(sandboxId)),
+      // verify required parameter 'sandboxIdOrName' is not null or undefined
+      assertParamExists('createSshAccess', 'sandboxIdOrName', sandboxIdOrName)
+      const localVarPath = `/sandbox/{sandboxIdOrName}/ssh-access`.replace(
+        `{${'sandboxIdOrName'}}`,
+        encodeURIComponent(String(sandboxIdOrName)),
       )
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
@@ -256,19 +256,22 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
     /**
      *
      * @summary Delete sandbox
-     * @param {string} sandboxId ID of the sandbox
+     * @param {string} sandboxIdOrName ID or name of the sandbox
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     deleteSandbox: async (
-      sandboxId: string,
+      sandboxIdOrName: string,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
-      // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('deleteSandbox', 'sandboxId', sandboxId)
-      const localVarPath = `/sandbox/{sandboxId}`.replace(`{${'sandboxId'}}`, encodeURIComponent(String(sandboxId)))
+      // verify required parameter 'sandboxIdOrName' is not null or undefined
+      assertParamExists('deleteSandbox', 'sandboxIdOrName', sandboxIdOrName)
+      const localVarPath = `/sandbox/{sandboxIdOrName}`.replace(
+        `{${'sandboxIdOrName'}}`,
+        encodeURIComponent(String(sandboxIdOrName)),
+      )
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
       let baseOptions
@@ -301,23 +304,23 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
     /**
      *
      * @summary Get build logs
-     * @param {string} sandboxId ID of the sandbox
+     * @param {string} sandboxIdOrName ID or name of the sandbox
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {boolean} [follow] Whether to follow the logs stream
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     getBuildLogs: async (
-      sandboxId: string,
+      sandboxIdOrName: string,
       xDaytonaOrganizationID?: string,
       follow?: boolean,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
-      // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('getBuildLogs', 'sandboxId', sandboxId)
-      const localVarPath = `/sandbox/{sandboxId}/build-logs`.replace(
-        `{${'sandboxId'}}`,
-        encodeURIComponent(String(sandboxId)),
+      // verify required parameter 'sandboxIdOrName' is not null or undefined
+      assertParamExists('getBuildLogs', 'sandboxIdOrName', sandboxIdOrName)
+      const localVarPath = `/sandbox/{sandboxIdOrName}/build-logs`.replace(
+        `{${'sandboxIdOrName'}}`,
+        encodeURIComponent(String(sandboxIdOrName)),
       )
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
@@ -355,24 +358,24 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
     /**
      *
      * @summary Get preview URL for a sandbox port
-     * @param {string} sandboxId ID of the sandbox
+     * @param {string} sandboxIdOrName ID or name of the sandbox
      * @param {number} port Port number to get preview URL for
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     getPortPreviewUrl: async (
-      sandboxId: string,
+      sandboxIdOrName: string,
       port: number,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
-      // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('getPortPreviewUrl', 'sandboxId', sandboxId)
+      // verify required parameter 'sandboxIdOrName' is not null or undefined
+      assertParamExists('getPortPreviewUrl', 'sandboxIdOrName', sandboxIdOrName)
       // verify required parameter 'port' is not null or undefined
       assertParamExists('getPortPreviewUrl', 'port', port)
-      const localVarPath = `/sandbox/{sandboxId}/ports/{port}/preview-url`
-        .replace(`{${'sandboxId'}}`, encodeURIComponent(String(sandboxId)))
+      const localVarPath = `/sandbox/{sandboxIdOrName}/ports/{port}/preview-url`
+        .replace(`{${'sandboxIdOrName'}}`, encodeURIComponent(String(sandboxIdOrName)))
         .replace(`{${'port'}}`, encodeURIComponent(String(port)))
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
@@ -406,21 +409,24 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
     /**
      *
      * @summary Get sandbox details
-     * @param {string} sandboxId ID of the sandbox
+     * @param {string} sandboxIdOrName ID or name of the sandbox
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {boolean} [verbose] Include verbose output
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     getSandbox: async (
-      sandboxId: string,
+      sandboxIdOrName: string,
       xDaytonaOrganizationID?: string,
       verbose?: boolean,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
-      // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('getSandbox', 'sandboxId', sandboxId)
-      const localVarPath = `/sandbox/{sandboxId}`.replace(`{${'sandboxId'}}`, encodeURIComponent(String(sandboxId)))
+      // verify required parameter 'sandboxIdOrName' is not null or undefined
+      assertParamExists('getSandbox', 'sandboxIdOrName', sandboxIdOrName)
+      const localVarPath = `/sandbox/{sandboxIdOrName}`.replace(
+        `{${'sandboxIdOrName'}}`,
+        encodeURIComponent(String(sandboxIdOrName)),
+      )
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
       let baseOptions
@@ -761,25 +767,25 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
     /**
      *
      * @summary Replace sandbox labels
-     * @param {string} sandboxId ID of the sandbox
+     * @param {string} sandboxIdOrName ID or name of the sandbox
      * @param {SandboxLabels} sandboxLabels
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     replaceLabels: async (
-      sandboxId: string,
+      sandboxIdOrName: string,
       sandboxLabels: SandboxLabels,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
-      // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('replaceLabels', 'sandboxId', sandboxId)
+      // verify required parameter 'sandboxIdOrName' is not null or undefined
+      assertParamExists('replaceLabels', 'sandboxIdOrName', sandboxIdOrName)
       // verify required parameter 'sandboxLabels' is not null or undefined
       assertParamExists('replaceLabels', 'sandboxLabels', sandboxLabels)
-      const localVarPath = `/sandbox/{sandboxId}/labels`.replace(
-        `{${'sandboxId'}}`,
-        encodeURIComponent(String(sandboxId)),
+      const localVarPath = `/sandbox/{sandboxIdOrName}/labels`.replace(
+        `{${'sandboxIdOrName'}}`,
+        encodeURIComponent(String(sandboxIdOrName)),
       )
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
@@ -816,23 +822,23 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
     /**
      *
      * @summary Revoke SSH access for sandbox
-     * @param {string} sandboxId ID of the sandbox
+     * @param {string} sandboxIdOrName ID or name of the sandbox
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {string} [token] SSH access token to revoke. If not provided, all SSH access for the sandbox will be revoked.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     revokeSshAccess: async (
-      sandboxId: string,
+      sandboxIdOrName: string,
       xDaytonaOrganizationID?: string,
       token?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
-      // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('revokeSshAccess', 'sandboxId', sandboxId)
-      const localVarPath = `/sandbox/{sandboxId}/ssh-access`.replace(
-        `{${'sandboxId'}}`,
-        encodeURIComponent(String(sandboxId)),
+      // verify required parameter 'sandboxIdOrName' is not null or undefined
+      assertParamExists('revokeSshAccess', 'sandboxIdOrName', sandboxIdOrName)
+      const localVarPath = `/sandbox/{sandboxIdOrName}/ssh-access`.replace(
+        `{${'sandboxIdOrName'}}`,
+        encodeURIComponent(String(sandboxIdOrName)),
       )
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
@@ -870,24 +876,24 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
     /**
      *
      * @summary Set sandbox auto-archive interval
-     * @param {string} sandboxId ID of the sandbox
+     * @param {string} sandboxIdOrName ID or name of the sandbox
      * @param {number} interval Auto-archive interval in minutes (0 means the maximum interval will be used)
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     setAutoArchiveInterval: async (
-      sandboxId: string,
+      sandboxIdOrName: string,
       interval: number,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
-      // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('setAutoArchiveInterval', 'sandboxId', sandboxId)
+      // verify required parameter 'sandboxIdOrName' is not null or undefined
+      assertParamExists('setAutoArchiveInterval', 'sandboxIdOrName', sandboxIdOrName)
       // verify required parameter 'interval' is not null or undefined
       assertParamExists('setAutoArchiveInterval', 'interval', interval)
-      const localVarPath = `/sandbox/{sandboxId}/autoarchive/{interval}`
-        .replace(`{${'sandboxId'}}`, encodeURIComponent(String(sandboxId)))
+      const localVarPath = `/sandbox/{sandboxIdOrName}/autoarchive/{interval}`
+        .replace(`{${'sandboxIdOrName'}}`, encodeURIComponent(String(sandboxIdOrName)))
         .replace(`{${'interval'}}`, encodeURIComponent(String(interval)))
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
@@ -921,24 +927,24 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
     /**
      *
      * @summary Set sandbox auto-delete interval
-     * @param {string} sandboxId ID of the sandbox
+     * @param {string} sandboxIdOrName ID or name of the sandbox
      * @param {number} interval Auto-delete interval in minutes (negative value means disabled, 0 means delete immediately upon stopping)
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     setAutoDeleteInterval: async (
-      sandboxId: string,
+      sandboxIdOrName: string,
       interval: number,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
-      // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('setAutoDeleteInterval', 'sandboxId', sandboxId)
+      // verify required parameter 'sandboxIdOrName' is not null or undefined
+      assertParamExists('setAutoDeleteInterval', 'sandboxIdOrName', sandboxIdOrName)
       // verify required parameter 'interval' is not null or undefined
       assertParamExists('setAutoDeleteInterval', 'interval', interval)
-      const localVarPath = `/sandbox/{sandboxId}/autodelete/{interval}`
-        .replace(`{${'sandboxId'}}`, encodeURIComponent(String(sandboxId)))
+      const localVarPath = `/sandbox/{sandboxIdOrName}/autodelete/{interval}`
+        .replace(`{${'sandboxIdOrName'}}`, encodeURIComponent(String(sandboxIdOrName)))
         .replace(`{${'interval'}}`, encodeURIComponent(String(interval)))
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
@@ -972,24 +978,24 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
     /**
      *
      * @summary Set sandbox auto-stop interval
-     * @param {string} sandboxId ID of the sandbox
+     * @param {string} sandboxIdOrName ID or name of the sandbox
      * @param {number} interval Auto-stop interval in minutes (0 to disable)
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     setAutostopInterval: async (
-      sandboxId: string,
+      sandboxIdOrName: string,
       interval: number,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
-      // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('setAutostopInterval', 'sandboxId', sandboxId)
+      // verify required parameter 'sandboxIdOrName' is not null or undefined
+      assertParamExists('setAutostopInterval', 'sandboxIdOrName', sandboxIdOrName)
       // verify required parameter 'interval' is not null or undefined
       assertParamExists('setAutostopInterval', 'interval', interval)
-      const localVarPath = `/sandbox/{sandboxId}/autostop/{interval}`
-        .replace(`{${'sandboxId'}}`, encodeURIComponent(String(sandboxId)))
+      const localVarPath = `/sandbox/{sandboxIdOrName}/autostop/{interval}`
+        .replace(`{${'sandboxIdOrName'}}`, encodeURIComponent(String(sandboxIdOrName)))
         .replace(`{${'interval'}}`, encodeURIComponent(String(interval)))
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
@@ -1023,21 +1029,21 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
     /**
      *
      * @summary Start sandbox
-     * @param {string} sandboxId ID of the sandbox
+     * @param {string} sandboxIdOrName ID or name of the sandbox
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     startSandbox: async (
-      sandboxId: string,
+      sandboxIdOrName: string,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
-      // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('startSandbox', 'sandboxId', sandboxId)
-      const localVarPath = `/sandbox/{sandboxId}/start`.replace(
-        `{${'sandboxId'}}`,
-        encodeURIComponent(String(sandboxId)),
+      // verify required parameter 'sandboxIdOrName' is not null or undefined
+      assertParamExists('startSandbox', 'sandboxIdOrName', sandboxIdOrName)
+      const localVarPath = `/sandbox/{sandboxIdOrName}/start`.replace(
+        `{${'sandboxIdOrName'}}`,
+        encodeURIComponent(String(sandboxIdOrName)),
       )
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
@@ -1071,21 +1077,21 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
     /**
      *
      * @summary Stop sandbox
-     * @param {string} sandboxId ID of the sandbox
+     * @param {string} sandboxIdOrName ID or name of the sandbox
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     stopSandbox: async (
-      sandboxId: string,
+      sandboxIdOrName: string,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
-      // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('stopSandbox', 'sandboxId', sandboxId)
-      const localVarPath = `/sandbox/{sandboxId}/stop`.replace(
-        `{${'sandboxId'}}`,
-        encodeURIComponent(String(sandboxId)),
+      // verify required parameter 'sandboxIdOrName' is not null or undefined
+      assertParamExists('stopSandbox', 'sandboxIdOrName', sandboxIdOrName)
+      const localVarPath = `/sandbox/{sandboxIdOrName}/stop`.replace(
+        `{${'sandboxIdOrName'}}`,
+        encodeURIComponent(String(sandboxIdOrName)),
       )
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
@@ -1119,24 +1125,24 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
     /**
      *
      * @summary Update public status
-     * @param {string} sandboxId ID of the sandbox
+     * @param {string} sandboxIdOrName ID or name of the sandbox
      * @param {boolean} isPublic Public status to set
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     updatePublicStatus: async (
-      sandboxId: string,
+      sandboxIdOrName: string,
       isPublic: boolean,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
-      // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('updatePublicStatus', 'sandboxId', sandboxId)
+      // verify required parameter 'sandboxIdOrName' is not null or undefined
+      assertParamExists('updatePublicStatus', 'sandboxIdOrName', sandboxIdOrName)
       // verify required parameter 'isPublic' is not null or undefined
       assertParamExists('updatePublicStatus', 'isPublic', isPublic)
-      const localVarPath = `/sandbox/{sandboxId}/public/{isPublic}`
-        .replace(`{${'sandboxId'}}`, encodeURIComponent(String(sandboxId)))
+      const localVarPath = `/sandbox/{sandboxIdOrName}/public/{isPublic}`
+        .replace(`{${'sandboxIdOrName'}}`, encodeURIComponent(String(sandboxIdOrName)))
         .replace(`{${'isPublic'}}`, encodeURIComponent(String(isPublic)))
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
@@ -1170,25 +1176,25 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
     /**
      *
      * @summary Update sandbox state
-     * @param {string} sandboxId ID of the sandbox
+     * @param {string} sandboxIdOrName ID or name of the sandbox
      * @param {UpdateSandboxStateDto} updateSandboxStateDto
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     updateSandboxState: async (
-      sandboxId: string,
+      sandboxIdOrName: string,
       updateSandboxStateDto: UpdateSandboxStateDto,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
-      // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('updateSandboxState', 'sandboxId', sandboxId)
+      // verify required parameter 'sandboxIdOrName' is not null or undefined
+      assertParamExists('updateSandboxState', 'sandboxIdOrName', sandboxIdOrName)
       // verify required parameter 'updateSandboxStateDto' is not null or undefined
       assertParamExists('updateSandboxState', 'updateSandboxStateDto', updateSandboxStateDto)
-      const localVarPath = `/sandbox/{sandboxId}/state`.replace(
-        `{${'sandboxId'}}`,
-        encodeURIComponent(String(sandboxId)),
+      const localVarPath = `/sandbox/{sandboxIdOrName}/state`.replace(
+        `{${'sandboxIdOrName'}}`,
+        encodeURIComponent(String(sandboxIdOrName)),
       )
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
@@ -1284,18 +1290,18 @@ export const SandboxApiFp = function (configuration?: Configuration) {
     /**
      *
      * @summary Archive sandbox
-     * @param {string} sandboxId
+     * @param {string} sandboxIdOrName
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async archiveSandbox(
-      sandboxId: string,
+      sandboxIdOrName: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Sandbox>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.archiveSandbox(
-        sandboxId,
+        sandboxIdOrName,
         xDaytonaOrganizationID,
         options,
       )
@@ -1313,17 +1319,21 @@ export const SandboxApiFp = function (configuration?: Configuration) {
     /**
      *
      * @summary Create sandbox backup
-     * @param {string} sandboxId ID of the sandbox
+     * @param {string} sandboxIdOrName ID or name of the sandbox
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async createBackup(
-      sandboxId: string,
+      sandboxIdOrName: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Sandbox>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.createBackup(sandboxId, xDaytonaOrganizationID, options)
+      const localVarAxiosArgs = await localVarAxiosParamCreator.createBackup(
+        sandboxIdOrName,
+        xDaytonaOrganizationID,
+        options,
+      )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
         operationServerMap['SandboxApi.createBackup']?.[localVarOperationServerIndex]?.url
@@ -1367,20 +1377,20 @@ export const SandboxApiFp = function (configuration?: Configuration) {
     /**
      *
      * @summary Create SSH access for sandbox
-     * @param {string} sandboxId ID of the sandbox
+     * @param {string} sandboxIdOrName ID or name of the sandbox
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {number} [expiresInMinutes] Expiration time in minutes (default: 60)
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async createSshAccess(
-      sandboxId: string,
+      sandboxIdOrName: string,
       xDaytonaOrganizationID?: string,
       expiresInMinutes?: number,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<SshAccessDto>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.createSshAccess(
-        sandboxId,
+        sandboxIdOrName,
         xDaytonaOrganizationID,
         expiresInMinutes,
         options,
@@ -1399,18 +1409,18 @@ export const SandboxApiFp = function (configuration?: Configuration) {
     /**
      *
      * @summary Delete sandbox
-     * @param {string} sandboxId ID of the sandbox
+     * @param {string} sandboxIdOrName ID or name of the sandbox
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async deleteSandbox(
-      sandboxId: string,
+      sandboxIdOrName: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Sandbox>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.deleteSandbox(
-        sandboxId,
+        sandboxIdOrName,
         xDaytonaOrganizationID,
         options,
       )
@@ -1428,20 +1438,20 @@ export const SandboxApiFp = function (configuration?: Configuration) {
     /**
      *
      * @summary Get build logs
-     * @param {string} sandboxId ID of the sandbox
+     * @param {string} sandboxIdOrName ID or name of the sandbox
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {boolean} [follow] Whether to follow the logs stream
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async getBuildLogs(
-      sandboxId: string,
+      sandboxIdOrName: string,
       xDaytonaOrganizationID?: string,
       follow?: boolean,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.getBuildLogs(
-        sandboxId,
+        sandboxIdOrName,
         xDaytonaOrganizationID,
         follow,
         options,
@@ -1460,20 +1470,20 @@ export const SandboxApiFp = function (configuration?: Configuration) {
     /**
      *
      * @summary Get preview URL for a sandbox port
-     * @param {string} sandboxId ID of the sandbox
+     * @param {string} sandboxIdOrName ID or name of the sandbox
      * @param {number} port Port number to get preview URL for
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async getPortPreviewUrl(
-      sandboxId: string,
+      sandboxIdOrName: string,
       port: number,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PortPreviewUrl>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.getPortPreviewUrl(
-        sandboxId,
+        sandboxIdOrName,
         port,
         xDaytonaOrganizationID,
         options,
@@ -1492,20 +1502,20 @@ export const SandboxApiFp = function (configuration?: Configuration) {
     /**
      *
      * @summary Get sandbox details
-     * @param {string} sandboxId ID of the sandbox
+     * @param {string} sandboxIdOrName ID or name of the sandbox
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {boolean} [verbose] Include verbose output
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async getSandbox(
-      sandboxId: string,
+      sandboxIdOrName: string,
       xDaytonaOrganizationID?: string,
       verbose?: boolean,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Sandbox>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.getSandbox(
-        sandboxId,
+        sandboxIdOrName,
         xDaytonaOrganizationID,
         verbose,
         options,
@@ -1694,20 +1704,20 @@ export const SandboxApiFp = function (configuration?: Configuration) {
     /**
      *
      * @summary Replace sandbox labels
-     * @param {string} sandboxId ID of the sandbox
+     * @param {string} sandboxIdOrName ID or name of the sandbox
      * @param {SandboxLabels} sandboxLabels
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async replaceLabels(
-      sandboxId: string,
+      sandboxIdOrName: string,
       sandboxLabels: SandboxLabels,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<SandboxLabels>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.replaceLabels(
-        sandboxId,
+        sandboxIdOrName,
         sandboxLabels,
         xDaytonaOrganizationID,
         options,
@@ -1726,20 +1736,20 @@ export const SandboxApiFp = function (configuration?: Configuration) {
     /**
      *
      * @summary Revoke SSH access for sandbox
-     * @param {string} sandboxId ID of the sandbox
+     * @param {string} sandboxIdOrName ID or name of the sandbox
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {string} [token] SSH access token to revoke. If not provided, all SSH access for the sandbox will be revoked.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async revokeSshAccess(
-      sandboxId: string,
+      sandboxIdOrName: string,
       xDaytonaOrganizationID?: string,
       token?: string,
       options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Sandbox>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.revokeSshAccess(
-        sandboxId,
+        sandboxIdOrName,
         xDaytonaOrganizationID,
         token,
         options,
@@ -1758,20 +1768,20 @@ export const SandboxApiFp = function (configuration?: Configuration) {
     /**
      *
      * @summary Set sandbox auto-archive interval
-     * @param {string} sandboxId ID of the sandbox
+     * @param {string} sandboxIdOrName ID or name of the sandbox
      * @param {number} interval Auto-archive interval in minutes (0 means the maximum interval will be used)
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async setAutoArchiveInterval(
-      sandboxId: string,
+      sandboxIdOrName: string,
       interval: number,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Sandbox>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.setAutoArchiveInterval(
-        sandboxId,
+        sandboxIdOrName,
         interval,
         xDaytonaOrganizationID,
         options,
@@ -1790,20 +1800,20 @@ export const SandboxApiFp = function (configuration?: Configuration) {
     /**
      *
      * @summary Set sandbox auto-delete interval
-     * @param {string} sandboxId ID of the sandbox
+     * @param {string} sandboxIdOrName ID or name of the sandbox
      * @param {number} interval Auto-delete interval in minutes (negative value means disabled, 0 means delete immediately upon stopping)
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async setAutoDeleteInterval(
-      sandboxId: string,
+      sandboxIdOrName: string,
       interval: number,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Sandbox>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.setAutoDeleteInterval(
-        sandboxId,
+        sandboxIdOrName,
         interval,
         xDaytonaOrganizationID,
         options,
@@ -1822,20 +1832,20 @@ export const SandboxApiFp = function (configuration?: Configuration) {
     /**
      *
      * @summary Set sandbox auto-stop interval
-     * @param {string} sandboxId ID of the sandbox
+     * @param {string} sandboxIdOrName ID or name of the sandbox
      * @param {number} interval Auto-stop interval in minutes (0 to disable)
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async setAutostopInterval(
-      sandboxId: string,
+      sandboxIdOrName: string,
       interval: number,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Sandbox>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.setAutostopInterval(
-        sandboxId,
+        sandboxIdOrName,
         interval,
         xDaytonaOrganizationID,
         options,
@@ -1854,17 +1864,21 @@ export const SandboxApiFp = function (configuration?: Configuration) {
     /**
      *
      * @summary Start sandbox
-     * @param {string} sandboxId ID of the sandbox
+     * @param {string} sandboxIdOrName ID or name of the sandbox
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async startSandbox(
-      sandboxId: string,
+      sandboxIdOrName: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Sandbox>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.startSandbox(sandboxId, xDaytonaOrganizationID, options)
+      const localVarAxiosArgs = await localVarAxiosParamCreator.startSandbox(
+        sandboxIdOrName,
+        xDaytonaOrganizationID,
+        options,
+      )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
         operationServerMap['SandboxApi.startSandbox']?.[localVarOperationServerIndex]?.url
@@ -1879,17 +1893,21 @@ export const SandboxApiFp = function (configuration?: Configuration) {
     /**
      *
      * @summary Stop sandbox
-     * @param {string} sandboxId ID of the sandbox
+     * @param {string} sandboxIdOrName ID or name of the sandbox
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async stopSandbox(
-      sandboxId: string,
+      sandboxIdOrName: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.stopSandbox(sandboxId, xDaytonaOrganizationID, options)
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Sandbox>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.stopSandbox(
+        sandboxIdOrName,
+        xDaytonaOrganizationID,
+        options,
+      )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
         operationServerMap['SandboxApi.stopSandbox']?.[localVarOperationServerIndex]?.url
@@ -1904,20 +1922,20 @@ export const SandboxApiFp = function (configuration?: Configuration) {
     /**
      *
      * @summary Update public status
-     * @param {string} sandboxId ID of the sandbox
+     * @param {string} sandboxIdOrName ID or name of the sandbox
      * @param {boolean} isPublic Public status to set
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async updatePublicStatus(
-      sandboxId: string,
+      sandboxIdOrName: string,
       isPublic: boolean,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Sandbox>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.updatePublicStatus(
-        sandboxId,
+        sandboxIdOrName,
         isPublic,
         xDaytonaOrganizationID,
         options,
@@ -1936,20 +1954,20 @@ export const SandboxApiFp = function (configuration?: Configuration) {
     /**
      *
      * @summary Update sandbox state
-     * @param {string} sandboxId ID of the sandbox
+     * @param {string} sandboxIdOrName ID or name of the sandbox
      * @param {UpdateSandboxStateDto} updateSandboxStateDto
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async updateSandboxState(
-      sandboxId: string,
+      sandboxIdOrName: string,
       updateSandboxStateDto: UpdateSandboxStateDto,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.updateSandboxState(
-        sandboxId,
+        sandboxIdOrName,
         updateSandboxStateDto,
         xDaytonaOrganizationID,
         options,
@@ -2007,35 +2025,35 @@ export const SandboxApiFactory = function (configuration?: Configuration, basePa
     /**
      *
      * @summary Archive sandbox
-     * @param {string} sandboxId
+     * @param {string} sandboxIdOrName
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     archiveSandbox(
-      sandboxId: string,
+      sandboxIdOrName: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
-    ): AxiosPromise<void> {
+    ): AxiosPromise<Sandbox> {
       return localVarFp
-        .archiveSandbox(sandboxId, xDaytonaOrganizationID, options)
+        .archiveSandbox(sandboxIdOrName, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      *
      * @summary Create sandbox backup
-     * @param {string} sandboxId ID of the sandbox
+     * @param {string} sandboxIdOrName ID or name of the sandbox
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     createBackup(
-      sandboxId: string,
+      sandboxIdOrName: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<Sandbox> {
       return localVarFp
-        .createBackup(sandboxId, xDaytonaOrganizationID, options)
+        .createBackup(sandboxIdOrName, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
@@ -2058,94 +2076,94 @@ export const SandboxApiFactory = function (configuration?: Configuration, basePa
     /**
      *
      * @summary Create SSH access for sandbox
-     * @param {string} sandboxId ID of the sandbox
+     * @param {string} sandboxIdOrName ID or name of the sandbox
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {number} [expiresInMinutes] Expiration time in minutes (default: 60)
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     createSshAccess(
-      sandboxId: string,
+      sandboxIdOrName: string,
       xDaytonaOrganizationID?: string,
       expiresInMinutes?: number,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<SshAccessDto> {
       return localVarFp
-        .createSshAccess(sandboxId, xDaytonaOrganizationID, expiresInMinutes, options)
+        .createSshAccess(sandboxIdOrName, xDaytonaOrganizationID, expiresInMinutes, options)
         .then((request) => request(axios, basePath))
     },
     /**
      *
      * @summary Delete sandbox
-     * @param {string} sandboxId ID of the sandbox
+     * @param {string} sandboxIdOrName ID or name of the sandbox
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     deleteSandbox(
-      sandboxId: string,
+      sandboxIdOrName: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
-    ): AxiosPromise<void> {
+    ): AxiosPromise<Sandbox> {
       return localVarFp
-        .deleteSandbox(sandboxId, xDaytonaOrganizationID, options)
+        .deleteSandbox(sandboxIdOrName, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      *
      * @summary Get build logs
-     * @param {string} sandboxId ID of the sandbox
+     * @param {string} sandboxIdOrName ID or name of the sandbox
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {boolean} [follow] Whether to follow the logs stream
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     getBuildLogs(
-      sandboxId: string,
+      sandboxIdOrName: string,
       xDaytonaOrganizationID?: string,
       follow?: boolean,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<void> {
       return localVarFp
-        .getBuildLogs(sandboxId, xDaytonaOrganizationID, follow, options)
+        .getBuildLogs(sandboxIdOrName, xDaytonaOrganizationID, follow, options)
         .then((request) => request(axios, basePath))
     },
     /**
      *
      * @summary Get preview URL for a sandbox port
-     * @param {string} sandboxId ID of the sandbox
+     * @param {string} sandboxIdOrName ID or name of the sandbox
      * @param {number} port Port number to get preview URL for
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     getPortPreviewUrl(
-      sandboxId: string,
+      sandboxIdOrName: string,
       port: number,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<PortPreviewUrl> {
       return localVarFp
-        .getPortPreviewUrl(sandboxId, port, xDaytonaOrganizationID, options)
+        .getPortPreviewUrl(sandboxIdOrName, port, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      *
      * @summary Get sandbox details
-     * @param {string} sandboxId ID of the sandbox
+     * @param {string} sandboxIdOrName ID or name of the sandbox
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {boolean} [verbose] Include verbose output
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     getSandbox(
-      sandboxId: string,
+      sandboxIdOrName: string,
       xDaytonaOrganizationID?: string,
       verbose?: boolean,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<Sandbox> {
       return localVarFp
-        .getSandbox(sandboxId, xDaytonaOrganizationID, verbose, options)
+        .getSandbox(sandboxIdOrName, xDaytonaOrganizationID, verbose, options)
         .then((request) => request(axios, basePath))
     },
     /**
@@ -2273,168 +2291,168 @@ export const SandboxApiFactory = function (configuration?: Configuration, basePa
     /**
      *
      * @summary Replace sandbox labels
-     * @param {string} sandboxId ID of the sandbox
+     * @param {string} sandboxIdOrName ID or name of the sandbox
      * @param {SandboxLabels} sandboxLabels
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     replaceLabels(
-      sandboxId: string,
+      sandboxIdOrName: string,
       sandboxLabels: SandboxLabels,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<SandboxLabels> {
       return localVarFp
-        .replaceLabels(sandboxId, sandboxLabels, xDaytonaOrganizationID, options)
+        .replaceLabels(sandboxIdOrName, sandboxLabels, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      *
      * @summary Revoke SSH access for sandbox
-     * @param {string} sandboxId ID of the sandbox
+     * @param {string} sandboxIdOrName ID or name of the sandbox
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {string} [token] SSH access token to revoke. If not provided, all SSH access for the sandbox will be revoked.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     revokeSshAccess(
-      sandboxId: string,
+      sandboxIdOrName: string,
       xDaytonaOrganizationID?: string,
       token?: string,
       options?: RawAxiosRequestConfig,
-    ): AxiosPromise<void> {
+    ): AxiosPromise<Sandbox> {
       return localVarFp
-        .revokeSshAccess(sandboxId, xDaytonaOrganizationID, token, options)
+        .revokeSshAccess(sandboxIdOrName, xDaytonaOrganizationID, token, options)
         .then((request) => request(axios, basePath))
     },
     /**
      *
      * @summary Set sandbox auto-archive interval
-     * @param {string} sandboxId ID of the sandbox
+     * @param {string} sandboxIdOrName ID or name of the sandbox
      * @param {number} interval Auto-archive interval in minutes (0 means the maximum interval will be used)
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     setAutoArchiveInterval(
-      sandboxId: string,
+      sandboxIdOrName: string,
       interval: number,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
-    ): AxiosPromise<void> {
+    ): AxiosPromise<Sandbox> {
       return localVarFp
-        .setAutoArchiveInterval(sandboxId, interval, xDaytonaOrganizationID, options)
+        .setAutoArchiveInterval(sandboxIdOrName, interval, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      *
      * @summary Set sandbox auto-delete interval
-     * @param {string} sandboxId ID of the sandbox
+     * @param {string} sandboxIdOrName ID or name of the sandbox
      * @param {number} interval Auto-delete interval in minutes (negative value means disabled, 0 means delete immediately upon stopping)
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     setAutoDeleteInterval(
-      sandboxId: string,
+      sandboxIdOrName: string,
       interval: number,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
-    ): AxiosPromise<void> {
+    ): AxiosPromise<Sandbox> {
       return localVarFp
-        .setAutoDeleteInterval(sandboxId, interval, xDaytonaOrganizationID, options)
+        .setAutoDeleteInterval(sandboxIdOrName, interval, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      *
      * @summary Set sandbox auto-stop interval
-     * @param {string} sandboxId ID of the sandbox
+     * @param {string} sandboxIdOrName ID or name of the sandbox
      * @param {number} interval Auto-stop interval in minutes (0 to disable)
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     setAutostopInterval(
-      sandboxId: string,
+      sandboxIdOrName: string,
       interval: number,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
-    ): AxiosPromise<void> {
+    ): AxiosPromise<Sandbox> {
       return localVarFp
-        .setAutostopInterval(sandboxId, interval, xDaytonaOrganizationID, options)
+        .setAutostopInterval(sandboxIdOrName, interval, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      *
      * @summary Start sandbox
-     * @param {string} sandboxId ID of the sandbox
+     * @param {string} sandboxIdOrName ID or name of the sandbox
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     startSandbox(
-      sandboxId: string,
+      sandboxIdOrName: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<Sandbox> {
       return localVarFp
-        .startSandbox(sandboxId, xDaytonaOrganizationID, options)
+        .startSandbox(sandboxIdOrName, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      *
      * @summary Stop sandbox
-     * @param {string} sandboxId ID of the sandbox
+     * @param {string} sandboxIdOrName ID or name of the sandbox
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     stopSandbox(
-      sandboxId: string,
+      sandboxIdOrName: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
-    ): AxiosPromise<void> {
+    ): AxiosPromise<Sandbox> {
       return localVarFp
-        .stopSandbox(sandboxId, xDaytonaOrganizationID, options)
+        .stopSandbox(sandboxIdOrName, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      *
      * @summary Update public status
-     * @param {string} sandboxId ID of the sandbox
+     * @param {string} sandboxIdOrName ID or name of the sandbox
      * @param {boolean} isPublic Public status to set
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     updatePublicStatus(
-      sandboxId: string,
+      sandboxIdOrName: string,
       isPublic: boolean,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
-    ): AxiosPromise<void> {
+    ): AxiosPromise<Sandbox> {
       return localVarFp
-        .updatePublicStatus(sandboxId, isPublic, xDaytonaOrganizationID, options)
+        .updatePublicStatus(sandboxIdOrName, isPublic, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      *
      * @summary Update sandbox state
-     * @param {string} sandboxId ID of the sandbox
+     * @param {string} sandboxIdOrName ID or name of the sandbox
      * @param {UpdateSandboxStateDto} updateSandboxStateDto
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     updateSandboxState(
-      sandboxId: string,
+      sandboxIdOrName: string,
       updateSandboxStateDto: UpdateSandboxStateDto,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<void> {
       return localVarFp
-        .updateSandboxState(sandboxId, updateSandboxStateDto, xDaytonaOrganizationID, options)
+        .updateSandboxState(sandboxIdOrName, updateSandboxStateDto, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
@@ -2467,30 +2485,30 @@ export class SandboxApi extends BaseAPI {
   /**
    *
    * @summary Archive sandbox
-   * @param {string} sandboxId
+   * @param {string} sandboxIdOrName
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof SandboxApi
    */
-  public archiveSandbox(sandboxId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
+  public archiveSandbox(sandboxIdOrName: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
     return SandboxApiFp(this.configuration)
-      .archiveSandbox(sandboxId, xDaytonaOrganizationID, options)
+      .archiveSandbox(sandboxIdOrName, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    *
    * @summary Create sandbox backup
-   * @param {string} sandboxId ID of the sandbox
+   * @param {string} sandboxIdOrName ID or name of the sandbox
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof SandboxApi
    */
-  public createBackup(sandboxId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
+  public createBackup(sandboxIdOrName: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
     return SandboxApiFp(this.configuration)
-      .createBackup(sandboxId, xDaytonaOrganizationID, options)
+      .createBackup(sandboxIdOrName, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
@@ -2512,7 +2530,7 @@ export class SandboxApi extends BaseAPI {
   /**
    *
    * @summary Create SSH access for sandbox
-   * @param {string} sandboxId ID of the sandbox
+   * @param {string} sandboxIdOrName ID or name of the sandbox
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {number} [expiresInMinutes] Expiration time in minutes (default: 60)
    * @param {*} [options] Override http request option.
@@ -2520,35 +2538,35 @@ export class SandboxApi extends BaseAPI {
    * @memberof SandboxApi
    */
   public createSshAccess(
-    sandboxId: string,
+    sandboxIdOrName: string,
     xDaytonaOrganizationID?: string,
     expiresInMinutes?: number,
     options?: RawAxiosRequestConfig,
   ) {
     return SandboxApiFp(this.configuration)
-      .createSshAccess(sandboxId, xDaytonaOrganizationID, expiresInMinutes, options)
+      .createSshAccess(sandboxIdOrName, xDaytonaOrganizationID, expiresInMinutes, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    *
    * @summary Delete sandbox
-   * @param {string} sandboxId ID of the sandbox
+   * @param {string} sandboxIdOrName ID or name of the sandbox
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof SandboxApi
    */
-  public deleteSandbox(sandboxId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
+  public deleteSandbox(sandboxIdOrName: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
     return SandboxApiFp(this.configuration)
-      .deleteSandbox(sandboxId, xDaytonaOrganizationID, options)
+      .deleteSandbox(sandboxIdOrName, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    *
    * @summary Get build logs
-   * @param {string} sandboxId ID of the sandbox
+   * @param {string} sandboxIdOrName ID or name of the sandbox
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {boolean} [follow] Whether to follow the logs stream
    * @param {*} [options] Override http request option.
@@ -2556,20 +2574,20 @@ export class SandboxApi extends BaseAPI {
    * @memberof SandboxApi
    */
   public getBuildLogs(
-    sandboxId: string,
+    sandboxIdOrName: string,
     xDaytonaOrganizationID?: string,
     follow?: boolean,
     options?: RawAxiosRequestConfig,
   ) {
     return SandboxApiFp(this.configuration)
-      .getBuildLogs(sandboxId, xDaytonaOrganizationID, follow, options)
+      .getBuildLogs(sandboxIdOrName, xDaytonaOrganizationID, follow, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    *
    * @summary Get preview URL for a sandbox port
-   * @param {string} sandboxId ID of the sandbox
+   * @param {string} sandboxIdOrName ID or name of the sandbox
    * @param {number} port Port number to get preview URL for
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
@@ -2577,20 +2595,20 @@ export class SandboxApi extends BaseAPI {
    * @memberof SandboxApi
    */
   public getPortPreviewUrl(
-    sandboxId: string,
+    sandboxIdOrName: string,
     port: number,
     xDaytonaOrganizationID?: string,
     options?: RawAxiosRequestConfig,
   ) {
     return SandboxApiFp(this.configuration)
-      .getPortPreviewUrl(sandboxId, port, xDaytonaOrganizationID, options)
+      .getPortPreviewUrl(sandboxIdOrName, port, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    *
    * @summary Get sandbox details
-   * @param {string} sandboxId ID of the sandbox
+   * @param {string} sandboxIdOrName ID or name of the sandbox
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {boolean} [verbose] Include verbose output
    * @param {*} [options] Override http request option.
@@ -2598,13 +2616,13 @@ export class SandboxApi extends BaseAPI {
    * @memberof SandboxApi
    */
   public getSandbox(
-    sandboxId: string,
+    sandboxIdOrName: string,
     xDaytonaOrganizationID?: string,
     verbose?: boolean,
     options?: RawAxiosRequestConfig,
   ) {
     return SandboxApiFp(this.configuration)
-      .getSandbox(sandboxId, xDaytonaOrganizationID, verbose, options)
+      .getSandbox(sandboxIdOrName, xDaytonaOrganizationID, verbose, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
@@ -2743,7 +2761,7 @@ export class SandboxApi extends BaseAPI {
   /**
    *
    * @summary Replace sandbox labels
-   * @param {string} sandboxId ID of the sandbox
+   * @param {string} sandboxIdOrName ID or name of the sandbox
    * @param {SandboxLabels} sandboxLabels
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
@@ -2751,20 +2769,20 @@ export class SandboxApi extends BaseAPI {
    * @memberof SandboxApi
    */
   public replaceLabels(
-    sandboxId: string,
+    sandboxIdOrName: string,
     sandboxLabels: SandboxLabels,
     xDaytonaOrganizationID?: string,
     options?: RawAxiosRequestConfig,
   ) {
     return SandboxApiFp(this.configuration)
-      .replaceLabels(sandboxId, sandboxLabels, xDaytonaOrganizationID, options)
+      .replaceLabels(sandboxIdOrName, sandboxLabels, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    *
    * @summary Revoke SSH access for sandbox
-   * @param {string} sandboxId ID of the sandbox
+   * @param {string} sandboxIdOrName ID or name of the sandbox
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {string} [token] SSH access token to revoke. If not provided, all SSH access for the sandbox will be revoked.
    * @param {*} [options] Override http request option.
@@ -2772,20 +2790,20 @@ export class SandboxApi extends BaseAPI {
    * @memberof SandboxApi
    */
   public revokeSshAccess(
-    sandboxId: string,
+    sandboxIdOrName: string,
     xDaytonaOrganizationID?: string,
     token?: string,
     options?: RawAxiosRequestConfig,
   ) {
     return SandboxApiFp(this.configuration)
-      .revokeSshAccess(sandboxId, xDaytonaOrganizationID, token, options)
+      .revokeSshAccess(sandboxIdOrName, xDaytonaOrganizationID, token, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    *
    * @summary Set sandbox auto-archive interval
-   * @param {string} sandboxId ID of the sandbox
+   * @param {string} sandboxIdOrName ID or name of the sandbox
    * @param {number} interval Auto-archive interval in minutes (0 means the maximum interval will be used)
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
@@ -2793,20 +2811,20 @@ export class SandboxApi extends BaseAPI {
    * @memberof SandboxApi
    */
   public setAutoArchiveInterval(
-    sandboxId: string,
+    sandboxIdOrName: string,
     interval: number,
     xDaytonaOrganizationID?: string,
     options?: RawAxiosRequestConfig,
   ) {
     return SandboxApiFp(this.configuration)
-      .setAutoArchiveInterval(sandboxId, interval, xDaytonaOrganizationID, options)
+      .setAutoArchiveInterval(sandboxIdOrName, interval, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    *
    * @summary Set sandbox auto-delete interval
-   * @param {string} sandboxId ID of the sandbox
+   * @param {string} sandboxIdOrName ID or name of the sandbox
    * @param {number} interval Auto-delete interval in minutes (negative value means disabled, 0 means delete immediately upon stopping)
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
@@ -2814,20 +2832,20 @@ export class SandboxApi extends BaseAPI {
    * @memberof SandboxApi
    */
   public setAutoDeleteInterval(
-    sandboxId: string,
+    sandboxIdOrName: string,
     interval: number,
     xDaytonaOrganizationID?: string,
     options?: RawAxiosRequestConfig,
   ) {
     return SandboxApiFp(this.configuration)
-      .setAutoDeleteInterval(sandboxId, interval, xDaytonaOrganizationID, options)
+      .setAutoDeleteInterval(sandboxIdOrName, interval, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    *
    * @summary Set sandbox auto-stop interval
-   * @param {string} sandboxId ID of the sandbox
+   * @param {string} sandboxIdOrName ID or name of the sandbox
    * @param {number} interval Auto-stop interval in minutes (0 to disable)
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
@@ -2835,50 +2853,50 @@ export class SandboxApi extends BaseAPI {
    * @memberof SandboxApi
    */
   public setAutostopInterval(
-    sandboxId: string,
+    sandboxIdOrName: string,
     interval: number,
     xDaytonaOrganizationID?: string,
     options?: RawAxiosRequestConfig,
   ) {
     return SandboxApiFp(this.configuration)
-      .setAutostopInterval(sandboxId, interval, xDaytonaOrganizationID, options)
+      .setAutostopInterval(sandboxIdOrName, interval, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    *
    * @summary Start sandbox
-   * @param {string} sandboxId ID of the sandbox
+   * @param {string} sandboxIdOrName ID or name of the sandbox
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof SandboxApi
    */
-  public startSandbox(sandboxId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
+  public startSandbox(sandboxIdOrName: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
     return SandboxApiFp(this.configuration)
-      .startSandbox(sandboxId, xDaytonaOrganizationID, options)
+      .startSandbox(sandboxIdOrName, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    *
    * @summary Stop sandbox
-   * @param {string} sandboxId ID of the sandbox
+   * @param {string} sandboxIdOrName ID or name of the sandbox
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof SandboxApi
    */
-  public stopSandbox(sandboxId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
+  public stopSandbox(sandboxIdOrName: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
     return SandboxApiFp(this.configuration)
-      .stopSandbox(sandboxId, xDaytonaOrganizationID, options)
+      .stopSandbox(sandboxIdOrName, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    *
    * @summary Update public status
-   * @param {string} sandboxId ID of the sandbox
+   * @param {string} sandboxIdOrName ID or name of the sandbox
    * @param {boolean} isPublic Public status to set
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
@@ -2886,20 +2904,20 @@ export class SandboxApi extends BaseAPI {
    * @memberof SandboxApi
    */
   public updatePublicStatus(
-    sandboxId: string,
+    sandboxIdOrName: string,
     isPublic: boolean,
     xDaytonaOrganizationID?: string,
     options?: RawAxiosRequestConfig,
   ) {
     return SandboxApiFp(this.configuration)
-      .updatePublicStatus(sandboxId, isPublic, xDaytonaOrganizationID, options)
+      .updatePublicStatus(sandboxIdOrName, isPublic, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    *
    * @summary Update sandbox state
-   * @param {string} sandboxId ID of the sandbox
+   * @param {string} sandboxIdOrName ID or name of the sandbox
    * @param {UpdateSandboxStateDto} updateSandboxStateDto
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
@@ -2907,13 +2925,13 @@ export class SandboxApi extends BaseAPI {
    * @memberof SandboxApi
    */
   public updateSandboxState(
-    sandboxId: string,
+    sandboxIdOrName: string,
     updateSandboxStateDto: UpdateSandboxStateDto,
     xDaytonaOrganizationID?: string,
     options?: RawAxiosRequestConfig,
   ) {
     return SandboxApiFp(this.configuration)
-      .updateSandboxState(sandboxId, updateSandboxStateDto, xDaytonaOrganizationID, options)
+      .updateSandboxState(sandboxIdOrName, updateSandboxStateDto, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
