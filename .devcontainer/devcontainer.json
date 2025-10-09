@@ -9,8 +9,7 @@
   },
   "remoteEnv": {
     "NX_DAEMON": "true",
-    "NODE_ENV": "development",
-    "POETRY_VIRTUALENVS_IN_PROJECT": "true"
+    "NODE_ENV": "development"
   },
   "customizations": {
     // Configure properties specific to VS Code.
@@ -30,10 +29,7 @@
         "bradlc.vscode-tailwindcss"
       ],
       "settings": {
-        "editor.defaultFormatter": "esbenp.prettier-vscode",
-        "python.defaultInterpreterPath": "${containerWorkspaceFolder}/.venv/bin/python",
-        "python.terminal.activateEnvironment": true,
-        "python.terminal.activateEnvInCurrentTerminal": true
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
       }
     }
   },
