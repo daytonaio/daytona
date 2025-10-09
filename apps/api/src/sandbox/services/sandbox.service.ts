@@ -676,7 +676,7 @@ export class SandboxService {
     page = 1,
     limit = 10,
     filters?: {
-      id?: string
+      name?: string
       labels?: { [key: string]: string }
       includeErroredDestroyed?: boolean
       states?: SandboxState[]
@@ -700,7 +700,7 @@ export class SandboxService {
     const limitNum = Number(limit)
 
     const {
-      id,
+      name,
       labels,
       includeErroredDestroyed,
       states,
@@ -721,7 +721,7 @@ export class SandboxService {
 
     const baseFindOptions: FindOptionsWhere<Sandbox> = {
       organizationId,
-      ...(id ? { id: ILike(`${id}%`) } : {}),
+      ...(name ? { name: ILike(`${name}%`) } : {}),
       ...(labels ? { labels: JsonContains(labels) } : {}),
       ...(snapshots ? { snapshot: In(snapshots) } : {}),
       ...(regions ? { region: In(regions) } : {}),
