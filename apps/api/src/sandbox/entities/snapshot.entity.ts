@@ -80,9 +80,6 @@ export class Snapshot {
   @Column({ array: true, type: 'text', nullable: true })
   entrypoint?: string[]
 
-  @Column({ array: true, type: 'text', nullable: true })
-  cmd?: string[]
-
   @CreateDateColumn({
     type: 'timestamp with time zone',
   })

@@ -12,7 +12,6 @@ export class Migration1759241690774 implements MigrationInterface {
     await queryRunner.renameColumn('snapshot', 'internalName', 'ref')
     await queryRunner.renameColumn('snapshot', 'buildRunnerId', 'initialRunnerId')
     await queryRunner.query(`ALTER TABLE "snapshot" ADD "skipValidation" boolean NOT NULL DEFAULT false`)
-    await queryRunner.query(`ALTER TABLE "snapshot" ADD "cmd" text array`)
 
     // Update snapshot states
     await queryRunner.query(`ALTER TYPE "public"."snapshot_state_enum" RENAME TO "snapshot_state_enum_old"`)
@@ -40,7 +39,6 @@ export class Migration1759241690774 implements MigrationInterface {
     await queryRunner.query(`ALTER TABLE "snapshot" ALTER COLUMN "state" SET DEFAULT 'pending'`)
     await queryRunner.query(`DROP TYPE "public"."snapshot_state_enum_old"`)
 
-    await queryRunner.query(`ALTER TABLE "snapshot" DROP COLUMN "cmd"`)
     await queryRunner.query(`ALTER TABLE "snapshot" DROP COLUMN "skipValidation"`)
     await queryRunner.renameColumn('snapshot', 'initialRunnerId', 'buildRunnerId')
     await queryRunner.renameColumn('snapshot', 'ref', 'internalName')
