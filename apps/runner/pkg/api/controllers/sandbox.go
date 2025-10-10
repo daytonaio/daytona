@@ -12,6 +12,8 @@ import (
 	"github.com/daytonaio/runner/pkg/models/enums"
 	"github.com/daytonaio/runner/pkg/runner"
 	"github.com/gin-gonic/gin"
+
+	common_errors "github.com/daytonaio/common-go/pkg/errors"
 )
 
 // Create 			godoc
@@ -22,11 +24,11 @@ import (
 //	@Param			sandbox	body	dto.CreateSandboxDTO	true	"Create sandbox"
 //	@Produce		json
 //	@Success		201	{string}	containerId
-//	@Failure		400	{object}	common.ErrorResponse
-//	@Failure		401	{object}	common.ErrorResponse
-//	@Failure		404	{object}	common.ErrorResponse
-//	@Failure		409	{object}	common.ErrorResponse
-//	@Failure		500	{object}	common.ErrorResponse
+//	@Failure		400	{object}	common_errors.ErrorResponse
+//	@Failure		401	{object}	common_errors.ErrorResponse
+//	@Failure		404	{object}	common_errors.ErrorResponse
+//	@Failure		409	{object}	common_errors.ErrorResponse
+//	@Failure		500	{object}	common_errors.ErrorResponse
 //	@Router			/sandboxes [post]
 //
 //	@id				Create
@@ -34,7 +36,7 @@ func Create(ctx *gin.Context) {
 	var createSandboxDto dto.CreateSandboxDTO
 	err := ctx.ShouldBindJSON(&createSandboxDto)
 	if err != nil {
-		ctx.Error(common.NewInvalidBodyRequestError(err))
+		ctx.Error(common_errors.NewInvalidBodyRequestError(err))
 		return
 	}
 
@@ -42,7 +44,7 @@ func Create(ctx *gin.Context) {
 
 	containerId, err := runner.Docker.Create(ctx.Request.Context(), createSandboxDto)
 	if err != nil {
-		runner.Cache.SetSandboxState(ctx, createSandboxDto.Id, enums.SandboxStateError)
+		runner.StatesCache.SetSandboxState(ctx, createSandboxDto.Id, enums.SandboxStateError)
 		common.ContainerOperationCount.WithLabelValues("create", string(common.PrometheusOperationStatusFailure)).Inc()
 		ctx.Error(err)
 		return
@@ -61,11 +63,11 @@ func Create(ctx *gin.Context) {
 //	@Produce		json
 //	@Param			sandboxId	path		string	true	"Sandbox ID"
 //	@Success		200			{string}	string	"Sandbox destroyed"
-//	@Failure		400			{object}	common.ErrorResponse
-//	@Failure		401			{object}	common.ErrorResponse
-//	@Failure		404			{object}	common.ErrorResponse
-//	@Failure		409			{object}	common.ErrorResponse
-//	@Failure		500			{object}	common.ErrorResponse
+//	@Failure		400			{object}	common_errors.ErrorResponse
+//	@Failure		401			{object}	common_errors.ErrorResponse
+//	@Failure		404			{object}	common_errors.ErrorResponse
+//	@Failure		409			{object}	common_errors.ErrorResponse
+//	@Failure		500			{object}	common_errors.ErrorResponse
 //	@Router			/sandboxes/{sandboxId}/destroy [post]
 //
 //	@id				Destroy
@@ -76,7 +78,7 @@ func Destroy(ctx *gin.Context) {
 
 	err := runner.Docker.Destroy(ctx.Request.Context(), sandboxId)
 	if err != nil {
-		runner.Cache.SetSandboxState(ctx, sandboxId, enums.SandboxStateError)
+		runner.StatesCache.SetSandboxState(ctx, sandboxId, enums.SandboxStateError)
 		common.ContainerOperationCount.WithLabelValues("destroy", string(common.PrometheusOperationStatusFailure)).Inc()
 		ctx.Error(err)
 		return
@@ -96,11 +98,11 @@ func Destroy(ctx *gin.Context) {
 //	@Param			sandboxId	path		string				true	"Sandbox ID"
 //	@Param			sandbox		body		dto.CreateBackupDTO	true	"Create backup"
 //	@Success		201			{string}	string				"Backup started"
-//	@Failure		400			{object}	common.ErrorResponse
-//	@Failure		401			{object}	common.ErrorResponse
-//	@Failure		404			{object}	common.ErrorResponse
-//	@Failure		409			{object}	common.ErrorResponse
-//	@Failure		500			{object}	common.ErrorResponse
+//	@Failure		400			{object}	common_errors.ErrorResponse
+//	@Failure		401			{object}	common_errors.ErrorResponse
+//	@Failure		404			{object}	common_errors.ErrorResponse
+//	@Failure		409			{object}	common_errors.ErrorResponse
+//	@Failure		500			{object}	common_errors.ErrorResponse
 //	@Router			/sandboxes/{sandboxId}/backup [post]
 //
 //	@id				CreateBackup
@@ -110,7 +112,7 @@ func CreateBackup(ctx *gin.Context) {
 	var createBackupDTO dto.CreateBackupDTO
 	err := ctx.ShouldBindJSON(&createBackupDTO)
 	if err != nil {
-		ctx.Error(common.NewInvalidBodyRequestError(err))
+		ctx.Error(common_errors.NewInvalidBodyRequestError(err))
 		return
 	}
 
@@ -118,7 +120,7 @@ func CreateBackup(ctx *gin.Context) {
 
 	err = runner.Docker.StartBackupCreate(ctx.Request.Context(), sandboxId, createBackupDTO)
 	if err != nil {
-		runner.Cache.SetBackupState(ctx, sandboxId, enums.BackupStateFailed, err)
+		runner.StatesCache.SetBackupState(ctx, sandboxId, enums.BackupStateFailed, err)
 		ctx.Error(err)
 		return
 	}
@@ -135,11 +137,11 @@ func CreateBackup(ctx *gin.Context) {
 //	@Param			sandboxId	path		string					true	"Sandbox ID"
 //	@Param			sandbox		body		dto.ResizeSandboxDTO	true	"Resize sandbox"
 //	@Success		200			{string}	string					"Sandbox resized"
-//	@Failure		400			{object}	common.ErrorResponse
-//	@Failure		401			{object}	common.ErrorResponse
-//	@Failure		404			{object}	common.ErrorResponse
-//	@Failure		409			{object}	common.ErrorResponse
-//	@Failure		500			{object}	common.ErrorResponse
+//	@Failure		400			{object}	common_errors.ErrorResponse
+//	@Failure		401			{object}	common_errors.ErrorResponse
+//	@Failure		404			{object}	common_errors.ErrorResponse
+//	@Failure		409			{object}	common_errors.ErrorResponse
+//	@Failure		500			{object}	common_errors.ErrorResponse
 //	@Router			/sandboxes/{sandboxId}/resize [post]
 //
 //	@id				Resize
@@ -147,7 +149,7 @@ func Resize(ctx *gin.Context) {
 	var resizeDto dto.ResizeSandboxDTO
 	err := ctx.ShouldBindJSON(&resizeDto)
 	if err != nil {
-		ctx.Error(common.NewInvalidBodyRequestError(err))
+		ctx.Error(common_errors.NewInvalidBodyRequestError(err))
 		return
 	}
 
@@ -157,7 +159,7 @@ func Resize(ctx *gin.Context) {
 
 	err = runner.Docker.Resize(ctx.Request.Context(), sandboxId, resizeDto)
 	if err != nil {
-		runner.Cache.SetSandboxState(ctx, sandboxId, enums.SandboxStateError)
+		runner.StatesCache.SetSandboxState(ctx, sandboxId, enums.SandboxStateError)
 		ctx.Error(err)
 		return
 	}
@@ -174,11 +176,11 @@ func Resize(ctx *gin.Context) {
 //	@Param			sandboxId	path		string							true	"Sandbox ID"
 //	@Param			sandbox		body		dto.UpdateNetworkSettingsDTO	true	"Update network settings"
 //	@Success		200			{string}	string							"Network settings updated"
-//	@Failure		400			{object}	common.ErrorResponse
-//	@Failure		401			{object}	common.ErrorResponse
-//	@Failure		404			{object}	common.ErrorResponse
-//	@Failure		409			{object}	common.ErrorResponse
-//	@Failure		500			{object}	common.ErrorResponse
+//	@Failure		400			{object}	common_errors.ErrorResponse
+//	@Failure		401			{object}	common_errors.ErrorResponse
+//	@Failure		404			{object}	common_errors.ErrorResponse
+//	@Failure		409			{object}	common_errors.ErrorResponse
+//	@Failure		500			{object}	common_errors.ErrorResponse
 //	@Router			/sandboxes/{sandboxId}/network-settings [post]
 //
 //	@id				UpdateNetworkSettings
@@ -186,7 +188,7 @@ func UpdateNetworkSettings(ctx *gin.Context) {
 	var updateNetworkSettingsDto dto.UpdateNetworkSettingsDTO
 	err := ctx.ShouldBindJSON(&updateNetworkSettingsDto)
 	if err != nil {
-		ctx.Error(common.NewInvalidBodyRequestError(err))
+		ctx.Error(common_errors.NewInvalidBodyRequestError(err))
 		return
 	}
 
@@ -195,27 +197,27 @@ func UpdateNetworkSettings(ctx *gin.Context) {
 
 	info, err := runner.Docker.ContainerInspect(ctx.Request.Context(), sandboxId)
 	if err != nil {
-		ctx.Error(common.NewInvalidBodyRequestError(err))
+		ctx.Error(common_errors.NewInvalidBodyRequestError(err))
 		return
 	}
 	containerShortId := info.ID[:12]
 
 	// Return error if container does not have an IP address
 	if info.NetworkSettings.IPAddress == "" {
-		ctx.Error(common.NewInvalidBodyRequestError(errors.New("sandbox does not have an IP address")))
+		ctx.Error(common_errors.NewInvalidBodyRequestError(errors.New("sandbox does not have an IP address")))
 		return
 	}
 
 	if updateNetworkSettingsDto.NetworkBlockAll != nil && *updateNetworkSettingsDto.NetworkBlockAll {
 		err = runner.NetRulesManager.SetNetworkRules(containerShortId, info.NetworkSettings.IPAddress, "")
 		if err != nil {
-			ctx.Error(common.NewInvalidBodyRequestError(err))
+			ctx.Error(common_errors.NewInvalidBodyRequestError(err))
 			return
 		}
 	} else if updateNetworkSettingsDto.NetworkAllowList != nil {
 		err = runner.NetRulesManager.SetNetworkRules(containerShortId, info.NetworkSettings.IPAddress, *updateNetworkSettingsDto.NetworkAllowList)
 		if err != nil {
-			ctx.Error(common.NewInvalidBodyRequestError(err))
+			ctx.Error(common_errors.NewInvalidBodyRequestError(err))
 			return
 		}
 	}
@@ -223,7 +225,7 @@ func UpdateNetworkSettings(ctx *gin.Context) {
 	if updateNetworkSettingsDto.NetworkLimitEgress != nil && *updateNetworkSettingsDto.NetworkLimitEgress {
 		err = runner.NetRulesManager.SetNetworkLimiter(containerShortId, info.NetworkSettings.IPAddress)
 		if err != nil {
-			ctx.Error(common.NewInvalidBodyRequestError(err))
+			ctx.Error(common_errors.NewInvalidBodyRequestError(err))
 			return
 		}
 	}
@@ -239,11 +241,11 @@ func UpdateNetworkSettings(ctx *gin.Context) {
 //	@Produce		json
 //	@Param			sandboxId	path		string							true	"Sandbox ID"
 //	@Success		200			{object}	dto.UpdateNetworkSettingsDTO	"Network settings"
-//	@Failure		400			{object}	common.ErrorResponse
-//	@Failure		401			{object}	common.ErrorResponse
-//	@Failure		404			{object}	common.ErrorResponse
-//	@Failure		409			{object}	common.ErrorResponse
-//	@Failure		500			{object}	common.ErrorResponse
+//	@Failure		400			{object}	common_errors.ErrorResponse
+//	@Failure		401			{object}	common_errors.ErrorResponse
+//	@Failure		404			{object}	common_errors.ErrorResponse
+//	@Failure		409			{object}	common_errors.ErrorResponse
+//	@Failure		500			{object}	common_errors.ErrorResponse
 //	@Router			/sandboxes/{sandboxId}/network-settings [get]
 //
 //	@id				GetNetworkSettings
@@ -275,11 +277,11 @@ func GetNetworkSettings(ctx *gin.Context) {
 //	@Param			sandboxId	path		string	true	"Sandbox ID"
 //	@Param			metadata	body		object	false	"Metadata"
 //	@Success		200			{string}	string	"Sandbox started"
-//	@Failure		400			{object}	common.ErrorResponse
-//	@Failure		401			{object}	common.ErrorResponse
-//	@Failure		404			{object}	common.ErrorResponse
-//	@Failure		409			{object}	common.ErrorResponse
-//	@Failure		500			{object}	common.ErrorResponse
+//	@Failure		400			{object}	common_errors.ErrorResponse
+//	@Failure		401			{object}	common_errors.ErrorResponse
+//	@Failure		404			{object}	common_errors.ErrorResponse
+//	@Failure		409			{object}	common_errors.ErrorResponse
+//	@Failure		500			{object}	common_errors.ErrorResponse
 //	@Router			/sandboxes/{sandboxId}/start [post]
 //
 //	@id				Start
@@ -291,14 +293,14 @@ func Start(ctx *gin.Context) {
 	var metadata map[string]string
 	err := ctx.ShouldBindJSON(&metadata)
 	if err != nil {
-		ctx.Error(common.NewInvalidBodyRequestError(err))
+		ctx.Error(common_errors.NewInvalidBodyRequestError(err))
 		return
 	}
 
 	err = runner.Docker.Start(ctx.Request.Context(), sandboxId, metadata)
 
 	if err != nil {
-		runner.Cache.SetSandboxState(ctx, sandboxId, enums.SandboxStateError)
+		runner.StatesCache.SetSandboxState(ctx, sandboxId, enums.SandboxStateError)
 		ctx.Error(err)
 		return
 	}
@@ -314,11 +316,11 @@ func Start(ctx *gin.Context) {
 //	@Produce		json
 //	@Param			sandboxId	path		string	true	"Sandbox ID"
 //	@Success		200			{string}	string	"Sandbox stopped"
-//	@Failure		400			{object}	common.ErrorResponse
-//	@Failure		401			{object}	common.ErrorResponse
-//	@Failure		404			{object}	common.ErrorResponse
-//	@Failure		409			{object}	common.ErrorResponse
-//	@Failure		500			{object}	common.ErrorResponse
+//	@Failure		400			{object}	common_errors.ErrorResponse
+//	@Failure		401			{object}	common_errors.ErrorResponse
+//	@Failure		404			{object}	common_errors.ErrorResponse
+//	@Failure		409			{object}	common_errors.ErrorResponse
+//	@Failure		500			{object}	common_errors.ErrorResponse
 //	@Router			/sandboxes/{sandboxId}/stop [post]
 //
 //	@id				Stop
@@ -329,7 +331,7 @@ func Stop(ctx *gin.Context) {
 
 	err := runner.Docker.Stop(ctx.Request.Context(), sandboxId)
 	if err != nil {
-		runner.Cache.SetSandboxState(ctx, sandboxId, enums.SandboxStateError)
+		runner.StatesCache.SetSandboxState(ctx, sandboxId, enums.SandboxStateError)
 		ctx.Error(err)
 		return
 	}
@@ -345,11 +347,11 @@ func Stop(ctx *gin.Context) {
 //	@Produce		json
 //	@Param			sandboxId	path		string				true	"Sandbox ID"
 //	@Success		200			{object}	SandboxInfoResponse	"Sandbox info"
-//	@Failure		400			{object}	common.ErrorResponse
-//	@Failure		401			{object}	common.ErrorResponse
-//	@Failure		404			{object}	common.ErrorResponse
-//	@Failure		409			{object}	common.ErrorResponse
-//	@Failure		500			{object}	common.ErrorResponse
+//	@Failure		400			{object}	common_errors.ErrorResponse
+//	@Failure		401			{object}	common_errors.ErrorResponse
+//	@Failure		404			{object}	common_errors.ErrorResponse
+//	@Failure		409			{object}	common_errors.ErrorResponse
+//	@Failure		500			{object}	common_errors.ErrorResponse
 //	@Router			/sandboxes/{sandboxId} [get]
 //
 //	@id				Info
@@ -381,11 +383,11 @@ type SandboxInfoResponse struct {
 //	@Produce		json
 //	@Param			sandboxId	path		string	true	"Sandbox ID"
 //	@Success		200			{string}	string	"Sandbox removed"
-//	@Failure		400			{object}	common.ErrorResponse
-//	@Failure		401			{object}	common.ErrorResponse
-//	@Failure		404			{object}	common.ErrorResponse
-//	@Failure		409			{object}	common.ErrorResponse
-//	@Failure		500			{object}	common.ErrorResponse
+//	@Failure		400			{object}	common_errors.ErrorResponse
+//	@Failure		401			{object}	common_errors.ErrorResponse
+//	@Failure		404			{object}	common_errors.ErrorResponse
+//	@Failure		409			{object}	common_errors.ErrorResponse
+//	@Failure		500			{object}	common_errors.ErrorResponse
 //	@Router			/sandboxes/{sandboxId} [delete]
 //
 //	@id				RemoveDestroyed
@@ -396,7 +398,7 @@ func RemoveDestroyed(ctx *gin.Context) {
 
 	err := runner.SandboxService.RemoveDestroyedSandbox(ctx.Request.Context(), sandboxId)
 	if err != nil {
-		if !common.IsNotFoundError(err) {
+		if !common_errors.IsNotFoundError(err) {
 			ctx.Error(err)
 			return
 		}

@@ -14,7 +14,7 @@ import (
 )
 
 func (d *DockerClient) Stop(ctx context.Context, containerId string) error {
-	d.cache.SetSandboxState(ctx, containerId, enums.SandboxStateStopping)
+	d.statesCache.SetSandboxState(ctx, containerId, enums.SandboxStateStopping)
 
 	// Cancel a backup if it's already in progress
 	backup_context, ok := backup_context_map.Get(containerId)
@@ -44,7 +44,7 @@ func (d *DockerClient) Stop(ctx context.Context, containerId string) error {
 		return err
 	}
 
-	d.cache.SetSandboxState(ctx, containerId, enums.SandboxStateStopped)
+	d.statesCache.SetSandboxState(ctx, containerId, enums.SandboxStateStopped)
 
 	return nil
 }

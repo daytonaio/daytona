@@ -13,7 +13,7 @@ import (
 )
 
 func (d *DockerClient) Resize(ctx context.Context, sandboxId string, sandboxDto dto.ResizeSandboxDTO) error {
-	d.cache.SetSandboxState(ctx, sandboxId, enums.SandboxStateResizing)
+	d.statesCache.SetSandboxState(ctx, sandboxId, enums.SandboxStateResizing)
 
 	_, err := d.apiClient.ContainerUpdate(ctx, sandboxId, container.UpdateConfig{
 		Resources: container.Resources{

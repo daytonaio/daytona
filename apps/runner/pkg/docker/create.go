@@ -18,6 +18,8 @@ import (
 	v1 "github.com/opencontainers/image-spec/specs-go/v1"
 
 	log "github.com/sirupsen/logrus"
+
+	common_errors "github.com/daytonaio/common-go/pkg/errors"
 )
 
 func (d *DockerClient) Create(ctx context.Context, sandboxDto dto.CreateSandboxDTO) (string, error) {
@@ -49,7 +51,7 @@ func (d *DockerClient) Create(ctx context.Context, sandboxDto dto.CreateSandboxD
 		return sandboxDto.Id, nil
 	}
 
-	d.cache.SetSandboxState(ctx, sandboxDto.Id, enums.SandboxStateCreating)
+	d.statesCache.SetSandboxState(ctx, sandboxDto.Id, enums.SandboxStateCreating)
 
 	ctx = context.WithValue(ctx, constants.ID_KEY, sandboxDto.Id)
 	err = d.PullImage(ctx, sandboxDto.Snapshot, sandboxDto.Registry)
@@ -57,7 +59,7 @@ func (d *DockerClient) Create(ctx context.Context, sandboxDto dto.CreateSandboxD
 		return "", err
 	}
 
-	d.cache.SetSandboxState(ctx, sandboxDto.Id, enums.SandboxStateCreating)
+	d.statesCache.SetSandboxState(ctx, sandboxDto.Id, enums.SandboxStateCreating)
 
 	err = d.validateImageArchitecture(ctx, sandboxDto.Snapshot)
 	if err != nil {
@@ -146,5 +148,5 @@ func (p *DockerClient) validateImageArchitecture(ctx context.Context, image stri
 		}
 	}
 
-	return common.NewConflictError(fmt.Errorf("image %s architecture (%s) is not x64 compatible", image, inspect.Architecture))
+	return common_errors.NewConflictError(fmt.Errorf("image %s architecture (%s) is not x64 compatible", image, inspect.Architecture))
 }
