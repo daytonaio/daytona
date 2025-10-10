@@ -270,7 +270,7 @@ function getDisplayName(sandbox: Sandbox): string {
   // If the sandbox is destroying and the name starts with "DESTROYED_", trim the prefix and timestamp
   if (sandbox.desiredState === SandboxDesiredState.DESTROYED && sandbox.name.startsWith('DESTROYED_')) {
     // Remove "DESTROYED_" prefix and everything after the last underscore (timestamp)
-    const withoutPrefix = sandbox.name.substring(9) // Remove "DESTROYED_"
+    const withoutPrefix = sandbox.name.substring(10) // Remove "DESTROYED_"
     const lastUnderscoreIndex = withoutPrefix.lastIndexOf('_')
     if (lastUnderscoreIndex !== -1) {
       return withoutPrefix.substring(0, lastUnderscoreIndex)
