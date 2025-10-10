@@ -619,6 +619,7 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {number} [page] Page number of the results
      * @param {number} [limit] Number of results per page
+     * @param {string} [id] Filter by partial ID match
      * @param {string} [name] Filter by partial name match
      * @param {string} [labels] JSON encoded labels to filter by
      * @param {boolean} [includeErroredDeleted] Include results with errored state and deleted desired state
@@ -642,6 +643,7 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
       xDaytonaOrganizationID?: string,
       page?: number,
       limit?: number,
+      id?: string,
       name?: string,
       labels?: string,
       includeErroredDeleted?: boolean,
@@ -684,6 +686,10 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
 
       if (limit !== undefined) {
         localVarQueryParameter['limit'] = limit
+      }
+
+      if (id !== undefined) {
+        localVarQueryParameter['id'] = id
       }
 
       if (name !== undefined) {
@@ -1627,6 +1633,7 @@ export const SandboxApiFp = function (configuration?: Configuration) {
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {number} [page] Page number of the results
      * @param {number} [limit] Number of results per page
+     * @param {string} [id] Filter by partial ID match
      * @param {string} [name] Filter by partial name match
      * @param {string} [labels] JSON encoded labels to filter by
      * @param {boolean} [includeErroredDeleted] Include results with errored state and deleted desired state
@@ -1650,6 +1657,7 @@ export const SandboxApiFp = function (configuration?: Configuration) {
       xDaytonaOrganizationID?: string,
       page?: number,
       limit?: number,
+      id?: string,
       name?: string,
       labels?: string,
       includeErroredDeleted?: boolean,
@@ -1672,6 +1680,7 @@ export const SandboxApiFp = function (configuration?: Configuration) {
         xDaytonaOrganizationID,
         page,
         limit,
+        id,
         name,
         labels,
         includeErroredDeleted,
@@ -2222,6 +2231,7 @@ export const SandboxApiFactory = function (configuration?: Configuration, basePa
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {number} [page] Page number of the results
      * @param {number} [limit] Number of results per page
+     * @param {string} [id] Filter by partial ID match
      * @param {string} [name] Filter by partial name match
      * @param {string} [labels] JSON encoded labels to filter by
      * @param {boolean} [includeErroredDeleted] Include results with errored state and deleted desired state
@@ -2245,6 +2255,7 @@ export const SandboxApiFactory = function (configuration?: Configuration, basePa
       xDaytonaOrganizationID?: string,
       page?: number,
       limit?: number,
+      id?: string,
       name?: string,
       labels?: string,
       includeErroredDeleted?: boolean,
@@ -2268,6 +2279,7 @@ export const SandboxApiFactory = function (configuration?: Configuration, basePa
           xDaytonaOrganizationID,
           page,
           limit,
+          id,
           name,
           labels,
           includeErroredDeleted,
@@ -2690,6 +2702,7 @@ export class SandboxApi extends BaseAPI {
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {number} [page] Page number of the results
    * @param {number} [limit] Number of results per page
+   * @param {string} [id] Filter by partial ID match
    * @param {string} [name] Filter by partial name match
    * @param {string} [labels] JSON encoded labels to filter by
    * @param {boolean} [includeErroredDeleted] Include results with errored state and deleted desired state
@@ -2714,6 +2727,7 @@ export class SandboxApi extends BaseAPI {
     xDaytonaOrganizationID?: string,
     page?: number,
     limit?: number,
+    id?: string,
     name?: string,
     labels?: string,
     includeErroredDeleted?: boolean,
@@ -2737,6 +2751,7 @@ export class SandboxApi extends BaseAPI {
         xDaytonaOrganizationID,
         page,
         limit,
+        id,
         name,
         labels,
         includeErroredDeleted,
@@ -2977,6 +2992,7 @@ export type ListSandboxesPaginatedStatesEnum =
  * @export
  */
 export const ListSandboxesPaginatedSortEnum = {
+  ID: 'id',
   NAME: 'name',
   STATE: 'state',
   SNAPSHOT: 'snapshot',

@@ -1305,6 +1305,15 @@ paths:
             minimum: 1
             type: number
           style: form
+        - description: Filter by partial ID match
+          explode: true
+          in: query
+          name: id
+          required: false
+          schema:
+            example: abc123
+            type: string
+          style: form
         - description: Filter by partial name match
           explode: true
           in: query
@@ -1460,6 +1469,7 @@ paths:
           schema:
             default: createdAt
             enum:
+              - id
               - name
               - state
               - snapshot
