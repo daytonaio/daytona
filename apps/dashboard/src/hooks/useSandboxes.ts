@@ -14,6 +14,7 @@ import {
 } from '@daytonaio/api-client'
 
 export interface SandboxFilters {
+  id?: string
   name?: string
   labels?: Record<string, string>
   includeErroredDeleted?: boolean
@@ -81,6 +82,7 @@ export function useSandboxes(queryKey: QueryKey, params: SandboxQueryParams) {
         selectedOrganization.id,
         page,
         pageSize,
+        filters.id,
         filters.name,
         filters.labels ? JSON.stringify(filters.labels) : undefined,
         filters.includeErroredDeleted,
