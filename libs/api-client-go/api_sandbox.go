@@ -28,22 +28,23 @@ type SandboxAPI interface {
 		ArchiveSandbox Archive sandbox
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param sandboxId
+		@param sandboxIdOrName
 		@return SandboxAPIArchiveSandboxRequest
 	*/
-	ArchiveSandbox(ctx context.Context, sandboxId string) SandboxAPIArchiveSandboxRequest
+	ArchiveSandbox(ctx context.Context, sandboxIdOrName string) SandboxAPIArchiveSandboxRequest
 
 	// ArchiveSandboxExecute executes the request
-	ArchiveSandboxExecute(r SandboxAPIArchiveSandboxRequest) (*http.Response, error)
+	//  @return Sandbox
+	ArchiveSandboxExecute(r SandboxAPIArchiveSandboxRequest) (*Sandbox, *http.Response, error)
 
 	/*
 		CreateBackup Create sandbox backup
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param sandboxId ID of the sandbox
+		@param sandboxIdOrName ID or name of the sandbox
 		@return SandboxAPICreateBackupRequest
 	*/
-	CreateBackup(ctx context.Context, sandboxId string) SandboxAPICreateBackupRequest
+	CreateBackup(ctx context.Context, sandboxIdOrName string) SandboxAPICreateBackupRequest
 
 	// CreateBackupExecute executes the request
 	//  @return Sandbox
@@ -65,10 +66,10 @@ type SandboxAPI interface {
 		CreateSshAccess Create SSH access for sandbox
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param sandboxId ID of the sandbox
+		@param sandboxIdOrName ID or name of the sandbox
 		@return SandboxAPICreateSshAccessRequest
 	*/
-	CreateSshAccess(ctx context.Context, sandboxId string) SandboxAPICreateSshAccessRequest
+	CreateSshAccess(ctx context.Context, sandboxIdOrName string) SandboxAPICreateSshAccessRequest
 
 	// CreateSshAccessExecute executes the request
 	//  @return SshAccessDto
@@ -78,22 +79,23 @@ type SandboxAPI interface {
 		DeleteSandbox Delete sandbox
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param sandboxId ID of the sandbox
+		@param sandboxIdOrName ID or name of the sandbox
 		@return SandboxAPIDeleteSandboxRequest
 	*/
-	DeleteSandbox(ctx context.Context, sandboxId string) SandboxAPIDeleteSandboxRequest
+	DeleteSandbox(ctx context.Context, sandboxIdOrName string) SandboxAPIDeleteSandboxRequest
 
 	// DeleteSandboxExecute executes the request
-	DeleteSandboxExecute(r SandboxAPIDeleteSandboxRequest) (*http.Response, error)
+	//  @return Sandbox
+	DeleteSandboxExecute(r SandboxAPIDeleteSandboxRequest) (*Sandbox, *http.Response, error)
 
 	/*
 		GetBuildLogs Get build logs
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param sandboxId ID of the sandbox
+		@param sandboxIdOrName ID or name of the sandbox
 		@return SandboxAPIGetBuildLogsRequest
 	*/
-	GetBuildLogs(ctx context.Context, sandboxId string) SandboxAPIGetBuildLogsRequest
+	GetBuildLogs(ctx context.Context, sandboxIdOrName string) SandboxAPIGetBuildLogsRequest
 
 	// GetBuildLogsExecute executes the request
 	GetBuildLogsExecute(r SandboxAPIGetBuildLogsRequest) (*http.Response, error)
@@ -102,11 +104,11 @@ type SandboxAPI interface {
 		GetPortPreviewUrl Get preview URL for a sandbox port
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param sandboxId ID of the sandbox
+		@param sandboxIdOrName ID or name of the sandbox
 		@param port Port number to get preview URL for
 		@return SandboxAPIGetPortPreviewUrlRequest
 	*/
-	GetPortPreviewUrl(ctx context.Context, sandboxId string, port float32) SandboxAPIGetPortPreviewUrlRequest
+	GetPortPreviewUrl(ctx context.Context, sandboxIdOrName string, port float32) SandboxAPIGetPortPreviewUrlRequest
 
 	// GetPortPreviewUrlExecute executes the request
 	//  @return PortPreviewUrl
@@ -116,10 +118,10 @@ type SandboxAPI interface {
 		GetSandbox Get sandbox details
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param sandboxId ID of the sandbox
+		@param sandboxIdOrName ID or name of the sandbox
 		@return SandboxAPIGetSandboxRequest
 	*/
-	GetSandbox(ctx context.Context, sandboxId string) SandboxAPIGetSandboxRequest
+	GetSandbox(ctx context.Context, sandboxIdOrName string) SandboxAPIGetSandboxRequest
 
 	// GetSandboxExecute executes the request
 	//  @return Sandbox
@@ -177,10 +179,10 @@ type SandboxAPI interface {
 		ReplaceLabels Replace sandbox labels
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param sandboxId ID of the sandbox
+		@param sandboxIdOrName ID or name of the sandbox
 		@return SandboxAPIReplaceLabelsRequest
 	*/
-	ReplaceLabels(ctx context.Context, sandboxId string) SandboxAPIReplaceLabelsRequest
+	ReplaceLabels(ctx context.Context, sandboxIdOrName string) SandboxAPIReplaceLabelsRequest
 
 	// ReplaceLabelsExecute executes the request
 	//  @return SandboxLabels
@@ -190,61 +192,65 @@ type SandboxAPI interface {
 		RevokeSshAccess Revoke SSH access for sandbox
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param sandboxId ID of the sandbox
+		@param sandboxIdOrName ID or name of the sandbox
 		@return SandboxAPIRevokeSshAccessRequest
 	*/
-	RevokeSshAccess(ctx context.Context, sandboxId string) SandboxAPIRevokeSshAccessRequest
+	RevokeSshAccess(ctx context.Context, sandboxIdOrName string) SandboxAPIRevokeSshAccessRequest
 
 	// RevokeSshAccessExecute executes the request
-	RevokeSshAccessExecute(r SandboxAPIRevokeSshAccessRequest) (*http.Response, error)
+	//  @return Sandbox
+	RevokeSshAccessExecute(r SandboxAPIRevokeSshAccessRequest) (*Sandbox, *http.Response, error)
 
 	/*
 		SetAutoArchiveInterval Set sandbox auto-archive interval
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param sandboxId ID of the sandbox
+		@param sandboxIdOrName ID or name of the sandbox
 		@param interval Auto-archive interval in minutes (0 means the maximum interval will be used)
 		@return SandboxAPISetAutoArchiveIntervalRequest
 	*/
-	SetAutoArchiveInterval(ctx context.Context, sandboxId string, interval float32) SandboxAPISetAutoArchiveIntervalRequest
+	SetAutoArchiveInterval(ctx context.Context, sandboxIdOrName string, interval float32) SandboxAPISetAutoArchiveIntervalRequest
 
 	// SetAutoArchiveIntervalExecute executes the request
-	SetAutoArchiveIntervalExecute(r SandboxAPISetAutoArchiveIntervalRequest) (*http.Response, error)
+	//  @return Sandbox
+	SetAutoArchiveIntervalExecute(r SandboxAPISetAutoArchiveIntervalRequest) (*Sandbox, *http.Response, error)
 
 	/*
 		SetAutoDeleteInterval Set sandbox auto-delete interval
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param sandboxId ID of the sandbox
+		@param sandboxIdOrName ID or name of the sandbox
 		@param interval Auto-delete interval in minutes (negative value means disabled, 0 means delete immediately upon stopping)
 		@return SandboxAPISetAutoDeleteIntervalRequest
 	*/
-	SetAutoDeleteInterval(ctx context.Context, sandboxId string, interval float32) SandboxAPISetAutoDeleteIntervalRequest
+	SetAutoDeleteInterval(ctx context.Context, sandboxIdOrName string, interval float32) SandboxAPISetAutoDeleteIntervalRequest
 
 	// SetAutoDeleteIntervalExecute executes the request
-	SetAutoDeleteIntervalExecute(r SandboxAPISetAutoDeleteIntervalRequest) (*http.Response, error)
+	//  @return Sandbox
+	SetAutoDeleteIntervalExecute(r SandboxAPISetAutoDeleteIntervalRequest) (*Sandbox, *http.Response, error)
 
 	/*
 		SetAutostopInterval Set sandbox auto-stop interval
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param sandboxId ID of the sandbox
+		@param sandboxIdOrName ID or name of the sandbox
 		@param interval Auto-stop interval in minutes (0 to disable)
 		@return SandboxAPISetAutostopIntervalRequest
 	*/
-	SetAutostopInterval(ctx context.Context, sandboxId string, interval float32) SandboxAPISetAutostopIntervalRequest
+	SetAutostopInterval(ctx context.Context, sandboxIdOrName string, interval float32) SandboxAPISetAutostopIntervalRequest
 
 	// SetAutostopIntervalExecute executes the request
-	SetAutostopIntervalExecute(r SandboxAPISetAutostopIntervalRequest) (*http.Response, error)
+	//  @return Sandbox
+	SetAutostopIntervalExecute(r SandboxAPISetAutostopIntervalRequest) (*Sandbox, *http.Response, error)
 
 	/*
 		StartSandbox Start sandbox
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param sandboxId ID of the sandbox
+		@param sandboxIdOrName ID or name of the sandbox
 		@return SandboxAPIStartSandboxRequest
 	*/
-	StartSandbox(ctx context.Context, sandboxId string) SandboxAPIStartSandboxRequest
+	StartSandbox(ctx context.Context, sandboxIdOrName string) SandboxAPIStartSandboxRequest
 
 	// StartSandboxExecute executes the request
 	//  @return Sandbox
@@ -254,26 +260,28 @@ type SandboxAPI interface {
 		StopSandbox Stop sandbox
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param sandboxId ID of the sandbox
+		@param sandboxIdOrName ID or name of the sandbox
 		@return SandboxAPIStopSandboxRequest
 	*/
-	StopSandbox(ctx context.Context, sandboxId string) SandboxAPIStopSandboxRequest
+	StopSandbox(ctx context.Context, sandboxIdOrName string) SandboxAPIStopSandboxRequest
 
 	// StopSandboxExecute executes the request
-	StopSandboxExecute(r SandboxAPIStopSandboxRequest) (*http.Response, error)
+	//  @return Sandbox
+	StopSandboxExecute(r SandboxAPIStopSandboxRequest) (*Sandbox, *http.Response, error)
 
 	/*
 		UpdatePublicStatus Update public status
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param sandboxId ID of the sandbox
+		@param sandboxIdOrName ID or name of the sandbox
 		@param isPublic Public status to set
 		@return SandboxAPIUpdatePublicStatusRequest
 	*/
-	UpdatePublicStatus(ctx context.Context, sandboxId string, isPublic bool) SandboxAPIUpdatePublicStatusRequest
+	UpdatePublicStatus(ctx context.Context, sandboxIdOrName string, isPublic bool) SandboxAPIUpdatePublicStatusRequest
 
 	// UpdatePublicStatusExecute executes the request
-	UpdatePublicStatusExecute(r SandboxAPIUpdatePublicStatusRequest) (*http.Response, error)
+	//  @return Sandbox
+	UpdatePublicStatusExecute(r SandboxAPIUpdatePublicStatusRequest) (*Sandbox, *http.Response, error)
 
 	/*
 		UpdateSandboxState Update sandbox state
@@ -306,7 +314,7 @@ type SandboxAPIService service
 type SandboxAPIArchiveSandboxRequest struct {
 	ctx                    context.Context
 	ApiService             SandboxAPI
-	sandboxId              string
+	sandboxIdOrName        string
 	xDaytonaOrganizationID *string
 }
 
@@ -316,7 +324,7 @@ func (r SandboxAPIArchiveSandboxRequest) XDaytonaOrganizationID(xDaytonaOrganiza
 	return r
 }
 
-func (r SandboxAPIArchiveSandboxRequest) Execute() (*http.Response, error) {
+func (r SandboxAPIArchiveSandboxRequest) Execute() (*Sandbox, *http.Response, error) {
 	return r.ApiService.ArchiveSandboxExecute(r)
 }
 
@@ -324,32 +332,35 @@ func (r SandboxAPIArchiveSandboxRequest) Execute() (*http.Response, error) {
 ArchiveSandbox Archive sandbox
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
+	@param sandboxIdOrName
 	@return SandboxAPIArchiveSandboxRequest
 */
-func (a *SandboxAPIService) ArchiveSandbox(ctx context.Context, sandboxId string) SandboxAPIArchiveSandboxRequest {
+func (a *SandboxAPIService) ArchiveSandbox(ctx context.Context, sandboxIdOrName string) SandboxAPIArchiveSandboxRequest {
 	return SandboxAPIArchiveSandboxRequest{
-		ApiService: a,
-		ctx:        ctx,
-		sandboxId:  sandboxId,
+		ApiService:      a,
+		ctx:             ctx,
+		sandboxIdOrName: sandboxIdOrName,
 	}
 }
 
 // Execute executes the request
-func (a *SandboxAPIService) ArchiveSandboxExecute(r SandboxAPIArchiveSandboxRequest) (*http.Response, error) {
+//
+//	@return Sandbox
+func (a *SandboxAPIService) ArchiveSandboxExecute(r SandboxAPIArchiveSandboxRequest) (*Sandbox, *http.Response, error) {
 	var (
-		localVarHTTPMethod = http.MethodPost
-		localVarPostBody   interface{}
-		formFiles          []formFile
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *Sandbox
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SandboxAPIService.ArchiveSandbox")
 	if err != nil {
-		return nil, &GenericOpenAPIError{error: err.Error()}
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/sandbox/{sandboxId}/archive"
-	localVarPath = strings.Replace(localVarPath, "{"+"sandboxId"+"}", url.PathEscape(parameterValueToString(r.sandboxId, "sandboxId")), -1)
+	localVarPath := localBasePath + "/sandbox/{sandboxIdOrName}/archive"
+	localVarPath = strings.Replace(localVarPath, "{"+"sandboxIdOrName"+"}", url.PathEscape(parameterValueToString(r.sandboxIdOrName, "sandboxIdOrName")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -365,7 +376,7 @@ func (a *SandboxAPIService) ArchiveSandboxExecute(r SandboxAPIArchiveSandboxRequ
 	}
 
 	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{}
+	localVarHTTPHeaderAccepts := []string{"application/json"}
 
 	// set Accept header
 	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
@@ -377,19 +388,19 @@ func (a *SandboxAPIService) ArchiveSandboxExecute(r SandboxAPIArchiveSandboxRequ
 	}
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
-		return nil, err
+		return localVarReturnValue, nil, err
 	}
 
 	localVarHTTPResponse, err := a.client.callAPI(req)
 	if err != nil || localVarHTTPResponse == nil {
-		return localVarHTTPResponse, err
+		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
 	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
 	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
-		return localVarHTTPResponse, err
+		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
 	if localVarHTTPResponse.StatusCode >= 300 {
@@ -397,16 +408,25 @@ func (a *SandboxAPIService) ArchiveSandboxExecute(r SandboxAPIArchiveSandboxRequ
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
-		return localVarHTTPResponse, newErr
+		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
-	return localVarHTTPResponse, nil
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
 type SandboxAPICreateBackupRequest struct {
 	ctx                    context.Context
 	ApiService             SandboxAPI
-	sandboxId              string
+	sandboxIdOrName        string
 	xDaytonaOrganizationID *string
 }
 
@@ -424,14 +444,14 @@ func (r SandboxAPICreateBackupRequest) Execute() (*Sandbox, *http.Response, erro
 CreateBackup Create sandbox backup
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId ID of the sandbox
+	@param sandboxIdOrName ID or name of the sandbox
 	@return SandboxAPICreateBackupRequest
 */
-func (a *SandboxAPIService) CreateBackup(ctx context.Context, sandboxId string) SandboxAPICreateBackupRequest {
+func (a *SandboxAPIService) CreateBackup(ctx context.Context, sandboxIdOrName string) SandboxAPICreateBackupRequest {
 	return SandboxAPICreateBackupRequest{
-		ApiService: a,
-		ctx:        ctx,
-		sandboxId:  sandboxId,
+		ApiService:      a,
+		ctx:             ctx,
+		sandboxIdOrName: sandboxIdOrName,
 	}
 }
 
@@ -451,8 +471,8 @@ func (a *SandboxAPIService) CreateBackupExecute(r SandboxAPICreateBackupRequest)
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/sandbox/{sandboxId}/backup"
-	localVarPath = strings.Replace(localVarPath, "{"+"sandboxId"+"}", url.PathEscape(parameterValueToString(r.sandboxId, "sandboxId")), -1)
+	localVarPath := localBasePath + "/sandbox/{sandboxIdOrName}/backup"
+	localVarPath = strings.Replace(localVarPath, "{"+"sandboxIdOrName"+"}", url.PathEscape(parameterValueToString(r.sandboxIdOrName, "sandboxIdOrName")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -637,7 +657,7 @@ func (a *SandboxAPIService) CreateSandboxExecute(r SandboxAPICreateSandboxReques
 type SandboxAPICreateSshAccessRequest struct {
 	ctx                    context.Context
 	ApiService             SandboxAPI
-	sandboxId              string
+	sandboxIdOrName        string
 	xDaytonaOrganizationID *string
 	expiresInMinutes       *float32
 }
@@ -662,14 +682,14 @@ func (r SandboxAPICreateSshAccessRequest) Execute() (*SshAccessDto, *http.Respon
 CreateSshAccess Create SSH access for sandbox
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId ID of the sandbox
+	@param sandboxIdOrName ID or name of the sandbox
 	@return SandboxAPICreateSshAccessRequest
 */
-func (a *SandboxAPIService) CreateSshAccess(ctx context.Context, sandboxId string) SandboxAPICreateSshAccessRequest {
+func (a *SandboxAPIService) CreateSshAccess(ctx context.Context, sandboxIdOrName string) SandboxAPICreateSshAccessRequest {
 	return SandboxAPICreateSshAccessRequest{
-		ApiService: a,
-		ctx:        ctx,
-		sandboxId:  sandboxId,
+		ApiService:      a,
+		ctx:             ctx,
+		sandboxIdOrName: sandboxIdOrName,
 	}
 }
 
@@ -689,8 +709,8 @@ func (a *SandboxAPIService) CreateSshAccessExecute(r SandboxAPICreateSshAccessRe
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/sandbox/{sandboxId}/ssh-access"
-	localVarPath = strings.Replace(localVarPath, "{"+"sandboxId"+"}", url.PathEscape(parameterValueToString(r.sandboxId, "sandboxId")), -1)
+	localVarPath := localBasePath + "/sandbox/{sandboxIdOrName}/ssh-access"
+	localVarPath = strings.Replace(localVarPath, "{"+"sandboxIdOrName"+"}", url.PathEscape(parameterValueToString(r.sandboxIdOrName, "sandboxIdOrName")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -759,7 +779,7 @@ func (a *SandboxAPIService) CreateSshAccessExecute(r SandboxAPICreateSshAccessRe
 type SandboxAPIDeleteSandboxRequest struct {
 	ctx                    context.Context
 	ApiService             SandboxAPI
-	sandboxId              string
+	sandboxIdOrName        string
 	xDaytonaOrganizationID *string
 }
 
@@ -769,7 +789,7 @@ func (r SandboxAPIDeleteSandboxRequest) XDaytonaOrganizationID(xDaytonaOrganizat
 	return r
 }
 
-func (r SandboxAPIDeleteSandboxRequest) Execute() (*http.Response, error) {
+func (r SandboxAPIDeleteSandboxRequest) Execute() (*Sandbox, *http.Response, error) {
 	return r.ApiService.DeleteSandboxExecute(r)
 }
 
@@ -777,32 +797,35 @@ func (r SandboxAPIDeleteSandboxRequest) Execute() (*http.Response, error) {
 DeleteSandbox Delete sandbox
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId ID of the sandbox
+	@param sandboxIdOrName ID or name of the sandbox
 	@return SandboxAPIDeleteSandboxRequest
 */
-func (a *SandboxAPIService) DeleteSandbox(ctx context.Context, sandboxId string) SandboxAPIDeleteSandboxRequest {
+func (a *SandboxAPIService) DeleteSandbox(ctx context.Context, sandboxIdOrName string) SandboxAPIDeleteSandboxRequest {
 	return SandboxAPIDeleteSandboxRequest{
-		ApiService: a,
-		ctx:        ctx,
-		sandboxId:  sandboxId,
+		ApiService:      a,
+		ctx:             ctx,
+		sandboxIdOrName: sandboxIdOrName,
 	}
 }
 
 // Execute executes the request
-func (a *SandboxAPIService) DeleteSandboxExecute(r SandboxAPIDeleteSandboxRequest) (*http.Response, error) {
+//
+//	@return Sandbox
+func (a *SandboxAPIService) DeleteSandboxExecute(r SandboxAPIDeleteSandboxRequest) (*Sandbox, *http.Response, error) {
 	var (
-		localVarHTTPMethod = http.MethodDelete
-		localVarPostBody   interface{}
-		formFiles          []formFile
+		localVarHTTPMethod  = http.MethodDelete
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *Sandbox
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SandboxAPIService.DeleteSandbox")
 	if err != nil {
-		return nil, &GenericOpenAPIError{error: err.Error()}
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/sandbox/{sandboxId}"
-	localVarPath = strings.Replace(localVarPath, "{"+"sandboxId"+"}", url.PathEscape(parameterValueToString(r.sandboxId, "sandboxId")), -1)
+	localVarPath := localBasePath + "/sandbox/{sandboxIdOrName}"
+	localVarPath = strings.Replace(localVarPath, "{"+"sandboxIdOrName"+"}", url.PathEscape(parameterValueToString(r.sandboxIdOrName, "sandboxIdOrName")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -818,7 +841,7 @@ func (a *SandboxAPIService) DeleteSandboxExecute(r SandboxAPIDeleteSandboxReques
 	}
 
 	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{}
+	localVarHTTPHeaderAccepts := []string{"application/json"}
 
 	// set Accept header
 	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
@@ -830,19 +853,19 @@ func (a *SandboxAPIService) DeleteSandboxExecute(r SandboxAPIDeleteSandboxReques
 	}
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
-		return nil, err
+		return localVarReturnValue, nil, err
 	}
 
 	localVarHTTPResponse, err := a.client.callAPI(req)
 	if err != nil || localVarHTTPResponse == nil {
-		return localVarHTTPResponse, err
+		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
 	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
 	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
-		return localVarHTTPResponse, err
+		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
 	if localVarHTTPResponse.StatusCode >= 300 {
@@ -850,16 +873,25 @@ func (a *SandboxAPIService) DeleteSandboxExecute(r SandboxAPIDeleteSandboxReques
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
-		return localVarHTTPResponse, newErr
+		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
-	return localVarHTTPResponse, nil
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
 type SandboxAPIGetBuildLogsRequest struct {
 	ctx                    context.Context
 	ApiService             SandboxAPI
-	sandboxId              string
+	sandboxIdOrName        string
 	xDaytonaOrganizationID *string
 	follow                 *bool
 }
@@ -884,14 +916,14 @@ func (r SandboxAPIGetBuildLogsRequest) Execute() (*http.Response, error) {
 GetBuildLogs Get build logs
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId ID of the sandbox
+	@param sandboxIdOrName ID or name of the sandbox
 	@return SandboxAPIGetBuildLogsRequest
 */
-func (a *SandboxAPIService) GetBuildLogs(ctx context.Context, sandboxId string) SandboxAPIGetBuildLogsRequest {
+func (a *SandboxAPIService) GetBuildLogs(ctx context.Context, sandboxIdOrName string) SandboxAPIGetBuildLogsRequest {
 	return SandboxAPIGetBuildLogsRequest{
-		ApiService: a,
-		ctx:        ctx,
-		sandboxId:  sandboxId,
+		ApiService:      a,
+		ctx:             ctx,
+		sandboxIdOrName: sandboxIdOrName,
 	}
 }
 
@@ -908,8 +940,8 @@ func (a *SandboxAPIService) GetBuildLogsExecute(r SandboxAPIGetBuildLogsRequest)
 		return nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/sandbox/{sandboxId}/build-logs"
-	localVarPath = strings.Replace(localVarPath, "{"+"sandboxId"+"}", url.PathEscape(parameterValueToString(r.sandboxId, "sandboxId")), -1)
+	localVarPath := localBasePath + "/sandbox/{sandboxIdOrName}/build-logs"
+	localVarPath = strings.Replace(localVarPath, "{"+"sandboxIdOrName"+"}", url.PathEscape(parameterValueToString(r.sandboxIdOrName, "sandboxIdOrName")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -969,7 +1001,7 @@ func (a *SandboxAPIService) GetBuildLogsExecute(r SandboxAPIGetBuildLogsRequest)
 type SandboxAPIGetPortPreviewUrlRequest struct {
 	ctx                    context.Context
 	ApiService             SandboxAPI
-	sandboxId              string
+	sandboxIdOrName        string
 	port                   float32
 	xDaytonaOrganizationID *string
 }
@@ -988,16 +1020,16 @@ func (r SandboxAPIGetPortPreviewUrlRequest) Execute() (*PortPreviewUrl, *http.Re
 GetPortPreviewUrl Get preview URL for a sandbox port
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId ID of the sandbox
+	@param sandboxIdOrName ID or name of the sandbox
 	@param port Port number to get preview URL for
 	@return SandboxAPIGetPortPreviewUrlRequest
 */
-func (a *SandboxAPIService) GetPortPreviewUrl(ctx context.Context, sandboxId string, port float32) SandboxAPIGetPortPreviewUrlRequest {
+func (a *SandboxAPIService) GetPortPreviewUrl(ctx context.Context, sandboxIdOrName string, port float32) SandboxAPIGetPortPreviewUrlRequest {
 	return SandboxAPIGetPortPreviewUrlRequest{
-		ApiService: a,
-		ctx:        ctx,
-		sandboxId:  sandboxId,
-		port:       port,
+		ApiService:      a,
+		ctx:             ctx,
+		sandboxIdOrName: sandboxIdOrName,
+		port:            port,
 	}
 }
 
@@ -1017,8 +1049,8 @@ func (a *SandboxAPIService) GetPortPreviewUrlExecute(r SandboxAPIGetPortPreviewU
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/sandbox/{sandboxId}/ports/{port}/preview-url"
-	localVarPath = strings.Replace(localVarPath, "{"+"sandboxId"+"}", url.PathEscape(parameterValueToString(r.sandboxId, "sandboxId")), -1)
+	localVarPath := localBasePath + "/sandbox/{sandboxIdOrName}/ports/{port}/preview-url"
+	localVarPath = strings.Replace(localVarPath, "{"+"sandboxIdOrName"+"}", url.PathEscape(parameterValueToString(r.sandboxIdOrName, "sandboxIdOrName")), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"port"+"}", url.PathEscape(parameterValueToString(r.port, "port")), -1)
 
 	localVarHeaderParams := make(map[string]string)
@@ -1085,7 +1117,7 @@ func (a *SandboxAPIService) GetPortPreviewUrlExecute(r SandboxAPIGetPortPreviewU
 type SandboxAPIGetSandboxRequest struct {
 	ctx                    context.Context
 	ApiService             SandboxAPI
-	sandboxId              string
+	sandboxIdOrName        string
 	xDaytonaOrganizationID *string
 	verbose                *bool
 }
@@ -1110,14 +1142,14 @@ func (r SandboxAPIGetSandboxRequest) Execute() (*Sandbox, *http.Response, error)
 GetSandbox Get sandbox details
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId ID of the sandbox
+	@param sandboxIdOrName ID or name of the sandbox
 	@return SandboxAPIGetSandboxRequest
 */
-func (a *SandboxAPIService) GetSandbox(ctx context.Context, sandboxId string) SandboxAPIGetSandboxRequest {
+func (a *SandboxAPIService) GetSandbox(ctx context.Context, sandboxIdOrName string) SandboxAPIGetSandboxRequest {
 	return SandboxAPIGetSandboxRequest{
-		ApiService: a,
-		ctx:        ctx,
-		sandboxId:  sandboxId,
+		ApiService:      a,
+		ctx:             ctx,
+		sandboxIdOrName: sandboxIdOrName,
 	}
 }
 
@@ -1137,8 +1169,8 @@ func (a *SandboxAPIService) GetSandboxExecute(r SandboxAPIGetSandboxRequest) (*S
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/sandbox/{sandboxId}"
-	localVarPath = strings.Replace(localVarPath, "{"+"sandboxId"+"}", url.PathEscape(parameterValueToString(r.sandboxId, "sandboxId")), -1)
+	localVarPath := localBasePath + "/sandbox/{sandboxIdOrName}"
+	localVarPath = strings.Replace(localVarPath, "{"+"sandboxIdOrName"+"}", url.PathEscape(parameterValueToString(r.sandboxIdOrName, "sandboxIdOrName")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -1585,6 +1617,7 @@ type SandboxAPIListSandboxesPaginatedRequest struct {
 	page                   *float32
 	limit                  *float32
 	id                     *string
+	name                   *string
 	labels                 *string
 	includeErroredDeleted  *bool
 	states                 *[]string
@@ -1623,6 +1656,12 @@ func (r SandboxAPIListSandboxesPaginatedRequest) Limit(limit float32) SandboxAPI
 // Filter by partial ID match
 func (r SandboxAPIListSandboxesPaginatedRequest) Id(id string) SandboxAPIListSandboxesPaginatedRequest {
 	r.id = &id
+	return r
+}
+
+// Filter by partial name match
+func (r SandboxAPIListSandboxesPaginatedRequest) Name(name string) SandboxAPIListSandboxesPaginatedRequest {
+	r.name = &name
 	return r
 }
 
@@ -1770,6 +1809,9 @@ func (a *SandboxAPIService) ListSandboxesPaginatedExecute(r SandboxAPIListSandbo
 	if r.id != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "id", r.id, "form", "")
 	}
+	if r.name != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "name", r.name, "form", "")
+	}
 	if r.labels != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "labels", r.labels, "form", "")
 	}
@@ -1908,7 +1950,7 @@ func (a *SandboxAPIService) ListSandboxesPaginatedExecute(r SandboxAPIListSandbo
 type SandboxAPIReplaceLabelsRequest struct {
 	ctx                    context.Context
 	ApiService             SandboxAPI
-	sandboxId              string
+	sandboxIdOrName        string
 	sandboxLabels          *SandboxLabels
 	xDaytonaOrganizationID *string
 }
@@ -1932,14 +1974,14 @@ func (r SandboxAPIReplaceLabelsRequest) Execute() (*SandboxLabels, *http.Respons
 ReplaceLabels Replace sandbox labels
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId ID of the sandbox
+	@param sandboxIdOrName ID or name of the sandbox
 	@return SandboxAPIReplaceLabelsRequest
 */
-func (a *SandboxAPIService) ReplaceLabels(ctx context.Context, sandboxId string) SandboxAPIReplaceLabelsRequest {
+func (a *SandboxAPIService) ReplaceLabels(ctx context.Context, sandboxIdOrName string) SandboxAPIReplaceLabelsRequest {
 	return SandboxAPIReplaceLabelsRequest{
-		ApiService: a,
-		ctx:        ctx,
-		sandboxId:  sandboxId,
+		ApiService:      a,
+		ctx:             ctx,
+		sandboxIdOrName: sandboxIdOrName,
 	}
 }
 
@@ -1959,8 +2001,8 @@ func (a *SandboxAPIService) ReplaceLabelsExecute(r SandboxAPIReplaceLabelsReques
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/sandbox/{sandboxId}/labels"
-	localVarPath = strings.Replace(localVarPath, "{"+"sandboxId"+"}", url.PathEscape(parameterValueToString(r.sandboxId, "sandboxId")), -1)
+	localVarPath := localBasePath + "/sandbox/{sandboxIdOrName}/labels"
+	localVarPath = strings.Replace(localVarPath, "{"+"sandboxIdOrName"+"}", url.PathEscape(parameterValueToString(r.sandboxIdOrName, "sandboxIdOrName")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -2031,7 +2073,7 @@ func (a *SandboxAPIService) ReplaceLabelsExecute(r SandboxAPIReplaceLabelsReques
 type SandboxAPIRevokeSshAccessRequest struct {
 	ctx                    context.Context
 	ApiService             SandboxAPI
-	sandboxId              string
+	sandboxIdOrName        string
 	xDaytonaOrganizationID *string
 	token                  *string
 }
@@ -2048,7 +2090,7 @@ func (r SandboxAPIRevokeSshAccessRequest) Token(token string) SandboxAPIRevokeSs
 	return r
 }
 
-func (r SandboxAPIRevokeSshAccessRequest) Execute() (*http.Response, error) {
+func (r SandboxAPIRevokeSshAccessRequest) Execute() (*Sandbox, *http.Response, error) {
 	return r.ApiService.RevokeSshAccessExecute(r)
 }
 
@@ -2056,32 +2098,35 @@ func (r SandboxAPIRevokeSshAccessRequest) Execute() (*http.Response, error) {
 RevokeSshAccess Revoke SSH access for sandbox
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId ID of the sandbox
+	@param sandboxIdOrName ID or name of the sandbox
 	@return SandboxAPIRevokeSshAccessRequest
 */
-func (a *SandboxAPIService) RevokeSshAccess(ctx context.Context, sandboxId string) SandboxAPIRevokeSshAccessRequest {
+func (a *SandboxAPIService) RevokeSshAccess(ctx context.Context, sandboxIdOrName string) SandboxAPIRevokeSshAccessRequest {
 	return SandboxAPIRevokeSshAccessRequest{
-		ApiService: a,
-		ctx:        ctx,
-		sandboxId:  sandboxId,
+		ApiService:      a,
+		ctx:             ctx,
+		sandboxIdOrName: sandboxIdOrName,
 	}
 }
 
 // Execute executes the request
-func (a *SandboxAPIService) RevokeSshAccessExecute(r SandboxAPIRevokeSshAccessRequest) (*http.Response, error) {
+//
+//	@return Sandbox
+func (a *SandboxAPIService) RevokeSshAccessExecute(r SandboxAPIRevokeSshAccessRequest) (*Sandbox, *http.Response, error) {
 	var (
-		localVarHTTPMethod = http.MethodDelete
-		localVarPostBody   interface{}
-		formFiles          []formFile
+		localVarHTTPMethod  = http.MethodDelete
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *Sandbox
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SandboxAPIService.RevokeSshAccess")
 	if err != nil {
-		return nil, &GenericOpenAPIError{error: err.Error()}
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/sandbox/{sandboxId}/ssh-access"
-	localVarPath = strings.Replace(localVarPath, "{"+"sandboxId"+"}", url.PathEscape(parameterValueToString(r.sandboxId, "sandboxId")), -1)
+	localVarPath := localBasePath + "/sandbox/{sandboxIdOrName}/ssh-access"
+	localVarPath = strings.Replace(localVarPath, "{"+"sandboxIdOrName"+"}", url.PathEscape(parameterValueToString(r.sandboxIdOrName, "sandboxIdOrName")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -2100,7 +2145,7 @@ func (a *SandboxAPIService) RevokeSshAccessExecute(r SandboxAPIRevokeSshAccessRe
 	}
 
 	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{}
+	localVarHTTPHeaderAccepts := []string{"application/json"}
 
 	// set Accept header
 	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
@@ -2112,19 +2157,19 @@ func (a *SandboxAPIService) RevokeSshAccessExecute(r SandboxAPIRevokeSshAccessRe
 	}
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
-		return nil, err
+		return localVarReturnValue, nil, err
 	}
 
 	localVarHTTPResponse, err := a.client.callAPI(req)
 	if err != nil || localVarHTTPResponse == nil {
-		return localVarHTTPResponse, err
+		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
 	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
 	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
-		return localVarHTTPResponse, err
+		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
 	if localVarHTTPResponse.StatusCode >= 300 {
@@ -2132,16 +2177,25 @@ func (a *SandboxAPIService) RevokeSshAccessExecute(r SandboxAPIRevokeSshAccessRe
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
-		return localVarHTTPResponse, newErr
+		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
-	return localVarHTTPResponse, nil
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
 type SandboxAPISetAutoArchiveIntervalRequest struct {
 	ctx                    context.Context
 	ApiService             SandboxAPI
-	sandboxId              string
+	sandboxIdOrName        string
 	interval               float32
 	xDaytonaOrganizationID *string
 }
@@ -2152,7 +2206,7 @@ func (r SandboxAPISetAutoArchiveIntervalRequest) XDaytonaOrganizationID(xDaytona
 	return r
 }
 
-func (r SandboxAPISetAutoArchiveIntervalRequest) Execute() (*http.Response, error) {
+func (r SandboxAPISetAutoArchiveIntervalRequest) Execute() (*Sandbox, *http.Response, error) {
 	return r.ApiService.SetAutoArchiveIntervalExecute(r)
 }
 
@@ -2160,34 +2214,37 @@ func (r SandboxAPISetAutoArchiveIntervalRequest) Execute() (*http.Response, erro
 SetAutoArchiveInterval Set sandbox auto-archive interval
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId ID of the sandbox
+	@param sandboxIdOrName ID or name of the sandbox
 	@param interval Auto-archive interval in minutes (0 means the maximum interval will be used)
 	@return SandboxAPISetAutoArchiveIntervalRequest
 */
-func (a *SandboxAPIService) SetAutoArchiveInterval(ctx context.Context, sandboxId string, interval float32) SandboxAPISetAutoArchiveIntervalRequest {
+func (a *SandboxAPIService) SetAutoArchiveInterval(ctx context.Context, sandboxIdOrName string, interval float32) SandboxAPISetAutoArchiveIntervalRequest {
 	return SandboxAPISetAutoArchiveIntervalRequest{
-		ApiService: a,
-		ctx:        ctx,
-		sandboxId:  sandboxId,
-		interval:   interval,
+		ApiService:      a,
+		ctx:             ctx,
+		sandboxIdOrName: sandboxIdOrName,
+		interval:        interval,
 	}
 }
 
 // Execute executes the request
-func (a *SandboxAPIService) SetAutoArchiveIntervalExecute(r SandboxAPISetAutoArchiveIntervalRequest) (*http.Response, error) {
+//
+//	@return Sandbox
+func (a *SandboxAPIService) SetAutoArchiveIntervalExecute(r SandboxAPISetAutoArchiveIntervalRequest) (*Sandbox, *http.Response, error) {
 	var (
-		localVarHTTPMethod = http.MethodPost
-		localVarPostBody   interface{}
-		formFiles          []formFile
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *Sandbox
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SandboxAPIService.SetAutoArchiveInterval")
 	if err != nil {
-		return nil, &GenericOpenAPIError{error: err.Error()}
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/sandbox/{sandboxId}/autoarchive/{interval}"
-	localVarPath = strings.Replace(localVarPath, "{"+"sandboxId"+"}", url.PathEscape(parameterValueToString(r.sandboxId, "sandboxId")), -1)
+	localVarPath := localBasePath + "/sandbox/{sandboxIdOrName}/autoarchive/{interval}"
+	localVarPath = strings.Replace(localVarPath, "{"+"sandboxIdOrName"+"}", url.PathEscape(parameterValueToString(r.sandboxIdOrName, "sandboxIdOrName")), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"interval"+"}", url.PathEscape(parameterValueToString(r.interval, "interval")), -1)
 
 	localVarHeaderParams := make(map[string]string)
@@ -2204,7 +2261,7 @@ func (a *SandboxAPIService) SetAutoArchiveIntervalExecute(r SandboxAPISetAutoArc
 	}
 
 	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{}
+	localVarHTTPHeaderAccepts := []string{"application/json"}
 
 	// set Accept header
 	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
@@ -2216,19 +2273,19 @@ func (a *SandboxAPIService) SetAutoArchiveIntervalExecute(r SandboxAPISetAutoArc
 	}
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
-		return nil, err
+		return localVarReturnValue, nil, err
 	}
 
 	localVarHTTPResponse, err := a.client.callAPI(req)
 	if err != nil || localVarHTTPResponse == nil {
-		return localVarHTTPResponse, err
+		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
 	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
 	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
-		return localVarHTTPResponse, err
+		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
 	if localVarHTTPResponse.StatusCode >= 300 {
@@ -2236,16 +2293,25 @@ func (a *SandboxAPIService) SetAutoArchiveIntervalExecute(r SandboxAPISetAutoArc
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
-		return localVarHTTPResponse, newErr
+		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
-	return localVarHTTPResponse, nil
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
 type SandboxAPISetAutoDeleteIntervalRequest struct {
 	ctx                    context.Context
 	ApiService             SandboxAPI
-	sandboxId              string
+	sandboxIdOrName        string
 	interval               float32
 	xDaytonaOrganizationID *string
 }
@@ -2256,7 +2322,7 @@ func (r SandboxAPISetAutoDeleteIntervalRequest) XDaytonaOrganizationID(xDaytonaO
 	return r
 }
 
-func (r SandboxAPISetAutoDeleteIntervalRequest) Execute() (*http.Response, error) {
+func (r SandboxAPISetAutoDeleteIntervalRequest) Execute() (*Sandbox, *http.Response, error) {
 	return r.ApiService.SetAutoDeleteIntervalExecute(r)
 }
 
@@ -2264,34 +2330,37 @@ func (r SandboxAPISetAutoDeleteIntervalRequest) Execute() (*http.Response, error
 SetAutoDeleteInterval Set sandbox auto-delete interval
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId ID of the sandbox
+	@param sandboxIdOrName ID or name of the sandbox
 	@param interval Auto-delete interval in minutes (negative value means disabled, 0 means delete immediately upon stopping)
 	@return SandboxAPISetAutoDeleteIntervalRequest
 */
-func (a *SandboxAPIService) SetAutoDeleteInterval(ctx context.Context, sandboxId string, interval float32) SandboxAPISetAutoDeleteIntervalRequest {
+func (a *SandboxAPIService) SetAutoDeleteInterval(ctx context.Context, sandboxIdOrName string, interval float32) SandboxAPISetAutoDeleteIntervalRequest {
 	return SandboxAPISetAutoDeleteIntervalRequest{
-		ApiService: a,
-		ctx:        ctx,
-		sandboxId:  sandboxId,
-		interval:   interval,
+		ApiService:      a,
+		ctx:             ctx,
+		sandboxIdOrName: sandboxIdOrName,
+		interval:        interval,
 	}
 }
 
 // Execute executes the request
-func (a *SandboxAPIService) SetAutoDeleteIntervalExecute(r SandboxAPISetAutoDeleteIntervalRequest) (*http.Response, error) {
+//
+//	@return Sandbox
+func (a *SandboxAPIService) SetAutoDeleteIntervalExecute(r SandboxAPISetAutoDeleteIntervalRequest) (*Sandbox, *http.Response, error) {
 	var (
-		localVarHTTPMethod = http.MethodPost
-		localVarPostBody   interface{}
-		formFiles          []formFile
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *Sandbox
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SandboxAPIService.SetAutoDeleteInterval")
 	if err != nil {
-		return nil, &GenericOpenAPIError{error: err.Error()}
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/sandbox/{sandboxId}/autodelete/{interval}"
-	localVarPath = strings.Replace(localVarPath, "{"+"sandboxId"+"}", url.PathEscape(parameterValueToString(r.sandboxId, "sandboxId")), -1)
+	localVarPath := localBasePath + "/sandbox/{sandboxIdOrName}/autodelete/{interval}"
+	localVarPath = strings.Replace(localVarPath, "{"+"sandboxIdOrName"+"}", url.PathEscape(parameterValueToString(r.sandboxIdOrName, "sandboxIdOrName")), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"interval"+"}", url.PathEscape(parameterValueToString(r.interval, "interval")), -1)
 
 	localVarHeaderParams := make(map[string]string)
@@ -2308,7 +2377,7 @@ func (a *SandboxAPIService) SetAutoDeleteIntervalExecute(r SandboxAPISetAutoDele
 	}
 
 	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{}
+	localVarHTTPHeaderAccepts := []string{"application/json"}
 
 	// set Accept header
 	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
@@ -2320,19 +2389,19 @@ func (a *SandboxAPIService) SetAutoDeleteIntervalExecute(r SandboxAPISetAutoDele
 	}
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
-		return nil, err
+		return localVarReturnValue, nil, err
 	}
 
 	localVarHTTPResponse, err := a.client.callAPI(req)
 	if err != nil || localVarHTTPResponse == nil {
-		return localVarHTTPResponse, err
+		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
 	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
 	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
-		return localVarHTTPResponse, err
+		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
 	if localVarHTTPResponse.StatusCode >= 300 {
@@ -2340,16 +2409,25 @@ func (a *SandboxAPIService) SetAutoDeleteIntervalExecute(r SandboxAPISetAutoDele
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
-		return localVarHTTPResponse, newErr
+		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
-	return localVarHTTPResponse, nil
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
 type SandboxAPISetAutostopIntervalRequest struct {
 	ctx                    context.Context
 	ApiService             SandboxAPI
-	sandboxId              string
+	sandboxIdOrName        string
 	interval               float32
 	xDaytonaOrganizationID *string
 }
@@ -2360,7 +2438,7 @@ func (r SandboxAPISetAutostopIntervalRequest) XDaytonaOrganizationID(xDaytonaOrg
 	return r
 }
 
-func (r SandboxAPISetAutostopIntervalRequest) Execute() (*http.Response, error) {
+func (r SandboxAPISetAutostopIntervalRequest) Execute() (*Sandbox, *http.Response, error) {
 	return r.ApiService.SetAutostopIntervalExecute(r)
 }
 
@@ -2368,34 +2446,37 @@ func (r SandboxAPISetAutostopIntervalRequest) Execute() (*http.Response, error) 
 SetAutostopInterval Set sandbox auto-stop interval
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId ID of the sandbox
+	@param sandboxIdOrName ID or name of the sandbox
 	@param interval Auto-stop interval in minutes (0 to disable)
 	@return SandboxAPISetAutostopIntervalRequest
 */
-func (a *SandboxAPIService) SetAutostopInterval(ctx context.Context, sandboxId string, interval float32) SandboxAPISetAutostopIntervalRequest {
+func (a *SandboxAPIService) SetAutostopInterval(ctx context.Context, sandboxIdOrName string, interval float32) SandboxAPISetAutostopIntervalRequest {
 	return SandboxAPISetAutostopIntervalRequest{
-		ApiService: a,
-		ctx:        ctx,
-		sandboxId:  sandboxId,
-		interval:   interval,
+		ApiService:      a,
+		ctx:             ctx,
+		sandboxIdOrName: sandboxIdOrName,
+		interval:        interval,
 	}
 }
 
 // Execute executes the request
-func (a *SandboxAPIService) SetAutostopIntervalExecute(r SandboxAPISetAutostopIntervalRequest) (*http.Response, error) {
+//
+//	@return Sandbox
+func (a *SandboxAPIService) SetAutostopIntervalExecute(r SandboxAPISetAutostopIntervalRequest) (*Sandbox, *http.Response, error) {
 	var (
-		localVarHTTPMethod = http.MethodPost
-		localVarPostBody   interface{}
-		formFiles          []formFile
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *Sandbox
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SandboxAPIService.SetAutostopInterval")
 	if err != nil {
-		return nil, &GenericOpenAPIError{error: err.Error()}
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/sandbox/{sandboxId}/autostop/{interval}"
-	localVarPath = strings.Replace(localVarPath, "{"+"sandboxId"+"}", url.PathEscape(parameterValueToString(r.sandboxId, "sandboxId")), -1)
+	localVarPath := localBasePath + "/sandbox/{sandboxIdOrName}/autostop/{interval}"
+	localVarPath = strings.Replace(localVarPath, "{"+"sandboxIdOrName"+"}", url.PathEscape(parameterValueToString(r.sandboxIdOrName, "sandboxIdOrName")), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"interval"+"}", url.PathEscape(parameterValueToString(r.interval, "interval")), -1)
 
 	localVarHeaderParams := make(map[string]string)
@@ -2412,7 +2493,7 @@ func (a *SandboxAPIService) SetAutostopIntervalExecute(r SandboxAPISetAutostopIn
 	}
 
 	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{}
+	localVarHTTPHeaderAccepts := []string{"application/json"}
 
 	// set Accept header
 	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
@@ -2424,19 +2505,19 @@ func (a *SandboxAPIService) SetAutostopIntervalExecute(r SandboxAPISetAutostopIn
 	}
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
-		return nil, err
+		return localVarReturnValue, nil, err
 	}
 
 	localVarHTTPResponse, err := a.client.callAPI(req)
 	if err != nil || localVarHTTPResponse == nil {
-		return localVarHTTPResponse, err
+		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
 	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
 	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
-		return localVarHTTPResponse, err
+		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
 	if localVarHTTPResponse.StatusCode >= 300 {
@@ -2444,16 +2525,25 @@ func (a *SandboxAPIService) SetAutostopIntervalExecute(r SandboxAPISetAutostopIn
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
-		return localVarHTTPResponse, newErr
+		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
-	return localVarHTTPResponse, nil
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
 type SandboxAPIStartSandboxRequest struct {
 	ctx                    context.Context
 	ApiService             SandboxAPI
-	sandboxId              string
+	sandboxIdOrName        string
 	xDaytonaOrganizationID *string
 }
 
@@ -2471,14 +2561,14 @@ func (r SandboxAPIStartSandboxRequest) Execute() (*Sandbox, *http.Response, erro
 StartSandbox Start sandbox
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId ID of the sandbox
+	@param sandboxIdOrName ID or name of the sandbox
 	@return SandboxAPIStartSandboxRequest
 */
-func (a *SandboxAPIService) StartSandbox(ctx context.Context, sandboxId string) SandboxAPIStartSandboxRequest {
+func (a *SandboxAPIService) StartSandbox(ctx context.Context, sandboxIdOrName string) SandboxAPIStartSandboxRequest {
 	return SandboxAPIStartSandboxRequest{
-		ApiService: a,
-		ctx:        ctx,
-		sandboxId:  sandboxId,
+		ApiService:      a,
+		ctx:             ctx,
+		sandboxIdOrName: sandboxIdOrName,
 	}
 }
 
@@ -2498,8 +2588,8 @@ func (a *SandboxAPIService) StartSandboxExecute(r SandboxAPIStartSandboxRequest)
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/sandbox/{sandboxId}/start"
-	localVarPath = strings.Replace(localVarPath, "{"+"sandboxId"+"}", url.PathEscape(parameterValueToString(r.sandboxId, "sandboxId")), -1)
+	localVarPath := localBasePath + "/sandbox/{sandboxIdOrName}/start"
+	localVarPath = strings.Replace(localVarPath, "{"+"sandboxIdOrName"+"}", url.PathEscape(parameterValueToString(r.sandboxIdOrName, "sandboxIdOrName")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -2565,7 +2655,7 @@ func (a *SandboxAPIService) StartSandboxExecute(r SandboxAPIStartSandboxRequest)
 type SandboxAPIStopSandboxRequest struct {
 	ctx                    context.Context
 	ApiService             SandboxAPI
-	sandboxId              string
+	sandboxIdOrName        string
 	xDaytonaOrganizationID *string
 }
 
@@ -2575,7 +2665,7 @@ func (r SandboxAPIStopSandboxRequest) XDaytonaOrganizationID(xDaytonaOrganizatio
 	return r
 }
 
-func (r SandboxAPIStopSandboxRequest) Execute() (*http.Response, error) {
+func (r SandboxAPIStopSandboxRequest) Execute() (*Sandbox, *http.Response, error) {
 	return r.ApiService.StopSandboxExecute(r)
 }
 
@@ -2583,32 +2673,35 @@ func (r SandboxAPIStopSandboxRequest) Execute() (*http.Response, error) {
 StopSandbox Stop sandbox
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId ID of the sandbox
+	@param sandboxIdOrName ID or name of the sandbox
 	@return SandboxAPIStopSandboxRequest
 */
-func (a *SandboxAPIService) StopSandbox(ctx context.Context, sandboxId string) SandboxAPIStopSandboxRequest {
+func (a *SandboxAPIService) StopSandbox(ctx context.Context, sandboxIdOrName string) SandboxAPIStopSandboxRequest {
 	return SandboxAPIStopSandboxRequest{
-		ApiService: a,
-		ctx:        ctx,
-		sandboxId:  sandboxId,
+		ApiService:      a,
+		ctx:             ctx,
+		sandboxIdOrName: sandboxIdOrName,
 	}
 }
 
 // Execute executes the request
-func (a *SandboxAPIService) StopSandboxExecute(r SandboxAPIStopSandboxRequest) (*http.Response, error) {
+//
+//	@return Sandbox
+func (a *SandboxAPIService) StopSandboxExecute(r SandboxAPIStopSandboxRequest) (*Sandbox, *http.Response, error) {
 	var (
-		localVarHTTPMethod = http.MethodPost
-		localVarPostBody   interface{}
-		formFiles          []formFile
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *Sandbox
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SandboxAPIService.StopSandbox")
 	if err != nil {
-		return nil, &GenericOpenAPIError{error: err.Error()}
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/sandbox/{sandboxId}/stop"
-	localVarPath = strings.Replace(localVarPath, "{"+"sandboxId"+"}", url.PathEscape(parameterValueToString(r.sandboxId, "sandboxId")), -1)
+	localVarPath := localBasePath + "/sandbox/{sandboxIdOrName}/stop"
+	localVarPath = strings.Replace(localVarPath, "{"+"sandboxIdOrName"+"}", url.PathEscape(parameterValueToString(r.sandboxIdOrName, "sandboxIdOrName")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -2624,7 +2717,7 @@ func (a *SandboxAPIService) StopSandboxExecute(r SandboxAPIStopSandboxRequest) (
 	}
 
 	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{}
+	localVarHTTPHeaderAccepts := []string{"application/json"}
 
 	// set Accept header
 	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
@@ -2636,19 +2729,19 @@ func (a *SandboxAPIService) StopSandboxExecute(r SandboxAPIStopSandboxRequest) (
 	}
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
-		return nil, err
+		return localVarReturnValue, nil, err
 	}
 
 	localVarHTTPResponse, err := a.client.callAPI(req)
 	if err != nil || localVarHTTPResponse == nil {
-		return localVarHTTPResponse, err
+		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
 	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
 	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
-		return localVarHTTPResponse, err
+		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
 	if localVarHTTPResponse.StatusCode >= 300 {
@@ -2656,16 +2749,25 @@ func (a *SandboxAPIService) StopSandboxExecute(r SandboxAPIStopSandboxRequest) (
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
-		return localVarHTTPResponse, newErr
+		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
-	return localVarHTTPResponse, nil
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
 type SandboxAPIUpdatePublicStatusRequest struct {
 	ctx                    context.Context
 	ApiService             SandboxAPI
-	sandboxId              string
+	sandboxIdOrName        string
 	isPublic               bool
 	xDaytonaOrganizationID *string
 }
@@ -2676,7 +2778,7 @@ func (r SandboxAPIUpdatePublicStatusRequest) XDaytonaOrganizationID(xDaytonaOrga
 	return r
 }
 
-func (r SandboxAPIUpdatePublicStatusRequest) Execute() (*http.Response, error) {
+func (r SandboxAPIUpdatePublicStatusRequest) Execute() (*Sandbox, *http.Response, error) {
 	return r.ApiService.UpdatePublicStatusExecute(r)
 }
 
@@ -2684,34 +2786,37 @@ func (r SandboxAPIUpdatePublicStatusRequest) Execute() (*http.Response, error) {
 UpdatePublicStatus Update public status
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId ID of the sandbox
+	@param sandboxIdOrName ID or name of the sandbox
 	@param isPublic Public status to set
 	@return SandboxAPIUpdatePublicStatusRequest
 */
-func (a *SandboxAPIService) UpdatePublicStatus(ctx context.Context, sandboxId string, isPublic bool) SandboxAPIUpdatePublicStatusRequest {
+func (a *SandboxAPIService) UpdatePublicStatus(ctx context.Context, sandboxIdOrName string, isPublic bool) SandboxAPIUpdatePublicStatusRequest {
 	return SandboxAPIUpdatePublicStatusRequest{
-		ApiService: a,
-		ctx:        ctx,
-		sandboxId:  sandboxId,
-		isPublic:   isPublic,
+		ApiService:      a,
+		ctx:             ctx,
+		sandboxIdOrName: sandboxIdOrName,
+		isPublic:        isPublic,
 	}
 }
 
 // Execute executes the request
-func (a *SandboxAPIService) UpdatePublicStatusExecute(r SandboxAPIUpdatePublicStatusRequest) (*http.Response, error) {
+//
+//	@return Sandbox
+func (a *SandboxAPIService) UpdatePublicStatusExecute(r SandboxAPIUpdatePublicStatusRequest) (*Sandbox, *http.Response, error) {
 	var (
-		localVarHTTPMethod = http.MethodPost
-		localVarPostBody   interface{}
-		formFiles          []formFile
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *Sandbox
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SandboxAPIService.UpdatePublicStatus")
 	if err != nil {
-		return nil, &GenericOpenAPIError{error: err.Error()}
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/sandbox/{sandboxId}/public/{isPublic}"
-	localVarPath = strings.Replace(localVarPath, "{"+"sandboxId"+"}", url.PathEscape(parameterValueToString(r.sandboxId, "sandboxId")), -1)
+	localVarPath := localBasePath + "/sandbox/{sandboxIdOrName}/public/{isPublic}"
+	localVarPath = strings.Replace(localVarPath, "{"+"sandboxIdOrName"+"}", url.PathEscape(parameterValueToString(r.sandboxIdOrName, "sandboxIdOrName")), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"isPublic"+"}", url.PathEscape(parameterValueToString(r.isPublic, "isPublic")), -1)
 
 	localVarHeaderParams := make(map[string]string)
@@ -2728,7 +2833,7 @@ func (a *SandboxAPIService) UpdatePublicStatusExecute(r SandboxAPIUpdatePublicSt
 	}
 
 	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{}
+	localVarHTTPHeaderAccepts := []string{"application/json"}
 
 	// set Accept header
 	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
@@ -2740,19 +2845,19 @@ func (a *SandboxAPIService) UpdatePublicStatusExecute(r SandboxAPIUpdatePublicSt
 	}
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
-		return nil, err
+		return localVarReturnValue, nil, err
 	}
 
 	localVarHTTPResponse, err := a.client.callAPI(req)
 	if err != nil || localVarHTTPResponse == nil {
-		return localVarHTTPResponse, err
+		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
 	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
 	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
-		return localVarHTTPResponse, err
+		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
 	if localVarHTTPResponse.StatusCode >= 300 {
@@ -2760,10 +2865,19 @@ func (a *SandboxAPIService) UpdatePublicStatusExecute(r SandboxAPIUpdatePublicSt
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
-		return localVarHTTPResponse, newErr
+		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
-	return localVarHTTPResponse, nil
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
 type SandboxAPIUpdateSandboxStateRequest struct {

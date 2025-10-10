@@ -26,6 +26,12 @@ import type { SandboxVolume } from './sandbox-volume'
  */
 export interface CreateSandbox {
   /**
+   * The name of the sandbox. If not provided, the sandbox ID will be used as the name
+   * @type {string}
+   * @memberof CreateSandbox
+   */
+  name?: string
+  /**
    * The ID or name of the snapshot used for the sandbox
    * @type {string}
    * @memberof CreateSandbox

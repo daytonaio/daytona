@@ -93,8 +93,8 @@ export const convertTableSortingToApiSorting = (sorting: SortingState): SandboxS
   let field: ListSandboxesPaginatedSortEnum
 
   switch (sort.id) {
-    case 'id':
-      field = ListSandboxesPaginatedSortEnum.ID
+    case 'name':
+      field = ListSandboxesPaginatedSortEnum.NAME
       break
     case 'state':
       field = ListSandboxesPaginatedSortEnum.STATE
@@ -127,9 +127,9 @@ export const convertTableFiltersToApiFilters = (columnFilters: ColumnFiltersStat
 
   columnFilters.forEach((filter) => {
     switch (filter.id) {
-      case 'id':
+      case 'name':
         if (filter.value && typeof filter.value === 'string') {
-          filters.id = filter.value
+          filters.name = filter.value
         }
         break
       case 'state':
@@ -214,8 +214,8 @@ export const convertApiSortingToTableSorting = (sorting: SandboxSorting): Sortin
 
   let id: string
   switch (sorting.field) {
-    case ListSandboxesPaginatedSortEnum.ID:
-      id = 'id'
+    case ListSandboxesPaginatedSortEnum.NAME:
+      id = 'name'
       break
     case ListSandboxesPaginatedSortEnum.STATE:
       id = 'state'
@@ -241,8 +241,8 @@ export const convertApiSortingToTableSorting = (sorting: SandboxSorting): Sortin
 export const convertApiFiltersToTableFilters = (filters: SandboxFilters): ColumnFiltersState => {
   const columnFilters: ColumnFiltersState = []
 
-  if (filters.id) {
-    columnFilters.push({ id: 'id', value: filters.id })
+  if (filters.name) {
+    columnFilters.push({ id: 'name', value: filters.name })
   }
 
   if (filters.states && filters.states.length > 0) {

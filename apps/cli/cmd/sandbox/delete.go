@@ -15,7 +15,7 @@ import (
 )
 
 var DeleteCmd = &cobra.Command{
-	Use:     "delete [SANDBOX_ID]",
+	Use:     "delete [SANDBOX_ID] | [SANDBOX_NAME]",
 	Short:   "Delete a sandbox",
 	Args:    cobra.MaximumNArgs(1),
 	Aliases: common.GetAliases("delete"),
@@ -56,7 +56,7 @@ var DeleteCmd = &cobra.Command{
 				var deletedCount int
 
 				for _, sandbox := range allSandboxes {
-					res, err := apiClient.SandboxAPI.DeleteSandbox(ctx, sandbox.Id).Execute()
+					_, res, err := apiClient.SandboxAPI.DeleteSandbox(ctx, sandbox.Id).Execute()
 					if err != nil {
 						fmt.Printf("Failed to delete sandbox %s: %s\n", sandbox.Id, apiclient_cli.HandleErrorResponse(res, err))
 					} else {
@@ -71,14 +71,14 @@ var DeleteCmd = &cobra.Command{
 		}
 
 		// Handle case when a sandbox ID is provided
-		sandboxIdArg := args[0]
+		sandboxIdOrNameArg := args[0]
 
-		res, err := apiClient.SandboxAPI.DeleteSandbox(ctx, sandboxIdArg).Execute()
+		_, res, err := apiClient.SandboxAPI.DeleteSandbox(ctx, sandboxIdOrNameArg).Execute()
 		if err != nil {
 			return apiclient_cli.HandleErrorResponse(res, err)
 		}
 
-		view_common.RenderInfoMessageBold(fmt.Sprintf("Sandbox %s deleted", sandboxIdArg))
+		view_common.RenderInfoMessageBold(fmt.Sprintf("Sandbox %s deleted", sandboxIdOrNameArg))
 
 		return nil
 	},

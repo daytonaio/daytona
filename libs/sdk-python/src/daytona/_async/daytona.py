@@ -376,6 +376,7 @@ class AsyncDaytona:
 
         # Create sandbox using dictionary
         sandbox_data = CreateSandbox(
+            name=params.name,
             user=params.os_user,
             env=params.env_vars if params.env_vars else {},
             labels=params.labels,
@@ -517,29 +518,29 @@ class AsyncDaytona:
         return await sandbox.delete(timeout)
 
     @intercept_errors(message_prefix="Failed to get sandbox: ")
-    async def get(self, sandbox_id: str) -> AsyncSandbox:
-        """Gets a Sandbox by its ID.
+    async def get(self, sandbox_id_or_name: str) -> AsyncSandbox:
+        """Gets a Sandbox by its ID or name.
 
         Args:
-            sandbox_id (str): The ID of the Sandbox to retrieve.
+            sandbox_id_or_name (str): The ID or name of the Sandbox to retrieve.
 
         Returns:
             Sandbox: The Sandbox instance.
 
         Raises:
-            DaytonaError: If sandbox_id is not provided.
+            DaytonaError: If sandbox_id_or_name is not provided.
 
         Example:
             ```python
-            sandbox = await daytona.get("my-sandbox-id")
+            sandbox = await daytona.get("my-sandbox-id-or-name")
             print(sandbox.state)
             ```
         """
-        if not sandbox_id:
-            raise DaytonaError("sandbox_id is required")
+        if not sandbox_id_or_name:
+            raise DaytonaError("sandbox_id_or_name is required")
 
         # Get the sandbox instance
-        sandbox_instance = await self._sandbox_api.get_sandbox(sandbox_id)
+        sandbox_instance = await self._sandbox_api.get_sandbox(sandbox_id_or_name)
 
         # Create and return sandbox with Python code toolbox as default
         code_toolbox = SandboxPythonCodeToolbox()
@@ -551,15 +552,17 @@ class AsyncDaytona:
         )
 
     @intercept_errors(message_prefix="Failed to find sandbox: ")
-    async def find_one(self, sandbox_id: Optional[str] = None, labels: Optional[Dict[str, str]] = None) -> AsyncSandbox:
-        """Finds a Sandbox by its ID or labels.
+    async def find_one(
+        self, sandbox_id_or_name: Optional[str] = None, labels: Optional[Dict[str, str]] = None
+    ) -> AsyncSandbox:
+        """Finds a Sandbox by its ID or name or labels.
 
         Args:
-            sandbox_id (Optional[str]): The ID of the Sandbox to retrieve.
+            sandbox_id_or_name (Optional[str]): The ID or name of the Sandbox to retrieve.
             labels (Optional[Dict[str, str]]): Labels to filter Sandboxes.
 
         Returns:
-            Sandbox: First Sandbox that matches the ID or labels.
+            Sandbox: First Sandbox that matches the ID or name or labels.
 
         Raises:
             DaytonaError: If no Sandbox is found.
@@ -570,8 +573,8 @@ class AsyncDaytona:
             print(f"Sandbox ID: {sandbox.id} State: {sandbox.state}")
             ```
         """
-        if sandbox_id:
-            return await self.get(sandbox_id)
+        if sandbox_id_or_name:
+            return await self.get(sandbox_id_or_name)
         sandboxes = await self.list(labels, page=1, limit=1)
         if len(sandboxes) == 0:
             raise DaytonaError(f"No sandbox found with labels {labels}")

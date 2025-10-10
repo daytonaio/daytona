@@ -208,6 +208,7 @@ export class SandboxStartAction extends SandboxAction {
         limitNetworkEgress: String(organization.sandboxLimitedNetworkEgress),
         organizationId: organization.id,
         organizationName: organization.name,
+        sandboxName: sandbox.name,
       }
     }
 
@@ -396,6 +397,7 @@ export class SandboxStartAction extends SandboxAction {
           limitNetworkEgress: String(organization.sandboxLimitedNetworkEgress),
           organizationId: organization.id,
           organizationName: organization.name,
+          sandboxName: sandbox.name,
         }
       }
 

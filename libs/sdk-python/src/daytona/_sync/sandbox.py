@@ -35,6 +35,7 @@ class Sandbox(SandboxDto):
         process (Process): Process execution interface.
         computer_use (ComputerUse): Computer use operations interface for desktop automation.
         id (str): Unique identifier for the Sandbox.
+        name (str): Name of the Sandbox.
         organization_id (str): Organization ID of the Sandbox.
         snapshot (str): Daytona snapshot used to create the Sandbox.
         user (str): OS user running in the Sandbox.
@@ -500,6 +501,7 @@ class Sandbox(SandboxDto):
 
     def __process_sandbox_dto(self, sandbox_dto: SandboxDto) -> None:
         self.id = sandbox_dto.id
+        self.name = sandbox_dto.name
         self.organization_id = sandbox_dto.organization_id
         self.snapshot = sandbox_dto.snapshot
         self.user = sandbox_dto.user

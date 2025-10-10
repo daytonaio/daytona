@@ -51,7 +51,7 @@ import { OrganizationAuthContext } from '../../common/interfaces/auth-context.in
 import { RequiredOrganizationResourcePermissions } from '../../organization/decorators/required-organization-resource-permissions.decorator'
 import { OrganizationResourcePermission } from '../../organization/enums/organization-resource-permission.enum'
 import { OrganizationResourceActionGuard } from '../../organization/guards/organization-resource-action.guard'
-import { PortPreviewUrlDto } from '../dto/port-preview-url.dto'
+import { WorkspacePortPreviewUrlDto } from '../dto/workspace-port-preview-url.deprecated.dto'
 import { IncomingMessage, ServerResponse } from 'http'
 import { NextFunction } from 'http-proxy-middleware/dist/types'
 import { LogProxy } from '../proxy/log-proxy'
@@ -254,7 +254,7 @@ export class WorkspaceController {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     @Query('force') force?: boolean,
   ): Promise<void> {
-    return this.workspaceService.destroy(workspaceId)
+    await this.workspaceService.destroy(workspaceId)
   }
 
   @Post(':workspaceId/start')
@@ -284,7 +284,7 @@ export class WorkspaceController {
     @AuthContext() authContext: OrganizationAuthContext,
     @Param('workspaceId') workspaceId: string,
   ): Promise<void> {
-    return this.workspaceService.start(workspaceId, authContext.organization)
+    await this.workspaceService.start(workspaceId, authContext.organization)
   }
 
   @Post(':workspaceId/stop')
@@ -311,7 +311,7 @@ export class WorkspaceController {
     targetIdFromRequest: (req) => req.params.workspaceId,
   })
   async stopWorkspace(@Param('workspaceId') workspaceId: string): Promise<void> {
-    return this.workspaceService.stop(workspaceId)
+    await this.workspaceService.stop(workspaceId)
   }
 
   @Put(':workspaceId/labels')
@@ -347,7 +347,7 @@ export class WorkspaceController {
     @Param('workspaceId') workspaceId: string,
     @Body() labelsDto: WorkspaceLabelsDto,
   ): Promise<WorkspaceLabelsDto> {
-    const labels = await this.workspaceService.replaceLabels(workspaceId, labelsDto.labels)
+    const { labels } = await this.workspaceService.replaceLabels(workspaceId, labelsDto.labels)
     return { labels }
   }
 
@@ -510,7 +510,7 @@ export class WorkspaceController {
     targetIdFromRequest: (req) => req.params.workspaceId,
   })
   async archiveWorkspace(@Param('workspaceId') workspaceId: string): Promise<void> {
-    return this.workspaceService.archive(workspaceId)
+    await this.workspaceService.archive(workspaceId)
   }
 
   @Get(':workspaceId/ports/:port/preview-url')
@@ -532,13 +532,13 @@ export class WorkspaceController {
   @ApiResponse({
     status: 200,
     description: 'Preview URL for the specified port',
-    type: PortPreviewUrlDto,
+    type: WorkspacePortPreviewUrlDto,
   })
   @UseGuards(WorkspaceAccessGuard)
   async getPortPreviewUrl(
     @Param('workspaceId') workspaceId: string,
     @Param('port') port: number,
-  ): Promise<PortPreviewUrlDto> {
+  ): Promise<WorkspacePortPreviewUrlDto> {
     if (port < 1 || port > 65535) {
       throw new BadRequestError('Invalid port')
     }

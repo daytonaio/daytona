@@ -1314,6 +1314,15 @@ paths:
             example: abc123
             type: string
           style: form
+        - description: Filter by partial name match
+          explode: true
+          in: query
+          name: name
+          required: false
+          schema:
+            example: abc123
+            type: string
+          style: form
         - description: JSON encoded labels to filter by
           explode: true
           in: query
@@ -1461,6 +1470,7 @@ paths:
             default: createdAt
             enum:
               - id
+              - name
               - state
               - snapshot
               - region
@@ -1572,7 +1582,7 @@ paths:
       summary: Get sandboxes for the authenticated runner
       tags:
         - sandbox
-  /sandbox/{sandboxId}:
+  /sandbox/{sandboxIdOrName}:
     delete:
       operationId: deleteSandbox
       parameters:
@@ -1584,16 +1594,20 @@ paths:
           schema:
             type: string
           style: simple
-        - description: ID of the sandbox
+        - description: ID or name of the sandbox
           explode: false
           in: path
-          name: sandboxId
+          name: sandboxIdOrName
           required: true
           schema:
             type: string
           style: simple
       responses:
         '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Sandbox'
           description: Sandbox has been deleted
       security:
         - bearer: []
@@ -1615,10 +1629,10 @@ paths:
           schema:
             type: string
           style: simple
-        - description: ID of the sandbox
+        - description: ID or name of the sandbox
           explode: false
           in: path
-          name: sandboxId
+          name: sandboxIdOrName
           required: true
           schema:
             type: string
@@ -1647,7 +1661,7 @@ paths:
       summary: Get sandbox details
       tags:
         - sandbox
-  /sandbox/{sandboxId}/start:
+  /sandbox/{sandboxIdOrName}/start:
     post:
       operationId: startSandbox
       parameters:
@@ -1659,10 +1673,10 @@ paths:
           schema:
             type: string
           style: simple
-        - description: ID of the sandbox
+        - description: ID or name of the sandbox
           explode: false
           in: path
-          name: sandboxId
+          name: sandboxIdOrName
           required: true
           schema:
             type: string
@@ -1684,7 +1698,7 @@ paths:
       summary: Start sandbox
       tags:
         - sandbox
-  /sandbox/{sandboxId}/stop:
+  /sandbox/{sandboxIdOrName}/stop:
     post:
       operationId: stopSandbox
       parameters:
@@ -1696,16 +1710,20 @@ paths:
           schema:
             type: string
           style: simple
-        - description: ID of the sandbox
+        - description: ID or name of the sandbox
           explode: false
           in: path
-          name: sandboxId
+          name: sandboxIdOrName
           required: true
           schema:
             type: string
           style: simple
       responses:
         '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Sandbox'
           description: Sandbox has been stopped
       security:
         - bearer: []
@@ -1716,7 +1734,7 @@ paths:
       summary: Stop sandbox
       tags:
         - sandbox
-  /sandbox/{sandboxId}/labels:
+  /sandbox/{sandboxIdOrName}/labels:
     put:
       operationId: replaceLabels
       parameters:
@@ -1728,10 +1746,10 @@ paths:
           schema:
             type: string
           style: simple
-        - description: ID of the sandbox
+        - description: ID or name of the sandbox
           explode: false
           in: path
-          name: sandboxId
+          name: sandboxIdOrName
           required: true
           schema:
             type: string
@@ -1796,7 +1814,7 @@ paths:
       summary: Update sandbox state
       tags:
         - sandbox
-  /sandbox/{sandboxId}/backup:
+  /sandbox/{sandboxIdOrName}/backup:
     post:
       operationId: createBackup
       parameters:
@@ -1808,10 +1826,10 @@ paths:
           schema:
             type: string
           style: simple
-        - description: ID of the sandbox
+        - description: ID or name of the sandbox
           explode: false
           in: path
-          name: sandboxId
+          name: sandboxIdOrName
           required: true
           schema:
             type: string
@@ -1832,7 +1850,7 @@ paths:
       summary: Create sandbox backup
       tags:
         - sandbox
-  /sandbox/{sandboxId}/public/{isPublic}:
+  /sandbox/{sandboxIdOrName}/public/{isPublic}:
     post:
       operationId: updatePublicStatus
       parameters:
@@ -1844,10 +1862,10 @@ paths:
           schema:
             type: string
           style: simple
-        - description: ID of the sandbox
+        - description: ID or name of the sandbox
           explode: false
           in: path
-          name: sandboxId
+          name: sandboxIdOrName
           required: true
           schema:
             type: string
@@ -1861,8 +1879,12 @@ paths:
             type: boolean
           style: simple
       responses:
-        '201':
-          description: ''
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Sandbox'
+          description: Public status has been successfully updated
       security:
         - bearer: []
         - oauth2:
@@ -1872,7 +1894,7 @@ paths:
       summary: Update public status
       tags:
         - sandbox
-  /sandbox/{sandboxId}/autostop/{interval}:
+  /sandbox/{sandboxIdOrName}/autostop/{interval}:
     post:
       operationId: setAutostopInterval
       parameters:
@@ -1884,10 +1906,10 @@ paths:
           schema:
             type: string
           style: simple
-        - description: ID of the sandbox
+        - description: ID or name of the sandbox
           explode: false
           in: path
-          name: sandboxId
+          name: sandboxIdOrName
           required: true
           schema:
             type: string
@@ -1902,6 +1924,10 @@ paths:
           style: simple
       responses:
         '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Sandbox'
           description: Auto-stop interval has been set
       security:
         - bearer: []
@@ -1912,7 +1938,7 @@ paths:
       summary: Set sandbox auto-stop interval
       tags:
         - sandbox
-  /sandbox/{sandboxId}/autoarchive/{interval}:
+  /sandbox/{sandboxIdOrName}/autoarchive/{interval}:
     post:
       operationId: setAutoArchiveInterval
       parameters:
@@ -1924,10 +1950,10 @@ paths:
           schema:
             type: string
           style: simple
-        - description: ID of the sandbox
+        - description: ID or name of the sandbox
           explode: false
           in: path
-          name: sandboxId
+          name: sandboxIdOrName
           required: true
           schema:
             type: string
@@ -1943,6 +1969,10 @@ paths:
           style: simple
       responses:
         '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Sandbox'
           description: Auto-archive interval has been set
       security:
         - bearer: []
@@ -1953,7 +1983,7 @@ paths:
       summary: Set sandbox auto-archive interval
       tags:
         - sandbox
-  /sandbox/{sandboxId}/autodelete/{interval}:
+  /sandbox/{sandboxIdOrName}/autodelete/{interval}:
     post:
       operationId: setAutoDeleteInterval
       parameters:
@@ -1965,10 +1995,10 @@ paths:
           schema:
             type: string
           style: simple
-        - description: ID of the sandbox
+        - description: ID or name of the sandbox
           explode: false
           in: path
-          name: sandboxId
+          name: sandboxIdOrName
           required: true
           schema:
             type: string
@@ -1984,6 +2014,10 @@ paths:
           style: simple
       responses:
         '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Sandbox'
           description: Auto-delete interval has been set
       security:
         - bearer: []
@@ -1994,7 +2028,7 @@ paths:
       summary: Set sandbox auto-delete interval
       tags:
         - sandbox
-  /sandbox/{sandboxId}/archive:
+  /sandbox/{sandboxIdOrName}/archive:
     post:
       operationId: archiveSandbox
       parameters:
@@ -2008,13 +2042,17 @@ paths:
           style: simple
         - explode: false
           in: path
-          name: sandboxId
+          name: sandboxIdOrName
           required: true
           schema:
             type: string
           style: simple
       responses:
         '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Sandbox'
           description: Sandbox has been archived
       security:
         - bearer: []
@@ -2025,7 +2063,7 @@ paths:
       summary: Archive sandbox
       tags:
         - sandbox
-  /sandbox/{sandboxId}/ports/{port}/preview-url:
+  /sandbox/{sandboxIdOrName}/ports/{port}/preview-url:
     get:
       operationId: getPortPreviewUrl
       parameters:
@@ -2037,10 +2075,10 @@ paths:
           schema:
             type: string
           style: simple
-        - description: ID of the sandbox
+        - description: ID or name of the sandbox
           explode: false
           in: path
-          name: sandboxId
+          name: sandboxIdOrName
           required: true
           schema:
             type: string
@@ -2069,7 +2107,7 @@ paths:
       summary: Get preview URL for a sandbox port
       tags:
         - sandbox
-  /sandbox/{sandboxId}/build-logs:
+  /sandbox/{sandboxIdOrName}/build-logs:
     get:
       operationId: getBuildLogs
       parameters:
@@ -2081,10 +2119,10 @@ paths:
           schema:
             type: string
           style: simple
-        - description: ID of the sandbox
+        - description: ID or name of the sandbox
           explode: false
           in: path
-          name: sandboxId
+          name: sandboxIdOrName
           required: true
           schema:
             type: string
@@ -2109,7 +2147,7 @@ paths:
       summary: Get build logs
       tags:
         - sandbox
-  /sandbox/{sandboxId}/ssh-access:
+  /sandbox/{sandboxIdOrName}/ssh-access:
     delete:
       operationId: revokeSshAccess
       parameters:
@@ -2121,10 +2159,10 @@ paths:
           schema:
             type: string
           style: simple
-        - description: ID of the sandbox
+        - description: ID or name of the sandbox
           explode: false
           in: path
-          name: sandboxId
+          name: sandboxIdOrName
           required: true
           schema:
             type: string
@@ -2140,6 +2178,10 @@ paths:
           style: form
       responses:
         '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Sandbox'
           description: SSH access has been revoked
       security:
         - bearer: []
@@ -2161,10 +2203,10 @@ paths:
           schema:
             type: string
           style: simple
-        - description: ID of the sandbox
+        - description: ID or name of the sandbox
           explode: false
           in: path
-          name: sandboxId
+          name: sandboxIdOrName
           required: true
           schema:
             type: string
@@ -6198,7 +6240,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PortPreviewUrl'
+                $ref: '#/components/schemas/WorkspacePortPreviewUrl'
           description: Preview URL for the specified port
       security:
         - bearer: []
@@ -8269,6 +8311,7 @@ components:
           daytona.io/public: 'true'
         target: local
         disk: 10
+        name: MySandbox
         backupState: None
         user: daytona
         autoArchiveInterval: 10080
@@ -8281,6 +8324,10 @@ components:
         organizationId:
           description: The organization ID of the sandbox
           example: organization123
+          type: string
+        name:
+          description: The name of the sandbox
+          example: MySandbox
           type: string
         snapshot:
           description: The snapshot used for the sandbox
@@ -8420,6 +8467,7 @@ components:
         - id
         - labels
         - memory
+        - name
         - networkBlockAll
         - organizationId
         - public
@@ -8463,6 +8511,7 @@ components:
               daytona.io/public: 'true'
             target: local
             disk: 10
+            name: MySandbox
             backupState: None
             user: daytona
             autoArchiveInterval: 10080
@@ -8498,6 +8547,7 @@ components:
               daytona.io/public: 'true'
             target: local
             disk: 10
+            name: MySandbox
             backupState: None
             user: daytona
             autoArchiveInterval: 10080
@@ -8574,11 +8624,17 @@ components:
         disk: 3
         autoDeleteInterval: 30
         public: false
+        name: MySandbox
         user: daytona
         class: small
         autoArchiveInterval: 10080
         snapshot: ubuntu-4vcpu-8ram-100gb
       properties:
+        name:
+          description: "The name of the sandbox. If not provided, the sandbox ID will\
+            \ be used as the name"
+          example: MySandbox
+          type: string
         snapshot:
           description: The ID or name of the snapshot used for the sandbox
           example: ubuntu-4vcpu-8ram-100gb
@@ -8713,10 +8769,15 @@ components:
       type: object
     PortPreviewUrl:
       example:
+        sandboxId: '123456'
         url: https://123456-mysandbox.runner.com
         legacyProxyUrl: https://3000-mysandbox.runner.com
         token: ul67qtv-jl6wb9z5o3eii-ljqt9qed6l
       properties:
+        sandboxId:
+          description: ID of the sandbox
+          example: '123456'
+          type: string
         url:
           description: Preview url
           example: https://123456-mysandbox.runner.com
@@ -8730,6 +8791,7 @@ components:
           example: https://3000-mysandbox.runner.com
           type: string
       required:
+        - sandboxId
         - token
         - url
       type: object
@@ -10768,7 +10830,7 @@ components:
           daytona.io/public: 'true'
         target: local
         disk: 10
-        name: MyWorkspace
+        name: MySandbox
         backupState: None
         user: daytona
         autoArchiveInterval: 10080
@@ -10781,6 +10843,10 @@ components:
         organizationId:
           description: The organization ID of the sandbox
           example: organization123
+          type: string
+        name:
+          description: The name of the sandbox
+          example: MySandbox
           type: string
         snapshot:
           description: The snapshot used for the sandbox
@@ -10911,11 +10977,6 @@ components:
         daemonVersion:
           description: The version of the daemon running in the sandbox
           example: 1.0.0
-          type: string
-        name:
-          default: ''
-          description: The name of the workspace
-          example: MyWorkspace
           type: string
         image:
           description: The image used for the workspace
@@ -11054,6 +11115,28 @@ components:
           allOf:
             - $ref: '#/components/schemas/CreateBuildInfo'
           description: Build information for the workspace
+      type: object
+    WorkspacePortPreviewUrl:
+      example:
+        url: https://123456-mysandbox.runner.com
+        legacyProxyUrl: https://3000-mysandbox.runner.com
+        token: ul67qtv-jl6wb9z5o3eii-ljqt9qed6l
+      properties:
+        url:
+          description: Preview url
+          example: https://123456-mysandbox.runner.com
+          type: string
+        token:
+          description: Access token
+          example: ul67qtv-jl6wb9z5o3eii-ljqt9qed6l
+          type: string
+        legacyProxyUrl:
+          description: Legacy preview url using runner domain
+          example: https://3000-mysandbox.runner.com
+          type: string
+      required:
+        - token
+        - url
       type: object
     VolumeState:
       description: Volume state

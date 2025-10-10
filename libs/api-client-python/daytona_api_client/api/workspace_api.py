@@ -21,9 +21,9 @@ from pydantic import Field, StrictBool, StrictFloat, StrictInt, StrictStr
 from typing import List, Optional, Union
 from typing_extensions import Annotated
 from daytona_api_client.models.create_workspace import CreateWorkspace
-from daytona_api_client.models.port_preview_url import PortPreviewUrl
 from daytona_api_client.models.sandbox_labels import SandboxLabels
 from daytona_api_client.models.workspace import Workspace
+from daytona_api_client.models.workspace_port_preview_url import WorkspacePortPreviewUrl
 
 from daytona_api_client.api_client import ApiClient, RequestSerialized
 from daytona_api_client.api_response import ApiResponse
@@ -1472,7 +1472,7 @@ class WorkspaceApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> PortPreviewUrl:
+    ) -> WorkspacePortPreviewUrl:
         """(Deprecated) [DEPRECATED] Get preview URL for a workspace port
 
 
@@ -1516,7 +1516,7 @@ class WorkspaceApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "PortPreviewUrl",
+            '200': "WorkspacePortPreviewUrl",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -1547,7 +1547,7 @@ class WorkspaceApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[PortPreviewUrl]:
+    ) -> ApiResponse[WorkspacePortPreviewUrl]:
         """(Deprecated) [DEPRECATED] Get preview URL for a workspace port
 
 
@@ -1591,7 +1591,7 @@ class WorkspaceApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "PortPreviewUrl",
+            '200': "WorkspacePortPreviewUrl",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -1666,7 +1666,7 @@ class WorkspaceApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "PortPreviewUrl",
+            '200': "WorkspacePortPreviewUrl",
         }
         response_data = self.api_client.call_api(
             *_param,

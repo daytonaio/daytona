@@ -161,4 +161,5 @@ models/webhook-controller-get-status200-response.ts
 models/webhook-initialization-status.ts
 models/windows-response.ts
 models/work-dir-response.ts
+models/workspace-port-preview-url.ts
 models/workspace.ts

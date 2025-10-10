@@ -118,6 +118,13 @@ Represents a Daytona Sandbox.
     ```ts
     SandboxDto.memory
     ```
+- `name` _string_ - The name of the sandbox
+    
+    ##### Implementation of
+    
+    ```ts
+    SandboxDto.name
+    ```
 - `networkAllowList?` _string_ - Comma-separated list of allowed CIDR network addresses for the Sandbox
     
     ##### Implementation of
@@ -722,7 +729,6 @@ or encounters an error.
 **Throws**:
 
 - `DaytonaError` - If the sandbox fails to stop within the timeout period.
-
 ## PaginatedSandboxes
 
 **Extends:**
@@ -741,7 +747,6 @@ or encounters an error.
 
 
 - `Omit`\<`PaginatedSandboxesDto`, `"items"`\>
-
 ## SandboxCodeToolbox
 
 Interface defining methods that a code toolbox must implement

@@ -4,7 +4,7 @@
  */
 
 import React from 'react'
-import { Sandbox } from '@daytonaio/api-client'
+import { Sandbox, SandboxDesiredState } from '@daytonaio/api-client'
 import { ColumnDef } from '@tanstack/react-table'
 import { ArrowUp, ArrowDown } from 'lucide-react'
 import { Checkbox } from '../ui/checkbox'
@@ -110,15 +110,16 @@ export function getColumns({
       enableHiding: false,
     },
     {
-      id: 'id',
+      id: 'name',
       header: ({ column }) => {
-        return <SortableHeader column={column} label="ID" />
+        return <SortableHeader column={column} label="Name" />
       },
-      accessorKey: 'id',
+      accessorKey: 'name',
       cell: ({ row }) => {
+        const displayName = getDisplayName(row.original)
         return (
           <div className=" w-full truncate">
-            <span>{row.original.id}</span>
+            <span>{displayName}</span>
           </div>
         )
       },
@@ -263,6 +264,20 @@ export function getColumns({
   ]
 
   return columns
+}
+
+function getDisplayName(sandbox: Sandbox): string {
+  // If the sandbox is destroying and the name starts with "DESTROYED_", trim the prefix and timestamp
+  if (sandbox.desiredState === SandboxDesiredState.DESTROYED && sandbox.name.startsWith('DESTROYED_')) {
+    // Remove "DESTROYED_" prefix and everything after the last underscore (timestamp)
+    const withoutPrefix = sandbox.name.substring(10) // Remove "DESTROYED_"
+    const lastUnderscoreIndex = withoutPrefix.lastIndexOf('_')
+    if (lastUnderscoreIndex !== -1) {
+      return withoutPrefix.substring(0, lastUnderscoreIndex)
+    }
+    return withoutPrefix
+  }
+  return sandbox.name
 }
 
 function getLastEvent(sandbox: Sandbox): { date: Date; relativeTimeString: string } {

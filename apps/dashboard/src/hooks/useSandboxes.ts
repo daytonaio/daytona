@@ -15,6 +15,7 @@ import {
 
 export interface SandboxFilters {
   id?: string
+  name?: string
   labels?: Record<string, string>
   includeErroredDeleted?: boolean
   states?: ListSandboxesPaginatedStatesEnum[]
@@ -82,6 +83,7 @@ export function useSandboxes(queryKey: QueryKey, params: SandboxQueryParams) {
         page,
         pageSize,
         filters.id,
+        filters.name,
         filters.labels ? JSON.stringify(filters.labels) : undefined,
         filters.includeErroredDeleted,
         filters.states,
