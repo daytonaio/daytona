@@ -43,8 +43,13 @@ export class SandboxStartAction extends SandboxAction {
 
   async run(sandbox: Sandbox): Promise<SyncState> {
     switch (sandbox.state) {
-      case SandboxState.PENDING_PULL: {
-        return this.handleUnassignedRunnerSandbox(sandbox, false)
+      case SandboxState.PULLING_SNAPSHOT: {
+        if (!sandbox.runnerId) {
+          // Using the PULLING_SNAPSHOT state for the case where the runner isn't assigned yet as well
+          return this.handleUnassignedRunnerSandbox(sandbox)
+        } else {
+          return this.handleRunnerSandboxStartedStateCheck(sandbox)
+        }
       }
       case SandboxState.PENDING_BUILD: {
         return this.handleUnassignedRunnerSandbox(sandbox, true)
@@ -64,7 +69,6 @@ export class SandboxStartAction extends SandboxAction {
       case SandboxState.CREATING: {
         return this.handleRunnerSandboxPullingSnapshotStateCheck(sandbox)
       }
-      case SandboxState.PULLING_SNAPSHOT:
       case SandboxState.STARTING: {
         return this.handleRunnerSandboxStartedStateCheck(sandbox)
       }
@@ -93,58 +97,6 @@ export class SandboxStartAction extends SandboxAction {
     }
 
     return DONT_SYNC_AGAIN
-  }
-
-  private async handleUnassignedBuildSandbox(sandbox: Sandbox): Promise<SyncState> {
-    // Try to assign an available runner with the snapshot build
-    let runnerId: string
-    try {
-      const runner = await this.runnerService.getRandomAvailableRunner({
-        region: sandbox.region,
-        sandboxClass: sandbox.class,
-        snapshotRef: sandbox.buildInfo.snapshotRef,
-      })
-      runnerId = runner.id
-    } catch {
-      // Continue to next assignment method
-    }
-
-    if (runnerId) {
-      await this.updateSandboxState(sandbox.id, SandboxState.UNKNOWN, runnerId)
-      return SYNC_AGAIN
-    }
-
-    // Try to assign an available runner that is currently building the snapshot
-    const snapshotRunners = await this.runnerService.getSnapshotRunners(sandbox.buildInfo.snapshotRef)
-
-    for (const snapshotRunner of snapshotRunners) {
-      const runner = await this.runnerService.findOne(snapshotRunner.runnerId)
-      if (runner.availabilityScore >= this.configService.getOrThrow('runnerUsage.declarativeBuildScoreThreshold')) {
-        if (snapshotRunner.state === SnapshotRunnerState.BUILDING_SNAPSHOT) {
-          await this.updateSandboxState(sandbox.id, SandboxState.BUILDING_SNAPSHOT, runner.id)
-          return SYNC_AGAIN
-        } else if (snapshotRunner.state === SnapshotRunnerState.ERROR) {
-          await this.updateSandboxState(sandbox.id, SandboxState.BUILD_FAILED, undefined, snapshotRunner.errorReason)
-          return DONT_SYNC_AGAIN
-        }
-      }
-    }
-
-    const excludedRunnerIds = await this.runnerService.getRunnersWithMultipleSnapshotsBuilding()
-
-    // Try to assign a new available runner
-    const runner = await this.runnerService.getRandomAvailableRunner({
-      region: sandbox.region,
-      sandboxClass: sandbox.class,
-      excludedRunnerIds: excludedRunnerIds,
-    })
-    runnerId = runner.id
-
-    this.buildOnRunner(sandbox.buildInfo, runnerId, sandbox.organizationId)
-
-    await this.updateSandboxState(sandbox.id, SandboxState.BUILDING_SNAPSHOT, runnerId)
-
-    return SYNC_AGAIN
   }
 
   private async handleRunnerSandboxBuildingSnapshotStateOnDesiredStateStart(sandbox: Sandbox): Promise<SyncState> {
