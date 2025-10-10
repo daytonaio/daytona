@@ -21,6 +21,16 @@ import axios from 'axios'
 
 const timeoutMs = 3000
 
+export interface ImageDetails {
+  digest: string
+  sizeGB: number
+  entrypoint: string[]
+  cmd: string[]
+  env: string[]
+  workingDir?: string
+  user?: string
+}
+
 @Injectable()
 @ApiOAuth2(['openid', 'profile', 'email'])
 export class DockerRegistryService {
@@ -375,18 +385,7 @@ export class DockerRegistryService {
     }
   }
 
-  async getImageDetails(
-    image: string,
-    organizationId?: string,
-  ): Promise<{
-    digest: string
-    sizeGB: number
-    entrypoint: string[]
-    cmd: string[]
-    env: string[]
-    workingDir?: string
-    user?: string
-  }> {
+  async getImageDetails(image: string, organizationId?: string): Promise<ImageDetails> {
     try {
       // Extract tag
       const lastColonIndex = image.lastIndexOf(':')
