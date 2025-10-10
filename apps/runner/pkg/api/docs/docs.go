@@ -1598,11 +1598,9 @@ const docTemplate = `{
             ],
             "properties": {
                 "sourceImage": {
-                    "description": "Source image name:tag or digest",
                     "type": "string"
                 },
                 "targetImage": {
-                    "description": "Target image name:tag",
                     "type": "string"
                 }
             }
