@@ -434,18 +434,10 @@ export class SandboxController {
     @Param('sandboxId') sandboxId: string,
   ): Promise<SandboxDto> {
     await this.sandboxService.start(sandboxId, authContext.organization)
-    let sandbox = SandboxDto.fromSandbox(await this.sandboxService.findOne(sandboxId), '')
+    let sandbox = SandboxDto.fromSandbox(await this.sandboxService.findOne(sandboxId))
 
     if (![SandboxState.ARCHIVED, SandboxState.RESTORING, SandboxState.STARTED].includes(sandbox.state)) {
       sandbox = await this.waitForSandboxStarted(sandbox, 30)
-    }
-
-    if (!sandbox.runnerDomain && sandbox.state != SandboxState.ARCHIVED) {
-      const runner = await this.runnerService.findBySandboxId(sandboxId)
-      if (!runner) {
-        throw new NotFoundException(`Runner for sandbox ${sandboxId} not found`)
-      }
-      sandbox.runnerDomain = runner.domain
     }
 
     return sandbox
@@ -813,15 +805,8 @@ export class SandboxController {
       throw new NotFoundException(`Sandbox with ID ${sandboxId} not found`)
     }
 
-    // Get runner info
-    const runner = await this.runnerService.findOne(sandbox.runnerId)
-    if (!runner) {
-      throw new NotFoundException(`Runner not found for sandbox ${sandboxId}`)
-    }
-
     return {
       url: `${proxyProtocol}://${port}-${sandbox.id}.${proxyDomain}`,
-      legacyProxyUrl: `https://${port}-${sandbox.id}.${runner.domain}`,
       token: sandbox.authToken,
     }
   }
@@ -980,8 +965,6 @@ export class SandboxController {
     return SshAccessValidationDto.fromValidationResult(
       result.valid,
       result.sandboxId,
-      result.runnerId,
-      result.runnerDomain,
     )
   }
 

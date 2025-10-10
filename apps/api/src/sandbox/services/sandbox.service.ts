@@ -1314,8 +1314,6 @@ export class SandboxService {
         return {
           valid: true,
           sandboxId: sshAccess.sandbox.id,
-          runnerId: runner.id,
-          runnerDomain: runner.domain,
         }
       }
     }

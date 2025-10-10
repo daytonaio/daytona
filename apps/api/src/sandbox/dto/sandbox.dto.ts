@@ -191,14 +191,6 @@ export class SandboxDto {
   autoDeleteInterval?: number
 
   @ApiPropertyOptional({
-    description: 'The domain name of the runner',
-    example: 'runner.example.com',
-    required: false,
-  })
-  @IsOptional()
-  runnerDomain?: string
-
-  @ApiPropertyOptional({
     description: 'Array of volumes attached to the sandbox',
     type: [SandboxVolume],
     required: false,
@@ -249,7 +241,7 @@ export class SandboxDto {
   @IsOptional()
   daemonVersion?: string
 
-  static fromSandbox(sandbox: Sandbox, runnerDomain: string): SandboxDto {
+  static fromSandbox(sandbox: Sandbox): SandboxDto {
     return {
       id: sandbox.id,
       organizationId: sandbox.organizationId,
@@ -285,7 +277,6 @@ export class SandboxDto {
             updatedAt: sandbox.buildInfo.updatedAt,
           }
         : undefined,
-      runnerDomain: runnerDomain,
       daemonVersion: sandbox.daemonVersion,
     }
   }

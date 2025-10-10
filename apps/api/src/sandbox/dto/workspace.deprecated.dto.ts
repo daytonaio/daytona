@@ -80,12 +80,13 @@ export class WorkspaceDto extends SandboxDto {
     }
   }
 
-  static fromSandbox(sandbox: Sandbox, runnerDomain: string): WorkspaceDto {
-    const dto = super.fromSandbox(sandbox, runnerDomain)
-    return this.fromSandboxDto(dto)
+  static fromSandbox(sandbox: Sandbox): WorkspaceDto
+  static fromSandbox(sandbox: Sandbox, runnerDomain?: string): WorkspaceDto {
+    const dto = super.fromSandbox(sandbox)
+    return this.fromSandboxDto(dto, runnerDomain)
   }
 
-  static fromSandboxDto(sandboxDto: SandboxDto): WorkspaceDto {
+  static fromSandboxDto(sandboxDto: SandboxDto, runnerDomain?: string): WorkspaceDto {
     return {
       ...sandboxDto,
       name: sandboxDto.id,
@@ -97,7 +98,7 @@ export class WorkspaceDto extends SandboxDto {
         created: sandboxDto.createdAt,
         providerMetadata: JSON.stringify({
           state: sandboxDto.state,
-          nodeDomain: sandboxDto.runnerDomain,
+          nodeDomain: runnerDomain,
           region: sandboxDto.target,
           class: sandboxDto.class,
           updatedAt: sandboxDto.updatedAt,
