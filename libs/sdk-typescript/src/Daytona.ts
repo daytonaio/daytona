@@ -569,6 +569,9 @@ export class Daytona {
    * @example
    * const sandbox = await daytona.findOne({ labels: { 'my-label': 'my-value' } });
    * console.log(`Sandbox ID: ${sandbox.id}, State: ${sandbox.state}`);
+   *
+   * @deprecated Use `get` instead. Filtering by labels will be removed in a future version.
+   *
    */
   public async findOne(filter: SandboxFilter): Promise<Sandbox> {
     if (filter.idOrName) {
@@ -586,23 +589,30 @@ export class Daytona {
   /**
    * Returns paginated list of Sandboxes filtered by labels.
    *
-   * @param {Record<string, string>} [labels] - Labels to filter Sandboxes
+   * @param {Record<string, string>} [labels] - Labels to filter Sandboxes.
+   * @deprecated Use `name` instead. Filtering by labels will be removed in a future version.
    * @param {number} [page] - Page number for pagination (starting from 1)
    * @param {number} [limit] - Maximum number of items per page
+   * @param {string} [name] - Filter by partial name match
    * @returns {Promise<PaginatedSandboxes>} Paginated list of Sandboxes that match the labels.
    *
    * @example
-   * const result = await daytona.list({ 'my-label': 'my-value' }, 2, 10);
+   * const result = await daytona.list(undefined, 2, 10, 'my-value');
    * for (const sandbox of result.items) {
    *     console.log(`${sandbox.id}: ${sandbox.state}`);
    * }
    */
-  public async list(labels?: Record<string, string>, page?: number, limit?: number): Promise<PaginatedSandboxes> {
+  public async list(
+    labels?: Record<string, string>,
+    page?: number,
+    limit?: number,
+    name?: string,
+  ): Promise<PaginatedSandboxes> {
     const response = await this.sandboxApi.listSandboxesPaginated(
       undefined,
       page,
       limit,
-      undefined,
+      name,
       labels ? JSON.stringify(labels) : undefined,
     )
 

@@ -6,7 +6,7 @@ import json
 import time
 import warnings
 from importlib.metadata import version
-from typing import Callable, Dict, Optional, Union, overload
+from typing import Annotated, Callable, Dict, Optional, Union, overload
 
 from daytona_api_client_async import (
     ApiClient,
@@ -20,7 +20,9 @@ from daytona_api_client_async import (
 )
 from daytona_api_client_async import ToolboxApi as ToolboxApi
 from daytona_api_client_async import VolumesApi as VolumesApi
+from deprecated import deprecated
 from environs import Env
+from pydantic import Field
 
 from .._utils.enum import to_enum
 from .._utils.errors import DaytonaError, intercept_errors
@@ -551,6 +553,9 @@ class AsyncDaytona:
             code_toolbox,
         )
 
+    @deprecated(
+        reason="Method is deprecated. Use `get` instead. Filtering by labels will be removed in a future version."
+    )
     @intercept_errors(message_prefix="Failed to find sandbox: ")
     async def find_one(
         self, sandbox_id_or_name: Optional[str] = None, labels: Optional[Dict[str, str]] = None
@@ -582,32 +587,53 @@ class AsyncDaytona:
 
     @intercept_errors(message_prefix="Failed to list sandboxes: ")
     async def list(
-        self, labels: Optional[Dict[str, str]] = None, page: Optional[int] = None, limit: Optional[int] = None
+        self,
+        labels: Annotated[
+            Optional[Dict[str, str]],
+            Field(
+                default=None,
+                deprecated="`labels` is deprecated and will be removed in a future version. Use `name` instead.",
+            ),
+        ] = None,
+        page: Optional[int] = None,
+        limit: Optional[int] = None,
+        name: Optional[str] = None,
     ) -> AsyncPaginatedSandboxes:
         """Returns paginated list of Sandboxes filtered by labels.
 
         Args:
             labels (Optional[Dict[str, str]]): Labels to filter Sandboxes.
+                Deprecated. Use `name` instead. This parameter will be removed in a future version.
             page (Optional[int]): Page number for pagination (starting from 1).
             limit (Optional[int]): Maximum number of items per page.
+            name (Optional[str]): Filter by partial name match
 
         Returns:
             AsyncPaginatedSandboxes: Paginated list of Sandbox instances that match the labels.
 
         Example:
             ```python
-            result = await daytona.list(labels={"my-label": "my-value"}, page=2, limit=10)
+            result = await daytona.list(page=2, limit=10, name="my-value")
             for sandbox in result.items:
                 print(f"{sandbox.id}: {sandbox.state}")
             ```
         """
+        if labels is not None:
+            warnings.warn(
+                "'labels' parameter is deprecated and will be removed in a future version. " + "Use 'name' instead.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+
         if page is not None and page < 1:
             raise DaytonaError("page must be a positive integer")
 
         if limit is not None and limit < 1:
             raise DaytonaError("limit must be a positive integer")
 
-        response = await self._sandbox_api.list_sandboxes_paginated(labels=json.dumps(labels), page=page, limit=limit)
+        response = await self._sandbox_api.list_sandboxes_paginated(
+            labels=json.dumps(labels), page=page, limit=limit, name=name
+        )
 
         return AsyncPaginatedSandboxes(
             items=[
