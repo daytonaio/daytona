@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import asyncio
+import codecs
 import inspect
 from typing import Callable
 
@@ -41,6 +42,8 @@ async def process_streaming_response(
             stream = response.aiter_bytes()
             next_chunk = None
             exit_check_streak = 0
+            # Use incremental decoder to properly handle UTF-8 sequences split across chunks
+            decoder = codecs.getincrementaldecoder("utf-8")(errors="replace")
 
             try:
                 while True:
@@ -70,7 +73,8 @@ async def process_streaming_response(
                         if chunk is None:
                             break
 
-                        on_chunk(chunk.decode("utf-8", "ignore"))
+                        # Use final=False to buffer incomplete UTF-8 sequences for the next chunk
+                        on_chunk(decoder.decode(chunk, final=False))
                         exit_check_streak = 0  # Reset on activity
 
                     elif timeout_task in done:
@@ -85,6 +89,11 @@ async def process_streaming_response(
                         else:
                             exit_check_streak = 0
             finally:
+                # Flush any remaining buffered bytes from the decoder
+                remaining = decoder.decode(b"", final=True)
+                if remaining:
+                    on_chunk(remaining)
+
                 # Final cleanup - ensure any remaining tasks are cancelled
                 if timeout_task:
                     timeout_task.cancel()
@@ -122,13 +131,20 @@ async def std_demux_stream(
     buf = bytearray()
     current_data_type = None  # None | "stdout" | "stderr"
 
+    # Separate incremental decoders for stdout and stderr to maintain independent UTF-8 decoding state
+    stdout_decoder = codecs.getincrementaldecoder("utf-8")(errors="replace")
+    stderr_decoder = codecs.getincrementaldecoder("utf-8")(errors="replace")
+
     def emit(payload: bytes):
         if not payload:
             return
+        # Use final=False to buffer incomplete UTF-8 sequences for the next chunk
         if current_data_type == "stdout":
-            on_stdout(payload.decode("utf-8", "ignore"))
+            text = stdout_decoder.decode(payload, final=False)
+            on_stdout(text)
         elif current_data_type == "stderr":
-            on_stderr(payload.decode("utf-8", "ignore"))
+            text = stderr_decoder.decode(payload, final=False)
+            on_stderr(text)
         # If current is None, drop unlabeled bytes (shouldn't happen with proper labeling)
 
     try:
@@ -214,6 +230,17 @@ async def std_demux_stream(
         # Flush any remaining buffered payload on clean close
         if buf and current_data_type in ("stdout", "stderr"):
             if current_data_type == "stdout":
-                on_stdout(bytes(buf).decode("utf-8", "ignore"))
+                # Use final=True to flush any buffered incomplete UTF-8 sequences
+                text = stdout_decoder.decode(bytes(buf), final=True)
+                on_stdout(text)
             else:
-                on_stderr(bytes(buf).decode("utf-8", "ignore"))
+                text = stderr_decoder.decode(bytes(buf), final=True)
+                on_stderr(text)
+        else:
+            # Flush any remaining bytes in the decoders even if buf is empty
+            stdout_flushed = stdout_decoder.decode(b"", final=True)
+            stderr_flushed = stderr_decoder.decode(b"", final=True)
+            if stdout_flushed:
+                on_stdout(stdout_flushed)
+            if stderr_flushed:
+                on_stderr(stderr_flushed)
