@@ -10,9 +10,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/daytonaio/runner/pkg/cache"
 	"github.com/daytonaio/runner/pkg/docker"
 	"github.com/daytonaio/runner/pkg/models"
+
+	common_cache "github.com/daytonaio/common-go/pkg/cache"
+
 	"github.com/docker/docker/api/types/container"
 	"github.com/shirou/gopsutil/cpu"
 	"github.com/shirou/gopsutil/disk"
@@ -24,21 +26,22 @@ import (
 const systemMetricsKey = "__system_metrics__"
 
 type MetricsServiceConfig struct {
-	Cache    cache.ICache[models.SystemMetrics]
 	Docker   *docker.DockerClient
 	Interval time.Duration
 }
 
 type MetricsService struct {
-	cache    cache.ICache[models.SystemMetrics]
+	cache    common_cache.ICache[models.SystemMetrics]
 	docker   *docker.DockerClient
 	interval time.Duration
 }
 
 // NewPrometheusParser creates a new parser instance
 func NewMetricsService(config MetricsServiceConfig) *MetricsService {
+	metricsCache := common_cache.NewMapCache[models.SystemMetrics]()
+
 	return &MetricsService{
-		cache:    config.Cache,
+		cache:    metricsCache,
 		docker:   config.Docker,
 		interval: config.Interval,
 	}

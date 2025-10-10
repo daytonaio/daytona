@@ -25,11 +25,14 @@ import (
 	"github.com/daytonaio/runner/pkg/api/controllers"
 	"github.com/daytonaio/runner/pkg/api/docs"
 	"github.com/daytonaio/runner/pkg/api/middlewares"
+	"github.com/daytonaio/runner/pkg/common"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	log "github.com/sirupsen/logrus"
+
+	common_errors "github.com/daytonaio/common-go/pkg/errors"
 
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -81,7 +84,7 @@ func (a *ApiServer) Start() error {
 	}
 
 	a.router.Use(middlewares.LoggingMiddleware())
-	a.router.Use(middlewares.ErrorMiddleware())
+	a.router.Use(common_errors.NewErrorMiddleware(common.HandlePossibleDockerError))
 
 	public := a.router.Group("/")
 	public.GET("", controllers.HealthCheck)

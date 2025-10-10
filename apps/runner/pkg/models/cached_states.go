@@ -4,14 +4,11 @@
 package models
 
 import (
-	"time"
-
 	"github.com/daytonaio/runner/pkg/models/enums"
 )
 
-type CacheData struct {
+type CachedStates struct {
 	SandboxState      enums.SandboxState
 	BackupState       enums.BackupState
 	BackupErrorReason *string
-	DestructionTime   *time.Time
 }

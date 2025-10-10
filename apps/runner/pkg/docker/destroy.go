@@ -15,6 +15,8 @@ import (
 	"github.com/docker/docker/errdefs"
 
 	log "github.com/sirupsen/logrus"
+
+	common_errors "github.com/daytonaio/common-go/pkg/errors"
 )
 
 func (d *DockerClient) Destroy(ctx context.Context, containerId string) error {
@@ -38,12 +40,12 @@ func (d *DockerClient) Destroy(ctx context.Context, containerId string) error {
 		return nil
 	}
 
-	d.cache.SetSandboxState(ctx, containerId, enums.SandboxStateDestroying)
+	d.statesCache.SetSandboxState(ctx, containerId, enums.SandboxStateDestroying)
 
 	ct, err := d.ContainerInspect(ctx, containerId)
 	if err != nil {
 		if errdefs.IsNotFound(err) {
-			d.cache.SetSandboxState(ctx, containerId, enums.SandboxStateDestroyed)
+			d.statesCache.SetSandboxState(ctx, containerId, enums.SandboxStateDestroyed)
 		}
 		return err
 	}
@@ -64,7 +66,7 @@ func (d *DockerClient) Destroy(ctx context.Context, containerId string) error {
 	if err != nil {
 		// Handle NotFound error case
 		if errdefs.IsNotFound(err) {
-			d.cache.SetSandboxState(ctx, containerId, enums.SandboxStateDestroyed)
+			d.statesCache.SetSandboxState(ctx, containerId, enums.SandboxStateDestroyed)
 			return nil
 		}
 		return err
@@ -78,7 +80,7 @@ func (d *DockerClient) Destroy(ctx context.Context, containerId string) error {
 		}
 	}()
 
-	d.cache.SetSandboxState(ctx, containerId, enums.SandboxStateDestroyed)
+	d.statesCache.SetSandboxState(ctx, containerId, enums.SandboxStateDestroyed)
 
 	return nil
 }
@@ -92,7 +94,7 @@ func (d *DockerClient) RemoveDestroyed(ctx context.Context, containerId string) 
 	}
 
 	if state != enums.SandboxStateDestroyed {
-		return common.NewBadRequestError(fmt.Errorf("container %s is not in destroyed state", containerId))
+		return common_errors.NewBadRequestError(fmt.Errorf("container %s is not in destroyed state", containerId))
 	}
 
 	// Use exponential backoff helper for container removal
