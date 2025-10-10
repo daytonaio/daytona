@@ -312,7 +312,7 @@ export class SnapshotController {
     const startTime = Date.now()
     const timeoutMs = 30 * 1000
 
-    while (!snapshot.buildRunnerId) {
+    while (!snapshot.initialRunnerId) {
       if (Date.now() - startTime > timeoutMs) {
         throw new NotFoundException(`Timeout waiting for build runner assignment for snapshot ${snapshotId}`)
       }
@@ -320,7 +320,7 @@ export class SnapshotController {
       snapshot = await this.snapshotService.getSnapshot(snapshotId)
     }
 
-    const runner = await this.runnerService.findOne(snapshot.buildRunnerId)
+    const runner = await this.runnerService.findOne(snapshot.initialRunnerId)
     if (!runner) {
       throw new NotFoundException(`Build runner for snapshot ${snapshotId} not found`)
     }
