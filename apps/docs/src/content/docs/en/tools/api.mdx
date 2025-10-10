@@ -587,13 +587,13 @@ import Label from '@components/Label.astro'
 | **`200`** | List of sandboxes for the authenticated runner |
 
 
-## GET /sandbox/\{sandboxId\}
+## GET /sandbox/\{sandboxIdOrName\}
 
 ### Parameters
 | Name | Location | Required | Type | Description |
 | :--- | :------- | :------- | :--- | :---------- |
 | **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
-| **`sandboxId`** | path | true | undefined | ID of the sandbox |
+| **`sandboxIdOrName`** | path | true | undefined | ID or name of the sandbox |
 | **`verbose`** | query | false | undefined | Include verbose output |
 
 ### Responses
@@ -601,13 +601,13 @@ import Label from '@components/Label.astro'
 | :-------- | :---------- |
 | **`200`** | Sandbox details |
 
-## DELETE /sandbox/\{sandboxId\}
+## DELETE /sandbox/\{sandboxIdOrName\}
 
 ### Parameters
 | Name | Location | Required | Type | Description |
 | :--- | :------- | :------- | :--- | :---------- |
 | **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
-| **`sandboxId`** | path | true | undefined | ID of the sandbox |
+| **`sandboxIdOrName`** | path | true | undefined | ID or name of the sandbox |
 
 ### Responses
 | Status Code | Description |
@@ -615,13 +615,13 @@ import Label from '@components/Label.astro'
 | **`200`** | Sandbox has been deleted |
 
 
-## POST /sandbox/\{sandboxId\}/start
+## POST /sandbox/\{sandboxIdOrName\}/start
 
 ### Parameters
 | Name | Location | Required | Type | Description |
 | :--- | :------- | :------- | :--- | :---------- |
 | **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
-| **`sandboxId`** | path | true | undefined | ID of the sandbox |
+| **`sandboxIdOrName`** | path | true | undefined | ID or name of the sandbox |
 
 ### Responses
 | Status Code | Description |
@@ -629,13 +629,13 @@ import Label from '@components/Label.astro'
 | **`200`** | Sandbox has been started or is being restored from archived state |
 
 
-## POST /sandbox/\{sandboxId\}/stop
+## POST /sandbox/\{sandboxIdOrName\}/stop
 
 ### Parameters
 | Name | Location | Required | Type | Description |
 | :--- | :------- | :------- | :--- | :---------- |
 | **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
-| **`sandboxId`** | path | true | undefined | ID of the sandbox |
+| **`sandboxIdOrName`** | path | true | undefined | ID or name of the sandbox |
 
 ### Responses
 | Status Code | Description |
@@ -643,13 +643,13 @@ import Label from '@components/Label.astro'
 | **`200`** | Sandbox has been stopped |
 
 
-## PUT /sandbox/\{sandboxId\}/labels
+## PUT /sandbox/\{sandboxIdOrName\}/labels
 
 ### Parameters
 | Name | Location | Required | Type | Description |
 | :--- | :------- | :------- | :--- | :---------- |
 | **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
-| **`sandboxId`** | path | true | undefined | ID of the sandbox |
+| **`sandboxIdOrName`** | path | true | undefined | ID or name of the sandbox |
 
 ### Responses
 | Status Code | Description |
@@ -657,13 +657,13 @@ import Label from '@components/Label.astro'
 | **`200`** | Labels have been successfully replaced |
 
 
-## PUT /sandbox/\{sandboxId\}/state
+## PUT /sandbox/\{sandboxIdOrName\}/state
 
 ### Parameters
 | Name | Location | Required | Type | Description |
 | :--- | :------- | :------- | :--- | :---------- |
 | **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
-| **`sandboxId`** | path | true | undefined | ID of the sandbox |
+| **`sandboxIdOrName`** | path | true | undefined | ID or name of the sandbox |
 
 ### Responses
 | Status Code | Description |
@@ -671,7 +671,7 @@ import Label from '@components/Label.astro'
 | **`200`** | Sandbox state has been successfully updated |
 
 
-## POST /sandbox/\{sandboxId\}/backup
+## POST /sandbox/\{sandboxIdOrName\}/backup
 
 ### Parameters
 | Name | Location | Required | Type | Description |
@@ -685,13 +685,13 @@ import Label from '@components/Label.astro'
 | **`200`** | Sandbox backup has been initiated |
 
 
-## POST /sandbox/\{sandboxId\}/public/\{isPublic\}
+## POST /sandbox/\{sandboxIdOrName\}/public/\{isPublic\}
 
 ### Parameters
 | Name | Location | Required | Type | Description |
 | :--- | :------- | :------- | :--- | :---------- |
 | **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
-| **`sandboxId`** | path | true | undefined | ID of the sandbox |
+| **`sandboxIdOrName`** | path | true | undefined | ID or name of the sandbox |
 | **`isPublic`** | path | true | undefined | Public status to set |
 
 ### Responses
@@ -700,13 +700,13 @@ import Label from '@components/Label.astro'
 | **`201`** |  |
 
 
-## POST /sandbox/\{sandboxId\}/autostop/\{interval\}
+## POST /sandbox/\{sandboxIdOrName\}/autostop/\{interval\}
 
 ### Parameters
 | Name | Location | Required | Type | Description |
 | :--- | :------- | :------- | :--- | :---------- |
 | **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
-| **`sandboxId`** | path | true | undefined | ID of the sandbox |
+| **`sandboxIdOrName`** | path | true | undefined | ID or name of the sandbox |
 | **`interval`** | path | true | undefined | Auto-stop interval in minutes (0 to disable) |
 
 ### Responses
@@ -715,13 +715,13 @@ import Label from '@components/Label.astro'
 | **`200`** | Auto-stop interval has been set |
 
 
-## POST /sandbox/\{sandboxId\}/autoarchive/\{interval\}
+## POST /sandbox/\{sandboxIdOrName\}/autoarchive/\{interval\}
 
 ### Parameters
 | Name | Location | Required | Type | Description |
 | :--- | :------- | :------- | :--- | :---------- |
 | **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
-| **`sandboxId`** | path | true | undefined | ID of the sandbox |
+| **`sandboxIdOrName`** | path | true | undefined | ID or name of the sandbox |
 | **`interval`** | path | true | undefined | Auto-archive interval in minutes (0 means the maximum interval will be used) |
 
 ### Responses
@@ -730,13 +730,13 @@ import Label from '@components/Label.astro'
 | **`200`** | Auto-archive interval has been set |
 
 
-## POST /sandbox/\{sandboxId\}/autodelete/\{interval\}
+## POST /sandbox/\{sandboxIdOrName\}/autodelete/\{interval\}
 
 ### Parameters
 | Name | Location | Required | Type | Description |
 | :--- | :------- | :------- | :--- | :---------- |
 | **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
-| **`sandboxId`** | path | true | undefined | ID of the sandbox |
+| **`sandboxIdOrName`** | path | true | undefined | ID or name of the sandbox |
 | **`interval`** | path | true | undefined | Auto-delete interval in minutes (negative value means disabled, 0 means delete immediately upon stopping) |
 
 ### Responses
@@ -745,13 +745,13 @@ import Label from '@components/Label.astro'
 | **`200`** | Auto-delete interval has been set |
 
 
-## POST /sandbox/\{sandboxId\}/archive
+## POST /sandbox/\{sandboxIdOrName\}/archive
 
 ### Parameters
 | Name | Location | Required | Type | Description |
 | :--- | :------- | :------- | :--- | :---------- |
 | **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
-| **`sandboxId`** | path | true | undefined | undefined |
+| **`sandboxIdOrName`** | path | true | undefined | ID or name of the sandbox |
 
 ### Responses
 | Status Code | Description |
@@ -759,13 +759,13 @@ import Label from '@components/Label.astro'
 | **`200`** | Sandbox has been archived |
 
 
-## GET /sandbox/\{sandboxId\}/ports/\{port\}/preview-url
+## GET /sandbox/\{sandboxIdOrName\}/ports/\{port\}/preview-url
 
 ### Parameters
 | Name | Location | Required | Type | Description |
 | :--- | :------- | :------- | :--- | :---------- |
 | **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
-| **`sandboxId`** | path | true | undefined | ID of the sandbox |
+| **`sandboxIdOrName`** | path | true | undefined | ID or name of the sandbox |
 | **`port`** | path | true | undefined | Port number to get preview URL for |
 
 ### Responses
@@ -774,13 +774,13 @@ import Label from '@components/Label.astro'
 | **`200`** | Preview URL for the specified port |
 
 
-## GET /sandbox/\{sandboxId\}/build-logs
+## GET /sandbox/\{sandboxIdOrName\}/build-logs
 
 ### Parameters
 | Name | Location | Required | Type | Description |
 | :--- | :------- | :------- | :--- | :---------- |
 | **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
-| **`sandboxId`** | path | true | undefined | ID of the sandbox |
+| **`sandboxIdOrName`** | path | true | undefined | ID or name of the sandbox |
 | **`follow`** | query | false | undefined | Whether to follow the logs stream |
 
 ### Responses
@@ -789,13 +789,13 @@ import Label from '@components/Label.astro'
 | **`200`** | Build logs stream |
 
 
-## POST /sandbox/\{sandboxId\}/ssh-access
+## POST /sandbox/\{sandboxIdOrName\}/ssh-access
 
 ### Parameters
 | Name | Location | Required | Type | Description |
 | :--- | :------- | :------- | :--- | :---------- |
 | **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
-| **`sandboxId`** | path | true | undefined | ID of the sandbox |
+| **`sandboxIdOrName`** | path | true | undefined | ID or name of the sandbox |
 | **`expiresInMinutes`** | query | false | undefined | Expiration time in minutes (default: 60) |
 
 ### Responses
@@ -803,13 +803,13 @@ import Label from '@components/Label.astro'
 | :-------- | :---------- |
 | **`200`** | SSH access has been created |
 
-## DELETE /sandbox/\{sandboxId\}/ssh-access
+## DELETE /sandbox/\{sandboxIdOrName\}/ssh-access
 
 ### Parameters
 | Name | Location | Required | Type | Description |
 | :--- | :------- | :------- | :--- | :---------- |
 | **`X-Daytona-Organization-ID`** | header | false | undefined | Use with JWT to specify the organization ID |
-| **`sandboxId`** | path | true | undefined | ID of the sandbox |
+| **`sandboxIdOrName`** | path | true | undefined | ID or name of the sandbox |
 | **`token`** | query | false | undefined | SSH access token to revoke. If not provided, all SSH access for the sandbox will be revoked. |
 
 ### Responses

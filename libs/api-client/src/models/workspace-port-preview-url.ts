@@ -15,31 +15,25 @@
 /**
  *
  * @export
- * @interface PortPreviewUrl
+ * @interface WorkspacePortPreviewUrl
  */
-export interface PortPreviewUrl {
-  /**
-   * ID of the sandbox
-   * @type {string}
-   * @memberof PortPreviewUrl
-   */
-  sandboxId: string
+export interface WorkspacePortPreviewUrl {
   /**
    * Preview url
    * @type {string}
-   * @memberof PortPreviewUrl
+   * @memberof WorkspacePortPreviewUrl
    */
   url: string
   /**
    * Access token
    * @type {string}
-   * @memberof PortPreviewUrl
+   * @memberof WorkspacePortPreviewUrl
    */
   token: string
   /**
    * Legacy preview url using runner domain
    * @type {string}
-   * @memberof PortPreviewUrl
+   * @memberof WorkspacePortPreviewUrl
    */
   legacyProxyUrl?: string
 }

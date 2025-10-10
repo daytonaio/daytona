@@ -161,6 +161,7 @@ daytona_api_client/models/webhook_initialization_status.py
 daytona_api_client/models/windows_response.py
 daytona_api_client/models/work_dir_response.py
 daytona_api_client/models/workspace.py
+daytona_api_client/models/workspace_port_preview_url.py
 daytona_api_client/py.typed
 daytona_api_client/rest.py
 pyproject.toml

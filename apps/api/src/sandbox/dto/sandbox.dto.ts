@@ -41,6 +41,12 @@ export class SandboxDto {
   })
   organizationId: string
 
+  @ApiProperty({
+    description: 'The name of the sandbox',
+    example: 'MySandbox',
+  })
+  name: string
+
   @ApiPropertyOptional({
     description: 'The snapshot used for the sandbox',
     example: 'daytonaio/sandbox:latest',
@@ -253,6 +259,7 @@ export class SandboxDto {
     return {
       id: sandbox.id,
       organizationId: sandbox.organizationId,
+      name: sandbox.name,
       target: sandbox.region,
       snapshot: sandbox.snapshot,
       user: sandbox.osUser,

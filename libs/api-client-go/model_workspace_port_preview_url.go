@@ -16,13 +16,11 @@ import (
 	"fmt"
 )
 
-// checks if the PortPreviewUrl type satisfies the MappedNullable interface at compile time
-var _ MappedNullable = &PortPreviewUrl{}
+// checks if the WorkspacePortPreviewUrl type satisfies the MappedNullable interface at compile time
+var _ MappedNullable = &WorkspacePortPreviewUrl{}
 
-// PortPreviewUrl struct for PortPreviewUrl
-type PortPreviewUrl struct {
-	// ID of the sandbox
-	SandboxId string `json:"sandboxId"`
+// WorkspacePortPreviewUrl struct for WorkspacePortPreviewUrl
+type WorkspacePortPreviewUrl struct {
 	// Preview url
 	Url string `json:"url"`
 	// Access token
@@ -32,54 +30,29 @@ type PortPreviewUrl struct {
 	AdditionalProperties map[string]interface{}
 }
 
-type _PortPreviewUrl PortPreviewUrl
+type _WorkspacePortPreviewUrl WorkspacePortPreviewUrl
 
-// NewPortPreviewUrl instantiates a new PortPreviewUrl object
+// NewWorkspacePortPreviewUrl instantiates a new WorkspacePortPreviewUrl object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewPortPreviewUrl(sandboxId string, url string, token string) *PortPreviewUrl {
-	this := PortPreviewUrl{}
-	this.SandboxId = sandboxId
+func NewWorkspacePortPreviewUrl(url string, token string) *WorkspacePortPreviewUrl {
+	this := WorkspacePortPreviewUrl{}
 	this.Url = url
 	this.Token = token
 	return &this
 }
 
-// NewPortPreviewUrlWithDefaults instantiates a new PortPreviewUrl object
+// NewWorkspacePortPreviewUrlWithDefaults instantiates a new WorkspacePortPreviewUrl object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewPortPreviewUrlWithDefaults() *PortPreviewUrl {
-	this := PortPreviewUrl{}
+func NewWorkspacePortPreviewUrlWithDefaults() *WorkspacePortPreviewUrl {
+	this := WorkspacePortPreviewUrl{}
 	return &this
 }
 
-// GetSandboxId returns the SandboxId field value
-func (o *PortPreviewUrl) GetSandboxId() string {
-	if o == nil {
-		var ret string
-		return ret
-	}
-
-	return o.SandboxId
-}
-
-// GetSandboxIdOk returns a tuple with the SandboxId field value
-// and a boolean to check if the value has been set.
-func (o *PortPreviewUrl) GetSandboxIdOk() (*string, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.SandboxId, true
-}
-
-// SetSandboxId sets field value
-func (o *PortPreviewUrl) SetSandboxId(v string) {
-	o.SandboxId = v
-}
-
 // GetUrl returns the Url field value
-func (o *PortPreviewUrl) GetUrl() string {
+func (o *WorkspacePortPreviewUrl) GetUrl() string {
 	if o == nil {
 		var ret string
 		return ret
@@ -90,7 +63,7 @@ func (o *PortPreviewUrl) GetUrl() string {
 
 // GetUrlOk returns a tuple with the Url field value
 // and a boolean to check if the value has been set.
-func (o *PortPreviewUrl) GetUrlOk() (*string, bool) {
+func (o *WorkspacePortPreviewUrl) GetUrlOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -98,12 +71,12 @@ func (o *PortPreviewUrl) GetUrlOk() (*string, bool) {
 }
 
 // SetUrl sets field value
-func (o *PortPreviewUrl) SetUrl(v string) {
+func (o *WorkspacePortPreviewUrl) SetUrl(v string) {
 	o.Url = v
 }
 
 // GetToken returns the Token field value
-func (o *PortPreviewUrl) GetToken() string {
+func (o *WorkspacePortPreviewUrl) GetToken() string {
 	if o == nil {
 		var ret string
 		return ret
@@ -114,7 +87,7 @@ func (o *PortPreviewUrl) GetToken() string {
 
 // GetTokenOk returns a tuple with the Token field value
 // and a boolean to check if the value has been set.
-func (o *PortPreviewUrl) GetTokenOk() (*string, bool) {
+func (o *WorkspacePortPreviewUrl) GetTokenOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -122,12 +95,12 @@ func (o *PortPreviewUrl) GetTokenOk() (*string, bool) {
 }
 
 // SetToken sets field value
-func (o *PortPreviewUrl) SetToken(v string) {
+func (o *WorkspacePortPreviewUrl) SetToken(v string) {
 	o.Token = v
 }
 
 // GetLegacyProxyUrl returns the LegacyProxyUrl field value if set, zero value otherwise.
-func (o *PortPreviewUrl) GetLegacyProxyUrl() string {
+func (o *WorkspacePortPreviewUrl) GetLegacyProxyUrl() string {
 	if o == nil || IsNil(o.LegacyProxyUrl) {
 		var ret string
 		return ret
@@ -137,7 +110,7 @@ func (o *PortPreviewUrl) GetLegacyProxyUrl() string {
 
 // GetLegacyProxyUrlOk returns a tuple with the LegacyProxyUrl field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *PortPreviewUrl) GetLegacyProxyUrlOk() (*string, bool) {
+func (o *WorkspacePortPreviewUrl) GetLegacyProxyUrlOk() (*string, bool) {
 	if o == nil || IsNil(o.LegacyProxyUrl) {
 		return nil, false
 	}
@@ -145,7 +118,7 @@ func (o *PortPreviewUrl) GetLegacyProxyUrlOk() (*string, bool) {
 }
 
 // HasLegacyProxyUrl returns a boolean if a field has been set.
-func (o *PortPreviewUrl) HasLegacyProxyUrl() bool {
+func (o *WorkspacePortPreviewUrl) HasLegacyProxyUrl() bool {
 	if o != nil && !IsNil(o.LegacyProxyUrl) {
 		return true
 	}
@@ -154,11 +127,11 @@ func (o *PortPreviewUrl) HasLegacyProxyUrl() bool {
 }
 
 // SetLegacyProxyUrl gets a reference to the given string and assigns it to the LegacyProxyUrl field.
-func (o *PortPreviewUrl) SetLegacyProxyUrl(v string) {
+func (o *WorkspacePortPreviewUrl) SetLegacyProxyUrl(v string) {
 	o.LegacyProxyUrl = &v
 }
 
-func (o PortPreviewUrl) MarshalJSON() ([]byte, error) {
+func (o WorkspacePortPreviewUrl) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
@@ -166,9 +139,8 @@ func (o PortPreviewUrl) MarshalJSON() ([]byte, error) {
 	return json.Marshal(toSerialize)
 }
 
-func (o PortPreviewUrl) ToMap() (map[string]interface{}, error) {
+func (o WorkspacePortPreviewUrl) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	toSerialize["sandboxId"] = o.SandboxId
 	toSerialize["url"] = o.Url
 	toSerialize["token"] = o.Token
 	if !IsNil(o.LegacyProxyUrl) {
@@ -182,12 +154,11 @@ func (o PortPreviewUrl) ToMap() (map[string]interface{}, error) {
 	return toSerialize, nil
 }
 
-func (o *PortPreviewUrl) UnmarshalJSON(data []byte) (err error) {
+func (o *WorkspacePortPreviewUrl) UnmarshalJSON(data []byte) (err error) {
 	// This validates that all required properties are included in the JSON object
 	// by unmarshalling the object into a generic map with string keys and checking
 	// that every required field exists as a key in the generic map.
 	requiredProperties := []string{
-		"sandboxId",
 		"url",
 		"token",
 	}
@@ -206,20 +177,19 @@ func (o *PortPreviewUrl) UnmarshalJSON(data []byte) (err error) {
 		}
 	}
 
-	varPortPreviewUrl := _PortPreviewUrl{}
+	varWorkspacePortPreviewUrl := _WorkspacePortPreviewUrl{}
 
-	err = json.Unmarshal(data, &varPortPreviewUrl)
+	err = json.Unmarshal(data, &varWorkspacePortPreviewUrl)
 
 	if err != nil {
 		return err
 	}
 
-	*o = PortPreviewUrl(varPortPreviewUrl)
+	*o = WorkspacePortPreviewUrl(varWorkspacePortPreviewUrl)
 
 	additionalProperties := make(map[string]interface{})
 
 	if err = json.Unmarshal(data, &additionalProperties); err == nil {
-		delete(additionalProperties, "sandboxId")
 		delete(additionalProperties, "url")
 		delete(additionalProperties, "token")
 		delete(additionalProperties, "legacyProxyUrl")
@@ -229,38 +199,38 @@ func (o *PortPreviewUrl) UnmarshalJSON(data []byte) (err error) {
 	return err
 }
 
-type NullablePortPreviewUrl struct {
-	value *PortPreviewUrl
+type NullableWorkspacePortPreviewUrl struct {
+	value *WorkspacePortPreviewUrl
 	isSet bool
 }
 
-func (v NullablePortPreviewUrl) Get() *PortPreviewUrl {
+func (v NullableWorkspacePortPreviewUrl) Get() *WorkspacePortPreviewUrl {
 	return v.value
 }
 
-func (v *NullablePortPreviewUrl) Set(val *PortPreviewUrl) {
+func (v *NullableWorkspacePortPreviewUrl) Set(val *WorkspacePortPreviewUrl) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullablePortPreviewUrl) IsSet() bool {
+func (v NullableWorkspacePortPreviewUrl) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullablePortPreviewUrl) Unset() {
+func (v *NullableWorkspacePortPreviewUrl) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullablePortPreviewUrl(val *PortPreviewUrl) *NullablePortPreviewUrl {
-	return &NullablePortPreviewUrl{value: val, isSet: true}
+func NewNullableWorkspacePortPreviewUrl(val *WorkspacePortPreviewUrl) *NullableWorkspacePortPreviewUrl {
+	return &NullableWorkspacePortPreviewUrl{value: val, isSet: true}
 }
 
-func (v NullablePortPreviewUrl) MarshalJSON() ([]byte, error) {
+func (v NullableWorkspacePortPreviewUrl) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullablePortPreviewUrl) UnmarshalJSON(src []byte) error {
+func (v *NullableWorkspacePortPreviewUrl) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }

@@ -8,10 +8,10 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  Generated,
   JoinColumn,
   ManyToOne,
-  PrimaryColumn,
+  PrimaryGeneratedColumn,
+  Unique,
   UpdateDateColumn,
 } from 'typeorm'
 import { SandboxState } from '../enums/sandbox-state.enum'
@@ -19,19 +19,23 @@ import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
 import { SandboxClass } from '../enums/sandbox-class.enum'
 import { BackupState } from '../enums/backup-state.enum'
 import { nanoid } from 'nanoid'
+import { v4 as uuidv4 } from 'uuid'
 import { SandboxVolume } from '../dto/sandbox.dto'
 import { BuildInfo } from './build-info.entity'
 
 @Entity()
+@Unique(['organizationId', 'name'])
 export class Sandbox {
-  @PrimaryColumn()
-  @Generated('uuid')
+  @PrimaryGeneratedColumn('uuid')
   id: string
 
   @Column({
     type: 'uuid',
   })
   organizationId: string
+
+  @Column()
+  name: string
 
   @Column({
     default: 'us',
@@ -192,6 +196,12 @@ export class Sandbox {
 
   @Column({ nullable: true })
   daemonVersion?: string
+
+  constructor(name?: string) {
+    this.id = uuidv4()
+    // Set name - use provided name or fallback to ID
+    this.name = name || this.id
+  }
 
   public setBackupState(
     state: BackupState,

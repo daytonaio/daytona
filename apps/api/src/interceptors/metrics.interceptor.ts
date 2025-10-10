@@ -147,35 +147,47 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
           case '/api/workspace':
             this.captureCreateWorkspace_deprecated(props, request.body, response)
             break
-          case '/api/sandbox/:sandboxId/start':
+          case '/api/sandbox/:sandboxIdOrName/start':
           case '/api/workspace/:workspaceId/start':
-            this.captureStartSandbox(props, request.params.sandboxId)
+            this.captureStartSandbox(props, request.params.sandboxIdOrName || request.params.workspaceId)
             break
-          case '/api/sandbox/:sandboxId/stop':
+          case '/api/sandbox/:sandboxIdOrName/stop':
           case '/api/workspace/:workspaceId/stop':
-            this.captureStopSandbox(props, request.params.sandboxId)
+            this.captureStopSandbox(props, request.params.sandboxIdOrName || request.params.workspaceId)
             break
-          case '/api/sandbox/:sandboxId/archive':
+          case '/api/sandbox/:sandboxIdOrName/archive':
           case '/api/workspace/:workspaceId/archive':
-            this.captureArchiveSandbox(props, request.params.sandboxId)
+            this.captureArchiveSandbox(props, request.params.sandboxIdOrName || request.params.workspaceId)
             break
-          case '/api/sandbox/:sandboxId/backup':
-            this.captureCreateBackup(props, request.params.sandboxId)
+          case '/api/sandbox/:sandboxIdOrName/backup':
+            this.captureCreateBackup(props, request.params.sandboxIdOrName)
             break
-          case '/api/sandbox/:sandboxId/public/:isPublic':
+          case '/api/sandbox/:sandboxIdOrName/public/:isPublic':
           case '/api/workspace/:workspaceId/public/:isPublic':
-            this.captureUpdatePublicStatus(props, request.params.sandboxId, request.params.isPublic === 'true')
+            this.captureUpdatePublicStatus(
+              props,
+              request.params.sandboxIdOrName || request.params.workspaceId,
+              request.params.isPublic === 'true',
+            )
             break
-          case '/api/sandbox/:sandboxId/autostop/:interval':
+          case '/api/sandbox/:sandboxIdOrName/autostop/:interval':
           case '/api/workspace/:workspaceId/autostop/:interval':
-            this.captureSetAutostopInterval(props, request.params.sandboxId, parseInt(request.params.interval))
+            this.captureSetAutostopInterval(
+              props,
+              request.params.sandboxIdOrName || request.params.workspaceId,
+              parseInt(request.params.interval),
+            )
             break
-          case '/api/sandbox/:sandboxId/autoarchive/:interval':
+          case '/api/sandbox/:sandboxIdOrName/autoarchive/:interval':
           case '/api/workspace/:workspaceId/autoarchive/:interval':
-            this.captureSetAutoArchiveInterval(props, request.params.sandboxId, parseInt(request.params.interval))
+            this.captureSetAutoArchiveInterval(
+              props,
+              request.params.sandboxIdOrName || request.params.workspaceId,
+              parseInt(request.params.interval),
+            )
             break
-          case '/api/sandbox/:sandboxId/autodelete/:interval':
-            this.captureSetAutoDeleteInterval(props, request.params.sandboxId, parseInt(request.params.interval))
+          case '/api/sandbox/:sandboxIdOrName/autodelete/:interval':
+            this.captureSetAutoDeleteInterval(props, request.params.sandboxIdOrName, parseInt(request.params.interval))
             break
           case '/api/organizations/invitations/:invitationId/accept':
             this.captureAcceptInvitation(props, request.params.invitationId)
@@ -213,9 +225,9 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
         break
       case 'DELETE':
         switch (request.route.path) {
-          case '/api/sandbox/:sandboxId':
+          case '/api/sandbox/:sandboxIdOrName':
           case '/api/workspace/:workspaceId':
-            this.captureDeleteSandbox(props, request.params.sandboxId)
+            this.captureDeleteSandbox(props, request.params.sandboxIdOrName || request.params.workspaceId)
             break
           case '/api/snapshots/:snapshotId':
             this.captureDeleteSnapshot(props, request.params.snapshotId)
@@ -236,9 +248,9 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
         break
       case 'PUT':
         switch (request.route.path) {
-          case '/api/sandbox/:sandboxId/labels':
+          case '/api/sandbox/:sandboxIdOrName/labels':
           case '/api/workspace/:workspaceId/labels':
-            this.captureUpdateSandboxLabels(props, request.params.sandboxId)
+            this.captureUpdateSandboxLabels(props, request.params.sandboxIdOrName || request.params.workspaceId)
             break
           case '/api/organizations/:organizationId/roles/:roleId':
             this.captureUpdateOrganizationRole(
@@ -477,6 +489,8 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
 
     const records = {
       sandbox_id: response.id,
+      sandbox_name_request: request.name,
+      sandbox_name: response.name,
       sandbox_snapshot_request: request.snapshot,
       sandbox_snapshot: response.snapshot,
       sandbox_user_request: request.user,

@@ -181,7 +181,7 @@ export function SandboxTable({
                     }}
                     className="border-b border-border"
                     style={{
-                      width: cell.column.id === 'id' ? '35%' : cell.column.id === 'select' ? '30px' : 'auto',
+                      width: cell.column.id === 'name' ? '35%' : cell.column.id === 'select' ? '30px' : 'auto',
                       maxWidth: cell.column.id === 'select' ? '30px' : cell.column.getSize() + 80,
                       minWidth: cell.column.id === 'select' ? '30px' : cell.column.getSize(),
                     }}

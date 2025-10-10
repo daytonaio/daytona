@@ -25,6 +25,8 @@ type Workspace struct {
 	Id string `json:"id"`
 	// The organization ID of the sandbox
 	OrganizationId string `json:"organizationId"`
+	// The name of the sandbox
+	Name string `json:"name"`
 	// The snapshot used for the sandbox
 	Snapshot *string `json:"snapshot,omitempty"`
 	// The user associated with the project
@@ -80,8 +82,6 @@ type Workspace struct {
 	Class *string `json:"class,omitempty"`
 	// The version of the daemon running in the sandbox
 	DaemonVersion *string `json:"daemonVersion,omitempty"`
-	// The name of the workspace
-	Name string `json:"name"`
 	// The image used for the workspace
 	Image *string `json:"image,omitempty"`
 	// The state of the snapshot
@@ -99,10 +99,11 @@ type _Workspace Workspace
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewWorkspace(id string, organizationId string, user string, env map[string]string, labels map[string]string, public bool, networkBlockAll bool, target string, cpu float32, gpu float32, memory float32, disk float32, name string) *Workspace {
+func NewWorkspace(id string, organizationId string, name string, user string, env map[string]string, labels map[string]string, public bool, networkBlockAll bool, target string, cpu float32, gpu float32, memory float32, disk float32) *Workspace {
 	this := Workspace{}
 	this.Id = id
 	this.OrganizationId = organizationId
+	this.Name = name
 	this.User = user
 	this.Env = env
 	this.Labels = labels
@@ -113,7 +114,6 @@ func NewWorkspace(id string, organizationId string, user string, env map[string]
 	this.Gpu = gpu
 	this.Memory = memory
 	this.Disk = disk
-	this.Name = name
 	return &this
 }
 
@@ -122,8 +122,6 @@ func NewWorkspace(id string, organizationId string, user string, env map[string]
 // but it doesn't guarantee that properties required by API are set
 func NewWorkspaceWithDefaults() *Workspace {
 	this := Workspace{}
-	var name string = ""
-	this.Name = name
 	return &this
 }
 
@@ -173,6 +171,30 @@ func (o *Workspace) GetOrganizationIdOk() (*string, bool) {
 // SetOrganizationId sets field value
 func (o *Workspace) SetOrganizationId(v string) {
 	o.OrganizationId = v
+}
+
+// GetName returns the Name field value
+func (o *Workspace) GetName() string {
+	if o == nil {
+		var ret string
+		return ret
+	}
+
+	return o.Name
+}
+
+// GetNameOk returns a tuple with the Name field value
+// and a boolean to check if the value has been set.
+func (o *Workspace) GetNameOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.Name, true
+}
+
+// SetName sets field value
+func (o *Workspace) SetName(v string) {
+	o.Name = v
 }
 
 // GetSnapshot returns the Snapshot field value if set, zero value otherwise.
@@ -962,30 +984,6 @@ func (o *Workspace) SetDaemonVersion(v string) {
 	o.DaemonVersion = &v
 }
 
-// GetName returns the Name field value
-func (o *Workspace) GetName() string {
-	if o == nil {
-		var ret string
-		return ret
-	}
-
-	return o.Name
-}
-
-// GetNameOk returns a tuple with the Name field value
-// and a boolean to check if the value has been set.
-func (o *Workspace) GetNameOk() (*string, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.Name, true
-}
-
-// SetName sets field value
-func (o *Workspace) SetName(v string) {
-	o.Name = v
-}
-
 // GetImage returns the Image field value if set, zero value otherwise.
 func (o *Workspace) GetImage() string {
 	if o == nil || IsNil(o.Image) {
@@ -1126,6 +1124,7 @@ func (o Workspace) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["id"] = o.Id
 	toSerialize["organizationId"] = o.OrganizationId
+	toSerialize["name"] = o.Name
 	if !IsNil(o.Snapshot) {
 		toSerialize["snapshot"] = o.Snapshot
 	}
@@ -1187,7 +1186,6 @@ func (o Workspace) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.DaemonVersion) {
 		toSerialize["daemonVersion"] = o.DaemonVersion
 	}
-	toSerialize["name"] = o.Name
 	if !IsNil(o.Image) {
 		toSerialize["image"] = o.Image
 	}
@@ -1215,6 +1213,7 @@ func (o *Workspace) UnmarshalJSON(data []byte) (err error) {
 	requiredProperties := []string{
 		"id",
 		"organizationId",
+		"name",
 		"user",
 		"env",
 		"labels",
@@ -1225,7 +1224,6 @@ func (o *Workspace) UnmarshalJSON(data []byte) (err error) {
 		"gpu",
 		"memory",
 		"disk",
-		"name",
 	}
 
 	allProperties := make(map[string]interface{})
@@ -1257,6 +1255,7 @@ func (o *Workspace) UnmarshalJSON(data []byte) (err error) {
 	if err = json.Unmarshal(data, &additionalProperties); err == nil {
 		delete(additionalProperties, "id")
 		delete(additionalProperties, "organizationId")
+		delete(additionalProperties, "name")
 		delete(additionalProperties, "snapshot")
 		delete(additionalProperties, "user")
 		delete(additionalProperties, "env")
@@ -1284,7 +1283,6 @@ func (o *Workspace) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "updatedAt")
 		delete(additionalProperties, "class")
 		delete(additionalProperties, "daemonVersion")
-		delete(additionalProperties, "name")
 		delete(additionalProperties, "image")
 		delete(additionalProperties, "snapshotState")
 		delete(additionalProperties, "snapshotCreatedAt")

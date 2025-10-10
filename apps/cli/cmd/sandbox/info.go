@@ -13,7 +13,7 @@ import (
 )
 
 var InfoCmd = &cobra.Command{
-	Use:     "info [SANDBOX_ID]",
+	Use:     "info [SANDBOX_ID] | [SANDBOX_NAME]",
 	Short:   "Get sandbox info",
 	Args:    cobra.ExactArgs(1),
 	Aliases: common.GetAliases("info"),
@@ -25,9 +25,9 @@ var InfoCmd = &cobra.Command{
 			return err
 		}
 
-		sandboxIdArg := args[0]
+		sandboxIdOrNameArg := args[0]
 
-		sb, res, err := apiClient.SandboxAPI.GetSandbox(ctx, sandboxIdArg).Execute()
+		sb, res, err := apiClient.SandboxAPI.GetSandbox(ctx, sandboxIdOrNameArg).Execute()
 		if err != nil {
 			return apiclient.HandleErrorResponse(res, err)
 		}

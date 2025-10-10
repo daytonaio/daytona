@@ -13,7 +13,7 @@ import (
 )
 
 var StartCmd = &cobra.Command{
-	Use:   "start [SANDBOX_ID]",
+	Use:   "start [SANDBOX_ID] | [SANDBOX_NAME]",
 	Short: "Start a sandbox",
 	Args:  cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -24,14 +24,14 @@ var StartCmd = &cobra.Command{
 			return err
 		}
 
-		sandboxIdArg := args[0]
+		sandboxIdOrNameArg := args[0]
 
-		_, res, err := apiClient.SandboxAPI.StartSandbox(ctx, sandboxIdArg).Execute()
+		_, res, err := apiClient.SandboxAPI.StartSandbox(ctx, sandboxIdOrNameArg).Execute()
 		if err != nil {
 			return apiclient.HandleErrorResponse(res, err)
 		}
 
-		view_common.RenderInfoMessageBold(fmt.Sprintf("Sandbox %s started", sandboxIdArg))
+		view_common.RenderInfoMessageBold(fmt.Sprintf("Sandbox %s started", sandboxIdOrNameArg))
 
 		return nil
 	},

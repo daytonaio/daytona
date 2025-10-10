@@ -111,9 +111,9 @@ type WorkspaceAPI interface {
 	GetPortPreviewUrlWorkspaceDeprecated(ctx context.Context, workspaceId string, port float32) WorkspaceAPIGetPortPreviewUrlWorkspaceDeprecatedRequest
 
 	// GetPortPreviewUrlWorkspaceDeprecatedExecute executes the request
-	//  @return PortPreviewUrl
+	//  @return WorkspacePortPreviewUrl
 	// Deprecated
-	GetPortPreviewUrlWorkspaceDeprecatedExecute(r WorkspaceAPIGetPortPreviewUrlWorkspaceDeprecatedRequest) (*PortPreviewUrl, *http.Response, error)
+	GetPortPreviewUrlWorkspaceDeprecatedExecute(r WorkspaceAPIGetPortPreviewUrlWorkspaceDeprecatedRequest) (*WorkspacePortPreviewUrl, *http.Response, error)
 
 	/*
 		GetWorkspaceDeprecated [DEPRECATED] Get workspace details
@@ -826,7 +826,7 @@ func (r WorkspaceAPIGetPortPreviewUrlWorkspaceDeprecatedRequest) XDaytonaOrganiz
 	return r
 }
 
-func (r WorkspaceAPIGetPortPreviewUrlWorkspaceDeprecatedRequest) Execute() (*PortPreviewUrl, *http.Response, error) {
+func (r WorkspaceAPIGetPortPreviewUrlWorkspaceDeprecatedRequest) Execute() (*WorkspacePortPreviewUrl, *http.Response, error) {
 	return r.ApiService.GetPortPreviewUrlWorkspaceDeprecatedExecute(r)
 }
 
@@ -851,15 +851,15 @@ func (a *WorkspaceAPIService) GetPortPreviewUrlWorkspaceDeprecated(ctx context.C
 
 // Execute executes the request
 //
-//	@return PortPreviewUrl
+//	@return WorkspacePortPreviewUrl
 //
 // Deprecated
-func (a *WorkspaceAPIService) GetPortPreviewUrlWorkspaceDeprecatedExecute(r WorkspaceAPIGetPortPreviewUrlWorkspaceDeprecatedRequest) (*PortPreviewUrl, *http.Response, error) {
+func (a *WorkspaceAPIService) GetPortPreviewUrlWorkspaceDeprecatedExecute(r WorkspaceAPIGetPortPreviewUrlWorkspaceDeprecatedRequest) (*WorkspacePortPreviewUrl, *http.Response, error) {
 	var (
 		localVarHTTPMethod  = http.MethodGet
 		localVarPostBody    interface{}
 		formFiles           []formFile
-		localVarReturnValue *PortPreviewUrl
+		localVarReturnValue *WorkspacePortPreviewUrl
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WorkspaceAPIService.GetPortPreviewUrlWorkspaceDeprecated")

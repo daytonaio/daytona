@@ -61,7 +61,7 @@ export function SandboxTableHeader({
   const currentSort = table.getState().sorting[0]?.id || ''
 
   const sortableColumns = [
-    { id: 'id', label: 'ID' },
+    { id: 'name', label: 'Name' },
     { id: 'state', label: 'State' },
     { id: 'snapshot', label: 'Snapshot' },
     { id: 'region', label: 'Region' },
@@ -72,9 +72,9 @@ export function SandboxTableHeader({
     <div className="flex flex-col gap-2 sm:flex-row sm:items-center mb-4">
       <div className="flex gap-2 items-center">
         <DebouncedInput
-          value={(table.getColumn('id')?.getFilterValue() as string) ?? ''}
-          onChange={(value) => table.getColumn('id')?.setFilterValue(value)}
-          placeholder="Search by ID"
+          value={(table.getColumn('name')?.getFilterValue() as string) ?? ''}
+          onChange={(value) => table.getColumn('name')?.setFilterValue(value)}
+          placeholder="Search by Name"
           className="max-w-[200px]"
         />
 
