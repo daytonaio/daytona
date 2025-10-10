@@ -759,6 +759,7 @@ export class SandboxService {
       },
       skip: (pageNum - 1) * limitNum,
       take: limitNum,
+      loadEagerRelations: false,
     })
 
     return {
