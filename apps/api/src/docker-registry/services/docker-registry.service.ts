@@ -18,6 +18,8 @@ import {
 import { RegistryType } from './../../docker-registry/enums/registry-type.enum'
 import { parseDockerImage } from '../../common/utils/docker-image.util'
 import axios from 'axios'
+import type { AxiosRequestHeaders } from 'axios'
+import { AxiosHeaders } from 'axios'
 
 const timeoutMs = 3000
 
@@ -422,39 +424,70 @@ export class DockerRegistryService {
       const manifestUrl = `${registryUrl}/v2/${repoPath}/manifests/${tag}`
 
       // Build headers - handle different auth methods
-      const headers: any = {
-        Accept: 'application/vnd.docker.distribution.manifest.v2+json',
-      }
+      const acceptHeader = [
+        'application/vnd.docker.distribution.manifest.v2+json',
+        'application/vnd.docker.distribution.manifest.list.v2+json',
+        'application/vnd.oci.image.index.v1+json',
+        'application/vnd.oci.image.manifest.v1+json',
+      ].join(', ')
 
+      const baseHeaders = new AxiosHeaders()
+      baseHeaders.set('Accept', acceptHeader)
+
+      let bearerToken: string | null = null
+
+      // Pre-populate auth if we already know how
       if (registry.username && registry.password) {
-        // Use basic auth for configured registries
         const encodedCredentials = Buffer.from(`${registry.username}:${registry.password}`).toString('base64')
-        headers.Authorization = `Basic ${encodedCredentials}`
+        baseHeaders.set('Authorization', `Basic ${encodedCredentials}`)
       } else if (registry.url.includes('registry.docker.io')) {
         // Get anonymous token for Docker Hub
         const dockerHubRepo = repoPath.includes('/') ? repoPath : `library/${repoPath}`
-        const token = await this.getDockerHubToken(dockerHubRepo)
-        if (token) {
-          headers.Authorization = `Bearer ${token}`
+        bearerToken = await this.getDockerHubToken(dockerHubRepo)
+        if (bearerToken) {
+          baseHeaders.set('Authorization', `Bearer ${bearerToken}`)
         }
       }
 
-      const manifestResponse = await axios({
-        method: 'get',
-        url: manifestUrl,
-        headers,
-        validateStatus: (status) => status < 500,
-        timeout: timeoutMs,
-      })
+      const sendWithHeaders = async (url: string, headers: AxiosRequestHeaders | typeof baseHeaders) =>
+        axios({ method: 'get', url, headers, validateStatus: (s) => s < 500, timeout: timeoutMs })
+
+      let manifestResponse = await sendWithHeaders(manifestUrl, baseHeaders)
+
+      // Handle Bearer challenge (e.g., AWS ECR Public)
+      if (manifestResponse.status === 401 && manifestResponse.headers['www-authenticate']) {
+        const authHeader = String(manifestResponse.headers['www-authenticate'])
+        const challenge = parseWwwAuthenticate(authHeader)
+        if (challenge?.scheme?.toLowerCase() === 'bearer' && challenge.realm) {
+          try {
+            const token = await fetchBearerToken(challenge, {
+              repoPath,
+              registryHost: registryHost,
+            })
+            if (token) {
+              bearerToken = token
+              const headersWithBearer = AxiosHeaders.from(baseHeaders)
+              headersWithBearer.set('Authorization', `Bearer ${token}`)
+              manifestResponse = await sendWithHeaders(manifestUrl, headersWithBearer)
+            }
+          } catch {
+            // fall through to normal error handling
+          }
+        }
+      }
 
       if (manifestResponse.status >= 300) {
         throw new Error(`Failed to get manifest for image ${image}: ${manifestResponse.statusText}`)
       }
 
       // Extract the digest from headers
-      const digest = manifestResponse.headers['docker-content-digest']
+      let digest = manifestResponse.headers['docker-content-digest']
+
+      // If digest not in headers, calculate it from the manifest body
       if (!digest) {
-        throw new Error(`Docker content digest not found for image ${image}`)
+        const crypto = require('crypto')
+        const manifestStr = JSON.stringify(manifestResponse.data)
+        digest = 'sha256:' + crypto.createHash('sha256').update(manifestStr).digest('hex')
       }
 
       let manifest = manifestResponse.data
@@ -464,8 +497,6 @@ export class DockerRegistryService {
         manifest.mediaType === 'application/vnd.oci.image.index.v1+json' ||
         manifest.mediaType === 'application/vnd.docker.distribution.manifest.list.v2+json'
       ) {
-        this.logger.debug(`Image ${image} is a manifest list, selecting platform-specific manifest`)
-
         // Find linux/amd64 platform (only architecture we support)
         const platformManifest = manifest.manifests?.find(
           (m: any) => m.platform?.architecture === 'amd64' && m.platform?.os === 'linux',
@@ -477,10 +508,14 @@ export class DockerRegistryService {
 
         // Fetch the actual platform-specific manifest
         const platformManifestUrl = `${registryUrl}/v2/${repoPath}/manifests/${platformManifest.digest}`
+        const platformHeaders = AxiosHeaders.from(baseHeaders)
+        if (bearerToken) {
+          platformHeaders.set('Authorization', `Bearer ${bearerToken}`)
+        }
         const platformResponse = await axios({
           method: 'get',
           url: platformManifestUrl,
-          headers,
+          headers: platformHeaders,
           validateStatus: (status) => status < 500,
           timeout: timeoutMs,
         })
@@ -490,7 +525,6 @@ export class DockerRegistryService {
         }
 
         manifest = platformResponse.data
-        this.logger.debug(`Successfully fetched platform-specific manifest for ${image}`)
       }
 
       // Calculate total size from all layers
@@ -512,18 +546,18 @@ export class DockerRegistryService {
 
       const configUrl = `${registryUrl}/v2/${repoPath}/blobs/${configDigest}`
 
-      // Build headers for config request - handle different auth methods
-      const configHeaders: any = {}
-      if (registry.username && registry.password) {
-        // Use basic auth for configured registries
+      // Build headers for config request - reuse Bearer token if available
+      const configHeaders = new AxiosHeaders()
+      if (bearerToken) {
+        configHeaders.set('Authorization', `Bearer ${bearerToken}`)
+      } else if (registry.username && registry.password) {
         const encodedCredentials = Buffer.from(`${registry.username}:${registry.password}`).toString('base64')
-        configHeaders.Authorization = `Basic ${encodedCredentials}`
+        configHeaders.set('Authorization', `Basic ${encodedCredentials}`)
       } else if (registry.url.includes('registry.docker.io')) {
-        // Get anonymous token for Docker Hub
         const dockerHubRepo = repoPath.includes('/') ? repoPath : `library/${repoPath}`
         const token = await this.getDockerHubToken(dockerHubRepo)
         if (token) {
-          configHeaders.Authorization = `Bearer ${token}`
+          configHeaders.set('Authorization', `Bearer ${token}`)
         }
       }
 
@@ -738,5 +772,54 @@ export class DockerRegistryService {
       this.logger.error(`Exception when deleting image ${imageName}: ${error.message}`)
       throw error
     }
+  }
+}
+
+// Parses a WWW-Authenticate header for Bearer challenges
+function parseWwwAuthenticate(header: string): {
+  scheme: string
+  realm?: string
+  service?: string
+  scope?: string
+} | null {
+  if (!header) return null
+  const [schemePart, paramsPart] = header.split(/\s+/, 2)
+  if (!schemePart) return null
+  const scheme = schemePart.trim()
+  const params: Record<string, string> = {}
+  if (paramsPart) {
+    for (const kv of paramsPart.split(',')) {
+      const idx = kv.indexOf('=')
+      if (idx > -1) {
+        const key = kv.slice(0, idx).trim()
+        let value = kv.slice(idx + 1).trim()
+        if (value.startsWith('"') && value.endsWith('"')) {
+          value = value.slice(1, -1)
+        }
+        params[key] = value
+      }
+    }
+  }
+  return { scheme, realm: params.realm, service: params.service, scope: params.scope }
+}
+
+// Fetches a Bearer token using the auth challenge parameters (works for Docker Registry and AWS ECR Public)
+async function fetchBearerToken(
+  challenge: { realm?: string; service?: string; scope?: string },
+  ctx: { repoPath: string; registryHost: string },
+): Promise<string | null> {
+  if (!challenge.realm) return null
+  const params = new URLSearchParams()
+  if (challenge.service) params.set('service', challenge.service)
+  // If scope not provided by challenge, construct a default repository:repo:pull
+  const scope = challenge.scope || `repository:${ctx.repoPath}:pull`
+  params.set('scope', scope)
+  try {
+    const url = `${challenge.realm}?${params.toString()}`
+    const resp = await axios.get(url, { timeout: 10000, validateStatus: (s) => s < 500 })
+    if (resp.status >= 300) return null
+    return resp.data?.token || resp.data?.access_token || null
+  } catch {
+    return null
   }
 }
