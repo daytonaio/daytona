@@ -19,13 +19,13 @@
  */
 export interface TagImageRequestDTO {
   /**
-   * Source image name:tag or digest
+   *
    * @type {string}
    * @memberof TagImageRequestDTO
    */
   sourceImage: string
   /**
-   * Target image name:tag
+   *
    * @type {string}
    * @memberof TagImageRequestDTO
    */
