@@ -32,10 +32,6 @@ import {
 // @ts-ignore
 import { BASE_PATH, COLLECTION_FORMATS, type RequestArgs, BaseAPI, RequiredError, operationServerMap } from '../base'
 // @ts-ignore
-import type { AuditLog } from '../models'
-// @ts-ignore
-import type { CreateAuditLog } from '../models'
-// @ts-ignore
 import type { PaginatedAuditLogs } from '../models'
 /**
  * AuditApi - axios parameter creator
@@ -45,58 +41,21 @@ export const AuditApiAxiosParamCreator = function (configuration?: Configuration
   return {
     /**
      *
-     * @summary Create audit log entry
-     * @param {CreateAuditLog} createAuditLog
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    createAuditLog: async (
-      createAuditLog: CreateAuditLog,
-      options: RawAxiosRequestConfig = {},
-    ): Promise<RequestArgs> => {
-      // verify required parameter 'createAuditLog' is not null or undefined
-      assertParamExists('createAuditLog', 'createAuditLog', createAuditLog)
-      const localVarPath = `/audit`
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
-      let baseOptions
-      if (configuration) {
-        baseOptions = configuration.baseOptions
-      }
-
-      const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options }
-      const localVarHeaderParameter = {} as any
-      const localVarQueryParameter = {} as any
-
-      // authentication bearer required
-      // http bearer authentication required
-      await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-      // authentication oauth2 required
-
-      localVarHeaderParameter['Content-Type'] = 'application/json'
-
-      setSearchParams(localVarUrlObj, localVarQueryParameter)
-      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
-      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
-      localVarRequestOptions.data = serializeDataIfNeeded(createAuditLog, localVarRequestOptions, configuration)
-
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      }
-    },
-    /**
-     *
      * @summary Get all audit logs
      * @param {number} [page] Page number of the results
      * @param {number} [limit] Number of results per page
+     * @param {Date} [from] From date (ISO 8601 format)
+     * @param {Date} [to] To date (ISO 8601 format)
+     * @param {string} [nextToken] Token for cursor-based pagination. When provided, takes precedence over page parameter.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     getAllAuditLogs: async (
       page?: number,
       limit?: number,
+      from?: Date,
+      to?: Date,
+      nextToken?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       const localVarPath = `/audit`
@@ -125,6 +84,18 @@ export const AuditApiAxiosParamCreator = function (configuration?: Configuration
         localVarQueryParameter['limit'] = limit
       }
 
+      if (from !== undefined) {
+        localVarQueryParameter['from'] = (from as any) instanceof Date ? (from as any).toISOString() : from
+      }
+
+      if (to !== undefined) {
+        localVarQueryParameter['to'] = (to as any) instanceof Date ? (to as any).toISOString() : to
+      }
+
+      if (nextToken !== undefined) {
+        localVarQueryParameter['nextToken'] = nextToken
+      }
+
       setSearchParams(localVarUrlObj, localVarQueryParameter)
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
       localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
@@ -140,6 +111,9 @@ export const AuditApiAxiosParamCreator = function (configuration?: Configuration
      * @param {string} organizationId Organization ID
      * @param {number} [page] Page number of the results
      * @param {number} [limit] Number of results per page
+     * @param {Date} [from] From date (ISO 8601 format)
+     * @param {Date} [to] To date (ISO 8601 format)
+     * @param {string} [nextToken] Token for cursor-based pagination. When provided, takes precedence over page parameter.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
@@ -147,6 +121,9 @@ export const AuditApiAxiosParamCreator = function (configuration?: Configuration
       organizationId: string,
       page?: number,
       limit?: number,
+      from?: Date,
+      to?: Date,
+      nextToken?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'organizationId' is not null or undefined
@@ -180,6 +157,18 @@ export const AuditApiAxiosParamCreator = function (configuration?: Configuration
         localVarQueryParameter['limit'] = limit
       }
 
+      if (from !== undefined) {
+        localVarQueryParameter['from'] = (from as any) instanceof Date ? (from as any).toISOString() : from
+      }
+
+      if (to !== undefined) {
+        localVarQueryParameter['to'] = (to as any) instanceof Date ? (to as any).toISOString() : to
+      }
+
+      if (nextToken !== undefined) {
+        localVarQueryParameter['nextToken'] = nextToken
+      }
+
       setSearchParams(localVarUrlObj, localVarQueryParameter)
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
       localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
@@ -201,41 +190,31 @@ export const AuditApiFp = function (configuration?: Configuration) {
   return {
     /**
      *
-     * @summary Create audit log entry
-     * @param {CreateAuditLog} createAuditLog
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async createAuditLog(
-      createAuditLog: CreateAuditLog,
-      options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<AuditLog>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.createAuditLog(createAuditLog, options)
-      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
-      const localVarOperationServerBasePath =
-        operationServerMap['AuditApi.createAuditLog']?.[localVarOperationServerIndex]?.url
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration,
-        )(axios, localVarOperationServerBasePath || basePath)
-    },
-    /**
-     *
      * @summary Get all audit logs
      * @param {number} [page] Page number of the results
      * @param {number} [limit] Number of results per page
+     * @param {Date} [from] From date (ISO 8601 format)
+     * @param {Date} [to] To date (ISO 8601 format)
+     * @param {string} [nextToken] Token for cursor-based pagination. When provided, takes precedence over page parameter.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async getAllAuditLogs(
       page?: number,
       limit?: number,
+      from?: Date,
+      to?: Date,
+      nextToken?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PaginatedAuditLogs>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.getAllAuditLogs(page, limit, options)
+      const localVarAxiosArgs = await localVarAxiosParamCreator.getAllAuditLogs(
+        page,
+        limit,
+        from,
+        to,
+        nextToken,
+        options,
+      )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
         operationServerMap['AuditApi.getAllAuditLogs']?.[localVarOperationServerIndex]?.url
@@ -253,6 +232,9 @@ export const AuditApiFp = function (configuration?: Configuration) {
      * @param {string} organizationId Organization ID
      * @param {number} [page] Page number of the results
      * @param {number} [limit] Number of results per page
+     * @param {Date} [from] From date (ISO 8601 format)
+     * @param {Date} [to] To date (ISO 8601 format)
+     * @param {string} [nextToken] Token for cursor-based pagination. When provided, takes precedence over page parameter.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
@@ -260,12 +242,18 @@ export const AuditApiFp = function (configuration?: Configuration) {
       organizationId: string,
       page?: number,
       limit?: number,
+      from?: Date,
+      to?: Date,
+      nextToken?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PaginatedAuditLogs>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.getOrganizationAuditLogs(
         organizationId,
         page,
         limit,
+        from,
+        to,
+        nextToken,
         options,
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
@@ -291,24 +279,26 @@ export const AuditApiFactory = function (configuration?: Configuration, basePath
   return {
     /**
      *
-     * @summary Create audit log entry
-     * @param {CreateAuditLog} createAuditLog
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    createAuditLog(createAuditLog: CreateAuditLog, options?: RawAxiosRequestConfig): AxiosPromise<AuditLog> {
-      return localVarFp.createAuditLog(createAuditLog, options).then((request) => request(axios, basePath))
-    },
-    /**
-     *
      * @summary Get all audit logs
      * @param {number} [page] Page number of the results
      * @param {number} [limit] Number of results per page
+     * @param {Date} [from] From date (ISO 8601 format)
+     * @param {Date} [to] To date (ISO 8601 format)
+     * @param {string} [nextToken] Token for cursor-based pagination. When provided, takes precedence over page parameter.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    getAllAuditLogs(page?: number, limit?: number, options?: RawAxiosRequestConfig): AxiosPromise<PaginatedAuditLogs> {
-      return localVarFp.getAllAuditLogs(page, limit, options).then((request) => request(axios, basePath))
+    getAllAuditLogs(
+      page?: number,
+      limit?: number,
+      from?: Date,
+      to?: Date,
+      nextToken?: string,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<PaginatedAuditLogs> {
+      return localVarFp
+        .getAllAuditLogs(page, limit, from, to, nextToken, options)
+        .then((request) => request(axios, basePath))
     },
     /**
      *
@@ -316,6 +306,9 @@ export const AuditApiFactory = function (configuration?: Configuration, basePath
      * @param {string} organizationId Organization ID
      * @param {number} [page] Page number of the results
      * @param {number} [limit] Number of results per page
+     * @param {Date} [from] From date (ISO 8601 format)
+     * @param {Date} [to] To date (ISO 8601 format)
+     * @param {string} [nextToken] Token for cursor-based pagination. When provided, takes precedence over page parameter.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
@@ -323,10 +316,13 @@ export const AuditApiFactory = function (configuration?: Configuration, basePath
       organizationId: string,
       page?: number,
       limit?: number,
+      from?: Date,
+      to?: Date,
+      nextToken?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<PaginatedAuditLogs> {
       return localVarFp
-        .getOrganizationAuditLogs(organizationId, page, limit, options)
+        .getOrganizationAuditLogs(organizationId, page, limit, from, to, nextToken, options)
         .then((request) => request(axios, basePath))
     },
   }
@@ -341,30 +337,26 @@ export const AuditApiFactory = function (configuration?: Configuration, basePath
 export class AuditApi extends BaseAPI {
   /**
    *
-   * @summary Create audit log entry
-   * @param {CreateAuditLog} createAuditLog
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof AuditApi
-   */
-  public createAuditLog(createAuditLog: CreateAuditLog, options?: RawAxiosRequestConfig) {
-    return AuditApiFp(this.configuration)
-      .createAuditLog(createAuditLog, options)
-      .then((request) => request(this.axios, this.basePath))
-  }
-
-  /**
-   *
    * @summary Get all audit logs
    * @param {number} [page] Page number of the results
    * @param {number} [limit] Number of results per page
+   * @param {Date} [from] From date (ISO 8601 format)
+   * @param {Date} [to] To date (ISO 8601 format)
+   * @param {string} [nextToken] Token for cursor-based pagination. When provided, takes precedence over page parameter.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof AuditApi
    */
-  public getAllAuditLogs(page?: number, limit?: number, options?: RawAxiosRequestConfig) {
+  public getAllAuditLogs(
+    page?: number,
+    limit?: number,
+    from?: Date,
+    to?: Date,
+    nextToken?: string,
+    options?: RawAxiosRequestConfig,
+  ) {
     return AuditApiFp(this.configuration)
-      .getAllAuditLogs(page, limit, options)
+      .getAllAuditLogs(page, limit, from, to, nextToken, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
@@ -374,6 +366,9 @@ export class AuditApi extends BaseAPI {
    * @param {string} organizationId Organization ID
    * @param {number} [page] Page number of the results
    * @param {number} [limit] Number of results per page
+   * @param {Date} [from] From date (ISO 8601 format)
+   * @param {Date} [to] To date (ISO 8601 format)
+   * @param {string} [nextToken] Token for cursor-based pagination. When provided, takes precedence over page parameter.
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof AuditApi
@@ -382,10 +377,13 @@ export class AuditApi extends BaseAPI {
     organizationId: string,
     page?: number,
     limit?: number,
+    from?: Date,
+    to?: Date,
+    nextToken?: string,
     options?: RawAxiosRequestConfig,
   ) {
     return AuditApiFp(this.configuration)
-      .getOrganizationAuditLogs(organizationId, page, limit, options)
+      .getOrganizationAuditLogs(organizationId, page, limit, from, to, nextToken, options)
       .then((request) => request(this.axios, this.basePath))
   }
 }

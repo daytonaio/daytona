@@ -19,12 +19,15 @@ import { TypedConfigService } from './config/typed-config.service'
 import { DataSource, MigrationExecutor } from 'typeorm'
 import { RunnerService } from './sandbox/services/runner.service'
 import { getOpenApiConfig } from './openapi.config'
-import { EventEmitter2 } from '@nestjs/event-emitter'
 import { AuditInterceptor } from './audit/interceptors/audit.interceptor'
 import { join } from 'node:path'
 import { ApiKeyService } from './api-key/api-key.service'
 import { DAYTONA_ADMIN_USER_ID } from './app.service'
 import { OrganizationService } from './organization/services/organization.service'
+import { MicroserviceOptions, Transport } from '@nestjs/microservices'
+import { Partitioners } from 'kafkajs'
+import { isApiEnabled, isWorkerEnabled } from './common/utils/app-mode'
+import cluster from 'node:cluster'
 
 // https options
 const httpsEnabled = process.env.CERT_PATH && process.env.CERT_KEY_PATH
@@ -55,6 +58,7 @@ async function bootstrap() {
 
   const configService = app.get(TypedConfigService)
   const httpAdapter = app.get(HttpAdapterHost)
+  app.set('trust proxy', true)
   app.useGlobalFilters(new AllExceptionsFilter(httpAdapter))
   app.useGlobalFilters(new NotFoundExceptionFilter())
   app.useGlobalInterceptors(new MetricsInterceptor(configService))
@@ -64,9 +68,6 @@ async function bootstrap() {
       transform: true,
     }),
   )
-
-  const eventEmitter = app.get(EventEmitter2)
-  eventEmitter.setMaxListeners(100)
 
   // Runtime flags for migrations for run and revert migrations
   if (process.argv.length > 2) {
@@ -169,10 +170,41 @@ async function bootstrap() {
 
   const host = '0.0.0.0'
   const port = configService.get('port')
-  await app.listen(port, host)
-  Logger.log(`🚀 Daytona API is running on: http://${host}:${port}/${globalPrefix}`)
 
-  if (process.send) {
+  if (isApiEnabled()) {
+    await app.listen(port, host)
+    Logger.log(`🚀 Daytona API is running on: http://${host}:${port}/${globalPrefix}`)
+  } else {
+    await app.init()
+  }
+
+  if (isWorkerEnabled() && configService.get('kafka.enabled')) {
+    app.connectMicroservice<MicroserviceOptions>({
+      transport: Transport.KAFKA,
+      options: {
+        client: configService.getKafkaClientConfig(),
+        producer: {
+          allowAutoTopicCreation: true,
+          createPartitioner: Partitioners.DefaultPartitioner,
+          idempotent: true,
+        },
+        consumer: {
+          allowAutoTopicCreation: true,
+          groupId: 'daytona',
+        },
+        run: {
+          autoCommit: false,
+        },
+        subscribe: {
+          fromBeginning: true,
+        },
+      },
+    })
+    await app.startAllMicroservices()
+  }
+
+  // If app running in cluster mode, send ready signal
+  if (cluster.isWorker) {
     process.send('ready')
   }
 }

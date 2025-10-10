@@ -8,4 +8,5 @@ export interface PaginatedList<T> {
   total: number
   page: number
   totalPages: number
+  nextToken?: string
 }

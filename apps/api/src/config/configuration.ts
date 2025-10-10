@@ -79,6 +79,7 @@ const configuration = {
   maxAutoArchiveInterval: parseInt(process.env.MAX_AUTO_ARCHIVE_INTERVAL || '43200', 10),
   maintananceMode: process.env.MAINTENANCE_MODE === 'true',
   disableCronJobs: process.env.DISABLE_CRON_JOBS === 'true',
+  appRole: process.env.APP_ROLE || 'all',
   proxy: {
     domain: process.env.PROXY_DOMAIN,
     protocol: process.env.PROXY_PROTOCOL,
@@ -91,6 +92,39 @@ const configuration = {
       ? parseInt(process.env.AUDIT_LOG_RETENTION_DAYS, 10)
       : undefined,
     consoleLogEnabled: process.env.AUDIT_CONSOLE_LOG_ENABLED === 'true',
+    publish: {
+      enabled: process.env.AUDIT_PUBLISH_ENABLED === 'true',
+      batchSize: process.env.AUDIT_PUBLISH_BATCH_SIZE ? parseInt(process.env.AUDIT_PUBLISH_BATCH_SIZE, 10) : 1000,
+      mode: (process.env.AUDIT_PUBLISH_MODE || 'direct') as 'direct' | 'kafka',
+      storageAdapter: process.env.AUDIT_PUBLISH_STORAGE_ADAPTER || 'opensearch',
+      opensearchIndexName: process.env.AUDIT_PUBLISH_OPENSEARCH_INDEX_NAME || 'audit-logs',
+    },
+  },
+  kafka: {
+    enabled: process.env.KAFKA_ENABLED === 'true',
+    brokers: process.env.KAFKA_BROKERS || 'localhost:9092',
+    clientId: process.env.KAFKA_CLIENT_ID,
+    sasl: {
+      mechanism: process.env.KAFKA_SASL_MECHANISM,
+      username: process.env.KAFKA_SASL_USERNAME,
+      password: process.env.KAFKA_SASL_PASSWORD,
+    },
+    tls: {
+      enabled: process.env.KAFKA_TLS_ENABLED === 'true',
+      rejectUnauthorized: process.env.KAFKA_TLS_REJECT_UNAUTHORIZED !== 'false',
+    },
+  },
+  opensearch: {
+    nodes: process.env.OPENSEARCH_NODES || 'https://localhost:9200',
+    username: process.env.OPENSEARCH_USERNAME,
+    password: process.env.OPENSEARCH_PASSWORD,
+    aws: {
+      roleArn: process.env.OPENSEARCH_AWS_ROLE_ARN,
+      region: process.env.OPENSEARCH_AWS_REGION,
+    },
+    tls: {
+      rejectUnauthorized: process.env.OPENSEARCH_TLS_REJECT_UNAUTHORIZED !== 'false',
+    },
   },
   cronTimeZone: process.env.CRON_TIMEZONE,
   maxConcurrentBackupsPerRunner: parseInt(process.env.MAX_CONCURRENT_BACKUPS_PER_RUNNER || '6', 10),

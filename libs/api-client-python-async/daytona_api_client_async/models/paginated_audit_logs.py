@@ -18,8 +18,8 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, Field, StrictFloat, StrictInt
-from typing import Any, ClassVar, Dict, List, Union
+from pydantic import BaseModel, ConfigDict, Field, StrictFloat, StrictInt, StrictStr
+from typing import Any, ClassVar, Dict, List, Optional, Union
 from daytona_api_client_async.models.audit_log import AuditLog
 from typing import Optional, Set
 from typing_extensions import Self
@@ -32,8 +32,9 @@ class PaginatedAuditLogs(BaseModel):
     total: Union[StrictFloat, StrictInt]
     page: Union[StrictFloat, StrictInt]
     total_pages: Union[StrictFloat, StrictInt] = Field(alias="totalPages")
+    next_token: Optional[StrictStr] = Field(default=None, description="Token for next page in cursor-based pagination", alias="nextToken")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["items", "total", "page", "totalPages"]
+    __properties: ClassVar[List[str]] = ["items", "total", "page", "totalPages", "nextToken"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -103,7 +104,8 @@ class PaginatedAuditLogs(BaseModel):
             "items": [AuditLog.from_dict(_item) for _item in obj["items"]] if obj.get("items") is not None else None,
             "total": obj.get("total"),
             "page": obj.get("page"),
-            "totalPages": obj.get("totalPages")
+            "totalPages": obj.get("totalPages"),
+            "nextToken": obj.get("nextToken")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

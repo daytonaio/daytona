@@ -35,7 +35,6 @@ model_computer_use_start_response.go
 model_computer_use_status_response.go
 model_computer_use_stop_response.go
 model_create_api_key.go
-model_create_audit_log.go
 model_create_build_info.go
 model_create_docker_registry.go
 model_create_linked_account.go

@@ -3,16 +3,13 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Body, Controller, Get, Param, Post, Query, UseGuards, Request as Req } from '@nestjs/common'
+import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common'
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiOAuth2, ApiParam } from '@nestjs/swagger'
-import { Request } from 'express'
 import { AuditLogDto } from '../dto/audit-log.dto'
 import { PaginatedAuditLogsDto } from '../dto/paginated-audit-logs.dto'
-import { CreateAuditLogDto } from '../dto/create-audit-log.dto'
 import { AuditService } from '../services/audit.service'
 import { CombinedAuthGuard } from '../../auth/combined-auth.guard'
 import { SystemActionGuard } from '../../auth/system-action.guard'
-import { CustomHeaders } from '../../common/constants/header.constants'
 import { RequiredSystemRole } from '../../common/decorators/required-role.decorator'
 import { OrganizationResourceActionGuard } from '../../organization/guards/organization-resource-action.guard'
 import { RequiredOrganizationResourcePermissions } from '../../organization/decorators/required-organization-resource-permissions.decorator'
@@ -39,14 +36,22 @@ export class AuditController {
     type: PaginatedAuditLogsDto,
   })
   @RequiredSystemRole(SystemRole.ADMIN)
-  async getAllLogs(@Query() queryParams: ListAuditLogsQueryDto): Promise<PaginatedAuditLogsDto> {
-    const { page, limit } = queryParams
-    const result = await this.auditService.getLogs(page, limit)
+  async getAllLogs(@Query() query: ListAuditLogsQueryDto): Promise<PaginatedAuditLogsDto> {
+    const result = await this.auditService.getAllLogs(
+      query.page,
+      query.limit,
+      {
+        from: query.from,
+        to: query.to,
+      },
+      query.nextToken,
+    )
     return {
       items: result.items.map(AuditLogDto.fromAuditLog),
       total: result.total,
       page: result.page,
       totalPages: result.totalPages,
+      nextToken: result.nextToken,
     }
   }
 
@@ -68,41 +73,24 @@ export class AuditController {
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.READ_AUDIT_LOGS])
   async getOrganizationLogs(
     @Param('organizationId') organizationId: string,
-    @Query() queryParams: ListAuditLogsQueryDto,
+    @Query() query: ListAuditLogsQueryDto,
   ): Promise<PaginatedAuditLogsDto> {
-    const { page, limit } = queryParams
-    const result = await this.auditService.getLogs(page, limit, organizationId)
+    const result = await this.auditService.getOrganizationLogs(
+      organizationId,
+      query.page,
+      query.limit,
+      {
+        from: query.from,
+        to: query.to,
+      },
+      query.nextToken,
+    )
     return {
       items: result.items.map(AuditLogDto.fromAuditLog),
       total: result.total,
       page: result.page,
       totalPages: result.totalPages,
+      nextToken: result.nextToken,
     }
-  }
-
-  @Post()
-  @ApiOperation({
-    summary: 'Create audit log entry',
-    operationId: 'createAuditLog',
-  })
-  @ApiResponse({
-    status: 201,
-    description: 'Audit log entry created successfully',
-    type: AuditLogDto,
-  })
-  @RequiredSystemRole(SystemRole.ADMIN)
-  async createLog(@Req() req: Request, @Body() createAuditLogDto: CreateAuditLogDto): Promise<AuditLogDto> {
-    const auditLog = await this.auditService.createLog({
-      actorId: createAuditLogDto.actorId,
-      actorEmail: createAuditLogDto.actorEmail,
-      organizationId: createAuditLogDto.organizationId,
-      action: createAuditLogDto.action,
-      targetType: createAuditLogDto.targetType,
-      targetId: createAuditLogDto.targetId,
-      ipAddress: req.ip,
-      userAgent: req.get('user-agent'),
-      source: req.get(CustomHeaders.SOURCE.name),
-    })
-    return AuditLogDto.fromAuditLog(auditLog)
   }
 }
