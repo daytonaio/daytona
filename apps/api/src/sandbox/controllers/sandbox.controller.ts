@@ -180,7 +180,7 @@ export class SandboxController {
       limit,
       {
         name,
-        labels: labels ? JSON.parse(labels) : {},
+        labels: labels ? JSON.parse(labels) : undefined,
         includeErroredDestroyed,
         states,
         snapshots,
