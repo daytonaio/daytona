@@ -637,28 +637,30 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
 
     let validationSuccess = false
     let creationSuccess = false
-    let errorMessage = 'Validation failed, ensure your entrypoint is valid/long-running'
+    let errorMessage = ''
 
     const registry = await this.dockerRegistryService.getDefaultInternalRegistry()
 
     try {
       await runnerAdapter.createSandbox(sandbox, registry, snapshot.entrypoint)
       creationSuccess = true
-
-      // Wait for 5 seconds to ensure the sandbox hasn't exited
-      await new Promise((resolve) => setTimeout(resolve, 5000))
-
-      try {
-        const sandboxInfo = await runnerAdapter.sandboxInfo(sandbox.id)
-        if (sandboxInfo.state === SandboxState.STARTED) {
-          validationSuccess = true
-        }
-      } catch (error) {
-        validationSuccess = false
-        errorMessage = `Validation failed, error getting sandbox info: ${fromAxiosError(error)}`
-      }
-    } catch {
+    } catch (error) {
       validationSuccess = false
+      errorMessage = `Validation failed, ensure your entrypoint is valid/long-running: ${fromAxiosError(error)}`
+      return { validationSuccess, errorMessage }
+    }
+
+    // Wait for 5 seconds to ensure the sandbox hasn't exited
+    await new Promise((resolve) => setTimeout(resolve, 5000))
+
+    try {
+      const sandboxInfo = await runnerAdapter.sandboxInfo(sandbox.id)
+      if (sandboxInfo.state === SandboxState.STARTED) {
+        validationSuccess = true
+      }
+    } catch (error) {
+      validationSuccess = false
+      errorMessage = `Validation failed, error getting sandbox info: ${fromAxiosError(error)}`
     }
 
     if (creationSuccess) {
