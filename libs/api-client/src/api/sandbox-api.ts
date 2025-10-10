@@ -625,14 +625,6 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
      * @param {Array<ListSandboxesPaginatedStatesEnum>} [states] List of states to filter by
      * @param {Array<string>} [snapshots] List of snapshot names to filter by
      * @param {Array<string>} [regions] List of regions to filter by
-     * @param {number} [minCpu] Minimum CPU
-     * @param {number} [maxCpu] Maximum CPU
-     * @param {number} [minMemoryGiB] Minimum memory in GiB
-     * @param {number} [maxMemoryGiB] Maximum memory in GiB
-     * @param {number} [minDiskGiB] Minimum disk space in GiB
-     * @param {number} [maxDiskGiB] Maximum disk space in GiB
-     * @param {Date} [lastEventAfter] Include items with last event after this timestamp
-     * @param {Date} [lastEventBefore] Include items with last event before this timestamp
      * @param {ListSandboxesPaginatedSortEnum} [sort] Field to sort by
      * @param {ListSandboxesPaginatedOrderEnum} [order] Direction to sort by
      * @param {*} [options] Override http request option.
@@ -648,14 +640,6 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
       states?: Array<ListSandboxesPaginatedStatesEnum>,
       snapshots?: Array<string>,
       regions?: Array<string>,
-      minCpu?: number,
-      maxCpu?: number,
-      minMemoryGiB?: number,
-      maxMemoryGiB?: number,
-      minDiskGiB?: number,
-      maxDiskGiB?: number,
-      lastEventAfter?: Date,
-      lastEventBefore?: Date,
       sort?: ListSandboxesPaginatedSortEnum,
       order?: ListSandboxesPaginatedOrderEnum,
       options: RawAxiosRequestConfig = {},
@@ -708,40 +692,6 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
 
       if (regions) {
         localVarQueryParameter['regions'] = regions
-      }
-
-      if (minCpu !== undefined) {
-        localVarQueryParameter['minCpu'] = minCpu
-      }
-
-      if (maxCpu !== undefined) {
-        localVarQueryParameter['maxCpu'] = maxCpu
-      }
-
-      if (minMemoryGiB !== undefined) {
-        localVarQueryParameter['minMemoryGiB'] = minMemoryGiB
-      }
-
-      if (maxMemoryGiB !== undefined) {
-        localVarQueryParameter['maxMemoryGiB'] = maxMemoryGiB
-      }
-
-      if (minDiskGiB !== undefined) {
-        localVarQueryParameter['minDiskGiB'] = minDiskGiB
-      }
-
-      if (maxDiskGiB !== undefined) {
-        localVarQueryParameter['maxDiskGiB'] = maxDiskGiB
-      }
-
-      if (lastEventAfter !== undefined) {
-        localVarQueryParameter['lastEventAfter'] =
-          (lastEventAfter as any) instanceof Date ? (lastEventAfter as any).toISOString() : lastEventAfter
-      }
-
-      if (lastEventBefore !== undefined) {
-        localVarQueryParameter['lastEventBefore'] =
-          (lastEventBefore as any) instanceof Date ? (lastEventBefore as any).toISOString() : lastEventBefore
       }
 
       if (sort !== undefined) {
@@ -1633,14 +1583,6 @@ export const SandboxApiFp = function (configuration?: Configuration) {
      * @param {Array<ListSandboxesPaginatedStatesEnum>} [states] List of states to filter by
      * @param {Array<string>} [snapshots] List of snapshot names to filter by
      * @param {Array<string>} [regions] List of regions to filter by
-     * @param {number} [minCpu] Minimum CPU
-     * @param {number} [maxCpu] Maximum CPU
-     * @param {number} [minMemoryGiB] Minimum memory in GiB
-     * @param {number} [maxMemoryGiB] Maximum memory in GiB
-     * @param {number} [minDiskGiB] Minimum disk space in GiB
-     * @param {number} [maxDiskGiB] Maximum disk space in GiB
-     * @param {Date} [lastEventAfter] Include items with last event after this timestamp
-     * @param {Date} [lastEventBefore] Include items with last event before this timestamp
      * @param {ListSandboxesPaginatedSortEnum} [sort] Field to sort by
      * @param {ListSandboxesPaginatedOrderEnum} [order] Direction to sort by
      * @param {*} [options] Override http request option.
@@ -1656,14 +1598,6 @@ export const SandboxApiFp = function (configuration?: Configuration) {
       states?: Array<ListSandboxesPaginatedStatesEnum>,
       snapshots?: Array<string>,
       regions?: Array<string>,
-      minCpu?: number,
-      maxCpu?: number,
-      minMemoryGiB?: number,
-      maxMemoryGiB?: number,
-      minDiskGiB?: number,
-      maxDiskGiB?: number,
-      lastEventAfter?: Date,
-      lastEventBefore?: Date,
       sort?: ListSandboxesPaginatedSortEnum,
       order?: ListSandboxesPaginatedOrderEnum,
       options?: RawAxiosRequestConfig,
@@ -1678,14 +1612,6 @@ export const SandboxApiFp = function (configuration?: Configuration) {
         states,
         snapshots,
         regions,
-        minCpu,
-        maxCpu,
-        minMemoryGiB,
-        maxMemoryGiB,
-        minDiskGiB,
-        maxDiskGiB,
-        lastEventAfter,
-        lastEventBefore,
         sort,
         order,
         options,
@@ -2228,14 +2154,6 @@ export const SandboxApiFactory = function (configuration?: Configuration, basePa
      * @param {Array<ListSandboxesPaginatedStatesEnum>} [states] List of states to filter by
      * @param {Array<string>} [snapshots] List of snapshot names to filter by
      * @param {Array<string>} [regions] List of regions to filter by
-     * @param {number} [minCpu] Minimum CPU
-     * @param {number} [maxCpu] Maximum CPU
-     * @param {number} [minMemoryGiB] Minimum memory in GiB
-     * @param {number} [maxMemoryGiB] Maximum memory in GiB
-     * @param {number} [minDiskGiB] Minimum disk space in GiB
-     * @param {number} [maxDiskGiB] Maximum disk space in GiB
-     * @param {Date} [lastEventAfter] Include items with last event after this timestamp
-     * @param {Date} [lastEventBefore] Include items with last event before this timestamp
      * @param {ListSandboxesPaginatedSortEnum} [sort] Field to sort by
      * @param {ListSandboxesPaginatedOrderEnum} [order] Direction to sort by
      * @param {*} [options] Override http request option.
@@ -2251,14 +2169,6 @@ export const SandboxApiFactory = function (configuration?: Configuration, basePa
       states?: Array<ListSandboxesPaginatedStatesEnum>,
       snapshots?: Array<string>,
       regions?: Array<string>,
-      minCpu?: number,
-      maxCpu?: number,
-      minMemoryGiB?: number,
-      maxMemoryGiB?: number,
-      minDiskGiB?: number,
-      maxDiskGiB?: number,
-      lastEventAfter?: Date,
-      lastEventBefore?: Date,
       sort?: ListSandboxesPaginatedSortEnum,
       order?: ListSandboxesPaginatedOrderEnum,
       options?: RawAxiosRequestConfig,
@@ -2274,14 +2184,6 @@ export const SandboxApiFactory = function (configuration?: Configuration, basePa
           states,
           snapshots,
           regions,
-          minCpu,
-          maxCpu,
-          minMemoryGiB,
-          maxMemoryGiB,
-          minDiskGiB,
-          maxDiskGiB,
-          lastEventAfter,
-          lastEventBefore,
           sort,
           order,
           options,
@@ -2696,14 +2598,6 @@ export class SandboxApi extends BaseAPI {
    * @param {Array<ListSandboxesPaginatedStatesEnum>} [states] List of states to filter by
    * @param {Array<string>} [snapshots] List of snapshot names to filter by
    * @param {Array<string>} [regions] List of regions to filter by
-   * @param {number} [minCpu] Minimum CPU
-   * @param {number} [maxCpu] Maximum CPU
-   * @param {number} [minMemoryGiB] Minimum memory in GiB
-   * @param {number} [maxMemoryGiB] Maximum memory in GiB
-   * @param {number} [minDiskGiB] Minimum disk space in GiB
-   * @param {number} [maxDiskGiB] Maximum disk space in GiB
-   * @param {Date} [lastEventAfter] Include items with last event after this timestamp
-   * @param {Date} [lastEventBefore] Include items with last event before this timestamp
    * @param {ListSandboxesPaginatedSortEnum} [sort] Field to sort by
    * @param {ListSandboxesPaginatedOrderEnum} [order] Direction to sort by
    * @param {*} [options] Override http request option.
@@ -2720,14 +2614,6 @@ export class SandboxApi extends BaseAPI {
     states?: Array<ListSandboxesPaginatedStatesEnum>,
     snapshots?: Array<string>,
     regions?: Array<string>,
-    minCpu?: number,
-    maxCpu?: number,
-    minMemoryGiB?: number,
-    maxMemoryGiB?: number,
-    minDiskGiB?: number,
-    maxDiskGiB?: number,
-    lastEventAfter?: Date,
-    lastEventBefore?: Date,
     sort?: ListSandboxesPaginatedSortEnum,
     order?: ListSandboxesPaginatedOrderEnum,
     options?: RawAxiosRequestConfig,
@@ -2743,14 +2629,6 @@ export class SandboxApi extends BaseAPI {
         states,
         snapshots,
         regions,
-        minCpu,
-        maxCpu,
-        minMemoryGiB,
-        maxMemoryGiB,
-        minDiskGiB,
-        maxDiskGiB,
-        lastEventAfter,
-        lastEventBefore,
         sort,
         order,
         options,

@@ -20,14 +20,6 @@ export interface SandboxFilters {
   states?: ListSandboxesPaginatedStatesEnum[]
   snapshots?: string[]
   regions?: string[]
-  minCpu?: number
-  maxCpu?: number
-  minMemoryGiB?: number
-  maxMemoryGiB?: number
-  minDiskGiB?: number
-  maxDiskGiB?: number
-  lastEventAfter?: Date
-  lastEventBefore?: Date
 }
 
 export interface SandboxSorting {
@@ -87,14 +79,6 @@ export function useSandboxes(queryKey: QueryKey, params: SandboxQueryParams) {
         filters.states,
         filters.snapshots,
         filters.regions,
-        filters.minCpu,
-        filters.maxCpu,
-        filters.minMemoryGiB,
-        filters.maxMemoryGiB,
-        filters.minDiskGiB,
-        filters.maxDiskGiB,
-        filters.lastEventAfter,
-        filters.lastEventBefore,
         sorting.field,
         sorting.direction,
       )

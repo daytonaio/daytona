@@ -1314,7 +1314,8 @@ paths:
             example: abc123
             type: string
           style: form
-        - description: JSON encoded labels to filter by
+        - deprecated: true
+          description: JSON encoded labels to filter by
           explode: true
           in: query
           name: labels
@@ -1377,80 +1378,6 @@ paths:
             items:
               type: string
             type: array
-          style: form
-        - description: Minimum CPU
-          explode: true
-          in: query
-          name: minCpu
-          required: false
-          schema:
-            minimum: 1
-            type: number
-          style: form
-        - description: Maximum CPU
-          explode: true
-          in: query
-          name: maxCpu
-          required: false
-          schema:
-            minimum: 1
-            type: number
-          style: form
-        - description: Minimum memory in GiB
-          explode: true
-          in: query
-          name: minMemoryGiB
-          required: false
-          schema:
-            minimum: 1
-            type: number
-          style: form
-        - description: Maximum memory in GiB
-          explode: true
-          in: query
-          name: maxMemoryGiB
-          required: false
-          schema:
-            minimum: 1
-            type: number
-          style: form
-        - description: Minimum disk space in GiB
-          explode: true
-          in: query
-          name: minDiskGiB
-          required: false
-          schema:
-            minimum: 1
-            type: number
-          style: form
-        - description: Maximum disk space in GiB
-          explode: true
-          in: query
-          name: maxDiskGiB
-          required: false
-          schema:
-            minimum: 1
-            type: number
-          style: form
-        - description: Include items with last event after this timestamp
-          explode: true
-          in: query
-          name: lastEventAfter
-          required: false
-          schema:
-            example: 2024-01-01T00:00:00Z
-            format: date-time
-            type: string
-          style: form
-        - description: Include items with last event before this timestamp
-          explode: true
-          in: query
-          name: lastEventBefore
-          required: false
-          schema:
-            example: 2024-12-31T23:59:59Z
-            format: date-time
-            type: string
           style: form
         - description: Field to sort by
           explode: true

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { ListFilter, Square, Globe, Cpu, Tag, Calendar, Camera, HardDrive, MemoryStick, RefreshCw } from 'lucide-react'
+import { ListFilter, Square, Globe, Camera, RefreshCw } from 'lucide-react'
 import { Button } from '../ui/button'
 import {
   DropdownMenu,
@@ -18,16 +18,7 @@ import { DebouncedInput } from '../DebouncedInput'
 import { SandboxTableHeaderProps } from './types'
 import { StateFilter, StateFilterIndicator } from './filters/StateFilter'
 import { RegionFilter, RegionFilterIndicator } from './filters/RegionFilter'
-import { LastEventFilter, LastEventFilterIndicator } from './filters/LastEventFilter'
 import { SnapshotFilter, SnapshotFilterIndicator } from './filters/SnapshotFilter'
-import { ResourceFilter, ResourceFilterIndicator, ResourceFilterValue } from './filters/ResourceFilter'
-import { LabelFilter, LabelFilterIndicator } from './filters/LabelFilter'
-
-const RESOURCE_FILTERS = [
-  { type: 'cpu' as const, label: 'CPU', icon: Cpu },
-  { type: 'memory' as const, label: 'Memory', icon: MemoryStick },
-  { type: 'disk' as const, label: 'Disk', icon: HardDrive },
-]
 
 export function SandboxTableHeader({
   table,
@@ -117,51 +108,6 @@ export function SandboxTableHeader({
                 </DropdownMenuSubContent>
               </DropdownMenuPortal>
             </DropdownMenuSub>
-            {RESOURCE_FILTERS.map(({ type, label, icon: Icon }) => (
-              <DropdownMenuSub key={type}>
-                <DropdownMenuSubTrigger>
-                  <Icon className="w-4 h-4" />
-                  {label}
-                </DropdownMenuSubTrigger>
-                <DropdownMenuPortal>
-                  <DropdownMenuSubContent className="p-3 w-64">
-                    <ResourceFilter
-                      value={(table.getColumn('resources')?.getFilterValue() as ResourceFilterValue) || {}}
-                      onFilterChange={(value) => table.getColumn('resources')?.setFilterValue(value)}
-                      resourceType={type}
-                    />
-                  </DropdownMenuSubContent>
-                </DropdownMenuPortal>
-              </DropdownMenuSub>
-            ))}
-            <DropdownMenuSub>
-              <DropdownMenuSubTrigger>
-                <Tag className="w-4 h-4" />
-                Labels
-              </DropdownMenuSubTrigger>
-              <DropdownMenuPortal>
-                <DropdownMenuSubContent className="p-0 w-64">
-                  <LabelFilter
-                    value={(table.getColumn('labels')?.getFilterValue() as string[]) || []}
-                    onFilterChange={(value) => table.getColumn('labels')?.setFilterValue(value)}
-                  />
-                </DropdownMenuSubContent>
-              </DropdownMenuPortal>
-            </DropdownMenuSub>
-            <DropdownMenuSub>
-              <DropdownMenuSubTrigger>
-                <Calendar className="w-4 h-4" />
-                Last Event
-              </DropdownMenuSubTrigger>
-              <DropdownMenuPortal>
-                <DropdownMenuSubContent className="p-3 w-92">
-                  <LastEventFilter
-                    onFilterChange={(value) => table.getColumn('lastEvent')?.setFilterValue(value)}
-                    value={(table.getColumn('lastEvent')?.getFilterValue() as Date[]) || []}
-                  />
-                </DropdownMenuSubContent>
-              </DropdownMenuPortal>
-            </DropdownMenuSub>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
@@ -191,32 +137,6 @@ export function SandboxTableHeader({
             onFilterChange={(value) => table.getColumn('region')?.setFilterValue(value)}
             options={regionOptions}
             isLoading={regionsDataIsLoading}
-          />
-        )}
-
-        {RESOURCE_FILTERS.map(({ type }) => {
-          const resourceValue = (table.getColumn('resources')?.getFilterValue() as ResourceFilterValue)?.[type]
-          return resourceValue ? (
-            <ResourceFilterIndicator
-              key={type}
-              value={table.getColumn('resources')?.getFilterValue() as ResourceFilterValue}
-              onFilterChange={(value) => table.getColumn('resources')?.setFilterValue(value)}
-              resourceType={type}
-            />
-          ) : null
-        })}
-
-        {(table.getColumn('labels')?.getFilterValue() as string[])?.length > 0 && (
-          <LabelFilterIndicator
-            value={(table.getColumn('labels')?.getFilterValue() as string[]) || []}
-            onFilterChange={(value) => table.getColumn('labels')?.setFilterValue(value)}
-          />
-        )}
-
-        {(table.getColumn('lastEvent')?.getFilterValue() as Date[])?.length > 0 && (
-          <LastEventFilterIndicator
-            value={(table.getColumn('lastEvent')?.getFilterValue() as Date[]) || []}
-            onFilterChange={(value) => table.getColumn('lastEvent')?.setFilterValue(value)}
           />
         )}
       </div>

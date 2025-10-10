@@ -4,7 +4,7 @@
  */
 
 import { ApiProperty, ApiSchema } from '@nestjs/swagger'
-import { IsBoolean, IsInt, IsOptional, IsString, IsArray, IsEnum, IsDate, Min } from 'class-validator'
+import { IsBoolean, IsOptional, IsString, IsArray, IsEnum } from 'class-validator'
 import { Type } from 'class-transformer'
 import { SandboxState } from '../enums/sandbox-state.enum'
 import { ToArray } from '../../common/decorators/to-array.decorator'
@@ -51,6 +51,7 @@ export class ListSandboxesQueryDto {
     required: false,
     type: String,
     example: '{"label1": "value1", "label2": "value2"}',
+    deprecated: true,
   })
   @IsOptional()
   @IsString()
@@ -107,110 +108,6 @@ export class ListSandboxesQueryDto {
   @IsArray()
   @IsString({ each: true })
   regions?: string[]
-
-  @ApiProperty({
-    name: 'minCpu',
-    description: 'Minimum CPU',
-    required: false,
-    type: Number,
-    minimum: 1,
-  })
-  @IsOptional()
-  @Type(() => Number)
-  @IsInt()
-  @Min(1)
-  minCpu?: number
-
-  @ApiProperty({
-    name: 'maxCpu',
-    description: 'Maximum CPU',
-    required: false,
-    type: Number,
-    minimum: 1,
-  })
-  @IsOptional()
-  @Type(() => Number)
-  @IsInt()
-  @Min(1)
-  maxCpu?: number
-
-  @ApiProperty({
-    name: 'minMemoryGiB',
-    description: 'Minimum memory in GiB',
-    required: false,
-    type: Number,
-    minimum: 1,
-  })
-  @IsOptional()
-  @Type(() => Number)
-  @IsInt()
-  @Min(1)
-  minMemoryGiB?: number
-
-  @ApiProperty({
-    name: 'maxMemoryGiB',
-    description: 'Maximum memory in GiB',
-    required: false,
-    type: Number,
-    minimum: 1,
-  })
-  @IsOptional()
-  @Type(() => Number)
-  @IsInt()
-  @Min(1)
-  maxMemoryGiB?: number
-
-  @ApiProperty({
-    name: 'minDiskGiB',
-    description: 'Minimum disk space in GiB',
-    required: false,
-    type: Number,
-    minimum: 1,
-  })
-  @IsOptional()
-  @Type(() => Number)
-  @IsInt()
-  @Min(1)
-  minDiskGiB?: number
-
-  @ApiProperty({
-    name: 'maxDiskGiB',
-    description: 'Maximum disk space in GiB',
-    required: false,
-    type: Number,
-    minimum: 1,
-  })
-  @IsOptional()
-  @Type(() => Number)
-  @IsInt()
-  @Min(1)
-  maxDiskGiB?: number
-
-  @ApiProperty({
-    name: 'lastEventAfter',
-    description: 'Include items with last event after this timestamp',
-    required: false,
-    type: String,
-    format: 'date-time',
-    example: '2024-01-01T00:00:00Z',
-  })
-  @IsOptional()
-  @Type(() => Date)
-  @IsDate()
-  lastEventAfter?: Date
-
-  @ApiProperty({
-    name: 'lastEventBefore',
-    description: 'Include items with last event before this timestamp',
-    required: false,
-    type: String,
-    format: 'date-time',
-    example: '2024-12-31T23:59:59Z',
-  })
-  @IsOptional()
-  @Type(() => Date)
-  @IsDate()
-  lastEventBefore?: Date
 
   @ApiProperty({
     name: 'sort',

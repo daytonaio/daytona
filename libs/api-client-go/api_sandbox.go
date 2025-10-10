@@ -19,7 +19,6 @@ import (
 	"net/url"
 	"reflect"
 	"strings"
-	"time"
 )
 
 type SandboxAPI interface {
@@ -1622,14 +1621,6 @@ type SandboxAPIListSandboxesPaginatedRequest struct {
 	states                 *[]string
 	snapshots              *[]string
 	regions                *[]string
-	minCpu                 *float32
-	maxCpu                 *float32
-	minMemoryGiB           *float32
-	maxMemoryGiB           *float32
-	minDiskGiB             *float32
-	maxDiskGiB             *float32
-	lastEventAfter         *time.Time
-	lastEventBefore        *time.Time
 	sort                   *string
 	order                  *string
 }
@@ -1659,6 +1650,7 @@ func (r SandboxAPIListSandboxesPaginatedRequest) Name(name string) SandboxAPILis
 }
 
 // JSON encoded labels to filter by
+// Deprecated
 func (r SandboxAPIListSandboxesPaginatedRequest) Labels(labels string) SandboxAPIListSandboxesPaginatedRequest {
 	r.labels = &labels
 	return r
@@ -1685,54 +1677,6 @@ func (r SandboxAPIListSandboxesPaginatedRequest) Snapshots(snapshots []string) S
 // List of regions to filter by
 func (r SandboxAPIListSandboxesPaginatedRequest) Regions(regions []string) SandboxAPIListSandboxesPaginatedRequest {
 	r.regions = &regions
-	return r
-}
-
-// Minimum CPU
-func (r SandboxAPIListSandboxesPaginatedRequest) MinCpu(minCpu float32) SandboxAPIListSandboxesPaginatedRequest {
-	r.minCpu = &minCpu
-	return r
-}
-
-// Maximum CPU
-func (r SandboxAPIListSandboxesPaginatedRequest) MaxCpu(maxCpu float32) SandboxAPIListSandboxesPaginatedRequest {
-	r.maxCpu = &maxCpu
-	return r
-}
-
-// Minimum memory in GiB
-func (r SandboxAPIListSandboxesPaginatedRequest) MinMemoryGiB(minMemoryGiB float32) SandboxAPIListSandboxesPaginatedRequest {
-	r.minMemoryGiB = &minMemoryGiB
-	return r
-}
-
-// Maximum memory in GiB
-func (r SandboxAPIListSandboxesPaginatedRequest) MaxMemoryGiB(maxMemoryGiB float32) SandboxAPIListSandboxesPaginatedRequest {
-	r.maxMemoryGiB = &maxMemoryGiB
-	return r
-}
-
-// Minimum disk space in GiB
-func (r SandboxAPIListSandboxesPaginatedRequest) MinDiskGiB(minDiskGiB float32) SandboxAPIListSandboxesPaginatedRequest {
-	r.minDiskGiB = &minDiskGiB
-	return r
-}
-
-// Maximum disk space in GiB
-func (r SandboxAPIListSandboxesPaginatedRequest) MaxDiskGiB(maxDiskGiB float32) SandboxAPIListSandboxesPaginatedRequest {
-	r.maxDiskGiB = &maxDiskGiB
-	return r
-}
-
-// Include items with last event after this timestamp
-func (r SandboxAPIListSandboxesPaginatedRequest) LastEventAfter(lastEventAfter time.Time) SandboxAPIListSandboxesPaginatedRequest {
-	r.lastEventAfter = &lastEventAfter
-	return r
-}
-
-// Include items with last event before this timestamp
-func (r SandboxAPIListSandboxesPaginatedRequest) LastEventBefore(lastEventBefore time.Time) SandboxAPIListSandboxesPaginatedRequest {
-	r.lastEventBefore = &lastEventBefore
 	return r
 }
 
@@ -1843,30 +1787,6 @@ func (a *SandboxAPIService) ListSandboxesPaginatedExecute(r SandboxAPIListSandbo
 		} else {
 			parameterAddToHeaderOrQuery(localVarQueryParams, "regions", t, "form", "multi")
 		}
-	}
-	if r.minCpu != nil {
-		parameterAddToHeaderOrQuery(localVarQueryParams, "minCpu", r.minCpu, "form", "")
-	}
-	if r.maxCpu != nil {
-		parameterAddToHeaderOrQuery(localVarQueryParams, "maxCpu", r.maxCpu, "form", "")
-	}
-	if r.minMemoryGiB != nil {
-		parameterAddToHeaderOrQuery(localVarQueryParams, "minMemoryGiB", r.minMemoryGiB, "form", "")
-	}
-	if r.maxMemoryGiB != nil {
-		parameterAddToHeaderOrQuery(localVarQueryParams, "maxMemoryGiB", r.maxMemoryGiB, "form", "")
-	}
-	if r.minDiskGiB != nil {
-		parameterAddToHeaderOrQuery(localVarQueryParams, "minDiskGiB", r.minDiskGiB, "form", "")
-	}
-	if r.maxDiskGiB != nil {
-		parameterAddToHeaderOrQuery(localVarQueryParams, "maxDiskGiB", r.maxDiskGiB, "form", "")
-	}
-	if r.lastEventAfter != nil {
-		parameterAddToHeaderOrQuery(localVarQueryParams, "lastEventAfter", r.lastEventAfter, "form", "")
-	}
-	if r.lastEventBefore != nil {
-		parameterAddToHeaderOrQuery(localVarQueryParams, "lastEventBefore", r.lastEventBefore, "form", "")
 	}
 	if r.sort != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "sort", r.sort, "form", "")

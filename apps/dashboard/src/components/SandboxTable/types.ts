@@ -134,59 +134,6 @@ export const convertTableFiltersToApiFilters = (columnFilters: ColumnFiltersStat
           filters.regions = filter.value as string[]
         }
         break
-      case 'labels':
-        if (Array.isArray(filter.value) && filter.value.length > 0) {
-          const labelObj: Record<string, string> = {}
-          filter.value.forEach((label: string) => {
-            const [key, value] = label.split(': ')
-            if (key && value) {
-              labelObj[key] = value
-            }
-          })
-          if (Object.keys(labelObj).length > 0) {
-            filters.labels = labelObj
-          }
-        }
-        break
-      case 'resources':
-        if (filter.value && typeof filter.value === 'object') {
-          const resourceValue = filter.value as {
-            cpu?: { min?: number; max?: number }
-            memory?: { min?: number; max?: number }
-            disk?: { min?: number; max?: number }
-          }
-
-          if (resourceValue.cpu?.min !== undefined) {
-            filters.minCpu = resourceValue.cpu.min
-          }
-          if (resourceValue.cpu?.max !== undefined) {
-            filters.maxCpu = resourceValue.cpu.max
-          }
-          if (resourceValue.memory?.min !== undefined) {
-            filters.minMemoryGiB = resourceValue.memory.min
-          }
-          if (resourceValue.memory?.max !== undefined) {
-            filters.maxMemoryGiB = resourceValue.memory.max
-          }
-          if (resourceValue.disk?.min !== undefined) {
-            filters.minDiskGiB = resourceValue.disk.min
-          }
-          if (resourceValue.disk?.max !== undefined) {
-            filters.maxDiskGiB = resourceValue.disk.max
-          }
-        }
-        break
-      case 'lastEvent':
-        if (Array.isArray(filter.value) && filter.value.length > 0) {
-          const dateRange = filter.value as (Date | undefined)[]
-          if (dateRange[0]) {
-            filters.lastEventAfter = dateRange[0]
-          }
-          if (dateRange[1]) {
-            filters.lastEventBefore = dateRange[1]
-          }
-        }
-        break
     }
   })
 
@@ -229,48 +176,6 @@ export const convertApiFiltersToTableFilters = (filters: SandboxFilters): Column
 
   if (filters.regions && filters.regions.length > 0) {
     columnFilters.push({ id: 'region', value: filters.regions })
-  }
-
-  if (filters.labels && Object.keys(filters.labels).length > 0) {
-    const labelArray = Object.entries(filters.labels).map(([key, value]) => `${key}: ${value}`)
-    columnFilters.push({ id: 'labels', value: labelArray })
-  }
-
-  // Convert resource filters back to table format
-  const resourceValue: {
-    cpu?: { min?: number; max?: number }
-    memory?: { min?: number; max?: number }
-    disk?: { min?: number; max?: number }
-  } = {}
-
-  if (filters.minCpu !== undefined || filters.maxCpu !== undefined) {
-    resourceValue.cpu = {}
-    if (filters.minCpu !== undefined) resourceValue.cpu.min = filters.minCpu
-    if (filters.maxCpu !== undefined) resourceValue.cpu.max = filters.maxCpu
-  }
-
-  if (filters.minMemoryGiB !== undefined || filters.maxMemoryGiB !== undefined) {
-    resourceValue.memory = {}
-    if (filters.minMemoryGiB !== undefined) resourceValue.memory.min = filters.minMemoryGiB
-    if (filters.maxMemoryGiB !== undefined) resourceValue.memory.max = filters.maxMemoryGiB
-  }
-
-  if (filters.minDiskGiB !== undefined || filters.maxDiskGiB !== undefined) {
-    resourceValue.disk = {}
-    if (filters.minDiskGiB !== undefined) resourceValue.disk.min = filters.minDiskGiB
-    if (filters.maxDiskGiB !== undefined) resourceValue.disk.max = filters.maxDiskGiB
-  }
-
-  if (Object.keys(resourceValue).length > 0) {
-    columnFilters.push({ id: 'resources', value: resourceValue })
-  }
-
-  // Convert date range filters back to table format
-  if (filters.lastEventAfter || filters.lastEventBefore) {
-    const dateRange: (Date | undefined)[] = [undefined, undefined]
-    if (filters.lastEventAfter) dateRange[0] = filters.lastEventAfter
-    if (filters.lastEventBefore) dateRange[1] = filters.lastEventBefore
-    columnFilters.push({ id: 'lastEvent', value: dateRange })
   }
 
   return columnFilters

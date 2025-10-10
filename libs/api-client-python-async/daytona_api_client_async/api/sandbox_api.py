@@ -17,7 +17,6 @@ from pydantic import validate_call, Field, StrictFloat, StrictStr, StrictInt
 from typing import Any, Dict, List, Optional, Tuple, Union
 from typing_extensions import Annotated
 
-from datetime import datetime
 from pydantic import Field, StrictBool, StrictFloat, StrictInt, StrictStr, field_validator
 from typing import List, Optional, Union
 from typing_extensions import Annotated
@@ -3187,14 +3186,6 @@ class SandboxApi:
         states: Annotated[Optional[List[StrictStr]], Field(description="List of states to filter by")] = None,
         snapshots: Annotated[Optional[List[StrictStr]], Field(description="List of snapshot names to filter by")] = None,
         regions: Annotated[Optional[List[StrictStr]], Field(description="List of regions to filter by")] = None,
-        min_cpu: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Minimum CPU")] = None,
-        max_cpu: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Maximum CPU")] = None,
-        min_memory_gi_b: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Minimum memory in GiB")] = None,
-        max_memory_gi_b: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Maximum memory in GiB")] = None,
-        min_disk_gi_b: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Minimum disk space in GiB")] = None,
-        max_disk_gi_b: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Maximum disk space in GiB")] = None,
-        last_event_after: Annotated[Optional[datetime], Field(description="Include items with last event after this timestamp")] = None,
-        last_event_before: Annotated[Optional[datetime], Field(description="Include items with last event before this timestamp")] = None,
         sort: Annotated[Optional[StrictStr], Field(description="Field to sort by")] = None,
         order: Annotated[Optional[StrictStr], Field(description="Direction to sort by")] = None,
         _request_timeout: Union[
@@ -3231,22 +3222,6 @@ class SandboxApi:
         :type snapshots: List[str]
         :param regions: List of regions to filter by
         :type regions: List[str]
-        :param min_cpu: Minimum CPU
-        :type min_cpu: float
-        :param max_cpu: Maximum CPU
-        :type max_cpu: float
-        :param min_memory_gi_b: Minimum memory in GiB
-        :type min_memory_gi_b: float
-        :param max_memory_gi_b: Maximum memory in GiB
-        :type max_memory_gi_b: float
-        :param min_disk_gi_b: Minimum disk space in GiB
-        :type min_disk_gi_b: float
-        :param max_disk_gi_b: Maximum disk space in GiB
-        :type max_disk_gi_b: float
-        :param last_event_after: Include items with last event after this timestamp
-        :type last_event_after: datetime
-        :param last_event_before: Include items with last event before this timestamp
-        :type last_event_before: datetime
         :param sort: Field to sort by
         :type sort: str
         :param order: Direction to sort by
@@ -3283,14 +3258,6 @@ class SandboxApi:
             states=states,
             snapshots=snapshots,
             regions=regions,
-            min_cpu=min_cpu,
-            max_cpu=max_cpu,
-            min_memory_gi_b=min_memory_gi_b,
-            max_memory_gi_b=max_memory_gi_b,
-            min_disk_gi_b=min_disk_gi_b,
-            max_disk_gi_b=max_disk_gi_b,
-            last_event_after=last_event_after,
-            last_event_before=last_event_before,
             sort=sort,
             order=order,
             _request_auth=_request_auth,
@@ -3325,14 +3292,6 @@ class SandboxApi:
         states: Annotated[Optional[List[StrictStr]], Field(description="List of states to filter by")] = None,
         snapshots: Annotated[Optional[List[StrictStr]], Field(description="List of snapshot names to filter by")] = None,
         regions: Annotated[Optional[List[StrictStr]], Field(description="List of regions to filter by")] = None,
-        min_cpu: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Minimum CPU")] = None,
-        max_cpu: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Maximum CPU")] = None,
-        min_memory_gi_b: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Minimum memory in GiB")] = None,
-        max_memory_gi_b: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Maximum memory in GiB")] = None,
-        min_disk_gi_b: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Minimum disk space in GiB")] = None,
-        max_disk_gi_b: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Maximum disk space in GiB")] = None,
-        last_event_after: Annotated[Optional[datetime], Field(description="Include items with last event after this timestamp")] = None,
-        last_event_before: Annotated[Optional[datetime], Field(description="Include items with last event before this timestamp")] = None,
         sort: Annotated[Optional[StrictStr], Field(description="Field to sort by")] = None,
         order: Annotated[Optional[StrictStr], Field(description="Direction to sort by")] = None,
         _request_timeout: Union[
@@ -3369,22 +3328,6 @@ class SandboxApi:
         :type snapshots: List[str]
         :param regions: List of regions to filter by
         :type regions: List[str]
-        :param min_cpu: Minimum CPU
-        :type min_cpu: float
-        :param max_cpu: Maximum CPU
-        :type max_cpu: float
-        :param min_memory_gi_b: Minimum memory in GiB
-        :type min_memory_gi_b: float
-        :param max_memory_gi_b: Maximum memory in GiB
-        :type max_memory_gi_b: float
-        :param min_disk_gi_b: Minimum disk space in GiB
-        :type min_disk_gi_b: float
-        :param max_disk_gi_b: Maximum disk space in GiB
-        :type max_disk_gi_b: float
-        :param last_event_after: Include items with last event after this timestamp
-        :type last_event_after: datetime
-        :param last_event_before: Include items with last event before this timestamp
-        :type last_event_before: datetime
         :param sort: Field to sort by
         :type sort: str
         :param order: Direction to sort by
@@ -3421,14 +3364,6 @@ class SandboxApi:
             states=states,
             snapshots=snapshots,
             regions=regions,
-            min_cpu=min_cpu,
-            max_cpu=max_cpu,
-            min_memory_gi_b=min_memory_gi_b,
-            max_memory_gi_b=max_memory_gi_b,
-            min_disk_gi_b=min_disk_gi_b,
-            max_disk_gi_b=max_disk_gi_b,
-            last_event_after=last_event_after,
-            last_event_before=last_event_before,
             sort=sort,
             order=order,
             _request_auth=_request_auth,
@@ -3463,14 +3398,6 @@ class SandboxApi:
         states: Annotated[Optional[List[StrictStr]], Field(description="List of states to filter by")] = None,
         snapshots: Annotated[Optional[List[StrictStr]], Field(description="List of snapshot names to filter by")] = None,
         regions: Annotated[Optional[List[StrictStr]], Field(description="List of regions to filter by")] = None,
-        min_cpu: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Minimum CPU")] = None,
-        max_cpu: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Maximum CPU")] = None,
-        min_memory_gi_b: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Minimum memory in GiB")] = None,
-        max_memory_gi_b: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Maximum memory in GiB")] = None,
-        min_disk_gi_b: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Minimum disk space in GiB")] = None,
-        max_disk_gi_b: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Maximum disk space in GiB")] = None,
-        last_event_after: Annotated[Optional[datetime], Field(description="Include items with last event after this timestamp")] = None,
-        last_event_before: Annotated[Optional[datetime], Field(description="Include items with last event before this timestamp")] = None,
         sort: Annotated[Optional[StrictStr], Field(description="Field to sort by")] = None,
         order: Annotated[Optional[StrictStr], Field(description="Direction to sort by")] = None,
         _request_timeout: Union[
@@ -3507,22 +3434,6 @@ class SandboxApi:
         :type snapshots: List[str]
         :param regions: List of regions to filter by
         :type regions: List[str]
-        :param min_cpu: Minimum CPU
-        :type min_cpu: float
-        :param max_cpu: Maximum CPU
-        :type max_cpu: float
-        :param min_memory_gi_b: Minimum memory in GiB
-        :type min_memory_gi_b: float
-        :param max_memory_gi_b: Maximum memory in GiB
-        :type max_memory_gi_b: float
-        :param min_disk_gi_b: Minimum disk space in GiB
-        :type min_disk_gi_b: float
-        :param max_disk_gi_b: Maximum disk space in GiB
-        :type max_disk_gi_b: float
-        :param last_event_after: Include items with last event after this timestamp
-        :type last_event_after: datetime
-        :param last_event_before: Include items with last event before this timestamp
-        :type last_event_before: datetime
         :param sort: Field to sort by
         :type sort: str
         :param order: Direction to sort by
@@ -3559,14 +3470,6 @@ class SandboxApi:
             states=states,
             snapshots=snapshots,
             regions=regions,
-            min_cpu=min_cpu,
-            max_cpu=max_cpu,
-            min_memory_gi_b=min_memory_gi_b,
-            max_memory_gi_b=max_memory_gi_b,
-            min_disk_gi_b=min_disk_gi_b,
-            max_disk_gi_b=max_disk_gi_b,
-            last_event_after=last_event_after,
-            last_event_before=last_event_before,
             sort=sort,
             order=order,
             _request_auth=_request_auth,
@@ -3596,14 +3499,6 @@ class SandboxApi:
         states,
         snapshots,
         regions,
-        min_cpu,
-        max_cpu,
-        min_memory_gi_b,
-        max_memory_gi_b,
-        min_disk_gi_b,
-        max_disk_gi_b,
-        last_event_after,
-        last_event_before,
         sort,
         order,
         _request_auth,
@@ -3662,56 +3557,6 @@ class SandboxApi:
         if regions is not None:
             
             _query_params.append(('regions', regions))
-            
-        if min_cpu is not None:
-            
-            _query_params.append(('minCpu', min_cpu))
-            
-        if max_cpu is not None:
-            
-            _query_params.append(('maxCpu', max_cpu))
-            
-        if min_memory_gi_b is not None:
-            
-            _query_params.append(('minMemoryGiB', min_memory_gi_b))
-            
-        if max_memory_gi_b is not None:
-            
-            _query_params.append(('maxMemoryGiB', max_memory_gi_b))
-            
-        if min_disk_gi_b is not None:
-            
-            _query_params.append(('minDiskGiB', min_disk_gi_b))
-            
-        if max_disk_gi_b is not None:
-            
-            _query_params.append(('maxDiskGiB', max_disk_gi_b))
-            
-        if last_event_after is not None:
-            if isinstance(last_event_after, datetime):
-                _query_params.append(
-                    (
-                        'lastEventAfter',
-                        last_event_after.strftime(
-                            self.api_client.configuration.datetime_format
-                        )
-                    )
-                )
-            else:
-                _query_params.append(('lastEventAfter', last_event_after))
-            
-        if last_event_before is not None:
-            if isinstance(last_event_before, datetime):
-                _query_params.append(
-                    (
-                        'lastEventBefore',
-                        last_event_before.strftime(
-                            self.api_client.configuration.datetime_format
-                        )
-                    )
-                )
-            else:
-                _query_params.append(('lastEventBefore', last_event_before))
             
         if sort is not None:
             
