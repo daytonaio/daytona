@@ -24,7 +24,7 @@ export async function processStreamingResponse(
   const res = await getStream()
   if (!res.body) throw new Error('No streaming support')
   const reader = res.body.getReader()
-  const decoder = new TextDecoder()
+  const decoder = new TextDecoder('utf-8')
   const TIMEOUT = Symbol()
   let exitCheckStreak = 0
 
@@ -59,12 +59,17 @@ export async function processStreamingResponse(
           // stream closed
           break
         }
-        // valid chunk
-        onChunk(decoder.decode(result))
+        // valid chunk - use {stream: true} to buffer incomplete UTF-8 sequences
+        onChunk(decoder.decode(result, { stream: true }))
         exitCheckStreak = 0
       }
     }
   } finally {
+    // Flush any remaining buffered bytes from the decoder
+    const remaining = decoder.decode()
+    if (remaining) {
+      onChunk(remaining)
+    }
     await reader.cancel()
   }
 }
@@ -87,17 +92,21 @@ export function stdDemuxStream(
       ws.binaryType = 'arraybuffer' // ensure binary frames yield ArrayBuffer, not Blob
     }
 
-    const textDecoder = new TextDecoder() // for decoding UTF-8 bytes to string
+    // Separate decoders for stdout and stderr to maintain independent UTF-8 decoding state
+    const stdoutDecoder = new TextDecoder('utf-8')
+    const stderrDecoder = new TextDecoder('utf-8')
     const buf: number[] = [] // Buffer to accumulate incoming chunks
     let currentDataType: 'stdout' | 'stderr' | null = null // Track current stream type
 
     // Helper function to emit payload data
     const emit = (payload: Uint8Array) => {
       if (payload.length === 0) return
-      const text = textDecoder.decode(payload)
+      // Use {stream: true} to buffer incomplete UTF-8 sequences for the next chunk
       if (currentDataType === 'stdout') {
+        const text = stdoutDecoder.decode(payload, { stream: true })
         onStdout(text)
       } else if (currentDataType === 'stderr') {
+        const text = stderrDecoder.decode(payload, { stream: true })
         onStderr(text)
       }
       // If currentDataType is null, drop unlabeled bytes (shouldn't happen with proper labeling)
@@ -271,12 +280,20 @@ export function stdDemuxStream(
       // Flush any remaining buffered payload on clean close
       if (buf.length > 0 && currentDataType) {
         const remainingBytes = new Uint8Array(buf)
-        const text = textDecoder.decode(remainingBytes)
+        // Use {stream: false} or omit to flush any buffered incomplete UTF-8 sequences
         if (currentDataType === 'stdout') {
+          const text = stdoutDecoder.decode(remainingBytes, { stream: false })
           onStdout(text)
         } else if (currentDataType === 'stderr') {
+          const text = stderrDecoder.decode(remainingBytes, { stream: false })
           onStderr(text)
         }
+      } else {
+        // Flush any remaining bytes in the decoders even if buf is empty
+        const stdoutFlushed = stdoutDecoder.decode()
+        const stderrFlushed = stderrDecoder.decode()
+        if (stdoutFlushed) onStdout(stdoutFlushed)
+        if (stderrFlushed) onStderr(stderrFlushed)
       }
       cleanup()
       resolve()
