@@ -69,6 +69,7 @@ export interface RunnerAdapter {
     pushToInternalRegistry?: boolean,
   ): Promise<void>
   pullSnapshot(snapshotName: string, registry?: DockerRegistry, destinationRegistry?: DockerRegistry): Promise<void>
+  tagImage(sourceImage: string, targetImage: string): Promise<void>
   snapshotExists(snapshotName: string): Promise<boolean>
   getSnapshotInfo(snapshotName: string): Promise<RunnerSnapshotInfo>
   getSnapshotLogs(snapshotRef: string, follow: boolean): Promise<string>

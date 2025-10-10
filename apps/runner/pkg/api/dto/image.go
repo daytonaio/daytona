@@ -17,3 +17,8 @@ type BuildSnapshotRequestDTO struct {
 	Context                []string     `json:"context"`
 	PushToInternalRegistry bool         `json:"pushToInternalRegistry"`
 } //	@name	BuildSnapshotRequestDTO
+
+type TagImageRequestDTO struct {
+	SourceImage string `json:"sourceImage" validate:"required"`
+	TargetImage string `json:"targetImage" validate:"required"`
+} //	@name	TagImageRequestDTO
