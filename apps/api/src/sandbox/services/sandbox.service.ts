@@ -59,6 +59,7 @@ import {
 } from '../dto/list-sandboxes-query.dto'
 import { createRangeFilter } from '../../common/utils/range-filter'
 import { LogExecution } from '../../common/decorators/log-execution.decorator'
+import { getSandboxStateChangeLockKey } from '../utils/lock-keys.util'
 
 const DEFAULT_CPU = 1
 const DEFAULT_MEMORY = 1
@@ -188,37 +189,44 @@ export class SandboxService {
   }
 
   async archive(sandboxId: string): Promise<void> {
-    const sandbox = await this.sandboxRepository.findOne({
-      where: {
-        id: sandboxId,
-      },
-    })
+    const lockKey = getSandboxStateChangeLockKey(sandboxId)
+    await this.redisLockProvider.waitForLock(lockKey, 60)
 
-    if (!sandbox) {
-      throw new NotFoundException(`Sandbox with ID ${sandboxId} not found`)
+    try {
+      const sandbox = await this.sandboxRepository.findOne({
+        where: {
+          id: sandboxId,
+        },
+      })
+
+      if (!sandbox) {
+        throw new NotFoundException(`Sandbox with ID ${sandboxId} not found`)
+      }
+
+      if (String(sandbox.state) !== String(sandbox.desiredState)) {
+        throw new SandboxError('State change in progress')
+      }
+
+      if (sandbox.state !== SandboxState.STOPPED) {
+        throw new SandboxError('Sandbox is not stopped')
+      }
+
+      if (sandbox.pending) {
+        throw new SandboxError('Sandbox state change in progress')
+      }
+
+      if (sandbox.autoDeleteInterval === 0) {
+        throw new SandboxError('Ephemeral sandboxes cannot be archived')
+      }
+
+      sandbox.state = SandboxState.ARCHIVING
+      sandbox.desiredState = SandboxDesiredState.ARCHIVED
+      await this.sandboxRepository.save(sandbox)
+
+      this.eventEmitter.emit(SandboxEvents.ARCHIVED, new SandboxArchivedEvent(sandbox))
+    } finally {
+      await this.redisLockProvider.unlock(lockKey)
     }
-
-    if (String(sandbox.state) !== String(sandbox.desiredState)) {
-      throw new SandboxError('State change in progress')
-    }
-
-    if (sandbox.state !== SandboxState.STOPPED) {
-      throw new SandboxError('Sandbox is not stopped')
-    }
-
-    if (sandbox.pending) {
-      throw new SandboxError('Sandbox state change in progress')
-    }
-
-    if (sandbox.autoDeleteInterval === 0) {
-      throw new SandboxError('Ephemeral sandboxes cannot be archived')
-    }
-
-    sandbox.state = SandboxState.ARCHIVING
-    sandbox.desiredState = SandboxDesiredState.ARCHIVED
-    await this.sandboxRepository.save(sandbox)
-
-    this.eventEmitter.emit(SandboxEvents.ARCHIVED, new SandboxArchivedEvent(sandbox))
   }
 
   async createForWarmPool(warmPoolItem: WarmPool): Promise<Sandbox> {
@@ -867,29 +875,36 @@ export class SandboxService {
   }
 
   async destroy(sandboxId: string): Promise<void> {
-    const sandbox = await this.sandboxRepository.findOne({
-      where: {
-        id: sandboxId,
-      },
-    })
+    const lockKey = getSandboxStateChangeLockKey(sandboxId)
+    await this.redisLockProvider.waitForLock(lockKey, 60)
 
-    if (!sandbox) {
-      throw new NotFoundException(`Sandbox with ID ${sandboxId} not found`)
+    try {
+      const sandbox = await this.sandboxRepository.findOne({
+        where: {
+          id: sandboxId,
+        },
+      })
+
+      if (!sandbox) {
+        throw new NotFoundException(`Sandbox with ID ${sandboxId} not found`)
+      }
+
+      if (sandbox.pending) {
+        throw new SandboxError('Sandbox state change in progress')
+      }
+      sandbox.pending = true
+      sandbox.desiredState = SandboxDesiredState.DESTROYED
+      sandbox.backupState = BackupState.NONE
+      await this.sandboxRepository.save(sandbox)
+
+      this.eventEmitter.emit(SandboxEvents.DESTROYED, new SandboxDestroyedEvent(sandbox))
+    } finally {
+      await this.redisLockProvider.unlock(lockKey)
     }
-
-    if (sandbox.pending) {
-      throw new SandboxError('Sandbox state change in progress')
-    }
-    sandbox.pending = true
-    sandbox.desiredState = SandboxDesiredState.DESTROYED
-    sandbox.backupState = BackupState.NONE
-    await this.sandboxRepository.save(sandbox)
-
-    this.eventEmitter.emit(SandboxEvents.DESTROYED, new SandboxDestroyedEvent(sandbox))
   }
 
   async start(sandboxId: string, organization: Organization): Promise<void> {
-    const lockKey = `sandbox:${sandboxId}:start`
+    const lockKey = getSandboxStateChangeLockKey(sandboxId)
     await this.redisLockProvider.waitForLock(lockKey, 60)
 
     let pendingCpuIncrement: number | undefined
@@ -963,42 +978,49 @@ export class SandboxService {
   }
 
   async stop(sandboxId: string): Promise<void> {
-    const sandbox = await this.sandboxRepository.findOne({
-      where: {
-        id: sandboxId,
-      },
-    })
+    const lockKey = getSandboxStateChangeLockKey(sandboxId)
+    await this.redisLockProvider.waitForLock(lockKey, 60)
 
-    if (!sandbox) {
-      throw new NotFoundException(`Sandbox with ID ${sandboxId} not found`)
-    }
+    try {
+      const sandbox = await this.sandboxRepository.findOne({
+        where: {
+          id: sandboxId,
+        },
+      })
 
-    if (String(sandbox.state) !== String(sandbox.desiredState)) {
-      throw new SandboxError('State change in progress')
-    }
+      if (!sandbox) {
+        throw new NotFoundException(`Sandbox with ID ${sandboxId} not found`)
+      }
 
-    if (sandbox.state !== SandboxState.STARTED) {
-      throw new SandboxError('Sandbox is not started')
-    }
+      if (String(sandbox.state) !== String(sandbox.desiredState)) {
+        throw new SandboxError('State change in progress')
+      }
 
-    if (sandbox.pending) {
-      throw new SandboxError('Sandbox state change in progress')
-    }
+      if (sandbox.state !== SandboxState.STARTED) {
+        throw new SandboxError('Sandbox is not started')
+      }
 
-    sandbox.pending = true
-    //  if auto-delete interval is 0, delete the sandbox immediately
-    if (sandbox.autoDeleteInterval === 0) {
-      sandbox.desiredState = SandboxDesiredState.DESTROYED
-    } else {
-      sandbox.desiredState = SandboxDesiredState.STOPPED
-    }
+      if (sandbox.pending) {
+        throw new SandboxError('Sandbox state change in progress')
+      }
 
-    await this.sandboxRepository.save(sandbox)
+      sandbox.pending = true
+      //  if auto-delete interval is 0, delete the sandbox immediately
+      if (sandbox.autoDeleteInterval === 0) {
+        sandbox.desiredState = SandboxDesiredState.DESTROYED
+      } else {
+        sandbox.desiredState = SandboxDesiredState.STOPPED
+      }
 
-    if (sandbox.autoDeleteInterval === 0) {
-      this.eventEmitter.emit(SandboxEvents.DESTROYED, new SandboxDestroyedEvent(sandbox))
-    } else {
-      this.eventEmitter.emit(SandboxEvents.STOPPED, new SandboxStoppedEvent(sandbox))
+      await this.sandboxRepository.save(sandbox)
+
+      if (sandbox.autoDeleteInterval === 0) {
+        this.eventEmitter.emit(SandboxEvents.DESTROYED, new SandboxDestroyedEvent(sandbox))
+      } else {
+        this.eventEmitter.emit(SandboxEvents.STOPPED, new SandboxStoppedEvent(sandbox))
+      }
+    } finally {
+      await this.redisLockProvider.unlock(lockKey)
     }
   }
 

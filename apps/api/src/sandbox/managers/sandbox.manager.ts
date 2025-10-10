@@ -39,8 +39,7 @@ import { TrackJobExecution } from '../../common/decorators/track-job-execution.d
 import { TrackableJobExecutions } from '../../common/interfaces/trackable-job-executions'
 import { setTimeout } from 'timers/promises'
 import { LogExecution } from '../../common/decorators/log-execution.decorator'
-
-export const SYNC_INSTANCE_STATE_LOCK_KEY = 'sync-instance-state-'
+import { getSandboxStateChangeLockKey } from '../utils/lock-keys.util'
 
 @Injectable()
 export class SandboxManager implements TrackableJobExecutions, OnApplicationShutdown {
@@ -107,7 +106,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
 
           await Promise.all(
             sandboxes.map(async (sandbox) => {
-              const lockKey = SYNC_INSTANCE_STATE_LOCK_KEY + sandbox.id
+              const lockKey = getSandboxStateChangeLockKey(sandbox.id)
               const acquired = await this.redisLockProvider.lock(lockKey, 30)
               if (!acquired) {
                 return
@@ -164,7 +163,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
 
       await Promise.all(
         sandboxes.map(async (sandbox) => {
-          const lockKey = SYNC_INSTANCE_STATE_LOCK_KEY + sandbox.id
+          const lockKey = getSandboxStateChangeLockKey(sandbox.id)
           const acquired = await this.redisLockProvider.lock(lockKey, 30)
           if (!acquired) {
             return
@@ -222,7 +221,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
 
           await Promise.all(
             sandboxes.map(async (sandbox) => {
-              const lockKey = SYNC_INSTANCE_STATE_LOCK_KEY + sandbox.id
+              const lockKey = getSandboxStateChangeLockKey(sandbox.id)
               const acquired = await this.redisLockProvider.lock(lockKey, 30)
               if (!acquired) {
                 return
@@ -352,7 +351,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
     }
 
     //  prevent syncState cron from running multiple instances of the same sandbox
-    const lockKey = SYNC_INSTANCE_STATE_LOCK_KEY + sandboxId
+    const lockKey = getSandboxStateChangeLockKey(sandboxId)
     const acquired = await this.redisLockProvider.lock(lockKey, 360)
     if (!acquired) {
       return
