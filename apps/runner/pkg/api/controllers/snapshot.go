@@ -22,6 +22,55 @@ import (
 	common_errors "github.com/daytonaio/common-go/pkg/errors"
 )
 
+// TagImage godoc
+//
+//	@Tags			snapshots
+//	@Summary		Tag an image
+//	@Description	Tag an existing local image with a new target reference
+//	@Param			request	body		dto.TagImageRequestDTO	true	"Tag image request"
+//	@Success		200		{string}	string					"Image successfully tagged"
+//	@Failure		400		{object}	common.ErrorResponse
+//	@Failure		401		{object}	common.ErrorResponse
+//	@Failure		404		{object}	common.ErrorResponse
+//	@Failure		409		{object}	common.ErrorResponse
+//	@Failure		500		{object}	common.ErrorResponse
+//
+//	@Router			/snapshots/tag [post]
+//
+//	@id				TagImage
+func TagImage(ctx *gin.Context) {
+	var request dto.TagImageRequestDTO
+	if err := ctx.ShouldBindJSON(&request); err != nil {
+		ctx.Error(common.NewInvalidBodyRequestError(err))
+		return
+	}
+
+	runner := runner.GetInstance(nil)
+
+	exists, err := runner.Docker.ImageExists(ctx.Request.Context(), request.SourceImage, false)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+
+	if !exists {
+		ctx.Error(common.NewNotFoundError(fmt.Errorf("source image not found: %s", request.SourceImage)))
+		return
+	}
+
+	if !strings.Contains(request.TargetImage, ":") || strings.HasSuffix(request.TargetImage, ":") {
+		ctx.Error(common.NewBadRequestError(errors.New("targetImage must include a valid tag")))
+		return
+	}
+
+	if err := runner.Docker.TagImage(ctx.Request.Context(), request.SourceImage, request.TargetImage); err != nil {
+		ctx.Error(err)
+		return
+	}
+
+	ctx.JSON(http.StatusOK, "Image tagged successfully")
+}
+
 // PullSnapshot godoc
 //
 //	@Tags			snapshots

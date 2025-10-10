@@ -1214,6 +1214,65 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/snapshots/tag": {
+            "post": {
+                "description": "Tag an existing local image with a new target reference",
+                "tags": [
+                    "snapshots"
+                ],
+                "summary": "Tag an image",
+                "operationId": "TagImage",
+                "parameters": [
+                    {
+                        "description": "Tag image request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/TagImageRequestDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Image successfully tagged",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -1528,6 +1587,23 @@ const docTemplate = `{
                 "sizeGB": {
                     "type": "number",
                     "example": 0.13
+                }
+            }
+        },
+        "TagImageRequestDTO": {
+            "type": "object",
+            "required": [
+                "sourceImage",
+                "targetImage"
+            ],
+            "properties": {
+                "sourceImage": {
+                    "description": "Source image name:tag or digest",
+                    "type": "string"
+                },
+                "targetImage": {
+                    "description": "Target image name:tag",
+                    "type": "string"
                 }
             }
         },

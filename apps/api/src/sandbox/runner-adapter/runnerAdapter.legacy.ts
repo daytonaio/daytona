@@ -285,6 +285,10 @@ export class RunnerAdapterLegacy implements RunnerAdapter {
     await this.snapshotApiClient.pullSnapshot(request)
   }
 
+  async tagImage(sourceImage: string, targetImage: string): Promise<void> {
+    await this.snapshotApiClient.tagImage({ sourceImage, targetImage })
+  }
+
   async snapshotExists(snapshotName: string): Promise<boolean> {
     const response = await this.snapshotApiClient.snapshotExists(snapshotName)
     return response.data.exists

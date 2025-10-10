@@ -559,7 +559,9 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
 
     const runnerAdapter = await this.runnerAdapterFactory.create(runner)
 
-    const initialImageRefOnRunner = snapshot.buildInfo ? snapshot.buildInfo.snapshotRef : snapshot.imageName
+    const initialImageRefOnRunner = snapshot.buildInfo
+      ? snapshot.buildInfo.snapshotRef
+      : this.getInitialRunnerSnapshotTag(snapshot)
 
     const snapshotInfoResponse = await runnerAdapter.getSnapshotInfo(initialImageRefOnRunner)
 
@@ -569,21 +571,30 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     }
 
     try {
-      await runnerAdapter.removeSnapshot(snapshot.imageName)
+      await runnerAdapter.removeSnapshot(initialImageRefOnRunner)
     } catch (error) {
       this.logger.error(`Failed to remove snapshot ${snapshot.imageName}: ${fromAxiosError(error)}`)
     }
 
+    let nextState = SnapshotState.ACTIVE
+    let snapshotErrorMessage: string | undefined = undefined
+
     if (!snapshot.skipValidation) {
       snapshot.state = SnapshotState.VALIDATING
       await this.snapshotRepository.save(snapshot)
-      await this.validateSandboxCreationOnRunner(snapshot, runner)
-    } else {
-      snapshot.state = SnapshotState.ACTIVE
-      await this.snapshotRepository.save(snapshot)
+
+      const { validationSuccess, errorMessage } = await this.validateSandboxCreationOnRunner(snapshot, runner)
+      if (!validationSuccess) {
+        nextState = SnapshotState.ERROR
+        snapshotErrorMessage = errorMessage
+      }
     }
 
-    await this.runnerService.createSnapshotRunnerEntry(runner.id, snapshot.ref, SnapshotRunnerState.READY)
+    if (nextState === SnapshotState.ACTIVE) {
+      await this.runnerService.createSnapshotRunnerEntry(runner.id, snapshot.ref, SnapshotRunnerState.READY)
+    }
+
+    await this.updateSnapshotState(snapshot.id, nextState, snapshotErrorMessage)
 
     // Best effort removal of old snapshot from transient registry
     const registry = await this.dockerRegistryService.findOneBySnapshotImageName(
@@ -605,7 +616,10 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     return DONT_SYNC_AGAIN
   }
 
-  async validateSandboxCreationOnRunner(snapshot: Snapshot, runner: Runner) {
+  async validateSandboxCreationOnRunner(
+    snapshot: Snapshot,
+    runner: Runner,
+  ): Promise<{ validationSuccess: boolean; errorMessage: string }> {
     const runnerAdapter = await this.runnerAdapterFactory.create(runner)
 
     const sandbox = new Sandbox()
@@ -647,21 +661,15 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
       validationSuccess = false
     }
 
-    try {
-      if (validationSuccess) {
-        await this.updateSnapshotState(snapshot.id, SnapshotState.ACTIVE)
-      } else {
-        await this.updateSnapshotState(snapshot.id, SnapshotState.ERROR, errorMessage)
-      }
-    } finally {
-      if (creationSuccess) {
-        try {
-          await runnerAdapter.destroySandbox(sandbox.id)
-        } catch (error) {
-          this.logger.error(`Failed to destroy sandbox ${sandbox.id}: ${fromAxiosError(error)}`)
-        }
+    if (creationSuccess) {
+      try {
+        await runnerAdapter.destroySandbox(sandbox.id)
+      } catch (error) {
+        this.logger.error(`Failed to destroy sandbox ${sandbox.id}: ${fromAxiosError(error)}`)
       }
     }
+
+    return { validationSuccess, errorMessage }
   }
 
   async processPullOnInitialRunner(snapshot: Snapshot, runner: Runner) {
@@ -674,6 +682,18 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     // Using image name for pull instead of the ref
     try {
       await this.pullSnapshotRunnerWithRetries(runner, snapshot.imageName, sourceRegistry, destinationRegistry)
+
+      // Tag image to org and creation timestamp for future use
+      const runnerAdapter = await this.runnerAdapterFactory.create(runner)
+
+      await runnerAdapter.tagImage(snapshot.imageName, this.getInitialRunnerSnapshotTag(snapshot))
+
+      // Best-effort cleanup of the original tag
+      try {
+        await runnerAdapter.removeSnapshot(snapshot.imageName)
+      } catch (err) {
+        this.logger.warn(`Failed to remove original tag ${snapshot.imageName}: ${fromAxiosError(err)}`)
+      }
     } catch (err) {
       if (err.code !== 'ECONNRESET') {
         await this.updateSnapshotState(snapshot.id, SnapshotState.ERROR, err.message)
@@ -948,6 +968,10 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
         snapshot.entrypoint = ['sleep', 'infinity']
       }
     }
+  }
+
+  private getInitialRunnerSnapshotTag(snapshot: Snapshot) {
+    return `${snapshot.imageName}-${snapshot.organizationId}-${snapshot.createdAt.getTime()}`
   }
 
   @OnEvent(SnapshotEvents.CREATED)
