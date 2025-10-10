@@ -693,7 +693,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
       try {
         const anotherSnapshot = await this.snapshotRepository.findOne({
           where: {
-            ref: snapshot.imageName,
+            name: snapshot.imageName,
             state: Not(In([SnapshotState.ACTIVE, SnapshotState.INACTIVE])),
           },
         })
