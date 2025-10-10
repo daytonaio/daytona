@@ -93,22 +93,8 @@ export const convertTableSortingToApiSorting = (sorting: SortingState): SandboxS
   let field: ListSandboxesPaginatedSortEnum
 
   switch (sort.id) {
-    case 'name':
-      field = ListSandboxesPaginatedSortEnum.NAME
-      break
-    case 'state':
-      field = ListSandboxesPaginatedSortEnum.STATE
-      break
-    case 'snapshot':
-      field = ListSandboxesPaginatedSortEnum.SNAPSHOT
-      break
-    case 'region':
-    case 'target':
-      field = ListSandboxesPaginatedSortEnum.REGION
-      break
     case 'lastEvent':
-    case 'updatedAt':
-      field = ListSandboxesPaginatedSortEnum.UPDATED_AT
+      field = ListSandboxesPaginatedSortEnum.LAST_ACTIVITY_AT
       break
     case 'createdAt':
     default:
@@ -214,19 +200,7 @@ export const convertApiSortingToTableSorting = (sorting: SandboxSorting): Sortin
 
   let id: string
   switch (sorting.field) {
-    case ListSandboxesPaginatedSortEnum.NAME:
-      id = 'name'
-      break
-    case ListSandboxesPaginatedSortEnum.STATE:
-      id = 'state'
-      break
-    case ListSandboxesPaginatedSortEnum.SNAPSHOT:
-      id = 'snapshot'
-      break
-    case ListSandboxesPaginatedSortEnum.REGION:
-      id = 'region'
-      break
-    case ListSandboxesPaginatedSortEnum.UPDATED_AT:
+    case ListSandboxesPaginatedSortEnum.LAST_ACTIVITY_AT:
       id = 'lastEvent'
       break
     case ListSandboxesPaginatedSortEnum.CREATED_AT:

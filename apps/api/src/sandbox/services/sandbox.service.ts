@@ -753,9 +753,14 @@ export class SandboxService {
       order: {
         [sortField]: {
           direction: sortDirection,
-          nulls: 'LAST',
+          ...(sortField === SandboxSortField.LAST_ACTIVITY_AT && { nulls: 'LAST' }),
         },
-        ...(sortField !== SandboxSortField.CREATED_AT && { createdAt: 'DESC' }),
+        // use as tiebreaker
+        ...(sortField === SandboxSortField.LAST_ACTIVITY_AT && {
+          createdAt: {
+            direction: 'DESC',
+          },
+        }),
       },
       skip: (pageNum - 1) * limitNum,
       take: limitNum,

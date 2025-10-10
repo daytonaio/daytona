@@ -6,7 +6,7 @@
 import React from 'react'
 import { Sandbox, SandboxDesiredState } from '@daytonaio/api-client'
 import { ColumnDef } from '@tanstack/react-table'
-import { ArrowUp, ArrowDown } from 'lucide-react'
+import { ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react'
 import { Checkbox } from '../ui/checkbox'
 import { getRelativeTimeString } from '@/lib/utils'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip'
@@ -33,7 +33,7 @@ const SortableHeader: React.FC<SortableHeaderProps> = ({ column, label, dataStat
       ) : column.getIsSorted() === 'desc' ? (
         <ArrowDown className="ml-2 h-4 w-4" />
       ) : (
-        <div className="ml-2 w-4 h-4" />
+        <ArrowUpDown className="ml-2 h-4 w-4" />
       )}
     </div>
   )
@@ -111,8 +111,9 @@ export function getColumns({
     },
     {
       id: 'name',
-      header: ({ column }) => {
-        return <SortableHeader column={column} label="Name" />
+      enableSorting: false,
+      header: () => {
+        return <span>Name</span>
       },
       accessorKey: 'name',
       cell: ({ row }) => {
@@ -126,9 +127,10 @@ export function getColumns({
     },
     {
       id: 'state',
+      enableSorting: false,
       size: 140,
-      header: ({ column }) => {
-        return <SortableHeader column={column} label="State" />
+      header: () => {
+        return <span>State</span>
       },
       cell: ({ row }) => (
         <div className=" w-full truncate">
@@ -139,8 +141,9 @@ export function getColumns({
     },
     {
       id: 'snapshot',
-      header: ({ column }) => {
-        return <SortableHeader column={column} label="Snapshot" />
+      enableSorting: false,
+      header: () => {
+        return <span>Snapshot</span>
       },
       cell: ({ row }) => {
         return (
@@ -158,8 +161,9 @@ export function getColumns({
     {
       id: 'region',
       size: 80,
-      header: ({ column }) => {
-        return <SortableHeader column={column} label="Region" dataState="sortable" />
+      enableSorting: false,
+      header: () => {
+        return <span>Region</span>
       },
       cell: ({ row }) => {
         return <span>{row.original.target}</span>
@@ -170,6 +174,7 @@ export function getColumns({
       id: 'resources',
       size: 10,
       minSize: 200,
+      enableSorting: false,
       header: () => {
         return <span>Resources</span>
       },
@@ -281,5 +286,5 @@ function getDisplayName(sandbox: Sandbox): string {
 }
 
 function getLastEvent(sandbox: Sandbox): { date: Date; relativeTimeString: string } {
-  return getRelativeTimeString(sandbox.updatedAt)
+  return getRelativeTimeString(sandbox.lastActivityAt)
 }

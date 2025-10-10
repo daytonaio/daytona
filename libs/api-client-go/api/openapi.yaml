@@ -1460,11 +1460,7 @@ paths:
           schema:
             default: createdAt
             enum:
-              - name
-              - state
-              - snapshot
-              - region
-              - updatedAt
+              - lastActivityAt
               - createdAt
             type: string
           style: form

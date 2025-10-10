@@ -2977,11 +2977,7 @@ export type ListSandboxesPaginatedStatesEnum =
  * @export
  */
 export const ListSandboxesPaginatedSortEnum = {
-  NAME: 'name',
-  STATE: 'state',
-  SNAPSHOT: 'snapshot',
-  REGION: 'region',
-  UPDATED_AT: 'updatedAt',
+  LAST_ACTIVITY_AT: 'lastActivityAt',
   CREATED_AT: 'createdAt',
 } as const
 export type ListSandboxesPaginatedSortEnum =
