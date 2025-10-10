@@ -689,10 +689,19 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
       await runnerAdapter.tagImage(snapshot.imageName, this.getInitialRunnerSnapshotTag(snapshot))
 
       // Best-effort cleanup of the original tag
+      // Only if there is no other snapshot in a processing state that uses the same image
       try {
-        await runnerAdapter.removeSnapshot(snapshot.imageName)
+        const anotherSnapshot = await this.snapshotRepository.findOne({
+          where: {
+            ref: snapshot.imageName,
+            state: Not(In([SnapshotState.ACTIVE, SnapshotState.INACTIVE])),
+          },
+        })
+        if (!anotherSnapshot) {
+          await runnerAdapter.removeSnapshot(snapshot.imageName)
+        }
       } catch (err) {
-        this.logger.warn(`Failed to remove original tag ${snapshot.imageName}: ${fromAxiosError(err)}`)
+        this.logger.error(`Failed to cleanup original tag ${snapshot.imageName}: ${fromAxiosError(err)}`)
       }
     } catch (err) {
       if (err.code !== 'ECONNRESET') {
