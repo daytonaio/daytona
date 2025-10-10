@@ -9,9 +9,12 @@ export class Migration1759768058397 implements MigrationInterface {
   name = 'Migration1759768058397'
 
   public async up(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(`ALTER TABLE "sandbox" ADD "name" character varying`)
+    await queryRunner.query(
+      `ALTER TABLE "sandbox" ADD "name" character varying DEFAULT 'sandbox-' || gen_random_uuid()`,
+    )
     await queryRunner.query(`UPDATE "sandbox" SET "name" = "id" WHERE "name" IS NULL`)
     await queryRunner.query(`ALTER TABLE "sandbox" ALTER COLUMN "name" SET NOT NULL`)
+
     await queryRunner.query(
       `ALTER TABLE "sandbox" ADD CONSTRAINT "sandbox_organizationId_name_unique" UNIQUE ("organizationId", "name")`,
     )
