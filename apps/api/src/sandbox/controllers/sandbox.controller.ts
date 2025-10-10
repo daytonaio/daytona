@@ -553,6 +553,16 @@ export class SandboxController {
   })
   @UseGuards(RunnerAuthGuard)
   @UseGuards(SandboxAccessGuard)
+  @Audit({
+    action: AuditAction.UPDATE,
+    targetType: AuditTarget.SANDBOX,
+    targetIdFromRequest: (req) => req.params.sandboxId,
+    requestMetadata: {
+      body: (req: TypedRequest<UpdateSandboxStateDto>) => ({
+        state: req.body?.state,
+      }),
+    },
+  })
   async updateSandboxState(
     @Param('sandboxId') sandboxId: string,
     @Body() updateStateDto: UpdateSandboxStateDto,
@@ -979,7 +989,7 @@ export class SandboxController {
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
   @UseGuards(SandboxAccessGuard)
   @Audit({
-    action: AuditAction.CREATE,
+    action: AuditAction.CREATE_SSH_ACCESS,
     targetType: AuditTarget.SANDBOX,
     targetIdFromRequest: (req) => req.params.sandboxIdOrName,
     targetIdFromResult: (result: SshAccessDto) => result?.sandboxId,
@@ -1027,7 +1037,7 @@ export class SandboxController {
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
   @UseGuards(SandboxAccessGuard)
   @Audit({
-    action: AuditAction.DELETE,
+    action: AuditAction.REVOKE_SSH_ACCESS,
     targetType: AuditTarget.SANDBOX,
     targetIdFromRequest: (req) => req.params.sandboxIdOrName,
     targetIdFromResult: (result: SandboxDto) => result?.id,
