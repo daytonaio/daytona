@@ -156,6 +156,7 @@ export class SandboxController {
     const {
       page,
       limit,
+      id,
       name,
       labels,
       includeErroredDeleted: includeErroredDestroyed,
@@ -179,6 +180,7 @@ export class SandboxController {
       page,
       limit,
       {
+        id,
         name,
         labels: labels ? JSON.parse(labels) : {},
         includeErroredDestroyed,

@@ -12,6 +12,7 @@ import { PageNumber } from '../../common/decorators/page-number.decorator'
 import { PageLimit } from '../../common/decorators/page-limit.decorator'
 
 export enum SandboxSortField {
+  ID = 'id',
   NAME = 'name',
   STATE = 'state',
   SNAPSHOT = 'snapshot',
@@ -37,6 +38,17 @@ export class ListSandboxesQueryDto {
 
   @PageLimit(100)
   limit = 100
+
+  @ApiProperty({
+    name: 'id',
+    description: 'Filter by partial ID match',
+    required: false,
+    type: String,
+    example: 'abc123',
+  })
+  @IsOptional()
+  @IsString()
+  id?: string
 
   @ApiProperty({
     name: 'name',
