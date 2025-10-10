@@ -33,7 +33,7 @@ import { PaginatedList } from '../../common/interfaces/paginated-list.interface'
 import { OrganizationUsageService } from '../../organization/services/organization-usage.service'
 import { RedisLockProvider } from '../common/redis-lock.provider'
 import { SnapshotSortDirection, SnapshotSortField } from '../dto/list-snapshots-query.dto'
-import { DockerRegistryService } from '../../docker-registry/services/docker-registry.service'
+import { DockerRegistryService, ImageDetails } from '../../docker-registry/services/docker-registry.service'
 
 const IMAGE_NAME_REGEX = /^[a-zA-Z0-9_.\-:]+(\/[a-zA-Z0-9_.\-:]+)*(@sha256:[a-f0-9]{64})?$/
 @Injectable()
@@ -107,29 +107,6 @@ export class SnapshotService {
         }
       }
 
-      try {
-        const imageDetails = await this.dockerRegistryService.getImageDetails(
-          createSnapshotDto.imageName,
-          organization.id,
-        )
-        if (!entrypoint || entrypoint.length === 0) {
-          if (imageDetails.entrypoint) {
-            entrypoint = imageDetails.entrypoint
-          } else if (imageDetails.cmd) {
-            entrypoint = imageDetails.cmd
-          } else {
-            entrypoint = ['sleep', 'infinity']
-          }
-        }
-        if (imageDetails.sizeGB > organization.maxSnapshotSize) {
-          throw new ForbiddenException(
-            `Image size ${imageDetails.sizeGB} exceeds the maximum allowed snapshot size (${organization.maxSnapshotSize})`,
-          )
-        }
-      } catch (error) {
-        this.logger.warn(`Could not get image details for ${createSnapshotDto.imageName}: ${error}`)
-      }
-
       this.organizationService.assertOrganizationIsNotSuspended(organization)
 
       const snapshotCount = await this.snapshotRepository.count({
@@ -138,6 +115,28 @@ export class SnapshotService {
 
       if (snapshotCount >= organization.snapshotQuota) {
         throw new ForbiddenException('Reached the maximum number of snapshots in the organization')
+      }
+
+      let imageDetails: ImageDetails | undefined = undefined
+
+      try {
+        imageDetails = await this.dockerRegistryService.getImageDetails(createSnapshotDto.imageName, organization.id)
+      } catch (error) {
+        this.logger.warn(`Could not get image details for ${createSnapshotDto.imageName}: ${error}`)
+      }
+
+      if ((!entrypoint || entrypoint.length === 0) && imageDetails) {
+        if (imageDetails.entrypoint) {
+          entrypoint = imageDetails.entrypoint
+        } else {
+          entrypoint = ['sleep', 'infinity']
+        }
+      }
+
+      if (imageDetails?.sizeGB > organization.maxSnapshotSize) {
+        throw new ForbiddenException(
+          `Image size ${imageDetails.sizeGB} exceeds the maximum allowed snapshot size (${organization.maxSnapshotSize})`,
+        )
       }
 
       const newSnapshotCount = 1
