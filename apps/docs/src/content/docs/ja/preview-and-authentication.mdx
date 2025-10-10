@@ -2,45 +2,67 @@
 title: プレビューと認証
 ---
 
-import { Tabs, TabItem } from '@astrojs/starlight/components';
+import { Tabs, TabItem } from '@astrojs/starlight/components'
 
-ポート範囲 `3000-9999` でHTTPトラフィックを待ち受けるプロセスは、プレビューリンクで公開して確認できます。
+Daytona SDK は、サンドボックス向けのプレビューリンクを生成するメソッドを提供します。プレビューリンクのスキーマは、ポートとサンドボックス ID で構成されます（例：
+`https://3000-sandboxid.proxy.daytona.works`）。
 
-プレビューリンクの形式はポート番号とサンドボックス（Sandbox）IDの組み合わせです。例:
-`https://3000-sandbox-123456.proxy.daytona.work`
+ポート 3000～9999 で HTTP トラフィックを待ち受けているプロセスは、プレビューできます。
 
-サンドボックスの `public` プロパティが `true` の場合、これらのリンクは一般公開されます。そうでない場合、プレビューリンクにアクセスできるのは当該サンドボックスの組織（Organization）ユーザーのみです。
+## プレビューリンクの取得 \{#fetching-a-preview-link\}
 
-プログラムからアクセスする場合（例: `curl`）、プレビュートークン（x-daytona-preview-token）をヘッダーに指定してプレビューURLへアクセスします:
+特定のポートに対するプレビューリンクと認証トークンを取得するには、次の SDK メソッドを使用します:
+
+<Tabs>
+  <TabItem label="Python" icon="seti:python">
+    ```python
+
+    preview_info = sandbox.get_preview_link(3000)
+
+    print(f"Preview link url: {preview_info.url}")
+    print(f"Preview link token: {preview_info.token}")
+
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+
+    const previewInfo = await sandbox.getPreviewUrl(3000);
+
+    console.log(`Preview link url: ${previewInfo.url}`);
+    console.log(`Preview link token: ${previewInfo.token}`);
+
+    ```
+  </TabItem>
+</Tabs>
+
+:::tip
+Daytona の URL を使用せず独自ドメインでプレビューを提供したい場合は、[Custom Domain/Authentication](/docs/ja/custom-domain-authentication) セクションを参照してください。
+:::
+
+参照: [get&#95;preview&#95;link（Python SDK）](/docs/python-sdk/sync/sandbox/#sandboxget_preview_link)、[getPreviewLink（TypeScript SDK）](/docs/typescript-sdk/sandbox/#getpreviewlink)
+
+## 認証 \{#authentication\}
+
+サンドボックスの `public` プロパティが `true` の場合、これらのリンクは公開されます。そうでない場合、プレビューリンクはサンドボックスの組織のユーザーのみが利用できます。
+
+プログラムからアクセスする場合は、認可トークンを使用してプレビューURLにアクセスしてください。
 
 ```bash
 curl -H "x-daytona-preview-token: vg5c0ylmcimr8b_v1ne0u6mdnvit6gc0" \
 https://3000-sandbox-123456.proxy.daytona.work
 ```
 
-特定のポートに対応するプレビューリンクとトークンを取得するには、SDKのメソッドを使用します:
+## 警告ページ \{#warning-page\}
 
-<Tabs>
-<TabItem label="Python" icon="seti:python">
-```python
+ブラウザでプレビューリンクを初めて開くと、警告ページが表示されます。
+この警告は、プレビューURLにアクセスする際の潜在的なリスクをユーザーに知らせるためのセキュリティ対策です。
 
-preview_info = sandbox.get_preview_link(3000)
+警告ページは、ブラウザでプレビューリンクを読み込む場合にのみ表示されます。
 
-print(f"Preview link url: {preview_info.url}")
-print(f"Preview link token: {preview_info.token}")
+この警告を回避するには、次のいずれかを行ってください:
 
-```
-
-</TabItem>
-<TabItem label="TypeScript" icon="seti:typescript">
-```typescript
-
-const previewInfo = await sandbox.getPreviewUrl(3000);
-
-console.log(`Preview link url: ${previewInfo.url}`);
-console.log(`Preview link token: ${previewInfo.token}`);
-
-```
-
-</TabItem>
-</Tabs>
+* `X-Daytona-Skip-Preview-Warning: true` ヘッダーを送信する
+* [Tier 3](/docs/ja/limits) にアップグレードする
+* 独自の [カスタムプレビュープロキシ](/docs/ja/custom-domain-authentication) をデプロイする
