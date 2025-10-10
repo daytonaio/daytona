@@ -75,7 +75,7 @@ func (s *SessionController) GetSessionCommandLogs(c *gin.Context) {
 					if isCombinedOutput && len(buffer) > 0 {
 						remainingData := flushRemainingBuffer(&buffer)
 						if len(remainingData) > 0 {
-							err := conn.WriteMessage(websocket.TextMessage, remainingData)
+							err := conn.WriteMessage(websocket.BinaryMessage, remainingData)
 							if err != nil {
 								log.Error(err)
 							}
@@ -92,14 +92,14 @@ func (s *SessionController) GetSessionCommandLogs(c *gin.Context) {
 						// Process chunks with buffering to handle prefixes split across chunks
 						processedData := processLogChunkWithPrefixFiltering(msg, &buffer)
 						if len(processedData) > 0 {
-							err := conn.WriteMessage(websocket.TextMessage, processedData)
+							err := conn.WriteMessage(websocket.BinaryMessage, processedData)
 							if err != nil {
 								errors <- err
 								return
 							}
 						}
 					} else {
-						err := conn.WriteMessage(websocket.TextMessage, msg)
+						err := conn.WriteMessage(websocket.BinaryMessage, msg)
 						if err != nil {
 							errors <- err
 							return
@@ -110,7 +110,7 @@ func (s *SessionController) GetSessionCommandLogs(c *gin.Context) {
 					if isCombinedOutput && len(buffer) > 0 {
 						remainingData := flushRemainingBuffer(&buffer)
 						if len(remainingData) > 0 {
-							writeErr := conn.WriteMessage(websocket.TextMessage, remainingData)
+							writeErr := conn.WriteMessage(websocket.BinaryMessage, remainingData)
 							if writeErr != nil {
 								log.Error(writeErr)
 							}
