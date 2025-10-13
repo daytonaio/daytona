@@ -33,7 +33,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        working-directory: [apps/daemon, apps/runner, apps/cli, apps/proxy]
+        working-directory: [apps/daemon, apps/runner, apps/cli, apps/proxy, apps/otel-proxy]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5

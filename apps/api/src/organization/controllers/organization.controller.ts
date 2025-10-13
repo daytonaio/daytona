@@ -14,6 +14,7 @@ import {
   Param,
   Patch,
   Post,
+  Put,
   UseGuards,
 } from '@nestjs/common'
 import { AuthGuard } from '@nestjs/passport'
@@ -48,6 +49,10 @@ import { AuthenticatedRateLimitGuard } from '../../common/guards/authenticated-r
 import { UpdateOrganizationRegionQuotaDto } from '../dto/update-organization-region-quota.dto'
 import { UpdateOrganizationDefaultRegionDto } from '../dto/update-organization-default-region.dto'
 import { RegionQuotaDto } from '../dto/region-quota.dto'
+import { RequireFlagsEnabled } from '@openfeature/nestjs-sdk'
+import { OrGuard } from '../../auth/or.guard'
+import { OtelProxyGuard } from '../../auth/otel-proxy.guard'
+import { OtelConfigDto } from '../dto/otel-config.dto'
 
 @ApiTags('organizations')
 @Controller('organizations')
@@ -557,6 +562,32 @@ export class OrganizationController {
     return regionQuota
   }
 
+  @Get('/otel-config/by-sandbox-auth-token/:authToken')
+  @ApiOperation({
+    summary: 'Get organization OTEL config by sandbox auth token',
+    operationId: 'getOrganizationOtelConfigBySandboxAuthToken',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'OTEL Config',
+    type: OtelConfigDto,
+  })
+  @ApiParam({
+    name: 'authToken',
+    description: 'Sandbox Auth Token',
+    type: 'string',
+  })
+  @RequiredApiRole([SystemRole.ADMIN, 'otel-proxy'])
+  @UseGuards(CombinedAuthGuard, OrGuard([SystemActionGuard, OtelProxyGuard]))
+  async getOtelConfigBySandboxAuthToken(@Param('authToken') authToken: string): Promise<OtelConfigDto> {
+    const otelConfigDto = await this.organizationService.getOtelConfigBySandboxAuthToken(authToken)
+    if (!otelConfigDto) {
+      throw new NotFoundException(`Organization OTEL config with sandbox auth token ${authToken} not found`)
+    }
+
+    return otelConfigDto
+  }
+
   @Post('/:organizationId/sandbox-default-limited-network-egress')
   @ApiOperation({
     summary: 'Update sandbox default limited network egress',
@@ -591,5 +622,40 @@ export class OrganizationController {
       organizationId,
       body.sandboxDefaultLimitedNetworkEgress,
     )
+  }
+
+  @Put('/:organizationId/experimental-config')
+  @ApiOperation({
+    summary: 'Update experimental configuration',
+    operationId: 'updateExperimentalConfig',
+  })
+  @ApiParam({
+    name: 'organizationId',
+    description: 'Organization ID',
+    type: 'string',
+  })
+  @ApiBody({
+    description: 'Experimental configuration as a JSON object. Set to null to clear the configuration.',
+    required: false,
+    schema: {
+      additionalProperties: true,
+      example: {
+        otel: {
+          endpoint: 'http://otel-collector:4317',
+          headers: {
+            'api-key': 'XXX',
+          },
+        },
+      },
+    },
+  })
+  @RequiredOrganizationMemberRole(OrganizationMemberRole.OWNER)
+  @UseGuards(AuthGuard('jwt'), OrganizationActionGuard)
+  @RequireFlagsEnabled({ flags: [{ flagKey: 'organization_experiments', defaultValue: false }] })
+  async updateExperimentalConfig(
+    @Param('organizationId') organizationId: string,
+    @Body() experimentalConfig: Record<string, any> | null,
+  ): Promise<void> {
+    await this.organizationService.updateExperimentalConfig(organizationId, experimentalConfig)
   }
 }

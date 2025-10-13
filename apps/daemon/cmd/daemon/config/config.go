@@ -18,6 +18,8 @@ type Config struct {
 	EntrypointShutdownTimeoutSec int    `envconfig:"ENTRYPOINT_SHUTDOWN_TIMEOUT_SEC"`
 	SigtermShutdownTimeoutSec    int    `envconfig:"SIGTERM_SHUTDOWN_TIMEOUT_SEC"`
 	UserHomeAsWorkDir            bool   `envconfig:"DAYTONA_USER_HOME_AS_WORKDIR"`
+	SandboxId    string  `envconfig:"DAYTONA_SANDBOX_ID" validate:"required"`
+	OtelEndpoint string  `envconfig:"DAYTONA_OTEL_ENDPOINT" validate:"required,url"`
 }
 
 var defaultDaemonLogFilePath = "/tmp/daytona-daemon.log"

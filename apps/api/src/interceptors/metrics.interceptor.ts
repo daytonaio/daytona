@@ -269,6 +269,10 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
               request.params.invitationId,
               request.body,
             )
+            break
+          case '/api/organizations/:organizationId/experimental-config':
+            this.captureUpdateOrganizationExperimentalConfig(props, request.body)
+            break
         }
         break
       case 'PATCH':
@@ -849,6 +853,21 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
     this.capture('api_volume_deleted', props, 'api_volume_deletion_failed', {
       volume_id: volumeId,
     })
+  }
+
+  private captureUpdateOrganizationExperimentalConfig(
+    props: CommonCaptureProps,
+    experimentalConfig: Record<string, any> | null,
+  ) {
+    this.capture(
+      'api_organization_experimental_config_updated',
+      props,
+      'api_organization_experimental_config_update_failed',
+      {
+        experimental_config_empty: !experimentalConfig,
+        experimental_config_otel_set: !!experimentalConfig?.otel,
+      },
+    )
   }
 
   private captureToolboxCommand(

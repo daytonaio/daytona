@@ -31,6 +31,10 @@ import (
 	"github.com/daytonaio/daemon/pkg/toolbox/process/pty"
 	"github.com/daytonaio/daemon/pkg/toolbox/process/session"
 	"github.com/daytonaio/daemon/pkg/toolbox/proxy"
+	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
+	otellog "go.opentelemetry.io/otel/sdk/log"
+	"go.opentelemetry.io/otel/sdk/metric"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 
 	"github.com/daytonaio/daemon/pkg/toolbox/docs"
 	"github.com/gin-gonic/gin"
@@ -41,96 +45,75 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-type Server struct {
-	WorkDir     string
-	ComputerUse computeruse.IComputerUse
+type ServerConfig struct {
+	WorkDir      string
+	SandboxId    string
+	OtelEndpoint string
 }
 
-type WorkDirResponse struct {
-	Dir string `json:"dir"`
-} // @name WorkDirResponse
-
-type UserHomeDirResponse struct {
-	Dir string `json:"dir"`
-} // @name UserHomeDirResponse
-
-// GetWorkDir godoc
-//
-//	@Summary		Get working directory
-//	@Description	Get the current working directory path. This is default directory used for running commands.
-//	@Tags			info
-//	@Produce		json
-//	@Success		200	{object}	WorkDirResponse
-//	@Router			/work-dir [get]
-//
-//	@id				GetWorkDir
-func (s *Server) GetWorkDir(ctx *gin.Context) {
-	workDir := WorkDirResponse{
-		Dir: s.WorkDir,
+func NewServer(config ServerConfig) *server {
+	return &server{
+		WorkDir:      config.WorkDir,
+		SandboxId:    config.SandboxId,
+		otelEndpoint: config.OtelEndpoint,
+		telemetry:    Telemetry{},
 	}
-
-	ctx.JSON(http.StatusOK, workDir)
 }
 
-// GetUserHomeDir godoc
-//
-//	@Summary		Get user home directory
-//	@Description	Get the current user home directory path.
-//	@Tags			info
-//	@Produce		json
-//	@Success		200	{object}	UserHomeDirResponse
-//	@Router			/user-home-dir [get]
-//
-//	@id				GetUserHomeDir
-func (s *Server) GetUserHomeDir(ctx *gin.Context) {
-	userHomeDir, err := os.UserHomeDir()
-	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, err)
-		return
-	}
-	userHomeDirResponse := UserHomeDirResponse{
-		Dir: userHomeDir,
-	}
-
-	ctx.JSON(http.StatusOK, userHomeDirResponse)
+type server struct {
+	WorkDir      string
+	ComputerUse  computeruse.IComputerUse
+	SandboxId    string
+	otelEndpoint string
+	authToken    string
+	telemetry    Telemetry
 }
 
-// GetVersion godoc
-//
-//	@Summary		Get version
-//	@Description	Get the current daemon version
-//	@Tags			info
-//	@Produce		json
-//	@Success		200	{object}	map[string]string
-//	@Router			/version [get]
-//
-//	@id				GetVersion
-func (s *Server) GetVersion(ctx *gin.Context) {
-	ctx.JSON(http.StatusOK, gin.H{
-		"version": internal.Version,
-	})
+type Telemetry struct {
+	TracerProvider *sdktrace.TracerProvider
+	MeterProvider  *metric.MeterProvider
+	Logger         *otellog.LoggerProvider
 }
 
-func (s *Server) Start() error {
+var EXCLUDED_TELEMETRY_PATHS = []string{"/proxy"}
+
+func (s *server) Start() error {
 	docs.SwaggerInfo.Description = "Daytona Daemon API"
 	docs.SwaggerInfo.Title = "Daytona Daemon API"
 	docs.SwaggerInfo.BasePath = "/"
+	docs.SwaggerInfo.Version = internal.Version
 
 	// Set Gin to release mode in production
 	if os.Getenv("ENVIRONMENT") == "production" {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
+	otelServiceName := fmt.Sprintf("sandbox-%s", s.SandboxId)
+
 	r := gin.New()
 	r.Use(common_errors.Recovery())
+	noTelemetryRouter := r.Group("/")
+	r.Use(func(ctx *gin.Context) {
+		if s.telemetry.TracerProvider == nil {
+			ctx.Next()
+			return
+		}
+
+		otelgin.Middleware(otelServiceName, otelgin.WithTracerProvider(s.telemetry.TracerProvider))(ctx)
+		ctx.Next()
+	})
 	r.Use(middlewares.LoggingMiddleware())
+	noTelemetryRouter.Use(middlewares.LoggingMiddleware())
 	r.Use(middlewares.ErrorMiddleware())
+	noTelemetryRouter.Use(middlewares.ErrorMiddleware())
 	binding.Validator = new(DefaultValidator)
 
 	// Add swagger UI in development mode
 	if os.Getenv("ENVIRONMENT") != "production" {
 		r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 	}
+
+	r.POST("/init", s.Initialize(otelServiceName))
 
 	r.GET("/version", s.GetVersion)
 
@@ -149,8 +132,6 @@ func (s *Server) Start() error {
 	if err != nil {
 		return fmt.Errorf("failed to create config directory: %w", err)
 	}
-
-	log.Println("configDir", configDir)
 
 	fsController := r.Group("/files")
 	{
@@ -332,14 +313,14 @@ func (s *Server) Start() error {
 		portController.GET("/:port/in-use", portDetector.IsPortInUse)
 	}
 
-	proxyController := r.Group("/proxy")
+	proxyController := noTelemetryRouter.Group("/proxy")
 	{
 		proxyController.Any("/:port/*path", common_proxy.NewProxyRequestHandler(proxy.GetProxyTarget, nil))
 	}
 
 	go portDetector.Start(context.Background())
 
-	httpServer := &http.Server{
+	httpserver := &http.Server{
 		Addr:    fmt.Sprintf(":%d", config.TOOLBOX_API_PORT),
 		Handler: r,
 	}
@@ -347,10 +328,10 @@ func (s *Server) Start() error {
 	// Print to stdout so the runner can know that the daemon is ready
 	fmt.Println("Starting toolbox server on port", config.TOOLBOX_API_PORT)
 
-	listener, err := net.Listen("tcp", httpServer.Addr)
+	listener, err := net.Listen("tcp", httpserver.Addr)
 	if err != nil {
 		return err
 	}
 
-	return httpServer.Serve(listener)
+	return httpserver.Serve(listener)
 }

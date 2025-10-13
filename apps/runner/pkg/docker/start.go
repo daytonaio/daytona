@@ -18,7 +18,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func (d *DockerClient) Start(ctx context.Context, containerId string, metadata map[string]string) error {
+func (d *DockerClient) Start(ctx context.Context, containerId string, authToken *string, metadata map[string]string) error {
 	defer timer.Timer()()
 	d.statesCache.SetSandboxState(ctx, containerId, enums.SandboxStateStarting)
 
@@ -39,7 +39,7 @@ func (d *DockerClient) Start(ctx context.Context, containerId string, metadata m
 			return errors.New("sandbox IP not found? Is the sandbox started?")
 		}
 
-		err = d.waitForDaemonRunning(ctx, containerIP)
+		err = d.waitForDaemonRunning(ctx, containerIP, authToken)
 		if err != nil {
 			return err
 		}
@@ -81,7 +81,7 @@ func (d *DockerClient) Start(ctx context.Context, containerId string, metadata m
 	// If daemon is the sandbox entrypoint (common.DAEMON_PATH), it is started as part of the sandbox;
 	// Otherwise, the daemon is started separately above.
 	// In either case, we wait for it here.
-	err = d.waitForDaemonRunning(ctx, containerIP)
+	err = d.waitForDaemonRunning(ctx, containerIP, authToken)
 	if err != nil {
 		return err
 	}

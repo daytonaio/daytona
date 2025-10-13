@@ -9,6 +9,7 @@ api/interpreter-api.ts
 api/lsp-api.ts
 api/port-api.ts
 api/process-api.ts
+api/server-api.ts
 base.ts
 common.ts
 configuration.ts
@@ -41,6 +42,7 @@ models/git-git-delete-branch-request.ts
 models/git-repo-request.ts
 models/git-status.ts
 models/index.ts
+models/initialize-request.ts
 models/interpreter-context.ts
 models/is-port-in-use-response.ts
 models/keyboard-hotkey-request.ts
