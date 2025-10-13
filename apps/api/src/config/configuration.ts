@@ -216,6 +216,12 @@ const configuration = {
     volumeQuota: parseInt(process.env.ADMIN_VOLUME_QUOTA || '0', 10),
   },
   skipUserEmailVerification: process.env.SKIP_USER_EMAIL_VERIFICATION === 'true',
+  sandboxOtel: {
+    endpointUrl: process.env.SANDBOX_OTEL_ENDPOINT_URL,
+  },
+  otelProxy: {
+    apiKey: process.env.OTEL_PROXY_API_KEY,
+  },
 }
 
 export { configuration }

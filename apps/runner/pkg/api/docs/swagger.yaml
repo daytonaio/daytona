@@ -32,6 +32,8 @@ definitions:
     type: object
   CreateSandboxDTO:
     properties:
+      authToken:
+        type: string
       cpuQuota:
         minimum: 1
         type: integer
@@ -62,6 +64,8 @@ definitions:
       networkBlockAll:
         type: boolean
       osUser:
+        type: string
+      otelEndpoint:
         type: string
       registry:
         $ref: '#/definitions/RegistryDTO'
@@ -628,6 +632,10 @@ paths:
           name: metadata
           schema:
             type: object
+        - description: Auth token
+          in: query
+          name: token
+          type: string
       produces:
         - application/json
       responses:

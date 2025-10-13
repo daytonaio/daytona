@@ -103,6 +103,11 @@ export class OrganizationDto {
   })
   defaultRegion: string
 
+  @ApiProperty({
+    description: 'Experimental configuration',
+  })
+  experimentalConfig: Record<string, any> | null
+
   static fromOrganization(organization: Organization): OrganizationDto {
     const dto: OrganizationDto = {
       id: organization.id,
@@ -124,6 +129,7 @@ export class OrganizationDto {
       maxDiskPerSandbox: organization.maxDiskPerSandbox,
       sandboxLimitedNetworkEgress: organization.sandboxLimitedNetworkEgress,
       defaultRegion: organization.defaultRegion,
+      experimentalConfig: organization._experimentalConfig,
     }
 
     return dto

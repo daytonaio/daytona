@@ -122,6 +122,18 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
     return this.organizationRepository.findOne({ where: { id: sandbox.organizationId } })
   }
 
+  async findBySandboxAuthToken(authToken: string): Promise<Organization | null> {
+    const sandbox = await this.sandboxRepository.findOne({
+      where: { authToken },
+    })
+
+    if (!sandbox) {
+      return null
+    }
+
+    return this.organizationRepository.findOne({ where: { id: sandbox.organizationId } })
+  }
+
   async findPersonal(userId: string): Promise<Organization> {
     return this.findPersonalWithEntityManager(this.organizationRepository.manager, userId)
   }
@@ -203,6 +215,19 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
       throw new NotFoundException(`Organization with ID ${organizationId} not found`)
     }
     organization.sandboxLimitedNetworkEgress = sandboxDefaultLimitedNetworkEgress
+
+    await this.organizationRepository.save(organization)
+  }
+
+  async updateExperimentalConfig(
+    organizationId: string,
+    experimentalConfig: Record<string, any> | null,
+  ): Promise<void> {
+    const organization = await this.organizationRepository.findOne({ where: { id: organizationId } })
+    if (!organization) {
+      throw new NotFoundException(`Organization with ID ${organizationId} not found`)
+    }
+    organization._experimentalConfig = experimentalConfig
 
     await this.organizationRepository.save(organization)
   }
