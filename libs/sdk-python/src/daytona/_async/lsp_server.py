@@ -15,6 +15,7 @@ from daytona_toolbox_api_client_async import (
 from deprecated import deprecated
 
 from .._utils.errors import intercept_errors
+from .._utils.otel_decorator import with_instrumentation
 from ..common.lsp_server import LspCompletionPosition, LspLanguageId, LspLanguageIdLiteral
 
 
@@ -42,6 +43,7 @@ class AsyncLspServer:
         self._api_client: LspApi = api_client
 
     @intercept_errors(message_prefix="Failed to start LSP server: ")
+    @with_instrumentation()
     async def start(self) -> None:
         """Starts the language server.
 
@@ -63,6 +65,7 @@ class AsyncLspServer:
         )
 
     @intercept_errors(message_prefix="Failed to stop LSP server: ")
+    @with_instrumentation()
     async def stop(self) -> None:
         """Stops the language server.
 
@@ -83,6 +86,7 @@ class AsyncLspServer:
         )
 
     @intercept_errors(message_prefix="Failed to open file: ")
+    @with_instrumentation()
     async def did_open(self, path: str) -> None:
         """Notifies the language server that a file has been opened.
 
@@ -110,6 +114,7 @@ class AsyncLspServer:
         )
 
     @intercept_errors(message_prefix="Failed to close file: ")
+    @with_instrumentation()
     async def did_close(self, path: str) -> None:
         """Notify the language server that a file has been closed.
 
@@ -135,6 +140,7 @@ class AsyncLspServer:
         )
 
     @intercept_errors(message_prefix="Failed to get symbols from document: ")
+    @with_instrumentation()
     async def document_symbols(self, path: str) -> list[LspSymbol]:
         """Gets symbol information (functions, classes, variables, etc.) from a document.
 
@@ -165,6 +171,7 @@ class AsyncLspServer:
     @deprecated(
         reason="Method is deprecated. Use `sandbox_symbols` instead. This method will be removed in a future version."
     )
+    @with_instrumentation()
     async def workspace_symbols(self, query: str) -> list[LspSymbol]:
         """Searches for symbols matching the query string across all files
         in the Sandbox.
@@ -178,6 +185,7 @@ class AsyncLspServer:
         return await self.sandbox_symbols(query)
 
     @intercept_errors(message_prefix="Failed to get symbols from sandbox: ")
+    @with_instrumentation()
     async def sandbox_symbols(self, query: str) -> list[LspSymbol]:
         """Searches for symbols matching the query string across all files
         in the Sandbox.
@@ -207,6 +215,7 @@ class AsyncLspServer:
         )
 
     @intercept_errors(message_prefix="Failed to get completions: ")
+    @with_instrumentation()
     async def completions(self, path: str, position: LspCompletionPosition) -> CompletionList:
         """Gets completion suggestions at a position in a file.
 

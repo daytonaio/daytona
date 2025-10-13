@@ -300,6 +300,24 @@ const configuration = {
   warmPool: {
     candidateLimit: parseInt(process.env.WARM_POOL_CANDIDATE_LIMIT || '300', 10),
   },
+  sandboxOtel: {
+    endpointUrl: process.env.SANDBOX_OTEL_ENDPOINT_URL,
+  },
+  otelCollector: {
+    apiKey: process.env.OTEL_COLLECTOR_API_KEY,
+  },
+  clickhouse: {
+    host: process.env.CLICKHOUSE_HOST,
+    port: parseInt(process.env.CLICKHOUSE_PORT || '8123', 10),
+    database: process.env.CLICKHOUSE_DATABASE || 'otel',
+    username: process.env.CLICKHOUSE_USERNAME || 'default',
+    password: process.env.CLICKHOUSE_PASSWORD,
+    protocol: process.env.CLICKHOUSE_PROTOCOL || 'https',
+  },
+  encryption: {
+    key: process.env.ENCRYPTION_KEY,
+    salt: process.env.ENCRYPTION_SALT,
+  },
 }
 
 export { configuration }

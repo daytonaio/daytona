@@ -43,6 +43,7 @@ require 'daytona_toolbox_api_client/models/git_commit_response'
 require 'daytona_toolbox_api_client/models/git_git_delete_branch_request'
 require 'daytona_toolbox_api_client/models/git_repo_request'
 require 'daytona_toolbox_api_client/models/git_status'
+require 'daytona_toolbox_api_client/models/initialize_request'
 require 'daytona_toolbox_api_client/models/interpreter_context'
 require 'daytona_toolbox_api_client/models/is_port_in_use_response'
 require 'daytona_toolbox_api_client/models/keyboard_hotkey_request'
@@ -105,6 +106,7 @@ require 'daytona_toolbox_api_client/api/interpreter_api'
 require 'daytona_toolbox_api_client/api/lsp_api'
 require 'daytona_toolbox_api_client/api/port_api'
 require 'daytona_toolbox_api_client/api/process_api'
+require 'daytona_toolbox_api_client/api/server_api'
 
 module DaytonaToolboxApiClient
   class << self

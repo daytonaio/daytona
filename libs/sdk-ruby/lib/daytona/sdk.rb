@@ -9,6 +9,7 @@ require 'websocket-client-simple'
 
 require_relative 'sdk/version'
 require_relative 'config'
+require_relative 'otel'
 require_relative 'common/charts'
 require_relative 'common/code_interpreter'
 require_relative 'common/code_language'

@@ -17,6 +17,7 @@ from daytona_toolbox_api_client_async import (
 )
 
 from .._utils.errors import intercept_errors
+from .._utils.otel_decorator import with_instrumentation
 from ..common.git import GitCommitResponse
 
 
@@ -58,6 +59,7 @@ class AsyncGit:
         self._api_client: GitApi = api_client
 
     @intercept_errors(message_prefix="Failed to add files: ")
+    @with_instrumentation()
     async def add(self, path: str, files: list[str]) -> None:
         """Stages the specified files for the next commit, similar to
         running 'git add' on the command line.
@@ -85,6 +87,7 @@ class AsyncGit:
         )
 
     @intercept_errors(message_prefix="Failed to list branches: ")
+    @with_instrumentation()
     async def branches(self, path: str) -> ListBranchResponse:
         """Lists branches in the repository.
 
@@ -106,6 +109,7 @@ class AsyncGit:
         )
 
     @intercept_errors(message_prefix="Failed to clone repository: ")
+    @with_instrumentation()
     async def clone(
         self,
         url: str,
@@ -167,6 +171,7 @@ class AsyncGit:
         )
 
     @intercept_errors(message_prefix="Failed to commit changes: ")
+    @with_instrumentation()
     async def commit(
         self, path: str, message: str, author: str, email: str, allow_empty: bool = False
     ) -> GitCommitResponse:
@@ -206,6 +211,7 @@ class AsyncGit:
         return GitCommitResponse(sha=response.hash)
 
     @intercept_errors(message_prefix="Failed to push changes: ")
+    @with_instrumentation()
     async def push(
         self,
         path: str,
@@ -244,6 +250,7 @@ class AsyncGit:
         )
 
     @intercept_errors(message_prefix="Failed to pull changes: ")
+    @with_instrumentation()
     async def pull(
         self,
         path: str,
@@ -281,6 +288,7 @@ class AsyncGit:
         )
 
     @intercept_errors(message_prefix="Failed to get status: ")
+    @with_instrumentation()
     async def status(self, path: str) -> GitStatus:
         """Gets the current Git repository status.
 
@@ -309,6 +317,7 @@ class AsyncGit:
         )
 
     @intercept_errors(message_prefix="Failed to checkout branch: ")
+    @with_instrumentation()
     async def checkout_branch(self, path: str, branch: str) -> None:
         """Checkout branch in the repository.
 
@@ -331,6 +340,7 @@ class AsyncGit:
         )
 
     @intercept_errors(message_prefix="Failed to create branch: ")
+    @with_instrumentation()
     async def create_branch(self, path: str, name: str) -> None:
         """Create branch in the repository.
 
@@ -353,6 +363,7 @@ class AsyncGit:
         )
 
     @intercept_errors(message_prefix="Failed to delete branch: ")
+    @with_instrumentation()
     async def delete_branch(self, path: str, name: str) -> None:
         """Delete branch in the repository.
 

@@ -25,6 +25,7 @@ from daytona_toolbox_api_client_async import (
 from multipart import MultipartSegment, PushMultipartParser
 
 from .._utils.errors import intercept_errors
+from .._utils.otel_decorator import with_instrumentation
 from ..common.errors import DaytonaError
 from ..common.filesystem import FileDownloadRequest, FileDownloadResponse, FileUpload
 
@@ -52,6 +53,7 @@ class AsyncFileSystem:
         self._ensure_toolbox_url: Callable[[], Awaitable[None]] = ensure_toolbox_url
 
     @intercept_errors(message_prefix="Failed to create folder: ")
+    @with_instrumentation()
     async def create_folder(self, path: str, mode: str) -> None:
         """Creates a new directory in the Sandbox at the specified path with the given
         permissions.
@@ -77,6 +79,7 @@ class AsyncFileSystem:
         )
 
     @intercept_errors(message_prefix="Failed to delete file: ")
+    @with_instrumentation()
     async def delete_file(self, path: str, recursive: bool = False) -> None:
         """Deletes a file from the Sandbox.
 
@@ -140,6 +143,7 @@ class AsyncFileSystem:
         """
 
     @intercept_errors(message_prefix="Failed to download file: ")
+    @with_instrumentation()
     async def download_file(self, *args: str) -> bytes | None:  # pyright: ignore[reportInconsistentOverload]
         if len(args) == 1 or (len(args) == 2 and isinstance(args[1], int)):
             remote_path = args[0]
@@ -165,6 +169,7 @@ class AsyncFileSystem:
         return None
 
     @intercept_errors(message_prefix="Failed to download files: ")
+    @with_instrumentation()
     async def download_files(
         self, files: list[FileDownloadRequest], timeout: int = 30 * 60
     ) -> list[FileDownloadResponse]:
@@ -329,6 +334,7 @@ class AsyncFileSystem:
         return results
 
     @intercept_errors(message_prefix="Failed to find files: ")
+    @with_instrumentation()
     async def find_files(self, path: str, pattern: str) -> list[Match]:
         """Searches for files containing a pattern, similar to
         the grep command.
@@ -359,6 +365,7 @@ class AsyncFileSystem:
         )
 
     @intercept_errors(message_prefix="Failed to get file info: ")
+    @with_instrumentation()
     async def get_file_info(self, path: str) -> FileInfo:
         """Gets detailed information about a file or directory, including its
         size, permissions, and timestamps.
@@ -395,6 +402,7 @@ class AsyncFileSystem:
         return await self._api_client.get_file_info(path=path)
 
     @intercept_errors(message_prefix="Failed to list files: ")
+    @with_instrumentation()
     async def list_files(self, path: str) -> list[FileInfo]:
         """Lists files and directories in a given path and returns their information, similar to the ls -l command.
 
@@ -424,6 +432,7 @@ class AsyncFileSystem:
         return await self._api_client.list_files(path=path)
 
     @intercept_errors(message_prefix="Failed to move files: ")
+    @with_instrumentation()
     async def move_files(self, source: str, destination: str) -> None:
         """Moves or renames a file or directory. The parent directory of the destination must exist.
 
@@ -460,6 +469,7 @@ class AsyncFileSystem:
         )
 
     @intercept_errors(message_prefix="Failed to replace in files: ")
+    @with_instrumentation()
     async def replace_in_files(self, files: list[str], pattern: str, new_value: str) -> list[ReplaceResult]:
         """Performs search and replace operations across multiple files.
 
@@ -501,6 +511,7 @@ class AsyncFileSystem:
         return await self._api_client.replace_in_files(request=replace_request)
 
     @intercept_errors(message_prefix="Failed to search files: ")
+    @with_instrumentation()
     async def search_files(self, path: str, pattern: str) -> SearchFilesResponse:
         """Searches for files and directories whose names match the
         specified pattern. The pattern can be a simple string or a glob pattern.
@@ -533,6 +544,7 @@ class AsyncFileSystem:
         )
 
     @intercept_errors(message_prefix="Failed to set file permissions: ")
+    @with_instrumentation()
     async def set_file_permissions(
         self, path: str, mode: str | None = None, owner: str | None = None, group: str | None = None
     ) -> None:
@@ -620,12 +632,14 @@ class AsyncFileSystem:
             ```
         """
 
+    @with_instrumentation()
     async def upload_file(  # pyright: ignore[reportInconsistentOverload]
         self, src: str | bytes, dst: str, timeout: int = 30 * 60
     ) -> None:
         await self.upload_files([FileUpload(src, dst)], timeout)
 
     @intercept_errors(message_prefix="Failed to upload files: ")
+    @with_instrumentation()
     async def upload_files(self, files: list[FileUpload], timeout: int = 30 * 60) -> None:
         """Uploads multiple files to the Sandbox. If files already exist at the destination paths,
         they will be overwritten.

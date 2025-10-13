@@ -42,6 +42,7 @@ import (
 //	err = sandbox.FileSystem.UploadFile(ctx, "local.txt", "/home/user/remote.txt")
 type Sandbox struct {
 	client        *Client
+	otel          *otelState
 	ID            string                 // Unique sandbox identifier
 	Name          string                 // Human-readable sandbox name
 	State         apiclient.SandboxState // Current sandbox state
@@ -83,8 +84,13 @@ type PaginatedSandboxes struct {
 // This is typically called internally by the SDK. Users should create sandboxes
 // using [Client.Create] rather than calling this directly.
 func NewSandbox(client *Client, toolboxClient *toolbox.APIClient, id string, name string, state apiclient.SandboxState, target string, autoArchiveInterval int, autoDeleteInterval int, networkBlockAll bool, networkAllowList *string) *Sandbox {
+	var otelSt *otelState
+	if client != nil {
+		otelSt = client.Otel
+	}
 	return &Sandbox{
 		client:              client,
+		otel:                otelSt,
 		ID:                  id,
 		Name:                name,
 		State:               state,
@@ -94,11 +100,11 @@ func NewSandbox(client *Client, toolboxClient *toolbox.APIClient, id string, nam
 		NetworkBlockAll:     networkBlockAll,
 		NetworkAllowList:    networkAllowList,
 		ToolboxClient:       toolboxClient,
-		FileSystem:          NewFileSystemService(toolboxClient),
-		Git:                 NewGitService(toolboxClient),
-		Process:             NewProcessService(toolboxClient),
-		CodeInterpreter:     NewCodeInterpreterService(toolboxClient),
-		ComputerUse:         NewComputerUseService(toolboxClient),
+		FileSystem:          NewFileSystemService(toolboxClient, otelSt),
+		Git:                 NewGitService(toolboxClient, otelSt),
+		Process:             NewProcessService(toolboxClient, otelSt),
+		CodeInterpreter:     NewCodeInterpreterService(toolboxClient, otelSt),
+		ComputerUse:         NewComputerUseService(toolboxClient, otelSt),
 	}
 }
 
@@ -115,6 +121,12 @@ func NewSandbox(client *Client, toolboxClient *toolbox.APIClient, id string, nam
 //	}
 //	fmt.Printf("Current state: %s\n", sandbox.State)
 func (s *Sandbox) RefreshData(ctx context.Context) error {
+	return withInstrumentationVoid(ctx, s.otel, "Sandbox", "RefreshData", func(ctx context.Context) error {
+		return s.doRefreshData(ctx)
+	})
+}
+
+func (s *Sandbox) doRefreshData(ctx context.Context) error {
 	authCtx := s.client.getAuthContext(ctx)
 	sandboxResp, httpResp, err := s.client.apiClient.SandboxAPI.GetSandbox(authCtx, s.ID).Execute()
 	if err != nil {
@@ -151,13 +163,14 @@ func (s *Sandbox) RefreshData(ctx context.Context) error {
 //	}
 //	fmt.Printf("Home directory: %s\n", homeDir) // e.g., "/home/daytona"
 func (s *Sandbox) GetUserHomeDir(ctx context.Context) (string, error) {
+	return withInstrumentation(ctx, s.otel, "Sandbox", "GetUserHomeDir", func(ctx context.Context) (string, error) {
+		resp, httpResp, err := s.ToolboxClient.InfoAPI.GetUserHomeDir(ctx).Execute()
+		if err != nil {
+			return "", errors.ConvertToolboxError(err, httpResp)
+		}
 
-	resp, httpResp, err := s.ToolboxClient.InfoAPI.GetUserHomeDir(ctx).Execute()
-	if err != nil {
-		return "", errors.ConvertToolboxError(err, httpResp)
-	}
-
-	return resp.GetDir(), nil
+		return resp.GetDir(), nil
+	})
 }
 
 // GetWorkingDir returns the current working directory in the sandbox.
@@ -170,12 +183,14 @@ func (s *Sandbox) GetUserHomeDir(ctx context.Context) (string, error) {
 //	}
 //	fmt.Printf("Working directory: %s\n", workDir)
 func (s *Sandbox) GetWorkingDir(ctx context.Context) (string, error) {
-	resp, httpResp, err := s.ToolboxClient.InfoAPI.GetWorkDir(ctx).Execute()
-	if err != nil {
-		return "", errors.ConvertToolboxError(err, httpResp)
-	}
+	return withInstrumentation(ctx, s.otel, "Sandbox", "GetWorkingDir", func(ctx context.Context) (string, error) {
+		resp, httpResp, err := s.ToolboxClient.InfoAPI.GetWorkDir(ctx).Execute()
+		if err != nil {
+			return "", errors.ConvertToolboxError(err, httpResp)
+		}
 
-	return resp.GetDir(), nil
+		return resp.GetDir(), nil
+	})
 }
 
 // Start starts the sandbox with a default timeout of 60 seconds.
@@ -191,7 +206,9 @@ func (s *Sandbox) GetWorkingDir(ctx context.Context) (string, error) {
 //	}
 //	// Sandbox is now running
 func (s *Sandbox) Start(ctx context.Context) error {
-	return s.StartWithTimeout(ctx, 60*time.Second)
+	return withInstrumentationVoid(ctx, s.otel, "Sandbox", "Start", func(ctx context.Context) error {
+		return s.StartWithTimeout(ctx, 60*time.Second)
+	})
 }
 
 // StartWithTimeout starts the sandbox with a custom timeout.
@@ -206,6 +223,12 @@ func (s *Sandbox) Start(ctx context.Context) error {
 //	    return err
 //	}
 func (s *Sandbox) StartWithTimeout(ctx context.Context, timeout time.Duration) error {
+	return withInstrumentationVoid(ctx, s.otel, "Sandbox", "StartWithTimeout", func(ctx context.Context) error {
+		return s.doStartWithTimeout(ctx, timeout)
+	})
+}
+
+func (s *Sandbox) doStartWithTimeout(ctx context.Context, timeout time.Duration) error {
 	if timeout <= 0 {
 		return errors.NewDaytonaError("Timeout must be non-negative", 0, nil)
 	}
@@ -232,7 +255,9 @@ func (s *Sandbox) StartWithTimeout(ctx context.Context, timeout time.Duration) e
 //
 //	err := sandbox.Stop(ctx)
 func (s *Sandbox) Stop(ctx context.Context) error {
-	return s.StopWithTimeout(ctx, 60*time.Second)
+	return withInstrumentationVoid(ctx, s.otel, "Sandbox", "Stop", func(ctx context.Context) error {
+		return s.StopWithTimeout(ctx, 60*time.Second)
+	})
 }
 
 // StopWithTimeout stops the sandbox with a custom timeout.
@@ -244,6 +269,12 @@ func (s *Sandbox) Stop(ctx context.Context) error {
 //
 //	err := sandbox.StopWithTimeout(ctx, 2*time.Minute)
 func (s *Sandbox) StopWithTimeout(ctx context.Context, timeout time.Duration) error {
+	return withInstrumentationVoid(ctx, s.otel, "Sandbox", "StopWithTimeout", func(ctx context.Context) error {
+		return s.doStopWithTimeout(ctx, timeout)
+	})
+}
+
+func (s *Sandbox) doStopWithTimeout(ctx context.Context, timeout time.Duration) error {
 	if timeout <= 0 {
 		return errors.NewDaytonaError("Timeout must be non-negative", 0, nil)
 	}
@@ -270,7 +301,9 @@ func (s *Sandbox) StopWithTimeout(ctx context.Context, timeout time.Duration) er
 //
 //	err := sandbox.Delete(ctx)
 func (s *Sandbox) Delete(ctx context.Context) error {
-	return s.DeleteWithTimeout(ctx, 60*time.Second)
+	return withInstrumentationVoid(ctx, s.otel, "Sandbox", "Delete", func(ctx context.Context) error {
+		return s.DeleteWithTimeout(ctx, 60*time.Second)
+	})
 }
 
 // DeleteWithTimeout deletes the sandbox with a custom timeout.
@@ -279,6 +312,12 @@ func (s *Sandbox) Delete(ctx context.Context) error {
 //
 //	err := sandbox.DeleteWithTimeout(ctx, 2*time.Minute)
 func (s *Sandbox) DeleteWithTimeout(ctx context.Context, timeout time.Duration) error {
+	return withInstrumentationVoid(ctx, s.otel, "Sandbox", "DeleteWithTimeout", func(ctx context.Context) error {
+		return s.doDeleteWithTimeout(ctx, timeout)
+	})
+}
+
+func (s *Sandbox) doDeleteWithTimeout(ctx context.Context, timeout time.Duration) error {
 	if timeout <= 0 {
 		return errors.NewDaytonaError("Timeout must be non-negative", 0, nil)
 	}
@@ -310,6 +349,12 @@ func (s *Sandbox) DeleteWithTimeout(ctx context.Context, timeout time.Duration) 
 //	}
 //	// Sandbox is now archived and can be restored later
 func (s *Sandbox) Archive(ctx context.Context) error {
+	return withInstrumentationVoid(ctx, s.otel, "Sandbox", "Archive", func(ctx context.Context) error {
+		return s.doArchive(ctx)
+	})
+}
+
+func (s *Sandbox) doArchive(ctx context.Context) error {
 	authCtx := s.client.getAuthContext(ctx)
 	_, httpResp, err := s.client.apiClient.SandboxAPI.ArchiveSandbox(authCtx, s.ID).Execute()
 	if err != nil {
@@ -332,6 +377,12 @@ func (s *Sandbox) Archive(ctx context.Context) error {
 //	}
 //	// Sandbox is now running
 func (s *Sandbox) WaitForStart(ctx context.Context, timeout time.Duration) error {
+	return withInstrumentationVoid(ctx, s.otel, "Sandbox", "WaitForStart", func(ctx context.Context) error {
+		return s.doWaitForStart(ctx, timeout)
+	})
+}
+
+func (s *Sandbox) doWaitForStart(ctx context.Context, timeout time.Duration) error {
 	if timeout <= 0 {
 		return errors.NewDaytonaError("Timeout must be non-negative", 0, nil)
 	}
@@ -370,6 +421,12 @@ func (s *Sandbox) WaitForStart(ctx context.Context, timeout time.Duration) error
 //
 //	err := sandbox.WaitForStop(ctx, 2*time.Minute)
 func (s *Sandbox) WaitForStop(ctx context.Context, timeout time.Duration) error {
+	return withInstrumentationVoid(ctx, s.otel, "Sandbox", "WaitForStop", func(ctx context.Context) error {
+		return s.doWaitForStop(ctx, timeout)
+	})
+}
+
+func (s *Sandbox) doWaitForStop(ctx context.Context, timeout time.Duration) error {
 	if timeout <= 0 {
 		return errors.NewDaytonaError("Timeout must be non-negative", 0, nil)
 	}
@@ -410,6 +467,12 @@ func (s *Sandbox) WaitForStop(ctx context.Context, timeout time.Duration) error 
 //	    "project": "api-server",
 //	})
 func (s *Sandbox) SetLabels(ctx context.Context, labels map[string]string) error {
+	return withInstrumentationVoid(ctx, s.otel, "Sandbox", "SetLabels", func(ctx context.Context) error {
+		return s.doSetLabels(ctx, labels)
+	})
+}
+
+func (s *Sandbox) doSetLabels(ctx context.Context, labels map[string]string) error {
 	sandboxLabels := apiclient.SandboxLabels{
 		Labels: labels,
 	}
@@ -443,17 +506,19 @@ func (s *Sandbox) SetLabels(ctx context.Context, labels map[string]string) error
 //	}
 //	fmt.Printf("Access at: %s\n", url)
 func (s *Sandbox) GetPreviewLink(ctx context.Context, port int) (string, error) {
-	result, httpResp, err := s.client.apiClient.SandboxAPI.GetPortPreviewUrl(
-		s.client.getAuthContext(ctx),
-		s.ID,
-		float32(port),
-	).Execute()
+	return withInstrumentation(ctx, s.otel, "Sandbox", "GetPreviewLink", func(ctx context.Context) (string, error) {
+		result, httpResp, err := s.client.apiClient.SandboxAPI.GetPortPreviewUrl(
+			s.client.getAuthContext(ctx),
+			s.ID,
+			float32(port),
+		).Execute()
 
-	if err != nil {
-		return "", s.client.handleAPIError(err, httpResp)
-	}
+		if err != nil {
+			return "", s.client.handleAPIError(err, httpResp)
+		}
 
-	return result.GetUrl(), nil
+		return result.GetUrl(), nil
+	})
 }
 
 // SetAutoArchiveInterval sets the auto-archive interval in minutes.
@@ -472,6 +537,12 @@ func (s *Sandbox) GetPreviewLink(ctx context.Context, port int) (string, error) 
 //	interval := 0
 //	err := sandbox.SetAutoArchiveInterval(ctx, &interval)
 func (s *Sandbox) SetAutoArchiveInterval(ctx context.Context, intervalMinutes *int) error {
+	return withInstrumentationVoid(ctx, s.otel, "Sandbox", "SetAutoArchiveInterval", func(ctx context.Context) error {
+		return s.doSetAutoArchiveInterval(ctx, intervalMinutes)
+	})
+}
+
+func (s *Sandbox) doSetAutoArchiveInterval(ctx context.Context, intervalMinutes *int) error {
 	if intervalMinutes == nil {
 		return errors.NewDaytonaError("intervalMinutes cannot be nil", 0, nil)
 	}
@@ -513,6 +584,12 @@ func (s *Sandbox) SetAutoArchiveInterval(ctx context.Context, intervalMinutes *i
 //	interval := -1
 //	err := sandbox.SetAutoDeleteInterval(ctx, &interval)
 func (s *Sandbox) SetAutoDeleteInterval(ctx context.Context, intervalMinutes *int) error {
+	return withInstrumentationVoid(ctx, s.otel, "Sandbox", "SetAutoDeleteInterval", func(ctx context.Context) error {
+		return s.doSetAutoDeleteInterval(ctx, intervalMinutes)
+	})
+}
+
+func (s *Sandbox) doSetAutoDeleteInterval(ctx context.Context, intervalMinutes *int) error {
 	if intervalMinutes == nil {
 		return errors.NewDaytonaError("intervalMinutes cannot be nil", 0, nil)
 	}

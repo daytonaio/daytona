@@ -3,6 +3,8 @@
 module Daytona
   class ComputerUse
     class Mouse
+      include Instrumentation
+
       # @return [String] The ID of the sandbox
       attr_reader :sandbox_id
 
@@ -11,9 +13,11 @@ module Daytona
 
       # @param sandbox_id [String] The ID of the sandbox
       # @param toolbox_api [DaytonaToolboxApiClient::ComputerUseApi] API client for sandbox operations
-      def initialize(sandbox_id:, toolbox_api:)
+      # @param otel_state [Daytona::OtelState, nil]
+      def initialize(sandbox_id:, toolbox_api:, otel_state: nil)
         @sandbox_id = sandbox_id
         @toolbox_api = toolbox_api
+        @otel_state = otel_state
       end
 
       # Gets the current mouse cursor position.
@@ -40,7 +44,7 @@ module Daytona
       # @example
       #   result = sandbox.computer_use.mouse.move(x: 100, y: 200)
       #   puts "Mouse moved to: #{result.x}, #{result.y}"
-      def move(x:, y:) # rubocop:disable Naming/MethodParameterName
+      def move(x:, y:)
         request = DaytonaToolboxApiClient::MouseMoveRequest.new(x:, y:)
         toolbox_api.move_mouse(request)
       rescue StandardError => e
@@ -65,7 +69,7 @@ module Daytona
       #
       #   # Right click
       #   right_click = sandbox.computer_use.mouse.click(x: 100, y: 200, button: 'right')
-      def click(x:, y:, button: 'left', double: false) # rubocop:disable Naming/MethodParameterName
+      def click(x:, y:, button: 'left', double: false)
         request = DaytonaToolboxApiClient::MouseClickRequest.new(x:, y:, button:, double:)
         toolbox_api.click(request)
       rescue StandardError => e
@@ -107,17 +111,26 @@ module Daytona
       #
       #   # Scroll down
       #   scroll_down = sandbox.computer_use.mouse.scroll(x: 100, y: 200, direction: 'down', amount: 5)
-      def scroll(x:, y:, direction:, amount: 1) # rubocop:disable Naming/MethodParameterName
+      def scroll(x:, y:, direction:, amount: 1)
         request = DaytonaToolboxApiClient::MouseScrollRequest.new(x:, y:, direction:, amount:)
         toolbox_api.scroll(request)
         true
       rescue StandardError => e
         raise Sdk::Error, "Failed to scroll mouse: #{e.message}"
       end
+
+      instrument :position, :move, :click, :drag, :scroll, component: 'Mouse'
+
+      private
+
+      # @return [Daytona::OtelState, nil]
+      attr_reader :otel_state
     end
 
     # Keyboard operations for computer use functionality.
     class Keyboard
+      include Instrumentation
+
       # @return [String] The ID of the sandbox
       attr_reader :sandbox_id
 
@@ -126,9 +139,11 @@ module Daytona
 
       # @param sandbox_id [String] The ID of the sandbox
       # @param toolbox_api [DaytonaToolboxApiClient::ComputerUseApi] API client for sandbox operations
-      def initialize(sandbox_id:, toolbox_api:)
+      # @param otel_state [Daytona::OtelState, nil]
+      def initialize(sandbox_id:, toolbox_api:, otel_state: nil)
         @sandbox_id = sandbox_id
         @toolbox_api = toolbox_api
+        @otel_state = otel_state
       end
 
       # Types the specified text.
@@ -194,10 +209,19 @@ module Daytona
       rescue StandardError => e
         raise Sdk::Error, "Failed to press hotkey: #{e.message}"
       end
+
+      instrument :type, :press, :hotkey, component: 'Keyboard'
+
+      private
+
+      # @return [Daytona::OtelState, nil]
+      attr_reader :otel_state
     end
 
     # Screenshot operations for computer use functionality.
     class Screenshot
+      include Instrumentation
+
       # @return [String] The ID of the sandbox
       attr_reader :sandbox_id
 
@@ -206,9 +230,11 @@ module Daytona
 
       # @param sandbox_id [String] The ID of the sandbox
       # @param toolbox_api [DaytonaToolboxApiClient::ComputerUseApi] API client for sandbox operations
-      def initialize(sandbox_id:, toolbox_api:)
+      # @param otel_state [Daytona::OtelState, nil]
+      def initialize(sandbox_id:, toolbox_api:, otel_state: nil)
         @sandbox_id = sandbox_id
         @toolbox_api = toolbox_api
+        @otel_state = otel_state
       end
 
       # Takes a screenshot of the entire screen.
@@ -292,7 +318,7 @@ module Daytona
       #     options: ScreenshotOptions.new(format: "webp", quality: 80, show_cursor: true)
       #   )
       #   puts "Compressed size: #{screenshot.size_bytes} bytes"
-      def take_compressed_region(region:, options: nil) # rubocop:disable Metrics/MethodLength
+      def take_compressed_region(region:, options: nil)
         options ||= ScreenshotOptions.new
         toolbox_api.take_compressed_region_screenshot(
           sandbox_id,
@@ -308,10 +334,20 @@ module Daytona
       rescue StandardError => e
         raise Sdk::Error, "Failed to take compressed region screenshot: #{e.message}"
       end
+
+      instrument :take_full_screen, :take_region, :take_compressed, :take_compressed_region,
+                 component: 'Screenshot'
+
+      private
+
+      # @return [Daytona::OtelState, nil]
+      attr_reader :otel_state
     end
 
     # Display operations for computer use functionality.
     class Display
+      include Instrumentation
+
       # @return [String] The ID of the sandbox
       attr_reader :sandbox_id
 
@@ -320,9 +356,11 @@ module Daytona
 
       # @param sandbox_id [String] The ID of the sandbox
       # @param toolbox_api [DaytonaToolboxApiClient::ComputerUseApi] API client for sandbox operations
-      def initialize(sandbox_id:, toolbox_api:)
+      # @param otel_state [Daytona::OtelState, nil]
+      def initialize(sandbox_id:, toolbox_api:, otel_state: nil)
         @sandbox_id = sandbox_id
         @toolbox_api = toolbox_api
+        @otel_state = otel_state
       end
 
       # Gets information about the displays.
@@ -359,6 +397,13 @@ module Daytona
       rescue StandardError => e
         raise Sdk::Error, "Failed to get windows: #{e.message}"
       end
+
+      instrument :info, :windows, component: 'Display'
+
+      private
+
+      # @return [Daytona::OtelState, nil]
+      attr_reader :otel_state
     end
 
     # Region coordinates for screenshot operations.
@@ -379,7 +424,7 @@ module Daytona
       # @param y [Integer] Y coordinate of the region
       # @param width [Integer] Width of the region
       # @param height [Integer] Height of the region
-      def initialize(x:, y:, width:, height:) # rubocop:disable Naming/MethodParameterName
+      def initialize(x:, y:, width:, height:)
         @x = x
         @y = y
         @width = width
@@ -415,6 +460,8 @@ module Daytona
 
     # Recording operations for computer use functionality.
     class Recording
+      include Instrumentation
+
       # @return [String] The ID of the sandbox
       attr_reader :sandbox_id
 
@@ -423,9 +470,11 @@ module Daytona
 
       # @param sandbox_id [String] The ID of the sandbox
       # @param toolbox_api [DaytonaToolboxApiClient::ComputerUseApi] API client for sandbox operations
-      def initialize(sandbox_id:, toolbox_api:)
+      # @param otel_state [Daytona::OtelState, nil]
+      def initialize(sandbox_id:, toolbox_api:, otel_state: nil)
         @sandbox_id = sandbox_id
         @toolbox_api = toolbox_api
+        @otel_state = otel_state
       end
 
       # Starts a new screen recording session.
@@ -568,7 +617,16 @@ module Daytona
         File.delete(local_path) if File.exist?(local_path)
         raise Sdk::Error, "Failed to download recording: #{e.message}"
       end
+
+      instrument :start, :stop, :list, :get, :delete, :download, component: 'Recording'
+
+      private
+
+      # @return [Daytona::OtelState, nil]
+      attr_reader :otel_state
     end
+
+    include Instrumentation
 
     # @return [String] The ID of the sandbox
     attr_reader :sandbox_id
@@ -595,14 +653,16 @@ module Daytona
     #
     # @param sandbox_id [String] The ID of the sandbox
     # @param toolbox_api [DaytonaApiClient::ToolboxApi] API client for sandbox operations
-    def initialize(sandbox_id:, toolbox_api:)
+    # @param otel_state [Daytona::OtelState, nil]
+    def initialize(sandbox_id:, toolbox_api:, otel_state: nil)
       @sandbox_id = sandbox_id
       @toolbox_api = toolbox_api
-      @mouse = Mouse.new(sandbox_id:, toolbox_api:)
-      @keyboard = Keyboard.new(sandbox_id:, toolbox_api:)
-      @screenshot = Screenshot.new(sandbox_id:, toolbox_api:)
-      @display = Display.new(sandbox_id:, toolbox_api:)
-      @recording = Recording.new(sandbox_id:, toolbox_api:)
+      @otel_state = otel_state
+      @mouse = Mouse.new(sandbox_id:, toolbox_api:, otel_state:)
+      @keyboard = Keyboard.new(sandbox_id:, toolbox_api:, otel_state:)
+      @screenshot = Screenshot.new(sandbox_id:, toolbox_api:, otel_state:)
+      @display = Display.new(sandbox_id:, toolbox_api:, otel_state:)
+      @recording = Recording.new(sandbox_id:, toolbox_api:, otel_state:)
     end
 
     # Starts all computer use processes (Xvfb, xfce4, x11vnc, novnc).
@@ -706,5 +766,14 @@ module Daytona
     rescue StandardError => e
       raise Sdk::Error, "Failed to get process errors: #{e.message}"
     end
+
+    instrument :start, :stop, :status, :get_process_status, :restart_process,
+               :get_process_logs, :get_process_errors,
+               component: 'ComputerUse'
+
+    private
+
+    # @return [Daytona::OtelState, nil]
+    attr_reader :otel_state
   end
 end

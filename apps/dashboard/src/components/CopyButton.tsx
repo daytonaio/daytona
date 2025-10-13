@@ -26,6 +26,7 @@ function CopyButton({
   tooltipText,
   variant = 'ghost',
   autoHide,
+  onClick,
   ...props
 }: { value: string; tooltipText?: string; autoHide?: boolean } & Omit<
   ComponentProps<typeof TooltipButton>,
@@ -36,7 +37,10 @@ function CopyButton({
   return (
     <TooltipButton
       tooltipText={tooltipText || (copied ? 'Copied' : 'Copy')}
-      onClick={() => copy(value)}
+      onClick={(e) => {
+        copy(value)
+        onClick?.(e)
+      }}
       className={cn(
         'font-sans text-muted-foreground hover:text-foreground',
         {

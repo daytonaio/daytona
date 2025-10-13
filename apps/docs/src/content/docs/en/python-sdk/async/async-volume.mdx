@@ -55,6 +55,7 @@ async with AsyncDaytona() as daytona:
 #### AsyncVolumeService.get
 
 ```python
+@with_instrumentation()
 async def get(name: str, create: bool = False) -> Volume
 ```
 
@@ -82,6 +83,7 @@ async with AsyncDaytona() as daytona:
 #### AsyncVolumeService.create
 
 ```python
+@with_instrumentation()
 async def create(name: str) -> Volume
 ```
 
@@ -108,6 +110,7 @@ async with AsyncDaytona() as daytona:
 #### AsyncVolumeService.delete
 
 ```python
+@with_instrumentation()
 async def delete(volume: Volume) -> None
 ```
 

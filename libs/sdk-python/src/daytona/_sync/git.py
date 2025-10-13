@@ -17,6 +17,7 @@ from daytona_toolbox_api_client import (
 )
 
 from .._utils.errors import intercept_errors
+from .._utils.otel_decorator import with_instrumentation
 from ..common.git import GitCommitResponse
 
 
@@ -58,6 +59,7 @@ class Git:
         self._api_client: GitApi = api_client
 
     @intercept_errors(message_prefix="Failed to add files: ")
+    @with_instrumentation()
     def add(self, path: str, files: list[str]) -> None:
         """Stages the specified files for the next commit, similar to
         running 'git add' on the command line.
@@ -85,6 +87,7 @@ class Git:
         )
 
     @intercept_errors(message_prefix="Failed to list branches: ")
+    @with_instrumentation()
     def branches(self, path: str) -> ListBranchResponse:
         """Lists branches in the repository.
 
@@ -106,6 +109,7 @@ class Git:
         )
 
     @intercept_errors(message_prefix="Failed to clone repository: ")
+    @with_instrumentation()
     def clone(
         self,
         url: str,
@@ -167,6 +171,7 @@ class Git:
         )
 
     @intercept_errors(message_prefix="Failed to commit changes: ")
+    @with_instrumentation()
     def commit(self, path: str, message: str, author: str, email: str, allow_empty: bool = False) -> GitCommitResponse:
         """Creates a new commit with the staged changes. Make sure to stage
         changes using the add() method before committing.
@@ -204,6 +209,7 @@ class Git:
         return GitCommitResponse(sha=response.hash)
 
     @intercept_errors(message_prefix="Failed to push changes: ")
+    @with_instrumentation()
     def push(
         self,
         path: str,
@@ -242,6 +248,7 @@ class Git:
         )
 
     @intercept_errors(message_prefix="Failed to pull changes: ")
+    @with_instrumentation()
     def pull(
         self,
         path: str,
@@ -279,6 +286,7 @@ class Git:
         )
 
     @intercept_errors(message_prefix="Failed to get status: ")
+    @with_instrumentation()
     def status(self, path: str) -> GitStatus:
         """Gets the current Git repository status.
 
@@ -307,6 +315,7 @@ class Git:
         )
 
     @intercept_errors(message_prefix="Failed to checkout branch: ")
+    @with_instrumentation()
     def checkout_branch(self, path: str, branch: str) -> None:
         """Checkout branch in the repository.
 
@@ -329,6 +338,7 @@ class Git:
         )
 
     @intercept_errors(message_prefix="Failed to create branch: ")
+    @with_instrumentation()
     def create_branch(self, path: str, name: str) -> None:
         """Create branch in the repository.
 
@@ -351,6 +361,7 @@ class Git:
         )
 
     @intercept_errors(message_prefix="Failed to delete branch: ")
+    @with_instrumentation()
     def delete_branch(self, path: str, name: str) -> None:
         """Delete branch in the repository.
 

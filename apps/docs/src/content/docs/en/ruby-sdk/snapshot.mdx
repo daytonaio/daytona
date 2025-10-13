@@ -12,7 +12,7 @@ SnapshotService class for Daytona SDK.
 #### new SnapshotService()
 
 ```ruby
-def initialize(snapshots_api:, object_storage_api:, default_region_id:)
+def initialize(snapshots_api:, object_storage_api:, default_region_id:, otel_state:)
 
 ```
 
@@ -21,6 +21,7 @@ def initialize(snapshots_api:, object_storage_api:, default_region_id:)
 - `snapshots_api` _DaytonaApiClient:SnapshotsApi_ - The snapshots API client
 - `object_storage_api` _DaytonaApiClient:ObjectStorageApi_ - The object storage API client
 - `default_region_id` _String, nil_ - Default region ID for snapshot creation
+- `otel_state` _Daytona:OtelState, nil_ -
 
 **Returns**:
 

@@ -15,7 +15,6 @@ var apiClient *apiclient.APIClient
 const DaytonaSourceHeader = "X-Daytona-Source"
 
 func GetApiClient() (*apiclient.APIClient, error) {
-
 	c, err := config.GetConfig()
 	if err != nil {
 		return nil, err

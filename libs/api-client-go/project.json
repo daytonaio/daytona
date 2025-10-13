@@ -70,7 +70,8 @@
         "cwd": "{workspaceRoot}",
         "commands": [
           "cd apps/cli && go mod edit -require=github.com/daytonaio/daytona/libs/api-client-go@$VERSION",
-          "cd libs/sdk-go && go mod edit -require=github.com/daytonaio/daytona/libs/api-client-go@$VERSION"
+          "cd libs/sdk-go && go mod edit -require=github.com/daytonaio/daytona/libs/api-client-go@$VERSION",
+          "cd apps/otel-collector/exporter && go mod edit -require=github.com/daytonaio/daytona/libs/api-client-go@$VERSION"
         ],
         "parallel": false
       },

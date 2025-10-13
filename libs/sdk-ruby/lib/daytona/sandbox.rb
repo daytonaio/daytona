@@ -4,6 +4,8 @@ require 'timeout'
 
 module Daytona
   class Sandbox # rubocop:disable Metrics/ClassLength
+    include Instrumentation
+
     DEFAULT_TIMEOUT = 60
 
     # @return [String] The ID of the sandbox
@@ -116,12 +118,14 @@ module Daytona
     # @params config [Daytona::Config]
     # @params sandbox_api [DaytonaApiClient::SandboxApi]
     # @params sandbox_dto [DaytonaApiClient::Sandbox]
-    def initialize(code_toolbox:, sandbox_dto:, config:, sandbox_api:, get_proxy_toolbox_url:) # rubocop:disable Metrics/MethodLength
+    # @params otel_state [Daytona::OtelState, nil]
+    def initialize(code_toolbox:, sandbox_dto:, config:, sandbox_api:, get_proxy_toolbox_url:, otel_state: nil) # rubocop:disable Metrics/MethodLength
       process_response(sandbox_dto)
       @code_toolbox = code_toolbox
       @config = config
       @sandbox_api = sandbox_api
       @get_proxy_toolbox_url = get_proxy_toolbox_url
+      @otel_state = otel_state
 
       # Create toolbox API clients with dynamic configuration
       toolbox_api_config = build_toolbox_api_config
@@ -148,15 +152,17 @@ module Daytona
         sandbox_id: id,
         code_toolbox:,
         toolbox_api: process_api,
-        get_preview_link: proc { |port| preview_url(port) }
+        get_preview_link: proc { |port| preview_url(port) },
+        otel_state:
       )
-      @fs = FileSystem.new(sandbox_id: id, toolbox_api: fs_api)
-      @git = Git.new(sandbox_id: id, toolbox_api: git_api)
-      @computer_use = ComputerUse.new(sandbox_id: id, toolbox_api: computer_use_api)
+      @fs = FileSystem.new(sandbox_id: id, toolbox_api: fs_api, otel_state:)
+      @git = Git.new(sandbox_id: id, toolbox_api: git_api, otel_state:)
+      @computer_use = ComputerUse.new(sandbox_id: id, toolbox_api: computer_use_api, otel_state:)
       @code_interpreter = CodeInterpreter.new(
         sandbox_id: id,
         toolbox_api: interpreter_api,
-        get_preview_link: proc { |port| preview_url(port) }
+        get_preview_link: proc { |port| preview_url(port) },
+        otel_state:
       )
       @lsp_api = lsp_api
       @info_api = info_api
@@ -382,7 +388,7 @@ module Daytona
     #                      based on the sandbox working directory.
     # @return [Daytona::LspServer]
     def create_lsp_server(language_id:, path_to_project:)
-      LspServer.new(language_id:, path_to_project:, toolbox_api: @lsp_api, sandbox_id: id)
+      LspServer.new(language_id:, path_to_project:, toolbox_api: @lsp_api, sandbox_id: id, otel_state:)
     end
 
     #  Validates an SSH access token for the sandbox.
@@ -411,7 +417,18 @@ module Daytona
                                                                  DaytonaApiClient::SandboxState::DESTROYED])
     end
 
+    instrument :archive, :auto_archive_interval=, :auto_delete_interval=, :auto_stop_interval=,
+               :create_ssh_access, :delete, :get_user_home_dir, :get_work_dir, :labels=,
+               :preview_url, :create_signed_preview_url, :expire_signed_preview_url,
+               :refresh, :refresh_activity, :revoke_ssh_access, :start, :recover, :stop,
+               :create_lsp_server, :validate_ssh_access, :wait_for_sandbox_start,
+               :wait_for_sandbox_stop,
+               component: 'Sandbox'
+
     private
+
+    # @return [Daytona::OtelState, nil]
+    attr_reader :otel_state
 
     # Build toolbox API configuration with dynamic base URL from preview link
     # @return [DaytonaToolboxApiClient::Configuration]

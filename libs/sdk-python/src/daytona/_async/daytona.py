@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import os
 import warnings
 from copy import deepcopy
 from importlib.metadata import version
@@ -25,9 +26,17 @@ from daytona_api_client_async import (
 from daytona_api_client_async import VolumesApi as VolumesApi
 from daytona_toolbox_api_client_async import ApiClient as ToolboxApiClient
 from environs import Env
+from opentelemetry import trace
+from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+from opentelemetry.instrumentation.aiohttp_client import AioHttpClientInstrumentor
+from opentelemetry.sdk.resources import Resource
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.semconv.attributes import service_attributes
 
 from .._utils.enum import to_enum
 from .._utils.errors import intercept_errors
+from .._utils.otel_decorator import with_instrumentation
 from .._utils.stream import process_streaming_response
 from .._utils.timeout import http_timeout, with_timeout
 from ..code_toolbox.sandbox_js_code_toolbox import SandboxJsCodeToolbox
@@ -78,6 +87,18 @@ class AsyncDaytona:
         finally:
             await daytona.close()
         ```
+
+        Using OpenTelemetry tracing:
+        ```python
+        config = DaytonaConfig(
+            api_key="your-api-key",
+            experimental={"otelEnabled": True}
+        )
+        async with AsyncDaytona(config) as daytona:
+            sandbox = await daytona.create()
+            # All SDK operations will be traced
+        # OpenTelemetry traces are flushed on close
+        ```
     """
 
     _api_key: str | None = None
@@ -85,6 +106,7 @@ class AsyncDaytona:
     _organization_id: str | None = None
     _api_url: str
     _target: str | None = None
+    _tracer_provider: TracerProvider | None = None
 
     def __init__(self, config: DaytonaConfig | None = None):
         """Initializes Daytona instance with optional configuration.
@@ -210,6 +232,38 @@ class AsyncDaytona:
             self._target,
         )
 
+        # Initialize OpenTelemetry if enabled
+        otel_enabled = (config and config._experimental and config._experimental.get("otelEnabled")) or os.environ.get(
+            "DAYTONA_EXPERIMENTAL_OTEL_ENABLED"
+        ) == "true"
+        if otel_enabled:
+            self._init_otel(sdk_version)
+
+    def _init_otel(self, sdk_version: str):
+        """Initialize OpenTelemetry tracing.
+
+        Args:
+            sdk_version: The SDK version to include in resource attributes
+        """
+        # Create resource with SDK version
+        resource = Resource.create(
+            {
+                service_attributes.SERVICE_VERSION: sdk_version,
+                service_attributes.SERVICE_NAME: "daytona-python-sdk",
+            }
+        )
+
+        # Create and configure tracer provider
+        self._tracer_provider = TracerProvider(resource=resource)
+
+        otlp_exporter = OTLPSpanExporter()
+        self._tracer_provider.add_span_processor(BatchSpanProcessor(otlp_exporter))
+
+        AioHttpClientInstrumentor().instrument()
+
+        # Set the global tracer provider
+        trace.set_tracer_provider(self._tracer_provider)
+
     async def __aenter__(self):
         """Async context manager entry."""
         return self
@@ -247,6 +301,11 @@ class AsyncDaytona:
             # Automatically closed
             ```
         """
+
+        # Shutdown OpenTelemetry if it was initialized
+        if self._tracer_provider is not None:
+            self._tracer_provider.shutdown()
+
         # Close the main API client
         if hasattr(self, "_api_client") and self._api_client:
             await self._api_client.close()
@@ -356,6 +415,7 @@ class AsyncDaytona:
 
     @intercept_errors(message_prefix="Failed to create sandbox: ")
     @with_timeout()
+    @with_instrumentation()
     async def create(
         self,
         params: CreateSandboxFromSnapshotParams | CreateSandboxFromImageParams | None = None,
@@ -511,6 +571,7 @@ class AsyncDaytona:
         except KeyError as e:
             raise DaytonaError(f"Unsupported language: {language}") from e
 
+    @with_instrumentation()
     async def delete(self, sandbox: AsyncSandbox, timeout: float = 60) -> None:
         """Deletes a Sandbox.
 
@@ -532,6 +593,7 @@ class AsyncDaytona:
         _ = await sandbox.delete(timeout)
 
     @intercept_errors(message_prefix="Failed to get sandbox: ")
+    @with_instrumentation()
     async def get(self, sandbox_id_or_name: str) -> AsyncSandbox:
         """Gets a Sandbox by its ID or name.
 
@@ -567,6 +629,7 @@ class AsyncDaytona:
         )
 
     @intercept_errors(message_prefix="Failed to find sandbox: ")
+    @with_instrumentation()
     async def find_one(
         self, sandbox_id_or_name: str | None = None, labels: dict[str, str] | None = None
     ) -> AsyncSandbox:
@@ -596,6 +659,7 @@ class AsyncDaytona:
         return sandboxes.items[0]
 
     @intercept_errors(message_prefix="Failed to list sandboxes: ")
+    @with_instrumentation()
     async def list(
         self, labels: dict[str, str] | None = None, page: int | None = None, limit: int | None = None
     ) -> AsyncPaginatedSandboxes:
@@ -660,6 +724,7 @@ class AsyncDaytona:
             raise DaytonaError(f"Invalid code-toolbox-language: {language}")
         return enum_language
 
+    @with_instrumentation()
     async def start(self, sandbox: AsyncSandbox, timeout: float = 60) -> None:
         """Starts a Sandbox and waits for it to be ready.
 
@@ -673,6 +738,7 @@ class AsyncDaytona:
         """
         await sandbox.start(timeout)
 
+    @with_instrumentation()
     async def stop(self, sandbox: AsyncSandbox, timeout: float = 60) -> None:
         """Stops a Sandbox and waits for it to be stopped.
 

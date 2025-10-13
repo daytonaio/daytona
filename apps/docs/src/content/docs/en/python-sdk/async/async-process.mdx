@@ -31,6 +31,7 @@ Initialize a new Process instance.
 
 ```python
 @intercept_errors(message_prefix="Failed to execute command: ")
+@with_instrumentation()
 async def exec(command: str,
                cwd: str | None = None,
                env: dict[str, str] | None = None,
@@ -75,6 +76,7 @@ result = await sandbox.process.exec("sleep 10", timeout=5)
 #### AsyncProcess.code\_run
 
 ```python
+@with_instrumentation()
 async def code_run(code: str,
                    params: CodeRunParams | None = None,
                    timeout: int | None = None) -> ExecuteResponse
@@ -154,6 +156,7 @@ if chart.type == ChartType.LINE and isinstance(chart, LineChart):
 
 ```python
 @intercept_errors(message_prefix="Failed to create session: ")
+@with_instrumentation()
 async def create_session(session_id: str) -> None
 ```
 
@@ -212,6 +215,7 @@ for cmd in session.commands:
 
 ```python
 @intercept_errors(message_prefix="Failed to get session command: ")
+@with_instrumentation()
 async def get_session_command(session_id: str, command_id: str) -> Command
 ```
 
@@ -243,6 +247,7 @@ if cmd.exit_code == 0:
 
 ```python
 @intercept_errors(message_prefix="Failed to execute session command: ")
+@with_instrumentation()
 async def execute_session_command(
         session_id: str,
         req: SessionExecuteRequest,
@@ -294,6 +299,7 @@ print(f"Command stderr: {result.stderr}")
 
 ```python
 @intercept_errors(message_prefix="Failed to get session command logs: ")
+@with_instrumentation()
 async def get_session_command_logs(
         session_id: str, command_id: str) -> SessionCommandLogsResponse
 ```
@@ -375,6 +381,7 @@ Sends input data to a command executed in a session.
 
 ```python
 @intercept_errors(message_prefix="Failed to list sessions: ")
+@with_instrumentation()
 async def list_sessions() -> list[Session]
 ```
 
@@ -398,6 +405,7 @@ for session in sessions:
 
 ```python
 @intercept_errors(message_prefix="Failed to delete session: ")
+@with_instrumentation()
 async def delete_session(session_id: str) -> None
 ```
 
@@ -424,6 +432,7 @@ await sandbox.process.delete_session("temp-session")
 
 ```python
 @intercept_errors(message_prefix="Failed to create PTY session: ")
+@with_instrumentation()
 async def create_pty_session(
         id: str,
         on_data: Callable[[bytes], None] | Callable[[bytes], Awaitable[None]],
@@ -462,6 +471,7 @@ The PTY session behaves like a real terminal, supporting features like command h
 
 ```python
 @intercept_errors(message_prefix="Failed to connect PTY session: ")
+@with_instrumentation()
 async def connect_pty_session(
     session_id: str,
     on_data: Callable[[bytes], None] | Callable[[bytes], Awaitable[None]]
@@ -491,6 +501,7 @@ interact with a previously created terminal session.
 
 ```python
 @intercept_errors(message_prefix="Failed to list PTY sessions: ")
+@with_instrumentation()
 async def list_pty_sessions() -> list[PtySessionInfo]
 ```
 
@@ -520,6 +531,7 @@ for session in sessions:
 
 ```python
 @intercept_errors(message_prefix="Failed to get PTY session info: ")
+@with_instrumentation()
 async def get_pty_session_info(session_id: str) -> PtySessionInfo
 ```
 
@@ -560,6 +572,7 @@ print(f"Terminal Size: {session_info.cols}x{session_info.rows}")
 
 ```python
 @intercept_errors(message_prefix="Failed to kill PTY session: ")
+@with_instrumentation()
 async def kill_pty_session(session_id: str) -> None
 ```
 
@@ -595,6 +608,7 @@ for pty_session in pty_sessions:
 
 ```python
 @intercept_errors(message_prefix="Failed to resize PTY session: ")
+@with_instrumentation()
 async def resize_pty_session(session_id: str,
                              pty_size: PtySize) -> PtySessionInfo
 ```

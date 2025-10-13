@@ -33,6 +33,10 @@ import (
 	"github.com/daytonaio/daemon/pkg/toolbox/process/pty"
 	"github.com/daytonaio/daemon/pkg/toolbox/process/session"
 	"github.com/daytonaio/daemon/pkg/toolbox/proxy"
+	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
+	otellog "go.opentelemetry.io/otel/sdk/log"
+	"go.opentelemetry.io/otel/sdk/metric"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 
 	"github.com/daytonaio/daemon/pkg/toolbox/docs"
 	"github.com/gin-gonic/gin"
@@ -43,105 +47,93 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-type Server struct {
+type ServerConfig struct {
 	WorkDir                              string
 	ConfigDir                            string
 	ComputerUse                          computeruse.IComputerUse
+	SandboxId                            string
+	OtelEndpoint                         *string
 	TerminationGracePeriodSeconds        int
 	TerminationCheckIntervalMilliseconds int
 	RecordingService                     *recording.RecordingService
 }
 
-type WorkDirResponse struct {
-	Dir string `json:"dir" validate:"required"`
-} // @name WorkDirResponse
-
-type UserHomeDirResponse struct {
-	Dir string `json:"dir" validate:"required"`
-} // @name UserHomeDirResponse
-
-// GetWorkDir godoc
-//
-//	@Summary		Get working directory
-//	@Description	Get the current working directory path. This is default directory used for running commands.
-//	@Tags			info
-//	@Produce		json
-//	@Success		200	{object}	WorkDirResponse
-//	@Router			/work-dir [get]
-//
-//	@id				GetWorkDir
-func (s *Server) GetWorkDir(ctx *gin.Context) {
-	workDir := WorkDirResponse{
-		Dir: s.WorkDir,
+func NewServer(config ServerConfig) *server {
+	return &server{
+		WorkDir:                              config.WorkDir,
+		SandboxId:                            config.SandboxId,
+		otelEndpoint:                         config.OtelEndpoint,
+		telemetry:                            Telemetry{},
+		terminationGracePeriodSeconds:        config.TerminationGracePeriodSeconds,
+		terminationCheckIntervalMilliseconds: config.TerminationCheckIntervalMilliseconds,
+		configDir:                            config.ConfigDir,
+		recordingService:                     config.RecordingService,
 	}
-
-	ctx.JSON(http.StatusOK, workDir)
 }
 
-// GetUserHomeDir godoc
-//
-//	@Summary		Get user home directory
-//	@Description	Get the current user home directory path.
-//	@Tags			info
-//	@Produce		json
-//	@Success		200	{object}	UserHomeDirResponse
-//	@Router			/user-home-dir [get]
-//
-//	@id				GetUserHomeDir
-func (s *Server) GetUserHomeDir(ctx *gin.Context) {
-	userHomeDir, err := os.UserHomeDir()
-	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, err)
-		return
-	}
-	userHomeDirResponse := UserHomeDirResponse{
-		Dir: userHomeDir,
-	}
-
-	ctx.JSON(http.StatusOK, userHomeDirResponse)
+type server struct {
+	WorkDir                              string
+	ComputerUse                          computeruse.IComputerUse
+	SandboxId                            string
+	otelEndpoint                         *string
+	authToken                            string
+	telemetry                            Telemetry
+	terminationGracePeriodSeconds        int
+	terminationCheckIntervalMilliseconds int
+	configDir                            string
+	recordingService                     *recording.RecordingService
 }
 
-// GetVersion godoc
-//
-//	@Summary		Get version
-//	@Description	Get the current daemon version
-//	@Tags			info
-//	@Produce		json
-//	@Success		200	{object}	map[string]string
-//	@Router			/version [get]
-//
-//	@id				GetVersion
-func (s *Server) GetVersion(ctx *gin.Context) {
-	ctx.JSON(http.StatusOK, gin.H{
-		"version": internal.Version,
-	})
+type Telemetry struct {
+	TracerProvider *sdktrace.TracerProvider
+	MeterProvider  *metric.MeterProvider
+	Logger         *otellog.LoggerProvider
 }
 
-func (s *Server) Start() error {
+func (s *server) Start() error {
 	docs.SwaggerInfo.Description = "Daytona Toolbox API"
 	docs.SwaggerInfo.Title = "Daytona Toolbox API"
 	docs.SwaggerInfo.BasePath = "/"
+	docs.SwaggerInfo.Version = internal.Version
 
 	// Set Gin to release mode in production
 	if os.Getenv("ENVIRONMENT") == "production" {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
+	otelServiceName := fmt.Sprintf("sandbox-%s", s.SandboxId)
+
 	r := gin.New()
 	r.Use(common_errors.Recovery())
+	noTelemetryRouter := r.Group("/")
+	r.Use(func(ctx *gin.Context) {
+		if s.telemetry.TracerProvider == nil {
+			ctx.Next()
+			return
+		}
+
+		otelgin.Middleware(otelServiceName, otelgin.WithTracerProvider(s.telemetry.TracerProvider))(ctx)
+		ctx.Next()
+	})
 	r.Use(middlewares.LoggingMiddleware())
-	r.Use(common_errors.NewErrorMiddleware(func(ctx *gin.Context, err error) common_errors.ErrorResponse {
+	errMiddleware := common_errors.NewErrorMiddleware(func(ctx *gin.Context, err error) common_errors.ErrorResponse {
 		return common_errors.ErrorResponse{
 			StatusCode: http.StatusInternalServerError,
 			Message:    err.Error(),
 		}
-	}))
+	})
+
+	noTelemetryRouter.Use(middlewares.LoggingMiddleware())
+	r.Use(errMiddleware)
+	noTelemetryRouter.Use(errMiddleware)
 	binding.Validator = new(DefaultValidator)
 
 	// Add swagger UI in development mode
 	if os.Getenv("ENVIRONMENT") != "production" {
 		r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 	}
+
+	r.POST("/init", s.Initialize(otelServiceName))
 
 	r.GET("/version", s.GetVersion)
 
@@ -176,7 +168,7 @@ func (s *Server) Start() error {
 	{
 		processController.POST("/execute", process.ExecuteCommand)
 
-		sessionController := session.NewSessionController(s.ConfigDir, s.WorkDir, s.TerminationGracePeriodSeconds, s.TerminationCheckIntervalMilliseconds)
+		sessionController := session.NewSessionController(s.configDir, s.WorkDir, s.terminationGracePeriodSeconds, s.terminationCheckIntervalMilliseconds)
 		sessionGroup := processController.Group("/session")
 		{
 			sessionGroup.GET("", sessionController.ListSessions)
@@ -247,7 +239,7 @@ func (s *Server) Start() error {
 	pluginPath := "/usr/local/lib/daytona-computer-use"
 	// Fallback to local config directory for development
 	if _, err := os.Stat(pluginPath); os.IsNotExist(err) {
-		pluginPath = path.Join(s.ConfigDir, "daytona-computer-use")
+		pluginPath = path.Join(s.configDir, "daytona-computer-use")
 	}
 	var err error
 	s.ComputerUse, err = manager.GetComputerUse(pluginPath)
@@ -325,7 +317,7 @@ func (s *Server) Start() error {
 	}
 
 	// Recording endpoints - always registered, independent of computer-use plugin
-	recordingController := recordingcontroller.NewRecordingController(s.RecordingService)
+	recordingController := recordingcontroller.NewRecordingController(s.recordingService)
 	recordingsGroup := computerUseController.Group("/recordings")
 	{
 		recordingsGroup.POST("/start", recordingController.StartRecording)
@@ -344,14 +336,14 @@ func (s *Server) Start() error {
 		portController.GET("/:port/in-use", portDetector.IsPortInUse)
 	}
 
-	proxyController := r.Group("/proxy")
+	proxyController := noTelemetryRouter.Group("/proxy")
 	{
 		proxyController.Any("/:port/*path", common_proxy.NewProxyRequestHandler(proxy.GetProxyTarget, nil))
 	}
 
 	go portDetector.Start(context.Background())
 
-	httpServer := &http.Server{
+	httpserver := &http.Server{
 		Addr:    fmt.Sprintf(":%d", config.TOOLBOX_API_PORT),
 		Handler: r,
 	}
@@ -359,10 +351,10 @@ func (s *Server) Start() error {
 	// Print to stdout so the runner can know that the daemon is ready
 	fmt.Println("Starting toolbox server on port", config.TOOLBOX_API_PORT)
 
-	listener, err := net.Listen("tcp", httpServer.Addr)
+	listener, err := net.Listen("tcp", httpserver.Addr)
 	if err != nil {
 		return err
 	}
 
-	return httpServer.Serve(listener)
+	return httpserver.Serve(listener)
 }

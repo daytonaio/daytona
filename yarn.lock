@@ -3546,6 +3546,22 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@clickhouse/client-common@npm:1.16.0":
+  version: 1.16.0
+  resolution: "@clickhouse/client-common@npm:1.16.0"
+  checksum: 10c0/ba78c0c944abc5b8fb59b83c50f75f0a0c8d5ca16403659ce78de0f0b04e5b84f4324b0547e1e68d96a27d518f0d7f0dc8861f89ff52aa335dc24719642b9b6b
+  languageName: node
+  linkType: hard
+
+"@clickhouse/client@npm:^1.16.0":
+  version: 1.16.0
+  resolution: "@clickhouse/client@npm:1.16.0"
+  dependencies:
+    "@clickhouse/client-common": "npm:1.16.0"
+  checksum: 10c0/861f7313b0689f1673bb9ab37aef322e95a9823cfcf5d33dada96e18cfd50e6b07656a244c741624fc709ee6bf626f661cc619cf18a7743ad403c86ad37b89a0
+  languageName: node
+  linkType: hard
+
 "@cspotcode/source-map-support@npm:^0.8.0":
   version: 0.8.1
   resolution: "@cspotcode/source-map-support@npm:0.8.1"
@@ -19001,6 +19017,7 @@ __metadata:
     "@aws-sdk/lib-storage": "npm:^3.798.0"
     "@babel/preset-env": "npm:^7.22.0"
     "@babel/preset-typescript": "npm:^7.22.0"
+    "@clickhouse/client": "npm:^1.16.0"
     "@dotenvx/dotenvx": "npm:^1.25.1"
     "@eslint/js": "npm:^9.8.0"
     "@esm2cjs/cacheable-lookup": "npm:^7.0.0"

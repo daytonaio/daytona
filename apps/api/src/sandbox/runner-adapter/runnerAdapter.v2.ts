@@ -165,6 +165,7 @@ export class RunnerAdapterV2 implements RunnerAdapter {
       networkBlockAll: sandbox.networkBlockAll,
       networkAllowList: sandbox.networkAllowList,
       metadata: metadata,
+      authToken: sandbox.authToken,
     }
 
     await this.jobService.createJob(
@@ -184,16 +185,13 @@ export class RunnerAdapterV2 implements RunnerAdapter {
 
   async startSandbox(
     sandboxId: string,
+    authToken: string,
     metadata?: { [key: string]: string },
   ): Promise<StartSandboxResponse | undefined> {
-    await this.jobService.createJob(
-      null,
-      JobType.START_SANDBOX,
-      this.runner.id,
-      ResourceType.SANDBOX,
-      sandboxId,
+    await this.jobService.createJob(null, JobType.START_SANDBOX, this.runner.id, ResourceType.SANDBOX, sandboxId, {
+      authToken,
       metadata,
-    )
+    })
 
     this.logger.debug(`Created START_SANDBOX job for sandbox ${sandboxId} on runner ${this.runner.id}`)
 

@@ -36,6 +36,7 @@ import (
 //	volumes, err := client.Volumes.List(ctx)
 type VolumeService struct {
 	client *Client
+	otel   *otelState
 }
 
 // NewVolumeService creates a new VolumeService.
@@ -46,6 +47,7 @@ type VolumeService struct {
 func NewVolumeService(client *Client) *VolumeService {
 	return &VolumeService{
 		client: client,
+		otel:   client.Otel,
 	}
 }
 
@@ -63,19 +65,21 @@ func NewVolumeService(client *Client) *VolumeService {
 //
 // Returns a slice of [types.Volume] or an error if the request fails.
 func (v *VolumeService) List(ctx context.Context) ([]*types.Volume, error) {
-	authCtx := v.client.getAuthContext(ctx)
-	volumeDtos, httpResp, err := v.client.apiClient.VolumesAPI.ListVolumes(authCtx).Execute()
-	if err != nil {
-		return nil, errors.ConvertAPIError(err, httpResp)
-	}
+	return withInstrumentation(ctx, v.otel, "Volume", "List", func(ctx context.Context) ([]*types.Volume, error) {
+		authCtx := v.client.getAuthContext(ctx)
+		volumeDtos, httpResp, err := v.client.apiClient.VolumesAPI.ListVolumes(authCtx).Execute()
+		if err != nil {
+			return nil, errors.ConvertAPIError(err, httpResp)
+		}
 
-	// Convert VolumeDto to types.Volume
-	volumes := make([]*types.Volume, len(volumeDtos))
-	for i, dto := range volumeDtos {
-		volumes[i] = volumeDtoToVolume(&dto)
-	}
+		// Convert VolumeDto to types.Volume
+		volumes := make([]*types.Volume, len(volumeDtos))
+		for i, dto := range volumeDtos {
+			volumes[i] = volumeDtoToVolume(&dto)
+		}
 
-	return volumes, nil
+		return volumes, nil
+	})
 }
 
 // Get retrieves a volume by its name.
@@ -93,13 +97,15 @@ func (v *VolumeService) List(ctx context.Context) ([]*types.Volume, error) {
 //
 // Returns the [types.Volume] or an error if not found.
 func (v *VolumeService) Get(ctx context.Context, name string) (*types.Volume, error) {
-	authCtx := v.client.getAuthContext(ctx)
-	volumeDto, httpResp, err := v.client.apiClient.VolumesAPI.GetVolumeByName(authCtx, name).Execute()
-	if err != nil {
-		return nil, errors.ConvertAPIError(err, httpResp)
-	}
+	return withInstrumentation(ctx, v.otel, "Volume", "Get", func(ctx context.Context) (*types.Volume, error) {
+		authCtx := v.client.getAuthContext(ctx)
+		volumeDto, httpResp, err := v.client.apiClient.VolumesAPI.GetVolumeByName(authCtx, name).Execute()
+		if err != nil {
+			return nil, errors.ConvertAPIError(err, httpResp)
+		}
 
-	return volumeDtoToVolume(volumeDto), nil
+		return volumeDtoToVolume(volumeDto), nil
+	})
 }
 
 // Create creates a new persistent storage volume.
@@ -122,15 +128,17 @@ func (v *VolumeService) Get(ctx context.Context, name string) (*types.Volume, er
 //
 // Returns the created [types.Volume] or an error.
 func (v *VolumeService) Create(ctx context.Context, name string) (*types.Volume, error) {
-	authCtx := v.client.getAuthContext(ctx)
+	return withInstrumentation(ctx, v.otel, "Volume", "Create", func(ctx context.Context) (*types.Volume, error) {
+		authCtx := v.client.getAuthContext(ctx)
 
-	req := apiclient.NewCreateVolume(name)
-	volumeDto, httpResp, err := v.client.apiClient.VolumesAPI.CreateVolume(authCtx).CreateVolume(*req).Execute()
-	if err != nil {
-		return nil, errors.ConvertAPIError(err, httpResp)
-	}
+		req := apiclient.NewCreateVolume(name)
+		volumeDto, httpResp, err := v.client.apiClient.VolumesAPI.CreateVolume(authCtx).CreateVolume(*req).Execute()
+		if err != nil {
+			return nil, errors.ConvertAPIError(err, httpResp)
+		}
 
-	return volumeDtoToVolume(volumeDto), nil
+		return volumeDtoToVolume(volumeDto), nil
+	})
 }
 
 // Delete permanently removes a volume and all its data.
@@ -150,13 +158,15 @@ func (v *VolumeService) Create(ctx context.Context, name string) (*types.Volume,
 //
 // Returns an error if deletion fails.
 func (v *VolumeService) Delete(ctx context.Context, volume *types.Volume) error {
-	authCtx := v.client.getAuthContext(ctx)
-	httpResp, err := v.client.apiClient.VolumesAPI.DeleteVolume(authCtx, volume.ID).Execute()
-	if err != nil {
-		return errors.ConvertAPIError(err, httpResp)
-	}
+	return withInstrumentationVoid(ctx, v.otel, "Volume", "Delete", func(ctx context.Context) error {
+		authCtx := v.client.getAuthContext(ctx)
+		httpResp, err := v.client.apiClient.VolumesAPI.DeleteVolume(authCtx, volume.ID).Execute()
+		if err != nil {
+			return errors.ConvertAPIError(err, httpResp)
+		}
 
-	return nil
+		return nil
+	})
 }
 
 // WaitForReady waits for a volume to reach the "ready" state.
@@ -184,44 +194,46 @@ func (v *VolumeService) Delete(ctx context.Context, volume *types.Volume) error 
 // Returns the updated [types.Volume] when ready, or an error if the timeout
 // expires or the volume enters an error state.
 func (v *VolumeService) WaitForReady(ctx context.Context, volume *types.Volume, timeout time.Duration) (*types.Volume, error) {
-	deadline := time.Now().Add(timeout)
+	return withInstrumentation(ctx, v.otel, "Volume", "WaitForReady", func(ctx context.Context) (*types.Volume, error) {
+		deadline := time.Now().Add(timeout)
 
-	for {
-		// Check if context is done
-		select {
-		case <-ctx.Done():
-			return nil, ctx.Err()
-		default:
-		}
-
-		// Check timeout
-		if time.Now().After(deadline) {
-			return nil, errors.NewDaytonaTimeoutError("volume did not become ready within timeout")
-		}
-
-		// Get current volume state
-		currentVolume, err := v.Get(ctx, volume.Name)
-		if err != nil {
-			return nil, err
-		}
-
-		// Check if volume is ready
-		if currentVolume.State == "ready" {
-			return currentVolume, nil
-		}
-
-		// Check if volume is in error state
-		if currentVolume.State == "error" {
-			errMsg := "volume creation failed"
-			if currentVolume.ErrorReason != nil {
-				errMsg = *currentVolume.ErrorReason
+		for {
+			// Check if context is done
+			select {
+			case <-ctx.Done():
+				return nil, ctx.Err()
+			default:
 			}
-			return nil, errors.NewDaytonaError(errMsg, 0, nil)
-		}
 
-		// Wait before polling again
-		time.Sleep(1 * time.Second)
-	}
+			// Check timeout
+			if time.Now().After(deadline) {
+				return nil, errors.NewDaytonaTimeoutError("volume did not become ready within timeout")
+			}
+
+			// Get current volume state
+			currentVolume, err := v.Get(ctx, volume.Name)
+			if err != nil {
+				return nil, err
+			}
+
+			// Check if volume is ready
+			if currentVolume.State == "ready" {
+				return currentVolume, nil
+			}
+
+			// Check if volume is in error state
+			if currentVolume.State == "error" {
+				errMsg := "volume creation failed"
+				if currentVolume.ErrorReason != nil {
+					errMsg = *currentVolume.ErrorReason
+				}
+				return nil, errors.NewDaytonaError(errMsg, 0, nil)
+			}
+
+			// Wait before polling again
+			time.Sleep(1 * time.Second)
+		}
+	})
 }
 
 // volumeDtoToVolume converts api-client VolumeDto to SDK types.Volume

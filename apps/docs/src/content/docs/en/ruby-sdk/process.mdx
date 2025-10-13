@@ -12,7 +12,7 @@ Initialize a new Process instance
 #### new Process()
 
 ```ruby
-def initialize(code_toolbox:, sandbox_id:, toolbox_api:, get_preview_link:)
+def initialize(code_toolbox:, sandbox_id:, toolbox_api:, get_preview_link:, otel_state:)
 
 ```
 
@@ -24,6 +24,7 @@ Initialize a new Process instance
 - `sandbox_id` _String_ - The ID of the Sandbox
 - `toolbox_api` _DaytonaToolboxApiClient:ProcessApi_ - API client for Sandbox operations
 - `get_preview_link` _Proc_ - Function to get preview link for a port
+- `otel_state` _Daytona:OtelState, nil_ -
 
 **Returns**:
 

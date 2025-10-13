@@ -5,6 +5,8 @@ require 'fileutils'
 
 module Daytona
   class FileSystem
+    include Instrumentation
+
     # @return [String] The Sandbox ID
     attr_reader :sandbox_id
 
@@ -15,9 +17,11 @@ module Daytona
     #
     # @param sandbox_id [String] The Sandbox ID
     # @param toolbox_api [DaytonaToolboxApiClient::FileSystemApi] API client for Sandbox operations
-    def initialize(sandbox_id:, toolbox_api:)
+    # @param otel_state [Daytona::OtelState, nil]
+    def initialize(sandbox_id:, toolbox_api:, otel_state: nil)
       @sandbox_id = sandbox_id
       @toolbox_api = toolbox_api
+      @otel_state = otel_state
     end
 
     # Creates a new directory in the Sandbox at the specified path with the given
@@ -355,5 +359,15 @@ module Daytona
     rescue StandardError => e
       raise Sdk::Error, "Failed to set file permissions: #{e.message}"
     end
+
+    instrument :create_folder, :delete_file, :get_file_info, :list_files, :download_file,
+               :upload_file, :upload_files, :find_files, :search_files, :move_files,
+               :replace_in_files, :set_file_permissions,
+               component: 'FileSystem'
+
+    private
+
+    # @return [Daytona::OtelState, nil]
+    attr_reader :otel_state
   end
 end

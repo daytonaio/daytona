@@ -12,7 +12,7 @@ Main class for a new FileSystem instance.
 #### new FileSystem()
 
 ```ruby
-def initialize(sandbox_id:, toolbox_api:)
+def initialize(sandbox_id:, toolbox_api:, otel_state:)
 
 ```
 
@@ -22,6 +22,7 @@ Initializes a new FileSystem instance.
 
 - `sandbox_id` _String_ - The Sandbox ID
 - `toolbox_api` _DaytonaToolboxApiClient:FileSystemApi_ - API client for Sandbox operations
+- `otel_state` _Daytona:OtelState, nil_ -
 
 **Returns**:
 

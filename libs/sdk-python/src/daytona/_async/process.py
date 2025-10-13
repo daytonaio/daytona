@@ -23,6 +23,7 @@ from daytona_toolbox_api_client_async import (
 from websockets.asyncio.client import connect
 
 from .._utils.errors import intercept_errors
+from .._utils.otel_decorator import with_instrumentation
 from .._utils.stream import std_demux_stream
 from .._utils.timeout import http_timeout
 from ..common.charts import Chart, parse_chart
@@ -95,6 +96,7 @@ class AsyncProcess:
         return ExecutionArtifacts(stdout="\n".join(stdout_lines), charts=charts)
 
     @intercept_errors(message_prefix="Failed to execute command: ")
+    @with_instrumentation()
     async def exec(
         self,
         command: str,
@@ -166,6 +168,7 @@ class AsyncProcess:
             additional_properties=response.additional_properties,
         )
 
+    @with_instrumentation()
     async def code_run(
         self,
         code: str,
@@ -241,6 +244,7 @@ class AsyncProcess:
         return await self.exec(command, env=params.env if params else None, timeout=timeout)
 
     @intercept_errors(message_prefix="Failed to create session: ")
+    @with_instrumentation()
     async def create_session(self, session_id: str) -> None:
         """Creates a new long-running background session in the Sandbox.
 
@@ -286,6 +290,7 @@ class AsyncProcess:
         return await self._api_client.get_session(session_id=session_id)
 
     @intercept_errors(message_prefix="Failed to get session command: ")
+    @with_instrumentation()
     async def get_session_command(self, session_id: str, command_id: str) -> Command:
         """Gets information about a specific command executed in a session.
 
@@ -309,6 +314,7 @@ class AsyncProcess:
         return await self._api_client.get_session_command(session_id=session_id, command_id=command_id)
 
     @intercept_errors(message_prefix="Failed to execute session command: ")
+    @with_instrumentation()
     async def execute_session_command(
         self,
         session_id: str,
@@ -369,6 +375,7 @@ class AsyncProcess:
         )
 
     @intercept_errors(message_prefix="Failed to get session command logs: ")
+    @with_instrumentation()
     async def get_session_command_logs(self, session_id: str, command_id: str) -> SessionCommandLogsResponse:
         """Get the logs for a command executed in a session.
 
@@ -453,6 +460,7 @@ class AsyncProcess:
         )
 
     @intercept_errors(message_prefix="Failed to list sessions: ")
+    @with_instrumentation()
     async def list_sessions(self) -> list[Session]:
         """Lists all sessions in the Sandbox.
 
@@ -470,6 +478,7 @@ class AsyncProcess:
         return await self._api_client.list_sessions()
 
     @intercept_errors(message_prefix="Failed to delete session: ")
+    @with_instrumentation()
     async def delete_session(self, session_id: str) -> None:
         """Terminates and removes a session from the Sandbox, cleaning up any resources
         associated with it.
@@ -490,6 +499,7 @@ class AsyncProcess:
         await self._api_client.delete_session(session_id=session_id)
 
     @intercept_errors(message_prefix="Failed to create PTY session: ")
+    @with_instrumentation()
     async def create_pty_session(
         self,
         id: str,
@@ -536,6 +546,7 @@ class AsyncProcess:
         )
 
     @intercept_errors(message_prefix="Failed to connect PTY session: ")
+    @with_instrumentation()
     async def connect_pty_session(
         self,
         session_id: str,
@@ -585,6 +596,7 @@ class AsyncProcess:
         return handle
 
     @intercept_errors(message_prefix="Failed to list PTY sessions: ")
+    @with_instrumentation()
     async def list_pty_sessions(self) -> list[PtySessionInfo]:
         """Lists all PTY sessions in the Sandbox.
 
@@ -608,6 +620,7 @@ class AsyncProcess:
         return (await self._api_client.list_pty_sessions()).sessions
 
     @intercept_errors(message_prefix="Failed to get PTY session info: ")
+    @with_instrumentation()
     async def get_pty_session_info(self, session_id: str) -> PtySessionInfo:
         """Gets detailed information about a specific PTY session.
 
@@ -638,6 +651,7 @@ class AsyncProcess:
         return await self._api_client.get_pty_session(session_id=session_id)
 
     @intercept_errors(message_prefix="Failed to kill PTY session: ")
+    @with_instrumentation()
     async def kill_pty_session(self, session_id: str) -> None:
         """Kills a PTY session and terminates its associated process.
 
@@ -665,6 +679,7 @@ class AsyncProcess:
         _ = await self._api_client.delete_pty_session(session_id=session_id)
 
     @intercept_errors(message_prefix="Failed to resize PTY session: ")
+    @with_instrumentation()
     async def resize_pty_session(self, session_id: str, pty_size: PtySize) -> PtySessionInfo:
         """Resizes a PTY session's terminal dimensions.
 

@@ -109,6 +109,9 @@ type Client struct {
 	httpClient      *http.Client       // HTTP client for API requests
 	defaultLanguage types.CodeLanguage // Default programming language for code execution
 
+	// Otel holds OpenTelemetry state; nil when OTel is disabled.
+	Otel *otelState
+
 	// toolboxProxyCache caches toolbox proxy URLs per region.
 	// Key: region string, Value: proxy URL string
 	toolboxProxyCache cmap.ConcurrentMap[string, string]
@@ -238,12 +241,36 @@ func NewClientWithConfig(config *types.DaytonaConfig) (*Client, error) {
 
 	client.apiClient = apiclient.NewAPIClient(apiCfg)
 
+	// Initialize OpenTelemetry if enabled
+	otelEnabled := (config != nil && config.Experimental != nil && config.Experimental.OtelEnabled) || os.Getenv("DAYTONA_EXPERIMENTAL_OTEL_ENABLED") == "true"
+	if otelEnabled {
+		otelState, err := initOtel(context.Background())
+		if err != nil {
+			return nil, errors.NewDaytonaError(fmt.Sprintf("failed to initialize OpenTelemetry: %v", err), 0, nil)
+		}
+		client.Otel = otelState
+
+		// Wrap HTTP transport with trace context propagation
+		base := client.httpClient.Transport
+		if base == nil {
+			base = http.DefaultTransport
+		}
+		client.httpClient.Transport = &otelTransport{base: base}
+	}
+
 	// Initialize services
 	client.Volume = NewVolumeService(client)
 	client.Snapshot = NewSnapshotService(client)
 	client.toolboxProxyCache = cmap.New[string]()
 
 	return client, nil
+}
+
+// Close shuts down the client and releases resources.
+// When OpenTelemetry is enabled, Close flushes and shuts down the OTel providers.
+// It is safe to call Close even when OTel is not enabled.
+func (c *Client) Close(ctx context.Context) error {
+	return shutdownOtel(ctx, c.Otel)
 }
 
 // getAuthContext returns a context with authentication for api-client-go
@@ -350,6 +377,12 @@ func (c *Client) createToolboxClient(ctx context.Context, sandboxID string, regi
 //
 // Returns the created [Sandbox] or an error if creation fails.
 func (c *Client) Create(ctx context.Context, params any, opts ...func(*options.CreateSandbox)) (*Sandbox, error) {
+	return withInstrumentation(ctx, c.Otel, "Client", "Create", func(ctx context.Context) (*Sandbox, error) {
+		return c.doCreate(ctx, params, opts...)
+	})
+}
+
+func (c *Client) doCreate(ctx context.Context, params any, opts ...func(*options.CreateSandbox)) (*Sandbox, error) {
 	// Apply options with defaults
 	createOpts := &options.CreateSandbox{
 		WaitForStart: true, // default to true
@@ -588,6 +621,12 @@ func (c *Client) Create(ctx context.Context, params any, opts ...func(*options.C
 //	    return err
 //	}
 func (c *Client) Get(ctx context.Context, sandboxIDOrName string) (*Sandbox, error) {
+	return withInstrumentation(ctx, c.Otel, "Client", "Get", func(ctx context.Context) (*Sandbox, error) {
+		return c.doGet(ctx, sandboxIDOrName)
+	})
+}
+
+func (c *Client) doGet(ctx context.Context, sandboxIDOrName string) (*Sandbox, error) {
 	if sandboxIDOrName == "" {
 		return nil, errors.NewDaytonaError("sandbox ID or name is required", 0, nil)
 	}
@@ -649,6 +688,12 @@ func (c *Client) Get(ctx context.Context, sandboxIDOrName string) (*Sandbox, err
 //
 // Returns [errors.DaytonaNotFoundError] if no matching sandbox is found.
 func (c *Client) FindOne(ctx context.Context, sandboxIDOrName *string, labels map[string]string) (*Sandbox, error) {
+	return withInstrumentation(ctx, c.Otel, "Client", "FindOne", func(ctx context.Context) (*Sandbox, error) {
+		return c.doFindOne(ctx, sandboxIDOrName, labels)
+	})
+}
+
+func (c *Client) doFindOne(ctx context.Context, sandboxIDOrName *string, labels map[string]string) (*Sandbox, error) {
 	if sandboxIDOrName != nil && *sandboxIDOrName != "" {
 		return c.Get(ctx, *sandboxIDOrName)
 	}
@@ -694,6 +739,12 @@ func (c *Client) FindOne(ctx context.Context, sandboxIDOrName *string, labels ma
 //
 // Returns a [PaginatedSandboxes] containing the matching sandboxes and pagination metadata.
 func (c *Client) List(ctx context.Context, labels map[string]string, page *int, limit *int) (*PaginatedSandboxes, error) {
+	return withInstrumentation(ctx, c.Otel, "Client", "List", func(ctx context.Context) (*PaginatedSandboxes, error) {
+		return c.doList(ctx, labels, page, limit)
+	})
+}
+
+func (c *Client) doList(ctx context.Context, labels map[string]string, page *int, limit *int) (*PaginatedSandboxes, error) {
 	if page != nil && *page < 1 {
 		return nil, errors.NewDaytonaError("page must be a positive integer", 0, nil)
 	}

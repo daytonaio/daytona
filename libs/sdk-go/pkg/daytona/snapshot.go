@@ -16,6 +16,9 @@ import (
 
 	apiclient "github.com/daytonaio/daytona/libs/api-client-go"
 	"github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/metric"
+	"go.opentelemetry.io/otel/trace"
 )
 
 // SnapshotService provides snapshot (image template) management operations.
@@ -50,6 +53,7 @@ import (
 //	})
 type SnapshotService struct {
 	client *Client
+	otel   *otelState
 }
 
 // NewSnapshotService creates a new SnapshotService.
@@ -60,6 +64,7 @@ type SnapshotService struct {
 func NewSnapshotService(client *Client) *SnapshotService {
 	return &SnapshotService{
 		client: client,
+		otel:   client.Otel,
 	}
 }
 
@@ -84,32 +89,34 @@ func NewSnapshotService(client *Client) *SnapshotService {
 //
 // Returns [types.PaginatedSnapshots] containing the snapshots and pagination info.
 func (s *SnapshotService) List(ctx context.Context, page *int, limit *int) (*types.PaginatedSnapshots, error) {
-	req := s.client.apiClient.SnapshotsAPI.GetAllSnapshots(s.client.getAuthContext(ctx))
+	return withInstrumentation(ctx, s.otel, "Snapshot", "List", func(ctx context.Context) (*types.PaginatedSnapshots, error) {
+		req := s.client.apiClient.SnapshotsAPI.GetAllSnapshots(s.client.getAuthContext(ctx))
 
-	if page != nil {
-		req = req.Page(float32(*page))
-	}
-	if limit != nil {
-		req = req.Limit(float32(*limit))
-	}
+		if page != nil {
+			req = req.Page(float32(*page))
+		}
+		if limit != nil {
+			req = req.Limit(float32(*limit))
+		}
 
-	result, httpResp, err := req.Execute()
-	if err != nil {
-		return nil, s.client.handleAPIError(err, httpResp)
-	}
+		result, httpResp, err := req.Execute()
+		if err != nil {
+			return nil, s.client.handleAPIError(err, httpResp)
+		}
 
-	// Map API response to SDK types
-	snapshots := make([]*types.Snapshot, len(result.Items))
-	for i, item := range result.Items {
-		snapshots[i] = mapSnapshotFromAPI(&item)
-	}
+		// Map API response to SDK types
+		snapshots := make([]*types.Snapshot, len(result.Items))
+		for i, item := range result.Items {
+			snapshots[i] = mapSnapshotFromAPI(&item)
+		}
 
-	return &types.PaginatedSnapshots{
-		Items:      snapshots,
-		Total:      int(result.GetTotal()),
-		Page:       int(result.GetPage()),
-		TotalPages: int(result.GetTotalPages()),
-	}, nil
+		return &types.PaginatedSnapshots{
+			Items:      snapshots,
+			Total:      int(result.GetTotal()),
+			Page:       int(result.GetPage()),
+			TotalPages: int(result.GetTotalPages()),
+		}, nil
+	})
 }
 
 // Get retrieves a snapshot by name or ID.
@@ -127,16 +134,18 @@ func (s *SnapshotService) List(ctx context.Context, page *int, limit *int) (*typ
 //
 // Returns the [types.Snapshot] or an error if not found.
 func (s *SnapshotService) Get(ctx context.Context, nameOrID string) (*types.Snapshot, error) {
-	result, httpResp, err := s.client.apiClient.SnapshotsAPI.GetSnapshot(
-		s.client.getAuthContext(ctx),
-		nameOrID,
-	).Execute()
+	return withInstrumentation(ctx, s.otel, "Snapshot", "Get", func(ctx context.Context) (*types.Snapshot, error) {
+		result, httpResp, err := s.client.apiClient.SnapshotsAPI.GetSnapshot(
+			s.client.getAuthContext(ctx),
+			nameOrID,
+		).Execute()
 
-	if err != nil {
-		return nil, s.client.handleAPIError(err, httpResp)
-	}
+		if err != nil {
+			return nil, s.client.handleAPIError(err, httpResp)
+		}
 
-	return mapSnapshotFromAPI(result), nil
+		return mapSnapshotFromAPI(result), nil
+	})
 }
 
 // Create builds a new snapshot from an image and streams build logs.
@@ -174,6 +183,38 @@ func (s *SnapshotService) Get(ctx context.Context, nameOrID string) (*types.Snap
 // Returns the created [types.Snapshot], a channel for streaming build logs, or an error.
 // The log channel is closed when the build completes or fails.
 func (s *SnapshotService) Create(ctx context.Context, params *types.CreateSnapshotParams) (*types.Snapshot, <-chan string, error) {
+	if s.otel == nil {
+		return s.doCreate(ctx, params)
+	}
+	ctx, span := s.otel.tracer.Start(ctx, "Snapshot.Create",
+		trace.WithAttributes(
+			attribute.String("component", "Snapshot"),
+			attribute.String("method", "Create"),
+		),
+	)
+	start := time.Now()
+	result, logChan, err := s.doCreate(ctx, params)
+	duration := float64(time.Since(start).Milliseconds())
+	status := "success"
+	if err != nil {
+		status = "error"
+		span.RecordError(err)
+	}
+	span.End()
+	metricName := "snapshot_create_duration"
+	if h, hErr := s.otel.getHistogram(metricName); hErr == nil {
+		h.Record(ctx, duration,
+			metric.WithAttributes(
+				attribute.String("component", "Snapshot"),
+				attribute.String("method", "Create"),
+				attribute.String("status", status),
+			),
+		)
+	}
+	return result, logChan, err
+}
+
+func (s *SnapshotService) doCreate(ctx context.Context, params *types.CreateSnapshotParams) (*types.Snapshot, <-chan string, error) {
 	// Build create snapshot request
 	req := s.client.apiClient.SnapshotsAPI.CreateSnapshot(s.client.getAuthContext(ctx))
 
@@ -299,16 +340,18 @@ func (s *SnapshotService) processImageContext(ctx context.Context, image *Docker
 //
 // Returns an error if deletion fails.
 func (s *SnapshotService) Delete(ctx context.Context, snapshot *types.Snapshot) error {
-	httpResp, err := s.client.apiClient.SnapshotsAPI.RemoveSnapshot(
-		s.client.getAuthContext(ctx),
-		snapshot.ID,
-	).Execute()
+	return withInstrumentationVoid(ctx, s.otel, "Snapshot", "Delete", func(ctx context.Context) error {
+		httpResp, err := s.client.apiClient.SnapshotsAPI.RemoveSnapshot(
+			s.client.getAuthContext(ctx),
+			snapshot.ID,
+		).Execute()
 
-	if err != nil {
-		return s.client.handleAPIError(err, httpResp)
-	}
+		if err != nil {
+			return s.client.handleAPIError(err, httpResp)
+		}
 
-	return nil
+		return nil
+	})
 }
 
 // streamSnapshotBuildLogs streams build logs for a snapshot until it reaches a terminal state

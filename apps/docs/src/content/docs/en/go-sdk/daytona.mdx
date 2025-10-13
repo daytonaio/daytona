@@ -80,18 +80,19 @@ result, err := sandbox.Process.ExecuteCommand(ctx, "ls -la")
 - [type Client](<#Client>)
   - [func NewClient\(\) \(\*Client, error\)](<#NewClient>)
   - [func NewClientWithConfig\(config \*types.DaytonaConfig\) \(\*Client, error\)](<#NewClientWithConfig>)
+  - [func \(c \*Client\) Close\(ctx context.Context\) error](<#Client.Close>)
   - [func \(c \*Client\) Create\(ctx context.Context, params any, opts ...func\(\*options.CreateSandbox\)\) \(\*Sandbox, error\)](<#Client.Create>)
   - [func \(c \*Client\) FindOne\(ctx context.Context, sandboxIDOrName \*string, labels map\[string\]string\) \(\*Sandbox, error\)](<#Client.FindOne>)
   - [func \(c \*Client\) Get\(ctx context.Context, sandboxIDOrName string\) \(\*Sandbox, error\)](<#Client.Get>)
   - [func \(c \*Client\) List\(ctx context.Context, labels map\[string\]string, page \*int, limit \*int\) \(\*PaginatedSandboxes, error\)](<#Client.List>)
 - [type CodeInterpreterService](<#CodeInterpreterService>)
-  - [func NewCodeInterpreterService\(toolboxClient \*toolbox.APIClient\) \*CodeInterpreterService](<#NewCodeInterpreterService>)
+  - [func NewCodeInterpreterService\(toolboxClient \*toolbox.APIClient, otel \*otelState\) \*CodeInterpreterService](<#NewCodeInterpreterService>)
   - [func \(c \*CodeInterpreterService\) CreateContext\(ctx context.Context, cwd \*string\) \(map\[string\]any, error\)](<#CodeInterpreterService.CreateContext>)
   - [func \(c \*CodeInterpreterService\) DeleteContext\(ctx context.Context, contextID string\) error](<#CodeInterpreterService.DeleteContext>)
   - [func \(c \*CodeInterpreterService\) ListContexts\(ctx context.Context\) \(\[\]map\[string\]any, error\)](<#CodeInterpreterService.ListContexts>)
   - [func \(c \*CodeInterpreterService\) RunCode\(ctx context.Context, code string, opts ...func\(\*options.RunCode\)\) \(\*OutputChannels, error\)](<#CodeInterpreterService.RunCode>)
 - [type ComputerUseService](<#ComputerUseService>)
-  - [func NewComputerUseService\(toolboxClient \*toolbox.APIClient\) \*ComputerUseService](<#NewComputerUseService>)
+  - [func NewComputerUseService\(toolboxClient \*toolbox.APIClient, otel \*otelState\) \*ComputerUseService](<#NewComputerUseService>)
   - [func \(c \*ComputerUseService\) Display\(\) \*DisplayService](<#ComputerUseService.Display>)
   - [func \(c \*ComputerUseService\) GetStatus\(ctx context.Context\) \(map\[string\]any, error\)](<#ComputerUseService.GetStatus>)
   - [func \(c \*ComputerUseService\) Keyboard\(\) \*KeyboardService](<#ComputerUseService.Keyboard>)
@@ -101,7 +102,7 @@ result, err := sandbox.Process.ExecuteCommand(ctx, "ls -la")
   - [func \(c \*ComputerUseService\) Start\(ctx context.Context\) error](<#ComputerUseService.Start>)
   - [func \(c \*ComputerUseService\) Stop\(ctx context.Context\) error](<#ComputerUseService.Stop>)
 - [type DisplayService](<#DisplayService>)
-  - [func NewDisplayService\(toolboxClient \*toolbox.APIClient\) \*DisplayService](<#NewDisplayService>)
+  - [func NewDisplayService\(toolboxClient \*toolbox.APIClient, otel \*otelState\) \*DisplayService](<#NewDisplayService>)
   - [func \(d \*DisplayService\) GetInfo\(ctx context.Context\) \(map\[string\]any, error\)](<#DisplayService.GetInfo>)
   - [func \(d \*DisplayService\) GetWindows\(ctx context.Context\) \(map\[string\]any, error\)](<#DisplayService.GetWindows>)
 - [type DockerImage](<#DockerImage>)
@@ -127,7 +128,7 @@ result, err := sandbox.Process.ExecuteCommand(ctx, "ls -la")
   - [func \(img \*DockerImage\) Workdir\(path string\) \*DockerImage](<#DockerImage.Workdir>)
 - [type DockerImageContext](<#DockerImageContext>)
 - [type FileSystemService](<#FileSystemService>)
-  - [func NewFileSystemService\(toolboxClient \*toolbox.APIClient\) \*FileSystemService](<#NewFileSystemService>)
+  - [func NewFileSystemService\(toolboxClient \*toolbox.APIClient, otel \*otelState\) \*FileSystemService](<#NewFileSystemService>)
   - [func \(f \*FileSystemService\) CreateFolder\(ctx context.Context, path string, opts ...func\(\*options.CreateFolder\)\) error](<#FileSystemService.CreateFolder>)
   - [func \(f \*FileSystemService\) DeleteFile\(ctx context.Context, path string, recursive bool\) error](<#FileSystemService.DeleteFile>)
   - [func \(f \*FileSystemService\) DownloadFile\(ctx context.Context, remotePath string, localPath \*string\) \(\[\]byte, error\)](<#FileSystemService.DownloadFile>)
@@ -140,7 +141,7 @@ result, err := sandbox.Process.ExecuteCommand(ctx, "ls -la")
   - [func \(f \*FileSystemService\) SetFilePermissions\(ctx context.Context, path string, opts ...func\(\*options.SetFilePermissions\)\) error](<#FileSystemService.SetFilePermissions>)
   - [func \(f \*FileSystemService\) UploadFile\(ctx context.Context, source any, destination string\) error](<#FileSystemService.UploadFile>)
 - [type GitService](<#GitService>)
-  - [func NewGitService\(toolboxClient \*toolbox.APIClient\) \*GitService](<#NewGitService>)
+  - [func NewGitService\(toolboxClient \*toolbox.APIClient, otel \*otelState\) \*GitService](<#NewGitService>)
   - [func \(g \*GitService\) Add\(ctx context.Context, path string, files \[\]string\) error](<#GitService.Add>)
   - [func \(g \*GitService\) Branches\(ctx context.Context, path string\) \(\[\]string, error\)](<#GitService.Branches>)
   - [func \(g \*GitService\) Checkout\(ctx context.Context, path, name string\) error](<#GitService.Checkout>)
@@ -152,12 +153,12 @@ result, err := sandbox.Process.ExecuteCommand(ctx, "ls -la")
   - [func \(g \*GitService\) Push\(ctx context.Context, path string, opts ...func\(\*options.GitPush\)\) error](<#GitService.Push>)
   - [func \(g \*GitService\) Status\(ctx context.Context, path string\) \(\*types.GitStatus, error\)](<#GitService.Status>)
 - [type KeyboardService](<#KeyboardService>)
-  - [func NewKeyboardService\(toolboxClient \*toolbox.APIClient\) \*KeyboardService](<#NewKeyboardService>)
+  - [func NewKeyboardService\(toolboxClient \*toolbox.APIClient, otel \*otelState\) \*KeyboardService](<#NewKeyboardService>)
   - [func \(k \*KeyboardService\) Hotkey\(ctx context.Context, keys string\) error](<#KeyboardService.Hotkey>)
   - [func \(k \*KeyboardService\) Press\(ctx context.Context, key string, modifiers \[\]string\) error](<#KeyboardService.Press>)
   - [func \(k \*KeyboardService\) Type\(ctx context.Context, text string, delay \*int\) error](<#KeyboardService.Type>)
 - [type LspServerService](<#LspServerService>)
-  - [func NewLspServerService\(toolboxClient \*toolbox.APIClient, languageID types.LspLanguageID, projectPath string\) \*LspServerService](<#NewLspServerService>)
+  - [func NewLspServerService\(toolboxClient \*toolbox.APIClient, languageID types.LspLanguageID, projectPath string, otel \*otelState\) \*LspServerService](<#NewLspServerService>)
   - [func \(l \*LspServerService\) Completions\(ctx context.Context, path string, position types.Position\) \(any, error\)](<#LspServerService.Completions>)
   - [func \(l \*LspServerService\) DidClose\(ctx context.Context, path string\) error](<#LspServerService.DidClose>)
   - [func \(l \*LspServerService\) DidOpen\(ctx context.Context, path string\) error](<#LspServerService.DidOpen>)
@@ -166,7 +167,7 @@ result, err := sandbox.Process.ExecuteCommand(ctx, "ls -la")
   - [func \(l \*LspServerService\) Start\(ctx context.Context\) error](<#LspServerService.Start>)
   - [func \(l \*LspServerService\) Stop\(ctx context.Context\) error](<#LspServerService.Stop>)
 - [type MouseService](<#MouseService>)
-  - [func NewMouseService\(toolboxClient \*toolbox.APIClient\) \*MouseService](<#NewMouseService>)
+  - [func NewMouseService\(toolboxClient \*toolbox.APIClient, otel \*otelState\) \*MouseService](<#NewMouseService>)
   - [func \(m \*MouseService\) Click\(ctx context.Context, x, y int, button \*string, double \*bool\) \(map\[string\]any, error\)](<#MouseService.Click>)
   - [func \(m \*MouseService\) Drag\(ctx context.Context, startX, startY, endX, endY int, button \*string\) \(map\[string\]any, error\)](<#MouseService.Drag>)
   - [func \(m \*MouseService\) GetPosition\(ctx context.Context\) \(map\[string\]any, error\)](<#MouseService.GetPosition>)
@@ -175,7 +176,7 @@ result, err := sandbox.Process.ExecuteCommand(ctx, "ls -la")
 - [type OutputChannels](<#OutputChannels>)
 - [type PaginatedSandboxes](<#PaginatedSandboxes>)
 - [type ProcessService](<#ProcessService>)
-  - [func NewProcessService\(toolboxClient \*toolbox.APIClient\) \*ProcessService](<#NewProcessService>)
+  - [func NewProcessService\(toolboxClient \*toolbox.APIClient, otel \*otelState\) \*ProcessService](<#NewProcessService>)
   - [func \(p \*ProcessService\) CodeRun\(ctx context.Context, code string, opts ...func\(\*options.CodeRun\)\) \(\*types.ExecuteResponse, error\)](<#ProcessService.CodeRun>)
   - [func \(p \*ProcessService\) ConnectPty\(ctx context.Context, sessionID string\) \(\*PtyHandle, error\)](<#ProcessService.ConnectPty>)
   - [func \(p \*ProcessService\) CreatePty\(ctx context.Context, id string, opts ...func\(\*options.CreatePty\)\) \(\*PtyHandle, error\)](<#ProcessService.CreatePty>)
@@ -235,7 +236,7 @@ result, err := sandbox.Process.ExecuteCommand(ctx, "ls -la")
   - [func \(s \*Sandbox\) WaitForStart\(ctx context.Context, timeout time.Duration\) error](<#Sandbox.WaitForStart>)
   - [func \(s \*Sandbox\) WaitForStop\(ctx context.Context, timeout time.Duration\) error](<#Sandbox.WaitForStop>)
 - [type ScreenshotService](<#ScreenshotService>)
-  - [func NewScreenshotService\(toolboxClient \*toolbox.APIClient\) \*ScreenshotService](<#NewScreenshotService>)
+  - [func NewScreenshotService\(toolboxClient \*toolbox.APIClient, otel \*otelState\) \*ScreenshotService](<#NewScreenshotService>)
   - [func \(s \*ScreenshotService\) TakeFullScreen\(ctx context.Context, showCursor \*bool\) \(\*types.ScreenshotResponse, error\)](<#ScreenshotService.TakeFullScreen>)
   - [func \(s \*ScreenshotService\) TakeRegion\(ctx context.Context, region types.ScreenshotRegion, showCursor \*bool\) \(\*types.ScreenshotResponse, error\)](<#ScreenshotService.TakeRegion>)
 - [type SnapshotService](<#SnapshotService>)
@@ -290,6 +291,9 @@ The Client is safe for concurrent use by multiple goroutines.
 ```go
 type Client struct {
 
+    // Otel holds OpenTelemetry state; nil when OTel is disabled.
+    Otel *otelState
+
     // Volume provides methods for managing persistent volumes.
     Volume *VolumeService
 
@@ -342,6 +346,15 @@ if err != nil {
 ```
 
 Returns an error if neither API key nor JWT token is provided, or if JWT token is provided without an organization ID.
+
+<a name="Client.Close"></a>
+### func \(\*Client\) Close
+
+```go
+func (c *Client) Close(ctx context.Context) error
+```
+
+Close shuts down the client and releases resources. When OpenTelemetry is enabled, Close flushes and shuts down the OTel providers. It is safe to call Close even when OTel is not enabled.
 
 <a name="Client.Create"></a>
 ### func \(\*Client\) Create
@@ -512,7 +525,7 @@ type CodeInterpreterService struct {
 ### func NewCodeInterpreterService
 
 ```go
-func NewCodeInterpreterService(toolboxClient *toolbox.APIClient) *CodeInterpreterService
+func NewCodeInterpreterService(toolboxClient *toolbox.APIClient, otel *otelState) *CodeInterpreterService
 ```
 
 NewCodeInterpreterService creates a new CodeInterpreterService.
@@ -688,7 +701,7 @@ type ComputerUseService struct {
 ### func NewComputerUseService
 
 ```go
-func NewComputerUseService(toolboxClient *toolbox.APIClient) *ComputerUseService
+func NewComputerUseService(toolboxClient *toolbox.APIClient, otel *otelState) *ComputerUseService
 ```
 
 NewComputerUseService creates a new ComputerUseService.
@@ -827,7 +840,7 @@ type DisplayService struct {
 ### func NewDisplayService
 
 ```go
-func NewDisplayService(toolboxClient *toolbox.APIClient) *DisplayService
+func NewDisplayService(toolboxClient *toolbox.APIClient, otel *otelState) *DisplayService
 ```
 
 NewDisplayService creates a new DisplayService.
@@ -1323,7 +1336,7 @@ type FileSystemService struct {
 ### func NewFileSystemService
 
 ```go
-func NewFileSystemService(toolboxClient *toolbox.APIClient) *FileSystemService
+func NewFileSystemService(toolboxClient *toolbox.APIClient, otel *otelState) *FileSystemService
 ```
 
 NewFileSystemService creates a new FileSystemService with the provided toolbox client.
@@ -1703,7 +1716,7 @@ type GitService struct {
 ### func NewGitService
 
 ```go
-func NewGitService(toolboxClient *toolbox.APIClient) *GitService
+func NewGitService(toolboxClient *toolbox.APIClient, otel *otelState) *GitService
 ```
 
 NewGitService creates a new GitService with the provided toolbox client.
@@ -2038,7 +2051,7 @@ type KeyboardService struct {
 ### func NewKeyboardService
 
 ```go
-func NewKeyboardService(toolboxClient *toolbox.APIClient) *KeyboardService
+func NewKeyboardService(toolboxClient *toolbox.APIClient, otel *otelState) *KeyboardService
 ```
 
 NewKeyboardService creates a new KeyboardService.
@@ -2166,7 +2179,7 @@ type LspServerService struct {
 ### func NewLspServerService
 
 ```go
-func NewLspServerService(toolboxClient *toolbox.APIClient, languageID types.LspLanguageID, projectPath string) *LspServerService
+func NewLspServerService(toolboxClient *toolbox.APIClient, languageID types.LspLanguageID, projectPath string, otel *otelState) *LspServerService
 ```
 
 NewLspServerService creates a new LspServerService.
@@ -2367,7 +2380,7 @@ type MouseService struct {
 ### func NewMouseService
 
 ```go
-func NewMouseService(toolboxClient *toolbox.APIClient) *MouseService
+func NewMouseService(toolboxClient *toolbox.APIClient, otel *otelState) *MouseService
 ```
 
 NewMouseService creates a new MouseService.
@@ -2565,7 +2578,7 @@ type ProcessService struct {
 ### func NewProcessService
 
 ```go
-func NewProcessService(toolboxClient *toolbox.APIClient) *ProcessService
+func NewProcessService(toolboxClient *toolbox.APIClient, otel *otelState) *ProcessService
 ```
 
 NewProcessService creates a new ProcessService with the provided toolbox client.
@@ -3983,7 +3996,7 @@ type ScreenshotService struct {
 ### func NewScreenshotService
 
 ```go
-func NewScreenshotService(toolboxClient *toolbox.APIClient) *ScreenshotService
+func NewScreenshotService(toolboxClient *toolbox.APIClient, otel *otelState) *ScreenshotService
 ```
 
 NewScreenshotService creates a new ScreenshotService.

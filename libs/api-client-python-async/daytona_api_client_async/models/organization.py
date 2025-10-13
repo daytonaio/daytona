@@ -47,8 +47,9 @@ class Organization(BaseModel):
     authenticated_rate_limit: Optional[Union[StrictFloat, StrictInt]] = Field(description="Authenticated rate limit per minute", serialization_alias="authenticatedRateLimit")
     sandbox_create_rate_limit: Optional[Union[StrictFloat, StrictInt]] = Field(description="Sandbox create rate limit per minute", serialization_alias="sandboxCreateRateLimit")
     sandbox_lifecycle_rate_limit: Optional[Union[StrictFloat, StrictInt]] = Field(description="Sandbox lifecycle rate limit per minute", serialization_alias="sandboxLifecycleRateLimit")
+    experimental_config: Dict[str, Any] = Field(description="Experimental configuration", serialization_alias="experimentalConfig")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["id", "name", "createdBy", "personal", "createdAt", "updatedAt", "suspended", "suspendedAt", "suspensionReason", "suspendedUntil", "suspensionCleanupGracePeriodHours", "maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "sandboxLimitedNetworkEgress", "defaultRegionId", "authenticatedRateLimit", "sandboxCreateRateLimit", "sandboxLifecycleRateLimit"]
+    __properties: ClassVar[List[str]] = ["id", "name", "createdBy", "personal", "createdAt", "updatedAt", "suspended", "suspendedAt", "suspensionReason", "suspendedUntil", "suspensionCleanupGracePeriodHours", "maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "sandboxLimitedNetworkEgress", "defaultRegionId", "authenticatedRateLimit", "sandboxCreateRateLimit", "sandboxLifecycleRateLimit", "experimentalConfig"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -141,7 +142,8 @@ class Organization(BaseModel):
             "default_region_id": obj.get("defaultRegionId"),
             "authenticated_rate_limit": obj.get("authenticatedRateLimit"),
             "sandbox_create_rate_limit": obj.get("sandboxCreateRateLimit"),
-            "sandbox_lifecycle_rate_limit": obj.get("sandboxLifecycleRateLimit")
+            "sandbox_lifecycle_rate_limit": obj.get("sandboxLifecycleRateLimit"),
+            "experimental_config": obj.get("experimentalConfig")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():
