@@ -606,6 +606,44 @@ paths:
       summary: Update sandbox default limited network egress
       tags:
         - organizations
+  /organizations/{organizationId}/experimental-config:
+    put:
+      operationId: updateExperimentalConfig
+      parameters:
+        - description: Organization ID
+          explode: false
+          in: path
+          name: organizationId
+          required: true
+          schema:
+            type: string
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: true
+              example:
+                otel:
+                  endpoint: http://otel-collector:4317
+                  headers:
+                    api-key: XXX
+              type: object
+        description: Experimental configuration as a JSON object. Set to null to clear
+          the configuration.
+        required: false
+      responses:
+        '200':
+          description: ''
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Update experimental configuration
+      tags:
+        - organizations
   /organizations/{organizationId}/roles:
     get:
       operationId: listOrganizationRoles
@@ -7570,6 +7608,7 @@ components:
         maxMemoryPerSandbox: 2.3021358869347655
         id: id
         totalMemoryQuota: 1.4658129805029452
+        experimentalConfig: '{}'
         totalDiskQuota: 5.962133916683182
         updatedAt: 2000-01-23T04:56:07.000+00:00
       properties:
@@ -7631,9 +7670,13 @@ components:
         sandboxLimitedNetworkEgress:
           description: Sandbox default network block all
           type: boolean
+        experimentalConfig:
+          description: Experimental configuration
+          type: object
       required:
         - createdAt
         - createdBy
+        - experimentalConfig
         - id
         - maxCpuPerSandbox
         - maxDiskPerSandbox

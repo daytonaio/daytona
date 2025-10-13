@@ -202,14 +202,7 @@ export class SandboxStartAction extends SandboxAction {
       entrypoint = this.getEntrypointFromDockerfile(sandbox.buildInfo.dockerfileContent)
     }
 
-    let metadata: { [key: string]: string } | undefined = undefined
-    if (organization) {
-      metadata = {
-        limitNetworkEgress: String(organization.sandboxLimitedNetworkEgress),
-        organizationId: organization.id,
-        organizationName: organization.name,
-      }
-    }
+    const metadata: { [key: string]: string } | undefined = organization?.sandboxMetadata
 
     await runnerAdapter.createSandbox(sandbox, registry, entrypoint, metadata)
 
@@ -390,14 +383,7 @@ export class SandboxStartAction extends SandboxAction {
 
       sandbox.snapshot = validBackup
 
-      let metadata: { [key: string]: string } | undefined = undefined
-      if (organization) {
-        metadata = {
-          limitNetworkEgress: String(organization.sandboxLimitedNetworkEgress),
-          organizationId: organization.id,
-          organizationName: organization.name,
-        }
-      }
+      const metadata: { [key: string]: string } | undefined = organization?.sandboxMetadata
 
       await runnerAdapter.createSandbox(sandbox, registry, undefined, metadata)
     } else {
@@ -410,12 +396,7 @@ export class SandboxStartAction extends SandboxAction {
 
       const runnerAdapter = await this.runnerAdapterFactory.create(runner)
 
-      let metadata: { [key: string]: string } | undefined = undefined
-      if (organization) {
-        metadata = {
-          limitNetworkEgress: String(organization.sandboxLimitedNetworkEgress),
-        }
-      }
+      const metadata: { [key: string]: string } | undefined = organization?.sandboxMetadata
 
       await runnerAdapter.startSandbox(sandbox.id, metadata)
 

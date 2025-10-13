@@ -200,6 +200,19 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
     await this.organizationRepository.save(organization)
   }
 
+  async updateExperimentalConfig(
+    organizationId: string,
+    experimentalConfig: Record<string, any> | null,
+  ): Promise<void> {
+    const organization = await this.organizationRepository.findOne({ where: { id: organizationId } })
+    if (!organization) {
+      throw new NotFoundException(`Organization with ID ${organizationId} not found`)
+    }
+    organization._experimentalConfig = experimentalConfig
+
+    await this.organizationRepository.save(organization)
+  }
+
   private async createWithEntityManager(
     entityManager: EntityManager,
     createOrganizationDto: CreateOrganizationDto,

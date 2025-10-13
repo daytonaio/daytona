@@ -10,6 +10,7 @@ import {
   ChevronsUpDown,
   Container,
   CreditCard,
+  FlaskConical,
   HardDrive,
   KeyRound,
   ListChecks,
@@ -142,6 +143,14 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
       label: 'Settings',
       path: RoutePath.SETTINGS,
     })
+
+    if (authenticatedUserOrganizationMember?.role === OrganizationUserRoleEnum.OWNER) {
+      arr.push({
+        icon: <FlaskConical size={16} strokeWidth={1.5} />,
+        label: 'Experimental',
+        path: RoutePath.EXPERIMENTAL,
+      })
+    }
     return arr
   }, [
     authenticatedUserOrganizationMember?.role,

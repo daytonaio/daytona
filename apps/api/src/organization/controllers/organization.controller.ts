@@ -13,6 +13,7 @@ import {
   Param,
   Patch,
   Post,
+  Put,
   UseGuards,
 } from '@nestjs/common'
 import { AuthGuard } from '@nestjs/passport'
@@ -42,6 +43,7 @@ import { AuditTarget } from '../../audit/enums/audit-target.enum'
 import { EmailUtils } from '../../common/utils/email.util'
 import { OrganizationUsageService } from '../services/organization-usage.service'
 import { OrganizationSandboxDefaultLimitedNetworkEgressDto } from '../dto/organization-sandbox-default-limited-network-egress.dto'
+import { RequireFlagsEnabled } from '@openfeature/nestjs-sdk'
 
 @ApiTags('organizations')
 @Controller('organizations')
@@ -476,5 +478,40 @@ export class OrganizationController {
       organizationId,
       body.sandboxDefaultLimitedNetworkEgress,
     )
+  }
+
+  @Put('/:organizationId/experimental-config')
+  @ApiOperation({
+    summary: 'Update experimental configuration',
+    operationId: 'updateExperimentalConfig',
+  })
+  @ApiParam({
+    name: 'organizationId',
+    description: 'Organization ID',
+    type: 'string',
+  })
+  @ApiBody({
+    description: 'Experimental configuration as a JSON object. Set to null to clear the configuration.',
+    required: false,
+    schema: {
+      additionalProperties: true,
+      example: {
+        otel: {
+          endpoint: 'http://otel-collector:4317',
+          headers: {
+            'api-key': 'XXX',
+          },
+        },
+      },
+    },
+  })
+  @RequiredOrganizationMemberRole(OrganizationMemberRole.OWNER)
+  @UseGuards(AuthGuard('jwt'), OrganizationActionGuard)
+  @RequireFlagsEnabled({ flags: [{ flagKey: 'organization_experiments', defaultValue: false }] })
+  async updateExperimentalConfig(
+    @Param('organizationId') organizationId: string,
+    @Body() experimentalConfig: Record<string, any> | null,
+  ): Promise<void> {
+    await this.organizationService.updateExperimentalConfig(organizationId, experimentalConfig)
   }
 }

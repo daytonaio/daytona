@@ -98,6 +98,11 @@ export class OrganizationDto {
   })
   sandboxLimitedNetworkEgress: boolean
 
+  @ApiProperty({
+    description: 'Experimental configuration',
+  })
+  experimentalConfig: Record<string, any> | null
+
   static fromOrganization(organization: Organization): OrganizationDto {
     const dto: OrganizationDto = {
       id: organization.id,
@@ -118,6 +123,7 @@ export class OrganizationDto {
       maxMemoryPerSandbox: organization.maxMemoryPerSandbox,
       maxDiskPerSandbox: organization.maxDiskPerSandbox,
       sandboxLimitedNetworkEgress: organization.sandboxLimitedNetworkEgress,
+      experimentalConfig: organization._experimentalConfig,
     }
 
     return dto

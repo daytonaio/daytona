@@ -6,8 +6,14 @@ package toolbox
 import (
 	"context"
 	"fmt"
+	"net"
+	"net/http"
+	"os"
+	"path"
+
 	common_proxy "github.com/daytonaio/common-go/pkg/proxy"
 	"github.com/daytonaio/daemon/internal"
+	"github.com/daytonaio/daemon/pkg/telemetry"
 	"github.com/daytonaio/daemon/pkg/toolbox/computeruse"
 	"github.com/daytonaio/daemon/pkg/toolbox/computeruse/manager"
 	"github.com/daytonaio/daemon/pkg/toolbox/config"
@@ -20,10 +26,10 @@ import (
 	"github.com/daytonaio/daemon/pkg/toolbox/process/pty"
 	"github.com/daytonaio/daemon/pkg/toolbox/process/session"
 	"github.com/daytonaio/daemon/pkg/toolbox/proxy"
-	"net"
-	"net/http"
-	"os"
-	"path"
+	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
+	otellog "go.opentelemetry.io/otel/sdk/log"
+	"go.opentelemetry.io/otel/sdk/metric"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
@@ -31,9 +37,17 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-type Server struct {
+type server struct {
 	WorkDir     string
 	ComputerUse computeruse.IComputerUse
+	SandboxId   string
+	telemetry   Telemetry
+}
+
+type Telemetry struct {
+	TracerProvider *sdktrace.TracerProvider
+	MeterProvider  *metric.MeterProvider
+	Logger         *otellog.LoggerProvider
 }
 
 type WorkDirResponse struct {
@@ -44,7 +58,15 @@ type UserHomeDirResponse struct {
 	Dir string `json:"dir"`
 } // @name UserHomeDirResponse
 
-func (s *Server) GetWorkDir(ctx *gin.Context) {
+func NewServer(workDir string, sandboxId string) *server {
+	return &server{
+		WorkDir:   workDir,
+		SandboxId: sandboxId,
+		telemetry: Telemetry{},
+	}
+}
+
+func (s *server) GetWorkDir(ctx *gin.Context) {
 	workDir := WorkDirResponse{
 		Dir: s.WorkDir,
 	}
@@ -52,7 +74,7 @@ func (s *Server) GetWorkDir(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, workDir)
 }
 
-func (s *Server) GetUserHomeDir(ctx *gin.Context) {
+func (s *server) GetUserHomeDir(ctx *gin.Context) {
 	userHomeDir, err := os.UserHomeDir()
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, err)
@@ -65,14 +87,26 @@ func (s *Server) GetUserHomeDir(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, userHomeDirResponse)
 }
 
-func (s *Server) Start() error {
+func (s *server) Start() error {
 	// Set Gin to release mode in production
 	if os.Getenv("ENVIRONMENT") == "production" {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
+	otelServiceName := fmt.Sprintf("sandbox-%s", s.SandboxId)
+
 	r := gin.New()
 	r.Use(gin.Recovery())
+	r.Use(func(ctx *gin.Context) {
+		if s.telemetry.TracerProvider == nil {
+			log.Warn("Telemetry not initialized. Proceeding without telemetry...")
+			ctx.Next()
+			return
+		}
+
+		otelgin.Middleware(otelServiceName, otelgin.WithTracerProvider(s.telemetry.TracerProvider))(ctx)
+		ctx.Next()
+	})
 	r.Use(middlewares.LoggingMiddleware())
 	r.Use(middlewares.ErrorMiddleware())
 	binding.Validator = new(DefaultValidator)
@@ -87,6 +121,57 @@ func (s *Server) Start() error {
 	r.GET("/project-dir", s.GetUserHomeDir)
 	r.GET("/user-home-dir", s.GetUserHomeDir)
 	r.GET("/work-dir", s.GetWorkDir)
+
+	r.POST("/start-telemetry", func(ctx *gin.Context) {
+		var req struct {
+			Endpoint string            `json:"endpoint" binding:"required,url"`
+			Headers  map[string]string `json:"headers"`
+		}
+		if err := ctx.ShouldBindJSON(&req); err != nil {
+			ctx.AbortWithError(http.StatusBadRequest, err)
+			return
+		}
+
+		config := telemetry.Config{
+			ServiceName: otelServiceName,
+			Endpoint:    req.Endpoint,
+			Headers:     req.Headers,
+		}
+
+		// Initialize OpenTelemetry logging
+		telemetryContext := context.Background()
+		lp, err := telemetry.InitLogger(telemetryContext, config)
+		if err != nil {
+			ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to initialize logger: %w", err))
+			return
+		}
+
+		// Initialize OpenTelemetry metrics
+		mp, err := telemetry.InitMetrics(ctx, config)
+		if err != nil {
+			ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to initialize metrics: %w", err))
+			defer lp.Shutdown(telemetryContext)
+			return
+		}
+
+		// Initialize OpenTelemetry tracing
+		tp, err := telemetry.InitTracer(ctx, config)
+		if err != nil {
+			defer lp.Shutdown(telemetryContext)
+			defer mp.Shutdown(telemetryContext)
+			ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to initialize tracer: %w", err))
+			return
+		}
+
+		s.telemetry.TracerProvider = tp
+		s.telemetry.MeterProvider = mp
+		s.telemetry.Logger = lp
+
+		log.Info("Telemetry initialized successfully")
+		ctx.JSON(http.StatusOK, gin.H{
+			"message": "Telemetry initialized successfully",
+		})
+	})
 
 	dirname, err := os.UserHomeDir()
 	if err != nil {
@@ -274,7 +359,7 @@ func (s *Server) Start() error {
 
 	go portDetector.Start(context.Background())
 
-	httpServer := &http.Server{
+	httpserver := &http.Server{
 		Addr:    fmt.Sprintf(":%d", config.TOOLBOX_API_PORT),
 		Handler: r,
 	}
@@ -282,16 +367,16 @@ func (s *Server) Start() error {
 	// Print to stdout so the runner can know that the daemon is ready
 	fmt.Println("Starting toolbox server on port", config.TOOLBOX_API_PORT)
 
-	listener, err := net.Listen("tcp", httpServer.Addr)
+	listener, err := net.Listen("tcp", httpserver.Addr)
 	if err != nil {
 		return err
 	}
 
-	return httpServer.Serve(listener)
+	return httpserver.Serve(listener)
 }
 
 // computerUseDisabledMiddleware returns a middleware that handles requests when computer-use is disabled
-func (s *Server) computerUseDisabledMiddleware() gin.HandlerFunc {
+func (s *server) computerUseDisabledMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.JSON(http.StatusServiceUnavailable, gin.H{
 			"message":  "Computer-use functionality is not available",
@@ -303,7 +388,7 @@ func (s *Server) computerUseDisabledMiddleware() gin.HandlerFunc {
 }
 
 // Computer use management handlers
-func (s *Server) startComputerUse(ctx *gin.Context) {
+func (s *server) startComputerUse(ctx *gin.Context) {
 	_, err := s.ComputerUse.Start()
 	if err != nil {
 		ctx.JSON(http.StatusServiceUnavailable, gin.H{
@@ -328,7 +413,7 @@ func (s *Server) startComputerUse(ctx *gin.Context) {
 	})
 }
 
-func (s *Server) stopComputerUse(ctx *gin.Context) {
+func (s *server) stopComputerUse(ctx *gin.Context) {
 	_, err := s.ComputerUse.Stop()
 	if err != nil {
 		ctx.JSON(http.StatusServiceUnavailable, gin.H{
@@ -352,7 +437,7 @@ func (s *Server) stopComputerUse(ctx *gin.Context) {
 	})
 }
 
-func (s *Server) getComputerUseStatus(ctx *gin.Context) {
+func (s *server) getComputerUseStatus(ctx *gin.Context) {
 	status, err := s.ComputerUse.GetProcessStatus()
 	if err != nil {
 		ctx.JSON(http.StatusServiceUnavailable, gin.H{
@@ -366,7 +451,7 @@ func (s *Server) getComputerUseStatus(ctx *gin.Context) {
 	})
 }
 
-func (s *Server) getProcessStatus(ctx *gin.Context) {
+func (s *server) getProcessStatus(ctx *gin.Context) {
 	processName := ctx.Param("processName")
 	req := &computeruse.ProcessRequest{
 		ProcessName: processName,
@@ -386,7 +471,7 @@ func (s *Server) getProcessStatus(ctx *gin.Context) {
 	})
 }
 
-func (s *Server) restartProcess(ctx *gin.Context) {
+func (s *server) restartProcess(ctx *gin.Context) {
 	processName := ctx.Param("processName")
 	req := &computeruse.ProcessRequest{
 		ProcessName: processName,
@@ -406,7 +491,7 @@ func (s *Server) restartProcess(ctx *gin.Context) {
 	})
 }
 
-func (s *Server) getProcessLogs(ctx *gin.Context) {
+func (s *server) getProcessLogs(ctx *gin.Context) {
 	processName := ctx.Param("processName")
 	req := &computeruse.ProcessRequest{
 		ProcessName: processName,
@@ -426,7 +511,7 @@ func (s *Server) getProcessLogs(ctx *gin.Context) {
 	})
 }
 
-func (s *Server) getProcessErrors(ctx *gin.Context) {
+func (s *server) getProcessErrors(ctx *gin.Context) {
 	processName := ctx.Param("processName")
 	req := &computeruse.ProcessRequest{
 		ProcessName: processName,

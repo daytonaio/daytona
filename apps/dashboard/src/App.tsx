@@ -50,6 +50,7 @@ import { BillingProvider } from './providers/BillingProvider'
 import { useConfig } from './hooks/useConfig'
 import { addPylonWidget } from './lib/pylon-widget'
 import { QueryProvider } from './providers/QueryProvider'
+import Experimental from './pages/Experimental'
 
 // Simple redirection components for external URLs
 const DocsRedirect = () => {
@@ -234,6 +235,14 @@ function App() {
           />
           <Route path={getRouteSubPath(RoutePath.USER_INVITATIONS)} element={<UserOrganizationInvitations />} />
           <Route path={getRouteSubPath(RoutePath.ONBOARDING)} element={<Onboarding />} />
+          <Route
+            path={getRouteSubPath(RoutePath.EXPERIMENTAL)}
+            element={
+              <OwnerAccessOrganizationPageWrapper>
+                <Experimental />
+              </OwnerAccessOrganizationPageWrapper>
+            }
+          />
         </Route>
         <Route path="*" element={<NotFound />} />
       </Routes>

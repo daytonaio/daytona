@@ -7,7 +7,9 @@ import (
 	"context"
 	"fmt"
 	"net"
+	"net/http"
 	"net/url"
+	"strings"
 	"time"
 
 	"github.com/daytonaio/common-go/pkg/timer"
@@ -90,6 +92,16 @@ func (d *DockerClient) Start(ctx context.Context, containerId string, metadata m
 			err = d.netRulesManager.SetNetworkLimiter(containerShortId, containerIP)
 			if err != nil {
 				log.Errorf("Failed to set network limiter: %v", err)
+			}
+		}()
+	}
+
+	if config, ok := metadata["otelConfig"]; ok && config != "" {
+		log.Info("FOUND OTEL CONFIG, APPLYING... ", config)
+		go func() {
+			_, err := http.Post(fmt.Sprintf("http://%s:2280/start-telemetry", containerIP), "application/json", strings.NewReader(config))
+			if err != nil {
+				log.Errorf("Failed to apply OTEL config: %v", err)
 			}
 		}()
 	}
