@@ -105,6 +105,8 @@ Below is a full list of environment variables with their default values:
 
 | Variable                                   | Type    | Default Value                                        | Description                                                                                          |
 | ------------------------------------------ | ------- | ---------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `ENCRYPTION_KEY`                           | string  | `supersecretkey`                                     | Encryption key for sensitive data (User must override outside of Compose)                            |
+| `ENCRYPTION_SALT`                          | string  | `supersecretsalt`                                    | Encryption salt for sensitive data (User must override outside of Compose)                           |
 | `PORT`                                     | number  | `3000`                                               | API service port                                                                                     |
 | `DB_HOST`                                  | string  | `db`                                                 | PostgreSQL database hostname                                                                         |
 | `DB_PORT`                                  | number  | `5432`                                               | PostgreSQL database port                                                                             |
