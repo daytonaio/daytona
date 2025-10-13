@@ -22,6 +22,9 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+const TERMINATION_GRACE_PERIOD = 10 * time.Second
+const TERMINATION_CHECK_INTERVAL = 100 * time.Millisecond
+
 var sessions = map[string]*session{}
 
 func (s *SessionController) CreateSession(c *gin.Context) {
@@ -104,52 +107,27 @@ func (s *SessionController) DeleteSession(c *gin.Context) {
 
 	session, ok := sessions[sessionId]
 	if !ok {
-		c.AbortWithError(http.StatusNotFound, errors.New("session not found"))
+		_ = c.AbortWithError(http.StatusNotFound, errors.New("session not found"))
 		return
 	}
 
-	if session.cmd != nil && session.cmd.Process != nil {
-		pid := session.cmd.Process.Pid
-
-		err := syscall.Kill(-pid, syscall.SIGTERM)
-		if err != nil {
-			log.Warnf("SIGTERM failed for session %s, trying SIGKILL: %v", sessionId, err)
-			if err := syscall.Kill(-pid, syscall.SIGKILL); err != nil {
-				log.Warnf("Failed to SIGKILL session %s: %v", sessionId, err)
-			}
-		} else {
-			const gracePeriod = 10
-			terminated := false
-
-			// Check every 100ms if process group terminated (gracePeriod is in seconds)
-			for i := 0; i < gracePeriod*10; i++ {
-				if syscall.Kill(-pid, 0) != nil {
-					log.Debugf("Session %s terminated gracefully", sessionId)
-					terminated = true
-					break
-				}
-				time.Sleep(100 * time.Millisecond)
-			}
-
-			// Final check and SIGKILL if still alive
-			if !terminated && syscall.Kill(-pid, 0) == nil {
-				log.Debugf("Session %s timeout, sending SIGKILL", sessionId)
-				if err := syscall.Kill(-pid, syscall.SIGKILL); err != nil {
-					log.Warnf("Failed to SIGKILL session %s: %v", sessionId, err)
-				}
-			}
-		}
+	// Terminate process if running
+	if err := s.terminateSession(c.Request.Context(), session); err != nil {
+		log.Errorf("Failed to terminate session %s: %v", session.id, err)
+		// Continue with cleanup even if termination fails
 	}
 
+	// Cancel context
 	session.cancel()
 
+	// Clean up session directory
 	err := os.RemoveAll(session.Dir(s.configDir))
 	if err != nil {
 		c.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
 
-	delete(sessions, sessionId)
+	delete(sessions, session.id)
 	c.Status(http.StatusNoContent)
 }
 
@@ -256,4 +234,50 @@ func (s *SessionController) getSessionCommand(sessionId, cmdId string) (*Command
 	command.ExitCode = &exitCodeInt
 
 	return command, nil
+}
+
+func (s *SessionController) terminateSession(ctx context.Context, session *session) error {
+	if session.cmd == nil || session.cmd.Process == nil {
+		return nil
+	}
+
+	pid := session.cmd.Process.Pid
+
+	// Send SIGTERM first
+	err := syscall.Kill(-pid, syscall.SIGTERM)
+	if err != nil {
+		// If SIGTERM fails, try SIGKILL immediately
+		log.Warnf("SIGTERM failed for session %s, trying SIGKILL: %v", session.id, err)
+		return syscall.Kill(-pid, syscall.SIGKILL)
+	}
+
+	// Wait for graceful termination
+	if s.waitForTermination(ctx, pid, TERMINATION_GRACE_PERIOD, TERMINATION_CHECK_INTERVAL) {
+		log.Debugf("Session %s terminated gracefully", session.id)
+		return nil
+	}
+
+	// Force kill if still alive
+	log.Debugf("Session %s timeout, sending SIGKILL", session.id)
+	return syscall.Kill(-pid, syscall.SIGKILL)
+}
+
+func (s *SessionController) waitForTermination(ctx context.Context, pid int, timeout, interval time.Duration) bool {
+	timeoutCtx, cancel := context.WithTimeout(ctx, timeout)
+	defer cancel()
+
+	ticker := time.NewTicker(interval)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-timeoutCtx.Done():
+			return false
+		case <-ticker.C:
+			err := syscall.Kill(-pid, 0)
+			if err != nil {
+				return true
+			}
+		}
+	}
 }
