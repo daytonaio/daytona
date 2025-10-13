@@ -4,8 +4,11 @@
 package docker
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
+	"net/http"
 	"net/url"
 	"time"
 
@@ -48,7 +51,7 @@ func (d *DockerClient) startDaytonaDaemon(ctx context.Context, containerId strin
 	return nil
 }
 
-func (d *DockerClient) waitForDaemonRunning(ctx context.Context, containerIP string) (string, error) {
+func (d *DockerClient) waitForDaemonRunning(ctx context.Context, containerIP string, authToken *string) (string, error) {
 	defer timer.Timer()()
 
 	// Build the target URL
@@ -72,7 +75,41 @@ func (d *DockerClient) waitForDaemonRunning(ctx context.Context, containerIP str
 				time.Sleep(5 * time.Millisecond)
 				continue
 			}
-			return version, nil
+
+			// For backward compatibility, only initialize daemon if authToken is provided
+			if authToken == nil {
+				return version, nil
+			}
+
+			return version, d.initializeDaemon(containerIP, *authToken)
 		}
 	}
+}
+
+type sandboxToken struct {
+	Token string `json:"token"`
+}
+
+func (d *DockerClient) initializeDaemon(containerIP string, token string) error {
+	sandboxToken := sandboxToken{
+		Token: token,
+	}
+
+	jsonData, err := json.Marshal(sandboxToken)
+	if err != nil {
+		return fmt.Errorf("failed to marshal sandbox token data: %w", err)
+	}
+
+	url := fmt.Sprintf("http://%s:2280/init", containerIP)
+	resp, err := http.Post(url, "application/json", bytes.NewBuffer(jsonData))
+	if err != nil {
+		return fmt.Errorf("failed to initialize daemon: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("daemon returned non-200 status code: %d", resp.StatusCode)
+	}
+
+	return nil
 }
