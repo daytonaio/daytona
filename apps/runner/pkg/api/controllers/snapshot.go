@@ -29,11 +29,11 @@ import (
 //	@Description	Tag an existing local image with a new target reference
 //	@Param			request	body		dto.TagImageRequestDTO	true	"Tag image request"
 //	@Success		200		{string}	string					"Image successfully tagged"
-//	@Failure		400		{object}	common.ErrorResponse
-//	@Failure		401		{object}	common.ErrorResponse
-//	@Failure		404		{object}	common.ErrorResponse
-//	@Failure		409		{object}	common.ErrorResponse
-//	@Failure		500		{object}	common.ErrorResponse
+//	@Failure		400		{object}	common_errors.ErrorResponse
+//	@Failure		401		{object}	common_errors.ErrorResponse
+//	@Failure		404		{object}	common_errors.ErrorResponse
+//	@Failure		409		{object}	common_errors.ErrorResponse
+//	@Failure		500		{object}	common_errors.ErrorResponse
 //
 //	@Router			/snapshots/tag [post]
 //
@@ -394,10 +394,10 @@ func GetBuildLogs(ctx *gin.Context) {
 //	@Produce		json
 //	@Param			snapshot	query		string	true	"Snapshot name and tag"	example:"nginx:latest"
 //	@Success		200			{object}	SnapshotInfoResponse
-//	@Failure		400			{object}	common.ErrorResponse
-//	@Failure		401			{object}	common.ErrorResponse
-//	@Failure		404			{object}	common.ErrorResponse
-//	@Failure		500			{object}	common.ErrorResponse
+//	@Failure		400			{object}	common_errors.ErrorResponse
+//	@Failure		401			{object}	common_errors.ErrorResponse
+//	@Failure		404			{object}	common_errors.ErrorResponse
+//	@Failure		500			{object}	common_errors.ErrorResponse
 //	@Router			/snapshots/info [get]
 //
 //	@id				GetSnapshotInfo
