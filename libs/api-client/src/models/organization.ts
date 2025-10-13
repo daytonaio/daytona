@@ -132,4 +132,10 @@ export interface Organization {
    * @memberof Organization
    */
   sandboxLifecycleRateLimit: number | null
+  /**
+   * Experimental configuration
+   * @type {object}
+   * @memberof Organization
+   */
+  experimentalConfig: object
 }

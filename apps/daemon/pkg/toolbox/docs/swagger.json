@@ -1295,6 +1295,37 @@
         }
       }
     },
+    "/init": {
+      "post": {
+        "description": "Set the auth token and initialize telemetry for the toolbox server",
+        "produces": ["application/json"],
+        "tags": ["server"],
+        "summary": "Initialize toolbox server",
+        "operationId": "Initialize",
+        "parameters": [
+          {
+            "description": "Initialization request",
+            "name": "request",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/InitializeRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
     "/lsp/completions": {
       "post": {
         "description": "Get code completion suggestions from the LSP server",
@@ -2535,6 +2566,15 @@
           "items": {
             "$ref": "#/definitions/FileStatus"
           }
+        }
+      }
+    },
+    "InitializeRequest": {
+      "type": "object",
+      "required": ["token"],
+      "properties": {
+        "token": {
+          "type": "string"
         }
       }
     },
