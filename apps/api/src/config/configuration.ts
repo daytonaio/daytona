@@ -195,6 +195,12 @@ const configuration = {
     maxSnapshotSize: parseInt(process.env.DEFAULT_ORG_QUOTA_MAX_SNAPSHOT_SIZE || '20', 10),
     volumeQuota: parseInt(process.env.DEFAULT_ORG_QUOTA_VOLUME_QUOTA || '100', 10),
   },
+  sandboxOtel: {
+    endpointUrl: process.env.SANDBOX_OTEL_ENDPOINT_URL,
+  },
+  otelProxy: {
+    apiKey: process.env.OTEL_PROXY_API_KEY,
+  },
 }
 
 export { configuration }

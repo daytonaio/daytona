@@ -4,9 +4,12 @@
 package docker
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"net"
+	"net/http"
 	"net/url"
 	"time"
 
@@ -20,7 +23,7 @@ import (
 	common_errors "github.com/daytonaio/common-go/pkg/errors"
 )
 
-func (d *DockerClient) Start(ctx context.Context, containerId string, metadata map[string]string) error {
+func (d *DockerClient) Start(ctx context.Context, containerId string, authToken *string, metadata map[string]string) error {
 	defer timer.Timer()()
 	d.statesCache.SetSandboxState(ctx, containerId, enums.SandboxStateStarting)
 
@@ -41,7 +44,7 @@ func (d *DockerClient) Start(ctx context.Context, containerId string, metadata m
 			return err
 		}
 
-		err = d.waitForDaemonRunning(ctx, containerIP, 10*time.Second)
+		err = d.waitForDaemonRunning(ctx, containerIP, 10*time.Second, authToken)
 		if err != nil {
 			return err
 		}
@@ -78,7 +81,7 @@ func (d *DockerClient) Start(ctx context.Context, containerId string, metadata m
 		}
 	}()
 
-	err = d.waitForDaemonRunning(ctx, containerIP, 10*time.Second)
+	err = d.waitForDaemonRunning(ctx, containerIP, 10*time.Second, authToken)
 	if err != nil {
 		return err
 	}
@@ -124,7 +127,7 @@ func (d *DockerClient) waitForContainerRunning(ctx context.Context, containerId 
 	}
 }
 
-func (d *DockerClient) waitForDaemonRunning(ctx context.Context, containerIP string, timeout time.Duration) error {
+func (d *DockerClient) waitForDaemonRunning(ctx context.Context, containerIP string, timeout time.Duration, authToken *string) error {
 	defer timer.Timer()()
 
 	// Build the target URL
@@ -148,7 +151,12 @@ func (d *DockerClient) waitForDaemonRunning(ctx context.Context, containerIP str
 				continue
 			}
 			conn.Close()
-			return nil
+
+			if authToken == nil {
+				return nil
+			}
+
+			return d.sendAuthTokenToDaemon(containerIP, *authToken)
 		}
 	}
 }
@@ -158,4 +166,32 @@ func getContainerIP(container *types.ContainerJSON) (string, error) {
 		return network.IPAddress, nil
 	}
 	return "", fmt.Errorf("no IP address found. Is the Sandbox started?")
+}
+
+type sandboxToken struct {
+	Token string `json:"token"`
+}
+
+func (d *DockerClient) sendAuthTokenToDaemon(containerIP string, token string) error {
+	sandboxToken := sandboxToken{
+		Token: token,
+	}
+
+	jsonData, err := json.Marshal(sandboxToken)
+	if err != nil {
+		return fmt.Errorf("failed to marshal sandbox token data: %w", err)
+	}
+
+	url := fmt.Sprintf("http://%s:2280/auth-token", containerIP)
+	resp, err := http.Post(url, "application/json", bytes.NewBuffer(jsonData))
+	if err != nil {
+		return fmt.Errorf("failed to send sandbox token to daemon: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("daemon returned non-200 status code: %d", resp.StatusCode)
+	}
+
+	return nil
 }

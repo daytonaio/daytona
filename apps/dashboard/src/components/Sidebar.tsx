@@ -10,6 +10,7 @@ import {
   ChevronsUpDown,
   Container,
   CreditCard,
+  FlaskConical,
   HardDrive,
   KeyRound,
   ListChecks,
@@ -56,6 +57,8 @@ import { RoutePath } from '@/enums/RoutePath'
 import { DAYTONA_DOCS_URL, DAYTONA_SLACK_URL } from '@/constants/ExternalLinks'
 import { Logo, LogoText } from '@/assets/Logo'
 import { useWebhooks } from '@/hooks/useWebhooks'
+import { useFeatureFlagEnabled } from 'posthog-js/react'
+
 interface SidebarProps {
   isBannerVisible: boolean
   billingEnabled: boolean
@@ -71,6 +74,8 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
     useSelectedOrganization()
   const { count: organizationInvitationsCount } = useUserOrganizationInvitations()
   const { isInitialized: webhooksInitialized, openAppPortal } = useWebhooks()
+  const organizationExperimentsEnabled = useFeatureFlagEnabled('organization_experiments')
+
   const sidebarItems = useMemo(() => {
     const arr: Array<{
       icon: React.ReactElement
@@ -142,6 +147,17 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
       label: 'Settings',
       path: RoutePath.SETTINGS,
     })
+
+    if (
+      organizationExperimentsEnabled &&
+      authenticatedUserOrganizationMember?.role === OrganizationUserRoleEnum.OWNER
+    ) {
+      arr.push({
+        icon: <FlaskConical size={16} strokeWidth={1.5} />,
+        label: 'Experimental',
+        path: RoutePath.EXPERIMENTAL,
+      })
+    }
     return arr
   }, [
     authenticatedUserOrganizationMember?.role,
@@ -149,6 +165,7 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
     authenticatedUserHasPermission,
     webhooksInitialized,
     openAppPortal,
+    organizationExperimentsEnabled,
   ])
 
   const billingItems = useMemo(() => {

@@ -58,7 +58,9 @@ type Organization struct {
 	MaxDiskPerSandbox float32 `json:"maxDiskPerSandbox"`
 	// Sandbox default network block all
 	SandboxLimitedNetworkEgress bool `json:"sandboxLimitedNetworkEgress"`
-	AdditionalProperties        map[string]interface{}
+	// Experimental configuration
+	ExperimentalConfig   map[string]interface{} `json:"experimentalConfig"`
+	AdditionalProperties map[string]interface{}
 }
 
 type _Organization Organization
@@ -67,7 +69,7 @@ type _Organization Organization
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewOrganization(id string, name string, createdBy string, personal bool, createdAt time.Time, updatedAt time.Time, suspended bool, suspendedAt time.Time, suspensionReason string, suspendedUntil time.Time, suspensionCleanupGracePeriodHours float32, totalCpuQuota float32, totalMemoryQuota float32, totalDiskQuota float32, maxCpuPerSandbox float32, maxMemoryPerSandbox float32, maxDiskPerSandbox float32, sandboxLimitedNetworkEgress bool) *Organization {
+func NewOrganization(id string, name string, createdBy string, personal bool, createdAt time.Time, updatedAt time.Time, suspended bool, suspendedAt time.Time, suspensionReason string, suspendedUntil time.Time, suspensionCleanupGracePeriodHours float32, totalCpuQuota float32, totalMemoryQuota float32, totalDiskQuota float32, maxCpuPerSandbox float32, maxMemoryPerSandbox float32, maxDiskPerSandbox float32, sandboxLimitedNetworkEgress bool, experimentalConfig map[string]interface{}) *Organization {
 	this := Organization{}
 	this.Id = id
 	this.Name = name
@@ -87,6 +89,7 @@ func NewOrganization(id string, name string, createdBy string, personal bool, cr
 	this.MaxMemoryPerSandbox = maxMemoryPerSandbox
 	this.MaxDiskPerSandbox = maxDiskPerSandbox
 	this.SandboxLimitedNetworkEgress = sandboxLimitedNetworkEgress
+	this.ExperimentalConfig = experimentalConfig
 	return &this
 }
 
@@ -530,6 +533,30 @@ func (o *Organization) SetSandboxLimitedNetworkEgress(v bool) {
 	o.SandboxLimitedNetworkEgress = v
 }
 
+// GetExperimentalConfig returns the ExperimentalConfig field value
+func (o *Organization) GetExperimentalConfig() map[string]interface{} {
+	if o == nil {
+		var ret map[string]interface{}
+		return ret
+	}
+
+	return o.ExperimentalConfig
+}
+
+// GetExperimentalConfigOk returns a tuple with the ExperimentalConfig field value
+// and a boolean to check if the value has been set.
+func (o *Organization) GetExperimentalConfigOk() (map[string]interface{}, bool) {
+	if o == nil {
+		return map[string]interface{}{}, false
+	}
+	return o.ExperimentalConfig, true
+}
+
+// SetExperimentalConfig sets field value
+func (o *Organization) SetExperimentalConfig(v map[string]interface{}) {
+	o.ExperimentalConfig = v
+}
+
 func (o Organization) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -558,6 +585,7 @@ func (o Organization) ToMap() (map[string]interface{}, error) {
 	toSerialize["maxMemoryPerSandbox"] = o.MaxMemoryPerSandbox
 	toSerialize["maxDiskPerSandbox"] = o.MaxDiskPerSandbox
 	toSerialize["sandboxLimitedNetworkEgress"] = o.SandboxLimitedNetworkEgress
+	toSerialize["experimentalConfig"] = o.ExperimentalConfig
 
 	for key, value := range o.AdditionalProperties {
 		toSerialize[key] = value
@@ -589,6 +617,7 @@ func (o *Organization) UnmarshalJSON(data []byte) (err error) {
 		"maxMemoryPerSandbox",
 		"maxDiskPerSandbox",
 		"sandboxLimitedNetworkEgress",
+		"experimentalConfig",
 	}
 
 	allProperties := make(map[string]interface{})
@@ -636,6 +665,7 @@ func (o *Organization) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "maxMemoryPerSandbox")
 		delete(additionalProperties, "maxDiskPerSandbox")
 		delete(additionalProperties, "sandboxLimitedNetworkEgress")
+		delete(additionalProperties, "experimentalConfig")
 		o.AdditionalProperties = additionalProperties
 	}
 

@@ -246,13 +246,6 @@ export class Sandbox {
   }
 
   @BeforeUpdate()
-  updateAccessToken() {
-    if (this.state === SandboxState.STARTED) {
-      this.authToken = nanoid(32).toLocaleLowerCase()
-    }
-  }
-
-  @BeforeUpdate()
   updateLastActivityAt() {
     this.lastActivityAt = new Date()
   }

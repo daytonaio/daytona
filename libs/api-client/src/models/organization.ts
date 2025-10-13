@@ -126,4 +126,10 @@ export interface Organization {
    * @memberof Organization
    */
   sandboxLimitedNetworkEgress: boolean
+  /**
+   * Experimental configuration
+   * @type {object}
+   * @memberof Organization
+   */
+  experimentalConfig: object
 }
