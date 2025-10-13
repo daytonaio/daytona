@@ -12,12 +12,20 @@ import { RunnerContext } from './runner-context.interface'
 import { SshGatewayContext } from './ssh-gateway-context.interface'
 import { RegionProxyContext } from './region-proxy.interface'
 import { RegionSSHGatewayContext } from './region-ssh-gateway.interface'
+import { OtelCollectorContext } from './otel-collector-context.interface'
 
 export interface BaseAuthContext {
   role: ApiRole
 }
 
-export type ApiRole = SystemRole | 'proxy' | 'runner' | 'ssh-gateway' | 'region-proxy' | 'region-ssh-gateway'
+export type ApiRole =
+  | SystemRole
+  | 'proxy'
+  | 'runner'
+  | 'ssh-gateway'
+  | 'region-proxy'
+  | 'region-ssh-gateway'
+  | 'otel-collector'
 
 export interface AuthContext extends BaseAuthContext {
   userId: string
@@ -49,3 +57,4 @@ export type AuthContextType =
   | SshGatewayContext
   | RegionProxyContext
   | RegionSSHGatewayContext
+  | OtelCollectorContext

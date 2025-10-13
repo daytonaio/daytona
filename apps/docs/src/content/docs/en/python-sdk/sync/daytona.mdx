@@ -38,6 +38,18 @@ config = DaytonaConfig(
 daytona = Daytona(config)
 sandbox = daytona.create()
 ```
+  
+  Using OpenTelemetry tracing:
+```python
+config = DaytonaConfig(
+    api_key="your-api-key",
+    otel_enabled=True
+)
+async with Daytona(config) as daytona:
+    sandbox = daytona.create()
+    # All SDK operations will be traced
+# OpenTelemetry traces are flushed on close
+```
 
 #### Daytona.\_\_init\_\_
 
@@ -393,6 +405,7 @@ Configuration options for initializing the Daytona client.
   in a future version.
 - `target` _str | None_ - Target runner location for the Sandbox. Default region for the organization is used
   if not set here or in the environment variable `DAYTONA_TARGET`.
+- `_experimental` _dict[str, any] | None_ - Configuration for experimental features.
   
 
 **Example**:

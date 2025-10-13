@@ -134,6 +134,7 @@ from daytona_api_client.models.organization_sandbox_default_limited_network_egre
 from daytona_api_client.models.organization_suspension import OrganizationSuspension
 from daytona_api_client.models.organization_usage_overview import OrganizationUsageOverview
 from daytona_api_client.models.organization_user import OrganizationUser
+from daytona_api_client.models.otel_config import OtelConfig
 from daytona_api_client.models.paginated_audit_logs import PaginatedAuditLogs
 from daytona_api_client.models.paginated_jobs import PaginatedJobs
 from daytona_api_client.models.paginated_sandboxes import PaginatedSandboxes
@@ -332,6 +333,7 @@ __all__ = [
     "OrganizationSuspension",
     "OrganizationUsageOverview",
     "OrganizationUser",
+    "OtelConfig",
     "PaginatedAuditLogs",
     "PaginatedJobs",
     "PaginatedSandboxes",

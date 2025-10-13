@@ -300,6 +300,16 @@ const configuration = {
   warmPool: {
     candidateLimit: parseInt(process.env.WARM_POOL_CANDIDATE_LIMIT || '300', 10),
   },
+  sandboxOtel: {
+    endpointUrl: process.env.SANDBOX_OTEL_ENDPOINT_URL,
+  },
+  otelCollector: {
+    apiKey: process.env.OTEL_COLLECTOR_API_KEY,
+  },
+  encryption: {
+    key: process.env.ENCRYPTION_KEY,
+    salt: process.env.ENCRYPTION_SALT,
+  },
 }
 
 export { configuration }

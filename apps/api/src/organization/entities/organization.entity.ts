@@ -163,6 +163,22 @@ export class Organization {
   })
   updatedAt: Date
 
+  @Column({
+    type: 'jsonb',
+    nullable: true,
+    name: 'experimentalConfig',
+  })
+  // configuration for experimental features
+  _experimentalConfig: Record<string, any> | null
+
+  get sandboxMetadata(): Record<string, string> {
+    return {
+      organizationId: this.id,
+      organizationName: this.name,
+      limitNetworkEgress: String(this.sandboxLimitedNetworkEgress),
+    }
+  }
+
   constructor(defaultRegionId?: string) {
     if (defaultRegionId) {
       this.defaultRegionId = defaultRegionId
