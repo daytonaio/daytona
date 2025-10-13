@@ -14,7 +14,9 @@ import (
 )
 
 type Config struct {
-	LogFilePath *string `envconfig:"DAYTONA_DAEMON_LOG_FILE_PATH"`
+	LogFilePath  *string `envconfig:"DAYTONA_DAEMON_LOG_FILE_PATH"`
+	SandboxId    string  `envconfig:"DAYTONA_SANDBOX_ID" validate:"required"`
+	OtelEndpoint string  `envconfig:"DAYTONA_OTEL_ENDPOINT" validate:"required,url"`
 }
 
 var DEFAULT_LOG_FILE_PATH = "/tmp/daytona-daemon.log"

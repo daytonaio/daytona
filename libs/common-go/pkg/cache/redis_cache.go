@@ -10,9 +10,14 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/daytonaio/proxy/cmd/proxy/config"
 	"github.com/redis/go-redis/v9"
 )
+
+type RedisConfig struct {
+	Host     *string `envconfig:"HOST"`
+	Port     *int    `envconfig:"PORT"`
+	Password *string `envconfig:"PASSWORD"`
+}
 
 type RedisCache[T any] struct {
 	redis     *redis.Client
@@ -63,7 +68,7 @@ func (c *RedisCache[T]) Delete(ctx context.Context, key string) error {
 	return c.redis.Del(ctx, c.keyPrefix+key).Err()
 }
 
-func NewRedisCache[T any](config *config.RedisConfig, keyPrefix string) (*RedisCache[T], error) {
+func NewRedisCache[T any](config *RedisConfig, keyPrefix string) (*RedisCache[T], error) {
 	if config.Host == nil || config.Port == nil {
 		return nil, errors.New("host and port are required")
 	}

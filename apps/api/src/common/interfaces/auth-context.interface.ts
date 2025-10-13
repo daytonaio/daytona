@@ -12,7 +12,7 @@ export interface BaseAuthContext {
   role: ApiRole
 }
 
-export type ApiRole = SystemRole | 'proxy' | 'runner' | 'ssh-gateway'
+export type ApiRole = SystemRole | 'proxy' | 'runner' | 'ssh-gateway' | 'otel-proxy'
 
 export interface AuthContext extends BaseAuthContext {
   userId: string

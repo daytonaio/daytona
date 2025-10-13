@@ -1,10 +1,10 @@
 import asyncio
 
-from daytona import AsyncDaytona
+from daytona import AsyncDaytona, DaytonaConfig
 
 
 async def main():
-    async with AsyncDaytona() as daytona:
+    async with AsyncDaytona(config=DaytonaConfig(otel_enabled=True)) as daytona:
         print("Creating sandbox")
         sandbox = await daytona.create()
         print("Sandbox created")
@@ -39,7 +39,7 @@ async def main():
         print(f"Printing first sandbox -> id: {result.items[0].id} state: {result.items[0].state}")
 
         print("Removing sandbox")
-        await daytona.delete(sandbox)
+        # await daytona.delete(sandbox)
         print("Sandbox removed")
 
 

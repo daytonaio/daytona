@@ -24,6 +24,7 @@ import { Volume } from '../sandbox/entities/volume.entity'
 import { RedisLockProvider } from '../sandbox/common/redis-lock.provider'
 import { SnapshotRunner } from '../sandbox/entities/snapshot-runner.entity'
 import { OrganizationUsageService } from './services/organization-usage.service'
+import { EncryptionModule } from '../encryption/encryption.module'
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { OrganizationUsageService } from './services/organization-usage.service'
       Volume,
       SnapshotRunner,
     ]),
+    EncryptionModule,
   ],
   controllers: [
     OrganizationController,

@@ -3,6 +3,7 @@ go 1.25.4
 use (
 	./apps/cli
 	./apps/daemon
+	./apps/otel-proxy
 	./apps/proxy
 	./apps/runner
 	./apps/ssh-gateway

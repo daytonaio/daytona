@@ -7,6 +7,7 @@ import WebSocket from 'isomorphic-ws'
 import { PtyResult } from './types/Pty'
 import { DaytonaError } from './errors/DaytonaError'
 import { PtySessionInfo } from '@daytonaio/toolbox-api-client'
+import { WithInstrumentation } from './utils/otel.decorator'
 
 /**
  * PTY session handle for managing a single PTY session.
@@ -85,6 +86,7 @@ export class PtyHandle {
    *
    * @throws {Error} If connection times out (10 seconds) or connection fails
    */
+  @WithInstrumentation()
   async waitForConnection(): Promise<void> {
     if (this.connectionEstablished) {
       return
@@ -127,6 +129,7 @@ export class PtyHandle {
    * // Send raw bytes
    * await ptyHandle.sendInput(new Uint8Array([3])); // Ctrl+C
    */
+  @WithInstrumentation()
   async sendInput(data: string | Uint8Array): Promise<void> {
     if (!this.isConnected()) {
       throw new DaytonaError('PTY is not connected')
@@ -157,6 +160,7 @@ export class PtyHandle {
    * // Resize to 120x30
    * await ptyHandle.resize(120, 30);
    */
+  @WithInstrumentation()
   async resize(cols: number, rows: number): Promise<PtySessionInfo> {
     return await this.handleResize(cols, rows)
   }
@@ -175,6 +179,7 @@ export class PtyHandle {
    *   await ptyHandle.disconnect();
    * }
    */
+  @WithInstrumentation()
   async disconnect(): Promise<void> {
     if (this.ws) {
       try {
@@ -206,6 +211,7 @@ export class PtyHandle {
    *   }
    * }
    */
+  @WithInstrumentation()
   async wait(): Promise<PtyResult> {
     return new Promise((resolve, reject) => {
       if (this._exitCode !== undefined) {
@@ -249,6 +255,7 @@ export class PtyHandle {
    * const result = await ptyHandle.wait();
    * console.log(`Process terminated with exit code: ${result.exitCode}`);
    */
+  @WithInstrumentation()
   async kill(): Promise<void> {
     return await this.handleKill()
   }

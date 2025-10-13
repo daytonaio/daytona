@@ -345,17 +345,18 @@ export class SandboxStartAction extends SandboxAction {
       entrypoint = this.snapshotService.getEntrypointFromDockerfile(sandbox.buildInfo.dockerfileContent)
     }
 
-    let metadata: { [key: string]: string } | undefined = undefined
-    if (organization) {
-      metadata = {
-        limitNetworkEgress: String(organization.sandboxLimitedNetworkEgress),
-        organizationId: organization.id,
-        organizationName: organization.name,
-        sandboxName: sandbox.name,
-      }
+    const metadata = {
+      ...organization?.sandboxMetadata,
+      sandboxName: sandbox.name,
     }
 
-    await runnerAdapter.createSandbox(sandbox, registry, entrypoint, metadata)
+    await runnerAdapter.createSandbox(
+      sandbox,
+      registry,
+      entrypoint,
+      metadata,
+      this.configService.get('sandboxOtel.endpointUrl'),
+    )
 
     await this.updateSandboxState(sandbox.id, SandboxState.CREATING, lockCode)
     //  sync states again immediately for sandbox
@@ -449,15 +450,10 @@ export class SandboxStartAction extends SandboxAction {
 
       const runnerAdapter = await this.runnerAdapterFactory.create(runner)
 
-      let metadata: { [key: string]: string } | undefined = undefined
-      if (organization) {
-        metadata = {
-          limitNetworkEgress: String(organization.sandboxLimitedNetworkEgress),
-        }
-      }
+      const metadata: { [key: string]: string } | undefined = organization?.sandboxMetadata
 
       try {
-        await runnerAdapter.startSandbox(sandbox.id, metadata)
+        await runnerAdapter.startSandbox(sandbox.id, sandbox.authToken, metadata)
       } catch (error) {
         // Check against a list of substrings that should trigger an automatic recovery
         if (error?.message) {
@@ -767,17 +763,18 @@ export class SandboxStartAction extends SandboxAction {
 
     sandbox.snapshot = validBackup
 
-    let metadata: { [key: string]: string } | undefined = undefined
-    if (organization) {
-      metadata = {
-        limitNetworkEgress: String(organization.sandboxLimitedNetworkEgress),
-        organizationId: organization.id,
-        organizationName: organization.name,
-        sandboxName: sandbox.name,
-      }
+    const metadata = {
+      ...organization?.sandboxMetadata,
+      sandboxName: sandbox.name,
     }
 
-    await runnerAdapter.createSandbox(sandbox, registry, undefined, metadata)
+    await runnerAdapter.createSandbox(
+      sandbox,
+      registry,
+      undefined,
+      metadata,
+      this.configService.get('sandboxOtel.endpointUrl'),
+    )
     return null
   }
 

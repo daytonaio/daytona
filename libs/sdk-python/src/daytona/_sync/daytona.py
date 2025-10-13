@@ -27,9 +27,17 @@ from daytona_api_client import (
 from daytona_api_client import VolumesApi as VolumesApi
 from daytona_toolbox_api_client import ApiClient as ToolboxApiClient
 from environs import Env
+from opentelemetry import trace
+from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+from opentelemetry.instrumentation.aiohttp_client import AioHttpClientInstrumentor
+from opentelemetry.sdk.resources import Resource
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.semconv.attributes import service_attributes
 
 from .._utils.enum import to_enum
 from .._utils.errors import DaytonaError, intercept_errors
+from .._utils.otel_decorator import with_instrumentation
 from .._utils.stream import process_streaming_response
 from .._utils.timeout import with_timeout
 from ..code_toolbox.sandbox_js_code_toolbox import SandboxJsCodeToolbox
@@ -74,6 +82,18 @@ class Daytona:
         daytona = Daytona(config)
         sandbox = daytona.create()
         ```
+
+        Using OpenTelemetry tracing:
+        ```python
+        config = DaytonaConfig(
+            api_key="your-api-key",
+            otel_enabled=True
+        )
+        async with Daytona(config) as daytona:
+            sandbox = daytona.create()
+            # All SDK operations will be traced
+        # OpenTelemetry traces are flushed on close
+        ```
     """
 
     _api_key: Optional[str] = None
@@ -82,6 +102,7 @@ class Daytona:
     _api_url: str
     _target: Optional[str] = None
     _api_clients: List[ApiClient | ToolboxApiClient] = []
+    _tracer_provider: Optional[TracerProvider] = None
 
     def __init__(self, config: Optional[DaytonaConfig] = None):
         """Initializes Daytona instance with optional configuration.
@@ -201,6 +222,35 @@ class Daytona:
         self.volume = VolumeService(VolumesApi(self._api_client))
         self.snapshot = SnapshotService(SnapshotsApi(self._api_client), self._object_storage_api)
 
+        # Initialize OpenTelemetry if enabled
+        if config and config._experimental and config._experimental.get("otelEnabled"):
+            self._init_otel(sdk_version)
+
+    def _init_otel(self, sdk_version: str):
+        """Initialize OpenTelemetry tracing.
+
+        Args:
+            sdk_version: The SDK version to include in resource attributes
+        """
+        # Create resource with SDK version
+        resource = Resource.create(
+            {
+                service_attributes.SERVICE_VERSION: sdk_version,
+                service_attributes.SERVICE_NAME: "daytona-python-sdk",
+            }
+        )
+
+        # Create and configure tracer provider
+        self._tracer_provider = TracerProvider(resource=resource)
+
+        otlp_exporter = OTLPSpanExporter()
+        self._tracer_provider.add_span_processor(BatchSpanProcessor(otlp_exporter))
+
+        AioHttpClientInstrumentor().instrument()
+
+        # Set the global tracer provider
+        trace.set_tracer_provider(self._tracer_provider)
+
     @overload
     def create(
         self,
@@ -300,6 +350,7 @@ class Daytona:
         """
 
     @intercept_errors(message_prefix="Failed to create sandbox: ")
+    @with_instrumentation()
     def create(
         self,
         params: Optional[Union[CreateSandboxFromSnapshotParams, CreateSandboxFromImageParams]] = None,

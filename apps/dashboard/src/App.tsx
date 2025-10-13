@@ -50,6 +50,7 @@ import Wallet from './pages/Wallet'
 import { ApiProvider } from './providers/ApiProvider'
 import { BillingProvider } from './providers/BillingProvider'
 import { QueryProvider } from './providers/QueryProvider'
+import Experimental from './pages/Experimental'
 
 // Simple redirection components for external URLs
 const DocsRedirect = () => {
@@ -72,10 +73,11 @@ function App() {
   const config = useConfig()
   const location = useLocation()
   const posthog = usePostHog()
+
   const { error: authError, isAuthenticated, user, signoutRedirect } = useAuth()
 
   useEffect(() => {
-    if (import.meta.env.PROD && isAuthenticated && user && posthog?.get_distinct_id() !== user.profile.sub) {
+    if (isAuthenticated && user && posthog?.get_distinct_id() !== user.profile.sub) {
       posthog?.identify(user.profile.sub, {
         email: user.profile.email,
         name: user.profile.name,
@@ -234,6 +236,14 @@ function App() {
           />
           <Route path={getRouteSubPath(RoutePath.USER_INVITATIONS)} element={<UserOrganizationInvitations />} />
           <Route path={getRouteSubPath(RoutePath.ONBOARDING)} element={<Onboarding />} />
+          <Route
+            path={getRouteSubPath(RoutePath.EXPERIMENTAL)}
+            element={
+              <OwnerAccessOrganizationPageWrapper>
+                <Experimental />
+              </OwnerAccessOrganizationPageWrapper>
+            }
+          />
         </Route>
         <Route path="*" element={<NotFound />} />
       </Routes>

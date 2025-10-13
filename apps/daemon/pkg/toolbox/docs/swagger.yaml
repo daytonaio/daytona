@@ -303,6 +303,13 @@ definitions:
       - currentBranch
       - fileStatus
     type: object
+  InitializeRequest:
+    properties:
+      token:
+        type: string
+    required:
+      - token
+    type: object
   IsPortInUseResponse:
     properties:
       isInUse:
@@ -1776,6 +1783,29 @@ paths:
       summary: Get Git status
       tags:
         - git
+  /init:
+    post:
+      description: Set the auth token and initialize telemetry for the toolbox server
+      operationId: Initialize
+      parameters:
+        - description: Initialization request
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: '#/definitions/InitializeRequest'
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Initialize toolbox server
+      tags:
+        - server
   /lsp/completions:
     post:
       consumes:

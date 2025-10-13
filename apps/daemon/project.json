@@ -71,7 +71,7 @@
       "executor": "nx:run-commands",
       "options": {
         "cwd": "{projectRoot}/pkg/toolbox",
-        "command": "swag fmt && swag init --parseDependency --parseInternal --parseDepth 1 -o docs -g toolbox.go"
+        "command": "swag fmt && swag init --parseDependency --parseInternal --parseDepth 1 -o docs -g server.go"
       }
     }
   }

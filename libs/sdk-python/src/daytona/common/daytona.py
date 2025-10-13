@@ -52,6 +52,7 @@ class DaytonaConfig(BaseModel):
             in a future version.
         target (Optional[str]): Target runner location for the Sandbox. Default region for the organization is used
             if not set here or in the environment variable `DAYTONA_TARGET`.
+        _experimental (Optional[Dict[str, any]]): Configuration for experimental features.
 
     Example:
         ```python
@@ -74,6 +75,13 @@ class DaytonaConfig(BaseModel):
     target: Optional[str] = None
     jwt_token: Optional[str] = None
     organization_id: Optional[str] = None
+    _experimental: Annotated[
+        Optional[Dict[str, any]],
+        Field(
+            default=None,
+            description="Configuration for experimental features",
+        ),
+    ] = None
 
     @model_validator(mode="before")
     @classmethod
