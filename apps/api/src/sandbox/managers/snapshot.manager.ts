@@ -629,8 +629,6 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     sandbox.disk = snapshot.disk
     sandbox.mem = snapshot.mem
     sandbox.cpu = snapshot.cpu
-    sandbox.organizationId = snapshot.organizationId
-    sandbox.runnerId = runner.id
     sandbox.labels = {
       DAYTONA_VALIDATING_SNAPSHOT_ID: snapshot.id,
     }
