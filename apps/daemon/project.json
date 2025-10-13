@@ -37,9 +37,13 @@
         "outputPath": "dist/apps/daemon-amd64",
         "env": {
           "GOARCH": "amd64",
-          "GOOS": "linux"
+          "GOOS": "linux",
+          "CGO_ENABLED": "0"
         },
-        "flags": ["-ldflags \"-X 'github.com/daytonaio/daemon/internal.Version=${npm_package_version}'\""]
+        "flags": [
+          "-tags netgo",
+          "-ldflags \"-s -w -X 'github.com/daytonaio/daemon/internal.Version=${npm_package_version}'\""
+        ]
       },
       "dependsOn": ["prepare"]
     },
