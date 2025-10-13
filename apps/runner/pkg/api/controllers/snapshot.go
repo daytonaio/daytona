@@ -41,7 +41,7 @@ import (
 func TagImage(ctx *gin.Context) {
 	var request dto.TagImageRequestDTO
 	if err := ctx.ShouldBindJSON(&request); err != nil {
-		ctx.Error(common.NewInvalidBodyRequestError(err))
+		ctx.Error(common_errors.NewInvalidBodyRequestError(err))
 		return
 	}
 
@@ -54,12 +54,12 @@ func TagImage(ctx *gin.Context) {
 	}
 
 	if !exists {
-		ctx.Error(common.NewNotFoundError(fmt.Errorf("source image not found: %s", request.SourceImage)))
+		ctx.Error(common_errors.NewNotFoundError(fmt.Errorf("source image not found: %s", request.SourceImage)))
 		return
 	}
 
 	if !strings.Contains(request.TargetImage, ":") || strings.HasSuffix(request.TargetImage, ":") {
-		ctx.Error(common.NewBadRequestError(errors.New("targetImage must include a valid tag")))
+		ctx.Error(common_errors.NewBadRequestError(errors.New("targetImage must include a valid tag")))
 		return
 	}
 
@@ -107,7 +107,7 @@ func PullSnapshot(ctx *gin.Context) {
 	// If push registry is provided, push the image
 	if request.DestinationRegistry != nil {
 		if request.DestinationRegistry.Project == nil {
-			ctx.Error(common.NewBadRequestError(errors.New("project is required when pushing to registry")))
+			ctx.Error(common_errors.NewBadRequestError(errors.New("project is required when pushing to registry")))
 			return
 		}
 
@@ -404,7 +404,7 @@ func GetBuildLogs(ctx *gin.Context) {
 func GetSnapshotInfo(ctx *gin.Context) {
 	snapshot := ctx.Query("snapshot")
 	if snapshot == "" {
-		ctx.Error(common.NewBadRequestError(errors.New("snapshot parameter is required")))
+		ctx.Error(common_errors.NewBadRequestError(errors.New("snapshot parameter is required")))
 		return
 	}
 
@@ -417,7 +417,7 @@ func GetSnapshotInfo(ctx *gin.Context) {
 	}
 
 	if !exists {
-		ctx.Error(common.NewNotFoundError(fmt.Errorf("snapshot not found: %s", snapshot)))
+		ctx.Error(common_errors.NewNotFoundError(fmt.Errorf("snapshot not found: %s", snapshot)))
 		return
 	}
 
