@@ -49,6 +49,7 @@ type Config struct {
 	HealthcheckTimeout                 time.Duration `envconfig:"HEALTHCHECK_TIMEOUT" default:"10s"`
 	BackupTimeoutMin                   int           `envconfig:"BACKUP_TIMEOUT_MIN" default:"60" validate:"min=1"`
 	ApiVersion                         int           `envconfig:"API_VERSION" default:"2"`
+	InitializeDaemonTelemetry          bool          `envconfig:"INITIALIZE_DAEMON_TELEMETRY" default:"true"`
 }
 
 var DEFAULT_API_PORT int = 8080

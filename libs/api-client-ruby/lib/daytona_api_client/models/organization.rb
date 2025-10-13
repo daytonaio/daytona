@@ -72,6 +72,9 @@ module DaytonaApiClient
     # Sandbox lifecycle rate limit per minute
     attr_accessor :sandbox_lifecycle_rate_limit
 
+    # Experimental configuration
+    attr_accessor :experimental_config
+
     # Attribute mapping from ruby-style variable name to JSON key.
     def self.attribute_map
       {
@@ -93,7 +96,8 @@ module DaytonaApiClient
         :'default_region_id' => :'defaultRegionId',
         :'authenticated_rate_limit' => :'authenticatedRateLimit',
         :'sandbox_create_rate_limit' => :'sandboxCreateRateLimit',
-        :'sandbox_lifecycle_rate_limit' => :'sandboxLifecycleRateLimit'
+        :'sandbox_lifecycle_rate_limit' => :'sandboxLifecycleRateLimit',
+        :'experimental_config' => :'experimentalConfig'
       }
     end
 
@@ -128,7 +132,8 @@ module DaytonaApiClient
         :'default_region_id' => :'String',
         :'authenticated_rate_limit' => :'Float',
         :'sandbox_create_rate_limit' => :'Float',
-        :'sandbox_lifecycle_rate_limit' => :'Float'
+        :'sandbox_lifecycle_rate_limit' => :'Float',
+        :'experimental_config' => :'Object'
       }
     end
 
@@ -137,7 +142,7 @@ module DaytonaApiClient
       Set.new([
         :'authenticated_rate_limit',
         :'sandbox_create_rate_limit',
-        :'sandbox_lifecycle_rate_limit'
+        :'sandbox_lifecycle_rate_limit',
       ])
     end
 
@@ -268,6 +273,12 @@ module DaytonaApiClient
       else
         self.sandbox_lifecycle_rate_limit = nil
       end
+
+      if attributes.key?(:'experimental_config')
+        self.experimental_config = attributes[:'experimental_config']
+      else
+        self.experimental_config = nil
+      end
     end
 
     # Show invalid properties with the reasons. Usually used together with valid?
@@ -335,6 +346,10 @@ module DaytonaApiClient
         invalid_properties.push('invalid value for "sandbox_limited_network_egress", sandbox_limited_network_egress cannot be nil.')
       end
 
+      if @experimental_config.nil?
+        invalid_properties.push('invalid value for "experimental_config", experimental_config cannot be nil.')
+      end
+
       invalid_properties
     end
 
@@ -357,6 +372,7 @@ module DaytonaApiClient
       return false if @max_memory_per_sandbox.nil?
       return false if @max_disk_per_sandbox.nil?
       return false if @sandbox_limited_network_egress.nil?
+      return false if @experimental_config.nil?
       true
     end
 
@@ -510,6 +526,16 @@ module DaytonaApiClient
       @sandbox_limited_network_egress = sandbox_limited_network_egress
     end
 
+    # Custom attribute writer method with validation
+    # @param [Object] experimental_config Value to be assigned
+    def experimental_config=(experimental_config)
+      if experimental_config.nil?
+        fail ArgumentError, 'experimental_config cannot be nil'
+      end
+
+      @experimental_config = experimental_config
+    end
+
     # Checks equality by comparing each attribute.
     # @param [Object] Object to be compared
     def ==(o)
@@ -533,7 +559,8 @@ module DaytonaApiClient
           default_region_id == o.default_region_id &&
           authenticated_rate_limit == o.authenticated_rate_limit &&
           sandbox_create_rate_limit == o.sandbox_create_rate_limit &&
-          sandbox_lifecycle_rate_limit == o.sandbox_lifecycle_rate_limit
+          sandbox_lifecycle_rate_limit == o.sandbox_lifecycle_rate_limit &&
+          experimental_config == o.experimental_config
     end
 
     # @see the `==` method
@@ -545,7 +572,7 @@ module DaytonaApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [id, name, created_by, personal, created_at, updated_at, suspended, suspended_at, suspension_reason, suspended_until, suspension_cleanup_grace_period_hours, max_cpu_per_sandbox, max_memory_per_sandbox, max_disk_per_sandbox, sandbox_limited_network_egress, default_region_id, authenticated_rate_limit, sandbox_create_rate_limit, sandbox_lifecycle_rate_limit].hash
+      [id, name, created_by, personal, created_at, updated_at, suspended, suspended_at, suspension_reason, suspended_until, suspension_cleanup_grace_period_hours, max_cpu_per_sandbox, max_memory_per_sandbox, max_disk_per_sandbox, sandbox_limited_network_egress, default_region_id, authenticated_rate_limit, sandbox_create_rate_limit, sandbox_lifecycle_rate_limit, experimental_config].hash
     end
 
     # Builds the object from hash

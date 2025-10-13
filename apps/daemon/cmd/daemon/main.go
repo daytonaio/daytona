@@ -128,13 +128,15 @@ func main() {
 	}
 	recordingService := recording.NewRecordingService(recordingsDir)
 
-	toolBoxServer := &toolbox.Server{
+	toolBoxServer := toolbox.NewServer(toolbox.ServerConfig{
 		WorkDir:                              workDir,
 		ConfigDir:                            configDir,
+		OtelEndpoint:                         c.OtelEndpoint,
+		SandboxId:                            c.SandboxId,
 		TerminationGracePeriodSeconds:        c.TerminationGracePeriodSeconds,
 		TerminationCheckIntervalMilliseconds: c.TerminationCheckIntervalMilliseconds,
 		RecordingService:                     recordingService,
-	}
+	})
 
 	// Start the toolbox server in a go routine
 	go func() {

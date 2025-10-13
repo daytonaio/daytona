@@ -21,3 +21,7 @@ export function sandboxLookupCacheKeyByName(args: SandboxLookupCacheKeyArgs & { 
   const returnDestroyed = args.returnDestroyed ? 1 : 0
   return `sandbox:lookup:by-name:org:${organizationId}:returnDestroyed:${returnDestroyed}:value:${args.sandboxName}`
 }
+
+export function sandboxLookupCacheKeyByAuthToken(args: { authToken: string }): string {
+  return `sandbox:lookup:by-authToken:${args.authToken}`
+}

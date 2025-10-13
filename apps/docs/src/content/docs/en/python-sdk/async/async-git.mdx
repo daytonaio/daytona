@@ -50,6 +50,7 @@ Initializes a new Git handler instance.
 
 ```python
 @intercept_errors(message_prefix="Failed to add files: ")
+@with_instrumentation()
 async def add(path: str, files: list[str]) -> None
 ```
 
@@ -81,6 +82,7 @@ await sandbox.git.add("workspace/repo", [
 
 ```python
 @intercept_errors(message_prefix="Failed to list branches: ")
+@with_instrumentation()
 async def branches(path: str) -> ListBranchResponse
 ```
 
@@ -108,6 +110,7 @@ print(f"Branches: {response.branches}")
 
 ```python
 @intercept_errors(message_prefix="Failed to clone repository: ")
+@with_instrumentation()
 async def clone(url: str,
                 path: str,
                 branch: str | None = None,
@@ -163,6 +166,7 @@ await sandbox.git.clone(
 
 ```python
 @intercept_errors(message_prefix="Failed to commit changes: ")
+@with_instrumentation()
 async def commit(path: str,
                  message: str,
                  author: str,
@@ -201,6 +205,7 @@ await sandbox.git.commit(
 
 ```python
 @intercept_errors(message_prefix="Failed to push changes: ")
+@with_instrumentation()
 async def push(path: str,
                username: str | None = None,
                password: str | None = None) -> None
@@ -236,6 +241,7 @@ await sandbox.git.push(
 
 ```python
 @intercept_errors(message_prefix="Failed to pull changes: ")
+@with_instrumentation()
 async def pull(path: str,
                username: str | None = None,
                password: str | None = None) -> None
@@ -270,6 +276,7 @@ await sandbox.git.pull(
 
 ```python
 @intercept_errors(message_prefix="Failed to get status: ")
+@with_instrumentation()
 async def status(path: str) -> GitStatus
 ```
 
@@ -304,6 +311,7 @@ print(f"Commits behind: {status.behind}")
 
 ```python
 @intercept_errors(message_prefix="Failed to checkout branch: ")
+@with_instrumentation()
 async def checkout_branch(path: str, branch: str) -> None
 ```
 
@@ -327,6 +335,7 @@ await sandbox.git.checkout_branch("workspace/repo", "feature-branch")
 
 ```python
 @intercept_errors(message_prefix="Failed to create branch: ")
+@with_instrumentation()
 async def create_branch(path: str, name: str) -> None
 ```
 
@@ -350,6 +359,7 @@ await sandbox.git.create_branch("workspace/repo", "new-feature")
 
 ```python
 @intercept_errors(message_prefix="Failed to delete branch: ")
+@with_instrumentation()
 async def delete_branch(path: str, name: str) -> None
 ```
 

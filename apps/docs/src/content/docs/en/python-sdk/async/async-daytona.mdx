@@ -41,6 +41,18 @@ try:
 finally:
     await daytona.close()
 ```
+  
+  Using OpenTelemetry tracing:
+```python
+config = DaytonaConfig(
+    api_key="your-api-key",
+    experimental={"otelEnabled": True}
+)
+async with AsyncDaytona(config) as daytona:
+    sandbox = await daytona.create()
+    # All SDK operations will be traced
+# OpenTelemetry traces are flushed on close
+```
 
 #### AsyncDaytona.\_\_init\_\_
 
@@ -250,6 +262,7 @@ sandbox = await daytona.create(
 #### AsyncDaytona.delete
 
 ```python
+@with_instrumentation()
 async def delete(sandbox: AsyncSandbox, timeout: float = 60) -> None
 ```
 
@@ -279,6 +292,7 @@ await daytona.delete(sandbox)  # Clean up when done
 
 ```python
 @intercept_errors(message_prefix="Failed to get sandbox: ")
+@with_instrumentation()
 async def get(sandbox_id_or_name: str) -> AsyncSandbox
 ```
 
@@ -310,6 +324,7 @@ print(sandbox.state)
 
 ```python
 @intercept_errors(message_prefix="Failed to find sandbox: ")
+@with_instrumentation()
 async def find_one(sandbox_id_or_name: str | None = None,
                    labels: dict[str, str] | None = None) -> AsyncSandbox
 ```
@@ -343,6 +358,7 @@ print(f"Sandbox ID: {sandbox.id} State: {sandbox.state}")
 
 ```python
 @intercept_errors(message_prefix="Failed to list sandboxes: ")
+@with_instrumentation()
 async def list(labels: dict[str, str] | None = None,
                page: int | None = None,
                limit: int | None = None) -> AsyncPaginatedSandboxes
@@ -373,6 +389,7 @@ for sandbox in result.items:
 #### AsyncDaytona.start
 
 ```python
+@with_instrumentation()
 async def start(sandbox: AsyncSandbox, timeout: float = 60) -> None
 ```
 
@@ -392,6 +409,7 @@ Starts a Sandbox and waits for it to be ready.
 #### AsyncDaytona.stop
 
 ```python
+@with_instrumentation()
 async def stop(sandbox: AsyncSandbox, timeout: float = 60) -> None
 ```
 
@@ -444,6 +462,7 @@ Configuration options for initializing the Daytona client.
   in a future version.
 - `target` _str | None_ - Target runner location for the Sandbox. Default region for the organization is used
   if not set here or in the environment variable `DAYTONA_TARGET`.
+- `_experimental` _dict[str, any] | None_ - Configuration for experimental features.
   
 
 **Example**:

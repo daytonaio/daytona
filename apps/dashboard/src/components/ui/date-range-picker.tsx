@@ -67,6 +67,7 @@ export interface DateRangePickerProps {
   className?: string
   timeSelection?: boolean
   disabled?: boolean
+  defaultSelectedQuickRange?: string
 }
 
 export interface DateRangePickerRef {
@@ -83,11 +84,12 @@ export const DateRangePicker = forwardRef<DateRangePickerRef, DateRangePickerPro
       className,
       timeSelection = true,
       disabled = false,
+      defaultSelectedQuickRange,
     },
     ref,
   ) => {
     const [isOpen, setIsOpen] = useState(false)
-    const [selectedQuickRange, setSelectedQuickRange] = useState<string | null>(null)
+    const [selectedQuickRange, setSelectedQuickRange] = useState<string | null>(defaultSelectedQuickRange ?? null)
     const [fromTime, setFromTime] = useState<string>('00:00:00')
     const [toTime, setToTime] = useState<string>('23:59:59')
 

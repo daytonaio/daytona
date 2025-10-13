@@ -14,6 +14,11 @@ const (
 	CodeLanguageTypeScript CodeLanguage = "typescript"
 )
 
+// ExperimentalConfig holds experimental feature flags for the Daytona client.
+type ExperimentalConfig struct {
+	OtelEnabled bool // Enable OpenTelemetry tracing and metrics
+}
+
 // DaytonaConfig represents the configuration for the Daytona client.
 // When a field is nil, the client will fall back to environment variables or defaults.
 type DaytonaConfig struct {
@@ -22,6 +27,7 @@ type DaytonaConfig struct {
 	OrganizationID string
 	APIUrl         string
 	Target         string
+	Experimental   *ExperimentalConfig
 }
 
 // Resources represents resource allocation for a sandbox.

@@ -5,7 +5,7 @@
 
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
-import { Tabs, TabsContent } from '@/components/ui/tabs'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { formatDuration, formatTimestamp, getRelativeTimeString } from '@/lib/utils'
 import { Sandbox, SandboxState } from '@daytonaio/api-client'
 import { Archive, Play, Tag, Trash, Wrench, X } from 'lucide-react'
@@ -14,6 +14,9 @@ import { CopyButton } from './CopyButton'
 import { ResourceChip } from './ResourceChip'
 import { SandboxState as SandboxStateComponent } from './SandboxTable/SandboxState'
 import { TimestampTooltip } from './TimestampTooltip'
+import { LogsTab, TracesTab, MetricsTab } from './telemetry'
+import { useFeatureFlagEnabled } from 'posthog-js/react'
+import { FeatureFlags } from '@/enums/FeatureFlags'
 
 interface SandboxDetailsSheetProps {
   sandbox: Sandbox | null
@@ -47,6 +50,7 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
   handleRecover,
 }) => {
   const [terminalUrl, setTerminalUrl] = useState<string | null>(null)
+  const experimentsEnabled = useFeatureFlagEnabled(FeatureFlags.ORGANIZATION_EXPERIMENTS)
 
   // TODO: uncomment when we enable the terminal tab
   // useEffect(() => {
@@ -161,11 +165,35 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
         </SheetHeader>
 
         <Tabs defaultValue="overview" className="flex-1 flex flex-col min-h-0">
-          {/* TODO: Add terminal tab */}
-          {/* <TabsList className="px-4 w-full flex-shrink-0">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="terminal">Terminal</TabsTrigger>
-          </TabsList> */}
+          {experimentsEnabled && (
+            <TabsList className="mx-4 w-fit flex-shrink-0 bg-transparent border-b border-border rounded-none h-auto p-0 gap-0 mt-2">
+              <TabsTrigger
+                value="overview"
+                className="rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2"
+              >
+                Overview
+              </TabsTrigger>
+              <TabsTrigger
+                value="logs"
+                className="rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2"
+              >
+                Logs
+              </TabsTrigger>
+              <TabsTrigger
+                value="traces"
+                className="rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2"
+              >
+                Traces
+              </TabsTrigger>
+              <TabsTrigger
+                value="metrics"
+                className="rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2"
+              >
+                Metrics
+              </TabsTrigger>
+            </TabsList>
+          )}
+
           <TabsContent value="overview" className="flex-1 p-6 space-y-10 overflow-y-auto min-h-0">
             <div className="grid grid-cols-2 gap-6">
               <div>
@@ -288,6 +316,18 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
 
           <TabsContent value="terminal" className="p-4">
             <iframe title="Terminal" src={terminalUrl || undefined} className="w-full h-full"></iframe>
+          </TabsContent>
+
+          <TabsContent value="logs" className="flex-1 min-h-0 overflow-hidden">
+            <LogsTab sandboxId={sandbox.id} />
+          </TabsContent>
+
+          <TabsContent value="traces" className="flex-1 min-h-0 overflow-hidden">
+            <TracesTab sandboxId={sandbox.id} />
+          </TabsContent>
+
+          <TabsContent value="metrics" className="flex-1 min-h-0 overflow-hidden">
+            <MetricsTab sandboxId={sandbox.id} />
           </TabsContent>
         </Tabs>
       </SheetContent>

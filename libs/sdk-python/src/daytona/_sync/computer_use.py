@@ -36,6 +36,7 @@ from daytona_toolbox_api_client import (
 )
 
 from .._utils.errors import intercept_errors
+from .._utils.otel_decorator import with_instrumentation
 from ..common.computer_use import ScreenshotOptions, ScreenshotRegion
 
 
@@ -46,6 +47,7 @@ class Mouse:
         self._api_client: ComputerUseApi = api_client
 
     @intercept_errors(message_prefix="Failed to get mouse position: ")
+    @with_instrumentation()
     def get_position(self) -> MousePositionResponse:
         """Gets the current mouse cursor position.
 
@@ -62,6 +64,7 @@ class Mouse:
         return response
 
     @intercept_errors(message_prefix="Failed to move mouse: ")
+    @with_instrumentation()
     def move(self, x: int, y: int) -> MousePositionResponse:
         """Moves the mouse cursor to the specified coordinates.
 
@@ -83,6 +86,7 @@ class Mouse:
         return response
 
     @intercept_errors(message_prefix="Failed to click mouse: ")
+    @with_instrumentation()
     def click(self, x: int, y: int, button: str = "left", double: bool = False) -> MouseClickResponse:
         """Clicks the mouse at the specified coordinates.
 
@@ -112,6 +116,7 @@ class Mouse:
         return response
 
     @intercept_errors(message_prefix="Failed to drag mouse: ")
+    @with_instrumentation()
     def drag(self, start_x: int, start_y: int, end_x: int, end_y: int, button: str = "left") -> MouseDragResponse:
         """Drags the mouse from start coordinates to end coordinates.
 
@@ -136,6 +141,7 @@ class Mouse:
         return response
 
     @intercept_errors(message_prefix="Failed to scroll mouse: ")
+    @with_instrumentation()
     def scroll(self, x: int, y: int, direction: str, amount: int = 1) -> bool:
         """Scrolls the mouse wheel at the specified coordinates.
 
@@ -169,6 +175,7 @@ class Keyboard:
         self._api_client: ComputerUseApi = api_client
 
     @intercept_errors(message_prefix="Failed to type text: ")
+    @with_instrumentation()
     def type(self, text: str, delay: int | None = None) -> None:
         """Types the specified text.
 
@@ -199,6 +206,7 @@ class Keyboard:
         _ = self._api_client.type_text(request=request)
 
     @intercept_errors(message_prefix="Failed to press key: ")
+    @with_instrumentation()
     def press(self, key: str, modifiers: list[str] | None = None) -> None:
         """Presses a key with optional modifiers.
 
@@ -235,6 +243,7 @@ class Keyboard:
         _ = self._api_client.press_key(request=request)
 
     @intercept_errors(message_prefix="Failed to press hotkey: ")
+    @with_instrumentation()
     def hotkey(self, keys: str) -> None:
         """Presses a hotkey combination.
 
@@ -279,6 +288,7 @@ class Screenshot:
         self._api_client: ComputerUseApi = api_client
 
     @intercept_errors(message_prefix="Failed to take screenshot: ")
+    @with_instrumentation()
     def take_full_screen(self, show_cursor: bool = False) -> ScreenshotResponse:
         """Takes a screenshot of the entire screen.
 
@@ -301,6 +311,7 @@ class Screenshot:
         return response
 
     @intercept_errors(message_prefix="Failed to take region screenshot: ")
+    @with_instrumentation()
     def take_region(self, region: ScreenshotRegion, show_cursor: bool = False) -> ScreenshotResponse:
         """Takes a screenshot of a specific region.
 
@@ -324,6 +335,7 @@ class Screenshot:
         return response
 
     @intercept_errors(message_prefix="Failed to take compressed screenshot: ")
+    @with_instrumentation()
     def take_compressed(self, options: ScreenshotOptions | None = None) -> ScreenshotResponse:
         """Takes a compressed screenshot of the entire screen.
 
@@ -361,6 +373,7 @@ class Screenshot:
         return response
 
     @intercept_errors(message_prefix="Failed to take compressed region screenshot: ")
+    @with_instrumentation()
     def take_compressed_region(
         self, region: ScreenshotRegion, options: ScreenshotOptions | None = None
     ) -> ScreenshotResponse:
@@ -406,6 +419,7 @@ class Display:
         self._api_client: ComputerUseApi = api_client
 
     @intercept_errors(message_prefix="Failed to get display info: ")
+    @with_instrumentation()
     def get_info(self) -> DisplayInfoResponse:
         """Gets information about the displays.
 
@@ -425,6 +439,7 @@ class Display:
         return response
 
     @intercept_errors(message_prefix="Failed to get windows: ")
+    @with_instrumentation()
     def get_windows(self) -> WindowsResponse:
         """Gets the list of open windows.
 
@@ -455,6 +470,7 @@ class RecordingService:
         self._ensure_toolbox_url: Callable[[], None] = ensure_toolbox_url
 
     @intercept_errors(message_prefix="Failed to start recording: ")
+    @with_instrumentation()
     def start(self, label: str | None = None) -> Recording:
         """Starts a new screen recording session.
 
@@ -476,6 +492,7 @@ class RecordingService:
         return self._api_client.start_recording(request=request)
 
     @intercept_errors(message_prefix="Failed to stop recording: ")
+    @with_instrumentation()
     def stop(self, recording_id: str) -> Recording:
         """Stops an active screen recording session.
 
@@ -496,6 +513,7 @@ class RecordingService:
         return self._api_client.stop_recording(request=request)
 
     @intercept_errors(message_prefix="Failed to list recordings: ")
+    @with_instrumentation()
     def list(self) -> ListRecordingsResponse:
         """Lists all recordings (active and completed).
 
@@ -513,6 +531,7 @@ class RecordingService:
         return self._api_client.list_recordings()
 
     @intercept_errors(message_prefix="Failed to get recording: ")
+    @with_instrumentation()
     def get(self, recording_id: str) -> Recording:
         """Gets details of a specific recording by ID.
 
@@ -533,6 +552,7 @@ class RecordingService:
         return self._api_client.get_recording(id=recording_id)
 
     @intercept_errors(message_prefix="Failed to delete recording: ")
+    @with_instrumentation()
     def delete(self, recording_id: str) -> None:
         """Deletes a recording by ID.
 
@@ -548,6 +568,7 @@ class RecordingService:
         self._api_client.delete_recording(id=recording_id)
 
     @intercept_errors(message_prefix="Failed to download recording: ")
+    @with_instrumentation()
     def download(self, recording_id: str, local_path: str) -> None:
         """Downloads a recording file from the Sandbox and saves it to a local file.
 
@@ -619,6 +640,7 @@ class ComputerUse:
         self.recording: RecordingService = RecordingService(api_client, ensure_toolbox_url)
 
     @intercept_errors(message_prefix="Failed to start computer use: ")
+    @with_instrumentation()
     def start(self) -> ComputerUseStartResponse:
         """Starts all computer use processes (Xvfb, xfce4, x11vnc, novnc).
 
@@ -635,6 +657,7 @@ class ComputerUse:
         return response
 
     @intercept_errors(message_prefix="Failed to stop computer use: ")
+    @with_instrumentation()
     def stop(self) -> ComputerUseStopResponse:
         """Stops all computer use processes.
 
@@ -651,6 +674,7 @@ class ComputerUse:
         return response
 
     @intercept_errors(message_prefix="Failed to get computer use status: ")
+    @with_instrumentation()
     def get_status(self) -> ComputerUseStatusResponse:
         """Gets the status of all computer use processes.
 
@@ -666,6 +690,7 @@ class ComputerUse:
         return self._api_client.get_computer_use_status()
 
     @intercept_errors(message_prefix="Failed to get process status: ")
+    @with_instrumentation()
     def get_process_status(self, process_name: str) -> ProcessStatusResponse:
         """Gets the status of a specific VNC process.
 
@@ -685,6 +710,7 @@ class ComputerUse:
         return response
 
     @intercept_errors(message_prefix="Failed to restart process: ")
+    @with_instrumentation()
     def restart_process(self, process_name: str) -> ProcessRestartResponse:
         """Restarts a specific VNC process.
 
@@ -704,6 +730,7 @@ class ComputerUse:
         return response
 
     @intercept_errors(message_prefix="Failed to get process logs: ")
+    @with_instrumentation()
     def get_process_logs(self, process_name: str) -> ProcessLogsResponse:
         """Gets logs for a specific VNC process.
 
@@ -723,6 +750,7 @@ class ComputerUse:
         return response
 
     @intercept_errors(message_prefix="Failed to get process errors: ")
+    @with_instrumentation()
     def get_process_errors(self, process_name: str) -> ProcessErrorsResponse:
         """Gets error logs for a specific VNC process.
 

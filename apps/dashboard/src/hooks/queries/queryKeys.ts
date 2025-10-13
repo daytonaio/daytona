@@ -61,4 +61,12 @@ export const queryKeys = {
       ] as const
     },
   },
+  telemetry: {
+    all: ['telemetry'] as const,
+    logs: (sandboxId: string, params: object) => [...queryKeys.telemetry.all, sandboxId, 'logs', params] as const,
+    traces: (sandboxId: string, params: object) => [...queryKeys.telemetry.all, sandboxId, 'traces', params] as const,
+    metrics: (sandboxId: string, params: object) => [...queryKeys.telemetry.all, sandboxId, 'metrics', params] as const,
+    traceSpans: (sandboxId: string, traceId: string) =>
+      [...queryKeys.telemetry.all, sandboxId, 'traces', traceId] as const,
+  },
 } as const

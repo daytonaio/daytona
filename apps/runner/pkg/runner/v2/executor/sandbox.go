@@ -37,13 +37,13 @@ func (e *Executor) createSandbox(ctx context.Context, job *apiclient.Job) (any, 
 }
 
 func (e *Executor) startSandbox(ctx context.Context, job *apiclient.Job) (any, error) {
-	var metadata map[string]string
-	err := e.parsePayload(job.Payload, &metadata)
+	var payload StartSandboxPayload
+	err := e.parsePayload(job.Payload, &payload)
 	if err != nil {
 		return nil, fmt.Errorf("failed to unmarshal payload: %w", err)
 	}
 
-	daemonVersion, err := e.docker.Start(ctx, job.ResourceId, metadata)
+	daemonVersion, err := e.docker.Start(ctx, job.ResourceId, payload.AuthToken, payload.Metadata)
 	if err != nil {
 		return nil, common.FormatRecoverableError(err)
 	}

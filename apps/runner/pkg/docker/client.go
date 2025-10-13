@@ -15,23 +15,24 @@ import (
 )
 
 type DockerClientConfig struct {
-	ApiClient                client.APIClient
-	StatesCache              *cache.StatesCache
-	LogWriter                io.Writer
-	AWSRegion                string
-	AWSEndpointUrl           string
-	AWSAccessKeyId           string
-	AWSSecretAccessKey       string
-	DaemonPath               string
-	ComputerUsePluginPath    string
-	NetRulesManager          *netrules.NetRulesManager
-	ResourceLimitsDisabled   bool
-	DaemonStartTimeoutSec    int
-	SandboxStartTimeoutSec   int
-	UseSnapshotEntrypoint    bool
-	VolumeCleanupIntervalSec int
-	VolumeCleanupDryRun      bool
-	BackupTimeoutMin         int
+	ApiClient                 client.APIClient
+	StatesCache               *cache.StatesCache
+	LogWriter                 io.Writer
+	AWSRegion                 string
+	AWSEndpointUrl            string
+	AWSAccessKeyId            string
+	AWSSecretAccessKey        string
+	DaemonPath                string
+	ComputerUsePluginPath     string
+	NetRulesManager           *netrules.NetRulesManager
+	ResourceLimitsDisabled    bool
+	DaemonStartTimeoutSec     int
+	SandboxStartTimeoutSec    int
+	UseSnapshotEntrypoint     bool
+	VolumeCleanupIntervalSec  int
+	VolumeCleanupDryRun       bool
+	BackupTimeoutMin          int
+	InitializeDaemonTelemetry bool
 }
 
 func NewDockerClient(config DockerClientConfig) *DockerClient {
@@ -51,24 +52,25 @@ func NewDockerClient(config DockerClientConfig) *DockerClient {
 	}
 
 	return &DockerClient{
-		apiClient:                config.ApiClient,
-		statesCache:              config.StatesCache,
-		logWriter:                config.LogWriter,
-		awsRegion:                config.AWSRegion,
-		awsEndpointUrl:           config.AWSEndpointUrl,
-		awsAccessKeyId:           config.AWSAccessKeyId,
-		awsSecretAccessKey:       config.AWSSecretAccessKey,
-		volumeMutexes:            make(map[string]*sync.Mutex),
-		daemonPath:               config.DaemonPath,
-		computerUsePluginPath:    config.ComputerUsePluginPath,
-		netRulesManager:          config.NetRulesManager,
-		resourceLimitsDisabled:   config.ResourceLimitsDisabled,
-		daemonStartTimeoutSec:    config.DaemonStartTimeoutSec,
-		sandboxStartTimeoutSec:   config.SandboxStartTimeoutSec,
-		useSnapshotEntrypoint:    config.UseSnapshotEntrypoint,
-		volumeCleanupIntervalSec: config.VolumeCleanupIntervalSec,
-		volumeCleanupDryRun:      config.VolumeCleanupDryRun,
-		backupTimeoutMin:         config.BackupTimeoutMin,
+		apiClient:                 config.ApiClient,
+		statesCache:               config.StatesCache,
+		logWriter:                 config.LogWriter,
+		awsRegion:                 config.AWSRegion,
+		awsEndpointUrl:            config.AWSEndpointUrl,
+		awsAccessKeyId:            config.AWSAccessKeyId,
+		awsSecretAccessKey:        config.AWSSecretAccessKey,
+		volumeMutexes:             make(map[string]*sync.Mutex),
+		daemonPath:                config.DaemonPath,
+		computerUsePluginPath:     config.ComputerUsePluginPath,
+		netRulesManager:           config.NetRulesManager,
+		resourceLimitsDisabled:    config.ResourceLimitsDisabled,
+		daemonStartTimeoutSec:     config.DaemonStartTimeoutSec,
+		sandboxStartTimeoutSec:    config.SandboxStartTimeoutSec,
+		useSnapshotEntrypoint:     config.UseSnapshotEntrypoint,
+		volumeCleanupIntervalSec:  config.VolumeCleanupIntervalSec,
+		volumeCleanupDryRun:       config.VolumeCleanupDryRun,
+		backupTimeoutMin:          config.BackupTimeoutMin,
+		initializeDaemonTelemetry: config.InitializeDaemonTelemetry,
 	}
 }
 
@@ -77,25 +79,26 @@ func (d *DockerClient) ApiClient() client.APIClient {
 }
 
 type DockerClient struct {
-	apiClient                client.APIClient
-	statesCache              *cache.StatesCache
-	logWriter                io.Writer
-	awsRegion                string
-	awsEndpointUrl           string
-	awsAccessKeyId           string
-	awsSecretAccessKey       string
-	volumeMutexes            map[string]*sync.Mutex
-	volumeMutexesMutex       sync.Mutex
-	daemonPath               string
-	computerUsePluginPath    string
-	netRulesManager          *netrules.NetRulesManager
-	resourceLimitsDisabled   bool
-	daemonStartTimeoutSec    int
-	sandboxStartTimeoutSec   int
-	useSnapshotEntrypoint    bool
-	volumeCleanupIntervalSec int
-	volumeCleanupDryRun      bool
-	backupTimeoutMin         int
-	volumeCleanupMutex       sync.Mutex
-	lastVolumeCleanup        time.Time
+	apiClient                 client.APIClient
+	statesCache               *cache.StatesCache
+	logWriter                 io.Writer
+	awsRegion                 string
+	awsEndpointUrl            string
+	awsAccessKeyId            string
+	awsSecretAccessKey        string
+	volumeMutexes             map[string]*sync.Mutex
+	volumeMutexesMutex        sync.Mutex
+	daemonPath                string
+	computerUsePluginPath     string
+	netRulesManager           *netrules.NetRulesManager
+	resourceLimitsDisabled    bool
+	daemonStartTimeoutSec     int
+	sandboxStartTimeoutSec    int
+	useSnapshotEntrypoint     bool
+	volumeCleanupIntervalSec  int
+	volumeCleanupDryRun       bool
+	backupTimeoutMin          int
+	volumeCleanupMutex        sync.Mutex
+	lastVolumeCleanup         time.Time
+	initializeDaemonTelemetry bool
 }

@@ -34,6 +34,7 @@ import (
 //	)
 type GitService struct {
 	toolboxClient *toolbox.APIClient
+	otel          *otelState
 }
 
 // NewGitService creates a new GitService with the provided toolbox client.
@@ -41,9 +42,10 @@ type GitService struct {
 // This is typically called internally by the SDK when creating a [Sandbox].
 // Users should access GitService through [Sandbox.Git] rather than creating
 // it directly.
-func NewGitService(toolboxClient *toolbox.APIClient) *GitService {
+func NewGitService(toolboxClient *toolbox.APIClient, otel *otelState) *GitService {
 	return &GitService{
 		toolboxClient: toolboxClient,
+		otel:          otel,
 	}
 }
 
@@ -77,28 +79,30 @@ func NewGitService(toolboxClient *toolbox.APIClient) *GitService {
 //
 // Returns an error if the clone operation fails.
 func (g *GitService) Clone(ctx context.Context, url, path string, opts ...func(*options.GitClone)) error {
-	cloneOpts := options.Apply(opts...)
+	return withInstrumentationVoid(ctx, g.otel, "Git", "Clone", func(ctx context.Context) error {
+		cloneOpts := options.Apply(opts...)
 
-	req := toolbox.NewGitCloneRequest(path, url)
-	if cloneOpts.Branch != nil {
-		req.SetBranch(*cloneOpts.Branch)
-	}
-	if cloneOpts.CommitId != nil {
-		req.SetCommitId(*cloneOpts.CommitId)
-	}
-	if cloneOpts.Username != nil {
-		req.SetUsername(*cloneOpts.Username)
-	}
-	if cloneOpts.Password != nil {
-		req.SetPassword(*cloneOpts.Password)
-	}
+		req := toolbox.NewGitCloneRequest(path, url)
+		if cloneOpts.Branch != nil {
+			req.SetBranch(*cloneOpts.Branch)
+		}
+		if cloneOpts.CommitId != nil {
+			req.SetCommitId(*cloneOpts.CommitId)
+		}
+		if cloneOpts.Username != nil {
+			req.SetUsername(*cloneOpts.Username)
+		}
+		if cloneOpts.Password != nil {
+			req.SetPassword(*cloneOpts.Password)
+		}
 
-	httpResp, err := g.toolboxClient.GitAPI.CloneRepository(ctx).Request(*req).Execute()
-	if err != nil {
-		return errors.ConvertToolboxError(err, httpResp)
-	}
+		httpResp, err := g.toolboxClient.GitAPI.CloneRepository(ctx).Request(*req).Execute()
+		if err != nil {
+			return errors.ConvertToolboxError(err, httpResp)
+		}
 
-	return nil
+		return nil
+	})
 }
 
 // Status returns the current Git status of a repository.
@@ -126,32 +130,34 @@ func (g *GitService) Clone(ctx context.Context, url, path string, opts ...func(*
 //
 // Returns an error if the status operation fails or the path is not a Git repository.
 func (g *GitService) Status(ctx context.Context, path string) (*types.GitStatus, error) {
-	status, httpResp, err := g.toolboxClient.GitAPI.GetStatus(ctx).Path(path).Execute()
-	if err != nil {
-		return nil, errors.ConvertToolboxError(err, httpResp)
-	}
+	return withInstrumentation(ctx, g.otel, "Git", "Status", func(ctx context.Context) (*types.GitStatus, error) {
+		status, httpResp, err := g.toolboxClient.GitAPI.GetStatus(ctx).Path(path).Execute()
+		if err != nil {
+			return nil, errors.ConvertToolboxError(err, httpResp)
+		}
 
-	// Convert pointer values to direct values
-	ahead := 0
-	if status.Ahead != nil {
-		ahead = int(*status.Ahead)
-	}
-	behind := 0
-	if status.Behind != nil {
-		behind = int(*status.Behind)
-	}
-	branchPublished := false
-	if status.BranchPublished != nil {
-		branchPublished = *status.BranchPublished
-	}
+		// Convert pointer values to direct values
+		ahead := 0
+		if status.Ahead != nil {
+			ahead = int(*status.Ahead)
+		}
+		behind := 0
+		if status.Behind != nil {
+			behind = int(*status.Behind)
+		}
+		branchPublished := false
+		if status.BranchPublished != nil {
+			branchPublished = *status.BranchPublished
+		}
 
-	return &types.GitStatus{
-		CurrentBranch:   status.GetCurrentBranch(),
-		Ahead:           ahead,
-		Behind:          behind,
-		BranchPublished: branchPublished,
-		FileStatus:      convertFileStatus(status.GetFileStatus()),
-	}, nil
+		return &types.GitStatus{
+			CurrentBranch:   status.GetCurrentBranch(),
+			Ahead:           ahead,
+			Behind:          behind,
+			BranchPublished: branchPublished,
+			FileStatus:      convertFileStatus(status.GetFileStatus()),
+		}, nil
+	})
 }
 
 // Add stages files for the next commit.
@@ -170,13 +176,15 @@ func (g *GitService) Status(ctx context.Context, path string) (*types.GitStatus,
 //
 // Returns an error if the add operation fails.
 func (g *GitService) Add(ctx context.Context, path string, files []string) error {
-	req := toolbox.NewGitAddRequest(files, path)
-	httpResp, err := g.toolboxClient.GitAPI.AddFiles(ctx).Request(*req).Execute()
-	if err != nil {
-		return errors.ConvertToolboxError(err, httpResp)
-	}
+	return withInstrumentationVoid(ctx, g.otel, "Git", "Add", func(ctx context.Context) error {
+		req := toolbox.NewGitAddRequest(files, path)
+		httpResp, err := g.toolboxClient.GitAPI.AddFiles(ctx).Request(*req).Execute()
+		if err != nil {
+			return errors.ConvertToolboxError(err, httpResp)
+		}
 
-	return nil
+		return nil
+	})
 }
 
 // Commit creates a new Git commit with the staged changes.
@@ -214,21 +222,23 @@ func (g *GitService) Add(ctx context.Context, path string, files []string) error
 // Returns the [types.GitCommitResponse] containing the commit SHA, or an error if
 // the commit fails.
 func (g *GitService) Commit(ctx context.Context, path, message, author, email string, opts ...func(*options.GitCommit)) (*types.GitCommitResponse, error) {
-	commitOpts := options.Apply(opts...)
+	return withInstrumentation(ctx, g.otel, "Git", "Commit", func(ctx context.Context) (*types.GitCommitResponse, error) {
+		commitOpts := options.Apply(opts...)
 
-	req := toolbox.NewGitCommitRequest(author, email, message, path)
-	if commitOpts.AllowEmpty != nil {
-		req.SetAllowEmpty(*commitOpts.AllowEmpty)
-	}
+		req := toolbox.NewGitCommitRequest(author, email, message, path)
+		if commitOpts.AllowEmpty != nil {
+			req.SetAllowEmpty(*commitOpts.AllowEmpty)
+		}
 
-	result, httpResp, err := g.toolboxClient.GitAPI.CommitChanges(ctx).Request(*req).Execute()
-	if err != nil {
-		return nil, errors.ConvertToolboxError(err, httpResp)
-	}
+		result, httpResp, err := g.toolboxClient.GitAPI.CommitChanges(ctx).Request(*req).Execute()
+		if err != nil {
+			return nil, errors.ConvertToolboxError(err, httpResp)
+		}
 
-	return &types.GitCommitResponse{
-		SHA: result.GetHash(),
-	}, nil
+		return &types.GitCommitResponse{
+			SHA: result.GetHash(),
+		}, nil
+	})
 }
 
 // Branches lists all branches in a Git repository.
@@ -247,12 +257,14 @@ func (g *GitService) Commit(ctx context.Context, path, message, author, email st
 //
 // Returns a slice of branch names or an error if the operation fails.
 func (g *GitService) Branches(ctx context.Context, path string) ([]string, error) {
-	result, httpResp, err := g.toolboxClient.GitAPI.ListBranches(ctx).Path(path).Execute()
-	if err != nil {
-		return nil, errors.ConvertToolboxError(err, httpResp)
-	}
+	return withInstrumentation(ctx, g.otel, "Git", "Branches", func(ctx context.Context) ([]string, error) {
+		result, httpResp, err := g.toolboxClient.GitAPI.ListBranches(ctx).Path(path).Execute()
+		if err != nil {
+			return nil, errors.ConvertToolboxError(err, httpResp)
+		}
 
-	return result.GetBranches(), nil
+		return result.GetBranches(), nil
+	})
 }
 
 // Checkout switches to a different branch or commit.
@@ -270,13 +282,15 @@ func (g *GitService) Branches(ctx context.Context, path string) ([]string, error
 //
 // Returns an error if the checkout fails (e.g., branch doesn't exist, uncommitted changes).
 func (g *GitService) Checkout(ctx context.Context, path, name string) error {
-	req := toolbox.NewGitCheckoutRequest(name, path)
-	httpResp, err := g.toolboxClient.GitAPI.CheckoutBranch(ctx).Request(*req).Execute()
-	if err != nil {
-		return errors.ConvertToolboxError(err, httpResp)
-	}
+	return withInstrumentationVoid(ctx, g.otel, "Git", "Checkout", func(ctx context.Context) error {
+		req := toolbox.NewGitCheckoutRequest(name, path)
+		httpResp, err := g.toolboxClient.GitAPI.CheckoutBranch(ctx).Request(*req).Execute()
+		if err != nil {
+			return errors.ConvertToolboxError(err, httpResp)
+		}
 
-	return nil
+		return nil
+	})
 }
 
 // CreateBranch creates a new branch at the current HEAD.
@@ -300,13 +314,15 @@ func (g *GitService) Checkout(ctx context.Context, path, name string) error {
 //
 // Returns an error if the branch creation fails (e.g., branch already exists).
 func (g *GitService) CreateBranch(ctx context.Context, path, name string) error {
-	req := toolbox.NewGitBranchRequest(name, path)
-	httpResp, err := g.toolboxClient.GitAPI.CreateBranch(ctx).Request(*req).Execute()
-	if err != nil {
-		return errors.ConvertToolboxError(err, httpResp)
-	}
+	return withInstrumentationVoid(ctx, g.otel, "Git", "CreateBranch", func(ctx context.Context) error {
+		req := toolbox.NewGitBranchRequest(name, path)
+		httpResp, err := g.toolboxClient.GitAPI.CreateBranch(ctx).Request(*req).Execute()
+		if err != nil {
+			return errors.ConvertToolboxError(err, httpResp)
+		}
 
-	return nil
+		return nil
+	})
 }
 
 // DeleteBranch deletes a branch from the repository.
@@ -331,15 +347,17 @@ func (g *GitService) CreateBranch(ctx context.Context, path, name string) error 
 //
 // Returns an error if the deletion fails.
 func (g *GitService) DeleteBranch(ctx context.Context, path, name string, opts ...func(*options.GitDeleteBranch)) error {
-	// Apply options (force parameter not yet supported in toolbox API)
-	_ = options.Apply(opts...)
-	req := toolbox.NewGitGitDeleteBranchRequest(name, path)
-	httpResp, err := g.toolboxClient.GitAPI.DeleteBranch(ctx).Request(*req).Execute()
-	if err != nil {
-		return errors.ConvertToolboxError(err, httpResp)
-	}
+	return withInstrumentationVoid(ctx, g.otel, "Git", "DeleteBranch", func(ctx context.Context) error {
+		// Apply options (force parameter not yet supported in toolbox API)
+		_ = options.Apply(opts...)
+		req := toolbox.NewGitGitDeleteBranchRequest(name, path)
+		httpResp, err := g.toolboxClient.GitAPI.DeleteBranch(ctx).Request(*req).Execute()
+		if err != nil {
+			return errors.ConvertToolboxError(err, httpResp)
+		}
 
-	return nil
+		return nil
+	})
 }
 
 // Push pushes local commits to the remote repository.
@@ -363,22 +381,24 @@ func (g *GitService) DeleteBranch(ctx context.Context, path, name string, opts .
 //
 // Returns an error if the push fails (e.g., authentication failure, remote rejection).
 func (g *GitService) Push(ctx context.Context, path string, opts ...func(*options.GitPush)) error {
-	pushOpts := options.Apply(opts...)
+	return withInstrumentationVoid(ctx, g.otel, "Git", "Push", func(ctx context.Context) error {
+		pushOpts := options.Apply(opts...)
 
-	req := toolbox.NewGitRepoRequest(path)
-	if pushOpts.Username != nil {
-		req.SetUsername(*pushOpts.Username)
-	}
-	if pushOpts.Password != nil {
-		req.SetPassword(*pushOpts.Password)
-	}
+		req := toolbox.NewGitRepoRequest(path)
+		if pushOpts.Username != nil {
+			req.SetUsername(*pushOpts.Username)
+		}
+		if pushOpts.Password != nil {
+			req.SetPassword(*pushOpts.Password)
+		}
 
-	httpResp, err := g.toolboxClient.GitAPI.PushChanges(ctx).Request(*req).Execute()
-	if err != nil {
-		return errors.ConvertToolboxError(err, httpResp)
-	}
+		httpResp, err := g.toolboxClient.GitAPI.PushChanges(ctx).Request(*req).Execute()
+		if err != nil {
+			return errors.ConvertToolboxError(err, httpResp)
+		}
 
-	return nil
+		return nil
+	})
 }
 
 // Pull fetches and merges changes from the remote repository.
@@ -402,22 +422,24 @@ func (g *GitService) Push(ctx context.Context, path string, opts ...func(*option
 //
 // Returns an error if the pull fails (e.g., merge conflicts, authentication failure).
 func (g *GitService) Pull(ctx context.Context, path string, opts ...func(*options.GitPull)) error {
-	pullOpts := options.Apply(opts...)
+	return withInstrumentationVoid(ctx, g.otel, "Git", "Pull", func(ctx context.Context) error {
+		pullOpts := options.Apply(opts...)
 
-	req := toolbox.NewGitRepoRequest(path)
-	if pullOpts.Username != nil {
-		req.SetUsername(*pullOpts.Username)
-	}
-	if pullOpts.Password != nil {
-		req.SetPassword(*pullOpts.Password)
-	}
+		req := toolbox.NewGitRepoRequest(path)
+		if pullOpts.Username != nil {
+			req.SetUsername(*pullOpts.Username)
+		}
+		if pullOpts.Password != nil {
+			req.SetPassword(*pullOpts.Password)
+		}
 
-	httpResp, err := g.toolboxClient.GitAPI.PullChanges(ctx).Request(*req).Execute()
-	if err != nil {
-		return errors.ConvertToolboxError(err, httpResp)
-	}
+		httpResp, err := g.toolboxClient.GitAPI.PullChanges(ctx).Request(*req).Execute()
+		if err != nil {
+			return errors.ConvertToolboxError(err, httpResp)
+		}
 
-	return nil
+		return nil
+	})
 }
 
 // convertFileStatus converts toolbox FileStatus to types FileStatus

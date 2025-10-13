@@ -34,7 +34,13 @@ import { BASE_PATH, COLLECTION_FORMATS, type RequestArgs, BaseAPI, RequiredError
 // @ts-ignore
 import type { CreateSandbox } from '../models'
 // @ts-ignore
+import type { MetricsResponse } from '../models'
+// @ts-ignore
+import type { PaginatedLogs } from '../models'
+// @ts-ignore
 import type { PaginatedSandboxes } from '../models'
+// @ts-ignore
+import type { PaginatedTraces } from '../models'
 // @ts-ignore
 import type { PortPreviewUrl } from '../models'
 // @ts-ignore
@@ -51,6 +57,8 @@ import type { SshAccessDto } from '../models'
 import type { SshAccessValidationDto } from '../models'
 // @ts-ignore
 import type { ToolboxProxyUrl } from '../models'
+// @ts-ignore
+import type { TraceSpan } from '../models'
 // @ts-ignore
 import type { UpdateSandboxStateDto } from '../models'
 // @ts-ignore
@@ -557,6 +565,291 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
 
       if (verbose !== undefined) {
         localVarQueryParameter['verbose'] = verbose
+      }
+
+      if (xDaytonaOrganizationID != null) {
+        localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
+      }
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     * Retrieve OTEL logs for a sandbox within a time range
+     * @summary Get sandbox logs
+     * @param {string} sandboxId ID of the sandbox
+     * @param {Date} from Start of time range (ISO 8601)
+     * @param {Date} to End of time range (ISO 8601)
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {number} [page] Page number (1-indexed)
+     * @param {number} [limit] Number of items per page
+     * @param {Array<string>} [severities] Filter by severity levels (DEBUG, INFO, WARN, ERROR)
+     * @param {string} [search] Search in log body
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    getSandboxLogs: async (
+      sandboxId: string,
+      from: Date,
+      to: Date,
+      xDaytonaOrganizationID?: string,
+      page?: number,
+      limit?: number,
+      severities?: Array<string>,
+      search?: string,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'sandboxId' is not null or undefined
+      assertParamExists('getSandboxLogs', 'sandboxId', sandboxId)
+      // verify required parameter 'from' is not null or undefined
+      assertParamExists('getSandboxLogs', 'from', from)
+      // verify required parameter 'to' is not null or undefined
+      assertParamExists('getSandboxLogs', 'to', to)
+      const localVarPath = `/sandbox/{sandboxId}/telemetry/logs`.replace(
+        `{${'sandboxId'}}`,
+        encodeURIComponent(String(sandboxId)),
+      )
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      // authentication bearer required
+      // http bearer authentication required
+      await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+      // authentication oauth2 required
+
+      if (from !== undefined) {
+        localVarQueryParameter['from'] = (from as any) instanceof Date ? (from as any).toISOString() : from
+      }
+
+      if (to !== undefined) {
+        localVarQueryParameter['to'] = (to as any) instanceof Date ? (to as any).toISOString() : to
+      }
+
+      if (page !== undefined) {
+        localVarQueryParameter['page'] = page
+      }
+
+      if (limit !== undefined) {
+        localVarQueryParameter['limit'] = limit
+      }
+
+      if (severities) {
+        localVarQueryParameter['severities'] = severities
+      }
+
+      if (search !== undefined) {
+        localVarQueryParameter['search'] = search
+      }
+
+      if (xDaytonaOrganizationID != null) {
+        localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
+      }
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     * Retrieve OTEL metrics for a sandbox within a time range
+     * @summary Get sandbox metrics
+     * @param {string} sandboxId ID of the sandbox
+     * @param {Date} from Start of time range (ISO 8601)
+     * @param {Date} to End of time range (ISO 8601)
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {Array<string>} [metricNames] Filter by metric names
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    getSandboxMetrics: async (
+      sandboxId: string,
+      from: Date,
+      to: Date,
+      xDaytonaOrganizationID?: string,
+      metricNames?: Array<string>,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'sandboxId' is not null or undefined
+      assertParamExists('getSandboxMetrics', 'sandboxId', sandboxId)
+      // verify required parameter 'from' is not null or undefined
+      assertParamExists('getSandboxMetrics', 'from', from)
+      // verify required parameter 'to' is not null or undefined
+      assertParamExists('getSandboxMetrics', 'to', to)
+      const localVarPath = `/sandbox/{sandboxId}/telemetry/metrics`.replace(
+        `{${'sandboxId'}}`,
+        encodeURIComponent(String(sandboxId)),
+      )
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      // authentication bearer required
+      // http bearer authentication required
+      await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+      // authentication oauth2 required
+
+      if (from !== undefined) {
+        localVarQueryParameter['from'] = (from as any) instanceof Date ? (from as any).toISOString() : from
+      }
+
+      if (to !== undefined) {
+        localVarQueryParameter['to'] = (to as any) instanceof Date ? (to as any).toISOString() : to
+      }
+
+      if (metricNames) {
+        localVarQueryParameter['metricNames'] = metricNames
+      }
+
+      if (xDaytonaOrganizationID != null) {
+        localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
+      }
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     * Retrieve all spans for a specific trace
+     * @summary Get trace spans
+     * @param {string} sandboxId ID of the sandbox
+     * @param {string} traceId ID of the trace
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    getSandboxTraceSpans: async (
+      sandboxId: string,
+      traceId: string,
+      xDaytonaOrganizationID?: string,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'sandboxId' is not null or undefined
+      assertParamExists('getSandboxTraceSpans', 'sandboxId', sandboxId)
+      // verify required parameter 'traceId' is not null or undefined
+      assertParamExists('getSandboxTraceSpans', 'traceId', traceId)
+      const localVarPath = `/sandbox/{sandboxId}/telemetry/traces/{traceId}`
+        .replace(`{${'sandboxId'}}`, encodeURIComponent(String(sandboxId)))
+        .replace(`{${'traceId'}}`, encodeURIComponent(String(traceId)))
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      // authentication bearer required
+      // http bearer authentication required
+      await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+      // authentication oauth2 required
+
+      if (xDaytonaOrganizationID != null) {
+        localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
+      }
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     * Retrieve OTEL traces for a sandbox within a time range
+     * @summary Get sandbox traces
+     * @param {string} sandboxId ID of the sandbox
+     * @param {Date} from Start of time range (ISO 8601)
+     * @param {Date} to End of time range (ISO 8601)
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {number} [page] Page number (1-indexed)
+     * @param {number} [limit] Number of items per page
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    getSandboxTraces: async (
+      sandboxId: string,
+      from: Date,
+      to: Date,
+      xDaytonaOrganizationID?: string,
+      page?: number,
+      limit?: number,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'sandboxId' is not null or undefined
+      assertParamExists('getSandboxTraces', 'sandboxId', sandboxId)
+      // verify required parameter 'from' is not null or undefined
+      assertParamExists('getSandboxTraces', 'from', from)
+      // verify required parameter 'to' is not null or undefined
+      assertParamExists('getSandboxTraces', 'to', to)
+      const localVarPath = `/sandbox/{sandboxId}/telemetry/traces`.replace(
+        `{${'sandboxId'}}`,
+        encodeURIComponent(String(sandboxId)),
+      )
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      // authentication bearer required
+      // http bearer authentication required
+      await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+      // authentication oauth2 required
+
+      if (from !== undefined) {
+        localVarQueryParameter['from'] = (from as any) instanceof Date ? (from as any).toISOString() : from
+      }
+
+      if (to !== undefined) {
+        localVarQueryParameter['to'] = (to as any) instanceof Date ? (to as any).toISOString() : to
+      }
+
+      if (page !== undefined) {
+        localVarQueryParameter['page'] = page
+      }
+
+      if (limit !== undefined) {
+        localVarQueryParameter['limit'] = limit
       }
 
       if (xDaytonaOrganizationID != null) {
@@ -1929,6 +2222,164 @@ export const SandboxApiFp = function (configuration?: Configuration) {
         )(axios, localVarOperationServerBasePath || basePath)
     },
     /**
+     * Retrieve OTEL logs for a sandbox within a time range
+     * @summary Get sandbox logs
+     * @param {string} sandboxId ID of the sandbox
+     * @param {Date} from Start of time range (ISO 8601)
+     * @param {Date} to End of time range (ISO 8601)
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {number} [page] Page number (1-indexed)
+     * @param {number} [limit] Number of items per page
+     * @param {Array<string>} [severities] Filter by severity levels (DEBUG, INFO, WARN, ERROR)
+     * @param {string} [search] Search in log body
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async getSandboxLogs(
+      sandboxId: string,
+      from: Date,
+      to: Date,
+      xDaytonaOrganizationID?: string,
+      page?: number,
+      limit?: number,
+      severities?: Array<string>,
+      search?: string,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PaginatedLogs>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.getSandboxLogs(
+        sandboxId,
+        from,
+        to,
+        xDaytonaOrganizationID,
+        page,
+        limit,
+        severities,
+        search,
+        options,
+      )
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['SandboxApi.getSandboxLogs']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
+    /**
+     * Retrieve OTEL metrics for a sandbox within a time range
+     * @summary Get sandbox metrics
+     * @param {string} sandboxId ID of the sandbox
+     * @param {Date} from Start of time range (ISO 8601)
+     * @param {Date} to End of time range (ISO 8601)
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {Array<string>} [metricNames] Filter by metric names
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async getSandboxMetrics(
+      sandboxId: string,
+      from: Date,
+      to: Date,
+      xDaytonaOrganizationID?: string,
+      metricNames?: Array<string>,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<MetricsResponse>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.getSandboxMetrics(
+        sandboxId,
+        from,
+        to,
+        xDaytonaOrganizationID,
+        metricNames,
+        options,
+      )
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['SandboxApi.getSandboxMetrics']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
+    /**
+     * Retrieve all spans for a specific trace
+     * @summary Get trace spans
+     * @param {string} sandboxId ID of the sandbox
+     * @param {string} traceId ID of the trace
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async getSandboxTraceSpans(
+      sandboxId: string,
+      traceId: string,
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<TraceSpan>>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.getSandboxTraceSpans(
+        sandboxId,
+        traceId,
+        xDaytonaOrganizationID,
+        options,
+      )
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['SandboxApi.getSandboxTraceSpans']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
+    /**
+     * Retrieve OTEL traces for a sandbox within a time range
+     * @summary Get sandbox traces
+     * @param {string} sandboxId ID of the sandbox
+     * @param {Date} from Start of time range (ISO 8601)
+     * @param {Date} to End of time range (ISO 8601)
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {number} [page] Page number (1-indexed)
+     * @param {number} [limit] Number of items per page
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async getSandboxTraces(
+      sandboxId: string,
+      from: Date,
+      to: Date,
+      xDaytonaOrganizationID?: string,
+      page?: number,
+      limit?: number,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PaginatedTraces>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.getSandboxTraces(
+        sandboxId,
+        from,
+        to,
+        xDaytonaOrganizationID,
+        page,
+        limit,
+        options,
+      )
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['SandboxApi.getSandboxTraces']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
+    /**
      *
      * @summary Get sandboxes for the authenticated runner
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
@@ -2737,6 +3188,102 @@ export const SandboxApiFactory = function (configuration?: Configuration, basePa
         .then((request) => request(axios, basePath))
     },
     /**
+     * Retrieve OTEL logs for a sandbox within a time range
+     * @summary Get sandbox logs
+     * @param {string} sandboxId ID of the sandbox
+     * @param {Date} from Start of time range (ISO 8601)
+     * @param {Date} to End of time range (ISO 8601)
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {number} [page] Page number (1-indexed)
+     * @param {number} [limit] Number of items per page
+     * @param {Array<string>} [severities] Filter by severity levels (DEBUG, INFO, WARN, ERROR)
+     * @param {string} [search] Search in log body
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    getSandboxLogs(
+      sandboxId: string,
+      from: Date,
+      to: Date,
+      xDaytonaOrganizationID?: string,
+      page?: number,
+      limit?: number,
+      severities?: Array<string>,
+      search?: string,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<PaginatedLogs> {
+      return localVarFp
+        .getSandboxLogs(sandboxId, from, to, xDaytonaOrganizationID, page, limit, severities, search, options)
+        .then((request) => request(axios, basePath))
+    },
+    /**
+     * Retrieve OTEL metrics for a sandbox within a time range
+     * @summary Get sandbox metrics
+     * @param {string} sandboxId ID of the sandbox
+     * @param {Date} from Start of time range (ISO 8601)
+     * @param {Date} to End of time range (ISO 8601)
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {Array<string>} [metricNames] Filter by metric names
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    getSandboxMetrics(
+      sandboxId: string,
+      from: Date,
+      to: Date,
+      xDaytonaOrganizationID?: string,
+      metricNames?: Array<string>,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<MetricsResponse> {
+      return localVarFp
+        .getSandboxMetrics(sandboxId, from, to, xDaytonaOrganizationID, metricNames, options)
+        .then((request) => request(axios, basePath))
+    },
+    /**
+     * Retrieve all spans for a specific trace
+     * @summary Get trace spans
+     * @param {string} sandboxId ID of the sandbox
+     * @param {string} traceId ID of the trace
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    getSandboxTraceSpans(
+      sandboxId: string,
+      traceId: string,
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<Array<TraceSpan>> {
+      return localVarFp
+        .getSandboxTraceSpans(sandboxId, traceId, xDaytonaOrganizationID, options)
+        .then((request) => request(axios, basePath))
+    },
+    /**
+     * Retrieve OTEL traces for a sandbox within a time range
+     * @summary Get sandbox traces
+     * @param {string} sandboxId ID of the sandbox
+     * @param {Date} from Start of time range (ISO 8601)
+     * @param {Date} to End of time range (ISO 8601)
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {number} [page] Page number (1-indexed)
+     * @param {number} [limit] Number of items per page
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    getSandboxTraces(
+      sandboxId: string,
+      from: Date,
+      to: Date,
+      xDaytonaOrganizationID?: string,
+      page?: number,
+      limit?: number,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<PaginatedTraces> {
+      return localVarFp
+        .getSandboxTraces(sandboxId, from, to, xDaytonaOrganizationID, page, limit, options)
+        .then((request) => request(axios, basePath))
+    },
+    /**
      *
      * @summary Get sandboxes for the authenticated runner
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
@@ -3316,6 +3863,110 @@ export class SandboxApi extends BaseAPI {
   ) {
     return SandboxApiFp(this.configuration)
       .getSandbox(sandboxIdOrName, xDaytonaOrganizationID, verbose, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   * Retrieve OTEL logs for a sandbox within a time range
+   * @summary Get sandbox logs
+   * @param {string} sandboxId ID of the sandbox
+   * @param {Date} from Start of time range (ISO 8601)
+   * @param {Date} to End of time range (ISO 8601)
+   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+   * @param {number} [page] Page number (1-indexed)
+   * @param {number} [limit] Number of items per page
+   * @param {Array<string>} [severities] Filter by severity levels (DEBUG, INFO, WARN, ERROR)
+   * @param {string} [search] Search in log body
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof SandboxApi
+   */
+  public getSandboxLogs(
+    sandboxId: string,
+    from: Date,
+    to: Date,
+    xDaytonaOrganizationID?: string,
+    page?: number,
+    limit?: number,
+    severities?: Array<string>,
+    search?: string,
+    options?: RawAxiosRequestConfig,
+  ) {
+    return SandboxApiFp(this.configuration)
+      .getSandboxLogs(sandboxId, from, to, xDaytonaOrganizationID, page, limit, severities, search, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   * Retrieve OTEL metrics for a sandbox within a time range
+   * @summary Get sandbox metrics
+   * @param {string} sandboxId ID of the sandbox
+   * @param {Date} from Start of time range (ISO 8601)
+   * @param {Date} to End of time range (ISO 8601)
+   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+   * @param {Array<string>} [metricNames] Filter by metric names
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof SandboxApi
+   */
+  public getSandboxMetrics(
+    sandboxId: string,
+    from: Date,
+    to: Date,
+    xDaytonaOrganizationID?: string,
+    metricNames?: Array<string>,
+    options?: RawAxiosRequestConfig,
+  ) {
+    return SandboxApiFp(this.configuration)
+      .getSandboxMetrics(sandboxId, from, to, xDaytonaOrganizationID, metricNames, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   * Retrieve all spans for a specific trace
+   * @summary Get trace spans
+   * @param {string} sandboxId ID of the sandbox
+   * @param {string} traceId ID of the trace
+   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof SandboxApi
+   */
+  public getSandboxTraceSpans(
+    sandboxId: string,
+    traceId: string,
+    xDaytonaOrganizationID?: string,
+    options?: RawAxiosRequestConfig,
+  ) {
+    return SandboxApiFp(this.configuration)
+      .getSandboxTraceSpans(sandboxId, traceId, xDaytonaOrganizationID, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   * Retrieve OTEL traces for a sandbox within a time range
+   * @summary Get sandbox traces
+   * @param {string} sandboxId ID of the sandbox
+   * @param {Date} from Start of time range (ISO 8601)
+   * @param {Date} to End of time range (ISO 8601)
+   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+   * @param {number} [page] Page number (1-indexed)
+   * @param {number} [limit] Number of items per page
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof SandboxApi
+   */
+  public getSandboxTraces(
+    sandboxId: string,
+    from: Date,
+    to: Date,
+    xDaytonaOrganizationID?: string,
+    page?: number,
+    limit?: number,
+    options?: RawAxiosRequestConfig,
+  ) {
+    return SandboxApiFp(this.configuration)
+      .getSandboxTraces(sandboxId, from, to, xDaytonaOrganizationID, page, limit, options)
       .then((request) => request(this.axios, this.basePath))
   }
 

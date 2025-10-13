@@ -30,6 +30,7 @@ import {
   ListRecordingsResponse,
 } from '@daytonaio/toolbox-api-client'
 import { dynamicImport } from './utils/Import'
+import { WithInstrumentation } from './utils/otel.decorator'
 
 /**
  * Interface for region coordinates used in screenshot operations
@@ -68,6 +69,7 @@ export class Mouse {
    * console.log(`Mouse is at: ${position.x}, ${position.y}`);
    * ```
    */
+  @WithInstrumentation()
   public async getPosition(): Promise<MousePositionResponse> {
     const response = await this.apiClient.getMousePosition()
     return response.data
@@ -86,6 +88,7 @@ export class Mouse {
    * console.log(`Mouse moved to: ${result.x}, ${result.y}`);
    * ```
    */
+  @WithInstrumentation()
   public async move(x: number, y: number): Promise<MousePositionResponse> {
     const request: MouseMoveRequest = { x, y }
     const response = await this.apiClient.moveMouse(request)
@@ -113,6 +116,7 @@ export class Mouse {
    * const rightClick = await sandbox.computerUse.mouse.click(100, 200, 'right');
    * ```
    */
+  @WithInstrumentation()
   public async click(x: number, y: number, button = 'left', double = false): Promise<MouseClickResponse> {
     const request: MouseClickRequest = { x, y, button, double }
     const response = await this.apiClient.click(request)
@@ -135,6 +139,7 @@ export class Mouse {
    * console.log(`Dragged from ${result.from.x},${result.from.y} to ${result.to.x},${result.to.y}`);
    * ```
    */
+  @WithInstrumentation()
   public async drag(
     startX: number,
     startY: number,
@@ -165,6 +170,7 @@ export class Mouse {
    * const scrollDown = await sandbox.computerUse.mouse.scroll(100, 200, 'down', 5);
    * ```
    */
+  @WithInstrumentation()
   public async scroll(x: number, y: number, direction: 'up' | 'down', amount = 1): Promise<boolean> {
     const request: MouseScrollRequest = { x, y, direction, amount }
     const response = await this.apiClient.scroll(request)
@@ -203,6 +209,7 @@ export class Keyboard {
    * }
    * ```
    */
+  @WithInstrumentation()
   public async type(text: string, delay?: number): Promise<void> {
     const request: KeyboardTypeRequest = { text, delay }
     await this.apiClient.typeText(request)
@@ -242,6 +249,7 @@ export class Keyboard {
    * }
    * ```
    */
+  @WithInstrumentation()
   public async press(key: string, modifiers: string[] = []): Promise<void> {
     const request: KeyboardPressRequest = { key, modifiers }
     await this.apiClient.pressKey(request)
@@ -280,6 +288,7 @@ export class Keyboard {
    * }
    * ```
    */
+  @WithInstrumentation()
   public async hotkey(keys: string): Promise<void> {
     const request: KeyboardHotkeyRequest = { keys }
     await this.apiClient.pressHotkey(request)
@@ -307,6 +316,7 @@ export class Screenshot {
    * const withCursor = await sandbox.computerUse.screenshot.takeFullScreen(true);
    * ```
    */
+  @WithInstrumentation()
   public async takeFullScreen(showCursor = false): Promise<ScreenshotResponse> {
     const response = await this.apiClient.takeScreenshot(showCursor)
     return response.data
@@ -326,6 +336,7 @@ export class Screenshot {
    * console.log(`Captured region: ${screenshot.region.width}x${screenshot.region.height}`);
    * ```
    */
+  @WithInstrumentation()
   public async takeRegion(region: ScreenshotRegion, showCursor = false): Promise<ScreenshotResponse> {
     const response = await this.apiClient.takeRegionScreenshot(
       region.height,
@@ -362,6 +373,7 @@ export class Screenshot {
    * });
    * ```
    */
+  @WithInstrumentation()
   public async takeCompressed(options: ScreenshotOptions = {}): Promise<ScreenshotResponse> {
     const response = await this.apiClient.takeCompressedScreenshot(
       options.showCursor,
@@ -390,6 +402,7 @@ export class Screenshot {
    * console.log(`Compressed size: ${screenshot.size_bytes} bytes`);
    * ```
    */
+  @WithInstrumentation()
   public async takeCompressedRegion(
     region: ScreenshotRegion,
     options: ScreenshotOptions = {},
@@ -429,6 +442,7 @@ export class Display {
    * });
    * ```
    */
+  @WithInstrumentation()
   public async getInfo(): Promise<DisplayInfoResponse> {
     const response = await this.apiClient.getDisplayInfo()
     return response.data
@@ -448,6 +462,7 @@ export class Display {
    * });
    * ```
    */
+  @WithInstrumentation()
   public async getWindows(): Promise<WindowsResponse> {
     const response = await this.apiClient.getWindows()
     return response.data
@@ -474,6 +489,7 @@ export class RecordingService {
    * console.log(`File: ${recording.filePath}`);
    * ```
    */
+  @WithInstrumentation()
   public async start(label?: string): Promise<Recording> {
     return (await this.apiClient.startRecording({ label })).data
   }
@@ -491,6 +507,7 @@ export class RecordingService {
    * console.log(`Saved to: ${result.filePath}`);
    * ```
    */
+  @WithInstrumentation()
   public async stop(id: string): Promise<Recording> {
     return (await this.apiClient.stopRecording({ id })).data
   }
@@ -509,6 +526,7 @@ export class RecordingService {
    * });
    * ```
    */
+  @WithInstrumentation()
   public async list(): Promise<ListRecordingsResponse> {
     return (await this.apiClient.listRecordings()).data
   }
@@ -527,6 +545,7 @@ export class RecordingService {
    * console.log(`Duration: ${recording.durationSeconds} seconds`);
    * ```
    */
+  @WithInstrumentation()
   public async get(id: string): Promise<Recording> {
     return (await this.apiClient.getRecording(id)).data
   }
@@ -542,6 +561,7 @@ export class RecordingService {
    * console.log('Recording deleted');
    * ```
    */
+  @WithInstrumentation()
   public async delete(id: string): Promise<void> {
     await this.apiClient.deleteRecording(id)
   }
@@ -561,6 +581,7 @@ export class RecordingService {
    * console.log('Recording downloaded');
    * ```
    */
+  @WithInstrumentation()
   public async download(id: string, localPath: string): Promise<void> {
     const response = await this.apiClient.downloadRecording(id, { responseType: 'stream' })
     const importErrPrefix = 'Recording download failed: '
@@ -621,6 +642,7 @@ export class ComputerUse {
    * console.log('Computer use processes started:', result.message);
    * ```
    */
+  @WithInstrumentation()
   public async start(): Promise<ComputerUseStartResponse> {
     const response = await this.apiClient.startComputerUse()
     return response.data
@@ -637,6 +659,7 @@ export class ComputerUse {
    * console.log('Computer use processes stopped:', result.message);
    * ```
    */
+  @WithInstrumentation()
   public async stop(): Promise<ComputerUseStopResponse> {
     const response = await this.apiClient.stopComputerUse()
     return response.data
@@ -653,6 +676,7 @@ export class ComputerUse {
    * console.log('Computer use status:', status.status);
    * ```
    */
+  @WithInstrumentation()
   public async getStatus(): Promise<ComputerUseStatusResponse> {
     const response = await this.apiClient.getComputerUseStatus()
     return response.data
@@ -670,6 +694,7 @@ export class ComputerUse {
    * const noVncStatus = await sandbox.computerUse.getProcessStatus('novnc');
    * ```
    */
+  @WithInstrumentation()
   public async getProcessStatus(processName: string): Promise<ProcessStatusResponse> {
     const response = await this.apiClient.getProcessStatus(processName)
     return response.data
@@ -687,6 +712,7 @@ export class ComputerUse {
    * console.log('XFCE4 process restarted:', result.message);
    * ```
    */
+  @WithInstrumentation()
   public async restartProcess(processName: string): Promise<ProcessRestartResponse> {
     const response = await this.apiClient.restartProcess(processName)
     return response.data
@@ -704,6 +730,7 @@ export class ComputerUse {
    * console.log('NoVNC logs:', logsResp.logs);
    * ```
    */
+  @WithInstrumentation()
   public async getProcessLogs(processName: string): Promise<ProcessLogsResponse> {
     const response = await this.apiClient.getProcessLogs(processName)
     return response.data
@@ -721,6 +748,7 @@ export class ComputerUse {
    * console.log('X11VNC errors:', errorsResp.errors);
    * ```
    */
+  @WithInstrumentation()
   public async getProcessErrors(processName: string): Promise<ProcessErrorsResponse> {
     const response = await this.apiClient.getProcessErrors(processName)
     return response.data

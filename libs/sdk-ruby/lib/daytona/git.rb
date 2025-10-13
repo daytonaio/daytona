@@ -2,6 +2,8 @@
 
 module Daytona
   class Git
+    include Instrumentation
+
     # @return [String] The Sandbox ID
     attr_reader :sandbox_id
 
@@ -12,9 +14,11 @@ module Daytona
     #
     # @param sandbox_id [String] The Sandbox ID.
     # @param toolbox_api [DaytonaToolboxApiClient::GitApi] API client for Sandbox operations.
-    def initialize(sandbox_id:, toolbox_api:)
+    # @param otel_state [Daytona::OtelState, nil]
+    def initialize(sandbox_id:, toolbox_api:, otel_state: nil)
       @sandbox_id = sandbox_id
       @toolbox_api = toolbox_api
+      @otel_state = otel_state
     end
 
     # Stages the specified files for the next commit, similar to
@@ -276,5 +280,14 @@ module Daytona
     rescue StandardError => e
       raise Sdk::Error, "Failed to delete branch: #{e.message}"
     end
+
+    instrument :add, :branches, :clone, :commit, :push, :pull, :status,
+               :checkout_branch, :create_branch, :delete_branch,
+               component: 'Git'
+
+    private
+
+    # @return [Daytona::OtelState, nil]
+    attr_reader :otel_state
   end
 end

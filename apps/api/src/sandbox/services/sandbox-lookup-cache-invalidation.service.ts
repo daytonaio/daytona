@@ -5,15 +5,26 @@
 
 import { Injectable, Logger } from '@nestjs/common'
 import { DataSource } from 'typeorm'
-import { sandboxLookupCacheKeyById, sandboxLookupCacheKeyByName } from '../utils/sandbox-lookup-cache.util'
+import {
+  sandboxLookupCacheKeyByAuthToken,
+  sandboxLookupCacheKeyById,
+  sandboxLookupCacheKeyByName,
+} from '../utils/sandbox-lookup-cache.util'
+import { SandboxEvents } from '../constants/sandbox-events.constants'
+import { OnEvent } from '@nestjs/event-emitter'
+import { SandboxStartedEvent } from '../events/sandbox-started.event'
 
-type InvalidateSandboxLookupCacheArgs = {
-  sandboxId: string
-  organizationId: string
-  name: string
-  previousOrganizationId?: string | null
-  previousName?: string | null
-}
+type InvalidateSandboxLookupCacheArgs =
+  | {
+      sandboxId: string
+      organizationId: string
+      name: string
+      previousOrganizationId?: string | null
+      previousName?: string | null
+    }
+  | {
+      authToken: string
+    }
 
 @Injectable()
 export class SandboxLookupCacheInvalidationService {
@@ -24,6 +35,18 @@ export class SandboxLookupCacheInvalidationService {
   invalidate(args: InvalidateSandboxLookupCacheArgs): void {
     const cache = this.dataSource.queryResultCache
     if (!cache) {
+      return
+    }
+
+    if ('authToken' in args) {
+      cache
+        .remove([sandboxLookupCacheKeyByAuthToken({ authToken: args.authToken })])
+        .then(() => this.logger.debug(`Invalidated sandbox lookup cache for authToken ${args.authToken}`))
+        .catch((error) =>
+          this.logger.warn(
+            `Failed to invalidate sandbox lookup cache for authToken ${args.authToken}: ${error instanceof Error ? error.message : String(error)}`,
+          ),
+        )
       return
     }
 
@@ -72,5 +95,12 @@ export class SandboxLookupCacheInvalidationService {
           `Failed to invalidate sandbox lookup cache for ${args.sandboxId}: ${error instanceof Error ? error.message : String(error)}`,
         ),
       )
+  }
+
+  @OnEvent(SandboxEvents.STARTED)
+  private _handleSandboxStarted(event: SandboxStartedEvent): void {
+    this.invalidate({
+      authToken: event.sandbox.authToken,
+    })
   }
 }

@@ -47,6 +47,7 @@ const maxPrefixLen = 3
 //	defer handle.Disconnect()
 type ProcessService struct {
 	toolboxClient *toolbox.APIClient
+	otel          *otelState
 }
 
 // NewProcessService creates a new ProcessService with the provided toolbox client.
@@ -54,9 +55,10 @@ type ProcessService struct {
 // This is typically called internally by the SDK when creating a [Sandbox].
 // Users should access ProcessService through [Sandbox.Process] rather than
 // creating it directly.
-func NewProcessService(toolboxClient *toolbox.APIClient) *ProcessService {
+func NewProcessService(toolboxClient *toolbox.APIClient, otel *otelState) *ProcessService {
 	return &ProcessService{
 		toolboxClient: toolboxClient,
+		otel:          otel,
 	}
 }
 
@@ -92,31 +94,33 @@ func NewProcessService(toolboxClient *toolbox.APIClient) *ProcessService {
 //
 // Returns [types.ExecuteResponse] containing the output and exit code, or an error.
 func (p *ProcessService) ExecuteCommand(ctx context.Context, command string, opts ...func(*options.ExecuteCommand)) (*types.ExecuteResponse, error) {
-	execOpts := options.Apply(opts...)
+	return withInstrumentation(ctx, p.otel, "Process", "ExecuteCommand", func(ctx context.Context) (*types.ExecuteResponse, error) {
+		execOpts := options.Apply(opts...)
 
-	req := toolbox.NewExecuteRequest(command)
-	if execOpts.Cwd != nil {
-		req.SetCwd(*execOpts.Cwd)
-	}
-	if execOpts.Timeout != nil {
-		req.SetTimeout(int32(execOpts.Timeout.Seconds()))
-	}
-	// Note: env parameter not supported in current toolbox API
+		req := toolbox.NewExecuteRequest(command)
+		if execOpts.Cwd != nil {
+			req.SetCwd(*execOpts.Cwd)
+		}
+		if execOpts.Timeout != nil {
+			req.SetTimeout(int32(execOpts.Timeout.Seconds()))
+		}
+		// Note: env parameter not supported in current toolbox API
 
-	resp, httpResp, err := p.toolboxClient.ProcessAPI.ExecuteCommand(ctx).Request(*req).Execute()
-	if err != nil {
-		return nil, errors.ConvertToolboxError(err, httpResp)
-	}
+		resp, httpResp, err := p.toolboxClient.ProcessAPI.ExecuteCommand(ctx).Request(*req).Execute()
+		if err != nil {
+			return nil, errors.ConvertToolboxError(err, httpResp)
+		}
 
-	exitCode := 0
-	if resp.ExitCode != nil {
-		exitCode = int(*resp.ExitCode)
-	}
+		exitCode := 0
+		if resp.ExitCode != nil {
+			exitCode = int(*resp.ExitCode)
+		}
 
-	return &types.ExecuteResponse{
-		ExitCode: exitCode,
-		Result:   resp.Result,
-	}, nil
+		return &types.ExecuteResponse{
+			ExitCode: exitCode,
+			Result:   resp.Result,
+		}, nil
+	})
 }
 
 // CodeRun executes code in a language-specific way.
@@ -129,7 +133,9 @@ func (p *ProcessService) ExecuteCommand(ctx context.Context, command string, opt
 //   - [options.WithCodeRunParams]: Set code execution parameters
 //   - [options.WithCodeRunTimeout]: Set execution timeout
 func (p *ProcessService) CodeRun(ctx context.Context, code string, opts ...func(*options.CodeRun)) (*types.ExecuteResponse, error) {
-	return nil, errors.NewDaytonaError("CodeRun is not supported by the current toolbox API. Use ExecuteCommand() or CodeInterpreter service instead.", 0, nil)
+	return withInstrumentation(ctx, p.otel, "Process", "CodeRun", func(ctx context.Context) (*types.ExecuteResponse, error) {
+		return nil, errors.NewDaytonaError("CodeRun is not supported by the current toolbox API. Use ExecuteCommand() or CodeInterpreter service instead.", 0, nil)
+	})
 }
 
 // CreateSession creates a named session for executing multiple commands.
@@ -152,13 +158,15 @@ func (p *ProcessService) CodeRun(ctx context.Context, code string, opts ...func(
 //
 // Returns an error if session creation fails.
 func (p *ProcessService) CreateSession(ctx context.Context, sessionID string) error {
-	req := toolbox.NewCreateSessionRequest(sessionID)
-	httpResp, err := p.toolboxClient.ProcessAPI.CreateSession(ctx).Request(*req).Execute()
-	if err != nil {
-		return errors.ConvertToolboxError(err, httpResp)
-	}
+	return withInstrumentationVoid(ctx, p.otel, "Process", "CreateSession", func(ctx context.Context) error {
+		req := toolbox.NewCreateSessionRequest(sessionID)
+		httpResp, err := p.toolboxClient.ProcessAPI.CreateSession(ctx).Request(*req).Execute()
+		if err != nil {
+			return errors.ConvertToolboxError(err, httpResp)
+		}
 
-	return nil
+		return nil
+	})
 }
 
 // GetSession retrieves information about a session.
@@ -179,16 +187,18 @@ func (p *ProcessService) CreateSession(ctx context.Context, sessionID string) er
 //
 // Returns an error if the session doesn't exist.
 func (p *ProcessService) GetSession(ctx context.Context, sessionID string) (map[string]any, error) {
-	resp, httpResp, err := p.toolboxClient.ProcessAPI.GetSession(ctx, sessionID).Execute()
-	if err != nil {
-		return nil, errors.ConvertToolboxError(err, httpResp)
-	}
+	return withInstrumentation(ctx, p.otel, "Process", "GetSession", func(ctx context.Context) (map[string]any, error) {
+		resp, httpResp, err := p.toolboxClient.ProcessAPI.GetSession(ctx, sessionID).Execute()
+		if err != nil {
+			return nil, errors.ConvertToolboxError(err, httpResp)
+		}
 
-	// Convert to map for backward compatibility
-	return map[string]any{
-		"sessionId": resp.GetSessionId(),
-		"commands":  resp.GetCommands(),
-	}, nil
+		// Convert to map for backward compatibility
+		return map[string]any{
+			"sessionId": resp.GetSessionId(),
+			"commands":  resp.GetCommands(),
+		}, nil
+	})
 }
 
 // DeleteSession removes a session and releases its resources.
@@ -201,12 +211,14 @@ func (p *ProcessService) GetSession(ctx context.Context, sessionID string) (map[
 //
 // Returns an error if the session doesn't exist or deletion fails.
 func (p *ProcessService) DeleteSession(ctx context.Context, sessionID string) error {
-	httpResp, err := p.toolboxClient.ProcessAPI.DeleteSession(ctx, sessionID).Execute()
-	if err != nil {
-		return errors.ConvertToolboxError(err, httpResp)
-	}
+	return withInstrumentationVoid(ctx, p.otel, "Process", "DeleteSession", func(ctx context.Context) error {
+		httpResp, err := p.toolboxClient.ProcessAPI.DeleteSession(ctx, sessionID).Execute()
+		if err != nil {
+			return errors.ConvertToolboxError(err, httpResp)
+		}
 
-	return nil
+		return nil
+	})
 }
 
 // ListSessions returns all active sessions.
@@ -223,21 +235,23 @@ func (p *ProcessService) DeleteSession(ctx context.Context, sessionID string) er
 //
 // Returns a slice of session information maps, or an error.
 func (p *ProcessService) ListSessions(ctx context.Context) ([]map[string]any, error) {
-	resp, httpResp, err := p.toolboxClient.ProcessAPI.ListSessions(ctx).Execute()
-	if err != nil {
-		return nil, errors.ConvertToolboxError(err, httpResp)
-	}
-
-	// Convert to map array for backward compatibility
-	result := make([]map[string]any, len(resp))
-	for i, session := range resp {
-		result[i] = map[string]any{
-			"sessionId": session.GetSessionId(),
-			"commands":  session.GetCommands(),
+	return withInstrumentation(ctx, p.otel, "Process", "ListSessions", func(ctx context.Context) ([]map[string]any, error) {
+		resp, httpResp, err := p.toolboxClient.ProcessAPI.ListSessions(ctx).Execute()
+		if err != nil {
+			return nil, errors.ConvertToolboxError(err, httpResp)
 		}
-	}
 
-	return result, nil
+		// Convert to map array for backward compatibility
+		result := make([]map[string]any, len(resp))
+		for i, session := range resp {
+			result[i] = map[string]any{
+				"sessionId": session.GetSessionId(),
+				"commands":  session.GetCommands(),
+			}
+		}
+
+		return result, nil
+	})
 }
 
 // ExecuteSessionCommand executes a command within a session.
@@ -266,28 +280,30 @@ func (p *ProcessService) ListSessions(ctx context.Context) ([]map[string]any, er
 //
 // Returns command result including id, exitCode (if completed), stdout, and stderr.
 func (p *ProcessService) ExecuteSessionCommand(ctx context.Context, sessionID, command string, runAsync bool) (map[string]any, error) {
-	req := toolbox.NewSessionExecuteRequest(command)
-	req.SetRunAsync(runAsync)
-	resp, httpResp, err := p.toolboxClient.ProcessAPI.SessionExecuteCommand(ctx, sessionID).Request(*req).Execute()
-	if err != nil {
-		return nil, errors.ConvertToolboxError(err, httpResp)
-	}
+	return withInstrumentation(ctx, p.otel, "Process", "ExecuteSessionCommand", func(ctx context.Context) (map[string]any, error) {
+		req := toolbox.NewSessionExecuteRequest(command)
+		req.SetRunAsync(runAsync)
+		resp, httpResp, err := p.toolboxClient.ProcessAPI.SessionExecuteCommand(ctx, sessionID).Request(*req).Execute()
+		if err != nil {
+			return nil, errors.ConvertToolboxError(err, httpResp)
+		}
 
-	// Convert to map for backward compatibility
-	result := map[string]any{
-		"id": resp.GetCmdId(),
-	}
-	if resp.ExitCode != nil {
-		result["exitCode"] = resp.GetExitCode()
-	}
-	if resp.Stdout != nil {
-		result["stdout"] = resp.GetStdout()
-	}
-	if resp.Stderr != nil {
-		result["stderr"] = resp.GetStderr()
-	}
+		// Convert to map for backward compatibility
+		result := map[string]any{
+			"id": resp.GetCmdId(),
+		}
+		if resp.ExitCode != nil {
+			result["exitCode"] = resp.GetExitCode()
+		}
+		if resp.Stdout != nil {
+			result["stdout"] = resp.GetStdout()
+		}
+		if resp.Stderr != nil {
+			result["stderr"] = resp.GetStderr()
+		}
 
-	return result, nil
+		return result, nil
+	})
 }
 
 // GetSessionCommand retrieves the status of a command in a session.
@@ -310,21 +326,23 @@ func (p *ProcessService) ExecuteSessionCommand(ctx context.Context, sessionID, c
 //
 // Returns command status including id, command text, and exitCode (if completed).
 func (p *ProcessService) GetSessionCommand(ctx context.Context, sessionID, commandID string) (map[string]any, error) {
-	resp, httpResp, err := p.toolboxClient.ProcessAPI.GetSessionCommand(ctx, sessionID, commandID).Execute()
-	if err != nil {
-		return nil, errors.ConvertToolboxError(err, httpResp)
-	}
+	return withInstrumentation(ctx, p.otel, "Process", "GetSessionCommand", func(ctx context.Context) (map[string]any, error) {
+		resp, httpResp, err := p.toolboxClient.ProcessAPI.GetSessionCommand(ctx, sessionID, commandID).Execute()
+		if err != nil {
+			return nil, errors.ConvertToolboxError(err, httpResp)
+		}
 
-	// Convert to map for backward compatibility
-	result := map[string]any{
-		"id":      resp.GetId(),
-		"command": resp.GetCommand(),
-	}
-	if resp.ExitCode != nil {
-		result["exitCode"] = resp.GetExitCode()
-	}
+		// Convert to map for backward compatibility
+		result := map[string]any{
+			"id":      resp.GetId(),
+			"command": resp.GetCommand(),
+		}
+		if resp.ExitCode != nil {
+			result["exitCode"] = resp.GetExitCode()
+		}
 
-	return result, nil
+		return result, nil
+	})
 }
 
 // GetSessionCommandLogs retrieves the output logs of a command.
@@ -343,16 +361,18 @@ func (p *ProcessService) GetSessionCommand(ctx context.Context, sessionID, comma
 //
 // Returns a map containing the "logs" key with command output.
 func (p *ProcessService) GetSessionCommandLogs(ctx context.Context, sessionID, commandID string) (map[string]any, error) {
-	logs, httpResp, err := p.toolboxClient.ProcessAPI.GetSessionCommandLogs(ctx, sessionID, commandID).Execute()
-	if err != nil {
-		return nil, errors.ConvertToolboxError(err, httpResp)
-	}
+	return withInstrumentation(ctx, p.otel, "Process", "GetSessionCommandLogs", func(ctx context.Context) (map[string]any, error) {
+		logs, httpResp, err := p.toolboxClient.ProcessAPI.GetSessionCommandLogs(ctx, sessionID, commandID).Execute()
+		if err != nil {
+			return nil, errors.ConvertToolboxError(err, httpResp)
+		}
 
-	// Convert to map for backward compatibility
-	// The API returns logs as a plain string, so we return it as "logs"
-	return map[string]any{
-		"logs": logs,
-	}, nil
+		// Convert to map for backward compatibility
+		// The API returns logs as a plain string, so we return it as "logs"
+		return map[string]any{
+			"logs": logs,
+		}, nil
+	})
 }
 
 // GetSessionCommandLogsStream streams command logs as they become available.
@@ -403,32 +423,34 @@ func (p *ProcessService) GetSessionCommandLogs(ctx context.Context, sessionID, c
 //
 // Returns an error if the connection fails or stream encounters an error.
 func (p *ProcessService) GetSessionCommandLogsStream(ctx context.Context, sessionID, commandID string, stdout, stderr chan<- string) error {
-	defer func() {
-		close(stdout)
-		close(stderr)
-	}()
+	return withInstrumentationVoid(ctx, p.otel, "Process", "GetSessionCommandLogsStream", func(ctx context.Context) error {
+		defer func() {
+			close(stdout)
+			close(stderr)
+		}()
 
-	// Convert HTTP URL to WebSocket URL
-	httpURL := p.toolboxClient.GetConfig().Servers[0].URL
-	wsURL := common.ConvertToWebSocketURL(httpURL)
+		// Convert HTTP URL to WebSocket URL
+		httpURL := p.toolboxClient.GetConfig().Servers[0].URL
+		wsURL := common.ConvertToWebSocketURL(httpURL)
 
-	// Get authentication headers from the toolbox client configuration
-	headers := make(map[string][]string)
-	cfg := p.toolboxClient.GetConfig()
-	for key, value := range cfg.DefaultHeader {
-		headers[key] = []string{value}
-	}
+		// Get authentication headers from the toolbox client configuration
+		headers := make(map[string][]string)
+		cfg := p.toolboxClient.GetConfig()
+		for key, value := range cfg.DefaultHeader {
+			headers[key] = []string{value}
+		}
 
-	// Connect to WebSocket with follow=true to stream logs
-	wsEndpoint := fmt.Sprintf("%s/process/session/%s/command/%s/logs?follow=true", wsURL, sessionID, commandID)
-	conn, _, err := websocket.DefaultDialer.DialContext(ctx, wsEndpoint, headers)
-	if err != nil {
-		return errors.NewDaytonaError(fmt.Sprintf("Failed to connect to log stream: %v", err), 0, nil)
-	}
-	defer conn.Close()
+		// Connect to WebSocket with follow=true to stream logs
+		wsEndpoint := fmt.Sprintf("%s/process/session/%s/command/%s/logs?follow=true", wsURL, sessionID, commandID)
+		conn, _, err := websocket.DefaultDialer.DialContext(ctx, wsEndpoint, headers)
+		if err != nil {
+			return errors.NewDaytonaError(fmt.Sprintf("Failed to connect to log stream: %v", err), 0, nil)
+		}
+		defer conn.Close()
 
-	// Process the WebSocket stream and demux stdout/stderr
-	return processWebsocketStream(ctx, conn, stdout, stderr)
+		// Process the WebSocket stream and demux stdout/stderr
+		return processWebsocketStream(ctx, conn, stdout, stderr)
+	})
 }
 
 // processWebsocketStream demultiplexes a WebSocket stream into separate stdout and stderr channels.
@@ -550,35 +572,37 @@ func flushToChannel(data []byte, dataType string, stdout, stderr chan<- string) 
 //
 // Returns [types.PtySessionInfo] containing session details, or an error.
 func (p *ProcessService) CreatePtySession(ctx context.Context, id string, opts ...func(*options.PtySession)) (*types.PtySessionInfo, error) {
-	sessionOpts := options.Apply(opts...)
+	return withInstrumentation(ctx, p.otel, "Process", "CreatePtySession", func(ctx context.Context) (*types.PtySessionInfo, error) {
+		sessionOpts := options.Apply(opts...)
 
-	req := toolbox.NewPtyCreateRequest()
-	if id != "" {
-		req.SetId(id)
-	}
-	if sessionOpts.PtySize != nil {
-		req.SetRows(int32(sessionOpts.PtySize.Rows))
-		req.SetCols(int32(sessionOpts.PtySize.Cols))
-	}
-	if sessionOpts.Env != nil {
-		req.SetEnvs(sessionOpts.Env)
-	}
+		req := toolbox.NewPtyCreateRequest()
+		if id != "" {
+			req.SetId(id)
+		}
+		if sessionOpts.PtySize != nil {
+			req.SetRows(int32(sessionOpts.PtySize.Rows))
+			req.SetCols(int32(sessionOpts.PtySize.Cols))
+		}
+		if sessionOpts.Env != nil {
+			req.SetEnvs(sessionOpts.Env)
+		}
 
-	resp, httpResp, err := p.toolboxClient.ProcessAPI.CreatePtySession(ctx).Request(*req).Execute()
-	if err != nil {
-		return nil, errors.ConvertToolboxError(err, httpResp)
-	}
+		resp, httpResp, err := p.toolboxClient.ProcessAPI.CreatePtySession(ctx).Request(*req).Execute()
+		if err != nil {
+			return nil, errors.ConvertToolboxError(err, httpResp)
+		}
 
-	// Return the session info with the created session ID and requested size
-	result := &types.PtySessionInfo{
-		ID: resp.GetSessionId(),
-	}
-	if sessionOpts.PtySize != nil {
-		result.Rows = sessionOpts.PtySize.Rows
-		result.Cols = sessionOpts.PtySize.Cols
-	}
+		// Return the session info with the created session ID and requested size
+		result := &types.PtySessionInfo{
+			ID: resp.GetSessionId(),
+		}
+		if sessionOpts.PtySize != nil {
+			result.Rows = sessionOpts.PtySize.Rows
+			result.Cols = sessionOpts.PtySize.Cols
+		}
 
-	return result, nil
+		return result, nil
+	})
 }
 
 // ListPtySessions returns all active PTY sessions.
@@ -595,22 +619,24 @@ func (p *ProcessService) CreatePtySession(ctx context.Context, id string, opts .
 //
 // Returns a slice of [types.PtySessionInfo], or an error.
 func (p *ProcessService) ListPtySessions(ctx context.Context) ([]*types.PtySessionInfo, error) {
-	resp, httpResp, err := p.toolboxClient.ProcessAPI.ListPtySessions(ctx).Execute()
-	if err != nil {
-		return nil, errors.ConvertToolboxError(err, httpResp)
-	}
-
-	sessions := resp.GetSessions()
-	result := make([]*types.PtySessionInfo, len(sessions))
-	for i, session := range sessions {
-		result[i] = &types.PtySessionInfo{
-			ID:   session.GetId(),
-			Rows: int(session.GetRows()),
-			Cols: int(session.GetCols()),
+	return withInstrumentation(ctx, p.otel, "Process", "ListPtySessions", func(ctx context.Context) ([]*types.PtySessionInfo, error) {
+		resp, httpResp, err := p.toolboxClient.ProcessAPI.ListPtySessions(ctx).Execute()
+		if err != nil {
+			return nil, errors.ConvertToolboxError(err, httpResp)
 		}
-	}
 
-	return result, nil
+		sessions := resp.GetSessions()
+		result := make([]*types.PtySessionInfo, len(sessions))
+		for i, session := range sessions {
+			result[i] = &types.PtySessionInfo{
+				ID:   session.GetId(),
+				Rows: int(session.GetRows()),
+				Cols: int(session.GetCols()),
+			}
+		}
+
+		return result, nil
+	})
 }
 
 // GetPtySessionInfo retrieves information about a PTY session.
@@ -628,16 +654,18 @@ func (p *ProcessService) ListPtySessions(ctx context.Context) ([]*types.PtySessi
 //
 // Returns [types.PtySessionInfo] with session details, or an error.
 func (p *ProcessService) GetPtySessionInfo(ctx context.Context, sessionID string) (*types.PtySessionInfo, error) {
-	resp, httpResp, err := p.toolboxClient.ProcessAPI.GetPtySession(ctx, sessionID).Execute()
-	if err != nil {
-		return nil, errors.ConvertToolboxError(err, httpResp)
-	}
+	return withInstrumentation(ctx, p.otel, "Process", "GetPtySessionInfo", func(ctx context.Context) (*types.PtySessionInfo, error) {
+		resp, httpResp, err := p.toolboxClient.ProcessAPI.GetPtySession(ctx, sessionID).Execute()
+		if err != nil {
+			return nil, errors.ConvertToolboxError(err, httpResp)
+		}
 
-	return &types.PtySessionInfo{
-		ID:   resp.GetId(),
-		Rows: int(resp.GetRows()),
-		Cols: int(resp.GetCols()),
-	}, nil
+		return &types.PtySessionInfo{
+			ID:   resp.GetId(),
+			Rows: int(resp.GetRows()),
+			Cols: int(resp.GetCols()),
+		}, nil
+	})
 }
 
 // KillPtySession terminates a PTY session.
@@ -653,13 +681,14 @@ func (p *ProcessService) GetPtySessionInfo(ctx context.Context, sessionID string
 //
 // Returns an error if the session doesn't exist or termination fails.
 func (p *ProcessService) KillPtySession(ctx context.Context, sessionID string) error {
+	return withInstrumentationVoid(ctx, p.otel, "Process", "KillPtySession", func(ctx context.Context) error {
+		_, httpResp, err := p.toolboxClient.ProcessAPI.DeletePtySession(ctx, sessionID).Execute()
+		if err != nil {
+			return errors.ConvertToolboxError(err, httpResp)
+		}
 
-	_, httpResp, err := p.toolboxClient.ProcessAPI.DeletePtySession(ctx, sessionID).Execute()
-	if err != nil {
-		return errors.ConvertToolboxError(err, httpResp)
-	}
-
-	return nil
+		return nil
+	})
 }
 
 // ResizePtySession changes the terminal dimensions of a PTY session.
@@ -681,17 +710,19 @@ func (p *ProcessService) KillPtySession(ctx context.Context, sessionID string) e
 //
 // Returns updated [types.PtySessionInfo], or an error.
 func (p *ProcessService) ResizePtySession(ctx context.Context, sessionID string, ptySize types.PtySize) (*types.PtySessionInfo, error) {
-	req := toolbox.NewPtyResizeRequest(int32(ptySize.Cols), int32(ptySize.Rows))
-	resp, httpResp, err := p.toolboxClient.ProcessAPI.ResizePtySession(ctx, sessionID).Request(*req).Execute()
-	if err != nil {
-		return nil, errors.ConvertToolboxError(err, httpResp)
-	}
+	return withInstrumentation(ctx, p.otel, "Process", "ResizePtySession", func(ctx context.Context) (*types.PtySessionInfo, error) {
+		req := toolbox.NewPtyResizeRequest(int32(ptySize.Cols), int32(ptySize.Rows))
+		resp, httpResp, err := p.toolboxClient.ProcessAPI.ResizePtySession(ctx, sessionID).Request(*req).Execute()
+		if err != nil {
+			return nil, errors.ConvertToolboxError(err, httpResp)
+		}
 
-	return &types.PtySessionInfo{
-		ID:   resp.GetId(),
-		Rows: int(resp.GetRows()),
-		Cols: int(resp.GetCols()),
-	}, nil
+		return &types.PtySessionInfo{
+			ID:   resp.GetId(),
+			Rows: int(resp.GetRows()),
+			Cols: int(resp.GetCols()),
+		}, nil
+	})
 }
 
 // ConnectPty establishes a WebSocket connection to an existing PTY session.
@@ -725,36 +756,38 @@ func (p *ProcessService) ResizePtySession(ctx context.Context, sessionID string,
 //
 // Returns a [PtyHandle] for terminal interaction, or an error.
 func (p *ProcessService) ConnectPty(ctx context.Context, sessionID string) (*PtyHandle, error) {
-	// Convert HTTP URL to WebSocket URL
-	httpURL := p.toolboxClient.GetConfig().Servers[0].URL
-	wsURL := common.ConvertToWebSocketURL(httpURL)
+	return withInstrumentation(ctx, p.otel, "Process", "ConnectPty", func(ctx context.Context) (*PtyHandle, error) {
+		// Convert HTTP URL to WebSocket URL
+		httpURL := p.toolboxClient.GetConfig().Servers[0].URL
+		wsURL := common.ConvertToWebSocketURL(httpURL)
 
-	// Get authentication headers from the toolbox client configuration
-	headers := make(map[string][]string)
-	cfg := p.toolboxClient.GetConfig()
-	for key, value := range cfg.DefaultHeader {
-		headers[key] = []string{value}
-	}
+		// Get authentication headers from the toolbox client configuration
+		headers := make(map[string][]string)
+		cfg := p.toolboxClient.GetConfig()
+		for key, value := range cfg.DefaultHeader {
+			headers[key] = []string{value}
+		}
 
-	conn, _, err := websocket.DefaultDialer.DialContext(ctx, fmt.Sprintf("%s/process/pty/%s/connect", wsURL, sessionID), headers)
-	if err != nil {
-		return nil, errors.NewDaytonaError(fmt.Sprintf("Failed to connect to PTY: %v", err), 0, nil)
-	}
+		conn, _, err := websocket.DefaultDialer.DialContext(ctx, fmt.Sprintf("%s/process/pty/%s/connect", wsURL, sessionID), headers)
+		if err != nil {
+			return nil, errors.NewDaytonaError(fmt.Sprintf("Failed to connect to PTY: %v", err), 0, nil)
+		}
 
-	// Create resize handler
-	resizeHandler := func(ctx context.Context, cols, rows int) (*types.PtySessionInfo, error) {
-		return p.ResizePtySession(ctx, sessionID, types.PtySize{Cols: cols, Rows: rows})
-	}
+		// Create resize handler
+		resizeHandler := func(ctx context.Context, cols, rows int) (*types.PtySessionInfo, error) {
+			return p.ResizePtySession(ctx, sessionID, types.PtySize{Cols: cols, Rows: rows})
+		}
 
-	// Create kill handler
-	killHandler := func(ctx context.Context) error {
-		return p.KillPtySession(ctx, sessionID)
-	}
+		// Create kill handler
+		killHandler := func(ctx context.Context) error {
+			return p.KillPtySession(ctx, sessionID)
+		}
 
-	// Create and return the handle
-	handle := newPtyHandle(conn, sessionID, resizeHandler, killHandler)
+		// Create and return the handle
+		handle := newPtyHandle(conn, sessionID, resizeHandler, killHandler)
 
-	return handle, nil
+		return handle, nil
+	})
 }
 
 // CreatePty creates a new PTY session and immediately connects to it.
@@ -795,23 +828,25 @@ func (p *ProcessService) ConnectPty(ctx context.Context, sessionID string) (*Pty
 //
 // Returns a [PtyHandle] for terminal interaction, or an error.
 func (p *ProcessService) CreatePty(ctx context.Context, id string, opts ...func(*options.CreatePty)) (*PtyHandle, error) {
-	createOpts := options.Apply(opts...)
+	return withInstrumentation(ctx, p.otel, "Process", "CreatePty", func(ctx context.Context) (*PtyHandle, error) {
+		createOpts := options.Apply(opts...)
 
-	// Convert to CreatePtySession options
-	sessionOpts := []func(*options.PtySession){}
-	if createOpts.PtySize != nil {
-		sessionOpts = append(sessionOpts, options.WithPtySize(*createOpts.PtySize))
-	}
-	if createOpts.Env != nil {
-		sessionOpts = append(sessionOpts, options.WithPtyEnv(createOpts.Env))
-	}
+		// Convert to CreatePtySession options
+		sessionOpts := []func(*options.PtySession){}
+		if createOpts.PtySize != nil {
+			sessionOpts = append(sessionOpts, options.WithPtySize(*createOpts.PtySize))
+		}
+		if createOpts.Env != nil {
+			sessionOpts = append(sessionOpts, options.WithPtyEnv(createOpts.Env))
+		}
 
-	// Create the PTY session
-	_, err := p.CreatePtySession(ctx, id, sessionOpts...)
-	if err != nil {
-		return nil, err
-	}
+		// Create the PTY session
+		_, err := p.CreatePtySession(ctx, id, sessionOpts...)
+		if err != nil {
+			return nil, err
+		}
 
-	// Connect to the session
-	return p.ConnectPty(ctx, id)
+		// Connect to the session
+		return p.ConnectPty(ctx, id)
+	})
 }

@@ -249,15 +249,15 @@ func GetNetworkSettings(ctx *gin.Context) {
 //	@Summary		Start sandbox
 //	@Description	Start sandbox
 //	@Produce		json
-//	@Param			sandboxId	path	string	true	"Sandbox ID"
-//	@Param			metadata	body	object	false	"Metadata"
-//	@Produce		json
-//	@Success		200	{object}	dto.StartSandboxResponse	"Sandbox started"
-//	@Failure		400	{object}	common_errors.ErrorResponse
-//	@Failure		401	{object}	common_errors.ErrorResponse
-//	@Failure		404	{object}	common_errors.ErrorResponse
-//	@Failure		409	{object}	common_errors.ErrorResponse
-//	@Failure		500	{object}	common_errors.ErrorResponse
+//	@Param			sandboxId	path		string						true	"Sandbox ID"
+//	@Param			metadata	body		object						false	"Metadata"
+//	@Param			token		query		string						false	"Auth token"
+//	@Success		200			{object}	dto.StartSandboxResponse	"Sandbox started"
+//	@Failure		400			{object}	common_errors.ErrorResponse
+//	@Failure		401			{object}	common_errors.ErrorResponse
+//	@Failure		404			{object}	common_errors.ErrorResponse
+//	@Failure		409			{object}	common_errors.ErrorResponse
+//	@Failure		500			{object}	common_errors.ErrorResponse
 //	@Router			/sandboxes/{sandboxId}/start [post]
 //
 //	@id				Start
@@ -273,8 +273,13 @@ func Start(ctx *gin.Context) {
 		return
 	}
 
-	daemonVersion, err := runner.Docker.Start(ctx.Request.Context(), sandboxId, metadata)
+	var authToken *string
+	tokenQuery := ctx.Query("token")
+	if tokenQuery != "" {
+		authToken = &tokenQuery
+	}
 
+	daemonVersion, err := runner.Docker.Start(ctx.Request.Context(), sandboxId, authToken, metadata)
 	if err != nil {
 		runner.StatesCache.SetSandboxState(ctx, sandboxId, enums.SandboxStateError)
 		ctx.Error(err)

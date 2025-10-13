@@ -911,6 +911,67 @@ module DaytonaApiClient
       return data, status_code, headers
     end
 
+    # Get organization OTEL config by sandbox auth token
+    # @param auth_token [String] Sandbox Auth Token
+    # @param [Hash] opts the optional parameters
+    # @return [OtelConfig]
+    def get_organization_otel_config_by_sandbox_auth_token(auth_token, opts = {})
+      data, _status_code, _headers = get_organization_otel_config_by_sandbox_auth_token_with_http_info(auth_token, opts)
+      data
+    end
+
+    # Get organization OTEL config by sandbox auth token
+    # @param auth_token [String] Sandbox Auth Token
+    # @param [Hash] opts the optional parameters
+    # @return [Array<(OtelConfig, Integer, Hash)>] OtelConfig data, response status code and response headers
+    def get_organization_otel_config_by_sandbox_auth_token_with_http_info(auth_token, opts = {})
+      if @api_client.config.debugging
+        @api_client.config.logger.debug 'Calling API: OrganizationsApi.get_organization_otel_config_by_sandbox_auth_token ...'
+      end
+      # verify the required parameter 'auth_token' is set
+      if @api_client.config.client_side_validation && auth_token.nil?
+        fail ArgumentError, "Missing the required parameter 'auth_token' when calling OrganizationsApi.get_organization_otel_config_by_sandbox_auth_token"
+      end
+      # resource path
+      local_var_path = '/organizations/otel-config/by-sandbox-auth-token/{authToken}'.sub('{' + 'authToken' + '}', CGI.escape(auth_token.to_s))
+
+      # query parameters
+      query_params = opts[:query_params] || {}
+
+      # header parameters
+      header_params = opts[:header_params] || {}
+      # HTTP header 'Accept' (if needed)
+      header_params['Accept'] = @api_client.select_header_accept(['application/json']) unless header_params['Accept']
+
+      # form parameters
+      form_params = opts[:form_params] || {}
+
+      # http body (model)
+      post_body = opts[:debug_body]
+
+      # return_type
+      return_type = opts[:debug_return_type] || 'OtelConfig'
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
+
+      new_options = opts.merge(
+        :operation => :"OrganizationsApi.get_organization_otel_config_by_sandbox_auth_token",
+        :header_params => header_params,
+        :query_params => query_params,
+        :form_params => form_params,
+        :body => post_body,
+        :auth_names => auth_names,
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:GET, local_var_path, new_options)
+      if @api_client.config.debugging
+        @api_client.config.logger.debug "API called: OrganizationsApi#get_organization_otel_config_by_sandbox_auth_token\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+      end
+      return data, status_code, headers
+    end
+
     # Get organization current usage overview
     # @param organization_id [String] Organization ID
     # @param [Hash] opts the optional parameters
@@ -1968,6 +2029,72 @@ module DaytonaApiClient
       data, status_code, headers = @api_client.call_api(:POST, local_var_path, new_options)
       if @api_client.config.debugging
         @api_client.config.logger.debug "API called: OrganizationsApi#update_access_for_organization_member\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+      end
+      return data, status_code, headers
+    end
+
+    # Update experimental configuration
+    # @param organization_id [String] Organization ID
+    # @param [Hash] opts the optional parameters
+    # @option opts [Hash<String, Object>] :request_body Experimental configuration as a JSON object. Set to null to clear the configuration.
+    # @return [nil]
+    def update_experimental_config(organization_id, opts = {})
+      update_experimental_config_with_http_info(organization_id, opts)
+      nil
+    end
+
+    # Update experimental configuration
+    # @param organization_id [String] Organization ID
+    # @param [Hash] opts the optional parameters
+    # @option opts [Hash<String, Object>] :request_body Experimental configuration as a JSON object. Set to null to clear the configuration.
+    # @return [Array<(nil, Integer, Hash)>] nil, response status code and response headers
+    def update_experimental_config_with_http_info(organization_id, opts = {})
+      if @api_client.config.debugging
+        @api_client.config.logger.debug 'Calling API: OrganizationsApi.update_experimental_config ...'
+      end
+      # verify the required parameter 'organization_id' is set
+      if @api_client.config.client_side_validation && organization_id.nil?
+        fail ArgumentError, "Missing the required parameter 'organization_id' when calling OrganizationsApi.update_experimental_config"
+      end
+      # resource path
+      local_var_path = '/organizations/{organizationId}/experimental-config'.sub('{' + 'organizationId' + '}', CGI.escape(organization_id.to_s))
+
+      # query parameters
+      query_params = opts[:query_params] || {}
+
+      # header parameters
+      header_params = opts[:header_params] || {}
+      # HTTP header 'Content-Type'
+      content_type = @api_client.select_header_content_type(['application/json'])
+      if !content_type.nil?
+        header_params['Content-Type'] = content_type
+      end
+
+      # form parameters
+      form_params = opts[:form_params] || {}
+
+      # http body (model)
+      post_body = opts[:debug_body] || @api_client.object_to_http_body(opts[:'request_body'])
+
+      # return_type
+      return_type = opts[:debug_return_type]
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
+
+      new_options = opts.merge(
+        :operation => :"OrganizationsApi.update_experimental_config",
+        :header_params => header_params,
+        :query_params => query_params,
+        :form_params => form_params,
+        :body => post_body,
+        :auth_names => auth_names,
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:PUT, local_var_path, new_options)
+      if @api_client.config.debugging
+        @api_client.config.logger.debug "API called: OrganizationsApi#update_experimental_config\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end

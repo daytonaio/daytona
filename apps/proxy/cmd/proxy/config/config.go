@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/daytonaio/common-go/pkg/cache"
 	"github.com/daytonaio/common-go/pkg/utils"
 	apiclient "github.com/daytonaio/daytona/libs/api-client-go"
 	"github.com/go-playground/validator/v10"
@@ -18,19 +19,19 @@ import (
 )
 
 type Config struct {
-	ProxyPort             int          `envconfig:"PROXY_PORT" validate:"required"`
-	ProxyProtocol         string       `envconfig:"PROXY_PROTOCOL" validate:"required"`
-	ProxyApiKey           string       `envconfig:"PROXY_API_KEY" validate:"required"`
-	CookieDomain          *string      `envconfig:"COOKIE_DOMAIN"`
-	TLSCertFile           string       `envconfig:"TLS_CERT_FILE"`
-	TLSKeyFile            string       `envconfig:"TLS_KEY_FILE"`
-	EnableTLS             bool         `envconfig:"ENABLE_TLS"`
-	DaytonaApiUrl         string       `envconfig:"DAYTONA_API_URL" validate:"required"`
-	Oidc                  OidcConfig   `envconfig:"OIDC"`
-	Redis                 *RedisConfig `envconfig:"REDIS"`
-	ToolboxOnlyMode       bool         `envconfig:"TOOLBOX_ONLY_MODE"`
-	PreviewWarningEnabled bool         `envconfig:"PREVIEW_WARNING_ENABLED"`
-	ShutdownTimeoutSec    int          `envconfig:"SHUTDOWN_TIMEOUT_SEC"`
+	ProxyPort             int                `envconfig:"PROXY_PORT" validate:"required"`
+	ProxyProtocol         string             `envconfig:"PROXY_PROTOCOL" validate:"required"`
+	ProxyApiKey           string             `envconfig:"PROXY_API_KEY" validate:"required"`
+	CookieDomain          *string            `envconfig:"COOKIE_DOMAIN"`
+	TLSCertFile           string             `envconfig:"TLS_CERT_FILE"`
+	TLSKeyFile            string             `envconfig:"TLS_KEY_FILE"`
+	EnableTLS             bool               `envconfig:"ENABLE_TLS"`
+	DaytonaApiUrl         string             `envconfig:"DAYTONA_API_URL" validate:"required"`
+	Oidc                  OidcConfig         `envconfig:"OIDC"`
+	Redis                 *cache.RedisConfig `envconfig:"REDIS"`
+	ToolboxOnlyMode       bool               `envconfig:"TOOLBOX_ONLY_MODE"`
+	PreviewWarningEnabled bool               `envconfig:"PREVIEW_WARNING_ENABLED"`
+	ShutdownTimeoutSec    int                `envconfig:"SHUTDOWN_TIMEOUT_SEC"`
 	ApiClient             *apiclient.APIClient
 }
 
@@ -40,13 +41,6 @@ type OidcConfig struct {
 	Domain       string  `envconfig:"DOMAIN"`
 	PublicDomain *string `envconfig:"PUBLIC_DOMAIN"`
 	Audience     string  `envconfig:"AUDIENCE"`
-}
-
-type RedisConfig struct {
-	Host     *string `envconfig:"HOST"`
-	Port     *int    `envconfig:"PORT"`
-	Password *string `envconfig:"PASSWORD"`
-	TLS      *bool   `envconfig:"TLS"`
 }
 
 var DEFAULT_PROXY_PORT int = 4000

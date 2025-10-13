@@ -26,6 +26,7 @@ for automating desktop interactions within a sandbox.
 
 ```python
 @intercept_errors(message_prefix="Failed to start computer use: ")
+@with_instrumentation()
 async def start() -> ComputerUseStartResponse
 ```
 
@@ -47,6 +48,7 @@ print("Computer use processes started:", result.message)
 
 ```python
 @intercept_errors(message_prefix="Failed to stop computer use: ")
+@with_instrumentation()
 async def stop() -> ComputerUseStopResponse
 ```
 
@@ -68,6 +70,7 @@ print("Computer use processes stopped:", result.message)
 
 ```python
 @intercept_errors(message_prefix="Failed to get computer use status: ")
+@with_instrumentation()
 async def get_status() -> ComputerUseStatusResponse
 ```
 
@@ -89,6 +92,7 @@ print("Computer use status:", response.status)
 
 ```python
 @intercept_errors(message_prefix="Failed to get process status: ")
+@with_instrumentation()
 async def get_process_status(process_name: str) -> ProcessStatusResponse
 ```
 
@@ -115,6 +119,7 @@ no_vnc_status = await sandbox.computer_use.get_process_status("novnc")
 
 ```python
 @intercept_errors(message_prefix="Failed to restart process: ")
+@with_instrumentation()
 async def restart_process(process_name: str) -> ProcessRestartResponse
 ```
 
@@ -141,6 +146,7 @@ print("XFCE4 process restarted:", result.message)
 
 ```python
 @intercept_errors(message_prefix="Failed to get process logs: ")
+@with_instrumentation()
 async def get_process_logs(process_name: str) -> ProcessLogsResponse
 ```
 
@@ -167,6 +173,7 @@ print("NoVNC logs:", logs)
 
 ```python
 @intercept_errors(message_prefix="Failed to get process errors: ")
+@with_instrumentation()
 async def get_process_errors(process_name: str) -> ProcessErrorsResponse
 ```
 
@@ -202,6 +209,7 @@ Mouse operations for computer use functionality.
 
 ```python
 @intercept_errors(message_prefix="Failed to get mouse position: ")
+@with_instrumentation()
 async def get_position() -> MousePositionResponse
 ```
 
@@ -223,6 +231,7 @@ print(f"Mouse is at: {position.x}, {position.y}")
 
 ```python
 @intercept_errors(message_prefix="Failed to move mouse: ")
+@with_instrumentation()
 async def move(x: int, y: int) -> MousePositionResponse
 ```
 
@@ -250,6 +259,7 @@ print(f"Mouse moved to: {result.x}, {result.y}")
 
 ```python
 @intercept_errors(message_prefix="Failed to click mouse: ")
+@with_instrumentation()
 async def click(x: int,
                 y: int,
                 button: str = "left",
@@ -288,6 +298,7 @@ right_click = await sandbox.computer_use.mouse.click(100, 200, "right")
 
 ```python
 @intercept_errors(message_prefix="Failed to drag mouse: ")
+@with_instrumentation()
 async def drag(start_x: int,
                start_y: int,
                end_x: int,
@@ -322,6 +333,7 @@ print(f"Dragged from {result.from_x},{result.from_y} to {result.to_x},{result.to
 
 ```python
 @intercept_errors(message_prefix="Failed to scroll mouse: ")
+@with_instrumentation()
 async def scroll(x: int, y: int, direction: str, amount: int = 1) -> bool
 ```
 
@@ -362,6 +374,7 @@ Keyboard operations for computer use functionality.
 
 ```python
 @intercept_errors(message_prefix="Failed to type text: ")
+@with_instrumentation()
 async def type(text: str, delay: int | None = None) -> None
 ```
 
@@ -399,6 +412,7 @@ except Exception as e:
 
 ```python
 @intercept_errors(message_prefix="Failed to press key: ")
+@with_instrumentation()
 async def press(key: str, modifiers: list[str] | None = None) -> None
 ```
 
@@ -442,6 +456,7 @@ except Exception as e:
 
 ```python
 @intercept_errors(message_prefix="Failed to press hotkey: ")
+@with_instrumentation()
 async def hotkey(keys: str) -> None
 ```
 
@@ -494,6 +509,7 @@ Screenshot operations for computer use functionality.
 
 ```python
 @intercept_errors(message_prefix="Failed to take screenshot: ")
+@with_instrumentation()
 async def take_full_screen(show_cursor: bool = False) -> ScreenshotResponse
 ```
 
@@ -523,6 +539,7 @@ with_cursor = await sandbox.computer_use.screenshot.take_full_screen(True)
 
 ```python
 @intercept_errors(message_prefix="Failed to take region screenshot: ")
+@with_instrumentation()
 async def take_region(region: ScreenshotRegion,
                       show_cursor: bool = False) -> ScreenshotResponse
 ```
@@ -552,6 +569,7 @@ print(f"Captured region: {screenshot.region.width}x{screenshot.region.height}")
 
 ```python
 @intercept_errors(message_prefix="Failed to take compressed screenshot: ")
+@with_instrumentation()
 async def take_compressed(
         options: ScreenshotOptions | None = None) -> ScreenshotResponse
 ```
@@ -590,6 +608,7 @@ scaled = await sandbox.computer_use.screenshot.take_compressed(
 ```python
 @intercept_errors(
     message_prefix="Failed to take compressed region screenshot: ")
+@with_instrumentation()
 async def take_compressed_region(
         region: ScreenshotRegion,
         options: ScreenshotOptions | None = None) -> ScreenshotResponse
@@ -631,6 +650,7 @@ Display operations for computer use functionality.
 
 ```python
 @intercept_errors(message_prefix="Failed to get display info: ")
+@with_instrumentation()
 async def get_info() -> DisplayInfoResponse
 ```
 
@@ -655,6 +675,7 @@ for i, display in enumerate(info.displays):
 
 ```python
 @intercept_errors(message_prefix="Failed to get windows: ")
+@with_instrumentation()
 async def get_windows() -> WindowsResponse
 ```
 
@@ -686,6 +707,7 @@ Recording operations for computer use functionality.
 
 ```python
 @intercept_errors(message_prefix="Failed to start recording: ")
+@with_instrumentation()
 async def start(label: str | None = None) -> Recording
 ```
 
@@ -714,6 +736,7 @@ print(f"File: {recording.file_path}")
 
 ```python
 @intercept_errors(message_prefix="Failed to stop recording: ")
+@with_instrumentation()
 async def stop(recording_id: str) -> Recording
 ```
 
@@ -741,6 +764,7 @@ print(f"Saved to: {result.file_path}")
 
 ```python
 @intercept_errors(message_prefix="Failed to list recordings: ")
+@with_instrumentation()
 async def list() -> ListRecordingsResponse
 ```
 
@@ -764,6 +788,7 @@ for rec in recordings.recordings:
 
 ```python
 @intercept_errors(message_prefix="Failed to get recording: ")
+@with_instrumentation()
 async def get(recording_id: str) -> Recording
 ```
 
@@ -792,6 +817,7 @@ print(f"Duration: {recording.duration_seconds} seconds")
 
 ```python
 @intercept_errors(message_prefix="Failed to delete recording: ")
+@with_instrumentation()
 async def delete(recording_id: str) -> None
 ```
 
@@ -813,6 +839,7 @@ print("Recording deleted")
 
 ```python
 @intercept_errors(message_prefix="Failed to download recording: ")
+@with_instrumentation()
 async def download(recording_id: str, local_path: str) -> None
 ```
 

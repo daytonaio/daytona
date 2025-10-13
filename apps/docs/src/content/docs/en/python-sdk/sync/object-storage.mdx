@@ -22,6 +22,7 @@ ObjectStorage class for interacting with object storage services.
 #### ObjectStorage.upload
 
 ```python
+@with_instrumentation()
 def upload(path: str,
            organization_id: str,
            archive_base_path: str | None = None) -> str

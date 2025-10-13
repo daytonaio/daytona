@@ -9,6 +9,8 @@ services:
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318
       # Default to slim image for faster startup
       - DEFAULT_SNAPSHOT=daytonaio/sandbox:0.5.0-slim
+      - ENCRYPTION_KEY=supersecretkey
+      - ENCRYPTION_SALT=supersecretsalt
       - NODE_ENV=production
       - PORT=3000
       - DB_HOST=db
@@ -89,6 +91,7 @@ services:
       - RUNNER_START_SCORE_THRESHOLD=3
       - SKIP_USER_EMAIL_VERIFICATION=true
       - RUN_MIGRATIONS=true
+      - OTEL_COLLECTOR_API_KEY=otel_collector_api_key
     networks:
       - daytona-network
     restart: always

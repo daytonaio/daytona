@@ -33,6 +33,11 @@ Gem::Specification.new do |spec|
   spec.executables = spec.files.grep(%r{\Aexe/}) { |f| File.basename(f) }
   spec.require_paths = ['lib']
 
+  spec.add_dependency 'opentelemetry-exporter-otlp', '~> 0.29'
+  spec.add_dependency 'opentelemetry-exporter-otlp-metrics', '~> 0.1'
+  spec.add_dependency 'opentelemetry-metrics-sdk', '~> 0.2'
+  spec.add_dependency 'opentelemetry-sdk', '~> 1.4'
+
   spec.add_dependency 'aws-sdk-s3', '~> 1.0'
   spec.add_dependency 'daytona_api_client', Daytona::Sdk::VERSION
   spec.add_dependency 'daytona_toolbox_api_client', Daytona::Sdk::VERSION

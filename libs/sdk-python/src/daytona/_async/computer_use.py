@@ -37,6 +37,7 @@ from daytona_toolbox_api_client_async import (
 )
 
 from .._utils.errors import intercept_errors
+from .._utils.otel_decorator import with_instrumentation
 from ..common.computer_use import ScreenshotOptions, ScreenshotRegion
 
 
@@ -47,6 +48,7 @@ class AsyncMouse:
         self._api_client: ComputerUseApi = api_client
 
     @intercept_errors(message_prefix="Failed to get mouse position: ")
+    @with_instrumentation()
     async def get_position(self) -> MousePositionResponse:
         """Gets the current mouse cursor position.
 
@@ -63,6 +65,7 @@ class AsyncMouse:
         return response
 
     @intercept_errors(message_prefix="Failed to move mouse: ")
+    @with_instrumentation()
     async def move(self, x: int, y: int) -> MousePositionResponse:
         """Moves the mouse cursor to the specified coordinates.
 
@@ -84,6 +87,7 @@ class AsyncMouse:
         return response
 
     @intercept_errors(message_prefix="Failed to click mouse: ")
+    @with_instrumentation()
     async def click(self, x: int, y: int, button: str = "left", double: bool = False) -> MouseClickResponse:
         """Clicks the mouse at the specified coordinates.
 
@@ -113,6 +117,7 @@ class AsyncMouse:
         return response
 
     @intercept_errors(message_prefix="Failed to drag mouse: ")
+    @with_instrumentation()
     async def drag(self, start_x: int, start_y: int, end_x: int, end_y: int, button: str = "left") -> MouseDragResponse:
         """Drags the mouse from start coordinates to end coordinates.
 
@@ -137,6 +142,7 @@ class AsyncMouse:
         return response
 
     @intercept_errors(message_prefix="Failed to scroll mouse: ")
+    @with_instrumentation()
     async def scroll(self, x: int, y: int, direction: str, amount: int = 1) -> bool:
         """Scrolls the mouse wheel at the specified coordinates.
 
@@ -170,6 +176,7 @@ class AsyncKeyboard:
         self._api_client: ComputerUseApi = api_client
 
     @intercept_errors(message_prefix="Failed to type text: ")
+    @with_instrumentation()
     async def type(self, text: str, delay: int | None = None) -> None:
         """Types the specified text.
 
@@ -200,6 +207,7 @@ class AsyncKeyboard:
         _ = await self._api_client.type_text(request=request)
 
     @intercept_errors(message_prefix="Failed to press key: ")
+    @with_instrumentation()
     async def press(self, key: str, modifiers: list[str] | None = None) -> None:
         """Presses a key with optional modifiers.
 
@@ -236,6 +244,7 @@ class AsyncKeyboard:
         _ = await self._api_client.press_key(request=request)
 
     @intercept_errors(message_prefix="Failed to press hotkey: ")
+    @with_instrumentation()
     async def hotkey(self, keys: str) -> None:
         """Presses a hotkey combination.
 
@@ -280,6 +289,7 @@ class AsyncScreenshot:
         self._api_client: ComputerUseApi = api_client
 
     @intercept_errors(message_prefix="Failed to take screenshot: ")
+    @with_instrumentation()
     async def take_full_screen(self, show_cursor: bool = False) -> ScreenshotResponse:
         """Takes a screenshot of the entire screen.
 
@@ -302,6 +312,7 @@ class AsyncScreenshot:
         return response
 
     @intercept_errors(message_prefix="Failed to take region screenshot: ")
+    @with_instrumentation()
     async def take_region(self, region: ScreenshotRegion, show_cursor: bool = False) -> ScreenshotResponse:
         """Takes a screenshot of a specific region.
 
@@ -325,6 +336,7 @@ class AsyncScreenshot:
         return response
 
     @intercept_errors(message_prefix="Failed to take compressed screenshot: ")
+    @with_instrumentation()
     async def take_compressed(self, options: ScreenshotOptions | None = None) -> ScreenshotResponse:
         """Takes a compressed screenshot of the entire screen.
 
@@ -362,6 +374,7 @@ class AsyncScreenshot:
         return response
 
     @intercept_errors(message_prefix="Failed to take compressed region screenshot: ")
+    @with_instrumentation()
     async def take_compressed_region(
         self, region: ScreenshotRegion, options: ScreenshotOptions | None = None
     ) -> ScreenshotResponse:
@@ -407,6 +420,7 @@ class AsyncDisplay:
         self._api_client: ComputerUseApi = api_client
 
     @intercept_errors(message_prefix="Failed to get display info: ")
+    @with_instrumentation()
     async def get_info(self) -> DisplayInfoResponse:
         """Gets information about the displays.
 
@@ -426,6 +440,7 @@ class AsyncDisplay:
         return response
 
     @intercept_errors(message_prefix="Failed to get windows: ")
+    @with_instrumentation()
     async def get_windows(self) -> WindowsResponse:
         """Gets the list of open windows.
 
@@ -456,6 +471,7 @@ class AsyncRecordingService:
         self._ensure_toolbox_url: Callable[[], Awaitable[None]] = ensure_toolbox_url
 
     @intercept_errors(message_prefix="Failed to start recording: ")
+    @with_instrumentation()
     async def start(self, label: str | None = None) -> Recording:
         """Starts a new screen recording session.
 
@@ -477,6 +493,7 @@ class AsyncRecordingService:
         return await self._api_client.start_recording(request=request)
 
     @intercept_errors(message_prefix="Failed to stop recording: ")
+    @with_instrumentation()
     async def stop(self, recording_id: str) -> Recording:
         """Stops an active screen recording session.
 
@@ -497,6 +514,7 @@ class AsyncRecordingService:
         return await self._api_client.stop_recording(request=request)
 
     @intercept_errors(message_prefix="Failed to list recordings: ")
+    @with_instrumentation()
     async def list(self) -> ListRecordingsResponse:
         """Lists all recordings (active and completed).
 
@@ -514,6 +532,7 @@ class AsyncRecordingService:
         return await self._api_client.list_recordings()
 
     @intercept_errors(message_prefix="Failed to get recording: ")
+    @with_instrumentation()
     async def get(self, recording_id: str) -> Recording:
         """Gets details of a specific recording by ID.
 
@@ -534,6 +553,7 @@ class AsyncRecordingService:
         return await self._api_client.get_recording(id=recording_id)
 
     @intercept_errors(message_prefix="Failed to delete recording: ")
+    @with_instrumentation()
     async def delete(self, recording_id: str) -> None:
         """Deletes a recording by ID.
 
@@ -549,6 +569,7 @@ class AsyncRecordingService:
         await self._api_client.delete_recording(id=recording_id)
 
     @intercept_errors(message_prefix="Failed to download recording: ")
+    @with_instrumentation()
     async def download(self, recording_id: str, local_path: str) -> None:
         """Downloads a recording file from the Sandbox and saves it to a local file.
 
@@ -620,6 +641,7 @@ class AsyncComputerUse:
         self.recording: AsyncRecordingService = AsyncRecordingService(api_client, ensure_toolbox_url)
 
     @intercept_errors(message_prefix="Failed to start computer use: ")
+    @with_instrumentation()
     async def start(self) -> ComputerUseStartResponse:
         """Starts all computer use processes (Xvfb, xfce4, x11vnc, novnc).
 
@@ -636,6 +658,7 @@ class AsyncComputerUse:
         return response
 
     @intercept_errors(message_prefix="Failed to stop computer use: ")
+    @with_instrumentation()
     async def stop(self) -> ComputerUseStopResponse:
         """Stops all computer use processes.
 
@@ -652,6 +675,7 @@ class AsyncComputerUse:
         return response
 
     @intercept_errors(message_prefix="Failed to get computer use status: ")
+    @with_instrumentation()
     async def get_status(self) -> ComputerUseStatusResponse:
         """Gets the status of all computer use processes.
 
@@ -667,6 +691,7 @@ class AsyncComputerUse:
         return await self._api_client.get_computer_use_status()
 
     @intercept_errors(message_prefix="Failed to get process status: ")
+    @with_instrumentation()
     async def get_process_status(self, process_name: str) -> ProcessStatusResponse:
         """Gets the status of a specific VNC process.
 
@@ -686,6 +711,7 @@ class AsyncComputerUse:
         return response
 
     @intercept_errors(message_prefix="Failed to restart process: ")
+    @with_instrumentation()
     async def restart_process(self, process_name: str) -> ProcessRestartResponse:
         """Restarts a specific VNC process.
 
@@ -705,6 +731,7 @@ class AsyncComputerUse:
         return response
 
     @intercept_errors(message_prefix="Failed to get process logs: ")
+    @with_instrumentation()
     async def get_process_logs(self, process_name: str) -> ProcessLogsResponse:
         """Gets logs for a specific VNC process.
 
@@ -724,6 +751,7 @@ class AsyncComputerUse:
         return response
 
     @intercept_errors(message_prefix="Failed to get process errors: ")
+    @with_instrumentation()
     async def get_process_errors(self, process_name: str) -> ProcessErrorsResponse:
         """Gets error logs for a specific VNC process.
 
