@@ -41,7 +41,7 @@ services:
       - 5556:5556
 
   db:
-    image: postgres:11.9
+    image: postgres:18
     environment:
       - POSTGRES_PASSWORD=pass
       - POSTGRES_USER=user
