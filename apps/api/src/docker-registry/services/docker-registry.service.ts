@@ -333,7 +333,7 @@ export class DockerRegistryService {
     const registry = new DockerRegistry()
     registry.id = `temp-${hostname}`
     registry.name = `Temporary ${hostname}`
-    registry.url = hostname === 'docker.io' ? 'https://registry.docker.io' : `https://${hostname}`
+    registry.url = hostname === 'docker.io' ? 'https://registry-1.docker.io' : `https://${hostname}`
     registry.username = ''
     registry.password = ''
     registry.project = ''
@@ -344,7 +344,7 @@ export class DockerRegistryService {
 
   private async getDockerHubToken(repository: string): Promise<string | null> {
     try {
-      const tokenUrl = `https://auth.docker.io/token?service=registry.docker.io&scope=repository:${repository}:pull`
+      const tokenUrl = `https://auth.docker.io/token?service=registry-1.docker.io&scope=repository:${repository}:pull`
       const response = await axios.get(tokenUrl, { timeout: 10000 })
       return response.data.token
     } catch (error) {
@@ -415,7 +415,7 @@ export class DockerRegistryService {
         repoPath = fullPath
 
         // Special handling for Docker Hub - add library/ prefix for single-name images
-        if (registry.url.includes('registry.docker.io') && !repoPath.includes('/')) {
+        if (registry.url.includes('registry-1.docker.io') && !repoPath.includes('/')) {
           repoPath = `library/${repoPath}`
         }
       }
@@ -440,7 +440,7 @@ export class DockerRegistryService {
       if (registry.username && registry.password) {
         const encodedCredentials = Buffer.from(`${registry.username}:${registry.password}`).toString('base64')
         baseHeaders.set('Authorization', `Basic ${encodedCredentials}`)
-      } else if (registry.url.includes('registry.docker.io')) {
+      } else if (registry.url.includes('registry-1.docker.io')) {
         // Get anonymous token for Docker Hub
         const dockerHubRepo = repoPath.includes('/') ? repoPath : `library/${repoPath}`
         bearerToken = await this.getDockerHubToken(dockerHubRepo)
@@ -553,7 +553,7 @@ export class DockerRegistryService {
       } else if (registry.username && registry.password) {
         const encodedCredentials = Buffer.from(`${registry.username}:${registry.password}`).toString('base64')
         configHeaders.set('Authorization', `Basic ${encodedCredentials}`)
-      } else if (registry.url.includes('registry.docker.io')) {
+      } else if (registry.url.includes('registry-1.docker.io')) {
         const dockerHubRepo = repoPath.includes('/') ? repoPath : `library/${repoPath}`
         const token = await this.getDockerHubToken(dockerHubRepo)
         if (token) {
