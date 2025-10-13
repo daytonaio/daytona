@@ -45,6 +45,7 @@ export class AppService implements OnApplicationBootstrap, OnApplicationShutdown
     await this.initializeAdminUser()
     await this.initializeTransientRegistry()
     await this.initializeInternalRegistry()
+    await this.initializeBackupRegistry()
     await this.initializeDefaultSnapshot()
   }
 
@@ -149,6 +150,37 @@ Admin user created with API key: ${value}
     })
 
     this.logger.log('Default internal registry initialized successfully')
+  }
+
+  private async initializeBackupRegistry(): Promise<void> {
+    const existingRegistry = await this.dockerRegistryService.getAvailableBackupRegistry('us')
+    if (existingRegistry) {
+      return
+    }
+
+    const registryUrl = this.configService.getOrThrow('internalRegistry.url')
+    const registryAdmin = this.configService.getOrThrow('internalRegistry.admin')
+    const registryPassword = this.configService.getOrThrow('internalRegistry.password')
+    const registryProjectId = this.configService.getOrThrow('internalRegistry.projectId')
+
+    if (!registryUrl || !registryAdmin || !registryPassword || !registryProjectId) {
+      this.logger.warn('Registry configuration not found, skipping backup registry setup')
+      return
+    }
+
+    this.logger.log('Initializing default backup registry...')
+
+    await this.dockerRegistryService.create({
+      name: 'Backup Registry',
+      url: registryUrl,
+      username: registryAdmin,
+      password: registryPassword,
+      project: registryProjectId,
+      registryType: RegistryType.BACKUP,
+      isDefault: true,
+    })
+
+    this.logger.log('Default backup registry initialized successfully')
   }
 
   private async initializeDefaultSnapshot(): Promise<void> {

@@ -8,7 +8,7 @@ services:
     ports:
       - 3000:3000
     networks:
-      - daytona-network
+      - daytona-build-network
 
   proxy:
     build:
@@ -16,7 +16,7 @@ services:
       dockerfile: apps/proxy/Dockerfile
       target: proxy
     networks:
-      - daytona-network
+      - daytona-build-network
     ports:
       - 4000:4000
 
@@ -27,7 +27,7 @@ services:
       target: runner
     privileged: true
     networks:
-      - daytona-network
+      - daytona-build-network
     ports:
       - 3003:3003
 
@@ -37,7 +37,7 @@ services:
       dockerfile: apps/ssh-gateway/Dockerfile
       target: ssh-gateway
     networks:
-      - daytona-network
+      - daytona-build-network
     ports:
       - 2222:2222
 
@@ -47,7 +47,7 @@ services:
       - ./dex/config.yaml:/etc/dex/config.yaml
     command: ['dex', 'serve', '/etc/dex/config.yaml']
     networks:
-      - daytona-network
+      - daytona-build-network
     ports:
       - 5556:5556
 
@@ -58,7 +58,7 @@ services:
       - POSTGRES_USER=user
       - POSTGRES_DB=daytona
     networks:
-      - daytona-network
+      - daytona-build-network
 
   pgadmin:
     image: dpage/pgadmin4:9.2.0
@@ -77,12 +77,12 @@ services:
     ports:
       - 5050:80
     networks:
-      - daytona-network
+      - daytona-build-network
 
   redis:
     image: redis:latest
     networks:
-      - daytona-network
+      - daytona-build-network
 
   registry-ui:
     image: joxit/docker-registry-ui:main
@@ -100,7 +100,7 @@ services:
       - REGISTRY_SECURED=false
       - CATALOG_ELEMENTS_LIMIT=1000
     networks:
-      - daytona-network
+      - daytona-build-network
     ports:
       - 5100:5100
   registry:
@@ -113,18 +113,18 @@ services:
       REGISTRY_HTTP_HEADERS_Access-Control-Allow-Headers: '[Authorization,Accept,Cache-Control]'
       REGISTRY_HTTP_HEADERS_Access-Control-Expose-Headers: '[Docker-Content-Digest]'
       REGISTRY_STORAGE_DELETE_ENABLED: 'true'
-      REGISTRY_HTTP_ADDR: localhost:6000
+      REGISTRY_HTTP_ADDR: registry:6000
     volumes:
       - registry:/var/lib/registry
     networks:
-      - daytona-network
+      - daytona-build-network
     ports:
       - 6000:6000
 
   maildev:
     image: maildev/maildev
     networks:
-      - daytona-network
+      - daytona-build-network
 
   minio:
     image: minio/minio:latest
@@ -136,18 +136,18 @@ services:
       - minio_data:/data
     command: server /data --console-address ":9001"
     networks:
-      - daytona-network
+      - daytona-build-network
 
   jaeger:
     image: jaegertracing/all-in-one:1.67.0
     networks:
-      - daytona-network
+      - daytona-build-network
 
 volumes:
   registry: {}
   minio_data: {}
 
 networks:
-  daytona-network:
+  daytona-build-network:
     driver: bridge
 

@@ -741,10 +741,15 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
       ? await this.runnerService.getRunnersWithMultipleSnapshotsBuilding()
       : await this.runnerService.getRunnersWithMultipleSnapshotsPulling()
 
-    const initialRunner = await this.runnerService.getRandomAvailableRunner({
-      region: DEFAULT_INITIAL_RUNNER_REGION,
-      excludedRunnerIds: excludedRunnerIds,
-    })
+    let initialRunner: Runner | null = null
+    try {
+      initialRunner = await this.runnerService.getRandomAvailableRunner({
+        region: DEFAULT_INITIAL_RUNNER_REGION,
+        excludedRunnerIds: excludedRunnerIds,
+      })
+    } catch (error) {
+      this.logger.warn(`Failed to get initial runner: ${fromAxiosError(error)}`)
+    }
 
     if (!initialRunner) {
       // No runners available, retry later
