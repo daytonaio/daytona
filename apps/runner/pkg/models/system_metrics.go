@@ -7,6 +7,7 @@ import "time"
 
 type SystemMetrics struct {
 	CPUUsage        float64   `json:"cpu_usage"`
+	CPULoadAvg      float64   `json:"cpu_load_avg"`
 	RAMUsage        float64   `json:"ram_usage"`
 	DiskUsage       float64   `json:"disk_usage"`
 	AllocatedCPU    int64     `json:"allocated_cpu"`

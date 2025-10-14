@@ -31,6 +31,8 @@ type Config struct {
 	AWSSecretAccessKey     string `envconfig:"AWS_SECRET_ACCESS_KEY"`
 	AWSDefaultBucket       string `envconfig:"AWS_DEFAULT_BUCKET"`
 	ResourceLimitsDisabled bool   `envconfig:"RESOURCE_LIMITS_DISABLED"`
+	MetricsTimeoutInterval string `envconfig:"METRICS_TIMEOUT_INTERVAL" default:"5s"`
+	MetricsWindowSize      int    `envconfig:"METRICS_WINDOW_SIZE" default:"60"`
 }
 
 var DEFAULT_API_PORT int = 8080

@@ -17,6 +17,8 @@ models/dto-volume-dto.ts
 models/enums-backup-state.ts
 models/enums-sandbox-state.ts
 models/error-response.ts
+models/gin-error-type.ts
+models/gin-error.ts
 models/index.ts
 models/pull-snapshot-request-dto.ts
 models/registry-dto.ts

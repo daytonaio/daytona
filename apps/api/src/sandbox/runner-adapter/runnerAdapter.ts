@@ -24,6 +24,7 @@ export interface RunnerMetrics {
   currentAllocatedDiskGiB?: number
   currentAllocatedMemoryGiB?: number
   currentCpuUsagePercentage?: number
+  currentCpuLoadAverage?: number
   currentDiskUsagePercentage?: number
   currentMemoryUsagePercentage?: number
   currentSnapshotCount?: number

@@ -111,8 +111,9 @@ func main() {
 	sandboxService := services.NewSandboxService(statesCache, dockerClient)
 
 	metricsService := services.NewMetricsService(services.MetricsServiceConfig{
-		Docker:   dockerClient,
-		WindowSize: 60,
+		Docker:          dockerClient,
+		TimeoutInterval: cfg.MetricsTimeoutInterval,
+		WindowSize:      cfg.MetricsWindowSize,
 	})
 	metricsService.Start(ctx)
 

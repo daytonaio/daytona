@@ -162,6 +162,8 @@ definitions:
         type: integer
       currentAllocatedMemoryGiB:
         type: integer
+      currentCpuLoadAverage:
+        type: number
       currentCpuUsagePercentage:
         type: number
       currentDiskUsagePercentage:
@@ -244,6 +246,27 @@ definitions:
       - SandboxStateError
       - SandboxStateUnknown
       - SandboxStatePullingSnapshot
+  gin.Error:
+    properties:
+      err: {}
+      meta: {}
+      type:
+        $ref: '#/definitions/gin.ErrorType'
+    type: object
+  gin.ErrorType:
+    enum:
+      - -9223372036854775808
+      - 4611686018427387904
+      - 1
+      - 2
+      - -1
+    type: integer
+    x-enum-varnames:
+      - ErrorTypeBind
+      - ErrorTypeRender
+      - ErrorTypePrivate
+      - ErrorTypePublic
+      - ErrorTypeAny
 info:
   contact: {}
   description: Daytona Runner API
@@ -275,6 +298,10 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/RunnerInfoResponseDTO'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/gin.Error'
       summary: Runner info
   /sandboxes:
     post:

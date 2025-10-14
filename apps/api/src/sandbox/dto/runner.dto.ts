@@ -86,6 +86,12 @@ export class RunnerDto {
   currentCpuUsagePercentage: number
 
   @ApiPropertyOptional({
+    description: 'Current CPU load average',
+    example: 1.2,
+  })
+  currentCpuLoadAverage: number
+
+  @ApiPropertyOptional({
     description: 'Current RAM usage percentage',
     example: 68.2,
   })
@@ -188,6 +194,7 @@ export class RunnerDto {
       gpuType: runner.gpuType,
       class: runner.class,
       currentCpuUsagePercentage: runner.currentCpuUsagePercentage,
+      currentCpuLoadAverage: runner.currentCpuLoadAverage,
       currentMemoryUsagePercentage: runner.currentMemoryUsagePercentage,
       currentDiskUsagePercentage: runner.currentDiskUsagePercentage,
       currentAllocatedCpu: runner.currentAllocatedCpu,

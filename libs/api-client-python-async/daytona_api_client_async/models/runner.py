@@ -41,6 +41,7 @@ class Runner(BaseModel):
     gpu_type: StrictStr = Field(description="The type of GPU", alias="gpuType")
     var_class: SandboxClass = Field(description="The class of the runner", alias="class")
     current_cpu_usage_percentage: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Current CPU usage percentage", alias="currentCpuUsagePercentage")
+    current_cpu_load_average: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Current CPU load average", alias="currentCpuLoadAverage")
     current_memory_usage_percentage: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Current RAM usage percentage", alias="currentMemoryUsagePercentage")
     current_disk_usage_percentage: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Current disk usage percentage", alias="currentDiskUsagePercentage")
     current_allocated_cpu: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Current allocated CPU", alias="currentAllocatedCpu")
@@ -56,7 +57,7 @@ class Runner(BaseModel):
     updated_at: StrictStr = Field(description="The last update timestamp of the runner", alias="updatedAt")
     version: StrictStr = Field(description="The version of the runner")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["id", "domain", "apiUrl", "proxyUrl", "apiKey", "cpu", "memory", "disk", "gpu", "gpuType", "class", "currentCpuUsagePercentage", "currentMemoryUsagePercentage", "currentDiskUsagePercentage", "currentAllocatedCpu", "currentAllocatedMemoryGiB", "currentAllocatedDiskGiB", "currentSnapshotCount", "availabilityScore", "region", "state", "lastChecked", "unschedulable", "createdAt", "updatedAt", "version"]
+    __properties: ClassVar[List[str]] = ["id", "domain", "apiUrl", "proxyUrl", "apiKey", "cpu", "memory", "disk", "gpu", "gpuType", "class", "currentCpuUsagePercentage", "currentCpuLoadAverage", "currentMemoryUsagePercentage", "currentDiskUsagePercentage", "currentAllocatedCpu", "currentAllocatedMemoryGiB", "currentAllocatedDiskGiB", "currentSnapshotCount", "availabilityScore", "region", "state", "lastChecked", "unschedulable", "createdAt", "updatedAt", "version"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -128,6 +129,7 @@ class Runner(BaseModel):
             "gpuType": obj.get("gpuType"),
             "class": obj.get("class"),
             "currentCpuUsagePercentage": obj.get("currentCpuUsagePercentage"),
+            "currentCpuLoadAverage": obj.get("currentCpuLoadAverage"),
             "currentMemoryUsagePercentage": obj.get("currentMemoryUsagePercentage"),
             "currentDiskUsagePercentage": obj.get("currentDiskUsagePercentage"),
             "currentAllocatedCpu": obj.get("currentAllocatedCpu"),

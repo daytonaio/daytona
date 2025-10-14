@@ -15,11 +15,10 @@ import (
 	"github.com/daytonaio/runner/pkg/docker"
 	"github.com/daytonaio/runner/pkg/models"
 
-	common_cache "github.com/daytonaio/common-go/pkg/cache"
-
 	"github.com/docker/docker/api/types/container"
 	"github.com/shirou/gopsutil/v4/cpu"
 	"github.com/shirou/gopsutil/v4/disk"
+	"github.com/shirou/gopsutil/v4/load"
 	"github.com/shirou/gopsutil/v4/mem"
 
 	log "github.com/sirupsen/logrus"
@@ -33,20 +32,22 @@ type CPUSnapshot struct {
 
 // MetricsServiceConfig holds configuration for the metrics service
 type MetricsServiceConfig struct {
-	Docker     *docker.DockerClient
-	WindowSize int // CPU metrics window size in seconds
+	Docker          *docker.DockerClient
+	TimeoutInterval string
+	WindowSize      int // CPU metrics window size in seconds
 }
 
 // MetricsService provides system metrics with proper encapsulation
 type MetricsService struct {
-	cache    common_cache.ICache[models.SystemMetrics]
-	docker   *docker.DockerClient
+	docker          *docker.DockerClient
+	timeoutInterval time.Duration
 
-	// CPU metrics - ring buffer for sliding window
+	// CPU usage metrics - ring buffer for sliding window
 	cpuRing  *ring.Ring
 	cpuMutex sync.RWMutex
 
 	// Other metrics - cached values
+	cpuLoadAvg      float64
 	ramUsage        float64
 	diskUsage       float64
 	allocatedCPU    int64
@@ -54,42 +55,84 @@ type MetricsService struct {
 	allocatedDisk   int64
 	snapshotCount   int
 	lastUpdated     time.Time
+	lastError       error
+	lastErrorTime   time.Time
 	otherMutex      sync.RWMutex
 }
 
 // NewMetricsService creates a new metrics service instance
 func NewMetricsService(config MetricsServiceConfig) *MetricsService {
-	metricsCache := common_cache.NewMapCache[models.SystemMetrics]()
-
 	windowSize := config.WindowSize
 	if windowSize <= 0 {
-		windowSize = 60 // Default to 60 seconds
+		windowSize = 60 // Default to size 60
+	}
+
+	timeoutInterval, err := time.ParseDuration(config.TimeoutInterval)
+	if err != nil {
+		log.Errorf("Error parsing timeout interval: %v - using default of 5s", err)
+		timeoutInterval = 5 * time.Second
 	}
 
 	return &MetricsService{
-		cache:   metricsCache,
-		docker:  config.Docker,
-		cpuRing: ring.New(windowSize),
+		docker:          config.Docker,
+		timeoutInterval: timeoutInterval,
+		cpuRing:         ring.New(windowSize),
 	}
 }
 
 // Start begins metrics collection in background goroutines
 func (s *MetricsService) Start(ctx context.Context) {
-	go s.collectCPUMetrics(ctx)
+	go s.collectCPUUsageMetrics(ctx)
 	go s.collectOtherMetrics(ctx)
 }
 
 // GetMetrics returns all current system metrics
-func (s *MetricsService) GetMetrics() *models.SystemMetrics {
+func (s *MetricsService) GetMetrics() (*models.SystemMetrics, error) {
+	for {
+		select {
+		case <-time.After(s.timeoutInterval):
+			s.otherMutex.RLock()
+			defer s.otherMutex.RUnlock()
+			if s.lastError != nil && time.Since(s.lastErrorTime) < time.Minute {
+				return nil, fmt.Errorf("error getting metrics: %w", s.lastError)
+			}
+			return nil, fmt.Errorf("timeout waiting for metrics")
+		default:
+			metrics := s.getMetrics()
+			if metrics != nil {
+				return metrics, nil
+			}
+		}
+	}
+}
+
+// getMetrics returns all current system metrics
+func (s *MetricsService) getMetrics() *models.SystemMetrics {
 	// Get CPU metrics (requires read lock)
 	s.cpuMutex.RLock()
-	cpuUsage := s.calculateCPUAverage()
+	cpuUsage, err := s.calculateCPUUsageAverage()
+	if err != nil {
+		s.otherMutex.Lock()
+		s.lastError = err
+		s.lastErrorTime = time.Now()
+		s.otherMutex.Unlock()
+
+		return nil
+	}
 	s.cpuMutex.RUnlock()
 
 	// Get other metrics (requires read lock)
 	s.otherMutex.RLock()
-	metrics := &models.SystemMetrics{
+	defer s.otherMutex.RUnlock()
+
+	// Return error if it's within the last minute
+	if s.lastError != nil && time.Since(s.lastErrorTime) < time.Minute {
+		return nil
+	}
+
+	return &models.SystemMetrics{
 		CPUUsage:        cpuUsage,
+		CPULoadAvg:      s.cpuLoadAvg,
 		RAMUsage:        s.ramUsage,
 		DiskUsage:       s.diskUsage,
 		AllocatedCPU:    s.allocatedCPU,
@@ -98,19 +141,16 @@ func (s *MetricsService) GetMetrics() *models.SystemMetrics {
 		SnapshotCount:   s.snapshotCount,
 		LastUpdated:     s.lastUpdated,
 	}
-	s.otherMutex.RUnlock()
-
-	return metrics
 }
 
-// collectCPUMetrics runs in a background goroutine, continuously monitoring CPU
-func (s *MetricsService) collectCPUMetrics(ctx context.Context) {
+// collectCPUUsageMetrics runs in a background goroutine, continuously monitoring CPU
+func (s *MetricsService) collectCPUUsageMetrics(ctx context.Context) {
 	for {
 		select {
 		case <-ctx.Done():
 			return
 		default:
-			s.addCPUSnapshot()
+			s.addCPUPercentSnapshot()
 		}
 	}
 }
@@ -133,8 +173,8 @@ func (s *MetricsService) collectOtherMetrics(ctx context.Context) {
 	}
 }
 
-// addCPUSnapshot adds a new CPU snapshot to the ring buffer
-func (s *MetricsService) addCPUSnapshot() {
+// addCPUPercentSnapshot adds a new CPU snapshot to the ring buffer
+func (s *MetricsService) addCPUPercentSnapshot() {
 	// Use 1-second averaging for accurate CPU measurement
 	cpuPercent, err := cpu.Percent(1*time.Second, false)
 	if err != nil {
@@ -152,8 +192,8 @@ func (s *MetricsService) addCPUSnapshot() {
 	s.cpuRing = s.cpuRing.Next()
 }
 
-// calculateCPUAverage calculates the average CPU usage from the ring buffer
-func (s *MetricsService) calculateCPUAverage() float64 {
+// calculateCPUUsageAverage calculates the average CPU usage from the ring buffer
+func (s *MetricsService) calculateCPUUsageAverage() (float64, error) {
 	var total float64
 	var count int
 
@@ -166,10 +206,10 @@ func (s *MetricsService) calculateCPUAverage() float64 {
 	})
 
 	if count == 0 {
-		return -1.0 // No data available
+		return -1.0, fmt.Errorf("no CPU usage data available") // No data available
 	}
 
-	return total / float64(count)
+	return total / float64(count), nil
 }
 
 // updateOtherMetrics updates RAM, disk, and container metrics
@@ -177,42 +217,70 @@ func (s *MetricsService) updateOtherMetrics(ctx context.Context) {
 	s.otherMutex.Lock()
 	defer s.otherMutex.Unlock()
 
-	// Update RAM usage
-	if memory, err := mem.VirtualMemory(); err != nil {
-		log.Errorf("Error getting memory metrics: %v", err)
-	} else {
-		s.ramUsage = (float64(memory.Total-memory.Available) / float64(memory.Total)) * 100
+	// Clear previous error at start
+	s.lastError = nil
+
+	// Update CPU load averages
+	loadAvg, err := load.Avg()
+	if err != nil {
+		log.Errorf("Error getting CPU load averages: %v", err)
+		s.lastError = err
+		return
 	}
+	cpuCounts, err := cpu.Counts(true)
+	if err != nil {
+		log.Errorf("Error getting CPU counts: %v", err)
+		s.lastError = err
+		return
+	}
+	s.cpuLoadAvg = loadAvg.Load15 / float64(cpuCounts)
+
+	// Update RAM usage
+	memory, err := mem.VirtualMemory()
+	if err != nil {
+		log.Errorf("Error getting memory metrics: %v", err)
+		s.lastError = err
+		return
+	}
+	s.ramUsage = (float64(memory.Total-memory.Available) / float64(memory.Total)) * 100
 
 	// Update disk usage
-	if diskUsage, err := disk.Usage("/var/lib/docker"); err != nil {
+	diskUsage, err := disk.Usage("/var/lib/docker")
+	if err != nil {
 		log.Errorf("Error getting disk metrics: %v", err)
-	} else {
-		s.diskUsage = diskUsage.UsedPercent
+		s.lastError = err
+		return
 	}
+	s.diskUsage = diskUsage.UsedPercent
 
 	// Update snapshot count
-	if info, err := s.docker.ApiClient().Info(ctx); err != nil {
+	info, err := s.docker.ApiClient().Info(ctx)
+	if err != nil {
 		log.Errorf("Error getting snapshot count: %v", err)
-	} else {
-		s.snapshotCount = info.Images
+		s.lastError = err
+		return
 	}
+	s.snapshotCount = info.Images
 
 	// Update allocated resources
-	s.updateAllocatedResources(ctx)
+	err = s.updateAllocatedResources(ctx)
+	if err != nil {
+		log.Errorf("Error updating allocated resources: %v", err)
+		s.lastError = err
+		return
+	}
 
 	s.lastUpdated = time.Now()
 }
 
 // updateAllocatedResources calculates total allocated container resources
-func (s *MetricsService) updateAllocatedResources(ctx context.Context) {
+func (s *MetricsService) updateAllocatedResources(ctx context.Context) error {
 	containers, err := s.docker.ApiClient().ContainerList(ctx, container.ListOptions{All: true})
 	if err != nil {
-		log.Errorf("Error listing containers: %v", err)
-		return
+		return err
 	}
 
-	var totalCPU, totalMemory, totalDisk int64
+	var totalCPU, totalMemory, totalDisk int64 = 0, 0, 0
 
 	for _, ctr := range containers {
 		cpu, memory, disk, err := s.getContainerResources(ctx, ctr.ID)
@@ -234,35 +302,49 @@ func (s *MetricsService) updateAllocatedResources(ctx context.Context) {
 	s.allocatedCPU = totalCPU / 100000                     // Convert to vCPUs
 	s.allocatedMemory = totalMemory / (1024 * 1024 * 1024) // Convert to GB
 	s.allocatedDisk = totalDisk
+
+	return nil
 }
 
 // getContainerResources extracts resource allocation from container config
 func (s *MetricsService) getContainerResources(ctx context.Context, containerID string) (int64, int64, int64, error) {
+	var cpu, memory, disk int64 = 0, 0, 0
+
 	containerJSON, err := s.docker.ContainerInspect(ctx, containerID)
 	if err != nil {
-		return 0, 0, 0, err
+		return cpu, memory, disk, err
 	}
 
-	var cpu, memory, disk int64
+	if containerJSON.HostConfig == nil {
+		return cpu, memory, disk, fmt.Errorf("container %s has no host config set and runner is unable to get allocated CPU, memory and disk quotas", containerID)
+	}
 
-	if containerJSON.HostConfig != nil {
-		resources := containerJSON.HostConfig.Resources
+	resources := containerJSON.HostConfig.Resources
 
-		if resources.CPUQuota > 0 {
-			cpu = resources.CPUQuota
-		}
-		if resources.Memory > 0 {
-			memory = resources.Memory
-		}
+	if resources.CPUQuota > 0 {
+		cpu = resources.CPUQuota
+	} else {
+		log.Warnf("Container %s has no CPU quota", containerID)
+	}
+
+	if resources.Memory > 0 {
+		memory = resources.Memory
+	} else {
+		log.Warnf("Container %s has no memory quota", containerID)
 	}
 
 	// Parse disk allocation from storage options
 	if containerJSON.HostConfig.StorageOpt != nil {
 		if sizeStr, exists := containerJSON.HostConfig.StorageOpt["size"]; exists {
-			if diskGB, err := s.parseStorageSize(sizeStr); err == nil {
+			diskGB, err := s.parseStorageSize(sizeStr)
+			if err == nil {
 				disk = diskGB
+			} else {
+				log.Warnf("Container %s has no disk quota", containerID)
 			}
 		}
+	} else {
+		log.Warnf("Container %s has no storage options", containerID)
 	}
 
 	return cpu, memory, disk, nil
