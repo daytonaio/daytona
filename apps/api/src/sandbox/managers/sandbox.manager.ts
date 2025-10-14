@@ -39,10 +39,10 @@ import { TrackJobExecution } from '../../common/decorators/track-job-execution.d
 import { TrackableJobExecutions } from '../../common/interfaces/trackable-job-executions'
 import { setTimeout } from 'timers/promises'
 import { LogExecution } from '../../common/decorators/log-execution.decorator'
-import { getSandboxStateChangeLockKey } from '../utils/lock-keys.util'
+import { LockableEntity } from '../../common/services/lockable-entity.service'
 
 @Injectable()
-export class SandboxManager implements TrackableJobExecutions, OnApplicationShutdown {
+export class SandboxManager extends LockableEntity implements TrackableJobExecutions, OnApplicationShutdown {
   activeJobs = new Set<string>()
 
   private readonly logger = new Logger(SandboxManager.name)
@@ -51,14 +51,20 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
     @InjectRepository(Sandbox)
     private readonly sandboxRepository: Repository<Sandbox>,
     private readonly runnerService: RunnerService,
-    private readonly redisLockProvider: RedisLockProvider,
+    redisLockProvider: RedisLockProvider,
     private readonly sandboxStartAction: SandboxStartAction,
     private readonly sandboxStopAction: SandboxStopAction,
     private readonly sandboxDestroyAction: SandboxDestroyAction,
     private readonly sandboxArchiveAction: SandboxArchiveAction,
     private readonly eventEmitter: EventEmitter2,
     private readonly configService: TypedConfigService,
-  ) {}
+  ) {
+    super(redisLockProvider)
+  }
+
+  protected getLockKey(id: string): string {
+    return `sandbox:${id}:state-change`
+  }
 
   async onApplicationShutdown() {
     //  wait for all active jobs to finish
@@ -106,9 +112,8 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
 
           await Promise.all(
             sandboxes.map(async (sandbox) => {
-              const lockKey = getSandboxStateChangeLockKey(sandbox.id)
-              const acquired = await this.redisLockProvider.lock(lockKey, 30)
-              if (!acquired) {
+              const lockKey = await this.tryLock(sandbox.id, 30)
+              if (!lockKey) {
                 return
               }
 
@@ -125,7 +130,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
               } catch (error) {
                 this.logger.error(`Error processing auto-stop state for sandbox ${sandbox.id}:`, error)
               } finally {
-                await this.redisLockProvider.unlock(lockKey)
+                await this.unlock(lockKey)
               }
             }),
           )
@@ -163,9 +168,8 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
 
       await Promise.all(
         sandboxes.map(async (sandbox) => {
-          const lockKey = getSandboxStateChangeLockKey(sandbox.id)
-          const acquired = await this.redisLockProvider.lock(lockKey, 30)
-          if (!acquired) {
+          const lockKey = await this.tryLock(sandbox.id, 30)
+          if (!lockKey) {
             return
           }
 
@@ -176,7 +180,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
           } catch (error) {
             this.logger.error(`Error processing auto-archive state for sandbox ${sandbox.id}:`, error)
           } finally {
-            await this.redisLockProvider.unlock(lockKey)
+            await this.unlock(lockKey)
           }
         }),
       )
@@ -221,9 +225,8 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
 
           await Promise.all(
             sandboxes.map(async (sandbox) => {
-              const lockKey = getSandboxStateChangeLockKey(sandbox.id)
-              const acquired = await this.redisLockProvider.lock(lockKey, 30)
-              if (!acquired) {
+              const lockKey = await this.tryLock(sandbox.id, 30)
+              if (!lockKey) {
                 return
               }
 
@@ -235,7 +238,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
               } catch (error) {
                 this.logger.error(`Error processing auto-delete state for sandbox ${sandbox.id}:`, error)
               } finally {
-                await this.redisLockProvider.unlock(lockKey)
+                await this.unlock(lockKey)
               }
             }),
           )
@@ -351,9 +354,8 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
     }
 
     //  prevent syncState cron from running multiple instances of the same sandbox
-    const lockKey = getSandboxStateChangeLockKey(sandboxId)
-    const acquired = await this.redisLockProvider.lock(lockKey, 360)
-    if (!acquired) {
+    const lockKey = await this.tryLock(sandboxId, 360)
+    if (!lockKey) {
       return
     }
 
@@ -362,7 +364,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
     })
 
     if ([SandboxState.DESTROYED, SandboxState.ERROR, SandboxState.BUILD_FAILED].includes(sandbox.state)) {
-      await this.redisLockProvider.unlock(lockKey)
+      await this.unlock(lockKey)
       return
     }
 
@@ -402,7 +404,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
       await this.sandboxRepository.save(sandbox)
     }
 
-    await this.redisLockProvider.unlock(lockKey)
+    await this.unlock(lockKey)
     if (syncState === SYNC_AGAIN) {
       this.syncInstanceState(sandboxId, startedAt)
     }

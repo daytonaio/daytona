@@ -59,7 +59,7 @@ import {
 } from '../dto/list-sandboxes-query.dto'
 import { createRangeFilter } from '../../common/utils/range-filter'
 import { LogExecution } from '../../common/decorators/log-execution.decorator'
-import { getSandboxStateChangeLockKey } from '../utils/lock-keys.util'
+import { LockableEntity } from '../../common/services/lockable-entity.service'
 
 const DEFAULT_CPU = 1
 const DEFAULT_MEMORY = 1
@@ -67,7 +67,7 @@ const DEFAULT_DISK = 3
 const DEFAULT_GPU = 0
 
 @Injectable()
-export class SandboxService {
+export class SandboxService extends LockableEntity {
   private readonly logger = new Logger(SandboxService.name)
 
   constructor(
@@ -89,8 +89,14 @@ export class SandboxService {
     private readonly organizationService: OrganizationService,
     private readonly runnerAdapterFactory: RunnerAdapterFactory,
     private readonly organizationUsageService: OrganizationUsageService,
-    private readonly redisLockProvider: RedisLockProvider,
-  ) {}
+    redisLockProvider: RedisLockProvider,
+  ) {
+    super(redisLockProvider)
+  }
+
+  protected getLockKey(id: string): string {
+    return `sandbox:${id}:state-change`
+  }
 
   private async validateOrganizationQuotas(
     organization: Organization,
@@ -190,10 +196,8 @@ export class SandboxService {
 
   async archive(sandboxIdOrName: string, organizationId?: string): Promise<Sandbox> {
     const { id: sandboxId } = await this.findOneByIdOrName(sandboxIdOrName, organizationId)
-    const lockKey = getSandboxStateChangeLockKey(sandboxId)
-    await this.redisLockProvider.waitForLock(lockKey, 60)
 
-    try {
+    return this.withLock(sandboxId, 60, async () => {
       // Re-fetch with fresh state after acquiring lock
       const sandbox = await this.findOneByIdOrName(sandboxId, organizationId)
 
@@ -219,9 +223,7 @@ export class SandboxService {
 
       this.eventEmitter.emit(SandboxEvents.ARCHIVED, new SandboxArchivedEvent(sandbox))
       return sandbox
-    } finally {
-      await this.redisLockProvider.unlock(lockKey)
-    }
+    })
   }
 
   async createForWarmPool(warmPoolItem: WarmPool): Promise<Sandbox> {
@@ -930,10 +932,8 @@ export class SandboxService {
   async destroy(sandboxIdOrName: string, organizationId?: string): Promise<Sandbox> {
     // Fetch to get actual ID for consistent locking
     const { id: sandboxId } = await this.findOneByIdOrName(sandboxIdOrName, organizationId)
-    const lockKey = getSandboxStateChangeLockKey(sandboxId)
-    await this.redisLockProvider.waitForLock(lockKey, 60)
 
-    try {
+    return this.withLock(sandboxId, 60, async () => {
       // Re-fetch with fresh state after acquiring lock
       const sandbox = await this.findOneByIdOrName(sandboxId, organizationId)
 
@@ -948,89 +948,83 @@ export class SandboxService {
 
       this.eventEmitter.emit(SandboxEvents.DESTROYED, new SandboxDestroyedEvent(sandbox))
       return sandbox
-    } finally {
-      await this.redisLockProvider.unlock(lockKey)
-    }
+    })
   }
 
   async start(sandboxIdOrName: string, organization: Organization): Promise<Sandbox> {
     // Fetch to get actual ID for consistent locking
     const { id: sandboxId } = await this.findOneByIdOrName(sandboxIdOrName, organization.id)
-    const lockKey = getSandboxStateChangeLockKey(sandboxId)
-    await this.redisLockProvider.waitForLock(lockKey, 60)
 
     let pendingCpuIncrement: number | undefined
     let pendingMemoryIncrement: number | undefined
     let pendingDiskIncrement: number | undefined
 
-    try {
-      // Re-fetch with fresh state after acquiring lock
-      const sandbox = await this.findOneByIdOrName(sandboxId, organization.id)
+    return this.withLock(sandboxId, 60, async () => {
+      try {
+        // Re-fetch with fresh state after acquiring lock
+        const sandbox = await this.findOneByIdOrName(sandboxId, organization.id)
 
-      if (sandbox.state === SandboxState.STARTED && sandbox.desiredState === SandboxDesiredState.STARTED) {
-        return sandbox
-      }
-
-      if (String(sandbox.state) !== String(sandbox.desiredState)) {
-        // Allow start of stopped | archived and archiving | archived sandboxes
-        if (
-          sandbox.desiredState !== SandboxDesiredState.ARCHIVED ||
-          (sandbox.state !== SandboxState.STOPPED && sandbox.state !== SandboxState.ARCHIVING)
-        ) {
-          throw new SandboxError('State change in progress')
+        if (sandbox.state === SandboxState.STARTED && sandbox.desiredState === SandboxDesiredState.STARTED) {
+          return sandbox
         }
+
+        if (String(sandbox.state) !== String(sandbox.desiredState)) {
+          // Allow start of stopped | archived and archiving | archived sandboxes
+          if (
+            sandbox.desiredState !== SandboxDesiredState.ARCHIVED ||
+            (sandbox.state !== SandboxState.STOPPED && sandbox.state !== SandboxState.ARCHIVING)
+          ) {
+            throw new SandboxError('State change in progress')
+          }
+        }
+
+        if (![SandboxState.STOPPED, SandboxState.ARCHIVED, SandboxState.ARCHIVING].includes(sandbox.state)) {
+          throw new SandboxError('Sandbox is not in valid state')
+        }
+
+        if (sandbox.pending) {
+          throw new SandboxError('Sandbox state change in progress')
+        }
+
+        this.organizationService.assertOrganizationIsNotSuspended(organization)
+
+        const { pendingCpuIncremented, pendingMemoryIncremented, pendingDiskIncremented } =
+          await this.validateOrganizationQuotas(organization, sandbox.cpu, sandbox.mem, sandbox.disk, sandbox.id)
+
+        if (pendingCpuIncremented) {
+          pendingCpuIncrement = sandbox.cpu
+        }
+        if (pendingMemoryIncremented) {
+          pendingMemoryIncrement = sandbox.mem
+        }
+        if (pendingDiskIncremented) {
+          pendingDiskIncrement = sandbox.disk
+        }
+
+        sandbox.pending = true
+        sandbox.desiredState = SandboxDesiredState.STARTED
+        await this.sandboxRepository.save(sandbox)
+
+        this.eventEmitter.emit(SandboxEvents.STARTED, new SandboxStartedEvent(sandbox))
+
+        return sandbox
+      } catch (error) {
+        await this.rollbackPendingUsage(
+          organization.id,
+          pendingCpuIncrement,
+          pendingMemoryIncrement,
+          pendingDiskIncrement,
+        )
+        throw error
       }
-
-      if (![SandboxState.STOPPED, SandboxState.ARCHIVED, SandboxState.ARCHIVING].includes(sandbox.state)) {
-        throw new SandboxError('Sandbox is not in valid state')
-      }
-
-      if (sandbox.pending) {
-        throw new SandboxError('Sandbox state change in progress')
-      }
-
-      this.organizationService.assertOrganizationIsNotSuspended(organization)
-
-      const { pendingCpuIncremented, pendingMemoryIncremented, pendingDiskIncremented } =
-        await this.validateOrganizationQuotas(organization, sandbox.cpu, sandbox.mem, sandbox.disk, sandbox.id)
-
-      if (pendingCpuIncremented) {
-        pendingCpuIncrement = sandbox.cpu
-      }
-      if (pendingMemoryIncremented) {
-        pendingMemoryIncrement = sandbox.mem
-      }
-      if (pendingDiskIncremented) {
-        pendingDiskIncrement = sandbox.disk
-      }
-
-      sandbox.pending = true
-      sandbox.desiredState = SandboxDesiredState.STARTED
-      await this.sandboxRepository.save(sandbox)
-
-      this.eventEmitter.emit(SandboxEvents.STARTED, new SandboxStartedEvent(sandbox))
-
-      return sandbox
-    } catch (error) {
-      await this.rollbackPendingUsage(
-        organization.id,
-        pendingCpuIncrement,
-        pendingMemoryIncrement,
-        pendingDiskIncrement,
-      )
-      throw error
-    } finally {
-      await this.redisLockProvider.unlock(lockKey)
-    }
+    })
   }
 
   async stop(sandboxIdOrName: string, organizationId?: string): Promise<Sandbox> {
     // Fetch to get actual ID for consistent locking
     const { id: sandboxId } = await this.findOneByIdOrName(sandboxIdOrName, organizationId)
-    const lockKey = getSandboxStateChangeLockKey(sandboxId)
-    await this.redisLockProvider.waitForLock(lockKey, 60)
 
-    try {
+    return this.withLock(sandboxId, 60, async () => {
       // Re-fetch with fresh state after acquiring lock
       const sandbox = await this.findOneByIdOrName(sandboxId, organizationId)
 
@@ -1062,9 +1056,7 @@ export class SandboxService {
         this.eventEmitter.emit(SandboxEvents.STOPPED, new SandboxStoppedEvent(sandbox))
       }
       return sandbox
-    } finally {
-      await this.redisLockProvider.unlock(lockKey)
-    }
+    })
   }
 
   async updatePublicStatus(sandboxIdOrName: string, isPublic: boolean, organizationId?: string): Promise<Sandbox> {
